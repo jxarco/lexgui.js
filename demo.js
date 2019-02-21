@@ -19,15 +19,24 @@ right.attach(panel);
 panel.branch("Information");
 panel.addText("Camera", "Canon EOS 80D", {disabled: true});
 panel.addText("Serial number", "194E283DD");
-
 panel.merge();
 
 // add widgets to panel directly
 // add title?
-panel.addText("null", "This do not have name");
+panel.addText(null, "This do not have name");
 
 // another branch
-panel.branch("Market");
-panel.addText("Camera", "Canon EOS 80D", {disabled: true});
-panel.addText("Serial number", "194E283DD", {name_width: "50%"});
+panel.branch("Preferences");
+panel.addText("Browser", "Chrome");
+panel.addText("Extensions", "", {placeholder: "e.g. ColorPicker"});
+panel.addText(null, "Shitty");
+panel.addButton(null, "Apply changes");
+panel.addButton("Apply", "Some changes");
+panel.merge();
+
+panel.addButton(null, "Restart");
+
+// another branch
+panel.branch("Other things");
+panel.addCombo("Pages", ["Federico", "Garcia", "Lorca"]);
 panel.merge();
