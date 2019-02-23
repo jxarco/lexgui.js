@@ -272,7 +272,7 @@ var LexGUI = {
         if(content.constructor == LexGUI.Panel)
             this.root.appendChild( content.root );
         else
-            console.warn("TODO");
+            this.root.appendChild( content );
     }
 
     LexGUI.Area = Area;

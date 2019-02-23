@@ -7,23 +7,30 @@ var area = new LexGUI.Area({id:"mainarea"});
 
 // split main area
 area.split({sizes:["70%","30%"]});
-var left = area.sections[0];
-var right = area.sections[1];
+var [left,right] = area.sections;
 
 // split left area
 left.split({type: 'vertical', sizes:["80vh","20vh"]});
-var up = area.sections[0];
-var bottom = area.sections[1];
+var [up, bottom] = left.sections;
+
+// add canvas to left upper part
+var canvas = document.createElement('canvas');
+canvas.style.width = "100%";
+canvas.style.height = "100%";
+canvas.style.backgroundColor = "#ccc";
+up.attach( canvas );
+
+var ctx = canvas.getContext("2d");
+
+ctx.font = "12px Monospace";
+ctx.fillText("This is a 2d canvas", 74, 60);
+ctx.fillText("Lexgui.js @jxarco", 80, 80);
 
 // add panels
 var panel = new LexGUI.Panel();
 right.attach(panel);
 fillPanel( panel );
 fillPanel( panel );
-
-
-
-
 
 
 // **** **** **** **** **** **** **** **** **** **** **** **** 
