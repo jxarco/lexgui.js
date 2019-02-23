@@ -25,6 +25,13 @@ var LexGUI = {
 };
 
 (function(){
+
+    function simple_guidGenerator() {
+        var S4 = function() {
+           return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+        };
+        return (S4()+"-"+S4());
+      }
 	
 	/**
      * @param {*} options 
@@ -123,8 +130,8 @@ var LexGUI = {
 
         else
         {
-            var height1 = "50vh",//sizes[0],
-                height2 = "50vh";
+            var height1 = sizes[0],
+                height2 = sizes[1];
 
             if(height1.constructor == Number)
                 width += "px";
@@ -313,7 +320,11 @@ var LexGUI = {
         this.root.appendChild( branch.root );
     }
 
-    Panel.prototype.addText = function( name, value, options ) 
+    function pick(arg, def) {
+        return (typeof arg == 'undefined' ? def : arg);
+     }
+
+    Panel.prototype.addText = function( name, value, callback, options ) 
     {
         options = options || {};
 
@@ -346,70 +357,15 @@ var LexGUI = {
         if(options.placeholder)
         wValue.setAttribute("placeholder", options.placeholder);
 
-        element.appendChild(wValue);
-        
-        if(this.current_branch) {
-            if(!name){ // remove branch padding
-                element.className += " nomargin";
-                wValue.style.width =  "calc( 100% - 21px )";
-            }
-            this.current_branch.content.appendChild( element );
-            this.current_branch.widgets.push( element );
+        if(callback) {
+            wValue.addEventListener("keyup", function(e){
+                if(e.keyCode == 13)
+                    callback(e.target.value, e);
+            });
+            wValue.addEventListener("focusout", function(e){
+                callback(e.target.value, e);
+            });
         }
-        else
-        {
-            console.warn("Get used to insert widgets only in a branch!");
-            if(!name){ // remove branch padding
-                element.className += " nomargin";
-            }
-            else // add branch padding 
-                wValue.style.width =  "calc( 60% - 28px )";
-            this.root.appendChild(element);
-        }
-            
-    }
-
-    Panel.prototype.addCombo = function( name, values, options ) 
-    {
-        options = options || {};
-
-        var element = document.createElement('div');
-        element.className = "lexwidget";
-        if(options.id)
-        element.id = options.id;
-        if(options.className)
-        element.className += " " + options.className;
-
-        element.style.width = "100%";
-
-        // part 1
-        if(name) {
-            var wName = document.createElement('div');
-            wName.className = "lexwidgetname";
-            wName.innerHTML = name || "";
-            wName.style.width = "40%";
-            element.appendChild(wName);
-        }
-        
-        // part 2
-        var wValue = document.createElement('select');
-        wValue.className = "lexcombo";
-        wValue.name = name;
-        wValue.style.width = "calc( 60% - 25px )"; // only 10px is for the padding 
-        wValue.style.width = name ? wValue.style.width : "calc( 100% - 16px )";
-
-        if(values.length)
-        for(var i = 0; i < values.length; i++)
-        {
-            var option = document.createElement('option');
-            option.value = values[i];
-            if(i == 0)
-                option.selected = true;
-            wValue.appendChild(option);
-        }
-
-        if(options.disabled)
-        wValue.setAttribute("disabled", true);
 
         element.appendChild(wValue);
         
@@ -468,11 +424,8 @@ var LexGUI = {
         if(options.disabled)
         wValue.setAttribute("disabled", true);
 
-        // if(callback)
-        wValue.addEventListener("click", function(){
-            console.log("e");
-
-        });
+        if(callback)
+        wValue.addEventListener("click", callback);
 
         element.appendChild(wValue);
         
@@ -495,6 +448,162 @@ var LexGUI = {
             else // add branch padding 
             {
                 wValue.style.width =  "calc( 60% - 28px )";
+            }
+            this.root.appendChild(element);
+        }
+            
+    }
+
+    Panel.prototype.addCombo = function( name, values, callback, options ) 
+    {
+        options = options || {};
+
+        var element = document.createElement('div');
+        element.className = "lexwidget";
+        if(options.id)
+        element.id = options.id;
+        if(options.className)
+        element.className += " " + options.className;
+
+        element.style.width = "100%";
+
+        // part 1
+        if(name) {
+            var wName = document.createElement('div');
+            wName.className = "lexwidgetname";
+            wName.innerHTML = name || "";
+            wName.style.width = "40%";
+            element.appendChild(wName);
+        }
+        
+        // part 2
+        var wValue = document.createElement('select');
+        wValue.className = "lexcombo";
+        wValue.name = name;
+        wValue.style.width = "calc( 60% - 25px )"; // only 10px is for the padding 
+        wValue.style.width = name ? wValue.style.width : "calc( 100% - 16px )";
+
+        if(values.length)
+        for(var i = 0; i < values.length; i++)
+        {
+            var option = document.createElement('option');
+            option.innerHTML = option.value = values[i];
+            if(i == 0)
+                option.selected = true;
+            wValue.appendChild(option);
+        }
+
+        if(options.disabled)
+        wValue.setAttribute("disabled", true);
+
+        if(callback)
+            wValue.addEventListener("change", function(e){
+                callback(e.target.value, e);
+            });
+
+        element.appendChild(wValue);
+        
+        if(this.current_branch) {
+            if(!name){ // remove branch padding
+                element.className += " nomargin";
+                wValue.style.width =  "calc( 100% - 21px )";
+            }
+            this.current_branch.content.appendChild( element );
+            this.current_branch.widgets.push( element );
+        }
+        else
+        {
+            console.warn("Get used to insert widgets only in a branch!");
+            if(!name){ // remove branch padding
+                element.className += " nomargin";
+            }
+            else // add branch padding 
+                wValue.style.width =  "calc( 60% - 28px )";
+            this.root.appendChild(element);
+        }
+            
+    }
+
+    Panel.prototype.addCheckbox = function( name, value, callback, options ) 
+    {
+        options = options || {};
+
+        var element = document.createElement('div');
+        element.className = "lexwidget";
+        if(options.id)
+        element.id = options.id;
+        if(options.className)
+        element.className += " " + options.className;
+
+        element.style.width = "100%";
+
+        // part 1
+        if(!name){
+            throw("set checkbox name")
+        }
+
+        var wName = document.createElement('div');
+        wName.className = "lexwidgetname";
+        wName.innerHTML = name || "";
+        wName.style.width = "40%";
+        wName.setAttribute("for","toggle");
+        element.appendChild(wName);
+        
+        // part 2
+
+        // create full toggle html
+
+        var container = document.createElement('div');
+
+        var toggle = document.createElement('div');
+        toggle.className = "onoffswitch";
+
+        var wValue = document.createElement('input');
+        wValue.name = "onoffswitch";
+        wValue.type = "checkbox";
+        wValue.className = "onoffswitch__checkbox";
+        wValue.id="myonoffswitch"+simple_guidGenerator();
+        wValue.checked = value || false;
+
+        var labels = document.createElement('label');
+        labels.className = "onoffswitch__label";
+        labels.setAttribute("for", wValue.id);
+        labels.innerHTML = `<span class="onoffswitch__inner"></span>
+        <span class="onoffswitch__switch"></span>`;
+
+        toggle.appendChild(wValue);
+        toggle.appendChild(labels);
+        container.appendChild(toggle);
+
+        if(options.disabled){
+            labels.className += " disabled";
+            wValue.setAttribute("disabled",true);
+        }
+
+        if(callback)
+        wValue.addEventListener("click", callback);
+        
+        element.appendChild(container);
+        
+        if(this.current_branch) {
+            if(!name){ // remove branch padding
+                container.className += " noname";
+                container.style.width =  "calc( 100% - 16px )";
+            }
+            this.current_branch.content.appendChild( element );
+            this.current_branch.widgets.push( element );
+        }
+        else
+        {
+            console.warn("Get used to insert widgets only in a branch!");
+            if(!name) // remove branch padding
+            {
+                container.className += " noname";
+                container.style.width =  "calc( 100% - 11px )";
+            }
+            else // add branch padding 
+            {
+                container.style.width =  "calc( 60% - 28px )";
             }
             this.root.appendChild(element);
         }
@@ -525,14 +634,14 @@ var LexGUI = {
         root.id = options.id;
         if(options.className)
         root.className += " " + options.className;
-        if(options.closed)
-        root.className += " closed";
 
         root.style.width = "calc(100% - 6px)";
         root.style.margin = "0 auto";
 
         this.root = root;
         var that = this;
+        this.sizeLeft = "40%";
+        this.widgets = [];
 
         // create element
         var title = document.createElement('div');
@@ -546,6 +655,15 @@ var LexGUI = {
         branch_content.className = "lexbranchcontent";
         root.appendChild(branch_content);
         this.content = branch_content;
+
+        this.addBranchSeparator();
+
+        if(options.closed) {
+            title.className += " closed";
+            root.className += " closed";
+            this.content.style.display = "none";
+            this.grabber.style.display = "none";
+        }
 
         title.addEventListener("click", function(e){
             e.preventDefault();
@@ -564,12 +682,8 @@ var LexGUI = {
                 parent.className += " closed";
 
             $(that.content).toggle();
-            $(that.grabber).toggle()
+            $(that.grabber).toggle();
         })
-
-        this.sizeLeft = "40%";
-        this.widgets = [];
-        this.addBranchSeparator();
     }
 
     Branch.prototype.addBranchSeparator = function( options ) 
@@ -587,6 +701,7 @@ var LexGUI = {
         element.style.background = "none";
 
         var grabber = document.createElement('div');
+        grabber.style.color = "#303030";
         grabber.innerHTML = "&#9662;";
         grabber.style.marginLeft = this.sizeLeft;
         element.appendChild(grabber);
