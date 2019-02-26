@@ -2,6 +2,8 @@
 // init library
 LexGUI.init();
 
+LexGUI.message("Welcome to Lexgui!", "Not an error!")
+
 // create main area
 var area = new LexGUI.Area({id:"mainarea"});
 

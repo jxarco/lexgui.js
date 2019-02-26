@@ -13,12 +13,64 @@ var LexGUI = {
 		var root = document.createElement("div");
 		root.id = "lexroot";
         
+        var modal = document.createElement("div");
+        modal.id = "modal";
+
+        this.modal = modal;
         this.root = root;
         this.container = document.body;
 
         if(options.container)
             this.container = document.getElementById(options.container);
         
+        this.container.appendChild( modal );
+        this.container.appendChild( root );
+    },
+
+    message: function(message, title, options)
+    {
+        if(!message)
+            throw("no message to show");
+
+        if(!title)
+            title = "Caraanchoa";
+
+        options = options || {};
+
+        var that = this;
+        $(that.modal).toggle();
+
+        var root = document.createElement('div');
+        root.className = "lexmessage";
+        if(options.id)
+            root.id = options.id;
+
+        var titleDiv = document.createElement('div');
+        titleDiv.className = "lexmessagetitle";
+        var content = document.createElement('div');
+        content.className = "lexmessagecontent";
+
+        titleDiv.innerHTML = title;
+        content.innerHTML = message;
+
+        root.style.width = "30%";
+        root.style.height = "30vh";
+        root.style.left = "35%";
+        root.style.top = "35vh";
+
+        var closeButton = document.createElement('div');
+        closeButton.className = "lexmessagecloser";
+        closeButton.innerHTML = '&#10005;';
+        closeButton.title = "Close message";
+        
+        closeButton.addEventListener('click', function(e){
+            $(root).remove();
+            $(that.modal).toggle();
+        })
+
+        root.appendChild(closeButton);
+        root.appendChild(titleDiv);
+        root.appendChild(content);
         this.container.appendChild( root );
     }
 
