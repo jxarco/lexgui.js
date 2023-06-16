@@ -31,7 +31,7 @@ ctx.fillText("Lexgui.js @jxarco", 80, 80);
 var panel = new LexGUI.Panel();
 right.attach(panel);
 fillPanel( panel );
-// fillPanel( panel );
+fillPanel( panel );
 
 
 // **** **** **** **** **** **** **** **** **** **** **** **** 
