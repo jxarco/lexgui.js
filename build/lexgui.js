@@ -5,6 +5,11 @@ var LexGUI = {
 
     version: 0.1,
 
+    icons: {
+        CIRCLE: "mini-icon-circle.png",
+        GEAR: "mini-icon-gear.png"
+    },
+
     init: function(options)
     {
         options = options || {};
@@ -20,6 +25,9 @@ var LexGUI = {
         this.root = root;
         this.container = document.body;
 
+        this.modal.hidden = true;
+        this.modal.toggle = function() { this.toggleAttribute('hidden'); };
+
         if(options.container)
             this.container = document.getElementById(options.container);
         
@@ -27,31 +35,23 @@ var LexGUI = {
         this.container.appendChild( root );
     },
 
-    message: function(message, title, options)
+    message: function(text, title, options)
     {
-        if(!message)
-            throw("no message to show");
-
-        if(!title)
-            title = "Caraanchoa";
+        if(!text)
+            throw("No message to show");
 
         options = options || {};
 
-        var that = this;
-        $(that.modal).toggle();
+        this.modal.toggle();
 
         var root = document.createElement('div');
         root.className = "lexmessage";
         if(options.id)
             root.id = options.id;
 
-        var titleDiv = document.createElement('div');
-        titleDiv.className = "lexmessagetitle";
         var content = document.createElement('div');
         content.className = "lexmessagecontent";
-
-        titleDiv.innerHTML = title;
-        content.innerHTML = message;
+        content.innerHTML = text;
 
         root.style.width = "30%";
         root.style.height = "30vh";
@@ -63,15 +63,23 @@ var LexGUI = {
         closeButton.innerHTML = '&#10005;';
         closeButton.title = "Close message";
         
-        closeButton.addEventListener('click', function(e){
-            $(root).remove();
-            $(that.modal).toggle();
-        })
+        closeButton.addEventListener('click', (function(e) {
+            root.remove();
+            this.modal.toggle();
+        }).bind(this));
 
         root.appendChild(closeButton);
-        root.appendChild(titleDiv);
+        
+        if(title) {
+            var titleDiv = document.createElement('div');
+            titleDiv.className = "lexmessagetitle";
+            titleDiv.innerHTML = title;
+            root.appendChild(titleDiv);
+        }
+        
         root.appendChild(content);
-        this.container.appendChild( root );
+
+        this.container.appendChild(root);
     }
 
 };
@@ -368,13 +376,31 @@ var LexGUI = {
         this.branch_open = true;
         this.current_branch = branch;
         // append to panel
+        if(this.branches.length == 0)
+            branch.root.classList.add('first');
         this.branches.push( branch );
         this.root.appendChild( branch.root );
     }
 
+    Panel.prototype.merge = function() 
+    {
+        this.branch_open = false;
+        this.current_branch = null;
+    }
+
+    Panel.prototype.end = function() 
+    {
+        if(this.current_branch) {
+            this.current_branch.root.classList.add('last');
+            this.branches = [];
+        }
+
+        this.merge();
+    }
+
     function pick(arg, def) {
         return (typeof arg == 'undefined' ? def : arg);
-     }
+    }
 
     Panel.prototype.addText = function( name, value, callback, options ) 
     {
@@ -662,14 +688,7 @@ var LexGUI = {
             
     }
 
-    Panel.prototype.merge = function() 
-    {
-        this.branch_open = false;
-        this.current_branch = null;
-    }
-
     LexGUI.Panel = Panel;
-    Panel.branch_icon = "&#9722; ";
 
     /**
      * @param {*} options 
@@ -690,15 +709,20 @@ var LexGUI = {
         root.style.width = "calc(100% - 6px)";
         root.style.margin = "0 auto";
 
-        this.root = root;
         var that = this;
+
+        this.root = root;
         this.sizeLeft = "40%";
         this.widgets = [];
 
         // create element
         var title = document.createElement('div');
         title.className = "lexbranch title";
-        title.innerHTML = "<span class='"+ (options.closed?"closed":"")+ "'>" + Panel.branch_icon + "</span> ";
+        
+        title.innerHTML = "<span class='"+ (options.closed?"closed":"")+ "'>" + "<span class='switch-branch-button'></span> ";
+        if(options.icon) {
+            title.innerHTML += "<img src='build/icons/" + options.icon + "' style='margin-right: 4px; margin-bottom: -2px;'>";
+        }
         title.innerHTML += name || "Branch";
         title.innerHTML = title.innerHTML.bold();
         root.appendChild(title);
@@ -713,8 +737,8 @@ var LexGUI = {
         if(options.closed) {
             title.className += " closed";
             root.className += " closed";
-            this.content.style.display = "none";
-            this.grabber.style.display = "none";
+            this.content.setAttribute('hidden', true);
+            this.grabber.setAttribute('hidden', true);
         }
 
         title.addEventListener("click", function(e){
@@ -733,8 +757,8 @@ var LexGUI = {
             else
                 parent.className += " closed";
 
-            $(that.content).toggle();
-            $(that.grabber).toggle();
+            that.content.toggleAttribute('hidden');
+            that.grabber.toggleAttribute('hidden');
         })
     }
 
@@ -753,7 +777,6 @@ var LexGUI = {
         element.style.background = "none";
 
         var grabber = document.createElement('div');
-        grabber.style.color = "#303030";
         grabber.innerHTML = "&#9662;";
         grabber.style.marginLeft = this.sizeLeft;
         element.appendChild(grabber);
@@ -761,7 +784,7 @@ var LexGUI = {
         var line = document.createElement('div');
         line.style.width = "1px";
         line.style.marginLeft = "4px";
-        line.style.marginTop = "5px";
+        line.style.marginTop = "-5px";
         line.style.height = "0px"; // get in time
         grabber.appendChild(line);
         grabber.addEventListener("mousedown", inner_mousedown);

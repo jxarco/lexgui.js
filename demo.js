@@ -1,8 +1,7 @@
-
 // init library
 LexGUI.init();
 
-LexGUI.message("Welcome to Lexgui!", "Not an error!")
+// LexGUI.message("Welcome to Lexgui!", "Not an error!")
 
 // create main area
 var area = new LexGUI.Area({id:"mainarea"});
@@ -32,7 +31,7 @@ ctx.fillText("Lexgui.js @jxarco", 80, 80);
 var panel = new LexGUI.Panel();
 right.attach(panel);
 fillPanel( panel );
-fillPanel( panel );
+// fillPanel( panel );
 
 
 // **** **** **** **** **** **** **** **** **** **** **** **** 
@@ -41,17 +40,17 @@ fillPanel( panel );
 function fillPanel( panel ) {
     
     // add widgets to panel branch
-    panel.branch("Information");
+    panel.branch("Information", {icon: LexGUI.icons.CIRCLE});
     panel.addText("Camera", "Canon EOS 80D", null,{disabled: true}); 
     panel.addText("Serial number", "194E283DD");
     panel.merge();
 
     // add widgets to panel directly
     // add title?
-    panel.addText(null, "This does not have name");
+    // panel.addText(null, "This does not have name");
 
     // another branch
-    panel.branch("Preferences");
+    panel.branch("Preferences", {icon: LexGUI.icons.GEAR});
     panel.addText("Browser", "Chrome");
     panel.addText("Extensions", "", null, {placeholder: "e.g. ColorPicker"});
     panel.addText(null, "This has a console.log callback", function(value, event){
@@ -67,7 +66,8 @@ function fillPanel( panel ) {
     panel.addText(null, "Nothing here", null, {disabled: true});
     panel.merge();
 
-    panel.addButton(null, "Restart");
+    // // button out of branch!
+    // panel.addButton(null, "Restart");
 
     // another branch
     panel.branch("Other things");
@@ -78,7 +78,8 @@ function fillPanel( panel ) {
         console.log(value.target.checked);
     });
     panel.addCheckbox("This is disabled", true, null, {disabled: true});
-    panel.merge();
+
+    panel.end();
 }
 
 
