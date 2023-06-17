@@ -491,6 +491,35 @@
         this.widgets[ name ] = element;
     }
 
+    Panel.prototype.addTitle = function( name, options ) 
+    {
+        options = options || {};
+
+        var element = document.createElement('div');
+        element.innerText = name;
+        element.className = "lextitle";
+        if(options.id)
+        element.id = options.id;
+        if(options.className)
+        element.className += " " + options.className;
+
+        element.style.width = "100%";
+
+        if(this.current_branch) {
+            element.className += " nomargin";
+            this.current_branch.content.appendChild( element );
+            this.current_branch.widgets.push( element );
+        }
+        else
+        {
+            console.warn("Get used to insert widgets only in a branch!");
+            if(!name){ // remove branch padding
+                element.className += " nomargin";
+            }
+            this.root.appendChild(element);
+        }
+    }
+    
     Panel.prototype.addButton = function( name, value, callback, options ) 
     {
         options = options || {};

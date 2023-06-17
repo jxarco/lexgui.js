@@ -91,6 +91,7 @@ function fillPanel( panel ) {
         console.log(value, event);
     });
     panel.separate();
+    panel.addTitle("Configuration");
     panel.addCheckbox("Enable", true, (value, event) => {
         console.log(value, event);
     });

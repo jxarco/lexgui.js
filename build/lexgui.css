@@ -164,6 +164,7 @@ html, body {
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
   margin-bottom: 6px;
+  padding: 4px;
 }
 
 .lexbranch.closed .lexbranchcontent {
@@ -280,6 +281,15 @@ html, body {
   border-top: 1px solid #111;
   border-bottom: 1px solid #555;
   margin: 5px 0 5px 10px;
+}
+
+.lextitle {
+  width: 100%;
+  color: #ddd;
+  font-weight:600;
+  font-size:14px;
+  margin-bottom:4px;
+  padding:4px;
 }
 
 /* Buttons */

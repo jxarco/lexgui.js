@@ -12,8 +12,9 @@ TODO List:
 - ~~Hide cursor when dragging resize bar~~
 - ~~Color Widget~~
 - ~~Branch separator~~
+- ~~Title widget~~
+- Include fontAwesome Icons
 - Create "Widget" class to implement different value getters
-- Title widget
 - Multiple widgets per row
 - Vector Widgets (N values)
 - Slider Widget
