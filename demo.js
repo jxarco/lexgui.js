@@ -44,7 +44,7 @@ function fillPanel( panel ) {
     
     // add widgets to panel branch
     panel.branch("Information", {icon: LX.icons.CIRCLE});
-    panel.addText("Camera", "Canon EOS 80D", null,{disabled: true}); 
+    panel.addText("Camera", "Canon EOS 80D", null, {disabled: true}); 
     panel.addText("Serial number", "194E283DD");
     panel.merge();
 
@@ -54,13 +54,15 @@ function fillPanel( panel ) {
 
     // another branch
     panel.branch("Preferences", {icon: LX.icons.GEAR});
-    panel.addText("Browser", "Chrome");
+    panel.addColor("Background", [1, 0.1, 0.6], (value, event) => {
+        console.log(value, event);
+    }, { useRGB: true });
     panel.addText("Extensions", "", null, {placeholder: "e.g. ColorPicker"});
-    panel.addText(null, "This has a console.log callback", function(value, event){
+    panel.addText(null, "This has a console.log callback", (value, event) => {
         console.log(value, event);
     });
     panel.addButton(null, "Apply changes");
-    panel.addButton("Apply", "Print event", function(event){
+    panel.addButton("Apply", "Print event", event => {
         console.log(event);
     });
     panel.merge();
@@ -74,10 +76,10 @@ function fillPanel( panel ) {
 
     // another branch
     panel.branch("Other things");
-    panel.addCombo("Pages", ["Federico", "Garcia", "Lorca"], function(value, event){
+    panel.addCombo("Pages", ["Federico", "Garcia", "Lorca"], (value, event) => {
         console.log(value, event);
     });
-    panel.addCheckbox("Enable", true, function(value, event){
+    panel.addCheckbox("Enable", true, (value, event) => {
         console.log(value, event);
     });
     panel.addCheckbox("This is disabled", false, null, {disabled: true});

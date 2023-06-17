@@ -10,5 +10,9 @@ TODO List:
 - ~~Update Combo Theme~~
 - ~~Update Checkbox Theme~~
 - ~~Hide cursor when dragging resize bar~~
+- ~~Color Widget~~
+- Vector Widgets (N values)
+- List Widget
 - Tree Widget
+- Context Menus
 - Menubar

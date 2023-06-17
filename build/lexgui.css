@@ -259,6 +259,10 @@ html, body {
   border-bottom: 1px solid #bbbbbb47;
 }
 
+.lexwidget input.colorinput {
+  border: none;
+}
+
 .lexwidget.nomargin input {
   margin-left: 0px;
 }
@@ -369,4 +373,14 @@ html, body {
 
 .lexcheckbox .checkbox.on {
   background-color: var(--checkbox-flag-on);
+}
+
+/* Input Color Widget */
+
+.lexcolor {
+  display: flex;
+}
+
+.lexcolor .colorinfo {
+  color: #b7b7cbb0;
 }

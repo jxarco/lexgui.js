@@ -638,7 +638,7 @@
 
         // part 1
         if(!name){
-            throw("set checkbox name")
+            throw("Set Widget name");
         }
 
         var wName = document.createElement('div');
@@ -670,7 +670,6 @@
         toggle.appendChild(flag);
         container.appendChild(toggle);
 
-        // if(callback)
         toggle.addEventListener("click", function(e) {
 
             let flag = this.querySelector(".checkbox");
@@ -682,6 +681,111 @@
 
             if(callback) callback( flag.value, e );
         });
+        
+        element.appendChild(container);
+        
+        if(this.current_branch) {
+            if(!name){ // remove branch padding
+                container.className += " noname";
+                container.style.width =  "calc( 100% - 16px )";
+            }
+            this.current_branch.content.appendChild( element );
+            this.current_branch.widgets.push( element );
+        }
+        else
+        {
+            console.warn("Get used to insert widgets only in a branch!");
+            if(!name) // remove branch padding
+            {
+                container.className += " noname";
+                container.style.width =  "calc( 100% - 11px )";
+            }
+            else // add branch padding 
+            {
+                container.style.width =  "calc( 60% - 28px )";
+            }
+            this.root.appendChild(element);
+        }
+            
+    }
+
+    function hexToRgb(string) {
+        const red = parseInt(string.substring(1, 3), 16) / 255;
+        const green = parseInt(string.substring(3, 5), 16) / 255;
+        const blue = parseInt(string.substring(5, 7), 16) / 255;
+        return [red, green, blue];
+    }
+
+    function rgbToHex(rgb) {
+        let hex = "#";
+        for(let c of rgb) {
+            c = Math.floor(c * 255);
+            hex += c.toString(16);
+        }
+        return hex;
+    }
+
+    Panel.prototype.addColor = function( name, value, callback, options ) 
+    {
+        options = options || {};
+
+        var element = document.createElement('div');
+        element.className = "lexwidget";
+        if(options.id)
+            element.id = options.id;
+        if(options.className)
+            element.className += " " + options.className;
+
+        element.style.width = "100%";
+
+        // part 1
+        if(!name){
+            throw("Set Widget name");
+        }
+
+        var wName = document.createElement('div');
+        wName.className = "lexwidgetcolor";
+        wName.innerHTML = name || "";
+        wName.style.width = "40%";
+        element.appendChild(wName);
+        
+        // part 2
+
+        // create color input
+
+        var container = document.createElement('span');
+        container.className = "lexcolor";
+
+        var color = document.createElement('input');
+        color.type = 'color';
+        color.className = "colorinput";
+        color.id = "color"+simple_guidGenerator();
+        color.useRGB = options.useRGB;
+        color.value = value.constructor === Array ? rgbToHex(value) : value;
+        
+        if(options.disabled) {
+            color.disabled = true;
+        }
+
+        let valueName = document.createElement('div');
+        valueName.className = "colorinfo";
+        valueName.innerText = color.value;
+
+        container.appendChild(valueName);
+        container.appendChild(color);
+
+        if(callback) {
+            color.addEventListener("input", function(e) {
+                let val = e.target.value;
+
+                // change value (always hex)
+                valueName.innerText = val;
+
+                if(this.useRGB)
+                    val = hexToRgb(val);
+                callback(val, e);
+            }, false);
+        }
         
         element.appendChild(container);
         
