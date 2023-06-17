@@ -11,7 +11,12 @@ TODO List:
 - ~~Update Checkbox Theme~~
 - ~~Hide cursor when dragging resize bar~~
 - ~~Color Widget~~
+- ~~Branch separator~~
+- Create "Widget" class to implement different value getters
+- Title widget
+- Multiple widgets per row
 - Vector Widgets (N values)
+- Slider Widget
 - List Widget
 - Tree Widget
 - Context Menus

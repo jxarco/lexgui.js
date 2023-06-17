@@ -21,22 +21,33 @@ canvas.style.height = "100%";
 canvas.style.backgroundColor = "#ccc";
 up.attach( canvas );
 
-var ctx = canvas.getContext("2d");
-
-ctx.font = "12px Monospace";
-ctx.fillText("This is a 2d canvas", 74, 60);
-ctx.fillText("Lexgui.js @jxarco", 80, 80);
-
 // add panels
 var side_panel = new LX.Panel();
 right.attach( side_panel );
-fillPanel( side_panel );
-fillPanel( side_panel );
 fillPanel( side_panel );
 
 var bottom_panel = new LX.Panel();
 bottom.attach( bottom_panel );
 fillPanel( bottom_panel );
+
+function loop() {
+    
+    var ctx = canvas.getContext("2d");
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.font = "12px Monospace";
+
+    // Get info from panels
+    let backgroundWidget = side_panel.get('Background').querySelector("input");
+    ctx.fillStyle = backgroundWidget.value;
+
+    ctx.fillText("This is a 2d canvas", 74, 60);
+    ctx.fillText("Lexgui.js @jxarco", 80, 80);
+
+    requestAnimationFrame(loop);
+}
+
+requestAnimationFrame(loop);
 
 // **** **** **** **** **** **** **** **** **** **** **** **** 
 
@@ -79,6 +90,7 @@ function fillPanel( panel ) {
     panel.addCombo("Pages", ["Federico", "Garcia", "Lorca"], (value, event) => {
         console.log(value, event);
     });
+    panel.separate();
     panel.addCheckbox("Enable", true, (value, event) => {
         console.log(value, event);
     });

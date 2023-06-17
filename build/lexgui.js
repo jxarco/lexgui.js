@@ -379,6 +379,12 @@
         this.branch_open = false;
         this.branches = [];
         this.current_branch = null;
+        this.widgets = {};
+    }
+
+    Panel.prototype.get = function( name ) 
+    {
+        return this.widgets[ name ];
     }
 
     Panel.prototype.branch = function( name, options ) 
@@ -481,7 +487,8 @@
                 wValue.style.width =  "calc( 60% - 28px )";
             this.root.appendChild(element);
         }
-            
+          
+        this.widgets[ name ] = element;
     }
 
     Panel.prototype.addButton = function( name, value, callback, options ) 
@@ -546,6 +553,7 @@
             this.root.appendChild(element);
         }
             
+        this.widgets[ name ] = element;
     }
 
     Panel.prototype.addCombo = function( name, values, callback, options ) 
@@ -620,7 +628,8 @@
                 wValue.style.width =  "calc( 60% - 28px )";
             this.root.appendChild(element);
         }
-            
+
+        this.widgets[ name ] = element;
     }
 
     Panel.prototype.addCheckbox = function( name, value, callback, options ) 
@@ -707,6 +716,7 @@
             this.root.appendChild(element);
         }
             
+        this.widgets[ name ] = element;
     }
 
     function hexToRgb(string) {
@@ -812,6 +822,17 @@
             this.root.appendChild(element);
         }
             
+        this.widgets[ name ] = element;
+    }
+
+    Panel.prototype.separate = function() 
+    {
+        if(!this.current_branch)
+            throw("You can only separate branches!");
+
+        var element = document.createElement('div');
+        element.className = "lexseparator";
+        this.current_branch.content.appendChild( element );
     }
 
     LX.Panel = Panel;

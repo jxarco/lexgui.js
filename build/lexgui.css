@@ -273,6 +273,17 @@ html, body {
   color: #888;
 }
 
+.lexseparator {
+  width: -moz-calc(100% - 20px);
+  width: -webkit-calc(100% - 20px);
+  width: calc(100% - 20px);
+  border-top: 1px solid #111;
+  border-bottom: 1px solid #555;
+  margin: 5px 0 5px 10px;
+}
+
+/* Buttons */
+
 .lexbutton {
   display: grid;
   align-content: center;
