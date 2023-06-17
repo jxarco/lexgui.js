@@ -121,7 +121,7 @@
         if(options.className)
             root.className += " " + options.className;
 
-        var width = options.width || "100%";
+        var width = options.width || "calc( 100% )";
         var height = options.height || "100vh";
 
         // size depending on the parent?
@@ -157,7 +157,7 @@
     Area.prototype.split = function( options )
     {
         if(this.sections.length)
-            throw("area has been split before");
+            throw("Area has been split before");
 
         options = options || {};
 
@@ -237,6 +237,8 @@
 			last_pos[1] = e.pageY;
 			e.stopPropagation();
 			e.preventDefault();
+            document.body.classList.add("dragging-split-area");
+            that.split_bar.classList.add("dragging-split-area");
 		}
 
 		function inner_mousemove(e)
@@ -263,6 +265,8 @@
 			var doc = that.root.ownerDocument;
 			doc.removeEventListener("mousemove",inner_mousemove);
 			doc.removeEventListener("mouseup",inner_mouseup);
+            document.body.classList.remove("dragging-split-area");
+            that.split_bar.classList.remove("dragging-split-area");
         }
         
         // update sizes
@@ -367,7 +371,7 @@
         if(options.className)
             root.className += " " + options.className;
 
-        root.style.width = "100%";
+        root.style.width = "calc( 100% - 6px )";
         root.style.height = "100%";
         this.root = root;
 

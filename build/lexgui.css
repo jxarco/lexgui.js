@@ -28,6 +28,26 @@ font-family: 'Roboto', sans-serif;
 	--dark: #151a30;*/
 } 
 
+::-webkit-scrollbar {
+  height: 3px;
+  width: 4px;
+  background: none;
+  margin-right: 2px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #aaaaaaa5;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #aaaaaa;
+}
+
+::-webkit-scrollbar-corner {
+  /* background: red; */
+}
+
 html, body {
   width: 100%;
   height: 100%;
@@ -36,6 +56,10 @@ html, body {
   padding: 0;
   font-family: 'Lato', sans-serif;
 } 
+
+.dragging-split-area {
+  cursor: none !important;
+}
 
 #modal{
   left: 0;
@@ -126,6 +150,7 @@ html, body {
 
 .lexpanel {
   margin: 0;
+  margin-left: 2px;
   overflow: hidden;
   overflow-y: scroll;
 }
@@ -162,6 +187,7 @@ html, body {
 .lexbranch.first .title {
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
+  margin-top: 4px;
 }
 
 .lexbranch.last.closed .title {

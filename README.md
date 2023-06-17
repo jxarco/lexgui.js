@@ -9,6 +9,6 @@ TODO List:
 - ~~Fix close branch when not last~~
 - ~~Update Combo Theme~~
 - ~~Update Checkbox Theme~~
-- Hide cursor when dragging resize bar
+- ~~Hide cursor when dragging resize bar~~
 - Tree Widget
 - Menubar
