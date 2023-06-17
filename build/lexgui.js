@@ -13,8 +13,9 @@
     };
 
     LX.icons = {
-        CIRCLE: "mini-icon-circle.png",
-        GEAR: "mini-icon-gear.png"
+        INFO: "fa-circle-info",
+        CIRCLE: "fa-circle-small",
+        GEAR: "fa-gear"
     };
 
     function simple_guidGenerator() {
@@ -431,9 +432,11 @@
         var element = document.createElement('div');
         element.className = "lexwidget";
         if(options.id)
-        element.id = options.id;
+            element.id = options.id;
         if(options.className)
-        element.className += " " + options.className;
+            element.className += " " + options.className;
+        if(options.title)
+            element.title = options.title;
 
         element.style.width = "100%";
 
@@ -499,9 +502,11 @@
         element.innerText = name;
         element.className = "lextitle";
         if(options.id)
-        element.id = options.id;
+            element.id = options.id;
         if(options.className)
-        element.className += " " + options.className;
+            element.className += " " + options.className;
+        if(options.title)
+            element.title = options.title;
 
         element.style.width = "100%";
 
@@ -527,9 +532,11 @@
         var element = document.createElement('div');
         element.className = "lexwidget";
         if(options.id)
-        element.id = options.id;
+            element.id = options.id;
         if(options.className)
-        element.className += " " + options.className;
+            element.className += " " + options.className;
+        if(options.title)
+            element.title = options.title;
 
         element.style.width = "100%";
 
@@ -592,9 +599,11 @@
         var element = document.createElement('div');
         element.className = "lexwidget";
         if(options.id)
-        element.id = options.id;
+            element.id = options.id;
         if(options.className)
-        element.className += " " + options.className;
+            element.className += " " + options.className;
+        if(options.title)
+            element.title = options.title;
 
         element.style.width = "100%";
 
@@ -671,6 +680,8 @@
             element.id = options.id;
         if(options.className)
             element.className += " " + options.className;
+        if(options.title)
+            element.title = options.title;
 
         element.style.width = "100%";
 
@@ -774,6 +785,8 @@
             element.id = options.id;
         if(options.className)
             element.className += " " + options.className;
+        if(options.title)
+            element.title = options.title;
 
         element.style.width = "100%";
 
@@ -795,23 +808,31 @@
         var container = document.createElement('span');
         container.className = "lexcolor";
 
-        var color = document.createElement('input');
+        let color = document.createElement('input');
         color.type = 'color';
         color.className = "colorinput";
         color.id = "color"+simple_guidGenerator();
-        color.useRGB = options.useRGB;
+        color.useRGB = options.useRGB || true;
         color.value = value.constructor === Array ? rgbToHex(value) : value;
         
         if(options.disabled) {
             color.disabled = true;
         }
 
+        let copy = document.createElement('i');
+        copy.className = "lexicon fa fa-copy";
+
+        copy.addEventListener("click", () => {
+            navigator.clipboard.writeText( color.value );
+        });
+
         let valueName = document.createElement('div');
         valueName.className = "colorinfo";
         valueName.innerText = color.value;
 
-        container.appendChild(valueName);
         container.appendChild(color);
+        container.appendChild(valueName);
+        container.appendChild(copy);
 
         if(callback) {
             color.addEventListener("input", function(e) {
@@ -897,7 +918,8 @@
         
         title.innerHTML = "<span class='"+ (options.closed?"closed":"")+ "'>" + "<span class='switch-branch-button'></span> ";
         if(options.icon) {
-            title.innerHTML += "<img src='build/icons/" + options.icon + "' style='margin-right: 4px; margin-bottom: -2px;'>";
+            // title.innerHTML += "<img src='build/icons/" + options.icon + "' style='margin-right: 4px; margin-bottom: -2px;'>";
+            title.innerHTML += "<a class='branchicon fa " + options.icon + "' style='margin-right: 4px; margin-bottom: -2px;'>";
         }
         title.innerHTML += name || "Branch";
         title.innerHTML = title.innerHTML.bold();

@@ -13,7 +13,7 @@ TODO List:
 - ~~Color Widget~~
 - ~~Branch separator~~
 - ~~Title widget~~
-- Include fontAwesome Icons
+- ~~Include fontAwesome Icons~~
 - Create "Widget" class to implement different value getters
 - Multiple widgets per row
 - Vector Widgets (N values)

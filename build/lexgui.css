@@ -185,6 +185,10 @@ html, body {
   user-select: none; /* Standard syntax */
 }
 
+.lexbranch .branchicon {
+  font-size: 12px;
+}
+
 .lexbranch.first .title {
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
@@ -400,8 +404,26 @@ html, body {
 
 .lexcolor {
   display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
 }
 
 .lexcolor .colorinfo {
   color: #b7b7cbb0;
+  min-width: 56px;
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.lexicon {
+  margin-left: 4px;
+  cursor: pointer;
+}
+
+.lexicon:hover {
+  color: #9293a68e;
+}
+
+.lexicon:active {
+  color: #aeb0c8be;
 }
