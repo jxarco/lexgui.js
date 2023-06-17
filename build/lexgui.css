@@ -10,6 +10,8 @@ font-family: 'Roboto', sans-serif;
 	--branch-background: #363b40;
 	--branch-title-background: #32373c;
   --global-button-color: #6a7178;
+  --global-combo-color: #4e5154;
+  --checkbox-flag-on: #5e9fdd;
 	/* --header-size: 60px;
   --global-font-family: Verdana, sans-serif;
   --global-font-size: 0.8rem;
@@ -232,7 +234,6 @@ html, body {
 }
 
 .lexwidget.nomargin input {
-  
   margin-left: 0px;
 }
 
@@ -260,130 +261,86 @@ html, body {
   box-shadow: 0px 0px 4px #5c5f73;
 }
 
-.lexbutton:active{
-  
+.lexbutton:active {
   background: rgb(71,71,71);
-  background: radial-gradient(circle, rgba(81,81,81,1) 0%, rgba(48,48,48,1) 50%);
   color: #DDD;
 }
 
-.lexbutton.noname{
-  
+.lexbutton.selected {
+  background: #3c4145;
+  outline: 1px solid #8c9bc7;
+  color: #DDD;
+}
+
+.lexbutton.noname {
   margin-left: 0px;
   margin-top: 0px;
 }
 
-.lexcombo{
-  
-  background: rgb(216,216,216);
-  background: linear-gradient(0deg, rgba(216,216,216,1) 0%, rgba(170,170,170,1) 50%);
-  
+/* Combo */
+
+.lexcombo {
+  display: grid;
+  align-content: center;
+}
+
+.lexcombo select {
+	background-color: var(--global-combo-color);
+  border-radius: 2px;
   border: none;
   margin-left: 5px;
-  margin-top: 1px;
-  padding: 3px;
-  color: #000;
+  margin-top: 2px;
+  width: 100%;
+  height: 22px !important;
+  color: #DDD;
   font-weight: 500;
-  outline:none;
+  outline: none;
   white-space: nowrap;
   overflow: hidden;
-  /* border-bottom: 1px solid #c26e5e; */
-  box-shadow: 0px 0px 5px #444;
+  cursor: pointer;
+  box-shadow: 0px 0px 4px #5c5f73;
+  position: relative;
+}
+
+.lexcombo option {
+	background-color: #3f4046;
+  color: #aeacac8a;
 }
 
 /* Toggle check box */
 
-.onoffswitch {
-  position: relative;
-  width: 60px;
+.lexcheckbox {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: top;
+  background-color: #1f1f1f;
+  border: 2px solid black;
+  border-radius: 2px;
+  margin: 0 4px;
+  margin-top: 2px;
+  text-align: center;
+  user-select: none;
+  -moz-user-select: none;
   -webkit-user-select: none;
-     -moz-user-select: none;
-      -ms-user-select: none;
-          user-select: none;
-  margin-left: 5px;
-}
-
-.onoffswitch__checkbox {
-  display: none;
-}
-
-.onoffswitch__label {
-  display: block;
-  overflow: hidden;
   cursor: pointer;
-  /* border: 2px solid #303030; */
-  border-top-right-radius: 6px;
-  border-top-left-radius: 6px;
-  box-shadow: 0px 0px 8px #444;
 }
 
-.onoffswitch__label.disabled .onoffswitch__inner:before{
- 
-  background: none !important;
+.lexcheckbox.disabled {
+  cursor: default !important;
+  border: 1px solid rgba(221, 218, 218, 0.672);
 }
 
-.onoffswitch__label.disabled .onoffswitch__inner:before{
-  background-color: #eeeeee;
-  color: #999999;
-}
-
-.onoffswitch__inner {
+.lexcheckbox .checkbox {
   display: block;
-  width: 200%;
-  margin-left: -100%;
-  transition: margin 0.15s ease-in 0.05s;
+  width: 100%;
+  height: 100%;
+  border-radius: 2px;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
 }
 
-.onoffswitch__inner:before,
-.onoffswitch__inner:after {
-  display: block;
-  float: left;
-  width: 50%;
-  height: 20px;
-  padding: 0;
-  line-height: 20px;
-  font-size: 12px;
-  color: white;
-  
-  font-family: Trebuchet, Arial, sans-serif;
-  font-weight: bold;
-  box-sizing: border-box;
+.lexcheckbox .checkbox.on {
+  background-color: var(--checkbox-flag-on);
 }
-
-.onoffswitch__inner:before {
-  content: "ON";
-  padding-left: 10px;
-  background-color: #303030;
-  color: #ccc;
-}
-
-.onoffswitch__inner:after {
-  content: "OFF";
-  padding-right: 10px;
-  background-color: #303030;
-  color: #ccc;
-  text-align: right;
-}
-
-.onoffswitch__switch {
-  display: block;
-  width: 14px;
-  margin: 6px;
-  background: #ffffff;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 32px;
-  border: 2px solid #999999;
-  border-radius: 6px;
-  transition: all 0.15s ease-in 0s;
-}
-
-.onoffswitch__checkbox:checked + .onoffswitch__label .onoffswitch__inner {
-  margin-left: 0;
-}
-
-.onoffswitch__checkbox:checked + .onoffswitch__label .onoffswitch__switch {
-  right: 0px;
-}
-

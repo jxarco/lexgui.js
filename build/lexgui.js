@@ -567,21 +567,25 @@
         }
         
         // part 2
+
+        var container = document.createElement('div');
+        container.className = "lexcombo";
+
         var wValue = document.createElement('select');
-        wValue.className = "lexcombo";
         wValue.name = name;
-        wValue.style.width = "calc( 60% - 25px )"; // only 10px is for the padding 
-        wValue.style.width = name ? wValue.style.width : "calc( 100% - 16px )";
+        
+        container.style.width = "calc( 60% - 25px )"; // only 10px is for the padding 
+        container.style.width = name ? wValue.style.width : "calc( 100% - 16px )";
 
         if(values.length)
-        for(var i = 0; i < values.length; i++)
-        {
-            var option = document.createElement('option');
-            option.innerHTML = option.value = values[i];
-            if(i == 0)
-                option.selected = true;
-            wValue.appendChild(option);
-        }
+            for(var i = 0; i < values.length; i++)
+            {
+                var option = document.createElement('option');
+                option.innerHTML = option.value = values[i];
+                if(i == 0)
+                    option.selected = true;
+                wValue.appendChild(option);
+            }
 
         if(options.disabled)
         wValue.setAttribute("disabled", true);
@@ -591,7 +595,8 @@
                 callback(e.target.value, e);
             });
 
-        element.appendChild(wValue);
+        container.appendChild(wValue);
+        element.appendChild(container);
         
         if(this.current_branch) {
             if(!name){ // remove branch padding
@@ -621,9 +626,9 @@
         var element = document.createElement('div');
         element.className = "lexwidget";
         if(options.id)
-        element.id = options.id;
+            element.id = options.id;
         if(options.className)
-        element.className += " " + options.className;
+            element.className += " " + options.className;
 
         element.style.width = "100%";
 
@@ -645,33 +650,34 @@
 
         var container = document.createElement('div');
 
-        var toggle = document.createElement('div');
-        toggle.className = "onoffswitch";
+        var toggle = document.createElement('span');
+        toggle.className = "lexcheckbox";
 
-        var wValue = document.createElement('input');
-        wValue.name = "onoffswitch";
-        wValue.type = "checkbox";
-        wValue.className = "onoffswitch__checkbox";
-        wValue.id="myonoffswitch"+simple_guidGenerator();
-        wValue.checked = value || false;
-
-        var labels = document.createElement('label');
-        labels.className = "onoffswitch__label";
-        labels.setAttribute("for", wValue.id);
-        labels.innerHTML = `<span class="onoffswitch__inner"></span>
-        <span class="onoffswitch__switch"></span>`;
-
-        toggle.appendChild(wValue);
-        toggle.appendChild(labels);
-        container.appendChild(toggle);
-
-        if(options.disabled){
-            labels.className += " disabled";
-            wValue.setAttribute("disabled",true);
+        var flag = document.createElement('span');
+        flag.value = value || false;
+        flag.className = "checkbox " + (flag.value ? "on" : "");
+        flag.id = "checkbox"+simple_guidGenerator();
+        
+        if(options.disabled) {
+            flag.disabled = true;
+            toggle.className += " disabled";
         }
 
-        if(callback)
-        wValue.addEventListener("click", callback);
+        toggle.appendChild(flag);
+        container.appendChild(toggle);
+
+        // if(callback)
+        toggle.addEventListener("click", function(e) {
+
+            let flag = this.querySelector(".checkbox");
+            if(flag.disabled)
+            return;
+
+            flag.value = !flag.value;
+            flag.className = "checkbox " + (flag.value ? "on" : "");
+
+            if(callback) callback( flag.value, e );
+        });
         
         element.appendChild(container);
         

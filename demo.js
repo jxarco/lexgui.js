@@ -33,9 +33,7 @@ right.attach(panel);
 fillPanel( panel );
 fillPanel( panel );
 
-
 // **** **** **** **** **** **** **** **** **** **** **** **** 
-
 
 function fillPanel( panel ) {
     
@@ -72,12 +70,12 @@ function fillPanel( panel ) {
     // another branch
     panel.branch("Other things");
     panel.addCombo("Pages", ["Federico", "Garcia", "Lorca"], function(value, event){
-        console.log(value);
+        console.log(value, event);
     });
     panel.addCheckbox("Enable", true, function(value, event){
-        console.log(value.target.checked);
+        console.log(value, event);
     });
-    panel.addCheckbox("This is disabled", true, null, {disabled: true});
+    panel.addCheckbox("This is disabled", false, null, {disabled: true});
 
     panel.end();
 }
