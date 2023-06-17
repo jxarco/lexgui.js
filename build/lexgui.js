@@ -1,17 +1,34 @@
+// Lexgui.js @jxarco
 
-// useful methods and general properties
+(function(global){
 
-var LexGUI = {
+    /**
+     * Main namespace
+     * @namespace LX
+    */
 
-    version: 0.1,
+    var LX = global.LX = {
+        version: 1.1,
+        ready: false
+    };
 
-    icons: {
+    LX.icons = {
         CIRCLE: "mini-icon-circle.png",
         GEAR: "mini-icon-gear.png"
-    },
+    };
 
-    init: function(options)
+    function simple_guidGenerator() {
+        var S4 = function() {
+           return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+        };
+        return (S4()+"-"+S4());
+    }
+
+    function init(options)
     {
+        if(this.ready)
+            return;
+
         options = options || {};
 
         // LexGUI root 
@@ -33,9 +50,13 @@ var LexGUI = {
         
         this.container.appendChild( modal );
         this.container.appendChild( root );
-    },
 
-    message: function(text, title, options)
+        this.ready = true;
+    }
+
+    LX.init = init;
+
+    function message(text, title, options)
     {
         if(!text)
             throw("No message to show");
@@ -82,16 +103,7 @@ var LexGUI = {
         this.container.appendChild(root);
     }
 
-};
-
-(function(){
-
-    function simple_guidGenerator() {
-        var S4 = function() {
-           return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
-        };
-        return (S4()+"-"+S4());
-      }
+    LX.message = message;
 	
 	/**
      * @param {*} options 
@@ -135,6 +147,8 @@ var LexGUI = {
         }
     }
 
+    Area.splitbar_size = 4;
+
     /**
      * @param {*} options 
      * type: "horizontal" / "vertical" 
@@ -151,8 +165,8 @@ var LexGUI = {
         var sizes = options.sizes || ["50%", "50%"];
 
         // create areas
-        var area1 = new LexGUI.Area({className: "split"});
-        var area2 = new LexGUI.Area({className: "split"});
+        var area1 = new LX.Area({className: "split"});
+        var area2 = new LX.Area({className: "split"});
 
         var resize = options.resize || true;
         var data = "0px";
@@ -329,15 +343,13 @@ var LexGUI = {
         if(!content)
         throw("no content to attach");
 
-        if(content.constructor == LexGUI.Panel)
+        if(content.constructor == LX.Panel)
             this.root.appendChild( content.root );
         else
             this.root.appendChild( content );
     }
 
-    LexGUI.Area = Area;
-    
-    Area.splitbar_size = 4;
+    LX.Area = Area;
 
     /**
      * @param {*} options 
@@ -688,7 +700,7 @@ var LexGUI = {
             
     }
 
-    LexGUI.Panel = Panel;
+    LX.Panel = Panel;
 
     /**
      * @param {*} options 
@@ -864,6 +876,6 @@ var LexGUI = {
     }
 
 
-    LexGUI.Branch = Branch;
+    LX.Branch = Branch;
 	
-})();
+})( typeof(window) != "undefined" ? window : (typeof(self) != "undefined" ? self : global ) );

@@ -7,9 +7,9 @@ font-family: 'Roboto', sans-serif;
 :root {
   --global-color-primary: #1a2025;
   --global-color-secondary: #2c3035e8;
-	--branch-background: #30373d;
-	--branch-title-background: #383d43;
-  --global-button-color: #616971;
+	--branch-background: #363b40;
+	--branch-title-background: #32373c;
+  --global-button-color: #6a7178;
 	/* --header-size: 60px;
   --global-font-family: Verdana, sans-serif;
   --global-font-size: 0.8rem;
@@ -109,7 +109,6 @@ html, body {
 }
 
 .lexsplitbar:hover {
-  
   background-color: #8e949be8;
 }
 
@@ -127,10 +126,6 @@ html, body {
   margin: 0;
   overflow: hidden;
   overflow-y: scroll;
-}
-
-.lexbranch {
- 
 }
 
 .lexbranch .lexbranchcontent {
@@ -172,16 +167,20 @@ html, body {
   border-bottom-right-radius: 8px;
 }
 
-.switch-branch-button {
+.lexbranch.last.closed .title {
+  margin-bottom: 6px;
+}
+
+.lexbranch .switch-branch-button {
   float: left;
-	margin: 8px 8px -4px 0;
+	margin: 8px 8px -4px 2px;
 	border-top: 6px solid #CCC;
 	border-left: 4px solid transparent;
 	border-right: 4px solid transparent;
 	border-bottom: 6px solid transparent;
 }
 
-.closed .switch-branch-button {
+.lexbranch.closed .switch-branch-button {
 	margin: 6px 2px 0 2px;
 	border-left: 6px solid #CCC;
 	border-bottom: 4px solid transparent;
