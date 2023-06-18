@@ -1,5 +1,5 @@
 # lexgui.js
-JS library to create simple web interfaces
+JS library to create web graphical user interfaces
 
 ![Screenshot](https://github.com/jxarco/lexgui.js/blob/master/images/Screenshot.png)
 
@@ -18,8 +18,8 @@ TODO List:
 - ~~Vector Widgets~~
 - ~~Add min-max to vector widgets~~
 - ~~Create "Widget" class to implement different value getters~~
+- ~~Addnumber/Slider widgets~~
 - Dialogs
-- Addnumber/Slider widgets
 - Multiple widgets per row
 - List Widget
 - Tree Widget

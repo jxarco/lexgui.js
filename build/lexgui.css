@@ -237,6 +237,7 @@ html, body {
 
 .lexwidget {
   display: flex;
+  align-items: center;
   padding: 5px;
   font-size: 13px;
   color: #DCDCDC;
@@ -480,13 +481,13 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
-.lexvector .vecbox .vecinput {
+.lexvector .vecbox .vecinput, .numberbox .vecinput {
   font-size: 14px;
   margin-left: 2px;
   border: none;
 }
 
-.lexvector .vecbox .vecinput:focus {
+.lexvector .vecbox .vecinput:focus, .numberbox .vecinput:focus {
   color: #c1c1dbef;
 }
 
@@ -500,4 +501,53 @@ input[type=number] {
 
 .lexvector .vecbox .vecinput.v4 {
   width: 33%;
+}
+
+/* Number Widget */
+
+.numberbox {
+  display: grid;
+  border-radius: 4px;
+  border: 1px solid #22292fbf;
+  margin-right: 2px;
+}
+
+.lexinputslider {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none !important;
+  width: calc( 100% - 12px );
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.lexinputslider:hover {
+  opacity: 1;
+}
+
+.lexinputslider::-webkit-slider-runnable-track {
+  height: 1px;
+  background: #a19dc9;
+}
+
+.lexinputslider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  margin-top: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 6px;
+  background: #c9c7de;
+  cursor: pointer;
+}
+
+.lexinputslider::-moz-range-thumb {
+  margin-top: -8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 6px;
+  background: #a19dc9;
+  cursor: pointer;
 }

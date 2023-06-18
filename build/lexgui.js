@@ -375,6 +375,8 @@
                 case Widget.TEXT: 
                 case Widget.COLOR:
                     return this.domEl.querySelector("input").value;
+                case Widget.NUMBER:
+                    return +this.domEl.querySelector("input").value;
                 case Widget.COMBO: 
                     return this.domEl.querySelector("select").value;
                 case Widget.CHECKBOX: 
@@ -386,7 +388,6 @@
                     return value;
             }
         }
-
     }
 
     Widget.TEXT     = 0;
@@ -394,8 +395,9 @@
     Widget.COMBO    = 2;
     Widget.CHECKBOX = 3;
     Widget.COLOR    = 4;
-    Widget.TITLE    = 5;
-    Widget.VECTOR   = 6;
+    Widget.NUMBER   = 5;
+    Widget.TITLE    = 6;
+    Widget.VECTOR   = 7;
 
     LX.Widget = Widget;
 
@@ -838,6 +840,125 @@
         element.appendChild(container);
     }
 
+    Panel.prototype.addNumber = function( name, value, callback, options ) 
+    {
+        if(!name) {
+            throw("Set Widget Name!");
+        }
+
+        if(!this.current_branch)
+            throw("No current branch!");
+
+        options = options || {};
+
+        let widget = this.create_widget(name, Widget.NUMBER, options);
+        let element = widget.domEl;
+
+        // add reset functionality
+        add_reset_property(element.domName, function() {
+            this.style.display = "none";
+            vecinput.value = vecinput.iValue;
+            dispatch_event(vecinput, "input");
+        });
+
+        // add widget value
+
+        var container = document.createElement('div');
+        container.className = "lexnumber";        
+        container.style.width = "calc( 60% - 9px )"; // only 10px is for the padding 
+
+        let box = document.createElement('div');
+        box.className = "numberbox";
+
+        let vecinput = document.createElement('input');
+        vecinput.className = "vecinput";
+        vecinput.min = options.min || -1e24;
+        vecinput.max = options.max || 1e24;
+        vecinput.step = "any";
+        vecinput.type = "number";
+        vecinput.id = "number_"+simple_guidGenerator();
+        vecinput.value = vecinput.iValue = value;
+        box.appendChild(vecinput);
+
+        if(options.disabled) {
+            vecinput.disabled = true;
+        }
+
+        // add slider below
+        if(options.min && options.max) {
+            let slider = document.createElement('input');
+            slider.className = "lexinputslider";
+            slider.min = options.min;
+            slider.max = options.max;
+            slider.type = "range";
+            slider.addEventListener("input", function(e) {
+                vecinput.value = +this.value;
+                dispatch_event(vecinput, "input");
+            }, false);
+            box.appendChild(slider);
+        }
+
+        // Add wheel input
+
+        vecinput.addEventListener("wheel", function(e) {
+            let mult = 1;
+            if(e.shiftKey) mult = 10;
+            else if(e.altKey) mult = 0.1;
+            this.value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
+            dispatch_event(vecinput, "input");
+            this.blur();
+        }, false);
+
+        vecinput.addEventListener("input", function(e) {
+            let val = e.target.value = clamp(e.target.value, vecinput.min, vecinput.max);
+            // reset button (default value)
+            if(val != vecinput.iValue) {
+                let btn = element.querySelector(".lexwidgetname .lexicon");
+                btn.style.display = "block";
+            }
+            // update slider!
+            box.querySelector(".lexinputslider").value = val;
+            callback(val, e);
+        }, false);
+        
+        // Add drag input
+
+        vecinput.addEventListener("mousedown", inner_mousedown);
+
+        var that = this;
+        var lastY = 0;
+        function inner_mousedown(e) {
+            var doc = that.root.ownerDocument;
+            doc.addEventListener("mousemove",inner_mousemove);
+            doc.addEventListener("mouseup",inner_mouseup);
+            lastY = e.pageY;
+        }
+
+        function inner_mousemove(e) {
+            if (lastY != e.pageY) {
+                let dt = lastY - e.pageY;
+                let mult = 1;
+                if(e.shiftKey) mult = 10;
+                else if(e.altKey) mult = 0.1;
+                vecinput.value = (+vecinput.valueAsNumber + mult * dt).toPrecision(5);
+                dispatch_event(vecinput, "input");
+            }
+
+            lastY = e.pageY;
+            e.stopPropagation();
+            e.preventDefault();
+        }
+
+        function inner_mouseup(e) {
+            var doc = that.root.ownerDocument;
+            doc.removeEventListener("mousemove",inner_mousemove);
+            doc.removeEventListener("mouseup",inner_mouseup);
+        }
+        
+        container.appendChild(box);
+        element.appendChild(container);
+    }
+
     const components = {0: 'x', 1: 'y', 2: 'z', 3: 'w'};
 
     Panel.prototype.add_vector = function( num_components, name, value, callback, options ) 
@@ -855,7 +976,6 @@
 
         let widget = this.create_widget(name, Widget.VECTOR, options);
         let element = widget.domEl;
-        element.type = "vec";
 
         // add reset functionality
         add_reset_property(element.domName, function() {

@@ -89,6 +89,9 @@ function fillPanel( panel ) {
     panel.addCombo("Pages", ["Federico", "Garcia", "Lorca"], "Garcia", (value, event) => {
         console.log(value);
     });
+    panel.addNumber("Font size", 12, (value, event) => {
+        console.log(value);
+    }, { min: 1, max: 24 });
     panel.addVector2("2D Position", [74, 60], (value, event) => {
         console.log(value);
     }, { min: 0, max: 256 });
