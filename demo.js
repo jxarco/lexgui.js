@@ -37,12 +37,12 @@ function loop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.font = "12px Monospace";
 
-    // Get info from panels
-    let backgroundWidget = side_panel.get('Background').querySelector("input");
-    ctx.fillStyle = backgroundWidget.value;
+    // Get values from panel widgets (e.g. color value)
+    ctx.fillStyle = side_panel.getValue('Background');
 
-    ctx.fillText("This is a 2d canvas", 74, 60);
-    ctx.fillText("Lexgui.js @jxarco", 80, 80);
+    const pos_2d = side_panel.getValue('2D Position');
+    ctx.fillText("This is a 2d canvas", pos_2d[0], pos_2d[1]);
+    ctx.fillText("Lexgui.js @jxarco", pos_2d[0] + 6, pos_2d[1] + 20);
 
     requestAnimationFrame(loop);
 }
@@ -89,7 +89,7 @@ function fillPanel( panel ) {
     panel.addCombo("Pages", ["Federico", "Garcia", "Lorca"], "Garcia", (value, event) => {
         console.log(value);
     });
-    panel.addVector2("2D Position", [0, 4], (value, event) => {
+    panel.addVector2("2D Position", [74, 60], (value, event) => {
         console.log(value);
     }, { min: 0, max: 256 });
     panel.addVector3("Velocity", [0.1, 0.4, 0.5], (value, event) => {

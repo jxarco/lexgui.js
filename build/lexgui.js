@@ -359,6 +359,47 @@
     LX.Area = Area;
 
     /**
+     * @class Widget
+     */
+
+    class Widget {
+        
+        constructor(name, type) {
+            this.name = name;
+            this.type = type;
+        }
+
+        get_val() {
+
+            switch(this.type) {
+                case Widget.TEXT: 
+                case Widget.COLOR:
+                    return this.domEl.querySelector("input").value;
+                case Widget.COMBO: 
+                    return this.domEl.querySelector("select").value;
+                case Widget.CHECKBOX: 
+                    return this.domEl.querySelector(".checkbox").value;
+                case Widget.VECTOR:
+                    const inputs = this.domEl.querySelectorAll("input");
+                    let value = [];
+                    for( var v of inputs ) value.push( +v.value );
+                    return value;
+            }
+        }
+
+    }
+
+    Widget.TEXT     = 0;
+    Widget.BUTTON   = 1;
+    Widget.COMBO    = 2;
+    Widget.CHECKBOX = 3;
+    Widget.COLOR    = 4;
+    Widget.TITLE    = 5;
+    Widget.VECTOR   = 6;
+
+    LX.Widget = Widget;
+
+    /**
      * @param {*} options 
      * id: id of the element
      */
@@ -388,6 +429,15 @@
     Panel.prototype.get = function( name ) 
     {
         return this.widgets[ name ];
+    }
+
+    Panel.prototype.getValue = function( name ) 
+    {
+        let widget = this.widgets[ name ];
+        if(!widget)
+            throw("No widget called " + name);
+
+        return widget.get_val();
     }
 
     Panel.prototype.branch = function( name, options ) 
@@ -433,7 +483,26 @@
         element.dispatchEvent(event);
     }
 
-    function create_widget( name, options ) {
+    function add_reset_property( container, callback ) {
+        var domEl = document.createElement('a');
+        domEl.style.display = "none";
+        domEl.style.marginRight = "6px";
+        domEl.className = "lexicon fa fa-rotate-left";
+        domEl.addEventListener("click", callback);
+        container.appendChild(domEl);
+        return domEl;
+    }
+
+    /*
+        Panel Widgets
+    */
+
+    Panel.prototype.create_widget = function( name, type, options ) {
+
+        if(!this.current_branch)
+            throw("No current branch!");
+
+        let widget = new Widget(name, type);
 
         let element = document.createElement('div');
         element.className = "lexwidget";
@@ -453,32 +522,17 @@
             domName.style.width = "40%";
             element.appendChild(domName);
             element.domName = domName;
+
+            this.widgets[ name ] = widget;
         }
 
-        return element;
-    }
+        widget.domEl = element;
 
-    function add_reset_property( container, callback ) {
-        var domEl = document.createElement('a');
-        domEl.style.display = "none";
-        domEl.style.marginRight = "6px";
-        domEl.className = "lexicon fa fa-rotate-left";
-        domEl.addEventListener("click", callback);
-        container.appendChild(domEl);
-        return domEl;
-    }
+        this.current_branch.content.appendChild( element );
+        this.current_branch.widgets.push( widget );
 
-    function add_to_branch( panel, element ) {
-        if(!panel.current_branch)
-            throw("No current branch!");
-        
-        panel.current_branch.content.appendChild( element );
-        panel.current_branch.widgets.push( element );
+        return widget;
     }
-
-    /*
-        Panel Widgets
-    */
 
     Panel.prototype.addText = function( name, value, callback, options ) 
     {
@@ -487,7 +541,8 @@
 
         options = options || {};
 
-        let element = create_widget(name, options);
+        let widget = this.create_widget(name, Widget.TEXT, options);
+        let element = widget.domEl;
 
         // add reset functionality
         if(name) {
@@ -529,10 +584,6 @@
             element.className += " noname";
             wValue.style.width =  "calc( 100% - 17px )";
         }
-
-        add_to_branch(this, element);
-          
-        this.widgets[ name ] = element;
     }
 
     Panel.prototype.addTitle = function( name, options ) 
@@ -546,11 +597,10 @@
 
         options = options || {};
 
-        let element = create_widget(null, options);
+        let widget = this.create_widget(null, Widget.TITLE, options);
+        let element = widget.domEl;
         element.innerText = name;
         element.className = "lextitle noname";
-
-        add_to_branch( this, element );
     }
     
     Panel.prototype.addButton = function( name, value, callback, options ) 
@@ -560,7 +610,8 @@
 
         options = options || {};
 
-        let element = create_widget(name, options);
+        let widget = this.create_widget(name, Widget.BUTTON, options);
+        let element = widget.domEl;
 
         var wValue = document.createElement('button');
         wValue.className = "lexbutton";
@@ -578,10 +629,6 @@
             wValue.className += " noname";
             wValue.style.width =  "calc( 100% - 10px )";
         }
-
-        add_to_branch(this, element);
-            
-        this.widgets[ name ] = element;
     }
 
     Panel.prototype.addCombo = function( name, values, value, callback, options ) 
@@ -595,7 +642,8 @@
 
         options = options || {};
 
-        let element = create_widget(name, options);
+        let widget = this.create_widget(name, Widget.COMBO, options);
+        let element = widget.domEl;
 
         // add reset functionality
         add_reset_property(element.domName, function() {
@@ -640,10 +688,6 @@
 
         container.appendChild(wValue);
         element.appendChild(container);
-        
-        add_to_branch( this, element );
-
-        this.widgets[ name ] = element;
     }
 
     Panel.prototype.addCheckbox = function( name, value, callback, options ) 
@@ -657,8 +701,8 @@
 
         options = options || {};
 
-        let element = create_widget(name, options);
-        element.domName.setAttribute("for","toggle");
+        let widget = this.create_widget(name, Widget.CHECKBOX, options);
+        let element = widget.domEl;
 
         // add reset functionality
         add_reset_property(element.domName, function() {
@@ -702,10 +746,6 @@
         });
         
         element.appendChild(container);
-        
-        add_to_branch( this, element );
-            
-        this.widgets[ name ] = element;
     }
 
     function hexToRgb(string) {
@@ -735,7 +775,8 @@
 
         options = options || {};
 
-        let element = create_widget(name, options);
+        let widget = this.create_widget(name, Widget.COLOR, options);
+        let element = widget.domEl;
 
         // add reset functionality
         add_reset_property(element.domName, function() {
@@ -795,10 +836,6 @@
         }
         
         element.appendChild(container);
-        
-        add_to_branch( this, element );
-            
-        this.widgets[ name ] = element;
     }
 
     const components = {0: 'x', 1: 'y', 2: 'z', 3: 'w'};
@@ -816,8 +853,9 @@
 
         options = options || {};
 
-        let element = create_widget(name, options);
-        element.type = "vec3";
+        let widget = this.create_widget(name, Widget.VECTOR, options);
+        let element = widget.domEl;
+        element.type = "vec";
 
         // add reset functionality
         add_reset_property(element.domName, function() {
@@ -842,11 +880,11 @@
 
             let vecinput = document.createElement('input');
             vecinput.className = "vecinput v" + num_components;
-            if(options.min) vecinput.min = options.min;
-            if(options.max) vecinput.max = options.max;
+            vecinput.min = options.min || -1e24;
+            vecinput.max = options.max || 1e24;
             vecinput.step = "any";
             vecinput.type = "number";
-            vecinput.id = "vec3"+simple_guidGenerator();
+            vecinput.id = "vec"+num_components+"_"+simple_guidGenerator();
             vecinput.value = vecinput.iValue = value[i];
 
             if(options.disabled) {
@@ -914,10 +952,6 @@
         }
         
         element.appendChild(container);
-        
-        add_to_branch( this, element );
-            
-        this.widgets[ name ] = element;
     }
 
     Panel.prototype.addVector2 = function( name, value, callback, options ) 
@@ -1107,16 +1141,17 @@
         // update sizes of widgets inside
         for(var i = 0; i < this.widgets.length;i++) {
 
-            var widget = this.widgets[i];
+            let widget = this.widgets[i];
+            let element = widget.domEl;
 
-            if(widget.children.length < 2)
+            if(element.children.length < 2)
             continue;
 
-            var name = widget.children[0];
-            var value = widget.children[1];
+            var name = element.children[0];
+            var value = element.children[1];
 
             name.style.width = this.sizeLeft;
-            const padding = widget.type == 'vec3' ? 9 : 17;
+            const padding = widget.type == Widget.VECTOR ? 9 : 17;
             value.style.width = "calc( 100% - " + padding + "px" + " - " + this.sizeLeft + " )";
         }
     }

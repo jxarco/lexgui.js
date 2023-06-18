@@ -17,6 +17,7 @@ TODO List:
 - ~~Store initial value and Add reset value button for widgets~~
 - ~~Vector Widgets~~
 - ~~Add min-max to vector widgets~~
+- ~~Create "Widget" class to implement different value getters~~
 - Dialogs
 - Addnumber/Slider widgets
 - Multiple widgets per row
@@ -27,5 +28,4 @@ TODO List:
 - Load File widget
 - Menubar
 - Tab menu
-- Create "Widget" class to implement different value getters
 - Timeline ???
