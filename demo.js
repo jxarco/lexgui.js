@@ -28,14 +28,14 @@ fillPanel( side_panel );
 
 var bottom_panel = new LX.Panel();
 bottom.attach( bottom_panel );
-fillPanel( bottom_panel );
+// fillPanel( bottom_panel );
 
 function loop() {
     
     var ctx = canvas.getContext("2d");
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.font = "12px Monospace";
+    ctx.font = side_panel.getValue('Font size') + "px Monospace";
 
     // Get values from panel widgets (e.g. color value)
     ctx.fillStyle = side_panel.getValue('Background');
@@ -107,7 +107,30 @@ function fillPanel( panel ) {
         console.log(value);
     });
     panel.addCheckbox("This is disabled", false, null, {disabled: true});
+    panel.merge();
 
+    panel.branch("Tabs!", {icon: LX.icons.TABS});
+    panel.tabs([
+        { 
+            name: "First tab",
+            icon: "fa-brands fa-discord",
+            callback: p => {
+                p.addTitle("Discord tab");
+                p.addButton(null, "Connect");
+            }
+        },
+        { 
+            name: "Second tab",
+            icon: "fa-brands fa-twitter",
+            callback: p => {
+                p.addTitle("Twitter tab");
+                p.addText("Tweet", "", null, {placeholder: "Tyler Rake 2"});
+            }
+        }
+    ]);
+    panel.addCheckbox("Post TABS", true, (value, event) => {
+        console.log(value);
+    });
     panel.end();
 }
 

@@ -15,7 +15,8 @@
     LX.icons = {
         INFO: "fa-circle-info",
         CIRCLE: "fa-circle-small",
-        GEAR: "fa-gear"
+        GEAR: "fa-gear",
+        TABS: "fa-table-list",
     };
 
     function clamp (num, min, max) { return Math.min(Math.max(num, min), max); }
@@ -501,7 +502,7 @@
 
     Panel.prototype.create_widget = function( name, type, options ) {
 
-        if(!this.current_branch)
+        if(!this.current_branch && !this.queuedContainer)
             throw("No current branch!");
 
         let widget = new Widget(name, type);
@@ -529,18 +530,35 @@
         }
 
         widget.domEl = element;
-
-        this.current_branch.content.appendChild( element );
-        this.current_branch.widgets.push( widget );
+        
+        if(!this.queuedContainer) {
+            this.current_branch.widgets.push( widget );
+            this.current_branch.content.appendChild( element );
+        } 
+        // append content to queued tab container
+        else {
+            this.queuedContainer.appendChild( element );
+        }
 
         return widget;
     }
 
+    Panel.prototype.addTitle = function( name, options ) 
+    {
+        if(!name) {
+            throw("Set Widget Name!");
+        }
+
+        options = options || {};
+
+        let widget = this.create_widget(null, Widget.TITLE, options);
+        let element = widget.domEl;
+        element.innerText = name;
+        element.className = "lextitle noname";
+    }
+
     Panel.prototype.addText = function( name, value, callback, options ) 
     {
-        if(!this.current_branch)
-            throw("No current branch!");
-
         options = options || {};
 
         let widget = this.create_widget(name, Widget.TEXT, options);
@@ -587,29 +605,9 @@
             wValue.style.width =  "calc( 100% - 17px )";
         }
     }
-
-    Panel.prototype.addTitle = function( name, options ) 
-    {
-        if(!name) {
-            throw("Set Widget Name!");
-        }
-
-        if(!this.current_branch)
-            throw("No current branch!");
-
-        options = options || {};
-
-        let widget = this.create_widget(null, Widget.TITLE, options);
-        let element = widget.domEl;
-        element.innerText = name;
-        element.className = "lextitle noname";
-    }
     
     Panel.prototype.addButton = function( name, value, callback, options ) 
     {
-        if(!this.current_branch)
-            throw("No current branch!");
-
         options = options || {};
 
         let widget = this.create_widget(name, Widget.BUTTON, options);
@@ -638,9 +636,6 @@
         if(!name) {
             throw("Set Widget Name!");
         }
-
-        if(!this.current_branch)
-            throw("No current branch!");
 
         options = options || {};
 
@@ -697,9 +692,6 @@
         if(!name) {
             throw("Set Widget Name!");
         }
-
-        if(!this.current_branch)
-            throw("No current branch!");
 
         options = options || {};
 
@@ -772,9 +764,6 @@
             throw("Set Widget Name!");
         }
 
-        if(!this.current_branch)
-            throw("No current branch!");
-
         options = options || {};
 
         let widget = this.create_widget(name, Widget.COLOR, options);
@@ -845,9 +834,6 @@
         if(!name) {
             throw("Set Widget Name!");
         }
-
-        if(!this.current_branch)
-            throw("No current branch!");
 
         options = options || {};
 
@@ -968,9 +954,6 @@
         if(!name) {
             throw("Set Widget Name!");
         }
-
-        if(!this.current_branch)
-            throw("No current branch!");
 
         options = options || {};
 
@@ -1097,6 +1080,63 @@
         var element = document.createElement('div');
         element.className = "lexseparator";
         this.current_branch.content.appendChild( element );
+    }
+
+    Panel.prototype.tabs = function( tabs ) 
+    {
+        if(!this.current_branch)
+            throw("No current branch!");
+
+        if(tabs.constructor != Array)
+            throw("Param @tabs must be an Array!");
+
+        let container = document.createElement('div');
+        container.className = "lextabs-container";
+        container.style.height = (tabs.length * 34) + "px";
+
+        let tabContainer = document.createElement("div");
+        tabContainer.className = "tabs";
+
+        let infoContainer = document.createElement("div");
+        infoContainer.className = "widgets";
+
+        container.appendChild( tabContainer );
+        container.appendChild( infoContainer );
+        this.current_branch.content.appendChild( container );
+
+        var that = this;
+        this.queuedContainer = infoContainer;
+
+        for( var i = 0; i < tabs.length; ++i ) 
+        {
+            const tab = tabs[i];
+            const selected = i == 0;
+            let tabEl = document.createElement('div');
+            tabEl.className = "lextab " + (i == tabs.length - 1 ? "last" : "") + (selected ? "selected" : "");
+            tabEl.innerHTML = "<a class='" + (tab.icon || "fa fa-hashtag") + "'></a>";
+            tabEl.id = tabs.name;
+            // tabEl.setAttribute('hidden', true);
+
+            tabEl.addEventListener("click", function() {
+                tabContainer.querySelectorAll(".lextab").forEach( e => { e.classList.remove("selected"); } );
+                this.classList.add("selected");
+                // set queued container
+                infoContainer.innerHTML = "";
+                that.queuedContainer = infoContainer;
+                // fill it!
+                tab.callback( that );
+                // remove from queue
+                delete that.queuedContainer;
+            });
+
+            tabContainer.appendChild(tabEl);
+
+            if(selected) {
+                tab.callback( this );
+            }
+        }
+        
+        delete this.queuedContainer;
     }
 
     LX.Panel = Panel;
