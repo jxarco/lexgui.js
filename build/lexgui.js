@@ -1096,16 +1096,8 @@
 
         let tabContainer = document.createElement("div");
         tabContainer.className = "tabs";
-
-        let infoContainer = document.createElement("div");
-        infoContainer.className = "widgets";
-
         container.appendChild( tabContainer );
-        container.appendChild( infoContainer );
         this.current_branch.content.appendChild( container );
-
-        var that = this;
-        this.queuedContainer = infoContainer;
 
         for( var i = 0; i < tabs.length; ++i ) 
         {
@@ -1114,28 +1106,32 @@
             let tabEl = document.createElement('div');
             tabEl.className = "lextab " + (i == tabs.length - 1 ? "last" : "") + (selected ? "selected" : "");
             tabEl.innerHTML = "<a class='" + (tab.icon || "fa fa-hashtag") + "'></a>";
-            tabEl.id = tabs.name;
-            // tabEl.setAttribute('hidden', true);
+            
+            let infoContainer = document.createElement("div");
+            infoContainer.id = tab.name.replace(/\s/g, '');
+            infoContainer.className = "widgets";
+            if(!selected) infoContainer.toggleAttribute('hidden', true);
+            container.appendChild( infoContainer );
 
             tabEl.addEventListener("click", function() {
+                // change selected tab
                 tabContainer.querySelectorAll(".lextab").forEach( e => { e.classList.remove("selected"); } );
                 this.classList.add("selected");
-                // set queued container
-                infoContainer.innerHTML = "";
-                that.queuedContainer = infoContainer;
-                // fill it!
-                tab.callback( that );
-                // remove from queue
-                delete that.queuedContainer;
+                // hide all tabs content
+                container.querySelectorAll(".widgets").forEach( e => { e.toggleAttribute('hidden', true); } );
+                // show tab content
+                const el = container.querySelector("#" + infoContainer.id);
+                el.toggleAttribute('hidden');
             });
 
             tabContainer.appendChild(tabEl);
 
-            if(selected) {
-                tab.callback( this );
-            }
+            // push to tab space
+            this.queuedContainer = infoContainer;
+            tab.callback( this );
         }
         
+        // push to branch from now on
         delete this.queuedContainer;
     }
 

@@ -19,12 +19,12 @@ TODO List:
 - ~~Add min-max to vector widgets~~
 - ~~Create "Widget" class to implement different value getters~~
 - ~~Addnumber/Slider widgets~~
+- ~~Tabs widget (Blender)~~
 - Dialogs
 - Multiple widgets per row
 - List Widget
 - Tree Widget
 - Context Menus
-- Tabs widget (Blender)
 - Load File widget
 - Menubar
 - Tab menu
