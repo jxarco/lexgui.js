@@ -14,7 +14,7 @@ TODO List:
 - ~~Branch separator~~
 - ~~Title widget~~
 - ~~Include fontAwesome Icons~~
-- Store initial value and Add reset value button for widgets
+- ~~Store initial value and Add reset value button for widgets~~
 - Dialogs
 - Create "Widget" class to implement different value getters
 - Addnumber/Slider widgets

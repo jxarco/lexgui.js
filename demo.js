@@ -56,7 +56,9 @@ function fillPanel( panel ) {
     // add widgets to panel branch
     panel.branch("Information", {icon: LX.icons.INFO});
     panel.addText("Camera", "Canon EOS 80D", null, {disabled: true}); 
-    panel.addText("Serial number", "194E283DD");
+    panel.addText("Serial number", "194E283DD", (value, event) => {
+        console.log(value);
+    });
     panel.merge();
 
     // add widgets to panel directly
@@ -87,7 +89,7 @@ function fillPanel( panel ) {
 
     // another branch
     panel.branch("Other things");
-    panel.addCombo("Pages", ["Federico", "Garcia", "Lorca"], (value, event) => {
+    panel.addCombo("Pages", ["Federico", "Garcia", "Lorca"], "Garcia", (value, event) => {
         console.log(value);
     });
     panel.separate();

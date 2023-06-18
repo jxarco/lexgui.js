@@ -425,6 +425,16 @@
         return (typeof arg == 'undefined' ? def : arg);
     }
 
+    function dispatch_event(element, type, bubbles, cancellable) {
+        let event = document.createEvent("HTMLEvents");
+        event.initEvent(type, bubbles, cancellable);
+        element.dispatchEvent(event);
+    }
+
+    /*
+        Panel Widgets
+    */
+
     Panel.prototype.addText = function( name, value, callback, options ) 
     {
         options = options || {};
@@ -455,6 +465,7 @@
             resetValButton.addEventListener("click", function() {
                 wValue.value = wValue.iValue;
                 this.style.display = "none";
+                dispatch_event(wValue, "focusout");
             });
 
             wName.appendChild(resetValButton);
@@ -610,11 +621,11 @@
         this.widgets[ name ] = element;
     }
 
-    Panel.prototype.addCombo = function( name, values, callback, options ) 
+    Panel.prototype.addCombo = function( name, values, value, callback, options ) 
     {
         options = options || {};
 
-        var element = document.createElement('div');
+        let element = document.createElement('div');
         element.className = "lexwidget";
         if(options.id)
             element.id = options.id;
@@ -627,11 +638,25 @@
 
         // part 1
         if(name) {
-            var wName = document.createElement('div');
+            let wName = document.createElement('div');
             wName.className = "lexwidgetname";
             wName.innerHTML = name || "";
             wName.style.width = "40%";
             element.appendChild(wName);
+
+            var resetValButton = document.createElement('a');
+            resetValButton.style.display = "none";
+            resetValButton.className = "lexicon fa fa-rotate-left";
+
+            resetValButton.addEventListener("click", function() {
+                for(let o of wValue.options)
+                    if(o.value == wValue.iValue)
+                        o.selected = true;
+                this.style.display = "none";
+                dispatch_event(wValue, "change");
+            });
+
+            wName.appendChild(resetValButton);
         }
         
         // part 2
@@ -639,8 +664,9 @@
         var container = document.createElement('div');
         container.className = "lexcombo";
 
-        var wValue = document.createElement('select');
+        let wValue = document.createElement('select');
         wValue.name = name;
+        wValue.iValue = value;
         
         container.style.width = "calc( 60% - 25px )"; // only 10px is for the padding 
         container.style.width = name ? wValue.style.width : "calc( 100% - 16px )";
@@ -650,18 +676,22 @@
             {
                 var option = document.createElement('option');
                 option.innerHTML = option.value = values[i];
-                if(i == 0)
+                if(values[i] == value)
                     option.selected = true;
                 wValue.appendChild(option);
             }
 
         if(options.disabled)
         wValue.setAttribute("disabled", true);
-
-        if(callback)
-            wValue.addEventListener("change", function(e){
-                callback(e.target.value, e);
-            });
+        
+        wValue.addEventListener("change", function(e) {
+            const val = e.target.value;
+            if(val != wValue.iValue) {
+                let btn = element.querySelector(".lexwidgetname .lexicon");
+                if(btn) btn.style.display = "block";
+            }
+            if(callback) callback(val, e);
+        });
 
         container.appendChild(wValue);
         element.appendChild(container);
@@ -692,7 +722,7 @@
     {
         options = options || {};
 
-        var element = document.createElement('div');
+        let element = document.createElement('div');
         element.className = "lexwidget";
         if(options.id)
             element.id = options.id;
@@ -708,12 +738,22 @@
             throw("Set Widget name");
         }
 
-        var wName = document.createElement('div');
+        let wName = document.createElement('div');
         wName.className = "lexwidgetname";
         wName.innerHTML = name || "";
         wName.style.width = "40%";
         wName.setAttribute("for","toggle");
         element.appendChild(wName);
+
+        var resetValButton = document.createElement('a');
+        resetValButton.style.display = "none";
+        resetValButton.className = "lexicon fa fa-rotate-left";
+
+        resetValButton.addEventListener("click", function() {
+            dispatch_event(toggle, "click");
+        });
+
+        wName.appendChild(resetValButton);
         
         // part 2
 
@@ -721,11 +761,11 @@
 
         var container = document.createElement('div');
 
-        var toggle = document.createElement('span');
+        let toggle = document.createElement('span');
         toggle.className = "lexcheckbox";
 
-        var flag = document.createElement('span');
-        flag.value = value || false;
+        let flag = document.createElement('span');
+        flag.value = flag.iValue = value || false;
         flag.className = "checkbox " + (flag.value ? "on" : "");
         flag.id = "checkbox"+simple_guidGenerator();
         
@@ -745,6 +785,10 @@
 
             flag.value = !flag.value;
             flag.className = "checkbox " + (flag.value ? "on" : "");
+
+            // reset button (default value)
+            let btn = element.querySelector(".lexwidgetname .lexicon");
+            btn.style.display = flag.value != flag.iValue ? "block": "none";
 
             if(callback) callback( flag.value, e );
         });
@@ -797,7 +841,7 @@
     {
         options = options || {};
 
-        var element = document.createElement('div');
+        let element = document.createElement('div');
         element.className = "lexwidget";
         if(options.id)
             element.id = options.id;
@@ -813,11 +857,23 @@
             throw("Set Widget name");
         }
 
-        var wName = document.createElement('div');
-        wName.className = "lexwidgetcolor";
+        let wName = document.createElement('div');
+        wName.className = "lexwidgetname";
         wName.innerHTML = name || "";
         wName.style.width = "40%";
         element.appendChild(wName);
+
+        var resetValButton = document.createElement('a');
+        resetValButton.style.display = "none";
+        resetValButton.className = "lexicon fa fa-rotate-left";
+
+        resetValButton.addEventListener("click", function() {
+            this.style.display = "none";
+            color.value = color.iValue;
+            dispatch_event(color, "input");
+        });
+
+        wName.appendChild(resetValButton);
         
         // part 2
 
@@ -831,7 +887,7 @@
         color.className = "colorinput";
         color.id = "color"+simple_guidGenerator();
         color.useRGB = options.useRGB || true;
-        color.value = value.constructor === Array ? rgbToHex(value) : value;
+        color.value = color.iValue = value.constructor === Array ? rgbToHex(value) : value;
         
         if(options.disabled) {
             color.disabled = true;
@@ -858,6 +914,12 @@
 
                 // change value (always hex)
                 valueName.innerText = val;
+
+                // reset button (default value)
+                if(val != color.iValue) {
+                    let btn = element.querySelector(".lexwidgetname .lexicon");
+                    btn.style.display = "block";
+                }
 
                 if(this.useRGB)
                     val = hexToRgb(val);
