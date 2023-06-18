@@ -91,7 +91,7 @@ function fillPanel( panel ) {
     });
     panel.addVector2("2D Position", [0, 4], (value, event) => {
         console.log(value);
-    });
+    }, { min: 0, max: 256 });
     panel.addVector3("Velocity", [0.1, 0.4, 0.5], (value, event) => {
         console.log(value);
     });

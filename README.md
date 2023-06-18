@@ -15,7 +15,8 @@ TODO List:
 - ~~Title widget~~
 - ~~Include fontAwesome Icons~~
 - ~~Store initial value and Add reset value button for widgets~~
-- ~~Vector3 Widget~~
+- ~~Vector Widgets~~
+- ~~Add min-max to vector widgets~~
 - Dialogs
 - Addnumber/Slider widgets
 - Multiple widgets per row

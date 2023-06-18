@@ -842,22 +842,30 @@
 
             let vecinput = document.createElement('input');
             vecinput.className = "vecinput v" + num_components;
+            if(options.min) vecinput.min = options.min;
+            if(options.max) vecinput.max = options.max;
             vecinput.step = "any";
             vecinput.type = "number";
             vecinput.id = "vec3"+simple_guidGenerator();
             vecinput.value = vecinput.iValue = value[i];
-            
+
+            if(options.disabled) {
+                vecinput.disabled = true;
+            }
+
+            // Add wheel input
+
             vecinput.addEventListener("wheel", function(e) {
                 let mult = 1;
                 if(e.shiftKey) mult = 10;
                 else if(e.altKey) mult = 0.1;
-                this.value = (+this.valueAsNumber).toPrecision(5) - mult * (e.deltaY > 0 ? 1 : -1);
+                this.value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
                 dispatch_event(vecinput, "input");
                 this.blur();
             }, false);
 
             vecinput.addEventListener("input", function(e) {
-                let val = e.target.value;
+                let val = e.target.value = clamp(e.target.value, vecinput.min, vecinput.max);
                 // reset button (default value)
                 if(val != vecinput.iValue) {
                     let btn = element.querySelector(".lexwidgetname .lexicon");
@@ -867,8 +875,38 @@
                 callback(val, e);
             }, false);
             
-            if(options.disabled) {
-                vecinput.disabled = true;
+            // Add drag input
+
+            vecinput.addEventListener("mousedown", inner_mousedown);
+
+            var that = this;
+            var lastY = 0;
+            function inner_mousedown(e) {
+                var doc = that.root.ownerDocument;
+                doc.addEventListener("mousemove",inner_mousemove);
+                doc.addEventListener("mouseup",inner_mouseup);
+                lastY = e.pageY;
+            }
+
+            function inner_mousemove(e) {
+                if (lastY != e.pageY) {
+                    let dt = lastY - e.pageY;
+                    let mult = 1;
+                    if(e.shiftKey) mult = 10;
+                    else if(e.altKey) mult = 0.1;
+                    vecinput.value = (+vecinput.valueAsNumber + mult * dt).toPrecision(5);
+                    dispatch_event(vecinput, "input");
+                }
+
+                lastY = e.pageY;
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            function inner_mouseup(e) {
+                var doc = that.root.ownerDocument;
+                doc.removeEventListener("mousemove",inner_mousemove);
+                doc.removeEventListener("mouseup",inner_mouseup);
             }
             
             box.appendChild(vecinput);
