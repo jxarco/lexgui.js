@@ -14,11 +14,17 @@ TODO List:
 - ~~Branch separator~~
 - ~~Title widget~~
 - ~~Include fontAwesome Icons~~
+- Store initial value and Add reset value button for widgets
+- Dialogs
 - Create "Widget" class to implement different value getters
+- Addnumber/Slider widgets
 - Multiple widgets per row
 - Vector Widgets (N values)
-- Slider Widget
 - List Widget
 - Tree Widget
 - Context Menus
+- Tabs widget (Blender)
+- Load File widget
 - Menubar
+- Tab menu
+- Timeline ???

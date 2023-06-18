@@ -11,6 +11,7 @@ font-family: 'Roboto', sans-serif;
 	--branch-title-background: #32373c;
   --global-button-color: #6a7178;
   --global-combo-color: #4e5154;
+  --global-text-secondary: #b7b7cbb0;
   --checkbox-flag-on: #5e9fdd;
 	/* --header-size: 60px;
   --global-font-family: Verdana, sans-serif;
@@ -167,13 +168,10 @@ html, body {
   padding: 4px;
 }
 
-.lexbranch.closed .lexbranchcontent {
-  height: 0px;
-}
-
 .lexbranch.title {
   background: var(--branch-title-background);
   font-size: 15px;
+  font-weight: bold;
   color: white;
   padding: 8px;
   text-shadow: 0px 1px 5px #000;
@@ -205,7 +203,7 @@ html, body {
 }
 
 .lexbranch .switch-branch-button {
-  float: left;
+  float: right;
 	margin: 8px 8px -4px 2px;
 	border-top: 6px solid #CCC;
 	border-left: 4px solid transparent;
@@ -214,11 +212,11 @@ html, body {
 }
 
 .lexbranch.closed .switch-branch-button {
-	margin: 6px 2px 0 2px;
-	border-left: 6px solid #CCC;
+	margin: 6px 9px 0 2px;
+	border-left: 6px solid transparent;
 	border-bottom: 4px solid transparent;
 	border-top: 4px solid transparent;
-	border-right: 6px solid transparent; 
+	border-right: 6px solid #CCC; 
 }
 
 /* Widgets */
@@ -240,8 +238,12 @@ html, body {
   transform: translateY(-8px);
   height: 2px;
   width: 11px;
-  cursor: grab;
-  color: #dddddd6b;
+  cursor: ew-resize;
+  color: #dddddd51;
+}
+
+.lexwidgetseparator div:hover {
+  color: #dddddddb;
 }
 
 .lexwidgetseparator div div {
@@ -251,14 +253,16 @@ html, body {
 .lexwidgetname {
   white-space: nowrap;
   overflow: hidden;
+  display: flex;
+  justify-content: space-between;
 }
 
 .lexwidget input {
   background: none;
   margin-left: 5px;
   padding: 3px;
-  color: #bbb;
-  font-weight: 500;
+  color: var(--global-text-secondary);
+  font-weight: 600;
   outline:none;
   border: none;
   border-bottom: 1px solid #bbbbbb47;
@@ -409,7 +413,7 @@ html, body {
 }
 
 .lexcolor .colorinfo {
-  color: #b7b7cbb0;
+  color: var(--global-text-secondary);
   min-width: 56px;
   margin-left: 8px;
   font-weight: 600;
@@ -418,6 +422,7 @@ html, body {
 .lexicon {
   margin-left: 4px;
   cursor: pointer;
+  line-height: inherit !important;
 }
 
 .lexicon:hover {

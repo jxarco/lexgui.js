@@ -1,7 +1,7 @@
 // init library
 LX.init();
 
-// LX.message("Welcome to Lexgui!", "Not an error!")
+LX.message("Welcome to Lexgui!", "Not an error!")
 
 // create main area
 var area = new LX.Area({id:"mainarea"});
@@ -88,12 +88,12 @@ function fillPanel( panel ) {
     // another branch
     panel.branch("Other things");
     panel.addCombo("Pages", ["Federico", "Garcia", "Lorca"], (value, event) => {
-        console.log(value, event);
+        console.log(value);
     });
     panel.separate();
     panel.addTitle("Configuration");
     panel.addCheckbox("Enable", true, (value, event) => {
-        console.log(value, event);
+        console.log(value);
     });
     panel.addCheckbox("This is disabled", false, null, {disabled: true});
 

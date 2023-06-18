@@ -429,7 +429,7 @@
     {
         options = options || {};
 
-        var element = document.createElement('div');
+        let element = document.createElement('div');
         element.className = "lexwidget";
         if(options.id)
             element.id = options.id;
@@ -447,11 +447,22 @@
             wName.innerHTML = name || "";
             wName.style.width = "40%";
             element.appendChild(wName);
+
+            var resetValButton = document.createElement('a');
+            resetValButton.style.display = "none";
+            resetValButton.className = "lexicon fa fa-rotate-left";
+
+            resetValButton.addEventListener("click", function() {
+                wValue.value = wValue.iValue;
+                this.style.display = "none";
+            });
+
+            wName.appendChild(resetValButton);
         }
         
         // part 2
-        var wValue = document.createElement('input');
-        wValue.value = value || "";
+        let wValue = document.createElement('input');
+        wValue.value = wValue.iValue = value || "";
         wValue.style.width = "calc( 60% - 25px )"; // only 10px is for the padding 
         wValue.style.width = name ? wValue.style.width : "calc( 100% - 16px )";
 
@@ -460,15 +471,22 @@
         if(options.placeholder)
         wValue.setAttribute("placeholder", options.placeholder);
 
-        if(callback) {
-            wValue.addEventListener("keyup", function(e){
-                if(e.keyCode == 13)
-                    callback(e.target.value, e);
-            });
-            wValue.addEventListener("focusout", function(e){
-                callback(e.target.value, e);
-            });
-        }
+        var resolve = (function(val, event) {
+            if(val != wValue.iValue) {
+                let btn = element.querySelector(".lexwidgetname .lexicon");
+                if(btn) btn.style.display = "block";
+            }
+            if(callback)
+                callback(val, event);
+        }).bind(this);
+
+        wValue.addEventListener("keyup", function(e){
+            if(e.keyCode == 13)
+                resolve(e.target.value, e);
+        });
+        wValue.addEventListener("focusout", function(e){
+            resolve(e.target.value, e);
+        });
 
         element.appendChild(wValue);
         
@@ -899,9 +917,9 @@
         var root = document.createElement('div');
         root.className = "lexbranch";
         if(options.id)
-        root.id = options.id;
+            root.id = options.id;
         if(options.className)
-        root.className += " " + options.className;
+            root.className += " " + options.className;
 
         root.style.width = "calc(100% - 6px)";
         root.style.margin = "0 auto";
@@ -916,13 +934,12 @@
         var title = document.createElement('div');
         title.className = "lexbranch title";
         
-        title.innerHTML = "<span class='"+ (options.closed?"closed":"")+ "'>" + "<span class='switch-branch-button'></span> ";
+        title.innerHTML = "<span class='switch-branch-button'></span>";
         if(options.icon) {
-            // title.innerHTML += "<img src='build/icons/" + options.icon + "' style='margin-right: 4px; margin-bottom: -2px;'>";
-            title.innerHTML += "<a class='branchicon fa " + options.icon + "' style='margin-right: 4px; margin-bottom: -2px;'>";
+            title.innerHTML += "<a class='branchicon fa " + options.icon + "' style='margin-right: 8px; margin-bottom: -2px;'>";
         }
         title.innerHTML += name || "Branch";
-        title.innerHTML = title.innerHTML.bold();
+
         root.appendChild(title);
 
         var branch_content = document.createElement('div');
@@ -967,9 +984,9 @@
         var element = document.createElement('div');
         element.className = "lexwidgetseparator";
         if(options.id)
-        element.id = options.id;
+            element.id = options.id;
         if(options.className)
-        element.className += " " + options.className;
+            element.className += " " + options.className;
 
         element.style.width = "100%";
         element.style.background = "none";
@@ -1050,7 +1067,7 @@
 
             var widget = this.widgets[i];
 
-            if(widget.children.length == 1)
+            if(widget.children.length < 2)
             continue;
 
             var name = widget.children[0];
