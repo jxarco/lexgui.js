@@ -158,6 +158,7 @@ html, body {
 
 .lexbranch .lexbranchcontent {
   background: var(--branch-background);
+  padding: 4px;
 }
 
 .lexbranch.last .lexbranchcontent {
@@ -165,7 +166,6 @@ html, body {
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
   margin-bottom: 6px;
-  padding: 4px;
 }
 
 .lexbranch.title {
@@ -259,7 +259,7 @@ html, body {
 
 .lexwidget input {
   background: none;
-  margin-left: 5px;
+  /* margin-left: 5px; */
   padding: 3px;
   color: var(--global-text-secondary);
   font-weight: 600;
@@ -270,10 +270,6 @@ html, body {
 
 .lexwidget input.colorinput {
   border: none;
-}
-
-.lexwidget.nomargin input {
-  margin-left: 0px;
 }
 
 .lexwidget input:disabled {

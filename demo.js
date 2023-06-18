@@ -84,9 +84,6 @@ function fillPanel( panel ) {
     panel.addText(null, "Nothing here", null, {disabled: true});
     panel.merge();
 
-    // // button out of branch!
-    // panel.addButton(null, "Restart");
-
     // another branch
     panel.branch("Other things");
     panel.addCombo("Pages", ["Federico", "Garcia", "Lorca"], "Garcia", (value, event) => {

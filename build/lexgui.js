@@ -421,23 +421,17 @@
         this.merge();
     }
 
-    function pick(arg, def) {
+    function pick( arg, def ) {
         return (typeof arg == 'undefined' ? def : arg);
     }
 
-    function dispatch_event(element, type, bubbles, cancellable) {
+    function dispatch_event( element, type, bubbles, cancellable ) {
         let event = document.createEvent("HTMLEvents");
         event.initEvent(type, bubbles, cancellable);
         element.dispatchEvent(event);
     }
 
-    /*
-        Panel Widgets
-    */
-
-    Panel.prototype.addText = function( name, value, callback, options ) 
-    {
-        options = options || {};
+    function create_widget( options ) {
 
         let element = document.createElement('div');
         element.className = "lexwidget";
@@ -449,6 +443,30 @@
             element.title = options.title;
 
         element.style.width = "100%";
+
+        return element;
+    }
+
+    function add_to_branch( panel, element ) {
+        if(!panel.current_branch)
+            throw("No current branch!");
+        
+        panel.current_branch.content.appendChild( element );
+        panel.current_branch.widgets.push( element );
+    }
+
+    /*
+        Panel Widgets
+    */
+
+    Panel.prototype.addText = function( name, value, callback, options ) 
+    {
+        if(!this.current_branch)
+            throw("No current branch!");
+
+        options = options || {};
+
+        let element = create_widget(options);
 
         // part 1
         if(name) {
@@ -474,13 +492,10 @@
         // part 2
         let wValue = document.createElement('input');
         wValue.value = wValue.iValue = value || "";
-        wValue.style.width = "calc( 60% - 25px )"; // only 10px is for the padding 
-        wValue.style.width = name ? wValue.style.width : "calc( 100% - 16px )";
+        wValue.style.width = "calc( 60% - 17px )"; // only 10px is for the padding 
 
-        if(options.disabled)
-        wValue.setAttribute("disabled", true);
-        if(options.placeholder)
-        wValue.setAttribute("placeholder", options.placeholder);
+        if(options.disabled) wValue.setAttribute("disabled", true);
+        if(options.placeholder) wValue.setAttribute("placeholder", options.placeholder);
 
         var resolve = (function(val, event) {
             if(val != wValue.iValue) {
@@ -501,73 +516,42 @@
 
         element.appendChild(wValue);
         
-        if(this.current_branch) {
-            if(!name){ // remove branch padding
-                element.className += " nomargin";
-                wValue.style.width =  "calc( 100% - 21px )";
-            }
-            this.current_branch.content.appendChild( element );
-            this.current_branch.widgets.push( element );
+        if(!name){ // remove branch padding
+            element.className += " noname";
+            wValue.style.width =  "calc( 100% - 17px )";
         }
-        else
-        {
-            console.warn("Get used to insert widgets only in a branch!");
-            if(!name){ // remove branch padding
-                element.className += " nomargin";
-            }
-            else // add branch padding 
-                wValue.style.width =  "calc( 60% - 28px )";
-            this.root.appendChild(element);
-        }
+
+        add_to_branch(this, element);
           
         this.widgets[ name ] = element;
     }
 
     Panel.prototype.addTitle = function( name, options ) 
     {
+        if(!name) {
+            throw("Set Widget Name!");
+        }
+
+        if(!this.current_branch)
+            throw("No current branch!");
+
         options = options || {};
 
-        var element = document.createElement('div');
+        let element = create_widget(options);
         element.innerText = name;
-        element.className = "lextitle";
-        if(options.id)
-            element.id = options.id;
-        if(options.className)
-            element.className += " " + options.className;
-        if(options.title)
-            element.title = options.title;
+        element.className = "lextitle noname";
 
-        element.style.width = "100%";
-
-        if(this.current_branch) {
-            element.className += " nomargin";
-            this.current_branch.content.appendChild( element );
-            this.current_branch.widgets.push( element );
-        }
-        else
-        {
-            console.warn("Get used to insert widgets only in a branch!");
-            if(!name){ // remove branch padding
-                element.className += " nomargin";
-            }
-            this.root.appendChild(element);
-        }
+        add_to_branch( this, element );
     }
     
     Panel.prototype.addButton = function( name, value, callback, options ) 
     {
+        if(!this.current_branch)
+            throw("No current branch!");
+
         options = options || {};
 
-        var element = document.createElement('div');
-        element.className = "lexwidget";
-        if(options.id)
-            element.id = options.id;
-        if(options.className)
-            element.className += " " + options.className;
-        if(options.title)
-            element.title = options.title;
-
-        element.style.width = "100%";
+        let element = create_widget(options);
 
         // part 1
         if(name) {
@@ -582,82 +566,58 @@
         var wValue = document.createElement('button');
         wValue.className = "lexbutton";
         wValue.innerHTML = value || "";
-        wValue.style.width = "calc( 60% - 20px )"; // only 10px is for the padding 
-
-        if(!name)
-            wValue.style.width = name ? wValue.style.width : "calc( 100% - 16px )";
+        wValue.style.width = "calc( 60% - 17px )"; // only 10px is for the padding 
 
         if(options.disabled)
-        wValue.setAttribute("disabled", true);
-
+            wValue.setAttribute("disabled", true);
         if(callback)
-        wValue.addEventListener("click", callback);
+            wValue.addEventListener("click", callback);
 
         element.appendChild(wValue);
         
-        if(this.current_branch) {
-            if(!name){ // remove branch padding
-                wValue.className += " noname";
-                wValue.style.width =  "calc( 100% - 16px )";
-            }
-            this.current_branch.content.appendChild( element );
-            this.current_branch.widgets.push( element );
+        if(!name) { // remove branch padding
+            wValue.className += " noname";
+            wValue.style.width =  "calc( 100% - 10px )";
         }
-        else
-        {
-            console.warn("Get used to insert widgets only in a branch!");
-            if(!name) // remove branch padding
-            {
-                wValue.className += " noname";
-                wValue.style.width =  "calc( 100% - 11px )";
-            }
-            else // add branch padding 
-            {
-                wValue.style.width =  "calc( 60% - 28px )";
-            }
-            this.root.appendChild(element);
-        }
+
+        add_to_branch(this, element);
             
         this.widgets[ name ] = element;
     }
 
     Panel.prototype.addCombo = function( name, values, value, callback, options ) 
     {
+        if(!name) {
+            throw("Set Widget Name!");
+        }
+
+        if(!this.current_branch)
+            throw("No current branch!");
+
         options = options || {};
 
-        let element = document.createElement('div');
-        element.className = "lexwidget";
-        if(options.id)
-            element.id = options.id;
-        if(options.className)
-            element.className += " " + options.className;
-        if(options.title)
-            element.title = options.title;
-
-        element.style.width = "100%";
+        let element = create_widget(options);
 
         // part 1
-        if(name) {
-            let wName = document.createElement('div');
-            wName.className = "lexwidgetname";
-            wName.innerHTML = name || "";
-            wName.style.width = "40%";
-            element.appendChild(wName);
 
-            var resetValButton = document.createElement('a');
-            resetValButton.style.display = "none";
-            resetValButton.className = "lexicon fa fa-rotate-left";
+        let wName = document.createElement('div');
+        wName.className = "lexwidgetname";
+        wName.innerHTML = name || "";
+        wName.style.width = "40%";
+        element.appendChild(wName);
 
-            resetValButton.addEventListener("click", function() {
-                for(let o of wValue.options)
-                    if(o.value == wValue.iValue)
-                        o.selected = true;
-                this.style.display = "none";
-                dispatch_event(wValue, "change");
-            });
+        var resetValButton = document.createElement('a');
+        resetValButton.style.display = "none";
+        resetValButton.className = "lexicon fa fa-rotate-left";
 
-            wName.appendChild(resetValButton);
-        }
+        resetValButton.addEventListener("click", function() {
+            for(let o of wValue.options)
+                if(o.value == wValue.iValue) o.selected = true;
+            this.style.display = "none";
+            dispatch_event(wValue, "change");
+        });
+
+        wName.appendChild(resetValButton);
         
         // part 2
 
@@ -668,8 +628,7 @@
         wValue.name = name;
         wValue.iValue = value;
         
-        container.style.width = "calc( 60% - 25px )"; // only 10px is for the padding 
-        container.style.width = name ? wValue.style.width : "calc( 100% - 16px )";
+        container.style.width = "calc( 60% - 17px )"; // only 10px is for the padding 
 
         if(values.length)
             for(var i = 0; i < values.length; i++)
@@ -696,47 +655,25 @@
         container.appendChild(wValue);
         element.appendChild(container);
         
-        if(this.current_branch) {
-            if(!name){ // remove branch padding
-                element.className += " nomargin";
-                wValue.style.width =  "calc( 100% - 21px )";
-            }
-            this.current_branch.content.appendChild( element );
-            this.current_branch.widgets.push( element );
-        }
-        else
-        {
-            console.warn("Get used to insert widgets only in a branch!");
-            if(!name){ // remove branch padding
-                element.className += " nomargin";
-            }
-            else // add branch padding 
-                wValue.style.width =  "calc( 60% - 28px )";
-            this.root.appendChild(element);
-        }
+        add_to_branch( this, element );
 
         this.widgets[ name ] = element;
     }
 
     Panel.prototype.addCheckbox = function( name, value, callback, options ) 
     {
+        if(!name) {
+            throw("Set Widget Name!");
+        }
+
+        if(!this.current_branch)
+            throw("No current branch!");
+
         options = options || {};
 
-        let element = document.createElement('div');
-        element.className = "lexwidget";
-        if(options.id)
-            element.id = options.id;
-        if(options.className)
-            element.className += " " + options.className;
-        if(options.title)
-            element.title = options.title;
-
-        element.style.width = "100%";
+        let element = create_widget(options);
 
         // part 1
-        if(!name){
-            throw("Set Widget name");
-        }
 
         let wName = document.createElement('div');
         wName.className = "lexwidgetname";
@@ -795,28 +732,7 @@
         
         element.appendChild(container);
         
-        if(this.current_branch) {
-            if(!name){ // remove branch padding
-                container.className += " noname";
-                container.style.width =  "calc( 100% - 16px )";
-            }
-            this.current_branch.content.appendChild( element );
-            this.current_branch.widgets.push( element );
-        }
-        else
-        {
-            console.warn("Get used to insert widgets only in a branch!");
-            if(!name) // remove branch padding
-            {
-                container.className += " noname";
-                container.style.width =  "calc( 100% - 11px )";
-            }
-            else // add branch padding 
-            {
-                container.style.width =  "calc( 60% - 28px )";
-            }
-            this.root.appendChild(element);
-        }
+        add_to_branch( this, element );
             
         this.widgets[ name ] = element;
     }
@@ -839,23 +755,18 @@
 
     Panel.prototype.addColor = function( name, value, callback, options ) 
     {
+        if(!name) {
+            throw("Set Widget Name!");
+        }
+
+        if(!this.current_branch)
+            throw("No current branch!");
+
         options = options || {};
 
-        let element = document.createElement('div');
-        element.className = "lexwidget";
-        if(options.id)
-            element.id = options.id;
-        if(options.className)
-            element.className += " " + options.className;
-        if(options.title)
-            element.title = options.title;
-
-        element.style.width = "100%";
+        let element = create_widget(options);
 
         // part 1
-        if(!name){
-            throw("Set Widget name");
-        }
 
         let wName = document.createElement('div');
         wName.className = "lexwidgetname";
@@ -929,28 +840,7 @@
         
         element.appendChild(container);
         
-        if(this.current_branch) {
-            if(!name){ // remove branch padding
-                container.className += " noname";
-                container.style.width =  "calc( 100% - 16px )";
-            }
-            this.current_branch.content.appendChild( element );
-            this.current_branch.widgets.push( element );
-        }
-        else
-        {
-            console.warn("Get used to insert widgets only in a branch!");
-            if(!name) // remove branch padding
-            {
-                container.className += " noname";
-                container.style.width =  "calc( 100% - 11px )";
-            }
-            else // add branch padding 
-            {
-                container.style.width =  "calc( 60% - 28px )";
-            }
-            this.root.appendChild(element);
-        }
+        add_to_branch( this, element );
             
         this.widgets[ name ] = element;
     }
@@ -1136,7 +1026,7 @@
             var value = widget.children[1];
 
             name.style.width = this.sizeLeft;
-            value.style.width = "calc( 100% - 25px" + " - " + this.sizeLeft + " )";
+            value.style.width = "calc( 100% - 17px" + " - " + this.sizeLeft + " )";
         }
     }
 
