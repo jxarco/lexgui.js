@@ -15,11 +15,10 @@ TODO List:
 - ~~Title widget~~
 - ~~Include fontAwesome Icons~~
 - ~~Store initial value and Add reset value button for widgets~~
+- ~~Vector3 Widget~~
 - Dialogs
-- Create "Widget" class to implement different value getters
 - Addnumber/Slider widgets
 - Multiple widgets per row
-- Vector Widgets (N values)
 - List Widget
 - Tree Widget
 - Context Menus
@@ -27,4 +26,5 @@ TODO List:
 - Load File widget
 - Menubar
 - Tab menu
+- Create "Widget" class to implement different value getters
 - Timeline ???

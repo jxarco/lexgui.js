@@ -89,7 +89,13 @@ function fillPanel( panel ) {
     panel.addCombo("Pages", ["Federico", "Garcia", "Lorca"], "Garcia", (value, event) => {
         console.log(value);
     });
+    panel.addVector2("2D Position", [0, 4], (value, event) => {
+        console.log(value);
+    });
     panel.addVector3("Velocity", [0.1, 0.4, 0.5], (value, event) => {
+        console.log(value);
+    });
+    panel.addVector4("Shader color", [0.3, 0.3, 0.5, 1], (value, event) => {
         console.log(value);
     });
     panel.separate();

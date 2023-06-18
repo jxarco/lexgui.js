@@ -18,6 +18,8 @@
         GEAR: "fa-gear"
     };
 
+    function clamp (num, min, max) { return Math.min(Math.max(num, min), max); }
+
     function simple_guidGenerator() {
         var S4 = function() {
            return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
@@ -431,7 +433,7 @@
         element.dispatchEvent(event);
     }
 
-    function create_widget( options ) {
+    function create_widget( name, options ) {
 
         let element = document.createElement('div');
         element.className = "lexwidget";
@@ -444,7 +446,26 @@
 
         element.style.width = "100%";
 
+        if(name) {
+            var domName = document.createElement('div');
+            domName.className = "lexwidgetname";
+            domName.innerHTML = name || "";
+            domName.style.width = "40%";
+            element.appendChild(domName);
+            element.domName = domName;
+        }
+
         return element;
+    }
+
+    function add_reset_property( container, callback ) {
+        var domEl = document.createElement('a');
+        domEl.style.display = "none";
+        domEl.style.marginRight = "6px";
+        domEl.className = "lexicon fa fa-rotate-left";
+        domEl.addEventListener("click", callback);
+        container.appendChild(domEl);
+        return domEl;
     }
 
     function add_to_branch( panel, element ) {
@@ -466,30 +487,18 @@
 
         options = options || {};
 
-        let element = create_widget(options);
+        let element = create_widget(name, options);
 
-        // part 1
+        // add reset functionality
         if(name) {
-            var wName = document.createElement('div');
-            wName.className = "lexwidgetname";
-            wName.innerHTML = name || "";
-            wName.style.width = "40%";
-            element.appendChild(wName);
-
-            var resetValButton = document.createElement('a');
-            resetValButton.style.display = "none";
-            resetValButton.className = "lexicon fa fa-rotate-left";
-
-            resetValButton.addEventListener("click", function() {
+            add_reset_property(element.domName, function() {
                 wValue.value = wValue.iValue;
                 this.style.display = "none";
                 dispatch_event(wValue, "focusout");
             });
-
-            wName.appendChild(resetValButton);
         }
         
-        // part 2
+        // add widget value
         let wValue = document.createElement('input');
         wValue.value = wValue.iValue = value || "";
         wValue.style.width = "calc( 60% - 17px )"; // only 10px is for the padding 
@@ -537,7 +546,7 @@
 
         options = options || {};
 
-        let element = create_widget(options);
+        let element = create_widget(null, options);
         element.innerText = name;
         element.className = "lextitle noname";
 
@@ -551,18 +560,8 @@
 
         options = options || {};
 
-        let element = create_widget(options);
+        let element = create_widget(name, options);
 
-        // part 1
-        if(name) {
-            var wName = document.createElement('div');
-            wName.className = "lexwidgetname";
-            wName.innerHTML = name || "";
-            wName.style.width = "40%";
-            element.appendChild(wName);
-        }
-        
-        // part 2
         var wValue = document.createElement('button');
         wValue.className = "lexbutton";
         wValue.innerHTML = value || "";
@@ -596,30 +595,17 @@
 
         options = options || {};
 
-        let element = create_widget(options);
+        let element = create_widget(name, options);
 
-        // part 1
-
-        let wName = document.createElement('div');
-        wName.className = "lexwidgetname";
-        wName.innerHTML = name || "";
-        wName.style.width = "40%";
-        element.appendChild(wName);
-
-        var resetValButton = document.createElement('a');
-        resetValButton.style.display = "none";
-        resetValButton.className = "lexicon fa fa-rotate-left";
-
-        resetValButton.addEventListener("click", function() {
+        // add reset functionality
+        add_reset_property(element.domName, function() {
             for(let o of wValue.options)
                 if(o.value == wValue.iValue) o.selected = true;
             this.style.display = "none";
             dispatch_event(wValue, "change");
         });
 
-        wName.appendChild(resetValButton);
-        
-        // part 2
+        // add widget value
 
         var container = document.createElement('div');
         container.className = "lexcombo";
@@ -671,30 +657,15 @@
 
         options = options || {};
 
-        let element = create_widget(options);
+        let element = create_widget(name, options);
+        element.domName.setAttribute("for","toggle");
 
-        // part 1
-
-        let wName = document.createElement('div');
-        wName.className = "lexwidgetname";
-        wName.innerHTML = name || "";
-        wName.style.width = "40%";
-        wName.setAttribute("for","toggle");
-        element.appendChild(wName);
-
-        var resetValButton = document.createElement('a');
-        resetValButton.style.display = "none";
-        resetValButton.className = "lexicon fa fa-rotate-left";
-
-        resetValButton.addEventListener("click", function() {
+        // add reset functionality
+        add_reset_property(element.domName, function() {
             dispatch_event(toggle, "click");
         });
-
-        wName.appendChild(resetValButton);
         
-        // part 2
-
-        // create full toggle html
+        // add widget value
 
         var container = document.createElement('div');
 
@@ -764,31 +735,16 @@
 
         options = options || {};
 
-        let element = create_widget(options);
+        let element = create_widget(name, options);
 
-        // part 1
-
-        let wName = document.createElement('div');
-        wName.className = "lexwidgetname";
-        wName.innerHTML = name || "";
-        wName.style.width = "40%";
-        element.appendChild(wName);
-
-        var resetValButton = document.createElement('a');
-        resetValButton.style.display = "none";
-        resetValButton.className = "lexicon fa fa-rotate-left";
-
-        resetValButton.addEventListener("click", function() {
+        // add reset functionality
+        add_reset_property(element.domName, function() {
             this.style.display = "none";
             color.value = color.iValue;
             dispatch_event(color, "input");
         });
 
-        wName.appendChild(resetValButton);
-        
-        // part 2
-
-        // create color input
+        // add widget value
 
         var container = document.createElement('span');
         container.className = "lexcolor";
@@ -847,8 +803,10 @@
 
     const components = {0: 'x', 1: 'y', 2: 'z', 3: 'w'};
 
-    Panel.prototype.addVector3 = function( name, value, callback, options ) 
+    Panel.prototype.add_vector = function( num_components, name, value, callback, options ) 
     {
+        num_components = clamp(num_components, 2, 4);
+
         if(!name) {
             throw("Set Widget Name!");
         }
@@ -858,48 +816,32 @@
 
         options = options || {};
 
-        let element = create_widget(options);
+        let element = create_widget(name, options);
         element.type = "vec3";
 
-        // part 1
-
-        let wName = document.createElement('div');
-        wName.className = "lexwidgetname";
-        wName.innerHTML = name || "";
-        wName.style.width = "40%";
-        element.appendChild(wName);
-
-        var resetValButton = document.createElement('a');
-        resetValButton.style.display = "none";
-        resetValButton.className = "lexicon fa fa-rotate-left";
-
-        resetValButton.addEventListener("click", function() {
+        // add reset functionality
+        add_reset_property(element.domName, function() {
             this.style.display = "none";
-            
             for( let v of element.querySelectorAll(".vecinput") ) {
                 v.value = v.iValue;
                 dispatch_event(v, "input");
             }
         });
 
-        wName.appendChild(resetValButton);
-        
-        // part 2
-
-        // create color input
+        // add widget value
 
         var container = document.createElement('div');
         container.className = "lexvector";        
-        container.style.width = "calc( 60% - 7px )"; // only 10px is for the padding 
+        container.style.width = "calc( 60% - 9px )"; // only 10px is for the padding 
 
-        for( var i = 0; i < 3; ++i ) {
+        for( var i = 0; i < num_components; ++i ) {
 
             let box = document.createElement('div');
             box.className = "vecbox";
             box.innerHTML = "<span class='" + components[i] + "'>" + components[i] + "</span>";
 
             let vecinput = document.createElement('input');
-            vecinput.className = "vecinput";
+            vecinput.className = "vecinput v" + num_components;
             vecinput.step = "any";
             vecinput.type = "number";
             vecinput.id = "vec3"+simple_guidGenerator();
@@ -913,7 +855,6 @@
                 dispatch_event(vecinput, "input");
                 this.blur();
             }, false);
-
 
             vecinput.addEventListener("input", function(e) {
                 let val = e.target.value;
@@ -939,6 +880,21 @@
         add_to_branch( this, element );
             
         this.widgets[ name ] = element;
+    }
+
+    Panel.prototype.addVector2 = function( name, value, callback, options ) 
+    {
+        this.add_vector(2, name, value, callback, options);
+    }
+
+    Panel.prototype.addVector3 = function( name, value, callback, options ) 
+    {
+        this.add_vector(3, name, value, callback, options);
+    }
+
+    Panel.prototype.addVector4 = function( name, value, callback, options ) 
+    {
+        this.add_vector(4, name, value, callback, options);
     }
 
     Panel.prototype.separate = function() 
@@ -1122,7 +1078,7 @@
             var value = widget.children[1];
 
             name.style.width = this.sizeLeft;
-            const padding = widget.type == 'vec3' ? 0 : 17;
+            const padding = widget.type == 'vec3' ? 9 : 17;
             value.style.width = "calc( 100% - " + padding + "px" + " - " + this.sizeLeft + " )";
         }
     }
