@@ -74,6 +74,20 @@ html, body {
   z-index: 100;
 }
 
+.lexicon {
+  margin-left: 4px;
+  cursor: pointer;
+  line-height: inherit !important;
+}
+
+.lexicon:hover {
+  color: #9293a68e;
+}
+
+.lexicon:active {
+  color: #aeb0c8be;
+}
+
 /* Dialogs and alerts */
 
 .lexmessage{
@@ -415,16 +429,56 @@ html, body {
   font-weight: 600;
 }
 
-.lexicon {
-  margin-left: 4px;
-  cursor: pointer;
-  line-height: inherit !important;
+
+/* Vector Widgets */
+
+.lexvector {
+  display: flex;
 }
 
-.lexicon:hover {
-  color: #9293a68e;
+.lexvector .vecbox {
+  display: flex;
 }
 
-.lexicon:active {
-  color: #aeb0c8be;
+.lexvector .vecbox span {
+  min-width: 24px;
+  justify-content: center;
+  background-color: #22292fbf;
+  display: flex;
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+.lexvector .vecbox span.x{
+  color:#ce5757;
+}
+
+.lexvector .vecbox span.y{
+  color:#57ce5f;
+}
+
+.lexvector .vecbox span.z{
+  color:#5783ce;
+}
+
+.lexvector .vecbox span.w{
+  color:#ffffff;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.lexvector .vecbox .vecinput {
+  font-size: 14px;
+  margin-left: 2px;
+  width: 50%;
 }

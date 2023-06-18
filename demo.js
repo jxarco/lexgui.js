@@ -1,7 +1,7 @@
 // init library
 LX.init();
 
-LX.message("Welcome to Lexgui!", "Not an error!")
+// LX.message("Welcome to Lexgui!", "Not an error!")
 
 // create main area
 var area = new LX.Area({id:"mainarea"});
@@ -87,6 +87,9 @@ function fillPanel( panel ) {
     // another branch
     panel.branch("Other things");
     panel.addCombo("Pages", ["Federico", "Garcia", "Lorca"], "Garcia", (value, event) => {
+        console.log(value);
+    });
+    panel.addVector3("Velocity", [0.1, 0.4, 0.5], (value, event) => {
         console.log(value);
     });
     panel.separate();

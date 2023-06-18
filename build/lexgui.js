@@ -845,6 +845,102 @@
         this.widgets[ name ] = element;
     }
 
+    const components = {0: 'x', 1: 'y', 2: 'z', 3: 'w'};
+
+    Panel.prototype.addVector3 = function( name, value, callback, options ) 
+    {
+        if(!name) {
+            throw("Set Widget Name!");
+        }
+
+        if(!this.current_branch)
+            throw("No current branch!");
+
+        options = options || {};
+
+        let element = create_widget(options);
+        element.type = "vec3";
+
+        // part 1
+
+        let wName = document.createElement('div');
+        wName.className = "lexwidgetname";
+        wName.innerHTML = name || "";
+        wName.style.width = "40%";
+        element.appendChild(wName);
+
+        var resetValButton = document.createElement('a');
+        resetValButton.style.display = "none";
+        resetValButton.className = "lexicon fa fa-rotate-left";
+
+        resetValButton.addEventListener("click", function() {
+            this.style.display = "none";
+            
+            for( let v of element.querySelectorAll(".vecinput") ) {
+                v.value = v.iValue;
+                dispatch_event(v, "input");
+            }
+        });
+
+        wName.appendChild(resetValButton);
+        
+        // part 2
+
+        // create color input
+
+        var container = document.createElement('div');
+        container.className = "lexvector";        
+        container.style.width = "calc( 60% - 7px )"; // only 10px is for the padding 
+
+        for( var i = 0; i < 3; ++i ) {
+
+            let box = document.createElement('div');
+            box.className = "vecbox";
+            box.innerHTML = "<span class='" + components[i] + "'>" + components[i] + "</span>";
+
+            let vecinput = document.createElement('input');
+            vecinput.className = "vecinput";
+            vecinput.step = "any";
+            vecinput.type = "number";
+            vecinput.id = "vec3"+simple_guidGenerator();
+            vecinput.value = vecinput.iValue = value[i];
+            
+            vecinput.addEventListener("wheel", function(e) {
+                let mult = 1;
+                if(e.shiftKey) mult = 10;
+                else if(e.altKey) mult = 0.1;
+                this.value = (+this.valueAsNumber).toPrecision(5) - mult * (e.deltaY > 0 ? 1 : -1);
+                dispatch_event(vecinput, "input");
+                this.blur();
+            }, false);
+
+
+            vecinput.addEventListener("input", function(e) {
+                let val = e.target.value;
+                // reset button (default value)
+                if(val != vecinput.iValue) {
+                    let btn = element.querySelector(".lexwidgetname .lexicon");
+                    btn.style.display = "block";
+                }
+    
+                callback(val, e);
+            }, false);
+            
+            if(options.disabled) {
+                vecinput.disabled = true;
+            }
+            
+            box.appendChild(vecinput);
+            container.appendChild(box);
+        }
+        
+        element.appendChild(container);
+        
+        add_to_branch( this, element );
+            
+        this.widgets[ name ] = element;
+    }
+
     Panel.prototype.separate = function() 
     {
         if(!this.current_branch)
@@ -1026,7 +1122,8 @@
             var value = widget.children[1];
 
             name.style.width = this.sizeLeft;
-            value.style.width = "calc( 100% - 17px" + " - " + this.sizeLeft + " )";
+            const padding = widget.type == 'vec3' ? 0 : 17;
+            value.style.width = "calc( 100% - " + padding + "px" + " - " + this.sizeLeft + " )";
         }
     }
 
