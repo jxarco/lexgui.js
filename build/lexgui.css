@@ -716,7 +716,18 @@ input[type=number] {
 /* Menu Bar */
 
 .lexmenubar {
-  height: 50px;
   width: 100%;
   background-color: red;
+  display: flex;
+  height: auto;
+}
+
+.lexmenubar .lexmenuentry {
+  background: yellowgreen;
+    width: 100px;
+    height: 100%;
+    border: 1px solid firebrick;
+    display: flex;
+    justify-content: center;
+    padding: 8px;
 }

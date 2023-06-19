@@ -28,12 +28,10 @@
         return (S4()+"-"+S4());
     }
 
-    function init(options)
+    function init(options = {})
     {
         if(this.ready)
             return;
-
-        options = options || {};
 
         // LexGUI root 
 		var root = document.createElement("div");
@@ -63,12 +61,10 @@
 
     LX.init = init;
 
-    function message(text, title, options)
+    function message(text, title, options = {})
     {
         if(!text)
             throw("No message to show");
-
-        options = options || {};
 
         this.modal.toggle(false);
         var root = document.createElement('div');
@@ -148,10 +144,8 @@
      * id: id of the element
      */
 
-    function Area( options ) 
+    function Area( options = {} ) 
     {
-        options = options || {};
-
         var root = document.createElement('div');
         root.className = "lexarea";
         if(options.id)
@@ -192,12 +186,10 @@
      * type: "horizontal" / "vertical" 
      * sizes: [ s1, s2 ]
      */
-    Area.prototype.split = function( options )
+    Area.prototype.split = function( options = {} )
     {
         if(this.sections.length)
             throw("Area has been split before");
-
-        options = options || {};
 
         var type = options.type || "horizontal";
         var sizes = options.sizes || ["50%", "50%"];
@@ -405,33 +397,96 @@
         this.root.appendChild( element );
     }
 
+    Area.prototype.addMenubar = function( callback )
+    {
+        var menubar = new LX.Menubar();
+        this.split({type: 'vertical', sizes:["5%","95%"]});
+        this.sections[0].attach( menubar );
+
+        if(callback) callback( menubar );
+
+        return this.sections[1];
+    }
+
     LX.Area = Area;
 
     /**
      * @class Menubar
      */
 
-    function Menubar( options ) 
+    function Menubar( options = {} ) 
     {
-        options = options || {};
-
         this.root = document.createElement('div');
         this.root.className = "lexmenubar";
-    }
-
-    Menubar.prototype.begin = function()
-    {
-
+        this.items = [];
     }
 
     Menubar.prototype.add = function(path)
     {
-        
-    }
+        // process path
+        const tokens = path.split("/");
+        console.log(tokens);
 
-    Menubar.prototype.end = function()
-    {
+        /*
         
+        items = [
+            {
+                scene: [
+                    {
+                        new_scene: []
+                    },
+                    {
+                        open_scene: []
+                    }
+                ]
+            },
+            {
+                project: []
+            }
+        ]
+
+        */
+
+        let idx = 0;
+
+        const insert = (token, list) => {
+            if(!token) return;
+
+            let found = null;
+            list.forEach( o => {
+                const keys = Object.keys(o);
+                const key = keys.find( t => t == token );
+                if(key) found = o[ key ];
+            } );
+
+            if(found) {
+                insert( tokens[idx++], found );    
+            }
+            else {
+                let item = {};
+                item[ token ] = [];
+                list.push( item );
+                insert( tokens[idx++], item[ token ] ); 
+            }
+        };
+
+        insert( tokens[idx++], this.items );
+
+        console.log(this.items.concat([]));
+
+        // create elements
+
+        // TODO: don't empty, append new stuff
+        this.root.innerHTML = "";
+
+        for( var item of this.items )
+        {
+            const key = Object.keys(item)[0];
+            let element = document.createElement('div');
+            element.className = "lexmenuentry";
+            element.innerText = key;
+            this.root.appendChild( element );
+        }
     }
 
     LX.Menubar = Menubar;
@@ -485,10 +540,8 @@
      * id: id of the element
      */
 
-    function Panel( options ) 
+    function Panel( options = {} ) 
     {
-        options = options || {};
-
         var root = document.createElement('div');
         root.className = "lexpanel";
         if(options.id)
@@ -521,10 +574,8 @@
         return widget.get_val();
     }
 
-    Panel.prototype.branch = function( name, options ) 
+    Panel.prototype.branch = function( name, options = {} ) 
     {
-        options = options || {};
-
         // create new branch
         var branch = new Branch(name, options);
         branch.panel = this;
@@ -625,13 +676,11 @@
         return widget;
     }
 
-    Panel.prototype.addTitle = function( name, options ) 
+    Panel.prototype.addTitle = function( name, options = {} ) 
     {
         if(!name) {
             throw("Set Widget Name!");
         }
-
-        options = options || {};
 
         let widget = this.create_widget(null, Widget.TITLE, options);
         let element = widget.domEl;
@@ -639,10 +688,8 @@
         element.className = "lextitle noname";
     }
 
-    Panel.prototype.addText = function( name, value, callback, options ) 
+    Panel.prototype.addText = function( name, value, callback, options = {} ) 
     {
-        options = options || {};
-
         let widget = this.create_widget(name, Widget.TEXT, options);
         let element = widget.domEl;
 
@@ -688,10 +735,8 @@
         }
     }
     
-    Panel.prototype.addButton = function( name, value, callback, options ) 
+    Panel.prototype.addButton = function( name, value, callback, options = {} ) 
     {
-        options = options || {};
-
         let widget = this.create_widget(name, Widget.BUTTON, options);
         let element = widget.domEl;
 
@@ -713,13 +758,11 @@
         }
     }
 
-    Panel.prototype.addCombo = function( name, values, value, callback, options ) 
+    Panel.prototype.addCombo = function( name, values, value, callback, options = {} ) 
     {
         if(!name) {
             throw("Set Widget Name!");
         }
-
-        options = options || {};
 
         let widget = this.create_widget(name, Widget.COMBO, options);
         let element = widget.domEl;
@@ -769,13 +812,11 @@
         element.appendChild(container);
     }
 
-    Panel.prototype.addCheckbox = function( name, value, callback, options ) 
+    Panel.prototype.addCheckbox = function( name, value, callback, options = {} ) 
     {
         if(!name) {
             throw("Set Widget Name!");
         }
-
-        options = options || {};
 
         let widget = this.create_widget(name, Widget.CHECKBOX, options);
         let element = widget.domEl;
@@ -840,13 +881,11 @@
         return hex;
     }
 
-    Panel.prototype.addColor = function( name, value, callback, options ) 
+    Panel.prototype.addColor = function( name, value, callback, options = {} ) 
     {
         if(!name) {
             throw("Set Widget Name!");
         }
-
-        options = options || {};
 
         let widget = this.create_widget(name, Widget.COLOR, options);
         let element = widget.domEl;
@@ -911,13 +950,11 @@
         element.appendChild(container);
     }
 
-    Panel.prototype.addNumber = function( name, value, callback, options ) 
+    Panel.prototype.addNumber = function( name, value, callback, options = {} ) 
     {
         if(!name) {
             throw("Set Widget Name!");
         }
-
-        options = options || {};
 
         let widget = this.create_widget(name, Widget.NUMBER, options);
         let element = widget.domEl;
@@ -1030,15 +1067,13 @@
 
     const components = {0: 'x', 1: 'y', 2: 'z', 3: 'w'};
 
-    Panel.prototype.add_vector = function( num_components, name, value, callback, options ) 
+    Panel.prototype.add_vector = function( num_components, name, value, callback, options = {} ) 
     {
         num_components = clamp(num_components, 2, 4);
 
         if(!name) {
             throw("Set Widget Name!");
         }
-
-        options = options || {};
 
         let widget = this.create_widget(name, Widget.VECTOR, options);
         let element = widget.domEl;
@@ -1156,10 +1191,8 @@
         this.add_vector(4, name, value, callback, options);
     }
 
-    Panel.prototype.addFilter = function( placeholder, options ) 
+    Panel.prototype.addFilter = function( placeholder, options = {} ) 
     {
-        options = options || {};
-
         options.placeholder = placeholder.constructor == String ? placeholder : "Filter properties"
         
         let widget = this.create_widget(null, Widget.TEXT, options);
@@ -1247,10 +1280,8 @@
 
     LX.TreeEvent = TreeEvent;
 
-    Panel.prototype.addTree = function( name, data, options ) 
+    Panel.prototype.addTree = function( name, data, options = {} ) 
     {
-        options = options || {};
-
         let container = document.createElement('div');
         container.className = "lextree";
 
@@ -1513,11 +1544,9 @@
      * id: id of the element
      */
 
-    function Branch( name, options ) 
+    function Branch( name, options = {} ) 
     {
         this.name = name;
-
-        options = options || {};
 
         var root = document.createElement('div');
         root.className = "lexbranch";

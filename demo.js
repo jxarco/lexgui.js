@@ -2,13 +2,27 @@
 LX.init();
 
 // change global properties after init
-LX.Branch.DEFAULT_NAME_WIDTH = "30%";
+LX.DEFAULT_NAME_WIDTH = "30%";
 
 // LX.message("I'm in another position", null, { position: [10, 10] });
 // LX.message("Welcome to Lexgui", "Welcome!", { draggable: true })
 
 // create main area
 var area = new LX.Area({id:"mainarea"});
+
+// menu bar
+
+area = area.addMenubar( m => {
+    m.add( "Scene/New Scene" );
+    // m.add( "Scene/" );
+    m.add( "Scene/Open Scene" );
+    m.add( "Project/Project Settings" );
+    m.add( "Project/Export" );
+    m.add( "Editor/Settings" );
+    m.add( "Help/Search Help" );
+    m.add( "Help/About LexGUI" );
+    m.add( "Help/Support LexGUI" );
+} );
 
 // split main area
 area.split({sizes:["70%","30%"]});
@@ -21,10 +35,6 @@ var [up, bottom] = left.sections;
 // split right area
 right.split({type: 'vertical', sizes:["87.5vh","12.5vh"], resize: false});
 var [rup, rbottom] = right.sections;
-
-// menu bar
-var menubar = new LX.Menubar();
-up.attach( menubar );
 
 // add canvas to left upper part
 var canvas = document.createElement('canvas');
