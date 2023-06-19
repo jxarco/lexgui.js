@@ -21,6 +21,29 @@ canvas.style.height = "100%";
 canvas.style.backgroundColor = "#ccc";
 up.attach( canvas );
 
+let scene_data = {
+    'id': 'root',
+    'children': [
+        {
+            'id': 'node_1',
+            'children': [
+                {
+                    'id': 'node_1_1',
+                    'children': []
+                },
+                {
+                    'id': 'node_1_2',
+                    'children': []
+                }
+            ]
+        },
+        {
+            'id': 'node_2',
+            'children': []
+        }
+    ]
+};
+
 // add panels
 var side_panel = new LX.Panel();
 right.attach( side_panel );
@@ -28,7 +51,7 @@ fillPanel( side_panel );
 
 var bottom_panel = new LX.Panel();
 bottom.attach( bottom_panel );
-// fillPanel( bottom_panel );
+fillBottomPanel( bottom_panel );
 
 function loop() {
     
@@ -55,47 +78,13 @@ function fillPanel( panel ) {
     
     // add data tree
 
-    const data = {
-        'id': 'root',
-        'children': [
-            {
-                'id': 'node_1',
-                'children': [
-                    {
-                        'id': 'node_1_1',
-                        'children': []
-                    },
-                    {
-                        'id': 'node_1_2',
-                        'children': []
-                    }
-                ]
-            },
-            {
-                'id': 'node_2',
-                'children': []
-            }
-        ]
-    };
-
-    panel.addTree("Test Data Tree", data, { 
+    panel.addTree("Scene Tree", scene_data, { 
         onselect: (name) => {  },
-        ondblclick: (name) => {  } 
+        ondblclick: (name) => {  },
+        onchange: (dr, p) => { console.log(dr.id + " is now child of " + p.id); },
     });    
 
     // add widgets to panel branch
-    panel.branch("Information", {icon: LX.icons.INFO});
-    panel.addText("Camera", "Canon EOS 80D", null, {disabled: true}); 
-    panel.addText("Serial number", "194E283DD", (value, event) => {
-        console.log(value);
-    });
-    panel.merge();
-
-    // add widgets to panel directly
-    // add title?
-    // panel.addText(null, "This does not have name");
-
-    // another branch
     panel.branch("Preferences", {icon: LX.icons.GEAR});
     panel.addColor("Background", [1, 0.1, 0.6], (value, event) => {
         console.log("Color: ", value);
@@ -108,10 +97,6 @@ function fillPanel( panel ) {
     panel.addButton("Apply", "Print event", event => {
         console.log(event);
     });
-    panel.merge();
-
-    panel.branch("A collapsed branch", {closed: true});
-    panel.addText(null, "Nothing here", null, {disabled: true});
     panel.merge();
 
     // another branch
@@ -161,6 +146,21 @@ function fillPanel( panel ) {
     panel.addCheckbox("Post TABS", true, (value, event) => {
         console.log(value);
     });
+    panel.end();
+}
+
+function fillBottomPanel( panel ) {
+    
+    // add widgets to panel branch
+    panel.branch("Information", {icon: LX.icons.INFO});
+    panel.addText("Camera", "Canon EOS 80D", null, {disabled: true}); 
+    panel.addText("Serial number", "194E283DD", (value, event) => {
+        console.log(value);
+    });
+    panel.merge();
+
+    panel.branch("A collapsed branch", {closed: true});
+    panel.addText(null, "Nothing here", null, {disabled: true});
     panel.end();
 }
 

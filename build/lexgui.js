@@ -1077,37 +1077,44 @@
      * @param {*} options:
      * onselect
      * ondoubleclick
+     * onchange
      */
 
     Panel.prototype.addTree = function( name, data, options ) 
     {
-        if(!name) {
-            throw("Set Widget Name!");
-        }
-
         options = options || {};
 
         let container = document.createElement('div');
         container.className = "lextree";
+
+        if(name) {
+            let title = document.createElement('span');
+            title.innerHTML = name;
+            container.appendChild(title);
+        }
+
         let list = document.createElement('ul');
+        list.style.paddingTop = name ? "0px" : "16px";
 
         const update_tree = function() {
             list.innerHTML = "";
-            create_item( data );
+            create_item( null, data );
         };
 
-        const create_item = function( node, level = 0 ) {
+        const create_item = function( parent, node, level = 0 ) {
 
-            const parent = node.children.length > 0;
+            node.parent = parent;
+            const is_parent = node.children.length > 0;
 
             var item = document.createElement('li');
-            item.className = "lextreeitem " + "datalevel" + level + " " + (parent ? "parent" : "");
+            item.className = "lextreeitem " + "datalevel" + level + " " + (is_parent ? "parent" : "");
             item.id = node.id;
             // select icon
             let icon = "fa-solid fa-square"; // default: no childs
-            if( parent ) icon = node.closed ? "fa-solid fa-caret-right" : "fa-solid fa-caret-down";
+            if( is_parent ) icon = node.closed ? "fa-solid fa-caret-right" : "fa-solid fa-caret-down";
             item.innerHTML = "<a class='" + icon + "'></a>" + (node.rename ? "" : node.id);
-            item.style.paddingLeft = ((parent ? 0 : 3 ) + (3 + (level+1) * 25)) + "px";
+            item.setAttribute('draggable', true);
+            item.style.paddingLeft = ((is_parent ? 0 : 3 ) + (3 + (level+1) * 25)) + "px";
             list.appendChild(item);
 
             // callbacks
@@ -1121,9 +1128,6 @@
                 // trigger rename
                 node.rename = true;
                 update_tree();
-                // const input = this.querySelector('input');
-                // input.toggleAttribute('hidden');
-                // input.focus();
                 if(options.ondblclick) options.ondblclick( node.id );
             });
 
@@ -1142,23 +1146,55 @@
             name_input.addEventListener("keyup", function(e){
                 if(e.key == 'Enter') {
                     node.id = this.value;
-                    node.rename = false;
+                    delete node.rename;
                     update_tree();
                     list.querySelector("#" + this.value).classList.add('selected');
                 }
                 if(e.key == 'Escape') {
-                    node.rename = false;
+                    delete node.rename;
                     update_tree();
                 }
             });
 
             name_input.addEventListener("blur", function(e){
-                node.rename = false;
+                delete node.rename;
                 update_tree();
             });
 
+            // drag nodes
+            if(parent) // root doesn't move!
+            {
+                item.addEventListener("dragstart", e => {
+                    window.__tree_node_dragged = node;
+                });
+            }
+
+            /* events fired on other node items */
+            item.addEventListener("dragover", e => {
+                e.preventDefault(); // allow drop
+            }, false );
+            item.addEventListener("dragenter", (e) => {
+                e.target.classList.add("draggingover");
+            });
+            item.addEventListener("dragleave", (e) => {
+                e.target.classList.remove("draggingover");
+            });
+            item.addEventListener("drop", e => {
+                e.preventDefault(); // prevent default action (open as link for some elements)
+                let dragged = window.__tree_node_dragged;
+                if(!dragged)
+                    return;
+                let target = node;
+                if(options.onchange) options.onchange( dragged, target );
+                const index = dragged.parent.children.findIndex(n => n.id == dragged.id);
+                const removed = dragged.parent.children.splice(index, 1);
+                target.children.push( removed[0] );
+                update_tree();
+                delete window.__tree_node_dragged;
+            });
+
             // show/hide children
-            if(parent) {
+            if(is_parent) {
                 item.querySelector('a').addEventListener("click", function(){
                     node.closed = !node.closed;
                     update_tree();
@@ -1169,16 +1205,11 @@
             return;
 
             for( var i = 0; i < node.children.length; ++i )
-                create_item( node.children[i], level + 1 );
+                create_item( node, node.children[i], level + 1 );
         };
 
-        create_item( data );
-        
-        // let widget = new Widget(name, Widget.TREE);
-        // widget.domEl = container;
-        // widget.tree_data = data;
-        // this.widgets[ name ] = widget;
-        
+        create_item( null, data );
+
         container.appendChild(list);
         this.root.appendChild(container);
     }

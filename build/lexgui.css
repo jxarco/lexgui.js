@@ -8,21 +8,13 @@ font-family: 'Roboto', sans-serif;
   --global-color-primary: #1a2025;
   --global-color-secondary: #2c3035e8;
 	--branch-background: #363b40;
-	--branch-title-background: #32373c;
+	--branch-title-background: #2c3137;
   --global-button-color: #6a7178;
   --global-combo-color: #4e5154;
   --global-text-primary: #d0d0e0e6;
   --global-text-secondary: #b7b7cbb0;
   --checkbox-flag-on: #5e9fdd;
-	/* --header-size: 60px;
-  --global-font-family: Verdana, sans-serif;
-  --global-font-size: 0.8rem;
-	--global-text-color-secondary: #ddd;
-	--global-color-selected: rgb(35, 105, 102);
-	--global-color-highlight: rgb(58, 161, 156, 0.8);
-	--global-color-selected-secondary: #5f88c9;
-	--global-color-disabled: rgb(117, 79, 79);
-	--global-color-disabled-hover: rgb(110, 91, 91);
+	/*
 	--primary: #0676ed;
 	--warning: #f2a600;
 	--success: #12c99b;
@@ -187,7 +179,7 @@ html, body {
   background: var(--branch-title-background);
   font-size: 15px;
   font-weight: bold;
-  color: white;
+  color: rgba(216, 218, 230, 0.932);
   padding: 8px;
   text-shadow: 0px 1px 5px #000;
   border-radius: 0px;
@@ -601,15 +593,29 @@ input[type=number] {
 .lextree {
   border-radius: 8px;
   background: #05050cc6;
-  width: calc( 100% - 8px );
+  width: calc( 100% - 6px );
   min-height: 12px;
   margin: 0 auto;
   color: var(--global-text-secondary);
   font-weight: bold;
+  margin-top: 6px;
+  margin-bottom: -8px;
+}
+
+.lextree span {
+  padding: 8px;
+  background: var(--global-color-secondary);
+  display: block;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  color: rgba(216, 218, 230, 0.932);
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
 }
 
 .lextree ul {
-  padding-top: 16px;
+  /* padding-top: 16px; */
   padding-bottom: 16px;
   padding-inline-start: 0px;
 }
@@ -622,6 +628,7 @@ input[type=number] {
   border: none;
   font-family: 'Lato', sans-serif;
   color: var(--checkbox-flag-on);
+  line-height: 23px;
   font-size: 16px;
 }
 
@@ -637,9 +644,13 @@ input[type=number] {
   cursor: pointer;
 }
 
-.lextree .lextreeitem.selected {
+.lextree .lextreeitem.selected{
   color: goldenrod;
   background: rgba(129, 132, 163, 0.421);
+}
+
+.lextree .lextreeitem.draggingover {
+  background: rgba(129, 132, 163, 0.191);
 }
 
 .lextree .lextreeitem.selected:hover {
