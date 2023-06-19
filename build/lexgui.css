@@ -181,7 +181,7 @@ html, body {
   font-weight: bold;
   color: rgba(216, 218, 230, 0.932);
   padding: 8px;
-  text-shadow: 0px 1px 5px #000;
+  text-shadow: 0px 1px 3px #000;
   border-radius: 0px;
   cursor: pointer;
   -webkit-user-select: none; /* Safari 3.1+ */
@@ -322,6 +322,7 @@ html, body {
   overflow: hidden;
   cursor: pointer;
   box-shadow: 0px 0px 4px #5c5f73;
+  font-size: 12px;
 }
 
 .lexbutton:active {
@@ -475,7 +476,7 @@ input[type=number] {
 }
 
 .lexvector .vecbox .vecinput, .numberbox .vecinput {
-  font-size: 14px;
+  font-size: 12px;
   margin-left: 2px;
   border: none;
 }
@@ -618,6 +619,7 @@ input[type=number] {
   /* padding-top: 16px; */
   padding-bottom: 16px;
   padding-inline-start: 0px;
+  font-size: 15px;
 }
 
 .lextree input {
@@ -629,7 +631,7 @@ input[type=number] {
   font-family: 'Lato', sans-serif;
   color: var(--checkbox-flag-on);
   line-height: 23px;
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .lextree .lextreeitem {
@@ -645,7 +647,7 @@ input[type=number] {
 }
 
 .lextree .lextreeitem.selected{
-  color: goldenrod;
+  color: #5f88c9;
   background: rgba(129, 132, 163, 0.421);
 }
 
@@ -653,19 +655,27 @@ input[type=number] {
   background: rgba(129, 132, 163, 0.191);
 }
 
-.lextree .lextreeitem.selected:hover {
-  color: rgba(214, 180, 94, 0.824);
-}
-
 .lextree .lextreeitem:hover {
   color: var(--global-text-primary);
 }
 
+.lextree .lextreeitem.selected:hover{
+  color: #5f88c9;
+}
+
+.lextree .lextreeitem:hover a {
+  color: var(--global-text-secondary);
+}
+
 .lextree .lextreeitem a {
-  font-size: 6px;
+  font-size: 5px;
   margin-right: 4px;
   margin-top: 4px;
-  vertical-align: 1px;
+  vertical-align: 2px;
+}
+
+.lextree .lextreeitem a:hover {
+  color: var(--global-text-primary);
 }
 
 .lextree .lextreeitem a:active {
@@ -673,7 +683,7 @@ input[type=number] {
 }
 
 .lextree .lextreeitem.parent a {
-  font-size: 16px;
+  font-size: 15px;
   vertical-align: -1px;
 }
 

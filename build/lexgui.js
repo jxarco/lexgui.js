@@ -526,7 +526,7 @@
             var domName = document.createElement('div');
             domName.className = "lexwidgetname";
             domName.innerHTML = name || "";
-            domName.style.width = "40%";
+            domName.style.width = "30%";
             element.appendChild(domName);
             element.domName = domName;
 
@@ -580,7 +580,7 @@
         // add widget value
         let wValue = document.createElement('input');
         wValue.value = wValue.iValue = value || "";
-        wValue.style.width = "calc( 60% - 17px )"; // only 10px is for the padding 
+        wValue.style.width = "calc( 70% - 17px )"; // only 10px is for the padding 
 
         if(options.disabled) wValue.setAttribute("disabled", true);
         if(options.placeholder) wValue.setAttribute("placeholder", options.placeholder);
@@ -620,7 +620,7 @@
         var wValue = document.createElement('button');
         wValue.className = "lexbutton";
         wValue.innerHTML = value || "";
-        wValue.style.width = "calc( 60% - 17px )"; // only 10px is for the padding 
+        wValue.style.width = "calc( 70% - 17px )"; // only 10px is for the padding 
 
         if(options.disabled)
             wValue.setAttribute("disabled", true);
@@ -663,7 +663,7 @@
         wValue.name = name;
         wValue.iValue = value;
         
-        container.style.width = "calc( 60% - 17px )"; // only 10px is for the padding 
+        container.style.width = "calc( 70% - 17px )"; // only 10px is for the padding 
 
         if(values.length)
             for(var i = 0; i < values.length; i++)
@@ -855,7 +855,7 @@
 
         var container = document.createElement('div');
         container.className = "lexnumber";        
-        container.style.width = "calc( 60% - 9px )"; // only 10px is for the padding 
+        container.style.width = "calc( 70% - 9px )"; // only 10px is for the padding 
 
         let box = document.createElement('div');
         box.className = "numberbox";
@@ -978,7 +978,7 @@
 
         var container = document.createElement('div');
         container.className = "lexvector";        
-        container.style.width = "calc( 60% - 9px )"; // only 10px is for the padding 
+        container.style.width = "calc( 70% - 9px )"; // only 10px is for the padding 
 
         for( var i = 0; i < num_components; ++i ) {
 
