@@ -1080,10 +1080,34 @@
 
     /**
      * @param {*} options:
-     * onselect
-     * ondoubleclick
-     * onchange
+     * onselect(node_id)
+     * ondoubleclick(node_id)
+     * onchange(tree_event)
      */
+
+    class TreeEvent {
+        constructor( type, node, parent ) {
+            this.type = type || TreeEvent.NONE;
+            this.node = node;
+            this.parent = parent;
+        }
+        
+        string() {
+            switch(this.type) {
+                case TreeEvent.NONE: return "tree_event_none";
+                case TreeEvent.NODE_DRAGGED: return "tree_event_dragged";
+                case TreeEvent.NODE_RENAMED: return "tree_event_renamed";
+                case TreeEvent.NODE_VISIBILITY: return "tree_event_visibility";
+            }
+        }
+    };
+
+    TreeEvent.NONE              = 0;
+    TreeEvent.NODE_DRAGGED      = 1;
+    TreeEvent.NODE_RENAMED      = 2;
+    TreeEvent.NODE_VISIBILITY   = 3;
+
+    LX.TreeEvent = TreeEvent;
 
     Panel.prototype.addTree = function( name, data, options ) 
     {
@@ -1108,6 +1132,7 @@
 
         const create_item = function( parent, node, level = 0 ) {
 
+            node.visible = node.visible ?? true;
             node.parent = parent;
             const is_parent = node.children.length > 0;
 
@@ -1141,7 +1166,7 @@
             let name_input = document.createElement('input');
             name_input.toggleAttribute('hidden', !node.rename);
             name_input.value = node.id;
-            item.appendChild(name_input);
+            item.appendChild(name_input);            
 
             if(node.rename) {
                 item.classList.add('selected');
@@ -1150,6 +1175,13 @@
 
             name_input.addEventListener("keyup", function(e){
                 if(e.key == 'Enter') {
+
+                    if(options.onchange) {
+                        const event = new TreeEvent(TreeEvent.NODE_RENAMED, node);
+                        event.name = this.value;
+                        options.onchange( event );
+                    }
+
                     node.id = this.value;
                     delete node.rename;
                     update_tree();
@@ -1190,7 +1222,12 @@
                 if(!dragged)
                     return;
                 let target = node;
-                if(options.onchange) options.onchange( dragged, target );
+                if(dragged.id == target.id)
+                    return;
+                if(options.onchange) {
+                    const event = new TreeEvent(TreeEvent.NODE_DRAGGED, dragged, target);
+                    options.onchange( event );
+                }
                 const index = dragged.parent.children.findIndex(n => n.id == dragged.id);
                 const removed = dragged.parent.children.splice(index, 1);
                 target.children.push( removed[0] );
@@ -1204,6 +1241,29 @@
                     node.closed = !node.closed;
                     update_tree();
                 });
+            }
+
+            // add button icons
+
+            let visibility = document.createElement('a');
+            visibility.className = "itemicon fa-solid fa-eye" + (!node.visible ? "-slash" : "");
+            visibility.title = "Toggle visible";
+            visibility.addEventListener("click", function(){
+                node.visible = node.visible === undefined ? false : !node.visible;
+                this.className = "itemicon fa-solid fa-eye" + (!node.visible ? "-slash" : "");
+            });
+            item.appendChild(visibility);
+
+            if(node.actions) 
+            {
+                for(var i = 0; i < node.actions.length; ++i) {
+                    let a = node.actions[i];
+                    var actionEl = document.createElement('a');
+                    actionEl.className = "itemicon " + a.icon;
+                    actionEl.title = a.name;
+                    actionEl.addEventListener("click", a.callback);
+                    item.appendChild(actionEl);
+                }
             }
 
             if(node.closed)

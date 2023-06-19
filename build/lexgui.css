@@ -634,7 +634,7 @@ input[type=number] {
 
 .lextree .lextreeitem {
   list-style-type: none;
-  display: flex;
+  /* display: flex; */
   align-items: center;
   margin-bottom: 3px;
   line-height: 25px;
@@ -665,12 +665,21 @@ input[type=number] {
   font-size: 6px;
   margin-right: 4px;
   margin-top: 4px;
+  vertical-align: 1px;
 }
 
-.lextree .lextreeitem.parent a:active {
+.lextree .lextreeitem a:active {
   color: var(--global-button-color);
 }
 
 .lextree .lextreeitem.parent a {
   font-size: 16px;
+  vertical-align: -1px;
+}
+
+.lextree .lextreeitem .itemicon {
+  font-size: 12px !important;
+  float: right;
+  margin-top: 6px;
+  margin-right: 12px;
 }

@@ -33,11 +33,21 @@ let scene_data = {
             'children': [
                 {
                     'id': 'node_1_1',
+                    'visible': false,
                     'children': []
                 },
                 {
                     'id': 'node_1_2',
-                    'children': []
+                    'children': [],
+                    'actions': [
+                        {
+                            'name': 'Open script',
+                            'icon': 'fa-solid fa-scroll',
+                            'callback': function() {
+                                console.log("Script opened!")
+                            }
+                        }
+                    ]
                 }
             ]
         },
@@ -89,7 +99,21 @@ function fillPanel( panel ) {
     panel.addTree("Scene Tree", scene_data, { 
         onselect: (name) => {  },
         ondblclick: (name) => {  },
-        onchange: (dr, p) => { console.log(dr.id + " is now child of " + p.id); },
+        onchange: (event) => { 
+            console.log(event.string());
+
+            switch(event.type) {
+                case LX.TreeEvent.NODE_DRAGGED: 
+                    console.log(event.node.id + " is now child of " + event.parent.id); 
+                    break;
+                case LX.TreeEvent.NODE_RENAMED:
+                    console.log(event.node.id + " is now called " + event.name); 
+                    break;
+                case LX.TreeEvent.NODE_VISIBILITY:
+                    // console.log(event.node.id + " is now called " + event.name); 
+                    break;
+            }
+        },
     });    
 
     // add widgets to panel branch
