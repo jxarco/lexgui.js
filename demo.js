@@ -1,6 +1,9 @@
 // init library
 LX.init();
 
+// change global properties after init
+LX.Branch.DEFAULT_NAME_WIDTH = "30%";
+
 // LX.message("Welcome to Lexgui!", "Not an error!")
 
 // create main area
@@ -117,7 +120,7 @@ function fillPanel( panel ) {
     });    
 
     // add widgets to panel branch
-    panel.branch("Preferences", {icon: LX.icons.GEAR});
+    panel.branch("Preferences", {icon: LX.icons.GEAR, filter: true});
     panel.addColor("Background", [1, 0.1, 0.6], (value, event) => {
         console.log("Color: ", value);
     });

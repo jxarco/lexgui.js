@@ -352,8 +352,6 @@ html, body {
 	background-color: var(--global-combo-color);
   border-radius: 2px;
   border: none;
-  margin-left: 5px;
-  margin-top: 2px;
   width: 100%;
   height: 22px !important;
   color: #DDD;
@@ -693,3 +691,6 @@ input[type=number] {
   margin-top: 6px;
   margin-right: 12px;
 }
+
+/* Filter Bar */
+

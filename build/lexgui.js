@@ -55,6 +55,9 @@
         this.container.appendChild( modal );
         this.container.appendChild( root );
 
+        // Global vars
+        this.DEFAULT_NAME_WIDTH = "30%";
+
         this.ready = true;
     }
 
@@ -354,6 +357,8 @@
         if(!content)
         throw("no content to attach");
 
+        content.parent = this;
+
         if(content.constructor == LX.Panel)
             this.root.appendChild( content.root );
         else
@@ -462,6 +467,11 @@
             branch.root.classList.add('first');
         this.branches.push( branch );
         this.root.appendChild( branch.root );
+
+        //  add widget filter
+        if(options.filter) {
+            this.addFilter( options.filter );
+        }
     }
 
     Panel.prototype.merge = function() 
@@ -474,7 +484,6 @@
     {
         if(this.current_branch) {
             this.current_branch.root.classList.add('last');
-            this.branches = [];
         }
 
         this.merge();
@@ -520,13 +529,13 @@
         if(options.title)
             element.title = options.title;
 
-        element.style.width = "100%";
+        element.style.width = "calc( 100% - 10px)";
 
         if(name) {
             var domName = document.createElement('div');
             domName.className = "lexwidgetname";
             domName.innerHTML = name || "";
-            domName.style.width = "30%";
+            domName.style.width = LX.DEFAULT_NAME_WIDTH;
             element.appendChild(domName);
             element.domName = domName;
 
@@ -580,7 +589,7 @@
         // add widget value
         let wValue = document.createElement('input');
         wValue.value = wValue.iValue = value || "";
-        wValue.style.width = "calc( 70% - 17px )"; // only 10px is for the padding 
+        wValue.style.width = "70%";
 
         if(options.disabled) wValue.setAttribute("disabled", true);
         if(options.placeholder) wValue.setAttribute("placeholder", options.placeholder);
@@ -606,7 +615,7 @@
         
         if(!name){ // remove branch padding
             element.className += " noname";
-            wValue.style.width =  "calc( 100% - 17px )";
+            wValue.style.width = "100%";
         }
     }
     
@@ -620,7 +629,7 @@
         var wValue = document.createElement('button');
         wValue.className = "lexbutton";
         wValue.innerHTML = value || "";
-        wValue.style.width = "calc( 70% - 17px )"; // only 10px is for the padding 
+        wValue.style.width = "70%";
 
         if(options.disabled)
             wValue.setAttribute("disabled", true);
@@ -631,7 +640,7 @@
         
         if(!name) { // remove branch padding
             wValue.className += " noname";
-            wValue.style.width =  "calc( 100% - 10px )";
+            wValue.style.width =  "100%";
         }
     }
 
@@ -663,7 +672,7 @@
         wValue.name = name;
         wValue.iValue = value;
         
-        container.style.width = "calc( 70% - 17px )"; // only 10px is for the padding 
+        container.style.width = "70%";
 
         if(values.length)
             for(var i = 0; i < values.length; i++)
@@ -855,7 +864,7 @@
 
         var container = document.createElement('div');
         container.className = "lexnumber";        
-        container.style.width = "calc( 70% - 9px )"; // only 10px is for the padding 
+        container.style.width = "70%";
 
         let box = document.createElement('div');
         box.className = "numberbox";
@@ -978,7 +987,7 @@
 
         var container = document.createElement('div');
         container.className = "lexvector";        
-        container.style.width = "calc( 70% - 9px )"; // only 10px is for the padding 
+        container.style.width = "70%";
 
         for( var i = 0; i < num_components; ++i ) {
 
@@ -1076,6 +1085,66 @@
     Panel.prototype.addVector4 = function( name, value, callback, options ) 
     {
         this.add_vector(4, name, value, callback, options);
+    }
+
+    Panel.prototype.addFilter = function( placeholder, options ) 
+    {
+        options = options || {};
+
+        options.placeholder = placeholder.constructor == String ? placeholder : "Filter properties"
+        
+        let widget = this.create_widget(null, Widget.TEXT, options);
+        let element = widget.domEl;
+        element.className += " lexfilter noname";
+        
+        let input = document.createElement('input');
+        input.setAttribute("placeholder", options.placeholder);
+        input.style.width =  "calc( 100% - 17px )";
+        input.value = options.filterValue || "";
+
+        let searchIcon = document.createElement('a');
+        searchIcon.className = "fa-solid fa-magnifying-glass";
+        element.appendChild(input);
+        element.appendChild(searchIcon);
+
+        // store ref to branch name
+        let branchName = options.branchName || this.current_branch.name;
+
+        var that = this;
+
+        input.addEventListener("input", (function(e){
+            for( let b of this.branches ) {
+
+                if(b.name !== branchName)
+                    continue;
+                
+                // remove all widgets
+                for( let w of b.widgets ) {
+                    if(w.domEl.classList.contains('lexfilter')) continue;
+                    w.domEl.remove();
+                }
+
+                // push to right container
+                that.queuedContainer = b.content;
+                
+                // add widgets
+                for( let w of b.widgets ) {
+                    if(!w.name) continue;
+                    const filterWord = input.value.toLowerCase();
+                    const name = w.name.toLowerCase();
+                    if(!name.includes(input.value)) continue;
+                    // insert filtered widget
+                    that.queuedContainer.appendChild( w.domEl );
+                }
+
+                // push again to current branch
+                delete that.queuedContainer;
+
+                // no more branches to check!
+                return;
+            }
+
+        }).bind(this));
     }
 
     /**
@@ -1377,6 +1446,8 @@
 
     function Branch( name, options ) 
     {
+        this.name = name;
+
         options = options || {};
 
         var root = document.createElement('div');
@@ -1392,7 +1463,7 @@
         var that = this;
 
         this.root = root;
-        this.sizeLeft = "40%";
+        this.sizeLeft = LX.DEFAULT_NAME_WIDTH;
         this.widgets = [];
 
         // create element
@@ -1442,17 +1513,10 @@
         })
     }
 
-    Branch.prototype.addBranchSeparator = function( options ) 
+    Branch.prototype.addBranchSeparator = function() 
     {
-        options = options || {};
-
         var element = document.createElement('div');
         element.className = "lexwidgetseparator";
-        if(options.id)
-            element.id = options.id;
-        if(options.className)
-            element.className += " " + options.className;
-
         element.style.width = "100%";
         element.style.background = "none";
 
@@ -1541,7 +1605,7 @@
 
             name.style.width = this.sizeLeft;
             const padding = widget.type == Widget.VECTOR ? 9 : 17;
-            value.style.width = "calc( 100% - " + padding + "px" + " - " + this.sizeLeft + " )";
+            value.style.width = "calc( 100% - " + " - " + this.sizeLeft + " )";
         }
     }
 

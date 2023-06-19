@@ -21,6 +21,7 @@ TODO List:
 - ~~Addnumber/Slider widgets~~
 - ~~Tabs widget (Blender)~~
 - ~~Tree Widget~~
+- ~~Filter Widgets bar~~
 - Context Menus
 - Dialogs
 - Multiple widgets per row
