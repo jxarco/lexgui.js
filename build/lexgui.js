@@ -172,9 +172,9 @@
         var area1 = new LX.Area({className: "split"});
         var area2 = new LX.Area({className: "split"});
 
-        var resize = options.resize || true;
+        var resize = options.resize ?? true;
         var data = "0px";
-
+        
         if(resize)
         {
             this.resize = resize;
@@ -223,10 +223,16 @@
         }
 
         this.root.appendChild( area1.root );
-        this.root.appendChild(this.split_bar);
+        if(resize) this.root.appendChild(this.split_bar);
         this.root.appendChild( area2.root );
         this.sections = [area1, area2];
         this.type = type;
+
+        // update sizes
+        this.update();
+
+        if(!resize)
+        return;
 
         // litegui.js @jagenjo
 
@@ -272,9 +278,6 @@
             document.body.classList.remove("dragging-split-area");
             that.split_bar.classList.remove("dragging-split-area");
         }
-        
-        // update sizes
-        this.update();
     }
 
     Area.prototype.moveSplit = function( dt )
@@ -888,6 +891,7 @@
         // Add wheel input
 
         vecinput.addEventListener("wheel", function(e) {
+            e.preventDefault();
             let mult = 1;
             if(e.shiftKey) mult = 10;
             else if(e.altKey) mult = 0.1;
@@ -998,6 +1002,7 @@
             // Add wheel input
 
             vecinput.addEventListener("wheel", function(e) {
+                e.preventDefault();
                 let mult = 1;
                 if(e.shiftKey) mult = 10;
                 else if(e.altKey) mult = 0.1;

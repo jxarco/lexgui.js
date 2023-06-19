@@ -20,7 +20,7 @@ TODO List:
 - ~~Create "Widget" class to implement different value getters~~
 - ~~Addnumber/Slider widgets~~
 - ~~Tabs widget (Blender)~~
-- Tree Widget
+- ~~Tree Widget~~
 - Dialogs
 - Multiple widgets per row
 - List Widget

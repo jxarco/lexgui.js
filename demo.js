@@ -14,6 +14,10 @@ var [left,right] = area.sections;
 left.split({type: 'vertical', sizes:["80vh","20vh"]});
 var [up, bottom] = left.sections;
 
+// split right area
+right.split({type: 'vertical', sizes:["87.5vh","12.5vh"], resize: false});
+var [rup, rbottom] = right.sections;
+
 // add canvas to left upper part
 var canvas = document.createElement('canvas');
 canvas.style.width = "100%";
@@ -46,8 +50,12 @@ let scene_data = {
 
 // add panels
 var side_panel = new LX.Panel();
-right.attach( side_panel );
+rup.attach( side_panel );
 fillPanel( side_panel );
+
+var side_bottom_panel = new LX.Panel();
+rbottom.attach( side_bottom_panel );
+fillRightBottomPanel( side_bottom_panel );
 
 var bottom_panel = new LX.Panel();
 bottom.attach( bottom_panel );
@@ -122,9 +130,12 @@ function fillPanel( panel ) {
         console.log(value);
     });
     panel.addCheckbox("This is disabled", false, null, {disabled: true});
-    panel.merge();
+    panel.end();
+}
 
-    panel.branch("Tabs!", {icon: LX.icons.TABS});
+function fillRightBottomPanel( panel ) {
+    
+    panel.branch("No resize area", {icon: LX.icons.TABS});
     panel.tabs([
         { 
             name: "First tab",
@@ -148,6 +159,7 @@ function fillPanel( panel ) {
     });
     panel.end();
 }
+
 
 function fillBottomPanel( panel ) {
     
