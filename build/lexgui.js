@@ -46,8 +46,8 @@
         this.root = root;
         this.container = document.body;
 
-        this.modal.hidden = true;
-        this.modal.toggle = function() { this.toggleAttribute('hidden'); };
+        this.modal.toggleAttribute('hidden', true);
+        this.modal.toggle = function(force) { this.toggleAttribute('hidden', force); };
 
         if(options.container)
             this.container = document.getElementById(options.container);
@@ -70,25 +70,57 @@
 
         options = options || {};
 
-        this.modal.toggle();
-
+        this.modal.toggle(false);
         var root = document.createElement('div');
+        window.root  = root;
         root.className = "lexmessage";
         if(options.id)
             root.id = options.id;
 
         var content = document.createElement('div');
-        content.className = "lexmessagecontent";
+        content.className = "lexmessagecontent" + (title ? "" : " notitle");
         content.innerHTML = text;
 
         root.style.width = "30%";
         root.style.height = "30vh";
-        root.style.left = "35%";
-        root.style.top = "35vh";
+        root.style.left = options.position ? (options.position[0] + "px") : "35%";
+        root.style.top = options.position ? (options.position[1] + "px") : "35vh";
+
+        if(options.draggable) {
+
+            let offsetX;
+            let offsetY;
+
+            root.setAttribute('draggable', true);
+            root.addEventListener("dragstart", function(e) {
+                const rect = e.target.getBoundingClientRect();
+                offsetX = e.clientX - rect.x;
+                offsetY = e.clientY - rect.y;
+                var img = new Image();
+                img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+                e.dataTransfer.setDragImage(img, 0, 0);
+                e.dataTransfer.effectAllowed = "move";
+            });
+            root.addEventListener("drag", function(e) {
+                e.preventDefault();
+                this.style.left = e.clientX - offsetX + 'px';
+                this.style.top = e.clientY - offsetY + 'px';
+            }, false );
+            root.addEventListener("dragend", function(e) {
+                e.preventDefault();
+                this.style.left = e.clientX - offsetX + 'px';
+                this.style.top = e.clientY - offsetY + 'px';
+            }, false );
+
+            // Disable drag icon
+            this.container.addEventListener("dragover", function(e) {
+                e.preventDefault();
+            }, false );
+        }
 
         var closeButton = document.createElement('div');
         closeButton.className = "lexmessagecloser";
-        closeButton.innerHTML = '&#10005;';
+        closeButton.innerHTML = "<a class='fa-solid fa-xmark'></a>";
         closeButton.title = "Close message";
         
         closeButton.addEventListener('click', (function(e) {
@@ -106,7 +138,6 @@
         }
         
         root.appendChild(content);
-
         this.container.appendChild(root);
     }
 
@@ -1126,7 +1157,7 @@
 
                 // push to right container
                 that.queuedContainer = b.content;
-                
+
                 // add widgets
                 for( let w of b.widgets ) {
                     if(!w.name) continue;

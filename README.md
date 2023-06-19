@@ -25,7 +25,6 @@ TODO List:
 - Context Menus
 - Dialogs
 - Multiple widgets per row
-- List Widget
 - Load File widget
 - Menubar
 - Area Tab
