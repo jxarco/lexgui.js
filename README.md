@@ -21,11 +21,12 @@ TODO List:
 - ~~Addnumber/Slider widgets~~
 - ~~Tabs widget (Blender)~~
 - ~~Tree Widget~~
+- Context Menus
 - Dialogs
 - Multiple widgets per row
 - List Widget
-- Context Menus
 - Load File widget
 - Menubar
-- Tab menu
-- Timeline ???
+- Area Tab
+- Progression bar
+- Timeline

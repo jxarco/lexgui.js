@@ -241,17 +241,17 @@ html, body {
 }
 
 .lexwidgetseparator div {
-  -ms-transform: translateY(-8px);
-  -webkit-transform: translateY(-8px);
-  transform: translateY(-8px);
+  -ms-transform: translateY(-12px);
+  -webkit-transform: translateY(-12px);
+  transform: translateY(-12px);
   height: 2px;
   width: 11px;
   cursor: ew-resize;
-  color: #dddddd51;
+  color: var(--branch-title-background);
 }
 
 .lexwidgetseparator div:hover {
-  color: #dddddddb;
+  color: #4d4d5ac4;
 }
 
 .lexwidgetseparator div div {

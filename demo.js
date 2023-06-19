@@ -104,13 +104,13 @@ function fillPanel( panel ) {
 
             switch(event.type) {
                 case LX.TreeEvent.NODE_DRAGGED: 
-                    console.log(event.node.id + " is now child of " + event.parent.id); 
+                    console.log(event.node.id + " is now child of " + event.value.id); 
                     break;
                 case LX.TreeEvent.NODE_RENAMED:
-                    console.log(event.node.id + " is now called " + event.name); 
+                    console.log(event.node.id + " is now called " + event.value); 
                     break;
                 case LX.TreeEvent.NODE_VISIBILITY:
-                    // console.log(event.node.id + " is now called " + event.name); 
+                    console.log(event.node.id + " visibility: " + event.value); 
                     break;
             }
         },

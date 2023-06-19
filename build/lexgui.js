@@ -1086,10 +1086,10 @@
      */
 
     class TreeEvent {
-        constructor( type, node, parent ) {
+        constructor( type, node, value ) {
             this.type = type || TreeEvent.NONE;
             this.node = node;
-            this.parent = parent;
+            this.value = value;
         }
         
         string() {
@@ -1177,8 +1177,7 @@
                 if(e.key == 'Enter') {
 
                     if(options.onchange) {
-                        const event = new TreeEvent(TreeEvent.NODE_RENAMED, node);
-                        event.name = this.value;
+                        const event = new TreeEvent(TreeEvent.NODE_RENAMED, node, this.value);
                         options.onchange( event );
                     }
 
@@ -1222,12 +1221,34 @@
                 if(!dragged)
                     return;
                 let target = node;
-                if(dragged.id == target.id)
+                // can't drop to same node
+                if(dragged.id == target.id) {
+                    console.warn("Cannot parent node to itself!");
                     return;
+                }
+
+                // can't drop to child node
+                const isChild = function(new_parent, node) {
+                    var result = false;
+                    for( var c of node.children ) {
+                        if( c.id == new_parent.id )
+                            return true;
+                        result |= isChild(new_parent, c);
+                    }
+                    return result;
+                };
+
+                if(isChild(target, dragged)) {
+                    console.warn("Cannot parent node to a current child!");
+                    return;
+                }
+
+                // trigger node dragger event
                 if(options.onchange) {
                     const event = new TreeEvent(TreeEvent.NODE_DRAGGED, dragged, target);
                     options.onchange( event );
                 }
+
                 const index = dragged.parent.children.findIndex(n => n.id == dragged.id);
                 const removed = dragged.parent.children.splice(index, 1);
                 target.children.push( removed[0] );
@@ -1251,6 +1272,11 @@
             visibility.addEventListener("click", function(){
                 node.visible = node.visible === undefined ? false : !node.visible;
                 this.className = "itemicon fa-solid fa-eye" + (!node.visible ? "-slash" : "");
+                // trigger visibility event
+                if(options.onchange) {
+                    const event = new TreeEvent(TreeEvent.NODE_VISIBILITY, node, node.visible);
+                    options.onchange( event );
+                }
             });
             item.appendChild(visibility);
 
@@ -1267,7 +1293,7 @@
             }
 
             if(node.closed)
-            return;
+                return;
 
             for( var i = 0; i < node.children.length; ++i )
                 create_item( node, node.children[i], level + 1 );
