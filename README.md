@@ -22,11 +22,12 @@ TODO List:
 - ~~Tabs widget (Blender)~~
 - ~~Tree Widget~~
 - ~~Filter Widgets bar~~
+- Menubar
+- Fix scrollbar spaces in right sides
 - Context Menus
 - Dialogs
 - Multiple widgets per row
 - Load File widget
-- Menubar
 - Area Tab
 - Progression bar
 - Timeline

@@ -5,7 +5,7 @@ LX.init();
 LX.Branch.DEFAULT_NAME_WIDTH = "30%";
 
 // LX.message("I'm in another position", null, { position: [10, 10] });
-LX.message("Welcome to Lexgui", "Welcome!", { draggable: true })
+// LX.message("Welcome to Lexgui", "Welcome!", { draggable: true })
 
 // create main area
 var area = new LX.Area({id:"mainarea"});
@@ -22,8 +22,14 @@ var [up, bottom] = left.sections;
 right.split({type: 'vertical', sizes:["87.5vh","12.5vh"], resize: false});
 var [rup, rbottom] = right.sections;
 
+// menu bar
+var menubar = new LX.Menubar();
+up.attach( menubar );
+
 // add canvas to left upper part
 var canvas = document.createElement('canvas');
+canvas.width = up.root.clientWidth;
+canvas.height = up.root.clientHeight;
 canvas.style.width = "100%";
 canvas.style.height = "100%";
 canvas.style.backgroundColor = "#ccc";
@@ -140,12 +146,12 @@ function fillPanel( panel ) {
     panel.addCombo("Pages", ["Federico", "Garcia", "Lorca"], "Garcia", (value, event) => {
         console.log(value);
     });
-    panel.addNumber("Font size", 12, (value, event) => {
+    panel.addNumber("Font size", 24, (value, event) => {
         console.log(value);
-    }, { min: 1, max: 24 });
-    panel.addVector2("2D Position", [74, 60], (value, event) => {
+    }, { min: 1, max: 48 });
+    panel.addVector2("2D Position", [280, 368], (value, event) => {
         console.log(value);
-    }, { min: 0, max: 256 });
+    }, { min: 0, max: 1024 });
     panel.addVector3("Velocity", [0.1, 0.4, 0.5], (value, event) => {
         console.log(value);
     });

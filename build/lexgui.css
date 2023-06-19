@@ -713,5 +713,10 @@ input[type=number] {
   margin-right: 12px;
 }
 
-/* Filter Bar */
+/* Menu Bar */
 
+.lexmenubar {
+  height: 50px;
+  width: 100%;
+  background-color: red;
+}

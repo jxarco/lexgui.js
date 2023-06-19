@@ -390,13 +390,51 @@
 
         content.parent = this;
 
-        if(content.constructor == LX.Panel)
-            this.root.appendChild( content.root );
-        else
-            this.root.appendChild( content );
+        let element = content.root ? content.root : content;
+        
+        // e.g. menubar has predefined height
+        if(element.style.height == "100%")
+        {
+            let size = 0;
+            for( var el of this.root.children ) {
+                size += el.offsetHeight;
+            }
+            element.style.height = "calc( 100% - " + size + "px )";
+        }
+
+        this.root.appendChild( element );
     }
 
     LX.Area = Area;
+
+    /**
+     * @class Menubar
+     */
+
+    function Menubar( options ) 
+    {
+        options = options || {};
+
+        this.root = document.createElement('div');
+        this.root.className = "lexmenubar";
+    }
+
+    Menubar.prototype.begin = function()
+    {
+
+    }
+
+    Menubar.prototype.add = function(path)
+    {
+        
+    }
+
+    Menubar.prototype.end = function()
+    {
+        
+    }
+
+    LX.Menubar = Menubar;
 
     /**
      * @class Widget
