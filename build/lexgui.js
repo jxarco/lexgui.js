@@ -399,6 +399,7 @@
     Widget.NUMBER   = 5;
     Widget.TITLE    = 6;
     Widget.VECTOR   = 7;
+    Widget.TREE     = 8;
 
     LX.Widget = Widget;
 
@@ -591,7 +592,7 @@
         }).bind(this);
 
         wValue.addEventListener("keyup", function(e){
-            if(e.keyCode == 13)
+            if(e.key == 'Enter')
                 resolve(e.target.value, e);
         });
         wValue.addEventListener("focusout", function(e){
@@ -1070,6 +1071,116 @@
     Panel.prototype.addVector4 = function( name, value, callback, options ) 
     {
         this.add_vector(4, name, value, callback, options);
+    }
+
+    /**
+     * @param {*} options:
+     * onselect
+     * ondoubleclick
+     */
+
+    Panel.prototype.addTree = function( name, data, options ) 
+    {
+        if(!name) {
+            throw("Set Widget Name!");
+        }
+
+        options = options || {};
+
+        let container = document.createElement('div');
+        container.className = "lextree";
+        let list = document.createElement('ul');
+
+        const update_tree = function() {
+            list.innerHTML = "";
+            create_item( data );
+        };
+
+        const create_item = function( node, level = 0 ) {
+
+            const parent = node.children.length > 0;
+
+            var item = document.createElement('li');
+            item.className = "lextreeitem " + "datalevel" + level + " " + (parent ? "parent" : "");
+            item.id = node.id;
+            // select icon
+            let icon = "fa-solid fa-square"; // default: no childs
+            if( parent ) icon = node.closed ? "fa-solid fa-caret-right" : "fa-solid fa-caret-down";
+            item.innerHTML = "<a class='" + icon + "'></a>" + (node.rename ? "" : node.id);
+            item.style.paddingLeft = ((parent ? 0 : 3 ) + (3 + (level+1) * 25)) + "px";
+            list.appendChild(item);
+
+            // callbacks
+            item.addEventListener("click", function(){
+                list.querySelectorAll("li").forEach( e => { e.classList.remove('selected'); } );
+                this.classList.add('selected');
+                if(options.onselect) options.onselect( node.id );
+            });
+
+            item.addEventListener("dblclick", function(){
+                // trigger rename
+                node.rename = true;
+                update_tree();
+                // const input = this.querySelector('input');
+                // input.toggleAttribute('hidden');
+                // input.focus();
+                if(options.ondblclick) options.ondblclick( node.id );
+            });
+
+            // node rename
+
+            let name_input = document.createElement('input');
+            name_input.toggleAttribute('hidden', !node.rename);
+            name_input.value = node.id;
+            item.appendChild(name_input);
+
+            if(node.rename) {
+                item.classList.add('selected');
+                name_input.focus();
+            }
+
+            name_input.addEventListener("keyup", function(e){
+                if(e.key == 'Enter') {
+                    node.id = this.value;
+                    node.rename = false;
+                    update_tree();
+                    list.querySelector("#" + this.value).classList.add('selected');
+                }
+                if(e.key == 'Escape') {
+                    node.rename = false;
+                    update_tree();
+                }
+            });
+
+            name_input.addEventListener("blur", function(e){
+                node.rename = false;
+                update_tree();
+            });
+
+            // show/hide children
+            if(parent) {
+                item.querySelector('a').addEventListener("click", function(){
+                    node.closed = !node.closed;
+                    update_tree();
+                });
+            }
+
+            if(node.closed)
+            return;
+
+            for( var i = 0; i < node.children.length; ++i )
+                create_item( node.children[i], level + 1 );
+        };
+
+        create_item( data );
+        
+        // let widget = new Widget(name, Widget.TREE);
+        // widget.domEl = container;
+        // widget.tree_data = data;
+        // this.widgets[ name ] = widget;
+        
+        container.appendChild(list);
+        this.root.appendChild(container);
     }
 
     Panel.prototype.separate = function() 

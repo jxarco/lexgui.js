@@ -53,6 +53,36 @@ requestAnimationFrame(loop);
 
 function fillPanel( panel ) {
     
+    // add data tree
+
+    const data = {
+        'id': 'root',
+        'children': [
+            {
+                'id': 'node_1',
+                'children': [
+                    {
+                        'id': 'node_1_1',
+                        'children': []
+                    },
+                    {
+                        'id': 'node_1_2',
+                        'children': []
+                    }
+                ]
+            },
+            {
+                'id': 'node_2',
+                'children': []
+            }
+        ]
+    };
+
+    panel.addTree("Test Data Tree", data, { 
+        onselect: (name) => {  },
+        ondblclick: (name) => {  } 
+    });    
+
     // add widgets to panel branch
     panel.branch("Information", {icon: LX.icons.INFO});
     panel.addText("Camera", "Canon EOS 80D", null, {disabled: true}); 
