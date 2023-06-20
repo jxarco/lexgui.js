@@ -27,12 +27,13 @@ TODO List:
 - ~~Node filter in tree widget~~
 - ~~Fix scrollbar spaces in right sides~~
 - ~~Add icons + mini-text (shortcut normally) to menubar entries~~
+- ~~Progression bar~~
+- Support optimum, sub, etc colors for the progress bars
 - Fix menubar submenus if not on top
-- Change resize bar to Godot one
 - Context Menus
 - Dialogs
 - Multiple widgets per row
 - Load File widget
 - Support horizontal tabs widget (i made vertical ones)
-- Progression bar
+- Change resize bar to Godot one
 - Timeline
