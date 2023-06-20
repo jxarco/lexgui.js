@@ -108,7 +108,6 @@ fillRightBottomPanel( side_bottom_panel );
 var bottom_panel = new LX.Panel();
 bottom.attach( bottom_panel );
 fillBottomPanel( bottom_panel );
-fillBottomPanel( bottom_panel );
 
 function loop() {
     
@@ -122,7 +121,7 @@ function loop() {
 
     const pos_2d = side_panel.getValue('2D Position');
     ctx.fillText("This is a 2d canvas", pos_2d[0], pos_2d[1]);
-    ctx.fillText("Lexgui.js @jxarco", pos_2d[0] + 6, pos_2d[1] + 30);
+    ctx.fillText("Lexgui.js @jxarco", pos_2d[0] + 6, pos_2d[1] + 48);
 
     requestAnimationFrame(loop);
 }
@@ -177,13 +176,7 @@ function fillPanel( panel ) {
         console.log("Color: ", value);
     });
     panel.addText("Extensions", "", null, {placeholder: "e.g. ColorPicker"});
-    panel.addText(null, "This has a console.log callback", (value, event) => {
-        console.log(value);
-    });
     panel.addButton(null, "Apply changes");
-    panel.addButton("Apply", "Print event", event => {
-        console.log(event);
-    });
     panel.merge();
 
     // another branch
@@ -191,10 +184,10 @@ function fillPanel( panel ) {
     panel.addCombo("Pages", ["Federico", "Garcia", "Lorca"], "Garcia", (value, event) => {
         console.log(value);
     });
-    panel.addNumber("Font size", 24, (value, event) => {
+    panel.addNumber("Font size", 36, (value, event) => {
         console.log(value);
     }, { min: 1, max: 48 });
-    panel.addVector2("2D Position", [280, 368], (value, event) => {
+    panel.addVector2("2D Position", [350, 450], (value, event) => {
         console.log(value);
     }, { min: 0, max: 1024 });
     panel.addVector3("Velocity", [0.1, 0.4, 0.5], (value, event) => {
@@ -233,10 +226,12 @@ function fillRightBottomPanel( panel ) {
             }
         }
     ]);
-    panel.addCheckbox("Post TABS", true, (value, event) => {
-        console.log(value);
-    });
-    panel.addProgress("EyeLookDownLeft", 0.5);
+
+    // update panel values uising widget name
+    panel.addNumber("HeadRoll Value", 0, (value, event) => {
+        panel.setValue('HeadRoll', value);
+    }, { min: -1, max: 1, step: 0.1 });
+    panel.addProgress("HeadRoll", 0, { min: -1, max: 1 });
     panel.end();
 }
 
@@ -248,6 +243,12 @@ function fillBottomPanel( panel ) {
     panel.addText("Camera", "Canon EOS 80D", null, {disabled: true}); 
     panel.addText("Serial number", "194E283DD", (value, event) => {
         console.log(value);
+    });
+    panel.addText(null, "This has a console.log callback", (value, event) => {
+        console.log(value);
+    });
+    panel.addButton("Apply", "Print event", event => {
+        console.log(event);
     });
     panel.merge();
 

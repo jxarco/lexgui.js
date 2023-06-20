@@ -651,8 +651,32 @@
                 case Widget.VECTOR:
                     const inputs = this.domEl.querySelectorAll("input");
                     let value = [];
-                    for( var v of inputs ) value.push( +v.value );
+                    for( var v of inputs )
+                        value.push( +v.value );
                     return value;
+                case Widget.PROGRESS:
+                    return this.domEl.querySelector("meter").value;
+            }
+        }
+
+        set_val( value ) {
+
+            switch(this.type) {
+                case Widget.TEXT: 
+                case Widget.COLOR:
+                    this.domEl.querySelector("input").value = value;
+                case Widget.NUMBER:
+                    this.domEl.querySelector("input").value = value;
+                case Widget.COMBO: 
+                    this.domEl.querySelector("select").value = value;
+                case Widget.CHECKBOX: 
+                    this.domEl.querySelector(".checkbox").value = value;
+                case Widget.VECTOR:
+                    const inputs = this.domEl.querySelectorAll("input");
+                    for( var i = 0; i < inputs.length; ++i ) 
+                        inputs[i].value = value[i];
+                case Widget.PROGRESS:
+                    this.domEl.querySelector("meter").value = value;
             }
         }
     }
@@ -707,6 +731,15 @@
             throw("No widget called " + name);
 
         return widget.get_val();
+    }
+
+    Panel.prototype.setValue = function( name, value ) 
+    {
+        let widget = this.widgets[ name ];
+        if(!widget)
+            throw("No widget called " + name);
+
+        return widget.set_val(value);
     }
 
     Panel.prototype.branch = function( name, options = {} ) 
@@ -1128,6 +1161,7 @@
         if(options.min && options.max) {
             let slider = document.createElement('input');
             slider.className = "lexinputslider";
+            slider.step = options.step ?? "any";
             slider.min = options.min;
             slider.max = options.max;
             slider.type = "range";
@@ -1341,13 +1375,12 @@
 
         // add slider (0-1 if not specified different )
 
-        let progress = document.createElement('progress');
+        let progress = document.createElement('meter');
         progress.className = "lexprogressbar";
-        progress.min = options.min ?? 0;
         progress.step = "any";
+        progress.min = options.min ?? 0;
         progress.max = options.max ?? 1;
         progress.value = value;
-        progress.type = "range";
 
         container.appendChild(progress);
         element.appendChild(container);

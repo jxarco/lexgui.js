@@ -735,26 +735,46 @@ input[type=number] {
 }
 
 .lexprogressbar {
-  -webkit-appearance: none;
+  /* -webkit-appearance: none;
   -moz-appearance: none;
-  appearance: none;
+  appearance: none; */
   border: none !important;
   width: 100%;
   outline: none;
   opacity: 0.7;
   -webkit-transition: .2s;
   transition: opacity .2s;
+  margin-top: 2px;
 }
 
-::-webkit-progress-bar {
-  margin-top: 2px;
-  height: 10px;
+/* The gray background in Chrome, etc. */
+meter::-webkit-meter-bar {
   background: var(--global-color-primary);
-  border-radius: 10px;
+  height: 12px;
 }
-::-webkit-progress-value {  
-  background-color: var(--checkbox-flag-on);
-  border-radius: 10px;
+
+/* (optimum) */
+meter:-moz-meter-optimum::-moz-meter-bar {
+  background: var(--checkbox-flag-on);
+}
+meter::-webkit-meter-optimum-value {
+  background: var(--checkbox-flag-on);
+}
+
+/* (sub-optimum)*/
+meter:-moz-meter-sub-optimum::-moz-meter-bar {
+  background: red;
+}
+meter::-webkit-meter-suboptimum-value {
+  background: red;
+}
+
+/* (even less good)*/
+meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
+  background: red;
+}
+meter::-webkit-meter-even-less-good-value {
+  background: red;
 }
 
 /* Menu Bar */
