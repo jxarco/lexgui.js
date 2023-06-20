@@ -236,6 +236,7 @@ function fillRightBottomPanel( panel ) {
     panel.addCheckbox("Post TABS", true, (value, event) => {
         console.log(value);
     });
+    panel.addProgress("EyeLookDownLeft", 0.5);
     panel.end();
 }
 

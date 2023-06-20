@@ -727,6 +727,36 @@ input[type=number] {
   margin-right: 12px;
 }
 
+/* Progress bar */
+
+.lexprogress {
+  display: flex;
+  justify-content: center;
+}
+
+.lexprogressbar {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border: none !important;
+  width: 100%;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+::-webkit-progress-bar {
+  margin-top: 2px;
+  height: 10px;
+  background: var(--global-color-primary);
+  border-radius: 10px;
+}
+::-webkit-progress-value {  
+  background-color: var(--checkbox-flag-on);
+  border-radius: 10px;
+}
+
 /* Menu Bar */
 
 .lexmenubar {

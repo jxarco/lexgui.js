@@ -666,6 +666,7 @@
     Widget.TITLE    = 6;
     Widget.VECTOR   = 7;
     Widget.TREE     = 8;
+    Widget.PROGRESS = 9;
 
     LX.Widget = Widget;
 
@@ -724,7 +725,7 @@
 
         //  add widget filter
         if(options.filter) {
-            this.addFilter( options.filter );
+            this.add_filter( options.filter );
         }
     }
 
@@ -1325,7 +1326,34 @@
         this.add_vector(4, name, value, callback, options);
     }
 
-    Panel.prototype.addFilter = function( placeholder, options = {} ) 
+    Panel.prototype.addProgress = function( name, value, options = {} ) 
+    {
+        if(!name) {
+            throw("Set Widget Name!");
+        }
+
+        let widget = this.create_widget(name, Widget.PROGRESS, options);
+        let element = widget.domEl;
+
+        var container = document.createElement('div');
+        container.className = "lexprogress";
+        container.style.width = "70%";
+
+        // add slider (0-1 if not specified different )
+
+        let progress = document.createElement('progress');
+        progress.className = "lexprogressbar";
+        progress.min = options.min ?? 0;
+        progress.step = "any";
+        progress.max = options.max ?? 1;
+        progress.value = value;
+        progress.type = "range";
+
+        container.appendChild(progress);
+        element.appendChild(container);
+    }
+
+    Panel.prototype.add_filter = function( placeholder, options = {} ) 
     {
         options.placeholder = placeholder.constructor == String ? placeholder : "Filter properties"
         
