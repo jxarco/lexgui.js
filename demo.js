@@ -13,10 +13,10 @@ var area = new LX.Area({id:"mainarea"});
 // menu bar
 area.addMenubar( m => {
     m.add( "Scene/New Scene", () => { console.log("New scene created!") });
-    m.add( "Scene/Open Recent/hello.scene", () => { console.log("Opening scene: hello.scene") });
-    m.add( "Scene/Open Recent/goodbye.scene" );
     m.add( "Scene/Open Scene" );
     m.add( "Scene/" );
+    m.add( "Scene/Open Recent/hello.scene", () => { console.log("Opening scene: hello.scene") });
+    m.add( "Scene/Open Recent/goodbye.scene" );
     m.add( "Scene/Open Recent" );
     m.add( "Project/Project Settings" );
     m.add( "Project/Export/DAE" );
@@ -29,7 +29,7 @@ area.addMenubar( m => {
     m.add( "Help/Support LexGUI/Please/Please1/Please2" );
     m.add( "Help/Support LexGUI/Please/Please1/Please2/Please3" );
     m.add( "Help/Support LexGUI/Do it" );
-} );
+});
 
 // split main area
 area.split({sizes:["70%","30%"]});
@@ -40,8 +40,14 @@ left.split({type: 'vertical', sizes:["80vh","20vh"]});
 var [up, bottom] = left.sections;
 
 // split right area
-right.split({type: 'vertical', sizes:["87.5vh","12.5vh"]});
+right.split({type: 'vertical', sizes:["70vh","30vh"]});
 var [rup, rbottom] = right.sections;
+
+// another menu bar
+rbottom.addMenubar( m => {
+    m.add( "Skeleton", () => { console.log("Showing Skeleton tab") });
+    m.add( "Blendshapes", () => { console.log("Showing Blendshapes tab") });
+}, { float: 'center' } );
 
 // add canvas to left upper part
 var canvas = document.createElement('canvas');

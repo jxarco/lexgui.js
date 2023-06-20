@@ -424,9 +424,9 @@
         this.root.appendChild( element );
     }
 
-    Area.prototype.addMenubar = function( callback )
+    Area.prototype.addMenubar = function( callback, options = {} )
     {
-        var menubar = new LX.Menubar();
+        var menubar = new LX.Menubar(options);
 
         if(callback) callback( menubar );
 
@@ -451,6 +451,8 @@
     {
         this.root = document.createElement('div');
         this.root.className = "lexmenubar";
+        if(options.float)
+            this.root.style.justifyContent = options.float;
         this.items = [];
     }
 
@@ -566,12 +568,21 @@
                     });
 
                     subentry.addEventListener("mouseleave", () => {
+                        d = -1; // reset depth
+                        delete subentry.built;
                         contextmenu.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
                     });
                 }
             };
 
             entry.addEventListener("click", () => {
+
+                const f = item[ 'callback' ];
+                if(f) {
+                    f.call();
+                    return;
+                } 
+
                 this.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
                 create_submenu( item, key, entry, -1 );
             });

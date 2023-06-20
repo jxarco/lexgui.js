@@ -22,13 +22,14 @@ TODO List:
 - ~~Tabs widget (Blender)~~
 - ~~Tree Widget~~
 - ~~Filter Widgets bar~~
-- Menubar
+- ~~Menubar~~
+- add icons + mini-text (shortcut normally) to menubar entries
 - Change resize bar to Godot one
 - Fix scrollbar spaces in right sides
 - Context Menus
 - Dialogs
 - Multiple widgets per row
 - Load File widget
-- Area Tab
+- Support horizontal tabs widget (i made vertical ones)
 - Progression bar
 - Timeline
