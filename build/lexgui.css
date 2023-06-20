@@ -621,6 +621,16 @@ input[type=number] {
   margin-bottom: -8px;
 }
 
+.lextree .lextreetools {
+  background: var(--global-color-secondary);
+  padding: 8px;
+  display: flex;
+}
+
+.lextree .lextreetools a {
+  margin-right: 8px;
+}
+
 .lextree span {
   padding: 8px;
   background: var(--global-color-secondary);

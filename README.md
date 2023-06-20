@@ -23,6 +23,8 @@ TODO List:
 - ~~Tree Widget~~
 - ~~Filter Widgets bar~~
 - ~~Menubar~~
+- ~~Add icons buttons to tree title~~
+- ~~Node filter in tree widget~~
 - Add icons + mini-text (shortcut normally) to menubar entries
 - Change resize bar to Godot one
 - Fix scrollbar spaces in right sides

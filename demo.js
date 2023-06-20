@@ -130,7 +130,22 @@ function fillPanel( panel ) {
     
     // add data tree
 
+    // this is optional!
+    const tree_icons = [
+        {
+            'name':'Add node',
+            'icon': 'fa-solid fa-plus',
+            'callback': () => { console.log("Node added!") }
+        },
+        {
+            'name':'Instantiate scene',
+            'icon': 'fa-solid fa-link',
+            'callback': () => { console.log("Scene instantiated!") }
+        }
+    ];
+
     panel.addTree("Scene Tree", scene_data, { 
+        icons: tree_icons, 
         onselect: (name) => {  },
         ondblclick: (name) => {  },
         onchange: (event) => { 

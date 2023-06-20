@@ -1395,6 +1395,41 @@
             container.appendChild(title);
         }
 
+        let toolsDiv = document.createElement('div');
+        toolsDiv.className = "lextreetools";
+
+        // tree icons
+        if(options.icons) {
+
+            for( let data of options.icons )
+            {
+                let iconEl = document.createElement('a');
+                iconEl.title = data.name;
+                iconEl.className = "lexicon " + data.icon;
+                iconEl.addEventListener("click", data.callback);
+                toolsDiv.appendChild(iconEl);
+            }
+
+        }
+
+        container.appendChild(toolsDiv);
+
+        // TODO: node filter
+        let node_filter_input = document.createElement('input');
+        node_filter_input.setAttribute("placeholder", "Filter..");
+        node_filter_input.style.width =  "calc( 100% - 17px )";
+        node_filter_input.style.marginTop =  "-6px";
+        node_filter_input.addEventListener('input', function(){
+            update_tree();
+        });
+
+        let searchIcon = document.createElement('a');
+        searchIcon.className = "fa-solid fa-magnifying-glass";
+        toolsDiv.appendChild(node_filter_input);
+        toolsDiv.appendChild(searchIcon);
+
+        // Tree
+
         let list = document.createElement('ul');
         list.style.paddingTop = name ? "0px" : "16px";
 
@@ -1404,6 +1439,9 @@
         };
 
         const create_item = function( parent, node, level = 0 ) {
+
+            if(parent && !node.id.includes(node_filter_input.value))
+            return;
 
             node.visible = node.visible ?? true;
             node.parent = parent;
