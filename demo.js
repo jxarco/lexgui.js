@@ -117,7 +117,7 @@ function loop() {
 
     const pos_2d = side_panel.getValue('2D Position');
     ctx.fillText("This is a 2d canvas", pos_2d[0], pos_2d[1]);
-    ctx.fillText("Lexgui.js @jxarco", pos_2d[0] + 6, pos_2d[1] + 20);
+    ctx.fillText("Lexgui.js @jxarco", pos_2d[0] + 6, pos_2d[1] + 30);
 
     requestAnimationFrame(loop);
 }

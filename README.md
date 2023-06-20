@@ -23,7 +23,7 @@ TODO List:
 - ~~Tree Widget~~
 - ~~Filter Widgets bar~~
 - ~~Menubar~~
-- add icons + mini-text (shortcut normally) to menubar entries
+- Add icons + mini-text (shortcut normally) to menubar entries
 - Change resize bar to Godot one
 - Fix scrollbar spaces in right sides
 - Context Menus
