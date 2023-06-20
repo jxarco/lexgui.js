@@ -454,14 +454,25 @@
         if(options.float)
             this.root.style.justifyContent = options.float;
         this.items = [];
+        
+        this.icons = {};
+        this.shorts = {};
     }
 
-    Menubar.prototype.add = function(path, options = {} )
+    Menubar.prototype.setIcon = function( token, icon )
+    {
+        this.icons[ token ] = icon;
+    }
+
+    Menubar.prototype.setShort = function( token, short )
+    {
+        this.shorts[ token ] = short;
+    }
+
+    Menubar.prototype.add = function( path, options = {} )
     {
         if(options.constructor == Function)
             options = { callback: options };
-
-        const callback = options.callback;
 
         // process path
         const tokens = path.split("/");
@@ -487,7 +498,7 @@
                 const next_token = tokens[idx++];
                 // check if last token -> add callback
                 if(!next_token) {
-                    item[ 'callback' ] = callback;
+                    item[ 'callback' ] = options.callback;
                 }
                 list.push( item );
                 insert( next_token, item[ token ] ); 
@@ -518,6 +529,7 @@
                 const isSubMenu = c.classList.contains('lexcontextmenuentry');
                 var rect = c.getBoundingClientRect();
                 contextmenu.style.left = (isSubMenu ? rect.width : rect.left) + "px";
+                // black magic here...
                 var offset = (d > 0 ? rect.height : 0) + that.root.offsetHeight - 1;
                 contextmenu.style.top = (isSubMenu ? rect.top - offset : -1 + rect.bottom) + "px";
                 c.appendChild( contextmenu );
@@ -536,10 +548,17 @@
                         subentry.className = " lexseparator";
                     else {
                         subentry.id = subkey;
-                        subentry.innerHTML = "<div class='lexentryname'>" + subkey + "</div>";
+                        subentry.innerHTML = "";
+                        const icon = that.icons[ subkey ];
+                        if(icon) {
+                            subentry.innerHTML += "<a class='" + icon + " fa-sm'></a>";
+                        }
+                        subentry.innerHTML += "<div class='lexentryname'>" + subkey + "</div>";
                     }
-                    subentry.style.minWidth = rect.width + "px";
                     contextmenu.appendChild( subentry );
+
+                    // nothing more for separators
+                    if(subkey == '') continue;
 
                     // add callback
                     subentry.addEventListener("click", e => {
@@ -551,9 +570,17 @@
                         e.stopPropagation();
                     });
 
-                    // add icon if has submenu
-                    if( !hasSubmenu )
-                    continue;
+                    // add icon if has submenu, else check for shortcut
+                    if( !hasSubmenu)
+                    {
+                        if(that.shorts[ subkey ]) {
+                            let shortEl = document.createElement('div');
+                            shortEl.className = "lexentryshort";
+                            shortEl.innerText = that.shorts[ subkey ];
+                            subentry.appendChild( shortEl );
+                        }
+                        continue;
+                    }
 
                     let submenuIcon = document.createElement('a');
                     submenuIcon.className = "fa-solid fa-angle-right fa-xs";
@@ -573,6 +600,9 @@
                         contextmenu.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
                     });
                 }
+
+                // set final width
+                contextmenu.style.width = contextmenu.offsetWidth + "px";
             };
 
             entry.addEventListener("click", () => {
@@ -653,7 +683,7 @@
         if(options.className)
             root.className += " " + options.className;
 
-        root.style.width = "calc( 100% - 6px )";
+        root.style.width = "calc( 100% - 7px )";
         root.style.height = "100%";
         this.root = root;
 
@@ -1409,24 +1439,31 @@
                 iconEl.addEventListener("click", data.callback);
                 toolsDiv.appendChild(iconEl);
             }
-
         }
 
-        container.appendChild(toolsDiv);
+        // node filter
 
-        // TODO: node filter
-        let node_filter_input = document.createElement('input');
-        node_filter_input.setAttribute("placeholder", "Filter..");
-        node_filter_input.style.width =  "calc( 100% - 17px )";
-        node_filter_input.style.marginTop =  "-6px";
-        node_filter_input.addEventListener('input', function(){
-            update_tree();
-        });
+        options.filter = options.filter ?? true;
 
-        let searchIcon = document.createElement('a');
-        searchIcon.className = "fa-solid fa-magnifying-glass";
-        toolsDiv.appendChild(node_filter_input);
-        toolsDiv.appendChild(searchIcon);
+        let node_filter_input = null;
+        if(options.filter)
+        {
+            node_filter_input = document.createElement('input');
+            node_filter_input.setAttribute("placeholder", "Filter..");
+            node_filter_input.style.width =  "calc( 100% - 17px )";
+            node_filter_input.style.marginTop =  "-6px";
+            node_filter_input.addEventListener('input', function(){
+                update_tree();
+            });
+    
+            let searchIcon = document.createElement('a');
+            searchIcon.className = "fa-solid fa-magnifying-glass";
+            toolsDiv.appendChild(node_filter_input);
+            toolsDiv.appendChild(searchIcon);
+        }
+
+        if(options.icons || options.filter)
+            container.appendChild(toolsDiv);
 
         // Tree
 
@@ -1440,7 +1477,7 @@
 
         const create_item = function( parent, node, level = 0 ) {
 
-            if(!node.id.includes(node_filter_input.value))
+            if(node_filter_input && !node.id.includes(node_filter_input.value))
             {
                 for( var i = 0; i < node.children.length; ++i )
                     create_item( node, node.children[i], level + 1 );
@@ -1701,7 +1738,7 @@
         if(options.className)
             root.className += " " + options.className;
 
-        root.style.width = "calc(100% - 6px)";
+        root.style.width = "calc(100% - 7px)";
         root.style.margin = "0 auto";
 
         var that = this;

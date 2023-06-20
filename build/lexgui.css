@@ -166,6 +166,9 @@ html, body {
 
 .lexsplitbar.horizontal {
   cursor: ew-resize;
+  /* margin: auto;
+  height: 7.5%;
+  background-color: red; */
 }
 
 .lexsplitbar.vertical {
@@ -176,7 +179,7 @@ html, body {
 
 .lexpanel {
   margin: 0;
-  margin-left: 2px;
+  margin-left: 5px;
   overflow: hidden;
   overflow-y: scroll;
 }
@@ -760,15 +763,16 @@ input[type=number] {
 .lexcontextmenu {
   background-color: var(--global-color-secondary);
   position: absolute;
-  min-width: 128px;
-  /* border-radius: 6px; */
+  padding-right: 30px;
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
   z-index: 1001;
+  /* min-width: 188px; */
 }
 
 .lexcontextmenu .lexcontextmenuentry {
-  color: var(--global-text-secondary);
+  width: 100%;
+  color: #c0c4cbe3;
   padding: 6px;
   padding-left: 18px;
   padding-right: 12px;
@@ -784,7 +788,15 @@ input[type=number] {
   margin-right: 32px;
 }
 
+/* normal icons  */
 .lexcontextmenu .lexcontextmenuentry a {
+  float: left;
+  margin-right: 10px;
+  margin-top: 10px;
+}
+
+/* submenu specified arrow  */
+.lexcontextmenu .lexcontextmenuentry a.fa-xs {
   float: right;
   margin-top: -8px;
 }
@@ -801,4 +813,11 @@ input[type=number] {
 
 .lexcontextmenu .lexseparator {
   margin: 3px 0 3px 10px;
+}
+
+.lexcontextmenu .lexentryshort {
+  font-size: 9px;
+  float: right;
+  margin-top: -13px;
+  font-weight: bold;
 }

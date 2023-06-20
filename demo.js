@@ -17,18 +17,23 @@ area.addMenubar( m => {
     m.add( "Scene/" );
     m.add( "Scene/Open Recent/hello.scene", () => { console.log("Opening scene: hello.scene") });
     m.add( "Scene/Open Recent/goodbye.scene" );
-    m.add( "Scene/Open Recent" );
     m.add( "Project/Project Settings" );
     m.add( "Project/Export/DAE" );
     m.add( "Project/Export/GLTF" );
     m.add( "Editor/Settings" );
     m.add( "Help/Search Help" );
-    m.add( "Help/Support LexGUI" );
     m.add( "Help/Support LexGUI/Please" );
-    m.add( "Help/Support LexGUI/Please/Please1" );
-    m.add( "Help/Support LexGUI/Please/Please1/Please2" );
-    m.add( "Help/Support LexGUI/Please/Please1/Please2/Please3" );
     m.add( "Help/Support LexGUI/Do it" );
+
+    // add icons for each entry
+    m.setIcon( "Project Settings", "fa-solid fa-gears" );
+    m.setIcon( "Open Scene", "fa-solid fa-folder-open" );
+    m.setIcon( "DAE", "fa-solid fa-cube" );
+    m.setIcon( "Please", "fa-solid fa-heart" );
+
+    // add key shortcuts
+    m.setShort( "Open Scene", "CTRL + O" );
+    m.setShort( "Help", "F1" );
 });
 
 // split main area
@@ -146,6 +151,7 @@ function fillPanel( panel ) {
 
     panel.addTree("Scene Tree", scene_data, { 
         icons: tree_icons, 
+        // filter: false,
         onselect: (name) => {  },
         ondblclick: (name) => {  },
         onchange: (event) => { 
