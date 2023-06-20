@@ -170,8 +170,6 @@
         this.size = [ this.root.offsetWidth, this.root.offsetHeight ];
         this.sections = {};
 
-        // content ????
-
         if(!options.no_append) {
             // append to lexroot
             var lexroot = document.getElementById("lexroot");
@@ -189,10 +187,24 @@
     Area.prototype.split = function( options = {} )
     {
         if(this.sections.length)
-            throw("Area has been split before");
+        {
+            // throw("Area has been split before");
+            // get 2nd section as root
+            this.root = this.sections[1].root;
+        }
 
         var type = options.type || "horizontal";
         var sizes = options.sizes || ["50%", "50%"];
+        var auto = false;
+
+        if( !sizes[1] )
+        {
+            if(sizes[0].constructor == Number)
+                sizes[0] += "px";
+            
+            sizes[1] = "calc( 100% - " + sizes[0] + " )";
+            auto = true;
+        }
 
         // create areas
         var area1 = new LX.Area({className: "split"});
@@ -221,13 +233,13 @@
                 width2 = sizes[1];
 
             if(width1.constructor == Number)
-                width += "px";
+                width1 += "px";
             if(width2.constructor == Number)
-                width += "px";
+                width2 += "px";
 
             area1.root.style.width = "calc( " + width1 + " - " + data + " )";
-            area2.root.style.width = "calc( " + width2 + " - " + data + " )";
             area1.root.style.height = "100%";
+            area2.root.style.width = "calc( " + width2 + " - " + data + " )";
             area2.root.style.height = "100%";
             this.root.style.display = "flex";
         }
@@ -238,14 +250,23 @@
                 height2 = sizes[1];
 
             if(height1.constructor == Number)
-                width += "px";
+                height1 += "px";
             if(height2.constructor == Number)
-                width += "px";
+                height2 += "px";
 
-            area1.root.style.height = "calc( " + height1 + " - " + data + " )";
-            area2.root.style.height = "calc( " + height2 + " - " + data + " )";
             area1.root.style.width = "100%";
+            area1.root.style.height = "calc( " + height1 + " - " + data + " )";
             area2.root.style.width = "100%";
+            
+            // there's a menubar!
+            if(!auto && this.root.parentElement.parentElement.children.length) {
+                const item = this.root.parentElement.parentElement.children[0];
+                const menubar = item.querySelector('.lexmenubar');
+                if(menubar)
+                    data = parseInt(data) + menubar.offsetHeight + "px";
+            }
+
+            area2.root.style.height = "calc( " + height2 + " - " + data + " )";
         }
 
         this.root.appendChild( area1.root );
@@ -400,12 +421,18 @@
     Area.prototype.addMenubar = function( callback )
     {
         var menubar = new LX.Menubar();
-        this.split({type: 'vertical', sizes:["5%","95%"]});
-        this.sections[0].attach( menubar );
-
         if(callback) callback( menubar );
 
-        return this.sections[1];
+        // hack to get content height
+        var d = document.createElement('div');
+        d.appendChild(menubar.root);
+        document.body.appendChild(d);
+        const height = menubar.root.clientHeight;
+        d.remove();
+
+        this.split({type: 'vertical', sizes:[height,null], resize: false});
+        this.sections[0].attach( menubar );
+
     }
 
     LX.Area = Area;

@@ -23,6 +23,7 @@ TODO List:
 - ~~Tree Widget~~
 - ~~Filter Widgets bar~~
 - Menubar
+- Change resize bar to Godot one
 - Fix scrollbar spaces in right sides
 - Context Menus
 - Dialogs

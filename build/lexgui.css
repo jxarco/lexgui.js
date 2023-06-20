@@ -11,6 +11,7 @@ font-family: 'Roboto', sans-serif;
 	--branch-title-background: #2c3137;
   --global-button-color: #6a7178;
   --global-combo-color: #4e5154;
+  --global-text: #d0d0e0;
   --global-text-primary: #d0d0e0e6;
   --global-text-secondary: #b7b7cbb0;
   --checkbox-flag-on: #5e9fdd;
@@ -717,17 +718,23 @@ input[type=number] {
 
 .lexmenubar {
   width: 100%;
-  background-color: red;
+  background-color: var(--global-color-primary);
   display: flex;
   height: auto;
 }
 
 .lexmenubar .lexmenuentry {
-  background: yellowgreen;
-    width: 100px;
-    height: 100%;
-    border: 1px solid firebrick;
-    display: flex;
-    justify-content: center;
-    padding: 8px;
+  width: 100px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 12px;
+  padding-left: 0px;
+  padding-right: 0px;
+  color: var(--global-text-secondary);
+  cursor: pointer;
+}
+
+.lexmenubar .lexmenuentry:hover{
+  color: var(--global-text);
 }

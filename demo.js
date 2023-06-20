@@ -12,7 +12,7 @@ var area = new LX.Area({id:"mainarea"});
 
 // menu bar
 
-area = area.addMenubar( m => {
+area.addMenubar( m => {
     m.add( "Scene/New Scene" );
     // m.add( "Scene/" );
     m.add( "Scene/Open Scene" );
@@ -33,7 +33,7 @@ left.split({type: 'vertical', sizes:["80vh","20vh"]});
 var [up, bottom] = left.sections;
 
 // split right area
-right.split({type: 'vertical', sizes:["87.5vh","12.5vh"], resize: false});
+right.split({type: 'vertical', sizes:["87.5vh","12.5vh"]});
 var [rup, rbottom] = right.sections;
 
 // add canvas to left upper part
@@ -89,6 +89,7 @@ fillRightBottomPanel( side_bottom_panel );
 
 var bottom_panel = new LX.Panel();
 bottom.attach( bottom_panel );
+fillBottomPanel( bottom_panel );
 fillBottomPanel( bottom_panel );
 
 function loop() {
