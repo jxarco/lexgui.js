@@ -1440,8 +1440,12 @@
 
         const create_item = function( parent, node, level = 0 ) {
 
-            if(parent && !node.id.includes(node_filter_input.value))
-            return;
+            if(!node.id.includes(node_filter_input.value))
+            {
+                for( var i = 0; i < node.children.length; ++i )
+                    create_item( node, node.children[i], level + 1 );
+                return;
+            }
 
             node.visible = node.visible ?? true;
             node.parent = parent;
