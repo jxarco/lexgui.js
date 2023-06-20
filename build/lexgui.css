@@ -724,17 +724,58 @@ input[type=number] {
 }
 
 .lexmenubar .lexmenuentry {
-  width: 100px;
   height: 100%;
   display: flex;
   justify-content: center;
   padding: 12px;
-  padding-left: 0px;
-  padding-right: 0px;
+  padding-left: 20px;
+  padding-right: 20px;
   color: var(--global-text-secondary);
   cursor: pointer;
+  margin-left: 4px;
 }
 
 .lexmenubar .lexmenuentry:hover{
   color: var(--global-text);
+}
+
+.lexcontextmenu {
+  background-color: var(--global-color-secondary);
+  position: absolute;
+  min-width: 128px;
+  /* border-radius: 6px; */
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.lexcontextmenu .lexcontextmenuentry {
+  color: var(--global-text-secondary);
+  padding: 6px;
+  padding-left: 18px;
+  padding-right: 12px;
+  padding-bottom: 10px;
+  cursor: pointer;
+}
+
+.lexcontextmenu .lexcontextmenuentry .lexentryname {
+  margin-right: 32px;
+}
+
+.lexcontextmenu .lexcontextmenuentry a {
+  float: right;
+  margin-top: -8px;
+}
+
+.lexcontextmenu .lexcontextmenuentry.last {
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.lexcontextmenu .lexcontextmenuentry:hover {
+  background-color: var(--global-button-color);
+  color: #eee;
+}
+
+.lexcontextmenu .lexseparator {
+  margin: 3px 0 3px 10px;
 }

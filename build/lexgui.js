@@ -398,6 +398,12 @@
 
     Area.prototype.attach = function( content )
     {
+        // append to last split section if area has been split
+        if(this.sections.length) {
+            this.sections[1].attach( content );
+            return;
+        }
+
         if(!content)
         throw("no content to attach");
 
@@ -421,6 +427,7 @@
     Area.prototype.addMenubar = function( callback )
     {
         var menubar = new LX.Menubar();
+
         if(callback) callback( menubar );
 
         // hack to get content height
@@ -432,7 +439,6 @@
 
         this.split({type: 'vertical', sizes:[height,null], resize: false});
         this.sections[0].attach( menubar );
-
     }
 
     LX.Area = Area;
@@ -448,36 +454,20 @@
         this.items = [];
     }
 
-    Menubar.prototype.add = function(path)
+    Menubar.prototype.add = function(path, options = {} )
     {
+        if(options.constructor == Function)
+            options = { callback: options };
+
+        const callback = options.callback;
+
         // process path
         const tokens = path.split("/");
-        console.log(tokens);
-
-        /*
-        
-        items = [
-            {
-                scene: [
-                    {
-                        new_scene: []
-                    },
-                    {
-                        open_scene: []
-                    }
-                ]
-            },
-            {
-                project: []
-            }
-        ]
-
-        */
-
         let idx = 0;
+        let that = this;
 
         const insert = (token, list) => {
-            if(!token) return;
+            if(token == undefined) return;
 
             let found = null;
             list.forEach( o => {
@@ -492,27 +482,103 @@
             else {
                 let item = {};
                 item[ token ] = [];
+                const next_token = tokens[idx++];
+                // check if last token -> add callback
+                if(!next_token) {
+                    item[ 'callback' ] = callback;
+                }
                 list.push( item );
-                insert( tokens[idx++], item[ token ] ); 
+                insert( next_token, item[ token ] ); 
             }
         };
 
         insert( tokens[idx++], this.items );
 
-        console.log(this.items.concat([]));
-
         // create elements
 
-        // TODO: don't empty, append new stuff
-        this.root.innerHTML = "";
-
-        for( var item of this.items )
+        for( let item of this.items )
         {
-            const key = Object.keys(item)[0];
-            let element = document.createElement('div');
-            element.className = "lexmenuentry";
-            element.innerText = key;
-            this.root.appendChild( element );
+            let key = Object.keys(item)[0];
+
+            // already created
+            if( this.root.querySelector("#" + key) )
+                continue;   
+
+            let entry = document.createElement('div');
+            entry.className = "lexmenuentry";
+            entry.id = entry.innerText = key;
+            this.root.appendChild( entry );
+
+            const create_submenu = function( o, k, c, d ) {
+
+                let contextmenu = document.createElement('div');
+                contextmenu.className = "lexcontextmenu";
+                const isSubMenu = c.classList.contains('lexcontextmenuentry');
+                var rect = c.getBoundingClientRect();
+                contextmenu.style.left = (isSubMenu ? rect.width : rect.left) + "px";
+                var offset = (d > 0 ? rect.height : 0) + that.root.offsetHeight - 1;
+                contextmenu.style.top = (isSubMenu ? rect.top - offset : -1 + rect.bottom) + "px";
+                c.appendChild( contextmenu );
+
+                rect = contextmenu.getBoundingClientRect();
+
+                for( var i = 0; i < o[k].length; ++i )
+                {
+                    const subitem = o[k][i];
+                    const subkey = Object.keys(subitem)[0];
+                    const hasSubmenu = subitem[ subkey ].length;
+                    let subentry = document.createElement('div');
+                    subentry.className = "lexcontextmenuentry";
+                    subentry.className += (i == o[k].length - 1 ? " last" : "");
+                    if(subkey == '')
+                        subentry.className = " lexseparator";
+                    else {
+                        subentry.id = subkey;
+                        subentry.innerHTML = "<div class='lexentryname'>" + subkey + "</div>";
+                    }
+                    subentry.style.minWidth = rect.width + "px";
+                    contextmenu.appendChild( subentry );
+
+                    // add callback
+                    subentry.addEventListener("click", e => {
+                        const f = subitem[ 'callback' ];
+                        if(f) {
+                            f.call();
+                            that.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());  
+                        } 
+                        e.stopPropagation();
+                    });
+
+                    // add icon if has submenu
+                    if( !hasSubmenu )
+                    continue;
+
+                    let submenuIcon = document.createElement('a');
+                    submenuIcon.className = "fa-solid fa-angle-right fa-xs";
+                    subentry.appendChild( submenuIcon );
+
+                    subentry.addEventListener("mouseover", e => {
+                        if(subentry.built)
+                        return;
+                        subentry.built = true;
+                        create_submenu( subitem, subkey, subentry, ++d );
+                        e.stopPropagation();
+                    });
+
+                    subentry.addEventListener("mouseleave", () => {
+                        contextmenu.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+                    });
+                }
+            };
+
+            entry.addEventListener("click", () => {
+                this.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+                create_submenu( item, key, entry, -1 );
+            });
+
+            entry.addEventListener("mouseleave", () => {
+               this.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+            });
         }
     }
 

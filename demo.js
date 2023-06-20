@@ -11,17 +11,24 @@ LX.DEFAULT_NAME_WIDTH = "30%";
 var area = new LX.Area({id:"mainarea"});
 
 // menu bar
-
 area.addMenubar( m => {
-    m.add( "Scene/New Scene" );
-    // m.add( "Scene/" );
+    m.add( "Scene/New Scene", () => { console.log("New scene created!") });
+    m.add( "Scene/Open Recent/hello.scene", () => { console.log("Opening scene: hello.scene") });
+    m.add( "Scene/Open Recent/goodbye.scene" );
     m.add( "Scene/Open Scene" );
+    m.add( "Scene/" );
+    m.add( "Scene/Open Recent" );
     m.add( "Project/Project Settings" );
-    m.add( "Project/Export" );
+    m.add( "Project/Export/DAE" );
+    m.add( "Project/Export/GLTF" );
     m.add( "Editor/Settings" );
     m.add( "Help/Search Help" );
-    m.add( "Help/About LexGUI" );
     m.add( "Help/Support LexGUI" );
+    m.add( "Help/Support LexGUI/Please" );
+    m.add( "Help/Support LexGUI/Please/Please1" );
+    m.add( "Help/Support LexGUI/Please/Please1/Please2" );
+    m.add( "Help/Support LexGUI/Please/Please1/Please2/Please3" );
+    m.add( "Help/Support LexGUI/Do it" );
 } );
 
 // split main area
