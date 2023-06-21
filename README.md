@@ -31,6 +31,7 @@ TODO List:
 - ~~Fix menubar submenus if not on top~~
 - ~~Support horizontal tabs widget (i made vertical ones)~~
 - ~~Support oninput listener (trigger = input) in textwidgets~~
+- Start Documentation
 - Context Menus
 - Dialogs
 - Update function for widgets

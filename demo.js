@@ -5,7 +5,7 @@ LX.init();
 LX.DEFAULT_NAME_WIDTH = "30%";
 
 // LX.message("I'm in another position", null, { position: [10, 10] });
-// LX.message("Welcome to Lexgui", "Welcome!", { draggable: true })
+LX.message("Welcome to Lexgui", "Welcome!", { draggable: true })
 
 // create main area
 var area = new LX.Area({id:"mainarea"});
@@ -173,7 +173,7 @@ function fillPanel( panel ) {
     });    
 
     // add widgets to panel branch
-    panel.branch("Preferences", {icon: LX.icons.GEAR, filter: true});
+    panel.branch("Preferences", {icon: "fa-solid fa-gear", filter: true});
     panel.addColor("Background", [1, 0.1, 0.6], (value, event) => {
         console.log("Color: ", value);
     });
@@ -198,7 +198,7 @@ function fillPanel( panel ) {
     panel.addVector4("Shader color", [0.3, 0.3, 0.5, 1], (value, event) => {
         console.log(value);
     });
-    panel.separate();
+    panel.addSeparator();
     panel.addTitle("Configuration");
     panel.addCheckbox("Enable", true, (value, event) => {
         console.log(value);
@@ -213,7 +213,7 @@ function fillRightBottomPanel( panel, tab ) {
 
     if(tab == 'Skeleton')
     {
-        panel.branch("Skeleton widgets", {icon: LX.icons.TABS});
+        panel.branch("Skeleton widgets", {icon: "fa-solid fa-table-list"});
         panel.addTabs([
             { 
                 name: "First tab",
@@ -241,7 +241,7 @@ function fillRightBottomPanel( panel, tab ) {
     }
     else if(tab == 'Blendshapes')
     {
-        panel.branch("Blendshapes widgets", {icon: LX.icons.TABS});
+        panel.branch("Blendshapes widgets", {icon: "fa fa-table-list"});
         panel.addTabs([
             { 
                 name: "First tab",
@@ -276,7 +276,7 @@ function fillRightBottomPanel( panel, tab ) {
 function fillBottomPanel( panel ) {
     
     // add widgets to panel branch
-    panel.branch("Information", {icon: LX.icons.INFO});
+    panel.branch("Information", {icon: "fa fa-circle-info"});
     panel.addText("Camera", "Canon EOS 80D", null, {disabled: true}); 
     panel.addText("Serial number", "194E283DD", (value, event) => {
         console.log(value);
