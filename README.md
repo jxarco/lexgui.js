@@ -2,11 +2,11 @@
 
 **lexgui.js** is a lightweight JavaScript library that allows you to create web interfaces using only JavaScript, HTML, and CSS. This library provides an easy-to-use API for building dynamic and interactive user interfaces without the need for complex frameworks or libraries. With lexgui.js, you can create custom UI components, handle user interactions, and update the interface dynamically.
 
-![Screenshot](https://github.com/jxarco/lexgui.js/blob/master/images/Screenshot.png)
+![Screenshot](images/Screenshot.png)
 
 - [lexgui.js](#lexguijs)
     - [Getting Started](#getting-started)
-      - [Installation](#installation)
+      - [Download](#download)
       - [Usage](#usage)
     - [Area](#area)
       - [Menubar](#menubar)
@@ -32,7 +32,7 @@
 ### Getting Started
 <br>
 
-#### Installation
+#### Download
 
 To use LexGUI.js, download the library `build` folder and include it directly in your HTML file using a script tag:
 
@@ -44,7 +44,7 @@ To use LexGUI.js, download the library `build` folder and include it directly in
 
 Once you have included the LexGUI.js library in your project, you can start using its API to create web interfaces. The library exposes several functions and components that you can utilize to build your UI.
 
-The first thing to do is initializing the library. Optionally you can pass the root container (if `null` the default is `document.body`:
+The first thing to do is initializing the library. Optionally you can pass the root container (if `null` the default is `document.body`):
 
 ```js
 LX.init( root_container );
@@ -55,7 +55,12 @@ LX.init( root_container );
 ### Area
 <br>
 
-An **Area** is the main container used in lexgui.js. You can have as many Areas you need using `Area.split( options )`, which allows you to split horizontally or vertically a given Area. To begin building your UI start creating an instance of Area, which will be automatically appended to **lexgui.js root element**:
+An **Area** is the main container used in lexgui.js. You can have as many Areas you need using `Area.split(options)`, which allows you to split horizontally or vertically a given Area. It has a single parameter as `Object` to specify different split options:
+
+* `type (String)`: Split mode, either horizontal (default) or vertical
+* `sizes (Array)`: Size of each new area. Default is ["50%", "50%"]
+
+To begin building your UI start creating an instance of Area, which will be automatically appended to **lexgui.js root element**:
 
 ```js
 // Create main area (fits sreen)
@@ -72,7 +77,7 @@ var [leftUpArea, leftBottomArea] = leftArea.sections;
 
 #### Menubar
 
-You can build a **Menubar** directly into any Area using `Area.addMenubar( callback, options )`. To specify each of the menu entries, you should pass a *callback function* to be called when the Menubar is constructed. **Callbacks will have a Menubar instance as parameter**, so use `Menubar.add( entryPath, callback )` on that instance inside your callback to build each of the menu entries:
+You can build a **Menubar** directly into any Area using `Area.addMenubar(callback, options)`. To specify each of the menu entries, you should pass a *callback function* to be called when the Menubar is constructed. **Callbacks will have a Menubar instance as parameter**, so use `Menubar.add(entryPath, callback)` on that instance inside your callback to build each of the menu entries:
 
 ```js
 area.addMenubar( m => {
@@ -90,19 +95,27 @@ area.addMenubar( m => {
 
 After adding all entries, you can set additional data per entry:
 
-* Icons ([Fontawesome](https://fontawesome.com/search)): `Menubar.setIcon( entryName, className )`
+* Icons ([Fontawesome](https://fontawesome.com/search)): After adding all the entries, use `Menubar.setIcon(entryName, className)` to add an icon to any of the entries created:
   
 ```js
 m.setIcon( "Support", "fa-solid fa-heart" );
 ```
 
-* Entry Shortcuts: 
+* Entry Shortcuts: The same way as the icons, you can add a small text next to each entry (which can be used as entry shortcuts):
 
 ```js
-// ...
-m.add( "Help/Support" );
+m.setShort( "Open Scene", "CTRL + O" );
+```
 
-m.setIcon( "Support", "fa-solid fa-heart" );
+After the callback, you can pass `Area.addMenubar` a second parameter as `Object` to specify the Menubar options: 
+* `float (String)`: Justify main entries to left (default), center, right
+
+```js
+area.addMenubar( m => {
+    // Fill entries...
+    // Set icons...
+    // Set shortcuts...
+}, { float: 'center' });
 ```
 
 #### Panel
