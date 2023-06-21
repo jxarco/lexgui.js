@@ -283,7 +283,7 @@ function fillBottomPanel( panel ) {
     });
     panel.addText(null, "This has a console.log callback", (value, event) => {
         console.log(value);
-    });
+    }, { trigger: 'input' });
     panel.addButton("Apply", "Print event", event => {
         console.log(event);
     });

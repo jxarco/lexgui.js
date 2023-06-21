@@ -1,4 +1,5 @@
 // Lexgui.js @jxarco
+"use strict";
 
 (function(global){
 
@@ -664,9 +665,10 @@
 
     class Widget {
         
-        constructor(name, type) {
+        constructor(name, type, options) {
             this.name = name;
             this.type = type;
+            this.options = options;
         }
 
         get_val() {
@@ -711,6 +713,11 @@
                 case Widget.PROGRESS:
                     this.domEl.querySelector("meter").value = value;
             }
+        }
+
+        refresh() {
+            // this.domEl.innerHTML = "";
+            // if( this.options.callback ) this.options.callback();
         }
     }
 
@@ -849,7 +856,7 @@
         if(!this.current_branch && !this.queuedContainer)
             throw("No current branch!");
 
-        let widget = new Widget(name, type);
+        let widget = new Widget(name, type, options);
 
         let element = document.createElement('div');
         element.className = "lexwidget";
@@ -930,13 +937,24 @@
                 callback(val, event);
         }).bind(this);
 
-        wValue.addEventListener("keyup", function(e){
-            if(e.key == 'Enter')
+        const trigger = options.trigger ?? 'default';
+
+        if(trigger == 'default')
+        {
+            wValue.addEventListener("keyup", function(e){
+                if(e.key == 'Enter')
+                    resolve(e.target.value, e);
+            });
+            wValue.addEventListener("focusout", function(e){
                 resolve(e.target.value, e);
-        });
-        wValue.addEventListener("focusout", function(e){
-            resolve(e.target.value, e);
-        });
+            });
+        }
+        else if(trigger == 'input')
+        {
+            wValue.addEventListener("input", function(e){
+                resolve(e.target.value, e);
+            });
+        }
 
         element.appendChild(wValue);
         
