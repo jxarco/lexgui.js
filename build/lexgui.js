@@ -90,6 +90,9 @@
         this.DEFAULT_SPLITBAR_SIZE  = 4;
 
         this.ready = true;
+
+        // Create main area
+        return new LX.Area( {id: options.id ?? "mainarea"} );
     }
 
     LX.init = init;

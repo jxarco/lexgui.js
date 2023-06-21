@@ -1,5 +1,5 @@
-// init library
-LX.init();
+// init library and get main area
+let area = LX.init();
 
 // change global properties after init
 // LX.DEFAULT_NAME_WIDTH = "10%";
@@ -7,9 +7,6 @@ LX.init();
 
 // LX.message("I'm in another position", null, { position: [10, 10] });
 LX.message("Welcome to Lexgui", "Welcome!", { draggable: true })
-
-// create main area
-var area = new LX.Area({id:"mainarea"});
 
 // menu bar
 area.addMenubar( m => {

@@ -27,9 +27,9 @@
     - [Contributing](#contributing)
     - [License](#license)
 
-### Getting Started
+## Getting Started
 
-#### Download
+### Download
 
 To use LexGUI.js, download the library `build` folder and include it directly in your HTML file using a script tag:
 
@@ -37,43 +37,44 @@ To use LexGUI.js, download the library `build` folder and include it directly in
 <script src="path/to/lexgui.js"></script>
 ```
 
-#### Usage
+### Usage
 
 Once you have included the LexGUI.js library in your project, you can start using its API to create web interfaces. The library exposes several functions and components that you can utilize to build your UI.
 
-The first thing to do is initializing the library. Optionally you can pass the root container (if `null` the default is `document.body`):
+The first thing to do is initializing the library. Calling `LX.init` will initialize the necessary stuff and build the main [Area](#area), which will fit the root container:
 
 ```js
-LX.init( root_container );
+let area = LX.init();
 ```
 
-You can modify global namespace (`LX`) variables before you start creating UI elements. For now, you can set the following:
+Optionally, you can pass an `Object` parameter to define a few properties: 
+* `container (String)`: Root container for the entire UI (default is `document.body`)
+* `id (String)`: id of the generated Main Area (default is *mainarea*)
+
+You can modify global namespace (`LX`) variables before you start creating UI elements. For now, the customizable vars are the following:
 * `LX.DEFAULT_NAME_WIDTH`: Width of the name container inside a widget (Default `"30%"`)
 * `LX.DEFAULT_SPLITBAR_SIZE`: Width (in pixels) of the area resize bar created on split (Default `4`)
 
-### Area
+## Area
 
-An **Area** is the main container used in lexgui.js. You can have as many Areas you need using `Area.split(options)`, which allows you to split horizontally or vertically a given Area. It has a single parameter as `Object` to specify different split options:
+An **Area** is the main container used in lexgui.js. You can have as many Areas you need using `Area.split(options)`, which allows you to split horizontally or vertically a given Area. It has a single `Object` parameter to specify different split options:
 
 * `type (String)`: Split mode, either horizontal (default) or vertical
 * `sizes (Array)`: Size of each new area. Default is ["50%", "50%"]
 
-To begin building your UI start creating an instance of Area, which will be automatically appended to **lexgui.js root element**:
+From here, you can already build your UI adding [Panels](#panel), but in most cases you will want to split the main Area first:
 
 ```js
-// Create main area (fits sreen)
-var mainArea = new LX.Area({ id: "mainarea" });
-
 // Split main area in 2 sections (2 Areas)
-mainArea.split({ sizes: ["70%", "30%"] });
-var [leftArea, rightArea] = mainArea.sections;
+area.split({ sizes: ["70%", "30%"] });
+var [leftArea, rightArea] = area.sections;
 
 // Split again left area this time vertically
 leftArea.split({ type: 'vertical', sizes: ["80vh", "20vh"] });
 var [leftUpArea, leftBottomArea] = leftArea.sections;
 ```
 
-#### Menubar
+### Menubar
 
 You can build a **Menubar** directly into any Area using `Area.addMenubar(callback, options)`. To specify each of the menu entries, you should pass a *callback function* to be called when the Menubar is constructed. **Callbacks will have a Menubar instance as parameter**, so use `Menubar.add(entryPath, callback)` on that instance inside your callback to build each of the menu entries:
 
@@ -93,7 +94,7 @@ area.addMenubar( m => {
 
 After adding all entries, you can set additional data per entry:
 
-* Icons ([Fontawesome](https://fontawesome.com/search)): After adding all the entries, use `Menubar.setIcon(entryName, className)` to add an icon to any of the entries created:
+* Icons ([Fontawesome](https://fontawesome.com/search)): After adding all the entries, use `Menubar.setIcon(entryName, className)` to add an icon to the left of any of the entries created:
   
 ```js
 m.setIcon( "Support", "fa-solid fa-heart" );
@@ -116,67 +117,67 @@ area.addMenubar( m => {
 }, { float: 'center' });
 ```
 
-#### Panel
+### Panel
 
 ...
 
-### Widgets
+## Widgets
 
 ...
 
-#### Title
+### Title
 
 ...
 
-#### Text
+### Text
 
 ...
 
-#### Button
+### Button
 
 ...
 
-#### Number
+### Number
 
 ...
 
-#### Vector
+### Vector
 
 ...
 
-#### Checkbox
+### Checkbox
 
 ...
 
-#### Dropdown
+### Dropdown
 
 ...
 
-#### Tree
+### Tree
 
 ...
 
-#### Progress
+### Progress
 
 ...
 
-### Event Handling
+## Event Handling
 
 ...
 
-### Styling
+## Styling
 
 ...
 
-### Examples
+## Examples
 
 Look at [demo.js](demo.js) to see how to create of the different widgets!
 
-### Contributing
+## Contributing
 
 ...
 
-### License
+## License
 
 ...
 
