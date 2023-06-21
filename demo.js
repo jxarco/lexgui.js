@@ -6,7 +6,7 @@ let area = LX.init();
 // LX.DEFAULT_SPLITBAR_SIZE = 15;
 
 // LX.message("I'm in another position", null, { position: [10, 10] });
-LX.message("Welcome to Lexgui", "Welcome!", { draggable: true })
+// LX.message("Welcome to Lexgui", "Welcome!", { draggable: true })
 
 // menu bar
 area.addMenubar( m => {
@@ -282,7 +282,7 @@ function fillBottomPanel( panel ) {
     panel.addText(null, "This has a console.log callback", (value, event) => {
         console.log(value);
     }, { trigger: 'input' });
-    panel.addButton("Apply", "Print event", event => {
+    panel.addButton("Apply", "Print event", (value, event) => {
         console.log(event);
     });
     panel.merge();

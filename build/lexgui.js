@@ -21,7 +21,22 @@
         return (S4()+"-"+S4());
     }
 
+    class IEvent {
+
+        constructor(name, value, domEvent) {
+            this.name = name;
+            this.value = value;
+            this.domEvent = domEvent;
+        }
+    };
+
     class TreeEvent {
+
+        static NONE              = 0;
+        static NODE_DRAGGED      = 1;
+        static NODE_RENAMED      = 2;
+        static NODE_VISIBILITY   = 3;
+
         constructor( type, node, value ) {
             this.type = type || TreeEvent.NONE;
             this.node = node;
@@ -37,11 +52,6 @@
             }
         }
     };
-
-    TreeEvent.NONE              = 0;
-    TreeEvent.NODE_DRAGGED      = 1;
-    TreeEvent.NODE_RENAMED      = 2;
-    TreeEvent.NODE_VISIBILITY   = 3;
 
     LX.TreeEvent = TreeEvent;
 
@@ -789,6 +799,8 @@
             root.style.height = "100%";
             this.root = root;
 
+            this.onevent = (e => {});
+
             // branches
             this.branch_open = false;
             this.branches = [];
@@ -999,6 +1011,15 @@
             }).bind(this));
         }
 
+        #trigger( event, callback ) {
+
+            if(callback)
+                callback.call(this, event.value, event.domEvent);
+
+            if(this.onevent)
+                this.onevent.call(this, event);
+        }
+
         /**
          * @method addTitle
          * @param {String} name Title name
@@ -1050,12 +1071,10 @@
             if(options.placeholder) wValue.setAttribute("placeholder", options.placeholder);
 
             var resolve = (function(val, event) {
-                if(val != wValue.iValue) {
-                    let btn = element.querySelector(".lexwidgetname .lexicon");
-                    if(btn) btn.style.display = "block";
-                }
-                if(callback)
-                    callback(val, event);
+                let btn = element.querySelector(".lexwidgetname .lexicon");
+                if(btn)
+                    btn.style.display = (val != wValue.iValue ? "block" : "none");
+                this.#trigger( new IEvent(name, val, event), callback );
             }).bind(this);
 
             const trigger = options.trigger ?? 'default';
@@ -1107,8 +1126,10 @@
 
             if(options.disabled)
                 wValue.setAttribute("disabled", true);
-            if(callback)
-                wValue.addEventListener("click", callback);
+            
+            wValue.addEventListener("click", e => {
+                this.#trigger( new IEvent(name, true, e), callback );   
+            });
 
             element.appendChild(wValue);
             
@@ -1170,13 +1191,12 @@
             if(options.disabled)
                 wValue.setAttribute("disabled", true);
             
-            wValue.addEventListener("change", function(e) {
+            wValue.addEventListener("change", e => {
                 const val = e.target.value;
-                if(val != wValue.iValue) {
-                    let btn = element.querySelector(".lexwidgetname .lexicon");
-                    if(btn) btn.style.display = "block";
-                }
-                if(callback) callback(val, e);
+                let btn = element.querySelector(".lexwidgetname .lexicon");
+                if(btn)
+                    btn.style.display = (val != wValue.iValue ? "block" : "none");
+                this.#trigger( new IEvent(name, val, e), callback ); 
             });
 
             container.appendChild(wValue);
@@ -1226,9 +1246,9 @@
             toggle.appendChild(flag);
             container.appendChild(toggle);
 
-            toggle.addEventListener("click", function(e) {
+            toggle.addEventListener("click", (e) => {
 
-                let flag = this.querySelector(".checkbox");
+                let flag = toggle.querySelector(".checkbox");
                 if(flag.disabled)
                 return;
 
@@ -1237,9 +1257,9 @@
 
                 // Reset button (default value)
                 let btn = element.querySelector(".lexwidgetname .lexicon");
-                btn.style.display = flag.value != flag.iValue ? "block": "none";
-
-                if(callback) callback( flag.value, e );
+                if(btn)
+                    btn.style.display = flag.value != flag.iValue ? "block": "none";
+                this.#trigger( new IEvent(name, flag.value, e), callback );
             });
             
             element.appendChild(container);
@@ -1320,7 +1340,7 @@
             container.appendChild(copy);
 
             if(callback) {
-                color.addEventListener("input", function(e) {
+                color.addEventListener("input", e => {
                     let val = e.target.value;
 
                     // Change value (always hex)
@@ -1332,9 +1352,10 @@
                         btn.style.display = "block";
                     }
 
-                    if(this.useRGB)
+                    if(color.useRGB)
                         val = Panel.#hexToRgb(val);
-                    callback(val, e);
+
+                    this.#trigger( new IEvent(name, val, e), callback );
                 }, false);
             }
             
@@ -1418,16 +1439,17 @@
                 this.blur();
             }, false);
 
-            vecinput.addEventListener("input", function(e) {
+            vecinput.addEventListener("input", e => {
                 let val = e.target.value = clamp(e.target.value, vecinput.min, vecinput.max);
-                // reset button (default value)
-                if(val != vecinput.iValue) {
-                    let btn = element.querySelector(".lexwidgetname .lexicon");
-                    btn.style.display = "block";
-                }
+   
                 // update slider!
                 box.querySelector(".lexinputslider").value = val;
-                callback(val, e);
+
+                // Reset button (default value)
+                let btn = element.querySelector(".lexwidgetname .lexicon");
+                if(btn)
+                    btn.style.display = val != vecinput.iValue ? "block": "none";
+                this.#trigger( new IEvent(name, val, e), callback );
             }, false);
             
             // Add drag input
@@ -1527,15 +1549,14 @@
                     this.blur();
                 }, false);
 
-                vecinput.addEventListener("input", function(e) {
+                vecinput.addEventListener("input", e => {
                     let val = e.target.value = clamp(e.target.value, vecinput.min, vecinput.max);
-                    // reset button (default value)
-                    if(val != vecinput.iValue) {
-                        let btn = element.querySelector(".lexwidgetname .lexicon");
-                        btn.style.display = "block";
-                    }
         
-                    callback(val, e);
+                    // Reset button (default value)
+                    let btn = element.querySelector(".lexwidgetname .lexicon");
+                    if(btn)
+                        btn.style.display = val != vecinput.iValue ? "block": "none";
+                    this.#trigger( new IEvent(name, val, e), callback );
                 }, false);
                 
                 // Add drag input
