@@ -28,12 +28,12 @@ TODO List:
 - ~~Fix scrollbar spaces in right sides~~
 - ~~Add icons + mini-text (shortcut normally) to menubar entries~~
 - ~~Progression bar~~
-- Support optimum, sub, etc colors for the progress bars
-- Fix menubar submenus if not on top
+- ~~Fix menubar submenus if not on top~~
 - Context Menus
 - Dialogs
 - Multiple widgets per row
 - Load File widget
 - Support horizontal tabs widget (i made vertical ones)
 - Change resize bar to Godot one
+- Support optimum, sub, etc colors for the progress bars
 - Timeline

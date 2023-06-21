@@ -530,8 +530,8 @@
                 var rect = c.getBoundingClientRect();
                 contextmenu.style.left = (isSubMenu ? rect.width : rect.left) + "px";
                 // black magic here...
-                var offset = (d > 0 ? rect.height : 0) + that.root.offsetHeight - 1;
-                contextmenu.style.top = (isSubMenu ? rect.top - offset : -1 + rect.bottom) + "px";
+                // var offset = (d > 0 ? rect.height : 0) + that.root.offsetHeight - 1;
+                contextmenu.style.top = (isSubMenu ? 0 : -1 + rect.bottom) + "px";
                 c.appendChild( contextmenu );
 
                 rect = contextmenu.getBoundingClientRect();
@@ -594,11 +594,11 @@
                         e.stopPropagation();
                     });
 
-                    subentry.addEventListener("mouseleave", () => {
-                        d = -1; // reset depth
-                        delete subentry.built;
-                        contextmenu.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
-                    });
+                    // subentry.addEventListener("mouseleave", () => {
+                    //     d = -1; // reset depth
+                    //     delete subentry.built;
+                    //     contextmenu.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+                    // });
                 }
 
                 // set final width
@@ -617,9 +617,9 @@
                 create_submenu( item, key, entry, -1 );
             });
 
-            entry.addEventListener("mouseleave", () => {
-               this.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
-            });
+            // entry.addEventListener("mouseleave", () => {
+            //    this.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+            // });
         }
     }
 

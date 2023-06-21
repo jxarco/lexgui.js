@@ -828,10 +828,14 @@ meter::-webkit-meter-even-less-good-value {
   padding-right: 12px;
   padding-bottom: 10px;
   cursor: pointer;
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* This makes properties like top, left to be relative to parents */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  -moz-transform: translateZ(0);
 }
 
 .lexcontextmenu .lexcontextmenuentry .lexentryname {
