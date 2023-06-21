@@ -569,13 +569,17 @@ input[type=number] {
 
 /* Tabs Widget */
 
-.lextabs-container {
+.lextabscontainer {
   width: 100%;
   height: 100%;
   display: flex;
 }
 
-.lextabs-container .tabs {
+.lextabscontainer.horizontal {
+  display: table;
+}
+
+.lextabscontainer .tabs {
   display: grid;
   padding: 4px;
   background: none !important;
@@ -584,12 +588,18 @@ input[type=number] {
   min-width: 32px;
 }
 
-.lextabs-container .widgets {
+.lextabscontainer.horizontal .tabs {
+  border-right: none;
+  border-bottom: 1px solid #a2a5c36a;
+  display: flex;
+}
+
+.lextabscontainer .widgets {
   width: 100%;
   padding: 4px;
 }
 
-.lextabs-container .tabs .lextab {
+.lextabscontainer .tabs .lextab {
   padding: 4px;
   margin-bottom: 10px;
   border-radius: 4px;
@@ -598,15 +608,24 @@ input[type=number] {
   margin-right: 4px;
 }
 
-.lextabs-container .tabs .lextab:hover {
+.lextabscontainer.horizontal .tabs .lextab {
+  margin-bottom: 0px;
+  margin-right: 10px;
+}
+
+.lextabscontainer.horizontal .tabs .lextab a.withname {
+  margin-left: 6px;
+}
+
+.lextabscontainer .tabs .lextab:hover {
   color: var(--global-text-primary);
 }
 
-.lextabs-container .tabs .lextab.last {
+.lextabscontainer .tabs .lextab.last {
   margin-right: 4px;
 }
 
-.lextabs-container .tabs .lextab.selected {
+.lextabscontainer .tabs .lextab.selected {
   color: var(--global-text-primary);
 }
 
@@ -874,4 +893,5 @@ meter::-webkit-meter-even-less-good-value {
   float: right;
   margin-top: -13px;
   font-weight: bold;
+  color: #979aa0e3;
 }

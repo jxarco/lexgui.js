@@ -33,6 +33,8 @@ area.addMenubar( m => {
 
     // add key shortcuts
     m.setShort( "Open Scene", "CTRL + O" );
+    m.setShort( "DAE", "D" );
+    m.setShort( "GLTF", "G" );
     m.setShort( "Help", "F1" );
 });
 
@@ -50,8 +52,8 @@ var [rup, rbottom] = right.sections;
 
 // another menu bar
 rbottom.addMenubar( m => {
-    m.add( "Skeleton", () => { console.log("Showing Skeleton tab") });
-    m.add( "Blendshapes", () => { console.log("Showing Blendshapes tab") });
+    m.add( "Skeleton", e => { console.log(e); fillRightBottomPanel( side_bottom_panel, e.name ); });
+    m.add( "Blendshapes", e => { console.log(e); fillRightBottomPanel( side_bottom_panel, e.name ); });
 }, { float: 'center' } );
 
 // add canvas to left upper part
@@ -103,7 +105,7 @@ fillPanel( side_panel );
 
 var side_bottom_panel = new LX.Panel();
 rbottom.attach( side_bottom_panel );
-fillRightBottomPanel( side_bottom_panel );
+fillRightBottomPanel( side_bottom_panel, 'Skeleton' );
 
 var bottom_panel = new LX.Panel();
 bottom.attach( bottom_panel );
@@ -205,34 +207,69 @@ function fillPanel( panel ) {
     panel.end();
 }
 
-function fillRightBottomPanel( panel ) {
+function fillRightBottomPanel( panel, tab ) {
     
-    panel.branch("No resize area", {icon: LX.icons.TABS});
-    panel.tabs([
-        { 
-            name: "First tab",
-            icon: "fa-brands fa-discord",
-            callback: p => {
-                p.addTitle("Discord tab");
-                p.addButton(null, "Connect");
-            }
-        },
-        { 
-            name: "Second tab",
-            icon: "fa-brands fa-twitter",
-            callback: p => {
-                p.addTitle("Twitter tab");
-                p.addText("Tweet", "", null, {placeholder: "Tyler Rake 2"});
-            }
-        }
-    ]);
+    panel.clear();
 
-    // update panel values uising widget name
-    panel.addNumber("HeadRoll Value", 0, (value, event) => {
-        panel.setValue('HeadRoll', value);
-    }, { min: -1, max: 1, step: 0.1 });
-    panel.addProgress("HeadRoll", 0, { min: -1, max: 1 });
+    if(tab == 'Skeleton')
+    {
+        panel.branch("Skeleton widgets", {icon: LX.icons.TABS});
+        panel.addTabs([
+            { 
+                name: "First tab",
+                icon: "fa-brands fa-discord",
+                callback: p => {
+                    p.addTitle("Discord tab");
+                    p.addButton(null, "Connect");
+                }
+            },
+            { 
+                name: "Second tab",
+                icon: "fa-brands fa-twitter",
+                callback: p => {
+                    p.addTitle("Twitter tab");
+                    p.addText("Tweet", "", null, {placeholder: "Tyler Rake 2"});
+                }
+            }
+        ], { vertical: false /*, showNames: true */});
+
+         // update panel values uising widget name
+        panel.addNumber("HeadRoll Value", 0, (value, event) => {
+            panel.setValue('HeadRoll', value);
+        }, { min: -1, max: 1, step: 0.1 });
+        panel.addProgress("HeadRoll", 0, { min: -1, max: 1 });
+    }
+    else if(tab == 'Blendshapes')
+    {
+        panel.branch("Blendshapes widgets", {icon: LX.icons.TABS});
+        panel.addTabs([
+            { 
+                name: "First tab",
+                icon: "fa-brands fa-discord",
+                callback: p => {
+                    p.addTitle("Discord tab");
+                    p.addButton(null, "Connect");
+                }
+            },
+            { 
+                name: "Second tab",
+                icon: "fa-brands fa-twitter",
+                callback: p => {
+                    p.addTitle("Twitter tab");
+                    p.addText("Tweet", "", null, {placeholder: "Tyler Rake 2"});
+                }
+            }
+        ]);
+
+         // update panel values uising widget name
+        panel.addNumber("HeadRoll Value", 0, (value, event) => {
+            panel.setValue('HeadRoll', value);
+        }, { min: -1, max: 1, step: 0.1 });
+        panel.addProgress("HeadRoll", 0, { min: -1, max: 1 });
+    }
+
     panel.end();
+   
 }
 
 

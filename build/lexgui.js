@@ -28,6 +28,39 @@
         return (S4()+"-"+S4());
     }
 
+    class TreeEvent {
+        constructor( type, node, value ) {
+            this.type = type || TreeEvent.NONE;
+            this.node = node;
+            this.value = value;
+        }
+        
+        string() {
+            switch(this.type) {
+                case TreeEvent.NONE: return "tree_event_none";
+                case TreeEvent.NODE_DRAGGED: return "tree_event_dragged";
+                case TreeEvent.NODE_RENAMED: return "tree_event_renamed";
+                case TreeEvent.NODE_VISIBILITY: return "tree_event_visibility";
+            }
+        }
+    };
+
+    TreeEvent.NONE              = 0;
+    TreeEvent.NODE_DRAGGED      = 1;
+    TreeEvent.NODE_RENAMED      = 2;
+    TreeEvent.NODE_VISIBILITY   = 3;
+
+    LX.TreeEvent = TreeEvent;
+
+    class MenubarEvent {
+        constructor( domEl, name ) {
+            this.domEl = domEl;
+            this.name = name;
+        }
+    };
+
+    LX.MenubarEvent = MenubarEvent;
+
     function init(options = {})
     {
         if(this.ready)
@@ -564,7 +597,7 @@
                     subentry.addEventListener("click", e => {
                         const f = subitem[ 'callback' ];
                         if(f) {
-                            f.call();
+                            f.call( this, new MenubarEvent(subentry, subkey) );
                             that.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());  
                         } 
                         e.stopPropagation();
@@ -594,11 +627,11 @@
                         e.stopPropagation();
                     });
 
-                    // subentry.addEventListener("mouseleave", () => {
-                    //     d = -1; // reset depth
-                    //     delete subentry.built;
-                    //     contextmenu.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
-                    // });
+                    subentry.addEventListener("mouseleave", () => {
+                        d = -1; // reset depth
+                        delete subentry.built;
+                        contextmenu.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+                    });
                 }
 
                 // set final width
@@ -609,7 +642,7 @@
 
                 const f = item[ 'callback' ];
                 if(f) {
-                    f.call();
+                    f.call( this, new MenubarEvent(entry, key) );
                     return;
                 } 
 
@@ -617,9 +650,9 @@
                 create_submenu( item, key, entry, -1 );
             });
 
-            // entry.addEventListener("mouseleave", () => {
-            //    this.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
-            // });
+            entry.addEventListener("mouseleave", () => {
+               this.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+            });
         }
     }
 
@@ -740,6 +773,16 @@
             throw("No widget called " + name);
 
         return widget.set_val(value);
+    }
+
+    Panel.prototype.clear = function() 
+    {
+        this.branch_open = false;
+        this.branches = [];
+        this.current_branch = null;
+        this.widgets = {};
+
+        this.root.innerHTML = "";
     }
 
     Panel.prototype.branch = function( name, options = {} ) 
@@ -1451,30 +1494,6 @@
      * onchange(tree_event)
      */
 
-    class TreeEvent {
-        constructor( type, node, value ) {
-            this.type = type || TreeEvent.NONE;
-            this.node = node;
-            this.value = value;
-        }
-        
-        string() {
-            switch(this.type) {
-                case TreeEvent.NONE: return "tree_event_none";
-                case TreeEvent.NODE_DRAGGED: return "tree_event_dragged";
-                case TreeEvent.NODE_RENAMED: return "tree_event_renamed";
-                case TreeEvent.NODE_VISIBILITY: return "tree_event_visibility";
-            }
-        }
-    };
-
-    TreeEvent.NONE              = 0;
-    TreeEvent.NODE_DRAGGED      = 1;
-    TreeEvent.NODE_RENAMED      = 2;
-    TreeEvent.NODE_VISIBILITY   = 3;
-
-    LX.TreeEvent = TreeEvent;
-
     Panel.prototype.addTree = function( name, data, options = {} ) 
     {
         let container = document.createElement('div');
@@ -1728,7 +1747,13 @@
         this.current_branch.content.appendChild( element );
     }
 
-    Panel.prototype.tabs = function( tabs ) 
+     /**
+     * @param {*} options 
+     * vertical: use vertical or horizontal tabs (vertical by default)
+     * showNames: show tab name only in horizontal tabs
+     */
+
+    Panel.prototype.addTabs = function( tabs, options = {} ) 
     {
         if(!this.current_branch)
             throw("No current branch!");
@@ -1736,8 +1761,12 @@
         if(tabs.constructor != Array)
             throw("Param @tabs must be an Array!");
 
+        const vertical = options.vertical ?? true;
+        const showNames = !vertical && (options.showNames ?? false);
+
         let container = document.createElement('div');
-        container.className = "lextabs-container";
+        container.className = "lextabscontainer";
+        if( !vertical ) container.className += " horizontal";
         container.style.height = (tabs.length * 34) + "px";
 
         let tabContainer = document.createElement("div");
@@ -1751,8 +1780,9 @@
             const selected = i == 0;
             let tabEl = document.createElement('div');
             tabEl.className = "lextab " + (i == tabs.length - 1 ? "last" : "") + (selected ? "selected" : "");
-            tabEl.innerHTML = "<a class='" + (tab.icon || "fa fa-hashtag") + "'></a>";
-            
+            tabEl.innerHTML = (showNames ? tab.name : "") + "<a class='" + (tab.icon || "fa fa-hashtag") + " " + (showNames ? "withname" : "") + "'></a>";
+            tabEl.title = tab.name;
+
             let infoContainer = document.createElement("div");
             infoContainer.id = tab.name.replace(/\s/g, '');
             infoContainer.className = "widgets";
@@ -1777,6 +1807,9 @@
             tab.callback( this );
         }
         
+        // add separator to last opened tab
+        this.separate();
+
         // push to branch from now on
         delete this.queuedContainer;
     }
