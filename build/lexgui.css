@@ -907,3 +907,12 @@ meter::-webkit-meter-even-less-good-value {
   font-weight: bold;
   color: #979aa0e3;
 }
+
+/* Context Menu */
+
+.lexmenubar.cmenu {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 10%;
+}

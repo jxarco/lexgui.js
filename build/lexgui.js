@@ -196,6 +196,24 @@
 
     LX.message = message;
 	
+    function createContextMenu( callback )
+    {
+        var menu = new LX.ContextMenu();
+
+        if(callback) callback( menu );
+
+        // Hack to get content height
+        var d = document.createElement('div');
+        d.appendChild(menu.root);
+        document.body.appendChild(d);
+        const height = menu.root.clientHeight;
+        d.remove();
+
+        LX.root.appendChild(menu.root);
+    }
+
+    LX.createContextMenu = createContextMenu;
+
     class Area {
 
         /**
@@ -2170,5 +2188,175 @@
     };
 
     LX.Branch = Branch;
+
+    class ContextMenu {
+
+        constructor( event, options = {} ) {
+            
+            this.event = event;
+            this.root = document.createElement('div');
+            this.root.className = "lexmenubar cmenu";
+            
+            this.items = [];
+            this.icons = {};
+            this.shorts = {};
+        }
+
+        add( path, options = {} ) {
+
+            if(options.constructor == Function)
+                options = { callback: options };
+
+            // process path
+            const tokens = path.split("/");
+            let idx = 0;
+            let that = this;
+
+            const insert = (token, list) => {
+                if(token == undefined) return;
+
+                let found = null;
+                list.forEach( o => {
+                    const keys = Object.keys(o);
+                    const key = keys.find( t => t == token );
+                    if(key) found = o[ key ];
+                } );
+
+                if(found) {
+                    insert( tokens[idx++], found );    
+                }
+                else {
+                    let item = {};
+                    item[ token ] = [];
+                    const next_token = tokens[idx++];
+                    // Check if last token -> add callback
+                    if(!next_token) {
+                        item[ 'callback' ] = options.callback;
+                    }
+                    list.push( item );
+                    insert( next_token, item[ token ] ); 
+                }
+            };
+
+            insert( tokens[idx++], this.items );
+
+            // Create elements
+
+            for( let item of this.items )
+            {
+                let key = Object.keys(item)[0];
+
+                // Item already created
+                if( this.root.querySelector("#" + key) )
+                    continue;   
+
+                let entry = document.createElement('div');
+                entry.className = "lexmenuentry";
+                entry.id = entry.innerText = key;
+                this.root.appendChild( entry );
+
+                const create_submenu = function( o, k, c, d ) {
+
+                    let contextmenu = document.createElement('div');
+                    contextmenu.className = "lexcontextmenu";
+                    const isSubMenu = c.classList.contains('lexcontextmenuentry');
+                    var rect = c.getBoundingClientRect();
+                    contextmenu.style.left = (isSubMenu ? rect.width : rect.left) + "px";
+                    // Entries use css to set top relative to parent
+                    contextmenu.style.top = (isSubMenu ? 0 : -1 + rect.bottom) + "px";
+                    c.appendChild( contextmenu );
+
+                    rect = contextmenu.getBoundingClientRect();
+
+                    for( var i = 0; i < o[k].length; ++i )
+                    {
+                        const subitem = o[k][i];
+                        const subkey = Object.keys(subitem)[0];
+                        const hasSubmenu = subitem[ subkey ].length;
+                        let subentry = document.createElement('div');
+                        subentry.className = "lexcontextmenuentry";
+                        subentry.className += (i == o[k].length - 1 ? " last" : "");
+                        if(subkey == '')
+                            subentry.className = " lexseparator";
+                        else {
+                            subentry.id = subkey;
+                            subentry.innerHTML = "";
+                            const icon = that.icons[ subkey ];
+                            if(icon) {
+                                subentry.innerHTML += "<a class='" + icon + " fa-sm'></a>";
+                            }
+                            subentry.innerHTML += "<div class='lexentryname'>" + subkey + "</div>";
+                        }
+                        contextmenu.appendChild( subentry );
+
+                        // Nothing more for separators
+                        if(subkey == '') continue;
+
+                        // Add callback
+                        subentry.addEventListener("click", e => {
+                            const f = subitem[ 'callback' ];
+                            if(f) {
+                                f.call( this, new MenubarEvent(subentry, subkey) );
+                                that.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());  
+                            } 
+                            e.stopPropagation();
+                        });
+
+                        // Add icon if has submenu, else check for shortcut
+                        if( !hasSubmenu)
+                        {
+                            if(that.shorts[ subkey ]) {
+                                let shortEl = document.createElement('div');
+                                shortEl.className = "lexentryshort";
+                                shortEl.innerText = that.shorts[ subkey ];
+                                subentry.appendChild( shortEl );
+                            }
+                            continue;
+                        }
+
+                        let submenuIcon = document.createElement('a');
+                        submenuIcon.className = "fa-solid fa-angle-right fa-xs";
+                        subentry.appendChild( submenuIcon );
+
+                        subentry.addEventListener("mouseover", e => {
+                            if(subentry.built)
+                            return;
+                            subentry.built = true;
+                            create_submenu( subitem, subkey, subentry, ++d );
+                            e.stopPropagation();
+                        });
+
+                        subentry.addEventListener("mouseleave", () => {
+                            d = -1; // Reset depth
+                            delete subentry.built;
+                            contextmenu.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+                        });
+                    }
+
+                    // Set final width
+                    contextmenu.style.width = contextmenu.offsetWidth + "px";
+                };
+
+                entry.addEventListener("click", () => {
+
+                    const f = item[ 'callback' ];
+                    if(f) {
+                        f.call( this, new MenubarEvent(entry, key) );
+                        return;
+                    } 
+
+                    this.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+                    create_submenu( item, key, entry, -1 );
+                });
+
+                entry.addEventListener("mouseleave", () => {
+                    this.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+                });
+            }
+        }
+        
+    };
+
+    LX.ContextMenu = ContextMenu;
 	
 })( typeof(window) != "undefined" ? window : (typeof(self) != "undefined" ? self : global ) );
