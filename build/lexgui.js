@@ -693,7 +693,7 @@
         
         static TEXT     = 0;
         static BUTTON   = 1;
-        static COMBO    = 2;
+        static DROPDOWN = 2;
         static CHECKBOX = 3;
         static COLOR    = 4;
         static NUMBER   = 5;
@@ -716,7 +716,7 @@
                     return this.domEl.querySelector("input").value;
                 case Widget.NUMBER:
                     return +this.domEl.querySelector("input").value;
-                case Widget.COMBO: 
+                case Widget.DROPDOWN: 
                     return this.domEl.querySelector("select").value;
                 case Widget.CHECKBOX: 
                     return this.domEl.querySelector(".checkbox").value;
@@ -739,7 +739,7 @@
                     this.domEl.querySelector("input").value = value;
                 case Widget.NUMBER:
                     this.domEl.querySelector("input").value = value;
-                case Widget.COMBO: 
+                case Widget.DROPDOWN: 
                     this.domEl.querySelector("select").value = value;
                 case Widget.CHECKBOX: 
                     this.domEl.querySelector(".checkbox").value = value;
@@ -1111,22 +1111,22 @@
         }
 
         /**
-         * @method addCombo
+         * @method addDropdown
          * @param {String} name Widget name
-         * @param {Array} values Posible options of the combo widget
+         * @param {Array} values Posible options of the dropdown widget
          * @param {String} value Select by default option
          * @param {Function} callback Callback function on change
          * @param {*} options:
          * disabled: Make the widget disabled [false]
          */
 
-        addCombo( name, values, value, callback, options = {} ) {
+        addDropdown( name, values, value, callback, options = {} ) {
 
             if(!name) {
                 throw("Set Widget Name!");
             }
 
-            let widget = this.#create_widget(name, Widget.COMBO, options);
+            let widget = this.#create_widget(name, Widget.DROPDOWN, options);
             let element = widget.domEl;
 
             // Add reset functionality
@@ -1140,7 +1140,7 @@
             // Add widget value
 
             var container = document.createElement('div');
-            container.className = "lexcombo";
+            container.className = "lexdropdown";
 
             let wValue = document.createElement('select');
             wValue.name = name;

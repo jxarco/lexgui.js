@@ -184,7 +184,7 @@ function fillPanel( panel ) {
 
     // another branch
     panel.branch("Other things");
-    panel.addCombo("Pages", ["Federico", "Garcia", "Lorca"], "Garcia", (value, event) => {
+    panel.addDropdown("Pages", ["Federico", "Garcia", "Lorca"], "Garcia", (value, event) => {
         console.log(value);
     });
     panel.addNumber("Font size", 36, (value, event) => {

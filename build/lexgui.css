@@ -10,7 +10,7 @@ font-family: 'Roboto', sans-serif;
 	--branch-background: #363b40;
 	--branch-title-background: #2c3137;
   --global-button-color: #6a7178;
-  --global-combo-color: #4e5154;
+  --global-dropdown-color: #4e5154;
   --global-text: #d0d0e0;
   --global-text-primary: #d0d0e0e6;
   --global-text-secondary: #b7b7cbb0;
@@ -362,15 +362,15 @@ html, body {
   margin-top: 0px;
 }
 
-/* Combo */
+/* Dropdown (Combo) */
 
-.lexcombo {
+.lexdropdown {
   display: grid;
   align-content: center;
 }
 
-.lexcombo select {
-	background-color: var(--global-combo-color);
+.lexdropdown select {
+	background-color: var(--global-dropdown-color);
   border-radius: 2px;
   border: none;
   width: 100%;
@@ -385,7 +385,7 @@ html, body {
   position: relative;
 }
 
-.lexcombo option {
+.lexdropdown option {
 	background-color: #3f4046;
   color: #aeacac8a;
 }

@@ -1,7 +1,175 @@
 # lexgui.js
-JS library to create web graphical user interfaces
+
+**lexgui.js** is a lightweight JavaScript library that allows you to create web interfaces using only JavaScript, HTML, and CSS. This library provides an easy-to-use API for building dynamic and interactive user interfaces without the need for complex frameworks or libraries. With lexgui.js, you can create custom UI components, handle user interactions, and update the interface dynamically.
 
 ![Screenshot](https://github.com/jxarco/lexgui.js/blob/master/images/Screenshot.png)
+
+- [lexgui.js](#lexguijs)
+    - [Getting Started](#getting-started)
+      - [Installation](#installation)
+      - [Usage](#usage)
+    - [Area](#area)
+      - [Menubar](#menubar)
+      - [Panel](#panel)
+    - [Widgets](#widgets)
+      - [Title](#title)
+      - [Text](#text)
+      - [Button](#button)
+      - [Number](#number)
+      - [Vector](#vector)
+      - [Checkbox](#checkbox)
+      - [Dropdown](#dropdown)
+      - [Tree](#tree)
+      - [Progress](#progress)
+    - [Event Handling](#event-handling)
+    - [Styling](#styling)
+    - [Examples](#examples)
+    - [Contributing](#contributing)
+    - [License](#license)
+
+<br>
+
+### Getting Started
+<br>
+
+#### Installation
+
+To use LexGUI.js, download the library `build` folder and include it directly in your HTML file using a script tag:
+
+```html
+<script src="path/to/lexgui.js"></script>
+```
+
+#### Usage
+
+Once you have included the LexGUI.js library in your project, you can start using its API to create web interfaces. The library exposes several functions and components that you can utilize to build your UI.
+
+The first thing to do is initializing the library. Optionally you can pass the root container (if `null` the default is `document.body`:
+
+```js
+LX.init( root_container );
+```
+
+<br>
+
+### Area
+<br>
+
+An **Area** is the main container used in lexgui.js. You can have as many Areas you need using `Area.split( options )`, which allows you to split horizontally or vertically a given Area. To begin building your UI start creating an instance of Area, which will be automatically appended to **lexgui.js root element**:
+
+```js
+// Create main area (fits sreen)
+var mainArea = new LX.Area({ id: "mainarea" });
+
+// Split main area in 2 sections (2 Areas)
+mainArea.split({ sizes: ["70%", "30%"] });
+var [leftArea, rightArea] = mainArea.sections;
+
+// Split again left area this time vertically
+leftArea.split({ type: 'vertical', sizes: ["80vh", "20vh"] });
+var [leftUpArea, leftBottomArea] = leftArea.sections;
+```
+
+#### Menubar
+
+You can build a **Menubar** directly into any Area using `Area.addMenubar( callback, options )`. To specify each of the menu entries, you should pass a *callback function* to be called when the Menubar is constructed. **Callbacks will have a Menubar instance as parameter**, so use `Menubar.add( entryPath, callback )` on that instance inside your callback to build each of the menu entries:
+
+```js
+area.addMenubar( m => {
+    m.add( "Scene/New Scene");
+    m.add( "Scene/Open Scene" );
+    m.add( "Scene/" ); // This is a separator!
+    m.add( "Scene/Open Recent/hello.scene");
+    m.add( "Scene/Open Recent/goodbye.scene" );
+    m.add( "Project/Export/DAE" );
+    m.add( "Project/Export/GLTF" );
+    m.add( "Help/About" );
+    m.add( "Help/Support" );
+});
+```
+
+After adding all entries, you can set additional data per entry:
+
+* Icons ([Fontawesome](https://fontawesome.com/search)): `Menubar.setIcon( entryName, className )`
+  
+```js
+m.setIcon( "Support", "fa-solid fa-heart" );
+```
+
+* Entry Shortcuts: 
+
+```js
+// ...
+m.add( "Help/Support" );
+
+m.setIcon( "Support", "fa-solid fa-heart" );
+```
+
+#### Panel
+
+...
+
+### Widgets
+
+...
+
+#### Title
+
+...
+
+#### Text
+
+...
+
+#### Button
+
+...
+
+#### Number
+
+...
+
+#### Vector
+
+...
+
+#### Checkbox
+
+...
+
+#### Dropdown
+
+...
+
+#### Tree
+
+...
+
+#### Progress
+
+...
+
+### Event Handling
+
+...
+
+### Styling
+
+...
+
+### Examples
+
+Look at [demo.js](demo.js) to see how to create of the different widgets!
+
+### Contributing
+
+...
+
+### License
+
+...
+
+---
 
 TODO List:
 
