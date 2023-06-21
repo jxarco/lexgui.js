@@ -27,10 +27,7 @@
     - [Contributing](#contributing)
     - [License](#license)
 
-<br>
-
 ### Getting Started
-<br>
 
 #### Download
 
@@ -50,10 +47,11 @@ The first thing to do is initializing the library. Optionally you can pass the r
 LX.init( root_container );
 ```
 
-<br>
+You can modify global namespace (`LX`) variables before you start creating UI elements. For now, you can set the following:
+* `LX.DEFAULT_NAME_WIDTH`: Width of the name container inside a widget (Default `"30%"`)
+* `LX.DEFAULT_SPLITBAR_SIZE`: Width (in pixels) of the area resize bar created on split (Default `4`)
 
 ### Area
-<br>
 
 An **Area** is the main container used in lexgui.js. You can have as many Areas you need using `Area.split(options)`, which allows you to split horizontally or vertically a given Area. It has a single parameter as `Object` to specify different split options:
 
