@@ -690,7 +690,7 @@
                 });
 
                 entry.addEventListener("mouseleave", () => {
-                this.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+                    this.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
                 });
             }
         }
@@ -984,7 +984,8 @@
                     
                     // remove all widgets
                     for( let w of b.widgets ) {
-                        if(w.domEl.classList.contains('lexfilter')) continue;
+                        if(w.domEl.classList.contains('lexfilter'))
+                            continue;
                         w.domEl.remove();
                     }
 

@@ -49,7 +49,7 @@ html, body {
   overflow: hidden;  /* no general overflow in desktop app  */
   margin: 0;
   padding: 0;
-  font-family: 'Lato', sans-serif;
+  font-family: 'Lato', sans-serif !important;
 } 
 
 .dragging-split-area {
@@ -198,7 +198,7 @@ html, body {
 
 .lexbranch.title {
   background: var(--branch-title-background);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: bold;
   color: rgba(216, 218, 230, 0.932);
   padding: 8px;
@@ -316,11 +316,16 @@ html, body {
   margin: 5px 0 5px 10px;
 }
 
+.lexfilter input {
+  font-size: 12px;
+  font-family: 'Lato', sans-serif !important;
+}
+
 .lextitle {
   width: 100%;
   color: #ddd;
   font-weight:600;
-  font-size:14px;
+  font-size:13px;
   margin-bottom:4px;
   padding:4px;
 }
@@ -647,10 +652,15 @@ input[type=number] {
   background: var(--global-color-secondary);
   padding: 8px;
   display: flex;
+  font-size: 13px;
 }
 
 .lextree .lextreetools a {
   margin-right: 8px;
+}
+
+.lextree .lextreetools input {
+  font-size: 13px;
 }
 
 .lextree span {
@@ -664,13 +674,13 @@ input[type=number] {
   -moz-user-select: none; /* Firefox 2+ */
   -ms-user-select: none; /* IE 10+ */
   user-select: none; /* Standard syntax */
+  font-size: 14px;
 }
 
 .lextree ul {
-  /* padding-top: 16px; */
   padding-bottom: 16px;
   padding-inline-start: 0px;
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .lextree input {
@@ -682,12 +692,11 @@ input[type=number] {
   font-family: 'Lato', sans-serif;
   color: var(--checkbox-flag-on);
   line-height: 23px;
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .lextree .lextreeitem {
   list-style-type: none;
-  /* display: flex; */
   align-items: center;
   margin-bottom: 3px;
   line-height: 25px;
@@ -803,6 +812,8 @@ meter::-webkit-meter-even-less-good-value {
   background-color: var(--global-color-primary);
   display: flex;
   height: auto;
+  font-size: 14px;
+  font-weight: bold;
 }
 
 .lexmenubar .lexmenuentry {
@@ -836,7 +847,7 @@ meter::-webkit-meter-even-less-good-value {
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
   z-index: 1001;
-  /* min-width: 188px; */
+  font-weight: 100;
 }
 
 .lexcontextmenu .lexcontextmenuentry {
@@ -859,6 +870,7 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexcontextmenu .lexcontextmenuentry .lexentryname {
   margin-right: 32px;
+  margin-top: 2px;
 }
 
 /* normal icons  */
