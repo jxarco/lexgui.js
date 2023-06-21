@@ -737,18 +737,24 @@
                 case Widget.TEXT: 
                 case Widget.COLOR:
                     this.domEl.querySelector("input").value = value;
+                    break;
                 case Widget.NUMBER:
                     this.domEl.querySelector("input").value = value;
+                    break;
                 case Widget.DROPDOWN: 
                     this.domEl.querySelector("select").value = value;
+                    break;
                 case Widget.CHECKBOX: 
                     this.domEl.querySelector(".checkbox").value = value;
+                    break;
                 case Widget.PROGRESS:
                     this.domEl.querySelector("meter").value = value;
+                    break;
                 case Widget.VECTOR:
                     const inputs = this.domEl.querySelectorAll("input");
                     for( var i = 0; i < inputs.length; ++i ) 
                         inputs[i].value = value[i];
+                    break;
             }
         }
 
