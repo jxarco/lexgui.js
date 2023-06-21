@@ -2,7 +2,8 @@
 LX.init();
 
 // change global properties after init
-LX.DEFAULT_NAME_WIDTH = "30%";
+// LX.DEFAULT_NAME_WIDTH = "10%";
+// LX.DEFAULT_SPLITBAR_SIZE = 15;
 
 // LX.message("I'm in another position", null, { position: [10, 10] });
 LX.message("Welcome to Lexgui", "Welcome!", { draggable: true })
