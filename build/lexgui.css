@@ -6,7 +6,7 @@ font-family: 'Roboto', sans-serif;
 
 :root {
   --global-color-primary: #1a2025;
-  --global-color-secondary: #2c3035e8;
+  --global-color-secondary: #2c3035f5;
 	--branch-background: #363b40;
 	--branch-title-background: #2c3137;
   --global-button-color: #6a7178;
@@ -836,10 +836,6 @@ meter::-webkit-meter-even-less-good-value {
   color: var(--global-text);
 }
 
-.lexmenubar .lexmenuentry:active{
-  color: #b7b7cba4;
-}
-
 .lexcontextmenu {
   background-color: var(--global-color-secondary);
   position: absolute;
@@ -877,7 +873,7 @@ meter::-webkit-meter-even-less-good-value {
 .lexcontextmenu .lexcontextmenuentry a {
   float: left;
   margin-right: 10px;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
 /* submenu specified arrow  */
@@ -887,13 +883,18 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexcontextmenu .lexcontextmenuentry.last {
-  border-bottom-left-radius: 6px;
-  border-bottom-right-radius: 6px;
+  /* border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px; */
+  border-bottom: 2px solid var(--checkbox-flag-on);
 }
 
 .lexcontextmenu .lexcontextmenuentry:hover {
   background-color: var(--global-button-color);
   color: #eee;
+}
+
+.lexcontextmenu .lexcontextmenuentry:active{
+  color: #b7b7cba4;
 }
 
 .lexcontextmenu .lexseparator {
@@ -910,9 +911,77 @@ meter::-webkit-meter-even-less-good-value {
 
 /* Context Menu */
 
-.lexmenubar.cmenu {
+.lexcontextmenubox {
+  background-color: var(--global-color-secondary);
   position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 10%;
+  padding-right: 20px;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  z-index: 1001;
+  font-weight: 100;
+}
+
+.lexcontextmenubox .lexcontextmenuentry {
+  width: 100%;
+  color: #c0c4cbe3;
+  padding: 3px;
+  padding-left: 8px;
+  padding-right: 10px;
+  padding-bottom: 6px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* This makes properties like top, left to be relative to parents */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  -moz-transform: translateZ(0);
+  border-left: 2px solid var(--checkbox-flag-on);
+}
+
+.lexcontextmenubox .lexcontextmenuentry.cmtitle {
+  background: #020205;
+  font-weight: bold;
+}
+
+.lexcontextmenubox .lexcontextmenuentry .lexentryname {
+  margin-right: 10px;
+  margin-top: 2px;
+  font-size: 12px;
+}
+
+/* normal icons  */
+.lexcontextmenubox .lexcontextmenuentry a {
+  float: left;
+  margin-right: 0px;
+  margin-top: 10px;
+  font-size: 11px;
+}
+
+/* submenu specified arrow  */
+.lexcontextmenubox .lexcontextmenuentry a.fa-xs {
+  float: right;
+  margin-top: -6px;
+}
+
+.lexcontextmenubox .lexcontextmenuentry:hover:not(.cmtitle) {
+  background-color: var(--global-button-color);
+  color: #eee;
+}
+
+.lexcontextmenubox .lexcontextmenuentry:active:not(.cmtitle) {
+  color: #b7b7cba4;
+}
+
+.lexcontextmenubox .lexseparator {
+  margin: 3px 0 3px 10px;
+}
+
+.lexcontextmenubox .lexentryshort {
+  font-size: 9px;
+  float: right;
+  margin-top: -13px;
+  font-weight: bold;
+  color: #979aa0e3;
 }

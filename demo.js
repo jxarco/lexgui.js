@@ -60,7 +60,7 @@ canvas.width = up.root.clientWidth;
 canvas.height = up.root.clientHeight;
 canvas.style.width = "100%";
 canvas.style.height = "100%";
-canvas.style.backgroundColor = "#ccc";
+canvas.style.backgroundColor = "#666";
 up.attach( canvas );
 
 let scene_data = {
@@ -151,12 +151,31 @@ function fillPanel( panel ) {
     panel.addTree("Scene Tree", scene_data, { 
         icons: tree_icons, 
         // filter: false,
-        onselect: (name) => {  },
-        ondblclick: (name) => {  },
-        onchange: (event) => { 
+        onevent: (event) => { 
             console.log(event.string());
 
             switch(event.type) {
+                case LX.TreeEvent.NODE_SELECTED: 
+                    console.log(event.node.id + " selected"); 
+                    break;
+                case LX.TreeEvent.NODE_DBLCLICKED: 
+                    console.log(event.node.id + " dbl clicked"); 
+                    break;
+                case LX.TreeEvent.NODE_CONTEXTMENU: 
+                    LX.createContextMenu( event.value, m => {
+                        m.add( "Select Children", () => console.log("select children") );
+                        m.add( "Clone", () => console.log("Clone") );
+                        m.add( "Components/Transform");
+                        m.add( "Components/MeshRenderer");
+                        m.add( "Components");
+                        m.add( "Move before sibling" );
+                        m.add( "Move after sibling" );
+                        m.add( "Move after sibling" );
+                        m.add( "Move to parent" );
+                        m.add( "Delete" );
+
+                    }, "Node");
+                    break;
                 case LX.TreeEvent.NODE_DRAGGED: 
                     console.log(event.node.id + " is now child of " + event.value.id); 
                     break;

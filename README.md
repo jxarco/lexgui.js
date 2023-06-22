@@ -5,27 +5,27 @@
 ![Screenshot](images/Screenshot.png)
 
 - [lexgui.js](#lexguijs)
-    - [Getting Started](#getting-started)
-      - [Download](#download)
-      - [Usage](#usage)
-    - [Area](#area)
-      - [Menubar](#menubar)
-      - [Panel](#panel)
-    - [Widgets](#widgets)
-      - [Title](#title)
-      - [Text](#text)
-      - [Button](#button)
-      - [Number](#number)
-      - [Vector](#vector)
-      - [Checkbox](#checkbox)
-      - [Dropdown](#dropdown)
-      - [Tree](#tree)
-      - [Progress](#progress)
-    - [Event Handling](#event-handling)
-    - [Styling](#styling)
-    - [Examples](#examples)
-    - [Contributing](#contributing)
-    - [License](#license)
+  - [Getting Started](#getting-started)
+    - [Download](#download)
+    - [Usage](#usage)
+  - [Area](#area)
+    - [Menubar](#menubar)
+    - [Panel](#panel)
+  - [Widgets](#widgets)
+    - [Title](#title)
+    - [Text](#text)
+    - [Button](#button)
+    - [Number](#number)
+    - [Vector](#vector)
+    - [Checkbox](#checkbox)
+    - [Dropdown](#dropdown)
+    - [Tree](#tree)
+    - [Progress](#progress)
+  - [Event Handling](#event-handling)
+  - [Styling](#styling)
+  - [Examples](#examples)
+  - [Contributing](#contributing)
+  - [License](#license)
 
 ## Getting Started
 
@@ -213,10 +213,11 @@ TODO List:
 - ~~Support oninput listener (trigger = input) in textwidgets~~
 - ~~Start Documentation~~
 - ~~Event system~~
+- ~~Context Menus~~
+- Open context menus the other way around if not enough space
+- Add title to any subentry in context menus
 - Resize callbacks
-- Context Menus
 - Dialogs
-- Update function for widgets
 - Multiple widgets per row
 - Load File widget
 - Change resize bar to Godot one
