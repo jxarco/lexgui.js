@@ -547,6 +547,14 @@
             }
                 
             this.#update();
+
+            // Resize events            
+            for(var i = 0; i < this.sections.length; i++)
+            {
+                const area = this.sections[i];
+                if(area.onresize)
+                    area.onresize.call(this, area.root.getBoundingClientRect());
+            }
         }
 
         #update()

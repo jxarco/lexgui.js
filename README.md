@@ -217,7 +217,7 @@ TODO List:
 - ~~Add title to any subentry in context menus~~
 - ~~Open context menus the other way around if not enough space~~
 - ~~Create addPanel to avoid instancing and attaching a panel to an area~~
-- Resize callbacks
+- ~~Resize callbacks~~
 - Dialogs
 - Multiple widgets per row
 - Load File widget

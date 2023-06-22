@@ -42,7 +42,7 @@ right.split({type: 'vertical', sizes:["70vh","30vh"]});
 var [rup, rbottom] = right.sections;
 
 // another menu bar
-rbottom.addMenubar( m => {
+bottom.addMenubar( m => {
     m.add( "Skeleton", e => { console.log(e); fillRightBottomPanel( side_bottom_panel, e.name ); });
     m.add( "Blendshapes", e => { console.log(e); fillRightBottomPanel( side_bottom_panel, e.name ); });
     m.add( "Test3rd", e => { console.log(e); });
@@ -56,6 +56,12 @@ canvas.style.width = "100%";
 canvas.style.height = "100%";
 canvas.style.backgroundColor = "#666";
 up.attach( canvas );
+
+// add on resize event to control canvas size
+up.onresize = function( bounding ) {
+    canvas.width = bounding.width;
+    canvas.height = bounding.height;
+};
 
 let scene_data = {
     'id': 'root',
