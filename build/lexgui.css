@@ -5,16 +5,18 @@ font-family: 'Roboto', sans-serif;
 */
 
 :root {
+  --background: #161c21;
   --global-color-primary: #1a2025;
-  --global-color-secondary: #2c3035e8;
-	--branch-background: #363b40;
+  --global-color-secondary: #22292f;
+	--branch-background: #2c303570;
 	--branch-title-background: #2c3137;
-  --global-button-color: #6a7178;
-  --global-dropdown-color: #4e5154;
+  --global-button-color: #495057;
+  --global-dropdown-color: #161c21;
   --global-text: #d0d0e0;
   --global-text-primary: #d0d0e0e6;
   --global-text-secondary: #b7b7cbb0;
   --checkbox-flag-on: #5e9fdd;
+  --global-highlight: #2c303570;
 	/*
 	--primary: #0676ed;
 	--warning: #f2a600;
@@ -96,7 +98,7 @@ html, body {
   background: var(--branch-title-background);
   font-size: 17px;
   color: #d9d9e3;
-  text-shadow: 0px 1px 4px #000;
+  /* text-shadow: 0px 1px 4px #000; */
   width: calc( 100% - 28px);
   padding: 12px;
   padding-left: 16px;
@@ -145,7 +147,7 @@ html, body {
 /* Area */
 
 .lexarea {
-  background-color: var(--global-color-primary);
+  background-color: var(--background);
   margin: 0;
 }
 
@@ -155,7 +157,7 @@ html, body {
 
 /* Split bar */
 
-.lexsplitbar {
+/* .lexsplitbar {
   background-color: var(--global-color-secondary);
   border-radius: 2px;
 }
@@ -169,10 +171,46 @@ html, body {
   /* margin: auto;
   height: 7.5%;
   background-color: red; */
+/* } */ */
+
+.lexsplitbar {
+	display: inline-block;
+	background: #ddd!important;
+  border-radius: 10px;
+}
+
+
+.lexsplitbar:hover {
+	background-color: var(--global-color-primary);
+}
+
+.lexsplitbar.horizontal {
+	cursor: e-resize;
+	width: 4px;
+  position: relative;
+  top: calc(50% - 32px);
+  height: 64px;
+  left: -5px;
+  display: inline-block;
+	background: white;
+  border-radius: 10px;
 }
 
 .lexsplitbar.vertical {
-  cursor: ns-resize;
+	cursor: n-resize;
+  width: 100%;
+  height: 4px;
+  width: 64px;
+  position: relative;
+  left: calc(50% - 32px);
+  top: -5px;
+  display: inline-block;
+	background: white;
+  border-radius: 10px;
+}
+
+.lexsplitbar.horizontal:hover, .lexsplitbar.vertical:hover {
+	background-color: var(--global-color-primary);
 }
 
 /* Branches */
@@ -199,10 +237,10 @@ html, body {
 .lexbranch.title {
   background: var(--branch-title-background);
   font-size: 15px;
-  font-weight: bold;
+  /* font-weight: bold; */
   color: rgba(216, 218, 230, 0.932);
   padding: 8px;
-  text-shadow: 0px 1px 3px #000;
+  /* text-shadow: 0px 1px 3px #000; */
   border-radius: 0px;
   cursor: pointer;
   -webkit-user-select: none; /* Safari 3.1+ */
@@ -351,6 +389,10 @@ html, body {
   color: #DDD;
 }
 
+.lexbutton:hover {
+  background-color: var(--global-color-primary);
+}
+
 .lexbutton.selected {
   background: #3c4145;
   outline: 1px solid #8c9bc7;
@@ -386,7 +428,7 @@ html, body {
 }
 
 .lexdropdown option {
-	background-color: #3f4046;
+	background-color: var(--global-highlight);
   color: #aeacac8a;
 }
 
@@ -633,12 +675,12 @@ input[type=number] {
 
 .lextree {
   border-radius: 8px;
-  background: #05050cc6;
+  /* background: #05050cc6; */
   width: calc( 100% - 6px );
   min-height: 12px;
   margin: 0 auto;
   color: var(--global-text-secondary);
-  font-weight: bold;
+  /* font-weight: bold; */
   margin-top: 6px;
   margin-bottom: -8px;
 }
@@ -676,7 +718,7 @@ input[type=number] {
 .lextree input {
   background: none;
   color: var(--global-text-secondary);
-  font-weight: bold;
+  /* font-weight: bold; */
   outline:none;
   border: none;
   font-family: 'Lato', sans-serif;
@@ -700,7 +742,7 @@ input[type=number] {
 
 .lextree .lextreeitem.selected{
   color: #5f88c9;
-  background: rgba(129, 132, 163, 0.421);
+  background:var(--global-highlight);
 }
 
 .lextree .lextreeitem.draggingover {
@@ -892,6 +934,23 @@ meter::-webkit-meter-even-less-good-value {
   font-size: 9px;
   float: right;
   margin-top: -13px;
-  font-weight: bold;
+  /* font-weight: bold; */
   color: #979aa0e3;
+}
+
+/**Timeline*/
+
+.lextimeline {
+  position: relative;
+  flex-direction: column;
+  color: var(--global-text-primary);
+}
+
+.lextimeline .lexbuttonscontainer {
+  position: absolute;
+  padding: 0 10px;
+}
+
+.lexicon {
+  padding: 4px;
 }
