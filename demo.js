@@ -45,6 +45,7 @@ var [rup, rbottom] = right.sections;
 rbottom.addMenubar( m => {
     m.add( "Skeleton", e => { console.log(e); fillRightBottomPanel( side_bottom_panel, e.name ); });
     m.add( "Blendshapes", e => { console.log(e); fillRightBottomPanel( side_bottom_panel, e.name ); });
+    m.add( "Test3rd", e => { console.log(e); });
 }, { float: 'center' } );
 
 // add canvas to left upper part
@@ -90,16 +91,13 @@ let scene_data = {
 };
 
 // add panels
-var side_panel = new LX.Panel();
-rup.attach( side_panel );
+var side_panel = rup.addPanel();
 fillPanel( side_panel );
 
-var side_bottom_panel = new LX.Panel();
-rbottom.attach( side_bottom_panel );
+var side_bottom_panel = rbottom.addPanel();
 fillRightBottomPanel( side_bottom_panel, 'Skeleton' );
 
-var bottom_panel = new LX.Panel();
-bottom.attach( bottom_panel );
+var bottom_panel = bottom.addPanel();
 fillBottomPanel( bottom_panel );
 
 function loop() {
@@ -281,7 +279,6 @@ function fillRightBottomPanel( panel, tab ) {
     panel.end();
    
 }
-
 
 function fillBottomPanel( panel ) {
     

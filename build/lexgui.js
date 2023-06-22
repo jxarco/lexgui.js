@@ -457,6 +457,18 @@
         }
 
         /**
+         * @method addPanel
+         * @param {*} options
+         * Options to create a Panel
+         */
+
+        addPanel( options ) {
+            let panel = new Panel( options );
+            this.attach( panel );
+            return panel;
+        }
+
+        /**
          * @method addMenubar
          * @param {*} options:
          * float: Justify content (left, center, right) [left]
