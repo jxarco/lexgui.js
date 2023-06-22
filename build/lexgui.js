@@ -1450,12 +1450,13 @@
 
             vecinput.addEventListener("wheel", function(e) {
                 e.preventDefault();
+                if(this !== document.activeElement)
+                    return;
                 let mult = 1;
                 if(e.shiftKey) mult = 10;
                 else if(e.altKey) mult = 0.1;
                 this.value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
                 Panel.#dispatch_event(vecinput, "input");
-                this.blur();
             }, false);
 
             vecinput.addEventListener("input", e => {
@@ -1560,12 +1561,13 @@
 
                 vecinput.addEventListener("wheel", function(e) {
                     e.preventDefault();
+                    if(this !== document.activeElement)
+                        return;
                     let mult = 1;
                     if(e.shiftKey) mult = 10;
                     else if(e.altKey) mult = 0.1;
                     this.value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
                     Panel.#dispatch_event(vecinput, "input");
-                    this.blur();
                 }, false);
 
                 vecinput.addEventListener("input", e => {
@@ -2232,28 +2234,28 @@
             }
         }
 
+        #create_submenu( o, k, c, d ) {
+
+            let contextmenu = document.createElement('div');
+            contextmenu.className = "lexcontextmenubox";
+            var rect = c.getBoundingClientRect();
+            contextmenu.style.left = (rect.width - 2) + "px";
+            // Entries use css to set top relative to parent
+            contextmenu.style.top = "0px";
+            c.appendChild( contextmenu );
+
+            for( var i = 0; i < o[k].length; ++i )
+            {
+                const subitem = o[k][i];
+                const subkey = Object.keys(subitem)[0];
+                this.#create_entry(subitem, subkey, contextmenu, d);
+            }
+
+            // Set final width
+            contextmenu.style.width = contextmenu.offsetWidth + "px";
+        }
+
         #create_entry( o, k, c, d ) {
-
-            const create_submenu = ( o, k, c, d ) => {
-
-                let contextmenu = document.createElement('div');
-                contextmenu.className = "lexcontextmenubox";
-                var rect = c.getBoundingClientRect();
-                contextmenu.style.left = (rect.width - 2) + "px";
-                // Entries use css to set top relative to parent
-                contextmenu.style.top = "0px";
-                c.appendChild( contextmenu );
-
-                for( var i = 0; i < o[k].length; ++i )
-                {
-                    const subitem = o[k][i];
-                    const subkey = Object.keys(subitem)[0];
-                    this.#create_entry(subitem, subkey, contextmenu, d);
-                }
-
-                // Set final width
-                contextmenu.style.width = contextmenu.offsetWidth + "px";
-            };
 
             const hasSubmenu = o[ k ].length;
             let entry = document.createElement('div');
@@ -2306,7 +2308,7 @@
                 if(entry.built)
                 return;
                 entry.built = true;
-                create_submenu( o, k, entry, ++d );
+                this.#create_submenu( o, k, entry, ++d );
                 e.stopPropagation();
             });
 
