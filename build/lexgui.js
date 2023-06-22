@@ -2222,6 +2222,8 @@
             this.root.addEventListener("mousedown", this.processMouse.bind(this));
             this.root.addEventListener("mouseup", this.processMouse.bind(this));
             this.root.addEventListener("mousemove", this.processMouse.bind(this));
+            this.root.addEventListener("wheel", this.processMouse.bind(this));
+            this.root.addEventListener("dblclick", this.processMouse.bind(this));
             
         }
 
@@ -2245,6 +2247,22 @@
             }
             
             this.root.prepend(div);
+        }
+
+        /** Add a new track to the timeline */
+        addNewTrack = function() {
+
+            if(!this.animationClip)
+                this.animationClip = {tracks:[]};
+
+            let trackInfo = {
+                idx: this.animationClip.tracks.length,
+                clips: [],
+                selected: [], edited: [], hovered: []
+            };
+
+            this.animationClip.tracks.push(trackInfo);
+            return trackInfo.idx;
         }
 
         setAnimationClip = function(animation) {
@@ -2422,9 +2440,10 @@
                 ctx.stroke();
                 ctx.globalAlpha = 1;
             }
-            ctx.restore();
+            
             if(this.onDrawContent)
                 this.onDrawContent( ctx, timeStart, timeEnd, this );
+            ctx.restore();
             
         }
 
@@ -3084,11 +3103,11 @@
 
         onDrawContent = function (ctx, timeStart, timeEnd) {
         
-            ctx.save();
             
-            if(this.selectedItem == null || !this.tracksPerItem)
+            if(this.selectedItem == null || !this.tracksPerItem) 
                 return;
             
+            ctx.save();
             let tracks = this.tracksPerItem[this.selectedItem] ? this.tracksPerItem[this.selectedItem] : [{name: this.selectedItem}];
             //if(!tracks) return;
             
@@ -3103,7 +3122,7 @@
             ctx.fillStyle = 'white';
 
             if(this.name)
-                ctx.fillText(this.name, 9 + ctx.measureText(this.name).actualBoundingBoxLeft + offset * this.buttonsDrawn.length, -this.topMargin*0.5 );
+                ctx.fillText(this.name,  offset + ctx.measureText(this.name).actualBoundingBoxLeft , -this.topMargin*0.4 );
         };
 
         onUpdateTracks ( keyType ) {
@@ -3197,9 +3216,9 @@
                 } );
             }
             
-            const menu = new LiteGUI.ContextMenu( actions, { event: e });
-            for( const el of menu.root.querySelectorAll(".submenu") )
-                el.style.fontSize = "0.9em";
+            // const menu = new LX.ContextMenu( actions, { event: e });
+            // for( const el of menu.root.querySelectorAll(".submenu") )
+            //     el.style.fontSize = "0.9em";
         }
 
         onPreProcessTrack = function( track ) {
@@ -3882,11 +3901,11 @@
 
         onDrawContent = function (ctx, timeStart, timeEnd)  {
 
-            ctx.save();
-                        
+            
             let tracks = this.animationClip.tracks|| [{name: "NMF", clips: []}];
             if(!tracks) return;
             
+            ctx.save();
             const height = this.trackHeight*1.2;
             for(let i = 0; i < tracks.length; i++) {
                 let track = tracks[i];
@@ -3897,24 +3916,9 @@
             let offset = 25;
             ctx.fillStyle = 'white';
             if(this.name)
-                ctx.fillText(this.name, 9 + ctx.measureText(this.name).actualBoundingBoxLeft + offset * this.buttonsDrawn.length, -this.topMargin*0.5 );
+                ctx.fillText(this.name, offset + ctx.measureText(this.name).actualBoundingBoxLeft, -this.topMargin*0.4 );
         }
 
-        /** Add a new track to the timeline */
-        addNewTrack = function() {
-
-            if(!this.animationClip)
-                this.animationClip = {tracks:[]};
-
-            let trackInfo = {
-                idx: this.animationClip.tracks.length,
-                clips: [],
-                selected: [], edited: [], hovered: []
-            };
-
-            this.animationClip.tracks.push(trackInfo);
-            return trackInfo.idx;
-        }
 
         /** Add a clip to the timeline in a free track slot at the current time
          * @clip: clip to be added

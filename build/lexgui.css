@@ -949,6 +949,7 @@ meter::-webkit-meter-even-less-good-value {
 .lextimeline .lexbuttonscontainer {
   position: absolute;
   padding: 0 10px;
+  right: 0;
 }
 
 .lexicon {

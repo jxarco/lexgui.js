@@ -144,6 +144,8 @@ bottom.addMenubar( m => {
         }
         else {
             kfTimeline = new LX.KeyFramesTimeline("kf-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
+            kfTimeline.setAnimationClip({tracks: [{name: "Test track", values: [0,1,0,1], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
+            kfTimeline.selectedItem = "Test track";
             bottom.attach(kfTimeline);
             kfTimeline.addButtons([ 
                 { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },
@@ -186,9 +188,6 @@ bottom.addMenubar( m => {
     });
 
 } );
-
-
-
 
 
 
