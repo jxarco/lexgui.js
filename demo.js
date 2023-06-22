@@ -42,10 +42,9 @@ right.split({type: 'vertical', sizes:["70vh","30vh"]});
 var [rup, rbottom] = right.sections;
 
 // another menu bar
-bottom.addMenubar( m => {
-    m.add( "Skeleton", e => { console.log(e); fillRightBottomPanel( side_bottom_panel, e.name ); });
-    m.add( "Blendshapes", e => { console.log(e); fillRightBottomPanel( side_bottom_panel, e.name ); });
-    m.add( "Test3rd", e => { console.log(e); });
+rbottom.addMenubar( m => {
+    m.add( "Vertical", e => { console.log(e); fillRightBottomPanel( side_bottom_panel, e.name ); });
+    m.add( "Horizontal", e => { console.log(e); fillRightBottomPanel( side_bottom_panel, e.name ); });
 }, { float: 'center' } );
 
 // add canvas to left upper part
@@ -54,7 +53,6 @@ canvas.width = up.root.clientWidth;
 canvas.height = up.root.clientHeight;
 canvas.style.width = "100%";
 canvas.style.height = "100%";
-canvas.style.backgroundColor = "#666";
 up.attach( canvas );
 
 // add on resize event to control canvas size
@@ -71,11 +69,6 @@ let scene_data = {
             'children': [
                 {
                     'id': 'node_1_1',
-                    'visible': false,
-                    'children': []
-                },
-                {
-                    'id': 'node_1_2',
                     'children': [],
                     'actions': [
                         {
@@ -101,7 +94,7 @@ var side_panel = rup.addPanel();
 fillPanel( side_panel );
 
 var side_bottom_panel = rbottom.addPanel();
-fillRightBottomPanel( side_bottom_panel, 'Skeleton' );
+fillRightBottomPanel( side_bottom_panel, 'Vertical' );
 
 var bottom_panel = bottom.addPanel();
 fillBottomPanel( bottom_panel );
@@ -110,15 +103,17 @@ function loop() {
     
     var ctx = canvas.getContext("2d");
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.font = side_panel.getValue('Font size') + "px Monospace";
-
     // Get values from panel widgets (e.g. color value)
     ctx.fillStyle = side_panel.getValue('Background');
 
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.font = side_panel.getValue('Font Size') + "px Monospace";
+
+    ctx.fillStyle = side_panel.getValue('Font Color');
+
+    const text = side_panel.getValue('Text');
     const pos_2d = side_panel.getValue('2D Position');
-    ctx.fillText("This is a 2d canvas", pos_2d[0], pos_2d[1]);
-    ctx.fillText("Lexgui.js @jxarco", pos_2d[0] + 6, pos_2d[1] + 48);
+    ctx.fillText(text, pos_2d[0] + 6, pos_2d[1] + 48);
 
     requestAnimationFrame(loop);
 }
@@ -187,37 +182,37 @@ function fillPanel( panel ) {
     });    
 
     // add widgets to panel branch
-    panel.branch("Preferences", {icon: "fa-solid fa-gear", filter: true});
-    panel.addColor("Background", [1, 0.1, 0.6], (value, event) => {
-        console.log("Color: ", value);
+    panel.branch("Preferences", {icon: "fa-solid fa-gear"});
+    panel.addButton(null, "Click me, I'm Full Width...");
+    panel.addDropdown("Best Engine", ["Godot", "Unity", "Unreal Engine"], "Godot", (value, event) => {
+        console.log(value);
     });
-    panel.addText("Extensions", "", null, {placeholder: "e.g. ColorPicker"});
-    panel.addButton(null, "Apply changes");
+    panel.addVector3("I'm a Vec3", [0.1, 0.4, 0.5], (value, event) => {
+        console.log(value);
+    });
     panel.merge();
 
     // another branch
-    panel.branch("Other things");
-    panel.addDropdown("Pages", ["Federico", "Garcia", "Lorca"], "Garcia", (value, event) => {
-        console.log(value);
+    panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});
+    panel.addColor("Background", "#b7a9b1");
+    panel.addText("Text", "Lexgui.js @jxarco", null, {placeholder: "e.g. ColorPicker"});
+    panel.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
+        console.log("Font Color: ", value);
     });
-    panel.addNumber("Font size", 36, (value, event) => {
+    panel.addNumber("Font Size", 36, (value, event) => {
         console.log(value);
     }, { min: 1, max: 48 });
-    panel.addVector2("2D Position", [350, 450], (value, event) => {
+    panel.addVector2("2D Position", [250, 350], (value, event) => {
         console.log(value);
     }, { min: 0, max: 1024 });
-    panel.addVector3("Velocity", [0.1, 0.4, 0.5], (value, event) => {
-        console.log(value);
-    });
-    panel.addVector4("Shader color", [0.3, 0.3, 0.5, 1], (value, event) => {
+    panel.addVector4("I'm a Vec4", [0.3, 0.3, 0.5, 1], (value, event) => {
         console.log(value);
     });
     panel.addSeparator();
-    panel.addTitle("Configuration");
-    panel.addCheckbox("Enable", true, (value, event) => {
+    panel.addTitle("Configuration (I'm a title)");
+    panel.addCheckbox("Toggle me", true, (value, event) => {
         console.log(value);
     });
-    panel.addCheckbox("This is disabled", false, null, {disabled: true});
     panel.end();
 }
 
@@ -225,9 +220,10 @@ function fillRightBottomPanel( panel, tab ) {
     
     panel.clear();
 
-    if(tab == 'Skeleton')
+    panel.branch("Tabs", {icon: "fa-solid fa-table-list"});
+
+    if(tab == 'Horizontal')
     {
-        panel.branch("Skeleton widgets", {icon: "fa-solid fa-table-list"});
         panel.addTabs([
             { 
                 name: "First tab",
@@ -247,15 +243,16 @@ function fillRightBottomPanel( panel, tab ) {
             }
         ], { vertical: false /*, showNames: true */});
 
-         // update panel values uising widget name
+        panel.addText(null, "Widgets below are out the tabs", null, { disabled: true })
+
+        // update panel values uising widget name
         panel.addNumber("HeadRoll Value", 0, (value, event) => {
             panel.setValue('HeadRoll', value);
         }, { min: -1, max: 1, step: 0.1 });
         panel.addProgress("HeadRoll", 0, { min: -1, max: 1 });
     }
-    else if(tab == 'Blendshapes')
+    else if(tab == 'Vertical')
     {
-        panel.branch("Blendshapes widgets", {icon: "fa fa-table-list"});
         panel.addTabs([
             { 
                 name: "First tab",
