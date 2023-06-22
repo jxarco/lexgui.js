@@ -4,36 +4,29 @@ let area = LX.init();
 // change global properties after init
 // LX.DEFAULT_NAME_WIDTH = "10%";
 // LX.DEFAULT_SPLITBAR_SIZE = 15;
+// LX.OPEN_CONTEXTMENU_ENTRY = 'mouseover';
 
 // LX.message("I'm in another position", null, { position: [10, 10] });
 // LX.message("Welcome to Lexgui", "Welcome!", { draggable: true })
 
 // menu bar
 area.addMenubar( m => {
+
+    // {options}: callback, icon, short
+
     m.add( "Scene/New Scene", () => { console.log("New scene created!") });
-    m.add( "Scene/Open Scene" );
-    m.add( "Scene/" );
-    m.add( "Scene/Open Recent/hello.scene", () => { console.log("Opening scene: hello.scene") });
+    m.add( "Scene/Open Scene", { icon: "fa-solid fa-folder-open", short: "CTRL + O" } );
+    m.add( "Scene/Open Recent/hello.scene", () => { console.log("Opening 'hello.scene'") });
     m.add( "Scene/Open Recent/goodbye.scene" );
     m.add( "Project/Project Settings" );
-    m.add( "Project/Export/DAE" );
-    m.add( "Project/Export/GLTF" );
-    m.add( "Editor/Settings" );
-    m.add( "Help/Search Help" );
-    m.add( "Help/Support LexGUI/Please" );
+    m.add( "Project/Export", { icon: "fa-solid fa-download" });
+    m.add( "Project/Export/DAE", { icon: "fa-solid fa-cube", short: "D" } );
+    m.add( "Project/Export/GLTF", { short:  "G" } );
+    m.add( "Editor/Settings", { icon: "fa-solid fa-gears" } );
+    m.add( "Help", { short:  "F1" } );
+    m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass" });
+    m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
     m.add( "Help/Support LexGUI/Do it" );
-
-    // add icons for each entry
-    m.setIcon( "Project Settings", "fa-solid fa-gears" );
-    m.setIcon( "Open Scene", "fa-solid fa-folder-open" );
-    m.setIcon( "DAE", "fa-solid fa-cube" );
-    m.setIcon( "Please", "fa-solid fa-heart" );
-
-    // add key shortcuts
-    m.setShort( "Open Scene", "CTRL + O" );
-    m.setShort( "DAE", "D" );
-    m.setShort( "GLTF", "G" );
-    m.setShort( "Help", "F1" );
 });
 
 // split main area
@@ -148,7 +141,7 @@ function fillPanel( panel ) {
         }
     ];
 
-    panel.addTree("Scene Tree", scene_data, { 
+    window.tree = panel.addTree("Scene Tree", scene_data, { 
         icons: tree_icons, 
         // filter: false,
         onevent: (event) => { 
@@ -162,19 +155,19 @@ function fillPanel( panel ) {
                     console.log(event.node.id + " dbl clicked"); 
                     break;
                 case LX.TreeEvent.NODE_CONTEXTMENU: 
-                    LX.createContextMenu( event.value, m => {
+                    LX.addContextMenu( "Node", event.value, m => {
+
+                        // {options}: callback, color
+
                         m.add( "Select Children", () => console.log("select children") );
-                        m.add( "Clone", () => console.log("Clone") );
+                        m.add( "Clone", { callback: () => console.log("Clone"), color: "#0d5" } );
                         m.add( "Components/Transform");
                         m.add( "Components/MeshRenderer");
-                        m.add( "Components");
                         m.add( "Move before sibling" );
                         m.add( "Move after sibling" );
-                        m.add( "Move after sibling" );
                         m.add( "Move to parent" );
-                        m.add( "Delete" );
-
-                    }, "Node");
+                        m.add( "Delete", { color: "#f33" });
+                    });
                     break;
                 case LX.TreeEvent.NODE_DRAGGED: 
                     console.log(event.node.id + " is now child of " + event.value.id); 

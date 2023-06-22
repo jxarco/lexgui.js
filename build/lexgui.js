@@ -14,12 +14,74 @@
 
     function clamp (num, min, max) { return Math.min(Math.max(num, min), max) }
 
+    function deepCopy(o) { return JSON.parse(JSON.stringify(o)) }
+
+    function hexToRgb(string) {
+        const red = parseInt(string.substring(1, 3), 16) / 255;
+        const green = parseInt(string.substring(3, 5), 16) / 255;
+        const blue = parseInt(string.substring(5, 7), 16) / 255;
+        return [red, green, blue];
+    }
+
+    function rgbToHex(rgb) {
+        let hex = "#";
+        for(let c of rgb) {
+            c = Math.floor(c * 255);
+            hex += c.toString(16);
+        }
+        return hex;
+    }
+
     function simple_guidGenerator() {
         var S4 = function() {
            return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
         };
         return (S4()+"-"+S4());
     }
+
+    /**
+     * @method init
+     * @param {*} options 
+     * container: Root location for the gui (default is the document body)
+     */
+
+    function init(options = {})
+    {
+        if(this.ready)
+            return;
+
+        // LexGUI root 
+		var root = document.createElement("div");
+		root.id = "lexroot";
+        
+        var modal = document.createElement("div");
+        modal.id = "modal";
+
+        this.modal = modal;
+        this.root = root;
+        this.container = document.body;
+
+        this.modal.toggleAttribute('hidden', true);
+        this.modal.toggle = function(force) { this.toggleAttribute('hidden', force); };
+
+        if(options.container)
+            this.container = document.getElementById(options.container);
+        
+        this.container.appendChild( modal );
+        this.container.appendChild( root );
+
+        // Global vars
+        this.DEFAULT_NAME_WIDTH     = "30%";
+        this.DEFAULT_SPLITBAR_SIZE  = 4;
+        this.OPEN_CONTEXTMENU_ENTRY = 'click';
+
+        this.ready = true;
+
+        // Create main area
+        return new Area( {id: options.id ?? "mainarea"} );
+    }
+
+    LX.init = init;
 
     class IEvent {
 
@@ -69,49 +131,6 @@
     };
 
     LX.MenubarEvent = MenubarEvent;
-
-    /**
-     * @method init
-     * @param {*} options 
-     * container: Root location for the gui (default is the document body)
-     */
-
-    function init(options = {})
-    {
-        if(this.ready)
-            return;
-
-        // LexGUI root 
-		var root = document.createElement("div");
-		root.id = "lexroot";
-        
-        var modal = document.createElement("div");
-        modal.id = "modal";
-
-        this.modal = modal;
-        this.root = root;
-        this.container = document.body;
-
-        this.modal.toggleAttribute('hidden', true);
-        this.modal.toggle = function(force) { this.toggleAttribute('hidden', force); };
-
-        if(options.container)
-            this.container = document.getElementById(options.container);
-        
-        this.container.appendChild( modal );
-        this.container.appendChild( root );
-
-        // Global vars
-        this.DEFAULT_NAME_WIDTH     = "30%";
-        this.DEFAULT_SPLITBAR_SIZE  = 4;
-
-        this.ready = true;
-
-        // Create main area
-        return new Area( {id: options.id ?? "mainarea"} );
-    }
-
-    LX.init = init;
 
     /**
      * @method message
@@ -202,16 +221,18 @@
 
     LX.message = message;
 	
-    function createContextMenu( event, callback, title )
+    function addContextMenu( title, event, callback )
     {
-        var menu = new ContextMenu( event, { 'title': title } );
+        var menu = new ContextMenu( event, title );
         this.root.appendChild(menu.root);
 
         if(callback)
             callback( menu );
+
+        menu.onCreate();
     }
 
-    LX.createContextMenu = createContextMenu;
+    LX.addContextMenu = addContextMenu;
 
     class Area {
 
@@ -545,14 +566,6 @@
             this.shorts = {};
         }
 
-        setIcon( token, icon ) {
-            this.icons[ token ] = icon;
-        }
-
-        setShort( token, short ) {
-            this.shorts[ token ] = short;
-        }
-
         /**
          * @method add
          * @param {*} options:
@@ -566,6 +579,12 @@
 
             // process path
             const tokens = path.split("/");
+
+            // assign icons and shortcuts to last token in path
+            const lastPath = tokens[tokens.length - 1];
+            this.icons[ lastPath ] = options.icon;
+            this.shorts[ lastPath ] = options.short;
+
             let idx = 0;
             let that = this;
 
@@ -796,6 +815,222 @@
     }
 
     LX.Widget = Widget;
+    
+    /**
+     * @class NodeTree
+     */
+
+    class NodeTree {
+            
+        constructor(domEl, data, onevent) {
+            this.domEl = domEl;
+            this.data = data;
+            this.onevent = onevent;
+            this.#create_item(null, data);
+        }
+
+        #create_item( parent, node, level = 0 ) {
+
+            const that = this;
+            const node_filter_input = this.domEl.querySelector("#lexnodetree_filter");
+
+            if(node_filter_input && !node.id.includes(node_filter_input.value))
+            {
+                for( var i = 0; i < node.children.length; ++i )
+                    this.#create_item( node, node.children[i], level + 1 );
+                return;
+            }
+
+            const list = this.domEl.querySelector("ul");
+
+            node.visible = node.visible ?? true;
+            node.parent = parent;
+            const is_parent = node.children.length > 0;
+
+            var item = document.createElement('li');
+            item.className = "lextreeitem " + "datalevel" + level + " " + (is_parent ? "parent" : "");
+            item.id = node.id;
+            // Select icon
+            let icon = "fa-solid fa-square"; // Default: no childs
+            if( is_parent ) icon = node.closed ? "fa-solid fa-caret-right" : "fa-solid fa-caret-down";
+            item.innerHTML = "<a class='" + icon + "'></a>" + (node.rename ? "" : node.id);
+            item.setAttribute('draggable', true);
+            item.style.paddingLeft = ((is_parent ? 0 : 3 ) + (3 + (level+1) * 25)) + "px";
+            list.appendChild(item);
+
+            // Callbacks
+            item.addEventListener("click", function(){
+                list.querySelectorAll("li").forEach( e => { e.classList.remove('selected'); } );
+                this.classList.add('selected');
+                if(that.onevent) {
+                    const event = new TreeEvent(TreeEvent.NODE_SELECTED, node);
+                    that.onevent( event );
+                }
+            });
+
+            item.addEventListener("dblclick", function() {
+                // Trigger rename
+                node.rename = true;
+                that.refresh();
+                if(that.onevent) {
+                    const event = new TreeEvent(TreeEvent.NODE_DBLCLICKED, node);
+                    that.onevent( event );
+                }
+            });
+
+            item.addEventListener("contextmenu", function(e) {
+                e.preventDefault();
+                if(that.onevent) {
+                    const event = new TreeEvent(TreeEvent.NODE_CONTEXTMENU, node, e);
+                    that.onevent( event );
+                }
+            });
+
+            // Node rename
+
+            let name_input = document.createElement('input');
+            name_input.toggleAttribute('hidden', !node.rename);
+            name_input.value = node.id;
+            item.appendChild(name_input);            
+
+            if(node.rename) {
+                item.classList.add('selected');
+                name_input.focus();
+            }
+
+            name_input.addEventListener("keyup", function(e){
+                if(e.key == 'Enter') {
+
+                    if(that.onevent) {
+                        const event = new TreeEvent(TreeEvent.NODE_RENAMED, node, this.value);
+                        that.onevent( event );
+                    }
+
+                    node.id = this.value;
+                    delete node.rename;
+                    that.refresh();
+                    list.querySelector("#" + this.value).classList.add('selected');
+                }
+                if(e.key == 'Escape') {
+                    delete node.rename;
+                    that.refresh();
+                }
+            });
+
+            name_input.addEventListener("blur", function(e){
+                delete node.rename;
+                that.refresh();
+            });
+
+            // Drag nodes
+            if(parent) // Root doesn't move!
+            {
+                item.addEventListener("dragstart", e => {
+                    window.__tree_node_dragged = node;
+                });
+            }
+
+            /* Events fired on other node items */
+            item.addEventListener("dragover", e => {
+                e.preventDefault(); // allow drop
+            }, false );
+            item.addEventListener("dragenter", (e) => {
+                e.target.classList.add("draggingover");
+            });
+            item.addEventListener("dragleave", (e) => {
+                e.target.classList.remove("draggingover");
+            });
+            item.addEventListener("drop", e => {
+                e.preventDefault(); // Prevent default action (open as link for some elements)
+                let dragged = window.__tree_node_dragged;
+                if(!dragged)
+                    return;
+                let target = node;
+                // Can't drop to same node
+                if(dragged.id == target.id) {
+                    console.warn("Cannot parent node to itself!");
+                    return;
+                }
+
+                // Can't drop to child node
+                const isChild = function(new_parent, node) {
+                    var result = false;
+                    for( var c of node.children ) {
+                        if( c.id == new_parent.id )
+                            return true;
+                        result |= isChild(new_parent, c);
+                    }
+                    return result;
+                };
+
+                if(isChild(target, dragged)) {
+                    console.warn("Cannot parent node to a current child!");
+                    return;
+                }
+
+                // Trigger node dragger event
+                if(that.onevent) {
+                    const event = new TreeEvent(TreeEvent.NODE_DRAGGED, dragged, target);
+                    that.onevent( event );
+                }
+
+                const index = dragged.parent.children.findIndex(n => n.id == dragged.id);
+                const removed = dragged.parent.children.splice(index, 1);
+                target.children.push( removed[0] );
+                that.refresh();
+                delete window.__tree_node_dragged;
+            });
+
+            // Show/hide children
+            if(is_parent) {
+                item.querySelector('a').addEventListener("click", function(){
+                    node.closed = !node.closed;
+                    that.refresh();
+                });
+            }
+
+            // Add button icons
+
+            let visibility = document.createElement('a');
+            visibility.className = "itemicon fa-solid fa-eye" + (!node.visible ? "-slash" : "");
+            visibility.title = "Toggle visible";
+            visibility.addEventListener("click", function(e) {
+                e.stopPropagation();
+                node.visible = node.visible === undefined ? false : !node.visible;
+                this.className = "itemicon fa-solid fa-eye" + (!node.visible ? "-slash" : "");
+                // Trigger visibility event
+                if(that.onevent) {
+                    const event = new TreeEvent(TreeEvent.NODE_VISIBILITY, node, node.visible);
+                    that.onevent( event );
+                }
+            });
+            item.appendChild(visibility);
+
+            if(node.actions) 
+            {
+                for(var i = 0; i < node.actions.length; ++i) {
+                    let a = node.actions[i];
+                    var actionEl = document.createElement('a');
+                    actionEl.className = "itemicon " + a.icon;
+                    actionEl.title = a.name;
+                    actionEl.addEventListener("click", a.callback);
+                    item.appendChild(actionEl);
+                }
+            }
+
+            if(node.closed)
+                return;
+
+            for( var i = 0; i < node.children.length; ++i )
+                this.#create_item( node, node.children[i], level + 1 );
+        }
+
+        refresh(newData) {
+            this.data = newData ?? this.data;
+            this.domEl.querySelector("ul").innerHTML = "";
+            this.#create_item( null, this.data );
+        }
+    }
 
     class Panel {
 
@@ -1284,22 +1519,6 @@
             element.appendChild(container);
         }
 
-        static #hexToRgb(string) {
-            const red = parseInt(string.substring(1, 3), 16) / 255;
-            const green = parseInt(string.substring(3, 5), 16) / 255;
-            const blue = parseInt(string.substring(5, 7), 16) / 255;
-            return [red, green, blue];
-        }
-
-        static #rgbToHex(rgb) {
-            let hex = "#";
-            for(let c of rgb) {
-                c = Math.floor(c * 255);
-                hex += c.toString(16);
-            }
-            return hex;
-        }
-
         /**
          * @method addColor
          * @param {String} name Widget name
@@ -1336,7 +1555,7 @@
             color.className = "colorinput";
             color.id = "color" + simple_guidGenerator();
             color.useRGB = options.useRGB ?? true;
-            color.value = color.iValue = value.constructor === Array ? Panel.#rgbToHex(value) : value;
+            color.value = color.iValue = value.constructor === Array ? rgbToHex(value) : value;
             
             if(options.disabled) {
                 color.disabled = true;
@@ -1372,7 +1591,7 @@
                     }
 
                     if(color.useRGB)
-                        val = Panel.#hexToRgb(val);
+                        val = hexToRgb(val);
 
                     this.#trigger( new IEvent(name, val, e), callback );
                 }, false);
@@ -1726,11 +1945,12 @@
             if(options.filter)
             {
                 node_filter_input = document.createElement('input');
+                node_filter_input.id = "lexnodetree_filter";
                 node_filter_input.setAttribute("placeholder", "Filter..");
                 node_filter_input.style.width =  "calc( 100% - 17px )";
                 node_filter_input.style.marginTop =  "-6px";
                 node_filter_input.addEventListener('input', function(){
-                    update_tree();
+                    nodeTree.refresh();
                 });
         
                 let searchIcon = document.createElement('a');
@@ -1750,205 +1970,11 @@
                 e.preventDefault();
             });
 
-            const update_tree = function() {
-                list.innerHTML = "";
-                create_item( null, data );
-            };
-
-            const create_item = function( parent, node, level = 0 ) {
-
-                if(node_filter_input && !node.id.includes(node_filter_input.value))
-                {
-                    for( var i = 0; i < node.children.length; ++i )
-                        create_item( node, node.children[i], level + 1 );
-                    return;
-                }
-
-                node.visible = node.visible ?? true;
-                node.parent = parent;
-                const is_parent = node.children.length > 0;
-
-                var item = document.createElement('li');
-                item.className = "lextreeitem " + "datalevel" + level + " " + (is_parent ? "parent" : "");
-                item.id = node.id;
-                // Select icon
-                let icon = "fa-solid fa-square"; // Default: no childs
-                if( is_parent ) icon = node.closed ? "fa-solid fa-caret-right" : "fa-solid fa-caret-down";
-                item.innerHTML = "<a class='" + icon + "'></a>" + (node.rename ? "" : node.id);
-                item.setAttribute('draggable', true);
-                item.style.paddingLeft = ((is_parent ? 0 : 3 ) + (3 + (level+1) * 25)) + "px";
-                list.appendChild(item);
-
-                // Callbacks
-                item.addEventListener("click", function(){
-                    list.querySelectorAll("li").forEach( e => { e.classList.remove('selected'); } );
-                    this.classList.add('selected');
-                    if(options.onevent) {
-                        const event = new TreeEvent(TreeEvent.NODE_SELECTED, node);
-                        options.onevent( event );
-                    }
-                });
-
-                item.addEventListener("dblclick", function() {
-                    // Trigger rename
-                    node.rename = true;
-                    update_tree();
-                    if(options.onevent) {
-                        const event = new TreeEvent(TreeEvent.NODE_DBLCLICKED, node);
-                        options.onevent( event );
-                    }
-                });
-
-                item.addEventListener("contextmenu", function(e) {
-                    e.preventDefault();
-                    if(options.onevent) {
-                        const event = new TreeEvent(TreeEvent.NODE_CONTEXTMENU, node, e);
-                        options.onevent( event );
-                    }
-                });
-
-                // Node rename
-
-                let name_input = document.createElement('input');
-                name_input.toggleAttribute('hidden', !node.rename);
-                name_input.value = node.id;
-                item.appendChild(name_input);            
-
-                if(node.rename) {
-                    item.classList.add('selected');
-                    name_input.focus();
-                }
-
-                name_input.addEventListener("keyup", function(e){
-                    if(e.key == 'Enter') {
-
-                        if(options.onevent) {
-                            const event = new TreeEvent(TreeEvent.NODE_RENAMED, node, this.value);
-                            options.onevent( event );
-                        }
-
-                        node.id = this.value;
-                        delete node.rename;
-                        update_tree();
-                        list.querySelector("#" + this.value).classList.add('selected');
-                    }
-                    if(e.key == 'Escape') {
-                        delete node.rename;
-                        update_tree();
-                    }
-                });
-
-                name_input.addEventListener("blur", function(e){
-                    delete node.rename;
-                    update_tree();
-                });
-
-                // Drag nodes
-                if(parent) // Root doesn't move!
-                {
-                    item.addEventListener("dragstart", e => {
-                        window.__tree_node_dragged = node;
-                    });
-                }
-
-                /* Events fired on other node items */
-                item.addEventListener("dragover", e => {
-                    e.preventDefault(); // allow drop
-                }, false );
-                item.addEventListener("dragenter", (e) => {
-                    e.target.classList.add("draggingover");
-                });
-                item.addEventListener("dragleave", (e) => {
-                    e.target.classList.remove("draggingover");
-                });
-                item.addEventListener("drop", e => {
-                    e.preventDefault(); // Prevent default action (open as link for some elements)
-                    let dragged = window.__tree_node_dragged;
-                    if(!dragged)
-                        return;
-                    let target = node;
-                    // Can't drop to same node
-                    if(dragged.id == target.id) {
-                        console.warn("Cannot parent node to itself!");
-                        return;
-                    }
-
-                    // Can't drop to child node
-                    const isChild = function(new_parent, node) {
-                        var result = false;
-                        for( var c of node.children ) {
-                            if( c.id == new_parent.id )
-                                return true;
-                            result |= isChild(new_parent, c);
-                        }
-                        return result;
-                    };
-
-                    if(isChild(target, dragged)) {
-                        console.warn("Cannot parent node to a current child!");
-                        return;
-                    }
-
-                    // Trigger node dragger event
-                    if(options.onchange) {
-                        const event = new TreeEvent(TreeEvent.NODE_DRAGGED, dragged, target);
-                        options.onchange( event );
-                    }
-
-                    const index = dragged.parent.children.findIndex(n => n.id == dragged.id);
-                    const removed = dragged.parent.children.splice(index, 1);
-                    target.children.push( removed[0] );
-                    update_tree();
-                    delete window.__tree_node_dragged;
-                });
-
-                // Show/hide children
-                if(is_parent) {
-                    item.querySelector('a').addEventListener("click", function(){
-                        node.closed = !node.closed;
-                        update_tree();
-                    });
-                }
-
-                // Add button icons
-
-                let visibility = document.createElement('a');
-                visibility.className = "itemicon fa-solid fa-eye" + (!node.visible ? "-slash" : "");
-                visibility.title = "Toggle visible";
-                visibility.addEventListener("click", function(){
-                    node.visible = node.visible === undefined ? false : !node.visible;
-                    this.className = "itemicon fa-solid fa-eye" + (!node.visible ? "-slash" : "");
-                    // Trigger visibility event
-                    if(options.onchange) {
-                        const event = new TreeEvent(TreeEvent.NODE_VISIBILITY, node, node.visible);
-                        options.onchange( event );
-                    }
-                });
-                item.appendChild(visibility);
-
-                if(node.actions) 
-                {
-                    for(var i = 0; i < node.actions.length; ++i) {
-                        let a = node.actions[i];
-                        var actionEl = document.createElement('a');
-                        actionEl.className = "itemicon " + a.icon;
-                        actionEl.title = a.name;
-                        actionEl.addEventListener("click", a.callback);
-                        item.appendChild(actionEl);
-                    }
-                }
-
-                if(node.closed)
-                    return;
-
-                for( var i = 0; i < node.children.length; ++i )
-                    create_item( node, node.children[i], level + 1 );
-            };
-
-            create_item( null, data );
-
             container.appendChild(list);
             this.root.appendChild(container);
+
+            const nodeTree = new NodeTree( container, data, options.onevent );
+            return nodeTree;
         }
 
         /**
@@ -2208,29 +2234,48 @@
 
     class ContextMenu {
 
-        constructor( event, options = {} ) {
+        constructor( event, title ) {
             
             // remove all context menus
             document.body.querySelectorAll(".lexcontextmenubox").forEach(e => e.remove());
 
             this.root = document.createElement('div');
             this.root.className = "lexcontextmenubox";
-            this.root.style.left = (event.x - 15) + "px";
-            this.root.style.top = (event.y - 15) + "px";
+            this.root.style.left = (event.x - 16) + "px";
+            this.root.style.top = (event.y - 8) + "px";
 
             this.root.addEventListener("mouseleave", function() {
                 this.remove();
             });
             
             this.items = [];
-            this.icons = {};
-            this.shorts = {};
+            this.colors = {};
 
-            if(options.title) {
+            if(title) {
                 const item = {};
-                item[ options.title ] = [];
+                item[ title ] = [];
                 item[ 'className' ] = "cmtitle";
+                item[ 'icon' ] = "fa-solid fa-ellipsis-vertical";
                 this.items.push( item );
+            }
+        }
+
+        #adjust_position(div, margin, useAbsolute = false) {
+            
+            let rect = div.getBoundingClientRect();
+            
+            if(!useAbsolute)
+            {   
+                let width = rect.width + 36; // this has paddings
+                if(window.innerWidth - rect.right < 0)
+                    div.style.left = (window.innerWidth - width - margin) + "px";
+            }
+            else
+            {
+                let dt = window.innerWidth - rect.right;
+                if(dt < 0) {
+                    div.style.left = div.offsetLeft + (dt - margin) + "px";
+                }
             }
         }
 
@@ -2238,10 +2283,6 @@
 
             let contextmenu = document.createElement('div');
             contextmenu.className = "lexcontextmenubox";
-            var rect = c.getBoundingClientRect();
-            contextmenu.style.left = (rect.width - 2) + "px";
-            // Entries use css to set top relative to parent
-            contextmenu.style.top = "0px";
             c.appendChild( contextmenu );
 
             for( var i = 0; i < o[k].length; ++i )
@@ -2251,8 +2292,13 @@
                 this.#create_entry(subitem, subkey, contextmenu, d);
             }
 
+            var rect = c.getBoundingClientRect();
+            contextmenu.style.left = rect.width + "px";
+            contextmenu.style.marginTop = 6 - c.offsetHeight + "px";
+
             // Set final width
             contextmenu.style.width = contextmenu.offsetWidth + "px";
+            this.#adjust_position( contextmenu, 6, true );
         }
 
         #create_entry( o, k, c, d ) {
@@ -2260,64 +2306,62 @@
             const hasSubmenu = o[ k ].length;
             let entry = document.createElement('div');
             entry.className = "lexcontextmenuentry" + (o[ 'className' ] ? " " + o[ 'className' ] : "" );
-            // entry.className += (this.items.indexOf(item) == this.items.length - 1 ? " last" : "");
-            if(k == '')
-                entry.className = " lexseparator";
-            else {
-                entry.id = k.replace(/\s/g, '');
-                entry.innerHTML = "";
-                const icon = this.icons[ k ];
-                if(icon) {
-                    entry.innerHTML += "<a class='" + icon + " fa-sm'></a>";
-                }
-                entry.innerHTML += "<div class='lexentryname'>" + k + "</div>";
+            entry.id = k.replace(/\s/g, '');
+            entry.innerHTML = "";
+            const icon = o[ 'icon' ];
+            if(icon) {
+                entry.innerHTML += "<a class='" + icon + " fa-sm'></a>";
             }
+            entry.innerHTML += "<div class='lexentryname'>" + k + "</div>";
             c.appendChild( entry );
 
-            // Nothing more for separators
-            if(k == '') return;
+            if( this.colors[ k ] )
+            {
+                entry.style.borderColor = this.colors[ k ];
+            }
 
             // Add callback
             entry.addEventListener("click", e => {
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                
                 const f = o[ 'callback' ];
                 if(f) {
                     f.call( this, new MenubarEvent(entry, k) );
                     this.root.remove();
                 } 
-                e.stopPropagation();
-                e.stopImmediatePropagation();
+
+                if( LX.OPEN_CONTEXTMENU_ENTRY == 'click' )
+                    this.#create_submenu( o, k, entry, ++d );
             });
 
-            // Add icon if has submenu, else check for shortcut
             if( !hasSubmenu)
-            {
-                if(this.shorts[ k ]) {
-                    let shortEl = document.createElement('div');
-                    shortEl.className = "lexentryshort";
-                    shortEl.innerText = this.shorts[ k ];
-                    entry.appendChild( shortEl );
-                }
                 return;
-            }
 
             let submenuIcon = document.createElement('a');
-            submenuIcon.className = "fa-solid fa-angle-right fa-xs";
+            submenuIcon.className = "fa-solid fa-bars-staggered fa-xs";
             entry.appendChild( submenuIcon );
 
-            entry.addEventListener("mouseover", e => {
-                if(entry.built)
-                return;
-                entry.built = true;
-                this.#create_submenu( o, k, entry, ++d );
-                e.stopPropagation();
-            });
+            if( LX.OPEN_CONTEXTMENU_ENTRY == 'mouseover' )
+            {
+                entry.addEventListener("mouseover", e => {
+                    if(entry.built)
+                        return;
+                    entry.built = true;
+                    this.#create_submenu( o, k, entry, ++d );
+                    e.stopPropagation();
+                });
+            }
 
             entry.addEventListener("mouseleave", () => {
                 d = -1; // Reset depth
-                delete entry.built;
+                // delete entry.built;
                 c.querySelectorAll(".lexcontextmenubox").forEach(e => e.remove());
             });
+        }
 
+        onCreate() {
+            this.#adjust_position( this.root, 6 );
         }
 
         add( path, options = {} ) {
@@ -2327,6 +2371,11 @@
 
             // process path
             const tokens = path.split("/");
+
+            // assign color to last token in path
+            const lastPath = tokens[tokens.length - 1];
+            this.colors[ lastPath ] = options.color;
+
             let idx = 0;
 
             const insert = (token, list) => {
@@ -2349,13 +2398,42 @@
                     // Check if last token -> add callback
                     if(!next_token) {
                         item[ 'callback' ] = options.callback;
-                    }
+                    } 
+
                     list.push( item );
                     insert( next_token, item[ token ] ); 
                 }
             };
 
             insert( tokens[idx++], this.items );
+
+            // Set parents
+
+            const setParent = _item => {
+
+                let key = Object.keys(_item)[0];
+                let children = _item[ key ];
+
+                if(!children.length)
+                    return;
+
+                if(children.find( c => Object.keys(c)[0] == key ) == null)
+                {
+                    const parent = {};
+                    parent[ key ] = [];
+                    parent[ 'className' ] = "cmtitle";
+                    _item[ key ].unshift( parent );
+                }
+
+                for( var child of _item[ key ] ) {
+                    let k = Object.keys(child)[0];
+                    for( var i = 0; i < child[k].length; ++i )
+                        setParent(child);
+                }
+            };
+
+            for( let item of this.items )
+                setParent(item);
 
             // Create elements
 
@@ -2364,11 +2442,17 @@
                 let key = Object.keys(item)[0];
 
                 // Item already created
-                if( this.root.querySelector("#" + key.replace(/\s/g, '')) )
-                    continue;
-
-                this.#create_entry(item, key, this.root, -1);
+                if( !this.root.querySelector("#" + key.replace(/\s/g, '')) )
+                    this.#create_entry(item, key, this.root, -1);
             }
+        }
+
+        setColor( token, color ) {
+
+            if(color[0] !== '#')
+                color = rgbToHex(color);
+
+            this.colors[ token ] = color;
         }
         
     };

@@ -214,8 +214,8 @@ TODO List:
 - ~~Start Documentation~~
 - ~~Event system~~
 - ~~Context Menus~~
-- Open context menus the other way around if not enough space
-- Add title to any subentry in context menus
+- ~~Add title to any subentry in context menus~~
+- ~~Open context menus the other way around if not enough space~~
 - Resize callbacks
 - Dialogs
 - Multiple widgets per row
