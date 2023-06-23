@@ -769,17 +769,18 @@
 
     class Widget {
         
-        static TEXT     = 0;
-        static TEXT     = 1;
-        static BUTTON   = 2;
-        static DROPDOWN = 3;
-        static CHECKBOX = 4;
-        static COLOR    = 5;
-        static NUMBER   = 6;
-        static TITLE    = 7;
-        static VECTOR   = 8;
-        static TREE     = 9;
-        static PROGRESS = 10;
+        static TEXT         = 0;
+        static TEXT         = 1;
+        static BUTTON       = 2;
+        static DROPDOWN     = 3;
+        static CHECKBOX     = 4;
+        static COLOR        = 5;
+        static NUMBER       = 6;
+        static TITLE        = 7;
+        static VECTOR       = 8;
+        static TREE         = 9;
+        static PROGRESS     = 10;
+        static SEPARATOR    = 11;
 
         constructor(name, type, options) {
             this.name = name;
@@ -1224,7 +1225,8 @@
 
                 if(this.current_branch)
                 {
-                    this.current_branch.widgets.push( widget );
+                    if(!options.skipWidget) 
+                        this.current_branch.widgets.push( widget );
                     this.current_branch.content.appendChild( element );
                 }
                 else
@@ -1243,7 +1245,8 @@
         #add_filter( placeholder, options = {} ) {
 
             options.placeholder = placeholder.constructor == String ? placeholder : "Filter properties"
-            
+            options.skipWidget = true;
+
             let widget = this.#create_widget(null, Widget.TEXT, options);
             let element = widget.domEl;
             element.className += " lexfilter noname";
@@ -1279,12 +1282,19 @@
                     // push to right container
                     that.queuedContainer = b.content;
 
+                    const emptyFilter = !input.value.length;
+
                     // add widgets
                     for( let w of b.widgets ) {
-                        if(!w.name) continue;
-                        const filterWord = input.value.toLowerCase();
-                        const name = w.name.toLowerCase();
-                        if(!name.includes(input.value)) continue;
+
+                        if(!emptyFilter)
+                        {
+                            if(!w.name) continue;
+                            const filterWord = input.value.toLowerCase();
+                            const name = w.name.toLowerCase();
+                            if(!name.includes(input.value)) continue;
+                        }
+
                         // insert filtered widget
                         that.queuedContainer.appendChild( w.domEl );
                     }
@@ -2030,9 +2040,13 @@
 
             var element = document.createElement('div');
             element.className = "lexseparator";
-            if(this.current_branch)
+            let widget = new Widget( null, Widget.SEPARATOR );
+            widget.domEl = element;
+            
+            if(this.current_branch) {
                 this.current_branch.content.appendChild( element );
-            else 
+                this.current_branch.widgets.push( widget );
+            } else 
                 this.root.appendChild(element);
         }
 

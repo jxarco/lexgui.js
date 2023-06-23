@@ -54,6 +54,7 @@ TODO List:
 - ~~Create addPanel to avoid instancing and attaching a panel to an area~~
 - ~~Resize callbacks~~
 - ~~Timeline~~
+- ~~Fix filter properties (separator is not in right place)~~
 - Open context menus the other way around if not enough space (vertical!!!)
 - Dialogs
 - Multiple widgets per row
