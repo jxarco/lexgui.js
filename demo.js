@@ -3,7 +3,7 @@ let area = LX.init();
 
 // change global properties after init
 // LX.DEFAULT_NAME_WIDTH = "10%";
-// LX.DEFAULT_SPLITBAR_SIZE = 15;
+// LX.DEFAULT_SPLITBAR_SIZE = 16;
 // LX.OPEN_CONTEXTMENU_ENTRY = 'mouseover';
 
 // LX.message("I'm in another position", null, { position: [10, 10] });
@@ -16,8 +16,8 @@ area.addMenubar( m => {
 
     m.add( "Scene/New Scene", () => { console.log("New scene created!") });
     m.add( "Scene/Open Scene", { icon: "fa-solid fa-folder-open", short: "CTRL + O" } );
-    m.add( "Scene/Open Recent/hello.scene", () => { console.log("Opening 'hello.scene'") });
-    m.add( "Scene/Open Recent/goodbye.scene" );
+    m.add( "Scene/Open Recent/hello.scene", name => { console.log("Opening " + name) });
+    m.add( "Scene/Open Recent/goodbye.scene", name => { console.log("Opening " + name) });
     m.add( "Project/Project Settings" );
     m.add( "Project/Export", { icon: "fa-solid fa-download" });
     m.add( "Project/Export/DAE", { icon: "fa-solid fa-cube", short: "D" } );
@@ -47,8 +47,8 @@ bottom.onresize = bounding => {
 
 // another menu bar
 bottom.addMenubar( m => {
-    m.add( "Information", e => { 
-        console.log(e); 
+    m.add( "Information", name => { 
+        console.log(name);
         var el = document.getElementById('kf-timeline');
         if(el)
             el.style.display = 'none';
@@ -59,8 +59,8 @@ bottom.addMenubar( m => {
         bottom_panel.root.style.display = 'block';
     });
 
-    m.add( "Keyframes Timeline", e => { 
-        console.log(e);
+    m.add( "Keyframes Timeline", name => { 
+        console.log(name);
         let el = document.getElementById('bottom-panel');
         if(el)
             el.style.display = 'none';
@@ -86,12 +86,11 @@ bottom.addMenubar( m => {
         }
     });
 
-    m.add( "Clips Timeline", e => { 
-        console.log(e);
+    m.add( "Clips Timeline", name => { 
+        console.log(name);
         let el = document.getElementById('bottom-panel');
         if(el)
             el.style.display = 'none';
-        
         el = document.getElementById('kf-timeline');
         if(el)
             el.style.display = 'none';
@@ -103,15 +102,9 @@ bottom.addMenubar( m => {
             clipsTimeline = new LX.KeyFramesTimeline("clips-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
             bottom.attach(clipsTimeline);
             clipsTimeline.draw(0);
-            
-            bottom.onResize = (a) => {
-                clipsTimeline.resize(a)
-            }
         }
-
     });
-
-} );
+});
 
 // split right area
 right.split({type: 'vertical', sizes:["70vh","30vh"]});
@@ -119,8 +112,8 @@ var [rup, rbottom] = right.sections;
 
 // another menu bar
 rbottom.addMenubar( m => {
-    m.add( "Vertical", e => { console.log(e); fillRightBottomPanel( side_bottom_panel, e.name ); });
-    m.add( "Horizontal", e => { console.log(e); fillRightBottomPanel( side_bottom_panel, e.name ); });
+    m.add( "Vertical", name => { console.log(name); fillRightBottomPanel( side_bottom_panel, name ); });
+    m.add( "Horizontal", name => { console.log(name); fillRightBottomPanel( side_bottom_panel, name ); });
 }, { float: 'center' } );
 
 // add canvas to left upper part

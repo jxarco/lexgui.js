@@ -72,7 +72,7 @@
 
         // Global vars
         this.DEFAULT_NAME_WIDTH     = "30%";
-        this.DEFAULT_SPLITBAR_SIZE  = 4;
+        this.DEFAULT_SPLITBAR_SIZE  = 6;
         this.OPEN_CONTEXTMENU_ENTRY = 'click';
 
         this.ready = true;
@@ -122,15 +122,6 @@
     };
 
     LX.TreeEvent = TreeEvent;
-
-    class MenubarEvent {
-        constructor( domEl, name ) {
-            this.domEl = domEl;
-            this.name = name;
-        }
-    };
-
-    LX.MenubarEvent = MenubarEvent;
 
     /**
      * @method message
@@ -350,10 +341,14 @@
                 this.split_bar = document.createElement("div");
                 this.split_bar.className = "lexsplitbar " + type;
 
-                if(type == "horizontal")
+                if(type == "horizontal") {
                     this.split_bar.style.width = LX.DEFAULT_SPLITBAR_SIZE + "px";
-                else
+                    this.split_bar.style.left = -LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
+                }
+                else {
                     this.split_bar.style.height = LX.DEFAULT_SPLITBAR_SIZE + "px";
+                    this.split_bar.style.top = -LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
+                }
                 this.split_bar.addEventListener("mousedown", inner_mousedown);
                 data = LX.DEFAULT_SPLITBAR_SIZE/2 + "px"; // updates
             }
@@ -705,7 +700,7 @@
                         subentry.addEventListener("click", e => {
                             const f = subitem[ 'callback' ];
                             if(f) {
-                                f.call( this, new MenubarEvent(subentry, subkey) );
+                                f.call( this, subkey, subentry );
                                 that.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());  
                             } 
                             e.stopPropagation();
@@ -751,7 +746,7 @@
 
                     const f = item[ 'callback' ];
                     if(f) {
-                        f.call( this, new MenubarEvent(entry, key) );
+                        f.call( this, key, entry );
                         return;
                     } 
 
@@ -2385,7 +2380,7 @@
                 
                 const f = o[ 'callback' ];
                 if(f) {
-                    f.call( this, new MenubarEvent(entry, k) );
+                    f.call( this, k, entry );
                     this.root.remove();
                 } 
 
