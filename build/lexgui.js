@@ -420,8 +420,8 @@
                 last_pos[1] = e.pageY;
                 e.stopPropagation();
                 e.preventDefault();
-                document.body.classList.add("dragging-split-area");
-                that.split_bar.classList.add("dragging-split-area");
+                document.body.classList.add("nocursor");
+                that.split_bar.classList.add("nocursor");
             }
 
             function inner_mousemove(e)
@@ -447,8 +447,8 @@
                 var doc = that.root.ownerDocument;
                 doc.removeEventListener("mousemove",inner_mousemove);
                 doc.removeEventListener("mouseup",inner_mouseup);
-                document.body.classList.remove("dragging-split-area");
-                that.split_bar.classList.remove("dragging-split-area");
+                document.body.classList.remove("nocursor");
+                that.split_bar.classList.remove("nocursor");
             }
         }
 
@@ -1375,6 +1375,7 @@
             let wValue = document.createElement('input');
             wValue.value = wValue.iValue = value || "";
             wValue.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+            wValue.style.marginLeft = "4px";
 
             if(options.disabled) wValue.setAttribute("disabled", true);
             if(options.placeholder) wValue.setAttribute("placeholder", options.placeholder);
@@ -2146,7 +2147,6 @@
             var that = this;
 
             this.root = root;
-            this.sizeLeft = LX.DEFAULT_NAME_WIDTH;
             this.widgets = [];
 
             // create element
@@ -2205,13 +2205,13 @@
 
             var grabber = document.createElement('div');
             grabber.innerHTML = "&#9662;";
-            grabber.style.marginLeft = this.sizeLeft;
+            grabber.style.marginLeft = LX.DEFAULT_NAME_WIDTH;
             element.appendChild(grabber);
 
             var line = document.createElement('div');
             line.style.width = "1px";
-            line.style.marginLeft = "4px";
-            line.style.marginTop = "-5px";
+            line.style.marginLeft = "6px";
+            line.style.marginTop = "2px";
             line.style.height = "0px"; // get in time
             grabber.appendChild(line);
             grabber.addEventListener("mousedown", inner_mousedown);
@@ -2237,15 +2237,15 @@
                 e.preventDefault();
                 var h = getBranchHeight();
                 line.style.height = (h-3) + "px";
+                document.body.classList.add('nocursor');
             }
             
             function inner_mousemove(e)
             {
                 if (lastXLine != e.pageX) {
                     var dt = lastXLine - e.pageX;
-                    var margin = line.style.marginLeft;
-                    var size = "calc( " + margin + " - " + dt + "px )";
-                    line.style.marginLeft = size;
+                    var margin = parseFloat( grabber.style.marginLeft );
+                    grabber.style.marginLeft = clamp(margin - dt * 0.1, 10, 90) + "%";
                 }
 
                 lastXLine = e.pageX;
@@ -2254,25 +2254,23 @@
             function inner_mouseup(e)
             {
                 if (lastX != e.pageX)
-                    that.#moveBranchSeparator(lastX - e.pageX);
+                    that.#updateWidgets();
                 lastX = e.pageX;
                 lastXLine = e.pageX;
-                line.style.marginLeft = "4px";
                 line.style.height = "0px";
 
                 var doc = that.root.ownerDocument;
                 doc.removeEventListener("mouseup",inner_mouseup);
                 doc.removeEventListener("mousemove",inner_mousemove);
+                document.body.classList.remove('nocursor');
             }
 
             this.content.appendChild( element );
         }
 
-        #moveBranchSeparator( dt ) {
+        #updateWidgets() {
 
-            var size = "calc( " + this.sizeLeft + " - " + dt + "px )";
-            this.grabber.style.marginLeft = size;
-            this.sizeLeft = size;
+            var size = this.grabber.style.marginLeft;
 
             // Update sizes of widgets inside
             for(var i = 0; i < this.widgets.length;i++) {
@@ -2286,9 +2284,9 @@
                 var name = element.children[0];
                 var value = element.children[1];
 
-                name.style.width = this.sizeLeft;
+                name.style.width = size;
                 const padding = widget.type == Widget.VECTOR ? 9 : 17;
-                value.style.width = "calc( 100% - " + padding + " - " + this.sizeLeft + " )";
+                value.style.width = "calc( 100% - " + size + " )";
             }
         }
     };
