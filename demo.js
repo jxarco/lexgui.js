@@ -41,7 +41,8 @@ var kfTimeline = null;
 var clipsTimeline = null;
 
 bottom.onresize = bounding => {
-    kfTimeline.resize( [ bounding.width, bounding.height ] );
+    if(kfTimeline) kfTimeline.resize( [ bounding.width, bounding.height ] );
+    if(clipsTimeline) clipsTimeline.resize( [ bounding.width, bounding.height ] );
 }
 
 // another menu bar
