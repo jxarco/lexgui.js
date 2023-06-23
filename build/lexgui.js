@@ -582,12 +582,13 @@
                 let key = Object.keys(item)[0];
 
                 // Item already created
-                if( this.root.querySelector("#" + key) )
+                if( this.root.querySelector("#" + key.replace(/\s/g, '')) )
                     continue;   
 
                 let entry = document.createElement('div');
                 entry.className = "lexmenuentry";
-                entry.id = entry.innerText = key;
+                entry.id = key.replace(/\s/g, '');
+                entry.innerText = key;
                 this.root.appendChild( entry );
 
                 const create_submenu = function( o, k, c, d ) {
