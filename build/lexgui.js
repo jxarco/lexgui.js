@@ -2309,9 +2309,9 @@
             this.root.style.left = (event.x - 16) + "px";
             this.root.style.top = (event.y - 8) + "px";
 
-            this.root.addEventListener("mouseleave", function() {
-                this.remove();
-            });
+            // this.root.addEventListener("mouseleave", function() {
+            //     this.remove();
+            // });
             
             this.items = [];
             this.colors = {};
@@ -2334,12 +2334,20 @@
                 let width = rect.width + 36; // this has paddings
                 if(window.innerWidth - rect.right < 0)
                     div.style.left = (window.innerWidth - width - margin) + "px";
+
+                if(rect.top + rect.height > window.innerHeight)
+                    div.style.top = (window.innerHeight - rect.height - margin) + "px";
             }
             else
             {
                 let dt = window.innerWidth - rect.right;
                 if(dt < 0) {
                     div.style.left = div.offsetLeft + (dt - margin) + "px";
+                }
+                
+                dt = window.innerHeight - (rect.top + rect.height);
+                if(dt < 0) {
+                    div.style.top = div.offsetTop + (dt - margin + 20 ) + "px";
                 }
             }
         }
@@ -2418,11 +2426,11 @@
                 });
             }
 
-            entry.addEventListener("mouseleave", () => {
-                d = -1; // Reset depth
-                // delete entry.built;
-                c.querySelectorAll(".lexcontextmenubox").forEach(e => e.remove());
-            });
+            // entry.addEventListener("mouseleave", () => {
+            //     d = -1; // Reset depth
+            //     // delete entry.built;
+            //     c.querySelectorAll(".lexcontextmenubox").forEach(e => e.remove());
+            // });
         }
 
         onCreate() {

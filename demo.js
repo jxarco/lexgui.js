@@ -228,7 +228,7 @@ function fillPanel( panel ) {
                     console.log(event.node.id + " dbl clicked"); 
                     break;
                 case LX.TreeEvent.NODE_CONTEXTMENU: 
-                    LX.addContextMenu( "Node", event.value, m => {
+                    LX.addContextMenu( event.node.id, event.value, m => {
 
                         // {options}: callback, color
 
