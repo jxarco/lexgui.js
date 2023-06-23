@@ -30,7 +30,7 @@ area.addMenubar( m => {
 });
 
 // split main area
-area.split({sizes:["70%","30%"]});
+area.split({sizes:["80%","20%"]});
 var [left,right] = area.sections;
 
 // split left area

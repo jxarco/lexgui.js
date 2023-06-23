@@ -70,6 +70,9 @@
         this.container.appendChild( modal );
         this.container.appendChild( root );
 
+        // Resize callback
+        this.onresize = null;
+
         // Global vars
         this.DEFAULT_NAME_WIDTH     = "30%";
         this.DEFAULT_SPLITBAR_SIZE  = 4;
@@ -457,6 +460,21 @@
         }
 
         /**
+         * @method propagateEvent
+         */
+
+        propagateEvent( type ) {
+
+            for(var i = 0; i < this.sections.length; i++)
+            {
+                const area = this.sections[i];
+                if(area.onresize)
+                    area.onresize.call(this, area.root.getBoundingClientRect());
+                area.propagateEvent( type );
+            }
+        }
+
+        /**
          * @method addPanel
          * @param {*} options
          * Options to create a Panel
@@ -554,6 +572,7 @@
                 const area = this.sections[i];
                 if(area.onresize)
                     area.onresize.call(this, area.root.getBoundingClientRect());
+                area.propagateEvent( 'onresize' );
             }
         }
 

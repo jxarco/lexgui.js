@@ -6,7 +6,7 @@
 
 ## Docs
 
-The library documentation is in progress but you can check it [here](documentation.md)
+The library documentation is in progress but you can check it [here](documentation.md).
 
 ## Examples
 
