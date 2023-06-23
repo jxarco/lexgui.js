@@ -14,7 +14,8 @@ Look at [demo.js](demo.js) to see how to create the different widgets!
 
 ## Contributors
 
-* Alex Rodríguez
+* Alex Rodríguez @jxarco
+* Eva Valls @evallsg
 
 ---
 
@@ -52,8 +53,8 @@ TODO List:
 - ~~Add title to any subentry in context menus~~
 - ~~Create addPanel to avoid instancing and attaching a panel to an area~~
 - ~~Resize callbacks~~
+- ~~Timeline~~
 - Open context menus the other way around if not enough space (vertical!!!)
-- Timeline (Eva)
 - Dialogs
 - Multiple widgets per row
 - Load File widget
