@@ -30,7 +30,7 @@ area.addMenubar( m => {
 });
 
 // split main area
-area.split({sizes:["80%","20%"]});
+area.split({sizes:["75%","25%"]});
 var [left,right] = area.sections;
 
 // split left area
@@ -96,10 +96,89 @@ fillPanel( side_panel );
 var side_bottom_panel = rbottom.addPanel();
 fillRightBottomPanel( side_bottom_panel, 'Vertical' );
 
-var bottom_panel = bottom.addPanel();
-fillBottomPanel( bottom_panel );
+var kfTimeline = null;
+var clipsTimeline = null;
 
-function loop() {
+// another menu bar
+bottom.addMenubar( m => {
+    m.add( "Information", e => { 
+        console.log(e); 
+        var el = document.getElementById('kf-timeline');
+        if(el)
+            el.style.display = 'none';
+        el = document.getElementById('clips-timeline');
+        if(el)
+            el.style.display = 'none';
+
+        var bottom_panel = document.getElementById('bottom-panel');
+        if(bottom_panel)
+            bottom_panel.style.display = 'block';
+        else {
+            bottom_panel = new LX.Panel({id: "bottom-panel"});
+            bottom.attach( bottom_panel );
+            fillBottomPanel( bottom_panel ); 
+        }
+    });
+
+    m.add( "Keyframes Timeline", e => { 
+        console.log(e);
+        let el = document.getElementById('bottom-panel');
+        if(el)
+            el.style.display = 'none';
+        el = document.getElementById('clips-timeline');
+        if(el)
+            el.style.display = 'none';
+        var timeline = document.getElementById('kf-timeline');            
+        if(timeline) {
+            timeline.style.display = 'block';
+        }
+        else {
+            kfTimeline = new LX.KeyFramesTimeline("kf-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
+            kfTimeline.setAnimationClip({tracks: [{name: "Test track", values: [0,1,0,1], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
+            kfTimeline.selectedItem = "Test Track";
+            bottom.attach(kfTimeline);
+            kfTimeline.addButtons([ 
+                { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },
+                { icon: 'fa fa-filter', name: "optimize", callback: (e) => {   kfTimeline.onShowOptimizeMenu(e);}},
+                { icon: 'fa fa-rectangle-xmark', name: 'unselectAll', callback: (e) => { kfTimeline.unSelectAllKeyFrames();}}
+            ]);
+            
+            kfTimeline.draw(0);
+            
+            bottom.onresize = bounding => {
+                kfTimeline.resize( [ bounding.width, bounding.height ] );
+            }
+        }
+    });
+
+    m.add( "Clips Timeline", e => { 
+        console.log(e);
+        let el = document.getElementById('bottom-panel');
+        if(el)
+            el.style.display = 'none';
+        
+        el = document.getElementById('kf-timeline');
+        if(el)
+            el.style.display = 'none';
+        var ctimeline = document.getElementById('clips-timeline');            
+        if(ctimeline) {
+            ctimeline.style.display = 'block';
+        }
+        else {
+            clipsTimeline = new LX.KeyFramesTimeline("clips-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
+            bottom.attach(clipsTimeline);
+            clipsTimeline.draw(0);
+            
+            bottom.onResize = (a) => {
+                clipsTimeline.resize(a)
+            }
+        }
+
+    });
+
+} );
+
+function loop(dt) {
     
     var ctx = canvas.getContext("2d");
 
@@ -115,6 +194,11 @@ function loop() {
     const pos_2d = side_panel.getValue('2D Position');
     ctx.fillText(text, pos_2d[0] + 6, pos_2d[1] + 48);
 
+    if(kfTimeline)
+        kfTimeline.draw();
+
+    if(clipsTimeline)
+        clipsTimeline.draw();
     requestAnimationFrame(loop);
 }
 
@@ -303,9 +387,3 @@ function fillBottomPanel( panel ) {
     panel.addText(null, "Nothing here", null, {disabled: true});
     panel.end();
 }
-
-
-
-
-
-
