@@ -37,6 +37,81 @@ var [left,right] = area.sections;
 left.split({type: 'vertical', sizes:["80vh","20vh"]});
 var [up, bottom] = left.sections;
 
+var kfTimeline = null;
+var clipsTimeline = null;
+
+bottom.onresize = bounding => {
+    kfTimeline.resize( [ bounding.width, bounding.height ] );
+}
+
+// another menu bar
+bottom.addMenubar( m => {
+    m.add( "Information", e => { 
+        console.log(e); 
+        var el = document.getElementById('kf-timeline');
+        if(el)
+            el.style.display = 'none';
+        el = document.getElementById('clips-timeline');
+        if(el)
+            el.style.display = 'none';
+
+        bottom_panel.root.style.display = 'block';
+    });
+
+    m.add( "Keyframes Timeline", e => { 
+        console.log(e);
+        let el = document.getElementById('bottom-panel');
+        if(el)
+            el.style.display = 'none';
+        el = document.getElementById('clips-timeline');
+        if(el)
+            el.style.display = 'none';
+        var timeline = document.getElementById('kf-timeline');            
+        if(timeline) {
+            timeline.style.display = 'block';
+        }
+        else {
+            kfTimeline = new LX.KeyFramesTimeline("kf-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
+            kfTimeline.setAnimationClip({tracks: [{name: "Test track", values: [0,1,0,1], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
+            kfTimeline.selectedItem = "Test Track";
+            bottom.attach(kfTimeline);
+            kfTimeline.addButtons([ 
+                { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },
+                { icon: 'fa fa-filter', name: "optimize", callback: (e) => {   kfTimeline.onShowOptimizeMenu(e);}},
+                { icon: 'fa fa-rectangle-xmark', name: 'unselectAll', callback: (e) => { kfTimeline.unSelectAllKeyFrames();}}
+            ]);
+            
+            kfTimeline.draw(0);
+        }
+    });
+
+    m.add( "Clips Timeline", e => { 
+        console.log(e);
+        let el = document.getElementById('bottom-panel');
+        if(el)
+            el.style.display = 'none';
+        
+        el = document.getElementById('kf-timeline');
+        if(el)
+            el.style.display = 'none';
+        var ctimeline = document.getElementById('clips-timeline');            
+        if(ctimeline) {
+            ctimeline.style.display = 'block';
+        }
+        else {
+            clipsTimeline = new LX.KeyFramesTimeline("clips-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
+            bottom.attach(clipsTimeline);
+            clipsTimeline.draw(0);
+            
+            bottom.onResize = (a) => {
+                clipsTimeline.resize(a)
+            }
+        }
+
+    });
+
+} );
+
 // split right area
 right.split({type: 'vertical', sizes:["70vh","30vh"]});
 var [rup, rbottom] = right.sections;
@@ -96,87 +171,8 @@ fillPanel( side_panel );
 var side_bottom_panel = rbottom.addPanel();
 fillRightBottomPanel( side_bottom_panel, 'Vertical' );
 
-var kfTimeline = null;
-var clipsTimeline = null;
-
-// another menu bar
-bottom.addMenubar( m => {
-    m.add( "Information", e => { 
-        console.log(e); 
-        var el = document.getElementById('kf-timeline');
-        if(el)
-            el.style.display = 'none';
-        el = document.getElementById('clips-timeline');
-        if(el)
-            el.style.display = 'none';
-
-        var bottom_panel = document.getElementById('bottom-panel');
-        if(bottom_panel)
-            bottom_panel.style.display = 'block';
-        else {
-            bottom_panel = new LX.Panel({id: "bottom-panel"});
-            bottom.attach( bottom_panel );
-            fillBottomPanel( bottom_panel ); 
-        }
-    });
-
-    m.add( "Keyframes Timeline", e => { 
-        console.log(e);
-        let el = document.getElementById('bottom-panel');
-        if(el)
-            el.style.display = 'none';
-        el = document.getElementById('clips-timeline');
-        if(el)
-            el.style.display = 'none';
-        var timeline = document.getElementById('kf-timeline');            
-        if(timeline) {
-            timeline.style.display = 'block';
-        }
-        else {
-            kfTimeline = new LX.KeyFramesTimeline("kf-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
-            kfTimeline.setAnimationClip({tracks: [{name: "Test track", values: [0,1,0,1], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
-            kfTimeline.selectedItem = "Test Track";
-            bottom.attach(kfTimeline);
-            kfTimeline.addButtons([ 
-                { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },
-                { icon: 'fa fa-filter', name: "optimize", callback: (e) => {   kfTimeline.onShowOptimizeMenu(e);}},
-                { icon: 'fa fa-rectangle-xmark', name: 'unselectAll', callback: (e) => { kfTimeline.unSelectAllKeyFrames();}}
-            ]);
-            
-            kfTimeline.draw(0);
-            
-            bottom.onresize = bounding => {
-                kfTimeline.resize( [ bounding.width, bounding.height ] );
-            }
-        }
-    });
-
-    m.add( "Clips Timeline", e => { 
-        console.log(e);
-        let el = document.getElementById('bottom-panel');
-        if(el)
-            el.style.display = 'none';
-        
-        el = document.getElementById('kf-timeline');
-        if(el)
-            el.style.display = 'none';
-        var ctimeline = document.getElementById('clips-timeline');            
-        if(ctimeline) {
-            ctimeline.style.display = 'block';
-        }
-        else {
-            clipsTimeline = new LX.KeyFramesTimeline("clips-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
-            bottom.attach(clipsTimeline);
-            clipsTimeline.draw(0);
-            
-            bottom.onResize = (a) => {
-                clipsTimeline.resize(a)
-            }
-        }
-
-    });
-
-} );
+var bottom_panel = bottom.addPanel( {id: "bottom-panel"} );
+fillBottomPanel( bottom_panel ); 
 
 function loop(dt) {
     
@@ -289,15 +285,20 @@ function fillPanel( panel ) {
     panel.addVector2("2D Position", [250, 350], (value, event) => {
         console.log(value);
     }, { min: 0, max: 1024 });
-    panel.addVector4("I'm a Vec4", [0.3, 0.3, 0.5, 1], (value, event) => {
-        console.log(value);
-    });
     panel.addSeparator();
     panel.addTitle("Configuration (I'm a title)");
     panel.addCheckbox("Toggle me", true, (value, event) => {
         console.log(value);
     });
-    panel.end();
+    panel.merge();
+
+    // This is outside a branch
+    panel.addText("I'm out :(", "", null, { placeholder: "Alone..." });
+    panel.addVector4("I'm a Vec4", [0.3, 0.3, 0.5, 1], (value, event) => {
+        console.log(value);
+    });
+    panel.addButton(null, "Click me, I'm Full Width...");
+    panel.addButton("Test Button", "Reduced width...");
 }
 
 function fillRightBottomPanel( panel, tab ) {
@@ -363,7 +364,7 @@ function fillRightBottomPanel( panel, tab ) {
         panel.addProgress("HeadRoll", 0, { min: -1, max: 1 });
     }
 
-    panel.end();
+    panel.merge();
    
 }
 
@@ -385,5 +386,5 @@ function fillBottomPanel( panel ) {
 
     panel.branch("A collapsed branch", {closed: true});
     panel.addText(null, "Nothing here", null, {disabled: true});
-    panel.end();
+    panel.merge();
 }

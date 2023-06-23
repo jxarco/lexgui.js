@@ -781,15 +781,16 @@
     class Widget {
         
         static TEXT     = 0;
-        static BUTTON   = 1;
-        static DROPDOWN = 2;
-        static CHECKBOX = 3;
-        static COLOR    = 4;
-        static NUMBER   = 5;
-        static TITLE    = 6;
-        static VECTOR   = 7;
-        static TREE     = 8;
-        static PROGRESS = 9;
+        static TEXT     = 1;
+        static BUTTON   = 2;
+        static DROPDOWN = 3;
+        static CHECKBOX = 4;
+        static COLOR    = 5;
+        static NUMBER   = 6;
+        static TITLE    = 7;
+        static VECTOR   = 8;
+        static TREE     = 9;
+        static PROGRESS = 10;
 
         constructor(name, type, options) {
             this.name = name;
@@ -1159,6 +1160,11 @@
             // Append to panel
             if(this.branches.length == 0)
                 branch.root.classList.add('first');
+
+            // This is the last!
+            this.root.querySelectorAll(".last").forEach( e => { e.classList.remove("last"); } );
+            branch.root.classList.add('last');
+
             this.branches.push( branch );
             this.root.appendChild( branch.root );
 
@@ -1172,15 +1178,6 @@
 
             this.branch_open = false;
             this.current_branch = null;
-        }
-
-        end() {
-
-            if(this.current_branch) {
-                this.current_branch.root.classList.add('last');
-            }
-
-            this.merge();
         }
 
         #pick( arg, def ) {
@@ -1207,9 +1204,6 @@
         */
 
         #create_widget( name, type, options = {} ) {
-
-            if(!this.current_branch && !this.queuedContainer)
-                throw("No current branch!");
 
             let widget = new Widget(name, type, options);
 
@@ -1238,8 +1232,16 @@
             widget.domEl = element;
             
             if(!this.queuedContainer) {
-                this.current_branch.widgets.push( widget );
-                this.current_branch.content.appendChild( element );
+
+                if(this.current_branch)
+                {
+                    this.current_branch.widgets.push( widget );
+                    this.current_branch.content.appendChild( element );
+                }
+                else
+                {
+                    this.root.appendChild( element );
+                }
             } 
             // Append content to queued tab container
             else {
@@ -1315,6 +1317,17 @@
 
             if(this.onevent)
                 this.onevent.call(this, event);
+        }
+
+        /**
+         * @method addBlank
+         * @param {Number} height
+         */
+
+        addBlank( height = 8) {
+
+            let widget = this.#create_widget(null, Widget.addBlank);
+            widget.domEl.style.height = height + "px";
         }
 
         /**
@@ -2026,12 +2039,12 @@
 
         addSeparator() {
 
-            if(!this.current_branch)
-                throw("You can only separate branches!");
-
             var element = document.createElement('div');
             element.className = "lexseparator";
-            this.current_branch.content.appendChild( element );
+            if(this.current_branch)
+                this.current_branch.content.appendChild( element );
+            else 
+                this.root.appendChild(element);
         }
 
         /**
