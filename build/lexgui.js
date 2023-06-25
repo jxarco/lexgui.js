@@ -673,12 +673,15 @@
 
                     let contextmenu = document.createElement('div');
                     contextmenu.className = "lexcontextmenu";
+                    contextmenu.tabIndex = "0";
                     const isSubMenu = c.classList.contains('lexcontextmenuentry');
                     var rect = c.getBoundingClientRect();
                     contextmenu.style.left = (isSubMenu ? rect.width : rect.left) + "px";
                     // Entries use css to set top relative to parent
                     contextmenu.style.top = (isSubMenu ? 0 : -1 + rect.bottom) + "px";
                     c.appendChild( contextmenu );
+
+                    contextmenu.focus();
 
                     rect = contextmenu.getBoundingClientRect();
 
@@ -705,6 +708,17 @@
 
                         // Nothing more for separators
                         if(subkey == '') continue;
+
+                        contextmenu.addEventListener('keydown', function(e) {
+                            let short = that.shorts[ subkey ];
+                            if(!short) return;
+                            e.preventDefault();
+                            // check if it's a letter or other key
+                            short = short.length == 1 ? short.toLowerCase() : short;
+                            if(short == e.key) {
+                                subentry.click()
+                            }
+                        });
 
                         // Add callback
                         subentry.addEventListener("click", e => {

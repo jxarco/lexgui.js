@@ -15,12 +15,12 @@ area.addMenubar( m => {
     // {options}: callback, icon, short
 
     m.add( "Scene/New Scene", () => { console.log("New scene created!") });
-    m.add( "Scene/Open Scene", { icon: "fa-solid fa-folder-open", short: "CTRL + O" } );
+    m.add( "Scene/Open Scene", { icon: "fa-solid fa-folder-open" } );
     m.add( "Scene/Open Recent/hello.scene", name => { console.log("Opening " + name) });
     m.add( "Scene/Open Recent/goodbye.scene", name => { console.log("Opening " + name) });
     m.add( "Project/Project Settings" );
     m.add( "Project/Export", { icon: "fa-solid fa-download" });
-    m.add( "Project/Export/DAE", { icon: "fa-solid fa-cube", short: "D" } );
+    m.add( "Project/Export/DAE", { icon: "fa-solid fa-cube", short: "D", callback: () => { console.log("Exporting DAE...") }} );
     m.add( "Project/Export/GLTF", { short:  "G" } );
     m.add( "Editor/Settings", { icon: "fa-solid fa-gears", callback: () => {
         const dialog = new LX.Dialog( "Settings", p => {
@@ -30,8 +30,7 @@ area.addMenubar( m => {
             });
         });
     }} );
-    m.add( "Help", { short:  "F1" } );
-    m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass" });
+    m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass", short:  "F1", callback: () => { console.log("Opening HELP") }});
     m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
     m.add( "Help/Support LexGUI/Do it" );
 });

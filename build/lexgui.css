@@ -894,6 +894,10 @@ meter::-webkit-meter-even-less-good-value {
   font-weight: 100;
 }
 
+.lexcontextmenu:focus {
+  outline: none;
+}
+
 .lexcontextmenu .lexcontextmenuentry {
   width: 100%;
   color: #c0c4cbe3;
