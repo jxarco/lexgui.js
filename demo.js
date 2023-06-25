@@ -26,7 +26,7 @@ area.addMenubar( m => {
         const dialog = new LX.Dialog( "Settings", p => {
             p.addText("A Text", "Testing first widget");
             p.sameLine(3);
-            p.addInfo("Buttons:");
+            p.addLabel("Buttons:");
             p.addButton(null, "Click me", () => {
                 console.log( p.getValue("A Text") );
             });
@@ -84,7 +84,7 @@ bottom.addMenubar( m => {
         }
         else {
             kfTimeline = new LX.KeyFramesTimeline("kf-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
-            kfTimeline.setAnimationClip({tracks: [{name: "Test track", values: [0,1,0,1], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
+            kfTimeline.setAnimationClip({tracks: [{name: "Test Track", values: [0,1,0,1], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
             kfTimeline.selectedItem = "Test Track";
             bottom.attach(kfTimeline);
             kfTimeline.addButtons([ 
@@ -295,6 +295,7 @@ function fillPanel( panel ) {
     panel.addCheckbox("Toggle me", true, (value, event) => {
         console.log(value);
     });
+    panel.addFile("Image", data => { console.log(data) }, {} );
     panel.merge();
 
     // This is outside a branch

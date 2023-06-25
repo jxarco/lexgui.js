@@ -805,7 +805,8 @@
         static VECTOR       = 8;
         static TREE         = 9;
         static PROGRESS     = 10;
-        static SEPARATOR    = 11;
+        static FILE         = 11;
+        static SEPARATOR    = 12;
 
         constructor(name, type, options) {
             this.name = name;
@@ -1481,13 +1482,13 @@
         }
 
         /**
-         * @method addInfo
+         * @method addLabel
          * @param {String} value Information string
          */
 
-        addInfo( value ) {
+        addLabel( value ) {
 
-            this.addText( null, value, null, { disabled: true, className: "small" } );
+            this.addText( null, value, null, { disabled: true, className: "auto" } );
         }
         
         /**
@@ -2033,6 +2034,54 @@
 
             container.appendChild(progress);
             element.appendChild(container);
+        }
+
+        /**
+         * @method addFile
+         * @param {String} name Widget name
+         * @param {Function} callback Callback function on change
+         * @param {*} options:
+         * local: Ask for local file
+         * type: type to read as [text (Default), buffer, bin, url]
+         */
+
+        addFile( name, callback, options = {} ) {
+
+            this.sameLine(3);
+
+            const local = options.local ?? true;
+            const type = options.type ?? 'text';
+
+            const filenametext = "filename" + simple_guidGenerator().replace('-', "");
+            const that = this;
+
+            this.addLabel(name);
+
+            // Create hidden input
+            let input = document.createElement('input');
+            input.type = 'file';
+            input.addEventListener('change', function(e) {
+                const files = e.target.files;
+                that.root.querySelector('#' + filenametext + " input").value = files[0].name;
+                const reader = new FileReader();
+
+                if(type === 'text')
+                {
+                    reader.readAsText(files[0]);
+                }else
+                {
+                    // TODO
+                }
+
+                reader.onload = (e) => { callback.call(this, e.target.result) } ;
+            });
+
+            let filename = "";
+
+            this.addText(null, filename, null, { id: filenametext });
+            this.addButton(null, "<a class='fa-solid fa-folder-open'></a>", () => {
+                input.click();
+            }, { className: "small" });
         }
 
         /**
@@ -3831,7 +3880,7 @@
 
             addContextMenu("Optimize", e, m => {
                 for( let t of tracks ) {
-                    m.add( t.name + "@" + t.type, () => { 
+                    m.add( t.name + (t.type ? "@" + t.type : ""), () => { 
                         this.animationClip.tracks[t.clipIdx].optimize( threshold );
                         t.edited = [];
                     })
