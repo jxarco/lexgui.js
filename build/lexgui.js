@@ -1737,7 +1737,7 @@
                 e.preventDefault();
                 if(this !== document.activeElement)
                     return;
-                let mult = 1;
+                let mult = options.step ?? 1;
                 if(e.shiftKey) mult = 10;
                 else if(e.altKey) mult = 0.1;
                 this.value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
@@ -1774,7 +1774,7 @@
             function inner_mousemove(e) {
                 if (lastY != e.pageY) {
                     let dt = lastY - e.pageY;
-                    let mult = 1;
+                    let mult = options.step ?? 1;
                     if(e.shiftKey) mult = 10;
                     else if(e.altKey) mult = 0.1;
                     vecinput.value = (+vecinput.valueAsNumber + mult * dt).toPrecision(5);
@@ -1850,7 +1850,7 @@
                     e.preventDefault();
                     if(this !== document.activeElement)
                         return;
-                    let mult = 1;
+                    let mult = options.step ?? 1;
                     if(e.shiftKey) mult = 10;
                     else if(e.altKey) mult = 0.1;
                     this.value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
@@ -1884,7 +1884,7 @@
                 function inner_mousemove(e) {
                     if (lastY != e.pageY) {
                         let dt = lastY - e.pageY;
-                        let mult = 1;
+                        let mult = options.step ?? 1;
                         if(e.shiftKey) mult = 10;
                         else if(e.altKey) mult = 0.1;
                         vecinput.value = (+vecinput.valueAsNumber + mult * dt).toPrecision(5);
