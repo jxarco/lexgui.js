@@ -89,23 +89,8 @@ body.nocursor * {
   position: absolute;
   z-index: 101;
   min-width: 256px;
-}
-
-.lexdialogtitle {
-  border-top-left-radius: 6px;
-  border-top-right-radius: 6px;
-  background: var(--branch-title-background);
-  font-size: 20px;
-  font-weight: bold;
-  color: #d9d9e3;
-  text-shadow: 0px 1px 4px #000;
-  width: calc( 100% - 28px);
-  padding: 12px;
-  padding-left: 16px;
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
+  box-shadow: 0 0 12px black;
+  border-radius: 6px;
 }
 
 .lexdialogtitle {
@@ -290,10 +275,17 @@ body.nocursor * {
   padding: 5px;
   font-size: 13px;
   color: #DCDCDC;
-  /* text-shadow: 0px 1px 5px #000; */
-  margin-right: 10px;
+  /* margin-right: 10px; */
   line-height: 2;
   overflow: hidden;
+}
+
+.lexwidget.small {
+  width: unset !important;
+}
+
+.lexinlinewidgets {
+  display: flex;
 }
 
 .lexwidgetseparator div {

@@ -15,7 +15,7 @@ area.addMenubar( m => {
     // {options}: callback, icon, short
 
     m.add( "Scene/New Scene", () => { console.log("New scene created!") });
-    m.add( "Scene/Open Scene", { icon: "fa-solid fa-folder-open" } );
+    m.add( "Scene/Open Scene", { icon: "fa-solid fa-folder-open", short:  "S", callback: () => { console.log("Opening SCENE Dialog") } } );
     m.add( "Scene/Open Recent/hello.scene", name => { console.log("Opening " + name) });
     m.add( "Scene/Open Recent/goodbye.scene", name => { console.log("Opening " + name) });
     m.add( "Project/Project Settings" );
@@ -25,7 +25,12 @@ area.addMenubar( m => {
     m.add( "Editor/Settings", { icon: "fa-solid fa-gears", callback: () => {
         const dialog = new LX.Dialog( "Settings", p => {
             p.addText("A Text", "Testing first widget");
+            p.sameLine(3);
+            p.addInfo("Buttons:");
             p.addButton(null, "Click me", () => {
+                console.log( p.getValue("A Text") );
+            });
+            p.addButton(null, "Click me v2!", () => {
                 console.log( p.getValue("A Text") );
             });
         });

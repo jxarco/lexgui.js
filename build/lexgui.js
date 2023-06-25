@@ -710,9 +710,10 @@
                         if(subkey == '') continue;
 
                         contextmenu.addEventListener('keydown', function(e) {
+                            e.preventDefault();
+                            console.log(e.key);
                             let short = that.shorts[ subkey ];
                             if(!short) return;
-                            e.preventDefault();
                             // check if it's a letter or other key
                             short = short.length == 1 ? short.toLowerCase() : short;
                             if(short == e.key) {
@@ -1092,6 +1093,8 @@
 
     class Panel {
 
+        #inline_widgets_left;
+
         /**
          * @param {*} options 
          * id: Id of the element
@@ -1142,6 +1145,10 @@
             return widget.setValue(value);
         }
 
+        /**
+         * @method clear
+         */
+
         clear() {
 
             this.branch_open = false;
@@ -1150,6 +1157,18 @@
             this.widgets = {};
 
             this.root.innerHTML = "";
+        }
+
+        /**
+         * @method sameLine
+         * @param {Number} number Of widgets that will be placed in the same line
+         * @description Next widgets will be in the same line
+         */
+
+        sameLine( number ) {
+
+            console.assert(number > 0);
+            this.#inline_widgets_left = number;
         }
 
         /**
@@ -1244,23 +1263,45 @@
             }
 
             widget.domEl = element;
-            
-            if(!this.queuedContainer) {
 
-                if(this.current_branch)
-                {
-                    if(!options.skipWidget) 
-                        this.current_branch.widgets.push( widget );
-                    this.current_branch.content.appendChild( element );
+            const insert_widget = el => {
+                
+                if(!this.queuedContainer) {
+
+                    if(this.current_branch)
+                    {
+                        if(!options.skipWidget) 
+                            this.current_branch.widgets.push( widget );
+                        this.current_branch.content.appendChild( el );
+                    }
+                    else
+                    {
+                        this.root.appendChild( el );
+                    }
+                } 
+                // Append content to queued tab container
+                else {
+                    this.queuedContainer.appendChild( el );
                 }
-                else
-                {
-                    this.root.appendChild( element );
+            };
+
+            // Process inline widgets
+            if(this.#inline_widgets_left > 0)
+            {
+                if(!this._inlineContainer)  {
+                    this._inlineContainer = document.createElement('div');
+                    this._inlineContainer.className = "lexinlinewidgets";
                 }
-            } 
-            // Append content to queued tab container
-            else {
-                this.queuedContainer.appendChild( element );
+                this._inlineContainer.appendChild(element);
+                this.#inline_widgets_left--;
+
+                // Last widget
+                if(!this.#inline_widgets_left) {
+                    insert_widget(this._inlineContainer);
+                    delete this._inlineContainer;
+                }
+            }else {
+                insert_widget(element);
             }
 
             return widget;
@@ -1401,7 +1442,7 @@
             wValue.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
             wValue.style.marginLeft = "4px";
 
-            if(options.disabled) wValue.setAttribute("disabled", true);
+            if(options.disabled ?? false) wValue.setAttribute("disabled", true);
             if(options.placeholder) wValue.setAttribute("placeholder", options.placeholder);
 
             var resolve = (function(val, event) {
@@ -1437,6 +1478,16 @@
                 element.className += " noname";
                 wValue.style.width = "100%";
             }
+        }
+
+        /**
+         * @method addInfo
+         * @param {String} value Information string
+         */
+
+        addInfo( value ) {
+
+            this.addText( null, value, null, { disabled: true, className: "small" } );
         }
         
         /**
