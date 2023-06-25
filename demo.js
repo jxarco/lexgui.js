@@ -7,7 +7,7 @@ let area = LX.init();
 // LX.OPEN_CONTEXTMENU_ENTRY = 'mouseover';
 
 // LX.message("I'm in another position", null, { position: [10, 10] });
-// LX.message("Welcome to Lexgui", "Welcome!", { draggable: true })
+// LX.message("Welcome to Lexgui", "Welcome!");
 
 // menu bar
 area.addMenubar( m => {
@@ -22,7 +22,14 @@ area.addMenubar( m => {
     m.add( "Project/Export", { icon: "fa-solid fa-download" });
     m.add( "Project/Export/DAE", { icon: "fa-solid fa-cube", short: "D" } );
     m.add( "Project/Export/GLTF", { short:  "G" } );
-    m.add( "Editor/Settings", { icon: "fa-solid fa-gears" } );
+    m.add( "Editor/Settings", { icon: "fa-solid fa-gears", callback: () => {
+        const dialog = new LX.Dialog( "Settings", p => {
+            p.addText("A Text", "Testing first widget");
+            p.addButton(null, "Click me", () => {
+                console.log( p.getValue("A Text") );
+            });
+        });
+    }} );
     m.add( "Help", { short:  "F1" } );
     m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass" });
     m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );

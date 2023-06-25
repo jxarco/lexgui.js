@@ -55,8 +55,8 @@ TODO List:
 - ~~Resize callbacks~~
 - ~~Timeline~~
 - ~~Fix filter properties (separator is not in right place)~~
-- Open context menus the other way around if not enough space (vertical!!!)
-- Dialogs
+- ~~Open context menus the other way around if not enough space (vertical!!!)~~
+- ~~Dialogs~~
 - Multiple widgets per row
 - Load File widget
 - Change resize bar to Godot one

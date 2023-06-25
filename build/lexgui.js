@@ -39,6 +39,34 @@
         return (S4()+"-"+S4());
     }
 
+    function set_as_draggable(domEl) {
+
+        let offsetX;
+        let offsetY;
+
+        domEl.setAttribute('draggable', true);
+        domEl.addEventListener("dragstart", function(e) {
+            const rect = e.target.getBoundingClientRect();
+            offsetX = e.clientX - rect.x;
+            offsetY = e.clientY - rect.y;
+            // Remove image when dragging
+            var img = new Image();
+            img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+            e.dataTransfer.setDragImage(img, 0, 0);
+            e.dataTransfer.effectAllowed = "move";
+        });
+        domEl.addEventListener("drag", function(e) {
+            e.preventDefault();
+            this.style.left = e.clientX - offsetX + 'px';
+            this.style.top = e.clientY - offsetY + 'px';
+        }, false );
+        domEl.addEventListener("dragend", function(e) {
+            e.preventDefault();
+            this.style.left = e.clientX - offsetX + 'px';
+            this.style.top = e.clientY - offsetY + 'px';
+        }, false );
+    }
+
     /**
      * @method init
      * @param {*} options 
@@ -69,6 +97,11 @@
         
         this.container.appendChild( modal );
         this.container.appendChild( root );
+
+        // Disable drag icon
+        root.addEventListener("dragover", function(e) {
+            e.preventDefault();
+        }, false );
 
         // Global vars
         this.DEFAULT_NAME_WIDTH     = "30%";
@@ -140,74 +173,51 @@
 
         this.modal.toggle(false);
         var root = document.createElement('div');
-        window.root  = root;
-        root.className = "lexmessage";
+        root.className = "lexdialog";
         if(options.id)
             root.id = options.id;
+        this.root.appendChild(root);
 
-        var content = document.createElement('div');
-        content.className = "lexmessagecontent" + (title ? "" : " notitle");
-        content.innerHTML = text;
-
-        root.style.width = "30%";
-        root.style.height = "30vh";
-        root.style.left = options.position ? (options.position[0] + "px") : "35%";
-        root.style.top = options.position ? (options.position[1] + "px") : "35vh";
-
-        if(options.draggable) {
-
-            let offsetX;
-            let offsetY;
-
-            root.setAttribute('draggable', true);
-            root.addEventListener("dragstart", function(e) {
-                const rect = e.target.getBoundingClientRect();
-                offsetX = e.clientX - rect.x;
-                offsetY = e.clientY - rect.y;
-                // Remove image when dragging
-                var img = new Image();
-                img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
-                e.dataTransfer.setDragImage(img, 0, 0);
-                e.dataTransfer.effectAllowed = "move";
-            });
-            root.addEventListener("drag", function(e) {
-                e.preventDefault();
-                this.style.left = e.clientX - offsetX + 'px';
-                this.style.top = e.clientY - offsetY + 'px';
-            }, false );
-            root.addEventListener("dragend", function(e) {
-                e.preventDefault();
-                this.style.left = e.clientX - offsetX + 'px';
-                this.style.top = e.clientY - offsetY + 'px';
-            }, false );
-
-            // Disable drag icon
-            this.container.addEventListener("dragover", function(e) {
-                e.preventDefault();
-            }, false );
+        var titleDiv = document.createElement('div');
+        if(title) {
+            titleDiv.className = "lexdialogtitle";
+            titleDiv.innerHTML = title;
+            root.appendChild(titleDiv);
         }
 
         var closeButton = document.createElement('div');
-        closeButton.className = "lexmessagecloser";
+        closeButton.className = "lexdialogcloser";
         closeButton.innerHTML = "<a class='fa-solid fa-xmark'></a>";
-        closeButton.title = "Close message";
-        
+        closeButton.title = "Close dialog";
+
         closeButton.addEventListener('click', (function(e) {
             root.remove();
             this.modal.toggle();
         }).bind(this));
 
         root.appendChild(closeButton);
-        
-        if(title) {
-            var titleDiv = document.createElement('div');
-            titleDiv.className = "lexmessagetitle";
-            titleDiv.innerHTML = title;
-            root.appendChild(titleDiv);
-        }
-        
+
+        var content = document.createElement('div');
+        content.className = "lexdialogcontent" + (title ? "" : " notitle");
+        content.innerHTML = text;
         root.appendChild(content);
-        this.container.appendChild(root);
+
+        // Process position and size
+        options.size = options.size ?? [];
+        options.position = options.position ?? [];
+
+        root.style.width = options.size[0] ? (options.size[0] + "px") : "auto";
+        root.style.height = options.size[1] ? (options.size[1] + "px") : "auto";
+        
+        let rect = root.getBoundingClientRect();
+        root.style.left = options.position[0] ? (options.position[0] + "px") : "calc( 50% - " + (rect.width * 0.5) + "px )";
+        root.style.top = options.position[1] ? (options.position[1] + "px") : "calc( 50vh - " + (rect.height * 0.5) + "px )";
+
+        content.style.height = title ? "calc( 100% - " + (titleDiv.offsetHeight + 30) + "px )" : "calc( 100% - 51px )";
+
+        // Process if draggble
+        if(options.draggable ?? true)
+            set_as_draggable(root);
     }
 
     LX.message = message;
@@ -1758,6 +1768,7 @@
                 doc.addEventListener("mousemove",inner_mousemove);
                 doc.addEventListener("mouseup",inner_mouseup);
                 lastY = e.pageY;
+                document.body.classList.add('nocursor');
             }
 
             function inner_mousemove(e) {
@@ -1779,6 +1790,7 @@
                 var doc = that.root.ownerDocument;
                 doc.removeEventListener("mousemove",inner_mousemove);
                 doc.removeEventListener("mouseup",inner_mouseup);
+                document.body.classList.remove('nocursor');
             }
             
             container.appendChild(box);
@@ -1866,6 +1878,7 @@
                     doc.addEventListener("mousemove",inner_mousemove);
                     doc.addEventListener("mouseup",inner_mouseup);
                     lastY = e.pageY;
+                    document.body.classList.add('nocursor');
                 }
 
                 function inner_mousemove(e) {
@@ -1887,6 +1900,7 @@
                     var doc = that.root.ownerDocument;
                     doc.removeEventListener("mousemove",inner_mousemove);
                     doc.removeEventListener("mouseup",inner_mouseup);
+                    document.body.classList.remove('nocursor');
                 }
                 
                 box.appendChild(vecinput);
@@ -2294,6 +2308,89 @@
     LX.Branch = Branch;
 
     /**
+     * @class Dialog
+     */
+
+    class Dialog {
+
+        #oncreate;
+
+        constructor( title, callback, options = {} ) {
+            
+            if(!callback)
+            console.warn("Content is empty, add some widgets using 'callback' parameter!");
+
+            this.#oncreate = callback;
+
+            const size = options.size ?? [],
+                position = options.position ?? [],
+                draggable = options.draggable ?? true,
+                modal = options.modal ?? false;
+
+            if(modal)
+                LX.modal.toggle(false);
+
+            var root = document.createElement('div');
+            root.className = "lexdialog";
+            if(options.id)
+                root.id = options.id;
+            LX.root.appendChild( root );
+
+            var titleDiv = document.createElement('div');
+            if(title) {
+                titleDiv.className = "lexdialogtitle";
+                titleDiv.innerHTML = title;
+                root.appendChild(titleDiv);
+            }
+
+            var closeButton = document.createElement('div');
+            closeButton.className = "lexdialogcloser";
+            closeButton.innerHTML = "<a class='fa-solid fa-xmark'></a>";
+            closeButton.title = "Close";
+
+            closeButton.addEventListener('click', e => {
+                root.remove();
+                if(modal)
+                    LX.modal.toggle();
+            });
+
+            root.appendChild(closeButton);
+
+            const panel = new Panel();
+            panel.root.classList.add('lexdialogcontent');
+            if(!title) panel.root.classList.add('notitle');
+            callback.call(this, panel);
+            root.appendChild(panel.root);
+            
+            this.panel = panel;
+            this.root = root;
+
+            if(draggable)
+                set_as_draggable(root);
+
+            // Process position and size
+
+            root.style.width = size[0] ? (size[0] + "px") : "25%";
+            root.style.height = size[1] ? (size[1] + "px") : "auto";
+            
+            let rect = root.getBoundingClientRect();
+            root.style.left = position[0] ? (position[0] + "px") : "calc( 50% - " + (rect.width * 0.5) + "px )";
+            root.style.top = position[1] ? (position[1] + "px") : "calc( 50vh - " + (rect.height * 0.5) + "px )";
+
+            panel.root.style.width = "calc( 100% - 30px )";
+            panel.root.style.height = title ? "calc( 100% - " + (titleDiv.offsetHeight + 30) + "px )" : "calc( 100% - 51px )";
+        }
+
+        refresh() {
+
+            this.panel.root.innerHTML = "";
+            this.#oncreate.call(this, this.panel);
+        }
+    }
+
+    LX.Dialog = Dialog;
+
+    /**
      * @class ContextMenu
      */
 
@@ -2309,9 +2406,9 @@
             this.root.style.left = (event.x - 16) + "px";
             this.root.style.top = (event.y - 8) + "px";
 
-            // this.root.addEventListener("mouseleave", function() {
-            //     this.remove();
-            // });
+            this.root.addEventListener("mouseleave", function() {
+                this.remove();
+            });
             
             this.items = [];
             this.colors = {};
@@ -2426,11 +2523,11 @@
                 });
             }
 
-            // entry.addEventListener("mouseleave", () => {
-            //     d = -1; // Reset depth
-            //     // delete entry.built;
-            //     c.querySelectorAll(".lexcontextmenubox").forEach(e => e.remove());
-            // });
+            entry.addEventListener("mouseleave", () => {
+                d = -1; // Reset depth
+                // delete entry.built;
+                c.querySelectorAll(".lexcontextmenubox").forEach(e => e.remove());
+            });
         }
 
         onCreate() {

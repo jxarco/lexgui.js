@@ -1,8 +1,5 @@
-@import url('https://fonts.googleapis.com/css?family=Lato|Roboto');
-/*
-font-family: 'Lato', sans-serif;
-font-family: 'Roboto', sans-serif;
-*/
+/* @import url('https://fonts.googleapis.com/css?family=Lato|Roboto'); */
+@import url('https://fonts.googleapis.com/css2?family=Rubik&display=swap');
 
 :root {
   --global-color-primary: #1a2025;
@@ -16,6 +13,8 @@ font-family: 'Roboto', sans-serif;
   --global-text-secondary: #b7b7cbb0;
   --checkbox-flag-on: #5e9fdd;
   --global-highlight: #2c303570;
+  /* --gloal-font: 'Lato', sans-serif !important; */
+  --gloal-font: 'Rubik', sans-serif;
 	/*
 	--primary: #0676ed;
 	--warning: #f2a600;
@@ -50,8 +49,8 @@ html, body {
   overflow: hidden;  /* no general overflow in desktop app  */
   margin: 0;
   padding: 0;
-  font-family: 'Lato', sans-serif !important;
-} 
+  font-family: var(--gloal-font);
+}
 
 body.nocursor * {
   cursor: none !important;
@@ -85,17 +84,19 @@ body.nocursor * {
 
 /* Dialogs and alerts */
 
-.lexmessage {
+.lexdialog {
   background:none;
   position: absolute;
   z-index: 101;
+  min-width: 256px;
 }
 
-.lexmessagetitle {
+.lexdialogtitle {
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
   background: var(--branch-title-background);
-  font-size: 17px;
+  font-size: 20px;
+  font-weight: bold;
   color: #d9d9e3;
   text-shadow: 0px 1px 4px #000;
   width: calc( 100% - 28px);
@@ -107,24 +108,41 @@ body.nocursor * {
   user-select: none; /* Standard syntax */
 }
 
-.lexmessagecontent {
+.lexdialogtitle {
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  background: var(--branch-title-background);
+  font-size: 20px;
+  font-weight: bold;
+  color: #d9d9e3;
+  text-shadow: 0px 1px 4px #000;
+  width: calc( 100% - 28px);
+  padding: 12px;
+  padding-left: 16px;
+  -webkit-user-select: none; /* Safari 3.1+ */
+  -moz-user-select: none; /* Firefox 2+ */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard syntax */
+}
+
+.lexdialogcontent {
   background-color:  var(--branch-background);
   padding: 15px;
-  height: 100%;
   word-break: break-all;
   color: var(--global-text-primary);
   font-size: 14px;
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
+  margin-left: 0px !important;
 }
 
-.lexmessagecontent.notitle {
+.lexdialogcontent.notitle {
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
   padding-top: 36px;
 }
 
-.lexmessagecloser{
+.lexdialogcloser{
   position: absolute;
   width: 20px;
   height: 20px;
@@ -139,7 +157,7 @@ body.nocursor * {
   user-select: none; /* Standard syntax */
 }
 
-.lexmessagecloser:hover{
+.lexdialogcloser:hover{
   color: #aaa;
 }
 
@@ -301,9 +319,11 @@ body.nocursor * {
   overflow: hidden;
   display: flex;
   justify-content: space-between;
+  font-family: var(--gloal-font);
 }
 
 .lexwidget input {
+  font-family: var(--gloal-font);
   background: none;
   /* margin-left: 5px; */
   padding: 3px;
@@ -336,7 +356,7 @@ body.nocursor * {
 
 .lexfilter input {
   font-size: 12px;
-  font-family: 'Lato', sans-serif !important;
+  font-family: var(--gloal-font);
 }
 
 .lextitle {
@@ -367,6 +387,7 @@ body.nocursor * {
   cursor: pointer;
   box-shadow: 0px 0px 4px #5c5f73;
   font-size: 12px;
+  font-family: var(--gloal-font);
 }
 
 .lexbutton:hover {
@@ -712,7 +733,7 @@ input[type=number] {
   font-weight: bold;
   outline:none;
   border: none;
-  font-family: 'Lato', sans-serif;
+  font-family: var(--gloal-font);
   color: var(--checkbox-flag-on);
   line-height: 23px;
   font-size: 14px;
