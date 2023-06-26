@@ -94,11 +94,12 @@ bottom.addMenubar( m => {
             kfTimeline.setAnimationClip({tracks: [{name: "Test track", values: [0,1,0,1], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
             kfTimeline.selectedItem = "Test track";
             bottom.attach(kfTimeline);
-            // kfTimeline.addButtons([ 
-            //     { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },
-            //     { icon: 'fa fa-filter', name: "optimize", callback: (e) => {   kfTimeline.onShowOptimizeMenu(e);}},
-            //     { icon: 'fa fa-rectangle-xmark', name: 'unselectAll', callback: (e) => { kfTimeline.unSelectAllKeyFrames();}}
-            // ]);
+            
+            kfTimeline.addButtons([
+                { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },
+                { icon: 'fa fa-filter', name: "optimize", callback: (value, event) => {   kfTimeline.onShowOptimizeMenu(event);}},
+                { icon: 'fa fa-rectangle-xmark', name: 'unselectAll', callback: (value, event) => { kfTimeline.unSelectAllKeyFrames();}}
+            ]);
             
             kfTimeline.draw(0);
             
@@ -131,8 +132,8 @@ bottom.addMenubar( m => {
             bottom.attach(clipsTimeline);
             clipsTimeline.draw(0);
             
-            bottom.onResize = (a) => {
-                clipsTimeline.resize(a)
+            bottom.onresize = bounding => {
+                clipsTimeline.resize( [ bounding.width, bounding.height ] );
             }
         }
 

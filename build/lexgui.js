@@ -903,7 +903,7 @@
             node.parent = parent;
             const is_parent = node.children.length > 0;
 
-            var item = document.createElement('li');
+            let item = document.createElement('li');
             item.className = "lextreeitem " + "datalevel" + level + " " + (is_parent ? "parent" : "");
             item.id = node.id;
             // Select icon
@@ -2805,7 +2805,7 @@
             this.canvas = options.canvas ?? document.createElement('canvas');
 
             //do not change, it will be updated when called draw
-            this.duration = 100;
+            this.duration = 5;
             this.position = [options.x ?? 0, options.y ?? 0];
 
             this.size = [ options.width ?? 400, options.height ?? 100];
@@ -2831,7 +2831,7 @@
             // this.onDrawContent = null;
 
             this.active = true;
-            var div = document.createElement('div');
+            let div = document.createElement('div');
             div.className = 'lextimeline';
 
 
@@ -2848,57 +2848,43 @@
             this.canvas.addEventListener("mousemove", this.processMouse.bind(this));
             this.canvas.addEventListener("wheel", this.processMouse.bind(this));
             this.canvas.addEventListener("dblclick", this.processMouse.bind(this));
+            this.canvas.addEventListener("context", this.processMouse.bind(this));
         }
 
         /**
          * @method addHeader
          * @param {*}  
-         * TODO
          */
 
-        addHeader( ) {
+        addHeader() {
 
-            var buttons = [{ icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },
-            { icon: 'fa fa-filter', name: "optimize", callback: (value, event) => {   kfTimeline.onShowOptimizeMenu(event);}},
-            { icon: 'fa fa-rectangle-xmark', name: 'unselectAll', callback: (value, event) => { kfTimeline.unSelectAllKeyFrames();}}];
-
-            var header = new LX.Panel({id:'lextimeline'});
-            header.addBlank();
-            header.sameLine(5);
-            header.addTitle(this.name);
-            header.addNumber("Duration", this.duration, (value, event) => this.setDuration(value));
-
-            for(let i = 0; i < buttons.length; i++) {
-                var button = buttons[i];
-                header.addButton( null, "<a class='" + button.icon +"' title='" + button.name + "'></a>", button.callback, {width: "50px"});
-                this.buttonsDrawn.push(button);
+            if(this.header)
+                this.header.clear();
+            else
+            {
+                this.header = new LX.Panel({id:'lextimeline'});
+                this.root.appendChild(this.header.root);
             }
+            let header = this.header;
+            header.addBlank();
+            header.sameLine(2 + this.buttonsDrawn.length);
+            header.addTitle(this.name);
+            header.addNumber("Duration", this.duration, (value, event) => this.setDuration(value), {width: '350px'});        
 
-            // var div = document.createElement('div');
-            // div.className = 'lexbuttonscontainer';
-            
-            this.root.appendChild(header.root);
-            
-            // for(let i = 0; i < buttons.length; i++) {
-            //     let icon = document.createElement('i');
-            //     icon.className = 'lexicon ' + buttons[i].icon;
-            //     icon.title = buttons[i].name;
-                
-            //     let button = {
-            //         element: icon, 
-            //         callback: buttons[i].callback,
-            //         name: buttons[i].name
-            //     };
-            //     icon.addEventListener('click', button.callback)
-            //     this.buttonsDrawn.push(button);
-            //     div.appendChild(icon);
-            // }
-            
-            // var header = document.getElementById('lextimelineheader');
-            // if(header)
-            //     header.appendChild(div);
-            // else
-            //     this.root.prepend(div);
+            for(let i = 0; i < this.buttonsDrawn.length; i++) {
+                let button = this.buttonsDrawn[i];
+                this.header.addButton( null, "<a class='" + button.icon +"' title='" + button.name + "'></a>", button.callback, {width: "45px"});
+            }
+        }
+
+        /**
+        * @method addButtons
+        * @param buttons: array
+        */
+
+        addButtons(buttons) {
+            this.buttonsDrawn = buttons || this.buttonsDrawn;
+            this.addHeader();
         }
 
         /**
@@ -2928,8 +2914,12 @@
 
         setAnimationClip( animation ) {
             this.animationClip = animation;
+            this.duration = animation.duration;
+
             if(this.processTracks)
                 this.processTracks();
+            
+            this.addHeader();
         }
 
         /**
@@ -3311,8 +3301,10 @@
                 this.timeBeforeMove = null;
                 e.discard = discard;
                 
-                if( this.onMouseUp )
+                if( e.button == 0 && this.onMouseUp )
                     this.onMouseUp(e, time);
+                else if( e.button == 2 && this.showContextMenu)
+                    this.showContextMenu(e);
             }
 
             if( !is_inside && !this.grabbing && !(e.metaKey || e.altKey ) )
@@ -3366,7 +3358,10 @@
             else if (e.type == "dblclick" && this.onDblClick) {
                 this.onDblClick(e);	
             }
+            else if (e.type == "context" && this.showContextMenu)
+                this.showContextMenu(e);
             this.canvas.style.cursor = this.grabbing && (UTILS.getTime() - this.clickTime > 320) ? "grabbing" : "pointer" ;
+
 
             return true;
         }
@@ -3846,9 +3841,7 @@
             ctx.restore();
             let offset = 25;
             ctx.fillStyle = 'white';
-
-            if(this.name)
-                ctx.fillText(this.name,  offset + ctx.measureText(this.name).actualBoundingBoxLeft , -this.topMargin*0.4 );
+            ctx.fillText("Tracks",  offset + ctx.measureText("Tracks").actualBoundingBoxLeft , -this.topMargin*0.4 );
         };
 
         onUpdateTracks ( keyType ) {
@@ -4514,8 +4507,10 @@
                     var distToStart = Math.abs( this.timeToX( clip.start ) - x );
                     var distToEnd = Math.abs( this.timeToX( clip.start + clip.duration ) - e.offsetX );
 
-                    if(this.duration < clip.start + clip.duration  )
+                    if(this.duration < clip.start + clip.duration  ){
                         this.setDuration(clip.start + clip.duration);
+                        this.addHeader();
+                    }
                     //this.addUndoStep( "clip_modified", clip );
                     if( (e.shiftKey && distToStart < 5) || (clip.fadein && Math.abs( this.timeToX( clip.start + clip.fadein ) - e.offsetX ) < 5) )
                         this.dragClipMode = "fadein";
@@ -4584,7 +4579,10 @@
                             clip.duration += diff;
                         this.clipTime = this.currentTime;
                         if(this.duration < clip.start + clip.duration  )
+                        {
                             this.setDuration(clip.start + clip.duration);
+                            this.addHeader();
+                        }
                     }
                     return true;
                 }
@@ -4606,6 +4604,81 @@
                 if( this.onSelectClip ) 
                     this.onSelectClip(track.clips[clipIndex]);
             }
+        }
+
+        showContextMenu( e ) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            let actions = [];
+            //let track = this.NMFtimeline.clip.tracks[0];
+            if(this.lastClipsSelected.length) {
+                actions.push(
+                    {
+                        title: "Copy",// + " <i class='bi bi-clipboard-fill float-right'></i>",
+                        callback: () => {this.clipsToCopy = [...this.lastClipsSelected];}
+                    }
+                )
+                actions.push(
+                    {
+                        title: "Delete",// + " <i class='bi bi-trash float-right'></i>",
+                        callback: () => {
+                            let clipstToDelete = this.lastClipsSelected;
+                            for(let i = 0; i < clipstToDelete.length; i++){
+                                this.deleteClip(clipstToDelete[i], null);
+                            }
+                            this.optimizeTracks();
+                        }
+                    }
+                )
+                // actions.push(
+                //     {
+                //         title: "Create preset" + " <i class='bi bi-file-earmark-plus-fill float-right'></i>",
+                //         callback: () => {
+                //             this.NMFtimeline.lastClipsSelected.sort((a,b) => {
+                //                 if(a[0]<b[0]) 
+                //                     return -1;
+                //                 return 1;
+                //             });
+                //             this.createNewPresetDialog(this.NMFtimeline.lastClipsSelected);
+                //         }
+                //     }
+                // )
+            }
+            else{
+                
+                if(this.clipsToCopy)
+                {
+                    actions.push(
+                        {
+                            title: "Paste",// + " <i class='bi bi-clipboard-fill float-right'></i>",
+                            callback: () => {
+                                this.clipsToCopy.sort((a,b) => {
+                                    if(a[0]<b[0]) 
+                                        return -1;
+                                    return 1;
+                                });
+
+                                for(let i = 0; i < this.clipsToCopy.length; i++){
+                                    let [trackIdx, clipIdx] = this.clipsToCopy[i];
+                                    let clipToCopy = this.clip.tracks[trackIdx].clips[clipIdx];
+                                    // let clip = new ANIM.FaceLexemeClip(clipToCopy);
+                                    this.addClip(clipToCopy, this.clipsToCopy.length > 1 ? clipToCopy.start : 0); 
+                                }
+                                this.clipsToCopy = null;
+                            }
+                        }
+                    )
+                }
+            }
+            
+            addContextMenu("Options", e, (m) => {
+                
+                for(let i = 0; i < actions.length; i++) {
+                    m.add(actions[i].title,  actions[i].callback )
+                }
+            });
+
         }
 
         onDrawContent( ctx, timeStart, timeEnd )  {
@@ -4742,7 +4815,10 @@
             let end = clip.start + clip.duration;
             
             if( end > this.duration || !this.animationClip.duration)
+            {
                 this.setDuration(end);
+                this.addHeader();
+            }
 
             if(callback)
                 callback();
