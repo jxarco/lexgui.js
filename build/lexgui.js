@@ -2788,7 +2788,7 @@
             this.currentTime = 0;
             this.framerate = 30;
             this.opacity = 0.8;
-            this.sidebarWidth = 200;
+            this.sidebarWidth = 0// 200;
             this.topMargin = 24;
             this.renderOutFrames = false;
 
@@ -2828,21 +2828,28 @@
             this.animationClip = options.animationClip ?? null;
             
             this.trackHeight = options.trackHeight ?? 15;
-            // this.onDrawContent = null;
 
             this.active = true;
+
             let div = document.createElement('div');
             div.className = 'lextimeline';
-
-
             this.root = div;
+
+            let area = new LX.Area();
+            area.split("horizontal");
+            let [left, right] = area.sections;
+            
             this.addHeader();
-            div.appendChild(this.canvas);
+            this.addLeftPanel(left);
+            right.root.appendChild(this.canvas)
+            // div.appendChild(this.canvas);
+            div.appendChild(area.root);
 
             if(!options.canvas && this.name != '') {
                 this.root.id = this.name;
                 this.canvas.id = this.name + '-canvas';
             }
+
             this.canvas.addEventListener("mousedown", this.processMouse.bind(this));
             this.canvas.addEventListener("mouseup", this.processMouse.bind(this));
             this.canvas.addEventListener("mousemove", this.processMouse.bind(this));
@@ -2878,6 +2885,42 @@
         }
 
         /**
+        * @method addLeftPanel
+        * 
+        */
+        addLeftPanel(area) {
+
+            if(this.leftPanel)
+                this.leftPanel.clear();
+            else {
+                this.leftPanel = area.addPanel({id: 'lextimelinepanel'});
+                
+            }
+            let panel = this.leftPanel;
+            // panel.addBlank(25);
+
+            if(!this.animationClip || !this.selectedItem) 
+                return;
+
+            let t = {
+                'id': this.selectedItem,
+                'children': []
+            }
+            for(let i = 0; i < this.tracksPerItem[this.selectedItem].length; i++) {
+                let track = this.tracksPerItem[this.selectedItem][i];
+                t.children.push({'id': track.name + (track.type? '(' + track.type + ')': ''), 'children':[]})
+                // panel.addTitle(track.name + (track.type? '(' + track.type + ')' : ''));
+            }
+            panel.addTree("Tracks", t, {filter: false});
+
+            // for(let i = 0; i < this.animationClip.tracks.length; i++) {
+            //     let track = this.animationClip.tracks[i];
+            //     panel.addTitle(track.name + (track.type? '(' + track.type + ')' : ''));
+            // }
+            
+        }
+
+        /**
         * @method addButtons
         * @param buttons: array
         */
@@ -2906,6 +2949,28 @@
             return trackInfo.idx;
         }
 
+        getTracksInRange( minY, maxY, threshold ) {
+
+            let tracks = [];
+
+            // Manage negative selection
+            if(minY > maxY) {
+                let aux = minY;
+                minY = maxY;
+                maxY = aux;
+            }
+
+            for(let i = this.tracksDrawn.length - 1; i >= 0; --i) {
+                let t = this.tracksDrawn[i];
+                let pos = t[1] - this.topMargin, size = t[2];
+                if( pos + threshold >= minY && (pos + size - threshold) <= maxY ) {
+                    tracks.push( t[0] );
+                }
+            }
+
+            return tracks;
+        }
+
         /**
          * @method setAnimationClip
          * @param {*} animation 
@@ -2920,6 +2985,7 @@
                 this.processTracks();
             
             this.addHeader();
+            this.addLeftPanel();
         }
 
         /**
@@ -3054,7 +3120,7 @@
             ctx.fillStyle = "#FFF";
             ctx.font = "12px Tahoma";
             ctx.textAlign = "center";
-            for(var t = start; t <= end; t += 1 )
+            for(var t = start; t <= end-0.01; t += 1 )
             {
                 if( t % deltaSeconds != 0 )
                     continue;
@@ -3069,7 +3135,7 @@
             ctx.globalAlpha = 1;
 
             // Current time marker
-            ctx.strokeStyle = "#AFD";
+            ctx.strokeStyle = "#5f88c9"//#AFD";
             var x = ((w*0.5)|0) + 0.5;
             ctx.globalAlpha = 0.5;
             ctx.fillStyle = "#AAA";
@@ -3080,7 +3146,7 @@
             ctx.lineTo( x,h);
             ctx.stroke();
 
-            ctx.fillStyle = "#AFD";
+            ctx.fillStyle = "#5f88c9"//"#AFD";
             ctx.beginPath();
             ctx.moveTo( x - 4,1);
             ctx.lineTo( x + 4,1);
@@ -3380,14 +3446,14 @@
             ctx.textAlign = "left";
             ctx.fillStyle = "rgba(255,255,255,0.8)";
             
-            if(title != null)
-            {
-                // var info = ctx.measureText( title );
-                ctx.fillStyle = this.active ? "rgba(255,255,255,0.9)" : "rgba(250,250,250,0.7)";
-                ctx.fillText( title, 25, y + trackHeight * 0.75 );
-            }
+            // if(title != null)
+            // {
+            //     // var info = ctx.measureText( title );
+            //     ctx.fillStyle = this.active ? "rgba(255,255,255,0.9)" : "rgba(250,250,250,0.7)";
+            //     ctx.fillText( title, 25, y + trackHeight * 0.75 );
+            // }
             
-            ctx.fillStyle = "rgba(10,200,200,1)";
+            ctx.fillStyle = "#5e9fdd"//"rgba(10,200,200,1)";
             var keyframes = track.times;
 
             if(keyframes) {
@@ -3497,18 +3563,18 @@
 
                     //background rect
                     ctx.globalAlpha = trackAlpha;
-                    ctx.fillStyle = clip.clipColor || "#333";
+                    ctx.fillStyle = clip.clipColor || "#5e9fdd"//#333";
                     //ctx.fillRect(x,y,w,trackHeight);
                     roundedRect(ctx, x, y, w, trackHeight, 5, true);
 
                     //draw clip content
-                    if( clip.drawTimeline )
+                    if( clip.drawClip )
                     {
                         ctx.save();
                         ctx.translate(x,y);
                         ctx.strokeStyle = "#AAA";
                         ctx.fillStyle = "#AAA";
-                        clip.drawTimeline( ctx, x2-x,trackHeight, this.selectedClip == clip || track.selected[j], this );
+                        clip.drawClip( ctx, x2-x,trackHeight, this.selectedClip == clip || track.selected[j], this );
                         ctx.restore();
                     }
                     //draw clip outline
@@ -3516,7 +3582,7 @@
                         ctx.globalAlpha = trackAlpha * 0.5;
                     
                         var safex = Math.max(-2, x );
-                    var safex2 = Math.min( this.canvas.width + 2, x2 );
+                        var safex2 = Math.min( this.canvas.width + 2, x2 );
                     // ctx.lineWidth = 0.5;
                     // ctx.strokeStyle = clip.constructor.color || "black";
                     // ctx.strokeRect( safex, y, safex2-safex, trackHeight );
@@ -3671,8 +3737,8 @@
                             this.pixelsToSeconds * 5);
                             
                         if(keyFrameIndices) {
-                        for(let index of keyFrameIndices)
-                            this.processCurrentKeyFrame( e, index, t, null, true );
+                            for(let index of keyFrameIndices)
+                                this.processCurrentKeyFrame( e, index, t, null, true );
                         }
                     }
                 }
@@ -3838,8 +3904,8 @@
             
             ctx.restore();
             let offset = 25;
-            ctx.fillStyle = 'white';
-            ctx.fillText("Tracks",  offset + ctx.measureText("Tracks").actualBoundingBoxLeft , -this.topMargin*0.4 );
+            // ctx.fillStyle = 'white';
+            // ctx.fillText("Tracks",  offset + ctx.measureText("Tracks").actualBoundingBoxLeft , -this.topMargin*0.4 );
         };
 
         onUpdateTracks ( keyType ) {
@@ -3984,9 +4050,9 @@
                                 
             this.lastKeyFramesSelected.push( selectionInfo );
             track.selected[index] = true;
-
+            
             if( this.onSetTime )
-                this.onSetTime( this.animationClip.tracks[track.clipIdx].times[ index ] );
+                this.onSetTime(  this.animationClip.tracks[track.clipIdx].times[ index ]);
         }
 
         canPasteKeyFrame () {
@@ -4244,28 +4310,6 @@
             return this.tracksPerItem[ name ][trackIndex];
         }
 
-        getTracksInRange( minY, maxY, threshold ) {
-
-            let tracks = [];
-
-            // Manage negative selection
-            if(minY > maxY) {
-                let aux = minY;
-                minY = maxY;
-                maxY = aux;
-            }
-
-            for(let i = this.tracksDrawn.length - 1; i >= 0; --i) {
-                let t = this.tracksDrawn[i];
-                let pos = t[1] - this.topMargin, size = t[2];
-                if( pos + threshold >= minY && (pos + size - threshold) <= maxY ) {
-                    tracks.push( t[0] );
-                }
-            }
-
-            return tracks;
-        }
-
         getTrackName( uglyName ) {
 
             let name, type;
@@ -4368,7 +4412,8 @@
             const [name, type] = this.getTrackName( track.name );
             let t = this.tracksPerItem[ name ][track.idx];
             let currentSelection = [name, track.idx, keyFrameIndex];
-            
+            if(!multiple)
+                this.selectKeyFrame(t, currentSelection, keyFrameIndex);
             if( this.onSelectKeyFrame && this.onSelectKeyFrame(e, currentSelection, keyFrameIndex)) {
                 // Event handled
                 return;
@@ -4557,8 +4602,8 @@
                 var curr = time - this.currentTime;
                 var delta = curr - this.grabTime;
                 this.grabTime = curr;
-                this.currentTime = Math.max(0,this.currentTime - delta);
-
+               
+                var ct = Math.max(0,this.currentTime - delta);
                 if( this.timelineClickedClips != undefined) {
                     for(let i = 0; i < this.timelineClickedClips.length; i++){
                         
@@ -4585,6 +4630,7 @@
                     return true;
                 }
                 else{
+                    this.currentTime = Math.max(0,this.currentTime - delta);
                     innerSetTime( this.currentTime );	
                 }
             }
@@ -4660,7 +4706,7 @@
 
                                 for(let i = 0; i < this.clipsToCopy.length; i++){
                                     let [trackIdx, clipIdx] = this.clipsToCopy[i];
-                                    let clipToCopy = this.clip.tracks[trackIdx].clips[clipIdx];
+                                    let clipToCopy = Object.assign({}, this.animationClip.tracks[trackIdx].clips[clipIdx]);
                                     // let clip = new ANIM.FaceLexemeClip(clipToCopy);
                                     this.addClip(clipToCopy, this.clipsToCopy.length > 1 ? clipToCopy.start : 0); 
                                 }

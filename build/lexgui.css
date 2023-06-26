@@ -1055,3 +1055,16 @@ meter::-webkit-meter-even-less-good-value {
 .lextimeline .lexicon {
   padding: 4px;
 }
+
+.lextimeline .lextree {
+  background: #05050b6b!important;
+  margin: 0px!important;
+  width: 100%;
+}
+.lextimeline span{
+  border-radius: 0!important;
+}
+.lextimeline ul{
+  background: var(--global-color-primary);
+  margin: 0;
+}
