@@ -2848,7 +2848,7 @@
             this.canvas.addEventListener("mousemove", this.processMouse.bind(this));
             this.canvas.addEventListener("wheel", this.processMouse.bind(this));
             this.canvas.addEventListener("dblclick", this.processMouse.bind(this));
-            this.canvas.addEventListener("context", this.processMouse.bind(this));
+            this.canvas.addEventListener("contextmenu", this.processMouse.bind(this));
         }
 
         /**
@@ -3303,8 +3303,6 @@
                 
                 if( e.button == 0 && this.onMouseUp )
                     this.onMouseUp(e, time);
-                else if( e.button == 2 && this.showContextMenu)
-                    this.showContextMenu(e);
             }
 
             if( !is_inside && !this.grabbing && !(e.metaKey || e.altKey ) )
@@ -3358,7 +3356,7 @@
             else if (e.type == "dblclick" && this.onDblClick) {
                 this.onDblClick(e);	
             }
-            else if (e.type == "context" && this.showContextMenu)
+            else if (e.type == "contextmenu" && this.showContextMenu)
                 this.showContextMenu(e);
             this.canvas.style.cursor = this.grabbing && (UTILS.getTime() - this.clickTime > 320) ? "grabbing" : "pointer" ;
 
@@ -4607,6 +4605,7 @@
         }
 
         showContextMenu( e ) {
+
             e.preventDefault();
             e.stopPropagation();
 
@@ -4673,7 +4672,6 @@
             }
             
             addContextMenu("Options", e, (m) => {
-                
                 for(let i = 0; i < actions.length; i++) {
                     m.add(actions[i].title,  actions[i].callback )
                 }
