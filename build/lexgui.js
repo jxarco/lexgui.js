@@ -1250,7 +1250,7 @@
             if(options.title)
                 element.title = options.title;
 
-            element.style.width = "calc( 100% - 10px)";
+            element.style.width = options.width || "calc( 100% - 10px)";
 
             if(name) {
                 var domName = document.createElement('div');
@@ -1393,6 +1393,7 @@
 
             let widget = this.#create_widget(null, Widget.addBlank);
             widget.domEl.style.height = height + "px";
+            return widget;
         }
 
         /**
@@ -1506,10 +1507,11 @@
             let element = widget.domEl;
 
             var wValue = document.createElement('button');
+
             wValue.className = "lexbutton";
             wValue.innerHTML = value || "";
             wValue.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
-
+          
             if(options.disabled)
                 wValue.setAttribute("disabled", true);
             
@@ -1814,7 +1816,8 @@
                 let val = e.target.value = clamp(e.target.value, vecinput.min, vecinput.max);
    
                 // update slider!
-                box.querySelector(".lexinputslider").value = val;
+                if( box.querySelector(".lexinputslider"))
+                    box.querySelector(".lexinputslider").value = val;
 
                 // Reset button (default value)
                 let btn = element.querySelector(".lexwidgetname .lexicon");
@@ -2796,7 +2799,6 @@
             this.buttonsDrawn = [];
             this.trackState = [];
             this.clipboard = null;
-            this.pixelsToSeconds;
             this.grabTime = 0;
             this.timeBeforeMove = 0;
 
@@ -2831,58 +2833,72 @@
             this.active = true;
             var div = document.createElement('div');
             div.className = 'lextimeline';
-           
-            var header = document.createElement('div');
-            header.id = 'lextimelineheader'
-            header.className = 'lexheader';
 
-            // var header = new LX.Panel({id:'lextimelineheader'});
-            // header.addTitle(this.name);
-            // div.appendChild(header.root);
+
             this.root = div;
+            this.addHeader();
             div.appendChild(this.canvas);
 
             if(!options.canvas && this.name != '') {
                 this.root.id = this.name;
                 this.canvas.id = this.name + '-canvas';
             }
-            this.root.addEventListener("mousedown", this.processMouse.bind(this));
-            this.root.addEventListener("mouseup", this.processMouse.bind(this));
-            this.root.addEventListener("mousemove", this.processMouse.bind(this));
-            this.root.addEventListener("wheel", this.processMouse.bind(this));
-            this.root.addEventListener("dblclick", this.processMouse.bind(this));
+            this.canvas.addEventListener("mousedown", this.processMouse.bind(this));
+            this.canvas.addEventListener("mouseup", this.processMouse.bind(this));
+            this.canvas.addEventListener("mousemove", this.processMouse.bind(this));
+            this.canvas.addEventListener("wheel", this.processMouse.bind(this));
+            this.canvas.addEventListener("dblclick", this.processMouse.bind(this));
         }
 
         /**
-         * @method addButtons
-         * @param {*} buttons 
+         * @method addHeader
+         * @param {*}  
          * TODO
          */
 
-        addButtons( buttons ) {
+        addHeader( ) {
 
-            var div = document.createElement('div');
-            div.className = 'lexbuttonscontainer';
+            var buttons = [{ icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },
+            { icon: 'fa fa-filter', name: "optimize", callback: (value, event) => {   kfTimeline.onShowOptimizeMenu(event);}},
+            { icon: 'fa fa-rectangle-xmark', name: 'unselectAll', callback: (value, event) => { kfTimeline.unSelectAllKeyFrames();}}];
+
+            var header = new LX.Panel({id:'lextimeline'});
+            header.addBlank();
+            header.sameLine(5);
+            header.addTitle(this.name);
+            header.addNumber("Duration", this.duration, (value, event) => this.setDuration(value));
+
             for(let i = 0; i < buttons.length; i++) {
-                let icon = document.createElement('i');
-                icon.className = 'lexicon ' + buttons[i].icon;
-                icon.title = buttons[i].name;
-                
-                let button = {
-                    element: icon, 
-                    callback: buttons[i].callback,
-                    name: buttons[i].name
-                };
-                icon.addEventListener('click', button.callback)
+                var button = buttons[i];
+                header.addButton( null, "<a class='" + button.icon +"' title='" + button.name + "'></a>", button.callback, {width: "50px"});
                 this.buttonsDrawn.push(button);
-                div.appendChild(icon);
             }
+
+            // var div = document.createElement('div');
+            // div.className = 'lexbuttonscontainer';
             
-            var header = document.getElementById('lextimelineheader');
-            if(header)
-                header.appendChild(div);
-            else
-                this.root.prepend(div);
+            this.root.appendChild(header.root);
+            
+            // for(let i = 0; i < buttons.length; i++) {
+            //     let icon = document.createElement('i');
+            //     icon.className = 'lexicon ' + buttons[i].icon;
+            //     icon.title = buttons[i].name;
+                
+            //     let button = {
+            //         element: icon, 
+            //         callback: buttons[i].callback,
+            //         name: buttons[i].name
+            //     };
+            //     icon.addEventListener('click', button.callback)
+            //     this.buttonsDrawn.push(button);
+            //     div.appendChild(icon);
+            // }
+            
+            // var header = document.getElementById('lextimelineheader');
+            // if(header)
+            //     header.appendChild(div);
+            // else
+            //     this.root.prepend(div);
         }
 
         /**
@@ -4387,19 +4403,6 @@
 
     class ClipsTimeline extends Timeline {
 
-        lastClipsSelected = [];
-        buttonsDrawn = [];
-
-        clipboard = null;
-
-        pixelsToSeconds;
-        grabTime = 0;
-        timeBeforeMove = 0;
-
-        movingKeys = false;
-        grabbing = false;
-        grabbingScroll = false;
-
         /**
          * @param {string} name 
          * @param {object} options = {animationClip, selectedItem, position = [0,0], width, height, canvas, trackHeight}
@@ -4408,6 +4411,7 @@
 
             super(name, options);
             this.selectedClip = null;
+            this.lastClipsSelected = [];
 
         }
 
@@ -4539,7 +4543,8 @@
                 this.timelineClickedClips = null;
                 this.selectedClip = null;
                 this.unSelectAllClips();
-                this.onSelectClip(null);
+                if(this.onSelectClip)
+                    this.onSelectClip(null);
             }
         }
 
@@ -4625,6 +4630,35 @@
                 ctx.fillText(this.name, offset + ctx.measureText(this.name).actualBoundingBoxLeft, -this.topMargin*0.4 );
         }
 
+        // Creates a map for each item -> tracks
+        processTracks() {
+
+            this.tracksPerItem = {};
+
+            for( let i = 0; i < this.animationClip.tracks.length; ++i ) {
+
+                let track = this.animationClip.tracks[i];
+
+                // const [name, type] = this.getTrackName(track.name);
+                const name = track.name;
+                const type = track.type;
+
+                let trackInfo = {
+                    clips: track.clips,
+                    name: name, type: type,
+                    selected: [], edited: [], hovered: []
+                };
+                
+                
+                // const trackIndex = this.tracksPerItem[name].length - 1;
+                // this.tracksPerItem[name][trackIndex].idx = trackIndex;
+                // this.tracksPerItem[name][trackIndex].clipIdx = i;
+
+                // Save index also in original track
+                // track.idx = trackIndex;
+                this.animationClip.tracks[i] = trackInfo;
+            }
+        }
 
         /** Add a clip to the timeline in a free track slot at the current time
          * @clip: clip to be added
@@ -4707,7 +4741,7 @@
                 
             let end = clip.start + clip.duration;
             
-            if( end > this.duration)
+            if( end > this.duration || !this.animationClip.duration)
                 this.setDuration(end);
 
             if(callback)
