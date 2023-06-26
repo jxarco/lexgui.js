@@ -135,7 +135,7 @@ bottom.addMenubar( m => {
         else {
             kfTimeline = new LX.KeyFramesTimeline("kf-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
             kfTimeline.setAnimationClip({tracks: [{name: "Test track", values: [0,1,0,1], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
-            kfTimeline.selectedItem = "Test Track";
+            kfTimeline.selectedItem = "Test track";
             bottom.attach(kfTimeline);
             kfTimeline.addButtons([ 
                 { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },
@@ -165,7 +165,12 @@ bottom.addMenubar( m => {
             ctimeline.style.display = 'block';
         }
         else {
-            clipsTimeline = new LX.KeyFramesTimeline("clips-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
+            clipsTimeline = new LX.ClipsTimeline("clips-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
+            var clip = {name:"", start:0, duration:1, type:""};
+            // clipsTimeline.addClip(clip)
+            clipsTimeline.setAnimationClip({tracks: [{clips: [clip]}], duration: 1});
+            clipsTimeline.selectedItem = "Test track";
+
             bottom.attach(clipsTimeline);
             clipsTimeline.draw(0);
             

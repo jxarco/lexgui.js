@@ -2569,11 +2569,19 @@
             this.animationClip = options.animationClip ?? null;
             
             this.trackHeight = options.trackHeight ?? 15;
-            this.onDrawContent = null;
+            // this.onDrawContent = null;
 
             this.active = true;
-            var div = document.createElement("div");
-            div.className = "lextimeline";
+            var div = document.createElement('div');
+            div.className = 'lextimeline';
+           
+            var header = document.createElement('div');
+            header.id = 'lextimelineheader'
+            header.className = 'lexheader';
+
+            // var header = new LX.Panel({id:'lextimelineheader'});
+            // header.addTitle(this.name);
+            // div.appendChild(header.root);
             this.root = div;
             div.appendChild(this.canvas);
 
@@ -2613,7 +2621,11 @@
                 div.appendChild(icon);
             }
             
-            this.root.prepend(div);
+            var header = document.getElementById('lextimelineheader');
+            if(header)
+                header.appendChild(div);
+            else
+                this.root.prepend(div);
         }
 
         /**
@@ -4138,6 +4150,8 @@
         constructor(name, options = {}) {
 
             super(name, options);
+            this.selectedClip = null;
+
         }
 
         onMouseUp( e ) {
@@ -4334,9 +4348,11 @@
 
         onDrawContent( ctx, timeStart, timeEnd )  {
 
-            
+            if(!this.animationClip)  
+                return;
             let tracks = this.animationClip.tracks|| [{name: "NMF", clips: []}];
-            if(!tracks) return;
+            if(!tracks) 
+                return;
             
             ctx.save();
             const height = this.trackHeight*1.2;
