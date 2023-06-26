@@ -1440,8 +1440,8 @@
             // Add widget value
             let wValue = document.createElement('input');
             wValue.value = wValue.iValue = value || "";
-            wValue.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
-            wValue.style.marginLeft = "4px";
+            wValue.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 8px )";
+            // wValue.style.marginLeft = "4px";
 
             if(options.disabled ?? false) wValue.setAttribute("disabled", true);
             if(options.placeholder) wValue.setAttribute("placeholder", options.placeholder);
@@ -2047,41 +2047,57 @@
 
         addFile( name, callback, options = {} ) {
 
-            this.sameLine(3);
+            if(!name) {
+                throw("Set Widget Name!");
+            }
 
-            const local = options.local ?? true;
-            const type = options.type ?? 'text';
+            let widget = this.#create_widget(name, Widget.FILE, options);
+            let element = widget.domEl;
 
-            const filenametext = "filename" + simple_guidGenerator().replace('-', "");
-            const that = this;
-
-            this.addLabel(name);
+            let local = options.local ?? true;
+            let type = options.type ?? 'text';
 
             // Create hidden input
             let input = document.createElement('input');
+            input.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 20%)";
             input.type = 'file';
             input.addEventListener('change', function(e) {
                 const files = e.target.files;
-                that.root.querySelector('#' + filenametext + " input").value = files[0].name;
+                if(!files.length) return;
+
                 const reader = new FileReader();
 
-                if(type === 'text')
-                {
+                if(type === 'text') {
                     reader.readAsText(files[0]);
-                }else
-                {
-                    // TODO
+                }else if(type === 'buffer') {
+                    reader.readAsArrayBuffer(files[0])
+                }else if(type === 'bin') {
+                    reader.readAsBinaryString(files[0])
+                }else if(type === 'url') {
+                    reader.readAsDataURL(files[0])
                 }
 
                 reader.onload = (e) => { callback.call(this, e.target.result) } ;
             });
 
-            let filename = "";
+            element.appendChild(input);
 
-            this.addText(null, filename, null, { id: filenametext });
+            this.queuedContainer = element;
+
             this.addButton(null, "<a class='fa-solid fa-folder-open'></a>", () => {
                 input.click();
             }, { className: "small" });
+            
+            this.addButton(null, "<a class='fa-solid fa-gear'></a>", () => {
+                
+                new Dialog("Load Settings", p => {
+                    p.addDropdown("Type", ['text', 'buffer', 'bin', 'url'], type, v => { type = v } );
+                    p.addButton(null, "Reload", v => { input.dispatchEvent( new Event('change') ) } );
+                });
+
+            }, { className: "small" });
+
+            delete this.queuedContainer;
         }
 
         /**
@@ -2413,8 +2429,16 @@
                 var value = element.children[1];
 
                 name.style.width = size;
-                const padding = widget.type == Widget.VECTOR ? 9 : 17;
-                value.style.width = "calc( 100% - " + size + " )";
+                let padding = "0px";
+                switch(widget.type) {
+                    case Widget.FILE:
+                        padding = "20%";
+                        break;
+                    case Widget.TEXT:
+                        padding = "8px";
+                        break;
+                };
+                value.style.width = "calc( 100% - " + size + " - " + padding + " )";
             }
         }
     };

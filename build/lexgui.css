@@ -39,10 +39,6 @@
   background: #aaaaaa;
 }
 
-::-webkit-scrollbar-corner {
-  /* background: red; */
-}
-
 html, body {
   width: 100%;
   height: 100%;
@@ -56,8 +52,12 @@ body.nocursor * {
   cursor: none !important;
 }
 
-input[type="file"] {
-  display: none;
+/* input[type="file"] {
+  opacity: 0.0;
+} */
+
+::-webkit-file-upload-button {
+ display: none;
 }
 
 #modal{
@@ -289,12 +289,11 @@ input[type="file"] {
 }
 
 .lexwidget.small {
-  width: 25% !important;
+  width: 10% !important;
 }
 
-.lexwidget.md * {
-  padding-left: 10px;
-  padding-right: 10px;
+.lexwidget.md {
+  width: 75% !important;
 }
 
 .lexinlinewidgets {
