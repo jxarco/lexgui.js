@@ -39,6 +39,34 @@
         return (S4()+"-"+S4());
     }
 
+    function set_as_draggable(domEl) {
+
+        let offsetX;
+        let offsetY;
+
+        domEl.setAttribute('draggable', true);
+        domEl.addEventListener("dragstart", function(e) {
+            const rect = e.target.getBoundingClientRect();
+            offsetX = e.clientX - rect.x;
+            offsetY = e.clientY - rect.y;
+            // Remove image when dragging
+            var img = new Image();
+            img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+            e.dataTransfer.setDragImage(img, 0, 0);
+            e.dataTransfer.effectAllowed = "move";
+        });
+        domEl.addEventListener("drag", function(e) {
+            e.preventDefault();
+            this.style.left = e.clientX - offsetX + 'px';
+            this.style.top = e.clientY - offsetY + 'px';
+        }, false );
+        domEl.addEventListener("dragend", function(e) {
+            e.preventDefault();
+            this.style.left = e.clientX - offsetX + 'px';
+            this.style.top = e.clientY - offsetY + 'px';
+        }, false );
+    }
+
     /**
      * @method init
      * @param {*} options 
@@ -70,9 +98,14 @@
         this.container.appendChild( modal );
         this.container.appendChild( root );
 
+        // Disable drag icon
+        root.addEventListener("dragover", function(e) {
+            e.preventDefault();
+        }, false );
+
         // Global vars
         this.DEFAULT_NAME_WIDTH     = "30%";
-        this.DEFAULT_SPLITBAR_SIZE  = 4;
+        this.DEFAULT_SPLITBAR_SIZE  = 6;
         this.OPEN_CONTEXTMENU_ENTRY = 'click';
 
         this.ready = true;
@@ -123,15 +156,6 @@
 
     LX.TreeEvent = TreeEvent;
 
-    class MenubarEvent {
-        constructor( domEl, name ) {
-            this.domEl = domEl;
-            this.name = name;
-        }
-    };
-
-    LX.MenubarEvent = MenubarEvent;
-
     /**
      * @method message
      * @param {String} text 
@@ -149,74 +173,51 @@
 
         this.modal.toggle(false);
         var root = document.createElement('div');
-        window.root  = root;
-        root.className = "lexmessage";
+        root.className = "lexdialog";
         if(options.id)
             root.id = options.id;
+        this.root.appendChild(root);
 
-        var content = document.createElement('div');
-        content.className = "lexmessagecontent" + (title ? "" : " notitle");
-        content.innerHTML = text;
-
-        root.style.width = "30%";
-        root.style.height = "30vh";
-        root.style.left = options.position ? (options.position[0] + "px") : "35%";
-        root.style.top = options.position ? (options.position[1] + "px") : "35vh";
-
-        if(options.draggable) {
-
-            let offsetX;
-            let offsetY;
-
-            root.setAttribute('draggable', true);
-            root.addEventListener("dragstart", function(e) {
-                const rect = e.target.getBoundingClientRect();
-                offsetX = e.clientX - rect.x;
-                offsetY = e.clientY - rect.y;
-                // Remove image when dragging
-                var img = new Image();
-                img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
-                e.dataTransfer.setDragImage(img, 0, 0);
-                e.dataTransfer.effectAllowed = "move";
-            });
-            root.addEventListener("drag", function(e) {
-                e.preventDefault();
-                this.style.left = e.clientX - offsetX + 'px';
-                this.style.top = e.clientY - offsetY + 'px';
-            }, false );
-            root.addEventListener("dragend", function(e) {
-                e.preventDefault();
-                this.style.left = e.clientX - offsetX + 'px';
-                this.style.top = e.clientY - offsetY + 'px';
-            }, false );
-
-            // Disable drag icon
-            this.container.addEventListener("dragover", function(e) {
-                e.preventDefault();
-            }, false );
+        var titleDiv = document.createElement('div');
+        if(title) {
+            titleDiv.className = "lexdialogtitle";
+            titleDiv.innerHTML = title;
+            root.appendChild(titleDiv);
         }
 
         var closeButton = document.createElement('div');
-        closeButton.className = "lexmessagecloser";
+        closeButton.className = "lexdialogcloser";
         closeButton.innerHTML = "<a class='fa-solid fa-xmark'></a>";
-        closeButton.title = "Close message";
-        
+        closeButton.title = "Close dialog";
+
         closeButton.addEventListener('click', (function(e) {
             root.remove();
             this.modal.toggle();
         }).bind(this));
 
         root.appendChild(closeButton);
-        
-        if(title) {
-            var titleDiv = document.createElement('div');
-            titleDiv.className = "lexmessagetitle";
-            titleDiv.innerHTML = title;
-            root.appendChild(titleDiv);
-        }
-        
+
+        var content = document.createElement('div');
+        content.className = "lexdialogcontent" + (title ? "" : " notitle");
+        content.innerHTML = text;
         root.appendChild(content);
-        this.container.appendChild(root);
+
+        // Process position and size
+        options.size = options.size ?? [];
+        options.position = options.position ?? [];
+
+        root.style.width = options.size[0] ? (options.size[0] + "px") : "auto";
+        root.style.height = options.size[1] ? (options.size[1] + "px") : "auto";
+        
+        let rect = root.getBoundingClientRect();
+        root.style.left = options.position[0] ? (options.position[0] + "px") : "calc( 50% - " + (rect.width * 0.5) + "px )";
+        root.style.top = options.position[1] ? (options.position[1] + "px") : "calc( 50vh - " + (rect.height * 0.5) + "px )";
+
+        content.style.height = title ? "calc( 100% - " + (titleDiv.offsetHeight + 30) + "px )" : "calc( 100% - 51px )";
+
+        // Process if draggble
+        if(options.draggable ?? true)
+            set_as_draggable(root);
     }
 
     LX.message = message;
@@ -350,10 +351,14 @@
                 this.split_bar = document.createElement("div");
                 this.split_bar.className = "lexsplitbar " + type;
 
-                if(type == "horizontal")
+                if(type == "horizontal") {
                     this.split_bar.style.width = LX.DEFAULT_SPLITBAR_SIZE + "px";
-                else
+                    this.split_bar.style.left = -LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
+                }
+                else {
                     this.split_bar.style.height = LX.DEFAULT_SPLITBAR_SIZE + "px";
+                    this.split_bar.style.top = -LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
+                }
                 this.split_bar.addEventListener("mousedown", inner_mousedown);
                 data = LX.DEFAULT_SPLITBAR_SIZE/2 + "px"; // updates
             }
@@ -425,8 +430,8 @@
                 last_pos[1] = e.pageY;
                 e.stopPropagation();
                 e.preventDefault();
-                document.body.classList.add("dragging-split-area");
-                that.split_bar.classList.add("dragging-split-area");
+                document.body.classList.add("nocursor");
+                that.split_bar.classList.add("nocursor");
             }
 
             function inner_mousemove(e)
@@ -452,8 +457,8 @@
                 var doc = that.root.ownerDocument;
                 doc.removeEventListener("mousemove",inner_mousemove);
                 doc.removeEventListener("mouseup",inner_mouseup);
-                document.body.classList.remove("dragging-split-area");
-                that.split_bar.classList.remove("dragging-split-area");
+                document.body.classList.remove("nocursor");
+                that.split_bar.classList.remove("nocursor");
             }
         }
 
@@ -466,8 +471,8 @@
             for(var i = 0; i < this.sections.length; i++)
             {
                 const area = this.sections[i];
-                if(area.onresize)
-                    area.onresize.call(this, area.root.getBoundingClientRect());
+                if(area[ type ])
+                    area[ type ].call(this, area.root.getBoundingClientRect());
                 area.propagateEvent( type );
             }
         }
@@ -564,14 +569,8 @@
                 
             this.#update();
 
-            // Resize events            
-            for(var i = 0; i < this.sections.length; i++)
-            {
-                const area = this.sections[i];
-                if(area.onresize)
-                    area.onresize.call(this, area.root.getBoundingClientRect());
-                area.propagateEvent( 'onresize' );
-            }
+            // Resize events   
+            this.propagateEvent( 'onresize' );
         }
 
         #update()
@@ -674,12 +673,15 @@
 
                     let contextmenu = document.createElement('div');
                     contextmenu.className = "lexcontextmenu";
+                    contextmenu.tabIndex = "0";
                     const isSubMenu = c.classList.contains('lexcontextmenuentry');
                     var rect = c.getBoundingClientRect();
                     contextmenu.style.left = (isSubMenu ? rect.width : rect.left) + "px";
                     // Entries use css to set top relative to parent
                     contextmenu.style.top = (isSubMenu ? 0 : -1 + rect.bottom) + "px";
                     c.appendChild( contextmenu );
+
+                    contextmenu.focus();
 
                     rect = contextmenu.getBoundingClientRect();
 
@@ -707,11 +709,23 @@
                         // Nothing more for separators
                         if(subkey == '') continue;
 
+                        contextmenu.addEventListener('keydown', function(e) {
+                            e.preventDefault();
+                            console.log(e.key);
+                            let short = that.shorts[ subkey ];
+                            if(!short) return;
+                            // check if it's a letter or other key
+                            short = short.length == 1 ? short.toLowerCase() : short;
+                            if(short == e.key) {
+                                subentry.click()
+                            }
+                        });
+
                         // Add callback
                         subentry.addEventListener("click", e => {
                             const f = subitem[ 'callback' ];
                             if(f) {
-                                f.call( this, new MenubarEvent(subentry, subkey) );
+                                f.call( this, subkey, subentry );
                                 that.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());  
                             } 
                             e.stopPropagation();
@@ -757,7 +771,7 @@
 
                     const f = item[ 'callback' ];
                     if(f) {
-                        f.call( this, new MenubarEvent(entry, key) );
+                        f.call( this, key, entry );
                         return;
                     } 
 
@@ -780,16 +794,19 @@
 
     class Widget {
         
-        static TEXT     = 0;
-        static BUTTON   = 1;
-        static DROPDOWN = 2;
-        static CHECKBOX = 3;
-        static COLOR    = 4;
-        static NUMBER   = 5;
-        static TITLE    = 6;
-        static VECTOR   = 7;
-        static TREE     = 8;
-        static PROGRESS = 9;
+        static TEXT         = 0;
+        static TEXT         = 1;
+        static BUTTON       = 2;
+        static DROPDOWN     = 3;
+        static CHECKBOX     = 4;
+        static COLOR        = 5;
+        static NUMBER       = 6;
+        static TITLE        = 7;
+        static VECTOR       = 8;
+        static TREE         = 9;
+        static PROGRESS     = 10;
+        static FILE         = 11;
+        static SEPARATOR    = 12;
 
         constructor(name, type, options) {
             this.name = name;
@@ -1077,6 +1094,8 @@
 
     class Panel {
 
+        #inline_widgets_left;
+
         /**
          * @param {*} options 
          * id: Id of the element
@@ -1127,6 +1146,10 @@
             return widget.setValue(value);
         }
 
+        /**
+         * @method clear
+         */
+
         clear() {
 
             this.branch_open = false;
@@ -1135,6 +1158,18 @@
             this.widgets = {};
 
             this.root.innerHTML = "";
+        }
+
+        /**
+         * @method sameLine
+         * @param {Number} number Of widgets that will be placed in the same line
+         * @description Next widgets will be in the same line
+         */
+
+        sameLine( number ) {
+
+            console.assert(number > 0);
+            this.#inline_widgets_left = number;
         }
 
         /**
@@ -1159,6 +1194,11 @@
             // Append to panel
             if(this.branches.length == 0)
                 branch.root.classList.add('first');
+
+            // This is the last!
+            this.root.querySelectorAll(".last").forEach( e => { e.classList.remove("last"); } );
+            branch.root.classList.add('last');
+
             this.branches.push( branch );
             this.root.appendChild( branch.root );
 
@@ -1172,15 +1212,6 @@
 
             this.branch_open = false;
             this.current_branch = null;
-        }
-
-        end() {
-
-            if(this.current_branch) {
-                this.current_branch.root.classList.add('last');
-            }
-
-            this.merge();
         }
 
         #pick( arg, def ) {
@@ -1208,9 +1239,6 @@
 
         #create_widget( name, type, options = {} ) {
 
-            if(!this.current_branch && !this.queuedContainer)
-                throw("No current branch!");
-
             let widget = new Widget(name, type, options);
 
             let element = document.createElement('div');
@@ -1236,14 +1264,45 @@
             }
 
             widget.domEl = element;
-            
-            if(!this.queuedContainer) {
-                this.current_branch.widgets.push( widget );
-                this.current_branch.content.appendChild( element );
-            } 
-            // Append content to queued tab container
-            else {
-                this.queuedContainer.appendChild( element );
+
+            const insert_widget = el => {
+                
+                if(!this.queuedContainer) {
+
+                    if(this.current_branch)
+                    {
+                        if(!options.skipWidget) 
+                            this.current_branch.widgets.push( widget );
+                        this.current_branch.content.appendChild( el );
+                    }
+                    else
+                    {
+                        this.root.appendChild( el );
+                    }
+                } 
+                // Append content to queued tab container
+                else {
+                    this.queuedContainer.appendChild( el );
+                }
+            };
+
+            // Process inline widgets
+            if(this.#inline_widgets_left > 0)
+            {
+                if(!this._inlineContainer)  {
+                    this._inlineContainer = document.createElement('div');
+                    this._inlineContainer.className = "lexinlinewidgets";
+                }
+                this._inlineContainer.appendChild(element);
+                this.#inline_widgets_left--;
+
+                // Last widget
+                if(!this.#inline_widgets_left) {
+                    insert_widget(this._inlineContainer);
+                    delete this._inlineContainer;
+                }
+            }else {
+                insert_widget(element);
             }
 
             return widget;
@@ -1252,7 +1311,8 @@
         #add_filter( placeholder, options = {} ) {
 
             options.placeholder = placeholder.constructor == String ? placeholder : "Filter properties"
-            
+            options.skipWidget = true;
+
             let widget = this.#create_widget(null, Widget.TEXT, options);
             let element = widget.domEl;
             element.className += " lexfilter noname";
@@ -1288,12 +1348,19 @@
                     // push to right container
                     that.queuedContainer = b.content;
 
+                    const emptyFilter = !input.value.length;
+
                     // add widgets
                     for( let w of b.widgets ) {
-                        if(!w.name) continue;
-                        const filterWord = input.value.toLowerCase();
-                        const name = w.name.toLowerCase();
-                        if(!name.includes(input.value)) continue;
+
+                        if(!emptyFilter)
+                        {
+                            if(!w.name) continue;
+                            const filterWord = input.value.toLowerCase();
+                            const name = w.name.toLowerCase();
+                            if(!name.includes(input.value)) continue;
+                        }
+
                         // insert filtered widget
                         that.queuedContainer.appendChild( w.domEl );
                     }
@@ -1315,6 +1382,17 @@
 
             if(this.onevent)
                 this.onevent.call(this, event);
+        }
+
+        /**
+         * @method addBlank
+         * @param {Number} height
+         */
+
+        addBlank( height = 8) {
+
+            let widget = this.#create_widget(null, Widget.addBlank);
+            widget.domEl.style.height = height + "px";
         }
 
         /**
@@ -1362,9 +1440,10 @@
             // Add widget value
             let wValue = document.createElement('input');
             wValue.value = wValue.iValue = value || "";
-            wValue.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+            wValue.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 8px )";
+            // wValue.style.marginLeft = "4px";
 
-            if(options.disabled) wValue.setAttribute("disabled", true);
+            if(options.disabled ?? false) wValue.setAttribute("disabled", true);
             if(options.placeholder) wValue.setAttribute("placeholder", options.placeholder);
 
             var resolve = (function(val, event) {
@@ -1400,6 +1479,16 @@
                 element.className += " noname";
                 wValue.style.width = "100%";
             }
+        }
+
+        /**
+         * @method addLabel
+         * @param {String} value Information string
+         */
+
+        addLabel( value ) {
+
+            this.addText( null, value, null, { disabled: true, className: "auto" } );
         }
         
         /**
@@ -1714,7 +1803,7 @@
                 e.preventDefault();
                 if(this !== document.activeElement)
                     return;
-                let mult = 1;
+                let mult = options.step ?? 1;
                 if(e.shiftKey) mult = 10;
                 else if(e.altKey) mult = 0.1;
                 this.value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
@@ -1745,12 +1834,13 @@
                 doc.addEventListener("mousemove",inner_mousemove);
                 doc.addEventListener("mouseup",inner_mouseup);
                 lastY = e.pageY;
+                document.body.classList.add('nocursor');
             }
 
             function inner_mousemove(e) {
                 if (lastY != e.pageY) {
                     let dt = lastY - e.pageY;
-                    let mult = 1;
+                    let mult = options.step ?? 1;
                     if(e.shiftKey) mult = 10;
                     else if(e.altKey) mult = 0.1;
                     vecinput.value = (+vecinput.valueAsNumber + mult * dt).toPrecision(5);
@@ -1766,6 +1856,7 @@
                 var doc = that.root.ownerDocument;
                 doc.removeEventListener("mousemove",inner_mousemove);
                 doc.removeEventListener("mouseup",inner_mouseup);
+                document.body.classList.remove('nocursor');
             }
             
             container.appendChild(box);
@@ -1825,7 +1916,7 @@
                     e.preventDefault();
                     if(this !== document.activeElement)
                         return;
-                    let mult = 1;
+                    let mult = options.step ?? 1;
                     if(e.shiftKey) mult = 10;
                     else if(e.altKey) mult = 0.1;
                     this.value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
@@ -1853,12 +1944,13 @@
                     doc.addEventListener("mousemove",inner_mousemove);
                     doc.addEventListener("mouseup",inner_mouseup);
                     lastY = e.pageY;
+                    document.body.classList.add('nocursor');
                 }
 
                 function inner_mousemove(e) {
                     if (lastY != e.pageY) {
                         let dt = lastY - e.pageY;
-                        let mult = 1;
+                        let mult = options.step ?? 1;
                         if(e.shiftKey) mult = 10;
                         else if(e.altKey) mult = 0.1;
                         vecinput.value = (+vecinput.valueAsNumber + mult * dt).toPrecision(5);
@@ -1874,6 +1966,7 @@
                     var doc = that.root.ownerDocument;
                     doc.removeEventListener("mousemove",inner_mousemove);
                     doc.removeEventListener("mouseup",inner_mouseup);
+                    document.body.classList.remove('nocursor');
                 }
                 
                 box.appendChild(vecinput);
@@ -1941,6 +2034,70 @@
 
             container.appendChild(progress);
             element.appendChild(container);
+        }
+
+        /**
+         * @method addFile
+         * @param {String} name Widget name
+         * @param {Function} callback Callback function on change
+         * @param {*} options:
+         * local: Ask for local file
+         * type: type to read as [text (Default), buffer, bin, url]
+         */
+
+        addFile( name, callback, options = {} ) {
+
+            if(!name) {
+                throw("Set Widget Name!");
+            }
+
+            let widget = this.#create_widget(name, Widget.FILE, options);
+            let element = widget.domEl;
+
+            let local = options.local ?? true;
+            let type = options.type ?? 'text';
+
+            // Create hidden input
+            let input = document.createElement('input');
+            input.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 20%)";
+            input.type = 'file';
+            input.addEventListener('change', function(e) {
+                const files = e.target.files;
+                if(!files.length) return;
+
+                const reader = new FileReader();
+
+                if(type === 'text') {
+                    reader.readAsText(files[0]);
+                }else if(type === 'buffer') {
+                    reader.readAsArrayBuffer(files[0])
+                }else if(type === 'bin') {
+                    reader.readAsBinaryString(files[0])
+                }else if(type === 'url') {
+                    reader.readAsDataURL(files[0])
+                }
+
+                reader.onload = (e) => { callback.call(this, e.target.result) } ;
+            });
+
+            element.appendChild(input);
+
+            this.queuedContainer = element;
+
+            this.addButton(null, "<a class='fa-solid fa-folder-open'></a>", () => {
+                input.click();
+            }, { className: "small" });
+            
+            this.addButton(null, "<a class='fa-solid fa-gear'></a>", () => {
+                
+                new Dialog("Load Settings", p => {
+                    p.addDropdown("Type", ['text', 'buffer', 'bin', 'url'], type, v => { type = v } );
+                    p.addButton(null, "Reload", v => { input.dispatchEvent( new Event('change') ) } );
+                });
+
+            }, { className: "small" });
+
+            delete this.queuedContainer;
         }
 
         /**
@@ -2026,12 +2183,16 @@
 
         addSeparator() {
 
-            if(!this.current_branch)
-                throw("You can only separate branches!");
-
             var element = document.createElement('div');
             element.className = "lexseparator";
-            this.current_branch.content.appendChild( element );
+            let widget = new Widget( null, Widget.SEPARATOR );
+            widget.domEl = element;
+            
+            if(this.current_branch) {
+                this.current_branch.content.appendChild( element );
+                this.current_branch.widgets.push( widget );
+            } else 
+                this.root.appendChild(element);
         }
 
         /**
@@ -2130,7 +2291,6 @@
             var that = this;
 
             this.root = root;
-            this.sizeLeft = LX.DEFAULT_NAME_WIDTH;
             this.widgets = [];
 
             // create element
@@ -2189,13 +2349,13 @@
 
             var grabber = document.createElement('div');
             grabber.innerHTML = "&#9662;";
-            grabber.style.marginLeft = this.sizeLeft;
+            grabber.style.marginLeft = LX.DEFAULT_NAME_WIDTH;
             element.appendChild(grabber);
 
             var line = document.createElement('div');
             line.style.width = "1px";
-            line.style.marginLeft = "4px";
-            line.style.marginTop = "-5px";
+            line.style.marginLeft = "6px";
+            line.style.marginTop = "2px";
             line.style.height = "0px"; // get in time
             grabber.appendChild(line);
             grabber.addEventListener("mousedown", inner_mousedown);
@@ -2221,15 +2381,15 @@
                 e.preventDefault();
                 var h = getBranchHeight();
                 line.style.height = (h-3) + "px";
+                document.body.classList.add('nocursor');
             }
             
             function inner_mousemove(e)
             {
                 if (lastXLine != e.pageX) {
                     var dt = lastXLine - e.pageX;
-                    var margin = line.style.marginLeft;
-                    var size = "calc( " + margin + " - " + dt + "px )";
-                    line.style.marginLeft = size;
+                    var margin = parseFloat( grabber.style.marginLeft );
+                    grabber.style.marginLeft = clamp(margin - dt * 0.1, 10, 90) + "%";
                 }
 
                 lastXLine = e.pageX;
@@ -2238,25 +2398,23 @@
             function inner_mouseup(e)
             {
                 if (lastX != e.pageX)
-                    that.#moveBranchSeparator(lastX - e.pageX);
+                    that.#updateWidgets();
                 lastX = e.pageX;
                 lastXLine = e.pageX;
-                line.style.marginLeft = "4px";
                 line.style.height = "0px";
 
                 var doc = that.root.ownerDocument;
                 doc.removeEventListener("mouseup",inner_mouseup);
                 doc.removeEventListener("mousemove",inner_mousemove);
+                document.body.classList.remove('nocursor');
             }
 
             this.content.appendChild( element );
         }
 
-        #moveBranchSeparator( dt ) {
+        #updateWidgets() {
 
-            var size = "calc( " + this.sizeLeft + " - " + dt + "px )";
-            this.grabber.style.marginLeft = size;
-            this.sizeLeft = size;
+            var size = this.grabber.style.marginLeft;
 
             // Update sizes of widgets inside
             for(var i = 0; i < this.widgets.length;i++) {
@@ -2270,14 +2428,105 @@
                 var name = element.children[0];
                 var value = element.children[1];
 
-                name.style.width = this.sizeLeft;
-                const padding = widget.type == Widget.VECTOR ? 9 : 17;
-                value.style.width = "calc( 100% - " + padding + " - " + this.sizeLeft + " )";
+                name.style.width = size;
+                let padding = "0px";
+                switch(widget.type) {
+                    case Widget.FILE:
+                        padding = "20%";
+                        break;
+                    case Widget.TEXT:
+                        padding = "8px";
+                        break;
+                };
+                value.style.width = "calc( 100% - " + size + " - " + padding + " )";
             }
         }
     };
 
     LX.Branch = Branch;
+
+    /**
+     * @class Dialog
+     */
+
+    class Dialog {
+
+        #oncreate;
+
+        constructor( title, callback, options = {} ) {
+            
+            if(!callback)
+            console.warn("Content is empty, add some widgets using 'callback' parameter!");
+
+            this.#oncreate = callback;
+
+            const size = options.size ?? [],
+                position = options.position ?? [],
+                draggable = options.draggable ?? true,
+                modal = options.modal ?? false;
+
+            if(modal)
+                LX.modal.toggle(false);
+
+            var root = document.createElement('div');
+            root.className = "lexdialog";
+            if(options.id)
+                root.id = options.id;
+            LX.root.appendChild( root );
+
+            var titleDiv = document.createElement('div');
+            if(title) {
+                titleDiv.className = "lexdialogtitle";
+                titleDiv.innerHTML = title;
+                root.appendChild(titleDiv);
+            }
+
+            var closeButton = document.createElement('div');
+            closeButton.className = "lexdialogcloser";
+            closeButton.innerHTML = "<a class='fa-solid fa-xmark'></a>";
+            closeButton.title = "Close";
+
+            closeButton.addEventListener('click', e => {
+                root.remove();
+                if(modal)
+                    LX.modal.toggle();
+            });
+
+            root.appendChild(closeButton);
+
+            const panel = new Panel();
+            panel.root.classList.add('lexdialogcontent');
+            if(!title) panel.root.classList.add('notitle');
+            callback.call(this, panel);
+            root.appendChild(panel.root);
+            
+            this.panel = panel;
+            this.root = root;
+
+            if(draggable)
+                set_as_draggable(root);
+
+            // Process position and size
+
+            root.style.width = size[0] ? (size[0] + "px") : "25%";
+            root.style.height = size[1] ? (size[1] + "px") : "auto";
+            
+            let rect = root.getBoundingClientRect();
+            root.style.left = position[0] ? (position[0] + "px") : "calc( 50% - " + (rect.width * 0.5) + "px )";
+            root.style.top = position[1] ? (position[1] + "px") : "calc( 50vh - " + (rect.height * 0.5) + "px )";
+
+            panel.root.style.width = "calc( 100% - 30px )";
+            panel.root.style.height = title ? "calc( 100% - " + (titleDiv.offsetHeight + 30) + "px )" : "calc( 100% - 51px )";
+        }
+
+        refresh() {
+
+            this.panel.root.innerHTML = "";
+            this.#oncreate.call(this, this.panel);
+        }
+    }
+
+    LX.Dialog = Dialog;
 
     /**
      * @class ContextMenu
@@ -2320,12 +2569,20 @@
                 let width = rect.width + 36; // this has paddings
                 if(window.innerWidth - rect.right < 0)
                     div.style.left = (window.innerWidth - width - margin) + "px";
+
+                if(rect.top + rect.height > window.innerHeight)
+                    div.style.top = (window.innerHeight - rect.height - margin) + "px";
             }
             else
             {
                 let dt = window.innerWidth - rect.right;
                 if(dt < 0) {
                     div.style.left = div.offsetLeft + (dt - margin) + "px";
+                }
+                
+                dt = window.innerHeight - (rect.top + rect.height);
+                if(dt < 0) {
+                    div.style.top = div.offsetTop + (dt - margin + 20 ) + "px";
                 }
             }
         }
@@ -2378,7 +2635,7 @@
                 
                 const f = o[ 'callback' ];
                 if(f) {
-                    f.call( this, new MenubarEvent(entry, k) );
+                    f.call( this, k, entry );
                     this.root.remove();
                 } 
 
@@ -3659,7 +3916,7 @@
 
             addContextMenu("Optimize", e, m => {
                 for( let t of tracks ) {
-                    m.add( t.name + "@" + t.type, () => { 
+                    m.add( t.name + (t.type ? "@" + t.type : ""), () => { 
                         this.animationClip.tracks[t.clipIdx].optimize( threshold );
                         t.edited = [];
                     })

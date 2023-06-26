@@ -54,10 +54,12 @@ TODO List:
 - ~~Create addPanel to avoid instancing and attaching a panel to an area~~
 - ~~Resize callbacks~~
 - ~~Timeline~~
-- Open context menus the other way around if not enough space (vertical!!!)
-- Dialogs
-- Multiple widgets per row
-- Load File widget
+- ~~Fix filter properties (separator is not in right place)~~
+- ~~Open context menus the other way around if not enough space (vertical!!!)~~
+- ~~Dialogs~~
+- ~~Multiple widgets per row~~
+- ~~Load File widget~~
+- Menubar: Support checkboxes ??
 - Change resize bar to Godot one
 - Support optimum, sub, etc colors for the progress bars
 - Image Dropdown

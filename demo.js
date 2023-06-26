@@ -3,11 +3,11 @@ let area = LX.init();
 
 // change global properties after init
 // LX.DEFAULT_NAME_WIDTH = "10%";
-// LX.DEFAULT_SPLITBAR_SIZE = 15;
+// LX.DEFAULT_SPLITBAR_SIZE = 16;
 // LX.OPEN_CONTEXTMENU_ENTRY = 'mouseover';
 
 // LX.message("I'm in another position", null, { position: [10, 10] });
-// LX.message("Welcome to Lexgui", "Welcome!", { draggable: true })
+// LX.message("Welcome to Lexgui", "Welcome!");
 
 // menu bar
 area.addMenubar( m => {
@@ -15,16 +15,27 @@ area.addMenubar( m => {
     // {options}: callback, icon, short
 
     m.add( "Scene/New Scene", () => { console.log("New scene created!") });
-    m.add( "Scene/Open Scene", { icon: "fa-solid fa-folder-open", short: "CTRL + O" } );
-    m.add( "Scene/Open Recent/hello.scene", () => { console.log("Opening 'hello.scene'") });
-    m.add( "Scene/Open Recent/goodbye.scene" );
+    m.add( "Scene/Open Scene", { icon: "fa-solid fa-folder-open", short:  "S", callback: () => { console.log("Opening SCENE Dialog") } } );
+    m.add( "Scene/Open Recent/hello.scene", name => { console.log("Opening " + name) });
+    m.add( "Scene/Open Recent/goodbye.scene", name => { console.log("Opening " + name) });
     m.add( "Project/Project Settings" );
     m.add( "Project/Export", { icon: "fa-solid fa-download" });
-    m.add( "Project/Export/DAE", { icon: "fa-solid fa-cube", short: "D" } );
+    m.add( "Project/Export/DAE", { icon: "fa-solid fa-cube", short: "D", callback: () => { console.log("Exporting DAE...") }} );
     m.add( "Project/Export/GLTF", { short:  "G" } );
-    m.add( "Editor/Settings", { icon: "fa-solid fa-gears" } );
-    m.add( "Help", { short:  "F1" } );
-    m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass" });
+    m.add( "Editor/Settings", { icon: "fa-solid fa-gears", callback: () => {
+        const dialog = new LX.Dialog( "Settings", p => {
+            p.addText("A Text", "Testing first widget");
+            p.sameLine(3);
+            p.addLabel("Buttons:");
+            p.addButton(null, "Click me", () => {
+                console.log( p.getValue("A Text") );
+            });
+            p.addButton(null, "Click me v2!", () => {
+                console.log( p.getValue("A Text") );
+            });
+        });
+    }} );
+    m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass", short:  "F1", callback: () => { console.log("Opening HELP") }});
     m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
     m.add( "Help/Support LexGUI/Do it" );
 });
@@ -37,14 +48,83 @@ var [left,right] = area.sections;
 left.split({type: 'vertical', sizes:["80vh","20vh"]});
 var [up, bottom] = left.sections;
 
+var kfTimeline = null;
+var clipsTimeline = null;
+
+bottom.onresize = bounding => {
+    if(kfTimeline) kfTimeline.resize( [ bounding.width, bounding.height ] );
+    if(clipsTimeline) clipsTimeline.resize( [ bounding.width, bounding.height ] );
+}
+
+// another menu bar
+bottom.addMenubar( m => {
+    m.add( "Information", name => { 
+        console.log(name);
+        var el = document.getElementById('kf-timeline');
+        if(el)
+            el.style.display = 'none';
+        el = document.getElementById('clips-timeline');
+        if(el)
+            el.style.display = 'none';
+
+        bottom_panel.root.style.display = 'block';
+    });
+
+    m.add( "Keyframes Timeline", name => { 
+        console.log(name);
+        let el = document.getElementById('bottom-panel');
+        if(el)
+            el.style.display = 'none';
+        el = document.getElementById('clips-timeline');
+        if(el)
+            el.style.display = 'none';
+        var timeline = document.getElementById('kf-timeline');            
+        if(timeline) {
+            timeline.style.display = 'block';
+        }
+        else {
+            kfTimeline = new LX.KeyFramesTimeline("kf-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
+            kfTimeline.setAnimationClip({tracks: [{name: "Test Track", values: [0,1,0,1], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
+            kfTimeline.selectedItem = "Test Track";
+            bottom.attach(kfTimeline);
+            kfTimeline.addButtons([ 
+                { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },
+                { icon: 'fa fa-filter', name: "optimize", callback: (e) => {   kfTimeline.onShowOptimizeMenu(e);}},
+                { icon: 'fa fa-rectangle-xmark', name: 'unselectAll', callback: (e) => { kfTimeline.unSelectAllKeyFrames();}}
+            ]);
+            
+            kfTimeline.draw(0);
+        }
+    });
+
+    m.add( "Clips Timeline", name => { 
+        console.log(name);
+        let el = document.getElementById('bottom-panel');
+        if(el)
+            el.style.display = 'none';
+        el = document.getElementById('kf-timeline');
+        if(el)
+            el.style.display = 'none';
+        var ctimeline = document.getElementById('clips-timeline');            
+        if(ctimeline) {
+            ctimeline.style.display = 'block';
+        }
+        else {
+            clipsTimeline = new LX.KeyFramesTimeline("clips-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
+            bottom.attach(clipsTimeline);
+            clipsTimeline.draw(0);
+        }
+    });
+});
+
 // split right area
 right.split({type: 'vertical', sizes:["70vh","30vh"]});
 var [rup, rbottom] = right.sections;
 
 // another menu bar
 rbottom.addMenubar( m => {
-    m.add( "Vertical", e => { console.log(e); fillRightBottomPanel( side_bottom_panel, e.name ); });
-    m.add( "Horizontal", e => { console.log(e); fillRightBottomPanel( side_bottom_panel, e.name ); });
+    m.add( "Vertical", name => { console.log(name); fillRightBottomPanel( side_bottom_panel, name ); });
+    m.add( "Horizontal", name => { console.log(name); fillRightBottomPanel( side_bottom_panel, name ); });
 }, { float: 'center' } );
 
 // add canvas to left upper part
@@ -243,7 +323,7 @@ function fillPanel( panel ) {
                     console.log(event.node.id + " dbl clicked"); 
                     break;
                 case LX.TreeEvent.NODE_CONTEXTMENU: 
-                    LX.addContextMenu( "Node", event.value, m => {
+                    LX.addContextMenu( event.node.id, event.value, m => {
 
                         // {options}: callback, color
 
@@ -294,15 +374,21 @@ function fillPanel( panel ) {
     panel.addVector2("2D Position", [250, 350], (value, event) => {
         console.log(value);
     }, { min: 0, max: 1024 });
-    panel.addVector4("I'm a Vec4", [0.3, 0.3, 0.5, 1], (value, event) => {
-        console.log(value);
-    });
     panel.addSeparator();
     panel.addTitle("Configuration (I'm a title)");
     panel.addCheckbox("Toggle me", true, (value, event) => {
         console.log(value);
     });
-    panel.end();
+    panel.addFile("Image", data => { console.log(data) }, {} );
+    panel.merge();
+
+    // This is outside a branch
+    panel.addText("I'm out :(", "", null, { placeholder: "Alone..." });
+    panel.addVector4("I'm a Vec4", [0.3, 0.3, 0.5, 1], (value, event) => {
+        console.log(value);
+    });
+    panel.addButton(null, "Click me, I'm Full Width...");
+    panel.addButton("Test Button", "Reduced width...");
 }
 
 function fillRightBottomPanel( panel, tab ) {
@@ -368,7 +454,7 @@ function fillRightBottomPanel( panel, tab ) {
         panel.addProgress("HeadRoll", 0, { min: -1, max: 1 });
     }
 
-    panel.end();
+    panel.merge();
    
 }
 
@@ -390,5 +476,5 @@ function fillBottomPanel( panel ) {
 
     panel.branch("A collapsed branch", {closed: true});
     panel.addText(null, "Nothing here", null, {disabled: true});
-    panel.end();
+    panel.merge();
 }
