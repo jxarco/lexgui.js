@@ -1098,6 +1098,10 @@ meter::-webkit-meter-even-less-good-value {
   font-size: 11px;
 }
 
+.lexarrayitems a {
+  font-size: 9px;
+}
+
 .lexarrayitems .lexwidgetname {
   color: var(--global-text-secondary);
 }

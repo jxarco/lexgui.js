@@ -225,7 +225,7 @@
     function addContextMenu( title, event, callback )
     {
         var menu = new ContextMenu( event, title );
-        this.root.appendChild(menu.root);
+        LX.root.appendChild(menu.root);
 
         if(callback)
             callback( menu );
@@ -1243,7 +1243,7 @@
                 var domName = document.createElement('div');
                 domName.className = "lexwidgetname";
                 domName.innerHTML = name || "";
-                domName.style.width = (options.nameFitsWidth ?? false) ? "100%" : LX.DEFAULT_NAME_WIDTH;
+                domName.style.width = options.nameWidth || LX.DEFAULT_NAME_WIDTH;
 
                 element.appendChild(domName);
                 element.domName = domName;
@@ -1410,6 +1410,7 @@
          * disabled: Make the widget disabled [false]
          * placeholder: Add input placeholder
          * trigger: Choose onchange trigger (default, input) [default]
+         * inputWidth: Width of the text input
          */
 
         addText( name, value, callback, options = {} ) {
@@ -1429,7 +1430,7 @@
             // Add widget value
             let wValue = document.createElement('input');
             wValue.value = wValue.iValue = value || "";
-            wValue.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 8px )";
+            wValue.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 8px )";
             // wValue.style.marginLeft = "4px";
 
             if(options.disabled ?? false) wValue.setAttribute("disabled", true);
@@ -1660,6 +1661,8 @@
 
             // Add dropdown array button
 
+            const itemNameWidth = "10%";
+
             var container = document.createElement('div');
             container.className = "lexarray";
             container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
@@ -1668,8 +1671,7 @@
             let buttonName = "Array (size " + values.length + ")";
             buttonName += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
             this.addButton(null, buttonName, () => {
-
-
+                element.querySelector(".lexarrayitems").toggleAttribute('hidden');
             }, { buttonClass: 'array' });
             delete this.queuedContainer;
 
@@ -1677,32 +1679,50 @@
 
             var array_items = document.createElement('div');
             array_items.className = "lexarrayitems";
+            array_items.toggleAttribute('hidden',  true);
 
             this.queuedContainer = array_items;
 
             for( let i = 0; i < values.length; ++i )
             {
-                // let item = document.createElement('div');
-                // item.className = "lexarrayitem";
-                // item.innerText = values[i];
-                // array_items.appendChild( item );
+                const value = values[i];
+                const baseclass = value.constructor;
 
-                this.addText(i+"", values[i], null, { width: "10%" });
+                this.sameLine(3);
 
-                // item.addEventListener("click", e => {
-                //     e.stopPropagation();
-                //     e.stopImmediatePropagation();
-                //     e.target.classList.toggle('selected');
-                //     flagvalue ^= ( 1 << bit );
-                //     this.#trigger( new IEvent(name, flagvalue, e), callback );
-                // });
+                switch(baseclass)
+                {
+                    case String:
+                        this.addText(i+"", value, null, { nameWidth: itemNameWidth, inputWidth: "90%" });
+                        break;
+                    case Number:
+                        this.addNumber(i+"", value, null, { nameWidth: itemNameWidth, inputWidth: "90%" });
+                        break;
+                }
+
+                this.addButton( null, "<a class='fa-solid fa-pen'></a>", (value, event) => {
+                    
+                    addContextMenu("Type", event, c => {
+                        // TODO
+                        // process new type, refresh widget
+                        c.add( "String" );
+                        c.add( "Number" );
+                    });
+                    
+                }, { title: "Change Type", className: 'small'} );
+
+                this.addButton( null, "<a class='fa-solid fa-xmark'></a>", (value, event) => {
+
+                    // TODO 
+                    // delete and refresh
+                    
+                }, { title: "Remove item", className: 'small'} );
             }
 
             buttonName = "Add item";
             buttonName += "<a class='fa-solid fa-plus' style='float:right'></a>";
             this.addButton(null, buttonName, () => {
-
-
+                // this.#trigger( new IEvent(name, flagvalue, e), callback );
             }, { buttonClass: 'array' });
 
             // Stop pushing to array_items
@@ -1886,7 +1906,7 @@
 
             var container = document.createElement('div');
             container.className = "lexnumber";        
-            container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+            container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
             let box = document.createElement('div');
             box.className = "numberbox";

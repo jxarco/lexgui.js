@@ -60,7 +60,8 @@ TODO List:
 - ~~Multiple widgets per row~~
 - ~~Load File widget~~
 - ~~Layers widget~~
-- Array widget
+- ~~Array widget~~
+- Refresh array widget on change
 - Use default Value in Layers widget
 - Add reset widget in Layers widget
 - Menubar: Support checkboxes ??
