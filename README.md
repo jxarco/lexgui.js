@@ -61,8 +61,8 @@ TODO List:
 - ~~Load File widget~~
 - ~~Layers widget~~
 - ~~Array widget~~
-- Refresh array widget on change
-- Use default Value in Layers widget
+- ~~Refresh array widget on change~~
+- ~~Use default Value in Layers widget~~
 - Add reset widget in Layers widget
 - Menubar: Support checkboxes ??
 - Change resize bar to Godot one

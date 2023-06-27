@@ -381,7 +381,7 @@ body.nocursor * {
   display: grid;
   align-content: center;
 	background-color: var(--global-button-color);
-  border-radius: 6px;
+  border-radius: 4px;
   border: none;
   margin-left: 5px;
   margin-top: 2px;
@@ -392,7 +392,7 @@ body.nocursor * {
   white-space: nowrap;
   overflow: hidden;
   cursor: pointer;
-  box-shadow: 0px 0px 4px #5c5f73;
+  /* box-shadow: 0px 0px 4px #5c5f73; */
   font-size: 12px;
   font-family: var(--gloal-font);
 }
@@ -1098,8 +1098,8 @@ meter::-webkit-meter-even-less-good-value {
   font-size: 11px;
 }
 
-.lexarrayitems a {
-  font-size: 9px;
+.lexarrayitems .small .lexbutton {
+  background: none;
 }
 
 .lexarrayitems .lexwidgetname {

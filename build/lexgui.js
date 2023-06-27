@@ -1585,7 +1585,7 @@
         /**
          * @method addLayers
          * @param {String} name Widget name
-         * @param {} value Select by default option
+         * @param {Number} value Flag value by default option
          * @param {Function} callback Callback function on change
          * @param {*} options:
          */
@@ -1612,12 +1612,23 @@
             container.className = "lexlayers";
             container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
-            let flagvalue = 0;
+            let binary = value.toString( 2 );
+            let nbits = binary.length;
+            // fill zeros
+            for(var i = 0; i < (16 - nbits); ++i) {
+                binary = '0' + binary;
+            }
 
             for( let bit = 0; bit < 16; ++bit )
             {
                 let layer = document.createElement('div');
                 layer.className = "lexlayer";
+                if( value != undefined )
+                {
+                    const valueBit = binary[ 16 - bit - 1 ];
+                    if(valueBit != undefined && valueBit == '1') 
+                        layer.classList.add('selected');    
+                }
                 layer.innerText = bit + 1;
                 layer.title = "Bit " + bit + ", value " + (1 << bit);
                 container.appendChild( layer );
@@ -1626,8 +1637,8 @@
                     e.stopPropagation();
                     e.stopImmediatePropagation();
                     e.target.classList.toggle('selected');
-                    flagvalue ^= ( 1 << bit );
-                    this.#trigger( new IEvent(name, flagvalue, e), callback );
+                    value ^= ( 1 << bit );
+                    this.#trigger( new IEvent(name, value, e), callback );
                 });
             }
 
@@ -1677,57 +1688,70 @@
 
             // Show elements
 
-            var array_items = document.createElement('div');
+            let array_items = document.createElement('div');
             array_items.className = "lexarrayitems";
             array_items.toggleAttribute('hidden',  true);
 
-            this.queuedContainer = array_items;
+            const updateItems = () => {
 
-            for( let i = 0; i < values.length; ++i )
-            {
-                const value = values[i];
-                const baseclass = value.constructor;
+                array_items.innerHTML = "";
 
-                this.sameLine(3);
+                this.queuedContainer = array_items;
 
-                switch(baseclass)
+                for( let i = 0; i < values.length; ++i )
                 {
-                    case String:
-                        this.addText(i+"", value, null, { nameWidth: itemNameWidth, inputWidth: "90%" });
-                        break;
-                    case Number:
-                        this.addNumber(i+"", value, null, { nameWidth: itemNameWidth, inputWidth: "90%" });
-                        break;
+                    const value = values[i];
+                    const baseclass = value.constructor;
+
+                    this.sameLine(2);
+
+                    switch(baseclass)
+                    {
+                        case String:
+                            this.addText(i+"", value, null, { nameWidth: itemNameWidth, inputWidth: "90%" });
+                            break;
+                        case Number:
+                            this.addNumber(i+"", value, null, { nameWidth: itemNameWidth, inputWidth: "90%" });
+                            break;
+                    }
+
+                    // this.addButton( null, "<a class='lexicon fa-solid fa-pen'></a>", (value, event) => {
+                        
+                    //     addContextMenu("Type", event, c => {
+                    //         // TODO
+                    //         // process new type, refresh widget
+                    //         c.add( "String" );
+                    //         c.add( "Number" );
+                    //     });
+                        
+                    // }, { title: "Change Type", className: 'small'} );
+
+                    this.addButton( null, "<a class='lexicon fa-solid fa-trash'></a>", () => {
+                        values.splice(values.indexOf( value ), 1);
+                        updateItems();
+                        // Update num items
+                        let buttonEl = element.querySelector(".lexbutton.array span");
+                        buttonEl.innerHTML = "Array (size " + values.length + ")";
+                        buttonEl.innerHTML += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
+                    }, { title: "Remove item", className: 'small'} );
                 }
 
-                this.addButton( null, "<a class='fa-solid fa-pen'></a>", (value, event) => {
-                    
-                    addContextMenu("Type", event, c => {
-                        // TODO
-                        // process new type, refresh widget
-                        c.add( "String" );
-                        c.add( "Number" );
-                    });
-                    
-                }, { title: "Change Type", className: 'small'} );
+                buttonName = "Add item";
+                buttonName += "<a class='fa-solid fa-plus' style='float:right'></a>";
+                this.addButton(null, buttonName, () => {
+                    values.push( "" );
+                    updateItems();
+                    // Update num items
+                    element.querySelector(".lexbutton.array span").innerHTML = "Array (size " + values.length + ")";
+                    // this.#trigger( new IEvent(name, flagvalue, e), callback );
+                }, { buttonClass: 'array' });
 
-                this.addButton( null, "<a class='fa-solid fa-xmark'></a>", (value, event) => {
+                // Stop pushing to array_items
+                delete this.queuedContainer;
+            };
 
-                    // TODO 
-                    // delete and refresh
-                    
-                }, { title: "Remove item", className: 'small'} );
-            }
-
-            buttonName = "Add item";
-            buttonName += "<a class='fa-solid fa-plus' style='float:right'></a>";
-            this.addButton(null, buttonName, () => {
-                // this.#trigger( new IEvent(name, flagvalue, e), callback );
-            }, { buttonClass: 'array' });
-
-            // Stop pushing to array_items
-            delete this.queuedContainer;
-
+            updateItems();
+            
             element.appendChild(container);
             element.appendChild(array_items);
         }

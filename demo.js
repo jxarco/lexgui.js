@@ -293,7 +293,7 @@ function fillPanel( panel ) {
     panel.addVector3("I'm a Vec3", [0.1, 0.4, 0.5], (value, event) => {
         console.log(value);
     });
-    panel.addLayers("Layers", null, (value, event) => {
+    panel.addLayers("Layers", 10, (value, event) => {
         console.log(value);
     });
     panel.addArray("Array", ['GPTeam', 'Blat Panthers', 'Blat Bunny'], (value, event) => {
