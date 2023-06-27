@@ -58,8 +58,8 @@ bottom.onresize = bounding => {
 
 // another menu bar
 bottom.addMenubar( m => {
-    m.add( "Information", name => { 
-        console.log(name);
+    m.add( "Information", e => { 
+        console.log(e); 
         var el = document.getElementById('kf-timeline');
         if(el)
             el.style.display = 'none';
@@ -67,11 +67,18 @@ bottom.addMenubar( m => {
         if(el)
             el.style.display = 'none';
 
-        bottom_panel.root.style.display = 'block';
+        var bottom_panel = document.getElementById('bottom-panel');
+        if(bottom_panel)
+            bottom_panel.style.display = 'block';
+        else {
+            bottom_panel = new LX.Panel({id: "bottom-panel"});
+            bottom.attach( bottom_panel );
+            fillBottomPanel( bottom_panel ); 
+        }
     });
 
-    m.add( "Keyframes Timeline", name => { 
-        console.log(name);
+    m.add( "Keyframes Timeline", e => { 
+        console.log(e);
         let el = document.getElementById('bottom-panel');
         if(el)
             el.style.display = 'none';
@@ -84,24 +91,30 @@ bottom.addMenubar( m => {
         }
         else {
             kfTimeline = new LX.KeyFramesTimeline("kf-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
-            kfTimeline.setAnimationClip({tracks: [{name: "Test Track", values: [0,1,0,1], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
-            kfTimeline.selectedItem = "Test Track";
+            kfTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
+            kfTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
             bottom.attach(kfTimeline);
-            kfTimeline.addButtons([ 
+            
+            kfTimeline.addButtons([
                 { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },
-                { icon: 'fa fa-filter', name: "optimize", callback: (e) => {   kfTimeline.onShowOptimizeMenu(e);}},
-                { icon: 'fa fa-rectangle-xmark', name: 'unselectAll', callback: (e) => { kfTimeline.unSelectAllKeyFrames();}}
+                { icon: 'fa fa-filter', name: "optimize", callback: (value, event) => {   kfTimeline.onShowOptimizeMenu(event);}},
+                { icon: 'fa fa-rectangle-xmark', name: 'unselectAll', callback: (value, event) => { kfTimeline.unSelectAllKeyFrames();}}
             ]);
             
             kfTimeline.draw(0);
+            
+            bottom.onresize = bounding => {
+                kfTimeline.resize( [ bounding.width, bounding.height ] );
+            }
         }
     });
 
-    m.add( "Clips Timeline", name => { 
-        console.log(name);
+    m.add( "Clips Timeline", e => { 
+        console.log(e);
         let el = document.getElementById('bottom-panel');
         if(el)
             el.style.display = 'none';
+        
         el = document.getElementById('kf-timeline');
         if(el)
             el.style.display = 'none';
@@ -110,12 +123,23 @@ bottom.addMenubar( m => {
             ctimeline.style.display = 'block';
         }
         else {
-            clipsTimeline = new LX.KeyFramesTimeline("clips-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
+            clipsTimeline = new LX.ClipsTimeline("clips-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
+            var clip = {name:"", start:0, duration:1, type:""};
+            clipsTimeline.addClip(clip)
+            // clipsTimeline.setAnimationClip({tracks: [{clips: [clip]}], duration: 2});
+            clipsTimeline.selectedItem = "Test track";
+
             bottom.attach(clipsTimeline);
             clipsTimeline.draw(0);
+            
+            bottom.onresize = bounding => {
+                clipsTimeline.resize( [ bounding.width, bounding.height ] );
+            }
         }
+
     });
-});
+
+} );
 
 // split right area
 right.split({type: 'vertical', sizes:["70vh","30vh"]});
@@ -175,9 +199,6 @@ fillPanel( side_panel );
 
 var side_bottom_panel = rbottom.addPanel();
 fillRightBottomPanel( side_bottom_panel, 'Vertical' );
-
-var bottom_panel = bottom.addPanel( {id: "bottom-panel"} );
-fillBottomPanel( bottom_panel ); 
 
 function loop(dt) {
     

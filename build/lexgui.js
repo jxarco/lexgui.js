@@ -426,8 +426,8 @@
                 var doc = that.root.ownerDocument;
                 doc.addEventListener("mousemove",inner_mousemove);
                 doc.addEventListener("mouseup",inner_mouseup);
-                last_pos[0] = e.pageX;
-                last_pos[1] = e.pageY;
+                last_pos[0] = e.x;
+                last_pos[1] = e.y;
                 e.stopPropagation();
                 e.preventDefault();
                 document.body.classList.add("nocursor");
@@ -437,16 +437,15 @@
             function inner_mousemove(e)
             {
                 if(that.type == "horizontal") {
-                    if (last_pos[0] != e.pageX)
-                        that.#moveSplit(last_pos[0] - e.pageX);
+                    that.#moveSplit(last_pos[0] - e.x);
+                        
                 }
                 else {
-                    if (last_pos[1] != e.pageY)
-                        that.#moveSplit(last_pos[1] - e.pageY);
+                    that.#moveSplit(last_pos[1] - e.y);
                 }
-
-                last_pos[0] = e.pageX;
-                last_pos[1] = e.pageY;
+                
+                last_pos[0] = e.x;
+                last_pos[1] = e.y;
                 e.stopPropagation();
                 e.preventDefault();
                             
@@ -515,56 +514,34 @@
         #moveSplit( dt ) {
 
             if(!this.type)
-                throw("no split area");
+                throw("No split area");
+
+            if(!dt) // splitbar didn't move!
+                return;
 
             var a1 = this.sections[0];
             var a2 = this.sections[1];
-
-            const midSize = LX.DEFAULT_SPLITBAR_SIZE / 2;
+            var splitinfo = " - "+ LX.DEFAULT_SPLITBAR_SIZE +"px";
+            const min_size = 10;
 
             if(this.type == "horizontal") {
 
-                var width2 = a2.size[0],
-                    data = midSize + "px"; // updates
-
-                // Move to left
-                if(dt > 0) {    
-
-                    dt = dt < midSize ? midSize: dt;
-
-                    var size = width2 + dt;
-                    data += " - " + size + "px";
-                    a1.root.style.width = "calc( 100% - " + data + " )";
-                    a2.root.style.width = size + "px";
-                } else {
-
-                    dt = dt > -midSize ? -midSize : dt;
-                    width2 = a1.size[0];
-
-                    var size = width2 - dt;
-                    data += " - " + size + "px";
-                    a2.root.style.width = "calc( 100% - " + data + " )";
-                    a1.root.style.width = size + "px";
-                }
+                var size = (a2.root.offsetWidth + dt);
+				if(size < min_size)
+					size = min_size;
+				a1.root.style.width = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
+				a1.root.style.width = "-webkit-calc( 100% - " + size + "px " + splitinfo + " )";
+				a1.root.style.width = "calc( 100% - " + size + "px " + splitinfo + " )";
+				a2.root.style.width = size + "px"; //other split
             }
             else {
-                var height2 = a2.size[1],
-                    data = midSize + "px"; // updates
-
-                // Move up
-                if(dt > 0) {
-                    var size = height2 + dt;
-                    data += " - " + size + "px";
-                    a1.root.style.height = "calc( 100% - " + data + " )";
-                    a2.root.style.height = size + "px";
-                }
-                
-                else {
-                    var size = height2 + dt;
-                    data += " - " + size + "px";
-                    a1.root.style.height = "calc( 100% - " + data + " )";
-                    a2.root.style.height = size + "px";
-                }
+                var size = (a2.root.offsetHeight + dt);
+				if(size < min_size)
+					size = min_size;
+				a1.root.style.height = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
+				a1.root.style.height = "-webkit-calc( 100% - " + size + "px " + splitinfo + " )";
+				a1.root.style.height = "calc( 100% - " + size + "px " + splitinfo + " )";
+				a2.root.style.height = size + "px"; //other split
             }
                 
             this.#update();
@@ -575,7 +552,9 @@
 
         #update()
         {
-            this.size = [ this.root.offsetWidth, this.root.offsetHeight ];
+            const rect = this.root.getBoundingClientRect();
+
+            this.size = [ rect.width, rect.height ];
 
             for(var i = 0; i < this.sections.length; i++) {
                 this.sections[i].#update();
@@ -880,10 +859,11 @@
 
     class NodeTree {
             
-        constructor(domEl, data, onevent) {
+        constructor(domEl, data, options) {
             this.domEl = domEl;
             this.data = data;
-            this.onevent = onevent;
+            this.onevent = options.onevent;
+            this.options = options;
             this.#create_item(null, data);
         }
 
@@ -905,7 +885,7 @@
             node.parent = parent;
             const is_parent = node.children.length > 0;
 
-            var item = document.createElement('li');
+            let item = document.createElement('li');
             item.className = "lextreeitem " + "datalevel" + level + " " + (is_parent ? "parent" : "");
             item.id = node.id;
             // Select icon
@@ -926,15 +906,16 @@
                 }
             });
 
-            item.addEventListener("dblclick", function() {
-                // Trigger rename
-                node.rename = true;
-                that.refresh();
-                if(that.onevent) {
-                    const event = new TreeEvent(TreeEvent.NODE_DBLCLICKED, node);
-                    that.onevent( event );
-                }
-            });
+            if( this.options.rename ?? true )
+                item.addEventListener("dblclick", function() {
+                    // Trigger rename
+                    node.rename = true;
+                    that.refresh();
+                    if(that.onevent) {
+                        const event = new TreeEvent(TreeEvent.NODE_DBLCLICKED, node);
+                        that.onevent( event );
+                    }
+                });
 
             item.addEventListener("contextmenu", function(e) {
                 e.preventDefault();
@@ -1049,21 +1030,25 @@
 
             // Add button icons
 
-            let visibility = document.createElement('a');
-            visibility.className = "itemicon fa-solid fa-eye" + (!node.visible ? "-slash" : "");
-            visibility.title = "Toggle visible";
-            visibility.addEventListener("click", function(e) {
-                e.stopPropagation();
-                node.visible = node.visible === undefined ? false : !node.visible;
-                this.className = "itemicon fa-solid fa-eye" + (!node.visible ? "-slash" : "");
-                // Trigger visibility event
-                if(that.onevent) {
-                    const event = new TreeEvent(TreeEvent.NODE_VISIBILITY, node, node.visible);
-                    that.onevent( event );
-                }
-            });
-            item.appendChild(visibility);
+            if( !node.skipVisibility ?? false )
+            {
+                let visibility = document.createElement('a');
+                visibility.className = "itemicon fa-solid fa-eye" + (!node.visible ? "-slash" : "");
+                visibility.title = "Toggle visible";
+                visibility.addEventListener("click", function(e) {
+                    e.stopPropagation();
+                    node.visible = node.visible === undefined ? false : !node.visible;
+                    this.className = "itemicon fa-solid fa-eye" + (!node.visible ? "-slash" : "");
+                    // Trigger visibility event
+                    if(that.onevent) {
+                        const event = new TreeEvent(TreeEvent.NODE_VISIBILITY, node, node.visible);
+                        that.onevent( event );
+                    }
+                });
 
+                item.appendChild(visibility);
+            }
+            
             if(node.actions) 
             {
                 for(var i = 0; i < node.actions.length; ++i) {
@@ -1112,8 +1097,8 @@
             if(options.className)
                 root.className += " " + options.className;
 
-            root.style.width = "calc( 100% - 7px )";
-            root.style.height = "100%";
+            root.style.width = options.width || "calc( 100% - 7px )";
+            root.style.height = options.height || "100%";
             this.root = root;
 
             this.onevent = (e => {});
@@ -1252,7 +1237,7 @@
             if(options.title)
                 element.title = options.title;
 
-            element.style.width = "calc( 100% - 10px)";
+            element.style.width = options.width || "calc( 100% - 10px)";
 
             if(name) {
                 var domName = document.createElement('div');
@@ -1396,6 +1381,7 @@
 
             let widget = this.#create_widget(null, Widget.addBlank);
             widget.domEl.style.height = height + "px";
+            return widget;
         }
 
         /**
@@ -1509,12 +1495,13 @@
             let element = widget.domEl;
 
             var wValue = document.createElement('button');
+
             wValue.className = "lexbutton";
             if(options.buttonClass)
                 wValue.classList.add(options.buttonClass);
             wValue.innerHTML = "<span>" + (value || "") + "</span>";
             wValue.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
-
+          
             if(options.disabled)
                 wValue.setAttribute("disabled", true);
             
@@ -1950,7 +1937,8 @@
                 let val = e.target.value = clamp(e.target.value, vecinput.min, vecinput.max);
    
                 // update slider!
-                box.querySelector(".lexinputslider").value = val;
+                if( box.querySelector(".lexinputslider"))
+                    box.querySelector(".lexinputslider").value = val;
 
                 // Reset button (default value)
                 let btn = element.querySelector(".lexwidgetname .lexicon");
@@ -2243,6 +2231,7 @@
          * @param {*} options:
          * icons: Array of objects with icon button information {name, icon, callback}
          * filter: Add nodes filter [true]
+         * rename: Boolean to allow rename [true]
          * onevent(tree_event): Called when node is selected, dbl clicked, contextmenu opened, changed visibility, parent or name
          */
 
@@ -2309,7 +2298,7 @@
             container.appendChild(list);
             this.root.appendChild(container);
 
-            const nodeTree = new NodeTree( container, data, options.onevent );
+            const nodeTree = new NodeTree( container, data, options );
             return nodeTree;
         }
 
@@ -2921,7 +2910,7 @@
             this.currentTime = 0;
             this.framerate = 30;
             this.opacity = 0.8;
-            this.sidebarWidth = 200;
+            this.sidebarWidth = 0// 200;
             this.topMargin = 24;
             this.renderOutFrames = false;
 
@@ -2932,14 +2921,13 @@
             this.buttonsDrawn = [];
             this.trackState = [];
             this.clipboard = null;
-            this.pixelsToSeconds;
             this.grabTime = 0;
             this.timeBeforeMove = 0;
 
             this.canvas = options.canvas ?? document.createElement('canvas');
 
             //do not change, it will be updated when called draw
-            this.duration = 100;
+            this.duration = 5;
             this.position = [options.x ?? 0, options.y ?? 0];
 
             this.size = [ options.width ?? 400, options.height ?? 100];
@@ -2957,56 +2945,135 @@
             this.pixelsToSeconds = 1 / this.secondsToPixels;
           
 
-            this.selectedItem = options.selectedItem ?? null;
+            this.selectedItems = options.selectedItems ?? null;
 
             this.animationClip = options.animationClip ?? null;
             
-            this.trackHeight = options.trackHeight ?? 15;
-            this.onDrawContent = null;
+            this.trackHeight = options.trackHeight ?? 25;
 
             this.active = true;
-            var div = document.createElement("div");
-            div.className = "lextimeline";
+
+            let div = document.createElement('div');
+            div.className = 'lextimeline';
             this.root = div;
-            div.appendChild(this.canvas);
+
+            let area = new LX.Area({height: "100%"});
+            area.split({ type: "horizontal", sizes: ["20%", "80%"]});
+            let [left, right] = area.sections;
+            
+            this.updateHeader();
+            this.#updateLeftPanel(left);
+            right.root.appendChild(this.canvas)
+            // div.appendChild(this.canvas);
+            div.appendChild(area.root);
 
             if(!options.canvas && this.name != '') {
                 this.root.id = this.name;
                 this.canvas.id = this.name + '-canvas';
             }
-            this.root.addEventListener("mousedown", this.processMouse.bind(this));
-            this.root.addEventListener("mouseup", this.processMouse.bind(this));
-            this.root.addEventListener("mousemove", this.processMouse.bind(this));
-            this.root.addEventListener("wheel", this.processMouse.bind(this));
-            this.root.addEventListener("dblclick", this.processMouse.bind(this));
+
+            this.canvas.addEventListener("mousedown", this.processMouse.bind(this));
+            this.canvas.addEventListener("mouseup", this.processMouse.bind(this));
+            this.canvas.addEventListener("mousemove", this.processMouse.bind(this));
+            this.canvas.addEventListener("wheel", this.processMouse.bind(this));
+            this.canvas.addEventListener("dblclick", this.processMouse.bind(this));
+            this.canvas.addEventListener("contextmenu", this.processMouse.bind(this));
+
+            right.onresize = bounding => {
+                this.#resizecanvas( [ bounding.width, bounding.height ] );
+            }
         }
 
         /**
-         * @method addButtons
-         * @param {*} buttons 
-         * TODO
+         * @method updateHeader
+         * @param {*}  
          */
 
-        addButtons( buttons ) {
+        updateHeader() {
 
-            var div = document.createElement('div');
-            div.className = 'lexbuttonscontainer';
-            for(let i = 0; i < buttons.length; i++) {
-                let icon = document.createElement('i');
-                icon.className = 'lexicon ' + buttons[i].icon;
-                icon.title = buttons[i].name;
+            if(this.header)
+                this.header.clear();
+            else
+            {
+                this.header = new LX.Panel({id:'lextimeline'});
+                this.root.appendChild(this.header.root);
+            }
+            let header = this.header;
+            header.addBlank();
+            header.sameLine(2 + this.buttonsDrawn.length);
+            header.addTitle(this.name);
+            header.addNumber("Duration", this.duration, (value, event) => this.setDuration(value), {width: '350px'});        
+
+            for(let i = 0; i < this.buttonsDrawn.length; i++) {
+                let button = this.buttonsDrawn[i];
+                this.header.addButton( null, "<a class='" + button.icon +"' title='" + button.name + "'></a>", button.callback, {width: "45px"});
+            }
+        }
+
+        /**
+        * @method updateLeftPanel
+        * 
+        */
+        #updateLeftPanel(area) {
+
+            if(this.leftPanel)
+                this.leftPanel.clear();
+            else {
+                this.leftPanel = area.addPanel({id: 'lextimelinepanel', className: 'lextimelinepanel'});
                 
-                let button = {
-                    element: icon, 
-                    callback: buttons[i].callback,
-                    name: buttons[i].name
-                };
-                icon.addEventListener('click', button.callback)
-                this.buttonsDrawn.push(button);
-                div.appendChild(icon);
+            }
+            let panel = this.leftPanel;
+            // panel.addBlank(25);
+            panel.addTitle("Tracks", { height: "24px"})
+            if(!this.animationClip || !this.selectedItems) 
+                return;
+
+            let items = {'id': '', 'children': []};
+
+            for(let i = 0; i < this.selectedItems.length; i++ ) {
+                let selected = this.selectedItems[i];
+                let t = {
+                    'id': selected,
+                    'skipVisibility': true,
+                    'children': []
+                }
+                for(let j = 0; j < this.tracksPerItem[selected].length; j++) {
+                    let track = this.tracksPerItem[selected][j];
+                    t.children.push({'id': track.name + (track.type? ' (' + track.type + ')': ''), 'children':[]})
+                    // panel.addTitle(track.name + (track.type? '(' + track.type + ')' : ''));
+                }
+                items.children.push(t);
+                panel.addTree(null, t, {filter: false, rename: false, onevent: (e) => {
+                    switch(e.type) {
+                        case LX.TreeEvent.NODE_SELECTED:
+                            if(this.onSelectTrack)
+                                this.onSelectTrack(e.node);
+                            break;
+                        case LX.TreeEvent.NODE_VISIBILITY:
+                            if(this.onChangeTrackVisibility)    
+                                this.onChangeTrackVisibility(e.node, e.value);
+                            break;
+                    }
+                }});
             }
             
-            this.root.prepend(div);
+
+            // for(let i = 0; i < this.animationClip.tracks.length; i++) {
+            //     let track = this.animationClip.tracks[i];
+            //     panel.addTitle(track.name + (track.type? '(' + track.type + ')' : ''));
+            // }
+            this.#resizecanvas([ this.root.clientWidth - this.leftPanel.root.clientWidth, this.size[1]]);
+            
+        }
+
+        /**
+        * @method addButtons
+        * @param buttons: array
+        */
+
+        addButtons(buttons) {
+            this.buttonsDrawn = buttons || this.buttonsDrawn;
+            this.updateHeader();
         }
 
         /**
@@ -3028,6 +3095,28 @@
             return trackInfo.idx;
         }
 
+        getTracksInRange( minY, maxY, threshold ) {
+
+            let tracks = [];
+
+            // Manage negative selection
+            if(minY > maxY) {
+                let aux = minY;
+                minY = maxY;
+                maxY = aux;
+            }
+
+            for(let i = this.tracksDrawn.length - 1; i >= 0; --i) {
+                let t = this.tracksDrawn[i];
+                let pos = t[1] - this.topMargin, size = t[2];
+                if( pos + threshold >= minY && (pos + size - threshold) <= maxY ) {
+                    tracks.push( t[0] );
+                }
+            }
+
+            return tracks;
+        }
+
         /**
          * @method setAnimationClip
          * @param {*} animation 
@@ -3036,8 +3125,13 @@
 
         setAnimationClip( animation ) {
             this.animationClip = animation;
+            this.duration = animation.duration;
+
             if(this.processTracks)
                 this.processTracks();
+            
+            this.updateHeader();
+            this.#updateLeftPanel();
         }
 
         /**
@@ -3172,7 +3266,7 @@
             ctx.fillStyle = "#FFF";
             ctx.font = "12px Tahoma";
             ctx.textAlign = "center";
-            for(var t = start; t <= end; t += 1 )
+            for(var t = start; t <= end-0.01; t += 1 )
             {
                 if( t % deltaSeconds != 0 )
                     continue;
@@ -3187,7 +3281,7 @@
             ctx.globalAlpha = 1;
 
             // Current time marker
-            ctx.strokeStyle = "#AFD";
+            ctx.strokeStyle = "#5f88c9"//#AFD";
             var x = ((w*0.5)|0) + 0.5;
             ctx.globalAlpha = 0.5;
             ctx.fillStyle = "#AAA";
@@ -3198,7 +3292,7 @@
             ctx.lineTo( x,h);
             ctx.stroke();
 
-            ctx.fillStyle = "#AFD";
+            ctx.fillStyle = "#5f88c9"//"#AFD";
             ctx.beginPath();
             ctx.moveTo( x - 4,1);
             ctx.lineTo( x + 4,1);
@@ -3419,7 +3513,7 @@
                 this.timeBeforeMove = null;
                 e.discard = discard;
                 
-                if( this.onMouseUp )
+                if( e.button == 0 && this.onMouseUp )
                     this.onMouseUp(e, time);
             }
 
@@ -3474,7 +3568,10 @@
             else if (e.type == "dblclick" && this.onDblClick) {
                 this.onDblClick(e);	
             }
+            else if (e.type == "contextmenu" && this.showContextMenu)
+                this.showContextMenu(e);
             this.canvas.style.cursor = this.grabbing && (UTILS.getTime() - this.clickTime > 320) ? "grabbing" : "pointer" ;
+
 
             return true;
         }
@@ -3495,14 +3592,16 @@
             ctx.textAlign = "left";
             ctx.fillStyle = "rgba(255,255,255,0.8)";
             
-            if(title != null)
-            {
-                // var info = ctx.measureText( title );
-                ctx.fillStyle = this.active ? "rgba(255,255,255,0.9)" : "rgba(250,250,250,0.7)";
-                ctx.fillText( title, 25, y + trackHeight * 0.75 );
-            }
-            
-            ctx.fillStyle = "rgba(10,200,200,1)";
+            // if(title != null)
+            // {
+            //     // var info = ctx.measureText( title );
+            //     ctx.fillStyle = this.active ? "rgba(255,255,255,0.9)" : "rgba(250,250,250,0.7)";
+            //     ctx.fillText( title, 25, y + trackHeight * 0.75 );
+            // }
+            ctx.fillStyle = "rgba(255,255,255,0.2)";
+            if(trackInfo.isSelected)
+                ctx.fillRect(0, y, ctx.canvas.width, trackHeight);
+            ctx.fillStyle = "#5e9fdd"//"rgba(10,200,200,1)";
             var keyframes = track.times;
 
             if(keyframes) {
@@ -3519,16 +3618,16 @@
                         ctx.save();
 
                         let margin = 0;
-                        let size = trackHeight * 0.4;
+                        let size = trackHeight * 0.3;
                         if(trackInfo.edited[j])
                             ctx.fillStyle = "rgba(255,0,255,1)";
                         if(selected) {
                             ctx.fillStyle = "rgba(250,250,20,1)";
-                            size = trackHeight * 0.5;
+                            size = trackHeight * 0.4;
                             margin = -2;
                         }
                         if(trackInfo.hovered[j]) {
-                            size = trackHeight * 0.5;
+                            size = trackHeight * 0.4;
                             ctx.fillStyle = "rgba(250,250,250,0.7)";
                             margin = -2;
                         }
@@ -3612,18 +3711,18 @@
 
                     //background rect
                     ctx.globalAlpha = trackAlpha;
-                    ctx.fillStyle = clip.clipColor || "#333";
+                    ctx.fillStyle = clip.clipColor || "#5e9fdd"//#333";
                     //ctx.fillRect(x,y,w,trackHeight);
                     roundedRect(ctx, x, y, w, trackHeight, 5, true);
 
                     //draw clip content
-                    if( clip.drawTimeline )
+                    if( clip.drawClip )
                     {
                         ctx.save();
                         ctx.translate(x,y);
                         ctx.strokeStyle = "#AAA";
                         ctx.fillStyle = "#AAA";
-                        clip.drawTimeline( ctx, x2-x,trackHeight, this.selectedClip == clip || track.selected[j], this );
+                        clip.drawClip( ctx, x2-x,trackHeight, this.selectedClip == clip || track.selected[j], this );
                         ctx.restore();
                     }
                     //draw clip outline
@@ -3631,7 +3730,7 @@
                         ctx.globalAlpha = trackAlpha * 0.5;
                     
                         var safex = Math.max(-2, x );
-                    var safex2 = Math.min( this.canvas.width + 2, x2 );
+                        var safex2 = Math.min( this.canvas.width + 2, x2 );
                     // ctx.lineWidth = 0.5;
                     // ctx.strokeStyle = clip.constructor.color || "black";
                     // ctx.strokeRect( safex, y, safex2-safex, trackHeight );
@@ -3656,6 +3755,44 @@
         }
 
         /**
+        * @method onSelectTrack
+        * @param {id, parent, children, visible} trackInfo 
+        */
+        onSelectTrack( trackInfo ) {
+            selectTrack(trackInfo);
+        }
+
+        selectTrack( trackInfo) {
+            console.log(trackInfo)
+            let [name, type] = trackInfo.id.split(" (");
+            type = type.replaceAll(")", "").replaceAll(" ", "");
+            let tracks = this.tracksPerItem[name];
+            for(let i = 0; i < tracks.length; i++) {
+                if(tracks[i].type != type)
+                    continue;
+                    this.tracksPerItem[name][i].isSelected = true;
+            }
+        }
+
+        unSelectAllTracks() {
+            for(let i = 0; i < this.selectedItems.length; i++) {
+                let item = this.selectedItems[i];
+                let tracks = this.tracksPerItem[item];
+                for(let t = 0; t < tracks.length; t++) {
+                    tracks[i].isSelected = false;
+                }
+            }
+        }
+
+        /**
+        * @method onChangeTrackVisibility
+        * @param {id, parent, children, visible} trackInfo 
+        */
+        onChangeTrackVisibility( trackInfo, visible ) {
+            console.log(visible)
+        }
+
+        /**
          * @method resize
          * @param {*} size
          * ...
@@ -3663,10 +3800,19 @@
          */
 
         resize( size ) {
-            this.size = size;
+            // this.root.style.width = size[0] + 'px';
+            // this.root.style.height = size[1] + 'px';
+            let w = size[0] - this.leftPanel.root.clientWidth - 10;
+            this.size = [w , size [1]];
+            this.#resizecanvas(this.size)
             // this.canvas.style.width = size[0] + 'px';
             // this.canvas.style.height = size[1] + 'px';
-            [this.canvas.width, this.canvas.height] = size;
+            
+        }
+
+        #resizecanvas( size ) {
+            this.canvas.width = size[0];
+            this.canvas.height = size[1];
             this.draw(this.currentTime);
         }
     };
@@ -3735,7 +3881,7 @@
 
         /**
          * @param {string} name 
-         * @param {object} options = {animationClip, selectedItem, position = [0,0], width, height, canvas, trackHeight}
+         * @param {object} options = {animationClip, selectedItems, position = [0,0], width, height, canvas, trackHeight}
          */
         constructor(name, options = {}) {
 
@@ -3743,7 +3889,7 @@
             
             this.tracksPerItem = {};
             
-            // this.selectedItem = selectedItem;
+            // this.selectedItems = selectedItems;
             this.snappedKeyFrameIndex = -1;
             this.autoKeyEnabled = false;
 
@@ -3786,8 +3932,8 @@
                             this.pixelsToSeconds * 5);
                             
                         if(keyFrameIndices) {
-                        for(let index of keyFrameIndices)
-                            this.processCurrentKeyFrame( e, index, t, null, true );
+                            for(let index of keyFrameIndices)
+                                this.processCurrentKeyFrame( e, index, t, null, true );
                         }
                     }
                 }
@@ -3938,50 +4084,58 @@
         onDrawContent( ctx, timeStart, timeEnd ) {
         
             
-            if(this.selectedItem == null || !this.tracksPerItem) 
+            if(this.selectedItems == null || !this.tracksPerItem) 
                 return;
             
             ctx.save();
-            let tracks = this.tracksPerItem[this.selectedItem] ? this.tracksPerItem[this.selectedItem] : [{name: this.selectedItem}];
-            //if(!tracks) return;
-            
-            const height = this.trackHeight;
-            for(let i = 0; i < tracks.length; i++) {
-                let track = tracks[i];
-                this.drawTrackWithKeyframes(ctx, (i+1) * height, height, track.name + " (" + track.type + ")", this.animationClip.tracks[track.clipIdx], track);
+
+            let offset = 16 + this.trackHeight;
+            for(let t = 0; t < this.selectedItems.length; t++) {
+                let tracks = this.tracksPerItem[this.selectedItems[t]] ? this.tracksPerItem[this.selectedItems[t]] : [{name: this.selectedItems[t]}];
+                if(!tracks) continue;
+                
+                const height = this.trackHeight;
+                for(let i = 0; i < tracks.length; i++) {
+                    let track = tracks[i];
+                    this.drawTrackWithKeyframes(ctx, (i) * height + (t+1)*(offset) , height, track.name + " (" + track.type + ")", this.animationClip.tracks[track.clipIdx], track);
+                }
+                offset+= (tracks.length - 1)*height;
             }
+             
+            
             
             ctx.restore();
-            let offset = 25;
-            ctx.fillStyle = 'white';
-
-            if(this.name)
-                ctx.fillText(this.name,  offset + ctx.measureText(this.name).actualBoundingBoxLeft , -this.topMargin*0.4 );
+            // let offset = 25;
+            // ctx.fillStyle = 'white';
+            // ctx.fillText("Tracks",  offset + ctx.measureText("Tracks").actualBoundingBoxLeft , -this.topMargin*0.4 );
         };
 
         onUpdateTracks ( keyType ) {
         
-            if(this.selectedItem == null || this.lastKeyFramesSelected.length || !this.autoKeyEnabled)
-            return;
-
-            let tracks = this.tracksPerItem[this.selectedItem];
-            if(!tracks) return;
-
-            // Get current track
-            const selectedTrackIdx = tracks.findIndex( t => t.type === keyType );
-            if(selectedTrackIdx < 0)
+            if(this.selectedItems == null || this.lastKeyFramesSelected.length || !this.autoKeyEnabled)
                 return;
-            let track = tracks[ selectedTrackIdx ];
+
+            for(let i = 0; i < this.selectedItems.length; i++) {
+                let tracks = this.tracksPerItem[this.selectedItems[i]];
+                if(!tracks) continue;
+    
+                // Get current track
+                const selectedTrackIdx = tracks.findIndex( t => t.type === keyType );
+                if(selectedTrackIdx < 0)
+                    return;
+                let track = tracks[ selectedTrackIdx ];
+                
+                // Add new keyframe
+                const newIdx = this.addKeyFrame( track );
+                if(newIdx === null) 
+                    continue;
+    
+                // Select it
+                this.lastKeyFramesSelected.push( [track.name, track.idx, newIdx] );
+                track.selected[newIdx] = true;
+    
+            }
             
-            // Add new keyframe
-            const newIdx = this.addKeyFrame( track );
-            if(newIdx === null) 
-                return;
-
-            // Select it
-            this.lastKeyFramesSelected.push( [track.name, track.idx, newIdx] );
-            track.selected[newIdx] = true;
-
             // Update time
             if(this.onSetTime)
                 this.onSetTime(this.currentTime);
@@ -4030,14 +4184,19 @@
 
         onShowOptimizeMenu( e ) {
             
-            if(this.selectedItem == null)
+            if(this.selectedItems == null)
                 return;
 
-            let tracks = this.tracksPerItem[this.selectedItem];
-            if(!tracks) return;
+            let tracks = [];
+            for(let i = 0; i < this.selectedItems.length; i++) {
+
+                tracks = [...tracks, ...this.tracksPerItem[this.selectedItems[i]]];
+                if(!tracks) continue;
+    
+            }
+            if(!tracks.length) return;
 
             const threshold = this.onGetOptimizeThreshold ? this.onGetOptimizeThreshold() : 0.025;
-
             addContextMenu("Optimize", e, m => {
                 for( let t of tracks ) {
                     m.add( t.name + (t.type ? "@" + t.type : ""), () => { 
@@ -4101,9 +4260,9 @@
                                 
             this.lastKeyFramesSelected.push( selectionInfo );
             track.selected[index] = true;
-
+            
             if( this.onSetTime )
-                this.onSetTime( this.animationClip.tracks[track.clipIdx].times[ index ] );
+                this.onSetTime(  this.animationClip.tracks[track.clipIdx].times[ index ]);
         }
 
         canPasteKeyFrame () {
@@ -4202,35 +4361,40 @@
             this.animationClip.tracks[clipIdx].times = new Float32Array( timesArray );
             
             // Get mid values
-            const item = this.onGetSelectedItem();
-            const lerpValue = item[ track.type ].toArray();
+            const items = this.onGetSelectedItems();
+
+            for(let i = 0; i < items.length; i++) {
+                let item = items[i];
+                let lerpValue = item[ track.type ].toArray();
             
-            // Add values
-            const valuesArray = [];
-            this.animationClip.tracks[clipIdx].values.forEach( (a, b) => {
-                if(b == newIdx * track.dim) {
+                // Add values
+                let valuesArray = [];
+                this.animationClip.tracks[clipIdx].values.forEach( (a, b) => {
+                    if(b == newIdx * track.dim) {
+                        for( let i = 0; i < track.dim; ++i )
+                            valuesArray.push(lerpValue[i]);
+                    }
+                    valuesArray.push(a);
+                } );
+    
+                if(lastIndex) {
                     for( let i = 0; i < track.dim; ++i )
                         valuesArray.push(lerpValue[i]);
                 }
-                valuesArray.push(a);
-            } );
-
-            if(lastIndex) {
-                for( let i = 0; i < track.dim; ++i )
-                    valuesArray.push(lerpValue[i]);
+    
+                this.animationClip.tracks[clipIdx].values = new Float32Array( valuesArray );
+    
+                // Move the other's key properties
+                for(let i = (this.animationClip.tracks[clipIdx].times.length - 1); i > newIdx; --i) {
+                    track.edited[i - 1] ? track.edited[i] = track.edited[i - 1] : 0;
+                }
+                
+                // Reset this key's properties
+                track.hovered[newIdx] = undefined;
+                track.selected[newIdx] = undefined;
+                track.edited[newIdx] = undefined;
             }
-
-            this.animationClip.tracks[clipIdx].values = new Float32Array( valuesArray );
-
-            // Move the other's key properties
-            for(let i = (this.animationClip.tracks[clipIdx].times.length - 1); i > newIdx; --i) {
-                track.edited[i - 1] ? track.edited[i] = track.edited[i - 1] : 0;
-            }
-            
-            // Reset this key's properties
-            track.hovered[newIdx] = undefined;
-            track.selected[newIdx] = undefined;
-            track.edited[newIdx] = undefined;
+           
 
             // Update animation action interpolation info
             if(this.onUpdateTrack)
@@ -4341,46 +4505,24 @@
         unSelect() {
 
             if(!this.unSelectAllKeyFrames()) {
-                this.selectedItem = null;
+                this.selectedItems = null;
                 if(this.onItemUnselected)
                     this.onItemUnselected();
             }
         }
 
-        setSelectedItem( itemName ) {
+        setSelectedItems( itemsName ) {
 
-            if(itemName.constructor !== String)
-            throw("Item name has to be a string!");
+            if(itemsName.constructor !== Array)
+            throw("Item name has to be an array!");
 
-            this.selectedItem = itemName;
+            this.selectedItems = itemsName;
             this.unSelectAllKeyFrames();
         }
 
         getTrack( trackInfo )  {
             const [name, trackIndex] = trackInfo;
             return this.tracksPerItem[ name ][trackIndex];
-        }
-
-        getTracksInRange( minY, maxY, threshold ) {
-
-            let tracks = [];
-
-            // Manage negative selection
-            if(minY > maxY) {
-                let aux = minY;
-                minY = maxY;
-                maxY = aux;
-            }
-
-            for(let i = this.tracksDrawn.length - 1; i >= 0; --i) {
-                let t = this.tracksDrawn[i];
-                let pos = t[1] - this.topMargin, size = t[2];
-                if( pos + threshold >= minY && (pos + size - threshold) <= maxY ) {
-                    tracks.push( t[0] );
-                }
-            }
-
-            return tracks;
         }
 
         getTrackName( uglyName ) {
@@ -4485,7 +4627,8 @@
             const [name, type] = this.getTrackName( track.name );
             let t = this.tracksPerItem[ name ][track.idx];
             let currentSelection = [name, track.idx, keyFrameIndex];
-            
+            if(!multiple)
+                this.selectKeyFrame(t, currentSelection, keyFrameIndex);
             if( this.onSelectKeyFrame && this.onSelectKeyFrame(e, currentSelection, keyFrameIndex)) {
                 // Event handled
                 return;
@@ -4511,19 +4654,6 @@
 
     class ClipsTimeline extends Timeline {
 
-        lastClipsSelected = [];
-        buttonsDrawn = [];
-
-        clipboard = null;
-
-        pixelsToSeconds;
-        grabTime = 0;
-        timeBeforeMove = 0;
-
-        movingKeys = false;
-        grabbing = false;
-        grabbingScroll = false;
-
         /**
          * @param {string} name 
          * @param {object} options = {animationClip, selectedItem, position = [0,0], width, height, canvas, trackHeight}
@@ -4531,6 +4661,9 @@
         constructor(name, options = {}) {
 
             super(name, options);
+            this.selectedClip = null;
+            this.lastClipsSelected = [];
+
         }
 
         onMouseUp( e ) {
@@ -4632,8 +4765,10 @@
                     var distToStart = Math.abs( this.timeToX( clip.start ) - x );
                     var distToEnd = Math.abs( this.timeToX( clip.start + clip.duration ) - e.offsetX );
 
-                    if(this.duration < clip.start + clip.duration  )
+                    if(this.duration < clip.start + clip.duration  ){
                         this.setDuration(clip.start + clip.duration);
+                        this.updateHeader();
+                    }
                     //this.addUndoStep( "clip_modified", clip );
                     if( (e.shiftKey && distToStart < 5) || (clip.fadein && Math.abs( this.timeToX( clip.start + clip.fadein ) - e.offsetX ) < 5) )
                         this.dragClipMode = "fadein";
@@ -4661,7 +4796,8 @@
                 this.timelineClickedClips = null;
                 this.selectedClip = null;
                 this.unSelectAllClips();
-                this.onSelectClip(null);
+                if(this.onSelectClip)
+                    this.onSelectClip(null);
             }
         }
 
@@ -4681,8 +4817,8 @@
                 var curr = time - this.currentTime;
                 var delta = curr - this.grabTime;
                 this.grabTime = curr;
-                this.currentTime = Math.max(0,this.currentTime - delta);
-
+               
+                var ct = Math.max(0,this.currentTime - delta);
                 if( this.timelineClickedClips != undefined) {
                     for(let i = 0; i < this.timelineClickedClips.length; i++){
                         
@@ -4701,11 +4837,15 @@
                             clip.duration += diff;
                         this.clipTime = this.currentTime;
                         if(this.duration < clip.start + clip.duration  )
+                        {
                             this.setDuration(clip.start + clip.duration);
+                            this.updateHeader();
+                        }
                     }
                     return true;
                 }
                 else{
+                    this.currentTime = Math.max(0,this.currentTime - delta);
                     innerSetTime( this.currentTime );	
                 }
             }
@@ -4725,11 +4865,88 @@
             }
         }
 
+        showContextMenu( e ) {
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            let actions = [];
+            //let track = this.NMFtimeline.clip.tracks[0];
+            if(this.lastClipsSelected.length) {
+                actions.push(
+                    {
+                        title: "Copy",// + " <i class='bi bi-clipboard-fill float-right'></i>",
+                        callback: () => {this.clipsToCopy = [...this.lastClipsSelected];}
+                    }
+                )
+                actions.push(
+                    {
+                        title: "Delete",// + " <i class='bi bi-trash float-right'></i>",
+                        callback: () => {
+                            let clipstToDelete = this.lastClipsSelected;
+                            for(let i = 0; i < clipstToDelete.length; i++){
+                                this.deleteClip(clipstToDelete[i], null);
+                            }
+                            this.optimizeTracks();
+                        }
+                    }
+                )
+                // actions.push(
+                //     {
+                //         title: "Create preset" + " <i class='bi bi-file-earmark-plus-fill float-right'></i>",
+                //         callback: () => {
+                //             this.NMFtimeline.lastClipsSelected.sort((a,b) => {
+                //                 if(a[0]<b[0]) 
+                //                     return -1;
+                //                 return 1;
+                //             });
+                //             this.createNewPresetDialog(this.NMFtimeline.lastClipsSelected);
+                //         }
+                //     }
+                // )
+            }
+            else{
+                
+                if(this.clipsToCopy)
+                {
+                    actions.push(
+                        {
+                            title: "Paste",// + " <i class='bi bi-clipboard-fill float-right'></i>",
+                            callback: () => {
+                                this.clipsToCopy.sort((a,b) => {
+                                    if(a[0]<b[0]) 
+                                        return -1;
+                                    return 1;
+                                });
+
+                                for(let i = 0; i < this.clipsToCopy.length; i++){
+                                    let [trackIdx, clipIdx] = this.clipsToCopy[i];
+                                    let clipToCopy = Object.assign({}, this.animationClip.tracks[trackIdx].clips[clipIdx]);
+                                    // let clip = new ANIM.FaceLexemeClip(clipToCopy);
+                                    this.addClip(clipToCopy, this.clipsToCopy.length > 1 ? clipToCopy.start : 0); 
+                                }
+                                this.clipsToCopy = null;
+                            }
+                        }
+                    )
+                }
+            }
+            
+            addContextMenu("Options", e, (m) => {
+                for(let i = 0; i < actions.length; i++) {
+                    m.add(actions[i].title,  actions[i].callback )
+                }
+            });
+
+        }
+
         onDrawContent( ctx, timeStart, timeEnd )  {
 
-            
+            if(!this.animationClip)  
+                return;
             let tracks = this.animationClip.tracks|| [{name: "NMF", clips: []}];
-            if(!tracks) return;
+            if(!tracks) 
+                return;
             
             ctx.save();
             const height = this.trackHeight*1.2;
@@ -4745,6 +4962,35 @@
                 ctx.fillText(this.name, offset + ctx.measureText(this.name).actualBoundingBoxLeft, -this.topMargin*0.4 );
         }
 
+        // Creates a map for each item -> tracks
+        processTracks() {
+
+            this.tracksPerItem = {};
+
+            for( let i = 0; i < this.animationClip.tracks.length; ++i ) {
+
+                let track = this.animationClip.tracks[i];
+
+                // const [name, type] = this.getTrackName(track.name);
+                const name = track.name;
+                const type = track.type;
+
+                let trackInfo = {
+                    clips: track.clips,
+                    name: name, type: type,
+                    selected: [], edited: [], hovered: []
+                };
+                
+                
+                // const trackIndex = this.tracksPerItem[name].length - 1;
+                // this.tracksPerItem[name][trackIndex].idx = trackIndex;
+                // this.tracksPerItem[name][trackIndex].clipIdx = i;
+
+                // Save index also in original track
+                // track.idx = trackIndex;
+                this.animationClip.tracks[i] = trackInfo;
+            }
+        }
 
         /** Add a clip to the timeline in a free track slot at the current time
          * @clip: clip to be added
@@ -4827,8 +5073,11 @@
                 
             let end = clip.start + clip.duration;
             
-            if( end > this.duration)
+            if( end > this.duration || !this.animationClip.duration)
+            {
                 this.setDuration(end);
+                this.updateHeader();
+            }
 
             if(callback)
                 callback();

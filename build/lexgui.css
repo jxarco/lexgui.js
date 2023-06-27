@@ -371,6 +371,8 @@ body.nocursor * {
   font-size:13px;
   margin-bottom:4px;
   padding:4px;
+  display: grid;
+  align-content: center;
 }
 
 /* Buttons */
@@ -1114,5 +1116,26 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lextimeline .lexicon {
-  padding: 4px;
+  /* padding: 4px; */
+}
+
+.lextimeline .lextree {
+  background: #05050b6b!important;
+  margin: 0px!important;
+  width: 100%;
+}
+
+.lextimeline .lextree .lextreeitem  {
+  margin: 0px;
+}
+.lextimelinepanel .lextitle{
+  /* border-radius: 0!important; */
+  background-color: #161c21;
+  margin: 0;
+  padding-left: 14px;
+}
+.lextimeline ul{
+  background: var(--global-color-primary);
+  margin: 0;
+  padding-bottom: 0px;
 }
