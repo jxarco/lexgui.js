@@ -59,6 +59,8 @@ TODO List:
 - ~~Dialogs~~
 - ~~Multiple widgets per row~~
 - ~~Load File widget~~
+- ~~Layers widget~~
+- Array widget
 - Menubar: Support checkboxes ??
 - Change resize bar to Godot one
 - Support optimum, sub, etc colors for the progress bars

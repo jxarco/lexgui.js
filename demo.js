@@ -275,6 +275,9 @@ function fillPanel( panel ) {
     panel.addVector3("I'm a Vec3", [0.1, 0.4, 0.5], (value, event) => {
         console.log(value);
     });
+    panel.addLayers("Layers", null, (value, event) => {
+        console.log(value);
+    });
     panel.merge();
 
     // another branch

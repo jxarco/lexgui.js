@@ -806,7 +806,8 @@
         static TREE         = 9;
         static PROGRESS     = 10;
         static FILE         = 11;
-        static SEPARATOR    = 12;
+        static LAYERS       = 12;
+        static SEPARATOR    = 13;
 
         constructor(name, type, options) {
             this.name = name;
@@ -1256,7 +1257,8 @@
                 var domName = document.createElement('div');
                 domName.className = "lexwidgetname";
                 domName.innerHTML = name || "";
-                domName.style.width = LX.DEFAULT_NAME_WIDTH;
+                domName.style.width = (options.nameFitsWidth ?? false) ? "100%" : LX.DEFAULT_NAME_WIDTH;
+
                 element.appendChild(domName);
                 element.domName = domName;
 
@@ -1586,6 +1588,58 @@
             });
 
             container.appendChild(wValue);
+            element.appendChild(container);
+        }
+
+        /**
+         * @method addLayers
+         * @param {String} name Widget name
+         * @param {} value Select by default option
+         * @param {Function} callback Callback function on change
+         * @param {*} options:
+         */
+
+        addLayers( name, value, callback, options = {} ) {
+
+            if(!name) {
+                throw("Set Widget Name!");
+            }
+
+            let widget = this.#create_widget(name, Widget.LAYERS, options);
+            let element = widget.domEl;
+
+            // Add reset functionality
+            Panel.#add_reset_property(element.domName, function() {
+                // ...
+                this.style.display = "none";
+                // Panel.#dispatch_event(wValue, "change");
+            });
+
+            // Add widget value
+
+            var container = document.createElement('div');
+            container.className = "lexlayers";
+            container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+
+            let flagvalue = 0;
+
+            for( let bit = 0; bit < 16; ++bit )
+            {
+                let layer = document.createElement('div');
+                layer.className = "lexlayer";
+                layer.innerText = bit + 1;
+                layer.title = "Bit " + bit + ", value " + (1 << bit);
+                container.appendChild( layer );
+                
+                layer.addEventListener("click", e => {
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    e.target.classList.toggle('selected');
+                    flagvalue ^= ( 1 << bit );
+                    this.#trigger( new IEvent(name, flagvalue, e), callback );
+                });
+            }
+
             element.appendChild(container);
         }
 
