@@ -370,6 +370,8 @@ body.nocursor * {
   font-size:13px;
   margin-bottom:4px;
   padding:4px;
+  display: grid;
+  align-content: center;
 }
 
 /* Buttons */
@@ -1053,7 +1055,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lextimeline .lexicon {
-  padding: 4px;
+  /* padding: 4px; */
 }
 
 .lextimeline .lextree {

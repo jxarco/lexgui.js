@@ -426,8 +426,8 @@
                 var doc = that.root.ownerDocument;
                 doc.addEventListener("mousemove",inner_mousemove);
                 doc.addEventListener("mouseup",inner_mouseup);
-                last_pos[0] = e.pageX;
-                last_pos[1] = e.pageY;
+                last_pos[0] = e.x;
+                last_pos[1] = e.y;
                 e.stopPropagation();
                 e.preventDefault();
                 document.body.classList.add("nocursor");
@@ -437,16 +437,15 @@
             function inner_mousemove(e)
             {
                 if(that.type == "horizontal") {
-                    if (last_pos[0] != e.pageX)
-                        that.#moveSplit(last_pos[0] - e.pageX);
+                    that.#moveSplit(last_pos[0] - e.x);
+                        
                 }
                 else {
-                    if (last_pos[1] != e.pageY)
-                        that.#moveSplit(last_pos[1] - e.pageY);
+                    that.#moveSplit(last_pos[1] - e.y);
                 }
-
-                last_pos[0] = e.pageX;
-                last_pos[1] = e.pageY;
+                
+                last_pos[0] = e.x;
+                last_pos[1] = e.y;
                 e.stopPropagation();
                 e.preventDefault();
                             
@@ -515,56 +514,34 @@
         #moveSplit( dt ) {
 
             if(!this.type)
-                throw("no split area");
+                throw("No split area");
+
+            if(!dt) // splitbar didn't move!
+                return;
 
             var a1 = this.sections[0];
             var a2 = this.sections[1];
-
-            const midSize = LX.DEFAULT_SPLITBAR_SIZE / 2;
+            var splitinfo = " - "+ LX.DEFAULT_SPLITBAR_SIZE +"px";
+            const min_size = 10;
 
             if(this.type == "horizontal") {
 
-                var width2 = a2.size[0],
-                    data = midSize + "px"; // updates
-
-                // Move to left
-                if(dt > 0) {    
-
-                    dt = dt < midSize ? midSize: dt;
-
-                    var size = width2 + dt;
-                    data += " - " + size + "px";
-                    a1.root.style.width = "calc( 100% - " + data + " )";
-                    a2.root.style.width = size + "px";
-                } else {
-
-                    dt = dt > -midSize ? -midSize : dt;
-                    width2 = a1.size[0];
-
-                    var size = width2 - dt;
-                    data += " - " + size + "px";
-                    a2.root.style.width = "calc( 100% - " + data + " )";
-                    a1.root.style.width = size + "px";
-                }
+                var size = (a2.root.offsetWidth + dt);
+				if(size < min_size)
+					size = min_size;
+				a1.root.style.width = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
+				a1.root.style.width = "-webkit-calc( 100% - " + size + "px " + splitinfo + " )";
+				a1.root.style.width = "calc( 100% - " + size + "px " + splitinfo + " )";
+				a2.root.style.width = size + "px"; //other split
             }
             else {
-                var height2 = a2.size[1],
-                    data = midSize + "px"; // updates
-
-                // Move up
-                if(dt > 0) {
-                    var size = height2 + dt;
-                    data += " - " + size + "px";
-                    a1.root.style.height = "calc( 100% - " + data + " )";
-                    a2.root.style.height = size + "px";
-                }
-                
-                else {
-                    var size = height2 + dt;
-                    data += " - " + size + "px";
-                    a1.root.style.height = "calc( 100% - " + data + " )";
-                    a2.root.style.height = size + "px";
-                }
+                var size = (a2.root.offsetHeight + dt);
+				if(size < min_size)
+					size = min_size;
+				a1.root.style.height = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
+				a1.root.style.height = "-webkit-calc( 100% - " + size + "px " + splitinfo + " )";
+				a1.root.style.height = "calc( 100% - " + size + "px " + splitinfo + " )";
+				a2.root.style.height = size + "px"; //other split
             }
                 
             this.#update();
@@ -575,7 +552,9 @@
 
         #update()
         {
-            this.size = [ this.root.offsetWidth, this.root.offsetHeight ];
+            const rect = this.root.getBoundingClientRect();
+
+            this.size = [ rect.width, rect.height ];
 
             for(var i = 0; i < this.sections.length; i++) {
                 this.sections[i].#update();
@@ -2822,7 +2801,6 @@
             this.secondsToPixels = 100;
             this.pixelsToSeconds = 1 / this.secondsToPixels;
           
-
             this.selectedItem = options.selectedItem ?? null;
 
             this.animationClip = options.animationClip ?? null;
