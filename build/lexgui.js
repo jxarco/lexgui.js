@@ -857,10 +857,11 @@
 
     class NodeTree {
             
-        constructor(domEl, data, onevent) {
+        constructor(domEl, data, options) {
             this.domEl = domEl;
             this.data = data;
-            this.onevent = onevent;
+            this.onevent = options.onevent;
+            this.options = options;
             this.#create_item(null, data);
         }
 
@@ -903,15 +904,16 @@
                 }
             });
 
-            item.addEventListener("dblclick", function() {
-                // Trigger rename
-                node.rename = true;
-                that.refresh();
-                if(that.onevent) {
-                    const event = new TreeEvent(TreeEvent.NODE_DBLCLICKED, node);
-                    that.onevent( event );
-                }
-            });
+            if( this.options.rename ?? true )
+                item.addEventListener("dblclick", function() {
+                    // Trigger rename
+                    node.rename = true;
+                    that.refresh();
+                    if(that.onevent) {
+                        const event = new TreeEvent(TreeEvent.NODE_DBLCLICKED, node);
+                        that.onevent( event );
+                    }
+                });
 
             item.addEventListener("contextmenu", function(e) {
                 e.preventDefault();
@@ -1026,21 +1028,25 @@
 
             // Add button icons
 
-            let visibility = document.createElement('a');
-            visibility.className = "itemicon fa-solid fa-eye" + (!node.visible ? "-slash" : "");
-            visibility.title = "Toggle visible";
-            visibility.addEventListener("click", function(e) {
-                e.stopPropagation();
-                node.visible = node.visible === undefined ? false : !node.visible;
-                this.className = "itemicon fa-solid fa-eye" + (!node.visible ? "-slash" : "");
-                // Trigger visibility event
-                if(that.onevent) {
-                    const event = new TreeEvent(TreeEvent.NODE_VISIBILITY, node, node.visible);
-                    that.onevent( event );
-                }
-            });
-            item.appendChild(visibility);
+            if( this.options.visibility ?? true )
+            {
+                let visibility = document.createElement('a');
+                visibility.className = "itemicon fa-solid fa-eye" + (!node.visible ? "-slash" : "");
+                visibility.title = "Toggle visible";
+                visibility.addEventListener("click", function(e) {
+                    e.stopPropagation();
+                    node.visible = node.visible === undefined ? false : !node.visible;
+                    this.className = "itemicon fa-solid fa-eye" + (!node.visible ? "-slash" : "");
+                    // Trigger visibility event
+                    if(that.onevent) {
+                        const event = new TreeEvent(TreeEvent.NODE_VISIBILITY, node, node.visible);
+                        that.onevent( event );
+                    }
+                });
 
+                item.appendChild(visibility);
+            }
+            
             if(node.actions) 
             {
                 for(var i = 0; i < node.actions.length; ++i) {
@@ -2089,6 +2095,8 @@
          * @param {*} options:
          * icons: Array of objects with icon button information {name, icon, callback}
          * filter: Add nodes filter [true]
+         * rename: Boolean to allow rename [true]
+         * visibility: Boolean to create Node Visibility button [true]
          * onevent(tree_event): Called when node is selected, dbl clicked, contextmenu opened, changed visibility, parent or name
          */
 
@@ -2155,7 +2163,7 @@
             container.appendChild(list);
             this.root.appendChild(container);
 
-            const nodeTree = new NodeTree( container, data, options.onevent );
+            const nodeTree = new NodeTree( container, data, options );
             return nodeTree;
         }
 
