@@ -3598,9 +3598,9 @@
             //     ctx.fillStyle = this.active ? "rgba(255,255,255,0.9)" : "rgba(250,250,250,0.7)";
             //     ctx.fillText( title, 25, y + trackHeight * 0.75 );
             // }
-            ctx.fillStyle = "rgba(255,255,255,0.2)";
+            ctx.fillStyle = "rgba(255,255,255,0.1)";
             if(trackInfo.isSelected)
-                ctx.fillRect(0, y, ctx.canvas.width, trackHeight);
+                ctx.fillRect(0, y-3, ctx.canvas.width, trackHeight);
             ctx.fillStyle = "#5e9fdd"//"rgba(10,200,200,1)";
             var keyframes = track.times;
 
@@ -3759,18 +3759,25 @@
         * @param {id, parent, children, visible} trackInfo 
         */
         onSelectTrack( trackInfo ) {
-            selectTrack(trackInfo);
+            let [name, type] = trackInfo.id.split(" (");
+            if(!type) return;
+            type = type.replaceAll(")", "").replaceAll(" ", "");
+            trackInfo = {name, type};
+            this.selectTrack(trackInfo);
         }
 
+        /**
+        * @method onSelectTrack
+        * @param {name, type} trackInfo 
+        */
         selectTrack( trackInfo) {
-            console.log(trackInfo)
-            let [name, type] = trackInfo.id.split(" (");
-            type = type.replaceAll(")", "").replaceAll(" ", "");
-            let tracks = this.tracksPerItem[name];
+            this.unSelectAllTracks();
+            
+            let tracks = this.tracksPerItem[trackInfo.name];
             for(let i = 0; i < tracks.length; i++) {
-                if(tracks[i].type != type)
+                if(tracks[i].type != trackInfo.type)
                     continue;
-                    this.tracksPerItem[name][i].isSelected = true;
+                    this.tracksPerItem[trackInfo.name][i].isSelected = true;
             }
         }
 
@@ -3779,7 +3786,7 @@
                 let item = this.selectedItems[i];
                 let tracks = this.tracksPerItem[item];
                 for(let t = 0; t < tracks.length; t++) {
-                    tracks[i].isSelected = false;
+                    tracks[t].isSelected = false;
                 }
             }
         }
