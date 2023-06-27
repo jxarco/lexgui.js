@@ -807,7 +807,8 @@
         static PROGRESS     = 10;
         static FILE         = 11;
         static LAYERS       = 12;
-        static SEPARATOR    = 13;
+        static ARRAY        = 13;
+        static SEPARATOR    = 14;
 
         constructor(name, type, options) {
             this.name = name;
@@ -1509,7 +1510,9 @@
 
             var wValue = document.createElement('button');
             wValue.className = "lexbutton";
-            wValue.innerHTML = value || "";
+            if(options.buttonClass)
+                wValue.classList.add(options.buttonClass);
+            wValue.innerHTML = "<span>" + (value || "") + "</span>";
             wValue.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
             if(options.disabled)
@@ -1641,6 +1644,85 @@
             }
 
             element.appendChild(container);
+        }
+
+        /**
+         * @method addArray
+         * @param {String} name Widget name
+         * @param {Array} values By default values in the array
+         * @param {Function} callback Callback function on change
+         * @param {*} options:
+         */
+
+        addArray( name, values, callback, options = {} ) {
+
+            if(!name) {
+                throw("Set Widget Name!");
+            }
+
+            let widget = this.#create_widget(name, Widget.ARRAY, options);
+            let element = widget.domEl;
+            element.style.flexWrap = "wrap";
+
+            // Add reset functionality
+            Panel.#add_reset_property(element.domName, function() {
+                // ...
+                this.style.display = "none";
+                // Panel.#dispatch_event(wValue, "change");
+            });
+
+            // Add dropdown array button
+
+            var container = document.createElement('div');
+            container.className = "lexarray";
+            container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+
+            this.queuedContainer = container;
+            let buttonName = "Array (size " + values.length + ")";
+            buttonName += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
+            this.addButton(null, buttonName, () => {
+
+
+            }, { buttonClass: 'array' });
+            delete this.queuedContainer;
+
+            // Show elements
+
+            var array_items = document.createElement('div');
+            array_items.className = "lexarrayitems";
+
+            this.queuedContainer = array_items;
+
+            for( let i = 0; i < values.length; ++i )
+            {
+                // let item = document.createElement('div');
+                // item.className = "lexarrayitem";
+                // item.innerText = values[i];
+                // array_items.appendChild( item );
+
+                this.addText(i+"", values[i], null, { width: "10%" });
+
+                // item.addEventListener("click", e => {
+                //     e.stopPropagation();
+                //     e.stopImmediatePropagation();
+                //     e.target.classList.toggle('selected');
+                //     flagvalue ^= ( 1 << bit );
+                //     this.#trigger( new IEvent(name, flagvalue, e), callback );
+                // });
+            }
+
+            buttonName = "Add item";
+            buttonName += "<a class='fa-solid fa-plus' style='float:right'></a>";
+            this.addButton(null, buttonName, () => {
+
+
+            }, { buttonClass: 'array' });
+
+            // Stop pushing to array_items
+            delete this.queuedContainer;
+
+            element.appendChild(container);
+            element.appendChild(array_items);
         }
 
         /**

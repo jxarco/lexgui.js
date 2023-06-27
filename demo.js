@@ -278,6 +278,9 @@ function fillPanel( panel ) {
     panel.addLayers("Layers", null, (value, event) => {
         console.log(value);
     });
+    panel.addArray("Array", ['GPTeam', 'Blat Panthers', 'Blat Bunny'], (value, event) => {
+        console.log(value);
+    });
     panel.merge();
 
     // another branch

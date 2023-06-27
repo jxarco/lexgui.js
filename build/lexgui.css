@@ -6,7 +6,7 @@
   --global-color-secondary: #2c3035f5;
 	--branch-background: #32363b;
 	--branch-title-background: #2c3137;
-  --global-button-color: #6a7178;
+  --global-button-color: #4a535c;
   --global-dropdown-color: #4e5154;
   --global-text: #d0d0e0;
   --global-text-primary: #d0d0e0e6;
@@ -395,8 +395,17 @@ body.nocursor * {
   font-family: var(--gloal-font);
 }
 
+.lexbutton.array {
+  border-radius: 0px;
+  box-shadow: none;
+}
+
+.lexbutton a {    
+  line-height: 13px;
+}
+
 .lexbutton:hover {
-  background-color: var(--global-text-secondary);
+  background-color: #5a6571;
 }
 
 .lexbutton:active {
@@ -1040,7 +1049,7 @@ meter::-webkit-meter-even-less-good-value {
   color: #979aa0e3;
 }
 
-/* Layers */
+/* Layers Widget */
 
 .lexlayers {
   display: grid;
@@ -1071,6 +1080,24 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexlayer:active {
   background-color: #497baab3;
+}
+
+/* Array Widget */
+
+.lexarrayitems {
+  border: 1px solid #a5a5ba54;
+  width: 100%;
+  padding: 6px;
+  color: var(--global-text-secondary);
+  font-size: 12px;
+}
+
+.lexarrayitems * {
+  font-size: 11px;
+}
+
+.lexarrayitems .lexwidgetname {
+  color: var(--global-text-secondary);
 }
 
 /** Timeline */

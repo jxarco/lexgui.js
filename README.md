@@ -61,6 +61,8 @@ TODO List:
 - ~~Load File widget~~
 - ~~Layers widget~~
 - Array widget
+- Use default Value in Layers widget
+- Add reset widget in Layers widget
 - Menubar: Support checkboxes ??
 - Change resize bar to Godot one
 - Support optimum, sub, etc colors for the progress bars
