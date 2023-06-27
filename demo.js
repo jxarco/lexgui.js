@@ -68,13 +68,7 @@ bottom.addMenubar( m => {
             el.style.display = 'none';
 
         var bottom_panel = document.getElementById('bottom-panel');
-        if(bottom_panel)
-            bottom_panel.style.display = 'block';
-        else {
-            bottom_panel = new LX.Panel({id: "bottom-panel"});
-            bottom.attach( bottom_panel );
-            fillBottomPanel( bottom_panel ); 
-        }
+        bottom_panel.style.display = 'block';
     });
 
     m.add( "Keyframes Timeline", e => { 
@@ -140,6 +134,9 @@ bottom.addMenubar( m => {
     });
 
 } );
+
+var bottom_panel = bottom.addPanel({id: "bottom-panel"});
+fillBottomPanel( bottom_panel ); 
 
 // split right area
 right.split({type: 'vertical', sizes:["70vh","30vh"]});
