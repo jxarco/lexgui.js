@@ -1887,25 +1887,23 @@
             container.appendChild(valueName);
             container.appendChild(copy);
 
-            if(callback) {
-                color.addEventListener("input", e => {
-                    let val = e.target.value;
+            color.addEventListener("input", e => {
+                let val = e.target.value;
 
-                    // Change value (always hex)
-                    valueName.innerText = val;
+                // Change value (always hex)
+                valueName.innerText = val;
 
-                    // Reset button (default value)
-                    if(val != color.iValue) {
-                        let btn = element.querySelector(".lexwidgetname .lexicon");
-                        btn.style.display = "block";
-                    }
+                // Reset button (default value)
+                if(val != color.iValue) {
+                    let btn = element.querySelector(".lexwidgetname .lexicon");
+                    btn.style.display = "block";
+                }
 
-                    if(color.useRGB)
-                        val = hexToRgb(val);
+                if(color.useRGB)
+                    val = hexToRgb(val);
 
-                    this.#trigger( new IEvent(name, val, e), callback );
-                }, false);
-            }
+                this.#trigger( new IEvent(name, val, e), callback );
+            }, false);
             
             element.appendChild(container);
         }
