@@ -1598,12 +1598,14 @@
 
             let widget = this.#create_widget(name, Widget.LAYERS, options);
             let element = widget.domEl;
+            let that = this;
 
             // Add reset functionality
-            Panel.#add_reset_property(element.domName, function() {
-                // ...
+            Panel.#add_reset_property(element.domName, function(e) {
                 this.style.display = "none";
-                // Panel.#dispatch_event(wValue, "change");
+                value = defaultValue;
+                setLayers();
+                that.#trigger( new IEvent(name, value, e), callback );
             });
 
             // Add widget value
@@ -1612,36 +1614,51 @@
             container.className = "lexlayers";
             container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
-            let binary = value.toString( 2 );
-            let nbits = binary.length;
-            // fill zeros
-            for(var i = 0; i < (16 - nbits); ++i) {
-                binary = '0' + binary;
-            }
+            let defaultValue = value;
 
-            for( let bit = 0; bit < 16; ++bit )
-            {
-                let layer = document.createElement('div');
-                layer.className = "lexlayer";
-                if( value != undefined )
-                {
-                    const valueBit = binary[ 16 - bit - 1 ];
-                    if(valueBit != undefined && valueBit == '1') 
-                        layer.classList.add('selected');    
+            const setLayers = () =>  {
+
+                container.innerHTML = "";
+
+                let binary = value.toString( 2 );
+                let nbits = binary.length;
+                // fill zeros
+                for(var i = 0; i < (16 - nbits); ++i) {
+                    binary = '0' + binary;
                 }
-                layer.innerText = bit + 1;
-                layer.title = "Bit " + bit + ", value " + (1 << bit);
-                container.appendChild( layer );
-                
-                layer.addEventListener("click", e => {
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                    e.target.classList.toggle('selected');
-                    value ^= ( 1 << bit );
-                    this.#trigger( new IEvent(name, value, e), callback );
-                });
-            }
+    
+                for( let bit = 0; bit < 16; ++bit )
+                {
+                    let layer = document.createElement('div');
+                    layer.className = "lexlayer";
+                    if( value != undefined )
+                    {
+                        const valueBit = binary[ 16 - bit - 1 ];
+                        if(valueBit != undefined && valueBit == '1') 
+                            layer.classList.add('selected');    
+                    }
+                    layer.innerText = bit + 1;
+                    layer.title = "Bit " + bit + ", value " + (1 << bit);
+                    container.appendChild( layer );
+                    
+                    layer.addEventListener("click", e => {
+    
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        e.target.classList.toggle('selected');
+                        value ^= ( 1 << bit );
+    
+                        let btn = element.querySelector(".lexwidgetname .lexicon");
+                        if(btn) btn.style.display = (value != defaultValue ? "block" : "none");
+    
+                        this.#trigger( new IEvent(name, value, e), callback );
+                    });
+                }
+    
+            };
 
+            setLayers();
+            
             element.appendChild(container);
         }
 
@@ -1715,17 +1732,6 @@
                             break;
                     }
 
-                    // this.addButton( null, "<a class='lexicon fa-solid fa-pen'></a>", (value, event) => {
-                        
-                    //     addContextMenu("Type", event, c => {
-                    //         // TODO
-                    //         // process new type, refresh widget
-                    //         c.add( "String" );
-                    //         c.add( "Number" );
-                    //     });
-                        
-                    // }, { title: "Change Type", className: 'small'} );
-
                     this.addButton( null, "<a class='lexicon fa-solid fa-trash'></a>", () => {
                         values.splice(values.indexOf( value ), 1);
                         updateItems();
@@ -1742,7 +1748,9 @@
                     values.push( "" );
                     updateItems();
                     // Update num items
-                    element.querySelector(".lexbutton.array span").innerHTML = "Array (size " + values.length + ")";
+                    let buttonEl = element.querySelector(".lexbutton.array span");
+                    buttonEl.innerHTML = "Array (size " + values.length + ")";
+                    buttonEl.innerHTML += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
                     // this.#trigger( new IEvent(name, flagvalue, e), callback );
                 }, { buttonClass: 'array' });
 
