@@ -175,8 +175,8 @@ let scene_data = {
                         {
                             'name': 'Open script',
                             'icon': 'fa-solid fa-scroll',
-                            'callback': function() {
-                                console.log("Script opened!")
+                            'callback': function(node) {
+                                console.log(node.id + ": Script opened!")
                             }
                         }
                     ]

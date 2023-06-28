@@ -897,7 +897,7 @@
             list.appendChild(item);
 
             // Callbacks
-            item.addEventListener("click", function(){
+            item.addEventListener("click", function(e) {
                 list.querySelectorAll("li").forEach( e => { e.classList.remove('selected'); } );
                 this.classList.add('selected');
                 if(that.onevent) {
@@ -1056,7 +1056,10 @@
                     var actionEl = document.createElement('a');
                     actionEl.className = "itemicon " + a.icon;
                     actionEl.title = a.name;
-                    actionEl.addEventListener("click", a.callback);
+                    actionEl.addEventListener("click", function(e) {
+                        a.callback.call(this, node);
+                        e.stopPropagation();
+                    });
                     item.appendChild(actionEl);
                 }
             }
