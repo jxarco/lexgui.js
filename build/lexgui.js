@@ -961,64 +961,68 @@
                 that.refresh();
             });
 
-            // Drag nodes
-            if(parent) // Root doesn't move!
-            {
-                item.addEventListener("dragstart", e => {
-                    window.__tree_node_dragged = node;
+
+            if(this.options.draggable ?? true) {
+                // Drag nodes
+                if(parent) // Root doesn't move!
+                {
+                    item.addEventListener("dragstart", e => {
+                        window.__tree_node_dragged = node;
+                    });
+                }
+
+                /* Events fired on other node items */
+                item.addEventListener("dragover", e => {
+                    e.preventDefault(); // allow drop
+                }, false );
+                item.addEventListener("dragenter", (e) => {
+                    e.target.classList.add("draggingover");
+                });
+                item.addEventListener("dragleave", (e) => {
+                    e.target.classList.remove("draggingover");
+                });
+                item.addEventListener("drop", e => {
+                    e.preventDefault(); // Prevent default action (open as link for some elements)
+                    let dragged = window.__tree_node_dragged;
+                    if(!dragged)
+                        return;
+                    let target = node;
+                    // Can't drop to same node
+                    if(dragged.id == target.id) {
+                        console.warn("Cannot parent node to itself!");
+                        return;
+                    }
+
+                    // Can't drop to child node
+                    const isChild = function(new_parent, node) {
+                        var result = false;
+                        for( var c of node.children ) {
+                            if( c.id == new_parent.id )
+                                return true;
+                            result |= isChild(new_parent, c);
+                        }
+                        return result;
+                    };
+
+                    if(isChild(target, dragged)) {
+                        console.warn("Cannot parent node to a current child!");
+                        return;
+                    }
+
+                    // Trigger node dragger event
+                    if(that.onevent) {
+                        const event = new TreeEvent(TreeEvent.NODE_DRAGGED, dragged, target);
+                        that.onevent( event );
+                    }
+
+                    const index = dragged.parent.children.findIndex(n => n.id == dragged.id);
+                    const removed = dragged.parent.children.splice(index, 1);
+                    target.children.push( removed[0] );
+                    that.refresh();
+                    delete window.__tree_node_dragged;
                 });
             }
-
-            /* Events fired on other node items */
-            item.addEventListener("dragover", e => {
-                e.preventDefault(); // allow drop
-            }, false );
-            item.addEventListener("dragenter", (e) => {
-                e.target.classList.add("draggingover");
-            });
-            item.addEventListener("dragleave", (e) => {
-                e.target.classList.remove("draggingover");
-            });
-            item.addEventListener("drop", e => {
-                e.preventDefault(); // Prevent default action (open as link for some elements)
-                let dragged = window.__tree_node_dragged;
-                if(!dragged)
-                    return;
-                let target = node;
-                // Can't drop to same node
-                if(dragged.id == target.id) {
-                    console.warn("Cannot parent node to itself!");
-                    return;
-                }
-
-                // Can't drop to child node
-                const isChild = function(new_parent, node) {
-                    var result = false;
-                    for( var c of node.children ) {
-                        if( c.id == new_parent.id )
-                            return true;
-                        result |= isChild(new_parent, c);
-                    }
-                    return result;
-                };
-
-                if(isChild(target, dragged)) {
-                    console.warn("Cannot parent node to a current child!");
-                    return;
-                }
-
-                // Trigger node dragger event
-                if(that.onevent) {
-                    const event = new TreeEvent(TreeEvent.NODE_DRAGGED, dragged, target);
-                    that.onevent( event );
-                }
-
-                const index = dragged.parent.children.findIndex(n => n.id == dragged.id);
-                const removed = dragged.parent.children.splice(index, 1);
-                target.children.push( removed[0] );
-                that.refresh();
-                delete window.__tree_node_dragged;
-            });
+            
 
             // Show/hide children
             if(is_parent) {
@@ -3019,42 +3023,40 @@
             if(this.leftPanel)
                 this.leftPanel.clear();
             else {
-                this.leftPanel = area.addPanel({id: 'lextimelinepanel', className: 'lextimelinepanel'});
+                this.leftPanel = area.addPanel({className: 'lextimelinepanel'});
                 
             }
             let panel = this.leftPanel;
             // panel.addBlank(25);
-            panel.addTitle("Tracks", { height: "24px"})
-            if(!this.animationClip || !this.selectedItems) 
-                return;
+            panel.addTitle("Tracks", { height: "24px"});
 
-            let items = {'id': '', 'children': []};
+            if(this.animationClip && this.selectedItems)  {
+                let items = {'id': '', 'children': []};
 
-            for(let i = 0; i < this.selectedItems.length; i++ ) {
-                let selected = this.selectedItems[i];
-                let t = {
-                    'id': selected,
-                    'skipVisibility': true,
-                    'children': []
-                }
-                for(let j = 0; j < this.tracksPerItem[selected].length; j++) {
-                    let track = this.tracksPerItem[selected][j];
-                    t.children.push({'id': track.name + (track.type? ' (' + track.type + ')': ''), 'children':[]})
-                    // panel.addTitle(track.name + (track.type? '(' + track.type + ')' : ''));
-                }
-                items.children.push(t);
-                panel.addTree(null, t, {filter: false, rename: false, onevent: (e) => {
-                    switch(e.type) {
-                        case LX.TreeEvent.NODE_SELECTED:
-                            if(this.onSelectTrack)
-                                this.onSelectTrack(e.node);
-                            break;
-                        case LX.TreeEvent.NODE_VISIBILITY:
-                            if(this.onChangeTrackVisibility)    
-                                this.onChangeTrackVisibility(e.node, e.value);
-                            break;
+                for(let i = 0; i < this.selectedItems.length; i++ ) {
+                    let selected = this.selectedItems[i];
+                    let t = {
+                        'id': selected,
+                        'skipVisibility': true,
+                        'children': []
                     }
-                }});
+                    for(let j = 0; j < this.tracksPerItem[selected].length; j++) {
+                        let track = this.tracksPerItem[selected][j];
+                        t.children.push({'id': track.name + (track.type? ' (' + track.type + ')': ''), 'children':[]})
+                        // panel.addTitle(track.name + (track.type? '(' + track.type + ')' : ''));
+                    }
+                    items.children.push(t);
+                    panel.addTree(null, t, {filter: false, rename: false, draggable: false, onevent: (e) => {
+                        switch(e.type) {
+                            case LX.TreeEvent.NODE_SELECTED:
+                                this.selectTrack(e.node);
+                                break;
+                            case LX.TreeEvent.NODE_VISIBILITY:    
+                                this.changeTrackVisibility(e.node, e.value);
+                                break;
+                        }
+                    }});
+                }
             }
             
 
@@ -3063,7 +3065,7 @@
             //     panel.addTitle(track.name + (track.type? '(' + track.type + ')' : ''));
             // }
             this.#resizecanvas([ this.root.clientWidth - this.leftPanel.root.clientWidth, this.size[1]]);
-            
+
         }
 
         /**
@@ -3598,9 +3600,9 @@
             //     ctx.fillStyle = this.active ? "rgba(255,255,255,0.9)" : "rgba(250,250,250,0.7)";
             //     ctx.fillText( title, 25, y + trackHeight * 0.75 );
             // }
-            ctx.fillStyle = "rgba(255,255,255,0.1)";
+            ctx.fillStyle = "#2c303570";
             if(trackInfo.isSelected)
-                ctx.fillRect(0, y-3, ctx.canvas.width, trackHeight);
+                ctx.fillRect(0, y, ctx.canvas.width, trackHeight -1 );
             ctx.fillStyle = "#5e9fdd"//"rgba(10,200,200,1)";
             var keyframes = track.times;
 
@@ -3631,7 +3633,7 @@
                             ctx.fillStyle = "rgba(250,250,250,0.7)";
                             margin = -2;
                         }
-                        if(!this.active)
+                        if(!this.active || trackInfo.active == false)
                             ctx.fillStyle = "rgba(250,250,250,0.7)";
                             
                         ctx.translate(keyframePosX, y + size * 2 + margin);
@@ -3670,12 +3672,12 @@
             ctx.textAlign = "left";
             ctx.fillStyle = "rgba(255,255,255,0.8)";
 
-            if(title != null)
-            {
-                // var info = ctx.measureText( title );
-                ctx.fillStyle = "rgba(255,255,255,0.9)";
-                ctx.fillText( title, 25, y + trackHeight * 0.8 );
-            }
+            // if(title != null)
+            // {
+            //     // var info = ctx.measureText( title );
+            //     ctx.fillStyle = "rgba(255,255,255,0.9)";
+            //     ctx.fillText( title, 25, y + trackHeight * 0.8 );
+            // }
 
             ctx.fillStyle = "rgba(10,200,200,1)";
             var clips = track.clips;
@@ -3754,31 +3756,27 @@
             //ctx.restore();
         }
 
-        /**
-        * @method onSelectTrack
+         /**
+        * @method selectTrack
         * @param {id, parent, children, visible} trackInfo 
-        */
-        onSelectTrack( trackInfo ) {
-            let [name, type] = trackInfo.id.split(" (");
-            if(!type) return;
-            type = type.replaceAll(")", "").replaceAll(" ", "");
-            trackInfo = {name, type};
-            this.selectTrack(trackInfo);
-        }
-
-        /**
-        * @method onSelectTrack
-        * @param {name, type} trackInfo 
         */
         selectTrack( trackInfo) {
             this.unSelectAllTracks();
             
-            let tracks = this.tracksPerItem[trackInfo.name];
+            let [name, type] = trackInfo.id.split(" (");
+            if(type)
+                type = type.replaceAll(")", "").replaceAll(" ", "");
+            let tracks = this.tracksPerItem[name];
+
             for(let i = 0; i < tracks.length; i++) {
-                if(tracks[i].type != trackInfo.type)
+                if(tracks[i].type != type && tracks.length > 1)
                     continue;
-                    this.tracksPerItem[trackInfo.name][i].isSelected = true;
+                this.tracksPerItem[name][i].isSelected = true;
+                trackInfo = this.tracksPerItem[name][i];
             }
+            
+            if(this.onSelectTrack)
+                this.onSelectTrack(trackInfo);
         }
 
         unSelectAllTracks() {
@@ -3792,11 +3790,25 @@
         }
 
         /**
-        * @method onChangeTrackVisibility
+        * @method changeTrackVisibility
         * @param {id, parent, children, visible} trackInfo 
         */
-        onChangeTrackVisibility( trackInfo, visible ) {
-            console.log(visible)
+        changeTrackVisibility(trackInfo, visible) {
+            let [name, type] = trackInfo.id.split(" (");
+            if(type)
+                type = type.replaceAll(")", "").replaceAll(" ", "");
+            trackInfo = {name, type};
+            let tracks = this.tracksPerItem[name];
+
+            for(let i = 0; i < tracks.length; i++) {
+                if(tracks[i].type != type && tracks.length > 1)
+                    continue;
+                    this.tracksPerItem[name][i].active = visible;
+                    trackInfo = this.tracksPerItem[name][i];
+            }
+            this.draw();
+            if(this.onChangeTrackVisibility)
+                this.onChangeTrackVisibility(trackInfo, visible)
         }
 
         /**
@@ -3806,7 +3818,7 @@
          * TODO
          */
 
-        resize( size ) {
+        resize( size = [this.parent.root.clientWidth, this.parent.root.clientHeight]) {
             // this.root.style.width = size[0] + 'px';
             // this.root.style.height = size[1] + 'px';
             let w = size[0] - this.leftPanel.root.clientWidth - 10;
@@ -4963,10 +4975,10 @@
             }
             
             ctx.restore();
-            let offset = 25;
-            ctx.fillStyle = 'white';
-            if(this.name)
-                ctx.fillText(this.name, offset + ctx.measureText(this.name).actualBoundingBoxLeft, -this.topMargin*0.4 );
+            // let offset = 25;
+            // ctx.fillStyle = 'white';
+            // if(this.name)
+            //     ctx.fillText(this.name, offset + ctx.measureText(this.name).actualBoundingBoxLeft, -this.topMargin*0.4 );
         }
 
         // Creates a map for each item -> tracks

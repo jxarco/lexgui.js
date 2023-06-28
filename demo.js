@@ -82,6 +82,7 @@ bottom.addMenubar( m => {
         var timeline = document.getElementById('kf-timeline');            
         if(timeline) {
             timeline.style.display = 'block';
+            kfTimeline.resize();
         }
         else {
             kfTimeline = new LX.KeyFramesTimeline("kf-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
@@ -96,10 +97,8 @@ bottom.addMenubar( m => {
             ]);
             
             kfTimeline.draw(0);
+
             
-            bottom.onresize = bounding => {
-                kfTimeline.resize( [ bounding.width, bounding.height ] );
-            }
         }
     });
 
@@ -115,24 +114,29 @@ bottom.addMenubar( m => {
         var ctimeline = document.getElementById('clips-timeline');            
         if(ctimeline) {
             ctimeline.style.display = 'block';
+            clipsTimeline.resize();
         }
         else {
             clipsTimeline = new LX.ClipsTimeline("clips-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
-            var clip = {name:"", start:0, duration:1, type:""};
+            var clip = {name:"Clip1", start:0, duration:1, type:""};
             clipsTimeline.addClip(clip)
             // clipsTimeline.setAnimationClip({tracks: [{clips: [clip]}], duration: 2});
-            clipsTimeline.selectedItem = "Test track";
+            clipsTimeline.selectedItems = ["Clip1"];
 
             bottom.attach(clipsTimeline);
             clipsTimeline.draw(0);
             
-            bottom.onresize = bounding => {
-                clipsTimeline.resize( [ bounding.width, bounding.height ] );
-            }
         }
 
     });
 
+    bottom.onresize = bounding => {
+        if(clipsTimeline)
+            clipsTimeline.resize( [ bounding.width, bounding.height ] );
+        
+        if(kfTimeline)
+            kfTimeline.resize( [ bounding.width, bounding.height ] );
+    }
 } );
 
 var bottom_panel = bottom.addPanel({id: "bottom-panel"});
