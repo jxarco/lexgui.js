@@ -39,9 +39,29 @@ area.addMenubar( m => {
     m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
     m.add( "Help/Support LexGUI/Do it" );
 
-    m.addButton( "fa-solid fa-play", () => { console.log("Something!") } );
-    m.addButton( "fa-solid fa-cube" );
-    m.addButton( "fa-solid fa-magnifying-glass" );
+    m.addButtons( [
+        {
+            title: "Play",
+            icon: "fa-solid fa-play",
+            callback:  (domEl) => { 
+                console.log("play!"); 
+                domEl.classList.toggle('fa-play'), domEl.classList.toggle('fa-stop');
+            }
+        },
+        {
+            title: "Pause",
+            icon: "fa-solid fa-pause",
+            disabled: true,
+            callback:  (domEl) => { console.log("pause!") }
+        },
+        {
+            icon: "fa-solid fa-magnifying-glass",
+            callback:  (domEl) => { console.log("glass!") }
+        }
+    ]);
+    
+    m.getButton("Play");
+
 });
 
 // split main area

@@ -580,6 +580,7 @@
             
             this.icons = {};
             this.shorts = {};
+            this.buttons = [];
         }
 
         /**
@@ -765,16 +766,36 @@
         }
 
         /**
-         * @method addButton
-         * @param {String} icon
-         * @param {*} options:
-         * callback: Function to call on each item
+         * @method getButton
+         * @param {String} title
          */
 
-        addButton( icon, options = {} ) {
+        getButton( title ) {
+            return this.buttons[ title ];
+        }
 
-            if(options.constructor == Function)
-                options = { callback: options };
+        /**
+         * @method setButtonIcon
+         * @param {String} title
+         * @param {String} icon
+         */
+
+        setButtonIcon( title, icon ) {
+            const button = this.buttons[ title ];
+            if(!button) return;
+
+            button.querySelector('a').className = "fa-solid" + " " + icon + " lexicon";
+        }
+
+        /**
+         * @method addButton
+         * @param {Array} buttons
+         */
+
+        addButtons( buttons ) {
+
+            if(!buttons)
+                throw("No buttons to add!");
 
             if(!this.buttonContainer)
             {
@@ -783,15 +804,26 @@
                 this.root.appendChild( this.buttonContainer );    
             }
 
-            let button = document.createElement('div');
-            button.className = "lexmenubutton";
-            button.innerHTML = "<a class='" + icon + " lexicon'></a>";
-            this.buttonContainer.appendChild( button );
+            for( let i = 0; i < buttons.length; ++i )
+            {
+                let data = buttons[i];
+                let button = document.createElement('div');
+                const title = data.title;
+                const disabled = data.disabled ?? false;
+                button.className = "lexmenubutton" + (disabled ? " disabled" : "");
+                button.title = title ?? "";
+                button.innerHTML = "<a class='" + data.icon + " lexicon'></a>";
+                this.buttonContainer.appendChild( button );
+    
+                const _b = button.querySelector('a');
+                _b.addEventListener("click", (e) => {
+                    if(data.callback && !disabled)
+                        data.callback.call( this, _b, e );
+                });
 
-            button.addEventListener("click", (e) => {
-                if(options.callback)
-                    options.callback.call( this, e );
-            });
+                if(title)
+                    this.buttons[ title ] = button;
+            }
         }
     };
 

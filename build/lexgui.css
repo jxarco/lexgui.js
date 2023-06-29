@@ -997,6 +997,10 @@ meter::-webkit-meter-even-less-good-value {
   user-select: none; /* Standard syntax */
 }
 
+.lexmenubar .lexmenubutton.disabled a {
+  color: var(--global-button-color);
+}
+
 /* Context Menu */
 
 .lexcontextmenubox {
