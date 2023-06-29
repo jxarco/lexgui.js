@@ -433,7 +433,10 @@ body.nocursor * {
   align-content: center;
 }
 
-.lexdropdown select {
+.lexdropdown .lexwidget {
+  padding: 0;
+}
+.lexdropdown .select {
 	background-color: var(--global-dropdown-color);
   border-radius: 2px;
   border: none;
@@ -449,9 +452,25 @@ body.nocursor * {
   position: relative;
 }
 
-.lexdropdown option {
+.lexdropdown .option {
 	background-color: #3f4046;
   color: #aeacac8a;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.lexdropdown .option:hover{
+  background-color: var(--global-dropdown-color);
+}
+
+.lexdropdown ul{
+  position: absolute;
+  list-style: none;
+  background: var(--global-dropdown-color);
+  padding: 1px 6px;
 }
 
 /* Toggle check box */
@@ -1143,3 +1162,4 @@ meter::-webkit-meter-even-less-good-value {
   margin: 0;
   padding-bottom: 0px;
 }
+

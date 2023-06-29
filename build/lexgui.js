@@ -1524,13 +1524,14 @@
                 wValue.className += " noname";
                 wValue.style.width =  "100%";
             }
+            return element;
         }
 
         /**
          * @method addDropdown
          * @param {String} name Widget name
-         * @param {Array} values Posible options of the dropdown widget
-         * @param {String} value Select by default option
+         * @param {Array} values Posible options of the dropdown widget -> String (for default dropdown) or Object = {title, url} (for images, videos..)
+         * @param {String or Object} value Select by default option
          * @param {Function} callback Callback function on change
          * @param {*} options:
          * disabled: Make the widget disabled [false]
@@ -1555,25 +1556,96 @@
 
             // Add widget value
 
-            var container = document.createElement('div');
+            let container = document.createElement('div');
             container.className = "lexdropdown";
-
-            let wValue = document.createElement('select');
+            
+            let wValue = document.createElement('div');
+            wValue.className = "lexdropdown lexoption";
             wValue.name = name;
             wValue.iValue = value;
-            
+
+            let list = document.createElement('ul');
+            list.className = "lexoptions";
+            list.hidden = true;
+
+            let buttonName = value;
+            buttonName += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
+            let selectedOption = this.addButton(null, buttonName, (value, event) => {
+                console.log(event)
+                element.querySelector(".lexoptions").style.top = event.y + 'px';
+                element.querySelector(".lexoptions").style.width = event.srcElement.clientWidth + 'px';
+                element.querySelector(".lexoptions").toggleAttribute('hidden');
+            }, { buttonClass: 'array' });
+
             container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+            let isString = true;
 
             if(values.length)
-                for(var i = 0; i < values.length; i++)
+                for(let i = 0; i < values.length; i++)
                 {
-                    var option = document.createElement('option');
-                    option.innerHTML = option.value = values[i];
-                    if(values[i] == value)
-                        option.selected = true;
-                    wValue.appendChild(option);
-                }
+                    let iValue = values[i];
+                    let li = document.createElement('li');
+                    let option = document.createElement('div');
+                    option.className = "option";
+                    li.appendChild(option);
+                    if(typeof iValue == 'string') {
+                        
+                        option.innerHTML = option.value = iValue;
+                        if(iValue == value)
+                        {
+                            option.selected = true;
+                            wValue.innerHTML = iValue;
+                        }
+                    }
+                    else {
+                        isString = false;
+                        let img = document.createElement("img");
+                        img.src = iValue.src;
 
+                        let p = document.createElement("p");
+                        p.innerText = iValue.value;
+                        option.appendChild(img);
+                        option.appendChild(p);
+
+                        option.setAttribute("value", iValue);
+                        option.setAttribute("data-index", i);
+                        option.setAttribute("data-src", iValue.src);
+                        option.setAttribute("title", iValue.value);
+                        if(value == value.value)
+                            option.selected = true;
+                    }                    
+                    list.appendChild(li);
+                }
+            // if(!isString) {
+            //     var optionsT = {
+            //         'templateSelection': custom_template,
+            //         'templateResult': custom_template,
+            //     }
+            //     $(select).select2(optionsT);
+            //     $('.select2-container--default .select2-selection--single').css({'height': '220px'});
+            //     $('.select2-selection__arrow').append('<i class="fa-solid fa-chevron-down" style="width:15px; height:15px"></i>')
+                
+            //     select.hidden = true;
+            //     $(select).on('select2:select',(e) => {
+            //         if(!options.callback) 
+            //             return;
+            //         var i = e.target.value;
+            //         // var v = values[i];
+            //         // options.callback(v);
+            //     });
+            // }
+
+            // function custom_template(option){
+                
+            //     var data = $(obj.element).data();
+            //     var text = $(obj.element).text();
+            //     if(data && data['thumbnail']){
+            //         let img_src = data['thumbnail'];
+            //         let template = $("<div style= 'display: flex;flex-direction: column;justify-content: center;align-items: center;'><img src=\"" + option.src + "\" style=\"width: calc(100% - 32px);height: auto;padding: 5px;\"/><p >" + option.title + "</p></div>");
+            //         return template;
+            //     }
+            // }
+        
             if(options.disabled)
                 wValue.setAttribute("disabled", true);
             
@@ -1585,7 +1657,8 @@
                 this.#trigger( new IEvent(name, val, e), callback ); 
             });
 
-            container.appendChild(wValue);
+            container.appendChild(selectedOption);
+            container.appendChild(list)
             element.appendChild(container);
         }
 

@@ -294,6 +294,11 @@ function fillPanel( panel ) {
     panel.addDropdown("Best Engine", ["Godot", "Unity", "Unreal Engine"], "Godot", (value, event) => {
         console.log(value);
     });
+
+    panel.addDropdown("Best Image", [{title:"Godot", src: "https://pbs.twimg.com/profile_images/1631591220630757377/nKSCjeS3_400x400.png"}, {title: "Unity", src: "https://imgcom.masterd.es/1/blog/2019/11/39809.jpg"}, {title:"Unreal Engine", src: "https://cdn2.unrealengine.com/ue-logo-1400x788-1400x788-8f185e1e3635.jpg"}], "Godot", (value, event) => {
+        console.log(value);
+    });
+
     panel.addVector3("I'm a Vec3", [0.1, 0.4, 0.5], (value, event) => {
         console.log(value);
     });
