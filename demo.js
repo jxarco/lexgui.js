@@ -38,6 +38,10 @@ area.addMenubar( m => {
     m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass", short:  "F1", callback: () => { console.log("Opening HELP") }});
     m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
     m.add( "Help/Support LexGUI/Do it" );
+
+    m.addButton( "fa-solid fa-play", () => { console.log("Something!") } );
+    m.addButton( "fa-solid fa-cube" );
+    m.addButton( "fa-solid fa-magnifying-glass" );
 });
 
 // split main area

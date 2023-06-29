@@ -763,6 +763,36 @@
                 });
             }
         }
+
+        /**
+         * @method addButton
+         * @param {String} icon
+         * @param {*} options:
+         * callback: Function to call on each item
+         */
+
+        addButton( icon, options = {} ) {
+
+            if(options.constructor == Function)
+                options = { callback: options };
+
+            if(!this.buttonContainer)
+            {
+                this.buttonContainer = document.createElement('div');
+                this.buttonContainer.className = "lexmenubuttons";
+                this.root.appendChild( this.buttonContainer );    
+            }
+
+            let button = document.createElement('div');
+            button.className = "lexmenubutton";
+            button.innerHTML = "<a class='" + icon + " lexicon'></a>";
+            this.buttonContainer.appendChild( button );
+
+            button.addEventListener("click", (e) => {
+                if(options.callback)
+                    options.callback.call( this, e );
+            });
+        }
     };
 
     LX.Menubar = Menubar;
