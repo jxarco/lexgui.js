@@ -1793,10 +1793,18 @@
 
             for( let i = 0; i < values.length; ++i )
             {
+                let icon = null;
                 let item_value = values[i];
-                let list_item = document.createElement('span');
+
+                if( item_value.constructor === Array )
+                {
+                    icon = item_value[1];
+                    item_value = item_value[0];
+                }
+
+                let list_item = document.createElement('div');
                 list_item.className = "lexlistitem" + (value == item_value ? " selected" : "");
-                list_item.innerHTML = item_value;
+                list_item.innerHTML = "<span>" + item_value + "</span>" + (icon ? "<a class='" + icon + "'></a>" : "");
 
                 list_item.addEventListener('click', (e) => {
                     list_container.querySelectorAll('.lexlistitem').forEach( e => e.classList.remove('selected'));

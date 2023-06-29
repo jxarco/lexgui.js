@@ -1104,12 +1104,19 @@ meter::-webkit-meter-even-less-good-value {
   margin-top: 1px;
   margin-bottom: 1px;
   height: 20px;
+  line-height: 22px;
   align-content: center;
-  display: grid;
+  display: flow-root;
   -webkit-user-select: none; /* Safari 3.1+ */
   -moz-user-select: none; /* Firefox 2+ */
   -ms-user-select: none; /* IE 10+ */
   user-select: none; /* Standard syntax */
+}
+
+.lexlistitem a {
+  float: left;
+  line-height: 20px;
+  margin-right: 4px;
 }
 
 .lexlistitem:hover {
