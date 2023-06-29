@@ -2906,7 +2906,7 @@
 
         /**
          * @param {string} name 
-         * @param {object} options = {animationClip, selectedItem, position = [0,0], width, height, canvas, trackHeight}
+         * @param {object} options = {animationClip, selectedItems, position = [0,0], width, height, canvas, trackHeight}
          */
         constructor( name, options = {} ) {
 
@@ -2927,6 +2927,9 @@
             this.clipboard = null;
             this.grabTime = 0;
             this.timeBeforeMove = 0;
+
+            this.tracksPerItem = {};
+            this.tracksDictionary = {};
 
             this.canvas = options.canvas ?? document.createElement('canvas');
 
@@ -3900,11 +3903,11 @@
 
         /**
          * @param {string} name 
-         * @param {object} options = {animationClip, selectedItems, position = [0,0], width, height, canvas, trackHeight}
+         * @param {object} options = {animationClip, selectedItems, x, y, width, height, canvas, trackHeight}
          */
         constructor(name, options = {}) {
 
-            super(name, options,);
+            super(name, options);
             
             this.tracksPerItem = {};
             
@@ -4083,7 +4086,7 @@
                 let keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
                 if(keyFrameIndex != undefined) {
                     
-                    const [name, type] = this.getTrackName(track.name);
+                    const name = this.tracksDictionary[track.name]; 
                     let t = this.tracksPerItem[ name ][track.idx];
 
                     removeHover();
@@ -4166,6 +4169,7 @@
         processTracks() {
 
             this.tracksPerItem = {};
+            this.tracksDictionary = {};
 
             for( let i = 0; i < this.animationClip.tracks.length; ++i ) {
 
@@ -4184,6 +4188,7 @@
                 }else {
                     this.tracksPerItem[name].push( trackInfo );
                 }
+                
 
                 const trackIndex = this.tracksPerItem[name].length - 1;
                 this.tracksPerItem[name][trackIndex].idx = trackIndex;
@@ -4191,6 +4196,7 @@
 
                 // Save index also in original track
                 track.idx = trackIndex;
+                this.tracksDictionary[track.name] = name;
             }
         }
 
@@ -4227,7 +4233,7 @@
         }
 
         onPreProcessTrack( track ) {
-            const name = this.getTrackName(track.name)[0];
+            const name = this.tracksDictionary[track.name];
             let trackInfo = this.tracksPerItem[name][track.idx];
             trackInfo.selected = [];
             trackInfo.edited = [];
@@ -4643,7 +4649,7 @@
                 this.unSelectAllKeyFrames();
             }
                             
-            const [name, type] = this.getTrackName( track.name );
+            const name = this.tracksDictionary[track.name];
             let t = this.tracksPerItem[ name ][track.idx];
             let currentSelection = [name, track.idx, keyFrameIndex];
             if(!multiple)
@@ -4675,7 +4681,7 @@
 
         /**
          * @param {string} name 
-         * @param {object} options = {animationClip, selectedItem, position = [0,0], width, height, canvas, trackHeight}
+         * @param {object} options = {animationClip, selectedItems, x, y, width, height, canvas, trackHeight}
          */
         constructor(name, options = {}) {
 
@@ -4985,6 +4991,7 @@
         processTracks() {
 
             this.tracksPerItem = {};
+            this.tracksDictionary = {};
 
             for( let i = 0; i < this.animationClip.tracks.length; ++i ) {
 
@@ -5000,7 +5007,7 @@
                     selected: [], edited: [], hovered: []
                 };
                 
-                
+                this.tracksDictionary[track.name] = name;
                 // const trackIndex = this.tracksPerItem[name].length - 1;
                 // this.tracksPerItem[name][trackIndex].idx = trackIndex;
                 // this.tracksPerItem[name][trackIndex].clipIdx = i;
