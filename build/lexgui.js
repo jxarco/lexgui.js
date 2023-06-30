@@ -1706,10 +1706,10 @@
         /**
          * @method addDropdown
          * @param {String} name Widget name
-         * @param {Array} values Posible options of the dropdown widget -> String (for default dropdown) or Object = {title, url} (for images, videos..)
-         * @param {String or Object} value Select by default option
+         * @param {Array} values Posible options of the dropdown widget -> String (for default dropdown) or Object = {value, url} (for images, gifs..)
+         * @param {String} value Select by default option
          * @param {Function} callback Callback function on change
-         * @param {*} options:
+         * @param {*} options: {filter: boolean} to add a search bar to the widget
          * disabled: Make the widget disabled [false]
          */
 
