@@ -580,6 +580,7 @@
             
             this.icons = {};
             this.shorts = {};
+            this.buttons = [];
         }
 
         /**
@@ -761,6 +762,67 @@
                 entry.addEventListener("mouseleave", () => {
                     this.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
                 });
+            }
+        }
+
+        /**
+         * @method getButton
+         * @param {String} title
+         */
+
+        getButton( title ) {
+            return this.buttons[ title ];
+        }
+
+        /**
+         * @method setButtonIcon
+         * @param {String} title
+         * @param {String} icon
+         */
+
+        setButtonIcon( title, icon ) {
+            const button = this.buttons[ title ];
+            if(!button) return;
+
+            button.querySelector('a').className = "fa-solid" + " " + icon + " lexicon";
+        }
+
+        /**
+         * @method addButton
+         * @param {Array} buttons
+         */
+
+        addButtons( buttons ) {
+
+            if(!buttons)
+                throw("No buttons to add!");
+
+            if(!this.buttonContainer)
+            {
+                this.buttonContainer = document.createElement('div');
+                this.buttonContainer.className = "lexmenubuttons";
+                this.root.appendChild( this.buttonContainer );    
+            }
+
+            for( let i = 0; i < buttons.length; ++i )
+            {
+                let data = buttons[i];
+                let button = document.createElement('div');
+                const title = data.title;
+                const disabled = data.disabled ?? false;
+                button.className = "lexmenubutton" + (disabled ? " disabled" : "");
+                button.title = title ?? "";
+                button.innerHTML = "<a class='" + data.icon + " lexicon'></a>";
+                this.buttonContainer.appendChild( button );
+    
+                const _b = button.querySelector('a');
+                _b.addEventListener("click", (e) => {
+                    if(data.callback && !disabled)
+                        data.callback.call( this, _b, e );
+                });
+
+                if(title)
+                    this.buttons[ title ] = button;
             }
         }
     };
@@ -1464,7 +1526,7 @@
             let element = widget.domEl;
 
             // Add reset functionality
-            if(name) {
+            if(name && !(options.noreset ?? false)) {
                 Panel.#add_reset_property(element.domName, function() {
                     wValue.value = wValue.iValue;
                     this.style.display = "none";
@@ -1801,13 +1863,6 @@
             let element = widget.domEl;
             element.style.flexWrap = "wrap";
 
-            // Add reset functionality
-            Panel.#add_reset_property(element.domName, function() {
-                // ...
-                this.style.display = "none";
-                // Panel.#dispatch_event(wValue, "change");
-            });
-
             // Add dropdown array button
 
             const itemNameWidth = "10%";
@@ -1846,33 +1901,40 @@
                     switch(baseclass)
                     {
                         case String:
-                            this.addText(i+"", value, null, { nameWidth: itemNameWidth, inputWidth: "90%" });
+                            this.addText(i+"", value, function(value, event) {
+                                values[i] = value;
+                                callback( values );
+                            }, { nameWidth: itemNameWidth, inputWidth: "90%", noreset: true });
                             break;
                         case Number:
-                            this.addNumber(i+"", value, null, { nameWidth: itemNameWidth, inputWidth: "90%" });
+                            this.addNumber(i+"", value, function(value, event) {
+                                values[i] = value;
+                                callback( values );
+                            }, { nameWidth: itemNameWidth, inputWidth: "90%", noreset: true });
                             break;
                     }
 
-                    this.addButton( null, "<a class='lexicon fa-solid fa-trash'></a>", () => {
+                    this.addButton( null, "<a class='lexicon fa-solid fa-trash'></a>", (v, event) => {
                         values.splice(values.indexOf( value ), 1);
                         updateItems();
                         // Update num items
                         let buttonEl = element.querySelector(".lexbutton.array span");
                         buttonEl.innerHTML = "Array (size " + values.length + ")";
                         buttonEl.innerHTML += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
+                        this.#trigger( new IEvent(name, values, event), callback );
                     }, { title: "Remove item", className: 'small'} );
                 }
 
                 buttonName = "Add item";
                 buttonName += "<a class='fa-solid fa-plus' style='float:right'></a>";
-                this.addButton(null, buttonName, () => {
+                this.addButton(null, buttonName, (v, event) => {
                     values.push( "" );
                     updateItems();
                     // Update num items
                     let buttonEl = element.querySelector(".lexbutton.array span");
                     buttonEl.innerHTML = "Array (size " + values.length + ")";
                     buttonEl.innerHTML += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
-                    // this.#trigger( new IEvent(name, flagvalue, e), callback );
+                    this.#trigger( new IEvent(name, values, event), callback );
                 }, { buttonClass: 'array' });
 
                 // Stop pushing to array_items
@@ -1883,6 +1945,59 @@
             
             element.appendChild(container);
             element.appendChild(array_items);
+        }
+
+        /**
+         * @method addList
+         * @param {String} name Widget name
+         * @param {String} value Selected list value
+         * @param {Array} values List values
+         * @param {Function} callback Callback function on change
+         * @param {*} options:
+         */
+
+        addList( name, value, values, callback, options = {} ) {
+
+            let widget = this.#create_widget(name, Widget.ARRAY, options);
+            let element = widget.domEl;
+
+            // Show list
+
+            let list_container = document.createElement('div');
+            list_container.className = "lexlist";
+            list_container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+
+            for( let i = 0; i < values.length; ++i )
+            {
+                let icon = null;
+                let item_value = values[i];
+
+                if( item_value.constructor === Array )
+                {
+                    icon = item_value[1];
+                    item_value = item_value[0];
+                }
+
+                let list_item = document.createElement('div');
+                list_item.className = "lexlistitem" + (value == item_value ? " selected" : "");
+                list_item.innerHTML = "<span>" + item_value + "</span>" + (icon ? "<a class='" + icon + "'></a>" : "");
+
+                list_item.addEventListener('click', (e) => {
+                    list_container.querySelectorAll('.lexlistitem').forEach( e => e.classList.remove('selected'));
+                    list_item.classList.toggle( 'selected' );
+                    this.#trigger( new IEvent(name, item_value, e), callback );
+                });
+
+                list_container.appendChild(list_item);
+            }
+
+            // Remove branch padding and margins
+            if(!name) {
+                element.className += " noname";
+                list_container.style.width = "100%";
+            }
+
+            element.appendChild(list_container);
         }
 
         /**

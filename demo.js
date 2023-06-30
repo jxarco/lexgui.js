@@ -38,6 +38,30 @@ area.addMenubar( m => {
     m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass", short:  "F1", callback: () => { console.log("Opening HELP") }});
     m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
     m.add( "Help/Support LexGUI/Do it" );
+
+    m.addButtons( [
+        {
+            title: "Play",
+            icon: "fa-solid fa-play",
+            callback:  (domEl) => { 
+                console.log("play!"); 
+                domEl.classList.toggle('fa-play'), domEl.classList.toggle('fa-stop');
+            }
+        },
+        {
+            title: "Pause",
+            icon: "fa-solid fa-pause",
+            disabled: true,
+            callback:  (domEl) => { console.log("pause!") }
+        },
+        {
+            icon: "fa-solid fa-magnifying-glass",
+            callback:  (domEl) => { console.log("glass!") }
+        }
+    ]);
+    
+    m.getButton("Play");
+
 });
 
 // split main area
@@ -310,6 +334,9 @@ function fillPanel( panel ) {
         console.log(value);
     });
     panel.addArray("Array", ['GPTeam', 'Blat Panthers', 'Blat Bunny'], (value, event) => {
+        console.log(value);
+    });
+    panel.addList(null, 'Blat Panthers', ['GPTeam', 'Blat Bunny', ['Blat Panthers', 'fa-solid fa-paw']], (value, event) => {
         console.log(value);
     });
     panel.merge();

@@ -10,7 +10,7 @@
   --global-dropdown-color: #4e5154;
   --global-text: #d0d0e0;
   --global-text-primary: #d0d0e0e6;
-  --global-text-secondary: #b7b7cbb0;
+  --global-text-secondary: #b7b7cbc5;
   --checkbox-flag-on: #5e9fdd;
   --global-selected: #497baa;
   --global-highlight: #2c303570;
@@ -84,7 +84,7 @@ body.nocursor * {
 }
 
 .lexicon:active {
-  color: #aeb0c8be;
+  color: var(--global-selected);
 }
 
 /* Dialogs and alerts */
@@ -579,15 +579,15 @@ body.nocursor * {
 }
 
 .lexvector .vecbox span.x{
-  color:#ce5757;
+  color:#fb8080;
 }
 
 .lexvector .vecbox span.y{
-  color:#57ce5f;
+  color:#8eef97;
 }
 
 .lexvector .vecbox span.z{
-  color:#5783ce;
+  color:#8da5f3;
 }
 
 .lexvector .vecbox span.w{
@@ -1018,6 +1018,34 @@ meter::-webkit-meter-even-less-good-value {
   color: #979aa0e3;
 }
 
+.lexmenubar .lexmenubuttons {
+  display: flex;
+  background-color: var(--branch-title-background);
+  margin: 0 auto;
+  margin-top: 6px;
+  margin-bottom: 6px;
+  border-radius: 4px;
+  float: right;
+}
+
+.lexmenubar .lexmenubutton {
+  display: flex;
+  justify-content: center;
+  padding: 4px;
+  padding-top: 8px;
+  color: var(--global-text-secondary);
+  cursor: pointer;
+  margin-right: 4px;
+  -webkit-user-select: none; /* Safari 3.1+ */
+  -moz-user-select: none; /* Firefox 2+ */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard syntax */
+}
+
+.lexmenubar .lexmenubutton.disabled a {
+  color: var(--global-button-color);
+}
+
 /* Context Menu */
 
 .lexcontextmenubox {
@@ -1127,6 +1155,55 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexlayer:active {
   background-color: #497baab3;
+}
+
+/* List Widget */
+
+.lexlist {
+  background: #05050b6b!important;
+  border-radius: 4px;
+  padding: 4px;
+  display: grid;
+}
+
+.lexlistitem {
+  width: calc( 100% - 8px );
+  cursor: pointer;
+  color: var(--global-text-secondary);
+  font-size: 12px;
+  border-radius: 4px;
+  padding-left: 4px;
+  padding-right: 4px;
+  margin-top: 1px;
+  margin-bottom: 1px;
+  height: 20px;
+  line-height: 22px;
+  align-content: center;
+  display: flow-root;
+  -webkit-user-select: none; /* Safari 3.1+ */
+  -moz-user-select: none; /* Firefox 2+ */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard syntax */
+}
+
+.lexlistitem a {
+  float: left;
+  line-height: 20px;
+  margin-right: 4px;
+}
+
+.lexlistitem:hover {
+  background-color: #497baa8b;
+  color: var(--global-color-primary);
+}
+
+.lexlistitem:active {
+  color: var(--global-dropdown-color);
+}
+
+.lexlistitem.selected {
+  color: var(--global-text);
+  background-color: var(--global-selected);
 }
 
 /* Array Widget */
