@@ -457,10 +457,10 @@ body.nocursor * {
 /* Toggle check box */
 
 .lexcheckbox {
-  width: 1em;
-  height: 1em;
+  width: 0.9em;
+  height: 0.9em;
   display: inline-block;
-  vertical-align: top;
+  vertical-align: -3px;
   background-color: #1f1f1f;
   border: 2px solid black;
   border-radius: 2px;
@@ -492,6 +492,11 @@ body.nocursor * {
 
 .lexcheckbox .checkbox.on {
   background-color: var(--checkbox-flag-on);
+}
+
+.lexcheckboxcont #checkboxtext {
+  font-weight: bold;
+  margin-left: 4px;
 }
 
 /* Input Color Widget */
@@ -698,7 +703,7 @@ input[type=number] {
 
 .lextree {
   border-radius: 8px;
-  background: #05050b6b;
+  background: #15181c;
   width: calc( 100% - 6px );
   min-height: 12px;
   margin: 0 auto;
@@ -976,11 +981,20 @@ meter::-webkit-meter-even-less-good-value {
 .lexmenubar .lexmenubuttons {
   display: flex;
   background-color: var(--branch-title-background);
-  margin: 0 auto;
-  margin-top: 6px;
+  margin-top: 5px;
   margin-bottom: 6px;
   border-radius: 4px;
-  float: right;
+}
+
+.lexmenubar .lexmenubuttons.center {
+  margin: 0 auto;
+  margin-top: 5px;
+  margin-bottom: 6px;
+}
+
+.lexmenubar .lexmenubuttons.right {
+  margin-left: auto;
+  margin-right: 16px;
 }
 
 .lexmenubar .lexmenubutton {
@@ -1115,7 +1129,7 @@ meter::-webkit-meter-even-less-good-value {
 /* List Widget */
 
 .lexlist {
-  background: #05050b6b!important;
+  background: #15181c;
   border-radius: 4px;
   padding: 4px;
   display: grid;
@@ -1124,7 +1138,7 @@ meter::-webkit-meter-even-less-good-value {
 .lexlistitem {
   width: calc( 100% - 8px );
   cursor: pointer;
-  color: var(--global-text-secondary);
+  color: rgba(216, 218, 230, 0.826);
   font-size: 12px;
   border-radius: 4px;
   padding-left: 4px;
@@ -1149,7 +1163,7 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexlistitem:hover {
   background-color: #497baa8b;
-  color: var(--global-color-primary);
+  color: var(--global-text-primary);
 }
 
 .lexlistitem:active {

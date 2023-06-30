@@ -691,7 +691,6 @@
 
                         contextmenu.addEventListener('keydown', function(e) {
                             e.preventDefault();
-                            console.log(e.key);
                             let short = that.shorts[ subkey ];
                             if(!short) return;
                             // check if it's a letter or other key
@@ -790,9 +789,11 @@
         /**
          * @method addButton
          * @param {Array} buttons
+         * @param {*} options
+         * float: center (Default), right
          */
 
-        addButtons( buttons ) {
+        addButtons( buttons, options = {} ) {
 
             if(!buttons)
                 throw("No buttons to add!");
@@ -801,6 +802,7 @@
             {
                 this.buttonContainer = document.createElement('div');
                 this.buttonContainer.className = "lexmenubuttons";
+                this.buttonContainer.classList.add(options.float ?? 'center');
                 this.root.appendChild( this.buttonContainer );    
             }
 
@@ -1912,6 +1914,7 @@
             // Add widget value
 
             var container = document.createElement('div');
+            container.className = "lexcheckboxcont";
 
             let toggle = document.createElement('span');
             toggle.className = "lexcheckbox";
@@ -1927,7 +1930,13 @@
             }
 
             toggle.appendChild(flag);
+
+            let value_name = document.createElement('span');
+            value_name.id = "checkboxtext";
+            value_name.innerHTML = "On";
+
             container.appendChild(toggle);
+            container.appendChild(value_name);
 
             toggle.addEventListener("click", (e) => {
 
