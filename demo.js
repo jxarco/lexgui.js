@@ -318,6 +318,15 @@ function fillPanel( panel ) {
     panel.addDropdown("Best Engine", ["Godot", "Unity", "Unreal Engine"], "Godot", (value, event) => {
         console.log(value);
     });
+
+    panel.addDropdown("Best Logo", [{value:"Godot", src: "https://pbs.twimg.com/profile_images/1631591220630757377/nKSCjeS3_400x400.png"}, {value: "Unity", src: "https://imgcom.masterd.es/1/blog/2019/11/39809.jpg"}, {value:"Unreal Engine", src: "https://cdn2.unrealengine.com/ue-logo-1400x788-1400x788-8f185e1e3635.jpg"}], "Godot", (value, event) => {
+        console.log(value);
+    }, {filter:true});
+
+    panel.addDropdown("Best Gif", [{value:"Godot", src: "https://thumbs.gfycat.com/CaringDefensiveAndeancondor-size_restricted.gif"}, {value: "Unity", src: "https://i.gifer.com/origin/db/db3cb258e9bbb78c5851a000742e5468_w200.gif"}, {value:"Unreal Engine", src: "https://d3kjluh73b9h9o.cloudfront.net/original/4X/e/0/d/e0deb23c10cc7852c6ab91c28083e27f9c8228f8.gif"}], "Godot", (value, event) => {
+        console.log(value);
+    }, {filter:true});
+
     panel.addVector3("I'm a Vec3", [0.1, 0.4, 0.5], (value, event) => {
         console.log(value);
     });
