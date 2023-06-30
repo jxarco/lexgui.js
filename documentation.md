@@ -148,7 +148,7 @@ As `options` you can pass `id` and `className` to be added to your new panel.
 
 ### Dropdown
 
-Drop-down list widget. It works as a HTML Select element, but it can also have media options. Call `Panel.addDropdown(name, values, value, callback, options)` function to add the widget to your instanced Panel.
+Drop-down list widget. It works as a HTML Select element, but it can also has media options. Call `Panel.addDropdown(name, values, value, callback, options)` function to add the widget to your instanced Panel.
 
 * `name (String)`: Name of the widget.
 * `values (Array)`: Array of the values of the list. The values can be [strings](#string-values) or [media](#media-values) (images or GIFs). For the media, the entries of the array must be an object containing a `value` and `src` fields.
