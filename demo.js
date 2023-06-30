@@ -190,34 +190,6 @@ up.onresize = function( bounding ) {
     canvas.height = bounding.height;
 };
 
-let scene_data = {
-    'id': 'root',
-    'children': [
-        {
-            'id': 'node_1',
-            'children': [
-                {
-                    'id': 'node_1_1',
-                    'children': [],
-                    'actions': [
-                        {
-                            'name': 'Open script',
-                            'icon': 'fa-solid fa-scroll',
-                            'callback': function(node) {
-                                console.log(node.id + ": Script opened!")
-                            }
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            'id': 'node_2',
-            'children': []
-        }
-    ]
-};
-
 // add panels
 var side_panel = rup.addPanel();
 fillPanel( side_panel );
@@ -256,6 +228,35 @@ requestAnimationFrame(loop);
 function fillPanel( panel ) {
     
     // add data tree
+
+    let scene_data = {
+        'id': 'root',
+        'children': [
+            {
+                'id': 'node_1',
+                'children': [
+                    {
+                        'id': 'node_1_1',
+                        // 'icon': 'fa-solid fa-cube',
+                        'children': [],
+                        'actions': [
+                            {
+                                'name': 'Open script',
+                                'icon': 'fa-solid fa-scroll',
+                                'callback': function(node) {
+                                    console.log(node.id + ": Script opened!")
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                'id': 'node_2',
+                'children': []
+            }
+        ]
+    };
 
     // this is optional!
     const tree_icons = [
@@ -339,7 +340,6 @@ function fillPanel( panel ) {
     panel.addList(null, 'Blat Panthers', ['GPTeam', 'Blat Bunny', ['Blat Panthers', 'fa-solid fa-paw']], (value, event) => {
         console.log(value);
     });
-    panel.merge();
 
     // another branch
     panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});
@@ -427,15 +427,31 @@ function fillRightBottomPanel( panel, tab ) {
             }
         ]);
 
-         // update panel values uising widget name
+        // update panel values uising widget name
         panel.addNumber("HeadRoll Value", 0, (value, event) => {
             panel.setValue('HeadRoll', value);
         }, { min: -1, max: 1, step: 0.1 });
         panel.addProgress("HeadRoll", 0, { min: -1, max: 1 });
     }
 
+    panel.tab("Another tab");
+
+    // update panel values uising widget name
+    panel.addNumber("Roll", 0, (value, event) => {
+        panel.setValue('PRoll', value);
+    }, { min: -1, max: 1, step: 0.1 });
+    panel.addProgress("PRoll", 0, { min: -1, max: 1 });
+
+    panel.tab("Third tab");
+
+    panel.addText("I'm out :(", "", null, { placeholder: "Alone..." });
+    panel.addVector4("I'm a Vec4", [0.3, 0.3, 0.5, 1], (value, event) => {
+        console.log(value);
+    });
+    panel.addButton(null, "Click me, I'm Full Width...");
+    panel.addButton("Test Button", "Reduced width...");
+
     panel.merge();
-   
 }
 
 function fillBottomPanel( panel ) {
@@ -452,7 +468,6 @@ function fillBottomPanel( panel ) {
     panel.addButton("Apply", "Print event", (value, event) => {
         console.log(event);
     });
-    panel.merge();
 
     panel.branch("A collapsed branch", {closed: true});
     panel.addText(null, "Nothing here", null, {disabled: true});

@@ -691,7 +691,6 @@
 
                         contextmenu.addEventListener('keydown', function(e) {
                             e.preventDefault();
-                            console.log(e.key);
                             let short = that.shorts[ subkey ];
                             if(!short) return;
                             // check if it's a letter or other key
@@ -790,9 +789,11 @@
         /**
          * @method addButton
          * @param {Array} buttons
+         * @param {*} options
+         * float: center (Default), right
          */
 
-        addButtons( buttons ) {
+        addButtons( buttons, options = {} ) {
 
             if(!buttons)
                 throw("No buttons to add!");
@@ -801,6 +802,7 @@
             {
                 this.buttonContainer = document.createElement('div');
                 this.buttonContainer.className = "lexmenubuttons";
+                this.buttonContainer.classList.add(options.float ?? 'center');
                 this.root.appendChild( this.buttonContainer );    
             }
 
@@ -950,10 +952,18 @@
             let item = document.createElement('li');
             item.className = "lextreeitem " + "datalevel" + level + " " + (is_parent ? "parent" : "");
             item.id = node.id;
-            // Select icon
+
+            // Select hierarchy icon
             let icon = "fa-solid fa-square"; // Default: no childs
             if( is_parent ) icon = node.closed ? "fa-solid fa-caret-right" : "fa-solid fa-caret-down";
-            item.innerHTML = "<a class='" + icon + "'></a>" + (node.rename ? "" : node.id);
+            item.innerHTML = "<a class='" + icon + " hierarchy'></a>";
+            
+            // Add display icon
+            icon = node.icon; // Default: no childs
+            if( icon ) item.innerHTML += "<a class='" + icon + "'></a>";
+
+            item.innerHTML += (node.rename ? "" : node.id);
+
             item.setAttribute('draggable', true);
             item.style.paddingLeft = ((is_parent ? 0 : 3 ) + (3 + (level+1) * 25)) + "px";
             list.appendChild(item);
@@ -1241,6 +1251,9 @@
 
         branch( name, options = {} ) {
 
+            if( this.branch_open )
+                this.merge();
+
             // Create new branch
             var branch = new Branch(name, options);
             branch.panel = this;
@@ -1264,10 +1277,84 @@
             }
         }
 
+        /**
+         * @method tab
+         * @param {String} name Name of the branch/section
+         * @param {*} options 
+         * id: Id of the branch
+         * className: Add class to the branch
+         * closed: Set branch collapsed/opened [false]
+         * icon: Set branch icon (Fontawesome class e.g. "fa-solid fa-skull")
+         * filter: Allow filter widgets in branch by name [false]
+         */
+
+        tab( name, options = {} ) {
+
+            if(!this.current_branch)
+            throw("Open the first tab using 'Panel.branch()'!");
+
+            // Create new branch
+            var branch = new Branch(name, options);
+            branch.panel = this;
+            this.branches.push( branch );
+
+            if(!this.current_tabs) {
+                this.current_tabs = [ this.current_branch.name ];
+                this.tab_parent = this.current_branch;
+            }
+
+            this.current_tabs.push( name );
+
+            // Set header to tabs
+            let title = this.tab_parent.root.querySelector(".lexbranchtitle");
+            title.classList.add('wtabs');
+            title.innerHTML = "";
+
+            // This might be called innecessarily more times...
+            title.removeEventListener("click", this.tab_parent.onclick);
+
+            for( let i = 0; i < this.current_tabs.length; ++i )
+            {
+                let branch_name = this.current_tabs[i];
+                let tab = document.createElement('span');
+                tab.className = i == 0 ? "first selected" : "";
+                tab.innerText = branch_name;
+                title.appendChild(tab);
+
+                tab.addEventListener("click", e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    title.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
+                    tab.classList.toggle('selected');
+
+                    // Hide Contents
+                    this.root.querySelectorAll('.lexbranchcontent').forEach( s => s.style.display = 'none');
+                    // Show branch
+                    const nameid = branch_name.replace(/\s/g, '');
+                    this.root.querySelector("#" + nameid).style.display = "";
+                });
+            }
+
+            // Append content to last branch
+            let content = branch.root.querySelector(".lexbranchcontent");
+            this.tab_parent.root.appendChild( content );
+            content.style.display = 'none';
+
+            // Set as current
+            this.current_branch = branch;
+
+            // Add widget filter
+            if(options.filter) {
+                this.#add_filter( options.filter, {callback: this.#search_widgets.bind(this, branch.name)} );
+            }
+        }
+
         merge() {
 
             this.branch_open = false;
             this.current_branch = null;
+            this.current_tabs = null;
+            this.tab_parent = null;
         }
 
         #pick( arg, def ) {
@@ -2021,6 +2108,7 @@
             // Add widget value
 
             var container = document.createElement('div');
+            container.className = "lexcheckboxcont";
 
             let toggle = document.createElement('span');
             toggle.className = "lexcheckbox";
@@ -2036,7 +2124,13 @@
             }
 
             toggle.appendChild(flag);
+
+            let value_name = document.createElement('span');
+            value_name.id = "checkboxtext";
+            value_name.innerHTML = "On";
+
             container.appendChild(toggle);
+            container.appendChild(value_name);
 
             toggle.addEventListener("click", (e) => {
 
@@ -2680,8 +2774,8 @@
 
     class Branch {
 
+        
         constructor( name, options = {} ) {
-
             this.name = name;
 
             var root = document.createElement('div');
@@ -2701,7 +2795,7 @@
 
             // create element
             var title = document.createElement('div');
-            title.className = "lexbranch title";
+            title.className = "lexbranchtitle";
             
             title.innerHTML = "<span class='switch-branch-button'></span>";
             if(options.icon) {
@@ -2712,6 +2806,7 @@
             root.appendChild(title);
 
             var branch_content = document.createElement('div');
+            branch_content.id = name.replace(/\s/g, '');
             branch_content.className = "lexbranchcontent";
             root.appendChild(branch_content);
             this.content = branch_content;
@@ -2725,7 +2820,7 @@
                 this.grabber.setAttribute('hidden', true);
             }
 
-            title.addEventListener("click", function(e){
+            this.onclick = function(e){
                 e.preventDefault();
                 e.stopPropagation();
 
@@ -2743,7 +2838,9 @@
 
                 that.content.toggleAttribute('hidden');
                 that.grabber.toggleAttribute('hidden');
-            })
+            };
+
+            title.addEventListener("click", this.onclick);
         }
 
         #addBranchSeparator() {
