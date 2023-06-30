@@ -1678,7 +1678,7 @@
             }, { buttonClass: 'array' });
 
             selectedOption.refresh = (v) => {
-                selectedOption.children[0].innerHTML = v;
+                selectedOption.querySelector("span").innerHTML = selectedOption.querySelector("span").innerHTML.replaceAll(selectedOption.querySelector("span").innerText, v); 
             }
 
             //Add dropdown options container
