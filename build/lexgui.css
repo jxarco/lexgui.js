@@ -221,12 +221,12 @@ body.nocursor * {
   margin-bottom: 6px;
 }
 
-.lexbranch.title {
+.lexbranchtitle {
   background: var(--branch-title-background);
   font-size: 14px;
   font-weight: bold;
   color: rgba(216, 218, 230, 0.932);
-  padding: 8px;
+  padding: 10px;
   text-shadow: 0px 1px 2px #000;
   border-radius: 0px;
   cursor: pointer;
@@ -236,22 +236,42 @@ body.nocursor * {
   user-select: none; /* Standard syntax */
 }
 
+.lexbranchtitle.wtabs {
+  display: flex;
+  padding: 0px;
+  cursor: default;
+}
+
+/* Tab */
+.lexbranchtitle.wtabs span {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.lexbranchtitle.wtabs span.first {
+  border-top-left-radius: 8px;
+}
+
+.lexbranchtitle.wtabs span.selected {
+  border-bottom: 2px solid var(--checkbox-flag-on);
+}
+
 .lexbranch .branchicon {
   font-size: 12px;
 }
 
-.lexbranch.first .title {
+.lexbranch.first .lexbranchtitle {
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   margin-top: 4px;
 }
 
-.lexbranch.last.closed .title {
+.lexbranch.last.closed .lexbranchtitle {
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
 }
 
-.lexbranch.last.closed .title {
+.lexbranch.last.closed .lexbranchtitle {
   margin-bottom: 6px;
 }
 

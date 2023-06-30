@@ -1251,6 +1251,9 @@
 
         branch( name, options = {} ) {
 
+            if( this.branch_open )
+                this.merge();
+
             // Create new branch
             var branch = new Branch(name, options);
             branch.panel = this;
@@ -1267,6 +1270,72 @@
 
             this.branches.push( branch );
             this.root.appendChild( branch.root );
+
+            // Add widget filter
+            if(options.filter) {
+                this.#add_filter( options.filter, {callback: this.#search_widgets.bind(this, branch.name)} );
+            }
+        }
+
+        /**
+         * @method tab
+         * @param {String} name Name of the branch/section
+         * @param {*} options 
+         * id: Id of the branch
+         * className: Add class to the branch
+         * closed: Set branch collapsed/opened [false]
+         * icon: Set branch icon (Fontawesome class e.g. "fa-solid fa-skull")
+         * filter: Allow filter widgets in branch by name [false]
+         */
+
+        tab( name, options = {} ) {
+
+            if(!this.current_branch)
+            throw("Open the first tab using 'Panel.branch()'!");
+
+            this.current_branch.tabs = [ this.current_branch.name, name ];
+
+            // Create new branch
+            var branch = new Branch(name, options);
+            branch.panel = this;
+            this.branches.push( branch );
+
+            // Set header to tabs
+            let title = this.current_branch.root.querySelector(".lexbranchtitle");
+            title.classList.add('wtabs');
+            title.innerHTML = "";
+
+            title.removeEventListener("click", this.current_branch.onclick);
+
+            for( let i = 0; i < this.current_branch.tabs.length; ++i )
+            {
+                let branch_name = this.current_branch.tabs[i];
+                let tab = document.createElement('span');
+                tab.className = i == 0 ? "first selected" : "";
+                tab.innerText = branch_name;
+                title.appendChild(tab);
+
+                tab.addEventListener("click", e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    title.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
+                    tab.classList.toggle('selected');
+
+                    // Hide Contents
+                    this.root.querySelectorAll('.lexbranchcontent').forEach( s => s.style.display = 'none');
+                    // Show branch
+                    const nameid = branch_name.replace(/\s/g, '');
+                    this.root.querySelector("#" + nameid).style.display = "";
+                });
+            }
+
+            // Append content to last branch
+            let content = branch.root.querySelector(".lexbranchcontent");
+            this.current_branch.root.appendChild( content );
+            content.style.display = 'none';
+
+            // Set as current
+            this.current_branch = branch;
 
             // Add widget filter
             if(options.filter) {
@@ -2702,8 +2771,8 @@
 
     class Branch {
 
+        
         constructor( name, options = {} ) {
-
             this.name = name;
 
             var root = document.createElement('div');
@@ -2723,7 +2792,7 @@
 
             // create element
             var title = document.createElement('div');
-            title.className = "lexbranch title";
+            title.className = "lexbranchtitle";
             
             title.innerHTML = "<span class='switch-branch-button'></span>";
             if(options.icon) {
@@ -2734,6 +2803,7 @@
             root.appendChild(title);
 
             var branch_content = document.createElement('div');
+            branch_content.id = name.replace(/\s/g, '');
             branch_content.className = "lexbranchcontent";
             root.appendChild(branch_content);
             this.content = branch_content;
@@ -2747,7 +2817,7 @@
                 this.grabber.setAttribute('hidden', true);
             }
 
-            title.addEventListener("click", function(e){
+            this.onclick = function(e){
                 e.preventDefault();
                 e.stopPropagation();
 
@@ -2765,7 +2835,9 @@
 
                 that.content.toggleAttribute('hidden');
                 that.grabber.toggleAttribute('hidden');
-            })
+            };
+
+            title.addEventListener("click", this.onclick);
         }
 
         #addBranchSeparator() {

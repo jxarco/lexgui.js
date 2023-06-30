@@ -340,7 +340,6 @@ function fillPanel( panel ) {
     panel.addList(null, 'Blat Panthers', ['GPTeam', 'Blat Bunny', ['Blat Panthers', 'fa-solid fa-paw']], (value, event) => {
         console.log(value);
     });
-    panel.merge();
 
     // another branch
     panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});
@@ -428,15 +427,22 @@ function fillRightBottomPanel( panel, tab ) {
             }
         ]);
 
-         // update panel values uising widget name
+        // update panel values uising widget name
         panel.addNumber("HeadRoll Value", 0, (value, event) => {
             panel.setValue('HeadRoll', value);
         }, { min: -1, max: 1, step: 0.1 });
         panel.addProgress("HeadRoll", 0, { min: -1, max: 1 });
     }
 
+    panel.tab("Another tab", {icon: "fa-solid fa-cube"});
+
+    // update panel values uising widget name
+    panel.addNumber("HeadRoll Value", 0, (value, event) => {
+        panel.setValue('HeadRoll', value);
+    }, { min: -1, max: 1, step: 0.1 });
+    panel.addProgress("HeadRoll", 0, { min: -1, max: 1 });
+
     panel.merge();
-   
 }
 
 function fillBottomPanel( panel ) {
@@ -453,7 +459,6 @@ function fillBottomPanel( panel ) {
     panel.addButton("Apply", "Print event", (value, event) => {
         console.log(event);
     });
-    panel.merge();
 
     panel.branch("A collapsed branch", {closed: true});
     panel.addText(null, "Nothing here", null, {disabled: true});
