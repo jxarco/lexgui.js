@@ -67,7 +67,7 @@ TODO List:
 - ~~List Widget~~
 - ~~Menubar: Support buttons~~
 - ~~Tree item icons~~
-- Menutabs
+- ~~Branchtabs~~
 - Custom Class Widget
 - Menubar: Support subitem checkboxes
 - Change resize bar to Godot one

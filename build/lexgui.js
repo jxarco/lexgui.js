@@ -1293,23 +1293,29 @@
             if(!this.current_branch)
             throw("Open the first tab using 'Panel.branch()'!");
 
-            this.current_branch.tabs = [ this.current_branch.name, name ];
-
             // Create new branch
             var branch = new Branch(name, options);
             branch.panel = this;
             this.branches.push( branch );
 
+            if(!this.current_tabs) {
+                this.current_tabs = [ this.current_branch.name ];
+                this.tab_parent = this.current_branch;
+            }
+
+            this.current_tabs.push( name );
+
             // Set header to tabs
-            let title = this.current_branch.root.querySelector(".lexbranchtitle");
+            let title = this.tab_parent.root.querySelector(".lexbranchtitle");
             title.classList.add('wtabs');
             title.innerHTML = "";
 
-            title.removeEventListener("click", this.current_branch.onclick);
+            // This might be called innecessarily more times...
+            title.removeEventListener("click", this.tab_parent.onclick);
 
-            for( let i = 0; i < this.current_branch.tabs.length; ++i )
+            for( let i = 0; i < this.current_tabs.length; ++i )
             {
-                let branch_name = this.current_branch.tabs[i];
+                let branch_name = this.current_tabs[i];
                 let tab = document.createElement('span');
                 tab.className = i == 0 ? "first selected" : "";
                 tab.innerText = branch_name;
@@ -1331,7 +1337,7 @@
 
             // Append content to last branch
             let content = branch.root.querySelector(".lexbranchcontent");
-            this.current_branch.root.appendChild( content );
+            this.tab_parent.root.appendChild( content );
             content.style.display = 'none';
 
             // Set as current
@@ -1347,6 +1353,8 @@
 
             this.branch_open = false;
             this.current_branch = null;
+            this.current_tabs = null;
+            this.tab_parent = null;
         }
 
         #pick( arg, def ) {

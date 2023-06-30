@@ -434,13 +434,22 @@ function fillRightBottomPanel( panel, tab ) {
         panel.addProgress("HeadRoll", 0, { min: -1, max: 1 });
     }
 
-    panel.tab("Another tab", {icon: "fa-solid fa-cube"});
+    panel.tab("Another tab");
 
     // update panel values uising widget name
-    panel.addNumber("HeadRoll Value", 0, (value, event) => {
-        panel.setValue('HeadRoll', value);
+    panel.addNumber("Roll", 0, (value, event) => {
+        panel.setValue('PRoll', value);
     }, { min: -1, max: 1, step: 0.1 });
-    panel.addProgress("HeadRoll", 0, { min: -1, max: 1 });
+    panel.addProgress("PRoll", 0, { min: -1, max: 1 });
+
+    panel.tab("Third tab");
+
+    panel.addText("I'm out :(", "", null, { placeholder: "Alone..." });
+    panel.addVector4("I'm a Vec4", [0.3, 0.3, 0.5, 1], (value, event) => {
+        console.log(value);
+    });
+    panel.addButton(null, "Click me, I'm Full Width...");
+    panel.addButton("Test Button", "Reduced width...");
 
     panel.merge();
 }
