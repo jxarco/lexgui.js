@@ -460,19 +460,24 @@ body.nocursor * {
 }
 
 .lexdropdown .option {
-	/* background-color: #3f4046; */
-  color: #aeacac8a;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   width: 100%;
 }
+.lexdropdown .lexlistitem {
+  height: fit-content;
 
-.lexdropdown .option:hover{
-  background: var(--global-highlight);
+}
+.lexdropdown .lexlistitem:hover {
+  background: var(--global-selected);
   filter: brightness(0.5);
 }
+/* .lexdropdown .option:hover{
+  background: var(--global-highlight);
+  filter: brightness(0.5);
+} */
 
 .lexdropdown .selected{
   background-color: var(--global-selected)!important;
@@ -491,7 +496,7 @@ body.nocursor * {
 
 .lexdropdown li {
   padding: 0 px10px;
-  background: var(--global-dropdown-color);
+  background-color: var(--global-color-primary);
 }
 
 .lexdropdown img {

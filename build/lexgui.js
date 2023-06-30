@@ -1438,8 +1438,6 @@
         }
 
         #search_options(options, value) {
-            options = typeof options == 'array' ? options : this.children;
-        
             // push to right container
             const emptyFilter = !value.length;
             let filteredOptions = [];
@@ -1448,26 +1446,17 @@
                 let o = options[i];
                 if(!emptyFilter)
                 {
-                    if(o.value == undefined) continue;
+                    if(typeof o == 'string')
+                        o = {value: o};
                     const filterWord = value.toLowerCase();
-                    const name = o.getAttribute("value").toLowerCase();
+                    const name = o.value.toLowerCase();
                     if(!name.includes(value)) continue;
                 }
                 // insert filtered widget
                 filteredOptions.push(o);
             }
-            for(let i = 0; i < options.length; i++) {
-                    
-                if(options[i].classList.contains('lexfilter'))
-                    continue;
-                options[i].remove();
-            }
-            for( let i = 0; i < filteredOptions.length; i++) {
-                this.appendChild(filteredOptions[i]);
-            }
-
-            if(value == "")
-                this.refresh();
+ 
+            this.refresh(filteredOptions);
         }
 
         #trigger( event, callback ) {
@@ -1688,19 +1677,23 @@
 
             // Add filter options
             if(options.filter)
-                this.#add_filter("Search option", {container: list, callback: this.#search_options.bind(list, list)});
+                this.#add_filter("Search option", {container: list, callback: this.#search_options.bind(list, values)});
 
             // Add dropdown options list
-            list.refresh = (options = values) => {
+            list.refresh = (options) => {
                 if(!options.length)
                     return;
+
+                let children = [];
                 for(let i = 0; i < list.children.length; i++) {
                     
                     if(list.children[i].classList.contains('lexfilter'))
                         continue;
-                        list.children[i].remove();
+                    children.push(list.children[i]);
                 }
-
+                for(let i = 0; i < children.length; i++) {
+                    list.removeChild(children[i]);
+                }
                 for(let i = 0; i < options.length; i++)
                 {
                     let iValue = options[i];
@@ -1721,6 +1714,7 @@
                         
                         option.innerHTML = option.value = iValue;
                         li.setAttribute("value", iValue);
+                        li.className = "lexlistitem";
                         if(iValue == value)
                         {
                             li.classList.add("selected");
@@ -1732,6 +1726,7 @@
                         let img = document.createElement("img");
                         img.src = iValue.src;
                         li.setAttribute("value", iValue.value);
+                        li.className = "lexlistitem";
                         let p = document.createElement("p");
                         p.innerText = iValue.value;
                         option.appendChild(img);
@@ -1747,7 +1742,7 @@
                     list.appendChild(li);
                 }
             }
-            list.refresh();
+            list.refresh(values);
             if(options.disabled)
                 wValue.setAttribute("disabled", true);
             
