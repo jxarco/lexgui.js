@@ -839,6 +839,11 @@ input[type=number] {
 }
 
 .lextree .lextreeitem a {
+  margin-right: 4px;
+  margin-top: 4px;
+}
+
+.lextree .lextreeitem a.hierarchy {
   font-size: 5px;
   margin-right: 4px;
   margin-top: 4px;

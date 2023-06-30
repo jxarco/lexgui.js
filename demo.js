@@ -190,34 +190,6 @@ up.onresize = function( bounding ) {
     canvas.height = bounding.height;
 };
 
-let scene_data = {
-    'id': 'root',
-    'children': [
-        {
-            'id': 'node_1',
-            'children': [
-                {
-                    'id': 'node_1_1',
-                    'children': [],
-                    'actions': [
-                        {
-                            'name': 'Open script',
-                            'icon': 'fa-solid fa-scroll',
-                            'callback': function(node) {
-                                console.log(node.id + ": Script opened!")
-                            }
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            'id': 'node_2',
-            'children': []
-        }
-    ]
-};
-
 // add panels
 var side_panel = rup.addPanel();
 fillPanel( side_panel );
@@ -256,6 +228,35 @@ requestAnimationFrame(loop);
 function fillPanel( panel ) {
     
     // add data tree
+
+    let scene_data = {
+        'id': 'root',
+        'children': [
+            {
+                'id': 'node_1',
+                'children': [
+                    {
+                        'id': 'node_1_1',
+                        // 'icon': 'fa-solid fa-cube',
+                        'children': [],
+                        'actions': [
+                            {
+                                'name': 'Open script',
+                                'icon': 'fa-solid fa-scroll',
+                                'callback': function(node) {
+                                    console.log(node.id + ": Script opened!")
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                'id': 'node_2',
+                'children': []
+            }
+        ]
+    };
 
     // this is optional!
     const tree_icons = [

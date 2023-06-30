@@ -952,10 +952,18 @@
             let item = document.createElement('li');
             item.className = "lextreeitem " + "datalevel" + level + " " + (is_parent ? "parent" : "");
             item.id = node.id;
-            // Select icon
+
+            // Select hierarchy icon
             let icon = "fa-solid fa-square"; // Default: no childs
             if( is_parent ) icon = node.closed ? "fa-solid fa-caret-right" : "fa-solid fa-caret-down";
-            item.innerHTML = "<a class='" + icon + "'></a>" + (node.rename ? "" : node.id);
+            item.innerHTML = "<a class='" + icon + " hierarchy'></a>";
+            
+            // Add display icon
+            icon = node.icon; // Default: no childs
+            if( icon ) item.innerHTML += "<a class='" + icon + "'></a>";
+
+            item.innerHTML += (node.rename ? "" : node.id);
+
             item.setAttribute('draggable', true);
             item.style.paddingLeft = ((is_parent ? 0 : 3 ) + (3 + (level+1) * 25)) + "px";
             list.appendChild(item);

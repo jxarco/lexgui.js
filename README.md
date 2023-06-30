@@ -66,8 +66,8 @@ TODO List:
 - ~~Add reset widget in Layers widget~~
 - ~~List Widget~~
 - ~~Menubar: Support buttons~~
+- ~~Tree item icons~~
 - Menutabs
-- Tree item icons
 - Custom Class Widget
 - Menubar: Support subitem checkboxes
 - Change resize bar to Godot one
