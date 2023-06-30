@@ -436,7 +436,14 @@ body.nocursor * {
 .lexdropdown .lexwidget {
   padding: 0;
 }
-.lexdropdown .select {
+
+.lexdropdown .lexfilter {
+  width: calc(100% - 6px)!important;
+  background-color: var(--global-color-primary);
+  padding: 2px 3px;
+}
+
+.lexdropdown select {
 	background-color: var(--global-dropdown-color);
   border-radius: 2px;
   border: none;
@@ -453,7 +460,7 @@ body.nocursor * {
 }
 
 .lexdropdown .option {
-	background-color: #3f4046;
+	/* background-color: #3f4046; */
   color: #aeacac8a;
   display: flex;
   flex-direction: column;
@@ -463,15 +470,34 @@ body.nocursor * {
 }
 
 .lexdropdown .option:hover{
-  background-color: var(--global-dropdown-color);
+  background: var(--global-highlight);
+  filter: brightness(0.5);
+}
+
+.lexdropdown .selected{
+  background-color: var(--global-selected)!important;
 }
 
 .lexdropdown ul{
   position: absolute;
   list-style: none;
-  background: var(--global-dropdown-color);
+  background: transparent;
   padding: 1px 6px;
+  z-index: 10;
+  overflow-y: scroll;
+  height: -webkit-fill-available;
+  margin-top: 5px;
 }
+
+.lexdropdown li {
+  padding: 0 px10px;
+  background: var(--global-dropdown-color);
+}
+
+.lexdropdown img {
+  width: inherit;
+}
+
 
 /* Toggle check box */
 

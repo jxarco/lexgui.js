@@ -1198,7 +1198,7 @@
 
             // Add widget filter
             if(options.filter) {
-                this.#add_filter( options.filter );
+                this.#add_filter( options.filter, {callback: this.#search_widgets.bind(this, branch.name)} );
             }
         }
 
@@ -1261,8 +1261,9 @@
             widget.domEl = element;
 
             const insert_widget = el => {
-                
-                if(!this.queuedContainer) {
+                if(options.container)
+                    options.container.appendChild(el);
+                else if(!this.queuedContainer) {
 
                     if(this.current_branch)
                     {
@@ -1306,7 +1307,7 @@
         #add_filter( placeholder, options = {} ) {
 
             options.placeholder = placeholder.constructor == String ? placeholder : "Filter properties"
-            options.skipWidget = true;
+            options.skipWidget = options.skipWidget ?? true;
 
             let widget = this.#create_widget(null, Widget.TEXT, options);
             let element = widget.domEl;
@@ -1327,47 +1328,84 @@
 
             var that = this;
 
-            input.addEventListener("input", (function(e){
-                for( let b of this.branches ) {
+            input.addEventListener("input", (e) => { 
+                if(options.callback)
+                    options.callback(input.value, e); 
+            });
+        }
 
-                    if(b.name !== branchName)
+        #search_widgets(branchName, value) {
+            for( let b of this.branches ) {
+
+                if(b.name !== branchName)
+                    continue;
+                
+                // remove all widgets
+                for( let w of b.widgets ) {
+                    if(w.domEl.classList.contains('lexfilter'))
                         continue;
-                    
-                    // remove all widgets
-                    for( let w of b.widgets ) {
-                        if(w.domEl.classList.contains('lexfilter'))
-                            continue;
-                        w.domEl.remove();
-                    }
-
-                    // push to right container
-                    that.queuedContainer = b.content;
-
-                    const emptyFilter = !input.value.length;
-
-                    // add widgets
-                    for( let w of b.widgets ) {
-
-                        if(!emptyFilter)
-                        {
-                            if(!w.name) continue;
-                            const filterWord = input.value.toLowerCase();
-                            const name = w.name.toLowerCase();
-                            if(!name.includes(input.value)) continue;
-                        }
-
-                        // insert filtered widget
-                        that.queuedContainer.appendChild( w.domEl );
-                    }
-
-                    // push again to current branch
-                    delete that.queuedContainer;
-
-                    // no more branches to check!
-                    return;
+                    w.domEl.remove();
                 }
 
-            }).bind(this));
+                // push to right container
+                this.queuedContainer = b.content;
+
+                const emptyFilter = !value.length;
+
+                // add widgets
+                for( let w of b.widgets ) {
+
+                    if(!emptyFilter)
+                    {
+                        if(!w.name) continue;
+                        const filterWord = value.toLowerCase();
+                        const name = w.name.toLowerCase();
+                        if(!name.includes(value)) continue;
+                    }
+
+                    // insert filtered widget
+                    this.queuedContainer.appendChild( w.domEl );
+                }
+
+                // push again to current branch
+                delete this.queuedContainer;
+
+                // no more branches to check!
+                return;
+            }
+        }
+
+        #search_options(options, value) {
+            options = typeof options == 'array' ? options : this.children;
+        
+            // push to right container
+            const emptyFilter = !value.length;
+            let filteredOptions = [];
+            // add widgets
+            for( let i = 0; i < options.length; i++) {
+                let o = options[i];
+                if(!emptyFilter)
+                {
+                    if(o.value == undefined) continue;
+                    const filterWord = value.toLowerCase();
+                    const name = o.getAttribute("value").toLowerCase();
+                    if(!name.includes(value)) continue;
+                }
+                // insert filtered widget
+                filteredOptions.push(o);
+            }
+            for(let i = 0; i < options.length; i++) {
+                    
+                if(options[i].classList.contains('lexfilter'))
+                    continue;
+                options[i].remove();
+            }
+            for( let i = 0; i < filteredOptions.length; i++) {
+                this.appendChild(filteredOptions[i]);
+            }
+
+            if(value == "")
+                this.refresh();
         }
 
         #trigger( event, callback ) {
@@ -1554,98 +1592,100 @@
                 Panel.#dispatch_event(wValue, "change");
             });
 
-            // Add widget value
-
+           
             let container = document.createElement('div');
             container.className = "lexdropdown";
+            container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";            
             
+            //Add widget value
             let wValue = document.createElement('div');
             wValue.className = "lexdropdown lexoption";
             wValue.name = name;
             wValue.iValue = value;
 
-            let list = document.createElement('ul');
-            list.className = "lexoptions";
-            list.hidden = true;
-
+            // Add dropdown widget button  
             let buttonName = value;
             buttonName += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
             let selectedOption = this.addButton(null, buttonName, (value, event) => {
                 console.log(event)
-                element.querySelector(".lexoptions").style.top = event.y + 'px';
-                element.querySelector(".lexoptions").style.width = event.srcElement.clientWidth + 'px';
+                let rect = event.currentTarget.getClientRects();
+                let y = rect[0].y + rect[0].height;
+                element.querySelector(".lexoptions").style.top = y + 'px';
+                element.querySelector(".lexoptions").style.width = event.currentTarget.clientWidth - 10 + 'px';
                 element.querySelector(".lexoptions").toggleAttribute('hidden');
             }, { buttonClass: 'array' });
 
-            container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
-            let isString = true;
+            selectedOption.refresh = (v) => {
+                selectedOption.children[0].innerHTML = v;
+            }
 
-            if(values.length)
-                for(let i = 0; i < values.length; i++)
+            //Add dropdown options container
+            let list = document.createElement('ul');
+            list.className = "lexoptions";
+            list.hidden = true;
+
+            // Add filter options
+            if(options.filter)
+                this.#add_filter("Search option", {container: list, callback: this.#search_options.bind(list, list)});
+
+            // Add dropdown options list
+            list.refresh = (options = values) => {
+                if(!options.length)
+                    return;
+                for(let i = 0; i < list.children.length; i++) {
+                    
+                    if(list.children[i].classList.contains('lexfilter'))
+                        continue;
+                        list.children[i].remove();
+                }
+
+                for(let i = 0; i < options.length; i++)
                 {
-                    let iValue = values[i];
+                    let iValue = options[i];
                     let li = document.createElement('li');
                     let option = document.createElement('div');
                     option.className = "option";
                     li.appendChild(option);
+                    li.addEventListener("click", (e) => {
+                        element.querySelector(".lexoptions").toggleAttribute('hidden');
+                        element.querySelector(".lexoptions .selected").classList.remove("selected");
+                        value = e.currentTarget.getAttribute("value");
+                        e.currentTarget.classList.add("selected");
+                        selectedOption.refresh(value);
+                    })
+
                     if(typeof iValue == 'string') {
+                        //Add string option
                         
                         option.innerHTML = option.value = iValue;
+                        li.setAttribute("value", iValue);
                         if(iValue == value)
                         {
-                            option.selected = true;
+                            li.classList.add("selected");
                             wValue.innerHTML = iValue;
                         }
                     }
                     else {
-                        isString = false;
+                        //Add image option
                         let img = document.createElement("img");
                         img.src = iValue.src;
-
+                        li.setAttribute("value", iValue.value);
                         let p = document.createElement("p");
                         p.innerText = iValue.value;
                         option.appendChild(img);
                         option.appendChild(p);
 
-                        option.setAttribute("value", iValue);
+                        option.setAttribute("value", iValue.value);
                         option.setAttribute("data-index", i);
                         option.setAttribute("data-src", iValue.src);
                         option.setAttribute("title", iValue.value);
-                        if(value == value.value)
-                            option.selected = true;
-                    }                    
+                        if(value == iValue.value)
+                            li.classList.add("selected");
+                    }      
                     list.appendChild(li);
                 }
-            // if(!isString) {
-            //     var optionsT = {
-            //         'templateSelection': custom_template,
-            //         'templateResult': custom_template,
-            //     }
-            //     $(select).select2(optionsT);
-            //     $('.select2-container--default .select2-selection--single').css({'height': '220px'});
-            //     $('.select2-selection__arrow').append('<i class="fa-solid fa-chevron-down" style="width:15px; height:15px"></i>')
-                
-            //     select.hidden = true;
-            //     $(select).on('select2:select',(e) => {
-            //         if(!options.callback) 
-            //             return;
-            //         var i = e.target.value;
-            //         // var v = values[i];
-            //         // options.callback(v);
-            //     });
-            // }
-
-            // function custom_template(option){
-                
-            //     var data = $(obj.element).data();
-            //     var text = $(obj.element).text();
-            //     if(data && data['thumbnail']){
-            //         let img_src = data['thumbnail'];
-            //         let template = $("<div style= 'display: flex;flex-direction: column;justify-content: center;align-items: center;'><img src=\"" + option.src + "\" style=\"width: calc(100% - 32px);height: auto;padding: 5px;\"/><p >" + option.title + "</p></div>");
-            //         return template;
-            //     }
-            // }
-        
+            }
+            list.refresh();
             if(options.disabled)
                 wValue.setAttribute("disabled", true);
             
@@ -1661,6 +1701,7 @@
             container.appendChild(list)
             element.appendChild(container);
         }
+
 
         /**
          * @method addLayers
