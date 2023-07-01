@@ -452,6 +452,9 @@ function fillRightBottomPanel( panel, tab ) {
     panel.addButton("Test Button", "Reduced width...");
 
     panel.merge();
+
+    panel.branch("Pepe", {icon: "fa-solid fa-palette", filter: true});
+    panel.addColor("wdwdwdwd", "#b7a9b1");
 }
 
 function fillBottomPanel( panel ) {

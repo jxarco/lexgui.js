@@ -322,13 +322,13 @@ body.nocursor * {
 }
 
 .lexwidgetseparator div {
-  -ms-transform: translateY(-12px);
-  -webkit-transform: translateY(-12px);
-  transform: translateY(-12px);
+  -ms-transform: translateY(-11px);
+  -webkit-transform: translateY(-11px);
+  transform: translateY(-11px);
   height: 2px;
   width: 11px;
   cursor: ew-resize;
-  color: var(--branch-title-background);
+  color: var(--global-button-color);
 }
 
 .lexwidgetseparator div:hover {

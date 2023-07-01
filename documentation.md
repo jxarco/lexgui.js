@@ -1,9 +1,10 @@
 # Docs
 
-- [lexgui.js](#lexguijs)
+- [Docs](#docs)
   - [Getting Started](#getting-started)
     - [Download](#download)
     - [Usage](#usage)
+    - [Namespace Globals](#namespace-globals)
   - [Area](#area)
     - [Menubar](#menubar)
     - [Panel](#panel)
@@ -15,13 +16,13 @@
     - [Vector](#vector)
     - [Checkbox](#checkbox)
     - [Dropdown](#dropdown)
+      - [String values](#string-values)
+      - [Media values](#media-values)
     - [Tree](#tree)
     - [Progress](#progress)
   - [Event Handling](#event-handling)
+    - [Progress](#progress-1)
   - [Styling](#styling)
-  - [Examples](#examples)
-  - [Contributing](#contributing)
-  - [License](#license)
 
 ## Getting Started
 
@@ -148,13 +149,13 @@ As `options` you can pass `id` and `className` to be added to your new panel.
 
 ### Dropdown
 
-Drop-down list widget. It works as a HTML Select element, but it can also has media options. Call `Panel.addDropdown(name, values, value, callback, options)` function to add the widget to your instanced Panel.
+Drop-down list widget. It works as a HTML Select element, but it can handle media options. Call `Panel.addDropdown(name, values, value, callback, options)` function to add the widget to your instanced Panel:
 
 * `name (String)`: Name of the widget.
 * `values (Array)`: Array of the values of the list. The values can be [strings](#string-values) or [media](#media-values) (images or GIFs). For the media, the entries of the array must be an object containing a `value` and `src` fields.
 * `values (String)`: Current selected value from the drop-down list.
 * `callback (Function)`: Function called when an list value is selected.
-* `options(Object)`: (optional) As `options` you can pass `filter` boolean field to specify if the drop-down has to have a search bar.
+* `options(Object)`: (optional) As `options` you can pass `filter` boolean field to specify if the drop-down needs a search bar.
 
 #### String values
 

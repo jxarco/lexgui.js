@@ -1326,12 +1326,12 @@
                     e.stopPropagation();
                     title.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
                     tab.classList.toggle('selected');
-
+                    let parent = title.parentElement;
                     // Hide Contents
-                    this.root.querySelectorAll('.lexbranchcontent').forEach( s => s.style.display = 'none');
+                    parent.querySelectorAll('.lexbranchcontent').forEach( s => s.style.display = 'none');
                     // Show branch
                     const nameid = branch_name.replace(/\s/g, '');
-                    this.root.querySelector("#" + nameid).style.display = "";
+                    parent.querySelector("#" + nameid).style.display = "";
                 });
             }
 
