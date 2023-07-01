@@ -884,10 +884,10 @@
                     return this.domEl.value;
                 case Widget.ARRAY:
                     let array_inputs = this.domEl.querySelectorAll("input");
-                    // let value = [];
-                    // for( var v of array_inputs )
-                    //     value.push( +v.value );
-                    return array_inputs;
+                    let values = [];
+                    for( var v of array_inputs )
+                        values.push( v.value );
+                    return values;
             }
         }
 
@@ -915,6 +915,12 @@
                     for( var i = 0; i < inputs.length; ++i ) 
                         inputs[i].value = value[i];
                     break;
+                case Widget.LAYERS:
+                    this.onSetValue(value);
+                    break;
+                case Widget.ARRAY:
+                    // TODO
+                    break;
             }
         }
 
@@ -934,6 +940,35 @@
 
             // TODO: Needs to show reset button
             this.setValue(navigator.clipboard.data);
+        }
+
+        typeName() {
+            switch(this.type) {
+                case Widget.TEXT:
+                    return "Text";
+                case Widget.BUTTON:
+                    return "Button";
+                case Widget.DROPDOWN:
+                    return "Dropdown";
+                case Widget.CHECKBOX:
+                    return "Checkbox";
+                case Widget.COLOR:
+                    return "Color";
+                case Widget.NUMBER:
+                    return "Number";
+                case Widget.VECTOR:
+                    return "Vector";
+                case Widget.TREE:
+                    return "Tree";
+                case Widget.PROGRESS:
+                    return "Progress";
+                case Widget.FILE:
+                    return "File";
+                case Widget.LAYERS:
+                    return "Layers";
+                case Widget.ARRAY:
+                    return "Array";
+            }
         }
 
         refresh() {
@@ -1898,9 +1933,17 @@
                 throw("Set Widget Name!");
             }
 
-            let widget = this.#create_widget(name, Widget.LAYERS, options);
-            let element = widget.domEl;
             let that = this;
+            let widget = this.#create_widget(name, Widget.LAYERS, options);
+            widget.onSetValue = (new_value) => {
+                let btn = element.querySelector(".lexwidgetname .lexicon");
+                if(btn) btn.style.display = (new_value != defaultValue ? "block" : "none");
+                value = element.value = new_value;
+                setLayers();
+                that.#trigger( new IEvent(name, value), callback );
+            };
+
+            let element = widget.domEl;
 
             // Add reset functionality
             Panel.#add_reset_property(element.domName, function(e) {
