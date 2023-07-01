@@ -837,7 +837,7 @@
 
     class Widget {
         
-        static TEXT         = 0;
+        static NONE         = 0;
         static TEXT         = 1;
         static BUTTON       = 2;
         static DROPDOWN     = 3;
@@ -864,6 +864,7 @@
             switch(this.type) {
                 case Widget.TEXT: 
                 case Widget.COLOR:
+                case Widget.FILE:
                     return this.domEl.querySelector("input").value;
                 case Widget.NUMBER:
                     return +this.domEl.querySelector("input").value;
@@ -874,11 +875,19 @@
                 case Widget.PROGRESS:
                     return this.domEl.querySelector("meter").value;
                 case Widget.VECTOR:
-                    const inputs = this.domEl.querySelectorAll("input");
+                    let inputs = this.domEl.querySelectorAll("input");
                     let value = [];
                     for( var v of inputs )
                         value.push( +v.value );
                     return value;
+                case Widget.LAYERS:
+                    return this.domEl.value;
+                case Widget.ARRAY:
+                    let array_inputs = this.domEl.querySelectorAll("input");
+                    // let value = [];
+                    // for( var v of array_inputs )
+                    //     value.push( +v.value );
+                    return array_inputs;
             }
         }
 
@@ -896,7 +905,7 @@
                     this.domEl.querySelector("select").value = value;
                     break;
                 case Widget.CHECKBOX: 
-                    this.domEl.querySelector(".checkbox").value = value;
+                    this.onSetValue(value);
                     break;
                 case Widget.PROGRESS:
                     this.domEl.querySelector("meter").value = value;
@@ -907,6 +916,24 @@
                         inputs[i].value = value[i];
                     break;
             }
+        }
+
+        copy() {
+            navigator.clipboard.type = this.type;
+            navigator.clipboard.data = this.value();
+            navigator.clipboard.writeText( navigator.clipboard.data );
+        }
+
+        canPaste() {
+            return navigator.clipboard.type === this.type;
+        }
+
+        paste() {
+            if( !this.canPaste() )
+            return;
+
+            // TODO: Needs to show reset button
+            this.setValue(navigator.clipboard.data);
         }
 
         refresh() {
@@ -1396,13 +1423,23 @@
             element.style.width = options.width || "calc( 100% - 10px)";
 
             if(name) {
-                var domName = document.createElement('div');
+                let domName = document.createElement('div');
                 domName.className = "lexwidgetname";
                 domName.innerHTML = name || "";
                 domName.style.width = options.nameWidth || LX.DEFAULT_NAME_WIDTH;
 
                 element.appendChild(domName);
                 element.domName = domName;
+
+                // Copy-paste info
+                domName.addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                    addContextMenu(name, e, c => {
+                        c.add("Copy", () => { widget.copy() });
+                        if(widget.canPaste())
+                            c.add("Paste", { /*disabled: widget.canPaste(), */callback: () => { widget.paste() } } );
+                    });
+                });
 
                 this.widgets[ name ] = widget;
             }
@@ -1868,7 +1905,7 @@
             // Add reset functionality
             Panel.#add_reset_property(element.domName, function(e) {
                 this.style.display = "none";
-                value = defaultValue;
+                value = element.value = defaultValue;
                 setLayers();
                 that.#trigger( new IEvent(name, value, e), callback );
             });
@@ -1879,7 +1916,7 @@
             container.className = "lexlayers";
             container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
-            let defaultValue = value;
+            let defaultValue = element.value = value;
 
             const setLayers = () =>  {
 
@@ -1912,6 +1949,7 @@
                         e.stopImmediatePropagation();
                         e.target.classList.toggle('selected');
                         value ^= ( 1 << bit );
+                        element.value = value;
     
                         let btn = element.querySelector(".lexwidgetname .lexicon");
                         if(btn) btn.style.display = (value != defaultValue ? "block" : "none");
@@ -2098,6 +2136,11 @@
             }
 
             let widget = this.#create_widget(name, Widget.CHECKBOX, options);
+            widget.onSetValue = (value) => {
+                if(flag.value !== value)
+                    Panel.#dispatch_event(toggle, "click");
+            };
+
             let element = widget.domEl;
 
             // Add reset functionality
@@ -2193,13 +2236,13 @@
                 color.disabled = true;
             }
 
-            let copy = document.createElement('i');
-            copy.className = "lexicon fa fa-copy";
+            // let copy = document.createElement('i');
+            // copy.className = "lexicon fa fa-copy";
 
-            copy.addEventListener("click", () => {
-                navigator.clipboard.writeText( color.value );
-                console.log("Copied to clipboard: " + color.value)
-            });
+            // copy.addEventListener("click", () => {
+            //     navigator.clipboard.writeText( color.value );
+            //     console.log("Copied to clipboard: " + color.value)
+            // });
 
             let valueName = document.createElement('div');
             valueName.className = "colorinfo";
@@ -2207,7 +2250,7 @@
 
             container.appendChild(color);
             container.appendChild(valueName);
-            container.appendChild(copy);
+            // container.appendChild(copy);
 
             color.addEventListener("input", e => {
                 let val = e.target.value;
@@ -3123,7 +3166,7 @@
             if(icon) {
                 entry.innerHTML += "<a class='" + icon + " fa-sm'></a>";
             }
-            entry.innerHTML += "<div class='lexentryname'>" + k + "</div>";
+            entry.innerHTML += "<div class='lexentryname'>" + k + (o['disabled'] == true ? " disabled" : "") + "</div>";
             c.appendChild( entry );
 
             if( this.colors[ k ] )
@@ -3146,7 +3189,7 @@
                     this.#create_submenu( o, k, entry, ++d );
             });
 
-            if( !hasSubmenu)
+            if( !hasSubmenu )
                 return;
 
             let submenuIcon = document.createElement('a');
@@ -3209,6 +3252,7 @@
                     // Check if last token -> add callback
                     if(!next_token) {
                         item[ 'callback' ] = options.callback;
+                        item[ 'disabled' ] = options.disabled ?? false;
                     } 
 
                     list.push( item );

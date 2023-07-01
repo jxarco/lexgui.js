@@ -69,12 +69,12 @@ TODO List:
 - ~~Tree item icons~~
 - ~~Branchtabs~~
 - ~~Image Dropdown~~
+- Copy Paste Widget Value
 - Custom Class Widget
 - Menubar: Support subitem checkboxes
 - Image Viewer
 - Overlay buttons
-- Change resize bar to Godot one
 - Support optimum, sub, etc colors for the progress bars
 - Components:
-    - Refactor timeline as component
+    - ~~Timeline~~
     - Node Graphs

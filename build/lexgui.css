@@ -606,6 +606,10 @@ body.nocursor * {
   display: flex;
   font-weight: 600;
   border-radius: 4px;
+  -webkit-user-select: none; /* Safari 3.1+ */
+  -moz-user-select: none; /* Firefox 2+ */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard syntax */
 }
 
 .lexvector .vecbox span.x{

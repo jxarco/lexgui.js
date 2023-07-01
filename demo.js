@@ -6,7 +6,7 @@ let area = LX.init();
 // LX.DEFAULT_SPLITBAR_SIZE = 16;
 // LX.OPEN_CONTEXTMENU_ENTRY = 'mouseover';
 
-// LX.message("I'm in another position", null, { position: [10, 10] });
+// LX.message("Im in another position", null, { position: [10, 10] });
 // LX.message("Welcome to Lexgui", "Welcome!");
 
 // menu bar
@@ -315,7 +315,7 @@ function fillPanel( panel ) {
 
     // add widgets to panel branch
     panel.branch("Preferences", {icon: "fa-solid fa-gear"});
-    panel.addButton(null, "Click me, I'm Full Width...");
+    panel.addButton(null, "Click me, Im Full Width...");
     panel.addDropdown("Best Engine", ["Godot", "Unity", "Unreal Engine"], "Godot", (value, event) => {
         console.log(value);
     });
@@ -328,7 +328,7 @@ function fillPanel( panel ) {
         console.log(value);
     }, {filter:true});
 
-    panel.addVector3("I'm a Vec3", [0.1, 0.4, 0.5], (value, event) => {
+    panel.addVector3("Im a Vec3", [0.1, 0.4, 0.5], (value, event) => {
         console.log(value);
     });
     panel.addLayers("Layers", 10, (value, event) => {
@@ -355,7 +355,7 @@ function fillPanel( panel ) {
         console.log(value);
     }, { min: 0, max: 1024 });
     panel.addSeparator();
-    panel.addTitle("Configuration (I'm a title)");
+    panel.addTitle("Configuration (Im a title)");
     panel.addCheckbox("Toggle me", true, (value, event) => {
         console.log(value);
     });
@@ -363,11 +363,11 @@ function fillPanel( panel ) {
     panel.merge();
 
     // This is outside a branch
-    panel.addText("I'm out :(", "", null, { placeholder: "Alone..." });
-    panel.addVector4("I'm a Vec4", [0.3, 0.3, 0.5, 1], (value, event) => {
+    panel.addText("Im out :(", "", null, { placeholder: "Alone..." });
+    panel.addVector4("Im a Vec4", [0.3, 0.3, 0.5, 1], (value, event) => {
         console.log(value);
     });
-    panel.addButton(null, "Click me, I'm Full Width...");
+    panel.addButton(null, "Click me, Im Full Width...");
     panel.addButton("Test Button", "Reduced width...");
 }
 
@@ -444,17 +444,14 @@ function fillRightBottomPanel( panel, tab ) {
 
     panel.tab("Third tab");
 
-    panel.addText("I'm out :(", "", null, { placeholder: "Alone..." });
-    panel.addVector4("I'm a Vec4", [0.3, 0.3, 0.5, 1], (value, event) => {
+    panel.addText("Im out :(", "", null, { placeholder: "Alone..." });
+    panel.addVector4("Im a Vec4", [0.3, 0.3, 0.5, 1], (value, event) => {
         console.log(value);
     });
-    panel.addButton(null, "Click me, I'm Full Width...");
+    panel.addButton(null, "Click me, Im Full Width...");
     panel.addButton("Test Button", "Reduced width...");
 
     panel.merge();
-
-    panel.branch("Pepe", {icon: "fa-solid fa-palette", filter: true});
-    panel.addColor("wdwdwdwd", "#b7a9b1");
 }
 
 function fillBottomPanel( panel ) {
