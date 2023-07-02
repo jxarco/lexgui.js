@@ -485,7 +485,7 @@ body.nocursor * {
 
 }
 .lexdropdown .lexlistitem:hover {
-  background: var(--global-selected);
+  /* background: var(--global-selected); */
   filter: brightness(0.5);
 }
 /* .lexdropdown .option:hover{
@@ -500,17 +500,17 @@ body.nocursor * {
 .lexdropdown ul{
   position: absolute;
   list-style: none;
-  background: transparent;
+  background: var(--global-color-primary);
   padding: 1px 6px;
   z-index: 10;
   overflow-y: scroll;
-  height: -webkit-fill-available;
+  max-height: -webkit-fill-available;
   margin-top: 5px;
 }
 
 .lexdropdown li {
-  padding: 0 px10px;
-  background-color: var(--global-color-primary);
+  /* padding: 0px 10px; */
+  /* background-color: var(--global-color-primary); */
 }
 
 .lexdropdown img {
