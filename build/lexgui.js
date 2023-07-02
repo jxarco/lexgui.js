@@ -851,7 +851,14 @@
         static FILE         = 11;
         static LAYERS       = 12;
         static ARRAY        = 13;
-        static SEPARATOR    = 14;
+        static LIST         = 14;
+        static SEPARATOR    = 15;
+
+        #no_context_types = [
+            Widget.BUTTON,
+            Widget.LIST,
+            Widget.FILE
+        ];
 
         constructor(name, type, options) {
             this.name = name;
@@ -864,12 +871,11 @@
             switch(this.type) {
                 case Widget.TEXT: 
                 case Widget.COLOR:
-                case Widget.FILE:
                     return this.domEl.querySelector("input").value;
                 case Widget.NUMBER:
                     return +this.domEl.querySelector("input").value;
                 case Widget.DROPDOWN: 
-                    return this.domEl.querySelector("select").value;
+                    return this.domEl.querySelector("li.selected").getAttribute('value');
                 case Widget.CHECKBOX: 
                     return this.domEl.querySelector(".checkbox").value;
                 case Widget.PROGRESS:
@@ -889,6 +895,8 @@
                         values.push( v.value );
                     return values;
             }
+
+            console.warn("Can't get value of " + this.typeName());
         }
 
         setValue( value ) {
@@ -902,7 +910,7 @@
                     this.domEl.querySelector("input").value = value;
                     break;
                 case Widget.DROPDOWN: 
-                    this.domEl.querySelector("select").value = value;
+                    this.onSetValue(value);
                     break;
                 case Widget.CHECKBOX: 
                     this.onSetValue(value);
@@ -919,9 +927,20 @@
                     this.onSetValue(value);
                     break;
                 case Widget.ARRAY:
-                    // TODO
+                    this.onSetValue(value);
                     break;
             }
+        }
+
+        oncontextmenu(e) {
+
+            if( this.#no_context_types.includes(this.type) )
+                return;
+
+            addContextMenu(this.typeName(), e, c => {
+                c.add("Copy", () => { this.copy() });
+                c.add("Paste", { disabled: !this.canPaste(), callback: () => { this.paste() } } );
+            });
         }
 
         copy() {
@@ -943,31 +962,20 @@
         }
 
         typeName() {
+
             switch(this.type) {
-                case Widget.TEXT:
-                    return "Text";
-                case Widget.BUTTON:
-                    return "Button";
-                case Widget.DROPDOWN:
-                    return "Dropdown";
-                case Widget.CHECKBOX:
-                    return "Checkbox";
-                case Widget.COLOR:
-                    return "Color";
-                case Widget.NUMBER:
-                    return "Number";
-                case Widget.VECTOR:
-                    return "Vector";
-                case Widget.TREE:
-                    return "Tree";
-                case Widget.PROGRESS:
-                    return "Progress";
-                case Widget.FILE:
-                    return "File";
-                case Widget.LAYERS:
-                    return "Layers";
-                case Widget.ARRAY:
-                    return "Array";
+                case Widget.TEXT: return "Text";
+                case Widget.BUTTON: return "Button";
+                case Widget.DROPDOWN: return "Dropdown";
+                case Widget.CHECKBOX: return "Checkbox";
+                case Widget.COLOR: return "Color";
+                case Widget.NUMBER: return "Number";
+                case Widget.VECTOR: return "Vector";
+                case Widget.TREE: return "Tree";
+                case Widget.PROGRESS: return "Progress";
+                case Widget.FILE: return "File";
+                case Widget.LAYERS: return "Layers";
+                case Widget.ARRAY: return "Array";
             }
         }
 
@@ -1469,11 +1477,7 @@
                 // Copy-paste info
                 domName.addEventListener('contextmenu', function(e) {
                     e.preventDefault();
-                    addContextMenu(name, e, c => {
-                        c.add("Copy", () => { widget.copy() });
-                        if(widget.canPaste())
-                            c.add("Paste", { /*disabled: widget.canPaste(), */callback: () => { widget.paste() } } );
-                    });
+                    widget.oncontextmenu(e);
                 });
 
                 this.widgets[ name ] = widget;
@@ -1792,22 +1796,30 @@
             }
 
             let widget = this.#create_widget(name, Widget.DROPDOWN, options);
+            widget.onSetValue = (new_value) => {
+                let btn = element.querySelector(".lexwidgetname .lexicon");
+                if(btn) btn.style.display = (new_value != wValue.iValue ? "block" : "none");
+                value = new_value;
+                list.querySelectorAll('li').forEach( e => { if( e.getAttribute('value') == value ) e.click() } );
+                this.#trigger( new IEvent(name, value, null), callback ); 
+            };
+
             let element = widget.domEl;
+            let that = this;
 
             // Add reset functionality
             Panel.#add_reset_property(element.domName, function() {
-                for(let o of wValue.options)
-                    if(o.value == wValue.iValue) o.selected = true;
+                value = wValue.iValue;
+                list.querySelectorAll('li').forEach( e => { if( e.getAttribute('value') == value ) e.click() } );
+                that.#trigger( new IEvent(name, value, null), callback ); 
                 this.style.display = "none";
-                Panel.#dispatch_event(wValue, "change");
             });
 
-           
             let container = document.createElement('div');
             container.className = "lexdropdown";
             container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";            
             
-            //Add widget value
+            // Add widget value
             let wValue = document.createElement('div');
             wValue.className = "lexdropdown lexoption";
             wValue.name = name;
@@ -1817,7 +1829,6 @@
             let buttonName = value;
             buttonName += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
             let selectedOption = this.addButton(null, buttonName, (value, event) => {
-                console.log(event)
                 let rect = event.currentTarget.getClientRects();
                 let y = rect[0].y + rect[0].height;
                 element.querySelector(".lexoptions").style.top = y + 'px';
@@ -1861,11 +1872,15 @@
                     option.className = "option";
                     li.appendChild(option);
                     li.addEventListener("click", (e) => {
-                        element.querySelector(".lexoptions").toggleAttribute('hidden');
+                        element.querySelector(".lexoptions").toggleAttribute('hidden', true);
                         element.querySelector(".lexoptions .selected").classList.remove("selected");
                         value = e.currentTarget.getAttribute("value");
+                        e.currentTarget.toggleAttribute('hidden', false);
                         e.currentTarget.classList.add("selected");
                         selectedOption.refresh(value);
+
+                        let btn = element.querySelector(".lexwidgetname .lexicon");
+                        if(btn) btn.style.display = (value != wValue.iValue ? "block" : "none");
                     })
 
                     if(typeof iValue == 'string') {
@@ -1901,6 +1916,7 @@
                     list.appendChild(li);
                 }
             }
+
             list.refresh(values);
             if(options.disabled)
                 wValue.setAttribute("disabled", true);
@@ -1908,8 +1924,7 @@
             wValue.addEventListener("change", e => {
                 const val = e.target.value;
                 let btn = element.querySelector(".lexwidgetname .lexicon");
-                if(btn)
-                    btn.style.display = (val != wValue.iValue ? "block" : "none");
+                if(btn) btn.style.display = (val != wValue.iValue ? "block" : "none");
                 this.#trigger( new IEvent(name, val, e), callback ); 
             });
 
@@ -1917,7 +1932,6 @@
             container.appendChild(list)
             element.appendChild(container);
         }
-
 
         /**
          * @method addLayers
@@ -2023,6 +2037,11 @@
             }
 
             let widget = this.#create_widget(name, Widget.ARRAY, options);
+            widget.onSetValue = (new_value) => {
+                values = new_value;
+                updateItems();
+                this.#trigger( new IEvent(name, values, null), callback );
+            };
             let element = widget.domEl;
             element.style.flexWrap = "wrap";
 
@@ -2047,9 +2066,18 @@
             let array_items = document.createElement('div');
             array_items.className = "lexarrayitems";
             array_items.toggleAttribute('hidden',  true);
+            
+            element.appendChild(container);
+            element.appendChild(array_items);
 
             const updateItems = () => {
 
+                // Update num items
+                let buttonEl = element.querySelector(".lexbutton.array span");
+                buttonEl.innerHTML = "Array (size " + values.length + ")";
+                buttonEl.innerHTML += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
+
+                // Update inputs
                 array_items.innerHTML = "";
 
                 this.queuedContainer = array_items;
@@ -2080,10 +2108,6 @@
                     this.addButton( null, "<a class='lexicon fa-solid fa-trash'></a>", (v, event) => {
                         values.splice(values.indexOf( value ), 1);
                         updateItems();
-                        // Update num items
-                        let buttonEl = element.querySelector(".lexbutton.array span");
-                        buttonEl.innerHTML = "Array (size " + values.length + ")";
-                        buttonEl.innerHTML += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
                         this.#trigger( new IEvent(name, values, event), callback );
                     }, { title: "Remove item", className: 'small'} );
                 }
@@ -2093,10 +2117,6 @@
                 this.addButton(null, buttonName, (v, event) => {
                     values.push( "" );
                     updateItems();
-                    // Update num items
-                    let buttonEl = element.querySelector(".lexbutton.array span");
-                    buttonEl.innerHTML = "Array (size " + values.length + ")";
-                    buttonEl.innerHTML += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
                     this.#trigger( new IEvent(name, values, event), callback );
                 }, { buttonClass: 'array' });
 
@@ -2105,9 +2125,6 @@
             };
 
             updateItems();
-            
-            element.appendChild(container);
-            element.appendChild(array_items);
         }
 
         /**
@@ -3144,7 +3161,7 @@
                 const item = {};
                 item[ title ] = [];
                 item[ 'className' ] = "cmtitle";
-                item[ 'icon' ] = "fa-solid fa-ellipsis-vertical";
+                // item[ 'icon' ] = "fa-solid fa-ellipsis-vertical";
                 this.items.push( item );
             }
         }
@@ -3203,17 +3220,17 @@
             const hasSubmenu = o[ k ].length;
             let entry = document.createElement('div');
             entry.className = "lexcontextmenuentry" + (o[ 'className' ] ? " " + o[ 'className' ] : "" );
-            entry.id = k.replace(/\s/g, '').replace('@', '_');;
+            entry.id = k.replace(/\s/g, '').replace('@', '_');
             entry.innerHTML = "";
             const icon = o[ 'icon' ];
             if(icon) {
                 entry.innerHTML += "<a class='" + icon + " fa-sm'></a>";
             }
-            entry.innerHTML += "<div class='lexentryname'>" + k + (o['disabled'] == true ? " disabled" : "") + "</div>";
+            const disabled = o['disabled'];
+            entry.innerHTML += "<div class='lexentryname" + (disabled ? " disabled" : "") + "'>" + k + "</div>";
             c.appendChild( entry );
 
-            if( this.colors[ k ] )
-            {
+            if( this.colors[ k ] ) {
                 entry.style.borderColor = this.colors[ k ];
             }
 
@@ -3222,6 +3239,8 @@
                 e.stopPropagation();
                 e.stopImmediatePropagation();
                 
+                if(disabled) return;
+
                 const f = o[ 'callback' ];
                 if(f) {
                     f.call( this, k, entry );
