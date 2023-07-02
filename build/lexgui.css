@@ -1279,6 +1279,24 @@ meter::-webkit-meter-even-less-good-value {
   color: var(--global-text-secondary);
 }
 
+/* Custom Widgets Widget */
+
+.lexwidget:has(.lexcustomitems) {
+  border: 1px solid #a5a5ba54;
+}
+
+.lexcustomitems {
+  border-top: 1px solid #a5a5ba54;
+  width: 100%;
+  padding: 6px;
+  color: var(--global-text-secondary);
+  font-size: 12px;
+}
+
+.lexcustomitems * {
+  font-size: 11px;
+}
+
 /** Timeline */
 
 .lextimeline {

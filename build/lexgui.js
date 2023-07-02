@@ -960,10 +960,47 @@
 
     LX.Widget = Widget;
 
-    function ADD_CUSTOM_WIDGET( name, callback )
+    function ADD_CUSTOM_WIDGET( name, callback, options = {} )
     {
         Panel.prototype[ 'add' + name ] = function( instance ) {
+
+            let widget = this.create_widget(name, Widget.NONE);
+            // widget.onSetValue = (new_value) => {
+            //     values = new_value;
+            //     updateItems();
+            //     this.#trigger( new IEvent(name, values, null), callback );
+            // };
+            let element = widget.domEl;
+            element.style.flexWrap = "wrap";
+
+            // Add dropdown array button
+
+            const itemNameWidth = "10%";
+
+            var container = document.createElement('div');
+            container.className = "lexarray";
+            container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+
+            this.queuedContainer = container;
+            let buttonName = name;
+            buttonName += "<a class='fa-solid " + (options.icon ?? "fa-cube")  + "' style='float:right'></a>";
+            this.addButton(null, buttonName, () => {
+                element.querySelector(".lexcustomitems").toggleAttribute('hidden');
+            }, { buttonClass: 'array' });
+            delete this.queuedContainer;
+
+            // Show elements
+
+            let custom_widgets = document.createElement('div');
+            custom_widgets.className = "lexcustomitems";
+            custom_widgets.toggleAttribute('hidden', true);
+            
+            element.appendChild(container);
+            element.appendChild(custom_widgets);
+
+            this.queuedContainer = custom_widgets;
             callback(this, instance);
+            delete this.queuedContainer;
         };
     }
 
@@ -1432,7 +1469,7 @@
             Panel Widgets
         */
 
-        #create_widget( name, type, options = {} ) {
+        create_widget( name, type, options = {} ) {
 
             let widget = new Widget(name, type, options);
 
@@ -1516,7 +1553,7 @@
             options.placeholder = placeholder.constructor == String ? placeholder : "Filter properties"
             options.skipWidget = options.skipWidget ?? true;
 
-            let widget = this.#create_widget(null, Widget.TEXT, options);
+            let widget = this.create_widget(null, Widget.TEXT, options);
             let element = widget.domEl;
             element.className += " lexfilter noname";
             
@@ -1620,7 +1657,7 @@
 
         addBlank( height = 8) {
 
-            let widget = this.#create_widget(null, Widget.addBlank);
+            let widget = this.create_widget(null, Widget.addBlank);
             widget.domEl.style.height = height + "px";
             return widget;
         }
@@ -1636,7 +1673,7 @@
                 throw("Set Widget Name!");
             }
 
-            let widget = this.#create_widget(null, Widget.TITLE, options);
+            let widget = this.create_widget(null, Widget.TITLE, options);
             let element = widget.domEl;
             element.innerText = name;
             element.className = "lextitle noname";
@@ -1656,7 +1693,7 @@
 
         addText( name, value, callback, options = {} ) {
 
-            let widget = this.#create_widget(name, Widget.TEXT, options);
+            let widget = this.create_widget(name, Widget.TEXT, options);
             widget.onSetValue = (new_value) => {
                 wValue.value = new_value;
                 Panel.#dispatch_event(wValue, "focusout");
@@ -1737,7 +1774,7 @@
 
         addButton( name, value, callback, options = {} ) {
 
-            let widget = this.#create_widget(name, Widget.BUTTON, options);
+            let widget = this.create_widget(name, Widget.BUTTON, options);
             let element = widget.domEl;
 
             var wValue = document.createElement('button');
@@ -1781,7 +1818,7 @@
                 throw("Set Widget Name!");
             }
 
-            let widget = this.#create_widget(name, Widget.DROPDOWN, options);
+            let widget = this.create_widget(name, Widget.DROPDOWN, options);
             widget.onSetValue = (new_value) => {
                 let btn = element.querySelector(".lexwidgetname .lexicon");
                 if(btn) btn.style.display = (new_value != wValue.iValue ? "block" : "none");
@@ -1934,7 +1971,7 @@
             }
 
             let that = this;
-            let widget = this.#create_widget(name, Widget.LAYERS, options);
+            let widget = this.create_widget(name, Widget.LAYERS, options);
             widget.onSetValue = (new_value) => {
                 let btn = element.querySelector(".lexwidgetname .lexicon");
                 if(btn) btn.style.display = (new_value != defaultValue ? "block" : "none");
@@ -2022,7 +2059,7 @@
                 throw("Set Widget Name!");
             }
 
-            let widget = this.#create_widget(name, Widget.ARRAY, options);
+            let widget = this.create_widget(name, Widget.ARRAY, options);
             widget.onSetValue = (new_value) => {
                 values = new_value;
                 updateItems();
@@ -2124,7 +2161,7 @@
 
         addList( name, value, values, callback, options = {} ) {
 
-            let widget = this.#create_widget(name, Widget.ARRAY, options);
+            let widget = this.create_widget(name, Widget.ARRAY, options);
             let element = widget.domEl;
 
             // Show list
@@ -2181,7 +2218,7 @@
                 throw("Set Widget Name!");
             }
 
-            let widget = this.#create_widget(name, Widget.CHECKBOX, options);
+            let widget = this.create_widget(name, Widget.CHECKBOX, options);
             widget.onSetValue = (value) => {
                 if(flag.value !== value)
                     Panel.#dispatch_event(toggle, "click");
@@ -2260,7 +2297,7 @@
                 throw("Set Widget Name!");
             }
 
-            let widget = this.#create_widget(name, Widget.COLOR, options);
+            let widget = this.create_widget(name, Widget.COLOR, options);
             widget.onSetValue = (new_value) => {
                 color.value = new_value;
                 Panel.#dispatch_event(color, "input");
@@ -2335,7 +2372,7 @@
                 throw("Set Widget Name!");
             }
 
-            let widget = this.#create_widget(name, Widget.NUMBER, options);
+            let widget = this.create_widget(name, Widget.NUMBER, options);
             widget.onSetValue = (new_value) => {
                 vecinput.value = new_value;
                 Panel.#dispatch_event(vecinput, "input");
@@ -2464,7 +2501,7 @@
                 throw("Set Widget Name!");
             }
 
-            let widget = this.#create_widget(name, Widget.VECTOR, options);
+            let widget = this.create_widget(name, Widget.VECTOR, options);
             widget.onSetValue = (new_value) => {
                 const inputs = element.querySelectorAll(".vecinput");
                 for( var i = 0; i < inputs.length; ++i ) {
@@ -2614,7 +2651,7 @@
                 throw("Set Widget Name!");
             }
 
-            let widget = this.#create_widget(name, Widget.PROGRESS, options);
+            let widget = this.create_widget(name, Widget.PROGRESS, options);
             widget.onSetValue = (new_value) => {
                 element.querySelector("meter").value = new_value;
             };
@@ -2652,7 +2689,7 @@
                 throw("Set Widget Name!");
             }
 
-            let widget = this.#create_widget(name, Widget.FILE, options);
+            let widget = this.create_widget(name, Widget.FILE, options);
             let element = widget.domEl;
 
             let local = options.local ?? true;
