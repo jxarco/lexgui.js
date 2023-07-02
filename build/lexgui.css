@@ -525,7 +525,7 @@ body.nocursor * {
   height: 0.9em;
   display: inline-block;
   background-color: #1f1f1f;
-  border: 2px solid black;
+  border: 2px solid var(--global-dark-background);
   vertical-align: -3px;
   border-radius: 2px;
   margin: 0 4px;
@@ -959,6 +959,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexmenubar .lexmenuentry {
+  font-size: 13px;
   height: 100%;
   display: flex;
   justify-content: center;
@@ -1023,7 +1024,7 @@ meter::-webkit-meter-even-less-good-value {
 .lexcontextmenu .lexcontextmenuentry a {
   float: left;
   margin-right: 10px;
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
 /* submenu specified arrow  */
@@ -1050,7 +1051,7 @@ meter::-webkit-meter-even-less-good-value {
 .lexcontextmenu .lexentryshort {
   font-size: 9px;
   float: right;
-  margin-top: -13px;
+  margin-top: -12px;
   font-weight: bold;
   color: #979aa0e3;
 }

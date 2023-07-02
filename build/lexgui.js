@@ -959,6 +959,15 @@
     }
 
     LX.Widget = Widget;
+
+    function ADD_CUSTOM_WIDGET( name, callback )
+    {
+        Panel.prototype[ 'add' + name ] = function( instance ) {
+            callback(this, instance);
+        };
+    }
+
+    LX.ADD_CUSTOM_WIDGET = ADD_CUSTOM_WIDGET;
     
     /**
      * @class NodeTree
@@ -2651,7 +2660,7 @@
 
             // Create hidden input
             let input = document.createElement('input');
-            input.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 20%)";
+            input.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 10%)";
             input.type = 'file';
             input.addEventListener('change', function(e) {
                 const files = e.target.files;
@@ -2676,9 +2685,9 @@
 
             this.queuedContainer = element;
 
-            this.addButton(null, "<a class='fa-solid fa-folder-open'></a>", () => {
-                input.click();
-            }, { className: "small" });
+            // this.addButton(null, "<a class='fa-solid fa-folder-open'></a>", () => {
+            //     input.click();
+            // }, { className: "small" });
             
             this.addButton(null, "<a class='fa-solid fa-gear'></a>", () => {
                 
@@ -3028,7 +3037,7 @@
                 let padding = "0px";
                 switch(widget.type) {
                     case Widget.FILE:
-                        padding = "20%";
+                        padding = "10%";
                         break;
                     case Widget.TEXT:
                         padding = "8px";

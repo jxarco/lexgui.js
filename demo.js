@@ -432,6 +432,23 @@ function fillRightBottomPanel( panel, tab ) {
             panel.setValue('HeadRoll', value);
         }, { min: -1, max: 1, step: 0.1 });
         panel.addProgress("HeadRoll", 0, { min: -1, max: 1 });
+
+        /************** */
+        // Custom Widget
+
+        LX.ADD_CUSTOM_WIDGET( 'Shader', (p, i) => {
+            p.addText("Name", i.name);
+            p.addArray("Uniforms", i.uniforms);
+        } );
+
+        const shader_instance = {
+            'name': 'texture',
+            'uniforms': ['u_texture', 'u_color']
+        };
+
+        panel.addShader( shader_instance );
+
+        /************** */
     }
 
     panel.tab("Another tab");
