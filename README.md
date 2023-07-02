@@ -69,7 +69,7 @@ TODO List:
 - ~~Tree item icons~~
 - ~~Branchtabs~~
 - ~~Image Dropdown~~
-- Copy Paste Widget Value
+- ~~Copy Paste Widget Value~~
 - Custom Class Widget
 - Menubar: Support subitem checkboxes
 - Image Viewer

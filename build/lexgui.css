@@ -14,13 +14,8 @@
   --checkbox-flag-on: #5e9fdd;
   --global-selected: #497baa;
   --global-highlight: #2c303570;
-  --gloal-font: 'Rubik', sans-serif;
-	/*
-	--primary: #0676ed;
-	--warning: #f2a600;
-	--success: #12c99b;
-	--error: #e41749;
-	--dark: #151a30;*/
+  --global-font: 'Rubik', sans-serif;
+  --global-dark-background: #15181c;
 } 
 
 ::-webkit-scrollbar {
@@ -45,7 +40,7 @@ html, body {
   overflow: hidden;  /* no general overflow in desktop app  */
   margin: 0;
   padding: 0;
-  font-family: var(--gloal-font);
+  font-family: var(--global-font);
 }
 
 body.nocursor * {
@@ -343,11 +338,11 @@ body.nocursor * {
   overflow: hidden;
   display: flex;
   justify-content: space-between;
-  font-family: var(--gloal-font);
+  font-family: var(--global-font);
 }
 
 .lexwidget input {
-  font-family: var(--gloal-font);
+  font-family: var(--global-font);
   background: none;
   /* margin-left: 5px; */
   padding: 3px;
@@ -380,7 +375,7 @@ body.nocursor * {
 
 .lexfilter input {
   font-size: 12px;
-  font-family: var(--gloal-font);
+  font-family: var(--global-font);
 }
 
 .lextitle {
@@ -413,7 +408,7 @@ body.nocursor * {
   cursor: pointer;
   /* box-shadow: 0px 0px 4px #5c5f73; */
   font-size: 12px;
-  font-family: var(--gloal-font);
+  font-family: var(--global-font);
 }
 
 .lexbutton.array {
@@ -469,7 +464,7 @@ body.nocursor * {
   width: 100%;
   height: 22px !important;
   color: #DDD;
-  font-family: var(--gloal-font);
+  font-family: var(--global-font);
   outline: none;
   white-space: nowrap;
   overflow: hidden;
@@ -776,7 +771,7 @@ input[type=number] {
 
 .lextree {
   border-radius: 8px;
-  background: #15181c;
+  background: var(--global-dark-background);
   width: calc( 100% - 6px );
   min-height: 12px;
   margin: 0 auto;
@@ -827,7 +822,7 @@ input[type=number] {
   font-weight: bold;
   outline:none;
   border: none;
-  font-family: var(--gloal-font);
+  font-family: var(--global-font);
   color: var(--checkbox-flag-on);
   line-height: 23px;
   font-size: 14px;
@@ -984,7 +979,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexcontextmenu {
-  background-color: var(--global-color-secondary);
+  background: var(--global-dark-background);
   position: absolute;
   padding-right: 30px;
   border-bottom-left-radius: 6px;
@@ -1211,7 +1206,7 @@ meter::-webkit-meter-even-less-good-value {
 /* List Widget */
 
 .lexlist {
-  background: #15181c;
+  background: var(--global-dark-background);
   border-radius: 4px;
   padding: 4px;
   display: grid;
