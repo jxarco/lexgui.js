@@ -857,7 +857,8 @@
         #no_context_types = [
             Widget.BUTTON,
             Widget.LIST,
-            Widget.FILE
+            Widget.FILE,
+            Widget.PROGRESS
         ];
 
         constructor(name, type, options) {
@@ -901,35 +902,8 @@
 
         setValue( value ) {
 
-            switch(this.type) {
-                case Widget.TEXT: 
-                case Widget.COLOR:
-                    this.domEl.querySelector("input").value = value;
-                    break;
-                case Widget.NUMBER:
-                    this.domEl.querySelector("input").value = value;
-                    break;
-                case Widget.DROPDOWN: 
-                    this.onSetValue(value);
-                    break;
-                case Widget.CHECKBOX: 
-                    this.onSetValue(value);
-                    break;
-                case Widget.PROGRESS:
-                    this.domEl.querySelector("meter").value = value;
-                    break;
-                case Widget.VECTOR:
-                    const inputs = this.domEl.querySelectorAll("input");
-                    for( var i = 0; i < inputs.length; ++i ) 
-                        inputs[i].value = value[i];
-                    break;
-                case Widget.LAYERS:
-                    this.onSetValue(value);
-                    break;
-                case Widget.ARRAY:
-                    this.onSetValue(value);
-                    break;
-            }
+            if(this.onSetValue)
+                this.onSetValue(value);
         }
 
         oncontextmenu(e) {
@@ -957,7 +931,6 @@
             if( !this.canPaste() )
             return;
 
-            // TODO: Needs to show reset button
             this.setValue(navigator.clipboard.data);
         }
 
@@ -1675,6 +1648,10 @@
         addText( name, value, callback, options = {} ) {
 
             let widget = this.#create_widget(name, Widget.TEXT, options);
+            widget.onSetValue = (new_value) => {
+                wValue.value = new_value;
+                Panel.#dispatch_event(wValue, "focusout");
+            };
             let element = widget.domEl;
 
             // Add reset functionality
@@ -2271,6 +2248,10 @@
             }
 
             let widget = this.#create_widget(name, Widget.COLOR, options);
+            widget.onSetValue = (new_value) => {
+                color.value = new_value;
+                Panel.#dispatch_event(color, "input");
+            };
             let element = widget.domEl;
 
             // Add reset functionality
@@ -2296,21 +2277,12 @@
                 color.disabled = true;
             }
 
-            // let copy = document.createElement('i');
-            // copy.className = "lexicon fa fa-copy";
-
-            // copy.addEventListener("click", () => {
-            //     navigator.clipboard.writeText( color.value );
-            //     console.log("Copied to clipboard: " + color.value)
-            // });
-
             let valueName = document.createElement('div');
             valueName.className = "colorinfo";
             valueName.innerText = color.value;
 
             container.appendChild(color);
             container.appendChild(valueName);
-            // container.appendChild(copy);
 
             color.addEventListener("input", e => {
                 let val = e.target.value;
@@ -2351,6 +2323,10 @@
             }
 
             let widget = this.#create_widget(name, Widget.NUMBER, options);
+            widget.onSetValue = (new_value) => {
+                vecinput.value = new_value;
+                Panel.#dispatch_event(vecinput, "input");
+            };
             let element = widget.domEl;
 
             // add reset functionality
@@ -2476,6 +2452,13 @@
             }
 
             let widget = this.#create_widget(name, Widget.VECTOR, options);
+            widget.onSetValue = (new_value) => {
+                const inputs = element.querySelectorAll(".vecinput");
+                for( var i = 0; i < inputs.length; ++i ) {
+                    inputs[i].value = new_value[i] ?? 0;
+                    Panel.#dispatch_event(inputs[i], "input");
+                }
+            };
             let element = widget.domEl;
 
             // Add reset functionality
@@ -2619,6 +2602,9 @@
             }
 
             let widget = this.#create_widget(name, Widget.PROGRESS, options);
+            widget.onSetValue = (new_value) => {
+                element.querySelector("meter").value = new_value;
+            };
             let element = widget.domEl;
 
             var container = document.createElement('div');
