@@ -2197,6 +2197,7 @@
             flag.value = flag.iValue = value || false;
             flag.className = "checkbox " + (flag.value ? "on" : "");
             flag.id = "checkbox"+simple_guidGenerator();
+            flag.innerHTML = "<a class='fa-solid fa-check' style='display: " + (flag.value ? "block" : "none") + "'></a>";
             
             if(options.disabled) {
                 flag.disabled = true;
@@ -2218,8 +2219,11 @@
                 if(flag.disabled)
                 return;
 
+                let check = toggle.querySelector(".checkbox a");
+
                 flag.value = !flag.value;
                 flag.className = "checkbox " + (flag.value ? "on" : "");
+                check.style.display = flag.value ? "block" : "none";
 
                 // Reset button (default value)
                 let btn = element.querySelector(".lexwidgetname .lexicon");

@@ -11,8 +11,8 @@
   --global-text: #d0d0e0;
   --global-text-primary: #d0d0e0e6;
   --global-text-secondary: #b7b7cbc5;
-  --checkbox-flag-on: #5e9fdd;
   --global-selected: #497baa;
+  --global-selected-light: #67aae9;
   --global-highlight: #2c303570;
   --global-font: 'Rubik', sans-serif;
   --global-dark-background: #15181c;
@@ -247,7 +247,7 @@ body.nocursor * {
 }
 
 .lexbranchtitle.wtabs span.selected {
-  border-bottom: 2px solid var(--checkbox-flag-on);
+  border-bottom: 2px solid var(--global-selected-light);
 }
 
 .lexbranch .branchicon {
@@ -524,9 +524,9 @@ body.nocursor * {
   width: 0.9em;
   height: 0.9em;
   display: inline-block;
-  vertical-align: -3px;
   background-color: #1f1f1f;
   border: 2px solid black;
+  vertical-align: -3px;
   border-radius: 2px;
   margin: 0 4px;
   margin-top: 2px;
@@ -536,6 +536,10 @@ body.nocursor * {
   -ms-user-select: none; /* IE 10+ */
   user-select: none; /* Standard syntax */
   cursor: pointer;
+}
+
+.lexcheckbox:has(.checkbox.on) {
+  vertical-align: 0px;
 }
 
 .lexcheckbox.disabled {
@@ -555,7 +559,7 @@ body.nocursor * {
 }
 
 .lexcheckbox .checkbox.on {
-  background-color: var(--checkbox-flag-on);
+  background-color: var(--global-selected);
 }
 
 .lexcheckboxcont #checkboxtext {
@@ -823,7 +827,7 @@ input[type=number] {
   outline:none;
   border: none;
   font-family: var(--global-font);
-  color: var(--checkbox-flag-on);
+  color: var(--global-selected-light);
   line-height: 23px;
   font-size: 14px;
 }
@@ -921,10 +925,10 @@ meter::-webkit-meter-bar {
 
 /* (optimum) */
 meter:-moz-meter-optimum::-moz-meter-bar {
-  background: var(--checkbox-flag-on);
+  background: var(--global-selected-light);
 }
 meter::-webkit-meter-optimum-value {
-  background: var(--checkbox-flag-on);
+  background: var(--global-selected-light);
 }
 
 /* (sub-optimum)*/
@@ -1031,7 +1035,7 @@ meter::-webkit-meter-even-less-good-value {
 .lexcontextmenu .lexcontextmenuentry.last {
   /* border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px; */
-  border-bottom: 2px solid var(--checkbox-flag-on);
+  border-bottom: 2px solid var(--global-selected-light);
 }
 
 .lexcontextmenu .lexcontextmenuentry:hover {
@@ -1112,7 +1116,7 @@ meter::-webkit-meter-even-less-good-value {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  border-left: 2px solid var(--checkbox-flag-on);
+  border-left: 2px solid var(--global-selected-light);
   /* This makes properties like top, left to be relative to parents */
   /* transform: translateZ(0);
   -webkit-transform: translateZ(0);
