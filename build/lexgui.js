@@ -852,7 +852,8 @@
         static LAYERS       = 12;
         static ARRAY        = 13;
         static LIST         = 14;
-        static SEPARATOR    = 15;
+        static CUSTOM       = 15;
+        static SEPARATOR    = 16;
 
         #no_context_types = [
             Widget.BUTTON,
@@ -960,11 +961,13 @@
 
     LX.Widget = Widget;
 
-    function ADD_CUSTOM_WIDGET( name, callback, options = {} )
+    function ADD_CUSTOM_WIDGET( name, options = {} )
     {
         Panel.prototype[ 'add' + name ] = function( instance ) {
 
-            let widget = this.create_widget(name, Widget.NONE);
+            const callback = options.oncreate ?? (() => {});
+
+            let widget = this.create_widget(name, Widget.CUSTOM, options);
             // widget.onSetValue = (new_value) => {
             //     values = new_value;
             //     updateItems();
@@ -973,34 +976,77 @@
             let element = widget.domEl;
             element.style.flexWrap = "wrap";
 
-            // Add dropdown array button
+            let container, custom_widgets;
 
-            const itemNameWidth = "10%";
+            // Add instance button
 
-            var container = document.createElement('div');
-            container.className = "lexarray";
-            container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+            const refresh_widget = () => {
 
-            this.queuedContainer = container;
-            let buttonName = name;
-            buttonName += "<a class='fa-solid " + (options.icon ?? "fa-cube")  + "' style='float:right'></a>";
-            this.addButton(null, buttonName, () => {
-                element.querySelector(".lexcustomitems").toggleAttribute('hidden');
-            }, { buttonClass: 'array' });
-            delete this.queuedContainer;
+                if(container) container.remove();
+                if(custom_widgets) custom_widgets.remove();
 
-            // Show elements
+                container = document.createElement('div');
+                container.className = "lexarray";
+                container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+    
+                this.queuedContainer = container;
+                let buttonName = instance ? instance.name : "empty";
+                buttonName += "<a class='fa-solid " + (options.icon ?? "fa-cube")  + "' style='float:left'></a>";
+                if(instance && options.oninstancebuttons)
+                    buttonName += "<a class='fa-solid fa-bars menu' style='float:right'></a>";
+                let buttonEl = this.addButton(null, buttonName, (value, event) => {
 
-            let custom_widgets = document.createElement('div');
-            custom_widgets.className = "lexcustomitems";
-            custom_widgets.toggleAttribute('hidden', true);
-            
-            element.appendChild(container);
-            element.appendChild(custom_widgets);
+                    if( instance ) {
+                        element.querySelector(".lexcustomitems").toggleAttribute('hidden');
+                    }
+                    else if(options.onemptybuttons) {
+                        addContextMenu(null, event, c => {    
+                            for( var i = 0; i < options.onemptybuttons.length; ++i ) {
+                                const button = options.onemptybuttons[i];
+                                c.add(button.name, () => {
+                                    if( button.callback( instance ) ) refresh_widget();
+                                });
+                            }
+                        });
+                    }
+    
+                }, { buttonClass: 'array' });
+                delete this.queuedContainer;
+    
+                // on instance buttons
+                if(instance && options.oninstancebuttons)
+                    buttonEl.querySelector('a.menu').addEventListener('click', e => {
+                        e.stopImmediatePropagation();
+                        e.stopPropagation();
+                        addContextMenu(null, e, c => {
+                            c.add("New " + name, () => { 
+                                instance = {};
+                                this.queuedContainer = custom_widgets;
+                                callback(this, instance);
+                                delete this.queuedContainer;
+                                element.querySelector(".lexcustomitems").toggleAttribute('hidden'); 
+                            });
+                        });
+                    });
+    
+                // Show elements
+    
+                custom_widgets = document.createElement('div');
+                custom_widgets.className = "lexcustomitems";
+                custom_widgets.toggleAttribute('hidden', true);
+                
+                element.appendChild(container);
+                element.appendChild(custom_widgets);
+    
+                if( instance )
+                {
+                    this.queuedContainer = custom_widgets;
+                    callback(this, instance);
+                    delete this.queuedContainer;
+                }
+            };
 
-            this.queuedContainer = custom_widgets;
-            callback(this, instance);
-            delete this.queuedContainer;
+            refresh_widget();
         };
     }
 
@@ -1799,6 +1845,7 @@
                 wValue.className += " noname";
                 wValue.style.width =  "100%";
             }
+
             return element;
         }
 
@@ -1858,6 +1905,7 @@
                 element.querySelector(".lexoptions").style.width = event.currentTarget.clientWidth - 10 + 'px';
                 element.querySelector(".lexoptions").toggleAttribute('hidden');
             }, { buttonClass: 'array' });
+            selectedOption.style.width = "100%";   
 
             selectedOption.refresh = (v) => {
                 selectedOption.querySelector("span").innerHTML = selectedOption.querySelector("span").innerHTML.replaceAll(selectedOption.querySelector("span").innerText, v); 
@@ -2053,7 +2101,7 @@
          * @param {*} options:
          */
 
-        addArray( name, values, callback, options = {} ) {
+        addArray( name, values = [], callback, options = {} ) {
 
             if(!name) {
                 throw("Set Widget Name!");
@@ -2496,6 +2544,7 @@
         #add_vector( num_components, name, value, callback, options = {} ) {
 
             num_components = clamp(num_components, 2, 4);
+            value = value ?? new Array(num_components).fill(0);
 
             if(!name) {
                 throw("Set Widget Name!");

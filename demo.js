@@ -427,26 +427,37 @@ function fillRightBottomPanel( panel, tab ) {
             }
         ]);
 
-        // update panel values uising widget name
-        panel.addNumber("HeadRoll Value", 0, (value, event) => {
-            panel.setValue('HeadRoll', value);
-        }, { min: -1, max: 1, step: 0.1 });
-        panel.addProgress("HeadRoll", 0, { min: -1, max: 1 });
-
         /************** */
         // Custom Widget
 
-        LX.ADD_CUSTOM_WIDGET( 'Shader', (p, i) => {
-            p.addText("Name", i.name);
-            p.addArray("Uniforms", i.uniforms);
-        } );
+        LX.ADD_CUSTOM_WIDGET( 'Shader', {
+            extension: 'shader',
+            oncreate: (p, i) => {
+                p.addVector3("Color", i.u_color);
+            },
+            oninstancebuttons: [
+                {
+                    
+                }
+            ],
+            onemptybuttons: [
+                {
+                    name: 'New Shader',
+                    callback: instance => { 
+                        instance = { name: 'unnamed' };
+                        return true;
+                    }
+                }
+            ]
+        });
 
         const shader_instance = {
-            'name': 'texture',
-            'uniforms': ['u_texture', 'u_color']
+            'name': 'texture.shader',
+            'u_color': [1, 1, 1]
         };
 
         panel.addShader( shader_instance );
+        panel.addShader( null );
 
         /************** */
     }

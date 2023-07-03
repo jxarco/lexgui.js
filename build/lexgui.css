@@ -5,6 +5,7 @@
   --global-color-primary: #1a2025;
   --global-color-secondary: #2c3035f5;
 	--branch-background: #32363b;
+	--global-branch-darker: #282c31;
 	--branch-title-background: #2c3137;
   --global-button-color: #4a535c;
   --global-dropdown-color: #4e5154;
@@ -1259,12 +1260,22 @@ meter::-webkit-meter-even-less-good-value {
 
 /* Array Widget */
 
+.lexwidget:has(.lexarrayitems) {
+  background-color: var(--global-branch-darker);
+  border-radius: 4px;
+}
+
+.lexarray .lexwidget {
+  padding: 0px;
+  width: 100% !important;
+}
+
 .lexarrayitems {
-  border: 1px solid #a5a5ba54;
   width: 100%;
   padding: 6px;
   color: var(--global-text-secondary);
   font-size: 12px;
+  margin-top: -1px;
 }
 
 .lexarrayitems * {
@@ -1282,15 +1293,16 @@ meter::-webkit-meter-even-less-good-value {
 /* Custom Widgets Widget */
 
 .lexwidget:has(.lexcustomitems) {
-  border: 1px solid #a5a5ba54;
+  background-color: var(--global-branch-darker);
+  border-radius: 4px;
 }
 
 .lexcustomitems {
-  border-top: 1px solid #a5a5ba54;
   width: 100%;
   padding: 6px;
   color: var(--global-text-secondary);
   font-size: 12px;
+  margin-top: -1px;
 }
 
 .lexcustomitems * {
