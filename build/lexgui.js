@@ -222,9 +222,9 @@
 
     LX.message = message;
 	
-    function addContextMenu( title, event, callback )
+    function addContextMenu( title, event, callback, options )
     {
-        var menu = new ContextMenu( event, title );
+        var menu = new ContextMenu( event, title, options );
         LX.root.appendChild(menu.root);
 
         if(callback)
@@ -2996,7 +2996,6 @@
      */
 
     class Branch {
-
         
         constructor( name, options = {} ) {
             this.name = name;
@@ -3044,26 +3043,38 @@
             }
 
             this.onclick = function(e){
-                e.preventDefault();
                 e.stopPropagation();
-
-                var parent = this.parentElement;
-
-                if(this.className.indexOf("closed") > 0)
-                    this.classList.remove("closed")
-                else
-                    this.className += " closed";
-
-                if(parent.className.indexOf("closed") > 0)
-                    parent.classList.remove("closed")
-                else
-                    parent.className += " closed";
+                this.classList.toggle('closed');
+                this.parentElement.classList.toggle('closed');
 
                 that.content.toggleAttribute('hidden');
                 that.grabber.toggleAttribute('hidden');
             };
 
+            this.oncontextmenu = function(e){
+                e.preventDefault();
+                e.stopPropagation();
+
+                addContextMenu("Dock", e, p => {
+                    e.preventDefault();
+                    p.add('Floating', that.#on_make_floating.bind(that));
+                }, { icon: "fa-solid fa-window-restore" });
+            };
+
             title.addEventListener("click", this.onclick);
+            title.addEventListener("contextmenu", this.oncontextmenu);
+        }
+
+        #on_make_floating() {
+
+            new Dialog(this.name, p => {
+                // add widgets
+                for( let w of this.widgets ) {
+                    p.root.appendChild( w.domEl );
+                }
+            });
+
+            this.root.remove();
         }
 
         #addBranchSeparator() {
@@ -3260,7 +3271,7 @@
 
     class ContextMenu {
 
-        constructor( event, title ) {
+        constructor( event, title, options = {} ) {
             
             // remove all context menus
             document.body.querySelectorAll(".lexcontextmenubox").forEach(e => e.remove());
@@ -3281,7 +3292,7 @@
                 const item = {};
                 item[ title ] = [];
                 item[ 'className' ] = "cmtitle";
-                // item[ 'icon' ] = "fa-solid fa-ellipsis-vertical";
+                item[ 'icon' ] = options.icon;
                 this.items.push( item );
             }
         }

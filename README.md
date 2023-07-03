@@ -71,10 +71,14 @@ TODO List:
 - ~~Image Dropdown~~
 - ~~Copy Paste Widget Value~~
 - ~~Custom Class Widget~~
+- Docking System
+- Table Widget
+- Card Widget
+- Tags Widget
 - Allow checkbox suboptions
 - Menubar: Support subitem checkboxes
 - Image Viewer
-- Overlay buttons
+- Area Overlay buttons
 - Support optimum, sub, etc colors for the progress bars
 - Components:
     - ~~Timeline~~

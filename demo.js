@@ -320,7 +320,7 @@ function fillPanel( panel ) {
         console.log(value);
     });
 
-    panel.addDropdown("Best Logo", [{value:"Godot", src: "https://pbs.twimg.com/profile_images/1631591220630757377/nKSCjeS3_400x400.png"}, {value: "Unity", src: "https://imgcom.masterd.es/1/blog/2019/11/39809.jpg"}, {value:"Unreal Engine", src: "https://cdn2.unrealengine.com/ue-logo-1400x788-1400x788-8f185e1e3635.jpg"}], "Godot", (value, event) => {
+    panel.addDropdown("Best Logo", [{value:"Godot", src: "https://pbs.twimg.com/profile_images/1631591220630757377/nKSCjeS3_400x400.png"}, {value: "Unity", src: "https://assets.stickpng.com/images/62e132087fe3599fdd46ecb5.png"}, {value:"Unreal Engine", src: "https://cdn2.unrealengine.com/ue-logo-stacked-unreal-engine-w-677x545-fac11de0943f.png"}], "Godot", (value, event) => {
         console.log(value);
     }, {filter:true});
 
