@@ -1899,10 +1899,9 @@
             let buttonName = value;
             buttonName += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
             let selectedOption = this.addButton(null, buttonName, (value, event) => {
-                let rect = event.currentTarget.getClientRects();
-                let y = rect[0].y + rect[0].height;
-                element.querySelector(".lexoptions").style.top = y + 'px';
-                element.querySelector(".lexoptions").style.width = event.currentTarget.clientWidth - 10 + 'px';
+                let rect = event.currentTarget.getBoundingClientRect();
+                element.querySelector(".lexoptions").style.top = (rect.y + rect.height - 5) + 'px';
+                element.querySelector(".lexoptions").style.width = event.currentTarget.clientWidth - 12 + 'px';
                 element.querySelector(".lexoptions").toggleAttribute('hidden');
             }, { buttonClass: 'array' });
             selectedOption.style.width = "100%";   
@@ -1915,6 +1914,9 @@
             let list = document.createElement('ul');
             list.className = "lexoptions";
             list.hidden = true;
+            list.addEventListener('mouseleave', function(e) {
+                this.toggleAttribute('hidden', true);
+            });
 
             // Add filter options
             if(options.filter)
@@ -1972,10 +1974,8 @@
                         img.src = iValue.src;
                         li.setAttribute("value", iValue.value);
                         li.className = "lexlistitem";
-                        let p = document.createElement("p");
-                        p.innerText = iValue.value;
-                        option.appendChild(img);
-                        option.appendChild(p);
+                        option.innerText = iValue.value;
+                        option.prepend(img);
 
                         option.setAttribute("value", iValue.value);
                         option.setAttribute("data-index", i);
@@ -2000,7 +2000,7 @@
             });
 
             container.appendChild(selectedOption);
-            container.appendChild(list)
+            container.appendChild(list);
             element.appendChild(container);
         }
 

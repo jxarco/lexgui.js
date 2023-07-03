@@ -297,7 +297,7 @@ function fillPanel( panel ) {
                         m.add( "Move before sibling" );
                         m.add( "Move after sibling" );
                         m.add( "Move to parent" );
-                        m.add( "Delete", { color: "#f33" });
+                        m.add( "Delete" );
                     });
                     break;
                 case LX.TreeEvent.NODE_DRAGGED: 
