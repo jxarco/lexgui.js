@@ -70,7 +70,8 @@ TODO List:
 - ~~Branchtabs~~
 - ~~Image Dropdown~~
 - ~~Copy Paste Widget Value~~
-- Custom Class Widget
+- ~~Custom Class Widget~~
+- Allow checkbox suboptions
 - Menubar: Support subitem checkboxes
 - Image Viewer
 - Overlay buttons

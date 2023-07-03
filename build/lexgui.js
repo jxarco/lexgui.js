@@ -886,22 +886,24 @@
                     let inputs = this.domEl.querySelectorAll("input");
                     let value = [];
                     for( var v of inputs )
-                        value.push( +v.value );
+                    value.push( +v.value );
                     return value;
-                case Widget.LAYERS:
-                    return this.domEl.value;
-                case Widget.ARRAY:
-                    let array_inputs = this.domEl.querySelectorAll("input");
-                    let values = [];
+                    case Widget.LAYERS:
+                        return this.domEl.value;
+                        case Widget.ARRAY:
+                            let array_inputs = this.domEl.querySelectorAll("input");
+                            let values = [];
                     for( var v of array_inputs )
-                        values.push( v.value );
+                    values.push( v.value );
                     return values;
+                case Widget.CUSTOM:
+                    return this.instance;
             }
 
             console.warn("Can't get value of " + this.typeName());
         }
 
-        setValue( value ) {
+        set( value ) {
 
             if(this.onSetValue)
                 this.onSetValue(value);
@@ -914,25 +916,27 @@
 
             addContextMenu(this.typeName(), e, c => {
                 c.add("Copy", () => { this.copy() });
-                c.add("Paste", { disabled: !this.canPaste(), callback: () => { this.paste() } } );
+                c.add("Paste", { disabled: !this.#can_paste(), callback: () => { this.paste() } } );
             });
         }
 
         copy() {
             navigator.clipboard.type = this.type;
+            navigator.clipboard.customIdx = this.customIdx;
             navigator.clipboard.data = this.value();
             navigator.clipboard.writeText( navigator.clipboard.data );
         }
 
-        canPaste() {
-            return navigator.clipboard.type === this.type;
+        #can_paste() {
+            return this.type === Widget.CUSTOM ? navigator.clipboard.customIdx !== undefined && this.customIdx == navigator.clipboard.customIdx :
+                navigator.clipboard.type === this.type;
         }
 
         paste() {
-            if( !this.canPaste() )
+            if( !this.#can_paste() )
             return;
 
-            this.setValue(navigator.clipboard.data);
+            this.set(navigator.clipboard.data);
         }
 
         typeName() {
@@ -950,6 +954,7 @@
                 case Widget.FILE: return "File";
                 case Widget.LAYERS: return "Layers";
                 case Widget.ARRAY: return "Array";
+                case Widget.CUSTOM: return this.customName;
             }
         }
 
@@ -961,70 +966,73 @@
 
     LX.Widget = Widget;
 
-    function ADD_CUSTOM_WIDGET( name, options = {} )
+    function ADD_CUSTOM_WIDGET( custom_widget_name, options = {} )
     {
-        Panel.prototype[ 'add' + name ] = function( instance ) {
+        let custom_idx = simple_guidGenerator();
 
-            const callback = options.oncreate ?? (() => {});
+        Panel.prototype[ 'add' + custom_widget_name ] = function( name, instance ) {
 
             let widget = this.create_widget(name, Widget.CUSTOM, options);
-            // widget.onSetValue = (new_value) => {
-            //     values = new_value;
-            //     updateItems();
-            //     this.#trigger( new IEvent(name, values, null), callback );
-            // };
+            widget.customName = custom_widget_name;
+            widget.customIdx = custom_idx;
+            widget.onSetValue = (new_value) => {
+                instance = new_value;
+                refresh_widget();
+                element.querySelector(".lexcustomitems").toggleAttribute('hidden', false); 
+                // this.#trigger( new IEvent(name, values, null), callback );
+            };
+
             let element = widget.domEl;
             element.style.flexWrap = "wrap";
 
             let container, custom_widgets;
+            let default_instance = options.default ?? {};
 
             // Add instance button
 
             const refresh_widget = () => {
 
+                if(instance)
+                    widget.instance = instance = Object.assign(deepCopy(default_instance), instance);
+
                 if(container) container.remove();
                 if(custom_widgets) custom_widgets.remove();
 
                 container = document.createElement('div');
-                container.className = "lexarray";
+                container.className = "lexcustomcontainer";
                 container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
     
                 this.queuedContainer = container;
-                let buttonName = instance ? instance.name : "empty";
+                let buttonName = custom_widget_name + (!instance ? " [empty]" : "");
                 buttonName += "<a class='fa-solid " + (options.icon ?? "fa-cube")  + "' style='float:left'></a>";
-                if(instance && options.oninstancebuttons)
-                    buttonName += "<a class='fa-solid fa-bars menu' style='float:right'></a>";
+                if(instance)
+                    buttonName += "<a class='fa-solid fa-bars-staggered menu' style='float:right; width:5%;'></a>";
                 let buttonEl = this.addButton(null, buttonName, (value, event) => {
 
                     if( instance ) {
                         element.querySelector(".lexcustomitems").toggleAttribute('hidden');
                     }
-                    else if(options.onemptybuttons) {
+                    else {
                         addContextMenu(null, event, c => {    
-                            for( var i = 0; i < options.onemptybuttons.length; ++i ) {
-                                const button = options.onemptybuttons[i];
-                                c.add(button.name, () => {
-                                    if( button.callback( instance ) ) refresh_widget();
-                                });
-                            }
+                            c.add("New " + custom_widget_name, () => { 
+                                instance = {};
+                                refresh_widget();
+                                element.querySelector(".lexcustomitems").toggleAttribute('hidden', false);
+                            });
                         });
                     }
     
                 }, { buttonClass: 'array' });
                 delete this.queuedContainer;
     
-                // on instance buttons
-                if(instance && options.oninstancebuttons)
+                if(instance)
                     buttonEl.querySelector('a.menu').addEventListener('click', e => {
                         e.stopImmediatePropagation();
                         e.stopPropagation();
                         addContextMenu(null, e, c => {
-                            c.add("New " + name, () => { 
-                                instance = {};
-                                this.queuedContainer = custom_widgets;
-                                callback(this, instance);
-                                delete this.queuedContainer;
-                                element.querySelector(".lexcustomitems").toggleAttribute('hidden'); 
+                            c.add("Clear", () => {
+                                instance = null;
+                                refresh_widget();
                             });
                         });
                     });
@@ -1038,10 +1046,35 @@
                 element.appendChild(container);
                 element.appendChild(custom_widgets);
     
-                if( instance )
-                {
+                if( instance ) {
                     this.queuedContainer = custom_widgets;
-                    callback(this, instance);
+                    
+                    for( let key in default_instance )
+                    {
+                        const value = instance[key] ?? default_instance[key];
+                        
+                        switch(value.constructor) {
+                            case String:
+                                if(value[0] === '#')
+                                    this.addColor(key, value, (v, e) => { instance[key] = v; });
+                                else
+                                    this.addText(key, value, (v, e) => { instance[key] = v; });
+                                break;
+                            case Number:
+                                this.addNumber(key, value, (v, e) => { instance[key] = v; });
+                                break;
+                            case Boolean:
+                                this.addCheckbox(key, value, (v, e) => { instance[key] = v; });
+                                break;
+                            case Array:
+                                if( value.length > 4 )
+                                    this.addArray(key, value, (v, e) => { instance[key] = v; });    
+                                else
+                                    this._add_vector(value.length, key, value, (v, e) => { instance[key] = v; });
+                                break;
+                        }
+                    }
+
                     delete this.queuedContainer;
                 }
             };
@@ -1344,7 +1377,7 @@
             if(!widget)
                 throw("No widget called " + name);
 
-            return widget.setValue(value);
+            return widget.set(value);
         }
 
         /**
@@ -2336,7 +2369,7 @@
          * @param {Function} callback Callback function on change
          * @param {*} options:
          * disabled: Make the widget disabled [false]
-         * useRGB: The callback returns color as Array (r, g, b) and not hex [true]
+         * useRGB: The callback returns color as Array (r, g, b) and not hex [false]
          */
 
         addColor( name, value, callback, options = {} ) {
@@ -2368,7 +2401,7 @@
             color.type = 'color';
             color.className = "colorinput";
             color.id = "color" + simple_guidGenerator();
-            color.useRGB = options.useRGB ?? true;
+            color.useRGB = options.useRGB ?? false;
             color.value = color.iValue = value.constructor === Array ? rgbToHex(value) : value;
             
             if(options.disabled) {
@@ -2541,7 +2574,7 @@
 
         static #VECTOR_COMPONENTS = {0: 'x', 1: 'y', 2: 'z', 3: 'w'};
 
-        #add_vector( num_components, name, value, callback, options = {} ) {
+        _add_vector( num_components, name, value, callback, options = {} ) {
 
             num_components = clamp(num_components, 2, 4);
             value = value ?? new Array(num_components).fill(0);
@@ -2575,7 +2608,7 @@
             container.className = "lexvector";        
             container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
-            for( var i = 0; i < num_components; ++i ) {
+            for( let i = 0; i < num_components; ++i ) {
 
                 let box = document.createElement('div');
                 box.className = "vecbox";
@@ -2588,6 +2621,7 @@
                 vecinput.step = options.step ?? "any";
                 vecinput.type = "number";
                 vecinput.id = "vec"+num_components+"_"+simple_guidGenerator();
+                vecinput.idx = i;
                 vecinput.value = vecinput.iValue = value[i];
 
                 if(options.disabled) {
@@ -2612,9 +2646,10 @@
         
                     // Reset button (default value)
                     let btn = element.querySelector(".lexwidgetname .lexicon");
-                    if(btn)
-                        btn.style.display = val != vecinput.iValue ? "block": "none";
-                    this.#trigger( new IEvent(name, val, e), callback );
+                    if(btn) btn.style.display = val != vecinput.iValue ? "block": "none";
+
+                    value[e.target.idx] = val;
+                    this.#trigger( new IEvent(name, value, e), callback );
                 }, false);
                 
                 // Add drag input
@@ -2673,17 +2708,17 @@
 
         addVector2( name, value, callback, options ) {
 
-            this.#add_vector(2, name, value, callback, options);
+            this._add_vector(2, name, value, callback, options);
         }
 
         addVector3( name, value, callback, options ) {
 
-            this.#add_vector(3, name, value, callback, options);
+            this._add_vector(3, name, value, callback, options);
         }
 
         addVector4( name, value, callback, options ) {
 
-            this.#add_vector(4, name, value, callback, options);
+            this._add_vector(4, name, value, callback, options);
         }
 
         /**

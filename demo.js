@@ -431,33 +431,26 @@ function fillRightBottomPanel( panel, tab ) {
         // Custom Widget
 
         LX.ADD_CUSTOM_WIDGET( 'Shader', {
-            extension: 'shader',
-            oncreate: (p, i) => {
-                p.addVector3("Color", i.u_color);
-            },
-            oninstancebuttons: [
-                {
-                    
-                }
-            ],
-            onemptybuttons: [
-                {
-                    name: 'New Shader',
-                    callback: instance => { 
-                        instance = { name: 'unnamed' };
-                        return true;
-                    }
-                }
-            ]
+            // icon: "fa-dice-d6",
+            default: {
+                'position': [0, 0],
+                'velocity': [0, 0, 0],
+                'color': [0, 0, 0, 0],
+                'hex_color': '#000',
+                'high_res': false
+            }
         });
 
         const shader_instance = {
-            'name': 'texture.shader',
-            'u_color': [1, 1, 1]
+            //'position': [0, 10],
+            //'velocity': [0, 1, 0],
+            // 'color': [1, 1, 1, 1],
+            'hex_color': '#f5f505',
+            'high_res': true
         };
 
-        panel.addShader( shader_instance );
-        panel.addShader( null );
+        panel.addShader( "PBR Shader", shader_instance );
+        panel.addShader( "Empty", null );
 
         /************** */
     }

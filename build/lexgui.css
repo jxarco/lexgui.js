@@ -1297,7 +1297,6 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexwidget:has(.lexcustomitems) {
   background-color: var(--global-branch-darker);
-  border-radius: 4px;
 }
 
 .lexcustomitems {
@@ -1308,8 +1307,8 @@ meter::-webkit-meter-even-less-good-value {
   margin-top: -1px;
 }
 
-.lexcustomitems * {
-  font-size: 11px;
+.lexcustomcontainer .lexbutton span:not(:has(.menu)) {
+  width: 95%;
 }
 
 /** Timeline */
