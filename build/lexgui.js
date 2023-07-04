@@ -852,8 +852,9 @@
         static LAYERS       = 12;
         static ARRAY        = 13;
         static LIST         = 14;
-        static CUSTOM       = 15;
-        static SEPARATOR    = 16;
+        static TAGS         = 15;
+        static CUSTOM       = 16;
+        static SEPARATOR    = 17;
 
         #no_context_types = [
             Widget.BUTTON,
@@ -2242,7 +2243,7 @@
 
         addList( name, value, values, callback, options = {} ) {
 
-            let widget = this.create_widget(name, Widget.ARRAY, options);
+            let widget = this.create_widget(name, Widget.LIST, options);
             let element = widget.domEl;
 
             // Show list
@@ -2282,6 +2283,77 @@
             }
 
             element.appendChild(list_container);
+        }
+
+        /**
+         * @method addTags
+         * @param {String} name Widget name
+         * @param {String} value Comma separated tags
+         * @param {Function} callback Callback function on change
+         * @param {*} options:
+         */
+
+        addTags( name, value, callback, options = {} ) {
+
+            value = value.replace(/\s/g, '').split(',');
+            let defaultValue = [].concat(value);
+            let widget = this.create_widget(name, Widget.TAGS, options);
+            widget.onSetValue = (new_value) => {
+                value = [].concat(new_value);
+                create_tags();
+                that.#trigger( new IEvent(name, value), callback );
+            };
+
+            let element = widget.domEl;
+            let that = this;
+
+            // Add reset functionality
+            if(name)
+                Panel.#add_reset_property(element.domName, function(e) {
+                    this.style.display = "none";
+                    value = [].concat(defaultValue);
+                    create_tags();
+                    that.#trigger( new IEvent(name, value, e), callback );
+                });
+
+            // Show tags
+
+            let tags_container = document.createElement('div');
+            tags_container.className = "lextags";
+            tags_container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+
+            const create_tags = () => {
+
+                tags_container.innerHTML = "";
+
+                for( let i = 0; i < value.length; ++i )
+                {
+                    let tag_name = value[i];
+                    let tag = document.createElement('span');
+                    tag.className = "lextag";
+                    tag.innerHTML = tag_name;
+    
+                    tag.addEventListener('click', function(e) {
+                        this.remove();
+                        value.splice( value.indexOf( tag_name ), 1 );
+                        let btn = element.querySelector(".lexwidgetname .lexicon");
+                        if(btn) btn.style.display = "block";
+                        that.#trigger( new IEvent(name, value, e), callback );
+                    });
+    
+                    tags_container.appendChild(tag);
+                }
+            }
+
+            create_tags();
+
+            // Remove branch padding and margins
+            if(!name) {
+                element.className += " noname";
+                tags_container.style.width = "100%";
+            }
+
+            element.appendChild(tags_container);
         }
 
         /**
@@ -3074,7 +3146,13 @@
                 }
             });
 
+            const parent = this.root.parentElement;
+
             this.root.remove();
+
+            // Make next the first branch
+            const next_branch = parent.querySelector(".lexbranch");
+            if(next_branch) next_branch.classList.add('first');
         }
 
         #addBranchSeparator() {

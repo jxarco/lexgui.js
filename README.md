@@ -71,10 +71,10 @@ TODO List:
 - ~~Image Dropdown~~
 - ~~Copy Paste Widget Value~~
 - ~~Custom Class Widget~~
+- ~~Tags Widget~~
 - Docking System
 - Table Widget
 - Card Widget
-- Tags Widget
 - Allow checkbox suboptions
 - Menubar: Support subitem checkboxes
 - Image Viewer

@@ -97,12 +97,12 @@ body.nocursor * {
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
   background: var(--branch-title-background);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
   color: #d9d9e3;
   text-shadow: 0px 1px 4px #000;
-  width: calc( 100% - 28px);
-  padding: 12px;
+  width: calc( 100% - 24px);
+  padding: 8px;
   padding-left: 16px;
   -webkit-user-select: none; /* Safari 3.1+ */
   -moz-user-select: none; /* Firefox 2+ */
@@ -1291,6 +1291,33 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexarrayitems .lexwidgetname {
   color: var(--global-text-secondary);
+}
+
+/* Tags Widget */
+
+.lextags {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  line-height: 12px;
+}
+
+.lextags .lextag {
+  padding: 6px;
+  background-color: var(--global-color-primary);
+  margin: 2px;
+  border-radius: 12px;
+  min-width: 16px;
+  justify-content: center;
+  color: var(--global-text-primary);
+  display: inherit;
+  font-size: 12px;
+}
+
+.lextags .lextag:hover {
+  background-color: var(--global-selected);
+  color: #f5f5f5;
+  cursor: pointer;
 }
 
 /* Custom Widgets Widget */

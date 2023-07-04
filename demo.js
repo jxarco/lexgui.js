@@ -337,6 +337,9 @@ function fillPanel( panel ) {
     panel.addArray("Array", ['GPTeam', 'Blat Panthers', 'Blat Bunny'], (value, event) => {
         console.log(value);
     });
+    panel.addTags("Game Tags", "2d,  karate, ai, audio,engine,   ps5, console", (value, event) => {
+        console.log(value);
+    });
     panel.addList(null, 'Blat Panthers', ['GPTeam', 'Blat Bunny', ['Blat Panthers', 'fa-solid fa-paw']], (value, event) => {
         console.log(value);
     });
