@@ -2593,6 +2593,9 @@
          * @param {Number} value Progress value 
          * @param {*} options:
          * min, max: Min and Max values
+         * showValue: show current value
+         * editable: allow edit value
+         * callback: function called on change value
          */
 
         addProgress( name, value, options = {} ) {
@@ -2604,6 +2607,7 @@
             let widget = this.#create_widget(name, Widget.PROGRESS, options);
             widget.onSetValue = (new_value) => {
                 element.querySelector("meter").value = new_value;
+                element.querySelector("span").innerText = new_value;
             };
             let element = widget.domEl;
 
@@ -2614,14 +2618,48 @@
             // add slider (0-1 if not specified different )
 
             let progress = document.createElement('meter');
+            progress.id = "lexprogressbar-" + name;
             progress.className = "lexprogressbar";
             progress.step = "any";
             progress.min = options.min ?? 0;
             progress.max = options.max ?? 1;
             progress.value = value;
-
+            
             container.appendChild(progress);
             element.appendChild(container);
+
+            if(options.showValue) {
+                if(document.getElementById('progressvalue-' + name ))
+                    document.getElementById('progressvalue-' + name ).remove();
+                let span = document.createElement("span");
+                span.id = "progressvalue-" + name;
+                span.style.padding = "0px 5px";
+                span.innerText = value;
+                container.appendChild(span);
+            }
+
+            if(options.editable) {
+                progress.classList.add("editable");
+                progress.addEventListener("mousemove", inner_mousemove.bind(this, value));
+                progress.addEventListener("mouseup", inner_mouseup.bind(this, progress));
+
+                function inner_mousemove(value, e) {
+                
+                    if(e.which < 1)
+                        return;
+                    let v = this.getValue(name, value);
+                    v+=e.movementX/100;
+                    v = v.toFixed(2);
+                    this.setValue(name, v);
+
+                    if(options.callback)
+                        options.callback(v);
+                }
+
+                function inner_mouseup(el, e) {
+                    el.removeEventListener("mousemove", inner_mousemove);
+                }
+            }
         }
 
         /**

@@ -898,6 +898,7 @@ input[type=number] {
 .lexprogress {
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .lexprogressbar {
@@ -911,6 +912,14 @@ input[type=number] {
   -webkit-transition: .2s;
   transition: opacity .2s;
   margin-top: 2px;
+}
+
+.lexprogressbar.editable:hover{
+  cursor: grab;
+}
+
+.lexprogressbar.editable:active{
+  cursor: grabbing;
 }
 
 /* The gray background in Chrome, etc. */
