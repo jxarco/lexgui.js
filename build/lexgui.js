@@ -54,6 +54,8 @@
             img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
             e.dataTransfer.setDragImage(img, 0, 0);
             e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData('branch_title', e.target.querySelector(".lexdialogtitle").innerText);
+            e.dataTransfer.setData('dialog_id', e.target.id);
         });
         domEl.addEventListener("drag", function(e) {
             e.preventDefault();
@@ -109,9 +111,9 @@
         this.OPEN_CONTEXTMENU_ENTRY = 'click';
 
         this.ready = true;
+        this.main_area = new Area( {id: options.id ?? "mainarea"} );
 
-        // Create main area
-        return new Area( {id: options.id ?? "mainarea"} );
+        return this.main_area;
     }
 
     LX.init = init;
@@ -269,7 +271,8 @@
     
             this.root = root;
             this.size = [ this.root.offsetWidth, this.root.offsetHeight ];
-            this.sections = {};
+            this.sections = [];
+            this.panels = [];
     
             if(!options.no_append) {
                 var lexroot = document.getElementById("lexroot");
@@ -485,6 +488,7 @@
         addPanel( options ) {
             let panel = new Panel( options );
             this.attach( panel );
+            this.panels.push( panel );
             return panel;
         }
 
@@ -1349,6 +1353,24 @@
             root.style.height = options.height || "100%";
             this.root = root;
 
+            let that = this;
+
+            // root.ondragover = (e) => { return false };
+            // root.ondragend = () => { return false };
+            // root.ondrop = function(e) {
+            //     e.preventDefault();
+            //     const branch_to_add = that.branches.find( b => b.name === e.dataTransfer.getData('branch_title') );
+            //     if( branch_to_add )
+            //     {
+            //         that.root.appendChild( branch_to_add.root );
+            //         for( let w of branch_to_add.widgets ) {
+            //             branch_to_add.content.appendChild( w.domEl );
+            //         }
+            //     }
+
+            //     document.querySelector("#" + e.dataTransfer.getData('dialog_id')).remove();
+            // };
+
             this.onevent = (e => {});
 
             // branches
@@ -1932,12 +1954,14 @@
             // Add dropdown widget button  
             let buttonName = value;
             buttonName += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
+            this.queuedContainer = container;
             let selectedOption = this.addButton(null, buttonName, (value, event) => {
                 let rect = event.currentTarget.getBoundingClientRect();
                 element.querySelector(".lexoptions").style.top = (rect.y + rect.height - 5) + 'px';
                 element.querySelector(".lexoptions").style.width = event.currentTarget.clientWidth - 12 + 'px';
                 element.querySelector(".lexoptions").toggleAttribute('hidden');
             }, { buttonClass: 'array' });
+            delete this.queuedContainer;
             selectedOption.style.width = "100%";   
 
             selectedOption.refresh = (v) => {
@@ -2033,7 +2057,6 @@
                 this.#trigger( new IEvent(name, val, e), callback ); 
             });
 
-            container.appendChild(selectedOption);
             container.appendChild(list);
             element.appendChild(container);
         }
@@ -2878,10 +2901,6 @@
 
             this.queuedContainer = element;
 
-            // this.addButton(null, "<a class='fa-solid fa-folder-open'></a>", () => {
-            //     input.click();
-            // }, { className: "small" });
-            
             this.addButton(null, "<a class='fa-solid fa-gear'></a>", () => {
                 
                 new Dialog("Load Settings", p => {
@@ -3129,8 +3148,12 @@
 
                 addContextMenu("Dock", e, p => {
                     e.preventDefault();
+                    // p.add('<i class="fa-regular fa-window-maximize">', {id: 'dock_options0'});
+                    // p.add('<i class="fa-regular fa-window-maximize fa-rotate-180">', {id: 'dock_options1'});
+                    // p.add('<i class="fa-regular fa-window-maximize fa-rotate-90">', {id: 'dock_options2'});
+                    // p.add('<i class="fa-regular fa-window-maximize fa-rotate-270">', {id: 'dock_options3'});
                     p.add('Floating', that.#on_make_floating.bind(that));
-                }, { icon: "fa-solid fa-window-restore" });
+                }, { icon: "fa-regular fa-window-restore" });
             };
 
             title.addEventListener("click", this.onclick);
@@ -3139,12 +3162,13 @@
 
         #on_make_floating() {
 
-            new Dialog(this.name, p => {
+            const dialog = new Dialog(this.name, p => {
                 // add widgets
                 for( let w of this.widgets ) {
                     p.root.appendChild( w.domEl );
                 }
             });
+            dialog.widgets = this.widgets;
 
             const parent = this.root.parentElement;
 
@@ -3153,6 +3177,10 @@
             // Make next the first branch
             const next_branch = parent.querySelector(".lexbranch");
             if(next_branch) next_branch.classList.add('first');
+
+            // Make new last the last branch
+            const last_branch = parent.querySelectorAll(".lexbranch");
+            if(last_branch.length) last_branch[last_branch.length - 1].classList.add('last');
         }
 
         #addBranchSeparator() {
@@ -3268,6 +3296,8 @@
 
         #oncreate;
 
+        static #last_id = 0;
+
         constructor( title, callback, options = {} ) {
             
             if(!callback)
@@ -3285,14 +3315,64 @@
 
             var root = document.createElement('div');
             root.className = "lexdialog";
-            if(options.id)
-                root.id = options.id;
+            root.id = options.id ?? "dialog" + Dialog.#last_id++;
             LX.root.appendChild( root );
+
+            let that = this;
 
             var titleDiv = document.createElement('div');
             if(title) {
                 titleDiv.className = "lexdialogtitle";
                 titleDiv.innerHTML = title;
+                titleDiv.setAttribute('draggable', false);
+                titleDiv.oncontextmenu = function(e){
+                    e.preventDefault();
+                    e.stopPropagation();
+    
+                    addContextMenu("Dock", e, p => {
+                        e.preventDefault();
+                        
+                        if(LX.main_area.type !== 'horizontal')
+                        return;
+
+                        const get_next_panel = function(area) {
+                            let p = area.panels[0];
+                            if( p ) return p;
+                            for(var s of area.sections){
+                                p = get_next_panel(s);
+                                if( p ) return p;
+                            }
+                        }
+
+                        const append_branch = function(panel) {
+                            let branch = panel.branches.find( b => b.name === title );
+                            if( !branch ) {
+                                panel.branch(title);
+                                branch = panel.branches.find( b => b.name === title );                                    
+                            }else
+                                panel.root.appendChild( branch.root );
+
+                            for( let w of that.widgets ) {
+                                branch.content.appendChild( w.domEl );
+                            }
+
+                            // Make new last the last branch
+                            branch.root.classList.add('last');
+                            root.remove();
+                        }
+                        
+                        // Right
+                        let rpanel = get_next_panel(LX.main_area.sections[1]);
+                        p.add('<i class="fa-regular fa-window-maximize fa-window-maximize fa-rotate-90">', {disabled: !rpanel, id: 'dock_options0', callback: () => {
+                            append_branch(rpanel);
+                        }});
+                        // Left
+                        let lpanel = get_next_panel(LX.main_area.sections[0]);
+                        p.add('<i class="fa-regular fa-window-maximize fa-window-maximize fa-rotate-270">', {disabled: !lpanel, id: 'dock_options1', callback: () => {
+                            append_branch(lpanel);
+                        }});
+                    }, { icon: "fa-regular fa-window-restore" });
+                };
                 root.appendChild(titleDiv);
             }
 
@@ -3429,7 +3509,7 @@
             const hasSubmenu = o[ k ].length;
             let entry = document.createElement('div');
             entry.className = "lexcontextmenuentry" + (o[ 'className' ] ? " " + o[ 'className' ] : "" );
-            entry.id = k.replace(/\s/g, '').replace('@', '_');
+            entry.id = o.id ?? k.replace(/\s/g, '').replace('@', '_');
             entry.innerHTML = "";
             const icon = o[ 'icon' ];
             if(icon) {
@@ -3522,6 +3602,7 @@
                     const next_token = tokens[idx++];
                     // Check if last token -> add callback
                     if(!next_token) {
+                        item[ 'id' ] = options.id;
                         item[ 'callback' ] = options.callback;
                         item[ 'disabled' ] = options.disabled ?? false;
                     } 
@@ -3569,7 +3650,8 @@
                 let pKey = key.replace(/\s/g, '').replace('@', '_');
 
                 // Item already created
-                if( !this.root.querySelector("#" + pKey) )
+                const id = "#" + (item.id ?? pKey);
+                if( !this.root.querySelector(id) )
                     this.#create_entry(item, key, this.root, -1);
             }
         }
