@@ -976,7 +976,7 @@
     {
         let custom_idx = simple_guidGenerator();
 
-        Panel.prototype[ 'add' + custom_widget_name ] = function( name, instance ) {
+        Panel.prototype[ 'add' + custom_widget_name ] = function( name, instance, callback ) {
 
             let widget = this.create_widget(name, Widget.CUSTOM, options);
             widget.customName = custom_widget_name;
@@ -984,8 +984,8 @@
             widget.onSetValue = (new_value) => {
                 instance = new_value;
                 refresh_widget();
-                element.querySelector(".lexcustomitems").toggleAttribute('hidden', false); 
-                // this.#trigger( new IEvent(name, values, null), callback );
+                element.querySelector(".lexcustomitems").toggleAttribute('hidden', false);
+                this._trigger( new IEvent(name, instance, null), callback );
             };
 
             let element = widget.domEl;
@@ -1055,6 +1055,11 @@
                 if( instance ) {
                     this.queuedContainer = custom_widgets;
                     
+                    const on_instance_changed = (key, value, event) => {
+                        instance[key] = value;
+                        this._trigger( new IEvent(name, instance, event), callback );
+                    };
+
                     for( let key in default_instance )
                     {
                         const value = instance[key] ?? default_instance[key];
@@ -1062,21 +1067,21 @@
                         switch(value.constructor) {
                             case String:
                                 if(value[0] === '#')
-                                    this.addColor(key, value, (v, e) => { instance[key] = v; });
+                                    this.addColor(key, value, on_instance_changed.bind(this, key));
                                 else
-                                    this.addText(key, value, (v, e) => { instance[key] = v; });
+                                    this.addText(key, value, on_instance_changed.bind(this, key));
                                 break;
                             case Number:
-                                this.addNumber(key, value, (v, e) => { instance[key] = v; });
+                                this.addNumber(key, value, on_instance_changed.bind(this, key));
                                 break;
                             case Boolean:
-                                this.addCheckbox(key, value, (v, e) => { instance[key] = v; });
+                                this.addCheckbox(key, value, on_instance_changed.bind(this, key));
                                 break;
                             case Array:
                                 if( value.length > 4 )
-                                    this.addArray(key, value, (v, e) => { instance[key] = v; });    
+                                    this.addArray(key, value, on_instance_changed.bind(this, key));    
                                 else
-                                    this._add_vector(value.length, key, value, (v, e) => { instance[key] = v; });
+                                    this._add_vector(value.length, key, value, on_instance_changed.bind(this, key));
                                 break;
                         }
                     }
@@ -1744,7 +1749,7 @@
             this.refresh(filteredOptions);
         }
 
-        #trigger( event, callback ) {
+        _trigger( event, callback ) {
 
             if(callback)
                 callback.call(this, event.value, event.domEvent);
@@ -1825,7 +1830,7 @@
                 let btn = element.querySelector(".lexwidgetname .lexicon");
                 if(btn)
                     btn.style.display = (val != wValue.iValue ? "block" : "none");
-                this.#trigger( new IEvent(name, val, event), callback );
+                this._trigger( new IEvent(name, val, event), callback );
             }).bind(this);
 
             const trigger = options.trigger ?? 'default';
@@ -1892,7 +1897,7 @@
                 wValue.setAttribute("disabled", true);
             
             wValue.addEventListener("click", e => {
-                this.#trigger( new IEvent(name, true, e), callback );   
+                this._trigger( new IEvent(name, true, e), callback );   
             });
 
             element.appendChild(wValue);
@@ -1928,7 +1933,7 @@
                 if(btn) btn.style.display = (new_value != wValue.iValue ? "block" : "none");
                 value = new_value;
                 list.querySelectorAll('li').forEach( e => { if( e.getAttribute('value') == value ) e.click() } );
-                this.#trigger( new IEvent(name, value, null), callback ); 
+                this._trigger( new IEvent(name, value, null), callback ); 
             };
 
             let element = widget.domEl;
@@ -1938,7 +1943,7 @@
             Panel.#add_reset_property(element.domName, function() {
                 value = wValue.iValue;
                 list.querySelectorAll('li').forEach( e => { if( e.getAttribute('value') == value ) e.click() } );
-                that.#trigger( new IEvent(name, value, null), callback ); 
+                that._trigger( new IEvent(name, value, null), callback ); 
                 this.style.display = "none";
             });
 
@@ -2066,7 +2071,7 @@
                 const val = e.target.value;
                 let btn = element.querySelector(".lexwidgetname .lexicon");
                 if(btn) btn.style.display = (val != wValue.iValue ? "block" : "none");
-                this.#trigger( new IEvent(name, val, e), callback ); 
+                this._trigger( new IEvent(name, val, e), callback ); 
             });
 
             container.appendChild(list);
@@ -2094,7 +2099,7 @@
                 if(btn) btn.style.display = (new_value != defaultValue ? "block" : "none");
                 value = element.value = new_value;
                 setLayers();
-                that.#trigger( new IEvent(name, value), callback );
+                that._trigger( new IEvent(name, value), callback );
             };
 
             let element = widget.domEl;
@@ -2104,7 +2109,7 @@
                 this.style.display = "none";
                 value = element.value = defaultValue;
                 setLayers();
-                that.#trigger( new IEvent(name, value, e), callback );
+                that._trigger( new IEvent(name, value, e), callback );
             });
 
             // Add widget value
@@ -2151,7 +2156,7 @@
                         let btn = element.querySelector(".lexwidgetname .lexicon");
                         if(btn) btn.style.display = (value != defaultValue ? "block" : "none");
     
-                        this.#trigger( new IEvent(name, value, e), callback );
+                        this._trigger( new IEvent(name, value, e), callback );
                     });
                 }
     
@@ -2180,7 +2185,7 @@
             widget.onSetValue = (new_value) => {
                 values = new_value;
                 updateItems();
-                this.#trigger( new IEvent(name, values, null), callback );
+                this._trigger( new IEvent(name, values, null), callback );
             };
             let element = widget.domEl;
             element.style.flexWrap = "wrap";
@@ -2248,7 +2253,7 @@
                     this.addButton( null, "<a class='lexicon fa-solid fa-trash'></a>", (v, event) => {
                         values.splice(values.indexOf( value ), 1);
                         updateItems();
-                        this.#trigger( new IEvent(name, values, event), callback );
+                        this._trigger( new IEvent(name, values, event), callback );
                     }, { title: "Remove item", className: 'small'} );
                 }
 
@@ -2257,7 +2262,7 @@
                 this.addButton(null, buttonName, (v, event) => {
                     values.push( "" );
                     updateItems();
-                    this.#trigger( new IEvent(name, values, event), callback );
+                    this._trigger( new IEvent(name, values, event), callback );
                 }, { buttonClass: 'array' });
 
                 // Stop pushing to array_items
@@ -2305,7 +2310,7 @@
                 list_item.addEventListener('click', (e) => {
                     list_container.querySelectorAll('.lexlistitem').forEach( e => e.classList.remove('selected'));
                     list_item.classList.toggle( 'selected' );
-                    this.#trigger( new IEvent(name, item_value, e), callback );
+                    this._trigger( new IEvent(name, item_value, e), callback );
                 });
 
                 list_container.appendChild(list_item);
@@ -2336,7 +2341,7 @@
             widget.onSetValue = (new_value) => {
                 value = [].concat(new_value);
                 create_tags();
-                that.#trigger( new IEvent(name, value), callback );
+                that._trigger( new IEvent(name, value), callback );
             };
 
             let element = widget.domEl;
@@ -2348,7 +2353,7 @@
                     this.style.display = "none";
                     value = [].concat(defaultValue);
                     create_tags();
-                    that.#trigger( new IEvent(name, value, e), callback );
+                    that._trigger( new IEvent(name, value, e), callback );
                 });
 
             // Show tags
@@ -2373,7 +2378,7 @@
                         value.splice( value.indexOf( tag_name ), 1 );
                         let btn = element.querySelector(".lexwidgetname .lexicon");
                         if(btn) btn.style.display = "block";
-                        that.#trigger( new IEvent(name, value, e), callback );
+                        that._trigger( new IEvent(name, value, e), callback );
                     });
     
                     tags_container.appendChild(tag);
@@ -2395,7 +2400,7 @@
                         create_tags();
                         let btn = element.querySelector(".lexwidgetname .lexicon");
                         if(btn) btn.style.display = "block";
-                        that.#trigger( new IEvent(name, value, e), callback );
+                        that._trigger( new IEvent(name, value, e), callback );
                     }
                 };
 
@@ -2485,7 +2490,7 @@
                 let btn = element.querySelector(".lexwidgetname .lexicon");
                 if(btn)
                     btn.style.display = flag.value != flag.iValue ? "block": "none";
-                this.#trigger( new IEvent(name, flag.value, e), callback );
+                this._trigger( new IEvent(name, flag.value, e), callback );
             });
             
             element.appendChild(container);
@@ -2559,7 +2564,7 @@
                 if(color.useRGB)
                     val = hexToRgb(val);
 
-                this.#trigger( new IEvent(name, val, e), callback );
+                this._trigger( new IEvent(name, val, e), callback );
             }, false);
             
             element.appendChild(container);
@@ -2658,7 +2663,7 @@
                 let btn = element.querySelector(".lexwidgetname .lexicon");
                 if(btn)
                     btn.style.display = val != vecinput.iValue ? "block": "none";
-                this.#trigger( new IEvent(name, val, e), callback );
+                this._trigger( new IEvent(name, val, e), callback );
             }, false);
             
             // Add drag input
@@ -2778,7 +2783,7 @@
                     if(btn) btn.style.display = val != vecinput.iValue ? "block": "none";
 
                     value[e.target.idx] = val;
-                    this.#trigger( new IEvent(name, value, e), callback );
+                    this._trigger( new IEvent(name, value, e), callback );
                 }, false);
                 
                 // Add drag input

@@ -448,14 +448,11 @@ function fillRightBottomPanel( panel, tab ) {
         });
 
         const shader_instance = {
-            //'position': [0, 10],
-            //'velocity': [0, 1, 0],
-            // 'color': [1, 1, 1, 1],
             'hex_color': '#f5f505',
             'high_res': true
         };
 
-        panel.addShader( "PBR Shader", shader_instance );
+        panel.addShader( "PBR Shader", shader_instance, (instance) => { console.log(instance) } );
         panel.addShader( "Empty", null );
 
         /************** */
