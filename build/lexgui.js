@@ -2882,10 +2882,10 @@
                     this.setValue(name, v);
 
                     if(options.callback)
-                        options.callback(v);
+                        options.callback(v, e);
                 }
 
-                function inner_mouseup(el, e) {
+                function inner_mouseup(el) {
                     el.removeEventListener("mousemove", inner_mousemove);
                 }
             }
