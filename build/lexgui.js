@@ -2861,6 +2861,7 @@
          * @param {Number} value Progress value 
          * @param {*} options:
          * min, max: Min and Max values
+         * low, optimum, high: Low and High boundary values, Optimum point in the range
          * showValue: show current value
          * editable: allow edit value
          * callback: function called on change value
@@ -2894,6 +2895,13 @@
             progress.max = options.max ?? 1;
             progress.value = value;
             
+            if(options.low)
+                progress.low = options.low;
+            if(options.high)
+                progress.high = options.high;
+            if(options.optimum)
+                progress.optimum = options.optimum;
+
             container.appendChild(progress);
             element.appendChild(container);
 
