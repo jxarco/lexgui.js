@@ -21,6 +21,10 @@
     - [Dropdown](#dropdown)
     - [Tags](#tags)
     - [Tree](#tree)
+    - [Array](#array)
+    - [List](#list)
+    - [Layers](#layers)
+    - [File](#file)
     - [Progress](#progress)
     - [Other Widgets](#other-widgets)
   - [Event Handling](#event-handling)
@@ -251,18 +255,18 @@ panel.addCheckbox("Toggle me", true, (value, event) => {
 Represents a color input. Allows users to select a color using a color picker, providing an interactive way to choose colors for various elements in your web interface. Call `Panel.addColor(name, value, callback, options)` to add a Color Widget to your panel:
 
 * `name (String)`: Widget name
-* `value (String)`: Color value in hex ("#fff")
+* `value (String or Array)`: Color value in hex ("#fff") or Array[r, g, b]
 * `callback (Function)`: Function called when the input changes
 * `options (Object)`:
   * `disabled`: Make the widget disabled
-  * `useRGB`: The callback returns color as Array (r, g, b) and not hex [`false`]
-
-<sup>Note: Setting `min`, `max` values will automatically add a slider below the number input.<sup>
+  * `useRGB`: The callback returns color as Array[r, g, b] and not hex [`false`]
 
 ```js
-panel.addNumber("Font Size", 36, (value, event) => {
-    console.log(value);
-}, { min: 1, max: 48 });
+panel.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
+    console.log("Font Color: ", value);
+});
+
+panel.addColor("Background", "#b7a9b1");
 ```
 
 ### Dropdown
@@ -311,6 +315,22 @@ panel.addTags("Game Tags", "2d, ai, engine, ps5, console", (value, event) => {
 ```
 
 ### Tree
+
+...TODO
+
+### Array
+
+...TODO
+
+### List
+
+...TODO
+
+### Layers
+
+...TODO
+
+### File
 
 ...TODO
 
