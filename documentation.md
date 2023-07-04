@@ -10,15 +10,16 @@
     - [Panel](#panel)
     - [Branch](#branch)
   - [Widgets](#widgets)
+    - [Getter and Setters](#getter-and-setters)
     - [Title](#title)
     - [Text](#text)
     - [Button](#button)
     - [Number](#number)
     - [Vector](#vector)
     - [Checkbox](#checkbox)
+    - [Color](#color)
     - [Dropdown](#dropdown)
-      - [String values](#string-values)
-      - [Media values](#media-values)
+    - [Tags](#tags)
     - [Tree](#tree)
     - [Progress](#progress)
     - [Other Widgets](#other-widgets)
@@ -121,7 +122,7 @@ As `options` you can pass `id` and `className` to be added to your new panel.
 
 ### Branch
 
-...
+...TODO
 
 ## Widgets
 
@@ -129,13 +130,20 @@ LexGUI.js provides a set of commonly used UI widgets that you can use to show or
 
 <sup>Note: In most cases where you set a Widget Name, you will have the option to reset the Widget Value to its default value by pressing a *reset button* what will appear on changing the initial state of the widget.<sup>
 
+### Getter and Setters
+
+...TODO
+
 ### Title
 
 Represents a text title section inside a [Branch](#branch). Call `Panel.addTitle(name, value, callback, options)` to add a Text Widget to your panel:
 
 * `name (String)`: Widget name
-* `value (String)`: Text
-* `callback (Function)`: Function called when the input 
+* `options (Object)`: Basic options for a Widget
+
+```js
+panel.addTitle("A title!");
+```
 
 ### Text
 
@@ -150,6 +158,12 @@ Represents a text input. Call `Panel.addText(name, value, callback, options)` to
   * `trigger`: Choose onchange trigger (default, input)
   * `inputWidth`: Width of the text input
 
+```js
+panel.addText("Text Name", "Text value", (value, event) => {
+    console.log(value);
+}, { placeholder: "Something" });
+```
+
 ### Button
 
 Represents a clickable element typically used to trigger an action. Call `Panel.addButton(name, value, callback, options)` to add a Button Widget to your panel:
@@ -159,6 +173,12 @@ Represents a clickable element typically used to trigger an action. Call `Panel.
 * `callback (Function)`: Function called when the button is clicked
 * `options (Object)`:
   * `disabled`: Make the widget disabled
+
+```js
+panel.addButton("A Name", "Print event", (value, event) => {
+    console.log(event);
+});
+```
 
 ### Number
 
@@ -173,6 +193,12 @@ Represents a number input. Call `Panel.addNumber(name, value, callback, options)
   * `min`, `max`: Min and Max input values
 
 <sup>Note: Setting `min`, `max` values will automatically add a slider below the number input.<sup>
+
+```js
+panel.addNumber("Font Size", 36, (value, event) => {
+    console.log(value);
+}, { min: 1, max: 48 });
+```
 
 You can change the value of this widget manually, using the mouse wheel, and dragging (up/down). In the last two cases, pressing *Alt* and *Left Shift* will apply a factor of ``0.1`` and ``10`` in that order.
 
@@ -190,15 +216,54 @@ Similar to the Number widget, it represents a numeric vector input. It's compose
 
 <sup>Note: Since a Vector Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.<sup>
 
+```js
+panel.addVector2("2D Position", [250, 350], (value, event) => {
+    console.log(value);
+}, { min: 0, max: 1024 });
+
+panel.addVector3("Velocity", [0.1, 1, 0.5], (value, event) => {
+    console.log(value);
+});
+
+panel.addVector4("Shader Color", [1, 1, 1, 1], (value, event) => {
+    console.log(value);
+});
+```
+
 ### Checkbox
 
-Represent a classic checkbox that allows users to select or deselect an option as a binary choice (either checked or unchecked). Call `Panel.addCheckbox(name, value, callback, options)` to add a Number Widget to your panel:
+Represents a classic checkbox that allows users to select or deselect an option as a binary choice (either checked or unchecked). Call `Panel.addCheckbox(name, value, callback, options)` to add a Checkbox Widget to your panel:
 
 * `name (String)`: Widget name
 * `value (Boolean)`: Boolean value (true/false)
 * `callback (Function)`: Function called when the checkbox value changes
 * `options (Object)`:
   * `disabled`: Make the widget disabled
+
+```js
+panel.addCheckbox("Toggle me", true, (value, event) => {
+    console.log(value);
+});
+```
+
+### Color
+
+Represents a color input. Allows users to select a color using a color picker, providing an interactive way to choose colors for various elements in your web interface. Call `Panel.addColor(name, value, callback, options)` to add a Color Widget to your panel:
+
+* `name (String)`: Widget name
+* `value (String)`: Color value in hex ("#fff")
+* `callback (Function)`: Function called when the input changes
+* `options (Object)`:
+  * `disabled`: Make the widget disabled
+  * `useRGB`: The callback returns color as Array (r, g, b) and not hex [`false`]
+
+<sup>Note: Setting `min`, `max` values will automatically add a slider below the number input.<sup>
+
+```js
+panel.addNumber("Font Size", 36, (value, event) => {
+    console.log(value);
+}, { min: 1, max: 48 });
+```
 
 ### Dropdown
 
@@ -211,33 +276,67 @@ Represents a classic Drop-down list. It works as a HTML Select element, but it c
 * `options (Object)`:
   * `filter`: Boolean field to specify if the drop-down needs a search bar
 
-#### String values
-
 ```js
-panel.addDropdown("Dropdown", ["Option 1", "Option 2"], "Option 1", (value, event) => {
+// String values
+
+panel.addDropdown("String Dropdown", ["Option 1", "Option 2"], "Option 1", (value, event) => {
       console.log(value);
-  }, options);
-```
-#### Media values
+}, options);
 
-```js
+// Media values
+
 const options = [
   { value: "Option 1", src: "/option1.png" }, 
   { value: "Option 2", src: "/option2.gif" },
   { value: "Option 3", src: "/option3.jpg" }
 ];
-panel.addDropdown("Dropdown", options, "Option 1", (value, event) => {
+panel.addDropdown("Media Dropdown", options, "Option 1", (value, event) => {
       console.log(value);
-  }, options);
+}, options);
+```
+
+### Tags
+
+Represents a collection of tags that can be added, removed, and modified dynamically. It provides a user-friendly way to manage and display multiple tags. Call `Panel.addTags(name, value, callback, options)` to add a Tags Widget to your panel:
+
+* `name (String)`: Widget name
+* `value (Boolean)`: Comma separated tags
+* `callback (Function)`: Function called when a tag is either removed or added
+* `options (Object)`: Basic options for a Widget
+
+```js
+panel.addTags("Game Tags", "2d, ai, engine, ps5, console", (value, event) => {
+    console.log(value);
+});
 ```
 
 ### Tree
 
-...
+...TODO
 
 ### Progress
 
-...
+Represents a horizontal bar that fills up gradually to indicate the completion progress of a task or operation or just show a numeric value. Call `Panel.addProgress(name, value, options)` to add a Progress Widget to your panel:
+
+* `name (String)`: Widget name
+* `value (Number)`: Progress value
+* `options (Object)`:
+  * `editable`: Allow to edit value manually
+  * `callback (Function)`: If editable, function called when progress changes
+  * `showValue`: Show current value
+  * `min`, `max`: Min and Max values
+
+```js
+panel.addProgress("HeadRoll", 0, { 
+  min: -1, 
+  max: 1, 
+  showValue: true, 
+  editable: true, 
+  callback: (value, event) => {
+    console.log(value);
+  }
+});
+```
 
 ### Other Widgets
 
@@ -245,4 +344,4 @@ panel.addDropdown("Dropdown", options, "Option 1", (value, event) => {
 
 ## Event Handling
 
-...
+...TODO
