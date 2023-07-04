@@ -2378,6 +2378,28 @@
     
                     tags_container.appendChild(tag);
                 }
+
+                let tag_input = document.createElement('input');
+                tag_input.style.width = "64px";
+                tag_input.value = "";
+                tag_input.placeholder = "Tag...";
+                tags_container.appendChild(tag_input);
+
+                tag_input.onkeydown = function(e) {
+                    const val = this.value.replace(/\s/g, '');
+                    if( e.key == ' ') { 
+                        e.preventDefault();
+                        if( !val.length || value.indexOf( val ) > -1 )
+                            return;
+                        value.push(val);
+                        create_tags();
+                        let btn = element.querySelector(".lexwidgetname .lexicon");
+                        if(btn) btn.style.display = "block";
+                        that.#trigger( new IEvent(name, value, e), callback );
+                    }
+                };
+
+                tag_input.focus();
             }
 
             create_tags();
