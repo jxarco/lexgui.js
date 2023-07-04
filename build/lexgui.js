@@ -2848,7 +2848,8 @@
             let widget = this.create_widget(name, Widget.PROGRESS, options);
             widget.onSetValue = (new_value) => {
                 element.querySelector("meter").value = new_value;
-                element.querySelector("span").innerText = new_value;
+                if( element.querySelector("span") )
+                    element.querySelector("span").innerText = new_value;
             };
             let element = widget.domEl;
 

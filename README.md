@@ -72,6 +72,8 @@ TODO List:
 - ~~Copy Paste Widget Value~~
 - ~~Custom Class Widget~~
 - ~~Tags Widget~~
+- Write tags
+- Custom widget callback
 - Fix dropdown elements when scroll, on dialog, ..
 - Global menu searchbar 
 - Docking System
