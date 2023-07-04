@@ -72,6 +72,8 @@ TODO List:
 - ~~Copy Paste Widget Value~~
 - ~~Custom Class Widget~~
 - ~~Tags Widget~~
+- Fix dropdown elements when scroll, on dialog, ..
+- Global menu searchbar 
 - Docking System
 - Table Widget
 - Card Widget
@@ -79,7 +81,6 @@ TODO List:
 - Menubar: Support subitem checkboxes
 - Image Viewer
 - Area Overlay buttons
-- Support optimum, sub, etc colors for the progress bars
 - Components:
     - ~~Timeline~~
     - Node Graphs

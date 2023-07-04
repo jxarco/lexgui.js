@@ -685,7 +685,8 @@
                             const icon = that.icons[ subkey ];
                             if(icon) {
                                 subentry.innerHTML += "<a class='" + icon + " fa-sm'></a>";
-                            }
+                            }else
+                                subentry.classList.add( "noicon" );
                             subentry.innerHTML += "<div class='lexentryname'>" + subkey + "</div>";
                         }
                         contextmenu.appendChild( subentry );
@@ -1956,10 +1957,15 @@
             buttonName += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
             this.queuedContainer = container;
             let selectedOption = this.addButton(null, buttonName, (value, event) => {
+                if( list.unfocus_event ) {
+                    delete list.unfocus_event;
+                    return;
+                }
                 let rect = event.currentTarget.getBoundingClientRect();
                 element.querySelector(".lexoptions").style.top = (rect.y + rect.height - 5) + 'px';
-                element.querySelector(".lexoptions").style.width = event.currentTarget.clientWidth - 12 + 'px';
+                element.querySelector(".lexoptions").style.width = event.currentTarget.clientWidth + 'px';
                 element.querySelector(".lexoptions").toggleAttribute('hidden');
+                list.focus();
             }, { buttonClass: 'array' });
             delete this.queuedContainer;
             selectedOption.style.width = "100%";   
@@ -1970,10 +1976,15 @@
 
             //Add dropdown options container
             let list = document.createElement('ul');
+            list.tabIndex = -1;
             list.className = "lexoptions";
             list.hidden = true;
-            list.addEventListener('mouseleave', function(e) {
+
+            list.addEventListener('focusout', function(e) {
+                e.stopPropagation();
+                e.stopImmediatePropagation();
                 this.toggleAttribute('hidden', true);
+                this.unfocus_event = e.relatedTarget === selectedOption.querySelector("button");
             });
 
             // Add filter options
@@ -1992,9 +2003,10 @@
                         continue;
                     children.push(list.children[i]);
                 }
-                for(let i = 0; i < children.length; i++) {
-                    list.removeChild(children[i]);
-                }
+
+                // Empty list
+                list.innerHTML = "";
+
                 for(let i = 0; i < options.length; i++)
                 {
                     let iValue = options[i];
@@ -2014,20 +2026,20 @@
                         if(btn) btn.style.display = (value != wValue.iValue ? "block" : "none");
                     })
 
+                    // Add string option
                     if(typeof iValue == 'string') {
-                        //Add string option
-                        
-                        option.innerHTML = option.value = iValue;
+                        option.style.flexDirection = 'unset';
+                        option.innerHTML = "<a class='fa-solid fa-check'></a><span>" + iValue + "</span>";
+                        option.value = iValue;
                         li.setAttribute("value", iValue);
-                        li.className = "lexlistitem";
-                        if(iValue == value)
-                        {
+                        li.className = "lexdropdownitem";
+                        if(iValue == value) {
                             li.classList.add("selected");
                             wValue.innerHTML = iValue;
                         }
                     }
                     else {
-                        //Add image option
+                        // Add image option
                         let img = document.createElement("img");
                         img.src = iValue.src;
                         li.setAttribute("value", iValue.value);

@@ -7,7 +7,7 @@
 	--branch-background: #32363b;
 	--global-branch-darker: #282c31;
 	--branch-title-background: #2c3137;
-  --global-button-color: #4a535c;
+  --global-button-color: #4a535cae;
   --global-dropdown-color: #4e5154;
   --global-text: #d0d0e0;
   --global-text-primary: #d0d0e0e6;
@@ -365,11 +365,11 @@ body.nocursor * {
 }
 
 .lexseparator {
-  width: -moz-calc(100% - 20px);
-  width: -webkit-calc(100% - 20px);
-  width: calc(100% - 20px);
-  border-top: 1px solid #111;
-  border-bottom: 1px solid #555;
+  width: -moz-calc(100% + 24px);
+  width: -webkit-calc(100% + 24px);
+  width: calc(100% + 24px);
+  /* border-top: 1px solid #111; */
+  border-bottom: 1px solid var(--global-button-color);
   margin: 5px 0 5px 10px;
 }
 
@@ -406,7 +406,6 @@ body.nocursor * {
   white-space: nowrap;
   overflow: hidden;
   cursor: pointer;
-  /* box-shadow: 0px 0px 4px #5c5f73; */
   font-size: 12px;
   font-family: var(--global-font);
 }
@@ -425,8 +424,9 @@ body.nocursor * {
 }
 
 .lexbutton:active {
-  background: var(--global-dropdown-color);
-  color: #DDD;
+  /* background: var(--global-dropdown-color);
+  color: #DDD; */
+  border: 2px solid var(--global-selected);
 }
 
 .lexbutton.selected {
@@ -483,26 +483,61 @@ body.nocursor * {
   justify-content: center;
   align-items: center;
   width: 100%;
-  font-weight: bold;
 }
 
 .lexdropdown .lexlistitem {
   height: fit-content;
 }
 
-.lexdropdown .selected{
-  background-color: var(--global-selected)!important;
-}
-
 .lexdropdown ul {
   position: absolute;
   list-style: none;
   background: var(--global-color-primary);
-  padding: 1px 6px;
+  padding: 4px 0px;
   z-index: 10;
   /* overflow-y: scroll; */
   max-height: -webkit-fill-available;
   margin-top: 5px;
+  width: 100%;
+}
+
+.lexdropdown .lexdropdownitem {
+  width: 100%;
+  cursor: pointer;
+  color: rgba(216, 218, 230, 0.826);
+  font-size: 12px;
+  height: 20px;
+  line-height: 22px;
+  align-content: center;
+  display: flow-root;
+  -webkit-user-select: none; /* Safari 3.1+ */
+  -moz-user-select: none; /* Firefox 2+ */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard syntax */
+}
+
+.lexdropdown .lexdropdownitem:hover {
+  background-color: var(--global-selected);
+  color: var(--global-text-primary);
+}
+
+.lexdropdown .lexdropdownitem:active {
+  color: #fff;
+}
+
+.lexdropdown .lexdropdownitem a {
+  display: none;
+  left: 16px;
+  position: absolute;
+}
+
+.lexdropdown .lexdropdownitem.selected {
+  font-weight: bold;
+  color: var(--global-selected-light);
+}
+
+.lexdropdown .lexdropdownitem.selected a {
+  display: block;
 }
 
 .lexdropdown img {
@@ -518,7 +553,7 @@ body.nocursor * {
   height: 1.1em;
   display: inline-block;
   background-color: #1f1f1f;
-  color: #f5f5f5;
+  color: #fff;
   border: 1px solid var(--global-dark-background);
   vertical-align: -3px;
   border-radius: 2px;
@@ -559,7 +594,7 @@ body.nocursor * {
 }
 
 .lexcheckbox .checkbox.on {
-  background-color: var(--global-selected);
+  background-color: var(--global-selected-light);
 }
 
 .lexcheckboxcont #checkboxtext {
@@ -1009,7 +1044,7 @@ meter::-webkit-meter-even-less-good-value {
   border-bottom-right-radius: 6px; */
   z-index: 1001;
   font-weight: 100;
-  box-shadow: 0 0 5px black !important;
+  box-shadow: 0 0 6px black !important;
 }
 
 .lexcontextmenu:focus {
@@ -1040,6 +1075,10 @@ meter::-webkit-meter-even-less-good-value {
   margin-top: 2px;
 }
 
+.lexcontextmenu .lexcontextmenuentry.noicon .lexentryname {
+  margin-left: 21px;
+}
+
 /* normal icons  */
 .lexcontextmenu .lexcontextmenuentry a {
   font-size: 10px;
@@ -1065,7 +1104,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexcontextmenu .lexseparator {
-  margin: 3px 0 3px 10px;
+  margin: 2px 0 2px;
 }
 
 .lexcontextmenu .lexentryshort {
@@ -1121,7 +1160,7 @@ meter::-webkit-meter-even-less-good-value {
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
   font-weight: 100;
-  box-shadow: 0 0 5px black !important
+  box-shadow: 0 0 6px black !important
 }
 
 .lexcontextmenubox .lexcontextmenuentry {
