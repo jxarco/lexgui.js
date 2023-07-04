@@ -297,7 +297,7 @@ function fillPanel( panel ) {
                         m.add( "Move before sibling" );
                         m.add( "Move after sibling" );
                         m.add( "Move to parent" );
-                        m.add( "Delete", { color: "#f33" });
+                        m.add( "Delete" );
                     });
                     break;
                 case LX.TreeEvent.NODE_DRAGGED: 
@@ -320,7 +320,7 @@ function fillPanel( panel ) {
         console.log(value);
     });
 
-    panel.addDropdown("Best Logo", [{value:"Godot", src: "https://pbs.twimg.com/profile_images/1631591220630757377/nKSCjeS3_400x400.png"}, {value: "Unity", src: "https://imgcom.masterd.es/1/blog/2019/11/39809.jpg"}, {value:"Unreal Engine", src: "https://cdn2.unrealengine.com/ue-logo-1400x788-1400x788-8f185e1e3635.jpg"}], "Godot", (value, event) => {
+    panel.addDropdown("Best Logo", [{value:"Godot", src: "https://pbs.twimg.com/profile_images/1631591220630757377/nKSCjeS3_400x400.png"}, {value: "Unity", src: "https://assets.stickpng.com/images/62e132087fe3599fdd46ecb5.png"}, {value:"Unreal Engine", src: "https://cdn2.unrealengine.com/ue-logo-stacked-unreal-engine-w-677x545-fac11de0943f.png"}], "Godot", (value, event) => {
         console.log(value);
     }, {filter:true});
 
@@ -335,6 +335,9 @@ function fillPanel( panel ) {
         console.log(value);
     });
     panel.addArray("Array", ['GPTeam', 'Blat Panthers', 'Blat Bunny'], (value, event) => {
+        console.log(value);
+    });
+    panel.addTags("Game Tags", "2d,  karate, ai, audio,engine,   ps5, console", (value, event) => {
         console.log(value);
     });
     panel.addList(null, 'Blat Panthers', ['GPTeam', 'Blat Bunny', ['Blat Panthers', 'fa-solid fa-paw']], (value, event) => {
@@ -427,11 +430,32 @@ function fillRightBottomPanel( panel, tab ) {
             }
         ]);
 
-        // update panel values uising widget name
-        panel.addNumber("HeadRoll Value", 0, (value, event) => {
-            panel.setValue('HeadRoll', value);
-        }, { min: -1, max: 1, step: 0.1 });
-        panel.addProgress("HeadRoll", 0, { min: -1, max: 1 });
+        /************** */
+        // Custom Widget
+
+        LX.ADD_CUSTOM_WIDGET( 'Shader', {
+            // icon: "fa-dice-d6",
+            default: {
+                'position': [0, 0],
+                'velocity': [0, 0, 0],
+                'color': [0, 0, 0, 0],
+                'hex_color': '#000',
+                'high_res': false
+            }
+        });
+
+        const shader_instance = {
+            //'position': [0, 10],
+            //'velocity': [0, 1, 0],
+            // 'color': [1, 1, 1, 1],
+            'hex_color': '#f5f505',
+            'high_res': true
+        };
+
+        panel.addShader( "PBR Shader", shader_instance );
+        panel.addShader( "Empty", null );
+
+        /************** */
     }
 
     panel.tab("Another tab");
