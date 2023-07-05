@@ -82,6 +82,36 @@ body.nocursor * {
   color: var(--global-text-secondary);
 }
 
+#global_search {
+  position: absolute;
+  background-color: var(--global-branch-darker);
+  border-radius: 6px;
+  border: 1px solid #d0d0ec84;
+  width: 30%;
+  height: 48px;
+  top: 15%;
+  left: calc(50% - 15%);
+  box-shadow: 0 2px 14px black;
+  display: flex;
+}
+
+#global_search a {
+  color: var(--global-text);
+  padding: 16px;
+}
+
+#global_search input {
+  background: none;
+  color: var(--global-text-secondary);
+  font-weight: bold;
+  outline:none;
+  border: none;
+  font-family: var(--global-font);
+  color: var(--global-selected-light);
+  line-height: 23px;
+  font-size: 14px;
+}
+
 /* Dialogs and alerts */
 
 .lexdialog {
@@ -1019,7 +1049,7 @@ meter::-webkit-meter-even-less-good-value {
   padding: 12px;
   padding-left: 20px;
   padding-right: 20px;
-  color: var(--global-text-secondary);
+  color: var(--global-text-primary);
   cursor: pointer;
   margin-left: 4px;
   -webkit-user-select: none; /* Safari 3.1+ */
@@ -1029,7 +1059,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexmenubar .lexmenuentry:hover{
-  color: var(--global-text);
+  color: #fff;
 }
 
 .lexmenubar .lexmenuentry:active{

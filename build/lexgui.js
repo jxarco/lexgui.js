@@ -69,6 +69,29 @@
         }, false );
     }
 
+    function create_global_searchbar( root ) {
+
+        var global_search = document.createElement("div");
+        global_search.id = "global_search";
+        global_search.tabIndex = -1;
+        root.appendChild( global_search );
+
+        global_search.toggleAttribute('hidden', true);
+
+        global_search.focusout = function(){
+            this.toggleAttribute('hidden');
+        }
+        
+        var icon = document.createElement("a");
+        icon.className = "fa-solid fa-magnifying-glass";
+
+        var input = document.createElement("input");
+        input.placeholder = "Search menus...";
+        
+        global_search.appendChild(icon);
+        global_search.appendChild(input);
+    }
+
     /**
      * @method init
      * @param {*} options 
@@ -96,7 +119,9 @@
 
         if(options.container)
             this.container = document.getElementById(options.container);
-        
+            
+        create_global_searchbar( this.container );
+
         this.container.appendChild( modal );
         this.container.appendChild( root );
 
@@ -662,7 +687,7 @@
                     var rect = c.getBoundingClientRect();
                     contextmenu.style.left = (isSubMenu ? rect.width : rect.left) + "px";
                     // Entries use css to set top relative to parent
-                    contextmenu.style.top = (isSubMenu ? 0 : -1 + rect.bottom) + "px";
+                    contextmenu.style.top = (isSubMenu ? 0 : rect.bottom) + "px";
                     c.appendChild( contextmenu );
 
                     contextmenu.focus();
