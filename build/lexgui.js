@@ -136,6 +136,7 @@
         static NODE_DRAGGED         = 4;
         static NODE_RENAMED         = 5;
         static NODE_VISIBILITY      = 6;
+        static NODE_CARETCHANGED    = 7;
 
         constructor( type, node, value ) {
             this.type = type || TreeEvent.NONE;
@@ -1273,6 +1274,8 @@
             if(is_parent) {
                 item.querySelector('a').addEventListener("click", function(){
                     node.closed = !node.closed;
+                    const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed);
+                    that.onevent( event );
                     that.refresh();
                 });
             }

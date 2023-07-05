@@ -164,6 +164,9 @@
                             case LX.TreeEvent.NODE_VISIBILITY:    
                                 this.changeTrackVisibility(e.node, e.value);
                                 break;
+                            case LX.TreeEvent.NODE_CARETCHANGED:    
+                                this.changeTrackDisplay(e.node, e.node.closed);
+                                break;
                         }
                     }});
                 }
@@ -921,6 +924,31 @@
                 this.onChangeTrackVisibility(trackInfo, visible)
         }
 
+         /**
+        * @method changeTrackDisplay
+        * @param {id, parent, children, display} trackInfo 
+        */
+         changeTrackDisplay(trackInfo, hidde) {
+            for(let idx = 0; idx < trackInfo.children.length; idx++) {
+                let [name, type] = trackInfo.children[idx].id.split(" (");
+                if(type)
+                    type = type.replaceAll(")", "").replaceAll(" ", "");
+                //trackInfo = {name, type};
+                let tracks = this.tracksPerItem[name];
+    
+                for(let i = 0; i < tracks.length; i++) {
+                    if(tracks[i].type != type && tracks.length > 1)
+                        continue;
+                        this.tracksPerItem[name][i].hidde = hidde;
+                  //      trackInfo = this.tracksPerItem[name][i];
+                }
+            }
+            
+            this.draw();
+            if(this.onChangeTrackDisplay)
+                this.onChangeTrackDisplay(trackInfo, visible)
+        }
+
         /**
          * @method resize
          * @param {*} size
@@ -1224,19 +1252,22 @@
                 if(!tracks) continue;
                 
                 const height = this.trackHeight;
+                let offsetT = 0;
                 for(let i = 0; i < tracks.length; i++) {
                     let track = tracks[i];
-                    this.drawTrackWithKeyframes(ctx, (i) * height + (t+1)*(offset) , height, track.name + " (" + track.type + ")", this.animationClip.tracks[track.clipIdx], track);
+                    if(track.hidde) {
+                        continue;
+                    }
+                    this.drawTrackWithKeyframes(ctx, (offsetT) * height + (t+1)*(offset) , height, track.name + " (" + track.type + ")", this.animationClip.tracks[track.clipIdx], track);
+                    offsetT++;
                 }
-                offset+= (tracks.length - 1)*height;
+                offset += offsetT ? (offsetT - 1)*height : 0;
             }
              
             
             
             ctx.restore();
-            // let offset = 25;
-            // ctx.fillStyle = 'white';
-            // ctx.fillText("Tracks",  offset + ctx.measureText("Tracks").actualBoundingBoxLeft , -this.topMargin*0.4 );
+           
         };
 
         onUpdateTracks ( keyType ) {
