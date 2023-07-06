@@ -7,10 +7,12 @@
     - [Namespace Globals](#namespace-globals)
   - [Area](#area)
     - [Menubar](#menubar)
+      - [Searchbar for Menu Entries](#searchbar-for-menu-entries)
     - [Panel](#panel)
     - [Branch](#branch)
   - [Widgets](#widgets)
     - [Getter and Setters](#getter-and-setters)
+    - [Reset Value](#reset-value)
     - [Same line](#same-line)
   - [Widget List](#widget-list)
     - [Title](#title)
@@ -115,6 +117,10 @@ area.addMenubar( m => {
 }, { float: 'center' });
 ```
 
+#### Searchbar for Menu Entries
+
+Pressing `Ctrl+Space` you can open a search bar as a shortcut for any Menubar entry created in the whole UI.
+
 ### Panel
 
 Panels are the DOM elements that will enclose your UI [widgets](#widgets). The pipeline is simple, create a Panel, attach it to an Area and fill it!
@@ -130,21 +136,50 @@ As `options` you can pass `id` and `className` to be added to your new panel.
 
 ### Branch
 
-...TODO
+A Branch essentially serves as a Panel Section, allowing you to effectively organize widgets within your panels. By opening and merging branches at any time, you can seamlessly incorporate widgets into your panels using `Panel.branch(name, options)`:
+
+```js
+panel.branch("Section Title");
+
+// Add widgets here...
+
+panel.merge();
+```
+
+When branching, you can use some options:
+
+ * `className`: Add class to the branch
+ * `closed`: Set branch collapsed/opened [false]
+ * `icon`: Set branch icon (Fontawesome class e.g. "fa-solid fa-skull")
+ * `filter`: Allow filter widgets in branch by name [false]
 
 ## Widgets
 
-LexGUI.js provides a set of commonly used UI widgets that you can use to show or modify your application state. 
+A widget is a *fundamental building block that represents a graphical user interface (GUI) element*. Widgets are the visual components with which users interact and provide input within an application, from basic elements like buttons and text fields to more complex elements such as dropdown menus, sliders, and checkboxes. 
 
-<sup>Note: In most cases where you set a Widget Name, you will have the option to reset the Widget Value to its default value by pressing a *reset button* what will appear on changing the initial state of the widget.<sup>
+LexGUI.js provides a wide range of pre-built widgets that developers can utilize to construct intuitive and visually appealing interfaces. These widgets are designed to be customizable, allowing developers to adjust their appearance and behavior to suit the specific requirements of their application.
 
 ### Getter and Setters
 
-...TODO
+One of the features of LexGUI is the ability to effortlessly retrieve and modify values for any widget that has been added. This functionality provides developers with a convenient way to interact with and manipulate the UI elements within their applications:
+
+```js
+// Getting Values by Widget Name
+const color = panel.getValue('Background');
+
+// Settings Values
+panel.setValue('Font Color', color);
+```
+
+<sup>Note: It's important to ensure that the new value provided is compatible with the widget's data type and constraints. Incorrect data types or out-of-range values may result in unexpected behavior or errors.<sup>
+
+### Reset Value
+
+In most cases where you set a Widget Name, you will have the option to reset the Widget Value to its default value by pressing a *reset button* what will appear on changing the initial state of the widget.
 
 ### Same line
 
-...TODO
+You can also add multiple widgets in the same panel row to create well-organized and visually optimized user interface layouts and by calling `panel.sameLine(number)`, where `number` is the number of widgets to be inlined.
 
 ## Widget List
 
@@ -169,6 +204,7 @@ Represents a text input. Call `Panel.addText(name, value, callback, options)` to
 * `options (Object)`:
   * `disabled`: Make the widget disabled
   * `placeholder`: Add input placeholder
+  * `icon`: Icon to be added before the input
   * `trigger`: Choose onchange trigger (default, input)
   * `inputWidth`: Width of the text input
 
@@ -253,11 +289,20 @@ Represents a classic checkbox that allows users to select or deselect an option 
 * `callback (Function)`: Function called when the checkbox value changes
 * `options (Object)`:
   * `disabled`: Make the widget disabled
+  * `suboptions`: Callback to add widgets shown if value = `TRUE`
 
 ```js
 panel.addCheckbox("Toggle me", true, (value, event) => {
     console.log(value);
 });
+
+// Suboptions in case checkbox is enabled
+panel.addCheckbox("Toggle me too", true, (value, event) => {
+        console.log(value);
+    }, { suboptions: (p) => {
+        p.addText(null, "Suboption 1");
+        p.addNumber("Suboption 2", 12);
+    } });
 ```
 
 ### Color

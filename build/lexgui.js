@@ -2652,6 +2652,7 @@
          * @param {Function} callback Callback function on change
          * @param {*} options:
          * disabled: Make the widget disabled [false]
+         * suboptions: Callback to add widgets in case of TRUE value
          */
 
         addCheckbox( name, value, callback, options = {} ) {
