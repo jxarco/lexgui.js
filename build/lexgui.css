@@ -134,6 +134,7 @@ body.nocursor * {
 
 #global_search .searchitembox .searchitem {
   padding: 10px;
+  padding-left: 50px;
   color: var(--global-text-primary);
   font-size: 14px;
   cursor: pointer;

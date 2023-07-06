@@ -83,10 +83,12 @@
         global_search.addEventListener('keydown', function(e) {
             e.stopPropagation();
             e.stopImmediatePropagation();
-            if( e.key == 'Escape' )
+            if( e.key == 'Escape' ) {
                 this.classList.add("hidden");
+                reset_bar(true);
+            }
             else if( e.key == 'Enter' ) {
-                if(allItems[ hoverElId ] && allItems[ hoverElId ].callback) {
+                if(allItems[ hoverElId ]) {
                     allItems[ hoverElId ].callback.call(window, allItems[ hoverElId ].innerText);
                     global_search.classList.toggle('hidden');
                 }
@@ -112,9 +114,11 @@
         });
 
         global_search.addEventListener('focusout', function(e) {
+           if(e.relatedTarget == e.currentTarget) return;
             e.stopPropagation();
             e.stopImmediatePropagation();
             this.classList.add("hidden");
+            reset_bar(true);
         });
 
         root.addEventListener('keydown', e => {
@@ -139,20 +143,27 @@
 
         let ref_previous;
 
-        const add_element  = (t, c) => {
+        const reset_bar = (reset_input) => {
+            itemContainer.innerHTML = "";
+            allItems.length = 0;
+            hoverElId = null;
+            if(reset_input) input.value = "";
+        }
+
+        const add_element = (t, c) => {
             if(!t.length) return;
 
             if(ref_previous) ref_previous.classList.remove('last');
 
             let searchItem = document.createElement("div");
             searchItem.className = "searchitem last";
-            searchItem.innerText = t;
+            searchItem.innerText = current_path + t;
             searchItem.callback = c;
-            if(c)
-                searchItem.addEventListener('click', (e) => {
-                    this.callback.call(window);
-                    global_search.classList.toggle('hidden');
-                });
+            searchItem.addEventListener('click', function(e) {
+                this.callback.call(window);
+                global_search.classList.toggle('hidden');
+                reset_bar(true);
+            });
             searchItem.addEventListener('mouseenter', function(e) {
                 global_search.querySelectorAll(".hovered").forEach(e => e.classList.remove('hovered'));
                 this.classList.add('hovered');
@@ -166,25 +177,30 @@
             ref_previous = searchItem;
         }
 
+        let current_path = "";
+
         const propagate_add = ( item, filter ) => {
 
             const key = Object.keys(item)[0];
-            if( key.toLowerCase().includes(filter) ) 
-                add_element(key, item.callback);
-            
+            if( key.toLowerCase().includes(filter) ) {
+                current_path += " > " + key;
+                if(item.callback)
+                    add_element(key, item.callback);
+            }
+
             for( let c of item[key] )
                 propagate_add( c, filter );
         };
 
         const add_elements = filter => {
             
-            itemContainer.innerHTML = "";
-            allItems.length = 0;
-            hoverElId = null;
+            reset_bar();
 
             for( let m of LX.menubars )
-                for( let i of m.items )
+                for( let i of m.items ) {
+                    current_path = Object.keys(i)[0];
                     propagate_add( i, filter );
+                }
         }
 
         input.addEventListener('input', function(e) {
