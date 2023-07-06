@@ -83,6 +83,7 @@
         global_search.addEventListener('keydown', function(e) {
             e.stopPropagation();
             e.stopImmediatePropagation();
+            hoverElId = hoverElId ?? -1;
             if( e.key == 'Escape' ) {
                 this.classList.add("hidden");
                 reset_bar(true);
@@ -94,7 +95,7 @@
                 }
             }
             else if ( e.key == 'ArrowDown' && hoverElId < (allItems.length - 1) ) {
-                hoverElId = (global_search.querySelectorAll(".hovered").length ? hoverElId : -1) + 1;
+                hoverElId++;
                 global_search.querySelectorAll(".hovered").forEach(e => e.classList.remove('hovered'));
                 allItems[ hoverElId ].classList.add('hovered');
 

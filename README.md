@@ -80,6 +80,7 @@ TODO List:
 - ~~Allow checkbox suboptions~~
 - ~~Menubar: Support subitem checkboxes~~
 - Fix menubar entry with checkbox and icon
+- Fix Array delete item button
 - Drag elements to timeline to animate
 - Table Widget
 - Card Widget
