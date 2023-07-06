@@ -1323,6 +1323,16 @@ meter::-webkit-meter-even-less-good-value {
   color: #979aa0e3;
 }
 
+/* Curve Widget */
+
+.curve {
+
+}
+
+.curve canvas{
+  border-radius: 2px;
+}
+
 /* Layers Widget */
 
 .lexlayers {

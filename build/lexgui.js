@@ -1026,35 +1026,8 @@
 
         value() {
 
-            switch(this.type) {
-                case Widget.TEXT: 
-                case Widget.COLOR:
-                    return this.domEl.querySelector("input").value;
-                case Widget.NUMBER:
-                    return +this.domEl.querySelector("input").value;
-                case Widget.DROPDOWN: 
-                    return this.domEl.querySelector("li.selected").getAttribute('value');
-                case Widget.CHECKBOX: 
-                    return this.domEl.querySelector(".checkbox").value;
-                case Widget.PROGRESS:
-                    return this.domEl.querySelector("meter").value;
-                case Widget.VECTOR:
-                    let inputs = this.domEl.querySelectorAll("input");
-                    let value = [];
-                    for( var v of inputs )
-                    value.push( +v.value );
-                    return value;
-                    case Widget.LAYERS:
-                        return this.domEl.value;
-                        case Widget.ARRAY:
-                            let array_inputs = this.domEl.querySelectorAll("input");
-                            let values = [];
-                    for( var v of array_inputs )
-                    values.push( v.value );
-                    return values;
-                case Widget.CUSTOM:
-                    return this.instance;
-            }
+            if(this.onGetValue)
+                return this.onGetValue();
 
             console.warn("Can't get value of " + this.typeName());
         }
@@ -1110,6 +1083,9 @@
                 case Widget.FILE: return "File";
                 case Widget.LAYERS: return "Layers";
                 case Widget.ARRAY: return "Array";
+                case Widget.LIST: return "List";
+                case Widget.TAGS: return "Tags";
+                case Widget.CURVE: return "Curve";
                 case Widget.CUSTOM: return this.customName;
             }
         }
@@ -1131,6 +1107,9 @@
             let widget = this.create_widget(name, Widget.CUSTOM, options);
             widget.customName = custom_widget_name;
             widget.customIdx = custom_idx;
+            widget.onGetValue = () => {
+                return instance;
+            };
             widget.onSetValue = (new_value) => {
                 instance = new_value;
                 refresh_widget();
@@ -1952,6 +1931,9 @@
         addText( name, value, callback, options = {} ) {
 
             let widget = this.create_widget(name, Widget.TEXT, options);
+            widget.onGetValue = () => {
+                return wValue.value;
+            };
             widget.onSetValue = (new_value) => {
                 wValue.value = new_value;
                 Panel.#dispatch_event(wValue, "focusout");
@@ -2078,6 +2060,9 @@
             }
 
             let widget = this.create_widget(name, Widget.DROPDOWN, options);
+            widget.onGetValue = () => {
+                return element.querySelector("li.selected").getAttribute('value');
+            };
             widget.onSetValue = (new_value) => {
                 let btn = element.querySelector(".lexwidgetname .lexicon");
                 if(btn) btn.style.display = (new_value != wValue.iValue ? "block" : "none");
@@ -2239,7 +2224,7 @@
          * @param {*} options:
          */
 
-        addCurve( name, values, callback, options ) {
+        addCurve( name, values, callback, options = {} ) {
 
             if(!name) {
                 throw("Set Widget Name!");
@@ -2247,12 +2232,15 @@
 
             let that = this;
             let widget = this.create_widget(name, Widget.CURVE, options);
+            widget.onGetValue = () => {
+                return JSON.parse(JSON.stringify(curve_instance.element.value));
+            };
             widget.onSetValue = (new_value) => {
-                // let btn = element.querySelector(".lexwidgetname .lexicon");
-                // if(btn) btn.style.display = (new_value != defaultValue ? "block" : "none");
-                // value = element.value = new_value;
-                // setLayers();
-                // that._trigger( new IEvent(name, value), callback );
+                let btn = element.querySelector(".lexwidgetname .lexicon");
+                if(btn) btn.style.display = (new_value != curve_instance.element.value ? "block" : "none");
+                curve_instance.element.value = JSON.parse(JSON.stringify(new_value));
+                curve_instance.redraw();
+                that._trigger( new IEvent(name, curve_instance.element.value, null), callback );
             };
 
             let element = widget.domEl;
@@ -2261,9 +2249,9 @@
             // Add reset functionality
             Panel.#add_reset_property(element.domName, function(e) {
                 this.style.display = "none";
-                curve_instance.value = JSON.parse(JSON.stringify(defaultValues));
+                curve_instance.element.value = JSON.parse(JSON.stringify(defaultValues));
                 curve_instance.redraw();
-                that._trigger( new IEvent(name, curve_instance.value, e), callback );
+                that._trigger( new IEvent(name, curve_instance.element.value, e), callback );
             });
 
             // Add widget value
@@ -2272,13 +2260,20 @@
             container.className = "lexcurve";
             container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
-            var curve_instance = new Curve(values, options);
-            container.appendChild(curve_instance);
+            options.callback = (v, e) => {
+                let btn = element.querySelector(".lexwidgetname .lexicon");
+                if(btn) btn.style.display = (v != defaultValues ? "block" : "none");
+                that._trigger( new IEvent(name, v, e), callback );
+            };
+            options.name = name;
+            var curve_instance = new Curve(this, values, options);
+            container.appendChild(curve_instance.element);
             element.appendChild(container);
 
             // Resize
             curve_instance.canvas.width = container.offsetWidth;
             curve_instance.redraw();
+            widget.onresize = curve_instance.redraw.bind(curve_instance);
         }
 
         /**
@@ -2297,6 +2292,9 @@
 
             let that = this;
             let widget = this.create_widget(name, Widget.LAYERS, options);
+            widget.onGetValue = () => {
+                return element.value;
+            };
             widget.onSetValue = (new_value) => {
                 let btn = element.querySelector(".lexwidgetname .lexicon");
                 if(btn) btn.style.display = (new_value != defaultValue ? "block" : "none");
@@ -2385,6 +2383,13 @@
             }
 
             let widget = this.create_widget(name, Widget.ARRAY, options);
+            widget.onGetValue = () => {
+                let array_inputs = element.querySelectorAll("input");
+                let values = [];
+                for( var v of array_inputs )
+                values.push( v.value );
+                return values;
+            };
             widget.onSetValue = (new_value) => {
                 values = new_value;
                 updateItems();
@@ -2637,6 +2642,9 @@
             }
 
             let widget = this.create_widget(name, Widget.CHECKBOX, options);
+            widget.onGetValue = () => {
+                return flag.value;
+            };
             widget.onSetValue = (value) => {
                 if(flag.value !== value)
                     Panel.#dispatch_event(toggle, "click");
@@ -2734,6 +2742,9 @@
             }
 
             let widget = this.create_widget(name, Widget.COLOR, options);
+            widget.onGetValue = () => {
+                return color.value;
+            };
             widget.onSetValue = (new_value) => {
                 color.value = new_value;
                 Panel.#dispatch_event(color, "input");
@@ -2809,6 +2820,9 @@
             }
 
             let widget = this.create_widget(name, Widget.NUMBER, options);
+            widget.onGetValue = () => {
+                return +vecinput.value;
+            };
             widget.onSetValue = (new_value) => {
                 vecinput.value = new_value;
                 Panel.#dispatch_event(vecinput, "input");
@@ -2939,6 +2953,13 @@
             }
 
             let widget = this.create_widget(name, Widget.VECTOR, options);
+            widget.onGetValue = () => {
+                let inputs = element.querySelectorAll("input");
+                let value = [];
+                for( var v of inputs )
+                    value.push( +v.value );
+                return value;
+            };
             widget.onSetValue = (new_value) => {
                 const inputs = element.querySelectorAll(".vecinput");
                 for( var i = 0; i < inputs.length; ++i ) {
@@ -3095,6 +3116,9 @@
             }
 
             let widget = this.create_widget(name, Widget.PROGRESS, options);
+            widget.onGetValue = () => {
+                return progress.value;
+            };
             widget.onSetValue = (new_value) => {
                 element.querySelector("meter").value = new_value;
                 if( element.querySelector("span") )
@@ -3587,11 +3611,13 @@
                     case Widget.TEXT:
                         padding = "8px";
                         break;
-                    case Widget.CURVE:
-                        // widget.onresize();
-                        break;
                 };
+
+                value.style.width = "-moz-calc( 100% - " + size + " - " + padding + " )";
+                value.style.width = "-webkit-calc( 100% - " + size + " - " + padding + " )";
                 value.style.width = "calc( 100% - " + size + " - " + padding + " )";
+
+                if(widget.onresize) widget.onresize();
             }
         }
     };
@@ -3989,17 +4015,16 @@
 
     class Curve {
 
-        constructor(value, options) {
+        constructor(panel, value, options = {}) {
 
-            options = options || {};
             let element = document.createElement("div");
             element.className = "curve " + (options.className ? options.className : "");
             element.style.minHeight = "50px";
             element.style.width = options.width || "100%";
 
-            element.bgcolor = options.bgcolor || "#222";
-            element.pointscolor = options.pointscolor || "#5AF";
-            element.linecolor = options.linecolor || "#444";
+            element.bgcolor = options.bgcolor || "#15181c";
+            element.pointscolor = options.pointscolor || "#67aae9";
+            element.linecolor = options.linecolor || "#555";
 
             element.value = value || [];
             element.xrange = options.xrange || [0,1]; //min,max
@@ -4017,7 +4042,7 @@
             canvas.width = options.width || 200;
             canvas.height = options.height || 50;
             element.appendChild( canvas );
-            element.canvas = canvas;
+            this.canvas = canvas;
 
             element.addEventListener("mousedown", onmousedown);
 
@@ -4086,7 +4111,8 @@
 
             element.redraw = function()  {
 
-                var rect = canvas.parentNode.getBoundingClientRect();
+                var rect = canvas.parentElement.getBoundingClientRect();
+                if(canvas.parentElement.parentElement) rect = canvas.parentElement.parentElement.getBoundingClientRect();
                 if(rect && canvas.width != rect.width && rect.width && rect.width < 1000)
                     canvas.width = rect.width;
                 if(rect && canvas.height != rect.height && rect.height && rect.height < 1000)
@@ -4126,7 +4152,7 @@
                     else
                         ctx.fillStyle = element.pointscolor;
                     ctx.beginPath();
-                    ctx.arc( pos[0], pos[1], selected == i ? 4 : 2, 0, Math.PI * 2);
+                    ctx.arc( pos[0], pos[1], selected == i ? 5 : 3, 0, Math.PI * 2);
                     ctx.fill();
                 }
 
@@ -4213,7 +4239,7 @@
                 element.redraw();
                 last_mouse[0] = mousex;
                 last_mouse[1] = mousey;
-                onchange();
+                onchange(evt);
 
                 evt.preventDefault();
                 evt.stopPropagation();
@@ -4224,14 +4250,14 @@
                 element.redraw();
                 document.removeEventListener("mousemove", onmousemove);
                 document.removeEventListener("mouseup", onmouseup);
-                onchange();
+                onchange(evt);
                 evt.preventDefault();
                 evt.stopPropagation();
             }
             
-            function onchange() {
+            function onchange(e) {
                 if(options.callback)
-                    options.callback.call(element, element.value);
+                    options.callback.call(element, element.value, e);
             }
 
             function distance(a,b) { return Math.sqrt( Math.pow(b[0]-a[0],2) + Math.pow(b[1]-a[1],2) ); };
@@ -4265,15 +4291,11 @@
             }
             
             element.redraw();
-            return element;
+            return this;
         }
 
-        resize(e) {
+        redraw() {
             this.element.redraw();
-        }
-
-        manolo(e) {
-            console.log("manolo");
         }
     }
 
