@@ -79,8 +79,8 @@ TODO List:
 - ~~Fix dropdown elements when scroll, on dialog, ..~~
 - ~~Allow checkbox suboptions~~
 - ~~Menubar: Support subitem checkboxes~~
+- ~~Fix Array delete item button~~
 - Fix menubar entry with checkbox and icon
-- Fix Array delete item button
 - Drag elements to timeline to animate
 - Table Widget
 - Card Widget

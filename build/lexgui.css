@@ -514,6 +514,7 @@ body.nocursor * {
 
 .lexbutton a {    
   line-height: 13px;
+  margin-left: 0px;
 }
 
 .lexbutton:hover {
