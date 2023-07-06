@@ -71,25 +71,131 @@
 
     function create_global_searchbar( root ) {
 
-        var global_search = document.createElement("div");
+        let global_search = document.createElement("div");
         global_search.id = "global_search";
+        global_search.className = "hidden";
         global_search.tabIndex = -1;
         root.appendChild( global_search );
 
-        global_search.toggleAttribute('hidden', true);
+        let allItems = [];
+        let hoverElId = null;
 
-        global_search.focusout = function(){
-            this.toggleAttribute('hidden');
-        }
-        
-        var icon = document.createElement("a");
+        global_search.addEventListener('keydown', function(e) {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            if( e.key == 'Escape' )
+                this.classList.add("hidden");
+            else if( e.key == 'Enter' ) {
+                if(allItems[ hoverElId ] && allItems[ hoverElId ].callback) {
+                    allItems[ hoverElId ].callback.call(window, allItems[ hoverElId ].innerText);
+                    global_search.classList.toggle('hidden');
+                }
+            }
+            else if ( e.key == 'ArrowDown' && hoverElId < (allItems.length - 1) ) {
+                hoverElId = (global_search.querySelectorAll(".hovered").length ? hoverElId : -1) + 1;
+                global_search.querySelectorAll(".hovered").forEach(e => e.classList.remove('hovered'));
+                allItems[ hoverElId ].classList.add('hovered');
+
+                let dt = allItems[ hoverElId ].offsetHeight * (hoverElId + 1) - itemContainer.offsetHeight;
+                if( dt > 0) {
+                    itemContainer.scrollTo({
+                        top: dt,
+                        behavior: "smooth",
+                    });
+                }
+
+            } else if ( e.key == 'ArrowUp' && hoverElId > 0 ) {
+                hoverElId--;
+                global_search.querySelectorAll(".hovered").forEach(e => e.classList.remove('hovered'));
+                allItems[ hoverElId ].classList.add('hovered');
+            }
+        });
+
+        global_search.addEventListener('focusout', function(e) {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            this.classList.add("hidden");
+        });
+
+        root.addEventListener('keydown', e => {
+            if( e.key == ' ' && e.ctrlKey ) {
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+                global_search.classList.toggle('hidden');
+                global_search.querySelector('input').focus();
+                add_elements(undefined);
+            }
+        });
+
+        let icon = document.createElement("a");
         icon.className = "fa-solid fa-magnifying-glass";
 
-        var input = document.createElement("input");
+        let input = document.createElement("input");
         input.placeholder = "Search menus...";
+        input.value = "";
+
+        let itemContainer = document.createElement("div");
+        itemContainer.className = "searchitembox";
+
+        let ref_previous;
+
+        const add_element  = (t, c) => {
+            if(!t.length) return;
+
+            if(ref_previous) ref_previous.classList.remove('last');
+
+            let searchItem = document.createElement("div");
+            searchItem.className = "searchitem last";
+            searchItem.innerText = t;
+            searchItem.callback = c;
+            if(c)
+                searchItem.addEventListener('click', (e) => {
+                    this.callback.call(window);
+                    global_search.classList.toggle('hidden');
+                });
+            searchItem.addEventListener('mouseenter', function(e) {
+                global_search.querySelectorAll(".hovered").forEach(e => e.classList.remove('hovered'));
+                this.classList.add('hovered');
+                hoverElId = allItems.indexOf(this);
+            });
+            searchItem.addEventListener('mouseleave', function(e) {
+                this.classList.remove('hovered');
+            });
+            allItems.push( searchItem );
+            itemContainer.appendChild(searchItem);
+            ref_previous = searchItem;
+        }
+
+        const propagate_add = ( item, filter ) => {
+
+            const key = Object.keys(item)[0];
+            if( key.toLowerCase().includes(filter) ) 
+                add_element(key, item.callback);
+            
+            for( let c of item[key] )
+                propagate_add( c, filter );
+        };
+
+        const add_elements = filter => {
+            
+            itemContainer.innerHTML = "";
+            allItems.length = 0;
+            hoverElId = null;
+
+            for( let m of LX.menubars )
+                for( let i of m.items )
+                    propagate_add( i, filter );
+        }
+
+        input.addEventListener('input', function(e) {
+            add_elements( this.value.toLowerCase() );
+        });
         
         global_search.appendChild(icon);
         global_search.appendChild(input);
+        global_search.appendChild(itemContainer);
+
+        return global_search;
     }
 
     /**
@@ -106,6 +212,7 @@
         // LexGUI root 
 		var root = document.createElement("div");
 		root.id = "lexroot";
+        root.tabIndex = -1;
         
         var modal = document.createElement("div");
         modal.id = "modal";
@@ -120,7 +227,7 @@
         if(options.container)
             this.container = document.getElementById(options.container);
             
-        create_global_searchbar( this.container );
+        this.global_search = create_global_searchbar( this.container );
 
         this.container.appendChild( modal );
         this.container.appendChild( root );
@@ -137,6 +244,7 @@
 
         this.ready = true;
         this.main_area = new Area( {id: options.id ?? "mainarea"} );
+        this.menubars = [];
 
         return this.main_area;
     }
@@ -525,12 +633,13 @@
 
         addMenubar( callback, options = {} ) {
             
-            var menubar = new Menubar(options);
+            let menubar = new Menubar(options);
+            LX.menubars.push( menubar );
 
             if(callback) callback( menubar );
 
             // Hack to get content height
-            var d = document.createElement('div');
+            let d = document.createElement('div');
             d.appendChild(menubar.root);
             document.body.appendChild(d);
             const height = menubar.root.clientHeight;
@@ -1487,7 +1596,7 @@
                 branch.root.classList.add('first');
 
             // This is the last!
-            this.root.querySelectorAll(".last").forEach( e => { e.classList.remove("last"); } );
+            this.root.querySelectorAll(".lexbranch.last").forEach( e => { e.classList.remove("last"); } );
             branch.root.classList.add('last');
 
             this.branches.push( branch );
@@ -1993,7 +2102,7 @@
                 }
                 let rect = event.currentTarget.getBoundingClientRect();
                 element.querySelector(".lexoptions").style.top = (rect.y + rect.height - 5) + 'px';
-                element.querySelector(".lexoptions").style.width = event.currentTarget.clientWidth + 'px';
+                element.querySelector(".lexoptions").style.width = (event.currentTarget.clientWidth - 1) + 'px';
                 element.querySelector(".lexoptions").toggleAttribute('hidden');
                 list.focus();
             }, { buttonClass: 'array' });
@@ -2010,12 +2119,12 @@
             list.className = "lexoptions";
             list.hidden = true;
 
-            list.addEventListener('focusout', function(e) {
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                this.toggleAttribute('hidden', true);
-                this.unfocus_event = e.relatedTarget === selectedOption.querySelector("button");
-            });
+            // list.addEventListener('focusout', function(e) {
+            //     e.stopPropagation();
+            //     e.stopImmediatePropagation();
+            //     this.toggleAttribute('hidden', true);
+            //     this.unfocus_event = e.relatedTarget === selectedOption.querySelector("button");
+            // });
 
             // Add filter options
             if(options.filter)
@@ -2063,6 +2172,7 @@
                         option.value = iValue;
                         li.setAttribute("value", iValue);
                         li.className = "lexdropdownitem";
+                        if( i == (options.length - 1) ) li.className += " last";
                         if(iValue == value) {
                             li.classList.add("selected");
                             wValue.innerHTML = iValue;

@@ -11,6 +11,7 @@
     - [Branch](#branch)
   - [Widgets](#widgets)
     - [Getter and Setters](#getter-and-setters)
+    - [Same line](#same-line)
     - [Title](#title)
     - [Text](#text)
     - [Button](#button)
@@ -27,6 +28,7 @@
     - [File](#file)
     - [Progress](#progress)
     - [Other Widgets](#other-widgets)
+  - [Dialogs](#dialogs)
   - [Event Handling](#event-handling)
 
 ## Getting Started
@@ -135,6 +137,10 @@ LexGUI.js provides a set of commonly used UI widgets that you can use to show or
 <sup>Note: In most cases where you set a Widget Name, you will have the option to reset the Widget Value to its default value by pressing a *reset button* what will appear on changing the initial state of the widget.<sup>
 
 ### Getter and Setters
+
+...TODO
+
+### Same line
 
 ...TODO
 
@@ -361,6 +367,10 @@ panel.addProgress("HeadRoll", 0, {
 ### Other Widgets
 
 * `Panel.addBlank(height)`: Add vertical space (in pixels) inside a branch.
+
+## Dialogs
+
+...TODO
 
 ## Event Handling
 
