@@ -2115,8 +2115,10 @@
                     delete list.unfocus_event;
                     return;
                 }
+                let container = selectedOption.parentElement.parentElement.parentElement.parentElement; // there must be a nicer way...
                 let rect = event.currentTarget.getBoundingClientRect();
-                element.querySelector(".lexoptions").style.top = (rect.y + rect.height - 5) + 'px';
+                let y_pos = container.classList.contains('lexdialog') ? event.currentTarget.offsetTop - 5 + rect.height : rect.y + rect.height - 5;
+                element.querySelector(".lexoptions").style.top = y_pos + 'px';
                 element.querySelector(".lexoptions").style.width = (event.currentTarget.clientWidth - 1) + 'px';
                 element.querySelector(".lexoptions").toggleAttribute('hidden');
                 list.focus();
@@ -2134,12 +2136,12 @@
             list.className = "lexoptions";
             list.hidden = true;
 
-            // list.addEventListener('focusout', function(e) {
-            //     e.stopPropagation();
-            //     e.stopImmediatePropagation();
-            //     this.toggleAttribute('hidden', true);
-            //     this.unfocus_event = e.relatedTarget === selectedOption.querySelector("button");
-            // });
+            list.addEventListener('focusout', function(e) {
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                this.toggleAttribute('hidden', true);
+                this.unfocus_event = e.relatedTarget === selectedOption.querySelector("button");
+            });
 
             // Add filter options
             if(options.filter)

@@ -76,7 +76,7 @@ TODO List:
 - ~~Custom widget callback~~
 - ~~Global menu searchbar~~
 - ~~Simple Docking System~~
-- Fix dropdown elements when scroll, on dialog, ..
+- ~~Fix dropdown elements when scroll, on dialog, ..~~
 - Table Widget
 - Card Widget
 - Allow checkbox suboptions
