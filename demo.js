@@ -354,7 +354,7 @@ function fillPanel( panel ) {
     });
     panel.addNumber("Font Size", 36, (value, event) => {
         console.log(value);
-    }, { min: 1, max: 48 });
+    }, { min: 1, max: 48, step: 1});
     panel.addVector2("2D Position", [250, 350], (value, event) => {
         console.log(value);
     }, { min: 0, max: 1024 });
@@ -373,6 +373,7 @@ function fillPanel( panel ) {
     });
     panel.addButton(null, "Click me, Im Full Width...");
     panel.addButton("Test Button", "Reduced width...");
+    panel.addBlank(12);
 }
 
 function fillRightBottomPanel( panel, tab ) {

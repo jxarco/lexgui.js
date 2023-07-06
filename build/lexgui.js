@@ -89,7 +89,7 @@
             }
             else if( e.key == 'Enter' ) {
                 if(allItems[ hoverElId ]) {
-                    allItems[ hoverElId ].callback.call(window, allItems[ hoverElId ].innerText);
+                    allItems[ hoverElId ].callback.call(window, allItems[ hoverElId ].entry_name);
                     global_search.classList.toggle('hidden');
                 }
             }
@@ -150,17 +150,18 @@
             if(reset_input) input.value = "";
         }
 
-        const add_element = (t, c) => {
+        const add_element = (t, c, p) => {
             if(!t.length) return;
 
             if(ref_previous) ref_previous.classList.remove('last');
 
             let searchItem = document.createElement("div");
             searchItem.className = "searchitem last";
-            searchItem.innerText = current_path + t;
+            searchItem.innerText = p + t;
+            searchItem.entry_name = t;
             searchItem.callback = c;
             searchItem.addEventListener('click', function(e) {
-                this.callback.call(window);
+                this.callback.call(window, this.entry_name);
                 global_search.classList.toggle('hidden');
                 reset_bar(true);
             });
@@ -177,19 +178,18 @@
             ref_previous = searchItem;
         }
 
-        let current_path = "";
-
-        const propagate_add = ( item, filter ) => {
+        const propagate_add = ( item, filter, path ) => {
 
             const key = Object.keys(item)[0];
             if( key.toLowerCase().includes(filter) ) {
-                current_path += " > " + key;
                 if(item.callback)
-                    add_element(key, item.callback);
+                    add_element(key, item.callback, path);
             }
 
+            path += key + " > ";
+
             for( let c of item[key] )
-                propagate_add( c, filter );
+                propagate_add( c, filter, path );
         };
 
         const add_elements = filter => {
@@ -198,8 +198,7 @@
 
             for( let m of LX.menubars )
                 for( let i of m.items ) {
-                    current_path = Object.keys(i)[0];
-                    propagate_add( i, filter );
+                    propagate_add( i, filter, "");
                 }
         }
 
@@ -3593,7 +3592,10 @@
                                 branch.content.appendChild( w.domEl );
                             }
 
+                            branch.widgets = that.widgets;
+
                             // Make new last the last branch
+                            panel.root.querySelectorAll(".lexbranch.last").forEach( e => { e.classList.remove("last"); } );
                             branch.root.classList.add('last');
                             root.remove();
                         }
