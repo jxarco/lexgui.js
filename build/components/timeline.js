@@ -107,8 +107,7 @@
 
             if(this.header)
                 this.header.clear();
-            else
-            {
+            else {
                 this.header = new LX.Panel({id:'lextimeline'});
                 this.root.appendChild(this.header.root);
             }
@@ -116,7 +115,7 @@
             header.addBlank();
             header.sameLine(2 + this.buttonsDrawn.length);
             header.addTitle(this.name);
-            header.addNumber("Duration", this.duration, (value, event) => this.setDuration(value), {min: "0", width: '350px'});        
+            header.addNumber("Duration", this.duration, (value, event) => this.setDuration(value), {step: 0.1, min: "0", width: '350px'});        
 
             for(let i = 0; i < this.buttonsDrawn.length; i++) {
                 let button = this.buttonsDrawn[i];
@@ -171,14 +170,12 @@
                     }});
                 }
             }
-            
 
             // for(let i = 0; i < this.animationClip.tracks.length; i++) {
             //     let track = this.animationClip.tracks[i];
             //     panel.addTitle(track.name + (track.type? '(' + track.type + ')' : ''));
             // }
             this.#resizecanvas([ this.root.clientWidth - this.leftPanel.root.clientWidth, this.size[1]]);
-
         }
 
         /**
@@ -429,7 +426,6 @@
             if(this.onDrawContent)
                 this.onDrawContent( ctx, timeStart, timeEnd, this );
             ctx.restore();
-            
         }
 
         /**
@@ -715,7 +711,7 @@
             // }
             ctx.fillStyle = "#2c303570";
             if(trackInfo.isSelected)
-                ctx.fillRect(0, y, ctx.canvas.width, trackHeight -1 );
+                ctx.fillRect(0, y - 3, ctx.canvas.width, trackHeight );
             ctx.fillStyle = "#5e9fdd"//"rgba(10,200,200,1)";
             var keyframes = track.times;
 
@@ -928,7 +924,8 @@
         * @method changeTrackDisplay
         * @param {id, parent, children, display} trackInfo 
         */
-         changeTrackDisplay(trackInfo, hidde) {
+         changeTrackDisplay(trackInfo, hide) {
+
             for(let idx = 0; idx < trackInfo.children.length; idx++) {
                 let [name, type] = trackInfo.children[idx].id.split(" (");
                 if(type)
@@ -939,14 +936,15 @@
                 for(let i = 0; i < tracks.length; i++) {
                     if(tracks[i].type != type && tracks.length > 1)
                         continue;
-                        this.tracksPerItem[name][i].hidde = hidde;
+                        this.tracksPerItem[name][i].hide = hide;
                   //      trackInfo = this.tracksPerItem[name][i];
                 }
             }
             
             this.draw();
+
             if(this.onChangeTrackDisplay)
-                this.onChangeTrackDisplay(trackInfo, visible)
+                this.onChangeTrackDisplay(trackInfo, hide)
         }
 
         /**
@@ -1240,13 +1238,12 @@
 
         onDrawContent( ctx, timeStart, timeEnd ) {
         
-            
             if(this.selectedItems == null || !this.tracksPerItem) 
                 return;
             
             ctx.save();
 
-            let offset = 16 + this.trackHeight;
+            let offset = this.trackHeight;
             for(let t = 0; t < this.selectedItems.length; t++) {
                 let tracks = this.tracksPerItem[this.selectedItems[t]] ? this.tracksPerItem[this.selectedItems[t]] : [{name: this.selectedItems[t]}];
                 if(!tracks) continue;
@@ -1255,19 +1252,16 @@
                 let offsetT = 0;
                 for(let i = 0; i < tracks.length; i++) {
                     let track = tracks[i];
-                    if(track.hidde) {
+                    if(track.hide) {
                         continue;
                     }
-                    this.drawTrackWithKeyframes(ctx, (offsetT) * height + (t+1)*(offset) , height, track.name + " (" + track.type + ")", this.animationClip.tracks[track.clipIdx], track);
+                    this.drawTrackWithKeyframes(ctx, 2 + offsetT * height + (t+1) * offset, height, track.name + " (" + track.type + ")", this.animationClip.tracks[track.clipIdx], track);
                     offsetT++;
                 }
                 offset += offsetT ? (offsetT - 1)*height : 0;
             }
              
-            
-            
             ctx.restore();
-           
         };
 
         onUpdateTracks ( keyType ) {

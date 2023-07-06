@@ -5,6 +5,7 @@
   --global-color-primary: #1a1f23;
   --global-color-secondary: #2c3035f5;
 	--branch-background: #32363b;
+  /* --widget-background-hover: #3e444b; */
 	--global-branch-darker: #282c31;
 	--branch-title-background: #2c3137;
   --global-button-color: #4a535cae;
@@ -368,6 +369,10 @@ body.nocursor * {
   overflow: hidden;
 }
 
+/* .lexwidget:hover {
+  background-color: var(--widget-background-hover);
+} */
+
 .lexwidget.auto {
   width: unset !important;
 }
@@ -415,17 +420,25 @@ body.nocursor * {
   background: none;
   /* margin-left: 5px; */
   padding: 3px;
-  color: var(--global-text-secondary);
+  color: var(--global-text-primary);
   font-weight: 600;
   outline:none;
   border: none;
   border-bottom: 1px solid #bbbbbb47;
 }
 
+.lexwidget .lextext input:focus {
+  border-bottom: 2px solid var(--global-selected-light);
+}
+
 .lexwidget .inputicon {
   border-bottom: 1px solid #bbbbbb47;
   padding: 4px;
   font-size: 11px;
+}
+
+.lexwidget:has(input:focus) .inputicon {
+  border-bottom: 2px solid var(--global-selected-light);
 }
 
 .lexwidget input.colorinput {
@@ -484,7 +497,7 @@ body.nocursor * {
   margin-left: 5px;
   margin-top: 2px;
   height: 22px !important;
-  color: #DDD;
+  color: var(--global-text);
   font-weight: 500;
   outline: none;
   white-space: nowrap;
@@ -510,7 +523,7 @@ body.nocursor * {
 .lexbutton:active {
   /* background: var(--global-dropdown-color);
   color: #DDD; */
-  border: 2px solid var(--global-selected);
+  border: 2px solid var(--global-selected-light);
 }
 
 .lexbutton.selected {
@@ -707,10 +720,17 @@ body.nocursor * {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.lexcolor:has(input:focus) {
+  outline: 2px solid var(--global-selected-light);
+  border-radius: 4px;
 }
 
 .lexcolor .colorinfo {
-  color: var(--global-text-secondary);
+  color: var(--global-text-primary);
   min-width: 56px;
   margin-left: 8px;
   font-weight: 600;
@@ -726,9 +746,13 @@ body.nocursor * {
 .lexvector .vecbox {
   display: flex;
   border-radius: 4px;
-  border: 1px solid #22292fbf;
+  border: 1px solid #22292fc8;
   margin-right: 2px;
   background: var(--branch-background);
+}
+
+.lexvector .vecbox:has(input:focus) {
+  outline: 2px solid var(--global-selected-light);
 }
 
 .lexvector .vecbox span {
@@ -796,11 +820,15 @@ input[type=number] {
 
 /* Number Widget */
 
-.numberbox {
+.lexwidget .numberbox {
   display: grid;
   border-radius: 4px;
-  border: 1px solid #22292fbf;
+  border: 1px solid #22292fc8;
   margin-right: 2px;
+}
+
+.lexwidget .numberbox:has(input:focus) {
+  outline: 2px solid var(--global-selected-light);
 }
 
 .lexinputslider {
@@ -926,6 +954,12 @@ input[type=number] {
   font-size: 13px;
 }
 
+.lextree .lextreetools.notitle {
+  padding-top: 14px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
 .lextree .lextreetools a {
   margin-right: 8px;
 }
@@ -979,7 +1013,7 @@ input[type=number] {
 }
 
 .lextree .lextreeitem.selected{
-  color: #5f88c9;
+  color: var(--global-selected-light);
   background: var(--global-highlight);
 }
 
@@ -992,7 +1026,7 @@ input[type=number] {
 }
 
 .lextree .lextreeitem.selected:hover{
-  color: #5f88c9;
+  color: var(--global-selected);
 }
 
 .lextree .lextreeitem:hover a {
@@ -1423,7 +1457,7 @@ meter::-webkit-meter-even-less-good-value {
 
 /* Array Widget */
 
-.lexwidget:has(.lexarrayitems),  .lexwidget:has(.lexcheckboxsubmenu) {
+.lexwidget:has(.lexarrayitems),  .lexwidget:has(.lexcheckboxsubmenu), .lexwidget:has(.lexcustomcontainer) {
   background-color: var(--global-branch-darker);
   border-radius: 4px;
 }
@@ -1469,7 +1503,7 @@ meter::-webkit-meter-even-less-good-value {
   border-radius: 12px;
   min-width: 16px;
   justify-content: center;
-  color: var(--global-text-primary);
+  color: var(--global-text);
   display: inherit;
   font-size: 12px;
 }
@@ -1481,10 +1515,6 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 /* Custom Widgets Widget */
-
-.lexwidget:has(.lexcustomitems) {
-  background-color: var(--global-branch-darker);
-}
 
 .lexcustomitems {
   width: 100%;
@@ -1511,8 +1541,12 @@ meter::-webkit-meter-even-less-good-value {
   padding: 0 10px;
 }
 
-.lextimeline .lexicon {
-  /* padding: 4px; */
+.lextimeline .lexwidget:has(.lexbutton) {
+  padding: 1px;
+}
+
+.lextimeline .lexbutton:hover {
+  color: var(--global-selected-light);
 }
 
 .lextimeline .lextree {
@@ -1521,18 +1555,25 @@ meter::-webkit-meter-even-less-good-value {
   width: 100%;
 }
 
-.lextimeline .lextree .lextreeitem  {
+/* .lextimeline .lextree li:nth-child(2n){
+  background: var(--global-highlight);
+} */
+
+.lextimeline .lextree .lextreeitem {
   margin: 0px;
 }
-.lextimelinepanel .lextitle{
+
+.lextimelinepanel .lextitle {
   /* border-radius: 0!important; */
   background-color: #161c21;
   margin: 0;
   padding-left: 14px;
 }
-.lextimeline ul{
+
+.lextimeline .lextree ul {
   background: var(--global-color-primary);
   margin: 0;
   padding-bottom: 0px;
+  padding-top: 0px;
 }
 

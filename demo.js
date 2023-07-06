@@ -118,7 +118,7 @@ bottom.addMenubar( m => {
             kfTimeline.addButtons([
                 { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },
                 { icon: 'fa fa-filter', name: "optimize", callback: (value, event) => {   kfTimeline.onShowOptimizeMenu(event);}},
-                { icon: 'fa fa-rectangle-xmark', name: 'unselectAll', callback: (value, event) => { kfTimeline.unSelectAllKeyFrames();}}
+                { icon: 'fa-regular fa-rectangle-xmark', name: 'unselectAll', callback: (value, event) => { kfTimeline.unSelectAllKeyFrames();}}
             ]);
             
             kfTimeline.draw(0);

@@ -1955,6 +1955,7 @@
             // Add widget value
 
             let container = document.createElement('div');
+            container.className = "lextext";
             container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 8px )";
             container.style.display = "flex";
 
@@ -3288,6 +3289,8 @@
 
             let toolsDiv = document.createElement('div');
             toolsDiv.className = "lextreetools";
+            if(!name)
+                toolsDiv.className += " notitle";
 
             // Tree icons
             if(options.icons) {
@@ -3330,7 +3333,6 @@
             // Tree
 
             let list = document.createElement('ul');
-            list.style.paddingTop = name ? "0px" : "16px";
             list.addEventListener("contextmenu", function(e) {
                 e.preventDefault();
             });
