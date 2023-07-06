@@ -565,7 +565,7 @@ body.nocursor * {
 .lexdropdown ul {
   position: absolute;
   list-style: none;
-  background: var(--global-color-primary);
+  background: var(--global-dark-background);
   padding: 4px 0px;
   z-index: 10;
   /* overflow-y: scroll; */
@@ -676,6 +676,14 @@ body.nocursor * {
 .lexcheckboxcont #checkboxtext {
   font-weight: bold;
   margin-left: 4px;
+}
+
+.lexcheckboxsubmenu {
+  width: 100%;
+  padding: 6px;
+  color: var(--global-text-secondary);
+  font-size: 12px;
+  margin-top: -1px;
 }
 
 /* Input Color Widget */
@@ -1390,7 +1398,7 @@ meter::-webkit-meter-even-less-good-value {
 
 /* Array Widget */
 
-.lexwidget:has(.lexarrayitems) {
+.lexwidget:has(.lexarrayitems),  .lexwidget:has(.lexcheckboxsubmenu) {
   background-color: var(--global-branch-darker);
   border-radius: 4px;
 }

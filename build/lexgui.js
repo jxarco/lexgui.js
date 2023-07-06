@@ -2640,12 +2640,30 @@
 
                 // Reset button (default value)
                 let btn = element.querySelector(".lexwidgetname .lexicon");
-                if(btn)
-                    btn.style.display = flag.value != flag.iValue ? "block": "none";
+                if(btn) btn.style.display = flag.value != flag.iValue ? "block": "none";
+
+                // Open suboptions
+                let submenu = element.querySelector(".lexcheckboxsubmenu");
+                if(submenu) submenu.toggleAttribute('hidden', !flag.value);
+
                 this._trigger( new IEvent(name, flag.value, e), callback );
             });
-            
+
             element.appendChild(container);
+
+            if( options.suboptions )
+            {
+                element.style.flexWrap = "wrap";
+                let suboptions = document.createElement('div');
+                suboptions.className = "lexcheckboxsubmenu";
+                suboptions.toggleAttribute('hidden', !flag.value);
+
+                this.queuedContainer = suboptions;
+                options.suboptions.call(this, this);
+                delete this.queuedContainer;
+
+                element.appendChild(suboptions);
+            }
         }
 
         /**

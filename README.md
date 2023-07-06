@@ -77,9 +77,9 @@ TODO List:
 - ~~Global menu searchbar~~
 - ~~Simple Docking System~~
 - ~~Fix dropdown elements when scroll, on dialog, ..~~
+- ~~Allow checkbox suboptions~~
 - Table Widget
 - Card Widget
-- Allow checkbox suboptions
 - Menubar: Support subitem checkboxes
 - Image Viewer
 - Area Overlay buttons

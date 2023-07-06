@@ -362,7 +362,10 @@ function fillPanel( panel ) {
     panel.addTitle("Configuration (Im a title)");
     panel.addCheckbox("Toggle me", true, (value, event) => {
         console.log(value);
-    });
+    }, { suboptions: (p) => {
+        p.addText(null, "Suboption 1");
+        p.addNumber("Suboption 2", 12);
+    } });
     panel.addFile("Image", data => { console.log(data) }, {} );
     panel.merge();
 
