@@ -78,6 +78,7 @@ TODO List:
 - ~~Simple Docking System~~
 - ~~Fix dropdown elements when scroll, on dialog, ..~~
 - ~~Allow checkbox suboptions~~
+- Drag elements to timeline to animate
 - Table Widget
 - Card Widget
 - Menubar: Support subitem checkboxes

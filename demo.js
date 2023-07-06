@@ -338,10 +338,19 @@ function fillPanel( panel ) {
     panel.addArray("Array", ['GPTeam', 'Blat Panthers', 'Blat Bunny'], (value, event) => {
         console.log(value);
     });
-    panel.addTags("Game Tags", "2d,  karate, ai, audio,engine,   ps5, console", (value, event) => {
+    panel.addTags("Game Tags", "2d, karate, ai, engine, ps5, console", (value, event) => {
         console.log(value);
     });
     panel.addList(null, 'Blat Panthers', ['GPTeam', 'Blat Bunny', ['Blat Panthers', 'fa-solid fa-paw']], (value, event) => {
+        console.log(value);
+    });
+    const opacityValues = [
+        [0.2, 0.3146875],
+        [0.417313915857606, 0.8946875000000003],
+        [0.5495145631067961, 0.6746875],
+        [1, 1]
+    ];
+    panel.addCurve("Opacity", opacityValues, (value, event) => {
         console.log(value);
     });
 
