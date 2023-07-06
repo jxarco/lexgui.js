@@ -913,11 +913,11 @@
                             e.stopPropagation();
                         });
 
-                        // subentry.addEventListener("mouseleave", () => {
-                        //     d = -1; // Reset depth
-                        //     delete subentry.built;
-                        //     contextmenu.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
-                        // });
+                        subentry.addEventListener("mouseleave", () => {
+                            d = -1; // Reset depth
+                            delete subentry.built;
+                            contextmenu.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+                        });
                     }
 
                     // Set final width
@@ -936,9 +936,9 @@
                     create_submenu( item, key, entry, -1 );
                 });
 
-                // entry.addEventListener("mouseleave", () => {
-                //     this.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
-                // });
+                entry.addEventListener("mouseleave", () => {
+                    this.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+                });
             }
         }
 
