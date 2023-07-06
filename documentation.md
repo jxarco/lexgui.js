@@ -90,9 +90,13 @@ let [leftUpArea, leftBottomArea] = leftArea.sections;
 You can build a **Menubar** directly into any Area using `Area.addMenubar(callback, options)`. To specify each of the menu entries, you should pass a *callback function* to be called when the Menubar is constructed. **Callbacks will have a Menubar instance as parameter**, so use `Menubar.add(entryPath, options)` on that instance inside your callback to build each of the menu entries:
 
 * `entryPath (String)`: The path menu/submenu/etc of each entry
-* `options (Object/Function)`: `callback`, `icon` at ([Fontawesome](https://fontawesome.com/search)) and `short` for shortcuts
+* `options (Object/Function)`: 
+  * `callback (Function)`: To be called when interacting with the entry
+  * `icon (String)` at ([Fontawesome](https://fontawesome.com/search))
+  * `short (String)` for shortcuts
+  * `type (String)` options: *checkbox*
 
-<sup>Note: In case of no-icon and no-shortcut, you can use `options` as the `Function` callback.<sup>
+<sup>Note: In case of no options rather than the callback, you can use `options` as the `Function` callback.<sup>
 
 ```js
 area.addMenubar( m => {

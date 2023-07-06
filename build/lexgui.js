@@ -779,6 +779,7 @@
                     // Check if last token -> add callback
                     if(!next_token) {
                         item[ 'callback' ] = options.callback;
+                        item[ 'type' ] = options.type;
                     }
                     list.push( item );
                     insert( next_token, item[ token ] ); 
@@ -824,6 +825,7 @@
                         const subitem = o[k][i];
                         const subkey = Object.keys(subitem)[0];
                         const hasSubmenu = subitem[ subkey ].length;
+                        const is_checkbox = subitem[ 'type' ] == 'checkbox';
                         let subentry = document.createElement('div');
                         subentry.className = "lexcontextmenuentry";
                         subentry.className += (i == o[k].length - 1 ? " last" : "");
@@ -833,12 +835,30 @@
                             subentry.id = subkey;
                             subentry.innerHTML = "";
                             const icon = that.icons[ subkey ];
-                            if(icon) {
+                            if(is_checkbox){
+                                subentry.innerHTML += "<input type='checkbox' >";
+                            }else if(icon) {
                                 subentry.innerHTML += "<a class='" + icon + " fa-sm'></a>";
                             }else
                                 subentry.classList.add( "noicon" );
                             subentry.innerHTML += "<div class='lexentryname'>" + subkey + "</div>";
                         }
+
+                        let checkbox_input = subentry.querySelector('input');
+                        if(checkbox_input) {
+                            checkbox_input.checked = subitem.checked ?? false;
+                            checkbox_input.addEventListener('change', (e) => {
+                                subitem.checked = checkbox_input.checked;
+                                const f = subitem[ 'callback' ];
+                                if(f) {
+                                    f.call( this, subitem.checked, subkey, subentry );
+                                    that.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());  
+                                } 
+                                e.stopPropagation();
+                                e.stopImmediatePropagation();
+                            })
+                        }
+
                         contextmenu.appendChild( subentry );
 
                         // Nothing more for separators
@@ -857,9 +877,12 @@
 
                         // Add callback
                         subentry.addEventListener("click", e => {
+                            if(checkbox_input) {
+                                subitem.checked = !subitem.checked;
+                            }
                             const f = subitem[ 'callback' ];
                             if(f) {
-                                f.call( this, subkey, subentry );
+                                f.call( this, checkbox_input ? subitem.checked : subkey, checkbox_input ? subkey : subentry );
                                 that.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());  
                             } 
                             e.stopPropagation();
@@ -890,11 +913,11 @@
                             e.stopPropagation();
                         });
 
-                        subentry.addEventListener("mouseleave", () => {
-                            d = -1; // Reset depth
-                            delete subentry.built;
-                            contextmenu.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
-                        });
+                        // subentry.addEventListener("mouseleave", () => {
+                        //     d = -1; // Reset depth
+                        //     delete subentry.built;
+                        //     contextmenu.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+                        // });
                     }
 
                     // Set final width
@@ -913,9 +936,9 @@
                     create_submenu( item, key, entry, -1 );
                 });
 
-                entry.addEventListener("mouseleave", () => {
-                    this.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
-                });
+                // entry.addEventListener("mouseleave", () => {
+                //     this.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+                // });
             }
         }
 
@@ -2004,7 +2027,7 @@
             // Remove branch padding and margins
             if(!name) {
                 element.className += " noname";
-                wValue.style.width = "100%";
+                container.style.width = "100%";
             }
         }
 

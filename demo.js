@@ -23,6 +23,8 @@ area.addMenubar( m => {
     m.add( "Project/Export", { icon: "fa-solid fa-download" });
     m.add( "Project/Export/DAE", { icon: "fa-solid fa-cube", short: "D", callback: () => { console.log("Exporting DAE...") }} );
     m.add( "Project/Export/GLTF", { short:  "G" } );
+    m.add( "Editor/Autosave", { type: 'checkbox', icon: "fa fa-floppy-disk", callback: (v, name) => { console.log(name + ": " + v ) } });
+    m.add( "Editor/Test");
     m.add( "Editor/Settings", { icon: "fa-solid fa-gears", callback: () => {
         const dialog = new LX.Dialog( "Settings", p => {
             p.addText("A Text", "Testing first widget");
