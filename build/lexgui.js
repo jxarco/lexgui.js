@@ -1950,10 +1950,14 @@
             }
             
             // Add widget value
+
+            let container = document.createElement('div');
+            container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 8px )";
+            container.style.display = "flex";
+
             let wValue = document.createElement('input');
             wValue.value = wValue.iValue = value || "";
-            wValue.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 8px )";
-            // wValue.style.marginLeft = "4px";
+            wValue.style.width = "100%";
 
             if(options.disabled ?? false) wValue.setAttribute("disabled", true);
             if(options.placeholder) wValue.setAttribute("placeholder", options.placeholder);
@@ -1983,7 +1987,15 @@
                 });
             }
 
-            element.appendChild(wValue);
+            if(options.icon)
+            {
+                let icon = document.createElement('a');
+                icon.className = "inputicon " + options.icon;
+                container.appendChild(icon);
+            }
+
+            container.appendChild(wValue);
+            element.appendChild(container);
             
             // Remove branch padding and margins
             if(!name) {
@@ -4156,7 +4168,7 @@
                     else
                         ctx.fillStyle = element.pointscolor;
                     ctx.beginPath();
-                    ctx.arc( pos[0], pos[1], selected == i ? 5 : 3, 0, Math.PI * 2);
+                    ctx.arc( pos[0], pos[1], selected == i ? 4 : 3, 0, Math.PI * 2);
                     ctx.fill();
                 }
 

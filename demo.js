@@ -357,7 +357,7 @@ function fillPanel( panel ) {
     // another branch
     panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});
     panel.addColor("Background", "#b7a9b1");
-    panel.addText("Text", "Lexgui.js @jxarco", null, {placeholder: "e.g. ColorPicker"});
+    panel.addText("Text", "Lexgui.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
     panel.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
         console.log("Font Color: ", value);
     });

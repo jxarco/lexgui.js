@@ -12,6 +12,7 @@
   - [Widgets](#widgets)
     - [Getter and Setters](#getter-and-setters)
     - [Same line](#same-line)
+  - [Widget List](#widget-list)
     - [Title](#title)
     - [Text](#text)
     - [Button](#button)
@@ -27,6 +28,7 @@
     - [Layers](#layers)
     - [File](#file)
     - [Progress](#progress)
+    - [Curve](#curve)
     - [Other Widgets](#other-widgets)
   - [Dialogs](#dialogs)
   - [Event Handling](#event-handling)
@@ -143,6 +145,8 @@ LexGUI.js provides a set of commonly used UI widgets that you can use to show or
 ### Same line
 
 ...TODO
+
+## Widget List
 
 ### Title
 
@@ -363,6 +367,10 @@ panel.addProgress("HeadRoll", 0, {
   }
 });
 ```
+
+### Curve
+
+...TODO
 
 ### Other Widgets
 
