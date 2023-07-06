@@ -1960,8 +1960,7 @@
 
             var resolve = (function(val, event) {
                 let btn = element.querySelector(".lexwidgetname .lexicon");
-                if(btn)
-                    btn.style.display = (val != wValue.iValue ? "block" : "none");
+                if(btn) btn.style.display = (val != wValue.iValue ? "block" : "none");
                 this._trigger( new IEvent(name, val, event), callback );
             }).bind(this);
 
@@ -2546,9 +2545,14 @@
             value = value.replace(/\s/g, '').split(',');
             let defaultValue = [].concat(value);
             let widget = this.create_widget(name, Widget.TAGS, options);
+            widget.onGetValue = () => {
+                return [].concat(value);
+            };
             widget.onSetValue = (new_value) => {
                 value = [].concat(new_value);
                 create_tags();
+                let btn = element.querySelector(".lexwidgetname .lexicon");
+                if(btn) btn.style.display = (new_value != defaultValue ? "block" : "none");1
                 that._trigger( new IEvent(name, value), callback );
             };
 
@@ -2585,7 +2589,7 @@
                         this.remove();
                         value.splice( value.indexOf( tag_name ), 1 );
                         let btn = element.querySelector(".lexwidgetname .lexicon");
-                        if(btn) btn.style.display = "block";
+                        if(btn) btn.style.display = (value != defaultValue ? "block" : "none");
                         that._trigger( new IEvent(name, value, e), callback );
                     });
     
