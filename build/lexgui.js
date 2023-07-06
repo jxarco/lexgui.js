@@ -3717,4 +3717,13 @@
 
     LX.ContextMenu = ContextMenu;
 
+        
+	LX.UTILS = {
+        getTime() { return new Date().getTime() },
+        compareThreshold( v, p, n, t ) { return Math.abs(v - p) >= t || Math.abs(v - n) >= t },
+        compareThresholdRange( v0, v1, t0, t1 ) { return v0 > t0 && v0 <= t1 || v1 > t0 && v1 <= t1 },
+        clamp (num, min, max) { return Math.min(Math.max(num, min), max) }
+    };
+    
+
 })( typeof(window) != "undefined" ? window : (typeof(self) != "undefined" ? self : global ) );

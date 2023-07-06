@@ -116,7 +116,7 @@
             header.addBlank();
             header.sameLine(2 + this.buttonsDrawn.length);
             header.addTitle(this.name);
-            header.addNumber("Duration", this.duration, (value, event) => this.setDuration(value), {width: '350px'});        
+            header.addNumber("Duration", this.duration, (value, event) => this.setDuration(value), {min: "0", width: '350px'});        
 
             for(let i = 0; i < this.buttonsDrawn.length; i++) {
                 let button = this.buttonsDrawn[i];
@@ -385,7 +385,7 @@
             {
                 if( t % deltaSeconds != 0 )
                     continue;
-                ctx.globalAlpha = t % 10 == 0 ? 0.5 : clamp( (this.secondsToPixels - 50) * 0.01,0,0.7);
+                ctx.globalAlpha = t % 10 == 0 ? 0.5 : LX.UTILS.clamp( (this.secondsToPixels - 50) * 0.01,0,0.7);
                 // if(Math.abs(t - currentTime) < 0.05)
                 // 	ctx.globalAlpha = 0.25;
                 var x = ((this.timeToX(t))|0) + 0.5;
@@ -615,7 +615,7 @@
 
             if( e.type == "mouseup" )
             {
-                const discard = this.movingKeys || (UTILS.getTime() - this.clickTime) > 420; // ms
+                const discard = this.movingKeys || (LX.UTILS.getTime() - this.clickTime) > 420; // ms
                 this.movingKeys ? innerSetTime( this.currentTime ) : 0;
 
                 if(this.grabbing && this.onClipMoved){
@@ -639,7 +639,7 @@
                 return;
 
             if( e.type == "mousedown")	{
-                this.clickTime = UTILS.getTime();
+                this.clickTime = LX.UTILS.getTime();
 
                 if(this.trackBulletCallback && e.track)
                     this.trackBulletCallback(e.track,e,this,[localX,localY]);
@@ -673,7 +673,7 @@
             else if( e.type == "wheel" ) {
                 if( timelineHeight < this.scrollableHeight && x > w - 10)
                 {
-                    this.currentScroll = clamp( this.currentScroll + (e.wheelDelta < 0 ? 0.1 : -0.1), 0, 1);
+                    this.currentScroll = LX.UTILS.clamp( this.currentScroll + (e.wheelDelta < 0 ? 0.1 : -0.1), 0, 1);
                 }
                 else
                 {
@@ -685,7 +685,7 @@
             }
             else if (e.type == "contextmenu" && this.showContextMenu)
                 this.showContextMenu(e);
-            this.canvas.style.cursor = this.grabbing && (UTILS.getTime() - this.clickTime > 320) ? "grabbing" : "pointer" ;
+            this.canvas.style.cursor = this.grabbing && (LX.UTILS.getTime() - this.clickTime > 320) ? "grabbing" : "pointer" ;
 
 
             return true;
@@ -1345,6 +1345,7 @@
             return tracks ? tracks.length : null;
         }
 
+    
         onShowOptimizeMenu( e ) {
             
             if(this.selectedItems == null)
@@ -1360,7 +1361,7 @@
             if(!tracks.length) return;
 
             const threshold = this.onGetOptimizeThreshold ? this.onGetOptimizeThreshold() : 0.025;
-            addContextMenu("Optimize", e, m => {
+            LX.addContextMenu("Optimize", e, m => {
                 for( let t of tracks ) {
                     m.add( t.name + (t.type ? "@" + t.type : ""), () => { 
                         this.animationClip.tracks[t.clipIdx].optimize( threshold );
@@ -1493,7 +1494,7 @@
             const clipIdx = track.clipIdx;
 
             // Time slot with other key?
-            const keyInCurrentSlot = this.animationClip.tracks[clipIdx].times.find( t => { return !UTILS.compareThreshold(this.currentTime, t, t, 0.001 ); });
+            const keyInCurrentSlot = this.animationClip.tracks[clipIdx].times.find( t => { return !LX.UTILS.compareThreshold(this.currentTime, t, t, 0.001 ); });
             if( keyInCurrentSlot ) {
                 console.warn("There is already a keyframe stored in time slot ", keyInCurrentSlot)
                 return;
@@ -1603,7 +1604,7 @@
             const slice1 = this.animationClip.tracks[clipIdx].values.slice(0, indexDim);
             const slice2 = this.animationClip.tracks[clipIdx].values.slice(indexDim + track.dim);
 
-            this.animationClip.tracks[clipIdx].values = UTILS.concatTypedArray([slice1, slice2], Float32Array);
+            this.animationClip.tracks[clipIdx].values = LX.UTILS.concatTypedArray([slice1, slice2], Float32Array);
 
             // Move the other's key properties
             for(let i = index; i < this.animationClip.tracks[clipIdx].times.length; ++i) {
@@ -2095,7 +2096,7 @@
                 }
             }
             
-            addContextMenu("Options", e, (m) => {
+            LX.addContextMenu("Options", e, (m) => {
                 for(let i = 0; i < actions.length; i++) {
                     m.add(actions[i].title,  actions[i].callback )
                 }
@@ -2178,7 +2179,7 @@
 
             for(let i = 0; i < this.animationClip.tracks.length; i++) {
                 clipInCurrentSlot = this.animationClip.tracks[i].clips.find( t => { 
-                    return UTILS.compareThresholdRange(this.currentTime, clip.start + clip.duration, t.start, t.start+t.duration);
+                    return LX.UTILS.compareThresholdRange(this.currentTime, clip.start + clip.duration, t.start, t.start+t.duration);
                     
                 });
                 if(!clipInCurrentSlot)
@@ -2383,12 +2384,5 @@
     }
 
     LX.ClipsTimeline = ClipsTimeline;
-
-    
-	const UTILS = {
-        getTime() { return new Date().getTime() },
-        compareThreshold( v, p, n, t ) { return Math.abs(v - p) >= t || Math.abs(v - n) >= t },
-        compareThresholdRange( v0, v1, t0, t1 ) { return v0 > t0 && v0 <= t1 || v1 > t0 && v1 <= t1 }
-    };
 
 })( typeof(window) != "undefined" ? window : (typeof(self) != "undefined" ? self : global ) );
