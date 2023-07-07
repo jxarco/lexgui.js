@@ -54,9 +54,9 @@ body.nocursor * {
   display: none !important;
 }
 
-/* input[type="file"] {
-  opacity: 0.0;
-} */
+input[type="file"] {
+  font-size: 11px;
+}
 
 ::-webkit-file-upload-button {
  display: none;
@@ -443,6 +443,7 @@ body.nocursor * {
   border-bottom: 1px solid #bbbbbb47;
   padding: 4px;
   font-size: 11px;
+  margin-top: 2px;
 }
 
 .lexwidget:has(input:focus) .inputicon {
@@ -606,7 +607,7 @@ body.nocursor * {
   padding: 4px 0px;
   z-index: 10;
   /* overflow-y: scroll; */
-  max-height: -webkit-fill-available;
+  /* max-height: -webkit-fill-available; */
   margin-top: 5px;
   width: 100%;
   box-shadow: 0 2px 10px black;
@@ -788,7 +789,7 @@ input[type=checkbox]:checked:after {
 .lexvector .vecbox {
   display: flex;
   border-radius: 4px;
-  border: 1px solid #22292fc8;
+  border: 1px solid #908fa356;
   margin-right: 2px;
   background: var(--branch-background);
 }
@@ -865,7 +866,7 @@ input[type=number] {
 .lexwidget .numberbox {
   display: grid;
   border-radius: 4px;
-  border: 1px solid #22292fc8;
+  border: 1px solid #908fa356;
   margin-right: 2px;
 }
 
