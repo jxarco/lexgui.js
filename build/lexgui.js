@@ -969,10 +969,11 @@
                 const disabled = options.disabled ?? false;
                 button.className = "lexmenubutton" + (disabled ? " disabled" : "");
                 button.title = title ?? "";
-                button.innerHTML = "<a class='" + icon + " lexicon'></a>";
-                button.style.fontSize = "20px";
-                button.style.padding = "10px";
-                
+                button.innerHTML = "<a class='" + icon + " lexicon' style='font-size:x-large;'></a>";
+                button.style.padding = "5px 10px";
+                button.style.maxHeight = "calc(100% - 10px)";
+                button.style.alignItems = "center";
+
                 if(options.position == "left")
                     this.root.prepend( button );
                 else
@@ -1003,9 +1004,10 @@
                 const disabled = options.disabled ?? false;
                 button.className = "lexmenubutton" + (disabled ? " disabled" : "");
                 button.title = title ?? "";
-                button.innerHTML = "<a><image src='" + src + "' class='lexicon' style='height:30px;'></a>";
+                button.innerHTML = "<a style='height:100%;'><image src='" + src + "' class='lexicon' style='height:100%;'></a>";
                 button.style.padding = "5px";
-                
+                button.style.alignItems = "center";
+
                 if(options.position == "left")
                     this.root.prepend( button );
                 else
@@ -3936,7 +3938,7 @@
 
             var rect = c.getBoundingClientRect();
             contextmenu.style.left = rect.width + "px";
-            contextmenu.style.marginTop = 6 - c.offsetHeight + "px";
+            contextmenu.style.marginTop =  3.5 - c.offsetHeight + "px";
 
             // Set final width
             contextmenu.style.width = contextmenu.offsetWidth + "px";

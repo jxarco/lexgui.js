@@ -1173,7 +1173,7 @@ meter::-webkit-meter-even-less-good-value {
   width: 100%;
   background-color: var(--global-color-primary);
   display: flex;
-  height: auto;
+  height: 100%;
   font-size: 14px;
   font-weight: bold;
 }
