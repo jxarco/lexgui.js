@@ -304,6 +304,7 @@
             this.type = type || TreeEvent.NONE;
             this.node = node;
             this.value = value;
+            this.multiple = false; // Multiple selection
         }
         
         string() {
@@ -1347,6 +1348,7 @@
             }
 
             const list = this.domEl.querySelector("ul");
+            this.selected = [];
 
             node.visible = node.visible ?? true;
             node.parent = parent;
@@ -1372,11 +1374,25 @@
             list.appendChild(item);
 
             // Callbacks
-            item.addEventListener("click", function(e) {
-                list.querySelectorAll("li").forEach( e => { e.classList.remove('selected'); } );
-                this.classList.add('selected');
+            item.addEventListener("click", e => {
+                if(!e.shiftKey) {
+                    list.querySelectorAll("li").forEach( e => { e.classList.remove('selected'); } );
+                    this.selected.length = 0;
+                }
+                
+                // Add or remove
+                const idx = this.selected.indexOf( node );
+                if( idx > -1 ) {
+                    item.classList.remove('selected');
+                    this.selected.splice(idx, 1);
+                }else {
+                    item.classList.add('selected');
+                    this.selected.push( node );
+                }
+
                 if(that.onevent) {
-                    const event = new TreeEvent(TreeEvent.NODE_SELECTED, node);
+                    const event = new TreeEvent(TreeEvent.NODE_SELECTED, e.shiftKey ? this.selected : node );
+                    event.multiple = e.shiftKey;
                     that.onevent( event );
                 }
             });
@@ -1392,10 +1408,11 @@
                     }
                 });
 
-            item.addEventListener("contextmenu", function(e) {
+            item.addEventListener("contextmenu", e => {
                 e.preventDefault();
                 if(that.onevent) {
-                    const event = new TreeEvent(TreeEvent.NODE_CONTEXTMENU, node, e);
+                    const event = new TreeEvent(TreeEvent.NODE_CONTEXTMENU, this.selected.length > 1 ? this.selected : node, e);
+                    event.multiple = this.selected.length > 1;
                     that.onevent( event );
                 }
             });

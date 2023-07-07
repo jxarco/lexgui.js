@@ -333,13 +333,16 @@ function fillPanel( panel ) {
 
             switch(event.type) {
                 case LX.TreeEvent.NODE_SELECTED: 
-                    console.log(event.node.id + " selected"); 
+                    if(event.multiple)
+                        console.log("Selected: ", event.node); 
+                    else
+                        console.log(event.node.id + " selected"); 
                     break;
                 case LX.TreeEvent.NODE_DBLCLICKED: 
                     console.log(event.node.id + " dbl clicked"); 
                     break;
                 case LX.TreeEvent.NODE_CONTEXTMENU: 
-                    LX.addContextMenu( event.node.id, event.value, m => {
+                    LX.addContextMenu( event.multiple ? "Selected Nodes" : event.node.id, event.value, m => {
 
                         // {options}: callback, color
 
