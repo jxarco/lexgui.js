@@ -414,6 +414,14 @@ function fillRightBottomPanel( panel, tab ) {
                     p.addTitle("Twitter tab");
                     p.addText("Tweet", "", null, {placeholder: "Tyler Rake 2"});
                 }
+            },
+            { 
+                name: "Third tab",
+                icon: "fa-brands fa-github",
+                callback: p => {
+                    p.addTitle("Github tab");
+                    p.addButton(null, "Go", () => {window.open("https://github.com/jxarco/lexgui.js/")});
+                }
             }
         ], { vertical: false /*, showNames: true */});
 
@@ -444,6 +452,14 @@ function fillRightBottomPanel( panel, tab ) {
                 callback: p => {
                     p.addTitle("Twitter tab");
                     p.addText("Tweet", "", null, {placeholder: "Tyler Rake 2"});
+                }
+            },
+            { 
+                name: "Third tab",
+                icon: "fa-brands fa-github",
+                callback: p => {
+                    p.addTitle("Github tab");
+                    p.addButton(null, "Go", (value, event) => {window.open("https://github.com/jxarco/lexgui.js/")});
                 }
             }
         ]);
