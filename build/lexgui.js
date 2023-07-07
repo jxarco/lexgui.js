@@ -829,6 +829,7 @@
                     var rect = c.getBoundingClientRect();
                     contextmenu.style.left = (isSubMenu ? rect.width : rect.left) + "px";
                     // Entries use css to set top relative to parent
+                    console.log(c, rect);
                     contextmenu.style.top = (isSubMenu ? 0 : rect.bottom) + "px";
                     c.appendChild( contextmenu );
 

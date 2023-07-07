@@ -1189,10 +1189,11 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexmenubar .lexmenuentry {
   font-size: 13px;
+  min-height: 39px;
   height: 100%;
   display: flex;
   justify-content: center;
-  padding: 12px;
+  align-items: center;
   padding-left: 20px;
   padding-right: 20px;
   color: var(--global-text-primary);
