@@ -302,6 +302,7 @@
                 case TreeEvent.NODE_DRAGGED: return "tree_event_dragged";
                 case TreeEvent.NODE_RENAMED: return "tree_event_renamed";
                 case TreeEvent.NODE_VISIBILITY: return "tree_event_visibility";
+                case TreeEvent.NODE_CARETCHANGED: return "tree_event_caretchanged";
             }
         }
     };
@@ -1485,7 +1486,9 @@
 
             // Show/hide children
             if(is_parent) {
-                item.querySelector('a').addEventListener("click", function(){
+                item.querySelector('a').addEventListener("click", function(e){
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
                     node.closed = !node.closed;
                     const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed);
                     that.onevent( event );
