@@ -79,10 +79,12 @@ var [up, bottom] = left.sections;
 
 var kfTimeline = null;
 var clipsTimeline = null;
+var curvesTimeline = null;
 
 bottom.onresize = bounding => {
     if(kfTimeline) kfTimeline.resize( [ bounding.width, bounding.height ] );
     if(clipsTimeline) clipsTimeline.resize( [ bounding.width, bounding.height ] );
+    if(curvesTimeline) curvesTimeline.resize( [ bounding.width, bounding.height ] );
 }
 
 // another menu bar
@@ -108,6 +110,10 @@ bottom.addMenubar( m => {
         el = document.getElementById('clips-timeline');
         if(el)
             el.style.display = 'none';
+        
+        el = document.getElementById('curves-timeline');
+        if(el)
+            el.style.display = 'none';
         var timeline = document.getElementById('kf-timeline');            
         if(timeline) {
             timeline.style.display = 'block';
@@ -116,7 +122,7 @@ bottom.addMenubar( m => {
         else {
             kfTimeline = new LX.KeyFramesTimeline("kf-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
             kfTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
-            kfTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
+            kfTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [0,1,0, 1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
             bottom.attach(kfTimeline);
             
             kfTimeline.addButtons([
@@ -126,8 +132,7 @@ bottom.addMenubar( m => {
             ]);
             
             kfTimeline.draw(0);
-
-            
+  
         }
     });
 
@@ -138,6 +143,10 @@ bottom.addMenubar( m => {
             el.style.display = 'none';
         
         el = document.getElementById('kf-timeline');
+        if(el)
+            el.style.display = 'none';
+        
+        el = document.getElementById('curves-timeline');
         if(el)
             el.style.display = 'none';
         var ctimeline = document.getElementById('clips-timeline');            
@@ -159,12 +168,48 @@ bottom.addMenubar( m => {
 
     });
 
+    m.add( "Curves Timeline", e => { 
+        console.log(e);
+        let el = document.getElementById('bottom-panel');
+        if(el)
+            el.style.display = 'none';
+        el = document.getElementById('curves-timeline');
+        if(el)
+            el.style.display = 'none';
+        el = document.getElementById('clips-timeline');
+        if(el)
+            el.style.display = 'none';
+        var timeline = document.getElementById('curves-timeline');            
+        if(timeline) {
+            timeline.style.display = 'block';
+            curvesTimeline.resize();
+        }
+        else {
+            curvesTimeline = new LX.CurvesTimeline("curves-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
+            curvesTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
+            curvesTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [0,1,0,1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,0,0,1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
+            bottom.attach(curvesTimeline);
+            
+            // kfTimeline.addButtons([
+            //     { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },
+            //     { icon: 'fa fa-filter', name: "optimize", callback: (value, event) => {   kfTimeline.onShowOptimizeMenu(event);}},
+            //     { icon: 'fa-regular fa-rectangle-xmark', name: 'unselectAll', callback: (value, event) => { kfTimeline.unSelectAllKeyFrames();}}
+            // ]);
+            
+            curvesTimeline.draw(0);
+  
+        }
+    });
+
     bottom.onresize = bounding => {
         if(clipsTimeline)
             clipsTimeline.resize( [ bounding.width, bounding.height ] );
         
         if(kfTimeline)
             kfTimeline.resize( [ bounding.width, bounding.height ] );
+        
+        if(curvesTimeline)
+            curvesTimeline.resize( [ bounding.width, bounding.height ] );
     }
 } );
 
@@ -223,6 +268,9 @@ function loop(dt) {
 
     if(clipsTimeline)
         clipsTimeline.draw();
+
+    if(curvesTimeline)
+        curvesTimeline.draw();
     requestAnimationFrame(loop);
 }
 
