@@ -4,6 +4,8 @@
         throw("lexgui.js missing!");
     }
 
+    LX.components.push( 'Timeline' );
+
     /**
      * @class Timeline
      * @description Agnostic timeline, do not impose any timeline content. Renders to a canvas

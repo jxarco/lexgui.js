@@ -66,7 +66,6 @@ area.addMenubar( m => {
     m.getButton("Play");
     m.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")})
     m.setButtonImage("lexgui.js", "images/lexgui-min.png", () => {window.open("https://github.com/jxarco/lexgui.js/")}, {position: "left"})
-
 });
 
 // split main area
@@ -74,12 +73,13 @@ area.split({sizes:["75%","25%"]});
 var [left,right] = area.sections;
 
 // split left area
-left.split({type: 'vertical', sizes:["80vh","20vh"]});
+left.split({type: 'vertical', sizes:["70vh","30vh"]});
 var [up, bottom] = left.sections;
 
 var kfTimeline = null;
 var clipsTimeline = null;
 var curvesTimeline = null;
+var assetBrowser = null;
 
 bottom.onresize = bounding => {
     if(kfTimeline) kfTimeline.resize( [ bounding.width, bounding.height ] );
@@ -97,9 +97,35 @@ bottom.addMenubar( m => {
         el = document.getElementById('clips-timeline');
         if(el)
             el.style.display = 'none';
-
+        el = document.getElementById('curves-timeline');
+        if(el)
+            el.style.display = 'none';
         var bottom_panel = document.getElementById('bottom-panel');
         bottom_panel.style.display = 'block';
+    });
+
+    m.add( "Asset Browser", e => { 
+        console.log(e); 
+        let el = document.getElementById('bottom-panel');
+        if(el)
+            el.style.display = 'none';
+        el = document.getElementById('kf-timeline');
+        if(el)
+            el.style.display = 'none';
+        el = document.getElementById('clips-timeline');
+        if(el)
+            el.style.display = 'none';
+        el = document.getElementById('curves-timeline');
+        if(el)
+            el.style.display = 'none';
+        var browser = document.getElementById('asset-browser');   
+        if(browser) {
+            browser.style.display = 'block';
+        }
+        else {
+            assetBrowser = new LX.AssetBrowser();
+            bottom.attach(assetBrowser.root);
+        }
     });
 
     m.add( "Keyframes Timeline", e => { 
@@ -110,7 +136,6 @@ bottom.addMenubar( m => {
         el = document.getElementById('clips-timeline');
         if(el)
             el.style.display = 'none';
-        
         el = document.getElementById('curves-timeline');
         if(el)
             el.style.display = 'none';
@@ -132,7 +157,6 @@ bottom.addMenubar( m => {
             ]);
             
             kfTimeline.draw(0);
-  
         }
     });
 
@@ -145,7 +169,6 @@ bottom.addMenubar( m => {
         el = document.getElementById('kf-timeline');
         if(el)
             el.style.display = 'none';
-        
         el = document.getElementById('curves-timeline');
         if(el)
             el.style.display = 'none';
@@ -160,12 +183,9 @@ bottom.addMenubar( m => {
             clipsTimeline.addClip(clip)
             // clipsTimeline.setAnimationClip({tracks: [{clips: [clip]}], duration: 2});
             clipsTimeline.selectedItems = ["Clip1"];
-
             bottom.attach(clipsTimeline);
             clipsTimeline.draw(0);
-            
         }
-
     });
 
     m.add( "Curves Timeline", e => { 
@@ -197,7 +217,6 @@ bottom.addMenubar( m => {
             // ]);
             
             curvesTimeline.draw(0);
-  
         }
     });
 
