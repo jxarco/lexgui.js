@@ -958,11 +958,65 @@
          * @param {String} icon
          */
 
-        setButtonIcon( title, icon ) {
+        setButtonIcon( title, icon, callback, options = {} ) {
             const button = this.buttons[ title ];
-            if(!button) return;
+            if(button) {
 
-            button.querySelector('a').className = "fa-solid" + " " + icon + " lexicon";
+                button.querySelector('a').className = "fa-solid" + " " + icon + " lexicon";
+            }
+            else {
+                let button = document.createElement('div');
+                const disabled = options.disabled ?? false;
+                button.className = "lexmenubutton" + (disabled ? " disabled" : "");
+                button.title = title ?? "";
+                button.innerHTML = "<a class='" + icon + " lexicon'></a>";
+                button.style.fontSize = "20px";
+                button.style.padding = "10px";
+                
+                if(options.position == "left")
+                    this.root.prepend( button );
+                else
+                    this.root.appendChild( button );
+    
+                const _b = button.querySelector('a');
+                _b.addEventListener("click", (e) => {
+                    if(callback && !disabled)
+                        callback.call( this, _b, e );
+                });
+            }
+        }
+
+        /**
+         * @method setButtonImage
+         * @param {String} title
+         * @param {String} src
+         */
+
+        setButtonImage( title, src, callback, options = {} ) {
+            const button = this.buttons[ title ];
+            if(button) {
+
+                button.querySelector('a').className = "fa-solid" + " " + icon + " lexicon";
+            }
+            else {
+                let button = document.createElement('div');
+                const disabled = options.disabled ?? false;
+                button.className = "lexmenubutton" + (disabled ? " disabled" : "");
+                button.title = title ?? "";
+                button.innerHTML = "<a><image src='" + src + "' class='lexicon' style='height:30px;'></a>";
+                button.style.padding = "5px";
+                
+                if(options.position == "left")
+                    this.root.prepend( button );
+                else
+                    this.root.appendChild( button );
+    
+                const _b = button.querySelector('a');
+                _b.addEventListener("click", (e) => {
+                    if(callback && !disabled)
+                        callback.call( this, _b, e );
+                });
+            }
         }
 
         /**
