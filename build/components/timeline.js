@@ -1249,16 +1249,16 @@
                 if(!tracks) continue;
                 
                 const height = this.trackHeight;
-                let offsetT = 0;
+                let offsetI = 0;
                 for(let i = 0; i < tracks.length; i++) {
                     let track = tracks[i];
                     if(track.hide) {
                         continue;
                     }
-                    this.drawTrackWithKeyframes(ctx, 2 + offsetT * height + (t+1) * offset, height, track.name + " (" + track.type + ")", this.animationClip.tracks[track.clipIdx], track);
-                    offsetT++;
+                    this.drawTrackWithKeyframes(ctx, 2 + offsetI * height + offset, height, track.name + " (" + track.type + ")", this.animationClip.tracks[track.clipIdx], track);
+                    offsetI++;
                 }
-                offset += offsetT ? (offsetT - 1)*height : 0;
+                offset += offsetI * height + height;
             }
              
             ctx.restore();
