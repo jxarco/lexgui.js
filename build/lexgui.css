@@ -141,6 +141,14 @@ body.nocursor * {
   cursor: pointer;
 }
 
+#global_search .searchitembox .searchitem a {
+  padding: 0px;
+  margin-left: -28px;
+  margin-top: 2px;
+  color: var(--global-selected-light);
+  float: left;
+}
+
 #global_search .searchitembox .searchitem.last {
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
@@ -1206,7 +1214,7 @@ meter::-webkit-meter-even-less-good-value {
 .lexcontextmenu {
   background: var(--global-dark-background);
   position: absolute;
-  padding-right: 26px;
+  padding-right: 14px;
   /* border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px; */
   z-index: 1001;
@@ -1224,7 +1232,7 @@ meter::-webkit-meter-even-less-good-value {
   color: #c0c4cbe3;
   padding: 4px;
   padding-left: 14px;
-  padding-right: 12px;
+  padding-right: 0px;
   padding-bottom: 6px;
   cursor: pointer;
   -webkit-user-select: none;
@@ -1243,7 +1251,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexcontextmenu .lexcontextmenuentry.noicon .lexentryname {
-  margin-left: 42px;
+  margin-left: 35px;
 }
 
 /* normal icons  */
@@ -1252,14 +1260,14 @@ meter::-webkit-meter-even-less-good-value {
   float: left;
   margin-right: 13px;
   margin-top: 9px;
-  margin-left: 18px;
+  margin-left: 9px;
 }
 
 /* submenu specified arrow  */
 .lexcontextmenu .lexcontextmenuentry a.fa-xs {
   float: right;
   margin-top: -8px;
-  margin-right: 0px;
+  margin-right: 8px;
 }
 
 .lexcontextmenu .lexcontextmenuentry.last {
@@ -1273,8 +1281,8 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexcontextmenu .lexcontextmenuentry input {
   float: left;
-  margin-right: 48px;
-  margin-left: -6px;
+  margin-right: 28px;
+  margin-left: 5px;
 }
 
 .lexcontextmenu .lexcontextmenuentry:hover input::after {
@@ -1291,6 +1299,7 @@ meter::-webkit-meter-even-less-good-value {
   margin-top: -12px;
   font-weight: bold;
   color: var(--global-text-secondary);
+  margin-right: 8px;
 }
 
 .lexcontextmenu .lexcontextmenuentry:hover .lexentryshort {

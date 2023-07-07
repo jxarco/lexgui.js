@@ -89,8 +89,15 @@
                 reset_bar(true);
             }
             else if( e.key == 'Enter' ) {
-                if(allItems[ hoverElId ]) {
-                    allItems[ hoverElId ].callback.call(window, allItems[ hoverElId ].entry_name);
+                const el = allItems[ hoverElId ];
+                if(el) {
+                    const is_checkbox = (el.item.type && el.item.type === 'checkbox');
+                    if(is_checkbox)  {
+                        el.item.checked = !el.item.checked;
+                        el.callback.call(window, el.item.checked, el.entry_name);
+                    }
+                    else
+                        el.callback.call(window, el.entry_name);
                     global_search.classList.toggle('hidden');
                 }
             }
@@ -151,16 +158,22 @@
             if(reset_input) input.value = "";
         }
 
-        const add_element = (t, c, p) => {
+        const add_element = (t, c, p, i) => {
             if(!t.length) return;
 
             if(ref_previous) ref_previous.classList.remove('last');
 
             let searchItem = document.createElement("div");
             searchItem.className = "searchitem last";
-            searchItem.innerText = p + t;
+            const is_checkbox = (i.type && i.type === 'checkbox');
+            if(is_checkbox) {
+                searchItem.innerHTML = "<a class='fa fa-check'></a><span>" + p + t + "</span>"
+            } else {
+                searchItem.innerHTML = p + t;
+            }
             searchItem.entry_name = t;
             searchItem.callback = c;
+            searchItem.item = i;
             searchItem.addEventListener('click', function(e) {
                 this.callback.call(window, this.entry_name);
                 global_search.classList.toggle('hidden');
@@ -182,9 +195,9 @@
         const propagate_add = ( item, filter, path ) => {
 
             const key = Object.keys(item)[0];
-            if( key.toLowerCase().includes(filter) ) {
+            if( (path + key).toLowerCase().includes(filter) ) {
                 if(item.callback)
-                    add_element(key, item.callback, path);
+                    add_element(key, item.callback, path, item);
             }
 
             path += key + " > ";

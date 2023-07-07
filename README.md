@@ -80,6 +80,7 @@ TODO List:
 - ~~Allow checkbox suboptions~~
 - ~~Menubar: Support subitem checkboxes~~
 - ~~Fix Array delete item button~~
+- ~~Show checkbox entries in search bar~~
 - Fix menubar entry with checkbox and icon
 - Drag elements to timeline to animate
 - Table Widget
