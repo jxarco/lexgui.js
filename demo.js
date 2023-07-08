@@ -73,13 +73,12 @@ area.split({sizes:["75%","25%"]});
 var [left,right] = area.sections;
 
 // split left area
-left.split({type: 'vertical', sizes:["70vh","30vh"]});
+left.split({type: 'vertical', sizes:["45vh","55vh"]});
 var [up, bottom] = left.sections;
 
 var kfTimeline = null;
 var clipsTimeline = null;
 var curvesTimeline = null;
-var assetBrowser = null;
 
 bottom.onresize = bounding => {
     if(kfTimeline) kfTimeline.resize( [ bounding.width, bounding.height ] );
@@ -104,30 +103,6 @@ bottom.addMenubar( m => {
         bottom_panel.style.display = 'block';
     });
 
-    m.add( "Asset Browser", e => { 
-        console.log(e); 
-        let el = document.getElementById('bottom-panel');
-        if(el)
-            el.style.display = 'none';
-        el = document.getElementById('kf-timeline');
-        if(el)
-            el.style.display = 'none';
-        el = document.getElementById('clips-timeline');
-        if(el)
-            el.style.display = 'none';
-        el = document.getElementById('curves-timeline');
-        if(el)
-            el.style.display = 'none';
-        var browser = document.getElementById('asset-browser');   
-        if(browser) {
-            browser.style.display = 'block';
-        }
-        else {
-            assetBrowser = new LX.AssetBrowser();
-            bottom.attach(assetBrowser.root);
-        }
-    });
-
     m.add( "Keyframes Timeline", e => { 
         console.log(e);
         let el = document.getElementById('bottom-panel');
@@ -145,7 +120,7 @@ bottom.addMenubar( m => {
             kfTimeline.resize();
         }
         else {
-            kfTimeline = new LX.KeyFramesTimeline("kf-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
+            kfTimeline = new LX.KeyFramesTimeline("kf-timeline", { width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight });
             kfTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
             kfTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [0,1,0, 1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
             bottom.attach(kfTimeline);

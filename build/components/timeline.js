@@ -21,14 +21,13 @@
 
             this.name = name ?? '';
             this.currentTime = 0;
+            this.currentScroll = 0;
             this.framerate = 30;
             this.opacity = 0.8;
             this.sidebarWidth = 0// 200;
             this.topMargin = 24;
             this.renderOutFrames = false;
-
             this.lastMouse = [];
-
             this.lastKeyFramesSelected = [];
             this.tracksDrawn = [];
             this.buttonsDrawn = [];
@@ -36,7 +35,6 @@
             this.clipboard = null;
             this.grabTime = 0;
             this.timeBeforeMove = 0;
-
             this.tracksPerItem = {};
             this.tracksDictionary = {};
 
@@ -45,7 +43,6 @@
             //do not change, it will be updated when called draw
             this.duration = 5;
             this.position = [options.x ?? 0, options.y ?? 0];
-
             this.size = [ options.width ?? 400, options.height ?? 100];
 
             if(options.width) 
@@ -59,30 +56,27 @@
             this.scrollableHeight = this.size[1]; //true height of the timeline content
             this.secondsToPixels = 100;
             this.pixelsToSeconds = 1 / this.secondsToPixels;
-          
-
             this.selectedItems = options.selectedItems ?? null;
-
             this.animationClip = options.animationClip ?? null;
-            
             this.trackHeight = options.trackHeight ?? 25;
-
             this.active = true;
 
-            let div = document.createElement('div');
-            div.className = 'lextimeline';
-            this.root = div;
+            this.root = document.createElement('div');
+            this.root.className = 'lextimeline';
 
-            let area = new LX.Area({height: "100%"});
+            this.updateHeader();
+
+            let header_offset = 36;
+            let area = new LX.Area({height: "calc( 100% - " + header_offset + "px )"});
             area.split({ type: "horizontal", sizes: ["20%", "80%"]});
+            this.content_area = area;
             let [left, right] = area.sections;
             
-            this.updateHeader();
             this.#updateLeftPanel(left);
+
             right.root.appendChild(this.canvas)
-            // div.appendChild(this.canvas);
             this.canvasArea = right;
-            div.appendChild(area.root);
+            this.root.appendChild(area.root);
 
             if(!options.canvas && this.name != '') {
                 this.root.id = this.name;
@@ -95,6 +89,8 @@
             this.canvas.addEventListener("wheel", this.processMouse.bind(this));
             this.canvas.addEventListener("dblclick", this.processMouse.bind(this));
             this.canvas.addEventListener("contextmenu", this.processMouse.bind(this));
+
+            setTimeout( () => this.resize(), 10 );
 
             right.onresize = bounding => {
                 this.#resizecanvas( [ bounding.width, bounding.height ] );
@@ -111,19 +107,21 @@
             if(this.header)
                 this.header.clear();
             else {
-                this.header = new LX.Panel({id:'lextimeline'});
+                this.header = new LX.Panel({id:'lextimelineheader', height: "36px"});
                 this.root.appendChild(this.header.root);
             }
             let header = this.header;
-            header.addBlank();
-            header.sameLine(2 + this.buttonsDrawn.length);
+            header.sameLine();
             header.addTitle(this.name);
-            header.addNumber("Duration", this.duration, (value, event) => this.setDuration(value), {step: 0.1, min: "0", width: '350px'});        
+            header.addNumber("Duration", this.duration, (value, event) => this.setDuration(value), {step: 0.01, min: 0, width: '350px'});        
+            header.addNumber("Current Time", this.currentTime, (value, event) => {}, {signal: "@on_current_time", step: 0.01, min: 0, precision: 3, width: '350px'});        
 
             for(let i = 0; i < this.buttonsDrawn.length; i++) {
                 let button = this.buttonsDrawn[i];
                 this.header.addButton( null, "<a class='" + button.icon +"' title='" + button.name + "'></a>", button.callback, {width: "45px"});
             }
+
+            header.endLine();
         }
 
         /**
@@ -282,7 +280,7 @@
             
             //background
             ctx.clearRect(0, -this.topMargin, w, h+this.topMargin);
-            ctx.fillStyle = "#161c21";// "#000";
+            ctx.fillStyle = "#14161a";// "#000";
             //ctx.globalAlpha = 0.65;
             ctx.fillRect(0, -this.topMargin, w, this.topMargin);
             ctx.fillStyle = "#1a2025";// "#000";
@@ -396,26 +394,24 @@
             ctx.globalAlpha = 1;
 
             // Current time marker
-            ctx.strokeStyle = "#5f88c9"//#AFD";
-            var x = ((w*0.5)|0) + 0.5;
-            ctx.globalAlpha = 0.5;
-            ctx.fillStyle = "#AAA";
-            ctx.fillRect( x-2,1,4,h);
+            var x = this.timeToX( currentTime );//((w*0.5)|0) + 0.5;
             ctx.globalAlpha = 1;
-            ctx.beginPath();
-            ctx.moveTo( x,1);
-            ctx.lineTo( x,h);
+            ctx.fillStyle = "#5f88c9";
+            ctx.fillRect( x-3,-24,6,h);
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = "#ddd";
+            ctx.fillRect( x-1,-24,2,h);
             ctx.stroke();
 
             ctx.fillStyle = "#5f88c9"//"#AFD";
             ctx.beginPath();
-            ctx.moveTo( x - 4,1);
-            ctx.lineTo( x + 4,1);
-            ctx.lineTo( x,6);
+            ctx.moveTo( x - 6, -24);
+            ctx.lineTo( x + 6, -24);
+            ctx.lineTo( x, -16);
             ctx.fill();
 
             // Current time text
-            ctx.fillText(String(currentTime.toFixed(3)), x, -5);
+            // ctx.fillText(String(currentTime.toFixed(3)), x, -5);
 
             // Selections
             if(this.boxSelection && this.boxSelectionStart && this.boxSelectionEnd) {
@@ -653,7 +649,7 @@
                     this.grabTime = time - this.currentTime;
 
                     if(this.onMouseDown)
-                        this.onMouseDown(e);
+                        this.onMouseDown(e, time);
                 }
             }
             else if( e.type == "mousemove" ) {
@@ -684,8 +680,6 @@
             }
             else if (e.type == "contextmenu" && this.showContextMenu)
                 this.showContextMenu(e);
-            this.canvas.style.cursor = this.grabbing && (LX.UTILS.getTime() - this.clickTime > 320) ? "grabbing" : "pointer" ;
-
 
             return true;
         }
@@ -697,6 +691,7 @@
          * @description helper function, you can call it from onDrawContent to render all the keyframes
          * TODO
          */
+
         drawTrackWithKeyframes( ctx, y, trackHeight, title, track, trackInfo ) {
             
             if(trackInfo.enabled === false)
@@ -868,10 +863,11 @@
             //ctx.restore();
         }
 
-         /**
+        /**
         * @method selectTrack
         * @param {id, parent, children, visible} trackInfo 
         */
+
         selectTrack( trackInfo) {
             this.unSelectAllTracks();
             
@@ -905,6 +901,7 @@
         * @method changeTrackVisibility
         * @param {id, parent, children, visible} trackInfo 
         */
+
         changeTrackVisibility(trackInfo, visible) {
             let [name, type] = trackInfo.id.split(" (");
             if(type)
@@ -923,11 +920,12 @@
                 this.onChangeTrackVisibility(trackInfo, visible)
         }
 
-         /**
+        /**
         * @method changeTrackDisplay
         * @param {id, parent, children, display} trackInfo 
         */
-         changeTrackDisplay(trackInfo, hide) {
+
+        changeTrackDisplay(trackInfo, hide) {
 
             for(let idx = 0; idx < trackInfo.children.length; idx++) {
                 let [name, type] = trackInfo.children[idx].id.split(" (");
@@ -956,16 +954,11 @@
          * ...
          * TODO
          */
-
         resize( size = [this.parent.root.clientWidth, this.parent.root.clientHeight]) {
-            // this.root.style.width = size[0] + 'px';
-            // this.root.style.height = size[1] + 'px';
+
             let w = size[0] - this.leftPanel.root.clientWidth - 10;
             this.size = [w , size [1]];
             this.#resizecanvas(this.size)
-            // this.canvas.style.width = size[0] + 'px';
-            // this.canvas.style.height = size[1] + 'px';
-            
         }
 
         #resizecanvas( size ) {
@@ -1015,13 +1008,14 @@
             }
         }
 
-        onMouseUp( e, time)  {
+        onMouseUp( e, time )  {
 
             let track = e.track;
             let localX = e.localX;
-            
             let discard = e.discard;
             
+            // this.canvas.style.cursor = "default";
+
             if(e.shiftKey) {
 
                 // Multiple selection
@@ -1071,16 +1065,15 @@
                         }
                     }
                 }
-                
             }
 
+            this.canvas.classList.remove('grabbing');
             this.boxSelection = false;
             this.boxSelectionStart = null;
             this.boxSelectionEnd = null;
-
         }
 
-        onMouseDown( e ) {
+        onMouseDown( e, time ) {
 
             let localX = e.localX;
             let localY = e.localY;
@@ -1094,23 +1087,22 @@
             }
             else if(e.ctrlKey && track) {
 
-                    const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
-                    if( keyFrameIndex != undefined ) {
-                        this.processCurrentKeyFrame( e, keyFrameIndex, track, null, true ); // Settings this as multiple so time is not being set
-                        this.movingKeys = true;
-                        
-                        // Set pre-move state
-                        for(let selectedKey of this.lastKeyFramesSelected) {
-                            let [name, idx, keyIndex] = selectedKey;
-                            let trackInfo = this.tracksPerItem[name][idx];
-                            selectedKey[3] = this.animationClip.tracks[ trackInfo.clipIdx ].times[ keyIndex ];
-                        }
-                        
-                        this.timeBeforeMove = track.times[ keyFrameIndex ];
+                const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
+                if( keyFrameIndex != undefined ) {
+                    this.processCurrentKeyFrame( e, keyFrameIndex, track, null, true ); // Settings this as multiple so time is not being set
+                    this.movingKeys = true;
+                    
+                    // Set pre-move state
+                    for(let selectedKey of this.lastKeyFramesSelected) {
+                        let [name, idx, keyIndex] = selectedKey;
+                        let trackInfo = this.tracksPerItem[name][idx];
+                        selectedKey[3] = this.animationClip.tracks[ trackInfo.clipIdx ].times[ keyIndex ];
                     }
-                
-
-            }else if(!track) {
+                    
+                    this.timeBeforeMove = track.times[ keyFrameIndex ];
+                    this.canvas.classList.add('grabbing');
+                }
+            } else if(!track) {
                 let x = e.offsetX;
                 let y = e.offsetY - this.topMargin;
                 for( const b of this.buttonsDrawn ) {
@@ -1151,7 +1143,9 @@
                 var curr = time - this.currentTime;
                 var delta = curr - this.grabTime;
                 this.grabTime = curr;
-                this.currentTime = Math.max(0,this.currentTime - delta);
+                this.currentTime = Math.max(0, this.currentTime - delta);
+                this.currentTime = Math.min(this.duration, this.currentTime);
+                LX.trigger( "@on_current_time", this.currentTime );
 
                 // fix this
                 if(e.shiftKey && track) {
@@ -1832,7 +1826,7 @@
 
         }
 
-        onMouseDown( e ) {
+        onMouseDown( e, time ) {
 
             let localX = e.localX;
             let localY = e.localY;
@@ -2432,7 +2426,7 @@
 
         }
 
-        onMouseDown( e ) {
+        onMouseDown( e, time ) {
 
             let localX = e.localX;
             let localY = e.localY;

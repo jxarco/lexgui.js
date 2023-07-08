@@ -10,11 +10,12 @@
     var LX = global.LX = {
         version: 1.1,
         ready: false,
-        components: []
+        components: [], // specific pre-build components
+        signals: {} // events and triggers
     };
 
     function clamp (num, min, max) { return Math.min(Math.max(num, min), max) }
-
+    function round(num, n) { return +num.toFixed(n); }
     function deepCopy(o) { return JSON.parse(JSON.stringify(o)) }
 
     function hexToRgb(string) {
@@ -269,7 +270,7 @@
 
         // Global vars
         this.DEFAULT_NAME_WIDTH     = "30%";
-        this.DEFAULT_SPLITBAR_SIZE  = 6;
+        this.DEFAULT_SPLITBAR_SIZE  = 4;
         this.OPEN_CONTEXTMENU_ENTRY = 'click';
 
         this.ready = true;
@@ -403,6 +404,21 @@
 
     LX.addContextMenu = addContextMenu;
 
+    function trigger( signal_name, value )
+    {
+        const obj = LX.signals[ signal_name ];
+
+        if( !obj )
+        return;
+
+        if( obj.constructor === Widget )
+        {
+            obj.set( value );
+        }
+    }
+
+    LX.trigger = trigger;
+
     class Area {
 
         /**
@@ -465,7 +481,7 @@
             content.parent = this;
 
             let element = content.root ? content.root : content;
-            
+
             // E.g. menubar has predefined height
             if(element.style.height == "100%")
             {
@@ -1672,13 +1688,34 @@
         /**
          * @method sameLine
          * @param {Number} number Of widgets that will be placed in the same line
-         * @description Next widgets will be in the same line
+         * @description Next N widgets will be in the same line. If no number, it will inline all until calling nextLine()
          */
 
         sameLine( number ) {
+            this.#inline_widgets_left = number ||  Infinity;
+        }
 
-            console.assert(number > 0);
-            this.#inline_widgets_left = number;
+        /**
+         * @method endLine
+         * @description Stop inlining widgets
+         */
+
+        endLine() {
+            this.#inline_widgets_left = 0;
+
+            if(!this.queuedContainer) {
+
+                if(this.current_branch)
+                    this.current_branch.content.appendChild( this._inlineContainer );
+                else
+                    this.root.appendChild( this._inlineContainer );
+            } 
+            // Append content to queued tab container
+            else {
+                this.queuedContainer.appendChild( this._inlineContainer );
+            }
+
+            delete this._inlineContainer;
         }
 
         /**
@@ -1836,7 +1873,7 @@
             if(options.title)
                 element.title = options.title;
 
-            element.style.width = options.width || "calc( 100% - 10px)";
+            element.style.width = options.width || "calc(100% - 10px)";
 
             if(name) {
                 let domName = document.createElement('div');
@@ -1852,6 +1889,11 @@
                     e.preventDefault();
                     widget.oncontextmenu(e);
                 });
+
+                if(options.signal)
+                {
+                    LX.signals[ options.signal ] = widget;
+                }
 
                 this.widgets[ name ] = widget;
             }
@@ -2012,6 +2054,7 @@
         addBlank( height = 8) {
 
             let widget = this.create_widget(null, Widget.addBlank);
+            widget.domEl.className += " blank";
             widget.domEl.style.height = height + "px";
             return widget;
         }
@@ -2027,10 +2070,11 @@
                 throw("Set Widget Name!");
             }
 
+            options.width = "auto";
             let widget = this.create_widget(null, Widget.TITLE, options);
             let element = widget.domEl;
             element.innerText = name;
-            element.className = "lextitle noname";
+            element.className = "lextitle";
         }
 
         /**
@@ -2947,6 +2991,7 @@
 
             var container = document.createElement('span');
             container.className = "lexcolor";
+            // container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
             let color = document.createElement('input');
             color.type = 'color';
@@ -2959,9 +3004,14 @@
                 color.disabled = true;
             }
 
-            let valueName = document.createElement('div');
+            let valueName = document.createElement('span');
             valueName.className = "colorinfo";
             valueName.innerText = color.value;
+
+            valueName.addEventListener("click", e => {
+                color.focus();
+                color.click();
+            });
 
             container.appendChild(color);
             container.appendChild(valueName);
@@ -2995,6 +3045,7 @@
          * @param {*} options:
          * disabled: Make the widget disabled [false]
          * step: Step of the input
+         * precision: The number of digits to appear after the decimal point
          * min, max: Min and Max values for the input
          */
 
@@ -3074,15 +3125,15 @@
 
             vecinput.addEventListener("input", e => {
                 let val = e.target.value = clamp(e.target.value, vecinput.min, vecinput.max);
-   
+                val = options.precision ? round(val, options.precision) : val;
                 // update slider!
                 if( box.querySelector(".lexinputslider"))
                     box.querySelector(".lexinputslider").value = val;
 
+                vecinput.value = val;
                 // Reset button (default value)
                 let btn = element.querySelector(".lexwidgetname .lexicon");
-                if(btn)
-                    btn.style.display = val != vecinput.iValue ? "block": "none";
+                if(btn) btn.style.display = val != vecinput.iValue ? "block": "none";
                 this._trigger( new IEvent(name, val, e), callback );
             }, false);
             
