@@ -6,6 +6,21 @@
 
     LX.components.push( 'Timeline' );
 
+    class Session {
+
+        constructor() {
+
+            this.start_time = -0.2;
+            this.left_margin = 0;
+            // this.current_time = 0;
+            // this.last_time = 0;
+            // this.seconds_to_pixels = 50;
+            // this.scroll_y = 0;
+            // this.offset_y = 0;
+            // this.selection = null;
+        }
+    };
+
     /**
      * @class Timeline
      * @description Agnostic timeline, do not impose any timeline content. Renders to a canvas
@@ -21,11 +36,10 @@
 
             this.name = name ?? '';
             this.currentTime = 0;
-            this.currentScroll = 0;
             this.framerate = 30;
             this.opacity = 0.8;
             this.sidebarWidth = 0// 200;
-            this.topMargin = 24;
+            this.topMargin = 28;
             this.renderOutFrames = false;
             this.lastMouse = [];
             this.lastKeyFramesSelected = [];
@@ -37,11 +51,13 @@
             this.timeBeforeMove = 0;
             this.tracksPerItem = {};
             this.tracksDictionary = {};
+	        this._times = [];
+
+            this.session = new Session();
 
             this.canvas = options.canvas ?? document.createElement('canvas');
 
-            //do not change, it will be updated when called draw
-            this.duration = 5;
+            this.duration = null;
             this.position = [options.x ?? 0, options.y ?? 0];
             this.size = [ options.width ?? 400, options.height ?? 100];
 
@@ -54,7 +70,7 @@
             this.currentScroll = 0; //in percentage
             this.currentScrollInPixels = 0; //in pixels
             this.scrollableHeight = this.size[1]; //true height of the timeline content
-            this.secondsToPixels = 100;
+            this.secondsToPixels = 300;
             this.pixelsToSeconds = 1 / this.secondsToPixels;
             this.selectedItems = options.selectedItems ?? null;
             this.animationClip = options.animationClip ?? null;
@@ -114,7 +130,9 @@
             header.sameLine();
             header.addTitle(this.name);
             header.addNumber("Duration", this.duration, (value, event) => this.setDuration(value), {step: 0.01, min: 0, width: '350px'});        
-            header.addNumber("Current Time", this.currentTime, (value, event) => {}, {signal: "@on_current_time", step: 0.01, min: 0, precision: 3, width: '350px'});        
+            header.addNumber("Current Time", this.currentTime, (value, event) => {
+                this.currentTime = value;
+            }, {signal: "@on_current_time", step: 0.01, min: 0, max: this.duration, precision: 3, width: '350px'});        
 
             for(let i = 0; i < this.buttonsDrawn.length; i++) {
                 let button = this.buttonsDrawn[i];
@@ -133,7 +151,7 @@
             if(this.leftPanel)
                 this.leftPanel.clear();
             else {
-                this.leftPanel = area.addPanel({className: 'lextimelinepanel'});
+                this.leftPanel = area.addPanel({className: 'lextimelinepanel', width: "100%"});
                 
             }
             let panel = this.leftPanel;
@@ -240,11 +258,135 @@
             this.animationClip = animation;
             this.duration = animation.duration;
 
+            // var w = Math.max(300, this.canvas.width);
+            // this.secondsToPixels = ( w - this.session.left_margin - 100 ) / this.duration;
+            // if(this.secondsToPixels < 1)
+            //     this.secondsToPixels = 100;
+            // this.session.start_time = -50 / this.secondsToPixels;
+
             if(this.processTracks)
                 this.processTracks();
             
             this.updateHeader();
             this.#updateLeftPanel();
+        }
+
+        drawTimeInfo (w, h) {
+
+            var ctx = this.canvas.getContext("2d");
+            
+            // Draw time markers
+            var startx = Math.round( this.timeToX( this.startTime ) ) + 0.5;
+	        var endx = Math.round( this.timeToX( this.endTime ) ) + 0.5;
+            var tick_time = 1;
+            var h = this.topMargin;
+
+            ctx.save();
+
+            ctx.fillStyle = "#111";
+            ctx.fillRect( this.session.left_margin,0, canvas.width, h );
+
+            if(this.secondsToPixels > 100 )
+            {
+                ctx.strokeStyle = "#AAA";
+                ctx.globalAlpha = 0.5 * (1.0 - LX.UTILS.clamp( 100 / this.secondsToPixels, 0, 1));
+                ctx.beginPath();
+                for( var time = this.startTime; time <= this.endTime; time += 1 / this.framerate )
+                {
+                    var x = this.timeToX( time );
+                    if(x < this.session.left_margin)
+                        continue;
+                    ctx.moveTo(Math.round(x) + 0.5, h * 0.75);
+                    ctx.lineTo(Math.round(x) + 0.5, h - 1);
+                }
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+
+            ctx.globalAlpha = 0.5;
+            ctx.strokeStyle = "#ADF";
+            ctx.beginPath();
+            var times = this._times;
+            this._times.length = 0;
+            for( var time = this.startTime; time <= this.endTime; time += tick_time )
+            {
+                var x = this.timeToX( time );
+
+                if(x < this.session.left_margin)
+                    continue;
+
+                var is_tick = time % 5 == 0;
+                if( is_tick || this.secondsToPixels > 70 )
+                    times.push([x,time]);
+
+                ctx.moveTo(Math.round(x) + 0.5, h * 0.5 + (is_tick ? 0 : h * 0.25) );
+                ctx.lineTo(Math.round(x) + 0.5, h);
+            }
+
+            var x = startx;
+            if(x < this.session.left_margin)
+                x = this.session.left_margin;
+            ctx.moveTo( x, h - 0.5);
+            ctx.lineTo( endx, h - 0.5);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+
+            //time seconds in text
+            ctx.font = "10px Arial";
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#888";
+            for(var i = 0; i < times.length; ++i)
+            {
+                var time = times[i][1];
+                ctx.fillText( time == (time|0) ? time : time.toFixed(1), times[i][0],10);
+            }
+
+            ctx.restore();
+        }
+
+        drawTracksBackground(w, h) {
+
+            var canvas = this.canvas;
+            var ctx = canvas.getContext("2d");
+            var duration = this.duration;
+        
+            //content
+            var margin = this.session.left_margin;
+            var timeline_height = this.topMargin;
+            var line_height = this.trackHeight;
+        
+            //fill track lines
+            var w = canvas.width;
+            var max_tracks = Math.ceil( h - timeline_height / line_height );
+
+            ctx.save();
+
+            for(var i = 0; i < max_tracks; ++i)
+            {
+                ctx.fillStyle = i % 2 == 0 ? "#222A" : "#2A2A2C";
+                ctx.fillRect(0, timeline_height + i * line_height, w, line_height );
+            }
+        
+            //black bg
+            ctx.globalAlpha = 0.2;
+            ctx.fillStyle = "black";
+            ctx.fillRect( margin, timeline_height, canvas.width - margin, canvas.height - timeline_height );
+            ctx.globalAlpha = 1;
+        
+            //bg lines
+            ctx.strokeStyle = "#444";
+            ctx.beginPath();
+        
+            var pos = this.timeToX( 0 );
+            if(pos < margin)
+                pos = margin;
+            ctx.moveTo( pos + 0.5, timeline_height);
+            ctx.lineTo( pos + 0.5, canvas.height);
+            ctx.moveTo( Math.round( this.timeToX( duration ) ) + 0.5, timeline_height);
+            ctx.lineTo( Math.round( this.timeToX( duration ) ) + 0.5, canvas.height);
+            ctx.stroke();
+
+            ctx.restore();
         }
 
         /**
@@ -255,6 +397,7 @@
          */
 
         draw( currentTime = this.currentTime, rect ) {
+
             let ctx = this.canvas.getContext("2d");
             ctx.globalAlpha = 1.0;
             if(!rect)
@@ -265,166 +408,77 @@
             this.position[1] = rect[1];
             var w = this.size[0] = rect[2];
             var h = this.size[1] = rect[3];
-            var P2S = this.pixelsToSeconds;
-            var S2P = this.secondsToPixels;
             var timelineHeight = this.size[1];
-            ctx.fillStyle = "black";
-            ctx.clearRect(0,0, w , h);
             this.currentTime = currentTime;
-            if(this.animationClip)
-                this.duration = this.animationClip.duration;
-            var duration = this.duration;
             this.currentScrollInPixels = this.scrollableHeight <= h ? 0 : (this.currentScroll * (this.scrollableHeight - timelineHeight));
-            ctx.save();
-            ctx.translate( this.position[0], this.position[1] + this.topMargin ); //20 is the top margin area
-            
-            //background
-            ctx.clearRect(0, -this.topMargin, w, h+this.topMargin);
-            ctx.fillStyle = "#14161a";// "#000";
-            //ctx.globalAlpha = 0.65;
-            ctx.fillRect(0, -this.topMargin, w, this.topMargin);
-            ctx.fillStyle = "#1a2025";// "#000";
-            ctx.globalAlpha = 0.75;
-            ctx.fillRect(0, 0, w, h);
-            ctx.globalAlpha = 1;
 
-            //buttons
-            // for( const b of this.buttonsDrawn ) {
-            //     const boundProperty = b[1];
-            //     ctx.fillStyle = this[ boundProperty ] ? "#b66" : "#454545";	
-            //     if(b.pressed) ctx.fillStyle = "#eee";
-            //     ctx.roundRect(b[2], b[3], b[4], b[5], 5, true, false);
-            //     ctx.drawImage(b[0], b[2] + 2, b[3] + 2, b[4] - 4, b[5] - 4);
-            // }
+            //zoom
+            if(this.duration > 0)
+            {
+                this.startTime = -50 / this.secondsToPixels;
+                this.startTime = Math.floor( this.session.start_time ); //seconds
+                if(this.startTime < 0)
+                    this.startTime = 0;
+                this.endTime = Math.ceil( this.startTime + (w - this.session.left_margin) * this.pixelsToSeconds );
+                if(this.endTime > this.duration)
+                    this.endTime = this.duration;
+                if(this.startTime > this.endTime) //avoids weird bug
+                    this.endTime = this.startTime + 1;
+            }
 
-            //seconds markers
-            var secondsFullWindow = (w * P2S); //how many seconds fit in the current window
-            var secondsHalfWindow = secondsFullWindow * 0.5;
-
-            //time in the left side (current time is always in the middle)
-            var timeStart = currentTime - secondsHalfWindow;
-            //time in the right side
-            var timeEnd = currentTime + secondsHalfWindow;
-
-            this.startTime = timeStart;
-            this.endTime = timeEnd;
-
-            var sidebar = this.sidebarWidth;
-
-            //this ones are limited to the true timeline (not the visible area)
-            var start = Math.ceil( Math.max(0,timeStart) );
-            var end = Math.floor( Math.min(duration,timeEnd) + 0.01 );
-            
-            // Calls using as 0,0 the top-left of the tracks area (not the top-left of the timeline but 20 pixels below)
             this.tracksDrawn.length = 0;
 
-            // Frame lines
-            if(S2P > 200)
+            ctx.save();
+
+            // Background
+            ctx.fillStyle = "#222";
+	        ctx.fillRect(0,0, canvas.width, canvas.height );
+
+            this.drawTimeInfo(w);
+
+            this.drawTracksBackground(w, h);
+
+            // Current time marker vertical line
+            var true_pos = Math.round( this.timeToX( this.currentTime ) ) + 0.5;
+            var quant_current_time = Math.round( this.currentTime * this.framerate ) / this.framerate;
+            var pos = Math.round( this.timeToX( quant_current_time ) ) + 0.5; //current_time is quantized
+            if(pos >= this.session.left_margin)
             {
-                ctx.strokeStyle = "#444";
-                ctx.globalAlpha = 0.4;
+                // ctx.strokeStyle = "#ABA";
+                // ctx.beginPath();
+                // ctx.globalAlpha = 0.3;
+                // ctx.moveTo(pos, 0); ctx.lineTo( pos, h );
+                // ctx.stroke();
+
+                ctx.strokeStyle = ctx.fillStyle = "#ADF";
+                ctx.globalAlpha = 1;
                 ctx.beginPath();
-
-                let start = timeStart;
-                let end = timeEnd;
-                
-                if(!this.renderOutFrames) {
-                    start = 0;
-                    end = duration;
-                }
-                
-                var pixelsPerFrame = S2P / this.framerate;
-                var x = pixelsPerFrame + Math.round( this.timeToX( Math.floor(start * this.framerate) / this.framerate));
-                var numFrames = (end - start ) * this.framerate - 1;
-                for(var i = 0; i < numFrames; ++i)
-                {
-                    ctx.moveTo( Math.round(x) + 0.5, 0);
-                    ctx.lineTo( Math.round(x) + 0.5, 10);
-                    x += pixelsPerFrame;
-                }
+                ctx.moveTo(true_pos, 0); ctx.lineTo(true_pos, ctx.canvas.height);//line
                 ctx.stroke();
-                ctx.globalAlpha = 1;
+                ctx.beginPath();
+                ctx.moveTo(true_pos - 4, 0); ctx.lineTo(true_pos + 4, 0); ctx.lineTo(true_pos, 6);//triangle
+                ctx.closePath();
+                ctx.fill();
             }
 
-            // Vertical lines
-            ctx.strokeStyle = "#444";
-            ctx.beginPath();
-            var linex = this.timeToX( 0 );
-            if( linex > sidebar )
-            {
-                ctx.moveTo( linex, 0.5);
-                ctx.lineTo( linex, h );
+            if(this.onDrawContent) {
+                
+                ctx.save();
+                ctx.translate( this.position[0], this.position[1] + this.topMargin ); //20 is the top margin area
+
+                // Selections
+                if(this.boxSelection && this.boxSelectionStart && this.boxSelectionEnd) {
+                    ctx.globalAlpha = 0.5;
+                    ctx.fillStyle = "#AAA";
+                    ctx.strokeRect( this.boxSelectionStart[0], this.boxSelectionStart[1], this.boxSelectionEnd[0] - this.boxSelectionStart[0], this.boxSelectionEnd[1] - this.boxSelectionStart[1]);
+                    ctx.stroke();
+                    ctx.globalAlpha = 1;
+                }
+
+                this.onDrawContent( ctx, this.timeStart, this.timeEnd, this );
+
+                ctx.restore();
             }
-            var linex = this.timeToX( duration );
-            if( linex > sidebar && linex < w )
-            {
-                ctx.moveTo( linex, 0.5);
-                ctx.lineTo( linex, h );
-            }
-            ctx.stroke();
-
-            // Horizontal line
-            ctx.strokeStyle = "#AAA";
-            ctx.beginPath();
-            ctx.moveTo( Math.max(sidebar, this.timeToX( Math.max(0,timeStart) ) ), 0.5);
-            ctx.lineTo( Math.min(w, this.timeToX( Math.min(duration,timeEnd) ) ), 0.5);
-            ctx.moveTo( Math.max(sidebar, this.timeToX( Math.max(0,timeStart) ) ), 1.5);
-            ctx.lineTo( Math.min(w, this.timeToX( Math.min(duration,timeEnd) ) ), 1.5);
-            var deltaSeconds = 1;
-            if( this.secondsToPixels < 50)
-                deltaSeconds = 10;
-            ctx.stroke();
-            
-            // Numbers
-            ctx.fillStyle = "#FFF";
-            ctx.font = "12px Tahoma";
-            ctx.textAlign = "center";
-            for(var t = start; t <= end-0.01; t += 1 )
-            {
-                if( t % deltaSeconds != 0 )
-                    continue;
-                ctx.globalAlpha = t % 10 == 0 ? 0.5 : LX.UTILS.clamp( (this.secondsToPixels - 50) * 0.01,0,0.7);
-                // if(Math.abs(t - currentTime) < 0.05)
-                // 	ctx.globalAlpha = 0.25;
-                var x = ((this.timeToX(t))|0) + 0.5;
-                if( x > sidebar-10 && x < (w + 10))
-                    ctx.fillText(String(t),x,-5);
-            }
-            ctx.fillText(String(duration.toFixed(3)), this.timeToX(duration),-5);
-            ctx.globalAlpha = 1;
-
-            // Current time marker
-            var x = this.timeToX( currentTime );//((w*0.5)|0) + 0.5;
-            ctx.globalAlpha = 1;
-            ctx.fillStyle = "#5f88c9";
-            ctx.fillRect( x-3,-24,6,h);
-            ctx.globalAlpha = 1;
-            ctx.fillStyle = "#ddd";
-            ctx.fillRect( x-1,-24,2,h);
-            ctx.stroke();
-
-            ctx.fillStyle = "#5f88c9"//"#AFD";
-            ctx.beginPath();
-            ctx.moveTo( x - 6, -24);
-            ctx.lineTo( x + 6, -24);
-            ctx.lineTo( x, -16);
-            ctx.fill();
-
-            // Current time text
-            // ctx.fillText(String(currentTime.toFixed(3)), x, -5);
-
-            // Selections
-            if(this.boxSelection && this.boxSelectionStart && this.boxSelectionEnd) {
-                ctx.globalAlpha = 0.5;
-                ctx.fillStyle = "#AAA";
-                ctx.strokeRect( this.boxSelectionStart[0], this.boxSelectionStart[1], this.boxSelectionEnd[0] - this.boxSelectionStart[0], this.boxSelectionEnd[1] - this.boxSelectionStart[1]);
-                ctx.stroke();
-                ctx.globalAlpha = 1;
-            }
-            
-            if(this.onDrawContent)
-                this.onDrawContent( ctx, timeStart, timeEnd, this );
-            ctx.restore();
         }
 
         /**
@@ -518,20 +572,22 @@
 
         // Converts distance in pixels to time
         xToTime( x, global ) {
-            if (global)
-                x -= this.position[0];
-            var v = (x - this.size[0] * 0.5) * this.pixelsToSeconds + this.currentTime;
-            return v;
+            // if (global)
+            //     x -= this.position[0];
+            // var v = (x - this.size[0] * 0.5) * this.pixelsToSeconds + this.currentTime;
+            // return v;
+            return (x - 0) / this.secondsToPixels + this.session.start_time;
         }
 
         // Converts time to disance in pixels
         timeToX( t, framerate, global ) {
-            if (framerate)
-                t = Math.round(t * framerate) / framerate;
-            var x = (t - this.currentTime) * this.secondsToPixels + this.size[0] * 0.5;
-            if (global)
-                x += this.position[0];
-            return x;
+            // if (framerate)
+            //     t = Math.round(t * framerate) / framerate;
+            // var x = (t - this.currentTime) * this.secondsToPixels + this.size[0] * 0.5;
+            // if (global)
+            //     x += this.position[0];
+            // return x;
+            return 0 + (t - this.session.start_time) * this.secondsToPixels;
         }
 
         getCurrentFrame( framerate ) {
@@ -546,10 +602,13 @@
 
         setScale( v ) {
 
-            this.secondsToPixels = v;
-            if (this.secondsToPixels > 3000)
-                this.secondsToPixels = 3000;
-            this.pixelsToSeconds = 1 / this.secondsToPixels;
+            if(!this.session)
+                return;
+
+            var centerx = this.canvas.width * 0.5;
+            var x = this.xToTime( centerx );
+            this.secondsToPixels *= v;
+            this.session.start_time += x - this.xToTime( centerx );
         }
         
         /**
@@ -582,9 +641,14 @@
             e.deltay = y - this.lastMouse[1];
             var localX = e.offsetX - this.position[0];
             var localY = e.offsetY - this.position[1];
-            this.lastMouse[0] = x;
-            this.lastMouse[1] = y;
             var timelineHeight = this.size[1];
+            this.canvas.style.cursor = "default";
+
+            var timeX = this.timeToX( this.currentTime );
+
+            if(localY < this.topMargin && localX > this.session.left_margin && 
+                localX > (timeX - 6) && localX < (timeX + 6) )
+                this.canvas.style.cursor = "col-resize";
 
             var time = this.xToTime(x, true);
 
@@ -672,7 +736,7 @@
                 }
                 else
                 {
-                    this.setScale( this.secondsToPixels * (e.wheelDelta < 0 ? 0.9 : (1/0.9)) );
+                    this.setScale( e.wheelDelta < 0 ? 0.95 : 1.05 );
                 }
             }
             else if (e.type == "dblclick" && this.onDblClick) {
@@ -680,6 +744,9 @@
             }
             else if (e.type == "contextmenu" && this.showContextMenu)
                 this.showContextMenu(e);
+
+            this.lastMouse[0] = x;
+            this.lastMouse[1] = y;
 
             return true;
         }
@@ -709,7 +776,7 @@
             // }
             ctx.fillStyle = "#2c303570";
             if(trackInfo.isSelected)
-                ctx.fillRect(0, y - 3, ctx.canvas.width, trackHeight );
+                ctx.fillRect(0, y, ctx.canvas.width, trackHeight );
             ctx.fillStyle = "#5e9fdd"//"rgba(10,200,200,1)";
             var keyframes = track.times;
 
@@ -726,24 +793,24 @@
                     if( keyframePosX > this.sidebarWidth ){
                         ctx.save();
 
-                        let margin = 0;
+                        let margin = -1;
                         let size = trackHeight * 0.3;
                         if(trackInfo.edited[j])
                             ctx.fillStyle = Timeline.COLOR_EDITED;
                         if(selected) {
                             ctx.fillStyle = Timeline.COLOR_SELECTED;
-                            size = trackHeight * 0.4;
-                            margin = -2;
+                            size = trackHeight * 0.35;
+                            margin = 0;
                         }
                         if(trackInfo.hovered[j]) {
-                            size = trackHeight * 0.4;
+                            size = trackHeight * 0.35;
                             ctx.fillStyle = Timeline.COLOR_HOVERED;
-                            margin = -2;
+                            margin = 0;
                         }
                         if(!this.active || trackInfo.active == false)
                             ctx.fillStyle = Timeline.COLOR_UNACTIVE;
                             
-                        ctx.translate(keyframePosX, y + size * 2 + margin);
+                        ctx.translate(keyframePosX, y + this.trackHeight * 0.75 + margin);
                         ctx.rotate(45 * Math.PI / 180);		
                         ctx.fillRect( -size, -size, size, size);
                         if(selected) {
@@ -1014,8 +1081,6 @@
             let localX = e.localX;
             let discard = e.discard;
             
-            // this.canvas.style.cursor = "default";
-
             if(e.shiftKey) {
 
                 // Multiple selection
@@ -1115,6 +1180,7 @@
         onMouseMove( e, time ) {
             
             let localX = e.localX;
+            let localY = e.localY;
             let track = e.track;
             
             const innerSetTime = (t) => { if( this.onSetTime ) this.onSetTime( t );	 }
@@ -1140,12 +1206,22 @@
 
             if( this.grabbing && e.button != 2) {
 
-                var curr = time - this.currentTime;
-                var delta = curr - this.grabTime;
-                this.grabTime = curr;
-                this.currentTime = Math.max(0, this.currentTime - delta);
-                this.currentTime = Math.min(this.duration, this.currentTime);
-                LX.trigger( "@on_current_time", this.currentTime );
+                var timeX = this.timeToX( this.currentTime );
+                if(localY < this.topMargin && localX > this.session.left_margin && 
+                    localX > (timeX - 6) && localX < (timeX + 6) )
+                {
+                    let time = this.xToTime( localX );
+                    time = Math.max(0, time);
+                    this.currentTime = Math.min(this.duration, time);
+                    LX.trigger( "@on_current_time", time );
+                }
+                else
+                {
+                    // Move timeline in X (independent of current time)
+                    var old = this.xToTime( this.lastMouse[0] );
+                    var now = this.xToTime( e.offsetX );
+                    this.session.start_time += (old - now);
+                }
 
                 // fix this
                 if(e.shiftKey && track) {
@@ -1204,7 +1280,7 @@
                     if(track.hide) {
                         continue;
                     }
-                    this.drawTrackWithKeyframes(ctx, 2 + offsetI * height + offset, height, track.name + " (" + track.type + ")", this.animationClip.tracks[track.clipIdx], track);
+                    this.drawTrackWithKeyframes(ctx, offsetI * height + offset, height, track.name + " (" + track.type + ")", this.animationClip.tracks[track.clipIdx], track);
                     offsetI++;
                 }
                 offset += offsetI * height + height;

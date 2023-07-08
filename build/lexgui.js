@@ -3061,7 +3061,7 @@
             };
             widget.onSetValue = (new_value) => {
                 vecinput.value = new_value;
-                Panel.#dispatch_event(vecinput, "input");
+                Panel.#dispatch_event(vecinput, "change");
             };
             let element = widget.domEl;
 
@@ -3069,7 +3069,7 @@
             Panel.#add_reset_property(element.domName, function() {
                 this.style.display = "none";
                 vecinput.value = vecinput.iValue;
-                Panel.#dispatch_event(vecinput, "input");
+                Panel.#dispatch_event(vecinput, "change");
             });
 
             // add widget value
@@ -3083,8 +3083,8 @@
 
             let vecinput = document.createElement('input');
             vecinput.className = "vecinput";
-            vecinput.min = options.min || -1e24;
-            vecinput.max = options.max || 1e24;
+            vecinput.min = options.min ?? -1e24;
+            vecinput.max = options.max ?? 1e24;
             vecinput.step = options.step ?? "any";
             vecinput.type = "number";
             vecinput.id = "number_"+simple_guidGenerator();
@@ -3105,7 +3105,7 @@
                 slider.type = "range";
                 slider.addEventListener("input", function(e) {
                     vecinput.value = +this.value;
-                    Panel.#dispatch_event(vecinput, "input");
+                    Panel.#dispatch_event(vecinput, "change");
                 }, false);
                 box.appendChild(slider);
             }
@@ -3117,13 +3117,13 @@
                 if(this !== document.activeElement)
                     return;
                 let mult = options.step ?? 1;
-                if(e.shiftKey) mult = 10;
-                else if(e.altKey) mult = 0.1;
+                if(e.shiftKey) mult *= 10;
+                else if(e.altKey) mult *= 0.1;
                 this.value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
-                Panel.#dispatch_event(vecinput, "input");
+                Panel.#dispatch_event(vecinput, "change");
             }, false);
 
-            vecinput.addEventListener("input", e => {
+            vecinput.addEventListener("change", e => {
                 let val = e.target.value = clamp(e.target.value, vecinput.min, vecinput.max);
                 val = options.precision ? round(val, options.precision) : val;
                 // update slider!
@@ -3144,6 +3144,7 @@
             var that = this;
             var lastY = 0;
             function inner_mousedown(e) {
+                if(document.activeElement == vecinput) return;
                 var doc = that.root.ownerDocument;
                 doc.addEventListener("mousemove",inner_mousemove);
                 doc.addEventListener("mouseup",inner_mouseup);
@@ -3155,10 +3156,10 @@
                 if (lastY != e.pageY) {
                     let dt = lastY - e.pageY;
                     let mult = options.step ?? 1;
-                    if(e.shiftKey) mult = 10;
-                    else if(e.altKey) mult = 0.1;
+                    if(e.shiftKey) mult *= 10;
+                    else if(e.altKey) mult *= 0.1;
                     vecinput.value = (+vecinput.valueAsNumber + mult * dt).toPrecision(5);
-                    Panel.#dispatch_event(vecinput, "input");
+                    Panel.#dispatch_event(vecinput, "change");
                 }
 
                 lastY = e.pageY;
@@ -3200,7 +3201,7 @@
                 const inputs = element.querySelectorAll(".vecinput");
                 for( var i = 0; i < inputs.length; ++i ) {
                     inputs[i].value = new_value[i] ?? 0;
-                    Panel.#dispatch_event(inputs[i], "input");
+                    Panel.#dispatch_event(inputs[i], "change");
                 }
             };
             let element = widget.domEl;
@@ -3210,7 +3211,7 @@
                 this.style.display = "none";
                 for( let v of element.querySelectorAll(".vecinput") ) {
                     v.value = v.iValue;
-                    Panel.#dispatch_event(v, "input");
+                    Panel.#dispatch_event(v, "change");
                 }
             });
 
@@ -3228,8 +3229,8 @@
 
                 let vecinput = document.createElement('input');
                 vecinput.className = "vecinput v" + num_components;
-                vecinput.min = options.min || -1e24;
-                vecinput.max = options.max || 1e24;
+                vecinput.min = options.min ?? -1e24;
+                vecinput.max = options.max ?? 1e24;
                 vecinput.step = options.step ?? "any";
                 vecinput.type = "number";
                 vecinput.id = "vec"+num_components+"_"+simple_guidGenerator();
@@ -3254,15 +3255,15 @@
                     {
                         for( let v of element.querySelectorAll(".vecinput") ) {
                             v.value = (+v.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
-                            Panel.#dispatch_event(v, "input");
+                            Panel.#dispatch_event(v, "change");
                         }
                     } else {
                         this.value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
-                        Panel.#dispatch_event(vecinput, "input");
+                        Panel.#dispatch_event(vecinput, "change");
                     }
                 }, false);
 
-                vecinput.addEventListener("input", e => {
+                vecinput.addEventListener("change", e => {
                     let val = e.target.value = clamp(e.target.value, vecinput.min, vecinput.max);
         
                     // Reset button (default value)
@@ -3289,6 +3290,7 @@
                 var that = this;
                 var lastY = 0;
                 function inner_mousedown(e) {
+                    if(document.activeElement == vecinput) return;
                     var doc = that.root.ownerDocument;
                     doc.addEventListener("mousemove",inner_mousemove);
                     doc.addEventListener("mouseup",inner_mouseup);
@@ -3307,11 +3309,11 @@
                         {
                             for( let v of element.querySelectorAll(".vecinput") ) {
                                 v.value = (+v.valueAsNumber + mult * dt).toPrecision(5);
-                                Panel.#dispatch_event(v, "input");
+                                Panel.#dispatch_event(v, "change");
                             }
                         } else {
                             vecinput.value = (+vecinput.valueAsNumber + mult * dt).toPrecision(5);
-                            Panel.#dispatch_event(vecinput, "input");
+                            Panel.#dispatch_event(vecinput, "change");
                         }
                     }
 
