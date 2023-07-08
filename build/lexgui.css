@@ -786,12 +786,20 @@ input[type=checkbox]:checked:after {
   display: flex;
 }
 
+.lexvector a {
+  width: 48px;
+  font-size: 11px;
+  margin-left: 6px;
+  margin-right: 6px;
+}
+
 .lexvector .vecbox {
   display: flex;
   border-radius: 4px;
   border: 1px solid #908fa356;
   margin-right: 2px;
   background: var(--branch-background);
+  width: 100%;
 }
 
 .lexvector .vecbox:has(input:focus) {
@@ -799,7 +807,7 @@ input[type=checkbox]:checked:after {
 }
 
 .lexvector .vecbox span {
-  min-width: 24px;
+  width: 3px;
   justify-content: center;
   background-color: #22292fbf;
   display: flex;
@@ -811,20 +819,20 @@ input[type=checkbox]:checked:after {
   user-select: none; /* Standard syntax */
 }
 
-.lexvector .vecbox span.x{
-  color:#fb8080;
+.lexvector .vecbox span.x {
+  background-color:#fb8080;
 }
 
-.lexvector .vecbox span.y{
-  color:#8eef97;
+.lexvector .vecbox span.y {
+  background-color:#8eef97;
 }
 
-.lexvector .vecbox span.z{
-  color:#8da5f3;
+.lexvector .vecbox span.z {
+  background-color:#8da5f3;
 }
 
-.lexvector .vecbox span.w{
-  color:#ffffff;
+.lexvector .vecbox span.w {
+  background-color:#ffffff;
 }
 
 /* Chrome, Safari, Edge, Opera */
@@ -843,13 +851,14 @@ input[type=number] {
   font-size: 12px;
   margin-left: 2px;
   border: none;
+  width: 100%;
 }
 
 .lexvector .vecbox .vecinput:focus, .numberbox .vecinput:focus {
   color: #c1c1dbef;
 }
 
-.lexvector .vecbox .vecinput.v2 {
+/* .lexvector .vecbox .vecinput.v2 {
   width: 66%;
 }
 
@@ -859,7 +868,7 @@ input[type=number] {
 
 .lexvector .vecbox .vecinput.v4 {
   width: 33%;
-}
+} */
 
 /* Number Widget */
 

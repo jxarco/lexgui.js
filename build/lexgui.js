@@ -3123,7 +3123,7 @@
 
                 let box = document.createElement('div');
                 box.className = "vecbox";
-                box.innerHTML = "<span class='" + Panel.#VECTOR_COMPONENTS[i] + "'>" + Panel.#VECTOR_COMPONENTS[i] + "</span>";
+                box.innerHTML = "<span class='" + Panel.#VECTOR_COMPONENTS[i] + "'></span>";
 
                 let vecinput = document.createElement('input');
                 vecinput.className = "vecinput v" + num_components;
@@ -3148,8 +3148,17 @@
                     let mult = options.step ?? 1;
                     if(e.shiftKey) mult = 10;
                     else if(e.altKey) mult = 0.1;
-                    this.value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
-                    Panel.#dispatch_event(vecinput, "input");
+
+                    if( lock_icon.locked )
+                    {
+                        for( let v of element.querySelectorAll(".vecinput") ) {
+                            v.value = (+v.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
+                            Panel.#dispatch_event(v, "input");
+                        }
+                    } else {
+                        this.value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
+                        Panel.#dispatch_event(vecinput, "input");
+                    }
                 }, false);
 
                 vecinput.addEventListener("input", e => {
@@ -3159,7 +3168,16 @@
                     let btn = element.querySelector(".lexwidgetname .lexicon");
                     if(btn) btn.style.display = val != vecinput.iValue ? "block": "none";
 
-                    value[e.target.idx] = val;
+                    if( lock_icon.locked )
+                    {
+                        for( let v of element.querySelectorAll(".vecinput") ) {
+                            v.value = val;
+                            value[v.idx] = val;
+                        }
+                    } else {
+                        value[e.target.idx] = val;
+                    }
+
                     this._trigger( new IEvent(name, value, e), callback );
                 }, false);
                 
@@ -3183,8 +3201,17 @@
                         let mult = options.step ?? 1;
                         if(e.shiftKey) mult = 10;
                         else if(e.altKey) mult = 0.1;
-                        vecinput.value = (+vecinput.valueAsNumber + mult * dt).toPrecision(5);
-                        Panel.#dispatch_event(vecinput, "input");
+
+                        if( lock_icon.locked )
+                        {
+                            for( let v of element.querySelectorAll(".vecinput") ) {
+                                v.value = (+v.valueAsNumber + mult * dt).toPrecision(5);
+                                Panel.#dispatch_event(v, "input");
+                            }
+                        } else {
+                            vecinput.value = (+vecinput.valueAsNumber + mult * dt).toPrecision(5);
+                            Panel.#dispatch_event(vecinput, "input");
+                        }
                     }
 
                     lastY = e.pageY;
@@ -3202,6 +3229,20 @@
                 box.appendChild(vecinput);
                 container.appendChild(box);
             }
+
+            let lock_icon = document.createElement('a');
+            lock_icon.className = "fa-solid fa-lock-open lexicon";
+            container.appendChild(lock_icon);
+            lock_icon.addEventListener("click", function(e) {
+                this.locked = !this.locked;
+                if(this.locked){
+                    this.classList.add("fa-lock");
+                    this.classList.remove("fa-lock-open");
+                } else {
+                    this.classList.add("fa-lock-open");
+                    this.classList.remove("fa-lock");
+                }
+            }, false);
             
             element.appendChild(container);
         }
