@@ -415,6 +415,27 @@ function fillPanel( panel ) {
     panel.addTags("Game Tags", "2d, karate, ai, engine, ps5, console", (value, event) => {
         console.log(value);
     });
+    panel.addComboButtons("Alignment", [
+        {
+            value: 'left',
+            icon: 'fa fa-align-left',
+            callback: (value, event) => {
+                console.log(value);
+            }
+        }, {
+            value: 'center',
+            icon: 'fa fa-align-center',
+            callback: (value, event) => {
+                console.log(value);
+            }
+        }, {
+            value: 'right',
+            icon: 'fa fa-align-right',
+            callback: (value, event) => {
+                console.log(value);
+            }
+        }
+    ]);
     panel.addList(null, 'Blat Panthers', ['GPTeam', 'Blat Bunny', ['Blat Panthers', 'fa-solid fa-paw']], (value, event) => {
         console.log(value);
     });

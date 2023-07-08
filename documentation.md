@@ -18,6 +18,7 @@
     - [Title](#title)
     - [Text](#text)
     - [Button](#button)
+    - [Combo Buttons](#combo-buttons)
     - [Number](#number)
     - [Vector](#vector)
     - [Checkbox](#checkbox)
@@ -189,7 +190,7 @@ You can also add multiple widgets in the same panel row to create well-organized
 
 ### Title
 
-Represents a text title section inside a [Branch](#branch). Call `Panel.addTitle(name, value, callback, options)` to add a Text Widget to your panel:
+Represents a text title section inside a [Branch](#branch). Call `Panel.addTitle(name, value, callback, options)` to add a Title Widget to your panel:
 
 * `name (String)`: Widget name
 * `options (Object)`: Basic options for a Widget
@@ -232,6 +233,39 @@ Represents a clickable element typically used to trigger an action. Call `Panel.
 panel.addButton("A Name", "Print event", (value, event) => {
     console.log(event);
 });
+```
+
+### Combo Buttons
+
+Multiple inlined (buttons)[#button] as selectable options. Call `Panel.addComboButtons(name, values, options)` to add a ComboButtons Widget to your panel:
+
+* `name (String)`: Widget name
+* `values (Array)`: Each of the {value, callback} items (you can add an `icon`)
+* `options (Object)`:
+  * `float`: Justify content (left, center, right) [center]
+
+```js
+panel.addComboButtons("Alignment", [
+    {
+        value: 'left',
+        icon: 'fa fa-align-left',
+        callback: (value, event) => {
+            console.log(value);
+        }
+    }, {
+        value: 'center',
+        icon: 'fa fa-align-center',
+        callback: (value, event) => {
+            console.log(value);
+        }
+    }, {
+        value: 'right',
+        icon: 'fa fa-align-right',
+        callback: (value, event) => {
+            console.log(value);
+        }
+    }
+]);
 ```
 
 ### Number

@@ -2173,6 +2173,56 @@
         }
 
         /**
+         * @method addComboButtons
+         * @param {String} name Widget name
+         * @param {Array} values Each of the {value, callback} items
+         * @param {*} options:
+         * float: Justify content (left, center, right) [center]
+         */
+
+        addComboButtons( name, values, options = {} ) {
+
+            let widget = this.create_widget(name, Widget.BUTTON, options);
+            let element = widget.domEl;
+
+            let that = this;
+            let container = document.createElement('div');
+            container.className = "lexcombobuttons ";
+            if( options.float ) container.className += options.float;
+            container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";   
+
+            for( let b of values )
+            {
+                if( !b.value ) throw("Set 'value' for each button!");
+
+                let buttonEl = document.createElement('button');
+                buttonEl.className = "lexbutton combo";
+                if(options.buttonClass)
+                    buttonEl.classList.add(options.buttonClass);
+                buttonEl.innerHTML = "<a class='"+ (b.icon ?? "") +"'></a><span>" + (b.icon ? "" : b.value) + "</span>";
+              
+                if(options.disabled)
+                    buttonEl.setAttribute("disabled", true);
+                
+                buttonEl.addEventListener("click", function(e) {
+                    container.querySelectorAll('button').forEach( s => s.classList.remove('selected'));
+                    this.classList.add('selected');
+                    that._trigger( new IEvent(name, b.value, e), b.callback );   
+                });
+    
+                container.appendChild(buttonEl);
+                
+                // Remove branch padding and margins
+                if(!name) {
+                    buttonEl.className += " noname";
+                    buttonEl.style.width =  "100%";
+                }
+            }
+
+            element.appendChild(container);
+        }
+
+        /**
          * @method addDropdown
          * @param {String} name Widget name
          * @param {Array} values Posible options of the dropdown widget -> String (for default dropdown) or Object = {value, url} (for images, gifs..)

@@ -530,7 +530,7 @@ input[type="file"] {
   background-color: #5a6571;
 }
 
-.lexbutton:active {
+.lexbutton:active:not(.lexbutton.combo) {
   /* background: var(--global-dropdown-color);
   color: #DDD; */
   border: 2px solid var(--global-selected-light);
@@ -545,6 +545,51 @@ input[type="file"] {
 .lexbutton.noname {
   margin-left: 0px;
   margin-top: 0px;
+}
+
+/* Combo Buttons */
+
+.lexcombobuttons {
+  display: flex;
+  justify-content: center;
+}
+
+.lexcombobuttons.right {
+  justify-content: right;
+}
+
+.lexcombobuttons.left {
+  justify-content: left;
+}
+
+.lexcombobuttons .lexbutton.combo {
+  margin-left: 0px;
+  border-radius: 0px;
+  display: flex;
+}
+
+.lexcombobuttons .lexbutton.combo:first-child {
+ border-top-left-radius: 4px;
+ border-bottom-left-radius: 4px;
+}
+
+.lexcombobuttons .lexbutton.combo:last-child {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.lexcombobuttons .lexbutton.combo.selected {
+  background-color: var(--global-selected);
+  color: #f5f5f5;
+}
+
+.lexcombobuttons .lexbutton.combo a {
+  padding: 2px;
+  margin-right: 2px;
+}
+
+.lexcombobuttons .lexbutton.combo span {
+  line-height: 18px;
 }
 
 /* Dropdown (Combo) */
