@@ -587,9 +587,10 @@ input[type="file"] {
 .lexdropdown .option {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  /* justify-content: center; */
   align-items: center;
   width: 100%;
+  padding-left: 12px;
 }
 
 .lexdropdown li.last {
@@ -641,7 +642,7 @@ input[type="file"] {
 
 .lexdropdown .lexdropdownitem a {
   display: none;
-  left: 16px;
+  right: 16px;
   position: absolute;
 }
 
