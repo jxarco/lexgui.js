@@ -82,12 +82,11 @@ TODO List:
 - ~~Fix Array delete item button~~
 - ~~Show checkbox entries in search bar~~
 - ~~Tree multiple selection~~
+- ~~Area Overlay panel~~
+- Fix some widgets in overlay panel
 - Fix menubar entry with checkbox and icon
 - Drag elements to timeline to animate
-- Table Widget
-- Card Widget
 - Image Viewer
-- Area Overlay buttons
 - Components:
     - ~~Timeline~~
     - Node Graphs

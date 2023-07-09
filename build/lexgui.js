@@ -678,6 +678,7 @@
 
         /**
          * @method addMenubar
+         * @param {Function} callback Function to fill the menubar
          * @param {*} options:
          * float: Justify content (left, center, right) [left]
          */
@@ -698,6 +699,67 @@
 
             this.split({type: 'vertical', sizes:[height,null], resize: false});
             this.sections[0].attach( menubar );
+        }
+
+        /**
+         * @method addOverlayPanel
+         * @param {Function} callback Function to fill the panel
+         * @param {*} options:
+         * float: Justify content (left, center, right) [left]
+         */
+
+        addOverlayPanel( callback, options = {} ) {
+            
+            console.assert( callback );
+
+            // Set area to relative to use local position
+            this.root.style.position = "relative";
+
+            options.className = "lexoverlaybuttons";
+            options.width = "auto";
+            options.height = "auto";
+
+            const float = options.float;
+
+            if( float )
+            {
+                for( var i = 0; i < float.length; i++ )
+                {
+                    const t = float[i];
+                    switch( t )
+                    {
+                    case 'h': break;
+                    case 'v': options.className += " vertical"; break;
+                    case 't': break;
+                    case 'm': options.className += " middle"; break;
+                    case 'b': options.className += " bottom"; break;
+                    case 'l': break;
+                    case 'c': options.className += " center"; break;
+                    case 'r': options.className += " right"; break;
+                    }
+                }
+            }
+
+            let overlayPanel = this.addPanel( options );
+            overlayPanel.skip_widget_names = true;
+            
+            callback( overlayPanel );
+
+            if( float )
+            {
+                if( options.className.includes("middle") )
+                {
+                    overlayPanel.root.style.top = "-moz-calc( 50% - " + overlayPanel.root.offsetHeight * 0.5 + "px )";
+                    overlayPanel.root.style.top = "-webkit-calc( 50% - " + overlayPanel.root.offsetHeight * 0.5 + "px )";
+                    overlayPanel.root.style.top = "calc( 50% - " + overlayPanel.root.offsetHeight * 0.5 + "px )";
+                }
+                if( options.className.includes("center") )
+                {
+                    overlayPanel.root.style.left = "-moz-calc( 50% - " + overlayPanel.root.offsetWidth * 0.5 + "px )";
+                    overlayPanel.root.style.left = "-webkit-calc( 50% - " + overlayPanel.root.offsetWidth * 0.5 + "px )";
+                    overlayPanel.root.style.left = "calc( 50% - " + overlayPanel.root.offsetWidth * 0.5 + "px )";
+                }
+            }
         }
 
         #moveSplit( dt ) {
@@ -1892,6 +1954,9 @@
 
         create_widget( name, type, options = {} ) {
 
+            if( this.skip_widget_names )
+                name = null;
+
             let widget = new Widget(name, type, options);
 
             let element = document.createElement('div');
@@ -2147,7 +2212,7 @@
             let element = widget.domEl;
 
             // Add reset functionality
-            if(name && !(options.noreset ?? false)) {
+            if(widget.name && !(options.noreset ?? false)) {
                 Panel.#add_reset_property(element.domName, function() {
                     wValue.value = wValue.iValue;
                     this.style.display = "none";
@@ -2205,7 +2270,7 @@
             element.appendChild(container);
             
             // Remove branch padding and margins
-            if(!name) {
+            if(!widget.name) {
                 element.className += " noname";
                 container.style.width = "100%";
             }
@@ -2227,6 +2292,7 @@
          * @param {String} value Button name
          * @param {Function} callback Callback function on click
          * @param {*} options:
+         * icon 
          * disabled: Make the widget disabled [false]
          */
 
@@ -2236,11 +2302,11 @@
             let element = widget.domEl;
 
             var wValue = document.createElement('button');
-
+            if(options.icon) wValue.title = value;
             wValue.className = "lexbutton";
             if(options.buttonClass)
                 wValue.classList.add(options.buttonClass);
-            wValue.innerHTML = "<span>" + (value || "") + "</span>";
+            wValue.innerHTML = "<span>" + (options.icon ? "<a class='" + options.icon + "'></a>" : (value || "")) + "</span>";
             wValue.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
           
             if(options.disabled)
@@ -2253,7 +2319,7 @@
             element.appendChild(wValue);
             
             // Remove branch padding and margins
-            if(!name) {
+            if(!widget.name) {
                 wValue.className += " noname";
                 wValue.style.width =  "100%";
             }
@@ -2302,7 +2368,7 @@
                 container.appendChild(buttonEl);
                 
                 // Remove branch padding and margins
-                if(!name) {
+                if(!widget.name) {
                     buttonEl.className += " noname";
                     buttonEl.style.width =  "100%";
                 }
@@ -2323,10 +2389,6 @@
 
         addDropdown( name, values, value, callback, options = {} ) {
 
-            if(!name) {
-                throw("Set Widget Name!");
-            }
-
             let widget = this.create_widget(name, Widget.DROPDOWN, options);
             widget.onGetValue = () => {
                 return element.querySelector("li.selected").getAttribute('value');
@@ -2343,12 +2405,15 @@
             let that = this;
 
             // Add reset functionality
-            Panel.#add_reset_property(element.domName, function() {
-                value = wValue.iValue;
-                list.querySelectorAll('li').forEach( e => { if( e.getAttribute('value') == value ) e.click() } );
-                that._trigger( new IEvent(name, value, null), callback ); 
-                this.style.display = "none";
-            });
+            if(widget.name)
+            {
+                Panel.#add_reset_property(element.domName, function() {
+                    value = wValue.iValue;
+                    list.querySelectorAll('li').forEach( e => { if( e.getAttribute('value') == value ) e.click() } );
+                    that._trigger( new IEvent(name, value, null), callback ); 
+                    this.style.display = "none";
+                });
+            }
 
             let container = document.createElement('div');
             container.className = "lexdropdown";
@@ -2482,6 +2547,12 @@
 
             container.appendChild(list);
             element.appendChild(container);
+
+            // Remove branch padding and margins
+            if(!widget.name) {
+                element.className += " noname";
+                container.style.width = "100%";
+            }
         }
 
         /**
@@ -2686,7 +2757,7 @@
 
             let array_items = document.createElement('div');
             array_items.className = "lexarrayitems";
-            // array_items.toggleAttribute('hidden',  true);
+            array_items.toggleAttribute('hidden',  true);
             
             element.appendChild(container);
             element.appendChild(array_items);
@@ -2793,7 +2864,7 @@
             }
 
             // Remove branch padding and margins
-            if(!name) {
+            if(!widget.name) {
                 element.className += " noname";
                 list_container.style.width = "100%";
             }
@@ -2829,13 +2900,15 @@
             let that = this;
 
             // Add reset functionality
-            if(name)
+            if(widget.name)
+            {
                 Panel.#add_reset_property(element.domName, function(e) {
                     this.style.display = "none";
                     value = [].concat(defaultValue);
                     create_tags();
                     that._trigger( new IEvent(name, value, e), callback );
                 });
+            }
 
             // Show tags
 
@@ -2891,7 +2964,7 @@
             create_tags();
 
             // Remove branch padding and margins
-            if(!name) {
+            if(!widget.name) {
                 element.className += " noname";
                 tags_container.style.width = "100%";
             }
