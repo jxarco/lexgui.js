@@ -6,6 +6,11 @@
 
     LX.components.push( 'Timeline' );
 
+    /**
+     * @class Session
+     * @description Store info about timeline session
+     */
+
     class Session {
 
         constructor() {
@@ -126,20 +131,24 @@
                 this.header = new LX.Panel({id:'lextimelineheader', height: "36px"});
                 this.root.appendChild(this.header.root);
             }
+
             let header = this.header;
+            LX.DEFAULT_NAME_WIDTH = "50%";
             header.sameLine();
-            header.addTitle(this.name);
-            header.addNumber("Duration", this.duration, (value, event) => this.setDuration(value), {step: 0.01, min: 0, width: '350px'});        
+            header.addTitle(this.name, {width: "132px"});
+            header.addDropdown("Animation", ["Scene", "Anim1", "Anim2"], "Scene", (value, event) => {});        
+            header.addNumber("Duration", this.duration, (value, event) => this.setDuration(value), {step: 0.01, min: 0});        
             header.addNumber("Current Time", this.currentTime, (value, event) => {
                 this.currentTime = value;
-            }, {signal: "@on_current_time", step: 0.01, min: 0, max: this.duration, precision: 3, width: '350px'});        
+            }, {signal: "@on_current_time", step: 0.01, min: 0, max: this.duration, precision: 3});        
 
             for(let i = 0; i < this.buttonsDrawn.length; i++) {
                 let button = this.buttonsDrawn[i];
-                this.header.addButton( null, "<a class='" + button.icon +"' title='" + button.name + "'></a>", button.callback, {width: "45px"});
+                this.header.addButton( null, "<a class='" + button.icon +"' title='" + button.name + "'></a>", button.callback, {width: "32px"});
             }
 
             header.endLine();
+            LX.DEFAULT_NAME_WIDTH = "30%";
         }
 
         /**
@@ -398,7 +407,7 @@
 
         draw( currentTime = this.currentTime, rect ) {
 
-            let ctx = this.canvas.getContext("2d");
+            var ctx = this.canvas.getContext("2d");
             ctx.globalAlpha = 1.0;
             if(!rect)
                 rect = [0, ctx.canvas.height - ctx.canvas.height , ctx.canvas.width, ctx.canvas.height ];
@@ -427,8 +436,6 @@
             }
 
             this.tracksDrawn.length = 0;
-
-            ctx.save();
 
             // Background
             ctx.fillStyle = "#222";
@@ -463,7 +470,6 @@
 
             if(this.onDrawContent) {
                 
-                ctx.save();
                 ctx.translate( this.position[0], this.position[1] + this.topMargin ); //20 is the top margin area
 
                 // Selections
@@ -477,7 +483,7 @@
 
                 this.onDrawContent( ctx, this.timeStart, this.timeEnd, this );
 
-                ctx.restore();
+                ctx.translate( -this.position[0], -(this.position[1] + this.topMargin) ); //20 is the top margin area
             }
         }
 
@@ -489,6 +495,7 @@
          */
 
         drawMarkers( ctx, markers ) {
+
             //render markers
             ctx.fillStyle = "white";
             ctx.textAlign = "left";
@@ -571,23 +578,13 @@
         }
 
         // Converts distance in pixels to time
-        xToTime( x, global ) {
-            // if (global)
-            //     x -= this.position[0];
-            // var v = (x - this.size[0] * 0.5) * this.pixelsToSeconds + this.currentTime;
-            // return v;
-            return (x - 0) / this.secondsToPixels + this.session.start_time;
+        xToTime( x ) {
+            return (x - this.session.left_margin) / this.secondsToPixels + this.session.start_time;
         }
 
         // Converts time to disance in pixels
-        timeToX( t, framerate, global ) {
-            // if (framerate)
-            //     t = Math.round(t * framerate) / framerate;
-            // var x = (t - this.currentTime) * this.secondsToPixels + this.size[0] * 0.5;
-            // if (global)
-            //     x += this.position[0];
-            // return x;
-            return 0 + (t - this.session.start_time) * this.secondsToPixels;
+        timeToX( t ) {
+            return this.session.left_margin + (t - this.session.start_time) * this.secondsToPixels;
         }
 
         getCurrentFrame( framerate ) {
@@ -642,12 +639,15 @@
             var localX = e.offsetX - this.position[0];
             var localY = e.offsetY - this.position[1];
             var timelineHeight = this.size[1];
-            this.canvas.style.cursor = "default";
+
+            if(!this.grabbing_timeline)
+                this.canvas.style.cursor = "default";
 
             var timeX = this.timeToX( this.currentTime );
+            var current_grabbing_timeline = localY < this.topMargin && localX > this.session.left_margin && 
+            localX > (timeX - 6) && localX < (timeX + 6);
 
-            if(localY < this.topMargin && localX > this.session.left_margin && 
-                localX > (timeX - 6) && localX < (timeX + 6) )
+            if( current_grabbing_timeline )
                 this.canvas.style.cursor = "col-resize";
 
             var time = this.xToTime(x, true);
@@ -681,6 +681,7 @@
                     this.onClipMoved();
                 }
 
+                this.grabbing_timeline = false;
                 this.grabbing = false;
                 this.grabbingScroll = false;
                 this.movingKeys = false;
@@ -711,6 +712,8 @@
                 {
                     this.grabbing = true;
                     this.grabTime = time - this.currentTime;
+
+                    this.grabbing_timeline = current_grabbing_timeline;
 
                     if(this.onMouseDown)
                         this.onMouseDown(e, time);
@@ -1206,9 +1209,7 @@
 
             if( this.grabbing && e.button != 2) {
 
-                var timeX = this.timeToX( this.currentTime );
-                if(localY < this.topMargin && localX > this.session.left_margin && 
-                    localX > (timeX - 6) && localX < (timeX + 6) )
+                if(this.grabbing_timeline )
                 {
                     let time = this.xToTime( localX );
                     time = Math.max(0, time);

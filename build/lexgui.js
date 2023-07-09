@@ -1,3 +1,5 @@
+'use strict';
+
 // Lexgui.js @jxarco
 
 (function(global){
@@ -1601,6 +1603,7 @@
 
     class Panel {
 
+        #inline_queued_container;
         #inline_widgets_left;
 
         /**
@@ -1692,6 +1695,8 @@
          */
 
         sameLine( number ) {
+
+            this.#inline_queued_container = this.queuedContainer;
             this.#inline_widgets_left = number ||  Infinity;
         }
 
@@ -1701,20 +1706,45 @@
          */
 
         endLine() {
+
             this.#inline_widgets_left = 0;
 
-            if(!this.queuedContainer) {
+            if(!this._inlineContainer)  {
+                this._inlineContainer = document.createElement('div');
+                this._inlineContainer.className = "lexinlinewidgets";
+            }
+            
+            // Push all elements single element or Array[element, container]
+            for( let item of this._inlineWidgets )
+            {
+                const is_pair = item.constructor == Array;
 
+                if(is_pair)
+                {
+                    // eg. an array, inline items appended later to 
+                    if(this.#inline_queued_container)
+                        this._inlineContainer.appendChild( item[0] );
+                    // eg. a dropdown, item is appended to parent, not to inline cont.
+                    else
+                        item[1].appendChild(item[0]);
+                } 
+                else
+                    this._inlineContainer.appendChild( item );
+            }
+            
+            if(!this.#inline_queued_container)
+            {
                 if(this.current_branch)
                     this.current_branch.content.appendChild( this._inlineContainer );
                 else
                     this.root.appendChild( this._inlineContainer );
-            } 
-            // Append content to queued tab container
-            else {
-                this.queuedContainer.appendChild( this._inlineContainer );
+            }
+            else
+            {
+                this.#inline_queued_container.appendChild( this._inlineContainer );
             }
 
+            delete this._inlineWidgets;
             delete this._inlineContainer;
         }
 
@@ -1873,7 +1903,10 @@
             if(options.title)
                 element.title = options.title;
 
-            element.style.width = options.width || "calc(100% - 10px)";
+            element.style.width = "calc(100% - 10px)";
+            if( options.width ) {
+                element.style.width = element.style.minWidth = options.width;
+            }
 
             if(name) {
                 let domName = document.createElement('div');
@@ -1922,20 +1955,32 @@
                 }
             };
 
+            const store_widget = el => {
+
+                if(!this.queuedContainer) {
+                    this._inlineWidgets.push( el );
+                } 
+                // Append content to queued tab container
+                else {
+                    this._inlineWidgets.push( [el, this.queuedContainer] );
+                }
+            };
+
             // Process inline widgets
             if(this.#inline_widgets_left > 0)
             {
-                if(!this._inlineContainer)  {
-                    this._inlineContainer = document.createElement('div');
-                    this._inlineContainer.className = "lexinlinewidgets";
+                if(!this._inlineWidgets)  {
+                    this._inlineWidgets = [];
                 }
-                this._inlineContainer.appendChild(element);
+
+                // Store widget and its container
+                store_widget(element);
+
                 this.#inline_widgets_left--;
 
                 // Last widget
                 if(!this.#inline_widgets_left) {
-                    insert_widget(this._inlineContainer);
-                    delete this._inlineContainer;
+                    this.endLine();
                 }
             }else {
                 insert_widget(element);
@@ -2070,7 +2115,7 @@
                 throw("Set Widget Name!");
             }
 
-            options.width = "auto";
+            options.width = options.width ?? "auto";
             let widget = this.create_widget(null, Widget.TITLE, options);
             let element = widget.domEl;
             element.innerText = name;
@@ -2641,7 +2686,7 @@
 
             let array_items = document.createElement('div');
             array_items.className = "lexarrayitems";
-            array_items.toggleAttribute('hidden',  true);
+            // array_items.toggleAttribute('hidden',  true);
             
             element.appendChild(container);
             element.appendChild(array_items);

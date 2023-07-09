@@ -382,6 +382,11 @@ input[type="file"] {
   overflow: hidden;
 }
 
+.lexinlinewidgets .lexwidget {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
 .lexwidget:hover:not(.blank) {
   background-color: var(--widget-background-hover);
 }
@@ -1687,8 +1692,14 @@ meter::-webkit-meter-even-less-good-value {
   padding: 0 10px;
 }
 
-.lextimeline .lexwidget:has(.lexbutton) {
+.lextimeline .lexwidget:has(.lexbutton:not(.array)) {
   padding: 1px;
+  /* padding-left: 10px;
+  padding-right: 10px; */
+}
+
+.lextimeline .lexinlinewidgets {
+  padding-right: 10px;
 }
 
 .lextimeline .lexbutton:hover {
@@ -1700,16 +1711,11 @@ meter::-webkit-meter-even-less-good-value {
   width: 100%;
 }
 
-/* .lextimeline .lextree li:nth-child(2n){
-  background: var(--global-highlight);
-} */
-
 .lextimeline .lextree .lextreeitem {
   margin: 0px;
 }
 
 .lextimeline .lextitle {
-  /* border-radius: 0!important; */
   padding-left: 24px;
 }
 
