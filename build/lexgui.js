@@ -702,15 +702,15 @@
         }
 
         /**
-         * @method addOverlayPanel
-         * @param {Function} callback Function to fill the panel
+         * @method addOverlayButtons
+         * @param {Array} buttons Buttons info
          * @param {*} options:
-         * float: Justify content (left, center, right) [left]
+         * float: Where to put the buttons (h: horizontal, v: vertical, t: top, m: middle, b: bottom, l: left, c: center, r: right) [htc]
          */
 
-        addOverlayPanel( callback, options = {} ) {
+        addOverlayButtons( buttons, options = {} ) {
             
-            console.assert( callback );
+            console.assert( buttons.constructor == Array && buttons.length );
 
             // Set area to relative to use local position
             this.root.style.position = "relative";
@@ -741,10 +741,13 @@
             }
 
             let overlayPanel = this.addPanel( options );
-            overlayPanel.skip_widget_names = true;
             
-            callback( overlayPanel );
+            for( var b of buttons )
+            {
+                overlayPanel.addButton( null, b.name, b.callback, b.icon ? { icon: b.icon } : {} );
+            }
 
+            // Add floating info
             if( float )
             {
                 if( options.className.includes("middle") )
@@ -1953,9 +1956,6 @@
         */
 
         create_widget( name, type, options = {} ) {
-
-            if( this.skip_widget_names )
-                name = null;
 
             let widget = new Widget(name, type, options);
 
@@ -3169,10 +3169,6 @@
 
         addNumber( name, value, callback, options = {} ) {
 
-            if(!name) {
-                throw("Set Widget Name!");
-            }
-
             let widget = this.create_widget(name, Widget.NUMBER, options);
             widget.onGetValue = () => {
                 return +vecinput.value;
@@ -3184,11 +3180,13 @@
             let element = widget.domEl;
 
             // add reset functionality
-            Panel.#add_reset_property(element.domName, function() {
-                this.style.display = "none";
-                vecinput.value = vecinput.iValue;
-                Panel.#dispatch_event(vecinput, "change");
-            });
+            if(widget.name) {
+                Panel.#add_reset_property(element.domName, function() {
+                    this.style.display = "none";
+                    vecinput.value = vecinput.iValue;
+                    Panel.#dispatch_event(vecinput, "change");
+                });
+            }
 
             // add widget value
 
@@ -3294,6 +3292,12 @@
             
             container.appendChild(box);
             element.appendChild(container);
+
+            // Remove branch padding and margins
+            if(!widget.name) {
+                element.className += " noname";
+                container.style.width = "100%";
+            }
         }
 
         static #VECTOR_COMPONENTS = {0: 'x', 1: 'y', 2: 'z', 3: 'w'};

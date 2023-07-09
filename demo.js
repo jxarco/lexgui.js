@@ -227,15 +227,25 @@ canvas.height = up.root.clientHeight;
 canvas.style.width = "100%";
 canvas.style.height = "100%";
 up.attach( canvas );
-up.addOverlayPanel( p => {
-    // p.addDropdown("Engine", ["Godot", "Unity", "Unreal Engine"], "Godot", (value, event) => {
-    //     console.log(value);
-    // });
-    p.addButton( "This is skipped", "Button 1", () => console.log("Overlay Button 1"), { icon: "fa fa-skull" });
-    p.addButton( "This is skipped", "Button 2", () => console.log("Overlay Button 2"), { icon: "fa fa-cube" });
-    p.addButton( "This is skipped", "Button 3", () => console.log("Overlay Button 3"), { icon: "fa fa-lock" });
-    p.addButton( "This is skipped", "Button 4", () => console.log("Overlay Button 4"), { icon: "fa fa-box" });
-}, { float: "htc" } );
+
+up.addOverlayButtons( [ {
+        name: "Button 1",
+        callback: () => console.log("Overlay Button 1"),
+        icon: "fa fa-skull"
+    }, {
+        name: "Button 2",
+        callback: () => console.log("Overlay Button 2"),
+        icon: "fa fa-cube"
+    }, {
+        name: "Button 3",
+        callback: () => console.log("Overlay Button 3"),
+        icon: "fa fa-lock"
+    }, {
+        name: "Button 4",
+        callback: () => console.log("Overlay Button 4"),
+        icon: "fa fa-download"
+    }
+], { float: "htc" } );
 
 // add on resize event to control canvas size
 up.onresize = function( bounding ) {
