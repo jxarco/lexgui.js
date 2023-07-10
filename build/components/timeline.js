@@ -2414,7 +2414,7 @@
 
         /**
          * @param {string} name 
-         * @param {object} options = {animationClip, selectedItems, x, y, width, height, canvas, trackHeight}
+         * @param {object} options = {animationClip, selectedItems, x, y, width, height, canvas, trackHeight, range}
          */
         constructor(name, options = {}) {
 
@@ -2426,6 +2426,7 @@
             this.snappedKeyFrameIndex = -1;
             this.autoKeyEnabled = false;
             this.valueBeforeMove = 0;
+            this.range = options.range || [0, 1];
 
             if(this.animationClip)
                 this.processTracks();
@@ -2559,13 +2560,12 @@
                 
                 for(let [name, idx, keyIndex, keyTime] of this.lastKeyFramesSelected) {
                     track = this.tracksPerItem[name][idx];
-
-                    localY = Math.min( this.topMargin + this.trackHeight + this.tracksDrawn[idx][1], Math.max(localY, 0))
-                    let deltay = localY - this.tracksDrawn[idx][1];
-                    deltay = Math.min( this.trackHeight, Math.max(0, deltay) );
-
-                    this.animationClip.tracks[ track.clipIdx ].values[ keyIndex ] =  2 * (deltay)/ this.trackHeight - 1;
-                    console.log(this.animationClip.tracks[ track.clipIdx ].values[ keyIndex ])
+                    let trackRange = [this.tracksDrawn[track.clipIdx][1], this.tracksDrawn[track.clipIdx][1] + this.trackHeight];
+                    localY = Math.min( trackRange[1], Math.max(trackRange[0], localY) );
+                    
+                    //convert to range track values
+                    let value = (((localY - trackRange[1]) * (this.range[1] - this.range[0])) / (trackRange[0] - trackRange[1])) + this.range[0];
+                    this.animationClip.tracks[ track.clipIdx ].values[ keyIndex ] = value;
                 }
 
                 return;
@@ -2638,7 +2638,7 @@
                         continue;
                     }
                    
-                    this.drawTrackWithCurves(ctx, 2 + offsetI * height + offset, height, track.name + " (" + track.type + ")", this.animationClip.tracks[track.clipIdx], track);
+                    this.drawTrackWithCurves(ctx, offsetI * height + offset, height, track.name + " (" + track.type + ")", this.animationClip.tracks[track.clipIdx], track);
                     offsetI++;
                 }
                 offset += offsetI * height + height;
@@ -2664,22 +2664,28 @@
                 ctx.beginPath();
                 for(var j = 0; j < keyframes.length; ++j)
                 {
-                    let margin = 0;
-                    let size = trackHeight * 0.15;
+
                     let time = keyframes[j];
                     let value = values[j];
+                    
+                    //convert to timeline track range
+                    value = (((value - this.range[0]) * ( -this.trackHeight) ) / (this.range[1] - this.range[0])) + this.trackHeight;
+
                     if( time < this.startTime || time > this.endTime )
                         continue;
-                    var keyframePosX = this.timeToX( time );
-                    if( keyframePosX > this.sidebarWidth ){
-                        ctx.save();
-                        ctx.translate(keyframePosX, y + size * 2 + margin);
-                        if(!j)
-                            ctx.moveTo( 0, value*size );   
-                        else
-                            ctx.lineTo( 0, value*size );   
+                    let keyframePosX = this.timeToX( time );
+                    
+                    ctx.save();
+                    ctx.translate(keyframePosX, y );
+                   
+                    if( keyframePosX <=  this.sidebarWidth ){
+                        ctx.moveTo( 0, value );  
+                    }
+                    else { 
+                        ctx.lineTo( 0, value );  
                     }
                     ctx.restore()
+                    
                 }
                 ctx.stroke();
                 ctx.closePath();
@@ -2690,7 +2696,7 @@
                     let time = keyframes[j];
                     let selected = trackInfo.selected[j];
                     let margin = 0;
-                    let size = trackHeight * 0.15;
+                    let size = 5;
                     if( time < this.startTime || time > this.endTime )
                         continue;
                     var keyframePosX = this.timeToX( time );
@@ -2702,26 +2708,27 @@
                             ctx.fillStyle = Timeline.COLOR_EDITED;
                         if(selected) {
                             ctx.fillStyle = Timeline.COLOR_SELECTED;
-                            size = trackHeight * 0.2;
-                            margin = -2;
+                            size = 7;
+                            margin = -4;
                         }
                         if(trackInfo.hovered[j]) {
-                            size = trackHeight * 0.2;
+                            size = 7;
                             ctx.fillStyle = Timeline.COLOR_HOVERED;
-                            margin = -2;
+                            margin = -4;
                         }
                         if(!this.active || trackInfo.active == false)
                             ctx.fillStyle = Timeline.COLOR_UNACTIVE;
                             
-                        ctx.translate(keyframePosX, y + size * 2 + margin);
+                        ctx.translate(keyframePosX, y);
                         
                         let value = values[j];
-
+                        value = (((value - this.range[0]) * ( -this.trackHeight) ) / (this.range[1] - this.range[0])) + this.trackHeight;
+                        
                         if(selected )
                             ctx.fillStyle = "white";
 
                         ctx.beginPath();
-                        ctx.arc( 0, (selected || trackInfo.hovered[j]) ? value*size : value*size, size, 0, Math.PI * 2);
+                        ctx.arc( 0, (selected || trackInfo.hovered[j]) ? value: value, size, 0, Math.PI * 2);
                         ctx.fill();
                         ctx.closePath();    
                         ctx.restore();
