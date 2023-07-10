@@ -585,6 +585,7 @@ input[type="file"] {
   margin-left: 0px;
   border-radius: 0px;
   display: flex;
+  padding-top: 3px;
 }
 
 .lexcombobuttons .lexbutton.combo:first-child {
@@ -1091,9 +1092,10 @@ input[type=number] {
 
 .lextree .lextreetools {
   background: var(--branch-background);
-  padding: 8px;
+  padding: 6px;
   display: flex;
   font-size: 13px;
+  align-items: center;
 }
 
 .lextree .lextreetools.notitle {
@@ -1165,10 +1167,6 @@ input[type=number] {
 
 .lextree .lextreeitem:hover {
   color: var(--global-text-primary);
-}
-
-.lextree .lextreeitem:active {
-  margin-left: 1px;
 }
 
 .lextree .lextreeitem.selected:hover{
@@ -1388,7 +1386,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexcontextmenu .lexcontextmenuentry:active {
-  padding-top: 5px;
+  color: var(--global-text-secondary);
 }
 
 .lexcontextmenu .lexcontextmenuentry input {
@@ -1598,7 +1596,7 @@ meter::-webkit-meter-even-less-good-value {
   font-size: 14px;
   border-radius: 6px;
   color: #11111d;
-  background-color: var(--global-text);
+  background-color: #d9d9f1a2;
   border: 1px solid #11111f2b;
 }
 
@@ -1611,7 +1609,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexoverlaybuttons .lexbutton.selected {
-  background-color: var(--global-color-primary);
+  background-color: var(--global-branch-darker);
   color: #f5f5f5;
   outline: none;
 }

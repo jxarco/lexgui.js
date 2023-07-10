@@ -3778,7 +3778,6 @@
                 node_filter_input.id = "lexnodetree_filter";
                 node_filter_input.setAttribute("placeholder", "Filter..");
                 node_filter_input.style.width =  "calc( 100% - 17px )";
-                node_filter_input.style.marginTop =  "-6px";
                 node_filter_input.addEventListener('input', function(){
                     nodeTree.refresh();
                 });

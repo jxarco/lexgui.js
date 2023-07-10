@@ -83,7 +83,7 @@ TODO List:
 - ~~Show checkbox entries in search bar~~
 - ~~Tree multiple selection~~
 - ~~Area Overlay panel~~
-- Fix some widgets in overlay panel
+- Minimisable tiny dialog (fast option to debugg)
 - Fix menubar entry with checkbox and icon
 - Drag elements to timeline to animate
 - Image Viewer
