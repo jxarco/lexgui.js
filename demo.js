@@ -218,15 +218,28 @@ rbottom.addMenubar( m => {
     m.add( "Horizontal", name => { console.log(name); fillRightBottomPanel( side_bottom_panel, name ); });
 }, { float: 'center' } );
 
+// Get new content area to fill it
+const tab_area = up.addTabs([
+    {
+        name: "Canvas",
+        id: "mycanvas",
+        selected:  true
+    },
+    {
+        name: "Empty"
+    }
+]);
+
 // add canvas to left upper part
 var canvas = document.createElement('canvas');
-canvas.width = up.root.clientWidth;
-canvas.height = up.root.clientHeight;
+canvas.id = "mycanvas";
+canvas.width = tab_area.root.clientWidth;
+canvas.height = tab_area.root.clientHeight;
 canvas.style.width = "100%";
 canvas.style.height = "100%";
-up.attach( canvas );
+tab_area.attach( canvas );
 
-up.addOverlayButtons( [ 
+tab_area.addOverlayButtons( [ 
     [
         {
             name: "Select",
@@ -273,7 +286,7 @@ up.addOverlayButtons( [
 ], { float: "htc" } );
 
 // add on resize event to control canvas size
-up.onresize = function( bounding ) {
+tab_area.onresize = function( bounding ) {
     canvas.width = bounding.width;
     canvas.height = bounding.height;
 };

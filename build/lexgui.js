@@ -710,6 +710,12 @@
 
         addOverlayButtons( buttons, options = {} ) {
             
+            // Add to last split section if area has been split
+            if(this.sections.length) {
+                this.sections[1].addOverlayButtons(  buttons, options );
+                return;
+            }
+
             console.assert( buttons.constructor == Array && buttons.length );
 
             // Set area to relative to use local position
@@ -798,11 +804,11 @@
 
                 overlayPanel.clear();
 
-                for( var b of buttons )
+                for( let b of buttons )
                 {
                     if( b.constructor === Array )
                     {
-                        for( var sub of b )
+                        for( let sub of b )
                         {
                             add_button(sub, true);
                         }
@@ -829,6 +835,58 @@
             }
 
             refresh_panel();
+        }
+
+        /**
+         * @method addTabs
+         * @param {Array} tabs Tabs info
+         * @param {*} options:
+         */
+
+        addTabs( tabs, options = {} ) {
+
+            console.assert( tabs.constructor == Array && tabs.length );
+
+            let container = document.createElement('div');
+            container.className = "lexareatabs";
+
+            const refresh = function() {
+
+                container.innerHTML = "";
+
+                for( let t of tabs )
+                {
+                    let tab = document.createElement('span');
+                    tab.className = "lexareatab" + (t.selected ? " selected" : "");
+                    tab.innerHTML = t.name;
+                    container.appendChild(tab);
+                    tab.addEventListener("click", e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        container.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
+                        tab.classList.toggle('selected');
+                        
+                        tabArea.root.childNodes.forEach( c => c.style.display = 'none');
+                        var el = tabArea.root.querySelector("#" + t.id);
+                        if( el ) el.style.display = "block";
+                    });
+                }
+            }
+
+            refresh();
+
+            // Hack to get content height
+            let d = document.createElement('div');
+            d.appendChild(container);
+            document.body.appendChild(d);
+            const height = container.offsetHeight;
+            d.remove();
+
+            this.split({type: 'vertical', sizes:[height, null], resize: false});
+            this.sections[0].attach( container );
+
+            let tabArea = this.sections[1];
+            return tabArea;
         }
 
         #moveSplit( dt ) {
@@ -2409,7 +2467,7 @@
             let element = widget.domEl;
 
             var wValue = document.createElement('button');
-            if(options.icon) 
+            if(options.icon || options.img) 
                 wValue.title = value;
             wValue.className = "lexbutton";
             if(options.selected)
