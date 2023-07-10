@@ -2560,12 +2560,12 @@
                 
                 for(let [name, idx, keyIndex, keyTime] of this.lastKeyFramesSelected) {
                     track = this.tracksPerItem[name][idx];
-                    const delta = this.timeBeforeMove - keyTime;
-                    console.log("localY", localY)
-                    const deltay = Math.min( this.tracksDrawn[idx][1]+ this.tracksDrawn[idx][2], Math.max(this.tracksDrawn[idx][1] , localY) ) //Math.min(Math.max(this.valueBeforeMove - localY, - this.trackHeight), this.trackHeight);
-                    console.log(deltay)
-                    this.animationClip.tracks[ track.clipIdx ].times[ keyIndex ] = Math.min( this.animationClip.duration, Math.max(0, newTime - delta) );
-                    this.animationClip.tracks[ track.clipIdx ].values[ keyIndex ] = (deltay-this.tracksDrawn[idx][1]) /this.trackHeight;
+
+                    localY = Math.min( this.topMargin + this.trackHeight + this.tracksDrawn[idx][1], Math.max(localY, 0))
+                    let deltay = localY - this.tracksDrawn[idx][1];
+                    deltay = Math.min( this.trackHeight, Math.max(0, deltay) );
+
+                    this.animationClip.tracks[ track.clipIdx ].values[ keyIndex ] = + 2 * (deltay)/ this.trackHeight - 1;
                     console.log(this.animationClip.tracks[ track.clipIdx ].values[ keyIndex ])
                 }
 

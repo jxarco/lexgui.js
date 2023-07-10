@@ -1598,7 +1598,7 @@ meter::-webkit-meter-even-less-good-value {
   font-size: 14px;
   border-radius: 6px;
   color: #11111d;
-  background-color: #8999a9ba;
+  background-color: var(--global-text);
   border: 1px solid #11111f2b;
 }
 
