@@ -89,6 +89,7 @@ input[type="file"] {
 
 .lexicon:active {
   color: var(--global-text-secondary);
+  margin-top: 1px;
 }
 
 #global_search {
@@ -1174,6 +1175,7 @@ input[type=number] {
 
 .lextree .lextreeitem a:active {
   color: var(--global-button-color);
+  margin-top: 6px;
 }
 
 .lextree .lextreeitem.parent a {
@@ -1194,6 +1196,7 @@ input[type=number] {
 
 .lextree .lextreeitem .itemicon:active {
   color: var(--global-text-secondary);
+  margin-top: 7px;
 }
 
 
@@ -1291,6 +1294,7 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexmenubar .lexmenuentry:active{
   color: #b7b7cba4;
+  margin-top: 1px;
 }
 
 .lexcontextmenu {
@@ -1359,6 +1363,10 @@ meter::-webkit-meter-even-less-good-value {
 .lexcontextmenu .lexcontextmenuentry:hover {
   background-color: var(--global-selected);
   color: #f5f5f5;
+}
+
+.lexcontextmenu .lexcontextmenuentry:active {
+  padding-top: 5px;
 }
 
 .lexcontextmenu .lexcontextmenuentry input {
@@ -1488,6 +1496,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexcontextmenubox .lexcontextmenuentry:active:not(.cmtitle) {
+  padding-top: 4px;
   color: #b7b7cba4;
 }
 
@@ -1507,28 +1516,29 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexoverlaybuttons {
   position: absolute;
-  padding: 12px;
-  top: 0;
-  left: 0;
   display: flex;
-  margin: 0;
+  margin: 6px;
+  top: 0;
+  justify-content: start;
 }
 
 .lexoverlaybuttons .lexwidget {
   padding: 1px;
+  margin-right: 4px;
 }
 
 .lexoverlaybuttons.vertical {
   display: grid;
+  justify-items: left;
 }
 
 .lexoverlaybuttons.vertical .lexwidget {
-  margin-right: 10px;
-  padding-bottom: 6px;
+  margin-bottom: 6px;
 }
 
-.lexoverlaybuttons.middle {
-  bottom: unset;
+.lexoverlaybuttons.vertical .lexwidget button {
+  min-width: 32px;
+  width: auto !important;
 }
 
 .lexoverlaybuttons.bottom {
@@ -1537,16 +1547,19 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexoverlaybuttons.center {
-  right: unset;
+  justify-content: center;
 }
 
 .lexoverlaybuttons.right {
-  left: unset;
-  right: 0;
+  justify-content: right;
+}
+
+.lexoverlaybuttons.vertical.center {
+  justify-items: center;
 }
 
 .lexoverlaybuttons.vertical.right {
-  padding-right: 2px;
+  justify-items: right;
 }
 
 .lexoverlaybuttons .lexwidget:hover {
@@ -1554,21 +1567,63 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexoverlaybuttons .lexbutton {
-  background-color: var(--global-button-color);
   padding: 8px;
-  /* padding-left: 0px;
-  padding-right: 0px; */
   font-size: 14px;
   border-radius: 6px;
+  color: #11111d;
+  background-color: #8999a9ba;
+  border: 1px solid #11111f2b;
 }
 
 .lexoverlaybuttons .lexbutton a {
   line-height: 17px;
 }
 
+.lexoverlaybuttons .lexbutton img {
+  filter: invert(1);
+}
+
+.lexoverlaybuttons .lexbutton.selected {
+  background-color: var(--global-color-primary);
+  color: #f5f5f5;
+  outline: none;
+}
+
+.lexoverlaybuttons .lexbutton.selected img {
+  filter: none;
+}
+
 .lexoverlaybuttons .lexbutton:hover {
   background-color: var(--global-selected);
   color: #f5f5f5;
+}
+
+.lexoverlaybuttons .lexbutton:active {
+  background-color: var(--global-selected-light);  
+}
+
+.lexoverlaybuttons .lexoverlaygroup {
+  display: flex;
+  margin-right: 4px;
+}
+
+.lexoverlaybuttons .lexoverlaygroup .lexwidget {
+  padding: 0px;
+  margin-right: 0px;
+}
+
+.lexoverlaybuttons .lexoverlaygroup .lexwidget button {
+  border-radius: 0px;
+}
+
+.lexoverlaybuttons .lexoverlaygroup .lexwidget:first-child button {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+.lexoverlaybuttons .lexoverlaygroup .lexwidget:last-child button {
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
 }
 
 /* Curve Widget */

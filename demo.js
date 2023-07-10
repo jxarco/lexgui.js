@@ -228,22 +228,49 @@ canvas.style.width = "100%";
 canvas.style.height = "100%";
 up.attach( canvas );
 
-up.addOverlayButtons( [ {
-        name: "Button 1",
-        callback: () => console.log("Overlay Button 1"),
-        icon: "fa fa-skull"
-    }, {
-        name: "Button 2",
-        callback: () => console.log("Overlay Button 2"),
-        icon: "fa fa-cube"
-    }, {
-        name: "Button 3",
-        callback: () => console.log("Overlay Button 3"),
-        icon: "fa fa-lock"
-    }, {
+up.addOverlayButtons( [ 
+    [
+        {
+            name: "Select",
+            icon: "fa fa-arrow-pointer",
+            callback: (value, event) => console.log(value),
+            selectable: true
+        },
+        {
+            name: "Move",
+            icon: "fa-solid fa-arrows-up-down-left-right",
+            img: "https://webglstudio.org/latest/imgs/mini-icon-gizmo.png",
+            callback: (value, event) => console.log(value),
+            selectable: true
+        },
+        {
+            name: "Rotate",
+            icon: "fa-solid fa-rotate-right",
+            callback: (value, event) => console.log(value),
+            selectable: true
+        }
+    ],
+    {
+        name: "View Mode",
+        options: ["Lit", "Unlit", "Wireframe"],
+        callback: (value, event) => console.log(value)
+    },
+    [
+        {
+            name: "Enable Snap",
+            icon: "fa fa-table-cells",
+            callback: (value, event) => console.log(value),
+            selectable: true
+        },
+        {
+            name: 10,
+            options: [10, 100, 1000],
+            callback: value => console.log(value)
+        }
+    ], {
         name: "Button 4",
-        callback: () => console.log("Overlay Button 4"),
-        icon: "fa fa-download"
+        img: "https://webglstudio.org/latest/imgs/mini-icon-gizmo.png",
+        callback: (value, event) => console.log(value)
     }
 ], { float: "htc" } );
 

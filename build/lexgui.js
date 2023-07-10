@@ -716,7 +716,7 @@
             this.root.style.position = "relative";
 
             options.className = "lexoverlaybuttons";
-            options.width = "auto";
+            options.width = "calc( 100% - 12px )";
             options.height = "auto";
 
             const float = options.float;
@@ -741,28 +741,94 @@
             }
 
             let overlayPanel = this.addPanel( options );
+            let overlaygroup;
             
-            for( var b of buttons )
-            {
-                overlayPanel.addButton( null, b.name, b.callback, b.icon ? { icon: b.icon } : {} );
+            const add_button = function(b, group) {
+
+                const _options = { 
+                    width: "auto", 
+                    selectable: b.selectable,
+                    selected: b.selected,
+                    icon: b.icon,
+                    img: b.img
+                };
+
+                if( group )
+                {
+                    if(!overlaygroup) {
+                        overlaygroup = document.createElement('div');
+                        overlaygroup.className = "lexoverlaygroup";
+                        overlayPanel.queuedContainer = overlaygroup;
+                    }
+
+                    _options.parent = overlaygroup;
+                }
+                // ends the group
+                else if(overlaygroup)
+                {
+                    overlayPanel.root.appendChild( overlaygroup );
+                    overlaygroup = null;
+                    delete overlayPanel.queuedContainer;
+                }
+
+                let callback = b.callback;
+
+                if( b.options )
+                {
+                    callback = function(value, event) {
+                        LX.addContextMenu(null, event, function(c) {
+                            for( let o of b.options )
+                                c.add(o, () => {
+                                    b.name = o;
+                                    b.callback( o );
+                                    refresh_panel();
+                                });
+                        });
+                    };
+                }
+
+                overlayPanel.addButton( null, b.name, function(value, event) {
+                    if(b.selectable) 
+                        b.selected = !b.selected;
+                    callback( value, event );
+                }, _options );
             }
 
-            // Add floating info
-            if( float )
-            {
-                if( options.className.includes("middle") )
+            const refresh_panel = function() {
+
+                overlayPanel.clear();
+
+                for( var b of buttons )
                 {
-                    overlayPanel.root.style.top = "-moz-calc( 50% - " + overlayPanel.root.offsetHeight * 0.5 + "px )";
-                    overlayPanel.root.style.top = "-webkit-calc( 50% - " + overlayPanel.root.offsetHeight * 0.5 + "px )";
-                    overlayPanel.root.style.top = "calc( 50% - " + overlayPanel.root.offsetHeight * 0.5 + "px )";
+                    if( b.constructor === Array )
+                    {
+                        for( var sub of b )
+                        {
+                            add_button(sub, true);
+                        }
+                    }else
+                    {
+                        add_button(b);
+                    }
+    
                 }
-                if( options.className.includes("center") )
+
+                // Add floating info
+                if( float )
                 {
-                    overlayPanel.root.style.left = "-moz-calc( 50% - " + overlayPanel.root.offsetWidth * 0.5 + "px )";
-                    overlayPanel.root.style.left = "-webkit-calc( 50% - " + overlayPanel.root.offsetWidth * 0.5 + "px )";
-                    overlayPanel.root.style.left = "calc( 50% - " + overlayPanel.root.offsetWidth * 0.5 + "px )";
+                    var height = 0;
+                    overlayPanel.root.childNodes.forEach( c => { height += c.offsetHeight; } );
+
+                    if( options.className.includes("middle") )
+                    {
+                        overlayPanel.root.style.top = "-moz-calc( 50% - " + (height * 0.5) + "px )";
+                        overlayPanel.root.style.top = "-webkit-calc( 50% - " + (height * 0.5) + "px )";
+                        overlayPanel.root.style.top = "calc( 50% - " + (height * 0.5) + "px )";
+                    }
                 }
             }
+
+            refresh_panel();
         }
 
         #moveSplit( dt ) {
@@ -2302,18 +2368,29 @@
             let element = widget.domEl;
 
             var wValue = document.createElement('button');
-            if(options.icon) wValue.title = value;
+            if(options.icon) 
+                wValue.title = value;
             wValue.className = "lexbutton";
+            if(options.selected)
+                wValue.classList.add("selected");
             if(options.buttonClass)
                 wValue.classList.add(options.buttonClass);
-            wValue.innerHTML = "<span>" + (options.icon ? "<a class='" + options.icon + "'></a>" : (value || "")) + "</span>";
+            wValue.innerHTML = "<span>" + 
+                (options.icon ? "<a class='" + options.icon + "'></a>" : 
+                ( options.img  ? "<img src='" + options.img + "'>" : (value || ""))) + "</span>";
+
             wValue.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
           
             if(options.disabled)
                 wValue.setAttribute("disabled", true);
             
             wValue.addEventListener("click", e => {
-                this._trigger( new IEvent(name, true, e), callback );   
+                if( options.selectable ) {
+                    if( options.parent )
+                        options.parent.querySelectorAll(".lexbutton.selected").forEach( e => { if(e == wValue) return; e.classList.remove("selected") } );
+                    wValue.classList.toggle('selected');
+                }
+                this._trigger( new IEvent(name, value, e), callback );   
             });
 
             element.appendChild(wValue);
@@ -2372,6 +2449,12 @@
                     buttonEl.className += " noname";
                     buttonEl.style.width =  "100%";
                 }
+            }
+
+            // Remove branch padding and margins
+            if(!widget.name) {
+                element.className += " noname";
+                container.style.width = "100%";
             }
 
             element.appendChild(container);
@@ -2744,7 +2827,6 @@
             var container = document.createElement('div');
             container.className = "lexarray";
             container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
-
             this.queuedContainer = container;
             let buttonName = "Array (size " + values.length + ")";
             buttonName += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
@@ -4250,7 +4332,7 @@
             const hasSubmenu = o[ k ].length;
             let entry = document.createElement('div');
             entry.className = "lexcontextmenuentry" + (o[ 'className' ] ? " " + o[ 'className' ] : "" );
-            entry.id = o.id ?? k.replace(/\s/g, '').replace('@', '_');
+            entry.id = o.id ?? ("eId" + k.replace(/\s/g, '').replace('@', '_'));
             entry.innerHTML = "";
             const icon = o[ 'icon' ];
             if(icon) {
@@ -4316,6 +4398,7 @@
                 options = { callback: options };
 
             // process path
+            path = path + ""; // make string!
             const tokens = path.split("/");
 
             // assign color to last token in path
@@ -4388,7 +4471,7 @@
             for( let item of this.items )
             {
                 let key = Object.keys(item)[0];
-                let pKey = key.replace(/\s/g, '').replace('@', '_');
+                let pKey = "eId" + key.replace(/\s/g, '').replace('@', '_');
 
                 // Item already created
                 const id = "#" + (item.id ?? pKey);
