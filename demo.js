@@ -306,11 +306,11 @@ function loop(dt) {
     if(kfTimeline)
         kfTimeline.draw();
 
-    // if(clipsTimeline)
-    //     clipsTimeline.draw();
+    if(clipsTimeline)
+        clipsTimeline.draw();
 
-    // if(curvesTimeline)
-    //     curvesTimeline.draw();
+    if(curvesTimeline)
+        curvesTimeline.draw();
 
     requestAnimationFrame(loop);
 }

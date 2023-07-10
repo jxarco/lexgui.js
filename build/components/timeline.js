@@ -2042,7 +2042,7 @@
 
             let clipIndex = this.getCurrentClip( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
             if(clipIndex != undefined)  {
-                this.lastClipsSelected = [track.idx, clipIndex];
+                this.lastClipsSelected = [[track.idx, clipIndex]];
 
                 if( this.onSelectClip ) 
                     this.onSelectClip(track.clips[clipIndex]);
@@ -2561,11 +2561,11 @@
                     track = this.tracksPerItem[name][idx];
                     const delta = this.timeBeforeMove - keyTime;
                     console.log("localY", localY)
-                    const deltay = Math.min( this.tracksDrawn[idx][1]+ this.tracksDrawn[idx][2], Math.max(this.tracksDrawn[idx][1] , localY) ) - this.valueBeforeMove//Math.min(Math.max(this.valueBeforeMove - localY, - this.trackHeight), this.trackHeight);
+                    const deltay = Math.min( this.tracksDrawn[idx][1]+ this.tracksDrawn[idx][2], Math.max(this.tracksDrawn[idx][1] , localY) ) //Math.min(Math.max(this.valueBeforeMove - localY, - this.trackHeight), this.trackHeight);
                     console.log(deltay)
                     this.animationClip.tracks[ track.clipIdx ].times[ keyIndex ] = Math.min( this.animationClip.duration, Math.max(0, newTime - delta) );
-                    this.animationClip.tracks[ track.clipIdx ].values[ keyIndex ] = deltay/this.trackHeight;
-                    console.log(this.tracksDrawn[idx][1])
+                    this.animationClip.tracks[ track.clipIdx ].values[ keyIndex ] = (deltay-this.tracksDrawn[idx][1]) /this.trackHeight;
+                    console.log(this.animationClip.tracks[ track.clipIdx ].values[ keyIndex ])
                 }
 
                 return;
