@@ -1560,6 +1560,7 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexoverlaybuttons.vertical .lexwidget {
   margin-bottom: 6px;
+  margin-right: 0px;
 }
 
 .lexoverlaybuttons.vertical .lexwidget button {
@@ -1633,13 +1634,28 @@ meter::-webkit-meter-even-less-good-value {
   margin-right: 4px;
 }
 
+.lexoverlaybuttons.vertical .lexoverlaygroup {
+  display: grid;
+  margin-right: 0px;
+  margin-bottom: 4px;
+}
+
 .lexoverlaybuttons .lexoverlaygroup .lexwidget {
   padding: 0px;
   margin-right: 0px;
 }
 
+.lexoverlaybuttons.vertical .lexoverlaygroup .lexwidget {
+  margin-right: 0px;
+  margin-bottom: 0px;
+}
+
 .lexoverlaybuttons .lexoverlaygroup .lexwidget button {
   border-radius: 0px;
+}
+
+.lexoverlaybuttons.vertical .lexoverlaygroup .lexwidget button {
+  width: 100% !important;
 }
 
 .lexoverlaybuttons .lexoverlaygroup .lexwidget:first-child button {
@@ -1649,6 +1665,18 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexoverlaybuttons .lexoverlaygroup .lexwidget:last-child button {
   border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.lexoverlaybuttons.vertical .lexoverlaygroup .lexwidget:first-child button {
+  border-radius: 0px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+.lexoverlaybuttons.vertical .lexoverlaygroup .lexwidget:last-child button {
+  border-radius: 0px;
+  border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
 }
 
