@@ -168,13 +168,11 @@ bottom.addMenubar( m => {
         let el = document.getElementById('bottom-panel');
         if(el)
             el.style.display = 'none';
-        el = document.getElementById('curves-timeline');
-        if(el)
-            el.style.display = 'none';
         el = document.getElementById('clips-timeline');
         if(el)
             el.style.display = 'none';
-        var timeline = document.getElementById('curves-timeline');            
+        
+        var timeline = document.getElementById('curves-timeline');
         if(timeline) {
             timeline.style.display = 'block';
             curvesTimeline.resize();
@@ -306,11 +304,11 @@ function loop(dt) {
     if(kfTimeline)
         kfTimeline.draw();
 
-    // if(clipsTimeline)
-    //     clipsTimeline.draw();
+    if(clipsTimeline)
+        clipsTimeline.draw();
 
-    // if(curvesTimeline)
-    //     curvesTimeline.draw();
+    if(curvesTimeline)
+        curvesTimeline.draw();
 
     requestAnimationFrame(loop);
 }

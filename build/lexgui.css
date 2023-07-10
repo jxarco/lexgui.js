@@ -4,11 +4,11 @@
 :root {
   --global-color-primary: #1a1f23;
   --global-color-secondary: #2c3035f5;
-	--branch-background: #32363b;
+	--branch-background: #282d32;
   --widget-background-hover: #3c434bab;
 	--global-branch-darker: #282c31;
 	--branch-title-background: #2c3137;
-  --global-button-color: #4a535ccb;
+  --global-button-color: #ffffff12;
   --global-dropdown-color: #4e5154;
   --global-text: #d0d0e0;
   --global-text-primary: #d0d0e0e6;
@@ -1090,7 +1090,7 @@ input[type=number] {
 }
 
 .lextree .lextreetools {
-  background: var(--branch-title-background);
+  background: var(--branch-background);
   padding: 8px;
   display: flex;
   font-size: 13px;
