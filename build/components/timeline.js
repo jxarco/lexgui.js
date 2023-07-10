@@ -1445,7 +1445,8 @@
                                 
             this.lastKeyFramesSelected.push( selectionInfo );
             track.selected[index] = true;
-            
+            this.currentTime =  this.animationClip.tracks[track.clipIdx].times[ index ];
+            LX.trigger("@on_current_time_" + this.constructor.name, this.currentTime);
             if( this.onSetTime )
                 this.onSetTime(  this.animationClip.tracks[track.clipIdx].times[ index ]);
         }
@@ -2030,7 +2031,6 @@
                     return true;
                 }
                 else{
-                    this.currentTime = Math.max(0,this.currentTime - delta);
                     innerSetTime( this.currentTime );	
                 }
             }
@@ -2582,7 +2582,6 @@
                 var curr = time - this.currentTime;
                 var delta = curr - this.grabTime;
                 this.grabTime = curr;
-                this.currentTime = Math.max(0,this.currentTime - delta);
 
                 // fix this
                 if(e.shiftKey && track) {
@@ -2591,7 +2590,6 @@
                     
                     if(keyFrameIndex != this.snappedKeyFrameIndex){
                         this.snappedKeyFrameIndex = keyFrameIndex;
-                        this.currentTime = track.times[ keyFrameIndex ];		
                         innerSetTime( this.currentTime );		
                     }
                 }
