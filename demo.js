@@ -610,7 +610,7 @@ function fillRightBottomPanel( panel, tab ) {
     }, { min: -1, max: 1, step: 0.1 });
     panel.addProgress("PRoll", 0, { min: -1, max: 1 });
 
-    panel.tab("Third tab");
+    panel.tab("Another One");
 
     panel.addText("Im out :(", "", null, { placeholder: "Alone..." });
     panel.addVector4("Im a Vec4", [0.3, 0.3, 0.5, 1], (value, event) => {
@@ -633,8 +633,11 @@ function fillBottomPanel( panel ) {
     panel.addText(null, "This has a console.log callback", (value, event) => {
         console.log(value);
     }, { trigger: 'input' });
-    panel.addButton("Apply", "Print event", (value, event) => {
-        console.log(event);
+    panel.addButton("Apply", "Add button to branch", (value, event) => {
+        const branch = panel.getBranch("Information");
+        panel.queue( branch.content );
+        panel.addButton(null, "Hello");
+        panel.clearQueue();
     });
 
     panel.branch("A collapsed branch", {closed: true});

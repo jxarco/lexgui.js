@@ -1383,7 +1383,8 @@
                 container.className = "lexcustomcontainer";
                 container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
     
-                this.queuedContainer = container;
+                this.queue(container);
+
                 let buttonName = custom_widget_name + (!instance ? " [empty]" : "");
                 buttonName += "<a class='fa-solid " + (options.icon ?? "fa-cube")  + "' style='float:left'></a>";
                 if(instance)
@@ -1404,7 +1405,8 @@
                     }
     
                 }, { buttonClass: 'array' });
-                delete this.queuedContainer;
+                
+                this.clearQueue();
     
                 if(instance)
                     buttonEl.querySelector('a.menu').addEventListener('click', e => {
@@ -1428,7 +1430,7 @@
                 element.appendChild(custom_widgets);
     
                 if( instance ) {
-                    this.queuedContainer = custom_widgets;
+                    this.queue( custom_widgets );
                     
                     const on_instance_changed = (key, value, event) => {
                         instance[key] = value;
@@ -1461,7 +1463,7 @@
                         }
                     }
 
-                    delete this.queuedContainer;
+                    this.clearQueue();
                 }
             };
 
@@ -2164,7 +2166,7 @@
                 }
 
                 // push to right container
-                this.queuedContainer = b.content;
+                this.queue( b.content );
 
                 const emptyFilter = !value.length;
 
@@ -2184,7 +2186,7 @@
                 }
 
                 // push again to current branch
-                delete this.queuedContainer;
+                this.clearQueue();
 
                 // no more branches to check!
                 return;
@@ -2223,11 +2225,50 @@
         }
 
         /**
+         * @method getBranch
+         * @param {String} name if null, return current branch
+         */
+
+        getBranch( name ) {
+
+            if( name )
+            {
+                return this.branches.find( b => b.name == name );
+            }
+
+            return this.current_branch;
+        }
+
+        /**
+         * @method queue
+         * @param {HTMLElement} domEl container to append elements to
+         */
+
+        queue( domEl ) {
+
+            if( !domEl && this.current_branch)
+            {
+                domEl = this.current_branch.root;
+            }
+
+            this.queuedContainer = domEl;
+        }
+
+        /**
+         * @method clearQueue
+         */
+
+        clearQueue() {
+
+            delete this.queuedContainer;
+        }
+
+        /**
          * @method addBlank
          * @param {Number} height
          */
 
-        addBlank( height = 8) {
+        addBlank( height = 8 ) {
 
             let widget = this.create_widget(null, Widget.addBlank);
             widget.domEl.className += " blank";
@@ -2511,7 +2552,9 @@
             // Add dropdown widget button  
             let buttonName = value;
             buttonName += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
-            this.queuedContainer = container;
+
+            this.queue(container);
+
             let selectedOption = this.addButton(null, buttonName, (value, event) => {
                 if( list.unfocus_event ) {
                     delete list.unfocus_event;
@@ -2525,7 +2568,9 @@
                 element.querySelector(".lexoptions").toggleAttribute('hidden');
                 list.focus();
             }, { buttonClass: 'array' });
-            delete this.queuedContainer;
+
+            this.clearQueue();
+
             selectedOption.style.width = "100%";   
 
             selectedOption.refresh = (v) => {
@@ -2827,13 +2872,16 @@
             var container = document.createElement('div');
             container.className = "lexarray";
             container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
-            this.queuedContainer = container;
+            
+            this.queue( container );
+
             let buttonName = "Array (size " + values.length + ")";
             buttonName += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
             this.addButton(null, buttonName, () => {
                 element.querySelector(".lexarrayitems").toggleAttribute('hidden');
             }, { buttonClass: 'array' });
-            delete this.queuedContainer;
+            
+            this.clearQueue();
 
             // Show elements
 
@@ -2854,7 +2902,7 @@
                 // Update inputs
                 array_items.innerHTML = "";
 
-                this.queuedContainer = array_items;
+                this.queue( array_items );
 
                 for( let i = 0; i < values.length; ++i )
                 {
@@ -2895,7 +2943,7 @@
                 }, { buttonClass: 'array' });
 
                 // Stop pushing to array_items
-                delete this.queuedContainer;
+                this.clearQueue();
             };
 
             updateItems();
@@ -3146,9 +3194,9 @@
                 suboptions.className = "lexcheckboxsubmenu";
                 suboptions.toggleAttribute('hidden', !flag.value);
 
-                this.queuedContainer = suboptions;
+                this.queue( suboptions );
                 options.suboptions.call(this, this);
-                delete this.queuedContainer;
+                this.clearQueue();
 
                 element.appendChild(suboptions);
             }
@@ -3713,7 +3761,7 @@
 
             element.appendChild(input);
 
-            this.queuedContainer = element;
+            this.queue( element );
 
             this.addButton(null, "<a class='fa-solid fa-gear'></a>", () => {
                 
@@ -3724,7 +3772,7 @@
 
             }, { className: "small" });
 
-            delete this.queuedContainer;
+            this.clearQueue();
         }
 
         /**
@@ -3881,7 +3929,7 @@
                 tabContainer.appendChild(tabEl);
 
                 // push to tab space
-                this.queuedContainer = infoContainer;
+                this.queue( infoContainer );
                 tab.callback( this );
             }
             
@@ -3889,7 +3937,7 @@
             this.addSeparator();
 
             // push to branch from now on
-            delete this.queuedContainer;
+            this.clearQueue();
         }
 
     }
