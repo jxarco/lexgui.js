@@ -854,7 +854,8 @@
 
         drawTrackWithBoxes( ctx, y, trackHeight, title, track ) {
 
-            trackHeight *= 0.8;
+            let offset = (trackHeight - trackHeight *0.6)*0.5;
+            trackHeight *= 0.6;
             let selectedClipArea = null;
 
             if(track.enabled === false)
@@ -895,10 +896,8 @@
                     let clip = clips[j];
                     let framerate = this.framerate;
                     //let selected = track.selected[j];
-                    var frameNum = Math.floor( clip.start * framerate );
-                    var x = Math.floor( this.timeToX( frameNum / framerate) ) + 0.5;
-                    frameNum = Math.floor( (clip.start + clip.duration) * framerate );
-                    var x2 = Math.floor( this.timeToX( frameNum / framerate) ) + 0.5;
+                    var x = Math.floor( this.timeToX(clip.start) ) + 0.5;
+                    var x2 = Math.floor( this.timeToX( clip.start + clip.duration ) ) + 0.5;
                     var w = x2-x;
 
                     if( x2 < 0 || x > this.canvas.width )
@@ -908,7 +907,7 @@
                     ctx.globalAlpha = trackAlpha;
                     ctx.fillStyle = clip.clipColor || "#5e9fdd"//#333";
                     //ctx.fillRect(x,y,w,trackHeight);
-                    roundedRect(ctx, x, y, w, trackHeight, 5, true);
+                    roundedRect(ctx, x, y + offset, w, trackHeight , 5, true);
 
                     //draw clip content
                     if( clip.drawClip )
@@ -917,7 +916,7 @@
                         ctx.translate(x,y);
                         ctx.strokeStyle = "#AAA";
                         ctx.fillStyle = "#AAA";
-                        clip.drawClip( ctx, x2-x,trackHeight, this.selectedClip == clip || track.selected[j], this );
+                        clip.drawClip( ctx, x2-x, trackHeight, this.selectedClip == clip || track.selected[j], this );
                         ctx.restore();
                     }
                     //draw clip outline
@@ -931,7 +930,7 @@
                     // ctx.strokeRect( safex, y, safex2-safex, trackHeight );
                     ctx.globalAlpha = trackAlpha;
                     if(this.selectedClip == clip || track.selected[j])
-                        selectedClipArea = [x,y,x2-x,trackHeight ]
+                        selectedClipArea = [x, y + offset, x2-x, trackHeight]
                     //render clip selection area
                     if(selectedClipArea)
                     {
@@ -2134,7 +2133,7 @@
                 return;
             
             ctx.save();
-            const height = this.trackHeight*1.2;
+            const height = this.trackHeight;
             for(let i = 0; i < tracks.length; i++) {
                 let track = tracks[i];
                 this.drawTrackWithBoxes(ctx, (i+1) * height, height, track.name || "", track);
