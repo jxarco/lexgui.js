@@ -170,7 +170,6 @@ input[type="file"] {
   background:none;
   position: absolute;
   min-width: 256px;
-  
   box-shadow: 0 2px 10px black;
   border-radius: 4px;
 }
@@ -186,10 +185,13 @@ input[type="file"] {
   width: calc( 100% - 24px);
   padding: 8px;
   padding-left: 16px;
+  display: flex;
+  justify-content: space-between;
   -webkit-user-select: none; /* Safari 3.1+ */
   -moz-user-select: none; /* Firefox 2+ */
   -ms-user-select: none; /* IE 10+ */
   user-select: none; /* Standard syntax */
+  align-items: center;
 }
 
 .lexdialogcontent {
@@ -209,12 +211,7 @@ input[type="file"] {
   padding-top: 36px;
 }
 
-.lexdialogcloser{
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  right: 14px;
-  top: 14px;
+.lexdialogcloser {
   font-size: 16px;
   color: #d9d9e3;
   cursor: pointer;
@@ -224,8 +221,70 @@ input[type="file"] {
   user-select: none; /* Standard syntax */
 }
 
-.lexdialogcloser:hover{
+.lexdialogcloser:hover {
   color: #aaa;
+}
+
+/* Pocket Dialog */
+
+.lexdialog.pocket {
+  top: 0;
+  right: 0;
+  margin: 3px;
+  background-color:  var(--branch-background);
+}
+
+.lexdialog.pocket .lexdialogtitle {
+  background: var(--global-dark-background);
+  font-size: 14px;
+}
+
+.lexdialog.pocket .lexdialogcontent {
+  padding: 4px;
+  padding-left: 8px;
+  max-height: -webkit-fill-available;
+  opacity: 1;
+
+  -webkit-transition: max-height 0.2s; 
+  -moz-transition: max-height 0.2s; 
+  -ms-transition: max-height 0.2s; 
+  -o-transition: max-height 0.2s; 
+  transition: max-height 0.2s;  
+
+  -webkit-transition: opacity 0.2s; 
+  -moz-transition: opacity 0.2s; 
+  -ms-transition: opacity 0.2s; 
+  -o-transition: opacity 0.2s; 
+  transition: opacity 0.2s;   
+}
+
+.lexdialog.pocket.closed .lexdialogtitle {
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.lexdialog.pocket.closed .lexdialogcontent {
+  max-height: 0px;
+  padding: 0px;
+  opacity: 0;
+
+  -webkit-transition: max-height 0.2s; 
+  -moz-transition: max-height 0.2s; 
+  -ms-transition: max-height 0.2s; 
+  -o-transition: max-height 0.2s; 
+  transition: max-height 0.2s;  
+
+  -webkit-transition: opacity 0.2s; 
+  -moz-transition: opacity 0.2s; 
+  -ms-transition: opacity 0.2s; 
+  -o-transition: opacity 0.2s; 
+  transition: opacity 0.2s;  
+
+  -webkit-transition: padding 0.2s; 
+  -moz-transition: padding 0.2s; 
+  -ms-transition: padding 0.2s; 
+  -o-transition: padding 0.2s; 
+  transition: padding 0.2s;  
 }
 
 /* Area */

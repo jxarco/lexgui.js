@@ -235,6 +235,7 @@
      * @method init
      * @param {*} options 
      * container: Root location for the gui (default is the document body)
+     * skip_default_area: Skip creation of main area
      */
 
     function init(options = {})
@@ -276,8 +277,10 @@
         this.OPEN_CONTEXTMENU_ENTRY = 'click';
 
         this.ready = true;
-        this.main_area = new Area( {id: options.id ?? "mainarea"} );
         this.menubars = [];
+
+        if(!options.skip_default_area)
+            this.main_area = new Area( {id: options.id ?? "mainarea"} );
 
         return this.main_area;
     }
@@ -4250,16 +4253,17 @@
                 titleDiv.className = "lexdialogtitle";
                 titleDiv.innerHTML = title;
                 titleDiv.setAttribute('draggable', false);
+
                 titleDiv.oncontextmenu = function(e){
                     e.preventDefault();
                     e.stopPropagation();
     
+                    if(!LX.main_area || LX.main_area.type !== 'horizontal')
+                        return;
+
                     addContextMenu("Dock", e, p => {
                         e.preventDefault();
                         
-                        if(LX.main_area.type !== 'horizontal')
-                        return;
-
                         const get_next_panel = function(area) {
                             let p = area.panels[0];
                             if( p ) return p;
@@ -4301,12 +4305,12 @@
                         }});
                     }, { icon: "fa-regular fa-window-restore" });
                 };
+
                 root.appendChild(titleDiv);
             }
 
-            var closeButton = document.createElement('div');
-            closeButton.className = "lexdialogcloser";
-            closeButton.innerHTML = "<a class='fa-solid fa-xmark'></a>";
+            var closeButton = document.createElement('a');
+            closeButton.className = "lexdialogcloser fa-solid fa-xmark";
             closeButton.title = "Close";
 
             closeButton.addEventListener('click', e => {
@@ -4315,7 +4319,7 @@
                     LX.modal.toggle();
             });
 
-            root.appendChild(closeButton);
+            titleDiv.appendChild(closeButton);
 
             const panel = new Panel();
             panel.root.classList.add('lexdialogcontent');
@@ -4325,6 +4329,7 @@
             
             this.panel = panel;
             this.root = root;
+            this.title = titleDiv;
 
             if(draggable)
                 set_as_draggable(root);
@@ -4350,6 +4355,33 @@
     }
 
     LX.Dialog = Dialog;
+
+    /**
+     * @class PocketDialog
+     */
+
+    class PocketDialog extends Dialog {
+
+        constructor( title, callback, options = {} ) {
+            
+            options.draggable = false;
+
+            super( title, callback, options );
+
+            // custom 
+            this.root.classList.add( "pocket" );
+            this.root.style.left = "";
+            this.root.style.top = "";
+            this.panel.root.style.width = "calc( 100% - 12px )";
+
+            this.title.addEventListener("click", e => {
+
+                this.root.classList.toggle("closed");
+            });
+        }
+    }
+
+    LX.PocketDialog = PocketDialog;
 
     /**
      * @class ContextMenu
