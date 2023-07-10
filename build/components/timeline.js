@@ -727,7 +727,7 @@
                         return; // Handled
                     }
                 }
-                else if(this.grabbing && e.button !=2) {
+                else if(this.grabbing && e.button !=2 && !this.movingKeys) {
 
                     if(this.grabbing_timeline )
                     {
@@ -2565,7 +2565,7 @@
                     let deltay = localY - this.tracksDrawn[idx][1];
                     deltay = Math.min( this.trackHeight, Math.max(0, deltay) );
 
-                    this.animationClip.tracks[ track.clipIdx ].values[ keyIndex ] = + 2 * (deltay)/ this.trackHeight - 1;
+                    this.animationClip.tracks[ track.clipIdx ].values[ keyIndex ] =  2 * (deltay)/ this.trackHeight - 1;
                     console.log(this.animationClip.tracks[ track.clipIdx ].values[ keyIndex ])
                 }
 
