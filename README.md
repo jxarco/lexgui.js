@@ -19,74 +19,74 @@ Look at [demo.js](demo.js) to see how to create the different widgets!
 
 ---
 
-TODO List:
+## Features
 
-- ~~Fix closed-by-default branch~~
-- ~~Fix close branch when not last~~
-- ~~Update Combo Theme~~
-- ~~Update Checkbox Theme~~
-- ~~Hide cursor when dragging resize bar~~
-- ~~Color Widget~~
-- ~~Branch separator~~
-- ~~Title widget~~
-- ~~Include fontAwesome Icons~~
-- ~~Store initial value and Add reset value button for widgets~~
-- ~~Vector Widgets~~
-- ~~Add min-max to vector widgets~~
-- ~~Create "Widget" class to implement different value getters~~
-- ~~Addnumber/Slider widgets~~
-- ~~Tabs widget (Blender)~~
-- ~~Tree Widget~~
-- ~~Filter Widgets bar~~
-- ~~Menubar~~
-- ~~Add icons buttons to tree title~~
-- ~~Node filter in tree widget~~
-- ~~Fix scrollbar spaces in right sides~~
-- ~~Add icons + mini-text (shortcut normally) to menubar entries~~
-- ~~Progression bar~~
-- ~~Fix menubar submenus if not on top~~
-- ~~Support horizontal tabs widget (i made vertical ones)~~
-- ~~Support oninput listener (trigger = input) in textwidgets~~
-- ~~Start Documentation~~
-- ~~Event system~~
-- ~~Context Menus~~
-- ~~Add title to any subentry in context menus~~
-- ~~Create addPanel to avoid instancing and attaching a panel to an area~~
-- ~~Resize callbacks~~
-- ~~Timeline~~
-- ~~Fix filter properties (separator is not in right place)~~
-- ~~Open context menus the other way around if not enough space (vertical!!!)~~
-- ~~Dialogs~~
-- ~~Multiple widgets per row~~
-- ~~Load File widget~~
-- ~~Layers widget~~
-- ~~Array widget~~
-- ~~Refresh array widget on change~~
-- ~~Use default Value in Layers widget~~
-- ~~Add reset widget in Layers widget~~
-- ~~List Widget~~
-- ~~Menubar: Support buttons~~
-- ~~Tree item icons~~
-- ~~Branchtabs~~
-- ~~Image Dropdown~~
-- ~~Copy Paste Widget Value~~
-- ~~Custom Class Widget~~
-- ~~Tags Widget~~
-- ~~Write tags~~
-- ~~Custom widget callback~~
-- ~~Global menu searchbar~~
-- ~~Simple Docking System~~
-- ~~Fix dropdown elements when scroll, on dialog, ..~~
-- ~~Allow checkbox suboptions~~
-- ~~Menubar: Support subitem checkboxes~~
-- ~~Fix Array delete item button~~
-- ~~Show checkbox entries in search bar~~
-- ~~Tree multiple selection~~
-- ~~Area Overlay panel~~
-- Minimisable tiny dialog (fast option to debugg)
-- Fix menubar entry with checkbox and icon
-- Drag elements to timeline to animate
-- Image Viewer
+- [x] Fix closed-by-default branch
+- [x] Fix close branch when not last
+- [x] Update Combo Theme
+- [x] Update Checkbox Theme
+- [x] Hide cursor when dragging resize bar
+- [x] Color Widget
+- [x] Branch separator
+- [x] Title widget
+- [x] Include fontAwesome Icons
+- [x] Store initial value and Add reset value button for widgets
+- [x] Vector Widgets
+- [x] Add min-max to vector widgets
+- [x] Create "Widget" class to implement different value getters
+- [x] Addnumber/Slider widgets
+- [x] Tabs widget (Blender)
+- [x] Tree Widget
+- [x] Filter Widgets bar
+- [x] Menubar
+- [x] Add icons buttons to tree title
+- [x] Node filter in tree widget
+- [x] Fix scrollbar spaces in right sides
+- [x] Add icons + mini-text (shortcut normally) to menubar entries
+- [x] Progression bar
+- [x] Fix menubar submenus if not on top
+- [x] Support horizontal tabs widget (i made vertical ones)
+- [x] Support oninput listener (trigger = input) in textwidgets
+- [x] Start Documentation
+- [x] Event system
+- [x] Context Menus
+- [x] Add title to any subentry in context menus
+- [x] Create addPanel to avoid instancing and attaching a panel to an area
+- [x] Resize callbacks
+- [x] Timeline
+- [x] Fix filter properties (separator is not in right place)
+- [x] Open context menus the other way around if not enough space (vertical!!!)
+- [x] Dialogs
+- [x] Multiple widgets per row
+- [x] Load File widget
+- [x] Layers widget
+- [x] Array widget
+- [x] Refresh array widget on change
+- [x] Use default Value in Layers widget
+- [x] Add reset widget in Layers widget
+- [x] List Widget
+- [x] Menubar: Support buttons
+- [x] Tree item icons
+- [x] Branchtabs
+- [x] Image Dropdown
+- [x] Copy Paste Widget Value
+- [x] Custom Class Widget
+- [x] Tags Widget
+- [x] Write tags
+- [x] Custom widget callback
+- [x] Global menu searchbar
+- [x] Simple Docking System
+- [x] Fix dropdown elements when scroll, on dialog, ..
+- [x] Allow checkbox suboptions
+- [x] Menubar: Support subitem checkboxes
+- [x] Fix Array delete item button
+- [x] Show checkbox entries in search bar
+- [x] Tree multiple selection
+- [x] Area Overlay panel
+- [ ] Minimisable tiny dialog (fast option to debugg)
+- [ ] Fix menubar entry with checkbox and icon
+- [ ] Drag elements to timeline to animate
+- [ ] Image Viewer
 - Components:
-    - ~~Timeline~~
-    - Node Graphs
+    - [x] Timeline
+    - [ ] Node Graphs
