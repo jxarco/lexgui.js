@@ -140,7 +140,7 @@
             header.addNumber("Duration", this.duration, (value, event) => this.setDuration(value), {step: 0.01, min: 0});        
             header.addNumber("Current Time", this.currentTime, (value, event) => {
                 this.currentTime = value;
-            }, {signal: "@on_current_time", step: 0.01, min: 0, max: this.duration, precision: 3});        
+            }, {signal: "@on_current_time_"+ this.constructor.name, step: 0.01, min: 0, max: this.duration, precision: 3,});        
 
             for(let i = 0; i < this.buttonsDrawn.length; i++) {
                 let button = this.buttonsDrawn[i];
@@ -727,7 +727,23 @@
                         return; // Handled
                     }
                 }
+                else if(this.grabbing && e.button !=2) {
 
+                    if(this.grabbing_timeline )
+                    {
+                        let time = this.xToTime( localX );
+                        time = Math.max(0, time);
+                        this.currentTime = Math.min(this.duration, time);
+                        LX.trigger( "@on_current_time_"+ this.constructor.name, time );
+                    }
+                    else
+                    {
+                        // Move timeline in X (independent of current time)
+                        var old = this.xToTime( this.lastMouse[0] );
+                        var now = this.xToTime( e.offsetX );
+                        this.session.start_time += (old - now);
+                    }
+                }
                 if(this.onMouseMove)
                     this.onMouseMove(e, time);
             }
@@ -1208,21 +1224,6 @@
             };
 
             if( this.grabbing && e.button != 2) {
-
-                if(this.grabbing_timeline )
-                {
-                    let time = this.xToTime( localX );
-                    time = Math.max(0, time);
-                    this.currentTime = Math.min(this.duration, time);
-                    LX.trigger( "@on_current_time", time );
-                }
-                else
-                {
-                    // Move timeline in X (independent of current time)
-                    var old = this.xToTime( this.lastMouse[0] );
-                    var now = this.xToTime( e.offsetX );
-                    this.session.start_time += (old - now);
-                }
 
                 // fix this
                 if(e.shiftKey && track) {

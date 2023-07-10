@@ -168,13 +168,11 @@ bottom.addMenubar( m => {
         let el = document.getElementById('bottom-panel');
         if(el)
             el.style.display = 'none';
-        el = document.getElementById('curves-timeline');
-        if(el)
-            el.style.display = 'none';
         el = document.getElementById('clips-timeline');
         if(el)
             el.style.display = 'none';
-        var timeline = document.getElementById('curves-timeline');            
+        
+        var timeline = document.getElementById('curves-timeline');
         if(timeline) {
             timeline.style.display = 'block';
             curvesTimeline.resize();
