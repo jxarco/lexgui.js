@@ -489,14 +489,14 @@
             let element = content.root ? content.root : content;
 
             // E.g. menubar has predefined height
-            if(element.style.height == "100%")
-            {
-                let size = 0;
-                for( var el of this.root.children ) {
-                    size += el.offsetHeight;
-                }
-                element.style.height = "calc( 100% - " + size + "px )";
-            }
+            // if(element.style.height == "100%")
+            // {
+            //     let size = 0;
+            //     for( var el of this.root.children ) {
+            //         size += el.offsetHeight;
+            //     }
+            //     element.style.height = "calc( 100% - " + size + "px )";
+            // }
 
             this.root.appendChild( element );
         }
@@ -845,55 +845,14 @@
 
         /**
          * @method addTabs
-         * @param {Array} tabs Tabs info
          * @param {*} options:
          */
 
-        addTabs( tabs, options = {} ) {
+        addTabs( options = {} ) {
 
-            console.assert( tabs.constructor == Array && tabs.length );
-
-            let container = document.createElement('div');
-            container.className = "lexareatabs";
-
-            const refresh = function() {
-
-                container.innerHTML = "";
-
-                for( let t of tabs )
-                {
-                    let tab = document.createElement('span');
-                    tab.className = "lexareatab" + (t.selected ? " selected" : "");
-                    tab.innerHTML = t.name;
-                    container.appendChild(tab);
-                    tab.addEventListener("click", e => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        container.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
-                        tab.classList.toggle('selected');
-                        
-                        tabArea.root.childNodes.forEach( c => c.style.display = 'none');
-                        var el = tabArea.root.querySelector("#" + t.id);
-                        if( el ) el.style.display = "block";
-                    });
-                }
-            }
-
-            refresh();
-
-            // Hack to get content height
-            let d = document.createElement('div');
-            d.appendChild(container);
-            document.body.appendChild(d);
-            const height = container.offsetHeight;
-            d.remove();
-
-            this.split({type: 'vertical', sizes: [height, null], resize: false});
-            this.sections[0].attach( container );
-
-            let tabArea = this.sections[1];
-            this.root.classList.add( "lexareatabscontent" );
-            return tabArea;
+            const tabs = new Tabs( this, options );
+            // this.attach( tabs );
+            return tabs;
         }
 
         moveSplit( dt ) {
@@ -909,15 +868,11 @@
             var splitinfo = " - "+ LX.DEFAULT_SPLITBAR_SIZE +"px";
             const min_size = 10;
 
-            console.log(dt > 0 ? "UU" : "__");
-
             if(this.type == "horizontal") {
 
                 var size = (a2.root.offsetWidth + dt);
 				if(size < min_size)
 					size = min_size;
-
-                console.log(dt, size);
 
 				a1.root.style.width = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
 				a1.root.style.width = "-webkit-calc( 100% - " + size + "px " + splitinfo + " )";
@@ -954,6 +909,63 @@
     };
 
     LX.Area = Area;
+
+     /**
+     * @class Tabs
+     */
+
+    class Tabs {
+
+        static TAB_SIZE = 29;
+
+        constructor( area, options = {} )  {
+
+            let container = document.createElement('div');
+            container.className = "lexareatabs";
+
+            area.root.classList.add( "lexareatabscontent" );
+
+            area.split({type: 'vertical', sizes: [Tabs.TAB_SIZE, null], resize: false});
+            area.sections[0].attach( container );
+
+            this.area = area;
+            this.selected = null;
+            this.root = container;
+            this.tabs = {};
+        }
+
+        add( name, content, selected ) {
+
+            if( selected )
+                this.root.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
+            
+            selected = Object.keys( this.tabs ).length ? true : selected;
+
+            // Create tab
+            let tabEl = document.createElement('span');
+            tabEl.className = "lexareatab" + (selected ? " selected" : "");
+            tabEl.innerHTML = name;
+            
+            this.root.appendChild(tabEl);
+            tabEl.addEventListener("click", e => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Manage selected
+                this.root.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
+                tabEl.classList.toggle('selected');
+                // Manage visibility
+                this.area.sections[1].root.childNodes.forEach( c => c.style.display = 'none');
+                content.style.display = "block";
+            });
+            
+            // Attach content
+            content = content.root ? content.root : content;
+            this.area.attach( content );
+            this.tabs[ name ] = content;
+        }
+    }
+
+    LX.Tabs = Tabs;
 
     /**
      * @class Menubar
