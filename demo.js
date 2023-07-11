@@ -253,7 +253,7 @@ top_tabs.area.addOverlayButtons( [
         }
     ],
     {
-        name: "View Mode",
+        name: "Lit",
         options: ["Lit", "Unlit", "Wireframe"],
         callback: (value, event) => console.log(value)
     },

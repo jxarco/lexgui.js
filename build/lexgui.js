@@ -791,6 +791,7 @@
                         LX.addContextMenu(null, event, function(c) {
                             for( let o of b.options )
                                 c.add(o, () => {
+                                    if( b.name == o ) return;
                                     b.name = o;
                                     b.callback( o );
                                     refresh_panel();
@@ -800,8 +801,15 @@
                 }
 
                 overlayPanel.addButton( null, b.name, function(value, event) {
-                    if(b.selectable) 
-                        b.selected = !b.selected;
+                    if(b.selectable) {
+                        if( b.group ) {
+                            let _prev = b.selected;
+                            b.group.forEach( sub => sub.selected = false );
+                            b.selected = !_prev;
+                        }
+                        else
+                            b.selected = !b.selected;
+                    }
                     callback( value, event );
                 }, _options );
             }
@@ -816,6 +824,7 @@
                     {
                         for( let sub of b )
                         {
+                            sub.group = b;
                             add_button(sub, true);
                         }
                     }else
