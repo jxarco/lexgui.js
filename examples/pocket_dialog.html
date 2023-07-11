@@ -14,6 +14,8 @@
         let area = LX.init({ skip_default_area: true });
 
         const pocket_dialog = new LX.PocketDialog("Load Settings", p => {
+            
+            p.branch("Canvas");
             p.addColor("Background", "#b7a9b1");
             p.addText("Text", "Pocket Dialog Lexgui.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
             p.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
@@ -25,6 +27,11 @@
             p.addVector2("2D Position", [250, 350], (value, event) => {
                 console.log(value);
             }, { min: 0, max: 1024 });
+
+            p.branch("Project");
+            p.addText("Name", "Lexgui.js");
+            p.addButton(null, "Export");
+            p.merge();
         });
 
         // add canvas to left upper part

@@ -7,8 +7,8 @@
 	--branch-background: #282d32;
   --widget-background-hover: #3c434bab;
 	--global-branch-darker: #282c31;
-	--branch-title-background: #2c3137;
-  --branch-title-inactive-background: #363c42;
+	--branch-title-background: #2e3338;
+  --branch-title-inactive-background: #42484e;
   --global-button-color: #ffffff12;
   --global-dropdown-color: #4e5154;
   --global-text: #d0d0e0;
@@ -232,6 +232,7 @@ input[type="file"] {
   right: 0;
   margin: 3px;
   background-color:  var(--branch-background);
+  transition: ease-out left 0.3s;
 }
 
 .lexdialog.pocket .lexdialogtitle {

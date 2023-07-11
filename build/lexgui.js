@@ -4267,17 +4267,20 @@
                 root.appendChild(titleDiv);
             }
 
-            var closeButton = document.createElement('a');
-            closeButton.className = "lexdialogcloser fa-solid fa-xmark";
-            closeButton.title = "Close";
-
-            closeButton.addEventListener('click', e => {
-                root.remove();
-                if(modal)
-                    LX.modal.toggle();
-            });
-
-            titleDiv.appendChild(closeButton);
+            if( options.closable ?? true)
+            {
+                var closeButton = document.createElement('a');
+                closeButton.className = "lexdialogcloser fa-solid fa-xmark";
+                closeButton.title = "Close";
+    
+                closeButton.addEventListener('click', e => {
+                    root.remove();
+                    if(modal)
+                        LX.modal.toggle();
+                });
+    
+                titleDiv.appendChild(closeButton);
+            }
 
             const panel = new Panel();
             panel.root.classList.add('lexdialogcontent');
@@ -4323,8 +4326,43 @@
         constructor( title, callback, options = {} ) {
             
             options.draggable = false;
+            options.closable = false;
 
             super( title, callback, options );
+
+            let offsetX;
+            let dockedLeft = false;
+            let dockedRight = true;
+            let moving = false;
+            let that = this;
+    
+            this.root.setAttribute('draggable', true);
+            this.root.addEventListener("dragstart", function(e) {
+                const rect = e.target.getBoundingClientRect();
+                offsetX = e.clientX - rect.x;
+                // Remove image when dragging
+                var img = new Image();
+                img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+                e.dataTransfer.setDragImage(img, 0, 0);
+                e.dataTransfer.effectAllowed = "move";
+                e.dataTransfer.setData('branch_title', e.target.querySelector(".lexdialogtitle").innerText);
+                e.dataTransfer.setData('dialog_id', e.target.id);
+            });
+            this.root.addEventListener("drag", function(e) {
+                if(moving) return;
+                e.preventDefault();
+                this.style.left = e.clientX - offsetX + 'px';
+                if( dockedRight && e.clientX < window.innerWidth * 0.85 ) {
+                    this.style.left = '0px';
+                    moving = true;
+                    setTimeout( () => { dockedLeft = true; dockedRight = false; moving = false; }, 500 );
+                }
+                if(dockedLeft && e.clientX > window.innerWidth * 0.15 ) {
+                    moving = true;
+                    this.style.left = (window.innerWidth - that.root.offsetWidth - 6) + "px";
+                    setTimeout( () => { dockedLeft = false; dockedRight = true; moving = false; }, 500 );
+                }
+            }, false );
 
             // custom 
             this.root.classList.add( "pocket" );
