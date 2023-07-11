@@ -1407,23 +1407,24 @@
         
         static NONE         = 0;
         static TEXT         = 1;
-        static BUTTON       = 2;
-        static DROPDOWN     = 3;
-        static CHECKBOX     = 4;
-        static COLOR        = 5;
-        static NUMBER       = 6;
-        static TITLE        = 7;
-        static VECTOR       = 8;
-        static TREE         = 9;
-        static PROGRESS     = 10;
-        static FILE         = 11;
-        static LAYERS       = 12;
-        static ARRAY        = 13;
-        static LIST         = 14;
-        static TAGS         = 15;
-        static CURVE        = 16;
-        static CUSTOM       = 17;
-        static SEPARATOR    = 18;
+        static TEXTAREA     = 2;
+        static BUTTON       = 3;
+        static DROPDOWN     = 4;
+        static CHECKBOX     = 5;
+        static COLOR        = 6;
+        static NUMBER       = 7;
+        static TITLE        = 8;
+        static VECTOR       = 9;
+        static TREE         = 10;
+        static PROGRESS     = 11;
+        static FILE         = 12;
+        static LAYERS       = 13;
+        static ARRAY        = 14;
+        static LIST         = 15;
+        static TAGS         = 16;
+        static CURVE        = 17;
+        static CUSTOM       = 18;
+        static SEPARATOR    = 19;
 
         #no_context_types = [
             Widget.BUTTON,
@@ -1486,6 +1487,7 @@
 
             switch(this.type) {
                 case Widget.TEXT: return "Text";
+                case Widget.TEXTAREA: return "TextArea";
                 case Widget.BUTTON: return "Button";
                 case Widget.DROPDOWN: return "Dropdown";
                 case Widget.CHECKBOX: return "Checkbox";
@@ -2425,10 +2427,99 @@
 
             let container = document.createElement('div');
             container.className = "lextext";
-            container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 8px )";
+            container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
             container.style.display = "flex";
 
             let wValue = document.createElement('input');
+            wValue.value = wValue.iValue = value || "";
+            wValue.style.width = "100%";
+
+            if(options.disabled ?? false) wValue.setAttribute("disabled", true);
+            if(options.placeholder) wValue.setAttribute("placeholder", options.placeholder);
+
+            var resolve = (function(val, event) {
+                let btn = element.querySelector(".lexwidgetname .lexicon");
+                if(btn) btn.style.display = (val != wValue.iValue ? "block" : "none");
+                this._trigger( new IEvent(name, val, event), callback );
+            }).bind(this);
+
+            const trigger = options.trigger ?? 'default';
+
+            if(trigger == 'default')
+            {
+                wValue.addEventListener("keyup", function(e){
+                    if(e.key == 'Enter')
+                        resolve(e.target.value, e);
+                });
+                wValue.addEventListener("focusout", function(e){
+                    resolve(e.target.value, e);
+                });
+            }
+            else if(trigger == 'input')
+            {
+                wValue.addEventListener("input", function(e){
+                    resolve(e.target.value, e);
+                });
+            }
+
+            if(options.icon)
+            {
+                let icon = document.createElement('a');
+                icon.className = "inputicon " + options.icon;
+                container.appendChild(icon);
+            }
+
+            container.appendChild(wValue);
+            element.appendChild(container);
+            
+            // Remove branch padding and margins
+            if(!widget.name) {
+                element.className += " noname";
+                container.style.width = "100%";
+            }
+        }
+
+        /**
+         * @method addTextArea
+         * @param {String} name Widget name
+         * @param {String} value Text Area value
+         * @param {Function} callback Callback function on change
+         * @param {*} options:
+         * disabled: Make the widget disabled [false]
+         * placeholder: Add input placeholder
+         * trigger: Choose onchange trigger (default, input) [default]
+         * inputWidth: Width of the text input
+         */
+
+        addTextArea( name, value, callback, options = {} ) {
+
+            let widget = this.create_widget(name, Widget.TEXTAREA, options);
+            widget.onGetValue = () => {
+                return wValue.value;
+            };
+            widget.onSetValue = (new_value) => {
+                wValue.value = new_value;
+                Panel.#dispatch_event(wValue, "focusout");
+            };
+            let element = widget.domEl;
+
+            // Add reset functionality
+            if(widget.name && !(options.noreset ?? false)) {
+                Panel.#add_reset_property(element.domName, function() {
+                    wValue.value = wValue.iValue;
+                    this.style.display = "none";
+                    Panel.#dispatch_event(wValue, "focusout");
+                });
+            }
+            
+            // Add widget value
+
+            let container = document.createElement('div');
+            container.className = "lextextarea";
+            container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
+            container.style.display = "flex";
+
+            let wValue = document.createElement('textarea');
             wValue.value = wValue.iValue = value || "";
             wValue.style.width = "100%";
 

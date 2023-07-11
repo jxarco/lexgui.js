@@ -638,9 +638,9 @@ function fillBottomPanel( panel ) {
     panel.addText("Serial number", "194E283DD", (value, event) => {
         console.log(value);
     });
-    panel.addText(null, "This has a console.log callback", (value, event) => {
+    panel.addTextArea("Notes", "", (value, event) => {
         console.log(value);
-    }, { trigger: 'input' });
+    }, { placeholder: 'Some notes...' });
     panel.addButton("Apply", "Add button to branch", (value, event) => {
         const branch = panel.getBranch("Information");
         panel.queue( branch.content );

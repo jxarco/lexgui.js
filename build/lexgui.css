@@ -510,7 +510,6 @@ input[type="file"] {
 .lexwidget input {
   font-family: var(--global-font);
   background: none;
-  /* margin-left: 5px; */
   padding: 3px;
   color: var(--global-text-primary);
   font-weight: 600;
@@ -532,6 +531,17 @@ input[type="file"] {
 
 .lexwidget:has(input:focus) .inputicon {
   border-bottom: 2px solid var(--global-selected-light);
+}
+
+.lexwidget textarea {
+  font-family: var(--global-font);
+  background: none;
+  padding: 3px;
+  color: var(--global-text-primary);
+  font-weight: 600;
+  outline:none;
+  border: none;
+  border-bottom: 1px solid #bbbbbb47;
 }
 
 .lexwidget input.colorinput {
@@ -587,7 +597,7 @@ input[type="file"] {
 	background-color: var(--global-button-color);
   border-radius: 4px;
   border: 1px solid #aba9c131;
-  margin-left: 5px;
+  /* margin-left: 5px; */
   margin-top: 2px;
   height: 22px !important;
   color: var(--global-text);
