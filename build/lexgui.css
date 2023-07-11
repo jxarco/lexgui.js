@@ -1762,6 +1762,7 @@ meter::-webkit-meter-even-less-good-value {
   user-select: none; /* Standard syntax */
   font-weight: bold;
   background-color: var(--branch-title-inactive-background);
+  border-top: 2px solid var(--branch-title-inactive-background);
 }
 
 .lexareatabs .lexareatab:hover{

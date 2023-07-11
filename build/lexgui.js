@@ -928,18 +928,18 @@
             area.split({type: 'vertical', sizes: [Tabs.TAB_SIZE, null], resize: false});
             area.sections[0].attach( container );
 
-            this.area = area;
+            this.area = area.sections[1];
             this.selected = null;
             this.root = container;
             this.tabs = {};
         }
 
-        add( name, content, selected ) {
+        add( name, content, selected, callback ) {
 
             if( selected )
                 this.root.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
             
-            selected = Object.keys( this.tabs ).length ? true : selected;
+            selected = !Object.keys( this.tabs ).length ? true : selected;
 
             // Create tab
             let tabEl = document.createElement('span');
@@ -954,7 +954,7 @@
                 this.root.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
                 tabEl.classList.toggle('selected');
                 // Manage visibility
-                this.area.sections[1].root.childNodes.forEach( c => c.style.display = 'none');
+                this.area.root.childNodes.forEach( c => c.style.display = 'none');
                 content.style.display = "block";
             });
             
@@ -962,6 +962,8 @@
             content = content.root ? content.root : content;
             this.area.attach( content );
             this.tabs[ name ] = content;
+
+            if( callback ) callback.call(this, this.area.root.getBoundingClientRect());
         }
     }
 
