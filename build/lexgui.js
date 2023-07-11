@@ -892,6 +892,7 @@
             this.sections[0].attach( container );
 
             let tabArea = this.sections[1];
+            this.root.classList.add( "lexareatabscontent" );
             return tabArea;
         }
 
@@ -1985,84 +1986,10 @@
             }
         }
 
-        /**
-         * @method tab
-         * @param {String} name Name of the branch/section
-         * @param {*} options 
-         * id: Id of the branch
-         * className: Add class to the branch
-         * closed: Set branch collapsed/opened [false]
-         * icon: Set branch icon (Fontawesome class e.g. "fa-solid fa-skull")
-         * filter: Allow filter widgets in branch by name [false]
-         */
-
-        // tab( name, options = {} ) {
-
-        //     if(!this.current_branch)
-        //     throw("Open the first tab using 'Panel.branch()'!");
-
-        //     // Create new branch
-        //     var branch = new Branch(name, options);
-        //     branch.panel = this;
-        //     this.branches.push( branch );
-
-        //     if(!this.current_tabs) {
-        //         this.current_tabs = [ this.current_branch.name ];
-        //         this.tab_parent = this.current_branch;
-        //     }
-
-        //     this.current_tabs.push( name );
-
-        //     // Set header to tabs
-        //     let title = this.tab_parent.root.querySelector(".lexbranchtitle");
-        //     title.classList.add('wtabs');
-        //     title.innerHTML = "";
-
-        //     // This might be called innecessarily more times...
-        //     title.removeEventListener("click", this.tab_parent.onclick);
-
-        //     for( let i = 0; i < this.current_tabs.length; ++i )
-        //     {
-        //         let branch_name = this.current_tabs[i];
-        //         let tab = document.createElement('span');
-        //         tab.className = i == 0 ? "first selected" : "";
-        //         tab.innerText = branch_name;
-        //         title.appendChild(tab);
-
-        //         tab.addEventListener("click", e => {
-        //             e.preventDefault();
-        //             e.stopPropagation();
-        //             title.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
-        //             tab.classList.toggle('selected');
-        //             let parent = title.parentElement;
-        //             // Hide Contents
-        //             parent.querySelectorAll('.lexbranchcontent').forEach( s => s.style.display = 'none');
-        //             // Show branch
-        //             const nameid = branch_name.replace(/\s/g, '');
-        //             parent.querySelector("#" + nameid).style.display = "";
-        //         });
-        //     }
-
-        //     // Append content to last branch
-        //     let content = branch.root.querySelector(".lexbranchcontent");
-        //     this.tab_parent.root.appendChild( content );
-        //     content.style.display = 'none';
-
-        //     // Set as current
-        //     this.current_branch = branch;
-
-        //     // Add widget filter
-        //     if(options.filter) {
-        //         this.#add_filter( options.filter, {callback: this.#search_widgets.bind(this, branch.name)} );
-        //     }
-        // }
-
         merge() {
 
             this.branch_open = false;
             this.current_branch = null;
-            this.current_tabs = null;
-            this.tab_parent = null;
         }
 
         #pick( arg, def ) {
@@ -3622,7 +3549,13 @@
                         if(e.shiftKey) mult = 10;
                         else if(e.altKey) mult = 0.1;
 
-                        if( !lock_icon.locked ) {
+                        if( lock_icon.locked )
+                        {
+                            for( let v of element.querySelectorAll(".vecinput") ) {
+                                v.value = (+v.valueAsNumber + mult * dt).toPrecision(5);
+                                Panel.#dispatch_event(v, "change");
+                            }
+                        } else {
                             vecinput.value = (+vecinput.valueAsNumber + mult * dt).toPrecision(5);
                             Panel.#dispatch_event(vecinput, "change");
                         }

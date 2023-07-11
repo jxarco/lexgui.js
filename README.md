@@ -84,7 +84,6 @@ Look at [demo.js](demo.js) to see how to create the different widgets!
 - [x] Tree multiple selection
 - [x] Area Overlay panel
 - [x] Minimisable tiny dialog (fast option to debugg)
-- [ ] Fix Branch tabs
 - [ ] Fix menubar entry with checkbox and icon
 - [ ] Drag elements to timeline to animate
 - [ ] Asset Browser
