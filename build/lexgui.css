@@ -1745,6 +1745,12 @@ meter::-webkit-meter-even-less-good-value {
 .lexareatabs {
   display: flex;
   margin-left: 7px;
+  width: calc(100% - 24px);
+  border-top-right-radius: 6px;
+}
+
+.lexareatabs.dockingtab {
+  background-color: #7cb9f34e;
 }
 
 .lexareatabs .lexareatab {

@@ -952,6 +952,16 @@
 
             let that = this;
 
+            container.addEventListener("dragenter", function(e) {
+                e.preventDefault(); // Prevent default action (open as link for some elements)
+                this.classList.add("dockingtab");
+            });
+
+            container.addEventListener("dragleave", function(e) {
+                e.preventDefault(); // Prevent default action (open as link for some elements)
+                this.classList.remove("dockingtab");
+            });
+
             container.addEventListener("drop", function(e) {
                 e.preventDefault(); // Prevent default action (open as link for some elements)
 
@@ -963,6 +973,7 @@
                 this.appendChild( el );
                 const content = document.getElementById(tab_id + "_content");
                 that.area.attach( content );
+                this.classList.remove("dockingtab");
 
                 // Change tabs instance
                 LX.emit( "@on_tab_docked", el.instance );
@@ -1031,7 +1042,7 @@
             });
             
             // Attach content
-            this.root.appendChild(tabEl);
+            this.root.prepend(tabEl);
             this.area.attach( content );
             this.tabs[ name ] = content;
 
