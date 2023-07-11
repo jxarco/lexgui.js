@@ -421,21 +421,26 @@
             if( obj.constructor === Widget )
             {
                 obj.set( value );
+            }else
+            {
+                obj[signal_name].call(obj);
             }
         }
     }
 
     LX.emit = emit;
 
-    function add_signal( name, obj )
+    function addSignal( name, obj, callback )
     {
+        obj[name] = callback;
+
         if( !LX.signals[ name ] )
             LX.signals[ name ] = [];
 
         LX.signals[ name ].push( obj );
     }
 
-    LX.add_signal = add_signal;
+    LX.addSignal = addSignal;
 
     class Area {
 
@@ -873,7 +878,6 @@
         addTabs( options = {} ) {
 
             const tabs = new Tabs( this, options );
-            // this.attach( tabs );
             return tabs;
         }
 
@@ -939,11 +943,37 @@
     class Tabs {
 
         static TAB_SIZE = 29;
+        static TAB_ID   = 0;
 
         constructor( area, options = {} )  {
 
             let container = document.createElement('div');
             container.className = "lexareatabs";
+
+            let that = this;
+
+            container.addEventListener("drop", function(e) {
+                e.preventDefault(); // Prevent default action (open as link for some elements)
+
+                const tab_id = e.dataTransfer.getData("source");
+                const el = document.getElementById(tab_id);
+                if( !el ) return;
+
+                // Append tab and content
+                this.appendChild( el );
+                const content = document.getElementById(tab_id + "_content");
+                that.area.attach( content );
+
+                // Change tabs instance
+                LX.emit( "@on_tab_docked", el.instance );
+                el.instance = that;
+
+                // Show on drop
+                el.click();
+                
+                // Store info
+                that.tabs[ el.dataset["name"] ] = content;
+            });
 
             area.root.classList.add( "lexareatabscontent" );
 
@@ -962,26 +992,46 @@
                 this.root.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
             
             selected = !Object.keys( this.tabs ).length ? true : selected;
+            content = content.root ? content.root : content;
 
             // Create tab
             let tabEl = document.createElement('span');
+            tabEl.dataset["name"] = name;
             tabEl.className = "lexareatab" + (selected ? " selected" : "");
             tabEl.innerHTML = name;
+            tabEl.id = name.replace(/\s/g, '') + Tabs.TAB_ID++;
+            tabEl.selected = selected;
+            tabEl.instance = this;
+            content.id = tabEl.id + "_content";
+
+            LX.addSignal( "@on_tab_docked", tabEl, function() {
+                if( this.parentElement.childNodes.length == 1 ){
+                    this.parentElement.childNodes[0].click(); // single tab!!
+                } 
+            } );
             
-            this.root.appendChild(tabEl);
             tabEl.addEventListener("click", e => {
                 e.preventDefault();
                 e.stopPropagation();
                 // Manage selected
-                this.root.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
+                tabEl.parentElement.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
                 tabEl.classList.toggle('selected');
                 // Manage visibility
-                this.area.root.childNodes.forEach( c => c.style.display = 'none');
+                tabEl.instance.area.root.childNodes.forEach( c => c.style.display = 'none');
                 content.style.display = "block";
             });
             
+            tabEl.setAttribute('draggable', true);
+            tabEl.addEventListener("dragstart", function(e) {
+                if( this.parentElement.childNodes.length == 1 ){
+                    e.preventDefault();
+                    return;
+                } 
+                e.dataTransfer.setData("source", e.target.id);
+            });
+            
             // Attach content
-            content = content.root ? content.root : content;
+            this.root.appendChild(tabEl);
             this.area.attach( content );
             this.tabs[ name ] = content;
 
@@ -2091,7 +2141,7 @@
 
                 if(options.signal)
                 {
-                    LX.add_signal( options.signal, widget );
+                    LX.addSignal( options.signal, widget );
                 }
 
                 this.widgets[ name ] = widget;
