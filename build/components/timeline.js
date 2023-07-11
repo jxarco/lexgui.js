@@ -315,7 +315,7 @@
             // Draw time markers
             var startx = Math.round( this.timeToX( this.startTime ) ) + 0.5;
 	        var endx = Math.round( this.timeToX( this.endTime ) ) + 0.5;
-            var tick_time = 1;
+            var tick_time = this.secondsToPixels > 300 ? 0.5 : 1;
             var h = this.topMargin;
 
             ctx.save();
@@ -345,7 +345,7 @@
             ctx.beginPath();
             var times = this._times;
             this._times.length = 0;
-            for( var time = this.startTime; time <= this.endTime; time += tick_time )
+            for( var time = this.startTime; time <= this.endTime; time += tick_time)
             {
                 var x = this.timeToX( time );
 
@@ -353,11 +353,13 @@
                     continue;
 
                 var is_tick = time % 5 == 0;
-                if( is_tick || this.secondsToPixels > 70 )
-                    times.push([x,time]);
+                if(is_tick ||  this.secondsToPixels > 70 ) {
 
-                ctx.moveTo(Math.round(x) + 0.5, h * 0.5 + (is_tick ? 0 : h * 0.25) );
-                ctx.lineTo(Math.round(x) + 0.5, h);
+                    times.push([x,time]);
+                    ctx.moveTo(Math.round(x) + 0.5, h * 0.5 + (is_tick ? 0 : h * 0.25) );
+                    ctx.lineTo(Math.round(x) + 0.5, h);
+                }
+
             }
 
             var x = startx;
@@ -668,16 +670,22 @@
             var localY = e.offsetY - this.position[1];
             var timelineHeight = this.size[1];
 
-            if(!this.grabbing_timeline)
-                this.canvas.style.cursor = "default";
-
+            // if(!this.grabbing_timeline && !this.movingKeys)
+            //     this.canvas.style.cursor = "default";
+                
+          
             var timeX = this.timeToX( this.currentTime );
             var current_grabbing_timeline = localY < this.topMargin && localX > this.session.left_margin && 
             localX > (timeX - 6) && localX < (timeX + 6);
 
             if( current_grabbing_timeline )
                 this.canvas.style.cursor = "col-resize";
-
+            else if(this.movingKeys) {
+                this.canvas.style.cursor = "grabbing";    
+            }
+             else 
+                this.canvas.style.cursor = "default";
+    
             var time = this.xToTime(x, true);
 
             var is_inside = x >= this.position[0] && x <= (this.position[0] + this.size[0]) &&
@@ -702,6 +710,7 @@
 
             if( e.type == "mouseup" )
             {
+                // this.canvas.style.cursor = "default";
                 const discard = this.movingKeys || (LX.UTILS.getTime() - this.clickTime) > 420; // ms
                 this.movingKeys ? innerSetTime( this.currentTime ) : 0;
 
@@ -756,7 +765,7 @@
                     }
                 }
                 else if(this.grabbing && e.button !=2 && !this.movingKeys) {
-
+                    this.canvas.style.cursor = "grabbing"; 
                     if(this.grabbing_timeline )
                     {
                         let time = this.xToTime( localX );
@@ -909,23 +918,10 @@
             let trackAlpha = 1;
 
             if(clips) {
-                // A utility function to draw a rectangle with rounded corners.
-                function roundedRect(ctx, x, y, width, height, radius, fill = true) {
-                    ctx.beginPath();
-                    ctx.moveTo(x, y + radius);
-                    ctx.arcTo(x, y + height, x + radius, y + height, radius);
-                    ctx.arcTo(x + width, y + height, x + width, y + height - radius, radius);
-                    ctx.arcTo(x + width, y, x + width - radius, y, radius);
-                    ctx.arcTo(x, y, x, y + radius, radius);
-                    if(fill)
-                        ctx.fill();
-                    else
-                        ctx.stroke();
-                }
+         
                 for(var j = 0; j < clips.length; ++j)
                 {
                     let clip = clips[j];
-                    let framerate = this.framerate;
                     //let selected = track.selected[j];
                     var x = Math.floor( this.timeToX(clip.start) ) + 0.5;
                     var x2 = Math.floor( this.timeToX( clip.start + clip.duration ) ) + 0.5;
@@ -938,8 +934,20 @@
                     ctx.globalAlpha = trackAlpha;
                     ctx.fillStyle = clip.clipColor || "#5e9fdd"//#333";
                     //ctx.fillRect(x,y,w,trackHeight);
-                    roundedRect(ctx, x, y + offset, w, trackHeight , 5, true);
-
+                    ctx.roundRect( x, y + offset, w, trackHeight , 5, true);
+                   
+                    let fadeinX = this.secondsToPixels * ((clip.fadein || 0) - clip.start);
+                    let fadeoutX = this.secondsToPixels * (clip.start + clip.duration - (clip.fadeout || (clip.start + clip.duration)));
+       
+                    let color = LX.UTILS.HexToRgb(ctx.fillStyle);
+                    color = color.map(x => x*=0.8);
+                    ctx.fillStyle = 'rgba(' + color.join(',') + ', 0.8)';
+                    
+                    if(fadeinX>0)
+                        ctx.roundRect(x, y + offset, fadeinX, trackHeight, {tl: 5, bl: 5, tr:0, br:0}, true);
+                    if(fadeoutX)
+                        ctx.roundRect( x + w - fadeoutX, y + offset, fadeoutX, trackHeight, {tl: 0, bl: 0, tr:5, br:5}, true);
+                    
                     //draw clip content
                     if( clip.drawClip )
                     {
@@ -968,7 +976,7 @@
                         ctx.strokeStyle = track.clips[j].clipColor;
                         ctx.globalAlpha = 0.8;
                         ctx.lineWidth = 1;
-                        roundedRect(ctx, selectedClipArea[0]-1,selectedClipArea[1]-1,selectedClipArea[2]+2,selectedClipArea[3]+2, 5, false);
+                        ctx.roundRect(selectedClipArea[0]-1,selectedClipArea[1]-1,selectedClipArea[2]+2,selectedClipArea[3]+2, 5, false, true);
                         ctx.strokeStyle = "#888";
                         ctx.lineWidth = 0.5;
                         ctx.globalAlpha = 1;
@@ -1206,7 +1214,7 @@
                 if( keyFrameIndex != undefined ) {
                     this.processCurrentKeyFrame( e, keyFrameIndex, track, null, true ); // Settings this as multiple so time is not being set
                     this.movingKeys = true;
-                    
+                    this.canvas.style.cursor = "grab";  
                     // Set pre-move state
                     for(let selectedKey of this.lastKeyFramesSelected) {
                         let [name, idx, keyIndex] = selectedKey;
@@ -1216,6 +1224,7 @@
                     
                     this.timeBeforeMove = track.times[ keyFrameIndex ];
                     this.canvas.classList.add('grabbing');
+                    
                 }
             } else if(!track) {
                 let x = e.offsetX;
@@ -1244,6 +1253,9 @@
                     track = this.tracksPerItem[name][idx];
                     if(track && track.lock)
                         return;
+
+                    this.canvas.style.cursor = "grabbing";
+
                     const delta = this.timeBeforeMove - keyTime;
                     this.animationClip.tracks[ track.clipIdx ].times[ keyIndex ] = Math.min( this.animationClip.duration, Math.max(0, newTime - delta) );
                 }
@@ -1966,7 +1978,7 @@
                 // 	}
                 
                 // }
-                
+                this.canvas.style.cursor = "grab";  
                 for(let i = 0; i< selectedClips.length; i++)
                 {
                     this.movingKeys = false
@@ -1990,9 +2002,9 @@
                         this.updateHeader();
                     }
                     //this.addUndoStep( "clip_modified", clip );
-                    if( (e.shiftKey && distToStart < 5) || (clip.fadein && Math.abs( this.timeToX( clip.start + clip.fadein ) - e.offsetX ) < 5) )
+                    if( (e.ctrlKey && distToStart < 5) || (clip.fadein && Math.abs( this.timeToX( clip.start + clip.fadein ) - e.offsetX ) < 5) )
                         this.dragClipMode = "fadein";
-                    else if( (e.shiftKey && distToEnd < 5) || (clip.fadeout && Math.abs( this.timeToX( clip.start + clip.duration - clip.fadeout ) - e.offsetX ) < 5) )
+                    else if( (e.ctrlKey && distToEnd < 5) || (clip.fadeout && Math.abs( this.timeToX( clip.start + clip.duration - clip.fadeout ) - e.offsetX ) < 5) )
                         this.dragClipMode = "fadeout";
                     else if( Math.abs( endingX - x ) < 10 )
                         this.dragClipMode = "duration";
@@ -2047,16 +2059,18 @@
                         var diff = delta;//this.currentTime - this.timelineClickedClipsTime[i];//delta;
                         if( this.dragClipMode == "move" ) {
                             clip.start += diff;
-                            clip.attackPeak += diff;
-                            clip.relax += diff;
+                            clip.fadein += diff;
+                            clip.fadeout += diff;
+                            this.canvas.style.cursor = "grabbing";
+
                         }
                         else if( this.dragClipMode == "fadein" )
-                            clip.fadein = (clip.fadein || 0) + diff;
+                            clip.fadein = Math.min(Math.max((clip.fadein || 0) + diff, clip.start), clip.start+clip.duration);
                         else if( this.dragClipMode == "fadeout" )
-                            clip.fadeout = (clip.fadeout || 0) - diff;
+                            clip.fadeout = Math.max(Math.min((clip.fadeout || clip.start+clip.duration) + diff, clip.start+clip.duration), clip.start);
                         else if( this.dragClipMode == "duration" )
                             clip.duration += diff;
-                        this.clipTime = this.currentTime;
+
                         if(this.duration < clip.start + clip.duration  )
                         {
                             this.setDuration(clip.start + clip.duration);
@@ -2224,8 +2238,8 @@
             let trackIdx = null;
             let newStart = this.currentTime + offsetTime;
 
-            clip.attackPeak += (newStart - clip.start);
-            clip.relax += (newStart - clip.start);
+            clip.fadein += (newStart - clip.start);
+            clip.fadeout += (newStart - clip.start);
             clip.start = newStart;
 
             // Time slot with other clip?
@@ -2553,13 +2567,16 @@
                 this.boxSelectionStart = [localX, localY - 20];
 
             }
-            else if(e.ctrlKey && track) {
+            else if(track) {
 
                     const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
                     if( keyFrameIndex != undefined ) {
                         this.processCurrentKeyFrame( e, keyFrameIndex, track, null, true ); // Settings this as multiple so time is not being set
-                        this.movingKeys = true;
-                        
+                        if(e.ctrlKey || e.altKey) {
+                            this.movingKeys = true;
+                            this.canvas.style.cursor = "grab";  
+
+                        }
                         // Set pre-move state
                         for(let selectedKey of this.lastKeyFramesSelected) {
                             let [name, idx, keyIndex] = selectedKey;
@@ -2592,7 +2609,6 @@
             const innerSetTime = (t) => { if( this.onSetTime ) this.onSetTime( t );	 }
             // Manage keyframe movement
             if(this.movingKeys) {
-
                 this.clearState();
                 const newTime = this.xToTime( localX );
                 
@@ -2600,17 +2616,27 @@
                     track = this.tracksPerItem[name][idx];
                     if(track && track.lock)
                         return;
-
-                    let trackRange = [this.tracksDrawn[track.clipIdx][1], this.tracksDrawn[track.clipIdx][1] + this.trackHeight];
-                    localY = Math.min( trackRange[1], Math.max(trackRange[0], localY) );
                     
-                    //convert to range track values
-                    let value = (((localY - trackRange[1]) * (this.range[1] - this.range[0])) / (trackRange[0] - trackRange[1])) + this.range[0];
-                    track.edited[keyIndex] = true;
-                    this.animationClip.tracks[ track.clipIdx ].values[ keyIndex ] = value;
-                }
+                    this.canvas.style.cursor = "grabbing";
 
-                return;
+                    if(e.ctrlKey) {
+                        const delta = this.timeBeforeMove - keyTime;
+                        this.animationClip.tracks[ track.clipIdx ].times[ keyIndex ] = Math.min( this.animationClip.duration, Math.max(0, newTime - delta) );
+                    }
+
+                    if(e.altKey) {
+                        let trackRange = [this.tracksDrawn[track.clipIdx][1], this.tracksDrawn[track.clipIdx][1] + this.trackHeight];
+                        localY = Math.min( trackRange[1], Math.max(trackRange[0], localY) );
+                        
+                        //convert to range track values
+                        let value = (((localY - trackRange[1]) * (this.range[1] - this.range[0])) / (trackRange[0] - trackRange[1])) + this.range[0];
+                        track.edited[keyIndex] = true;
+                        this.animationClip.tracks[ track.clipIdx ].values[ keyIndex ] = value;
+                    }
+                    return
+                }
+                
+               
             }
 
             const removeHover = () => {
@@ -3348,13 +3374,8 @@
      * @param {Boolean} [stroke = true] Whether to stroke the rectangle.
      */
 
-    CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius, fill, stroke) {
-        if (typeof stroke === 'undefined') {
-            stroke = true;
-        }
-        if (typeof radius === 'undefined') {
-            radius = 5;
-        }
+    CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius = 5, fill = false, stroke = false) {
+        
         if (typeof radius === 'number') {
             radius = {tl: radius, tr: radius, br: radius, bl: radius};
         } else {
@@ -3382,5 +3403,18 @@
         if (stroke) {
          this.stroke();
         }
+    }
+
+    LX.UTILS.HexToRgb = (hex) => {
+        var c;
+        if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
+            c= hex.substring(1).split('');
+            if(c.length== 3){
+                c= [c[0], c[0], c[1], c[1], c[2], c[2]];
+            }
+            c= '0x'+c.join('');
+            return [(c>>16)&255, (c>>8)&255, c&255];
+        }
+        throw new Error('Bad Hex');
     }
 })( typeof(window) != "undefined" ? window : (typeof(self) != "undefined" ? self : global ) );
