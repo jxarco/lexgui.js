@@ -3618,13 +3618,7 @@
                         if(e.shiftKey) mult = 10;
                         else if(e.altKey) mult = 0.1;
 
-                        if( lock_icon.locked )
-                        {
-                            for( let v of element.querySelectorAll(".vecinput") ) {
-                                v.value = (+v.valueAsNumber + mult * dt).toPrecision(5);
-                                Panel.#dispatch_event(v, "change");
-                            }
-                        } else {
+                        if( !lock_icon.locked ) {
                             vecinput.value = (+vecinput.valueAsNumber + mult * dt).toPrecision(5);
                             Panel.#dispatch_event(vecinput, "change");
                         }
