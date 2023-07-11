@@ -409,20 +409,33 @@
 
     LX.addContextMenu = addContextMenu;
 
-    function trigger( signal_name, value )
+    function emit( signal_name, value )
     {
-        const obj = LX.signals[ signal_name ];
+        const data = LX.signals[ signal_name ];
 
-        if( !obj )
+        if( !data )
         return;
 
-        if( obj.constructor === Widget )
+        for( let obj of data )
         {
-            obj.set( value );
+            if( obj.constructor === Widget )
+            {
+                obj.set( value );
+            }
         }
     }
 
-    LX.trigger = trigger;
+    LX.emit = emit;
+
+    function add_signal( name, obj )
+    {
+        if( !LX.signals[ name ] )
+            LX.signals[ name ] = [];
+
+        LX.signals[ name ].push( obj );
+    }
+
+    LX.add_signal = add_signal;
 
     class Area {
 
@@ -2078,7 +2091,7 @@
 
                 if(options.signal)
                 {
-                    LX.signals[ options.signal ] = widget;
+                    LX.add_signal( options.signal, widget );
                 }
 
                 this.widgets[ name ] = widget;

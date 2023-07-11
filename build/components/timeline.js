@@ -140,7 +140,7 @@
             header.addNumber("Duration", this.duration, (value, event) => this.setDuration(value), {step: 0.01, min: 0});        
             header.addNumber("Current Time", this.currentTime, (value, event) => {
                 this.currentTime = value;
-            }, {signal: "@on_current_time_"+ this.constructor.name, step: 0.01, min: 0, max: this.duration, precision: 3,});        
+            }, {signal: "@on_current_time_" + this.constructor.name, step: 0.01, min: 0, max: this.duration, precision: 3,});        
 
             for(let i = 0; i < this.buttonsDrawn.length; i++) {
                 let button = this.buttonsDrawn[i];
@@ -762,7 +762,7 @@
                         let time = this.xToTime( localX );
                         time = Math.max(0, time);
                         this.currentTime = Math.min(this.duration, time);
-                        LX.trigger( "@on_current_time_"+ this.constructor.name, time );
+                        LX.emit( "@on_current_time_" + this.constructor.name, time );
                     }
                     else
                     {
@@ -1480,7 +1480,7 @@
             this.lastKeyFramesSelected.push( selectionInfo );
             track.selected[index] = true;
             this.currentTime =  this.animationClip.tracks[track.clipIdx].times[ index ];
-            LX.trigger("@on_current_time_" + this.constructor.name, this.currentTime);
+            LX.emit( "@on_current_time_" + this.constructor.name, this.currentTime );
             if( this.onSetTime )
                 this.onSetTime(  this.animationClip.tracks[track.clipIdx].times[ index ]);
         }

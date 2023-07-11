@@ -2011,6 +2011,7 @@ meter::-webkit-meter-even-less-good-value {
   margin: 0;
   padding-bottom: 0px;
   padding-top: 0px;
+  font-size: 12px;
 }
 
 .lextimeline .lexsplitbar.horizontal {
