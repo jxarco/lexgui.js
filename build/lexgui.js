@@ -456,6 +456,7 @@
             root.style.width = width;
             root.style.height = height;
     
+            this.offset = 0;
             this.root = root;
             this.size = [ this.root.offsetWidth, this.root.offsetHeight ];
             this.sections = [];
@@ -512,6 +513,7 @@
             if(this.sections.length)
             {
                 // In case Area has been split before, get 2nd section as root
+                this.offset = this.root.childNodes[0].offsetHeight; // store offset to take into account when resizing
                 this.root = this.sections[1].root;
             }
 
@@ -661,7 +663,7 @@
             {
                 const area = this.sections[i];
                 if(area[ type ])
-                    area[ type ].call(this, area.root.getBoundingClientRect());
+                    area[ type ].call( this, area.root.getBoundingClientRect() );
                 area.propagateEvent( type );
             }
         }
@@ -702,6 +704,7 @@
 
             this.split({type: 'vertical', sizes:[height,null], resize: false});
             this.sections[0].attach( menubar );
+            this.sections[0].is_menubar = true;
         }
 
         /**
@@ -885,7 +888,7 @@
             const height = container.offsetHeight;
             d.remove();
 
-            this.split({type: 'vertical', sizes:[height, null], resize: false});
+            this.split({type: 'vertical', sizes: [height, null], resize: false});
             this.sections[0].attach( container );
 
             let tabArea = this.sections[1];
@@ -916,13 +919,14 @@
 				a2.root.style.width = size + "px"; //other split
             }
             else {
-                var size = (a2.root.offsetHeight + dt);
+
+                var size = (a2.root.offsetHeight + dt) + a2.offset;
 				if(size < min_size)
 					size = min_size;
 				a1.root.style.height = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
 				a1.root.style.height = "-webkit-calc( 100% - " + size + "px " + splitinfo + " )";
 				a1.root.style.height = "calc( 100% - " + size + "px " + splitinfo + " )";
-				a2.root.style.height = size + "px"; //other split
+				a2.root.style.height = ( size - a2.offset ) + "px"; //other split
             }
                 
             this.#update();
@@ -1992,66 +1996,66 @@
          * filter: Allow filter widgets in branch by name [false]
          */
 
-        tab( name, options = {} ) {
+        // tab( name, options = {} ) {
 
-            if(!this.current_branch)
-            throw("Open the first tab using 'Panel.branch()'!");
+        //     if(!this.current_branch)
+        //     throw("Open the first tab using 'Panel.branch()'!");
 
-            // Create new branch
-            var branch = new Branch(name, options);
-            branch.panel = this;
-            this.branches.push( branch );
+        //     // Create new branch
+        //     var branch = new Branch(name, options);
+        //     branch.panel = this;
+        //     this.branches.push( branch );
 
-            if(!this.current_tabs) {
-                this.current_tabs = [ this.current_branch.name ];
-                this.tab_parent = this.current_branch;
-            }
+        //     if(!this.current_tabs) {
+        //         this.current_tabs = [ this.current_branch.name ];
+        //         this.tab_parent = this.current_branch;
+        //     }
 
-            this.current_tabs.push( name );
+        //     this.current_tabs.push( name );
 
-            // Set header to tabs
-            let title = this.tab_parent.root.querySelector(".lexbranchtitle");
-            title.classList.add('wtabs');
-            title.innerHTML = "";
+        //     // Set header to tabs
+        //     let title = this.tab_parent.root.querySelector(".lexbranchtitle");
+        //     title.classList.add('wtabs');
+        //     title.innerHTML = "";
 
-            // This might be called innecessarily more times...
-            title.removeEventListener("click", this.tab_parent.onclick);
+        //     // This might be called innecessarily more times...
+        //     title.removeEventListener("click", this.tab_parent.onclick);
 
-            for( let i = 0; i < this.current_tabs.length; ++i )
-            {
-                let branch_name = this.current_tabs[i];
-                let tab = document.createElement('span');
-                tab.className = i == 0 ? "first selected" : "";
-                tab.innerText = branch_name;
-                title.appendChild(tab);
+        //     for( let i = 0; i < this.current_tabs.length; ++i )
+        //     {
+        //         let branch_name = this.current_tabs[i];
+        //         let tab = document.createElement('span');
+        //         tab.className = i == 0 ? "first selected" : "";
+        //         tab.innerText = branch_name;
+        //         title.appendChild(tab);
 
-                tab.addEventListener("click", e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    title.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
-                    tab.classList.toggle('selected');
-                    let parent = title.parentElement;
-                    // Hide Contents
-                    parent.querySelectorAll('.lexbranchcontent').forEach( s => s.style.display = 'none');
-                    // Show branch
-                    const nameid = branch_name.replace(/\s/g, '');
-                    parent.querySelector("#" + nameid).style.display = "";
-                });
-            }
+        //         tab.addEventListener("click", e => {
+        //             e.preventDefault();
+        //             e.stopPropagation();
+        //             title.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
+        //             tab.classList.toggle('selected');
+        //             let parent = title.parentElement;
+        //             // Hide Contents
+        //             parent.querySelectorAll('.lexbranchcontent').forEach( s => s.style.display = 'none');
+        //             // Show branch
+        //             const nameid = branch_name.replace(/\s/g, '');
+        //             parent.querySelector("#" + nameid).style.display = "";
+        //         });
+        //     }
 
-            // Append content to last branch
-            let content = branch.root.querySelector(".lexbranchcontent");
-            this.tab_parent.root.appendChild( content );
-            content.style.display = 'none';
+        //     // Append content to last branch
+        //     let content = branch.root.querySelector(".lexbranchcontent");
+        //     this.tab_parent.root.appendChild( content );
+        //     content.style.display = 'none';
 
-            // Set as current
-            this.current_branch = branch;
+        //     // Set as current
+        //     this.current_branch = branch;
 
-            // Add widget filter
-            if(options.filter) {
-                this.#add_filter( options.filter, {callback: this.#search_widgets.bind(this, branch.name)} );
-            }
-        }
+        //     // Add widget filter
+        //     if(options.filter) {
+        //         this.#add_filter( options.filter, {callback: this.#search_widgets.bind(this, branch.name)} );
+        //     }
+        // }
 
         merge() {
 

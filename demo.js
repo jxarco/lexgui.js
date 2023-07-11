@@ -295,8 +295,23 @@ tab_area.onresize = function( bounding ) {
 var side_panel = rup.addPanel();
 fillPanel( side_panel );
 
-var side_bottom_panel = rbottom.addPanel();
+// var side_bottom_panel = rbottom.addPanel();
+// fillRightBottomPanel( side_bottom_panel, 'Vertical' );
+
+const bottom_tab_container = rbottom.addTabs([
+    {
+        name: "Panel",
+        id: "side_bottom_panel",
+        selected:  true
+    },
+    {
+        name: "Empty"
+    }
+]);
+
+var side_bottom_panel = new LX.Panel({ id: "side_bottom_panel" });
 fillRightBottomPanel( side_bottom_panel, 'Vertical' );
+bottom_tab_container.attach( side_bottom_panel );
 
 function loop(dt) {
     
@@ -520,7 +535,7 @@ function fillRightBottomPanel( panel, tab ) {
     
     panel.clear();
 
-    panel.branch("Tabs", {icon: "fa-solid fa-table-list"});
+    panel.branch("Bottom", {icon: "fa-solid fa-table-list"});
 
     if(tab == 'Horizontal')
     {
@@ -615,22 +630,22 @@ function fillRightBottomPanel( panel, tab ) {
         /************** */
     }
 
-    panel.tab("Another tab");
+    // panel.tab("Another tab");
 
-    // update panel values uising widget name
-    panel.addNumber("Roll", 0, (value, event) => {
-        panel.setValue('PRoll', value);
-    }, { min: -1, max: 1, step: 0.1 });
-    panel.addProgress("PRoll", 0, { min: -1, max: 1 });
+    // // update panel values uising widget name
+    // panel.addNumber("Roll", 0, (value, event) => {
+    //     panel.setValue('PRoll', value);
+    // }, { min: -1, max: 1, step: 0.1 });
+    // panel.addProgress("PRoll", 0, { min: -1, max: 1 });
 
-    panel.tab("Another One");
+    // panel.tab("Another One");
 
-    panel.addText("Im out :(", "", null, { placeholder: "Alone..." });
-    panel.addVector4("Im a Vec4", [0.3, 0.3, 0.5, 1], (value, event) => {
-        console.log(value);
-    });
-    panel.addButton(null, "Click me, Im Full Width...");
-    panel.addButton("Test Button", "Reduced width...");
+    // panel.addText("Im out :(", "", null, { placeholder: "Alone..." });
+    // panel.addVector4("Im a Vec4", [0.3, 0.3, 0.5, 1], (value, event) => {
+    //     console.log(value);
+    // });
+    // panel.addButton(null, "Click me, Im Full Width...");
+    // panel.addButton("Test Button", "Reduced width...");
 
     panel.merge();
 }
