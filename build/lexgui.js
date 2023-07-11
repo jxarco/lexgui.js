@@ -1774,7 +1774,7 @@
                     actionEl.className = "itemicon " + a.icon;
                     actionEl.title = a.name;
                     actionEl.addEventListener("click", function(e) {
-                        a.callback.call(this, node);
+                        a.callback(this, node);
                         e.stopPropagation();
                     });
                     item.appendChild(actionEl);
