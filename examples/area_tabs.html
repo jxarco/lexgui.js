@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>LexGUI PocketDialog Demo</title>
+    <link rel="stylesheet" href="../build/lexgui.css">    
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.css">    
+</head>
+    <body></body>
+    <script src="../build/lexgui.js"></script>
+    <script>
+
+        // init library and get main area
+        let area = LX.init();
+
+        area.addMenubar( m => {
+
+            // {options}: callback, icon, short
+
+            m.add( "Project/Autosave", { type: 'checkbox', icon: "fa fa-floppy-disk", callback: (v, name) => { console.log(name + ": " + v ) } });
+            m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass", short:  "F1", callback: () => { console.log("Opening HELP") }});
+            m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
+            m.add( "Help/Support LexGUI/Do it" );
+
+            m.setButtonImage("lexgui.js", "../images/lexgui-min.png", () => {window.open("https://github.com/jxarco/lexgui.js/")}, {position: "left"})
+        });
+
+        // split main area
+        area.split({sizes:["75%","25%"]});
+        var [left,right] = area.sections;
+
+        // Get new content area to fill it
+        const left_tab_area = left.addTabs([
+            {
+                name: "Canvas",
+                id: "mycanvas",
+                selected:  true
+            },
+            {
+                name: "Empty"
+            }
+        ]);
+
+        // add canvas to left upper part
+        var canvas = document.createElement('canvas');
+        canvas.id = "mycanvas";
+        canvas.width = left_tab_area.root.clientWidth;
+        canvas.height = left_tab_area.root.clientHeight;
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        left_tab_area.attach( canvas );
+
+        // add on resize event to control canvas size
+        left_tab_area.onresize = function( bounding ) {
+            canvas.width = bounding.width;
+            canvas.height = bounding.height;
+        };
+
+        const right_tab_area = right.addTabs([
+            {
+                name: "Panel",
+                id: "right_panel",
+                selected:  true
+            },
+            {
+                name: "Empty"
+            }
+        ]);
+
+        var right_panel = new LX.Panel({ id: "right_panel" });
+        fillPanel( right_panel, 'Vertical' );
+        right_tab_area.attach( right_panel );
+
+        function loop(dt) {
+            
+            var ctx = canvas.getContext("2d");
+
+            // Get values from panel widgets (e.g. color value)
+            ctx.fillStyle = right_panel.getValue('Background');
+
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.font = right_panel.getValue('Font Size') + "px Monospace";
+
+            ctx.fillStyle = right_panel.getValue('Font Color');
+
+            const text = right_panel.getValue('Text');
+            const pos_2d = right_panel.getValue('2D Position');
+            ctx.fillText(text, pos_2d[0] + 6, pos_2d[1] + 48);
+
+            requestAnimationFrame(loop);
+        }
+
+        requestAnimationFrame(loop);
+
+        // **** **** **** **** **** **** **** **** **** **** **** **** 
+
+        function fillPanel( panel ) {
+            
+            panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});
+            panel.addColor("Background", "#b7a9b1");
+            panel.addText("Text", "Lexgui.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
+            panel.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
+                console.log("Font Color: ", value);
+            });
+            panel.addNumber("Font Size", 36, (value, event) => {
+                console.log(value);
+            }, { min: 1, max: 48, step: 1});
+            panel.addVector2("2D Position", [250, 350], (value, event) => {
+                console.log(value);
+            }, { min: 0, max: 1024 });
+            panel.addSeparator();
+            panel.addTitle("Configuration (Im a title)");
+            panel.addCheckbox("Toggle me", true, (value, event) => {
+                console.log(value);
+            }, { suboptions: (p) => {
+                p.addText(null, "Suboption 1");
+                p.addNumber("Suboption 2", 12);
+            } });
+            panel.addFile("Image", data => { console.log(data) }, {} );
+            panel.merge();
+        }
+
+    </script>
+</html>

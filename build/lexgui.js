@@ -629,11 +629,11 @@
             function inner_mousemove(e)
             {
                 if(that.type == "horizontal") {
-                    that.#moveSplit(last_pos[0] - e.x);
+                    that.moveSplit(last_pos[0] - e.x);
                         
                 }
                 else {
-                    that.#moveSplit(last_pos[1] - e.y);
+                    that.moveSplit(last_pos[1] - e.y);
                 }
                 
                 last_pos[0] = e.x;
@@ -896,7 +896,7 @@
             return tabArea;
         }
 
-        #moveSplit( dt ) {
+        moveSplit( dt ) {
 
             if(!this.type)
                 throw("No split area");
@@ -909,11 +909,16 @@
             var splitinfo = " - "+ LX.DEFAULT_SPLITBAR_SIZE +"px";
             const min_size = 10;
 
+            console.log(dt > 0 ? "UU" : "__");
+
             if(this.type == "horizontal") {
 
                 var size = (a2.root.offsetWidth + dt);
 				if(size < min_size)
 					size = min_size;
+
+                console.log(dt, size);
+
 				a1.root.style.width = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
 				a1.root.style.width = "-webkit-calc( 100% - " + size + "px " + splitinfo + " )";
 				a1.root.style.width = "calc( 100% - " + size + "px " + splitinfo + " )";
