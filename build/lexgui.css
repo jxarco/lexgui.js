@@ -1081,7 +1081,6 @@ input[type=number] {
 }
 
 .lextabscontainer .tabs {
-  display: grid;
   padding: 4px;
   background: none !important;
   border-right: 1px solid #a2a5c36a;

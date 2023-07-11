@@ -3904,7 +3904,6 @@
             let container = document.createElement('div');
             container.className = "lextabscontainer";
             if( !vertical ) container.className += " horizontal";
-            container.style.height = (tabs.length * 34) + "px";
 
             let tabContainer = document.createElement("div");
             tabContainer.className = "tabs";
@@ -3941,7 +3940,7 @@
 
                 // push to tab space
                 this.queue( infoContainer );
-                tab.callback( this );
+                tab.callback( this, infoContainer );
             }
             
             // add separator to last opened tab

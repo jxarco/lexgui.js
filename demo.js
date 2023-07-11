@@ -558,9 +558,13 @@ function fillRightBottomPanel( panel, tab ) {
             { 
                 name: "First tab",
                 icon: "fa-brands fa-discord",
-                callback: p => {
+                callback: (p, content) => {
                     p.addTitle("Discord tab");
-                    p.addButton(null, "Connect");
+                    p.addButton("Apply", "Add button to branch", (value, event) => {
+                        p.queue( content );
+                        p.addButton(null, "Hello");
+                        p.clearQueue();
+                    });
                 }
             },
             { 
