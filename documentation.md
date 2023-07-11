@@ -14,7 +14,9 @@
     - [Getter and Setters](#getter-and-setters)
     - [Reset Value](#reset-value)
     - [Same line](#same-line)
-  - [Widget List](#widget-list)
+  
+  - <details><summary><a href=#widget-list>Widget List</a></summary>
+
     - [Title](#title)
     - [Text](#text)
     - [Button](#button)
@@ -33,8 +35,17 @@
     - [Progress](#progress)
     - [Curve](#curve)
     - [Other Widgets](#other-widgets)
+
+    </details>
+
   - [Dialogs](#dialogs)
   - [Event Handling](#event-handling)
+  - [Components](#components)
+    - [Timeline](#timeline)
+      - [Keyframes timeline](#keyframe-timeline)
+      - [Clips timeline](#clips-timeline)
+      - [Curves timeline](#curves-timeline)
+
 
 ## Getting Started
 
@@ -465,4 +476,15 @@ panel.addProgress("HeadRoll", 0, {
 
 ## Event Handling
 
+...TODO
+
+## Timeline
+
+### Keyframes timeline
+...TODO
+
+### Clips timeline
+...TODO
+
+### Curves timeline
 ...TODO

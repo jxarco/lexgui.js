@@ -163,6 +163,7 @@
                 this.leftPanel = area.addPanel({className: 'lextimelinepanel', width: "100%"});
                 
             }
+
             let panel = this.leftPanel;
             // panel.addBlank(25);
             panel.addTitle("Tracks", { height: "24px"});
@@ -179,7 +180,25 @@
                     }
                     for(let j = 0; j < this.tracksPerItem[selected].length; j++) {
                         let track = this.tracksPerItem[selected][j];
-                        t.children.push({'id': track.name + (track.type? ' (' + track.type + ')': ''), 'children':[]})
+                        
+                        t.children.push({'id': track.name + (track.type? ' (' + track.type + ')': ''), 'children':[], actions : [{
+                            'name':'Block edition',
+                            'icon': 'fa-solid fa-lock-open',
+                            'callback': (e) => {
+                                // TO DO (apply functionality)
+                                if(this.classList.contains('fa-lock')) {
+                                    this.title = 'Lock edition';
+                                    this.classList.remove('fa-lock');
+                                    this.classList.add('fa-lock-open');    
+                                }
+                                else {
+                                    this.title = 'Unlock edition';
+                                    this.classList.remove('fa-lock-open');
+                                    this.classList.add('fa-lock');                                 
+                                }
+                            }
+                             
+                        }]})
                         // panel.addTitle(track.name + (track.type? '(' + track.type + ')' : ''));
                     }
                     items.children.push(t);
