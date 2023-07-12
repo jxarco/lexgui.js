@@ -217,34 +217,25 @@ fillBottomPanel( bottom_panel );
 right.split({type: 'vertical', sizes:["70vh","30vh"]});
 var [rup, rbottom] = right.sections;
 
-// another menu bar
-rbottom.addMenubar( m => {
-    m.add( "Vertical", name => { console.log(name); fillRightBottomPanel( side_bottom_panel, name ); });
-    m.add( "Horizontal", name => { console.log(name); fillRightBottomPanel( side_bottom_panel, name ); });
-}, { float: 'center' } );
-
 // Get new content area to fill it
-const tab_area = up.addTabs([
-    {
-        name: "Canvas",
-        id: "mycanvas",
-        selected:  true
-    },
-    {
-        name: "Empty"
-    }
-]);
+const top_tabs = up.addTabs();
 
 // add canvas to left upper part
 var canvas = document.createElement('canvas');
-canvas.id = "mycanvas";
-canvas.width = tab_area.root.clientWidth;
-canvas.height = tab_area.root.clientHeight;
 canvas.style.width = "100%";
 canvas.style.height = "100%";
-tab_area.attach( canvas );
 
-tab_area.addOverlayButtons( [ 
+const resize_canvas = ( bounding ) => {
+    canvas.width = bounding.width;
+    canvas.height = bounding.height;
+};
+
+top_tabs.add( "Canvas", canvas, true, resize_canvas );
+
+// add on resize event to control canvas size
+top_tabs.area.onresize = resize_canvas;
+
+top_tabs.area.addOverlayButtons( [ 
     [
         {
             name: "Select",
@@ -267,7 +258,7 @@ tab_area.addOverlayButtons( [
         }
     ],
     {
-        name: "View Mode",
+        name: "Lit",
         options: ["Lit", "Unlit", "Wireframe"],
         callback: (value, event) => console.log(value)
     },
@@ -290,33 +281,18 @@ tab_area.addOverlayButtons( [
     }
 ], { float: "htc" } );
 
-// add on resize event to control canvas size
-tab_area.onresize = function( bounding ) {
-    canvas.width = bounding.width;
-    canvas.height = bounding.height;
-};
-
 // add panels
 var side_panel = rup.addPanel();
 fillPanel( side_panel );
 
-// var side_bottom_panel = rbottom.addPanel();
-// fillRightBottomPanel( side_bottom_panel, 'Vertical' );
-
-const bottom_tab_container = rbottom.addTabs([
-    {
-        name: "Panel",
-        id: "side_bottom_panel",
-        selected:  true
-    },
-    {
-        name: "Empty"
-    }
-]);
-
-var side_bottom_panel = new LX.Panel({ id: "side_bottom_panel" });
+const bottom_tabs = rbottom.addTabs();
+var side_bottom_panel = new LX.Panel();
+var side_bottom_panel_h = new LX.Panel();
 fillRightBottomPanel( side_bottom_panel, 'Vertical' );
-bottom_tab_container.attach( side_bottom_panel );
+fillRightBottomPanel( side_bottom_panel_h, 'Horizontal' );
+
+bottom_tabs.add( "Panel V", side_bottom_panel );
+bottom_tabs.add( "Panel H", side_bottom_panel_h );
 
 function loop(dt) {
     
@@ -587,9 +563,13 @@ function fillRightBottomPanel( panel, tab ) {
             { 
                 name: "First tab",
                 icon: "fa-brands fa-discord",
-                callback: p => {
+                callback: (p, content) => {
                     p.addTitle("Discord tab");
-                    p.addButton(null, "Connect");
+                    p.addButton("Apply", "Add button to branch", (value, event) => {
+                        p.queue( content );
+                        p.addButton(null, "Hello");
+                        p.clearQueue();
+                    });
                 }
             },
             { 
@@ -663,9 +643,9 @@ function fillBottomPanel( panel ) {
     panel.addText("Serial number", "194E283DD", (value, event) => {
         console.log(value);
     });
-    panel.addText(null, "This has a console.log callback", (value, event) => {
+    panel.addTextArea("Notes", "", (value, event) => {
         console.log(value);
-    }, { trigger: 'input' });
+    }, { placeholder: 'Some notes...' });
     panel.addButton("Apply", "Add button to branch", (value, event) => {
         const branch = panel.getBranch("Information");
         panel.queue( branch.content );

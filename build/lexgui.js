@@ -409,20 +409,38 @@
 
     LX.addContextMenu = addContextMenu;
 
-    function trigger( signal_name, value )
+    function emit( signal_name, value )
     {
-        const obj = LX.signals[ signal_name ];
+        const data = LX.signals[ signal_name ];
 
-        if( !obj )
+        if( !data )
         return;
 
-        if( obj.constructor === Widget )
+        for( let obj of data )
         {
-            obj.set( value );
+            if( obj.constructor === Widget )
+            {
+                obj.set( value );
+            }else
+            {
+                obj[signal_name].call(obj);
+            }
         }
     }
 
-    LX.trigger = trigger;
+    LX.emit = emit;
+
+    function addSignal( name, obj, callback )
+    {
+        obj[name] = callback;
+
+        if( !LX.signals[ name ] )
+            LX.signals[ name ] = [];
+
+        LX.signals[ name ].push( obj );
+    }
+
+    LX.addSignal = addSignal;
 
     class Area {
 
@@ -489,14 +507,14 @@
             let element = content.root ? content.root : content;
 
             // E.g. menubar has predefined height
-            if(element.style.height == "100%")
-            {
-                let size = 0;
-                for( var el of this.root.children ) {
-                    size += el.offsetHeight;
-                }
-                element.style.height = "calc( 100% - " + size + "px )";
-            }
+            // if(element.style.height == "100%")
+            // {
+            //     let size = 0;
+            //     for( var el of this.root.children ) {
+            //         size += el.offsetHeight;
+            //     }
+            //     element.style.height = "calc( 100% - " + size + "px )";
+            // }
 
             this.root.appendChild( element );
         }
@@ -629,11 +647,11 @@
             function inner_mousemove(e)
             {
                 if(that.type == "horizontal") {
-                    that.#moveSplit(last_pos[0] - e.x);
+                    that.moveSplit(last_pos[0] - e.x);
                         
                 }
                 else {
-                    that.#moveSplit(last_pos[1] - e.y);
+                    that.moveSplit(last_pos[1] - e.y);
                 }
                 
                 last_pos[0] = e.x;
@@ -791,6 +809,7 @@
                         LX.addContextMenu(null, event, function(c) {
                             for( let o of b.options )
                                 c.add(o, () => {
+                                    if( b.name == o ) return;
                                     b.name = o;
                                     b.callback( o );
                                     refresh_panel();
@@ -800,8 +819,15 @@
                 }
 
                 overlayPanel.addButton( null, b.name, function(value, event) {
-                    if(b.selectable) 
-                        b.selected = !b.selected;
+                    if(b.selectable) {
+                        if( b.group ) {
+                            let _prev = b.selected;
+                            b.group.forEach( sub => sub.selected = false );
+                            b.selected = !_prev;
+                        }
+                        else
+                            b.selected = !b.selected;
+                    }
                     callback( value, event );
                 }, _options );
             }
@@ -816,6 +842,7 @@
                     {
                         for( let sub of b )
                         {
+                            sub.group = b;
                             add_button(sub, true);
                         }
                     }else
@@ -845,57 +872,16 @@
 
         /**
          * @method addTabs
-         * @param {Array} tabs Tabs info
          * @param {*} options:
          */
 
-        addTabs( tabs, options = {} ) {
+        addTabs( options = {} ) {
 
-            console.assert( tabs.constructor == Array && tabs.length );
-
-            let container = document.createElement('div');
-            container.className = "lexareatabs";
-
-            const refresh = function() {
-
-                container.innerHTML = "";
-
-                for( let t of tabs )
-                {
-                    let tab = document.createElement('span');
-                    tab.className = "lexareatab" + (t.selected ? " selected" : "");
-                    tab.innerHTML = t.name;
-                    container.appendChild(tab);
-                    tab.addEventListener("click", e => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        container.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
-                        tab.classList.toggle('selected');
-                        
-                        tabArea.root.childNodes.forEach( c => c.style.display = 'none');
-                        var el = tabArea.root.querySelector("#" + t.id);
-                        if( el ) el.style.display = "block";
-                    });
-                }
-            }
-
-            refresh();
-
-            // Hack to get content height
-            let d = document.createElement('div');
-            d.appendChild(container);
-            document.body.appendChild(d);
-            const height = container.offsetHeight;
-            d.remove();
-
-            this.split({type: 'vertical', sizes: [height, null], resize: false});
-            this.sections[0].attach( container );
-
-            let tabArea = this.sections[1];
-            return tabArea;
+            const tabs = new Tabs( this, options );
+            return tabs;
         }
 
-        #moveSplit( dt ) {
+        moveSplit( dt ) {
 
             if(!this.type)
                 throw("No split area");
@@ -913,6 +899,7 @@
                 var size = (a2.root.offsetWidth + dt);
 				if(size < min_size)
 					size = min_size;
+
 				a1.root.style.width = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
 				a1.root.style.width = "-webkit-calc( 100% - " + size + "px " + splitinfo + " )";
 				a1.root.style.width = "calc( 100% - " + size + "px " + splitinfo + " )";
@@ -948,6 +935,122 @@
     };
 
     LX.Area = Area;
+
+     /**
+     * @class Tabs
+     */
+
+    class Tabs {
+
+        static TAB_SIZE = 29;
+        static TAB_ID   = 0;
+
+        constructor( area, options = {} )  {
+
+            let container = document.createElement('div');
+            container.className = "lexareatabs";
+
+            let that = this;
+
+            container.addEventListener("dragenter", function(e) {
+                e.preventDefault(); // Prevent default action (open as link for some elements)
+                this.classList.add("dockingtab");
+            });
+
+            container.addEventListener("dragleave", function(e) {
+                e.preventDefault(); // Prevent default action (open as link for some elements)
+                this.classList.remove("dockingtab");
+            });
+
+            container.addEventListener("drop", function(e) {
+                e.preventDefault(); // Prevent default action (open as link for some elements)
+
+                const tab_id = e.dataTransfer.getData("source");
+                const el = document.getElementById(tab_id);
+                if( !el ) return;
+
+                // Append tab and content
+                this.appendChild( el );
+                const content = document.getElementById(tab_id + "_content");
+                that.area.attach( content );
+                this.classList.remove("dockingtab");
+
+                // Change tabs instance
+                LX.emit( "@on_tab_docked", el.instance );
+                el.instance = that;
+
+                // Show on drop
+                el.click();
+                
+                // Store info
+                that.tabs[ el.dataset["name"] ] = content;
+            });
+
+            area.root.classList.add( "lexareatabscontent" );
+
+            area.split({type: 'vertical', sizes: [Tabs.TAB_SIZE, null], resize: false});
+            area.sections[0].attach( container );
+
+            this.area = area.sections[1];
+            this.selected = null;
+            this.root = container;
+            this.tabs = {};
+        }
+
+        add( name, content, selected, callback ) {
+
+            if( selected )
+                this.root.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
+            
+            selected = !Object.keys( this.tabs ).length ? true : selected;
+            content = content.root ? content.root : content;
+
+            // Create tab
+            let tabEl = document.createElement('span');
+            tabEl.dataset["name"] = name;
+            tabEl.className = "lexareatab" + (selected ? " selected" : "");
+            tabEl.innerHTML = name;
+            tabEl.id = name.replace(/\s/g, '') + Tabs.TAB_ID++;
+            tabEl.selected = selected;
+            tabEl.instance = this;
+            content.id = tabEl.id + "_content";
+
+            LX.addSignal( "@on_tab_docked", tabEl, function() {
+                if( this.parentElement.childNodes.length == 1 ){
+                    this.parentElement.childNodes[0].click(); // single tab!!
+                } 
+            } );
+            
+            tabEl.addEventListener("click", e => {
+                e.preventDefault();
+                e.stopPropagation();
+                // Manage selected
+                tabEl.parentElement.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
+                tabEl.classList.toggle('selected');
+                // Manage visibility
+                tabEl.instance.area.root.childNodes.forEach( c => c.style.display = 'none');
+                content.style.display = "block";
+            });
+            
+            tabEl.setAttribute('draggable', true);
+            tabEl.addEventListener("dragstart", function(e) {
+                if( this.parentElement.childNodes.length == 1 ){
+                    e.preventDefault();
+                    return;
+                } 
+                e.dataTransfer.setData("source", e.target.id);
+            });
+            
+            // Attach content
+            this.root.prepend(tabEl);
+            this.area.attach( content );
+            this.tabs[ name ] = content;
+
+            if( callback ) callback.call(this, this.area.root.getBoundingClientRect());
+        }
+    }
+
+    LX.Tabs = Tabs;
 
     /**
      * @class Menubar
@@ -1304,23 +1407,24 @@
         
         static NONE         = 0;
         static TEXT         = 1;
-        static BUTTON       = 2;
-        static DROPDOWN     = 3;
-        static CHECKBOX     = 4;
-        static COLOR        = 5;
-        static NUMBER       = 6;
-        static TITLE        = 7;
-        static VECTOR       = 8;
-        static TREE         = 9;
-        static PROGRESS     = 10;
-        static FILE         = 11;
-        static LAYERS       = 12;
-        static ARRAY        = 13;
-        static LIST         = 14;
-        static TAGS         = 15;
-        static CURVE        = 16;
-        static CUSTOM       = 17;
-        static SEPARATOR    = 18;
+        static TEXTAREA     = 2;
+        static BUTTON       = 3;
+        static DROPDOWN     = 4;
+        static CHECKBOX     = 5;
+        static COLOR        = 6;
+        static NUMBER       = 7;
+        static TITLE        = 8;
+        static VECTOR       = 9;
+        static TREE         = 10;
+        static PROGRESS     = 11;
+        static FILE         = 12;
+        static LAYERS       = 13;
+        static ARRAY        = 14;
+        static LIST         = 15;
+        static TAGS         = 16;
+        static CURVE        = 17;
+        static CUSTOM       = 18;
+        static SEPARATOR    = 19;
 
         #no_context_types = [
             Widget.BUTTON,
@@ -1383,6 +1487,7 @@
 
             switch(this.type) {
                 case Widget.TEXT: return "Text";
+                case Widget.TEXTAREA: return "TextArea";
                 case Widget.BUTTON: return "Button";
                 case Widget.DROPDOWN: return "Dropdown";
                 case Widget.CHECKBOX: return "Checkbox";
@@ -1985,84 +2090,10 @@
             }
         }
 
-        /**
-         * @method tab
-         * @param {String} name Name of the branch/section
-         * @param {*} options 
-         * id: Id of the branch
-         * className: Add class to the branch
-         * closed: Set branch collapsed/opened [false]
-         * icon: Set branch icon (Fontawesome class e.g. "fa-solid fa-skull")
-         * filter: Allow filter widgets in branch by name [false]
-         */
-
-        // tab( name, options = {} ) {
-
-        //     if(!this.current_branch)
-        //     throw("Open the first tab using 'Panel.branch()'!");
-
-        //     // Create new branch
-        //     var branch = new Branch(name, options);
-        //     branch.panel = this;
-        //     this.branches.push( branch );
-
-        //     if(!this.current_tabs) {
-        //         this.current_tabs = [ this.current_branch.name ];
-        //         this.tab_parent = this.current_branch;
-        //     }
-
-        //     this.current_tabs.push( name );
-
-        //     // Set header to tabs
-        //     let title = this.tab_parent.root.querySelector(".lexbranchtitle");
-        //     title.classList.add('wtabs');
-        //     title.innerHTML = "";
-
-        //     // This might be called innecessarily more times...
-        //     title.removeEventListener("click", this.tab_parent.onclick);
-
-        //     for( let i = 0; i < this.current_tabs.length; ++i )
-        //     {
-        //         let branch_name = this.current_tabs[i];
-        //         let tab = document.createElement('span');
-        //         tab.className = i == 0 ? "first selected" : "";
-        //         tab.innerText = branch_name;
-        //         title.appendChild(tab);
-
-        //         tab.addEventListener("click", e => {
-        //             e.preventDefault();
-        //             e.stopPropagation();
-        //             title.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
-        //             tab.classList.toggle('selected');
-        //             let parent = title.parentElement;
-        //             // Hide Contents
-        //             parent.querySelectorAll('.lexbranchcontent').forEach( s => s.style.display = 'none');
-        //             // Show branch
-        //             const nameid = branch_name.replace(/\s/g, '');
-        //             parent.querySelector("#" + nameid).style.display = "";
-        //         });
-        //     }
-
-        //     // Append content to last branch
-        //     let content = branch.root.querySelector(".lexbranchcontent");
-        //     this.tab_parent.root.appendChild( content );
-        //     content.style.display = 'none';
-
-        //     // Set as current
-        //     this.current_branch = branch;
-
-        //     // Add widget filter
-        //     if(options.filter) {
-        //         this.#add_filter( options.filter, {callback: this.#search_widgets.bind(this, branch.name)} );
-        //     }
-        // }
-
         merge() {
 
             this.branch_open = false;
             this.current_branch = null;
-            this.current_tabs = null;
-            this.tab_parent = null;
         }
 
         #pick( arg, def ) {
@@ -2123,7 +2154,7 @@
 
                 if(options.signal)
                 {
-                    LX.signals[ options.signal ] = widget;
+                    LX.addSignal( options.signal, widget );
                 }
 
                 this.widgets[ name ] = widget;
@@ -2396,10 +2427,99 @@
 
             let container = document.createElement('div');
             container.className = "lextext";
-            container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 8px )";
+            container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
             container.style.display = "flex";
 
             let wValue = document.createElement('input');
+            wValue.value = wValue.iValue = value || "";
+            wValue.style.width = "100%";
+
+            if(options.disabled ?? false) wValue.setAttribute("disabled", true);
+            if(options.placeholder) wValue.setAttribute("placeholder", options.placeholder);
+
+            var resolve = (function(val, event) {
+                let btn = element.querySelector(".lexwidgetname .lexicon");
+                if(btn) btn.style.display = (val != wValue.iValue ? "block" : "none");
+                this._trigger( new IEvent(name, val, event), callback );
+            }).bind(this);
+
+            const trigger = options.trigger ?? 'default';
+
+            if(trigger == 'default')
+            {
+                wValue.addEventListener("keyup", function(e){
+                    if(e.key == 'Enter')
+                        resolve(e.target.value, e);
+                });
+                wValue.addEventListener("focusout", function(e){
+                    resolve(e.target.value, e);
+                });
+            }
+            else if(trigger == 'input')
+            {
+                wValue.addEventListener("input", function(e){
+                    resolve(e.target.value, e);
+                });
+            }
+
+            if(options.icon)
+            {
+                let icon = document.createElement('a');
+                icon.className = "inputicon " + options.icon;
+                container.appendChild(icon);
+            }
+
+            container.appendChild(wValue);
+            element.appendChild(container);
+            
+            // Remove branch padding and margins
+            if(!widget.name) {
+                element.className += " noname";
+                container.style.width = "100%";
+            }
+        }
+
+        /**
+         * @method addTextArea
+         * @param {String} name Widget name
+         * @param {String} value Text Area value
+         * @param {Function} callback Callback function on change
+         * @param {*} options:
+         * disabled: Make the widget disabled [false]
+         * placeholder: Add input placeholder
+         * trigger: Choose onchange trigger (default, input) [default]
+         * inputWidth: Width of the text input
+         */
+
+        addTextArea( name, value, callback, options = {} ) {
+
+            let widget = this.create_widget(name, Widget.TEXTAREA, options);
+            widget.onGetValue = () => {
+                return wValue.value;
+            };
+            widget.onSetValue = (new_value) => {
+                wValue.value = new_value;
+                Panel.#dispatch_event(wValue, "focusout");
+            };
+            let element = widget.domEl;
+
+            // Add reset functionality
+            if(widget.name && !(options.noreset ?? false)) {
+                Panel.#add_reset_property(element.domName, function() {
+                    wValue.value = wValue.iValue;
+                    this.style.display = "none";
+                    Panel.#dispatch_event(wValue, "focusout");
+                });
+            }
+            
+            // Add widget value
+
+            let container = document.createElement('div');
+            container.className = "lextextarea";
+            container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
+            container.style.display = "flex";
+
+            let wValue = document.createElement('textarea');
             wValue.value = wValue.iValue = value || "";
             wValue.style.width = "100%";
 
@@ -3622,7 +3742,13 @@
                         if(e.shiftKey) mult = 10;
                         else if(e.altKey) mult = 0.1;
 
-                        if( !lock_icon.locked ) {
+                        if( lock_icon.locked )
+                        {
+                            for( let v of element.querySelectorAll(".vecinput") ) {
+                                v.value = (+v.valueAsNumber + mult * dt).toPrecision(5);
+                                Panel.#dispatch_event(v, "change");
+                            }
+                        } else {
                             vecinput.value = (+vecinput.valueAsNumber + mult * dt).toPrecision(5);
                             Panel.#dispatch_event(vecinput, "change");
                         }
@@ -3952,7 +4078,6 @@
             let container = document.createElement('div');
             container.className = "lextabscontainer";
             if( !vertical ) container.className += " horizontal";
-            container.style.height = (tabs.length * 34) + "px";
 
             let tabContainer = document.createElement("div");
             tabContainer.className = "tabs";
@@ -3989,7 +4114,7 @@
 
                 // push to tab space
                 this.queue( infoContainer );
-                tab.callback( this );
+                tab.callback( this, infoContainer );
             }
             
             // add separator to last opened tab
@@ -4307,17 +4432,20 @@
                 root.appendChild(titleDiv);
             }
 
-            var closeButton = document.createElement('a');
-            closeButton.className = "lexdialogcloser fa-solid fa-xmark";
-            closeButton.title = "Close";
-
-            closeButton.addEventListener('click', e => {
-                root.remove();
-                if(modal)
-                    LX.modal.toggle();
-            });
-
-            titleDiv.appendChild(closeButton);
+            if( options.closable ?? true)
+            {
+                var closeButton = document.createElement('a');
+                closeButton.className = "lexdialogcloser fa-solid fa-xmark";
+                closeButton.title = "Close";
+    
+                closeButton.addEventListener('click', e => {
+                    root.remove();
+                    if(modal)
+                        LX.modal.toggle();
+                });
+    
+                titleDiv.appendChild(closeButton);
+            }
 
             const panel = new Panel();
             panel.root.classList.add('lexdialogcontent');
@@ -4363,8 +4491,43 @@
         constructor( title, callback, options = {} ) {
             
             options.draggable = false;
+            options.closable = false;
 
             super( title, callback, options );
+
+            let offsetX;
+            let dockedLeft = false;
+            let dockedRight = true;
+            let moving = false;
+            let that = this;
+    
+            this.root.setAttribute('draggable', true);
+            this.root.addEventListener("dragstart", function(e) {
+                const rect = e.target.getBoundingClientRect();
+                offsetX = e.clientX - rect.x;
+                // Remove image when dragging
+                var img = new Image();
+                img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+                e.dataTransfer.setDragImage(img, 0, 0);
+                e.dataTransfer.effectAllowed = "move";
+                e.dataTransfer.setData('branch_title', e.target.querySelector(".lexdialogtitle").innerText);
+                e.dataTransfer.setData('dialog_id', e.target.id);
+            });
+            this.root.addEventListener("drag", function(e) {
+                if(moving) return;
+                e.preventDefault();
+                this.style.left = e.clientX - offsetX + 'px';
+                if( dockedRight && e.clientX < window.innerWidth * 0.85 ) {
+                    this.style.left = '0px';
+                    moving = true;
+                    setTimeout( () => { dockedLeft = true; dockedRight = false; moving = false; }, 500 );
+                }
+                if(dockedLeft && e.clientX > window.innerWidth * 0.15 ) {
+                    moving = true;
+                    this.style.left = (window.innerWidth - that.root.offsetWidth - 6) + "px";
+                    setTimeout( () => { dockedLeft = false; dockedRight = true; moving = false; }, 500 );
+                }
+            }, false );
 
             // custom 
             this.root.classList.add( "pocket" );
