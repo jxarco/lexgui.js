@@ -1167,7 +1167,7 @@
 
             }else {
                 let boundingBox = this.canvas.getBoundingClientRect()
-                if(e.y < boundingBox.top || e.y > boundingBox.bottom)
+                if(e.y < boundingBox.top || e.y > boundingBox.bottom) 
                     return;
                 // Check exact track keyframe
                 if(!discard && track) {
@@ -1175,6 +1175,7 @@
                     
                 } 
                 else {
+                    this.unSelectAllKeyFrames();
                     let x = e.offsetX;
                     let y = e.offsetY - this.topMargin;
                     for( const b of this.buttonsDrawn ) {
@@ -1197,7 +1198,6 @@
         }
 
         onMouseDown( e, time ) {
-
             let localX = e.localX;
             let localY = e.localY;
             let track = e.track;
@@ -1307,6 +1307,92 @@
             else {
                 removeHover();
             }
+        }
+
+        showContextMenu( e ) {
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            let actions = [];
+            //let track = this.NMFtimeline.clip.tracks[0];
+            if(this.lastKeyFramesSelected && this.lastKeyFramesSelected.length) {
+                if(this.lastKeyFramesSelected.length == 1 && this.clipboard && this.clipboard.value)
+                {
+                    actions.push(
+                        {
+                            title: "Paste",// + " <i class='bi bi-clipboard-fill float-right'></i>",
+                            callback: () => {
+                                let [id, trackIdx, keyIdx] = this.lastKeyFramesSelected[0];
+                                    this.pasteKeyFrameValue(e, this.tracksPerItem[id][trackIdx], keyIdx);
+                            }
+                        }
+                    )
+                }
+                actions.push(
+                    {
+                        title: "Copy",// + " <i class='bi bi-clipboard-fill float-right'></i>",
+                        callback: () => {
+                            let toCopy = {};
+                            for(let i = 0; i < this.lastKeyFramesSelected.length; i++){
+                                let [id, trackIdx, keyIdx] = this.lastKeyFramesSelected[i];
+                                if(toCopy[this.tracksPerItem[id][trackIdx].clipIdx]) {
+                                    toCopy[this.tracksPerItem[id][trackIdx].clipIdx].idxs.push(keyIdx);
+                                } else {
+                                    toCopy[this.tracksPerItem[id][trackIdx].clipIdx] = {idxs : [keyIdx]};
+                                    toCopy[this.tracksPerItem[id][trackIdx].clipIdx].track = this.tracksPerItem[id][trackIdx]
+                                }                
+                                if(i == 0) {
+                                    this.copyKeyFrameValue(this.tracksPerItem[id][trackIdx], keyIdx)
+                                }
+                            }
+                            for(let clipIdx in toCopy) {
+                                
+                                this.copyKeyFrames(toCopy[clipIdx].track, toCopy[clipIdx].idxs)
+                            }
+                           
+                        }
+                    }
+                )
+                actions.push(
+                    {
+                        title: "Delete",// + " <i class='bi bi-trash float-right'></i>",
+                        callback: () => {
+                            let keyframesToDelete = this.lastKeyFramesSelected;
+                            for(let i = 0; i < keyframesToDelete.length; i++){
+                                this.deleteKeyFrame(e, keyframesToDelete [1], keyframesToDelete[2])
+                            }
+                            this.optimizeTracks();
+                        }
+                    }
+                )
+            }
+            else{
+                
+                if(this.clipboard && this.clipboard.keyframes)
+                {
+                    actions.push(
+                        {
+                            title: "Paste",// + " <i class='bi bi-clipboard-fill float-right'></i>",
+                            callback: () => {
+                                let currentTime = this.currentTime;
+                                for(let clipIdx in this.clipboard.keyframes) {
+                                    let indices = Object.keys( this.clipboard.keyframes[clipIdx].values)
+                                    this.pasteKeyFrames(e, clipIdx, indices);
+                                    this.currentTime = currentTime;
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+            
+            LX.addContextMenu("Options", e, (m) => {
+                for(let i = 0; i < actions.length; i++) {
+                    m.add(actions[i].title,  actions[i].callback )
+                }
+            });
+
         }
 
         onDrawContent( ctx, timeStart, timeEnd ) {
@@ -1501,7 +1587,7 @@
             return this.clipboard != null;
         }
 
-        copyKeyFrame( track, index ) {
+        copyKeyFrameValue( track, index ) {
 
             // 1 element clipboard by now
 
@@ -1510,15 +1596,40 @@
             for(let i = start; i < start + track.dim; ++i)
                 values.push( this.animationClip.tracks[ track.clipIdx ].values[i] );
 
-            this.clipboard = {
+            if(!this.clipboard)
+                this.clipboard = {};
+
+            this.clipboard.value = {
                 type: track.type,
                 values: values
             };
         }
 
+        copyKeyFrames( track, indices ) {
+
+            let clipIdx = track.clipIdx;
+            if(!this.clipboard)
+                this.clipboard = {};
+            if(!this.clipboard.keyframes) {
+                this.clipboard.keyframes = {};
+            }
+                
+            this.clipboard.keyframes[clipIdx] = { track: track, values:{} }; 
+            // 1 element clipboard by now
+            for(let idx = 0; idx < indices.length; idx++ ){
+                let keyIdx = indices[idx] ;
+                let values = [];
+                let start = keyIdx * track.dim;
+                for(let i = start; i < start + track.dim; ++i)
+                    values.push( this.animationClip.tracks[ clipIdx ].values[i] );
+                
+                this.clipboard.keyframes[clipIdx].values[indices[idx]] =  values;
+            };
+        }
+
         #paste( track, index ) {
 
-            let clipboardInfo = this.clipboard;
+            let clipboardInfo = this.clipboard.value;
 
             if(clipboardInfo.type != track.type){
                 return;
@@ -1537,7 +1648,7 @@
             track.edited[ index ] = true;
         }
 
-        pasteKeyFrame( e, track, index ) {
+        pasteKeyFrameValue( e, track, index ) {
 
             this.saveState(track.clipIdx);
 
@@ -1556,7 +1667,36 @@
             }
         }
 
-        addKeyFrame( track ) {
+        pasteKeyFrames( e, clipIdx, indices ) {
+            
+            this.saveState(clipIdx);
+
+            // Copy to current key
+            for(let i = 0; i < indices.length; i++) {
+                let value = this.clipboard.keyframes[clipIdx].values[indices[i]];
+                if(typeof value == 'number')
+                    value = [value];
+                if(i > 0) {
+                    let delta = this.animationClip.tracks[clipIdx].times[indices[i]] - this.animationClip.tracks[clipIdx].times[indices[i-1]];
+                    this.currentTime += delta;
+
+                }
+                this.addKeyFrame( this.clipboard.keyframes[clipIdx].track, value);
+            }
+            
+            if(!e.multipleSelection)
+            return;
+            
+            // Don't want anything after this
+            this.clearState();
+
+            // Copy to every selected key
+            for(let [name, idx, keyIndex] of this.lastKeyFramesSelected) {
+                this.#paste( this.tracksPerItem[name][idx], keyIndex );
+            }
+        }
+
+        addKeyFrame( track, value ) {
 
             // Update animationClip information
             const clipIdx = track.clipIdx;
@@ -1591,41 +1731,56 @@
             }
 
             this.animationClip.tracks[clipIdx].times = new Float32Array( timesArray );
-            
-            // Get mid values
-            const items = this.onGetSelectedItems();
+           
+            // Add values
+            let valuesArray = [];
+            let dim = value.length;
+            this.animationClip.tracks[clipIdx].values.forEach( (a, b) => {
+                if(b == newIdx * dim) {
+                    for( let i = 0; i < dim; ++i )
+                        valuesArray.push(value[i]);
+                }
+                valuesArray.push(a);
+            } );
 
-            for(let i = 0; i < items.length; i++) {
-                let item = items[i];
-                let lerpValue = item[ track.type ].toArray();
-            
-                // Add values
-                let valuesArray = [];
-                this.animationClip.tracks[clipIdx].values.forEach( (a, b) => {
-                    if(b == newIdx * track.dim) {
-                        for( let i = 0; i < track.dim; ++i )
-                            valuesArray.push(lerpValue[i]);
-                    }
-                    valuesArray.push(a);
-                } );
-    
-                if(lastIndex) {
-                    for( let i = 0; i < track.dim; ++i )
-                        valuesArray.push(lerpValue[i]);
-                }
-    
-                this.animationClip.tracks[clipIdx].values = new Float32Array( valuesArray );
-    
-                // Move the other's key properties
-                for(let i = (this.animationClip.tracks[clipIdx].times.length - 1); i > newIdx; --i) {
-                    track.edited[i - 1] ? track.edited[i] = track.edited[i - 1] : 0;
-                }
-                
-                // Reset this key's properties
-                track.hovered[newIdx] = undefined;
-                track.selected[newIdx] = undefined;
-                track.edited[newIdx] = undefined;
+            if(lastIndex) {
+                for( let i = 0; i < dim; ++i )
+                    valuesArray.push(value[i]);
             }
+            // // Get mid values
+            // const items = this.selectedItems;
+
+            // for(let i = 0; i < items.length; i++) {
+            //     let item = items[i];
+            //     let lerpValue = item[ track.type ].toArray();
+            
+            //     // Add values
+            //     let valuesArray = [];
+            //     this.animationClip.tracks[clipIdx].values.forEach( (a, b) => {
+            //         if(b == newIdx * track.dim) {
+            //             for( let i = 0; i < track.dim; ++i )
+            //                 valuesArray.push(lerpValue[i]);
+            //         }
+            //         valuesArray.push(a);
+            //     } );
+    
+            //     if(lastIndex) {
+            //         for( let i = 0; i < track.dim; ++i )
+            //             valuesArray.push(lerpValue[i]);
+            //     }
+    
+            //     this.animationClip.tracks[clipIdx].values = new Float32Array( valuesArray );
+    
+            //     // Move the other's key properties
+            //     for(let i = (this.animationClip.tracks[clipIdx].times.length - 1); i > newIdx; --i) {
+            //         track.edited[i - 1] ? track.edited[i] = track.edited[i - 1] : 0;
+            //     }
+                
+            //     // Reset this key's properties
+            //     track.hovered[newIdx] = undefined;
+            //     track.selected[newIdx] = undefined;
+            //     track.edited[newIdx] = undefined;
+            // }
            
 
             // Update animation action interpolation info
@@ -1861,6 +2016,8 @@
             let currentSelection = [name, track.idx, keyFrameIndex];
             if(!multiple)
                 this.selectKeyFrame(t, currentSelection, keyFrameIndex);
+            else
+                this.lastKeyFramesSelected.push( currentSelection );
             if( this.onSelectKeyFrame && this.onSelectKeyFrame(e, currentSelection, keyFrameIndex)) {
                 // Event handled
                 return;
@@ -1870,7 +2027,7 @@
             return;
 
             // Select if not handled
-            this.lastKeyFramesSelected.push( currentSelection );
+            
             t.selected[keyFrameIndex] = true;
 
             if( !multiple && this.onSetTime )
@@ -2633,8 +2790,8 @@
                         track.edited[keyIndex] = true;
                         this.animationClip.tracks[ track.clipIdx ].values[ keyIndex ] = value;
                     }
-                    return
                 }
+                return
                 
                
             }
@@ -2994,7 +3151,7 @@
 
         #paste( track, index ) {
 
-            let clipboardInfo = this.clipboard;
+            let clipboardInfo = this.clipboard.value;
 
             if(clipboardInfo.type != track.type){
                 return;
@@ -3032,7 +3189,7 @@
             }
         }
 
-        addKeyFrame( track ) {
+        addKeyFrame( track, value ) {
 
             // Update animationClip information
             const clipIdx = track.clipIdx;
@@ -3069,11 +3226,10 @@
             this.animationClip.tracks[clipIdx].times = new Float32Array( timesArray );
             
             // Get mid values
-            const items = this.onGetSelectedItems();
+            const values = value != undefined ? [value] : this.onGetSelectedItem()
 
-            for(let i = 0; i < items.length; i++) {
-                let item = items[i];
-                let lerpValue = item[ track.type ].toArray();
+            for(let i = 0; i < values.length; i++) {
+                let lerpValue = values[i];
             
                 // Add values
                 let valuesArray = [];
