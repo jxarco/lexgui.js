@@ -65,13 +65,7 @@
             this.duration = null;
             this.position = [options.x ?? 0, options.y ?? 0];
             this.size = [ options.width ?? 400, options.height ?? 100];
-
-            if(options.width) 
-                this.canvas.width = this.size[0];
-
-            if(options.height)
-                this.canvas.height = this.size[1];
-
+            
             this.currentScroll = 0; //in percentage
             this.currentScrollInPixels = 0; //in pixels
             this.scrollableHeight = this.size[1]; //true height of the timeline content
@@ -85,18 +79,21 @@
             this.root = document.createElement('div');
             this.root.className = 'lextimeline';
 
-            this.updateHeader();
-
-            let header_offset = 36;
-            let area = new LX.Area({height: "calc( 100% - " + header_offset + "px )"});
+            this.header_offset = 36;
+            
+            let width = options.width ? options.width : null;
+            let height = options.height ? options.height - this.header_offset : null;
+            let area = new LX.Area( {width: width || "100%", height: height || "100%"});
             area.split({ type: "horizontal", sizes: ["20%", "80%"]});
             this.content_area = area;
             let [left, right] = area.sections;
             
-            this.#updateLeftPanel(left);
-
-            right.root.appendChild(this.canvas)
+            
+            right.root.appendChild(this.canvas);
             this.canvasArea = right;
+            
+            this.updateHeader();
+            this.#updateLeftPanel(left);
             this.root.appendChild(area.root);
 
             if(!options.canvas && this.name != '') {
@@ -308,15 +305,15 @@
             this.#updateLeftPanel();
         }
 
-        drawTimeInfo (w, h) {
+        drawTimeInfo (w, h = this.topMargin) {
 
-            var ctx = this.canvas.getContext("2d");
-            
+            let ctx = this.canvas.getContext("2d");
+            let canvas = this.canvas;
             // Draw time markers
-            var startx = Math.round( this.timeToX( this.startTime ) ) + 0.5;
-	        var endx = Math.round( this.timeToX( this.endTime ) ) + 0.5;
-            var tick_time = this.secondsToPixels > 300 ? 0.5 : 1;
-            var h = this.topMargin;
+            let startx = Math.round( this.timeToX( this.startTime ) ) + 0.5;
+	        let endx = Math.round( this.timeToX( this.endTime ) ) + 0.5;
+            let tick_time = this.secondsToPixels > 300 ? 0.5 : 1;
+            
 
             ctx.save();
 
@@ -328,9 +325,9 @@
                 ctx.strokeStyle = "#AAA";
                 ctx.globalAlpha = 0.5 * (1.0 - LX.UTILS.clamp( 100 / this.secondsToPixels, 0, 1));
                 ctx.beginPath();
-                for( var time = this.startTime; time <= this.endTime; time += 1 / this.framerate )
+                for( let time = this.startTime; time <= this.endTime; time += 1 / this.framerate )
                 {
-                    var x = this.timeToX( time );
+                    let x = this.timeToX( time );
                     if(x < this.session.left_margin)
                         continue;
                     ctx.moveTo(Math.round(x) + 0.5, h * 0.75);
@@ -343,16 +340,16 @@
             ctx.globalAlpha = 0.5;
             ctx.strokeStyle = "#ADF";
             ctx.beginPath();
-            var times = this._times;
+            let times = this._times;
             this._times.length = 0;
-            for( var time = this.startTime; time <= this.endTime; time += tick_time)
+            for( let time = this.startTime; time <= this.endTime; time += tick_time)
             {
-                var x = this.timeToX( time );
+                let x = this.timeToX( time );
 
                 if(x < this.session.left_margin)
                     continue;
 
-                var is_tick = time % 5 == 0;
+                let is_tick = time % 5 == 0;
                 if(is_tick ||  this.secondsToPixels > 70 ) {
 
                     times.push([x,time]);
@@ -362,7 +359,7 @@
 
             }
 
-            var x = startx;
+            let x = startx;
             if(x < this.session.left_margin)
                 x = this.session.left_margin;
             ctx.moveTo( x, h - 0.5);
@@ -376,7 +373,7 @@
             ctx.fillStyle = "#888";
             for(var i = 0; i < times.length; ++i)
             {
-                var time = times[i][1];
+                let time = times[i][1];
                 ctx.fillText( time == (time|0) ? time : time.toFixed(1), times[i][0],10);
             }
 
@@ -385,22 +382,22 @@
 
         drawTracksBackground(w, h) {
 
-            var canvas = this.canvas;
-            var ctx = canvas.getContext("2d");
-            var duration = this.duration;
+            let canvas = this.canvas;
+            let ctx = canvas.getContext("2d");
+            let duration = this.duration;
         
             //content
-            var margin = this.session.left_margin;
-            var timeline_height = this.topMargin;
-            var line_height = this.trackHeight;
+            let margin = this.session.left_margin;
+            let timeline_height = this.topMargin;
+            let line_height = this.trackHeight;
         
             //fill track lines
-            var w = canvas.width;
-            var max_tracks = Math.ceil( h - timeline_height / line_height );
+            w = w || canvas.width;
+            let max_tracks = Math.ceil( h - timeline_height / line_height );
 
             ctx.save();
 
-            for(var i = 0; i < max_tracks; ++i)
+            for(let i = 0; i < max_tracks; ++i)
             {
                 ctx.fillStyle = i % 2 == 0 ? "#222A" : "#2A2A2C";
                 ctx.fillRect(0, timeline_height + i * line_height, w, line_height );
@@ -416,7 +413,7 @@
             ctx.strokeStyle = "#444";
             ctx.beginPath();
         
-            var pos = this.timeToX( 0 );
+            let pos = this.timeToX( 0 );
             if(pos < margin)
                 pos = margin;
             ctx.moveTo( pos + 0.5, timeline_height);
@@ -437,7 +434,7 @@
 
         draw( currentTime = this.currentTime, rect ) {
 
-            var ctx = this.canvas.getContext("2d");
+            let ctx = this.canvas.getContext("2d");
             ctx.globalAlpha = 1.0;
             if(!rect)
                 rect = [0, ctx.canvas.height - ctx.canvas.height , ctx.canvas.width, ctx.canvas.height ];
@@ -445,9 +442,9 @@
             this.canvas = ctx.canvas;
             this.position[0] = rect[0];
             this.position[1] = rect[1];
-            var w = this.size[0] = rect[2];
-            var h = this.size[1] = rect[3];
-            var timelineHeight = this.size[1];
+            let w = rect[2];
+            let h = rect[3];
+            let timelineHeight = this.size[1];
             this.currentTime = currentTime;
             this.currentScrollInPixels = this.scrollableHeight <= h ? 0 : (this.currentScroll * (this.scrollableHeight - timelineHeight));
 
@@ -469,16 +466,16 @@
 
             // Background
             ctx.fillStyle = "#222";
-	        ctx.fillRect(0,0, canvas.width, canvas.height );
+	        ctx.fillRect(0,0, this.canvas.width, this.canvas.height );
 
             this.drawTimeInfo(w);
 
             this.drawTracksBackground(w, h);
 
             // Current time marker vertical line
-            var true_pos = Math.round( this.timeToX( this.currentTime ) ) + 0.5;
-            var quant_current_time = Math.round( this.currentTime * this.framerate ) / this.framerate;
-            var pos = Math.round( this.timeToX( quant_current_time ) ) + 0.5; //current_time is quantized
+            let true_pos = Math.round( this.timeToX( this.currentTime ) ) + 0.5;
+            let quant_current_time = Math.round( this.currentTime * this.framerate ) / this.framerate;
+            let pos = Math.round( this.timeToX( quant_current_time ) ) + 0.5; //current_time is quantized
             if(pos >= this.session.left_margin)
             {
                 // ctx.strokeStyle = "#ABA";
@@ -490,7 +487,7 @@
                 ctx.strokeStyle = ctx.fillStyle = "#ADF";
                 ctx.globalAlpha = 1;
                 ctx.beginPath();
-                ctx.moveTo(true_pos, 0); ctx.lineTo(true_pos, ctx.canvas.height);//line
+                ctx.moveTo(true_pos, 0); ctx.lineTo(true_pos, this.canvas.height);//line
                 ctx.stroke();
                 ctx.beginPath();
                 ctx.moveTo(true_pos - 4, 0); ctx.lineTo(true_pos + 4, 0); ctx.lineTo(true_pos, 6);//triangle
@@ -529,9 +526,9 @@
             //render markers
             ctx.fillStyle = "white";
             ctx.textAlign = "left";
-            var markersPos = [];
-            for (var i = 0; i < markers.length; ++i) {
-                var marker = markers[i];
+            let markersPos = [];
+            for (let i = 0; i < markers.length; ++i) {
+                let marker = markers[i];
                 if (marker.time < this.startTime - this.pixelsToSeconds * 100 ||
                     marker.time > this.endTime)
                     continue;
@@ -1075,19 +1072,25 @@
         /**
          * @method resize
          * @param {*} size
-         * ...
-         * TODO
+         * 
+         * 
          */
         resize( size = [this.parent.root.clientWidth, this.parent.root.clientHeight]) {
 
+            this.root.style.width = size[0] + "px";
+            this.root.style.height = size[1] + "px";
+            
+            this.size = size; 
+            this.content_area.setSize([size[0], size[1] - this.header_offset]);
+            
             let w = size[0] - this.leftPanel.root.clientWidth - 10;
-            this.size = [w , size [1]];
-            this.#resizecanvas(this.size)
+            this.#resizecanvas([w , size[1]]);
         }
 
         #resizecanvas( size ) {
             this.canvas.width = size[0];
-            this.canvas.height = size[1];
+            this.canvas.height = size[1] - this.header_offset;
+           
             this.draw(this.currentTime);
         }
     };

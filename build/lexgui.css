@@ -2048,3 +2048,26 @@ meter::-webkit-meter-even-less-good-value {
   width: unset;
   height: unset;
 }
+
+/*Overlay area*/
+.overlay-top {
+  position: absolute;
+  top: 0;
+}
+
+.overlay-bottom {
+  position: absolute;
+  bottom: 0;
+}
+
+.overlay-left {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.overlay-right {
+  position: absolute;
+  right: 0;
+  top: 0;
+}

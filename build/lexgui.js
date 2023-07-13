@@ -484,6 +484,106 @@
                 var lexroot = document.getElementById("lexroot");
                 lexroot.appendChild( this.root );
             }
+
+            let overlay = options.overlay;
+            if(overlay) {
+                this.root.classList.add("overlay-" + overlay);
+
+                if(options.resize)
+                { 
+                    let data = "0px";
+                   
+                    this.split_bar = document.createElement("div");
+                    let type = overlay == "left" || overlay == "right" ? "horizontal" : "vertical";
+                    this.type = overlay;
+                    this.split_bar.className = "lexsplitbar " + type;
+
+                    if(overlay == "right") {
+                        this.split_bar.style.width = LX.DEFAULT_SPLITBAR_SIZE + "px";
+                        this.split_bar.style.left = -LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
+                    } 
+                    else if(overlay == "left") {
+                        this.split_bar.style.width = LX.DEFAULT_SPLITBAR_SIZE + "px";
+                        this.split_bar.style.left = this.root.clientWidth + LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
+                    }
+                    else if (overlay == "top") {
+                        this.split_bar.style.height = LX.DEFAULT_SPLITBAR_SIZE + "px";
+                        this.split_bar.style.top = this.root.clientHeight + LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
+                    }
+                    else if(overlay == "bottom") {
+                        this.split_bar.style.height = LX.DEFAULT_SPLITBAR_SIZE + "px";
+                        this.split_bar.style.top = -LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
+                    }
+
+                    this.split_bar.addEventListener("mousedown", inner_mousedown);
+                    data = LX.DEFAULT_SPLITBAR_SIZE/2 + "px"; // updates
+                    this.root.appendChild(this.split_bar);
+                    
+                    var that = this;
+                    var last_pos = [0,0];
+                    
+                    function inner_mousedown(e)
+                    {
+                        var doc = that.root.ownerDocument;
+                        doc.addEventListener("mousemove",inner_mousemove);
+                        doc.addEventListener("mouseup",inner_mouseup);
+                        last_pos[0] = e.x;
+                        last_pos[1] = e.y;
+                        e.stopPropagation();
+                        e.preventDefault();
+                        document.body.classList.add("nocursor");
+                        that.split_bar.classList.add("nocursor");
+                    }
+
+                    function inner_mousemove(e)
+                    {
+                        switch(that.type) {
+                            case "right":
+                                var dt = (last_pos[0] - e.x);
+                                var size = (that.root.offsetWidth + dt);
+                                that.root.style.width = size + "px";
+                                break;
+                            
+                            case "left":
+                                var dt = (last_pos[0] - e.x);
+                                var size = (that.root.offsetWidth - dt);
+                                that.root.style.width = size + "px";
+                                break;
+                            
+                            case "top":
+                                var dt = (last_pos[1] - e.y);
+                                var size = (that.root.offsetHeight - dt);
+                                that.root.style.height = size + "px";
+                                that.split_bar.style.top = size + LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
+                                break;
+
+                            case "bottom":
+                                var dt = (last_pos[1] - e.y);
+                                var size = (that.root.offsetHeight + dt);
+                                that.root.style.height = size + "px";
+                                break;
+                        }
+                        
+                        last_pos[0] = e.x;
+                        last_pos[1] = e.y;
+                        e.stopPropagation();
+                        e.preventDefault();
+                        
+                        // Resize events   
+                        if(that.onresize)
+                            that.onresize( that.root.getBoundingClientRect() );
+                    }
+
+                    function inner_mouseup(e)
+                    {
+                        var doc = that.root.ownerDocument;
+                        doc.removeEventListener("mousemove",inner_mousemove);
+                        doc.removeEventListener("mouseup",inner_mouseup);
+                        document.body.classList.remove("nocursor");
+                        that.split_bar.classList.remove("nocursor");
+                    }
+                }
+            }
         }
 
         /**
@@ -669,6 +769,29 @@
                 document.body.classList.remove("nocursor");
                 that.split_bar.classList.remove("nocursor");
             }
+        }
+
+        /**
+        * @method resize
+        * Resize element
+        */
+        setSize(size) {
+            
+            let [width, height] = size;
+    
+            if(width != undefined && width.constructor == Number)
+                width += "px";
+            if(height != undefined && height.constructor == Number)
+                height += "px";
+    
+            if(width)
+                this.root.style.width = width;
+            if(height)
+                this.root.style.height = height;
+
+            this.size = [this.root.clientWidth, this.root.clientHeight];
+
+            this.propagateEvent("onresize");
         }
 
         /**
@@ -2236,11 +2359,6 @@
             searchIcon.className = "fa-solid fa-magnifying-glass";
             element.appendChild(input);
             element.appendChild(searchIcon);
-
-            // store ref to branch name
-            let branchName = options.branchName || this.current_branch.name;
-
-            var that = this;
 
             input.addEventListener("input", (e) => { 
                 if(options.callback)
@@ -4065,9 +4183,9 @@
          */
 
         addTabs( tabs, options = {} ) {
-
+            let root = this.current_branch ? this.current_branch.content : this.root;
             if(!this.current_branch)
-                throw("No current branch!");
+                console.warn("No current branch!");
 
             if(tabs.constructor != Array)
                 throw("Param @tabs must be an Array!");
@@ -4082,7 +4200,7 @@
             let tabContainer = document.createElement("div");
             tabContainer.className = "tabs";
             container.appendChild( tabContainer );
-            this.current_branch.content.appendChild( container );
+            root.content.appendChild( container );
 
             for( var i = 0; i < tabs.length; ++i ) 
             {

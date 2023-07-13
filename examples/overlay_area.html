@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>LexGUI Overaly Timeline Demo</title>
+    <link rel="stylesheet" href="../build/lexgui.css">    
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.css">    
+</head>
+    <body></body>
+    <script src="../build/lexgui.js"></script>
+    <script src="../build/components/timeline.js"></script>
+    <script>
+
+        // init library and get main area
+        let area = LX.init({ });
+        // area.split({type: 'vertical', sizes:["45vh","55vh"]}).sections;
+        // let [toparea, bottomarea] = area.sections;
+        // add canvas to left upper part
+        var canvas = document.createElement('canvas');
+        canvas.id = "mycanvas";
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        area.attach( canvas );
+        
+        let kfTimeline = new LX.KeyFramesTimeline("kf-timeline", { height: area.root.clientHeight });
+        kfTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
+        kfTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [0,1,0, 1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
+        let timelinearea = new LX.Area({width: 200, height: kfTimeline.size[1], overlay:"left", resize: true});
+        timelinearea.attach(kfTimeline);
+
+        timelinearea.onresize = (bounding) => {kfTimeline.resize( [ bounding.width, bounding.height ] );}
+        area.attach(timelinearea);
+        kfTimeline.addButtons([
+            { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },
+            { icon: 'fa fa-filter', name: "optimize", callback: (value, event) => {   kfTimeline.onShowOptimizeMenu(event);}},
+            { icon: 'fa-regular fa-rectangle-xmark', name: 'unselectAll', callback: (value, event) => { kfTimeline.unSelectAllKeyFrames();}}
+        ]);
+        
+        kfTimeline.draw(0);
+
+
+        function loop(dt) {
+            
+            var ctx = canvas.getContext("2d");
+            ctx.fillText("TIMELINE", 100, 400);
+            // Get values from panel widgets (e.g. color value)
+            kfTimeline.draw(0);
+
+            requestAnimationFrame(loop);
+        }
+
+        requestAnimationFrame(loop);
+    </script>
+</html>
