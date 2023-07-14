@@ -1674,7 +1674,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexoverlaybuttons .lexbutton a {
-  line-height: 17px;
+  line-height: 18px;
 }
 
 .lexoverlaybuttons .lexbutton img {
@@ -1782,11 +1782,19 @@ meter::-webkit-meter-even-less-good-value {
   border-top: 2px solid var(--branch-title-inactive-background);
 }
 
-.lexareatabs .lexareatab:hover{
+.lexareatabs .lexareatab:first-child {
+ border-top-left-radius: 3px;
+}
+
+.lexareatabs .lexareatab:last-child {
+ border-top-right-radius: 3px;
+}
+
+.lexareatabs .lexareatab:hover {
   color: #fff;
 }
 
-.lexareatabs .lexareatab:active{
+.lexareatabs .lexareatab:active {
   color: #b7b7cba4;
 }
 
@@ -1797,9 +1805,9 @@ meter::-webkit-meter-even-less-good-value {
   border-top: 2px solid var(--global-selected-light);
 }
 
-/* .lexareatabscontent {
-  
-} */
+.lexareatabscontent {
+  margin-top: 2px;
+}
 
 .lexareatabscontent .lexpanel:not(.lexoverlaybuttons) {
   margin: 0;

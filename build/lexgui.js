@@ -551,10 +551,14 @@
 
             if( !sizes[1] )
             {
-                if(sizes[0].constructor == Number)
-                    sizes[0] += "px";
+                let size = sizes[0];
+                let margin = options.top ? options.top : 0;
+                if(size.constructor == Number) {
+                    size += margin;
+                    size += "px";
+                }
                 
-                sizes[1] = "calc( 100% - " + sizes[0] + " )";
+                sizes[1] = "calc( 100% - " + size + " )";
                 auto = true;
             }
 
@@ -998,7 +1002,7 @@
 
             area.root.classList.add( "lexareatabscontent" );
 
-            area.split({type: 'vertical', sizes: [Tabs.TAB_SIZE, null], resize: false});
+            area.split({type: 'vertical', sizes: [Tabs.TAB_SIZE, null], resize: false, top: 6});
             area.sections[0].attach( container );
 
             this.area = area.sections[1];
@@ -1013,7 +1017,9 @@
                 this.root.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
             
             selected = !Object.keys( this.tabs ).length ? true : selected;
+
             content = content.root ? content.root : content;
+            content.style.display = selected ? "block" : "none";
 
             // Create tab
             let tabEl = document.createElement('span');
@@ -2702,7 +2708,8 @@
          * @param {Array} values Posible options of the dropdown widget -> String (for default dropdown) or Object = {value, url} (for images, gifs..)
          * @param {String} value Select by default option
          * @param {Function} callback Callback function on change
-         * @param {*} options: {filter: boolean} to add a search bar to the widget
+         * @param {*} options:
+         * filter: Add a search bar to the widget [false]
          * disabled: Make the widget disabled [false]
          */
 
@@ -2729,7 +2736,6 @@
                 Panel.#add_reset_property(element.domName, function() {
                     value = wValue.iValue;
                     list.querySelectorAll('li').forEach( e => { if( e.getAttribute('value') == value ) e.click() } );
-                    that._trigger( new IEvent(name, value, null), callback ); 
                     this.style.display = "none";
                 });
             }
@@ -2786,7 +2792,7 @@
             });
 
             // Add filter options
-            if(options.filter)
+            if(options.filter ?? false)
                 this.#add_filter("Search option", {container: list, callback: this.#search_options.bind(list, values)});
 
             // Add dropdown options list
@@ -2822,6 +2828,7 @@
 
                         let btn = element.querySelector(".lexwidgetname .lexicon");
                         if(btn) btn.style.display = (value != wValue.iValue ? "block" : "none");
+                        that._trigger( new IEvent(name, value, null), callback ); 
                     })
 
                     // Add string option
@@ -2858,15 +2865,6 @@
             }
 
             list.refresh(values);
-            if(options.disabled)
-                wValue.setAttribute("disabled", true);
-            
-            wValue.addEventListener("change", e => {
-                const val = e.target.value;
-                let btn = element.querySelector(".lexwidgetname .lexicon");
-                if(btn) btn.style.display = (val != wValue.iValue ? "block" : "none");
-                this._trigger( new IEvent(name, val, e), callback ); 
-            });
 
             container.appendChild(list);
             element.appendChild(container);
