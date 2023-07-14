@@ -47,29 +47,39 @@
 
         let offsetX;
         let offsetY;
+        let currentTarget = null;
 
         domEl.setAttribute('draggable', true);
+        domEl.addEventListener("mousedown", function(e) {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            currentTarget = e.target.classList.contains('lexdialogtitle') ? e.target : null;
+        });
         domEl.addEventListener("dragstart", function(e) {
-            const rect = e.target.getBoundingClientRect();
-            offsetX = e.clientX - rect.x;
-            offsetY = e.clientY - rect.y;
             // Remove image when dragging
             var img = new Image();
             img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
             e.dataTransfer.setDragImage(img, 0, 0);
             e.dataTransfer.effectAllowed = "move";
+            if(!currentTarget) return;
+            const rect = e.target.getBoundingClientRect();
+            offsetX = e.clientX - rect.x;
+            offsetY = e.clientY - rect.y;
             e.dataTransfer.setData('branch_title', e.target.querySelector(".lexdialogtitle").innerText);
             e.dataTransfer.setData('dialog_id', e.target.id);
         });
         domEl.addEventListener("drag", function(e) {
+            if(!currentTarget) return;
             e.preventDefault();
-            this.style.left = e.clientX - offsetX + 'px';
-            this.style.top = e.clientY - offsetY + 'px';
+            let left = e.clientX - offsetX;
+            let top = e.clientY - offsetY;
+            if(left > 0 && (left + this.offsetWidth + 6) <= window.innerWidth)
+                this.style.left = left + 'px';
+            if(top > 0 && (top + this.offsetHeight + 6) <= window.innerHeight)
+                this.style.top = top + 'px';
         }, false );
         domEl.addEventListener("dragend", function(e) {
-            e.preventDefault();
-            this.style.left = e.clientX - offsetX + 'px';
-            this.style.top = e.clientY - offsetY + 'px';
+            currentTarget = null;
         }, false );
     }
 
@@ -4491,11 +4501,12 @@
 
             var titleDiv = document.createElement('div');
             if(title) {
+
                 titleDiv.className = "lexdialogtitle";
                 titleDiv.innerHTML = title;
                 titleDiv.setAttribute('draggable', false);
 
-                titleDiv.oncontextmenu = function(e){
+                titleDiv.oncontextmenu = function(e) {
                     e.preventDefault();
                     e.stopPropagation();
     
@@ -4580,12 +4591,12 @@
 
             // Process position and size
 
-            root.style.width = size[0] ? (size[0] + "px") : "25%";
-            root.style.height = size[1] ? (size[1] + "px") : "auto";
+            root.style.width = size[0] ? (size[0]) : "25%";
+            root.style.height = size[1] ? (size[1]) : "auto";
             
             let rect = root.getBoundingClientRect();
-            root.style.left = position[0] ? (position[0] + "px") : "calc( 50% - " + (rect.width * 0.5) + "px )";
-            root.style.top = position[1] ? (position[1] + "px") : "calc( 50vh - " + (rect.height * 0.5) + "px )";
+            root.style.left = position[0] ? (position[0]) : "calc( 50% - " + (rect.width * 0.5) + "px )";
+            root.style.top = position[1] ? (position[1]) : "calc( 50vh - " + (rect.height * 0.5) + "px )";
 
             panel.root.style.width = "calc( 100% - 30px )";
             panel.root.style.height = title ? "calc( 100% - " + (titleDiv.offsetHeight + 30) + "px )" : "calc( 100% - 51px )";
@@ -4607,56 +4618,58 @@
     class PocketDialog extends Dialog {
 
         constructor( title, callback, options = {} ) {
-            
-            options.draggable = false;
+
+            options.draggable = options.draggable ?? false;
             options.closable = false;
 
             super( title, callback, options );
 
-            let offsetX;
-            let dockedLeft = false;
-            let dockedRight = true;
-            let moving = false;
+            // Custom 
             let that = this;
-    
-            this.root.setAttribute('draggable', true);
-            this.root.addEventListener("dragstart", function(e) {
-                const rect = e.target.getBoundingClientRect();
-                offsetX = e.clientX - rect.x;
-                // Remove image when dragging
-                var img = new Image();
-                img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
-                e.dataTransfer.setDragImage(img, 0, 0);
-                e.dataTransfer.effectAllowed = "move";
-                e.dataTransfer.setData('branch_title', e.target.querySelector(".lexdialogtitle").innerText);
-                e.dataTransfer.setData('dialog_id', e.target.id);
-            });
-            this.root.addEventListener("drag", function(e) {
-                if(moving) return;
-                e.preventDefault();
-                this.style.left = e.clientX - offsetX + 'px';
-                if( dockedRight && e.clientX < window.innerWidth * 0.85 ) {
-                    this.style.left = '0px';
-                    moving = true;
-                    setTimeout( () => { dockedLeft = true; dockedRight = false; moving = false; }, 500 );
-                }
-                if(dockedLeft && e.clientX > window.innerWidth * 0.15 ) {
-                    moving = true;
-                    this.style.left = (window.innerWidth - that.root.offsetWidth - 6) + "px";
-                    setTimeout( () => { dockedLeft = false; dockedRight = true; moving = false; }, 500 );
-                }
-            }, false );
-
-            // custom 
             this.root.classList.add( "pocket" );
-            this.root.style.left = "";
-            this.root.style.top = "";
+            this.root.style.left = "calc(100% - " + (this.root.offsetWidth + 6) + "px)";
+            this.root.style.top = "0px";
             this.panel.root.style.width = "calc( 100% - 12px )";
 
+            this.title.tabIndex = -1;
             this.title.addEventListener("click", e => {
-
                 this.root.classList.toggle("closed");
             });
+
+            if( !options.draggable )
+            {
+                const float = options.float;
+
+                if( float )
+                {
+                    for( var i = 0; i < float.length; i++ )
+                    {
+                        const t = float[i];
+                        switch( t )
+                        {
+                        case 'b': 
+                            this.root.style.top = "calc(100% - " + (this.root.offsetHeight + 6) + "px)";
+                            break;
+                        case 'l': 
+                            this.root.style.left = "0px";
+                            break;
+                        }
+                    }
+                }
+
+                this.root.classList.add('dockable');
+                this.title.addEventListener("keydown", function(e) {
+                    if( e.ctrlKey && e.key == 'ArrowLeft' ) {
+                        that.root.style.left = '0px';
+                    } else if( e.ctrlKey && e.key == 'ArrowRight' ) {
+                        that.root.style.left = "calc(100% - " + (that.root.offsetWidth + 6) + "px)";
+                    }else if( e.ctrlKey && e.key == 'ArrowUp' ) {
+                        that.root.style.top = "0px";
+                    }else if( e.ctrlKey && e.key == 'ArrowDown' ) {
+                        that.root.style.top = "calc(100% - " + (that.root.offsetHeight + 6) + "px)";
+                    }
+                });
+            }
         }
     }
 
