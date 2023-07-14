@@ -4210,7 +4210,7 @@
             let tabContainer = document.createElement("div");
             tabContainer.className = "tabs";
             container.appendChild( tabContainer );
-            root.content.appendChild( container );
+            root.appendChild( container );
 
             for( var i = 0; i < tabs.length; ++i ) 
             {
