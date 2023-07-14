@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>LexGUI AssetBrowser Demo</title>
+    <link rel="stylesheet" href="../build/lexgui.css">    
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.css">    
+</head>
+    <body></body>
+    <script src="../build/lexgui.js"></script>
+    <script src="../build/components/assetbrowser.js"></script>
+    <script>
+
+        // init library and get main area
+        let area = LX.init();
+
+        area.addMenubar( m => {
+
+            // {options}: callback, icon, short
+
+            m.add( "Project/Autosave", { type: 'checkbox', icon: "fa fa-floppy-disk", callback: (v, name) => { console.log(name + ": " + v ) } });
+            m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass", short:  "F1", callback: () => { console.log("Opening HELP") }});
+            m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
+            m.add( "Help/Support LexGUI/Do it" );
+
+            m.setButtonImage("lexgui.js", "../images/lexgui-min.png", () => {window.open("https://github.com/jxarco/lexgui.js/")}, {position: "left"})
+        });
+
+        // split main area
+        area.split({type: 'vertical', sizes:["60vh","40vh"]});
+        var [top_area, bottom_area] = area.sections;
+
+        // add canvas to top_area
+        var canvas = document.createElement('canvas');
+        canvas.id = "mycanvas";
+        canvas.width = top_area.root.clientWidth;
+        canvas.height = top_area.root.clientHeight;
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        top_area.attach( canvas );
+
+        // add on resize event to control canvas size
+        top_area.onresize = function( bounding ) {
+            canvas.width = bounding.width;
+            canvas.height = bounding.height;
+        };
+
+        let asset_browser = new LX.AssetBrowser();
+        bottom_area.attach( asset_browser );
+        
+        function loop(dt) {
+            
+            var ctx = canvas.getContext("2d");
+
+            // Get values from panel widgets (e.g. color value)
+            ctx.fillStyle = "#b7a9b1";
+
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.font = "48px Monospace";
+
+            ctx.fillStyle = "#ff1999";
+
+            const text = "Lexgui.js @jxarco";
+            const pos_2d = [400, 300];
+            ctx.fillText(text, pos_2d[0], pos_2d[1]);
+
+            requestAnimationFrame(loop);
+        }
+
+        requestAnimationFrame(loop);
+
+    </script>
+</html>

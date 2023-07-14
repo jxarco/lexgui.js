@@ -74,7 +74,7 @@
 
             const text = pocket_dialog.panel.getValue('Text');
             const pos_2d = pocket_dialog.panel.getValue('2D Position');
-            ctx.fillText(text, pos_2d[0] + 6, pos_2d[1] + 48);
+            ctx.fillText(text, pos_2d[0], pos_2d[1]);
 
             requestAnimationFrame(loop);
         }

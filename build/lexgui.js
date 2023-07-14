@@ -1826,7 +1826,7 @@
             
             // Add display icon
             icon = node.icon; // Default: no childs
-            if( icon ) item.innerHTML += "<a class='" + icon + "'></a>";
+            if( icon ) item.innerHTML = "<a class='" + icon + "'></a>";
 
             item.innerHTML += (node.rename ? "" : node.id);
 

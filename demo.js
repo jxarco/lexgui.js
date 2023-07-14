@@ -308,7 +308,7 @@ function loop(dt) {
 
     const text = side_panel.getValue('Text');
     const pos_2d = side_panel.getValue('2D Position');
-    ctx.fillText(text, pos_2d[0] + 6, pos_2d[1] + 48);
+    ctx.fillText(text, pos_2d[0], pos_2d[1]);
 
     if(kfTimeline)
         kfTimeline.draw();
@@ -338,7 +338,7 @@ function fillPanel( panel ) {
                 'children': [
                     {
                         'id': 'node_1_1',
-                        // 'icon': 'fa-solid fa-cube',
+                        'icon': 'fa-solid fa-cube',
                         'children': [],
                         'actions': [
                             {
@@ -354,6 +354,7 @@ function fillPanel( panel ) {
             },
             {
                 'id': 'node_2',
+                'icon': 'fa-solid fa-circle-play',
                 'children': []
             }
         ]

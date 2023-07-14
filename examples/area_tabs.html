@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-    <title>LexGUI PocketDialog Demo</title>
+    <title>LexGUI Area Tabs Demo</title>
     <link rel="stylesheet" href="../build/lexgui.css">    
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.css">    
 </head>
@@ -30,16 +30,7 @@
         var [left,right] = area.sections;
 
         // Get new content area to fill it
-        // const left_tabs = left.addTabs([
-        //     {
-        //         name: "Canvas",
-        //         id: "mycanvas",
-        //         selected:  true
-        //     },
-        //     {
-        //         name: "Empty"
-        //     }
-        // ]);
+        const left_tabs = left.addTabs();
 
         // add canvas to left upper part
         var canvas = document.createElement('canvas');
@@ -48,7 +39,7 @@
         canvas.height = left.root.clientHeight;
         canvas.style.width = "100%";
         canvas.style.height = "100%";
-        left.attach( canvas );
+        left_tabs.add( "Canvas", canvas );
 
         // add on resize event to control canvas size
         left.onresize = function( bounding ) {
@@ -80,7 +71,7 @@
 
             const text = panelA.getValue('Text');
             const pos_2d = panelA.getValue('2D Position');
-            ctx.fillText(text, pos_2d[0] + 6, pos_2d[1] + 48);
+            ctx.fillText(text, pos_2d[0], pos_2d[1]);
 
             requestAnimationFrame(loop);
         }
