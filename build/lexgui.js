@@ -490,25 +490,24 @@
                 this.root.classList.add("overlay-" + overlay);
 
                 if(options.resize)
-                { 
-                    let data = "0px";
-                   
+                {                  
                     this.split_bar = document.createElement("div");
                     let type = overlay == "left" || overlay == "right" ? "horizontal" : "vertical";
-                    this.type = overlay;
+                    this.type = overlay;;
                     this.split_bar.className = "lexsplitbar " + type;
-
                     if(overlay == "right") {
                         this.split_bar.style.width = LX.DEFAULT_SPLITBAR_SIZE + "px";
                         this.split_bar.style.left = -LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
                     } 
                     else if(overlay == "left") {
+                        let size = Math.min(document.body.clientWidth - LX.DEFAULT_SPLITBAR_SIZE, this.root.clientWidth);
                         this.split_bar.style.width = LX.DEFAULT_SPLITBAR_SIZE + "px";
-                        this.split_bar.style.left = this.root.clientWidth + LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
+                        this.split_bar.style.left = size + LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
                     }
                     else if (overlay == "top") {
+                        let size = Math.min(document.body.clientHeight - LX.DEFAULT_SPLITBAR_SIZE, this.root.clientHeight);
                         this.split_bar.style.height = LX.DEFAULT_SPLITBAR_SIZE + "px";
-                        this.split_bar.style.top = this.root.clientHeight + LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
+                        this.split_bar.style.top = size + LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
                     }
                     else if(overlay == "bottom") {
                         this.split_bar.style.height = LX.DEFAULT_SPLITBAR_SIZE + "px";
@@ -516,7 +515,6 @@
                     }
 
                     this.split_bar.addEventListener("mousedown", inner_mousedown);
-                    data = LX.DEFAULT_SPLITBAR_SIZE/2 + "px"; // updates
                     this.root.appendChild(this.split_bar);
                     
                     var that = this;
@@ -546,13 +544,15 @@
                             
                             case "left":
                                 var dt = (last_pos[0] - e.x);
-                                var size = (that.root.offsetWidth - dt);
+                                var size = Math.min(document.body.clientWidth - LX.DEFAULT_SPLITBAR_SIZE, (that.root.offsetWidth - dt));
                                 that.root.style.width = size + "px";
+                                that.split_bar.style.left = size + LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
+
                                 break;
                             
                             case "top":
                                 var dt = (last_pos[1] - e.y);
-                                var size = (that.root.offsetHeight - dt);
+                                var size = Math.min(document.body.clientHeight - LX.DEFAULT_SPLITBAR_SIZE, (that.root.offsetHeight - dt));
                                 that.root.style.height = size + "px";
                                 that.split_bar.style.top = size + LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
                                 break;

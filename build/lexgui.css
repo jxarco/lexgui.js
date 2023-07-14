@@ -1982,7 +1982,7 @@ meter::-webkit-meter-even-less-good-value {
   height: 100%;
 }
 
-.lextimeline .lexarea {
+.lextimeline .lexarea, .lextimelinepanel {
   background-color: var(--global-dark-background);
 }
 
@@ -2003,6 +2003,7 @@ meter::-webkit-meter-even-less-good-value {
 
 .lextimeline .lexinlinewidgets {
   padding-right: 10px;
+  background-color: var(--global-color-primary);
 }
 
 .lextimeline .lexbutton:hover {
@@ -2070,4 +2071,12 @@ meter::-webkit-meter-even-less-good-value {
   position: absolute;
   right: 0;
   top: 0;
+}
+
+.lexarea.overlay-bottom, .lexarea.overlay-top, .lexarea.overlay-left, .lexarea.overlay-right,
+.overlay-bottom .lexarea, .overlay-top  .lexarea, .overlay-left  .lexarea, .overlay-right  .lexarea,
+.overlay-bottom .lextimeline, .overlay-top  .lextimeline, .overlay-left  .lextimeline, .overlay-right  .lextimeline,
+.overlay-bottom .lextimelinearea, .overlay-top  .lextimelinearea, .overlay-left  .lextimeline, .overlay-right  .lextimelinearea {
+  
+  background-color: var(--global-highlight);
 }

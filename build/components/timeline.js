@@ -42,7 +42,7 @@
             this.name = name ?? '';
             this.currentTime = 0;
             this.framerate = 30;
-            this.opacity = 0.8;
+            this.opacity = options.opacity || 1;
             this.sidebarWidth = 0// 200;
             this.topMargin = 28;
             this.renderOutFrames = false;
@@ -91,7 +91,7 @@
             
             right.root.appendChild(this.canvas);
             this.canvasArea = right;
-            
+            this.canvasArea.root.classList.add("lextimelinearea");
             this.updateHeader();
             this.#updateLeftPanel(left);
             this.root.appendChild(area.root);
@@ -334,7 +334,7 @@
                     ctx.lineTo(Math.round(x) + 0.5, h - 1);
                 }
                 ctx.stroke();
-                ctx.globalAlpha = 1;
+                ctx.globalAlpha = this.opacity;
             }
 
             ctx.globalAlpha = 0.5;
@@ -365,7 +365,7 @@
             ctx.moveTo( x, h - 0.5);
             ctx.lineTo( endx, h - 0.5);
             ctx.stroke();
-            ctx.globalAlpha = 1;
+            ctx.globalAlpha = this.opacity;
 
             //time seconds in text
             ctx.font = "10px Arial";
@@ -385,7 +385,7 @@
             let canvas = this.canvas;
             let ctx = canvas.getContext("2d");
             let duration = this.duration;
-        
+            ctx.globalAlpha = this.opacity;
             //content
             let margin = this.session.left_margin;
             let timeline_height = this.topMargin;
@@ -407,7 +407,7 @@
             ctx.globalAlpha = 0.2;
             ctx.fillStyle = "black";
             ctx.fillRect( margin, timeline_height, canvas.width - margin, canvas.height - timeline_height );
-            ctx.globalAlpha = 1;
+            ctx.globalAlpha = this.opacity;
         
             //bg lines
             ctx.strokeStyle = "#444";
@@ -435,7 +435,6 @@
         draw( currentTime = this.currentTime, rect ) {
 
             let ctx = this.canvas.getContext("2d");
-            ctx.globalAlpha = 1.0;
             if(!rect)
                 rect = [0, ctx.canvas.height - ctx.canvas.height , ctx.canvas.width, ctx.canvas.height ];
 
@@ -465,8 +464,9 @@
             this.tracksDrawn.length = 0;
 
             // Background
-            ctx.fillStyle = "#222";
-	        ctx.fillRect(0,0, this.canvas.width, this.canvas.height );
+            ctx.globalAlpha = this.opacity;
+            ctx.fillStyle = "black";
+	        ctx.clearRect(0,0, this.canvas.width, this.canvas.height );
 
             this.drawTimeInfo(w);
 
@@ -485,7 +485,7 @@
                 // ctx.stroke();
 
                 ctx.strokeStyle = ctx.fillStyle = "#ADF";
-                ctx.globalAlpha = 1;
+                ctx.globalAlpha = this.opacity;
                 ctx.beginPath();
                 ctx.moveTo(true_pos, 0); ctx.lineTo(true_pos, this.canvas.height);//line
                 ctx.stroke();
@@ -505,7 +505,7 @@
                     ctx.fillStyle = "#AAA";
                     ctx.strokeRect( this.boxSelectionStart[0], this.boxSelectionStart[1], this.boxSelectionEnd[0] - this.boxSelectionStart[0], this.boxSelectionEnd[1] - this.boxSelectionStart[1]);
                     ctx.stroke();
-                    ctx.globalAlpha = 1;
+                    ctx.globalAlpha = this.opacity;
                 }
 
                 this.onDrawContent( ctx, this.timeStart, this.timeEnd, this );
@@ -879,7 +879,7 @@
                 }
             }
 
-            ctx.globalAlpha = 1;
+            ctx.globalAlpha = this.opacity;
         }
 
         /**
@@ -976,7 +976,7 @@
                         ctx.roundRect(selectedClipArea[0]-1,selectedClipArea[1]-1,selectedClipArea[2]+2,selectedClipArea[3]+2, 5, false, true);
                         ctx.strokeStyle = "#888";
                         ctx.lineWidth = 0.5;
-                        ctx.globalAlpha = 1;
+                        ctx.globalAlpha = this.opacity;
                 }
                 }
             }

@@ -12,10 +12,9 @@
     <script>
 
         // init library and get main area
-        let area = LX.init({ });
-        // area.split({type: 'vertical', sizes:["45vh","55vh"]}).sections;
-        // let [toparea, bottomarea] = area.sections;
-        // add canvas to left upper part
+        let area = LX.init();
+       
+        // add canvas
         var canvas = document.createElement('canvas');
         canvas.id = "mycanvas";
         canvas.width = window.innerWidth;
@@ -24,29 +23,28 @@
         canvas.style.height = "100%";
         area.attach( canvas );
         
-        let kfTimeline = new LX.KeyFramesTimeline("kf-timeline", { height: area.root.clientHeight });
-        kfTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
-        kfTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [0,1,0, 1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
-        let timelinearea = new LX.Area({width: 200, height: kfTimeline.size[1], overlay:"left", resize: true});
-        timelinearea.attach(kfTimeline);
+        //ad
+        let timeline = new LX.KeyFramesTimeline("kf-timeline", {opacity: 0.8});
+        timeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
+        timeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [0,1,0, 1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
+        let timelinearea = new LX.Area({ height: 400, overlay:"bottom", resize: true});
+        timelinearea.attach(timeline);
 
-        timelinearea.onresize = (bounding) => {kfTimeline.resize( [ bounding.width, bounding.height ] );}
-        area.attach(timelinearea);
-        kfTimeline.addButtons([
-            { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },
-            { icon: 'fa fa-filter', name: "optimize", callback: (value, event) => {   kfTimeline.onShowOptimizeMenu(event);}},
-            { icon: 'fa-regular fa-rectangle-xmark', name: 'unselectAll', callback: (value, event) => { kfTimeline.unSelectAllKeyFrames();}}
-        ]);
+        timelinearea.onresize = (bounding) => {timeline.resize( [ bounding.width, bounding.height ] );}
+        area.attach(timelinearea)
         
-        kfTimeline.draw(0);
+        timeline.draw(0);
 
 
         function loop(dt) {
             
             var ctx = canvas.getContext("2d");
-            ctx.fillText("TIMELINE", 100, 400);
-            // Get values from panel widgets (e.g. color value)
-            kfTimeline.draw(0);
+            ctx.fillStyle = "cyan";
+            ctx.fillRect(0,0,1000,800);
+            ctx.fillStyle = "black";
+            ctx.font = "bold 48px serif"
+            ctx.fillText("Overlay timeline area", 400, 400);
+            timeline.draw(0);
 
             requestAnimationFrame(loop);
         }
