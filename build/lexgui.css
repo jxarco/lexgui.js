@@ -228,11 +228,12 @@ input[type="file"] {
 /* Pocket Dialog */
 
 .lexdialog.pocket {
-  top: 0;
-  right: 0;
   margin: 3px;
   background-color:  var(--branch-background);
-  transition: ease-out left 0.3s;
+}
+
+.lexdialog.pocket.dockable {
+  transition: ease-out left 0.2s, ease-out top 0.2s;
 }
 
 .lexdialog.pocket .lexdialogtitle {
