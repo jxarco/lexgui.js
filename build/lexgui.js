@@ -297,6 +297,64 @@
 
     LX.init = init;
 
+    /**
+     * @method message
+     * @param {String} text 
+     * @param {String} title (Optional)
+     * @param {*} options 
+     * id: Id of the message dialog
+     * position: Dialog position in screen [screen centered]
+     * draggable: Dialog can be dragged [false]
+     */
+
+    function message(text, title, options = {})
+    {
+        if(!text)
+            throw("No message to show");
+
+        options.modal = true;
+
+        new Dialog(title, p => {
+            p.addTextArea(null, text, null, { disabled: true });
+        }, options);
+    }
+
+    LX.message = message;
+
+    /**
+     * @method prompt
+     * @param {String} text 
+     * @param {String} title (Optional)
+     * @param {*} options 
+     * id: Id of the prompt dialog
+     * position: Dialog position in screen [screen centered]
+     * draggable: Dialog can be dragged [false]
+     */
+
+    function prompt(text, title, callback, options = {})
+    {
+        options.modal = true;
+
+        let value = "";
+
+        const dialog = new Dialog(title, p => {
+            p.addTextArea(null, text, null, { disabled: true });
+            p.addText(null, value, (v) => value = v, {placeholder: "..."} );
+            p.sameLine(2);
+            p.addButton(null, "OK", () => { callback.call(this, value); dialog.close() }, { buttonClass: "accept" });
+            p.addButton(null, "Cancel", () => dialog.close() );
+        }, options);
+
+        // Focus text prompt
+        dialog.root.querySelector('input').focus();
+    }
+
+    LX.prompt = prompt;
+
+    /*
+    *   Events and Signals
+    */
+
     class IEvent {
 
         constructor(name, value, domEvent) {
@@ -340,85 +398,6 @@
 
     LX.TreeEvent = TreeEvent;
 
-    /**
-     * @method message
-     * @param {String} text 
-     * @param {String} title (Optional)
-     * @param {*} options 
-     * id: Id of the message dialog
-     * position: Dialog position in screen [screen centered]
-     * draggable: Dialog can be dragged [false]
-     */
-
-    function message(text, title, options = {})
-    {
-        if(!text)
-            throw("No message to show");
-
-        this.modal.toggle(false);
-        var root = document.createElement('div');
-        root.className = "lexdialog";
-        if(options.id)
-            root.id = options.id;
-        this.root.appendChild(root);
-
-        var titleDiv = document.createElement('div');
-        if(title) {
-            titleDiv.className = "lexdialogtitle";
-            titleDiv.innerHTML = title;
-            root.appendChild(titleDiv);
-        }
-
-        var closeButton = document.createElement('div');
-        closeButton.className = "lexdialogcloser";
-        closeButton.innerHTML = "<a class='fa-solid fa-xmark'></a>";
-        closeButton.title = "Close dialog";
-
-        closeButton.addEventListener('click', (function(e) {
-            root.remove();
-            this.modal.toggle();
-        }).bind(this));
-
-        root.appendChild(closeButton);
-
-        var content = document.createElement('div');
-        content.className = "lexdialogcontent" + (title ? "" : " notitle");
-        content.innerHTML = text;
-        root.appendChild(content);
-
-        // Process position and size
-        options.size = options.size ?? [];
-        options.position = options.position ?? [];
-
-        root.style.width = options.size[0] ? (options.size[0] + "px") : "auto";
-        root.style.height = options.size[1] ? (options.size[1] + "px") : "auto";
-        
-        let rect = root.getBoundingClientRect();
-        root.style.left = options.position[0] ? (options.position[0] + "px") : "calc( 50% - " + (rect.width * 0.5) + "px )";
-        root.style.top = options.position[1] ? (options.position[1] + "px") : "calc( 50vh - " + (rect.height * 0.5) + "px )";
-
-        content.style.height = title ? "calc( 100% - " + (titleDiv.offsetHeight + 30) + "px )" : "calc( 100% - 51px )";
-
-        // Process if draggble
-        if(options.draggable ?? true)
-            set_as_draggable(root);
-    }
-
-    LX.message = message;
-	
-    function addContextMenu( title, event, callback, options )
-    {
-        var menu = new ContextMenu( event, title, options );
-        LX.root.appendChild(menu.root);
-
-        if(callback)
-            callback( menu );
-
-        menu.onCreate();
-    }
-
-    LX.addContextMenu = addContextMenu;
-
     function emit( signal_name, value )
     {
         const data = LX.signals[ signal_name ];
@@ -451,6 +430,10 @@
     }
 
     LX.addSignal = addSignal;
+
+    /*
+    *   DOM Elements
+    */
 
     class Area {
 
@@ -4498,6 +4481,7 @@
             let that = this;
 
             var titleDiv = document.createElement('div');
+
             if(title) {
 
                 titleDiv.className = "lexdialogtitle";
@@ -4561,23 +4545,29 @@
 
             if( options.closable ?? true)
             {
-                var closeButton = document.createElement('a');
-                closeButton.className = "lexdialogcloser fa-solid fa-xmark";
-                closeButton.title = "Close";
-    
-                closeButton.addEventListener('click', e => {
+                this.close = () => {
                     root.remove();
                     if(modal)
                         LX.modal.toggle();
-                });
-    
-                titleDiv.appendChild(closeButton);
+                };
+
+                var closeButton = document.createElement('a');
+                closeButton.className = "lexdialogcloser fa-solid fa-xmark";
+                closeButton.title = "Close";
+                closeButton.addEventListener('click', this.close);
+
+                if(title) titleDiv.appendChild(closeButton);
+                else {
+                    closeButton.classList.add("notitle");
+                    root.appendChild(closeButton);
+                }
             }
 
             const panel = new Panel();
             panel.root.classList.add('lexdialogcontent');
             if(!title) panel.root.classList.add('notitle');
-            callback.call(this, panel);
+            if(callback)
+                callback.call(this, panel);
             root.appendChild(panel.root);
             
             this.panel = panel;
@@ -4918,6 +4908,19 @@
     };
 
     LX.ContextMenu = ContextMenu;
+
+    function addContextMenu( title, event, callback, options )
+    {
+        var menu = new ContextMenu( event, title, options );
+        LX.root.appendChild(menu.root);
+
+        if(callback)
+            callback( menu );
+
+        menu.onCreate();
+    }
+
+    LX.addContextMenu = addContextMenu;
 
     /**
      * @class Curve
