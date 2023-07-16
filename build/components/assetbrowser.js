@@ -34,11 +34,21 @@
 
                 m.addButtons( [
                     {
-                        title: "Play",
-                        icon: "fa-solid fa-play",
+                        icon: "fa-solid fa-left-long",
                         callback:  (domEl) => { 
-                            console.log("play!"); 
-                            domEl.classList.toggle('fa-play'), domEl.classList.toggle('fa-stop');
+                            if(!this.prev_data.length) return;
+                            this.next_data.push( this.current_data );
+                            this.current_data = this.prev_data.pop();
+                            this.#refresh_content();
+                        }
+                    },
+                    {
+                        icon: "fa-solid fa-right-long",
+                        callback:  (domEl) => { 
+                            if(!this.next_data.length) return;
+                            this.prev_data.push( this.current_data );
+                            this.current_data = this.next_data.pop();
+                            this.#refresh_content();
                         }
                     },
                     {
@@ -49,28 +59,59 @@
                 ]);
             } );
 
+            this.prev_data = [];
+            this.next_data = [];
             this.data = [
                 {
-                    name: "color.png",
-                    type: "Image",
+                    id: "color.png",
+                    type: "image",
                     src: "https://godotengine.org/assets/press/icon_color.png"
                 },
                 {
-                    name: "monochrome_light.png",
-                    type: "Image",
+                    id: "godot",
+                    type: "folder",
+                    closed: true,
+                    children: [
+                        {
+                            id: "color.png",
+                            type: "image",
+                            src: "https://godotengine.org/assets/press/icon_color.png"
+                        },
+                        {
+                            id: "monochrome_light.png",
+                            type: "image",
+                            src: "https://godotengine.org/assets/press/icon_monochrome_light.png"
+                        },
+                        {
+                            id: "example.png",
+                            type: "image",
+                            src: "../images/godot_pixelart.png"
+                        },
+                        {
+                            id: "vertical_color.png",
+                            type: "image",
+                            src: "https://godotengine.org/assets/press/logo_vertical_color_dark.png"
+                        }
+                    ]
+                },
+                {
+                    id: "monochrome_light.png",
+                    type: "image",
                     src: "https://godotengine.org/assets/press/icon_monochrome_light.png"
                 },
                 {
-                    name: "example.png",
-                    type: "Image",
-                    path: "../images/godot_pixelart.png"
+                    id: "example.png",
+                    type: "image",
+                    src: "../images/godot_pixelart.png"
                 },
                 {
-                    name: "vertical_color.png",
-                    type: "Image",
+                    id: "vertical_color.png",
+                    type: "image",
                     src: "https://godotengine.org/assets/press/logo_vertical_color_dark.png"
                 }
             ];
+
+            this.current_data = this.data;
 
             this.#create_left_panel(left);
             this.#create_right_panel(right);
@@ -87,6 +128,37 @@
             else {
                 this.leftPanel = area.addPanel({className: 'lexassetbrowserpanel'});
             }
+
+            // Process data to show in tree
+            let tree_data = {
+                id: 'root',
+                children: this.data
+            }
+
+            this.leftPanel.addTree("Content Browser", tree_data, { 
+                // icons: tree_icons, 
+                filter: false,
+                onevent: (event) => { 
+                    switch(event.type) {
+                        case LX.TreeEvent.NODE_SELECTED: 
+                            if(!event.multiple)
+                                event.node.domEl.click();
+                            break;
+                        case LX.TreeEvent.NODE_DBLCLICKED: 
+                            console.log(event.node.id + " dbl clicked"); 
+                            break;
+                        case LX.TreeEvent.NODE_DRAGGED: 
+                            console.log(event.node.id + " is now child of " + event.value.id); 
+                            break;
+                        case LX.TreeEvent.NODE_RENAMED:
+                            console.log(event.node.id + " is now called " + event.value); 
+                            break;
+                        // case LX.TreeEvent.NODE_VISIBILITY:
+                        //     console.log(event.node.id + " visibility: " + event.value); 
+                        //     break;
+                    }
+                },
+            });    
         }
 
         #create_right_panel(area) {
@@ -118,59 +190,86 @@
                 e.preventDefault();
                 this.#process_drop(e);
             });
+            this.content.addEventListener('click', function() {
+                this.querySelectorAll('.lexassetitem').forEach( i => i.classList.remove('selected') );
+            });
 
             this.#refresh_content();
         }
 
-        #refresh_content(search_value = "", filter = "None") {
+        #refresh_content(search_value, filter) {
 
-            this.filter = filter ?? this.filter;
-            this.search_value = search_value ?? this.search_value;
-
+            this.filter = filter ?? (this.filter ?? "None");
+            this.search_value = search_value ?? (this.search_value ?? "");
             this.content.innerHTML = "";
             let that = this;
 
             const add_item = function(item) {
 
+                const type = item.type.charAt(0).toUpperCase() + item.type.slice(1);
+                const is_folder = type === "Folder";
+
+                if((that.filter != "None" && type != that.filter) || !item.id.includes(that.search_value))
+                    return;
+
                 let itemEl = document.createElement('li');
                 itemEl.className = "lexassetitem";
-                itemEl.title = item.type + ": " + item.name;
+                itemEl.title = type + ": " + item.id;
+                itemEl.tabIndex = -1;
                 that.content.appendChild(itemEl);
 
                 let title = document.createElement('span');
                 title.className = "lexassettitle";
-                title.innerText = item.name;
+                title.innerText = item.id;
                 itemEl.appendChild(title);
 
                 let preview = document.createElement('img');
-                preview.src = item.src;
+                preview.src = is_folder ? "../images/folder.png" : item.src;
                 itemEl.appendChild(preview);
 
-                let info = document.createElement('span');
-                info.className = "lexassetinfo";
-                info.innerText = item.type;
-                itemEl.appendChild(info);
+                if( !is_folder )
+                {
+                    let info = document.createElement('span');
+                    info.className = "lexassetinfo";
+                    info.innerText = type;
+                    itemEl.appendChild(info);
+                }
 
-                itemEl.addEventListener('click', function() {
-                    that.content.querySelectorAll('.lexassetitem').forEach( i => i.classList.remove('selected') );
-                    this.classList.add('selected');
+                itemEl.addEventListener('click', function(e) {
+                    e.stopImmediatePropagation();
+                    e.stopPropagation();
+
+                    if( !is_folder ) {
+                        if(!e.shiftKey)
+                            that.content.querySelectorAll('.lexassetitem').forEach( i => i.classList.remove('selected') );
+                        this.classList.add('selected');
+                    } else {
+                        that.prev_data.push( that.current_data );
+                        that.current_data = item.children;
+                        that.#refresh_content(search_value, filter);
+                    }
                 });
 
                 itemEl.addEventListener('contextmenu', function(e) {
                     e.preventDefault();
-                    LX.addContextMenu( item.type, e, m => {
-                        m.add("Rename");
+
+                    const multiple = that.content.querySelectorAll('.selected').length;
+
+                    LX.addContextMenu( multiple > 1 ? (multiple + " selected") : item.type, e, m => {
+                        if(!multiple) m.add("Rename");
                         m.add("Clone");
-                        m.add("Properties");
+                        if(!multiple) m.add("Properties");
                         m.add("");
                         m.add("Delete");
                     });
                 });
+
+                return itemEl;
             }
 
             const fr = new FileReader();
 
-            for( let item of this.data )
+            for( let item of this.current_data )
             {
                 if( item.path )
                 {
@@ -184,7 +283,7 @@
                     } });
                 }else
                 {
-                    add_item( item );
+                    item.domEl = add_item( item );
                 }
             }
         }
@@ -207,12 +306,12 @@
                     {
                     case 'png':
                     case 'jpg':
-                        type = "Image";
+                        type = "image";
                         break;
                     }
 
-                    this.data.push({
-                        "name": file.name,
+                    this.current_data.push({
+                        "id": file.name,
                         "src": e.currentTarget.result,
                         "extension": ext,
                         "type": type

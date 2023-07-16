@@ -1784,6 +1784,7 @@
             const that = this;
             const node_filter_input = this.domEl.querySelector("#lexnodetree_filter");
 
+            node.children = node.children ?? [];
             if(node_filter_input && !node.id.includes(node_filter_input.value))
             {
                 for( var i = 0; i < node.children.length; ++i )
@@ -1967,7 +1968,10 @@
                     e.stopImmediatePropagation();
                     node.closed = !node.closed;
                     const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed);
-                    that.onevent( event );
+                    if(that.onevent) {
+                        that.onevent( event );
+                    }
+                    item.click();
                     that.refresh();
                 });
             }
