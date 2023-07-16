@@ -30,8 +30,6 @@
 
             left.addMenubar( m => {
 
-                m.add("Content");
-
                 m.addButtons( [
                     {
                         icon: "fa-solid fa-left-long",
@@ -135,13 +133,13 @@
                 children: this.data
             }
 
-            this.leftPanel.addTree("Content Browser", tree_data, { 
+            this.tree = this.leftPanel.addTree("Content Browser", tree_data, { 
                 // icons: tree_icons, 
                 filter: false,
                 onevent: (event) => { 
                     switch(event.type) {
                         case LX.TreeEvent.NODE_SELECTED: 
-                            if(!event.multiple)
+                            if(!event.multiple && event.node.domEl)
                                 event.node.domEl.click();
                             break;
                         case LX.TreeEvent.NODE_DBLCLICKED: 
@@ -317,8 +315,10 @@
                         "type": type
                     });
                     
-                    if(i == (num_files - 1))
-                    this.#refresh_content(this.search_value, this.filter);
+                    if(i == (num_files - 1)) {
+                        this.#refresh_content(this.search_value, this.filter);
+                        this.tree.refresh();
+                    }
                 };
             }
         }

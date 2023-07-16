@@ -1960,7 +1960,6 @@
                 });
             }
             
-
             // Show/hide children
             if(is_parent) {
                 item.querySelector('a').addEventListener("click", function(e){
@@ -4727,6 +4726,8 @@
         }
 
         #create_submenu( o, k, c, d ) {
+
+            this.root.querySelectorAll(".lexcontextmenubox").forEach( cm => cm.remove() );
 
             let contextmenu = document.createElement('div');
             contextmenu.className = "lexcontextmenubox";
