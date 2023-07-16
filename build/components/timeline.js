@@ -158,7 +158,6 @@
                 this.leftPanel.clear();
             else {
                 this.leftPanel = area.addPanel({className: 'lextimelinepanel', width: "100%"});
-                
             }
 
             let panel = this.leftPanel;

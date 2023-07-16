@@ -4676,7 +4676,7 @@
 
             this.root = document.createElement('div');
             this.root.className = "lexcontextmenubox";
-            this.root.style.left = (event.x - 16) + "px";
+            this.root.style.left = (event.x - 48) + "px";
             this.root.style.top = (event.y - 8) + "px";
 
             this.root.addEventListener("mouseleave", function() {
@@ -4761,6 +4761,11 @@
 
             if( this.colors[ k ] ) {
                 entry.style.borderColor = this.colors[ k ];
+            }
+
+            if( k == "" ) {
+                entry.className += " cmseparator";
+                return;
             }
 
             // Add callback
@@ -5216,6 +5221,182 @@
 
     LX.Curve = Curve;
         
+    /*
+    *   Requests
+    */
+
+    Object.assign(LX, {
+
+        /**
+        * Request file from url (it could be a binary, text, etc.). If you want a simplied version use 
+        * @method request
+        * @param {Object} request object with all the parameters like data (for sending forms), dataType, success, error
+        * @param {Function} on_complete
+        **/
+        request(request) {
+
+            var dataType = request.dataType || "text";
+            if(dataType == "json") //parse it locally
+                dataType = "text";
+            else if(dataType == "xml") //parse it locally
+                dataType = "text";
+            else if (dataType == "binary")
+            {
+                //request.mimeType = "text/plain; charset=x-user-defined";
+                dataType = "arraybuffer";
+                request.mimeType = "application/octet-stream";
+            }	
+
+            //regular case, use AJAX call
+            var xhr = new XMLHttpRequest();
+            xhr.open( request.data ? 'POST' : 'GET', request.url, true);
+            if(dataType)
+                xhr.responseType = dataType;
+            if (request.mimeType)
+                xhr.overrideMimeType( request.mimeType );
+            if( request.nocache )
+                xhr.setRequestHeader('Cache-Control', 'no-cache');
+
+            xhr.onload = function(load)
+            {
+                var response = this.response;
+                if(this.status != 200)
+                {
+                    var err = "Error " + this.status;
+                    if(request.error)
+                        request.error(err);
+                    return;
+                }
+
+                if(request.dataType == "json") //chrome doesnt support json format
+                {
+                    try
+                    {
+                        response = JSON.parse(response);
+                    }
+                    catch (err)
+                    {
+                        if(request.error)
+                            request.error(err);
+                        else
+                            throw err;
+                    }
+                }
+                else if(request.dataType == "xml")
+                {
+                    try
+                    {
+                        var xmlparser = new DOMParser();
+                        response = xmlparser.parseFromString(response,"text/xml");
+                    }
+                    catch (err)
+                    {
+                        if(request.error)
+                            request.error(err);
+                        else
+                            throw err;
+                    }
+                }
+                if(request.success)
+                    request.success.call(this, response, this);
+            };
+            xhr.onerror = function(err) {
+                if(request.error)
+                    request.error(err);
+            }
+
+            var data = new FormData();
+            if( request.data )
+            {
+                for(var i in request.data)
+                    data.append(i,request.data[i]);
+            }
+
+            xhr.send( data );
+            return xhr;
+        },
+
+        /**
+        * Request file from url
+        * @method requestText
+        * @param {String} url
+        * @param {Function} on_complete
+        * @param {Function} on_error
+        **/
+        requestText(url, on_complete, on_error ) {
+            return this.request({ url: url, dataType:"text", success: on_complete, error: on_error });
+        },
+
+        /**
+        * Request file from url
+        * @method requestJSON
+        * @param {String} url
+        * @param {Function} on_complete
+        * @param {Function} on_error
+        **/
+        requestJSON(url, on_complete, on_error ) {
+            return this.request({ url: url, dataType:"json", success: on_complete, error: on_error });
+        },
+
+        /**
+        * Request binary file from url
+        * @method requestBinary
+        * @param {String} url
+        * @param {Function} on_complete
+        * @param {Function} on_error
+        **/
+        requestBinary(url, on_complete, on_error ) {
+            return this.request({ url: url, dataType:"binary", success: on_complete, error: on_error });
+        },
+        
+        /**
+        * Request script and inserts it in the DOM
+        * @method requireScript
+        * @param {String|Array} url the url of the script or an array containing several urls
+        * @param {Function} on_complete
+        * @param {Function} on_error
+        * @param {Function} on_progress (if several files are required, on_progress is called after every file is added to the DOM)
+        **/
+        requireScript(url, on_complete, on_error, on_progress, version ) {
+
+            if(!url)
+                throw("invalid URL");
+
+            if( url.constructor === String )
+                url = [url];
+
+            var total = url.length;
+            var size = total;
+            var loaded_scripts = [];
+
+            for(var i in url)
+            {
+                var script = document.createElement('script');
+                script.num = i;
+                script.type = 'text/javascript';
+                script.src = url[i] + ( version ? "?version=" + version : "" );
+                script.original_src = url[i];
+                script.async = false;
+                script.onload = function(e) { 
+                    total--;
+                    loaded_scripts.push(this);
+                    if(total)
+                    {
+                        if(on_progress)
+                            on_progress(this.original_src, this.num);
+                    }
+                    else if(on_complete)
+                        on_complete( loaded_scripts );
+                };
+                if(on_error)
+                    script.onerror = function(err) { 
+                        on_error(err, this.original_src, this.num );
+                    }
+                document.getElementsByTagName('head')[0].appendChild(script);
+            }
+        }
+    });
+
 	LX.UTILS = {
         getTime() { return new Date().getTime() },
         compareThreshold( v, p, n, t ) { return Math.abs(v - p) >= t || Math.abs(v - n) >= t },
@@ -5223,5 +5404,4 @@
         clamp (num, min, max) { return Math.min(Math.max(num, min), max) }
     };
     
-
 })( typeof(window) != "undefined" ? window : (typeof(self) != "undefined" ? self : global ) );
