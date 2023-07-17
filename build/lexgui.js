@@ -625,6 +625,7 @@
             {
                 // In case Area has been split before, get 2nd section as root
                 this.offset = this.root.childNodes[0].offsetHeight; // store offset to take into account when resizing
+                this._root = this.sections[0].root;
                 this.root = this.sections[1].root;
             }
 
@@ -843,6 +844,8 @@
             this.split({type: 'vertical', sizes:[height,null], resize: false});
             this.sections[0].attach( menubar );
             this.sections[0].is_menubar = true;
+
+            return menubar;
         }
 
         /**
@@ -1062,7 +1065,7 @@
 
     class Tabs {
 
-        static TAB_SIZE = 29;
+        static TAB_SIZE = 28;
         static TAB_ID   = 0;
 
         constructor( area, options = {} )  {
