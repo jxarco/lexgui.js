@@ -62,7 +62,7 @@
 
             this.canvas = options.canvas ?? document.createElement('canvas');
 
-            this.duration = null;
+            this.duration = 5;
             this.position = [options.x ?? 0, options.y ?? 0];
             this.size = [ options.width ?? 400, options.height ?? 100];
             
@@ -76,8 +76,9 @@
             this.trackHeight = options.trackHeight ?? 25;
             this.active = true;
 
-            this.root = document.createElement('div');
-            this.root.className = 'lextimeline';
+            this.root = new LX.Area({className : 'lextimeline'});
+            // this.root = document.createElement('div');
+            // this.root.className = 'lextimeline';
 
             this.header_offset = 36;
             
@@ -94,10 +95,10 @@
             this.canvasArea.root.classList.add("lextimelinearea");
             this.updateHeader();
             this.#updateLeftPanel(left);
-            this.root.appendChild(area.root);
+            this.root.root.appendChild(area.root);
 
             if(!options.canvas && this.name != '') {
-                this.root.id = this.name;
+                this.root.root.id = this.name;
                 this.canvas.id = this.name + '-canvas';
             }
 
@@ -126,7 +127,7 @@
                 this.header.clear();
             else {
                 this.header = new LX.Panel({id:'lextimelineheader', height: "36px"});
-                this.root.appendChild(this.header.root);
+                this.root.root.appendChild(this.header.root);
             }
 
             let header = this.header;
@@ -227,7 +228,7 @@
             //     let track = this.animationClip.tracks[i];
             //     panel.addTitle(track.name + (track.type? '(' + track.type + ')' : ''));
             // }
-            this.#resizecanvas([ this.root.clientWidth - this.leftPanel.root.clientWidth, this.size[1]]);
+            this.#resizecanvas([ this.root.root.clientWidth - this.leftPanel.root.clientWidth, this.size[1]]);
         }
 
         /**
@@ -1074,10 +1075,10 @@
          * 
          * 
          */
-        resize( size = [this.parent.root.clientWidth, this.parent.root.clientHeight]) {
+        resize( size = [this.root.parent.root.clientWidth, this.root.parent.root.clientHeight]) {
 
-            this.root.style.width = size[0] + "px";
-            this.root.style.height = size[1] + "px";
+            this.root.root.style.width = size[0] + "px";
+            this.root.root.style.height = size[1] + "px";
             
             this.size = size; 
             this.content_area.setSize([size[0], size[1] - this.header_offset]);
@@ -1091,6 +1092,22 @@
             this.canvas.height = size[1] - this.header_offset;
            
             this.draw(this.currentTime);
+        }
+
+        /**
+        * @method hide
+        * Hide timeline area
+        */
+        hide() {
+            this.root.hide();
+        }
+
+        /**
+        * @method show
+        * Show timeline area if it is hidden
+        */
+        show() {
+            this.root.show();
         }
     };
 

@@ -793,6 +793,22 @@
         }
 
         /**
+        * @method hide
+        * Hide element
+        */
+        hide() {
+            this.root.classList.add("hidden");
+        }
+
+        /**
+        * @method show
+        * Show element if it is hidden
+        */
+        show() {
+            this.root.classList.remove("hidden");
+        }
+
+        /**
          * @method propagateEvent
          */
 
@@ -844,7 +860,6 @@
             this.split({type: 'vertical', sizes:[height,null], resize: false});
             this.sections[0].attach( menubar );
             this.sections[0].is_menubar = true;
-
             return menubar;
         }
 

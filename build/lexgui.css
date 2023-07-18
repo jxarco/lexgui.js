@@ -1355,18 +1355,18 @@ meter::-webkit-meter-optimum-value {
 
 /* (sub-optimum)*/
 meter:-moz-meter-sub-optimum::-moz-meter-bar {
-  background: red;
+  background: #ffc107;
 }
 meter::-webkit-meter-suboptimum-value {
-  background: red;
+  background: #ffc107;
 }
 
 /* (even less good)*/
 meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
-  background: red;
+  background: #dc3545;
 }
 meter::-webkit-meter-even-less-good-value {
-  background: red;
+  background: #dc3545;
 }
 
 /* Menu Bar */
