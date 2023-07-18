@@ -1619,8 +1619,9 @@
         static LIST         = 15;
         static TAGS         = 16;
         static CURVE        = 17;
-        static CUSTOM       = 18;
-        static SEPARATOR    = 19;
+        static CARD         = 18;
+        static CUSTOM       = 19;
+        static SEPARATOR    = 20;
 
         #no_context_types = [
             Widget.BUTTON,
@@ -2347,26 +2348,29 @@
             }
 
             if(name) {
-                let domName = document.createElement('div');
-                domName.className = "lexwidgetname";
-                domName.innerHTML = name || "";
-                domName.style.width = options.nameWidth || LX.DEFAULT_NAME_WIDTH;
 
-                element.appendChild(domName);
-                element.domName = domName;
-
-                // Copy-paste info
-                domName.addEventListener('contextmenu', function(e) {
-                    e.preventDefault();
-                    widget.oncontextmenu(e);
-                });
-
-                if(options.signal)
+                if(!(options.no_name ?? false) )
                 {
-                    LX.addSignal( options.signal, widget );
+                    let domName = document.createElement('div');
+                    domName.className = "lexwidgetname";
+                    domName.innerHTML = name || "";
+                    domName.style.width = options.nameWidth || LX.DEFAULT_NAME_WIDTH;
+                    element.appendChild(domName);
+                    element.domName = domName;
+    
+                    // Copy-paste info
+                    domName.addEventListener('contextmenu', function(e) {
+                        e.preventDefault();
+                        widget.oncontextmenu(e);
+                    });
                 }
-
+                
                 this.widgets[ name ] = widget;
+            }
+
+            if(options.signal)
+            {
+                LX.addSignal( options.signal, widget );
             }
 
             widget.domEl = element;
@@ -2889,6 +2893,74 @@
                 element.className += " noname";
                 container.style.width = "100%";
             }
+
+            element.appendChild(container);
+        }
+
+        /**
+         * @method addCard
+         * @param {String} name Card Name
+         * @param {*} options:
+         * title: title if any
+         * text: card text if any
+         * src: url of the image if any
+         */
+
+        addCard( name, options = {} ) {
+
+            options.no_name = true;
+            let widget = this.create_widget(name, Widget.CARD, options);
+            let element = widget.domEl;
+
+            let container = document.createElement('div');
+            container.className = "lexcard";
+            container.style.width = "100%";
+
+            if( options.img )
+            {
+                let img = document.createElement('img');
+                img.src = options.img;
+                container.appendChild(img);
+
+                if(options.link != undefined)
+                {
+                    img.style.cursor = "pointer";
+                    img.addEventListener('click', function() {
+                        const _a = container.querySelector('a');
+                        if(_a) _a.click();
+                    });
+                }
+            }
+
+            let name_el = document.createElement('span');
+            name_el.innerText = name;
+
+            if(options.link != undefined)
+            {
+                let link_el = document.createElement('a');
+                link_el.innerText = name;
+                link_el.href = options.link;
+                link_el.target = options.target ?? "";
+                name_el.innerText = "";
+                name_el.appendChild(link_el);
+            }
+
+            container.appendChild(name_el);
+            
+            // cardEl.addEventListener("click", function(e) {
+            //     if(should_select) {
+            //         container.querySelectorAll('button').forEach( s => s.classList.remove('selected'));
+            //         this.classList.add('selected');
+            //     }
+            //     that._trigger( new IEvent(name, b.value, e), b.callback );   
+            // });
+
+
+            // Remove branch padding and margins
+            // if(!widget.name) {
+            //     element.className += " noname";
+            //     container.style.width = "100%";
+            // }
 
             element.appendChild(container);
         }
