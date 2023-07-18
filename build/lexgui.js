@@ -879,11 +879,12 @@
             if(callback) callback( menubar );
 
             // Hack to get content height
-            let d = document.createElement('div');
-            d.appendChild(menubar.root);
-            document.body.appendChild(d);
-            const height = menubar.root.clientHeight;
-            d.remove();
+            // let d = document.createElement('div');
+            // d.appendChild(menubar.root);
+            // document.body.appendChild(d);
+            // const height = menubar.root.clientHeight;
+            // d.remove();
+            const height = 39; // pixels
 
             this.split({type: 'vertical', sizes:[height,null], resize: false});
             this.sections[0].attach( menubar );
@@ -1475,7 +1476,7 @@
                 button.style.maxHeight = "calc(100% - 10px)";
                 button.style.alignItems = "center";
 
-                if(options.position == "left")
+                if(options.float == "left")
                     this.root.prepend( button );
                 else
                     this.root.appendChild( button );
@@ -5309,7 +5310,7 @@
             
             if( !this.skip_browser )
             {
-                area.split({ type: "horizontal", sizes: ["20%", "80%"]});
+                area.split({ type: "horizontal", sizes: ["25%", "75%"]});
                 [left, right] = area.sections;
                 content_area = right;
             }
@@ -5460,33 +5461,36 @@
 
             this.rightPanel.sameLine();
 
-            this.rightPanel.addComboButtons( "Content", [
-                {
-                    value: "Left",
-                    icon: "fa-solid fa-left-long",
-                    callback:  (domEl) => { 
-                        if(!this.prev_data.length) return;
-                        this.next_data.push( this.current_data );
-                        this.current_data = this.prev_data.pop();
-                        this.#refresh_content();
+            if( this.skip_browser )
+            {
+                this.rightPanel.addComboButtons( "Content", [
+                    {
+                        value: "Left",
+                        icon: "fa-solid fa-left-long",
+                        callback:  (domEl) => { 
+                            if(!this.prev_data.length) return;
+                            this.next_data.push( this.current_data );
+                            this.current_data = this.prev_data.pop();
+                            this.#refresh_content();
+                        }
+                    },
+                    {
+                        value: "Right",
+                        icon: "fa-solid fa-right-long",
+                        callback:  (domEl) => { 
+                            if(!this.next_data.length) return;
+                            this.prev_data.push( this.current_data );
+                            this.current_data = this.next_data.pop();
+                            this.#refresh_content();
+                        }
+                    },
+                    {
+                        value: "Refresh",
+                        icon: "fa-solid fa-arrows-rotate",
+                        callback:  (domEl) => { this.#refresh_content(); }
                     }
-                },
-                {
-                    value: "Right",
-                    icon: "fa-solid fa-right-long",
-                    callback:  (domEl) => { 
-                        if(!this.next_data.length) return;
-                        this.prev_data.push( this.current_data );
-                        this.current_data = this.next_data.pop();
-                        this.#refresh_content();
-                    }
-                },
-                {
-                    value: "Refresh",
-                    icon: "fa-solid fa-arrows-rotate",
-                    callback:  (domEl) => { this.#refresh_content(); }
-                }
-            ], { width: "20%", no_selection: true } );
+                ], { width: "20%", no_selection: true } );
+            }
 
             this.rightPanel.addDropdown("Filter", ["None", "Image", "Mesh", "JSON"], "None", (v) => this.#refresh_content.call(this, null, v), { width: "20%" });
             this.rightPanel.addText(null, this.search_value ?? "", (v) => this.#refresh_content.call(this, v, null), { placeholder: "Search assets..." });

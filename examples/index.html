@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>LexGUI Examples</title>
+    <link rel="stylesheet" href="../build/lexgui.css">    
+    <style>
+        iframe { border: none; color: red; }
+
+    </style>
+</head>
+    <body></body>
+    <script src="../build/lexgui.js"></script>
+    <script>
+
+        // init library and get main area
+        let area = LX.init();
+
+        // split main area
+        area.split({sizes:["25%","80%"], resize: false});
+        let [left,right] = area.sections;
+
+        left.addMenubar( m => {
+            m.add( "Examples", () => {
+                iframe.src = url;
+                fillExamples(panel);
+            });
+            m.add( "Docs", (v, name) => {
+                iframe.src = "../docs/documentation.html";
+                fillDocs(panel);
+            });
+            m.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
+        });
+
+        let url = "asset_view.html";
+        let example_selected = "Asset View";
+
+        let panel = left.addPanel();
+        fillExamples( panel );
+
+        let iframe = document.createElement('iframe');
+        iframe.src = url;
+        iframe.style.width = "100%";
+        iframe.style.height = "100%";
+        right.root.appendChild(iframe);
+
+        // **** **** **** **** **** **** **** **** **** **** **** **** 
+
+        function fillExamples( panel ) {
+            
+            panel.clear();
+            panel.branch("Examples");
+            panel.addList(null, example_selected, [
+                'Asset View',
+                'Overlay Area',
+                'Pocket Dialog',
+                'Area Tabs'
+            ], (v) => { 
+                iframe.src = url = v.replace(" ", "_").toLowerCase() + ".html";
+                example_selected = v;
+            });
+            panel.addButton(null, "View Source Code", () => window.open("https://github.com/jxarco/lexgui.js/blob/master/examples/" + url, '_blank') );
+            panel.merge();
+        }
+
+        function fillDocs( panel ) {
+            
+            panel.clear();
+            panel.branch("Docs");
+            
+            panel.merge();
+        }
+
+    </script>
+</html>
