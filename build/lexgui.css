@@ -1670,9 +1670,10 @@ meter::-webkit-meter-even-less-good-value {
   margin-right: 0px;
 }
 
-.lexoverlaybuttons.vertical .lexwidget button {
-  min-width: 32px;
-  width: auto !important;
+.lexoverlaybuttons.vertical .lexwidget button {	
+  min-width: 32px;	
+  max-width: 32px!important;	
+  max-height: 32px!important;	
 }
 
 .lexoverlaybuttons.bottom {
