@@ -8,7 +8,6 @@
 </head>
     <body></body>
     <script src="../build/lexgui.js"></script>
-    <script src="../build/components/assetbrowser.js"></script>
     <script>
 
         // init library and get main area
@@ -45,7 +44,7 @@
             canvas.height = bounding.height;
         };
 
-        let asset_browser = new LX.AssetBrowser();
+        let asset_browser = new LX.AssetView({ skip_browser: true });
         bottom_area.attach( asset_browser );
         
         function loop(dt) {
