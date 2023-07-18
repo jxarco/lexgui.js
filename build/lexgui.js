@@ -1305,7 +1305,19 @@
                 entry.className = "lexmenuentry";
                 entry.id = key.replace(/\s/g, '');
                 entry.innerText = key;
-                this.root.appendChild( entry );
+                if(options.position == "left") {	
+                    this.root.prepend( entry );	
+                }	
+                else {	
+                    if(options.position == "right") 	
+                        entry.right = true;	
+                    if(this.root.lastChild && this.root.lastChild.right) {	
+                        this.root.lastChild.before( entry );	
+                    }	
+                    else {	
+                        this.root.appendChild( entry );	
+                    }	
+                }
 
                 const create_submenu = function( o, k, c, d ) {
 
@@ -1476,10 +1488,14 @@
                 button.style.maxHeight = "calc(100% - 10px)";
                 button.style.alignItems = "center";
 
-                if(options.float == "left")
-                    this.root.prepend( button );
-                else
-                    this.root.appendChild( button );
+                if(options.float == "right")	
+                    button.right = true;	
+                if(this.root.lastChild && this.root.lastChild.right) {	
+                    this.root.lastChild.before( button );	
+                }	
+                else {	
+                    this.root.appendChild( button );	
+                }
     
                 const _b = button.querySelector('a');
                 _b.addEventListener("click", (e) => {
@@ -1510,10 +1526,14 @@
                 button.style.padding = "5px";
                 button.style.alignItems = "center";
 
-                if(options.position == "left")
-                    this.root.prepend( button );
-                else
-                    this.root.appendChild( button );
+                if(options.position == "right")	
+                    button.right = true;	
+                if(this.root.lastChild && this.root.lastChild.right) {	
+                    this.root.lastChild.before( button );	
+                }	
+                else {	
+                    this.root.appendChild( button );	
+                }
     
                 const _b = button.querySelector('a');
                 _b.addEventListener("click", (e) => {
@@ -1540,7 +1560,14 @@
                 this.buttonContainer = document.createElement('div');
                 this.buttonContainer.className = "lexmenubuttons";
                 this.buttonContainer.classList.add(options.float ?? 'center');
-                this.root.appendChild( this.buttonContainer );    
+                if(options.position == "right")	
+                    this.buttonContainer.right = true;	
+                if(this.root.lastChild && this.root.lastChild.right) {	
+                    this.root.lastChild.before( this.buttonContainer );	
+                }	
+                else {	
+                    this.root.appendChild( this.buttonContainer );	
+                }      
             }
 
             for( let i = 0; i < buttons.length; ++i )
