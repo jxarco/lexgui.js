@@ -675,7 +675,7 @@ input[type="file"] {
   margin-left: 0px;
   border-radius: 0px;
   display: flex;
-  padding-top: 3px;
+  padding-top: 0.19em;
 }
 
 .lexcombobuttons .lexbutton.combo:first-child {
@@ -689,8 +689,10 @@ input[type="file"] {
 }
 
 .lexcombobuttons .lexbutton.combo.selected {
-  background-color: var(--global-selected);
-  color: #f5f5f5;
+  background-color: var(--global-selected-light);
+  outline: none;
+  border: 1px solid var(--global-selected-light);
+  color: #fff;
 }
 
 .lexcombobuttons .lexbutton.combo a {
@@ -1878,6 +1880,7 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexlayer.selected {
   background-color: var(--global-selected);
+  color: white;
 }
 
 .lexlayer:hover {

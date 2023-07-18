@@ -1838,6 +1838,11 @@
 
             // Callbacks
             item.addEventListener("click", e => {
+                if( handled ) {
+                    handled = false;
+                    return;
+                }
+
                 if(!e.shiftKey) {
                     list.querySelectorAll("li").forEach( e => { e.classList.remove('selected'); } );
                     this.selected.length = 0;
@@ -1978,11 +1983,16 @@
                 });
             }
             
+            let handled = false;
+
             // Show/hide children
             if(is_parent) {
-                item.querySelector('a').addEventListener("click", function(e){
-                    e.stopPropagation();
+                item.querySelector('a').addEventListener("click", function(e) {
+                    
+                    handled = true;
                     e.stopImmediatePropagation();
+                    e.stopPropagation();
+
                     node.closed = !node.closed;
                     const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed);
                     if(that.onevent) {
