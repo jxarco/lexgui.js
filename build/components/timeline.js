@@ -94,7 +94,7 @@
             this.canvasArea = right;
             this.canvasArea.root.classList.add("lextimelinearea");
             this.updateHeader();
-            this.#updateLeftPanel(left);
+            this.updateLeftPanel(left);
             this.root.root.appendChild(area.root);
 
             if(!options.canvas && this.name != '') {
@@ -109,7 +109,7 @@
             this.canvas.addEventListener("dblclick", this.processMouse.bind(this));
             this.canvas.addEventListener("contextmenu", this.processMouse.bind(this));
 
-            setTimeout( () => this.resize(), 10 );
+            // setTimeout( () => this.resize(), 10 );
 
             right.onresize = bounding => {
                 this.#resizecanvas( [ bounding.width, bounding.height ] );
@@ -153,7 +153,8 @@
         * @method updateLeftPanel
         * 
         */
-        #updateLeftPanel(area) {
+        updateLeftPanel(area) {
+
 
             if(this.leftPanel)
                 this.leftPanel.clear();
@@ -228,6 +229,8 @@
             //     let track = this.animationClip.tracks[i];
             //     panel.addTitle(track.name + (track.type? '(' + track.type + ')' : ''));
             // }
+            if(this.leftPanel.parent.root.classList.contains("hidden"))
+                return;
             this.#resizecanvas([ this.root.root.clientWidth - this.leftPanel.root.clientWidth, this.size[1]]);
         }
 
@@ -302,7 +305,7 @@
                 this.processTracks();
             
             this.updateHeader();
-            this.#updateLeftPanel();
+            this.updateLeftPanel();
         }
 
         drawTimeInfo (w, h = this.topMargin) {
@@ -569,6 +572,8 @@
 
         setDuration( t ) {
             this.duration = this.animationClip.duration = t; 
+            this.updateHeader();
+
             if( this.onSetDuration ) 
                 this.onSetDuration( t );	 
         }
@@ -1108,6 +1113,7 @@
         */
         show() {
             this.root.show();
+            this.resize();
         }
     };
 
@@ -1924,6 +1930,7 @@
 
             this.selectedItems = itemsName;
             this.unSelectAllKeyFrames();
+            this.updateLeftPanel();
         }
 
         getTrack( trackInfo )  {
@@ -2175,7 +2182,6 @@
 
                     if(this.duration < clip.start + clip.duration  ){
                         this.setDuration(clip.start + clip.duration);
-                        this.updateHeader();
                     }
                     //this.addUndoStep( "clip_modified", clip );
                     if( (e.ctrlKey && distToStart < 5) || (clip.fadein && Math.abs( this.timeToX( clip.start + clip.fadein ) - e.offsetX ) < 5) )
@@ -2250,7 +2256,6 @@
                         if(this.duration < clip.start + clip.duration  )
                         {
                             this.setDuration(clip.start + clip.duration);
-                            this.updateHeader();
                         }
                     }
                     return true;
@@ -2487,7 +2492,6 @@
             if( end > this.duration || !this.animationClip.duration)
             {
                 this.setDuration(end);
-                this.updateHeader();
             }
 
             if(callback)
@@ -3401,6 +3405,7 @@
 
             this.selectedItems = itemsName;
             this.unSelectAllKeyFrames();
+            this.updateLeftPanel();
         }
 
         getTrack( trackInfo )  {
