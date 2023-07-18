@@ -281,6 +281,14 @@
             e.preventDefault();
         }, false );
 
+        // CSS fontawesome
+        var head = document.getElementsByTagName('HEAD')[0];
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = 'https://use.fontawesome.com/releases/v6.4.0/css/all.css';
+        head.appendChild(link);
+
         // Global vars
         this.DEFAULT_NAME_WIDTH     = "30%";
         this.DEFAULT_SPLITBAR_SIZE  = 4;
