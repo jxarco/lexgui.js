@@ -631,7 +631,8 @@
 
             var type = options.type || "horizontal";
             var sizes = options.sizes || ["50%", "50%"];
-            var auto = false;
+            var infer_height = false;
+            var auto = options.sizes === 'auto';
 
             if( !sizes[1] )
             {
@@ -643,7 +644,7 @@
                 }
                 
                 sizes[1] = "calc( 100% - " + size + " )";
-                auto = true;
+                infer_height = true;
             }
 
             // Create areas
@@ -652,7 +653,7 @@
 
             var resize = options.resize ?? true;
             var data = "0px";
-            
+
             if(resize)
             {
                 this.resize = resize;
@@ -687,34 +688,53 @@
                 area2.root.style.height = "100%";
                 this.root.style.display = "flex";
             }
-
-            else
+            else // vertical
             {
-                var height1 = sizes[0],
-                    height2 = sizes[1];
-
-                if(height1.constructor == Number)
-                    height1 += "px";
-                if(height2.constructor == Number)
-                    height2 += "px";
-
                 area1.root.style.width = "100%";
-                area1.root.style.height = "calc( " + height1 + " - " + data + " )";
                 area2.root.style.width = "100%";
-                
-                // Check for menubar to add more offset
-                if(!auto && this.root.parentElement.parentElement.children.length) {
-                    const item = this.root.parentElement.parentElement.children[0];
-                    const menubar = item.querySelector('.lexmenubar');
-                    if(menubar)
-                        data = parseInt(data) + menubar.offsetHeight + "px";
-                }
 
-                area2.root.style.height = "calc( " + height2 + " - " + data + " )";
+                if(auto)
+                {
+                    area1.root.style.height = "auto";
+
+                    // Listen resize event on first area
+                    const resizeObserver = new ResizeObserver((entries) => {
+                        for (const entry of entries) {
+                            const bb = entry.contentRect;
+                            area2.root.style.height = "calc(100% - " + ( bb.height + 4) + "px )";
+                        }
+                    });
+
+                    resizeObserver.observe(area1.root);
+                }
+                else
+                {
+                    var height1 = sizes[0],
+                        height2 = sizes[1];
+    
+                    if(height1.constructor == Number)
+                        height1 += "px";
+                    if(height2.constructor == Number)
+                        height2 += "px";
+    
+                    area1.root.style.width = "100%";
+                    area1.root.style.height = "calc( " + height1 + " - " + data + " )";
+                    
+                    // Check for menubar to add more offset
+                    if(!infer_height && this.root.parentElement.parentElement.children.length) {
+                        const item = this.root.parentElement.parentElement.children[0];
+                        const menubar = item.querySelector('.lexmenubar');
+                        if(menubar)
+                            data = parseInt(data) + menubar.offsetHeight + "px";
+                    }
+    
+                    area2.root.style.height = "calc( " + height2 + " - " + data + " )";
+                }
             }
 
             this.root.appendChild( area1.root );
-            if(resize) this.root.appendChild(this.split_bar);
+            if(resize) 
+                this.root.appendChild(this.split_bar);
             this.root.appendChild( area2.root );
             this.sections = [area1, area2];
             this.type = type;
