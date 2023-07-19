@@ -2199,6 +2199,7 @@
 
             content.parent = this;
             let element = content.root ? content.root : content;
+            this.root.style.maxHeight = "512px"; // limit size when attaching stuff from outside
             this.root.appendChild( element );
         }
 
@@ -4783,6 +4784,12 @@
 
             this.panel.root.innerHTML = "";
             this.#oncreate.call(this, this.panel);
+        }
+
+        setPosition(x, y) {
+            
+            this.root.style.left = x + "px";
+            this.root.style.top = y + "px";
         }
     }
 
