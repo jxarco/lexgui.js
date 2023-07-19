@@ -123,7 +123,7 @@ bottom.addMenubar( m => {
             kfTimeline = new LX.KeyFramesTimeline("kf-timeline", { width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight });
             kfTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
             kfTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [0,1,0, 1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
-            bottom.attach(kfTimeline);
+            bottom.attach(kfTimeline.root);
             
             kfTimeline.addButtons([
                 { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },
@@ -160,7 +160,7 @@ bottom.addMenubar( m => {
             clipsTimeline.addClip(clip);
             // clipsTimeline.setAnimationClip({tracks: [{clips: [clip]}], duration: 2});
             clipsTimeline.selectedItems = ["Clip1"];
-            bottom.attach(clipsTimeline);
+            bottom.attach(clipsTimeline.root);
             clipsTimeline.draw(0);
         }
     });
@@ -186,7 +186,7 @@ bottom.addMenubar( m => {
             curvesTimeline = new LX.CurvesTimeline("curves-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight, range: [-1,1]});
             curvesTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
             curvesTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [0,1,0,-1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,0,0,1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
-            bottom.attach(curvesTimeline);
+            bottom.attach(curvesTimeline.root);
             
             // kfTimeline.addButtons([
             //     { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },

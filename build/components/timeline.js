@@ -498,7 +498,7 @@
                 ctx.fill();
             }
 
-            if(this.onDrawContent) {
+            if(this.onDrawContent && this.animationClip) {
                 
                 ctx.translate( this.position[0], this.position[1] + this.topMargin ); //20 is the top margin area
 
