@@ -1,0 +1,28 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>LexGUI Docs</title>
+    <link rel="stylesheet" href="style.css">    
+</head>
+
+<body>
+
+<h1 id="branch">Branch</h1>
+<p>A Branch essentially serves as a Panel Section, allowing you to effectively organize widgets within your panels. By opening and merging branches at any time, you can seamlessly incorporate widgets into your panels using <code class='inline'>Panel.branch(name, options)</code>:</p>
+<pre><code class="lang-js">panel.branch(<span class="str">"Section Title"</span>);
+
+<span class="com">// Add widgets here...</span>
+
+panel.merge();
+</code></pre>
+<p>When branching, you can use some options:</p>
+<ul>
+<li><code class='inline'>className</code>: Add class to the branch</li>
+<li><code class='inline'>closed</code>: Set branch collapsed/opened [false]</li>
+<li><code class='inline'>icon</code>: Set branch icon (Fontawesome class e.g. &quot;fa-solid fa-skull&quot;)</li>
+<li><code class='inline'>filter</code>: Allow filter widgets in branch by name [false]</li>
+</ul>
+
+</body>
+</html>

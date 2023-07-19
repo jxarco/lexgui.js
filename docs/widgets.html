@@ -8,148 +8,13 @@
 
 <body>
 
-<h1 id="docs">LexGUI Docs</h1>
-<br>
-<ul>
-    <li><a href="#getting-started">Getting Started</a>
-    <ul>
-        <li><a href="#download">Download</a></li>
-        <li><a href="#usage">Usage</a></li>
-        <li><a href="#namespace-globals">Namespace Globals</a></li>
-    </ul>
-    <li><a href="#area">Area</a>
-    <ul>
-        <li><a href="#menubar">Menubar</a>
-        <li><a href="#searchbar-for-menu-entries">Searchbar for Menu Entries</a></li>
-    </ul>
-    <li><a href="#panel">Panel</a></li>
-    <li><a href="#branch">Branch</a></li>
-    <li><a href="#widgets">Widgets</a>
-    <ul>
-        <li><a href="#getter-and-setters">Getter and Setters</a></li>
-        <li><a href="#reset-value">Reset Value</a></li>
-        <li><a href="#same-line">Same line</a></li>
-    </ul>
-    <li><a href="#widget-list">WidgetList</a></li>
-    <li><a href="#dialogs">Dialogs</a>
-    <li><a href="#event-handling">Event Handling</a></li>
-    <li><a href="#components">Components</a>
-    <ul>
-        <li><a href="#timeline">Timeline</a>
-        <li><a href="#keyframe-timeline">Keyframes timeline</a></li>
-        <li><a href="#clips-timeline">Clips timeline</a></li>
-        <li><a href="#curves-timeline">Curves timeline</a></li>
-    </ul>
-</ul>
+<h1 id="widgets">Widgets</h1>
 
-<h2 id="getting-started">Getting Started</h2>
-
-<h3 id="download">Download</h3>
-
-<p>To use LexGUI.js, download it at the <code class='inline'>build</code> folder (the best option is to <em>clone this repository in your project folder</em> to facilitate next updates) and include it directly in your HTML file using a script tag:</p>
-<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="tag">script</span> <span class="hljs-attr">src</span>=<span class="atv">"build/lexgui.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="tag">script</span>&gt;</span>
-</code></pre>
-
-<h3 id="usage">Usage</h3>
-
-<p>Once you have included <strong>lexgui.js</strong> in your project, you can start using its API to create web interfaces. The library exposes several functions and components that you can utilize to build your UI.</p>
-<p>The first thing to do is initializing the library. Calling <code class='inline'>LX.init</code> will initialize the necessary stuff and build the main <a href="#area">Area</a>, which by default will fit the root container:</p>
-<pre><code class="lang-js"><span class="kwd">let</span> area = LX.init();
-</code></pre>
-<p>Optionally, you can pass an <code class='inline'>Object</code> parameter to define a few properties: </p>
-<ul>
-<li><code class='inline'>container (String)</code>: Root container for the entire UI (default is <code class='inline'>document.body</code>)</li>
-<li><code class='inline'>id (String)</code>: id of the generated Main Area (default is <em>mainarea</em>)</li>
-</ul>
-
-<h3 id="namespace-globals">Namespace Globals</h3>
-
-<p>You can modify global namespace (<code class='inline'>LX</code>) variables before you start creating UI elements. For now, the customizable vars are the following:</p>
-<ul>
-<li><code class='inline'>LX.DEFAULT_NAME_WIDTH</code>: Width of the name container inside a widget (Default <code class='inline'>&quot;30%&quot;</code>)</li>
-<li><code class='inline'>LX.DEFAULT_SPLITBAR_SIZE</code>: Width (in pixels) of the area resize bar created on split (Default <code class='inline'>4</code>)</li>
-<li><code class='inline'>LX.OPEN_CONTEXTMENU_ENTRY</code>: Specify how the subentries of a Context Menu will be opened, &#39;<em>mouseover</em>&#39; or &#39;<em>click</em>&#39; (Default <code class='inline'>click</code>)</li>
-</ul>
-
-<h2 id="area">Area</h2>
-
-<p>An <strong>Area</strong> is the main container used in lexgui.js. You can have as many Areas you need using <code class='inline'>Area.split(options)</code>, which allows you to split horizontally or vertically a given Area:</p>
-<ul>
-<li><code class='inline'>type (String)</code>: Split mode, either horizontal (default) or vertical</li>
-<li><code class='inline'>sizes (Array)</code>: Size of each new area. Default is [&quot;50%&quot;, &quot;50%&quot;]</li>
-</ul>
-<p>From here, you can already build your UI adding <a href="#panel">Panels</a>, but in most cases you will want to split the main Area first:</p>
-<pre><code class="lang-js"><span class="com">// Split main area in 2 sections (2 Areas)</span>
-area.<span class="hljs-built_in">split</span>({ sizes: [<span class="str">"70%"</span>, <span class="str">"30%"</span>] });
-<span class="kwd">let</span> [leftArea, rightArea] = area.sections;
-
-<span class="com">// Split again left area this time vertically</span>
-leftArea.<span class="hljs-built_in">split</span>({ type: <span class="str">"vertical"</span>, sizes: [<span class="str">"80vh"</span>, <span class="str">"20vh"</span>] });
-<span class="kwd">let</span> [leftUpArea, leftBottomArea] = leftArea.sections;
-</code></pre>
-
-<h3 id="menubar">Menubar</h3>
-
-<p>You can build a <strong>Menubar</strong> directly into any Area using <code class='inline'>Area.addMenubar(callback, options)</code>. To specify each of the menu entries, you should pass a <em>callback function</em> to be called when the Menubar is constructed. <strong>Callbacks will have a Menubar instance as parameter</strong>, so use <code class="inline">Menubar.add(entryPath, options)</code> on that instance inside your callback to build each of the menu entries:</p>
-<ul>
-<li><code class='inline'>entryPath (String)</code>: The path menu/submenu/etc of each entry</li>
-<li><code class='inline'>options (Object/Function)</code>: <ul>
-<li><code class='inline'>callback (Function)</code>: To be called when interacting with the entry</li>
-<li><code class='inline'>icon (String)</code> at (<a href="https://fontawesome.com/search">Fontawesome</a>)</li>
-<li><code class='inline'>short (String)</code> for shortcuts</li>
-<li><code class='inline'>type (String)</code> options: <em>checkbox</em></li>
-</ul>
-</li>
-</ul>
-<p><sup>Note: In case of no options rather than the callback, you can use <code class='inline'>options</code> as the <code class='inline'>Function</code> callback.<sup></p>
-<pre><code class="lang-js">area.addMenubar( m =&gt; {
-    m.<span class="hljs-keyword">add( </span><span class="str">"Scene/New Scene"</span>, () =&gt; { console.log(<span class="str">"New scene created!"</span>) } )<span class="hljs-comment">;</span>
-    m.<span class="hljs-keyword">add( </span><span class="str">"Scene/Open Scene"</span> )<span class="hljs-comment">;</span>
-    m.<span class="hljs-keyword">add( </span><span class="str">"Scene/"</span> )<span class="com">; // This is a separator!</span>
-    m.<span class="hljs-keyword">add( </span><span class="str">"Scene/Open Recent/hello.scene"</span>)<span class="hljs-comment">;</span>
-    m.<span class="hljs-keyword">add( </span><span class="str">"Scene/Open Recent/goodbye.scene"</span> )<span class="hljs-comment">;</span>
-    m.<span class="hljs-keyword">add( </span><span class="str">"Project/Export/DAE"</span>, { <span class="hljs-keyword">short: </span><span class="str">"E"</span> } )<span class="hljs-comment">;</span>
-    m.<span class="hljs-keyword">add( </span><span class="str">"Project/Export/GLTF"</span> )<span class="hljs-comment">;</span>
-    m.<span class="hljs-keyword">add( </span><span class="str">"Help/About"</span> )<span class="hljs-comment">;</span>
-    m.<span class="hljs-keyword">add( </span><span class="str">"Help/Support"</span>, { callback: () =&gt; { console.log(<span class="str">"Support!"</span>) }, icon: <span class="str">"fa-solid fa-heart"</span> } )<span class="hljs-comment">;</span>
-})<span class="hljs-comment">;</span>
-</code></pre>
-<p>The <code class='inline'>options</code> in <code class='inline'>Area.addMenubar(callback, options)</code> are by now the following: </p>
-<ul>
-<li><code class='inline'>float (String)</code>: Justify main entries to left (default), center, right</li>
-</ul>
-<pre><code class="lang-js">area.addMenubar( <span class="hljs-function"><span class="hljs-params">m</span> =&gt;</span> {
-    <span class="com">// Fill entries...</span>
-}, { <span class="hljs-attr">float</span>: <span class="str">"center"</span> });
-</code></pre>
-<h4 id="searchbar-for-menu-entries">Searchbar for Menu Entries</h4>
-<p>Pressing <code class='inline'>Ctrl+Space</code> you can open a search bar as a shortcut for any Menubar entry created in the whole UI.</p>
-<h3 id="panel">Panel</h3>
-<p>Panels are the DOM elements that will enclose your UI <a href="#widgets">widgets</a>. The pipeline is simple, create a Panel, attach it to an Area and fill it!</p>
-<p>You could do it manually instancing a <code class='inline'>LX.Panel</code> and attaching it using <code class='inline'>Area.attach(content)</code> but you might want to call <code class='inline'>Area.addPanel(options)</code> to get an instanced panel already attached to that area:</p>
-<pre><code class="lang-js"><span class="kwd">var</span> panel = area.addPanel();
-fillPanel( side_panel );
-</code></pre>
-<p>As <code class='inline'>options</code> you can pass <code class='inline'>id</code> and <code class='inline'>className</code> to be added to your new panel.</p>
-<h3 id="branch">Branch</h3>
-<p>A Branch essentially serves as a Panel Section, allowing you to effectively organize widgets within your panels. By opening and merging branches at any time, you can seamlessly incorporate widgets into your panels using <code class='inline'>Panel.branch(name, options)</code>:</p>
-<pre><code class="lang-js">panel.branch(<span class="str">"Section Title"</span>);
-
-<span class="com">// Add widgets here...</span>
-
-panel.merge();
-</code></pre>
-<p>When branching, you can use some options:</p>
-<ul>
-<li><code class='inline'>className</code>: Add class to the branch</li>
-<li><code class='inline'>closed</code>: Set branch collapsed/opened [false]</li>
-<li><code class='inline'>icon</code>: Set branch icon (Fontawesome class e.g. &quot;fa-solid fa-skull&quot;)</li>
-<li><code class='inline'>filter</code>: Allow filter widgets in branch by name [false]</li>
-</ul>
-<h2 id="widgets">Widgets</h2>
 <p>A widget is a <em>fundamental building block that represents a graphical user interface (GUI) element</em>. Widgets are the visual components with which users interact and provide input within an application, from basic elements like buttons and text fields to more complex elements such as dropdown menus, sliders, and checkboxes. </p>
 <p>LexGUI.js provides a wide range of pre-built widgets that developers can utilize to construct intuitive and visually appealing interfaces. These widgets are designed to be customizable, allowing developers to adjust their appearance and behavior to suit the specific requirements of their application.</p>
-<h3 id="getter-and-setters">Getter and Setters</h3>
+
+<h2 id="getter-and-setters">Getter and Setters</h2>
+
 <p>One of the features of LexGUI is the ability to effortlessly retrieve and modify values for any widget that has been added. This functionality provides developers with a convenient way to interact with and manipulate the UI elements within their applications:</p>
 <pre><code class="lang-js"><span class="com">// Getting Values by Widget Name</span>
 <span class="kwd">const</span> color = <span class="hljs-keyword">panel</span>.getValue(<span class="str">'Background'</span>);
@@ -158,11 +23,17 @@ panel.merge();
 <span class="hljs-keyword">panel</span>.setValue(<span class="str">'Font Color'</span>, <span class="hljs-keyword">color</span>);
 </code></pre>
 <p><sup>Note: It&#39;s important to ensure that the new value provided is compatible with the widget&#39;s data type and constraints. Incorrect data types or out-of-range values may result in unexpected behavior or errors.<sup></p>
-<h3 id="reset-value">Reset Value</h3>
+
+<h2 id="reset-value">Reset Value</h2>
+
 <p>In most cases where you set a Widget Name, you will have the option to reset the Widget Value to its default value by pressing a <em>reset button</em> what will appear on changing the initial state of the widget.</p>
-<h3 id="same-line">Same line</h3>
+
+<h2 id="same-line">Same line</h2>
+
 <p>You can also add multiple widgets in the same panel row to create well-organized and visually optimized user interface layouts and by calling <code class='inline'>panel.sameLine(number)</code>, where <code class='inline'>number</code> is the number of widgets to be inlined.</p>
+
 <h2 id="widget-list">Widget List</h2>
+
 <h3 id="title">Title</h3>
 <p>Represents a title section inside a <a href="#branch">Branch</a>. Call <code class='inline'>Panel.addTitle(name, value, callback, options)</code> to add a Title Widget to your panel:</p>
 <ul>
@@ -404,17 +275,6 @@ panel.addDropdown(<span class="str">"Media Dropdown"</span>, options, <span clas
 <ul>
 <li><code class='inline'>Panel.addBlank(height)</code>: Add vertical space (in pixels) inside a branch.</li>
 </ul>
-<h2 id="dialogs">Dialogs</h2>
-<p>...TODO</p>
-<h2 id="event-handling">Event Handling</h2>
-<p>...TODO</p>
-<h2 id="timeline">Timeline</h2>
-<h3 id="keyframes-timeline">Keyframes timeline</h3>
-<p>...TODO</p>
-<h3 id="clips-timeline">Clips timeline</h3>
-<p>...TODO</p>
-<h3 id="curves-timeline">Curves timeline</h3>
-<p>...TODO</p>
 
 </body>
 </html>

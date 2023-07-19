@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>LexGUI Docs</title>
+    <link rel="stylesheet" href="style.css">    
+</head>
+
+<body>
+
+<h1 id="area">Area</h1>
+
+<p>An <strong>Area</strong> is the main container used in lexgui.js. You can have as many Areas you need using <code class='inline'>Area.split(options)</code>, which allows you to split horizontally or vertically a given Area:</p>
+<ul>
+<li><code class='inline'>type (String)</code>: Split mode, either horizontal (default) or vertical</li>
+<li><code class='inline'>sizes (Array/String)</code>: Size of each new area. Default is [&quot;50%&quot;, &quot;50%&quot;]. Using "auto" will make a vertical split to resize automatically.</li>
+</ul>
+
+<p>From here, you can already build your UI adding <a href="panel.html">Panels</a>, but in most cases you will want to split the main Area first:</p>
+<pre><code class="lang-js"><span class="com">// Split main area in 2 sections (2 Areas)</span>
+area.split({ sizes: [<span class="str">"70%"</span>, <span class="str">"30%"</span>] });
+<span class="kwd">let</span> [leftArea, rightArea] = area.sections;
+
+<span class="com">// Split again left area this time vertically</span>
+leftArea.split({ type: <span class="str">"vertical"</span>, sizes: [<span class="str">"80vh"</span>, <span class="str">"20vh"</span>] });
+<span class="kwd">let</span> [leftUpArea, leftBottomArea] = leftArea.sections;
+</code></pre>
+
+<h2 id="menubar">Menubar</h2>
+
+<p>You can build a <strong>Menubar</strong> directly into any Area using <code class='inline'>Area.addMenubar(callback, options)</code>. To specify each of the menu entries, you should pass a <em>callback function</em> to be called when the Menubar is constructed. <strong>Callbacks will have a Menubar instance as parameter</strong>, so use <code class="inline">Menubar.add(entryPath, options)</code> on that instance inside your callback to build each of the menu entries:</p>
+<ul>
+<li><code class='inline'>entryPath (String)</code>: The path menu/submenu/etc of each entry</li>
+<li><code class='inline'>options (Object/Function)</code>: <ul>
+<li><code class='inline'>callback (Function)</code>: To be called when interacting with the entry</li>
+<li><code class='inline'>icon (String)</code> at (<a href="https://fontawesome.com/search">Fontawesome</a>)</li>
+<li><code class='inline'>short (String)</code> for shortcuts</li>
+<li><code class='inline'>type (String)</code> options: <em>checkbox</em></li>
+</ul>
+</li>
+</ul>
+<p><sup>Note: In case of no options rather than the callback, you can use <code class='inline'>options</code> as the <code class='inline'>Function</code> callback.<sup></p>
+<pre><code class="lang-js">area.addMenubar( m =&gt; {
+    m.add( <span class="str">"Scene/Open Scene"</span> );
+    m.add( <span class="str">"Scene/New Scene"</span>, () =&gt; { console.log(<span class="str">"New scene created!"</span>) } );
+    m.add( <span class="str">"Scene/"</span> )<span class="com">; // This is a separator!</span>
+    m.add( <span class="str">"Scene/Open Recent/hello.scene"</span>);
+    m.add( <span class="str">"Scene/Open Recent/goodbye.scene"</span> );
+    m.add( <span class="str">"Project/Export/DAE"</span>, { short: <span class="str">"E"</span> } );
+    m.add( <span class="str">"Project/Export/GLTF"</span> );
+    m.add( <span class="str">"Help/About"</span> );
+    m.add( <span class="str">"Help/Support"</span>, { callback: () =&gt; { 
+        console.log(<span class="str">"Support!"</span>) }, icon: <span class="str">"fa-solid fa-heart"</span> } );
+});
+</code></pre>
+<p>The <code class='inline'>options</code> in <code class='inline'>Area.addMenubar(callback, options)</code> are by now the following: </p>
+<ul>
+<li><code class='inline'>float (String)</code>: Justify main entries to left (default), center, right</li>
+</ul>
+<pre><code class="lang-js">area.addMenubar( <span class="hljs-function"><span class="hljs-params">m</span> =&gt;</span> {
+    <span class="com">// Fill entries...</span>
+}, { <span class="hljs-attr">float</span>: <span class="str">"center"</span> });
+</code></pre>
+
+<h3 id="menubar-buttons">Menubar Buttons</h3>
+
+<p>Inside the menubar creation callback, you can add a group of buttons to be added to your menubar using <code class='inline'>Area.addButtons(callback, options)</code>:</p>
+
+<pre><code class="lang-js">m.addButtons( [
+    {
+        title: <span class="str">"Play"</span>,
+        icon: <span class="str">"fa-solid fa-play"</span>,
+        callback:  (domEl) => { 
+            domEl.classList.toggle(<span class="str">"fa-play"</span>), domEl.classList.toggle(<span class="str">"fa-stop"</span>);
+        }
+    },
+    {
+        title: <span class="str">"Pause"</span>,
+        icon: <span class="str">"fa-solid fa-pause"</span>,
+        disabled: <span class="lit">true</span>,
+        callback:  (domEl) => { }
+    },
+    {
+        icon: <span class="str">"fa-solid fa-magnifying-glass"</span>,
+        callback:  (domEl) => { }
+    }
+]);
+</code></pre>
+
+<h3 id="searchbar-for-menu-entries">Searchbar for Menu Entries</h3>
+
+<p>Pressing <code class='inline'>Ctrl+Space</code> you can open a search bar as a shortcut for any Menubar entry created in the whole UI.</p>
+
+</body>
+</html>
