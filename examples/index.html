@@ -82,8 +82,17 @@
             
             panel.clear();
             panel.branch("Docs");
-
-            
+            panel.addTitle("LexGUI", { style: { fontSize: "18px" } });
+            panel.addTitle("Getting Started", {link: "../docs/getting_started.html", target: 'viewer'});
+            panel.addTitle("Area", {link: "../docs/area.html", target: 'viewer'});
+            panel.addTitle("Panel", {link: "../docs/panel.html", target: 'viewer'});
+            panel.addTitle("Branch", {link: "../docs/branch.html", target: 'viewer'});
+            panel.addTitle("Widgets", {link: "../docs/widgets.html", target: 'viewer'});
+            panel.addTitle("Dialog", {link: "../docs/dialog.html", target: 'viewer'});
+            panel.addTitle("Event Handling", {link: "../docs/event_handling.html", target: 'viewer'});
+            panel.addSeparator();
+            panel.addTitle("Components", { style: { fontSize: "18px" } });
+            panel.addTitle("Timeline", {link: "../docs/timeline.html", target: 'viewer'});
             
             panel.merge();
         }

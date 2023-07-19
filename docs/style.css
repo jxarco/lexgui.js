@@ -37,6 +37,9 @@ body {
 	margin: 0 auto;
 	padding: var(--page-padding);
 	word-break: break-word;
+
+	text-align: justify;
+  	text-justify: inter-word;
 }
 
 ::-webkit-scrollbar {

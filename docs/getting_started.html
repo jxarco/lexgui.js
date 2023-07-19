@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>LexGUI Docs</title>
+    <link rel="stylesheet" href="style.css">    
+</head>
+
+<body>
+
+<h1 id="getting-started">Getting Started</h1>
+
+<h2 id="download">Download</h2>
+
+<p>To use LexGUI.js, download it from <a href="https://github.com/jxarco/lexgui.js">jxarco/lexgui.js</a> at the <code class='inline'>build</code> folder (the best option is to <em>clone the repository in your project folder</em> to facilitate next updates) and include it directly in your HTML file using a script tag:</p>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="tag">script</span> <span class="hljs-attr">src</span>=<span class="atv">"build/lexgui.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="tag">script</span>&gt;</span>
+</code></pre>
+
+<h2 id="usage">Usage</h2>
+
+<p>Once you have included <strong>lexgui.js</strong> in your project, you can start using its API to create web interfaces. The library exposes several functions and components that you can utilize to build your UI.</p>
+<p>The first thing to do is initializing the library. Calling <code class='inline'>LX.init</code> will initialize the necessary stuff and build the main <a href="#area">Area</a>, which by default will fit the root container:</p>
+<pre><code class="lang-js"><span class="kwd">let</span> area = LX.init();
+</code></pre>
+<p>Optionally, you can pass an <code class='inline'>Object</code> parameter to define a few properties: </p>
+<ul>
+<li><code class='inline'>container (String)</code>: Root container for the entire UI (default is <code class='inline'>document.body</code>)</li>
+<li><code class='inline'>id (String)</code>: id of the generated Main Area (default is <em>mainarea</em>)</li>
+</ul>
+
+<h2 id="namespace-globals">Namespace Globals</h2>
+
+<p>You can modify global namespace (<code class='inline'>LX</code>) variables before you start creating UI elements. For now, the customizable vars are the following:</p>
+<ul>
+<li><code class='inline'>LX.DEFAULT_NAME_WIDTH</code>: Width of the name container inside a widget (Default <code class='inline'>&quot;30%&quot;</code>)</li>
+<li><code class='inline'>LX.DEFAULT_SPLITBAR_SIZE</code>: Width (in pixels) of the area resize bar created on split (Default <code class='inline'>4</code>)</li>
+<li><code class='inline'>LX.OPEN_CONTEXTMENU_ENTRY</code>: Specify how the subentries of a Context Menu will be opened, &#39;<em>mouseover</em>&#39; or &#39;<em>click</em>&#39; (Default <code class='inline'>click</code>)</li>
+</ul>
+
+</body>
+</html>

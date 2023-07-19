@@ -170,6 +170,7 @@ input[type="file"] {
   background:none;
   position: absolute;
   min-width: 256px;
+  overflow: hidden;
   box-shadow: 0 2px 10px black;
   border-radius: 4px;
   z-index: 101;
@@ -597,6 +598,11 @@ input[type="file"] {
   display: grid;
   align-content: center;
 }
+
+.lextitle.link:hover {
+  color: var(--global-selected-light);
+}
+
 
 /* Buttons */
 
@@ -1868,6 +1874,7 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexcard {
   position: relative;
+  margin-bottom: 4px;
 }
 
 .lexcard img {
@@ -1875,10 +1882,15 @@ meter::-webkit-meter-even-less-good-value {
   height: 164px;
   object-fit: cover;
   border-radius: 6px;
+  outline: 3px solid var(--global-text-secondary);
 }
 
 .lexcard:hover a {
   color: var(--global-selected-light);
+}
+
+.lexcard:hover img {
+  outline: 3px solid var(--global-selected-light);
 }
 
 .lexcard span {
