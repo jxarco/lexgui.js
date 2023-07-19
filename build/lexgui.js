@@ -2188,6 +2188,21 @@
         }
 
         /**
+         * @method attach
+         * @param {Element} content child element to append to panel
+         */
+
+        attach( content ) {
+
+            if(!content)
+            throw("no content to attach");
+
+            content.parent = this;
+            let element = content.root ? content.root : content;
+            this.root.appendChild( element );
+        }
+
+        /**
          * @method clear
          */
 
@@ -2596,6 +2611,18 @@
             let element = widget.domEl;
             element.innerText = name;
             element.className = "lextitle";
+            Object.assign(element.style, options.style ?? {});
+
+            if(options.link != undefined)
+            {
+                let link_el = document.createElement('a');
+                link_el.innerText = name;
+                link_el.href = options.link;
+                link_el.target = options.target ?? "";
+                link_el.className = "lextitle link";
+                Object.assign(link_el.style, options.style ?? {});
+                element.replaceWith(link_el);
+            }
         }
 
         /**
