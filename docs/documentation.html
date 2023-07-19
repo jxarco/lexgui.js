@@ -1,0 +1,420 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>LexGUI Docs</title>
+    <link rel="stylesheet" href="style.css">    
+</head>
+
+<body>
+
+<h1 id="docs">LexGUI Docs</h1>
+<br>
+<ul>
+    <li><a href="#getting-started">Getting Started</a>
+    <ul>
+        <li><a href="#download">Download</a></li>
+        <li><a href="#usage">Usage</a></li>
+        <li><a href="#namespace-globals">Namespace Globals</a></li>
+    </ul>
+    <li><a href="#area">Area</a>
+    <ul>
+        <li><a href="#menubar">Menubar</a>
+        <li><a href="#searchbar-for-menu-entries">Searchbar for Menu Entries</a></li>
+    </ul>
+    <li><a href="#panel">Panel</a></li>
+    <li><a href="#branch">Branch</a></li>
+    <li><a href="#widgets">Widgets</a>
+    <ul>
+        <li><a href="#getter-and-setters">Getter and Setters</a></li>
+        <li><a href="#reset-value">Reset Value</a></li>
+        <li><a href="#same-line">Same line</a></li>
+    </ul>
+    <li><a href="#widget-list">WidgetList</a></li>
+    <li><a href="#dialogs">Dialogs</a>
+    <li><a href="#event-handling">Event Handling</a></li>
+    <li><a href="#components">Components</a>
+    <ul>
+        <li><a href="#timeline">Timeline</a>
+        <li><a href="#keyframe-timeline">Keyframes timeline</a></li>
+        <li><a href="#clips-timeline">Clips timeline</a></li>
+        <li><a href="#curves-timeline">Curves timeline</a></li>
+    </ul>
+</ul>
+
+<h2 id="getting-started">Getting Started</h2>
+
+<h3 id="download">Download</h3>
+
+<p>To use LexGUI.js, download it at the <code class='inline'>build</code> folder (the best option is to <em>clone this repository in your project folder</em> to facilitate next updates) and include it directly in your HTML file using a script tag:</p>
+<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="tag">script</span> <span class="hljs-attr">src</span>=<span class="atv">"build/lexgui.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="tag">script</span>&gt;</span>
+</code></pre>
+
+<h3 id="usage">Usage</h3>
+
+<p>Once you have included <strong>lexgui.js</strong> in your project, you can start using its API to create web interfaces. The library exposes several functions and components that you can utilize to build your UI.</p>
+<p>The first thing to do is initializing the library. Calling <code class='inline'>LX.init</code> will initialize the necessary stuff and build the main <a href="#area">Area</a>, which by default will fit the root container:</p>
+<pre><code class="lang-js"><span class="kwd">let</span> area = LX.init();
+</code></pre>
+<p>Optionally, you can pass an <code class='inline'>Object</code> parameter to define a few properties: </p>
+<ul>
+<li><code class='inline'>container (String)</code>: Root container for the entire UI (default is <code class='inline'>document.body</code>)</li>
+<li><code class='inline'>id (String)</code>: id of the generated Main Area (default is <em>mainarea</em>)</li>
+</ul>
+
+<h3 id="namespace-globals">Namespace Globals</h3>
+
+<p>You can modify global namespace (<code class='inline'>LX</code>) variables before you start creating UI elements. For now, the customizable vars are the following:</p>
+<ul>
+<li><code class='inline'>LX.DEFAULT_NAME_WIDTH</code>: Width of the name container inside a widget (Default <code class='inline'>&quot;30%&quot;</code>)</li>
+<li><code class='inline'>LX.DEFAULT_SPLITBAR_SIZE</code>: Width (in pixels) of the area resize bar created on split (Default <code class='inline'>4</code>)</li>
+<li><code class='inline'>LX.OPEN_CONTEXTMENU_ENTRY</code>: Specify how the subentries of a Context Menu will be opened, &#39;<em>mouseover</em>&#39; or &#39;<em>click</em>&#39; (Default <code class='inline'>click</code>)</li>
+</ul>
+
+<h2 id="area">Area</h2>
+
+<p>An <strong>Area</strong> is the main container used in lexgui.js. You can have as many Areas you need using <code class='inline'>Area.split(options)</code>, which allows you to split horizontally or vertically a given Area:</p>
+<ul>
+<li><code class='inline'>type (String)</code>: Split mode, either horizontal (default) or vertical</li>
+<li><code class='inline'>sizes (Array)</code>: Size of each new area. Default is [&quot;50%&quot;, &quot;50%&quot;]</li>
+</ul>
+<p>From here, you can already build your UI adding <a href="#panel">Panels</a>, but in most cases you will want to split the main Area first:</p>
+<pre><code class="lang-js"><span class="com">// Split main area in 2 sections (2 Areas)</span>
+area.<span class="hljs-built_in">split</span>({ sizes: [<span class="str">"70%"</span>, <span class="str">"30%"</span>] });
+<span class="kwd">let</span> [leftArea, rightArea] = area.sections;
+
+<span class="com">// Split again left area this time vertically</span>
+leftArea.<span class="hljs-built_in">split</span>({ type: <span class="str">"vertical"</span>, sizes: [<span class="str">"80vh"</span>, <span class="str">"20vh"</span>] });
+<span class="kwd">let</span> [leftUpArea, leftBottomArea] = leftArea.sections;
+</code></pre>
+
+<h3 id="menubar">Menubar</h3>
+
+<p>You can build a <strong>Menubar</strong> directly into any Area using <code class='inline'>Area.addMenubar(callback, options)</code>. To specify each of the menu entries, you should pass a <em>callback function</em> to be called when the Menubar is constructed. <strong>Callbacks will have a Menubar instance as parameter</strong>, so use <code class="inline">Menubar.add(entryPath, options)</code> on that instance inside your callback to build each of the menu entries:</p>
+<ul>
+<li><code class='inline'>entryPath (String)</code>: The path menu/submenu/etc of each entry</li>
+<li><code class='inline'>options (Object/Function)</code>: <ul>
+<li><code class='inline'>callback (Function)</code>: To be called when interacting with the entry</li>
+<li><code class='inline'>icon (String)</code> at (<a href="https://fontawesome.com/search">Fontawesome</a>)</li>
+<li><code class='inline'>short (String)</code> for shortcuts</li>
+<li><code class='inline'>type (String)</code> options: <em>checkbox</em></li>
+</ul>
+</li>
+</ul>
+<p><sup>Note: In case of no options rather than the callback, you can use <code class='inline'>options</code> as the <code class='inline'>Function</code> callback.<sup></p>
+<pre><code class="lang-js">area.addMenubar( m =&gt; {
+    m.<span class="hljs-keyword">add( </span><span class="str">"Scene/New Scene"</span>, () =&gt; { console.log(<span class="str">"New scene created!"</span>) } )<span class="hljs-comment">;</span>
+    m.<span class="hljs-keyword">add( </span><span class="str">"Scene/Open Scene"</span> )<span class="hljs-comment">;</span>
+    m.<span class="hljs-keyword">add( </span><span class="str">"Scene/"</span> )<span class="com">; // This is a separator!</span>
+    m.<span class="hljs-keyword">add( </span><span class="str">"Scene/Open Recent/hello.scene"</span>)<span class="hljs-comment">;</span>
+    m.<span class="hljs-keyword">add( </span><span class="str">"Scene/Open Recent/goodbye.scene"</span> )<span class="hljs-comment">;</span>
+    m.<span class="hljs-keyword">add( </span><span class="str">"Project/Export/DAE"</span>, { <span class="hljs-keyword">short: </span><span class="str">"E"</span> } )<span class="hljs-comment">;</span>
+    m.<span class="hljs-keyword">add( </span><span class="str">"Project/Export/GLTF"</span> )<span class="hljs-comment">;</span>
+    m.<span class="hljs-keyword">add( </span><span class="str">"Help/About"</span> )<span class="hljs-comment">;</span>
+    m.<span class="hljs-keyword">add( </span><span class="str">"Help/Support"</span>, { callback: () =&gt; { console.log(<span class="str">"Support!"</span>) }, icon: <span class="str">"fa-solid fa-heart"</span> } )<span class="hljs-comment">;</span>
+})<span class="hljs-comment">;</span>
+</code></pre>
+<p>The <code class='inline'>options</code> in <code class='inline'>Area.addMenubar(callback, options)</code> are by now the following: </p>
+<ul>
+<li><code class='inline'>float (String)</code>: Justify main entries to left (default), center, right</li>
+</ul>
+<pre><code class="lang-js">area.addMenubar( <span class="hljs-function"><span class="hljs-params">m</span> =&gt;</span> {
+    <span class="com">// Fill entries...</span>
+}, { <span class="hljs-attr">float</span>: <span class="str">"center"</span> });
+</code></pre>
+<h4 id="searchbar-for-menu-entries">Searchbar for Menu Entries</h4>
+<p>Pressing <code class='inline'>Ctrl+Space</code> you can open a search bar as a shortcut for any Menubar entry created in the whole UI.</p>
+<h3 id="panel">Panel</h3>
+<p>Panels are the DOM elements that will enclose your UI <a href="#widgets">widgets</a>. The pipeline is simple, create a Panel, attach it to an Area and fill it!</p>
+<p>You could do it manually instancing a <code class='inline'>LX.Panel</code> and attaching it using <code class='inline'>Area.attach(content)</code> but you might want to call <code class='inline'>Area.addPanel(options)</code> to get an instanced panel already attached to that area:</p>
+<pre><code class="lang-js"><span class="kwd">var</span> panel = area.addPanel();
+fillPanel( side_panel );
+</code></pre>
+<p>As <code class='inline'>options</code> you can pass <code class='inline'>id</code> and <code class='inline'>className</code> to be added to your new panel.</p>
+<h3 id="branch">Branch</h3>
+<p>A Branch essentially serves as a Panel Section, allowing you to effectively organize widgets within your panels. By opening and merging branches at any time, you can seamlessly incorporate widgets into your panels using <code class='inline'>Panel.branch(name, options)</code>:</p>
+<pre><code class="lang-js">panel.branch(<span class="str">"Section Title"</span>);
+
+<span class="com">// Add widgets here...</span>
+
+panel.merge();
+</code></pre>
+<p>When branching, you can use some options:</p>
+<ul>
+<li><code class='inline'>className</code>: Add class to the branch</li>
+<li><code class='inline'>closed</code>: Set branch collapsed/opened [false]</li>
+<li><code class='inline'>icon</code>: Set branch icon (Fontawesome class e.g. &quot;fa-solid fa-skull&quot;)</li>
+<li><code class='inline'>filter</code>: Allow filter widgets in branch by name [false]</li>
+</ul>
+<h2 id="widgets">Widgets</h2>
+<p>A widget is a <em>fundamental building block that represents a graphical user interface (GUI) element</em>. Widgets are the visual components with which users interact and provide input within an application, from basic elements like buttons and text fields to more complex elements such as dropdown menus, sliders, and checkboxes. </p>
+<p>LexGUI.js provides a wide range of pre-built widgets that developers can utilize to construct intuitive and visually appealing interfaces. These widgets are designed to be customizable, allowing developers to adjust their appearance and behavior to suit the specific requirements of their application.</p>
+<h3 id="getter-and-setters">Getter and Setters</h3>
+<p>One of the features of LexGUI is the ability to effortlessly retrieve and modify values for any widget that has been added. This functionality provides developers with a convenient way to interact with and manipulate the UI elements within their applications:</p>
+<pre><code class="lang-js"><span class="com">// Getting Values by Widget Name</span>
+<span class="kwd">const</span> color = <span class="hljs-keyword">panel</span>.getValue(<span class="str">'Background'</span>);
+
+<span class="com">// Settings Values</span>
+<span class="hljs-keyword">panel</span>.setValue(<span class="str">'Font Color'</span>, <span class="hljs-keyword">color</span>);
+</code></pre>
+<p><sup>Note: It&#39;s important to ensure that the new value provided is compatible with the widget&#39;s data type and constraints. Incorrect data types or out-of-range values may result in unexpected behavior or errors.<sup></p>
+<h3 id="reset-value">Reset Value</h3>
+<p>In most cases where you set a Widget Name, you will have the option to reset the Widget Value to its default value by pressing a <em>reset button</em> what will appear on changing the initial state of the widget.</p>
+<h3 id="same-line">Same line</h3>
+<p>You can also add multiple widgets in the same panel row to create well-organized and visually optimized user interface layouts and by calling <code class='inline'>panel.sameLine(number)</code>, where <code class='inline'>number</code> is the number of widgets to be inlined.</p>
+<h2 id="widget-list">Widget List</h2>
+<h3 id="title">Title</h3>
+<p>Represents a title section inside a <a href="#branch">Branch</a>. Call <code class='inline'>Panel.addTitle(name, value, callback, options)</code> to add a Title Widget to your panel:</p>
+<ul>
+<li><code class='inline'>name (String)</code>: Widget name</li>
+<li><code class='inline'>options (Object)</code>: Basic options for a Widget</li>
+</ul>
+<pre><code class="lang-js">panel.addTitle(<span class="str">"A title!"</span>)<span class="hljs-comment">;</span>
+</code></pre>
+<h3 id="text">Text</h3>
+<p>Represents a text input. Call <code class='inline'>Panel.addText(name, value, callback, options)</code> to add a Text Widget to your panel:</p>
+<ul>
+<li><code class='inline'>name (String)</code>: Widget name</li>
+<li><code class='inline'>value (String)</code>: Text</li>
+<li><code class='inline'>callback (Function)</code>: Function called when the input changes</li>
+<li><code class='inline'>options (Object)</code>:<ul>
+<li><code class='inline'>disabled</code>: Make the widget disabled</li>
+<li><code class='inline'>placeholder</code>: Add input placeholder</li>
+<li><code class='inline'>icon</code>: Icon to be added before the input</li>
+<li><code class='inline'>trigger</code>: Choose onchange trigger (default, input)</li>
+<li><code class='inline'>inputWidth</code>: Width of the text input</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js">panel.addText(<span class="str">"Text Name"</span>, <span class="str">"Text value"</span>, (value, event) =&gt;</span> {
+    console.log(value);
+}, { placeholder: <span class="str">"Something"</span> });
+</code></pre>
+<h3 id="button">Button</h3>
+<p>Represents a clickable element typically used to trigger an action. Call <code class='inline'>Panel.addButton(name, value, callback, options)</code> to add a Button Widget to your panel:</p>
+<ul>
+<li><code class='inline'>name (String)</code>: Widget name</li>
+<li><code class='inline'>value (String)</code>: Button text</li>
+<li><code class='inline'>callback (Function)</code>: Function called when the button is clicked</li>
+<li><code class='inline'>options (Object)</code>:<ul>
+<li><code class='inline'>disabled</code>: Make the widget disabled</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js">panel.addButton(<span class="str">"A Name"</span>, <span class="str">"Print event"</span>, <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(event);
+});
+</code></pre>
+<h3 id="combo-buttons">Combo Buttons</h3>
+<p>Multiple inlined (buttons)[#button] as selectable options. Call <code class='inline'>Panel.addComboButtons(name, values, options)</code> to add a ComboButtons Widget to your panel:</p>
+<ul>
+<li><code class='inline'>name (String)</code>: Widget name</li>
+<li><code class='inline'>values (Array)</code>: Each of the {value, callback} items (you can add an <code class='inline'>icon</code>)</li>
+<li><code class='inline'>options (Object)</code>:<ul>
+<li><code class='inline'>float</code>: Justify content (left, center, right) [center]</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js">panel.addComboButtons(<span class="str">"Alignment"</span>, [
+    {
+        value: <span class="str">'left'</span>,
+        icon: <span class="str">'fa fa-align-left'</span>,
+        callback: <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(value);
+        }
+    }, {
+        value: <span class="str">'center'</span>,
+        icon: <span class="str">'fa fa-align-center'</span>,
+        callback: <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(value);
+        }
+    }, {
+        value: <span class="str">'right'</span>,
+        icon: <span class="str">'fa fa-align-right'</span>,
+        callback: <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(value);
+        }
+    }
+]);
+</code></pre>
+<h3 id="number">Number</h3>
+<p>Represents a number input. Call <code class='inline'>Panel.addNumber(name, value, callback, options)</code> to add a Number Widget to your panel:</p>
+<ul>
+<li><code class='inline'>name (String)</code>: Widget name</li>
+<li><code class='inline'>value (Number)</code>: Number value</li>
+<li><code class='inline'>callback (Function)</code>: Function called when the input changes</li>
+<li><code class='inline'>options (Object)</code>:<ul>
+<li><code class='inline'>disabled</code>: Make the widget disabled</li>
+<li><code class='inline'>step</code>: Change value step</li>
+<li><code class='inline'>min</code>, <code class='inline'>max</code>: Min and Max input values</li>
+</ul>
+</li>
+</ul>
+<p><sup>Note: Setting <code class='inline'>min</code>, <code class='inline'>max</code> values will automatically add a slider below the number input.<sup></p>
+<pre><code class="lang-js"><span class="hljs-keyword">panel</span>.addNumber(<span class="str">"Font Size"</span>, <span class="dec">36</span>, (value, <span class="hljs-keyword">event</span>) =&gt; {
+    console.<span class="hljs-keyword">log</span>(value);
+}, { <span class="hljs-keyword">min</span>: <span class="dec">1</span>, <span class="hljs-keyword">max</span>: <span class="dec">48</span> });
+</code></pre>
+<p>You can change the value of this widget manually, using the mouse wheel, and dragging (up/down). In the last two cases, pressing <em>Alt</em> and <em>Left Shift</em> will apply a factor of <code class='inline'>0.1</code> and <code class='inline'>10</code> in that order.</p>
+<h3 id="vector">Vector</h3>
+<p>Similar to the Number widget, it represents a numeric vector input. It&#39;s composed by multiple Number Widgets. Call <code class='inline'>Panel.addVectorN(name, value, callback, options)</code>, where N is a number in the range [2, 4], to add a Vector Widget to your panel:</p>
+<ul>
+<li><code class='inline'>name (String)</code>: Widget name</li>
+<li><code class='inline'>values (Number Array)</code>: Array containing the values for the vector</li>
+<li><code class='inline'>callback (Function)</code>: Function called when any of the N number inputs change</li>
+<li><code class='inline'>options (Object)</code>:<ul>
+<li><code class='inline'>disabled</code>: Make the widget disabled</li>
+<li><code class='inline'>step</code>: Change values step</li>
+<li><code class='inline'>min</code>, <code class='inline'>max</code>: Min and Max inputs value</li>
+</ul>
+</li>
+</ul>
+<p><sup>Note: Since a Vector Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.<sup></p>
+<pre><code class="lang-js">panel.addVector2(<span class="str">"2D Position"</span>, [<span class="dec">250</span>, <span class="dec">350</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(value);
+}, { min: <span class="dec">0</span>, max: <span class="dec">1024</span> });
+
+panel.addVector3(<span class="str">"Velocity"</span>, [<span class="dec">0.1</span>, <span class="dec">1</span>, <span class="dec">0.5</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(value);
+});
+
+panel.addVector4(<span class="str">"Shader Color"</span>, [<span class="dec">1</span>, <span class="dec">1</span>, <span class="dec">1</span>, <span class="dec">1</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(value);
+});
+</code></pre>
+<h3 id="checkbox">Checkbox</h3>
+<p>Represents a classic checkbox that allows users to select or deselect an option as a binary choice (either checked or unchecked). Call <code class='inline'>Panel.addCheckbox(name, value, callback, options)</code> to add a Checkbox Widget to your panel:</p>
+<ul>
+<li><code class='inline'>name (String)</code>: Widget name</li>
+<li><code class='inline'>value (Boolean)</code>: Boolean value (true/false)</li>
+<li><code class='inline'>callback (Function)</code>: Function called when the checkbox value changes</li>
+<li><code class='inline'>options (Object)</code>:<ul>
+<li><code class='inline'>disabled</code>: Make the widget disabled</li>
+<li><code class='inline'>suboptions</code>: Callback to add widgets shown if value = <code class='inline'>TRUE</code></li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js">panel.addCheckbox(<span class="str">"Toggle me"</span>, <span class="lit">true</span>, <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(value);
+});
+
+<span class="com">// Suboptions in case checkbox is enabled</span>
+panel.addCheckbox(<span class="str">"Toggle me too"</span>, <span class="lit">true</span>, <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+        <span class="hljs-built_in">console</span>.log(value);
+    }, { suboptions: <span class="hljs-function"><span class="hljs-params">p</span> =&gt;</span> {
+        p.addText(<span class="lit">null</span>, <span class="str">"Suboption 1"</span>);
+        p.addNumber(<span class="str">"Suboption 2"</span>, <span class="dec">12</span>);
+} });
+</code></pre>
+<h3 id="color">Color</h3>
+<p>Represents a color input. Allows users to select a color using a color picker, providing an interactive way to choose colors for various elements in your web interface. Call <code class='inline'>Panel.addColor(name, value, callback, options)</code> to add a Color Widget to your panel:</p>
+<ul>
+<li><code class='inline'>name (String)</code>: Widget name</li>
+<li><code class='inline'>value (String or Array)</code>: Color value in hex (&quot;#fff&quot;) or Array[r, g, b]</li>
+<li><code class='inline'>callback (Function)</code>: Function called when the input changes</li>
+<li><code class='inline'>options (Object)</code>:<ul>
+<li><code class='inline'>disabled</code>: Make the widget disabled</li>
+<li><code class='inline'>useRGB</code>: The callback returns color as Array[r, g, b] and not hex [<code class='inline'>FALSE</code>]</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js">panel.addColor(<span class="str">"Font Color"</span>, [<span class="dec">1</span>, <span class="dec">0.1</span>, <span class="dec">0.6</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(<span class="str">"Font Color: "</span>, value);
+});
+
+panel.addColor(<span class="str">"Background"</span>, <span class="str">"#b7a9b1"</span>);
+</code></pre>
+<h3 id="dropdown">Dropdown</h3>
+<p>Represents a classic Drop-down list. It works as a HTML Select element, but it can handle media options. Call <code class='inline'>Panel.addDropdown(name, values, value, callback, options)</code> function to add a Dropdown Widget to your Panel:</p>
+<ul>
+<li><code class='inline'>name (String)</code>: Widget name</li>
+<li><code class='inline'>values (Array)</code>: Array of the values of the list. The values can be strings or media (images or GIFs). For the media, the entries of the array must be an object containing a <code class='inline'>value</code> and <code class='inline'>src</code> fields.</li>
+<li><code class='inline'>values (String)</code>: Current selected value from the drop-down list.</li>
+<li><code class='inline'>callback (Function)</code>: Function called when an list value is selected.</li>
+<li><code class='inline'>options (Object)</code>:<ul>
+<li><code class='inline'>filter</code>: Boolean field to specify if the drop-down needs a search bar</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js"><span class="com">// String values</span>
+
+panel.addDropdown(<span class="str">"String Dropdown"</span>, [<span class="str">"Option 1"</span>, <span class="str">"Option 2"</span>], <span class="str">"Option 1"</span>, (<span class="hljs-keyword">value</span>, <span class="hljs-keyword">event</span>) =&gt; {
+      console.log(<span class="hljs-keyword">value</span>);
+}, options);
+
+<span class="com">// Media values</span>
+
+<span class="kwd">const</span> options = [
+  { <span class="hljs-keyword">value</span>: <span class="str">"Option 1"</span>, src: <span class="str">"/option1.png"</span> }, 
+  { <span class="hljs-keyword">value</span>: <span class="str">"Option 2"</span>, src: <span class="str">"/option2.gif"</span> },
+  { <span class="hljs-keyword">value</span>: <span class="str">"Option 3"</span>, src: <span class="str">"/option3.jpg"</span> }
+];
+panel.addDropdown(<span class="str">"Media Dropdown"</span>, options, <span class="str">"Option 1"</span>, (<span class="hljs-keyword">value</span>, <span class="hljs-keyword">event</span>) =&gt; {
+      console.log(<span class="hljs-keyword">value</span>);
+}, options);
+</code></pre>
+<h3 id="tags">Tags</h3>
+<p>Represents a collection of tags that can be added, removed, and modified dynamically. It provides a user-friendly way to manage and display multiple tags. Call <code class='inline'>Panel.addTags(name, value, callback, options)</code> to add a Tags Widget to your panel:</p>
+<ul>
+<li><code class='inline'>name (String)</code>: Widget name</li>
+<li><code class='inline'>value (Boolean)</code>: Comma separated tags</li>
+<li><code class='inline'>callback (Function)</code>: Function called when a tag is either removed or added</li>
+<li><code class='inline'>options (Object)</code>: Basic options for a Widget</li>
+</ul>
+<pre><code class="lang-js">panel.addTags(<span class="str">"Game Tags"</span>, <span class="str">"2d, ai, engine, ps5, console"</span>, <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(value);
+});
+</code></pre>
+<h3 id="tree">Tree</h3>
+<p>...TODO</p>
+<h3 id="array">Array</h3>
+<p>...TODO</p>
+<h3 id="list">List</h3>
+<p>...TODO</p>
+<h3 id="layers">Layers</h3>
+<p>...TODO</p>
+<h3 id="file">File</h3>
+<p>...TODO</p>
+<h3 id="progress">Progress</h3>
+<p>Represents a horizontal bar that fills up gradually to indicate the completion progress of a task or operation or just show a numeric value. Call <code class='inline'>Panel.addProgress(name, value, options)</code> to add a Progress Widget to your panel:</p>
+<ul>
+<li><code class='inline'>name (String)</code>: Widget name</li>
+<li><code class='inline'>value (Number)</code>: Progress value</li>
+<li><code class='inline'>options (Object)</code>:<ul>
+<li><code class='inline'>editable</code>: Allow to edit value manually</li>
+<li><code class='inline'>callback (Function)</code>: If editable, function called when progress changes</li>
+<li><code class='inline'>showValue</code>: Show current value</li>
+<li><code class='inline'>min</code>, <code class='inline'>max</code>: Min and Max values</li>
+</ul>
+</li>
+</ul>
+<pre><code class="lang-js"><span class="hljs-selector-tag">panel</span><span class="hljs-selector-class">.addProgress</span>(<span class="str">"HeadRoll"</span>, <span class="dec">0</span>, { 
+  <span class="hljs-attribute">min</span>: -<span class="dec">1</span>, 
+  max: <span class="dec">1</span>, 
+  showValue: <span class="lit">true</span>, 
+  editable: <span class="lit">true</span>, 
+  callback: (value, event) =&gt; {
+    console.<span class="hljs-built_in">log</span>(value);
+  }
+});
+</code></pre>
+<h3 id="curve">Curve</h3>
+<p>...TODO</p>
+<h3 id="other-widgets">Other Widgets</h3>
+<ul>
+<li><code class='inline'>Panel.addBlank(height)</code>: Add vertical space (in pixels) inside a branch.</li>
+</ul>
+<h2 id="dialogs">Dialogs</h2>
+<p>...TODO</p>
+<h2 id="event-handling">Event Handling</h2>
+<p>...TODO</p>
+<h2 id="timeline">Timeline</h2>
+<h3 id="keyframes-timeline">Keyframes timeline</h3>
+<p>...TODO</p>
+<h3 id="clips-timeline">Clips timeline</h3>
+<p>...TODO</p>
+<h3 id="curves-timeline">Curves timeline</h3>
+<p>...TODO</p>
+
+</body>
+</html>
