@@ -34,6 +34,7 @@
 
         let url = "asset_view.html";
         let example_selected = "Asset View";
+        let show_previews = true;
 
         const examples = [
             'Asset View',
@@ -67,12 +68,22 @@
             panel.clear();
             panel.branch("Examples");
 
-            panel.addCheckbox("Show previews", true, () => {} );
+            // panel.addCheckbox("Show previews", show_previews, v => {
+            //     show_previews = v;
+            //     fillExamples( panel );
+            // } );
 
             for( let ex of examples )
             {
                 const id = ex.replace(" ", "_").toLowerCase();
-                panel.addCard(ex, {img: "previews/" + id + ".png", link: id + ".html", target: 'viewer'});
+                const options = {
+                    link: id + ".html", 
+                    target: 'viewer'
+                };
+                if( show_previews )
+                    options.img = "previews/" + id + ".png";
+
+                panel.addCard(ex, options);
             }
 
             panel.merge();
