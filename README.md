@@ -6,11 +6,11 @@
 
 ## Docs
 
-The library documentation is in progress but you can check it [here](docs/documentation.md).
+The library documentation is in progress but you can check it [here](https://jxarco.github.io/lexgui.js/docs/).
 
 ## Examples
 
-Look at [demo.js](demo.js) to see how to create the different widgets!
+Look at this [examples](https://jxarco.github.io/lexgui.js/examples/) to see how to create the different widgets and components!
 
 ## Contributors
 
@@ -84,9 +84,9 @@ Look at [demo.js](demo.js) to see how to create the different widgets!
 - [x] Tree multiple selection
 - [x] Area Overlay panel
 - [x] Minimisable tiny dialog (fast option to debugg)
+- [x] Asset Browser
 - [ ] Fix menubar entry with checkbox and icon
 - [ ] Drag elements to timeline to animate
-- [ ] Asset Browser
 - Components:
     - [x] Timeline
     - [ ] Node Graphs
