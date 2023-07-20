@@ -1659,11 +1659,13 @@ meter::-webkit-meter-even-less-good-value {
   margin: 6px;
   top: 0;
   justify-content: start;
+  pointer-events: none;
 }
 
 .lexoverlaybuttons .lexwidget {
   padding: 1px;
   margin-right: 4px;
+  pointer-events: auto;
 }
 
 .lexoverlaybuttons.vertical {

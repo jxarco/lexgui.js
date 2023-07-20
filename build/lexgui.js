@@ -4801,6 +4801,9 @@
 
     class PocketDialog extends Dialog {
 
+        static TOP      = 0;
+        static BOTTOM   = 1;
+
         constructor( title, callback, options = {} ) {
 
             options.draggable = options.draggable ?? false;
@@ -4814,10 +4817,14 @@
             this.root.style.left = "calc(100% - " + (this.root.offsetWidth + 6) + "px)";
             this.root.style.top = "0px";
             this.panel.root.style.width = "calc( 100% - 12px )";
+            this.dock_pos = PocketDialog.TOP;
 
             this.title.tabIndex = -1;
             this.title.addEventListener("click", e => {
                 this.root.classList.toggle("closed");
+                if( this.dock_pos == PocketDialog.BOTTOM )
+                    that.root.style.top = this.root.classList.contains("closed") ? 
+                    "calc(100% - " + (that.title.offsetHeight + 6) + "px)" : "calc(100% - " + (that.root.offsetHeight + 6) + "px)";
             });
 
             if( !options.draggable )
@@ -4849,8 +4856,10 @@
                         that.root.style.left = "calc(100% - " + (that.root.offsetWidth + 6) + "px)";
                     }else if( e.ctrlKey && e.key == 'ArrowUp' ) {
                         that.root.style.top = "0px";
+                        that.dock_pos = PocketDialog.TOP;
                     }else if( e.ctrlKey && e.key == 'ArrowDown' ) {
                         that.root.style.top = "calc(100% - " + (that.root.offsetHeight + 6) + "px)";
+                        that.dock_pos = PocketDialog.BOTTOM;
                     }
                 });
             }
