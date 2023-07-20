@@ -9,7 +9,37 @@
 <body>
 
 <h1 id="event-handling">Event Handling</h1>
-<p>...TODO</p>
+
+<p>LexGUI relies almost entirely on callbacks when creating each of its widgets and it's not a problem when a callback should be triggered
+<strong>only</strong> from one place.</p>
+
+<h2>Signals</h2>
+
+<p>For those cases where there is no trivial connection between the callbacks and the element that triggers it, LexGUI allows
+to create <strong>Signals</strong>. E.g. We could make a widget to be updated when it receives a signal from any location in the application.</p>
+
+<h3>Connect a Signal</h3>
+
+<p>The following code is creating a widget bound to a signal. That implies that it will be updated when
+     it receives the corresponding signal:</p>
+
+<pre><code class="lang-js">panel.addNumber(<span class="str">"Font Size"</span>, <span class="dec">36</span>, (value, <span class="hljs-keyword">event</span>) =&gt; {
+    console.<span class="hljs-keyword">log</span>(value);
+}, { signal: <span class="str">"@on_set_fontsize"</span>, min: <span class="dec">1</span>, max: <span class="dec">48</span> });
+</code></pre>
+
+<p>In the case the receiver it's not a widget we could do it using <code class="inline">LX.addSignal(name, obj, callback)</code>:</p>
+
+<pre><code class="lang-js">LX.addSignal( <span class="str">"@on_value_changed"</span>, element, function(value) {
+    console.log(value);
+} );
+</code></pre>
+
+<sup>Note that we are using a callback this time that will called within the element scope when the signal is emitted.</sup>
+
+<h3>Emit a Signal</h3>
+
+<p>To emit a signal we only have to call <code class="inline">LX.emit(signal_name, callback_param)</code> in any of the cases.</p>
 
 </body>
 </html>

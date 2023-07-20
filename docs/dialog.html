@@ -8,8 +8,47 @@
 
 <body>
 
-<h1 id="dialogs">Dialog</h1>
-<p>...TODO</p>
+<h1 id="dialogs">Dialogs</h1>
+
+<p>LexGUI allows to create Dialogs, also known as modal windows or pop-ups, allowing developers to display
+     important information, gather user 
+     input, or prompt for user actions without navigating away from the current context.
+     The possible dialogs are the following: </p>
+
+     <ul>
+        <li><strong>Classic</strong> General pop-up to display any kind of information or errors.</li>
+        <li><strong>Pocket</strong>: Tiny dialog used normally as a debugging tool. Can be docked to the window corners.</li>
+        <li><strong>Prompt</strong>: Classic prompt pop-up to gather user information.</li>
+    </ul>
+
+<p>To fill the dialog content, a panel is automatically created inside the root so it's possible 
+    to begin branching and adding widgets. The same way as menubars, you can fill the panel inside the creation callback. The following code creates a classic dialog:</p>
+
+<pre><code class="lang-js"><span class="kwd">const</span> dialog = <span class="kwd">new</span> LX.<span class="typ">Dialog</span>(<span class="str">"Title"</span>, p => {
+    <span class="com">// Start adding widgets</span>
+    p.addNumber(<span class="str">"Example"</span>, <span class="dec">18</span>);
+}, options);
+
+<span class="com">// To use classic dialogs as simple messages or error alerts, they can be also created using LX.message</span>
+<span class="kwd">const</span> dialog =  LX.message(<span class="str">"Some text"</span>, <span class="str">"Title"</span>, options);
+</code></pre>
+
+<p>To create a Pocket Dialog you can follow the same steps but using <code class='inline'>LX.PocketDialog</code> class.
+In case of prompts, you can create them using the following code:</p>
+
+<pre><code class="lang-js">LX.prompt(<span class="str">"Message"</span>, <span class="str">"Title"</span>, (result) => {
+    <span class="com">// result is the user's response</span>
+    console.log(result);
+}, options);
+</code></pre>
+
+<p>The possible <code class='inline'>options (Object)</code> when creating dialogs are the following:</p>
+
+<ul>
+    <li><code class='inline'>position (Array)</code>: [x, y] representing left-top values relative to the main LX root area.</li>
+    <li><code class='inline'>size (Array)</code>: [width, height] in css</li>
+    <li><code class='inline'>draggable (Boolean)</code>: Set the pop-up as draggable. In case of pocket dialogs it's <span class="lit">false</span>, by default (they are dockables)</li>
+</ul>
 
 </body>
 </html>
