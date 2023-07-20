@@ -8,41 +8,19 @@
 
 <body>
 
-<h1 id="widgets">Widgets</h1>
+<h1 id="widget-list">Widget List</h1>
 
-<p>A widget is a <em>fundamental building block that represents a graphical user interface (GUI) element</em>. Widgets are the visual components with which users interact and provide input within an application, from basic elements like buttons and text fields to more complex elements such as dropdown menus, sliders, and checkboxes. </p>
-<p>LexGUI.js provides a wide range of pre-built widgets that developers can utilize to construct intuitive and visually appealing interfaces. These widgets are designed to be customizable, allowing developers to adjust their appearance and behavior to suit the specific requirements of their application.</p>
-
-<h2 id="getter-and-setters">Getter and Setters</h2>
-
-<p>One of the features of LexGUI is the ability to effortlessly retrieve and modify values for any widget that has been added. This functionality provides developers with a convenient way to interact with and manipulate the UI elements within their applications:</p>
-<pre><code class="lang-js"><span class="com">// Getting Values by Widget Name</span>
-<span class="kwd">const</span> color = <span class="hljs-keyword">panel</span>.getValue(<span class="str">'Background'</span>);
-
-<span class="com">// Settings Values</span>
-<span class="hljs-keyword">panel</span>.setValue(<span class="str">'Font Color'</span>, <span class="hljs-keyword">color</span>);
-</code></pre>
-<p><sup>Note: It&#39;s important to ensure that the new value provided is compatible with the widget&#39;s data type and constraints. Incorrect data types or out-of-range values may result in unexpected behavior or errors.<sup></p>
-
-<h2 id="reset-value">Reset Value</h2>
-
-<p>In most cases where you set a Widget Name, you will have the option to reset the Widget Value to its default value by pressing a <em>reset button</em> what will appear on changing the initial state of the widget.</p>
-
-<h2 id="same-line">Same line</h2>
-
-<p>You can also add multiple widgets in the same panel row to create well-organized and visually optimized user interface layouts and by calling <code class='inline'>panel.sameLine(number)</code>, where <code class='inline'>number</code> is the number of widgets to be inlined.</p>
-
-<h2 id="widget-list">Widget List</h2>
-
-<h3 id="title">Title</h3>
-<p>Represents a title section inside a <a href="#branch">Branch</a>. Call <code class='inline'>Panel.addTitle(name, value, callback, options)</code> to add a Title Widget to your panel:</p>
+<h2 id="title">Title</h2>
+<p>Represents a title section inside a <a href="branch.html">Branch</a>. Call <code class='inline'>Panel.addTitle(name, value, callback, options)</code> to add a Title Widget to your panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
 <li><code class='inline'>options (Object)</code>: Basic options for a Widget</li>
 </ul>
 <pre><code class="lang-js">panel.addTitle(<span class="str">"A title!"</span>)<span class="hljs-comment">;</span>
 </code></pre>
-<h3 id="text">Text</h3>
+
+<h2 id="text">Text</h2>
+
 <p>Represents a text input. Call <code class='inline'>Panel.addText(name, value, callback, options)</code> to add a Text Widget to your panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
@@ -61,7 +39,17 @@
     console.log(value);
 }, { placeholder: <span class="str">"Something"</span> });
 </code></pre>
-<h3 id="button">Button</h3>
+
+<h2 id="text-area">Text Area</h2>
+<p>Represents a text area element. Call <code class='inline'>Panel.addTextArea(name, value, callback, options)</code> to add a Text Area Widget to your panel (the <code class='inline'>options</code> are the same as the Text widget):</p>
+
+<pre><code class="lang-js">panel.addTextArea(<span class="str">"Text Name"</span>, <span class="str">"Text value"</span>, (value, event) =&gt;</span> {
+    console.log(value);
+}, { placeholder: <span class="str">"Something"</span> });
+</code></pre>
+
+<h2 id="button">Button</h2>
+
 <p>Represents a clickable element typically used to trigger an action. Call <code class='inline'>Panel.addButton(name, value, callback, options)</code> to add a Button Widget to your panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
@@ -76,8 +64,10 @@
     <span class="hljs-built_in">console</span>.log(event);
 });
 </code></pre>
-<h3 id="combo-buttons">Combo Buttons</h3>
-<p>Multiple inlined (buttons)[#button] as selectable options. Call <code class='inline'>Panel.addComboButtons(name, values, options)</code> to add a ComboButtons Widget to your panel:</p>
+
+<h2 id="combo-buttons">Combo Buttons</h2>
+
+<p>Multiple inlined <a href="#button">buttons</a> as selectable options. Call <code class='inline'>Panel.addComboButtons(name, values, options)</code> to add a ComboButtons Widget to your panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
 <li><code class='inline'>values (Array)</code>: Each of the {value, callback} items (you can add an <code class='inline'>icon</code>)</li>
@@ -88,27 +78,27 @@
 </ul>
 <pre><code class="lang-js">panel.addComboButtons(<span class="str">"Alignment"</span>, [
     {
-        value: <span class="str">'left'</span>,
-        icon: <span class="str">'fa fa-align-left'</span>,
+        value: <span class="str">"left"</span>,
+        icon: <span class="str">"fa fa-align-left"</span>,
         callback: <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
             <span class="hljs-built_in">console</span>.log(value);
         }
     }, {
-        value: <span class="str">'center'</span>,
-        icon: <span class="str">'fa fa-align-center'</span>,
+        value: <span class="str">"center"</span>,
+        icon: <span class="str">"fa fa-align-center"</span>,
         callback: <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
             <span class="hljs-built_in">console</span>.log(value);
         }
     }, {
-        value: <span class="str">'right'</span>,
-        icon: <span class="str">'fa fa-align-right'</span>,
+        value: <span class="str">"right"</span>,
+        icon: <span class="str">"fa fa-align-right"</span>,
         callback: <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
             <span class="hljs-built_in">console</span>.log(value);
         }
     }
 ]);
 </code></pre>
-<h3 id="number">Number</h3>
+<h2 id="number">Number</h2>
 <p>Represents a number input. Call <code class='inline'>Panel.addNumber(name, value, callback, options)</code> to add a Number Widget to your panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
@@ -122,12 +112,14 @@
 </li>
 </ul>
 <p><sup>Note: Setting <code class='inline'>min</code>, <code class='inline'>max</code> values will automatically add a slider below the number input.<sup></p>
-<pre><code class="lang-js"><span class="hljs-keyword">panel</span>.addNumber(<span class="str">"Font Size"</span>, <span class="dec">36</span>, (value, <span class="hljs-keyword">event</span>) =&gt; {
+
+<pre><code class="lang-js">panel.addNumber(<span class="str">"Font Size"</span>, <span class="dec">36</span>, (value, <span class="hljs-keyword">event</span>) =&gt; {
     console.<span class="hljs-keyword">log</span>(value);
 }, { <span class="hljs-keyword">min</span>: <span class="dec">1</span>, <span class="hljs-keyword">max</span>: <span class="dec">48</span> });
 </code></pre>
+
 <p>You can change the value of this widget manually, using the mouse wheel, and dragging (up/down). In the last two cases, pressing <em>Alt</em> and <em>Left Shift</em> will apply a factor of <code class='inline'>0.1</code> and <code class='inline'>10</code> in that order.</p>
-<h3 id="vector">Vector</h3>
+<h2 id="vector">Vector</h2>
 <p>Similar to the Number widget, it represents a numeric vector input. It&#39;s composed by multiple Number Widgets. Call <code class='inline'>Panel.addVectorN(name, value, callback, options)</code>, where N is a number in the range [2, 4], to add a Vector Widget to your panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
@@ -153,7 +145,7 @@ panel.addVector4(<span class="str">"Shader Color"</span>, [<span class="dec">1</
     <span class="hljs-built_in">console</span>.log(value);
 });
 </code></pre>
-<h3 id="checkbox">Checkbox</h3>
+<h2 id="checkbox">Checkbox</h2>
 <p>Represents a classic checkbox that allows users to select or deselect an option as a binary choice (either checked or unchecked). Call <code class='inline'>Panel.addCheckbox(name, value, callback, options)</code> to add a Checkbox Widget to your panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
@@ -177,7 +169,7 @@ panel.addCheckbox(<span class="str">"Toggle me too"</span>, <span class="lit">tr
         p.addNumber(<span class="str">"Suboption 2"</span>, <span class="dec">12</span>);
 } });
 </code></pre>
-<h3 id="color">Color</h3>
+<h2 id="color">Color</h2>
 <p>Represents a color input. Allows users to select a color using a color picker, providing an interactive way to choose colors for various elements in your web interface. Call <code class='inline'>Panel.addColor(name, value, callback, options)</code> to add a Color Widget to your panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
@@ -195,7 +187,7 @@ panel.addCheckbox(<span class="str">"Toggle me too"</span>, <span class="lit">tr
 
 panel.addColor(<span class="str">"Background"</span>, <span class="str">"#b7a9b1"</span>);
 </code></pre>
-<h3 id="dropdown">Dropdown</h3>
+<h2 id="dropdown">Dropdown</h2>
 <p>Represents a classic Drop-down list. It works as a HTML Select element, but it can handle media options. Call <code class='inline'>Panel.addDropdown(name, values, value, callback, options)</code> function to add a Dropdown Widget to your Panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
@@ -224,7 +216,7 @@ panel.addDropdown(<span class="str">"Media Dropdown"</span>, options, <span clas
       console.log(<span class="hljs-keyword">value</span>);
 }, options);
 </code></pre>
-<h3 id="tags">Tags</h3>
+<h2 id="tags">Tags</h2>
 <p>Represents a collection of tags that can be added, removed, and modified dynamically. It provides a user-friendly way to manage and display multiple tags. Call <code class='inline'>Panel.addTags(name, value, callback, options)</code> to add a Tags Widget to your panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
@@ -236,17 +228,17 @@ panel.addDropdown(<span class="str">"Media Dropdown"</span>, options, <span clas
     <span class="hljs-built_in">console</span>.log(value);
 });
 </code></pre>
-<h3 id="tree">Tree</h3>
+<h2 id="tree">Tree</h2>
 <p>...TODO</p>
-<h3 id="array">Array</h3>
+<h2 id="array">Array</h2>
 <p>...TODO</p>
-<h3 id="list">List</h3>
+<h2 id="list">List</h2>
 <p>...TODO</p>
-<h3 id="layers">Layers</h3>
+<h2 id="layers">Layers</h2>
 <p>...TODO</p>
-<h3 id="file">File</h3>
+<h2 id="file">File</h2>
 <p>...TODO</p>
-<h3 id="progress">Progress</h3>
+<h2 id="progress">Progress</h2>
 <p>Represents a horizontal bar that fills up gradually to indicate the completion progress of a task or operation or just show a numeric value. Call <code class='inline'>Panel.addProgress(name, value, options)</code> to add a Progress Widget to your panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
@@ -269,9 +261,9 @@ panel.addDropdown(<span class="str">"Media Dropdown"</span>, options, <span clas
   }
 });
 </code></pre>
-<h3 id="curve">Curve</h3>
+<h2 id="curve">Curve</h2>
 <p>...TODO</p>
-<h3 id="other-widgets">Other Widgets</h3>
+<h2 id="other-widgets">Other Widgets</h2>
 <ul>
 <li><code class='inline'>Panel.addBlank(height)</code>: Add vertical space (in pixels) inside a branch.</li>
 </ul>

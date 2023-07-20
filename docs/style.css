@@ -36,7 +36,7 @@ body {
 	max-width: var(--max-width);
 	margin: 0 auto;
 	padding: var(--page-padding);
-	word-break: break-word;
+	/* word-break: break-word; */
 
 	text-align: justify;
   	text-justify: inter-word;
