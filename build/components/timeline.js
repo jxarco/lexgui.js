@@ -206,6 +206,7 @@
                                     if(tracks[i].name == node.parent.id && type.includes(tracks[i].type))
                                         tracks[i].lock = !value;
                                 }
+                                this.draw();
                             }
                              
                         }]})
@@ -1048,7 +1049,7 @@
             }
             this.draw();
             if(this.onChangeTrackVisibility)
-                this.onChangeTrackVisibility(trackInfo, visible)
+                this.onChangeTrackVisibility(trackInfo, visible);
         }
 
         /**
