@@ -599,8 +599,15 @@ input[type="file"] {
   align-content: center;
 }
 
+.lextitle.link {
+  color: #aaa;
+  text-decoration: none;
+  transition: padding-left 0.1s;
+}
+
 .lextitle.link:hover {
-  color: var(--global-selected-light);
+  color: #049EF4;
+  padding-left: 8px;
 }
 
 

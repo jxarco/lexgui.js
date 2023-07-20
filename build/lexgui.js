@@ -773,11 +773,11 @@
             function inner_mousemove(e)
             {
                 if(that.type == "horizontal") {
-                    that.moveSplit(last_pos[0] - e.x);
+                    that._moveSplit(last_pos[0] - e.x);
                         
                 }
                 else {
-                    that.moveSplit(last_pos[1] - e.y);
+                    that._moveSplit(last_pos[1] - e.y);
                 }
                 
                 last_pos[0] = e.x;
@@ -842,14 +842,14 @@
          * @method propagateEvent
          */
 
-        propagateEvent( type ) {
+        propagateEvent( eventName ) {
 
             for(var i = 0; i < this.sections.length; i++)
             {
                 const area = this.sections[i];
-                if(area[ type ])
-                    area[ type ].call( this, area.root.getBoundingClientRect() );
-                area.propagateEvent( type );
+                if(area[ eventName ])
+                    area[ eventName ].call( this, area.root.getBoundingClientRect() );
+                area.propagateEvent( eventName );
             }
         }
 
@@ -891,6 +891,7 @@
             this.split({type: 'vertical', sizes:[height,null], resize: false});
             this.sections[0].attach( menubar );
             this.sections[0].is_menubar = true;
+
             return menubar;
         }
 
@@ -1050,7 +1051,7 @@
             return tabs;
         }
 
-        moveSplit( dt ) {
+        _moveSplit( dt ) {
 
             if(!this.type)
                 throw("No split area");
@@ -1166,23 +1167,23 @@
             this.tabs = {};
         }
 
-        add( name, content, selected, callback ) {
+        add( name, content, isSelected, callback ) {
 
-            if( selected )
+            if( isSelected )
                 this.root.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
             
-            selected = !Object.keys( this.tabs ).length ? true : selected;
+            isSelected = !Object.keys( this.tabs ).length ? true : isSelected;
 
             content = content.root ? content.root : content;
-            content.style.display = selected ? "block" : "none";
+            content.style.display = isSelected ? "block" : "none";
 
             // Create tab
             let tabEl = document.createElement('span');
             tabEl.dataset["name"] = name;
-            tabEl.className = "lexareatab" + (selected ? " selected" : "");
+            tabEl.className = "lexareatab" + (isSelected ? " selected" : "");
             tabEl.innerHTML = name;
             tabEl.id = name.replace(/\s/g, '') + Tabs.TAB_ID++;
-            tabEl.selected = selected;
+            tabEl.selected = isSelected;
             tabEl.instance = this;
             content.id = tabEl.id + "_content";
 
@@ -3438,13 +3439,13 @@
         /**
          * @method addList
          * @param {String} name Widget name
-         * @param {String} value Selected list value
          * @param {Array} values List values
+         * @param {String} value Selected list value
          * @param {Function} callback Callback function on change
          * @param {*} options:
          */
 
-        addList( name, value, values, callback, options = {} ) {
+        addList( name, values, value, callback, options = {} ) {
 
             let widget = this.create_widget(name, Widget.LIST, options);
             let element = widget.domEl;

@@ -24,7 +24,7 @@
             m.add( "Examples", () => {
                 location.href = "../examples/";
             });
-            m.add( "Docs", (v, name) => {
+            m.add( "Docs v" + LX.version, (v, name) => {
                 location.href = "../docs/";
             });
             m.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
@@ -47,13 +47,13 @@
         function fillDocs( panel ) {
             
             panel.clear();
-            panel.branch("Docs v1.0.0");
+            panel.branch("Manual");
             panel.addTitle("LexGUI", { style: { fontSize: "18px" } });
-            panel.addTitle("Getting Started", {link: "../docs/getting_started.html", target: 'viewer'});
-            panel.addTitle("Area", {link: "../docs/area.html", target: 'viewer'});
-            panel.addTitle("Panel", {link: "../docs/panel.html", target: 'viewer'});
-            panel.addTitle("Branch", {link: "../docs/branch.html", target: 'viewer'});
-            panel.addTitle("Widget", {link: "../docs/widget.html", target: 'viewer'});
+            panel.addTitle("Getting started", {link: "../docs/getting_started.html", target: 'viewer'});
+            panel.addTitle("Creating an area", {link: "../docs/creating_an_area.html", target: 'viewer'});
+            panel.addTitle("Instancing panels", {link: "../docs/instancing_panels.html", target: 'viewer'});
+            panel.addTitle("Branching", {link: "../docs/branching.html", target: 'viewer'});
+            panel.addTitle("Adding the first widget", {link: "../docs/adding_first_widget.html", target: 'viewer'});
             panel.addTitle("Widget List", {link: "../docs/widget_list.html", target: 'viewer'});
             panel.addTitle("Dialog", {link: "../docs/dialog.html", target: 'viewer'});
             panel.addTitle("Context Menu", {link: "../docs/context_menu.html", target: 'viewer'});
@@ -61,7 +61,14 @@
             panel.addSeparator();
             panel.addTitle("Components", { style: { fontSize: "18px" } });
             panel.addTitle("Timeline", {link: "../docs/timeline.html", target: 'viewer'});
-            
+            panel.merge();
+
+            panel.branch("Reference", { closed: true });
+            panel.addTitle("Areas", { style: { fontSize: "18px" } });
+            panel.addTitle("Area", {link: "../docs/reference/area.html", target: 'viewer'});
+            panel.addTitle("Panel", {link: "../docs/reference/panel.html", target: 'viewer'});
+            panel.addTitle("Menubar", {link: "../docs/reference/menubar.html", target: 'viewer'});
+            panel.addTitle("Tabs", {link: "../docs/reference/tabs.html", target: 'viewer'});
             panel.merge();
         }
 

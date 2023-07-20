@@ -463,7 +463,7 @@ function fillPanel( panel ) {
             }
         }
     ]);
-    panel.addList(null, 'Blat Panthers', ['GPTeam', 'Blat Bunny', ['Blat Panthers', 'fa-solid fa-paw']], (value, event) => {
+    panel.addList(null, ['GPTeam', 'Blat Bunny', ['Blat Panthers', 'fa-solid fa-paw']], 'Blat Panthers',  (value, event) => {
         console.log(value);
     });
     const opacityValues = [
