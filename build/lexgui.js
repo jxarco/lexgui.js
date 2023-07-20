@@ -10,7 +10,7 @@
     */
 
     var LX = global.LX = {
-        version: 1.1,
+        version: "1.0.0",
         ready: false,
         components: [], // specific pre-build components
         signals: {} // events and triggers
@@ -795,6 +795,8 @@
                 document.body.classList.remove("nocursor");
                 that.split_bar.classList.remove("nocursor");
             }
+
+            return this.sections;
         }
 
         /**
@@ -1296,14 +1298,15 @@
             for( let item of this.items )
             {
                 let key = Object.keys(item)[0];
+                let pKey = key.replace(/\s/g, '').replaceAll('.', '');
 
                 // Item already created
-                if( this.root.querySelector("#" + key.replace(/\s/g, '')) )
+                if( this.root.querySelector("#" + pKey) )
                     continue;   
 
                 let entry = document.createElement('div');
                 entry.className = "lexmenuentry";
-                entry.id = key.replace(/\s/g, '');
+                entry.id = pKey;
                 entry.innerText = key;
                 if(options.position == "left") {	
                     this.root.prepend( entry );	
@@ -2932,6 +2935,7 @@
          * title: title if any
          * text: card text if any
          * src: url of the image if any
+         * callback (Function): function to call on click
          */
 
         addCard( name, options = {} ) {
@@ -2975,14 +2979,12 @@
 
             container.appendChild(name_el);
             
-            // cardEl.addEventListener("click", function(e) {
-            //     if(should_select) {
-            //         container.querySelectorAll('button').forEach( s => s.classList.remove('selected'));
-            //         this.classList.add('selected');
-            //     }
-            //     that._trigger( new IEvent(name, b.value, e), b.callback );   
-            // });
-
+            if( options.callback ) {
+                container.style.cursor = "pointer";
+                container.addEventListener("click", (e) => {
+                    this._trigger( new IEvent(name, null, e), options.callback );   
+                });
+            }
 
             // Remove branch padding and margins
             // if(!widget.name) {
@@ -5130,6 +5132,8 @@
             callback( menu );
 
         menu.onCreate();
+
+        return menu;
     }
 
     LX.addContextMenu = addContextMenu;

@@ -13,8 +13,7 @@
         let area = LX.init();
 
         // split main area
-        area.split({type: 'vertical', sizes:["60vh","40vh"]});
-        var [top_area, bottom_area] = area.sections;
+        var [top_area, bottom_area] = area.split({type: 'vertical', sizes:["60vh","40vh"]});
 
         // add canvas to top_area
         var canvas = document.createElement('canvas');

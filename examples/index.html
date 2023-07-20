@@ -6,6 +6,10 @@
     <link rel="stylesheet" href="../build/lexgui.css">    
     <style>
         iframe { border: none; }
+        .lexexamplespanel {
+            margin-left: 6px;
+            margin-top: 6px;
+        }
     </style>
 </head>
     <body></body>
@@ -16,21 +20,19 @@
         let area = LX.init();
 
         // split main area
-        area.split({sizes:["20%","80%"], resize: false});
-        let [left,right] = area.sections;
+        let [left,right] = area.split({sizes:["20%","80%"], resize: false});
 
         left.root.style.borderRight = "2px solid gray";
         left.addMenubar( m => {
             m.add( "Examples", () => {
                 location.href = "../examples/";
             });
-            m.add( "Docs", (v, name) => {
+            m.add( "Docs v" + LX.version, (v, name) => {
                 location.href = "../docs/";
             });
             m.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
         });
 
-        let url = "asset_view.html";
         let example_selected = "Asset View";
         let show_previews = true;
 
@@ -41,12 +43,12 @@
             'Area Tabs'
         ];
 
-        let panel = left.addPanel();
+        let panel = left.addPanel({ className: "lexexamplespanel" });
         fillExamples( panel );
 
         let iframe = document.createElement('iframe');
         iframe.id = iframe.name = 'viewer';
-        iframe.src = url;
+        iframe.src = "asset_view.html";
         iframe.style.width = "100%";
         iframe.style.height = "100%";
         right.root.appendChild(iframe);
@@ -55,7 +57,10 @@
                 {
                     name: "View Source Code",
                     icon: "fa fa-code",
-                    callback: (value, event) => () => { window.open("https://github.com/jxarco/lexgui.js/blob/master/examples/" + iframe.src, '_blank') }
+                    callback: (value, event) => { 
+                        const tokens = iframe.src.split('/');
+                        window.open("https://github.com/jxarco/lexgui.js/blob/master/examples/" + tokens[tokens.length - 1], '_blank')
+                    }
                 }
         ], { float: "htc" } );
 
@@ -64,7 +69,6 @@
         function fillExamples( panel ) {
             
             panel.clear();
-            panel.branch("Examples");
 
             // panel.addCheckbox("Show previews", show_previews, v => {
             //     show_previews = v;
@@ -75,16 +79,14 @@
             {
                 const id = ex.replace(" ", "_").toLowerCase();
                 const options = {
-                    link: id + ".html", 
-                    target: 'viewer'
+                    callback: function() {
+                        iframe.src = id + ".html";
+                    }
                 };
                 if( show_previews )
                     options.img = "previews/" + id + ".png";
-
                 panel.addCard(ex, options);
             }
-
-            panel.merge();
         }
     </script>
 </html>
