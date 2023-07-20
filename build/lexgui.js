@@ -433,7 +433,12 @@
 
         if( !LX.signals[ name ] )
             LX.signals[ name ] = [];
-
+        else if(obj.name) {
+            for(let i = 0; i < LX.signals[ name ].length; i++ ) {
+                if(obj.name == LX.signals[ name ][ i ].name)  
+                    return;
+            }
+        }
         LX.signals[ name ].push( obj );
     }
 
@@ -3854,7 +3859,7 @@
                 else if(e.altKey) mult *= 0.1;
                 this.value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
                 Panel.#dispatch_event(vecinput, "change");
-            }, false);
+            }, {passive:false});
 
             vecinput.addEventListener("change", e => {
                 let val = e.target.value = clamp(e.target.value, vecinput.min, vecinput.max);
@@ -3868,7 +3873,7 @@
                 let btn = element.querySelector(".lexwidgetname .lexicon");
                 if(btn) btn.style.display = val != vecinput.iValue ? "block": "none";
                 this._trigger( new IEvent(name, val, e), callback );
-            }, false);
+            }, {passive:false});
             
             // Add drag input
 
@@ -4000,7 +4005,7 @@
                         this.value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
                         Panel.#dispatch_event(vecinput, "change");
                     }
-                }, false);
+                }, {passive:false});
 
                 vecinput.addEventListener("change", e => {
                     let val = e.target.value = clamp(e.target.value, vecinput.min, vecinput.max);

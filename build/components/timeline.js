@@ -80,11 +80,11 @@
             // this.root = document.createElement('div');
             // this.root.className = 'lextimeline';
 
-            this.header_offset = 36;
+            this.header_offset = 38;
             
             let width = options.width ? options.width : null;
             let height = options.height ? options.height - this.header_offset : null;
-            let area = new LX.Area( {width: width || "100%", height: height || "100%"});
+            let area = new LX.Area( {id: "bottom-timeline-area", width: width || "calc(100% - 7px)", height: height || "100%"});
             area.split({ type: "horizontal", sizes: ["20%", "80%"]});
             this.content_area = area;
             let [left, right] = area.sections;
@@ -105,7 +105,7 @@
             this.canvas.addEventListener("mousedown", this.processMouse.bind(this));
             this.canvas.addEventListener("mouseup", this.processMouse.bind(this));
             this.canvas.addEventListener("mousemove", this.processMouse.bind(this));
-            this.canvas.addEventListener("wheel", this.processMouse.bind(this));
+            this.canvas.addEventListener("wheel", this.processMouse.bind(this), {passive:false});
             this.canvas.addEventListener("dblclick", this.processMouse.bind(this));
             this.canvas.addEventListener("contextmenu", this.processMouse.bind(this));
 
@@ -126,7 +126,7 @@
             if(this.header)
                 this.header.clear();
             else {
-                this.header = new LX.Panel({id:'lextimelineheader', height: "36px"});
+                this.header = new LX.Panel({id:'lextimelineheader', height: this.header_offset+"px"});
                 this.root.root.appendChild(this.header.root);
             }
 
@@ -235,7 +235,7 @@
             // }
             if(this.leftPanel.parent.root.classList.contains("hidden"))
                 return;
-            this.#resizecanvas([ this.root.root.clientWidth - this.leftPanel.root.clientWidth, this.size[1]]);
+            this.#resizecanvas([ this.root.root.clientWidth - this.leftPanel.root.clientWidth  - 8, this.size[1]]);
         }
 
         /**
@@ -445,7 +445,7 @@
             if(!rect)
                 rect = [0, ctx.canvas.height - ctx.canvas.height , ctx.canvas.width, ctx.canvas.height ];
 
-            this.canvas = ctx.canvas;
+            // this.canvas = ctx.canvas;
             this.position[0] = rect[0];
             this.position[1] = rect[1];
             let w = rect[2];
@@ -643,6 +643,7 @@
             var x = this.xToTime( centerx );
             this.secondsToPixels *= v;
             this.session.start_time += x - this.xToTime( centerx );
+            this.draw();
         }
         
         /**
@@ -1094,7 +1095,7 @@
             this.size = size; 
             this.content_area.setSize([size[0], size[1] - this.header_offset]);
             
-            let w = size[0] - this.leftPanel.root.clientWidth - 10;
+            let w = size[0] - this.leftPanel.root.clientWidth - 8;
             this.#resizecanvas([w , size[1]]);
         }
 
