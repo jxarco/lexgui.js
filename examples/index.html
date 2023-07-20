@@ -20,7 +20,8 @@
         let area = LX.init();
 
         // split main area
-        let [left,right] = area.split({sizes:["20%","80%"], resize: false});
+        area.split({sizes:["20%","80%"], resize: false});
+        let [left,right] = area.sections;
 
         left.root.style.borderRight = "2px solid gray";
         left.addMenubar( m => {
