@@ -69,12 +69,10 @@ area.addMenubar( m => {
 });
 
 // split main area
-area.split({sizes:["75%","25%"]});
-var [left,right] = area.sections;
+var [left,right] = area.split({sizes:["75%","25%"]});
 
 // split left area
-left.split({type: 'vertical', sizes:["45vh","55vh"]});
-var [up, bottom] = left.sections;
+var [up, bottom] = left.split({type: 'vertical', sizes:["45vh","55vh"]});
 
 var kfTimeline = null;
 var clipsTimeline = null;
@@ -214,8 +212,7 @@ var bottom_panel = bottom.addPanel({id: "bottom-panel"});
 fillBottomPanel( bottom_panel ); 
 
 // split right area
-right.split({type: 'vertical', sizes:["70vh","30vh"]});
-var [rup, rbottom] = right.sections;
+var [rup, rbottom] = right.split({type: 'vertical', sizes:["70vh","30vh"]});
 
 // Get new content area to fill it
 const top_tabs = up.addTabs();
@@ -466,7 +463,7 @@ function fillPanel( panel ) {
             }
         }
     ]);
-    panel.addList(null, 'Blat Panthers', ['GPTeam', 'Blat Bunny', ['Blat Panthers', 'fa-solid fa-paw']], (value, event) => {
+    panel.addList(null, ['GPTeam', 'Blat Bunny', ['Blat Panthers', 'fa-solid fa-paw']], 'Blat Panthers',  (value, event) => {
         console.log(value);
     });
     const opacityValues = [

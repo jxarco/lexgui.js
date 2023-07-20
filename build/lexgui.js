@@ -10,7 +10,7 @@
     */
 
     var LX = global.LX = {
-        version: 1.1,
+        version: "1.0.0",
         ready: false,
         components: [], // specific pre-build components
         signals: {} // events and triggers
@@ -773,11 +773,11 @@
             function inner_mousemove(e)
             {
                 if(that.type == "horizontal") {
-                    that.moveSplit(last_pos[0] - e.x);
+                    that._moveSplit(last_pos[0] - e.x);
                         
                 }
                 else {
-                    that.moveSplit(last_pos[1] - e.y);
+                    that._moveSplit(last_pos[1] - e.y);
                 }
                 
                 last_pos[0] = e.x;
@@ -795,6 +795,8 @@
                 document.body.classList.remove("nocursor");
                 that.split_bar.classList.remove("nocursor");
             }
+
+            return this.sections;
         }
 
         /**
@@ -840,14 +842,14 @@
          * @method propagateEvent
          */
 
-        propagateEvent( type ) {
+        propagateEvent( eventName ) {
 
             for(var i = 0; i < this.sections.length; i++)
             {
                 const area = this.sections[i];
-                if(area[ type ])
-                    area[ type ].call( this, area.root.getBoundingClientRect() );
-                area.propagateEvent( type );
+                if(area[ eventName ])
+                    area[ eventName ].call( this, area.root.getBoundingClientRect() );
+                area.propagateEvent( eventName );
             }
         }
 
@@ -889,6 +891,7 @@
             this.split({type: 'vertical', sizes:[height,null], resize: false});
             this.sections[0].attach( menubar );
             this.sections[0].is_menubar = true;
+
             return menubar;
         }
 
@@ -1048,7 +1051,7 @@
             return tabs;
         }
 
-        moveSplit( dt ) {
+        _moveSplit( dt ) {
 
             if(!this.type)
                 throw("No split area");
@@ -1164,23 +1167,23 @@
             this.tabs = {};
         }
 
-        add( name, content, selected, callback ) {
+        add( name, content, isSelected, callback ) {
 
-            if( selected )
+            if( isSelected )
                 this.root.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
             
-            selected = !Object.keys( this.tabs ).length ? true : selected;
+            isSelected = !Object.keys( this.tabs ).length ? true : isSelected;
 
             content = content.root ? content.root : content;
-            content.style.display = selected ? "block" : "none";
+            content.style.display = isSelected ? "block" : "none";
 
             // Create tab
             let tabEl = document.createElement('span');
             tabEl.dataset["name"] = name;
-            tabEl.className = "lexareatab" + (selected ? " selected" : "");
+            tabEl.className = "lexareatab" + (isSelected ? " selected" : "");
             tabEl.innerHTML = name;
             tabEl.id = name.replace(/\s/g, '') + Tabs.TAB_ID++;
-            tabEl.selected = selected;
+            tabEl.selected = isSelected;
             tabEl.instance = this;
             content.id = tabEl.id + "_content";
 
@@ -1296,14 +1299,15 @@
             for( let item of this.items )
             {
                 let key = Object.keys(item)[0];
+                let pKey = key.replace(/\s/g, '').replaceAll('.', '');
 
                 // Item already created
-                if( this.root.querySelector("#" + key.replace(/\s/g, '')) )
+                if( this.root.querySelector("#" + pKey) )
                     continue;   
 
                 let entry = document.createElement('div');
                 entry.className = "lexmenuentry";
-                entry.id = key.replace(/\s/g, '');
+                entry.id = pKey;
                 entry.innerText = key;
                 if(options.position == "left") {	
                     this.root.prepend( entry );	
@@ -2932,6 +2936,7 @@
          * title: title if any
          * text: card text if any
          * src: url of the image if any
+         * callback (Function): function to call on click
          */
 
         addCard( name, options = {} ) {
@@ -2975,14 +2980,12 @@
 
             container.appendChild(name_el);
             
-            // cardEl.addEventListener("click", function(e) {
-            //     if(should_select) {
-            //         container.querySelectorAll('button').forEach( s => s.classList.remove('selected'));
-            //         this.classList.add('selected');
-            //     }
-            //     that._trigger( new IEvent(name, b.value, e), b.callback );   
-            // });
-
+            if( options.callback ) {
+                container.style.cursor = "pointer";
+                container.addEventListener("click", (e) => {
+                    this._trigger( new IEvent(name, null, e), options.callback );   
+                });
+            }
 
             // Remove branch padding and margins
             // if(!widget.name) {
@@ -3436,13 +3439,13 @@
         /**
          * @method addList
          * @param {String} name Widget name
-         * @param {String} value Selected list value
          * @param {Array} values List values
+         * @param {String} value Selected list value
          * @param {Function} callback Callback function on change
          * @param {*} options:
          */
 
-        addList( name, value, values, callback, options = {} ) {
+        addList( name, values, value, callback, options = {} ) {
 
             let widget = this.create_widget(name, Widget.LIST, options);
             let element = widget.domEl;
@@ -5130,6 +5133,8 @@
             callback( menu );
 
         menu.onCreate();
+
+        return menu;
     }
 
     LX.addContextMenu = addContextMenu;

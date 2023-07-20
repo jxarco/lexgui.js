@@ -9,21 +9,31 @@
 <body>
 
 <h1 id="context-menu">Context Menu</h1>
+<br>
 
-<p>TODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODO: </p>
+<p>LexGUI offers a powerful context menu feature that allows you to create customizable context menus with ease. 
+    These menus provide quick access to relevant actions and options based on the user's current context, enhancing the overall user experience.</p>
 
-<pre><code class="lang-js"><span class="kwd">const</span> dialog = <span class="kwd">new</span> LX.<span class="typ">Dialog</span>(<span class="str">"Title"</span>, p => {
-    <span class="com">// Start adding widgets</span>
-    p.addNumber(<span class="str">"Example"</span>, <span class="dec">18</span>);
-}, options);
+<p>LexGUI's context menus can be triggered not only on right-click, but in any custom event or moment is necessary. Integrating a context menu is simple calling the following function 
+    <code class='inline'>LX.addContextMenu(title, event, callback, options)</code>:</p>
+
+<pre><code class="lang-js">LX.addContextMenu( <span class="str">"Selected Nodes"</span>, event, m => {
+    <span class="com">// event is the DOM event that should have position info</span>
+    m.add( <span class="str">"Select Children"</span>, () => console.log(<span class="str">"Select children"</span>) );
+    m.add( <span class="str">"Clone"</span>, { color: <span class="str">"#0d5"</span> } );
+    m.add( <span class="str">"Components/Transform"</span>);
+    m.add( <span class="str">"Components/MeshRenderer"</span>);
+    m.add( <span class="str">"Delete"</span> );
+});
 </code></pre>
 
-<p>TODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODOTODO</p>
+<p>As you can observe, the usage format resembles that of other UI elements such as dialogs or menubars. You pass the menu as a parameter, 
+    allowing the user to populate it with all the desired entries and subentries. </p>
 
+<p>The <code class='inline'>options (Object)</code> when creating a Context Menu are the following:</p>
 <ul>
-    <li><code class='inline'>TODOTODOTODO</code>: TODOTODOTODOTODOTODOTODOTODOTODO</li>
-    <li><code class='inline'>TODOTODO</code>: TODOTODO</li>
-    <li><code class='inline'>TODOTODOTODOTODOTODO</code>: TODOTODOTODOTODOTODO</li>
+    <li><code class='inline'>callback</code>: Action to call when entry is clicked</li>
+    <li><code class='inline'>color</code>:  Color of the left border of the entry (e.g. mark specific types of entries)</li>
 </ul>
 
 </body>

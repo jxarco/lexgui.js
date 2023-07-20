@@ -11,7 +11,8 @@
 <h1 id="widget-list">Widget List</h1>
 
 <h2 id="title">Title</h2>
-<p>Represents a title section inside a <a href="branch.html">Branch</a>. Call <code class='inline'>Panel.addTitle(name, value, callback, options)</code> to add a Title Widget to your panel:</p>
+<p>Represents a title section inside a <a href="branch.html">Branch</a>.</p>
+<p>Call <code class='inline'>Panel.addTitle(name, value, callback, options)</code> to add a Title Widget to your panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
 <li><code class='inline'>options (Object)</code>: Basic options for a Widget</li>
@@ -21,7 +22,8 @@
 
 <h2 id="text">Text</h2>
 
-<p>Represents a text input. Call <code class='inline'>Panel.addText(name, value, callback, options)</code> to add a Text Widget to your panel:</p>
+<p>Represents a text input.</p>
+<p>Call <code class='inline'>Panel.addText(name, value, callback, options)</code> to add a Text Widget to your panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
 <li><code class='inline'>value (String)</code>: Text</li>
@@ -41,7 +43,8 @@
 </code></pre>
 
 <h2 id="text-area">Text Area</h2>
-<p>Represents a text area element. Call <code class='inline'>Panel.addTextArea(name, value, callback, options)</code> to add a Text Area Widget to your panel (the <code class='inline'>options</code> are the same as the Text widget):</p>
+<p>Represents a text area input element.</p>
+<p>Call <code class='inline'>Panel.addTextArea(name, value, callback, options)</code> to add a Text Area Widget to your panel (the <code class='inline'>options</code> are the same as the Text widget):</p>
 
 <pre><code class="lang-js">panel.addTextArea(<span class="str">"Text Name"</span>, <span class="str">"Text value"</span>, (value, event) =&gt;</span> {
     console.log(value);
@@ -50,7 +53,8 @@
 
 <h2 id="button">Button</h2>
 
-<p>Represents a clickable element typically used to trigger an action. Call <code class='inline'>Panel.addButton(name, value, callback, options)</code> to add a Button Widget to your panel:</p>
+<p>Represents a clickable element typically used to trigger an action.</p>
+<p>Call <code class='inline'>Panel.addButton(name, value, callback, options)</code> to add a Button Widget to your panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
 <li><code class='inline'>value (String)</code>: Button text</li>
@@ -67,7 +71,8 @@
 
 <h2 id="combo-buttons">Combo Buttons</h2>
 
-<p>Multiple inlined <a href="#button">buttons</a> as selectable options. Call <code class='inline'>Panel.addComboButtons(name, values, options)</code> to add a ComboButtons Widget to your panel:</p>
+<p>Multiple inlined <a href="#button">buttons</a> as selectable options.</p>
+<p>Call <code class='inline'>Panel.addComboButtons(name, values, options)</code> to add a ComboButtons Widget to your panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
 <li><code class='inline'>values (Array)</code>: Each of the {value, callback} items (you can add an <code class='inline'>icon</code>)</li>
@@ -99,7 +104,8 @@
 ]);
 </code></pre>
 <h2 id="number">Number</h2>
-<p>Represents a number input. Call <code class='inline'>Panel.addNumber(name, value, callback, options)</code> to add a Number Widget to your panel:</p>
+<p>Represents a number input.</p>
+<p>Call <code class='inline'>Panel.addNumber(name, value, callback, options)</code> to add a Number Widget to your panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
 <li><code class='inline'>value (Number)</code>: Number value</li>
@@ -119,8 +125,11 @@
 </code></pre>
 
 <p>You can change the value of this widget manually, using the mouse wheel, and dragging (up/down). In the last two cases, pressing <em>Alt</em> and <em>Left Shift</em> will apply a factor of <code class='inline'>0.1</code> and <code class='inline'>10</code> in that order.</p>
+
 <h2 id="vector">Vector</h2>
-<p>Similar to the Number widget, it represents a numeric vector input. It&#39;s composed by multiple Number Widgets. Call <code class='inline'>Panel.addVectorN(name, value, callback, options)</code>, where N is a number in the range [2, 4], to add a Vector Widget to your panel:</p>
+
+<p>Similar to the Number widget, it represents a numeric vector input. It&#39;s composed by multiple <a href="#number">number</a> widgets.</p>
+<p>Call <code class='inline'>Panel.addVectorN(name, value, callback, options)</code>, where N is a number in the range [2, 4], to add a Vector Widget to your panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
 <li><code class='inline'>values (Number Array)</code>: Array containing the values for the vector</li>
@@ -145,8 +154,11 @@ panel.addVector4(<span class="str">"Shader Color"</span>, [<span class="dec">1</
     <span class="hljs-built_in">console</span>.log(value);
 });
 </code></pre>
+
 <h2 id="checkbox">Checkbox</h2>
-<p>Represents a classic checkbox that allows users to select or deselect an option as a binary choice (either checked or unchecked). Call <code class='inline'>Panel.addCheckbox(name, value, callback, options)</code> to add a Checkbox Widget to your panel:</p>
+
+<p>Represents a classic checkbox that allows users to select or deselect an option as a binary choice (either checked or unchecked).</p>
+<p>Call <code class='inline'>Panel.addCheckbox(name, value, callback, options)</code> to add a Checkbox Widget to your panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
 <li><code class='inline'>value (Boolean)</code>: Boolean value (true/false)</li>
@@ -169,8 +181,11 @@ panel.addCheckbox(<span class="str">"Toggle me too"</span>, <span class="lit">tr
         p.addNumber(<span class="str">"Suboption 2"</span>, <span class="dec">12</span>);
 } });
 </code></pre>
+
 <h2 id="color">Color</h2>
-<p>Represents a color input. Allows users to select a color using a color picker, providing an interactive way to choose colors for various elements in your web interface. Call <code class='inline'>Panel.addColor(name, value, callback, options)</code> to add a Color Widget to your panel:</p>
+
+<p>Represents a color input. Allows users to select a color using a color picker, providing an interactive way to choose colors for various elements in your web interface.</p>
+<p>Call <code class='inline'>Panel.addColor(name, value, callback, options)</code> to add a Color Widget to your panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
 <li><code class='inline'>value (String or Array)</code>: Color value in hex (&quot;#fff&quot;) or Array[r, g, b]</li>
@@ -187,12 +202,15 @@ panel.addCheckbox(<span class="str">"Toggle me too"</span>, <span class="lit">tr
 
 panel.addColor(<span class="str">"Background"</span>, <span class="str">"#b7a9b1"</span>);
 </code></pre>
+
 <h2 id="dropdown">Dropdown</h2>
-<p>Represents a classic Drop-down list. It works as a HTML Select element, but it can handle media options. Call <code class='inline'>Panel.addDropdown(name, values, value, callback, options)</code> function to add a Dropdown Widget to your Panel:</p>
+
+<p>Represents a classic Drop-down list. It works as a HTML Select element, but it can handle media options.</p>
+<p>Call <code class='inline'>Panel.addDropdown(name, values, value, callback, options)</code> function to add a Dropdown Widget to your Panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
 <li><code class='inline'>values (Array)</code>: Array of the values of the list. The values can be strings or media (images or GIFs). For the media, the entries of the array must be an object containing a <code class='inline'>value</code> and <code class='inline'>src</code> fields.</li>
-<li><code class='inline'>values (String)</code>: Current selected value from the drop-down list.</li>
+<li><code class='inline'>value (String)</code>: Current selected value from the drop-down list.</li>
 <li><code class='inline'>callback (Function)</code>: Function called when an list value is selected.</li>
 <li><code class='inline'>options (Object)</code>:<ul>
 <li><code class='inline'>filter</code>: Boolean field to specify if the drop-down needs a search bar</li>
@@ -216,11 +234,14 @@ panel.addDropdown(<span class="str">"Media Dropdown"</span>, options, <span clas
       console.log(<span class="hljs-keyword">value</span>);
 }, options);
 </code></pre>
+
 <h2 id="tags">Tags</h2>
-<p>Represents a collection of tags that can be added, removed, and modified dynamically. It provides a user-friendly way to manage and display multiple tags. Call <code class='inline'>Panel.addTags(name, value, callback, options)</code> to add a Tags Widget to your panel:</p>
+
+<p>Represents a collection of tags that can be added, removed, and modified dynamically. It provides a user-friendly way to manage and display multiple tags.</p>
+<p>Call <code class='inline'>Panel.addTags(name, value, callback, options)</code> to add a Tags Widget to your panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
-<li><code class='inline'>value (Boolean)</code>: Comma separated tags</li>
+<li><code class='inline'>value (String)</code>: Comma separated tags</li>
 <li><code class='inline'>callback (Function)</code>: Function called when a tag is either removed or added</li>
 <li><code class='inline'>options (Object)</code>: Basic options for a Widget</li>
 </ul>
@@ -228,18 +249,58 @@ panel.addDropdown(<span class="str">"Media Dropdown"</span>, options, <span clas
     <span class="hljs-built_in">console</span>.log(value);
 });
 </code></pre>
+
 <h2 id="tree">Tree</h2>
 <p>...TODO</p>
+
 <h2 id="array">Array</h2>
-<p>...TODO</p>
+
+<p>Represents a array of any basic type of elements which can be modified or deleted and new ones can be added.</p>
+<p>Call <code class='inline'>Panel.addArray(name, value, values, callback, options)</code> to add an Array Widget to your panel:</p>
+<ul>
+<li><code class='inline'>name (String)</code>: Widget name</li>
+<li><code class='inline'>values (Array)</code>: Array values</li>
+<li><code class='inline'>callback (Function)</code>: Function called when the array is modified</li>
+<li><code class='inline'>options (Object)</code>: Basic options for a Widget</li>
+</ul>
+<pre><code class="lang-js">panel.addArray(<span class="str">"Array name"</span>, [<span class="str">"GPTeam"</span>, <span class="str">"Blat Panthers"</span>], (value, event) => {
+    console.log(value);
+});
+</code></pre>
+
 <h2 id="list">List</h2>
-<p>...TODO</p>
+
+<p>Represents a list of selectable elements.</p>
+<p>Call <code class='inline'>Panel.addList(name, value, values, callback, options)</code> to add a List Widget to your panel:</p>
+<ul>
+<li><code class='inline'>name (String)</code>: Widget name</li>
+<li><code class='inline'>values (Array)</code>: List values</li>
+<li><code class='inline'>value (*)</code>: Selected list value</li>
+<li><code class='inline'>callback (Function)</code>: Function called when the list is modified</li>
+<li><code class='inline'>options (Object)</code>: Basic options for a Widget</li>
+</ul>
+<pre><code class="lang-js">panel.addList(<span class="str">"List name"</span>, [<span class="str">"GPTeam"</span>, <span class="str">"Blat Panthers"</span>], <span class="str">"Blat Panthers"</span>,  (value, event) => {
+    console.log(value);
+});
+</code></pre>
+
+<p>It's possible to preppend an icon to the element name inside the list using an <code class='inline'>Array</code> for the item [item, icon]:</p>
+
+<pre><code class="lang-js">panel.addList(<span class="str">"List name"</span>, [<span class="str">"GPTeam"</span>, [<span class="str">"Blat Panthers"</span>, <span class="str">"fa-solid fa-paw"</span>]], <span class="str">"Blat Panthers"</span>,  (value, event) => {
+    console.log(value);
+});
+</code></pre>
+
 <h2 id="layers">Layers</h2>
 <p>...TODO</p>
+
 <h2 id="file">File</h2>
 <p>...TODO</p>
+
 <h2 id="progress">Progress</h2>
-<p>Represents a horizontal bar that fills up gradually to indicate the completion progress of a task or operation or just show a numeric value. Call <code class='inline'>Panel.addProgress(name, value, options)</code> to add a Progress Widget to your panel:</p>
+
+<p>Represents a horizontal bar that fills up gradually to indicate the completion progress of a task or operation or just show a numeric value.</p>
+<p>Call <code class='inline'>Panel.addProgress(name, value, options)</code> to add a Progress Widget to your panel:</p>
 <ul>
 <li><code class='inline'>name (String)</code>: Widget name</li>
 <li><code class='inline'>value (Number)</code>: Progress value</li>
