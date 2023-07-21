@@ -44,6 +44,7 @@
 <li><code class='inline'>icon (String)</code> at (<a href="https://fontawesome.com/search">Fontawesome</a>)</li>
 <li><code class='inline'>short (String)</code> for shortcuts</li>
 <li><code class='inline'>type (String)</code> options: <em>checkbox</em></li>
+<li><code class='inline'>checked (Boolean)</code>for <em>checkbox</em> type</li>
 </ul>
 </li>
 </ul>
@@ -56,10 +57,14 @@
     m.add( <span class="str">"Scene/Open Recent/goodbye.scene"</span> );
     m.add( <span class="str">"Project/Export/DAE"</span>, { short: <span class="str">"E"</span> } );
     m.add( <span class="str">"Project/Export/GLTF"</span> );
+    m.add( <span class="str">"View/Show grid"</span>, { type: <span class="str">"checkbox"</span>, checked: <span class="str">true</span>, 
+    callback: (v) =&gt; { 
+        console.log(<span class="str">"Show grid:"</span>, v);
+    }});
     m.add( <span class="str">"Help/About"</span> );
     m.add( <span class="str">"Help/Support"</span>, { callback: () =&gt; { 
         console.log(<span class="str">"Support!"</span>) }, icon: <span class="str">"fa-solid fa-heart"</span> } );
-});
+    });
 </code></pre>
 <p>The <code class='inline'>options</code> in <code class='inline'>Area.addMenubar(callback, options)</code> are by now the following: </p>
 <ul>
@@ -93,6 +98,20 @@
         callback:  (domEl) => { }
     }
 ]);
+</code></pre>
+
+<h3 id="menubar-icons">Menubar Icons and Logos</h3>
+
+<p>Inside the menubar creation callback, you can add an icon and/or a logo button to be added to your menubar using <code class='inline'>Area.setButtonIcon(title, src, callback, options)</code>:
+
+<pre><code class="lang-js">m.setButtonIcon(<span class="str">"Github"</span>, <span class="str">"fa-brands fa-github"</span>, () => { 
+    window.open(<span class="str">"https://github.com/jxarco/lexgui.js/"</span>) 
+});
+</code></pre>
+
+and <code class='inline'>Area.setButtonImage(title, src, callback, options)</code>:</p>
+
+<pre><code class="lang-js">m.setButtonImage(<span class="str">"LexGUI"</span>, <span class="str">"./imgs/lexgui-logo.png"</span>, null, {float: <span class="str">"left"</span>});
 </code></pre>
 
 <h3 id="searchbar-for-menu-entries">Searchbar for Menu Entries</h3>

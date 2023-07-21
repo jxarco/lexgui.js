@@ -1299,6 +1299,7 @@
                     if(!next_token) {
                         item[ 'callback' ] = options.callback;
                         item[ 'type' ] = options.type;
+                        item[ 'checked' ] = options.checked;
                     }
                     list.push( item );
                     insert( next_token, item[ token ] ); 
