@@ -957,7 +957,7 @@ input[type=checkbox]:checked:after {
 	border-radius: 4px;
 }
 
-.lexcolor:has(input:focus) {
+.lexcolor:has(input:focus) input[type="color"] {
   outline: 2px solid var(--global-selected-light);
   border-radius: 4px;
 }
@@ -969,7 +969,7 @@ input[type=checkbox]:checked:after {
   font-weight: 600;
 }
 
-.lexcolor * {
+.lexcolor input[type="color"] {
   cursor: pointer;
 }
 

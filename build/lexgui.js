@@ -2729,6 +2729,8 @@
                 element.className += " noname";
                 container.style.width = "100%";
             }
+
+            return widget;
         }
 
         /**
@@ -2818,6 +2820,8 @@
                 element.className += " noname";
                 container.style.width = "100%";
             }
+
+            return widget;
         }
 
         /**
@@ -2827,7 +2831,7 @@
 
         addLabel( value ) {
 
-            this.addText( null, value, null, { disabled: true, className: "auto" } );
+            return this.addText( null, value, null, { disabled: true, className: "auto" } );
         }
         
         /**
@@ -2939,6 +2943,8 @@
             }
 
             element.appendChild(container);
+
+            return widget;
         }
 
         /**
@@ -2999,13 +3005,9 @@
                 });
             }
 
-            // Remove branch padding and margins
-            // if(!widget.name) {
-            //     element.className += " noname";
-            //     container.style.width = "100%";
-            // }
-
             element.appendChild(container);
+
+            return widget;
         }
 
         /**
@@ -3183,6 +3185,8 @@
                 element.className += " noname";
                 container.style.width = "100%";
             }
+
+            return widget;
         }
 
         /**
@@ -3243,6 +3247,8 @@
             curve_instance.canvas.width = container.offsetWidth;
             curve_instance.redraw();
             widget.onresize = curve_instance.redraw.bind(curve_instance);
+
+            return widget;
         }
 
         /**
@@ -3335,6 +3341,8 @@
             setLayers();
             
             element.appendChild(container);
+
+            return widget;
         }
 
         /**
@@ -3449,6 +3457,8 @@
             };
 
             updateItems();
+
+            return widget;
         }
 
         /**
@@ -3502,6 +3512,8 @@
             }
 
             element.appendChild(list_container);
+
+            return widget;
         }
 
         /**
@@ -3602,6 +3614,8 @@
             }
 
             element.appendChild(tags_container);
+
+            return widget;
         }
 
         /**
@@ -3702,6 +3716,8 @@
 
                 element.appendChild(suboptions);
             }
+
+            return widget;
         }
 
         /**
@@ -3729,6 +3745,7 @@
                 Panel.#dispatch_event(color, "input");
             };
             let element = widget.domEl;
+            let change_from_input = false;
 
             // Add reset functionality
             Panel.#add_reset_property(element.domName, function() {
@@ -3741,9 +3758,10 @@
 
             var container = document.createElement('span');
             container.className = "lexcolor";
-            // container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+            container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
             let color = document.createElement('input');
+            color.style.width = "calc(30% - 6px)";
             color.type = 'color';
             color.className = "colorinput";
             color.id = "color" + simple_guidGenerator();
@@ -3754,23 +3772,12 @@
                 color.disabled = true;
             }
 
-            let valueName = document.createElement('span');
-            valueName.className = "colorinfo";
-            valueName.innerText = color.value;
-
-            valueName.addEventListener("click", e => {
-                color.focus();
-                color.click();
-            });
-
-            container.appendChild(color);
-            container.appendChild(valueName);
-
             color.addEventListener("input", e => {
                 let val = e.target.value;
 
                 // Change value (always hex)
-                valueName.innerText = val;
+                if( !change_from_input )
+                    text_widget.set(val);
 
                 // Reset button (default value)
                 if(val != color.iValue) {
@@ -3783,8 +3790,35 @@
 
                 this._trigger( new IEvent(name, val, e), callback );
             }, false);
+
+            container.appendChild(color);
+
+            this.queue( container );
+
+            const text_widget = this.addText(null, color.value, (v) => {
+                change_from_input = true;
+                widget.set( v );
+                change_from_input = false;
+            }, { width: "calc(70% - 4px)" });
+            
+            text_widget.domEl.style.marginLeft = "4px";
+
+            this.clearQueue();
+
+            // let valueName = document.createElement('span');
+            // valueName.className = "colorinfo";
+            // valueName.innerText = color.value;
+
+            // valueName.addEventListener("click", e => {
+            //     color.focus();
+            //     color.click();
+            // });
+
+            // container.appendChild(valueName);
             
             element.appendChild(container);
+
+            return widget;
         }
 
         /**
@@ -3936,6 +3970,8 @@
                 element.className += " noname";
                 container.style.width = "100%";
             }
+
+            return widget;
         }
 
         static #VECTOR_COMPONENTS = {0: 'x', 1: 'y', 2: 'z', 3: 'w'};
@@ -4108,6 +4144,8 @@
             }, false);
             
             element.appendChild(container);
+
+            return widget;
         }
 
         /**
@@ -4123,17 +4161,17 @@
 
         addVector2( name, value, callback, options ) {
 
-            this._add_vector(2, name, value, callback, options);
+            return this._add_vector(2, name, value, callback, options);
         }
 
         addVector3( name, value, callback, options ) {
 
-            this._add_vector(3, name, value, callback, options);
+            return this._add_vector(3, name, value, callback, options);
         }
 
         addVector4( name, value, callback, options ) {
 
-            this._add_vector(4, name, value, callback, options);
+            return this._add_vector(4, name, value, callback, options);
         }
 
         /**
@@ -4221,6 +4259,8 @@
                     el.removeEventListener("mousemove", inner_mousemove);
                 }
             }
+
+            return widget;
         }
 
         /**
@@ -4281,6 +4321,8 @@
             }, { className: "small" });
 
             this.clearQueue();
+
+            return widget;
         }
 
         /**
