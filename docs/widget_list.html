@@ -292,9 +292,23 @@ panel.addDropdown(<span class="str">"Media Dropdown"</span>, options, <span clas
 </code></pre>
 
 <h2 id="layers">Layers</h2>
-<p>...TODO</p>
+
+<p>Represents Bit Layers. Enables 
+    you to work with binary data and manipulate individual bits to set bit masks.</p>
+<p>Call <code class='inline'>Panel.addLayers(name, value, callback)</code> to add a Layers Widget to your panel:</p>
+<ul>
+<li><code class='inline'>name (String)</code>: Widget name</li>
+<li><code class='inline'>value (Number)</code>: Mask value (decimal) that will be decomposed into bits</li>
+<li><code class='inline'>callback (Function)</code>: Function called when bit mask changes</li>
+</ul>
+
+<pre><code class="lang-js">panel.addLayers(<span class="str">"Layer name"</span>, <span class="dec">10</span>, (value, event) => {
+    console.log(value);
+});
+</code></pre>
 
 <h2 id="file">File</h2>
+
 <p>...TODO</p>
 
 <h2 id="progress">Progress</h2>
