@@ -4509,10 +4509,14 @@
                 LX.emit("@on_branch_closed", this.classList.contains("closed"), that.panel);
             };
 
-            this.oncontextmenu = function(e){
+            this.oncontextmenu = function(e) {
+
                 e.preventDefault();
                 e.stopPropagation();
 
+                if( this.parentElement.classList.contains("dialog") )
+                   return;
+                   
                 addContextMenu("Dock", e, p => {
                     e.preventDefault();
                     // p.add('<i class="fa-regular fa-window-maximize">', {id: 'dock_options0'});
@@ -4782,6 +4786,9 @@
             if(callback)
                 callback.call(this, panel);
             root.appendChild(panel.root);
+
+            // Make branches have a distintive to manage some cases
+            panel.root.querySelectorAll(".lexbranch").forEach( b => b.classList.add("dialog") );
             
             this.panel = panel;
             this.root = root;
