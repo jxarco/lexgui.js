@@ -1508,6 +1508,9 @@
                     button.right = true;	
                 if(this.root.lastChild && this.root.lastChild.right) {	
                     this.root.lastChild.before( button );	
+                }
+                else if(options.float == "left") {
+                    this.root.prepend(button);
                 }	
                 else {	
                     this.root.appendChild( button );	
@@ -1542,11 +1545,14 @@
                 button.style.padding = "5px";
                 button.style.alignItems = "center";
 
-                if(options.position == "right")	
+                if(options.float == "right")	
                     button.right = true;	
                 if(this.root.lastChild && this.root.lastChild.right) {	
                     this.root.lastChild.before( button );	
                 }	
+                else if(options.float == "left") {
+                    this.root.prepend(button);
+                }
                 else {	
                     this.root.appendChild( button );	
                 }
@@ -2910,6 +2916,10 @@
                 buttonEl.className = "lexbutton combo";
                 if(options.buttonClass)
                     buttonEl.classList.add(options.buttonClass);
+
+                if(options.selected == b.value) 
+                    buttonEl.classList.add("selected");
+                    
                 buttonEl.innerHTML = "<a class='"+ (b.icon ?? "") +"'></a><span>" + (b.icon ? "" : b.value) + "</span>";
               
                 if(options.disabled)

@@ -38,7 +38,7 @@ area.addMenubar( m => {
             });
         });
     }} );
-    m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass", short:  "F1", callback: () => { console.log("Opening HELP") }});
+    m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass", short:  "F1", callback: () => { window.open("./docs/") }});
     m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
     m.add( "Help/Support LexGUI/Do it" );
 
@@ -65,7 +65,7 @@ area.addMenubar( m => {
     
     m.getButton("Play");
     m.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")})
-    m.setButtonImage("lexgui.js", "images/lexgui-min.png", () => {window.open("https://github.com/jxarco/lexgui.js/")}, {position: "left"})
+    m.setButtonImage("lexgui.js", "images/lexgui-min.png", () => {window.open("https://github.com/jxarco/lexgui.js/")}, {float: "left"})
 });
 
 // split main area
@@ -462,7 +462,7 @@ function fillPanel( panel ) {
                 console.log(value);
             }
         }
-    ]);
+    ], {selected: "center"});
     panel.addList(null, ['GPTeam', 'Blat Bunny', ['Blat Panthers', 'fa-solid fa-paw']], 'Blat Panthers',  (value, event) => {
         console.log(value);
     });
