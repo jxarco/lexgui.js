@@ -40,7 +40,8 @@ to create <strong>Signals</strong>. E.g. We could make a widget to be updated wh
 
 <h3>Emit a Signal</h3>
 
-<p>To emit a signal we only have to call <code class="inline">LX.emit(signal_name, callback_param)</code> in any of the cases.</p>
+<p>To emit a signal we only have to call <code class="inline">LX.emit(signal_name, value, target)</code> in any of the cases, where <code class="inline">target</code> 
+is optional. If defined, the callback will be called only to that object.</p>
 
 </body>
 </html>

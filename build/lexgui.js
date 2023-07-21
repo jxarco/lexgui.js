@@ -406,12 +406,18 @@
 
     LX.TreeEvent = TreeEvent;
 
-    function emit( signal_name, value )
+    function emit( signal_name, value, target )
     {
         const data = LX.signals[ signal_name ];
 
         if( !data )
         return;
+
+        if( target )
+        {
+            target[signal_name].call(target, value);
+            return;
+        }
 
         for( let obj of data )
         {
@@ -420,7 +426,7 @@
                 obj.set( value );
             }else
             {
-                obj[signal_name].call(obj);
+                obj[signal_name].call(obj, value);
             }
         }
     }
@@ -756,7 +762,10 @@
             this.#update();
 
             if(!resize)
-            return;
+            {
+                return this.sections;
+            }
+            
 
             // from litegui.js @jagenjo
 
@@ -789,7 +798,6 @@
                 last_pos[1] = e.y;
                 e.stopPropagation();
                 e.preventDefault();
-                            
             }
 
             function inner_mouseup(e)
@@ -4493,6 +4501,8 @@
 
                 that.content.toggleAttribute('hidden');
                 that.grabber.toggleAttribute('hidden');
+
+                LX.emit("@on_branch_closed", this.classList.contains("closed"), that.panel);
             };
 
             this.oncontextmenu = function(e){
@@ -4662,6 +4672,7 @@
             console.warn("Content is empty, add some widgets using 'callback' parameter!");
 
             this.#oncreate = callback;
+            this.id = simple_guidGenerator();
 
             const size = options.size ?? [],
                 position = options.position ?? [],
@@ -4816,11 +4827,17 @@
 
             options.draggable = options.draggable ?? false;
             options.closable = false;
-
+            
             super( title, callback, options );
+            
+            let that = this;
+            // Update margins on branch title closes/opens
+            LX.addSignal("@on_branch_closed", this.panel, closed => {
+                if( this.dock_pos == PocketDialog.BOTTOM )
+                    this.root.style.top = "calc(100% - " + (this.root.offsetHeight + 6) + "px)";
+            });
 
             // Custom 
-            let that = this;
             this.root.classList.add( "pocket" );
             this.root.style.left = "calc(100% - " + (this.root.offsetWidth + 6) + "px)";
             this.root.style.top = "0px";

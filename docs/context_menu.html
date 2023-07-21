@@ -14,8 +14,8 @@
 <p>LexGUI offers a powerful context menu feature that allows you to create customizable context menus with ease. 
     These menus provide quick access to relevant actions and options based on the user's current context, enhancing the overall user experience.</p>
 
-<p>LexGUI's context menus can be triggered not only on right-click, but in any custom event or moment is necessary. Integrating a context menu is simple calling the following function 
-    <code class='inline'>LX.addContextMenu(title, event, callback, options)</code>:</p>
+<p>LexGUI's context menus can be triggered not only on right-click, but in any custom event or moment is necessary. Call <code class='inline'>LX.addContextMenu(title, event, callback, options)</code>
+    to create a Context Menu:</p>
 
 <pre><code class="lang-js">LX.addContextMenu( <span class="str">"Selected Nodes"</span>, event, m => {
     <span class="com">// event is the DOM event that should have position info</span>
