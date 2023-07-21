@@ -3094,7 +3094,10 @@
                 e.stopPropagation();
                 e.stopImmediatePropagation();
                 this.toggleAttribute('hidden', true);
-                this.unfocus_event = e.relatedTarget === selectedOption.querySelector("button");
+                if(e.relatedTarget === selectedOption.querySelector("button")) {
+                    this.unfocus_event = true;
+                    setTimeout(() => delete this.unfocus_event, 200);
+                }
             });
 
             // Add filter options
