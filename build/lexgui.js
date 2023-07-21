@@ -439,12 +439,10 @@
 
         if( !LX.signals[ name ] )
             LX.signals[ name ] = [];
-        else if(obj.name) {
-            for(let i = 0; i < LX.signals[ name ].length; i++ ) {
-                if(obj.name == LX.signals[ name ][ i ].name)  
-                    return;
-            }
-        }
+        
+        if( LX.signals[ name ].indexOf( obj ) > -1 )
+            return;
+
         LX.signals[ name ].push( obj );
     }
 
@@ -3842,15 +3840,17 @@
             }
 
             // add slider below
-            if(options.min && options.max) {
+            if(options.min !== undefined && options.max !== undefined) {
                 let slider = document.createElement('input');
                 slider.className = "lexinputslider";
-                slider.step = options.step ?? "any";
+                slider.step = options.step ?? 1;
                 slider.min = options.min;
                 slider.max = options.max;
                 slider.type = "range";
                 slider.addEventListener("input", function(e) {
-                    vecinput.value = +this.value;
+                    let new_value = +this.valueAsNumber;
+                    let fract = new_value % 1;
+                    vecinput.value = Math.floor(new_value) + (+fract.toPrecision(5));
                     Panel.#dispatch_event(vecinput, "change");
                 }, false);
                 box.appendChild(slider);
@@ -3865,12 +3865,14 @@
                 let mult = options.step ?? 1;
                 if(e.shiftKey) mult *= 10;
                 else if(e.altKey) mult *= 0.1;
-                this.value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
+                let new_value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1));
+                let fract = new_value % 1;
+                this.value = Math.floor(new_value) + (+fract.toPrecision(5));
                 Panel.#dispatch_event(vecinput, "change");
             }, {passive:false});
 
             vecinput.addEventListener("change", e => {
-                let val = e.target.value = clamp(e.target.value, vecinput.min, vecinput.max);
+                let val = e.target.value = clamp(+e.target.valueAsNumber, +vecinput.min, +vecinput.max);
                 val = options.precision ? round(val, options.precision) : val;
                 // update slider!
                 if( box.querySelector(".lexinputslider"))
@@ -3904,7 +3906,9 @@
                     let mult = options.step ?? 1;
                     if(e.shiftKey) mult *= 10;
                     else if(e.altKey) mult *= 0.1;
-                    vecinput.value = (+vecinput.valueAsNumber + mult * dt).toPrecision(5);
+                    let new_value = (+vecinput.valueAsNumber + mult * dt);
+                    let fract = new_value % 1;
+                    vecinput.value = Math.floor(new_value) + (+fract.toPrecision(5));
                     Panel.#dispatch_event(vecinput, "change");
                 }
 
