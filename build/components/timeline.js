@@ -105,7 +105,7 @@
             this.canvas.addEventListener("mousedown", this.processMouse.bind(this));
             this.canvas.addEventListener("mouseup", this.processMouse.bind(this));
             this.canvas.addEventListener("mousemove", this.processMouse.bind(this));
-            this.canvas.addEventListener("wheel", this.processMouse.bind(this), {passive:false});
+            this.canvas.addEventListener("wheel", this.processMouse.bind(this), {passive:true});
             this.canvas.addEventListener("dblclick", this.processMouse.bind(this));
             this.canvas.addEventListener("contextmenu", this.processMouse.bind(this));
 
@@ -583,36 +583,6 @@
                 this.onSetDuration( t );	 
         }
 
-        /**
-         * @method optimizeTracks
-         */
-
-        optimizeTracks() {
-            
-            let tracks = [];
-            for(let i = 0; i < this.animationClip.tracks.length; i++)
-            {
-                if(this.animationClip.tracks[i].clips.length) {
-                    this.animationClip.tracks[i].idx = tracks.length;
-                    for(let j = 0; j < this.animationClip.tracks[i].clips.length; j++)
-                    {
-                        this.animationClip.tracks[i].clips[j].trackIdx = tracks.length;
-                    }
-                    let selectedIdx = 0;
-                    for(let l = 0; l < this.lastClipsSelected.length; l++)
-                    {
-                        let [t,c] = this.lastClipsSelected[l];
-                    
-                        if(t > i)
-                            this.lastClipsSelected[l][1] = t - 1;
-                        if(t == i)
-                            selectedIdx = l;
-                    }
-                    this.lastClipsSelected = [...this.lastClipsSelected.slice(0, selectedIdx), ...this.lastClipsSelected.slice(selectedIdx + 1, this.lastClipsSelected.length)];
-                    tracks.push(this.animationClip.tracks[i]);
-                }			
-            }
-        }
 
         // Converts distance in pixels to time
         xToTime( x ) {
@@ -1391,10 +1361,11 @@
                         title: "Delete",// + " <i class='bi bi-trash float-right'></i>",
                         callback: () => {
                             let keyframesToDelete = this.lastKeyFramesSelected;
+                            e.multipleSelection = keyframesToDelete.length > 1 ?? false;
                             for(let i = 0; i < keyframesToDelete.length; i++){
-                                this.deleteKeyFrame(e, keyframesToDelete [1], keyframesToDelete[2])
+                                this.deleteKeyFrame(e, keyframesToDelete[i][1], keyframesToDelete[i][2]);
                             }
-                            this.optimizeTracks();
+                            
                         }
                     }
                 )
@@ -1853,7 +1824,7 @@
             // Don't remove by now the first key
             if(index == 0) {
                 console.warn("Operation not supported! [remove first keyframe track]");
-                return;
+                return 0;
             }
 
             // Update clip information
@@ -1888,6 +1859,8 @@
             // Update animation action interpolation info
             if(this.onUpdateTrack)
                 this.onUpdateTrack( clipIdx );
+            
+            return 1;
         }
 
         /** Delete one or more keyframes given the triggered event
@@ -1913,8 +1886,7 @@
 
                     // Delete every selected key
                     for(let [name, idx, keyIndex] of pts) {
-                        this.#delete( this.tracksPerItem[name][idx], keyIndex - deletedIndices );
-                        deletedIndices++;
+                        deletedIndices += this.#delete( this.tracksPerItem[name][idx], keyIndex - deletedIndices );
                     }
                 }
             }
@@ -2434,6 +2406,36 @@
             }
         }
 
+        /**
+         * @method optimizeTracks
+         */
+
+        optimizeTracks() {
+            
+            let tracks = [];
+            for(let i = 0; i < this.animationClip.tracks.length; i++)
+            {
+                if(this.animationClip.tracks[i].clips.length) {
+                    this.animationClip.tracks[i].idx = tracks.length;
+                    for(let j = 0; j < this.animationClip.tracks[i].clips.length; j++)
+                    {
+                        this.animationClip.tracks[i].clips[j].trackIdx = tracks.length;
+                    }
+                    let selectedIdx = 0;
+                    for(let l = 0; l < this.lastClipsSelected.length; l++)
+                    {
+                        let [t,c] = this.lastClipsSelected[l];
+                    
+                        if(t > i)
+                            this.lastClipsSelected[l][1] = t - 1;
+                        if(t == i)
+                            selectedIdx = l;
+                    }
+                    this.lastClipsSelected = [...this.lastClipsSelected.slice(0, selectedIdx), ...this.lastClipsSelected.slice(selectedIdx + 1, this.lastClipsSelected.length)];
+                    tracks.push(this.animationClip.tracks[i]);
+                }			
+            }
+        }
         /** Add a clip to the timeline in a free track slot at the current time
          * @clip: clip to be added
          * @offsetTime: (optional) offset time of current time
@@ -3623,4 +3625,9 @@
         }
         throw new Error('Bad Hex');
     }
+
+    LX.UTILS.concatTypedArray = (Arrays, ArrayType) => {
+		return Arrays.reduce((acc, arr) => new ArrayType([...acc, ...arr]), []);
+	}
+
 })( typeof(window) != "undefined" ? window : (typeof(self) != "undefined" ? self : global ) );
