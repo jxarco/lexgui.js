@@ -77,7 +77,8 @@
 <li><code class='inline'>name (String)</code>: Widget name</li>
 <li><code class='inline'>values (Array)</code>: Each of the {value, callback} items (you can add an <code class='inline'>icon</code>)</li>
 <li><code class='inline'>options (Object)</code>:<ul>
-<li><code class='inline'>float</code>: Justify content (left, center, right) [center]</li>
+<li><code class='inline'>float (String)</code>: Justify content (left, center, right) [center]</li>
+<li><code class='inline'>noSelection (Boolean)</code>: Buttons can be clicked, but they are not selectable [false]</li>
 </ul>
 </li>
 </ul>
@@ -165,7 +166,7 @@ panel.addVector4(<span class="str">"Shader Color"</span>, [<span class="dec">1</
 <li><code class='inline'>callback (Function)</code>: Function called when the checkbox value changes</li>
 <li><code class='inline'>options (Object)</code>:<ul>
 <li><code class='inline'>disabled</code>: Make the widget disabled</li>
-<li><code class='inline'>suboptions</code>: Callback to add widgets shown if value = <code class='inline'>TRUE</code></li>
+<li><code class='inline'>suboptions</code>: Callback to add widgets shown if value = <code class='inline'><span class="lit">true</span></code></li>
 </ul>
 </li>
 </ul>
@@ -250,8 +251,99 @@ panel.addDropdown(<span class="str">"Media Dropdown"</span>, options, <span clas
 });
 </code></pre>
 
-<h2 id="tree">Tree</h2>
-<p>...TODO</p>
+<h2 id="tree">Data Tree</h2>
+
+<p>Represents a <strong>Data Visualization Tree</strong>. Enables developers to display hierarchical data in an organized
+     and visually appealing manner. This feature is especially useful when presenting data with parent-child
+      relationships, such as file directories, organizational structures, family trees, and more.</p>
+
+    <p>Call <code class='inline'>Panel.addTree(name, data, options)</code> to add a Data Tree Widget to your panel:</p>
+    <ul>
+    <li><code class='inline'>name (String)</code>: Widget name</li>
+    <li><code class='inline'>data (Object)</code>: Hierarchical data</li>
+    <li><code class='inline'>options (Object)</code>
+        <ul>
+            <li><code class='inline'>icons (Array)</code>: Array of objects with button information {name, icon, callback}</li>
+            <li><code class='inline'>filter (Boolean)</code>: Adds a filter bar [true]</li>
+            <li><code class='inline'>rename (Boolean)</code>: Allow item rename [true]</li>
+            <li><code class='inline'>onevent(TreeEvent) (Function)</code>: Function to catch the different types of Tree events</li>
+        </ul>
+    </li>
+    </ul>
+
+<pre><code class="lang-js"><span class="com">// Tree data!</span>
+<span class="kwd">const</span> scene_data = {
+    id: <span class="str">"root"</span>,
+    children: [
+        {
+            id: <span class="str">"node_1"</span>,
+            children: [
+                {
+                    id: <span class="str">"node_1_1"</span>,
+                    icon: <span class="str">"fa-solid fa-cube"</span>,
+                    children: [],
+                    actions: [
+                        {
+                            name: <span class="str">"Open script"</span>,
+                            icon: <span class="str">"fa-solid fa-scroll"</span>,
+                            callback: function(node) {
+                                console.log(node.id + <span class="str">": Script opened!"</span>)
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            id: <span class="str">"node_2"</span>,
+            icon: <span class="str">"fa-solid fa-circle-play"</span>,
+            children: []
+        }
+    ]
+};
+    
+<span class="com">// This is optional!</span>
+<span class="kwd">const</span> tree_icons = [
+    {
+        name: <span class="str">"Add node"</span>,
+        icon: <span class="str">"fa-solid fa-plus"</span>,
+        callback: () => { console.log(<span class="str">"Node added!"</span>) }
+    },
+    {
+        name: <span class="str">"Instantiate scene"</span>,
+        icon: <span class="str">"fa-solid fa-link"</span>,
+        callback: () => { console.log(<span class="str">"Scene instantiated!"</span>) }
+    }
+];
+    
+panel.addTree(<span class="str">"Scene Tree"</span>, scene_data, { 
+    icons: tree_icons, 
+    filter: <span class="lit">false</span>,
+    rename: <span class="lit">true</span>,
+    onevent: (event) => { 
+        switch(event.type) {
+            <span class="kwd">case</span> LX.<span class="typ">TreeEvent</span>.NODE_SELECTED: 
+                <span class="com">// ...</span>
+                <span class="kwd">break</span>;
+            <span class="kwd">case</span> LX.<span class="typ">TreeEvent</span>.NODE_DBLCLICKED: 
+                <span class="com">// ...</span>
+                <span class="kwd">break</span>;
+            <span class="kwd">case</span> LX.<span class="typ">TreeEvent</span>.NODE_CONTEXTMENU: 
+                <span class="com">// ...</span>
+                <span class="kwd">break</span>;
+            <span class="kwd">case</span> LX.<span class="typ">TreeEvent</span>.NODE_DRAGGED: 
+                <span class="com">// ...</span>
+                <span class="kwd">break</span>;
+            <span class="kwd">case</span> LX.<span class="typ">TreeEvent</span>.NODE_RENAMED:
+                <span class="com">// ...</span>
+                <span class="kwd">break</span>;
+            <span class="kwd">case</span> LX.<span class="typ">TreeEvent</span>.NODE_VISIBILITY:
+                <span class="com">// ...</span>
+                <span class="kwd">break</span>;
+        }
+    }
+});
+</code></pre>
 
 <h2 id="array">Array</h2>
 
@@ -336,8 +428,30 @@ panel.addDropdown(<span class="str">"Media Dropdown"</span>, options, <span clas
   }
 });
 </code></pre>
+
 <h2 id="curve">Curve</h2>
-<p>...TODO</p>
+
+<p>Represents a simple Curve Editor. It's a versatile component designed to simplify the manipulation and visualization 
+    of curves or graphs, ideal for any scenario where the smooth interpolation of values over time 
+    or other parameters is essential.</p>
+<p>Call <code class='inline'>Panel.addCurve(name, values, callback)</code> to add a Curve Editor Widget to your panel:</p>
+<ul>
+<li><code class='inline'>name (String)</code>: Widget name</li>
+<li><code class='inline'>values (Array)</code>: Values of the curve to be interpolated</li>
+<li><code class='inline'>callback (Function)</code>: Function called when the values change</li>
+</ul>
+
+<pre><code class="lang-js"><span class="kwd">const</span> opacityValues = [
+    [<span class="dec">0.2</span>, <span class="dec">0.35</span>],
+    [<span class="dec">0.42</span>, <span class="dec">0.9</span>],
+    [<span class="dec">0.55</span>, <span class="dec">0.67</span>],
+    [<span class="dec">1</span>, <span class="dec">1</span>]
+];
+panel.addCurve(<span class="str">"Opacity"</span>, opacityValues, (value, event) => {
+    console.log(value);
+});
+</code></pre>
+
 <h2 id="other-widgets">Other Widgets</h2>
 <ul>
 <li><code class='inline'>Panel.addBlank(height)</code>: Add vertical space (in pixels) inside a branch.</li>

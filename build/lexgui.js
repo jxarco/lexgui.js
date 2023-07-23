@@ -2892,6 +2892,7 @@
          * @param {Array} values Each of the {value, callback} items
          * @param {*} options:
          * float: Justify content (left, center, right) [center]
+         * noSelection: Buttons can be clicked, but they are not selectable
          */
 
         addComboButtons( name, values, options = {} ) {
@@ -2905,7 +2906,7 @@
             if( options.float ) container.className += options.float;
             container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";   
 
-            let should_select = !(options.no_selection ?? false);
+            let should_select = !(options.noSelection ?? false);
             for( let b of values )
             {
                 if( !b.value ) throw("Set 'value' for each button!");
@@ -5716,7 +5717,7 @@
                         icon: "fa-solid fa-arrows-rotate",
                         callback:  (domEl) => { this.#refresh_content(); }
                     }
-                ], { width: "20%", no_selection: true } );
+                ], { width: "20%", noSelection: true } );
             }
 
             this.rightPanel.addDropdown("Filter", ["None", "Image", "Mesh", "JSON"], "None", (v) => this.#refresh_content.call(this, null, v), { width: "20%" });
