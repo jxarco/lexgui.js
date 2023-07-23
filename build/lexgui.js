@@ -1176,6 +1176,7 @@
             this.selected = null;
             this.root = container;
             this.tabs = {};
+            window.tabs = this;
         }
 
         add( name, content, isSelected, callback ) {
@@ -2139,6 +2140,8 @@
          * @param {*} options 
          * id: Id of the element
          * className: Add class to the element
+         * width: Width of the panel element [fit space]
+         * height: Height of the panel element [fit space]
          */
 
         constructor( options = {} )  {
@@ -2152,24 +2155,6 @@
             root.style.width = options.width || "calc( 100% - 7px )";
             root.style.height = options.height || "100%";
             this.root = root;
-
-            let that = this;
-
-            // root.ondragover = (e) => { return false };
-            // root.ondragend = () => { return false };
-            // root.ondrop = function(e) {
-            //     e.preventDefault();
-            //     const branch_to_add = that.branches.find( b => b.name === e.dataTransfer.getData('branch_title') );
-            //     if( branch_to_add )
-            //     {
-            //         that.root.appendChild( branch_to_add.root );
-            //         for( let w of branch_to_add.widgets ) {
-            //             branch_to_add.content.appendChild( w.domEl );
-            //         }
-            //     }
-
-            //     document.querySelector("#" + e.dataTransfer.getData('dialog_id')).remove();
-            // };
 
             this.onevent = (e => {});
 
@@ -2330,6 +2315,8 @@
             if(options.filter) {
                 this.#add_filter( options.filter, {callback: this.#search_widgets.bind(this, branch.name)} );
             }
+
+            return branch;
         }
 
         merge() {
