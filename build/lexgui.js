@@ -3162,6 +3162,7 @@
                         li.setAttribute("value", iValue.value);
                         li.className = "lexlistitem";
                         option.innerText = iValue.value;
+                        option.className += " media";
                         option.prepend(img);
 
                         option.setAttribute("value", iValue.value);
