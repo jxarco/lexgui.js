@@ -105,7 +105,7 @@
             this.canvas.addEventListener("mousedown", this.processMouse.bind(this));
             this.canvas.addEventListener("mouseup", this.processMouse.bind(this));
             this.canvas.addEventListener("mousemove", this.processMouse.bind(this));
-            this.canvas.addEventListener("wheel", this.processMouse.bind(this), {passive:true});
+            this.canvas.addEventListener("wheel", this.processMouse.bind(this), {passive:false});
             this.canvas.addEventListener("dblclick", this.processMouse.bind(this));
             this.canvas.addEventListener("contextmenu", this.processMouse.bind(this));
 
@@ -299,8 +299,8 @@
             this.animationClip = animation;
             this.duration = animation.duration;
 
-            // var w = Math.max(300, this.canvas.width);
-            // this.secondsToPixels = ( w - this.session.left_margin - 100 ) / this.duration;
+            var w = Math.max(300, this.canvas.width);
+            this.secondsToPixels = ( w - this.session.left_margin ) / this.duration;
             // if(this.secondsToPixels < 1)
             //     this.secondsToPixels = 100;
             // this.session.start_time = -50 / this.secondsToPixels;
@@ -452,17 +452,19 @@
             let h = rect[3];
             let timelineHeight = this.size[1];
             this.currentTime = currentTime;
-            this.updateHeader();
+            // this.updateHeader();
             this.currentScrollInPixels = this.scrollableHeight <= h ? 0 : (this.currentScroll * (this.scrollableHeight - timelineHeight));
 
             //zoom
             if(this.duration > 0)
             {
                 this.startTime = -50 / this.secondsToPixels;
-                this.startTime = Math.floor( this.session.start_time ); //seconds
+                // this.startTime = Math.floor( this.session.start_time ); //seconds
+                this.startTime = this.session.start_time ; //seconds
                 if(this.startTime < 0)
                     this.startTime = 0;
-                this.endTime = Math.ceil( this.startTime + (w - this.session.left_margin) * this.pixelsToSeconds );
+                // this.endTime = Math.ceil( this.startTime + (w - this.session.left_margin) * this.pixelsToSeconds );
+                this.endTime = this.startTime + (w - this.session.left_margin) * this.pixelsToSeconds ;
                 if(this.endTime > this.duration)
                     this.endTime = this.duration;
                 if(this.startTime > this.endTime) //avoids weird bug
@@ -636,7 +638,8 @@
 
             if(!this.canvas)
                 return;
-
+            e.preventDefault();
+            e.stopPropagation();
             var w = this.size[0];
 
             // Process mouse
@@ -750,7 +753,7 @@
                         time = Math.max(0, time);
                         this.currentTime = Math.min(this.duration, time);
                         this.draw();
-                        // LX.emit( "@on_current_time_" + this.constructor.name, time );
+                        LX.emit( "@on_current_time_" + this.constructor.name, this.currentTime );
                     }
                     else
                     {
@@ -1072,7 +1075,9 @@
         #resizecanvas( size ) {
             this.canvas.width = size[0];
             this.canvas.height = size[1] - this.header_offset;
-           
+            var w = Math.max(300, this.canvas.width);
+            this.secondsToPixels = ( w - this.session.left_margin ) / this.duration;
+            this.pixelsToSeconds = 1 / this.secondsToPixels;
             this.draw(this.currentTime);
         }
 
@@ -1089,8 +1094,10 @@
         * Show timeline area if it is hidden
         */
         show() {
+            
             this.root.show();
             this.resize();
+            
         }
     };
 
@@ -1711,13 +1718,15 @@
             // Update animationClip information
             let clipIdx = track.clipIdx;
 
+            let [name, keyType] = this.getTrackName(track.name)
+            let tracks = this.tracksPerItem[name];
+            if(!tracks) return;
+
+            // Get current track
+            const selectedTrackIdx = tracks.findIndex( t => t.type === keyType );
+            if(selectedTrackIdx >=  0)
+                track = tracks[ selectedTrackIdx ];
             if(clipIdx == undefined) {
-                let [name, keyType] = this.getTrackName(track.name)
-                let tracks = this.tracksPerItem[name];
-                if(!tracks) return;
-    
-                // Get current track
-                const selectedTrackIdx = tracks.findIndex( t => t.type === keyType );
                 if(selectedTrackIdx < 0)
                     return;
                     clipIdx = tracks[ selectedTrackIdx ].clipIdx;
@@ -1769,41 +1778,20 @@
                 for( let i = 0; i < dim; ++i )
                     valuesArray.push(value[i]);
             }
-            // // Get mid values
-            // const items = this.selectedItems;
 
-            // for(let i = 0; i < items.length; i++) {
-            //     let item = items[i];
-            //     let lerpValue = item[ track.type ].toArray();
+            this.animationClip.tracks[clipIdx].values = new Float32Array( valuesArray );
+
             
-            //     // Add values
-            //     let valuesArray = [];
-            //     this.animationClip.tracks[clipIdx].values.forEach( (a, b) => {
-            //         if(b == newIdx * track.dim) {
-            //             for( let i = 0; i < track.dim; ++i )
-            //                 valuesArray.push(lerpValue[i]);
-            //         }
-            //         valuesArray.push(a);
-            //     } );
-    
-            //     if(lastIndex) {
-            //         for( let i = 0; i < track.dim; ++i )
-            //             valuesArray.push(lerpValue[i]);
-            //     }
-    
-            //     this.animationClip.tracks[clipIdx].values = new Float32Array( valuesArray );
-    
-            //     // Move the other's key properties
-            //     for(let i = (this.animationClip.tracks[clipIdx].times.length - 1); i > newIdx; --i) {
-            //         track.edited[i - 1] ? track.edited[i] = track.edited[i - 1] : 0;
-            //     }
-                
-            //     // Reset this key's properties
-            //     track.hovered[newIdx] = undefined;
-            //     track.selected[newIdx] = undefined;
-            //     track.edited[newIdx] = undefined;
-            // }
-           
+            // Move the other's key properties
+            for(let i = (this.animationClip.tracks[clipIdx].times.length - 1); i > newIdx; --i) {
+                track.edited[i - 1] ? track.edited[i] = track.edited[i - 1] : 0;
+            }
+            
+            // Reset this key's properties
+            track.hovered[newIdx] = undefined;
+            track.selected[newIdx] = undefined;
+            track.edited[newIdx] = true;
+        
 
             // Update animation action interpolation info
             if(this.onUpdateTrack)

@@ -1598,7 +1598,7 @@
                 let data = buttons[i];
                 let button = document.createElement('div');
                 const title = data.title;
-                const disabled = data.disabled ?? false;
+                let disabled = data.disabled ?? false;
                 button.className = "lexmenubutton" + (disabled ? " disabled" : "");
                 button.title = title ?? "";
                 button.innerHTML = "<a class='" + data.icon + " lexicon'></a>";
@@ -1606,6 +1606,7 @@
     
                 const _b = button.querySelector('a');
                 _b.addEventListener("click", (e) => {
+                    disabled = e.target.parentElement.classList.contains("disabled");
                     if(data.callback && !disabled)
                         data.callback.call( this, _b, e );
                 });
