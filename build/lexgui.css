@@ -1576,11 +1576,16 @@ meter::-webkit-meter-even-less-good-value {
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
   font-weight: 100;
-  box-shadow: 0 0 6px black !important
+  box-shadow: 0 0 6px black !important;
+  background-color: var(--global-blur-background);
+  backdrop-filter: blur(12px);
+}
+
+.lexcontextmenuentry .lexcontextmenubox {
+  background-color: var(--global-color-secondary);
 }
 
 .lexcontextmenubox .lexcontextmenuentry {
-  background-color: var(--global-color-secondary);
   width: 100%;
   color: #c0c4cbe3;
   padding: 3px;

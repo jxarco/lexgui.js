@@ -5072,12 +5072,15 @@
                 e.stopImmediatePropagation();
                 
                 if(disabled) return;
-
+                
                 const f = o[ 'callback' ];
                 if(f) {
                     f.call( this, k, entry );
                     this.root.remove();
                 } 
+
+                if( !hasSubmenu )
+                return;
 
                 if( LX.OPEN_CONTEXTMENU_ENTRY == 'click' )
                     this.#create_submenu( o, k, entry, ++d );
