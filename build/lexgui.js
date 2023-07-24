@@ -1821,6 +1821,7 @@
                 element.appendChild(custom_widgets);
     
                 if( instance ) {
+                    
                     this.queue( custom_widgets );
                     
                     const on_instance_changed = (key, value, event) => {
@@ -2170,6 +2171,7 @@
             this.branches = [];
             this.current_branch = null;
             this.widgets = {};
+            this._queue = []; // Append widgets in other locations
         }
 
         get( name ) {
@@ -2581,6 +2583,11 @@
                 domEl = this.current_branch.root;
             }
 
+            if( this.queuedContainer )
+            {
+                this._queue.push( this.queuedContainer );
+            }
+
             this.queuedContainer = domEl;
         }
 
@@ -2589,6 +2596,12 @@
          */
 
         clearQueue() {
+
+            if(this._queue && this._queue.length)
+            {
+                this.queuedContainer = this._queue.pop();
+                return;
+            }
 
             delete this.queuedContainer;
         }
@@ -4480,15 +4493,11 @@
                 // push to tab space
                 this.queue( infoContainer );
                 tab.callback( this, infoContainer );
+                this.clearQueue();
             }
             
-            // add separator to last opened tab
             this.addSeparator();
-
-            // push to branch from now on
-            this.clearQueue();
         }
-
     }
 
     LX.Panel = Panel;

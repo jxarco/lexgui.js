@@ -97,7 +97,7 @@ input[type="file"] {
 #global_search {
   position: absolute;
   background-color: var(--global-blur-background);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
   border-radius: 8px;
   border: 1px solid #d0d0ec6b;
   width: 30%;
@@ -757,7 +757,7 @@ input[type="file"] {
   padding-left: 12px;
 }
 
-.lexdropdown li.last {
+.lexdropdown li {
   
 }
 
@@ -769,7 +769,7 @@ input[type="file"] {
   position: absolute;
   list-style: none;
   background-color: var(--global-blur-background);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
   padding: 4px 0px;
   z-index: 10;
   margin-top: 5px;
@@ -779,6 +779,14 @@ input[type="file"] {
   border-bottom-right-radius: 6px;
   max-height: -webkit-fill-available;
   overflow: scroll;
+}
+
+.lexdialog .lexdropdown ul {
+  max-height: unset;
+}
+
+.lexdropdown ul::-webkit-scrollbar {
+  display: none;
 }
 
 .lexdropdown .lexdropdownitem {
