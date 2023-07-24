@@ -3103,15 +3103,15 @@
             list.className = "lexoptions";
             list.hidden = true;
 
-            // list.addEventListener('focusout', function(e) {
-            //     e.stopPropagation();
-            //     e.stopImmediatePropagation();
-            //     this.toggleAttribute('hidden', true);
-            //     if(e.relatedTarget === selectedOption.querySelector("button")) {
-            //         this.unfocus_event = true;
-            //         setTimeout(() => delete this.unfocus_event, 200);
-            //     }
-            // });
+            list.addEventListener('focusout', function(e) {
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                this.toggleAttribute('hidden', true);
+                if(e.relatedTarget === selectedOption.querySelector("button")) {
+                    this.unfocus_event = true;
+                    setTimeout(() => delete this.unfocus_event, 200);
+                }
+            });
 
             // Add filter options
             if(options.filter ?? false)
