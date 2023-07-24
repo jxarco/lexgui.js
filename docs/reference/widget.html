@@ -8,7 +8,7 @@
 
 <body>
 
-<h1 id="tabs">Tabs</h1>
+<h1 id="widget">Widget</h1>
 
 <!-- <h2 id="examples">Examples</h2> -->
 
@@ -30,20 +30,19 @@
 <h2 id="properties">Properties</h2>
 <br>
 
-<p><span class="prop">.area</span> : <a href="area.html"><span class="desc">Area</span></a></p>
-<p>Area of the tab container.</p>
+<p><span class="prop">.name</span> : <span class="desc">String</span></p>
+<p>Widget name</p>
 
-<p><span class="prop">.root</span> : <span class="desc">HTMLElement</span></p>
-<p>Container element of the tabs DOM element (div)</p>
-
-<p><span class="prop">.tabs</span> : <span class="desc">Object</span></p>
-<p>Map containing each of tab information.</p>
+<p><span class="prop">.type</span> : <span class="desc">Number</span></p>
+<p>Widget type</p>
 
 <h2 id="methods">Methods</h2>
 <br>
+<p><span class="method">.value </span>( ) : <span class="desc">*</span></p>
+<p>Returns the value of the widget. Type depends on the specific widget.</p>
 
-<p><span class="method">.add </span>( name : <span class="desc">String</span>, content : <span class="desc">HTMLElement</span>, isSelected : <span class="desc">Boolean</span>, callback : <span class="desc">Function</span> )</p>
-<p>Adds a new tab inside the tab container.</p>
+<p><span class="method">.set </span>( value : <span class="desc">*</span> )</p>
+<p>Sets the value of the widget. Type depends on the specific widget.</p>
 
 </body>
 </html>

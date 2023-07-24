@@ -1176,6 +1176,7 @@
             this.selected = null;
             this.root = container;
             this.tabs = {};
+            window.tabs = this;
         }
 
         add( name, content, isSelected, callback ) {
@@ -2145,6 +2146,8 @@
          * @param {*} options 
          * id: Id of the element
          * className: Add class to the element
+         * width: Width of the panel element [fit space]
+         * height: Height of the panel element [fit space]
          */
 
         constructor( options = {} )  {
@@ -2158,24 +2161,6 @@
             root.style.width = options.width || "calc( 100% - 7px )";
             root.style.height = options.height || "100%";
             this.root = root;
-
-            let that = this;
-
-            // root.ondragover = (e) => { return false };
-            // root.ondragend = () => { return false };
-            // root.ondrop = function(e) {
-            //     e.preventDefault();
-            //     const branch_to_add = that.branches.find( b => b.name === e.dataTransfer.getData('branch_title') );
-            //     if( branch_to_add )
-            //     {
-            //         that.root.appendChild( branch_to_add.root );
-            //         for( let w of branch_to_add.widgets ) {
-            //             branch_to_add.content.appendChild( w.domEl );
-            //         }
-            //     }
-
-            //     document.querySelector("#" + e.dataTransfer.getData('dialog_id')).remove();
-            // };
 
             this.onevent = (e => {});
 
@@ -2336,6 +2321,8 @@
             if(options.filter) {
                 this.#add_filter( options.filter, {callback: this.#search_widgets.bind(this, branch.name)} );
             }
+
+            return branch;
         }
 
         merge() {
@@ -2735,6 +2722,8 @@
                 element.className += " noname";
                 container.style.width = "100%";
             }
+
+            return widget;
         }
 
         /**
@@ -2824,6 +2813,8 @@
                 element.className += " noname";
                 container.style.width = "100%";
             }
+
+            return widget;
         }
 
         /**
@@ -2833,7 +2824,7 @@
 
         addLabel( value ) {
 
-            this.addText( null, value, null, { disabled: true, className: "auto" } );
+            return this.addText( null, value, null, { disabled: true, className: "auto" } );
         }
         
         /**
@@ -2894,6 +2885,7 @@
          * @param {Array} values Each of the {value, callback} items
          * @param {*} options:
          * float: Justify content (left, center, right) [center]
+         * noSelection: Buttons can be clicked, but they are not selectable
          */
 
         addComboButtons( name, values, options = {} ) {
@@ -2907,7 +2899,7 @@
             if( options.float ) container.className += options.float;
             container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";   
 
-            let should_select = !(options.no_selection ?? false);
+            let should_select = !(options.noSelection ?? false);
             for( let b of values )
             {
                 if( !b.value ) throw("Set 'value' for each button!");
@@ -2949,6 +2941,8 @@
             }
 
             element.appendChild(container);
+
+            return widget;
         }
 
         /**
@@ -3009,13 +3003,9 @@
                 });
             }
 
-            // Remove branch padding and margins
-            // if(!widget.name) {
-            //     element.className += " noname";
-            //     container.style.width = "100%";
-            // }
-
             element.appendChild(container);
+
+            return widget;
         }
 
         /**
@@ -3104,7 +3094,10 @@
                 e.stopPropagation();
                 e.stopImmediatePropagation();
                 this.toggleAttribute('hidden', true);
-                this.unfocus_event = e.relatedTarget === selectedOption.querySelector("button");
+                if(e.relatedTarget === selectedOption.querySelector("button")) {
+                    this.unfocus_event = true;
+                    setTimeout(() => delete this.unfocus_event, 200);
+                }
             });
 
             // Add filter options
@@ -3167,6 +3160,7 @@
                         li.setAttribute("value", iValue.value);
                         li.className = "lexlistitem";
                         option.innerText = iValue.value;
+                        option.className += " media";
                         option.prepend(img);
 
                         option.setAttribute("value", iValue.value);
@@ -3190,6 +3184,8 @@
                 element.className += " noname";
                 container.style.width = "100%";
             }
+
+            return widget;
         }
 
         /**
@@ -3250,6 +3246,8 @@
             curve_instance.canvas.width = container.offsetWidth;
             curve_instance.redraw();
             widget.onresize = curve_instance.redraw.bind(curve_instance);
+
+            return widget;
         }
 
         /**
@@ -3342,6 +3340,8 @@
             setLayers();
             
             element.appendChild(container);
+
+            return widget;
         }
 
         /**
@@ -3456,6 +3456,8 @@
             };
 
             updateItems();
+
+            return widget;
         }
 
         /**
@@ -3509,6 +3511,8 @@
             }
 
             element.appendChild(list_container);
+
+            return widget;
         }
 
         /**
@@ -3609,6 +3613,8 @@
             }
 
             element.appendChild(tags_container);
+
+            return widget;
         }
 
         /**
@@ -3709,6 +3715,8 @@
 
                 element.appendChild(suboptions);
             }
+
+            return widget;
         }
 
         /**
@@ -3736,6 +3744,7 @@
                 Panel.#dispatch_event(color, "input");
             };
             let element = widget.domEl;
+            let change_from_input = false;
 
             // Add reset functionality
             Panel.#add_reset_property(element.domName, function() {
@@ -3748,9 +3757,10 @@
 
             var container = document.createElement('span');
             container.className = "lexcolor";
-            // container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+            container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
             let color = document.createElement('input');
+            color.style.width = "calc(30% - 6px)";
             color.type = 'color';
             color.className = "colorinput";
             color.id = "color" + simple_guidGenerator();
@@ -3761,23 +3771,12 @@
                 color.disabled = true;
             }
 
-            let valueName = document.createElement('span');
-            valueName.className = "colorinfo";
-            valueName.innerText = color.value;
-
-            valueName.addEventListener("click", e => {
-                color.focus();
-                color.click();
-            });
-
-            container.appendChild(color);
-            container.appendChild(valueName);
-
             color.addEventListener("input", e => {
                 let val = e.target.value;
 
                 // Change value (always hex)
-                valueName.innerText = val;
+                if( !change_from_input )
+                    text_widget.set(val);
 
                 // Reset button (default value)
                 if(val != color.iValue) {
@@ -3790,8 +3789,35 @@
 
                 this._trigger( new IEvent(name, val, e), callback );
             }, false);
+
+            container.appendChild(color);
+
+            this.queue( container );
+
+            const text_widget = this.addText(null, color.value, (v) => {
+                change_from_input = true;
+                widget.set( v );
+                change_from_input = false;
+            }, { width: "calc(70% - 4px)" });
+            
+            text_widget.domEl.style.marginLeft = "4px";
+
+            this.clearQueue();
+
+            // let valueName = document.createElement('span');
+            // valueName.className = "colorinfo";
+            // valueName.innerText = color.value;
+
+            // valueName.addEventListener("click", e => {
+            //     color.focus();
+            //     color.click();
+            // });
+
+            // container.appendChild(valueName);
             
             element.appendChild(container);
+
+            return widget;
         }
 
         /**
@@ -3943,6 +3969,8 @@
                 element.className += " noname";
                 container.style.width = "100%";
             }
+
+            return widget;
         }
 
         static #VECTOR_COMPONENTS = {0: 'x', 1: 'y', 2: 'z', 3: 'w'};
@@ -4115,6 +4143,8 @@
             }, false);
             
             element.appendChild(container);
+
+            return widget;
         }
 
         /**
@@ -4130,17 +4160,17 @@
 
         addVector2( name, value, callback, options ) {
 
-            this._add_vector(2, name, value, callback, options);
+            return this._add_vector(2, name, value, callback, options);
         }
 
         addVector3( name, value, callback, options ) {
 
-            this._add_vector(3, name, value, callback, options);
+            return this._add_vector(3, name, value, callback, options);
         }
 
         addVector4( name, value, callback, options ) {
 
-            this._add_vector(4, name, value, callback, options);
+            return this._add_vector(4, name, value, callback, options);
         }
 
         /**
@@ -4228,6 +4258,8 @@
                     el.removeEventListener("mousemove", inner_mousemove);
                 }
             }
+
+            return widget;
         }
 
         /**
@@ -4288,6 +4320,8 @@
             }, { className: "small" });
 
             this.clearQueue();
+
+            return widget;
         }
 
         /**
@@ -4520,10 +4554,14 @@
                 LX.emit("@on_branch_closed", this.classList.contains("closed"), that.panel);
             };
 
-            this.oncontextmenu = function(e){
+            this.oncontextmenu = function(e) {
+
                 e.preventDefault();
                 e.stopPropagation();
 
+                if( this.parentElement.classList.contains("dialog") )
+                   return;
+                   
                 addContextMenu("Dock", e, p => {
                     e.preventDefault();
                     // p.add('<i class="fa-regular fa-window-maximize">', {id: 'dock_options0'});
@@ -4793,6 +4831,9 @@
             if(callback)
                 callback.call(this, panel);
             root.appendChild(panel.root);
+
+            // Make branches have a distintive to manage some cases
+            panel.root.querySelectorAll(".lexbranch").forEach( b => b.classList.add("dialog") );
             
             this.panel = panel;
             this.root = root;
@@ -5673,7 +5714,7 @@
                         icon: "fa-solid fa-arrows-rotate",
                         callback:  (domEl) => { this.#refresh_content(); }
                     }
-                ], { width: "20%", no_selection: true } );
+                ], { width: "20%", noSelection: true } );
             }
 
             this.rightPanel.addDropdown("Filter", ["None", "Image", "Mesh", "JSON"], "None", (v) => this.#refresh_content.call(this, null, v), { width: "20%" });

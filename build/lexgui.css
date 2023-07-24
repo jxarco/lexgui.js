@@ -19,6 +19,7 @@
   --global-highlight: #2c303570;
   --global-font: 'Rubik', sans-serif;
   --global-dark-background: #14161a;
+  --global-blur-background: #2326299c;
 } 
 
 ::-webkit-scrollbar {
@@ -95,8 +96,9 @@ input[type="file"] {
 
 #global_search {
   position: absolute;
-  background-color: var(--global-branch-darker);
-  border-radius: 6px;
+  background-color: var(--global-blur-background);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
   border: 1px solid #d0d0ec6b;
   width: 30%;
   top: 15%;
@@ -170,7 +172,7 @@ input[type="file"] {
   background:none;
   position: absolute;
   min-width: 256px;
-  overflow: hidden;
+  /* overflow: hidden; */
   box-shadow: 0 2px 10px black;
   border-radius: 4px;
   z-index: 101;
@@ -744,28 +746,14 @@ input[type="file"] {
   font-size: 11px;
 }
 
-.lexdropdown select {
-	background-color: var(--global-dropdown-color);
-  border-radius: 2px;
-  border: none;
-  width: 100%;
-  height: 22px !important;
-  color: #DDD;
-  font-family: var(--global-font);
-  outline: none;
-  white-space: nowrap;
-  overflow: hidden;
-  cursor: pointer;
-  box-shadow: 0px 0px 4px #5c5f73;
-  position: relative;
-}
-
 .lexdropdown .option {
   display: flex;
   flex-direction: column;
-  /* justify-content: center; */
   align-items: center;
   width: 100%;
+}
+
+.lexdropdown .option:not(.media) {
   padding-left: 12px;
 }
 
@@ -780,16 +768,17 @@ input[type="file"] {
 .lexdropdown ul {
   position: absolute;
   list-style: none;
-  background: var(--global-dark-background);
+  background-color: var(--global-blur-background);
+  backdrop-filter: blur(10px);
   padding: 4px 0px;
   z-index: 10;
-  /* overflow-y: scroll; */
-  /* max-height: -webkit-fill-available; */
   margin-top: 5px;
   width: 100%;
   box-shadow: 0 2px 10px black;
-  border-bottom-left-radius: 3px;
-  border-bottom-right-radius: 3px;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  max-height: -webkit-fill-available;
+  overflow: scroll;
 }
 
 .lexdropdown .lexdropdownitem {
@@ -957,7 +946,7 @@ input[type=checkbox]:checked:after {
 	border-radius: 4px;
 }
 
-.lexcolor:has(input:focus) {
+.lexcolor:has(input:focus) input[type="color"] {
   outline: 2px solid var(--global-selected-light);
   border-radius: 4px;
 }
@@ -969,7 +958,7 @@ input[type=checkbox]:checked:after {
   font-weight: 600;
 }
 
-.lexcolor * {
+.lexcolor input[type="color"] {
   cursor: pointer;
 }
 

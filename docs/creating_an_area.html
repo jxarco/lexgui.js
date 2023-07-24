@@ -44,7 +44,7 @@
 <li><code class='inline'>icon (String)</code> at (<a href="https://fontawesome.com/search">Fontawesome</a>)</li>
 <li><code class='inline'>short (String)</code> for shortcuts</li>
 <li><code class='inline'>type (String)</code> options: <em>checkbox</em></li>
-<li><code class='inline'>checked (Boolean)</code>for <em>checkbox</em> type</li>
+<li><code class='inline'>checked (Boolean)</code> for <em>checkbox</em> type</li>
 </ul>
 </li>
 </ul>
@@ -57,8 +57,8 @@
     m.add( <span class="str">"Scene/Open Recent/goodbye.scene"</span> );
     m.add( <span class="str">"Project/Export/DAE"</span>, { short: <span class="str">"E"</span> } );
     m.add( <span class="str">"Project/Export/GLTF"</span> );
-    m.add( <span class="str">"View/Show grid"</span>, { type: <span class="str">"checkbox"</span>, checked: <span class="str">true</span>, 
-    callback: (v) =&gt; { 
+    m.add( <span class="str">"View/Show grid"</span>, { type: <span class="str">"checkbox"</span>, checked: <span class="lit">true</span>, 
+    callback: (v) => { 
         console.log(<span class="str">"Show grid:"</span>, v);
     }});
     m.add( <span class="str">"Help/About"</span> );
