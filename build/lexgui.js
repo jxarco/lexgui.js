@@ -1167,12 +1167,13 @@
                 that.tabs[ el.dataset["name"] ] = content;
             });
 
-            area.root.classList.add( "lexareatabscontent" );
+            area.root.classList.add( "lexareatabscontainer" );
 
             area.split({type: 'vertical', sizes: [Tabs.TAB_SIZE, null], resize: false, top: 6});
             area.sections[0].attach( container );
 
             this.area = area.sections[1];
+            this.area.root.className += " lexareatabscontent";
             this.selected = null;
             this.root = container;
             this.tabs = {};

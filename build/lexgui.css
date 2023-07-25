@@ -1859,21 +1859,24 @@ meter::-webkit-meter-even-less-good-value {
   border-top: 2px solid var(--global-selected-light);
 }
 
-.lexareatabscontent {
+.lexareatabscontainer {
   margin-top: 2px;
-  overflow-y: scroll
 }
 
-.lexareatabscontent .lexpanel:not(.lexoverlaybuttons) {
+.lexareatabscontainer .lexpanel:not(.lexoverlaybuttons) {
   margin: 0;
 }
 
-.lexareatabscontent .lexbranch {
+.lexareatabscontainer .lexbranch {
   margin: -4px 7px !important;
 }
 
-.lexareatabscontent .lexbranchtitle {
+.lexareatabscontainer .lexbranchtitle {
   border-top-left-radius: 0px !important;
+}
+
+.lexareatabscontent {
+  overflow-y: scroll;
 }
 
 /* Curve Widget */
