@@ -522,6 +522,7 @@ input[type="file"] {
   background: none;
   padding: 3px;
   color: var(--global-text-primary);
+  font-size: 13px;
   font-weight: 600;
   outline:none;
   border: none;
@@ -545,6 +546,7 @@ input[type="file"] {
 
 .lexwidget textarea {
   font-family: var(--global-font);
+  font-size: 13px;
   background: none;
   padding: 3px;
   color: var(--global-text-primary);
