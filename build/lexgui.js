@@ -1879,16 +1879,16 @@
             this.#create_item(null, data);
         }
 
-        #create_item( parent, node, level = 0 ) {
+        #create_item( parent, node, level = 0, selectedId ) {
 
             const that = this;
             const node_filter_input = this.domEl.querySelector("#lexnodetree_filter");
 
             node.children = node.children ?? [];
-            if(node_filter_input && !node.id.includes(node_filter_input.value))
+            if(node_filter_input && !node.id.includes(node_filter_input.value) || (selectedId != undefined) && selectedId != node.id)
             {
                 for( var i = 0; i < node.children.length; ++i )
-                    this.#create_item( node, node.children[i], level + 1 );
+                    this.#create_item( node, node.children[i], level + 1, selectedId );
                 return;
             }
 
@@ -2120,18 +2120,26 @@
                     item.appendChild(actionEl);
                 }
             }
+            if(selectedId != undefined && node.id == selectedId) {
+                this.selected = [node];
+                item.click();
+            }
 
-            if(node.closed)
+            if(node.closed )
                 return;
 
             for( var i = 0; i < node.children.length; ++i )
                 this.#create_item( node, node.children[i], level + 1 );
         }
 
-        refresh(newData) {
+        refresh(newData, selectedId) {
             this.data = newData ?? this.data;
             this.domEl.querySelector("ul").innerHTML = "";
-            this.#create_item( null, this.data );
+            this.#create_item( null, this.data, null, selectedId );
+        }
+
+        select(id) {
+            this.refresh(null, id)
         }
     }
 
