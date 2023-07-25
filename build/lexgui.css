@@ -710,7 +710,7 @@ input[type="file"] {
 }
 
 .lexcombobuttons .lexbutton.combo.selected {
-  background-color: var(--global-selected-light);
+  background-color: var(--global-selected);
   outline: none;
   border: 1px solid var(--global-selected-light);
   color: #fff;
@@ -1861,6 +1861,7 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexareatabscontent {
   margin-top: 2px;
+  overflow-y: scroll
 }
 
 .lexareatabscontent .lexpanel:not(.lexoverlaybuttons) {

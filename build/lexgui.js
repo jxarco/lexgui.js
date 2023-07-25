@@ -3852,6 +3852,7 @@
          * step: Step of the input
          * precision: The number of digits to appear after the decimal point
          * min, max: Min and Max values for the input
+         * skipSlider: If there are min and max values, skip the slider
          */
 
         addNumber( name, value, callback, options = {} ) {
@@ -3899,7 +3900,7 @@
             }
 
             // add slider below
-            if(options.min !== undefined && options.max !== undefined) {
+            if(!options.skipSlider && options.min !== undefined && options.max !== undefined) {
                 let slider = document.createElement('input');
                 slider.className = "lexinputslider";
                 slider.step = options.step ?? 1;
