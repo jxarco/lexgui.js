@@ -690,13 +690,14 @@ input[type="file"] {
   margin-left: 0px;
   border-radius: 0px;
   display: flex;
-  padding-top: 0.19em;
+  padding-top: 0.15em;
 }
 
 .lexcombobuttons .lexbutton.combo:active {
   outline: none;
-  border: 2px solid var(--global-selected-light);
+  border: 1px solid var(--global-selected-light);
   color: #fff;
+  padding-top: 0.25em;
 }
 
 .lexcombobuttons .lexbutton.combo:first-child {

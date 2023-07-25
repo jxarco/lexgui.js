@@ -2935,7 +2935,7 @@
                 if(options.selected == b.value) 
                     buttonEl.classList.add("selected");
                     
-                buttonEl.innerHTML = "<a class='"+ (b.icon ?? "") +"'></a><span>" + (b.icon ? "" : b.value) + "</span>";
+                buttonEl.innerHTML = (b.icon ? "<a class='" + b.icon +"'></a>" : "") + "<span>" + (b.icon ? "" : b.value) + "</span>";
               
                 if(options.disabled)
                     buttonEl.setAttribute("disabled", true);
