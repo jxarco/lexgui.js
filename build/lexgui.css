@@ -1030,7 +1030,9 @@ input[type=checkbox]:checked:after {
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
+  appearance: none;
   -webkit-appearance: none;
+  -moz-appearance: none;
   margin: 0;
 }
 
@@ -1077,17 +1079,28 @@ input[type=number] {
 
 .lexinputslider {
   appearance: none;
+  -moz-appearance: none;
   -webkit-appearance: none;
   border: none !important;
   width: calc( 100% - 12px );
   outline: none;
   opacity: 0.7;
-  -webkit-transition: .2s;
   transition: opacity .2s;
+  -moz-transition: .2s;
+  -webkit-transition: .2s;
 }
 
 .lexinputslider:hover {
   opacity: 1;
+}
+
+input[type="range"] {
+  height: 1px;
+}
+
+.lexinputslider::-moz-range-track {
+  height: 1px;
+  background: #a19dc9;
 }
 
 .lexinputslider::-webkit-slider-runnable-track {
@@ -1338,9 +1351,6 @@ input[type=number] {
 }
 
 .lexprogressbar {
-  /* -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none; */
   border: none !important;
   width: 100%;
   outline: none;
