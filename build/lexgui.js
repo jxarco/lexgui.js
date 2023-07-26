@@ -1365,16 +1365,23 @@
                         if(subkey == '')
                             subentry.className = " lexseparator";
                         else {
+                            
                             subentry.id = subkey;
-                            subentry.innerHTML = "";
+                            let subentrycont = document.createElement('div');
+                            subentrycont.innerHTML = "";
+                            subentrycont.classList = "lexcontextmenuentrycontainer";
+                            subentry.appendChild(subentrycont);
                             const icon = that.icons[ subkey ];
                             if(is_checkbox){
-                                subentry.innerHTML += "<input type='checkbox' >";
+                                subentrycont.innerHTML += "<input type='checkbox' >";
                             }else if(icon) {
-                                subentry.innerHTML += "<a class='" + icon + " fa-sm'></a>";
-                            }else
-                                subentry.classList.add( "noicon" );
-                            subentry.innerHTML += "<div class='lexentryname'>" + subkey + "</div>";
+                                subentrycont.innerHTML += "<a class='" + icon + " fa-sm'></a>";
+                            }else {
+                                subentrycont.innerHTML += "<a class='fa-solid fa-sm noicon'></a>";
+                                subentrycont.classList.add( "noicon" );
+
+                            }
+                            subentrycont.innerHTML += "<div class='lexentryname'>" + subkey + "</div>";
                         }
 
                         let checkbox_input = subentry.querySelector('input');

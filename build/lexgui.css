@@ -1470,6 +1470,14 @@ meter::-webkit-meter-even-less-good-value {
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   -moz-transform: translateZ(0);
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+  justify-content: space-between;
+}
+.lexcontextmenu .lexcontextmenuentrycontainer {
+  display: flex;
+  flex-direction: row;
 }
 
 .lexcontextmenu .lexcontextmenuentry .lexentryname {
@@ -1478,7 +1486,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexcontextmenu .lexcontextmenuentry.noicon .lexentryname {
-  margin-left: 35px;
+  margin-left: 10px;
 }
 
 /* normal icons  */
@@ -1488,12 +1496,13 @@ meter::-webkit-meter-even-less-good-value {
   margin-right: 13px;
   margin-top: 9px;
   margin-left: 9px;
+  min-width: 10px;
 }
 
 /* submenu specified arrow  */
 .lexcontextmenu .lexcontextmenuentry a.fa-xs {
   float: right;
-  margin-top: -8px;
+  /* margin-top: -8px; */
   margin-right: 8px;
 }
 
@@ -1530,7 +1539,7 @@ meter::-webkit-meter-even-less-good-value {
 .lexcontextmenu .lexentryshort {
   font-size: 10px;
   float: right;
-  margin-top: -12px;
+  /* margin-top: -12px; */
   font-weight: bold;
   color: var(--global-text-secondary);
   margin-right: 8px;
@@ -1648,7 +1657,7 @@ meter::-webkit-meter-even-less-good-value {
 /* submenu specified arrow  */
 .lexcontextmenubox .lexcontextmenuentry a.fa-xs {
   float: right;
-  margin-top: -6px;
+  /* margin-top: -6px; */
 }
 
 .lexcontextmenubox .lexcontextmenuentry:hover:not(.cmtitle) {
@@ -1668,7 +1677,7 @@ meter::-webkit-meter-even-less-good-value {
 .lexcontextmenubox .lexentryshort {
   font-size: 9px;
   float: right;
-  margin-top: -13px;
+  /* margin-top: -13px; */
   font-weight: bold;
   color: #979aa0e3;
 }

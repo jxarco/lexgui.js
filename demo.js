@@ -41,7 +41,19 @@ area.addMenubar( m => {
     m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass", short:  "F1", callback: () => { window.open("./docs/") }});
     m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
     m.add( "Help/Support LexGUI/Do it" );
-
+    m.add("Timeline/Shortcuts", { disabled: true });
+    m.add("Timeline/Shortcuts/Play-Pause", { short: "SPACE" });
+    m.add("Timeline/Shortcuts/Zoom", { short: "Wheel" });
+    m.add("Timeline/Shortcuts/Change time", { short: "Left Click+Drag" });
+    m.add("Timeline/Shortcuts/Move keys", { short: "Hold CTRL" });
+    m.add("Timeline/Shortcuts/Add keys", { short: "Right Click" });
+    m.add("Timeline/Shortcuts/Delete keys");
+    m.add("Timeline/Shortcuts/Delete keys/Single", { short: "DEL" });
+    m.add("Timeline/Shortcuts/Delete keys/Multiple", { short: "Hold LSHIFT" });
+    m.add("Timeline/Shortcuts/Key Selection");
+    m.add("Timeline/Shortcuts/Key Selection/Single", { short: "Left Click" });
+    m.add("Timeline/Shortcuts/Key Selection/Multiple", { short: "Hold LSHIFT" });
+    m.add("Timeline/Shortcuts/Key Selection/Box", { short: "Hold LSHIFT+Drag" });
     m.addButtons( [
         {
             title: "Play",
