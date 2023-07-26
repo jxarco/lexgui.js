@@ -1485,6 +1485,42 @@
         }
 
         /**
+         * @method getSubitems: recursive method to find subentries of a menu entry
+         * @param {Object} item: parent item
+         * @param {Array} tokens: split path strings
+        */
+        getSubitem(item, tokens) {
+           
+            let subitem = null;
+            let path = tokens[0];
+            for(let i = 0; i < item.length; i++) {
+                if(item[i][path]) {
+
+                    if(tokens.length == 1) {
+                        subitem = item[i];
+                        return subitem;
+                    }
+                    else {
+                        tokens.splice(0,1);
+                        return this.getSubitem(item[i][path], tokens);
+                    }
+                     
+                }
+            }
+        }
+
+        /**
+         * @method getItem
+         * @param {String} path
+        */
+        getItem( path ) {
+            // process path
+            const tokens = path.split("/");
+            
+            return this.getSubitem(this.items, tokens)
+        }
+
+        /**
          * @method setButtonIcon
          * @param {String} title
          * @param {String} icon
