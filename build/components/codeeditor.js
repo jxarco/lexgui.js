@@ -49,6 +49,7 @@
             area.root.style.overflow = 'scroll';
 
             div.addEventListener( 'keydown', this.processKey.bind(this) );
+            div.addEventListener( 'click', this.processClick.bind(this) );
             div.addEventListener( 'focus', this.restartBlink.bind(this) );
 
             div.addEventListener( 'focusout', () => {
@@ -101,11 +102,11 @@
             this.specialKeys = [
                 'Backspace', 'Enter', 'ArrowUp', 'ArrowDown', 
                 'ArrowRight', 'ArrowLeft', 'Delete', 'Home',
-                'End'
+                'End', 'Tab'
             ];
             this.keywords = [
                 'var', 'let', 'const', 'this', 'in', 'of', 
-                'true', 'false', 'new'
+                'true', 'false', 'new', 'function'
             ];
             this.builtin = [
                 'console'
@@ -119,19 +120,51 @@
             // this.action();
         }
 
+        processClick(e) {
+
+            var code_rect = this.area.root.getBoundingClientRect();
+            var position = [e.clientX - code_rect.x, e.clientY - code_rect.y];
+
+            var line = -1;
+            while( position[1] > (line + 1) * 22 ) 
+                line++;
+            
+            if(this.lines[line] == undefined) return;
+
+            this.resetCursorPos();
+
+            var chars_width = 0;
+            for( let char of this.lines[line] )
+            {
+                var [w, h] = this.measureChar(char);
+                chars_width += w;
+
+                if( position[0] < chars_width )
+                    break;
+
+                this.cursorToRight(char);
+            }
+        }
+
         processKey(e) {
 
-            console.log(e.key);
+            var key = e.key;
+            console.log(key);
 
             // keys with length > 1 are probably special keys
-            if( e.key.length > 1 && this.specialKeys.indexOf(e.key) == -1 )
+            if( key.length > 1 && this.specialKeys.indexOf(key) == -1 )
                 return;
 
             let cursor = this.cursors.children[0];
             let lidx = this._current_line;
             this.lines[lidx] = this.lines[lidx] ?? "";
             
-            if( e.key == 'Backspace' )
+            if( key == 'Tab' ) {
+                e.preventDefault();
+                key = "    ";
+            }
+
+            if( key == 'Backspace' )
             {
                 var letter;
                 [ this.lines[lidx], letter ] = popChar(this.lines[lidx]);
@@ -144,7 +177,7 @@
                     this.cursorToTop( null );
                 }
             }
-            else if( e.key == 'Delete' )
+            else if( key == 'Delete' )
             {
                 var letter = this.getCharAtPos( cursor.charPos );
                 if(!letter) return;
@@ -152,14 +185,14 @@
                 this.lines[lidx] = sliceChar( this.lines[lidx], cursor.charPos );
                 
             }
-            else if( e.key == 'ArrowUp' )
+            else if( key == 'ArrowUp' )
             {
                 this._current_line--;
                 this._current_line = Math.max(0, this._current_line);
                 this.cursorToTop( null );
                 return;
             }
-            else if( e.key == 'ArrowDown' )
+            else if( key == 'ArrowDown' )
             {
                 if( this.lines[ this._current_line + 1 ] == undefined )
                 return;
@@ -167,34 +200,32 @@
                 this.cursorToBottom( null );
                 return;
             }
-            else if( e.key == 'ArrowLeft' )
+            else if( key == 'ArrowLeft' )
             {
                 this.cursorToLeft( lastLetter(this.lines[lidx]) );
                 return;
             }
-            else if( e.key == 'ArrowRight' )
+            else if( key == 'ArrowRight' )
             {
                 var letter = this.getCharAtPos( cursor.charPos );
                 if(!letter) return;
                 this.cursorToRight( lastLetter(this.lines[lidx]) );
                 return;
             }
-            else if( e.key == 'Enter' )
+            else if( key == 'Enter' )
             {
                 this._current_line++;
                 this.lines.splice(this._current_line, 0, "");
                 this.lines[this._current_line] = this.lines[lidx].substr( cursor.charPos );
                 this.lines[lidx] = this.lines[lidx].substr( 0, cursor.charPos );
                 this.cursorToBottom( null, true );
-                this.processLines();
-                return;
             }
-            else if( e.key == 'Home' )
+            else if( key == 'Home' )
             {
                 this.resetCursorPos( cursor );
                 return;
             }
-            else if( e.key == 'End' )
+            else if( key == 'End' )
             {
                 // Reset cursor first..
                 this.resetCursorPos( cursor );
@@ -209,10 +240,8 @@
             // Apend key
             else 
             {
-                console.log(cursor.charPos);
-                this.lines[lidx] = [this.lines[lidx].slice(0, cursor.charPos), e.key, this.lines[lidx].slice(cursor.charPos)].join('');
-                // this.lines[lidx] += e.key;
-                this.cursorToRight( e.key );
+                this.lines[lidx] = [this.lines[lidx].slice(0, cursor.charPos), key, this.lines[lidx].slice(cursor.charPos)].join('');
+                this.cursorToRight( key );
                 this.restartBlink();
             }
 
@@ -238,7 +267,7 @@
                 for( let t of tokens )
                 {
                     if(!t.length)
-                    continue;
+                        t = ' ';
                     
                     if(t == ' ')
                     {
@@ -315,13 +344,14 @@
             cursor._left = Math.max(cursor._left, 0);
             cursor.style.left = "calc(" + cursor._left + "px + 0.25em)";
             cursor.charPos--;
+            cursor.charPos = Math.max(cursor.charPos, 0);
             this.restartBlink();
         }
 
         cursorToTop( cursor, resetLeft = false ) {
 
             cursor = cursor ?? this.cursors.children[0];
-            var h = 20.5;
+            var h = 22;
             cursor._top -= h;
             cursor._top = Math.max(cursor._top, 0);
             cursor.style.top = "calc(" + cursor._top + "px)";
@@ -334,7 +364,7 @@
         cursorToBottom( cursor, resetLeft = false ) {
 
             cursor = cursor ?? this.cursors.children[0];
-            var h = 20.5;
+            var h = 22;
             cursor._top += h;
             cursor.style.top = "calc(" + cursor._top + "px)";
             this.restartBlink();
