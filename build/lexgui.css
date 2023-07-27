@@ -1601,6 +1601,7 @@ meter::-webkit-meter-even-less-good-value {
   box-shadow: 0 0 6px black !important;
   background-color: var(--global-blur-background);
   backdrop-filter: blur(12px);
+  z-index: 10;
 }
 
 .lexcontextmenuentry .lexcontextmenubox {
@@ -2278,7 +2279,7 @@ ul.lexassetscontent {
   padding: 0;
   box-shadow: 0 0 8px black;
   overflow: hidden;
-  background-color: #555;
+  background-color: var(--branch-title-inactive-background);
   cursor: pointer;
   text-align: center;
   border-radius: 4px;
@@ -2320,6 +2321,7 @@ ul.lexassetscontent {
   background-color: rgba(12, 12, 12, 0.8);
   transition: all 0.1s;
   z-index: 1;
+  backdrop-filter: blur(10px);
 }
 
 .lexassetscontent li .lexassetinfo {
@@ -2362,9 +2364,10 @@ ul.lexassetscontent {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: all 0.2s;
+  transition: all ease-out .2s;
+  transform: scale(0.9);
 }
 
 .lexassetscontent li:hover img {
-  transform: scale(1.15);
+  transform: scale(1.1);
 }

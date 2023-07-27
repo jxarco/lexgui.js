@@ -424,7 +424,7 @@ function fillPanel( panel ) {
                     console.log(event.node.id + " visibility: " + event.value); 
                     break;
             }
-        },
+        }
     });    
 
     // add widgets to panel branch

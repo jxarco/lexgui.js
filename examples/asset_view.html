@@ -32,7 +32,29 @@
 
         let asset_browser = new LX.AssetView({ /* skip_browser: true */ });
         bottom_area.attach( asset_browser );
-        
+        asset_browser.onevent = event => { 
+
+            // console.log(event.string());
+
+            switch(event.type) {
+                case LX.AssetViewEvent.ASSET_SELECTED: 
+                    if(event.multiple)
+                        console.log("Selected: ", event.item); 
+                    else
+                        console.log(event.item.id + " selected"); 
+                    break;
+                case LX.AssetViewEvent.ASSET_DELETED: 
+                    console.log(event.item.id + " deleted"); 
+                    break;
+                case LX.AssetViewEvent.ASSET_CLONED: 
+                    console.log(event.item.id + " cloned"); 
+                    break;
+                case LX.AssetViewEvent.ASSET_RENAMED:
+                    console.log(event.item.id + " is now called " + event.value); 
+                    break;
+            }
+        }
+
         function loop(dt) {
             
             var ctx = canvas.getContext("2d");

@@ -1177,7 +1177,6 @@
             this.selected = null;
             this.root = container;
             this.tabs = {};
-            window.tabs = this;
         }
 
         add( name, content, isSelected, callback ) {
@@ -1920,7 +1919,12 @@
             this.data = data;
             this.onevent = options.onevent;
             this.options = options;
-            this.#create_item(null, data);
+
+            if(data.constructor === Object)
+                this.#create_item(null, data);
+            else
+                for( let d of data )
+                    this.#create_item(null, d);
         }
 
         #create_item( parent, node, level = 0, selectedId ) {
@@ -1941,7 +1945,13 @@
 
             node.visible = node.visible ?? true;
             node.parent = parent;
-            const is_parent = node.children.length > 0;
+            let is_parent = node.children.length > 0;
+            
+            let has_parent_child = false;
+            if( this.options.only_parents ) {
+                node.children.forEach( c => has_parent_child |= (c.children && c.children.length) );
+                is_parent = !!has_parent_child;
+            }
 
             let item = document.createElement('li');
             item.className = "lextreeitem " + "datalevel" + level + " " + (is_parent ? "parent" : "");
@@ -2046,7 +2056,6 @@
                 delete node.rename;
                 that.refresh();
             });
-
 
             if(this.options.draggable ?? true) {
                 // Drag nodes
@@ -2164,6 +2173,7 @@
                     item.appendChild(actionEl);
                 }
             }
+
             if(selectedId != undefined && node.id == selectedId) {
                 this.selected = [node];
                 item.click();
@@ -2173,17 +2183,28 @@
                 return;
 
             for( var i = 0; i < node.children.length; ++i )
-                this.#create_item( node, node.children[i], level + 1 );
+            {
+                let child = node.children[i];
+
+                if( this.options.only_parents ) {
+
+                    if(!child.children || !child.children.length) continue;
+                    let has_parent_child = false;
+                    node.children.forEach( c => has_parent_child |= (c.children && c.children.length) );
+                    if(!has_parent_child) continue;
+                }
+                this.#create_item( node, child, level + 1 );
+            }
         }
 
         refresh(newData, selectedId) {
             this.data = newData ?? this.data;
             this.domEl.querySelector("ul").innerHTML = "";
-            this.#create_item( null, this.data, null, selectedId );
+            this.#create_item( null, this.data, 0, selectedId );
         }
 
         select(id) {
-            this.refresh(null, id)
+            this.refresh(null, id);
         }
     }
 
@@ -2427,7 +2448,7 @@
                 element.style.width = element.style.minWidth = options.width;
             }
 
-            if(name) {
+            if(name != undefined) {
 
                 if(!(options.no_name ?? false) )
                 {
@@ -2723,6 +2744,7 @@
                 wValue.value = new_value;
                 Panel.#dispatch_event(wValue, "focusout");
             };
+
             let element = widget.domEl;
 
             // Add reset functionality
@@ -2744,6 +2766,7 @@
             let wValue = document.createElement('input');
             wValue.value = wValue.iValue = value || "";
             wValue.style.width = "100%";
+            Object.assign(wValue.style, options.style ?? {});
 
             if(options.disabled ?? false) wValue.setAttribute("disabled", true);
             if(options.placeholder) wValue.setAttribute("placeholder", options.placeholder);
@@ -2994,14 +3017,14 @@
                 container.appendChild(buttonEl);
                 
                 // Remove branch padding and margins
-                if(!widget.name) {
+                if(widget.name === undefined) {
                     buttonEl.className += " noname";
                     buttonEl.style.width =  "100%";
                 }
             }
 
             // Remove branch padding and margins
-            if(!widget.name) {
+            if(widget.name !== undefined) {
                 element.className += " noname";
                 container.style.width = "100%";
             }
@@ -5577,6 +5600,34 @@
 
     LX.Curve = Curve;
 
+    class AssetViewEvent {
+
+        static NONE             = 0;
+        static ASSET_SELECTED   = 1;
+        static ASSET_DELETED    = 2;
+        static ASSET_RENAMED    = 3;
+        static ASSET_CLONED     = 4;
+
+        constructor( type, item, value ) {
+            this.type = type || TreeEvent.NONE;
+            this.item = item;
+            this.value = value;
+            this.multiple = false; // Multiple selection
+        }
+        
+        string() {
+            switch(this.type) {
+                case AssetViewEvent.NONE: return "assetview_event_none";
+                case AssetViewEvent.ASSET_SELECTED: return "assetview_event_selected";
+                case AssetViewEvent.ASSET_DELETED: return "assetview_event_deleted";
+                case AssetViewEvent.ASSET_RENAMED:  return "assetview_event_renamed";
+                case AssetViewEvent.ASSET_CLONED:  return "assetview_event_cloned";
+            }
+        }
+    };
+
+    LX.AssetViewEvent = AssetViewEvent;
+
     /**
      * @class AssetView
      * @description Asset container with Tree for file system
@@ -5606,50 +5657,22 @@
                 content_area = right;
             }
             
-            if( left )
-            {
-                left.addMenubar( m => {
-
-                    m.addButtons( [
-                        {
-                            icon: "fa-solid fa-left-long",
-                            callback:  (domEl) => { 
-                                if(!this.prev_data.length) return;
-                                this.next_data.push( this.current_data );
-                                this.current_data = this.prev_data.pop();
-                                this.#refresh_content();
-                            }
-                        },
-                        {
-                            icon: "fa-solid fa-right-long",
-                            callback:  (domEl) => { 
-                                if(!this.next_data.length) return;
-                                this.prev_data.push( this.current_data );
-                                this.current_data = this.next_data.pop();
-                                this.#refresh_content();
-                            }
-                        },
-                        {
-                            title: "Refresh",
-                            icon: "fa-solid fa-arrows-rotate",
-                            callback:  (domEl) => { this.#refresh_content(); }
-                        }
-                    ]);
-                } );
-            }
-
             this.prev_data = [];
             this.next_data = [];
             this.data = [
                 {
-                    id: "color.png",
+                    id: "dog.png",
                     type: "image",
-                    src: "https://godotengine.org/assets/press/icon_color.png"
+                    src: "https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png"
+                },
+                {
+                    id: "dog.json",
+                    type: "JSON",
+                    src: "../data/test.json"
                 },
                 {
                     id: "godot",
                     type: "folder",
-                    closed: true,
                     children: [
                         {
                             id: "color.png",
@@ -5670,32 +5693,94 @@
                             id: "vertical_color.png",
                             type: "image",
                             src: "https://godotengine.org/assets/press/logo_vertical_color_dark.png"
+                        },
+                        {
+                            id: "doggies",
+                            type: "folder",
+                            children: [
+                                {
+                                    id: "pepe.png",
+                                    type: "image",
+                                    src: "https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png"
+                                }
+                            ]
                         }
                     ]
                 },
                 {
-                    id: "monochrome_light.png",
+                    id: "blacky.png",
                     type: "image",
-                    src: "https://godotengine.org/assets/press/icon_monochrome_light.png"
+                    src: "https://www.pngall.com/wp-content/uploads/5/Black-Dog-PNG.png"
                 },
                 {
-                    id: "example.png",
+                    id: "german.png",
                     type: "image",
-                    src: "../images/godot_pixelart.png"
+                    src: "https://static.vecteezy.com/system/resources/previews/017/420/504/original/portrait-of-a-dog-png.png"
                 },
                 {
-                    id: "vertical_color.png",
-                    type: "image",
-                    src: "https://godotengine.org/assets/press/logo_vertical_color_dark.png"
-                }
+                    id: "unreal",
+                    type: "folder",
+                    children: [
+                        {
+                            id: "color.png",
+                            type: "image",
+                            src: "https://cdn.icon-icons.com/icons2/2389/PNG/512/unreal_engine_logo_icon_144771.png"
+                        }
+                    ]
+                },
             ];
 
+            this._process_data(this.data, null);
+
             this.current_data = this.data;
+            this.path = ['@'];
 
             if(!this.skip_browser)
                 this.#create_left_panel(left);
 
             this.#create_right_panel(content_area);
+        }
+
+        /**
+        * @method _process_data
+        */
+
+        _process_data( data, parent ) {
+
+            if( data.constructor !== Array )
+            {
+                // process
+                data['folder'] = parent;
+                data.children = data.children ?? [];
+            }
+
+            let list = data.constructor === Array ? data : data.children;
+
+            for( var i = 0; i < list.length; ++i )
+                this._process_data( list[i], data );
+        }
+
+        /**
+        * @method _update_path
+        */
+
+        _update_path( data ) {
+            
+            this.path.length = 0;
+
+            const push_parents_id = i => {
+                if(!i) return;
+                let list = i.children ? i.children : i;
+                let c = list[0];
+                if( !c ) return;
+                if( !c.folder ) return;
+                this.path.push( c.folder.id ?? '@' );
+                push_parents_id( c.folder.folder );
+            };
+
+            push_parents_id( data );
+
+            LX.emit("@on_folder_change", this.path.reverse().join('/'));
         }
 
         /**
@@ -5712,31 +5797,32 @@
 
             // Process data to show in tree
             let tree_data = {
-                id: 'root',
+                id: '/',
                 children: this.data
             }
 
             this.tree = this.leftPanel.addTree("Content Browser", tree_data, { 
                 // icons: tree_icons, 
                 filter: false,
+                only_parents: true,
                 onevent: (event) => { 
+
+                    let node = event.node;
+
                     switch(event.type) {
                         case LX.TreeEvent.NODE_SELECTED: 
-                            if(!event.multiple && event.node.domEl)
-                                event.node.domEl.click();
+                            if(!event.multiple && node.domEl) {
+                                node.domEl.click();
+                            }
+                            if(!node.parent) {
+                                this.prev_data.push( this.current_data );
+                                this.current_data = this.data;
+                                this.#refresh_content();
+
+                                this.path = ['@'];
+                                LX.emit("@on_folder_change", this.path.join('/'));
+                            }
                             break;
-                        case LX.TreeEvent.NODE_DBLCLICKED: 
-                            console.log(event.node.id + " dbl clicked"); 
-                            break;
-                        case LX.TreeEvent.NODE_DRAGGED: 
-                            console.log(event.node.id + " is now child of " + event.value.id); 
-                            break;
-                        case LX.TreeEvent.NODE_RENAMED:
-                            console.log(event.node.id + " is now called " + event.value); 
-                            break;
-                        // case LX.TreeEvent.NODE_VISIBILITY:
-                        //     console.log(event.node.id + " visibility: " + event.value); 
-                        //     break;
                     }
                 },
             });    
@@ -5751,40 +5837,41 @@
             }
 
             this.rightPanel.sameLine();
-
-            if( this.skip_browser )
-            {
-                this.rightPanel.addComboButtons( "Content", [
-                    {
-                        value: "Left",
-                        icon: "fa-solid fa-left-long",
-                        callback:  (domEl) => { 
-                            if(!this.prev_data.length) return;
-                            this.next_data.push( this.current_data );
-                            this.current_data = this.prev_data.pop();
-                            this.#refresh_content();
-                        }
-                    },
-                    {
-                        value: "Right",
-                        icon: "fa-solid fa-right-long",
-                        callback:  (domEl) => { 
-                            if(!this.next_data.length) return;
-                            this.prev_data.push( this.current_data );
-                            this.current_data = this.next_data.pop();
-                            this.#refresh_content();
-                        }
-                    },
-                    {
-                        value: "Refresh",
-                        icon: "fa-solid fa-arrows-rotate",
-                        callback:  (domEl) => { this.#refresh_content(); }
-                    }
-                ], { width: "20%", noSelection: true } );
-            }
-
             this.rightPanel.addDropdown("Filter", ["None", "Image", "Mesh", "JSON"], "None", (v) => this.#refresh_content.call(this, null, v), { width: "20%" });
             this.rightPanel.addText(null, this.search_value ?? "", (v) => this.#refresh_content.call(this, v, null), { placeholder: "Search assets..." });
+            this.rightPanel.endLine();
+
+            this.rightPanel.sameLine();
+            this.rightPanel.addComboButtons( null, [
+                {
+                    value: "Left",
+                    icon: "fa-solid fa-left-long",
+                    callback:  (domEl) => { 
+                        if(!this.prev_data.length) return;
+                        this.next_data.push( this.current_data );
+                        this.current_data = this.prev_data.pop();
+                        this.#refresh_content();
+                        this._update_path( this.current_data );
+                    }
+                },
+                {
+                    value: "Right",
+                    icon: "fa-solid fa-right-long",
+                    callback:  (domEl) => { 
+                        if(!this.next_data.length) return;
+                        this.prev_data.push( this.current_data );
+                        this.current_data = this.next_data.pop();
+                        this.#refresh_content();
+                        this._update_path( this.current_data );
+                    }
+                },
+                {
+                    value: "Refresh",
+                    icon: "fa-solid fa-arrows-rotate",
+                    callback:  (domEl) => { this.#refresh_content(); }
+                }
+            ], { width: "auto", noSelection: true } );
+            this.rightPanel.addText(null, this.path.join('/'), null, { disabled: true, signal: "@on_folder_change", style: { fontSize: "16px", color: "#aaa" } });
             this.rightPanel.endLine();
 
             this.content = document.createElement('ul');
@@ -5821,6 +5908,7 @@
 
                 const type = item.type.charAt(0).toUpperCase() + item.type.slice(1);
                 const is_folder = type === "Folder";
+                const is_json = type === "JSON";
 
                 if((that.filter != "None" && type != that.filter) || !item.id.includes(that.search_value))
                     return;
@@ -5837,7 +5925,7 @@
                 itemEl.appendChild(title);
 
                 let preview = document.createElement('img');
-                preview.src = is_folder ? "../images/folder.png" : item.src;
+                preview.src = (is_folder || is_json) ? "../images/" + item.type.toLowerCase() + ".png" : item.src;
                 itemEl.appendChild(preview);
 
                 if( !is_folder )
@@ -5860,6 +5948,15 @@
                         that.prev_data.push( that.current_data );
                         that.current_data = item.children;
                         that.#refresh_content(search_value, filter);
+
+                        // Update path
+                        that._update_path(that.current_data);
+                    }
+
+                    if(that.onevent) {
+                        const event = new AssetViewEvent(AssetViewEvent.ASSET_SELECTED, e.shiftKey ? [item] : item );
+                        event.multiple = !!e.shiftKey;
+                        that.onevent( event );
                     }
                 });
 
@@ -5868,12 +5965,16 @@
 
                     const multiple = that.content.querySelectorAll('.selected').length;
 
-                    LX.addContextMenu( multiple > 1 ? (multiple + " selected") : item.type, e, m => {
-                        if(!multiple) m.add("Rename");
-                        m.add("Clone");
-                        if(!multiple) m.add("Properties");
+                    LX.addContextMenu( multiple > 1 ? (multiple + " selected") : 
+                                is_folder ? item.id : item.type, e, m => {
+                        if(multiple <= 1)   
+                            m.add("Rename");
+                        if( !is_folder )
+                            m.add("Clone", that._clone_item.bind(that, item));
+                        if(multiple <= 1)
+                            m.add("Properties");
                         m.add("");
-                        m.add("Delete");
+                        m.add("Delete", that._delete_item.bind(that, item));
                     });
                 });
 
@@ -5909,6 +6010,10 @@
             for( let i = 0; i < e.dataTransfer.files.length; ++i )
             {
                 const file = e.dataTransfer.files[i];
+
+                const result = this.current_data.find( e => e.id === file.name );
+                if(result) continue;
+
                 fr.readAsDataURL( file );
                 fr.onload = e => { 
                     
@@ -5936,6 +6041,42 @@
                             this.tree.refresh();
                     }
                 };
+            }
+        }
+
+        _delete_item( item ) {
+
+            const idx = this.current_data.indexOf(item);
+            if(idx > -1) {
+                this.current_data.splice(idx, 1);
+                this.#refresh_content(this.search_value, this.filter);
+
+                if(this.onevent) {
+                    const event = new AssetViewEvent(AssetViewEvent.ASSET_DELETED, item );
+                    this.onevent( event );
+                }
+
+                this.tree.refresh();
+                this._process_data(this.data);
+            }
+        }
+
+        _clone_item( item ) {
+
+            const idx = this.current_data.indexOf(item);
+            if(idx > -1) {
+                delete item.domEl;
+                delete item.folder;
+                const new_item = deepCopy( item );
+                this.current_data.splice(idx, 0, new_item);
+                this.#refresh_content(this.search_value, this.filter);
+
+                if(this.onevent) {
+                    const event = new AssetViewEvent(AssetViewEvent.ASSET_CLONED, item );
+                    this.onevent( event );
+                }
+
+                this._process_data(this.data);
             }
         }
     }
