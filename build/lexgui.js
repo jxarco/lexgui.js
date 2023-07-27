@@ -1687,8 +1687,9 @@
         static TAGS         = 16;
         static CURVE        = 17;
         static CARD         = 18;
-        static CUSTOM       = 19;
-        static SEPARATOR    = 20;
+        static IMAGE        = 19;
+        static CUSTOM       = 20;
+        static SEPARATOR    = 21;
 
         #no_context_types = [
             Widget.BUTTON,
@@ -2235,6 +2236,8 @@
 
             root.style.width = options.width || "calc( 100% - 7px )";
             root.style.height = options.height || "100%";
+            Object.assign(root.style, options.style ?? {});
+
             this.root = root;
 
             this.onevent = (e => {});
@@ -3092,6 +3095,34 @@
                 });
             }
 
+            element.appendChild(container);
+
+            return widget;
+        }
+
+        /**
+         * @method addImage
+         * @param {String} url Image Url
+         * @param {*} options
+         */
+
+        async addImage( url, options = {} ) {
+
+            if( !url )
+            return;
+
+            options.no_name = true;
+            let widget = this.create_widget(null, Widget.IMAGE, options);
+            let element = widget.domEl;
+
+            let container = document.createElement('div');
+            container.className = "leximage";
+            container.style.width = "100%";
+
+            let img = document.createElement('img');
+            img.src = url;
+            await img.decode();
+            container.appendChild(img);
             element.appendChild(container);
 
             return widget;
@@ -5644,7 +5675,7 @@
             div.className = 'lexassetbrowser';
             this.root = div;
 
-            let area = new LX.Area();
+            let area = new LX.Area({height: "100%"});
             div.appendChild(area.root);
 
             let left, right, content_area = area;
@@ -5652,10 +5683,11 @@
             
             if( !this.skip_browser )
             {
-                area.split({ type: "horizontal", sizes: ["25%", "75%"]});
-                [left, right] = area.sections;
+                [left, right] = area.split({ type: "horizontal", sizes: ["15%", "85%"]});
                 content_area = right;
             }
+
+            [content_area, right] = content_area.split({ type: "horizontal", sizes: ["80%", "20%"]});
             
             this.allowed_types = ["None", "Image", "Mesh", "Script", "JSON"];
 
@@ -5669,9 +5701,12 @@
             this.path = ['@'];
 
             if(!this.skip_browser)
-                this._create_left_panel(left);
+                this._create_tree_panel(left);
 
-            this._create_right_panel(content_area);
+            this._create_content_panel(content_area);
+            
+            // Create resource preview panel
+            this.previewPanel = right.addPanel({className: 'lexassetcontentpanel', style: { overflow: 'scroll' }});
         }
 
         /**
@@ -5688,7 +5723,7 @@
             this.current_data = this.data;
             this.path = ['@'];
 
-            this._create_left_panel(this.area);
+            this._create_tree_panel(this.area);
             this._refresh_content();
 
             this.onevent = onevent;
@@ -5737,10 +5772,10 @@
         }
 
         /**
-        * @method _create_left_panel
+        * @method _create_tree_panel
         */
 
-        _create_left_panel(area) {
+        _create_tree_panel(area) {
 
             if(this.leftPanel)
                 this.leftPanel.clear();
@@ -5787,10 +5822,10 @@
         }
 
         /**
-        * @method _create_right_panel
+        * @method _create_content_panel
         */
 
-        _create_right_panel(area) {
+        _create_content_panel(area) {
 
             if(this.rightPanel)
                 this.rightPanel.clear();
@@ -5811,7 +5846,7 @@
             this.rightPanel.sameLine();
             this.rightPanel.addDropdown("Filter", this.allowed_types, "None", (v) => this._refresh_content.call(this, null, v), { width: "20%" });
             this.rightPanel.addText(null, this.search_value ?? "", (v) => this._refresh_content.call(this, v, null), { placeholder: "Search assets..." });
-            this.rightPanel.addButton(null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { width: "2%" });
+            this.rightPanel.addButton(null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { width: "3%" });
             this.rightPanel.endLine();
 
             this.rightPanel.sameLine();
@@ -5917,6 +5952,7 @@
                         if(!e.shiftKey)
                             that.content.querySelectorAll('.lexassetitem').forEach( i => i.classList.remove('selected') );
                         this.classList.add('selected');
+                        that._preview_asset( item );
                     } else
                         that._enter_folder( item );
 
@@ -5945,6 +5981,10 @@
                     });
                 });
 
+                itemEl.addEventListener("dragstart", function(e) {
+                    e.preventDefault();
+                }, false );
+
                 return itemEl;
             }
 
@@ -5967,6 +6007,35 @@
                     item.domEl = add_item( item );
                 }
             }
+        }
+
+        /**
+        * @method _preview_asset
+        */
+
+        _preview_asset(file) {
+
+            this.previewPanel.clear();
+
+            this.previewPanel.branch("Asset");
+
+            if( file.type == 'image' )
+            {
+                this.previewPanel.addImage(file.src, { style: {} });
+            }
+
+            this.previewPanel.addText("Filename", file.id);
+            this.previewPanel.addText("URL", file.src);
+            // this.previewPanel.addText("Folder", file.id);
+            this.previewPanel.sameLine();
+            this.previewPanel.addText("Type", file.type);
+            this.previewPanel.addText("Size", file.bytesize ?? "0 KBs");
+            this.previewPanel.endLine();
+            this.previewPanel.addSeparator();
+            
+            this.previewPanel.addButton(null, "Download", () => LX.downloadURL(file.src, file.id));
+
+            this.previewPanel.merge();
         }
 
         _process_drop(e) {
@@ -6246,6 +6315,66 @@
                     }
                 document.getElementsByTagName('head')[0].appendChild(script);
             }
+        },
+
+        downloadURL( url, filename ) {
+
+            const fr = new FileReader();
+
+            const _download = function(_url) {
+                var link = document.createElement('a');
+                link.href = _url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            if( url.includes('http') )
+            {
+                LX.request({ url: url, dataType: 'blob', success: (f) => {
+                    fr.readAsDataURL( f );
+                    fr.onload = e => { 
+                        _download(e.currentTarget.result);
+                    };
+                } });
+            }else
+            {
+                _download(url);
+            }
+
+        },
+
+        downloadFile: function( filename, data, dataType ) {
+            if(!data)
+            {
+                console.warn("No file provided to download");
+                return;
+            }
+
+            if(!dataType)
+            {
+                if(data.constructor === String )
+                    dataType = 'text/plain';
+                else
+                    dataType = 'application/octet-stream';
+            }
+
+            var file = null;
+            if(data.constructor !== File && data.constructor !== Blob)
+                file = new Blob( [ data ], {type : dataType});
+            else
+                file = data;
+
+            var url = URL.createObjectURL( file );
+            var element = document.createElement("a");
+            element.setAttribute('href', url);
+            element.setAttribute('download', filename );
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+            setTimeout( function(){ URL.revokeObjectURL( url ); }, 1000*60 ); //wait one minute to revoke url
         }
     });
 
