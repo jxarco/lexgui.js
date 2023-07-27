@@ -5659,76 +5659,7 @@
             
             this.prev_data = [];
             this.next_data = [];
-            this.data = [
-                {
-                    id: "dog.png",
-                    type: "image",
-                    src: "https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png"
-                },
-                {
-                    id: "dog.json",
-                    type: "JSON",
-                    src: "../data/test.json"
-                },
-                {
-                    id: "godot",
-                    type: "folder",
-                    children: [
-                        {
-                            id: "color.png",
-                            type: "image",
-                            src: "https://godotengine.org/assets/press/icon_color.png"
-                        },
-                        {
-                            id: "monochrome_light.png",
-                            type: "image",
-                            src: "https://godotengine.org/assets/press/icon_monochrome_light.png"
-                        },
-                        {
-                            id: "example.png",
-                            type: "image",
-                            src: "../images/godot_pixelart.png"
-                        },
-                        {
-                            id: "vertical_color.png",
-                            type: "image",
-                            src: "https://godotengine.org/assets/press/logo_vertical_color_dark.png"
-                        },
-                        {
-                            id: "doggies",
-                            type: "folder",
-                            children: [
-                                {
-                                    id: "pepe.png",
-                                    type: "image",
-                                    src: "https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png"
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    id: "blacky.png",
-                    type: "image",
-                    src: "https://www.pngall.com/wp-content/uploads/5/Black-Dog-PNG.png"
-                },
-                {
-                    id: "german.png",
-                    type: "image",
-                    src: "https://static.vecteezy.com/system/resources/previews/017/420/504/original/portrait-of-a-dog-png.png"
-                },
-                {
-                    id: "unreal",
-                    type: "folder",
-                    children: [
-                        {
-                            id: "color.png",
-                            type: "image",
-                            src: "https://cdn.icon-icons.com/icons2/2389/PNG/512/unreal_engine_logo_icon_144771.png"
-                        }
-                    ]
-                },
-            ];
+            this.data = [];
 
             this._process_data(this.data, null);
 
@@ -5736,9 +5667,29 @@
             this.path = ['@'];
 
             if(!this.skip_browser)
-                this.#create_left_panel(left);
+                this._create_left_panel(left);
 
-            this.#create_right_panel(content_area);
+            this._create_right_panel(content_area);
+        }
+
+        /**
+        * @method _process_data
+        */
+
+        load( data, onevent ) {
+
+            this.prev_data.length = 0;
+            this.next_data.length = 0;
+            
+            this.data = data;
+            this._process_data(this.data, null);
+            this.current_data = this.data;
+            this.path = ['@'];
+
+            this._create_left_panel(this.area);
+            this._refresh_content();
+
+            this.onevent = onevent;
         }
 
         /**
@@ -5784,10 +5735,10 @@
         }
 
         /**
-        * @method updateLeftPanel
+        * @method _create_left_panel
         */
 
-        #create_left_panel(area) {
+        _create_left_panel(area) {
 
             if(this.leftPanel)
                 this.leftPanel.clear();
@@ -5811,13 +5762,13 @@
 
                     switch(event.type) {
                         case LX.TreeEvent.NODE_SELECTED: 
-                            if(!event.multiple && node.domEl) {
-                                node.domEl.click();
+                            if(!event.multiple) {
+                                this._enter_folder( node );
                             }
                             if(!node.parent) {
                                 this.prev_data.push( this.current_data );
                                 this.current_data = this.data;
-                                this.#refresh_content();
+                                this._refresh_content();
 
                                 this.path = ['@'];
                                 LX.emit("@on_folder_change", this.path.join('/'));
@@ -5828,7 +5779,11 @@
             });    
         }
 
-        #create_right_panel(area) {
+        /**
+        * @method _create_right_panel
+        */
+
+        _create_right_panel(area) {
 
             if(this.rightPanel)
                 this.rightPanel.clear();
@@ -5837,8 +5792,8 @@
             }
 
             this.rightPanel.sameLine();
-            this.rightPanel.addDropdown("Filter", ["None", "Image", "Mesh", "JSON"], "None", (v) => this.#refresh_content.call(this, null, v), { width: "20%" });
-            this.rightPanel.addText(null, this.search_value ?? "", (v) => this.#refresh_content.call(this, v, null), { placeholder: "Search assets..." });
+            this.rightPanel.addDropdown("Filter", ["None", "Image", "Mesh", "JSON"], "None", (v) => this._refresh_content.call(this, null, v), { width: "20%" });
+            this.rightPanel.addText(null, this.search_value ?? "", (v) => this._refresh_content.call(this, v, null), { placeholder: "Search assets..." });
             this.rightPanel.endLine();
 
             this.rightPanel.sameLine();
@@ -5850,7 +5805,7 @@
                         if(!this.prev_data.length) return;
                         this.next_data.push( this.current_data );
                         this.current_data = this.prev_data.pop();
-                        this.#refresh_content();
+                        this._refresh_content();
                         this._update_path( this.current_data );
                     }
                 },
@@ -5861,14 +5816,14 @@
                         if(!this.next_data.length) return;
                         this.prev_data.push( this.current_data );
                         this.current_data = this.next_data.pop();
-                        this.#refresh_content();
+                        this._refresh_content();
                         this._update_path( this.current_data );
                     }
                 },
                 {
                     value: "Refresh",
                     icon: "fa-solid fa-arrows-rotate",
-                    callback:  (domEl) => { this.#refresh_content(); }
+                    callback:  (domEl) => { this._refresh_content(); }
                 }
             ], { width: "auto", noSelection: true } );
             this.rightPanel.addText(null, this.path.join('/'), null, { disabled: true, signal: "@on_folder_change", style: { fontSize: "16px", color: "#aaa" } });
@@ -5894,10 +5849,10 @@
                 this.querySelectorAll('.lexassetitem').forEach( i => i.classList.remove('selected') );
             });
 
-            this.#refresh_content();
+            this._refresh_content();
         }
 
-        #refresh_content(search_value, filter) {
+        _refresh_content(search_value, filter) {
 
             this.filter = filter ?? (this.filter ?? "None");
             this.search_value = search_value ?? (this.search_value ?? "");
@@ -5944,14 +5899,8 @@
                         if(!e.shiftKey)
                             that.content.querySelectorAll('.lexassetitem').forEach( i => i.classList.remove('selected') );
                         this.classList.add('selected');
-                    } else {
-                        that.prev_data.push( that.current_data );
-                        that.current_data = item.children;
-                        that.#refresh_content(search_value, filter);
-
-                        // Update path
-                        that._update_path(that.current_data);
-                    }
+                    } else
+                        that._enter_folder( item );
 
                     if(that.onevent) {
                         const event = new AssetViewEvent(AssetViewEvent.ASSET_SELECTED, e.shiftKey ? [item] : item );
@@ -5992,7 +5941,7 @@
                         fr.onload = e => { 
                             item.src = e.currentTarget.result;
                             delete item.path;
-                            this.#refresh_content(search_value, filter);
+                            this._refresh_content(search_value, filter);
                         };
                     } });
                 }else
@@ -6036,7 +5985,7 @@
                     });
                     
                     if(i == (num_files - 1)) {
-                        this.#refresh_content(this.search_value, this.filter);
+                        this._refresh_content(this.search_value, this.filter);
                         if( !this.skip_browser )
                             this.tree.refresh();
                     }
@@ -6044,12 +5993,22 @@
             }
         }
 
+        _enter_folder( folder_item ) {
+
+            this.prev_data.push( this.current_data );
+            this.current_data = folder_item.children;
+            this._refresh_content(this.search_value, this.filter);
+
+            // Update path
+            this._update_path(this.current_data);
+        }
+
         _delete_item( item ) {
 
             const idx = this.current_data.indexOf(item);
             if(idx > -1) {
                 this.current_data.splice(idx, 1);
-                this.#refresh_content(this.search_value, this.filter);
+                this._refresh_content(this.search_value, this.filter);
 
                 if(this.onevent) {
                     const event = new AssetViewEvent(AssetViewEvent.ASSET_DELETED, item );
@@ -6069,7 +6028,7 @@
                 delete item.folder;
                 const new_item = deepCopy( item );
                 this.current_data.splice(idx, 0, new_item);
-                this.#refresh_content(this.search_value, this.filter);
+                this._refresh_content(this.search_value, this.filter);
 
                 if(this.onevent) {
                     const event = new AssetViewEvent(AssetViewEvent.ASSET_CLONED, item );

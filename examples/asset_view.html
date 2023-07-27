@@ -32,10 +32,79 @@
 
         let asset_browser = new LX.AssetView({ /* skip_browser: true */ });
         bottom_area.attach( asset_browser );
-        asset_browser.onevent = event => { 
 
-            // console.log(event.string());
+        let asset_data = [
+            {
+                id: "dog.png",
+                type: "image",
+                src: "https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png"
+            },
+            {
+                id: "test.json",
+                type: "JSON",
+                src: "../data/test.json"
+            },
+            {
+                id: "godot",
+                type: "folder",
+                children: [
+                    {
+                        id: "color.png",
+                        type: "image",
+                        src: "https://godotengine.org/assets/press/icon_color.png"
+                    },
+                    {
+                        id: "monochrome_light.png",
+                        type: "image",
+                        src: "https://godotengine.org/assets/press/icon_monochrome_light.png"
+                    },
+                    {
+                        id: "example.png",
+                        type: "image",
+                        src: "../images/godot_pixelart.png"
+                    },
+                    {
+                        id: "vertical_color.png",
+                        type: "image",
+                        src: "https://godotengine.org/assets/press/logo_vertical_color_dark.png"
+                    },
+                    {
+                        id: "doggies",
+                        type: "folder",
+                        children: [
+                            {
+                                id: "pepe.png",
+                                type: "image",
+                                src: "https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: "blacky.png",
+                type: "image",
+                src: "https://www.pngall.com/wp-content/uploads/5/Black-Dog-PNG.png"
+            },
+            {
+                id: "german.png",
+                type: "image",
+                src: "https://static.vecteezy.com/system/resources/previews/017/420/504/original/portrait-of-a-dog-png.png"
+            },
+            {
+                id: "unreal",
+                type: "folder",
+                children: [
+                    {
+                        id: "color.png",
+                        type: "image",
+                        src: "https://cdn.icon-icons.com/icons2/2389/PNG/512/unreal_engine_logo_icon_144771.png"
+                    }
+                ]
+            },
+        ];
 
+        asset_browser.load( asset_data, event => { 
             switch(event.type) {
                 case LX.AssetViewEvent.ASSET_SELECTED: 
                     if(event.multiple)
@@ -53,7 +122,7 @@
                     console.log(event.item.id + " is now called " + event.value); 
                     break;
             }
-        }
+        } );
 
         function loop(dt) {
             
