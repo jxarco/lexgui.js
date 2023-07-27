@@ -5657,6 +5657,8 @@
                 content_area = right;
             }
             
+            this.allowed_types = ["None", "Image", "Mesh", "Script", "JSON"];
+
             this.prev_data = [];
             this.next_data = [];
             this.data = [];
@@ -5759,6 +5761,7 @@
                 onevent: (event) => { 
 
                     let node = event.node;
+                    let value = event.value;
 
                     switch(event.type) {
                         case LX.TreeEvent.NODE_SELECTED: 
@@ -5773,6 +5776,10 @@
                                 this.path = ['@'];
                                 LX.emit("@on_folder_change", this.path.join('/'));
                             }
+                            break;
+                        case LX.TreeEvent.NODE_DRAGGED: 
+                            node.folder = value;
+                            this._refresh_content();
                             break;
                     }
                 },
@@ -5791,9 +5798,20 @@
                 this.rightPanel = area.addPanel({className: 'lexassetcontentpanel'});
             }
 
+            function on_sort(value, event) {
+                addContextMenu( "Sort by", event, c => {
+                    c.add("Name", () => this._sort_data('id') );
+                    c.add("Type", () => this._sort_data('type') );
+                    c.add("");
+                    c.add("Ascending", () => this._sort_data() );
+                    c.add("Descending", () => this._sort_data(null, true) );
+                } );
+            }
+
             this.rightPanel.sameLine();
-            this.rightPanel.addDropdown("Filter", ["None", "Image", "Mesh", "JSON"], "None", (v) => this._refresh_content.call(this, null, v), { width: "20%" });
+            this.rightPanel.addDropdown("Filter", this.allowed_types, "None", (v) => this._refresh_content.call(this, null, v), { width: "20%" });
             this.rightPanel.addText(null, this.search_value ?? "", (v) => this._refresh_content.call(this, v, null), { placeholder: "Search assets..." });
+            this.rightPanel.addButton(null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { width: "2%" });
             this.rightPanel.endLine();
 
             this.rightPanel.sameLine();
@@ -5843,7 +5861,7 @@
             });
             this.content.addEventListener('drop', (e) => {
                 e.preventDefault();
-                this.#process_drop(e);
+                this._process_drop(e);
             });
             this.content.addEventListener('click', function() {
                 this.querySelectorAll('.lexassetitem').forEach( i => i.classList.remove('selected') );
@@ -5863,13 +5881,13 @@
 
                 const type = item.type.charAt(0).toUpperCase() + item.type.slice(1);
                 const is_folder = type === "Folder";
-                const is_json = type === "JSON";
+                const is_image = type === "Image";
 
                 if((that.filter != "None" && type != that.filter) || !item.id.includes(that.search_value))
                     return;
 
                 let itemEl = document.createElement('li');
-                itemEl.className = "lexassetitem";
+                itemEl.className = "lexassetitem " + item.type.toLowerCase();
                 itemEl.title = type + ": " + item.id;
                 itemEl.tabIndex = -1;
                 that.content.appendChild(itemEl);
@@ -5880,7 +5898,7 @@
                 itemEl.appendChild(title);
 
                 let preview = document.createElement('img');
-                preview.src = (is_folder || is_json) ? "../images/" + item.type.toLowerCase() + ".png" : item.src;
+                preview.src = is_image ? item.src : "../images/" + item.type.toLowerCase() + ".png";
                 itemEl.appendChild(preview);
 
                 if( !is_folder )
@@ -5951,7 +5969,7 @@
             }
         }
 
-        #process_drop(e) {
+        _process_drop(e) {
 
             const fr = new FileReader();
             const num_files = e.dataTransfer.files.length;
@@ -5985,7 +6003,7 @@
                     });
                     
                     if(i == (num_files - 1)) {
-                        this._refresh_content(this.search_value, this.filter);
+                        this._refresh_content();
                         if( !this.skip_browser )
                             this.tree.refresh();
                     }
@@ -5993,11 +6011,24 @@
             }
         }
 
+        _sort_data( sort_by, sort_descending = false ) {
+
+            sort_by = sort_by ?? (this._last_sort_by ?? 'id');
+            this.data = this.data.sort( (a, b) => {
+                var r = sort_descending ? b[sort_by].localeCompare(a[sort_by]) : a[sort_by].localeCompare(b[sort_by]);
+                if(r == 0) r = sort_descending ? b['id'].localeCompare(a['id']) : a['id'].localeCompare(b['id']);
+                return r;
+            } );
+
+            this._last_sort_by = sort_by;
+            this._refresh_content();
+        }
+
         _enter_folder( folder_item ) {
 
             this.prev_data.push( this.current_data );
             this.current_data = folder_item.children;
-            this._refresh_content(this.search_value, this.filter);
+            this._refresh_content();
 
             // Update path
             this._update_path(this.current_data);

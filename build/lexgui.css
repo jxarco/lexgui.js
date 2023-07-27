@@ -2263,6 +2263,7 @@ ul.lexassetscontent {
 }
 
 .lexassetscontent li {
+  position: relative;
   -webkit-text-size-adjust: 100%;
   font-size: 12px;
   color: #AAA;
@@ -2282,13 +2283,18 @@ ul.lexassetscontent {
   background-color: var(--branch-title-inactive-background);
   cursor: pointer;
   text-align: center;
-  border-radius: 4px;
-  position: relative;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  border-top: 2px solid var(--global-selected-light);
 }
+
+.lexassetscontent li.image { border-top: 2px solid palegreen; }
+.lexassetscontent li.json { border-top: 2px solid blanchedalmond; }
+.lexassetscontent li.mesh { border-top: 2px solid firebrick; }
+.lexassetscontent li.script { border-top: 2px solid goldenrod; }
 
 .lexassetscontent li:hover {
   outline: 1px solid var(--global-selected-light);
-  /* transform: scale(1.05); */
 }
 
 .lexassetscontent li:active {
@@ -2298,6 +2304,7 @@ ul.lexassetscontent {
 .lexassetscontent li.selected {
   transition: none !important;
   outline: 2px solid var(--global-selected-light);
+  border-top: 2px solid var(--global-selected-light);
   font-weight: bold;
 }
 
@@ -2306,7 +2313,7 @@ ul.lexassetscontent {
   width: 100%;
   bottom: 0px;
   -webkit-text-size-adjust: 100%;
-  font-size: 12px;
+  font-size: 1.1em;
   color: #AAA;
   cursor: pointer;
   text-align: center;
@@ -2314,7 +2321,7 @@ ul.lexassetscontent {
   display: block;
   height: 20px;
   padding: 0.1em;
-  padding-top: 0.3em;
+  padding-top: 0.15em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2322,6 +2329,8 @@ ul.lexassetscontent {
   transition: all 0.1s;
   z-index: 1;
   backdrop-filter: blur(10px);
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
 }
 
 .lexassetscontent li .lexassetinfo {
@@ -2329,7 +2338,7 @@ ul.lexassetscontent {
   color: #AAA;
   cursor: pointer;
   box-sizing: border-box;
-  font-size: 1.1em !important;
+  font-size: 0.9em !important;
   position: absolute;
   background-color: rgba(0,0,0,0.75);
   overflow: hidden;
