@@ -1179,7 +1179,7 @@
             this.tabs = {};
         }
 
-        add( name, content, isSelected, callback ) {
+        add( name, content, isSelected, callback, options = {} ) {
 
             if( isSelected )
                 this.root.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
@@ -1214,6 +1214,9 @@
                 // Manage visibility
                 tabEl.instance.area.root.childNodes.forEach( c => c.style.display = 'none');
                 content.style.display = "block";
+                
+                if(options.onSelect) 
+                    options.onSelect(e, tabEl.dataset.name);
             });
             
             tabEl.setAttribute('draggable', true);
