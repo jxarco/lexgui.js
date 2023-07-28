@@ -1188,6 +1188,7 @@
 
             content = content.root ? content.root : content;
             content.style.display = isSelected ? "block" : "none";
+            content.classList.add("lextabcontent");
 
             // Create tab
             let tabEl = document.createElement('span');
@@ -1212,7 +1213,7 @@
                 tabEl.parentElement.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
                 tabEl.classList.toggle('selected');
                 // Manage visibility
-                tabEl.instance.area.root.childNodes.forEach( c => c.style.display = 'none');
+                tabEl.instance.area.root.querySelectorAll('.lextabcontent').forEach( c => c.style.display = 'none');
                 content.style.display = "block";
                 
                 if(options.onSelect) 
@@ -1229,7 +1230,7 @@
             });
             
             // Attach content
-            this.root.prepend(tabEl);
+            this.root.appendChild(tabEl);
             this.area.attach( content );
             this.tabs[ name ] = content;
 
