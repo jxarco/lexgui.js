@@ -1169,7 +1169,7 @@
 
             area.root.classList.add( "lexareatabscontainer" );
 
-            area.split({type: 'vertical', sizes: [Tabs.TAB_SIZE, null], resize: false, top: 6});
+            area.split({type: 'vertical', sizes: "auto", resize: false, top: 6});
             area.sections[0].attach( container );
 
             this.area = area.sections[1];
@@ -1186,8 +1186,8 @@
             
             isSelected = !Object.keys( this.tabs ).length ? true : isSelected;
 
-            content = content.root ? content.root : content;
-            content.style.display = isSelected ? "block" : "none";
+            let contentEl = content.root ? content.root : content;
+            contentEl.style.display = isSelected ? "block" : "none";
 
             // Create tab
             let tabEl = document.createElement('span');
@@ -1196,8 +1196,10 @@
             tabEl.innerHTML = name;
             tabEl.id = name.replace(/\s/g, '') + Tabs.TAB_ID++;
             tabEl.selected = isSelected;
+            if(tabEl.selected)
+                this.selected = name;
             tabEl.instance = this;
-            content.id = tabEl.id + "_content";
+            contentEl.id = tabEl.id + "_content";
 
             LX.addSignal( "@on_tab_docked", tabEl, function() {
                 if( this.parentElement.childNodes.length == 1 ){
@@ -1213,8 +1215,8 @@
                 tabEl.classList.toggle('selected');
                 // Manage visibility
                 tabEl.instance.area.root.childNodes.forEach( c => c.style.display = 'none');
-                content.style.display = "block";
-                
+                contentEl.style.display = "block";
+                tabEl.instance.selected = tabEl.dataset.name;
                 if(options.onSelect) 
                     options.onSelect(e, tabEl.dataset.name);
             });
@@ -1230,7 +1232,7 @@
             
             // Attach content
             this.root.prepend(tabEl);
-            this.area.attach( content );
+            this.area.attach( contentEl );
             this.tabs[ name ] = content;
 
             if( callback ) callback.call(this, this.area.root.getBoundingClientRect());

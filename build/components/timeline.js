@@ -186,7 +186,7 @@
                     }
                     for(let j = 0; j < this.tracksPerItem[selected].length; j++) {
                         let track = this.tracksPerItem[selected][j];
-                        let id = track.name + (track.type? ' (' + track.type + ')': '');
+                        let id = track.type ? track.type : track.name;
 
                         t.children.push({'id': id, 'skipVisibility': this.skipVisibility, visible: track.active, 'children':[], actions : this.skipLock ? null : [{
                             'name':'Lock edition',
@@ -988,8 +988,13 @@
             this.unSelectAllTracks();
             
             let [name, type] = trackInfo.id.split(" (");
+            
             if(type)
                 type = type.replaceAll(")", "").replaceAll(" ", "");
+            else {
+                type = name;
+                name = trackInfo.parent.id;
+            }
             let tracks = this.tracksPerItem[name];
 
             for(let i = 0; i < tracks.length; i++) {
@@ -1022,6 +1027,10 @@
             let [name, type] = trackInfo.id.split(" (");
             if(type)
                 type = type.replaceAll(")", "").replaceAll(" ", "");
+            else {
+                type = name;
+                name = trackInfo.parent.id;
+            }
             trackInfo = {name, type};
             let tracks = this.tracksPerItem[name];
 
@@ -1047,6 +1056,10 @@
                 let [name, type] = trackInfo.children[idx].id.split(" (");
                 if(type)
                     type = type.replaceAll(")", "").replaceAll(" ", "");
+                else {
+                    type = name;
+                    name = trackInfo.parent.id;
+                }
                 //trackInfo = {name, type};
                 let tracks = this.tracksPerItem[name];
     
@@ -3213,7 +3226,9 @@
                                 
             this.lastKeyFramesSelected.push( selectionInfo );
             track.selected[index] = true;
-            
+            this.currentTime =  this.animationClip.tracks[track.clipIdx].times[ index ];
+            LX.emit( "@on_current_time_" + this.constructor.name, this.currentTime );
+
             if( this.onSetTime )
                 this.onSetTime(  this.animationClip.tracks[track.clipIdx].times[ index ]);
         }
