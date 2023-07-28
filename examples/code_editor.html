@@ -34,6 +34,11 @@
             margin: 0;
         }
 
+        .lexcodeeditor .lexcodearea {
+            overflow: scroll;
+            background-color: #2f2f35;
+        }
+
         .lexcodeeditor pre {
             -webkit-text-size-adjust: 100%;
             cursor: text;
@@ -66,7 +71,9 @@
             line-height: inherit;
             -webkit-tap-highlight-color: transparent;
             box-sizing: border-box;
-            /* letter-spacing: 0.05em; */
+            display: inline-block;
+            height: 18px;
+            vertical-align: top;
         }
 
         .lexcodeeditor .cursors {

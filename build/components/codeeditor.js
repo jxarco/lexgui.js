@@ -46,7 +46,6 @@
             this.root = div;
 
             area.attach( this.root );
-            area.root.style.overflow = 'scroll';
 
             div.addEventListener( 'keydown', this.processKey.bind(this) );
             div.addEventListener( 'click', this.processClick.bind(this) );
@@ -57,7 +56,7 @@
                 this.cursors.classList.remove('show');
             } );
 
-            this.area = new LX.Area( { height: "100%" } );
+            this.area = new LX.Area( { className: "lexcodearea", height: "100%" } );
             div.appendChild(this.area.root);
 
             this.cursors = document.createElement('div');
@@ -69,8 +68,10 @@
                 var cursor = document.createElement('div');
                 cursor.className = "cursor";
                 cursor.innerHTML = "&nbsp;";
-                cursor.style.top = cursor.style.left = "0px";
-                cursor._left = cursor._top = 0;
+                cursor.style.top = "4px";
+                cursor.style.left = "0px";
+                cursor._top = 4;
+                cursor._left = 0;
                 cursor.charPos = 0;
                 this.cursors.appendChild(cursor);
             }
@@ -96,6 +97,7 @@
 
             this.actions = {};
             this.cursorBlinkRate = 550;
+            this.tabSpaces = 4;
             this.lines = [];
             this._current_line = 0;
 
@@ -112,12 +114,13 @@
                 'console'
             ];
             this.literals = [
-                'for', 'if', 'else', 'case', 'switch'
+                'for', 'if', 'else', 'case', 'switch', 'return'
             ];
-
             // Action keys
 
             // this.action();
+
+            // this.processLines();
         }
 
         processClick(e) {
@@ -161,10 +164,10 @@
             
             if( key == 'Tab' ) {
                 e.preventDefault();
-                key = "    ";
+                this.addSpaces( this.tabSpaces );
+                return;
             }
-
-            if( key == 'Backspace' )
+            else if( key == 'Backspace' )
             {
                 var letter;
                 [ this.lines[lidx], letter ] = popChar(this.lines[lidx]);
@@ -190,6 +193,20 @@
                 this._current_line--;
                 this._current_line = Math.max(0, this._current_line);
                 this.cursorToTop( null );
+
+                // Go to end of line if out of line
+                var letter = this.getCharAtPos( cursor.charPos );
+                if(!letter)
+                {
+                    // Reset cursor first..
+                    this.resetCursorPos( cursor );
+
+                    for( let char of this.lines[this._current_line] )
+                    {
+                        this.cursorToRight(char);
+                    }
+                }
+
                 return;
             }
             else if( key == 'ArrowDown' )
@@ -198,6 +215,20 @@
                 return;
                 this._current_line++;
                 this.cursorToBottom( null );
+
+                // Go to end of line if out of line
+                var letter = this.getCharAtPos( cursor.charPos );
+                if(!letter)
+                {
+                    // Reset cursor first..
+                    this.resetCursorPos( cursor );
+
+                    for( let char of this.lines[this._current_line] )
+                    {
+                        this.cursorToRight(char);
+                    }
+                }
+
                 return;
             }
             else if( key == 'ArrowLeft' )
@@ -237,7 +268,7 @@
                 return;
             }
 
-            // Apend key
+            // Append key
             else 
             {
                 this.lines[lidx] = [this.lines[lidx].slice(0, cursor.charPos), key, this.lines[lidx].slice(cursor.charPos)].join('');
@@ -266,49 +297,56 @@
     
                 for( let t of tokens )
                 {
-                    if(!t.length)
-                        t = ' ';
-                    
-                    if(t == ' ')
+                    let iter = t.matchAll(/[(){}.;:]+/g);
+                    let subtokens = iter.next();
+
+                    if( subtokens.value && !(+t) )
                     {
-                        linespan.innerHTML += t;
+                        let idx = 0;
+                        while( subtokens.value != undefined )
+                        {
+                            const _t = t.substring(idx, subtokens.value.index);
+                            this.processToken(_t, linespan);
+                            this.processToken(subtokens.value[0], linespan);
+                            idx = subtokens.value.index + 1;
+                            subtokens = iter.next();
+                        }
                     }
                     else
                     {
-                        // special characters
-                        let _t = t;
-                        let match = t.indexOf(';');
-                        if(match > -1)
-                        {
-                           t = t.substr(0, match);
-                        }
-    
-                        var span = document.createElement('span');
-                        span.innerHTML = t;
-    
-                        if( this.keywords.indexOf(t) > -1 )
-                            span.className += " cm-kwd";
-    
-                        else if( this.builtin.indexOf(t) > -1 )
-                            span.className += " cm-bln";
-
-                        else if( this.literals.indexOf(t) > -1 )
-                            span.className += " cm-lit";
-    
-                        else if( isString(t) )
-                            span.className += " cm-str";
-    
-                        else if( !!(+t) )
-                            span.className += " cm-dec";
-    
-                        linespan.appendChild(span);
-    
-                        if(match > -1)
-                        {
-                            linespan.innerHTML += _t.substr(match);
-                        }
+                        this.processToken(t, linespan);
                     }
                 }
+            }
+        }
+
+        processToken(token, line) {
+
+            if(token == ' ')
+            {
+                line.innerHTML += token;
+            }
+            else
+            {
+                var span = document.createElement('span');
+                span.innerHTML = token;
+
+                if( this.keywords.indexOf(token) > -1 )
+                    span.className += " cm-kwd";
+
+                else if( this.builtin.indexOf(token) > -1 )
+                    span.className += " cm-bln";
+
+                else if( this.literals.indexOf(token) > -1 )
+                    span.className += " cm-lit";
+
+                else if( isString(token) )
+                    span.className += " cm-str";
+
+                else if( !!(+token) )
+                    span.className += " cm-dec";
+
+                line.appendChild(span);
             }
         }
 
@@ -353,7 +391,7 @@
             cursor = cursor ?? this.cursors.children[0];
             var h = 22;
             cursor._top -= h;
-            cursor._top = Math.max(cursor._top, 0);
+            cursor._top = Math.max(cursor._top, 4);
             cursor.style.top = "calc(" + cursor._top + "px)";
             this.restartBlink();
             
@@ -379,6 +417,12 @@
             cursor.style.left = "0px";
             cursor.charPos = 0;
             this.restartBlink();
+        }
+
+        addSpaces(n) {
+            for( var i = 0; i < n; ++i ) {
+                this.root.dispatchEvent(new KeyboardEvent('keydown', {'key': ' '}));
+            }
         }
 
         getCharAtPos( pos ) {
