@@ -17,6 +17,10 @@
         return /^[A-Za-z\s]*$/.test(str);
     }
 
+    function swapElements (array, id0, id1) {
+        [array[id0], array[id1]] = [array[id1], array[id0]];
+    };
+
     function isString(str) {
         return (str[0] == '"' &&  str[ str.length - 1 ] == '"') 
                 || (str[0] == "'" &&  str[ str.length - 1 ] == "'");
@@ -185,8 +189,7 @@
             this.action('ArrowDown', ( ln, cursor, e ) => {
                 if( this.code.lines[ ln + 1 ] == undefined ) 
                     return;
-                this._current_line++;
-                this.cursorToBottom();
+                this.lineDown();
                 // Go to end of line if out of line
                 var letter = this.getCharAtPos( cursor.charPos );
                 if(!letter) this.actions['End'](this._current_line, cursor);
@@ -324,6 +327,26 @@
                 }
             }
 
+            if( e.altKey )
+            {
+                switch( key ) {
+                case 'ArrowUp':
+                    if(!this.code.lines[ lidx - 1 ])
+                        return;
+                    swapElements(this.code.lines, lidx - 1, lidx);
+                    this.lineUp();
+                    this.processLines();
+                    return;
+                case 'ArrowDown':
+                    if(!this.code.lines[ lidx + 1 ])
+                        return;
+                    swapElements(this.code.lines, lidx, lidx + 1);
+                    this.lineDown();
+                    this.processLines();
+                    return;
+                }
+            }
+
             for( const actKey in this.actions ) {
                 if( key != actKey ) continue;
                 e.preventDefault();
@@ -449,6 +472,11 @@
             this._current_line--;
             this._current_line = Math.max(0, this._current_line);
             this.cursorToTop();
+        }
+
+        lineDown() {
+            this._current_line++;
+            this.cursorToBottom();
         }
 
         restartBlink() {
