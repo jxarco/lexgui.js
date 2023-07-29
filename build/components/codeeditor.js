@@ -256,7 +256,8 @@
                 line++;
             
             if(this.code.lines[line] == undefined) return;
-
+            
+            this._current_line = line;
             var cursor = cursor ?? this.cursors.children[0];
             var transition = cursor.style.transition;
             cursor.style.transition = "none"; // no transition!
