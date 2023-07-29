@@ -20,6 +20,8 @@
     function round(num, n) { return +num.toFixed(n); }
     function deepCopy(o) { return JSON.parse(JSON.stringify(o)) }
 
+    LX.deepCopy = deepCopy;
+
     function hexToRgb(string) {
         const red = parseInt(string.substring(1, 3), 16) / 255;
         const green = parseInt(string.substring(3, 5), 16) / 255;

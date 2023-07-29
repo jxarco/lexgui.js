@@ -60,7 +60,6 @@
 
             this.root.addEventListener( 'keydown', this.processKey.bind(this) );
             this.root.addEventListener( 'click', this.processClick.bind(this) );
-            // this.root.addEventListener( 'mousemove', this.processMove.bind(this) );
             this.root.addEventListener( 'focus', this.restartBlink.bind(this) );
 
             this.root.addEventListener( 'focusout', () => {
@@ -109,7 +108,9 @@
             this.actions = {};
             this.cursorBlinkRate = 550;
             this.tabSpaces = 4;
+            this.maxUndoSteps = 16;
             this._current_line = 0;
+            this._lastTime = 0;
 
             this.specialKeys = [
                 'Backspace', 'Enter', 'ArrowUp', 'ArrowDown', 
@@ -139,6 +140,7 @@
             code.className = 'code';
             code.lines = [];
             code.cursorState = {};
+            code.undoSteps = [];
             this.openedTabs[name] = code;
             this.tabs.add(name, code, selected, null, { onSelect: (e, tabname) => {
                 this.saveCursor(this.code.cursorState);    
@@ -148,21 +150,6 @@
             
             if(selected)
                 this.code = code;  
-        }
-
-        processMove(e) {
-
-            if( !this.code ) return;
-
-            var code_rect = this.code.getBoundingClientRect();
-            var position = [e.clientX - code_rect.x, e.clientY - code_rect.y];
-
-            
-            var line = -1;
-            while( position[1] > (4 + (line + 1) * 18) ) 
-            line++;
-            
-            console.log(line);
         }
 
         processClick(e) {
@@ -210,6 +197,20 @@
             var key = e.key;
             // console.log(key);
 
+            const d = new Date();
+            const current = d.getTime();
+            if( (current - this._lastTime) > 3000 && this.code.lines.length){
+                this._lastTime = current;
+                this.code.undoSteps.push( LX.deepCopy(this.code.lines) );
+            }
+
+            if( key == 'z' && e.ctrlKey )
+            {
+                this.code.lines = this.code.undoSteps.pop();
+                this.processLines();
+                return;
+            }
+
             // keys with length > 1 are probably special keys
             if( key.length > 1 && this.specialKeys.indexOf(key) == -1 )
                 return;
@@ -227,13 +228,14 @@
             {
                 var letter;
                 [ this.code.lines[lidx], letter ] = popChar(this.code.lines[lidx]);
-
                 if(letter) this.cursorToLeft( letter );
                 else {
                     this._current_line--;
                     this._current_line = Math.max(0, this._current_line);
-                    this.restartBlink();
-                    this.cursorToTop( null );
+                    this.cursorToTop( null, true );
+
+                    for( let char of this.code.lines[this._current_line] )
+                        this.cursorToRight(char);
                 }
             }
             else if( key == 'Delete' )
