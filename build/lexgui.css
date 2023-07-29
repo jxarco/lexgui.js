@@ -34,6 +34,10 @@
   border-radius: 6px;
 }
 
+::-webkit-scrollbar-corner {
+  display: none;
+}
+
 ::-webkit-scrollbar-thumb:hover {
   background: #aaaaaa;
 }

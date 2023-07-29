@@ -59,11 +59,12 @@
 
             this.root.addEventListener( 'keydown', this.processKey.bind(this) );
             this.root.addEventListener( 'click', this.processClick.bind(this) );
-            this.root.addEventListener( 'focus', this.restartBlink.bind(this) );
+            this.root.addEventListener( 'focus', this.processFocus.bind(this, true) );
+            this.root.addEventListener( 'focusout', this.processFocus.bind(this, false) );
 
-            this.root.addEventListener( 'focusout', () => {
-                clearInterval( this.blinker );
-                this.cursors.classList.remove('show');
+            this.tabs.root.addEventListener( 'dblclick', (e) => {
+                e.preventDefault();
+                this.addTab("unnamed.js");
             } );
 
             // Cursors
@@ -89,7 +90,6 @@
             
             this.openedTabs = { };
             this.addTab("script1.js", true);
-            this.addTab("script2.js");
 
             // State
 
@@ -147,7 +147,7 @@
 
             this.action('End', ( ln, cursor, e ) => {
                 this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
-                for( let char of this.code.lines[ln] ) this.cursorToRight(char);
+                this.cursorToWord( this.code.lines[ln] );
             });
 
             this.action('Enter', ( ln, cursor, e ) => {
@@ -234,6 +234,16 @@
             }
         }
 
+        processFocus( active ) {
+
+            if( active )
+                this.restartBlink();
+            else {
+                clearInterval( this.blinker );
+                this.cursors.classList.remove('show');
+            }
+        }
+
         processClick(e) {
 
             if( !this.code ) return;
@@ -272,23 +282,12 @@
             cursor.style.transition = transition; // restore transition
         }
 
-        processKey(e) {
+        async processKey(e) {
 
-            if( !this.code ) return;
+            if( !this.code ) 
+                return;
 
             var key = e.key;
-            // console.log(key);
-
-            if( (e.ctrlKey || e.metaKey) && key == 'z' )
-            {
-                if(!this.code.undoSteps.length)
-                    return;
-                const step = this.code.undoSteps.pop();
-                this.code.lines = step.lines;
-                this.restoreCursor( step.cursor );
-                this.processLines();
-                return;
-            }
 
             // keys with length > 1 are probably special keys
             if( key.length > 1 && this.specialKeys.indexOf(key) == -1 )
@@ -297,12 +296,42 @@
             let cursor = this.cursors.children[0];
             let lidx = this._current_line;
             this.code.lines[lidx] = this.code.lines[lidx] ?? "";
-            
+
+            // Check combinations
+
+            if( e.ctrlKey || e.metaKey )
+            {
+                switch( key ) {
+                case 'z':
+                    if(!this.code.undoSteps.length)
+                        return;
+                    const step = this.code.undoSteps.pop();
+                    this.code.lines = step.lines;
+                    this.restoreCursor( step.cursor );
+                    this.processLines();
+                    return;
+                case 'v':
+                    const text = await navigator.clipboard.readText();
+                    this.code.lines[lidx] = [
+                        this.code.lines[lidx].slice(0, cursor.charPos), 
+                        text, 
+                        this.code.lines[lidx].slice(cursor.charPos)
+                    ].join('');
+                    this.cursorToWord( text );
+                    this.processLines();
+                    return;
+                }
+            }
+
             for( const actKey in this.actions ) {
                 if( key != actKey ) continue;
                 e.preventDefault();
                 return this.actions[ key ]( lidx, cursor, e );
             }
+
+            // from now on, don't allow ctrl, shift or meta (mac) combinations
+            if( (e.ctrlKey || e.shiftKey || e.metaKey) )
+                return;
 
             // Add undo steps
 
@@ -482,6 +511,11 @@
 
             if(resetLeft)
                 this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
+        }
+
+        cursorToWord( text ) {
+            for( let char of text ) 
+                this.cursorToRight(char);
         }
 
         saveCursor( state = {} ) {
