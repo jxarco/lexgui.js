@@ -87,6 +87,7 @@
                 cursor._top = 4;
                 cursor.style.top = "4px";
                 cursor.charPos = 0;
+                cursor.line = 0;
                 this.cursors.appendChild(cursor);
             }
 
@@ -112,7 +113,6 @@
             this.cursorBlinkRate = 550;
             this.tabSpaces = 4;
             this.maxUndoSteps = 16;
-            this._current_line = 0;
             this._lastTime = null;
 
             this.specialKeys = [
@@ -136,9 +136,10 @@
             // Action keys
 
             this.action('Delete', ( ln, cursor, e ) => {
-                var letter = this.getCharAtPos( cursor.charPos );
+                var letter = this.getCharAtPos( cursor );
                 if(!letter) return;
                 this.code.lines[ln] = sliceChar( this.code.lines[ln], cursor.charPos );
+                this.processLines();
             });
 
             this.action('Tab', ( ln, cursor, e ) => {
@@ -155,23 +156,23 @@
             });
 
             this.action('Enter', ( ln, cursor, e ) => {
-                this._current_line++;
-                this.code.lines.splice(this._current_line, 0, "");
-                this.code.lines[this._current_line] = this.code.lines[ln].substr( cursor.charPos );
+                cursor.line++;
+                this.code.lines.splice(cursor.line, 0, "");
+                this.code.lines[cursor.line] = this.code.lines[ln].substr( cursor.charPos );
                 this.code.lines[ln] = this.code.lines[ln].substr( 0, cursor.charPos );
                 this.cursorToBottom( null, true );
                 this.processLines();
             });
 
             this.action('Backspace', ( ln, cursor, e ) => {
-                var letter = this.getCharAtPos( cursor.charPos - 1 );
+                var letter = this.getCharAtPos( cursor,  -1 );
                 if(letter) {
                     this.code.lines[ln] = sliceChar( this.code.lines[ln], cursor.charPos - 1 );
                     this.cursorToLeft( letter );
                 } 
                 else if(this.code.lines[ln - 1] != undefined) {
                     this.lineUp();
-                    this.actions['End'](this._current_line, cursor);
+                    this.actions['End'](cursor.line, cursor);
                     // Move line on top
                     this.code.lines[ln - 1] += this.code.lines[ln];
                     this.code.lines.splice(ln, 1);
@@ -182,8 +183,8 @@
             this.action('ArrowUp', ( ln, cursor, e ) => {
                 this.lineUp();
                 // Go to end of line if out of line
-                var letter = this.getCharAtPos( cursor.charPos );
-                if(!letter) this.actions['End'](this._current_line, cursor);
+                var letter = this.getCharAtPos( cursor );
+                if(!letter) this.actions['End'](cursor.line, cursor);
             });
 
             this.action('ArrowDown', ( ln, cursor, e ) => {
@@ -191,8 +192,8 @@
                     return;
                 this.lineDown();
                 // Go to end of line if out of line
-                var letter = this.getCharAtPos( cursor.charPos );
-                if(!letter) this.actions['End'](this._current_line, cursor);
+                var letter = this.getCharAtPos( cursor );
+                if(!letter) this.actions['End'](cursor.line, cursor);
             });
 
             this.action('ArrowLeft', ( ln, cursor, e ) => {
@@ -200,7 +201,12 @@
                     e.preventDefault();
                     this.actions[ 'Home' ]( ln, cursor );
                 }else {
-                    this.cursorToLeft( lastLetter(this.code.lines[ln]) );
+                    var letter = this.getCharAtPos( cursor, -1 );
+                    if(letter) this.cursorToLeft( letter, cursor );
+                    else if( cursor.line > 0 ) {
+                        this.lineUp( cursor );
+                        this.actions['End'](cursor.line, cursor);
+                    }
                 }
             });
 
@@ -209,9 +215,12 @@
                     e.preventDefault();
                     this.actions[ 'End' ]( ln, cursor );
                 }else{
-                    var letter = this.getCharAtPos( cursor.charPos );
-                    if(!letter) return;
-                    this.cursorToRight( lastLetter(this.code.lines[ln]) );
+                    var letter = this.getCharAtPos( cursor );
+                    if(letter) this.cursorToRight( letter, cursor );
+                    else if( this.code.lines[ cursor.line + 1 ] ) {
+                        this.lineDown( cursor );
+                        this.actions['Home'](cursor.line, cursor);
+                    }
                 }
             });
 
@@ -227,9 +236,9 @@
             code.undoSteps = [];
             this.openedTabs[name] = code;
             this.tabs.add(name, code, selected, null, { onSelect: (e, tabname) => {
-                this.saveCursor(this.code.cursorState);    
+                this.saveCursor(null, this.code.cursorState);    
                 this.code = this.openedTabs[tabname];
-                this.restoreCursor(this.code.cursorState);    
+                this.restoreCursor(null, this.code.cursorState);    
             }});
             
             if(selected){
@@ -260,8 +269,8 @@
             
             if(this.code.lines[line] == undefined) return;
             
-            this._current_line = line;
             var cursor = cursor ?? this.cursors.children[0];
+            cursor.line = line;
             var transition = cursor.style.transition;
             cursor.style.transition = "none"; // no transition!
             this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
@@ -298,7 +307,7 @@
                 return;
 
             let cursor = this.cursors.children[0];
-            let lidx = this._current_line;
+            let lidx = cursor.line;
             this.code.lines[lidx] = this.code.lines[lidx] ?? "";
 
             // Check combinations
@@ -311,7 +320,8 @@
                         return;
                     const step = this.code.undoSteps.pop();
                     this.code.lines = step.lines;
-                    this.restoreCursor( step.cursor );
+                    cursor.line = step.line;
+                    this.restoreCursor( cursor, step.cursor );
                     this.processLines();
                     return;
                 case 'v':
@@ -354,7 +364,7 @@
             }
 
             // from now on, don't allow ctrl, shift or meta (mac) combinations
-            if( (e.ctrlKey || e.shiftKey || e.metaKey) )
+            if( (e.ctrlKey || e.metaKey) )
                 return;
 
             // Add undo steps
@@ -366,14 +376,16 @@
                 this._lastTime = current;
                 this.code.undoSteps.push( {
                     lines: LX.deepCopy(this.code.lines),
-                    cursor: this.saveCursor()
+                    cursor: this.saveCursor(cursor),
+                    line: cursor.line
                 } );
             } else {
                 if( (current - this._lastTime) > 3000 && this.code.lines.length){
                     this._lastTime = null;
                     this.code.undoSteps.push( {
                         lines: LX.deepCopy(this.code.lines),
-                        cursor: this.saveCursor()
+                        cursor: this.saveCursor(cursor),
+                        line: cursor.line
                     } );
                 }else{
                     // If time not enough, reset timer
@@ -468,14 +480,16 @@
             }
         }
 
-        lineUp() {
-            this._current_line--;
-            this._current_line = Math.max(0, this._current_line);
+        lineUp(cursor) {
+            cursor = cursor ?? this.cursors.children[0];
+            cursor.line--;
+            cursor.line = Math.max(0, cursor.line);
             this.cursorToTop();
         }
 
-        lineDown() {
-            this._current_line++;
+        lineDown(cursor) {
+            cursor = cursor ?? this.cursors.children[0];
+            cursor.line++;
             this.cursorToBottom();
         }
 
@@ -547,15 +561,17 @@
                 this.cursorToRight(char);
         }
 
-        saveCursor( state = {} ) {
+        saveCursor( cursor, state = {} ) {
             var cursor = cursor ?? this.cursors.children[0];
             state.top = cursor._top;
             state.left = cursor._left;
+            state.line = cursor.line;
+            state.charPos = cursor.charPos;
             return state;
         }
 
-        restoreCursor( state ) {
-            var cursor = cursor ?? this.cursors.children[0];
+        restoreCursor( cursor, state ) {
+            cursor = cursor ?? this.cursors.children[0];
             var transition = cursor.style.transition;
             cursor.style.transition = "none"; // no transition!
 
@@ -566,6 +582,9 @@
             flushCss(cursor);
 
             cursor.style.transition = transition; // restore transition
+
+            cursor.line = state.line;
+            cursor.charPos = state.charPos;
         }
 
         resetCursorPos( flag, cursor ) {
@@ -592,9 +611,9 @@
             }
         }
 
-        getCharAtPos( pos ) {
-            let idx = this._current_line;
-            return this.code.lines[idx][pos];
+        getCharAtPos( cursor, offset = 0) {
+            cursor = cursor ?? this.cursors.children[0];
+            return this.code.lines[cursor.line][cursor.charPos + offset];
         }
 
         measureChar(char) {
