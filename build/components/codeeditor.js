@@ -414,6 +414,7 @@
         processLines() {
 
             this.code.innerHTML = "";
+            this._building_string = false;
 
             for( let line of this.code.lines )
             {
@@ -425,7 +426,7 @@
     
                 for( let t of tokens )
                 {
-                    let iter = t.matchAll(/[(){}.;:]/g);
+                    let iter = t.matchAll(/[(){}.;:"']/g);
                     let subtokens = iter.next();
                     if( subtokens.value && !(+t) )
                     {
@@ -453,6 +454,14 @@
 
         processToken(token, line) {
 
+            let sString = false;
+
+            if(token == '"' || token == "'")
+            {
+                sString = this._building_string; // stop string if i was building it
+                this._building_string = true;
+            }
+
             if(token == ' ')
             {
                 line.innerHTML += token;
@@ -471,7 +480,7 @@
                 else if( this.literals.indexOf(token) > -1 )
                     span.className += " cm-lit";
 
-                else if( isString(token) )
+                else if( this._building_string  )
                     span.className += " cm-str";
 
                 else if( !!(+token) )
@@ -479,6 +488,8 @@
 
                 line.appendChild(span);
             }
+
+            if(sString) delete this._building_string;
         }
 
         lineUp(cursor) {
