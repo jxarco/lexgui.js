@@ -236,9 +236,10 @@
             code.undoSteps = [];
             this.openedTabs[name] = code;
             this.tabs.add(name, code, selected, null, { onSelect: (e, tabname) => {
-                this.saveCursor(null, this.code.cursorState);    
+                var cursor = cursor ?? this.cursors.children[0];
+                this.saveCursor(cursor, this.code.cursorState);    
                 this.code = this.openedTabs[tabname];
-                this.restoreCursor(null, this.code.cursorState);    
+                this.restoreCursor(cursor, this.code.cursorState);    
             }});
             
             if(selected){
@@ -572,19 +573,17 @@
 
         restoreCursor( cursor, state ) {
             cursor = cursor ?? this.cursors.children[0];
+            cursor.line = state.line ?? 0;
+            cursor.charPos = state.charPos ?? 0;
+
             var transition = cursor.style.transition;
             cursor.style.transition = "none"; // no transition!
-
             cursor._left = state.left ?? 0;
             cursor.style.left = "calc(" + cursor._left + "px + 0.25em)";
             cursor._top = state.top ?? 4;
             cursor.style.top = "calc(" + cursor._top + "px)";
             flushCss(cursor);
-
             cursor.style.transition = transition; // restore transition
-
-            cursor.line = state.line;
-            cursor.charPos = state.charPos;
         }
 
         resetCursorPos( flag, cursor ) {
