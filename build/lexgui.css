@@ -2376,6 +2376,24 @@ ul.lexassetscontent {
 
 /* Code Editor */
 
+.lexcodegutter {
+  width: 16px;
+  height: calc(100% - 33.2px);
+  margin-top: 31.3px;
+  background-color: var(--branch-title-background);
+  opacity: 0.4;
+  text-align: center;
+}
+
+.lexcodegutter span {
+  width: 100%;
+  display: block;
+  height: 18px;
+  margin: 4px 0px;
+  font-size: 11px;
+  color: papayawhip;
+}
+
 .lexcodeeditor ::-webkit-scrollbar {
   height: 6px;
 }
@@ -2389,6 +2407,7 @@ ul.lexassetscontent {
   /* padding: 30px; */
   outline: none;
   overflow: none;
+  width: calc(100% - 16px);
 }
 
 .lexcodeeditor .code {

@@ -57,6 +57,11 @@
 
             this.tabs = this.area.addTabs();
 
+            area.root.style.display = "flex"; // add gutter and code
+            this.gutter = document.createElement('div');
+            this.gutter.className = "lexcodegutter";
+            area.attach( this.gutter );
+
             this.root = this.area.root;
             this.root.tabIndex = -1;
             area.attach( this.root );
@@ -68,7 +73,7 @@
 
             this.tabs.root.addEventListener( 'dblclick', (e) => {
                 e.preventDefault();
-                this.addTab("unnamed.js");
+                this.addTab("unnamed.js", true);
             } );
 
             // Cursors
@@ -224,14 +229,14 @@
                 }
             });
 
-            // this.processLines();
+            this.processLines();
         }
 
         addTab(name, selected) {
             
             let code = document.createElement('div');
             code.className = 'code';
-            code.lines = [];
+            code.lines = [""];
             code.cursorState = {};
             code.undoSteps = [];
             this.openedTabs[name] = code;
@@ -413,8 +418,10 @@
 
         processLines() {
 
+            this.gutter.innerHTML = "";
             this.code.innerHTML = "";
             this._building_string = false;
+            let numlines = 0;
 
             for( let line of this.code.lines )
             {
@@ -449,6 +456,12 @@
                         this.processToken(t, linespan);
                     }
                 }
+
+                // add line gutter
+                numlines++;
+                var linenum = document.createElement('span');
+                linenum.innerHTML = numlines;
+                this.gutter.appendChild(linenum);
             }
         }
 

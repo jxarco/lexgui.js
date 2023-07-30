@@ -1183,8 +1183,10 @@
 
         add( name, content, isSelected, callback, options = {} ) {
 
-            if( isSelected )
+            if( isSelected ) {
                 this.root.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
+                this.area.root.querySelectorAll('.lextabcontent').forEach( c => c.style.display = 'none');
+            }
             
             isSelected = !Object.keys( this.tabs ).length ? true : isSelected;
 
