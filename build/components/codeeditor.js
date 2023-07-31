@@ -221,15 +221,36 @@
                 }else {
                     var letter = this.getCharAtPos( cursor, -1 );
                     if(letter) {
-                        this.cursorToLeft( letter, cursor );
                         let selection = this.selections.children[0];
-                        if( selection.range && e.shiftKey ) {
-                            selection.range[1]--;
-                            const new_width = +parseInt(selection.style.width) - this.measureChar(letter)[0];
+                        if( e.shiftKey ) {
+                            if(!selection.range) this.startSelection(cursor, selection);
+                            let new_width;
+                            const charWidth = this.measureChar(letter)[0];
+                            if( (cursor.charPos - 1) < this.initial_charPos ) {
+                                selection.range[0]--;
+                                // cursor is not moved yet
+                                selection.style.left = "calc(" + (cursor._left - charWidth) + "px + 0.25em)";
+                                new_width = +parseInt(selection.style.width) + charWidth;
+                            }
+                            else if( (cursor.charPos - 1) == this.initial_charPos ) {
+                                selection.range[1]--;
+                                new_width = 0;
+                            }
+                            else {
+                                selection.range[1]--;
+                                new_width = +parseInt(selection.style.width) - this.measureChar(letter)[0];
+                            }
                             selection.style.width = new_width + "px";
                             if(new_width == 0) this.removeSelection();
-                        }else{
-                            this.removeSelection();
+                            this.cursorToLeft( letter, cursor );
+                        }else {
+                            // no selection
+                            if(!selection.range) this.cursorToLeft( letter, cursor );
+                            else {
+                                this.removeSelection();
+                                // TODO: go to start of selection
+                                // ...
+                            }
                         }
                     }
                     else if( cursor.line > 0 ) {
@@ -246,14 +267,32 @@
                 }else {
                     var letter = this.getCharAtPos( cursor );
                     if(letter) {
-                        this.cursorToRight( letter, cursor );
                         let selection = this.selections.children[0];
-                        if( selection.range && e.shiftKey ) {
-                            selection.range[1]++;
-                            const new_width = +parseInt(selection.style.width) + this.measureChar(letter)[0];
+                        if( e.shiftKey ) {
+                            if(!selection.range) this.startSelection(cursor, selection);
+                            let new_width;
+                            const charWidth = this.measureChar(letter)[0];
+                            if( cursor.charPos < this.initial_charPos ) {
+                                selection.range[0]++;
+                                // cursor is not moved yet
+                                selection.style.left = "calc(" + (cursor._left + charWidth) + "px + 0.25em)";
+                                new_width = +parseInt(selection.style.width) - charWidth;
+                            }
+                            else {
+                                selection.range[1]++;
+                                new_width = +parseInt(selection.style.width) + charWidth;
+                            }
                             selection.style.width = new_width + "px";
+                            if(new_width == 0) this.removeSelection();
+                            this.cursorToRight( letter, cursor );
                         }else{
-                            this.removeSelection();
+                            // no selection
+                            if(!selection.range) this.cursorToRight( letter, cursor );
+                            else {
+                                this.removeSelection();
+                                // TODO: go to end of selection
+                                // ...
+                            }
                         }
                     }
                     else if( this.code.lines[ cursor.line + 1 ] !== undefined ) {
@@ -445,7 +484,6 @@
 
         processSelection( e, selection ) {
 
-            this.selections.classList.add('show');
             selection = selection ?? this.selections.children[0];
             var cursor = cursor ?? this.cursors.children[0];
 
@@ -453,10 +491,7 @@
 
             if( !this.selection_started )
             {
-                selection.style.left = cursor.style.left;
-                selection.style.top = cursor.style.top;
-                this.initial_charPos = cursor.charPos;
-                this.selection_started = true;
+                this.startSelection(cursor, selection);
             }
 
             var chars_width = 0;
@@ -733,6 +768,17 @@
                 }, this.cursorBlinkRate);
             else if (this.cursorBlinkRate < 0)
                 this.cursors.classList.remove('show');
+        }
+
+        startSelection( cursor, selection ) {
+
+            this.selections.classList.add('show');
+            selection.style.left = cursor.style.left;
+            selection.style.top = cursor.style.top;
+            selection.range = [cursor.charPos, cursor.charPos];
+            selection.style.width = "0px";
+            this.initial_charPos = cursor.charPos;
+            this.selection_started = true;
         }
 
         removeSelection( selection ) {
