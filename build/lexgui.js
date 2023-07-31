@@ -1200,6 +1200,7 @@
             tabEl.className = "lexareatab" + (isSelected ? " selected" : "");
             tabEl.innerHTML = name;
             tabEl.id = name.replace(/\s/g, '') + Tabs.TAB_ID++;
+            tabEl.title = options.title;
             tabEl.selected = isSelected;
             if(tabEl.selected)
                 this.selected = name;
@@ -2957,7 +2958,7 @@
                 (options.icon ? "<a class='" + options.icon + "'></a>" : 
                 ( options.img  ? "<img src='" + options.img + "'>" : (value || ""))) + "</span>";
 
-            wValue.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+            wValue.style.width = "calc( 100% - " + (options.nameWidth ?? LX.DEFAULT_NAME_WIDTH) + ")";
           
             if(options.disabled)
                 wValue.setAttribute("disabled", true);

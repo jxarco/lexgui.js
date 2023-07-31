@@ -6,7 +6,7 @@
   --global-color-secondary: #2c3035f5;
 	--branch-background: #282d32;
   --widget-background-hover: #3c434bab;
-	--global-branch-darker: #282c31;
+	--global-branch-darker: #202327;
 	--branch-title-background: #2e3338;
   --branch-title-inactive-background: #42484e;
   --global-button-color: #ffffff12;
@@ -1597,6 +1597,7 @@ meter::-webkit-meter-even-less-good-value {
 /* Context Menu */
 
 .lexcontextmenubox {
+  z-index: 2;
   position: absolute;
   padding-right: 20px;
   border-bottom-left-radius: 6px;
@@ -2411,9 +2412,17 @@ ul.lexassetscontent {
   width: calc(100% - 16px);
 }
 
+.lexcodetabinfo {
+  background-color: rgba(46, 51, 56, 0.5);
+  position: absolute;
+  z-index: 1;
+  bottom: 2px;
+  margin-left: 16px;
+}
+
 .lexcodeeditor .code {
   font-size: 18px;
-  background-color: var(--branch-title-background);
+  background-color: var(--global-branch-darker);
   overflow: scroll;
   height: 100%;
 }

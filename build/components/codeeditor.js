@@ -53,11 +53,13 @@
 
         constructor( area, options = {} ) {
 
+            this.base_area = area;
             this.area = new LX.Area( { className: "lexcodeeditor" } );
 
             this.tabs = this.area.addTabs();
 
             area.root.style.display = "flex"; // add gutter and code
+            area.root.style.position = "relative"; // add gutter and code
             this.gutter = document.createElement('div');
             this.gutter.className = "lexcodegutter";
             area.attach( this.gutter );
@@ -99,7 +101,7 @@
             // Default code tab
             
             this.openedTabs = { };
-            this.addTab("+");
+            this.addTab("+", false, "New File");
             this.addTab("script1.js", true);
 
             // State
@@ -113,6 +115,7 @@
 
             // Code
 
+            this.highlight = 'JavaScript';
             this.onsave = options.onsave ?? (() => {});
             this.actions = {};
             this.cursorBlinkRate = 550;
@@ -120,6 +123,9 @@
             this.maxUndoSteps = 16;
             this._lastTime = null;
 
+            this.languages = [
+                'JavaScript', 'GLSL'
+            ];
             this.specialKeys = [
                 'Backspace', 'Enter', 'ArrowUp', 'ArrowDown', 
                 'ArrowRight', 'ArrowLeft', 'Delete', 'Home',
@@ -222,7 +228,7 @@
                 }else{
                     var letter = this.getCharAtPos( cursor );
                     if(letter) this.cursorToRight( letter, cursor );
-                    else if( this.code.lines[ cursor.line + 1 ] ) {
+                    else if( this.code.lines[ cursor.line + 1 ] !== undefined ) {
                         this.lineDown( cursor );
                         this.actions['Home'](cursor.line, cursor);
                     }
@@ -232,28 +238,67 @@
             this.processLines();
 
             this.loadFile( "../data/script.js" );
+
+            // Create inspector panel
+            let panel = this._create_panel_info();
+            area.attach( panel );
         }
 
         loadFile( filename ) {
 
             LX.request({ url: filename, success: text => {
                 const name = filename.substring(filename.lastIndexOf('/') + 1);
-                this.addTab(name, true);
-                console.log(text);
+                this.addTab(name, true, filename);
                 this.code.lines = text.split('\r\n');
                 this.processLines();
             } });
         }
 
-        addTab(name, selected) {
+        _create_panel_info() {
             
+            let panel = new LX.Panel({ className: "lexcodetabinfo", width: "calc(100% - 16px)", height: "auto" });
+            panel.ln = 0;
+            panel.col = 0;
+
+            const on_change_language = ( lang ) => {
+                console.log(lang);
+                this.highlight = lang;
+                this._refresh_code_info();
+            }
+
+            this._refresh_code_info = (ln = panel.ln, col = panel.col) => {
+                panel.ln = ln;
+                panel.col = col;
+                panel.clear();
+                panel.sameLine();
+                panel.addBlank(); 
+                panel.addLabel("Ln " + ln);
+                panel.addLabel("Col " + col);
+                panel.addButton("<b>{ }</b>", this.highlight, (value, event) => {
+                    LX.addContextMenu( "Language", event, m => {
+                        for( const lang of this.languages )
+                            m.add( lang, on_change_language );
+                    });
+                }, { width: "25%", nameWidth: "15%" });
+                panel.endLine();
+            };
+
+            this._refresh_code_info();
+
+            return panel;
+        }
+
+        addTab(name, selected, title) {
+            
+            // Create code content
             let code = document.createElement('div');
             code.className = 'code';
             code.lines = [""];
             code.cursorState = {};
             code.undoSteps = [];
             this.openedTabs[name] = code;
-            this.tabs.add(name, code, selected, null, { onSelect: (e, tabname) => {
+
+            this.tabs.add(name, code, selected, null, { 'title': (title ?? name), 'onSelect': (e, tabname) => {
 
                 if(tabname == '+')
                 {
@@ -265,6 +310,7 @@
                 this.saveCursor(cursor, this.code.cursorState);    
                 this.code = this.openedTabs[tabname];
                 this.restoreCursor(cursor, this.code.cursorState);    
+                this.processLines();
             }});
             
             if(selected){
@@ -319,6 +365,8 @@
             
             flushCss(cursor);
             cursor.style.transition = transition; // restore transition
+
+            this._refresh_code_info( line + 1, cursor.charPos );
         }
 
         async processKey(e) {
@@ -581,6 +629,7 @@
             cursor.style.left = "calc(" + cursor._left + "px + 0.25em)";
             cursor.charPos++;
             this.restartBlink();
+            this._refresh_code_info( cursor.line + 1, cursor.charPos );
         }
 
         cursorToLeft( key, cursor ) {
@@ -593,6 +642,7 @@
             cursor.charPos--;
             cursor.charPos = Math.max(cursor.charPos, 0);
             this.restartBlink();
+            this._refresh_code_info( cursor.line + 1, cursor.charPos );
         }
 
         cursorToTop( cursor, resetLeft = false ) {
@@ -606,6 +656,8 @@
             
             if(resetLeft)
                 this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
+
+            this._refresh_code_info( cursor.line + 1, cursor.charPos );
         }
 
         cursorToBottom( cursor, resetLeft = false ) {
@@ -618,6 +670,8 @@
 
             if(resetLeft)
                 this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
+
+            this._refresh_code_info( cursor.line + 1, cursor.charPos );
         }
 
         cursorToWord( text ) {
