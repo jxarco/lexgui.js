@@ -99,6 +99,7 @@
             // Default code tab
             
             this.openedTabs = { };
+            this.addTab("+");
             this.addTab("script1.js", true);
 
             // State
@@ -106,14 +107,13 @@
             this.state = {
                 overwrite: false,
                 focused: false,
-                // pasteIncoming: false, 
-                // cutIncoming: false,
-                selectingText: false,
-                draggingText: false
+                // selectingText: false,
+                // draggingText: false
             }
 
             // Code
 
+            this.onsave = options.onsave ?? (() => {});
             this.actions = {};
             this.cursorBlinkRate = 550;
             this.tabSpaces = 4;
@@ -128,10 +128,10 @@
             this.keywords = [
                 'var', 'let', 'const', 'this', 'in', 'of', 
                 'true', 'false', 'new', 'function', '(', ')',
-                'static'
+                'static', 'class', 'constructor'
             ];
             this.builtin = [
-                'console'
+                'console', 'window', 'navigator'
             ];
             this.literals = [
                 'for', 'if', 'else', 'case', 'switch', 'return',
@@ -230,6 +230,19 @@
             });
 
             this.processLines();
+
+            this.loadFile( "../data/script.js" );
+        }
+
+        loadFile( filename ) {
+
+            LX.request({ url: filename, success: text => {
+                const name = filename.substring(filename.lastIndexOf('/') + 1);
+                this.addTab(name, true);
+                console.log(text);
+                this.code.lines = text.split('\r\n');
+                this.processLines();
+            } });
         }
 
         addTab(name, selected) {
@@ -241,6 +254,13 @@
             code.undoSteps = [];
             this.openedTabs[name] = code;
             this.tabs.add(name, code, selected, null, { onSelect: (e, tabname) => {
+
+                if(tabname == '+')
+                {
+                    this.addTab("unnamed.js", true);
+                    return;
+                }
+
                 var cursor = cursor ?? this.cursors.children[0];
                 this.saveCursor(cursor, this.code.cursorState);    
                 this.code = this.openedTabs[tabname];
@@ -321,25 +341,28 @@
             if( e.ctrlKey || e.metaKey )
             {
                 switch( key ) {
-                case 'z':
-                    if(!this.code.undoSteps.length)
+                    case 's':
+                        this.onsave( this.code.lines.join("\n") );
                         return;
-                    const step = this.code.undoSteps.pop();
-                    this.code.lines = step.lines;
-                    cursor.line = step.line;
-                    this.restoreCursor( cursor, step.cursor );
-                    this.processLines();
-                    return;
-                case 'v':
-                    const text = await navigator.clipboard.readText();
-                    this.code.lines[lidx] = [
-                        this.code.lines[lidx].slice(0, cursor.charPos), 
-                        text, 
-                        this.code.lines[lidx].slice(cursor.charPos)
-                    ].join('');
-                    this.cursorToWord( text );
-                    this.processLines();
-                    return;
+                    case 'v':
+                        const text = await navigator.clipboard.readText();
+                        this.code.lines[lidx] = [
+                            this.code.lines[lidx].slice(0, cursor.charPos), 
+                            text, 
+                            this.code.lines[lidx].slice(cursor.charPos)
+                        ].join('');
+                        this.cursorToWord( text );
+                        this.processLines();
+                        return;
+                    case 'z':
+                        if(!this.code.undoSteps.length)
+                            return;
+                        const step = this.code.undoSteps.pop();
+                        this.code.lines = step.lines;
+                        cursor.line = step.line;
+                        this.restoreCursor( cursor, step.cursor );
+                        this.processLines();
+                        return;
                 }
             }
 
@@ -425,12 +448,20 @@
 
             for( let line of this.code.lines )
             {
-                const tokens = line.split(' ').join('& &').split('&');
                 var pre = document.createElement('pre');
                 var linespan = document.createElement('span');
                 pre.appendChild(linespan);
                 this.code.appendChild(pre);
-    
+
+                // Check if comment
+                const is_comment = line.split('//');
+                if( is_comment.length > 1 )
+                {
+                    line = is_comment[0];
+                }
+
+                const tokens = line.split(' ').join('& &').split('&');
+
                 for( let t of tokens )
                 {
                     let iter = t.matchAll(/[(){}.;:"']/g);
@@ -455,6 +486,11 @@
                     {
                         this.processToken(t, linespan);
                     }
+                }
+
+                if( is_comment.length > 1 )
+                {
+                    this.processToken("//" + is_comment[1], linespan);
                 }
 
                 // add line gutter
@@ -492,6 +528,9 @@
 
                 else if( this.literals.indexOf(token) > -1 )
                     span.className += " cm-lit";
+
+                else if( token.substr(0, 2) == '//' )
+                    span.className += " cm-com";
 
                 else if( this._building_string  )
                     span.className += " cm-str";
