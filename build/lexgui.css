@@ -1662,7 +1662,7 @@ meter::-webkit-meter-even-less-good-value {
 /* submenu specified arrow  */
 .lexcontextmenubox .lexcontextmenuentry a.fa-xs {
   float: right;
-  /* margin-top: -6px; */
+  margin-top: -6px;
 }
 
 .lexcontextmenubox .lexcontextmenuentry:hover:not(.cmtitle) {
@@ -2418,6 +2418,10 @@ ul.lexassetscontent {
   outline: none;
   overflow: none;
   width: calc(100% - 16px);
+  -webkit-user-select: none; /* Safari 3.1+ */
+  -moz-user-select: none; /* Firefox 2+ */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard syntax */
 }
 
 .lexcodetabinfo {
@@ -2482,21 +2486,21 @@ ul.lexassetscontent {
   vertical-align: top;
 }
 
-.lexcodeeditor .cursors {
+.lexcodeeditor .cursors, .lexcodeeditor .selections {
   -webkit-text-size-adjust: 100%;
   font-family: monospace;
   color: #AAA !important;
   font-size: 15px;
   cursor: text;
   box-sizing: border-box;
+  visibility: hidden;
   margin: 0;
   padding: 0;
-  visibility: hidden;
   position: relative;
   z-index: 3;
 }
 
-.lexcodeeditor .cursors.show {
+.lexcodeeditor .cursors.show, .lexcodeeditor .selections.show {
   visibility: visible;
 }
 
@@ -2518,6 +2522,26 @@ ul.lexassetscontent {
   top: 0px;
   height: 18px;
   transition: left linear 0.1s;
+}
+
+.lexcodeeditor .lexcodeselection {
+  -webkit-text-size-adjust: 100%;
+  font-family: monospace;
+  color: #AAA !important;
+  font-size: 15px;
+  cursor: text;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-right: none;
+  position: absolute;
+  z-index: 0 !important;
+  left: 0px;
+  top: 0px;
+  width: 100px;
+  height: 18px;
+  background-color: rgba(85, 158, 221, 0.35);
+  border: 2px dotted var(--global-selected-light);
 }
 
 .cm-str { color: #9737f6; } /* string */

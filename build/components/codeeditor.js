@@ -69,7 +69,9 @@
             area.attach( this.root );
 
             this.root.addEventListener( 'keydown', this.processKey.bind(this) );
-            this.root.addEventListener( 'click', this.processClick.bind(this) );
+            this.root.addEventListener( 'mousedown', this.processMouse.bind(this) );
+            this.root.addEventListener( 'mouseup', this.processMouse.bind(this) );
+            this.root.addEventListener( 'mousemove', this.processMouse.bind(this) );
             this.root.addEventListener( 'focus', this.processFocus.bind(this, true) );
             this.root.addEventListener( 'focusout', this.processFocus.bind(this, false) );
 
@@ -78,11 +80,15 @@
                 this.addTab("unnamed.js", true);
             } );
 
-            // Cursors
+            // Cursors and selection
 
             this.cursors = document.createElement('div');
             this.cursors.className = 'cursors';
             this.tabs.area.attach(this.cursors);
+
+            this.selections = document.createElement('div');
+            this.selections.className = 'selections';
+            this.tabs.area.attach(this.selections);
 
             // Add main cursor
             {
@@ -98,12 +104,19 @@
                 this.cursors.appendChild(cursor);
             }
 
+            // Test selection
+            {
+                this.selection = document.createElement('div');
+                this.selection.className = "lexcodeselection";
+                this.selections.appendChild( this.selection );
+            }
+
             // State
 
             this.state = {
                 overwrite: false,
                 focused: false,
-                // selectingText: false,
+                selectingText: false,
                 // draggingText: false
             }
 
@@ -207,7 +220,18 @@
                     this.actions[ 'Home' ]( ln, cursor );
                 }else {
                     var letter = this.getCharAtPos( cursor, -1 );
-                    if(letter) this.cursorToLeft( letter, cursor );
+                    if(letter) {
+                        this.cursorToLeft( letter, cursor );
+                        let selection = this.selections.children[0];
+                        if( selection.range && e.shiftKey ) {
+                            selection.range[1]--;
+                            const new_width = +parseInt(selection.style.width) - this.measureChar(letter)[0];
+                            selection.style.width = new_width + "px";
+                            if(new_width == 0) this.removeSelection();
+                        }else{
+                            this.removeSelection();
+                        }
+                    }
                     else if( cursor.line > 0 ) {
                         this.lineUp( cursor );
                         this.actions['End'](cursor.line, cursor);
@@ -219,9 +243,19 @@
                 if(e.metaKey) {
                     e.preventDefault();
                     this.actions[ 'End' ]( ln, cursor );
-                }else{
+                }else {
                     var letter = this.getCharAtPos( cursor );
-                    if(letter) this.cursorToRight( letter, cursor );
+                    if(letter) {
+                        this.cursorToRight( letter, cursor );
+                        let selection = this.selections.children[0];
+                        if( selection.range && e.shiftKey ) {
+                            selection.range[1]++;
+                            const new_width = +parseInt(selection.style.width) + this.measureChar(letter)[0];
+                            selection.style.width = new_width + "px";
+                        }else{
+                            this.removeSelection();
+                        }
+                    }
                     else if( this.code.lines[ cursor.line + 1 ] !== undefined ) {
                         this.lineDown( cursor );
                         this.actions['Home'](cursor.line, cursor);
@@ -338,9 +372,40 @@
             }
         }
 
-        processClick(e) {
+        processMouse(e) {
 
             if( !this.code ) return;
+
+            const time = new Date();
+
+            if( e.type == 'mousedown' )
+            {
+                this.lastMouseDown = time.getTime();
+                this.state.selectingText = true;
+                return;
+            }
+            
+            else if( e.type == 'mouseup' )
+            {
+                if( (time.getTime() - this.lastMouseDown) < 300 ) {
+                    this.state.selectingText = false;
+                    this.processClick(e);
+                    this.removeSelection();
+                }
+                this.selection_started = false;
+                this.state.selectingText = false;
+            }
+
+            else if( e.type == 'mousemove' )
+            {
+                if( this.state.selectingText )
+                {
+                    this.processSelection(e);
+                }
+            }
+        }
+
+        processClick(e) {
 
             var code_rect = this.code.getBoundingClientRect();
             var position = [e.clientX - code_rect.x, e.clientY - code_rect.y];
@@ -378,6 +443,34 @@
             this._refresh_code_info( line + 1, cursor.charPos );
         }
 
+        processSelection( e, selection ) {
+
+            this.selections.classList.add('show');
+            selection = selection ?? this.selections.children[0];
+            var cursor = cursor ?? this.cursors.children[0];
+
+            this.processClick(e);
+
+            if( !this.selection_started )
+            {
+                selection.style.left = cursor.style.left;
+                selection.style.top = cursor.style.top;
+                this.initial_charPos = cursor.charPos;
+                this.selection_started = true;
+            }
+
+            var chars_width = 0;
+            for( var i = this.initial_charPos; i < cursor.charPos; ++i )
+            {
+                let char = this.code.lines[cursor.line][i];
+                var [w, h] = this.measureChar(char);
+                chars_width += w;
+            }
+
+            selection.style.width = chars_width + "px";
+            selection.range = [this.initial_charPos, cursor.charPos];
+        }
+
         async processKey(e) {
 
             if( !this.code ) 
@@ -398,11 +491,23 @@
             if( e.ctrlKey || e.metaKey )
             {
                 switch( key ) {
-                    case 's':
+                    case 's': // save
                         e.preventDefault();
                         this.onsave( this.code.lines.join("\n") );
                         return;
-                    case 'v':
+                    case 'c': // copy
+                        let selected_text = "";
+                        let selection = this.selections.children[0];
+                        if( !selection.range ) {
+                            selected_text = this.code.lines[cursor.line];
+                        }
+                        else {
+                            for( var i = selection.range[0]; i < selection.range[1]; ++i )
+                                selected_text += this.code.lines[cursor.line][i];
+                        }
+                        navigator.clipboard.writeText(selected_text);
+                        return;
+                    case 'v': // paste
                         const text = await navigator.clipboard.readText();
                         this.code.lines[lidx] = [
                             this.code.lines[lidx].slice(0, cursor.charPos), 
@@ -412,7 +517,7 @@
                         this.cursorToWord( text );
                         this.processLines();
                         return;
-                    case 'z':
+                    case 'z': // undo
                         if(!this.code.undoSteps.length)
                             return;
                         const step = this.code.undoSteps.pop();
@@ -630,6 +735,13 @@
                 this.cursors.classList.remove('show');
         }
 
+        removeSelection( selection ) {
+
+            this.selections.classList.remove('show');
+            selection = selection ?? this.selections.children[0];
+            selection.range = null;
+        }
+
         cursorToRight( key, cursor ) {
 
             if(!key) return;
@@ -716,8 +828,6 @@
         resetCursorPos( flag, cursor ) {
             
             cursor = cursor ?? this.cursors.children[0];
-            this.restartBlink();
-
             var transition = cursor.style.transition;
             cursor.style.transition = "none";
 
