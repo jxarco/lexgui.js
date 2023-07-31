@@ -1865,11 +1865,11 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexareatabs .lexareatab:first-child {
- border-top-left-radius: 3px;
+ border-top-left-radius: 6px;
 }
 
 .lexareatabs .lexareatab:last-child {
- border-top-right-radius: 3px;
+ border-top-right-radius: 6px;
 }
 
 .lexareatabs .lexareatab:hover {
@@ -1885,6 +1885,14 @@ meter::-webkit-meter-even-less-good-value {
   font-weight: bold;
   background-color: var(--branch-title-background);
   border-top: 2px solid var(--global-selected-light);
+}
+
+.lexareatabs .lexareatab.selected:first-child {
+  border-left: 2px solid var(--global-selected-light);
+}
+
+.lexareatabs .lexareatab.selected:last-child {
+  border-right: 2px solid var(--global-selected-light);
 }
 
 .lexareatabscontainer {
@@ -2416,7 +2424,7 @@ ul.lexassetscontent {
   background-color: rgba(46, 51, 56, 0.5);
   position: absolute;
   z-index: 1;
-  bottom: 2px;
+  bottom: 8px;
   margin-left: 16px;
 }
 
@@ -2517,7 +2525,7 @@ ul.lexassetscontent {
 .cm-com { color: #499847; } /* comment */
 .cm-typ { color: #36c0b0; } /* type */
 .cm-lit { color: #ff0080; } /* literal */
-.cm-bln { color: #e9d11e; } /* builtin */
+.cm-bln { color: #cfc159; } /* builtin */
 .cm-dec { color: #22c44a; } /* decimal */
 
 .cm-tag { color: #2194ce; } /* HTML tag */

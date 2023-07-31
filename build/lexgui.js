@@ -1179,6 +1179,7 @@
             this.selected = null;
             this.root = container;
             this.tabs = {};
+            this.tabDOMs = {};
         }
 
         add( name, content, isSelected, callback, options = {} ) {
@@ -1240,10 +1241,20 @@
             // Attach content
             this.root.appendChild(tabEl);
             this.area.attach( contentEl );
+            this.tabDOMs[ name ] = tabEl;
             this.tabs[ name ] = content;
 
             if( callback ) callback.call(this, this.area.root.getBoundingClientRect());
         }
+
+        select( name ) {
+
+            if(!this.tabDOMs[ name ] )
+            return;
+
+            this.tabDOMs[ name ].click();
+        }
+
     }
 
     LX.Tabs = Tabs;
@@ -2699,11 +2710,15 @@
          * @param {Number} height
          */
 
-        addBlank( height = 8 ) {
+        addBlank( height = 8, width ) {
 
             let widget = this.create_widget(null, Widget.addBlank);
             widget.domEl.className += " blank";
             widget.domEl.style.height = height + "px";
+
+            if(width)
+                widget.domEl.style.width = width;
+
             return widget;
         }
 
@@ -2747,6 +2762,7 @@
          * placeholder: Add input placeholder
          * trigger: Choose onchange trigger (default, input) [default]
          * inputWidth: Width of the text input
+         * float: Justify text
          */
 
         addText( name, value, callback, options = {} ) {
@@ -2781,6 +2797,7 @@
             let wValue = document.createElement('input');
             wValue.value = wValue.iValue = value || "";
             wValue.style.width = "100%";
+            wValue.style.textAlign = options.float ?? "";
             Object.assign(wValue.style, options.style ?? {});
 
             if(options.disabled ?? false) wValue.setAttribute("disabled", true);
@@ -2926,9 +2943,10 @@
          * @param {String} value Information string
          */
 
-        addLabel( value ) {
+        addLabel( value, options = {} ) {
 
-            return this.addText( null, value, null, { disabled: true, className: "auto" } );
+            options.disabled = true;
+            return this.addText( null, value, null, options );
         }
         
         /**

@@ -98,12 +98,6 @@
                 this.cursors.appendChild(cursor);
             }
 
-            // Default code tab
-            
-            this.openedTabs = { };
-            this.addTab("+", false, "New File");
-            this.addTab("script1.js", true);
-
             // State
 
             this.state = {
@@ -116,7 +110,7 @@
             // Code
 
             this.highlight = 'JavaScript';
-            this.onsave = options.onsave ?? (() => {});
+            this.onsave = options.onsave ?? ((code) => { console.log(code) });
             this.actions = {};
             this.cursorBlinkRate = 550;
             this.tabSpaces = 4;
@@ -235,9 +229,13 @@
                 }
             });
 
-            this.processLines();
+            // Default code tab
+        
+            this.openedTabs = { };
+            this.addTab("+", false, "New File");
+            this.addTab("script1.js", true);
 
-            this.loadFile( "../data/script.js" );
+            this.loadFile( "../build/components/codeeditor.js" );
 
             // Create inspector panel
             let panel = this._create_panel_info();
@@ -251,6 +249,7 @@
                 this.addTab(name, true, filename);
                 this.code.lines = text.split('\r\n');
                 this.processLines();
+                this._refresh_code_info();
             } });
         }
 
@@ -261,7 +260,6 @@
             panel.col = 0;
 
             const on_change_language = ( lang ) => {
-                console.log(lang);
                 this.highlight = lang;
                 this._refresh_code_info();
             }
@@ -271,9 +269,9 @@
                 panel.col = col;
                 panel.clear();
                 panel.sameLine();
-                panel.addBlank(); 
-                panel.addLabel("Ln " + ln);
-                panel.addLabel("Col " + col);
+                panel.addLabel(this.code.title, { float: 'right' });
+                panel.addLabel("Ln " + ln, { width: "48px" });
+                panel.addLabel("Col " + col, { width: "48px" });
                 panel.addButton("<b>{ }</b>", this.highlight, (value, event) => {
                     LX.addContextMenu( "Language", event, m => {
                         for( const lang of this.languages )
@@ -290,15 +288,23 @@
 
         addTab(name, selected, title) {
             
+            if(this.openedTabs[name])
+            {
+                this.tabs.select( this.code.tabName );
+                return;
+            }
+
             // Create code content
             let code = document.createElement('div');
             code.className = 'code';
             code.lines = [""];
             code.cursorState = {};
             code.undoSteps = [];
+            code.tabName = name;
+            code.title = title ?? name;
             this.openedTabs[name] = code;
 
-            this.tabs.add(name, code, selected, null, { 'title': (title ?? name), 'onSelect': (e, tabname) => {
+            this.tabs.add(name, code, selected, null, { 'title': code.title, 'onSelect': (e, tabname) => {
 
                 if(tabname == '+')
                 {
@@ -311,10 +317,14 @@
                 this.code = this.openedTabs[tabname];
                 this.restoreCursor(cursor, this.code.cursorState);    
                 this.processLines();
+                this._refresh_code_info(cursor.line + 1, cursor.charPos);
             }});
             
             if(selected){
                 this.code = code;  
+                this.resetCursorPos(CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP);
+                this.processLines();
+                setTimeout( () => this._refresh_code_info(0, 0), 50 )
             }
         }
 
@@ -390,6 +400,7 @@
             {
                 switch( key ) {
                     case 's':
+                        e.preventDefault();
                         this.onsave( this.code.lines.join("\n") );
                         return;
                     case 'v':
@@ -491,11 +502,11 @@
 
             this.gutter.innerHTML = "";
             this.code.innerHTML = "";
-            this._building_string = false;
             let numlines = 0;
 
             for( let line of this.code.lines )
             {
+                this._building_string = false; // multi-line strings not supported by now
                 var pre = document.createElement('pre');
                 var linespan = document.createElement('span');
                 pre.appendChild(linespan);
@@ -508,11 +519,11 @@
                     line = is_comment[0];
                 }
 
-                const tokens = line.split(' ').join('& &').split('&');
+                const tokens = line.split(' ').join('¬ ¬').split('¬'); // trick to split without losing spaces
 
                 for( let t of tokens )
                 {
-                    let iter = t.matchAll(/[(){}.;:"']/g);
+                    let iter = t.matchAll(/[(){}.,;:"']/g);
                     let subtokens = iter.next();
                     if( subtokens.value && !(+t) )
                     {
@@ -555,8 +566,8 @@
 
             if(token == '"' || token == "'")
             {
-                sString = this._building_string; // stop string if i was building it
-                this._building_string = true;
+                sString = (this._building_string == token); // stop string if i was building it
+                this._building_string = this._building_string ? this._building_string : token;
             }
 
             if(token == ' ')
@@ -568,7 +579,10 @@
                 var span = document.createElement('span');
                 span.innerHTML = token;
 
-                if( this.keywords.indexOf(token) > -1 )
+                if( this._building_string  )
+                    span.className += " cm-str";
+                
+                else if( this.keywords.indexOf(token) > -1 )
                     span.className += " cm-kwd";
 
                 else if( this.builtin.indexOf(token) > -1 )
@@ -579,9 +593,6 @@
 
                 else if( token.substr(0, 2) == '//' )
                     span.className += " cm-com";
-
-                else if( this._building_string  )
-                    span.className += " cm-str";
 
                 else if( !!(+token) )
                     span.className += " cm-dec";
@@ -704,8 +715,12 @@
         }
 
         resetCursorPos( flag, cursor ) {
+            
             cursor = cursor ?? this.cursors.children[0];
             this.restartBlink();
+
+            var transition = cursor.style.transition;
+            cursor.style.transition = "none";
 
             if( flag & CodeEditor.CURSOR_LEFT )
             {
@@ -718,7 +733,11 @@
             {
                 cursor._top = 4;
                 cursor.style.top = "4px";
+                cursor.line = 0;
             }
+
+            flushCss(cursor);
+            cursor.style.transition = transition;
         }
 
         addSpaces(n) {
