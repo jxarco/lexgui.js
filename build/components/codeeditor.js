@@ -235,7 +235,7 @@
             this.addTab("+", false, "New File");
             this.addTab("script1.js", true);
 
-            this.loadFile( "../build/components/codeeditor.js" );
+            this.loadFile( "../data/script.js" );
 
             // Create inspector panel
             let panel = this._create_panel_info();
@@ -352,7 +352,6 @@
             if(this.code.lines[line] == undefined) return;
             
             var cursor = cursor ?? this.cursors.children[0];
-            cursor.line = line;
             var transition = cursor.style.transition;
             cursor.style.transition = "none"; // no transition!
             this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
@@ -375,7 +374,7 @@
             
             flushCss(cursor);
             cursor.style.transition = transition; // restore transition
-
+            cursor.line = line;
             this._refresh_code_info( line + 1, cursor.charPos );
         }
 
@@ -523,9 +522,9 @@
 
                 for( let t of tokens )
                 {
-                    let iter = t.matchAll(/[(){}.,;:"']/g);
+                    let iter = t.matchAll(/[\[\](){}.,;:"']/g);
                     let subtokens = iter.next();
-                    if( subtokens.value && !(+t) )
+                    if( subtokens.value )
                     {
                         let idx = 0;
                         while( subtokens.value != undefined )
@@ -594,7 +593,7 @@
                 else if( token.substr(0, 2) == '//' )
                     span.className += " cm-com";
 
-                else if( !!(+token) )
+                else if( !Number.isNaN(+token) )
                     span.className += " cm-dec";
 
                 line.appendChild(span);
