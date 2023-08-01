@@ -151,7 +151,7 @@
                 'while', 'continue', 'break', 'do'
             ];
             this.symbols = [
-                '{', '}', '(', ')', ';', '='
+                '<', '>', '{', '}', '(', ')', ';', '='
             ];
 
             // Action keys
@@ -194,11 +194,33 @@
             });
 
             this.action('Enter', ( ln, cursor, e ) => {
+
+                var _c0 = this.getCharAtPos( cursor, -1 );
+                var _c1 = this.getCharAtPos( cursor );
+
                 cursor.line++;
                 this.code.lines.splice(cursor.line, 0, "");
-                this.code.lines[cursor.line] = this.code.lines[ln].substr( cursor.charPos );
-                this.code.lines[ln] = this.code.lines[ln].substr( 0, cursor.charPos );
+                this.code.lines[cursor.line] = this.code.lines[ln].substr( cursor.charPos ); // new line (below)
+                this.code.lines[ln] = this.code.lines[ln].substr( 0, cursor.charPos ); // line above
                 this.cursorToBottom( null, true );
+
+                // Check indentation
+                var spaces = firstNonspaceIndex(this.code.lines[ln]);
+                var tabs = Math.floor( spaces / this.tabSpaces );
+                var transition = cursor.style.transition;
+                cursor.style.transition = "none";
+
+                if( _c0 == '{' && _c1 == '}' ) {
+                    this.code.lines.splice(cursor.line, 0, "");
+                    this.addSpaceTabs(tabs + 1);
+                    this.code.lines[cursor.line + 1] = " ".repeat(spaces) + this.code.lines[cursor.line + 1];
+                } else {
+                    this.addSpaceTabs(tabs);
+                }
+
+                flushCss(cursor);
+                cursor.style.transition = transition; // restore transition
+                
                 this.processLines();
             });
 
@@ -655,14 +677,22 @@
 
             // Append key 
 
-            this.cursorToRight( key );
-            // if(key == '{') key += '}';
             this.code.lines[lidx] = [
-                this.code.lines[lidx].slice(0, cursor.charPos - 1), 
+                this.code.lines[lidx].slice(0, cursor.charPos), 
                 key, 
-                this.code.lines[lidx].slice(cursor.charPos - 1)
+                this.code.lines[lidx].slice(cursor.charPos)
             ].join('');
-            this.restartBlink();
+
+            this.cursorToRight( key );
+
+            // Special single char cases
+
+            if( key == '{' )
+            {
+                this.root.dispatchEvent(new KeyboardEvent('keydown', {'key': '}'}));
+                this.cursorToLeft( key, cursor );
+                return; // it will be processed with the above event
+            }
 
             // Update only the current line, since it's only an appended key
             this.processLine( this.code.lines[lidx], lidx );
@@ -719,7 +749,7 @@
 
             for( let t of tokens )
             {
-                let iter = t.matchAll(/[\[\](){}.,;:"']/g);
+                let iter = t.matchAll(/[\[\](){}<>.,;:"']/g);
                 let subtokens = iter.next();
                 if( subtokens.value )
                 {
@@ -958,6 +988,12 @@
 
             flushCss(cursor);
             cursor.style.transition = transition;
+        }
+
+        addSpaceTabs(n) {
+            for( var i = 0; i < n; ++i ) {
+                this.actions['Tab']();
+            }
         }
 
         addSpaces(n) {
