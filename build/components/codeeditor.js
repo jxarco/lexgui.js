@@ -551,41 +551,46 @@
             if( e.ctrlKey || e.metaKey )
             {
                 switch( key ) {
-                    case 's': // save
-                        e.preventDefault();
-                        this.onsave( this.code.lines.join("\n") );
+                case 'c': // copy
+                    let selected_text = "";
+                    let selection = this.selections.children[0];
+                    if( !selection.range ) {
+                        selected_text = this.code.lines[cursor.line];
+                    }
+                    else {
+                        for( var i = selection.range[0]; i < selection.range[1]; ++i )
+                        selected_text += this.code.lines[cursor.line][i];
+                    }
+                    navigator.clipboard.writeText(selected_text);
+                    return;
+                case 'd': // duplicate line
+                    e.preventDefault();
+                    this.code.lines.splice(lidx, 0, this.code.lines[lidx]);
+                    this.cursorToBottom(cursor);
+                    this.processLines();
+                case 's': // save
+                    e.preventDefault();
+                    this.onsave( this.code.lines.join("\n") );
+                    return;
+                case 'v': // paste
+                    const text = await navigator.clipboard.readText();
+                    this.code.lines[lidx] = [
+                        this.code.lines[lidx].slice(0, cursor.charPos), 
+                        text, 
+                        this.code.lines[lidx].slice(cursor.charPos)
+                    ].join('');
+                    this.cursorToString( cursor, text );
+                    this.processLines();
+                    return;
+                case 'z': // undo
+                    if(!this.code.undoSteps.length)
                         return;
-                    case 'c': // copy
-                        let selected_text = "";
-                        let selection = this.selections.children[0];
-                        if( !selection.range ) {
-                            selected_text = this.code.lines[cursor.line];
-                        }
-                        else {
-                            for( var i = selection.range[0]; i < selection.range[1]; ++i )
-                                selected_text += this.code.lines[cursor.line][i];
-                        }
-                        navigator.clipboard.writeText(selected_text);
-                        return;
-                    case 'v': // paste
-                        const text = await navigator.clipboard.readText();
-                        this.code.lines[lidx] = [
-                            this.code.lines[lidx].slice(0, cursor.charPos), 
-                            text, 
-                            this.code.lines[lidx].slice(cursor.charPos)
-                        ].join('');
-                        this.cursorToString( cursor, text );
-                        this.processLines();
-                        return;
-                    case 'z': // undo
-                        if(!this.code.undoSteps.length)
-                            return;
-                        const step = this.code.undoSteps.pop();
-                        this.code.lines = step.lines;
-                        cursor.line = step.line;
-                        this.restoreCursor( cursor, step.cursor );
-                        this.processLines();
-                        return;
+                    const step = this.code.undoSteps.pop();
+                    this.code.lines = step.lines;
+                    cursor.line = step.line;
+                    this.restoreCursor( cursor, step.cursor );
+                    this.processLines();
+                    return;
                 }
             }
 
