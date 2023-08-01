@@ -568,14 +568,14 @@
             {
                 switch( key ) {
                 case 'ArrowUp':
-                    if(!this.code.lines[ lidx - 1 ])
+                    if(this.code.lines[ lidx - 1 ] == undefined)
                         return;
                     swapElements(this.code.lines, lidx - 1, lidx);
                     this.lineUp();
                     this.processLines();
                     return;
                 case 'ArrowDown':
-                    if(!this.code.lines[ lidx + 1 ])
+                    if(this.code.lines[ lidx + 1 ] == undefined)
                         return;
                     swapElements(this.code.lines, lidx, lidx + 1);
                     this.lineDown();
@@ -630,7 +630,9 @@
                 this.code.lines[lidx].slice(cursor.charPos - 1)
             ].join('');
             this.restartBlink();
-            this.processLines();
+
+            // Update only the current line, since it's only an appended key
+            this.processLine( this.code.lines[lidx], lidx );
         }
 
         action( key, fn ) {
@@ -641,61 +643,80 @@
 
             this.gutter.innerHTML = "";
             this.code.innerHTML = "";
-            let numlines = 0;
 
-            for( let line of this.code.lines )
+            for( let i = 0; i < this.code.lines.length; ++i )
             {
-                this._building_string = false; // multi-line strings not supported by now
+                this.processLine( this.code.lines[i], i );
+            }
+        }
+
+        processLine( line, linenum ) {
+            
+            this._building_string = false; // multi-line strings not supported by now
+            
+            // It's allowed to process only 1 line to optimize
+            var _lines = this.code.querySelectorAll('pre');
+            var pre = null, single_update = false;
+            for( let l of _lines )
+            if(l.dataset['linenum'] == linenum) {
+                pre = l;
+                single_update = true;
+                break;
+            }
+            
+            if(!pre)
+            {
                 var pre = document.createElement('pre');
-                var linespan = document.createElement('span');
-                pre.appendChild(linespan);
+                pre.dataset['linenum'] = linenum;
                 this.code.appendChild(pre);
+            }
+            else
+            {
+                pre.children[0].remove(); // Remove token list
+            }
 
-                // Check if comment
-                const is_comment = line.split('//');
-                if( is_comment.length > 1 )
+            var linespan = document.createElement('span');
+            pre.appendChild(linespan);
+
+            // Check if comment
+            const is_comment = line.split('//');
+            line = ( is_comment.length > 1 ) ? is_comment[0] : line;
+
+            const tokens = line.split(' ').join('¬ ¬').split('¬'); // trick to split without losing spaces
+
+            for( let t of tokens )
+            {
+                let iter = t.matchAll(/[\[\](){}.,;:"']/g);
+                let subtokens = iter.next();
+                if( subtokens.value )
                 {
-                    line = is_comment[0];
-                }
-
-                const tokens = line.split(' ').join('¬ ¬').split('¬'); // trick to split without losing spaces
-
-                for( let t of tokens )
-                {
-                    let iter = t.matchAll(/[\[\](){}.,;:"']/g);
-                    let subtokens = iter.next();
-                    if( subtokens.value )
+                    let idx = 0;
+                    while( subtokens.value != undefined )
                     {
-                        let idx = 0;
-                        while( subtokens.value != undefined )
-                        {
-                            const _pt = t.substring(idx, subtokens.value.index);
-                            this.processToken(_pt, linespan);
-                            this.processToken(subtokens.value[0], linespan);
-                            idx = subtokens.value.index + 1;
-                            subtokens = iter.next();
-                            if(!subtokens.value) {
-                                const _at = t.substring(idx);
-                                this.processToken(_at, linespan);
-                            }
+                        const _pt = t.substring(idx, subtokens.value.index);
+                        this.processToken(_pt, linespan);
+                        this.processToken(subtokens.value[0], linespan);
+                        idx = subtokens.value.index + 1;
+                        subtokens = iter.next();
+                        if(!subtokens.value) {
+                            const _at = t.substring(idx);
+                            this.processToken(_at, linespan);
                         }
                     }
-                    else
-                    {
-                        this.processToken(t, linespan);
-                    }
                 }
+                else
+                    this.processToken(t, linespan);
+            }
 
-                if( is_comment.length > 1 )
-                {
-                    this.processToken("//" + is_comment[1], linespan);
-                }
+            if( is_comment.length > 1 )
+                this.processToken("//" + is_comment[1], linespan);
 
-                // add line gutter
-                numlines++;
-                var linenum = document.createElement('span');
-                linenum.innerHTML = numlines;
-                this.gutter.appendChild(linenum);
+            // add line gutter
+            if(!single_update)
+            {
+                var linenumspan = document.createElement('span');
+                linenumspan.innerHTML = (linenum + 1);
+                this.gutter.appendChild(linenumspan);
             }
         }
 
