@@ -44,8 +44,8 @@
 
     class CodeEditor {
 
-        static CURSOR_LEFT = 1;
-        static CURSOR_TOP = 2;
+        static CURSOR_LEFT  = 1;
+        static CURSOR_TOP   = 2;
 
         /**
          * @param {*} options
@@ -150,13 +150,30 @@
                 'for', 'if', 'else', 'case', 'switch', 'return',
                 'while', 'continue', 'break', 'do'
             ];
+            this.symbols = [
+                '{', '}', '(', ')', ';', '='
+            ];
 
             // Action keys
 
             this.action('Delete', ( ln, cursor, e ) => {
-                var letter = this.getCharAtPos( cursor );
-                if(!letter) return;
-                this.code.lines[ln] = sliceChar( this.code.lines[ln], cursor.charPos );
+                let selection = this.selections.children[0];
+                if(selection.range)
+                {
+                    this.code.lines[ln] = [
+                        this.code.lines[ln].slice(0, selection.range[0]), 
+                        this.code.lines[ln].slice(selection.range[1])
+                    ].join('');
+                    this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
+                    this.cursorToString(cursor, this.code.lines[ln].slice(0, selection.range[0]));
+                    this.removeSelection();
+                }
+                else
+                {
+                    var letter = this.getCharAtPos( cursor );
+                    if(!letter) return;
+                    this.code.lines[ln] = sliceChar( this.code.lines[ln], cursor.charPos );
+                }
                 this.processLines();
             });
 
@@ -170,7 +187,7 @@
 
             this.action('End', ( ln, cursor, e ) => {
                 this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
-                this.cursorToWord( this.code.lines[ln] );
+                this.cursorToString( cursor, this.code.lines[ln] );
             });
 
             this.action('Enter', ( ln, cursor, e ) => {
@@ -183,17 +200,25 @@
             });
 
             this.action('Backspace', ( ln, cursor, e ) => {
-                var letter = this.getCharAtPos( cursor,  -1 );
-                if(letter) {
-                    this.code.lines[ln] = sliceChar( this.code.lines[ln], cursor.charPos - 1 );
-                    this.cursorToLeft( letter );
-                } 
-                else if(this.code.lines[ln - 1] != undefined) {
-                    this.lineUp();
-                    this.actions['End'](cursor.line, cursor);
-                    // Move line on top
-                    this.code.lines[ln - 1] += this.code.lines[ln];
-                    this.code.lines.splice(ln, 1);
+                let selection = this.selections.children[0];
+                if(selection.range)
+                {
+                    this.actions['Delete'](ln, cursor);
+                }
+                else
+                {
+                    var letter = this.getCharAtPos( cursor,  -1 );
+                    if(letter) {
+                        this.code.lines[ln] = sliceChar( this.code.lines[ln], cursor.charPos - 1 );
+                        this.cursorToLeft( letter );
+                    } 
+                    else if(this.code.lines[ln - 1] != undefined) {
+                        this.lineUp();
+                        this.actions['End'](cursor.line, cursor);
+                        // Move line on top
+                        this.code.lines[ln - 1] += this.code.lines[ln];
+                        this.code.lines.splice(ln, 1);
+                    }
                 }
                 this.processLines();
             });
@@ -549,7 +574,7 @@
                             text, 
                             this.code.lines[lidx].slice(cursor.charPos)
                         ].join('');
-                        this.cursorToWord( text );
+                        this.cursorToString( cursor, text );
                         this.processLines();
                         return;
                     case 'z': // undo
@@ -652,7 +677,7 @@
 
         processLine( line, linenum ) {
             
-            this._building_string = false; // multi-line strings not supported by now
+            delete this._building_string; // multi-line strings not supported by now
             
             // It's allowed to process only 1 line to optimize
             var _lines = this.code.querySelectorAll('pre');
@@ -751,6 +776,9 @@
                 else if( this.literals.indexOf(token) > -1 )
                     span.className += " cm-lit";
 
+                else if( this.symbols.indexOf(token) > -1 )
+                    span.className += " cm-sym";
+
                 else if( token.substr(0, 2) == '//' )
                     span.className += " cm-com";
 
@@ -823,6 +851,7 @@
 
         cursorToLeft( key, cursor ) {
 
+            if(!key) return;
             cursor = cursor ?? this.cursors.children[0];
             var [w, h] = this.measureChar(key);
             cursor._left -= w;
@@ -863,9 +892,16 @@
             this._refresh_code_info( cursor.line + 1, cursor.charPos );
         }
 
-        cursorToWord( text ) {
+        cursorToString( cursor, text ) {
+            cursor = cursor ?? this.cursors.children[0];
+            var transition = cursor.style.transition;
+            cursor.style.transition = "none";
+
             for( let char of text ) 
                 this.cursorToRight(char);
+
+            flushCss(cursor);
+            cursor.style.transition = transition; // restore transition
         }
 
         saveCursor( cursor, state = {} ) {

@@ -2551,10 +2551,10 @@ ul.lexassetscontent {
 .cm-lit { color: #ff0080; } /* literal */
 .cm-bln { color: #cfc159; } /* builtin */
 .cm-dec { color: #22c44a; } /* decimal */
+.cm-sym { color: #f4dab2; } /* symbol */
 
 .cm-tag { color: #2194ce; } /* HTML tag */
 .cm-atn { color: #BB55FF; } /* HTML attribute name */
-.cm-atv { color: #dea576; } /* HTML attribute value */
 .cm-str { color: #BB55FF; } /* string */
 .cm-lit { color: #ff3399; } /* literal */
 .cm-pln { color: #aaaaaa; } /* plaintext */
