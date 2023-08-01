@@ -34,8 +34,8 @@
         return str.substr(0, idx) + str.substr(idx + 1);
     }
 
-    function lastLetter(str) {
-        return str[str.length - 1];
+    function firstNonspaceIndex(str) {
+        return str.search(/\S|$/);
     }
 
     /**
@@ -183,6 +183,9 @@
 
             this.action('Home', ( ln, cursor, e ) => {
                 this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
+                // Find first non space char
+                var idx = firstNonspaceIndex(this.code.lines[ln]);
+                this.cursorToString(cursor, this.code.lines[ln].substring(0, idx));
             });
 
             this.action('End', ( ln, cursor, e ) => {
