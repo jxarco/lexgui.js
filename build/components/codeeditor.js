@@ -181,17 +181,28 @@
             });
 
             this.action('Home', ( ln, cursor, e ) => {
-                this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
                 // Find first non space char
                 var idx = firstNonspaceIndex(this.code.lines[ln]);
-                this.cursorToString(cursor, this.code.lines[ln].substring(0, idx));
+                var prestring = this.code.lines[ln].substring(0, idx);
+                let selection = this.selections.children[0];
+                if( e.shiftKey ) {
+                    this.startSelection(cursor, selection);
+                    var string = this.code.lines[ln].substring(idx, cursor.charPos);
+                    selection.style.width = this.measureString(string)[0] + "px";
+                    selection.style.left = "calc(" + (this.measureString(prestring)[0]) + "px + 0.25em)";
+                    selection.range = [ idx, cursor.charPos ];
+                }
+                this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
+                this.cursorToString(cursor, prestring);
             });
 
             this.action('End', ( ln, cursor, e ) => {
                 let selection = this.selections.children[0];
                 if( e.shiftKey ) {
                     this.startSelection(cursor, selection);
-                    selection.style.width = 100 + "px";
+                    var string = this.code.lines[ln].substring(cursor.charPos);
+                    selection.style.width = this.measureString(string)[0] + "px";
+                    selection.range = [ cursor.charPos, this.code.lines[ln].length ];
                 }
                 this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
                 this.cursorToString( cursor, this.code.lines[ln] );
