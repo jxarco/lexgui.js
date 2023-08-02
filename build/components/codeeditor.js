@@ -360,7 +360,7 @@
                     }
                     else if( this.code.lines[ cursor.line + 1 ] !== undefined ) {
                         this.lineDown( cursor );
-                        this.actions['Home'](cursor.line, cursor);
+                        this.actions['Home'](cursor.line, cursor, e);
                     }
                 }
             });
@@ -629,6 +629,7 @@
                     this.code.lines.splice(lidx, 0, this.code.lines[lidx]);
                     this.cursorToBottom(cursor);
                     this.processLines();
+                    return;
                 case 's': // save
                     e.preventDefault();
                     this.onsave( this.code.lines.join("\n") );
