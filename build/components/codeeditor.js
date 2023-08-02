@@ -123,7 +123,7 @@
             // Code
 
             this.highlight = 'JavaScript';
-            this.onsave = options.onsave ?? ((code) => { console.log(code) });
+            this.onsave = options.onsave ?? ((code) => { this.runScript(code) });
             this.actions = {};
             this.cursorBlinkRate = 550;
             this.tabSpaces = 4;
@@ -470,6 +470,13 @@
                     this.loadFile( e.dataTransfer.files[i] );
             });
 
+            code.addEventListener('scroll', (e) => {
+                // const maxScrollTop = this.gutter.scrollHeight - this.gutter.offsetHeight;
+                // code.scrollTop = Math.min( code.scrollTop, maxScrollTop );
+                this.gutter.scrollTop = code.scrollTop;
+                this.gutter.scrollLeft = code.scrollLeft;
+            });
+
             this.openedTabs[name] = code;
 
             this.tabs.add(name, code, selected, null, { 'fixed': (name === '+') , 'title': code.title, 'onSelect': (e, tabname) => {
@@ -643,6 +650,7 @@
 
             if( e.ctrlKey || e.metaKey )
             {
+                key = key.toLowerCase();
                 switch( key ) {
                 case 'c': // copy
                     let selected_text = "";
@@ -1101,9 +1109,9 @@
             const words = this.code.lines[col];
 
             const is_char = (char) => {
-                // return ['.',' ',':','?',';','=','<','>','{','}','(',')'].indexOf(char) > -1;
+                const exceptions = ['_'];
                 const code = char.charCodeAt(0);
-                return (code > 47 && code < 58) || (code > 64 && code < 91) || (code > 96 && code < 123);
+                return (exceptions.indexOf(char) > - 1) || (code > 47 && code < 58) || (code > 64 && code < 91) || (code > 96 && code < 123);
             }
 
             let it = cursor.charPos;
@@ -1142,6 +1150,16 @@
                 h += ch;
             }
             return [w, h];
+        }
+
+        runScript( code ) {
+            var script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.innerHTML = code;
+            // script.src = url[i] + ( version ? "?version=" + version : "" );
+            script.async = false;
+            // script.onload = function(e) { };
+            document.getElementsByTagName('head')[0].appendChild(script);
         }
     }
 
