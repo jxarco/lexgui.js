@@ -2439,6 +2439,10 @@ ul.lexassetscontent {
   height: 100%;
 }
 
+.lexcodeeditor .code.dragging {
+  background-color: var(--widget-background-hover);
+}
+
 .codechar {
   font-size: 18px;
   font-family: 'Inconsolata', monospace;
@@ -2469,6 +2473,7 @@ ul.lexassetscontent {
   overflow: visible;
   -webkit-tap-highlight-color: transparent;
   z-index: 0 !important;
+  pointer-events: none;
 }
 
 .lexcodeeditor span {

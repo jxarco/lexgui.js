@@ -56,7 +56,11 @@
             this.base_area = area;
             this.area = new LX.Area( { className: "lexcodeeditor" } );
 
-            this.tabs = this.area.addTabs();
+            this.tabs = this.area.addTabs( { onclose: (name) => delete this.openedTabs[name] } );
+            this.tabs.root.addEventListener( 'dblclick', (e) => {
+                e.preventDefault();
+                this.addTab("unnamed.js", true);
+            } );
 
             area.root.style.display = "flex"; // add gutter and code
             area.root.style.position = "relative"; // add gutter and code
@@ -74,11 +78,6 @@
             this.root.addEventListener( 'mousemove', this.processMouse.bind(this) );
             this.root.addEventListener( 'focus', this.processFocus.bind(this, true) );
             this.root.addEventListener( 'focusout', this.processFocus.bind(this, false) );
-
-            this.tabs.root.addEventListener( 'dblclick', (e) => {
-                e.preventDefault();
-                this.addTab("unnamed.js", true);
-            } );
 
             // Cursors and selection
 
@@ -189,6 +188,11 @@
             });
 
             this.action('End', ( ln, cursor, e ) => {
+                let selection = this.selections.children[0];
+                if( e.shiftKey ) {
+                    this.startSelection(cursor, selection);
+                    selection.style.width = 100 + "px";
+                }
                 this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
                 this.cursorToString( cursor, this.code.lines[ln] );
             });
@@ -226,12 +230,10 @@
 
             this.action('Backspace', ( ln, cursor, e ) => {
                 let selection = this.selections.children[0];
-                if(selection.range)
-                {
+                if(selection.range) {
                     this.actions['Delete'](ln, cursor);
                 }
-                else
-                {
+                else {
                     var letter = this.getCharAtPos( cursor,  -1 );
                     if(letter) {
                         this.code.lines[ln] = sliceChar( this.code.lines[ln], cursor.charPos - 1 );
@@ -239,7 +241,7 @@
                     } 
                     else if(this.code.lines[ln - 1] != undefined) {
                         this.lineUp();
-                        this.actions['End'](cursor.line, cursor);
+                        this.actions['End'](cursor.line, cursor, e);
                         // Move line on top
                         this.code.lines[ln - 1] += this.code.lines[ln];
                         this.code.lines.splice(ln, 1);
@@ -252,7 +254,7 @@
                 this.lineUp();
                 // Go to end of line if out of line
                 var letter = this.getCharAtPos( cursor );
-                if(!letter) this.actions['End'](cursor.line, cursor);
+                if(!letter) this.actions['End'](cursor.line, cursor, e);
             });
 
             this.action('ArrowDown', ( ln, cursor, e ) => {
@@ -261,7 +263,7 @@
                 this.lineDown();
                 // Go to end of line if out of line
                 var letter = this.getCharAtPos( cursor );
-                if(!letter) this.actions['End'](cursor.line, cursor);
+                if(!letter) this.actions['End'](cursor.line, cursor, e);
             });
 
             this.action('ArrowLeft', ( ln, cursor, e ) => {
@@ -305,7 +307,7 @@
                     }
                     else if( cursor.line > 0 ) {
                         this.lineUp( cursor );
-                        this.actions['End'](cursor.line, cursor);
+                        this.actions['End'](cursor.line, cursor, e);
                     }
                 }
             });
@@ -365,15 +367,33 @@
             area.attach( panel );
         }
 
-        loadFile( filename ) {
+        loadFile( file ) {
 
-            LX.request({ url: filename, success: text => {
-                const name = filename.substring(filename.lastIndexOf('/') + 1);
-                this.addTab(name, true, filename);
-                this.code.lines = text.split('\r\n');
-                this.processLines();
-                this._refresh_code_info();
-            } });
+            if(file.constructor == String)
+            {
+                let filename = file;
+                LX.request({ url: filename, success: text => {
+                    const name = filename.substring(filename.lastIndexOf('/') + 1);
+                    this.addTab(name, true, filename);
+                    this.code.lines = text.split('\r\n');
+                    this.processLines();
+                    this._refresh_code_info();
+                } });
+            }
+            else // File Blob
+            {
+                const fr = new FileReader();
+                fr.readAsText( file );
+                fr.onload = e => { 
+                    const text = e.currentTarget.result;
+                    const name = file.name;
+                    this.addTab(name, true);
+                    this.code.lines = text.split('\r\n');
+                    this.processLines();
+                    this._refresh_code_info();
+                };
+            }
+            
         }
 
         _create_panel_info() {
@@ -425,9 +445,25 @@
             code.undoSteps = [];
             code.tabName = name;
             code.title = title ?? name;
+
+            code.addEventListener('dragenter', function(e) {
+                e.preventDefault();
+                this.classList.add('dragging');
+            });
+            code.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragging');
+            });
+            code.addEventListener('drop', (e) => {
+                e.preventDefault();
+                code.classList.remove('dragging');
+                for( let i = 0; i < e.dataTransfer.files.length; ++i )
+                    this.loadFile( e.dataTransfer.files[i] );
+            });
+
             this.openedTabs[name] = code;
 
-            this.tabs.add(name, code, selected, null, { 'title': code.title, 'onSelect': (e, tabname) => {
+            this.tabs.add(name, code, selected, null, { 'fixed': (name === '+') , 'title': code.title, 'onSelect': (e, tabname) => {
 
                 if(tabname == '+')
                 {
@@ -494,28 +530,25 @@
             }
         }
 
-        processClick(e) {
+        processClick(e, skip_refresh) {
 
             var code_rect = this.code.getBoundingClientRect();
             var position = [e.clientX - code_rect.x, e.clientY - code_rect.y];
+            var col = (position[1] / 22)|0;
 
-            var line = -1;
-            while( position[1] > (line + 1) * 22 ) 
-                line++;
-            
-            if(this.code.lines[line] == undefined) return;
+            if(this.code.lines[col] == undefined) return;
             
             var cursor = cursor ?? this.cursors.children[0];
             var transition = cursor.style.transition;
             cursor.style.transition = "none"; // no transition!
             this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
 
-            for( var i = 0; i < line; ++i ) {
-                this.cursorToBottom(null, true);
+            for( var i = 0; i < col; ++i ) {
+                this.cursorToBottom(null, true, skip_refresh);
             }
 
             var chars_width = 0;
-            for( let char of this.code.lines[line] )
+            for( let char of this.code.lines[col] )
             {
                 var [w, h] = this.measureChar(char);
                 chars_width += w;
@@ -528,8 +561,9 @@
             
             flushCss(cursor);
             cursor.style.transition = transition; // restore transition
-            cursor.line = line;
-            this._refresh_code_info( line + 1, cursor.charPos );
+            cursor.line = col;
+
+            this._refresh_code_info( col + 1, cursor.charPos );
         }
 
         processSelection( e, selection ) {
@@ -537,22 +571,13 @@
             selection = selection ?? this.selections.children[0];
             var cursor = cursor ?? this.cursors.children[0];
 
-            this.processClick(e);
+            this.processClick(e, true);
 
             if( !this.selection_started )
-            {
                 this.startSelection(cursor, selection);
-            }
 
-            var chars_width = 0;
-            for( var i = this.initial_charPos; i < cursor.charPos; ++i )
-            {
-                let char = this.code.lines[cursor.line][i];
-                var [w, h] = this.measureChar(char);
-                chars_width += w;
-            }
-
-            selection.style.width = chars_width + "px";
+            var [sw, sh] = this.measureString( this.code.lines[cursor.line].substring(this.initial_charPos, cursor.charPos) );
+            selection.style.width = sw + "px";
             selection.range = [this.initial_charPos, cursor.charPos];
         }
 
@@ -627,14 +652,16 @@
                         return;
                     swapElements(this.code.lines, lidx - 1, lidx);
                     this.lineUp();
-                    this.processLines();
+                    this.processLine( lidx - 1 );
+                    this.processLine( lidx );
                     return;
                 case 'ArrowDown':
                     if(this.code.lines[ lidx + 1 ] == undefined)
                         return;
                     swapElements(this.code.lines, lidx, lidx + 1);
                     this.lineDown();
-                    this.processLines();
+                    this.processLine( lidx );
+                    this.processLine( lidx + 1 );
                     return;
                 }
             }
@@ -695,7 +722,7 @@
             }
 
             // Update only the current line, since it's only an appended key
-            this.processLine( this.code.lines[lidx], lidx );
+            this.processLine( lidx );
         }
 
         action( key, fn ) {
@@ -709,15 +736,16 @@
 
             for( let i = 0; i < this.code.lines.length; ++i )
             {
-                this.processLine( this.code.lines[i], i );
+                this.processLine( i );
             }
         }
 
-        processLine( line, linenum ) {
+        processLine( linenum ) {
             
             delete this._building_string; // multi-line strings not supported by now
             
             // It's allowed to process only 1 line to optimize
+            let linestring = this.code.lines[ linenum ];
             var _lines = this.code.querySelectorAll('pre');
             var pre = null, single_update = false;
             for( let l of _lines )
@@ -742,10 +770,10 @@
             pre.appendChild(linespan);
 
             // Check if comment
-            const is_comment = line.split('//');
-            line = ( is_comment.length > 1 ) ? is_comment[0] : line;
+            const is_comment = linestring.split('//');
+            linestring = ( is_comment.length > 1 ) ? is_comment[0] : linestring;
 
-            const tokens = line.split(' ').join('¬ ¬').split('¬'); // trick to split without losing spaces
+            const tokens = linestring.split(' ').join('¬ ¬').split('¬'); // trick to split without losing spaces
 
             for( let t of tokens )
             {
@@ -783,7 +811,7 @@
             }
         }
 
-        processToken(token, line) {
+        processToken(token, linespan) {
 
             let sString = false;
 
@@ -795,7 +823,7 @@
 
             if(token == ' ')
             {
-                line.innerHTML += token;
+                linespan.innerHTML += token;
             }
             else
             {
@@ -823,7 +851,7 @@
                 else if( !Number.isNaN(+token) )
                     span.className += " cm-dec";
 
-                line.appendChild(span);
+                linespan.appendChild(span);
             }
 
             if(sString) delete this._building_string;
@@ -916,7 +944,7 @@
             this._refresh_code_info( cursor.line + 1, cursor.charPos );
         }
 
-        cursorToBottom( cursor, resetLeft = false ) {
+        cursorToBottom( cursor, resetLeft = false, skip_refresh = false ) {
 
             cursor = cursor ?? this.cursors.children[0];
             var h = 22;
@@ -1015,6 +1043,16 @@
             var rect = test.getBoundingClientRect();
             test.remove();
             return [Math.floor(rect.width), Math.floor(rect.height)];
+        }
+
+        measureString(str) {
+            var w = 0, h = 0;
+            for( var i = 0; i < str.length; ++i ) {
+                const [cw, ch] = this.measureChar(str[i]);
+                w += cw;
+                h += ch;
+            }
+            return [w, h];
         }
     }
 

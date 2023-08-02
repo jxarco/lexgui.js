@@ -1130,6 +1130,8 @@
 
         constructor( area, options = {} )  {
 
+            this.onclose = options.onclose;
+
             let container = document.createElement('div');
             container.className = "lexareatabs";
 
@@ -1203,6 +1205,7 @@
             tabEl.id = name.replace(/\s/g, '') + Tabs.TAB_ID++;
             tabEl.title = options.title;
             tabEl.selected = isSelected;
+            tabEl.fixed = options.fixed;
             if(tabEl.selected)
                 this.selected = name;
             tabEl.instance = this;
@@ -1217,6 +1220,7 @@
             tabEl.addEventListener("click", e => {
                 e.preventDefault();
                 e.stopPropagation();
+
                 // Manage selected
                 tabEl.parentElement.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
                 tabEl.classList.toggle('selected');
@@ -1227,6 +1231,16 @@
                 
                 if(options.onSelect) 
                     options.onSelect(e, tabEl.dataset.name);
+            });
+
+            tabEl.addEventListener("mouseup", e => {
+                e.preventDefault();
+                e.stopPropagation();
+                if(e.button == 1 ) {
+                    if(this.onclose)
+                        this.onclose( tabEl.dataset["name"] );
+                    this.delete( tabEl.dataset["name"] );
+                }
             });
             
             tabEl.setAttribute('draggable', true);
@@ -1239,7 +1253,7 @@
             });
             
             // Attach content
-            this.root.appendChild(tabEl);
+            this.root.appendChild( tabEl );
             this.area.attach( contentEl );
             this.tabDOMs[ name ] = tabEl;
             this.tabs[ name ] = content;
@@ -1253,6 +1267,27 @@
             return;
 
             this.tabDOMs[ name ].click();
+        }
+
+        delete( name ) {
+
+            const tabEl = this.tabDOMs[ name ];
+
+            if(!tabEl || tabEl.fixed)
+            return;
+
+            // Delete tab element
+            this.tabDOMs[ name ].remove();
+            delete this.tabDOMs[ name ];
+
+            // Delete content
+            this.tabs[ name ].remove();
+            delete this.tabs[ name ];
+
+            // Select last tab
+            const last_tab = this.root.lastChild;
+            if(last_tab && !last_tab.fixed)
+                this.root.lastChild.click();
         }
 
     }
