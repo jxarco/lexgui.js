@@ -380,15 +380,20 @@
 
         loadFile( file ) {
 
+            const inner_add_tab = ( text, name, title ) => {
+                this.addTab(name, true, title);
+                text = text.replaceAll('\r', '');
+                this.code.lines = text.split('\n');
+                this.processLines();
+                this._refresh_code_info();
+            };
+
             if(file.constructor == String)
             {
                 let filename = file;
                 LX.request({ url: filename, success: text => {
                     const name = filename.substring(filename.lastIndexOf('/') + 1);
-                    this.addTab(name, true, filename);
-                    this.code.lines = text.split('\r\n');
-                    this.processLines();
-                    this._refresh_code_info();
+                    inner_add_tab( text, name, filename );
                 } });
             }
             else // File Blob
@@ -397,11 +402,7 @@
                 fr.readAsText( file );
                 fr.onload = e => { 
                     const text = e.currentTarget.result;
-                    const name = file.name;
-                    this.addTab(name, true);
-                    this.code.lines = text.split('\r\n');
-                    this.processLines();
-                    this._refresh_code_info();
+                    inner_add_tab( text, file.name );
                 };
             }
             
