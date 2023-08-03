@@ -2511,6 +2511,7 @@ ul.lexassetscontent {
   padding: 0;
   position: relative;
   z-index: 3;
+  pointer-events: none;
 }
 
 .lexcodeeditor .cursors.show, .lexcodeeditor .selections.show {

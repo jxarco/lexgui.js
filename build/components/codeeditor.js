@@ -72,7 +72,7 @@
             this.root.tabIndex = -1;
             area.attach( this.root );
 
-            this.root.addEventListener( 'keydown', this.processKey.bind(this) );
+            this.root.addEventListener( 'keydown', this.processKey.bind(this), true);
             this.root.addEventListener( 'mousedown', this.processMouse.bind(this) );
             this.root.addEventListener( 'mouseup', this.processMouse.bind(this) );
             this.root.addEventListener( 'mousemove', this.processMouse.bind(this) );
@@ -123,7 +123,8 @@
             // Code
 
             this.highlight = 'JavaScript';
-            this.onsave = options.onsave ?? ((code) => { this.runScript(code) });
+            this.onsave = options.onsave ?? ((code) => {  });
+            this.onrun = options.onrun ?? ((code) => { this.runScript(code) });
             this.actions = {};
             this.cursorBlinkRate = 550;
             this.tabSpaces = 4;
@@ -229,6 +230,12 @@
 
             this.action('Enter', ( ln, cursor, e ) => {
 
+                if(e.ctrlKey)
+                {
+                    this.onrun( this.code.lines.join("\n") );
+                    return;
+                }
+
                 var _c0 = this.getCharAtPos( cursor, -1 );
                 var _c1 = this.getCharAtPos( cursor );
 
@@ -278,7 +285,13 @@
                 if(e.metaKey) {
                     e.preventDefault();
                     this.actions[ 'Home' ]( ln, cursor );
-                }else {
+                } else if(e.ctrlKey) {
+                    // get next word
+                    const [word, from, to] = this.getWordAtPos( cursor, -1 );
+                    var diff = Math.max(cursor.charPos - from, 1);
+                    var substr = word.substr(0, diff);
+                    this.cursorToString(cursor, substr, true);
+                } else {
                     var letter = this.getCharAtPos( cursor, -1 );
                     if(letter) {
                         let selection = this.selections.children[0];
@@ -324,7 +337,13 @@
                 if(e.metaKey) {
                     e.preventDefault();
                     this.actions[ 'End' ]( ln, cursor );
-                }else {
+                } else if(e.ctrlKey) {
+                    // get next word
+                    const [word, from, to] = this.getWordAtPos( cursor );
+                    var diff = cursor.charPos - from;
+                    var substr = word.substr(diff);
+                    this.cursorToString(cursor, substr);
+                } else {
                     var letter = this.getCharAtPos( cursor );
                     if(letter) {
                         let selection = this.selections.children[0];
@@ -491,6 +510,7 @@
                 this.saveCursor(cursor, this.code.cursorState);    
                 this.code = this.openedTabs[tabname];
                 this.restoreCursor(cursor, this.code.cursorState);    
+                this.endSelection();
                 this.processLines();
                 this._refresh_code_info(cursor.line + 1, cursor.charPos);
             }});
@@ -515,6 +535,7 @@
 
         processMouse(e) {
 
+            if( !e.target.classList.contains('code') ) return;
             if( !this.code ) return;
 
             const time = new Date();
@@ -650,8 +671,7 @@
 
             if( e.ctrlKey || e.metaKey )
             {
-                key = key.toLowerCase();
-                switch( key ) {
+                switch( key.toLowerCase() ) {
                 case 'c': // copy
                     let selected_text = "";
                     let selection = this.selections.children[0];
@@ -965,6 +985,7 @@
             this.selections.classList.remove('show');
             selection = selection ?? this.selections.children[0];
             selection.range = null;
+            this.state.selectingText = false;
         }
 
         cursorToRight( key, cursor ) {
@@ -1022,13 +1043,13 @@
             this._refresh_code_info( cursor.line + 1, cursor.charPos );
         }
 
-        cursorToString( cursor, text ) {
+        cursorToString( cursor, text, reverse ) {
             cursor = cursor ?? this.cursors.children[0];
             var transition = cursor.style.transition;
             cursor.style.transition = "none";
 
             for( let char of text ) 
-                this.cursorToRight(char);
+                reverse ? this.cursorToLeft(char) : this.cursorToRight(char);
 
             flushCss(cursor);
             cursor.style.transition = transition; // restore transition
@@ -1114,13 +1135,13 @@
                 return (exceptions.indexOf(char) > - 1) || (code > 47 && code < 58) || (code > 64 && code < 91) || (code > 96 && code < 123);
             }
 
-            let it = cursor.charPos;
+            let it = cursor.charPos + offset;
 
             while( words[it] && is_char(words[it]) )
                 it--;
 
             const from = it + 1;
-            it = cursor.charPos;
+            it = cursor.charPos + offset;
 
             while( words[it] && is_char(words[it]) )
                 it++;
