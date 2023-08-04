@@ -33,14 +33,15 @@
             m.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
         });
 
-        let example_selected = "Asset View";
+        let example_selected = "Area Tabs";
         let show_previews = true;
 
         const examples = [
+            'Area Tabs',
             'Asset View',
+            'Code Editor',
             'Overlay Area',
             'Pocket Dialog',
-            'Area Tabs'
         ];
 
         let panel = left.addPanel({ className: "lexexamplespanel" });
@@ -48,7 +49,7 @@
 
         let iframe = document.createElement('iframe');
         iframe.id = iframe.name = 'viewer';
-        iframe.src = "asset_view.html";
+        iframe.src = "area_tabs.html";
         iframe.style.width = "100%";
         iframe.style.height = "100%";
         right.root.appendChild(iframe);
