@@ -129,6 +129,7 @@
             this.cursorBlinkRate = 550;
             this.tabSpaces = 4;
             this.maxUndoSteps = 16;
+            this.lineHeight = 22;
             this._lastTime = null;
 
             this.languages = [
@@ -263,6 +264,7 @@
                 cursor.style.transition = transition; // restore transition
                 
                 this.processLines();
+                this.code.scrollTop = this.code.scrollHeight;
             });
 
             this.action('ArrowUp', ( ln, cursor, e ) => {
@@ -426,7 +428,7 @@
 
         _create_panel_info() {
             
-            let panel = new LX.Panel({ className: "lexcodetabinfo", width: "calc(100% - 16px)", height: "auto" });
+            let panel = new LX.Panel({ className: "lexcodetabinfo", width: "calc(100%)", height: "auto" });
             panel.ln = 0;
             panel.col = 0;
 
@@ -517,6 +519,10 @@
                 this.endSelection();
                 this.processLines();
                 this._refresh_code_info(cursor.line + 1, cursor.charPos);
+
+                // Restore scroll
+                this.gutter.scrollTop = this.code.scrollTop;
+                this.gutter.scrollLeft = this.code.scrollLeft;
             }});
             
             if(selected){
@@ -602,7 +608,7 @@
 
             var code_rect = this.code.getBoundingClientRect();
             var position = [e.clientX - code_rect.x, (e.clientY - code_rect.y) + this.getScrollTop()];
-            var ln = (position[1] / 22)|0;
+            var ln = (position[1] / this.lineHeight)|0;
 
             if(this.code.lines[ln] == undefined) return;
             
@@ -1019,8 +1025,7 @@
         cursorToTop( cursor, resetLeft = false ) {
 
             cursor = cursor ?? this.cursors.children[0];
-            var h = 22;
-            cursor._top -= h;
+            cursor._top -= this.lineHeight;
             cursor._top = Math.max(cursor._top, 4);
             cursor.style.top = "calc(" + cursor._top + "px - " + this.getScrollTop() + "px)";
             this.restartBlink();
@@ -1029,13 +1034,16 @@
                 this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
 
             this._refresh_code_info( cursor.line + 1, cursor.charPos );
+
+            var first_line = (this.code.scrollTop / this.lineHeight)|0;
+            if( cursor.line < first_line )
+                this.code.scrollTop -= this.lineHeight;
         }
 
-        cursorToBottom( cursor, resetLeft = false, skip_refresh = false ) {
+        cursorToBottom( cursor, resetLeft = false ) {
 
             cursor = cursor ?? this.cursors.children[0];
-            var h = 22;
-            cursor._top += h;
+            cursor._top += this.lineHeight;
             cursor.style.top = "calc(" + cursor._top + "px - " + this.getScrollTop() + "px)";
             this.restartBlink();
 
@@ -1043,6 +1051,10 @@
                 this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
 
             this._refresh_code_info( cursor.line + 1, cursor.charPos );
+
+            var last_line = ((this.code.scrollTop  + this.code.offsetHeight) / this.lineHeight)|0;
+            if( cursor.line >= last_line )
+                this.code.scrollTop += this.lineHeight;
         }
 
         cursorToString( cursor, text, reverse ) {
