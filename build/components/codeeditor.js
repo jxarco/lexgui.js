@@ -494,6 +494,10 @@
                 // code.scrollTop = Math.min( code.scrollTop, maxScrollTop );
                 this.gutter.scrollTop = code.scrollTop;
                 this.gutter.scrollLeft = code.scrollLeft;
+
+                // Update cursor
+                var cursor = this.cursors.children[0];
+                cursor.style.top = "calc(" + cursor._top + "px - " + code.scrollTop + "px)";
             });
 
             this.openedTabs[name] = code;
@@ -549,7 +553,7 @@
             
             else if( e.type == 'mouseup' )
             {
-                if( (time.getTime() - this.lastMouseDown) < 300 ) {
+                if( (time.getTime() - this.lastMouseDown) < 600 ) {
                     this.state.selectingText = false;
                     this.processClick(e);
                     this.endSelection();
@@ -589,8 +593,6 @@
                     e._shiftKey = true;
                     var cursor = this.cursors.children[0];
                     this.actions['End'](cursor.line, cursor, e);
-                    // this.cursorToBottom(cursor, true);
-                    // cursor.line++;
                     break;
                 }
             }
@@ -599,22 +601,22 @@
         processClick(e, skip_refresh) {
 
             var code_rect = this.code.getBoundingClientRect();
-            var position = [e.clientX - code_rect.x, e.clientY - code_rect.y];
-            var col = (position[1] / 22)|0;
+            var position = [e.clientX - code_rect.x, (e.clientY - code_rect.y) + this.getScrollTop()];
+            var ln = (position[1] / 22)|0;
 
-            if(this.code.lines[col] == undefined) return;
+            if(this.code.lines[ln] == undefined) return;
             
             var cursor = this.cursors.children[0];
             var transition = cursor.style.transition;
             cursor.style.transition = "none"; // no transition!
             this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
 
-            for( var i = 0; i < col; ++i ) {
+            for( var i = 0; i < ln; ++i ) {
                 this.cursorToBottom(null, true, skip_refresh);
             }
 
             var chars_width = 0;
-            for( let char of this.code.lines[col] )
+            for( let char of this.code.lines[ln] )
             {
                 var [w, h] = this.measureChar(char);
                 chars_width += w;
@@ -627,9 +629,9 @@
             
             flushCss(cursor);
             cursor.style.transition = transition; // restore transition
-            cursor.line = col;
+            cursor.line = ln;
 
-            this._refresh_code_info( col + 1, cursor.charPos );
+            this._refresh_code_info( ln + 1, cursor.charPos );
         }
 
         processSelection( e, selection ) {
@@ -1020,7 +1022,7 @@
             var h = 22;
             cursor._top -= h;
             cursor._top = Math.max(cursor._top, 4);
-            cursor.style.top = "calc(" + cursor._top + "px)";
+            cursor.style.top = "calc(" + cursor._top + "px - " + this.getScrollTop() + "px)";
             this.restartBlink();
             
             if(resetLeft)
@@ -1034,7 +1036,7 @@
             cursor = cursor ?? this.cursors.children[0];
             var h = 22;
             cursor._top += h;
-            cursor.style.top = "calc(" + cursor._top + "px)";
+            cursor.style.top = "calc(" + cursor._top + "px - " + this.getScrollTop() + "px)";
             this.restartBlink();
 
             if(resetLeft)
@@ -1074,7 +1076,7 @@
             cursor._left = state.left ?? 0;
             cursor.style.left = "calc(" + cursor._left + "px + 0.25em)";
             cursor._top = state.top ?? 4;
-            cursor.style.top = "calc(" + cursor._top + "px)";
+            cursor.style.top = "calc(" + cursor._top + "px - " + this.getScrollTop() + "px)";
             flushCss(cursor);
             cursor.style.transition = transition; // restore transition
         }
@@ -1095,7 +1097,7 @@
             if( flag & CodeEditor.CURSOR_TOP )
             {
                 cursor._top = 4;
-                cursor.style.top = "4px";
+                cursor.style.top = "calc(4px - " + this.getScrollTop() + "px)";
                 cursor.line = 0;
             }
 
@@ -1115,6 +1117,12 @@
             for( var i = 0; i < n; ++i ) {
                 this.root.dispatchEvent(new KeyboardEvent('keydown', {'key': ' '}));
             }
+        }
+
+        getScrollTop() {
+
+            if(!this.code) return 0;
+            return this.code.scrollTop;
         }
 
         getCharAtPos( cursor, offset = 0) {
