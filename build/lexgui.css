@@ -2475,7 +2475,7 @@ ul.lexassetscontent {
   white-space: pre;
   word-wrap: normal;
   line-height: inherit;
-  color: #ddd;
+  color: #c9d5f4;
   position: relative;
   overflow: visible;
   -webkit-tap-highlight-color: transparent;
@@ -2557,17 +2557,11 @@ ul.lexassetscontent {
   border: 2px dotted var(--global-selected-light);
 }
 
-.cm-str { color: #9737f6; } /* string */
+.cm-str { color: #d98c5e; } /* string */
 .cm-kwd { color: #2194ce; } /* keyword */
 .cm-com { color: #499847; } /* comment */
 .cm-typ { color: #36c0b0; } /* type */
-.cm-lit { color: #ff0080; } /* literal */
+.cm-lit { color: #ee2c8d; } /* literal */
 .cm-bln { color: #cfc159; } /* builtin */
 .cm-dec { color: #22c44a; } /* decimal */
 .cm-sym { color: #f4dab2; } /* symbol */
-
-.cm-tag { color: #2194ce; } /* HTML tag */
-.cm-atn { color: #BB55FF; } /* HTML attribute name */
-.cm-str { color: #BB55FF; } /* string */
-.cm-lit { color: #ff3399; } /* literal */
-.cm-pln { color: #aaaaaa; } /* plaintext */

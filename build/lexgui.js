@@ -1221,14 +1221,17 @@
                 e.preventDefault();
                 e.stopPropagation();
 
-                // Manage selected
-                tabEl.parentElement.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
-                tabEl.classList.toggle('selected');
-                // Manage visibility 
-                tabEl.instance.area.root.querySelectorAll('.lextabcontent').forEach( c => c.style.display = 'none');
-                contentEl.style.display = "block";
-                tabEl.instance.selected = tabEl.dataset.name;
-                
+                if( !tabEl.fixed )
+                {
+                    // Manage selected
+                    tabEl.parentElement.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
+                    tabEl.classList.toggle('selected');
+                    // Manage visibility 
+                    tabEl.instance.area.root.querySelectorAll('.lextabcontent').forEach( c => c.style.display = 'none');
+                    contentEl.style.display = "block";
+                    tabEl.instance.selected = tabEl.dataset.name;
+                }
+
                 if(options.onSelect) 
                     options.onSelect(e, tabEl.dataset.name);
             });

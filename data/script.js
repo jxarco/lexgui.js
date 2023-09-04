@@ -10,8 +10,11 @@ class Test {
         div.style.position = "absolute"
         div.style.top = "0px"
 
+        // single line comment
+
         document.body.appendChild( div );
 
+        let a = 1; /* single line block comment */ let b = 2;
     }
 
     getFoo() {
