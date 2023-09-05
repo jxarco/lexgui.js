@@ -63,7 +63,7 @@
             } );
 
             area.root.style.display = "flex"; // add gutter and code
-            area.root.style.position = "relative"; // add gutter and code
+            area.root.style.position = "relative";
             this.gutter = document.createElement('div');
             this.gutter.className = "lexcodegutter";
             area.attach( this.gutter );
@@ -142,8 +142,9 @@
             ];
             this.keywords = [
                 'var', 'let', 'const', 'this', 'in', 'of', 
-                'true', 'false', 'new', 'function', '(', ')',
-                'static', 'class', 'constructor'
+                'true', 'false', 'new', 'function', 'NaN',
+                'static', 'class', 'constructor', 'null', 
+                'typeof'
             ];
             this.builtin = [
                 'console', 'window', 'navigator'
@@ -153,7 +154,7 @@
                 'while', 'continue', 'break', 'do'
             ];
             this.symbols = [
-                '<', '>', '{', '}', '(', ')', ';', '='
+                '<', '>', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'
             ];
 
             // Action keys
@@ -163,12 +164,14 @@
                 if(selection.range) {
                     this.deleteSelection(cursor, selection);
                     if(!this.code.lines[ln].length) this.actions['Backspace'](ln, cursor, e);
+                    this.processLines();
                 }
                 else {
                     var letter = this.getCharAtPos( cursor,  -1 );
                     if(letter) {
                         this.code.lines[ln] = sliceChar( this.code.lines[ln], cursor.charPos - 1 );
                         this.cursorToLeft( letter );
+                        this.processLine(ln);
                     } 
                     else if(this.code.lines[ln - 1] != undefined) {
                         this.lineUp();
@@ -176,9 +179,9 @@
                         // Move line on top
                         this.code.lines[ln - 1] += this.code.lines[ln];
                         this.code.lines.splice(ln, 1);
+                        this.processLines(ln);
                     }
                 }
-                this.processLines();
             });
 
             this.action('Delete', ( ln, cursor, e ) => {
@@ -187,14 +190,21 @@
                 {
                     this.deleteSelection(cursor, selection);
                     if(!this.code.lines[ln].length) this.actions['Delete'](ln, cursor);
+                    this.processLines();
                 }
                 else
                 {
                     var letter = this.getCharAtPos( cursor );
-                    if(!letter) return;
-                    this.code.lines[ln] = sliceChar( this.code.lines[ln], cursor.charPos );
+                    if(letter) {
+                        this.code.lines[ln] = sliceChar( this.code.lines[ln], cursor.charPos );
+                        this.processLine(ln);
+                    } 
+                    else if(this.code.lines[ln + 1] != undefined) {
+                        this.code.lines[ln] += this.code.lines[ln + 1];
+                        this.code.lines.splice(ln + 1, 1);
+                        this.processLines(ln);
+                    }
                 }
-                this.processLines();
             });
 
             this.action('Tab', ( ln, cursor, e ) => {
@@ -263,7 +273,7 @@
                 flushCss(cursor);
                 cursor.style.transition = transition; // restore transition
                 
-                this.processLines();
+                this.processLines( ln );
                 this.code.scrollTop = this.code.scrollHeight;
             });
 
@@ -459,6 +469,14 @@
             return panel;
         }
 
+        _onNewTab( e ) {
+
+            LX.addContextMenu( null, e, m => {
+                m.add( "Create", this.addTab.bind(this, "unnamed.js", true) );
+                m.add( "Load", this.loadTab.bind(this, "unnamed.js", true) );
+            });
+        }
+
         addTab(name, selected, title) {
             
             if(this.openedTabs[name])
@@ -508,7 +526,7 @@
 
                 if(tabname == '+')
                 {
-                    this.addTab("unnamed.js", true);
+                    this._onNewTab( e );
                     return;
                 }
 
@@ -531,6 +549,19 @@
                 this.processLines();
                 setTimeout( () => this._refresh_code_info(0, 0), 50 )
             }
+        }
+
+        loadTab() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            document.body.appendChild(input);
+            input.click();
+            input.addEventListener('change', (e) => {
+                if (e.target.files[0]) {
+                    this.loadFile( e.target.files[0] );
+                }
+                input.remove();
+            });
         }
 
         processFocus( active ) {
@@ -695,8 +726,8 @@
                 case 'd': // duplicate line
                     e.preventDefault();
                     this.code.lines.splice(lidx, 0, this.code.lines[lidx]);
-                    this.cursorToBottom(cursor);
-                    this.processLines();
+                    this.lineDown( cursor );
+                    this.processLines(lidx);
                     return;
                 case 's': // save
                     e.preventDefault();
@@ -710,7 +741,7 @@
                         this.code.lines[lidx].slice(cursor.charPos)
                     ].join('');
                     this.cursorToString( cursor, text );
-                    this.processLines();
+                    this.processLine( lidx );
                     return;
                 case 'z': // undo
                     if(!this.code.undoSteps.length)
@@ -809,30 +840,41 @@
             this.actions[ key ] = fn;
         }
 
-        processLines() {
+        processLines( from ) {
 
-            this.gutter.innerHTML = "";
-            this.code.innerHTML = "";
+            if( !from )
+            {
+                this.gutter.innerHTML = "";
+                this.code.innerHTML = "";
+            }
 
-            for( let i = 0; i < this.code.lines.length; ++i )
+            for( let i = from ?? 0; i < this.code.lines.length; ++i )
             {
                 this.processLine( i );
             }
+
+            // Clean up...
+            if( from )
+            {
+                while( this.code.lines.length != this.gutter.children.length )            
+                    this.gutter.lastChild.remove();
+                while( this.code.lines.length != this.code.children.length )            
+                    this.code.lastChild.remove();
+            }
+
         }
 
         processLine( linenum ) {
-            
+
             delete this._building_string; // multi-line strings not supported by now
             
             // It's allowed to process only 1 line to optimize
             let linestring = this.code.lines[ linenum ];
             var _lines = this.code.querySelectorAll('pre');
             var pre = null, single_update = false;
-            for( let l of _lines )
-            if(l.dataset['linenum'] == linenum) {
-                pre = l;
+            if( _lines[linenum] ) {
+                pre = _lines[linenum];
                 single_update = true;
-                break;
             }
             
             if(!pre)
@@ -849,11 +891,24 @@
             var linespan = document.createElement('span');
             pre.appendChild(linespan);
 
-            // Check if comment
+            // Check if line comment
             const is_comment = linestring.split('//');
             linestring = ( is_comment.length > 1 ) ? is_comment[0] : linestring;
 
+            // ... if starts comment block
+            const starts_block_comment = linestring.split('/*');
+            linestring = ( starts_block_comment.length > 1 ) ? starts_block_comment[0] : linestring;
+
+            // ... if ends comment block
+            // const ends_block_comment = linestring.split('*/');
+            // linestring = ( ends_block_comment.length > 1 ) ? ends_block_comment[1] : linestring;
+
             const tokens = linestring.split(' ').join('¬ ¬').split('¬'); // trick to split without losing spaces
+            const to_process = []; // store in a temp array so we know prev and next tokens...
+
+            // append block line
+            // if( ends_block_comment.length > 1 )
+            //     to_process.push( ends_block_comment[0] + "*/" );
 
             for( let t of tokens )
             {
@@ -865,22 +920,63 @@
                     while( subtokens.value != undefined )
                     {
                         const _pt = t.substring(idx, subtokens.value.index);
-                        this.processToken(_pt, linespan);
-                        this.processToken(subtokens.value[0], linespan);
+                        to_process.push( _pt );
+                        to_process.push( subtokens.value[0] );
                         idx = subtokens.value.index + 1;
                         subtokens = iter.next();
                         if(!subtokens.value) {
                             const _at = t.substring(idx);
-                            this.processToken(_at, linespan);
+                            to_process.push( _at );
                         }
                     }
                 }
                 else
-                    this.processToken(t, linespan);
+                    to_process.push( t );
             }
 
             if( is_comment.length > 1 )
-                this.processToken("//" + is_comment[1], linespan);
+                to_process.push( "//" + is_comment[1] );
+
+            else if( starts_block_comment.length > 1 )
+            {
+                let line_comm = starts_block_comment[1];
+
+                // ... if ends comment block
+                const ends_block_comment = line_comm.split('*/');
+                if( ends_block_comment.length > 1 ) {
+                    line_comm = ends_block_comment[0];
+                }
+
+                to_process.push( "/*" + line_comm );
+                to_process.push( "*/" );
+                to_process.push( ends_block_comment[1] );
+            }
+            
+            // Process all tokens
+            for( var i = 0; i < to_process.length; ++i )
+            {
+                let it = i - 1;
+                let prev = to_process[it];
+                while( prev == '' || prev == ' ' ) {
+                    it--;
+                    prev = to_process[it];
+                }
+
+                it = i + 1;
+                let next = to_process[it];
+                while( next == '' || next == ' ' ) {
+                    it++;
+                    next = to_process[it];
+                }
+                
+                let token = to_process[i];
+                if( token.substr(0, 2) == '/*' )
+                    this._building_block_comment = true;
+                if( token.substr(token.length - 2) == '*/' )
+                    delete this._building_block_comment;
+                
+                this.processToken(token, linespan, prev, next);
+            }
 
             // add line gutter
             if(!single_update)
@@ -891,7 +987,7 @@
             }
         }
 
-        processToken(token, linespan) {
+        processToken(token, linespan, prev, next) {
 
             let sString = false;
 
@@ -910,7 +1006,10 @@
                 var span = document.createElement('span');
                 span.innerHTML = token;
 
-                if( this._building_string  )
+                if( this._building_block_comment )
+                    span.className += " cm-com";
+                
+                else if( this._building_string  )
                     span.className += " cm-str";
                 
                 else if( this.keywords.indexOf(token) > -1 )
@@ -928,8 +1027,18 @@
                 else if( token.substr(0, 2) == '//' )
                     span.className += " cm-com";
 
+                else if( token.substr(0, 2) == '/*' )
+                    span.className += " cm-com";
+
+                else if( token.substr(token.length - 2) == '*/' )
+                    span.className += " cm-com";
+
                 else if( !Number.isNaN(+token) )
                     span.className += " cm-dec";
+
+                else if (   (prev == 'class' && next == '{') || 
+                            (prev == 'new' && next == '(') )
+                    span.className += " cm-typ";
 
                 linespan.appendChild(span);
             }
