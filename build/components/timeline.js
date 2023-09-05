@@ -650,6 +650,7 @@
                 return;
             e.preventDefault();
             e.stopPropagation();
+            e.multipleSelection = false;
             var w = this.size[0];
 
             // Process mouse
@@ -1175,7 +1176,7 @@
 
                 // Multiple selection
                 if(!discard && track) {
-                    this.processCurrentKeyFrame( e, null, track, localX, true ); 
+                    this.processCurrentKeyFrame( e, null, track, localX, e.multipleSelection ); 
                 }
                 // Box selection
                 else{
@@ -1192,7 +1193,7 @@
                             
                         if(keyFrameIndices) {
                             for(let index of keyFrameIndices)
-                                this.processCurrentKeyFrame( e, index, t, null, true );
+                                this.processCurrentKeyFrame( e, index, t, null, e.multipleSelection );
                         }
                     }
                 }
@@ -1239,12 +1240,12 @@
                 this.boxSelection = true;
                 this.boxSelectionStart = [localX, localY - 20];
 
+                e.multipleSelection = true;
             }
             else if(e.ctrlKey && track && !track.locked) {
-
                 const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
                 if( keyFrameIndex != undefined ) {
-                    this.processCurrentKeyFrame( e, keyFrameIndex, track, null, true ); // Settings this as multiple so time is not being set
+                    this.processCurrentKeyFrame( e, keyFrameIndex, track, null, e.multipleSelection ); // Settings this as multiple so time is not being set
                     this.movingKeys = true;
                     this.canvas.style.cursor = "grab";  
                     // Set pre-move state
@@ -2330,7 +2331,7 @@
                             for(let i = 0; i < clipstToDelete.length; i++){
                                 this.deleteClip(clipstToDelete[i], null);
                             }
-                            this.optimizeTracks();
+                            // this.optimizeTracks();
                         }
                     }
                 )
@@ -2747,7 +2748,7 @@
 
                 // Multiple selection
                 if(!discard && track) {
-                    this.processCurrentKeyFrame( e, null, track, localX, true ); 
+                    this.processCurrentKeyFrame( e, null, track, localX, e.multipleSelection ); 
                 }
                 // Box selection
                 else{
@@ -2764,7 +2765,7 @@
                             
                         if(keyFrameIndices) {
                             for(let index of keyFrameIndices)
-                                this.processCurrentKeyFrame( e, index, t, null, true );
+                                this.processCurrentKeyFrame( e, index, t, null, e.multipleSelection );
                         }
                     }
                 }
@@ -2818,7 +2819,7 @@
 
                     const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
                     if( keyFrameIndex != undefined ) {
-                        this.processCurrentKeyFrame( e, keyFrameIndex, track, null, true ); // Settings this as multiple so time is not being set
+                        this.processCurrentKeyFrame( e, keyFrameIndex, track, null, e.multipleSelection ); // Settings this as multiple so time is not being set
                         if(e.ctrlKey || e.altKey) {
                             this.movingKeys = true;
                             this.canvas.style.cursor = "grab";  
@@ -2872,13 +2873,14 @@
                     }
 
                     if(e.altKey) {
-                        let trackRange = [this.tracksDrawn[track.clipIdx][1], this.tracksDrawn[track.clipIdx][1] + this.trackHeight];
+                        let trackRange = [this.tracksDrawn[track.idx][1], this.tracksDrawn[track.idx][1] + this.trackHeight];
                         localY = Math.min( trackRange[1], Math.max(trackRange[0], localY) );
                         
                         //convert to range track values
                         let value = (((localY - trackRange[1]) * (this.range[1] - this.range[0])) / (trackRange[0] - trackRange[1])) + this.range[0];
                         track.edited[keyIndex] = true;
                         this.animationClip.tracks[ track.clipIdx ].values[ keyIndex ] = value;
+                        LX.emit( "@on_change_" + this.tracksDrawn[track.idx][0].type, value );
                     }
                 }
                 return
@@ -2933,6 +2935,100 @@
             else {
                 removeHover();
             }
+        }
+
+        showContextMenu( e ) {
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            let actions = [];
+            //let track = this.NMFtimeline.clip.tracks[0];
+            if(this.lastKeyFramesSelected && this.lastKeyFramesSelected.length) {
+                if(this.lastKeyFramesSelected.length == 1 && this.clipboard && this.clipboard.value)
+                {
+                    actions.push(
+                        {
+                            title: "Paste",// + " <i class='bi bi-clipboard-fill float-right'></i>",
+                            callback: () => {
+                                let [id, trackIdx, keyIdx] = this.lastKeyFramesSelected[0];
+                                    this.pasteKeyFrameValue(e, this.tracksPerItem[id][trackIdx], keyIdx);
+                            }
+                        }
+                    )
+                }
+                actions.push(
+                    {
+                        title: "Copy",// + " <i class='bi bi-clipboard-fill float-right'></i>",
+                        callback: () => {
+                            let toCopy = {};
+                            for(let i = 0; i < this.lastKeyFramesSelected.length; i++){
+                                let [id, trackIdx, keyIdx] = this.lastKeyFramesSelected[i];
+                                if(toCopy[this.tracksPerItem[id][trackIdx].clipIdx]) {
+                                    toCopy[this.tracksPerItem[id][trackIdx].clipIdx].idxs.push(keyIdx);
+                                } else {
+                                    toCopy[this.tracksPerItem[id][trackIdx].clipIdx] = {idxs : [keyIdx]};
+                                    toCopy[this.tracksPerItem[id][trackIdx].clipIdx].track = this.tracksPerItem[id][trackIdx]
+                                }                
+                                if(i == 0) {
+                                    this.copyKeyFrameValue(this.tracksPerItem[id][trackIdx], keyIdx)
+                                }
+                            }
+                            for(let clipIdx in toCopy) {
+                                
+                                this.copyKeyFrames(toCopy[clipIdx].track, toCopy[clipIdx].idxs)
+                            }
+                           
+                        }
+                    }
+                )
+                actions.push(
+                    {
+                        title: "Delete",// + " <i class='bi bi-trash float-right'></i>",
+                        callback: () => {
+                            let keyframesToDelete = this.lastKeyFramesSelected;
+                            e.multipleSelection = keyframesToDelete.length > 1 ?? false;
+                            for(let i = 0; i < keyframesToDelete.length; i++){
+                                this.deleteKeyFrame(e, keyframesToDelete[i][1], keyframesToDelete[i][2]);
+                            }
+                            
+                        }
+                    }
+                )
+            }
+            else{
+                
+                actions.push(
+                    {
+                        title: "Add",
+                        callback: () => this.addKeyFrame( e.track )
+                    }
+                )
+
+                if(this.clipboard && this.clipboard.keyframes)
+                {
+                    actions.push(
+                        {
+                            title: "Paste",// + " <i class='bi bi-clipboard-fill float-right'></i>",
+                            callback: () => {
+                                let currentTime = this.currentTime;
+                                for(let clipIdx in this.clipboard.keyframes) {
+                                    let indices = Object.keys( this.clipboard.keyframes[clipIdx].values)
+                                    this.pasteKeyFrames(e, clipIdx, indices);
+                                    this.currentTime = currentTime;
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+            
+            LX.addContextMenu("Options", e, (m) => {
+                for(let i = 0; i < actions.length; i++) {
+                    m.add(actions[i].title,  actions[i].callback )
+                }
+            });
+
         }
 
         onDrawContent( ctx, timeStart, timeEnd ) {
@@ -3501,11 +3597,13 @@
             if(uglyName.includes("[")) {
                 const nameIndex = uglyName.indexOf('['),
                     trackNameInfo = uglyName.substr(nameIndex+1).split("].");
-                name = trackNameInfo[0];
+                name = trackNameInfo[0].replaceAll(/[\[\]]/g,"");
+                name = name.replaceAll("_", " ");
                 type = trackNameInfo[1];
             }else {
                 const trackNameInfo = uglyName.split(".");
-                name = trackNameInfo[0];
+                name = trackNameInfo[0].replaceAll(/[\[\]]/g,"");
+                name = name.replaceAll("_", " ");
                 type = trackNameInfo[1];
             }
 

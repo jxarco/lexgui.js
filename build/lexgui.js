@@ -426,6 +426,9 @@
             if( obj.constructor === Widget )
             {
                 obj.set( value );
+                
+                if(obj.options && obj.options.callback)
+                    obj.options.callback(value, data);
             }else
             {
                 obj[signal_name].call(obj, value);
