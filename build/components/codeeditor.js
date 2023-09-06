@@ -895,20 +895,8 @@
             const is_comment = linestring.split('//');
             linestring = ( is_comment.length > 1 ) ? is_comment[0] : linestring;
 
-            // ... if starts comment block
-            const starts_block_comment = linestring.split('/*');
-            linestring = ( starts_block_comment.length > 1 ) ? starts_block_comment[0] : linestring;
-
-            // ... if ends comment block
-            // const ends_block_comment = linestring.split('*/');
-            // linestring = ( ends_block_comment.length > 1 ) ? ends_block_comment[1] : linestring;
-
             const tokens = linestring.split(' ').join('¬ ¬').split('¬'); // trick to split without losing spaces
             const to_process = []; // store in a temp array so we know prev and next tokens...
-
-            // append block line
-            // if( ends_block_comment.length > 1 )
-            //     to_process.push( ends_block_comment[0] + "*/" );
 
             for( let t of tokens )
             {
@@ -937,21 +925,6 @@
             if( is_comment.length > 1 )
                 to_process.push( "//" + is_comment[1] );
 
-            else if( starts_block_comment.length > 1 )
-            {
-                let line_comm = starts_block_comment[1];
-
-                // ... if ends comment block
-                const ends_block_comment = line_comm.split('*/');
-                if( ends_block_comment.length > 1 ) {
-                    line_comm = ends_block_comment[0];
-                }
-
-                to_process.push( "/*" + line_comm );
-                to_process.push( "*/" );
-                to_process.push( ends_block_comment[1] );
-            }
-            
             // Process all tokens
             for( var i = 0; i < to_process.length; ++i )
             {

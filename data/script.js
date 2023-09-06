@@ -15,6 +15,10 @@ class Test {
         document.body.appendChild( div );
 
         let a = 1; /* single line block comment */ let b = 2;
+
+        /*
+            multiple line block comment
+        */
     }
 
     getFoo() {
