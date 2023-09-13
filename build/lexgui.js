@@ -2688,9 +2688,8 @@
         }
 
         _trigger( event, callback ) {
-
             if(callback)
-                callback.call(this, event.value, event.domEvent);
+                callback.call(this, event.value, event.domEvent, event.name);
 
             if(this.onevent)
                 this.onevent.call(this, event);
@@ -5803,7 +5802,8 @@
             this.current_data = this.data;
             this.path = ['@'];
 
-            this._create_tree_panel(this.area);
+            if(!this.skip_browser)
+                this._create_tree_panel(this.area);
             this._refresh_content();
 
             this.onevent = onevent;
