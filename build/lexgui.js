@@ -4076,6 +4076,7 @@
                 slider.min = options.min;
                 slider.max = options.max;
                 slider.type = "range";
+                slider.value = value;
                 slider.addEventListener("input", function(e) {
                     let new_value = +this.valueAsNumber;
                     let fract = new_value % 1;
