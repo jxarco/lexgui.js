@@ -253,7 +253,7 @@
     function init(options = {})
     {
         if(this.ready)
-            return;
+            return this.main_area;
 
         // LexGUI root 
 		var root = document.createElement("div");
@@ -4463,7 +4463,7 @@
          * type: type to read as [text (Default), buffer, bin, url]
          */
 
-        addFile( name, callback, options = {} ) {
+        addFile( name, callback, options = { } ) {
 
             if(!name) {
                 throw("Set Widget Name!");
@@ -4474,6 +4474,7 @@
 
             let local = options.local ?? true;
             let type = options.type ?? 'text';
+            let read = options.read ?? true; 
 
             // Create hidden input
             let input = document.createElement('input');
@@ -4482,34 +4483,41 @@
             input.addEventListener('change', function(e) {
                 const files = e.target.files;
                 if(!files.length) return;
+                if(read) {
+                    const reader = new FileReader();
 
-                const reader = new FileReader();
+                    if(type === 'text') {
+                        reader.readAsText(files[0]);
+                    }else if(type === 'buffer') {
+                        reader.readAsArrayBuffer(files[0])
+                    }else if(type === 'bin') {
+                        reader.readAsBinaryString(files[0])
+                    }else if(type === 'url') {
+                        reader.readAsDataURL(files[0])
+                    }
 
-                if(type === 'text') {
-                    reader.readAsText(files[0]);
-                }else if(type === 'buffer') {
-                    reader.readAsArrayBuffer(files[0])
-                }else if(type === 'bin') {
-                    reader.readAsBinaryString(files[0])
-                }else if(type === 'url') {
-                    reader.readAsDataURL(files[0])
+                    reader.onload = (e) => { callback.call(this, e.target.result) } ;
                 }
-
-                reader.onload = (e) => { callback.call(this, e.target.result) } ;
+                else 
+                    callback(files[0]);
+                
             });
 
             element.appendChild(input);
 
             this.queue( element );
+            
+            if(local) {
 
-            this.addButton(null, "<a class='fa-solid fa-gear'></a>", () => {
-                
-                new Dialog("Load Settings", p => {
-                    p.addDropdown("Type", ['text', 'buffer', 'bin', 'url'], type, v => { type = v } );
-                    p.addButton(null, "Reload", v => { input.dispatchEvent( new Event('change') ) } );
-                });
-
-            }, { className: "small" });
+                this.addButton(null, "<a class='fa-solid fa-gear'></a>", () => {
+                    
+                    new Dialog("Load Settings", p => {
+                        p.addDropdown("Type", ['text', 'buffer', 'bin', 'url'], type, v => { type = v } );
+                        p.addButton(null, "Reload", v => { input.dispatchEvent( new Event('change') ) } );
+                    });
+                    
+                }, { className: "small" });
+            }
 
             this.clearQueue();
 
