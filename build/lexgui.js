@@ -19,6 +19,7 @@
     function clamp (num, min, max) { return Math.min(Math.max(num, min), max) }
     function round(num, n) { return +num.toFixed(n); }
     function deepCopy(o) { return JSON.parse(JSON.stringify(o)) }
+    function getExtension(s) { return s.split('.').pop(); }
 
     LX.deepCopy = deepCopy;
 
@@ -5809,7 +5810,7 @@
             this._create_content_panel(content_area);
             
             // Create resource preview panel
-            if(! this.skip_preview )
+            if( !this.skip_preview )
                 this.previewPanel = right.addPanel({className: 'lexassetcontentpanel', style: { overflow: 'scroll' }});
         }
 
@@ -6040,7 +6041,8 @@
                 if( !that.skip_preview ) {
 
                     let preview = document.createElement('img');
-                    preview.src = is_image || item.src ? item.src : "../images/" + item.type.toLowerCase() + ".png";
+                    const has_image = item.src && ['png'].indexOf( getExtension( item.src ) ) > -1;
+                    preview.src = has_image ? item.src : "../images/" + item.type.toLowerCase() + ".png";
                     itemEl.appendChild(preview);
                 }
 
@@ -6133,12 +6135,14 @@
                 this.previewPanel.addImage(file.src, { style: {width:"100%"} });
             }
 
-            this.previewPanel.addText("Filename", file.id);
-            this.previewPanel.addText("URL", file.src);
+            const options = { disabled: true };
+
+            this.previewPanel.addText("Filename", file.id, null, options);
+            this.previewPanel.addText("URL", file.src, null, options);
             // this.previewPanel.addText("Folder", file.id);
             this.previewPanel.sameLine();
-            this.previewPanel.addText("Type", file.type);
-            this.previewPanel.addText("Size", file.bytesize ?? "0 KBs");
+            this.previewPanel.addText("Type", file.type, null, options);
+            this.previewPanel.addText("Size", file.bytesize ?? "0 KBs", null, options);
             this.previewPanel.endLine();
             this.previewPanel.addSeparator();
             
