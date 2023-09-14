@@ -2609,6 +2609,7 @@
             element.className += " lexfilter noname";
             
             let input = document.createElement('input');
+            input.id = 'input-filter';
             input.setAttribute("placeholder", options.placeholder);
             input.style.width =  "calc( 100% - 17px )";
             input.value = options.filterValue || "";
@@ -2622,6 +2623,8 @@
                 if(options.callback)
                     options.callback(input.value, e); 
             });
+
+            return element;
         }
 
         #search_widgets(branchName, value) {
@@ -2683,7 +2686,7 @@
                 // insert filtered widget
                 filteredOptions.push(o);
             }
- 
+
             this.refresh(filteredOptions);
         }
 
@@ -3287,7 +3290,6 @@
             list.hidden = true;
 
             list.addEventListener('focusout', function(e) {
-                
                 e.stopPropagation();
                 e.stopImmediatePropagation();
                 if(e.relatedTarget === selectedOption.querySelector("button")) {
@@ -3295,34 +3297,29 @@
                     setTimeout(() => delete this.unfocus_event, 200);
                 } else if (e.relatedTarget && e.relatedTarget.tagName == "INPUT") {
                     return;
+                }else if (e.target.id == 'input-filter') {
+                    return;
                 }
                 this.toggleAttribute('hidden', true);
             });
 
             // Add filter options
+            let filter = null;
             if(options.filter ?? false)
-                this.#add_filter("Search option", {container: list, callback: this.#search_options.bind(list, values)});
+                filter = this.#add_filter("Search option", {container: list, callback: this.#search_options.bind(list, values)});
+
+            if(filter)
+                list.appendChild(filter);
+
+            // Create option list to empty it easily..
+            const list_options = document.createElement('span');
+            list.appendChild(list_options);
 
             // Add dropdown options list
             list.refresh = (options) => {
-                if(!options.length)
-                    return;
-
-                let children = [];
-                let filter = "";
-                for(let i = 0; i < list.children.length; i++) {
-                    
-                    if(list.children[i].classList.contains('lexfilter')) {
-                        filter = list.children[i];
-                        continue;
-                    }
-                    children.push(list.children[i]);
-                }
 
                 // Empty list
-                list.innerHTML = "";
-                if(filter)
-                    list.appendChild(filter);
+                list_options.innerHTML = "";
 
                 for(let i = 0; i < options.length; i++)
                 {
@@ -3333,7 +3330,8 @@
                     li.appendChild(option);
                     li.addEventListener("click", (e) => {
                         element.querySelector(".lexoptions").toggleAttribute('hidden', true);
-                        element.querySelector(".lexoptions .selected").classList.remove("selected");
+                        const currentSelected = element.querySelector(".lexoptions .selected");
+                        if(currentSelected) currentSelected.classList.remove("selected");
                         value = e.currentTarget.getAttribute("value");
                         e.currentTarget.toggleAttribute('hidden', false);
                         e.currentTarget.classList.add("selected");
@@ -3342,7 +3340,11 @@
                         let btn = element.querySelector(".lexwidgetname .lexicon");
                         if(btn) btn.style.display = (value != wValue.iValue ? "block" : "none");
                         that._trigger( new IEvent(name, value, null), callback ); 
-                    })
+
+                        // Reset filter
+                        filter.querySelector('input').value = "";
+                        this.#search_options.bind(list, values, "")();
+                    });
 
                     // Add string option
                     if(typeof iValue == 'string') {
@@ -3374,7 +3376,7 @@
                         if(value == iValue.value)
                             li.classList.add("selected");
                     }      
-                    list.appendChild(li);
+                    list_options.appendChild(li);
                 }
             }
 
