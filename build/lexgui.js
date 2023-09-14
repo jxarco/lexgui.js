@@ -3345,8 +3345,11 @@
                         that._trigger( new IEvent(name, value, null), callback ); 
 
                         // Reset filter
-                        filter.querySelector('input').value = "";
-                        this.#search_options.bind(list, values, "")();
+                        if(filter)
+                        {
+                            filter.querySelector('input').value = "";
+                            this.#search_options.bind(list, values, "")();
+                        }
                     });
 
                     // Add string option
@@ -5781,10 +5784,11 @@
             div.appendChild(area.root);
 
             let left, right, content_area = area;
-            
+
             this.skip_browser = options.skip_browser ?? false;
             this.skip_preview = options.skip_preview ?? false;
             this.skip_navigation = options.skip_navigation ?? false;
+            this.preview_actions = options.preview_actions ?? [];
 
             if( !this.skip_browser )
             {
@@ -6142,7 +6146,7 @@
             {
                 const has_image = ['png', 'jpg'].indexOf( getExtension( file.src ) ) > -1;
                 const source = has_image ? file.src : "../images/" + file.type.toLowerCase() + ".png";
-                this.previewPanel.addImage(source, { style: { width:"100%" } });
+                this.previewPanel.addImage(source, { style: { width: "100%" } });
             }
 
             const options = { disabled: true };
@@ -6156,7 +6160,20 @@
             this.previewPanel.endLine();
             this.previewPanel.addSeparator();
             
-            this.previewPanel.addButton(null, "Download", () => LX.downloadURL(file.src, file.id));
+            const preview_actions = [...this.preview_actions];
+
+            // By default
+            preview_actions.push({
+                name: 'Download', 
+                callback: () => LX.downloadURL(file.src, file.id)
+            });
+
+            for( let action of preview_actions )
+            {
+                if( action.type && action.type !== file.type )
+                    continue;
+                this.previewPanel.addButton( null, action.name, action.callback.bind( this, file ) );
+            }
 
             this.previewPanel.merge();
         }

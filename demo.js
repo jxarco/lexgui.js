@@ -655,27 +655,55 @@ function fillBottomPanel( panel ) {
 
 function createAssetDialog() {
 
-    // Create a new dialog
-    let that = this;
     let dialog = new LX.Dialog('Non Manual Features lexemes', (p) => {
+
+        const preview_actions = [
+            {
+                name: 'Print Clip',
+                type: 'clip',
+                callback: ( item ) => {
+                    console.log(item);
+                }
+            },
+            {
+                name: 'Print Image',
+                type: 'image',
+                callback: ( item ) => {
+                    console.log(item);
+                }
+            },
+            {
+                name: 'Common',
+                callback: ( item ) => {
+                    console.log(item);
+                }
+            }
+        ];
 
         asset_browser = new LX.AssetView({ 
             skip_browser: true,
             skip_navigation: true,
+            preview_actions: preview_actions
         });
+
         p.attach( asset_browser );
         let asset_data = [];
+        const values = ['brow_lowerer.png', 'lexgui.png', 'icon.png', 'json.png'];
 
-        const vvvalues = ['brow_lowerer', 'lexgui', 'icon', 'json'];
-
-        for(let i = 0; i < vvvalues.length; i++){
+        for(let i = 0; i < values.length; i++){
             let data = {
-                id: vvvalues[i], 
+                id: values[i], 
                 type: "clip",
-                src: "images/" + vvvalues[i].toLowerCase() + ".png",
+                src: "images/" + values[i].toLowerCase(),
             }
             asset_data.push(data);
         }
+
+        asset_data.push({
+            id: "script.png", 
+            type: "image",
+            src: "images/script.png",
+        });
         
         asset_browser.load( asset_data, (e,v) => {
             switch(e.type) {
@@ -684,23 +712,6 @@ function createAssetDialog() {
                         console.log("Selected: ", e.item); 
                     else
                         console.log(e.item.id + " selected"); 
-                    // dialog.close();
-                    let asset_panel = document.querySelector("#Asset");
-                    let button = asset_panel.getElementsByTagName("button")[0];
-                    let new_button = button.cloneNode()
-                    new_button.innerText = "Add clip";
-                    new_button.addEventListener("click", () => {that.clipsTimeline.addClip( new ANIM.FaceLexemeClip({lexeme: e.item.id})); dialog.close();});
-                    let parent = button.parentElement;
-                    let to_remove = [];
-                    for(let i = 3; i < asset_panel.children.length-1; i++) {
-                        if(asset_panel.children[i].classList.contains("lexwidget"))
-                            to_remove.push(asset_panel.children[i])
-                    }
-                    for(let i = 0; i < to_remove.length; i++) {
-                        asset_panel.removeChild(to_remove[i]);
-                    }
-                    button.remove();
-                    parent.appendChild(new_button);
                     break;
                 case LX.AssetViewEvent.ASSET_DELETED: 
                     console.log(e.item.id + " deleted"); 
