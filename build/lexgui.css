@@ -2565,3 +2565,21 @@ ul.lexassetscontent {
 .cm-bln { color: #cfc159; } /* builtin */
 .cm-dec { color: #22c44a; } /* decimal */
 .cm-sym { color: #f4dab2; } /* symbol */
+
+.cm-str.json { color: #71a7c2; } /* string */
+.cm-kwd.json { color: inherit; } /* keyword */
+.cm-com.json { color: inherit; } /* comment */
+.cm-typ.json { color: inherit; } /* type */
+.cm-lit.json { color: inherit; } /* literal */
+.cm-bln.json { color: inherit; } /* builtin */
+.cm-dec.json { color: #9ed09a; } /* decimal */
+.cm-sym.json { color: #c53693; } /* symbol */
+
+.cm-str.plaintext { color: inherit; } /* string */
+.cm-kwd.plaintext { color: inherit; } /* keyword */
+.cm-com.plaintext { color: inherit; } /* comment */
+.cm-typ.plaintext { color: inherit; } /* type */
+.cm-lit.plaintext { color: inherit; } /* literal */
+.cm-bln.plaintext { color: inherit; } /* builtin */
+.cm-dec.plaintext { color: inherit; } /* decimal */
+.cm-sym.plaintext { color: inherit; } /* symbol */
