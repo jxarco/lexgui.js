@@ -1264,7 +1264,9 @@
             this.tabDOMs[ name ] = tabEl;
             this.tabs[ name ] = content;
 
-            if( callback ) callback.call(this, this.area.root.getBoundingClientRect());
+            setTimeout( () => {
+                if( callback ) callback.call(this, this.area.root.getBoundingClientRect());
+            }, 10 );
         }
 
         select( name ) {
