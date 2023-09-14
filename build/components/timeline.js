@@ -941,16 +941,16 @@
                     if(fadeoutX)
                         ctx.roundRect( x + w - fadeoutX, y + offset, fadeoutX, trackHeight, {tl: 0, bl: 0, tr:5, br:5}, true);
                     
-                    //draw clip content
-                    if( clip.drawClip )
-                    {
-                        ctx.save();
-                        ctx.translate(x,y);
-                        ctx.strokeStyle = "#AAA";
-                        ctx.fillStyle = "#AAA";
-                        clip.drawClip( ctx, x2-x, trackHeight, this.selectedClip == clip || track.selected[j], this );
-                        ctx.restore();
-                    }
+                    // //draw clip content
+                    // if( clip.drawClip )
+                    // {
+                    //     ctx.save();
+                    //     ctx.translate(x,y);
+                    //     ctx.strokeStyle = "#AAA";
+                    //     ctx.fillStyle = "#AAA";
+                    //     clip.drawClip( ctx, x2-x, trackHeight, this.selectedClip == clip || track.selected[j], this );
+                    //     ctx.restore();
+                    // }
                     //draw clip outline
                     if(clip.hidden)
                         ctx.globalAlpha = trackAlpha * 0.5;
@@ -1173,10 +1173,10 @@
             let discard = e.discard;
             
             if(e.shiftKey) {
-
+                e.multipleSelection = true;
                 // Multiple selection
                 if(!discard && track) {
-                    this.processCurrentKeyFrame( e, null, track, localX, e.multipleSelection ); 
+                    this.processCurrentKeyFrame( e, null, track, localX, true ); 
                 }
                 // Box selection
                 else{
@@ -1193,7 +1193,7 @@
                             
                         if(keyFrameIndices) {
                             for(let index of keyFrameIndices)
-                                this.processCurrentKeyFrame( e, index, t, null, e.multipleSelection );
+                                this.processCurrentKeyFrame( e, index, t, null, true );
                         }
                     }
                 }
@@ -1239,7 +1239,6 @@
 
                 this.boxSelection = true;
                 this.boxSelectionStart = [localX, localY - 20];
-
                 e.multipleSelection = true;
             }
             else if(e.ctrlKey && track && !track.locked) {
@@ -2315,7 +2314,6 @@
             e.stopPropagation();
 
             let actions = [];
-            //let track = this.NMFtimeline.clip.tracks[0];
             if(this.lastClipsSelected.length) {
                 actions.push(
                     {
@@ -2335,19 +2333,6 @@
                         }
                     }
                 )
-                // actions.push(
-                //     {
-                //         title: "Create preset" + " <i class='bi bi-file-earmark-plus-fill float-right'></i>",
-                //         callback: () => {
-                //             this.NMFtimeline.lastClipsSelected.sort((a,b) => {
-                //                 if(a[0]<b[0]) 
-                //                     return -1;
-                //                 return 1;
-                //             });
-                //             this.createNewPresetDialog(this.NMFtimeline.lastClipsSelected);
-                //         }
-                //     }
-                // )
             }
             else{
                 
@@ -2366,7 +2351,6 @@
                                 for(let i = 0; i < this.clipsToCopy.length; i++){
                                     let [trackIdx, clipIdx] = this.clipsToCopy[i];
                                     let clipToCopy = Object.assign({}, this.animationClip.tracks[trackIdx].clips[clipIdx]);
-                                    // let clip = new ANIM.FaceLexemeClip(clipToCopy);
                                     this.addClip(clipToCopy, this.clipsToCopy.length > 1 ? clipToCopy.start : 0); 
                                 }
                                 this.clipsToCopy = null;
@@ -2741,14 +2725,13 @@
 
             let track = e.track;
             let localX = e.localX;
-            
             let discard = e.discard;
             
             if(e.shiftKey) {
-
+                e.multipleSelection = true;
                 // Multiple selection
                 if(!discard && track) {
-                    this.processCurrentKeyFrame( e, null, track, localX, e.multipleSelection ); 
+                    this.processCurrentKeyFrame( e, null, track, localX, true ); 
                 }
                 // Box selection
                 else{
@@ -2765,7 +2748,7 @@
                             
                         if(keyFrameIndices) {
                             for(let index of keyFrameIndices)
-                                this.processCurrentKeyFrame( e, index, t, null, e.multipleSelection );
+                                this.processCurrentKeyFrame( e, index, t, null, true );
                         }
                     }
                 }
@@ -2813,9 +2796,10 @@
 
                 this.boxSelection = true;
                 this.boxSelectionStart = [localX, localY - 20];
+                e.multipleSelection = true;
 
             }
-            else if(track) {
+            else if((e.ctrlKey || e.altKey) && track && !track.locked) {
 
                     const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
                     if( keyFrameIndex != undefined ) {

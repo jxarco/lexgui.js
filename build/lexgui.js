@@ -3191,6 +3191,12 @@
 
             let img = document.createElement('img');
             img.src = url;
+
+            for(let s in options.style) {
+
+                img.style[s] = options.style[s];
+            }
+
             await img.decode();
             container.appendChild(img);
             element.appendChild(container);
@@ -3281,13 +3287,16 @@
             list.hidden = true;
 
             list.addEventListener('focusout', function(e) {
+                
                 e.stopPropagation();
                 e.stopImmediatePropagation();
-                this.toggleAttribute('hidden', true);
                 if(e.relatedTarget === selectedOption.querySelector("button")) {
                     this.unfocus_event = true;
                     setTimeout(() => delete this.unfocus_event, 200);
+                } else if (e.relatedTarget && e.relatedTarget.tagName == "INPUT") {
+                    return;
                 }
+                this.toggleAttribute('hidden', true);
             });
 
             // Add filter options
@@ -3300,15 +3309,20 @@
                     return;
 
                 let children = [];
+                let filter = "";
                 for(let i = 0; i < list.children.length; i++) {
                     
-                    if(list.children[i].classList.contains('lexfilter'))
+                    if(list.children[i].classList.contains('lexfilter')) {
+                        filter = list.children[i];
                         continue;
+                    }
                     children.push(list.children[i]);
                 }
 
                 // Empty list
                 list.innerHTML = "";
+                if(filter)
+                    list.appendChild(filter);
 
                 for(let i = 0; i < options.length; i++)
                 {
@@ -3428,7 +3442,7 @@
                 that._trigger( new IEvent(name, v, e), callback );
             };
             options.name = name;
-            var curve_instance = new Curve(this, values, options);
+            let curve_instance = new Curve(this, values, options);
             container.appendChild(curve_instance.element);
             element.appendChild(container);
 
@@ -3436,7 +3450,7 @@
             curve_instance.canvas.width = container.offsetWidth;
             curve_instance.redraw();
             widget.onresize = curve_instance.redraw.bind(curve_instance);
-
+            widget.curve_instance = curve_instance;
             return widget;
         }
 
@@ -5039,6 +5053,10 @@
                 set_as_draggable(root);
 
             // Process position and size
+            if(size.length && typeof(size[0]) != "string")
+                size[0] += "px";
+            if(size.length && typeof(size[1]) != "string")
+                size[1] += "px";
 
             root.style.width = size[0] ? (size[0]) : "25%";
             root.style.height = size[1] ? (size[1]) : "auto";
@@ -5524,8 +5542,8 @@
                 if(canvas.parentElement.parentElement) rect = canvas.parentElement.parentElement.getBoundingClientRect();
                 if(rect && canvas.width != rect.width && rect.width && rect.width < 1000)
                     canvas.width = rect.width;
-                if(rect && canvas.height != rect.height && rect.height && rect.height < 1000)
-                    canvas.height = rect.height;
+                // if(rect && canvas.height != rect.height && rect.height && rect.height < 1000)
+                //     canvas.height = rect.height;
 
                 var ctx = canvas.getContext("2d");
                 ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -5759,14 +5777,16 @@
 
             let left, right, content_area = area;
             this.skip_browser = options.skip_browser ?? false;
-            
+            this.skip_preview = options.skip_preview ?? false;
+
             if( !this.skip_browser )
             {
                 [left, right] = area.split({ type: "horizontal", sizes: ["15%", "85%"]});
                 content_area = right;
             }
 
-            [content_area, right] = content_area.split({ type: "horizontal", sizes: ["80%", "20%"]});
+            if( !this.skip_preview)
+                [content_area, right] = content_area.split({ type: "horizontal", sizes: ["80%", "20%"]});
             
             this.allowed_types = ["None", "Image", "Mesh", "Script", "JSON"];
 
@@ -5785,7 +5805,8 @@
             this._create_content_panel(content_area);
             
             // Create resource preview panel
-            this.previewPanel = right.addPanel({className: 'lexassetcontentpanel', style: { overflow: 'scroll' }});
+            if(! this.skip_preview )
+                this.previewPanel = right.addPanel({className: 'lexassetcontentpanel', style: { overflow: 'scroll' }});
         }
 
         /**
@@ -5998,7 +6019,7 @@
                 const is_folder = type === "Folder";
                 const is_image = type === "Image";
 
-                if((that.filter != "None" && type != that.filter) || !item.id.includes(that.search_value))
+                if((that.filter != "None" && type != that.filter) || !item.id.toLowerCase().includes(that.search_value.toLowerCase()))
                     return;
 
                 let itemEl = document.createElement('li');
@@ -6012,9 +6033,12 @@
                 title.innerText = item.id;
                 itemEl.appendChild(title);
 
-                let preview = document.createElement('img');
-                preview.src = is_image ? item.src : "../images/" + item.type.toLowerCase() + ".png";
-                itemEl.appendChild(preview);
+                if( !that.skip_preview ) {
+
+                    let preview = document.createElement('img');
+                    preview.src = is_image || item.src ? item.src : "../images/" + item.type.toLowerCase() + ".png";
+                    itemEl.appendChild(preview);
+                }
 
                 if( !is_folder )
                 {
@@ -6032,7 +6056,8 @@
                         if(!e.shiftKey)
                             that.content.querySelectorAll('.lexassetitem').forEach( i => i.classList.remove('selected') );
                         this.classList.add('selected');
-                        that._preview_asset( item );
+                        if( !that.skip_preview )
+                            that._preview_asset( item );
                     } else
                         that._enter_folder( item );
 
@@ -6099,9 +6124,9 @@
 
             this.previewPanel.branch("Asset");
 
-            if( file.type == 'image' )
+            if( file.type == 'image' || file.src )
             {
-                this.previewPanel.addImage(file.src, { style: {} });
+                this.previewPanel.addImage(file.src, { style: {width:"100%"} });
             }
 
             this.previewPanel.addText("Filename", file.id);
