@@ -331,6 +331,8 @@ function loop(dt) {
     requestAnimationFrame(loop);
 }
 
+createAssetDialog();
+
 requestAnimationFrame(loop);
 
 // **** **** **** **** **** **** **** **** **** **** **** **** 
@@ -438,7 +440,7 @@ function fillPanel( panel ) {
         console.log(value);
     }, {filter: true});
 
-    panel.addDropdown("Best Gif", [{value:"Godot", src: "https://thumbs.gfycat.com/CaringDefensiveAndeancondor-size_restricted.gif"}, {value: "Unity", src: "https://i.gifer.com/origin/db/db3cb258e9bbb78c5851a000742e5468_w200.gif"}, {value:"Unreal Engine", src: "https://d3kjluh73b9h9o.cloudfront.net/original/4X/e/0/d/e0deb23c10cc7852c6ab91c28083e27f9c8228f8.gif"}], "Godot", (value, event) => {
+    panel.addDropdown("Best Gif", [{value:"Godot", src: "https://i.redd.it/4vepr95bye861.gif"}, {value: "Unity", src: "https://i.gifer.com/origin/db/db3cb258e9bbb78c5851a000742e5468_w200.gif"}, {value:"Unreal Engine", src: "https://d3kjluh73b9h9o.cloudfront.net/original/4X/e/0/d/e0deb23c10cc7852c6ab91c28083e27f9c8228f8.gif"}], "Godot", (value, event) => {
         console.log(value);
     }, {filter: true});
 
@@ -625,23 +627,6 @@ function fillRightBottomPanel( panel, tab ) {
         /************** */
     }
 
-    // panel.tab("Another tab");
-
-    // // update panel values uising widget name
-    // panel.addNumber("Roll", 0, (value, event) => {
-    //     panel.setValue('PRoll', value);
-    // }, { min: -1, max: 1, step: 0.1 });
-    // panel.addProgress("PRoll", 0, { min: -1, max: 1 });
-
-    // panel.tab("Another One");
-
-    // panel.addText("Im out :(", "", null, { placeholder: "Alone..." });
-    // panel.addVector4("Im a Vec4", [0.3, 0.3, 0.5, 1], (value, event) => {
-    //     console.log(value);
-    // });
-    // panel.addButton(null, "Click me, Im Full Width...");
-    // panel.addButton("Test Button", "Reduced width...");
-
     panel.merge();
 }
 
@@ -666,4 +651,68 @@ function fillBottomPanel( panel ) {
     panel.branch("A collapsed branch", {closed: true});
     panel.addText(null, "Nothing here", null, {disabled: true});
     panel.merge();
+}
+
+function createAssetDialog() {
+
+    // Create a new dialog
+    let that = this;
+    let dialog = new LX.Dialog('Non Manual Features lexemes', (p) => {
+
+        asset_browser = new LX.AssetView({ 
+            skip_browser: true,
+            skip_navigation: true,
+        });
+        p.attach( asset_browser );
+        let asset_data = [];
+
+        const vvvalues = ['brow_lowerer', 'lexgui', 'icon', 'json'];
+
+        for(let i = 0; i < vvvalues.length; i++){
+            let data = {
+                id: vvvalues[i], 
+                type: "clip",
+                src: "images/" + vvvalues[i].toLowerCase() + ".png",
+            }
+            asset_data.push(data);
+        }
+        
+        asset_browser.load( asset_data, (e,v) => {
+            switch(e.type) {
+                case LX.AssetViewEvent.ASSET_SELECTED: 
+                    if(e.multiple)
+                        console.log("Selected: ", e.item); 
+                    else
+                        console.log(e.item.id + " selected"); 
+                    // dialog.close();
+                    let asset_panel = document.querySelector("#Asset");
+                    let button = asset_panel.getElementsByTagName("button")[0];
+                    let new_button = button.cloneNode()
+                    new_button.innerText = "Add clip";
+                    new_button.addEventListener("click", () => {that.clipsTimeline.addClip( new ANIM.FaceLexemeClip({lexeme: e.item.id})); dialog.close();});
+                    let parent = button.parentElement;
+                    let to_remove = [];
+                    for(let i = 3; i < asset_panel.children.length-1; i++) {
+                        if(asset_panel.children[i].classList.contains("lexwidget"))
+                            to_remove.push(asset_panel.children[i])
+                    }
+                    for(let i = 0; i < to_remove.length; i++) {
+                        asset_panel.removeChild(to_remove[i]);
+                    }
+                    button.remove();
+                    parent.appendChild(new_button);
+                    break;
+                case LX.AssetViewEvent.ASSET_DELETED: 
+                    console.log(e.item.id + " deleted"); 
+                    break;
+                case LX.AssetViewEvent.ASSET_CLONED: 
+                    console.log(e.item.id + " cloned"); 
+                    break;
+                case LX.AssetViewEvent.ASSET_RENAMED:
+                    console.log(e.item.id + " is now called " + e.value); 
+                    break;
+            }
+        })
+    },{ title:'Lexemes', close: true, minimize: false, size: ["80%"], scroll: true, resizable: true, draggable: true });
+   
 }

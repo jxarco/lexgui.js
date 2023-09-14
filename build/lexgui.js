@@ -5781,8 +5781,10 @@
             div.appendChild(area.root);
 
             let left, right, content_area = area;
+            
             this.skip_browser = options.skip_browser ?? false;
             this.skip_preview = options.skip_preview ?? false;
+            this.skip_navigation = options.skip_navigation ?? false;
 
             if( !this.skip_browser )
             {
@@ -5790,10 +5792,10 @@
                 content_area = right;
             }
 
-            if( !this.skip_preview)
+            if( !this.skip_preview )
                 [content_area, right] = content_area.split({ type: "horizontal", sizes: ["80%", "20%"]});
             
-            this.allowed_types = ["None", "Image", "Mesh", "Script", "JSON"];
+            this.allowed_types = ["None", "Image", "Mesh", "Script", "JSON", "Clip"];
 
             this.prev_data = [];
             this.next_data = [];
@@ -5939,14 +5941,17 @@
                 this.rightPanel = area.addPanel({className: 'lexassetcontentpanel'});
             }
 
-            function on_sort(value, event) {
-                addContextMenu( "Sort by", event, c => {
+            const on_sort = (value, event) => {
+                const cmenu = addContextMenu( "Sort by", event, c => {
                     c.add("Name", () => this._sort_data('id') );
                     c.add("Type", () => this._sort_data('type') );
                     c.add("");
                     c.add("Ascending", () => this._sort_data() );
                     c.add("Descending", () => this._sort_data(null, true) );
                 } );
+                const parent = this.parent.root.parentElement;
+                if( parent.classList.contains('lexdialog') )
+                    cmenu.root.style.zIndex = (+getComputedStyle( parent ).zIndex) + 1;
             }
 
             this.rightPanel.sameLine();
@@ -5955,38 +5960,41 @@
             this.rightPanel.addButton(null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { width: "3%" });
             this.rightPanel.endLine();
 
-            this.rightPanel.sameLine();
-            this.rightPanel.addComboButtons( null, [
-                {
-                    value: "Left",
-                    icon: "fa-solid fa-left-long",
-                    callback:  (domEl) => { 
-                        if(!this.prev_data.length) return;
-                        this.next_data.push( this.current_data );
-                        this.current_data = this.prev_data.pop();
-                        this._refresh_content();
-                        this._update_path( this.current_data );
+            if( !this.skip_navigation )
+            {
+                this.rightPanel.sameLine();
+                this.rightPanel.addComboButtons( null, [
+                    {
+                        value: "Left",
+                        icon: "fa-solid fa-left-long",
+                        callback:  (domEl) => { 
+                            if(!this.prev_data.length) return;
+                            this.next_data.push( this.current_data );
+                            this.current_data = this.prev_data.pop();
+                            this._refresh_content();
+                            this._update_path( this.current_data );
+                        }
+                    },
+                    {
+                        value: "Right",
+                        icon: "fa-solid fa-right-long",
+                        callback:  (domEl) => { 
+                            if(!this.next_data.length) return;
+                            this.prev_data.push( this.current_data );
+                            this.current_data = this.next_data.pop();
+                            this._refresh_content();
+                            this._update_path( this.current_data );
+                        }
+                    },
+                    {
+                        value: "Refresh",
+                        icon: "fa-solid fa-arrows-rotate",
+                        callback:  (domEl) => { this._refresh_content(); }
                     }
-                },
-                {
-                    value: "Right",
-                    icon: "fa-solid fa-right-long",
-                    callback:  (domEl) => { 
-                        if(!this.next_data.length) return;
-                        this.prev_data.push( this.current_data );
-                        this.current_data = this.next_data.pop();
-                        this._refresh_content();
-                        this._update_path( this.current_data );
-                    }
-                },
-                {
-                    value: "Refresh",
-                    icon: "fa-solid fa-arrows-rotate",
-                    callback:  (domEl) => { this._refresh_content(); }
-                }
-            ], { width: "auto", noSelection: true } );
-            this.rightPanel.addText(null, this.path.join('/'), null, { disabled: true, signal: "@on_folder_change", style: { fontSize: "16px", color: "#aaa" } });
-            this.rightPanel.endLine();
+                ], { width: "auto", noSelection: true } );
+                this.rightPanel.addText(null, this.path.join('/'), null, { disabled: true, signal: "@on_folder_change", style: { fontSize: "16px", color: "#aaa" } });
+                this.rightPanel.endLine();
+            }
 
             this.content = document.createElement('ul');
             this.content.className = "lexassetscontent";
@@ -6041,7 +6049,7 @@
                 if( !that.skip_preview ) {
 
                     let preview = document.createElement('img');
-                    const has_image = item.src && ['png'].indexOf( getExtension( item.src ) ) > -1;
+                    const has_image = item.src && ['png', 'jpg'].indexOf( getExtension( item.src ) ) > -1;
                     preview.src = has_image ? item.src : "../images/" + item.type.toLowerCase() + ".png";
                     itemEl.appendChild(preview);
                 }
@@ -6132,14 +6140,16 @@
 
             if( file.type == 'image' || file.src )
             {
-                this.previewPanel.addImage(file.src, { style: {width:"100%"} });
+                const has_image = ['png', 'jpg'].indexOf( getExtension( file.src ) ) > -1;
+                const source = has_image ? file.src : "../images/" + file.type.toLowerCase() + ".png";
+                this.previewPanel.addImage(source, { style: { width:"100%" } });
             }
 
             const options = { disabled: true };
 
             this.previewPanel.addText("Filename", file.id, null, options);
             this.previewPanel.addText("URL", file.src, null, options);
-            // this.previewPanel.addText("Folder", file.id);
+            this.previewPanel.addText("Path", this.path.join('/'), null, options);
             this.previewPanel.sameLine();
             this.previewPanel.addText("Type", file.type, null, options);
             this.previewPanel.addText("Size", file.bytesize ?? "0 KBs", null, options);
