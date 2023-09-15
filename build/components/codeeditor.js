@@ -133,7 +133,7 @@
             this._lastTime = null;
 
             this.languages = [
-                'JavaScript', 'GLSL'
+                'JavaScript', 'GLSL', 'JSON', 'XML', 'Plain Text'
             ];
             this.specialKeys = [
                 'Backspace', 'Enter', 'ArrowUp', 'ArrowDown', 
@@ -154,7 +154,7 @@
                 'while', 'continue', 'break', 'do'
             ];
             this.symbols = [
-                '<', '>', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'
+                '<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'
             ];
 
             // Action keys
@@ -445,6 +445,7 @@
             const on_change_language = ( lang ) => {
                 this.highlight = lang;
                 this._refresh_code_info();
+                this.processLines();
             }
 
             this._refresh_code_info = (ln = panel.ln, col = panel.col) => {
@@ -982,42 +983,44 @@
                 span.innerHTML = token;
 
                 if( this._building_block_comment )
-                    span.className += " cm-com";
+                    span.classList.add("cm-com");
                 
                 else if( this._building_string  )
-                    span.className += " cm-str";
+                    span.classList.add("cm-str");
                 
                 else if( this.keywords.indexOf(token) > -1 )
-                    span.className += " cm-kwd";
+                    span.classList.add("cm-kwd");
 
                 else if( this.builtin.indexOf(token) > -1 )
-                    span.className += " cm-bln";
+                    span.classList.add("cm-bln");
 
                 else if( this.literals.indexOf(token) > -1 )
-                    span.className += " cm-lit";
+                    span.classList.add("cm-lit");
 
                 else if( this.symbols.indexOf(token) > -1 )
-                    span.className += " cm-sym";
+                    span.classList.add("cm-sym");
 
                 else if( token.substr(0, 2) == '//' )
-                    span.className += " cm-com";
+                    span.classList.add("cm-com");
 
                 else if( token.substr(0, 2) == '/*' )
-                    span.className += " cm-com";
+                    span.classList.add("cm-com");
 
                 else if( token.substr(token.length - 2) == '*/' )
-                    span.className += " cm-com";
+                    span.classList.add("cm-com");
 
                 else if( !Number.isNaN(+token) )
-                    span.className += " cm-dec";
+                    span.classList.add("cm-dec");
 
                 else if (   (prev == 'class' && next == '{') || 
                             (prev == 'new' && next == '(') )
-                    span.className += " cm-typ";
+                     span.classList.add("cm-typ");
                 
                 else if ( next == '(' )
-                    span.className += " cm-mtd";
+                    span.classList.add("cm-mtd");
 
+                let highlight = this.highlight.replace(/\s/g, '');
+                span.classList.add(highlight.toLowerCase());
                 linespan.appendChild(span);
             }
 

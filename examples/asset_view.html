@@ -30,7 +30,10 @@
             canvas.height = bounding.height;
         };
 
-        let asset_browser = new LX.AssetView({ /* skip_browser: true */ });
+        let asset_browser = new LX.AssetView({ 
+            // skip_browser: true,
+            // skip_preview: true
+        });
         bottom_area.attach( asset_browser );
 
         let asset_data = [
@@ -107,6 +110,11 @@
                     }
                 ]
             },
+            {
+                id: "brow_lowerer.png",
+                type: "clip",
+                src: "../images/brow_lowerer.png"
+            }
         ];
 
         asset_browser.load( asset_data, event => { 

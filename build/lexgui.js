@@ -19,6 +19,7 @@
     function clamp (num, min, max) { return Math.min(Math.max(num, min), max) }
     function round(num, n) { return +num.toFixed(n); }
     function deepCopy(o) { return JSON.parse(JSON.stringify(o)) }
+    function getExtension(s) { return s.split('.').pop(); }
 
     LX.deepCopy = deepCopy;
 
@@ -253,7 +254,7 @@
     function init(options = {})
     {
         if(this.ready)
-            return;
+            return this.main_area;
 
         // LexGUI root 
 		var root = document.createElement("div");
@@ -1264,7 +1265,9 @@
             this.tabDOMs[ name ] = tabEl;
             this.tabs[ name ] = content;
 
-            if( callback ) callback.call(this, this.area.root.getBoundingClientRect());
+            setTimeout( () => {
+                if( callback ) callback.call(this, this.area.root.getBoundingClientRect());
+            }, 10 );
         }
 
         select( name ) {
@@ -2609,6 +2612,7 @@
             element.className += " lexfilter noname";
             
             let input = document.createElement('input');
+            input.id = 'input-filter';
             input.setAttribute("placeholder", options.placeholder);
             input.style.width =  "calc( 100% - 17px )";
             input.value = options.filterValue || "";
@@ -2622,6 +2626,8 @@
                 if(options.callback)
                     options.callback(input.value, e); 
             });
+
+            return element;
         }
 
         #search_widgets(branchName, value) {
@@ -2683,14 +2689,13 @@
                 // insert filtered widget
                 filteredOptions.push(o);
             }
- 
+
             this.refresh(filteredOptions);
         }
 
         _trigger( event, callback ) {
-
             if(callback)
-                callback.call(this, event.value, event.domEvent);
+                callback.call(this, event.value, event.domEvent, event.name);
 
             if(this.onevent)
                 this.onevent.call(this, event);
@@ -3192,6 +3197,12 @@
 
             let img = document.createElement('img');
             img.src = url;
+
+            for(let s in options.style) {
+
+                img.style[s] = options.style[s];
+            }
+
             await img.decode();
             container.appendChild(img);
             element.appendChild(container);
@@ -3284,32 +3295,34 @@
             list.addEventListener('focusout', function(e) {
                 e.stopPropagation();
                 e.stopImmediatePropagation();
-                this.toggleAttribute('hidden', true);
                 if(e.relatedTarget === selectedOption.querySelector("button")) {
                     this.unfocus_event = true;
                     setTimeout(() => delete this.unfocus_event, 200);
+                } else if (e.relatedTarget && e.relatedTarget.tagName == "INPUT") {
+                    return;
+                }else if (e.target.id == 'input-filter') {
+                    return;
                 }
+                this.toggleAttribute('hidden', true);
             });
 
             // Add filter options
+            let filter = null;
             if(options.filter ?? false)
-                this.#add_filter("Search option", {container: list, callback: this.#search_options.bind(list, values)});
+                filter = this.#add_filter("Search option", {container: list, callback: this.#search_options.bind(list, values)});
+
+            if(filter)
+                list.appendChild(filter);
+
+            // Create option list to empty it easily..
+            const list_options = document.createElement('span');
+            list.appendChild(list_options);
 
             // Add dropdown options list
             list.refresh = (options) => {
-                if(!options.length)
-                    return;
-
-                let children = [];
-                for(let i = 0; i < list.children.length; i++) {
-                    
-                    if(list.children[i].classList.contains('lexfilter'))
-                        continue;
-                    children.push(list.children[i]);
-                }
 
                 // Empty list
-                list.innerHTML = "";
+                list_options.innerHTML = "";
 
                 for(let i = 0; i < options.length; i++)
                 {
@@ -3320,7 +3333,8 @@
                     li.appendChild(option);
                     li.addEventListener("click", (e) => {
                         element.querySelector(".lexoptions").toggleAttribute('hidden', true);
-                        element.querySelector(".lexoptions .selected").classList.remove("selected");
+                        const currentSelected = element.querySelector(".lexoptions .selected");
+                        if(currentSelected) currentSelected.classList.remove("selected");
                         value = e.currentTarget.getAttribute("value");
                         e.currentTarget.toggleAttribute('hidden', false);
                         e.currentTarget.classList.add("selected");
@@ -3329,7 +3343,14 @@
                         let btn = element.querySelector(".lexwidgetname .lexicon");
                         if(btn) btn.style.display = (value != wValue.iValue ? "block" : "none");
                         that._trigger( new IEvent(name, value, null), callback ); 
-                    })
+
+                        // Reset filter
+                        if(filter)
+                        {
+                            filter.querySelector('input').value = "";
+                            this.#search_options.bind(list, values, "")();
+                        }
+                    });
 
                     // Add string option
                     if(typeof iValue == 'string') {
@@ -3361,7 +3382,7 @@
                         if(value == iValue.value)
                             li.classList.add("selected");
                     }      
-                    list.appendChild(li);
+                    list_options.appendChild(li);
                 }
             }
 
@@ -3429,7 +3450,7 @@
                 that._trigger( new IEvent(name, v, e), callback );
             };
             options.name = name;
-            var curve_instance = new Curve(this, values, options);
+            let curve_instance = new Curve(this, values, options);
             container.appendChild(curve_instance.element);
             element.appendChild(container);
 
@@ -3437,7 +3458,7 @@
             curve_instance.canvas.width = container.offsetWidth;
             curve_instance.redraw();
             widget.onresize = curve_instance.redraw.bind(curve_instance);
-
+            widget.curve_instance = curve_instance;
             return widget;
         }
 
@@ -4076,6 +4097,7 @@
                 slider.min = options.min;
                 slider.max = options.max;
                 slider.type = "range";
+                slider.value = value;
                 slider.addEventListener("input", function(e) {
                     let new_value = +this.valueAsNumber;
                     let fract = new_value % 1;
@@ -4463,7 +4485,7 @@
          * type: type to read as [text (Default), buffer, bin, url]
          */
 
-        addFile( name, callback, options = {} ) {
+        addFile( name, callback, options = { } ) {
 
             if(!name) {
                 throw("Set Widget Name!");
@@ -4474,6 +4496,7 @@
 
             let local = options.local ?? true;
             let type = options.type ?? 'text';
+            let read = options.read ?? true; 
 
             // Create hidden input
             let input = document.createElement('input');
@@ -4482,34 +4505,41 @@
             input.addEventListener('change', function(e) {
                 const files = e.target.files;
                 if(!files.length) return;
+                if(read) {
+                    const reader = new FileReader();
 
-                const reader = new FileReader();
+                    if(type === 'text') {
+                        reader.readAsText(files[0]);
+                    }else if(type === 'buffer') {
+                        reader.readAsArrayBuffer(files[0])
+                    }else if(type === 'bin') {
+                        reader.readAsBinaryString(files[0])
+                    }else if(type === 'url') {
+                        reader.readAsDataURL(files[0])
+                    }
 
-                if(type === 'text') {
-                    reader.readAsText(files[0]);
-                }else if(type === 'buffer') {
-                    reader.readAsArrayBuffer(files[0])
-                }else if(type === 'bin') {
-                    reader.readAsBinaryString(files[0])
-                }else if(type === 'url') {
-                    reader.readAsDataURL(files[0])
+                    reader.onload = (e) => { callback.call(this, e.target.result) } ;
                 }
-
-                reader.onload = (e) => { callback.call(this, e.target.result) } ;
+                else 
+                    callback(files[0]);
+                
             });
 
             element.appendChild(input);
 
             this.queue( element );
+            
+            if(local) {
 
-            this.addButton(null, "<a class='fa-solid fa-gear'></a>", () => {
-                
-                new Dialog("Load Settings", p => {
-                    p.addDropdown("Type", ['text', 'buffer', 'bin', 'url'], type, v => { type = v } );
-                    p.addButton(null, "Reload", v => { input.dispatchEvent( new Event('change') ) } );
-                });
-
-            }, { className: "small" });
+                this.addButton(null, "<a class='fa-solid fa-gear'></a>", () => {
+                    
+                    new Dialog("Load Settings", p => {
+                        p.addDropdown("Type", ['text', 'buffer', 'bin', 'url'], type, v => { type = v } );
+                        p.addButton(null, "Reload", v => { input.dispatchEvent( new Event('change') ) } );
+                    });
+                    
+                }, { className: "small" });
+            }
 
             this.clearQueue();
 
@@ -5031,6 +5061,10 @@
                 set_as_draggable(root);
 
             // Process position and size
+            if(size.length && typeof(size[0]) != "string")
+                size[0] += "px";
+            if(size.length && typeof(size[1]) != "string")
+                size[1] += "px";
 
             root.style.width = size[0] ? (size[0]) : "25%";
             root.style.height = size[1] ? (size[1]) : "auto";
@@ -5516,8 +5550,8 @@
                 if(canvas.parentElement.parentElement) rect = canvas.parentElement.parentElement.getBoundingClientRect();
                 if(rect && canvas.width != rect.width && rect.width && rect.width < 1000)
                     canvas.width = rect.width;
-                if(rect && canvas.height != rect.height && rect.height && rect.height < 1000)
-                    canvas.height = rect.height;
+                // if(rect && canvas.height != rect.height && rect.height && rect.height < 1000)
+                //     canvas.height = rect.height;
 
                 var ctx = canvas.getContext("2d");
                 ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -5750,17 +5784,22 @@
             div.appendChild(area.root);
 
             let left, right, content_area = area;
+
             this.skip_browser = options.skip_browser ?? false;
-            
+            this.skip_preview = options.skip_preview ?? false;
+            this.skip_navigation = options.skip_navigation ?? false;
+            this.preview_actions = options.preview_actions ?? [];
+
             if( !this.skip_browser )
             {
                 [left, right] = area.split({ type: "horizontal", sizes: ["15%", "85%"]});
                 content_area = right;
             }
 
-            [content_area, right] = content_area.split({ type: "horizontal", sizes: ["80%", "20%"]});
+            if( !this.skip_preview )
+                [content_area, right] = content_area.split({ type: "horizontal", sizes: ["80%", "20%"]});
             
-            this.allowed_types = ["None", "Image", "Mesh", "Script", "JSON"];
+            this.allowed_types = ["None", "Image", "Mesh", "Script", "JSON", "Clip"];
 
             this.prev_data = [];
             this.next_data = [];
@@ -5777,7 +5816,8 @@
             this._create_content_panel(content_area);
             
             // Create resource preview panel
-            this.previewPanel = right.addPanel({className: 'lexassetcontentpanel', style: { overflow: 'scroll' }});
+            if( !this.skip_preview )
+                this.previewPanel = right.addPanel({className: 'lexassetcontentpanel', style: { overflow: 'scroll' }});
         }
 
         /**
@@ -5794,7 +5834,8 @@
             this.current_data = this.data;
             this.path = ['@'];
 
-            this._create_tree_panel(this.area);
+            if(!this.skip_browser)
+                this._create_tree_panel(this.area);
             this._refresh_content();
 
             this.onevent = onevent;
@@ -5904,14 +5945,17 @@
                 this.rightPanel = area.addPanel({className: 'lexassetcontentpanel'});
             }
 
-            function on_sort(value, event) {
-                addContextMenu( "Sort by", event, c => {
+            const on_sort = (value, event) => {
+                const cmenu = addContextMenu( "Sort by", event, c => {
                     c.add("Name", () => this._sort_data('id') );
                     c.add("Type", () => this._sort_data('type') );
                     c.add("");
                     c.add("Ascending", () => this._sort_data() );
                     c.add("Descending", () => this._sort_data(null, true) );
                 } );
+                const parent = this.parent.root.parentElement;
+                if( parent.classList.contains('lexdialog') )
+                    cmenu.root.style.zIndex = (+getComputedStyle( parent ).zIndex) + 1;
             }
 
             this.rightPanel.sameLine();
@@ -5920,38 +5964,41 @@
             this.rightPanel.addButton(null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { width: "3%" });
             this.rightPanel.endLine();
 
-            this.rightPanel.sameLine();
-            this.rightPanel.addComboButtons( null, [
-                {
-                    value: "Left",
-                    icon: "fa-solid fa-left-long",
-                    callback:  (domEl) => { 
-                        if(!this.prev_data.length) return;
-                        this.next_data.push( this.current_data );
-                        this.current_data = this.prev_data.pop();
-                        this._refresh_content();
-                        this._update_path( this.current_data );
+            if( !this.skip_navigation )
+            {
+                this.rightPanel.sameLine();
+                this.rightPanel.addComboButtons( null, [
+                    {
+                        value: "Left",
+                        icon: "fa-solid fa-left-long",
+                        callback:  (domEl) => { 
+                            if(!this.prev_data.length) return;
+                            this.next_data.push( this.current_data );
+                            this.current_data = this.prev_data.pop();
+                            this._refresh_content();
+                            this._update_path( this.current_data );
+                        }
+                    },
+                    {
+                        value: "Right",
+                        icon: "fa-solid fa-right-long",
+                        callback:  (domEl) => { 
+                            if(!this.next_data.length) return;
+                            this.prev_data.push( this.current_data );
+                            this.current_data = this.next_data.pop();
+                            this._refresh_content();
+                            this._update_path( this.current_data );
+                        }
+                    },
+                    {
+                        value: "Refresh",
+                        icon: "fa-solid fa-arrows-rotate",
+                        callback:  (domEl) => { this._refresh_content(); }
                     }
-                },
-                {
-                    value: "Right",
-                    icon: "fa-solid fa-right-long",
-                    callback:  (domEl) => { 
-                        if(!this.next_data.length) return;
-                        this.prev_data.push( this.current_data );
-                        this.current_data = this.next_data.pop();
-                        this._refresh_content();
-                        this._update_path( this.current_data );
-                    }
-                },
-                {
-                    value: "Refresh",
-                    icon: "fa-solid fa-arrows-rotate",
-                    callback:  (domEl) => { this._refresh_content(); }
-                }
-            ], { width: "auto", noSelection: true } );
-            this.rightPanel.addText(null, this.path.join('/'), null, { disabled: true, signal: "@on_folder_change", style: { fontSize: "16px", color: "#aaa" } });
-            this.rightPanel.endLine();
+                ], { width: "auto", noSelection: true } );
+                this.rightPanel.addText(null, this.path.join('/'), null, { disabled: true, signal: "@on_folder_change", style: { fontSize: "16px", color: "#aaa" } });
+                this.rightPanel.endLine();
+            }
 
             this.content = document.createElement('ul');
             this.content.className = "lexassetscontent";
@@ -5989,7 +6036,7 @@
                 const is_folder = type === "Folder";
                 const is_image = type === "Image";
 
-                if((that.filter != "None" && type != that.filter) || !item.id.includes(that.search_value))
+                if((that.filter != "None" && type != that.filter) || !item.id.toLowerCase().includes(that.search_value.toLowerCase()))
                     return;
 
                 let itemEl = document.createElement('li');
@@ -6003,9 +6050,13 @@
                 title.innerText = item.id;
                 itemEl.appendChild(title);
 
-                let preview = document.createElement('img');
-                preview.src = is_image ? item.src : "../images/" + item.type.toLowerCase() + ".png";
-                itemEl.appendChild(preview);
+                if( !that.skip_preview ) {
+
+                    let preview = document.createElement('img');
+                    const has_image = item.src && ['png', 'jpg'].indexOf( getExtension( item.src ) ) > -1;
+                    preview.src = has_image ? item.src : "../images/" + item.type.toLowerCase() + ".png";
+                    itemEl.appendChild(preview);
+                }
 
                 if( !is_folder )
                 {
@@ -6023,7 +6074,8 @@
                         if(!e.shiftKey)
                             that.content.querySelectorAll('.lexassetitem').forEach( i => i.classList.remove('selected') );
                         this.classList.add('selected');
-                        that._preview_asset( item );
+                        if( !that.skip_preview )
+                            that._preview_asset( item );
                     } else
                         that._enter_folder( item );
 
@@ -6090,21 +6142,38 @@
 
             this.previewPanel.branch("Asset");
 
-            if( file.type == 'image' )
+            if( file.type == 'image' || file.src )
             {
-                this.previewPanel.addImage(file.src, { style: {} });
+                const has_image = ['png', 'jpg'].indexOf( getExtension( file.src ) ) > -1;
+                const source = has_image ? file.src : "../images/" + file.type.toLowerCase() + ".png";
+                this.previewPanel.addImage(source, { style: { width: "100%" } });
             }
 
-            this.previewPanel.addText("Filename", file.id);
-            this.previewPanel.addText("URL", file.src);
-            // this.previewPanel.addText("Folder", file.id);
+            const options = { disabled: true };
+
+            this.previewPanel.addText("Filename", file.id, null, options);
+            this.previewPanel.addText("URL", file.src, null, options);
+            this.previewPanel.addText("Path", this.path.join('/'), null, options);
             this.previewPanel.sameLine();
-            this.previewPanel.addText("Type", file.type);
-            this.previewPanel.addText("Size", file.bytesize ?? "0 KBs");
+            this.previewPanel.addText("Type", file.type, null, options);
+            this.previewPanel.addText("Size", file.bytesize ?? "0 KBs", null, options);
             this.previewPanel.endLine();
             this.previewPanel.addSeparator();
             
-            this.previewPanel.addButton(null, "Download", () => LX.downloadURL(file.src, file.id));
+            const preview_actions = [...this.preview_actions];
+
+            // By default
+            preview_actions.push({
+                name: 'Download', 
+                callback: () => LX.downloadURL(file.src, file.id)
+            });
+
+            for( let action of preview_actions )
+            {
+                if( action.type && action.type !== file.type )
+                    continue;
+                this.previewPanel.addButton( null, action.name, action.callback.bind( this, file ) );
+            }
 
             this.previewPanel.merge();
         }

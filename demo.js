@@ -331,6 +331,8 @@ function loop(dt) {
     requestAnimationFrame(loop);
 }
 
+createAssetDialog();
+
 requestAnimationFrame(loop);
 
 // **** **** **** **** **** **** **** **** **** **** **** **** 
@@ -436,11 +438,11 @@ function fillPanel( panel ) {
 
     panel.addDropdown("Best Logo", [{value:"Godot", src: "https://pbs.twimg.com/profile_images/1631591220630757377/nKSCjeS3_400x400.png"}, {value: "Unity", src: "https://logos-world.net/wp-content/uploads/2023/01/Unity-Logo.png"}, {value:"Unreal Engine", src: "https://cdn2.unrealengine.com/ue-logo-stacked-unreal-engine-w-677x545-fac11de0943f.png"}], "Godot", (value, event) => {
         console.log(value);
-    }, {filter:true});
+    }, {filter: true});
 
-    panel.addDropdown("Best Gif", [{value:"Godot", src: "https://thumbs.gfycat.com/CaringDefensiveAndeancondor-size_restricted.gif"}, {value: "Unity", src: "https://i.gifer.com/origin/db/db3cb258e9bbb78c5851a000742e5468_w200.gif"}, {value:"Unreal Engine", src: "https://d3kjluh73b9h9o.cloudfront.net/original/4X/e/0/d/e0deb23c10cc7852c6ab91c28083e27f9c8228f8.gif"}], "Godot", (value, event) => {
+    panel.addDropdown("Best Gif", [{value:"Godot", src: "https://i.redd.it/4vepr95bye861.gif"}, {value: "Unity", src: "https://i.gifer.com/origin/db/db3cb258e9bbb78c5851a000742e5468_w200.gif"}, {value:"Unreal Engine", src: "https://d3kjluh73b9h9o.cloudfront.net/original/4X/e/0/d/e0deb23c10cc7852c6ab91c28083e27f9c8228f8.gif"}], "Godot", (value, event) => {
         console.log(value);
-    }, {filter:true});
+    }, {filter: true});
 
     panel.addVector3("Im a Vec3", [0.1, 0.4, 0.5], (value, event) => {
         console.log(value);
@@ -625,23 +627,6 @@ function fillRightBottomPanel( panel, tab ) {
         /************** */
     }
 
-    // panel.tab("Another tab");
-
-    // // update panel values uising widget name
-    // panel.addNumber("Roll", 0, (value, event) => {
-    //     panel.setValue('PRoll', value);
-    // }, { min: -1, max: 1, step: 0.1 });
-    // panel.addProgress("PRoll", 0, { min: -1, max: 1 });
-
-    // panel.tab("Another One");
-
-    // panel.addText("Im out :(", "", null, { placeholder: "Alone..." });
-    // panel.addVector4("Im a Vec4", [0.3, 0.3, 0.5, 1], (value, event) => {
-    //     console.log(value);
-    // });
-    // panel.addButton(null, "Click me, Im Full Width...");
-    // panel.addButton("Test Button", "Reduced width...");
-
     panel.merge();
 }
 
@@ -666,4 +651,79 @@ function fillBottomPanel( panel ) {
     panel.branch("A collapsed branch", {closed: true});
     panel.addText(null, "Nothing here", null, {disabled: true});
     panel.merge();
+}
+
+function createAssetDialog() {
+
+    let dialog = new LX.Dialog('Non Manual Features lexemes', (p) => {
+
+        const preview_actions = [
+            {
+                name: 'Print Clip',
+                type: 'clip',
+                callback: ( item ) => {
+                    console.log(item);
+                }
+            },
+            {
+                name: 'Print Image',
+                type: 'image',
+                callback: ( item ) => {
+                    console.log(item);
+                }
+            },
+            {
+                name: 'Common',
+                callback: ( item ) => {
+                    console.log(item);
+                }
+            }
+        ];
+
+        asset_browser = new LX.AssetView({ 
+            skip_browser: true,
+            skip_navigation: true,
+            preview_actions: preview_actions
+        });
+
+        p.attach( asset_browser );
+        let asset_data = [];
+        const values = ['brow_lowerer.png', 'lexgui.png', 'icon.png', 'json.png'];
+
+        for(let i = 0; i < values.length; i++){
+            let data = {
+                id: values[i], 
+                type: "clip",
+                src: "images/" + values[i].toLowerCase(),
+            }
+            asset_data.push(data);
+        }
+
+        asset_data.push({
+            id: "script.png", 
+            type: "image",
+            src: "images/script.png",
+        });
+        
+        asset_browser.load( asset_data, (e,v) => {
+            switch(e.type) {
+                case LX.AssetViewEvent.ASSET_SELECTED: 
+                    if(e.multiple)
+                        console.log("Selected: ", e.item); 
+                    else
+                        console.log(e.item.id + " selected"); 
+                    break;
+                case LX.AssetViewEvent.ASSET_DELETED: 
+                    console.log(e.item.id + " deleted"); 
+                    break;
+                case LX.AssetViewEvent.ASSET_CLONED: 
+                    console.log(e.item.id + " cloned"); 
+                    break;
+                case LX.AssetViewEvent.ASSET_RENAMED:
+                    console.log(e.item.id + " is now called " + e.value); 
+                    break;
+            }
+        })
+    },{ title:'Lexemes', close: true, minimize: false, size: ["80%"], scroll: true, resizable: true, draggable: true });
+   
 }
