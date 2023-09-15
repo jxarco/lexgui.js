@@ -6162,11 +6162,14 @@
             
             const preview_actions = [...this.preview_actions];
 
-            // By default
-            preview_actions.push({
-                name: 'Download', 
-                callback: () => LX.downloadURL(file.src, file.id)
-            });
+            if( !preview_actions.length )
+            {
+                // By default
+                preview_actions.push({
+                    name: 'Download', 
+                    callback: () => LX.downloadURL(file.src, file.id)
+                });
+            }
 
             for( let action of preview_actions )
             {

@@ -773,7 +773,7 @@ input[type="file"] {
 }
 
 .lexdropdown ul {
-  position: absolute;
+  position: fixed;
   list-style: none;
   background-color: var(--global-blur-background);
   backdrop-filter: blur(12px);
