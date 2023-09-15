@@ -21,6 +21,7 @@
     function deepCopy(o) { return JSON.parse(JSON.stringify(o)) }
     function getExtension(s) { return s.split('.').pop(); }
 
+    LX.getExtension = getExtension;
     LX.deepCopy = deepCopy;
 
     function hexToRgb(string) {
@@ -621,17 +622,6 @@
             content.parent = this;
 
             let element = content.root ? content.root : content;
-
-            // E.g. menubar has predefined height
-            // if(element.style.height == "100%")
-            // {
-            //     let size = 0;
-            //     for( var el of this.root.children ) {
-            //         size += el.offsetHeight;
-            //     }
-            //     element.style.height = "calc( 100% - " + size + "px )";
-            // }
-
             this.root.appendChild( element );
         }
 
@@ -2352,7 +2342,7 @@
 
             content.parent = this;
             let element = content.root ? content.root : content;
-            this.root.style.maxHeight = "512px"; // limit size when attaching stuff from outside
+            //this.root.style.maxHeight = "800px"; // limit size when attaching stuff from outside
             this.root.appendChild( element );
         }
 
@@ -2903,6 +2893,7 @@
          * placeholder: Add input placeholder
          * trigger: Choose onchange trigger (default, input) [default]
          * inputWidth: Width of the text input
+         * fitHeight: Height adapts to text
          */
 
         addTextArea( name, value, callback, options = {} ) {
@@ -2980,6 +2971,15 @@
                 element.className += " noname";
                 container.style.width = "100%";
             }
+
+            // Do this after creating the DOM element
+            setTimeout( () => {
+                if( options.fitHeight )
+                {
+                    // Update height depending on the content
+                    wValue.style.height = wValue.scrollHeight + "px";
+                }
+            }, 100);
 
             return widget;
         }
@@ -5120,6 +5120,7 @@
             this.root.style.left = "calc(100% - " + (this.root.offsetWidth + 6) + "px)";
             this.root.style.top = "0px";
             this.panel.root.style.width = "calc( 100% - 12px )";
+            this.panel.root.style.height = "calc( 100% - 40px )";
             this.dock_pos = PocketDialog.TOP;
 
             this.title.tabIndex = -1;

@@ -38,22 +38,54 @@ area.addMenubar( m => {
             });
         });
     }} );
+    m.add( "Editor/Write BML", { icon: "fa-solid fa-gears", callback: () => {
+
+        new LX.PocketDialog( "BML Instruction", p => {
+
+            let htmlStr = "Write in the text area below the bml instructions to move the avatar from the web application. A sample of BML instructions can be tested through the helper tabs in the right panel.";
+            p.addTextArea(null, htmlStr, null, {disabled: true, fitHeight: true});
+
+            p.addButton(null, "Click here to see BML instructions and attributes", () => {
+                window.open("https://github.com/upf-gti/SignON-realizer/blob/SiGMLExperiments/docs/InstructionsBML.md");
+            });
+
+            htmlStr = "Note: In 'speech', all text between '%' is treated as actual words. An automatic translation from words (dutch) to phonemes (arpabet) is performed.";
+            htmlStr += "\n\nNote: Each instruction is inside '{}'. Each instruction is separated by a coma ',' except que last one.";
+            p.addTextArea(null, htmlStr, null, {disabled: true, fitHeight: true});
+
+            htmlStr = 'An example: { "type":"speech", "start": 0, "text": "%hallo%.", "sentT": 1, "sentInt": 0.5 }, { "type": "gesture", "start": 0, "attackPeak": 0.5, "relax": 1, "end": 2, "locationBodyArm": "shoulder", "lrSym": true, "hand": "both", "distance": 0.1 }';
+            p.addTextArea(null, htmlStr, null, {disabled: true, fitHeight: true});
+
+            const area = new LX.Area({ height: "250px" });
+            p.attach( area.root );
+
+            window.editor = new LX.CodeEditor(area, {
+                highlight: 'JSON',
+                skip_info: true
+            });
+
+            p.addButton(null, "Send", () => {
+                console.log(":)")
+            });
+
+        }, { size: ["30%", null], float: "right", draggable: false});
+    }} );
     m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass", short:  "F1", callback: () => { window.open("./docs/") }});
     m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
     m.add( "Help/Support LexGUI/Do it" );
-    m.add("Timeline/Shortcuts", { disabled: true });
-    m.add("Timeline/Shortcuts/Play-Pause", { short: "SPACE" });
-    m.add("Timeline/Shortcuts/Zoom", { short: "Wheel" });
-    m.add("Timeline/Shortcuts/Change time", { short: "Left Click+Drag" });
-    m.add("Timeline/Shortcuts/Move keys", { short: "Hold CTRL" });
-    m.add("Timeline/Shortcuts/Add keys", { short: "Right Click" });
-    m.add("Timeline/Shortcuts/Delete keys");
-    m.add("Timeline/Shortcuts/Delete keys/Single", { short: "DEL" });
-    m.add("Timeline/Shortcuts/Delete keys/Multiple", { short: "Hold LSHIFT" });
-    m.add("Timeline/Shortcuts/Key Selection");
-    m.add("Timeline/Shortcuts/Key Selection/Single", { short: "Left Click" });
-    m.add("Timeline/Shortcuts/Key Selection/Multiple", { short: "Hold LSHIFT" });
-    m.add("Timeline/Shortcuts/Key Selection/Box", { short: "Hold LSHIFT+Drag" });
+    m.add( "Timeline/Shortcuts", { disabled: true });
+    m.add( "Timeline/Shortcuts/Play-Pause", { short: "SPACE" });
+    m.add( "Timeline/Shortcuts/Zoom", { short: "Wheel" });
+    m.add( "Timeline/Shortcuts/Change time", { short: "Left Click+Drag" });
+    m.add( "Timeline/Shortcuts/Move keys", { short: "Hold CTRL" });
+    m.add( "Timeline/Shortcuts/Add keys", { short: "Right Click" });
+    m.add( "Timeline/Shortcuts/Delete keys");
+    m.add( "Timeline/Shortcuts/Delete keys/Single", { short: "DEL" });
+    m.add( "Timeline/Shortcuts/Delete keys/Multiple", { short: "Hold LSHIFT" });
+    m.add( "Timeline/Shortcuts/Key Selection");
+    m.add( "Timeline/Shortcuts/Key Selection/Single", { short: "Left Click" });
+    m.add( "Timeline/Shortcuts/Key Selection/Multiple", { short: "Hold LSHIFT" });
+    m.add( "Timeline/Shortcuts/Key Selection/Box", { short: "Hold LSHIFT+Drag" });
     m.addButtons( [
         {
             title: "Play",

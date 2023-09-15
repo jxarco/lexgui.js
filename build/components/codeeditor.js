@@ -53,8 +53,9 @@
 
         constructor( area, options = {} ) {
 
+            this.skip_info = options.skip_info;
             this.base_area = area;
-            this.area = new LX.Area( { className: "lexcodeeditor" } );
+            this.area = new LX.Area( { className: "lexcodeeditor", height: "auto" } );
 
             this.tabs = this.area.addTabs( { onclose: (name) => delete this.openedTabs[name] } );
             this.tabs.root.addEventListener( 'dblclick', (e) => {
@@ -62,8 +63,7 @@
                 this.addTab("unnamed.js", true);
             } );
 
-            area.root.style.display = "flex"; // add gutter and code
-            area.root.style.position = "relative";
+            area.root.classList.add('codebasearea');
             this.gutter = document.createElement('div');
             this.gutter.className = "lexcodegutter";
             area.attach( this.gutter );
@@ -122,7 +122,7 @@
 
             // Code
 
-            this.highlight = 'JavaScript';
+            this.highlight = options.highlight ?? 'Plain Text';
             this.onsave = options.onsave ?? ((code) => {  });
             this.onrun = options.onrun ?? ((code) => { this.runScript(code) });
             this.actions = {};
@@ -133,7 +133,7 @@
             this._lastTime = null;
 
             this.languages = [
-                'JavaScript', 'GLSL', 'JSON', 'XML', 'Plain Text'
+                'Plain Text', 'JavaScript', 'GLSL', 'JSON', 'XML'
             ];
             this.specialKeys = [
                 'Backspace', 'Enter', 'ArrowUp', 'ArrowDown', 
@@ -397,13 +397,11 @@
         
             this.openedTabs = { };
             this.addTab("+", false, "New File");
-            this.addTab("script1.js", true);
-
-            this.loadFile( "../data/script.js" );
+            this.addTab("untitled", true);
 
             // Create inspector panel
             let panel = this._create_panel_info();
-            area.attach( panel );
+            if( panel ) area.attach( panel );
         }
 
         loadFile( file ) {
@@ -420,7 +418,9 @@
             {
                 let filename = file;
                 LX.request({ url: filename, success: text => {
+
                     const name = filename.substring(filename.lastIndexOf('/') + 1);
+                    this._change_language_from_extension( LX.getExtension(name) );
                     inner_add_tab( text, name, filename );
                 } });
             }
@@ -429,6 +429,7 @@
                 const fr = new FileReader();
                 fr.readAsText( file );
                 fr.onload = e => { 
+                    this._change_language_from_extension( LX.getExtension(file.name) );
                     const text = e.currentTarget.result;
                     inner_add_tab( text, file.name );
                 };
@@ -436,38 +437,68 @@
             
         }
 
+        _change_language( lang ) {
+            this.highlight = lang;
+            this._refresh_code_info();
+            this.processLines();
+        }
+
+        _change_language_from_extension( ext ) {
+            
+            switch(ext.toLowerCase())
+            {
+                case 'js': return this._change_language('JavaScript');
+                case 'glsl': return this._change_language('GLSL');
+                case 'json': return this._change_language('JSON');
+                case 'xml': return this._change_language('XML');
+                case 'txt': 
+                default:
+                    this._change_language('Plain Text');
+            }
+        }
+
         _create_panel_info() {
             
-            let panel = new LX.Panel({ className: "lexcodetabinfo", width: "calc(100%)", height: "auto" });
-            panel.ln = 0;
-            panel.col = 0;
+            if( !this.skip_info )
+            {
+                let panel = new LX.Panel({ className: "lexcodetabinfo", width: "calc(100%)", height: "auto" });
+                panel.ln = 0;
+                panel.col = 0;
+    
+                this._refresh_code_info = (ln = panel.ln, col = panel.col) => {
+                    panel.ln = ln;
+                    panel.col = col;
+                    panel.clear();
+                    panel.sameLine();
+                    panel.addLabel(this.code.title, { float: 'right' });
+                    panel.addLabel("Ln " + ln, { width: "48px" });
+                    panel.addLabel("Col " + col, { width: "48px" });
+                    panel.addButton("<b>{ }</b>", this.highlight, (value, event) => {
+                        LX.addContextMenu( "Language", event, m => {
+                            for( const lang of this.languages )
+                                m.add( lang, this._change_language.bind(this) );
+                        });
+                    }, { width: "25%", nameWidth: "15%" });
+                    panel.endLine();
+                };
 
-            const on_change_language = ( lang ) => {
-                this.highlight = lang;
                 this._refresh_code_info();
-                this.processLines();
+
+                return panel;
             }
+            else
+            {
+                this._refresh_code_info = () => {};
 
-            this._refresh_code_info = (ln = panel.ln, col = panel.col) => {
-                panel.ln = ln;
-                panel.col = col;
-                panel.clear();
-                panel.sameLine();
-                panel.addLabel(this.code.title, { float: 'right' });
-                panel.addLabel("Ln " + ln, { width: "48px" });
-                panel.addLabel("Col " + col, { width: "48px" });
-                panel.addButton("<b>{ }</b>", this.highlight, (value, event) => {
-                    LX.addContextMenu( "Language", event, m => {
-                        for( const lang of this.languages )
-                            m.add( lang, on_change_language );
-                    });
-                }, { width: "25%", nameWidth: "15%" });
-                panel.endLine();
-            };
+                setTimeout( () => {
 
-            this._refresh_code_info();
+                    // Change css a little bit...
+                    this.gutter.style.height = "calc(100% - 31px)";
+                    this.root.querySelectorAll('.code').forEach( e => e.style.height = "100%" );
+                    this.root.querySelector('.lexareatabscontent').style.height = "calc(100% - 23px)";
 
-            return panel;
+                }, 100);
+            }
         }
 
         _onNewTab( e ) {
@@ -538,7 +569,8 @@
                 this.code = this.openedTabs[tabname];
                 this.restoreCursor(cursor, this.code.cursorState);    
                 this.endSelection();
-                this.processLines();
+                // this.processLines();
+                this._change_language_from_extension( LX.getExtension(tabname) );
                 this._refresh_code_info(cursor.line + 1, cursor.charPos);
 
                 // Restore scroll

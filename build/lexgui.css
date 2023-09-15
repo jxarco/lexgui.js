@@ -549,6 +549,7 @@ input[type="file"] {
 }
 
 .lexwidget textarea {
+  word-break: break-word;
   font-family: var(--global-font);
   font-size: 13px;
   background: none;
@@ -1597,7 +1598,7 @@ meter::-webkit-meter-even-less-good-value {
 /* Context Menu */
 
 .lexcontextmenubox {
-  z-index: 2;
+  z-index: 102;
   position: absolute;
   padding-right: 20px;
   border-bottom-left-radius: 6px;
@@ -2385,6 +2386,12 @@ ul.lexassetscontent {
 
 /* Code Editor */
 
+.codebasearea {
+  display: flex;
+  position: relative;
+  overflow: inherit;
+}
+
 .lexcodeeditor ::-webkit-scrollbar {
   height: 6px;
 }
@@ -2412,14 +2419,14 @@ ul.lexassetscontent {
   background-color: var(--global-branch-darker);
   position: absolute;
   z-index: 1;
-  bottom: 8px;
+  bottom: 0px;
   margin-left: 0px;
 }
 
 .lexcodegutter {
   width: 32px;
-  height: calc(100% - 75.2px); /* 6px of the vertical scrollbar */
-  margin-top: 31.3px;
+  height: calc(100% - 69px); /* 6px of the vertical scrollbar */
+  margin-top: 31px;
   background-color: var(--branch-title-background);
   text-align: center;
   overflow: hidden;
@@ -2445,9 +2452,7 @@ ul.lexassetscontent {
   font-size: 18px;
   background-color: var(--global-branch-darker);
   overflow: scroll;
-  /* overflow: overlay; */
-  height: calc(100% - 36px);
-  /* margin-left: 16px; */
+  height: calc(100% - 26px);
 }
 
 .lexcodeeditor .code.dragging {
