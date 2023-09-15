@@ -471,6 +471,8 @@
 
         _onNewTab( e ) {
 
+            this.processFocus(false);
+
             LX.addContextMenu( null, e, m => {
                 m.add( "Create", this.addTab.bind(this, "unnamed.js", true) );
                 m.add( "Load", this.loadTab.bind(this, "unnamed.js", true) );
@@ -1012,6 +1014,9 @@
                 else if (   (prev == 'class' && next == '{') || 
                             (prev == 'new' && next == '(') )
                     span.className += " cm-typ";
+                
+                else if ( next == '(' )
+                    span.className += " cm-mtd";
 
                 linespan.appendChild(span);
             }

@@ -2423,7 +2423,10 @@ ul.lexassetscontent {
   background-color: var(--branch-title-background);
   text-align: center;
   overflow: hidden;
-  /* position: fixed; */
+  -webkit-user-select: none; /* Safari 3.1+ */
+  -moz-user-select: none; /* Firefox 2+ */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard syntax */
 }
 
 .lexcodegutter span {
@@ -2438,6 +2441,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .code {
+  cursor: text;
   font-size: 18px;
   background-color: var(--global-branch-darker);
   overflow: scroll;
@@ -2534,7 +2538,7 @@ ul.lexassetscontent {
   left: 0px;
   top: 0px;
   height: 18px;
-  transition: left linear 0.1s;
+  transition: left linear 0.015s;
 }
 
 .lexcodeeditor .lexcodeselection {
@@ -2552,16 +2556,20 @@ ul.lexassetscontent {
   left: 0px;
   top: 0px;
   width: 100px;
-  height: 18px;
+  /* height: 18px; */
+  height: 22px;
+  margin-top: -2px;
   background-color: rgba(85, 158, 221, 0.35);
-  border: 2px dotted var(--global-selected-light);
+  border-radius: 3px;
+  /* border: 1px solid var(--global-selected-light); */
 }
 
-.cm-str { color: #d98c5e; } /* string */
+.cm-str { color: #efa87f; } /* string */
 .cm-kwd { color: #2194ce; } /* keyword */
-.cm-com { color: #499847; } /* comment */
+.cm-com { color: #6db76b; } /* comment */
 .cm-typ { color: #36c0b0; } /* type */
 .cm-lit { color: #ee2c8d; } /* literal */
 .cm-bln { color: #cfc159; } /* builtin */
 .cm-dec { color: #22c44a; } /* decimal */
-.cm-sym { color: #f4dab2; } /* symbol */
+.cm-sym { color: #e7ded2; } /* symbol */
+.cm-mtd { color: #f1e9bf; } /* method */
