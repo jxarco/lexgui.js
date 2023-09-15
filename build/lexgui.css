@@ -2582,6 +2582,7 @@ ul.lexassetscontent {
 .cm-bln.json { color: inherit; } /* builtin */
 .cm-dec.json { color: #9ed09a; } /* decimal */
 .cm-sym.json { color: #c53693; } /* symbol */
+.cm-mtd.json { color: inherit; } /* method */
 
 .cm-str.plaintext { color: inherit; } /* string */
 .cm-kwd.plaintext { color: inherit; } /* keyword */
@@ -2591,3 +2592,4 @@ ul.lexassetscontent {
 .cm-bln.plaintext { color: inherit; } /* builtin */
 .cm-dec.plaintext { color: inherit; } /* decimal */
 .cm-sym.plaintext { color: inherit; } /* symbol */
+.cm-mtd.plaintext { color: inherit; } /* method */
