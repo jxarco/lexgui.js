@@ -706,8 +706,8 @@
                 const discard = this.movingKeys || (LX.UTILS.getTime() - this.clickTime) > 420; // ms
                 this.movingKeys ? innerSetTime( this.currentTime ) : 0;
 
-                if(this.grabbing && this.onClipMoved){
-                    this.onClipMoved();
+                if(this.grabbing && this.onClipMoved && this.lastClipsSelected.length){
+                    this.onClipMoved(this.lastClipsSelected);
                 }
 
                 this.grabbing_timeline = false;
@@ -967,13 +967,20 @@
                     if(selectedClipArea)
                     {
                         ctx.strokeStyle = track.clips[j].clipColor;
-                        ctx.globalAlpha = 0.8;
-                        ctx.lineWidth = 1;
+                        ctx.globalAlpha = 0.5;
+                        ctx.lineWidth = 2;
                         ctx.roundRect(selectedClipArea[0]-1,selectedClipArea[1]-1,selectedClipArea[2]+2,selectedClipArea[3]+2, 5, false, true);
                         ctx.strokeStyle = "#888";
                         ctx.lineWidth = 0.5;
                         ctx.globalAlpha = this.opacity;
-                }
+                    }
+
+                    let text = clip.id.replaceAll("_", " ").replaceAll("-", " ");
+                    let textInfo = ctx.measureText( text );
+                    ctx.fillStyle = clip.color;
+                    ctx.font = "12px Rubik"
+                    if( textInfo.width < (w - 24) )
+                        ctx.fillText( text, x + (w - textInfo.width)*0.5,  y + offset + 12 );
                 }
             }
 
@@ -2198,11 +2205,14 @@
 
                     if(!this.timelineClickedClips)
                         this.timelineClickedClips  = [];
-                    this.timelineClickedClips.push(clip);
+                    if(this.timelineClickedClips.indexOf(clip) < 0) {
+                        this.timelineClickedClips.push(clip);
 
-                    if(!this.timelineClickedClipsTime)
-                        this.timelineClickedClipsTime  = [];
-                    this.timelineClickedClipsTime.push(this.xToTime( localX ));
+                        if(!this.timelineClickedClipsTime)
+                            this.timelineClickedClipsTime  = [];
+                        this.timelineClickedClipsTime.push(this.xToTime( localX ));
+                    }
+
 
                     var endingX = this.timeToX( clip.start + clip.duration );
                     var distToStart = Math.abs( this.timeToX( clip.start ) - x );
@@ -2266,8 +2276,9 @@
                     for(let i = 0; i < this.timelineClickedClips.length; i++){
                         
                         var clip = this.timelineClickedClips[i] ;
-                        var diff = delta;//this.currentTime - this.timelineClickedClipsTime[i];//delta;
+                        var diff = clip.start + delta < 0 ? - clip.start : delta;//this.currentTime - this.timelineClickedClipsTime[i];//delta;
                         if( this.dragClipMode == "move" ) {
+                           
                             clip.start += diff;
                             clip.fadein += diff;
                             clip.fadeout += diff;
@@ -2469,7 +2480,7 @@
 
             // Update clip information
             let trackIdx = null;
-            let newStart = this.currentTime + offsetTime;
+            let newStart = this.currentTime + offsetTime + clip.start;
 
             clip.fadein += (newStart - clip.start);
             clip.fadeout += (newStart - clip.start);
@@ -2482,7 +2493,7 @@
 
             for(let i = 0; i < this.animationClip.tracks.length; i++) {
                 clipInCurrentSlot = this.animationClip.tracks[i].clips.find( t => { 
-                    return LX.UTILS.compareThresholdRange(this.currentTime, clip.start + clip.duration, t.start, t.start+t.duration);
+                    return LX.UTILS.compareThresholdRange(newStart, clip.start + clip.duration, t.start, t.start+t.duration);
                     
                 });
                 if(!clipInCurrentSlot)
@@ -2501,7 +2512,7 @@
             //this.saveState(clipIdx);
 
             // Find new index
-            let newIdx = this.animationClip.tracks[trackIdx].clips.findIndex( t => t.start > this.currentTime );
+            let newIdx = this.animationClip.tracks[trackIdx].clips.findIndex( t => t.start > newStart );
 
             // Add as last index
             let lastIndex = false;
@@ -2623,6 +2634,8 @@
             // Something has been unselected
             const unselected = this.lastClipsSelected.length > 0;
             this.lastClipsSelected.length = 0;
+            this.timelineClickedClips = null;
+            this.timelineClickedClipsTime = null;
             this.selectedClip = false;
             return unselected;
         }
@@ -2637,6 +2650,9 @@
             }
                             
             if(clipIndex == undefined)
+                return;
+
+            if(track.selected[clipIndex])
                 return;
 
             let currentSelection = [ track.idx, clipIndex];

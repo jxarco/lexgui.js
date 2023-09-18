@@ -5533,19 +5533,27 @@
 
             //value to canvas
             function convert(v) {
-                return [ canvas.width * ( (element.xrange[1] - element.xrange[0]) * v[0] + element.xrange[0]),
-                    canvas.height * ((element.yrange[1] - element.yrange[0]) * v[1] + element.yrange[0])];
+                return [ canvas.width * ( v[0] - element.xrange[0])/ (element.xrange[1]),
+                    canvas.height * (v[1] - element.yrange[0])/ (element.yrange[1])];
+                // return [ canvas.width * ( (element.xrange[1] - element.xrange[0]) * v[0] + element.xrange[0]),
+                //     canvas.height * ((element.yrange[1] - element.yrange[0]) * v[1] + element.yrange[0])];
             }
 
             //canvas to value
             function unconvert(v) {
-                return [(v[0] / canvas.width - element.xrange[0]) / (element.xrange[1] - element.xrange[0]),
-                        (v[1] / canvas.height - element.yrange[0]) / (element.yrange[1] - element.yrange[0])];
+                return [(v[0] * element.xrange[1] / canvas.width + element.xrange[0]),
+                        (v[1] * element.yrange[1] / canvas.height + element.yrange[0])];
+                // return [(v[0] / canvas.width - element.xrange[0]) / (element.xrange[1] - element.xrange[0]),
+                //         (v[1] / canvas.height - element.yrange[0]) / (element.yrange[1] - element.yrange[0])];
             }
 
             var selected = -1;
 
-            element.redraw = function()  {
+            element.redraw = function(o = {} )  {
+                
+                if(o.value) element.value = o.value;
+                if(o.xrange) element.xrange = o.xrange;
+                if(o.yrange) element.yrange = o.yrange;
 
                 var rect = canvas.parentElement.getBoundingClientRect();
                 if(canvas.parentElement.parentElement) rect = canvas.parentElement.parentElement.getBoundingClientRect();
@@ -5730,8 +5738,8 @@
             return this;
         }
 
-        redraw() {
-            this.element.redraw();
+        redraw(options = {}) {
+            this.element.redraw(options);
         }
     }
 
