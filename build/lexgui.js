@@ -5788,7 +5788,6 @@
 
             this.skip_browser = options.skip_browser ?? false;
             this.skip_preview = options.skip_preview ?? false;
-            this.skip_navigation = options.skip_navigation ?? false;
             this.preview_actions = options.preview_actions ?? [];
 
             if( !this.skip_browser )
@@ -5965,7 +5964,7 @@
             this.rightPanel.addButton(null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { width: "3%" });
             this.rightPanel.endLine();
 
-            if( !this.skip_navigation )
+            if( !this.skip_browser )
             {
                 this.rightPanel.sameLine();
                 this.rightPanel.addComboButtons( null, [
