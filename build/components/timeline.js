@@ -62,7 +62,7 @@
 
             this.canvas = options.canvas ?? document.createElement('canvas');
 
-            this.duration = 5;
+            this.duration = 1;
             this.position = [options.x ?? 0, options.y ?? 0];
             this.size = [ options.width ?? 400, options.height ?? 100];
             
@@ -80,9 +80,6 @@
             this.skipLock = options.skipLock ?? false;
 
             this.root = new LX.Area({className : 'lextimeline'});
-            // this.root = document.createElement('div');
-            // this.root.className = 'lextimeline';
-
             
             this.header_offset = 38;
             
@@ -140,7 +137,7 @@
             header.sameLine();
             header.addTitle(this.name, {width: "132px"});
             header.addDropdown("Animation", ["Scene", "Anim1", "Anim2"], "Scene", (value, event) => {});        
-            header.addNumber("Duration", this.duration, (value, event) => this.setDuration(value), {step: 0.01, min: 0});        
+            header.addNumber("Duration", this.duration.toFixed(3), (value, event) => this.setDuration(value), {step: 0.01, min: 0});        
             header.addNumber("Current Time", this.currentTime, (value, event) => {
                 this.currentTime = value;
                 if(this.onSetTime)
@@ -631,7 +628,6 @@
         /**
          * @method setFramerate
          * @param {*} v
-         * TODO
          */
 
         setFramerate( v ) {
@@ -641,7 +637,6 @@
         /**
          * @method processMouse
          * @param {*} e
-         * TODO
          */
 
         processMouse( e ) {
@@ -706,7 +701,7 @@
                 const discard = this.movingKeys || (LX.UTILS.getTime() - this.clickTime) > 420; // ms
                 this.movingKeys ? innerSetTime( this.currentTime ) : 0;
 
-                if(this.grabbing && this.onClipMoved && this.lastClipsSelected.length){
+                if(e.button == 0 && this.grabbing && this.onClipMoved && this.lastClipsSelected.length){
                     this.onClipMoved(this.lastClipsSelected);
                 }
 
@@ -799,7 +794,7 @@
 
             return true;
         }
-
+        
         /**
          * @method drawTrackWithKeyframes
          * @param {*} ctx
@@ -2338,7 +2333,7 @@
                         callback: () => {
                             let clipstToDelete = this.lastClipsSelected;
                             for(let i = 0; i < clipstToDelete.length; i++){
-                                this.deleteClip(clipstToDelete[i], null);
+                                this.deleteClip(e, clipstToDelete[i], null);
                             }
                             // this.optimizeTracks();
                         }
@@ -2567,7 +2562,7 @@
          * @clip: clip to be delete
          * @callback: (optional) function to call after deleting the clip
         */
-        deleteClip( clip, callback ) {
+        deleteClip( e, clip, callback ) {
 
             let index = -1;
             // Key pressed
@@ -2575,8 +2570,47 @@
                 clip = this.selectedClip;
             }
             
+            if(e.multipleSelection || !clip) {
 
-            let [trackIdx, clipIdx] = clip;
+                // Split in tracks
+                const perTrack = [];
+                this.lastClipsSelected.forEach( e => perTrack[e[0]] ? perTrack[e[0]].push(e) : perTrack[e[0]] = [e] );
+                
+                for(let pts of perTrack) {
+                    
+                    if(!pts) continue;
+
+                    pts = pts.sort( (a,b) => a[2] - b[2] );
+                    
+                    let deletedIndices = 0;
+
+                    // Delete every selected clip
+                    for(let [trackIdx, clipIdx] of pts) {
+                        this.#delete(trackIdx, clipIdx );
+                        deletedIndices++;
+                    }
+                }
+            } 
+            else if ( clip ){
+                const [trackIdx, clipIdx]  = clip;
+
+                this.saveState(clip);
+                this.#delete( trackIdx, clipIdx );
+            }
+            
+
+            if(callback)
+                callback();
+            
+            this.timelineClickedClips = [];
+            this.selectedClip = null;
+            //this.unSelectAllClips();
+            // // Update animation action interpolation info
+
+        }
+
+        #delete( trackIdx, clipIdx) {
+
             let clips = this.animationClip.tracks[trackIdx].clips;
             if(clipIdx >= 0)
             {
@@ -2596,15 +2630,41 @@
                     }
                     this.lastClipsSelected = [...this.lastClipsSelected.slice(0, selectedIdx), ...this.lastClipsSelected.slice(selectedIdx + 1, this.lastClipsSelected.length)];
                 }
-                if(callback)
-                    callback();
             }
-            this.selectedClip = null;
-            //this.unSelectAllClips();
-            // // Update animation action interpolation info
 
         }
 
+        saveState( clipIdx ) {
+
+            // const localIdx = this.animationClip.tracks[clipIdx].idx;
+            // const name = this.getTrackName(this.animationClip.tracks[clipIdx].name)[0];
+            // const trackInfo = this.tracksPerItem[name][localIdx];
+
+            // this.trackState.push({
+            //     idx: clipIdx,
+            //     t: this.animationClip.tracks[clipIdx].times.slice(),
+            //     v: this.animationClip.tracks[clipIdx].values.slice(),
+            //     editedTracks: [].concat(trackInfo.edited)
+            // });
+        }
+
+        restoreState() {
+            
+            // if(!this.trackState.length)
+            // return;
+
+            // const state = this.trackState.pop();
+            // this.animationClip.tracks[state.idx].times = state.t;
+            // this.animationClip.tracks[state.idx].values = state.v;
+
+            // const localIdx = this.animationClip.tracks[state.idx].idx;
+            // const name = this.getTrackName(this.animationClip.tracks[state.idx].name)[0];
+            // this.tracksPerItem[name][localIdx].edited = state.editedTracks;
+
+            // // Update animation action interpolation info
+            // if(this.onUpdateTrack)
+            //     this.onUpdateTrack( state.idx );
+        }
         
         getCurrentClip( track, time, threshold ) {
 

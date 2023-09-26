@@ -351,14 +351,16 @@
 
         const dialog = new Dialog(title, p => {
             p.addTextArea(null, text, null, { disabled: true });
-            p.addText(null, value, (v) => value = v, {placeholder: "..."} );
+            if(options.input != false)
+                p.addText(null, value, (v) => value = v, {placeholder: "..."} );
             p.sameLine(2);
             p.addButton(null, "OK", () => { callback.call(this, value); dialog.close() }, { buttonClass: "accept" });
-            p.addButton(null, "Cancel", () => dialog.close() );
+            p.addButton(null, "Cancel", () => {if(options.on_cancel) options.on_cancel(); dialog.close();} );
         }, options);
 
         // Focus text prompt
-        dialog.root.querySelector('input').focus();
+        if(options.input != false)
+            dialog.root.querySelector('input').focus();
     }
 
     LX.prompt = prompt;
@@ -2377,13 +2379,17 @@
          * @description Stop inlining widgets
          */
 
-        endLine() {
+        endLine(justifyContent) {
 
             this.#inline_widgets_left = 0;
 
             if(!this._inlineContainer)  {
                 this._inlineContainer = document.createElement('div');
                 this._inlineContainer.className = "lexinlinewidgets";
+                if(justifyContent)
+                {
+                    this._inlineContainer.style.justifyContent = justifyContent;
+                }
             }
             
             // Push all elements single element or Array[element, container]
@@ -4502,6 +4508,9 @@
             let input = document.createElement('input');
             input.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 10%)";
             input.type = 'file';
+            if(options.placeholder)
+                input.placeholder = options.placeholder;
+
             input.addEventListener('change', function(e) {
                 const files = e.target.files;
                 if(!files.length) return;
@@ -5752,6 +5761,7 @@
         static ASSET_DELETED    = 2;
         static ASSET_RENAMED    = 3;
         static ASSET_CLONED     = 4;
+        static ASSET_DBCLICK    = 5;
 
         constructor( type, item, value ) {
             this.type = type || TreeEvent.NONE;
@@ -5767,6 +5777,7 @@
                 case AssetViewEvent.ASSET_DELETED: return "assetview_event_deleted";
                 case AssetViewEvent.ASSET_RENAMED:  return "assetview_event_renamed";
                 case AssetViewEvent.ASSET_CLONED:  return "assetview_event_cloned";
+                case AssetViewEvent.ASSET_DBCLICK:  return "assetview_event_dbclick";
             }
         }
     };
@@ -6089,7 +6100,7 @@
                         that._enter_folder( item );
 
                     if(that.onevent) {
-                        const event = new AssetViewEvent(AssetViewEvent.ASSET_SELECTED, e.shiftKey ? [item] : item );
+                        const event = new AssetViewEvent(e.detail === 1 ? AssetViewEvent.ASSET_SELECTED: AssetViewEvent.ASSET_DBCLICK, e.shiftKey ? [item] : item );
                         event.multiple = !!e.shiftKey;
                         that.onevent( event );
                     }
