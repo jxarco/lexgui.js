@@ -341,6 +341,7 @@
      * id: Id of the prompt dialog
      * position: Dialog position in screen [screen centered]
      * draggable: Dialog can be dragged [false]
+     * input: If false, no text input appeats
      */
 
     function prompt(text, title, callback, options = {})
