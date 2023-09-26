@@ -79,6 +79,8 @@
             this.skipVisibility = options.skipVisibility ?? false;
             this.skipLock = options.skipLock ?? false;
 
+            this.optimizeThreshold = 0.025;
+
             this.root = new LX.Area({className : 'lextimeline'});
             
             this.header_offset = 38;
@@ -136,7 +138,11 @@
             LX.DEFAULT_NAME_WIDTH = "50%";
             header.sameLine();
             header.addTitle(this.name, {width: "132px"});
-            header.addDropdown("Animation", ["Scene", "Anim1", "Anim2"], "Scene", (value, event) => {});        
+            header.addText("Animation", this.animationClip ? this.animationClip.name : "Animation", (value, event) => { 
+                if( !this.animationClip )
+                    return;
+                this.animationClip.name = value ;
+            });        
             header.addNumber("Duration", this.duration.toFixed(3), (value, event) => this.setDuration(value), {step: 0.01, min: 0});        
             header.addNumber("Current Time", this.currentTime, (value, event) => {
                 this.currentTime = value;
@@ -150,6 +156,21 @@
                 this.header.addButton( null, "<a class='" + button.icon +"' title='" + button.name + "'></a>", button.callback, {width: "32px"});
             }
 
+            if(this.onShowOptimizeMenu)
+                header.addButton("", '<i class="fa-solid fa-filter"></i>', (value, event) => {this.onShowOptimizeMenu(event)}, {width: "40px"});
+
+            header.addButton("", '<i class="fa-solid fa-gear"></i>', (value, event) => {
+                let dialog = new LX.Dialog("Configuration", d => {
+                    d.addNumber("Framerate", this.framerate, null, {disabled: true});
+                    d.addNumber("Num items", Object.keys(this.tracksPerItem).length, null, {disabled: true});
+                    d.addNumber("Num tracks", this.animationClip ? this.animationClip.tracks.length : 0, null, {disabled: true});
+                    if(this.onShowOptimizeMenu)
+                        d.addNumber("Optimize Threshold", this.optimizeThreshold, v => {
+                            this.optimizeThreshold = v;
+                        }, {min: 0, max: 0.25, step: 0.001, precision: 4});
+                    
+                })
+            }, {width: "40px"})
             header.endLine();
             LX.DEFAULT_NAME_WIDTH = "30%";
         }
@@ -305,7 +326,7 @@
         setAnimationClip( animation ) {
             this.animationClip = animation;
             this.duration = animation.duration;
-
+            this.speed = animation.speed || 1;
             var w = Math.max(300, this.canvas.width);
             this.secondsToPixels = ( w - this.session.left_margin ) / this.duration;
             // if(this.secondsToPixels < 1)
@@ -1544,6 +1565,34 @@
             }
         }
 
+
+        optimizeTrack(trackIdx) {
+            const track = this.animationClip.tracks[trackIdx];
+            if(track.optimize) {
+
+                track.optimize( this.optimizeThreshold );
+                if(this.onOptimizeTracks)
+                   this.onOptimizeTracks(trackIdx);
+            }
+        }
+    
+        optimizeTracks() {
+    
+            if(!this.animationClip)
+                return;
+    
+            for( let i = 0; i < this.animationClip.tracks.length; ++i ) {
+                const track = this.animationClip.tracks[i];
+                if(track.optimize) {
+    
+                    track.optimize( this.optimizeThreshold );
+                    if(this.onOptimizeTracks)
+                        this.onOptimizeTracks(i);
+                }
+            }
+        }
+
+
         getNumTracks( item ) {
             if(!item || !this.tracksPerItem)
                 return;
@@ -2437,6 +2486,32 @@
         }
 
         /**
+         * @method optimizeTrack
+         */
+
+        optimizeTrack(trackIdx) {
+            if(this.animationClip.tracks[trackIdx].clips.length) {
+                this.animationClip.tracks[trackIdx].idx = tracks.length;
+                for(let j = 0; j < this.animationClip.tracks[trackIdx].clips.length; j++)
+                {
+                    this.animationClip.tracks[trackIdx].clips[j].trackIdx = tracks.length;
+                }
+                let selectedIdx = 0;
+                for(let l = 0; l < this.lastClipsSelected.length; l++)
+                {
+                    let [t,c] = this.lastClipsSelected[l];
+                
+                    if(t > trackIdx)
+                        this.lastClipsSelected[l][1] = t - 1;
+                    if(t == trackIdx)
+                        selectedIdx = l;
+                }
+                this.lastClipsSelected = [...this.lastClipsSelected.slice(0, selectedIdx), ...this.lastClipsSelected.slice(selectedIdx + 1, this.lastClipsSelected.length)];
+                tracks.push(this.animationClip.tracks[i]);
+            }		
+        }
+
+        /**
          * @method optimizeTracks
          */
 
@@ -3304,7 +3379,7 @@
         }
 
     
-        onShowOptimizeMenu( e ) {
+        onShowOptimizeMenu( e) {
             
             if(this.selectedItems == null)
                 return;
@@ -3324,6 +3399,8 @@
                     m.add( t.name + (t.type ? "@" + t.type : ""), () => { 
                         this.animationClip.tracks[t.clipIdx].optimize( threshold );
                         t.edited = [];
+                        if(this.onOptimizeTracks)
+                            this.onOptimizeTracks(t.clipIdx);
                     })
                 }
             });
