@@ -160,7 +160,10 @@
             // Action keys
 
             this.action('Backspace', ( ln, cursor, e ) => {
+
+                this._addUndoStep(cursor);
                 let selection = this.selections.children[0];
+
                 if(selection.range) {
                     this.deleteSelection(cursor, selection);
                     if(!this.code.lines[ln].length) this.actions['Backspace'](ln, cursor, e);
@@ -185,6 +188,9 @@
             });
 
             this.action('Delete', ( ln, cursor, e ) => {
+
+                this._addUndoStep( cursor );
+
                 let selection = this.selections.children[0];
                 if(selection.range)
                 {
@@ -243,9 +249,11 @@
 
                 if(e.ctrlKey)
                 {
-                    this.onrun( this.code.lines.join("\n") );
+                    this.onrun( this.getText() );
                     return;
                 }
+
+                this._addUndoStep(cursor);
 
                 var _c0 = this.getCharAtPos( cursor, -1 );
                 var _c1 = this.getCharAtPos( cursor );
@@ -404,6 +412,10 @@
             if( panel ) area.attach( panel );
         }
 
+        getText( min ) {
+            return this.code.lines.join(min ? ' ' : '\n');
+        }
+
         loadFile( file ) {
 
             const inner_add_tab = ( text, name, title ) => {
@@ -435,6 +447,17 @@
                 };
             }
             
+        }
+
+        _addUndoStep( cursor )  {
+
+            var cursor = cursor ?? this.cursors.children[0];
+
+            this.code.undoSteps.push( {
+                lines: LX.deepCopy(this.code.lines),
+                cursor: this.saveCursor(cursor),
+                line: cursor.line
+            } );
         }
 
         _change_language( lang ) {
@@ -731,7 +754,9 @@
             if( !this.code ) 
                 return;
 
-            var key = e.key;
+            var key = e.key ?? e.detail.key;
+
+            const skip_undo = e.detail.skip_undo ?? false;
 
             // keys with length > 1 are probably special keys
             if( key.length > 1 && this.specialKeys.indexOf(key) == -1 )
@@ -766,7 +791,7 @@
                     return;
                 case 's': // save
                     e.preventDefault();
-                    this.onsave( this.code.lines.join("\n") );
+                    this.onsave( this.getText() );
                     return;
                 case 'v': // paste
                     const text = await navigator.clipboard.readText();
@@ -827,24 +852,19 @@
             const d = new Date();
             const current = d.getTime();
 
-            if( !this._lastTime ) {
-                this._lastTime = current;
-                this.code.undoSteps.push( {
-                    lines: LX.deepCopy(this.code.lines),
-                    cursor: this.saveCursor(cursor),
-                    line: cursor.line
-                } );
-            } else {
-                if( (current - this._lastTime) > 3000 && this.code.lines.length){
-                    this._lastTime = null;
-                    this.code.undoSteps.push( {
-                        lines: LX.deepCopy(this.code.lines),
-                        cursor: this.saveCursor(cursor),
-                        line: cursor.line
-                    } );
-                }else{
-                    // If time not enough, reset timer
+            if( !skip_undo )
+            {
+                if( !this._lastTime ) {
                     this._lastTime = current;
+                    this._addUndoStep( cursor );
+                } else {
+                    if( (current - this._lastTime) > 3000 && this.code.lines.length){
+                        this._lastTime = null;
+                        this._addUndoStep( cursor );
+                    }else{
+                        // If time not enough, reset timer
+                        this._lastTime = current;
+                    }
                 }
             }
 
@@ -1249,7 +1269,10 @@
         addSpaces(n) {
             
             for( var i = 0; i < n; ++i ) {
-                this.root.dispatchEvent(new KeyboardEvent('keydown', {'key': ' '}));
+                this.root.dispatchEvent(new CustomEvent('keydown', {'detail': {
+                    skip_undo: true,
+                    key: ' '
+                }}));
             }
         }
 
