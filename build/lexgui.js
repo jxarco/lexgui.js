@@ -2597,7 +2597,7 @@
 
         #add_filter( placeholder, options = {} ) {
 
-            options.placeholder = placeholder.constructor == String ? placeholder : "Filter properties"
+            options.placeholder = placeholder.constructor == String ? placeholder : "Filter properties..";
             options.skipWidget = options.skipWidget ?? true;
 
             let widget = this.create_widget(null, Widget.TEXT, options);
@@ -5963,7 +5963,7 @@
 
             this.rightPanel.sameLine();
             this.rightPanel.addDropdown("Filter", this.allowed_types, "None", (v) => this._refresh_content.call(this, null, v), { width: "20%" });
-            this.rightPanel.addText(null, this.search_value ?? "", (v) => this._refresh_content.call(this, v, null), { placeholder: "Search assets..." });
+            this.rightPanel.addText(null, this.search_value ?? "", (v) => this._refresh_content.call(this, v, null), { placeholder: "Search assets.." });
             this.rightPanel.addButton(null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { width: "3%" });
             this.rightPanel.endLine();
 
