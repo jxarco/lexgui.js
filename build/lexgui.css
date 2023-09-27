@@ -110,10 +110,11 @@ input[type="file"] {
   width: 30%;
   top: 15%;
   left: calc(50% - 15%);
-  box-shadow: 0 2px 10px black;
   display: flex;
   flex-wrap: wrap;
   z-index: 105;
+  -webkit-mask-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAA5JREFUeNpiYGBgAAgwAAAEAAGbA+oJAAAAAElFTkSuQmCC); /* this fixes the overflow:hidden in Chrome/Opera */
+  /* box-shadow: 0 2px 10px black; */
 }
 
 #global_search a {
@@ -128,7 +129,7 @@ input[type="file"] {
   flex: 50%;
   background: none;
   color: var(--global-text-secondary);
-  outline:none;
+  outline: none;
   border: none;
   font-family: var(--global-font);
   line-height: 23px;
@@ -900,7 +901,6 @@ input[type=checkbox]:checked:after {
 .lexcheckbox:has(.checkbox.on) {
   vertical-align: 0px;
   border: none;
-  box-shadow: 0 0 5px black !important
 }
 
 .lexcheckbox.disabled {
@@ -1255,12 +1255,12 @@ input[type="range"] {
 
 .lextree input {
   background: none;
-  color: var(--global-text-secondary);
+  color: var(--global-text-primary);
   outline:none;
   border: none;
   font-family: var(--global-font);
   line-height: 23px;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .lextree .lextreeitem {
@@ -1277,11 +1277,6 @@ input[type="range"] {
   user-select: none; /* Standard syntax */
 }
 
-.lextree .lextreeitem.selected {
-  color: var(--global-text-primary);
-  background: var(--global-selected);
-}
-
 .lextree .lextreeitem.draggingover {
   background: #7b8ae27b;
 }
@@ -1291,18 +1286,15 @@ input[type="range"] {
   background: rgba(129, 132, 163, 0.191);
 }
 
-/* .lextree .lextreeitem.selected:hover{
-  color: var(--global-selected);
-} */
-
-.lextree .lextreeitem:hover a {
-  color: var(--global-text-secondary);
+.lextree .lextreeitem.selected {
+  color: var(--global-text-primary);
+  background: var(--global-selected);
 }
 
 .lextree .lextreeitem a {
   margin-right: 6px;
   margin-top: 4px;
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .lextree .lextreeitem a.hierarchy {
@@ -1327,7 +1319,7 @@ input[type="range"] {
 }
 
 .lextree .lextreeitem .itemicon {
-  font-size: 12px !important;
+  font-size: 10px !important;
   float: right;
   margin-top: 7px;
   margin-right: 8px;
@@ -1337,8 +1329,11 @@ input[type="range"] {
   color: var(--global-selected);
 }
 
-.lextree .lextreeitem .itemicon:active {
+.lextree .lextreeitem.selected .itemicon:hover {
   color: var(--global-text-secondary);
+}
+
+.lextree .lextreeitem .itemicon:active {
   margin-top: 7px;
 }
 
@@ -2265,8 +2260,6 @@ ul.lexassetscontent {
   overflow: auto;
   padding: 0 1em;
   margin: 0;
-  /* background-color: var(--global-branch-darker); */
-  /* box-shadow: inset 0 0 3px black; */
   height: calc(100% - 36px);
 }
 

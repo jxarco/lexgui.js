@@ -110,13 +110,13 @@
                 const el = allItems[ hoverElId ];
                 if(el) {
                     const is_checkbox = (el.item.type && el.item.type === 'checkbox');
+                    this.classList.toggle('hidden');
                     if(is_checkbox)  {
                         el.item.checked = !el.item.checked;
                         el.callback.call(window, el.item.checked, el.entry_name);
                     }
                     else
                         el.callback.call(window, el.entry_name);
-                    global_search.classList.toggle('hidden');
                 }
             }
             else if ( e.key == 'ArrowDown' && hoverElId < (allItems.length - 1) ) {
@@ -2094,6 +2094,8 @@
 
             name_input.addEventListener("keyup", function(e){
                 if(e.key == 'Enter') {
+
+                    this.value = this.value.replace(/\s/g, '_');
 
                     if(that.onevent) {
                         const event = new TreeEvent(TreeEvent.NODE_RENAMED, node, this.value);
