@@ -5,16 +5,16 @@
 :root {
   --global-color-primary: #232323;
   --global-color-secondary: #343434;
-	--branch-background: #2d2d2f;
+	--branch-background: #2c2c2e;
   --widget-background-hover: #3c434bab;
 	--global-branch-darker: #28282a;
 	--branch-title-background: #2e3338;
   --branch-title-inactive-background: #42484e;
   --global-button-color: #ffffff12;
   --global-dropdown-color: #4e5154;
-  --global-text: #a1a1a1;
+  --global-text: #d4d4dcd7;
   --global-text-primary: #f4f4ffe6;
-  --global-text-secondary: #b7b7cbc5;
+  --global-text-secondary: #c6c6cfb8;
   --global-selected: #4e65e9;
   --global-selected-light: #7b8ae2;
   --global-highlight: #2c303570;
@@ -362,22 +362,21 @@ input[type="file"] {
 
 .lexbranch .lexbranchcontent {
   padding: 4px;
-  background: var(--branch-background);
-  border-radius: 8px;
+  background-color: var(--branch-background);
 }
 
 .lexbranch.last .lexbranchcontent {
   overflow: hidden;
+  margin-bottom: 6px;
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
-  margin-bottom: 6px;
 }
 
 .lexbranchtitle {
-  /* background: var(--branch-title-background); */
   font-size: 14px;
   font-weight: bold;
   color: var(--global-text);
+  background-color: var(--branch-background);
   padding: 10px;
   text-shadow: 0px 1px 2px #000;
   border-radius: 0px;
@@ -439,9 +438,6 @@ input[type="file"] {
 .lexbranch.last.closed .lexbranchtitle {
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
-}
-
-.lexbranch.last.closed .lexbranchtitle {
   margin-bottom: 6px;
 }
 
@@ -468,7 +464,6 @@ input[type="file"] {
   padding: 5px;
   font-size: 13px;
   color: #DCDCDC;
-  /* margin-right: 10px; */
   line-height: 2;
   overflow: hidden;
 }
@@ -478,9 +473,9 @@ input[type="file"] {
   padding-right: 10px;
 }
 
-.lexwidget:hover:not(.blank) {
+/* .lexwidget:hover:not(.blank) {
   background-color: var(--widget-background-hover);
-}
+} */
 
 .lexwidget.auto {
   width: unset !important;
@@ -522,6 +517,7 @@ input[type="file"] {
   display: flex;
   justify-content: space-between;
   font-family: var(--global-font);
+  color: var(--global-text-secondary);
 }
 
 .lexwidget input {
@@ -530,14 +526,14 @@ input[type="file"] {
   padding: 3px;
   color: var(--global-text-primary);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   outline:none;
   border: none;
   border-bottom: 1px solid #bbbbbb47;
 }
 
 .lexwidget .lextext input:focus {
-  border-bottom: 2px solid var(--global-selected-light);
+  border-bottom: 2px solid var(--global-selected);
 }
 
 .lexwidget .inputicon {
@@ -548,7 +544,7 @@ input[type="file"] {
 }
 
 .lexwidget:has(input:focus) .inputicon {
-  border-bottom: 2px solid var(--global-selected-light);
+  border-bottom: 2px solid var(--global-selected);
 }
 
 .lexwidget textarea {
@@ -629,9 +625,8 @@ input[type="file"] {
   display: grid;
   align-content: center;
 	background-color: var(--global-button-color);
-  border-radius: 6px;
-  border: 1px solid #aba9c131;
-  /* margin-left: 5px; */
+  border-radius: 8px;
+  border: none;
   margin-top: 2px;
   height: 22px !important;
   color: var(--global-text);
@@ -659,7 +654,8 @@ input[type="file"] {
 }
 
 .lexbutton:hover {
-  background-color: #5a6571;
+  background-color: #ffffff30;
+  color: var(--global-text-primary);
 }
 
 .lexbutton.accept:hover {
@@ -701,13 +697,7 @@ input[type="file"] {
   border-radius: 0px;
   display: flex;
   padding-top: 0.15em;
-}
-
-.lexcombobuttons .lexbutton.combo:active {
-  outline: none;
-  border: 1px solid var(--global-selected-light);
-  color: #fff;
-  padding-top: 0.25em;
+  transition: 0.2s;
 }
 
 .lexcombobuttons .lexbutton.combo:first-child {
@@ -723,8 +713,13 @@ input[type="file"] {
 .lexcombobuttons .lexbutton.combo.selected {
   background-color: var(--global-selected);
   outline: none;
-  border: 1px solid var(--global-selected-light);
   color: #fff;
+}
+
+.lexcombobuttons .lexbutton.combo:active {
+  outline: none;
+  color: #fff;
+  padding-top: 0.2em;
 }
 
 .lexcombobuttons .lexbutton.combo a {
@@ -816,7 +811,7 @@ input[type="file"] {
 }
 
 .lexdropdown .lexdropdownitem:hover {
-  background-color: var(--global-selected);
+  background-color: var(--branch-title-inactive-background);
   color: var(--global-text-primary);
 }
 
@@ -832,7 +827,7 @@ input[type="file"] {
 
 .lexdropdown .lexdropdownitem.selected {
   font-weight: bold;
-  color: var(--global-selected-light);
+  color: var(--global-selected);
 }
 
 .lexdropdown .lexdropdownitem.selected a {
@@ -840,7 +835,6 @@ input[type="file"] {
 }
 
 .lexdropdown img {
-  /* width: inherit; */
   max-height: 64px;
   margin-top: 8px;
 }
@@ -870,7 +864,7 @@ input[type=checkbox]:checked:after {
   display: block;
   width: 4px;
   height: 8px;
-  border: solid var(--global-selected-light);
+  border: solid var(--global-selected);
   border-width: 0 2px 2px 0;
   -webkit-transform: rotate(45deg);
   -ms-transform: rotate(45deg);
@@ -926,7 +920,7 @@ input[type=checkbox]:checked:after {
 }
 
 .lexcheckbox .checkbox.on {
-  background-color: var(--global-selected-light);
+  background-color: var(--global-selected);
 }
 
 .lexcheckboxcont #checkboxtext {
@@ -966,7 +960,7 @@ input[type=checkbox]:checked:after {
 }
 
 .lexcolor:has(input:focus) input[type="color"] {
-  outline: 2px solid var(--global-selected-light);
+  outline: 2px solid var(--global-selected);
   border-radius: 4px;
 }
 
@@ -1004,7 +998,7 @@ input[type=checkbox]:checked:after {
 }
 
 .lexvector .vecbox:has(input:focus) {
-  outline: 2px solid var(--global-selected-light);
+  outline: 2px solid var(--global-selected);
 }
 
 .lexvector .vecbox span {
@@ -1176,6 +1170,7 @@ input[type="range"] {
   color: #8184a264;
   cursor: pointer;
   margin-right: 4px;
+  text-align: center;
 }
 
 .lextabscontainer.horizontal .tabs .lextab {
@@ -1191,14 +1186,6 @@ input[type="range"] {
   color: var(--global-text-primary);
 }
 
-.lextabscontainer .tabs .lextab:active {
-  padding-left: 5px;
-}
-
-.lextabscontainer.horizontal .tabs .lextab:active {
-  padding-top: 5px;
-}
-
 .lextabscontainer .tabs .lextab.last {
   margin-right: 4px;
 }
@@ -1207,26 +1194,33 @@ input[type="range"] {
   color: var(--global-text-primary);
 }
 
+.lextabscontainer .tabs .lextab:active {
+  color: var(--global-text-secondary);
+}
+
 /* Data Tree Widget */
 
 .lextree {
   border-radius: 8px;
-  background: var(--global-dark-background);
   width: calc( 100% - 6px );
   min-height: 12px;
   margin: 0 auto;
-  color: var(--global-text-secondary);
-  font-weight: bold;
   margin-top: 6px;
   margin-bottom: -8px;
+  color: var(--global-text-secondary);
+  font-weight: 600;
+  font-size: 13px;
 }
 
 .lextree .lextreetools {
   background: var(--branch-background);
-  padding: 6px;
+  padding: 2px;
+  padding-left: 6px;
+  padding-right: 6px;
   display: flex;
-  font-size: 13px;
   align-items: center;
+  border-radius: 10px;
+  margin-top: 4px;
 }
 
 .lextree .lextreetools.notitle {
@@ -1239,22 +1233,18 @@ input[type="range"] {
   margin-right: 8px;
 }
 
-.lextree .lextreetools input {
-  font-size: 13px;
-}
-
 .lextree span {
   padding: 8px;
-  background: var(--branch-title-background);
   display: block;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
-  color: rgba(216, 218, 230, 0.932);
+  color: var(--global-text-secondary);
   -webkit-user-select: none; /* Safari 3.1+ */
   -moz-user-select: none; /* Firefox 2+ */
   -ms-user-select: none; /* IE 10+ */
   user-select: none; /* Standard syntax */
-  font-size: 14px;
+  font-size: 16px;
+  font-weight: 800;
 }
 
 .lextree ul {
@@ -1266,11 +1256,9 @@ input[type="range"] {
 .lextree input {
   background: none;
   color: var(--global-text-secondary);
-  font-weight: bold;
   outline:none;
   border: none;
   font-family: var(--global-font);
-  color: var(--global-selected-light);
   line-height: 23px;
   font-size: 14px;
 }
@@ -1280,29 +1268,32 @@ input[type="range"] {
   align-items: center;
   margin-bottom: 3px;
   line-height: 25px;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 6px;
   -webkit-user-select: none; /* Safari 3.1+ */
   -moz-user-select: none; /* Firefox 2+ */
   -ms-user-select: none; /* IE 10+ */
   user-select: none; /* Standard syntax */
-  cursor: pointer;
 }
 
-.lextree .lextreeitem.selected{
-  color: var(--global-selected-light);
-  background: var(--global-highlight);
+.lextree .lextreeitem.selected {
+  color: var(--global-text-primary);
+  background: var(--global-selected);
 }
 
 .lextree .lextreeitem.draggingover {
-  background: rgba(129, 132, 163, 0.191);
+  background: #7b8ae27b;
 }
 
 .lextree .lextreeitem:hover {
   color: var(--global-text-primary);
+  background: rgba(129, 132, 163, 0.191);
 }
 
-.lextree .lextreeitem.selected:hover{
+/* .lextree .lextreeitem.selected:hover{
   color: var(--global-selected);
-}
+} */
 
 .lextree .lextreeitem:hover a {
   color: var(--global-text-secondary);
@@ -1331,14 +1322,14 @@ input[type="range"] {
 }
 
 .lextree .lextreeitem.parent a {
-  font-size: 15px;
-  vertical-align: -1px;
+  font-size: 9px;
+  vertical-align: 1px;
 }
 
 .lextree .lextreeitem .itemicon {
   font-size: 12px !important;
   float: right;
-  margin-top: 6px;
+  margin-top: 7px;
   margin-right: 8px;
 }
 
@@ -1447,13 +1438,13 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexcontextmenu {
-  background: var(--global-dark-background);
+  background-color: #343434b6;
+  backdrop-filter: blur(16px);
   position: absolute;
   padding-right: 14px;
-  /* border-bottom-left-radius: 6px;
-  border-bottom-right-radius: 6px; */
   z-index: 1001;
-  box-shadow: 0 0 6px black !important;
+  border-bottom-right-radius: 6px;
+  border-bottom-left-radius: 6px;
 }
 
 .lexcontextmenu:focus {
@@ -1482,6 +1473,12 @@ meter::-webkit-meter-even-less-good-value {
   align-content: center;
   justify-content: space-between;
 }
+
+.lexcontextmenu .lexcontextmenuentry.last {
+  border-bottom-right-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
 .lexcontextmenu .lexcontextmenuentrycontainer {
   display: flex;
   flex-direction: row;
@@ -1511,10 +1508,6 @@ meter::-webkit-meter-even-less-good-value {
   float: right;
   /* margin-top: -8px; */
   margin-right: 8px;
-}
-
-.lexcontextmenu .lexcontextmenuentry.last {
-  border-bottom: 2px solid var(--global-selected-light);
 }
 
 .lexcontextmenu .lexcontextmenuentry:hover {
@@ -1844,8 +1837,8 @@ meter::-webkit-meter-even-less-good-value {
   width: fit-content;
   width: moz-fit-content;
   border-radius: 10px;
-  margin-top: 4px;
-  margin-bottom: 4px;
+  margin-top: 6px;
+  margin-bottom: 6px;
   background-color: var(--global-color-secondary);
 }
 
@@ -1858,7 +1851,7 @@ meter::-webkit-meter-even-less-good-value {
   justify-content: center;
   text-align: center;
   align-items: center;
-  padding: 4px;
+  padding: 2px;
   padding-left: 20px;
   padding-right: 20px;
   color: var(--global-text-secondary);
@@ -1911,10 +1904,6 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexareatabscontainer .lexbranch {
   margin: -4px 7px !important;
-}
-
-.lexareatabscontainer .lexbranchtitle {
-  border-top-left-radius: 0px !important;
 }
 
 .lexareatabscontent {
@@ -1979,8 +1968,8 @@ meter::-webkit-meter-even-less-good-value {
 .lexlayers {
   display: grid;
   grid-template-columns: 18px 18px 18px 18px 18px 18px 18px 18px;
-  grid-gap: 4px 6px; /* Gap between grid cells */
-  /* justify-content: center; */
+  grid-gap: 6px 8px; /* Gap between grid cells */
+  justify-content: center;
 }
 
 .lexlayer {
@@ -1991,7 +1980,7 @@ meter::-webkit-meter-even-less-good-value {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  border-radius: 1px;
+  border-radius: 4px;
   font-size: 12px;
 }
 
@@ -2044,12 +2033,12 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexlistitem:hover {
-  background-color: #497baa8b;
+  background-color: var(--branch-title-inactive-background);
   color: var(--global-text-primary);
 }
 
 .lexlistitem:active {
-  color: var(--global-dropdown-color);
+  color: rgba(216, 218, 230, 0.826);
 }
 
 .lexlistitem.selected {

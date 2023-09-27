@@ -4603,7 +4603,7 @@
                 });
         
                 let searchIcon = document.createElement('a');
-                searchIcon.className = "fa-solid fa-magnifying-glass";
+                searchIcon.className = "lexicon fa-solid fa-magnifying-glass";
                 toolsDiv.appendChild(node_filter_input);
                 toolsDiv.appendChild(searchIcon);
             }
@@ -5460,7 +5460,7 @@
             element.style.width = options.width || "100%";
 
             element.bgcolor = options.bgcolor || "#15181c";
-            element.pointscolor = options.pointscolor || "#67aae9";
+            element.pointscolor = options.pointscolor || "#7b8ae2";
             element.linecolor = options.linecolor || "#555";
 
             element.value = value || [];
