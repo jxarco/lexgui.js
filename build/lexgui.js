@@ -4108,7 +4108,7 @@
                 slider.addEventListener("input", function(e) {
                     let new_value = +this.valueAsNumber;
                     let fract = new_value % 1;
-                    vecinput.value = Math.floor(new_value) + (+fract.toPrecision(5));
+                    vecinput.value = Math.trunc(new_value) + (+fract.toPrecision(5));
                     Panel.#dispatch_event(vecinput, "change");
                 }, false);
                 box.appendChild(slider);
@@ -4125,7 +4125,7 @@
                 else if(e.altKey) mult *= 0.1;
                 let new_value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1));
                 let fract = new_value % 1;
-                this.value = Math.floor(new_value) + (+fract.toPrecision(5));
+                this.value = Math.trunc(new_value) + (+fract.toPrecision(5));
                 Panel.#dispatch_event(vecinput, "change");
             }, {passive:false});
 
@@ -4166,7 +4166,7 @@
                     else if(e.altKey) mult *= 0.1;
                     let new_value = (+vecinput.valueAsNumber + mult * dt);
                     let fract = new_value % 1;
-                    vecinput.value = Math.floor(new_value) + (+fract.toPrecision(5));
+                    vecinput.value = Math.trunc(new_value) + (+fract.toPrecision(5));
                     Panel.#dispatch_event(vecinput, "change");
                 }
 
