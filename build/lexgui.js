@@ -1128,6 +1128,7 @@
 
             let container = document.createElement('div');
             container.className = "lexareatabs";
+            if(options.fit) container.classList.add("fit");
 
             let that = this;
 

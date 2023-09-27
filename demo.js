@@ -14,6 +14,7 @@ area.addMenubar( m => {
 
     // {options}: callback, icon, short
 
+    m.add( "Add/");
     m.add( "Scene/New Scene", () => { console.log("New scene created!") });
     m.add( "Scene/");
     m.add( "Scene/Open Scene", { icon: "fa-solid fa-folder-open", short:  "S", callback: () => { console.log("Opening SCENE Dialog") } } );
@@ -272,6 +273,7 @@ const resize_canvas = ( bounding ) => {
 };
 
 top_tabs.add( "Canvas", canvas, true, resize_canvas );
+top_tabs.add( "Debug", document.createElement('div'));
 
 // add on resize event to control canvas size
 top_tabs.area.onresize = resize_canvas;
@@ -326,7 +328,7 @@ top_tabs.area.addOverlayButtons( [
 var side_panel = rup.addPanel();
 fillPanel( side_panel );
 
-const bottom_tabs = rbottom.addTabs();
+const bottom_tabs = rbottom.addTabs({ fit: true });
 var side_bottom_panel = new LX.Panel();
 var side_bottom_panel_h = new LX.Panel();
 fillRightBottomPanel( side_bottom_panel, 'Vertical' );
@@ -363,7 +365,7 @@ function loop(dt) {
     requestAnimationFrame(loop);
 }
 
-createAssetDialog();
+// createAssetDialog();
 
 requestAnimationFrame(loop);
 
