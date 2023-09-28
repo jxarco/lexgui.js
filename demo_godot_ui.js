@@ -112,22 +112,13 @@ top_tabs.area.onresize = resize_canvas;
 fillRightSide( right );
 fillLeftSide( left );
 
+const img = new Image();
+img.src = "images/godot_canvas.png";
+
 function loop(dt) {
     
     var ctx = canvas.getContext("2d");
-
-    // Get values from panel widgets (e.g. color value)
-    ctx.fillStyle = "#444";
-
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.font = "48px Monospace";
-
-    ctx.fillStyle = "#67d";
-
-    const text = "left_side_panel.getValue('Text')";
-    const pos_2d = [200, 200];
-    ctx.fillText(text, pos_2d[0], pos_2d[1]);
-
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     requestAnimationFrame(loop);
 }
 
@@ -162,6 +153,43 @@ function fillRightSide( area ) {
     panel.addTitle("Mesh Instance 3D");
 
     panel.branch("Skeleton");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
+    panel.addText("Skin", "...");
     panel.addText("Skin", "...");
     panel.addSkeleton("Skeleton", skeleton_instance);
     panel.merge();

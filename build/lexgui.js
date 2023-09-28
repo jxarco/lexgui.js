@@ -680,7 +680,7 @@
                 }
                 else {
                     this.split_bar.style.height = LX.DEFAULT_SPLITBAR_SIZE + "px";
-                    this.split_bar.style.top = -LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
+                    // this.split_bar.style.top = -LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
                 }
                 this.split_bar.addEventListener("mousedown", inner_mousedown);
                 data = LX.DEFAULT_SPLITBAR_SIZE/2 + "px"; // updates
@@ -760,7 +760,6 @@
             {
                 return this.sections;
             }
-            
 
             // from litegui.js @jagenjo
 
@@ -803,6 +802,8 @@
                 document.body.classList.remove("nocursor");
                 that.split_bar.classList.remove("nocursor");
             }
+
+            this._moveSplit(0);
 
             return this.sections;
         }
@@ -896,10 +897,10 @@
             // d.remove();
             const height = 48; // pixels
 
-            this.split({type: 'vertical', sizes:[height,null], resize: false, menubar: true});
-            this.sections[0].attach( menubar );
-            this.sections[0].is_menubar = true;
-
+            const [bar, content] = this.split({type: 'vertical', sizes: [height, null], resize: false, menubar: true});
+            bar.attach( menubar );
+            bar.is_menubar = true;
+            window.content = content;
             return menubar;
         }
 
@@ -1064,7 +1065,7 @@
             if(!this.type)
                 throw("No split area");
 
-            if(!dt) // splitbar didn't move!
+            if(dt === undefined) // splitbar didn't move!
                 return;
 
             var a1 = this.sections[0];
@@ -1128,8 +1129,7 @@
             this.onclose = options.onclose;
 
             let container = document.createElement('div');
-            container.className = "lexareatabs";
-            if(options.fit) container.classList.add("fit");
+            container.className = "lexareatabs " + (options.fit ? "fit" : "row");
 
             let that = this;
 
