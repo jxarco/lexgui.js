@@ -77,6 +77,7 @@
             this.root.addEventListener( 'mouseup', this.processMouse.bind(this) );
             this.root.addEventListener( 'mousemove', this.processMouse.bind(this) );
             this.root.addEventListener( 'click', this.processMouse.bind(this) );
+            this.root.addEventListener( 'contextmenu', this.processMouse.bind(this) );
             this.root.addEventListener( 'focus', this.processFocus.bind(this, true) );
             this.root.addEventListener( 'focusout', this.processFocus.bind(this, false) );
 
@@ -648,6 +649,13 @@
             
             else if( e.type == 'mouseup' )
             {
+            //     if( e.button == 2 ) {
+            //         LX.addContextMenu( "Format code", event, m => {
+            //             let json = this.toJSONFormat(this.getText());
+            //         });
+            //         return;
+            //     }
+
                 if( (time.getTime() - this.lastMouseDown) < 600 ) {
                     this.state.selectingText = false;
                     this.processClick(e);
@@ -655,6 +663,7 @@
                 }
                 this.selection_started = false;
                 this.state.selectingText = false;
+                
             }
 
             else if( e.type == 'mousemove' )
@@ -669,27 +678,39 @@
             {
                 switch( e.detail )
                 {
-                case 2:
-                    // double click
-                    const [word, from, to] = this.getWordAtPos( cursor );
+                    case 2:
+                        // double click
+                        const [word, from, to] = this.getWordAtPos( cursor );
 
-                    var cursor = this.cursors.children[0];
-                    let selection = this.selections.children[0];
+                        var cursor = this.cursors.children[0];
+                        let selection = this.selections.children[0];
 
-                    this.resetCursorPos( CodeEditor.CURSOR_LEFT );
-                    this.cursorToString( cursor, this.code.lines[cursor.line].substr(0, from) );
-                    this.startSelection( cursor, selection );
-                    selection.style.width = this.measureString(word)[0] + "px";
-                    selection.range = [from, to];
-                    break;
-                case 3:
-                    // triple click: select entire line
-                    this.resetCursorPos( CodeEditor.CURSOR_LEFT );
-                    e._shiftKey = true;
-                    var cursor = this.cursors.children[0];
-                    this.actions['End'](cursor.line, cursor, e);
-                    break;
+                        this.resetCursorPos( CodeEditor.CURSOR_LEFT );
+                        this.cursorToString( cursor, this.code.lines[cursor.line].substr(0, from) );
+                        this.startSelection( cursor, selection );
+                        selection.style.width = this.measureString(word)[0] + "px";
+                        selection.range = [from, to];
+                        break;
+                    case 3:
+                        // triple click: select entire line
+                        this.resetCursorPos( CodeEditor.CURSOR_LEFT );
+                        e._shiftKey = true;
+                        var cursor = this.cursors.children[0];
+                        this.actions['End'](cursor.line, cursor, e);
+                        break;
                 }
+            }
+
+            else if ( e.type == 'contextmenu' ) {
+                e.preventDefault()
+                LX.addContextMenu( "Format code", e, m => {
+                    m.add( "JSON", () => { 
+                        let json = this.toJSONFormat(this.getText());
+                        this.code.lines = json.replaceAll("\n", "\n \n   ").split("\n   "); 
+                        this.processLines();
+                    } );
+                   
+                });
             }
         }
 
@@ -794,14 +815,33 @@
                     this.onsave( this.getText() );
                     return;
                 case 'v': // paste
-                    const text = await navigator.clipboard.readText();
+                    let text = await navigator.clipboard.readText();
+                    let params = text.split(":");
+                    for(let i = 0; i < params.length; i++) {
+                        let key = params[i].split(',');
+                        if(key.length > 1) {
+                            if(key[key.length-1].includes("]"))
+                                continue;
+                            key = key[key.length-1];
+                        }
+                        else
+                            key = key[0];
+                        key = key.replaceAll(/[{}\n\r]/g,"").replaceAll(" ","")
+                        if(key[0] != '"' && key[key.length - 1] != '"') {
+                            params[i] = params[i].replace(key, '"' + key + '"');
+                        }
+                    }
+                    text = params.join(':');
+
                     this.code.lines[lidx] = [
                         this.code.lines[lidx].slice(0, cursor.charPos), 
                         text, 
                         this.code.lines[lidx].slice(cursor.charPos)
                     ].join('');
+
                     this.cursorToString( cursor, text );
-                    this.processLine( lidx );
+                    this.processLines()
+                    // this.processLine( lidx );
                     return;
                 case 'z': // undo
                     if(!this.code.undoSteps.length)
@@ -1360,6 +1400,20 @@
             script.async = false;
             // script.onload = function(e) { };
             document.getElementsByTagName('head')[0].appendChild(script);
+        }
+
+        toJSONFormat(json) {
+
+            try{
+                let parseJSON = JSON.parse(json);
+                let prettyJSON = JSON.stringify(parseJSON, undefined, 4);
+                return prettyJSON;
+              }
+              catch(e){
+                
+                alert("Invalid JSON format")
+                return;	
+              }
         }
     }
 
