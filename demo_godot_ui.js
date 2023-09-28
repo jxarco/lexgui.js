@@ -1,14 +1,6 @@
 // init library and get main area
 let area = LX.init();
 
-// change global properties after init
-// LX.DEFAULT_NAME_WIDTH = "10%";
-// LX.DEFAULT_SPLITBAR_SIZE = 16;
-// LX.OPEN_CONTEXTMENU_ENTRY = 'mouseover';
-
-// LX.message("Im in another position", null, { position: [10, 10] });
-// LX.message("Welcome to Lexgui", "Welcome!");
-
 // menu bar
 area.addMenubar( m => {
 
@@ -49,9 +41,8 @@ area.addMenubar( m => {
         }
     ]);
     
-    m.getButton("Play");
     m.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")})
-    m.setButtonImage("lexgui.js", "images/lexgui-min.png", () => {window.open("https://github.com/jxarco/lexgui.js/")}, {float: "left"})
+    m.setButtonImage("lexgui.js", "images/icon_godot_version.png", () => {window.open("https://github.com/jxarco/lexgui.js/")}, {float: "left"})
 });
 
 // split main area
@@ -183,8 +174,8 @@ function fillRightSide( area ) {
     panel.addTitle("Node 3D");
     panel.branch("Transform", {closed: true});
     panel.branch("Visibility", {closed: true});
-    panel.addTitle("Node");
-
+    panel.merge();
+    
     tabs.add( "Inspector", inspector_panel );
     tabs.add( "Node", node_panel );
     tabs.add( "History", history_panel );
@@ -205,10 +196,12 @@ function fillLeftSide( area ) {
     // add data tree
 
     let scene_data = {
-        'id': 'root',
+        'id': 'Node 3D',
         'children': [
             {
-                'id': 'node_1',
+                'id': 'WorldEnvironment',
+                'icon': 'fa-solid fa-globe',
+                'closed': true,
                 'children': [
                     {
                         'id': 'node_1_1',
@@ -227,9 +220,16 @@ function fillLeftSide( area ) {
                 ]
             },
             {
-                'id': 'node_2',
-                'icon': 'fa-solid fa-circle-play',
-                'children': []
+                'id': 'AnimatedSprite3D',
+                'icon': 'fa-solid fa-film',
+                'closed': true,
+                'children': [
+                    {
+                        'id': 'node_2_1',
+                        'icon': 'fa-solid fa-circle',
+                        'children': []
+                    }
+                ]
             }
         ]
     };

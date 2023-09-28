@@ -290,7 +290,7 @@
         var link = document.createElement('link');
         link.rel = 'stylesheet';
         link.type = 'text/css';
-        link.href = 'https://use.fontawesome.com/releases/v6.4.0/css/all.css';
+        link.href = 'https://use.fontawesome.com/releases/v6.4.2/css/all.css';
         head.appendChild(link);
 
         // Global vars
@@ -503,7 +503,9 @@
             }
 
             let overlay = options.overlay;
-            if(overlay) {
+
+            if(overlay)
+            {
                 this.root.classList.add("overlay-" + overlay);
 
                 if(options.resize)
@@ -564,7 +566,6 @@
                                 var size = Math.min(document.body.clientWidth - LX.DEFAULT_SPLITBAR_SIZE, (that.root.offsetWidth - dt));
                                 that.root.style.width = size + "px";
                                 that.split_bar.style.left = size + LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
-
                                 break;
                             
                             case "top":
@@ -661,7 +662,7 @@
             }
 
             // Create areas
-            var area1 = new Area({className: "split"});
+            var area1 = new Area({className: "split" + (options.menubar ? "" : " origin")});
             var area2 = new Area({className: "split"});
 
             var resize = options.resize ?? true;
@@ -675,7 +676,7 @@
 
                 if(type == "horizontal") {
                     this.split_bar.style.width = LX.DEFAULT_SPLITBAR_SIZE + "px";
-                    this.split_bar.style.left = -LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
+                    // this.split_bar.style.left = -LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
                 }
                 else {
                     this.split_bar.style.height = LX.DEFAULT_SPLITBAR_SIZE + "px";
@@ -893,9 +894,9 @@
             // document.body.appendChild(d);
             // const height = menubar.root.clientHeight;
             // d.remove();
-            const height = 39; // pixels
+            const height = 48; // pixels
 
-            this.split({type: 'vertical', sizes:[height,null], resize: false});
+            this.split({type: 'vertical', sizes:[height,null], resize: false, menubar: true});
             this.sections[0].attach( menubar );
             this.sections[0].is_menubar = true;
 
@@ -1591,6 +1592,7 @@
          */
 
         setButtonIcon( title, icon, callback, options = {} ) {
+
             const button = this.buttons[ title ];
             if(button) {
 
@@ -1643,7 +1645,7 @@
                 const disabled = options.disabled ?? false;
                 button.className = "lexmenubutton" + (disabled ? " disabled" : "");
                 button.title = title ?? "";
-                button.innerHTML = "<a style='height:100%;'><image src='" + src + "' class='lexicon' style='height:100%;'></a>";
+                button.innerHTML = "<a><image src='" + src + "' class='lexicon' style='height:32px;'></a>";
                 button.style.padding = "5px";
                 button.style.alignItems = "center";
 
@@ -2294,7 +2296,7 @@
             if(options.className)
                 root.className += " " + options.className;
 
-            root.style.width = options.width || "calc( 100% - 7px )";
+            root.style.width = options.width || "calc( 100% - 4px )";
             root.style.height = options.height || "100%";
             Object.assign(root.style, options.style ?? {});
 
@@ -2506,9 +2508,12 @@
             if(options.title)
                 element.title = options.title;
 
-            element.style.width = "calc(100% - 10px)";
-            if( options.width ) {
-                element.style.width = element.style.minWidth = options.width;
+            if( type != Widget.TITLE )
+            {
+                element.style.width = "calc(100% - 10px)";
+                if( options.width ) {
+                    element.style.width = element.style.minWidth = options.width;
+                }
             }
 
             if(name != undefined) {
@@ -2772,7 +2777,6 @@
                 throw("Set Widget Name!");
             }
 
-            options.width = options.width ?? "auto";
             let widget = this.create_widget(null, Widget.TITLE, options);
             let element = widget.domEl;
             element.innerText = name;
