@@ -767,13 +767,13 @@
             this.code.lines[lidx] = this.code.lines[lidx] ?? "";
 
             // Check combinations
+            let selection = this.selections.children[0];
 
             if( e.ctrlKey || e.metaKey )
             {
                 switch( key.toLowerCase() ) {
                 case 'c': // copy
                     let selected_text = "";
-                    let selection = this.selections.children[0];
                     if( !selection.range ) {
                         selected_text = this.code.lines[cursor.line];
                     }
@@ -885,6 +885,20 @@
                 this.root.dispatchEvent(new KeyboardEvent('keydown', {'key': '}'}));
                 this.cursorToLeft( key, cursor );
                 return; // it will be processed with the above event
+            }
+            else if( key == '"' || "key" == "'" )
+            {
+                if( selection.range ) {
+                    
+                    this.code.lines[lidx] = [
+                        this.code.lines[lidx].slice(0, selection.range[1] + 1), 
+                        key, 
+                        this.code.lines[lidx].slice(selection.range[1] + 1)
+                    ].join('');
+
+                    selection.range[0]++;
+                    selection.range[1]++;
+                }
             }
 
             // Update only the current line, since it's only an appended key
