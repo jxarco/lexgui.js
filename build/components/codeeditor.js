@@ -873,42 +873,13 @@
                 }
             }
 
-            //  Some custom cases...
+            //  Some custom cases for word enclosing (), {}, "", '', ...
 
-            if( key == '"' || key == "'" )
+            const enclosableKeys = ["\"", "'", "(", "{"];
+            if( enclosableKeys.indexOf( key ) > -1 )
             {
-                if( selection.range ) {
-                                        
-                    const _lastLeft = cursor._left;
-
-                    this.code.lines[lidx] = [
-                        this.code.lines[lidx].slice(0, cursor.charPos), 
-                        key, 
-                        this.code.lines[lidx].slice(cursor.charPos)
-                    ].join('');
-
-                    this.cursorToString(cursor, 
-                        this.code.lines[lidx].slice(selection.range[0], selection.range[1] + 1));
-
-                    this.code.lines[lidx] = [
-                        this.code.lines[lidx].slice(0, cursor.charPos), 
-                        key, 
-                        this.code.lines[lidx].slice(cursor.charPos)
-                    ].join('');
-
-                    this.selection.range[0]++; this.selection.range[1]++;
-
-                    const text_selected  = this.code.lines[lidx].slice(
-                        this.selection.range[0],
-                        this.selection.range[1]
-                    );
-
-                    selection.style.width = this.measureString(text_selected) + "px";
-                    selection.style.left = "calc(" + (_lastLeft + this.measureChar(key)[0]) + "px + 0.25em)";
-
-                    this.processLine( lidx );
-                    return;
-                }
+                this.encloseSelectedWordWithKey(key, lidx, cursor, selection);
+                return;
             }
 
             // Append key 
@@ -1120,6 +1091,53 @@
             }
 
             if(sString) delete this._building_string;
+        }
+
+        encloseSelectedWordWithKey( key, lidx, cursor, selection ) {
+
+            if( !selection.range )
+            return;
+                                        
+            const _lastLeft = cursor._left;
+
+            // Insert first..
+            this.code.lines[lidx] = [
+                this.code.lines[lidx].slice(0, cursor.charPos), 
+                key, 
+                this.code.lines[lidx].slice(cursor.charPos)
+            ].join('');
+
+            // Go to the end of the word
+            this.cursorToString(cursor, 
+                this.code.lines[lidx].slice(selection.range[0], selection.range[1] + 1));
+
+            // Change next key?
+            switch(key)
+            {
+                case "'":
+                case "\"":
+                    break;
+                case "(": key = ")"; break;
+                case "{": key = "}"; break;
+            }
+
+            // Insert the other
+            this.code.lines[lidx] = [
+                this.code.lines[lidx].slice(0, cursor.charPos), 
+                key, 
+                this.code.lines[lidx].slice(cursor.charPos)
+            ].join('');
+
+            // Recompute and reposition current selection
+            this.selection.range[0]++; this.selection.range[1]++;
+            const text_selected = this.code.lines[lidx].slice(
+                this.selection.range[0],
+                this.selection.range[1]
+            );
+            selection.style.width = this.measureString(text_selected) + "px";
+            selection.style.left = "calc(" + (_lastLeft + this.measureChar(key)[0]) + "px + 0.25em)";
+
+            this.processLine( lidx );
         }
 
         lineUp(cursor) {
