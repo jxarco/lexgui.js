@@ -2543,7 +2543,6 @@ ul.lexassetscontent {
   left: 0px;
   top: 0px;
   height: 18px;
-  transition: left linear 0.015s;
 }
 
 .lexcodeeditor .lexcodeselection {

@@ -21,15 +21,6 @@
         [array[id0], array[id1]] = [array[id1], array[id0]];
     };
 
-    function isString(str) {
-        return (str[0] == '"' &&  str[ str.length - 1 ] == '"') 
-                || (str[0] == "'" &&  str[ str.length - 1 ] == "'");
-    }
-
-    function popChar(str) {
-        return [str.substr(0, str.length - 1), str.substr(str.length - 1)];
-    }
-
     function sliceChar(str, idx) {
         return str.substr(0, idx) + str.substr(idx + 1);
     }
@@ -267,8 +258,6 @@
                 // Check indentation
                 var spaces = firstNonspaceIndex(this.code.lines[ln]);
                 var tabs = Math.floor( spaces / this.tabSpaces );
-                var transition = cursor.style.transition;
-                cursor.style.transition = "none";
 
                 if( _c0 == '{' && _c1 == '}' ) {
                     this.code.lines.splice(cursor.line, 0, "");
@@ -278,9 +267,6 @@
                     this.addSpaceTabs(tabs);
                 }
 
-                flushCss(cursor);
-                cursor.style.transition = transition; // restore transition
-                
                 this.processLines( ln );
                 this.code.scrollTop = this.code.scrollHeight;
             });
@@ -702,8 +688,6 @@
             if(this.code.lines[ln] == undefined) return;
             
             var cursor = this.cursors.children[0];
-            var transition = cursor.style.transition;
-            cursor.style.transition = "none"; // no transition!
             this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
 
             for( var i = 0; i < ln; ++i ) {
@@ -722,8 +706,6 @@
                 this.cursorToRight(char);
             }
             
-            flushCss(cursor);
-            cursor.style.transition = transition; // restore transition
             cursor.line = ln;
 
             this._refresh_code_info( ln + 1, cursor.charPos );
@@ -795,13 +777,36 @@
                     return;
                 case 'v': // paste
                     const text = await navigator.clipboard.readText();
+                    const new_lines = text.split('\n');
+                    console.assert(new_lines.length > 0);
+                    const first_line = new_lines.shift();
+
+                    const remaining = this.code.lines[lidx].slice(cursor.charPos);
+
+                    // Add first line
                     this.code.lines[lidx] = [
                         this.code.lines[lidx].slice(0, cursor.charPos), 
-                        text, 
-                        this.code.lines[lidx].slice(cursor.charPos)
+                        first_line
                     ].join('');
-                    this.cursorToString( cursor, text );
-                    this.processLine( lidx );
+
+                    this.cursorToString(cursor, first_line);
+
+                    // Enter next lines...
+
+                    let _text = new_lines[i];
+                    for( var i = 0; i < new_lines.length; ++i )
+                    {
+                        _text = new_lines[i];
+                        this.cursorToBottom(cursor, true);
+                        // Add remaining...
+                        if( i == (new_lines.length - 1) )
+                            _text += remaining;
+                        this.code.lines.splice( 1 + lidx + i, 0, _text);
+                    }
+
+                    this.cursorToString(cursor, _text);
+                    this.processLines(lidx);
+
                     return;
                 case 'z': // undo
                     if(!this.code.undoSteps.length)
@@ -1238,15 +1243,10 @@
         }
 
         cursorToString( cursor, text, reverse ) {
-            cursor = cursor ?? this.cursors.children[0];
-            var transition = cursor.style.transition;
-            cursor.style.transition = "none";
 
+            cursor = cursor ?? this.cursors.children[0];
             for( let char of text ) 
                 reverse ? this.cursorToLeft(char) : this.cursorToRight(char);
-
-            flushCss(cursor);
-            cursor.style.transition = transition; // restore transition
         }
 
         saveCursor( cursor, state = {} ) {
@@ -1259,25 +1259,20 @@
         }
 
         restoreCursor( cursor, state ) {
+
             cursor = cursor ?? this.cursors.children[0];
             cursor.line = state.line ?? 0;
             cursor.charPos = state.charPos ?? 0;
 
-            var transition = cursor.style.transition;
-            cursor.style.transition = "none"; // no transition!
             cursor._left = state.left ?? 0;
             cursor.style.left = "calc(" + cursor._left + "px + 0.25em)";
             cursor._top = state.top ?? 4;
             cursor.style.top = "calc(" + cursor._top + "px - " + this.getScrollTop() + "px)";
-            flushCss(cursor);
-            cursor.style.transition = transition; // restore transition
         }
 
         resetCursorPos( flag, cursor ) {
             
             cursor = cursor ?? this.cursors.children[0];
-            var transition = cursor.style.transition;
-            cursor.style.transition = "none";
 
             if( flag & CodeEditor.CURSOR_LEFT )
             {
@@ -1292,9 +1287,6 @@
                 cursor.style.top = "calc(4px - " + this.getScrollTop() + "px)";
                 cursor.line = 0;
             }
-
-            flushCss(cursor);
-            cursor.style.transition = transition;
         }
 
         addSpaceTabs(n) {
