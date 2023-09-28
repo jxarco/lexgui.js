@@ -868,6 +868,44 @@
                 }
             }
 
+            //  Some custom cases...
+
+            if( key == '"' || key == "'" )
+            {
+                if( selection.range ) {
+                                        
+                    const _lastLeft = cursor._left;
+
+                    this.code.lines[lidx] = [
+                        this.code.lines[lidx].slice(0, cursor.charPos), 
+                        key, 
+                        this.code.lines[lidx].slice(cursor.charPos)
+                    ].join('');
+
+                    this.cursorToString(cursor, 
+                        this.code.lines[lidx].slice(selection.range[0], selection.range[1] + 1));
+
+                    this.code.lines[lidx] = [
+                        this.code.lines[lidx].slice(0, cursor.charPos), 
+                        key, 
+                        this.code.lines[lidx].slice(cursor.charPos)
+                    ].join('');
+
+                    this.selection.range[0]++; this.selection.range[1]++;
+
+                    const text_selected  = this.code.lines[lidx].slice(
+                        this.selection.range[0],
+                        this.selection.range[1]
+                    );
+
+                    selection.style.width = this.measureString(text_selected) + "px";
+                    selection.style.left = "calc(" + (_lastLeft + this.measureChar(key)[0]) + "px + 0.25em)";
+
+                    this.processLine( lidx );
+                    return;
+                }
+            }
+
             // Append key 
 
             this.code.lines[lidx] = [
@@ -878,27 +916,13 @@
 
             this.cursorToRight( key );
 
-            // Special single char cases
+            // Other special char cases...
 
             if( key == '{' )
             {
                 this.root.dispatchEvent(new KeyboardEvent('keydown', {'key': '}'}));
                 this.cursorToLeft( key, cursor );
                 return; // it will be processed with the above event
-            }
-            else if( key == '"' || "key" == "'" )
-            {
-                if( selection.range ) {
-                    
-                    this.code.lines[lidx] = [
-                        this.code.lines[lidx].slice(0, selection.range[1] + 1), 
-                        key, 
-                        this.code.lines[lidx].slice(selection.range[1] + 1)
-                    ].join('');
-
-                    selection.range[0]++;
-                    selection.range[1]++;
-                }
             }
 
             // Update only the current line, since it's only an appended key
