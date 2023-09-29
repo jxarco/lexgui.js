@@ -1204,7 +1204,9 @@
             // debug
             if(folding) 
             {
+                this.folded = true;
                 this.folding = folding;
+                
                 if(folding == "up") area.root.insertBefore(area.sections[1].root, area.sections[0].root);
 
                 // Add fold back button
@@ -1216,6 +1218,7 @@
 
                 btn.addEventListener('click', e => {
                     this.area.hide();
+                    this.folded = true;
                 });
 
                 // Listen resize event on parent area
@@ -1271,10 +1274,10 @@
                 e.preventDefault();
                 e.stopPropagation();
 
-                if( this.folding && !this.folded)
+                if( this.folding && this.folded )
                 {
                     this.folded = !this.folded;
-                    this.area.toggle();
+                    this.area.show();
                 }
 
                 if( !tabEl.fixed )
