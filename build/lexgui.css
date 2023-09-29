@@ -668,6 +668,15 @@ input[type="file"] {
 	background-color: var(--global-selected);
 }
 
+.lexbutton.foldback {
+  padding: 11px 10px;
+  padding-bottom: 14px;
+  float: right;
+  align-items: center;
+  margin-right: 4px;
+  margin-top: 2px;
+}
+
 .lexbutton a {    
   margin-left: 0px;
   font-size: 10px;
@@ -1903,9 +1912,9 @@ meter::-webkit-meter-even-less-good-value {
   background-color: var(--global-selected);
 }
 
-.lexareatabs.fit .lexareatab.selected {
+.lexareatabs.fit .lexareatab.selected, .lexareatabs.folding .lexareatab.selected {
   color: var(--global-text-primary);
-  background-color: #454546;
+  background-color: #555556;
 }
 
 .lexareatabs .lexareatab:hover {

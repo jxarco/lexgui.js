@@ -673,6 +673,9 @@
             var area1 = new Area({className: "split" + (options.menubar ? "" : " origin")});
             var area2 = new Area({className: "split"});
 
+            area1.parentArea = this;
+            area2.parentArea = this;
+
             var resize = options.resize ?? true;
             var data = "0px";
 
@@ -853,6 +856,14 @@
         */
         show() {
             this.root.classList.remove("hidden");
+        }
+
+        /**
+        * @method toggle
+        * Toggle element if it is hidden
+        */
+        toggle() {
+            this.root.classList.toggle("hidden");
         }
 
         /**
@@ -1138,6 +1149,9 @@
 
             let container = document.createElement('div');
             container.className = "lexareatabs " + (options.fit ? "fit" : "row");
+            
+            const folding = options.folding ?? false;
+            if(folding) container.classList.add("folding");
 
             let that = this;
 
@@ -1186,6 +1200,38 @@
             this.root = container;
             this.tabs = {};
             this.tabDOMs = {};
+
+            // debug
+            if(folding) 
+            {
+                this.folding = folding;
+                if(folding == "up") area.root.insertBefore(area.sections[1].root, area.sections[0].root);
+
+                // Add fold back button
+
+                let btn = document.createElement('button');
+                btn.className = "lexbutton foldback";
+                btn.innerHTML = "<a class='fa-solid fa-x'></a>";
+                this.area.root.appendChild(btn);
+
+                btn.addEventListener('click', e => {
+                    this.area.hide();
+                });
+
+                // Listen resize event on parent area
+                const resizeObserver = new ResizeObserver((entries) => {
+                    for (const entry of entries) {
+                        const bb = entry.contentRect;
+                        const sibling = area.parentArea.sections[0].root;
+                        const add_offset = true; // hardcoded...
+                        sibling.style.height = "calc(100% - " + ((add_offset ? 42 : 0) + bb.height) + "px )";
+                    }
+                });
+
+                resizeObserver.observe(this.area.root);
+
+                this.area.hide();
+            }
         }
 
         add( name, content, isSelected, callback, options = {} ) {
@@ -1224,6 +1270,12 @@
             tabEl.addEventListener("click", e => {
                 e.preventDefault();
                 e.stopPropagation();
+
+                if( this.folding && !this.folded)
+                {
+                    this.folded = !this.folded;
+                    this.area.toggle();
+                }
 
                 if( !tabEl.fixed )
                 {
