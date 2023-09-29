@@ -2556,7 +2556,6 @@ ul.lexassetscontent {
   left: 0px;
   top: 0px;
   height: 18px;
-  transition: left linear 0.015s;
 }
 
 .lexcodeeditor .lexcodeselection {
@@ -2582,32 +2581,27 @@ ul.lexassetscontent {
   /* border: 1px solid var(--global-selected-light); */
 }
 
-.cm-str { color: #efa87f; } /* string */
+.cm-str { color: #c69179; } /* string */
 .cm-kwd { color: #2194ce; } /* keyword */
-.cm-com { color: #6db76b; } /* comment */
+.cm-com { color: #75b073; } /* comment */
 .cm-typ { color: #36c0b0; } /* type */
-.cm-lit { color: #ee2c8d; } /* literal */
+.cm-lit { color: #cf6dcf; } /* literal */
 .cm-bln { color: #cfc159; } /* builtin */
-.cm-dec { color: #22c44a; } /* decimal */
+.cm-dec { color: #b1ce9b; } /* decimal */
 .cm-sym { color: #e7ded2; } /* symbol */
 .cm-mtd { color: #f1e9bf; } /* method */
 
-.cm-str.json { color: #71a7c2; } /* string */
-.cm-kwd.json { color: inherit; } /* keyword */
-.cm-com.json { color: inherit; } /* comment */
-.cm-typ.json { color: inherit; } /* type */
-.cm-lit.json { color: inherit; } /* literal */
-.cm-bln.json { color: inherit; } /* builtin */
-.cm-dec.json { color: #9ed09a; } /* decimal */
-.cm-sym.json { color: #c53693; } /* symbol */
-.cm-mtd.json { color: inherit; } /* method */
+.cm-str.json      { color: #c69179; } /* string */
+.cm-str.key.json  { color: #93dcfd; } /* string key */
+.cm-kwd.json      { color: inherit; } /* keyword */
+.cm-com.json      { color: inherit; } /* comment */
+.cm-typ.json      { color: inherit; } /* type */
+.cm-lit.json      { color: inherit; } /* literal */
+.cm-bln.json      { color: inherit; } /* builtin */
+.cm-dec.json      { color: #b1ce9b; } /* decimal */
+.cm-sym.json      { color: #cf6dcf; } /* symbol */
+.cm-mtd.json      { color: inherit; } /* method */
 
-.cm-str.plaintext { color: inherit; } /* string */
-.cm-kwd.plaintext { color: inherit; } /* keyword */
-.cm-com.plaintext { color: inherit; } /* comment */
-.cm-typ.plaintext { color: inherit; } /* type */
-.cm-lit.plaintext { color: inherit; } /* literal */
-.cm-bln.plaintext { color: inherit; } /* builtin */
-.cm-dec.plaintext { color: inherit; } /* decimal */
-.cm-sym.plaintext { color: inherit; } /* symbol */
-.cm-mtd.plaintext { color: inherit; } /* method */
+/* plain color */
+.cm-str.plaintext, .cm-kwd.plaintext, .cm-com.plaintext, .cm-typ.plaintext, .cm-lit.plaintext, 
+.cm-bln.plaintext, .cm-dec.plaintext, .cm-sym.plaintext, .cm-mtd.plaintext { color: inherit; }

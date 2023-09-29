@@ -21,15 +21,6 @@
         [array[id0], array[id1]] = [array[id1], array[id0]];
     };
 
-    function isString(str) {
-        return (str[0] == '"' &&  str[ str.length - 1 ] == '"') 
-                || (str[0] == "'" &&  str[ str.length - 1 ] == "'");
-    }
-
-    function popChar(str) {
-        return [str.substr(0, str.length - 1), str.substr(str.length - 1)];
-    }
-
     function sliceChar(str, idx) {
         return str.substr(0, idx) + str.substr(idx + 1);
     }
@@ -153,20 +144,21 @@
                 'for', 'if', 'else', 'case', 'switch', 'return',
                 'while', 'continue', 'break', 'do'
             ];
-            this.symbols = [
-                '<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'
-            ];
+            this.symbols = {
+                'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
+                'JSON': ['[', ']', '{', '}', '(', ')']
+            };
 
             // Action keys
 
-            this.action('Backspace', ( ln, cursor, e ) => {
+            this.action('Backspace', true, ( ln, cursor, e ) => {
 
                 this._addUndoStep(cursor);
                 let selection = this.selections.children[0];
 
                 if(selection.range) {
                     this.deleteSelection(cursor, selection);
-                    if(!this.code.lines[ln].length) this.actions['Backspace'](ln, cursor, e);
+                    if(!this.code.lines[ln].length) this.actions['Backspace'].callback(ln, cursor, e);
                     this.processLines();
                 }
                 else {
@@ -178,7 +170,7 @@
                     } 
                     else if(this.code.lines[ln - 1] != undefined) {
                         this.lineUp();
-                        this.actions['End'](cursor.line, cursor, e);
+                        this.actions['End'].callback(cursor.line, cursor, e);
                         // Move line on top
                         this.code.lines[ln - 1] += this.code.lines[ln];
                         this.code.lines.splice(ln, 1);
@@ -187,7 +179,7 @@
                 }
             });
 
-            this.action('Delete', ( ln, cursor, e ) => {
+            this.action('Delete', true, ( ln, cursor, e ) => {
 
                 this._addUndoStep( cursor );
 
@@ -195,7 +187,7 @@
                 if(selection.range)
                 {
                     this.deleteSelection(cursor, selection);
-                    if(!this.code.lines[ln].length) this.actions['Delete'](ln, cursor);
+                    if(!this.code.lines[ln].length) this.actions['Delete'].callback(ln, cursor);
                     this.processLines();
                 }
                 else
@@ -213,11 +205,11 @@
                 }
             });
 
-            this.action('Tab', ( ln, cursor, e ) => {
+            this.action('Tab', true, ( ln, cursor, e ) => {
                 this.addSpaces( this.tabSpaces );
             });
 
-            this.action('Home', ( ln, cursor, e ) => {
+            this.action('Home', false, ( ln, cursor, e ) => {
                 // Find first non space char
                 var idx = firstNonspaceIndex(this.code.lines[ln]);
                 var prestring = this.code.lines[ln].substring(0, idx);
@@ -233,7 +225,7 @@
                 this.cursorToString(cursor, prestring);
             });
 
-            this.action('End', ( ln, cursor, e ) => {
+            this.action('End', false, ( ln, cursor, e ) => {
                 let selection = this.selections.children[0];
                 if( e.shiftKey || e._shiftKey ) {
                     this.startSelection(cursor, selection);
@@ -245,7 +237,7 @@
                 this.cursorToString( cursor, this.code.lines[ln] );
             });
 
-            this.action('Enter', ( ln, cursor, e ) => {
+            this.action('Enter', true, ( ln, cursor, e ) => {
 
                 if(e.ctrlKey)
                 {
@@ -267,8 +259,6 @@
                 // Check indentation
                 var spaces = firstNonspaceIndex(this.code.lines[ln]);
                 var tabs = Math.floor( spaces / this.tabSpaces );
-                var transition = cursor.style.transition;
-                cursor.style.transition = "none";
 
                 if( _c0 == '{' && _c1 == '}' ) {
                     this.code.lines.splice(cursor.line, 0, "");
@@ -278,33 +268,30 @@
                     this.addSpaceTabs(tabs);
                 }
 
-                flushCss(cursor);
-                cursor.style.transition = transition; // restore transition
-                
                 this.processLines( ln );
                 this.code.scrollTop = this.code.scrollHeight;
             });
 
-            this.action('ArrowUp', ( ln, cursor, e ) => {
+            this.action('ArrowUp', false, ( ln, cursor, e ) => {
                 this.lineUp();
                 // Go to end of line if out of line
                 var letter = this.getCharAtPos( cursor );
-                if(!letter) this.actions['End'](cursor.line, cursor, e);
+                if(!letter) this.actions['End'].callback(cursor.line, cursor, e);
             });
 
-            this.action('ArrowDown', ( ln, cursor, e ) => {
+            this.action('ArrowDown', false, ( ln, cursor, e ) => {
                 if( this.code.lines[ ln + 1 ] == undefined ) 
                     return;
                 this.lineDown();
                 // Go to end of line if out of line
                 var letter = this.getCharAtPos( cursor );
-                if(!letter) this.actions['End'](cursor.line, cursor, e);
+                if(!letter) this.actions['End'].callback(cursor.line, cursor, e);
             });
 
-            this.action('ArrowLeft', ( ln, cursor, e ) => {
+            this.action('ArrowLeft', false, ( ln, cursor, e ) => {
                 if(e.metaKey) {
                     e.preventDefault();
-                    this.actions[ 'Home' ]( ln, cursor );
+                    this.actions[ 'Home' ].callback( ln, cursor );
                 } else if(e.ctrlKey) {
                     // get next word
                     const [word, from, to] = this.getWordAtPos( cursor, -1 );
@@ -348,15 +335,15 @@
                     }
                     else if( cursor.line > 0 ) {
                         this.lineUp( cursor );
-                        this.actions['End'](cursor.line, cursor, e);
+                        this.actions['End'].callback(cursor.line, cursor, e);
                     }
                 }
             });
 
-            this.action('ArrowRight', ( ln, cursor, e ) => {
+            this.action('ArrowRight', false, ( ln, cursor, e ) => {
                 if(e.metaKey) {
                     e.preventDefault();
-                    this.actions[ 'End' ]( ln, cursor );
+                    this.actions[ 'End' ].callback( ln, cursor );
                 } else if(e.ctrlKey) {
                     // get next word
                     const [word, from, to] = this.getWordAtPos( cursor );
@@ -396,7 +383,7 @@
                     }
                     else if( this.code.lines[ cursor.line + 1 ] !== undefined ) {
                         this.lineDown( cursor );
-                        this.actions['Home'](cursor.line, cursor, e);
+                        this.actions['Home'].callback(cursor.line, cursor, e);
                     }
                 }
             });
@@ -687,7 +674,7 @@
                     this.resetCursorPos( CodeEditor.CURSOR_LEFT );
                     e._shiftKey = true;
                     var cursor = this.cursors.children[0];
-                    this.actions['End'](cursor.line, cursor, e);
+                    this.actions['End'].callback(cursor.line, cursor, e);
                     break;
                 }
             }
@@ -702,8 +689,6 @@
             if(this.code.lines[ln] == undefined) return;
             
             var cursor = this.cursors.children[0];
-            var transition = cursor.style.transition;
-            cursor.style.transition = "none"; // no transition!
             this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
 
             for( var i = 0; i < ln; ++i ) {
@@ -722,8 +707,6 @@
                 this.cursorToRight(char);
             }
             
-            flushCss(cursor);
-            cursor.style.transition = transition; // restore transition
             cursor.line = ln;
 
             this._refresh_code_info( ln + 1, cursor.charPos );
@@ -767,13 +750,13 @@
             this.code.lines[lidx] = this.code.lines[lidx] ?? "";
 
             // Check combinations
+            let selection = this.selections.children[0];
 
             if( e.ctrlKey || e.metaKey )
             {
                 switch( key.toLowerCase() ) {
                 case 'c': // copy
                     let selected_text = "";
-                    let selection = this.selections.children[0];
                     if( !selection.range ) {
                         selected_text = this.code.lines[cursor.line];
                     }
@@ -795,13 +778,36 @@
                     return;
                 case 'v': // paste
                     const text = await navigator.clipboard.readText();
+                    const new_lines = text.split('\n');
+                    console.assert(new_lines.length > 0);
+                    const first_line = new_lines.shift();
+
+                    const remaining = this.code.lines[lidx].slice(cursor.charPos);
+
+                    // Add first line
                     this.code.lines[lidx] = [
                         this.code.lines[lidx].slice(0, cursor.charPos), 
-                        text, 
-                        this.code.lines[lidx].slice(cursor.charPos)
+                        first_line
                     ].join('');
-                    this.cursorToString( cursor, text );
-                    this.processLine( lidx );
+
+                    this.cursorToString(cursor, first_line);
+
+                    // Enter next lines...
+
+                    let _text = null;
+                    for( var i = 0; i < new_lines.length; ++i )
+                    {
+                        _text = new_lines[i];
+                        this.cursorToBottom(cursor, true);
+                        // Add remaining...
+                        if( i == (new_lines.length - 1) )
+                            _text += remaining;
+                        this.code.lines.splice( 1 + lidx + i, 0, _text);
+                    }
+
+                    if(_text) this.cursorToString(cursor, _text);
+                    this.processLines(lidx);
+
                     return;
                 case 'z': // undo
                     if(!this.code.undoSteps.length)
@@ -837,13 +843,19 @@
                 }
             }
 
+            // Apply binded actions...
+
             for( const actKey in this.actions ) {
                 if( key != actKey ) continue;
                 e.preventDefault();
-                return this.actions[ key ]( lidx, cursor, e );
+
+                if(this.actions[ key ].deleteSelection && selection.range)
+                    this.actions['Delete'].callback(lidx, cursor, e);
+
+                return this.actions[ key ].callback( lidx, cursor, e );
             }
 
-            // from now on, don't allow ctrl, shift or meta (mac) combinations
+            // From now on, don't allow ctrl, shift or meta (mac) combinations
             if( (e.ctrlKey || e.metaKey) )
                 return;
 
@@ -868,6 +880,23 @@
                 }
             }
 
+            //  Some custom cases for word enclosing (), {}, "", '', ...
+
+            const enclosableKeys = ["\"", "'", "(", "{"];
+            if( enclosableKeys.indexOf( key ) > -1 )
+            {
+                this.encloseSelectedWordWithKey(key, lidx, cursor, selection);
+                return;
+            }
+
+            // Until this point, if there was a selection, we need 
+            // to delete the content..
+
+            if( selection.range )
+            {
+                this.actions['Delete'].callback(lidx, cursor, e);
+            }
+
             // Append key 
 
             this.code.lines[lidx] = [
@@ -878,7 +907,7 @@
 
             this.cursorToRight( key );
 
-            // Special single char cases
+            // Other special char cases...
 
             if( key == '{' )
             {
@@ -891,8 +920,12 @@
             this.processLine( lidx );
         }
 
-        action( key, fn ) {
-            this.actions[ key ] = fn;
+        action( key, deleteSelection, fn ) {
+
+            this.actions[ key ] = {
+                "callback": fn,
+                "deleteSelection": deleteSelection
+            };
         }
 
         processLines( from ) {
@@ -992,7 +1025,7 @@
 
                 it = i + 1;
                 let next = to_process[it];
-                while( next == '' || next == ' ' ) {
+                while( next == '' || next == ' ' || next == '"') {
                     it++;
                     next = to_process[it];
                 }
@@ -1038,7 +1071,11 @@
                     span.classList.add("cm-com");
                 
                 else if( this._building_string  )
+                {
                     span.classList.add("cm-str");
+                    // if (this.highlight === "JSON" && next == ':' )
+                    //     span.classList.add("key");
+                }
                 
                 else if( this.keywords.indexOf(token) > -1 )
                     span.classList.add("cm-kwd");
@@ -1049,7 +1086,7 @@
                 else if( this.literals.indexOf(token) > -1 )
                     span.classList.add("cm-lit");
 
-                else if( this.symbols.indexOf(token) > -1 )
+                else if( this.symbols[this.highlight] && this.symbols[this.highlight].indexOf(token) > -1 )
                     span.classList.add("cm-sym");
 
                 else if( token.substr(0, 2) == '//' )
@@ -1077,6 +1114,53 @@
             }
 
             if(sString) delete this._building_string;
+        }
+
+        encloseSelectedWordWithKey( key, lidx, cursor, selection ) {
+
+            if( !selection.range )
+            return;
+                                        
+            const _lastLeft = cursor._left;
+
+            // Insert first..
+            this.code.lines[lidx] = [
+                this.code.lines[lidx].slice(0, cursor.charPos), 
+                key, 
+                this.code.lines[lidx].slice(cursor.charPos)
+            ].join('');
+
+            // Go to the end of the word
+            this.cursorToString(cursor, 
+                this.code.lines[lidx].slice(selection.range[0], selection.range[1] + 1));
+
+            // Change next key?
+            switch(key)
+            {
+                case "'":
+                case "\"":
+                    break;
+                case "(": key = ")"; break;
+                case "{": key = "}"; break;
+            }
+
+            // Insert the other
+            this.code.lines[lidx] = [
+                this.code.lines[lidx].slice(0, cursor.charPos), 
+                key, 
+                this.code.lines[lidx].slice(cursor.charPos)
+            ].join('');
+
+            // Recompute and reposition current selection
+            this.selection.range[0]++; this.selection.range[1]++;
+            const text_selected = this.code.lines[lidx].slice(
+                this.selection.range[0],
+                this.selection.range[1]
+            );
+            selection.style.width = this.measureString(text_selected) + "px";
+            selection.style.left = "calc(" + (_lastLeft + this.measureChar(key)[0]) + "px + 0.25em)";
+
+            this.processLine( lidx );
         }
 
         lineUp(cursor) {
@@ -1200,15 +1284,10 @@
         }
 
         cursorToString( cursor, text, reverse ) {
-            cursor = cursor ?? this.cursors.children[0];
-            var transition = cursor.style.transition;
-            cursor.style.transition = "none";
 
+            cursor = cursor ?? this.cursors.children[0];
             for( let char of text ) 
                 reverse ? this.cursorToLeft(char) : this.cursorToRight(char);
-
-            flushCss(cursor);
-            cursor.style.transition = transition; // restore transition
         }
 
         saveCursor( cursor, state = {} ) {
@@ -1221,25 +1300,20 @@
         }
 
         restoreCursor( cursor, state ) {
+
             cursor = cursor ?? this.cursors.children[0];
             cursor.line = state.line ?? 0;
             cursor.charPos = state.charPos ?? 0;
 
-            var transition = cursor.style.transition;
-            cursor.style.transition = "none"; // no transition!
             cursor._left = state.left ?? 0;
             cursor.style.left = "calc(" + cursor._left + "px + 0.25em)";
             cursor._top = state.top ?? 4;
             cursor.style.top = "calc(" + cursor._top + "px - " + this.getScrollTop() + "px)";
-            flushCss(cursor);
-            cursor.style.transition = transition; // restore transition
         }
 
         resetCursorPos( flag, cursor ) {
             
             cursor = cursor ?? this.cursors.children[0];
-            var transition = cursor.style.transition;
-            cursor.style.transition = "none";
 
             if( flag & CodeEditor.CURSOR_LEFT )
             {
@@ -1254,15 +1328,12 @@
                 cursor.style.top = "calc(4px - " + this.getScrollTop() + "px)";
                 cursor.line = 0;
             }
-
-            flushCss(cursor);
-            cursor.style.transition = transition;
         }
 
         addSpaceTabs(n) {
             
             for( var i = 0; i < n; ++i ) {
-                this.actions['Tab']();
+                this.actions['Tab'].callback();
             }
         }
 
