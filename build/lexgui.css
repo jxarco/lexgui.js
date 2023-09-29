@@ -10,7 +10,7 @@
 	--global-branch-darker: #28282a;
 	--branch-title-background: #2e3338;
   --branch-title-inactive-background: #42484e;
-  --global-button-color: #ffffff12;
+  --global-button-color: #4e4e4e;
   --global-dropdown-color: #4e5154;
   --global-text: #d4d4dce6;
   --global-text-primary: #f4f4ffe6;
@@ -20,7 +20,7 @@
   --global-highlight: #2c303570;
   --global-font: 'Noto Sans', sans-serif; /*'Rubik', sans-serif; */
   --global-dark-background: #14161a;
-  --global-blur-background: #232629b2;
+  --global-blur-background: #2326299a;
 } 
 
 ::-webkit-scrollbar {
@@ -455,17 +455,13 @@ input[type="file"] {
 
 .lexbranch .switch-branch-button {
   float: right;
-	margin: 8px 8px -4px 2px;
-	border-top: 6px solid #CCC;
-	border-left: 4px solid transparent;
-	border-right: 4px solid transparent;
-	border-bottom: 6px solid transparent;
+  font-size: 11px;
+	margin: 8px 6px -4px 2px;
   transition: 0.1s;
 }
 
 .lexbranch.closed .switch-branch-button {
-	margin: 4px 11px 0 2px;
-  transform: rotate(90deg);
+  transform: rotate(180deg);
 }
 
 /* Widgets */
@@ -622,6 +618,18 @@ input[type="file"] {
   align-content: center;
   border-radius: 12px;
   background-color: var(--global-color-secondary);
+  display: flex;
+  -webkit-user-select: none; /* Safari 3.1+ */
+  -moz-user-select: none; /* Firefox 2+ */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard syntax */
+}
+
+.lextitle a {
+  font-size: 12px;
+  margin-top: 0.3em;
+  margin-right: 0.7em;
+  color: var(--global-selected-light);
 }
 
 .lextitle.link {
@@ -656,17 +664,11 @@ input[type="file"] {
   font-family: var(--global-font);
 }
 
-.lexbutton.array {
-  border-radius: 0px;
-  box-shadow: none;
-}
-
 .lexbutton.accept {
 	background-color: var(--global-selected);
 }
 
 .lexbutton a {    
-  /* line-height: 13px; */
   margin-left: 0px;
   font-size: 10px;
   margin-top: 3px;
@@ -682,7 +684,7 @@ input[type="file"] {
 }
 
 .lexbutton:active:not(.lexbutton.combo) {
-  outline: 2px solid var(--global-selected-light);
+  outline: 2px solid var(--global-color-secondary);
 }
 
 .lexbutton.selected {
@@ -782,10 +784,6 @@ input[type="file"] {
   padding-left: 12px;
 }
 
-.lexdropdown li {
-  
-}
-
 .lexdropdown .lexlistitem {
   height: fit-content;
 }
@@ -793,15 +791,15 @@ input[type="file"] {
 .lexdropdown ul {
   position: fixed;
   list-style: none;
-  background-color: var(--global-blur-background);
+	background-color: var(--global-blur-background);
   backdrop-filter: blur(12px);
   padding: 4px 0px;
   z-index: 10;
   margin-top: 5px;
   width: 100%;
   box-shadow: 0 2px 10px black;
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
   max-height: -webkit-fill-available;
   overflow: scroll;
 }
@@ -818,11 +816,12 @@ input[type="file"] {
   width: 100%;
   cursor: pointer;
   color: rgba(216, 218, 230, 0.826);
-  font-size: 12px;
+  font-size: 13px;
   height: 20px;
   line-height: 22px;
   align-content: center;
   display: flow-root;
+  padding: 2px 0px;
   -webkit-user-select: none; /* Safari 3.1+ */
   -moz-user-select: none; /* Firefox 2+ */
   -ms-user-select: none; /* IE 10+ */
@@ -845,8 +844,8 @@ input[type="file"] {
 }
 
 .lexdropdown .lexdropdownitem.selected {
-  font-weight: bold;
-  color: var(--global-selected);
+  font-weight: 700;
+  background-color: var(--global-selected);
 }
 
 .lexdropdown .lexdropdownitem.selected a {
@@ -1447,7 +1446,7 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexmenubar .lexmenuentry:active{
   color: #b7b7cba4;
-  margin-top: 1px;
+  margin-top: 0.05em;
 }
 
 .lexcontextmenu {
@@ -1595,10 +1594,6 @@ meter::-webkit-meter-even-less-good-value {
   -moz-user-select: none; /* Firefox 2+ */
   -ms-user-select: none; /* IE 10+ */
   user-select: none; /* Standard syntax */
-}
-
-.lexmenubar .lexmenubutton:active {
-  margin-top: 1px;
 }
 
 .lexmenubar .lexmenubutton.disabled a {
@@ -1756,16 +1751,16 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexoverlaybuttons .lexbutton {
-  padding: 8px;
+  padding: 14px 10px;
   font-size: 14px;
-  border-radius: 6px;
+  border-radius: 8px;
   color: #11111d;
   background-color: #d9d9f1a2;
-  border: 1px solid #11111f2b;
 }
 
 .lexoverlaybuttons .lexbutton a {
   line-height: 19px;
+  font-size: 14px;
 }
 
 .lexoverlaybuttons .lexbutton img {
@@ -1773,7 +1768,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexoverlaybuttons .lexbutton.selected {
-  background-color: var(--global-branch-darker);
+  background-color: var(--global-selected);
   color: #f5f5f5;
   outline: none;
 }
@@ -1783,12 +1778,13 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexoverlaybuttons .lexbutton:hover {
-  background-color: var(--global-selected);
+  background-color: #858585;
   color: #f5f5f5;
 }
 
 .lexoverlaybuttons .lexbutton:active {
-  background-color: var(--global-selected-light);  
+  outline: none !important;
+  color: #d5d5d5;
 }
 
 .lexoverlaybuttons .lexoverlaygroup {

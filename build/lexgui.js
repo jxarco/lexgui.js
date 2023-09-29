@@ -24,6 +24,14 @@
     LX.getExtension = getExtension;
     LX.deepCopy = deepCopy;
 
+    function setHighlightColor(color)
+    {
+        var r = document.querySelector(':root');
+        r.style.setProperty('--global-selected', color);
+    }
+
+    LX.setHighlightColor = setHighlightColor;
+
     function hexToRgb(string) {
         const red = parseInt(string.substring(1, 3), 16) / 255;
         const green = parseInt(string.substring(3, 5), 16) / 255;
@@ -2779,8 +2787,19 @@
 
             let widget = this.create_widget(null, Widget.TITLE, options);
             let element = widget.domEl;
-            element.innerText = name;
             element.className = "lextitle";
+
+            if(options.icon) {
+                let icon = document.createElement('a');
+                icon.className = options.icon;
+                icon.style.color = options.icon_color || "";
+                element.appendChild(icon);
+            }
+
+            let text = document.createElement('span');
+            text.innerText = name;
+            element.appendChild(text);
+
             Object.assign(element.style, options.style ?? {});
 
             if(options.link != undefined)
@@ -3267,7 +3286,7 @@
 
             // Add dropdown widget button  
             let buttonName = value;
-            buttonName += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
+            buttonName += "<a class='fa-solid fa-angle-down' style='float:right; margin-right: 6px;'></a>";
 
             this.queue(container);
 
@@ -3603,8 +3622,10 @@
             
             this.queue( container );
 
+            const angle_down = `<a class='fa-solid fa-angle-down' style='float:right; margin-right: 6px;'></a>`;
+
             let buttonName = "Array (size " + values.length + ")";
-            buttonName += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
+            buttonName += angle_down;
             this.addButton(null, buttonName, () => {
                 element.querySelector(".lexarrayitems").toggleAttribute('hidden');
             }, { buttonClass: 'array' });
@@ -3625,7 +3646,7 @@
                 // Update num items
                 let buttonEl = element.querySelector(".lexbutton.array span");
                 buttonEl.innerHTML = "Array (size " + values.length + ")";
-                buttonEl.innerHTML += "<a class='fa-solid fa-caret-down' style='float:right'></a>";
+                buttonEl.innerHTML += angle_down;
 
                 // Update inputs
                 array_items.innerHTML = "";
@@ -3663,7 +3684,7 @@
                 }
 
                 buttonName = "Add item";
-                buttonName += "<a class='fa-solid fa-plus' style='float:right'></a>";
+                buttonName += "<a class='fa-solid fa-plus' style='float:right; margin-right: 6px;'></a>";
                 this.addButton(null, buttonName, (v, event) => {
                     values.push( "" );
                     updateItems();
@@ -4745,7 +4766,7 @@
             var title = document.createElement('div');
             title.className = "lexbranchtitle";
             
-            title.innerHTML = "<span class='switch-branch-button'></span>";
+            title.innerHTML = "<a class='fa-solid fa-angle-up switch-branch-button'></a>";
             if(options.icon) {
                 title.innerHTML += "<a class='branchicon " + options.icon + "' style='margin-right: 8px; margin-bottom: -2px;'>";
             }
