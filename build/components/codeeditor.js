@@ -101,6 +101,7 @@
                 this.selection = document.createElement('div');
                 this.selection.className = "lexcodeselection";
                 // this.selections.appendChild( this.selection );
+                this.selected_lines = [];
             }
 
             // State
@@ -184,15 +185,18 @@
 
                 this._addUndoStep( cursor );
                 let count = this.selected_lines[0];
-                for(let i = 0; i < this.selected_lines.length; i++) {
+                for(let i = this.selected_lines.length - 1; i >= 0; i--) {
                     ln = this.selected_lines[i];
                     
                     let selection = this.selections.children[ln - count];
-                    if(selection.range)
+                    cursor.line = ln;
+                    if(selection.range && (selection.range[1] - selection.range[0]))
                     {
                         this.deleteSelection(cursor, selection);
-                        if(!this.code.lines[ln].length) this.actions['Delete'].callback(ln, cursor);
+
+                        // if(!this.code.lines[ln].length) this.actions['Delete'].callback(ln, cursor);
                         this.processLines();
+
                     }
                     else
                     {
@@ -208,7 +212,7 @@
                         }
                     }
                 }
-                
+                this.endSelection();
             });
 
             this.action('Tab', true, ( ln, cursor, e ) => {
@@ -219,7 +223,7 @@
                 // Find first non space char
                 var idx = firstNonspaceIndex(this.code.lines[ln]);
                 var prestring = this.code.lines[ln].substring(0, idx);
-                let selection = this.selections.children[0];
+                let selection = this.selections.children[0] || this.selection;
                 if( e.shiftKey ) {
                     this.startSelection(cursor, selection);
                     var string = this.code.lines[ln].substring(idx, cursor.charPos);
@@ -232,7 +236,7 @@
             });
 
             this.action('End', false, ( ln, cursor, e ) => {
-                let selection = this.selections.children[0];
+                let selection = this.selections.children[0] || this.selection;
                 if( e.shiftKey || e._shiftKey ) {
                     this.startSelection(cursor, selection);
                     var string = this.code.lines[ln].substring(cursor.charPos);
@@ -675,21 +679,21 @@
                         const [word, from, to] = this.getWordAtPos( cursor );
 
                         var cursor = this.cursors.children[0];
-                        let selection = this.selections.children[0];
+                        let selection = this.selections.children[0] || this.selection;
 
-                    this.resetCursorPos( CodeEditor.CURSOR_LEFT );
-                    this.cursorToString( cursor, this.code.lines[cursor.line].substr(0, from) );
-                    this.startSelection( cursor, selection );
-                    selection.style.width = this.measureString(word)[0] + "px";
-                    selection.range = [from, to];
-                    break;
-                case 3:
-                    // triple click: select entire line
-                    this.resetCursorPos( CodeEditor.CURSOR_LEFT );
-                    e._shiftKey = true;
-                    var cursor = this.cursors.children[0];
-                    this.actions['End'].callback(cursor.line, cursor, e);
-                    break;
+                        this.resetCursorPos( CodeEditor.CURSOR_LEFT );
+                        this.cursorToString( cursor, this.code.lines[cursor.line].substr(0, from) );
+                        this.startSelection( cursor, selection );
+                        selection.style.width = this.measureString(word)[0] + "px";
+                        selection.range = [from, to];
+                        break;
+                    case 3:
+                        // triple click: select entire line
+                        this.resetCursorPos( CodeEditor.CURSOR_LEFT );
+                        e._shiftKey = true;
+                        var cursor = this.cursors.children[0];
+                        this.actions['End'].callback(cursor.line, cursor, e);
+                        break;
                 }
             }
 
@@ -742,7 +746,6 @@
 
             selection = selection ?? this.selection;
             var cursor = cursor ?? this.cursors.lastChild;
-            const firstSelection = !this.selection_started;
 
             this.processClick(e, true);
 
@@ -761,6 +764,8 @@
 
                     let currentSelection = null;
                     if(this.selected_lines.indexOf(i) > -1 ){
+                        // if(i > this.initial_cursorLine + 1 && i + 1 < cursor.line) 
+                        //     continue;
                         currentSelection = this.selections.children[ i - this.initial_cursorLine ];
                     }
                     else {
@@ -775,8 +780,8 @@
                     if(!initPos)
                         currentSelection.style.left = "0.25em";
 
-                    currentSelection.style.width = (sw ? sw : 4) + "px";
-                    currentSelection.style.top = ( 4 + i * this.lineHeight - this.getScrollTop() ) + "px";//calc( 4px +" + i * this.lineHeight + "px -" + this.getScrollTop() + "px)";
+                    currentSelection.style.width = (sw || 4) + "px";
+                    currentSelection.style.top = ( 4 + i * this.lineHeight - this.getScrollTop() ) + "px";
                     currentSelection.range = [initPos, finalPos];
 
                     if(this.selected_lines.indexOf(i) > -1 )
@@ -817,7 +822,7 @@
                         currentSelection.style.left = "0.25em";
                     else
                         currentSelection.style.left = cursor.style.left;
-                    currentSelection.style.width = ( sw ? sw : 4 ) + "px";
+                    currentSelection.style.width = ( sw || 4 ) + "px";
                     currentSelection.style.top = ( 4 + i * this.lineHeight - this.getScrollTop() ) + "px"; 
                     currentSelection.range = [initPos, finalPos];
                     if(this.selected_lines.indexOf(i) > -1 )
@@ -1318,6 +1323,14 @@
 
         startSelection( cursor, selection ) {
 
+            if(!selection) {
+                this.selected_lines = [];
+                for(let i = this.selections.children.length - 1; i > 0 ; i--) {
+    
+                    this.selections.removeChild(this.selections.children[i]);
+                }
+                selection = this.selection;
+            }
             this.selections.classList.add('show');
             selection.style.left = cursor.style.left;
             selection.style.top = cursor.style.top;
@@ -1326,12 +1339,7 @@
             this.initial_charPos = cursor.charPos;
             this.selection_started = true;
             this.initial_cursorLine = cursor.line;
-
-            this.selected_lines = [];
-            for(let i = this.selections.children.length - 1; i > 0 ; i--) {
-
-                this.selections.removeChild(this.selections.children[i]);
-            }
+  
         }
 
         deleteSelection( cursor, selection ) {
@@ -1343,7 +1351,7 @@
             ].join('');
             this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
             this.cursorToString(cursor, this.code.lines[ln].slice(0, selection.range[0]));
-            this.endSelection();
+            
         }
 
         endSelection( selection ) {
@@ -1353,6 +1361,10 @@
             selection.range = null;
             this.state.selectingText = false;
             this.selected_lines = [];
+            for(let i = this.selections.children.length - 1; i > 0 ; i--) {
+    
+                this.selections.removeChild(this.selections.children[i]);
+            }
         }
 
         cursorToRight( key, cursor ) {
