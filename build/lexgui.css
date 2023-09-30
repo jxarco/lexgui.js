@@ -1882,8 +1882,8 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexareatabs.row {
-  
-}
+  width: 100%;
+} 
 
 .lexareatabs.row .lexareatab {
   background-color: var(--global-color-secondary);
@@ -2410,6 +2410,14 @@ ul.lexassetscontent {
   overflow: inherit;
 }
 
+.codebasearea * {
+  letter-spacing: 0em !important;
+}
+
+.codebasearea .lexareatab {
+  padding: 0px;
+}
+
 .lexcodeeditor ::-webkit-scrollbar {
   height: 6px;
 }
@@ -2443,8 +2451,8 @@ ul.lexassetscontent {
 
 .lexcodegutter {
   width: 32px;
-  height: calc(100% - 69px); /* 6px of the vertical scrollbar */
-  margin-top: 31px;
+  height: calc(100% - 63px); /* 6px of the vertical scrollbar */
+  margin-top: 26.7px;
   background-color: var(--branch-title-background);
   text-align: center;
   overflow: hidden;
