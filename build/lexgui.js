@@ -349,6 +349,7 @@
      * id: Id of the prompt dialog
      * position: Dialog position in screen [screen centered]
      * draggable: Dialog can be dragged [false]
+     * input: If false, no text input appears
      */
 
     function prompt(text, title, callback, options = {})
@@ -359,14 +360,16 @@
 
         const dialog = new Dialog(title, p => {
             p.addTextArea(null, text, null, { disabled: true });
-            p.addText(null, value, (v) => value = v, {placeholder: "..."} );
+            if(options.input != false)
+                p.addText(null, value, (v) => value = v, {placeholder: "..."} );
             p.sameLine(2);
             p.addButton(null, "OK", () => { callback.call(this, value); dialog.close() }, { buttonClass: "accept" });
-            p.addButton(null, "Cancel", () => dialog.close() );
+            p.addButton(null, "Cancel", () => {if(options.on_cancel) options.on_cancel(); dialog.close();} );
         }, options);
 
         // Focus text prompt
-        dialog.root.querySelector('input').focus();
+        if(options.input != false)
+            dialog.root.querySelector('input').focus();
     }
 
     LX.prompt = prompt;
@@ -2445,13 +2448,17 @@
          * @description Stop inlining widgets
          */
 
-        endLine() {
+        endLine(justifyContent) {
 
             this.#inline_widgets_left = 0;
 
             if(!this._inlineContainer)  {
                 this._inlineContainer = document.createElement('div');
                 this._inlineContainer.className = "lexinlinewidgets";
+                if(justifyContent)
+                {
+                    this._inlineContainer.style.justifyContent = justifyContent;
+                }
             }
             
             // Push all elements single element or Array[element, container]
@@ -3122,7 +3129,7 @@
             // Remove branch padding and margins
             if(!widget.name) {
                 wValue.className += " noname";
-                wValue.style.width =  "100%";
+                wValue.style.width =  options.width || "100%";
             }
 
             return element;
@@ -4585,6 +4592,9 @@
             let input = document.createElement('input');
             input.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 10%)";
             input.type = 'file';
+            if(options.placeholder)
+                input.placeholder = options.placeholder;
+
             input.addEventListener('change', function(e) {
                 const files = e.target.files;
                 if(!files.length) return;
@@ -5616,19 +5626,27 @@
 
             //value to canvas
             function convert(v) {
-                return [ canvas.width * ( (element.xrange[1] - element.xrange[0]) * v[0] + element.xrange[0]),
-                    canvas.height * ((element.yrange[1] - element.yrange[0]) * v[1] + element.yrange[0])];
+                return [ canvas.width * ( v[0] - element.xrange[0])/ (element.xrange[1]),
+                    canvas.height * (v[1] - element.yrange[0])/ (element.yrange[1])];
+                // return [ canvas.width * ( (element.xrange[1] - element.xrange[0]) * v[0] + element.xrange[0]),
+                //     canvas.height * ((element.yrange[1] - element.yrange[0]) * v[1] + element.yrange[0])];
             }
 
             //canvas to value
             function unconvert(v) {
-                return [(v[0] / canvas.width - element.xrange[0]) / (element.xrange[1] - element.xrange[0]),
-                        (v[1] / canvas.height - element.yrange[0]) / (element.yrange[1] - element.yrange[0])];
+                return [(v[0] * element.xrange[1] / canvas.width + element.xrange[0]),
+                        (v[1] * element.yrange[1] / canvas.height + element.yrange[0])];
+                // return [(v[0] / canvas.width - element.xrange[0]) / (element.xrange[1] - element.xrange[0]),
+                //         (v[1] / canvas.height - element.yrange[0]) / (element.yrange[1] - element.yrange[0])];
             }
 
             var selected = -1;
 
-            element.redraw = function()  {
+            element.redraw = function(o = {} )  {
+                
+                if(o.value) element.value = o.value;
+                if(o.xrange) element.xrange = o.xrange;
+                if(o.yrange) element.yrange = o.yrange;
 
                 var rect = canvas.parentElement.getBoundingClientRect();
                 if(canvas.parentElement.parentElement) rect = canvas.parentElement.parentElement.getBoundingClientRect();
@@ -5813,8 +5831,8 @@
             return this;
         }
 
-        redraw() {
-            this.element.redraw();
+        redraw(options = {}) {
+            this.element.redraw(options);
         }
     }
 
@@ -5827,6 +5845,7 @@
         static ASSET_DELETED    = 2;
         static ASSET_RENAMED    = 3;
         static ASSET_CLONED     = 4;
+        static ASSET_DBCLICK    = 5;
 
         constructor( type, item, value ) {
             this.type = type || TreeEvent.NONE;
@@ -5842,6 +5861,7 @@
                 case AssetViewEvent.ASSET_DELETED: return "assetview_event_deleted";
                 case AssetViewEvent.ASSET_RENAMED:  return "assetview_event_renamed";
                 case AssetViewEvent.ASSET_CLONED:  return "assetview_event_cloned";
+                case AssetViewEvent.ASSET_DBCLICK:  return "assetview_event_dbclick";
             }
         }
     };
@@ -6163,7 +6183,7 @@
                         that._enter_folder( item );
 
                     if(that.onevent) {
-                        const event = new AssetViewEvent(AssetViewEvent.ASSET_SELECTED, e.shiftKey ? [item] : item );
+                        const event = new AssetViewEvent(e.detail === 1 ? AssetViewEvent.ASSET_SELECTED: AssetViewEvent.ASSET_DBCLICK, e.shiftKey ? [item] : item );
                         event.multiple = !!e.shiftKey;
                         that.onevent( event );
                     }

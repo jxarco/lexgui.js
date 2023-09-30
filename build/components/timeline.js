@@ -62,7 +62,7 @@
 
             this.canvas = options.canvas ?? document.createElement('canvas');
 
-            this.duration = 5;
+            this.duration = 1;
             this.position = [options.x ?? 0, options.y ?? 0];
             this.size = [ options.width ?? 400, options.height ?? 100];
             
@@ -79,10 +79,9 @@
             this.skipVisibility = options.skipVisibility ?? false;
             this.skipLock = options.skipLock ?? false;
 
-            this.root = new LX.Area({className : 'lextimeline'});
-            // this.root = document.createElement('div');
-            // this.root.className = 'lextimeline';
+            this.optimizeThreshold = 0.025;
 
+            this.root = new LX.Area({className : 'lextimeline'});
             
             this.header_offset = 38;
             
@@ -139,8 +138,12 @@
             LX.DEFAULT_NAME_WIDTH = "50%";
             header.sameLine();
             header.addTitle(this.name, {width: "132px"});
-            header.addDropdown("Animation", ["Scene", "Anim1", "Anim2"], "Scene", (value, event) => {});        
-            header.addNumber("Duration", this.duration, (value, event) => this.setDuration(value), {step: 0.01, min: 0});        
+            header.addText("Animation", this.animationClip ? this.animationClip.name : "Animation", (value, event) => { 
+                if( !this.animationClip )
+                    return;
+                this.animationClip.name = value ;
+            });        
+            header.addNumber("Duration", this.duration.toFixed(3), (value, event) => this.setDuration(value), {step: 0.01, min: 0});        
             header.addNumber("Current Time", this.currentTime, (value, event) => {
                 this.currentTime = value;
                 if(this.onSetTime)
@@ -153,6 +156,21 @@
                 this.header.addButton( null, "<a class='" + button.icon +"' title='" + button.name + "'></a>", button.callback, {width: "32px"});
             }
 
+            if(this.onShowOptimizeMenu)
+                header.addButton("", '<i class="fa-solid fa-filter"></i>', (value, event) => {this.onShowOptimizeMenu(event)}, {width: "40px"});
+
+            header.addButton("", '<i class="fa-solid fa-gear"></i>', (value, event) => {
+                let dialog = new LX.Dialog("Configuration", d => {
+                    d.addNumber("Framerate", this.framerate, null, {disabled: true});
+                    d.addNumber("Num items", Object.keys(this.tracksPerItem).length, null, {disabled: true});
+                    d.addNumber("Num tracks", this.animationClip ? this.animationClip.tracks.length : 0, null, {disabled: true});
+                    if(this.onShowOptimizeMenu)
+                        d.addNumber("Optimize Threshold", this.optimizeThreshold, v => {
+                            this.optimizeThreshold = v;
+                        }, {min: 0, max: 0.25, step: 0.001, precision: 4});
+                    
+                })
+            }, {width: "40px"})
             header.endLine();
             LX.DEFAULT_NAME_WIDTH = "30%";
         }
@@ -308,7 +326,7 @@
         setAnimationClip( animation ) {
             this.animationClip = animation;
             this.duration = animation.duration;
-
+            this.speed = animation.speed || 1;
             var w = Math.max(300, this.canvas.width);
             this.secondsToPixels = ( w - this.session.left_margin ) / this.duration;
             // if(this.secondsToPixels < 1)
@@ -631,7 +649,6 @@
         /**
          * @method setFramerate
          * @param {*} v
-         * TODO
          */
 
         setFramerate( v ) {
@@ -641,7 +658,6 @@
         /**
          * @method processMouse
          * @param {*} e
-         * TODO
          */
 
         processMouse( e ) {
@@ -706,8 +722,8 @@
                 const discard = this.movingKeys || (LX.UTILS.getTime() - this.clickTime) > 420; // ms
                 this.movingKeys ? innerSetTime( this.currentTime ) : 0;
 
-                if(this.grabbing && this.onClipMoved){
-                    this.onClipMoved();
+                if(e.button == 0 && this.grabbing && this.onClipMoved && this.lastClipsSelected.length){
+                    this.onClipMoved(this.lastClipsSelected);
                 }
 
                 this.grabbing_timeline = false;
@@ -799,7 +815,7 @@
 
             return true;
         }
-
+        
         /**
          * @method drawTrackWithKeyframes
          * @param {*} ctx
@@ -962,18 +978,29 @@
                     // ctx.strokeRect( safex, y, safex2-safex, trackHeight );
                     ctx.globalAlpha = trackAlpha;
                     if(this.selectedClip == clip || track.selected[j])
-                        selectedClipArea = [x, y + offset, x2-x, trackHeight]
+                        selectedClipArea = [x, y + offset, x2-x, trackHeight];
+
+                    ctx.font = "12px Rubik";
                     //render clip selection area
                     if(selectedClipArea)
                     {
                         ctx.strokeStyle = track.clips[j].clipColor;
-                        ctx.globalAlpha = 0.8;
-                        ctx.lineWidth = 1;
+                        ctx.globalAlpha = 0.5;
+                        ctx.lineWidth = 2.5;
                         ctx.roundRect(selectedClipArea[0]-1,selectedClipArea[1]-1,selectedClipArea[2]+2,selectedClipArea[3]+2, 5, false, true);
                         ctx.strokeStyle = "#888";
                         ctx.lineWidth = 0.5;
                         ctx.globalAlpha = this.opacity;
-                }
+                        ctx.font = "bold 13px Rubik";
+                    }
+
+                    let text = clip.id.replaceAll("_", " ").replaceAll("-", " ");
+                    let textInfo = ctx.measureText( text );
+                    ctx.fillStyle = clip.color;
+                    
+                    if( textInfo.width < (w - 24) )
+                        ctx.fillText( text, x + (w - textInfo.width)*0.5,  y + offset + 12 );
+                    ctx.font = "12px Rubik";
                 }
             }
 
@@ -1541,6 +1568,34 @@
                 this.animationClip.tracks.push(trackInfo);
             }
         }
+
+
+        optimizeTrack(trackIdx) {
+            const track = this.animationClip.tracks[trackIdx];
+            if(track.optimize) {
+
+                track.optimize( this.optimizeThreshold );
+                if(this.onOptimizeTracks)
+                   this.onOptimizeTracks(trackIdx);
+            }
+        }
+    
+        optimizeTracks() {
+    
+            if(!this.animationClip)
+                return;
+    
+            for( let i = 0; i < this.animationClip.tracks.length; ++i ) {
+                const track = this.animationClip.tracks[i];
+                if(track.optimize) {
+    
+                    track.optimize( this.optimizeThreshold );
+                    if(this.onOptimizeTracks)
+                        this.onOptimizeTracks(i);
+                }
+            }
+        }
+
 
         getNumTracks( item ) {
             if(!item || !this.tracksPerItem)
@@ -2198,11 +2253,14 @@
 
                     if(!this.timelineClickedClips)
                         this.timelineClickedClips  = [];
-                    this.timelineClickedClips.push(clip);
+                    if(this.timelineClickedClips.indexOf(clip) < 0) {
+                        this.timelineClickedClips.push(clip);
 
-                    if(!this.timelineClickedClipsTime)
-                        this.timelineClickedClipsTime  = [];
-                    this.timelineClickedClipsTime.push(this.xToTime( localX ));
+                        if(!this.timelineClickedClipsTime)
+                            this.timelineClickedClipsTime  = [];
+                        this.timelineClickedClipsTime.push(this.xToTime( localX ));
+                    }
+
 
                     var endingX = this.timeToX( clip.start + clip.duration );
                     var distToStart = Math.abs( this.timeToX( clip.start ) - x );
@@ -2266,8 +2324,9 @@
                     for(let i = 0; i < this.timelineClickedClips.length; i++){
                         
                         var clip = this.timelineClickedClips[i] ;
-                        var diff = delta;//this.currentTime - this.timelineClickedClipsTime[i];//delta;
+                        var diff = clip.start + delta < 0 ? - clip.start : delta;//this.currentTime - this.timelineClickedClipsTime[i];//delta;
                         if( this.dragClipMode == "move" ) {
+                           
                             clip.start += diff;
                             clip.fadein += diff;
                             clip.fadeout += diff;
@@ -2327,7 +2386,7 @@
                         callback: () => {
                             let clipstToDelete = this.lastClipsSelected;
                             for(let i = 0; i < clipstToDelete.length; i++){
-                                this.deleteClip(clipstToDelete[i], null);
+                                this.deleteClip(e, clipstToDelete[i], null);
                             }
                             // this.optimizeTracks();
                         }
@@ -2431,6 +2490,32 @@
         }
 
         /**
+         * @method optimizeTrack
+         */
+
+        optimizeTrack(trackIdx) {
+            if(this.animationClip.tracks[trackIdx].clips.length) {
+                this.animationClip.tracks[trackIdx].idx = tracks.length;
+                for(let j = 0; j < this.animationClip.tracks[trackIdx].clips.length; j++)
+                {
+                    this.animationClip.tracks[trackIdx].clips[j].trackIdx = tracks.length;
+                }
+                let selectedIdx = 0;
+                for(let l = 0; l < this.lastClipsSelected.length; l++)
+                {
+                    let [t,c] = this.lastClipsSelected[l];
+                
+                    if(t > trackIdx)
+                        this.lastClipsSelected[l][1] = t - 1;
+                    if(t == trackIdx)
+                        selectedIdx = l;
+                }
+                this.lastClipsSelected = [...this.lastClipsSelected.slice(0, selectedIdx), ...this.lastClipsSelected.slice(selectedIdx + 1, this.lastClipsSelected.length)];
+                tracks.push(this.animationClip.tracks[i]);
+            }		
+        }
+
+        /**
          * @method optimizeTracks
          */
 
@@ -2469,7 +2554,7 @@
 
             // Update clip information
             let trackIdx = null;
-            let newStart = this.currentTime + offsetTime;
+            let newStart = this.currentTime + offsetTime + clip.start;
 
             clip.fadein += (newStart - clip.start);
             clip.fadeout += (newStart - clip.start);
@@ -2482,7 +2567,7 @@
 
             for(let i = 0; i < this.animationClip.tracks.length; i++) {
                 clipInCurrentSlot = this.animationClip.tracks[i].clips.find( t => { 
-                    return LX.UTILS.compareThresholdRange(this.currentTime, clip.start + clip.duration, t.start, t.start+t.duration);
+                    return LX.UTILS.compareThresholdRange(newStart, clip.start + clip.duration, t.start, t.start+t.duration);
                     
                 });
                 if(!clipInCurrentSlot)
@@ -2501,7 +2586,7 @@
             //this.saveState(clipIdx);
 
             // Find new index
-            let newIdx = this.animationClip.tracks[trackIdx].clips.findIndex( t => t.start > this.currentTime );
+            let newIdx = this.animationClip.tracks[trackIdx].clips.findIndex( t => t.start > newStart );
 
             // Add as last index
             let lastIndex = false;
@@ -2556,7 +2641,7 @@
          * @clip: clip to be delete
          * @callback: (optional) function to call after deleting the clip
         */
-        deleteClip( clip, callback ) {
+        deleteClip( e, clip, callback ) {
 
             let index = -1;
             // Key pressed
@@ -2564,8 +2649,47 @@
                 clip = this.selectedClip;
             }
             
+            if(e.multipleSelection || !clip) {
 
-            let [trackIdx, clipIdx] = clip;
+                // Split in tracks
+                const perTrack = [];
+                this.lastClipsSelected.forEach( e => perTrack[e[0]] ? perTrack[e[0]].push(e) : perTrack[e[0]] = [e] );
+                
+                for(let pts of perTrack) {
+                    
+                    if(!pts) continue;
+
+                    pts = pts.sort( (a,b) => a[2] - b[2] );
+                    
+                    let deletedIndices = 0;
+
+                    // Delete every selected clip
+                    for(let [trackIdx, clipIdx] of pts) {
+                        this.#delete(trackIdx, clipIdx );
+                        deletedIndices++;
+                    }
+                }
+            } 
+            else if ( clip ){
+                const [trackIdx, clipIdx]  = clip;
+
+                this.saveState(clip);
+                this.#delete( trackIdx, clipIdx );
+            }
+            
+
+            if(callback)
+                callback();
+            
+            this.timelineClickedClips = [];
+            this.selectedClip = null;
+            //this.unSelectAllClips();
+            // // Update animation action interpolation info
+
+        }
+
+        #delete( trackIdx, clipIdx) {
+
             let clips = this.animationClip.tracks[trackIdx].clips;
             if(clipIdx >= 0)
             {
@@ -2585,15 +2709,41 @@
                     }
                     this.lastClipsSelected = [...this.lastClipsSelected.slice(0, selectedIdx), ...this.lastClipsSelected.slice(selectedIdx + 1, this.lastClipsSelected.length)];
                 }
-                if(callback)
-                    callback();
             }
-            this.selectedClip = null;
-            //this.unSelectAllClips();
-            // // Update animation action interpolation info
 
         }
 
+        saveState( clipIdx ) {
+
+            // const localIdx = this.animationClip.tracks[clipIdx].idx;
+            // const name = this.getTrackName(this.animationClip.tracks[clipIdx].name)[0];
+            // const trackInfo = this.tracksPerItem[name][localIdx];
+
+            // this.trackState.push({
+            //     idx: clipIdx,
+            //     t: this.animationClip.tracks[clipIdx].times.slice(),
+            //     v: this.animationClip.tracks[clipIdx].values.slice(),
+            //     editedTracks: [].concat(trackInfo.edited)
+            // });
+        }
+
+        restoreState() {
+            
+            // if(!this.trackState.length)
+            // return;
+
+            // const state = this.trackState.pop();
+            // this.animationClip.tracks[state.idx].times = state.t;
+            // this.animationClip.tracks[state.idx].values = state.v;
+
+            // const localIdx = this.animationClip.tracks[state.idx].idx;
+            // const name = this.getTrackName(this.animationClip.tracks[state.idx].name)[0];
+            // this.tracksPerItem[name][localIdx].edited = state.editedTracks;
+
+            // // Update animation action interpolation info
+            // if(this.onUpdateTrack)
+            //     this.onUpdateTrack( state.idx );
+        }
         
         getCurrentClip( track, time, threshold ) {
 
@@ -2623,6 +2773,8 @@
             // Something has been unselected
             const unselected = this.lastClipsSelected.length > 0;
             this.lastClipsSelected.length = 0;
+            this.timelineClickedClips = null;
+            this.timelineClickedClipsTime = null;
             this.selectedClip = false;
             return unselected;
         }
@@ -2637,6 +2789,9 @@
             }
                             
             if(clipIndex == undefined)
+                return;
+
+            if(track.selected[clipIndex])
                 return;
 
             let currentSelection = [ track.idx, clipIndex];
@@ -3228,7 +3383,7 @@
         }
 
     
-        onShowOptimizeMenu( e ) {
+        onShowOptimizeMenu( e) {
             
             if(this.selectedItems == null)
                 return;
@@ -3248,6 +3403,8 @@
                     m.add( t.name + (t.type ? "@" + t.type : ""), () => { 
                         this.animationClip.tracks[t.clipIdx].optimize( threshold );
                         t.edited = [];
+                        if(this.onOptimizeTracks)
+                            this.onOptimizeTracks(t.clipIdx);
                     })
                 }
             });

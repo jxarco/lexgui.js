@@ -2578,12 +2578,10 @@ ul.lexassetscontent {
   left: 0px;
   top: 0px;
   width: 100px;
-  /* height: 18px; */
   height: 22px;
   margin-top: -2px;
-  background-color: rgba(85, 158, 221, 0.35);
-  border-radius: 3px;
-  /* border: 1px solid var(--global-selected-light); */
+  background-color: var(--global-selected);
+  opacity: 0.3;
 }
 
 .cm-str { color: #c69179; } /* string */
