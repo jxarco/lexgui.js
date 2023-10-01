@@ -342,7 +342,7 @@
                         else {
                             if(!this.selection) this.cursorToLeft( letter, cursor );
                             else {
-                                this.resetCursorPos( CodeEditor.CURSOR_LEFT & CodeEditor.CURSOR_TOP );
+                                this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
                                 this.cursorToLine(cursor, this.selection.fromY, true);
                                 this.cursorToPosition(cursor, this.selection.fromX);
                                 this.endSelection();
@@ -844,6 +844,17 @@
             if( e.ctrlKey || e.metaKey )
             {
                 switch( key.toLowerCase() ) {
+                case 'a': // select all
+                    e.preventDefault();
+                    this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
+                    this.startSelection(cursor);
+                    const nlines = this.code.lines.length - 1;
+                    this.selection.toX = this.code.lines[nlines].length;
+                    this.selection.toY = nlines;
+                    this.processSelection(null, true);
+                    this.cursorToPosition(cursor, this.selection.toX);
+                    this.cursorToLine(cursor, this.selection.toY);
+                    break;
                 case 'c': // copy
                     let text_to_copy = "";
                     if( !this.selection ) {
@@ -911,6 +922,11 @@
                     if(_text) this.cursorToString(cursor, _text);
                     this.cursorToLine(cursor, cursor.line + num_lines);
                     this.processLines(lidx);
+                    return;
+                case 'x': // cut line
+                    const to_copy = this.code.lines.splice(lidx, 1)[0];
+                    this.processLines(lidx);
+                    navigator.clipboard.writeText(to_copy + '\n');
                     return;
                 case 'z': // undo
                     if(!this.code.undoSteps.length)
