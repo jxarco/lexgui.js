@@ -2466,6 +2466,7 @@ ul.lexassetscontent {
   -moz-user-select: none; /* Firefox 2+ */
   -ms-user-select: none; /* IE 10+ */
   user-select: none; /* Standard syntax */
+  font-family: 'Inconsolata', monospace;
 }
 
 .lexcodegutter span {
@@ -2474,7 +2475,7 @@ ul.lexassetscontent {
   height: 18px;
   margin-top: 4px;
   font-size: 13px;
-  color: #999;
+  color: #888;
   text-align-last: auto;
   line-height: 22px;
 }
@@ -2484,7 +2485,7 @@ ul.lexassetscontent {
   font-size: 18px;
   background-color: var(--global-branch-darker);
   overflow: scroll;
-  height: calc(100% - 26px);
+  height: calc(100% - 37px);
 }
 
 .lexcodeeditor .code.dragging {

@@ -2076,8 +2076,8 @@
 
             node.visible = node.visible ?? true;
             node.parent = parent;
-            const is_parent = node.children.length > 0;
-            const is_selected = this.selected.indexOf( node ) > -1;
+            let is_parent = node.children.length > 0;
+            let is_selected = this.selected.indexOf( node ) > -1;
             
             let has_parent_child = false;
             if( this.options.only_parents ) {
