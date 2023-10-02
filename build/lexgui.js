@@ -2767,7 +2767,7 @@
                     ;
                     const filterWord = value.toLowerCase();
                     const name = toCompare.toLowerCase();
-                    if(!name.includes(value)) continue;
+                    if(!name.includes(filterWord)) continue;
                 }
                 // insert filtered widget
                 filteredOptions.push(o);
