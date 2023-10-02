@@ -806,11 +806,12 @@ body.nocursor * {
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
   max-height: -webkit-fill-available;
+  max-height: 400px;
   overflow: scroll;
 }
 
 .lexdialog .lexdropdown ul {
-  max-height: unset;
+  /* max-height: unset; */
 }
 
 .lexdropdown ul::-webkit-scrollbar {
