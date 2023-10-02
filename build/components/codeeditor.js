@@ -63,6 +63,7 @@
 
         /**
          * @param {*} options
+         * skip_info, allow_add_scripts, name
          */
 
         constructor( area, options = {} ) {
@@ -400,8 +401,10 @@
             // Default code tab
         
             this.openedTabs = { };
-            this.addTab("+", false, "New File");
-            this.addTab("untitled", true);
+            
+            if( options.allow_add_scripts != false)
+                this.addTab("+", false, "New File");
+            this.addTab(options.name || "untitled", true);
 
             // Create inspector panel
             let panel = this._create_panel_info();
@@ -866,6 +869,14 @@
 
                         // Get linear start index
                         let index = 0;
+                        if(this.selection.fromY > this.selection.toY) {
+                            let toY = this.selection.toY;
+                            let toX = this.selection.toX;
+                            this.selection.toY = this.selection.fromY;
+                            this.selection.fromY = toY;
+                            this.selection.toX = this.selection.fromX;
+                            this.selection.fromX = toX;
+                        }
                         for(let i = 0; i <= this.selection.fromY; i++)
                             index += (i == this.selection.fromY ? this.selection.fromX : this.code.lines[i].length);
 
@@ -873,9 +884,9 @@
                         const num_chars = this.selection.chars + (this.selection.toY - this.selection.fromY) * separator.length;
                         const text = code.substr(index, num_chars);
                         const lines = text.split(separator);
-                        text_to_copy = lines.join('\n');
+                        text_to_copy = lines.join(' ');
                     }
-                    navigator.clipboard.writeText(text_to_copy);
+                    navigator.clipboard.writeText(text_to_copy).then(() => console.log("Successfully copied"), (err) => console.error("Error"));
                     return;
                 case 'd': // duplicate line
                     e.preventDefault();
@@ -1577,6 +1588,8 @@
                         continue;
                     key = key[key.length-1];
                 }
+                else if(key[0].includes("}"))
+                    continue;
                 else
                     key = key[0];
                 key = key.replaceAll(/[{}\n\r]/g,"").replaceAll(" ","")

@@ -5212,7 +5212,7 @@
         constructor( title, callback, options = {} ) {
 
             options.draggable = options.draggable ?? false;
-            options.closable = false;
+            options.closable = options.closable ?? false;
             
             super( title, callback, options );
             
