@@ -3374,7 +3374,7 @@
                 }
                 let container = selectedOption.parentElement.parentElement.parentElement.parentElement; // there must be a nicer way...
                 let rect = event.currentTarget.getBoundingClientRect();
-                let y_pos = container.classList.contains('lexdialog') ? event.currentTarget.offsetTop - 5 + rect.height : rect.y + rect.height - 5;
+                let y_pos = container.classList.contains('lexdialog') ? rect.top - 5 + rect.height : rect.y + rect.height - 5;
                 element.querySelector(".lexoptions").style.top = y_pos + 'px';
                 element.querySelector(".lexoptions").style.width = (event.currentTarget.clientWidth) + 2 + 'px';
                 element.querySelector(".lexoptions").toggleAttribute('hidden');
