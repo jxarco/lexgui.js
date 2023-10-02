@@ -918,43 +918,59 @@
                         this.deleteSelection(cursor);
                         lidx = cursor.line;
                     }
-                    
+
                     this.endSelection();
 
                     let text = await navigator.clipboard.readText();
-
                     const new_lines = text.split('\n');
-                    let num_lines = new_lines.length;
-                    console.assert(num_lines > 0);
-                    const first_line = new_lines.shift();
-                    num_lines--;
 
-                    // const remaining = this.code.lines[lidx].slice(cursor.position);
-
-                    // Add first line
-                    this.code.lines[lidx] = [
-                        this.code.lines[lidx].slice(0, cursor.position), 
-                        first_line
-                    ].join('');
-
-                    this.cursorToString(cursor, first_line);
-
-                    // Enter next lines...
-
-                    let _text = null;
-                    for( var i = 0; i < new_lines.length; ++i )
+                    // Pasting Multiline...
+                    if(new_lines.length != 1)
                     {
-                        _text = new_lines[i];
-                        this.cursorToBottom(cursor, true);
-                        // Add remaining...
-                        // if( i == (new_lines.length - 1) )
-                        //     _text += remaining;
-                        this.code.lines.splice( 1 + lidx + i, 0, _text);
+                        let num_lines = new_lines.length;
+                        console.assert(num_lines > 0);
+                        const first_line = new_lines.shift();
+                        num_lines--;
+    
+                        const remaining = this.code.lines[lidx].slice(cursor.position);
+    
+                        // Add first line
+                        this.code.lines[lidx] = [
+                            this.code.lines[lidx].slice(0, cursor.position), 
+                            first_line
+                        ].join('');
+    
+                        this.cursorToString(cursor, first_line);
+    
+                        // Enter next lines...
+    
+                        let _text = null;
+    
+                        for( var i = 0; i < new_lines.length; ++i ) {
+                            _text = new_lines[i];
+                            this.cursorToBottom(cursor, true);
+                            // Add remaining...
+                            if( i == (new_lines.length - 1) )
+                                _text += remaining;
+                            this.code.lines.splice( 1 + lidx + i, 0, _text);
+                        }
+    
+                        if(_text) this.cursorToString(cursor, _text);
+                        this.cursorToLine(cursor, cursor.line + num_lines);
+                        this.processLines(lidx);
                     }
+                    // Pasting one line...
+                    else
+                    {
+                        this.code.lines[lidx] = [
+                            this.code.lines[lidx].slice(0, cursor.position), 
+                            new_lines[0], 
+                            this.code.lines[lidx].slice(cursor.position)
+                        ].join('');
 
-                    if(_text) this.cursorToString(cursor, _text);
-                    this.cursorToLine(cursor, cursor.line + num_lines);
-                    this.processLines(lidx);
+                        this.cursorToString(cursor, new_lines[0]);
+                        this.processLine(lidx);
+                    }
                     return;
                 case 'x': // cut line
                     const to_copy = this.code.lines.splice(lidx, 1)[0];
