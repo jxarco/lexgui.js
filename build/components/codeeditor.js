@@ -1572,6 +1572,8 @@
                         continue;
                     key = key[key.length-1];
                 }
+                else if(key[0].includes("}"))
+                    continue;
                 else
                     key = key[0];
                 key = key.replaceAll(/[{}\n\r]/g,"").replaceAll(" ","")
