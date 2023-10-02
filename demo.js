@@ -1,13 +1,18 @@
-// init library and get main area
+// Init library and get main area
 let area = LX.init();
 
-// change global properties after init
+// Change global properties after init
 // LX.DEFAULT_NAME_WIDTH = "10%";
 // LX.DEFAULT_SPLITBAR_SIZE = 16;
 // LX.OPEN_CONTEXTMENU_ENTRY = 'mouseover';
 
 // LX.message("Im in another position", null, { position: [10, 10] });
 // LX.message("Welcome to Lexgui", "Welcome!");
+
+// Change some theme colors...
+// LX.setThemeColor('global-color-primary', "#211");
+// LX.setThemeColor('global-selected', "#a74");
+// LX.setThemeColor('global-text', "#f21");
 
 // menu bar
 area.addMenubar( m => {

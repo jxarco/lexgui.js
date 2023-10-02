@@ -24,13 +24,13 @@
     LX.getExtension = getExtension;
     LX.deepCopy = deepCopy;
 
-    function setHighlightColor(color)
+    function setThemeColor(color_name, color)
     {
         var r = document.querySelector(':root');
-        r.style.setProperty('--global-selected', color);
+        r.style.setProperty("--" + color_name, color);
     }
 
-    LX.setHighlightColor = setHighlightColor;
+    LX.setThemeColor = setThemeColor;
 
     function hexToRgb(string) {
         const red = parseInt(string.substring(1, 3), 16) / 255;
@@ -865,8 +865,8 @@
         * @method toggle
         * Toggle element if it is hidden
         */
-        toggle() {
-            this.root.classList.toggle("hidden");
+        toggle( force ) {
+            this.root.classList.toggle("hidden", force);
         }
 
         /**
@@ -1212,17 +1212,17 @@
                 
                 if(folding == "up") area.root.insertBefore(area.sections[1].root, area.sections[0].root);
 
-                // Add fold back button
+                // // Add fold back button
 
-                let btn = document.createElement('button');
-                btn.className = "lexbutton foldback";
-                btn.innerHTML = "<a class='fa-solid fa-x'></a>";
-                this.area.root.appendChild(btn);
+                // let btn = document.createElement('button');
+                // btn.className = "lexbutton foldback";
+                // btn.innerHTML = "<a class='fa-solid fa-x'></a>";
+                // this.area.root.appendChild(btn);
 
-                btn.addEventListener('click', e => {
-                    this.area.hide();
-                    this.folded = true;
-                });
+                // btn.addEventListener('click', e => {
+                //     this.area.hide();
+                //     this.folded = true;
+                // });
 
                 // Listen resize event on parent area
                 const resizeObserver = new ResizeObserver((entries) => {
@@ -1247,7 +1247,7 @@
                 this.area.root.querySelectorAll('.lextabcontent').forEach( c => c.style.display = 'none');
             }
             
-            isSelected = !Object.keys( this.tabs ).length ? true : isSelected;
+            isSelected = !Object.keys( this.tabs ).length && !this.folding ? true : isSelected;
 
             let contentEl = content.root ? content.root : content;
             contentEl.style.display = isSelected ? "block" : "none";
@@ -1260,7 +1260,7 @@
             tabEl.innerHTML = name;
             tabEl.id = name.replace(/\s/g, '') + Tabs.TAB_ID++;
             tabEl.title = options.title;
-            tabEl.selected = isSelected;
+            tabEl.selected = isSelected ?? false;
             tabEl.fixed = options.fixed;
             if(tabEl.selected)
                 this.selected = name;
@@ -1277,21 +1277,25 @@
                 e.preventDefault();
                 e.stopPropagation();
 
-                if( this.folding && this.folded )
-                {
-                    this.folded = !this.folded;
-                    this.area.show();
-                }
-
                 if( !tabEl.fixed )
                 {
+                    // For folding tabs
+                    const lastValue = tabEl.selected;
+                    tabEl.parentElement.querySelectorAll('span').forEach( s => s.selected = false );
+                    tabEl.selected = !lastValue; 
                     // Manage selected
                     tabEl.parentElement.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
-                    tabEl.classList.toggle('selected');
+                    tabEl.classList.toggle('selected', (this.folding && tabEl.selected));
                     // Manage visibility 
                     tabEl.instance.area.root.querySelectorAll('.lextabcontent').forEach( c => c.style.display = 'none');
                     contentEl.style.display = "block";
                     tabEl.instance.selected = tabEl.dataset.name;
+                }
+
+                if( this.folding )
+                {
+                    this.folded = tabEl.selected;
+                    this.area.toggle(!this.folded);
                 }
 
                 if(options.onSelect) 
@@ -1946,8 +1950,8 @@
     
                 this.queue(container);
 
-                let buttonName = custom_widget_name + (!instance ? " [empty]" : "");
-                buttonName += "<a class='fa-solid " + (options.icon ?? "fa-cube")  + "' style='float:left'></a>";
+                let buttonName = "<a class='fa-solid " + (options.icon ?? "fa-cube")  + "' style='float:left'></a>";
+                buttonName += custom_widget_name + (!instance ? " [empty]" : "");
                 if(instance)
                     buttonName += "<a class='fa-solid fa-bars-staggered menu' style='float:right; width:5%;'></a>";
                 let buttonEl = this.addButton(null, buttonName, (value, event) => {
@@ -1965,7 +1969,7 @@
                         });
                     }
     
-                }, { buttonClass: 'array' });
+                }, { buttonClass: 'custom' });
                 
                 this.clearQueue();
     
@@ -2590,7 +2594,7 @@
 
             if( type != Widget.TITLE )
             {
-                element.style.width = "calc(100% - " + (this.current_branch ? 10 : 20) + "px)";
+                element.style.width = "calc(100% - " + (this.current_branch || type == Widget.FILE ? 10 : 20) + "px)";
                 if( options.width ) {
                     element.style.width = element.style.minWidth = options.width;
                 }

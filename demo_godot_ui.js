@@ -134,6 +134,7 @@ function fillRightSide( area ) {
     panel.addFile("Mesh");
     panel.branch("Skeleton");
     panel.addText("Skin", "...");
+    panel.addNumber("NUMBER", 12);
     panel.addSkeleton("Skeleton", skeleton_instance);
     panel.merge();
 
