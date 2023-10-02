@@ -581,6 +581,10 @@
                 // Update cursor
                 var cursor = this.cursors.children[0];
                 cursor.style.top = "calc(" + cursor._top + "px - " + code.scrollTop + "px)";
+
+                // Update selection
+                for( let s of this.selections.childNodes )
+                    s.style.top = (s._top - code.scrollTop) + "px";
             });
 
             this.openedTabs[name] = code;
@@ -793,7 +797,8 @@
                     
                     const stringWidth = this.measureString(string);
                     domEl.style.width = (stringWidth || 8) + "px";
-                    domEl.style.top = (4 + i * this.lineHeight) + "px";
+                    domEl._top = 4 + i * this.lineHeight;
+                    domEl.style.top = (domEl._top - this.getScrollTop()) + "px";
                     this.selection.chars += stringWidth / this.charWidth;
                 }
             }
@@ -831,7 +836,8 @@
                     
                     const stringWidth = this.measureString(string);
                     domEl.style.width = (stringWidth || 8) + "px";
-                    domEl.style.top = (4 + i * this.lineHeight) + "px";
+                    domEl._top = 4 + i * this.lineHeight;
+                    domEl.style.top = (domEl._top - this.getScrollTop()) + "px";
                     this.selection.chars += stringWidth / this.charWidth;
                 }
             }
@@ -1517,12 +1523,6 @@
             
             if(!this.code) return 0;
             return this.code.scrollTop;
-        }
-
-        addScrollTop( pixels ) {
-            if(!this.code) return;
-            this.code.scrollTop += pixels;
-            this.processSelection(null, true);
         }
 
         getCharAtPos( cursor, offset = 0) {

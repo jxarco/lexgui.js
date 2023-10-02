@@ -2450,7 +2450,7 @@ ul.lexassetscontent {
 .lexcodetabinfo {
   background-color: var(--global-branch-darker);
   position: absolute;
-  z-index: 1;
+  z-index: 3;
   bottom: 0px;
   margin-left: 0px;
 }
