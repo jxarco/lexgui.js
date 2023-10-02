@@ -913,6 +913,14 @@
                     this.onsave( this.getText() );
                     return;
                 case 'v': // paste
+
+                    if( this.selection ) {
+                        this.deleteSelection(cursor);
+                        lidx = cursor.line;
+                    }
+                    
+                    this.endSelection();
+
                     let text = await navigator.clipboard.readText();
 
                     const new_lines = text.split('\n');
@@ -921,7 +929,7 @@
                     const first_line = new_lines.shift();
                     num_lines--;
 
-                    const remaining = this.code.lines[lidx].slice(cursor.position);
+                    // const remaining = this.code.lines[lidx].slice(cursor.position);
 
                     // Add first line
                     this.code.lines[lidx] = [
@@ -939,8 +947,8 @@
                         _text = new_lines[i];
                         this.cursorToBottom(cursor, true);
                         // Add remaining...
-                        if( i == (new_lines.length - 1) )
-                            _text += remaining;
+                        // if( i == (new_lines.length - 1) )
+                        //     _text += remaining;
                         this.code.lines.splice( 1 + lidx + i, 0, _text);
                     }
 
