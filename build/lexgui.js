@@ -2046,6 +2046,7 @@
             this.data = data;
             this.onevent = options.onevent;
             this.options = options;
+            this.selected = [];
 
             if(data.constructor === Object)
                 this.#create_item(null, data);
@@ -2068,11 +2069,11 @@
             }
 
             const list = this.domEl.querySelector("ul");
-            this.selected = [];
 
             node.visible = node.visible ?? true;
             node.parent = parent;
-            let is_parent = node.children.length > 0;
+            const is_parent = node.children.length > 0;
+            const is_selected = this.selected.indexOf( node ) > -1;
             
             let has_parent_child = false;
             if( this.options.only_parents ) {
@@ -2081,7 +2082,7 @@
             }
 
             let item = document.createElement('li');
-            item.className = "lextreeitem " + "datalevel" + level + " " + (is_parent ? "parent" : "");
+            item.className = "lextreeitem " + "datalevel" + level + (is_parent ? " parent" : "") + (is_selected ? " selected" : "");
             item.id = node.id;
 
             // Select hierarchy icon
@@ -2090,8 +2091,8 @@
             item.innerHTML = "<a class='" + icon + " hierarchy'></a>";
             
             // Add display icon
-            icon = node.icon; // Default: no childs
-            if( icon ) item.innerHTML = "<a class='" + icon + "'></a>";
+            icon = node.icon;
+            if( icon ) item.innerHTML += "<a class='" + icon + "'></a>";
 
             item.innerHTML += (node.rename ? "" : node.id);
 
@@ -2119,6 +2120,16 @@
                 }else {
                     item.classList.add('selected');
                     this.selected.push( node );
+                }
+
+                // Only Show children...
+                if(is_parent) {
+                    node.closed = false;
+                    if(that.onevent) {
+                        const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed);
+                        that.onevent( event );
+                    }
+                    that.refresh();
                 }
 
                 if(that.onevent) {
@@ -2251,18 +2262,17 @@
 
             // Show/hide children
             if(is_parent) {
-                item.querySelector('a').addEventListener("click", function(e) {
+                item.querySelector('a.hierarchy').addEventListener("click", function(e) {
                     
                     handled = true;
                     e.stopImmediatePropagation();
                     e.stopPropagation();
 
                     node.closed = !node.closed;
-                    const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed);
                     if(that.onevent) {
+                        const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed);
                         that.onevent( event );
                     }
-                    item.click();
                     that.refresh();
                 });
             }
@@ -2580,7 +2590,7 @@
 
             if( type != Widget.TITLE )
             {
-                element.style.width = "calc(100% - 10px)";
+                element.style.width = "calc(100% - " + (this.current_branch ? 10 : 20) + "px)";
                 if( options.width ) {
                     element.style.width = element.style.minWidth = options.width;
                 }
@@ -2627,6 +2637,7 @@
                     }
                     else
                     {
+                        el.classList.add("nobranch");
                         this.root.appendChild( el );
                     }
                 } 
@@ -4624,7 +4635,7 @@
             
             if(local) {
 
-                this.addButton(null, "<a class='fa-solid fa-gear'></a>", () => {
+                this.addButton(null, "<a style='margin-top: 0px;' class='fa-solid fa-gear'></a>", () => {
                     
                     new Dialog("Load Settings", p => {
                         p.addDropdown("Type", ['text', 'buffer', 'bin', 'url'], type, v => { type = v } );

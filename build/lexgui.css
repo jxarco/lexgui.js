@@ -70,10 +70,6 @@ body.nocursor * {
   display: none !important;
 }
 
-input[type="file"] {
-  font-size: 11px;
-}
-
 ::-webkit-file-upload-button {
  display: none;
 }
@@ -481,9 +477,9 @@ input[type="file"] {
   padding-right: 10px;
 }
 
-/* .lexwidget:hover:not(.blank) {
-  background-color: var(--widget-background-hover);
-} */
+.lexwidget.nobranch {
+  padding-left: 12px;
+}
 
 .lexwidget.auto {
   width: unset !important;
@@ -1325,7 +1321,7 @@ input[type="range"] {
 
 .lextree .lextreeitem a.hierarchy {
   font-size: 5px;
-  margin-right: 4px;
+  margin-right: 6px;
   margin-top: 4px;
   vertical-align: 2px;
 }
@@ -1343,6 +1339,10 @@ input[type="range"] {
   font-size: 10px;
   vertical-align: 1px;
 }
+
+/* .lextree .lextreeitem.parent a.caret {
+  margin-right: 6px;
+} */
 
 .lextree .lextreeitem .itemicon {
   font-size: 10px !important;

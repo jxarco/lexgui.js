@@ -131,6 +131,7 @@ function fillRightSide( area ) {
 
     panel.addTitle("Mesh Instance 3D", {icon: "fa-brands fa-hashnode"});
 
+    panel.addFile("Mesh");
     panel.branch("Skeleton");
     panel.addText("Skin", "...");
     panel.addSkeleton("Skeleton", skeleton_instance);
