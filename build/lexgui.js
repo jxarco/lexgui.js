@@ -2376,7 +2376,7 @@
             if(options.className)
                 root.className += " " + options.className;
 
-            root.style.width = options.width || "calc( 100% - 4px )";
+            root.style.width = options.width || "calc( 100% - 6px )";
             root.style.height = options.height || "100%";
             Object.assign(root.style, options.style ?? {});
 

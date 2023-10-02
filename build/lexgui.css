@@ -309,10 +309,6 @@ body.nocursor * {
   margin: 0;
 }
 
-.lexarea.split.origin .lexpanel{
-  padding-left: 4px;
-}
-
 /* Split bar */
 
 .lexsplitbar {
@@ -2462,8 +2458,8 @@ ul.lexassetscontent {
 .lexcodegutter {
   width: 32px;
   height: calc(100% - 63px); /* 6px of the vertical scrollbar */
+  background-color: var(--global-branch-darker);
   margin-top: 26.7px;
-  background-color: var(--branch-title-background);
   text-align: center;
   overflow: hidden;
   -webkit-user-select: none; /* Safari 3.1+ */
