@@ -2763,10 +2763,10 @@
                 let o = options[i];
                 if(!emptyFilter)
                 {
-                    if(typeof o == 'string')
-                        o = {value: o};
+                    let toCompare = (typeof o == 'string') ? o : o.value;
+                    ;
                     const filterWord = value.toLowerCase();
-                    const name = o.value.toLowerCase();
+                    const name = toCompare.toLowerCase();
                     if(!name.includes(value)) continue;
                 }
                 // insert filtered widget
