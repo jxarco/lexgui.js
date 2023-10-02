@@ -2425,13 +2425,17 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor ::-webkit-scrollbar {
+  /* width: 6px;
   height: 6px;
+  background: none; */
+  display: none;
 }
 
-.lexcodeeditor ::-webkit-scrollbar-thumb {
-  background: #aaa;
-  border-radius: 0px;
-}
+/* .lexcodeeditor ::-webkit-scrollbar-thumb {
+  background: #8c8c909c;
+  opacity: 0.4;
+  border-radius: 4px;
+} */
 
 .lexcodeeditor {
   outline: none;
@@ -2459,7 +2463,7 @@ ul.lexassetscontent {
   width: 32px;
   height: calc(100% - 63px); /* 6px of the vertical scrollbar */
   background-color: var(--global-branch-darker);
-  margin-top: 26.7px;
+  margin-top: 27.8px;
   text-align: center;
   overflow: hidden;
   -webkit-user-select: none; /* Safari 3.1+ */
@@ -2481,11 +2485,13 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .code {
+  width: calc(100% - 42px);
+  height: calc(100% - 37px);
   cursor: text;
   font-size: 18px;
-  background-color: var(--global-branch-darker);
   overflow: scroll;
-  height: calc(100% - 37px);
+  background-color: var(--global-branch-darker);
+  padding-right: 6px;
 }
 
 .lexcodeeditor .code.dragging {

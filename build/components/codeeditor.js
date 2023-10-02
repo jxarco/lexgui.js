@@ -248,6 +248,7 @@
 
                 this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
                 this.cursorToString(cursor, prestring);
+                // this.code.scrollLeft = 0;
 
                 if( !e.shiftKey )
                 return;
@@ -271,6 +272,7 @@
                 }
                 this.resetCursorPos( CodeEditor.CURSOR_LEFT );
                 this.cursorToString( cursor, this.code.lines[ln] );
+                // this.code.scrollLeft = this.code.scrollWidth;
             });
 
             this.action('Enter', true, ( ln, cursor, e ) => {
@@ -584,6 +586,7 @@
                 // Update cursor
                 var cursor = this.cursors.children[0];
                 cursor.style.top = "calc(" + cursor._top + "px - " + code.scrollTop + "px)";
+                // cursor.style.left = "calc(" + cursor._left + "px - " + code.scrollLeft + "px)";
 
                 // Update selection
                 for( let s of this.selections.childNodes )
@@ -658,12 +661,13 @@
             {
                 this.lastMouseDown = time.getTime();
                 this.state.selectingText = true;
+                this.endSelection();
                 return;
             }
             
             else if( e.type == 'mouseup' )
             {
-                if( (time.getTime() - this.lastMouseDown) < 200 ) {
+                if( (time.getTime() - this.lastMouseDown) < 300 ) {
                     this.state.selectingText = false;
                     this.processClick(e);
                     this.endSelection();
@@ -1412,6 +1416,11 @@
             cursor.position++;
             this.restartBlink();
             this._refresh_code_info( cursor.line + 1, cursor.position );
+
+            // Add horizontal scroll
+            // var last_char = ((this.code.scrollLeft + this.code.clientWidth) / this.charWidth)|0 - 1;
+            // if( cursor.position >= last_char )
+            //     this.code.scrollLeft += this.charWidth;
         }
 
         cursorToLeft( key, cursor ) {
