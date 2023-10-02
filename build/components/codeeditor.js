@@ -85,8 +85,10 @@
 
             this.tabs = this.area.addTabs( { onclose: (name) => delete this.openedTabs[name] } );
             this.tabs.root.addEventListener( 'dblclick', (e) => {
-                e.preventDefault();
-                this.addTab("unnamed.js", true);
+                if( options.allow_add_scripts ?? true ) {
+                    e.preventDefault();
+                    this.addTab("unnamed.js", true);
+                }
             } );
 
             area.root.classList.add('codebasearea');
@@ -411,8 +413,9 @@
         
             this.openedTabs = { };
             
-            if( options.allow_add_scripts != false)
+            if( options.allow_add_scripts ?? true )
                 this.addTab("+", false, "New File");
+
             this.addTab(options.name || "untitled", true);
 
             // Create inspector panel

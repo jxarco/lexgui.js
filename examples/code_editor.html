@@ -14,7 +14,7 @@
         let area = LX.init();
 
         // split main area
-        var [left, right] = area.split({sizes:["50%","50%"]});
+        var [left, right] = area.split({sizes:["55%","45%"]});
 
         // add canvas to left
         var canvas = document.createElement('canvas');
@@ -31,7 +31,9 @@
             canvas.height = bounding.height;
         };
 
-        let editor = new LX.CodeEditor(right);
+        let editor = new LX.CodeEditor(right, {
+            // allow_add_scripts: false
+        });
         editor.loadFile( "../data/script.js" );
         
         function loop(dt) {
