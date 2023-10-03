@@ -278,7 +278,8 @@
                 if( e.shiftKey || e._shiftKey ) {
                     
                     var string = this.code.lines[ln].substring(cursor.position);
-                    this.startSelection(cursor);
+                    if(!this.selection)
+                        this.startSelection(cursor);
                     this.selection.selectInline(cursor.position, cursor.line, this.measureString(string));
                 }
                 this.resetCursorPos( CodeEditor.CURSOR_LEFT );
@@ -322,19 +323,41 @@
             });
 
             this.action('ArrowUp', false, ( ln, cursor, e ) => {
-                this.lineUp();
-                // Go to end of line if out of line
-                var letter = this.getCharAtPos( cursor );
-                if(!letter) this.actions['End'].callback(cursor.line, cursor, e);
+                if(e.shiftKey) {
+                    if(!this.selection)
+                        this.startSelection(cursor);
+                    this.selection.fromX = cursor.position;
+                    this.selection.toY = this.selection.toY > 0 ? this.selection.toY - 1 : 0;
+                    this.processSelection(null, true);
+                    this.cursorToPosition(cursor, this.selection.fromX);
+                    this.cursorToLine(cursor, this.selection.toY);
+                } else {
+
+                    this.lineUp();
+                    // Go to end of line if out of line
+                    var letter = this.getCharAtPos( cursor );
+                    if(!letter) this.actions['End'].callback(cursor.line, cursor, e);
+                }
             });
 
             this.action('ArrowDown', false, ( ln, cursor, e ) => {
-                if( this.code.lines[ ln + 1 ] == undefined ) 
-                    return;
-                this.lineDown();
-                // Go to end of line if out of line
-                var letter = this.getCharAtPos( cursor );
-                if(!letter) this.actions['End'].callback(cursor.line, cursor, e);
+                if(e.shiftKey) {
+                    if(!this.selection)
+                        this.startSelection(cursor);
+                    this.selection.toX = cursor.position;
+                    this.selection.toY = this.selection.toY < this.code.lines.length - 1 ? this.selection.toY + 1 : this.code.lines.length - 1;
+                    this.processSelection(null, true);
+                    this.cursorToPosition(cursor, this.selection.toX);
+                    this.cursorToLine(cursor, this.selection.toY);
+                } else {
+
+                    if( this.code.lines[ ln + 1 ] == undefined ) 
+                        return;
+                    this.lineDown();
+                    // Go to end of line if out of line
+                    var letter = this.getCharAtPos( cursor );
+                    if(!letter) this.actions['End'].callback(cursor.line, cursor, e);
+                }
             });
 
             this.action('ArrowLeft', false, ( ln, cursor, e ) => {
@@ -1013,13 +1036,15 @@
                     this.restoreCursor( cursor, step.cursor );
                     this.processLines();
                     return;
+
+                    
                 }
             }
 
-            if( e.altKey )
+            else if( e.altKey )
             {
                 switch( key ) {
-                case 'ArrowUp':
+                    case 'ArrowUp':
                     if(this.code.lines[ lidx - 1 ] == undefined)
                         return;
                     swapArrayElements(this.code.lines, lidx - 1, lidx);
@@ -1035,6 +1060,14 @@
                     this.processLine( lidx );
                     this.processLine( lidx + 1 );
                     return;
+                }
+            }
+            
+            else if(!e.shiftKey){
+                switch( key ) {
+                    case 'ArrowUp': case 'ArrowDown': case 'ArrowLeft': case 'ArrowRight':
+                    this.endSelection();
+                
                 }
             }
 
