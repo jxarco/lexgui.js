@@ -51,6 +51,13 @@
             this.toY    = iy;
         }
 
+        invertIfNecessary() {
+            if(this.fromX > this.toX)
+                swapElements(this, 'fromX', 'toX');
+            if(this.fromY > this.toY)
+                swapElements(this, 'fromY', 'toY');
+        }
+
         selectInline(x, y, width) {
            
             var domEl = document.createElement('div');
@@ -371,7 +378,10 @@
                     const [word, from, to] = this.getWordAtPos( cursor, -1 );
                     var diff = Math.max(cursor.position - from, 1);
                     var substr = word.substr(0, diff);
+                    // Selections...
+                    if( e.shiftKey ) if(!this.selection) this.startSelection(cursor);
                     this.cursorToString(cursor, substr, true);
+                    if( e.shiftKey ) this.processSelection();
                 }
                 else {
                     var letter = this.getCharAtPos( cursor, -1 );
@@ -412,11 +422,14 @@
                     e.preventDefault();
                     this.actions[ 'End' ].callback( ln, cursor );
                 } else if(e.ctrlKey) {
-                    // get next word
+                    // Get next word
                     const [word, from, to] = this.getWordAtPos( cursor );
                     var diff = cursor.position - from;
                     var substr = word.substr(diff);
+                    // Selections...
+                    if( e.shiftKey ) if(!this.selection) this.startSelection(cursor);
                     this.cursorToString(cursor, substr);
+                    if( e.shiftKey ) this.processSelection();
                 } else {
                     var letter = this.getCharAtPos( cursor );
                     if(letter) {
@@ -715,10 +728,7 @@
                     this.endSelection();
                 }
 
-                if(this.selection && (this.selection.fromY > this.selection.toY)) {
-                    swapElements(this.selection, 'fromX', 'toX');
-                    swapElements(this.selection, 'fromY', 'toY');
-                }
+                if(this.selection) this.selection.invertIfNecessary();
 
                 this.state.selectingText = false;
             }
@@ -726,9 +736,7 @@
             else if( e.type == 'mousemove' )
             {
                 if( this.state.selectingText )
-                {
                     this.processSelection(e);
-                }
             }
 
             else if ( e.type == 'click' ) // trip
@@ -742,7 +750,7 @@
                         this.cursorToPosition( cursor, from );
                         this.startSelection( cursor );
                         this.selection.selectInline(from, cursor.line, this.measureString(word));
-                        this.cursorToPosition( cursor, cursor.position + word.length ); // Go to the end of the word
+                        this.cursorToString( cursor, word ); // Go to the end of the word
                         break;
                     // Select entire line
                     case CodeEditor.MOUSE_TRIPLE_CLICK:
@@ -1430,6 +1438,9 @@
         }
 
         deleteSelection( cursor ) {
+
+            // Some selections don't depend on mouse up..
+            if(this.selection) this.selection.invertIfNecessary();
 
             const separator = "_NEWLINE_";
             let code = this.code.lines.join(separator);
