@@ -29,8 +29,13 @@
         return str.search(/\S|$/);
     }
 
+    let ASYNC_ENABLED = true;
+
     function doAsync( fn ) {
-        setTimeout( fn, 0 );
+        if( ASYNC_ENABLED )
+            setTimeout( fn, 0 );
+        else
+            fn();
     }
 
     class ISelection {
@@ -51,8 +56,10 @@
             var domEl = document.createElement('div');
             domEl.className = "lexcodeselection";
             
-            domEl.style.top = (4 + y * this.editor.lineHeight - this.editor.getScrollTop()) + "px";
-            domEl.style.left = "calc(" + (x * this.editor.charWidth) + "px + 0.25em)";
+            domEl._top = 4 + y * this.editor.lineHeight;
+            domEl.style.top = (domEl._top - this.editor.getScrollTop()) + "px";
+            domEl._left = x * this.editor.charWidth;
+            domEl.style.left = "calc(" + (domEl._left - this.editor.getScrollLeft()) + "px + 0.25em)";
             domEl.style.width = width + "px";
             this.editor.selections.appendChild(domEl);
             
@@ -246,9 +253,10 @@
                 const prestring = this.code.lines[ln].substring(0, idx);
                 let last_pos = cursor.position;
 
-                this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
-                this.cursorToString(cursor, prestring);
-                // this.code.scrollLeft = 0;
+                this.resetCursorPos( CodeEditor.CURSOR_LEFT );
+                if(idx > 0) this.cursorToString(cursor, prestring);
+                this._refresh_code_info(cursor.line + 1, cursor.position);
+                this.code.scrollLeft = 0;
 
                 if( !e.shiftKey )
                 return;
@@ -272,7 +280,9 @@
                 }
                 this.resetCursorPos( CodeEditor.CURSOR_LEFT );
                 this.cursorToString( cursor, this.code.lines[ln] );
-                // this.code.scrollLeft = this.code.scrollWidth;
+
+                const last_char = ((this.code.scrollLeft + this.code.clientWidth) / this.charWidth)|0;
+                this.code.scrollLeft = cursor.position >= last_char ? (cursor.position - last_char) * this.charWidth : 0;
             });
 
             this.action('Enter', true, ( ln, cursor, e ) => {
@@ -585,12 +595,14 @@
 
                 // Update cursor
                 var cursor = this.cursors.children[0];
-                cursor.style.top = "calc(" + cursor._top + "px - " + code.scrollTop + "px)";
-                // cursor.style.left = "calc(" + cursor._left + "px - " + code.scrollLeft + "px)";
+                cursor.style.top = (cursor._top - code.scrollTop) + "px";
+                cursor.style.left = "calc( " + (cursor._left - code.scrollLeft) + "px + 0.25em)";
 
                 // Update selection
-                for( let s of this.selections.childNodes )
+                for( let s of this.selections.childNodes ) {
                     s.style.top = (s._top - code.scrollTop) + "px";
+                    s.style.left = "calc( " + (s._left - code.scrollLeft) + "px + 0.25em)";
+                }
             });
 
             this.openedTabs[name] = code;
@@ -659,6 +671,10 @@
 
             if( e.type == 'mousedown' )
             {
+                var code_rect = this.code.getBoundingClientRect();
+                var mouse_pos = [(e.clientX - code_rect.x), (e.clientY - code_rect.y)];
+                if( mouse_pos[0] > this.code.clientWidth || mouse_pos[1] > this.code.clientHeight )
+                    return; // Scrollbar click
                 this.lastMouseDown = time.getTime();
                 this.state.selectingText = true;
                 this.endSelection();
@@ -697,10 +713,10 @@
                         const [word, from, to] = this.getWordAtPos( cursor );
 
                         this.resetCursorPos( CodeEditor.CURSOR_LEFT );
-                        this.cursorToString( cursor, this.code.lines[cursor.line].substr(0, from) );
+                        this.cursorToPosition( cursor, from );
                         this.startSelection( cursor );
                         this.selection.selectInline(from, cursor.line, this.measureString(word));
-                        this.cursorToString( cursor, word ); // Go to the end of the word
+                        this.cursorToPosition( cursor, cursor.position + word.length ); // Go to the end of the word
                         break;
                     // Select entire line
                     case CodeEditor.MOUSE_TRIPLE_CLICK:
@@ -726,7 +742,7 @@
         processClick(e, skip_refresh = false) {
 
             var code_rect = this.code.getBoundingClientRect();
-            var position = [e.clientX - code_rect.x, (e.clientY - code_rect.y) + this.getScrollTop()];
+            var position = [(e.clientX - code_rect.x) + this.getScrollLeft(), (e.clientY - code_rect.y) + this.getScrollTop()];
             var ln = (position[1] / this.lineHeight)|0;
 
             if(this.code.lines[ln] == undefined) return;
@@ -738,7 +754,8 @@
             
             var ch = (position[0] / this.charWidth)|0;
             var string = this.code.lines[ln].slice(0, ch);
-            this.cursorToString(cursor, string);
+            // this.cursorToString(cursor, string);
+            this.cursorToPosition(cursor, string.length);
             
             if(!skip_refresh) 
                 this._refresh_code_info( ln + 1, cursor.position );
@@ -794,12 +811,14 @@
                         const reverse = fromX > toX;
                         if(deltaY == 0) string = !reverse ? this.code.lines[i].substring(fromX, toX) : this.code.lines[i].substring(toX, fromX);
                         else string = this.code.lines[i].substr(fromX);
-                        domEl.style.left = "calc(" + ((reverse && deltaY == 0 ? toX : fromX) * this.charWidth) + "px + 0.25em)";
+                        const pixels = ((reverse && deltaY == 0 ? toX : fromX) * this.charWidth) - this.getScrollLeft();
+                        domEl.style.left = "calc(" + pixels + "px + 0.25em)";
                     }
                     else
                     {
                         string = (i == toY) ? this.code.lines[i].substring(0, toX) : this.code.lines[i]; // Last line, any multiple line...
-                        domEl.style.left = "0.25em";
+                        const pixels = -this.getScrollLeft();
+                        domEl.style.left = "calc(" + pixels + "px + 0.25em)";
                     }
                     
                     const stringWidth = this.measureString(string);
@@ -833,12 +852,13 @@
                     if(sId == 0)
                     {
                         string = this.code.lines[i].substr(toX);
-                        domEl.style.left = "calc(" + (toX * this.charWidth) + "px + 0.25em)";
+                        const pixels = (toX * this.charWidth) - this.getScrollLeft();
+                        domEl.style.left = "calc(" + pixels + "px + 0.25em)";
                     }
                     else
                     {
                         string = (i == fromY) ? this.code.lines[i].substring(0, fromX) : this.code.lines[i]; // Last line, any multiple line...
-                        domEl.style.left = "0.25em";
+                        domEl.style.left = "calc(" + (-this.getScrollLeft()) + "px + 0.25em)";
                     }
                     
                     const stringWidth = this.measureString(string);
@@ -944,7 +964,7 @@
                             first_line
                         ].join('');
     
-                        this.cursorToString(cursor, first_line);
+                        this.cursorToPosition(cursor, (cursor.position + first_line.length));
     
                         // Enter next lines...
     
@@ -952,14 +972,14 @@
     
                         for( var i = 0; i < new_lines.length; ++i ) {
                             _text = new_lines[i];
-                            this.cursorToBottom(cursor, true);
+                            this.cursorToLine(cursor, cursor.line++, true);
                             // Add remaining...
                             if( i == (new_lines.length - 1) )
                                 _text += remaining;
                             this.code.lines.splice( 1 + lidx + i, 0, _text);
                         }
     
-                        if(_text) this.cursorToString(cursor, _text);
+                        if(_text) this.cursorToPosition(cursor, _text.length);
                         this.cursorToLine(cursor, cursor.line + num_lines);
                         this.processLines(lidx);
                     }
@@ -972,7 +992,7 @@
                             this.code.lines[lidx].slice(cursor.position)
                         ].join('');
 
-                        this.cursorToString(cursor, new_lines[0]);
+                        this.cursorToPosition(cursor, (cursor.position + new_lines[0].length));
                         this.processLine(lidx);
                     }
                     return;
@@ -1395,8 +1415,9 @@
 
             this.code.lines = (pre + post).split(separator);
             this.processLines(this.selection.fromY);
+            
             this.cursorToLine(cursor, this.selection.fromY, true);
-            this.cursorToString(cursor, this.code.lines[this.selection.fromY].slice(0, this.selection.fromX));
+            this.cursorToPosition(cursor, this.selection.fromX);
             this.endSelection();
         }
 
@@ -1412,15 +1433,18 @@
             if(!key) return;
             cursor = cursor ?? this.cursors.children[0];
             cursor._left += this.charWidth;
-            cursor.style.left = "calc(" + cursor._left + "px + 0.25em)";
+            cursor.style.left = "calc(" + (cursor._left - this.getScrollLeft()) + "px + 0.25em)";
             cursor.position++;
             this.restartBlink();
             this._refresh_code_info( cursor.line + 1, cursor.position );
 
             // Add horizontal scroll
-            // var last_char = ((this.code.scrollLeft + this.code.clientWidth) / this.charWidth)|0 - 1;
-            // if( cursor.position >= last_char )
-            //     this.code.scrollLeft += this.charWidth;
+
+            doAsync(() => {
+                var last_char = ((this.code.scrollLeft + this.code.clientWidth) / this.charWidth)|0;
+                if( cursor.position >= last_char )
+                    this.code.scrollLeft += this.charWidth;
+            });
         }
 
         cursorToLeft( key, cursor ) {
@@ -1429,11 +1453,17 @@
             cursor = cursor ?? this.cursors.children[0];
             cursor._left -= this.charWidth;
             cursor._left = Math.max(cursor._left, 0);
-            cursor.style.left = "calc(" + cursor._left + "px + 0.25em)";
+            cursor.style.left = "calc(" + (cursor._left - this.getScrollLeft()) + "px + 0.25em)";
             cursor.position--;
             cursor.position = Math.max(cursor.position, 0);
             this.restartBlink();
             this._refresh_code_info( cursor.line + 1, cursor.position );
+
+            doAsync(() => {
+                var first_char = (this.code.scrollLeft / this.charWidth)|0;
+                if( (cursor.position - 1) < first_char )
+                    this.code.scrollLeft -= this.charWidth;
+            });
         }
 
         cursorToTop( cursor, resetLeft = false ) {
@@ -1441,7 +1471,7 @@
             cursor = cursor ?? this.cursors.children[0];
             cursor._top -= this.lineHeight;
             cursor._top = Math.max(cursor._top, 4);
-            cursor.style.top = "calc(" + cursor._top + "px - " + this.getScrollTop() + "px)";
+            cursor.style.top = "calc(" + (cursor._top - this.getScrollTop()) + "px)";
             this.restartBlink();
             
             if(resetLeft)
@@ -1460,7 +1490,7 @@
 
             cursor = cursor ?? this.cursors.children[0];
             cursor._top += this.lineHeight;
-            cursor.style.top = "calc(" + cursor._top + "px - " + this.getScrollTop() + "px)";
+            cursor.style.top = "calc(" + (cursor._top - this.getScrollTop()) + "px)";
             this.restartBlink();
 
             if(resetLeft)
@@ -1486,14 +1516,14 @@
 
             cursor.position = position;
             cursor._left = position * this.charWidth;
-            cursor.style.left = "calc(" + cursor._left + "px + 0.25em)";
+            cursor.style.left = "calc(" + (cursor._left - this.getScrollLeft()) + "px + 0.25em)";
         }
 
         cursorToLine( cursor, line, resetLeft = false ) {
 
             cursor.line = line;
             cursor._top = 4 + this.lineHeight * line;
-            cursor.style.top = "calc(" + cursor._top + "px - " + this.getScrollTop() + "px)";
+            cursor.style.top = (cursor._top - this.getScrollTop()) + "px";
             if(resetLeft) this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
         }
 
@@ -1514,9 +1544,9 @@
             cursor.position = state.charPos ?? 0;
 
             cursor._left = state.left ?? 0;
-            cursor.style.left = "calc(" + cursor._left + "px + 0.25em)";
+            cursor.style.left = "calc(" + (cursor._left - this.getScrollLeft()) + "px + 0.25em)";
             cursor._top = state.top ?? 4;
-            cursor.style.top = "calc(" + cursor._top + "px - " + this.getScrollTop() + "px)";
+            cursor.style.top = "calc(" + (cursor._top - this.getScrollTop()) + "px)";
         }
 
         resetCursorPos( flag, cursor ) {
@@ -1526,14 +1556,14 @@
             if( flag & CodeEditor.CURSOR_LEFT )
             {
                 cursor._left = 0;
-                cursor.style.left = "0.25em";
+                cursor.style.left = "calc(" + (-this.getScrollLeft()) + "px + 0.25em)";
                 cursor.position = 0;
             }
 
             if( flag & CodeEditor.CURSOR_TOP )
             {
                 cursor._top = 4;
-                cursor.style.top = "calc(4px - " + this.getScrollTop() + "px)";
+                cursor.style.top = (cursor._top - this.getScrollTop()) + "px";
                 cursor.line = 0;
             }
         }
@@ -1553,6 +1583,12 @@
                     key: ' '
                 }}));
             }
+        }
+
+        getScrollLeft() {
+            
+            if(!this.code) return 0;
+            return this.code.scrollLeft;
         }
 
         getScrollTop() {

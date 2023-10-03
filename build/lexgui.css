@@ -2411,6 +2411,7 @@ ul.lexassetscontent {
   display: flex;
   position: relative;
   overflow: inherit;
+  background-color: var(--global-branch-darker);
 }
 
 .codebasearea * {
@@ -2422,22 +2423,23 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor ::-webkit-scrollbar {
-  /* width: 6px;
+  width: 6px;
   height: 6px;
-  background: none; */
-  display: none;
+  background: none;
 }
 
-/* .lexcodeeditor ::-webkit-scrollbar-thumb {
+.lexcodeeditor ::-webkit-scrollbar-thumb {
   background: #8c8c909c;
-  opacity: 0.4;
-  border-radius: 4px;
-} */
+}
+
+.lexcodeeditor ::-webkit-scrollbar-thumb:hover {
+  background: #afafb4c2;
+}
 
 .lexcodeeditor {
   outline: none;
   overflow: hidden;
-  width: calc(100% - 16px);
+  width: calc(100% );
   -webkit-user-select: none; /* Safari 3.1+ */
   -moz-user-select: none; /* Firefox 2+ */
   -ms-user-select: none; /* IE 10+ */
@@ -2458,7 +2460,7 @@ ul.lexassetscontent {
 
 .lexcodegutter {
   width: 32px;
-  height: calc(100% - 63px); /* 6px of the vertical scrollbar */
+  height: calc(100% - 69px); /* 6px of the vertical scrollbar */
   background-color: var(--global-branch-darker);
   margin-top: 27.8px;
   text-align: center;
@@ -2482,8 +2484,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .code {
-  width: calc(100% - 42px);
-  height: calc(100% - 37px);
+  height: calc(100% - 42px);
   cursor: text;
   font-size: 18px;
   overflow: scroll;
