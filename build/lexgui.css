@@ -2613,16 +2613,35 @@ ul.lexassetscontent {
 .cm-sym { color: #e7ded2; } /* symbol */
 .cm-mtd { color: #f1e9bf; } /* method */
 
-.cm-str.json      { color: #c69179; } /* string */
-.cm-str.key.json  { color: #93dcfd; } /* string key */
-.cm-kwd.json      { color: inherit; } /* keyword */
-.cm-com.json      { color: inherit; } /* comment */
-.cm-typ.json      { color: inherit; } /* type */
-.cm-lit.json      { color: inherit; } /* literal */
-.cm-bln.json      { color: inherit; } /* builtin */
-.cm-dec.json      { color: #b1ce9b; } /* decimal */
-.cm-sym.json      { color: #cf6dcf; } /* symbol */
-.cm-mtd.json      { color: inherit; } /* method */
+.cm-str.json { color: #c69179; } /* string */
+.cm-kwd.json { color: inherit; } /* keyword */
+.cm-com.json { color: inherit; } /* comment */
+.cm-typ.json { color: inherit; } /* type */
+.cm-lit.json { color: inherit; } /* literal */
+.cm-bln.json { color: inherit; } /* builtin */
+.cm-dec.json { color: #b1ce9b; } /* decimal */
+.cm-sym.json { color: #cf6dcf; } /* symbol */
+.cm-mtd.json { color: inherit; } /* method */
+
+.cm-str.glsl { color: #c69179; } /* string */
+.cm-kwd.glsl { color: #2194ce; } /* keyword */
+.cm-com.glsl { color: #75b073; } /* comment */
+.cm-typ.glsl { color: #36c0b0; } /* type */
+.cm-lit.glsl { color: #cf6dcf; } /* literal */
+.cm-bln.glsl { color: #cfc159; } /* builtin */
+.cm-dec.glsl { color: #b1ce9b; } /* decimal */
+.cm-sym.glsl { color: #f9cb20; } /* symbol */
+.cm-mtd.glsl { color: #f1e9bf; } /* method */
+
+.cm-str.wgsl { color: #c69179; } /* string */
+.cm-kwd.wgsl { color: #2194ce; } /* keyword */
+.cm-com.wgsl { color: #75b073; } /* comment */
+.cm-typ.wgsl { color: #36c0b0; } /* type */
+.cm-lit.wgsl { color: #cf6dcf; } /* literal */
+.cm-bln.wgsl { color: #cfc159; } /* builtin */
+.cm-dec.wgsl { color: #b1ce9b; } /* decimal */
+.cm-sym.wgsl { color: #f9cb20; } /* symbol */
+.cm-mtd.wgsl { color: #f1e9bf; } /* method */
 
 /* plain color */
 .cm-str.plaintext, .cm-kwd.plaintext, .cm-com.plaintext, .cm-typ.plaintext, .cm-lit.plaintext, 

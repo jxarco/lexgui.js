@@ -31,9 +31,9 @@
 
     let ASYNC_ENABLED = true;
 
-    function doAsync( fn ) {
+    function doAsync( fn, ms ) {
         if( ASYNC_ENABLED )
-            setTimeout( fn, 0 );
+            setTimeout( fn, ms ?? 0 );
         else
             fn();
     }
@@ -162,28 +162,31 @@
             this._lastTime = null;
 
             this.languages = [
-                'Plain Text', 'JavaScript', 'GLSL', 'JSON', 'XML'
+                'Plain Text', 'JavaScript', 'GLSL', 'WGSL', 'JSON', 'XML' 
             ];
             this.specialKeys = [
                 'Backspace', 'Enter', 'ArrowUp', 'ArrowDown', 
                 'ArrowRight', 'ArrowLeft', 'Delete', 'Home',
                 'End', 'Tab'
             ];
-            this.keywords = [
-                'var', 'let', 'const', 'this', 'in', 'of', 
-                'true', 'false', 'new', 'function', 'NaN',
-                'static', 'class', 'constructor', 'null', 
-                'typeof'
-            ];
+            this.keywords = {
+                'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof'],
+                'GLSL': ['true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4', 'struct'],
+                'WGSL': ['var', 'let', 'true', 'false', 'fn', 'u32', 'f32', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array', 'struct'],
+            };
             this.builtin = [
                 'console', 'window', 'navigator'
             ];
             this.literals = {
-                'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do']
+                'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do'],
+                'GLSL': ['for', 'if', 'else', 'return', 'continue', 'break'],
+                'WGSL': ['for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'uniform']
             };
             this.symbols = {
                 'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
-                'JSON': ['[', ']', '{', '}', '(', ')']
+                'JSON': ['[', ']', '{', '}', '(', ')'],
+                'GLSL': ['[', ']', '{', '}', '(', ')'],
+                'WGSL': ['[', ']', '{', '}', '(', ')', '->']
             };
 
             // Action keys
@@ -536,7 +539,7 @@
             {
                 this._refresh_code_info = () => {};
 
-                setTimeout( () => {
+                doAsync( () => {
 
                     // Change css a little bit...
                     this.gutter.style.height = "calc(100% - 31px)";
@@ -634,7 +637,7 @@
                 this.code = code;  
                 this.resetCursorPos(CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP);
                 this.processLines();
-                setTimeout( () => this._refresh_code_info(0, 0), 50 );
+                doAsync( () => this._refresh_code_info(0, 0), 50 );
             }
         }
 
@@ -1263,13 +1266,9 @@
                     span.classList.add("cm-com");
                 
                 else if( this._building_string  )
-                {
                     span.classList.add("cm-str");
-                    // if (this.highlight === "JSON" && next == ':' )
-                    //     span.classList.add("key");
-                }
                 
-                else if( this.keywords.indexOf(token) > -1 )
+                else if( this.keywords[this.highlight] && this.keywords[this.highlight].indexOf(token) > -1 )
                     span.classList.add("cm-kwd");
 
                 else if( this.builtin.indexOf(token) > -1 )
@@ -1297,7 +1296,7 @@
                             (prev == 'new' && next == '(') )
                      span.classList.add("cm-typ");
                 
-                else if ( next == '(' )
+                else if ( token[0] != '@' && next == '(' )
                     span.classList.add("cm-mtd");
 
                 let highlight = this.highlight.replace(/\s/g, '');
