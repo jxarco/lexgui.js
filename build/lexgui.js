@@ -817,7 +817,7 @@
                 that.split_bar.classList.remove("nocursor");
             }
 
-            this._moveSplit(0);
+            setTimeout( () => this._moveSplit(0), 100);
 
             return this.sections;
         }
@@ -1093,14 +1093,10 @@
             var a1 = this.sections[0];
             var a2 = this.sections[1];
             var splitinfo = " - "+ LX.DEFAULT_SPLITBAR_SIZE +"px";
-            const min_size = 10;
 
             if(this.type == "horizontal") {
 
                 var size = (a2.root.offsetWidth + dt);
-				if(size < min_size)
-					size = min_size;
-
 				a1.root.style.width = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
 				a1.root.style.width = "-webkit-calc( 100% - " + size + "px " + splitinfo + " )";
 				a1.root.style.width = "calc( 100% - " + size + "px " + splitinfo + " )";
@@ -1109,8 +1105,6 @@
             else {
 
                 var size = (a2.root.offsetHeight + dt) + a2.offset;
-				if(size < min_size)
-					size = min_size;
 				a1.root.style.height = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
 				a1.root.style.height = "-webkit-calc( 100% - " + size + "px " + splitinfo + " )";
 				a1.root.style.height = "calc( 100% - " + size + "px " + splitinfo + " )";
@@ -3144,7 +3138,7 @@
             // Remove branch padding and margins
             if(!widget.name) {
                 wValue.className += " noname";
-                wValue.style.width =  options.width || "100%";
+                wValue.style.width = "100%";
             }
 
             return element;
