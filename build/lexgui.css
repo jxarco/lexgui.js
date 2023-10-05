@@ -618,6 +618,12 @@ body.nocursor * {
   user-select: none; /* Standard syntax */
 }
 
+.lexinlinewidgets .lextitle {
+  margin: 8px;
+  height: 20px;
+  flex: none;
+}
+
 .lextitle a {
   font-size: 12px;
   margin-top: 0.3em;
@@ -2161,13 +2167,13 @@ meter::-webkit-meter-even-less-good-value {
 .lextimeline {
   flex-direction: column;
   color: var(--global-text-primary);
-  background-color: var(--global-dark-background);
+  background-color: var(--global-primary-color);
   height: 100%;
 }
 
-.lextimeline .lexarea, .lextimelinepanel {
+/* .lextimeline .lexarea, .lextimelinepanel {
   background-color: var(--global-dark-background);
-}
+} */
 
 .lextimeline *::-webkit-scrollbar {
   display: none;
@@ -2186,7 +2192,8 @@ meter::-webkit-meter-even-less-good-value {
 
 .lextimeline .lexinlinewidgets {
   padding-right: 10px;
-  background-color: var(--global-color-primary);
+  /* background-color: var(--global-color-secondary); */
+  height: 100%;
 }
 
 .lextimeline .lexbutton:hover {
@@ -2207,7 +2214,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lextimeline .lextree ul {
-  background-color: var(--global-dark-background);
+  /* background-color: var(--global-dark-background); */
   margin: 0;
   padding-bottom: 0px;
   padding-top: 0px;

@@ -31,6 +31,14 @@
     }
 
     LX.setThemeColor = setThemeColor;
+    
+    function getThemeColor(color_name)
+    {
+        var r = getComputedStyle(document.querySelector(':root'));
+        return r.getPropertyValue("--" + color_name);
+    }
+
+    LX.getThemeColor = getThemeColor;
 
     function hexToRgb(string) {
         const red = parseInt(string.substring(1, 3), 16) / 255;

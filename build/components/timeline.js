@@ -44,7 +44,7 @@
             this.framerate = 30;
             this.opacity = options.opacity || 1;
             this.sidebarWidth = 0// 200;
-            this.topMargin = 28;
+            this.topMargin = 46;
             this.renderOutFrames = false;
             this.lastMouse = [];
             this.lastKeyFramesSelected = [];
@@ -137,7 +137,7 @@
             let header = this.header;
             LX.DEFAULT_NAME_WIDTH = "50%";
             header.sameLine();
-            header.addTitle(this.name, {width: "132px"});
+            header.addTitle(this.name);
             header.addText("Animation", this.animationClip ? this.animationClip.name : "Animation", (value, event) => { 
                 if( !this.animationClip )
                     return;
@@ -190,7 +190,7 @@
 
             let panel = this.leftPanel;
             // panel.addBlank(25);
-            panel.addTitle("Tracks", { height: "24px"});
+            panel.addTitle("Tracks");
 
             if(this.animationClip && this.selectedItems)  {
                 let items = {'id': '', 'children': []};
@@ -352,7 +352,7 @@
 
             ctx.save();
 
-            ctx.fillStyle = "#111";
+            ctx.fillStyle = LX.getThemeColor("global-dark-background");
             ctx.fillRect( this.session.left_margin,0, canvas.width, h );
 
             if(this.secondsToPixels > 100 )
@@ -434,13 +434,13 @@
 
             for(let i = 0; i < max_tracks; ++i)
             {
-                ctx.fillStyle = i % 2 == 0 ? "#222A" : "#2A2A2C";
+                ctx.fillStyle = i % 2 == 0 ?  Timeline.BACKGROUND_COLOR: Timeline.TRACK_COLOR_PRIMARY;
                 ctx.fillRect(0, timeline_height + i * line_height, w, line_height );
             }
         
             //black bg
             ctx.globalAlpha = 0.2;
-            ctx.fillStyle = "black";
+            ctx.fillStyle = Timeline.BACKGROUND_COLOR;
             ctx.fillRect( margin, timeline_height, canvas.width - margin, canvas.height - timeline_height );
             ctx.globalAlpha = this.opacity;
         
@@ -503,7 +503,7 @@
 
             // Background
             ctx.globalAlpha = this.opacity;
-            ctx.fillStyle = "black";
+            ctx.fillStyle = Timeline.BACKGROUND_COLOR;
 	        ctx.clearRect(0,0, this.canvas.width, this.canvas.height );
 
             this.drawTimeInfo(w);
@@ -839,9 +839,11 @@
             //     ctx.fillStyle = this.active ? "rgba(255,255,255,0.9)" : "rgba(250,250,250,0.7)";
             //     ctx.fillText( title, 25, y + trackHeight * 0.75 );
             // }
-            ctx.fillStyle = "#2c303570";
+            ctx.globalAlpha = 0.2;
+            ctx.fillStyle = Timeline.TRACK_SELECTED//"#2c303570";
             if(trackInfo.isSelected)
                 ctx.fillRect(0, y, ctx.canvas.width, trackHeight );
+            ctx.globalAlpha = 1;
             ctx.fillStyle = "#5e9fdd"//"rgba(10,200,200,1)";
             var keyframes = track.times;
 
@@ -1152,6 +1154,10 @@
         }
     };
 
+    Timeline.BACKGROUND_COLOR = LX.getThemeColor("global-color-primary");
+    Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor("global-color-secondary");
+    Timeline.TRACK_COLOR_SECONDARY = LX.getThemeColor("global-color-terciary");
+    Timeline.TRACK_SELECTED = LX.getThemeColor("global-selected");
     Timeline.COLOR = "#5e9fdd";
     Timeline.COLOR_HOVERED = "rgba(250,250,250,0.7)";
     Timeline.COLOR_SELECTED = "rgba(250,250,20,1)"///"rgba(250,250,20,1)";
