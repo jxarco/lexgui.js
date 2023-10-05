@@ -137,7 +137,7 @@
             let header = this.header;
             LX.DEFAULT_NAME_WIDTH = "50%";
             header.sameLine();
-            header.addTitle(this.name, {width: "132px"});
+            header.addTitle(this.name);
             header.addText("Animation", this.animationClip ? this.animationClip.name : "Animation", (value, event) => { 
                 if( !this.animationClip )
                     return;
@@ -190,7 +190,7 @@
 
             let panel = this.leftPanel;
             // panel.addBlank(25);
-            panel.addTitle("Tracks", { height: "24px"});
+            panel.addTitle("Tracks");
 
             if(this.animationClip && this.selectedItems)  {
                 let items = {'id': '', 'children': []};
