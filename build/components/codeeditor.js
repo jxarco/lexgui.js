@@ -53,6 +53,11 @@
 
         selectInline(x, y, width) {
            
+            this.chars = width / this.editor.charWidth;
+            this.fromX = x;
+            this.toX = x + this.chars;
+            this.fromY = this.toY = y;
+
             var domEl = document.createElement('div');
             domEl.className = "lexcodeselection";
             
@@ -62,8 +67,6 @@
             domEl.style.left = "calc(" + (domEl._left - this.editor.getScrollLeft()) + "px + 0.25em)";
             domEl.style.width = width + "px";
             this.editor.selections.appendChild(domEl);
-            
-            this.chars = width / this.editor.charWidth;
         }
     };
 
@@ -281,6 +284,7 @@
                     this.startSelection(cursor);
                     this.selection.selectInline(cursor.position, cursor.line, this.measureString(string));
                 }
+
                 this.resetCursorPos( CodeEditor.CURSOR_LEFT );
                 this.cursorToString( cursor, this.code.lines[ln] );
 
@@ -414,7 +418,13 @@
                             this.processSelection(null, keep_range);
                         }else{
                             if(!this.selection) this.cursorToRight( letter, cursor );
-                            else this.endSelection();
+                            else 
+                            {
+                                this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
+                                this.cursorToLine(cursor, this.selection.toY);
+                                this.cursorToPosition(cursor, this.selection.toX);
+                                this.endSelection();
+                            }
                         }
                     }
                     else if( this.code.lines[ cursor.line + 1 ] !== undefined ) {
@@ -1418,6 +1428,8 @@
             this.cursorToLine(cursor, this.selection.fromY, true);
             this.cursorToPosition(cursor, this.selection.fromX);
             this.endSelection();
+
+            this._refresh_code_info(cursor.line, cursor.position);
         }
 
         endSelection() {
