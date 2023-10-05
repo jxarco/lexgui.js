@@ -51,6 +51,13 @@
             this.toY    = iy;
         }
 
+        invertIfNecessary() {
+            if(this.fromX > this.toX)
+                swapElements(this, 'fromX', 'toX');
+            if(this.fromY > this.toY)
+                swapElements(this, 'fromY', 'toY');
+        }
+
         selectInline(x, y, width) {
            
             this.chars = width / this.editor.charWidth;
@@ -281,7 +288,8 @@
                 if( e.shiftKey || e._shiftKey ) {
                     
                     var string = this.code.lines[ln].substring(cursor.position);
-                    this.startSelection(cursor);
+                    if(!this.selection)
+                        this.startSelection(cursor);
                     this.selection.selectInline(cursor.position, cursor.line, this.measureString(string));
                 }
 
@@ -326,19 +334,41 @@
             });
 
             this.action('ArrowUp', false, ( ln, cursor, e ) => {
-                this.lineUp();
-                // Go to end of line if out of line
-                var letter = this.getCharAtPos( cursor );
-                if(!letter) this.actions['End'].callback(cursor.line, cursor, e);
+                if(e.shiftKey) {
+                    if(!this.selection)
+                        this.startSelection(cursor);
+                    this.selection.fromX = cursor.position;
+                    this.selection.toY = this.selection.toY > 0 ? this.selection.toY - 1 : 0;
+                    this.processSelection(null, true);
+                    this.cursorToPosition(cursor, this.selection.fromX);
+                    this.cursorToLine(cursor, this.selection.toY);
+                } else {
+
+                    this.lineUp();
+                    // Go to end of line if out of line
+                    var letter = this.getCharAtPos( cursor );
+                    if(!letter) this.actions['End'].callback(cursor.line, cursor, e);
+                }
             });
 
             this.action('ArrowDown', false, ( ln, cursor, e ) => {
-                if( this.code.lines[ ln + 1 ] == undefined ) 
-                    return;
-                this.lineDown();
-                // Go to end of line if out of line
-                var letter = this.getCharAtPos( cursor );
-                if(!letter) this.actions['End'].callback(cursor.line, cursor, e);
+                if(e.shiftKey) {
+                    if(!this.selection)
+                        this.startSelection(cursor);
+                    this.selection.toX = cursor.position;
+                    this.selection.toY = this.selection.toY < this.code.lines.length - 1 ? this.selection.toY + 1 : this.code.lines.length - 1;
+                    this.processSelection(null, true);
+                    this.cursorToPosition(cursor, this.selection.toX);
+                    this.cursorToLine(cursor, this.selection.toY);
+                } else {
+
+                    if( this.code.lines[ ln + 1 ] == undefined ) 
+                        return;
+                    this.lineDown();
+                    // Go to end of line if out of line
+                    var letter = this.getCharAtPos( cursor );
+                    if(!letter) this.actions['End'].callback(cursor.line, cursor, e);
+                }
             });
 
             this.action('ArrowLeft', false, ( ln, cursor, e ) => {
@@ -352,7 +382,10 @@
                     const [word, from, to] = this.getWordAtPos( cursor, -1 );
                     var diff = Math.max(cursor.position - from, 1);
                     var substr = word.substr(0, diff);
+                    // Selections...
+                    if( e.shiftKey ) if(!this.selection) this.startSelection(cursor);
                     this.cursorToString(cursor, substr, true);
+                    if( e.shiftKey ) this.processSelection();
                 }
                 else {
                     var letter = this.getCharAtPos( cursor, -1 );
@@ -393,11 +426,14 @@
                     e.preventDefault();
                     this.actions[ 'End' ].callback( ln, cursor );
                 } else if(e.ctrlKey) {
-                    // get next word
+                    // Get next word
                     const [word, from, to] = this.getWordAtPos( cursor );
                     var diff = cursor.position - from;
                     var substr = word.substr(diff);
+                    // Selections...
+                    if( e.shiftKey ) if(!this.selection) this.startSelection(cursor);
                     this.cursorToString(cursor, substr);
+                    if( e.shiftKey ) this.processSelection();
                 } else {
                     var letter = this.getCharAtPos( cursor );
                     if(letter) {
@@ -702,10 +738,7 @@
                     this.endSelection();
                 }
 
-                if(this.selection && (this.selection.fromY > this.selection.toY)) {
-                    swapElements(this.selection, 'fromX', 'toX');
-                    swapElements(this.selection, 'fromY', 'toY');
-                }
+                if(this.selection) this.selection.invertIfNecessary();
 
                 this.state.selectingText = false;
             }
@@ -713,9 +746,7 @@
             else if( e.type == 'mousemove' )
             {
                 if( this.state.selectingText )
-                {
                     this.processSelection(e);
-                }
             }
 
             else if ( e.type == 'click' ) // trip
@@ -729,7 +760,7 @@
                         this.cursorToPosition( cursor, from );
                         this.startSelection( cursor );
                         this.selection.selectInline(from, cursor.line, this.measureString(word));
-                        this.cursorToPosition( cursor, cursor.position + word.length ); // Go to the end of the word
+                        this.cursorToString( cursor, word ); // Go to the end of the word
                         break;
                     // Select entire line
                     case CodeEditor.MOUSE_TRIPLE_CLICK:
@@ -1023,13 +1054,15 @@
                     this.restoreCursor( cursor, step.cursor );
                     this.processLines();
                     return;
+
+                    
                 }
             }
 
-            if( e.altKey )
+            else if( e.altKey )
             {
                 switch( key ) {
-                case 'ArrowUp':
+                    case 'ArrowUp':
                     if(this.code.lines[ lidx - 1 ] == undefined)
                         return;
                     swapArrayElements(this.code.lines, lidx - 1, lidx);
@@ -1045,6 +1078,14 @@
                     this.processLine( lidx );
                     this.processLine( lidx + 1 );
                     return;
+                }
+            }
+            
+            else if(!e.shiftKey){
+                switch( key ) {
+                    case 'ArrowUp': case 'ArrowDown': case 'ArrowLeft': case 'ArrowRight':
+                    this.endSelection();
+                
                 }
             }
 
@@ -1407,6 +1448,9 @@
         }
 
         deleteSelection( cursor ) {
+
+            // Some selections don't depend on mouse up..
+            if(this.selection) this.selection.invertIfNecessary();
 
             const separator = "_NEWLINE_";
             let code = this.code.lines.join(separator);
