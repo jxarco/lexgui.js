@@ -55,6 +55,15 @@
         return (S4()+"-"+S4());
     }
 
+    let ASYNC_ENABLED = true;
+
+    function doAsync( fn, ms ) {
+        if( ASYNC_ENABLED )
+            setTimeout( fn, ms ?? 0 );
+        else
+            fn();
+    }
+
     function set_as_draggable(domEl) {
 
         let offsetX;
@@ -768,7 +777,7 @@
             this.type = type;
 
             // Update sizes
-            this.#update();
+            this._update();
 
             if(!resize)
             {
@@ -817,7 +826,8 @@
                 that.split_bar.classList.remove("nocursor");
             }
 
-            setTimeout( () => this._moveSplit(0), 100);
+            // Is this necessary?..
+            // setTimeout( () => this._moveSplit(0), 100);
 
             return this.sections;
         }
@@ -1079,6 +1089,14 @@
         addTabs( options = {} ) {
 
             const tabs = new Tabs( this, options );
+
+            if( options.folding )
+            {
+                this.parentArea._disableSplitResize();
+                // Compensate split bar...
+                this.root.style.paddingTop = "4px"; 
+            }
+
             return tabs;
         }
 
@@ -1111,20 +1129,27 @@
 				a2.root.style.height = ( size - a2.offset ) + "px"; //other split
             }
                 
-            this.#update();
+            this._update();
 
             // Resize events   
             this.propagateEvent( 'onresize' );
         }
 
-        #update()
-        {
+        _disableSplitResize() {
+
+            this.resize = false;
+            this.split_bar.remove();
+            delete this.split_bar;
+        }
+
+        _update() {
+
             const rect = this.root.getBoundingClientRect();
 
             this.size = [ rect.width, rect.height ];
 
             for(var i = 0; i < this.sections.length; i++) {
-                this.sections[i].#update();
+                this.sections[i]._update();
             }
         }
     };
@@ -2304,7 +2329,7 @@
                     actionEl.className = "itemicon " + a.icon;
                     actionEl.title = a.name;
                     actionEl.addEventListener("click", function(e) {
-                        a.callback(this, node);
+                        a.callback(node);
                         e.stopPropagation();
                     });
                     item.appendChild(actionEl);
@@ -4978,7 +5003,7 @@
             function inner_mouseup(e)
             {
                 if (lastX != e.pageX)
-                    that.#updateWidgets();
+                    that._updateWidgets();
                 lastX = e.pageX;
                 lastXLine = e.pageX;
                 line.style.height = "0px";
@@ -4992,7 +5017,7 @@
             this.content.appendChild( element );
         }
 
-        #updateWidgets() {
+        _updateWidgets() {
 
             var size = this.grabber.style.marginLeft;
 
