@@ -807,11 +807,18 @@ body.nocursor * {
   border-bottom-right-radius: 10px;
   height: -webkit-fill-available;
   max-height: 400px;
-  overflow: scroll;
+  /* overflow: scroll; */
 }
 
 .lexdropdown ul::-webkit-scrollbar {
   display: none;
+}
+
+.lexdropdown ul span{
+  display: block;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  height: 100%;
 }
 
 .lexdropdown .lexdropdownitem {

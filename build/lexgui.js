@@ -3414,13 +3414,14 @@
             if(options.filter ?? false)
                 filter = this.#add_filter("Search option", {container: list, callback: this.#search_options.bind(list, values)});
 
-            if(filter)
-                list.appendChild(filter);
-
             // Create option list to empty it easily..
             const list_options = document.createElement('span');
             list.appendChild(list_options);
-
+            
+            if(filter)  {
+                list.prepend(filter);
+                list_options.style.height = "calc(100% - 25px)";
+            }
             // Add dropdown options list
             list.refresh = (options) => {
 
