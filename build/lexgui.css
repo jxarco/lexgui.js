@@ -1931,9 +1931,10 @@ meter::-webkit-meter-even-less-good-value {
   color: white;
 }
 
-/* .lexareatabscontainer {
-  margin-top: 2px;
-} */
+.lexareatabscontainer {
+  transition: height 0.1s;
+  transition-timing-function: ease-out;
+}
 
 .lexareatabscontainer .lexpanel:not(.lexoverlaybuttons) {
   margin: 0;
@@ -1945,6 +1946,10 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexareatabscontent {
   overflow-y: scroll;
+}
+
+.lexareatabscontent.folded {
+  max-height: 0px; 
 }
 
 /* Curve Widget */

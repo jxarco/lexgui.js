@@ -1164,7 +1164,14 @@
 
     LX.Area = Area;
 
-     /**
+    function flushCss(element) {
+        // By reading the offsetHeight property, we are forcing
+        // the browser to flush the pending CSS changes (which it
+        // does to ensure the value obtained is accurate).
+        element.offsetHeight;
+    }
+
+    /**
      * @class Tabs
      */
 
@@ -1262,8 +1269,7 @@
                 });
 
                 resizeObserver.observe(this.area.root);
-
-                this.area.hide();
+                this.area.root.classList.add('folded');
             }
         }
 
@@ -1322,7 +1328,7 @@
                 if( this.folding )
                 {
                     this.folded = tabEl.selected;
-                    this.area.toggle(!this.folded);
+                    this.area.root.classList.toggle('folded', !this.folded);
                 }
 
                 if(options.onSelect) 
@@ -2625,6 +2631,9 @@
                 if( options.width ) {
                     element.style.width = element.style.minWidth = options.width;
                 }
+                if( options.height ) {
+                    element.style.height = element.style.minHeight = options.height;
+                }
             }
 
             if(name != undefined) {
@@ -3052,11 +3061,13 @@
             let container = document.createElement('div');
             container.className = "lextextarea";
             container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
+            container.style.height = options.height;
             container.style.display = "flex";
 
             let wValue = document.createElement('textarea');
             wValue.value = wValue.iValue = value || "";
             wValue.style.width = "100%";
+            Object.assign(wValue.style, options.style ?? {});
 
             if(options.disabled ?? false) wValue.setAttribute("disabled", true);
             if(options.placeholder) wValue.setAttribute("placeholder", options.placeholder);
@@ -3103,7 +3114,7 @@
             }
 
             // Do this after creating the DOM element
-            setTimeout( () => {
+            doAsync( () => {
                 if( options.fitHeight )
                 {
                     // Update height depending on the content
