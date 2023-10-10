@@ -965,7 +965,7 @@
             this.root.style.position = "relative";
 
             options.className = "lexoverlaybuttons";
-            options.width = "calc( 100% - 12px )";
+            options.width = "calc( 100% - 24px )";
             options.height = "auto";
 
             const float = options.float;
@@ -992,7 +992,7 @@
             let overlayPanel = this.addPanel( options );
             let overlaygroup;
             
-            const add_button = function(b, group) {
+            const add_button = function(b, group, last) {
 
                 const _options = { 
                     width: "auto", 
@@ -1011,13 +1011,6 @@
                     }
 
                     _options.parent = overlaygroup;
-                }
-                // ends the group
-                else if(overlaygroup)
-                {
-                    overlayPanel.root.appendChild( overlaygroup );
-                    overlaygroup = null;
-                    delete overlayPanel.queuedContainer;
                 }
 
                 let callback = b.callback;
@@ -1049,6 +1042,14 @@
                     }
                     callback( value, event );
                 }, _options );
+
+                // ends the group
+                if(overlaygroup && last)
+                {
+                    overlayPanel.root.appendChild( overlaygroup );
+                    overlaygroup = null;
+                    overlayPanel.clearQueue();
+                }
             }
 
             const refresh_panel = function() {
@@ -1059,10 +1060,11 @@
                 {
                     if( b.constructor === Array )
                     {
-                        for( let sub of b )
+                        for( let i = 0; i < b.length; ++i )
                         {
+                            let sub = b[i];
                             sub.group = b;
-                            add_button(sub, true);
+                            add_button(sub, true, i == (b.length - 1));
                         }
                     }else
                     {

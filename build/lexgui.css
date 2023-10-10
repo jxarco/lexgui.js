@@ -1716,16 +1716,21 @@ meter::-webkit-meter-even-less-good-value {
 .lexoverlaybuttons {
   position: absolute;
   display: flex;
-  margin: 6px;
+  margin: 12px;
   top: 0;
   justify-content: start;
   pointer-events: none;
 }
 
 .lexoverlaybuttons .lexwidget {
-  padding: 1px;
-  margin-right: 4px;
+  padding: 0px;
+  margin-right: 6px;
   pointer-events: auto;
+  min-width: 32px;
+}
+
+.lexoverlaybuttons .lexwidget button {	
+  min-width: 32px;	
 }
 
 .lexoverlaybuttons.vertical {
@@ -1740,8 +1745,8 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexoverlaybuttons.vertical .lexwidget button {	
   min-width: 32px;	
-  max-width: 32px!important;	
-  max-height: 32px!important;	
+  /* max-width: 32px !important;	 */
+  max-height: 32px !important;	
 }
 
 .lexoverlaybuttons.bottom {
@@ -1771,33 +1776,35 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexoverlaybuttons .lexbutton {
   padding: 14px 10px;
-  font-size: 14px;
+  font-size: 12px;
   border-radius: 8px;
-  color: #11111d;
-  background-color: #d9d9f1a2;
+  justify-content: center;
+  background-color: #313132a5;
+  backdrop-filter: blur(6px);
+  color: #d1d1d3bd;
 }
 
 .lexoverlaybuttons .lexbutton a {
   line-height: 19px;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .lexoverlaybuttons .lexbutton img {
-  filter: invert(1);
+  filter: brightness(0.7)
 }
 
 .lexoverlaybuttons .lexbutton.selected {
-  background-color: var(--global-selected);
-  color: #f5f5f5;
+  background-color: #898989d6 !important;
+  color: #fff;
   outline: none;
+  border-radius: 8px;
 }
 
-.lexoverlaybuttons .lexbutton.selected img {
+.lexoverlaybuttons .lexbutton.selected img, .lexoverlaybuttons .lexbutton:hover img {
   filter: none;
 }
 
 .lexoverlaybuttons .lexbutton:hover {
-  background-color: #858585;
   color: #f5f5f5;
 }
 
@@ -1808,13 +1815,21 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexoverlaybuttons .lexoverlaygroup {
   display: flex;
-  margin-right: 4px;
+  margin-right: 6px;
+  background-color: #313132a5;
+  backdrop-filter: blur(6px);
+  border-radius: 8px;
+}
+
+.lexoverlaybuttons .lexoverlaygroup .lexbutton {
+  background: none;
+  backdrop-filter: none;
 }
 
 .lexoverlaybuttons.vertical .lexoverlaygroup {
   display: grid;
   margin-right: 0px;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .lexoverlaybuttons .lexoverlaygroup .lexwidget {
@@ -1827,34 +1842,8 @@ meter::-webkit-meter-even-less-good-value {
   margin-bottom: 0px;
 }
 
-.lexoverlaybuttons .lexoverlaygroup .lexwidget button {
-  border-radius: 0px;
-}
-
 .lexoverlaybuttons.vertical .lexoverlaygroup .lexwidget button {
   width: 100% !important;
-}
-
-.lexoverlaybuttons .lexoverlaygroup .lexwidget:first-child button {
-  border-top-left-radius: 6px;
-  border-bottom-left-radius: 6px;
-}
-
-.lexoverlaybuttons .lexoverlaygroup .lexwidget:last-child button {
-  border-top-right-radius: 6px;
-  border-bottom-right-radius: 6px;
-}
-
-.lexoverlaybuttons.vertical .lexoverlaygroup .lexwidget:first-child button {
-  border-radius: 0px;
-  border-top-left-radius: 6px;
-  border-top-right-radius: 6px;
-}
-
-.lexoverlaybuttons.vertical .lexoverlaygroup .lexwidget:last-child button {
-  border-radius: 0px;
-  border-bottom-left-radius: 6px;
-  border-bottom-right-radius: 6px;
 }
 
 /* Area Tabs */
