@@ -51,6 +51,10 @@
             this.toY    = iy;
         }
 
+        sameLine() {
+            return this.fromY === this.toY;
+        }
+
         invertIfNecessary() {
             if(this.fromX > this.toX)
                 swapElements(this, 'fromX', 'toX');
@@ -274,7 +278,7 @@
                 this._refresh_code_info(cursor.line + 1, cursor.position);
                 this.code.scrollLeft = 0;
 
-                if( !e.shiftKey )
+                if( !e.shiftKey || e.cancelShift )
                 return;
             
                 // Get last selection range
@@ -396,9 +400,9 @@
                     if(letter) {
                         if( e.shiftKey ) {
                             if(!this.selection) this.startSelection(cursor);
-                            if( (cursor.position - 1) < this.selection.fromX )
+                            if( ((cursor.position - 1) < this.selection.fromX) && this.selection.sameLine() )
                                 this.selection.fromX--;
-                            else if( (cursor.position - 1) == this.selection.fromX ) {
+                            else if( (cursor.position - 1) == this.selection.fromX && this.selection.sameLine() ) {
                                 this.cursorToLeft( letter, cursor );
                                 this.endSelection();
                                 return;
@@ -419,8 +423,17 @@
                         }
                     }
                     else if( cursor.line > 0 ) {
+
                         this.lineUp( cursor );
-                        this.actions['End'].callback(cursor.line, cursor, e);
+                        this.resetCursorPos( CodeEditor.CURSOR_LEFT );
+                        this.cursorToPosition( cursor, this.code.lines[cursor.line].length );
+
+                        if( e.shiftKey ) {
+                            if(!this.selection) this.startSelection(cursor);
+                            this.selection.toX = cursor.position;
+                            this.selection.toY--;
+                            this.processSelection(null, true);
+                        }
                     }
                 }
             });
@@ -446,7 +459,7 @@
                             if(!this.selection) this.startSelection(cursor);
                             var keep_range = false;
                             if( cursor.position == this.selection.fromX ) {
-                                if( (cursor.position + 1) == this.selection.toX ) {
+                                if( (cursor.position + 1) == this.selection.toX && this.selection.sameLine() ) {
                                     this.cursorToRight( letter, cursor );
                                     this.endSelection();
                                     return;
@@ -470,8 +483,17 @@
                         }
                     }
                     else if( this.code.lines[ cursor.line + 1 ] !== undefined ) {
+                        
                         this.lineDown( cursor );
+                        e.cancelShift = true;
                         this.actions['Home'].callback(cursor.line, cursor, e);
+
+                        if( e.shiftKey ) {
+                            if(!this.selection) this.startSelection(cursor);
+                            this.selection.toX = cursor.position;
+                            this.selection.toY++;
+                            this.processSelection(null, true);
+                        }
                     }
                 }
             });
