@@ -15,7 +15,7 @@
 
         constructor() {
 
-            this.start_time = -0.2;
+            this.start_time = - 0.01;
             this.left_margin = 0;
             // this.current_time = 0;
             // this.last_time = 0;
@@ -89,7 +89,7 @@
             let height = options.height ? options.height - this.header_offset : null;
 
             let area = new LX.Area( {id: "bottom-timeline-area", width: width || "calc(100% - 7px)", height: height || "100%"});
-            area.split({ type: "horizontal", sizes: ["20%", "80%"]});
+            area.split({ type: "horizontal", sizes: ["10%", "90%"]});
             this.content_area = area;
             let [left, right] = area.sections;
             
@@ -352,12 +352,12 @@
 
             ctx.save();
 
-            ctx.fillStyle = LX.getThemeColor("global-dark-background");
+            ctx.fillStyle = Timeline.BACKGROUND_COLOR;
             ctx.fillRect( this.session.left_margin,0, canvas.width, h );
 
             if(this.secondsToPixels > 100 )
             {
-                ctx.strokeStyle = "#AAA";
+                ctx.strokeStyle = LX.getThemeColor("global-selected-light");
                 ctx.globalAlpha = 0.5 * (1.0 - LX.UTILS.clamp( 100 / this.secondsToPixels, 0, 1));
                 ctx.beginPath();
                 for( let time = this.startTime; time <= this.endTime; time += 1 / this.framerate )
@@ -373,7 +373,7 @@
             }
 
             ctx.globalAlpha = 0.5;
-            ctx.strokeStyle = "#ADF";
+            ctx.strokeStyle = LX.getThemeColor("global-selected-light");
             ctx.beginPath();
             let times = this._times;
             this._times.length = 0;
@@ -403,13 +403,13 @@
             ctx.globalAlpha = this.opacity;
 
             //time seconds in text
-            ctx.font = "10px Arial";
+            ctx.font = "11px " + Timeline.FONT;//"11px Calibri";
             ctx.textAlign = "center";
-            ctx.fillStyle = "#888";
+            ctx.fillStyle = Timeline.FONT_COLOR//"#888";
             for(var i = 0; i < times.length; ++i)
             {
                 let time = times[i][1];
-                ctx.fillText( time == (time|0) ? time : time.toFixed(1), times[i][0],10);
+                ctx.fillText( time == (time|0) ? time : time.toFixed(1), times[i][0], 20);
             }
 
             ctx.restore();
@@ -434,16 +434,16 @@
 
             for(let i = 0; i < max_tracks; ++i)
             {
-                ctx.fillStyle = i % 2 == 0 ?  Timeline.BACKGROUND_COLOR: Timeline.TRACK_COLOR_PRIMARY;
+                ctx.fillStyle = i % 2 == 0 ?  Timeline.TRACK_COLOR_PRIMARY:  Timeline.BACKGROUND_COLOR;
                 ctx.fillRect(0, timeline_height + i * line_height, w, line_height );
             }
         
             //black bg
-            ctx.globalAlpha = 0.2;
+            ctx.globalAlpha = 0.7;
             ctx.fillStyle = Timeline.BACKGROUND_COLOR;
             ctx.fillRect( margin, timeline_height, canvas.width - margin, canvas.height - timeline_height );
             ctx.globalAlpha = this.opacity;
-        
+            
             //bg lines
             ctx.strokeStyle = "#444";
             ctx.beginPath();
@@ -503,7 +503,7 @@
 
             // Background
             ctx.globalAlpha = this.opacity;
-            ctx.fillStyle = Timeline.BACKGROUND_COLOR;
+            ctx.fillStyle = Timeline.TRACK_COLOR_SECONDARY;
 	        ctx.clearRect(0,0, this.canvas.width, this.canvas.height );
 
             this.drawTimeInfo(w);
@@ -1023,7 +1023,7 @@
                 type = type.replaceAll(")", "").replaceAll(" ", "");
             else {
                 type = name;
-                name = trackInfo.parent.id;
+                name = trackInfo.parent ? trackInfo.parent.id : trackInfo.id;
             }
             let tracks = this.tracksPerItem[name];
 
@@ -1059,7 +1059,7 @@
                 type = type.replaceAll(")", "").replaceAll(" ", "");
             else {
                 type = name;
-                name = trackInfo.parent.id;
+                name = trackInfo.parent ? trackInfo.parent.id : trackInfo.id;
             }
             trackInfo = {name, type};
             let tracks = this.tracksPerItem[name];
@@ -1088,7 +1088,7 @@
                     type = type.replaceAll(")", "").replaceAll(" ", "");
                 else {
                     type = name;
-                    name = trackInfo.parent.id;
+                    name = trackInfo.parent ? trackInfo.parent.id : trackInfo.id;
                 }
                 //trackInfo = {name, type};
                 let tracks = this.tracksPerItem[name];
@@ -1158,6 +1158,8 @@
     Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor("global-color-secondary");
     Timeline.TRACK_COLOR_SECONDARY = LX.getThemeColor("global-color-terciary");
     Timeline.TRACK_SELECTED = LX.getThemeColor("global-selected");
+    Timeline.FONT = LX.getThemeColor("global-font");
+    Timeline.FONT_COLOR = LX.getThemeColor("global-text");
     Timeline.COLOR = "#5e9fdd";
     Timeline.COLOR_HOVERED = "rgba(250,250,250,0.7)";
     Timeline.COLOR_SELECTED = "rgba(250,250,20,1)"///"rgba(250,250,20,1)";
@@ -2167,7 +2169,6 @@
             super(name, options);
             this.selectedClip = null;
             this.lastClipsSelected = [];
-
         }
 
         onMouseUp( e ) {
@@ -2445,7 +2446,7 @@
             const height = this.trackHeight;
             for(let i = 0; i < tracks.length; i++) {
                 let track = tracks[i];
-                this.drawTrackWithBoxes(ctx, (i+1) * height, height, track.name || "", track);
+                this.drawTrackWithBoxes(ctx, (i) * height, height, track.name || "", track);
             }
             
             ctx.restore();
