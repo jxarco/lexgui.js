@@ -119,10 +119,10 @@ area.addMenubar( m => {
 });
 
 // split main area
-var [left,right] = area.split({sizes:["75%","25%"]});
+var [left,right] = area.split({sizes:["75%","25%"], minimizable: true});
 
 // split left area
-var [up, bottom] = left.split({type: 'vertical', sizes:["45vh","55vh"]});
+var [up, bottom] = left.split({type: 'vertical', sizes:["45vh","55vh"], minimizable: true});
 
 var kfTimeline = null;
 var clipsTimeline = null;
