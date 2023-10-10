@@ -723,14 +723,14 @@
                 this.min = document.createElement("div");
                 this.min.className = "lexmin  " + type + " fa-solid";
                 if(type == "horizontal") 
-                    this.min.classList.add("fa-angle-left");
+                    this.min.classList.add("fa-angle-right");
                 else
-                    this.min.classList.add("fa-angle-up");
+                    this.min.classList.add("fa-angle-down");
 
                 this.min.addEventListener("mousedown", (e) => {
-                    if(this.min.classList.contains("fa-angle-up")) {
-                        this.min.classList.remove("fa-angle-up");
-                        this.min.classList.add("fa-angle-down");
+                    if(this.min.classList.contains("fa-angle-down")) {
+                        this.min.classList.remove("fa-angle-down");
+                        this.min.classList.add("fa-angle-up");
                         this.offset = area2.root.offsetHeight;
                         area2.root.classList.remove("fadein-vertical");
                         area2.root.classList.add("fadeout-vertical");
@@ -740,9 +740,9 @@
                             this._moveSplit(20);
                         }, 400);
                     }
-                    else if(this.min.classList.contains("fa-angle-down")) {
-                        this.min.classList.remove("fa-angle-down");
-                        this.min.classList.add("fa-angle-up");
+                    else if(this.min.classList.contains("fa-angle-up")) {
+                        this.min.classList.remove("fa-angle-up");
+                        this.min.classList.add("fa-angle-down");
                         this._moveSplit(this.offset);
                         area2.show();
                         area2.root.classList.remove("fadeout-vertical");
@@ -752,9 +752,9 @@
                         // }, 100);
                         
                     }
-                    else if(this.min.classList.contains("fa-angle-left")) {
-                        this.min.classList.remove("fa-angle-left");
-                        this.min.classList.add("fa-angle-right");
+                    else if(this.min.classList.contains("fa-angle-right")) {
+                        this.min.classList.remove("fa-angle-right");
+                        this.min.classList.add("fa-angle-left");
                         this.offset = area2.root.offsetWidth;
                         area2.root.classList.remove("fadein-horizontal");
                         area2.root.classList.add("fadeout-horizontal");
@@ -764,9 +764,9 @@
                             this._moveSplit(20);
                         }, 300);
                     }
-                    else if(this.min.classList.contains("fa-angle-right")) {
-                        this.min.classList.remove("fa-angle-right");
-                        this.min.classList.add("fa-angle-left");
+                    else if(this.min.classList.contains("fa-angle-left")) {
+                        this.min.classList.remove("fa-angle-left");
+                        this.min.classList.add("fa-angle-right");
                         this._moveSplit(this.offset);
                         area2.show();
                         area2.root.classList.remove("fadeout-horizontal");

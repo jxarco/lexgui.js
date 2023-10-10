@@ -2245,6 +2245,7 @@ meter::-webkit-meter-even-less-good-value {
   padding: 4px;
   position: relative;
   transition: 0.3s;
+  font-size: initial;
 }
 .lexmin.horizontal{
   top: 40px;
