@@ -2215,23 +2215,53 @@ meter::-webkit-meter-even-less-good-value {
   font-size: 12px;
 }
 
-.lextimeline .lexsplitbar.horizontal {
-  position: relative;
-  height: calc(100% - 24px);
-  top: 24px;
-  border-radius: 0px;
-  left: 0 !important;
-  background-color: var(--global-color-secondary);
-}
-
-.lextimeline .lexsplitbar.horizontal:hover {
-  background-color: var(--global-text-secondary);
-}
-
 .lextimeline .lexsplitbar.vertical {
   position: unset;
   width: unset;
   height: unset;
+}
+
+
+.lextimeline.hidden{
+  animation-name: fadeout;
+  animation-duration: 0.5s;
+}
+
+@keyframes fadein {
+  from {
+    margin-top: -1%;
+    opacity: 0%;
+    height: 0%;
+  }
+
+  75% {
+    margin-top: 0.2%;
+    opacity: 75%;
+
+  }
+
+  to {
+    margin-top: 0%;
+    opacity: 100%;
+  }
+}
+
+@keyframes fadeout {
+  from {
+    margin-top: 0%;
+    opacity: 100%;
+  }
+
+  75% {
+    margin-top: 0.1%;
+    opacity: 25%;
+  }
+
+  to {
+    margin-top: -1%;
+    opacity: 0%;
+    height: 0%;
+  }
 }
 
 /* Overlay area */
