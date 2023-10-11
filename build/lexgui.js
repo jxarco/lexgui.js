@@ -717,6 +717,69 @@
                 data = LX.DEFAULT_SPLITBAR_SIZE/2 + "px"; // updates
             }
 
+            let minimizable = options.minimizable ?? false;
+            this.offset = 0;
+            if(minimizable) {
+                this.min = document.createElement("div");
+                this.min.className = "lexmin  " + type + " fa-solid";
+                if(type == "horizontal") 
+                    this.min.classList.add("fa-angle-right");
+                else
+                    this.min.classList.add("fa-angle-down");
+
+                this.min.addEventListener("mousedown", (e) => {
+                    // Fade out to down
+                    if(this.min.classList.contains("fa-angle-down")) {
+                        this.min.classList.remove("fa-angle-down");
+                        this.min.classList.add("fa-angle-up");
+                        this.offset = area2.root.offsetHeight;
+                        area2.root.classList.remove("fadein-vertical");
+                        area2.root.classList.add("fadeout-vertical");
+                        
+                        setTimeout(() => {
+                            area2.hide();
+                            this._moveSplit(20);
+                        }, 200);
+                    }
+                    // Fade in from down
+                    else if(this.min.classList.contains("fa-angle-up")) {
+                        this.min.classList.remove("fa-angle-up");
+                        this.min.classList.add("fa-angle-down");
+                        this._moveSplit(this.offset);
+                        area2.show();
+                        area2.root.classList.remove("fadeout-vertical");
+                        area2.root.classList.add("fadein-vertical");
+                        // setTimeout(() => {
+                           
+                        // }, 100);
+                        
+                    }
+                    //Fade out to right
+                    else if(this.min.classList.contains("fa-angle-right")) {
+                        this.min.classList.remove("fa-angle-right");
+                        this.min.classList.add("fa-angle-left");
+                        this.offset = area2.root.offsetWidth;
+                        area2.root.classList.remove("fadein-horizontal");
+                        area2.root.classList.add("fadeout-horizontal");
+                        
+                        setTimeout(() => {
+                            area2.hide();
+                            this._moveSplit(20);
+                        }, 200);
+                    }
+                    //Fade in from right
+                    else if(this.min.classList.contains("fa-angle-left")) {
+                        this.min.classList.remove("fa-angle-left");
+                        this.min.classList.add("fa-angle-right");
+                        area2.show();
+                        this._moveSplit(this.offset);
+                        area2.root.classList.remove("fadeout-horizontal");
+                        area2.root.classList.add("fadein-horizontal");
+                    }
+                    
+                });
+            }
+
             if(type == "horizontal")
             {
                 var width1 = sizes[0],
@@ -780,6 +843,8 @@
             this.root.appendChild( area1.root );
             if(resize) 
                 this.root.appendChild(this.split_bar);
+            if(minimizable)
+                this.root.appendChild(this.min);
             this.root.appendChild( area2.root );
             this.sections = [area1, area2];
             this.type = type;
@@ -6684,7 +6749,7 @@
 	LX.UTILS = {
         getTime() { return new Date().getTime() },
         compareThreshold( v, p, n, t ) { return Math.abs(v - p) >= t || Math.abs(v - n) >= t },
-        compareThresholdRange( v0, v1, t0, t1 ) { return v0 > t0 && v0 <= t1 || v1 > t0 && v1 <= t1 },
+        compareThresholdRange( v0, v1, t0, t1 ) { return v0 >= t0 && v0 <= t1 || v1 >= t0 && v1 <= t1 || v0 <= t0 && v1 >= t1},
         clamp (num, min, max) { return Math.min(Math.max(num, min), max) }
     };
     
