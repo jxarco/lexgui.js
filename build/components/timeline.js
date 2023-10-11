@@ -2365,8 +2365,10 @@
                         if( this.dragClipMode == "move" ) {
                            
                             clip.start += diff;
-                            clip.fadein += diff;
-                            clip.fadeout += diff;
+                            if(clip.fadein != undefined)
+                                clip.fadein += diff;
+                            if(clip.fadeout != undefined)
+                                clip.fadeout += diff;
                             this.canvas.style.cursor = "grabbing";
 
                         }
@@ -2592,9 +2594,10 @@
             // Update clip information
             let trackIdx = null;
             let newStart = this.currentTime + offsetTime + clip.start;
-
-            clip.fadein += (newStart - clip.start);
-            clip.fadeout += (newStart - clip.start);
+            if(clip.fadein != undefined)
+                clip.fadein += (newStart - clip.start);
+            if(clip.fadeout != undefined)
+                clip.fadeout += (newStart - clip.start);
             clip.start = newStart;
 
             // Time slot with other clip?
