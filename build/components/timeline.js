@@ -295,6 +295,25 @@
             return trackInfo.idx;
         }
 
+        /**
+         * @method deleteTrack
+         */
+
+        deleteTrack(idx) {
+
+            if(!this.animationClip)
+                this.animationClip = {tracks:[]};
+
+            let trackInfo = {
+                idx: idx,
+                clips: [],
+                selected: [], edited: [], hovered: []
+            };
+
+            this.animationClip.tracks[idx] = trackInfo;
+            return trackInfo.idx;
+        }
+
         getTracksInRange( minY, maxY, threshold ) {
 
             let tracks = [];
