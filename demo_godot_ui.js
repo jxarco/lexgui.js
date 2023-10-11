@@ -56,13 +56,34 @@ var [up, bottom] = middle.split({type: 'vertical', sizes:["70vh","30vh"]});
 
 const bottom_tabs = bottom.addTabs({folding: "up"});
 
-const output_panel = new LX.Panel();
+// Output
+const output_area = new LX.Area({width: "calc(100% - 8px)", height: "calc(100% - 8px)"});
+output_area.root.style.backgroundColor = LX.getThemeColor('global-color-secondary');
+output_area.root.style.margin = "4px";
+output_area.root.style.borderRadius = "6px";
 
-output_panel.branch("Test");
-output_panel.merge();
+const output_panel = output_area.addPanel();
+output_panel.addTextArea(null, "Godot Engine v4.1.stable.official (c) 2007-present Juan Linietsky, Ariel Manzur & Godot Contributors.", null, {
+    height: "100%",
+    disabled: true,
+    style: {
+        'font-family': 'Inconsolata, monospace',
+        'border': 'none',
+        'resize': 'none'
+    }
+});
 
-bottom_tabs.add( "Output", output_panel);
-bottom_tabs.add( "Debugger", document.createElement('div'));
+// Debugger
+const debugger_area = new LX.Area({width: "calc(100% - 8px)", height: "calc(100% - 8px)"});
+const debugger_tabs = debugger_area.addTabs();
+
+debugger_tabs.add( "Stack Trace",  document.createElement('div'));
+debugger_tabs.add( "Errors",  document.createElement('div'));
+
+// const debug_tabs = output_area.addTabs();
+
+bottom_tabs.add( "Output", output_area);
+bottom_tabs.add( "Debugger", debugger_area);
 bottom_tabs.add( "Search Results", document.createElement('div'));
 bottom_tabs.add( "Audio", document.createElement('div'));
 bottom_tabs.add( "Animation", document.createElement('div'));
@@ -87,21 +108,65 @@ top_tabs.add( "Scene_1", document.createElement('div'));
 // add on resize event to control canvas size
 top_tabs.area.onresize = resize_canvas;
 
+top_tabs.area.addOverlayButtons( [ 
+    [
+        {
+            name: "Select",
+            icon: "fa fa-arrow-pointer",
+            callback: (value, event) => console.log(value),
+            selectable: true
+        },
+        {
+            name: "Move",
+            icon: "fa-solid fa-arrows-up-down-left-right",
+            img: "https://webglstudio.org/latest/imgs/mini-icon-gizmo.png",
+            callback: (value, event) => console.log(value),
+            selectable: true
+        },
+        {
+            name: "Rotate",
+            icon: "fa-solid fa-rotate-right",
+            callback: (value, event) => console.log(value),
+            selectable: true
+        },
+        {
+            name: "Unselect",
+            icon: "fa-solid fa-x",
+            callback: (value, event) => console.log(value),
+            selectable: true
+        }
+    ]
+], { float: "vtl" } );
+
 // add widgets
 fillRightSide( right );
 fillLeftSide( left );
 
 const img = new Image();
 img.src = "images/godot_canvas.png";
+img.onload = () => {
+    requestAnimationFrame(loop);
+}
+
+function drawImageScaled(img, ctx) {
+    var hRatio = canvas.width  / img.width    ;
+    var vRatio =  canvas.height / img.height  ;
+    var ratio  = Math.min ( hRatio, vRatio );
+    var centerShift_x = ( canvas.width - img.width*ratio ) / 2;
+    var centerShift_y = ( canvas.height - img.height*ratio ) / 2;  
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    ctx.drawImage(img, 0,0, img.width, img.height,
+                       centerShift_x,centerShift_y,img.width*ratio, img.height*ratio);  
+ }
 
 function loop(dt) {
     
     var ctx = canvas.getContext("2d");
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    drawImageScaled(img, ctx);
+    // var aspect = img.width / img.height;
+    // ctx.drawImage(img, 0, 0, canvas.width * aspect, canvas.height);
     requestAnimationFrame(loop);
 }
-
-requestAnimationFrame(loop);
 
 // **** **** **** **** **** **** **** **** **** **** **** **** 
 
