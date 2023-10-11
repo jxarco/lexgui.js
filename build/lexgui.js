@@ -3562,7 +3562,7 @@
                     });
 
                     // Add string option
-                    if(typeof iValue == 'string') {
+                    if(typeof iValue == 'string' || !iValue) {
                         option.style.flexDirection = 'unset';
                         option.innerHTML = "<a class='fa-solid fa-check'></a><span>" + iValue + "</span>";
                         option.value = iValue;

@@ -714,10 +714,20 @@
             e.localX = localX;
             e.localY = localY;
 
+           
+
             const innerSetTime = (t) => { if( this.onSetTime ) this.onSetTime( t );	 }
 
             if( e.type == "mouseup" )
             {
+                if(!this.active) {
+                    this.grabbing_timeline = false;
+                    this.grabbing = false;
+                    this.grabbingScroll = false;
+                    this.movingKeys = false;
+                    this.timeBeforeMove = null;
+                    return;
+                }
                 // this.canvas.style.cursor = "default";
                 const discard = this.movingKeys || (LX.UTILS.getTime() - this.clickTime) > 420; // ms
                 this.movingKeys ? innerSetTime( this.currentTime ) : 0;
@@ -744,6 +754,7 @@
                 return;
 
             if( e.type == "mousedown")	{
+                
                 this.clickTime = LX.UTILS.getTime();
 
                 if(this.trackBulletCallback && e.track)
@@ -760,21 +771,21 @@
 
                     this.grabbing_timeline = current_grabbing_timeline;
 
-                    if(this.onMouseDown)
+                    if(this.onMouseDown && this.active )
                         this.onMouseDown(e, time);
                 }
             }
             else if( e.type == "mousemove" ) {
 
-                if(e.shiftKey) {
+                if(e.shiftKey && this.active) {
                     if(this.boxSelection) {
                         this.boxSelectionEnd = [localX, localY - 20];
                         return; // Handled
                     }
                 }
-                else if(this.grabbing && e.button !=2 && !this.movingKeys) {
+                else if(this.grabbing && e.button !=2 && !this.movingKeys ) {
                     this.canvas.style.cursor = "grabbing"; 
-                    if(this.grabbing_timeline )
+                    if(this.grabbing_timeline  && this.active)
                     {
                         let time = this.xToTime( localX );
                         time = Math.max(0, time);
@@ -807,7 +818,7 @@
             else if (e.type == "dblclick" && this.onDblClick) {
                 this.onDblClick(e);	
             }
-            else if (e.type == "contextmenu" && this.showContextMenu)
+            else if (e.type == "contextmenu" && this.showContextMenu && this.active)
                 this.showContextMenu(e);
 
             this.lastMouse[0] = x;
