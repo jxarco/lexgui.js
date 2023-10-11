@@ -447,7 +447,7 @@
 
         if( target )
         {
-            target[signal_name].call(target, value);
+            if(target[signal_name]) target[signal_name].call(target, value);
             return;
         }
 
