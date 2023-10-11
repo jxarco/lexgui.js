@@ -447,7 +447,7 @@
 
         if( target )
         {
-            target[signal_name].call(target, value);
+            if(target[signal_name]) target[signal_name].call(target, value);
             return;
         }
 
@@ -3282,6 +3282,7 @@
 
                 let buttonEl = document.createElement('button');
                 buttonEl.className = "lexbutton combo";
+                buttonEl.title = b.icon ? b.value : "";
                 if(options.buttonClass)
                     buttonEl.classList.add(options.buttonClass);
 

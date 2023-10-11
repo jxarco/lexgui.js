@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-    <title>LexGUI PocketDialog Demo</title>
+    <title>LexGUI Dialogs Demo</title>
     <link rel="stylesheet" href="../build/lexgui.css">    
 </head>
     <body></body>
@@ -33,7 +33,24 @@
             p.merge();
         }, { float: 'lt' } );
 
-        const pocket_dialog_draggable = new LX.PocketDialog("Draggable Dialog", p => {
+        const dialog_closable = new LX.Dialog("Closable Dialog", p => {
+            
+            p.branch("Canvas");
+            p.addColor("Background", "#b7a9b1");
+            p.addText("Text", "Dialog Lexgui.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
+            p.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
+                console.log("Font Color: ", value);
+            });
+            p.addNumber("Font Size", 36, (value, event) => {
+                console.log(value);
+            }, { min: 1, max: 48, step: 1});
+            p.addVector2("2D Position", [250, 350], (value, event) => {
+                console.log(value);
+            }, { min: 0, max: 1024 });
+            p.merge();
+        }, { size: ["350px", null], closable: true });
+
+        const pocket_dialog_draggable = new LX.PocketDialog("Draggable PocketDialog", p => {
             
             p.branch("Canvas");
             p.addColor("Background", "#b7a9b1");
@@ -47,6 +64,9 @@
             p.addVector2("2D Position", [250, 350], (value, event) => {
                 console.log(value);
             }, { min: 0, max: 1024 });
+            p.addDropdown("Best Engine", ["Godot", "Unity", "Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Pepe"], "Godot", (value, event) => {
+                console.log(value);
+            }, {filter: true});
             p.merge();
         }, { size: ["350px", null], draggable: true });
 
