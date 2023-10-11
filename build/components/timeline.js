@@ -2654,12 +2654,7 @@
             track.selected[newIdx] = undefined;
             track.edited[newIdx] = undefined;
 
-            // // Update animation action interpolation info
-            if(this.onUpdateTrack)
-                this.onUpdateTrack( trackIdx );
-
-            if(this.onSetTime)
-                this.onSetTime(this.currentTime);
+           
                 
             let end = clip.start + clip.duration;
             
@@ -2667,6 +2662,13 @@
             {
                 this.setDuration(end);
             }
+
+             // // Update animation action interpolation info
+             if(this.onUpdateTrack)
+                this.onUpdateTrack( trackIdx );
+
+            if(this.onSetTime)
+                this.onSetTime(this.currentTime);
 
             if(callback)
                 callback();
