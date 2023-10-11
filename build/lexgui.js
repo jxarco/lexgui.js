@@ -3492,7 +3492,10 @@
             selectedOption.style.width = "100%";   
 
             selectedOption.refresh = (v) => {
-                selectedOption.querySelector("span").innerHTML = selectedOption.querySelector("span").innerHTML.replaceAll(selectedOption.querySelector("span").innerText, v); 
+                if(selectedOption.querySelector("span").innerText == "")
+                    selectedOption.querySelector("span").innerText = v;
+                else
+                    selectedOption.querySelector("span").innerHTML = selectedOption.querySelector("span").innerHTML.replaceAll(selectedOption.querySelector("span").innerText, v); 
             }
 
             //Add dropdown options container
