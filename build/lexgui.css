@@ -729,6 +729,7 @@ body.nocursor * {
   border-radius: 0px;
   display: flex;
   padding-top: 0.35em;
+  padding-bottom: 1.7em;
   transition: 0.2s;
 }
 
@@ -756,7 +757,8 @@ body.nocursor * {
 
 .lexcombobuttons .lexbutton.combo a {
   padding: 2px;
-  margin-right: 2px;
+  /* margin-right: 2px; */
+  padding-top: 0.3em;
 }
 
 .lexcombobuttons .lexbutton.combo span {
@@ -1613,6 +1615,10 @@ meter::-webkit-meter-even-less-good-value {
   -moz-user-select: none; /* Firefox 2+ */
   -ms-user-select: none; /* IE 10+ */
   user-select: none; /* Standard syntax */
+}
+
+.lexmenubar .lexmenubutton a {
+  margin-left: 0px !important;
 }
 
 .lexmenubar .lexmenubutton.disabled a {
