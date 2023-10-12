@@ -2540,6 +2540,28 @@
             this.branch_open = false;
             this.branches = [];
             this.current_branch = null;
+            for(let w in this.widgets) {
+                if(this.widgets[w].options && this.widgets[w].options.signal)
+                {
+                    const signal = this.widgets[w].options.signal;
+                    for(let i = 0; i < LX.signals[signal].length; i++) {
+                        if(LX.signals[signal][i] == this.widgets[w]) {
+                            LX.signals[signal] = [...LX.signals[signal].slice(0, i), ...LX.signals[signal].slice(i+1)];
+                        }
+                    }
+                }
+            }
+            if(this.signals) {
+                for(let w = 0; w < this.signals.length; w++) {
+                    let widget = Object.values(this.signals[w])[0];
+                    let signal = widget.options.signal;
+                    for(let i = 0; i < LX.signals[signal].length; i++) {
+                        if(LX.signals[signal][i] == widget) {
+                            LX.signals[signal] = [...LX.signals[signal].slice(0, i), ...LX.signals[signal].slice(i+1)];
+                        }
+                    }
+                }
+            }
             this.widgets = {};
 
             this.root.innerHTML = "";
@@ -2726,6 +2748,11 @@
 
             if(options.signal)
             {
+                if(!name) {
+                    if(!this.signals)
+                        this.signals = [];
+                    this.signals.push({[options.signal]: widget})
+                }
                 LX.addSignal( options.signal, widget );
             }
 
@@ -5244,6 +5271,7 @@
             if( options.closable ?? true)
             {
                 this.close = () => {
+                    that.panel.clear();
                     root.remove();
                     if(modal)
                         LX.modal.toggle();
@@ -6049,7 +6077,7 @@
         }
 
         /**
-        * @method _process_data
+        * @method load
         */
 
         load( data, onevent ) {
@@ -6067,6 +6095,18 @@
             this._refresh_content();
 
             this.onevent = onevent;
+        }
+
+        /**
+        * @method clear
+        */
+        clear() {
+            if(this.previewPanel)
+                this.previewPanel.clear();
+            if(this.leftPanel)
+                this.leftPanel.clear();
+            if(this.rightPanel)
+             this.rightPanel.clear()
         }
 
         /**
@@ -6509,6 +6549,7 @@
                 this._process_data(this.data);
             }
         }
+
     }
 
     LX.AssetView = AssetView;
