@@ -138,7 +138,7 @@
             LX.DEFAULT_NAME_WIDTH = "50%";
             header.sameLine();
             header.addTitle(this.name);
-            header.addText("Animation", this.animationClip ? this.animationClip.name : "Animation", (value, event) => { 
+            header.addText("Animation", this.animationClip ? this.animationClip.name : "", (value, event) => { 
                 if( !this.animationClip )
                     return;
                 this.animationClip.name = value ;

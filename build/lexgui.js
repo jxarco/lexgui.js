@@ -378,7 +378,7 @@
         const dialog = new Dialog(title, p => {
             p.addTextArea(null, text, null, { disabled: true });
             if(options.input != false)
-                p.addText(null, value, (v) => value = v, {placeholder: "..."} );
+                p.addText(null, options.input || value, (v) => value = v, {placeholder: "..."} );
             p.sameLine(2);
             p.addButton(null, "OK", () => { callback.call(this, value); dialog.close() }, { buttonClass: "accept" });
             p.addButton(null, "Cancel", () => {if(options.on_cancel) options.on_cancel(); dialog.close();} );
