@@ -213,20 +213,7 @@ bottom.addMenubar( m => {
             clipsTimeline.addClip(clip);
             var clip = {id:"Clip5", start:0, fadein: 0.5, fadeout: 0.8, duration:1, type:""};
             clipsTimeline.addClip(clip);
-            var clip = {id:"Clip2", start:0, fadein: 0.5, fadeout: 0.8, duration:1, type:""};
-            clipsTimeline.addClip(clip);
-            var clip = {id:"Clip2", start:0, fadein: 0.5, fadeout: 0.8, duration:1, type:""};
-            clipsTimeline.addClip(clip);
-            var clip = {id:"Clip2", start:0, fadein: 0.5, fadeout: 0.8, duration:1, type:""};
-            clipsTimeline.addClip(clip);
-            var clip = {id:"Clip2", start:0, fadein: 0.5, fadeout: 0.8, duration:1, type:""};
-            clipsTimeline.addClip(clip);
-            var clip = {id:"Clip2", start:0, fadein: 0.5, fadeout: 0.8, duration:1, type:""};
-            clipsTimeline.addClip(clip);
-            var clip = {id:"Clip2", start:0, fadein: 0.5, fadeout: 0.8, duration:1, type:""};
-            clipsTimeline.addClip(clip);
-            var clip = {id:"Clip2", start:0, fadein: 0.5, fadeout: 0.8, duration:1, type:""};
-            clipsTimeline.addClip(clip);
+           
             // clipsTimeline.setAnimationClip({tracks: [{clips: [clip]}], duration: 2});
             clipsTimeline.selectedItems = ["Clip1"];
   
