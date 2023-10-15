@@ -5714,6 +5714,10 @@
             element.defaulty = options.defaulty != null ? options.defaulty : 0.0;
             element.no_trespassing = options.no_trespassing || false;
             element.show_samples = options.show_samples || 0;
+            element.allow_add_values = options.allow_add_values ?? true;
+            element.draggable_x = options.draggable_x ?? true;
+            element.draggable_y = options.draggable_y ?? true;
+
             element.options = options;
             element.style.minWidth = "50px";
             element.style.minHeight = "20px";
@@ -5872,7 +5876,7 @@
 
                 selected = computeSelected(mousex,canvas.height-mousey);
 
-                if(selected == -1) {
+                if(selected == -1 && element.allow_add_values) {
                     var v = unconvert([mousex,canvas.height-mousey]);
                     element.value.push(v);
                     sortValues();
@@ -5903,8 +5907,8 @@
                     return;
                 }
 
-                var dx = last_mouse[0] - mousex;
-                var dy = last_mouse[1] - mousey;
+                var dx = element.draggable_x ? last_mouse[0] - mousex : 0;
+                var dy = element.draggable_y ? last_mouse[1] - mousey : 0;
                 var delta = unconvert([-dx,dy]);
                 if(selected != -1) {
                     var minx = element.xrange[0];
