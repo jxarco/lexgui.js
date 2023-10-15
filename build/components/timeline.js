@@ -20,7 +20,7 @@
             // this.current_time = 0;
             // this.last_time = 0;
             // this.seconds_to_pixels = 50;
-            // this.scroll_y = 0;
+            this.scroll_y = 0;
             // this.offset_y = 0;
             // this.selection = null;
         }
@@ -497,10 +497,9 @@
             this.position[1] = rect[1];
             let w = rect[2];
             let h = rect[3];
-            let timelineHeight = this.size[1];
             this.currentTime = currentTime;
             // this.updateHeader();
-            this.currentScrollInPixels = this.scrollableHeight <= h ? 0 : (this.currentScroll * (this.scrollableHeight - timelineHeight));
+            this.currentScrollInPixels = this.scrollableHeight <= h ? 0 : (this.currentScroll * (this.scrollableHeight - h));
 
             //zoom
             if(this.duration > 0)
@@ -524,8 +523,6 @@
             ctx.globalAlpha = this.opacity;
             ctx.fillStyle = Timeline.TRACK_COLOR_SECONDARY;
 	        ctx.clearRect(0,0, this.canvas.width, this.canvas.height );
-
-            this.drawTimeInfo(w);
 
             this.drawTracksBackground(w, h);
 
@@ -569,6 +566,17 @@
 
                 ctx.translate( -this.position[0], -(this.position[1] + this.topMargin) ); //20 is the top margin area
             }
+            //scrollbar
+            if( h < this.scrollableHeight )
+            {
+                ctx.fillStyle = "#222";
+                ctx.fillRect( w - this.session.left_margin - 10, 0, 10, h );
+                var scrollh = (h - this.topMargin)*h/ this.scrollableHeight;
+                ctx.fillStyle = this.grabbingScroll ? Timeline.FONT_COLOR : Timeline.TRACK_COLOR_SECONDARY;
+                ctx.roundRect( w - 8, this.currentScroll * (h - scrollh) + this.topMargin, 4, scrollh - this.topMargin, 5, true );
+            }
+            this.drawTimeInfo(w);
+
         }
 
         /**
@@ -686,23 +694,23 @@
             e.preventDefault();
             e.stopPropagation();
             e.multipleSelection = false;
-            var w = this.size[0];
 
+            let h = this.canvas.height;
+            let w = this.canvas.width;
             // Process mouse
-            var x = e.offsetX;
-            var y = e.offsetY;
+            let x = e.offsetX;
+            let y = e.offsetY;
             e.deltax = x - this.lastMouse[0];
             e.deltay = y - this.lastMouse[1];
-            var localX = e.offsetX - this.position[0];
-            var localY = e.offsetY - this.position[1];
-            var timelineHeight = this.size[1];
+            let localX = e.offsetX - this.position[0];
+            let localY = e.offsetY - this.position[1];
 
             // if(!this.grabbing_timeline && !this.movingKeys)
             //     this.canvas.style.cursor = "default";
                 
           
-            var timeX = this.timeToX( this.currentTime );
-            var current_grabbing_timeline = localY < this.topMargin && localX > this.session.left_margin && 
+            let timeX = this.timeToX( this.currentTime );
+            let current_grabbing_timeline = localY < this.topMargin && localX > this.session.left_margin && 
             localX > (timeX - 6) && localX < (timeX + 6);
 
             if( current_grabbing_timeline )
@@ -779,9 +787,10 @@
                 if(this.trackBulletCallback && e.track)
                     this.trackBulletCallback(e.track,e,this,[localX,localY]);
 
-                if( timelineHeight < this.scrollableHeight && x > w - 10)
+                if( h < this.scrollableHeight && x > w - 10 )
                 {
                     this.grabbingScroll = true;
+                    this.grabbing = true;
                 }
                 else
                 {
@@ -812,6 +821,10 @@
                         this.draw();
                         LX.emit( "@on_current_time_" + this.constructor.name, this.currentTime );
                     }
+                    else if(this.grabbingScroll )
+                    {
+                        this.currentScroll = LX.UTILS.clamp( this.currentScroll + (e.movementY / h), 0, 1);
+                    }
                     else
                     {
                         // Move timeline in X (independent of current time)
@@ -825,14 +838,15 @@
             }
 
             else if( e.type == "wheel" ) {
-                if( timelineHeight < this.scrollableHeight && x > w - 10)
-                {
-                    this.currentScroll = LX.UTILS.clamp( this.currentScroll + (e.wheelDelta < 0 ? 0.1 : -0.1), 0, 1);
-                }
-                else
+                if(e.ctrlKey)
                 {
                     this.setScale( e.wheelDelta < 0 ? 0.95 : 1.05 );
                 }
+                else if( h < this.scrollableHeight)
+                {
+                    this.currentScroll = LX.UTILS.clamp( this.currentScroll + (e.wheelDelta < 0 ? 0.1 : -0.1), 0, 1);
+                }
+                
             }
             else if (e.type == "dblclick" && this.onDblClick) {
                 this.onDblClick(e);	
@@ -1028,7 +1042,7 @@
 
                     let text = clip.id.replaceAll("_", " ").replaceAll("-", " ");
                     let textInfo = ctx.measureText( text );
-                    ctx.fillStyle = clip.color;
+                    ctx.fillStyle = clip.color || Timeline.FONT_COLOR;
                     
                     if( textInfo.width < (w - 24) )
                         ctx.fillText( text, x + (w - textInfo.width)*0.5,  y + offset + 12 );
@@ -1513,13 +1527,16 @@
                 if(!tracks) continue;
                 
                 const height = this.trackHeight;
+                this.scrollableHeight = (tracks.length+1)*height + this.topMargin;
+                let	scroll_y = - this.currentScrollInPixels;
+
                 let offsetI = 0;
                 for(let i = 0; i < tracks.length; i++) {
                     let track = tracks[i];
                     if(track.hide) {
                         continue;
                     }
-                    this.drawTrackWithKeyframes(ctx, offsetI * height + offset, height, track.name + " (" + track.type + ")", this.animationClip.tracks[track.clipIdx], track);
+                    this.drawTrackWithKeyframes(ctx, offsetI * height + offset + scroll_y, height, track.name + " (" + track.type + ")", this.animationClip.tracks[track.clipIdx], track);
                     offsetI++;
                 }
                 offset += offsetI * height + height;
@@ -2473,12 +2490,16 @@
             let tracks = this.animationClip.tracks|| [{name: "NMF", clips: []}];
             if(!tracks) 
                 return;
+                      
+            const height = this.trackHeight;
+
+            this.scrollableHeight = (tracks.length+1)*height + this.topMargin;
+		    let	scroll_y = - this.currentScrollInPixels;
             
             ctx.save();
-            const height = this.trackHeight;
             for(let i = 0; i < tracks.length; i++) {
                 let track = tracks[i];
-                this.drawTrackWithBoxes(ctx, (i) * height, height, track.name || "", track);
+                this.drawTrackWithBoxes(ctx, (i) * height + scroll_y, height, track.name || "", track);
             }
             
             ctx.restore();
@@ -2675,7 +2696,7 @@
 
             if(callback)
                 callback();
-
+            this.resize();
             return newIdx;
         }
 
@@ -3224,6 +3245,9 @@
                 if(!tracks) continue;
                 
                 const height = this.trackHeight;
+                this.scrollableHeight = (tracks.length+1)*height + this.topMargin;
+                let	scroll_y = - this.currentScrollInPixels;
+
                 let offsetI = 0;
                 for(let i = 0; i < tracks.length; i++) {
                     let track = tracks[i];
@@ -3231,7 +3255,7 @@
                         continue;
                     }
                    
-                    this.drawTrackWithCurves(ctx, offsetI * height + offset, height, track.name + " (" + track.type + ")", this.animationClip.tracks[track.clipIdx], track);
+                    this.drawTrackWithCurves(ctx, offsetI * height + offset + scroll_y, height, track.name + " (" + track.type + ")", this.animationClip.tracks[track.clipIdx], track);
                     offsetI++;
                 }
                 offset += offsetI * height + height;
