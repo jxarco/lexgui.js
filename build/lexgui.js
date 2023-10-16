@@ -745,13 +745,10 @@
                     else if(this.min.classList.contains("fa-angle-up")) {
                         this.min.classList.remove("fa-angle-up");
                         this.min.classList.add("fa-angle-down");
-                        this._moveSplit(this.offset);
                         area2.show();
                         area2.root.classList.remove("fadeout-vertical");
                         area2.root.classList.add("fadein-vertical");
-                        // setTimeout(() => {
-                           
-                        // }, 100);
+                        this._moveSplit(this.offset);
                         
                     }
                     //Fade out to right
@@ -772,9 +769,9 @@
                         this.min.classList.remove("fa-angle-left");
                         this.min.classList.add("fa-angle-right");
                         area2.show();
-                        this._moveSplit(this.offset);
                         area2.root.classList.remove("fadeout-horizontal");
                         area2.root.classList.add("fadein-horizontal");
+                        this._moveSplit(this.offset);
                     }
                     
                 });
