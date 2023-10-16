@@ -730,48 +730,20 @@
                 this.min.addEventListener("mousedown", (e) => {
                     // Fade out to down
                     if(this.min.classList.contains("fa-angle-down")) {
-                        this.min.classList.remove("fa-angle-down");
-                        this.min.classList.add("fa-angle-up");
-                        this.offset = area2.root.offsetHeight;
-                        area2.root.classList.remove("fadein-vertical");
-                        area2.root.classList.add("fadeout-vertical");
-                        
-                        setTimeout(() => {
-                            area2.hide();
-                            this._moveSplit(20);
-                        }, 200);
+                        this.minimize();
                     }
                     // Fade in from down
                     else if(this.min.classList.contains("fa-angle-up")) {
-                        this.min.classList.remove("fa-angle-up");
-                        this.min.classList.add("fa-angle-down");
-                        area2.show();
-                        area2.root.classList.remove("fadeout-vertical");
-                        area2.root.classList.add("fadein-vertical");
-                        this._moveSplit(this.offset);
                         
+                        this.maximize();
                     }
                     //Fade out to right
                     else if(this.min.classList.contains("fa-angle-right")) {
-                        this.min.classList.remove("fa-angle-right");
-                        this.min.classList.add("fa-angle-left");
-                        this.offset = area2.root.offsetWidth;
-                        area2.root.classList.remove("fadein-horizontal");
-                        area2.root.classList.add("fadeout-horizontal");
-                        
-                        setTimeout(() => {
-                            area2.hide();
-                            this._moveSplit(20);
-                        }, 200);
+                        this.minimize();
                     }
                     //Fade in from right
                     else if(this.min.classList.contains("fa-angle-left")) {
-                        this.min.classList.remove("fa-angle-left");
-                        this.min.classList.add("fa-angle-right");
-                        area2.show();
-                        area2.root.classList.remove("fadeout-horizontal");
-                        area2.root.classList.add("fadein-horizontal");
-                        this._moveSplit(this.offset);
+                        this.maximize();
                     }
                     
                 });
@@ -923,6 +895,66 @@
             this.size = [this.root.clientWidth, this.root.clientHeight];
 
             this.propagateEvent("onresize");
+        }
+
+         /**
+        * @method minimize
+        * Hide element
+        */
+        minimize() {
+            if(!this.min)
+                return;
+
+            if(this.min.classList.contains("vertical") && this.min.classList.contains("fa-angle-down")) {
+
+                this.min.classList.remove("fa-angle-down");
+                this.min.classList.add("fa-angle-up");
+                this.offset = this.sections[1].root.offsetHeight;
+                this.sections[1].root.classList.remove("fadein-vertical");
+                this.sections[1].root.classList.add("fadeout-vertical");
+                setTimeout(() => {
+                    this.sections[1].hide();
+                    this._moveSplit(20);
+                }, 200);
+            }
+            else if(this.min.classList.contains("horizontal") && this.min.classList.contains("fa-angle-right")){
+
+                this.min.classList.remove("fa-angle-right");
+                this.min.classList.add("fa-angle-left");
+                this.offset = this.sections[1].root.offsetWidth;
+                this.sections[1].root.classList.remove("fadein-horizontal");
+                this.sections[1].root.classList.add("fadeout-horizontal");
+                
+                setTimeout(() => {
+                    this.sections[1].hide();
+                    this._moveSplit(20);
+                }, 200);
+            }
+        }
+
+        /**
+        * @method maximize
+        * Show element if it is hidden
+        */
+        maximize() {
+            if(!this.min)
+                return;
+            if(this.min.classList.contains("vertical") && this.min.classList.contains("fa-angle-up")) {
+                this.min.classList.remove("fa-angle-up");
+                this.min.classList.add("fa-angle-down");
+                this.sections[1].show();
+                this.sections[1].root.classList.remove("fadeout-vertical");
+                this.sections[1].root.classList.add("fadein-vertical");
+                this._moveSplit(this.offset);
+            }
+            else if(this.min.classList.contains("horizontal") && this.min.classList.contains("fa-angle-left")){
+                this.min.classList.remove("fa-angle-left");
+                this.min.classList.add("fa-angle-right");
+                this.sections[1].show();
+                this.sections[1].root.classList.remove("fadeout-horizontal");
+                this.sections[1].root.classList.add("fadein-horizontal");
+                this._moveSplit(this.offset);
+            }
         }
 
         /**
