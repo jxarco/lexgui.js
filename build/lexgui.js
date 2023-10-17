@@ -2052,8 +2052,9 @@
 
                 let buttonName = "<a class='fa-solid " + (options.icon ?? "fa-cube")  + "' style='float:left'></a>";
                 buttonName += custom_widget_name + (!instance ? " [empty]" : "");
-                if(instance)
-                    buttonName += "<a class='fa-solid fa-bars-staggered menu' style='float:right; width:5%;'></a>";
+                // Add alwayis icon to keep spacing right
+                buttonName += "<a class='fa-solid " + (instance ? "fa-bars-staggered" : " ") + " menu' style='float:right; width:5%;'></a>";
+                
                 let buttonEl = this.addButton(null, buttonName, (value, event) => {
 
                     if( instance ) {

@@ -743,13 +743,13 @@ body.nocursor * {
 }
 
 .lexcombobuttons .lexbutton.combo:first-child {
- border-top-left-radius: 6px;
- border-bottom-left-radius: 6px;
+ border-top-left-radius: 5px;
+ border-bottom-left-radius: 5px;
 }
 
 .lexcombobuttons .lexbutton.combo:last-child {
-  border-top-right-radius: 6px;
-  border-bottom-right-radius: 6px;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
 }
 
 .lexcombobuttons .lexbutton.combo.selected {
@@ -1792,7 +1792,7 @@ meter::-webkit-meter-even-less-good-value {
 .lexoverlaybuttons .lexbutton {
   padding: 14px 10px;
   font-size: 12px;
-  border-radius: 8px;
+  border-radius: 6px;
   justify-content: center;
   background-color: #313132a5;
   backdrop-filter: blur(6px);
@@ -2243,24 +2243,25 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexmin {
   display: inline-block;
-  color: var(--global-selected);
+  color: var(--global-selected-light);
   background: var(--global-color-primary);
-  border-radius: 11px;
+  border-radius: 8px;
   padding: 4px;
   position: relative;
   transition: 0.3s;
   font-size: initial;
+  cursor: pointer;
 }
-.lexmin.horizontal{
-  top: 40px;
+
+.lexmin.horizontal {
+  top: 48px;
   right: 15px;
   height: fit-content;
 }
 
-.lexmin.vertical{
+.lexmin.vertical {
   top: -4px;
   right: 0;
-
 }
 
 .lexarea .fadein-vertical {
