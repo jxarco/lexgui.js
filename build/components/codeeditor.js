@@ -516,6 +516,45 @@
             return this.code.lines.join(min ? ' ' : '\n');
         }
 
+        setText(text)  {
+            const new_lines = text.split('\n');
+        
+            if (new_lines.length < 1) { return; }
+        
+            let num_lines = new_lines.length;
+            console.assert(num_lines > 0);
+            const first_line = new_lines.shift();
+            num_lines--;
+        
+            let cursor = this.cursors.children[0];
+            let lidx = cursor.line;
+            const remaining = this.code.lines[lidx].slice(cursor.position);
+        
+            // Add first line
+            this.code.lines[lidx] = [
+                this.code.lines[lidx].slice(0, cursor.position),
+                first_line
+            ].join('');
+        
+            this.cursorToPosition(cursor, (cursor.position + first_line.length));
+        
+            // Enter next lines...
+            let _text = null;
+        
+            for (var i = 0; i < new_lines.length; ++i) {
+                _text = new_lines[i];
+                this.cursorToLine(cursor, cursor.line++, true);
+                // Add remaining...
+                if (i == (new_lines.length - 1))
+                    _text += remaining;
+                this.code.lines.splice(1 + lidx + i, 0, _text);
+            }
+        
+            if (_text) this.cursorToPosition(cursor, _text.length);
+            this.cursorToLine(cursor, cursor.line + num_lines);
+            this.processLines(lidx);
+        }
+
         loadFile( file ) {
 
             const inner_add_tab = ( text, name, title ) => {

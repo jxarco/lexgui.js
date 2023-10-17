@@ -378,7 +378,7 @@
         const dialog = new Dialog(title, p => {
             p.addTextArea(null, text, null, { disabled: true });
             if(options.input != false)
-                p.addText(null, value, (v) => value = v, {placeholder: "..."} );
+                p.addText(null, options.input || value, (v) => value = v, {placeholder: "..."} );
             p.sameLine(2);
             p.addButton(null, "OK", () => { callback.call(this, value); dialog.close() }, { buttonClass: "accept" });
             p.addButton(null, "Cancel", () => {if(options.on_cancel) options.on_cancel(); dialog.close();} );
@@ -730,51 +730,20 @@
                 this.min.addEventListener("mousedown", (e) => {
                     // Fade out to down
                     if(this.min.classList.contains("fa-angle-down")) {
-                        this.min.classList.remove("fa-angle-down");
-                        this.min.classList.add("fa-angle-up");
-                        this.offset = area2.root.offsetHeight;
-                        area2.root.classList.remove("fadein-vertical");
-                        area2.root.classList.add("fadeout-vertical");
-                        
-                        setTimeout(() => {
-                            area2.hide();
-                            this._moveSplit(20);
-                        }, 200);
+                        this.minimize();
                     }
                     // Fade in from down
                     else if(this.min.classList.contains("fa-angle-up")) {
-                        this.min.classList.remove("fa-angle-up");
-                        this.min.classList.add("fa-angle-down");
-                        this._moveSplit(this.offset);
-                        area2.show();
-                        area2.root.classList.remove("fadeout-vertical");
-                        area2.root.classList.add("fadein-vertical");
-                        // setTimeout(() => {
-                           
-                        // }, 100);
                         
+                        this.maximize();
                     }
                     //Fade out to right
                     else if(this.min.classList.contains("fa-angle-right")) {
-                        this.min.classList.remove("fa-angle-right");
-                        this.min.classList.add("fa-angle-left");
-                        this.offset = area2.root.offsetWidth;
-                        area2.root.classList.remove("fadein-horizontal");
-                        area2.root.classList.add("fadeout-horizontal");
-                        
-                        setTimeout(() => {
-                            area2.hide();
-                            this._moveSplit(20);
-                        }, 200);
+                        this.minimize();
                     }
                     //Fade in from right
                     else if(this.min.classList.contains("fa-angle-left")) {
-                        this.min.classList.remove("fa-angle-left");
-                        this.min.classList.add("fa-angle-right");
-                        area2.show();
-                        this._moveSplit(this.offset);
-                        area2.root.classList.remove("fadeout-horizontal");
-                        area2.root.classList.add("fadein-horizontal");
+                        this.maximize();
                     }
                     
                 });
@@ -926,6 +895,66 @@
             this.size = [this.root.clientWidth, this.root.clientHeight];
 
             this.propagateEvent("onresize");
+        }
+
+         /**
+        * @method minimize
+        * Hide element
+        */
+        minimize() {
+            if(!this.min)
+                return;
+
+            if(this.min.classList.contains("vertical") && this.min.classList.contains("fa-angle-down")) {
+
+                this.min.classList.remove("fa-angle-down");
+                this.min.classList.add("fa-angle-up");
+                this.offset = this.sections[1].root.offsetHeight;
+                this.sections[1].root.classList.remove("fadein-vertical");
+                this.sections[1].root.classList.add("fadeout-vertical");
+                setTimeout(() => {
+                    this.sections[1].hide();
+                    this._moveSplit(20);
+                }, 200);
+            }
+            else if(this.min.classList.contains("horizontal") && this.min.classList.contains("fa-angle-right")){
+
+                this.min.classList.remove("fa-angle-right");
+                this.min.classList.add("fa-angle-left");
+                this.offset = this.sections[1].root.offsetWidth;
+                this.sections[1].root.classList.remove("fadein-horizontal");
+                this.sections[1].root.classList.add("fadeout-horizontal");
+                
+                setTimeout(() => {
+                    this.sections[1].hide();
+                    this._moveSplit(20);
+                }, 200);
+            }
+        }
+
+        /**
+        * @method maximize
+        * Show element if it is hidden
+        */
+        maximize() {
+            if(!this.min)
+                return;
+            if(this.min.classList.contains("vertical") && this.min.classList.contains("fa-angle-up")) {
+                this.min.classList.remove("fa-angle-up");
+                this.min.classList.add("fa-angle-down");
+                this.sections[1].show();
+                this.sections[1].root.classList.remove("fadeout-vertical");
+                this.sections[1].root.classList.add("fadein-vertical");
+                this._moveSplit(this.offset);
+            }
+            else if(this.min.classList.contains("horizontal") && this.min.classList.contains("fa-angle-left")){
+                this.min.classList.remove("fa-angle-left");
+                this.min.classList.add("fa-angle-right");
+                this.sections[1].show();
+                this.sections[1].root.classList.remove("fadeout-horizontal");
+                this.sections[1].root.classList.add("fadein-horizontal");
+                this._moveSplit(this.offset);
+            }
         }
 
         /**
@@ -5715,6 +5744,10 @@
             element.defaulty = options.defaulty != null ? options.defaulty : 0.0;
             element.no_trespassing = options.no_trespassing || false;
             element.show_samples = options.show_samples || 0;
+            element.allow_add_values = options.allow_add_values ?? true;
+            element.draggable_x = options.draggable_x ?? true;
+            element.draggable_y = options.draggable_y ?? true;
+
             element.options = options;
             element.style.minWidth = "50px";
             element.style.minHeight = "20px";
@@ -5873,7 +5906,7 @@
 
                 selected = computeSelected(mousex,canvas.height-mousey);
 
-                if(selected == -1) {
+                if(selected == -1 && element.allow_add_values) {
                     var v = unconvert([mousex,canvas.height-mousey]);
                     element.value.push(v);
                     sortValues();
@@ -5904,8 +5937,8 @@
                     return;
                 }
 
-                var dx = last_mouse[0] - mousex;
-                var dy = last_mouse[1] - mousey;
+                var dx = element.draggable_x ? last_mouse[0] - mousex : 0;
+                var dy = element.draggable_y ? last_mouse[1] - mousey : 0;
                 var delta = unconvert([-dx,dy]);
                 if(selected != -1) {
                     var minx = element.xrange[0];

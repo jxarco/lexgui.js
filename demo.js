@@ -202,13 +202,21 @@ bottom.addMenubar( m => {
         }
         else {
             clipsTimeline = new LX.ClipsTimeline("clips-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
+            bottom.attach(clipsTimeline.root);
             var clip = {id:"Clip1", start:0, duration:1, type:""};
             clipsTimeline.addClip(clip);
             var clip = {id:"Clip2", start:0, fadein: 0.5, fadeout: 0.8, duration:1, type:""};
             clipsTimeline.addClip(clip);
+            var clip = {id:"Clip3", start:0, fadein: 0.5, fadeout: 0.8, duration:1, type:""};
+            clipsTimeline.addClip(clip);
+            var clip = {id:"Clip4", start:0, fadein: 0.5, fadeout: 0.8, duration:1, type:""};
+            clipsTimeline.addClip(clip);
+            var clip = {id:"Clip5", start:0, fadein: 0.5, fadeout: 0.8, duration:1, type:""};
+            clipsTimeline.addClip(clip);
+           
             // clipsTimeline.setAnimationClip({tracks: [{clips: [clip]}], duration: 2});
             clipsTimeline.selectedItems = ["Clip1"];
-            bottom.attach(clipsTimeline.root);
+  
             clipsTimeline.draw(0);
         }
     });
