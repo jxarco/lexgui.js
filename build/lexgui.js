@@ -1216,6 +1216,11 @@
             var a2 = this.sections[1];
             var splitinfo = " - "+ LX.DEFAULT_SPLITBAR_SIZE +"px";
 
+            // Remove transitions for this change..
+            const transition = a1.root.style.transition;
+            a1.root.style.transition = "none";
+            flushCss(a1.root);
+
             if(this.type == "horizontal") {
 
                 var size = (a2.root.offsetWidth + dt);
@@ -1233,6 +1238,8 @@
 				a2.root.style.height = ( size - a2.offset ) + "px"; //other split
             }
                 
+            a1.root.style.transition = transition;
+
             this._update();
 
             // Resize events   
