@@ -322,10 +322,10 @@ body.nocursor * {
 /* Split bar */
 
 .lexsplitbar {
-  display: inline-block;
-	background: rgba(186, 188, 207, 0.961);
+  background: rgba(186, 188, 207, 0.01);
   border-radius: 8px;
-  position: relative;
+  /* display: inline-block; */
+  /* position: relative; */
 }
 
 .lexsplitbar:hover {
@@ -334,18 +334,19 @@ body.nocursor * {
 
 .lexsplitbar.horizontal {
   cursor: e-resize;
-  top: calc(50% - 32px);
-  height: 64px;
+  /* top: calc(50% - 32px);
+  height: 64px; */
 }
 
 .lexsplitbar.vertical {
 	cursor: n-resize;
-  width: 64px;
-  left: calc(50% - 32px);
+  margin-top: 2px;
+  /* width: 64px;
+  left: calc(50% - 32px); */
 }
 
 .lexsplitbar:hover {
-	background-color: var(--global-button-color);
+	background: rgba(186, 188, 207, 0.45);
 }
 
 .lexsplitbar.dragging-split-area {
@@ -1973,7 +1974,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexareatabscontent {
-  overflow-y: scroll;
+  /* overflow-y: scroll; */
 }
 
 .lexareatabscontent.folded {
@@ -2282,13 +2283,14 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexmin.horizontal {
   top: 48px;
-  right: 15px;
+  right: 12px;
   height: fit-content;
 }
 
 .lexmin.vertical {
-  top: -4px;
-  right: 48px;
+  top: -8px;
+  left: 12px;
+  height: 2px;
 }
 
 .lexarea .fadein-vertical {

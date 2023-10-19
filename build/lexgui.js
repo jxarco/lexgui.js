@@ -813,10 +813,17 @@
             }
 
             this.root.appendChild( area1.root );
+
             if(resize) 
+            {
                 this.root.appendChild(this.split_bar);
+            }
+
             if(minimizable)
-                this.root.appendChild(this.min);
+            {
+                area2.root.appendChild(this.min);
+            }
+
             this.root.appendChild( area2.root );
             this.sections = [area1, area2];
             this.type = type;
@@ -909,21 +916,26 @@
             if(!this.min)
                 return;
 
+            let [area1, area2] = this.sections;
+
             if(this.min.classList.contains("vertical") && this.min.classList.contains("fa-angle-down")) {
                 this.min.classList.remove("fa-angle-down");
                 this.min.classList.add("fa-angle-up");
-                this.offset = this.sections[1].root.offsetHeight;
-                this.sections[1].root.classList.add("fadeout-vertical");
+                this.offset = area2.root.offsetHeight;
+                area2.root.classList.add("fadeout-vertical");
                 this._moveSplit(-Infinity, true);
 
             }
             else if(this.min.classList.contains("horizontal") && this.min.classList.contains("fa-angle-right")) {
                 this.min.classList.remove("fa-angle-right");
                 this.min.classList.add("fa-angle-left");
-                this.offset = this.sections[1].root.offsetWidth;
-                this.sections[1].root.classList.add("fadeout-horizontal");
+                this.offset = area2.root.offsetWidth;
+                area2.root.classList.add("fadeout-horizontal");
                 this._moveSplit(-Infinity, true);
             }
+
+            // Set min icon to the parent
+            this.root.appendChild( this.min );
         }
 
         /**
@@ -935,18 +947,23 @@
             if(!this.min)
                 return;
             
+            let [area1, area2] = this.sections;
+
             if(this.min.classList.contains("vertical") && this.min.classList.contains("fa-angle-up")) {
                 this.min.classList.remove("fa-angle-up");
                 this.min.classList.add("fa-angle-down");
-                this.sections[1].root.classList.add("fadein-vertical");
+                area2.root.classList.add("fadein-vertical");
                 this._moveSplit(this.offset);
             }
             else if(this.min.classList.contains("horizontal") && this.min.classList.contains("fa-angle-left")) {
                 this.min.classList.remove("fa-angle-left");
                 this.min.classList.add("fa-angle-right");
-                this.sections[1].root.classList.add("fadein-horizontal");
+                area2.root.classList.add("fadein-horizontal");
                 this._moveSplit(this.offset);
             }
+
+            // Set min icon to the minimizable area
+            area2.root.insertChildAtIndex( this.min, 0 );
         }
 
         /**
@@ -1206,7 +1223,7 @@
 
             var a1 = this.sections[0];
             var a2 = this.sections[1];
-            var splitinfo = " - "+ (LX.DEFAULT_SPLITBAR_SIZE + ( this.min ? this.min.offsetWidth : 0 )) +"px";
+            var splitinfo = " - "+ LX.DEFAULT_SPLITBAR_SIZE + "px";
 
             let transition = null;
             if( !force_animation )
@@ -1348,7 +1365,7 @@
                 this.folded = true;
                 this.folding = folding;
                 
-                if(folding == "up") area.root.insertBefore(area.sections[1].root, area.sections[0].root);
+                if(folding == "up") area.root.insertChildAtIndex(area.sections[1].root, 0);
 
                 // // Add fold back button
 
@@ -6839,6 +6856,11 @@
             setTimeout( function(){ URL.revokeObjectURL( url ); }, 1000*60 ); //wait one minute to revoke url
         }
     });
+
+    Element.prototype.insertChildAtIndex = function(child, index = Infinity) {
+        if (index >= this.children.length) this.appendChild(child);
+        else this.insertBefore(child, this.children[index]);
+    }
 
 	LX.UTILS = {
         getTime() { return new Date().getTime() },
