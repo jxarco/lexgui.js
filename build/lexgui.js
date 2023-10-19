@@ -1218,8 +1218,9 @@
 
             // Remove transitions for this change..
             const transition = a1.root.style.transition;
-            a1.root.style.transition = "none";
+            a1.root.style.transition = a2.root.style.transition = "none";
             flushCss(a1.root);
+            flushCss(a2.root);
 
             if(this.type == "horizontal") {
 
@@ -1238,7 +1239,8 @@
 				a2.root.style.height = ( size - a2.offset ) + "px"; //other split
             }
                 
-            a1.root.style.transition = transition;
+            // Reapply transitions
+            a1.root.style.transition = a2.root.style.transition = transition;
 
             this._update();
 
