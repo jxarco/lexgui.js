@@ -2285,96 +2285,44 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexmin.vertical {
   top: -4px;
-  right: 0;
+  right: 48px;
 }
 
 .lexarea .fadein-vertical {
-  animation: fadein-vertical;
-  animation-duration: 0.5s;
+  animation-name: fadein;
+  animation-duration: 0.25s;
+  animation-fill-mode: forwards;
+  transition: 0.25s height;
 }
 .lexarea .fadeout-vertical {
-  animation: fadeout-vertical;
-  animation-duration: 0.5s;
+  animation-name: fadeout;
+  animation-duration: 0.25s;
+  animation-fill-mode: forwards;
+  transition: 0.25s height;
 }
 
 .lexarea .fadein-horizontal {
-  animation: fadein-horizontal;
-  animation-duration: 0.5s;
+  animation-name: fadein;
+  animation-duration: 0.25s;
+  animation-fill-mode: forwards;
 }
 .lexarea .fadeout-horizontal {
-  animation: fadeout-horizontal;
-  animation-duration: 0.5s;
+  animation-name: fadeout;
+  animation-duration: 0.25s;
+  animation-fill-mode: forwards;
+  transition: 0.25s width;
 }
 
-@keyframes fadein-vertical {
-  from {
-    margin-top: 5%;
-    opacity: 0%;
-  }
-
-  75% {
-    margin-top: -0.1%;
-    opacity: 75%;
-  }
-
-  to {
-    margin-top: 0%;
-    opacity: 100%;
-  }
+@keyframes fadein {
+  from { opacity: 0%; }
+  25% { opacity: 75%; }
+  to { opacity: 100%; }
 }
 
-@keyframes fadeout-vertical {
-  from {
-    margin-top: 0%;
-    opacity: 100%;
-  }
-
-  75% {
-    margin-top: -0.1%;
-    opacity: 75%;
-  }
-
-  to {
-    margin-top: 0.1%;
-    opacity: 0%;
-  }
-}
-
-@keyframes fadein-horizontal {
-  from {
-    margin-right: 0%;
-    opacity: 0%;
-    height: 0%;
-  }
-
-  25% {
-    margin-right: 1%;
-    opacity: 75%;
-
-  }
-
-  to {
-    margin-right: 0%;
-    opacity: 100%;
-  }
-}
-
-@keyframes fadeout-horizontal {
-  from {
-    margin-right: 0%;
-    opacity: 100%;
-  }
-
-  25% {
-    margin-right: 1%;
-    opacity: 75%;
-  }
-
-  to {
-    margin-right: 0%;
-    opacity: 0%;
-    height: 0%;
-  }
+@keyframes fadeout {
+  from { opacity: 100%; }
+  25% { opacity: 25%; }
+  to { opacity: 0%; }
 }
 
 /* Overlay area */
