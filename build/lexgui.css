@@ -2204,6 +2204,9 @@ meter::-webkit-meter-even-less-good-value {
   height: 100%;
 }
 
+.lextimelinepanel {
+  overflow: hidden;
+}
 /* .lextimeline .lexarea, .lextimelinepanel {
   background-color: var(--global-dark-background);
 } */

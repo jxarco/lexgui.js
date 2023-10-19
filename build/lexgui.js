@@ -3057,6 +3057,7 @@
                 Object.assign(link_el.style, options.style ?? {});
                 element.replaceWith(link_el);
             }
+            return element;
         }
 
         /**
@@ -4499,7 +4500,7 @@
                     inputs[i].value = new_value[i] ?? 0;
                 }
             }
-            
+
             let element = widget.domEl;
 
             // Add reset functionality

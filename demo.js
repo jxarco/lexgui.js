@@ -167,9 +167,9 @@ bottom.addMenubar( m => {
         }
         else {
             kfTimeline = new LX.KeyFramesTimeline("kf-timeline", { width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight });
+            bottom.attach(kfTimeline.root);
             kfTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
             kfTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [0,1,0, 1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
-            bottom.attach(kfTimeline.root);
             
             kfTimeline.addButtons([
                 { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },
@@ -238,29 +238,22 @@ bottom.addMenubar( m => {
         }
         else {
             curvesTimeline = new LX.CurvesTimeline("curves-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight, range: [-1,1]});
+            bottom.attach(curvesTimeline.root);
             curvesTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
             curvesTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [0,1,0,-1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,0,0,1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
-            bottom.attach(curvesTimeline.root);
-            
-            // kfTimeline.addButtons([
-            //     { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },
-            //     { icon: 'fa fa-filter', name: "optimize", callback: (value, event) => {   kfTimeline.onShowOptimizeMenu(event);}},
-            //     { icon: 'fa-regular fa-rectangle-xmark', name: 'unselectAll', callback: (value, event) => { kfTimeline.unSelectAllKeyFrames();}}
-            // ]);
-            
             curvesTimeline.draw(0);
         }
     });
 
     bottom.onresize = bounding => {
         if(clipsTimeline)
-            clipsTimeline.resize( [ bounding.width, bounding.height ] );
+            clipsTimeline.resize(  );
         
         if(kfTimeline)
-            kfTimeline.resize( [ bounding.width, bounding.height ] );
+            kfTimeline.resize();
         
         if(curvesTimeline)
-            curvesTimeline.resize( [ bounding.width, bounding.height ] );
+            curvesTimeline.resize();
     }
 } );
 
