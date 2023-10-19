@@ -265,7 +265,7 @@
             p.root.style.overflowY = "scroll";
             p.root.addEventListener("scroll", (e) => {
                
-                this.currentScroll = e.currentTarget.scrollTop/(e.currentTarget.scrollHeight - e.currentTarget.clientHeight)
+                this.currentScroll = e.currentTarget.scrollTop/(e.currentTarget.scrollHeight - e.currentTarget.clientHeight);
              })
             // for(let i = 0; i < this.animationClip.tracks.length; i++) {
             //     let track = this.animationClip.tracks[i];
@@ -720,6 +720,7 @@
                 else if( h < this.scrollableHeight)
                 {
                     this.currentScroll =  LX.UTILS.clamp( this.currentScroll + (e.wheelDelta < 0 ? 0.1 : -0.1), 0, 1);
+                    this.leftPanel.root.children[1].scrollTop = this.currentScroll* (this.scrollableHeight - h);
                 }
                 
                 return;
