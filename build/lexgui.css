@@ -490,7 +490,7 @@ body.nocursor * {
 }
 
 .lexwidget.small {
-  width: 10% !important;
+  width: 5% !important;
 }
 
 .lexwidget.md {
@@ -2158,6 +2158,12 @@ meter::-webkit-meter-even-less-good-value {
   line-height: 12px;
 }
 
+.lextags input {
+  width: 100%;
+  margin-bottom: 0.5em;
+  text-align: center;
+}
+
 .lextags .lextag {
   padding: 6px;
   background-color: var(--global-color-primary);
@@ -2174,6 +2180,10 @@ meter::-webkit-meter-even-less-good-value {
   background-color: var(--global-selected);
   color: #f5f5f5;
   cursor: pointer;
+}
+
+.lextags .lextag:hover::after {
+  content: "⊗";
 }
 
 /* Custom Widgets Widget */

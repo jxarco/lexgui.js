@@ -3884,7 +3884,7 @@
 
             // Add dropdown array button
 
-            const itemNameWidth = "10%";
+            const itemNameWidth = "3%";
 
             var container = document.createElement('div');
             container.className = "lexarray";
@@ -3936,13 +3936,13 @@
                             this.addText(i+"", value, function(value, event) {
                                 values[i] = value;
                                 callback( values );
-                            }, { nameWidth: itemNameWidth, inputWidth: "90%", noreset: true });
+                            }, { nameWidth: itemNameWidth, inputWidth: "95%", noreset: true });
                             break;
                         case Number:
                             this.addNumber(i+"", value, function(value, event) {
                                 values[i] = value;
                                 callback( values );
-                            }, { nameWidth: itemNameWidth, inputWidth: "90%", noreset: true });
+                            }, { nameWidth: itemNameWidth, inputWidth: "95%", noreset: true });
                             break;
                     }
 
@@ -4092,10 +4092,9 @@
                 }
 
                 let tag_input = document.createElement('input');
-                tag_input.style.width = "64px";
                 tag_input.value = "";
                 tag_input.placeholder = "Tag...";
-                tags_container.appendChild(tag_input);
+                tags_container.insertChildAtIndex(tag_input, 0);
 
                 tag_input.onkeydown = function(e) {
                     const val = this.value.replace(/\s/g, '');
