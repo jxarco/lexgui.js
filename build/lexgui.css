@@ -17,7 +17,7 @@
   --global-text-primary: #f4f4ffe6;
   --global-text-secondary: #c6c6cfd9;
   --global-dark-background: #14161a;
-  --global-blur-background: #2326299a;
+  --global-blur-background: #292b2da9;
 } 
 
 ::-webkit-scrollbar {
@@ -101,6 +101,7 @@ body.nocursor * {
 #global_search {
   position: absolute;
   background-color: var(--global-blur-background);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border-radius: 12px;
   border: 1px solid #d0d0ec6b;
@@ -814,6 +815,7 @@ body.nocursor * {
   position: fixed;
   list-style: none;
 	background-color: var(--global-blur-background);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   padding: 4px 0px;
   z-index: 10;
@@ -1480,8 +1482,6 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexcontextmenu {
-  background-color: #343434b6;
-  backdrop-filter: blur(16px);
   position: absolute;
   padding-right: 14px;
   z-index: 1001;
@@ -1496,7 +1496,8 @@ meter::-webkit-meter-even-less-good-value {
 .lexcontextmenu .lexcontextmenuentry {
   font-size: 12px;
   width: 100%;
-  color: #c0c4cbe3;
+  background-color: #343434c2;
+  color: #d5d7dbee;
   padding: 4px;
   padding-left: 14px;
   padding-right: 0px;
@@ -1514,6 +1515,19 @@ meter::-webkit-meter-even-less-good-value {
   flex-direction: row;
   align-content: center;
   justify-content: space-between;
+  position: relative;
+}
+
+.lexcontextmenu .lexcontextmenuentry:before {
+  content:"";
+  position:absolute;
+  width: 100%;
+  height: 100%;
+  top:0;
+  left:0;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  z-index:-1;
 }
 
 .lexcontextmenu .lexcontextmenuentry.last {
@@ -1644,11 +1658,18 @@ meter::-webkit-meter-even-less-good-value {
   border-bottom-right-radius: 6px;
   box-shadow: 0 0 6px black !important;
   background-color: var(--global-blur-background);
-  backdrop-filter: blur(10px);
 }
 
-.lexcontextmenuentry .lexcontextmenubox {
-  background-color: var(--global-color-secondary);
+.lexcontextmenubox:before {
+  content:"";
+  position:absolute;
+  width: 100%;
+  height: 100%;
+  top:0;
+  left:0;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  z-index:-1;
 }
 
 .lexcontextmenubox .lexcontextmenuentry {
@@ -1701,7 +1722,7 @@ meter::-webkit-meter-even-less-good-value {
 /* submenu specified arrow  */
 .lexcontextmenubox .lexcontextmenuentry a.fa-xs {
   float: right;
-  margin-top: -6px;
+  margin-top: -7px;
 }
 
 .lexcontextmenubox .lexcontextmenuentry:hover:not(.cmtitle) {
@@ -1710,7 +1731,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexcontextmenubox .lexcontextmenuentry:active:not(.cmtitle):not(.cmseparator) {
-  padding-top: 4px;
+  padding-top: 0.22em;
   color: #b7b7cba4;
 }
 
@@ -1795,6 +1816,7 @@ meter::-webkit-meter-even-less-good-value {
   border-radius: 6px;
   justify-content: center;
   background-color: #313132a5;
+  -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
   color: #d1d1d3bd;
 }
@@ -1832,12 +1854,14 @@ meter::-webkit-meter-even-less-good-value {
   display: flex;
   margin-right: 6px;
   background-color: #313132a5;
+  -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
   border-radius: 8px;
 }
 
 .lexoverlaybuttons .lexoverlaygroup .lexbutton {
   background: none;
+  -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
 

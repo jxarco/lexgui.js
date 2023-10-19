@@ -19,9 +19,7 @@ area.addMenubar( m => {
 
     // {options}: callback, icon, short
 
-    m.add( "Add/");
     m.add( "Scene/New Scene", () => { console.log("New scene created!") });
-    m.add( "Scene/");
     m.add( "Scene/Open Scene", { icon: "fa-solid fa-folder-open", short:  "S", callback: () => { console.log("Opening SCENE Dialog") } } );
     m.add( "Scene/Open Recent/hello.scene", name => { console.log("Opening " + name) });
     m.add( "Scene/Open Recent/goodbye.scene", name => { console.log("Opening " + name) });
