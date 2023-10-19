@@ -351,7 +351,7 @@
 
         options.modal = true;
 
-        new Dialog(title, p => {
+        return new Dialog(title, p => {
             p.addTextArea(null, text, null, { disabled: true });
         }, options);
     }
@@ -387,6 +387,8 @@
         // Focus text prompt
         if(options.input != false)
             dialog.root.querySelector('input').focus();
+        
+        return dialog;
     }
 
     LX.prompt = prompt;
@@ -2446,7 +2448,7 @@
                     actionEl.className = "itemicon " + a.icon;
                     actionEl.title = a.name;
                     actionEl.addEventListener("click", function(e) {
-                        a.callback(node);
+                        a.callback(node, actionEl);
                         e.stopPropagation();
                     });
                     item.appendChild(actionEl);
@@ -4491,6 +4493,13 @@
                     Panel.#dispatch_event(inputs[i], "change");
                 }
             };
+            widget.setValue = (new_value) => {
+                const inputs = element.querySelectorAll(".vecinput");
+                for( var i = 0; i < inputs.length; ++i ) {
+                    inputs[i].value = new_value[i] ?? 0;
+                }
+            }
+            
             let element = widget.domEl;
 
             // Add reset functionality
