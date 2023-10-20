@@ -410,12 +410,13 @@
 
         static NONE                 = 0;
         static NODE_SELECTED        = 1;
-        static NODE_DBLCLICKED      = 2;
-        static NODE_CONTEXTMENU     = 3;
-        static NODE_DRAGGED         = 4;
-        static NODE_RENAMED         = 5;
-        static NODE_VISIBILITY      = 6;
-        static NODE_CARETCHANGED    = 7;
+        static NODE_DELETED         = 2;
+        static NODE_DBLCLICKED      = 3;
+        static NODE_CONTEXTMENU     = 4;
+        static NODE_DRAGGED         = 5;
+        static NODE_RENAMED         = 6;
+        static NODE_VISIBILITY      = 7;
+        static NODE_CARETCHANGED    = 8;
 
         constructor( type, node, value ) {
             this.type = type || TreeEvent.NONE;
@@ -428,6 +429,7 @@
             switch(this.type) {
                 case TreeEvent.NONE: return "tree_event_none";
                 case TreeEvent.NODE_SELECTED: return "tree_event_selected";
+                case TreeEvent.NODE_DELETED: return "tree_event_deleted";
                 case TreeEvent.NODE_DBLCLICKED:  return "tree_event_dblclick";
                 case TreeEvent.NODE_CONTEXTMENU:  return "tree_event_contextmenu";
                 case TreeEvent.NODE_DRAGGED: return "tree_event_dragged";
@@ -2243,6 +2245,7 @@
             let item = document.createElement('li');
             item.className = "lextreeitem " + "datalevel" + level + (is_parent ? " parent" : "") + (is_selected ? " selected" : "");
             item.id = node.id;
+            item.tabIndex = "0";
 
             // Select hierarchy icon
             let icon = "fa-solid fa-square"; // Default: no childs
@@ -2289,6 +2292,8 @@
                         that.onevent( event );
                     }
                     that.refresh();
+                    // Focus the element so we can read events...
+                    this.domEl.querySelector("#" + node.id).focus();
                 }
 
                 if(that.onevent) {
@@ -2315,6 +2320,37 @@
                     const event = new TreeEvent(TreeEvent.NODE_CONTEXTMENU, this.selected.length > 1 ? this.selected : node, e);
                     event.multiple = this.selected.length > 1;
                     that.onevent( event );
+                }
+            });
+
+            item.addEventListener("keydown", e => {
+                e.preventDefault();
+                if( e.key == "Delete" )
+                {
+                    // Send event now so we have the info in selected array..
+                    if(that.onevent) {
+                        const event = new TreeEvent(TreeEvent.NODE_DELETED, this.selected.length > 1 ? this.selected : node, e);
+                        event.multiple = this.selected.length > 1;
+                        that.onevent( event );
+                    }
+
+                    // Delete nodes now
+                    for( let _node of this.selected )
+                    {
+                        let childs = _node.parent.children;
+                        const index = childs.indexOf( _node );
+                        childs.splice( index, 1 );
+                    }
+
+                    this.selected.length = 0;
+                    this.refresh();
+                }
+                else if( e.key == "ArrowUp" || e.key == "ArrowDown" ) // Unique or zero selected
+                {
+                    var selected = this.selected.length > 1 ? (e.key == "ArrowUp" ? this.selected.shift() : this.selected.pop()) : this.selected[0];
+                    var el = this.domEl.querySelector("#" + selected.id);
+                    var sibling = e.key == "ArrowUp" ? el.previousSibling : el.nextSibling;
+                    if( sibling ) sibling.click();
                 }
             });
 

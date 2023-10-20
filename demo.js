@@ -436,6 +436,12 @@ function fillPanel( panel ) {
                     else
                         console.log(event.node.id + " selected"); 
                     break;
+                case LX.TreeEvent.NODE_DELETED: 
+                    if(event.multiple)
+                        console.log("Deleted: ", event.node); 
+                    else
+                        console.log(event.node.id + " deleted"); 
+                    break;
                 case LX.TreeEvent.NODE_DBLCLICKED: 
                     console.log(event.node.id + " dbl clicked"); 
                     break;
