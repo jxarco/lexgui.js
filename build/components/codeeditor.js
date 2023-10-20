@@ -176,7 +176,7 @@
             this._lastTime = null;
 
             this.languages = [
-                'Plain Text', 'JavaScript', 'GLSL', 'WGSL', 'JSON', 'XML' 
+                'Plain Text', 'JavaScript', 'CSS', 'GLSL', 'WGSL', 'JSON', 'XML' 
             ];
             this.specialKeys = [
                 'Backspace', 'Enter', 'ArrowUp', 'ArrowDown', 
@@ -186,14 +186,16 @@
             this.keywords = {
                 'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof'],
                 'GLSL': ['true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4', 'struct'],
+                'CSS': ['body', 'html', 'canvas', 'div', 'input', 'span', '.'],
                 'WGSL': ['var', 'const', 'let', 'true', 'false', 'fn', 'bool', 'u32', 'i32', 'f16', 'f32', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array', 'atomic', 'struct',
                         'sampler', 'sampler_comparison', 'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array', 'texture_depth_multisampled_2d',
                         'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d', 'texture_storage_2d',
                         'texture_storage_2d_array', 'texture_storage_3d'],
             };
-            this.builtin = [
-                'console', 'window', 'navigator'
-            ];
+            this.builtin = {
+                'JavaScript': ['console', 'window', 'navigator'],
+                'CSS': ['*', '!important']
+            };
             this.literals = {
                 'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do'],
                 'GLSL': ['for', 'if', 'else', 'return', 'continue', 'break'],
@@ -203,7 +205,8 @@
                 'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
                 'JSON': ['[', ']', '{', '}', '(', ')'],
                 'GLSL': ['[', ']', '{', '}', '(', ')'],
-                'WGSL': ['[', ']', '{', '}', '(', ')', '->']
+                'WGSL': ['[', ']', '{', '}', '(', ')', '->'],
+                'CSS': ['{', '}', '(', ')', '*']
             };
 
             // Action keys
@@ -611,6 +614,7 @@
             {
                 case 'js': return this._change_language('JavaScript');
                 case 'glsl': return this._change_language('GLSL');
+                case 'css': return this._change_language('CSS');
                 case 'json': return this._change_language('JSON');
                 case 'xml': return this._change_language('XML');
                 case 'wgsl': return this._change_language('WGSL');
@@ -1386,7 +1390,7 @@
                 else if( this.keywords[this.highlight] && this.keywords[this.highlight].indexOf(token) > -1 )
                     span.classList.add("cm-kwd");
 
-                else if( this.builtin.indexOf(token) > -1 )
+                else if( this.builtin[this.highlight] && this.builtin[this.highlight].indexOf(token) > -1 )
                     span.classList.add("cm-bln");
 
                 else if( this.literals[this.highlight] && this.literals[this.highlight].indexOf(token) > -1 )
@@ -1404,14 +1408,23 @@
                 else if( token.substr(token.length - 2) == '*/' )
                     span.classList.add("cm-com");
 
-                else if( !Number.isNaN(+token) )
+                else if(  this.isNumber(token) || this.isNumber( token.replace(/[px]|[em]|%/g,'') ) )
                     span.classList.add("cm-dec");
+
+                else if( this.isCSSClass(token, prev, next) )
+                    span.classList.add("cm-kwd");
 
                 else if ( this.isType(token, prev, next) )
                     span.classList.add("cm-typ");
-                
+
                 else if ( token[0] != '@' && next == '(' )
                     span.classList.add("cm-mtd");
+
+                else if ( prev == ':' && (next == ';' || next == '!important') ) // CSS value
+                    span.classList.add("cm-str");
+
+                else if ( prev == undefined && next == ':' ) // CSS attribute
+                    span.classList.add("cm-typ");
 
                 let highlight = this.highlight.replace(/\s/g, '');
                 span.classList.add(highlight.toLowerCase());
@@ -1421,7 +1434,15 @@
             if(sString) delete this._building_string;
         }
 
-        isType( token, prev, next) {
+        isCSSClass( token, prev, next ) {
+            return prev == '.';
+        }
+
+        isNumber( token ) {
+            return token.length && !Number.isNaN(+token);
+        }
+
+        isType( token, prev, next ) {
             
             if( this.highlight == 'JavaScript' )
             {

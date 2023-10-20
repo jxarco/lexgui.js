@@ -1,0 +1,17 @@
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;  /* no general overflow in desktop app  */
+    margin: 0;
+    padding: 0;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+}
+
+canvas {
+    border-radius: 6px;
+}
+
+body.nocursor * {
+    cursor: none !important;
+}

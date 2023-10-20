@@ -2739,6 +2739,16 @@ ul.lexassetscontent {
 .cm-sym { color: #e7ded2; } /* symbol */
 .cm-mtd { color: #f1e9bf; } /* method */
 
+.cm-str.css { color: #c69179; } /* string */
+.cm-kwd.css { color: #d2ba7f; } /* keyword */
+.cm-com.css { color: #75b073; } /* comment */
+.cm-typ.css { color: #b7c3ec; } /* type */
+.cm-lit.css { color: #cf6dcf; } /* literal */
+.cm-bln.css { color: #2194ce; } /* builtin */
+.cm-dec.css { color: #b1ce9b; } /* decimal */
+.cm-sym.css { color: #f9d620; } /* symbol */
+.cm-mtd.css { color: #f1e9bf; } /* method */
+
 .cm-str.json { color: #c69179; } /* string */
 .cm-kwd.json { color: inherit; } /* keyword */
 .cm-com.json { color: inherit; } /* comment */
