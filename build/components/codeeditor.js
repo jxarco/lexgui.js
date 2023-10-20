@@ -1365,6 +1365,7 @@
         processToken(token, linespan, prev, next) {
 
             let sString = false;
+            let highlight = this.highlight.replace(/\s/g, '').toLowerCase();
 
             if(token == '"' || token == "'")
             {
@@ -1420,14 +1421,14 @@
                 else if ( token[0] != '@' && next == '(' )
                     span.classList.add("cm-mtd");
 
-                else if ( prev == ':' && (next == ';' || next == '!important') ) // CSS value
+                else if ( highlight == 'css' && prev == ':' && (next == ';' || next == '!important') ) // CSS value
                     span.classList.add("cm-str");
 
-                else if ( prev == undefined && next == ':' ) // CSS attribute
+                else if ( highlight == 'css' && prev == undefined && next == ':' ) // CSS attribute
                     span.classList.add("cm-typ");
 
-                let highlight = this.highlight.replace(/\s/g, '');
-                span.classList.add(highlight.toLowerCase());
+                
+                span.classList.add(highlight);
                 linespan.appendChild(span);
             }
 
@@ -1435,7 +1436,7 @@
         }
 
         isCSSClass( token, prev, next ) {
-            return prev == '.';
+            return this.highlight == 'CSS' && prev == '.';
         }
 
         isNumber( token ) {
