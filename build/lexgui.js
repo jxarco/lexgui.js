@@ -2285,7 +2285,7 @@
                 }
 
                 // Only Show children...
-                if(is_parent) {
+                if(is_parent && node.id.length > 1 /* Strange case... */) {
                     node.closed = false;
                     if(that.onevent) {
                         const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed);
@@ -2293,7 +2293,8 @@
                     }
                     that.refresh();
                     // Focus the element so we can read events...
-                    this.domEl.querySelector("#" + node.id).focus();
+                    var el = this.domEl.querySelector("#" + node.id);
+                    if(el) el.focus();
                 }
 
                 if(that.onevent) {
@@ -6425,6 +6426,7 @@
                     let preview = document.createElement('img');
                     const has_image = item.src && ['png', 'jpg'].indexOf( getExtension( item.src ) ) > -1;
                     preview.src = has_image ? item.src : "../images/" + item.type.toLowerCase() + ".png";
+                    if(item.unknown_extension) preview.src = "../images/file.png";
                     itemEl.appendChild(preview);
                 }
 
@@ -6567,22 +6569,29 @@
                 fr.onload = e => { 
                     
                     let ext = file.name.substr(file.name.lastIndexOf('.') + 1).toLowerCase();
-                    let type = 'Resource';
+
+                    let item = {
+                        "id": file.name,
+                        "src": e.currentTarget.result,
+                        "extension": ext
+                    };
 
                     switch(ext)
                     {
                     case 'png':
                     case 'jpg':
-                        type = "image";
+                        item.type = "image"; break;
+                    case 'js': 
+                        item.type = "script"; break;
+                    case 'json': 
+                        item.type = "json"; break;
+                    default:
+                        item.type = ext;
+                        item.unknown_extension = true;
                         break;
                     }
 
-                    this.current_data.push({
-                        "id": file.name,
-                        "src": e.currentTarget.result,
-                        "extension": ext,
-                        "type": type
-                    });
+                    this.current_data.push( item );
                     
                     if(i == (num_files - 1)) {
                         this._refresh_content();

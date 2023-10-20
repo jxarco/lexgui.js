@@ -2432,9 +2432,19 @@ ul.lexassetscontent {
   background-color: #555;
   cursor: pointer;
   text-align: center;
-  border-radius: 4px;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
   position: relative;
+  border-top: 4px solid rgba(0,0,0,0);
 }
+
+.lexassetscontent li.image  { border-color: rgb(219, 221, 228); }
+.lexassetscontent li.script { border-color: rgb(219, 189, 79); }
+.lexassetscontent li.json   { border-color: rgb(104, 129, 195); }
+.lexassetscontent li.mesh   { border-color: rgb(156, 68, 68); }
+.lexassetscontent li.clip   { border-color: rgb(131, 70, 139); }
 
 .lexassetscontent li:hover {
   outline: 2px solid var(--global-selected);
@@ -2464,7 +2474,7 @@ ul.lexassetscontent {
   display: block;
   height: 20px;
   padding: 0.1em;
-  padding-top: 0.3em;
+  padding-top: 0.15em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2487,6 +2497,7 @@ ul.lexassetscontent {
   display: block;
   top: 0;
   transition: all 0.1s;
+  display: none; /* testing */
 }
 
 .lexassetscontent li:hover span {
@@ -2517,7 +2528,7 @@ ul.lexassetscontent {
 }
 
 .lexassetscontent li:hover img {
-  transform: scale(1.1);
+  transform: scale(1.12);
 }
 
 /* Code Editor */
