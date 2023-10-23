@@ -923,7 +923,7 @@
             if(this.min.classList.contains("vertical") && this.min.classList.contains("fa-angle-down")) {
                 this.min.classList.remove("fa-angle-down");
                 this.min.classList.add("fa-angle-up");
-                this.offset = area2.root.offsetHeight;
+                this.offset = area2.root.offsetHeight - this.min.offsetHeight;
                 area2.root.classList.add("fadeout-vertical");
                 this._moveSplit(-Infinity, true, this.min.offsetHeight); // Force some height here...
 
