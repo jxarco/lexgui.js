@@ -5372,8 +5372,16 @@
             if( options.closable ?? true)
             {
                 this.close = () => {
-                    that.panel.clear();
-                    root.remove();
+
+                    if( !options.onclose )
+                    {
+                        that.panel.clear();
+                        root.remove();
+                    } else
+                    {
+                        options.onclose( this.root );
+                    }
+
                     if(modal)
                         LX.modal.toggle();
                 };
