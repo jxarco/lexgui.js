@@ -5423,6 +5423,8 @@
 
             root.style.width = size[0] ? (size[0]) : "25%";
             root.style.height = size[1] ? (size[1]) : "auto";
+
+            if(options.size) this.size = size;
             
             let rect = root.getBoundingClientRect();
             root.style.left = position[0] ? (position[0]) : "calc( 50% - " + (rect.width * 0.5) + "px )";
@@ -5478,11 +5480,22 @@
             this.panel.root.style.height = "calc( 100% - 40px )";
             this.dock_pos = PocketDialog.TOP;
 
+            this.minimized = false;
             this.title.tabIndex = -1;
             this.title.addEventListener("click", e => {
-                this.root.classList.toggle("closed");
+
+                // Sized dialogs have to keep their size 
+                if( this.size )
+                {
+                    if( !this.minimized ) this.root.style.height = "auto";
+                    else this.root.style.height = this.size[1];
+                }
+
+                this.root.classList.toggle("minimized");
+                this.minimized = !this.minimized;
+
                 if( this.dock_pos == PocketDialog.BOTTOM )
-                    that.root.style.top = this.root.classList.contains("closed") ? 
+                    that.root.style.top = this.root.classList.contains("minimized") ? 
                     "calc(100% - " + (that.title.offsetHeight + 6) + "px)" : "calc(100% - " + (that.root.offsetHeight + 6) + "px)";
             });
 

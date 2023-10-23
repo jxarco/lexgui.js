@@ -283,12 +283,12 @@ body.nocursor * {
   transition: opacity 0.2s;   
 }
 
-.lexdialog.pocket.closed .lexdialogtitle {
+.lexdialog.pocket.minimized .lexdialogtitle {
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
 }
 
-.lexdialog.pocket.closed .lexdialogcontent {
+.lexdialog.pocket.minimized .lexdialogcontent {
   max-height: 0px;
   padding: 0px;
   opacity: 0;
