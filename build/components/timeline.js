@@ -2982,6 +2982,9 @@
         }
 
         pasteContent() {
+            if(!this.clipsToCopy)
+                return;
+            
             this.clipsToCopy.sort((a,b) => {
                 if(a[0]<b[0]) 
                     return -1;
