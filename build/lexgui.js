@@ -925,7 +925,7 @@
                 this.min.classList.add("fa-angle-up");
                 this.offset = area2.root.offsetHeight;
                 area2.root.classList.add("fadeout-vertical");
-                this._moveSplit(-Infinity, true);
+                this._moveSplit(-Infinity, true, this.min.offsetHeight); // Force some height here...
 
             }
             else if(this.min.classList.contains("horizontal") && this.min.classList.contains("fa-angle-right")) {
@@ -937,7 +937,7 @@
             }
 
             // Set min icon to the parent
-            this.root.appendChild( this.min );
+            this.root.insertChildAtIndex( this.min, 2 );
         }
 
         /**
@@ -1215,7 +1215,7 @@
             return tabs;
         }
 
-        _moveSplit( dt, force_animation = false ) {
+        _moveSplit( dt, force_animation = false, force_width = 0 ) {
 
             if(!this.type)
                 throw("No split area");
@@ -1240,6 +1240,7 @@
             if(this.type == "horizontal") {
 
                 var size = Math.max(a2.root.offsetWidth + dt,  0);
+                if( force_width ) size = force_width;
 				a1.root.style.width = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
 				a1.root.style.width = "-webkit-calc( 100% - " + size + "px " + splitinfo + " )";
 				a1.root.style.width = "calc( 100% - " + size + "px " + splitinfo + " )";
@@ -1248,6 +1249,7 @@
             else {
 
                 var size = Math.max((a2.root.offsetHeight + dt) + a2.offset,  0);
+                if( force_width ) size = force_width;
 				a1.root.style.height = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
 				a1.root.style.height = "-webkit-calc( 100% - " + size + "px " + splitinfo + " )";
 				a1.root.style.height = "calc( 100% - " + size + "px " + splitinfo + " )";
