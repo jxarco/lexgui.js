@@ -791,10 +791,13 @@
             var cursor = this.cursors.children[0];
 
             // Discard out of lines click...
-            var code_rect = this.code.getBoundingClientRect();
-            var mouse_pos = [(e.clientX - code_rect.x) + this.getScrollLeft(), (e.clientY - code_rect.y) + this.getScrollTop()];
-            var ln = (mouse_pos[1] / this.lineHeight)|0;
-            if(this.code.lines[ln] == undefined) return;
+            if( e.type != 'contextmenu' )
+            {
+                var code_rect = this.code.getBoundingClientRect();
+                var mouse_pos = [(e.clientX - code_rect.x) + this.getScrollLeft(), (e.clientY - code_rect.y) + this.getScrollTop()];
+                var ln = (mouse_pos[1] / this.lineHeight)|0;
+                if(this.code.lines[ln] == undefined) return;
+            }
 
             if( e.type == 'mousedown' )
             {

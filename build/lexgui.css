@@ -2301,32 +2301,28 @@ meter::-webkit-meter-even-less-good-value {
 .lexmin.vertical {
   top: -8px;
   left: 12px;
-  /* height: 2px; */
 }
 
 .lexarea .fadein-vertical {
   animation-name: fadein;
-  animation-duration: 0.25s;
   animation-fill-mode: forwards;
-  transition: 0.25s height;
 }
 .lexarea .fadeout-vertical {
   animation-name: fadeout;
   animation-duration: 0.25s;
   animation-fill-mode: forwards;
-  transition: 0.25s height;
+  transition: height;
 }
 
 .lexarea .fadein-horizontal {
   animation-name: fadein;
-  animation-duration: 0.25s;
   animation-fill-mode: forwards;
 }
 .lexarea .fadeout-horizontal {
   animation-name: fadeout;
   animation-duration: 0.25s;
   animation-fill-mode: forwards;
-  transition: 0.25s width;
+  transition: width;
 }
 
 @keyframes fadein {
