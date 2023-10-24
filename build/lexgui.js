@@ -938,6 +938,9 @@
 
             // Set min icon to the parent
             this.root.insertChildAtIndex( this.min, 2 );
+
+            // Async resize in some ms...
+            doAsync( () => this.propagateEvent('onresize'), 150 );
         }
 
         /**
@@ -966,6 +969,9 @@
 
             // Set min icon to the minimizable area
             area2.root.insertChildAtIndex( this.min, 0 );
+
+            // Async resize in some ms...
+            doAsync( () => this.propagateEvent('onresize'), 150 );
         }
 
         /**
@@ -4421,6 +4427,10 @@
             vecinput.value = vecinput.iValue = value;
             box.appendChild(vecinput);
 
+            let drag_icon = document.createElement('a');
+            drag_icon.className = "fa-solid fa-arrows-up-down drag-icon hidden";
+            box.appendChild(drag_icon);
+
             if(options.disabled) {
                 vecinput.disabled = true;
             }
@@ -4485,6 +4495,7 @@
                 doc.addEventListener("mouseup",inner_mouseup);
                 lastY = e.pageY;
                 document.body.classList.add('nocursor');
+                drag_icon.classList.remove('hidden');
             }
 
             function inner_mousemove(e) {
@@ -4509,6 +4520,7 @@
                 doc.removeEventListener("mousemove",inner_mousemove);
                 doc.removeEventListener("mouseup",inner_mouseup);
                 document.body.classList.remove('nocursor');
+                drag_icon.classList.add('hidden');
             }
             
             container.appendChild(box);
@@ -4589,6 +4601,10 @@
                 vecinput.idx = i;
                 vecinput.value = vecinput.iValue = value[i];
 
+                let drag_icon = document.createElement('a');
+                drag_icon.className = "fa-solid fa-arrows-up-down drag-icon hidden";
+                box.appendChild(drag_icon);
+
                 if(options.disabled) {
                     vecinput.disabled = true;
                 }
@@ -4648,6 +4664,7 @@
                     doc.addEventListener("mouseup",inner_mouseup);
                     lastY = e.pageY;
                     document.body.classList.add('nocursor');
+                    drag_icon.classList.remove('hidden');
                 }
 
                 function inner_mousemove(e) {
@@ -4679,6 +4696,7 @@
                     doc.removeEventListener("mousemove",inner_mousemove);
                     doc.removeEventListener("mouseup",inner_mouseup);
                     document.body.classList.remove('nocursor');
+                    drag_icon.classList.add('hidden');
                 }
                 
                 box.appendChild(vecinput);
@@ -5423,6 +5441,8 @@
 
             root.style.width = size[0] ? (size[0]) : "25%";
             root.style.height = size[1] ? (size[1]) : "auto";
+
+            if(options.size) this.size = size;
             
             let rect = root.getBoundingClientRect();
             root.style.left = position[0] ? (position[0]) : "calc( 50% - " + (rect.width * 0.5) + "px )";
@@ -5478,11 +5498,22 @@
             this.panel.root.style.height = "calc( 100% - 40px )";
             this.dock_pos = PocketDialog.TOP;
 
+            this.minimized = false;
             this.title.tabIndex = -1;
             this.title.addEventListener("click", e => {
-                this.root.classList.toggle("closed");
+
+                // Sized dialogs have to keep their size 
+                if( this.size )
+                {
+                    if( !this.minimized ) this.root.style.height = "auto";
+                    else this.root.style.height = this.size[1];
+                }
+
+                this.root.classList.toggle("minimized");
+                this.minimized = !this.minimized;
+
                 if( this.dock_pos == PocketDialog.BOTTOM )
-                    that.root.style.top = this.root.classList.contains("closed") ? 
+                    that.root.style.top = this.root.classList.contains("minimized") ? 
                     "calc(100% - " + (that.title.offsetHeight + 6) + "px)" : "calc(100% - " + (that.root.offsetHeight + 6) + "px)";
             });
 

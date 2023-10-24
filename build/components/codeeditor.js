@@ -75,7 +75,7 @@
             domEl._top = 4 + y * this.editor.lineHeight;
             domEl.style.top = (domEl._top - this.editor.getScrollTop()) + "px";
             domEl._left = x * this.editor.charWidth;
-            domEl.style.left = "calc(" + (domEl._left - this.editor.getScrollLeft()) + "px + 0.25em)";
+            domEl.style.left = "calc(" + (domEl._left - this.editor.getScrollLeft()) + "px + " + this.xPadding + ")";
             domEl.style.width = width + "px";
             this.editor.selections.appendChild(domEl);
         }
@@ -140,13 +140,16 @@
             this.selections.className = 'selections';
             this.tabs.area.attach(this.selections);
 
+            // Css char synchronization
+            this.xPadding = "0.25em";
+
             // Add main cursor
             {
                 var cursor = document.createElement('div');
                 cursor.className = "cursor";
                 cursor.innerHTML = "&nbsp;";
                 cursor._left = 0;
-                cursor.style.left = "0.25em";
+                cursor.style.left = this.xPadding;
                 cursor._top = 4;
                 cursor.style.top = "4px";
                 cursor.position = 0;
@@ -172,7 +175,7 @@
             this.tabSpaces = 4;
             this.maxUndoSteps = 16;
             this.lineHeight = 22;
-            this.charWidth = this.measureChar();
+            this.charWidth = 9;//this.measureChar();
             this._lastTime = null;
 
             this.languages = [
@@ -717,12 +720,12 @@
                 // Update cursor
                 var cursor = this.cursors.children[0];
                 cursor.style.top = (cursor._top - code.scrollTop) + "px";
-                cursor.style.left = "calc( " + (cursor._left - code.scrollLeft) + "px + 0.25em)";
+                cursor.style.left = "calc( " + (cursor._left - code.scrollLeft) + "px + " + this.xPadding + ")";
 
                 // Update selection
                 for( let s of this.selections.childNodes ) {
                     s.style.top = (s._top - code.scrollTop) + "px";
-                    s.style.left = "calc( " + (s._left - code.scrollLeft) + "px + 0.25em)";
+                    s.style.left = "calc( " + (s._left - code.scrollLeft) + "px + " + this.xPadding + ")";
                 }
             });
 
@@ -935,13 +938,13 @@
                         if(deltaY == 0) string = !reverse ? this.code.lines[i].substring(fromX, toX) : this.code.lines[i].substring(toX, fromX);
                         else string = this.code.lines[i].substr(fromX);
                         const pixels = ((reverse && deltaY == 0 ? toX : fromX) * this.charWidth) - this.getScrollLeft();
-                        domEl.style.left = "calc(" + pixels + "px + 0.25em)";
+                        domEl.style.left = "calc(" + pixels + "px + " + this.xPadding + ")";
                     }
                     else
                     {
                         string = (i == toY) ? this.code.lines[i].substring(0, toX) : this.code.lines[i]; // Last line, any multiple line...
                         const pixels = -this.getScrollLeft();
-                        domEl.style.left = "calc(" + pixels + "px + 0.25em)";
+                        domEl.style.left = "calc(" + pixels + "px + " + this.xPadding + ")";
                     }
                     
                     const stringWidth = this.measureString(string);
@@ -976,12 +979,12 @@
                     {
                         string = this.code.lines[i].substr(toX);
                         const pixels = (toX * this.charWidth) - this.getScrollLeft();
-                        domEl.style.left = "calc(" + pixels + "px + 0.25em)";
+                        domEl.style.left = "calc(" + pixels + "px + " + this.xPadding + ")";
                     }
                     else
                     {
                         string = (i == fromY) ? this.code.lines[i].substring(0, fromX) : this.code.lines[i]; // Last line, any multiple line...
-                        domEl.style.left = "calc(" + (-this.getScrollLeft()) + "px + 0.25em)";
+                        domEl.style.left = "calc(" + (-this.getScrollLeft()) + "px + " + this.xPadding + ")";
                     }
                     
                     const stringWidth = this.measureString(string);
@@ -1592,7 +1595,7 @@
             if(!key) return;
             cursor = cursor ?? this.cursors.children[0];
             cursor._left += this.charWidth;
-            cursor.style.left = "calc(" + (cursor._left - this.getScrollLeft()) + "px + 0.25em)";
+            cursor.style.left = "calc(" + (cursor._left - this.getScrollLeft()) + "px + " + this.xPadding + ")";
             cursor.position++;
             this.restartBlink();
             this._refresh_code_info( cursor.line + 1, cursor.position );
@@ -1612,7 +1615,7 @@
             cursor = cursor ?? this.cursors.children[0];
             cursor._left -= this.charWidth;
             cursor._left = Math.max(cursor._left, 0);
-            cursor.style.left = "calc(" + (cursor._left - this.getScrollLeft()) + "px + 0.25em)";
+            cursor.style.left = "calc(" + (cursor._left - this.getScrollLeft()) + "px + " + this.xPadding + ")";
             cursor.position--;
             cursor.position = Math.max(cursor.position, 0);
             this.restartBlink();
@@ -1675,7 +1678,7 @@
 
             cursor.position = position;
             cursor._left = position * this.charWidth;
-            cursor.style.left = "calc(" + (cursor._left - this.getScrollLeft()) + "px + 0.25em)";
+            cursor.style.left = "calc(" + (cursor._left - this.getScrollLeft()) + "px + " + this.xPadding + ")";
         }
 
         cursorToLine( cursor, line, resetLeft = false ) {
@@ -1703,7 +1706,7 @@
             cursor.position = state.charPos ?? 0;
 
             cursor._left = state.left ?? 0;
-            cursor.style.left = "calc(" + (cursor._left - this.getScrollLeft()) + "px + 0.25em)";
+            cursor.style.left = "calc(" + (cursor._left - this.getScrollLeft()) + "px + " + this.xPadding + ")";
             cursor._top = state.top ?? 4;
             cursor.style.top = "calc(" + (cursor._top - this.getScrollTop()) + "px)";
         }
@@ -1715,7 +1718,7 @@
             if( flag & CodeEditor.CURSOR_LEFT )
             {
                 cursor._left = 0;
-                cursor.style.left = "calc(" + (-this.getScrollLeft()) + "px + 0.25em)";
+                cursor.style.left = "calc(" + (-this.getScrollLeft()) + "px + " + this.xPadding + ")";
                 cursor.position = 0;
             }
 
