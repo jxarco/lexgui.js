@@ -938,6 +938,9 @@
 
             // Set min icon to the parent
             this.root.insertChildAtIndex( this.min, 2 );
+
+            // Async resize in some ms...
+            doAsync( () => this.propagateEvent('onresize'), 150 );
         }
 
         /**
@@ -966,6 +969,9 @@
 
             // Set min icon to the minimizable area
             area2.root.insertChildAtIndex( this.min, 0 );
+
+            // Async resize in some ms...
+            doAsync( () => this.propagateEvent('onresize'), 150 );
         }
 
         /**

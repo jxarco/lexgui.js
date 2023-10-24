@@ -2324,8 +2324,9 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexmin.vertical {
-  top: -8px;
-  left: 12px;
+  margin-top: -12px;
+  margin-left: 12px;
+  position: absolute;
 }
 
 .lexarea .fadein-vertical {
