@@ -75,7 +75,7 @@
             domEl._top = 4 + y * this.editor.lineHeight;
             domEl.style.top = (domEl._top - this.editor.getScrollTop()) + "px";
             domEl._left = x * this.editor.charWidth;
-            domEl.style.left = "calc(" + (domEl._left - this.editor.getScrollLeft()) + "px + " + this.xPadding + ")";
+            domEl.style.left = "calc(" + (domEl._left - this.editor.getScrollLeft()) + "px + " + this.editor.xPadding + ")";
             domEl.style.width = width + "px";
             this.editor.selections.appendChild(domEl);
         }
@@ -837,7 +837,6 @@
                 {
                     case CodeEditor.MOUSE_DOUBLE_CLICK:
                         const [word, from, to] = this.getWordAtPos( cursor );
-
                         this.resetCursorPos( CodeEditor.CURSOR_LEFT );
                         this.cursorToPosition( cursor, from );
                         this.startSelection( cursor );
