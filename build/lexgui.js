@@ -3164,46 +3164,57 @@
             container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
             container.style.display = "flex";
 
-            let wValue = document.createElement('input');
-            wValue.value = wValue.iValue = value || "";
-            wValue.style.width = "100%";
-            wValue.style.textAlign = options.float ?? "";
-            Object.assign(wValue.style, options.style ?? {});
+            let wValue = null;
 
-            if(options.disabled ?? false) wValue.setAttribute("disabled", true);
-            if(options.placeholder) wValue.setAttribute("placeholder", options.placeholder);
-
-            var resolve = (function(val, event) {
-                let btn = element.querySelector(".lexwidgetname .lexicon");
-                if(btn) btn.style.display = (val != wValue.iValue ? "block" : "none");
-                this._trigger( new IEvent(name, val, event), callback );
-            }).bind(this);
-
-            const trigger = options.trigger ?? 'default';
-
-            if(trigger == 'default')
+            if( !options.disabled )
             {
-                wValue.addEventListener("keyup", function(e){
-                    if(e.key == 'Enter')
+                wValue = document.createElement('input');
+                wValue.value = wValue.iValue = value || "";
+                wValue.style.width = "100%";
+                wValue.style.textAlign = options.float ?? "";
+    
+                if(options.placeholder) wValue.setAttribute("placeholder", options.placeholder);
+    
+                var resolve = (function(val, event) {
+                    let btn = element.querySelector(".lexwidgetname .lexicon");
+                    if(btn) btn.style.display = (val != wValue.iValue ? "block" : "none");
+                    this._trigger( new IEvent(name, val, event), callback );
+                }).bind(this);
+    
+                const trigger = options.trigger ?? 'default';
+    
+                if(trigger == 'default')
+                {
+                    wValue.addEventListener("keyup", function(e){
+                        if(e.key == 'Enter')
+                            resolve(e.target.value, e);
+                    });
+                    wValue.addEventListener("focusout", function(e){
                         resolve(e.target.value, e);
-                });
-                wValue.addEventListener("focusout", function(e){
-                    resolve(e.target.value, e);
-                });
-            }
-            else if(trigger == 'input')
+                    });
+                }
+                else if(trigger == 'input')
+                {
+                    wValue.addEventListener("input", function(e){
+                        resolve(e.target.value, e);
+                    });
+                }
+    
+                if(options.icon)
+                {
+                    let icon = document.createElement('a');
+                    icon.className = "inputicon " + options.icon;
+                    container.appendChild(icon);
+                }
+            } else
             {
-                wValue.addEventListener("input", function(e){
-                    resolve(e.target.value, e);
-                });
+                wValue = document.createElement('div');
+                wValue.innerText = value || "";
+                wValue.style.width = "100%";
+                wValue.style.textAlign = options.float ?? "";
             }
 
-            if(options.icon)
-            {
-                let icon = document.createElement('a');
-                icon.className = "inputicon " + options.icon;
-                container.appendChild(icon);
-            }
+            Object.assign(wValue.style, options.style ?? {});
 
             container.appendChild(wValue);
             element.appendChild(container);
