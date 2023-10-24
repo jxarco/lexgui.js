@@ -456,8 +456,8 @@
             let max_tracks = Math.ceil( h - timeline_height / line_height );
 
             ctx.save();
-
-            for(let i = 0; i < max_tracks; ++i)
+            ctx.fillStyle = Timeline.BACKGROUND_COLOR;
+            for(let i = 0; i <= max_tracks; ++i)
             {
                 ctx.fillStyle = i % 2 == 0 ?  Timeline.TRACK_COLOR_PRIMARY:  Timeline.BACKGROUND_COLOR;
                 ctx.fillRect(0, timeline_height + i * line_height  - this.currentScrollInPixels, w, line_height );
@@ -466,7 +466,7 @@
             //black bg
             ctx.globalAlpha = 0.7;
             ctx.fillStyle = Timeline.BACKGROUND_COLOR;
-            ctx.fillRect( margin, timeline_height - this.currentScrollInPixels, canvas.width - margin, canvas.height - timeline_height );
+            ctx.fillRect( margin, 0, canvas.width - margin, canvas.height);
             ctx.globalAlpha = this.opacity;
             
             //bg lines
@@ -536,15 +536,6 @@
                 
                 ctx.translate( this.position[0], this.position[1] + this.topMargin ); //20 is the top margin area
 
-                // Selections
-                if(this.boxSelection && this.boxSelectionStart && this.boxSelectionEnd) {
-                    ctx.globalAlpha = 0.5;
-                    ctx.fillStyle = "#AAA";
-                    ctx.strokeRect( this.boxSelectionStart[0], this.boxSelectionStart[1], this.boxSelectionEnd[0] - this.boxSelectionStart[0], this.boxSelectionEnd[1] - this.boxSelectionStart[1]);
-                    ctx.stroke();
-                    ctx.globalAlpha = this.opacity;
-                }
-
                 this.onDrawContent( ctx, this.timeStart, this.timeEnd, this );
 
                 ctx.translate( -this.position[0], -(this.position[1] + this.topMargin) ); //20 is the top margin area
@@ -583,6 +574,18 @@
                 ctx.closePath();
                 ctx.fill();
             }
+            
+            // Selections
+            ctx.translate( this.position[0], this.position[1] + this.topMargin )
+            if(this.boxSelection && this.boxSelectionStart && this.boxSelectionEnd) {
+                ctx.globalAlpha = 0.5;
+                ctx.fillStyle = "#AAA";
+                ctx.strokeRect( this.boxSelectionStart[0], this.boxSelectionStart[1], this.boxSelectionEnd[0] - this.boxSelectionStart[0], this.boxSelectionEnd[1] - this.boxSelectionStart[1]);
+                ctx.stroke();
+                ctx.globalAlpha = this.opacity;
+            }
+            ctx.translate( -this.position[0], -(this.position[1] + this.topMargin) ); //20 is the top margin area
+
         }
 
         /**
@@ -808,7 +811,7 @@
                     this.trackBulletCallback(e.track,e,this,[localX,localY]);
 
                 if(e.localY <= this.topMargin) {
-                    this.currentTime = time;
+                    this.currentTime = Math.max(0, time);
                     innerSetTime(this.currentTime);
                 }
                 else if( h < this.scrollableHeight && x > w - 10 )
@@ -1301,7 +1304,7 @@
                     this.processCurrentKeyFrame( e, null, track, localX, true ); 
                 }
                 // Box selection
-                else{
+                else if(this.boxSelection) {
             
                     this.unSelectAllKeyFrames();
                     
@@ -1360,7 +1363,7 @@
             if(e.shiftKey) {
 
                 this.boxSelection = true;
-                this.boxSelectionStart = [localX, localY - 20];
+                this.boxSelectionStart = [localX, localY - this.topMargin];
                 e.multipleSelection = true;
             }
             else if(track && !track.locked) {
@@ -2405,7 +2408,7 @@
             if(e.shiftKey) {
 
                 this.boxSelection = true;
-                this.boxSelectionStart = [localX,localY - 20];
+                this.boxSelectionStart = [localX, localY - this.topMargin];
 
             }
             else if(e.ctrlKey && track) {
@@ -3276,7 +3279,7 @@
             if(e.shiftKey) {
 
                 this.boxSelection = true;
-                this.boxSelectionStart = [localX, localY - 20];
+                this.boxSelectionStart = [localX, localY - this.topMargin];
                 e.multipleSelection = true;
 
             }
