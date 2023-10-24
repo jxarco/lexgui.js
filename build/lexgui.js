@@ -6199,7 +6199,7 @@
             if( !this.skip_preview )
                 [content_area, right] = content_area.split({ type: "horizontal", sizes: ["80%", "20%"]});
             
-            this.allowed_types = ["None", "Image", "Mesh", "Script", "JSON", "Clip"];
+            this.allowed_types = options.allowed_types || ["None", "Image", "Mesh", "Script", "JSON", "Clip"];
 
             this.prev_data = [];
             this.next_data = [];
@@ -6371,7 +6371,7 @@
             }
 
             this.rightPanel.sameLine();
-            this.rightPanel.addDropdown("Filter", this.allowed_types, "None", (v) => this._refresh_content.call(this, null, v), { width: "20%" });
+            this.rightPanel.addDropdown("Filter", this.allowed_types, this.allowed_types[0], (v) => this._refresh_content.call(this, null, v), { width: "20%" });
             this.rightPanel.addText(null, this.search_value ?? "", (v) => this._refresh_content.call(this, v, null), { placeholder: "Search assets.." });
             this.rightPanel.addButton(null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { width: "3%" });
             this.rightPanel.endLine();

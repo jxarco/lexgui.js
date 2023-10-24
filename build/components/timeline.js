@@ -156,9 +156,10 @@
                 this.draw();
             }, {signal: "@on_current_time_" + this.constructor.name, step: 0.01, min: 0, max: this.duration, precision: 3, skipSlider: true});        
 
+            
             for(let i = 0; i < this.buttonsDrawn.length; i++) {
                 let button = this.buttonsDrawn[i];
-                this.header.addButton( null, "<a class='" + button.icon +"' title='" + button.name + "'></a>", button.callback, {width: "32px"});
+                this.header.addButton( button.title || "", button.name, button.callback, button);
             }
 
             if(this.onShowOptimizeMenu)
@@ -166,7 +167,9 @@
 
             header.addButton("", '<i class="fa-solid fa-gear"></i>', (value, event) => {
                 let dialog = new LX.Dialog("Configuration", d => {
-                    d.addNumber("Framerate", this.framerate, null, {disabled: true});
+                    d.addNumber("Framerate", this.framerate, (v) => {
+                        this.framerate = v;
+                    }, {min: 0, disabled: false});
                     d.addNumber("Num items", Object.keys(this.tracksPerItem).length, null, {disabled: true});
                     d.addNumber("Num tracks", this.animationClip ? this.animationClip.tracks.length : 0, null, {disabled: true});
                     if(this.onShowOptimizeMenu)
@@ -725,7 +728,7 @@
                 this.canvas.style.cursor = "default";
     
             if( e.type == "wheel" ) {
-                if(e.ctrlKey)
+                if(e.shiftKey)
                 {
                     this.setScale( e.wheelDelta < 0 ? 0.95 : 1.05 );
                 }
@@ -792,7 +795,7 @@
             }
 
             if( !is_inside && !this.grabbing && !(e.metaKey || e.altKey ) )
-                return;
+                return true;
 
             if( this.onMouse && this.onMouse( e, time, this ) )
                 return;
@@ -2288,10 +2291,10 @@
         }
 
         /**
-         * @method cleanTrack
+         * @method clearTrack
          */
 
-        cleanTrack(idx, defaultValue) {
+        clearTrack(idx, defaultValue) {
 
             let track =  this.animationClip.tracks[idx];
 
@@ -3019,10 +3022,10 @@
         }
 
         /**
-         * @method cleanTrack
+         * @method clearTrack
          */
 
-        cleanTrack(idx) {
+        clearTrack(idx) {
 
             if(!this.animationClip) {
                 this.animationClip = {tracks:[]};
@@ -4076,10 +4079,10 @@
         }
 
         /**
-         * @method cleanTrack
+         * @method clearTrack
          */
 
-        cleanTrack(idx, defaultValue) {
+        clearTrack(idx, defaultValue) {
 
             let track =  this.animationClip.tracks[idx];
 
