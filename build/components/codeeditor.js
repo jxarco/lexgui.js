@@ -804,7 +804,7 @@
 
             if( e.type == 'mousedown' )
             {
-                if( mouse_pos[0] > this.code.clientWidth || mouse_pos[1] > this.code.clientHeight )
+                if( mouse_pos[0] > this.code.scrollWidth || mouse_pos[1] > this.code.scrollHeight )
                     return; // Scrollbar click
                 this.lastMouseDown = time.getTime();
                 this.state.selectingText = true;
