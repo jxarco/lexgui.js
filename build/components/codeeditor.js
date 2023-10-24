@@ -663,8 +663,8 @@
                 doAsync( () => {
 
                     // Change css a little bit...
-                    this.gutter.style.height = "calc(100% - 31px)";
-                    this.root.querySelectorAll('.code').forEach( e => e.style.height = "100%" );
+                    this.gutter.style.height = "calc(100% - 38px)";
+                    this.root.querySelectorAll('.code').forEach( e => e.style.height = "calc(100% - 6px)" );
                     this.root.querySelector('.lexareatabscontent').style.height = "calc(100% - 23px)";
 
                 }, 100);
