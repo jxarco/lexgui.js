@@ -481,6 +481,13 @@ body.nocursor * {
   padding-right: 10px;
 }
 
+.lexinlinewidgets .lexwidgetname {
+  justify-content: end;
+  -moz-transform: translateX(-1em);
+  -webkit-transform: translateX(-1em);
+  transform: translateX(-1em);
+}
+
 .lexwidget.nobranch {
   padding-left: 12px;
 }
@@ -706,7 +713,9 @@ body.nocursor * {
 }
 
 .lexbutton:active:not(.lexbutton.combo) {
-  outline: 2px solid var(--global-color-secondary);
+	background-color: #4e4e4e;
+  color: var(--global-text-secondary);
+  padding-top: 0.3em;
 }
 
 .lexbutton.selected {
@@ -1036,11 +1045,22 @@ input[type=checkbox]:checked:after {
 
 .lexvector .vecbox {
   display: flex;
+  position: relative;
+  width: 100%;
   border-radius: 4px;
   border: 1px solid #908fa356;
   margin-right: 2px;
   background: var(--global-color-secondary);
-  width: 100%;
+}
+
+.lexwidget .numberbox .drag-icon, .lexwidget .vecbox .drag-icon {
+  position: absolute;
+  width: 2px;
+  right: 0.25em;
+  top: 25%;
+  font-size: 11px;
+  color: var(--global-text-secondary);
+  z-index: 11;
 }
 
 .lexvector .vecbox:has(input:focus) {
@@ -1121,6 +1141,7 @@ input[type=number] {
   border-radius: 4px;
   border: 1px solid #908fa356;
   margin-right: 2px;
+  position: relative;
 }
 
 .lexwidget .numberbox:has(input:focus) {
@@ -1176,6 +1197,10 @@ input[type="range"] {
   border-radius: 8px;
   background: #a19dc9;
   cursor: pointer;
+}
+
+.lexwidget .numberbox .drag-icon {
+  right: 0.8em;
 }
 
 /* Tabs Widget */

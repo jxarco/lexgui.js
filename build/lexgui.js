@@ -4421,6 +4421,10 @@
             vecinput.value = vecinput.iValue = value;
             box.appendChild(vecinput);
 
+            let drag_icon = document.createElement('a');
+            drag_icon.className = "fa-solid fa-arrows-up-down drag-icon hidden";
+            box.appendChild(drag_icon);
+
             if(options.disabled) {
                 vecinput.disabled = true;
             }
@@ -4485,6 +4489,7 @@
                 doc.addEventListener("mouseup",inner_mouseup);
                 lastY = e.pageY;
                 document.body.classList.add('nocursor');
+                drag_icon.classList.remove('hidden');
             }
 
             function inner_mousemove(e) {
@@ -4509,6 +4514,7 @@
                 doc.removeEventListener("mousemove",inner_mousemove);
                 doc.removeEventListener("mouseup",inner_mouseup);
                 document.body.classList.remove('nocursor');
+                drag_icon.classList.add('hidden');
             }
             
             container.appendChild(box);
@@ -4589,6 +4595,10 @@
                 vecinput.idx = i;
                 vecinput.value = vecinput.iValue = value[i];
 
+                let drag_icon = document.createElement('a');
+                drag_icon.className = "fa-solid fa-arrows-up-down drag-icon hidden";
+                box.appendChild(drag_icon);
+
                 if(options.disabled) {
                     vecinput.disabled = true;
                 }
@@ -4648,6 +4658,7 @@
                     doc.addEventListener("mouseup",inner_mouseup);
                     lastY = e.pageY;
                     document.body.classList.add('nocursor');
+                    drag_icon.classList.remove('hidden');
                 }
 
                 function inner_mousemove(e) {
@@ -4679,6 +4690,7 @@
                     doc.removeEventListener("mousemove",inner_mousemove);
                     doc.removeEventListener("mouseup",inner_mouseup);
                     document.body.classList.remove('nocursor');
+                    drag_icon.classList.add('hidden');
                 }
                 
                 box.appendChild(vecinput);
