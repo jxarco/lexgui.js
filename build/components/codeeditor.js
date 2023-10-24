@@ -237,7 +237,7 @@
                         // Move line on top
                         this.code.lines[ln - 1] += this.code.lines[ln];
                         this.code.lines.splice(ln, 1);
-                        this.processLines(ln);
+                        this.processLines(ln - 1);
                     }
                 }
             });
