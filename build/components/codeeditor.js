@@ -75,7 +75,7 @@
             domEl._top = 4 + y * this.editor.lineHeight;
             domEl.style.top = (domEl._top - this.editor.getScrollTop()) + "px";
             domEl._left = x * this.editor.charWidth;
-            domEl.style.left = "calc(" + (domEl._left - this.editor.getScrollLeft()) + "px + " + this.xPadding + ")";
+            domEl.style.left = "calc(" + (domEl._left - this.editor.getScrollLeft()) + "px + " + this.editor.xPadding + ")";
             domEl.style.width = width + "px";
             this.editor.selections.appendChild(domEl);
         }
@@ -663,8 +663,8 @@
                 doAsync( () => {
 
                     // Change css a little bit...
-                    this.gutter.style.height = "calc(100% - 31px)";
-                    this.root.querySelectorAll('.code').forEach( e => e.style.height = "100%" );
+                    this.gutter.style.height = "calc(100% - 38px)";
+                    this.root.querySelectorAll('.code').forEach( e => e.style.height = "calc(100% - 6px)" );
                     this.root.querySelector('.lexareatabscontent').style.height = "calc(100% - 23px)";
 
                 }, 100);
@@ -804,7 +804,7 @@
 
             if( e.type == 'mousedown' )
             {
-                if( mouse_pos[0] > this.code.clientWidth || mouse_pos[1] > this.code.clientHeight )
+                if( mouse_pos[0] > this.code.scrollWidth || mouse_pos[1] > this.code.scrollHeight )
                     return; // Scrollbar click
                 this.lastMouseDown = time.getTime();
                 this.state.selectingText = true;
@@ -837,7 +837,6 @@
                 {
                     case CodeEditor.MOUSE_DOUBLE_CLICK:
                         const [word, from, to] = this.getWordAtPos( cursor );
-
                         this.resetCursorPos( CodeEditor.CURSOR_LEFT );
                         this.cursorToPosition( cursor, from );
                         this.startSelection( cursor );
