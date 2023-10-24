@@ -542,13 +542,17 @@ body.nocursor * {
   color: var(--global-text-primary);
   font-size: 13px;
   font-weight: 500;
-  outline:none;
+  outline: none;
   border: none;
   border-bottom: 1px solid #bbbbbb47;
 }
 
 .lexwidget .lextext, .lexwidget .lexnumber {
   padding-left: 4px;
+}
+
+.lexwidget .lextext div {
+  color: #b2b2b5d6;
 }
 
 .lexwidget .lextext input:focus {
