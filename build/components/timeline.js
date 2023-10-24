@@ -2931,7 +2931,7 @@
 
                     // Delete every selected clip
                     for(let [trackIdx, clipIdx] of pts) {
-                        this.saveState(clip);
+                        this.saveState(trackIdx, clipIdx);
                         this.#delete(trackIdx, clipIdx );
                         deletedIndices++;
                     }
@@ -2940,7 +2940,7 @@
             else if ( clip ){
                 const [trackIdx, clipIdx]  = clip;
 
-                this.saveState(clip);
+                this.saveState(trackIdx, clipIdx);
                 this.#delete( trackIdx, clipIdx );
             }
             
@@ -3045,36 +3045,30 @@
             return trackInfo.idx;
         }
 
-        saveState( clipIdx ) {
+        saveState( trackIdx, clipIdx ) {
 
-            // const localIdx = this.animationClip.tracks[clipIdx].idx;
-            // const name = this.getTrackName(this.animationClip.tracks[clipIdx].name)[0];
-            // const trackInfo = this.tracksPerItem[name][localIdx];
-
-            // this.trackState.push({
-            //     idx: clipIdx,
-            //     t: this.animationClip.tracks[clipIdx].times.slice(),
-            //     v: this.animationClip.tracks[clipIdx].values.slice(),
-            //     editedTracks: [].concat(trackInfo.edited)
-            // });
+            let track = this.animationClip.tracks[trackIdx];
+            let clips = Array.from(track.clips);
+            let trackInfo = Object.assign({}, track);
+            trackInfo.clips = clips;
+            this.trackState.push({
+                idx: clipIdx,
+                t: trackInfo,
+                editedTracks: [].concat(trackInfo.edited)
+            });
         }
 
         restoreState() {
             
-            // if(!this.trackState.length)
-            // return;
+            if(!this.trackState.length)
+            return;
 
-            // const state = this.trackState.pop();
-            // this.animationClip.tracks[state.idx].times = state.t;
-            // this.animationClip.tracks[state.idx].values = state.v;
+            const state = this.trackState.pop();
+            this.animationClip.tracks[state.t.idx].clips = state.t.clips;
 
-            // const localIdx = this.animationClip.tracks[state.idx].idx;
-            // const name = this.getTrackName(this.animationClip.tracks[state.idx].name)[0];
-            // this.tracksPerItem[name][localIdx].edited = state.editedTracks;
-
-            // // Update animation action interpolation info
-            // if(this.onUpdateTrack)
-            //     this.onUpdateTrack( state.idx );
+            // Update animation action interpolation info
+            if(this.onUpdateTrack)
+                this.onUpdateTrack( state.t.idx );
         }
         
         getCurrentClip( track, time, threshold ) {
