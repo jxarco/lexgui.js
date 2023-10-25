@@ -1930,8 +1930,6 @@ meter::-webkit-meter-even-less-good-value {
   width: fit-content;
   width: -moz-fit-content;
   border-radius: 10px;
-  padding: 4px;
-  padding-bottom: 6px;
 }
 
 .lexareatabs.dockingtab {
@@ -1959,6 +1957,11 @@ meter::-webkit-meter-even-less-good-value {
   width: 100%;
 }
 
+.lexareatabs.row {
+  padding: 4px;
+  padding-bottom: 6px;
+}
+
 .lexareatabs.row .lexareatab {
   background-color: var(--global-color-secondary);
   padding-left: 16px;
@@ -1969,7 +1972,7 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexareatabs.fit {
   background-color: var(--global-color-secondary);
-  width: calc(100% - 12px);
+  width: calc(100% - 14px);
 }
 
 .lexareatabs.fit .lexareatab {
