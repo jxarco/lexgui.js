@@ -526,7 +526,7 @@
                 root.className += " " + options.className;
     
             var width = options.width || "calc( 100% )";
-            var height = options.height || "100vh";
+            var height = options.height || "100%";
     
             if(width.constructor == Number)
                 width += "px";
@@ -713,9 +713,10 @@
             area1.parentArea = this;
             area2.parentArea = this;
 
-            var resize = options.resize ?? true;
+            let minimizable = options.minimizable ?? false;
+            let resize = (options.resize ?? true) || minimizable;
+
             var data = "0px";
-            
             this.offset = 0;
 
             if(resize)
@@ -726,45 +727,34 @@
 
                 if(type == "horizontal") {
                     this.split_bar.style.width = LX.DEFAULT_SPLITBAR_SIZE + "px";
-                    // this.split_bar.style.left = -LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
                 }
                 else {
                     this.split_bar.style.height = LX.DEFAULT_SPLITBAR_SIZE + "px";
-                    // this.split_bar.style.top = -LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
                 }
                 this.split_bar.addEventListener("mousedown", inner_mousedown);
                 data = LX.DEFAULT_SPLITBAR_SIZE/2 + "px"; // updates
-            }
 
-            let minimizable = options.minimizable ?? false;
+                // Being minimizable means it's also resizeable!
+                if(minimizable)
+                {
+                    this.split_extended = false;
 
-            if(minimizable) {
-
-                // Keep state of the animation when ends...
-                area2.root.addEventListener('animationend', e => {
-                    const opacity = getComputedStyle(area2.root).opacity;
-                    area2.root.classList.remove( e.animationName + "-" + type );
-                    area2.root.style.opacity = opacity;
-                    flushCss(area2.root);
-                });
-
-                this.min = document.createElement("div");
-                this.min.className = "lexmin " + type + " fa-solid";
-                if(type == "horizontal") 
-                    this.min.classList.add("fa-angle-right");
-                else
-                    this.min.classList.add("fa-angle-down");
-
-                this.min.addEventListener("mousedown", (e) => {
-                    // Fade out to down
-                    if(this.min.classList.contains("fa-angle-down")) this.minimize();
-                    // Fade in from down
-                    else if(this.min.classList.contains("fa-angle-up")) this.maximize();
-                    // Fade out to right
-                    else if(this.min.classList.contains("fa-angle-right")) this.minimize();
-                    // Fade in from right
-                    else if(this.min.classList.contains("fa-angle-left")) this.maximize();
-                });
+                    // Keep state of the animation when ends...
+                    area2.root.addEventListener('animationend', e => {
+                        const opacity = getComputedStyle(area2.root).opacity;
+                        area2.root.classList.remove( e.animationName + "-" + type );
+                        area2.root.style.opacity = opacity;
+                        flushCss(area2.root);
+                    });
+    
+                    this.split_bar.addEventListener("contextmenu", e => {
+                        e.preventDefault();
+                        addContextMenu(null, e, c => {
+                            c.add("Extend", { disabled: this.split_extended, callback: () => { this.extend() } });
+                            c.add("Reduce", { disabled: !this.split_extended, callback: () => { this.reduce() } });
+                        });
+                    });
+                }
             }
 
             if(type == "horizontal")
@@ -778,9 +768,9 @@
                     width2 += "px";
 
                 area1.root.style.width = "calc( " + width1 + " - " + data + " )";
-                area1.root.style.height = "100%";
+                area1.root.style.height = "calc(100% - 0px)";
                 area2.root.style.width = "calc( " + width2 + " - " + data + " )";
-                area2.root.style.height = "100%";
+                area2.root.style.height = "calc(100% - 0px)";
                 this.root.style.display = "flex";
             }
             else // vertical
@@ -814,15 +804,6 @@
     
                     area1.root.style.width = "100%";
                     area1.root.style.height = "calc( " + height1 + " - " + data + " )";
-                    
-                    // Check for menubar to add more offset
-                    if(!infer_height && this.root.parentElement.parentElement.children.length) {
-                        const item = this.root.parentElement.parentElement.children[0];
-                        const menubar = item.querySelector('.lexmenubar');
-                        if(menubar)
-                            data = parseInt(data) + menubar.offsetHeight + "px";
-                    }
-    
                     area2.root.style.height = "calc( " + height2 + " - " + data + " )";
                 }
             }
@@ -832,11 +813,6 @@
             if(resize) 
             {
                 this.root.appendChild(this.split_bar);
-            }
-
-            if(minimizable)
-            {
-                area2.root.appendChild(this.min);
             }
 
             this.root.appendChild( area2.root );
@@ -923,65 +899,57 @@
         }
 
          /**
-        * @method minimize
-        * Hide element
+        * @method extend
+        * Hide 2nd area split
         */
-        minimize() {
+        extend() {
 
-            if(!this.min)
-                return;
+            if( this.split_extended )
+            return;
 
             let [area1, area2] = this.sections;
+            this.split_extended = true;
 
-            if(this.min.classList.contains("vertical") && this.min.classList.contains("fa-angle-down")) {
-                this.min.classList.remove("fa-angle-down");
-                this.min.classList.add("fa-angle-up");
-                this.offset = area2.root.offsetHeight - this.min.offsetHeight;
+            if(this.type == "vertical")
+            {
+                this.offset = area2.root.offsetHeight;
                 area2.root.classList.add("fadeout-vertical");
-                this._moveSplit(-Infinity, true, this.min.offsetHeight); // Force some height here...
+                this._moveSplit(-Infinity, true); 
 
             }
-            else if(this.min.classList.contains("horizontal") && this.min.classList.contains("fa-angle-right")) {
-                this.min.classList.remove("fa-angle-right");
-                this.min.classList.add("fa-angle-left");
-                this.offset = area2.root.offsetWidth;
+            else 
+            {
+                this.offset = area2.root.offsetWidth - 8; // Force some height here...
                 area2.root.classList.add("fadeout-horizontal");
-                this._moveSplit(-Infinity, true);
+                this._moveSplit(-Infinity, true, 8);
             }
-
-            // Set min icon to the parent
-            this.root.insertChildAtIndex( this.min, 2 );
 
             // Async resize in some ms...
             doAsync( () => this.propagateEvent('onresize'), 150 );
         }
 
         /**
-        * @method maximize
-        * Show element if it is hidden
+        * @method reduce
+        * Show 2nd area split
         */
-        maximize() {
+        reduce() {
 
-            if(!this.min)
-                return;
+            if( !this.split_extended )
+            return;
             
+            this.split_extended = false;
             let [area1, area2] = this.sections;
 
-            if(this.min.classList.contains("vertical") && this.min.classList.contains("fa-angle-up")) {
-                this.min.classList.remove("fa-angle-up");
-                this.min.classList.add("fa-angle-down");
+            if(this.type == "vertical")
+            {
                 area2.root.classList.add("fadein-vertical");
                 this._moveSplit(this.offset);
             }
-            else if(this.min.classList.contains("horizontal") && this.min.classList.contains("fa-angle-left")) {
-                this.min.classList.remove("fa-angle-left");
-                this.min.classList.add("fa-angle-right");
+            else
+            {
                 area2.root.classList.add("fadein-horizontal");
                 this._moveSplit(this.offset);
             }
-
-            // Set min icon to the minimizable area
-            area2.root.insertChildAtIndex( this.min, 0 );
 
             // Async resize in some ms...
             doAsync( () => this.propagateEvent('onresize'), 150 );
@@ -2312,10 +2280,7 @@
                         const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed);
                         that.onevent( event );
                     }
-                    that.refresh();
-                    // Focus the element so we can read events...
-                    var el = this.domEl.querySelector("#" + node.id);
-                    if(el) el.focus();
+                    that.frefresh( node.id );
                 }
 
                 if(that.onevent) {
@@ -2346,6 +2311,8 @@
             });
 
             item.addEventListener("keydown", e => {
+                if(node.rename)
+                return;
                 e.preventDefault();
                 if( e.key == "Delete" )
                 {
@@ -2400,12 +2367,12 @@
 
                     node.id = this.value;
                     delete node.rename;
-                    that.refresh();
+                    that.frefresh( node.id );
                     list.querySelector("#" + this.value).classList.add('selected');
                 }
                 if(e.key == 'Escape') {
                     delete node.rename;
-                    that.refresh();
+                    that.frefresh( node.id );
                 }
             });
 
@@ -2490,7 +2457,7 @@
                         const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed);
                         that.onevent( event );
                     }
-                    that.refresh();
+                    that.frefresh( node.id );
                 });
             }
 
@@ -2557,6 +2524,13 @@
             this.data = newData ?? this.data;
             this.domEl.querySelector("ul").innerHTML = "";
             this.#create_item( null, this.data, 0, selectedId );
+        }
+
+        /* Refreshes the tree and focuses current element */
+        frefresh( id ) {
+            this.refresh();
+            var el = this.domEl.querySelector("#" + id);
+            if(el) el.focus();
         }
 
         select(id) {
@@ -5470,7 +5444,7 @@
             
             let rect = root.getBoundingClientRect();
             root.style.left = position[0] ? (position[0]) : "calc( 50% - " + (rect.width * 0.5) + "px )";
-            root.style.top = position[1] ? (position[1]) : "calc( 50vh - " + (rect.height * 0.5) + "px )";
+            root.style.top = position[1] ? (position[1]) : "calc( 50% - " + (rect.height * 0.5) + "px )";
 
             panel.root.style.width = "calc( 100% - 30px )";
             panel.root.style.height = title ? "calc( 100% - " + (titleDiv.offsetHeight + 30) + "px )" : "calc( 100% - 51px )";
@@ -6980,6 +6954,14 @@
     Element.prototype.insertChildAtIndex = function(child, index = Infinity) {
         if (index >= this.children.length) this.appendChild(child);
         else this.insertBefore(child, this.children[index]);
+    }
+
+    Element.prototype.getComputedSize = function() {
+        const cs = getComputedStyle( this );
+        return {
+            width: this.offsetWidth + cs.getPropertyValue('marginLeft') + cs.getPropertyValue('marginRight'),
+            height: this.offsetHeight + cs.getPropertyValue('marginTop') + cs.getPropertyValue('marginBottom')
+        }
     }
 
 	LX.UTILS = {
