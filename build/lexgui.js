@@ -4467,6 +4467,8 @@
             }, {passive:false});
 
             vecinput.addEventListener("change", e => {
+                if(isNaN(e.target.valueAsNumber))
+                    return;
                 let val = e.target.value = clamp(+e.target.valueAsNumber, +vecinput.min, +vecinput.max);
                 val = options.precision ? round(val, options.precision) : val;
                 // update slider!
@@ -4630,6 +4632,8 @@
                 }, {passive:false});
 
                 vecinput.addEventListener("change", e => {
+                    if(isNaN(e.target.value))
+                        return;
                     let val = e.target.value = clamp(e.target.value, vecinput.min, vecinput.max);
         
                     // Reset button (default value)
