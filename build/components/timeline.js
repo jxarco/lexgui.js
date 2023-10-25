@@ -166,7 +166,9 @@
                 header.addButton("", '<i class="fa-solid fa-filter"></i>', (value, event) => {this.onShowOptimizeMenu(event)}, {width: "40px"});
 
             header.addButton("", '<i class="fa-solid fa-gear"></i>', (value, event) => {
-                let dialog = new LX.Dialog("Configuration", d => {
+                if(this.dialog)
+                    return;
+                this.dialog = new LX.Dialog("Configuration", d => {
                     d.addNumber("Framerate", this.framerate, (v) => {
                         this.framerate = v;
                     }, {min: 0, disabled: false});
@@ -177,6 +179,12 @@
                             this.optimizeThreshold = v;
                         }, {min: 0, max: 0.25, step: 0.001, precision: 4});
                     
+                }, {
+                    onclose: (root) => {
+            
+                        root.remove();
+                        this.dialog = null;
+                    }
                 })
             }, {width: "40px"})
             header.endLine();
