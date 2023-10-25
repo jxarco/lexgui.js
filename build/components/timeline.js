@@ -123,6 +123,8 @@
                     return;
                 this.#resizeCanvas( [ bounding.width, bounding.height + this.header_offset ] );
             }
+
+            this.addNewTrack();
         }
 
         /**
