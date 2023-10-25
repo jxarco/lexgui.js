@@ -380,18 +380,19 @@
             // Draw time markers
             let startx = Math.round( this.timeToX( this.startTime ) ) + 0.5;
 	        let endx = Math.round( this.timeToX( this.endTime ) ) + 0.5;
-            let tick_time = this.secondsToPixels > 300 ? 0.5 : 1;
-            
+            let tick_time = this.secondsToPixels > 400 ? 0.1 : 0.5;
+            if(this.secondsToPixels < 100 )
+                tick_time = 1;
 
             ctx.save();
 
             ctx.fillStyle = Timeline.BACKGROUND_COLOR;
             ctx.fillRect( this.session.left_margin,0, canvas.width, h );
 
-            if(this.secondsToPixels > 100 )
+            if(this.secondsToPixels > 200 )
             {
                 ctx.strokeStyle = LX.getThemeColor("global-selected-light");
-                ctx.globalAlpha = 0.5 * (1.0 - LX.UTILS.clamp( 100 / this.secondsToPixels, 0, 1));
+                ctx.globalAlpha = 0.5 * (1.0 - LX.UTILS.clamp( 200 / this.secondsToPixels, 0, 1));
                 ctx.beginPath();
                 for( let time = this.startTime; time <= this.endTime; time += 1 / this.framerate )
                 {
@@ -686,6 +687,7 @@
             var centerx = this.canvas.width * 0.5;
             var x = this.xToTime( centerx );
             this.secondsToPixels *= v;
+            this.pixelsToSeconds = 1 / this.secondsToPixels;
             this.session.start_time += x - this.xToTime( centerx );
             this.draw();
         }
