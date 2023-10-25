@@ -120,7 +120,7 @@ area.addMenubar( m => {
 var [left,right] = area.split({sizes:["75%","25%"], minimizable: true});
 
 // split left area
-var [up, bottom] = left.split({type: 'vertical', sizes:["45vh","55vh"], minimizable: true});
+var [up, bottom] = left.split({type: 'vertical', sizes:["85%","15%"], minimizable: true});
 
 var kfTimeline = null;
 var clipsTimeline = null;
@@ -261,7 +261,7 @@ var bottom_panel = bottom.addPanel({id: "bottom-panel"});
 fillBottomPanel( bottom_panel ); 
 
 // split right area
-var [rup, rbottom] = right.split({type: 'vertical', sizes:["70vh","30vh"]});
+var [rup, rbottom] = right.split({type: 'vertical', sizes:["70%","30%"]});
 
 // Get new content area to fill it
 const top_tabs = up.addTabs();

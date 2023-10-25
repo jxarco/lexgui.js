@@ -83,6 +83,16 @@ body.nocursor * {
   z-index: 99;
 }
 
+#lexroot {
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+
 .lexicon {
   margin-left: 4px;
   cursor: pointer;
@@ -324,8 +334,6 @@ body.nocursor * {
 .lexsplitbar {
   background: rgba(186, 188, 207, 0.01);
   border-radius: 8px;
-  /* display: inline-block; */
-  /* position: relative; */
 }
 
 .lexsplitbar:hover {
@@ -334,15 +342,12 @@ body.nocursor * {
 
 .lexsplitbar.horizontal {
   cursor: e-resize;
-  /* top: calc(50% - 32px);
-  height: 64px; */
 }
 
 .lexsplitbar.vertical {
 	cursor: n-resize;
-  margin-top: 2px;
-  /* width: 64px;
-  left: calc(50% - 32px); */
+  transform: translateY(-3px);
+  left: calc(50% - 32px);
 }
 
 .lexsplitbar:hover {
@@ -698,7 +703,7 @@ body.nocursor * {
   margin-top: 2px;
 }
 
-.lexbutton a {    
+.lexbutton a {
   margin-left: 0px;
   font-size: 10px;
 }
@@ -1796,8 +1801,8 @@ meter::-webkit-meter-even-less-good-value {
   min-width: 32px;
 }
 
-.lexoverlaybuttons .lexwidget button {	
-  min-width: 32px;	
+.lexoverlaybuttons .lexwidget button {
+  min-width: 32px;
 }
 
 .lexoverlaybuttons.vertical {
@@ -1810,10 +1815,10 @@ meter::-webkit-meter-even-less-good-value {
   margin-right: 0px;
 }
 
-.lexoverlaybuttons.vertical .lexwidget button {	
-  min-width: 32px;	
+.lexoverlaybuttons.vertical .lexwidget button {
+  min-width: 32px;
   /* max-width: 32px !important;	 */
-  max-height: 32px !important;	
+  max-height: 32px !important;
 }
 
 .lexoverlaybuttons.bottom {
@@ -1925,8 +1930,8 @@ meter::-webkit-meter-even-less-good-value {
   width: fit-content;
   width: -moz-fit-content;
   border-radius: 10px;
-  margin-top: 4px;
-  margin-bottom: 6px;
+  padding: 4px;
+  padding-bottom: 6px;
 }
 
 .lexareatabs.dockingtab {
@@ -1952,7 +1957,7 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexareatabs.row {
   width: 100%;
-} 
+}
 
 .lexareatabs.row .lexareatab {
   background-color: var(--global-color-secondary);
@@ -2309,28 +2314,31 @@ meter::-webkit-meter-even-less-good-value {
   animation-duration: 0.5s;
 } */
 
+/* .lexarea:has(.lexmin) {
+  position: relative;
+} */
+
 .lexmin {
   display: inline-block;
   color: var(--global-selected-light);
   background: var(--global-color-primary);
   border-radius: 8px;
   padding: 4px;
-  position: relative;
+  position: absolute;
   transition: 0.3s;
   font-size: initial;
   cursor: pointer;
 }
 
 .lexmin.horizontal {
-  top: 48px;
-  right: 12px;
+  margin-top: 48px;
+  margin-left: -12px;
   height: fit-content;
 }
 
 .lexmin.vertical {
   margin-top: -12px;
   margin-left: 12px;
-  position: absolute;
 }
 
 .lexarea .fadein-vertical {
@@ -2395,7 +2403,7 @@ meter::-webkit-meter-even-less-good-value {
 .overlay-bottom .lexarea, .overlay-top  .lexarea, .overlay-left  .lexarea, .overlay-right  .lexarea,
 .overlay-bottom .lextimeline, .overlay-top  .lextimeline, .overlay-left  .lextimeline, .overlay-right  .lextimeline,
 .overlay-bottom .lextimelinearea, .overlay-top  .lextimelinearea, .overlay-left  .lextimeline, .overlay-right  .lextimelinearea {
-  
+
   background-color: var(--global-color-primary);
 }
 
