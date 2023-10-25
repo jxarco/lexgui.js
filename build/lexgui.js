@@ -2267,10 +2267,7 @@
                         const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed);
                         that.onevent( event );
                     }
-                    that.refresh();
-                    // Focus the element so we can read events...
-                    var el = this.domEl.querySelector("#" + node.id);
-                    if(el) el.focus();
+                    that.frefresh( node.id );
                 }
 
                 if(that.onevent) {
@@ -2301,6 +2298,8 @@
             });
 
             item.addEventListener("keydown", e => {
+                if(node.rename)
+                return;
                 e.preventDefault();
                 if( e.key == "Delete" )
                 {
@@ -2355,12 +2354,12 @@
 
                     node.id = this.value;
                     delete node.rename;
-                    that.refresh();
+                    that.frefresh( node.id );
                     list.querySelector("#" + this.value).classList.add('selected');
                 }
                 if(e.key == 'Escape') {
                     delete node.rename;
-                    that.refresh();
+                    that.frefresh( node.id );
                 }
             });
 
@@ -2445,7 +2444,7 @@
                         const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed);
                         that.onevent( event );
                     }
-                    that.refresh();
+                    that.frefresh( node.id );
                 });
             }
 
@@ -2512,6 +2511,13 @@
             this.data = newData ?? this.data;
             this.domEl.querySelector("ul").innerHTML = "";
             this.#create_item( null, this.data, 0, selectedId );
+        }
+
+        /* Refreshes the tree and focuses current element */
+        frefresh( id ) {
+            this.refresh();
+            var el = this.domEl.querySelector("#" + id);
+            if(el) el.focus();
         }
 
         select(id) {
