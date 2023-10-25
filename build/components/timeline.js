@@ -123,8 +123,6 @@
                     return;
                 this.#resizeCanvas( [ bounding.width, bounding.height + this.header_offset ] );
             }
-
-            this.addNewTrack();
         }
 
         /**
@@ -145,11 +143,11 @@
             LX.DEFAULT_NAME_WIDTH = "50%";
             header.sameLine();
             header.addTitle(this.name);
-            header.addText("Animation", this.animationClip ? this.animationClip.name : "", (value, event) => { 
-                if( !this.animationClip )
-                    return;
-                this.animationClip.name = value ;
-            });        
+            // header.addText("Timeline", this.animationClip ? this.animationClip.name : "", (value, event) => { 
+            //     if( !this.animationClip )
+            //         return;
+            //     this.animationClip.name = value ;
+            // });        
             header.addNumber("Duration", this.duration.toFixed(3), (value, event) => this.setDuration(value), {step: 0.01, min: 0});        
             header.addNumber("Current Time", this.currentTime, (value, event) => {
                 this.currentTime = value;
@@ -360,7 +358,7 @@
             //     this.secondsToPixels = 100;
             // this.session.start_time = -50 / this.secondsToPixels;
 
-            if(this.processTracks)
+            if(this.animationClip && this.animationClip.tracks.length)
                 this.processTracks(animation);
             
             this.updateHeader();
@@ -1282,7 +1280,7 @@
             this.autoKeyEnabled = false;
 
 
-            if(this.animationClip)
+            if(this.animationClip && this.animationClip.tracks.length)
                 this.processTracks(this.animationClip);
 
             // Add button data
@@ -2344,6 +2342,8 @@
         constructor(name, options = {}) {
 
             super(name, options);
+                        
+            this.addNewTrack();
             this.selectedClip = null;
             this.lastClipsSelected = [];
         }
@@ -3036,6 +3036,8 @@
                 this.animationClip = {tracks:[]};
                 return;
             }
+            this.saveState(idx);
+            
             if(this.animationClip.tracks[idx].locked )
             {
                 return;
@@ -3196,7 +3198,7 @@
             this.valueBeforeMove = 0;
             this.range = options.range || [0, 1];
 
-            if(this.animationClip)
+            if(this.animationClip && this.animationClip.tracks.length)
                 this.processTracks(animation);
 
             // Add button data

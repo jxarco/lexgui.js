@@ -367,6 +367,7 @@
      * position: Dialog position in screen [screen centered]
      * draggable: Dialog can be dragged [false]
      * input: If false, no text input appears
+     * required: Input has to be filled [true]. Default: false
      */
 
     function prompt(text, title, callback, options = {})
@@ -377,15 +378,27 @@
 
         const dialog = new Dialog(title, p => {
             p.addTextArea(null, text, null, { disabled: true });
-            if(options.input != false)
+            if(options.input !== false)
                 p.addText(null, options.input || value, (v) => value = v, {placeholder: "..."} );
             p.sameLine(2);
-            p.addButton(null, "OK", () => { callback.call(this, value); dialog.close() }, { buttonClass: "accept" });
+            p.addButton(null, "OK", () => { 
+                if(options.required && value === '') {
+
+                    text += text.includes("You must fill the input text.") ? "": "\nYou must fill the input text.";
+                    dialog.close() ;
+                    prompt(text, title, callback, options);
+                }else {
+
+                    callback.call(this, value); 
+                    dialog.close() ;
+                }
+                
+            }, { buttonClass: "accept" });
             p.addButton(null, "Cancel", () => {if(options.on_cancel) options.on_cancel(); dialog.close();} );
         }, options);
 
         // Focus text prompt
-        if(options.input != false)
+        if(options.input !== false)
             dialog.root.querySelector('input').focus();
         
         return dialog;
