@@ -801,6 +801,12 @@
                 this.timeBeforeMove = null;
                 e.discard = discard;
                 
+                if(e.localY <= this.topMargin) {
+                    this.currentTime = Math.max(0, time);
+                    innerSetTime(this.currentTime);
+                    return;
+                }
+                
                 if( e.button == 0 && this.onMouseUp )
                     this.onMouseUp(e, time);
             }
@@ -818,11 +824,8 @@
                 if(this.trackBulletCallback && e.track)
                     this.trackBulletCallback(e.track,e,this,[localX,localY]);
 
-                if(e.localY <= this.topMargin) {
-                    this.currentTime = Math.max(0, time);
-                    innerSetTime(this.currentTime);
-                }
-                else if( h < this.scrollableHeight && x > w - 10 )
+                
+                if( h < this.scrollableHeight && x > w - 10 )
                 {
                     this.grabbingScroll = true;
                     this.grabbing = true;
@@ -999,12 +1002,12 @@
         drawTrackWithBoxes( ctx, y, trackHeight, title, track ) {
 
             let offset = (trackHeight - trackHeight *0.6)*0.5;
+            this.tracksDrawn.push([track,y+this.topMargin,trackHeight]);
             trackHeight *= 0.6;
             let selectedClipArea = null;
 
             if(track.enabled === false)
                 ctx.globalAlpha = 0.4;
-            this.tracksDrawn.push([track,y+this.topMargin,trackHeight]);
             this.canvas = this.canvas || ctx.canvas;
             ctx.font = Math.floor( trackHeight * 0.8) + "px Arial";
             ctx.textAlign = "left";
@@ -2367,7 +2370,7 @@
 
                 // Multiple selection
                 if(!discard && track) {
-                        this.processCurrentClip( e, null, track, localX, true );
+                    this.processCurrentClip( e, null, track, localX, true );
                 }
                 // Box selection
                 else if (this.boxSelection){
