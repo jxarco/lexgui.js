@@ -11,7 +11,7 @@
 
         // init library and get main area
         let area = LX.init({ skip_default_area: true });
-
+        LX.popup("Hello! I'm a popup dialog :)", null, {position: ["45%", "20%"]})
         const pocket_dialog = new LX.PocketDialog("Load Settings", p => {
             
             p.branch("Canvas");

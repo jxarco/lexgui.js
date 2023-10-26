@@ -20,6 +20,7 @@
         <li><strong>Classic</strong> General pop-up to display any kind of information or errors.</li>
         <li><strong>Pocket</strong>: Tiny dialog used normally as a debugging tool. Can be docked to the window corners.</li>
         <li><strong>Prompt</strong>: Classic prompt pop-up to gather user information.</li>
+        <li><strong>Pop-up</strong>: Classic prompt pop-up to gather user information that fades out after a while.</li>
     </ul>
 
 <p>To fill the dialog content, a panel is automatically created inside the root so it's possible 
@@ -43,6 +44,10 @@ In case of prompts, you can create them using the following code:</p>
 }, options);
 </code></pre>
 
+<p>In case of pop-ups, you can create them using the following code:</p>
+<pre><code class="lang-js">LX.popup(<span class="str">"Message"</span>, <span class="str">"Title"</span>, options);
+</code></pre>
+
 <p>The possible <code class='inline'>options (Object)</code> when creating dialogs are the following:</p>
 
 <ul>
@@ -54,6 +59,12 @@ In case of prompts, you can create them using the following code:</p>
         <li><code class='inline'>input (Boolean)</code>: Set if it has to be an input. By default is true</li>
         <li><code class='inline'>required (Boolean)</code>: Set if the input must be filled. By default is false</li>
     </ul>
+    <li>For popup:</li>
+    <ul>
+        <li><code class='inline'>time: (Number)</code>: Time before the dialog fade out (ms). Defalut: [3000]</li>
+    </ul>
+    
+
 </ul>
 
 </body>

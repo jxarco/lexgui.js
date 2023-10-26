@@ -364,8 +364,8 @@
      * @param {String} title (Optional)
      * @param {*} options 
      * id: Id of the message dialog
-     * position: (Array) [x,y] Dialog position in screen. Default: [screen centered]
      * time: (Number) Delay time before close automatically (ms). Defalut: [3000]
+     * position: (Array) [x,y] Dialog position in screen. Default: [screen centered]
      * size: (Array) [width, height]
      */
 
