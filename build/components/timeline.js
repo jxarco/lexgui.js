@@ -143,18 +143,19 @@
             LX.DEFAULT_NAME_WIDTH = "50%";
             header.sameLine();
             header.addTitle(this.name);
-            // header.addText("Timeline", this.animationClip ? this.animationClip.name : "", (value, event) => { 
-            //     if( !this.animationClip )
-            //         return;
-            //     this.animationClip.name = value ;
-            // });        
-            header.addNumber("Duration", this.duration.toFixed(3), (value, event) => this.setDuration(value), {step: 0.01, min: 0});        
+               
+            header.addNumber("Duration", +this.duration.toFixed(3), (value, event) => {
+                this.setDuration(value, false)}, {step: 0.01, min: 0, signal: "@on_set_duration"});        
             header.addNumber("Current Time", this.currentTime, (value, event) => {
+                if(value > this.duration) {
+                    LX.emit("@on_current_time_" + this.constructor.name, this.duration);
+                    return;
+                }
                 this.currentTime = value;
                 if(this.onSetTime)
                     this.onSetTime(this.currentTime);
                 this.draw();
-            }, {signal: "@on_current_time_" + this.constructor.name, step: 0.01, min: 0, max: this.duration, precision: 3, skipSlider: true});        
+            }, {signal: "@on_current_time_" + this.constructor.name, step: 0.01, min: 0, precision: 3, skipSlider: true});        
 
             
             for(let i = 0; i < this.buttonsDrawn.length; i++) {
@@ -650,14 +651,28 @@
          * @param {Number} t 
          */
 
-        setDuration( t ) {
-            this.duration = this.animationClip.duration = t; 
-            this.updateHeader();
+        setDuration( t, updateHeader = true ) {
+            let v = this.validateDuration(t);
+            let decimals = t.toString().split('.')[1].length;
+            updateHeader = (updateHeader || +v.toFixed(decimals) != t);
+            this.duration = this.animationClip.duration = v; 
+
+            if(updateHeader) {
+                LX.emit( "@on_set_duration", v);
+            }
 
             if( this.onSetDuration ) 
-                this.onSetDuration( t );	 
+                this.onSetDuration( v );	 
         }
 
+        /**
+         * @method validateDuration
+         * @param {Number} t 
+         * @returns minimum available duration
+         */
+        validateDuration(t) {
+            return t;
+        }
 
         // Converts distance in pixels to time
         xToTime( x ) {
@@ -3183,6 +3198,18 @@
             }
 
             return indices;
+        }
+
+        validateDuration(t) {
+            for(let i = 0; i < this.animationClip.tracks.length; i++) {
+                const track = this.animationClip.tracks[i];
+                const clipsIdxs = this.getClipsInRange( track, t , this.animationClip.duration, 0 );
+                if(!clipsIdxs || !clipsIdxs.length)
+                    continue;
+                const clip = track.clips[clipsIdxs[clipsIdxs.length - 1]];
+                t = Math.max(t, clip.start + clip.duration);
+            }
+            return t;
         }
     }
 
