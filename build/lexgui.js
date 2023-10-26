@@ -352,7 +352,7 @@
         options.modal = true;
 
         return new Dialog(title, p => {
-            p.addTextArea(null, text, null, { disabled: true });
+            p.addTextArea(null, text, null, { disabled: true, fitHeight: true  });
         }, options);
     }
 
@@ -379,7 +379,7 @@
         const time = options.timeout || 3000; 
 
         const dialog = new Dialog(title, p => {
-            p.addTextArea(null, text, null, { disabled: true });
+            p.addTextArea(null, text, null, { disabled: true, fitHeight: true });
         }, options);
       
         dialog.root.classList.add("fadein");
