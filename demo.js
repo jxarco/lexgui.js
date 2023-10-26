@@ -769,5 +769,7 @@ function createAssetDialog() {
             }
         })
     },{ title:'Lexemes', close: true, minimize: false, size: ["80%"], scroll: true, resizable: true, draggable: true });
-   
+ 
+    
 }
+LX.popup("Hello! I'm a popup :)", null, {position: ["50px", "100px"]})

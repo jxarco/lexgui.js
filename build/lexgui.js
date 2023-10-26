@@ -359,6 +359,42 @@
     LX.message = message;
 
     /**
+     * @method popup
+     * @param {String} text 
+     * @param {String} title (Optional)
+     * @param {*} options 
+     * id: Id of the message dialog
+     * position: (Array) [x,y] Dialog position in screen. Default: [screen centered]
+     * time: (Number) Delay time before close automatically (ms). Defalut: [3000]
+     * size: (Array) [width, height]
+     */
+
+    function popup(text, title, options = {})
+    {
+        if(!text)
+            throw("No message to show");
+
+        options.size = options.size ?? ["auto", "auto"];
+        options.class = "lexpopup";
+        const time = options.timeout || 3000; 
+
+        const dialog = new Dialog(title, p => {
+            p.addTextArea(null, text, null, { disabled: true });
+        }, options);
+      
+        dialog.root.classList.add("fadein");
+        setTimeout(() => {
+            dialog.root.classList.remove("fadein");
+            dialog.root.classList.add("fadeout");   
+        }, time - 1000);
+        
+        setTimeout(dialog.close, time);
+        return dialog;
+    }
+
+    LX.popup = popup;
+
+    /**
      * @method prompt
      * @param {String} text 
      * @param {String} title (Optional)
@@ -5320,7 +5356,7 @@
                 LX.modal.toggle(false);
 
             var root = document.createElement('div');
-            root.className = "lexdialog";
+            root.className = "lexdialog " + (options.class ?? "");
             root.id = options.id ?? "dialog" + Dialog.#last_id++;
             LX.root.appendChild( root );
 

@@ -18,6 +18,7 @@
   --global-text-secondary: #c6c6cfd9;
   --global-dark-background: #14161a;
   --global-blur-background: #292b2da9;
+  --transition-time: 1000;
 } 
 
 ::-webkit-scrollbar {
@@ -320,6 +321,20 @@ body.nocursor * {
   -ms-transition: padding 0.2s; 
   -o-transition: padding 0.2s; 
   transition: padding 0.2s;  
+}
+
+/* Pop up dialog */
+.lexpopup {
+  opacity: 0;
+  transition: opacity 1s; 
+}
+
+.lexpopup.fadein {
+  opacity: 1;
+}
+
+.lexpopup.fadeout {
+  opacity: 0;
 }
 
 /* Area */
