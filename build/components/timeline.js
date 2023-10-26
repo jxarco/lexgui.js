@@ -148,13 +148,15 @@
                 this.setDuration(value, false)}, {step: 0.01, min: 0, signal: "@on_set_duration"});        
             header.addNumber("Current Time", this.currentTime, (value, event) => {
                 if(value > this.duration) {
-                    LX.emit("@on_current_time_" + this.constructor.name, this.duration);
-                    return;
+                    value = this.duration;
+                    LX.emit( "@on_current_time_" + this.constructor.name, value);
                 }
+                
                 this.currentTime = value;
                 if(this.onSetTime)
                     this.onSetTime(this.currentTime);
                 this.draw();
+                
             }, {signal: "@on_current_time_" + this.constructor.name, step: 0.01, min: 0, precision: 3, skipSlider: true});        
 
             
@@ -653,7 +655,7 @@
 
         setDuration( t, updateHeader = true ) {
             let v = this.validateDuration(t);
-            let decimals = t.toString().split('.')[1].length;
+            let decimals = t.toString().split('.')[1] ? t.toString().split('.')[1].length : 0;
             updateHeader = (updateHeader || +v.toFixed(decimals) != t);
             this.duration = this.animationClip.duration = v; 
 
@@ -791,7 +793,11 @@
 
            
 
-            const innerSetTime = (t) => { if( this.onSetTime ) this.onSetTime( t );	 }
+            const innerSetTime = (t) => { 
+                LX.emit( "@on_current_time_" + this.constructor.name, t);
+                if( this.onSetTime ) 
+                this.onSetTime( t );	 
+            }
 
             if( e.type == "mouseup" )
             {
@@ -1431,7 +1437,11 @@
             let localY = e.localY;
             let track = e.track;
 
-            const innerSetTime = (t) => { if( this.onSetTime ) this.onSetTime( t );	 }
+            const innerSetTime = (t) => { 
+                LX.emit( "@on_current_time_" + this.constructor.name, t);
+                if( this.onSetTime ) 
+                    this.onSetTime( t );	 
+                }
             // Manage keyframe movement
             if(this.movingKeys) {
 
@@ -1800,7 +1810,7 @@
             this.currentTime =  this.animationClip.tracks[track.clipIdx].times[ index ];
             LX.emit( "@on_current_time_" + this.constructor.name, this.currentTime );
             if( this.onSetTime )
-                this.onSetTime(  this.animationClip.tracks[track.clipIdx].times[ index ]);
+                this.onSetTime(  this.currentTime);
         }
 
         copyContent() {
@@ -1900,7 +1910,7 @@
                 this.animationClip.tracks[ track.clipIdx ].values[i] = clipboardInfo.values[j];
                 ++j;
             }
-
+            LX.emit( "@on_current_time_" + this.constructor.name, this.currentTime);
             if(this.onSetTime)
                 this.onSetTime(this.currentTime);
 
@@ -2039,6 +2049,7 @@
             if(this.onUpdateTrack)
                 this.onUpdateTrack( clipIdx );
 
+            LX.emit( "@on_current_time_" + this.constructor.name, time);
             if(this.onSetTime)
                 this.onSetTime(time);
             this.draw();
@@ -2298,8 +2309,12 @@
             
             t.selected[keyFrameIndex] = true;
 
-            if( !multiple && this.onSetTime )
-                this.onSetTime( track.times[ keyFrameIndex ] );
+            if( !multiple ) {
+                LX.emit( "@on_current_time_" + this.constructor.name, track.times[ keyFrameIndex ]);
+
+                if(this.onSetTime )
+                    this.onSetTime( track.times[ keyFrameIndex ] );
+            }
         }
 
         /**
@@ -2515,7 +2530,11 @@
 
         onMouseMove( e, time ) {
 
-            const innerSetTime = (t) => { if( this.onSetTime ) this.onSetTime( t );	 }
+            const innerSetTime = (t) => { 
+                LX.emit( "@on_current_time_" + this.constructor.name, t);
+                if( this.onSetTime ) 
+                    this.onSetTime( t );	 
+            }
 
             if(e.shiftKey) {
                 if(this.boxSelection) {
@@ -2855,6 +2874,7 @@
              if(this.onUpdateTrack)
                 this.onUpdateTrack( trackIdx );
 
+            LX.emit( "@on_current_time_" + this.constructor.name, this.currentTime);
             if(this.onSetTime)
                 this.onSetTime(this.currentTime);
 
@@ -2924,6 +2944,7 @@
              if(this.onUpdateTrack)
                 this.onUpdateTrack( trackIdx );
 
+            LX.emit( "@on_current_time_" + this.constructor.name, this.currentTime);
             if(this.onSetTime)
                 this.onSetTime(this.currentTime);
 
@@ -3365,7 +3386,11 @@
             let localY = e.localY;
             let track = e.track;
             
-            const innerSetTime = (t) => { if( this.onSetTime ) this.onSetTime( t );	 }
+            const innerSetTime = (t) => { 
+                LX.emit( "@on_current_time_" + this.constructor.name, t);
+                if( this.onSetTime ) 
+                    this.onSetTime( t );	 
+            }
             // Manage keyframe movement
             if(this.movingKeys) {
                 this.clearState();
@@ -3671,6 +3696,7 @@
     
             }
             
+            LX.emit( "@on_current_time_" + this.constructor.name, this.currentTime);
             // Update time
             if(this.onSetTime)
                 this.onSetTime(this.currentTime);
@@ -3815,10 +3841,10 @@
             this.lastKeyFramesSelected.push( selectionInfo );
             track.selected[index] = true;
             this.currentTime =  this.animationClip.tracks[track.clipIdx].times[ index ];
+            
             LX.emit( "@on_current_time_" + this.constructor.name, this.currentTime );
-
             if( this.onSetTime )
-                this.onSetTime(  this.animationClip.tracks[track.clipIdx].times[ index ]);
+                this.onSetTime( this.currentTime );
         }
 
         copyContent() {
@@ -3895,6 +3921,7 @@
                 ++j;
             }
 
+            LX.emit( "@on_current_time_" + this.constructor.name, this.currentTime);
             if(this.onSetTime)
                 this.onSetTime(this.currentTime);
 
@@ -4013,6 +4040,7 @@
             if(this.onUpdateTrack)
                 this.onUpdateTrack( clipIdx );
 
+            LX.emit( "@on_current_time_" + this.constructor.name, this.currentTime);
             if(this.onSetTime)
                 this.onSetTime(this.currentTime);
 
@@ -4300,8 +4328,12 @@
             // Select if not handled
             t.selected[keyFrameIndex] = true;
 
-            if( !multiple && this.onSetTime )
-                this.onSetTime( track.times[ keyFrameIndex ] );
+            if( !multiple) {
+
+                LX.emit( "@on_current_time_" + this.constructor.name, track.times[ keyFrameIndex]);
+                if(this.onSetTime)
+                    this.onSetTime( track.times[ keyFrameIndex ] );
+            }
         }
     }
 
