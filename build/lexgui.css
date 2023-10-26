@@ -325,6 +325,7 @@ body.nocursor * {
 
 /* Pop up dialog */
 .lexpopup {
+  background: var(--global-blur-background);
   opacity: 0;
   transition: opacity 1s; 
 }
