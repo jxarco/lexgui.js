@@ -121,7 +121,7 @@
             right.onresize = bounding => {
                 if(!(bounding.width && bounding.height)) 
                     return;
-                this.#resizeCanvas( [ bounding.width, bounding.height + this.header_offset ] );
+                this.resizeCanvas( [ bounding.width, bounding.height + this.header_offset ] );
             }
         }
 
@@ -290,7 +290,7 @@
             // }
             if(this.leftPanel.parent.root.classList.contains("hidden") || !this.root.root.parent)
                 return;
-            this.#resizeCanvas([ this.root.root.clientWidth - this.leftPanel.root.clientWidth  - 8, this.size[1]]);
+            this.resizeCanvas([ this.root.root.clientWidth - this.leftPanel.root.clientWidth  - 8, this.size[1]]);
         }
 
         /**
@@ -465,7 +465,7 @@
         
             //fill track lines
             w = w || canvas.width;
-            let max_tracks = Math.ceil( h - timeline_height / line_height );
+            let max_tracks = Math.ceil( (h - timeline_height) / line_height );
 
             ctx.save();
             ctx.fillStyle = Timeline.BACKGROUND_COLOR;
@@ -1241,10 +1241,10 @@
             this.content_area.setSize([size[0], size[1] - this.header_offset]);
             
             let w = size[0] - this.leftPanel.root.clientWidth - 8;
-            this.#resizeCanvas([w , size[1]]);
+            this.resizeCanvas([w , size[1]]);
         }
 
-        #resizeCanvas( size ) {
+        resizeCanvas( size ) {
             if( size[0] <= 0 && size[1] <=0 )
                 return;
 
@@ -1256,6 +1256,7 @@
             this.secondsToPixels = ( w - this.session.left_margin ) / this.duration;
             this.pixelsToSeconds = 1 / this.secondsToPixels;
             this.draw(this.currentTime);
+            
         }
 
         /**
@@ -2391,6 +2392,29 @@
             this.lastClipsSelected = [];
         }
 
+        resizeCanvas( size ) {
+            if( size[0] <= 0 && size[1] <=0 )
+                return;
+
+            size[1] -= this.header_offset;
+            this.canvasArea.setSize(size);
+            this.canvas.width = size[0];
+            this.canvas.height = size[1];
+            var w = Math.max(300, this.canvas.width);
+            this.secondsToPixels = ( w - this.session.left_margin ) / this.duration;
+            this.pixelsToSeconds = 1 / this.secondsToPixels;
+            
+            let timeline_height = this.topMargin;
+            let line_height = this.trackHeight;
+            let max_tracks = Math.ceil( (size[1] - timeline_height) / line_height );
+            while(this.animationClip.tracks.length < max_tracks - 1) {
+                this.addNewTrack();
+            }
+            
+            this.draw(this.currentTime);
+          
+        }
+
         onMouseUp( e ) {
             
             let track = e.track;
@@ -2676,7 +2700,7 @@
                       
             const height = this.trackHeight;
 
-            this.scrollableHeight = (tracks.length+1)*height + this.topMargin;
+            this.scrollableHeight = (tracks.length)*height + this.topMargin;
 		    let	scroll_y = - this.currentScrollInPixels;
             
             ctx.save();
@@ -2686,10 +2710,7 @@
             }
             
             ctx.restore();
-            // let offset = 25;
-            // ctx.fillStyle = 'white';
-            // if(this.name)
-            //     ctx.fillText(this.name, offset + ctx.measureText(this.name).actualBoundingBoxLeft, -this.topMargin*0.4 );
+          
         }
 
         // Creates a map for each item -> tracks
@@ -2708,7 +2729,6 @@
 
                 let track = animation.tracks[i];
 
-                // const [name, type] = this.getTrackName(track.name);
                 const name = track.name;
                 const type = track.type;
 
@@ -2718,16 +2738,10 @@
                     name: name, type: type,
                     selected: [], edited: [], hovered: [], active: true,
                     times: track.times,
-                    values: track.values
                 };
                 
                 this.tracksDictionary[track.name] = name;
-                // const trackIndex = this.tracksPerItem[name].length - 1;
-                // this.tracksPerItem[name][trackIndex].idx = trackIndex;
-                // this.tracksPerItem[name][trackIndex].clipIdx = i;
-
-                // Save index also in original track
-                // track.idx = trackIndex;
+ 
                 this.animationClip.tracks.push(trackInfo);
             }
         }
