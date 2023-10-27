@@ -2513,6 +2513,7 @@ ul.lexassetscontent {
 .lexassetscontent li.json   { border-color: rgb(104, 129, 195); }
 .lexassetscontent li.mesh   { border-color: rgb(156, 68, 68); }
 .lexassetscontent li.clip   { border-color: rgb(131, 70, 139); }
+.lexassetscontent li.sigml  { border-color: rgb(157, 186, 110); }
 
 .lexassetscontent li:hover {
   outline: 2px solid var(--global-selected);

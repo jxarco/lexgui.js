@@ -1397,18 +1397,6 @@
                 
                 if(folding == "up") area.root.insertChildAtIndex(area.sections[1].root, 0);
 
-                // // Add fold back button
-
-                // let btn = document.createElement('button');
-                // btn.className = "lexbutton foldback";
-                // btn.innerHTML = "<a class='fa-solid fa-x'></a>";
-                // this.area.root.appendChild(btn);
-
-                // btn.addEventListener('click', e => {
-                //     this.area.hide();
-                //     this.folded = true;
-                // });
-
                 // Listen resize event on parent area
                 const resizeObserver = new ResizeObserver((entries) => {
                     for (const entry of entries) {
@@ -6543,7 +6531,8 @@
                         
                         let textEl = document.createElement('text');
                         preview.appendChild(textEl);
-                        textEl.innerText = "." + extension.toUpperCase();;
+                        // If no extension, e.g. Clip, use the type...
+                        textEl.innerText = extension == item.id ? item.type.toUpperCase() : ("." + extension.toUpperCase());
 
                         var newLength = textEl.innerText.length;
                         var charsPerLine = 2.5;
@@ -6720,9 +6709,12 @@
                     case 'jpg':
                         item.type = "image"; break;
                     case 'js': 
+                    case 'css': 
                         item.type = "script"; break;
                     case 'json': 
                         item.type = "json"; break;
+                    case 'obj': 
+                        item.type = "mesh"; break;
                     default:
                         item.type = ext;
                         item.unknown_extension = true;
