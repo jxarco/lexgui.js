@@ -6497,7 +6497,7 @@
                 const is_folder = type === "Folder";
                 const is_image = type === "Image";
 
-                if((that.filter != "None" && type != that.filter) || !item.id.toLowerCase().includes(that.search_value.toLowerCase()))
+                if((that.filter != "None" && type.toLowerCase() != that.filter.toLowerCase()) || !item.id.toLowerCase().includes(that.search_value.toLowerCase()))
                     return;
 
                 let itemEl = document.createElement('li');
