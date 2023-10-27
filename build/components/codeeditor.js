@@ -90,9 +90,6 @@
         static CURSOR_LEFT  = 1;
         static CURSOR_TOP   = 2;
 
-        static MOUSE_DOUBLE_CLICK = 2;
-        static MOUSE_TRIPLE_CLICK = 3;
-
         /**
          * @param {*} options
          * skip_info, allow_add_scripts, name
@@ -835,7 +832,7 @@
             {
                 switch( e.detail )
                 {
-                    case CodeEditor.MOUSE_DOUBLE_CLICK:
+                    case LX.MOUSE_DOUBLE_CLICK:
                         const [word, from, to] = this.getWordAtPos( cursor );
                         this.resetCursorPos( CodeEditor.CURSOR_LEFT );
                         this.cursorToPosition( cursor, from );
@@ -844,7 +841,7 @@
                         this.cursorToString( cursor, word ); // Go to the end of the word
                         break;
                     // Select entire line
-                    case CodeEditor.MOUSE_TRIPLE_CLICK:
+                    case LX.MOUSE_TRIPLE_CLICK:
                         this.resetCursorPos( CodeEditor.CURSOR_LEFT );
                         e._shiftKey = true;
                         this.actions['End'].callback(cursor.line, cursor, e);

@@ -32,7 +32,8 @@
 
         let asset_browser = new LX.AssetView({ 
             // skip_browser: true,
-            // skip_preview: true
+            // skip_preview: true,
+            // root_path: "../"
         });
         bottom_area.attach( asset_browser );
 
@@ -129,6 +130,9 @@
                         console.log("Selected: ", event.item); 
                     else
                         console.log(event.item.id + " selected"); 
+                    break;
+                case LX.AssetViewEvent.ASSET_DBLCLICK: 
+                    console.log(event.item.id + " double clicked"); 
                     break;
                 case LX.AssetViewEvent.ASSET_DELETED: 
                     console.log(event.item.id + " deleted"); 
