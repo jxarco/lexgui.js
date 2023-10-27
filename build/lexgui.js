@@ -6513,11 +6513,47 @@
 
                 if( !that.skip_preview ) {
 
-                    let preview = document.createElement('img');
+                    let preview = null;
                     const has_image = item.src && ['png', 'jpg'].indexOf( getExtension( item.src ) ) > -1;
-                    preview.src = has_image ? item.src : "../images/" + item.type.toLowerCase() + ".png";
-                    if(item.unknown_extension) preview.src = "../images/file.png";
-                    itemEl.appendChild(preview);
+
+                    if( has_image || is_folder)
+                    {
+                        preview = document.createElement('img');
+                        preview.src = item.unknown_extension ? "../images/file.png" : (is_folder ? "../images/folder.png" : item.src);
+                        itemEl.appendChild(preview);
+                    }
+                    else
+                    {
+                        preview = document.createElement('svg');
+                        preview.className = "asset-file-preview";
+                        itemEl.appendChild(preview);
+                        
+                        let textEl = document.createElement('text');
+                        preview.appendChild(textEl);
+
+                        let text = item.type.toLowerCase();
+                        switch(item.type)
+                        {
+                            case "JSON": text = "{ }"; break;
+                            case "script": text = "JS"; break;
+                            case "sigml": text = "SiGML"; break;
+                            case "bml": text = "BML"; break;
+                            default: text = item.type; break;
+                        }
+
+                        textEl.innerText = text;
+
+                        var newLength = text.length;
+                        var charsPerLine = 2.5;
+                        var newEmSize = charsPerLine / newLength;
+                        var textBaseSize = 64;
+
+                        if(newEmSize < 1) {
+                            var newFontSize = newEmSize * textBaseSize;
+                            textEl.style.fontSize = newFontSize + "px";
+                            preview.style.paddingTop = "calc(50% - " + (textEl.offsetHeight * 0.5 + 10) + "px)"
+                        }
+                    }
                 }
 
                 if( !is_folder )

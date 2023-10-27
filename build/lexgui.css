@@ -1,6 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Rubik&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap');
 
 :root {
   --global-font: 'Noto Sans', sans-serif; /*'Rubik', sans-serif; */
@@ -2493,6 +2493,21 @@ ul.lexassetscontent {
   border-top: 4px solid rgba(0,0,0,0);
 }
 
+.lexassetscontent .asset-file-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: calc(100% - 20px);
+  padding-top: 16px; 
+}
+
+.lexassetscontent .asset-file-preview text {
+  font-size: 64px;
+  text-anchor: middle;
+  font-family: 'Ubuntu', sans-serif;
+}
+
 .lexassetscontent li.image  { border-color: rgb(219, 221, 228); }
 .lexassetscontent li.script { border-color: rgb(219, 189, 79); }
 .lexassetscontent li.json   { border-color: rgb(104, 129, 195); }
@@ -2578,6 +2593,10 @@ ul.lexassetscontent {
   height: 100%;
   object-fit: cover;
   transition: all 0.2s;
+}
+
+.lexassetscontent li.folder img {
+  transform: translateY(-6px);
 }
 
 .lexassetscontent li:hover img {
