@@ -6307,17 +6307,6 @@
             
             this.data = data;
 
-            for( var k = 9; k < 1700; k++ )
-            {
-                this.data.push(
-                    {
-                        id: k + ".png",
-                        type: "image",
-                        src: "https://www.pngall.com/wp-content/uploads/5/Black-Dog-PNG.png"
-                    }
-                )
-            }
-
             this._process_data(this.data, null);
             this.current_data = this.data;
             this.path = ['@'];
@@ -6349,7 +6338,6 @@
 
             if( data.constructor !== Array )
             {
-                // process
                 data['folder'] = parent;
                 data.children = data.children ?? [];
             }
@@ -6870,7 +6858,6 @@
                 this._process_data(this.data);
             }
         }
-
     }
 
     LX.AssetView = AssetView;
