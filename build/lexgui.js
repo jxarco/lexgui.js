@@ -6306,6 +6306,18 @@
             this.next_data.length = 0;
             
             this.data = data;
+
+            for( var k = 9; k < 1700; k++ )
+            {
+                this.data.push(
+                    {
+                        id: k + ".png",
+                        type: "image",
+                        src: "https://www.pngall.com/wp-content/uploads/5/Black-Dog-PNG.png"
+                    }
+                )
+            }
+
             this._process_data(this.data, null);
             this.current_data = this.data;
             this.path = ['@'];
@@ -6562,9 +6574,6 @@
                 const extension = getExtension( item.id );
                 const is_folder = type === "Folder";
 
-                if((that.filter != "None" && type.toLowerCase() != that.filter.toLowerCase()) || !item.id.toLowerCase().includes(that.search_value.toLowerCase()))
-                    return;
-
                 let itemEl = document.createElement('li');
                 itemEl.className = "lexassetitem " + item.type.toLowerCase();
                 itemEl.title = type + ": " + item.id;
@@ -6673,12 +6682,18 @@
 
             const fr = new FileReader();
 
+            const filtered_data = this.current_data.filter( _i => {
+                return (this.filter != "None" ? _i.type.toLowerCase() == this.filter.toLowerCase() : true) &&
+                    _i.id.toLowerCase().includes(this.search_value.toLowerCase())
+            } );
+
+            // Show all data if using filters
             const start_index = (this.contentPage - 1) * AssetView.MAX_PAGE_ELEMENTS;
-            const end_index = Math.min( start_index + AssetView.MAX_PAGE_ELEMENTS, this.current_data.length );
+            const end_index = Math.min( start_index + AssetView.MAX_PAGE_ELEMENTS, filtered_data.length );
 
             for( let i = start_index; i < end_index; ++i )
             {
-                let item = this.current_data[i];
+                let item = filtered_data[i];
 
                 if( item.path )
                 {
