@@ -1990,8 +1990,9 @@
         static CURVE        = 17;
         static CARD         = 18;
         static IMAGE        = 19;
-        static CUSTOM       = 20;
-        static SEPARATOR    = 21;
+        static CONTENT      = 20;
+        static CUSTOM       = 21;
+        static SEPARATOR    = 22;
 
         #no_context_types = [
             Widget.BUTTON,
@@ -3535,6 +3536,21 @@
 
             element.appendChild(container);
 
+            return widget;
+        }
+
+        /**
+         * @method addContent
+         * @param {HTMLElement} element
+         */
+
+        addContent( element, options = {} ) {
+
+            if( !element )
+            return;
+
+            let widget = this.create_widget(null, Widget.CONTENT, options);
+            widget.domEl.appendChild(element);
             return widget;
         }
 
@@ -5481,6 +5497,10 @@
             panel.root.style.height = title ? "calc( 100% - " + (titleDiv.offsetHeight + 30) + "px )" : "calc( 100% - 51px )";
         }
 
+        destroy() {
+            this.root.remove();
+        }
+
         refresh() {
 
             this.panel.root.innerHTML = "";
@@ -6212,12 +6232,16 @@
 
     class AssetView {
 
+        static ASSETVIEW_LAYOUT_CONTENT = 0;
+        static ASSETVIEW_LAYOUT_LIST    = 1;
+
         /**
          * @param {object} options
          */
         constructor( options = {} ) {
 
             this.rootPath = "../";
+            this.layout = AssetView.ASSETVIEW_LAYOUT_CONTENT;
 
             if(options.root_path)
             {
@@ -6396,6 +6420,17 @@
         }
 
         /**
+        * @method _set_content_layout
+        */
+
+        _set_content_layout( layout_mode ) {
+
+            this.layout = layout_mode;
+
+            this._refresh_content();
+        }
+
+        /**
         * @method _create_content_panel
         */
 
@@ -6420,10 +6455,22 @@
                     cmenu.root.style.zIndex = (+getComputedStyle( parent ).zIndex) + 1;
             }
 
+            const on_change_view = (value, event) => {
+                const cmenu = addContextMenu( "Layout", event, c => {
+                    c.add("Content", () => this._set_content_layout( AssetView.ASSETVIEW_LAYOUT_CONTENT ) );
+                    c.add("");
+                    c.add("List", () => this._set_content_layout( AssetView.ASSETVIEW_LAYOUT_LIST ) );
+                } );
+                const parent = this.parent.root.parentElement;
+                if( parent.classList.contains('lexdialog') )
+                    cmenu.root.style.zIndex = (+getComputedStyle( parent ).zIndex) + 1;
+            }
+
             this.rightPanel.sameLine();
             this.rightPanel.addDropdown("Filter", this.allowed_types, this.allowed_types[0], (v) => this._refresh_content.call(this, null, v), { width: "20%" });
             this.rightPanel.addText(null, this.search_value ?? "", (v) => this._refresh_content.call(this, v, null), { placeholder: "Search assets.." });
-            this.rightPanel.addButton(null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { width: "3%" });
+            this.rightPanel.addButton(null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { className: "micro", title: "Sort" });
+            this.rightPanel.addButton(null, "<a class='fa-solid fa-grip'></a>", on_change_view.bind(this), { className: "micro", title: "View" });
             this.rightPanel.endLine();
 
             if( !this.skip_browser )
@@ -6487,9 +6534,12 @@
 
         _refresh_content(search_value, filter) {
 
+            const is_content_layout = (this.layout == AssetView.ASSETVIEW_LAYOUT_CONTENT); // default
+
             this.filter = filter ?? (this.filter ?? "None");
             this.search_value = search_value ?? (this.search_value ?? "");
             this.content.innerHTML = "";
+            this.content.className = (is_content_layout ? "lexassetscontent" : "lexassetscontent list");
             let that = this;
 
             const add_item = function(item) {
@@ -6515,12 +6565,13 @@
                 if( !that.skip_preview ) {
 
                     let preview = null;
-                    const has_image = item.src && ['png', 'jpg'].indexOf( getExtension( item.src ) ) > -1;
+                    const has_image = item.src && (['png', 'jpg'].indexOf( getExtension( item.src ) ) > -1 || item.src.includes("data:image/") ); // Support b64 image as src
 
-                    if( has_image || is_folder)
+                    if( has_image || is_folder || !is_content_layout)
                     {
                         preview = document.createElement('img');
-                        preview.src = item.unknown_extension ? that.rootPath + "images/file.png" : (is_folder ? that.rootPath + "images/folder.png" : item.src);
+                        let real_src = item.unknown_extension ? that.rootPath + "images/file.png" : (is_folder ? that.rootPath + "images/folder.png" : item.src);
+                        preview.src = (is_content_layout || is_folder ? real_src : that.rootPath + "images/file.png");
                         itemEl.appendChild(preview);
                     }
                     else
@@ -6561,21 +6612,17 @@
 
                     const is_double_click = e.detail == LX.MOUSE_DOUBLE_CLICK;
 
-                    if( !is_folder ) {
-
-                        if(!is_double_click)
-                        {
-                            if(!e.shiftKey)
-                                that.content.querySelectorAll('.lexassetitem').forEach( i => i.classList.remove('selected') );
-                            this.classList.add('selected');
-                            if( !that.skip_preview )
-                                that._preview_asset( item );
-                        }
-                    }
+                    if(!is_double_click)
+                    {
+                        if(!e.shiftKey)
+                            that.content.querySelectorAll('.lexassetitem').forEach( i => i.classList.remove('selected') );
+                        this.classList.add('selected');
+                        if( !that.skip_preview )
+                            that._preview_asset( item );
+                    } 
                     else
                     {
-                        if(is_double_click) that._enter_folder( item );
-                        else console.log("TODO: Select Folder"); 
+                        if(is_folder) that._enter_folder( item );
                     }
 
                     if(that.onevent) {
@@ -6617,6 +6664,7 @@
                 if( item.path )
                 {
                     LX.request({ url: item.path, dataType: 'blob', success: (f) => {
+                        item.bytesize = f.size;
                         fr.readAsDataURL( f );
                         fr.onload = e => { 
                             item.src = e.currentTarget.result;
@@ -6643,9 +6691,9 @@
 
             if( file.type == 'image' || file.src )
             {
-                const has_image = ['png', 'jpg'].indexOf( getExtension( file.src ) ) > -1;
-                const source = has_image ? file.src : this.rootPath + "images/" + file.type.toLowerCase() + ".png";
-                this.previewPanel.addImage(source, { style: { width: "100%" } });
+                const has_image = ['png', 'jpg'].indexOf( getExtension( file.src ) ) > -1 || file.src.includes("data:image/");
+                if( has_image )
+                    this.previewPanel.addImage(file.src, { style: { width: "100%" } });
             }
 
             const options = { disabled: true };
@@ -6653,10 +6701,8 @@
             this.previewPanel.addText("Filename", file.id, null, options);
             this.previewPanel.addText("URL", file.src, null, options);
             this.previewPanel.addText("Path", this.path.join('/'), null, options);
-            this.previewPanel.sameLine();
             this.previewPanel.addText("Type", file.type, null, options);
-            this.previewPanel.addText("Size", file.bytesize ?? "0 KBs", null, options);
-            this.previewPanel.endLine();
+            file.bytesize ? this.previewPanel.addText("Size", (file.bytesize/1024).toPrecision(3) + " KBs", null, options) : 0;
             this.previewPanel.addSeparator();
             
             const preview_actions = [...this.preview_actions];

@@ -94,6 +94,14 @@ body.nocursor * {
   position: absolute;
 }
 
+.leximage {
+  text-align: center;
+}
+
+.leximage img {
+  max-width: 256px;
+}
+
 .lexicon {
   margin-left: 4px;
   cursor: pointer;
@@ -517,6 +525,12 @@ body.nocursor * {
   width: unset !important;
 }
 
+.lexwidget.micro {
+  width: 3% !important;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
 .lexwidget.small {
   width: 5% !important;
 }
@@ -740,7 +754,7 @@ body.nocursor * {
 .lexbutton:active:not(.lexbutton.combo) {
 	background-color: #4e4e4e;
   color: var(--global-text-secondary);
-  padding-top: 0.3em;
+  transform: scale(0.99);
 }
 
 .lexbutton.selected {
@@ -2466,6 +2480,11 @@ ul.lexassetscontent {
   height: calc(100% - 36px);
 }
 
+.lexassetscontent.list {
+  display: block;
+  column-count: 2;
+}
+
 .lexassetscontent li {
   -webkit-text-size-adjust: 100%;
   font-size: 12px;
@@ -2487,10 +2506,22 @@ ul.lexassetscontent {
   text-align: center;
   border-top-left-radius: 2px;
   border-top-right-radius: 2px;
-  border-bottom-left-radius: 6px;
-  border-bottom-right-radius: 6px;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
   position: relative;
   border-top: 4px solid rgba(0,0,0,0);
+}
+
+.lexassetscontent.list li {
+  width: 100%;
+  height: 1.8em;
+  border-top: 0px;
+  border-left: 4px solid rgba(0,0,0,0);
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+  margin: 0.2em;
+  margin-top: 0.5em;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.858);
 }
 
 .lexassetscontent .asset-file-preview {
@@ -2508,19 +2539,14 @@ ul.lexassetscontent {
   font-family: 'Ubuntu', sans-serif;
 }
 
-.lexassetscontent li.image  { border-color: rgb(219, 221, 228); }
-.lexassetscontent li.script { border-color: rgb(219, 189, 79); }
-.lexassetscontent li.json   { border-color: rgb(104, 129, 195); }
+.lexassetscontent li.image  { border-color: rgb(239, 188, 78); }
+.lexassetscontent li.script { border-color: rgb(104, 129, 195); }
+.lexassetscontent li.json   { border-color: rgb(163, 213, 225); }
 .lexassetscontent li.mesh   { border-color: rgb(156, 68, 68); }
-.lexassetscontent li.clip   { border-color: rgb(131, 70, 139); }
-.lexassetscontent li.sigml  { border-color: rgb(157, 186, 110); }
+.lexassetscontent li.clip   { border-color: rgb(176, 97, 187); }
+.lexassetscontent li.sigml  { border-color: rgb(154, 188, 101); }
 
 .lexassetscontent li:hover {
-  outline: 2px solid var(--global-selected);
-  /* transform: scale(1.05); */
-}
-
-.lexassetscontent li:active {
   outline: 2px solid var(--global-selected);
 }
 
@@ -2536,7 +2562,7 @@ ul.lexassetscontent {
   bottom: 0px;
   -webkit-text-size-adjust: 100%;
   font-size: 12px;
-  color: #AAA;
+  color: #BBB;
   cursor: pointer;
   text-align: center;
   box-sizing: border-box;
@@ -2552,21 +2578,30 @@ ul.lexassetscontent {
   z-index: 1;
 }
 
+.lexassetscontent.list li .lexassettitle {
+  width: 100%;
+  height: 100%;
+  text-align: left;
+  padding-left: 2em;
+}
+
 .lexassetscontent li .lexassetinfo {
   -webkit-text-size-adjust: 100%;
-  color: #AAA;
-  cursor: pointer;
+  color: #999;
   box-sizing: border-box;
-  font-size: 1.1em !important;
   position: absolute;
-  background-color: rgba(0,0,0,0.75);
   overflow: hidden;
   text-align: left;
   padding: 3px;
-  display: block;
   top: 0;
   transition: all 0.1s;
-  display: none; /* testing */
+  display: none;
+}
+
+.lexassetscontent.list li .lexassetinfo {
+  display: block;
+  right: 6px;
+  z-index: 1;
 }
 
 .lexassetscontent li:hover span {
@@ -2596,8 +2631,21 @@ ul.lexassetscontent {
   transition: all 0.2s;
 }
 
+.lexassetscontent.list img {
+  width: unset;
+  height: 2em;
+  object-fit: contain;
+  float: left;
+  z-index: 1;
+  position: relative;
+}
+
 .lexassetscontent li.folder img {
   transform: translateY(-6px);
+}
+
+.lexassetscontent.list li.folder img {
+  transform: scale(0.9);
 }
 
 .lexassetscontent li:hover img {
