@@ -531,6 +531,11 @@ body.nocursor * {
   padding-right: 4px;
 }
 
+.lexwidget.micro button {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
 .lexwidget.small {
   width: 5% !important;
 }
@@ -2481,8 +2486,9 @@ ul.lexassetscontent {
 }
 
 .lexassetscontent.list {
-  display: block;
-  column-count: 2;
+  display: table-cell;
+  columns: 3 256px;
+  width: 100%;
 }
 
 .lexassetscontent li {
@@ -2513,14 +2519,15 @@ ul.lexassetscontent {
 }
 
 .lexassetscontent.list li {
-  width: 100%;
+  width: calc(100% - 0.5em);
   height: 1.8em;
   border-top: 0px;
   border-left: 4px solid rgba(0,0,0,0);
   border-bottom-left-radius: 2px;
   border-bottom-right-radius: 2px;
-  margin: 0.2em;
-  margin-top: 0.5em;
+  margin: 0;
+  margin-top: 0.4em;
+  margin-bottom: 0.4em;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.858);
 }
 

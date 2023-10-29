@@ -6232,8 +6232,9 @@
 
     class AssetView {
 
-        static ASSETVIEW_LAYOUT_CONTENT = 0;
-        static ASSETVIEW_LAYOUT_LIST    = 1;
+        static LAYOUT_CONTENT       = 0;
+        static LAYOUT_LIST          = 1;
+        static MAX_PAGE_ELEMENTS    = 50;
 
         /**
          * @param {object} options
@@ -6241,7 +6242,8 @@
         constructor( options = {} ) {
 
             this.rootPath = "../";
-            this.layout = AssetView.ASSETVIEW_LAYOUT_CONTENT;
+            this.layout = AssetView.LAYOUT_CONTENT;
+            this.contentPage = 1;
 
             if(options.root_path)
             {
@@ -6457,13 +6459,22 @@
 
             const on_change_view = (value, event) => {
                 const cmenu = addContextMenu( "Layout", event, c => {
-                    c.add("Content", () => this._set_content_layout( AssetView.ASSETVIEW_LAYOUT_CONTENT ) );
+                    c.add("Content", () => this._set_content_layout( AssetView.LAYOUT_CONTENT ) );
                     c.add("");
-                    c.add("List", () => this._set_content_layout( AssetView.ASSETVIEW_LAYOUT_LIST ) );
+                    c.add("List", () => this._set_content_layout( AssetView.LAYOUT_LIST ) );
                 } );
                 const parent = this.parent.root.parentElement;
                 if( parent.classList.contains('lexdialog') )
                     cmenu.root.style.zIndex = (+getComputedStyle( parent ).zIndex) + 1;
+            }
+
+            const on_change_page = (value, event) => {
+                const last_page = this.contentPage;
+                this.contentPage += value;
+                this.contentPage = Math.min( this.contentPage, (((this.current_data.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1 );
+                this.contentPage = Math.max( this.contentPage, 1 );
+                if( last_page != this.contentPage )
+                    this._refresh_content();
             }
 
             this.rightPanel.sameLine();
@@ -6471,6 +6482,9 @@
             this.rightPanel.addText(null, this.search_value ?? "", (v) => this._refresh_content.call(this, v, null), { placeholder: "Search assets.." });
             this.rightPanel.addButton(null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { className: "micro", title: "Sort" });
             this.rightPanel.addButton(null, "<a class='fa-solid fa-grip'></a>", on_change_view.bind(this), { className: "micro", title: "View" });
+            // Content Pages
+            this.rightPanel.addButton(null, "<a class='fa-solid fa-angles-left'></a>", on_change_page.bind(this, -1), { className: "micro", title: "Previous Page" });
+            this.rightPanel.addButton(null, "<a class='fa-solid fa-angles-right'></a>", on_change_page.bind(this, 1), { className: "micro", title: "Next Page" });
             this.rightPanel.endLine();
 
             if( !this.skip_browser )
@@ -6534,7 +6548,7 @@
 
         _refresh_content(search_value, filter) {
 
-            const is_content_layout = (this.layout == AssetView.ASSETVIEW_LAYOUT_CONTENT); // default
+            const is_content_layout = (this.layout == AssetView.LAYOUT_CONTENT); // default
 
             this.filter = filter ?? (this.filter ?? "None");
             this.search_value = search_value ?? (this.search_value ?? "");
@@ -6659,8 +6673,13 @@
 
             const fr = new FileReader();
 
-            for( let item of this.current_data )
+            const start_index = (this.contentPage - 1) * AssetView.MAX_PAGE_ELEMENTS;
+            const end_index = Math.min( start_index + AssetView.MAX_PAGE_ELEMENTS, this.current_data.length );
+
+            for( let i = start_index; i < end_index; ++i )
             {
+                let item = this.current_data[i];
+
                 if( item.path )
                 {
                     LX.request({ url: item.path, dataType: 'blob', success: (f) => {
