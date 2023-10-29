@@ -3157,7 +3157,7 @@
                 return wValue.value;
             };
             widget.onSetValue = (new_value) => {
-                wValue.value = new_value;
+                this.disabled ? wValue.innerText = new_value : wValue.value = new_value;
                 Panel.#dispatch_event(wValue, "focusout");
             };
 
@@ -3179,9 +3179,10 @@
             container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
             container.style.display = "flex";
 
+            this.disabled = options.disabled ?? false;
             let wValue = null;
 
-            if( !options.disabled )
+            if( !this.disabled )
             {
                 wValue = document.createElement('input');
                 wValue.value = wValue.iValue = value || "";
@@ -6519,7 +6520,7 @@
                         callback:  (domEl) => { this._refresh_content(); }
                     }
                 ], { width: "auto", noSelection: true } );
-                this.rightPanel.addText(null, this.path.join('/'), null, { disabled: true, signal: "@on_folder_change", style: { fontSize: "16px", color: "#aaa" } });
+                this.rightPanel.addText(null, this.path.join('/'), null, { disabled: true, signal: "@on_folder_change", style: { fontWeight: "bolder", fontSize: "16px", color: "#aaa" } });
                 this.rightPanel.endLine();
             }
 
