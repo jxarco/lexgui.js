@@ -6803,7 +6803,7 @@
         _sort_data( sort_by, sort_descending = false ) {
 
             sort_by = sort_by ?? (this._last_sort_by ?? 'id');
-            this.data = this.data.sort( (a, b) => {
+            this.current_data = this.current_data.sort( (a, b) => {
                 var r = sort_descending ? b[sort_by].localeCompare(a[sort_by]) : a[sort_by].localeCompare(b[sort_by]);
                 if(r == 0) r = sort_descending ? b['id'].localeCompare(a['id']) : a['id'].localeCompare(b['id']);
                 return r;
