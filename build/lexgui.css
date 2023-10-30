@@ -52,6 +52,10 @@ html, body {
   font-weight: 400;
 }
 
+a:any-link {
+  color: var(--global-selected-light);
+}
+
 canvas {
   border-radius: 6px;
 }

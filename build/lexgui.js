@@ -3179,7 +3179,7 @@
             container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
             container.style.display = "flex";
 
-            this.disabled = options.disabled ?? false;
+            this.disabled = options.disabled ?? ( options.url ? true : false );
             let wValue = null;
 
             if( !this.disabled )
@@ -3224,7 +3224,12 @@
                 }
             } else
             {
-                wValue = document.createElement('div');
+                wValue = document.createElement(options.url ? 'a' : 'div');
+                if(options.url)
+                {
+                    wValue.href = options.url;
+                    wValue.target = "_blank";
+                }
                 wValue.innerText = value || "";
                 wValue.style.width = "100%";
                 wValue.style.textAlign = options.float ?? "";
