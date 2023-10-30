@@ -6527,7 +6527,7 @@
                     }
                 ], { width: "auto", noSelection: true } );
                 this.rightPanel.addText(null, this.path.join('/'), null, { disabled: true, signal: "@on_folder_change", style: { fontWeight: "bolder", fontSize: "16px", color: "#aaa" } });
-                this.rightPanel.addText(null, "Page " + this.contentPage + " / " + (((this.current_data.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1, null, {disabled: true, signal: "@on_page_change", width: "fit-content"})
+                this.rightPanel.addText(null, "Page " + this.contentPage + " / " + ((((this.current_data.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1), null, {disabled: true, signal: "@on_page_change", width: "fit-content"})
                 this.rightPanel.endLine();
             }
 
@@ -6563,7 +6563,7 @@
             this.content.innerHTML = "";
             this.content.className = (is_content_layout ? "lexassetscontent" : "lexassetscontent list");
             let that = this;
-            LX.emit("@on_page_change", "Page " + this.contentPage + " / " + (((this.current_data.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1);
+            LX.emit("@on_page_change", "Page " + this.contentPage + " / " + ((((this.current_data.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1));
             const add_item = function(item) {
 
                 const type = item.type.charAt(0).toUpperCase() + item.type.slice(1);
