@@ -465,7 +465,7 @@
         
             //fill track lines
             w = w || canvas.width;
-            let max_tracks = Math.ceil( (h - timeline_height) / line_height );
+            let max_tracks = Math.ceil( (h - timeline_height + this.currentScrollInPixels) / line_height );
 
             ctx.save();
             ctx.fillStyle = Timeline.BACKGROUND_COLOR;
