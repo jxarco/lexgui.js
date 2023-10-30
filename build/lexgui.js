@@ -6690,7 +6690,8 @@
                         item.bytesize = f.size;
                         fr.readAsDataURL( f );
                         fr.onload = e => { 
-                            item.src = e.currentTarget.result;
+                            item.src = e.currentTarget.result;  // This is a base64 string...
+                            item._path = item.path;
                             delete item.path;
                             this._refresh_content(search_value, filter);
                         };
@@ -6708,13 +6709,14 @@
 
         _preview_asset(file) {
 
-            this.previewPanel.clear();
+            const is_base_64 = file.src && file.src.includes("data:image/");
 
+            this.previewPanel.clear();
             this.previewPanel.branch("Asset");
 
             if( file.type == 'image' || file.src )
             {
-                const has_image = ['png', 'jpg'].indexOf( getExtension( file.src ) ) > -1 || file.src.includes("data:image/");
+                const has_image = ['png', 'jpg'].indexOf( getExtension( file.src ) ) > -1 || is_base_64;
                 if( has_image )
                     this.previewPanel.addImage(file.src, { style: { width: "100%" } });
             }
@@ -6722,7 +6724,7 @@
             const options = { disabled: true };
 
             this.previewPanel.addText("Filename", file.id, null, options);
-            this.previewPanel.addText("URL", file.src, null, options);
+            this.previewPanel.addText("URL", file._path ? file._path : file.src, null, options);
             this.previewPanel.addText("Path", this.path.join('/'), null, options);
             this.previewPanel.addText("Type", file.type, null, options);
             file.bytesize ? this.previewPanel.addText("Size", (file.bytesize/1024).toPrecision(3) + " KBs", null, options) : 0;
