@@ -52,6 +52,10 @@ html, body {
   font-weight: 400;
 }
 
+a:any-link {
+  color: var(--global-selected-light);
+}
+
 canvas {
   border-radius: 6px;
 }
@@ -2738,7 +2742,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .code {
-  height: calc(100% - 42px);
+  height: calc(100% - 30px);
   cursor: text;
   font-size: 18px;
   overflow: scroll;
