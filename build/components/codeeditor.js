@@ -97,6 +97,8 @@
 
         constructor( area, options = {} ) {
 
+            this.disable_edition = options.disable_edition ?? false;
+
             this.skip_info = options.skip_info;
             this.base_area = area;
             this.area = new LX.Area( { className: "lexcodeeditor", height: "auto" } );
@@ -508,7 +510,7 @@
             if( options.allow_add_scripts ?? true )
                 this.addTab("+", false, "New File");
 
-            this.addTab(options.name || "untitled", true);
+            this.addTab(options.name || "untitled", true, options.title);
 
             // Create inspector panel
             let panel = this._create_panel_info();
@@ -1552,6 +1554,8 @@
 
         deleteSelection( cursor ) {
 
+            if(this.disable_edition) 
+                return;
             // Some selections don't depend on mouse up..
             if(this.selection) this.selection.invertIfNecessary();
 

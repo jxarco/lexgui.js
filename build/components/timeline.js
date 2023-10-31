@@ -660,7 +660,7 @@
             this.duration = this.animationClip.duration = v; 
 
             if(updateHeader) {
-                LX.emit( "@on_set_duration", v);
+                LX.emit( "@on_set_duration", +v.toFixed(3));
             }
 
             if( this.onSetDuration ) 
