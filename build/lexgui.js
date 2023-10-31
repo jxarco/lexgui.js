@@ -6475,6 +6475,8 @@
             }
 
             const on_change_page = (value, event) => {
+                if(!this.allow_next_page)
+                    return;
                 const last_page = this.contentPage;
                 this.contentPage += value;
                 this.contentPage = Math.min( this.contentPage, (((this.current_data.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1 );
@@ -6683,7 +6685,7 @@
                     _i.id.toLowerCase().includes(this.search_value.toLowerCase())
             } );
 
-            if(filter) {
+            if(filter || search_value) {
                 this.contentPage = 1;
             }
             // Show all data if using filters
@@ -6711,6 +6713,7 @@
                     item.domEl = add_item( item );
                 }
             }
+            this.allow_next_page = filtered_data.length - 1 > AssetView.MAX_PAGE_ELEMENTS;
             LX.emit("@on_page_change", "Page " + this.contentPage + " / " + ((((filtered_data.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1));
         }
 
@@ -6831,6 +6834,7 @@
 
             this.prev_data.push( this.current_data );
             this.current_data = folder_item.children;
+            this.contentPage = 1;
             this._refresh_content();
 
             // Update path
