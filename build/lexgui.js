@@ -6563,7 +6563,7 @@
             this.content.innerHTML = "";
             this.content.className = (is_content_layout ? "lexassetscontent" : "lexassetscontent list");
             let that = this;
-            LX.emit("@on_page_change", "Page " + this.contentPage + " / " + ((((this.current_data.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1));
+           
             const add_item = function(item) {
 
                 const type = item.type.charAt(0).toUpperCase() + item.type.slice(1);
@@ -6683,6 +6683,9 @@
                     _i.id.toLowerCase().includes(this.search_value.toLowerCase())
             } );
 
+            if(filter) {
+                this.contentPage = 1;
+            }
             // Show all data if using filters
             const start_index = (this.contentPage - 1) * AssetView.MAX_PAGE_ELEMENTS;
             const end_index = Math.min( start_index + AssetView.MAX_PAGE_ELEMENTS, filtered_data.length );
@@ -6708,6 +6711,7 @@
                     item.domEl = add_item( item );
                 }
             }
+            LX.emit("@on_page_change", "Page " + this.contentPage + " / " + ((((filtered_data.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1));
         }
 
         /**
