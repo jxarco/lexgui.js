@@ -14,26 +14,27 @@
         let area = LX.init();
 
         // split main area
-        var [left, right] = area.split({sizes:["55%","45%"]});
+        var [leftArea, rightArea] = area.split({ sizes:["55%","45%"] });
 
-        // add canvas to left
+        // add canvas to leftArea
         var canvas = document.createElement('canvas');
         canvas.id = "mycanvas";
-        canvas.width = left.root.clientWidth;
-        canvas.height = left.root.clientHeight;
+        canvas.width = leftArea.root.clientWidth;
+        canvas.height = leftArea.root.clientHeight;
         canvas.style.width = "100%";
         canvas.style.height = "100%";
-        left.attach( canvas );
+        leftArea.attach( canvas );
 
         // add on resize event to control canvas size
-        left.onresize = function( bounding ) {
+        leftArea.onresize = function( bounding ) {
             canvas.width = bounding.width;
             canvas.height = bounding.height;
         };
 
-        let editor = new LX.CodeEditor(right, {
+        let editor = new LX.CodeEditor(rightArea, {
             // allow_add_scripts: false
         });
+
         editor.loadFile( "../data/test.json" );
         editor.loadFile( "../data/style.css" );
         editor.loadFile( "../data/script.js" );
@@ -42,17 +43,14 @@
             
             var ctx = canvas.getContext("2d");
 
-            // Get values from panel widgets (e.g. color value)
             ctx.fillStyle = "#b7a9b1";
-
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.font = "48px Monospace";
 
+            ctx.font = "48px Monospace";
             ctx.fillStyle = "#ff1999";
 
             const text = "Lexgui.js @jxarco";
-            const pos_2d = [400, 300];
-            ctx.fillText(text, pos_2d[0], pos_2d[1]);
+            ctx.fillText(text, 300, 300);
 
             requestAnimationFrame(loop);
         }

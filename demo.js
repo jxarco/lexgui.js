@@ -74,6 +74,9 @@ area.addMenubar( m => {
 
         }, { size: ["30%", null], float: "right", draggable: false});
     }} );
+    m.add( "Editor/Open AssetView", { icon: "fa-solid fa-rect", callback: () => {
+        createAssetDialog();
+    }} );
     m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass", short:  "F1", callback: () => { window.open("./docs/") }});
     m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
     m.add( "Help/Support LexGUI/Do it" );
@@ -117,10 +120,10 @@ area.addMenubar( m => {
 });
 
 // split main area
-var [left,right] = area.split({sizes:["80%","20%"], minimizable: true});
+var [left, right] = area.split({ sizes:["80%","20%"], minimizable: true });
 
 // split left area
-var [up, bottom] = left.split({type: 'vertical', sizes:["50%", null], minimizable: true});
+var [up, bottom] = left.split({ type: 'vertical', sizes:["50%", null], minimizable: true });
 
 var kfTimeline = null;
 var clipsTimeline = null;
@@ -145,8 +148,8 @@ bottom.addMenubar( m => {
         el = document.getElementById('curves-timeline');
         if(el)
             el.style.display = 'none';
-        var bottom_panel = document.getElementById('bottom-panel');
-        bottom_panel.style.display = 'block';
+        var bottomPanel = document.getElementById('bottom-panel');
+        bottomPanel.style.display = 'block';
     });
 
     m.add( "Keyframes Timeline", e => { 
@@ -257,32 +260,32 @@ bottom.addMenubar( m => {
     }
 } );
 
-var bottom_panel = bottom.addPanel({id: "bottom-panel"});
-fillBottomPanel( bottom_panel ); 
+var bottomPanel = bottom.addPanel({id: "bottom-panel"});
+fillBottomPanel( bottomPanel ); 
 
 // split right area
 var [rup, rbottom] = right.split({type: 'vertical', sizes:["70%","30%"]});
 
 // Get new content area to fill it
-const top_tabs = up.addTabs();
+const topTabs = up.addTabs();
 
 // add canvas to left upper part
 var canvas = document.createElement('canvas');
 canvas.style.width = "100%";
 canvas.style.height = "100%";
 
-const resize_canvas = ( bounding ) => {
+const resizeCanvas = ( bounding ) => {
     canvas.width = bounding.width;
     canvas.height = bounding.height;
 };
 
-top_tabs.add( "Canvas", canvas, true, resize_canvas );
-top_tabs.add( "Debug", document.createElement('div'));
+topTabs.add( "Canvas", canvas, true, resizeCanvas );
+topTabs.add( "Debug", document.createElement('div'));
 
 // add on resize event to control canvas size
-top_tabs.area.onresize = resize_canvas;
+topTabs.area.onresize = resizeCanvas;
 
-top_tabs.area.addOverlayButtons( [ 
+topTabs.area.addOverlayButtons( [ 
     [
         {
             name: "Select",
@@ -329,33 +332,33 @@ top_tabs.area.addOverlayButtons( [
 ], { float: "htc" } );
 
 // add panels
-var side_panel = rup.addPanel();
-fillPanel( side_panel );
+var sidePanel = rup.addPanel();
+fillPanel( sidePanel );
 
-const bottom_tabs = rbottom.addTabs({ fit: true });
-var side_bottom_panel = new LX.Panel();
-var side_bottom_panel_h = new LX.Panel();
-fillRightBottomPanel( side_bottom_panel, 'Vertical' );
-fillRightBottomPanel( side_bottom_panel_h, 'Horizontal' );
+const bottomTabs = rbottom.addTabs({ fit: true });
+var sideBottomPanel = new LX.Panel();
+var sideBottomPanelH = new LX.Panel();
+fillRightBottomPanel( sideBottomPanel, 'Vertical' );
+fillRightBottomPanel( sideBottomPanelH, 'Horizontal' );
 
-bottom_tabs.add( "Panel V", side_bottom_panel );
-bottom_tabs.add( "Panel H", side_bottom_panel_h );
+bottomTabs.add( "Panel V", sideBottomPanel );
+bottomTabs.add( "Panel H", sideBottomPanelH );
 
 function loop(dt) {
     
     var ctx = canvas.getContext("2d");
 
     // Get values from panel widgets (e.g. color value)
-    ctx.fillStyle = side_panel.getValue('Background');
+    ctx.fillStyle = sidePanel.getValue('Background');
 
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.font = side_panel.getValue('Font Size') + "px Monospace";
+    ctx.font = sidePanel.getValue('Font Size') + "px Monospace";
 
-    ctx.fillStyle = side_panel.getValue('Font Color');
+    ctx.fillStyle = sidePanel.getValue('Font Color');
 
-    const text = side_panel.getValue('Text');
-    const pos_2d = side_panel.getValue('2D Position');
-    ctx.fillText(text, pos_2d[0], pos_2d[1]);
+    const text = sidePanel.getValue('Text');
+    const pos2D = sidePanel.getValue('2D Position');
+    ctx.fillText(text, pos2D[0], pos2D[1]);
 
     if(kfTimeline)
         kfTimeline.draw();
@@ -377,9 +380,9 @@ requestAnimationFrame(loop);
 
 function fillPanel( panel ) {
     
-    // add data tree
+    // Add data tree
 
-    let scene_data = {
+    let sceneData = {
         'id': 'root',
         'children': [
             {
@@ -409,8 +412,8 @@ function fillPanel( panel ) {
         ]
     };
 
-    // this is optional!
-    const tree_icons = [
+    // This is optional!
+    const treeIcons = [
         {
             'name':'Add node',
             'icon': 'fa-solid fa-plus',
@@ -423,8 +426,8 @@ function fillPanel( panel ) {
         }
     ];
 
-    window.tree = panel.addTree("Scene Tree", scene_data, { 
-        icons: tree_icons, 
+    window.tree = panel.addTree("Scene Tree", sceneData, { 
+        icons: treeIcons, 
         // filter: false,
         onevent: (event) => { 
             console.log(event.string());
@@ -660,12 +663,12 @@ function fillRightBottomPanel( panel, tab ) {
             }
         });
 
-        const shader_instance = {
+        const shaderInstance = {
             'hex_color': '#f5f505',
             'high_res': true
         };
 
-        panel.addShader( "PBR Shader", shader_instance, (instance) => { console.log(instance) } );
+        panel.addShader( "PBR Shader", shaderInstance, (instance) => { console.log(instance) } );
         panel.addShader( "Empty", null );
 
         /************** */
@@ -701,7 +704,7 @@ function createAssetDialog() {
 
     let dialog = new LX.Dialog('Non Manual Features lexemes', (p) => {
 
-        const preview_actions = [
+        const previewActions = [
             {
                 name: 'Print Clip',
                 type: 'clip',
@@ -724,32 +727,26 @@ function createAssetDialog() {
             }
         ];
 
-        asset_browser = new LX.AssetView({ 
+        assetView = new LX.AssetView({ 
             skip_browser: true,
             skip_navigation: true,
-            preview_actions: preview_actions
+            preview_actions: previewActions
         });
 
-        p.attach( asset_browser );
-        let asset_data = [];
-        const values = ['brow_lowerer.png', 'lexgui.png', 'icon.png', 'json.png'];
+        p.attach( assetView );
+        let assetData = [];
+        const values = ['brow_lowerer.png', 'godot_pixelart.png', 'icon.png' ];
 
         for(let i = 0; i < values.length; i++){
             let data = {
                 id: values[i], 
-                type: "clip",
+                type: i == 0 ? "clip" : "image",
                 src: "images/" + values[i].toLowerCase(),
             }
-            asset_data.push(data);
+            assetData.push(data);
         }
 
-        asset_data.push({
-            id: "script.png", 
-            type: "image",
-            src: "images/script.png",
-        });
-        
-        asset_browser.load( asset_data, (e,v) => {
+        assetView.load( assetData, (e,v) => {
             switch(e.type) {
                 case LX.AssetViewEvent.ASSET_SELECTED: 
                     if(e.multiple)

@@ -9,10 +9,12 @@
     <script src="../build/lexgui.js"></script>
     <script>
 
-        // init library and get main area
+        // Init library and get main area
         let area = LX.init({ skip_default_area: true });
-        LX.popup("Hello! I'm a popup dialog :)", null, {position: ["45%", "20%"]})
-        const pocket_dialog = new LX.PocketDialog("Load Settings", p => {
+
+        LX.popup("Hello! I'm a popup dialog :)", null, { position: ["45%", "20%"] })
+        
+        const pocketDialog = new LX.PocketDialog("Load Settings", p => {
             
             p.branch("Canvas");
             p.addColor("Background", "#b7a9b1");
@@ -33,7 +35,7 @@
             p.merge();
         }, { float: 'lt' } );
 
-        const dialog_closable = new LX.Dialog("Closable Dialog", p => {
+        const dialogClosable = new LX.Dialog("Closable Dialog", p => {
             
             p.branch("Canvas");
             p.addColor("Background", "#b7a9b1");
@@ -50,7 +52,7 @@
             p.merge();
         }, { size: ["350px", null], closable: true });
 
-        const pocket_dialog_draggable = new LX.PocketDialog("Draggable PocketDialog", p => {
+        const draggablePocketDialog = new LX.PocketDialog("Draggable PocketDialog", p => {
             
             p.branch("Canvas");
             p.addColor("Background", "#b7a9b1");
@@ -84,16 +86,15 @@
             var ctx = canvas.getContext("2d");
 
             // Get values from panel widgets (e.g. color value)
-            ctx.fillStyle = pocket_dialog.panel.getValue('Background');
-
+            ctx.fillStyle = pocketDialog.panel.getValue('Background');
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.font = pocket_dialog.panel.getValue('Font Size') + "px Monospace";
 
-            ctx.fillStyle = pocket_dialog.panel.getValue('Font Color');
+            ctx.font = pocketDialog.panel.getValue('Font Size') + "px Monospace";
+            ctx.fillStyle = pocketDialog.panel.getValue('Font Color');
 
-            const text = pocket_dialog.panel.getValue('Text');
-            const pos_2d = pocket_dialog.panel.getValue('2D Position');
-            ctx.fillText(text, pos_2d[0], pos_2d[1]);
+            const text = pocketDialog.panel.getValue('Text');
+            const pos2D = pocketDialog.panel.getValue('2D Position');
+            ctx.fillText(text, pos2D[0], pos2D[1]);
 
             requestAnimationFrame(loop);
         }

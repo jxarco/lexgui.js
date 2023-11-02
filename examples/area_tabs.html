@@ -13,35 +13,35 @@
         let area = LX.init();
 
         // split main area
-        var [left,right] = area.split({sizes:["75%","25%"]});
+        var [leftArea, rightArea] = area.split({sizes:["75%","25%"]});
 
         // Get new content area to fill it
-        const left_tabs = left.addTabs();
+        const leftTabs = leftArea.addTabs();
 
         // add canvas to left upper part
         var canvas = document.createElement('canvas');
         canvas.id = "mycanvas";
-        canvas.width = left.root.clientWidth;
-        canvas.height = left.root.clientHeight;
+        canvas.width = leftArea.root.clientWidth;
+        canvas.height = leftArea.root.clientHeight;
         canvas.style.width = "100%";
         canvas.style.height = "100%";
-        left_tabs.add( "Canvas", canvas );
+        leftTabs.add( "Canvas", canvas );
 
         // add on resize event to control canvas size
-        left.onresize = function( bounding ) {
+        leftArea.onresize = function( bounding ) {
             canvas.width = bounding.width;
             canvas.height = bounding.height;
         };
 
-        const right_tabs = right.addTabs();
+        const rightTabs = rightArea.addTabs();
 
         var panelA = new LX.Panel();
         fillPanelA( panelA );
-        right_tabs.add( "PanelA", panelA );
+        rightTabs.add( "PanelA", panelA );
 
         var panelB = new LX.Panel();
         fillPanelB( panelB );
-        right_tabs.add( "PanelB", panelB );
+        rightTabs.add( "PanelB", panelB );
 
         function loop(dt) {
             
@@ -56,8 +56,8 @@
             ctx.fillStyle = panelA.getValue('Font Color');
 
             const text = panelA.getValue('Text');
-            const pos_2d = panelA.getValue('2D Position');
-            ctx.fillText(text, pos_2d[0], pos_2d[1]);
+            const pos2D = panelA.getValue('2D Position');
+            ctx.fillText(text, pos2D[0], pos2D[1]);
 
             requestAnimationFrame(loop);
         }
