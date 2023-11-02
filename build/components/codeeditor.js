@@ -87,6 +87,8 @@
 
     class CodeEditor {
 
+        static __instances  = [];
+
         static CURSOR_LEFT  = 1;
         static CURSOR_TOP   = 2;
 
@@ -96,6 +98,8 @@
          */
 
         constructor( area, options = {} ) {
+
+            CodeEditor.__instances.push( this );
 
             this.disable_edition = options.disable_edition ?? false;
 
@@ -515,6 +519,11 @@
             // Create inspector panel
             let panel = this._create_panel_info();
             if( panel ) area.attach( panel );
+        }
+
+        static getInstances()
+        {
+            return CodeEditor.__instances;
         }
 
         getText( min ) {

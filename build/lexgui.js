@@ -21,10 +21,26 @@
 
     function clamp (num, min, max) { return Math.min(Math.max(num, min), max) }
     function round(num, n) { return +num.toFixed(n); }
-    function deepCopy(o) { return JSON.parse(JSON.stringify(o)) }
-    function getExtension(s) { return s.split('.').pop(); }
+    
+    function has( component_name )
+    {
+        return (LX.components.indexOf( component_name ) > -1);
+    }
 
+    LX.has = has;
+
+    function getExtension(s)
+    { 
+        return s.split('.').pop(); 
+    }
+    
     LX.getExtension = getExtension;
+    
+    function deepCopy(o)
+    { 
+        return JSON.parse(JSON.stringify(o)) 
+    }
+
     LX.deepCopy = deepCopy;
 
     function setThemeColor(color_name, color)
@@ -189,7 +205,7 @@
         icon.className = "fa-solid fa-magnifying-glass";
 
         let input = document.createElement("input");
-        input.placeholder = "Search menus...";
+        input.placeholder = "Search...";
         input.value = "";
 
         let itemContainer = document.createElement("div");
@@ -211,7 +227,7 @@
 
             let searchItem = document.createElement("div");
             searchItem.className = "searchitem last";
-            const is_checkbox = (i.type && i.type === 'checkbox');
+            const is_checkbox = (i && i.type && i.type === 'checkbox');
             if(is_checkbox) {
                 searchItem.innerHTML = "<a class='fa fa-check'></a><span>" + p + t + "</span>"
             } else {
@@ -260,6 +276,26 @@
                 for( let i of m.items ) {
                     propagate_add( i, filter, "");
                 }
+
+            if( LX.has('CodeEditor') )
+            {
+                const instances = LX.CodeEditor.getInstances();
+                if(!instances.length) return;
+
+                const languages = instances[0].languages;
+
+                for( let l of languages ) {
+
+                    const key = "Set language: " + l;
+                    if( key.toLowerCase().includes(filter) ) {
+                        add_element(key, () => {
+                            for( let i of instances ) {
+                                i._change_language( l );
+                            }
+                        }, "", {});
+                    }
+                }
+            }
         }
 
         input.addEventListener('input', function(e) {
