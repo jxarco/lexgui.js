@@ -1779,7 +1779,7 @@
             });
         }
 
-        restoreState() {
+        undo() {
             
             if(!this.trackState.length)
             return;
@@ -2864,6 +2864,9 @@
                 clipsArray.push(clip);			
             }
 
+            //Save track state before add the new clip
+
+            this.saveState(trackIdx, newIdx);
             this.animationClip.tracks[trackIdx].clips = clipsArray;	
             // Move the other's clips properties
             let track = this.animationClip.tracks[trackIdx];
@@ -2978,10 +2981,11 @@
             if(!this.animationClip) 
                 this.addNewTrack();
 
+            //Search track where to place each new clip
             let trackIdxs = {};
-
             for(let i = 0; i < this.animationClip.tracks.length; i++) {
-                
+                trackIdxs = {}
+
                 for(let c = 0; c < clips.length; c++) {
                     let clip = clips[c];
                     // Update clip information
@@ -2997,22 +3001,13 @@
                         
                         if(!clipInCurrentSlot)
                         {
-                            if(clip.fadein != undefined)
-                                clip.fadein += (newStart - clip.start);
-                            if(clip.fadeout != undefined)
-                                clip.fadeout += (newStart - clip.start);
-                            clip.start = newStart;
-                            trackIdxs[c] = {trackIdx:i, start: clip.start, end: clip.start + clip.duration};
+                            trackIdxs[c] = {trackIdx:i , start: newStart, end: newStart + clip.duration};
                         } else {
                             console.warn("There is already a clip stored in time slot ", clipInCurrentSlot)
                             if(!this.animationClip.tracks[i+1]) {
                                 this.addNewTrack();
-                                if(clip.fadein != undefined)
-                                    clip.fadein += (newStart - clip.start);
-                                if(clip.fadeout != undefined)
-                                    clip.fadeout += (newStart - clip.start);
-                                clip.start = newStart;
-                                trackIdxs[c] = {trackIdx:i+1, stat: clip.start, end: clip.start + clip.duration};
+           
+                                trackIdxs[c] = {trackIdx: i+1, stat: newStart, end: newStart + clip.duration};
                             }
                             else {
 
@@ -3021,17 +3016,22 @@
                         }
                     }
                     else {
-                        clipInCurrentSlot = LX.UTILS.compareThresholdRange(newStart, newStart + clip.duration, trackIdxs[c-1].start, trackIdxs[c-1].end);                
-                        
-                        
+
+                        for(let t in trackIdxs) {
+                            if(trackIdxs[t].trackIdx == trackIdxs[c -1].trackIdx) {
+                                clipInCurrentSlot = LX.UTILS.compareThresholdRange(newStart, newStart + clip.duration, trackIdxs[t].start, trackIdxs[t].end);                
+                                if(clipInCurrentSlot)
+                                    break;
+                            }                     
+                        }
+                        if(!clipInCurrentSlot) {
+                            clipInCurrentSlot = this.animationClip.tracks[trackIdxs[c-1].trackIdx].clips.find( t => { 
+                                return LX.UTILS.compareThresholdRange(newStart, newStart + clip.duration, t.start, t.start+t.duration);                
+                            });   
+                        }
                         if(!clipInCurrentSlot) {
 
-                            if(clip.fadein != undefined)
-                                clip.fadein += (newStart - clip.start);
-                            if(clip.fadeout != undefined)
-                                clip.fadeout += (newStart - clip.start);
-                            clip.start = newStart;
-                            trackIdxs[c] = {trackIdx: trackIdxs[c-1].trackIdx, start: clip.start, end: clip.start + clip.duration};
+                            trackIdxs[c] = {trackIdx: trackIdxs[c-1].trackIdx, start: newStart, end: newStart + clip.duration};
                         } 
                         else{
                             
@@ -3043,13 +3043,8 @@
                                 });
                                 
                                 if(!clipInCurrentSlot) {
-        
-                                    if(clip.fadein != undefined)
-                                        clip.fadein += (newStart - clip.start);
-                                    if(clip.fadeout != undefined)
-                                        clip.fadeout += (newStart - clip.start);
-                                    clip.start = newStart;
-                                    trackIdxs[c] = {trackIdx:j, start: clip.start, end: clip.start + clip.duration};
+
+                                    trackIdxs[c] = {trackIdx: j, start: newStart, end: newStart + clip.duration};
                                 } 
                                 else {
                                     break;
@@ -3058,12 +3053,7 @@
                             else {
 
                                 this.addNewTrack();
-                                if(clip.fadein != undefined)
-                                    clip.fadein += (newStart - clip.start);
-                                if(clip.fadeout != undefined)
-                                    clip.fadeout += (newStart - clip.start);
-                                clip.start = newStart;
-                                trackIdxs[c] = {trackIdx:j, start: clip.start, end: clip.start + clip.duration};
+                                trackIdxs[c] = {trackIdx: j, start: newStart, end: newStart + clip.duration};
                             }   
                         }
                         
@@ -3073,7 +3063,6 @@
                         }
                     }
                     
-                    //this.saveState(clipIdx);
                 }
 
                 if(Object.keys(trackIdxs).length == clips.length) {
@@ -3081,8 +3070,17 @@
                 }
             }
 
+            //Add each clip in the assigned free slot track
             for(let i = 0; i < clips.length; i++) {
                 let clip = clips[i];
+                let newStart = trackIdxs[i].start; 
+                if(clip.fadein != undefined)
+                    clip.fadein += (newStart - clip.start);
+                if(clip.fadeout != undefined)
+                    clip.fadeout += (newStart - clip.start);
+                clip.start = newStart;
+                clip.end = clip.start + clip.duration;
+
                 // Find new index
                 let trackIdx = trackIdxs[i].trackIdx;
                 let newIdx = this.animationClip.tracks[trackIdx].clips.findIndex( t => t.start > trackIdxs[i].start );
@@ -3104,6 +3102,8 @@
                     clipsArray.push(clip);			
                 }
 
+                //Save track state before add the new clip
+                this.saveState(trackIdx, newIdx);
                 this.animationClip.tracks[trackIdx].clips = clipsArray;	
                 // Move the other's clips properties
                 let track = this.animationClip.tracks[trackIdx];
@@ -3115,9 +3115,8 @@
                 track.hovered[newIdx] = undefined;
                 track.selected[newIdx] = true;
                 track.edited[newIdx] = undefined;
-
                 this.lastClipsSelected.push( [track.idx, newIdx] );
-                    
+                
                 let end = clip.start + clip.duration;
                 
                 if( end > this.duration || !this.animationClip.duration)
@@ -3218,6 +3217,10 @@
                     }
                     this.lastClipsSelected = [...this.lastClipsSelected.slice(0, selectedIdx), ...this.lastClipsSelected.slice(selectedIdx + 1, this.lastClipsSelected.length)];
                 }
+                else {
+                    let selectedIdx = this.lastClipsSelected.findIndex(  c=> c[0] == trackIdx && c[1] == clipIdx);
+                    this.lastClipsSelected = [...this.lastClipsSelected.slice(0, selectedIdx), ...this.lastClipsSelected.slice(selectedIdx + 1, this.lastClipsSelected.length)];
+                }
             }
 
         }
@@ -3302,7 +3305,7 @@
             });
         }
 
-        restoreState() {
+        undo() {
             
             if(!this.trackState.length)
             return;
@@ -4001,7 +4004,7 @@
             });
         }
 
-        restoreState() {
+        undo() {
             
             if(!this.trackState.length)
             return;
