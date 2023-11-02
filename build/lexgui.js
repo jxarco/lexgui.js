@@ -603,7 +603,8 @@
             var width = options.width || "calc( 100% )";
             var height = options.height || "100%";
             
-            this.minWidth = options.minWidth ?? 0;
+            // This has default options..
+            this.setLimitBox( options.minWidth, options.minHeight, options.maxWidth, options.maxHeight );
     
             if(width.constructor == Number)
                 width += "px";
@@ -925,7 +926,6 @@
             {
                 if(that.type == "horizontal") {
                     that._moveSplit(last_pos[0] - e.x);
-                        
                 }
                 else {
                     that._moveSplit(last_pos[1] - e.y);
@@ -1325,11 +1325,12 @@
             }
             else {
 
-                var size = Math.max((a2.root.offsetHeight + dt) + a2.offset,  0);
+                var size = Math.max((a2.root.offsetHeight + dt) + a2.offset, parseInt(a2.minHeight));
                 if( force_width ) size = force_width;
 				a1.root.style.height = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
 				a1.root.style.height = "-webkit-calc( 100% - " + size + "px " + splitinfo + " )";
 				a1.root.style.height = "calc( 100% - " + size + "px " + splitinfo + " )";
+                a1.root.style.minHeight = a1.minHeight + "px";
 				a2.root.style.height = ( size - a2.offset ) + "px"; //other split
             }
                 
