@@ -602,6 +602,8 @@
     
             var width = options.width || "calc( 100% )";
             var height = options.height || "100%";
+            
+            this.minWidth = options.minWidth ?? 0;
     
             if(width.constructor == Number)
                 width += "px";
@@ -948,6 +950,18 @@
             // setTimeout( () => this._moveSplit(0), 100);
 
             return this.sections;
+        }
+
+        /**
+        * @method setLimitBox
+        * Set min max for width and height
+        */
+        setLimitBox( minw = 0, minh = 0, maxw = Infinity, maxh = Infinity ) {
+
+            this.minWidth   = minw;
+            this.minHeight  = minh;
+            this.maxWidth   = maxw;
+            this.maxHeight  = maxh;
         }
 
         /**
@@ -1301,11 +1315,12 @@
 
             if(this.type == "horizontal") {
 
-                var size = Math.max(a2.root.offsetWidth + dt,  0);
+                var size = Math.max(a2.root.offsetWidth + dt, parseInt(a2.minWidth));
                 if( force_width ) size = force_width;
 				a1.root.style.width = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
 				a1.root.style.width = "-webkit-calc( 100% - " + size + "px " + splitinfo + " )";
 				a1.root.style.width = "calc( 100% - " + size + "px " + splitinfo + " )";
+                a1.root.style.minWidth = a1.minWidth + "px";
 				a2.root.style.width = size + "px"; //other split
             }
             else {
@@ -2870,6 +2885,9 @@
                 element.style.width = "calc(100% - " + (this.current_branch || type == Widget.FILE ? 10 : 20) + "px)";
                 if( options.width ) {
                     element.style.width = element.style.minWidth = options.width;
+                }
+                if( options.minWidth ) {
+                    element.style.minWidth = options.minWidth;
                 }
                 if( options.height ) {
                     element.style.height = element.style.minHeight = options.height;
@@ -6312,6 +6330,9 @@
             {
                 [left, right] = area.split({ type: "horizontal", sizes: ["15%", "85%"]});
                 content_area = right;
+
+                left.setLimitBox( 210, 0 );
+                right.setLimitBox( 512, 0 );
             }
 
             if( !this.skip_preview )
@@ -6523,7 +6544,7 @@
             }
 
             this.rightPanel.sameLine();
-            this.rightPanel.addDropdown("Filter", this.allowed_types, this.allowed_types[0], (v) => this._refresh_content.call(this, null, v), { width: "20%" });
+            this.rightPanel.addDropdown("Filter", this.allowed_types, this.allowed_types[0], (v) => this._refresh_content.call(this, null, v), { width: "20%", minWidth: "128px" });
             this.rightPanel.addText(null, this.search_value ?? "", (v) => this._refresh_content.call(this, v, null), { placeholder: "Search assets.." });
             this.rightPanel.addButton(null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { className: "micro", title: "Sort" });
             this.rightPanel.addButton(null, "<a class='fa-solid fa-grip'></a>", on_change_view.bind(this), { className: "micro", title: "View" });

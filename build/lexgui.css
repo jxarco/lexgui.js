@@ -530,6 +530,7 @@ body.nocursor * {
 }
 
 .lexwidget.micro {
+  min-width: 24px;
   width: 3% !important;
   padding-left: 4px;
   padding-right: 4px;
