@@ -701,6 +701,9 @@
             if(!this.session)
                 return;
 
+            if( this.secondsToPixels * v < 100)
+                return;
+
             var centerx = this.canvas.width * 0.5;
             var x = this.xToTime( centerx );
             this.secondsToPixels *= v;
@@ -1077,51 +1080,41 @@
                         ctx.roundRect(x, y + offset, fadeinX, trackHeight, {tl: 5, bl: 5, tr:0, br:0}, true);
                     if(fadeoutX)
                         ctx.roundRect( x + w - fadeoutX, y + offset, fadeoutX, trackHeight, {tl: 0, bl: 0, tr:5, br:5}, true);
-                    
-                    // //draw clip content
-                    // if( clip.drawClip )
-                    // {
-                    //     ctx.save();
-                    //     ctx.translate(x,y);
-                    //     ctx.strokeStyle = "#AAA";
-                    //     ctx.fillStyle = "#AAA";
-                    //     clip.drawClip( ctx, x2-x, trackHeight, this.selectedClip == clip || track.selected[j], this );
-                    //     ctx.restore();
-                    // }
+                   
                     //draw clip outline
                     if(clip.hidden)
                         ctx.globalAlpha = trackAlpha * 0.5;
                     
-                        var safex = Math.max(-2, x );
-                        var safex2 = Math.min( this.canvas.width + 2, x2 );
-                    // ctx.lineWidth = 0.5;
-                    // ctx.strokeStyle = clip.constructor.color || "black";
-                    // ctx.strokeRect( safex, y, safex2-safex, trackHeight );
                     ctx.globalAlpha = trackAlpha;
                     if(this.selectedClip == clip || track.selected[j])
                         selectedClipArea = [x, y + offset, x2-x, trackHeight];
 
-                    ctx.font = "12px Rubik";
+                    ctx.fillStyle = "black"; //Timeline.FONT_COLOR; // clip.color || Timeline.FONT_COLOR;
+                    ctx.font = "12px" + Timeline.FONT;
                     //render clip selection area
                     if(selectedClipArea)
                     {
-                        ctx.strokeStyle = track.clips[j].clipColor;
-                        ctx.globalAlpha = 0.5;
+                        ctx.strokeStyle =  track.clips[j].clipColor;
+                        ctx.fillStyle = "white"; //(Timeline.FONT_COLOR || track.clips[j].clipColor);
+                        ctx.globalAlpha = 0.6;
                         ctx.lineWidth = 2.5;
                         ctx.roundRect(selectedClipArea[0]-1,selectedClipArea[1]-1,selectedClipArea[2]+2,selectedClipArea[3]+2, 5, false, true);
                         ctx.strokeStyle = "#888";
                         ctx.lineWidth = 0.5;
                         ctx.globalAlpha = this.opacity;
-                        ctx.font = "bold 13px Rubik";
+                        ctx.font = "bold 13px " + Timeline.FONT;
                     }
 
                     let text = clip.id.replaceAll("_", " ").replaceAll("-", " ");
-                    let textInfo = ctx.measureText( text );
-                    ctx.fillStyle = clip.color || Timeline.FONT_COLOR;
                     
-                    if( textInfo.width < (w - 24) )
-                        ctx.fillText( text, x + (w - textInfo.width)*0.5,  y + offset + 12 );
-                    ctx.font = "12px Rubik";
+                    if( this.secondsToPixels < 200)
+                        ctx.font = this.secondsToPixels*0.06  +"px" + Timeline.FONT;
+                
+                    let textInfo = ctx.measureText( text );
+                    if(this.secondsToPixels > 100)
+                        ctx.fillText( text, x + (w - textInfo.width)*0.5,  y + offset + trackHeight/2 + textInfo.fontBoundingBoxDescent );
+
+                    ctx.font = "12px" + Timeline.FONT;
                 }
             }
 
@@ -1242,6 +1235,8 @@
             
             let w = size[0] - this.leftPanel.root.clientWidth - 8;
             this.resizeCanvas([w , size[1]]);
+            
+            this.session.start_time = 0;
         }
 
         resizeCanvas( size ) {
@@ -1255,6 +1250,7 @@
             var w = Math.max(300, this.canvas.width);
             this.secondsToPixels = ( w - this.session.left_margin ) / this.duration;
             this.pixelsToSeconds = 1 / this.secondsToPixels;
+
             this.draw(this.currentTime);
             
         }
