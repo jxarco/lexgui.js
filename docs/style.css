@@ -42,8 +42,8 @@ code button {
 	outline: none;
 	background: none;
 	position: absolute;
-	top: 18px;
-	right: 18px;
+	top: 14px;
+	right: 14px;
 	font-size: 18px;
 	padding: 6px;
 	color: #bbb;
@@ -157,7 +157,7 @@ code {
 	font-size: calc(var(--font-size) - 1px);
 	line-height: calc(var(--line-height) - 1px);
 	margin: 16px calc(-1 * var(--page-padding));
-    background-color: #333333;
+    background-color: #282828;
 	text-align: unset !important;
   	text-justify: unset !important;
 }
@@ -207,6 +207,7 @@ code:not(.inline) {
 	overflow: auto;
 	box-sizing: border-box;
 	position: relative;
+	border-radius: 6px;
 }
 
 iframe {
@@ -299,7 +300,7 @@ pre .typ, code .typ { color: #36c0b0; } /* type */
 pre .lit, code .lit { color: #ff0080; } /* literal */
 pre .pun, code .pun { color: #888888; } /* punctuation */
 pre .pln, code .pln { color: #444444; } /* plaintext */
-pre .dec, code .dec { color: #22c44a; } /* decimal */
+pre .dec, code .dec { color: #64d881; } /* decimal */
 
 pre .tag, code .tag { color: #2194ce; } /* HTML tag */
 pre .atn, code .atn { color: #BB55FF; } /* HTML attribute name */

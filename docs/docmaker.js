@@ -1,5 +1,10 @@
 // @jxarco
 
+function MAKE_LINE_BREAK()
+{
+    document.body.appendChild( document.createElement('br') );
+}
+
 function MAKE_HEADER( string, type, id )
 {
     console.assert(string && type);
@@ -9,10 +14,10 @@ function MAKE_HEADER( string, type, id )
     document.body.appendChild( header );
 }
 
-function MAKE_PARAGRAPH( string )
+function MAKE_PARAGRAPH( string, sup )
 {
     console.assert(string);
-    let paragraph = document.createElement('p');
+    let paragraph = document.createElement(sup ? 'sup' : 'p');
     paragraph.innerHTML = string;
     document.body.appendChild( paragraph );
 }
