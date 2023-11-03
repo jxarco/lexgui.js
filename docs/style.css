@@ -36,6 +36,31 @@ body {
   	text-justify: inter-word;
 }
 
+code button {
+	border: 1px solid #666;
+	border-radius: 4px;
+	outline: none;
+	background: none;
+	position: absolute;
+	top: 18px;
+	right: 18px;
+	font-size: 18px;
+	padding: 6px;
+	color: #bbb;
+	transition: all 0.25s;
+}
+
+code button:hover {
+	color: #ccc;
+	border-color: #ccc;
+	cursor: pointer;
+}
+
+code button.copied {
+	border: 1px solid #42d065;
+	color: #42d065;
+}
+
 ::-webkit-scrollbar {
     height: 3px;
     width: 4px;
@@ -181,6 +206,7 @@ code:not(.inline) {
 	white-space: pre-wrap;
 	overflow: auto;
 	box-sizing: border-box;
+	position: relative;
 }
 
 iframe {

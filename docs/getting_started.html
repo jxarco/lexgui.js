@@ -3,39 +3,46 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Docs</title>
-    <link rel="stylesheet" href="style.css">    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.2/css/all.css">
+    <script type="text/javascript" src="docmaker.js"></script>
 </head>
 
 <body>
 
-<h1 id="getting-started">Getting Started</h1>
+<script type="text/javascript">
 
-<h2 id="download">Download</h2>
+MAKE_HEADER( "Getting Started", "h1", "getting-started" );
 
-<p>To use LexGUI.js, download it from <a href="https://github.com/jxarco/lexgui.js">jxarco/lexgui.js</a> at the <code class='inline'>build</code> folder (the best option is to <em>clone the repository in your project folder</em> to facilitate next updates) and include it directly in your HTML file using a script tag:</p>
-<pre><code class="lang-html"><span class="hljs-tag">&lt;<span class="tag">script</span> <span class="hljs-attr">src</span>=<span class="atv">"build/lexgui.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="tag">script</span>&gt;</span>
-</code></pre>
+MAKE_HEADER( "Download", "h2", "download" );
 
-<h2 id="usage">Usage</h2>
+MAKE_PARAGRAPH( `To use LexGUI.js, download it from ${INLINE_LINK("jxarco/lexgui.js", "https://github.com/jxarco/lexgui.js")} at the ${INLINE_CODE("build")} folder (the best option is to <em>clone the repository in your project folder</em> to facilitate next updates) and include it directly in your HTML file using a script tag:` );
+MAKE_CODE( `&lt;<span class="tag">script</span> src=<span class="atv">'build/lexgui.js'</span>&gt;&lt;/<span class="tag">script</span>&gt;` );
 
-<p>Once you have included <strong>lexgui.js</strong> in your project, you can start using its API to create web interfaces. The library exposes several functions and components that you can utilize to build your UI.</p>
-<p>The first thing to do is initializing the library. Calling <code class='inline'>LX.init</code> will initialize the necessary stuff and build the main <a href="#area">Area</a>, which by default will fit the root container:</p>
-<pre><code class="lang-js"><span class="kwd">let</span> area = LX.init();
-</code></pre>
-<p>Optionally, you can pass an <code class='inline'>Object</code> parameter to define a few properties: </p>
-<ul>
-<li><code class='inline'>container (String)</code>: Root container for the entire UI (default is <code class='inline'>document.body</code>)</li>
-<li><code class='inline'>id (String)</code>: id of the generated Main Area (default is <em>mainarea</em>)</li>
-</ul>
+MAKE_PARAGRAPH( `Make sure you are also including the main LexGUI stylesheet (css), located at the same ${INLINE_CODE("build")} folder:` );
+MAKE_CODE( `&lt;<span class="tag">link</span> rel=<span class="atv">'stylesheet'</span> href=<span class="atv">'build/lexgui.css'</span>&gt;&lt;/<span class="tag">script</span>&gt;` );
 
-<h2 id="namespace-globals">Namespace Globals</h2>
+MAKE_HEADER( "Usage", "h2", "usage" );
 
-<p>You can modify global namespace (<code class='inline'>LX</code>) variables before you start creating UI elements. For now, the customizable vars are the following:</p>
-<ul>
-<li><code class='inline'>LX.DEFAULT_NAME_WIDTH</code>: Width of the name container inside a widget (Default <code class='inline'>&quot;30%&quot;</code>)</li>
-<li><code class='inline'>LX.DEFAULT_SPLITBAR_SIZE</code>: Width (in pixels) of the area resize bar created on split (Default <code class='inline'>4</code>)</li>
-<li><code class='inline'>LX.OPEN_CONTEXTMENU_ENTRY</code>: Specify how the subentries of a Context Menu will be opened, &#39;<em>mouseover</em>&#39; or &#39;<em>click</em>&#39; (Default <code class='inline'>click</code>)</li>
-</ul>
+MAKE_PARAGRAPH( `Once you have included <strong>lexgui.js</strong> in your project, you can start using its API to create web interfaces. The library exposes several functions and components that you can utilize to build your UI.` );
+MAKE_PARAGRAPH( `The first thing to do is initializing the library. Calling ${INLINE_CODE("LX.init")} will initialize the necessary stuff and build the main ${INLINE_LINK("Area", "#area")}, which by default will fit the root container:` );
+MAKE_CODE( `<span class="kwd">let</span> area = LX.init();` );
+MAKE_PARAGRAPH( `Optionally, you can pass an ${INLINE_CODE("Object")} parameter to define a few properties:` );
+MAKE_BULLET_LIST( [
+    [`container (String)`, `Root container for the entire UI (default is ${INLINE_CODE("document.body")})`],
+    [`id (String)`, `id of the generated Main Area (default is <em>mainarea</em>)`]
+] );
+
+MAKE_HEADER( "Namespace Globals", "h2", "namespace-globals" );
+
+MAKE_PARAGRAPH( `You can modify global namespace (${INLINE_CODE("LX")}) variables before you start creating UI elements. For now, the customizable vars are the following:` );
+MAKE_BULLET_LIST( [
+    [`LX.DEFAULT_NAME_WIDTH`, `Width of the name container inside a widget (Default ${INLINE_CODE("30%")})`],
+    [`LX.DEFAULT_SPLITBAR_SIZE`, `Width (in pixels) of the area resize bar created on split (Default ${INLINE_CODE("4")})`],
+    [`LX.OPEN_CONTEXTMENU_ENTRY`, `Specify how the subentries of a Context Menu will be opened, '<em>mouseover</em>' or '<em>click</em>' (Default ${INLINE_CODE("click")})`]
+] );
+
+</script>
 
 </body>
 </html>
