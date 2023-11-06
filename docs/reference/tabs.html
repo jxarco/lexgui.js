@@ -12,20 +12,18 @@
 
 <!-- <h2 id="examples">Examples</h2> -->
 
-<!-- <h2 id="constructor">Constructor</h2>
+<h2 id="constructor">Constructor</h2>
 
-<h3>Area( options : Object )</h2>
+<h3>Tabs( area : Area, options : Object )</h2>
 
 <br>
 
 <p>- <span class="param">options</span></p>
 <ul>
-    <li>id: <span class="desc">Id of the element</span></li>
-    <li>className: <span class="desc">Add class to the element</span></li>
-    <li>width: <span class="desc">Width of the area element [fit space]</span></li>
-    <li>height: <span class="desc">Height of the area element [fit space]</span></li>
-    <li>no_append: <span class="desc">Create but not append to GUI root [false]</span></li>
-</ul> -->
+    <li>fit: <span class="desc">Style of the tabs. Use all parent width.</span></li>
+    <li>folding: <span class="desc">Tabs can be folded/minimized</span></li>
+    <li>onclose: <span class="desc">Function to be called when closing tabs.</span></li>
+</ul>
 
 <h2 id="properties">Properties</h2>
 <br>
@@ -36,14 +34,31 @@
 <p><span class="prop">.root</span> : <span class="desc">HTMLElement</span></p>
 <p>Container element of the tabs DOM element (div)</p>
 
+<p><span class="prop">.selected</span> : <span class="desc">String</span></p>
+<p>Name of the selected tab if any</p>
+
 <p><span class="prop">.tabs</span> : <span class="desc">Object</span></p>
-<p>Map containing each of tab information.</p>
+<p>Map containing information for each of the generated tabs.</p>
+
+<p><span class="prop">.tabDOMs</span> : <span class="desc">Object</span></p>
+<p>Map containing the DOM elements for each of the generated tabs.</p>
 
 <h2 id="methods">Methods</h2>
 <br>
 
-<p><span class="method">.add </span>( name : <span class="desc">String</span>, content : <span class="desc">HTMLElement</span>, isSelected : <span class="desc">Boolean</span>, callback : <span class="desc">Function</span> )</p>
-<p>Adds a new tab inside the tab container.</p>
+<p><span class="method">.add </span>( name : <span class="desc">String</span>, content : <span class="desc">HTMLElement</span>, options : <span class="desc">Object</span> )</p>
+<p>Adds a new tab inside the tab container. As options, you can use: </p>
+<ul> 
+    <li><b>selected</b>: If the tab is selected by default.</li>
+    <li><b>onCreate</b>: Function to be called when creating the tab DOM element.</li>
+    <li><b>onSelect</b>: Function to be called when selecting the tab.</li>
+</ul>
+
+<p><span class="method">.select </span>( name : <span class="desc">String</span> )</p>
+<p>Selects a tab, calling onSelect option callback if used when the tab was added.</p>
+
+<p><span class="method">.delete </span>( name : <span class="desc">String</span>  )</p>
+<p>Deletes permanently the tab.</p>
 
 </body>
 </html>

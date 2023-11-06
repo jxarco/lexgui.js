@@ -293,7 +293,7 @@ a.permalink {
 
 }
 
-pre .str, code .str { color: #9737f6; } /* string */
+pre .str, code .str { color: #a75bf3; } /* string */
 pre .kwd, code .kwd { color: #2194ce; } /* keyword */
 pre .com, code .com { color: #999999; } /* comment */
 pre .typ, code .typ { color: #36c0b0; } /* type */
