@@ -739,7 +739,7 @@
 
             this.openedTabs[name] = code;
 
-            this.tabs.add(name, code, selected, null, { 'fixed': (name === '+') , 'title': code.title, 'onSelect': (e, tabname) => {
+            this.tabs.add(name, code, { 'selected': selected, 'fixed': (name === '+') , 'title': code.title, 'onSelect': (e, tabname) => {
 
                 if(tabname == '+')
                 {

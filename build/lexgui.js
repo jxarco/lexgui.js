@@ -1464,7 +1464,9 @@
             }
         }
 
-        add( name, content, isSelected, callback, options = {} ) {
+        add( name, content, options = {} ) {
+
+            let isSelected = options.selected ?? false;
 
             if( isSelected ) {
                 this.root.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
@@ -1522,8 +1524,7 @@
                     this.area.root.classList.toggle('folded', !this.folded);
                 }
 
-                if(options.onSelect) 
-                    options.onSelect(e, tabEl.dataset.name);
+                if(options.onSelect) options.onSelect(e, tabEl.dataset.name);
             });
 
             tabEl.addEventListener("mouseup", e => {
@@ -1552,7 +1553,7 @@
             this.tabs[ name ] = content;
 
             setTimeout( () => {
-                if( callback ) callback.call(this, this.area.root.getBoundingClientRect());
+                if( options.onCreate ) options.onCreate.call(this, this.area.root.getBoundingClientRect());
             }, 10 );
         }
 

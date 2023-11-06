@@ -279,7 +279,7 @@ const resizeCanvas = ( bounding ) => {
     canvas.height = bounding.height;
 };
 
-topTabs.add( "Canvas", canvas, true, resizeCanvas );
+topTabs.add( "Canvas", canvas, { selected: true, onCreate: resizeCanvas } );
 topTabs.add( "Debug", document.createElement('div'));
 
 // add on resize event to control canvas size
