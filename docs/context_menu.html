@@ -3,38 +3,40 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Docs</title>
-    <link rel="stylesheet" href="style.css">    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.2/css/all.css">
+    <script type="text/javascript" src="docmaker.js"></script>
 </head>
 
 <body>
 
-<h1 id="context-menu">Context Menu</h1>
-<br>
+    <script type="text/javascript">
 
-<p>LexGUI offers a powerful context menu feature that allows you to create customizable context menus with ease. 
-    These menus provide quick access to relevant actions and options based on the user's current context, enhancing the overall user experience.</p>
-
-<p>LexGUI's context menus can be triggered not only on right-click, but in any custom event or moment is necessary. Call <code class='inline'>LX.addContextMenu(title, event, callback, options)</code>
-    to create a Context Menu:</p>
-
-<pre><code class="lang-js">LX.addContextMenu( <span class="str">"Selected Nodes"</span>, event, m => {
+        MAKE_HEADER( "Context Menu", "h1", "context-menu" );
+        MAKE_LINE_BREAK();
+                
+        MAKE_PARAGRAPH( `LexGUI offers a powerful context menu feature that allows you to create customizable context menus with ease. 
+        These menus provide quick access to relevant actions and options based on the user's current context, enhancing the overall user experience.` );
+        MAKE_PARAGRAPH( `LexGUI's context menus can be triggered not only on right-click, but in any custom event or moment is necessary. Call ${INLINE_CODE("LX.addContextMenu(title, event, callback, options)")}
+        to create a Context Menu:` );
+        MAKE_CODE( `LX.addContextMenu( <span class="str">"Selected Nodes"</span>, event, m => {
     <span class="com">// event is the DOM event that should have position info</span>
     m.add( <span class="str">"Select Children"</span>, () => console.log(<span class="str">"Select children"</span>) );
     m.add( <span class="str">"Clone"</span>, { color: <span class="str">"#0d5"</span> } );
     m.add( <span class="str">"Components/Transform"</span>);
     m.add( <span class="str">"Components/MeshRenderer"</span>);
     m.add( <span class="str">"Delete"</span> );
-});
-</code></pre>
+});` );
 
-<p>As you can observe, the usage format resembles that of other UI elements such as dialogs or menubars. You pass the menu as a parameter, 
-    allowing the user to populate it with all the desired entries and subentries. </p>
+        MAKE_PARAGRAPH( `As you can observe, the usage format resembles that of other UI elements such as dialogs or menubars. You pass the menu as a parameter, 
+        allowing the user to populate it with all the desired entries and subentries.` );
+        MAKE_PARAGRAPH( `The <code class='inline'>options (Object)</code> when creating a Context Menu are the following:` );
+        MAKE_BULLET_LIST( [
+            ["callback", "Action to call when entry is clicked"],
+            ["color", "Color of the left border of the entry (e.g. mark specific types of entries)"]
+        ] );
 
-<p>The <code class='inline'>options (Object)</code> when creating a Context Menu are the following:</p>
-<ul>
-    <li><code class='inline'>callback</code>: Action to call when entry is clicked</li>
-    <li><code class='inline'>color</code>:  Color of the left border of the entry (e.g. mark specific types of entries)</li>
-</ul>
+    </script>
 
 </body>
 </html>

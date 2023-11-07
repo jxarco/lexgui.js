@@ -10,7 +10,7 @@
     */
 
     var LX = global.LX = {
-        version: "1.0.0",
+        version: "1.1.0",
         ready: false,
         components: [], // specific pre-build components
         signals: {} // events and triggers

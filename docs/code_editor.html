@@ -3,53 +3,54 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Docs</title>
-    <link rel="stylesheet" href="style.css">    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.2/css/all.css">
+    <script type="text/javascript" src="docmaker.js"></script>
 </head>
 
 <body>
 
-<h1 id="code-editor">Code Editor</h1>
-<br>
+    <script type="text/javascript">
 
-<p>The Code Editor component supports the following language highlightings:</p>
+        MAKE_HEADER( "Code Editor", "h1", "code-editor" );
+        MAKE_LINE_BREAK();
+                
+        MAKE_PARAGRAPH( `The Code Editor component supports the following language highlightings:` );
+        MAKE_BULLET_LIST( [
+            "Plain text",
+            "JavaScript",
+            "CSS",
+            "WGSL, GLSL",
+            "JSON",
+            "XML"
+        ] );
 
-<ul>
-    <li><code class='inline'>Plain text</code></li>
-    <li><code class='inline'>JavaScript</code></li>
-    <li><code class='inline'>CSS</code></li>
-    <li><code class='inline'>WGSL, GLSL</code></li>
-    <li><code class='inline'>JSON</code></li>
-    <li><code class='inline'>XML</code></li>
-</ul>
+        MAKE_HEADER( "Creating the editor", "h2", "init" );
 
-<h2 id="init">Creating the editor</h2>
+        MAKE_PARAGRAPH( `The Editor has to be appended to an existing area. It means that it can be created anywhere in the document window (e.g. dialogs, panels, areas, etc.), since to create an area it's as easy as instancing a new
+        one. The following lines instanciate the DOM element for the editor:` );
+        MAKE_CODE( `<span class="kwd">let</span> editor = <span class="kwd">new</span> LX.<span class="typ">CodeEditor</span>( area );` );
 
-<p>The Editor has to be appended to an existing area. It means that it can be created anywhere in the document window (e.g. dialogs, panels, areas, etc.), since to create an area it's as easy as instancing a new
-    one. The following lines instanciate the DOM element for the editor: </p>
+        MAKE_PARAGRAPH( `When creating it, you can use different options to adapt the editor to your needs:` );
+        MAKE_BULLET_LIST( [
+            ["allow_add_scripts (bool)", "Enables/Disables adding new tabs when double-clicking the tab space and doesn't add the 'New tab' tab"],
+            ["skip_info (bool)", "Show or hide the editor info panel at the bottom (Line, Column, Change Hightlighting, etc.)"],
+            ["name (String)", "If defined, name of the default code tab"],
+            ["highlight (String)", "Default Hightlightin"],
+            ["onsave (Function)", "Code to call when pressing <code class='inline'>Ctrl+S</code> in the editor"],
+            ["onrun (Function)", "Code to call when pressing <code class='inline'>Ctrl+Enter</code> in the editor"]
+        ] );
 
-<pre><code class="lang-js"><span class="kwd">let</span> editor = <span class="kwd">new</span> LX.<span class="typ">CodeEditor</span>( area );</code></pre>
+        MAKE_HEADER( "Opening files and new tabs", "h2", "using-tabs" );
+        MAKE_PARAGRAPH( `To load existing files you must use ${INLINE_CODE("CodeEditor.loadFile( filename )")}. This will open a new tab with the code in it.` );
 
-<p>When creating it, you can use different options to adapt the editor to your needs:</p>
+        MAKE_PARAGRAPH( `Tab Events:` );
+        MAKE_BULLET_LIST( [
+            ["Double click to tab space", "Adds new empty tab"],
+            ["Middle click to tab", "Closes tab"]
+        ] );
 
-<ul>
-    <li><code class='inline'>allow_add_scripts (bool)</code>: Enables/Disables adding new tabs when double-clicking the tab space and doesn't add the 'New tab' tab.</li>
-    <li><code class='inline'>skip_info (bool)</code>: Show or hide the editor info panel at the bottom (Line, Column, Change Hightlighting, etc.).</li>
-    <li><code class='inline'>name (String)</code>: If defined, name of the default code tab.</li>
-    <li><code class='inline'>highlight (String)</code>: Default Hightlighting</li>
-    <li><code class='inline'>onsave (Function)</code>: Code to call when pressing <code class='inline'>Ctrl+S</code> in the editor.</li>
-    <li><code class='inline'>onrun (Function)</code>: Code to call when pressing <code class='inline'>Ctrl+Enter</code> in the editor.</li>
-</ul>
-
-<h2 id="using-tabs">Opening files and new tabs</h2>
-
-<p>To load existing files you must use <code class='inline'>CodeEditor.loadFile( filename )</code>. This will open a new tab with the code in it.</p>
-
-<p>Tab Events:</p>
-
-<ul>
-    <li><code class='inline'>Double click to tab space</code>: Adds new empty tab</li>
-    <li><code class='inline'>Middle click to tab</code>: Closes tab</li>
-</ul>
+    </script>
 
 </body>
 </html>

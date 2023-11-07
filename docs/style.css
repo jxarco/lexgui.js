@@ -293,7 +293,7 @@ a.permalink {
 
 }
 
-pre .str, code .str { color: #a75bf3; } /* string */
+pre .str, code .str { color: #9e73c9; } /* string */
 pre .kwd, code .kwd { color: #2194ce; } /* keyword */
 pre .com, code .com { color: #999999; } /* comment */
 pre .typ, code .typ { color: #36c0b0; } /* type */
@@ -305,7 +305,6 @@ pre .dec, code .dec { color: #64d881; } /* decimal */
 pre .tag, code .tag { color: #2194ce; } /* HTML tag */
 pre .atn, code .atn { color: #BB55FF; } /* HTML attribute name */
 pre .atv, code .atv { color: #dea576; } /* HTML attribute value */
-pre .str, code .str { color: #BB55FF; } /* string */
 pre .com, code .com { color: #498748; } /* comment */
 pre .lit, code .lit { color: #ff3399; } /* literal */
 pre .pln, code .pln { color: #aaaaaa; } /* plaintext */

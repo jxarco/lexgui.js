@@ -41,11 +41,12 @@ function MAKE_CODE( string )
 
 function MAKE_BULLET_LIST( list )
 {
-    console.assert(list);
+    console.assert(list && list.length > 0);
     let ul = document.createElement('ul');
+    let split = (list[0].constructor === Array);
     for( var el of list ) {
         let li = document.createElement('li');
-        li.innerHTML = INLINE_CODE( el[0] ) + ": " + el[1];
+        li.innerHTML = split ? INLINE_CODE( el[0] ) + ": " + el[1] : INLINE_CODE( el );
         ul.appendChild( li );
     }
     document.body.appendChild( ul );
