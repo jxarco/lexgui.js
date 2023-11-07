@@ -3,45 +3,54 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Docs</title>
-    <link rel="stylesheet" href="style.css">    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.2/css/all.css">
+    <script type="text/javascript" src="docmaker.js"></script>
 </head>
 
 <body>
 
-<h1 id="widgets">Adding the first widget</h1>
-<br>
+    <script type="text/javascript">
 
-<p>A widget is a <em>fundamental building block that represents a graphical user interface (GUI) element</em>. Widgets are the visual components with which users interact and provide input within an application, from basic elements like buttons and text fields to more complex elements such as dropdown menus, sliders, and checkboxes. </p>
-<p>LexGUI.js provides a wide range of <a href="widget_list.html">pre-built widgets</a> that developers can utilize to construct intuitive and visually appealing interfaces. These widgets are designed to be customizable, allowing developers to adjust their appearance and behavior to suit the specific requirements of their application.</p>
+        MAKE_HEADER( "Adding the first widget", "h1", "widgets" );
+        MAKE_LINE_BREAK();
+                
+        MAKE_PARAGRAPH( `A widget is a <em>fundamental building block that represents a graphical user interface (GUI) element</em>. 
+        Widgets are the visual components with which users interact and provide input within an application, from basic elements like buttons 
+        and text fields to more complex elements such as dropdown menus, sliders, and checkboxes.` );
+        MAKE_PARAGRAPH( `LexGUI.js provides a wide range of ${INLINE_LINK("pre-built widgets", "widget_list.html")} that developers can utilize to construct intuitive and visually appealing interfaces. 
+        These widgets are designed to be customizable, allowing developers to adjust their appearance and behavior to suit the specific requirements of their application.` );
+        MAKE_PARAGRAPH( `To add a new widget you will need a ${INLINE_LINK("Panel", "instancing_panels.html")}, that at the same time is usually attached to an area. 
+        All widgets can be created using ${INLINE_CODE("Panel.add<em>_WidgetName_</em>()")} and passing specific parameters.` );
 
-<p>To add a new widget you will need a <a href="instancing_panels.html">Panel</a>, that at the same time is usually attached to an area. 
-All widgets can be created using <code class='inline'>Panel.add<em>WidgetName</em>()</code> and passing specific parameters.</p>
+        MAKE_HEADER( "Getter and Setters", "h2", "getter-and-setters" );
 
-<h2 id="getter-and-setters">Getter and Setters</h2>
-
-<p>One of the features of LexGUI is the ability to effortlessly retrieve and modify values for any widget that has been added. This functionality provides developers with a convenient way to interact with and manipulate the UI elements within their applications:</p>
-<pre><code class="lang-js"><span class="com">// Getting Values by Widget Name</span>
+        MAKE_PARAGRAPH( `One of the features of LexGUI is the ability to effortlessly retrieve and modify values for any widget that has been added. 
+        This functionality provides developers with a convenient way to interact with and manipulate the UI elements within their applications:` );
+        MAKE_CODE( `<span class="com">// Getting Values by Widget Name</span>
 <span class="kwd">const</span> color = panel.getValue(<span class="str">'Background'</span>);
 
 <span class="com">// Settings Values</span>
 panel.setValue(<span class="str">'Font Color'</span>, color);
-</code></pre>
-<p><sup>Note: It&#39;s important to ensure that the new value provided is compatible with the widget&#39;s data type and constraints. Incorrect data types or out-of-range values may result in unexpected behavior or errors.<sup></p>
+` );
+        MAKE_PARAGRAPH( `Note: It&#39;s important to ensure that the new value provided is compatible with the widget&#39;s data type and constraints. 
+        Incorrect data types or out-of-range values may result in unexpected behavior or errors.`, true );
+        
+        MAKE_HEADER( "Reset Value", "h2", "reset-value" );
 
-<h2 id="reset-value">Reset Value</h2>
+        MAKE_PARAGRAPH( `In most cases where you set a Widget Name, you will have the option to reset the Widget Value to its default value by pressing a <em>reset button</em> what will appear on changing the initial state of the widget.` );
 
-<p>In most cases where you set a Widget Name, you will have the option to reset the Widget Value to its default value by pressing a <em>reset button</em> what will appear on changing the initial state of the widget.</p>
+        MAKE_HEADER( "Copy/Paste Value", "h2", "copy-paste-value" );
 
-<h2 id="copy-paste-value">Copy/Paste Value</h2>
+        MAKE_PARAGRAPH( `With mouse right click you will open a ${INLINE_LINK("Context Menu", "context_menu.html")} that will allow you to copy and paste widget values to other widgets of the <strong>same type</strong>.` );
 
-<p>With mouse right click you will open a <a href="context_menu.html">Context Menu</a> that will allow you to copy and paste widget values to other widgets of the <strong>same type</strong>.</p>
+        MAKE_HEADER( "Same line", "h2", "same-line" );
 
-<h2 id="same-line">Same line</h2>
+        MAKE_PARAGRAPH( `You can also add multiple widgets in the same panel row to create well-organized and visually optimized user interface layouts by calling ${INLINE_CODE("panel.sameLine(number)")}, 
+        where ${INLINE_CODE("number")} is the number of widgets to be inlined.` );
+        MAKE_PARAGRAPH( `In case of adding a dynamic number of widgets, you might want to use <span class="str">null</span> as the number and call ${INLINE_CODE("panel.endLine()")} after all the widgets have been added.` );
 
-<p>You can also add multiple widgets in the same panel row to create well-organized and visually optimized user interface layouts by calling <code class='inline'>panel.sameLine(number)</code>, 
-    where <code class='inline'>number</code> is the number of widgets to be inlined.</p>
-
-<p>In case of adding a dynamic number of widgets, you might want to use <span class="str">null</span> as the number and call <code class='inline'>panel.endLine()</code> after all the widgets have been added. </p>
+    </script>
 
 </body>
 </html>

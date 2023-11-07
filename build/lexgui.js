@@ -2648,6 +2648,8 @@
             root.style.height = options.height || "100%";
             Object.assign(root.style, options.style ?? {});
 
+            this.#inline_widgets_left = -1;
+
             this.root = root;
 
             this.onevent = (e => {});
@@ -2708,9 +2710,9 @@
             this.branch_open = false;
             this.branches = [];
             this.current_branch = null;
+
             for(let w in this.widgets) {
-                if(this.widgets[w].options && this.widgets[w].options.signal)
-                {
+                if(this.widgets[w].options && this.widgets[w].options.signal) {
                     const signal = this.widgets[w].options.signal;
                     for(let i = 0; i < LX.signals[signal].length; i++) {
                         if(LX.signals[signal][i] == this.widgets[w]) {
@@ -2719,6 +2721,7 @@
                     }
                 }
             }
+
             if(this.signals) {
                 for(let w = 0; w < this.signals.length; w++) {
                     let widget = Object.values(this.signals[w])[0];
@@ -2730,8 +2733,8 @@
                     }
                 }
             }
-            this.widgets = {};
 
+            this.widgets = {};
             this.root.innerHTML = "";
         }
 
@@ -2744,17 +2747,23 @@
         sameLine( number ) {
 
             this.#inline_queued_container = this.queuedContainer;
-            this.#inline_widgets_left = number ||  Infinity;
+            this.#inline_widgets_left = number || Infinity;
         }
 
         /**
          * @method endLine
-         * @description Stop inlining widgets
+         * @description Stop inlining widgets. Use it only if the number of widgets to be inlined is NOT specified.
          */
 
-        endLine(justifyContent) {
+        endLine( justifyContent ) {
 
-            this.#inline_widgets_left = 0;
+            if( this.#inline_widgets_left == -1)
+            {
+                console.warn("No pending widgets to be inlined!");
+                return;
+            }
+
+            this.#inline_widgets_left = -1;
 
             if(!this._inlineContainer)  {
                 this._inlineContainer = document.createElement('div');
