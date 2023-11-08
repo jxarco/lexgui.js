@@ -59,6 +59,17 @@
 
     LX.getThemeColor = getThemeColor;
 
+    function getBase64Image(img) {
+        var canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        return canvas.toDataURL("image/png");
+    }
+
+    LX.getBase64Image = getBase64Image;
+
     function hexToRgb(string) {
         const red = parseInt(string.substring(1, 3), 16) / 255;
         const green = parseInt(string.substring(3, 5), 16) / 255;
@@ -80,6 +91,22 @@
            return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
         };
         return (S4()+"-"+S4());
+    }
+
+    // Timer that works everywhere (from litegraph.js)
+    if (typeof performance != "undefined") {
+        LX.getTime = performance.now.bind(performance);
+    } else if (typeof Date != "undefined" && Date.now) {
+        LX.getTime = Date.now.bind(Date);
+    } else if (typeof process != "undefined") {
+        LX.getTime = function() {
+            var t = process.hrtime();
+            return t[0] * 0.001 + t[1] * 1e-6;
+        };
+    } else {
+        LX.getTime = function getTime() {
+            return new Date().getTime();
+        };
     }
 
     let ASYNC_ENABLED = true;

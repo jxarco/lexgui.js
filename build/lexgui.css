@@ -2915,3 +2915,11 @@ ul.lexassetscontent {
 /* plain color */
 .cm-str.plaintext, .cm-kwd.plaintext, .cm-com.plaintext, .cm-typ.plaintext, .cm-lit.plaintext, 
 .cm-bln.plaintext, .cm-dec.plaintext, .cm-sym.plaintext, .cm-mtd.plaintext { color: inherit; }
+
+
+/* Node Graph */
+
+.lexnodegraph canvas {
+  width: 100%;
+  height: 100%;
+}
