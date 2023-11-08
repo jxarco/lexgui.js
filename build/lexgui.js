@@ -10,7 +10,7 @@
     */
 
     var LX = global.LX = {
-        version: "1.1.0",
+        version: "0.0.1",
         ready: false,
         components: [], // specific pre-build components
         signals: {} // events and triggers
@@ -785,8 +785,8 @@
             }
 
             // Create areas
-            var area1 = new Area({className: "split" + (options.menubar ? "" : " origin")});
-            var area2 = new Area({className: "split"});
+            var area1 = new Area({ no_append: true, className: "split" + (options.menubar ? "" : " origin") });
+            var area2 = new Area({ no_append: true, className: "split"});
 
             area1.parentArea = this;
             area2.parentArea = this;
@@ -2047,7 +2047,7 @@
         static CUSTOM       = 21;
         static SEPARATOR    = 22;
 
-        #no_context_types = [
+        static NO_CONTEXT_TYPES = [
             Widget.BUTTON,
             Widget.LIST,
             Widget.FILE,
@@ -2076,12 +2076,12 @@
 
         oncontextmenu(e) {
 
-            if( this.#no_context_types.includes(this.type) )
+            if( Widget.NO_CONTEXT_TYPES.includes(this.type) )
                 return;
 
             addContextMenu(this.typeName(), e, c => {
                 c.add("Copy", () => { this.copy() });
-                c.add("Paste", { disabled: !this.#can_paste(), callback: () => { this.paste() } } );
+                c.add("Paste", { disabled: !this._can_paste(), callback: () => { this.paste() } } );
             });
         }
 
@@ -2092,13 +2092,13 @@
             navigator.clipboard.writeText( navigator.clipboard.data );
         }
 
-        #can_paste() {
+        _can_paste() {
             return this.type === Widget.CUSTOM ? navigator.clipboard.customIdx !== undefined && this.customIdx == navigator.clipboard.customIdx :
                 navigator.clipboard.type === this.type;
         }
 
         paste() {
-            if( !this.#can_paste() )
+            if( !this._can_paste() )
             return;
 
             this.set(navigator.clipboard.data);
@@ -2280,13 +2280,13 @@
             this.selected = [];
 
             if(data.constructor === Object)
-                this.#create_item(null, data);
+                this._create_item(null, data);
             else
                 for( let d of data )
-                    this.#create_item(null, d);
+                    this._create_item(null, d);
         }
 
-        #create_item( parent, node, level = 0, selectedId ) {
+        _create_item( parent, node, level = 0, selectedId ) {
 
             const that = this;
             const node_filter_input = this.domEl.querySelector("#lexnodetree_filter");
@@ -2295,7 +2295,7 @@
             if(node_filter_input && !node.id.includes(node_filter_input.value) || (selectedId != undefined) && selectedId != node.id)
             {
                 for( var i = 0; i < node.children.length; ++i )
-                    this.#create_item( node, node.children[i], level + 1, selectedId );
+                    this._create_item( node, node.children[i], level + 1, selectedId );
                 return;
             }
 
@@ -2597,14 +2597,14 @@
                     node.children.forEach( c => has_parent_child |= (c.children && c.children.length) );
                     if(!has_parent_child) continue;
                 }
-                this.#create_item( node, child, level + 1 );
+                this._create_item( node, child, level + 1 );
             }
         }
 
         refresh(newData, selectedId) {
             this.data = newData ?? this.data;
             this.domEl.querySelector("ul").innerHTML = "";
-            this.#create_item( null, this.data, 0, selectedId );
+            this._create_item( null, this.data, 0, selectedId );
         }
 
         /* Refreshes the tree and focuses current element */
@@ -2624,9 +2624,6 @@
      */
 
     class Panel {
-
-        #inline_queued_container;
-        #inline_widgets_left;
 
         /**
          * @param {*} options 
@@ -2648,7 +2645,8 @@
             root.style.height = options.height || "100%";
             Object.assign(root.style, options.style ?? {});
 
-            this.#inline_widgets_left = -1;
+            this._inline_widgets_left = -1;
+            this._inline_queued_container = null;
 
             this.root = root;
 
@@ -2746,8 +2744,8 @@
 
         sameLine( number ) {
 
-            this.#inline_queued_container = this.queuedContainer;
-            this.#inline_widgets_left = number || Infinity;
+            this._inline_queued_container = this.queuedContainer;
+            this._inline_widgets_left = number || Infinity;
         }
 
         /**
@@ -2757,13 +2755,13 @@
 
         endLine( justifyContent ) {
 
-            if( this.#inline_widgets_left == -1)
+            if( this._inline_widgets_left == -1)
             {
                 console.warn("No pending widgets to be inlined!");
                 return;
             }
 
-            this.#inline_widgets_left = -1;
+            this._inline_widgets_left = -1;
 
             if(!this._inlineContainer)  {
                 this._inlineContainer = document.createElement('div');
@@ -2782,7 +2780,7 @@
                 if(is_pair)
                 {
                     // eg. an array, inline items appended later to 
-                    if(this.#inline_queued_container)
+                    if(this._inline_queued_container)
                         this._inlineContainer.appendChild( item[0] );
                     // eg. a dropdown, item is appended to parent, not to inline cont.
                     else
@@ -2792,7 +2790,7 @@
                     this._inlineContainer.appendChild( item );
             }
             
-            if(!this.#inline_queued_container)
+            if(!this._inline_queued_container)
             {
                 if(this.current_branch)
                     this.current_branch.content.appendChild( this._inlineContainer );
@@ -2801,7 +2799,7 @@
             }
             else
             {
-                this.#inline_queued_container.appendChild( this._inlineContainer );
+                this._inline_queued_container.appendChild( this._inlineContainer );
             }
 
             delete this._inlineWidgets;
@@ -2843,7 +2841,7 @@
 
             // Add widget filter
             if(options.filter) {
-                this.#add_filter( options.filter, {callback: this.#search_widgets.bind(this, branch.name)} );
+                this._add_filter( options.filter, {callback: this._search_widgets.bind(this, branch.name)} );
             }
 
             return branch;
@@ -2855,16 +2853,16 @@
             this.current_branch = null;
         }
 
-        #pick( arg, def ) {
+        _pick( arg, def ) {
             return (typeof arg == 'undefined' ? def : arg);
         }
 
-        static #dispatch_event( element, type, bubbles, cancelable ) {
+        static _dispatch_event( element, type, bubbles, cancelable ) {
             let event = new Event(type, { 'bubbles': bubbles, 'cancelable': cancelable });
             element.dispatchEvent(event);
         }
 
-        static #add_reset_property( container, callback ) {
+        static _add_reset_property( container, callback ) {
             var domEl = document.createElement('a');
             domEl.style.display = "none";
             domEl.style.marginRight = "6px";
@@ -2973,7 +2971,7 @@
             };
 
             // Process inline widgets
-            if(this.#inline_widgets_left > 0)
+            if(this._inline_widgets_left > 0)
             {
                 if(!this._inlineWidgets)  {
                     this._inlineWidgets = [];
@@ -2982,10 +2980,10 @@
                 // Store widget and its container
                 store_widget(element);
 
-                this.#inline_widgets_left--;
+                this._inline_widgets_left--;
 
                 // Last widget
-                if(!this.#inline_widgets_left) {
+                if(!this._inline_widgets_left) {
                     this.endLine();
                 }
             }else {
@@ -2995,7 +2993,7 @@
             return widget;
         }
 
-        #add_filter( placeholder, options = {} ) {
+        _add_filter( placeholder, options = {} ) {
 
             options.placeholder = placeholder.constructor == String ? placeholder : "Filter properties..";
             options.skipWidget = options.skipWidget ?? true;
@@ -3023,7 +3021,8 @@
             return element;
         }
 
-        #search_widgets(branchName, value) {
+        _search_widgets(branchName, value) {
+
             for( let b of this.branches ) {
 
                 if(b.name !== branchName)
@@ -3064,7 +3063,7 @@
             }
         }
 
-        #search_options(options, value) {
+        _search_options(options, value) {
             // push to right container
             const emptyFilter = !value.length;
             let filteredOptions = [];
@@ -3223,17 +3222,17 @@
             };
             widget.onSetValue = (new_value) => {
                 this.disabled ? wValue.innerText = new_value : wValue.value = new_value;
-                Panel.#dispatch_event(wValue, "focusout");
+                Panel._dispatch_event(wValue, "focusout");
             };
 
             let element = widget.domEl;
 
             // Add reset functionality
             if(widget.name && !(options.noreset ?? false)) {
-                Panel.#add_reset_property(element.domName, function() {
+                Panel._add_reset_property(element.domName, function() {
                     wValue.value = wValue.iValue;
                     this.style.display = "none";
-                    Panel.#dispatch_event(wValue, "focusout");
+                    Panel._dispatch_event(wValue, "focusout");
                 });
             }
             
@@ -3335,16 +3334,16 @@
             };
             widget.onSetValue = (new_value) => {
                 wValue.value = new_value;
-                Panel.#dispatch_event(wValue, "focusout");
+                Panel._dispatch_event(wValue, "focusout");
             };
             let element = widget.domEl;
 
             // Add reset functionality
             if(widget.name && !(options.noreset ?? false)) {
-                Panel.#add_reset_property(element.domName, function() {
+                Panel._add_reset_property(element.domName, function() {
                     wValue.value = wValue.iValue;
                     this.style.display = "none";
-                    Panel.#dispatch_event(wValue, "focusout");
+                    Panel._dispatch_event(wValue, "focusout");
                 });
             }
             
@@ -3690,7 +3689,7 @@
             // Add reset functionality
             if(widget.name)
             {
-                Panel.#add_reset_property(element.domName, function() {
+                Panel._add_reset_property(element.domName, function() {
                     value = wValue.iValue;
                     list.querySelectorAll('li').forEach( e => { if( e.getAttribute('value') == value ) e.click() } );
                     this.style.display = "none";
@@ -3761,7 +3760,7 @@
             // Add filter options
             let filter = null;
             if(options.filter ?? false)
-                filter = this.#add_filter("Search option", {container: list, callback: this.#search_options.bind(list, values)});
+                filter = this._add_filter("Search option", {container: list, callback: this._search_options.bind(list, values)});
 
             // Create option list to empty it easily..
             const list_options = document.createElement('span');
@@ -3801,7 +3800,7 @@
                         if(filter)
                         {
                             filter.querySelector('input').value = "";
-                            this.#search_options.bind(list, values, "")();
+                            this._search_options.bind(list, values, "")();
                         }
                     });
 
@@ -3884,7 +3883,7 @@
             let defaultValues = JSON.parse(JSON.stringify(values));
 
             // Add reset functionality
-            Panel.#add_reset_property(element.domName, function(e) {
+            Panel._add_reset_property(element.domName, function(e) {
                 this.style.display = "none";
                 curve_instance.element.value = JSON.parse(JSON.stringify(defaultValues));
                 curve_instance.redraw();
@@ -3945,7 +3944,7 @@
             let element = widget.domEl;
 
             // Add reset functionality
-            Panel.#add_reset_property(element.domName, function(e) {
+            Panel._add_reset_property(element.domName, function(e) {
                 this.style.display = "none";
                 value = element.value = defaultValue;
                 setLayers();
@@ -4212,7 +4211,7 @@
             // Add reset functionality
             if(widget.name)
             {
-                Panel.#add_reset_property(element.domName, function(e) {
+                Panel._add_reset_property(element.domName, function(e) {
                     this.style.display = "none";
                     value = [].concat(defaultValue);
                     create_tags();
@@ -4305,14 +4304,14 @@
             };
             widget.onSetValue = (value) => {
                 if(flag.value !== value)
-                    Panel.#dispatch_event(toggle, "click");
+                    Panel._dispatch_event(toggle, "click");
             };
 
             let element = widget.domEl;
 
             // Add reset functionality
-            Panel.#add_reset_property(element.domName, function() {
-                Panel.#dispatch_event(toggle, "click");
+            Panel._add_reset_property(element.domName, function() {
+                Panel._dispatch_event(toggle, "click");
             });
             
             // Add widget value
@@ -4407,16 +4406,16 @@
             };
             widget.onSetValue = (new_value) => {
                 color.value = new_value;
-                Panel.#dispatch_event(color, "input");
+                Panel._dispatch_event(color, "input");
             };
             let element = widget.domEl;
             let change_from_input = false;
 
             // Add reset functionality
-            Panel.#add_reset_property(element.domName, function() {
+            Panel._add_reset_property(element.domName, function() {
                 this.style.display = "none";
                 color.value = color.iValue;
-                Panel.#dispatch_event(color, "input");
+                Panel._dispatch_event(color, "input");
             });
 
             // Add widget value
@@ -4507,16 +4506,16 @@
             };
             widget.onSetValue = (new_value) => {
                 vecinput.value = new_value;
-                Panel.#dispatch_event(vecinput, "change");
+                Panel._dispatch_event(vecinput, "change");
             };
             let element = widget.domEl;
 
             // add reset functionality
             if(widget.name) {
-                Panel.#add_reset_property(element.domName, function() {
+                Panel._add_reset_property(element.domName, function() {
                     this.style.display = "none";
                     vecinput.value = vecinput.iValue;
-                    Panel.#dispatch_event(vecinput, "change");
+                    Panel._dispatch_event(vecinput, "change");
                 });
             }
 
@@ -4560,7 +4559,7 @@
                     let new_value = +this.valueAsNumber;
                     let fract = new_value % 1;
                     vecinput.value = Math.trunc(new_value) + (+fract.toPrecision(5));
-                    Panel.#dispatch_event(vecinput, "change");
+                    Panel._dispatch_event(vecinput, "change");
                 }, false);
                 box.appendChild(slider);
             }
@@ -4577,7 +4576,7 @@
                 let new_value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1));
                 let fract = new_value % 1;
                 this.value = Math.trunc(new_value) + (+fract.toPrecision(5));
-                Panel.#dispatch_event(vecinput, "change");
+                Panel._dispatch_event(vecinput, "change");
             }, {passive:false});
 
             vecinput.addEventListener("change", e => {
@@ -4621,7 +4620,7 @@
                     let new_value = (+vecinput.valueAsNumber + mult * dt);
                     let fract = new_value % 1;
                     vecinput.value = Math.trunc(new_value) + (+fract.toPrecision(5));
-                    Panel.#dispatch_event(vecinput, "change");
+                    Panel._dispatch_event(vecinput, "change");
                 }
 
                 lastY = e.pageY;
@@ -4649,7 +4648,7 @@
             return widget;
         }
 
-        static #VECTOR_COMPONENTS = {0: 'x', 1: 'y', 2: 'z', 3: 'w'};
+        static VECTOR_COMPONENTS = {0: 'x', 1: 'y', 2: 'z', 3: 'w'};
 
         _add_vector( num_components, name, value, callback, options = {} ) {
 
@@ -4672,7 +4671,7 @@
                 const inputs = element.querySelectorAll(".vecinput");
                 for( var i = 0; i < inputs.length; ++i ) {
                     inputs[i].value = new_value[i] ?? 0;
-                    Panel.#dispatch_event(inputs[i], "change");
+                    Panel._dispatch_event(inputs[i], "change");
                 }
             };
             widget.setValue = (new_value) => {
@@ -4685,11 +4684,11 @@
             let element = widget.domEl;
 
             // Add reset functionality
-            Panel.#add_reset_property(element.domName, function() {
+            Panel._add_reset_property(element.domName, function() {
                 this.style.display = "none";
                 for( let v of element.querySelectorAll(".vecinput") ) {
                     v.value = v.iValue;
-                    Panel.#dispatch_event(v, "change");
+                    Panel._dispatch_event(v, "change");
                 }
             });
 
@@ -4703,7 +4702,7 @@
 
                 let box = document.createElement('div');
                 box.className = "vecbox";
-                box.innerHTML = "<span class='" + Panel.#VECTOR_COMPONENTS[i] + "'></span>";
+                box.innerHTML = "<span class='" + Panel.VECTOR_COMPONENTS[i] + "'></span>";
 
                 let vecinput = document.createElement('input');
                 vecinput.className = "vecinput v" + num_components;
@@ -4737,11 +4736,11 @@
                     {
                         for( let v of element.querySelectorAll(".vecinput") ) {
                             v.value = (+v.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
-                            Panel.#dispatch_event(v, "change");
+                            Panel._dispatch_event(v, "change");
                         }
                     } else {
                         this.value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
-                        Panel.#dispatch_event(vecinput, "change");
+                        Panel._dispatch_event(vecinput, "change");
                     }
                 }, {passive:false});
 
@@ -4794,11 +4793,11 @@
                         {
                             for( let v of element.querySelectorAll(".vecinput") ) {
                                 v.value = (+v.valueAsNumber + mult * dt).toPrecision(5);
-                                Panel.#dispatch_event(v, "change");
+                                Panel._dispatch_event(v, "change");
                             }
                         } else {
                             vecinput.value = (+vecinput.valueAsNumber + mult * dt).toPrecision(5);
-                            Panel.#dispatch_event(vecinput, "change");
+                            Panel._dispatch_event(vecinput, "change");
                         }
                     }
 
@@ -5232,7 +5231,7 @@
             root.appendChild(branch_content);
             this.content = branch_content;
 
-            this.#addBranchSeparator();
+            this._addBranchSeparator();
 
             if(options.closed) {
                 title.className += " closed";
@@ -5266,7 +5265,7 @@
                     // p.add('<i class="fa-regular fa-window-maximize fa-rotate-180">', {id: 'dock_options1'});
                     // p.add('<i class="fa-regular fa-window-maximize fa-rotate-90">', {id: 'dock_options2'});
                     // p.add('<i class="fa-regular fa-window-maximize fa-rotate-270">', {id: 'dock_options3'});
-                    p.add('Floating', that.#on_make_floating.bind(that));
+                    p.add('Floating', that._on_make_floating.bind(that));
                 }, { icon: "fa-regular fa-window-restore" });
             };
 
@@ -5274,7 +5273,7 @@
             title.addEventListener("contextmenu", this.oncontextmenu);
         }
 
-        #on_make_floating() {
+        _on_make_floating() {
 
             const dialog = new Dialog(this.name, p => {
                 // add widgets
@@ -5297,7 +5296,7 @@
             if(last_branch.length) last_branch[last_branch.length - 1].classList.add('last');
         }
 
-        #addBranchSeparator() {
+        _addBranchSeparator() {
 
             var element = document.createElement('div');
             element.className = "lexwidgetseparator";
@@ -5413,16 +5412,14 @@
 
     class Dialog {
 
-        #oncreate;
-
-        static #last_id = 0;
+        static _last_id = 0;
 
         constructor( title, callback, options = {} ) {
             
             if(!callback)
             console.warn("Content is empty, add some widgets using 'callback' parameter!");
 
-            this.#oncreate = callback;
+            this._oncreate = callback;
             this.id = simple_guidGenerator();
 
             const size = options.size ?? [],
@@ -5435,7 +5432,7 @@
 
             var root = document.createElement('div');
             root.className = "lexdialog " + (options.class ?? "");
-            root.id = options.id ?? "dialog" + Dialog.#last_id++;
+            root.id = options.id ?? "dialog" + Dialog._last_id++;
             LX.root.appendChild( root );
 
             let that = this;
@@ -5575,7 +5572,7 @@
         refresh() {
 
             this.panel.root.innerHTML = "";
-            this.#oncreate.call(this, this.panel);
+            this._oncreate.call(this, this.panel);
         }
 
         setPosition(x, y) {
@@ -5710,7 +5707,7 @@
             }
         }
 
-        #adjust_position(div, margin, useAbsolute = false) {
+        _adjust_position(div, margin, useAbsolute = false) {
             
             let rect = div.getBoundingClientRect();
             
@@ -5737,7 +5734,7 @@
             }
         }
 
-        #create_submenu( o, k, c, d ) {
+        _create_submenu( o, k, c, d ) {
 
             this.root.querySelectorAll(".lexcontextmenubox").forEach( cm => cm.remove() );
 
@@ -5749,7 +5746,7 @@
             {
                 const subitem = o[k][i];
                 const subkey = Object.keys(subitem)[0];
-                this.#create_entry(subitem, subkey, contextmenu, d);
+                this._create_entry(subitem, subkey, contextmenu, d);
             }
 
             var rect = c.getBoundingClientRect();
@@ -5758,10 +5755,10 @@
 
             // Set final width
             contextmenu.style.width = contextmenu.offsetWidth + "px";
-            this.#adjust_position( contextmenu, 6, true );
+            this._adjust_position( contextmenu, 6, true );
         }
 
-        #create_entry( o, k, c, d ) {
+        _create_entry( o, k, c, d ) {
 
             const hasSubmenu = o[ k ].length;
             let entry = document.createElement('div');
@@ -5802,7 +5799,7 @@
                 return;
 
                 if( LX.OPEN_CONTEXTMENU_ENTRY == 'click' )
-                    this.#create_submenu( o, k, entry, ++d );
+                    this._create_submenu( o, k, entry, ++d );
             });
 
             if( !hasSubmenu )
@@ -5818,7 +5815,7 @@
                     if(entry.built)
                         return;
                     entry.built = true;
-                    this.#create_submenu( o, k, entry, ++d );
+                    this._create_submenu( o, k, entry, ++d );
                     e.stopPropagation();
                 });
             }
@@ -5831,7 +5828,7 @@
         }
 
         onCreate() {
-            this.#adjust_position( this.root, 6 );
+            this._adjust_position( this.root, 6 );
         }
 
         add( path, options = {} ) {
@@ -5918,7 +5915,7 @@
                 // Item already created
                 const id = "#" + (item.id ?? pKey);
                 if( !this.root.querySelector(id) )
-                    this.#create_entry(item, key, this.root, -1);
+                    this._create_entry(item, key, this.root, -1);
             }
         }
 

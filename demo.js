@@ -1,3 +1,9 @@
+import { LX } from 'lexgui';
+import 'lexgui/components/codeeditor.js';
+import 'lexgui/components/timeline.js';
+
+console.log(LX, LX.CodeEditor, LX.Timeline)
+
 // Init library and get main area
 let area = LX.init();
 
@@ -727,7 +733,7 @@ function createAssetDialog() {
             }
         ];
 
-        assetView = new LX.AssetView({ 
+        var assetView = new LX.AssetView({ 
             skip_browser: true,
             skip_navigation: true,
             preview_actions: previewActions
