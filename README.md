@@ -20,11 +20,11 @@ Look at this [examples](https://jxarco.github.io/lexgui.js/examples/) to see how
 
 ## Projects using lexgui.js
 
-### EU H2020 SignON project - [Animics](https://github.com/upf-gti/SignON-editor)
+### [Animics](https://github.com/upf-gti/SignON-editor) (EU H2020 SignON project)
 
 <img src="data/scriptAnimation_signon.png" alt="scriptAnimation_signon"/>
 
-### EU H2020 SignON project - [Performs](https://github.com/upf-gti/SignON-realizer)
+### [Performs](https://github.com/upf-gti/SignON-realizer) (EU H2020 SignON project)
 
 <img src="data/realizer_signon.png" alt="scriptAnimation_signon"/>
 
