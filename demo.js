@@ -741,13 +741,13 @@ function createAssetDialog() {
 
         p.attach( assetView );
         let assetData = [];
-        const values = ['brow_lowerer.png', 'godot_pixelart.png', 'icon.png' ];
+        const values = ['brow_lowerer.png', 'godot_pixelart.png', 'godot_canvas.png' ];
 
         for(let i = 0; i < values.length; i++){
             let data = {
                 id: values[i], 
                 type: i == 0 ? "clip" : "image",
-                src: "images/" + values[i].toLowerCase(),
+                src: "data/" + values[i].toLowerCase(),
             }
             assetData.push(data);
         }

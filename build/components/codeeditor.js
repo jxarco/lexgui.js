@@ -798,7 +798,6 @@ class CodeEditor {
         if( !e.target.classList.contains('code') ) return;
         if( !this.code ) return;
 
-        const time = new Date();
         var cursor = this.cursors.children[0];
 
         // Discard out of lines click...
@@ -814,7 +813,7 @@ class CodeEditor {
         {
             if( mouse_pos[0] > this.code.scrollWidth || mouse_pos[1] > this.code.scrollHeight )
                 return; // Scrollbar click
-            this.lastMouseDown = time.getTime();
+            this.lastMouseDown = LX.getTime();
             this.state.selectingText = true;
             this.endSelection();
             return;
@@ -822,7 +821,7 @@ class CodeEditor {
         
         else if( e.type == 'mouseup' )
         {
-            if( (time.getTime() - this.lastMouseDown) < 300 ) {
+            if( (LX.getTime() - this.lastMouseDown) < 300 ) {
                 this.state.selectingText = false;
                 this.processClick(e);
                 this.endSelection();
