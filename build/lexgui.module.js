@@ -57,6 +57,17 @@ function getThemeColor(color_name)
 
 LX.getThemeColor = getThemeColor;
 
+function getBase64Image(img) {
+    var canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+    return canvas.toDataURL("image/png");
+}
+
+LX.getBase64Image = getBase64Image;
+
 function hexToRgb(string) {
     const red = parseInt(string.substring(1, 3), 16) / 255;
     const green = parseInt(string.substring(3, 5), 16) / 255;
@@ -78,6 +89,22 @@ function simple_guidGenerator() {
         return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
     };
     return (S4()+"-"+S4());
+}
+
+// Timer that works everywhere (from litegraph.js)
+if (typeof performance != "undefined") {
+    LX.getTime = performance.now.bind(performance);
+} else if (typeof Date != "undefined" && Date.now) {
+    LX.getTime = Date.now.bind(Date);
+} else if (typeof process != "undefined") {
+    LX.getTime = function() {
+        var t = process.hrtime();
+        return t[0] * 0.001 + t[1] * 1e-6;
+    };
+} else {
+    LX.getTime = function getTime() {
+        return new Date().getTime();
+    };
 }
 
 let ASYNC_ENABLED = true;
@@ -6307,7 +6334,7 @@ class AssetView {
      */
     constructor( options = {} ) {
 
-        this.rootPath = "../";
+        this.rootPath = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/";
         this.layout = AssetView.LAYOUT_CONTENT;
         this.contentPage = 1;
 
@@ -6326,7 +6353,7 @@ class AssetView {
         let area = new LX.Area({height: "100%"});
         div.appendChild(area.root);
 
-        let left, right, content_area = area;
+        let left, right, contentArea = area;
 
         this.skip_browser = options.skip_browser ?? false;
         this.skip_preview = options.skip_preview ?? false;
@@ -6335,30 +6362,30 @@ class AssetView {
         if( !this.skip_browser )
         {
             [left, right] = area.split({ type: "horizontal", sizes: ["15%", "85%"]});
-            content_area = right;
+            contentArea = right;
 
             left.setLimitBox( 210, 0 );
             right.setLimitBox( 512, 0 );
         }
 
         if( !this.skip_preview )
-            [content_area, right] = content_area.split({ type: "horizontal", sizes: ["80%", "20%"]});
+            [contentArea, right] = contentArea.split({ type: "horizontal", sizes: ["80%", "20%"]});
         
-        this.allowed_types = options.allowed_types || ["None", "Image", "Mesh", "Script", "JSON", "Clip"];
+        this.allowedTypes = options.allowed_types || ["None", "Image", "Mesh", "Script", "JSON", "Clip"];
 
-        this.prev_data = [];
-        this.next_data = [];
+        this.prevData = [];
+        this.nextData = [];
         this.data = [];
 
-        this._process_data(this.data, null);
+        this._processData(this.data, null);
 
-        this.current_data = this.data;
+        this.currentData = this.data;
         this.path = ['@'];
 
         if(!this.skip_browser)
-            this._create_tree_panel(left);
+            this._createTreePanel(left);
 
-        this._create_content_panel(content_area);
+        this._createContentPanel(contentArea);
         
         // Create resource preview panel
         if( !this.skip_preview )
@@ -6371,18 +6398,18 @@ class AssetView {
 
     load( data, onevent ) {
 
-        this.prev_data.length = 0;
-        this.next_data.length = 0;
+        this.prevData.length = 0;
+        this.nextData.length = 0;
         
         this.data = data;
 
-        this._process_data(this.data, null);
-        this.current_data = this.data;
+        this._processData(this.data, null);
+        this.currentData = this.data;
         this.path = ['@'];
 
         if(!this.skip_browser)
-            this._create_tree_panel(this.area);
-        this._refresh_content();
+            this._createTreePanel(this.area);
+        this._refreshContent();
 
         this.onevent = onevent;
     }
@@ -6400,10 +6427,10 @@ class AssetView {
     }
 
     /**
-    * @method _process_data
+    * @method _processData
     */
 
-    _process_data( data, parent ) {
+    _processData( data, parent ) {
 
         if( data.constructor !== Array )
         {
@@ -6414,14 +6441,14 @@ class AssetView {
         let list = data.constructor === Array ? data : data.children;
 
         for( var i = 0; i < list.length; ++i )
-            this._process_data( list[i], data );
+            this._processData( list[i], data );
     }
 
     /**
-    * @method _update_path
+    * @method _updatePath
     */
 
-    _update_path( data ) {
+    _updatePath( data ) {
         
         this.path.length = 0;
 
@@ -6441,10 +6468,10 @@ class AssetView {
     }
 
     /**
-    * @method _create_tree_panel
+    * @method _createTreePanel
     */
 
-    _create_tree_panel(area) {
+    _createTreePanel(area) {
 
         if(this.leftPanel)
             this.leftPanel.clear();
@@ -6470,12 +6497,12 @@ class AssetView {
                 switch(event.type) {
                     case LX.TreeEvent.NODE_SELECTED: 
                         if(!event.multiple) {
-                            this._enter_folder( node );
+                            this._enterFolder( node );
                         }
                         if(!node.parent) {
-                            this.prev_data.push( this.current_data );
-                            this.current_data = this.data;
-                            this._refresh_content();
+                            this.prevData.push( this.currentData );
+                            this.currentData = this.data;
+                            this._refreshContent();
 
                             this.path = ['@'];
                             LX.emit("@on_folder_change", this.path.join('/'));
@@ -6483,7 +6510,7 @@ class AssetView {
                         break;
                     case LX.TreeEvent.NODE_DRAGGED: 
                         node.folder = value;
-                        this._refresh_content();
+                        this._refreshContent();
                         break;
                 }
             },
@@ -6491,21 +6518,21 @@ class AssetView {
     }
 
     /**
-    * @method _set_content_layout
+    * @method _setContentLayout
     */
 
-    _set_content_layout( layout_mode ) {
+    _setContentLayout( layout_mode ) {
 
         this.layout = layout_mode;
 
-        this._refresh_content();
+        this._refreshContent();
     }
 
     /**
-    * @method _create_content_panel
+    * @method _createContentPanel
     */
 
-    _create_content_panel(area) {
+    _createContentPanel(area) {
 
         if(this.rightPanel)
             this.rightPanel.clear();
@@ -6515,11 +6542,11 @@ class AssetView {
 
         const on_sort = (value, event) => {
             const cmenu = addContextMenu( "Sort by", event, c => {
-                c.add("Name", () => this._sort_data('id') );
-                c.add("Type", () => this._sort_data('type') );
+                c.add("Name", () => this._sortData('id') );
+                c.add("Type", () => this._sortData('type') );
                 c.add("");
-                c.add("Ascending", () => this._sort_data() );
-                c.add("Descending", () => this._sort_data(null, true) );
+                c.add("Ascending", () => this._sortData() );
+                c.add("Descending", () => this._sortData(null, true) );
             } );
             const parent = this.parent.root.parentElement;
             if( parent.classList.contains('lexdialog') )
@@ -6528,9 +6555,9 @@ class AssetView {
 
         const on_change_view = (value, event) => {
             const cmenu = addContextMenu( "Layout", event, c => {
-                c.add("Content", () => this._set_content_layout( AssetView.LAYOUT_CONTENT ) );
+                c.add("Content", () => this._setContentLayout( AssetView.LAYOUT_CONTENT ) );
                 c.add("");
-                c.add("List", () => this._set_content_layout( AssetView.LAYOUT_LIST ) );
+                c.add("List", () => this._setContentLayout( AssetView.LAYOUT_LIST ) );
             } );
             const parent = this.parent.root.parentElement;
             if( parent.classList.contains('lexdialog') )
@@ -6542,16 +6569,16 @@ class AssetView {
                 return;
             const last_page = this.contentPage;
             this.contentPage += value;
-            this.contentPage = Math.min( this.contentPage, (((this.current_data.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1 );
+            this.contentPage = Math.min( this.contentPage, (((this.currentData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1 );
             this.contentPage = Math.max( this.contentPage, 1 );
 
             if( last_page != this.contentPage )
-                this._refresh_content();
+                this._refreshContent();
         }
 
         this.rightPanel.sameLine();
-        this.rightPanel.addDropdown("Filter", this.allowed_types, this.allowed_types[0], (v) => this._refresh_content.call(this, null, v), { width: "20%", minWidth: "128px" });
-        this.rightPanel.addText(null, this.search_value ?? "", (v) => this._refresh_content.call(this, v, null), { placeholder: "Search assets.." });
+        this.rightPanel.addDropdown("Filter", this.allowedTypes, this.allowedTypes[0], (v) => this._refreshContent.call(this, null, v), { width: "20%", minWidth: "128px" });
+        this.rightPanel.addText(null, this.search_value ?? "", (v) => this._refreshContent.call(this, v, null), { placeholder: "Search assets.." });
         this.rightPanel.addButton(null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { className: "micro", title: "Sort" });
         this.rightPanel.addButton(null, "<a class='fa-solid fa-grip'></a>", on_change_view.bind(this), { className: "micro", title: "View" });
         // Content Pages
@@ -6567,32 +6594,32 @@ class AssetView {
                     value: "Left",
                     icon: "fa-solid fa-left-long",
                     callback:  (domEl) => { 
-                        if(!this.prev_data.length) return;
-                        this.next_data.push( this.current_data );
-                        this.current_data = this.prev_data.pop();
-                        this._refresh_content();
-                        this._update_path( this.current_data );
+                        if(!this.prevData.length) return;
+                        this.nextData.push( this.currentData );
+                        this.currentData = this.prevData.pop();
+                        this._refreshContent();
+                        this._updatePath( this.currentData );
                     }
                 },
                 {
                     value: "Right",
                     icon: "fa-solid fa-right-long",
                     callback:  (domEl) => { 
-                        if(!this.next_data.length) return;
-                        this.prev_data.push( this.current_data );
-                        this.current_data = this.next_data.pop();
-                        this._refresh_content();
-                        this._update_path( this.current_data );
+                        if(!this.nextData.length) return;
+                        this.prevData.push( this.currentData );
+                        this.currentData = this.nextData.pop();
+                        this._refreshContent();
+                        this._updatePath( this.currentData );
                     }
                 },
                 {
                     value: "Refresh",
                     icon: "fa-solid fa-arrows-rotate",
-                    callback:  (domEl) => { this._refresh_content(); }
+                    callback:  (domEl) => { this._refreshContent(); }
                 }
             ], { width: "auto", noSelection: true } );
             this.rightPanel.addText(null, this.path.join('/'), null, { disabled: true, signal: "@on_folder_change", style: { fontWeight: "bolder", fontSize: "16px", color: "#aaa" } });
-            this.rightPanel.addText(null, "Page " + this.contentPage + " / " + ((((this.current_data.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1), null, {disabled: true, signal: "@on_page_change", width: "fit-content"})
+            this.rightPanel.addText(null, "Page " + this.contentPage + " / " + ((((this.currentData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1), null, {disabled: true, signal: "@on_page_change", width: "fit-content"})
             this.rightPanel.endLine();
         }
 
@@ -6610,16 +6637,16 @@ class AssetView {
         });
         this.content.addEventListener('drop', (e) => {
             e.preventDefault();
-            this._process_drop(e);
+            this._processDrop(e);
         });
         this.content.addEventListener('click', function() {
             this.querySelectorAll('.lexassetitem').forEach( i => i.classList.remove('selected') );
         });
 
-        this._refresh_content();
+        this._refreshContent();
     }
 
-    _refresh_content(search_value, filter) {
+    _refreshContent(search_value, filter) {
 
         const is_content_layout = (this.layout == AssetView.LAYOUT_CONTENT); // default
 
@@ -6702,11 +6729,11 @@ class AssetView {
                         that.content.querySelectorAll('.lexassetitem').forEach( i => i.classList.remove('selected') );
                     this.classList.add('selected');
                     if( !that.skip_preview )
-                        that._preview_asset( item );
+                        that._previewAsset( item );
                 } 
                 else
                 {
-                    if(is_folder) that._enter_folder( item );
+                    if(is_folder) that._enterFolder( item );
                 }
 
                 if(that.onevent) {
@@ -6726,11 +6753,11 @@ class AssetView {
                     if(multiple <= 1)   
                         m.add("Rename");
                     if( !is_folder )
-                        m.add("Clone", that._clone_item.bind(that, item));
+                        m.add("Clone", that._cloneItem.bind(that, item));
                     if(multiple <= 1)
                         m.add("Properties");
                     m.add("");
-                    m.add("Delete", that._delete_item.bind(that, item));
+                    m.add("Delete", that._deleteItem.bind(that, item));
                 });
             });
 
@@ -6743,7 +6770,7 @@ class AssetView {
 
         const fr = new FileReader();
 
-        const filtered_data = this.current_data.filter( _i => {
+        const filtered_data = this.currentData.filter( _i => {
             return (this.filter != "None" ? _i.type.toLowerCase() == this.filter.toLowerCase() : true) &&
                 _i.id.toLowerCase().includes(this.search_value.toLowerCase())
         } );
@@ -6768,7 +6795,7 @@ class AssetView {
                         item.src = e.currentTarget.result;  // This is a base64 string...
                         item._path = item.path;
                         delete item.path;
-                        this._refresh_content(search_value, filter);
+                        this._refreshContent(search_value, filter);
                     };
                 } });
             }else
@@ -6781,10 +6808,10 @@ class AssetView {
     }
 
     /**
-    * @method _preview_asset
+    * @method _previewAsset
     */
 
-    _preview_asset(file) {
+    _previewAsset(file) {
 
         const is_base_64 = file.src && file.src.includes("data:image/");
 
@@ -6828,7 +6855,7 @@ class AssetView {
         this.previewPanel.merge();
     }
 
-    _process_drop(e) {
+    _processDrop(e) {
 
         const fr = new FileReader();
         const num_files = e.dataTransfer.files.length;
@@ -6837,7 +6864,7 @@ class AssetView {
         {
             const file = e.dataTransfer.files[i];
 
-            const result = this.current_data.find( e => e.id === file.name );
+            const result = this.currentData.find( e => e.id === file.name );
             if(result) continue;
 
             fr.readAsDataURL( file );
@@ -6869,10 +6896,10 @@ class AssetView {
                     break;
                 }
 
-                this.current_data.push( item );
+                this.currentData.push( item );
                 
                 if(i == (num_files - 1)) {
-                    this._refresh_content();
+                    this._refreshContent();
                     if( !this.skip_browser )
                         this.tree.refresh();
                 }
@@ -6880,36 +6907,36 @@ class AssetView {
         }
     }
 
-    _sort_data( sort_by, sort_descending = false ) {
+    _sortData( sort_by, sort_descending = false ) {
 
-        sort_by = sort_by ?? (this._last_sort_by ?? 'id');
-        this.current_data = this.current_data.sort( (a, b) => {
+        sort_by = sort_by ?? (this._lastSortBy ?? 'id');
+        this.currentData = this.currentData.sort( (a, b) => {
             var r = sort_descending ? b[sort_by].localeCompare(a[sort_by]) : a[sort_by].localeCompare(b[sort_by]);
             if(r == 0) r = sort_descending ? b['id'].localeCompare(a['id']) : a['id'].localeCompare(b['id']);
             return r;
         } );
 
-        this._last_sort_by = sort_by;
-        this._refresh_content();
+        this._lastSortBy = sort_by;
+        this._refreshContent();
     }
 
-    _enter_folder( folder_item ) {
+    _enterFolder( folder_item ) {
 
-        this.prev_data.push( this.current_data );
-        this.current_data = folder_item.children;
+        this.prevData.push( this.currentData );
+        this.currentData = folder_item.children;
         this.contentPage = 1;
-        this._refresh_content();
+        this._refreshContent();
 
         // Update path
-        this._update_path(this.current_data);
+        this._updatePath(this.currentData);
     }
 
-    _delete_item( item ) {
+    _deleteItem( item ) {
 
-        const idx = this.current_data.indexOf(item);
+        const idx = this.currentData.indexOf(item);
         if(idx > -1) {
-            this.current_data.splice(idx, 1);
-            this._refresh_content(this.search_value, this.filter);
+            this.currentData.splice(idx, 1);
+            this._refreshContent(this.search_value, this.filter);
 
             if(this.onevent) {
                 const event = new AssetViewEvent(AssetViewEvent.ASSET_DELETED, item );
@@ -6917,26 +6944,26 @@ class AssetView {
             }
 
             this.tree.refresh();
-            this._process_data(this.data);
+            this._processData(this.data);
         }
     }
 
-    _clone_item( item ) {
+    _cloneItem( item ) {
 
-        const idx = this.current_data.indexOf(item);
+        const idx = this.currentData.indexOf(item);
         if(idx > -1) {
             delete item.domEl;
             delete item.folder;
             const new_item = deepCopy( item );
-            this.current_data.splice(idx, 0, new_item);
-            this._refresh_content(this.search_value, this.filter);
+            this.currentData.splice(idx, 0, new_item);
+            this._refreshContent(this.search_value, this.filter);
 
             if(this.onevent) {
                 const event = new AssetViewEvent(AssetViewEvent.ASSET_CLONED, item );
                 this.onevent( event );
             }
 
-            this._process_data(this.data);
+            this._processData(this.data);
         }
     }
 }
@@ -7197,7 +7224,9 @@ LX.UTILS = {
     compareThreshold( v, p, n, t ) { return Math.abs(v - p) >= t || Math.abs(v - n) >= t },
     compareThresholdRange( v0, v1, t0, t1 ) { return v0 >= t0 && v0 <= t1 || v1 >= t0 && v1 <= t1 || v0 <= t0 && v1 >= t1},
     clamp (num, min, max) { return Math.min(Math.max(num, min), max) },
-    getControlPoints(x0,y0,x1,y1,x2,y2,t) {
+
+    getControlPoints( x0, y0, x1, y1, x2, y2, t ) {
+        
         //  x0,y0,x1,y1 are the coordinates of the end (knot) pts of this segment
         //  x2,y2 is the next knot -- not connected here but needed to calculate p2
         //  p1 is the control point calculated here, from x1 back toward x0.
@@ -7221,31 +7250,31 @@ LX.UTILS = {
         return [p1x,p1y,p2x,p2y]
     },
 
-    drawSpline(ctx,pts,t){
+    drawSpline( ctx, pts, t ) {
     
         ctx.save();
         var cp=[];   // array of control points, as x0,y0,x1,y1,...
         var n=pts.length;
 
         // Draw an open curve, not connected at the ends
-        for(var i=0;i<n-4;i+=2){
+        for(var i=0;i<n-4;i+=2) {
             cp=cp.concat(LX.UTILS.getControlPoints(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
         }    
-        for(var i=2;i<pts.length-5;i+=2){
+
+        for(var i=2;i<pts.length-5;i+=2) {
             ctx.beginPath();
             ctx.moveTo(pts[i],pts[i+1]);
             ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
             ctx.stroke();
             ctx.closePath();
-            
         }
+
         //  For open curves the first and last arcs are simple quadratics.
         ctx.beginPath();
         ctx.moveTo(pts[0],pts[1]);
         ctx.quadraticCurveTo(cp[0],cp[1],pts[2],pts[3]);
         ctx.stroke();
         ctx.closePath();
-        
     
         ctx.beginPath();
         ctx.moveTo(pts[n-2],pts[n-1]);
@@ -7253,10 +7282,8 @@ LX.UTILS = {
         ctx.stroke();
         ctx.closePath();
         
-    ctx.restore();
-    
+        ctx.restore();
     }
-
 };
 
 export { LX };
