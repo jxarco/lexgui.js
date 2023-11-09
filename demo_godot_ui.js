@@ -42,7 +42,7 @@ area.addMenubar( m => {
     ]);
     
     m.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")})
-    m.setButtonImage("lexgui.js", "images/icon_godot_version.png", () => {window.open("https://github.com/jxarco/lexgui.js/")}, {float: "left"})
+    m.setButtonImage("lexgui.js", "data/icon_godot_version.png", () => {window.open("https://github.com/jxarco/lexgui.js/")}, {float: "left"})
 });
 
 // split main area
@@ -143,7 +143,7 @@ fillRightSide( right );
 fillLeftSide( left );
 
 const img = new Image();
-img.src = "images/godot_canvas.png";
+img.src = "data/godot_canvas.png";
 img.onload = () => {
     requestAnimationFrame(loop);
 }

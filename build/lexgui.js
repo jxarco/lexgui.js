@@ -6339,7 +6339,7 @@
          */
         constructor( options = {} ) {
 
-            this.rootPath = "../";
+            this.rootPath = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/";
             this.layout = AssetView.LAYOUT_CONTENT;
             this.contentPage = 1;
 
