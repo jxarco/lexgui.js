@@ -1,0 +1,37 @@
+{
+    "name": "lexgui",
+    "version": "0.1.1",
+    "description": "JS library to create web graphical user interfaces",
+    "type": "module",
+    "main": "./build/lexgui.js",
+    "module": "./build/lexgui.module.js",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/jxarco/lexgui.js"
+    },
+    "files": [
+      "build",
+      "build/components",
+      "examples",
+      "LICENSE",
+      "package.json",
+      "README.md",
+      "demo.js"
+    ],
+    "keywords": [
+      "lexgui",
+      "lexgui.js",
+      "javascript",
+      "editor",
+      "gui",
+      "interface",
+      "canvas",
+      "svg",
+      "html5"
+    ],
+    "author": "jxarco",
+    "license": "MIT",
+    "bugs": {
+      "url": "https://github.com/jxarco/lexgui.js/issues"
+    }
+  }

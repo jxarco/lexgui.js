@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-    <title>LexGUI Code Editor Demo</title>
+    <title>LexGUI Node Graph Demo</title>
     <link rel="stylesheet" href="https://cdn.skypack.dev/lexgui@^0.1.1/build/lexgui.css">
     <link rel="icon" href="../images/icon.png">
     <script type="importmap">
@@ -14,41 +14,39 @@
         }
     </script>
 </head>
-    <body></body>
+<body></body>
     <script type="module">
 
         import { LX } from 'lexgui';
-        import 'lexgui/components/codeeditor.js';
+        import 'lexgui/components/nodegraph.js';
 
         // init library and get main area
         let area = LX.init();
 
         // split main area
-        var [leftArea, rightArea] = area.split({ sizes:["55%","45%"] });
+        var [topArea, bottomArea] = area.split({ type: 'vertical', sizes:["25%","75%"] });
 
-        // add canvas to leftArea
+        // add canvas to topArea
         var canvas = document.createElement('canvas');
         canvas.id = "mycanvas";
-        canvas.width = leftArea.root.clientWidth;
-        canvas.height = leftArea.root.clientHeight;
+        canvas.width = topArea.root.clientWidth;
+        canvas.height = topArea.root.clientHeight;
         canvas.style.width = "100%";
         canvas.style.height = "100%";
-        leftArea.attach( canvas );
+        topArea.attach( canvas );
 
         // add on resize event to control canvas size
-        leftArea.onresize = function( bounding ) {
+        topArea.onresize = function( bounding ) {
             canvas.width = bounding.width;
             canvas.height = bounding.height;
         };
 
-        let editor = new LX.CodeEditor(rightArea, {
+        let graph_canvas = new LX.GraphCanvas(bottomArea, {
             // allow_add_scripts: false
         });
 
-        editor.loadFile( "../data/test.json" );
-        editor.loadFile( "../data/style.css" );
-        editor.loadFile( "../data/script.js" );
-        
+        graph_canvas.setGraph( new LX.Graph() );
+
         function loop(dt) {
             
             var ctx = canvas.getContext("2d");
@@ -60,7 +58,7 @@
             ctx.fillStyle = "#ff1999";
 
             const text = "Lexgui.js @jxarco";
-            ctx.fillText(text, 300, 300);
+            ctx.fillText(text, 100, 125);
 
             requestAnimationFrame(loop);
         }

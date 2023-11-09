@@ -3,11 +3,21 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Dialogs Demo</title>
-    <link rel="stylesheet" href="../build/lexgui.css">    
+    <link rel="stylesheet" href="https://cdn.skypack.dev/lexgui@^0.1.1/build/lexgui.css">
+    <link rel="icon" href="../images/icon.png">
+    <script type="importmap">
+        {
+          "imports": {
+            "lexgui": "https://cdn.skypack.dev/lexgui@^0.1.1/build/lexgui.module.js",
+            "lexgui/components/": "https://cdn.skypack.dev/lexgui@^0.1.1/build/components/"
+          }
+        }
+    </script>
 </head>
-    <body></body>
-    <script src="../build/lexgui.js"></script>
-    <script>
+<body></body>
+    <script type="module">
+
+        import { LX } from 'lexgui';
 
         // Init library and get main area
         let area = LX.init({ skip_default_area: true });

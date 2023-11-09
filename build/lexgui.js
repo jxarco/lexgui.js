@@ -1,5 +1,7 @@
 'use strict';
 
+console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. Please use ES Modules or alternatives: https://jxarco.github.io/lexgui.js/docs/' );
+
 // Lexgui.js @jxarco
 
 (function(global){
@@ -10,7 +12,7 @@
     */
 
     var LX = global.LX = {
-        version: "1.0.0",
+        version: "0.1.1",
         ready: false,
         components: [], // specific pre-build components
         signals: {} // events and triggers
@@ -59,6 +61,17 @@
 
     LX.getThemeColor = getThemeColor;
 
+    function getBase64Image(img) {
+        var canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        return canvas.toDataURL("image/png");
+    }
+
+    LX.getBase64Image = getBase64Image;
+
     function hexToRgb(string) {
         const red = parseInt(string.substring(1, 3), 16) / 255;
         const green = parseInt(string.substring(3, 5), 16) / 255;
@@ -80,6 +93,22 @@
            return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
         };
         return (S4()+"-"+S4());
+    }
+
+    // Timer that works everywhere (from litegraph.js)
+    if (typeof performance != "undefined") {
+        LX.getTime = performance.now.bind(performance);
+    } else if (typeof Date != "undefined" && Date.now) {
+        LX.getTime = Date.now.bind(Date);
+    } else if (typeof process != "undefined") {
+        LX.getTime = function() {
+            var t = process.hrtime();
+            return t[0] * 0.001 + t[1] * 1e-6;
+        };
+    } else {
+        LX.getTime = function getTime() {
+            return new Date().getTime();
+        };
     }
 
     let ASYNC_ENABLED = true;
@@ -785,8 +814,8 @@
             }
 
             // Create areas
-            var area1 = new Area({className: "split" + (options.menubar ? "" : " origin")});
-            var area2 = new Area({className: "split"});
+            var area1 = new Area({ no_append: true, className: "split" + (options.menubar ? "" : " origin") });
+            var area2 = new Area({ no_append: true, className: "split"});
 
             area1.parentArea = this;
             area2.parentArea = this;
@@ -1464,7 +1493,9 @@
             }
         }
 
-        add( name, content, isSelected, callback, options = {} ) {
+        add( name, content, options = {} ) {
+
+            let isSelected = options.selected ?? false;
 
             if( isSelected ) {
                 this.root.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
@@ -1522,8 +1553,7 @@
                     this.area.root.classList.toggle('folded', !this.folded);
                 }
 
-                if(options.onSelect) 
-                    options.onSelect(e, tabEl.dataset.name);
+                if(options.onSelect) options.onSelect(e, tabEl.dataset.name);
             });
 
             tabEl.addEventListener("mouseup", e => {
@@ -1552,7 +1582,7 @@
             this.tabs[ name ] = content;
 
             setTimeout( () => {
-                if( callback ) callback.call(this, this.area.root.getBoundingClientRect());
+                if( options.onCreate ) options.onCreate.call(this, this.area.root.getBoundingClientRect());
             }, 10 );
         }
 
@@ -2046,7 +2076,7 @@
         static CUSTOM       = 21;
         static SEPARATOR    = 22;
 
-        #no_context_types = [
+        static NO_CONTEXT_TYPES = [
             Widget.BUTTON,
             Widget.LIST,
             Widget.FILE,
@@ -2075,12 +2105,12 @@
 
         oncontextmenu(e) {
 
-            if( this.#no_context_types.includes(this.type) )
+            if( Widget.NO_CONTEXT_TYPES.includes(this.type) )
                 return;
 
             addContextMenu(this.typeName(), e, c => {
                 c.add("Copy", () => { this.copy() });
-                c.add("Paste", { disabled: !this.#can_paste(), callback: () => { this.paste() } } );
+                c.add("Paste", { disabled: !this._can_paste(), callback: () => { this.paste() } } );
             });
         }
 
@@ -2091,13 +2121,13 @@
             navigator.clipboard.writeText( navigator.clipboard.data );
         }
 
-        #can_paste() {
+        _can_paste() {
             return this.type === Widget.CUSTOM ? navigator.clipboard.customIdx !== undefined && this.customIdx == navigator.clipboard.customIdx :
                 navigator.clipboard.type === this.type;
         }
 
         paste() {
-            if( !this.#can_paste() )
+            if( !this._can_paste() )
             return;
 
             this.set(navigator.clipboard.data);
@@ -2279,13 +2309,13 @@
             this.selected = [];
 
             if(data.constructor === Object)
-                this.#create_item(null, data);
+                this._create_item(null, data);
             else
                 for( let d of data )
-                    this.#create_item(null, d);
+                    this._create_item(null, d);
         }
 
-        #create_item( parent, node, level = 0, selectedId ) {
+        _create_item( parent, node, level = 0, selectedId ) {
 
             const that = this;
             const node_filter_input = this.domEl.querySelector("#lexnodetree_filter");
@@ -2294,7 +2324,7 @@
             if(node_filter_input && !node.id.includes(node_filter_input.value) || (selectedId != undefined) && selectedId != node.id)
             {
                 for( var i = 0; i < node.children.length; ++i )
-                    this.#create_item( node, node.children[i], level + 1, selectedId );
+                    this._create_item( node, node.children[i], level + 1, selectedId );
                 return;
             }
 
@@ -2596,14 +2626,14 @@
                     node.children.forEach( c => has_parent_child |= (c.children && c.children.length) );
                     if(!has_parent_child) continue;
                 }
-                this.#create_item( node, child, level + 1 );
+                this._create_item( node, child, level + 1 );
             }
         }
 
         refresh(newData, selectedId) {
             this.data = newData ?? this.data;
             this.domEl.querySelector("ul").innerHTML = "";
-            this.#create_item( null, this.data, 0, selectedId );
+            this._create_item( null, this.data, 0, selectedId );
         }
 
         /* Refreshes the tree and focuses current element */
@@ -2624,9 +2654,6 @@
 
     class Panel {
 
-        #inline_queued_container;
-        #inline_widgets_left;
-
         /**
          * @param {*} options 
          * id: Id of the element
@@ -2646,6 +2673,9 @@
             root.style.width = options.width || "calc( 100% - 6px )";
             root.style.height = options.height || "100%";
             Object.assign(root.style, options.style ?? {});
+
+            this._inline_widgets_left = -1;
+            this._inline_queued_container = null;
 
             this.root = root;
 
@@ -2707,9 +2737,9 @@
             this.branch_open = false;
             this.branches = [];
             this.current_branch = null;
+
             for(let w in this.widgets) {
-                if(this.widgets[w].options && this.widgets[w].options.signal)
-                {
+                if(this.widgets[w].options && this.widgets[w].options.signal) {
                     const signal = this.widgets[w].options.signal;
                     for(let i = 0; i < LX.signals[signal].length; i++) {
                         if(LX.signals[signal][i] == this.widgets[w]) {
@@ -2718,6 +2748,7 @@
                     }
                 }
             }
+
             if(this.signals) {
                 for(let w = 0; w < this.signals.length; w++) {
                     let widget = Object.values(this.signals[w])[0];
@@ -2729,8 +2760,8 @@
                     }
                 }
             }
-            this.widgets = {};
 
+            this.widgets = {};
             this.root.innerHTML = "";
         }
 
@@ -2742,18 +2773,24 @@
 
         sameLine( number ) {
 
-            this.#inline_queued_container = this.queuedContainer;
-            this.#inline_widgets_left = number ||  Infinity;
+            this._inline_queued_container = this.queuedContainer;
+            this._inline_widgets_left = number || Infinity;
         }
 
         /**
          * @method endLine
-         * @description Stop inlining widgets
+         * @description Stop inlining widgets. Use it only if the number of widgets to be inlined is NOT specified.
          */
 
-        endLine(justifyContent) {
+        endLine( justifyContent ) {
 
-            this.#inline_widgets_left = 0;
+            if( this._inline_widgets_left == -1)
+            {
+                console.warn("No pending widgets to be inlined!");
+                return;
+            }
+
+            this._inline_widgets_left = -1;
 
             if(!this._inlineContainer)  {
                 this._inlineContainer = document.createElement('div');
@@ -2772,7 +2809,7 @@
                 if(is_pair)
                 {
                     // eg. an array, inline items appended later to 
-                    if(this.#inline_queued_container)
+                    if(this._inline_queued_container)
                         this._inlineContainer.appendChild( item[0] );
                     // eg. a dropdown, item is appended to parent, not to inline cont.
                     else
@@ -2782,7 +2819,7 @@
                     this._inlineContainer.appendChild( item );
             }
             
-            if(!this.#inline_queued_container)
+            if(!this._inline_queued_container)
             {
                 if(this.current_branch)
                     this.current_branch.content.appendChild( this._inlineContainer );
@@ -2791,7 +2828,7 @@
             }
             else
             {
-                this.#inline_queued_container.appendChild( this._inlineContainer );
+                this._inline_queued_container.appendChild( this._inlineContainer );
             }
 
             delete this._inlineWidgets;
@@ -2833,7 +2870,7 @@
 
             // Add widget filter
             if(options.filter) {
-                this.#add_filter( options.filter, {callback: this.#search_widgets.bind(this, branch.name)} );
+                this._add_filter( options.filter, {callback: this._search_widgets.bind(this, branch.name)} );
             }
 
             return branch;
@@ -2845,16 +2882,16 @@
             this.current_branch = null;
         }
 
-        #pick( arg, def ) {
+        _pick( arg, def ) {
             return (typeof arg == 'undefined' ? def : arg);
         }
 
-        static #dispatch_event( element, type, bubbles, cancelable ) {
+        static _dispatch_event( element, type, bubbles, cancelable ) {
             let event = new Event(type, { 'bubbles': bubbles, 'cancelable': cancelable });
             element.dispatchEvent(event);
         }
 
-        static #add_reset_property( container, callback ) {
+        static _add_reset_property( container, callback ) {
             var domEl = document.createElement('a');
             domEl.style.display = "none";
             domEl.style.marginRight = "6px";
@@ -2963,7 +3000,7 @@
             };
 
             // Process inline widgets
-            if(this.#inline_widgets_left > 0)
+            if(this._inline_widgets_left > 0)
             {
                 if(!this._inlineWidgets)  {
                     this._inlineWidgets = [];
@@ -2972,10 +3009,10 @@
                 // Store widget and its container
                 store_widget(element);
 
-                this.#inline_widgets_left--;
+                this._inline_widgets_left--;
 
                 // Last widget
-                if(!this.#inline_widgets_left) {
+                if(!this._inline_widgets_left) {
                     this.endLine();
                 }
             }else {
@@ -2985,7 +3022,7 @@
             return widget;
         }
 
-        #add_filter( placeholder, options = {} ) {
+        _add_filter( placeholder, options = {} ) {
 
             options.placeholder = placeholder.constructor == String ? placeholder : "Filter properties..";
             options.skipWidget = options.skipWidget ?? true;
@@ -3013,7 +3050,8 @@
             return element;
         }
 
-        #search_widgets(branchName, value) {
+        _search_widgets(branchName, value) {
+
             for( let b of this.branches ) {
 
                 if(b.name !== branchName)
@@ -3054,7 +3092,7 @@
             }
         }
 
-        #search_options(options, value) {
+        _search_options(options, value) {
             // push to right container
             const emptyFilter = !value.length;
             let filteredOptions = [];
@@ -3213,17 +3251,17 @@
             };
             widget.onSetValue = (new_value) => {
                 this.disabled ? wValue.innerText = new_value : wValue.value = new_value;
-                Panel.#dispatch_event(wValue, "focusout");
+                Panel._dispatch_event(wValue, "focusout");
             };
 
             let element = widget.domEl;
 
             // Add reset functionality
             if(widget.name && !(options.noreset ?? false)) {
-                Panel.#add_reset_property(element.domName, function() {
+                Panel._add_reset_property(element.domName, function() {
                     wValue.value = wValue.iValue;
                     this.style.display = "none";
-                    Panel.#dispatch_event(wValue, "focusout");
+                    Panel._dispatch_event(wValue, "focusout");
                 });
             }
             
@@ -3325,16 +3363,16 @@
             };
             widget.onSetValue = (new_value) => {
                 wValue.value = new_value;
-                Panel.#dispatch_event(wValue, "focusout");
+                Panel._dispatch_event(wValue, "focusout");
             };
             let element = widget.domEl;
 
             // Add reset functionality
             if(widget.name && !(options.noreset ?? false)) {
-                Panel.#add_reset_property(element.domName, function() {
+                Panel._add_reset_property(element.domName, function() {
                     wValue.value = wValue.iValue;
                     this.style.display = "none";
-                    Panel.#dispatch_event(wValue, "focusout");
+                    Panel._dispatch_event(wValue, "focusout");
                 });
             }
             
@@ -3680,7 +3718,7 @@
             // Add reset functionality
             if(widget.name)
             {
-                Panel.#add_reset_property(element.domName, function() {
+                Panel._add_reset_property(element.domName, function() {
                     value = wValue.iValue;
                     list.querySelectorAll('li').forEach( e => { if( e.getAttribute('value') == value ) e.click() } );
                     this.style.display = "none";
@@ -3751,7 +3789,7 @@
             // Add filter options
             let filter = null;
             if(options.filter ?? false)
-                filter = this.#add_filter("Search option", {container: list, callback: this.#search_options.bind(list, values)});
+                filter = this._add_filter("Search option", {container: list, callback: this._search_options.bind(list, values)});
 
             // Create option list to empty it easily..
             const list_options = document.createElement('span');
@@ -3791,7 +3829,7 @@
                         if(filter)
                         {
                             filter.querySelector('input').value = "";
-                            this.#search_options.bind(list, values, "")();
+                            this._search_options.bind(list, values, "")();
                         }
                     });
 
@@ -3874,7 +3912,7 @@
             let defaultValues = JSON.parse(JSON.stringify(values));
 
             // Add reset functionality
-            Panel.#add_reset_property(element.domName, function(e) {
+            Panel._add_reset_property(element.domName, function(e) {
                 this.style.display = "none";
                 curve_instance.element.value = JSON.parse(JSON.stringify(defaultValues));
                 curve_instance.redraw();
@@ -3935,7 +3973,7 @@
             let element = widget.domEl;
 
             // Add reset functionality
-            Panel.#add_reset_property(element.domName, function(e) {
+            Panel._add_reset_property(element.domName, function(e) {
                 this.style.display = "none";
                 value = element.value = defaultValue;
                 setLayers();
@@ -4202,7 +4240,7 @@
             // Add reset functionality
             if(widget.name)
             {
-                Panel.#add_reset_property(element.domName, function(e) {
+                Panel._add_reset_property(element.domName, function(e) {
                     this.style.display = "none";
                     value = [].concat(defaultValue);
                     create_tags();
@@ -4295,14 +4333,14 @@
             };
             widget.onSetValue = (value) => {
                 if(flag.value !== value)
-                    Panel.#dispatch_event(toggle, "click");
+                    Panel._dispatch_event(toggle, "click");
             };
 
             let element = widget.domEl;
 
             // Add reset functionality
-            Panel.#add_reset_property(element.domName, function() {
-                Panel.#dispatch_event(toggle, "click");
+            Panel._add_reset_property(element.domName, function() {
+                Panel._dispatch_event(toggle, "click");
             });
             
             // Add widget value
@@ -4397,16 +4435,16 @@
             };
             widget.onSetValue = (new_value) => {
                 color.value = new_value;
-                Panel.#dispatch_event(color, "input");
+                Panel._dispatch_event(color, "input");
             };
             let element = widget.domEl;
             let change_from_input = false;
 
             // Add reset functionality
-            Panel.#add_reset_property(element.domName, function() {
+            Panel._add_reset_property(element.domName, function() {
                 this.style.display = "none";
                 color.value = color.iValue;
-                Panel.#dispatch_event(color, "input");
+                Panel._dispatch_event(color, "input");
             });
 
             // Add widget value
@@ -4497,16 +4535,16 @@
             };
             widget.onSetValue = (new_value) => {
                 vecinput.value = new_value;
-                Panel.#dispatch_event(vecinput, "change");
+                Panel._dispatch_event(vecinput, "change");
             };
             let element = widget.domEl;
 
             // add reset functionality
             if(widget.name) {
-                Panel.#add_reset_property(element.domName, function() {
+                Panel._add_reset_property(element.domName, function() {
                     this.style.display = "none";
                     vecinput.value = vecinput.iValue;
-                    Panel.#dispatch_event(vecinput, "change");
+                    Panel._dispatch_event(vecinput, "change");
                 });
             }
 
@@ -4550,7 +4588,7 @@
                     let new_value = +this.valueAsNumber;
                     let fract = new_value % 1;
                     vecinput.value = Math.trunc(new_value) + (+fract.toPrecision(5));
-                    Panel.#dispatch_event(vecinput, "change");
+                    Panel._dispatch_event(vecinput, "change");
                 }, false);
                 box.appendChild(slider);
             }
@@ -4567,7 +4605,7 @@
                 let new_value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1));
                 let fract = new_value % 1;
                 this.value = Math.trunc(new_value) + (+fract.toPrecision(5));
-                Panel.#dispatch_event(vecinput, "change");
+                Panel._dispatch_event(vecinput, "change");
             }, {passive:false});
 
             vecinput.addEventListener("change", e => {
@@ -4611,7 +4649,7 @@
                     let new_value = (+vecinput.valueAsNumber + mult * dt);
                     let fract = new_value % 1;
                     vecinput.value = Math.trunc(new_value) + (+fract.toPrecision(5));
-                    Panel.#dispatch_event(vecinput, "change");
+                    Panel._dispatch_event(vecinput, "change");
                 }
 
                 lastY = e.pageY;
@@ -4639,7 +4677,7 @@
             return widget;
         }
 
-        static #VECTOR_COMPONENTS = {0: 'x', 1: 'y', 2: 'z', 3: 'w'};
+        static VECTOR_COMPONENTS = {0: 'x', 1: 'y', 2: 'z', 3: 'w'};
 
         _add_vector( num_components, name, value, callback, options = {} ) {
 
@@ -4662,7 +4700,7 @@
                 const inputs = element.querySelectorAll(".vecinput");
                 for( var i = 0; i < inputs.length; ++i ) {
                     inputs[i].value = new_value[i] ?? 0;
-                    Panel.#dispatch_event(inputs[i], "change");
+                    Panel._dispatch_event(inputs[i], "change");
                 }
             };
             widget.setValue = (new_value) => {
@@ -4675,11 +4713,11 @@
             let element = widget.domEl;
 
             // Add reset functionality
-            Panel.#add_reset_property(element.domName, function() {
+            Panel._add_reset_property(element.domName, function() {
                 this.style.display = "none";
                 for( let v of element.querySelectorAll(".vecinput") ) {
                     v.value = v.iValue;
-                    Panel.#dispatch_event(v, "change");
+                    Panel._dispatch_event(v, "change");
                 }
             });
 
@@ -4693,7 +4731,7 @@
 
                 let box = document.createElement('div');
                 box.className = "vecbox";
-                box.innerHTML = "<span class='" + Panel.#VECTOR_COMPONENTS[i] + "'></span>";
+                box.innerHTML = "<span class='" + Panel.VECTOR_COMPONENTS[i] + "'></span>";
 
                 let vecinput = document.createElement('input');
                 vecinput.className = "vecinput v" + num_components;
@@ -4727,11 +4765,11 @@
                     {
                         for( let v of element.querySelectorAll(".vecinput") ) {
                             v.value = (+v.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
-                            Panel.#dispatch_event(v, "change");
+                            Panel._dispatch_event(v, "change");
                         }
                     } else {
                         this.value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
-                        Panel.#dispatch_event(vecinput, "change");
+                        Panel._dispatch_event(vecinput, "change");
                     }
                 }, {passive:false});
 
@@ -4784,11 +4822,11 @@
                         {
                             for( let v of element.querySelectorAll(".vecinput") ) {
                                 v.value = (+v.valueAsNumber + mult * dt).toPrecision(5);
-                                Panel.#dispatch_event(v, "change");
+                                Panel._dispatch_event(v, "change");
                             }
                         } else {
                             vecinput.value = (+vecinput.valueAsNumber + mult * dt).toPrecision(5);
-                            Panel.#dispatch_event(vecinput, "change");
+                            Panel._dispatch_event(vecinput, "change");
                         }
                     }
 
@@ -5222,7 +5260,7 @@
             root.appendChild(branch_content);
             this.content = branch_content;
 
-            this.#addBranchSeparator();
+            this._addBranchSeparator();
 
             if(options.closed) {
                 title.className += " closed";
@@ -5256,7 +5294,7 @@
                     // p.add('<i class="fa-regular fa-window-maximize fa-rotate-180">', {id: 'dock_options1'});
                     // p.add('<i class="fa-regular fa-window-maximize fa-rotate-90">', {id: 'dock_options2'});
                     // p.add('<i class="fa-regular fa-window-maximize fa-rotate-270">', {id: 'dock_options3'});
-                    p.add('Floating', that.#on_make_floating.bind(that));
+                    p.add('Floating', that._on_make_floating.bind(that));
                 }, { icon: "fa-regular fa-window-restore" });
             };
 
@@ -5264,7 +5302,7 @@
             title.addEventListener("contextmenu", this.oncontextmenu);
         }
 
-        #on_make_floating() {
+        _on_make_floating() {
 
             const dialog = new Dialog(this.name, p => {
                 // add widgets
@@ -5287,7 +5325,7 @@
             if(last_branch.length) last_branch[last_branch.length - 1].classList.add('last');
         }
 
-        #addBranchSeparator() {
+        _addBranchSeparator() {
 
             var element = document.createElement('div');
             element.className = "lexwidgetseparator";
@@ -5403,16 +5441,14 @@
 
     class Dialog {
 
-        #oncreate;
-
-        static #last_id = 0;
+        static _last_id = 0;
 
         constructor( title, callback, options = {} ) {
             
             if(!callback)
             console.warn("Content is empty, add some widgets using 'callback' parameter!");
 
-            this.#oncreate = callback;
+            this._oncreate = callback;
             this.id = simple_guidGenerator();
 
             const size = options.size ?? [],
@@ -5425,7 +5461,7 @@
 
             var root = document.createElement('div');
             root.className = "lexdialog " + (options.class ?? "");
-            root.id = options.id ?? "dialog" + Dialog.#last_id++;
+            root.id = options.id ?? "dialog" + Dialog._last_id++;
             LX.root.appendChild( root );
 
             let that = this;
@@ -5565,7 +5601,7 @@
         refresh() {
 
             this.panel.root.innerHTML = "";
-            this.#oncreate.call(this, this.panel);
+            this._oncreate.call(this, this.panel);
         }
 
         setPosition(x, y) {
@@ -5700,7 +5736,7 @@
             }
         }
 
-        #adjust_position(div, margin, useAbsolute = false) {
+        _adjust_position(div, margin, useAbsolute = false) {
             
             let rect = div.getBoundingClientRect();
             
@@ -5727,7 +5763,7 @@
             }
         }
 
-        #create_submenu( o, k, c, d ) {
+        _create_submenu( o, k, c, d ) {
 
             this.root.querySelectorAll(".lexcontextmenubox").forEach( cm => cm.remove() );
 
@@ -5739,7 +5775,7 @@
             {
                 const subitem = o[k][i];
                 const subkey = Object.keys(subitem)[0];
-                this.#create_entry(subitem, subkey, contextmenu, d);
+                this._create_entry(subitem, subkey, contextmenu, d);
             }
 
             var rect = c.getBoundingClientRect();
@@ -5748,10 +5784,10 @@
 
             // Set final width
             contextmenu.style.width = contextmenu.offsetWidth + "px";
-            this.#adjust_position( contextmenu, 6, true );
+            this._adjust_position( contextmenu, 6, true );
         }
 
-        #create_entry( o, k, c, d ) {
+        _create_entry( o, k, c, d ) {
 
             const hasSubmenu = o[ k ].length;
             let entry = document.createElement('div');
@@ -5792,7 +5828,7 @@
                 return;
 
                 if( LX.OPEN_CONTEXTMENU_ENTRY == 'click' )
-                    this.#create_submenu( o, k, entry, ++d );
+                    this._create_submenu( o, k, entry, ++d );
             });
 
             if( !hasSubmenu )
@@ -5808,7 +5844,7 @@
                     if(entry.built)
                         return;
                     entry.built = true;
-                    this.#create_submenu( o, k, entry, ++d );
+                    this._create_submenu( o, k, entry, ++d );
                     e.stopPropagation();
                 });
             }
@@ -5821,7 +5857,7 @@
         }
 
         onCreate() {
-            this.#adjust_position( this.root, 6 );
+            this._adjust_position( this.root, 6 );
         }
 
         add( path, options = {} ) {
@@ -5908,7 +5944,7 @@
                 // Item already created
                 const id = "#" + (item.id ?? pKey);
                 if( !this.root.querySelector(id) )
-                    this.#create_entry(item, key, this.root, -1);
+                    this._create_entry(item, key, this.root, -1);
             }
         }
 
@@ -6302,7 +6338,7 @@
          */
         constructor( options = {} ) {
 
-            this.rootPath = "../";
+            this.rootPath = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/";
             this.layout = AssetView.LAYOUT_CONTENT;
             this.contentPage = 1;
 
@@ -6321,7 +6357,7 @@
             let area = new LX.Area({height: "100%"});
             div.appendChild(area.root);
 
-            let left, right, content_area = area;
+            let left, right, contentArea = area;
 
             this.skip_browser = options.skip_browser ?? false;
             this.skip_preview = options.skip_preview ?? false;
@@ -6330,30 +6366,30 @@
             if( !this.skip_browser )
             {
                 [left, right] = area.split({ type: "horizontal", sizes: ["15%", "85%"]});
-                content_area = right;
+                contentArea = right;
 
                 left.setLimitBox( 210, 0 );
                 right.setLimitBox( 512, 0 );
             }
 
             if( !this.skip_preview )
-                [content_area, right] = content_area.split({ type: "horizontal", sizes: ["80%", "20%"]});
+                [contentArea, right] = contentArea.split({ type: "horizontal", sizes: ["80%", "20%"]});
             
-            this.allowed_types = options.allowed_types || ["None", "Image", "Mesh", "Script", "JSON", "Clip"];
+            this.allowedTypes = options.allowed_types || ["None", "Image", "Mesh", "Script", "JSON", "Clip"];
 
-            this.prev_data = [];
-            this.next_data = [];
+            this.prevData = [];
+            this.nextData = [];
             this.data = [];
 
-            this._process_data(this.data, null);
+            this._processData(this.data, null);
 
-            this.current_data = this.data;
+            this.currentData = this.data;
             this.path = ['@'];
 
             if(!this.skip_browser)
-                this._create_tree_panel(left);
+                this._createTreePanel(left);
 
-            this._create_content_panel(content_area);
+            this._createContentPanel(contentArea);
             
             // Create resource preview panel
             if( !this.skip_preview )
@@ -6366,18 +6402,18 @@
 
         load( data, onevent ) {
 
-            this.prev_data.length = 0;
-            this.next_data.length = 0;
+            this.prevData.length = 0;
+            this.nextData.length = 0;
             
             this.data = data;
 
-            this._process_data(this.data, null);
-            this.current_data = this.data;
+            this._processData(this.data, null);
+            this.currentData = this.data;
             this.path = ['@'];
 
             if(!this.skip_browser)
-                this._create_tree_panel(this.area);
-            this._refresh_content();
+                this._createTreePanel(this.area);
+            this._refreshContent();
 
             this.onevent = onevent;
         }
@@ -6395,10 +6431,10 @@
         }
 
         /**
-        * @method _process_data
+        * @method _processData
         */
 
-        _process_data( data, parent ) {
+        _processData( data, parent ) {
 
             if( data.constructor !== Array )
             {
@@ -6409,14 +6445,14 @@
             let list = data.constructor === Array ? data : data.children;
 
             for( var i = 0; i < list.length; ++i )
-                this._process_data( list[i], data );
+                this._processData( list[i], data );
         }
 
         /**
-        * @method _update_path
+        * @method _updatePath
         */
 
-        _update_path( data ) {
+        _updatePath( data ) {
             
             this.path.length = 0;
 
@@ -6436,10 +6472,10 @@
         }
 
         /**
-        * @method _create_tree_panel
+        * @method _createTreePanel
         */
 
-        _create_tree_panel(area) {
+        _createTreePanel(area) {
 
             if(this.leftPanel)
                 this.leftPanel.clear();
@@ -6448,12 +6484,12 @@
             }
 
             // Process data to show in tree
-            let tree_data = {
+            let treeData = {
                 id: '/',
                 children: this.data
             }
 
-            this.tree = this.leftPanel.addTree("Content Browser", tree_data, { 
+            this.tree = this.leftPanel.addTree("Content Browser", treeData, { 
                 // icons: tree_icons, 
                 filter: false,
                 only_parents: true,
@@ -6465,12 +6501,12 @@
                     switch(event.type) {
                         case LX.TreeEvent.NODE_SELECTED: 
                             if(!event.multiple) {
-                                this._enter_folder( node );
+                                this._enterFolder( node );
                             }
                             if(!node.parent) {
-                                this.prev_data.push( this.current_data );
-                                this.current_data = this.data;
-                                this._refresh_content();
+                                this.prevData.push( this.currentData );
+                                this.currentData = this.data;
+                                this._refreshContent();
 
                                 this.path = ['@'];
                                 LX.emit("@on_folder_change", this.path.join('/'));
@@ -6478,7 +6514,7 @@
                             break;
                         case LX.TreeEvent.NODE_DRAGGED: 
                             node.folder = value;
-                            this._refresh_content();
+                            this._refreshContent();
                             break;
                     }
                 },
@@ -6486,21 +6522,21 @@
         }
 
         /**
-        * @method _set_content_layout
+        * @method _setContentLayout
         */
 
-        _set_content_layout( layout_mode ) {
+        _setContentLayout( layout_mode ) {
 
             this.layout = layout_mode;
 
-            this._refresh_content();
+            this._refreshContent();
         }
 
         /**
-        * @method _create_content_panel
+        * @method _createContentPanel
         */
 
-        _create_content_panel(area) {
+        _createContentPanel(area) {
 
             if(this.rightPanel)
                 this.rightPanel.clear();
@@ -6510,11 +6546,11 @@
 
             const on_sort = (value, event) => {
                 const cmenu = addContextMenu( "Sort by", event, c => {
-                    c.add("Name", () => this._sort_data('id') );
-                    c.add("Type", () => this._sort_data('type') );
+                    c.add("Name", () => this._sortData('id') );
+                    c.add("Type", () => this._sortData('type') );
                     c.add("");
-                    c.add("Ascending", () => this._sort_data() );
-                    c.add("Descending", () => this._sort_data(null, true) );
+                    c.add("Ascending", () => this._sortData() );
+                    c.add("Descending", () => this._sortData(null, true) );
                 } );
                 const parent = this.parent.root.parentElement;
                 if( parent.classList.contains('lexdialog') )
@@ -6523,9 +6559,9 @@
 
             const on_change_view = (value, event) => {
                 const cmenu = addContextMenu( "Layout", event, c => {
-                    c.add("Content", () => this._set_content_layout( AssetView.LAYOUT_CONTENT ) );
+                    c.add("Content", () => this._setContentLayout( AssetView.LAYOUT_CONTENT ) );
                     c.add("");
-                    c.add("List", () => this._set_content_layout( AssetView.LAYOUT_LIST ) );
+                    c.add("List", () => this._setContentLayout( AssetView.LAYOUT_LIST ) );
                 } );
                 const parent = this.parent.root.parentElement;
                 if( parent.classList.contains('lexdialog') )
@@ -6537,16 +6573,16 @@
                     return;
                 const last_page = this.contentPage;
                 this.contentPage += value;
-                this.contentPage = Math.min( this.contentPage, (((this.current_data.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1 );
+                this.contentPage = Math.min( this.contentPage, (((this.currentData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1 );
                 this.contentPage = Math.max( this.contentPage, 1 );
 
                 if( last_page != this.contentPage )
-                    this._refresh_content();
+                    this._refreshContent();
             }
 
             this.rightPanel.sameLine();
-            this.rightPanel.addDropdown("Filter", this.allowed_types, this.allowed_types[0], (v) => this._refresh_content.call(this, null, v), { width: "20%", minWidth: "128px" });
-            this.rightPanel.addText(null, this.search_value ?? "", (v) => this._refresh_content.call(this, v, null), { placeholder: "Search assets.." });
+            this.rightPanel.addDropdown("Filter", this.allowedTypes, this.allowedTypes[0], (v) => this._refreshContent.call(this, null, v), { width: "20%", minWidth: "128px" });
+            this.rightPanel.addText(null, this.search_value ?? "", (v) => this._refreshContent.call(this, v, null), { placeholder: "Search assets.." });
             this.rightPanel.addButton(null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { className: "micro", title: "Sort" });
             this.rightPanel.addButton(null, "<a class='fa-solid fa-grip'></a>", on_change_view.bind(this), { className: "micro", title: "View" });
             // Content Pages
@@ -6562,32 +6598,32 @@
                         value: "Left",
                         icon: "fa-solid fa-left-long",
                         callback:  (domEl) => { 
-                            if(!this.prev_data.length) return;
-                            this.next_data.push( this.current_data );
-                            this.current_data = this.prev_data.pop();
-                            this._refresh_content();
-                            this._update_path( this.current_data );
+                            if(!this.prevData.length) return;
+                            this.nextData.push( this.currentData );
+                            this.currentData = this.prevData.pop();
+                            this._refreshContent();
+                            this._updatePath( this.currentData );
                         }
                     },
                     {
                         value: "Right",
                         icon: "fa-solid fa-right-long",
                         callback:  (domEl) => { 
-                            if(!this.next_data.length) return;
-                            this.prev_data.push( this.current_data );
-                            this.current_data = this.next_data.pop();
-                            this._refresh_content();
-                            this._update_path( this.current_data );
+                            if(!this.nextData.length) return;
+                            this.prevData.push( this.currentData );
+                            this.currentData = this.nextData.pop();
+                            this._refreshContent();
+                            this._updatePath( this.currentData );
                         }
                     },
                     {
                         value: "Refresh",
                         icon: "fa-solid fa-arrows-rotate",
-                        callback:  (domEl) => { this._refresh_content(); }
+                        callback:  (domEl) => { this._refreshContent(); }
                     }
                 ], { width: "auto", noSelection: true } );
                 this.rightPanel.addText(null, this.path.join('/'), null, { disabled: true, signal: "@on_folder_change", style: { fontWeight: "bolder", fontSize: "16px", color: "#aaa" } });
-                this.rightPanel.addText(null, "Page " + this.contentPage + " / " + ((((this.current_data.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1), null, {disabled: true, signal: "@on_page_change", width: "fit-content"})
+                this.rightPanel.addText(null, "Page " + this.contentPage + " / " + ((((this.currentData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1), null, {disabled: true, signal: "@on_page_change", width: "fit-content"})
                 this.rightPanel.endLine();
             }
 
@@ -6605,16 +6641,16 @@
             });
             this.content.addEventListener('drop', (e) => {
                 e.preventDefault();
-                this._process_drop(e);
+                this._processDrop(e);
             });
             this.content.addEventListener('click', function() {
                 this.querySelectorAll('.lexassetitem').forEach( i => i.classList.remove('selected') );
             });
 
-            this._refresh_content();
+            this._refreshContent();
         }
 
-        _refresh_content(search_value, filter) {
+        _refreshContent(search_value, filter) {
 
             const is_content_layout = (this.layout == AssetView.LAYOUT_CONTENT); // default
 
@@ -6697,11 +6733,11 @@
                             that.content.querySelectorAll('.lexassetitem').forEach( i => i.classList.remove('selected') );
                         this.classList.add('selected');
                         if( !that.skip_preview )
-                            that._preview_asset( item );
+                            that._previewAsset( item );
                     } 
                     else
                     {
-                        if(is_folder) that._enter_folder( item );
+                        if(is_folder) that._enterFolder( item );
                     }
 
                     if(that.onevent) {
@@ -6721,11 +6757,11 @@
                         if(multiple <= 1)   
                             m.add("Rename");
                         if( !is_folder )
-                            m.add("Clone", that._clone_item.bind(that, item));
+                            m.add("Clone", that._cloneItem.bind(that, item));
                         if(multiple <= 1)
                             m.add("Properties");
                         m.add("");
-                        m.add("Delete", that._delete_item.bind(that, item));
+                        m.add("Delete", that._deleteItem.bind(that, item));
                     });
                 });
 
@@ -6738,7 +6774,7 @@
 
             const fr = new FileReader();
 
-            const filtered_data = this.current_data.filter( _i => {
+            const filtered_data = this.currentData.filter( _i => {
                 return (this.filter != "None" ? _i.type.toLowerCase() == this.filter.toLowerCase() : true) &&
                     _i.id.toLowerCase().includes(this.search_value.toLowerCase())
             } );
@@ -6763,7 +6799,7 @@
                             item.src = e.currentTarget.result;  // This is a base64 string...
                             item._path = item.path;
                             delete item.path;
-                            this._refresh_content(search_value, filter);
+                            this._refreshContent(search_value, filter);
                         };
                     } });
                 }else
@@ -6776,10 +6812,10 @@
         }
 
         /**
-        * @method _preview_asset
+        * @method _previewAsset
         */
 
-        _preview_asset(file) {
+        _previewAsset(file) {
 
             const is_base_64 = file.src && file.src.includes("data:image/");
 
@@ -6823,7 +6859,7 @@
             this.previewPanel.merge();
         }
 
-        _process_drop(e) {
+        _processDrop(e) {
 
             const fr = new FileReader();
             const num_files = e.dataTransfer.files.length;
@@ -6832,7 +6868,7 @@
             {
                 const file = e.dataTransfer.files[i];
 
-                const result = this.current_data.find( e => e.id === file.name );
+                const result = this.currentData.find( e => e.id === file.name );
                 if(result) continue;
 
                 fr.readAsDataURL( file );
@@ -6864,10 +6900,10 @@
                         break;
                     }
 
-                    this.current_data.push( item );
+                    this.currentData.push( item );
                     
                     if(i == (num_files - 1)) {
-                        this._refresh_content();
+                        this._refreshContent();
                         if( !this.skip_browser )
                             this.tree.refresh();
                     }
@@ -6875,36 +6911,36 @@
             }
         }
 
-        _sort_data( sort_by, sort_descending = false ) {
+        _sortData( sort_by, sort_descending = false ) {
 
             sort_by = sort_by ?? (this._last_sort_by ?? 'id');
-            this.current_data = this.current_data.sort( (a, b) => {
+            this.currentData = this.currentData.sort( (a, b) => {
                 var r = sort_descending ? b[sort_by].localeCompare(a[sort_by]) : a[sort_by].localeCompare(b[sort_by]);
                 if(r == 0) r = sort_descending ? b['id'].localeCompare(a['id']) : a['id'].localeCompare(b['id']);
                 return r;
             } );
 
             this._last_sort_by = sort_by;
-            this._refresh_content();
+            this._refreshContent();
         }
 
-        _enter_folder( folder_item ) {
+        _enterFolder( folder_item ) {
 
-            this.prev_data.push( this.current_data );
-            this.current_data = folder_item.children;
+            this.prevData.push( this.currentData );
+            this.currentData = folder_item.children;
             this.contentPage = 1;
-            this._refresh_content();
+            this._refreshContent();
 
             // Update path
-            this._update_path(this.current_data);
+            this._updatePath(this.currentData);
         }
 
-        _delete_item( item ) {
+        _deleteItem( item ) {
 
-            const idx = this.current_data.indexOf(item);
+            const idx = this.currentData.indexOf(item);
             if(idx > -1) {
-                this.current_data.splice(idx, 1);
-                this._refresh_content(this.search_value, this.filter);
+                this.currentData.splice(idx, 1);
+                this._refreshContent(this.search_value, this.filter);
 
                 if(this.onevent) {
                     const event = new AssetViewEvent(AssetViewEvent.ASSET_DELETED, item );
@@ -6912,26 +6948,26 @@
                 }
 
                 this.tree.refresh();
-                this._process_data(this.data);
+                this._processData(this.data);
             }
         }
 
-        _clone_item( item ) {
+        _cloneItem( item ) {
 
-            const idx = this.current_data.indexOf(item);
+            const idx = this.currentData.indexOf(item);
             if(idx > -1) {
                 delete item.domEl;
                 delete item.folder;
                 const new_item = deepCopy( item );
-                this.current_data.splice(idx, 0, new_item);
-                this._refresh_content(this.search_value, this.filter);
+                this.currentData.splice(idx, 0, new_item);
+                this._refreshContent(this.search_value, this.filter);
 
                 if(this.onevent) {
                     const event = new AssetViewEvent(AssetViewEvent.ASSET_CLONED, item );
                     this.onevent( event );
                 }
 
-                this._process_data(this.data);
+                this._processData(this.data);
             }
         }
     }
@@ -7192,7 +7228,9 @@
         compareThreshold( v, p, n, t ) { return Math.abs(v - p) >= t || Math.abs(v - n) >= t },
         compareThresholdRange( v0, v1, t0, t1 ) { return v0 >= t0 && v0 <= t1 || v1 >= t0 && v1 <= t1 || v0 <= t0 && v1 >= t1},
         clamp (num, min, max) { return Math.min(Math.max(num, min), max) },
-        getControlPoints(x0,y0,x1,y1,x2,y2,t) {
+
+        getControlPoints( x0, y0, x1, y1, x2, y2 ,t ) {
+            
             //  x0,y0,x1,y1 are the coordinates of the end (knot) pts of this segment
             //  x2,y2 is the next knot -- not connected here but needed to calculate p2
             //  p1 is the control point calculated here, from x1 back toward x0.
@@ -7216,17 +7254,18 @@
             return [p1x,p1y,p2x,p2y]
         },
    
-        drawSpline(ctx,pts,t){
+        drawSpline( ctx, pts, t ) {
         
             ctx.save();
             var cp=[];   // array of control points, as x0,y0,x1,y1,...
             var n=pts.length;
 
             // Draw an open curve, not connected at the ends
-            for(var i=0;i<n-4;i+=2){
+            for(var i=0;i<n-4;i+=2) {
                 cp=cp.concat(LX.UTILS.getControlPoints(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
             }    
-            for(var i=2;i<pts.length-5;i+=2){
+
+            for(var i=2;i<pts.length-5;i+=2) {
                 ctx.beginPath();
                 ctx.moveTo(pts[i],pts[i+1]);
                 ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
@@ -7240,7 +7279,6 @@
             ctx.quadraticCurveTo(cp[0],cp[1],pts[2],pts[3]);
             ctx.stroke();
             ctx.closePath();
-            
         
             ctx.beginPath();
             ctx.moveTo(pts[n-2],pts[n-1]);
@@ -7248,9 +7286,7 @@
             ctx.stroke();
             ctx.closePath();
             
-        ctx.restore();
-       
+            ctx.restore();
         }
-
     };
 })( typeof(window) != "undefined" ? window : (typeof(self) != "undefined" ? self : global ) );

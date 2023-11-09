@@ -1,3 +1,7 @@
+import { LX } from 'lexgui';
+import 'lexgui/components/codeeditor.js';
+import 'lexgui/components/timeline.js';
+
 // Init library and get main area
 let area = LX.init();
 
@@ -279,7 +283,7 @@ const resizeCanvas = ( bounding ) => {
     canvas.height = bounding.height;
 };
 
-topTabs.add( "Canvas", canvas, true, resizeCanvas );
+topTabs.add( "Canvas", canvas, { selected: true, onCreate: resizeCanvas } );
 topTabs.add( "Debug", document.createElement('div'));
 
 // add on resize event to control canvas size
@@ -727,7 +731,7 @@ function createAssetDialog() {
             }
         ];
 
-        assetView = new LX.AssetView({ 
+        var assetView = new LX.AssetView({ 
             skip_browser: true,
             skip_navigation: true,
             preview_actions: previewActions
@@ -735,13 +739,13 @@ function createAssetDialog() {
 
         p.attach( assetView );
         let assetData = [];
-        const values = ['brow_lowerer.png', 'godot_pixelart.png', 'icon.png' ];
+        const values = ['brow_lowerer.png', 'godot_pixelart.png', 'godot_canvas.png' ];
 
         for(let i = 0; i < values.length; i++){
             let data = {
                 id: values[i], 
                 type: i == 0 ? "clip" : "image",
-                src: "images/" + values[i].toLowerCase(),
+                src: "data/" + values[i].toLowerCase(),
             }
             assetData.push(data);
         }

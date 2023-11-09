@@ -1,3 +1,5 @@
+import { LX } from 'lexgui';
+
 // init library and get main area
 let area = LX.init();
 
@@ -42,7 +44,7 @@ area.addMenubar( m => {
     ]);
     
     m.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")})
-    m.setButtonImage("lexgui.js", "images/icon_godot_version.png", () => {window.open("https://github.com/jxarco/lexgui.js/")}, {float: "left"})
+    m.setButtonImage("lexgui.js", "data/icon_godot_version.png", () => {window.open("https://github.com/jxarco/lexgui.js/")}, {float: "left"})
 });
 
 // split main area
@@ -143,7 +145,7 @@ fillRightSide( right );
 fillLeftSide( left );
 
 const img = new Image();
-img.src = "images/godot_canvas.png";
+img.src = "data/godot_canvas.png";
 img.onload = () => {
     requestAnimationFrame(loop);
 }
@@ -174,9 +176,9 @@ function fillRightSide( area ) {
     
     const tabs = area.addTabs({ fit: true });
 
-    var inspector_panel = panel = new LX.Panel();
-    var node_panel = new LX.Panel();
-    var history_panel = new LX.Panel();
+    var inspPanel = new LX.Panel();
+    var nodePanel = new LX.Panel();
+    var historyPanel = new LX.Panel();
     
     LX.ADD_CUSTOM_WIDGET( 'Skeleton', {
         // icon: "fa-dice-d6",
@@ -194,45 +196,45 @@ function fillRightSide( area ) {
         'high_res': true
     };
 
-    panel.addTitle("Mesh Instance 3D", {icon: "fa-brands fa-hashnode"});
+    inspPanel.addTitle("Mesh Instance 3D", {icon: "fa-brands fa-hashnode"});
 
-    panel.addFile("Mesh");
-    panel.branch("Skeleton");
-    panel.addText("Skin", "...");
-    panel.addNumber("NUMBER", 12);
-    panel.addSkeleton("Skeleton", skeleton_instance);
-    panel.merge();
+    inspPanel.addFile("Mesh");
+    inspPanel.branch("Skeleton");
+    inspPanel.addText("Skin", "...");
+    inspPanel.addNumber("NUMBER", 12);
+    inspPanel.addSkeleton("Skeleton", skeleton_instance);
+    inspPanel.merge();
 
-    panel.addTitle("Geometry Instance 3D", {icon: "fa-regular fa-square-full", icon_color: "#d63434"});
-    panel.branch("Geometry", {closed: true});
-    panel.branch("Global Illumination", {closed: true});
-    panel.branch("Visibility Range", {closed: true});
-    panel.merge();
-    panel.addTitle("Node 3D", {icon: "fa-regular fa-circle", icon_color: "#fff"});
-    panel.branch("Transform", {closed: true});
-    panel.branch("Visibility", {closed: true});
-    panel.merge();
+    inspPanel.addTitle("Geometry Instance 3D", {icon: "fa-regular fa-square-full", icon_color: "#d63434"});
+    inspPanel.branch("Geometry", {closed: true});
+    inspPanel.branch("Global Illumination", {closed: true});
+    inspPanel.branch("Visibility Range", {closed: true});
+    inspPanel.merge();
+    inspPanel.addTitle("Node 3D", {icon: "fa-regular fa-circle", icon_color: "#fff"});
+    inspPanel.branch("Transform", {closed: true});
+    inspPanel.branch("Visibility", {closed: true});
+    inspPanel.merge();
     
-    tabs.add( "Inspector", inspector_panel );
-    tabs.add( "Node", node_panel );
-    tabs.add( "History", history_panel );
+    tabs.add( "Inspector", inspPanel );
+    tabs.add( "Node", nodePanel );
+    tabs.add( "History", historyPanel );
 }
 
 function fillLeftSide( area ) {
     
     const tabs = area.addTabs({ fit: true });
 
-    var scene_panel = panel = new LX.Panel();
-    var import_panel = new LX.Panel();
-    var files_panel = new LX.Panel();
+    var scenePanel = new LX.Panel();
+    var importPanel = new LX.Panel();
+    var filesPanel = new LX.Panel();
 
-    tabs.add( "Scene", scene_panel );
-    tabs.add( "Import", import_panel );
-    tabs.add( "Files", files_panel );
+    tabs.add( "Scene", scenePanel );
+    tabs.add( "Import", importPanel );
+    tabs.add( "Files", filesPanel );
 
     // add data tree
 
-    let scene_data = {
+    let sceneData = {
         'id': 'Node 3D',
         'children': [
             {
@@ -271,8 +273,8 @@ function fillLeftSide( area ) {
         ]
     };
 
-    // this is optional!
-    const tree_icons = [
+    // This is optional!
+    const treeIcons = [
         {
             'name':'Add node',
             'icon': 'fa-solid fa-plus',
@@ -285,8 +287,8 @@ function fillLeftSide( area ) {
         }
     ];
 
-    window.tree = panel.addTree("Scene Tree", scene_data, { 
-        icons: tree_icons, 
+    scenePanel.addTree("Scene Tree", sceneData, { 
+        icons: treeIcons, 
         // filter: false,
         onevent: (event) => { 
             console.log(event.string());
@@ -297,6 +299,9 @@ function fillLeftSide( area ) {
                         console.log("Selected: ", event.node); 
                     else
                         console.log(event.node.id + " selected"); 
+                    break;
+                case LX.TreeEvent.NODE_DELETED: 
+                    console.log(event.node.id + " deleted"); 
                     break;
                 case LX.TreeEvent.NODE_DBLCLICKED: 
                     console.log(event.node.id + " dbl clicked"); 

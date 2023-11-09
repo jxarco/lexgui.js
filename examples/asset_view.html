@@ -3,21 +3,31 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI AssetView Demo</title>
-    <link rel="stylesheet" href="../build/lexgui.css">    
+    <link rel="stylesheet" href="https://cdn.skypack.dev/lexgui@^0.1.1/build/lexgui.css">
+    <link rel="icon" href="../images/icon.png">
+    <script type="importmap">
+        {
+          "imports": {
+            "lexgui": "https://cdn.skypack.dev/lexgui@^0.1.1/build/lexgui.module.js",
+            "lexgui/components/": "https://cdn.skypack.dev/lexgui@^0.1.1/build/components/"
+          }
+        }
+    </script>
 </head>
-    <body></body>
-    <script src="../build/lexgui.js"></script>
-    <script src="../build/components/codeeditor.js"></script>
-    <script>
+<body></body>
+    <script type="module">
 
-        // init library and get main area
+        import { LX } from 'lexgui';
+        import 'lexgui/components/codeeditor.js';
+
+        // Init library and get main area
         let area = LX.init();
 
-        // split main area
+        // Split main area
         var [topArea, bottomArea] = area.split({type: 'vertical', sizes:["60vh","40vh"]});
         bottomArea.setLimitBox(0, 450);
 
-        // add canvas to topArea
+        // Add canvas to topArea
         var canvas = document.createElement('canvas');
         canvas.id = "mycanvas";
         canvas.width = topArea.root.clientWidth;
@@ -26,7 +36,7 @@
         canvas.style.height = "100%";
         topArea.attach( canvas );
 
-        // add on resize event to control canvas size
+        // Add on resize event to control canvas size
         topArea.onresize = function( bounding ) {
             canvas.width = bounding.width;
             canvas.height = bounding.height;
@@ -72,7 +82,7 @@
                     {
                         id: "example.png",
                         type: "image",
-                        src: "../images/godot_pixelart.png"
+                        src: "../data/godot_pixelart.png"
                     },
                     {
                         id: "vertical_color.png",
@@ -121,7 +131,7 @@
             {
                 id: "brow_lowerer.png",
                 type: "clip",
-                src: "../images/brow_lowerer.png"
+                src: "../data/brow_lowerer.png"
             }
         ];
 
