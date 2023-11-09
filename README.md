@@ -3,10 +3,12 @@
 **lexgui.js** is a lightweight JavaScript library that allows you to create web interfaces using only JavaScript, HTML, and CSS. This library provides an easy-to-use API for building dynamic and interactive user interfaces without the need for complex frameworks or libraries. With lexgui.js, you can create custom UI components, handle user interactions, and update the interface dynamically.
 
 <img src="data/Screenshot.png" alt="Screenshot" style="width: 100%"/>
-<div style="display: flex">
-<img src="data/Screenshot_Godot.png" alt="ScreenshotGodot" style="width: 50%"/>
-<img src="data/Screenshot_Code.png" alt="ScreenshotCode" style="width: 50%"/>
-</div>
+<table>
+  <tr>
+    <td valign="top"><img src="data/Screenshot_Godot.png"/></td>
+    <td valign="top"><img src="data/Screenshot_Code.png"/></td>
+  </tr>
+</table>
 
 ## Docs
 
@@ -16,12 +18,20 @@ The library documentation is in progress but you can check it [here](https://jxa
 
 Look at this [examples](https://jxarco.github.io/lexgui.js/examples/) to see how to create the different widgets and components!
 
+## Projects using lexgui.js
+
+### EU H2020 SignON project - [Editor](https://github.com/upf-gti/SignON-editor)
+
+<img src="data/scriptAnimation_signon.png" alt="scriptAnimation_signon"/>
+
 ## Contributors
 
 * Alex Rodríguez @jxarco
 * Eva Valls @evallsg
 
----
+## Feedback/Issues
+
+You can use the [repository issues section](https://github.com/jxarco/lexgui.js/issues) or simply write any feedback to alexroco.30@gmail.com.
 
 ## Component Features
 
