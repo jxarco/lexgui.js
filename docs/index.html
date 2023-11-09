@@ -3,52 +3,83 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Docs</title>
-    <link rel="stylesheet" href="../build/lexgui.css">    
+    <link rel="stylesheet" href="https://cdn.skypack.dev/lexgui/build/lexgui.css">
+    <link rel="icon" href="../images/icon.png"> 
     <style>
         iframe { border: none; }
     </style>
 </head>
     <body></body>
-    <script src="../build/lexgui.js"></script>
-    <script>
+    <script type="module">
 
-        // init library and get main area
-        let area = LX.init();
+        import { LX } from 'https://cdn.skypack.dev/lexgui/build/lexgui.module.js';
 
-        // split main area
-        area.split({sizes:["20%","80%"], resize: false});
-        let [left,right] = area.sections;
+        const mobile = navigator && /Android|iPhone/i.test(navigator.userAgent);
 
-        left.root.style.borderRight = "2px solid gray";
-        left.addMenubar( m => {
-            m.add( "Examples", () => {
-                location.href = "../examples/";
-            });
-            m.add( "Docs v" + LX.version, (v, name) => {
-                location.href = "../docs/";
-            });
-            m.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
-        });
-
-        let url = "getting_started.html";
-
-        let panel = left.addPanel();
-        fillDocs( panel );
+        let url = "installation.html";
 
         let iframe = document.createElement('iframe');
         iframe.id = iframe.name = 'viewer';
         iframe.src = url;
         iframe.style.width = "100%";
         iframe.style.height = "100%";
-        right.root.appendChild(iframe);
+
+        // Init library and get main area
+        let area = LX.init();
+
+        if( mobile )
+        {
+            area.root.style.borderRight = "2px solid gray";
+            area.addMenubar( m => {
+                m.add( "Examples", () => {
+                    location.href = "../examples/";
+                });
+                m.add( "Docs v" + LX.version, (v, name) => {
+                    location.href = "../docs/";
+                });
+                m.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
+            });
+
+            // Split main area
+            area.split({ type: 'vertical', sizes: "auto", resize: false });
+            let [top, bottom] = area.sections;
+
+            let panel = top.addPanel();
+            fillDocs( panel, true );
+
+            bottom.root.appendChild(iframe);
+        }
+        else
+        {
+            // Split main area
+            area.split({sizes:["20%","80%"], resize: false});
+            let [left,right] = area.sections;
+
+            left.root.style.borderRight = "2px solid gray";
+            left.addMenubar( m => {
+                m.add( "Examples", () => {
+                    location.href = "../examples/";
+                });
+                m.add( "Docs v" + LX.version, (v, name) => {
+                    location.href = "../docs/";
+                });
+                m.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
+            });
+
+            let panel = left.addPanel();
+            fillDocs( panel );
+
+            right.root.appendChild(iframe);
+        }
 
         // **** **** **** **** **** **** **** **** **** **** **** **** 
 
-        function fillDocs( panel ) {
+        function fillDocs( panel, branches_closed ) {
             
             panel.clear();
-            panel.branch("Manual");
+            panel.branch("Manual", { closed: branches_closed });
             panel.addTitle("LexGUI", { style: { fontSize: "18px" } });
+            panel.addTitle("Installation", {link: "../docs/installation.html", target: 'viewer'});
             panel.addTitle("Getting started", {link: "../docs/getting_started.html", target: 'viewer'});
             panel.addTitle("Creating an area", {link: "../docs/creating_an_area.html", target: 'viewer'});
             panel.addTitle("Instancing panels", {link: "../docs/instancing_panels.html", target: 'viewer'});
@@ -60,11 +91,12 @@
             panel.addTitle("Event Handling", {link: "../docs/event_handling.html", target: 'viewer'});
             panel.addSeparator();
             panel.addTitle("Components", { style: { fontSize: "18px" } });
+            panel.addTitle("Node Graph", {link: "../docs/node_graph.html", target: 'viewer'});
             panel.addTitle("Code Editor", {link: "../docs/code_editor.html", target: 'viewer'});
             panel.addTitle("Timeline", {link: "../docs/timeline.html", target: 'viewer'});
             panel.merge();
 
-            panel.branch("Reference", { closed: true });
+            panel.branch("Reference", { closed: branches_closed });
             panel.addTitle("Areas", { style: { fontSize: "18px" } });
             panel.addTitle("Area", {link: "../docs/reference/area.html", target: 'viewer'});
             panel.addTitle("Menubar", {link: "../docs/reference/menubar.html", target: 'viewer'});

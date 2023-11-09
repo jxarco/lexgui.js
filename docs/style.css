@@ -13,7 +13,7 @@
 	--border-style: 1px solid #444;
 	--panel-width: 300px;
 	--page-padding: 24px;
-	--max-width: 760px;
+	--max-width: 960px;
 	--icon-size: 20px;
 }
 
@@ -27,6 +27,7 @@ body {
 	color: var(--text-color);
 	tab-size: 4;
 	overflow: auto;
+	overflow-x: hidden;
 	max-width: var(--max-width);
 	margin: 0 auto;
 	padding: var(--page-padding);
@@ -203,7 +204,7 @@ table td:first-child {
 code:not(.inline) {
 	display: block;
 	padding: calc(var(--page-padding) - 6px) var(--page-padding);
-	white-space: pre-wrap;
+	/* white-space: pre-wrap; */
 	overflow: auto;
 	box-sizing: border-box;
 	position: relative;
@@ -238,7 +239,6 @@ a.permalink {
 		--panel-width: 360px;
 		--font-size: 18px;
 		--line-height: 28px;
-		--max-width: 880px;
 		--page-padding: 28px;
 		--icon-size: 24px;
 	}
@@ -267,6 +267,7 @@ a.permalink {
 	:root {
 		--page-padding: 16px;
 		--icon-size: 24px;
+		--font-size: 24px;
 	}
 
 	body {

@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>LexGUI Docs</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.2/css/all.css">
+    <script type="text/javascript" src="docmaker.js"></script>
+</head>
+
+<body>
+
+<script type="text/javascript">
+
+    MAKE_HEADER( "Installation", "h1", "installation" );
+
+    MAKE_HEADER( "Project structure", "h2", "project-structure" );
+
+    MAKE_PARAGRAPH( `Each <b>lexgui.js</b> project must include at least one HTML file for webpage definition and a JavaScript file to execute your lexgui code. 
+    While the specific structure and naming conventions mentioned below are not obligatory, they will be consistently referenced throughout this guide:` );
+
+    MAKE_BULLET_LIST( ["index.html"] );
+    MAKE_CODE( `<span class="typ">&lt;!DOCTYPE html&gt;</span>
+&lt;<span class="tag">html</span> lang=<span class="atv">"en"</span>&gt;
+&lt;<span class="tag">head</span>&gt;
+    &lt;<span class="tag">meta</span> charset=<span class="atv">"utf-8"</span>&gt;
+    &lt;<span class="tag">title</span>&gt;My first lexgui.js app&lt;/<span class="tag">title</span>&gt;
+	&lt;<span class="tag">link</span> rel=<span class="atv">"stylesheet"</span> href=<span class="atv">"https://cdn.skypack.dev/lexgui@^&lt;version&gt;/build/lexgui.css"</span>&gt;
+    &lt;<span class="tag">script</span> type=<span class="atv">"importmap"</span>&gt;
+    {
+        "imports": {
+            "lexgui": "https://cdn.skypack.dev/lexgui@^&lt;version&gt;/build/lexgui.module.js",
+            "lexgui/components/": "https://cdn.skypack.dev/lexgui@^&lt;version&gt;/build/components/"
+        }
+    }
+    &lt;/<span class="tag">script</span>&gt;
+&lt;/<span class="tag">head</span>&gt;
+&lt;<span class="tag">body</span>&gt;
+	&lt;<span class="tag">script</span> type=<span class="atv">"module"</span> src=<span class="atv">"/main.js"</span>&gt;&lt;/<span class="tag">script</span>&gt;
+&lt;/<span class="tag">body</span>&gt;
+&lt;/<span class="tag">html</span>&gt;` );
+
+    MAKE_PARAGRAPH( `Don't forget to replace &lt;version&gt; with an actual version of lexgui.js, like "0.1.1". 
+    The most recent version can be found on the ${INLINE_LINK("npm version list", "https://www.npmjs.com/package/lexgui?activeTab=versions")}}.
+    Use <i>lexgui</i> without the version tag to use the latest version.`, true );
+
+    MAKE_BULLET_LIST( ["main.js"] );
+    MAKE_CODE( `<span class="kwd">import</span> { <span class="typ">LX</span> } <span class="kwd">from</span> <span class="str">'lexgui'</span>;
+
+<span class="com">// Your code...</span>` );
+
+
+    MAKE_HEADER( "Components", "h2", "components" );
+    MAKE_PARAGRAPH( `By default, lexgui.js provides the core elements for creating web interfaces. Other components, such as the code editor or timelines are located in the components/ directory. 
+    These ones are not required to be installed individually, but they <b>do need to be imported separately<b>:` );
+    MAKE_CODE( `<span class="kwd">import</span> { <span class="typ">LX</span> } <span class="kwd">from</span> <span class="str">'lexgui'</span>;
+
+<span class="com">// First option, importing the component</span>    
+<span class="kwd">import</span> { <span class="typ">CodeEditor</span> } <span class="kwd">from</span> <span class="str">'lexgui/components/codeeditor.js'</span>;
+
+<span class="kwd">const</span> editor = <span class="kwd">new</span> <span class="typ">CodeEditor</span>();
+
+<span class="com">// Or since it's added to the LX namespace...</span>    
+<span class="kwd">import</span> <span class="str">'lexgui/components/codeeditor.js'</span>;
+
+<span class="kwd">const</span> editor = <span class="kwd">new</span> LX.<span class="typ">CodeEditor</span>();` );
+
+</script>
+
+</body>
+</html>

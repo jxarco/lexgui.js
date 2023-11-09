@@ -25,6 +25,10 @@ function MAKE_PARAGRAPH( string, sup )
 function MAKE_CODE( string )
 {
     console.assert(string);
+
+    string.replaceAll('<', '&lt;');
+    string.replaceAll('>', '&gt;');
+    
     let pre = document.createElement('pre');
     let code = document.createElement('code');
     code.innerHTML = string;
