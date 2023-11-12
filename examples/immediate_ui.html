@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>LexGUI ImUI Demo</title>
+    <link rel="stylesheet" href="../build/lexgui.css">
+    <link rel="icon" href="../images/icon.png">
+    <script type="importmap">
+        {
+          "imports": {
+            "lexgui": "../build/lexgui.module.js",
+            "lexgui/components/": "../build/components/"
+          }
+        }
+    </script>
+</head>
+<body></body>
+    <script type="module">
+
+        import { LX } from 'lexgui';
+        import 'lexgui/components/imui.js';
+
+        // init library and get main area
+        let area = LX.init();
+
+        // add canvas to area
+        var canvas = document.createElement('canvas');
+        canvas.id = "mycanvas";
+        canvas.width = area.root.clientWidth;
+        canvas.height = area.root.clientHeight;
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        area.attach( canvas );
+
+        // add on resize event to control canvas size
+        area.onresize = function( bounding ) {
+            canvas.width = bounding.width;
+            canvas.height = bounding.height;
+        };
+
+        let im_ui = new LX.ImUI( canvas );
+
+        function loop( time ) {
+            
+            var ctx = canvas.getContext("2d");
+
+            ctx.fillStyle = "#b7a9b1";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.font = "48px Monospace";
+            ctx.fillStyle = "#ff1999";
+
+            const text = "Lexgui.js @jxarco";
+            ctx.fillText(text, 300, 225);
+
+            if( im_ui.Button( "First button", 50, 50 ) )
+            {
+                console.log("Button clicked!");
+            }
+
+            im_ui.Slider( "A very cool slider", 50, 100, false, (v) => {
+                console.log("Slider value: " + v);
+            } );
+
+            im_ui.Checkbox( "First checkbox", 50, 150, false, (v) => {
+                console.log("Checkbox value: " + v);
+            } );
+
+            im_ui.endFrame();
+
+            requestAnimationFrame(loop);
+        }
+
+        requestAnimationFrame(loop);
+
+    </script>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Examples</title>
-    <link rel="stylesheet" href="https://cdn.skypack.dev/lexgui@^0.1.1/build/lexgui.css">
+    <link rel="stylesheet" href="../build/lexgui.css">
     <link rel="icon" href="../images/icon.png">
     <style>
         iframe { border: none; }
@@ -15,8 +15,8 @@
     <script type="importmap">
         {
           "imports": {
-            "lexgui": "https://cdn.skypack.dev/lexgui@^0.1.1/build/lexgui.module.js",
-            "lexgui/components/": "https://cdn.skypack.dev/lexgui@^0.1.1/build/components/"
+            "lexgui": "../build/lexgui.module.js",
+            "lexgui/components/": "../build/components/"
           }
         }
     </script>
@@ -47,9 +47,10 @@
             'Area Tabs',
             'Asset View',
             'Code Editor',
-            'Overlay Area',
             'Dialogs',
-            'Node Graph'
+            'Immediate UI',
+            'Node Graph',
+            'Overlay Area'
         ];
 
         let panel = leftArea.addPanel({ className: "lexexamplespanel" });
@@ -57,7 +58,7 @@
 
         let iframe = document.createElement('iframe');
         iframe.id = iframe.name = 'viewer';
-        iframe.src = "area_tabs.html";
+        iframe.src = examples[0].replace(" ", "_").toLowerCase() + ".html";
         iframe.style.width = "100%";
         iframe.style.height = "100%";
         rightArea.root.appendChild(iframe);

@@ -8,7 +8,7 @@
 */
 
 var LX = {
-    version: "0.1.1",
+    version: "0.1.2",
     ready: false,
     components: [], // specific pre-build components
     signals: {} // events and triggers
@@ -115,6 +115,29 @@ function doAsync( fn, ms ) {
     else
         fn();
 }
+
+// Math classes
+
+class vec2 {
+
+    constructor(x, y) {
+        this.x = x ?? 0;
+        this.y = y ?? 0;
+    }
+
+    get xy() { return [ this.x, this.y]; }
+    get yx() { return [ this.y, this.x]; }
+
+    set( x, y ) { this.x = x; this.y = y; }
+    add( v ) { this.set( this.x + v.x, this.y + v.y ) }
+    sub( v ) { this.set( this.x - v.x, this.y - v.y ) }
+    mul( v ) { this.set( this.x * v.x, this.y * v.y ) }
+    div( v ) { this.set( this.x / v.x, this.y / v.y ) }
+};
+
+LX.vec2 = vec2;
+
+// Other utils
 
 function set_as_draggable(domEl) {
 
@@ -2996,7 +3019,7 @@ class Panel {
         };
 
         // Process inline widgets
-        if(this._inline_widgets_left > 0)
+        if(this._inline_widgets_left > 0 && !options.skipInlineCount)
         {
             if(!this._inlineWidgets)  {
                 this._inlineWidgets = [];
@@ -3749,7 +3772,7 @@ class Panel {
             element.querySelector(".lexoptions").style.width = (event.currentTarget.clientWidth) + 2 + 'px';
             element.querySelector(".lexoptions").toggleAttribute('hidden');
             list.focus();
-        }, { buttonClass: 'array' });
+        }, { buttonClass: 'array', skipInlineCount: true });
 
         this.clearQueue();
 
