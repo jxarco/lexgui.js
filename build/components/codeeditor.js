@@ -530,43 +530,83 @@ class CodeEditor {
         return this.code.lines.join(min ? ' ' : '\n');
     }
 
-    setText(text)  {
-        const new_lines = text.split('\n');
+    setText( text ) {
+
+        console.assert( text.length > 0 );
+        let new_lines = text.split('\n');
     
-        if (new_lines.length < 1) { return; }
-    
-        let num_lines = new_lines.length;
-        console.assert(num_lines > 0);
-        const first_line = new_lines.shift();
-        num_lines--;
-    
+        this.code.lines = [].concat(new_lines);
+
+        let cursor = this.cursors.children[0];
+        let lastLine = new_lines.pop();
+
+        this.cursorToLine(cursor, new_lines.length); // Already substracted 1
+        this.cursorToPosition(cursor, lastLine.length);
+
+        this.processLines();
+    }
+
+    appendText( text ) {
+
         let cursor = this.cursors.children[0];
         let lidx = cursor.line;
-        const remaining = this.code.lines[lidx].slice(cursor.position);
-    
-        // Add first line
-        this.code.lines[lidx] = [
-            this.code.lines[lidx].slice(0, cursor.position),
-            first_line
-        ].join('');
-    
-        this.cursorToPosition(cursor, (cursor.position + first_line.length));
-    
-        // Enter next lines...
-        let _text = null;
-    
-        for (var i = 0; i < new_lines.length; ++i) {
-            _text = new_lines[i];
-            this.cursorToLine(cursor, cursor.line++, true);
-            // Add remaining...
-            if (i == (new_lines.length - 1))
-                _text += remaining;
-            this.code.lines.splice(1 + lidx + i, 0, _text);
+
+        if( this.selection ) {
+            this.deleteSelection(cursor);
+            lidx = cursor.line;
         }
-    
-        if (_text) this.cursorToPosition(cursor, _text.length);
-        this.cursorToLine(cursor, cursor.line + num_lines);
-        this.processLines(lidx);
+
+        this.endSelection();
+
+        const new_lines = text.split('\n');
+
+        // Pasting Multiline...
+        if(new_lines.length != 1)
+        {
+            let num_lines = new_lines.length;
+            console.assert(num_lines > 0);
+            const first_line = new_lines.shift();
+            num_lines--;
+
+            const remaining = this.code.lines[lidx].slice(cursor.position);
+
+            // Add first line
+            this.code.lines[lidx] = [
+                this.code.lines[lidx].slice(0, cursor.position), 
+                first_line
+            ].join('');
+
+            this.cursorToPosition(cursor, (cursor.position + first_line.length));
+
+            // Enter next lines...
+
+            let _text = null;
+
+            for( var i = 0; i < new_lines.length; ++i ) {
+                _text = new_lines[i];
+                this.cursorToLine(cursor, cursor.line++, true);
+                // Add remaining...
+                if( i == (new_lines.length - 1) )
+                    _text += remaining;
+                this.code.lines.splice( 1 + lidx + i, 0, _text);
+            }
+
+            if(_text) this.cursorToPosition(cursor, _text.length);
+            this.cursorToLine(cursor, cursor.line + num_lines);
+            this.processLines(lidx);
+        }
+        // Pasting one line...
+        else
+        {
+            this.code.lines[lidx] = [
+                this.code.lines[lidx].slice(0, cursor.position), 
+                new_lines[0], 
+                this.code.lines[lidx].slice(cursor.position)
+            ].join('');
+
+            this.cursorToPosition(cursor, (cursor.position + new_lines[0].length));
+            this.processLine(lidx);
+        }
     }
 
     loadFile( file ) {
@@ -1069,64 +1109,8 @@ class CodeEditor {
                 this.onsave( this.getText() );
                 return;
             case 'v': // paste
-
-                if( this.selection ) {
-                    this.deleteSelection(cursor);
-                    lidx = cursor.line;
-                }
-
-                this.endSelection();
-
                 let text = await navigator.clipboard.readText();
-                const new_lines = text.split('\n');
-
-                // Pasting Multiline...
-                if(new_lines.length != 1)
-                {
-                    let num_lines = new_lines.length;
-                    console.assert(num_lines > 0);
-                    const first_line = new_lines.shift();
-                    num_lines--;
-
-                    const remaining = this.code.lines[lidx].slice(cursor.position);
-
-                    // Add first line
-                    this.code.lines[lidx] = [
-                        this.code.lines[lidx].slice(0, cursor.position), 
-                        first_line
-                    ].join('');
-
-                    this.cursorToPosition(cursor, (cursor.position + first_line.length));
-
-                    // Enter next lines...
-
-                    let _text = null;
-
-                    for( var i = 0; i < new_lines.length; ++i ) {
-                        _text = new_lines[i];
-                        this.cursorToLine(cursor, cursor.line++, true);
-                        // Add remaining...
-                        if( i == (new_lines.length - 1) )
-                            _text += remaining;
-                        this.code.lines.splice( 1 + lidx + i, 0, _text);
-                    }
-
-                    if(_text) this.cursorToPosition(cursor, _text.length);
-                    this.cursorToLine(cursor, cursor.line + num_lines);
-                    this.processLines(lidx);
-                }
-                // Pasting one line...
-                else
-                {
-                    this.code.lines[lidx] = [
-                        this.code.lines[lidx].slice(0, cursor.position), 
-                        new_lines[0], 
-                        this.code.lines[lidx].slice(cursor.position)
-                    ].join('');
-
-                    this.cursorToPosition(cursor, (cursor.position + new_lines[0].length));
-                    this.processLine(lidx);
-                }
+                this.appendText(text);
                 return;
             case 'x': // cut line
                 const to_copy = this.code.lines.splice(lidx, 1)[0];
