@@ -126,17 +126,17 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
         constructor(x, y) {
             this.x = x ?? 0;
-            this.y = y ?? 0;
+            this.y = y ?? (x ?? 0);
         }
-
+    
         get xy() { return [ this.x, this.y]; }
         get yx() { return [ this.y, this.x]; }
-
-        set( x, y ) { this.x = x; this.y = y; }
-        add( v ) { this.set( this.x + v.x, this.y + v.y ) }
-        sub( v ) { this.set( this.x - v.x, this.y - v.y ) }
-        mul( v ) { this.set( this.x * v.x, this.y * v.y ) }
-        div( v ) { this.set( this.x / v.x, this.y / v.y ) }
+    
+        set ( x, y ) { this.x = x; this.y = y; }
+        add ( v, v0 = new vec2() ) { v0.set( this.x + v.x, this.y + v.y ); return v0; }
+        sub ( v, v0 = new vec2() ) { v0.set( this.x - v.x, this.y - v.y ); return v0; }
+        mul ( v, v0 = new vec2() ) { if( v.constructor == Number ) { v = new vec2(v) } v = v0.set( this.x * v.x, this.y * v.y ); return v0; }
+        div ( v, v0 = new vec2() ) { v0.set( this.x / v.x, this.y / v.y ); return v0; }
     };
 
     LX.vec2 = vec2;

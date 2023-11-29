@@ -56,6 +56,7 @@ class ImUI {
         // Mouse state
 
         this.mousePosition = new LX.vec2();
+        this.setPointerCursor = false;
 
         this.root = this.canvas = canvas;
     }
@@ -121,22 +122,17 @@ class ImUI {
 
         // Draw button
 
+        ctx.beginPath();
         ctx.fillStyle = active ? "#666" : (hovered ? "#444" : "#222");
-        ctx.fillRect( position.x, position.y, size.x + padding.x * 2.0, size.y + padding.y * 2.0 );
+        ctx.roundRect( position.x, position.y, size.x + padding.x * 2.0, size.y + padding.y * 2.0, [8, 8, 8, 8] );
+        ctx.fill();
 
         // Draw text
 
         ctx.fillStyle = hovered ? "#fff" : "#ddd";
         ctx.fillText( text, position.x + padding.x, position.y + metrics.actualBoundingBoxAscent + padding.y );
 
-        if( !hovered )
-        {
-            document.body.style.cursor = "default";
-            return false;
-        }
-
-        // Pointer cursor on hover
-        document.body.style.cursor = "pointer";
+        this.setPointerCursor |= hovered;
 
         if( this.eventClick )
         {
@@ -176,50 +172,53 @@ class ImUI {
 
         const metrics = ctx.measureText( text );
         let size = new LX.vec2( metrics.width, metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent );
+        let fullSize = size.add( padding.mul( 2.0 ) );
 
         // Get mouse state
 
-        const hovered = this.mousePosition.x >= position.x && this.mousePosition.x <= (position.x + size.x + padding.x * 2.0)
-        && this.mousePosition.y >= position.y && this.mousePosition.y <= (position.y + size.y + padding.y * 2.0);
+        const hovered = this.mousePosition.x >= position.x && this.mousePosition.x <= (position.x + fullSize.x)
+        && this.mousePosition.y >= position.y && this.mousePosition.y <= (position.y + fullSize.y);
 
         const active = hovered && this.mouseDown;
 
         // Draw box
 
+        ctx.beginPath();
         ctx.fillStyle = hovered ? "#444" : "#222";
-        ctx.fillRect( position.x, position.y, size.x + padding.x * 2.0, size.y + padding.y * 2.0 );
+        ctx.roundRect( position.x, position.y, fullSize.x, fullSize.y, [8, 8, 8, 8] );
+        ctx.fill();
 
-        // Draw thumb
-
-        let thumbSize = new LX.vec2( 12, size.y );
+        // Draw value
 
         const min = position.x;
-        const max = position.x + size.x + padding.x * 2.0 - thumbSize.x;
+        const max = position.x + fullSize.x;
 
         if(active)
         {
-            value = LX.UTILS.clamp((this.mousePosition.x - min - thumbSize.x * 0.5) / (max - min), 0.0, 1.0);
+            value = LX.UTILS.clamp((this.mousePosition.x - min) / (max - min), 0.0, 1.0);
             this.widgets[ text ].value = value;
         }
         
-        let thumbPos = new LX.vec2( min + (max - position.x) * value, position.y );
+        let valueSize = new LX.vec2( fullSize.x * value, size.y );
 
-        ctx.fillStyle = active ? "#bbb" : (hovered ? "#777" : "#888");
-        ctx.fillRect( thumbPos.x, thumbPos.y, thumbSize.x, thumbSize.y + padding.y * 2.0 );
+        ctx.beginPath();
+        ctx.fillStyle = hovered ? "#6074e7" : "#3e57e4";
+        if( valueSize.x > ( fullSize.x - 8 ) ) // 8: radius
+        {
+            ctx.roundRect( position.x, position.y, valueSize.x, valueSize.y + padding.y * 2.0, [8, 8, 8, 8] );
+            ctx.fill();    
+        }
+        else
+        {
+            ctx.fillRect( position.x, position.y, valueSize.x, valueSize.y + padding.y * 2.0 );
+        }
 
         // Draw text
 
         ctx.fillStyle = hovered ? "#fff" : "#ddd";
         ctx.fillText( text, position.x + padding.x, position.y + metrics.actualBoundingBoxAscent + padding.y );
 
-        if( !hovered )
-        {
-            document.body.style.cursor = "default";
-            return;
-        }
-
-        // Pointer cursor on hover
-        document.body.style.cursor = "pointer";
+        this.setPointerCursor |= hovered;
 
         if( active )
         {
@@ -259,7 +258,7 @@ class ImUI {
 
         let boxMargin = 12;
         let fullSize = new LX.vec2(boxMargin * 2.0, 0);
-        fullSize.add( size );
+        fullSize.add( size, fullSize );
 
         // Get mouse state
 
@@ -294,8 +293,7 @@ class ImUI {
         ctx.fillStyle = hovered ? "#fff" : "#ddd";
         ctx.fillText( text, position.x + padding.x, position.y + metrics.actualBoundingBoxAscent + padding.y );
 
-        // Pointer cursor on hover
-        document.body.style.cursor = hovered ? "pointer" : "default";
+        this.setPointerCursor |= hovered;
     }
 
     /**
@@ -307,6 +305,11 @@ class ImUI {
 
         this.eventClick = null;
 
+        // Pointer cursor on hover
+        document.body.style.cursor = this.setPointerCursor ? "pointer" : "default";
+
+        // Clear info
+        this.setPointerCursor = false;
     }
 }
 
