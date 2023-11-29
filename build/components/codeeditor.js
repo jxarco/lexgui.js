@@ -284,7 +284,7 @@ class CodeEditor {
 
             this.resetCursorPos( CodeEditor.CURSOR_LEFT );
             if(idx > 0) this.cursorToString(cursor, prestring);
-            this._refresh_code_info(cursor.line + 1, cursor.position);
+            this._refreshCodeInfo(cursor.line + 1, cursor.position);
             this.code.scrollLeft = 0;
 
             if( !e.shiftKey || e.cancelShift )
@@ -517,7 +517,7 @@ class CodeEditor {
         this.addTab(options.name || "untitled", true, options.title);
 
         // Create inspector panel
-        let panel = this._create_panel_info();
+        let panel = this._createPanelInfo();
         if( panel ) area.attach( panel );
     }
 
@@ -530,11 +530,10 @@ class CodeEditor {
         return this.code.lines.join(min ? ' ' : '\n');
     }
 
-    setText( text ) {
+    // This can be used to empty all text...
+    setText( text = "" ) {
 
-        console.assert( text.length > 0 );
         let new_lines = text.split('\n');
-    
         this.code.lines = [].concat(new_lines);
 
         let cursor = this.cursors.children[0];
@@ -542,7 +541,6 @@ class CodeEditor {
 
         this.cursorToLine(cursor, new_lines.length); // Already substracted 1
         this.cursorToPosition(cursor, lastLine.length);
-
         this.processLines();
     }
 
@@ -616,7 +614,7 @@ class CodeEditor {
             text = text.replaceAll('\r', '');
             this.code.lines = text.split('\n');
             this.processLines();
-            this._refresh_code_info();
+            this._refreshCodeInfo();
         };
 
         if(file.constructor == String)
@@ -625,7 +623,7 @@ class CodeEditor {
             LX.request({ url: filename, success: text => {
 
                 const name = filename.substring(filename.lastIndexOf('/') + 1);
-                this._change_language_from_extension( LX.getExtension(name) );
+                this._changeLanguageFromExtension( LX.getExtension(name) );
                 inner_add_tab( text, name, filename );
             } });
         }
@@ -634,7 +632,7 @@ class CodeEditor {
             const fr = new FileReader();
             fr.readAsText( file );
             fr.onload = e => { 
-                this._change_language_from_extension( LX.getExtension(file.name) );
+                this._changeLanguageFromExtension( LX.getExtension(file.name) );
                 const text = e.currentTarget.result;
                 inner_add_tab( text, file.name );
             };
@@ -653,29 +651,29 @@ class CodeEditor {
         } );
     }
 
-    _change_language( lang ) {
+    _changeLanguage( lang ) {
         this.highlight = lang;
-        this._refresh_code_info();
+        this._refreshCodeInfo();
         this.processLines();
     }
 
-    _change_language_from_extension( ext ) {
+    _changeLanguageFromExtension( ext ) {
         
         switch(ext.toLowerCase())
         {
-            case 'js': return this._change_language('JavaScript');
-            case 'glsl': return this._change_language('GLSL');
-            case 'css': return this._change_language('CSS');
-            case 'json': return this._change_language('JSON');
-            case 'xml': return this._change_language('XML');
-            case 'wgsl': return this._change_language('WGSL');
+            case 'js': return this._changeLanguage('JavaScript');
+            case 'glsl': return this._changeLanguage('GLSL');
+            case 'css': return this._changeLanguage('CSS');
+            case 'json': return this._changeLanguage('JSON');
+            case 'xml': return this._changeLanguage('XML');
+            case 'wgsl': return this._changeLanguage('WGSL');
             case 'txt': 
             default:
-                this._change_language('Plain Text');
+                this._changeLanguage('Plain Text');
         }
     }
 
-    _create_panel_info() {
+    _createPanelInfo() {
         
         if( !this.skip_info )
         {
@@ -683,7 +681,7 @@ class CodeEditor {
             panel.ln = 0;
             panel.col = 0;
 
-            this._refresh_code_info = (ln = panel.ln, col = panel.col) => {
+            this._refreshCodeInfo = (ln = panel.ln, col = panel.col) => {
                 panel.ln = ln;
                 panel.col = col;
                 panel.clear();
@@ -694,19 +692,19 @@ class CodeEditor {
                 panel.addButton("<b>{ }</b>", this.highlight, (value, event) => {
                     LX.addContextMenu( "Language", event, m => {
                         for( const lang of this.languages )
-                            m.add( lang, this._change_language.bind(this) );
+                            m.add( lang, this._changeLanguage.bind(this) );
                     });
                 }, { width: "25%", nameWidth: "15%" });
                 panel.endLine();
             };
 
-            this._refresh_code_info();
+            this._refreshCodeInfo();
 
             return panel;
         }
         else
         {
-            this._refresh_code_info = () => {};
+            this._refreshCodeInfo = () => {};
 
             doAsync( () => {
 
@@ -792,8 +790,8 @@ class CodeEditor {
             this.code = this.openedTabs[tabname];
             this.restoreCursor(cursor, this.code.cursorState);    
             this.endSelection();
-            this._change_language_from_extension( LX.getExtension(tabname) );
-            this._refresh_code_info(cursor.line + 1, cursor.position);
+            this._changeLanguageFromExtension( LX.getExtension(tabname) );
+            this._refreshCodeInfo(cursor.line + 1, cursor.position);
 
             // Restore scroll
             this.gutter.scrollTop = this.code.scrollTop;
@@ -806,7 +804,7 @@ class CodeEditor {
             this.code = code;  
             this.resetCursorPos(CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP);
             this.processLines();
-            doAsync( () => this._refresh_code_info(0, 0), 50 );
+            doAsync( () => this._refreshCodeInfo(0, 0), 50 );
         }
     }
 
@@ -930,7 +928,7 @@ class CodeEditor {
         this.cursorToPosition(cursor, string.length);
         
         if(!skip_refresh) 
-            this._refresh_code_info( ln + 1, cursor.position );
+            this._refreshCodeInfo( ln + 1, cursor.position );
     }
 
     processSelection( e, keep_range ) {
@@ -1572,7 +1570,7 @@ class CodeEditor {
         this.cursorToPosition(cursor, this.selection.fromX);
         this.endSelection();
 
-        this._refresh_code_info(cursor.line, cursor.position);
+        this._refreshCodeInfo(cursor.line, cursor.position);
     }
 
     endSelection() {
@@ -1590,7 +1588,7 @@ class CodeEditor {
         cursor.style.left = "calc(" + (cursor._left - this.getScrollLeft()) + "px + " + this.xPadding + ")";
         cursor.position++;
         this.restartBlink();
-        this._refresh_code_info( cursor.line + 1, cursor.position );
+        this._refreshCodeInfo( cursor.line + 1, cursor.position );
 
         // Add horizontal scroll
 
@@ -1611,7 +1609,7 @@ class CodeEditor {
         cursor.position--;
         cursor.position = Math.max(cursor.position, 0);
         this.restartBlink();
-        this._refresh_code_info( cursor.line + 1, cursor.position );
+        this._refreshCodeInfo( cursor.line + 1, cursor.position );
 
         doAsync(() => {
             var first_char = (this.code.scrollLeft / this.charWidth)|0;
@@ -1631,7 +1629,7 @@ class CodeEditor {
         if(resetLeft)
             this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
 
-        this._refresh_code_info( cursor.line + 1, cursor.position );
+        this._refreshCodeInfo( cursor.line + 1, cursor.position );
 
         doAsync(() => {
             var first_line = (this.code.scrollTop / this.lineHeight)|0;
@@ -1650,7 +1648,7 @@ class CodeEditor {
         if(resetLeft)
             this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
 
-        this._refresh_code_info( cursor.line + 1, cursor.position );
+        this._refreshCodeInfo( cursor.line + 1, cursor.position );
 
         doAsync(() => {
             var last_line = ((this.code.scrollTop  + this.code.offsetHeight) / this.lineHeight)|0;
