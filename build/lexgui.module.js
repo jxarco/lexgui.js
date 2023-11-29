@@ -3045,6 +3045,7 @@ class Panel {
 
         options.placeholder = placeholder.constructor == String ? placeholder : "Filter properties..";
         options.skipWidget = options.skipWidget ?? true;
+        options.skipInlineCount = true;
 
         let widget = this.create_widget(null, Widget.TEXT, options);
         let element = widget.domEl;
@@ -3260,6 +3261,7 @@ class Panel {
      * trigger: Choose onchange trigger (default, input) [default]
      * inputWidth: Width of the text input
      * float: Justify text
+     * skipReset: Don't add the reset value button when value changes
      */
 
     addText( name, value, callback, options = {} ) {
@@ -3276,7 +3278,7 @@ class Panel {
         let element = widget.domEl;
 
         // Add reset functionality
-        if(widget.name && !(options.noreset ?? false)) {
+        if(widget.name && !(options.skipReset ?? false)) {
             Panel._add_reset_property(element.domName, function() {
                 wValue.value = wValue.iValue;
                 this.style.display = "none";
@@ -3387,7 +3389,7 @@ class Panel {
         let element = widget.domEl;
 
         // Add reset functionality
-        if(widget.name && !(options.noreset ?? false)) {
+        if(widget.name && !(options.skipReset ?? false)) {
             Panel._add_reset_property(element.domName, function() {
                 wValue.value = wValue.iValue;
                 this.style.display = "none";
@@ -3715,6 +3717,7 @@ class Panel {
      * @param {*} options:
      * filter: Add a search bar to the widget [false]
      * disabled: Make the widget disabled [false]
+     * skipReset: Don't add the reset value button when value changes
      */
 
     addDropdown( name, values, value, callback, options = {} ) {
@@ -3735,7 +3738,7 @@ class Panel {
         let that = this;
 
         // Add reset functionality
-        if(widget.name)
+        if(widget.name && !(options.skipReset ?? false))
         {
             Panel._add_reset_property(element.domName, function() {
                 value = wValue.iValue;
@@ -3746,7 +3749,7 @@ class Panel {
 
         let container = document.createElement('div');
         container.className = "lexdropdown";
-        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";            
+        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
         
         // Add widget value
         let wValue = document.createElement('div');
@@ -3853,7 +3856,7 @@ class Panel {
                 });
 
                 // Add string option
-                if(typeof iValue == 'string' || !iValue) {
+                if( iValue.constructor != Object ) {
                     option.style.flexDirection = 'unset';
                     option.innerHTML = "<a class='fa-solid fa-check'></a><span>" + iValue + "</span>";
                     option.value = iValue;
@@ -3906,6 +3909,7 @@ class Panel {
      * @param {Array of Array} values Array of 2N Arrays of each value of the curve
      * @param {Function} callback Callback function on change
      * @param {*} options:
+     * skipReset: Don't add the reset value button when value changes
      */
 
     addCurve( name, values, callback, options = {} ) {
@@ -3931,12 +3935,15 @@ class Panel {
         let defaultValues = JSON.parse(JSON.stringify(values));
 
         // Add reset functionality
-        Panel._add_reset_property(element.domName, function(e) {
-            this.style.display = "none";
-            curve_instance.element.value = JSON.parse(JSON.stringify(defaultValues));
-            curve_instance.redraw();
-            that._trigger( new IEvent(name, curve_instance.element.value, e), callback );
-        });
+        if( !(options.skipReset ?? false) )
+        {
+            Panel._add_reset_property(element.domName, function(e) {
+                this.style.display = "none";
+                curve_instance.element.value = JSON.parse(JSON.stringify(defaultValues));
+                curve_instance.redraw();
+                that._trigger( new IEvent(name, curve_instance.element.value, e), callback );
+            });
+        }
 
         // Add widget value
 
@@ -4130,23 +4137,29 @@ class Panel {
             for( let i = 0; i < values.length; ++i )
             {
                 const value = values[i];
-                const baseclass = value.constructor;
+                let baseclass = options.innerValues ? 'dropdown' : value.constructor;
 
                 this.sameLine(2);
 
                 switch(baseclass)
                 {
                     case String:
-                        this.addText(i+"", value, function(value, event) {
+                        this.addText(i + "", value, function(value, event) {
                             values[i] = value;
                             callback( values );
-                        }, { nameWidth: itemNameWidth, inputWidth: "95%", noreset: true });
+                        }, { nameWidth: itemNameWidth, inputWidth: "95%", skipReset: true });
                         break;
                     case Number:
-                        this.addNumber(i+"", value, function(value, event) {
+                        this.addNumber(i + "", value, function(value, event) {
                             values[i] = value;
                             callback( values );
-                        }, { nameWidth: itemNameWidth, inputWidth: "95%", noreset: true });
+                        }, { nameWidth: itemNameWidth, inputWidth: "95%", skipReset: true });
+                        break;
+                    case 'dropdown':
+                        this.addDropdown(i + "", options.innerValues, value, function(value, event) {
+                            values[i] = value;
+                            callback( values );
+                        }, { nameWidth: itemNameWidth, inputWidth: "95%", skipReset: true });
                         break;
                 }
 
@@ -4154,11 +4167,11 @@ class Panel {
                     values.splice(values.indexOf( value ), 1);
                     updateItems();
                     this._trigger( new IEvent(name, values, event), callback );
-                }, { title: "Remove item", className: 'small'} );
+                }, { title: "Remove item", className: 'micro'} );
             }
 
             buttonName = "Add item";
-            buttonName += "<a class='fa-solid fa-plus' style='float:right; margin-right: 6px;'></a>";
+            buttonName += "<a class='fa-solid fa-plus' style='float:right; margin-right: 6px; margin-top: 2px;'></a>";
             this.addButton(null, buttonName, (v, event) => {
                 values.push( "" );
                 updateItems();
