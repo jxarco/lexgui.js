@@ -2358,10 +2358,10 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             let is_parent = node.children.length > 0;
             let is_selected = this.selected.indexOf( node ) > -1;
             
-            let has_parent_child = false;
-            if( this.options.only_parents ) {
-                node.children.forEach( c => has_parent_child |= (c.children && c.children.length) );
-                is_parent = !!has_parent_child;
+            if( this.options.only_folders ) {
+                let has_folders = false;
+                node.children.forEach( c => has_folders |= (c.type == 'folder') );
+                is_parent = !!has_folders;
             }
 
             let item = document.createElement('li');
@@ -2642,13 +2642,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             {
                 let child = node.children[i];
 
-                if( this.options.only_parents ) {
+                if( this.options.only_folders && child.type != 'folder')
+                    continue;
 
-                    if(!child.children || !child.children.length) continue;
-                    let has_parent_child = false;
-                    node.children.forEach( c => has_parent_child |= (c.children && c.children.length) );
-                    if(!has_parent_child) continue;
-                }
                 this._create_item( node, child, level + 1 );
             }
         }
@@ -6530,7 +6526,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             this.tree = this.leftPanel.addTree("Content Browser", treeData, { 
                 // icons: tree_icons, 
                 filter: false,
-                only_parents: true,
+                only_folders: true,
                 onevent: (event) => { 
 
                     let node = event.node;
