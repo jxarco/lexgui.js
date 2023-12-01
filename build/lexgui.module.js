@@ -6331,7 +6331,8 @@ class AssetViewEvent {
     static ASSET_DELETED    = 2;
     static ASSET_RENAMED    = 3;
     static ASSET_CLONED     = 4;
-    static ASSET_DBLCLICK   = 5;
+    static ASSET_DBLCLICKED = 5;
+    static ENTER_FOLDER     = 6;
 
     constructor( type, item, value ) {
         this.type = type || TreeEvent.NONE;
@@ -6345,9 +6346,10 @@ class AssetViewEvent {
             case AssetViewEvent.NONE: return "assetview_event_none";
             case AssetViewEvent.ASSET_SELECTED: return "assetview_event_selected";
             case AssetViewEvent.ASSET_DELETED: return "assetview_event_deleted";
-            case AssetViewEvent.ASSET_RENAMED:  return "assetview_event_renamed";
-            case AssetViewEvent.ASSET_CLONED:  return "assetview_event_cloned";
-            case AssetViewEvent.ASSET_DBLCLICK:  return "assetview_event_dbclick";
+            case AssetViewEvent.ASSET_RENAMED: return "assetview_event_renamed";
+            case AssetViewEvent.ASSET_CLONED: return "assetview_event_cloned";
+            case AssetViewEvent.ASSET_DBLCLICKED: return "assetview_event_dblclicked";
+            case AssetViewEvent.ENTER_FOLDER: return "assetview_event_enter_folder";
         }
     }
 };
@@ -6767,13 +6769,14 @@ class AssetView {
                     if( !that.skip_preview )
                         that._previewAsset( item );
                 } 
-                else
+                else if(is_folder) 
                 {
-                    if(is_folder) that._enterFolder( item );
+                    that._enterFolder( item );
+                    return;
                 }
 
                 if(that.onevent) {
-                    const event = new AssetViewEvent(is_double_click ? AssetViewEvent.ASSET_DBLCLICK : AssetViewEvent.ASSET_SELECTED, e.shiftKey ? [item] : item );
+                    const event = new AssetViewEvent(is_double_click ? AssetViewEvent.ASSET_DBLCLICKED : AssetViewEvent.ASSET_SELECTED, e.shiftKey ? [item] : item );
                     event.multiple = !!e.shiftKey;
                     that.onevent( event );
                 }
@@ -6965,6 +6968,12 @@ class AssetView {
 
         // Update path
         this._updatePath(this.currentData);
+
+        // Trigger event
+        if(this.onevent) {
+            const event = new AssetViewEvent(AssetViewEvent.ENTER_FOLDER, folder_item);
+            this.onevent( event );
+        }
     }
 
     _deleteItem( item ) {
