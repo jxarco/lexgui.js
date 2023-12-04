@@ -8,7 +8,7 @@
 */
 
 var LX = {
-    version: "0.1.6",
+    version: "0.1.7",
     ready: false,
     components: [], // specific pre-build components
     signals: {} // events and triggers
@@ -490,6 +490,7 @@ LX.popup = popup;
  * position: Dialog position in screen [screen centered]
  * draggable: Dialog can be dragged [false]
  * input: If false, no text input appears
+ * accept: Accept text
  * required: Input has to be filled [true]. Default: false
  */
 
@@ -504,7 +505,7 @@ function prompt(text, title, callback, options = {})
         if(options.input !== false)
             p.addText(null, options.input || value, (v) => value = v, {placeholder: "..."} );
         p.sameLine(2);
-        p.addButton(null, "OK", () => { 
+        p.addButton(null, options.accept || "OK", () => { 
             if(options.required && value === '') {
 
                 text += text.includes("You must fill the input text.") ? "": "\nYou must fill the input text.";
@@ -3285,7 +3286,7 @@ class Panel {
         // Add widget value
 
         let container = document.createElement('div');
-        container.className = "lextext";
+        container.className = "lextext" + (options.warning ? " lexwarning" : "");
         container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
         container.style.display = "flex";
 
@@ -3295,6 +3296,7 @@ class Panel {
         if( !this.disabled )
         {
             wValue = document.createElement('input');
+            wValue.type = options.type || "";
             wValue.value = wValue.iValue = value || "";
             wValue.style.width = "100%";
             wValue.style.textAlign = options.float ?? "";
@@ -5557,7 +5559,7 @@ class Dialog {
             root.appendChild(titleDiv);
         }
 
-        if( options.closable ?? true)
+        if( options.closable ?? true )
         {
             this.close = () => {
 
@@ -5571,7 +5573,7 @@ class Dialog {
                 }
 
                 if(modal)
-                    LX.modal.toggle();
+                    LX.modal.toggle(true);
             };
 
             var closeButton = document.createElement('a');
@@ -6391,6 +6393,7 @@ class AssetView {
 
         this.skip_browser = options.skip_browser ?? false;
         this.skip_preview = options.skip_preview ?? false;
+        this.only_folders = options.only_folders ?? true;
         this.preview_actions = options.preview_actions ?? [];
 
         if( !this.skip_browser )
@@ -6522,7 +6525,7 @@ class AssetView {
         this.tree = this.leftPanel.addTree("Content Browser", tree_data, { 
             // icons: tree_icons, 
             filter: false,
-            only_folders: true,
+            only_folders: this.only_folders,
             onevent: (event) => { 
 
                 let node = event.node;
@@ -6863,10 +6866,12 @@ class AssetView {
         const options = { disabled: true };
 
         this.previewPanel.addText("Filename", file.id, null, options);
-        this.previewPanel.addText("URL", file._path ? file._path : file.src, null, options);
+        if(file._path || file.src ) this.previewPanel.addText("URL", file._path ? file._path : file.src, null, options);
         this.previewPanel.addText("Path", this.path.join('/'), null, options);
         this.previewPanel.addText("Type", file.type, null, options);
-        file.bytesize ? this.previewPanel.addText("Size", (file.bytesize/1024).toPrecision(3) + " KBs", null, options) : 0;
+        if(file.bytesize) this.previewPanel.addText("Size", (file.bytesize/1024).toPrecision(3) + " KBs", null, options);
+        if(file.type == "folder") this.previewPanel.addText("Files", file.children ? file.children.length.toString() : "0", null, options);
+
         this.previewPanel.addSeparator();
         
         const preview_actions = [...this.preview_actions];
