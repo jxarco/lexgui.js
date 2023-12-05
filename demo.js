@@ -483,6 +483,9 @@ function fillPanel( panel ) {
     // add widgets to panel branch
     panel.branch("Preferences", {icon: "fa-solid fa-gear"});
     panel.addButton(null, "Click me, Im Full Width...");
+    panel.sameLine(2);
+    panel.addFile("Img1", data => { console.log(data) }, {} );
+    panel.addFile("Img2", data => { console.log(data) }, {} );
     panel.addDropdown("Best Engine", ["Godot", "Unity", "Unreal Engine"], "Godot", (value, event) => {
         console.log(value);
     });

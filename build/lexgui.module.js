@@ -5076,7 +5076,7 @@ class Panel {
                     p.addButton(null, "Reload", v => { input.dispatchEvent( new Event('change') ) } );
                 });
                 
-            }, { className: "small" });
+            }, { className: "micro", skipInlineCount: true });
         }
 
         this.clearQueue();

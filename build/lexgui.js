@@ -5080,7 +5080,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         p.addButton(null, "Reload", v => { input.dispatchEvent( new Event('change') ) } );
                     });
                     
-                }, { className: "small" });
+                }, { className: "micro", skipInlineCount: true });
             }
 
             this.clearQueue();
