@@ -483,6 +483,7 @@ function fillPanel( panel ) {
     // add widgets to panel branch
     panel.branch("Preferences", {icon: "fa-solid fa-gear"});
     panel.addButton(null, "Click me, Im Full Width...");
+    panel.addText("Text", "Warning text", null, { warning: true });
     panel.sameLine(2);
     panel.addFile("Img1", data => { console.log(data) }, {} );
     panel.addFile("Img2", data => { console.log(data) }, {} );

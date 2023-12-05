@@ -601,7 +601,13 @@ body.nocursor * {
 }
 
 .lexwidget .lextext.lexwarning div {
-  color: var(--global-color-highlight);
+  color: rgb(213, 208, 128);
+  font-weight: 700;
+}
+
+.lexwidget .lextext.lexwarning i {
+  color: rgb(212, 165, 63);
+  margin-right: 16px;
 }
 
 .lexwidget .lextext input:focus {

@@ -3294,7 +3294,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
             container.style.display = "flex";
 
-            this.disabled = options.disabled ?? ( options.url ? true : false );
+            this.disabled = (options.disabled || options.warning) ?? ( options.url ? true : false );
             let wValue = null;
 
             if( !this.disabled )
@@ -3338,6 +3338,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     icon.className = "inputicon " + options.icon;
                     container.appendChild(icon);
                 }
+
             } else
             {
                 wValue = document.createElement(options.url ? 'a' : 'div');
@@ -3346,7 +3347,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     wValue.href = options.url;
                     wValue.target = "_blank";
                 }
-                wValue.innerText = value || "";
+                const icon = options.warning ? '<i class="fa-solid fa-triangle-exclamation"></i>' : '';
+                wValue.innerHTML = (icon + value) || "";
                 wValue.style.width = "100%";
                 wValue.style.textAlign = options.float ?? "";
             }
