@@ -69,7 +69,8 @@ class Timeline {
         this.currentScroll = 0; //in percentage
         this.currentScrollInPixels = 0; //in pixels
         this.scrollableHeight = this.size[1]; //true height of the timeline content
-        this.secondsToPixels = 300;
+        
+        this.secondsToPixels = this.canvas.width/this.duration;
         this.pixelsToSeconds = 1 / this.secondsToPixels;
         this.selectedItems = options.selectedItems ?? null;
         this.animationClip = options.animationClip ?? null;
@@ -123,6 +124,7 @@ class Timeline {
                 return;
             this.resizeCanvas( [ bounding.width, bounding.height + this.header_offset ] );
         }
+
     }
 
     /**
@@ -143,9 +145,7 @@ class Timeline {
         LX.DEFAULT_NAME_WIDTH = "50%";
         header.sameLine();
         header.addTitle(this.name);
-            
-        header.addNumber("Duration", +this.duration.toFixed(3), (value, event) => {
-            this.setDuration(value, false)}, {step: 0.01, min: 0, signal: "@on_set_duration"});        
+                
         header.addNumber("Current Time", this.currentTime, (value, event) => {
             if(value > this.duration) {
                 value = this.duration;
@@ -159,7 +159,10 @@ class Timeline {
             
         }, {signal: "@on_current_time_" + this.constructor.name, step: 0.01, min: 0, precision: 3, skipSlider: true});        
 
-        
+        header.addNumber("Duration", +this.duration.toFixed(3), (value, event) => {
+            this.setDuration(value, false)}, {step: 0.01, min: 0, signal: "@on_set_duration"
+        });    
+
         for(let i = 0; i < this.buttonsDrawn.length; i++) {
             let button = this.buttonsDrawn[i];
             this.header.addButton( button.title || "", button.name, button.callback, button);
@@ -347,10 +350,10 @@ class Timeline {
     getCurrentContent(track, time, threshold) {
 
         if(this.getCurrentKeyFrame)
-            this.getCurrentKeyFrame(track, time, threshold);
+            return this.getCurrentKeyFrame(track, time, threshold);
 
         if(this.getCurrentClip)
-            this.getCurrentClip(track, time, threshold);
+            return this.getCurrentClip(track, time, threshold);
     }
 
     /**
@@ -402,8 +405,8 @@ class Timeline {
                 let x = this.timeToX( time );
                 if(x < this.session.left_margin)
                     continue;
-                ctx.moveTo(Math.round(x) + 0.5, h * 0.75);
-                ctx.lineTo(Math.round(x) + 0.5, h - 1);
+                ctx.moveTo(Math.round(x) + 0.5, h * 0.8);
+                ctx.lineTo(Math.round(x) + 0.5, h *0.95);
             }
             ctx.stroke();
             ctx.globalAlpha = this.opacity;
@@ -425,8 +428,8 @@ class Timeline {
             if(is_tick ||  this.secondsToPixels > 70 ) {
 
                 times.push([x,time]);
-                ctx.moveTo(Math.round(x) + 0.5, h * 0.5 + (is_tick ? 0 : h * 0.25) );
-                ctx.lineTo(Math.round(x) + 0.5, h);
+                ctx.moveTo(Math.round(x) + 0.5, h * 0.4 + (is_tick ? 0 : h * 0.3) );
+                ctx.lineTo(Math.round(x) + 0.5, h *0.95 );
             }
 
         }
@@ -435,7 +438,7 @@ class Timeline {
         if(x < this.session.left_margin)
             x = this.session.left_margin;
         ctx.moveTo( x, h - 0.5);
-        ctx.lineTo( endx, h - 0.5);
+        // ctx.lineTo( endx, h - 0.5);
         ctx.stroke();
         ctx.globalAlpha = this.opacity;
 
@@ -446,7 +449,7 @@ class Timeline {
         for(var i = 0; i < times.length; ++i)
         {
             let time = times[i][1];
-            ctx.fillText( time == (time|0) ? time : time.toFixed(1), times[i][0], 20);
+            ctx.fillText( time == (time|0) ? time : time.toFixed(1), times[i][0] +12, h*0.9);
         }
 
         ctx.restore();
@@ -576,23 +579,25 @@ class Timeline {
             // ctx.moveTo(pos, 0); ctx.lineTo( pos, h );
             // ctx.stroke();
 
-            ctx.strokeStyle = ctx.fillStyle = "#ADF";
+            ctx.strokeStyle = ctx.fillStyle =  LX.getThemeColor("global-selected-light");
             ctx.globalAlpha = this.opacity;
             ctx.beginPath();
             ctx.moveTo(true_pos, 0); ctx.lineTo(true_pos, this.canvas.height);//line
             ctx.stroke();
             ctx.beginPath();
-            ctx.moveTo(true_pos - 4, 0); ctx.lineTo(true_pos + 4, 0); ctx.lineTo(true_pos, 6);//triangle
+            ctx.moveTo(true_pos - 4, 0); ctx.lineTo(true_pos + 4, 0); ctx.lineTo(true_pos + 4, 10); ctx.lineTo(true_pos + 2, 12);ctx.lineTo(true_pos - 2, 12); ctx.lineTo(true_pos - 4, 10); //triangle
             ctx.closePath();
             ctx.fill();
         }
         
         // Selections
+        ctx.strokeStyle = ctx.fillStyle =  Timeline.FONT_COLOR;
         ctx.translate( this.position[0], this.position[1] + this.topMargin )
         if(this.boxSelection && this.boxSelectionStart && this.boxSelectionEnd) {
-            ctx.globalAlpha = 0.5;
+            ctx.globalAlpha = 0.15;
             ctx.fillStyle = "#AAA";
             ctx.strokeRect( this.boxSelectionStart[0], this.boxSelectionStart[1], this.boxSelectionEnd[0] - this.boxSelectionStart[0], this.boxSelectionEnd[1] - this.boxSelectionStart[1]);
+            ctx.fillRect( this.boxSelectionStart[0], this.boxSelectionStart[1], this.boxSelectionEnd[0] - this.boxSelectionStart[0], this.boxSelectionEnd[1] - this.boxSelectionStart[1]);
             ctx.stroke();
             ctx.globalAlpha = this.opacity;
         }
@@ -704,11 +709,10 @@ class Timeline {
         if( this.secondsToPixels * v < 100)
             return;
 
-        var centerx = this.canvas.width * 0.5;
-        var x = this.xToTime( centerx );
+        const xCurrentTime = this.timeToX(this.currentTime);
         this.secondsToPixels *= v;
         this.pixelsToSeconds = 1 / this.secondsToPixels;
-        this.session.start_time += x - this.xToTime( centerx );
+        this.session.start_time += this.currentTime - this.xToTime(xCurrentTime);
         this.draw();
     }
     
@@ -858,12 +862,12 @@ class Timeline {
             }
             else
             {
+                
+                this.grabbing = true;
+                this.grabTime = time - this.currentTime;
                 if(!track || track && this.getCurrentContent(track, time, 0.001) == undefined) {
-
-                    this.grabbing = true;
-                    this.grabTime = time - this.currentTime;
-
                     this.grabbing_timeline = current_grabbing_timeline;
+
                 }
 
                 if(this.onMouseDown && this.active )
@@ -1063,7 +1067,7 @@ class Timeline {
                 if( x2 < 0 || x > this.canvas.width )
                     continue;
 
-                // Background rect
+                //background rect
                 ctx.globalAlpha = trackAlpha;
                 ctx.fillStyle = clip.clipColor || "#5e9fdd"//#333";
                 //ctx.fillRect(x,y,w,trackHeight);
@@ -1081,7 +1085,7 @@ class Timeline {
                 if(fadeoutX)
                     ctx.roundRect( x + w - fadeoutX, y + offset, fadeoutX, trackHeight, {tl: 0, bl: 0, tr:5, br:5}, true);
                 
-                // Draw clip outline
+                //draw clip outline
                 if(clip.hidden)
                     ctx.globalAlpha = trackAlpha * 0.5;
                 
@@ -1091,11 +1095,10 @@ class Timeline {
 
                 ctx.fillStyle = "black"; //Timeline.FONT_COLOR; // clip.color || Timeline.FONT_COLOR;
                 ctx.font = "12px" + Timeline.FONT;
-
-                // Render clip selection area
+                //render clip selection area
                 if(selectedClipArea)
                 {
-                    ctx.strokeStyle = track.clips[j].clipColor;
+                    ctx.strokeStyle =  track.clips[j].clipColor;
                     ctx.fillStyle = "white"; //(Timeline.FONT_COLOR || track.clips[j].clipColor);
                     ctx.globalAlpha = 0.6;
                     ctx.lineWidth = 2.5;
@@ -1110,7 +1113,7 @@ class Timeline {
                 
                 if( this.secondsToPixels < 200)
                     ctx.font = this.secondsToPixels*0.06  +"px" + Timeline.FONT;
-
+            
                 let textInfo = ctx.measureText( text );
                 if(this.secondsToPixels > 100)
                     ctx.fillText( text, x + (w - textInfo.width)*0.5,  y + offset + trackHeight/2 + textInfo.fontBoundingBoxDescent );
@@ -1226,7 +1229,7 @@ class Timeline {
      * 
      * 
      */
-    resize( size = [this.root.parent.root.clientWidth, this.root.parent.root.clientHeight] ) {
+    resize( size = [this.root.parent.root.clientWidth, this.root.parent.root.clientHeight]) {
 
         this.root.root.style.width = size[0] + "px";
         this.root.root.style.height = size[1] + "px";
@@ -1236,23 +1239,31 @@ class Timeline {
         
         let w = size[0] - this.leftPanel.root.clientWidth - 8;
         this.resizeCanvas([w , size[1]]);
+        
+        // this.session.start_time = 0;
+        
 
-        this.session.start_time = 0;
     }
 
     resizeCanvas( size ) {
         if( size[0] <= 0 && size[1] <=0 )
             return;
-
+        if(Math.abs(this.canvas.width - size[0]) > 1) {
+            
+            var w = Math.max(300, size[0] );
+            this.secondsToPixels = ( w- this.session.left_margin ) / this.duration;
+            this.pixelsToSeconds = 1 / this.secondsToPixels;
+        }
         size[1] -= this.header_offset;
         this.canvasArea.setSize(size);
         this.canvas.width = size[0];
         this.canvas.height = size[1];
-        var w = Math.max(300, this.canvas.width);
-        this.secondsToPixels = ( w - this.session.left_margin ) / this.duration;
-        this.pixelsToSeconds = 1 / this.secondsToPixels;
 
+        // var centerx = this.canvas.width * 0.5;
+        // var x = this.xToTime( centerx );
+        // this.session.start_time += x - this.xToTime( centerx );
         this.draw(this.currentTime);
+        
     }
 
     /**
@@ -2393,12 +2404,20 @@ class ClipsTimeline extends Timeline {
             return;
 
         size[1] -= this.header_offset;
+
+        if(Math.abs(this.canvas.width - size[0]) > 1) {
+            
+            var w = Math.max(300, size[0] );
+            this.secondsToPixels = ( w- this.session.left_margin ) / this.duration;
+            this.pixelsToSeconds = 1 / this.secondsToPixels;
+        }
+
         this.canvasArea.setSize(size);
         this.canvas.width = size[0];
         this.canvas.height = size[1];
         var w = Math.max(300, this.canvas.width);
-        this.secondsToPixels = ( w - this.session.left_margin ) / this.duration;
-        this.pixelsToSeconds = 1 / this.secondsToPixels;
+        // this.secondsToPixels = ( w - this.session.left_margin ) / this.duration;
+        // this.pixelsToSeconds = 1 / this.secondsToPixels;
         
         let timeline_height = this.topMargin;
         let line_height = this.trackHeight;
@@ -2528,7 +2547,7 @@ class ClipsTimeline extends Timeline {
             }
             
         }
-        else if(!track) {
+        else if(!track || track && this.getCurrentContent(track, time, 0.001) == undefined) {
 
             if( this.timelineClickedClips )
             {
@@ -2604,6 +2623,9 @@ class ClipsTimeline extends Timeline {
                                     return true;
                                 }     
                             // }
+                        }
+                        if(this.onContentMoved) {
+                            this.onContentMoved(clip, diff);
                         }
                     }
                     else if( this.dragClipMode == "fadein" )
@@ -3199,6 +3221,10 @@ class ClipsTimeline extends Timeline {
         {
             clips = [...clips.slice(0, clipIdx), ...clips.slice(clipIdx + 1, clips.length)];
             this.animationClip.tracks[trackIdx].clips = clips;
+            this.animationClip.tracks[trackIdx].hovered[clipIdx] = undefined;
+            this.animationClip.tracks[trackIdx].selected[clipIdx] = undefined;
+            this.animationClip.tracks[trackIdx].edited[clipIdx] = undefined;
+
             if(clips.length)
             {
                 let selectedIdx = 0;
@@ -3294,6 +3320,7 @@ class ClipsTimeline extends Timeline {
         let clips = Array.from(track.clips);
         let trackInfo = Object.assign({}, track);
         trackInfo.clips = clips;
+        trackInfo.selected.fill(false);
         this.trackState.push({
             idx: clipIdx,
             t: trackInfo,
