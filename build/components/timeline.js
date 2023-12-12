@@ -1058,6 +1058,7 @@ class Timeline {
         
             for(var j = 0; j < clips.length; ++j)
             {
+                selectedClipArea = null;
                 let clip = clips[j];
                 //let selected = track.selected[j];
                 var x = Math.floor( this.timeToX(clip.start) ) + 0.5;
