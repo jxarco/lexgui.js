@@ -8,7 +8,7 @@
 */
 
 var LX = {
-    version: "0.1.7",
+    version: "0.1.8",
     ready: false,
     components: [], // specific pre-build components
     signals: {} // events and triggers
@@ -3290,7 +3290,7 @@ class Panel {
         container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
         container.style.display = "flex";
 
-        this.disabled = options.disabled ?? ( options.url ? true : false );
+        this.disabled = (options.disabled || options.warning) ?? ( options.url ? true : false );
         let wValue = null;
 
         if( !this.disabled )
@@ -3334,6 +3334,7 @@ class Panel {
                 icon.className = "inputicon " + options.icon;
                 container.appendChild(icon);
             }
+
         } else
         {
             wValue = document.createElement(options.url ? 'a' : 'div');
@@ -3342,7 +3343,8 @@ class Panel {
                 wValue.href = options.url;
                 wValue.target = "_blank";
             }
-            wValue.innerText = value || "";
+            const icon = options.warning ? '<i class="fa-solid fa-triangle-exclamation"></i>' : '';
+            wValue.innerHTML = (icon + value) || "";
             wValue.style.width = "100%";
             wValue.style.textAlign = options.float ?? "";
         }
@@ -5076,7 +5078,7 @@ class Panel {
                     p.addButton(null, "Reload", v => { input.dispatchEvent( new Event('change') ) } );
                 });
                 
-            }, { className: "small" });
+            }, { className: "micro", skipInlineCount: true });
         }
 
         this.clearQueue();

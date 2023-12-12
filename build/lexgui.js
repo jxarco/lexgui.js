@@ -12,7 +12,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     */
 
     var LX = global.LX = {
-        version: "0.1.7",
+        version: "0.1.8",
         ready: false,
         components: [], // specific pre-build components
         signals: {} // events and triggers
@@ -3294,7 +3294,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
             container.style.display = "flex";
 
-            this.disabled = options.disabled ?? ( options.url ? true : false );
+            this.disabled = (options.disabled || options.warning) ?? ( options.url ? true : false );
             let wValue = null;
 
             if( !this.disabled )
@@ -3338,6 +3338,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     icon.className = "inputicon " + options.icon;
                     container.appendChild(icon);
                 }
+
             } else
             {
                 wValue = document.createElement(options.url ? 'a' : 'div');
@@ -3346,7 +3347,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     wValue.href = options.url;
                     wValue.target = "_blank";
                 }
-                wValue.innerText = value || "";
+                const icon = options.warning ? '<i class="fa-solid fa-triangle-exclamation"></i>' : '';
+                wValue.innerHTML = (icon + value) || "";
                 wValue.style.width = "100%";
                 wValue.style.textAlign = options.float ?? "";
             }
@@ -5080,7 +5082,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         p.addButton(null, "Reload", v => { input.dispatchEvent( new Event('change') ) } );
                     });
                     
-                }, { className: "small" });
+                }, { className: "micro", skipInlineCount: true });
             }
 
             this.clearQueue();
@@ -6891,7 +6893,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             for( let action of preview_actions )
             {
-                if( action.type && action.type !== file.type )
+                if( action.type && action.type !== file.type || action.path && action.path !== this.path.join('/') )
                     continue;
                 this.previewPanel.addButton( null, action.name, action.callback.bind( this, file ) );
             }
