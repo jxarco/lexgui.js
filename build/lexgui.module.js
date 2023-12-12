@@ -6889,7 +6889,7 @@ class AssetView {
 
         for( let action of preview_actions )
         {
-            if( action.type && action.type !== file.type )
+            if( action.type && action.type !== file.type || action.path && action.path !== this.path.join('/') )
                 continue;
             this.previewPanel.addButton( null, action.name, action.callback.bind( this, file ) );
         }
