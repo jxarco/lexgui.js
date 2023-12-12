@@ -342,7 +342,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     if( key.toLowerCase().includes(filter) ) {
                         add_element(key, () => {
                             for( let i of instances ) {
-                                i._change_language( l );
+                                i._changeLanguage( l );
                             }
                         }, "", {});
                     }

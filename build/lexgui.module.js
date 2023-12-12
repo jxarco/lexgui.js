@@ -338,7 +338,7 @@ function create_global_searchbar( root ) {
                 if( key.toLowerCase().includes(filter) ) {
                     add_element(key, () => {
                         for( let i of instances ) {
-                            i._change_language( l );
+                            i._changeLanguage( l );
                         }
                     }, "", {});
                 }

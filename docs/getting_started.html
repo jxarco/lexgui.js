@@ -14,16 +14,6 @@
 
 MAKE_HEADER( "Getting Started", "h1", "getting-started" );
 
-MAKE_HEADER( "Download", "h2", "download" );
-
-MAKE_PARAGRAPH( `To use LexGUI.js, download it from ${INLINE_LINK("jxarco/lexgui.js", "https://github.com/jxarco/lexgui.js")} at the ${INLINE_CODE("build")} folder (the best option is to <em>clone the repository in your project folder</em> to facilitate next updates) and include it directly in your HTML file using a script tag:` );
-MAKE_CODE( `&lt;<span class="tag">script</span> src=<span class="atv">'build/lexgui.js'</span>&gt;&lt;/<span class="tag">script</span>&gt;` );
-
-MAKE_PARAGRAPH( `Make sure you are also including the main LexGUI stylesheet (css), located at the same ${INLINE_CODE("build")} folder:` );
-MAKE_CODE( `&lt;<span class="tag">link</span> rel=<span class="atv">'stylesheet'</span> href=<span class="atv">'build/lexgui.css'</span>&gt;&lt;/<span class="tag">script</span>&gt;` );
-
-MAKE_HEADER( "Usage", "h2", "usage" );
-
 MAKE_PARAGRAPH( `Once you have included <strong>lexgui.js</strong> in your project, you can start using its API to create web interfaces. The library exposes several functions and components that you can utilize to build your UI.` );
 MAKE_PARAGRAPH( `The first thing to do is initializing the library. Calling ${INLINE_CODE("LX.init")} will initialize the necessary stuff and build the main ${INLINE_LINK("Area", "#area")}, which by default will fit the root container:` );
 MAKE_CODE( `<span class="kwd">let</span> area = LX.init();` );
