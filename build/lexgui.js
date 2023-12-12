@@ -3821,10 +3821,15 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             const list_options = document.createElement('span');
             list.appendChild(list_options);
             
-            if(filter)  {
+            if( filter ) {
                 list.prepend(filter);
                 list_options.style.height = "calc(100% - 25px)";
+    
+                filter.addEventListener('focusout', function(e) {
+                    list.toggleAttribute('hidden', true);
+                });
             }
+
             // Add dropdown options list
             list.refresh = (options) => {
 
