@@ -160,6 +160,14 @@ class CodeEditor {
             this.cursors.appendChild(cursor);
         }
 
+        // Add autocomplete box
+        {
+            var box = document.createElement('div');
+            box.className = "autocomplete";
+            this.autocomplete = box;
+            this.tabs.area.attach(box);
+        }
+
         // State
 
         this.state = {
@@ -177,8 +185,8 @@ class CodeEditor {
         this.cursorBlinkRate = 550;
         this.tabSpaces = 4;
         this.maxUndoSteps = 16;
-        this.lineHeight = 22;
-        this.charWidth = 9;//this.measureChar();
+        this.lineHeight = 20;
+        this.charWidth = this.measureChar();
         this._lastTime = null;
 
         this.languages = [
@@ -187,7 +195,7 @@ class CodeEditor {
         this.specialKeys = [
             'Backspace', 'Enter', 'ArrowUp', 'ArrowDown', 
             'ArrowRight', 'ArrowLeft', 'Delete', 'Home',
-            'End', 'Tab'
+            'End', 'Tab', 'Escape'
         ];
         this.keywords = {
             'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof'],
@@ -216,6 +224,10 @@ class CodeEditor {
         };
 
         // Action keys
+
+        this.action('Escape', false, ( ln, cursor, e ) => {
+            this.autocomplete.classList.remove('show');
+        });
 
         this.action('Backspace', false, ( ln, cursor, e ) => {
 
@@ -837,12 +849,12 @@ class CodeEditor {
         if( !this.code ) return;
 
         var cursor = this.cursors.children[0];
+        var code_rect = this.code.getBoundingClientRect();
+        var mouse_pos = [(e.clientX - code_rect.x) + this.getScrollLeft(), (e.clientY - code_rect.y) + this.getScrollTop()];
 
         // Discard out of lines click...
         if( e.type != 'contextmenu' )
         {
-            var code_rect = this.code.getBoundingClientRect();
-            var mouse_pos = [(e.clientX - code_rect.x) + this.getScrollLeft(), (e.clientY - code_rect.y) + this.getScrollTop()];
             var ln = (mouse_pos[1] / this.lineHeight)|0;
             if(this.code.lines[ln] == undefined) return;
         }
@@ -1226,6 +1238,23 @@ class CodeEditor {
 
         // Update only the current line, since it's only an appended key
         this.processLine( lidx );
+
+        // Manage autocomplete
+
+        // this.showAutocompleteBox( key, cursor );
+    }
+
+    showAutocompleteBox( key, cursor ) {
+        
+        // Delimiter.. no autocomplete for this case
+        if( key == ' ' )
+        return;
+
+        this.autocomplete.classList.toggle('show', true);
+        this.autocomplete.style.left = (cursor._left + 36) + "px";
+        this.autocomplete.style.top = (cursor._top + 48) + "px";
+
+        const word = this.getWordAtPos( cursor, -1 );
     }
 
     action( key, deleteSelection, fn ) {
