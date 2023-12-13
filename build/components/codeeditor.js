@@ -204,7 +204,7 @@ class CodeEditor {
             'End', 'Tab', 'Escape'
         ];
         this.keywords = {
-            'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof'],
+            'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof', 'debugger'],
             'GLSL': ['true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4', 'struct'],
             'CSS': ['body', 'html', 'canvas', 'div', 'input', 'span', '.'],
             'WGSL': ['var', 'let', 'true', 'false', 'fn', 'bool', 'u32', 'i32', 'f16', 'f32', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array', 'atomic', 'struct',
@@ -213,15 +213,23 @@ class CodeEditor {
                     'texture_storage_2d_array', 'texture_storage_3d'],
             'JSON': []
         };
+        this.utils = {
+            'JavaScript': ['querySelector', 'body', 'addEventListener', 'removeEventListener', 'remove', 'sort', 'filter', 'isNaN', 'parseFloat', 'parseInt'],
+            'GLSL': [],
+            'CSS': [],
+            'WGSL': [],
+            'JSON': []
+        };
         this.builtin = {
-            'JavaScript': ['console', 'window', 'navigator'],
+            'JavaScript': ['document', 'console', 'window', 'navigator', 'Object', 'Function', 'Boolean', 'Symbol', 'Error'],
             'CSS': ['*', '!important'],
             'GLSL': [],
             'WGSL': [],
             'JSON': []
         };
-        this.literals = {
-            'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do'],
+        this.statementsAndDeclarations = {
+            'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import',
+                            'from', 'throw', 'async', 'try', 'catch'],
             'GLSL': ['for', 'if', 'else', 'return', 'continue', 'break'],
             'WGSL': ['const','for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'uniform'],
             'JSON': [],
@@ -1455,8 +1463,8 @@ class CodeEditor {
             else if( this.builtin[this.highlight] && this.builtin[this.highlight].indexOf(token) > -1 )
                 span.classList.add("cm-bln");
 
-            else if( this.literals[this.highlight] && this.literals[this.highlight].indexOf(token) > -1 )
-                span.classList.add("cm-lit");
+            else if( this.statementsAndDeclarations[this.highlight] && this.statementsAndDeclarations[this.highlight].indexOf(token) > -1 )
+                span.classList.add("cm-std");
 
             else if( this.symbols[this.highlight] && this.symbols[this.highlight].indexOf(token) > -1 )
                 span.classList.add("cm-sym");
@@ -1923,13 +1931,11 @@ class CodeEditor {
 
     showAutoCompleteBox( key, cursor ) {
         
-        // Delimiter.. no autocomplete for this case
-        if( key == ' ' )
-        return;
-
         const [word, start, end] = this.getWordAtPos( cursor, -1 );
-        if(!word.length)
-        return;
+        if(key == ' ' || !word.length) {
+            this.hideAutoCompleteBox();
+            return;
+        }
 
         this.autocomplete.innerHTML = ""; // Clear all suggestions
 
@@ -1937,8 +1943,9 @@ class CodeEditor {
 
         // Add language special keys...
         suggestions = suggestions.concat( this.keywords[ this.highlight ] );
-        suggestions = suggestions.concat( this.literals[ this.highlight ] );
+        suggestions = suggestions.concat( this.statementsAndDeclarations[ this.highlight ] );
         suggestions = suggestions.concat( this.builtin[ this.highlight ] );
+        suggestions = suggestions.concat( this.utils[ this.highlight ] );
         suggestions = suggestions.concat( Object.keys(this.code.tokens).filter( a => a != word ) );
 
         // Remove single chars and duplicates...        
