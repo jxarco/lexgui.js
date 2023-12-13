@@ -3863,7 +3863,7 @@ class Panel {
                 // Add string option
                 if( iValue.constructor != Object ) {
                     option.style.flexDirection = 'unset';
-                    option.innerHTML = "<a class='fa-solid fa-check'></a><span>" + iValue + "</span>";
+                    option.innerHTML = "</a><span>" + iValue + "</span><a class='fa-solid fa-check'>";
                     option.value = iValue;
                     li.setAttribute("value", iValue);
                     li.className = "lexdropdownitem";

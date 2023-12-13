@@ -870,6 +870,7 @@ body.nocursor * {
   flex-direction: column;
   align-items: center;
   width: 100%;
+  position: relative;
 }
 
 .lexdropdown .option:not(.media) {
@@ -936,7 +937,7 @@ body.nocursor * {
 
 .lexdropdown .lexdropdownitem a {
   display: none;
-  right: 16px;
+  right: 24px;
   position: absolute;
 }
 
