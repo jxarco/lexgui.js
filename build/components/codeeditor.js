@@ -1310,43 +1310,19 @@ class CodeEditor {
         };
     }
 
-    // processLines( from ) {
-
-    //     if( !from )
-    //     {
-    //         this.gutter.innerHTML = "";
-    //         this.code.innerHTML = "";
-    //         this.code.tokens = {};
-    //     }
-
-    //     for( let i = from ?? 0; i < this.code.lines.length; ++i )
-    //     {
-    //         this.processLine( i );
-    //     }
-
-    //     // Clean up...
-    //     if( from )
-    //     {
-    //         while( this.code.lines.length != this.gutter.children.length )            
-    //             this.gutter.lastChild.remove();
-    //         while( this.code.lines.length != this.code.children.length )            
-    //             this.code.lastChild.remove();
-    //     }
-
-    // }
-
     processLines() {
 
         let running = 0;
         let lineList = [];
+        let completeResult = [];
+
         var tStart = performance.now();
 
         function workerDone(e)
         {
             --running;
             e.target.terminate();
-
-            const workerResult = e.data.result;
+            completeResult = completeResult.concat( e.data.result );
 
             if (running === 0) {
 
@@ -1357,9 +1333,13 @@ class CodeEditor {
 
                 console.log("All workers ended in", (performance.now() - tStart) / 1000,  "s");
 
-                for( var i = 0; i < workerResult.length; ++i )
+                if( !completeResult.length )
+                return;
+
+                for( var i = 0; i < completeResult.length; ++i )
                 {
-                    lineList[ e.data.result[i].linenum ] = e.data.result[i].line;
+                    const lineResult = completeResult[i];
+                    lineList[ lineResult.linenum ] = lineResult.line;
                 }
 
                 for( var i = 0; i < lineList.length; ++i )
@@ -1393,7 +1373,7 @@ class CodeEditor {
             }
         }
         
-        const startWorker = (function( id, linesPerWorker ) {
+        const startWorker = (function( id, linesPerWorker, linesPerLastWorker, isLastWorker ) {
 
             // Build a worker from an anonymous function body
             var blobURL = URL.createObjectURL( new Blob([ '(',
@@ -1403,11 +1383,18 @@ class CodeEditor {
                 this.onmessage = (e) => {
                     
                     const highlight = e.data.highlight.replace(/\s/g, '').toLowerCase();
+                    const linesToProcess = ( e.data.isLastWorker ? e.data.linesPerLastWorker : e.data.linesPerWorker);
+
                     var result = [];
 
-                    for( var k = 0; k < e.data.linesPerWorker; k++ )
+                    for( var k = 0; k < linesToProcess; k++ )
                     {
-                        let linestring = e.data.lines[e.data.id + k];
+                        // Multi-line string not allowed by now
+                        delete this._building_string;
+
+                        const linenum = e.data.id * e.data.linesPerWorker + k;
+
+                        let linestring = e.data.lines[ k ];
                         var linespan = [];
     
                         // Check if line comment
@@ -1469,13 +1456,13 @@ class CodeEditor {
                             
                             // Process token...
     
-                            // let sString = false;
+                            let sString = false;
     
-                            // if(token == '"' || token == "'")
-                            // {
-                            //     sString = (this._building_string == token); // stop string if i was building it
-                            //     this._building_string = this._building_string ? this._building_string : token;
-                            // }
+                            if(token == '"' || token == "'")
+                            {
+                                sString = (this._building_string == token); // stop string if i was building it
+                                this._building_string = this._building_string ? this._building_string : token;
+                            }
     
                             var span = { html: token, classList: [] };
     
@@ -1487,54 +1474,55 @@ class CodeEditor {
                             {
                                 span.dom = 'span'; 
     
-                                // if( this._building_block_comment )
-                                //     span.classList.add("cm-com");
+                                if( this._building_block_comment )
+                                    span.classList.push("cm-com");
                                 
-                                // else if( this._building_string  )
-                                //     span.classList.add("cm-str");
+                                else if( this._building_string  )
+                                    span.classList.push("cm-str");
                                 
                                 // else if( this.keywords[this.highlight] && this.keywords[this.highlight].indexOf(token) > -1 )
-                                //     span.classList.add("cm-kwd");
+                                //     span.classList.push("cm-kwd");
     
                                 // else if( this.builtin[this.highlight] && this.builtin[this.highlight].indexOf(token) > -1 )
-                                //     span.classList.add("cm-bln");
+                                //     span.classList.push("cm-bln");
     
                                 // else if( this.statementsAndDeclarations[this.highlight] && this.statementsAndDeclarations[this.highlight].indexOf(token) > -1 )
-                                //     span.classList.add("cm-std");
+                                //     span.classList.push("cm-std");
     
                                 // else if( this.symbols[this.highlight] && this.symbols[this.highlight].indexOf(token) > -1 )
-                                //     span.classList.add("cm-sym");
+                                //     span.classList.push("cm-sym");
     
-                                // else if( token.substr(0, 2) == '//' )
-                                //     span.classList.add("cm-com");
+                                else if( token.substr(0, 2) == '//' )
+                                    span.classList.push("cm-com");
     
-                                // else if( token.substr(0, 2) == '/*' )
-                                //     span.classList.add("cm-com");
+                                else if( token.substr(0, 2) == '/*' )
+                                    span.classList.push("cm-com");
     
-                                // else if( token.substr(token.length - 2) == '*/' )
-                                //     span.classList.add("cm-com");
+                                else if( token.substr(token.length - 2) == '*/' )
+                                    span.classList.push("cm-com");
     
                                 // else if(  this.isNumber(token) || this.isNumber( token.replace(/[px]|[em]|%/g,'') ) )
-                                //     span.classList.add("cm-dec");
+                                //     span.classList.push("cm-dec");
     
-                                // else if( this.isCSSClass(token, prev, next) )
-                                //     span.classList.add("cm-kwd");
+                                else if( highlight == 'css' && prev == '.' ) // CSS class
+                                    span.classList.push("cm-kwd");
     
-                                // else if ( this.isType(token, prev, next) ) {
-                                //     span.classList.add("cm-typ");
-                                //     this.code.tokens[ token ] = CodeEditor.WORD_TYPE_CLASS;
+                                // else if ( scopeFunctions.isType(token, prev, next) ) {
+                                //     span.classList.push("cm-typ");
+                                //     // this.code.tokens[ token ] = CodeEditor.WORD_TYPE_CLASS;
                                 // }
     
-                                // else if ( token[0] != '@' && next == '(' ) {
-                                //     span.classList.add("cm-mtd");
-                                //     this.code.tokens[ token ] = CodeEditor.WORD_TYPE_METHOD;
-                                // }
+                                else if ( token[0] != '@' && next == '(' ) {
+                                    span.classList.push("cm-mtd");
+                                    // this.code.tokens[ token ] = CodeEditor.WORD_TYPE_METHOD;
+                                }
     
-                                // else if ( highlight == 'css' && prev == ':' && (next == ';' || next == '!important') ) // CSS value
-                                //     span.classList.add("cm-str");
+                                else if ( highlight == 'css' && prev == ':' && (next == ';' || next == '!important') ) // CSS value
+                                    span.classList.push("cm-str");
     
-                                // else if ( highlight == 'css' && prev == undefined && next == ':' ) // CSS attribute
-                                //     span.classList.add("cm-typ");
+                                else if ( highlight == 'css' && prev == undefined && next == ':' ) // CSS attribute
+                                    span.classList.push("cm-typ");
+
                                 // else {
     
                                 //     if( token.length > 1 )
@@ -1549,10 +1537,10 @@ class CodeEditor {
     
                             linespan.push( span );
     
-                            // if(sString) delete this._building_string;
+                            if(sString) delete this._building_string;
                         }
 
-                        result.push( { line: linespan, linenum: k } );
+                        result.push( { line: linespan, linenum: linenum } );
                     }
                     
                     this.postMessage({ id: e.data.id, result: result });
@@ -1562,9 +1550,19 @@ class CodeEditor {
     
             ')()' ], { type: 'application/javascript' } ) );
     
+            const workerLinesStart = id * linesPerWorker;
+            const workerLinesEnd = workerLinesStart + (isLastWorker ? linesPerLastWorker : linesPerWorker);
+
             var worker = new Worker( blobURL );
             worker.onmessage = workerDone.bind(this);
-            worker.postMessage({ id: id, lines: this.code.lines, linesPerWorker: linesPerWorker, highlight: this.highlight });
+            worker.postMessage({ 
+                id: id,
+                lines: this.code.lines.slice(workerLinesStart, workerLinesEnd),
+                linesPerWorker: linesPerWorker,
+                linesPerLastWorker: linesPerLastWorker,
+                isLastWorker: isLastWorker,
+                highlight: this.highlight
+            });
             ++running;
     
             // Won't be needing this anymore
@@ -1575,13 +1573,14 @@ class CodeEditor {
         const count = this.code.lines.length;
         const maxWorkers = Math.min(count, navigator.hardwareConcurrency);
         const linesPerWorker = Math.floor(count / maxWorkers);
-        const linesPerLastWorker = count % maxWorkers;
+        const linesPerLastWorker = (count % maxWorkers) == 0 ? linesPerWorker : (count % maxWorkers);
 
         // console.log(count, maxWorkers, linesPerWorker, linesPerLastWorker);
 
         for( let i = 0; i < maxWorkers; ++i )
         {
-            startWorker( i, i == (maxWorkers - 1) ? linesPerLastWorker : linesPerWorker );
+            const isLastWorker = i == (maxWorkers - 1);
+            startWorker( i, linesPerWorker, isLastWorker ? linesPerLastWorker : linesPerWorker, isLastWorker );
         }
     }
 
@@ -1763,10 +1762,6 @@ class CodeEditor {
         }
 
         if(sString) delete this._building_string;
-    }
-
-    isCSSClass( token, prev, next ) {
-        return this.highlight == 'CSS' && prev == '.';
     }
 
     isNumber( token ) {
