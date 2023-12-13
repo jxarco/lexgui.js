@@ -787,7 +787,7 @@ class Timeline {
         for(var i = this.tracksDrawn.length - 1; i >= 0; --i)
         {
             var t = this.tracksDrawn[i];
-            if( localY >= t[1] && localY < (t[1] + t[2]) )
+            if( t[1] >= this.topMargin && localY >= t[1] && localY < (t[1] + t[2]) )
             {
                 track = t[0];
                 break;
