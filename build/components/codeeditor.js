@@ -1310,29 +1310,279 @@ class CodeEditor {
         };
     }
 
-    processLines( from ) {
+    // processLines( from ) {
 
-        if( !from )
+    //     if( !from )
+    //     {
+    //         this.gutter.innerHTML = "";
+    //         this.code.innerHTML = "";
+    //         this.code.tokens = {};
+    //     }
+
+    //     for( let i = from ?? 0; i < this.code.lines.length; ++i )
+    //     {
+    //         this.processLine( i );
+    //     }
+
+    //     // Clean up...
+    //     if( from )
+    //     {
+    //         while( this.code.lines.length != this.gutter.children.length )            
+    //             this.gutter.lastChild.remove();
+    //         while( this.code.lines.length != this.code.children.length )            
+    //             this.code.lastChild.remove();
+    //     }
+
+    // }
+
+    processLines() {
+
+        let running = 0;
+        let lineList = [];
+        var tStart = performance.now();
+
+        function workerDone(e)
         {
-            this.gutter.innerHTML = "";
-            this.code.innerHTML = "";
-            this.code.tokens = {};
-        }
+            --running;
+            e.target.terminate();
 
-        for( let i = from ?? 0; i < this.code.lines.length; ++i )
+            const workerResult = e.data.result;
+
+            if (running === 0) {
+
+                // Clean state
+                this.gutter.innerHTML = "";
+                this.code.innerHTML = "";
+                this.code.tokens = {};
+
+                console.log("All workers ended in", (performance.now() - tStart) / 1000,  "s");
+
+                for( var i = 0; i < workerResult.length; ++i )
+                {
+                    lineList[ e.data.result[i].linenum ] = e.data.result[i].line;
+                }
+
+                for( var i = 0; i < lineList.length; ++i )
+                {
+                    const linespan_info = lineList[i];
+                    var pre = document.createElement('pre');
+                    pre.dataset['linenum'] = i;
+                    this.code.appendChild(pre);
+
+                    var linespan = document.createElement('span');
+                    pre.appendChild(linespan);
+
+                    for( let t of linespan_info )
+                    {
+                        if( t.dom == 'space' ) linespan.innerHTML += " ";
+                        else
+                        {
+                            var span = document.createElement('span');
+                            span.innerHTML = t.html;
+                            t.classList.forEach( c => span.classList.add( c ) );
+                            linespan.appendChild(span);
+                        }
+                    }
+
+                    // Add line gutter
+                    var linenumspan = document.createElement('span');
+                    linenumspan.innerHTML = (i + 1);
+                    this.gutter.appendChild(linenumspan);
+                }
+
+            }
+        }
+        
+        const startWorker = (function( id, linesPerWorker ) {
+
+            // Build a worker from an anonymous function body
+            var blobURL = URL.createObjectURL( new Blob([ '(',
+    
+            function() {
+                
+                this.onmessage = (e) => {
+                    
+                    const highlight = e.data.highlight.replace(/\s/g, '').toLowerCase();
+                    var result = [];
+
+                    for( var k = 0; k < e.data.linesPerWorker; k++ )
+                    {
+                        let linestring = e.data.lines[e.data.id + k];
+                        var linespan = [];
+    
+                        // Check if line comment
+                        const is_comment = linestring.split('//');
+                        linestring = ( is_comment.length > 1 ) ? is_comment[0] : linestring;
+    
+                        const tokens = linestring.split(' ').join('¬ ¬').split('¬'); // trick to split without losing spaces
+                        const to_process = []; // store in a temp array so we know prev and next tokens...
+    
+                        for( let t of tokens )
+                        {
+                            let iter = t.matchAll(/[\[\](){}<>.,;:"']/g);
+                            let subtokens = iter.next();
+                            if( subtokens.value )
+                            {
+                                let idx = 0;
+                                while( subtokens.value != undefined )
+                                {
+                                    const _pt = t.substring(idx, subtokens.value.index);
+                                    to_process.push( _pt );
+                                    to_process.push( subtokens.value[0] );
+                                    idx = subtokens.value.index + 1;
+                                    subtokens = iter.next();
+                                    if(!subtokens.value) {
+                                        const _at = t.substring(idx);
+                                        to_process.push( _at );
+                                    }
+                                }
+                            }
+                            else
+                                to_process.push( t );
+                        }
+    
+                        if( is_comment.length > 1 )
+                            to_process.push( "//" + is_comment[1] );
+    
+                        // Process all tokens
+                        for( var i = 0; i < to_process.length; ++i )
+                        {
+                            let it = i - 1;
+                            let prev = to_process[it];
+                            while( prev == '' || prev == ' ' ) {
+                                it--;
+                                prev = to_process[it];
+                            }
+    
+                            it = i + 1;
+                            let next = to_process[it];
+                            while( next == '' || next == ' ' || next == '"') {
+                                it++;
+                                next = to_process[it];
+                            }
+                            
+                            let token = to_process[i];
+                            // if( token.substr(0, 2) == '/*' )
+                            //     this._building_block_comment = true;
+                            // if( token.substr(token.length - 2) == '*\/' )
+                            //     delete this._building_block_comment;
+                            
+                            // Process token...
+    
+                            // let sString = false;
+    
+                            // if(token == '"' || token == "'")
+                            // {
+                            //     sString = (this._building_string == token); // stop string if i was building it
+                            //     this._building_string = this._building_string ? this._building_string : token;
+                            // }
+    
+                            var span = { html: token, classList: [] };
+    
+                            if(token == ' ')
+                            {
+                                span.dom = 'space'; 
+                            }
+                            else
+                            {
+                                span.dom = 'span'; 
+    
+                                // if( this._building_block_comment )
+                                //     span.classList.add("cm-com");
+                                
+                                // else if( this._building_string  )
+                                //     span.classList.add("cm-str");
+                                
+                                // else if( this.keywords[this.highlight] && this.keywords[this.highlight].indexOf(token) > -1 )
+                                //     span.classList.add("cm-kwd");
+    
+                                // else if( this.builtin[this.highlight] && this.builtin[this.highlight].indexOf(token) > -1 )
+                                //     span.classList.add("cm-bln");
+    
+                                // else if( this.statementsAndDeclarations[this.highlight] && this.statementsAndDeclarations[this.highlight].indexOf(token) > -1 )
+                                //     span.classList.add("cm-std");
+    
+                                // else if( this.symbols[this.highlight] && this.symbols[this.highlight].indexOf(token) > -1 )
+                                //     span.classList.add("cm-sym");
+    
+                                // else if( token.substr(0, 2) == '//' )
+                                //     span.classList.add("cm-com");
+    
+                                // else if( token.substr(0, 2) == '/*' )
+                                //     span.classList.add("cm-com");
+    
+                                // else if( token.substr(token.length - 2) == '*/' )
+                                //     span.classList.add("cm-com");
+    
+                                // else if(  this.isNumber(token) || this.isNumber( token.replace(/[px]|[em]|%/g,'') ) )
+                                //     span.classList.add("cm-dec");
+    
+                                // else if( this.isCSSClass(token, prev, next) )
+                                //     span.classList.add("cm-kwd");
+    
+                                // else if ( this.isType(token, prev, next) ) {
+                                //     span.classList.add("cm-typ");
+                                //     this.code.tokens[ token ] = CodeEditor.WORD_TYPE_CLASS;
+                                // }
+    
+                                // else if ( token[0] != '@' && next == '(' ) {
+                                //     span.classList.add("cm-mtd");
+                                //     this.code.tokens[ token ] = CodeEditor.WORD_TYPE_METHOD;
+                                // }
+    
+                                // else if ( highlight == 'css' && prev == ':' && (next == ';' || next == '!important') ) // CSS value
+                                //     span.classList.add("cm-str");
+    
+                                // else if ( highlight == 'css' && prev == undefined && next == ':' ) // CSS attribute
+                                //     span.classList.add("cm-typ");
+                                // else {
+    
+                                //     if( token.length > 1 )
+                                //     {
+                                //         // Store in token map to show later as autocomplete suggestions
+                                //         this.code.tokens[ token ] = -1;
+                                //     }
+                                // }
+    
+                                span.classList.push( highlight );
+                            }
+    
+                            linespan.push( span );
+    
+                            // if(sString) delete this._building_string;
+                        }
+
+                        result.push( { line: linespan, linenum: k } );
+                    }
+                    
+                    this.postMessage({ id: e.data.id, result: result });
+                };
+    
+            }.toString(),
+    
+            ')()' ], { type: 'application/javascript' } ) );
+    
+            var worker = new Worker( blobURL );
+            worker.onmessage = workerDone.bind(this);
+            worker.postMessage({ id: id, lines: this.code.lines, linesPerWorker: linesPerWorker, highlight: this.highlight });
+            ++running;
+    
+            // Won't be needing this anymore
+            URL.revokeObjectURL( blobURL );
+
+        }).bind(this);
+
+        const count = this.code.lines.length;
+        const maxWorkers = Math.min(count, navigator.hardwareConcurrency);
+        const linesPerWorker = Math.floor(count / maxWorkers);
+        const linesPerLastWorker = count % maxWorkers;
+
+        // console.log(count, maxWorkers, linesPerWorker, linesPerLastWorker);
+
+        for( let i = 0; i < maxWorkers; ++i )
         {
-            this.processLine( i );
+            startWorker( i, i == (maxWorkers - 1) ? linesPerLastWorker : linesPerWorker );
         }
-
-        // Clean up...
-        if( from )
-        {
-            while( this.code.lines.length != this.gutter.children.length )            
-                this.gutter.lastChild.remove();
-            while( this.code.lines.length != this.code.children.length )            
-                this.code.lastChild.remove();
-        }
-
     }
 
     processLine( linenum ) {
