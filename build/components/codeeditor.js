@@ -1180,9 +1180,32 @@ class CodeEditor {
                 this.appendText(text);
                 return;
             case 'x': // cut line
-                const to_copy = this.code.lines.splice(lidx, 1)[0];
-                this.processLines(lidx);
-                navigator.clipboard.writeText(to_copy + '\n');
+                let text_to_cut = "";
+                if( !this.selection ) {
+                    text_to_cut = "\n" + this.code.lines[cursor.line];
+                    this.code.lines.splice(lidx, 1);
+                    this.processLines(lidx);
+                    this.resetCursorPos( CodeEditor.CURSOR_LEFT );
+                }
+                else {
+                    const separator = "_NEWLINE_";
+                    let code = this.code.lines.join(separator);
+
+                    // Get linear start index
+                    let index = 0;
+                    
+                    for(let i = 0; i <= this.selection.fromY; i++)
+                        index += (i == this.selection.fromY ? this.selection.fromX : this.code.lines[i].length);
+
+                    index += this.selection.fromY * separator.length; 
+                    const num_chars = this.selection.chars + (this.selection.toY - this.selection.fromY) * separator.length;
+                    const text = code.substr(index, num_chars);
+                    const lines = text.split(separator);
+                    text_to_cut = lines.join('\n');
+
+                    this.deleteSelection( cursor );
+                }
+                navigator.clipboard.writeText(text_to_cut).then(() => console.log("Successfully cut"), (err) => console.error("Error"));
                 return;
             case 'z': // undo
                 if(!this.code.undoSteps.length)
