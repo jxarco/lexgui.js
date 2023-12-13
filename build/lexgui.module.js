@@ -147,36 +147,48 @@ function set_as_draggable(domEl) {
 
     domEl.setAttribute('draggable', true);
     domEl.addEventListener("mousedown", function(e) {
-        e.stopPropagation();
-        e.stopImmediatePropagation();
+        // e.stopPropagation();
+        // e.stopImmediatePropagation();
         currentTarget = e.target.classList.contains('lexdialogtitle') ? e.target : null;
     });
+
     domEl.addEventListener("dragstart", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        if(!currentTarget) return;
         // Remove image when dragging
         var img = new Image();
         img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
         e.dataTransfer.setDragImage(img, 0, 0);
         e.dataTransfer.effectAllowed = "move";
-        if(!currentTarget) return;
         const rect = e.target.getBoundingClientRect();
         offsetX = e.clientX - rect.x;
         offsetY = e.clientY - rect.y;
         e.dataTransfer.setData('branch_title', e.target.querySelector(".lexdialogtitle").innerText);
         e.dataTransfer.setData('dialog_id', e.target.id);
-    });
-    domEl.addEventListener("drag", function(e) {
+
+        document.addEventListener("mousemove", moveFunc );
+        console.log("wefwef");
+
+    }, false);
+    
+    const moveFunc = (e) => {
         if(!currentTarget) return;
-        e.preventDefault();
         let left = e.clientX - offsetX;
         let top = e.clientY - offsetY;
-        if(left > 0 && (left + this.offsetWidth + 6) <= window.innerWidth)
-            this.style.left = left + 'px';
-        if(top > 0 && (top + this.offsetHeight + 6) <= window.innerHeight)
-            this.style.top = top + 'px';
-    }, false );
-    domEl.addEventListener("dragend", function(e) {
-        currentTarget = null;
-    }, false );
+        if(left > 3 && (left + domEl.offsetWidth + 6) <= window.innerWidth)
+            domEl.style.left = left + 'px';
+        if(top > 3 && (top + domEl.offsetHeight + 6) <= window.innerHeight)
+            domEl.style.top = top + 'px';
+    };
+
+    document.addEventListener('mouseup', () => {
+        if(currentTarget) {
+            currentTarget = null;
+            document.removeEventListener("mousemove", moveFunc );
+        }
+    });
 }
 
 function create_global_searchbar( root ) {
