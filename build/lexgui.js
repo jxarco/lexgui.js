@@ -3835,6 +3835,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 list_options.style.height = "calc(100% - 25px)";
     
                 filter.addEventListener('focusout', function(e) {
+                    if (e.relatedTarget && e.relatedTarget.tagName == "UL" && e.relatedTarget.classList.contains("lexoptions"))
+                        return;
                     list.toggleAttribute('hidden', true);
                 });
             }
