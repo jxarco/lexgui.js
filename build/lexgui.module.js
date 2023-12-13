@@ -139,7 +139,7 @@ LX.vec2 = vec2;
 
 // Other utils
 
-function set_as_draggable(domEl) {
+function makeDraggable( domEl, targetClass ) {
 
     let offsetX;
     let offsetY;
@@ -149,7 +149,7 @@ function set_as_draggable(domEl) {
     domEl.addEventListener("mousedown", function(e) {
         // e.stopPropagation();
         // e.stopImmediatePropagation();
-        currentTarget = e.target.classList.contains('lexdialogtitle') ? e.target : null;
+        currentTarget = (e.target.classList.contains(targetClass) || !targetClass) ? e.target : null;
     });
 
     domEl.addEventListener("dragstart", function(e) {
@@ -165,12 +165,7 @@ function set_as_draggable(domEl) {
         const rect = e.target.getBoundingClientRect();
         offsetX = e.clientX - rect.x;
         offsetY = e.clientY - rect.y;
-        e.dataTransfer.setData('branch_title', e.target.querySelector(".lexdialogtitle").innerText);
-        e.dataTransfer.setData('dialog_id', e.target.id);
-
         document.addEventListener("mousemove", moveFunc );
-        console.log("wefwef");
-
     }, false);
     
     const moveFunc = (e) => {
@@ -190,6 +185,8 @@ function set_as_draggable(domEl) {
         }
     });
 }
+
+LX.makeDraggable = makeDraggable;
 
 function create_global_searchbar( root ) {
 
@@ -5622,7 +5619,7 @@ class Dialog {
         this.title = titleDiv;
 
         if(draggable)
-            set_as_draggable(root);
+            makeDraggable( root, 'lexdialogtitle' );
 
         // Process position and size
         if(size.length && typeof(size[0]) != "string")

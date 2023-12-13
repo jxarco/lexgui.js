@@ -1880,7 +1880,7 @@ class CodeEditor {
 
     runScript( code ) {
         var script = document.createElement('script');
-        script.type = 'text/javascript';
+        script.type = 'module';
         script.innerHTML = code;
         // script.src = url[i] + ( version ? "?version=" + version : "" );
         script.async = false;

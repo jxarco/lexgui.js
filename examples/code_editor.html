@@ -42,25 +42,25 @@
         };
 
         let editor = new LX.CodeEditor(rightArea, {
-            // allow_add_scripts: false
+            // allow_add_scripts: false,
+            // autocomplete: false
         });
 
         editor.loadFile( "../data/test.json" );
         editor.loadFile( "../data/style.css" );
         editor.loadFile( "../data/script.js" );
         
+        var ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#b7a9b1";
+        ctx.font = "48px Monospace";
+        ctx.strokeStyle = "#ff1999";
+
         function loop(dt) {
             
             var ctx = canvas.getContext("2d");
 
-            ctx.fillStyle = "#b7a9b1";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.font = "48px Monospace";
-            ctx.fillStyle = "#ff1999";
-
-            const text = "Lexgui.js @jxarco";
-            ctx.fillText(text, 300, 300);
+            ctx.strokeText("Lexgui.js @jxarco", 200, 300);
 
             requestAnimationFrame(loop);
         }

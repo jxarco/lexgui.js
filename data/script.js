@@ -1,6 +1,9 @@
+import { LX } from 'lexgui';
+
 class Test {
 
     constructor() {
+
         this.foo = 1;
 
         var div = document.createElement('div');
@@ -9,6 +12,8 @@ class Test {
         div.style.background = "red"
         div.style.position = "absolute"
         div.style.top = "0px"
+
+        LX.makeDraggable(div);
 
         // single line comment
 
@@ -28,7 +33,12 @@ class Test {
     setFoo( value ) {
         this.foo = value;
     }
-
 }
 
 let instance = new Test();
+
+var canvas = document.querySelector('canvas');
+var ctx = canvas.getContext("2d");
+ctx.fillStyle = "#b7a9b1";
+ctx.font = "48px Monospace";
+ctx.strokeStyle = "#ff1999";
