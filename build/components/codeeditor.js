@@ -92,6 +92,9 @@ class CodeEditor {
     static CURSOR_LEFT  = 1;
     static CURSOR_TOP   = 2;
 
+    static WORD_TYPE_METHOD = 0;
+    static WORD_TYPE_CLASS  = 1;
+
     /**
      * @param {*} options
      * skip_info, allow_add_scripts, name
@@ -166,6 +169,8 @@ class CodeEditor {
             box.className = "autocomplete";
             this.autocomplete = box;
             this.tabs.area.attach(box);
+
+            this.isAutoCompleteActive = false;
         }
 
         // State
@@ -201,19 +206,24 @@ class CodeEditor {
             'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof'],
             'GLSL': ['true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4', 'struct'],
             'CSS': ['body', 'html', 'canvas', 'div', 'input', 'span', '.'],
-            'WGSL': ['var', 'const', 'let', 'true', 'false', 'fn', 'bool', 'u32', 'i32', 'f16', 'f32', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array', 'atomic', 'struct',
+            'WGSL': ['var', 'let', 'true', 'false', 'fn', 'bool', 'u32', 'i32', 'f16', 'f32', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array', 'atomic', 'struct',
                     'sampler', 'sampler_comparison', 'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array', 'texture_depth_multisampled_2d',
                     'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d', 'texture_storage_2d',
                     'texture_storage_2d_array', 'texture_storage_3d'],
         };
         this.builtin = {
             'JavaScript': ['console', 'window', 'navigator'],
-            'CSS': ['*', '!important']
+            'CSS': ['*', '!important'],
+            'GLSL': [],
+            'WGSL': [],
+            'JSON': []
         };
         this.literals = {
             'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do'],
             'GLSL': ['for', 'if', 'else', 'return', 'continue', 'break'],
-            'WGSL': ['for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'uniform']
+            'WGSL': ['const','for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'uniform'],
+            'JSON': [],
+            'CSS': []
         };
         this.symbols = {
             'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
@@ -226,7 +236,7 @@ class CodeEditor {
         // Action keys
 
         this.action('Escape', false, ( ln, cursor, e ) => {
-            this.autocomplete.classList.remove('show');
+            this.hideAutoCompleteBox();
         });
 
         this.action('Backspace', false, ( ln, cursor, e ) => {
@@ -281,7 +291,14 @@ class CodeEditor {
         });
 
         this.action('Tab', true, ( ln, cursor, e ) => {
-            this.addSpaces( this.tabSpaces );
+            
+            if( this.isAutoCompleteActive )
+            {
+                this.autoCompleteWord( cursor );
+            } else 
+            {
+                this.addSpaces( this.tabSpaces );
+            }
         });
 
         this.action('Home', false, ( ln, cursor, e ) => {
@@ -330,6 +347,13 @@ class CodeEditor {
 
         this.action('Enter', true, ( ln, cursor, e ) => {
 
+            // Add word
+            if( this.isAutoCompleteActive )
+            {
+                this.autoCompleteWord( cursor );
+                return;
+            }
+
             if(e.ctrlKey)
             {
                 this.onrun( this.getText() );
@@ -362,41 +386,61 @@ class CodeEditor {
         });
 
         this.action('ArrowUp', false, ( ln, cursor, e ) => {
-            if(e.shiftKey) {
-                if(!this.selection)
-                    this.startSelection(cursor);
-                this.selection.fromX = cursor.position;
-                this.selection.toY = this.selection.toY > 0 ? this.selection.toY - 1 : 0;
-                this.processSelection(null, true);
-                this.cursorToPosition(cursor, this.selection.fromX);
-                this.cursorToLine(cursor, this.selection.toY);
-            } else {
-                this.endSelection();
-                this.lineUp();
-                // Go to end of line if out of line
-                var letter = this.getCharAtPos( cursor );
-                if(!letter) this.actions['End'].callback(cursor.line, cursor, e);
+
+            // Move cursor..
+            if( !this.isAutoCompleteActive )
+            {
+                if( e.shiftKey ) {
+                    if(!this.selection)
+                        this.startSelection(cursor);
+                    this.selection.fromX = cursor.position;
+                    this.selection.toY = this.selection.toY > 0 ? this.selection.toY - 1 : 0;
+                    this.processSelection(null, true);
+                    this.cursorToPosition(cursor, this.selection.fromX);
+                    this.cursorToLine(cursor, this.selection.toY);
+                } else {
+                    this.endSelection();
+                    this.lineUp();
+                    // Go to end of line if out of line
+                    var letter = this.getCharAtPos( cursor );
+                    if(!letter) this.actions['End'].callback(cursor.line, cursor, e);
+                }
+            } 
+            // Move up autocomplete selection
+            else
+            {
+                this.moveArrowSelectedAutoComplete('up');
             }
         });
 
         this.action('ArrowDown', false, ( ln, cursor, e ) => {
-            if(e.shiftKey) {
-                if(!this.selection)
-                    this.startSelection(cursor);
-                this.selection.toX = cursor.position;
-                this.selection.toY = this.selection.toY < this.code.lines.length - 1 ? this.selection.toY + 1 : this.code.lines.length - 1;
-                this.processSelection(null, true);
-                this.cursorToPosition(cursor, this.selection.toX);
-                this.cursorToLine(cursor, this.selection.toY);
-            } else {
 
-                if( this.code.lines[ ln + 1 ] == undefined ) 
-                    return;
-                this.endSelection();
-                this.lineDown();
-                // Go to end of line if out of line
-                var letter = this.getCharAtPos( cursor );
-                if(!letter) this.actions['End'].callback(cursor.line, cursor, e);
+            // Move cursor..
+            if( !this.isAutoCompleteActive )
+            {
+                if( e.shiftKey ) {
+                    if(!this.selection)
+                        this.startSelection(cursor);
+                    this.selection.toX = cursor.position;
+                    this.selection.toY = this.selection.toY < this.code.lines.length - 1 ? this.selection.toY + 1 : this.code.lines.length - 1;
+                    this.processSelection(null, true);
+                    this.cursorToPosition(cursor, this.selection.toX);
+                    this.cursorToLine(cursor, this.selection.toY);
+                } else {
+    
+                    if( this.code.lines[ ln + 1 ] == undefined ) 
+                        return;
+                    this.endSelection();
+                    this.lineDown();
+                    // Go to end of line if out of line
+                    var letter = this.getCharAtPos( cursor );
+                    if(!letter) this.actions['End'].callback(cursor.line, cursor, e);
+                }
+            } 
+            // Move down autocomplete selection
+            else
+            {
+                this.moveArrowSelectedAutoComplete('down');
             }
         });
 
@@ -755,6 +799,7 @@ class CodeEditor {
         code.undoSteps = [];
         code.tabName = name;
         code.title = title ?? name;
+        code.tokens = {}; 
 
         code.addEventListener('dragenter', function(e) {
             e.preventDefault();
@@ -938,6 +983,8 @@ class CodeEditor {
         var string = this.code.lines[ln].slice(0, ch);
         // this.cursorToString(cursor, string);
         this.cursorToPosition(cursor, string.length);
+
+        this.hideAutoCompleteBox();
         
         if(!skip_refresh) 
             this._refreshCodeInfo( ln + 1, cursor.position );
@@ -1241,20 +1288,7 @@ class CodeEditor {
 
         // Manage autocomplete
 
-        // this.showAutocompleteBox( key, cursor );
-    }
-
-    showAutocompleteBox( key, cursor ) {
-        
-        // Delimiter.. no autocomplete for this case
-        if( key == ' ' )
-        return;
-
-        this.autocomplete.classList.toggle('show', true);
-        this.autocomplete.style.left = (cursor._left + 36) + "px";
-        this.autocomplete.style.top = (cursor._top + 48) + "px";
-
-        const word = this.getWordAtPos( cursor, -1 );
+        this.showAutoCompleteBox( key, cursor );
     }
 
     action( key, deleteSelection, fn ) {
@@ -1271,6 +1305,7 @@ class CodeEditor {
         {
             this.gutter.innerHTML = "";
             this.code.innerHTML = "";
+            this.code.tokens = {};
         }
 
         for( let i = from ?? 0; i < this.code.lines.length; ++i )
@@ -1438,19 +1473,30 @@ class CodeEditor {
             else if( this.isCSSClass(token, prev, next) )
                 span.classList.add("cm-kwd");
 
-            else if ( this.isType(token, prev, next) )
+            else if ( this.isType(token, prev, next) ) {
                 span.classList.add("cm-typ");
+                this.code.tokens[ token ] = CodeEditor.WORD_TYPE_CLASS;
+            }
 
-            else if ( token[0] != '@' && next == '(' )
+            else if ( token[0] != '@' && next == '(' ) {
                 span.classList.add("cm-mtd");
+                this.code.tokens[ token ] = CodeEditor.WORD_TYPE_METHOD;
+            }
 
             else if ( highlight == 'css' && prev == ':' && (next == ';' || next == '!important') ) // CSS value
                 span.classList.add("cm-str");
 
             else if ( highlight == 'css' && prev == undefined && next == ':' ) // CSS attribute
                 span.classList.add("cm-typ");
+            else {
 
-            
+                if( token.length > 1 )
+                {
+                    // Store in token map to show later as autocomplete suggestions
+                    this.code.tokens[ token ] = -1;
+                }
+            }
+
             span.classList.add(highlight);
             linespan.appendChild(span);
         }
@@ -1594,7 +1640,7 @@ class CodeEditor {
 
         this.code.lines = (pre + post).split(separator);
         this.processLines(this.selection.fromY);
-        
+
         this.cursorToLine(cursor, this.selection.fromY, true);
         this.cursorToPosition(cursor, this.selection.fromX);
         this.endSelection();
@@ -1778,13 +1824,13 @@ class CodeEditor {
         return this.code.scrollTop;
     }
 
-    getCharAtPos( cursor, offset = 0) {
+    getCharAtPos( cursor, offset = 0 ) {
         
         cursor = cursor ?? this.cursors.children[0];
         return this.code.lines[cursor.line][cursor.position + offset];
     }
 
-    getWordAtPos( cursor, offset = 0) {
+    getWordAtPos( cursor, offset = 0 ) {
         
         cursor = cursor ?? this.cursors.children[0];
         const col = cursor.line;
@@ -1812,7 +1858,7 @@ class CodeEditor {
         return [words.substring( from, to ), from, to];
     }
 
-    measureChar(char = "a", get_bb = false) {
+    measureChar( char = "a", get_bb = false ) {
         
         var test = document.createElement("pre");
         test.className = "codechar";
@@ -1824,7 +1870,7 @@ class CodeEditor {
         return get_bb ? bb : bb[0];
     }
 
-    measureString(str) {
+    measureString( str ) {
 
         return str.length * this.charWidth;
     }
@@ -1839,9 +1885,10 @@ class CodeEditor {
         document.getElementsByTagName('head')[0].appendChild(script);
     }
 
-    toJSONFormat(text) {
+    toJSONFormat( text ) {
 
         let params = text.split(":");
+
         for(let i = 0; i < params.length; i++) {
             let key = params[i].split(',');
             if(key.length > 1) {
@@ -1858,6 +1905,7 @@ class CodeEditor {
                 params[i] = params[i].replace(key, '"' + key + '"');
             }
         }
+
         text = params.join(':');
 
         try {
@@ -1868,6 +1916,127 @@ class CodeEditor {
             alert("Invalid JSON format");
             return;	
         }
+    }
+
+    showAutoCompleteBox( key, cursor ) {
+        
+        // Delimiter.. no autocomplete for this case
+        if( key == ' ' )
+        return;
+
+        const word = this.getWordAtPos( cursor, -1 )[0];
+        if(!word.length)
+        return;
+
+        this.autocomplete.innerHTML = ""; // Clear all suggestions
+
+        let suggestions = [];
+        // let suggestions = ['constructor', 'constructor', 'constructor', 'constructor', 'constructor', 'constructor', 'constructor', 'constructor', 'constructor', 'constructor', 'surprise', 'homeAction', 'disabled', 'hideAutoCompleteBox'];
+
+        // Add language special keys...
+        suggestions = suggestions.concat( this.keywords[ this.highlight ] );
+        suggestions = suggestions.concat( this.literals[ this.highlight ] );
+        suggestions = suggestions.concat( this.builtin[ this.highlight ] );
+        suggestions = suggestions.concat( Object.keys(this.code.tokens).filter( a => a != word ) );
+
+        // Remove single chars and duplicates...        
+        suggestions = suggestions.filter( (value, index) => value.length > 1 && suggestions.indexOf(value) === index );
+
+        // Order...
+        suggestions = suggestions.sort( (a, b) => a.localeCompare(b) );
+
+        for( let s of suggestions )
+        {
+            if( !s.toLowerCase().includes(word.toLowerCase()) )
+            continue;
+
+            var pre = document.createElement('pre');
+            this.autocomplete.appendChild(pre);
+
+            pre.addEventListener( 'click', () => {
+                this.autoCompleteWord( cursor, s );
+            } );
+
+            var linespan = document.createElement('span');
+            pre.appendChild(linespan);
+            linespan.innerHTML = s;
+        }
+
+        if( !this.autocomplete.childElementCount )
+        {
+            this.hideAutoCompleteBox();
+            return;
+        }
+
+        // Select always first option
+        this.autocomplete.firstChild.classList.add('selected');
+
+        // Show box
+        this.autocomplete.classList.toggle('show', true);
+        this.autocomplete.style.left = (cursor._left + 36) + "px";
+        this.autocomplete.style.top = (cursor._top + 48) + "px";
+
+        this.isAutoCompleteActive = true;
+    }
+
+    hideAutoCompleteBox() {
+
+        this.isAutoCompleteActive = false;
+        this.autocomplete.classList.remove('show');
+    }
+
+    autoCompleteWord( cursor, suggestion ) {
+        
+        if( !this.isAutoCompleteActive )
+        return;
+
+        let [suggestedWord, idx] = this.getSelectedAutoComplete();
+        suggestedWord = suggestion ?? suggestedWord;
+
+        const [word, start, end] = this.getWordAtPos( cursor, -1 );
+
+        const lineString = this.code.lines[ cursor.line ];
+        this.code.lines[ cursor.line ] = 
+            lineString.slice(0, start) + suggestedWord + lineString.slice(end);
+
+        // Process lines and remove suggestion box
+        this.cursorToPosition(cursor, start + suggestedWord.length);
+        this.processLine(cursor.line);
+        this.hideAutoCompleteBox();
+    }
+
+    getSelectedAutoComplete() {
+        
+        if( !this.isAutoCompleteActive )
+        return;
+
+        for( let i = 0; i < this.autocomplete.childElementCount; ++i )
+        {
+            const child = this.autocomplete.childNodes[i];
+            if( child.classList.contains('selected') )
+            return [child.firstChild.innerHTML, i ]; // Get text of the span inside the 'pre' element
+        }
+    }
+
+    moveArrowSelectedAutoComplete( dir ) {
+        
+        if( !this.isAutoCompleteActive )
+        return;
+
+        const [word, idx] = this.getSelectedAutoComplete();
+        const offset = dir == 'down' ? 1 : -1;
+
+        if( dir == 'down' ) {
+            if( (idx + offset) >= this.autocomplete.childElementCount ) return;
+        } else if( dir == 'up') {
+            if( (idx + offset) < 0 ) return;
+        }
+
+        this.autocomplete.scrollTop += offset * 20;
+
+        // Remove selected from the current word and add it to the next one
+        this.autocomplete.childNodes[ idx ].classList.remove('selected');
+        this.autocomplete.childNodes[ idx + offset ].classList.add('selected');
     }
 }
 

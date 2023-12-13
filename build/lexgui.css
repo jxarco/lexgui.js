@@ -2875,7 +2875,7 @@ ul.lexassetscontent {
 .lexcodeeditor .autocomplete {
   background-color: var(--global-branch-darker);
   width: 256px;
-  min-height: 20px;
+  max-height: 128px;
   position: absolute;
   left: 0;
   top: 0;
@@ -2884,23 +2884,44 @@ ul.lexassetscontent {
   border-radius: 4px;
   border: 1px solid var(--global-button-color);
   box-shadow: 0 0px 4px #101010;
+  overflow-y: scroll;
 }
 
 .lexcodeeditor .autocomplete.show {
   visibility: visible;
 }
 
-.cm-str { color: #c18062; } /* string */
-.cm-kwd { color: #2194ce; } /* keyword */
+.lexcodeeditor .autocomplete pre {
+  margin: 0;
+  pointer-events: unset;
+  cursor: default;
+}
+
+.lexcodeeditor .autocomplete pre:hover {
+  background-color: var(--global-color-terciary);
+  cursor: pointer;
+}
+
+.lexcodeeditor .autocomplete pre.selected {
+  background-color: var(--global-selected);
+}
+
+.lexcodeeditor .autocomplete pre span {
+  margin: 2px 0px;
+  cursor: inherit;
+}
+
+.cm-str { color: #d0774e; } /* string */
+.cm-kwd { color: #218cce; } /* keyword */
 .cm-com { color: #5cab5a; } /* comment */
 .cm-typ { color: #36c0b0; } /* type */
 .cm-lit { color: #cf6dcf; } /* literal */
 .cm-bln { color: inherit; } /* builtin */
 .cm-dec { color: #b1ce9b; } /* decimal */
 .cm-sym { color: #e7ded2; } /* symbol */
-.cm-mtd { color: #caba67 } /* method */
+.cm-mtd { color: #e0cc68 } /* method */
 
-.cm-str.css { color: #c18062; } /* string */
+.cm-str.css { color: #d0774e; } /* string */
 .cm-kwd.css { color: #e8be53; } /* keyword */
 .cm-com.css { color: #5cab5a; } /* comment */
 .cm-typ.css { color: #b7c3ec; } /* type */
@@ -2908,9 +2929,9 @@ ul.lexassetscontent {
 .cm-bln.css { color: #2194ce; } /* builtin */
 .cm-dec.css { color: #b1ce9b; } /* decimal */
 .cm-sym.css { color: #f9d620; } /* symbol */
-.cm-mtd.css { color: #f1e9bf; } /* method */
+.cm-mtd.css { color: #e0cc68; } /* method */
 
-.cm-str.json { color: #c18062; } /* string */
+.cm-str.json { color: #d0774e; } /* string */
 .cm-kwd.json { color: inherit; } /* keyword */
 .cm-com.json { color: inherit; } /* comment */
 .cm-typ.json { color: inherit; } /* type */
@@ -2920,7 +2941,7 @@ ul.lexassetscontent {
 .cm-sym.json { color: #cf6dcf; } /* symbol */
 .cm-mtd.json { color: inherit; } /* method */
 
-.cm-str.glsl { color: #c18062; } /* string */
+.cm-str.glsl { color: #d0774e; } /* string */
 .cm-kwd.glsl { color: #2194ce; } /* keyword */
 .cm-com.glsl { color: #5cab5a; } /* comment */
 .cm-typ.glsl { color: #36c0b0; } /* type */
@@ -2928,9 +2949,9 @@ ul.lexassetscontent {
 .cm-bln.glsl { color: #cfc159; } /* builtin */
 .cm-dec.glsl { color: #b1ce9b; } /* decimal */
 .cm-sym.glsl { color: #f9cb20; } /* symbol */
-.cm-mtd.glsl { color: #f1e9bf; } /* method */
+.cm-mtd.glsl { color: #e0cc68; } /* method */
 
-.cm-str.wgsl { color: #c18062; } /* string */
+.cm-str.wgsl { color: #d0774e; } /* string */
 .cm-kwd.wgsl { color: #2194ce; } /* keyword */
 .cm-com.wgsl { color: #5cab5a; } /* comment */
 .cm-typ.wgsl { color: #36c0b0; } /* type */
@@ -2938,7 +2959,7 @@ ul.lexassetscontent {
 .cm-bln.wgsl { color: #cfc159; } /* builtin */
 .cm-dec.wgsl { color: #b1ce9b; } /* decimal */
 .cm-sym.wgsl { color: #f9cb20; } /* symbol */
-.cm-mtd.wgsl { color: #f1e9bf; } /* method */
+.cm-mtd.wgsl { color: #e0cc68; } /* method */
 
 /* plain color */
 .cm-str.plaintext, .cm-kwd.plaintext, .cm-com.plaintext, .cm-typ.plaintext, .cm-lit.plaintext, 
