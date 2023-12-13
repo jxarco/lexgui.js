@@ -191,7 +191,7 @@ class CodeEditor {
         this.tabSpaces = 4;
         this.maxUndoSteps = 16;
         this.lineHeight = 20;
-        this.charWidth = this.measureChar();
+        this.charWidth = 8;//this.measureChar();
         this._lastTime = null;
 
         this.languages = [

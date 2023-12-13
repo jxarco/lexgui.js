@@ -369,11 +369,11 @@ body.nocursor * {
 }
 
 .lexsplitbar.horizontal {
-  cursor: e-resize;
+  cursor: col-resize;
 }
 
 .lexsplitbar.vertical {
-	cursor: n-resize;
+	cursor: row-resize;
   transform: translateY(-3px);
   left: calc(50% - 32px);
 }
