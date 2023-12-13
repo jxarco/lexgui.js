@@ -6415,6 +6415,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             this.skip_preview = options.skip_preview ?? false;
             this.only_folders = options.only_folders ?? true;
             this.preview_actions = options.preview_actions ?? [];
+            this.context_menu = options.context_menu ?? [];
 
             if( !this.skip_browser )
             {
@@ -6801,23 +6802,26 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     }
                 });
 
-                itemEl.addEventListener('contextmenu', function(e) {
-                    e.preventDefault();
+                if(that.context_menu) {
 
-                    const multiple = that.content.querySelectorAll('.selected').length;
-
-                    LX.addContextMenu( multiple > 1 ? (multiple + " selected") : 
-                                is_folder ? item.id : item.type, e, m => {
-                        if(multiple <= 1)   
-                            m.add("Rename");
-                        if( !is_folder )
-                            m.add("Clone", that._cloneItem.bind(that, item));
-                        if(multiple <= 1)
-                            m.add("Properties");
-                        m.add("");
-                        m.add("Delete", that._deleteItem.bind(that, item));
+                    itemEl.addEventListener('contextmenu', function(e) {
+                        e.preventDefault();
+    
+                        const multiple = that.content.querySelectorAll('.selected').length;
+    
+                        LX.addContextMenu( multiple > 1 ? (multiple + " selected") : 
+                                    is_folder ? item.id : item.type, e, m => {
+                            if(multiple <= 1)   
+                                m.add("Rename");
+                            if( !is_folder )
+                                m.add("Clone", that._clone_item.bind(that, item));
+                            if(multiple <= 1)
+                                m.add("Properties");
+                            m.add("");
+                            m.add("Delete", that._delete_item.bind(that, item));
+                        });
                     });
-                });
+                }
 
                 itemEl.addEventListener("dragstart", function(e) {
                     e.preventDefault();
