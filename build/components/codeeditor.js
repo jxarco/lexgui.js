@@ -183,6 +183,7 @@ class CodeEditor {
 
         // Code
 
+        this.useAutoComplete = options.autocomplete ?? true;
         this.highlight = options.highlight ?? 'Plain Text';
         this.onsave = options.onsave ?? ((code) => {  });
         this.onrun = options.onrun ?? ((code) => { this.runScript(code) });
@@ -1289,7 +1290,8 @@ class CodeEditor {
 
         // Manage autocomplete
 
-        this.showAutoCompleteBox( key, cursor );
+        if( this.useAutoComplete )
+            this.showAutoCompleteBox( key, cursor );
     }
 
     action( key, deleteSelection, fn ) {
