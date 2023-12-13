@@ -210,30 +210,20 @@ class CodeEditor {
             'WGSL': ['var', 'let', 'true', 'false', 'fn', 'bool', 'u32', 'i32', 'f16', 'f32', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array', 'atomic', 'struct',
                     'sampler', 'sampler_comparison', 'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array', 'texture_depth_multisampled_2d',
                     'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d', 'texture_storage_2d',
-                    'texture_storage_2d_array', 'texture_storage_3d'],
-            'JSON': []
+                    'texture_storage_2d_array', 'texture_storage_3d']
         };
         this.utils = {
-            'JavaScript': ['querySelector', 'body', 'addEventListener', 'removeEventListener', 'remove', 'sort', 'filter', 'isNaN', 'parseFloat', 'parseInt'],
-            'GLSL': [],
-            'CSS': [],
-            'WGSL': [],
-            'JSON': []
+            'JavaScript': ['querySelector', 'body', 'addEventListener', 'removeEventListener', 'remove', 'sort', 'filter', 'isNaN', 'parseFloat', 'parseInt']
         };
         this.builtin = {
             'JavaScript': ['document', 'console', 'window', 'navigator', 'Object', 'Function', 'Boolean', 'Symbol', 'Error'],
-            'CSS': ['*', '!important'],
-            'GLSL': [],
-            'WGSL': [],
-            'JSON': []
+            'CSS': ['*', '!important']
         };
         this.statementsAndDeclarations = {
             'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import',
                             'from', 'throw', 'async', 'try', 'catch'],
             'GLSL': ['for', 'if', 'else', 'return', 'continue', 'break'],
-            'WGSL': ['const','for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'uniform'],
-            'JSON': [],
-            'CSS': []
+            'WGSL': ['const','for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'uniform']
         };
         this.symbols = {
             'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
@@ -1454,6 +1444,11 @@ class CodeEditor {
         }
     }
 
+    _mustHightlightWord( token, kindArray ) {
+
+        return kindArray[this.highlight] && kindArray[this.highlight].indexOf(token) > -1;
+    }
+
     processToken(token, linespan, prev, next) {
 
         let sString = false;
@@ -1480,16 +1475,16 @@ class CodeEditor {
             else if( this._building_string  )
                 span.classList.add("cm-str");
             
-            else if( this.keywords[this.highlight] && this.keywords[this.highlight].indexOf(token) > -1 )
+            else if( this._mustHightlightWord( token, this.keywords ) )
                 span.classList.add("cm-kwd");
 
-            else if( this.builtin[this.highlight] && this.builtin[this.highlight].indexOf(token) > -1 )
+            else if( this._mustHightlightWord( token, this.builtin ) )
                 span.classList.add("cm-bln");
 
-            else if( this.statementsAndDeclarations[this.highlight] && this.statementsAndDeclarations[this.highlight].indexOf(token) > -1 )
+            else if( this._mustHightlightWord( token, this.statementsAndDeclarations ) )
                 span.classList.add("cm-std");
 
-            else if( this.symbols[this.highlight] && this.symbols[this.highlight].indexOf(token) > -1 )
+                else if( this._mustHightlightWord( token, this.symbols ) )
                 span.classList.add("cm-sym");
 
             else if( token.substr(0, 2) == '//' )
@@ -1965,10 +1960,12 @@ class CodeEditor {
         let suggestions = [];
 
         // Add language special keys...
-        suggestions = suggestions.concat( this.keywords[ this.highlight ] );
-        suggestions = suggestions.concat( this.statementsAndDeclarations[ this.highlight ] );
-        suggestions = suggestions.concat( this.builtin[ this.highlight ] );
-        suggestions = suggestions.concat( this.utils[ this.highlight ] );
+        suggestions = suggestions.concat( this.keywords[ this.highlight ] ?? [] );
+        suggestions = suggestions.concat( this.statementsAndDeclarations[ this.highlight ] ?? [] );
+        suggestions = suggestions.concat( this.builtin[ this.highlight ] ?? [] );
+        suggestions = suggestions.concat( this.utils[ this.highlight ] ?? [] );
+
+        // Remove current word
         suggestions = suggestions.concat( Object.keys(this.code.tokens).filter( a => a != word ) );
 
         // Remove single chars and duplicates...        
