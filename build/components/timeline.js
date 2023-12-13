@@ -820,10 +820,6 @@ class Timeline {
             const discard = this.movingKeys || (LX.UTILS.getTime() - this.clickTime) > 420; // ms
             this.movingKeys ? innerSetTime( this.currentTime ) : 0;
 
-            if(e.button == 0 && this.grabbing && this.onClipMoved && this.lastClipsSelected.length){
-                this.onClipMoved(this.lastClipsSelected);
-            }
-
             this.grabbing_timeline = false;
             this.grabbing = false;
             this.grabbingScroll = false;
