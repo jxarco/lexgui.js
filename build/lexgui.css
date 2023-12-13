@@ -2887,6 +2887,10 @@ ul.lexassetscontent {
   overflow-y: scroll;
 }
 
+.lexcodeeditor .autocomplete.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 .lexcodeeditor .autocomplete.show {
   visibility: visible;
 }
@@ -2909,6 +2913,14 @@ ul.lexassetscontent {
 .lexcodeeditor .autocomplete pre span {
   margin: 2px 0px;
   cursor: inherit;
+}
+
+.lexcodeeditor .autocomplete pre span.word-highlight {
+  color: var(--global-selected-light);
+}
+
+.lexcodeeditor .autocomplete pre.selected span.word-highlight {
+  color: #95a0e1;
 }
 
 .cm-str { color: #d0774e; } /* string */

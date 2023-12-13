@@ -210,6 +210,7 @@ class CodeEditor {
                     'sampler', 'sampler_comparison', 'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array', 'texture_depth_multisampled_2d',
                     'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d', 'texture_storage_2d',
                     'texture_storage_2d_array', 'texture_storage_3d'],
+            'JSON': []
         };
         this.builtin = {
             'JavaScript': ['console', 'window', 'navigator'],
@@ -1924,14 +1925,13 @@ class CodeEditor {
         if( key == ' ' )
         return;
 
-        const word = this.getWordAtPos( cursor, -1 )[0];
+        const [word, start, end] = this.getWordAtPos( cursor, -1 );
         if(!word.length)
         return;
 
         this.autocomplete.innerHTML = ""; // Clear all suggestions
 
         let suggestions = [];
-        // let suggestions = ['constructor', 'constructor', 'constructor', 'constructor', 'constructor', 'constructor', 'constructor', 'constructor', 'constructor', 'constructor', 'surprise', 'homeAction', 'disabled', 'hideAutoCompleteBox'];
 
         // Add language special keys...
         suggestions = suggestions.concat( this.keywords[ this.highlight ] );
@@ -1955,11 +1955,23 @@ class CodeEditor {
 
             pre.addEventListener( 'click', () => {
                 this.autoCompleteWord( cursor, s );
-            } );
+            } ); 
 
-            var linespan = document.createElement('span');
-            pre.appendChild(linespan);
-            linespan.innerHTML = s;
+            // Highlight the written part
+            const index = s.toLowerCase().indexOf(word.toLowerCase());
+
+            var preWord = document.createElement('span');
+            preWord.innerHTML = s.substring(0, index);
+            pre.appendChild(preWord);
+
+            var actualWord = document.createElement('span');
+            actualWord.innerHTML = s.substr(index, word.length);
+            actualWord.classList.add( 'word-highlight' );
+            pre.appendChild(actualWord);
+
+            var postWord = document.createElement('span');
+            postWord.innerHTML = s.substring(index + word.length);
+            pre.appendChild(postWord);
         }
 
         if( !this.autocomplete.childElementCount )
@@ -1973,8 +1985,10 @@ class CodeEditor {
 
         // Show box
         this.autocomplete.classList.toggle('show', true);
+        this.autocomplete.classList.toggle('no-scrollbar', !(this.autocomplete.scrollHeight > this.autocomplete.offsetHeight));
         this.autocomplete.style.left = (cursor._left + 36) + "px";
         this.autocomplete.style.top = (cursor._top + 48) + "px";
+
 
         this.isAutoCompleteActive = true;
     }
@@ -2014,7 +2028,13 @@ class CodeEditor {
         {
             const child = this.autocomplete.childNodes[i];
             if( child.classList.contains('selected') )
-            return [child.firstChild.innerHTML, i ]; // Get text of the span inside the 'pre' element
+            {
+                var word = "";
+                for( let childSpan of child.childNodes )
+                    word += childSpan.innerHTML;
+
+                return [word, i ]; // Get text of the span inside the 'pre' element
+            }
         }
     }
 
