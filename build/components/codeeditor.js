@@ -264,7 +264,6 @@ class CodeEditor {
                 if(letter) {
                     this.code.lines[ln] = sliceChar( this.code.lines[ln], cursor.position - 1 );
                     this.cursorToLeft( letter );
-                    this.processLine(ln);
                 } 
                 else if(this.code.lines[ln - 1] != undefined) {
                     this.lineUp();
@@ -272,8 +271,8 @@ class CodeEditor {
                     // Move line on top
                     this.code.lines[ln - 1] += this.code.lines[ln];
                     this.code.lines.splice(ln, 1);
-                    this.processLines(ln - 1);
                 }
+                this.processLines();
             }
         });
 
@@ -290,12 +289,12 @@ class CodeEditor {
                 var letter = this.getCharAtPos( cursor );
                 if(letter) {
                     this.code.lines[ln] = sliceChar( this.code.lines[ln], cursor.position );
-                    this.processLine(ln);
+                    this.processLines();
                 } 
                 else if(this.code.lines[ln + 1] != undefined) {
                     this.code.lines[ln] += this.code.lines[ln + 1];
                     this.code.lines.splice(ln + 1, 1);
-                    this.processLines(ln);
+                    this.processLines();
                 }
             }
         });
@@ -392,7 +391,7 @@ class CodeEditor {
                 this.addSpaceTabs(tabs);
             }
 
-            this.processLines( ln );
+            this.processLines();
         });
 
         this.action('ArrowUp', false, ( ln, cursor, e ) => {
@@ -657,7 +656,6 @@ class CodeEditor {
 
             if(_text) this.cursorToPosition(cursor, _text.length);
             this.cursorToLine(cursor, cursor.line + num_lines);
-            this.processLines(lidx);
         }
         // Pasting one line...
         else
@@ -669,8 +667,9 @@ class CodeEditor {
             ].join('');
 
             this.cursorToPosition(cursor, (cursor.position + new_lines[0].length));
-            this.processLine(lidx);
         }
+        
+        this.processLines();
     }
 
     loadFile( file ) {
@@ -1169,7 +1168,7 @@ class CodeEditor {
                 e.preventDefault();
                 this.code.lines.splice(lidx, 0, this.code.lines[lidx]);
                 this.lineDown( cursor );
-                this.processLines(lidx);
+                this.processLines();
                 return;
             case 's': // save
                 e.preventDefault();
@@ -1181,7 +1180,7 @@ class CodeEditor {
                 return;
             case 'x': // cut line
                 const to_copy = this.code.lines.splice(lidx, 1)[0];
-                this.processLines(lidx);
+                this.processLines();
                 navigator.clipboard.writeText(to_copy + '\n');
                 return;
             case 'z': // undo
@@ -1206,16 +1205,14 @@ class CodeEditor {
                     return;
                 swapArrayElements(this.code.lines, lidx - 1, lidx);
                 this.lineUp();
-                this.processLine( lidx - 1 );
-                this.processLine( lidx );
+                this.processLines();
                 return;
             case 'ArrowDown':
                 if(this.code.lines[ lidx + 1 ] == undefined)
                     return;
                 swapArrayElements(this.code.lines, lidx, lidx + 1);
                 this.lineDown();
-                this.processLine( lidx );
-                this.processLine( lidx + 1 );
+                this.processLines();
                 return;
             }
         }
@@ -1293,8 +1290,7 @@ class CodeEditor {
             return; // It will be processed with the above event
         }
 
-        // Update only the current line, since it's only an appended key
-        this.processLine( lidx );
+        this.processLines();
 
         // Manage autocomplete
 
@@ -1322,6 +1318,7 @@ class CodeEditor {
         {
             --running;
             e.target.terminate();
+
             completeResult = completeResult.concat( e.data.result );
 
             if (running === 0) {
@@ -1331,7 +1328,7 @@ class CodeEditor {
                 this.code.innerHTML = "";
                 this.code.tokens = {};
 
-                console.log("All workers ended in", (performance.now() - tStart) / 1000,  "s");
+                console.log("All workers ended in", (performance.now() - tStart),  "ms");
 
                 if( !completeResult.length )
                 return;
@@ -1385,6 +1382,9 @@ class CodeEditor {
                     const highlight = e.data.highlight.replace(/\s/g, '').toLowerCase();
                     const linesToProcess = ( e.data.isLastWorker ? e.data.linesPerLastWorker : e.data.linesPerWorker);
 
+                    const td = new TextDecoder();
+                    const decodedLines = td.decode( e.data.lines ).split( "_ENCODED_" );
+
                     var result = [];
 
                     for( var k = 0; k < linesToProcess; k++ )
@@ -1394,7 +1394,7 @@ class CodeEditor {
 
                         const linenum = e.data.id * e.data.linesPerWorker + k;
 
-                        let linestring = e.data.lines[ k ];
+                        let linestring = decodedLines[ k ];
                         var linespan = [];
     
                         // Check if line comment
@@ -1449,10 +1449,10 @@ class CodeEditor {
                             }
                             
                             let token = to_process[i];
-                            // if( token.substr(0, 2) == '/*' )
-                            //     this._building_block_comment = true;
-                            // if( token.substr(token.length - 2) == '*\/' )
-                            //     delete this._building_block_comment;
+                            if( token.substr(0, 2) == '/*' )
+                                this._building_block_comment = true;
+                            if( token.substr(token.length - 2) == '*\/' )
+                                delete this._building_block_comment;
                             
                             // Process token...
     
@@ -1553,16 +1553,19 @@ class CodeEditor {
             const workerLinesStart = id * linesPerWorker;
             const workerLinesEnd = workerLinesStart + (isLastWorker ? linesPerLastWorker : linesPerWorker);
 
+            const te = new TextEncoder();
+            const encodedLines = te.encode( this.code.lines.slice(workerLinesStart, workerLinesEnd).join("_ENCODED_") );
+
             var worker = new Worker( blobURL );
             worker.onmessage = workerDone.bind(this);
             worker.postMessage({ 
                 id: id,
-                lines: this.code.lines.slice(workerLinesStart, workerLinesEnd),
+                lines: encodedLines,
                 linesPerWorker: linesPerWorker,
                 linesPerLastWorker: linesPerLastWorker,
                 isLastWorker: isLastWorker,
                 highlight: this.highlight
-            });
+            }, [ encodedLines.buffer ]);
             ++running;
     
             // Won't be needing this anymore
@@ -1582,186 +1585,6 @@ class CodeEditor {
             const isLastWorker = i == (maxWorkers - 1);
             startWorker( i, linesPerWorker, isLastWorker ? linesPerLastWorker : linesPerWorker, isLastWorker );
         }
-    }
-
-    processLine( linenum ) {
-
-        delete this._building_string; // multi-line strings not supported by now
-        
-        // It's allowed to process only 1 line to optimize
-        let linestring = this.code.lines[ linenum ];
-        var _lines = this.code.querySelectorAll('pre');
-        var pre = null, single_update = false;
-        if( _lines[linenum] ) {
-            pre = _lines[linenum];
-            single_update = true;
-        }
-        
-        if(!pre)
-        {
-            var pre = document.createElement('pre');
-            pre.dataset['linenum'] = linenum;
-            this.code.appendChild(pre);
-        }
-        else
-        {
-            pre.children[0].remove(); // Remove token list
-        }
-
-        var linespan = document.createElement('span');
-        pre.appendChild(linespan);
-
-        // Check if line comment
-        const is_comment = linestring.split('//');
-        linestring = ( is_comment.length > 1 ) ? is_comment[0] : linestring;
-
-        const tokens = linestring.split(' ').join('¬ ¬').split('¬'); // trick to split without losing spaces
-        const to_process = []; // store in a temp array so we know prev and next tokens...
-
-        for( let t of tokens )
-        {
-            let iter = t.matchAll(/[\[\](){}<>.,;:"']/g);
-            let subtokens = iter.next();
-            if( subtokens.value )
-            {
-                let idx = 0;
-                while( subtokens.value != undefined )
-                {
-                    const _pt = t.substring(idx, subtokens.value.index);
-                    to_process.push( _pt );
-                    to_process.push( subtokens.value[0] );
-                    idx = subtokens.value.index + 1;
-                    subtokens = iter.next();
-                    if(!subtokens.value) {
-                        const _at = t.substring(idx);
-                        to_process.push( _at );
-                    }
-                }
-            }
-            else
-                to_process.push( t );
-        }
-
-        if( is_comment.length > 1 )
-            to_process.push( "//" + is_comment[1] );
-
-        // Process all tokens
-        for( var i = 0; i < to_process.length; ++i )
-        {
-            let it = i - 1;
-            let prev = to_process[it];
-            while( prev == '' || prev == ' ' ) {
-                it--;
-                prev = to_process[it];
-            }
-
-            it = i + 1;
-            let next = to_process[it];
-            while( next == '' || next == ' ' || next == '"') {
-                it++;
-                next = to_process[it];
-            }
-            
-            let token = to_process[i];
-            if( token.substr(0, 2) == '/*' )
-                this._building_block_comment = true;
-            if( token.substr(token.length - 2) == '*/' )
-                delete this._building_block_comment;
-            
-            this.processToken(token, linespan, prev, next);
-        }
-
-        // add line gutter
-        if(!single_update)
-        {
-            var linenumspan = document.createElement('span');
-            linenumspan.innerHTML = (linenum + 1);
-            this.gutter.appendChild(linenumspan);
-        }
-    }
-
-    processToken(token, linespan, prev, next) {
-
-        let sString = false;
-        let highlight = this.highlight.replace(/\s/g, '').toLowerCase();
-
-        if(token == '"' || token == "'")
-        {
-            sString = (this._building_string == token); // stop string if i was building it
-            this._building_string = this._building_string ? this._building_string : token;
-        }
-
-        if(token == ' ')
-        {
-            linespan.innerHTML += token;
-        }
-        else
-        {
-            var span = document.createElement('span');
-            span.innerHTML = token;
-
-            if( this._building_block_comment )
-                span.classList.add("cm-com");
-            
-            else if( this._building_string  )
-                span.classList.add("cm-str");
-            
-            else if( this.keywords[this.highlight] && this.keywords[this.highlight].indexOf(token) > -1 )
-                span.classList.add("cm-kwd");
-
-            else if( this.builtin[this.highlight] && this.builtin[this.highlight].indexOf(token) > -1 )
-                span.classList.add("cm-bln");
-
-            else if( this.statementsAndDeclarations[this.highlight] && this.statementsAndDeclarations[this.highlight].indexOf(token) > -1 )
-                span.classList.add("cm-std");
-
-            else if( this.symbols[this.highlight] && this.symbols[this.highlight].indexOf(token) > -1 )
-                span.classList.add("cm-sym");
-
-            else if( token.substr(0, 2) == '//' )
-                span.classList.add("cm-com");
-
-            else if( token.substr(0, 2) == '/*' )
-                span.classList.add("cm-com");
-
-            else if( token.substr(token.length - 2) == '*/' )
-                span.classList.add("cm-com");
-
-            else if(  this.isNumber(token) || this.isNumber( token.replace(/[px]|[em]|%/g,'') ) )
-                span.classList.add("cm-dec");
-
-            else if( this.isCSSClass(token, prev, next) )
-                span.classList.add("cm-kwd");
-
-            else if ( this.isType(token, prev, next) ) {
-                span.classList.add("cm-typ");
-                this.code.tokens[ token ] = CodeEditor.WORD_TYPE_CLASS;
-            }
-
-            else if ( token[0] != '@' && next == '(' ) {
-                span.classList.add("cm-mtd");
-                this.code.tokens[ token ] = CodeEditor.WORD_TYPE_METHOD;
-            }
-
-            else if ( highlight == 'css' && prev == ':' && (next == ';' || next == '!important') ) // CSS value
-                span.classList.add("cm-str");
-
-            else if ( highlight == 'css' && prev == undefined && next == ':' ) // CSS attribute
-                span.classList.add("cm-typ");
-            else {
-
-                if( token.length > 1 )
-                {
-                    // Store in token map to show later as autocomplete suggestions
-                    this.code.tokens[ token ] = -1;
-                }
-            }
-
-            span.classList.add(highlight);
-            linespan.appendChild(span);
-        }
-
-        if(sString) delete this._building_string;
     }
 
     isNumber( token ) {
@@ -1825,7 +1648,7 @@ class CodeEditor {
         this.selection.toX++;
 
         this.processSelection();
-        this.processLine( lidx );
+        this.processLines();
 
         // Stop propagation
         return true;
@@ -1895,7 +1718,7 @@ class CodeEditor {
         const post = code.slice(index + num_chars);
 
         this.code.lines = (pre + post).split(separator);
-        this.processLines(this.selection.fromY);
+        this.processLines();
 
         this.cursorToLine(cursor, this.selection.fromY, true);
         this.cursorToPosition(cursor, this.selection.fromX);
@@ -2269,7 +2092,7 @@ class CodeEditor {
 
         // Process lines and remove suggestion box
         this.cursorToPosition(cursor, start + suggestedWord.length);
-        this.processLine(cursor.line);
+        this.processLines();
         this.hideAutoCompleteBox();
     }
 
