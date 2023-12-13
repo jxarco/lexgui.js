@@ -102,6 +102,8 @@ class CodeEditor {
 
     constructor( area, options = {} ) {
 
+        window.editor = this;
+
         CodeEditor.__instances.push( this );
 
         this.disable_edition = options.disable_edition ?? false;
@@ -393,10 +395,8 @@ class CodeEditor {
                 if( e.shiftKey ) {
                     if(!this.selection)
                         this.startSelection(cursor);
-                    this.selection.fromX = cursor.position;
-                    this.selection.toY = this.selection.toY > 0 ? this.selection.toY - 1 : 0;
+                    this.selection.toY = (this.selection.toY > 0) ? (this.selection.toY - 1) : 0;
                     this.processSelection(null, true);
-                    this.cursorToPosition(cursor, this.selection.fromX);
                     this.cursorToLine(cursor, this.selection.toY);
                 } else {
                     this.endSelection();
