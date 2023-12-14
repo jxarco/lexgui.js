@@ -162,6 +162,7 @@ class CodeEditor {
             cursor.style.top = "4px";
             cursor.position = 0;
             cursor.line = 0;
+            cursor.print = (function() { console.log( this.line, this.position ) }).bind(cursor);
             this.cursors.appendChild(cursor);
         }
 
@@ -194,7 +195,7 @@ class CodeEditor {
         this.tabSpaces = 4;
         this.maxUndoSteps = 16;
         this.lineHeight = 20;
-        this.charWidth = 8;//this.measureChar();
+        this.charWidth = 8; //this.measureChar();
         this._lastTime = null;
 
         this.languages = [
@@ -395,9 +396,18 @@ class CodeEditor {
                 if( e.shiftKey ) {
                     if(!this.selection)
                         this.startSelection(cursor);
+
                     this.selection.toY = (this.selection.toY > 0) ? (this.selection.toY - 1) : 0;
-                    this.processSelection(null, true);
                     this.cursorToLine(cursor, this.selection.toY);
+
+                    var letter = this.getCharAtPos( cursor );
+                    if(!letter) {
+                        this.selection.toX = (this.code.lines[cursor.line].length - 1);
+                        this.cursorToPosition(cursor, this.selection.toX);
+                    }
+                    
+                    this.processSelection(null, true);
+
                 } else {
                     this.endSelection();
                     this.lineUp();
@@ -421,11 +431,17 @@ class CodeEditor {
                 if( e.shiftKey ) {
                     if(!this.selection)
                         this.startSelection(cursor);
-                    this.selection.toX = cursor.position;
+
                     this.selection.toY = this.selection.toY < this.code.lines.length - 1 ? this.selection.toY + 1 : this.code.lines.length - 1;
-                    this.processSelection(null, true);
-                    this.cursorToPosition(cursor, this.selection.toX);
                     this.cursorToLine(cursor, this.selection.toY);
+                    
+                    var letter = this.getCharAtPos( cursor );
+                    if(!letter) {
+                        this.selection.toX = Math.max(this.code.lines[cursor.line].length - 1, 0);
+                        this.cursorToPosition(cursor, this.selection.toX);
+                    }
+
+                    this.processSelection(null, true);
                 } else {
     
                     if( this.code.lines[ ln + 1 ] == undefined ) 
