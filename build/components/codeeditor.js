@@ -326,16 +326,17 @@ class CodeEditor {
             this._refreshCodeInfo(cursor.line + 1, cursor.position);
             this.code.scrollLeft = 0;
 
-            if( !e.shiftKey || e.cancelShift )
-            return;
-        
-            // Get last selection range
-            if(this.selection) 
+            if( e.shiftKey && !e.cancelShift )
+            {
+                // Get last selection range
+                if(this.selection) 
                 last_pos += this.selection.chars;
 
-            this.startSelection(cursor);
-            var string = this.code.lines[ln].substring(idx, last_pos);
-            this.selection.selectInline(idx, cursor.line, this.measureString(string));
+                this.startSelection(cursor);
+                var string = this.code.lines[ln].substring(idx, last_pos);
+                this.selection.selectInline(idx, cursor.line, this.measureString(string));
+            } else
+                this.endSelection();
         });
 
         this.action('End', false, ( ln, cursor, e ) => {
@@ -346,7 +347,8 @@ class CodeEditor {
                 if(!this.selection)
                     this.startSelection(cursor);
                 this.selection.selectInline(cursor.position, cursor.line, this.measureString(string));
-            }
+            } else 
+                this.endSelection();
 
             this.resetCursorPos( CodeEditor.CURSOR_LEFT );
             this.cursorToString( cursor, this.code.lines[ln] );
@@ -1330,14 +1332,32 @@ class CodeEditor {
 
         this.cursorToRight( key );
 
-        // Other special char cases...
+        //  Some custom cases for auto key pair (), {}, "", '', ...
 
-        if( key == '{' )
+        const pairKeys = ["\"", "'", "(", "{"];
+        if( pairKeys.indexOf( key ) > -1 && !this.wasKeyPaired )
         {
-            this.root.dispatchEvent(new KeyboardEvent('keydown', {'key': '}'}));
+            // Find pair key
+            let pair = key;
+            switch(key)
+            {
+                case "'":
+                case "\"":
+                    break;
+                case "(": pair = ")"; break;
+                case "{": pair = "}"; break;
+            }
+
+            // Make sure to detect later that the key is paired automatically to avoid loops...
+            this.wasKeyPaired = true;
+
+            this.root.dispatchEvent(new KeyboardEvent('keydown', { 'key': pair }));
             this.cursorToLeft( key, cursor );
-            return; // It will be processed with the above event
+            return;
         }
+
+        // Once here we can pair keys again
+        delete this.wasKeyPaired;
 
         // Update only the current line, since it's only an appended key
         this.processLine( lidx );
@@ -1598,7 +1618,7 @@ class CodeEditor {
 
         if( !this.selection || (this.selection.fromY != this.selection.toY) )
         return false;
-                                    
+        
         const _lastLeft = cursor._left;
 
         // Insert first..
@@ -1609,8 +1629,7 @@ class CodeEditor {
         ].join('');
 
         // Go to the end of the word
-        this.cursorToString(cursor, 
-            this.code.lines[lidx].slice(this.selection.fromX, this.selection.toX + 1));
+        this.cursorToPosition(cursor, this.selection.toX + 1);
 
         // Change next key?
         switch(key)
