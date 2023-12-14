@@ -2900,6 +2900,14 @@ ul.lexassetscontent {
   margin: 0;
   pointer-events: unset;
   cursor: default;
+  height: 18px;
+}
+
+.lexcodeeditor .autocomplete pre a {
+  font-size: 11px;
+  margin-top: 4px;
+  margin-right: 6px;
+  margin-left: 2px;
 }
 
 .lexcodeeditor .autocomplete pre:hover {
@@ -2912,7 +2920,6 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .autocomplete pre span {
-  margin: 2px 0px;
   cursor: inherit;
 }
 

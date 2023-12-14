@@ -217,7 +217,7 @@ class CodeEditor {
         };
         this.utils = { // These ones don't have hightlight, used as suggestions to autocomplete only...
             'JavaScript': ['querySelector', 'body', 'addEventListener', 'removeEventListener', 'remove', 'sort', 'keys', 'filter', 'isNaN', 'parseFloat', 'parseInt', 'EPSILON', 'isFinite',
-                          'bind', 'prototype', 'length', 'assign', 'entries', 'values', 'concat', 'substring', 'substr', 'splice', 'slice', 'buffer', 'appendChild'],
+                          'bind', 'prototype', 'length', 'assign', 'entries', 'values', 'concat', 'substring', 'substr', 'splice', 'slice', 'buffer', 'appendChild', 'createElement'],
             'WGSL': ['textureSample']
         };
         this.types = {
@@ -2016,11 +2016,13 @@ class CodeEditor {
         let suggestions = [];
 
         // Add language special keys...
-        suggestions = suggestions.concat( this.builtin[ this.highlight ] ?? [] );
-        suggestions = suggestions.concat( this.keywords[ this.highlight ] ?? [] );
-        suggestions = suggestions.concat( this.statementsAndDeclarations[ this.highlight ] ?? [] );
-        suggestions = suggestions.concat( this.types[ this.highlight ] ?? [] );
-        suggestions = suggestions.concat( this.utils[ this.highlight ] ?? [] );
+        suggestions = suggestions.concat(   
+            this.builtin[ this.highlight ] ?? [],
+            this.keywords[ this.highlight ] ?? [],
+            this.statementsAndDeclarations[ this.highlight ] ?? [],
+            this.types[ this.highlight ] ?? [],
+            this.utils[ this.highlight ] ?? []
+        );
 
         // Add words in current tab plus remove current word
         // suggestions = suggestions.concat( Object.keys(this.code.tokens).filter( a => a != word ) );
@@ -2038,6 +2040,17 @@ class CodeEditor {
 
             var pre = document.createElement('pre');
             this.autocomplete.appendChild(pre);
+
+            var icon = document.createElement('a');
+            
+            if( this._mustHightlightWord( s, this.utils ) )
+                icon.className = "fa fa-cube";
+            else if( this._mustHightlightWord( s, this.types ) )
+                icon.className = "fa fa-code";
+            else
+                icon.className = "fa fa-font";
+
+            pre.appendChild(icon);
 
             pre.addEventListener( 'click', () => {
                 this.autoCompleteWord( cursor, s );
@@ -2119,13 +2132,13 @@ class CodeEditor {
                 for( let childSpan of child.childNodes )
                     word += childSpan.innerHTML;
 
-                return [word, i ]; // Get text of the span inside the 'pre' element
+                return [ word, i ]; // Get text of the span inside the 'pre' element
             }
         }
     }
 
     moveArrowSelectedAutoComplete( dir ) {
-        
+
         if( !this.isAutoCompleteActive )
         return;
 
@@ -2138,7 +2151,7 @@ class CodeEditor {
             if( (idx + offset) < 0 ) return;
         }
 
-        this.autocomplete.scrollTop += offset * 20;
+        this.autocomplete.scrollTop += offset * 18;
 
         // Remove selected from the current word and add it to the next one
         this.autocomplete.childNodes[ idx ].classList.remove('selected');
