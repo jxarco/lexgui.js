@@ -942,10 +942,26 @@ class CodeEditor {
         {
             if( mouse_pos[0] > this.code.scrollWidth || mouse_pos[1] > this.code.scrollHeight )
                 return; // Scrollbar click
+
+            // Left click only...
+            if( e.button === 2 )
+            {
+                this.processClick(e);
+
+                this.canOpenContextMenu = !this.selection;
+
+                if( this.selection )
+                {
+                    this.canOpenContextMenu |= (cursor.line >= this.selection.fromY && cursor.line <= this.selection.toY 
+                                                && cursor.position >= this.selection.fromX && cursor.position <= this.selection.toX);
+                    if( this.canOpenContextMenu )
+                        return;
+                }
+            }
+
             this.lastMouseDown = LX.getTime();
             this.state.selectingText = true;
             this.endSelection();
-            return;
         }
         
         else if( e.type == 'mouseup' )
@@ -988,15 +1004,26 @@ class CodeEditor {
             }
         }
 
-        else if ( e.type == 'contextmenu' ) {
-            e.preventDefault()
-            LX.addContextMenu( "Format code", e, m => {
-                m.add( "JSON", () => { 
+        else if ( e.type == 'contextmenu' )
+        {
+            e.preventDefault();
+
+            if( !this.canOpenContextMenu )
+                return;
+
+            LX.addContextMenu( null, e, m => {
+                m.add( "Format/JSON", () => { 
                     let json = this.toJSONFormat(this.getText());
                     this.code.lines = json.split("\n"); 
                     this.processLines();
                 } );
+                m.add( "" )
+                m.add( "Cut", () => {  this._cutContent(); } );
+                m.add( "Copy", () => {  this._copyContent(); } );
+                m.add( "Paste", () => {  this._pasteContent(); } );
             });
+
+            this.canOpenContextMenu = false;
         }
     }
 
@@ -1167,27 +1194,7 @@ class CodeEditor {
                 this.cursorToLine(cursor, this.selection.toY);
                 break;
             case 'c': // copy
-                let text_to_copy = "";
-                if( !this.selection ) {
-                    text_to_copy = "\n" + this.code.lines[cursor.line];
-                }
-                else {
-                    const separator = "_NEWLINE_";
-                    let code = this.code.lines.join(separator);
-
-                    // Get linear start index
-                    let index = 0;
-                    
-                    for(let i = 0; i <= this.selection.fromY; i++)
-                        index += (i == this.selection.fromY ? this.selection.fromX : this.code.lines[i].length);
-
-                    index += this.selection.fromY * separator.length; 
-                    const num_chars = this.selection.chars + (this.selection.toY - this.selection.fromY) * separator.length;
-                    const text = code.substr(index, num_chars);
-                    const lines = text.split(separator);
-                    text_to_copy = lines.join('\n');
-                }
-                navigator.clipboard.writeText(text_to_copy).then(() => console.log("Successfully copied"), (err) => console.error("Error"));
+                this._copyContent();
                 return;
             case 'd': // duplicate line
                 e.preventDefault();
@@ -1200,36 +1207,10 @@ class CodeEditor {
                 this.onsave( this.getText() );
                 return;
             case 'v': // paste
-                let text = await navigator.clipboard.readText();
-                this.appendText(text);
+                this._pasteContent();
                 return;
             case 'x': // cut line
-                let text_to_cut = "";
-                if( !this.selection ) {
-                    text_to_cut = "\n" + this.code.lines[cursor.line];
-                    this.code.lines.splice(lidx, 1);
-                    this.processLines(lidx);
-                    this.resetCursorPos( CodeEditor.CURSOR_LEFT );
-                }
-                else {
-                    const separator = "_NEWLINE_";
-                    let code = this.code.lines.join(separator);
-
-                    // Get linear start index
-                    let index = 0;
-                    
-                    for(let i = 0; i <= this.selection.fromY; i++)
-                        index += (i == this.selection.fromY ? this.selection.fromX : this.code.lines[i].length);
-
-                    index += this.selection.fromY * separator.length; 
-                    const num_chars = this.selection.chars + (this.selection.toY - this.selection.fromY) * separator.length;
-                    const text = code.substr(index, num_chars);
-                    const lines = text.split(separator);
-                    text_to_cut = lines.join('\n');
-
-                    this.deleteSelection( cursor );
-                }
-                navigator.clipboard.writeText(text_to_cut).then(() => console.log("Successfully cut"), (err) => console.error("Error"));
+                this._cutContent();
                 return;
             case 'z': // undo
                 if(!this.code.undoSteps.length)
@@ -1366,6 +1347,73 @@ class CodeEditor {
 
         if( this.useAutoComplete )
             this.showAutoCompleteBox( key, cursor );
+    }
+
+    async _pasteContent() {
+        let text = await navigator.clipboard.readText();
+        this.appendText(text);
+    }
+
+    async _copyContent() {
+
+        let cursor = this.cursors.children[0];
+        let text_to_copy = "";
+
+        if( !this.selection ) {
+            text_to_copy = "\n" + this.code.lines[cursor.line];
+        }
+        else {
+            const separator = "_NEWLINE_";
+            let code = this.code.lines.join(separator);
+
+            // Get linear start index
+            let index = 0;
+            
+            for(let i = 0; i <= this.selection.fromY; i++)
+                index += (i == this.selection.fromY ? this.selection.fromX : this.code.lines[i].length);
+
+            index += this.selection.fromY * separator.length; 
+            const num_chars = this.selection.chars + (this.selection.toY - this.selection.fromY) * separator.length;
+            const text = code.substr(index, num_chars);
+            const lines = text.split(separator);
+            text_to_copy = lines.join('\n');
+        }
+
+        navigator.clipboard.writeText(text_to_copy).then(() => console.log("Successfully copied"), (err) => console.error("Error"));
+    }
+
+    async _cutContent() {
+
+        let cursor = this.cursors.children[0];
+        let lidx = cursor.line;
+        let text_to_cut = "";
+
+        if( !this.selection ) {
+            text_to_cut = "\n" + this.code.lines[cursor.line];
+            this.code.lines.splice(lidx, 1);
+            this.processLines(lidx);
+            this.resetCursorPos( CodeEditor.CURSOR_LEFT );
+        }
+        else {
+            const separator = "_NEWLINE_";
+            let code = this.code.lines.join(separator);
+
+            // Get linear start index
+            let index = 0;
+            
+            for(let i = 0; i <= this.selection.fromY; i++)
+                index += (i == this.selection.fromY ? this.selection.fromX : this.code.lines[i].length);
+
+            index += this.selection.fromY * separator.length; 
+            const num_chars = this.selection.chars + (this.selection.toY - this.selection.fromY) * separator.length;
+            const text = code.substr(index, num_chars);
+            const lines = text.split(separator);
+            text_to_cut = lines.join('\n');
+
+            this.deleteSelection( cursor );
+        }
+
+        navigator.clipboard.writeText(text_to_cut).then(() => console.log("Successfully cut"), (err) => console.error("Error"));
     }
 
     action( key, deleteSelection, fn ) {
