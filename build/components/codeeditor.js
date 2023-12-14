@@ -199,7 +199,7 @@ class CodeEditor {
         this._lastTime = null;
 
         this.languages = [
-            'Plain Text', 'JavaScript', 'CSS', 'GLSL', 'WGSL', 'JSON', 'XML' 
+            'Plain Text', 'JavaScript', 'CSS', 'GLSL', 'WGSL', 'JSON', 'XML', 'Python'
         ];
         this.specialKeys = [
             'Backspace', 'Enter', 'ArrowUp', 'ArrowDown', 
@@ -213,15 +213,18 @@ class CodeEditor {
             'WGSL': ['var', 'let', 'true', 'false', 'fn', 'bool', 'u32', 'i32', 'f16', 'f32', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array', 'atomic', 'struct',
                     'sampler', 'sampler_comparison', 'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array', 'texture_depth_multisampled_2d',
                     'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d', 'texture_storage_2d',
-                    'texture_storage_2d_array', 'texture_storage_3d']
+                    'texture_storage_2d_array', 'texture_storage_3d'],
+            'Python': ['False', 'def', 'None', 'True', 'in', 'is', 'and', 'lambda', 'nonlocal', 'not', 'or']
         };
         this.utils = { // These ones don't have hightlight, used as suggestions to autocomplete only...
             'JavaScript': ['querySelector', 'body', 'addEventListener', 'removeEventListener', 'remove', 'sort', 'keys', 'filter', 'isNaN', 'parseFloat', 'parseInt', 'EPSILON', 'isFinite',
                           'bind', 'prototype', 'length', 'assign', 'entries', 'values', 'concat', 'substring', 'substr', 'splice', 'slice', 'buffer', 'appendChild', 'createElement'],
-            'WGSL': ['textureSample']
+            'WGSL': ['textureSample'],
+            'Python': ['print', 'open']
         };
         this.types = {
-            'JavaScript': ['Object', 'String', 'Function', 'Boolean', 'Symbol', 'Error', 'Number']
+            'JavaScript': ['Object', 'String', 'Function', 'Boolean', 'Symbol', 'Error', 'Number'],
+            'Python': ['int', 'type', 'TypeError', 'float', 'ZeroDivisionError', 'map', 'list']
         };
         this.builtin = {
             'JavaScript': ['document', 'console', 'window', 'navigator'],
@@ -231,14 +234,16 @@ class CodeEditor {
             'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import',
                             'from', 'throw', 'async', 'try', 'catch'],
             'GLSL': ['for', 'if', 'else', 'return', 'continue', 'break'],
-            'WGSL': ['const','for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'uniform']
+            'WGSL': ['const','for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'uniform'],
+            'Python': ['if', 'raise', 'del', 'import', 'return', 'elif', 'try', 'else', 'while', 'as', 'except', 'with', 'assert', 'finally', 'yield', 'break', 'for', 'class', 'continue', 'global', 'pass']
         };
         this.symbols = {
             'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
             'JSON': ['[', ']', '{', '}', '(', ')'],
             'GLSL': ['[', ']', '{', '}', '(', ')'],
             'WGSL': ['[', ']', '{', '}', '(', ')', '->'],
-            'CSS': ['{', '}', '(', ')', '*']
+            'CSS': ['{', '}', '(', ')', '*'],
+            'Python': ['<', '>', '[', ']', '(', ')', '=']
         };
 
         // Action keys

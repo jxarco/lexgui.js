@@ -2931,15 +2931,15 @@ ul.lexassetscontent {
   color: #95a0e1;
 }
 
-.cm-str { color: #d0774e; } /* string */
-.cm-kwd { color: #218cce; } /* keyword */
-.cm-com { color: #5cab5a; } /* comment */
-.cm-typ { color: #36c0b0; } /* type */
-.cm-std { color: #cf6dcf; } /* statements & declarations */
-.cm-bln { color: inherit; } /* builtin */
-.cm-dec { color: #b1ce9b; } /* decimal */
-.cm-sym { color: #e7ded2; } /* symbol */
-.cm-mtd { color: #e0cc68 } /* method */
+.cm-str.javascript { color: #d0774e; } /* string */
+.cm-kwd.javascript { color: #218cce; } /* keyword */
+.cm-com.javascript { color: #5cab5a; } /* comment */
+.cm-typ.javascript { color: #36c0b0; } /* type */
+.cm-std.javascript { color: #cf6dcf; } /* statements & declarations */
+.cm-bln.javascript { color: inherit; } /* builtin */
+.cm-dec.javascript { color: #b1ce9b; } /* decimal */
+.cm-sym.javascript { color: #e7ded2; } /* symbol */
+.cm-mtd.javascript { color: #e0cc68 } /* method */
 
 .cm-str.css { color: #d0774e; } /* string */
 .cm-kwd.css { color: #e8be53; } /* keyword */
@@ -2980,6 +2980,16 @@ ul.lexassetscontent {
 .cm-dec.wgsl { color: #b1ce9b; } /* decimal */
 .cm-sym.wgsl { color: #f9cb20; } /* symbol */
 .cm-mtd.wgsl { color: #e0cc68; } /* method */
+
+.cm-str.python { color: #d0774e; } /* string */
+.cm-kwd.python { color: #218cce; } /* keyword */
+.cm-com.python { color: #5cab5a; } /* comment */
+.cm-typ.python { color: #36c0b0; } /* type */
+.cm-std.python { color: #cf6dcf; } /* statements & declarations */
+.cm-bln.python { color: inherit; } /* builtin */
+.cm-dec.python { color: #b1ce9b; } /* decimal */
+.cm-sym.python { color: #e7ded2; } /* symbol */
+.cm-mtd.python { color: #e0cc68 } /* method */
 
 /* plain color */
 .cm-str.plaintext, .cm-kwd.plaintext, .cm-com.plaintext, .cm-typ.plaintext, .cm-std.plaintext, 
