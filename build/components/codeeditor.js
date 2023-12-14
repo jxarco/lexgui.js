@@ -215,11 +215,16 @@ class CodeEditor {
                     'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d', 'texture_storage_2d',
                     'texture_storage_2d_array', 'texture_storage_3d']
         };
-        this.utils = {
-            'JavaScript': ['querySelector', 'body', 'addEventListener', 'removeEventListener', 'remove', 'sort', 'filter', 'isNaN', 'parseFloat', 'parseInt']
+        this.utils = { // These ones don't have hightlight, used as suggestions to autocomplete only...
+            'JavaScript': ['querySelector', 'body', 'addEventListener', 'removeEventListener', 'remove', 'sort', 'keys', 'filter', 'isNaN', 'parseFloat', 'parseInt', 'EPSILON', 'isFinite',
+                          'bind', 'prototype', 'length', 'assign', 'entries', 'values', 'concat', 'substring', 'substr', 'splice', 'slice', 'buffer', 'appendChild'],
+            'WGSL': ['textureSample']
+        };
+        this.types = {
+            'JavaScript': ['Object', 'String', 'Function', 'Boolean', 'Symbol', 'Error', 'Number']
         };
         this.builtin = {
-            'JavaScript': ['document', 'console', 'window', 'navigator', 'Object', 'Function', 'Boolean', 'Symbol', 'Error'],
+            'JavaScript': ['document', 'console', 'window', 'navigator'],
             'CSS': ['*', '!important']
         };
         this.statementsAndDeclarations = {
@@ -258,6 +263,8 @@ class CodeEditor {
                     this.code.lines[ln] = sliceChar( this.code.lines[ln], cursor.position - 1 );
                     this.cursorToLeft( letter );
                     this.processLine(ln);
+                    if( this.useAutoComplete )
+                        this.showAutoCompleteBox( 'foo', cursor );
                 } 
                 else if(this.code.lines[ln - 1] != undefined) {
                     this.lineUp();
@@ -493,7 +500,11 @@ class CodeEditor {
                         this.processSelection(null, true);
                     }
                     else {
-                        if(!this.selection) this.cursorToLeft( letter, cursor );
+                        if(!this.selection) {
+                            this.cursorToLeft( letter, cursor );
+                            if( this.useAutoComplete && this.isAutoCompleteActive )
+                                this.showAutoCompleteBox( 'foo', cursor );
+                        }
                         else {
                             this.selection.invertIfNecessary();
                             this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
@@ -552,7 +563,11 @@ class CodeEditor {
                         this.cursorToRight( letter, cursor );
                         this.processSelection(null, keep_range);
                     }else{
-                        if(!this.selection) this.cursorToRight( letter, cursor );
+                        if(!this.selection) {
+                            this.cursorToRight( letter, cursor );
+                            if( this.useAutoComplete && this.isAutoCompleteActive )
+                                this.showAutoCompleteBox( 'foo', cursor );
+                        }
                         else 
                         {
                             this.selection.invertIfNecessary();
@@ -568,6 +583,7 @@ class CodeEditor {
                     this.lineDown( cursor );
                     e.cancelShift = true;
                     this.actions['Home'].callback(cursor.line, cursor, e);
+                    this.hideAutoCompleteBox();
 
                     if( e.shiftKey ) {
                         if(!this.selection) this.startSelection(cursor);
@@ -1301,6 +1317,7 @@ class CodeEditor {
         if( this.selection )
         {
             this.actions['Backspace'].callback(lidx, cursor, e);
+            lidx = cursor.line; // Update this, since it's from the old code
         }
 
         // Append key 
@@ -1559,6 +1576,10 @@ class CodeEditor {
 
     isType( token, prev, next ) {
         
+        // Common case
+        if( this._mustHightlightWord( token, this.types ) )
+            return true;
+
         if( this.highlight == 'JavaScript' )
         {
             return (prev == 'class' && next == '{') || (prev == 'new' && next == '(');
@@ -1976,13 +1997,14 @@ class CodeEditor {
         let suggestions = [];
 
         // Add language special keys...
+        suggestions = suggestions.concat( this.builtin[ this.highlight ] ?? [] );
         suggestions = suggestions.concat( this.keywords[ this.highlight ] ?? [] );
         suggestions = suggestions.concat( this.statementsAndDeclarations[ this.highlight ] ?? [] );
-        suggestions = suggestions.concat( this.builtin[ this.highlight ] ?? [] );
+        suggestions = suggestions.concat( this.types[ this.highlight ] ?? [] );
         suggestions = suggestions.concat( this.utils[ this.highlight ] ?? [] );
 
-        // Remove current word
-        suggestions = suggestions.concat( Object.keys(this.code.tokens).filter( a => a != word ) );
+        // Add words in current tab plus remove current word
+        // suggestions = suggestions.concat( Object.keys(this.code.tokens).filter( a => a != word ) );
 
         // Remove single chars and duplicates...        
         suggestions = suggestions.filter( (value, index) => value.length > 1 && suggestions.indexOf(value) === index );
