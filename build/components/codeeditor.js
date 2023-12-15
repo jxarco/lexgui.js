@@ -1505,13 +1505,13 @@ class CodeEditor {
                 while( subtokens.value != undefined )
                 {
                     const _pt = t.substring(idx, subtokens.value.index);
-                    to_process.push( _pt );
+                    if( _pt.length ) to_process.push( _pt );
                     to_process.push( subtokens.value[0] );
                     idx = subtokens.value.index + 1;
                     subtokens = iter.next();
                     if(!subtokens.value) {
                         const _at = t.substring(idx);
-                        to_process.push( _at );
+                        if( _at.length ) to_process.push( _at );
                     }
                 }
             }
@@ -1525,6 +1525,10 @@ class CodeEditor {
         // Process all tokens
         for( var i = 0; i < to_process.length; ++i )
         {
+            let token = to_process[i];
+
+            if( !token.length ) continue;
+
             let it = i - 1;
             let prev = to_process[it];
             while( prev == '' || prev == ' ' ) {
@@ -1539,7 +1543,6 @@ class CodeEditor {
                 next = to_process[it];
             }
             
-            let token = to_process[i];
             if( token.substr(0, 2) == '/*' )
                 this._building_block_comment = true;
             if( token.substr(token.length - 2) == '*/' )
