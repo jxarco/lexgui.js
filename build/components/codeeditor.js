@@ -198,6 +198,17 @@ class CodeEditor {
         this.charWidth = 8; //this.measureChar();
         this._lastTime = null;
 
+        this.pairKeys = {
+            "\"": "\"",
+            "'": "'",
+            "(": ")",
+            "{": "}",
+            "[": "]"
+        };
+
+        // Scan tokens..
+        setInterval( this.scanWordSuggestions.bind(this), 2000 );
+
         this.languages = [
             'Plain Text', 'JavaScript', 'CSS', 'GLSL', 'WGSL', 'JSON', 'XML', 'Python'
         ];
@@ -1315,36 +1326,33 @@ class CodeEditor {
             lidx = cursor.line; // Update this, since it's from the old code
         }
 
-        // Append key 
+        // Append key
 
-        this.code.lines[lidx] = [
-            this.code.lines[lidx].slice(0, cursor.position), 
-            key, 
-            this.code.lines[lidx].slice(cursor.position)
-        ].join('');
+        const isPairKey = (Object.values( this.pairKeys ).indexOf( key ) > -1) && !this.wasKeyPaired;
+        const sameKeyNext = isPairKey && (this.code.lines[lidx][cursor.position] === key);
+
+        if( !sameKeyNext )
+        {
+            this.code.lines[lidx] = [
+                this.code.lines[lidx].slice(0, cursor.position), 
+                key, 
+                this.code.lines[lidx].slice(cursor.position)
+            ].join('');
+        }
 
         this.cursorToRight( key );
 
         //  Some custom cases for auto key pair (), {}, "", '', ...
-
-        const pairKeys = ["\"", "'", "(", "{"];
-        if( pairKeys.indexOf( key ) > -1 && !this.wasKeyPaired )
+        
+        const keyMustPair = (this.pairKeys[ key ] !== undefined);
+        if( keyMustPair && !this.wasKeyPaired )
         {
-            // Find pair key
-            let pair = key;
-            switch(key)
-            {
-                case "'":
-                case "\"":
-                    break;
-                case "(": pair = ")"; break;
-                case "{": pair = "}"; break;
-            }
-
             // Make sure to detect later that the key is paired automatically to avoid loops...
             this.wasKeyPaired = true;
 
-            this.root.dispatchEvent(new KeyboardEvent('keydown', { 'key': pair }));
+            if(sameKeyNext) return;
+
+            this.root.dispatchEvent(new KeyboardEvent('keydown', { 'key': this.pairKeys[ key ] }));
             this.cursorToLeft( key, cursor );
             return;
         }
@@ -1436,57 +1444,102 @@ class CodeEditor {
         };
     }
 
-    processLines( from ) {
+    scanWordSuggestions() {
 
-        if( !from )
+        this.code.tokens = {};
+
+        for( let i = 0; i < this.code.lines.length; ++i )
         {
-            this.gutter.innerHTML = "";
-            this.code.innerHTML = "";
-            this.code.tokens = {};
+            const linestring = this.code.lines[ i ];
+            const tokens = this._getTokensFromString( linestring, true );
+            tokens.forEach( t => this.code.tokens[ t ] = 1 );
         }
-
-        for( let i = from ?? 0; i < this.code.lines.length; ++i )
-        {
-            this.processLine( i );
-        }
-
-        // Clean up...
-        if( from )
-        {
-            while( this.code.lines.length != this.gutter.children.length )            
-                this.gutter.lastChild.remove();
-            while( this.code.lines.length != this.code.children.length )            
-                this.code.lastChild.remove();
-        }
-
     }
 
-    processLine( linenum ) {
+    processLines( from ) {
+
+        // const start = performance.now();
+
+        this.gutter.innerHTML = "";
+        this.code.innerHTML = "";
+
+        for( let i = 0; i < this.code.lines.length; ++i )
+        {
+            this.processLine( i, true );
+        }
+
+        // console.log( performance.now() - start );
+    }
+
+    processLine( linenum, force ) {
+
+        // if(!force)
+        // {
+        //     this.processLines();
+        //     return;
+        // }
 
         delete this._building_string; // multi-line strings not supported by now
         
         // It's allowed to process only 1 line to optimize
         let linestring = this.code.lines[ linenum ];
-        var _lines = this.code.querySelectorAll('pre');
-        var pre = null, single_update = false;
-        if( _lines[linenum] ) {
-            pre = _lines[linenum];
-            single_update = true;
-        }
-        
-        if(!pre)
+
+        var pre = document.createElement('pre');
+        pre.dataset['linenum'] = linenum;
+
+        // Line gutter
+        var linenumspan = document.createElement('span');
+        linenumspan.innerHTML = (linenum + 1);
+
+        if( force )
         {
-            var pre = document.createElement('pre');
-            pre.dataset['linenum'] = linenum;
-            this.code.appendChild(pre);
-        }
-        else
+            this.gutter.appendChild(linenumspan);
+            this.code.appendChild( pre );
+        } else
         {
-            pre.children[0].remove(); // Remove token list
+            this.gutter.childNodes[ linenum ].remove();
+            this.code.childNodes[ linenum ].remove();
+            this.gutter.insertChildAtIndex( linenumspan, linenum );
+            this.code.insertChildAtIndex( pre, linenum );
         }
 
         var linespan = document.createElement('span');
         pre.appendChild(linespan);
+
+        const to_process = this._getTokensFromString( linestring );
+
+        let line_inner_html = "";
+
+        // Process all tokens
+        for( var i = 0; i < to_process.length; ++i )
+        {
+            let it = i - 1;
+            let prev = to_process[it];
+            while( prev == ' ' ) {
+                it--;
+                prev = to_process[it];
+            }
+            
+            it = i + 1;
+            let next = to_process[it];
+            while( next == ' ' || next == '"') {
+                it++;
+                next = to_process[it];
+            }
+            
+            let token = to_process[i];
+            if( token.substr(0, 2) == '/*' )
+                this._building_block_comment = true;
+            if( token.substr(token.length - 2) == '*/' )
+                delete this._building_block_comment;
+            
+            line_inner_html += this.processToken(token, prev, next);
+        }
+
+        linespan.innerHTML = line_inner_html;
+    }
+
+    _getTokensFromString( linestring, skipNonWords ) {
 
         // Check if line comment
         const is_comment = linestring.split('//');
@@ -1497,6 +1550,14 @@ class CodeEditor {
 
         for( let t of tokens )
         {
+            if( !t.length || (skipNonWords && ( t.includes('"') || t.length < 3 )) )
+                continue;
+
+            if( t == ' ' ) {
+                to_process.push( t );
+                continue;
+            }
+
             let iter = t.matchAll(/[\[\](){}<>.,;:"']/g);
             let subtokens = iter.next();
             if( subtokens.value )
@@ -1515,49 +1576,13 @@ class CodeEditor {
                     }
                 }
             }
-            else
-                to_process.push( t );
+            else to_process.push( t );
         }
 
-        if( is_comment.length > 1 )
+        if( is_comment.length > 1 && !skipNonWords )
             to_process.push( "//" + is_comment[1] );
 
-        // Process all tokens
-        for( var i = 0; i < to_process.length; ++i )
-        {
-            let token = to_process[i];
-
-            if( !token.length ) continue;
-
-            let it = i - 1;
-            let prev = to_process[it];
-            while( prev == '' || prev == ' ' ) {
-                it--;
-                prev = to_process[it];
-            }
-
-            it = i + 1;
-            let next = to_process[it];
-            while( next == '' || next == ' ' || next == '"') {
-                it++;
-                next = to_process[it];
-            }
-            
-            if( token.substr(0, 2) == '/*' )
-                this._building_block_comment = true;
-            if( token.substr(token.length - 2) == '*/' )
-                delete this._building_block_comment;
-            
-            this.processToken(token, linespan, prev, next);
-        }
-
-        // add line gutter
-        if(!single_update)
-        {
-            var linenumspan = document.createElement('span');
-            linenumspan.innerHTML = (linenum + 1);
-            this.gutter.appendChild(linenumspan);
-        }
+        return to_process;
     }
 
     _mustHightlightWord( token, kindArray ) {
@@ -1565,10 +1590,11 @@ class CodeEditor {
         return kindArray[this.highlight] && kindArray[this.highlight].indexOf(token) > -1;
     }
 
-    processToken(token, linespan, prev, next) {
+    processToken(token, prev, next) {
 
         let sString = false;
         let highlight = this.highlight.replace(/\s/g, '').toLowerCase();
+        let inner_html = "", token_classname = "";
 
         if(token == '"' || token == "'")
         {
@@ -1578,75 +1604,62 @@ class CodeEditor {
 
         if(token == ' ')
         {
-            linespan.innerHTML += token;
+            inner_html += token;
         }
         else
         {
-            var span = document.createElement('span');
-            span.innerHTML = token;
-
             if( this._building_block_comment )
-                span.classList.add("cm-com");
+                token_classname += "cm-com";
             
             else if( this._building_string  )
-                span.classList.add("cm-str");
+                token_classname += "cm-str";
             
             else if( this._mustHightlightWord( token, this.keywords ) )
-                span.classList.add("cm-kwd");
+                token_classname += "cm-kwd";
 
             else if( this._mustHightlightWord( token, this.builtin ) )
-                span.classList.add("cm-bln");
+                token_classname += "cm-bln";
 
             else if( this._mustHightlightWord( token, this.statementsAndDeclarations ) )
-                span.classList.add("cm-std");
+                token_classname += "cm-std";
 
-                else if( this._mustHightlightWord( token, this.symbols ) )
-                span.classList.add("cm-sym");
+            else if( this._mustHightlightWord( token, this.symbols ) )
+                token_classname += "cm-sym";
 
             else if( token.substr(0, 2) == '//' )
-                span.classList.add("cm-com");
+                token_classname += "cm-com";
 
             else if( token.substr(0, 2) == '/*' )
-                span.classList.add("cm-com");
+                token_classname += "cm-com";
 
             else if( token.substr(token.length - 2) == '*/' )
-                span.classList.add("cm-com");
+                token_classname += "cm-com";
 
             else if(  this.isNumber(token) || this.isNumber( token.replace(/[px]|[em]|%/g,'') ) )
-                span.classList.add("cm-dec");
+                token_classname += "cm-dec";
 
             else if( this.isCSSClass(token, prev, next) )
-                span.classList.add("cm-kwd");
+                token_classname += "cm-kwd";
 
-            else if ( this.isType(token, prev, next) ) {
-                span.classList.add("cm-typ");
-                this.code.tokens[ token ] = CodeEditor.WORD_TYPE_CLASS;
-            }
+            else if ( this.isType(token, prev, next) )
+                token_classname += "cm-typ";
 
-            else if ( token[0] != '@' && next == '(' ) {
-                span.classList.add("cm-mtd");
-                this.code.tokens[ token ] = CodeEditor.WORD_TYPE_METHOD;
-            }
+            else if ( token[0] != '@' && next == '(' )
+                token_classname += "cm-mtd";
 
             else if ( highlight == 'css' && prev == ':' && (next == ';' || next == '!important') ) // CSS value
-                span.classList.add("cm-str");
+                token_classname += "cm-str";
 
             else if ( highlight == 'css' && prev == undefined && next == ':' ) // CSS attribute
-                span.classList.add("cm-typ");
-            else {
+                token_classname += "cm-typ";
 
-                if( token.length > 1 )
-                {
-                    // Store in token map to show later as autocomplete suggestions
-                    this.code.tokens[ token ] = -1;
-                }
-            }
-
-            span.classList.add(highlight);
-            linespan.appendChild(span);
+            token_classname += " " + highlight;
+            inner_html += "<span class=' " + token_classname + "'>" + token + "</span>";
         }
 
         if(sString) delete this._building_string;
+
+        return inner_html;
     }
 
     isCSSClass( token, prev, next ) {
@@ -2088,10 +2101,10 @@ class CodeEditor {
         );
 
         // Add words in current tab plus remove current word
-        // suggestions = suggestions.concat( Object.keys(this.code.tokens).filter( a => a != word ) );
+        suggestions = suggestions.concat( Object.keys(this.code.tokens).filter( a => a != word ) );
 
-        // Remove single chars and duplicates...        
-        suggestions = suggestions.filter( (value, index) => value.length > 1 && suggestions.indexOf(value) === index );
+        // Remove 1/2 char words and duplicates...        
+        suggestions = suggestions.filter( (value, index) => value.length > 2 && suggestions.indexOf(value) === index );
 
         // Order...
         suggestions = suggestions.sort( (a, b) => a.localeCompare(b) );
