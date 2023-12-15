@@ -106,9 +106,6 @@ class CodeEditor {
 
         CodeEditor.__instances.push( this );
 
-        this.disable_edition = options.disable_edition ?? false;
-
-        this.skip_info = options.skip_info;
         this.base_area = area;
         this.area = new LX.Area( { className: "lexcodeeditor", height: "auto", no_append: true } );
 
@@ -129,14 +126,21 @@ class CodeEditor {
         this.root.tabIndex = -1;
         area.attach( this.root );
 
-        this.root.addEventListener( 'keydown', this.processKey.bind(this), true);
+        this.skipCodeInfo = options.skip_info ?? false;
+        this.disableEdition = options.disable_edition ?? false;
+
+        if( !this.disableEdition )
+        {
+            this.root.addEventListener( 'keydown', this.processKey.bind(this), true);
+            this.root.addEventListener( 'focus', this.processFocus.bind(this, true) );
+            this.root.addEventListener( 'focusout', this.processFocus.bind(this, false) );
+        }
+       
         this.root.addEventListener( 'mousedown', this.processMouse.bind(this) );
         this.root.addEventListener( 'mouseup', this.processMouse.bind(this) );
         this.root.addEventListener( 'mousemove', this.processMouse.bind(this) );
         this.root.addEventListener( 'click', this.processMouse.bind(this) );
         this.root.addEventListener( 'contextmenu', this.processMouse.bind(this) );
-        this.root.addEventListener( 'focus', this.processFocus.bind(this, true) );
-        this.root.addEventListener( 'focusout', this.processFocus.bind(this, false) );
 
         // Cursors and selection
 
@@ -788,7 +792,7 @@ class CodeEditor {
 
     _createPanelInfo() {
         
-        if( !this.skip_info )
+        if( !this.skipCodeInfo )
         {
             let panel = new LX.Panel({ className: "lexcodetabinfo", width: "calc(100%)", height: "auto" });
             panel.ln = 0;
@@ -1035,15 +1039,18 @@ class CodeEditor {
                 return;
 
             LX.addContextMenu( null, e, m => {
-                m.add( "Format/JSON", () => { 
-                    let json = this.toJSONFormat(this.getText());
-                    this.code.lines = json.split("\n"); 
-                    this.processLines();
-                } );
-                m.add( "" )
-                m.add( "Cut", () => {  this._cutContent(); } );
                 m.add( "Copy", () => {  this._copyContent(); } );
-                m.add( "Paste", () => {  this._pasteContent(); } );
+                if( !this.disableEdition )
+                {
+                    m.add( "Cut", () => {  this._cutContent(); } );
+                    m.add( "Paste", () => {  this._pasteContent(); } );
+                    m.add( "" );
+                    m.add( "Format/JSON", () => { 
+                        let json = this.toJSONFormat(this.getText());
+                        this.code.lines = json.split("\n"); 
+                        this.processLines();
+                    } );
+                }
             });
 
             this.canOpenContextMenu = false;
@@ -1780,8 +1787,10 @@ class CodeEditor {
 
     deleteSelection( cursor ) {
 
-        if(this.disable_edition) 
+        // I think it's not necessary but... 
+        if(this.disableEdition) 
             return;
+
         // Some selections don't depend on mouse up..
         if(this.selection) this.selection.invertIfNecessary();
 
