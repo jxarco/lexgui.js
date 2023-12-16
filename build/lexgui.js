@@ -5845,7 +5845,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             const hasSubmenu = o[ k ].length;
             let entry = document.createElement('div');
             entry.className = "lexcontextmenuentry" + (o[ 'className' ] ? " " + o[ 'className' ] : "" );
-            entry.id = o.id ?? ("eId" + k.replace(/\s/g, '').replace('@', '_'));
+            entry.id = o.id ?? ("eId" + this._getSupportedDOMName( k ));
             entry.innerHTML = "";
             const icon = o[ 'icon' ];
             if(icon) {
@@ -5992,7 +5992,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             for( let item of this.items )
             {
                 let key = Object.keys(item)[0];
-                let pKey = "eId" + key.replace(/\s/g, '').replace('@', '_');
+                let pKey = "eId" + this._getSupportedDOMName( key );
 
                 // Item already created
                 const id = "#" + (item.id ?? pKey);
@@ -6008,7 +6008,10 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             this.colors[ token ] = color;
         }
-        
+
+        _getSupportedDOMName( key ) {
+            return key.replace(/\s/g, '').replaceAll('@', '_').replaceAll('+', '_plus_');
+        }
     };
 
     LX.ContextMenu = ContextMenu;

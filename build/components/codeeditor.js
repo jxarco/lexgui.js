@@ -214,7 +214,7 @@ class CodeEditor {
         setInterval( this.scanWordSuggestions.bind(this), 2000 );
 
         this.languages = [
-            'Plain Text', 'JavaScript', 'CSS', 'GLSL', 'WGSL', 'JSON', 'XML', 'Python'
+            'Plain Text', 'JavaScript', 'C++', 'CSS', 'GLSL', 'WGSL', 'JSON', 'XML', 'Python'
         ];
         this.specialKeys = [
             'Backspace', 'Enter', 'ArrowUp', 'ArrowDown', 
@@ -224,6 +224,7 @@ class CodeEditor {
         this.keywords = {
             'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof', 'debugger', 'abstract',
                           'arguments', 'extends', 'instanceof'],
+            'C++': ['int', 'float', 'bool', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true', 'false', 'auto', 'struct', 'typedef'],
             'GLSL': ['true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4', 'struct'],
             'CSS': ['body', 'html', 'canvas', 'div', 'input', 'span', '.'],
             'WGSL': ['var', 'let', 'true', 'false', 'fn', 'bool', 'u32', 'i32', 'f16', 'f32', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array', 'atomic', 'struct',
@@ -251,16 +252,19 @@ class CodeEditor {
         };
         this.builtin = {
             'JavaScript': ['document', 'console', 'window', 'navigator', 'performance'],
-            'CSS': ['*', '!important']
+            'CSS': ['*', '!important'],
+            'C++': ['vector', 'list', 'map']
         };
         this.statementsAndDeclarations = {
             'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'from', 'throw', 'async', 'try', 'catch', 'await'],
+            'C++': ['std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'glm'],
             'GLSL': ['for', 'if', 'else', 'return', 'continue', 'break'],
             'WGSL': ['const','for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'uniform'],
             'Python': ['if', 'raise', 'del', 'import', 'return', 'elif', 'try', 'else', 'while', 'as', 'except', 'with', 'assert', 'finally', 'yield', 'break', 'for', 'class', 'continue', 'global', 'pass']
         };
         this.symbols = {
             'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
+            'C++': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '::'],
             'JSON': ['[', ']', '{', '}', '(', ')'],
             'GLSL': ['[', ']', '{', '}', '(', ')'],
             'WGSL': ['[', ']', '{', '}', '(', ')', '->'],
@@ -350,7 +354,7 @@ class CodeEditor {
 
             this.resetCursorPos( CodeEditor.CURSOR_LEFT );
             if(idx > 0) this.cursorToString(cursor, prestring);
-            this._refreshCodeInfo(cursor.line + 1, cursor.position);
+            this._refreshCodeInfo(cursor.line, cursor.position);
             this.code.scrollLeft = 0;
 
             if( e.shiftKey && !e.cancelShift )
@@ -779,11 +783,14 @@ class CodeEditor {
         switch(ext.toLowerCase())
         {
             case 'js': return this._changeLanguage('JavaScript');
+            case 'cpp': return this._changeLanguage('C++');
+            case 'h': return this._changeLanguage('C++');
             case 'glsl': return this._changeLanguage('GLSL');
             case 'css': return this._changeLanguage('CSS');
             case 'json': return this._changeLanguage('JSON');
             case 'xml': return this._changeLanguage('XML');
             case 'wgsl': return this._changeLanguage('WGSL');
+            case 'py': return this._changeLanguage('Python');
             case 'txt': 
             default:
                 this._changeLanguage('Plain Text');
@@ -799,13 +806,13 @@ class CodeEditor {
             panel.col = 0;
 
             this._refreshCodeInfo = (ln = panel.ln, col = panel.col) => {
-                panel.ln = ln;
-                panel.col = col;
+                panel.ln = ln + 1;
+                panel.col = col + 1;
                 panel.clear();
                 panel.sameLine();
                 panel.addLabel(this.code.title, { float: 'right' });
-                panel.addLabel("Ln " + ln, { width: "64px" });
-                panel.addLabel("Col " + col, { width: "64px" });
+                panel.addLabel("Ln " + panel.ln, { width: "64px" });
+                panel.addLabel("Col " + panel.col, { width: "64px" });
                 panel.addButton("<b>{ }</b>", this.highlight, (value, event) => {
                     LX.addContextMenu( "Language", event, m => {
                         for( const lang of this.languages )
@@ -909,7 +916,7 @@ class CodeEditor {
             this.restoreCursor(cursor, this.code.cursorState);    
             this.endSelection();
             this._changeLanguageFromExtension( LX.getExtension(tabname) );
-            this._refreshCodeInfo(cursor.line + 1, cursor.position);
+            this._refreshCodeInfo(cursor.line, cursor.position);
 
             // Restore scroll
             this.gutter.scrollTop = this.code.scrollTop;
@@ -1078,7 +1085,7 @@ class CodeEditor {
         this.hideAutoCompleteBox();
         
         if(!skip_refresh) 
-            this._refreshCodeInfo( ln + 1, cursor.position );
+            this._refreshCodeInfo( ln, cursor.position );
     }
 
     processSelection( e, keep_range ) {
@@ -1565,7 +1572,7 @@ class CodeEditor {
                 continue;
             }
 
-            let iter = t.matchAll(/[\[\](){}<>.,;:"']/g);
+            let iter = t.matchAll(/(::|[\[\](){}<>.,;:"'])/g);
             let subtokens = iter.next();
             if( subtokens.value )
             {
@@ -1575,7 +1582,7 @@ class CodeEditor {
                     const _pt = t.substring(idx, subtokens.value.index);
                     if( _pt.length ) to_process.push( _pt );
                     to_process.push( subtokens.value[0] );
-                    idx = subtokens.value.index + 1;
+                    idx = subtokens.value.index + subtokens.value[0].length;
                     subtokens = iter.next();
                     if(!subtokens.value) {
                         const _at = t.substring(idx);
@@ -1588,7 +1595,7 @@ class CodeEditor {
 
         if( is_comment.length > 1 && !skipNonWords )
             to_process.push( "//" + is_comment[1] );
-
+            
         return to_process;
     }
 
@@ -1600,7 +1607,7 @@ class CodeEditor {
     processToken(token, prev, next) {
 
         let sString = false;
-        let highlight = this.highlight.replace(/\s/g, '').toLowerCase();
+        let highlight = this.highlight.replace(/\s/g, '').replaceAll("+", "p").toLowerCase();
         let inner_html = "", token_classname = "";
 
         if(token == '"' || token == "'")
@@ -1653,6 +1660,12 @@ class CodeEditor {
 
             else if ( token[0] != '@' && next == '(' )
                 token_classname += "cm-mtd";
+
+            else if ( highlight == 'cpp' && token.includes('#') ) // C++ preprocessor
+                token_classname += "cm-ppc";
+
+            else if ( highlight == 'cpp' && prev != 'WDWD:' && next == '::' ) // C++ Class
+                token_classname += "cm-typ";
 
             else if ( highlight == 'css' && prev == ':' && (next == ';' || next == '!important') ) // CSS value
                 token_classname += "cm-str";
@@ -1833,7 +1846,7 @@ class CodeEditor {
         cursor.style.left = "calc(" + (cursor._left - this.getScrollLeft()) + "px + " + this.xPadding + ")";
         cursor.position++;
         this.restartBlink();
-        this._refreshCodeInfo( cursor.line + 1, cursor.position );
+        this._refreshCodeInfo( cursor.line, cursor.position );
 
         // Add horizontal scroll
 
@@ -1854,7 +1867,7 @@ class CodeEditor {
         cursor.position--;
         cursor.position = Math.max(cursor.position, 0);
         this.restartBlink();
-        this._refreshCodeInfo( cursor.line + 1, cursor.position );
+        this._refreshCodeInfo( cursor.line, cursor.position );
 
         doAsync(() => {
             var first_char = (this.code.scrollLeft / this.charWidth)|0;
@@ -1874,7 +1887,7 @@ class CodeEditor {
         if(resetLeft)
             this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
 
-        this._refreshCodeInfo( cursor.line + 1, cursor.position );
+        this._refreshCodeInfo( cursor.line, cursor.position );
 
         doAsync(() => {
             var first_line = (this.code.scrollTop / this.lineHeight)|0;
@@ -1893,7 +1906,7 @@ class CodeEditor {
         if(resetLeft)
             this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
 
-        this._refreshCodeInfo( cursor.line + 1, cursor.position );
+        this._refreshCodeInfo( cursor.line, cursor.position );
 
         doAsync(() => {
             var last_line = ((this.code.scrollTop  + this.code.offsetHeight) / this.lineHeight)|0;
