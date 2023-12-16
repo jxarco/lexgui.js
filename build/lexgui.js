@@ -2883,9 +2883,11 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             // Create new branch
             var branch = new Branch(name, options);
             branch.panel = this;
+
             // Declare new open
             this.branch_open = true;
             this.current_branch = branch;
+
             // Append to panel
             if(this.branches.length == 0)
                 branch.root.classList.add('first');
@@ -2899,7 +2901,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             // Add widget filter
             if(options.filter) {
-                this._add_filter( options.filter, {callback: this._search_widgets.bind(this, branch.name)} );
+                this._addFilter( options.filter, {callback: this._searchWidgets.bind(this, branch.name)} );
             }
 
             return branch;
@@ -3051,7 +3053,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             return widget;
         }
 
-        _add_filter( placeholder, options = {} ) {
+        _addFilter( placeholder, options = {} ) {
 
             options.placeholder = placeholder.constructor == String ? placeholder : "Filter properties..";
             options.skipWidget = options.skipWidget ?? true;
@@ -3080,7 +3082,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             return element;
         }
 
-        _search_widgets(branchName, value) {
+        _searchWidgets(branchName, value) {
 
             for( let b of this.branches ) {
 
@@ -3474,7 +3476,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     // Update height depending on the content
                     wValue.style.height = wValue.scrollHeight + "px";
                 }
-            }, 100);
+            }, 10);
 
             return widget;
         }
@@ -3824,7 +3826,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             // Add filter options
             let filter = null;
             if(options.filter ?? false)
-                filter = this._add_filter("Search option", {container: list, callback: this._search_options.bind(list, values)});
+                filter = this._addFilter("Search option", {container: list, callback: this._search_options.bind(list, values)});
 
             // Create option list to empty it easily..
             const list_options = document.createElement('span');
@@ -5314,11 +5316,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             this._addBranchSeparator();
 
-            if(options.closed) {
+            if( options.closed ) {
                 title.className += " closed";
                 root.className += " closed";
-                this.content.setAttribute('hidden', true);
                 this.grabber.setAttribute('hidden', true);
+                doAsync( () => {
+                    this.content.setAttribute('hidden', true);
+                }, 15);
             }
 
             this.onclick = function(e){
