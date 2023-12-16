@@ -4636,8 +4636,7 @@ class Panel {
             slider.value = value;
             slider.addEventListener("input", function(e) {
                 let new_value = +this.valueAsNumber;
-                let fract = new_value % 1;
-                vecinput.value = Math.trunc(new_value) + (+fract.toPrecision(5));
+                vecinput.value = (+new_value).toFixed(4).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/,'$1');
                 Panel._dispatch_event(vecinput, "change");
             }, false);
             box.appendChild(slider);
@@ -4653,8 +4652,7 @@ class Panel {
             if(e.shiftKey) mult *= 10;
             else if(e.altKey) mult *= 0.1;
             let new_value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1));
-            let fract = new_value % 1;
-            this.value = Math.trunc(new_value) + (+fract.toPrecision(5));
+            this.value = (+new_value).toFixed(4).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/,'$1');
             Panel._dispatch_event(vecinput, "change");
         }, {passive:false});
 
@@ -4697,8 +4695,7 @@ class Panel {
                 if(e.shiftKey) mult *= 10;
                 else if(e.altKey) mult *= 0.1;
                 let new_value = (+vecinput.valueAsNumber + mult * dt);
-                let fract = new_value % 1;
-                vecinput.value = Math.trunc(new_value) + (+fract.toPrecision(5));
+                vecinput.value = (+new_value).toFixed(4).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/,'$1');
                 Panel._dispatch_event(vecinput, "change");
             }
 
