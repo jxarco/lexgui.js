@@ -11,7 +11,7 @@
 
 int RoomsEngine::initialize(Renderer* renderer, GLFWwindow* window, bool use_glfw, bool use_mirror_screen)
 {
-	int error = Engine::initialize(renderer, window, use_glfw, use_mirror_screen);
+    int error = Engine::initialize(renderer, window, use_glfw, use_mirror_screen);
 
     sculpt_editor.initialize();
 
@@ -27,7 +27,7 @@ int RoomsEngine::initialize(Renderer* renderer, GLFWwindow* window, bool use_glf
 
     // import_scene();
 
-	return error;
+    return error;
 }
 
 void RoomsEngine::clean()
@@ -56,13 +56,13 @@ void RoomsEngine::render()
 {
     skybox->render();
 
-	for (auto entity : entities) {
-		entity->render();
-	}
+    for (auto entity : entities) {
+        entity->render();
+    }
 
     sculpt_editor.render();
 
-	Engine::render();
+    Engine::render();
 }
 
 bool RoomsEngine::export_scene()

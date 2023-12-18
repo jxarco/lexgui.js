@@ -29,6 +29,10 @@ function firstNonspaceIndex(str) {
     return str.search(/\S|$/);
 }
 
+function deleteElement(el) {
+    if(el) el.remove();
+}
+
 let ASYNC_ENABLED = true;
 
 function doAsync( fn, ms ) {
@@ -224,7 +228,7 @@ class CodeEditor {
         this.keywords = {
             'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof', 'debugger', 'abstract',
                           'arguments', 'extends', 'instanceof'],
-            'C++': ['int', 'float', 'bool', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true', 'false', 'auto', 'struct', 'typedef'],
+            'C++': ['int', 'float', 'double', 'bool', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'nullptr', 'NULL'],
             'GLSL': ['true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4', 'struct'],
             'CSS': ['body', 'html', 'canvas', 'div', 'input', 'span', '.'],
             'WGSL': ['var', 'let', 'true', 'false', 'fn', 'bool', 'u32', 'i32', 'f16', 'f32', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array', 'atomic', 'struct',
@@ -248,7 +252,8 @@ class CodeEditor {
             'Python': ['int', 'type', 'float', 'map', 'list', 'ArithmeticError', 'AssertionError', 'AttributeError', 'Exception', 'EOFError', 'FloatingPointError', 'GeneratorExit', 
                       'ImportError', 'IndentationError', 'IndexError', 'KeyError', 'KeyboardInterrupt', 'LookupError', 'MemoryError', 'NameError', 'NotImplementedError', 'OSError',
                       'OverflowError', 'ReferenceError', 'RuntimeError', 'StopIteration', 'SyntaxError', 'TabError', 'SystemError', 'SystemExit', 'TypeError', 'UnboundLocalError', 
-                      'UnicodeError', 'UnicodeEncodeError', 'UnicodeDecodeError', 'UnicodeTranslateError', 'ValueError', 'ZeroDivisionError' ]
+                      'UnicodeError', 'UnicodeEncodeError', 'UnicodeDecodeError', 'UnicodeTranslateError', 'ValueError', 'ZeroDivisionError' ],
+            'C++': ['uint8_t', 'uint16_t', 'uint32_t']
         };
         this.builtin = {
             'JavaScript': ['document', 'console', 'window', 'navigator', 'performance'],
@@ -366,7 +371,7 @@ class CodeEditor {
                 this.startSelection(cursor);
                 var string = this.code.lines[ln].substring(idx, last_pos);
                 this.selection.selectInline(idx, cursor.line, this.measureString(string));
-            } else
+            } else if( !e.keepSelection )
                 this.endSelection();
         });
 
@@ -442,7 +447,7 @@ class CodeEditor {
 
                     var letter = this.getCharAtPos( cursor );
                     if(!letter) {
-                        this.selection.toX = (this.code.lines[cursor.line].length - 1);
+                        this.selection.toX = this.code.lines[cursor.line].length;
                         this.cursorToPosition(cursor, this.selection.toX);
                     }
                     
@@ -548,13 +553,16 @@ class CodeEditor {
                     }
                 }
                 else if( cursor.line > 0 ) {
-
+                    
+                    if( e.shiftKey ) {
+                        if(!this.selection) this.startSelection(cursor);
+                    }
+                        
                     this.lineUp( cursor );
                     this.resetCursorPos( CodeEditor.CURSOR_LEFT );
                     this.cursorToPosition( cursor, this.code.lines[cursor.line].length );
 
                     if( e.shiftKey ) {
-                        if(!this.selection) this.startSelection(cursor);
                         this.selection.toX = cursor.position;
                         this.selection.toY--;
                         this.processSelection(null, true);
@@ -613,17 +621,22 @@ class CodeEditor {
                 }
                 else if( this.code.lines[ cursor.line + 1 ] !== undefined ) {
                     
-                    this.lineDown( cursor );
-                    e.cancelShift = true;
-                    this.actions['Home'].callback(cursor.line, cursor, e);
-                    this.hideAutoCompleteBox();
-
                     if( e.shiftKey ) {
                         if(!this.selection) this.startSelection(cursor);
+                        e.cancelShift = true;
+                        e.keepSelection = true;
+                    }
+
+                    this.lineDown( cursor );
+                    this.actions['Home'].callback(cursor.line, cursor, e);
+                    
+                    if( e.shiftKey ) {
                         this.selection.toX = cursor.position;
                         this.selection.toY++;
                         this.processSelection(null, true);
                     }
+
+                    this.hideAutoCompleteBox();
                 }
             }
         });
@@ -1115,7 +1128,7 @@ class CodeEditor {
         if( deltaY >= 0 )
         {
             while( deltaY < (this.selections.childElementCount - 1) )            
-                this.selections.lastChild.remove();
+                deleteElement( this.selections.lastChild );
 
             for(let i = fromY; i <= toY; i++){
 
@@ -1158,7 +1171,7 @@ class CodeEditor {
         else // Selection goes up...
         {
             while( Math.abs(deltaY) < (this.selections.childElementCount - 1) )            
-                this.selections.firstChild.remove();
+                deleteElement( this.selections.firstChild );
 
             for(let i = toY; i <= fromY; i++){
 
@@ -1511,8 +1524,8 @@ class CodeEditor {
             this.code.appendChild( pre );
         } else
         {
-            this.gutter.childNodes[ linenum ].remove();
-            this.code.childNodes[ linenum ].remove();
+            deleteElement( this.gutter.childNodes[ linenum ] );
+            deleteElement( this.code.childNodes[ linenum ] );
             this.gutter.insertChildAtIndex( linenumspan, linenum );
             this.code.insertChildAtIndex( pre, linenum );
         }
@@ -1700,6 +1713,10 @@ class CodeEditor {
         {
             return (prev == 'class' && next == '{') || (prev == 'new' && next == '(');
         }
+        else if( this.highlight == 'C++' )
+        {
+            return (prev == 'class' && next == '{') || (prev == 'struct' && next == '{');
+        }
         else if ( this.highlight == 'WGSL' )
         {
             const is_kwd = (this.keywords[this.highlight] && this.keywords[this.highlight].indexOf(token) == -1);
@@ -1715,7 +1732,7 @@ class CodeEditor {
         if( !this.selection || (this.selection.fromY != this.selection.toY) )
         return false;
         
-        const _lastLeft = cursor._left;
+        this.selection.invertIfNecessary();
 
         // Insert first..
         this.code.lines[lidx] = [
@@ -2048,7 +2065,7 @@ class CodeEditor {
         test.innerHTML = char;
         document.body.appendChild(test);
         var rect = test.getBoundingClientRect();
-        test.remove();
+        deleteElement( test );
         const bb = [Math.floor(rect.width), Math.floor(rect.height)];
         return get_bb ? bb : bb[0];
     }

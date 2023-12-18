@@ -2862,6 +2862,7 @@ ul.lexassetscontent {
   margin: 0;
   padding: 0;
   border-right: none;
+  border-radius: 1px;
   position: absolute;
   z-index: 0 !important;
   left: 0px;
