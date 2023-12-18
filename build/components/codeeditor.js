@@ -214,6 +214,11 @@ class CodeEditor {
             "[": "]"
         };
 
+        this.stringKeys = { // adding @ because some words are always true in (e.g. constructor..)
+            "@\"": "\"", 
+            "@'": "'"
+        };
+
         // Scan tokens..
         setInterval( this.scanWordSuggestions.bind(this), 2000 );
 
@@ -1500,13 +1505,7 @@ class CodeEditor {
 
     processLine( linenum, force ) {
 
-        // if(!force)
-        // {
-        //     this.processLines();
-        //     return;
-        // }
-
-        delete this._building_string; // multi-line strings not supported by now
+        delete this._buildingString; // multi-line strings not supported by now
         
         // It's allowed to process only 1 line to optimize
         let linestring = this.code.lines[ linenum ];
@@ -1556,9 +1555,9 @@ class CodeEditor {
             
             let token = to_process[i];
             if( token.substr(0, 2) == '/*' )
-                this._building_block_comment = true;
+                this._buildingBlockComment = true;
             if( token.substr(token.length - 2) == '*/' )
-                delete this._building_block_comment;
+                delete this._buildingBlockComment;
             
             line_inner_html += this.processToken(token, prev, next);
         }
@@ -1619,14 +1618,27 @@ class CodeEditor {
 
     processToken(token, prev, next) {
 
-        let sString = false;
+        let stringEnded = false;
         let highlight = this.highlight.replace(/\s/g, '').replaceAll("+", "p").toLowerCase();
         let inner_html = "", token_classname = "";
 
-        if(token == '"' || token == "'")
+        const customStringKeys = Object.assign( {}, this.stringKeys );
+
+        if( highlight == 'cpp' && prev && prev.includes('#') ) // preprocessor code..
         {
-            sString = (this._building_string == token); // stop string if i was building it
-            this._building_string = this._building_string ? this._building_string : token;
+            customStringKeys['@<'] = '>';
+        }
+
+        // Manage strings
+        if( this._buildingString != undefined )
+        {
+            const idx = Object.values(customStringKeys).indexOf( token );
+            stringEnded = (idx > -1) && (idx == Object.values(customStringKeys).indexOf( customStringKeys[ '@' + this._buildingString ] ));
+        } 
+        else if( customStringKeys[ '@' + token ] )
+        {   
+            // Start new string
+            this._buildingString = token;
         }
 
         if(token == ' ')
@@ -1635,10 +1647,10 @@ class CodeEditor {
         }
         else
         {
-            if( this._building_block_comment )
+            if( this._buildingBlockComment != undefined )
                 token_classname += "cm-com";
             
-            else if( this._building_string  )
+            else if( this._buildingString != undefined )
                 token_classname += "cm-str";
             
             else if( this._mustHightlightWord( token, this.keywords ) )
@@ -1690,7 +1702,7 @@ class CodeEditor {
             inner_html += "<span class=' " + token_classname + "'>" + token + "</span>";
         }
 
-        if(sString) delete this._building_string;
+        if(stringEnded) delete this._buildingString;
 
         return inner_html;
     }
@@ -2037,7 +2049,7 @@ class CodeEditor {
         const words = this.code.lines[col];
 
         const is_char = (char) => {
-            const exceptions = ['_'];
+            const exceptions = ['_', '#', '!'];
             const code = char.charCodeAt(0);
             return (exceptions.indexOf(char) > - 1) || (code > 47 && code < 58) || (code > 64 && code < 91) || (code > 96 && code < 123);
         }

@@ -2932,7 +2932,7 @@ ul.lexassetscontent {
   color: #95a0e1;
 }
 
-.cm-str.javascript { color: #d0774e; } /* string */
+.cm-str.javascript { color: #ca7d59; } /* string */
 .cm-kwd.javascript { color: #218cce; } /* keyword */
 .cm-com.javascript { color: #5cab5a; } /* comment */
 .cm-typ.javascript { color: #36c0b0; } /* type */
@@ -2942,7 +2942,7 @@ ul.lexassetscontent {
 .cm-sym.javascript { color: #e7ded2; } /* symbol */
 .cm-mtd.javascript { color: #e0cc68 } /* method */
 
-.cm-str.cpp { color: #d0774e; } /* string */
+.cm-str.cpp { color: #ca7d59; } /* string */
 .cm-kwd.cpp { color: #218cce; } /* keyword */
 .cm-com.cpp { color: #5cab5a; } /* comment */
 .cm-typ.cpp { color: #36c0b0; } /* type */
@@ -2950,10 +2950,10 @@ ul.lexassetscontent {
 .cm-bln.cpp { color: #d44141; } /* builtin */
 .cm-dec.cpp { color: #2ddf53; } /* decimal */
 .cm-sym.cpp { color: #e7ded2; } /* symbol */
-.cm-mtd.cpp { color: #7493d6 } /* method */
+.cm-mtd.cpp { color: #7a9ae0 } /* method */
 .cm-ppc.cpp { color: #969696 } /* preprocessor */
 
-.cm-str.css { color: #d0774e; } /* string */
+.cm-str.css { color: #ca7d59; } /* string */
 .cm-kwd.css { color: #e8be53; } /* keyword */
 .cm-com.css { color: #5cab5a; } /* comment */
 .cm-typ.css { color: #b7c3ec; } /* type */
@@ -2963,7 +2963,7 @@ ul.lexassetscontent {
 .cm-sym.css { color: #f9d620; } /* symbol */
 .cm-mtd.css { color: #e0cc68; } /* method */
 
-.cm-str.json { color: #d0774e; } /* string */
+.cm-str.json { color: #ca7d59; } /* string */
 .cm-kwd.json { color: inherit; } /* keyword */
 .cm-com.json { color: inherit; } /* comment */
 .cm-typ.json { color: inherit; } /* type */
@@ -2973,7 +2973,7 @@ ul.lexassetscontent {
 .cm-sym.json { color: #cf6dcf; } /* symbol */
 .cm-mtd.json { color: inherit; } /* method */
 
-.cm-str.glsl { color: #d0774e; } /* string */
+.cm-str.glsl { color: #ca7d59; } /* string */
 .cm-kwd.glsl { color: #2194ce; } /* keyword */
 .cm-com.glsl { color: #5cab5a; } /* comment */
 .cm-typ.glsl { color: #36c0b0; } /* type */
@@ -2983,7 +2983,7 @@ ul.lexassetscontent {
 .cm-sym.glsl { color: #f9cb20; } /* symbol */
 .cm-mtd.glsl { color: #e0cc68; } /* method */
 
-.cm-str.wgsl { color: #d0774e; } /* string */
+.cm-str.wgsl { color: #ca7d59; } /* string */
 .cm-kwd.wgsl { color: #2194ce; } /* keyword */
 .cm-com.wgsl { color: #5cab5a; } /* comment */
 .cm-typ.wgsl { color: #36c0b0; } /* type */
@@ -2993,7 +2993,7 @@ ul.lexassetscontent {
 .cm-sym.wgsl { color: #f9cb20; } /* symbol */
 .cm-mtd.wgsl { color: #e0cc68; } /* method */
 
-.cm-str.python { color: #d0774e; } /* string */
+.cm-str.python { color: #ca7d59; } /* string */
 .cm-kwd.python { color: #218cce; } /* keyword */
 .cm-com.python { color: #5cab5a; } /* comment */
 .cm-typ.python { color: #36c0b0; } /* type */
