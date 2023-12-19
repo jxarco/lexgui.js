@@ -29,7 +29,7 @@ LX.has = has;
 
 function getExtension(s)
 { 
-    return s.split('.').pop(); 
+    return s.includes('.') ? s.split('.').pop() : null;
 }
 
 LX.getExtension = getExtension;

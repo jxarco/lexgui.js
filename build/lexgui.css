@@ -3003,6 +3003,16 @@ ul.lexassetscontent {
 .cm-sym.python { color: #e7ded2; } /* symbol */
 .cm-mtd.python { color: #e0cc68 } /* method */
 
+.cm-str.batch { color: #ca7d59; } /* string */
+.cm-kwd.batch { color: #218cce; } /* keyword */
+.cm-com.batch { color: #5cab5a; } /* comment */
+.cm-typ.batch { color: #36c0b0; } /* type */
+.cm-std.batch { color: #cf6dcf; } /* statements & declarations */
+.cm-bln.batch { color: inherit; } /* builtin */
+.cm-dec.batch { color: #b1ce9b; } /* decimal */
+.cm-sym.batch { color: #e6dc20; } /* symbol */
+.cm-mtd.batch { color: inherit } /* method */
+
 /* plain color */
 .cm-str.plaintext, .cm-kwd.plaintext, .cm-com.plaintext, .cm-typ.plaintext, .cm-std.plaintext, 
 .cm-bln.plaintext, .cm-dec.plaintext, .cm-sym.plaintext, .cm-mtd.plaintext { color: inherit; }

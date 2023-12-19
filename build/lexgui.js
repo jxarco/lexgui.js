@@ -33,7 +33,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
     function getExtension(s)
     { 
-        return s.split('.').pop(); 
+        return s.includes('.') ? s.split('.').pop() : null;
     }
     
     LX.getExtension = getExtension;

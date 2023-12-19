@@ -223,7 +223,7 @@ class CodeEditor {
         setInterval( this.scanWordSuggestions.bind(this), 2000 );
 
         this.languages = [
-            'Plain Text', 'JavaScript', 'C++', 'CSS', 'GLSL', 'WGSL', 'JSON', 'XML', 'Python'
+            'Plain Text', 'JavaScript', 'C++', 'CSS', 'GLSL', 'WGSL', 'JSON', 'XML', 'Python', 'Batch'
         ];
         this.specialKeys = [
             'Backspace', 'Enter', 'ArrowUp', 'ArrowDown', 
@@ -241,7 +241,9 @@ class CodeEditor {
                     'sampler', 'sampler_comparison', 'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array', 'texture_depth_multisampled_2d',
                     'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d', 'texture_storage_2d',
                     'texture_storage_2d_array', 'texture_storage_3d'],
-            'Python': ['False', 'def', 'None', 'True', 'in', 'is', 'and', 'lambda', 'nonlocal', 'not', 'or']
+            'Python': ['False', 'def', 'None', 'True', 'in', 'is', 'and', 'lambda', 'nonlocal', 'not', 'or'],
+            'Batch': ['set', 'SET', 'echo', 'ECHO', 'off', 'OFF', 'del', 'DEL', 'defined', 'DEFINED', 'setlocal', 'SETLOCAL', 'enabledelayedexpansion', 'ENABLEDELAYEDEXPANSION', 'driverquery', 
+                      'DRIVERQUERY', 'print', 'PRINT']
         };
         this.utils = { // These ones don't have hightlight, used as suggestions to autocomplete only...
             'JavaScript': ['querySelector', 'body', 'addEventListener', 'removeEventListener', 'remove', 'sort', 'keys', 'filter', 'isNaN', 'parseFloat', 'parseInt', 'EPSILON', 'isFinite',
@@ -271,7 +273,9 @@ class CodeEditor {
             'C++': ['std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'glm'],
             'GLSL': ['for', 'if', 'else', 'return', 'continue', 'break'],
             'WGSL': ['const','for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'uniform'],
-            'Python': ['if', 'raise', 'del', 'import', 'return', 'elif', 'try', 'else', 'while', 'as', 'except', 'with', 'assert', 'finally', 'yield', 'break', 'for', 'class', 'continue', 'global', 'pass']
+            'Python': ['if', 'raise', 'del', 'import', 'return', 'elif', 'try', 'else', 'while', 'as', 'except', 'with', 'assert', 'finally', 'yield', 'break', 'for', 'class', 'continue', 
+                      'global', 'pass'],
+            'Batch': ['if', 'IF', 'for', 'FOR', 'in', 'IN', 'do', 'DO', 'call', 'CALL', 'goto', 'GOTO', 'exit', 'EXIT']
         };
         this.symbols = {
             'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
@@ -280,7 +284,8 @@ class CodeEditor {
             'GLSL': ['[', ']', '{', '}', '(', ')'],
             'WGSL': ['[', ']', '{', '}', '(', ')', '->'],
             'CSS': ['{', '}', '(', ')', '*'],
-            'Python': ['<', '>', '[', ']', '(', ')', '=']
+            'Python': ['<', '>', '[', ']', '(', ')', '='],
+            'Batch': ['[', ']', '(', ')'],
         };
 
         // Action keys
@@ -671,7 +676,7 @@ class CodeEditor {
     }
 
     // This can be used to empty all text...
-    setText( text = "" ) {
+    setText( text = "", lang ) {
 
         let new_lines = text.split('\n');
         this.code.lines = [].concat(new_lines);
@@ -682,6 +687,11 @@ class CodeEditor {
         this.cursorToLine(cursor, new_lines.length); // Already substracted 1
         this.cursorToPosition(cursor, lastLine.length);
         this.processLines();
+
+        if( lang )
+        {
+            this._changeLanguage( lang );
+        }
     }
 
     appendText( text ) {
@@ -753,8 +763,9 @@ class CodeEditor {
             this.addTab(name, true, title);
             text = text.replaceAll('\r', '');
             this.code.lines = text.split('\n');
-            this.processLines();
             this._refreshCodeInfo();
+            this._changeLanguageFromExtension( LX.getExtension(name) );
+            this.processLines();
         };
 
         if(file.constructor == String)
@@ -763,7 +774,6 @@ class CodeEditor {
             LX.request({ url: filename, success: text => {
 
                 const name = filename.substring(filename.lastIndexOf('/') + 1);
-                this._changeLanguageFromExtension( LX.getExtension(name) );
                 inner_add_tab( text, name, filename );
             } });
         }
@@ -772,7 +782,6 @@ class CodeEditor {
             const fr = new FileReader();
             fr.readAsText( file );
             fr.onload = e => { 
-                this._changeLanguageFromExtension( LX.getExtension(file.name) );
                 const text = e.currentTarget.result;
                 inner_add_tab( text, file.name );
             };
@@ -792,6 +801,10 @@ class CodeEditor {
     }
 
     _changeLanguage( lang ) {
+
+        console.log("to language: " + lang);
+
+        this.code.lang = lang;
         this.highlight = lang;
         this._refreshCodeInfo();
         this.processLines();
@@ -799,6 +812,11 @@ class CodeEditor {
 
     _changeLanguageFromExtension( ext ) {
         
+        console.log("from extension: " + ext);
+
+        if( !ext )
+        return this._changeLanguage( this.code.lang );
+
         switch(ext.toLowerCase())
         {
             case 'js': return this._changeLanguage('JavaScript');
@@ -810,6 +828,7 @@ class CodeEditor {
             case 'xml': return this._changeLanguage('XML');
             case 'wgsl': return this._changeLanguage('WGSL');
             case 'py': return this._changeLanguage('Python');
+            case 'bat': return this._changeLanguage('Batch');
             case 'txt': 
             default:
                 this._changeLanguage('Plain Text');
@@ -882,6 +901,7 @@ class CodeEditor {
         let code = document.createElement('div');
         code.className = 'code';
         code.lines = [""];
+        code.lang = "Plain Text";
         code.cursorState = {};
         code.undoSteps = [];
         code.tabName = name;
