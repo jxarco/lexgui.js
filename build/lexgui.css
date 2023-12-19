@@ -3010,7 +3010,7 @@ ul.lexassetscontent {
 .cm-std.batch { color: #cf6dcf; } /* statements & declarations */
 .cm-bln.batch { color: inherit; } /* builtin */
 .cm-dec.batch { color: #b1ce9b; } /* decimal */
-.cm-sym.batch { color: #e6dc20; } /* symbol */
+.cm-sym.batch { color: #dfd85e; } /* symbol */
 .cm-mtd.batch { color: inherit } /* method */
 
 /* plain color */

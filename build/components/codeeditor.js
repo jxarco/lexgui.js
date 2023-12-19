@@ -246,6 +246,7 @@ class CodeEditor {
                           'arguments', 'extends', 'instanceof'],
             'C++': ['int', 'float', 'double', 'bool', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'nullptr', 
                     'NULL', 'unsigned'],
+            'JSON': ['true', 'false'],
             'GLSL': ['true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4', 'struct'],
             'CSS': ['body', 'html', 'canvas', 'div', 'input', 'span', '.'],
             'WGSL': ['var', 'let', 'true', 'false', 'fn', 'bool', 'u32', 'i32', 'f16', 'f32', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array', 'atomic', 'struct',
@@ -281,7 +282,7 @@ class CodeEditor {
         };
         this.statementsAndDeclarations = {
             'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'from', 'throw', 'async', 'try', 'catch', 'await'],
-            'C++': ['std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'glm'],
+            'C++': ['std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'glm', 'spdlog'],
             'GLSL': ['for', 'if', 'else', 'return', 'continue', 'break'],
             'WGSL': ['const','for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'uniform'],
             'Python': ['if', 'raise', 'del', 'import', 'return', 'elif', 'try', 'else', 'while', 'as', 'except', 'with', 'assert', 'finally', 'yield', 'break', 'for', 'class', 'continue', 
@@ -290,7 +291,7 @@ class CodeEditor {
         };
         this.symbols = {
             'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
-            'C++': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '::'],
+            'C++': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '::', '*', '-', '+'],
             'JSON': ['[', ']', '{', '}', '(', ')'],
             'GLSL': ['[', ']', '{', '}', '(', ')'],
             'WGSL': ['[', ']', '{', '}', '(', ')', '->'],
@@ -298,7 +299,7 @@ class CodeEditor {
             'Python': ['<', '>', '[', ']', '(', ')', '='],
             'Batch': ['[', ']', '(', ')', '%'],
         };
-
+        
         // Action keys
 
         this.action('Escape', false, ( ln, cursor, e ) => {
@@ -1534,6 +1535,7 @@ class CodeEditor {
     processLine( linenum, force ) {
 
         delete this._buildingString; // multi-line strings not supported by now
+        // delete this._buildingBlockComment;
         
         // It's allowed to process only 1 line to optimize
         let linestring = this.code.lines[ linenum ];
@@ -1624,6 +1626,7 @@ class CodeEditor {
 
         // Check if line comment
         const singleLineCommentToken = this.languages[ this.highlight ].singleLineCommentToken ?? this.defaultSingleLineCommentToken;
+        const usesBlockComments = this.languages[ this.highlight ].blockComments ?? true;
         const is_comment = linestring.split(singleLineCommentToken);
         linestring = ( is_comment.length > 1 ) ? is_comment[0] : linestring;
 
@@ -1640,7 +1643,27 @@ class CodeEditor {
                 continue;
             }
 
-            let iter = t.matchAll(/(::|[\[\](){}<>.,;:"'])/g);
+            if( usesBlockComments )
+            {
+                var block = false;
+
+                if( t.includes('/*') )
+                {
+                    const idx = t.indexOf( '/*' );
+                    tokensToEvaluate.push( t.substring( 0, idx ), '/*', t.substring( idx + 2 ) );
+                    block |= true;
+                }
+                else if( t.includes('*/') )
+                {
+                    const idx = t.indexOf( '*/' );
+                    tokensToEvaluate.push( t.substring( 0, idx ), '*/', t.substring( idx + 2 ) );
+                    block |= true;
+                }
+
+                if( block ) continue;
+            }
+
+            let iter = t.matchAll(/(::|[\[\](){}<>.,;:*"'%@])/g);
             let subtokens = iter.next();
             if( subtokens.value )
             {
@@ -1741,13 +1764,16 @@ class CodeEditor {
             else if ( this.isType(token, prev, next) )
                 token_classname += "cm-typ";
 
-            else if ( token[0] != '@' && next == '(' )
-                token_classname += "cm-mtd";
+            else if ( highlight == 'batch' && (token == '@' || prev == ':' || prev == '@') )
+                token_classname += "cm-kwd";
 
             else if ( highlight == 'cpp' && token.includes('#') ) // C++ preprocessor
                 token_classname += "cm-ppc";
 
-            else if ( highlight == 'cpp' && prev != 'WDWD:' && next == '::' ) // C++ Class
+            else if ( highlight == 'cpp' && prev == '<' && (next == '>' || next == '*') ) // Defining template type in C++
+                token_classname += "cm-typ";
+
+            else if ( highlight == 'cpp' && (next == '::' || prev == '::' && next != '(' )) // C++ Class
                 token_classname += "cm-typ";
 
             else if ( highlight == 'css' && prev == ':' && (next == ';' || next == '!important') ) // CSS value
@@ -1755,6 +1781,9 @@ class CodeEditor {
 
             else if ( highlight == 'css' && prev == undefined && next == ':' ) // CSS attribute
                 token_classname += "cm-typ";
+
+            else if ( token[0] != '@' && next == '(' )
+                token_classname += "cm-mtd";
 
             token_classname += " " + highlight;
             inner_html += "<span class=' " + token_classname + "'>" + token + "</span>";
