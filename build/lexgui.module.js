@@ -7279,6 +7279,12 @@ Object.assign(LX, {
     }
 });
 
+Object.defineProperty(String.prototype, 'lastChar', {
+    get: function() { return this[ this.length - 1 ]; },
+    enumerable: true,
+    configurable: true
+});
+
 Element.prototype.insertChildAtIndex = function(child, index = Infinity) {
     if (index >= this.children.length) this.appendChild(child);
     else this.insertBefore(child, this.children[index]);

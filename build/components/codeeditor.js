@@ -233,7 +233,8 @@ class CodeEditor {
         this.keywords = {
             'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof', 'debugger', 'abstract',
                           'arguments', 'extends', 'instanceof'],
-            'C++': ['int', 'float', 'double', 'bool', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'nullptr', 'NULL'],
+            'C++': ['int', 'float', 'double', 'bool', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'nullptr', 
+                    'NULL', 'unsigned'],
             'GLSL': ['true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4', 'struct'],
             'CSS': ['body', 'html', 'canvas', 'div', 'input', 'span', '.'],
             'WGSL': ['var', 'let', 'true', 'false', 'fn', 'bool', 'u32', 'i32', 'f16', 'f32', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array', 'atomic', 'struct',
@@ -1532,37 +1533,60 @@ class CodeEditor {
         var linespan = document.createElement('span');
         pre.appendChild(linespan);
 
-        const to_process = this._getTokensFromString( linestring );
+        const tokensToEvaluate = this._getTokensFromString( linestring );
 
         let line_inner_html = "";
 
         // Process all tokens
-        for( var i = 0; i < to_process.length; ++i )
+        for( var i = 0; i < tokensToEvaluate.length; ++i )
         {
             let it = i - 1;
-            let prev = to_process[it];
+            let prev = tokensToEvaluate[it];
             while( prev == ' ' ) {
                 it--;
-                prev = to_process[it];
+                prev = tokensToEvaluate[it];
             }
             
             it = i + 1;
-            let next = to_process[it];
+            let next = tokensToEvaluate[it];
             while( next == ' ' || next == '"') {
                 it++;
-                next = to_process[it];
+                next = tokensToEvaluate[it];
             }
             
-            let token = to_process[i];
+            let token = tokensToEvaluate[i];
             if( token.substr(0, 2) == '/*' )
                 this._buildingBlockComment = true;
             if( token.substr(token.length - 2) == '*/' )
                 delete this._buildingBlockComment;
             
-            line_inner_html += this.processToken(token, prev, next);
+            line_inner_html += this.evaluateToken(token, prev, next);
         }
 
         linespan.innerHTML = line_inner_html;
+    }
+
+    _processTokens( tokens, offset = 0 ) {
+
+        if( this.highlight == 'C++' )
+        {
+            var idx = tokens.slice(offset).findIndex( (value, index) => this.isNumber(value) );
+            if( idx > -1 )
+            {
+                idx += offset; // Add offset to compute within the whole array of tokens
+                let data = tokens[idx] + tokens[++idx];
+                while( this.isNumber( data ) )
+                {
+                    tokens[ idx - 1 ] += tokens[ idx ];
+                    tokens.splice( idx, 1 );
+                    data += tokens[idx];
+                }
+                // Scan for numbers again
+                return this._processTokens( tokens, idx );
+            }
+        }
+
+        return tokens;
     }
 
     _getTokensFromString( linestring, skipNonWords ) {
@@ -1572,7 +1596,7 @@ class CodeEditor {
         linestring = ( is_comment.length > 1 ) ? is_comment[0] : linestring;
 
         const tokens = linestring.split(' ').join('¬ ¬').split('¬'); // trick to split without losing spaces
-        const to_process = []; // store in a temp array so we know prev and next tokens...
+        let tokensToEvaluate = []; // store in a temp array so we know prev and next tokens...
 
         for( let t of tokens )
         {
@@ -1580,7 +1604,7 @@ class CodeEditor {
                 continue;
 
             if( t == ' ' ) {
-                to_process.push( t );
+                tokensToEvaluate.push( t );
                 continue;
             }
 
@@ -1592,23 +1616,23 @@ class CodeEditor {
                 while( subtokens.value != undefined )
                 {
                     const _pt = t.substring(idx, subtokens.value.index);
-                    if( _pt.length ) to_process.push( _pt );
-                    to_process.push( subtokens.value[0] );
+                    if( _pt.length ) tokensToEvaluate.push( _pt );
+                    tokensToEvaluate.push( subtokens.value[0] );
                     idx = subtokens.value.index + subtokens.value[0].length;
                     subtokens = iter.next();
                     if(!subtokens.value) {
                         const _at = t.substring(idx);
-                        if( _at.length ) to_process.push( _at );
+                        if( _at.length ) tokensToEvaluate.push( _at );
                     }
                 }
             }
-            else to_process.push( t );
+            else tokensToEvaluate.push( t );
         }
 
         if( is_comment.length > 1 && !skipNonWords )
-            to_process.push( "//" + is_comment[1] );
-            
-        return to_process;
+            tokensToEvaluate.push( "//" + is_comment[1] );
+
+        return this._processTokens( tokensToEvaluate );
     }
 
     _mustHightlightWord( token, kindArray ) {
@@ -1616,7 +1640,7 @@ class CodeEditor {
         return kindArray[this.highlight] && kindArray[this.highlight].indexOf(token) > -1;
     }
 
-    processToken(token, prev, next) {
+    evaluateToken( token, prev, next ) {
 
         let stringEnded = false;
         let highlight = this.highlight.replace(/\s/g, '').replaceAll("+", "p").toLowerCase();
@@ -1712,7 +1736,16 @@ class CodeEditor {
     }
 
     isNumber( token ) {
-        return token.length && !Number.isNaN(+token);
+
+        if(this.highlight == 'C++')
+        {
+            if( token.lastChar == 'f' )
+                return this.isNumber( token.substring(0, token.length - 1) )
+            else if( token.lastChar == 'u' )
+                return !(token.includes('.')) && this.isNumber( token.substring(0, token.length - 1) );
+        }
+        
+        return token.length && token != ' ' && !Number.isNaN(+token);
     }
 
     isType( token, prev, next ) {
