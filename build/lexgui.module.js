@@ -339,7 +339,7 @@ function create_global_searchbar( root ) {
             const instances = LX.CodeEditor.getInstances();
             if(!instances.length) return;
 
-            const languages = instances[0].languages;
+            const languages = Object.keys( instances[0].languages );
 
             for( let l of languages ) {
 

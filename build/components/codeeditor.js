@@ -203,6 +203,7 @@ class CodeEditor {
         this.tabSpaces = 4;
         this.maxUndoSteps = 16;
         this.lineHeight = 20;
+        this.defaultSingleLineCommentToken = "//";
         this.charWidth = 8; //this.measureChar();
         this._lastTime = null;
 
@@ -222,9 +223,19 @@ class CodeEditor {
         // Scan tokens..
         setInterval( this.scanWordSuggestions.bind(this), 2000 );
 
-        this.languages = [
-            'Plain Text', 'JavaScript', 'C++', 'CSS', 'GLSL', 'WGSL', 'JSON', 'XML', 'Python', 'Batch'
-        ];
+        this.languages = {
+            'Plain Text': { },
+            'JavaScript': { },
+            'C++': { },
+            'CSS': { },
+            'GLSL': { },
+            'WGSL': { },
+            'JSON': { },
+            'XML': { },
+            'Python': { },
+            'Batch': { blockComments: false, singleLineCommentToken: '::' }
+        };
+
         this.specialKeys = [
             'Backspace', 'Enter', 'ArrowUp', 'ArrowDown', 
             'ArrowRight', 'ArrowLeft', 'Delete', 'Home',
@@ -285,7 +296,7 @@ class CodeEditor {
             'WGSL': ['[', ']', '{', '}', '(', ')', '->'],
             'CSS': ['{', '}', '(', ')', '*'],
             'Python': ['<', '>', '[', ']', '(', ')', '='],
-            'Batch': ['[', ']', '(', ')'],
+            'Batch': ['[', ']', '(', ')', '%'],
         };
 
         // Action keys
@@ -802,8 +813,6 @@ class CodeEditor {
 
     _changeLanguage( lang ) {
 
-        console.log("to language: " + lang);
-
         this.code.lang = lang;
         this.highlight = lang;
         this._refreshCodeInfo();
@@ -812,8 +821,6 @@ class CodeEditor {
 
     _changeLanguageFromExtension( ext ) {
         
-        console.log("from extension: " + ext);
-
         if( !ext )
         return this._changeLanguage( this.code.lang );
 
@@ -853,7 +860,7 @@ class CodeEditor {
                 panel.addLabel("Col " + panel.col, { width: "64px" });
                 panel.addButton("<b>{ }</b>", this.highlight, (value, event) => {
                     LX.addContextMenu( "Language", event, m => {
-                        for( const lang of this.languages )
+                        for( const lang of Object.keys(this.languages) )
                             m.add( lang, this._changeLanguage.bind(this) );
                     });
                 }, { width: "25%", nameWidth: "15%" });
@@ -1575,11 +1582,15 @@ class CodeEditor {
             }
             
             let token = tokensToEvaluate[i];
-            if( token.substr(0, 2) == '/*' )
-                this._buildingBlockComment = true;
-            if( token.substr(token.length - 2) == '*/' )
-                delete this._buildingBlockComment;
-            
+
+            if( this.languages[ this.highlight ].blockComments ?? true )
+            {
+                if( token.substr(0, 2) == '/*' )
+                    this._buildingBlockComment = true;
+                if( token.substr(token.length - 2) == '*/' )
+                    delete this._buildingBlockComment;
+            }
+
             line_inner_html += this.evaluateToken(token, prev, next);
         }
 
@@ -1612,7 +1623,8 @@ class CodeEditor {
     _getTokensFromString( linestring, skipNonWords ) {
 
         // Check if line comment
-        const is_comment = linestring.split('//');
+        const singleLineCommentToken = this.languages[ this.highlight ].singleLineCommentToken ?? this.defaultSingleLineCommentToken;
+        const is_comment = linestring.split(singleLineCommentToken);
         linestring = ( is_comment.length > 1 ) ? is_comment[0] : linestring;
 
         const tokens = linestring.split(' ').join('¬ ¬').split('¬'); // trick to split without losing spaces
@@ -1650,7 +1662,7 @@ class CodeEditor {
         }
 
         if( is_comment.length > 1 && !skipNonWords )
-            tokensToEvaluate.push( "//" + is_comment[1] );
+            tokensToEvaluate.push( singleLineCommentToken + is_comment[1] );
 
         return this._processTokens( tokensToEvaluate );
     }
@@ -1666,6 +1678,8 @@ class CodeEditor {
         let highlight = this.highlight.replace(/\s/g, '').replaceAll("+", "p").toLowerCase();
         let inner_html = "", token_classname = "";
 
+        const singleLineCommentToken = this.languages[ this.highlight ].singleLineCommentToken ?? this.defaultSingleLineCommentToken;
+        const usesBlockComments = this.languages[ this.highlight ].blockComments ?? true;
         const customStringKeys = Object.assign( {}, this.stringKeys );
 
         if( highlight == 'cpp' && prev && prev.includes('#') ) // preprocessor code..
@@ -1709,13 +1723,13 @@ class CodeEditor {
             else if( this._mustHightlightWord( token, this.symbols ) )
                 token_classname += "cm-sym";
 
-            else if( token.substr(0, 2) == '//' )
+            else if( token.substr(0, 2) == singleLineCommentToken )
                 token_classname += "cm-com";
 
-            else if( token.substr(0, 2) == '/*' )
+            else if( usesBlockComments && token.substr(0, 2) == '/*' )
                 token_classname += "cm-com";
 
-            else if( token.substr(token.length - 2) == '*/' )
+            else if( usesBlockComments && token.substr(token.length - 2) == '*/' )
                 token_classname += "cm-com";
 
             else if(  this.isNumber(token) || this.isNumber( token.replace(/[px]|[em]|%/g,'') ) )

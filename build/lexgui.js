@@ -343,7 +343,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 const instances = LX.CodeEditor.getInstances();
                 if(!instances.length) return;
 
-                const languages = instances[0].languages;
+                const languages = Object.keys( instances[0].languages );
 
                 for( let l of languages ) {
 
