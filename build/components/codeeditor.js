@@ -146,6 +146,9 @@ class CodeEditor {
         this.root.addEventListener( 'click', this.processMouse.bind(this) );
         this.root.addEventListener( 'contextmenu', this.processMouse.bind(this) );
 
+        // Take into account the scrollbar..
+        this.tabs.area.root.style.width = "calc( 100% - 10px )";
+
         // Cursors and selection
 
         this.cursors = document.createElement('div');
@@ -177,9 +180,9 @@ class CodeEditor {
         // Add custom scroll bar
         {
             var scrollbar = document.createElement('div');
-            scrollbar.className = "scrollbar";
+            scrollbar.className = "lexcodescrollbar";
             this.scrollbar = scrollbar;
-            this.tabs.area.attach(this.scrollbar);
+            area.attach(this.scrollbar);
 
             var scrollbarThumb = document.createElement('div');
             this.scrollbarThumb = scrollbarThumb;
@@ -395,7 +398,7 @@ class CodeEditor {
             this.resetCursorPos( CodeEditor.CURSOR_LEFT );
             if(idx > 0) this.cursorToString(cursor, prestring);
             this._refreshCodeInfo(cursor.line, cursor.position);
-            this.code.scrollLeft = 0;
+            this.setScrollLeft( 0 );
 
             if( e.shiftKey && !e.cancelShift )
             {
@@ -424,8 +427,8 @@ class CodeEditor {
             this.resetCursorPos( CodeEditor.CURSOR_LEFT );
             this.cursorToString( cursor, this.code.lines[ln] );
 
-            const last_char = ((this.getScrollLeft() + this.code.clientWidth) / this.charWidth)|0;
-            this.code.scrollLeft = cursor.position >= last_char ? (cursor.position - last_char) * this.charWidth : 0;
+            const last_char = (this.code.clientWidth / this.charWidth)|0;
+            this.setScrollLeft( cursor.position >= last_char ? (cursor.position - last_char) * this.charWidth : 0 );
         });
 
         this.action('Enter', true, ( ln, cursor, e ) => {
@@ -544,7 +547,7 @@ class CodeEditor {
 
             if(e.metaKey) { // Apple devices (Command)
                 e.preventDefault();
-                this.actions[ 'Home' ].callback( ln, cursor );
+                this.actions[ 'Home' ].callback( ln, cursor, e );
             }
             else if(e.ctrlKey) {
                 // Get next word
@@ -594,8 +597,7 @@ class CodeEditor {
                     }
                         
                     this.lineUp( cursor );
-                    this.resetCursorPos( CodeEditor.CURSOR_LEFT );
-                    this.cursorToPosition( cursor, this.code.lines[cursor.line].length );
+                    this.actions[ 'End' ].callback( cursor.line, cursor, e );
 
                     if( e.shiftKey ) {
                         this.selection.toX = cursor.position;
@@ -943,43 +945,19 @@ class CodeEditor {
             for( let i = 0; i < e.dataTransfer.files.length; ++i )
                 this.loadFile( e.dataTransfer.files[i] );
         });
-
         code.addEventListener('wheel', (e) => {
 
             // Get scroll data
 
-            const dX = e.deltaX * 0.4;
-            const dY = e.deltaY * 0.4;
+            const dX = (e.deltaY > 0.0 ? 1.0 : -1.0) * 20.0 * ( e.shiftKey ? 1.0 : 0.0 );
+            const dY = (e.deltaY > 0.0 ? 1.0 : -1.0) * 40.0 * ( e.shiftKey ? 0.0 : 1.0 );
 
-            code.customScroll.add( new LX.vec2( dX, dY ), code.customScroll );
-
-            code.customScroll.x = Math.max( code.customScroll.x, 0 );
-            code.customScroll.y = Math.max( code.customScroll.y, 0 );
-
-            code.customScroll.x = Math.min( code.customScroll.x, code.offsetWidth );
-            code.customScroll.y = Math.min( code.customScroll.y, code.offsetHeight );
-
-            // Update state
-
-            const scrollLeft = this.getScrollLeft();
-            const scrollTop = this.getScrollTop();
-
-            this.gutter.scrollTop = scrollTop;
-            this.scrollbarThumb.style.top = scrollTop + "px";
+            var new_scroll = code.customScroll.add( new LX.vec2( dX, dY ), new LX.vec2() );
             
-            this.code.style.marginLeft = (-scrollLeft) + "px";
-            this.code.style.marginTop = (-scrollTop) + "px";
-
-            // Update cursor
-            var cursor = this.cursors.children[0];
-            cursor.style.top = (cursor._top - scrollTop) + "px";
-            cursor.style.left = "calc( " + (cursor._left - scrollLeft) + "px + " + this.xPadding + ")";
-
-            // Update selection
-            for( let s of this.selections.childNodes ) {
-                s.style.top = (s._top - scrollTop) + "px";
-                s.style.left = "calc( " + (s._left - scrollLeft) + "px + " + this.xPadding + ")";
-            }
+            // Update state
+            
+            if( new_scroll.x != this.getScrollLeft()) this.setScrollLeft( new_scroll.x );
+            if( new_scroll.y != this.getScrollTop()) this.setScrollTop( new_scroll.y );
         });
 
         this.openedTabs[name] = code;
@@ -1555,7 +1533,7 @@ class CodeEditor {
 
         // const start = performance.now();
 
-        var numViewportLines = Math.floor( this.code.offsetHeight / this.lineHeight );
+        var numViewportLines = Math.floor( (this.code.parentElement.offsetHeight - 36) / this.lineHeight );
 
         if( numViewportLines > this.code.lines.length )
         {
@@ -1564,7 +1542,8 @@ class CodeEditor {
         else
         {
             this.scrollbarThumb.style.display = 'block';
-            this.scrollbarThumb.style.height = (numViewportLines / this.code.lines.length) * 100.0 + "%";
+            this.scrollbarThumb.size = (numViewportLines / this.code.lines.length);
+            this.scrollbarThumb.style.height = (this.scrollbarThumb.size * 100.0) + "%";
         }
 
         this.gutter.innerHTML = "";
@@ -2022,9 +2001,9 @@ class CodeEditor {
         // Add horizontal scroll
 
         doAsync(() => {
-            var last_char = ((this.getScrollLeft() + this.code.clientWidth) / this.charWidth)|0;
+            var last_char = ((this.code.clientWidth) / this.charWidth)|0;
             if( cursor.position >= last_char )
-                this.code.scrollLeft += this.charWidth;
+                this.setScrollLeft( this.getScrollLeft() + this.charWidth );
         });
     }
 
@@ -2040,10 +2019,12 @@ class CodeEditor {
         this.restartBlink();
         this._refreshCodeInfo( cursor.line, cursor.position );
 
+        // Add horizontal scroll
+
         doAsync(() => {
             var first_char = (this.getScrollLeft() / this.charWidth)|0;
             if( (cursor.position - 1) < first_char )
-                this.code.scrollLeft -= this.charWidth;
+                this.setScrollLeft( this.getScrollLeft() - this.charWidth );
         });
     }
 
@@ -2176,6 +2157,58 @@ class CodeEditor {
         
         if(!this.code) return 0;
         return this.code.customScroll.y;
+    }
+
+    setScrollLeft( value ) {
+        
+        if(!this.code) return;
+        
+        const realClientWidth = (this.code.clientWidth - this.code.customScroll.x);
+        const maxWidth = this.code.scrollWidth - realClientWidth;
+        
+        value = LX.UTILS.clamp( value, 0, maxWidth );
+
+        this.code.style.marginLeft = (-value) + "px";
+
+        // Update cursor
+        var cursor = this.cursors.children[0];
+        cursor.style.left = "calc( " + (cursor._left - value) + "px + " + this.xPadding + ")";
+
+        // Update selection
+        for( let s of this.selections.childNodes ) {
+            s.style.left = "calc( " + (s._left - value) + "px + " + this.xPadding + ")";
+        }
+
+        this.code.customScroll.x = value;
+    }
+
+    setScrollTop( value ) {
+        
+        if(!this.code) return;
+
+        const realClientHeight = this.code.parentElement.offsetHeight - 32;
+        const maxHeight = this.code.scrollHeight - realClientHeight;
+        
+        value = LX.UTILS.clamp( value, 0, maxHeight );
+        
+        this.gutter.scrollTop = value;
+        
+        this.code.style.marginTop = (-value) + "px";
+        
+        const scrollHeight = this.scrollbarThumb.parentElement.offsetHeight;
+        const scrollBarHeight = this.scrollbarThumb.offsetHeight;
+        this.scrollbarThumb.style.top = ( scrollHeight - scrollBarHeight ) * ( value / maxHeight ) + "px";
+        
+        // Update cursor
+        var cursor = this.cursors.children[0];
+        cursor.style.top = (cursor._top - value) + "px";
+        
+        // Update selection
+        for( let s of this.selections.childNodes ) {
+            s.style.top = (s._top - value) + "px";
+        }
+        
+        this.code.customScroll.y = value;
     }
 
     getCharAtPos( cursor, offset = 0 ) {
