@@ -186,7 +186,43 @@ class CodeEditor {
 
             var scrollbarThumb = document.createElement('div');
             this.scrollbarThumb = scrollbarThumb;
+            this.scrollbarThumb._top = 0;
             scrollbar.appendChild(scrollbarThumb);
+
+            this.scrollbarThumb.addEventListener("mousedown", inner_mousedown);
+            
+            var that = this;
+            var last_pos = [0, 0];
+            
+            function inner_mousedown(e)
+            {
+                var doc = that.root.ownerDocument;
+                doc.addEventListener("mousemove",inner_mousemove);
+                doc.addEventListener("mouseup",inner_mouseup);
+                last_pos[0] = e.x;
+                last_pos[1] = e.y;
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            function inner_mousemove(e)
+            {
+                var dt = (last_pos[1] - e.y);
+                
+                that.applyScrollFromScrollBar( that.scrollbarThumb._top - dt )
+
+                last_pos[0] = e.x;
+                last_pos[1] = e.y;
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            function inner_mouseup(e)
+            {
+                var doc = that.root.ownerDocument;
+                doc.removeEventListener("mousemove", inner_mousemove);
+                doc.removeEventListener("mouseup", inner_mouseup);
+            }
         }
 
         // Add autocomplete box
@@ -1023,7 +1059,7 @@ class CodeEditor {
 
         var cursor = this.cursors.children[0];
         var code_rect = this.code.getBoundingClientRect();
-        var mouse_pos = [(e.clientX - code_rect.x) + this.getScrollLeft(), (e.clientY - code_rect.y) + this.getScrollTop()];
+        var mouse_pos = [(e.clientX - code_rect.x), (e.clientY - code_rect.y)];
 
         // Discard out of lines click...
         if( e.type != 'contextmenu' )
@@ -1034,9 +1070,6 @@ class CodeEditor {
 
         if( e.type == 'mousedown' )
         {
-            // if( mouse_pos[0] > this.code.scrollWidth || mouse_pos[1] > this.code.scrollHeight )
-            //     return; // Scrollbar click
-
             // Left click only...
             if( e.button === 2 )
             {
@@ -2044,7 +2077,7 @@ class CodeEditor {
         doAsync(() => {
             var first_line = (this.getScrollTop() / this.lineHeight)|0;
             if( (cursor.line - 1) < first_line )
-                this.code.scrollTop -= this.lineHeight;
+                this.setScrollTop( this.getScrollTop() - this.lineHeight );
         });
     }
 
@@ -2061,9 +2094,9 @@ class CodeEditor {
         this._refreshCodeInfo( cursor.line, cursor.position );
 
         doAsync(() => {
-            var last_line = ((this.getScrollTop()  + this.code.offsetHeight) / this.lineHeight)|0;
+            var last_line = ((this.code.parentElement.offsetHeight - 32) / this.lineHeight)|0;
             if( cursor.line >= last_line )
-                this.code.scrollTop += this.lineHeight;
+                this.setScrollTop( this.getScrollTop() + this.lineHeight );
         });
     }
 
@@ -2182,7 +2215,7 @@ class CodeEditor {
         this.code.customScroll.x = value;
     }
 
-    setScrollTop( value ) {
+    setScrollTop( value, keepScrollBar ) {
         
         if(!this.code) return;
 
@@ -2194,11 +2227,14 @@ class CodeEditor {
         this.gutter.scrollTop = value;
         
         this.code.style.marginTop = (-value) + "px";
-        
-        const scrollHeight = this.scrollbarThumb.parentElement.offsetHeight;
-        const scrollBarHeight = this.scrollbarThumb.offsetHeight;
-        this.scrollbarThumb.style.top = ( scrollHeight - scrollBarHeight ) * ( value / maxHeight ) + "px";
-        
+
+        if( !keepScrollBar )
+        {
+            const scrollHeight = this.scrollbarThumb.parentElement.offsetHeight;
+            const scrollBarHeight = this.scrollbarThumb.offsetHeight;
+            this.setScrollBarValue( ( scrollHeight - scrollBarHeight ) * ( value / maxHeight ) )
+        }
+
         // Update cursor
         var cursor = this.cursors.children[0];
         cursor.style.top = (cursor._top - value) + "px";
@@ -2209,6 +2245,24 @@ class CodeEditor {
         }
         
         this.code.customScroll.y = value;
+    }
+
+    setScrollBarValue( value ) {
+
+        const scrollHeight = this.scrollbarThumb.parentElement.offsetHeight;
+        const scrollBarHeight = this.scrollbarThumb.offsetHeight;
+
+        value = LX.UTILS.clamp( value, 0, ( scrollHeight - scrollBarHeight ) );
+
+        this.scrollbarThumb._top = value;
+        this.scrollbarThumb.style.top = this.scrollbarThumb._top + "px";
+    }
+
+    applyScrollFromScrollBar( value ) {
+
+        this.setScrollBarValue( value );
+
+        this.setScrollTop( value / this.scrollbarThumb.size, true );
     }
 
     getCharAtPos( cursor, offset = 0 ) {
