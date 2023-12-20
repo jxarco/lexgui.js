@@ -2753,6 +2753,10 @@ ul.lexassetscontent {
   line-height: 22px;
 }
 
+.lexcodeeditor .codetabsarea {
+  background-color: var(--global-branch-darker);
+}
+
 .lexcodeeditor .codetabsarea.with-vscrollbar {
   width: calc( 100% - 10px ) !important;
 }
@@ -2761,16 +2765,15 @@ ul.lexassetscontent {
   height: calc( 100% - 40px ) !important;
 }
 
+.lexcodeeditor .codetabsarea.dragging {
+  background-color: var(--global-color-secondary);
+}
+
 .lexcodeeditor .code {
   cursor: text;
   font-size: 16px;
   overflow: hidden;
-  background-color: var(--global-branch-darker);
   padding-right: 6px;
-}
-
-.lexcodeeditor .code.dragging {
-  background-color: var(--global-color-secondary);
 }
 
 .codechar {

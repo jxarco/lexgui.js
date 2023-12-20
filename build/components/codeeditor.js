@@ -1013,15 +1013,15 @@ class CodeEditor {
 
         code.addEventListener('dragenter', function(e) {
             e.preventDefault();
-            this.classList.add('dragging');
+            this.parentElement.classList.add('dragging');
         });
         code.addEventListener('dragleave', function(e) {
             e.preventDefault();
-            this.classList.remove('dragging');
+            this.parentElement.remove('dragging');
         });
         code.addEventListener('drop', (e) => {
             e.preventDefault();
-            code.classList.remove('dragging');
+            code.parentElement.classList.remove('dragging');
             for( let i = 0; i < e.dataTransfer.files.length; ++i )
                 this.loadFile( e.dataTransfer.files[i] );
         });
@@ -1610,7 +1610,7 @@ class CodeEditor {
 
         // const start = performance.now();
 
-        var numViewportLines = Math.floor( (this.code.parentElement.offsetHeight - 36) / this.lineHeight );
+        const numViewportLines = Math.floor( (this.code.parentElement.offsetHeight - 36) / this.lineHeight );
 
         if( numViewportLines > this.code.lines.length )
         {
@@ -1625,8 +1625,9 @@ class CodeEditor {
             this.scrollbarThumb.style.height = (this.scrollbarThumb.size * 100.0) + "%";
         }
 
-        var numViewportChars = Math.floor( this.code.clientWidth / this.charWidth );
-        var maxLineLength = 424;
+        const numViewportChars = Math.floor( this.code.clientWidth / this.charWidth );
+        const line_lengths = this.code.lines.map( value => value.length );
+        const maxLineLength = Math.max(...line_lengths);
 
         if( numViewportChars > maxLineLength )
         {
@@ -2259,8 +2260,8 @@ class CodeEditor {
         if(!this.code) return;
         
         const realClientWidth = (this.code.clientWidth - this.code.customScroll.x);
-        const maxWidth = this.code.scrollWidth - realClientWidth;
-        
+        const maxWidth = Math.max( this.code.scrollWidth - realClientWidth, 0 );
+
         value = LX.UTILS.clamp( value, 0, maxWidth );
 
         this.code.style.marginLeft = (-value) + "px";
@@ -2289,7 +2290,7 @@ class CodeEditor {
         if(!this.code) return;
 
         const realClientHeight = this.code.parentElement.offsetHeight - 32;
-        const maxHeight = this.code.scrollHeight - realClientHeight;
+        const maxHeight = Math.max( this.code.scrollHeight - realClientHeight, 0 );
         
         value = LX.UTILS.clamp( value, 0, maxHeight );
         
