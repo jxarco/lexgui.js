@@ -2797,6 +2797,7 @@ ul.lexassetscontent {
   -webkit-tap-highlight-color: transparent;
   z-index: 0 !important;
   pointer-events: none;
+  height: 16px;
 }
 
 .lexcodeeditor span {

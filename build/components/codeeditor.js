@@ -106,6 +106,25 @@ class CodeEditor {
 
     constructor( area, options = {} ) {
 
+        // var a = [];
+
+        // var map = {};
+
+        // for( var i = 0; i < 1000000; ++i )
+        // map[i] = 1;
+
+        // const start = performance.now();
+
+        // for( var i = 0; i < 3000; ++i ) {
+        //     const b = map[Math.floor( Math.random() * 1000000 )];
+        // }
+
+        // console.log( performance.now() - start );
+
+
+        // debugger;
+
+
         window.editor = this;
 
         CodeEditor.__instances.push( this );
@@ -221,7 +240,7 @@ class CodeEditor {
         };
 
         // Scan tokens..
-        setInterval( this.scanWordSuggestions.bind(this), 2000 );
+        // setInterval( this.scanWordSuggestions.bind(this), 2000 );
 
         this.languages = {
             'Plain Text': { },
@@ -241,6 +260,7 @@ class CodeEditor {
             'ArrowRight', 'ArrowLeft', 'Delete', 'Home',
             'End', 'Tab', 'Escape'
         ];
+
         this.keywords = {
             'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof', 'debugger', 'abstract',
                           'arguments', 'extends', 'instanceof'],
@@ -299,7 +319,16 @@ class CodeEditor {
             'Python': ['<', '>', '[', ']', '(', ')', '='],
             'Batch': ['[', ']', '(', ')', '%'],
         };
-        
+
+        // Convert reserved word arrays to maps so we can search tokens faster
+
+        for( let lang in this.keywords ) this.keywords[lang] = this.keywords[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+        for( let lang in this.utils ) this.utils[lang] = this.utils[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+        for( let lang in this.types ) this.types[lang] = this.types[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+        for( let lang in this.builtin ) this.builtin[lang] = this.builtin[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+        for( let lang in this.statementsAndDeclarations ) this.statementsAndDeclarations[lang] = this.statementsAndDeclarations[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+        for( let lang in this.symbols ) this.symbols[lang] = this.symbols[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+
         // Action keys
 
         this.action('Escape', false, ( ln, cursor, e ) => {
@@ -772,12 +801,13 @@ class CodeEditor {
     loadFile( file ) {
 
         const inner_add_tab = ( text, name, title ) => {
-            this.addTab(name, true, title);
-            text = text.replaceAll('\r', '');
-            this.code.lines = text.split('\n');
-            this._refreshCodeInfo();
-            this._changeLanguageFromExtension( LX.getExtension(name) );
-            this.processLines();
+            const existing = this.addTab(name, true, title);
+            if( !existing )
+            {
+                text = text.replaceAll('\r', '');
+                this.code.lines = text.split('\n');
+                this._changeLanguageFromExtension( LX.getExtension(name) );
+            }
         };
 
         if(file.constructor == String)
@@ -798,7 +828,6 @@ class CodeEditor {
                 inner_add_tab( text, file.name );
             };
         }
-        
     }
 
     _addUndoStep( cursor )  {
@@ -902,7 +931,7 @@ class CodeEditor {
         if(this.openedTabs[name])
         {
             this.tabs.select( this.code.tabName );
-            return;
+            return true;
         }
 
         // Create code content
@@ -972,7 +1001,8 @@ class CodeEditor {
         
         this.endSelection();
 
-        if(selected){
+        if( selected )
+        {
             this.code = code;  
             this.resetCursorPos(CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP);
             this.processLines();
@@ -1517,54 +1547,52 @@ class CodeEditor {
         }
     }
 
-    processLines( from ) {
+    processLines( from__legacy ) {
 
-        // const start = performance.now();
+        const start = performance.now();
 
-        this.gutter.innerHTML = "";
+        var gutter_html = "";
+        var code_html = "";
+
         this.code.innerHTML = "";
+        this.gutter.innerHTML = "";
 
         for( let i = 0; i < this.code.lines.length; ++i )
         {
-            this.processLine( i, true );
+            gutter_html += "<span>" + (i + 1) + "</span>";
+            code_html += this.processLine( i, true );
         }
 
-        // console.log( performance.now() - start );
+        this.code.innerHTML = code_html;
+        this.gutter.innerHTML = gutter_html;
+        
+        console.log( "Num lines processed: " + this.code.lines.length, performance.now() - start );
     }
 
     processLine( linenum, force ) {
 
         delete this._buildingString; // multi-line strings not supported by now
-        // delete this._buildingBlockComment;
         
         // It's allowed to process only 1 line to optimize
         let linestring = this.code.lines[ linenum ];
 
-        var pre = document.createElement('pre');
-        pre.dataset['linenum'] = linenum;
-
-        // Line gutter
-        var linenumspan = document.createElement('span');
-        linenumspan.innerHTML = (linenum + 1);
-
-        if( force )
-        {
-            this.gutter.appendChild(linenumspan);
-            this.code.appendChild( pre );
-        } else
+        if( !force )
         {
             deleteElement( this.gutter.childNodes[ linenum ] );
             deleteElement( this.code.childNodes[ linenum ] );
-            this.gutter.insertChildAtIndex( linenumspan, linenum );
             this.code.insertChildAtIndex( pre, linenum );
-        }
 
-        var linespan = document.createElement('span');
-        pre.appendChild(linespan);
+            var linenumspan = document.createElement('span');
+            linenumspan.innerHTML = (linenum + 1);
+            this.gutter.insertChildAtIndex( linenumspan, linenum );
+        }
 
         const tokensToEvaluate = this._getTokensFromString( linestring );
 
-        let line_inner_html = "";
+        if( !tokensToEvaluate.length )
+        return "<pre></pre>";
+
+        var line_inner_html = "";
 
         // Process all tokens
         for( var i = 0; i < tokensToEvaluate.length; ++i )
@@ -1578,12 +1606,12 @@ class CodeEditor {
             
             it = i + 1;
             let next = tokensToEvaluate[it];
-            while( next == ' ' || next == '"') {
+            while( next == ' ' || next == '"' ) {
                 it++;
                 next = tokensToEvaluate[it];
             }
             
-            let token = tokensToEvaluate[i];
+            const token = tokensToEvaluate[i];
 
             if( this.languages[ this.highlight ].blockComments ?? true )
             {
@@ -1596,7 +1624,7 @@ class CodeEditor {
             line_inner_html += this.evaluateToken(token, prev, next);
         }
 
-        linespan.innerHTML = line_inner_html;
+        return "<pre>" + line_inner_html + "</pre>";
     }
 
     _processTokens( tokens, offset = 0 ) {
@@ -1631,6 +1659,7 @@ class CodeEditor {
         linestring = ( is_comment.length > 1 ) ? is_comment[0] : linestring;
 
         const tokens = linestring.split(' ').join('¬ ¬').split('¬'); // trick to split without losing spaces
+        
         let tokensToEvaluate = []; // store in a temp array so we know prev and next tokens...
 
         for( let t of tokens )
@@ -1692,106 +1721,104 @@ class CodeEditor {
 
     _mustHightlightWord( token, kindArray ) {
 
-        return kindArray[this.highlight] && kindArray[this.highlight].indexOf(token) > -1;
+        return kindArray[this.highlight] && kindArray[this.highlight][token] != undefined;
     }
 
     evaluateToken( token, prev, next ) {
 
-        let stringEnded = false;
-        let highlight = this.highlight.replace(/\s/g, '').replaceAll("+", "p").toLowerCase();
-        let inner_html = "", token_classname = "";
-
-        const singleLineCommentToken = this.languages[ this.highlight ].singleLineCommentToken ?? this.defaultSingleLineCommentToken;
-        const usesBlockComments = this.languages[ this.highlight ].blockComments ?? true;
-        const customStringKeys = Object.assign( {}, this.stringKeys );
-
-        if( highlight == 'cpp' && prev && prev.includes('#') ) // preprocessor code..
-        {
-            customStringKeys['@<'] = '>';
-        }
-
-        // Manage strings
-        if( this._buildingString != undefined )
-        {
-            const idx = Object.values(customStringKeys).indexOf( token );
-            stringEnded = (idx > -1) && (idx == Object.values(customStringKeys).indexOf( customStringKeys[ '@' + this._buildingString ] ));
-        } 
-        else if( customStringKeys[ '@' + token ] )
-        {   
-            // Start new string
-            this._buildingString = token;
-        }
-
         if(token == ' ')
         {
-            inner_html += token;
+            return token;
         }
         else
         {
+            let stringEnded = false;
+            let highlight = this.highlight.replace(/\s/g, '').replaceAll("+", "p").toLowerCase();
+
+            const singleLineCommentToken = this.languages[ this.highlight ].singleLineCommentToken ?? this.defaultSingleLineCommentToken;
+            const usesBlockComments = this.languages[ this.highlight ].blockComments ?? true;
+            const customStringKeys = Object.assign( {}, this.stringKeys );
+
+            if( highlight == 'cpp' && prev && prev.includes('#') ) // preprocessor code..
+            {
+                customStringKeys['@<'] = '>';
+            }
+
+            // Manage strings
+            if( this._buildingString != undefined )
+            {
+                const idx = Object.values(customStringKeys).indexOf( token );
+                stringEnded = (idx > -1) && (idx == Object.values(customStringKeys).indexOf( customStringKeys[ '@' + this._buildingString ] ));
+            } 
+            else if( customStringKeys[ '@' + token ] )
+            {   
+                // Start new string
+                this._buildingString = token;
+            }
+
+            let token_classname = "";
+
             if( this._buildingBlockComment != undefined )
-                token_classname += "cm-com";
+                token_classname = "cm-com";
             
             else if( this._buildingString != undefined )
-                token_classname += "cm-str";
+                token_classname = "cm-str";
             
             else if( this._mustHightlightWord( token, this.keywords ) )
-                token_classname += "cm-kwd";
+                token_classname = "cm-kwd";
 
             else if( this._mustHightlightWord( token, this.builtin ) )
-                token_classname += "cm-bln";
+                token_classname = "cm-bln";
 
             else if( this._mustHightlightWord( token, this.statementsAndDeclarations ) )
-                token_classname += "cm-std";
+                token_classname = "cm-std";
 
             else if( this._mustHightlightWord( token, this.symbols ) )
-                token_classname += "cm-sym";
+                token_classname = "cm-sym";
 
             else if( token.substr(0, 2) == singleLineCommentToken )
-                token_classname += "cm-com";
+                token_classname = "cm-com";
 
             else if( usesBlockComments && token.substr(0, 2) == '/*' )
-                token_classname += "cm-com";
+                token_classname = "cm-com";
 
             else if( usesBlockComments && token.substr(token.length - 2) == '*/' )
-                token_classname += "cm-com";
+                token_classname = "cm-com";
 
-            else if(  this.isNumber(token) || this.isNumber( token.replace(/[px]|[em]|%/g,'') ) )
-                token_classname += "cm-dec";
+            else if( this.isNumber(token) || this.isNumber( token.replace(/[px]|[em]|%/g,'') ) )
+                token_classname = "cm-dec";
 
             else if( this.isCSSClass(token, prev, next) )
-                token_classname += "cm-kwd";
+                token_classname = "cm-kwd";
 
             else if ( this.isType(token, prev, next) )
-                token_classname += "cm-typ";
+                token_classname = "cm-typ";
 
             else if ( highlight == 'batch' && (token == '@' || prev == ':' || prev == '@') )
-                token_classname += "cm-kwd";
+                token_classname = "cm-kwd";
 
             else if ( highlight == 'cpp' && token.includes('#') ) // C++ preprocessor
-                token_classname += "cm-ppc";
+                token_classname = "cm-ppc";
 
             else if ( highlight == 'cpp' && prev == '<' && (next == '>' || next == '*') ) // Defining template type in C++
-                token_classname += "cm-typ";
+                token_classname = "cm-typ";
 
             else if ( highlight == 'cpp' && (next == '::' || prev == '::' && next != '(' )) // C++ Class
-                token_classname += "cm-typ";
+                token_classname = "cm-typ";
 
             else if ( highlight == 'css' && prev == ':' && (next == ';' || next == '!important') ) // CSS value
-                token_classname += "cm-str";
+                token_classname = "cm-str";
 
             else if ( highlight == 'css' && prev == undefined && next == ':' ) // CSS attribute
-                token_classname += "cm-typ";
+                token_classname = "cm-typ";
 
             else if ( token[0] != '@' && next == '(' )
-                token_classname += "cm-mtd";
+                token_classname = "cm-mtd";
 
-            token_classname += " " + highlight;
-            inner_html += "<span class=' " + token_classname + "'>" + token + "</span>";
+            this._buildingString = stringEnded ? undefined : this._buildingString;
+
+            return "<span class='" + highlight + " " + token_classname + "'>" + token + "</span>";
         }
-
-        if(stringEnded) delete this._buildingString;
-
-        return inner_html;
     }
 
     isCSSClass( token, prev, next ) {
@@ -1827,7 +1854,7 @@ class CodeEditor {
         }
         else if ( this.highlight == 'WGSL' )
         {
-            const is_kwd = (this.keywords[this.highlight] && this.keywords[this.highlight].indexOf(token) == -1);
+            const is_kwd = !this._mustHightlightWord( token, this.keywords );
             return (prev == 'struct' && next == '{') || 
             ( is_kwd && 
                 ( prev == ':' && next == ')' || prev == ':' && next == ',' || prev == '>' && next == '{' 
