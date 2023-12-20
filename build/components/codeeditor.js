@@ -110,6 +110,8 @@ class CodeEditor {
 
         CodeEditor.__instances.push( this );
 
+        var that = this;
+
         this.base_area = area;
         this.area = new LX.Area( { className: "lexcodeeditor", height: "auto", no_append: true } );
 
@@ -147,7 +149,7 @@ class CodeEditor {
         this.root.addEventListener( 'contextmenu', this.processMouse.bind(this) );
 
         // Take into account the scrollbar..
-        this.tabs.area.root.style.width = "calc( 100% - 10px )";
+        this.tabs.area.root.classList.add( 'codetabsarea' );
 
         // Cursors and selection
 
@@ -177,7 +179,7 @@ class CodeEditor {
             this.cursors.appendChild(cursor);
         }
 
-        // Add custom scroll bar
+        // Add custom vertical scroll bar
         {
             var scrollbar = document.createElement('div');
             scrollbar.className = "lexcodescrollbar";
@@ -191,28 +193,70 @@ class CodeEditor {
 
             this.scrollbarThumb.addEventListener("mousedown", inner_mousedown);
             
-            var that = this;
-            var last_pos = [0, 0];
+            var last_pos = 0;
             
             function inner_mousedown(e)
             {
                 var doc = that.root.ownerDocument;
                 doc.addEventListener("mousemove",inner_mousemove);
                 doc.addEventListener("mouseup",inner_mouseup);
-                last_pos[0] = e.x;
-                last_pos[1] = e.y;
+                last_pos = e.y;
                 e.stopPropagation();
                 e.preventDefault();
             }
 
             function inner_mousemove(e)
             {
-                var dt = (last_pos[1] - e.y);
+                var dt = (last_pos - e.y);
                 
-                that.applyScrollFromScrollBar( that.scrollbarThumb._top - dt )
+                that.applyVerticalScrollFromScrollBar( that.scrollbarThumb._top - dt )
 
-                last_pos[0] = e.x;
-                last_pos[1] = e.y;
+                last_pos = e.y;
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            function inner_mouseup(e)
+            {
+                var doc = that.root.ownerDocument;
+                doc.removeEventListener("mousemove", inner_mousemove);
+                doc.removeEventListener("mouseup", inner_mouseup);
+            }
+        }
+
+        // Add custom horizontal scroll bar
+        {
+            var hScrollbar = document.createElement('div');
+            hScrollbar.className = "lexcodescrollbar horizontal";
+            this.hScrollbar = hScrollbar;
+            area.attach(this.hScrollbar);
+
+            var hScrollbarThumb = document.createElement('div');
+            this.hScrollbarThumb = hScrollbarThumb;
+            this.hScrollbarThumb._left = 0;
+            hScrollbar.appendChild(hScrollbarThumb);
+
+            this.hScrollbarThumb.addEventListener("mousedown", inner_mousedown);
+            
+            var last_pos = 0;
+            
+            function inner_mousedown(e)
+            {
+                var doc = that.root.ownerDocument;
+                doc.addEventListener("mousemove",inner_mousemove);
+                doc.addEventListener("mouseup",inner_mouseup);
+                last_pos = e.x;
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            function inner_mousemove(e)
+            {
+                var dt = (last_pos - e.x);
+                
+                that.applyHorizontalScrollFromScrollBar( that.hScrollbarThumb._left - dt )
+
+                last_pos = e.x;
                 e.stopPropagation();
                 e.preventDefault();
             }
@@ -1570,13 +1614,31 @@ class CodeEditor {
 
         if( numViewportLines > this.code.lines.length )
         {
-            this.scrollbarThumb.style.display = 'none';
+            this.scrollbar.classList.add( 'scrollbar-unused' );
+            this.tabs.area.root.classList.remove( 'with-vscrollbar' );
         }
         else
         {
-            this.scrollbarThumb.style.display = 'block';
+            this.scrollbar.classList.remove( 'scrollbar-unused' );
+            this.tabs.area.root.classList.add( 'with-vscrollbar' );
             this.scrollbarThumb.size = (numViewportLines / this.code.lines.length);
             this.scrollbarThumb.style.height = (this.scrollbarThumb.size * 100.0) + "%";
+        }
+
+        var numViewportChars = Math.floor( this.code.clientWidth / this.charWidth );
+        var maxLineLength = 424;
+
+        if( numViewportChars > maxLineLength )
+        {
+            this.hScrollbar.classList.add( 'scrollbar-unused' );
+            this.tabs.area.root.classList.remove( 'with-hscrollbar' );
+        }
+        else
+        {
+            this.hScrollbar.classList.remove( 'scrollbar-unused' );
+            this.tabs.area.root.classList.add( 'with-hscrollbar' );
+            this.hScrollbarThumb.size = (numViewportChars / maxLineLength);
+            this.hScrollbarThumb.style.width = (this.hScrollbarThumb.size * 100.0) + "%";
         }
 
         this.gutter.innerHTML = "";
@@ -2192,7 +2254,7 @@ class CodeEditor {
         return this.code.customScroll.y;
     }
 
-    setScrollLeft( value ) {
+    setScrollLeft( value, keepScrollBar ) {
         
         if(!this.code) return;
         
@@ -2202,6 +2264,13 @@ class CodeEditor {
         value = LX.UTILS.clamp( value, 0, maxWidth );
 
         this.code.style.marginLeft = (-value) + "px";
+
+        if( !keepScrollBar )
+        {
+            const scrollWidth = this.hScrollbarThumb.parentElement.offsetWidth;
+            const scrollBarWidth = this.hScrollbarThumb.offsetWidth;
+            this.setScrollBarValue( ( scrollWidth - scrollBarWidth ) * ( value / maxWidth ), 'horizontal' );
+        }
 
         // Update cursor
         var cursor = this.cursors.children[0];
@@ -2247,21 +2316,39 @@ class CodeEditor {
         this.code.customScroll.y = value;
     }
 
-    setScrollBarValue( value ) {
+    setScrollBarValue( value, type = 'vertical' ) {
 
-        const scrollHeight = this.scrollbarThumb.parentElement.offsetHeight;
-        const scrollBarHeight = this.scrollbarThumb.offsetHeight;
-
-        value = LX.UTILS.clamp( value, 0, ( scrollHeight - scrollBarHeight ) );
-
-        this.scrollbarThumb._top = value;
-        this.scrollbarThumb.style.top = this.scrollbarThumb._top + "px";
+        if( type == 'vertical' )
+        {
+            const scrollHeight = this.scrollbarThumb.parentElement.offsetHeight;
+            const scrollBarHeight = this.scrollbarThumb.offsetHeight;
+    
+            value = LX.UTILS.clamp( value, 0, ( scrollHeight - scrollBarHeight ) );
+    
+            this.scrollbarThumb._top = value;
+            this.scrollbarThumb.style.top = this.scrollbarThumb._top + "px";
+        }
+        else
+        {
+            const scrollWidth = this.hScrollbarThumb.parentElement.offsetWidth;
+            const scrollBarWidth = this.hScrollbarThumb.offsetWidth;
+    
+            value = LX.UTILS.clamp( value, 0, ( scrollWidth - scrollBarWidth ) );
+    
+            this.hScrollbarThumb._left = value;
+            this.hScrollbarThumb.style.left = this.hScrollbarThumb._left + "px";
+        }
     }
 
-    applyScrollFromScrollBar( value ) {
+    applyHorizontalScrollFromScrollBar( value ) {
+
+        this.setScrollBarValue( value, 'horizontal');
+        this.setScrollLeft( value / this.hScrollbarThumb.size, true );
+    }
+
+    applyVerticalScrollFromScrollBar( value ) {
 
         this.setScrollBarValue( value );
-
         this.setScrollTop( value / this.scrollbarThumb.size, true );
     }
 
