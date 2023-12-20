@@ -2732,7 +2732,7 @@ ul.lexassetscontent {
   width: 32px;
   height: calc(100% - 69px); /* 6px of the vertical scrollbar */
   background-color: var(--global-branch-darker);
-  margin-top: 25px;
+  margin-top: 24px;
   text-align: center;
   overflow: hidden;
   -webkit-user-select: none; /* Safari 3.1+ */
@@ -2757,7 +2757,7 @@ ul.lexassetscontent {
   height: calc(100% - 30px);
   cursor: text;
   font-size: 16px;
-  overflow: scroll;
+  overflow: hidden;
   background-color: var(--global-branch-darker);
   padding-right: 6px;
 }
@@ -2850,6 +2850,35 @@ ul.lexassetscontent {
   left: 0px;
   top: 0px;
   height: 18px;
+}
+
+.lexcodeeditor .scrollbar {
+  background-color: var(--global-branch-darker);
+  filter: brightness(0.95);
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  margin-top: 30px;
+  position: absolute;
+  z-index: 1 !important;
+  right: 0px;
+  top: 0px;
+  width: 10px;
+  height: calc(100% - 66px);
+}
+
+.lexcodeeditor .scrollbar div { /* thumb */
+  background-color: #858585cb !important;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-right: none;
+  position: absolute;
+  z-index: 0 !important;
+  right: 0px;
+  top: 0px;
+  width: 10px;
+  height: 10px;
 }
 
 .lexcodeeditor .lexcodeselection {
