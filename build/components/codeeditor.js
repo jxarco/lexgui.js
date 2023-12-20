@@ -129,6 +129,8 @@ class CodeEditor {
 
         CodeEditor.__instances.push( this );
 
+        var that = this;
+
         this.base_area = area;
         this.area = new LX.Area( { className: "lexcodeeditor", height: "auto", no_append: true } );
 
@@ -165,6 +167,9 @@ class CodeEditor {
         this.root.addEventListener( 'click', this.processMouse.bind(this) );
         this.root.addEventListener( 'contextmenu', this.processMouse.bind(this) );
 
+        // Take into account the scrollbar..
+        this.tabs.area.root.classList.add( 'codetabsarea' );
+
         // Cursors and selection
 
         this.cursors = document.createElement('div');
@@ -191,6 +196,96 @@ class CodeEditor {
             cursor.line = 0;
             cursor.print = (function() { console.log( this.line, this.position ) }).bind(cursor);
             this.cursors.appendChild(cursor);
+        }
+
+        // Add custom vertical scroll bar
+        {
+            var scrollbar = document.createElement('div');
+            scrollbar.className = "lexcodescrollbar";
+            this.scrollbar = scrollbar;
+            area.attach(this.scrollbar);
+
+            var scrollbarThumb = document.createElement('div');
+            this.scrollbarThumb = scrollbarThumb;
+            this.scrollbarThumb._top = 0;
+            scrollbar.appendChild(scrollbarThumb);
+
+            this.scrollbarThumb.addEventListener("mousedown", inner_mousedown);
+            
+            var last_pos = 0;
+            
+            function inner_mousedown(e)
+            {
+                var doc = that.root.ownerDocument;
+                doc.addEventListener("mousemove",inner_mousemove);
+                doc.addEventListener("mouseup",inner_mouseup);
+                last_pos = e.y;
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            function inner_mousemove(e)
+            {
+                var dt = (last_pos - e.y);
+                
+                that.applyVerticalScrollFromScrollBar( that.scrollbarThumb._top - dt )
+
+                last_pos = e.y;
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            function inner_mouseup(e)
+            {
+                var doc = that.root.ownerDocument;
+                doc.removeEventListener("mousemove", inner_mousemove);
+                doc.removeEventListener("mouseup", inner_mouseup);
+            }
+        }
+
+        // Add custom horizontal scroll bar
+        {
+            var hScrollbar = document.createElement('div');
+            hScrollbar.className = "lexcodescrollbar horizontal";
+            this.hScrollbar = hScrollbar;
+            area.attach(this.hScrollbar);
+
+            var hScrollbarThumb = document.createElement('div');
+            this.hScrollbarThumb = hScrollbarThumb;
+            this.hScrollbarThumb._left = 0;
+            hScrollbar.appendChild(hScrollbarThumb);
+
+            this.hScrollbarThumb.addEventListener("mousedown", inner_mousedown);
+            
+            var last_pos = 0;
+            
+            function inner_mousedown(e)
+            {
+                var doc = that.root.ownerDocument;
+                doc.addEventListener("mousemove",inner_mousemove);
+                doc.addEventListener("mouseup",inner_mouseup);
+                last_pos = e.x;
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            function inner_mousemove(e)
+            {
+                var dt = (last_pos - e.x);
+                
+                that.applyHorizontalScrollFromScrollBar( that.hScrollbarThumb._left - dt )
+
+                last_pos = e.x;
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            function inner_mouseup(e)
+            {
+                var doc = that.root.ownerDocument;
+                doc.removeEventListener("mousemove", inner_mousemove);
+                doc.removeEventListener("mouseup", inner_mouseup);
+            }
         }
 
         // Add autocomplete box
@@ -240,7 +335,7 @@ class CodeEditor {
         };
 
         // Scan tokens..
-        // setInterval( this.scanWordSuggestions.bind(this), 2000 );
+        setInterval( this.scanWordSuggestions.bind(this), 2000 );
 
         this.languages = {
             'Plain Text': { },
@@ -412,7 +507,7 @@ class CodeEditor {
             this.resetCursorPos( CodeEditor.CURSOR_LEFT );
             if(idx > 0) this.cursorToString(cursor, prestring);
             this._refreshCodeInfo(cursor.line, cursor.position);
-            this.code.scrollLeft = 0;
+            this.setScrollLeft( 0 );
 
             if( e.shiftKey && !e.cancelShift )
             {
@@ -441,8 +536,8 @@ class CodeEditor {
             this.resetCursorPos( CodeEditor.CURSOR_LEFT );
             this.cursorToString( cursor, this.code.lines[ln] );
 
-            const last_char = ((this.code.scrollLeft + this.code.clientWidth) / this.charWidth)|0;
-            this.code.scrollLeft = cursor.position >= last_char ? (cursor.position - last_char) * this.charWidth : 0;
+            const last_char = (this.code.clientWidth / this.charWidth)|0;
+            this.setScrollLeft( cursor.position >= last_char ? (cursor.position - last_char) * this.charWidth : 0 );
         });
 
         this.action('Enter', true, ( ln, cursor, e ) => {
@@ -561,7 +656,7 @@ class CodeEditor {
 
             if(e.metaKey) { // Apple devices (Command)
                 e.preventDefault();
-                this.actions[ 'Home' ].callback( ln, cursor );
+                this.actions[ 'Home' ].callback( ln, cursor, e );
             }
             else if(e.ctrlKey) {
                 // Get next word
@@ -611,8 +706,7 @@ class CodeEditor {
                     }
                         
                     this.lineUp( cursor );
-                    this.resetCursorPos( CodeEditor.CURSOR_LEFT );
-                    this.cursorToPosition( cursor, this.code.lines[cursor.line].length );
+                    this.actions[ 'End' ].callback( cursor.line, cursor, e );
 
                     if( e.shiftKey ) {
                         this.selection.toX = cursor.position;
@@ -943,37 +1037,36 @@ class CodeEditor {
         code.undoSteps = [];
         code.tabName = name;
         code.title = title ?? name;
-        code.tokens = {}; 
+        code.tokens = {};
+        code.customScroll = new LX.vec2;
 
         code.addEventListener('dragenter', function(e) {
             e.preventDefault();
-            this.classList.add('dragging');
+            this.parentElement.classList.add('dragging');
         });
         code.addEventListener('dragleave', function(e) {
             e.preventDefault();
-            this.classList.remove('dragging');
+            this.parentElement.remove('dragging');
         });
         code.addEventListener('drop', (e) => {
             e.preventDefault();
-            code.classList.remove('dragging');
+            code.parentElement.classList.remove('dragging');
             for( let i = 0; i < e.dataTransfer.files.length; ++i )
                 this.loadFile( e.dataTransfer.files[i] );
         });
+        code.addEventListener('wheel', (e) => {
 
-        code.addEventListener('scroll', (e) => {
-            this.gutter.scrollTop = code.scrollTop;
-            this.gutter.scrollLeft = code.scrollLeft;
+            // Get scroll data
 
-            // Update cursor
-            var cursor = this.cursors.children[0];
-            cursor.style.top = (cursor._top - code.scrollTop) + "px";
-            cursor.style.left = "calc( " + (cursor._left - code.scrollLeft) + "px + " + this.xPadding + ")";
+            const dX = (e.deltaY > 0.0 ? 1.0 : -1.0) * 20.0 * ( e.shiftKey ? 1.0 : 0.0 );
+            const dY = (e.deltaY > 0.0 ? 1.0 : -1.0) * 40.0 * ( e.shiftKey ? 0.0 : 1.0 );
 
-            // Update selection
-            for( let s of this.selections.childNodes ) {
-                s.style.top = (s._top - code.scrollTop) + "px";
-                s.style.left = "calc( " + (s._left - code.scrollLeft) + "px + " + this.xPadding + ")";
-            }
+            var new_scroll = code.customScroll.add( new LX.vec2( dX, dY ), new LX.vec2() );
+            
+            // Update state
+            
+            if( new_scroll.x != this.getScrollLeft()) this.setScrollLeft( new_scroll.x );
+            if( new_scroll.y != this.getScrollTop()) this.setScrollTop( new_scroll.y );
         });
 
         this.openedTabs[name] = code;
@@ -995,8 +1088,8 @@ class CodeEditor {
             this._refreshCodeInfo(cursor.line, cursor.position);
 
             // Restore scroll
-            this.gutter.scrollTop = this.code.scrollTop;
-            this.gutter.scrollLeft = this.code.scrollLeft;
+            this.gutter.scrollLeft = this.getScrollLeft();
+            this.gutter.scrollTop = this.getScrollTop();
         }});
         
         this.endSelection();
@@ -1040,7 +1133,7 @@ class CodeEditor {
 
         var cursor = this.cursors.children[0];
         var code_rect = this.code.getBoundingClientRect();
-        var mouse_pos = [(e.clientX - code_rect.x) + this.getScrollLeft(), (e.clientY - code_rect.y) + this.getScrollTop()];
+        var mouse_pos = [(e.clientX - code_rect.x), (e.clientY - code_rect.y)];
 
         // Discard out of lines click...
         if( e.type != 'contextmenu' )
@@ -1051,9 +1144,6 @@ class CodeEditor {
 
         if( e.type == 'mousedown' )
         {
-            if( mouse_pos[0] > this.code.scrollWidth || mouse_pos[1] > this.code.scrollHeight )
-                return; // Scrollbar click
-
             // Left click only...
             if( e.button === 2 )
             {
@@ -1144,7 +1234,7 @@ class CodeEditor {
     processClick(e, skip_refresh = false) {
 
         var code_rect = this.code.getBoundingClientRect();
-        var position = [(e.clientX - code_rect.x) + this.getScrollLeft(), (e.clientY - code_rect.y) + this.getScrollTop()];
+        var position = [(e.clientX - code_rect.x), (e.clientY - code_rect.y)];
         var ln = (position[1] / this.lineHeight)|0;
 
         if(this.code.lines[ln] == undefined) return;
@@ -1156,7 +1246,6 @@ class CodeEditor {
         
         var ch = (position[0] / this.charWidth)|0;
         var string = this.code.lines[ln].slice(0, ch);
-        // this.cursorToString(cursor, string);
         this.cursorToPosition(cursor, string.length);
 
         this.hideAutoCompleteBox();
@@ -1553,6 +1642,8 @@ class CodeEditor {
 
         var gutter_html = "";
         var code_html = "";
+
+        this.resizeScrollBars();
 
         this.code.innerHTML = "";
         this.gutter.innerHTML = "";
@@ -2013,9 +2104,9 @@ class CodeEditor {
         // Add horizontal scroll
 
         doAsync(() => {
-            var last_char = ((this.code.scrollLeft + this.code.clientWidth) / this.charWidth)|0;
+            var last_char = ((this.code.clientWidth) / this.charWidth)|0;
             if( cursor.position >= last_char )
-                this.code.scrollLeft += this.charWidth;
+                this.setScrollLeft( this.getScrollLeft() + this.charWidth );
         });
     }
 
@@ -2031,10 +2122,12 @@ class CodeEditor {
         this.restartBlink();
         this._refreshCodeInfo( cursor.line, cursor.position );
 
+        // Add horizontal scroll
+
         doAsync(() => {
-            var first_char = (this.code.scrollLeft / this.charWidth)|0;
+            var first_char = (this.getScrollLeft() / this.charWidth)|0;
             if( (cursor.position - 1) < first_char )
-                this.code.scrollLeft -= this.charWidth;
+                this.setScrollLeft( this.getScrollLeft() - this.charWidth );
         });
     }
 
@@ -2052,9 +2145,9 @@ class CodeEditor {
         this._refreshCodeInfo( cursor.line, cursor.position );
 
         doAsync(() => {
-            var first_line = (this.code.scrollTop / this.lineHeight)|0;
+            var first_line = (this.getScrollTop() / this.lineHeight)|0;
             if( (cursor.line - 1) < first_line )
-                this.code.scrollTop -= this.lineHeight;
+                this.setScrollTop( this.getScrollTop() - this.lineHeight );
         });
     }
 
@@ -2071,9 +2164,9 @@ class CodeEditor {
         this._refreshCodeInfo( cursor.line, cursor.position );
 
         doAsync(() => {
-            var last_line = ((this.code.scrollTop  + this.code.offsetHeight) / this.lineHeight)|0;
+            var last_line = ((this.code.parentElement.offsetHeight - 32) / this.lineHeight)|0;
             if( cursor.line >= last_line )
-                this.code.scrollTop += this.lineHeight;
+                this.setScrollTop( this.getScrollTop() + this.lineHeight );
         });
     }
 
@@ -2160,13 +2253,146 @@ class CodeEditor {
     getScrollLeft() {
         
         if(!this.code) return 0;
-        return this.code.scrollLeft;
+        return this.code.customScroll.x;
     }
 
     getScrollTop() {
         
         if(!this.code) return 0;
-        return this.code.scrollTop;
+        return this.code.customScroll.y;
+    }
+
+    setScrollLeft( value, keepScrollBar ) {
+        
+        if(!this.code) return;
+        
+        const realClientWidth = (this.code.clientWidth - this.code.customScroll.x);
+        const maxWidth = Math.max( this.code.scrollWidth - realClientWidth, 0 );
+
+        value = LX.UTILS.clamp( value, 0, maxWidth );
+
+        this.code.style.marginLeft = (-value) + "px";
+
+        if( !keepScrollBar )
+        {
+            const scrollWidth = this.hScrollbarThumb.parentElement.offsetWidth;
+            const scrollBarWidth = this.hScrollbarThumb.offsetWidth;
+            this.setScrollBarValue( ( scrollWidth - scrollBarWidth ) * ( value / maxWidth ), 'horizontal' );
+        }
+
+        // Update cursor
+        var cursor = this.cursors.children[0];
+        cursor.style.left = "calc( " + (cursor._left - value) + "px + " + this.xPadding + ")";
+
+        // Update selection
+        for( let s of this.selections.childNodes ) {
+            s.style.left = "calc( " + (s._left - value) + "px + " + this.xPadding + ")";
+        }
+
+        this.code.customScroll.x = value;
+    }
+
+    setScrollTop( value, keepScrollBar ) {
+        
+        if(!this.code) return;
+
+        const realClientHeight = this.code.parentElement.offsetHeight - 32;
+        const maxHeight = Math.max( this.code.scrollHeight - realClientHeight, 0 );
+        
+        value = LX.UTILS.clamp( value, 0, maxHeight );
+        
+        this.gutter.scrollTop = value;
+        
+        this.code.style.marginTop = (-value) + "px";
+
+        if( !keepScrollBar )
+        {
+            const scrollHeight = this.scrollbarThumb.parentElement.offsetHeight;
+            const scrollBarHeight = this.scrollbarThumb.offsetHeight;
+            this.setScrollBarValue( ( scrollHeight - scrollBarHeight ) * ( value / maxHeight ) )
+        }
+
+        // Update cursor
+        var cursor = this.cursors.children[0];
+        cursor.style.top = (cursor._top - value) + "px";
+        
+        // Update selection
+        for( let s of this.selections.childNodes ) {
+            s.style.top = (s._top - value) + "px";
+        }
+        
+        this.code.customScroll.y = value;
+    }
+
+    resizeScrollBars() {
+
+        const numViewportLines = Math.floor( (this.code.parentElement.offsetHeight - 36) / this.lineHeight );
+
+        if( numViewportLines > this.code.lines.length )
+        {
+            this.scrollbar.classList.add( 'scrollbar-unused' );
+            this.tabs.area.root.classList.remove( 'with-vscrollbar' );
+        }
+        else
+        {
+            this.scrollbar.classList.remove( 'scrollbar-unused' );
+            this.tabs.area.root.classList.add( 'with-vscrollbar' );
+            this.scrollbarThumb.size = (numViewportLines / this.code.lines.length);
+            this.scrollbarThumb.style.height = (this.scrollbarThumb.size * 100.0) + "%";
+        }
+
+        const numViewportChars = Math.floor( this.code.clientWidth / this.charWidth );
+        const line_lengths = this.code.lines.map( value => value.length );
+        const maxLineLength = Math.max(...line_lengths);
+
+        if( numViewportChars > maxLineLength )
+        {
+            this.hScrollbar.classList.add( 'scrollbar-unused' );
+            this.tabs.area.root.classList.remove( 'with-hscrollbar' );
+        }
+        else
+        {
+            this.hScrollbar.classList.remove( 'scrollbar-unused' );
+            this.tabs.area.root.classList.add( 'with-hscrollbar' );
+            this.hScrollbarThumb.size = (numViewportChars / maxLineLength);
+            this.hScrollbarThumb.style.width = (this.hScrollbarThumb.size * 100.0) + "%";
+        }
+    }
+
+    setScrollBarValue( value, type = 'vertical' ) {
+
+        if( type == 'vertical' )
+        {
+            const scrollHeight = this.scrollbarThumb.parentElement.offsetHeight;
+            const scrollBarHeight = this.scrollbarThumb.offsetHeight;
+    
+            value = LX.UTILS.clamp( value, 0, ( scrollHeight - scrollBarHeight ) );
+    
+            this.scrollbarThumb._top = value;
+            this.scrollbarThumb.style.top = this.scrollbarThumb._top + "px";
+        }
+        else
+        {
+            const scrollWidth = this.hScrollbarThumb.parentElement.offsetWidth;
+            const scrollBarWidth = this.hScrollbarThumb.offsetWidth;
+    
+            value = LX.UTILS.clamp( value, 0, ( scrollWidth - scrollBarWidth ) );
+    
+            this.hScrollbarThumb._left = value;
+            this.hScrollbarThumb.style.left = this.hScrollbarThumb._left + "px";
+        }
+    }
+
+    applyHorizontalScrollFromScrollBar( value ) {
+
+        this.setScrollBarValue( value, 'horizontal');
+        this.setScrollLeft( value / this.hScrollbarThumb.size, true );
+    }
+
+    applyVerticalScrollFromScrollBar( value ) {
+
+        this.setScrollBarValue( value );
+        this.setScrollTop( value / this.scrollbarThumb.size, true );
     }
 
     getCharAtPos( cursor, offset = 0 ) {
@@ -2221,6 +2447,7 @@ class CodeEditor {
     }
 
     runScript( code ) {
+
         var script = document.createElement('script');
         script.type = 'module';
         script.innerHTML = code;
@@ -2277,15 +2504,15 @@ class CodeEditor {
 
         // Add language special keys...
         suggestions = suggestions.concat(   
-            this.builtin[ this.highlight ] ?? [],
-            this.keywords[ this.highlight ] ?? [],
-            this.statementsAndDeclarations[ this.highlight ] ?? [],
-            this.types[ this.highlight ] ?? [],
-            this.utils[ this.highlight ] ?? []
+            Object.keys( this.builtin[ this.highlight ] ) ?? [],
+            Object.keys( this.keywords[ this.highlight ] ) ?? [],
+            Object.keys( this.statementsAndDeclarations[ this.highlight ] ) ?? [],
+            Object.keys( this.types[ this.highlight ] ) ?? [],
+            Object.keys( this.utils[ this.highlight ] ) ?? []
         );
 
         // Add words in current tab plus remove current word
-        suggestions = suggestions.concat( Object.keys(this.code.tokens).filter( a => a != word ) );
+        // suggestions = suggestions.concat( Object.keys(this.code.tokens).filter( a => a != word ) );
 
         // Remove 1/2 char words and duplicates...        
         suggestions = suggestions.filter( (value, index) => value.length > 2 && suggestions.indexOf(value) === index );
@@ -2345,9 +2572,8 @@ class CodeEditor {
         // Show box
         this.autocomplete.classList.toggle('show', true);
         this.autocomplete.classList.toggle('no-scrollbar', !(this.autocomplete.scrollHeight > this.autocomplete.offsetHeight));
-        this.autocomplete.style.left = (cursor._left + 36) + "px";
-        this.autocomplete.style.top = (cursor._top + 48) + "px";
-
+        this.autocomplete.style.left = (cursor._left + 36 - this.getScrollLeft()) + "px";
+        this.autocomplete.style.top = (cursor._top + 48 - this.getScrollTop()) + "px";
 
         this.isAutoCompleteActive = true;
     }

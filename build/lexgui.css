@@ -2709,7 +2709,7 @@ ul.lexassetscontent {
 .lexcodeeditor {
   outline: none;
   overflow: hidden;
-  width: calc(100% );
+  width: calc(100%);
   -webkit-user-select: none; /* Safari 3.1+ */
   -moz-user-select: none; /* Firefox 2+ */
   -ms-user-select: none; /* IE 10+ */
@@ -2730,9 +2730,9 @@ ul.lexassetscontent {
 
 .lexcodegutter {
   width: 32px;
-  height: calc(100% - 69px); /* 6px of the vertical scrollbar */
+  height: calc(100% - 60px);
   background-color: var(--global-branch-darker);
-  margin-top: 25px;
+  margin-top: 24px;
   text-align: center;
   overflow: hidden;
   -webkit-user-select: none; /* Safari 3.1+ */
@@ -2753,17 +2753,27 @@ ul.lexassetscontent {
   line-height: 22px;
 }
 
-.lexcodeeditor .code {
-  height: calc(100% - 30px);
-  cursor: text;
-  font-size: 16px;
-  overflow: scroll;
+.lexcodeeditor .codetabsarea {
   background-color: var(--global-branch-darker);
-  padding-right: 6px;
 }
 
-.lexcodeeditor .code.dragging {
+.lexcodeeditor .codetabsarea.with-vscrollbar {
+  width: calc( 100% - 10px ) !important;
+}
+
+.lexcodeeditor .codetabsarea.with-hscrollbar {
+  height: calc( 100% - 40px ) !important;
+}
+
+.lexcodeeditor .codetabsarea.dragging {
   background-color: var(--global-color-secondary);
+}
+
+.lexcodeeditor .code {
+  cursor: text;
+  font-size: 16px;
+  overflow: hidden;
+  padding-right: 6px;
 }
 
 .codechar {
@@ -2851,6 +2861,56 @@ ul.lexassetscontent {
   left: 0px;
   top: 0px;
   height: 18px;
+}
+
+.lexcodescrollbar {
+  position: absolute;
+  background-color: var(--global-branch-darker);
+  filter: brightness(0.9);
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  margin-top: 26px;
+  z-index: 1 !important;
+  right: 0px;
+  width: 10px;
+  height: calc(100% - 62px);
+}
+
+.lexcodescrollbar.horizontal {
+  position: absolute;
+  background-color: var(--global-branch-darker);
+  filter: brightness(0.9);
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  z-index: 1 !important;
+  bottom: 36px;
+  right: 10px;
+  width: calc( 100% - 40px );
+  height: 10px;
+}
+
+.lexcodescrollbar.scrollbar-unused {
+  display: none;
+}
+
+.lexcodescrollbar div { /* thumb */
+  background-color: #bbbbbb57 !important;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-right: none;
+  position: absolute;
+  z-index: 0 !important;
+  top: 0px;
+  width: 10px;
+  height: 10px;
+  transition: linear 0.1s background-color;
+}
+
+.lexcodescrollbar div:hover { /* thumb */
+  background-color: #bbbbbb8c !important;
 }
 
 .lexcodeeditor .lexcodeselection {
