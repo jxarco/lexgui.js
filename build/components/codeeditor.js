@@ -1578,10 +1578,14 @@ class CodeEditor {
 
         if( !force )
         {
-            deleteElement( this.gutter.childNodes[ linenum ] );
+            var pre = document.createElement('pre');
+
+            // Single code line
             deleteElement( this.code.childNodes[ linenum ] );
             this.code.insertChildAtIndex( pre, linenum );
-
+            
+            // Gutter
+            deleteElement( this.gutter.childNodes[ linenum ] );
             var linenumspan = document.createElement('span');
             linenumspan.innerHTML = (linenum + 1);
             this.gutter.insertChildAtIndex( linenumspan, linenum );
@@ -1624,7 +1628,16 @@ class CodeEditor {
             line_inner_html += this.evaluateToken(token, prev, next);
         }
 
-        return "<pre>" + line_inner_html + "</pre>";
+        // Single line update
+        if( !force )
+        {
+            this.code.childNodes[ linenum ].innerHTML = line_inner_html;
+        }
+        // Update all lines at once
+        else
+        {
+            return "<pre>" + line_inner_html + "</pre>";
+        }
     }
 
     _processTokens( tokens, offset = 0 ) {
@@ -1655,66 +1668,63 @@ class CodeEditor {
         // Check if line comment
         const singleLineCommentToken = this.languages[ this.highlight ].singleLineCommentToken ?? this.defaultSingleLineCommentToken;
         const usesBlockComments = this.languages[ this.highlight ].blockComments ?? true;
-        const is_comment = linestring.split(singleLineCommentToken);
-        linestring = ( is_comment.length > 1 ) ? is_comment[0] : linestring;
+        const has_comment = linestring.split(singleLineCommentToken);
+        linestring = ( has_comment.length > 1 ) ? has_comment[0] : linestring;
 
-        const tokens = linestring.split(' ').join('¬ ¬').split('¬'); // trick to split without losing spaces
+       //  const tokens = linestring.split(' ').join('¬ ¬').split('¬'); // trick to split without losing spaces
         
         let tokensToEvaluate = []; // store in a temp array so we know prev and next tokens...
 
-        for( let t of tokens )
+        const pushToken = function( t ) {
+            if( (skipNonWords && ( t.includes('"') || t.length < 3 )) )
+                return;
+            tokensToEvaluate.push( t );
+        };
+
+        let iter = linestring.matchAll(/(::|[\[\](){}<>.,;:*"'%@ ])/g);
+        let subtokens = iter.next();
+        if( subtokens.value )
         {
-            if( !t.length || (skipNonWords && ( t.includes('"') || t.length < 3 )) )
-                continue;
-
-            if( t == ' ' ) {
-                tokensToEvaluate.push( t );
-                continue;
-            }
-
-            if( usesBlockComments )
+            let idx = 0;
+            while( subtokens.value != undefined )
             {
-                var block = false;
-
-                if( t.includes('/*') )
-                {
-                    const idx = t.indexOf( '/*' );
-                    tokensToEvaluate.push( t.substring( 0, idx ), '/*', t.substring( idx + 2 ) );
-                    block |= true;
-                }
-                else if( t.includes('*/') )
-                {
-                    const idx = t.indexOf( '*/' );
-                    tokensToEvaluate.push( t.substring( 0, idx ), '*/', t.substring( idx + 2 ) );
-                    block |= true;
-                }
-
-                if( block ) continue;
-            }
-
-            let iter = t.matchAll(/(::|[\[\](){}<>.,;:*"'%@])/g);
-            let subtokens = iter.next();
-            if( subtokens.value )
-            {
-                let idx = 0;
-                while( subtokens.value != undefined )
-                {
-                    const _pt = t.substring(idx, subtokens.value.index);
-                    if( _pt.length ) tokensToEvaluate.push( _pt );
-                    tokensToEvaluate.push( subtokens.value[0] );
-                    idx = subtokens.value.index + subtokens.value[0].length;
-                    subtokens = iter.next();
-                    if(!subtokens.value) {
-                        const _at = t.substring(idx);
-                        if( _at.length ) tokensToEvaluate.push( _at );
-                    }
+                const _pt = linestring.substring(idx, subtokens.value.index);
+                if( _pt.length ) pushToken( _pt );
+                pushToken( subtokens.value[0] );
+                idx = subtokens.value.index + subtokens.value[0].length;
+                subtokens = iter.next();
+                if(!subtokens.value) {
+                    const _at = linestring.substring(idx);
+                    if( _at.length ) pushToken( _at );
                 }
             }
-            else tokensToEvaluate.push( t );
         }
+        else tokensToEvaluate.push( linestring );
 
-        if( is_comment.length > 1 && !skipNonWords )
-            tokensToEvaluate.push( singleLineCommentToken + is_comment[1] );
+        // if( usesBlockComments )
+        // {
+        //     var block = false;
+
+        //     if( t.includes('/*') )
+        //     {
+        //         const idx = t.indexOf( '/*' );
+        //         tokensToEvaluate.push( t.substring( 0, idx ), '/*', t.substring( idx + 2 ) );
+        //         block |= true;
+        //     }
+        //     else if( t.includes('*/') )
+        //     {
+        //         const idx = t.indexOf( '*/' );
+        //         tokensToEvaluate.push( t.substring( 0, idx ), '*/', t.substring( idx + 2 ) );
+        //         block |= true;
+        //     }
+
+        //     if( block ) continue;
+        // }
+
+        if( has_comment.length > 1 && !skipNonWords )
+            pushToken( singleLineCommentToken + has_comment[1] );
+
+        // console.log( tokensToEvaluate );
 
         return this._processTokens( tokensToEvaluate );
     }
