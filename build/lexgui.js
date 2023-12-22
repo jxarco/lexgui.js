@@ -5046,50 +5046,45 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             if(!name) {
                 throw("Set Widget Name!");
             }
-
+    
             let widget = this.create_widget(name, Widget.FILE, options);
             let element = widget.domEl;
-
+    
             let local = options.local ?? true;
             let type = options.type ?? 'text';
             let read = options.read ?? true; 
-
+    
             // Create hidden input
             let input = document.createElement('input');
             input.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 10%)";
             input.type = 'file';
             if(options.placeholder)
                 input.placeholder = options.placeholder;
-
+    
             input.addEventListener('change', function(e) {
                 const files = e.target.files;
-                if(!files.length) return;
-                if(read) {
+                if( !files.length ) return;
+                if(read)
+                {
                     const reader = new FileReader();
-
-                    if(type === 'text') {
-                        reader.readAsText(files[0]);
-                    }else if(type === 'buffer') {
-                        reader.readAsArrayBuffer(files[0])
-                    }else if(type === 'bin') {
-                        reader.readAsBinaryString(files[0])
-                    }else if(type === 'url') {
-                        reader.readAsDataURL(files[0])
-                    }
-
-                    reader.onload = (e) => { callback.call(this, e.target.result) } ;
+    
+                    if(type === 'text') reader.readAsText(files[0]);
+                    else if(type === 'buffer') reader.readAsArrayBuffer(files[0]);
+                    else if(type === 'bin') reader.readAsBinaryString(files[0]);
+                    else if(type === 'url') reader.readAsDataURL(files[0]);
+    
+                    reader.onload = (e) => { callback.call( this, e.target.result, files[0] ) } ;
                 }
-                else 
-                    callback(files[0]);
+                else callback(files[0]);
                 
             });
-
+    
             element.appendChild(input);
-
+    
             this.queue( element );
             
-            if(local) {
-
+            if( local )
+            {
                 this.addButton(null, "<a style='margin-top: 0px;' class='fa-solid fa-gear'></a>", () => {
                     
                     new Dialog("Load Settings", p => {
@@ -5099,9 +5094,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     
                 }, { className: "micro", skipInlineCount: true });
             }
-
+    
             this.clearQueue();
-
+    
             return widget;
         }
 

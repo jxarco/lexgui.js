@@ -5059,24 +5059,19 @@ class Panel {
 
         input.addEventListener('change', function(e) {
             const files = e.target.files;
-            if(!files.length) return;
-            if(read) {
+            if( !files.length ) return;
+            if(read)
+            {
                 const reader = new FileReader();
 
-                if(type === 'text') {
-                    reader.readAsText(files[0]);
-                }else if(type === 'buffer') {
-                    reader.readAsArrayBuffer(files[0])
-                }else if(type === 'bin') {
-                    reader.readAsBinaryString(files[0])
-                }else if(type === 'url') {
-                    reader.readAsDataURL(files[0])
-                }
+                if(type === 'text') reader.readAsText(files[0]);
+                else if(type === 'buffer') reader.readAsArrayBuffer(files[0]);
+                else if(type === 'bin') reader.readAsBinaryString(files[0]);
+                else if(type === 'url') reader.readAsDataURL(files[0]);
 
-                reader.onload = (e) => { callback.call(this, e.target.result) } ;
+                reader.onload = (e) => { callback.call( this, e.target.result, files[0] ) } ;
             }
-            else 
-                callback(files[0]);
+            else callback(files[0]);
             
         });
 
@@ -5084,8 +5079,8 @@ class Panel {
 
         this.queue( element );
         
-        if(local) {
-
+        if( local )
+        {
             this.addButton(null, "<a style='margin-top: 0px;' class='fa-solid fa-gear'></a>", () => {
                 
                 new Dialog("Load Settings", p => {
