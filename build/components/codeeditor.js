@@ -1675,6 +1675,13 @@ class CodeEditor {
 
     processLine( linenum, force ) {
 
+        const UPDATE_LINE = ( html ) => {
+            if( !force ) // Single line update
+                this.code.childNodes[ linenum ].innerHTML = html;
+            else // Update all lines at once
+                return "<pre>" + html + "</pre>";
+        }
+
         delete this._buildingString; // multi-line strings not supported by now
         
         // It's allowed to process only 1 line to optimize
@@ -1693,6 +1700,12 @@ class CodeEditor {
             var linenumspan = document.createElement('span');
             linenumspan.innerHTML = (linenum + 1);
             this.gutter.insertChildAtIndex( linenumspan, linenum );
+        }
+
+        // Early out check for no highlighting languages
+        if( this.highlight == 'Plain Text' )
+        {
+            return UPDATE_LINE( linestring );
         }
 
         const tokensToEvaluate = this._getTokensFromString( linestring );
@@ -1732,16 +1745,7 @@ class CodeEditor {
             line_inner_html += this.evaluateToken(token, prev, next);
         }
 
-        // Single line update
-        if( !force )
-        {
-            this.code.childNodes[ linenum ].innerHTML = line_inner_html;
-        }
-        // Update all lines at once
-        else
-        {
-            return "<pre>" + line_inner_html + "</pre>";
-        }
+        return UPDATE_LINE( line_inner_html );
     }
 
     _processTokens( tokens, offset = 0 ) {
@@ -1872,7 +1876,6 @@ class CodeEditor {
         }
         else
         {
-
             const singleLineCommentToken = this.languages[ this.highlight ].singleLineCommentToken ?? this.defaultSingleLineCommentToken;
             const usesBlockComments = this.languages[ this.highlight ].blockComments ?? true;
             
