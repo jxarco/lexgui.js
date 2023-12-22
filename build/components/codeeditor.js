@@ -405,14 +405,14 @@ class CodeEditor {
             'Batch': ['if', 'IF', 'for', 'FOR', 'in', 'IN', 'do', 'DO', 'call', 'CALL', 'goto', 'GOTO', 'exit', 'EXIT']
         };
         this.symbols = {
-            'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
-            'C++': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '::', '*', '-', '+'],
-            'JSON': ['[', ']', '{', '}', '(', ')'],
-            'GLSL': ['[', ']', '{', '}', '(', ')'],
-            'WGSL': ['[', ']', '{', '}', '(', ')', '->'],
-            'CSS': ['{', '}', '(', ')', '*'],
-            'Python': ['<', '>', '[', ']', '(', ')', '='],
-            'Batch': ['[', ']', '(', ')', '%'],
+            // 'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
+            // 'C++': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '::', '*', '-', '+'],
+            // 'JSON': ['[', ']', '{', '}', '(', ')'],
+            // 'GLSL': ['[', ']', '{', '}', '(', ')'],
+            // 'WGSL': ['[', ']', '{', '}', '(', ')', '->'],
+            // 'CSS': ['{', '}', '(', ')', '*'],
+            // 'Python': ['<', '>', '[', ']', '(', ')', '='],
+            // 'Batch': ['[', ']', '(', ')', '%'],
         };
 
         // Convert reserved word arrays to maps so we can search tokens faster
@@ -1648,7 +1648,20 @@ class CodeEditor {
         this.code.innerHTML = "";
         this.gutter.innerHTML = "";
 
-        for( let i = 0; i < this.code.lines.length; ++i )
+        // Get info about lines in viewport
+        const margin = 20;
+        const firstLineInViewport = (this.getScrollTop() / this.lineHeight)|0;
+        const totalLinesInViewport = ((this.code.parentElement.offsetHeight - 36) / this.lineHeight)|0;
+        const viewportRange = new LX.vec2( 
+            Math.max( firstLineInViewport - margin, 0 ), 
+            Math.min( firstLineInViewport + totalLinesInViewport + margin, this.code.lines.length )
+        );
+
+        viewportRange.set( 0, this.code.lines.length );
+
+        this.numSpanElements = 0;
+
+        for( let i = viewportRange.x; i < viewportRange.y; ++i )
         {
             gutter_html += "<span>" + (i + 1) + "</span>";
             code_html += this.processLine( i, true );
@@ -1657,7 +1670,7 @@ class CodeEditor {
         this.code.innerHTML = code_html;
         this.gutter.innerHTML = gutter_html;
         
-        console.log( "Num lines processed: " + this.code.lines.length, performance.now() - start );
+        console.log(this.numSpanElements, "Num lines processed: " + (viewportRange.y - viewportRange.x), performance.now() - start );
     }
 
     processLine( linenum, force ) {
@@ -1827,43 +1840,50 @@ class CodeEditor {
 
     evaluateToken( token, prev, next ) {
 
+        const highlight = this.highlight.replace(/\s/g, '').replaceAll("+", "p").toLowerCase();
+        const customStringKeys = Object.assign( {}, this.stringKeys );
+
+        if( highlight == 'cpp' && prev && prev.includes('#') ) // preprocessor code..
+        {
+            customStringKeys['@<'] = '>';
+        }
+
+        // Manage strings
+        this._stringEnded = false;
+        if( this._buildingString != undefined )
+        {
+            const idx = Object.values(customStringKeys).indexOf( token );
+            this._stringEnded = (idx > -1) && (idx == Object.values(customStringKeys).indexOf( customStringKeys[ '@' + this._buildingString ] ));
+        } 
+        else if( customStringKeys[ '@' + token ] )
+        {   
+            // Start new string
+            this._buildingString = token;
+        }
+
         if(token == ' ')
         {
+            if( this._buildingString != undefined )
+            {
+                this.appendStringToken( token );
+                return "";
+            }
             return token;
         }
         else
         {
-            let stringEnded = false;
-            let highlight = this.highlight.replace(/\s/g, '').replaceAll("+", "p").toLowerCase();
 
             const singleLineCommentToken = this.languages[ this.highlight ].singleLineCommentToken ?? this.defaultSingleLineCommentToken;
             const usesBlockComments = this.languages[ this.highlight ].blockComments ?? true;
-            const customStringKeys = Object.assign( {}, this.stringKeys );
-
-            if( highlight == 'cpp' && prev && prev.includes('#') ) // preprocessor code..
-            {
-                customStringKeys['@<'] = '>';
-            }
-
-            // Manage strings
-            if( this._buildingString != undefined )
-            {
-                const idx = Object.values(customStringKeys).indexOf( token );
-                stringEnded = (idx > -1) && (idx == Object.values(customStringKeys).indexOf( customStringKeys[ '@' + this._buildingString ] ));
-            } 
-            else if( customStringKeys[ '@' + token ] )
-            {   
-                // Start new string
-                this._buildingString = token;
-            }
-
+            
             let token_classname = "";
+            let discardToken = false;
 
             if( this._buildingBlockComment != undefined )
                 token_classname = "cm-com";
             
             else if( this._buildingString != undefined )
-                token_classname = "cm-str";
+                discardToken = this.appendStringToken( token );
             
             else if( this._mustHightlightWord( token, this.keywords ) )
                 token_classname = "cm-kwd";
@@ -1913,13 +1933,47 @@ class CodeEditor {
             else if ( highlight == 'css' && prev == undefined && next == ':' ) // CSS attribute
                 token_classname = "cm-typ";
 
-            else if ( token[0] != '@' && next == '(' )
+            else if ( token[0] != '@' && token[0] != ',' && next == '(' )
                 token_classname = "cm-mtd";
 
-            this._buildingString = stringEnded ? undefined : this._buildingString;
+            this._buildingString = this._stringEnded ? undefined : this._buildingString;
+
+            // We finished constructing a string
+            if( this._stringEnded )
+            {
+                token = this.getCurrentString();
+                token_classname = "cm-str";
+                discardToken = false;
+            }
+
+            if( discardToken )
+                return "";
+
+            // No highlighting, no need to put it inside another span..
+            if( !token_classname.length )
+                return token;
+
+            this.numSpanElements++;
 
             return "<span class='" + highlight + " " + token_classname + "'>" + token + "</span>";
         }
+    }
+
+    appendStringToken( token ) {
+
+        if( !this._pendingString )
+            this._pendingString = "";
+
+        this._pendingString += token;
+
+        return true;
+    }
+
+    getCurrentString() {
+
+        const chars = this._pendingString;
+        delete this._pendingString;
+        return chars;
     }
 
     isCSSClass( token, prev, next ) {
@@ -2296,7 +2350,7 @@ class CodeEditor {
         
         if(!this.code) return;
 
-        const realClientHeight = this.code.parentElement.offsetHeight - 32;
+        const realClientHeight = this.code.parentElement.offsetHeight - 36;
         const maxHeight = Math.max( this.code.scrollHeight - realClientHeight, 0 );
         
         value = LX.UTILS.clamp( value, 0, maxHeight );
@@ -2309,7 +2363,9 @@ class CodeEditor {
         {
             const scrollHeight = this.scrollbarThumb.parentElement.offsetHeight;
             const scrollBarHeight = this.scrollbarThumb.offsetHeight;
-            this.setScrollBarValue( ( scrollHeight - scrollBarHeight ) * ( value / maxHeight ) )
+            // this.setScrollBarValue( ( scrollHeight - scrollBarHeight ) * ( value / maxHeight ) )
+            const firstLineInViewport = (this.getScrollTop() / this.lineHeight)|0;
+            this.setScrollBarValue( ( scrollHeight - scrollBarHeight ) * ( firstLineInViewport / this.code.lines.length ) )
         }
 
         // Update cursor

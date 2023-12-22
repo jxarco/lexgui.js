@@ -2730,7 +2730,7 @@ ul.lexassetscontent {
 
 .lexcodegutter {
   width: 32px;
-  height: calc(100% - 60px);
+  height: calc(100% - 70px);
   background-color: var(--global-branch-darker);
   margin-top: 24px;
   text-align: center;
@@ -2806,8 +2806,8 @@ ul.lexassetscontent {
   overflow: visible;
   -webkit-tap-highlight-color: transparent;
   z-index: 0 !important;
-  pointer-events: none;
   height: 16px;
+  pointer-events: none;
 }
 
 .lexcodeeditor span {
@@ -2866,7 +2866,6 @@ ul.lexassetscontent {
 .lexcodescrollbar {
   position: absolute;
   background-color: var(--global-branch-darker);
-  filter: brightness(0.9);
   box-sizing: border-box;
   margin: 0;
   padding: 0;
