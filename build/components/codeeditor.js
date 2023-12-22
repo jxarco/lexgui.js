@@ -273,7 +273,7 @@ class CodeEditor {
             {
                 var dt = (last_pos - e.x);
                 
-                that.applyHorizontalScrollFromScrollBar( that.hScrollbarThumb._left - dt )
+                that.applyHorizontalScrollFromScrollBar( that.hScrollbarThumb._left - dt );
 
                 last_pos = e.x;
                 e.stopPropagation();
@@ -1058,15 +1058,13 @@ class CodeEditor {
 
             // Get scroll data
 
-            const dX = (e.deltaY > 0.0 ? 1.0 : -1.0) * 20.0 * ( e.shiftKey ? 1.0 : 0.0 );
-            const dY = (e.deltaY > 0.0 ? 1.0 : -1.0) * 40.0 * ( e.shiftKey ? 0.0 : 1.0 );
+            const dX = (e.deltaY > 0.0 ? 1.0 : -1.0) * 2.0 * ( e.shiftKey ? 1.0 : 0.0 );
+            const dY = (e.deltaY > 0.0 ? 1.0 : -1.0) * 4.0 * ( e.shiftKey ? 0.0 : 1.0 );
 
-            var new_scroll = code.customScroll.add( new LX.vec2( dX, dY ), new LX.vec2() );
-            
             // Update state
             
-            if( new_scroll.x != this.getScrollLeft()) this.setScrollLeft( new_scroll.x );
-            if( new_scroll.y != this.getScrollTop()) this.setScrollTop( new_scroll.y );
+            if( dX != 0.0 ) this.applyHorizontalScrollFromScrollBar( this.hScrollbarThumb._left + dX );
+            if( dY != 0.0 ) this.applyVerticalScrollFromScrollBar( this.scrollbarThumb._top + dY )
         });
 
         this.openedTabs[name] = code;
@@ -2366,7 +2364,6 @@ class CodeEditor {
         {
             const scrollHeight = this.scrollbarThumb.parentElement.offsetHeight;
             const scrollBarHeight = this.scrollbarThumb.offsetHeight;
-            // this.setScrollBarValue( ( scrollHeight - scrollBarHeight ) * ( value / maxHeight ) )
             const firstLineInViewport = (this.getScrollTop() / this.lineHeight)|0;
             this.setScrollBarValue( ( scrollHeight - scrollBarHeight ) * ( firstLineInViewport / this.code.lines.length ) )
         }
@@ -2385,7 +2382,7 @@ class CodeEditor {
 
     resizeScrollBars() {
 
-        const numViewportLines = Math.floor( (this.code.parentElement.offsetHeight - 36) / this.lineHeight );
+        const numViewportLines = Math.ceil( (this.code.parentElement.offsetHeight - 36) / this.lineHeight );
 
         if( numViewportLines > this.code.lines.length )
         {
