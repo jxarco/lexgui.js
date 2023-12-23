@@ -273,7 +273,6 @@ class CodeEditor {
         // State
 
         this.state = {
-            overwrite: false,
             focused: false,
             selectingText: false
         }
@@ -559,7 +558,7 @@ class CodeEditor {
             {
                 if( e.shiftKey ) {
                     if(!this.selection)
-                        this.startSelection(cursor);
+                        this.startSelection( cursor );
 
                     this.selection.toY = (this.selection.toY > 0) ? (this.selection.toY - 1) : 0;
                     this.cursorToLine(cursor, this.selection.toY);
@@ -567,17 +566,17 @@ class CodeEditor {
                     var letter = this.getCharAtPos( cursor );
                     if(!letter) {
                         this.selection.toX = this.code.lines[cursor.line].length;
-                        this.cursorToPosition(cursor, this.selection.toX);
+                        this.cursorToPosition( cursor, this.selection.toX );
                     }
                     
-                    this.processSelection(null, true);
+                    this.processSelection( null, true );
 
                 } else {
                     this.endSelection();
                     this.lineUp();
                     // Go to end of line if out of line
                     var letter = this.getCharAtPos( cursor );
-                    if(!letter) this.actions['End'].callback(cursor.line, cursor, e);
+                    if(!letter) this.actions['End'].callback( cursor.line, cursor, e );
                 }
             } 
             // Move up autocomplete selection
@@ -870,13 +869,13 @@ class CodeEditor {
             const existing = this.addTab(name, true, title);
             if( !existing )
             {
-                text = text.replaceAll('\r', '');
-                this.code.lines = text.split('\n');
-                this._changeLanguageFromExtension( LX.getExtension(name) );
+                text = text.replaceAll( '\r', '' );
+                this.code.lines = text.split( '\n' );
+                this._changeLanguageFromExtension( LX.getExtension( name ) );
             }
         };
 
-        if(file.constructor == String)
+        if( file.constructor == String )
         {
             let filename = file;
             LX.request({ url: filename, success: text => {
@@ -901,15 +900,15 @@ class CodeEditor {
         var cursor = cursor ?? this.cursors.children[0];
 
         this.code.undoSteps.push( {
-            lines: LX.deepCopy(this.code.lines),
-            cursor: this.saveCursor(cursor),
+            lines: LX.deepCopy( this.code.lines ),
+            cursor: this.saveCursor( cursor ),
             line: cursor.line
         } );
     }
 
     _changeLanguage( lang ) {
 
-        this.code.lang = lang;
+        this.code.language = lang;
         this.highlight = lang;
         this._refreshCodeInfo();
         this.processLines();
@@ -918,23 +917,23 @@ class CodeEditor {
     _changeLanguageFromExtension( ext ) {
         
         if( !ext )
-        return this._changeLanguage( this.code.lang );
+        return this._changeLanguage( this.code.language );
 
-        switch(ext.toLowerCase())
+        switch( ext.toLowerCase() )
         {
-            case 'js': return this._changeLanguage('JavaScript');
-            case 'cpp': return this._changeLanguage('C++');
-            case 'h': return this._changeLanguage('C++');
-            case 'glsl': return this._changeLanguage('GLSL');
-            case 'css': return this._changeLanguage('CSS');
-            case 'json': return this._changeLanguage('JSON');
-            case 'xml': return this._changeLanguage('XML');
-            case 'wgsl': return this._changeLanguage('WGSL');
-            case 'py': return this._changeLanguage('Python');
-            case 'bat': return this._changeLanguage('Batch');
+            case 'js': return this._changeLanguage( 'JavaScript' );
+            case 'cpp': return this._changeLanguage( 'C++' );
+            case 'h': return this._changeLanguage( 'C++' );
+            case 'glsl': return this._changeLanguage( 'GLSL' );
+            case 'css': return this._changeLanguage( 'CSS' );
+            case 'json': return this._changeLanguage( 'JSON' );
+            case 'xml': return this._changeLanguage( 'XML' );
+            case 'wgsl': return this._changeLanguage( 'WGSL' );
+            case 'py': return this._changeLanguage( 'Python' );
+            case 'bat': return this._changeLanguage( 'Batch' );
             case 'txt': 
             default:
-                this._changeLanguage('Plain Text');
+                this._changeLanguage( 'Plain Text' );
         }
     }
 
@@ -1004,7 +1003,7 @@ class CodeEditor {
         let code = document.createElement('div');
         code.className = 'code';
         code.lines = [""];
-        code.lang = "Plain Text";
+        code.language = "Plain Text";
         code.cursorState = {};
         code.undoSteps = [];
         code.tabName = name;
@@ -1216,9 +1215,9 @@ class CodeEditor {
 
         var cursor = this.cursors.children[0];
 
-        if(e) this.processClick(e, true);
+        if(e) this.processClick( e, true );
         if( !this.selection )
-            this.startSelection(cursor);
+            this.startSelection( cursor );
 
         // Update selection
         if(!keep_range)
@@ -1249,7 +1248,7 @@ class CodeEditor {
                 let domEl = this.selections.childNodes[sId];
                 if(!domEl)
                 {
-                    domEl = document.createElement('div');
+                    domEl = document.createElement( 'div' );
                     domEl.className = "lexcodeselection";
                     this.selections.appendChild( domEl );
                 }
@@ -1345,13 +1344,13 @@ class CodeEditor {
             case 'a': // select all
                 e.preventDefault();
                 this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
-                this.startSelection(cursor);
+                this.startSelection( cursor );
                 const nlines = this.code.lines.length - 1;
                 this.selection.toX = this.code.lines[nlines].length;
                 this.selection.toY = nlines;
-                this.processSelection(null, true);
-                this.cursorToPosition(cursor, this.selection.toX);
-                this.cursorToLine(cursor, this.selection.toY);
+                this.processSelection( null, true );
+                this.cursorToPosition( cursor, this.selection.toX );
+                this.cursorToLine( cursor, this.selection.toY );
                 break;
             case 'c': // copy
                 this._copyContent();
@@ -1600,8 +1599,6 @@ class CodeEditor {
         var gutter_html = "";
         var code_html = "";
 
-        this.resizeScrollBars();
-
         this.code.innerHTML = "";
         this.gutter.innerHTML = "";
 
@@ -1616,6 +1613,8 @@ class CodeEditor {
 
         viewportRange.set( 0, this.code.lines.length );
 
+        this.resizeScrollBars( totalLinesInViewport );
+
         this.numSpanElements = 0;
 
         for( let i = viewportRange.x; i < viewportRange.y; ++i )
@@ -1627,7 +1626,8 @@ class CodeEditor {
         this.code.innerHTML = code_html;
         this.gutter.innerHTML = gutter_html;
         
-        console.log(this.numSpanElements, "Num lines processed: " + (viewportRange.y - viewportRange.x), performance.now() - start );
+        console.log( "Span tokens:", this.numSpanElements );
+        console.log( "Num lines processed:",  (viewportRange.y - viewportRange.x), performance.now() - start );
     }
 
     processLine( linenum, force ) {
@@ -2290,19 +2290,17 @@ class CodeEditor {
         this.setScrollBarValue( 'vertical' );
     }
 
-    resizeScrollBars() {
-
-        const numViewportLines = Math.ceil( (this.codeScroller.offsetHeight - 16) / this.lineHeight );
+    resizeScrollBars( numViewportLines ) {
 
         if( numViewportLines > this.code.lines.length )
         {
+            this.codeScroller.classList.remove( 'with-vscrollbar' );
             this.vScrollbar.root.classList.add( 'scrollbar-unused' );
-            this.tabs.area.root.classList.remove( 'with-vscrollbar' );
         }
         else
         {
+            this.codeScroller.classList.add( 'with-vscrollbar' );
             this.vScrollbar.root.classList.remove( 'scrollbar-unused' );
-            this.tabs.area.root.classList.add( 'with-vscrollbar' );
             this.vScrollbar.thumb.size = (numViewportLines / this.code.lines.length);
             this.vScrollbar.thumb.style.height = (this.vScrollbar.thumb.size * 100.0) + "%";
         }
@@ -2313,13 +2311,13 @@ class CodeEditor {
 
         if( numViewportChars > maxLineLength )
         {
+            this.codeScroller.classList.remove( 'with-hscrollbar' );
             this.hScrollbar.root.classList.add( 'scrollbar-unused' );
-            this.tabs.area.root.classList.remove( 'with-hscrollbar' );
         }
         else
         {
+            this.codeScroller.classList.add( 'with-hscrollbar' );
             this.hScrollbar.root.classList.remove( 'scrollbar-unused' );
-            this.tabs.area.root.classList.add( 'with-hscrollbar' );
             this.hScrollbar.thumb.size = (numViewportChars / maxLineLength);
             this.hScrollbar.thumb.style.width = (this.hScrollbar.thumb.size * 100.0) + "%";
         }
