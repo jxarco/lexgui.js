@@ -2754,7 +2754,13 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .codetabsarea {
+  height: calc( 100% - 62px ) !important;
   background-color: var(--global-branch-darker);
+  overflow: scroll;
+}
+
+.lexcodeeditor .codetabsarea::-webkit-scrollbar {
+  display: none;
 }
 
 .lexcodeeditor .codetabsarea.with-vscrollbar {
@@ -2762,7 +2768,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .codetabsarea.with-hscrollbar {
-  height: calc( 100% - 40px ) !important;
+  height: calc( 100% - 72px ) !important;
 }
 
 .lexcodeeditor .codetabsarea.dragging {
@@ -2772,7 +2778,7 @@ ul.lexassetscontent {
 .lexcodeeditor .code {
   cursor: text;
   font-size: 16px;
-  overflow: hidden;
+  /* overflow: hidden; */
   padding-right: 6px;
 }
 
@@ -2864,6 +2870,8 @@ ul.lexassetscontent {
 }
 
 .lexcodescrollbar {
+  width: 10px;
+  height: calc(100% - 62px);
   position: absolute;
   background-color: var(--global-branch-darker);
   box-sizing: border-box;
@@ -2872,21 +2880,13 @@ ul.lexassetscontent {
   margin-top: 26px;
   z-index: 1 !important;
   right: 0px;
-  width: 10px;
-  height: calc(100% - 62px);
 }
 
 .lexcodescrollbar.horizontal {
-  position: absolute;
-  background-color: var(--global-branch-darker);
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  z-index: 1 !important;
-  bottom: 36px;
-  right: 10px;
   width: calc( 100% - 40px );
   height: 10px;
+  bottom: 36px;
+  right: 10px;
 }
 
 .lexcodescrollbar.scrollbar-unused {
