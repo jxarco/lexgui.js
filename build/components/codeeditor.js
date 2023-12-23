@@ -77,9 +77,9 @@ class CodeSelection {
         domEl.className = "lexcodeselection";
         
         domEl._top = 4 + y * this.editor.lineHeight;
-        domEl.style.top = (domEl._top - this.editor.getScrollTop()) + "px";
+        domEl.style.top = domEl._top + "px";
         domEl._left = x * this.editor.charWidth;
-        domEl.style.left = "calc(" + (domEl._left - this.editor.getScrollLeft()) + "px + " + this.editor.xPadding + ")";
+        domEl.style.left = "calc(" + domEl._left + "px + " + this.editor.xPadding + ")";
         domEl.style.width = width + "px";
         this.editor.selections.appendChild(domEl);
     }
@@ -1262,20 +1262,19 @@ class CodeEditor {
                     const reverse = fromX > toX;
                     if(deltaY == 0) string = !reverse ? this.code.lines[i].substring(fromX, toX) : this.code.lines[i].substring(toX, fromX);
                     else string = this.code.lines[i].substr(fromX);
-                    const pixels = ((reverse && deltaY == 0 ? toX : fromX) * this.charWidth) - this.getScrollLeft();
+                    const pixels = (reverse && deltaY == 0 ? toX : fromX) * this.charWidth;
                     domEl.style.left = "calc(" + pixels + "px + " + this.xPadding + ")";
                 }
                 else
                 {
                     string = (i == toY) ? this.code.lines[i].substring(0, toX) : this.code.lines[i]; // Last line, any multiple line...
-                    const pixels = -this.getScrollLeft();
-                    domEl.style.left = "calc(" + pixels + "px + " + this.xPadding + ")";
+                    domEl.style.left = this.xPadding;
                 }
                 
                 const stringWidth = this.measureString(string);
                 domEl.style.width = (stringWidth || 8) + "px";
                 domEl._top = 4 + i * this.lineHeight;
-                domEl.style.top = (domEl._top - this.getScrollTop()) + "px";
+                domEl.style.top = domEl._top + "px";
                 this.selection.chars += stringWidth / this.charWidth;
             }
         }
@@ -1303,19 +1302,19 @@ class CodeEditor {
                 if(sId == 0)
                 {
                     string = this.code.lines[i].substr(toX);
-                    const pixels = (toX * this.charWidth) - this.getScrollLeft();
+                    const pixels = toX * this.charWidth;
                     domEl.style.left = "calc(" + pixels + "px + " + this.xPadding + ")";
                 }
                 else
                 {
                     string = (i == fromY) ? this.code.lines[i].substring(0, fromX) : this.code.lines[i]; // Last line, any multiple line...
-                    domEl.style.left = "calc(" + (-this.getScrollLeft()) + "px + " + this.xPadding + ")";
+                    domEl.style.left = this.xPadding;
                 }
                 
                 const stringWidth = this.measureString(string);
                 domEl.style.width = (stringWidth || 8) + "px";
                 domEl._top = 4 + i * this.lineHeight;
-                domEl.style.top = (domEl._top - this.getScrollTop()) + "px";
+                domEl.style.top = domEl._top + "px";
                 this.selection.chars += stringWidth / this.charWidth;
             }
         }
