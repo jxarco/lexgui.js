@@ -76,7 +76,7 @@ class CodeSelection {
         var domEl = document.createElement('div');
         domEl.className = "lexcodeselection";
         
-        domEl._top = 4 + y * this.editor.lineHeight;
+        domEl._top = y * this.editor.lineHeight;
         domEl.style.top = domEl._top + "px";
         domEl._left = x * this.editor.charWidth;
         domEl.style.left = "calc(" + domEl._left + "px + " + this.editor.xPadding + ")";
@@ -195,9 +195,9 @@ class CodeEditor {
 
         if( !this.disableEdition )
         {
-            this.root.addEventListener( 'keydown', this.processKey.bind(this), true);
-            this.root.addEventListener( 'focus', this.processFocus.bind(this, true) );
-            this.root.addEventListener( 'focusout', this.processFocus.bind(this, false) );
+            this.root.addEventListener( 'keydown', this.processKey.bind( this), true );
+            this.root.addEventListener( 'focus', this.processFocus.bind( this, true ) );
+            this.root.addEventListener( 'focusout', this.processFocus.bind( this, false ) );
         }
        
         this.root.addEventListener( 'mousedown', this.processMouse.bind(this) );
@@ -208,41 +208,53 @@ class CodeEditor {
 
         // Cursors and selection
 
-        this.cursors = document.createElement('div');
+        this.cursors = document.createElement( 'div' );
         this.cursors.className = 'cursors';
-        this.tabs.area.attach(this.cursors);
+        this.tabs.area.attach( this.cursors );
 
-        this.selections = document.createElement('div');
+        this.selections = document.createElement( 'div' );
         this.selections.className = 'selections';
-        this.tabs.area.attach(this.selections);
+        this.tabs.area.attach( this.selections );
 
         // Css char synchronization
         this.xPadding = "0.25em";
 
         // Add main cursor
         {
-            var cursor = document.createElement('div');
+            var cursor = document.createElement( 'div' );
             cursor.className = "cursor";
             cursor.innerHTML = "&nbsp;";
             cursor._left = 0;
             cursor.style.left = this.xPadding;
-            cursor._top = 4;
-            cursor.style.top = "4px";
+            cursor._top = 0;
+            cursor.style.top = cursor._top + "px";
             cursor.position = 0;
             cursor.line = 0;
-            cursor.print = (function() { console.log( this.line, this.position ) }).bind(cursor);
-            this.cursors.appendChild(cursor);
+            cursor.print = (function() { console.log( this.line, this.position ) }).bind( cursor );
+            this.cursors.appendChild( cursor );
         }
 
         // Scroll stuff
         {
             this.codeScroller = this.tabs.area.root;
+            this.testScrollTop = 0;
+            window.scroller = this.codeScroller;
 
-            this.codeScroller.addEventListener('scroll', (e) => {
+            this.codeScroller.addEventListener( 'scroll', (e) => {
+
                 this.setScrollBarValue( 'vertical' );
+
+                // const viewportSizeY = (this.codeScroller.offsetHeight - 36);
+
+                // if( this.getScrollTop() > (viewportSizeY * 0.5) )
+                // {
+                //     this.testScrollTop += this.getScrollTop();
+                //     this.setScrollTop( 0 );
+                //     this.processLines();
+                // }
             });
 
-            this.codeScroller.addEventListener('wheel', (e) => {
+            this.codeScroller.addEventListener( 'wheel', (e) => {
                 const dX = (e.deltaY > 0.0 ? 10.0 : -10.0) * ( e.shiftKey ? 1.0 : 0.0 );
                 if( dX != 0.0 ) this.setScrollBarValue( 'horizontal', dX );
             });
@@ -268,6 +280,18 @@ class CodeEditor {
             this.tabs.area.attach(box);
 
             this.isAutoCompleteActive = false;
+        }
+
+        // Add code-sizer
+        {
+            this.codeSizer = document.createElement( 'div' );
+            this.codeSizer.className = "code-sizer";
+            
+            // Append all childs
+            while( this.codeScroller.firstChild )
+                this.codeSizer.appendChild( this.codeScroller.firstChild );
+
+            this.codeScroller.appendChild( this.codeSizer );
         }
 
         // State
@@ -306,7 +330,7 @@ class CodeEditor {
         };
 
         // Scan tokens..
-        setInterval( this.scanWordSuggestions.bind(this), 2000 );
+        // setInterval( this.scanWordSuggestions.bind( this ), 2000 );
 
         this.languages = {
             'Plain Text': { },
@@ -403,30 +427,30 @@ class CodeEditor {
 
         this.action('Backspace', false, ( ln, cursor, e ) => {
 
-            this._addUndoStep(cursor);
+            this._addUndoStep( cursor );
 
             if(this.selection) {
-                this.deleteSelection(cursor);
+                this.deleteSelection( cursor );
                 // Remove entire line when selecting with triple click
-                if(this.code.lines[ln] && !this.code.lines[ln].length) 
+                if(this.code.lines[ ln ] && !this.code.lines[ ln ].length) 
                     this.actions['Backspace'].callback(ln, cursor, e);
             }
             else {
                 var letter = this.getCharAtPos( cursor, -1 );
                 if(letter) {
-                    this.code.lines[ln] = sliceChar( this.code.lines[ln], cursor.position - 1 );
+                    this.code.lines[ ln ] = sliceChar( this.code.lines[ ln ], cursor.position - 1 );
                     this.cursorToLeft( letter );
-                    this.processLine(ln);
+                    this.processLine( ln );
                     if( this.useAutoComplete )
                         this.showAutoCompleteBox( 'foo', cursor );
                 } 
-                else if(this.code.lines[ln - 1] != undefined) {
+                else if(this.code.lines[ ln - 1 ] != undefined) {
                     this.lineUp();
-                    this.actions['End'].callback(cursor.line, cursor, e);
+                    this.actions[ 'End' ].callback( cursor.line, cursor, e );
                     // Move line on top
-                    this.code.lines[ln - 1] += this.code.lines[ln];
-                    this.code.lines.splice(ln, 1);
-                    this.processLines(ln - 1);
+                    this.code.lines[ ln - 1 ] += this.code.lines[ ln ];
+                    this.code.lines.splice( ln, 1 );
+                    this.processLines( ln - 1 );
                 }
             }
         });
@@ -1047,6 +1071,9 @@ class CodeEditor {
             this.gutter.scrollLeft = this.getScrollLeft();
             this.gutter.scrollTop = this.getScrollTop();
         }});
+
+        // Move into the sizer..
+        this.codeSizer.appendChild( code );
         
         this.endSelection();
 
@@ -1272,7 +1299,7 @@ class CodeEditor {
                 
                 const stringWidth = this.measureString(string);
                 domEl.style.width = (stringWidth || 8) + "px";
-                domEl._top = 4 + i * this.lineHeight;
+                domEl._top = i * this.lineHeight;
                 domEl.style.top = domEl._top + "px";
                 this.selection.chars += stringWidth / this.charWidth;
             }
@@ -1312,7 +1339,7 @@ class CodeEditor {
                 
                 const stringWidth = this.measureString(string);
                 domEl.style.width = (stringWidth || 8) + "px";
-                domEl._top = 4 + i * this.lineHeight;
+                domEl._top = i * this.lineHeight;
                 domEl.style.top = domEl._top + "px";
                 this.selection.chars += stringWidth / this.charWidth;
             }
@@ -1587,13 +1614,18 @@ class CodeEditor {
         for( let i = 0; i < this.code.lines.length; ++i )
         {
             const linestring = this.code.lines[ i ];
-            const tokens = this._getTokensFromString( linestring, true );
+            const tokens = this._getTokensFromLine( linestring, true );
             tokens.forEach( t => this.code.tokens[ t ] = 1 );
         }
     }
 
     processLines( from__legacy ) {
 
+        console.clear();
+        console.log("_______________________________________________________");
+
+        const lastScrollTop = this.getScrollTop();
+        
         const start = performance.now();
 
         var gutter_html = "";
@@ -1603,13 +1635,17 @@ class CodeEditor {
         this.gutter.innerHTML = "";
 
         // Get info about lines in viewport
-        const margin = 20;
-        const firstLineInViewport = (this.getScrollTop() / this.lineHeight)|0;
+        const margin = 50;
+        // const firstLineInViewport = (this.testScrollTop / this.lineHeight)|0;
+        const firstLineInViewport = (lastScrollTop / this.lineHeight)|0;
         const totalLinesInViewport = ((this.codeScroller.offsetHeight - 36) / this.lineHeight)|0;
         const viewportRange = new LX.vec2( 
-            Math.max( firstLineInViewport - margin, 0 ), 
+            Math.max( firstLineInViewport, 0 ), 
             Math.min( firstLineInViewport + totalLinesInViewport + margin, this.code.lines.length )
-        );
+            );
+            
+        // console.log("FIRST LINE IS " + firstLineInViewport, "WITH SCROLL TOP = " + this.testScrollTop);
+        console.log("RANGE:", viewportRange);
 
         viewportRange.set( 0, this.code.lines.length );
 
@@ -1626,8 +1662,12 @@ class CodeEditor {
         this.code.innerHTML = code_html;
         this.gutter.innerHTML = gutter_html;
         
-        console.log( "Span tokens:", this.numSpanElements );
+        // console.log( "Span tokens:", this.numSpanElements );
         console.log( "Num lines processed:",  (viewportRange.y - viewportRange.x), performance.now() - start );
+        console.log("_______________________________________________________");
+
+        this.gutter.scrollTop = lastScrollTop;
+        this.codeScroller.scrollTop = lastScrollTop;
     }
 
     processLine( linenum, force ) {
@@ -1646,7 +1686,7 @@ class CodeEditor {
 
         if( !force )
         {
-            var pre = document.createElement('pre');
+            var pre = document.createElement( 'pre' );
 
             // Single code line
             deleteElement( this.code.childNodes[ linenum ] );
@@ -1655,7 +1695,7 @@ class CodeEditor {
             // Gutter
             deleteElement( this.gutter.childNodes[ linenum ] );
             var linenumspan = document.createElement('span');
-            linenumspan.innerHTML = (linenum + 1);
+            linenumspan.innerHTML = ( linenum + 1 );
             this.gutter.insertChildAtIndex( linenumspan, linenum );
         }
 
@@ -1665,7 +1705,7 @@ class CodeEditor {
             return UPDATE_LINE( linestring );
         }
 
-        const tokensToEvaluate = this._getTokensFromString( linestring );
+        const tokensToEvaluate = this._getTokensFromLine( linestring );
 
         if( !tokensToEvaluate.length )
         return "<pre></pre>";
@@ -1676,30 +1716,30 @@ class CodeEditor {
         for( var i = 0; i < tokensToEvaluate.length; ++i )
         {
             let it = i - 1;
-            let prev = tokensToEvaluate[it];
+            let prev = tokensToEvaluate[ it ];
             while( prev == ' ' ) {
                 it--;
-                prev = tokensToEvaluate[it];
+                prev = tokensToEvaluate[ it ];
             }
             
             it = i + 1;
-            let next = tokensToEvaluate[it];
+            let next = tokensToEvaluate[ it ];
             while( next == ' ' || next == '"' ) {
                 it++;
-                next = tokensToEvaluate[it];
+                next = tokensToEvaluate[ it ];
             }
             
-            const token = tokensToEvaluate[i];
+            const token = tokensToEvaluate[ i ];
 
             if( this.languages[ this.highlight ].blockComments ?? true )
             {
-                if( token.substr(0, 2) == '/*' )
+                if( token.substr( 0, 2 ) == '/*' )
                     this._buildingBlockComment = true;
-                if( token.substr(token.length - 2) == '*/' )
+                if( token.substr( token.length - 2 ) == '*/' )
                     delete this._buildingBlockComment;
             }
 
-            line_inner_html += this.evaluateToken(token, prev, next);
+            line_inner_html += this.evaluateToken( token, prev, next );
         }
 
         return UPDATE_LINE( line_inner_html );
@@ -1709,16 +1749,16 @@ class CodeEditor {
 
         if( this.highlight == 'C++' )
         {
-            var idx = tokens.slice(offset).findIndex( (value, index) => this.isNumber(value) );
+            var idx = tokens.slice( offset ).findIndex( ( value, index ) => this.isNumber( value ) );
             if( idx > -1 )
             {
                 idx += offset; // Add offset to compute within the whole array of tokens
-                let data = tokens[idx] + tokens[++idx];
+                let data = tokens[ idx ] + tokens[ ++idx ];
                 while( this.isNumber( data ) )
                 {
                     tokens[ idx - 1 ] += tokens[ idx ];
                     tokens.splice( idx, 1 );
-                    data += tokens[idx];
+                    data += tokens[ idx ];
                 }
                 // Scan for numbers again
                 return this._processTokens( tokens, idx );
@@ -1728,16 +1768,44 @@ class CodeEditor {
         return tokens;
     }
 
-    _getTokensFromString( linestring, skipNonWords ) {
+    _lineHasComment( linestring ) {
+
+        const singleLineCommentToken = this.languages[ this.highlight ].singleLineCommentToken ?? this.defaultSingleLineCommentToken;
+        const idx = linestring.indexOf( singleLineCommentToken );
+        
+        if( idx > -1 )
+        {
+            const stringKeys = Object.values( this.stringKeys );
+            // Count times we started a string BEFORE the comment
+            var err = false;
+            err |= stringKeys.some( function(v) { 
+                var re = new RegExp( v, "g" ); 
+                var matches = (linestring.substring( 0, idx ).match( re ) || []);
+                return (matches.length % 2) !== 0; 
+            } );
+            err |= stringKeys.some( function(v) { 
+                var re = new RegExp( v, "g" ); 
+                var matches = (linestring.substring( idx ).match( re ) || []);
+                return (matches.length % 2) !== 0; 
+            } );
+            return err ? undefined : idx;
+        }
+    }
+
+    _getTokensFromLine( linestring, skipNonWords ) {
 
         // Check if line comment
+        const ogLine = linestring;
         const singleLineCommentToken = this.languages[ this.highlight ].singleLineCommentToken ?? this.defaultSingleLineCommentToken;
-        const usesBlockComments = this.languages[ this.highlight ].blockComments ?? true;
-        const has_comment = linestring.split(singleLineCommentToken);
-        linestring = ( has_comment.length > 1 ) ? has_comment[0] : linestring;
+        const hasCommentIdx = this._lineHasComment( linestring );
 
-       //  const tokens = linestring.split(' ').join('¬ ¬').split('¬'); // trick to split without losing spaces
-        
+        if( hasCommentIdx != undefined )
+        {
+            linestring = ogLine.substring( 0, hasCommentIdx );
+        }
+
+        // const usesBlockComments = this.languages[ this.highlight ].blockComments ?? true;
+
         let tokensToEvaluate = []; // store in a temp array so we know prev and next tokens...
 
         const pushToken = function( t ) {
@@ -1786,10 +1854,10 @@ class CodeEditor {
         //     if( block ) continue;
         // }
 
-        if( has_comment.length > 1 && !skipNonWords )
-            pushToken( singleLineCommentToken + has_comment[1] );
-
-        // console.log( tokensToEvaluate );
+        if( hasCommentIdx != undefined )
+        {
+            pushToken( ogLine.substring( hasCommentIdx ) );
+        }
 
         return this._processTokens( tokensToEvaluate );
     }
@@ -2068,34 +2136,34 @@ class CodeEditor {
     deleteSelection( cursor ) {
 
         // I think it's not necessary but... 
-        if(this.disableEdition) 
+        if( this.disableEdition ) 
             return;
 
         // Some selections don't depend on mouse up..
-        if(this.selection) this.selection.invertIfNecessary();
+        if( this.selection ) this.selection.invertIfNecessary();
 
         const separator = "_NEWLINE_";
-        let code = this.code.lines.join(separator);
+        let code = this.code.lines.join( separator );
 
         // Get linear start index
         let index = 0;
         for(let i = 0; i <= this.selection.fromY; i++)
-            index += (i == this.selection.fromY ? this.selection.fromX : this.code.lines[i].length);
+            index += (i == this.selection.fromY ? this.selection.fromX : this.code.lines[ i ].length);
 
         index += this.selection.fromY * separator.length; 
 
         const num_chars = this.selection.chars + (this.selection.toY - this.selection.fromY) * separator.length;
-        const pre = code.slice(0, index);
-        const post = code.slice(index + num_chars);
+        const pre = code.slice( 0, index );
+        const post = code.slice( index + num_chars );
 
-        this.code.lines = (pre + post).split(separator);
-        this.processLines(this.selection.fromY);
+        this.code.lines = ( pre + post ).split( separator );
+        this.processLines( this.selection.fromY );
 
-        this.cursorToLine(cursor, this.selection.fromY, true);
-        this.cursorToPosition(cursor, this.selection.fromX);
+        this.cursorToLine( cursor, this.selection.fromY, true );
+        this.cursorToPosition( cursor, this.selection.fromX );
+        
         this.endSelection();
-
-        this._refreshCodeInfo(cursor.line, cursor.position);
+        this._refreshCodeInfo( cursor.line, cursor.position );
     }
 
     endSelection() {
@@ -2107,8 +2175,8 @@ class CodeEditor {
 
     cursorToRight( key, cursor ) {
 
-        if(!key) return;
-        cursor = cursor ?? this.cursors.children[0];
+        if( !key ) return;
+        cursor = cursor ?? this.cursors.children[ 0 ];
         cursor._left += this.charWidth;
         cursor.style.left = "calc( " + cursor._left + "px + " + this.xPadding + " )";
         cursor.position++;
@@ -2149,7 +2217,7 @@ class CodeEditor {
 
         cursor = cursor ?? this.cursors.children[0];
         cursor._top -= this.lineHeight;
-        cursor._top = Math.max(cursor._top, 4);
+        cursor._top = Math.max(cursor._top, 0);
         cursor.style.top = "calc(" + cursor._top + "px)";
         this.restartBlink();
         
@@ -2201,7 +2269,7 @@ class CodeEditor {
     cursorToLine( cursor, line, resetLeft = false ) {
 
         cursor.line = line;
-        cursor._top = 4 + this.lineHeight * line;
+        cursor._top = this.lineHeight * line;
         cursor.style.top = cursor._top + "px";
         if(resetLeft) this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
     }
@@ -2224,7 +2292,7 @@ class CodeEditor {
 
         cursor._left = state.left ?? 0;
         cursor.style.left = "calc(" + (cursor._left - this.getScrollLeft()) + "px + " + this.xPadding + ")";
-        cursor._top = state.top ?? 4;
+        cursor._top = state.top ?? 0;
         cursor.style.top = "calc(" + (cursor._top - this.getScrollTop()) + "px)";
     }
 
@@ -2241,7 +2309,7 @@ class CodeEditor {
 
         if( flag & CodeEditor.CURSOR_TOP )
         {
-            cursor._top = 4;
+            cursor._top = 0;
             cursor.style.top = (cursor._top - this.getScrollTop()) + "px";
             cursor.line = 0;
         }
