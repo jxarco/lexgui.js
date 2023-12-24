@@ -1621,15 +1621,25 @@ class CodeEditor {
 
     processLines( from__legacy ) {
 
+        var inner = () => {
+
         console.clear();
         console.log("_______________________________________________________");
 
         const lastScrollTop = this.getScrollTop();
         
+        // Update max viewport
+        {
+            const scrollWidth = this.codeScroller.scrollWidth - this.codeScroller.clientWidth;
+            const scrollHeight = this.codeScroller.scrollHeight - this.codeScroller.clientHeight;
+    
+            this.codeSizer.style.minWidth = scrollWidth + "px";
+            this.codeSizer.style.minHeight = scrollHeight + "px";
+        }
+
         const start = performance.now();
 
-        var gutter_html = "";
-        var code_html = "";
+        var gutter_html = "", code_html = "";
 
         this.code.innerHTML = "";
         this.gutter.innerHTML = "";
@@ -1645,7 +1655,7 @@ class CodeEditor {
             );
             
         // console.log("FIRST LINE IS " + firstLineInViewport, "WITH SCROLL TOP = " + this.testScrollTop);
-        console.log("RANGE:", viewportRange);
+        // console.log("RANGE:", viewportRange);
 
         viewportRange.set( 0, this.code.lines.length );
 
@@ -1668,6 +1678,10 @@ class CodeEditor {
 
         this.gutter.scrollTop = lastScrollTop;
         this.codeScroller.scrollTop = lastScrollTop;
+
+        };
+
+        setTimeout( inner, 10 );
     }
 
     processLine( linenum, force ) {
@@ -2373,7 +2387,7 @@ class CodeEditor {
             this.vScrollbar.thumb.style.height = (this.vScrollbar.thumb.size * 100.0) + "%";
         }
 
-        const numViewportChars = Math.floor( this.code.clientWidth / this.charWidth );
+        const numViewportChars = Math.floor( this.codeScroller.clientWidth / this.charWidth );
         const line_lengths = this.code.lines.map( value => value.length );
         const maxLineLength = Math.max(...line_lengths);
 
