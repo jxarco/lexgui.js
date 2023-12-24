@@ -2778,8 +2778,8 @@ ul.lexassetscontent {
 .lexcodeeditor .code {
   cursor: text;
   font-size: 16px;
-  /* overflow: hidden; */
   padding-right: 6px;
+  position: relative;
 }
 
 .codechar {

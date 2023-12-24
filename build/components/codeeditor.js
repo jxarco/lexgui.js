@@ -154,6 +154,9 @@ class CodeEditor {
     static CURSOR_LEFT  = 1;
     static CURSOR_TOP   = 2;
 
+    static KEEP_VISIBLE_LINES   = 1;
+    static UPDATE_VISIBLE_LINES = 2;
+
     static WORD_TYPE_METHOD = 0;
     static WORD_TYPE_CLASS  = 1;
 
@@ -237,21 +240,23 @@ class CodeEditor {
         // Scroll stuff
         {
             this.codeScroller = this.tabs.area.root;
-            this.testScrollTop = 0;
+            this._firstLineIndex = 0;
             window.scroller = this.codeScroller;
 
             this.codeScroller.addEventListener( 'scroll', (e) => {
 
                 this.setScrollBarValue( 'vertical' );
 
-                // const viewportSizeY = (this.codeScroller.offsetHeight - 36);
+                const scrollTop = this.getScrollTop();
+                const firstLineInViewport = ( (scrollTop / this.lineHeight)|0 ) + this._firstLineIndex;
+                const boundary = ( (this._firstLineIndex + 25) * this.lineHeight  );
 
-                // if( this.getScrollTop() > (viewportSizeY * 0.5) )
-                // {
-                //     this.testScrollTop += this.getScrollTop();
-                //     this.setScrollTop( 0 );
-                //     this.processLines();
-                // }
+                if( scrollTop > boundary )
+                {
+                    this.code.style.top = boundary + "px";
+                    // this.gutter.style.paddingTop = this.getScrollTop() + "px";
+                    this.processLines( CodeEditor.UPDATE_VISIBLE_LINES );
+                }
             });
 
             this.codeScroller.addEventListener( 'wheel', (e) => {
@@ -450,7 +455,7 @@ class CodeEditor {
                     // Move line on top
                     this.code.lines[ ln - 1 ] += this.code.lines[ ln ];
                     this.code.lines.splice( ln, 1 );
-                    this.processLines( ln - 1 );
+                    this.processLines();
                 }
             }
         });
@@ -461,19 +466,19 @@ class CodeEditor {
             
             if(this.selection) {
                 // Use 'Backspace' as it's the same callback...
-                this.actions['Backspace'].callback(ln, cursor, e);
+                this.actions['Backspace'].callback( ln, cursor, e );
             }
             else
             {
                 var letter = this.getCharAtPos( cursor );
                 if(letter) {
-                    this.code.lines[ln] = sliceChar( this.code.lines[ln], cursor.position );
-                    this.processLine(ln);
+                    this.code.lines[ ln ] = sliceChar( this.code.lines[ ln ], cursor.position );
+                    this.processLine( ln );
                 } 
-                else if(this.code.lines[ln + 1] != undefined) {
-                    this.code.lines[ln] += this.code.lines[ln + 1];
-                    this.code.lines.splice(ln + 1, 1);
-                    this.processLines(ln);
+                else if(this.code.lines[ ln + 1 ] != undefined) {
+                    this.code.lines[ ln ] += this.code.lines[ ln + 1 ];
+                    this.code.lines.splice( ln + 1, 1 );
+                    this.processLines();
                 }
             }
         });
@@ -572,7 +577,7 @@ class CodeEditor {
                 this.addSpaceTabs(tabs);
             }
 
-            this.processLines( ln );
+            this.processLines();
         });
 
         this.action('ArrowUp', false, ( ln, cursor, e ) => {
@@ -811,7 +816,7 @@ class CodeEditor {
         let new_lines = text.split('\n');
         this.code.lines = [].concat(new_lines);
 
-        let cursor = this.cursors.children[0];
+        let cursor = this.cursors.children[ 0 ];
         let lastLine = new_lines.pop();
 
         this.cursorToLine(cursor, new_lines.length); // Already substracted 1
@@ -826,7 +831,7 @@ class CodeEditor {
 
     appendText( text ) {
 
-        let cursor = this.cursors.children[0];
+        let cursor = this.cursors.children[ 0 ];
         let lidx = cursor.line;
 
         if( this.selection ) {
@@ -839,22 +844,22 @@ class CodeEditor {
         const new_lines = text.split('\n');
 
         // Pasting Multiline...
-        if(new_lines.length != 1)
+        if( new_lines.length != 1 )
         {
             let num_lines = new_lines.length;
-            console.assert(num_lines > 0);
+            console.assert( num_lines > 0 );
             const first_line = new_lines.shift();
             num_lines--;
 
             const remaining = this.code.lines[lidx].slice(cursor.position);
 
             // Add first line
-            this.code.lines[lidx] = [
-                this.code.lines[lidx].slice(0, cursor.position), 
+            this.code.lines[ lidx ] = [
+                this.code.lines[ lidx ].slice(0, cursor.position), 
                 first_line
             ].join('');
 
-            this.cursorToPosition(cursor, (cursor.position + first_line.length));
+            this.cursorToPosition( cursor, (cursor.position + first_line.length) );
 
             // Enter next lines...
 
@@ -869,17 +874,17 @@ class CodeEditor {
                 this.code.lines.splice( 1 + lidx + i, 0, _text);
             }
 
-            if(_text) this.cursorToPosition(cursor, _text.length);
-            this.cursorToLine(cursor, cursor.line + num_lines);
-            this.processLines(lidx);
+            if( _text ) this.cursorToPosition( cursor, _text.length );
+            this.cursorToLine( cursor, cursor.line + num_lines );
+            this.processLines();
         }
         // Pasting one line...
         else
         {
-            this.code.lines[lidx] = [
-                this.code.lines[lidx].slice(0, cursor.position), 
+            this.code.lines[ lidx ] = [
+                this.code.lines[ lidx ].slice(0, cursor.position), 
                 new_lines[0], 
-                this.code.lines[lidx].slice(cursor.position)
+                this.code.lines[ lidx ].slice(cursor.position)
             ].join('');
 
             this.cursorToPosition(cursor, (cursor.position + new_lines[0].length));
@@ -921,7 +926,7 @@ class CodeEditor {
 
     _addUndoStep( cursor )  {
 
-        var cursor = cursor ?? this.cursors.children[0];
+        var cursor = cursor ?? this.cursors.children[ 0 ];
 
         this.code.undoSteps.push( {
             lines: LX.deepCopy( this.code.lines ),
@@ -1059,7 +1064,7 @@ class CodeEditor {
                 return;
             }
 
-            var cursor = cursor ?? this.cursors.children[0];
+            var cursor = cursor ?? this.cursors.children[ 0 ];
             this.saveCursor(cursor, this.code.cursorState);    
             this.code = this.openedTabs[tabname];
             this.restoreCursor(cursor, this.code.cursorState);    
@@ -1114,7 +1119,7 @@ class CodeEditor {
         if( !e.target.classList.contains('code') ) return;
         if( !this.code ) return;
 
-        var cursor = this.cursors.children[0];
+        var cursor = this.cursors.children[ 0 ];
         var code_rect = this.code.getBoundingClientRect();
         var mouse_pos = [(e.clientX - code_rect.x), (e.clientY - code_rect.y)];
 
@@ -1223,7 +1228,7 @@ class CodeEditor {
         if( this.code.lines[ln] == undefined )
             return;
         
-        var cursor = this.cursors.children[0];
+        var cursor = this.cursors.children[ 0 ];
         cursor.line = ln;
 
         this.cursorToLine( cursor, ln, true );
@@ -1240,7 +1245,7 @@ class CodeEditor {
 
     processSelection( e, keep_range ) {
 
-        var cursor = this.cursors.children[0];
+        var cursor = this.cursors.children[ 0 ];
 
         if(e) this.processClick( e, true );
         if( !this.selection )
@@ -1359,7 +1364,7 @@ class CodeEditor {
         if( key.length > 1 && this.specialKeys.indexOf(key) == -1 )
             return;
 
-        let cursor = this.cursors.children[0];
+        let cursor = this.cursors.children[ 0 ];
         let lidx = cursor.line;
         this.code.lines[lidx] = this.code.lines[lidx] ?? "";
 
@@ -1373,7 +1378,7 @@ class CodeEditor {
                 this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
                 this.startSelection( cursor );
                 const nlines = this.code.lines.length - 1;
-                this.selection.toX = this.code.lines[nlines].length;
+                this.selection.toX = this.code.lines[ nlines ].length;
                 this.selection.toY = nlines;
                 this.processSelection( null, true );
                 this.cursorToPosition( cursor, this.selection.toX );
@@ -1384,9 +1389,9 @@ class CodeEditor {
                 return;
             case 'd': // duplicate line
                 e.preventDefault();
-                this.code.lines.splice(lidx, 0, this.code.lines[lidx]);
+                this.code.lines.splice( lidx, 0, this.code.lines[ lidx ] );
                 this.lineDown( cursor );
-                this.processLines(lidx);
+                this.processLines();
                 return;
             case 's': // save
                 e.preventDefault();
@@ -1407,8 +1412,6 @@ class CodeEditor {
                 this.restoreCursor( cursor, step.cursor );
                 this.processLines();
                 return;
-
-                
             }
         }
 
@@ -1539,7 +1542,7 @@ class CodeEditor {
 
     async _copyContent() {
 
-        let cursor = this.cursors.children[0];
+        let cursor = this.cursors.children[ 0 ];
         let text_to_copy = "";
 
         if( !this.selection ) {
@@ -1567,14 +1570,14 @@ class CodeEditor {
 
     async _cutContent() {
 
-        let cursor = this.cursors.children[0];
+        let cursor = this.cursors.children[ 0 ];
         let lidx = cursor.line;
         let text_to_cut = "";
 
         if( !this.selection ) {
-            text_to_cut = "\n" + this.code.lines[cursor.line];
-            this.code.lines.splice(lidx, 1);
-            this.processLines(lidx);
+            text_to_cut = "\n" + this.code.lines[ cursor.line ];
+            this.code.lines.splice( lidx, 1 );
+            this.processLines();
             this.resetCursorPos( CodeEditor.CURSOR_LEFT );
         }
         else {
@@ -1619,24 +1622,14 @@ class CodeEditor {
         }
     }
 
-    processLines( from__legacy ) {
+    processLines( mode ) {
 
-        var inner = () => {
+        mode = mode ?? CodeEditor.KEEP_VISIBLE_LINES;
 
         console.clear();
         console.log("_______________________________________________________");
 
         const lastScrollTop = this.getScrollTop();
-        
-        // Update max viewport
-        {
-            const scrollWidth = this.codeScroller.scrollWidth - this.codeScroller.clientWidth;
-            const scrollHeight = this.codeScroller.scrollHeight - this.codeScroller.clientHeight;
-    
-            this.codeSizer.style.minWidth = scrollWidth + "px";
-            this.codeSizer.style.minHeight = scrollHeight + "px";
-        }
-
         const start = performance.now();
 
         var gutter_html = "", code_html = "";
@@ -1645,23 +1638,22 @@ class CodeEditor {
         this.gutter.innerHTML = "";
 
         // Get info about lines in viewport
-        const margin = 50;
-        // const firstLineInViewport = (this.testScrollTop / this.lineHeight)|0;
-        const firstLineInViewport = (lastScrollTop / this.lineHeight)|0;
+        const margin = 25;
+        const firstLineInViewport = mode & CodeEditor.UPDATE_VISIBLE_LINES ? ( (lastScrollTop / this.lineHeight)|0 ) : this._firstLineIndex;
         const totalLinesInViewport = ((this.codeScroller.offsetHeight - 36) / this.lineHeight)|0;
         const viewportRange = new LX.vec2( 
             Math.max( firstLineInViewport, 0 ), 
             Math.min( firstLineInViewport + totalLinesInViewport + margin, this.code.lines.length )
             );
             
-        // console.log("FIRST LINE IS " + firstLineInViewport, "WITH SCROLL TOP = " + this.testScrollTop);
-        // console.log("RANGE:", viewportRange);
+        console.log("FIRST LINE IS " + firstLineInViewport, "WITH SCROLL TOP = " + lastScrollTop);
+        console.log("RANGE:", viewportRange);
 
-        viewportRange.set( 0, this.code.lines.length );
+        // viewportRange.set( 0, this.code.lines.length );
 
-        this.resizeScrollBars( totalLinesInViewport );
+        // this.numSpanElements = 0;
 
-        this.numSpanElements = 0;
+        this._firstLineIndex = viewportRange.x;
 
         for( let i = viewportRange.x; i < viewportRange.y; ++i )
         {
@@ -1670,25 +1662,36 @@ class CodeEditor {
         }
 
         this.code.innerHTML = code_html;
-        this.gutter.innerHTML = gutter_html;
+        // this.gutter.innerHTML = gutter_html;
         
         // console.log( "Span tokens:", this.numSpanElements );
         console.log( "Num lines processed:",  (viewportRange.y - viewportRange.x), performance.now() - start );
         console.log("_______________________________________________________");
 
-        this.gutter.scrollTop = lastScrollTop;
+        // this.gutter.scrollTop = lastScrollTop;
         this.codeScroller.scrollTop = lastScrollTop;
 
-        };
+        setTimeout( () => {
+            // Update max viewport
+            const scrollWidth = this.codeScroller.scrollWidth - this.codeScroller.clientWidth;
+            // const scrollHeight = this.codeScroller.scrollHeight - this.codeScroller.clientHeight;
+            const scrollHeight = this.code.lines.length * this.lineHeight;
+    
+            this.codeSizer.style.minWidth = scrollWidth + "px";
+            this.codeSizer.style.minHeight = scrollHeight + "px";
 
-        setTimeout( inner, 10 );
+            this.resizeScrollBars( totalLinesInViewport );
+
+        }, 10 );
     }
 
     processLine( linenum, force ) {
 
+        const localLinenum = LX.UTILS.clamp( linenum - this._firstLineIndex, 0, this.code.lines.length - 1 );
+
         const UPDATE_LINE = ( html ) => {
             if( !force ) // Single line update
-                this.code.childNodes[ linenum ].innerHTML = html;
+                this.code.childNodes[ localLinenum ].innerHTML = html;
             else // Update all lines at once
                 return "<pre>" + html + "</pre>";
         }
@@ -1995,7 +1998,7 @@ class CodeEditor {
             if( !token_classname.length )
                 return token;
 
-            this.numSpanElements++;
+            // this.numSpanElements++;
 
             return "<span class='" + highlight + " " + token_classname + "'>" + token + "</span>";
         }
@@ -2107,7 +2110,7 @@ class CodeEditor {
 
     lineUp( cursor, resetLeft ) {
 
-        cursor = cursor ?? this.cursors.children[0];
+        cursor = cursor ?? this.cursors.children[ 0 ];
         cursor.line--;
         cursor.line = Math.max( 0, cursor.line );
         this.cursorToTop( cursor, resetLeft );
@@ -2115,7 +2118,7 @@ class CodeEditor {
 
     lineDown( cursor, resetLeft ) {
 
-        cursor = cursor ?? this.cursors.children[0];
+        cursor = cursor ?? this.cursors.children[ 0 ];
         cursor.line++;
         this.cursorToBottom( cursor, resetLeft );
     }
@@ -2171,7 +2174,7 @@ class CodeEditor {
         const post = code.slice( index + num_chars );
 
         this.code.lines = ( pre + post ).split( separator );
-        this.processLines( this.selection.fromY );
+        this.processLines();
 
         this.cursorToLine( cursor, this.selection.fromY, true );
         this.cursorToPosition( cursor, this.selection.fromX );
@@ -2209,7 +2212,7 @@ class CodeEditor {
     cursorToLeft( key, cursor ) {
 
         if(!key) return;
-        cursor = cursor ?? this.cursors.children[0];
+        cursor = cursor ?? this.cursors.children[ 0 ];
         cursor._left -= this.charWidth;
         cursor._left = Math.max(cursor._left, 0);
         cursor.style.left = "calc( " + cursor._left + "px + " + this.xPadding + " )";
@@ -2229,7 +2232,7 @@ class CodeEditor {
 
     cursorToTop( cursor, resetLeft = false ) {
 
-        cursor = cursor ?? this.cursors.children[0];
+        cursor = cursor ?? this.cursors.children[ 0 ];
         cursor._top -= this.lineHeight;
         cursor._top = Math.max(cursor._top, 0);
         cursor.style.top = "calc(" + cursor._top + "px)";
@@ -2249,7 +2252,7 @@ class CodeEditor {
 
     cursorToBottom( cursor, resetLeft = false ) {
 
-        cursor = cursor ?? this.cursors.children[0];
+        cursor = cursor ?? this.cursors.children[ 0 ];
         cursor._top += this.lineHeight;
         cursor.style.top = "calc(" + cursor._top + "px)";
         this.restartBlink();
@@ -2268,7 +2271,7 @@ class CodeEditor {
 
     cursorToString( cursor, text, reverse ) {
 
-        cursor = cursor ?? this.cursors.children[0];
+        cursor = cursor ?? this.cursors.children[ 0 ];
         for( let char of text ) 
             reverse ? this.cursorToLeft(char) : this.cursorToRight(char);
     }
@@ -2290,7 +2293,7 @@ class CodeEditor {
 
     saveCursor( cursor, state = {} ) {
 
-        var cursor = cursor ?? this.cursors.children[0];
+        var cursor = cursor ?? this.cursors.children[ 0 ];
         state.top = cursor._top;
         state.left = cursor._left;
         state.line = cursor.line;
@@ -2300,7 +2303,7 @@ class CodeEditor {
 
     restoreCursor( cursor, state ) {
 
-        cursor = cursor ?? this.cursors.children[0];
+        cursor = cursor ?? this.cursors.children[ 0 ];
         cursor.line = state.line ?? 0;
         cursor.position = state.charPos ?? 0;
 
@@ -2312,7 +2315,7 @@ class CodeEditor {
 
     resetCursorPos( flag, cursor ) {
         
-        cursor = cursor ?? this.cursors.children[0];
+        cursor = cursor ?? this.cursors.children[ 0 ];
 
         if( flag & CodeEditor.CURSOR_LEFT )
         {
@@ -2475,13 +2478,13 @@ class CodeEditor {
 
     getCharAtPos( cursor, offset = 0 ) {
         
-        cursor = cursor ?? this.cursors.children[0];
+        cursor = cursor ?? this.cursors.children[ 0 ];
         return this.code.lines[cursor.line][cursor.position + offset];
     }
 
     getWordAtPos( cursor, offset = 0 ) {
         
-        cursor = cursor ?? this.cursors.children[0];
+        cursor = cursor ?? this.cursors.children[ 0 ];
         const col = cursor.line;
         const words = this.code.lines[col];
 
