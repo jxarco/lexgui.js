@@ -2729,32 +2729,16 @@ ul.lexassetscontent {
 }
 
 .lexcodegutter {
-  width: 32px;
-  height: calc(100% - 70px);
+  width: 48px;
+  height: calc(100% - 62px);
   background-color: var(--global-branch-darker);
-  margin-top: 24px;
-  text-align: center;
+  margin-top: 26px;
   overflow: hidden;
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
-  font-family: 'Inconsolata', monospace;
-}
-
-.lexcodegutter span {
-  width: 100%;
-  display: block;
-  height: 16px;
-  margin-top: 4px;
-  font-size: 13px;
-  color: #888;
-  text-align-last: auto;
-  line-height: 22px;
+  position: absolute;
 }
 
 .lexcodeeditor .codetabsarea {
-  height: calc( 100% - 62px ) !important;
+  height: calc( 100% - 60px ) !important;
   background-color: var(--global-branch-darker);
   overflow: scroll;
 }
@@ -2767,9 +2751,9 @@ ul.lexassetscontent {
   width: calc( 100% - 10px ) !important;
 }
 
-.lexcodeeditor .codetabsarea.with-hscrollbar {
+/* .lexcodeeditor .codetabsarea.with-hscrollbar {
   height: calc( 100% - 72px ) !important;
-}
+} */
 
 .lexcodeeditor .codetabsarea.dragging {
   background-color: var(--global-color-secondary);
@@ -2796,7 +2780,6 @@ ul.lexassetscontent {
   -webkit-text-size-adjust: 100%;
   cursor: text;
   box-sizing: border-box;
-  padding: 0 4px;
   border-radius: 0;
   border-width: 0;
   background: transparent;
@@ -2811,9 +2794,12 @@ ul.lexassetscontent {
   position: relative;
   overflow: visible;
   -webkit-tap-highlight-color: transparent;
-  z-index: 0 !important;
   height: 16px;
   pointer-events: none;
+}
+
+.lexcodeeditor pre.active-line {
+  background-color: var(--global-blur-background);
 }
 
 .lexcodeeditor span {
@@ -2828,7 +2814,22 @@ ul.lexassetscontent {
   box-sizing: border-box;
   display: inline-block;
   height: 16px;
-  vertical-align: top;
+}
+
+pre .line-gutter {
+  color: #888;
+  width: 48px;
+  height: 16px;
+  font-size: 14px;
+  line-height: 22px;
+  text-align: center;
+  -webkit-user-select: none; /* Safari 3.1+ */
+  -moz-user-select: none; /* Firefox 2+ */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard syntax */
+  position: sticky;
+  left: 0;
+  z-index: 1;
 }
 
 .lexcodeeditor .cursors, .lexcodeeditor .selections {
@@ -2873,7 +2874,7 @@ ul.lexassetscontent {
   width: 10px;
   height: calc(100% - 62px);
   position: absolute;
-  background-color: var(--global-branch-darker);
+  background-color: transparent;
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -2883,7 +2884,7 @@ ul.lexassetscontent {
 }
 
 .lexcodescrollbar.horizontal {
-  width: calc( 100% - 40px );
+  width: calc( 100% - 58px );
   height: 10px;
   bottom: 36px;
   right: 10px;
@@ -2894,7 +2895,7 @@ ul.lexassetscontent {
 }
 
 .lexcodescrollbar div { /* thumb */
-  background-color: #bbbbbb57 !important;
+  background-color: #bbbbbb3d !important;
   box-sizing: border-box;
   margin: 0;
   padding: 0;

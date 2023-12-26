@@ -182,12 +182,11 @@ class CodeEditor {
             }
         } );
 
-        this.tabs.area.root.classList.add( 'codetabsarea' );
-
+        // Full editor
         area.root.classList.add('codebasearea');
-        this.gutter = document.createElement('div');
-        this.gutter.className = "lexcodegutter";
-        area.attach( this.gutter );
+
+        // Code area
+        this.tabs.area.root.classList.add( 'codetabsarea' );
 
         this.root = this.area.root;
         this.root.tabIndex = -1;
@@ -220,7 +219,7 @@ class CodeEditor {
         this.tabs.area.attach( this.selections );
 
         // Css char synchronization
-        this.xPadding = "0.25em";
+        this.xPadding = "48px";
 
         // Add main cursor
         {
@@ -232,37 +231,79 @@ class CodeEditor {
             cursor._top = 0;
             cursor.style.top = cursor._top + "px";
             cursor.position = 0;
-            cursor.line = 0;
+            cursor._line = 0;
             cursor.print = (function() { console.log( this.line, this.position ) }).bind( cursor );
+
+            Object.defineProperty( cursor, 'line', {
+                get: (v) => { return this._line },
+                set: (v) => { this._line = v; }
+            } );
+
             this.cursors.appendChild( cursor );
         }
 
         // Scroll stuff
         {
             this.codeScroller = this.tabs.area.root;
-            this._firstLineIndex = 0;
+            this.viewportRangeStart = 0;
+            this.lineScrollMargin = new LX.vec2( 20, 20 ); // [ mUp, mDown ]
             window.scroller = this.codeScroller;
 
+            let lastScrollTopValue = -1;
             this.codeScroller.addEventListener( 'scroll', (e) => {
+
+                if( this._discardScroll )
+                {
+                    this._discardScroll = false;
+                    return;
+                }
 
                 this.setScrollBarValue( 'vertical' );
 
                 const scrollTop = this.getScrollTop();
-                const firstLineInViewport = ( (scrollTop / this.lineHeight)|0 ) + this._firstLineIndex;
-                const boundary = ( (this._firstLineIndex + 25) * this.lineHeight  );
 
-                if( scrollTop > boundary )
+                // Scroll down...
+                if( scrollTop > lastScrollTopValue )
                 {
-                    this.code.style.top = boundary + "px";
-                    // this.gutter.style.paddingTop = this.getScrollTop() + "px";
-                    this.processLines( CodeEditor.UPDATE_VISIBLE_LINES );
+                    const scrollDownBoundary = (this.viewportRangeStart + this.lineScrollMargin.y) * this.lineHeight;
+
+                    if( scrollTop > scrollDownBoundary )
+                    {
+                        this.code.style.top = (scrollDownBoundary - this.lineScrollMargin.x * this.lineHeight) + "px";
+                        this.processLines( CodeEditor.UPDATE_VISIBLE_LINES );
+                    }
                 }
+                // Scroll up...
+                else
+                {
+                    const scrollUpBoundary = (this.viewportRangeStart + this.lineScrollMargin.x) * this.lineHeight;
+                    // console.log(scrollTop, scrollUpBoundary)
+    
+                    if( scrollTop <= scrollUpBoundary )
+                    {
+                        this.viewportRangeStart -= this.lineScrollMargin.x;
+                        this.viewportRangeStart = Math.max( this.viewportRangeStart, 0 );
+
+                        this.code.style.top = this.viewportRangeStart == 0 ? "0px" : (scrollUpBoundary - this.lineScrollMargin.x * this.lineHeight) + "px";
+                        
+                        this.processLines( CodeEditor.KEEP_VISIBLE_LINES );
+                    }
+                }
+
+                lastScrollTopValue = scrollTop;
             });
 
             this.codeScroller.addEventListener( 'wheel', (e) => {
                 const dX = (e.deltaY > 0.0 ? 10.0 : -10.0) * ( e.shiftKey ? 1.0 : 0.0 );
                 if( dX != 0.0 ) this.setScrollBarValue( 'horizontal', dX );
             });
+        }
+
+        // This is only the container, line numbers are in the same line div
+        {
+            this.gutter = document.createElement('div');
+            this.gutter.className = "lexcodegutter";
+            area.attach( this.gutter );
         }
 
         // Add custom vertical scroll bar
@@ -405,14 +446,14 @@ class CodeEditor {
             'Batch': ['if', 'IF', 'for', 'FOR', 'in', 'IN', 'do', 'DO', 'call', 'CALL', 'goto', 'GOTO', 'exit', 'EXIT']
         };
         this.symbols = {
-            // 'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
-            // 'C++': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '::', '*', '-', '+'],
-            // 'JSON': ['[', ']', '{', '}', '(', ')'],
-            // 'GLSL': ['[', ']', '{', '}', '(', ')'],
-            // 'WGSL': ['[', ']', '{', '}', '(', ')', '->'],
-            // 'CSS': ['{', '}', '(', ')', '*'],
-            // 'Python': ['<', '>', '[', ']', '(', ')', '='],
-            // 'Batch': ['[', ']', '(', ')', '%'],
+            'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
+            'C++': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '::', '*', '-', '+'],
+            'JSON': ['[', ']', '{', '}', '(', ')'],
+            'GLSL': ['[', ']', '{', '}', '(', ')'],
+            'WGSL': ['[', ']', '{', '}', '(', ')', '->'],
+            'CSS': ['{', '}', '(', ')', '*'],
+            'Python': ['<', '>', '[', ']', '(', ')', '='],
+            'Batch': ['[', ']', '(', ')', '%'],
         };
 
         // Convert reserved word arrays to maps so we can search tokens faster
@@ -426,30 +467,30 @@ class CodeEditor {
 
         // Action keys
 
-        this.action('Escape', false, ( ln, cursor, e ) => {
+        this.action( 'Escape', false, ( ln, cursor, e ) => {
             this.hideAutoCompleteBox();
         });
 
-        this.action('Backspace', false, ( ln, cursor, e ) => {
+        this.action( 'Backspace', false, ( ln, cursor, e ) => {
 
             this._addUndoStep( cursor );
 
-            if(this.selection) {
+            if( this.selection ) {
                 this.deleteSelection( cursor );
                 // Remove entire line when selecting with triple click
                 if(this.code.lines[ ln ] && !this.code.lines[ ln ].length) 
-                    this.actions['Backspace'].callback(ln, cursor, e);
+                    this.actions['Backspace'].callback( ln, cursor, e );
             }
             else {
                 var letter = this.getCharAtPos( cursor, -1 );
-                if(letter) {
+                if( letter ) {
                     this.code.lines[ ln ] = sliceChar( this.code.lines[ ln ], cursor.position - 1 );
                     this.cursorToLeft( letter );
                     this.processLine( ln );
                     if( this.useAutoComplete )
                         this.showAutoCompleteBox( 'foo', cursor );
                 } 
-                else if(this.code.lines[ ln - 1 ] != undefined) {
+                else if( this.code.lines[ ln - 1 ] != undefined ) {
                     this.lineUp();
                     this.actions[ 'End' ].callback( cursor.line, cursor, e );
                     // Move line on top
@@ -460,7 +501,7 @@ class CodeEditor {
             }
         });
 
-        this.action('Delete', false, ( ln, cursor, e ) => {
+        this.action( 'Delete', false, ( ln, cursor, e ) => {
 
             this._addUndoStep( cursor );
             
@@ -483,7 +524,7 @@ class CodeEditor {
             }
         });
 
-        this.action('Tab', true, ( ln, cursor, e ) => {
+        this.action( 'Tab', true, ( ln, cursor, e ) => {
             
             if( this.isAutoCompleteActive )
             {
@@ -494,7 +535,7 @@ class CodeEditor {
             }
         });
 
-        this.action('Home', false, ( ln, cursor, e ) => {
+        this.action( 'Home', false, ( ln, cursor, e ) => {
             
             let idx = firstNonspaceIndex(this.code.lines[ln]);
 
@@ -522,7 +563,7 @@ class CodeEditor {
                 this.endSelection();
         });
 
-        this.action('End', false, ( ln, cursor, e ) => {
+        this.action( 'End', false, ( ln, cursor, e ) => {
             
             if( e.shiftKey || e._shiftKey ) {
                 
@@ -540,7 +581,7 @@ class CodeEditor {
             this.setScrollLeft( cursor.position >= last_char ? (cursor.position - last_char) * this.charWidth : 0 );
         });
 
-        this.action('Enter', true, ( ln, cursor, e ) => {
+        this.action( 'Enter', true, ( ln, cursor, e ) => {
 
             // Add word
             if( this.isAutoCompleteActive )
@@ -580,7 +621,7 @@ class CodeEditor {
             this.processLines();
         });
 
-        this.action('ArrowUp', false, ( ln, cursor, e ) => {
+        this.action( 'ArrowUp', false, ( ln, cursor, e ) => {
 
             // Move cursor..
             if( !this.isAutoCompleteActive )
@@ -615,7 +656,7 @@ class CodeEditor {
             }
         });
 
-        this.action('ArrowDown', false, ( ln, cursor, e ) => {
+        this.action( 'ArrowDown', false, ( ln, cursor, e ) => {
 
             // Move cursor..
             if( !this.isAutoCompleteActive )
@@ -652,7 +693,7 @@ class CodeEditor {
             }
         });
 
-        this.action('ArrowLeft', false, ( ln, cursor, e ) => {
+        this.action( 'ArrowLeft', false, ( ln, cursor, e ) => {
 
             if(e.metaKey) { // Apple devices (Command)
                 e.preventDefault();
@@ -717,7 +758,7 @@ class CodeEditor {
             }
         });
 
-        this.action('ArrowRight', false, ( ln, cursor, e ) => {
+        this.action( 'ArrowRight', false, ( ln, cursor, e ) => {
 
             if(e.metaKey) { // Apple devices (Command)
                 e.preventDefault();
@@ -1071,10 +1112,6 @@ class CodeEditor {
             this.endSelection();
             this._changeLanguageFromExtension( LX.getExtension(tabname) );
             this._refreshCodeInfo(cursor.line, cursor.position);
-
-            // Restore scroll
-            this.gutter.scrollLeft = this.getScrollLeft();
-            this.gutter.scrollTop = this.getScrollTop();
         }});
 
         // Move into the sizer..
@@ -1221,20 +1258,18 @@ class CodeEditor {
 
     processClick( e, skip_refresh = false ) {
 
+        var cursor = this.cursors.children[ 0 ];
         var code_rect = this.codeScroller.getBoundingClientRect();
-        var position = [(e.clientX - code_rect.x) + this.getScrollLeft(), (e.clientY - code_rect.y) + this.getScrollTop()];
-        var ln = (position[1] / this.lineHeight)|0;
+        var position = [( e.clientX - code_rect.x ) + this.getScrollLeft(), (e.clientY - code_rect.y) + this.getScrollTop()];
+        var ln = (position[ 1 ] / this.lineHeight)|0;
 
-        if( this.code.lines[ln] == undefined )
+        if( this.code.lines[ ln ] == undefined )
             return;
         
-        var cursor = this.cursors.children[ 0 ];
-        cursor.line = ln;
-
         this.cursorToLine( cursor, ln, true );
         
-        var ch = (position[0] / this.charWidth)|0;
-        var string = this.code.lines[ln].slice(0, ch);
+        var ch = ( ( position[ 0 ] - parseInt( this.xPadding ) + 3) / this.charWidth )|0;
+        var string = this.code.lines[ ln ].slice( 0, ch );
         this.cursorToPosition( cursor, string.length );
 
         this.hideAutoCompleteBox();
@@ -1622,12 +1657,23 @@ class CodeEditor {
         }
     }
 
+    toLocalLine( line ) {
+
+        const d = Math.max( this.viewportRangeStart - this.lineScrollMargin.x, 0 );
+        return Math.min( Math.max( line - d, 0 ), this.code.lines.length - 1 );
+    }
+
+    getMaxLineLength() {
+
+        return Math.max(...this.code.lines.map( v => v.length ));
+    }
+
     processLines( mode ) {
 
         mode = mode ?? CodeEditor.KEEP_VISIBLE_LINES;
 
-        console.clear();
-        console.log("_______________________________________________________");
+        // console.clear();
+        console.log("--------------------------------------------");
 
         const lastScrollTop = this.getScrollTop();
         const start = performance.now();
@@ -1635,46 +1681,36 @@ class CodeEditor {
         var gutter_html = "", code_html = "";
 
         this.code.innerHTML = "";
-        this.gutter.innerHTML = "";
 
         // Get info about lines in viewport
-        const margin = 25;
-        const firstLineInViewport = mode & CodeEditor.UPDATE_VISIBLE_LINES ? ( (lastScrollTop / this.lineHeight)|0 ) : this._firstLineIndex;
+        const firstLineInViewport = mode & CodeEditor.UPDATE_VISIBLE_LINES ? 
+                                    ( (lastScrollTop / this.lineHeight)|0 ) : this.viewportRangeStart;
         const totalLinesInViewport = ((this.codeScroller.offsetHeight - 36) / this.lineHeight)|0;
+        this.viewportRangeStart = firstLineInViewport;
+
         const viewportRange = new LX.vec2( 
-            Math.max( firstLineInViewport, 0 ), 
-            Math.min( firstLineInViewport + totalLinesInViewport + margin, this.code.lines.length )
-            );
+            Math.max( firstLineInViewport - this.lineScrollMargin.x, 0 ), 
+            Math.min( firstLineInViewport + totalLinesInViewport + this.lineScrollMargin.y, this.code.lines.length )
+        );
             
-        console.log("FIRST LINE IS " + firstLineInViewport, "WITH SCROLL TOP = " + lastScrollTop);
-        console.log("RANGE:", viewportRange);
-
-        // viewportRange.set( 0, this.code.lines.length );
-
-        // this.numSpanElements = 0;
-
-        this._firstLineIndex = viewportRange.x;
-
         for( let i = viewportRange.x; i < viewportRange.y; ++i )
         {
             gutter_html += "<span>" + (i + 1) + "</span>";
             code_html += this.processLine( i, true );
         }
-
-        this.code.innerHTML = code_html;
-        // this.gutter.innerHTML = gutter_html;
         
-        // console.log( "Span tokens:", this.numSpanElements );
+        this.code.innerHTML = code_html;
+            
+        console.log("RANGE:", viewportRange);
         console.log( "Num lines processed:",  (viewportRange.y - viewportRange.x), performance.now() - start );
-        console.log("_______________________________________________________");
+        console.log("--------------------------------------------");
 
-        // this.gutter.scrollTop = lastScrollTop;
         this.codeScroller.scrollTop = lastScrollTop;
 
         setTimeout( () => {
+
             // Update max viewport
-            const scrollWidth = this.codeScroller.scrollWidth - this.codeScroller.clientWidth;
-            // const scrollHeight = this.codeScroller.scrollHeight - this.codeScroller.clientHeight;
+            const scrollWidth = this.getMaxLineLength() * this.charWidth;
             const scrollHeight = this.code.lines.length * this.lineHeight;
     
             this.codeSizer.style.minWidth = scrollWidth + "px";
@@ -1687,33 +1723,25 @@ class CodeEditor {
 
     processLine( linenum, force ) {
 
-        const localLinenum = LX.UTILS.clamp( linenum - this._firstLineIndex, 0, this.code.lines.length - 1 );
+        const local_line_num =  this.toLocalLine( linenum );
+        const gutter_line = "<span class='line-gutter'>" + (linenum + 1) + "</span>";
 
         const UPDATE_LINE = ( html ) => {
             if( !force ) // Single line update
-                this.code.childNodes[ localLinenum ].innerHTML = html;
+                this.code.childNodes[ local_line_num ].innerHTML = gutter_line + html;
             else // Update all lines at once
-                return "<pre>" + html + "</pre>";
+                return "<pre>" + ( gutter_line + html ) + "</pre>";
         }
 
         delete this._buildingString; // multi-line strings not supported by now
         
-        // It's allowed to process only 1 line to optimize
         let linestring = this.code.lines[ linenum ];
 
+        // Single line
         if( !force )
         {
-            var pre = document.createElement( 'pre' );
-
-            // Single code line
-            deleteElement( this.code.childNodes[ linenum ] );
-            this.code.insertChildAtIndex( pre, linenum );
-            
-            // Gutter
-            deleteElement( this.gutter.childNodes[ linenum ] );
-            var linenumspan = document.createElement('span');
-            linenumspan.innerHTML = ( linenum + 1 );
-            this.gutter.insertChildAtIndex( linenumspan, linenum );
+            deleteElement( this.code.childNodes[ local_line_num ] );
+            this.code.insertChildAtIndex( document.createElement( 'pre' ), local_line_num );
         }
 
         // Early out check for no highlighting languages
@@ -1725,7 +1753,7 @@ class CodeEditor {
         const tokensToEvaluate = this._getTokensFromLine( linestring );
 
         if( !tokensToEvaluate.length )
-        return "<pre></pre>";
+        return "<pre><span class='line-gutter'>" + linenum + "</span></pre>";
 
         var line_inner_html = "";
 
@@ -1756,7 +1784,7 @@ class CodeEditor {
                     delete this._buildingBlockComment;
             }
 
-            line_inner_html += this.evaluateToken( token, prev, next );
+            line_inner_html += this.evaluateToken( token, prev, next, (i == tokensToEvaluate.length - 1) );
         }
 
         return UPDATE_LINE( line_inner_html );
@@ -1813,7 +1841,6 @@ class CodeEditor {
 
         // Check if line comment
         const ogLine = linestring;
-        const singleLineCommentToken = this.languages[ this.highlight ].singleLineCommentToken ?? this.defaultSingleLineCommentToken;
         const hasCommentIdx = this._lineHasComment( linestring );
 
         if( hasCommentIdx != undefined )
@@ -1884,7 +1911,7 @@ class CodeEditor {
         return kindArray[this.highlight] && kindArray[this.highlight][token] != undefined;
     }
 
-    evaluateToken( token, prev, next ) {
+    evaluateToken( token, prev, next, isLastToken ) {
 
         const highlight = this.highlight.replace(/\s/g, '').replaceAll("+", "p").toLowerCase();
         const customStringKeys = Object.assign( {}, this.stringKeys );
@@ -1981,15 +2008,17 @@ class CodeEditor {
             else if ( token[0] != '@' && token[0] != ',' && next == '(' )
                 token_classname = "cm-mtd";
 
-            this._buildingString = this._stringEnded ? undefined : this._buildingString;
 
             // We finished constructing a string
-            if( this._stringEnded )
+            if( this._buildingString && ( this._stringEnded || isLastToken ) )
             {
                 token = this.getCurrentString();
                 token_classname = "cm-str";
                 discardToken = false;
             }
+
+            // Update state
+            this._buildingString = this._stringEnded ? undefined : this._buildingString;
 
             if( discardToken )
                 return "";
@@ -1997,8 +2026,6 @@ class CodeEditor {
             // No highlighting, no need to put it inside another span..
             if( !token_classname.length )
                 return token;
-
-            // this.numSpanElements++;
 
             return "<span class='" + highlight + " " + token_classname + "'>" + token + "</span>";
         }
@@ -2018,6 +2045,7 @@ class CodeEditor {
 
         const chars = this._pendingString;
         delete this._pendingString;
+        console.log( chars );
         return chars;
     }
 
@@ -2420,8 +2448,6 @@ class CodeEditor {
 
             this.vScrollbar.thumb._top = ( currentScroll / scrollHeight ) * ( scrollBarHeight - scrollThumbHeight );
             this.vScrollbar.thumb.style.top = this.vScrollbar.thumb._top + "px";
-
-            this.gutter.scrollTop = currentScroll;
         }
         else
         {
@@ -2455,6 +2481,9 @@ class CodeEditor {
         const scrollWidth = this.codeScroller.scrollWidth - this.codeScroller.clientWidth;
         const currentScroll = (this.hScrollbar.thumb._left * scrollWidth) / ( scrollBarWidth - scrollThumbWidth );
         this.codeScroller.scrollLeft = currentScroll;
+        
+
+        this._discardScroll = true;
     }
 
     updateVerticalScrollFromScrollBar( value ) {
