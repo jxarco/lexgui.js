@@ -12,7 +12,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     */
 
     var LX = global.LX = {
-        version: "0.1.16",
+        version: "0.1.17",
         ready: false,
         components: [], // specific pre-build components
         signals: {} // events and triggers
