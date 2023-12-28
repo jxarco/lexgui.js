@@ -1136,7 +1136,7 @@ class CodeEditor {
             selected: selected, 
             fixed: (name === '+') , 
             title: code.title, 
-            icon:   ext == 'js' ? "images/folder.png" : 
+            icon:   ext == 'js' ? "images/js.png" : 
                     ext == 'html' ? "fa-solid fa-code orange" : undefined, 
             onSelect: (e, tabname) => {
 
@@ -1629,6 +1629,10 @@ class CodeEditor {
             text_to_copy = "\n" + this.code.lines[ cursor.line ];
         }
         else {
+            
+            // Some selections don't depend on mouse up..
+            if( this.selection ) this.selection.invertIfNecessary();
+
             const separator = "_NEWLINE_";
             let code = this.code.lines.join(separator);
 
@@ -1645,7 +1649,7 @@ class CodeEditor {
             text_to_copy = lines.join('\n');
         }
 
-        navigator.clipboard.writeText(text_to_copy).then(() => console.log("Successfully copied"), (err) => console.error("Error"));
+        navigator.clipboard.writeText( text_to_copy ).then(() => console.log("Successfully copied"), (err) => console.error("Error"));
     }
 
     async _cutContent() {
@@ -1661,6 +1665,10 @@ class CodeEditor {
             this.resetCursorPos( CodeEditor.CURSOR_LEFT );
         }
         else {
+            
+            // Some selections don't depend on mouse up..
+            if( this.selection ) this.selection.invertIfNecessary();
+
             const separator = "_NEWLINE_";
             let code = this.code.lines.join(separator);
 
@@ -1679,7 +1687,7 @@ class CodeEditor {
             this.deleteSelection( cursor );
         }
 
-        navigator.clipboard.writeText(text_to_cut).then(() => console.log("Successfully cut"), (err) => console.error("Error"));
+        navigator.clipboard.writeText( text_to_cut ).then(() => console.log("Successfully cut"), (err) => console.error("Error"));
     }
 
     action( key, deleteSelection, fn ) {

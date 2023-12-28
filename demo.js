@@ -487,7 +487,7 @@ function fillPanel( panel ) {
     panel.sameLine(2);
     panel.addFile("Img1", data => { console.log(data) }, {} );
     panel.addFile("Img2", data => { console.log(data) }, {} );
-    panel.addDropdown("Best Engine", ["Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot","Godot", "Unity", "Unreal Engine"], "Unity", (value, event) => {
+    panel.addDropdown("Best Engine", ["Godot", "Unity", "Unreal Engine"], "Unity", (value, event) => {
         console.log(value);
     });
 

@@ -9,7 +9,7 @@
   --global-color-primary: #232323;
   --global-color-secondary: #343434;
   --global-color-terciary: #444;
-	--global-branch-darker: #28282a;
+	--global-branch-darker: #252525;
 	--branch-title-background: #2e3338;
   --branch-title-inactive-background: #42484e;
   --global-button-color: #4e4e4e;
@@ -2703,8 +2703,8 @@ ul.lexassetscontent {
 }
 
 .codebasearea .lexareatab img {
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   margin-right: 4px;
   vertical-align: middle;
 }
