@@ -3090,6 +3090,7 @@ pre .line-gutter {
 .cm-str.html { color: #ca7d59; } /* string */
 .cm-kwd.html { color: #2194ce; } /* keyword */
 .cm-bln.html { color: #b4d7ec; } /* builtin */
+.cm-sym.html { color: #929292; } /* symbol */
 
 
 /* Node Graph */

@@ -380,7 +380,7 @@ class CodeEditor {
             'WGSL': { },
             'JSON': { },
             'XML': { },
-            'Python': { },
+            'Python': { singleLineCommentToken: '#' },
             'HTML': { },
             'Batch': { blockComments: false, singleLineCommentToken: '::' }
         };
@@ -423,14 +423,14 @@ class CodeEditor {
             'Python': ['int', 'type', 'float', 'map', 'list', 'ArithmeticError', 'AssertionError', 'AttributeError', 'Exception', 'EOFError', 'FloatingPointError', 'GeneratorExit', 
                       'ImportError', 'IndentationError', 'IndexError', 'KeyError', 'KeyboardInterrupt', 'LookupError', 'MemoryError', 'NameError', 'NotImplementedError', 'OSError',
                       'OverflowError', 'ReferenceError', 'RuntimeError', 'StopIteration', 'SyntaxError', 'TabError', 'SystemError', 'SystemExit', 'TypeError', 'UnboundLocalError', 
-                      'UnicodeError', 'UnicodeEncodeError', 'UnicodeDecodeError', 'UnicodeTranslateError', 'ValueError', 'ZeroDivisionError' ],
+                      'UnicodeError', 'UnicodeEncodeError', 'UnicodeDecodeError', 'UnicodeTranslateError', 'ValueError', 'ZeroDivisionError'],
             'C++': ['uint8_t', 'uint16_t', 'uint32_t']
         };
         this.builtin = {
             'JavaScript': ['document', 'console', 'window', 'navigator', 'performance'],
             'CSS': ['*', '!important'],
             'C++': ['vector', 'list', 'map'],
-            'HTML': ['type', 'xmlns', 'PUBLIC', 'http-equiv', 'src', 'lang', 'href', 'rel', 'content'], // attributes
+            'HTML': ['type', 'xmlns', 'PUBLIC', 'http-equiv', 'src', 'lang', 'href', 'rel', 'content', 'xml'], // attributes
         };
         this.statementsAndDeclarations = {
             'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'from', 'throw', 'async', 'try', 'catch', 'await'],
@@ -450,6 +450,7 @@ class CodeEditor {
             'CSS': ['{', '}', '(', ')', '*'],
             'Python': ['<', '>', '[', ']', '(', ')', '='],
             'Batch': ['[', ']', '(', ')', '%'],
+            'HTML': ['<', '>', '/']
         };
 
         // Convert reserved word arrays to maps so we can search tokens faster
@@ -1136,8 +1137,9 @@ class CodeEditor {
             selected: selected, 
             fixed: (name === '+') , 
             title: code.title, 
-            icon:   ext == 'js' ? "images/js.png" : 
-                    ext == 'html' ? "fa-solid fa-code orange" : undefined, 
+            icon:   ext == 'html' ? "fa-solid fa-code orange" : 
+                    ext == 'js' ? "images/js.png" :
+                    ext == 'py' ? "images/py.png" : undefined, 
             onSelect: (e, tabname) => {
 
                 if(tabname == '+')
@@ -1885,7 +1887,7 @@ class CodeEditor {
 
         const singleLineCommentToken = this.languages[ this.highlight ].singleLineCommentToken ?? this.defaultSingleLineCommentToken;
         const idx = linestring.indexOf( singleLineCommentToken );
-        
+
         if( idx > -1 )
         {
             const stringKeys = Object.values( this.stringKeys );
@@ -2037,28 +2039,28 @@ class CodeEditor {
             else if( this._mustHightlightWord( token, this.symbols ) )
                 token_classname = "cm-sym";
 
-            else if( token.substr(0, 2) == singleLineCommentToken )
+            else if( token.substr( 0, singleLineCommentToken.length ) == singleLineCommentToken )
                 token_classname = "cm-com";
 
-            else if( usesBlockComments && token.substr(0, 2) == '/*' )
+            else if( usesBlockComments && token.substr( 0, 2 ) == '/*' )
                 token_classname = "cm-com";
 
-            else if( usesBlockComments && token.substr(token.length - 2) == '*/' )
+            else if( usesBlockComments && token.substr( token.length - 2 ) == '*/' )
                 token_classname = "cm-com";
 
-            else if( this.isNumber(token) || this.isNumber( token.replace(/[px]|[em]|%/g,'') ) )
+            else if( this.isNumber( token ) || this.isNumber( token.replace(/[px]|[em]|%/g,'') ) )
                 token_classname = "cm-dec";
 
-            else if( this._isCSSClass(token, prev, next) )
+            else if( this._isCSSClass( token, prev, next ) )
                 token_classname = "cm-kwd";
 
-            else if ( this._isType(token, prev, next) )
+            else if ( this._isType( token, prev, next ) )
                 token_classname = "cm-typ";
 
-            else if ( highlight == 'batch' && (token == '@' || prev == ':' || prev == '@') )
+            else if ( highlight == 'batch' && ( token == '@' || prev == ':' || prev == '@' ) )
                 token_classname = "cm-kwd";
 
-            else if ( highlight == 'cpp' && token.includes('#') ) // C++ preprocessor
+            else if ( highlight == 'cpp' && token.includes( '#' ) ) // C++ preprocessor
                 token_classname = "cm-ppc";
 
             else if ( highlight == 'cpp' && prev == '<' && (next == '>' || next == '*') ) // Defining template type in C++
