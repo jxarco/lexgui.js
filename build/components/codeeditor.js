@@ -701,7 +701,8 @@ class CodeEditor {
                 var diff = Math.max(cursor.position - from, 1);
                 var substr = word.substr(0, diff);
                 // Selections...
-                if( e.shiftKey ) if( !this.selection ) this.startSelection( cursor );
+                if( e.shiftKey ) { if( !this.selection ) this.startSelection( cursor ); }
+                else this.endSelection();
                 this.cursorToString(cursor, substr, true);
                 if( e.shiftKey ) this.processSelection();
             }
@@ -765,7 +766,8 @@ class CodeEditor {
                 var diff = cursor.position - from;
                 var substr = word.substr( diff );
                 // Selections...
-                if( e.shiftKey ) if( !this.selection ) this.startSelection( cursor );
+                if( e.shiftKey ) { if( !this.selection ) this.startSelection( cursor ); }
+                else this.endSelection();
                 this.cursorToString( cursor, substr);
                 if( e.shiftKey ) this.processSelection();
             } else {
@@ -1057,7 +1059,7 @@ class CodeEditor {
         });
     }
 
-    addTab(name, selected, title) {
+    addTab( name, selected, title ) {
         
         if(this.openedTabs[ name ])
         {
@@ -1095,22 +1097,31 @@ class CodeEditor {
 
         this.openedTabs[ name ] = code;
 
-        this.tabs.add(name, code, { 'selected': selected, 'fixed': (name === '+') , 'title': code.title, 'onSelect': (e, tabname) => {
+        const ext = LX.getExtension( name );
 
-            if(tabname == '+')
-            {
-                this._onNewTab( e );
-                return;
+        this.tabs.add(name, code, { 
+            selected: selected, 
+            fixed: (name === '+') , 
+            title: code.title, 
+            icon:   ext == 'js' ? "images/folder.png" : 
+                    ext == 'html' ? "fa-solid fa-code orange" : undefined, 
+            onSelect: (e, tabname) => {
+
+                if(tabname == '+')
+                {
+                    this._onNewTab( e );
+                    return;
+                }
+
+                var cursor = cursor ?? this.cursors.children[ 0 ];
+                this.saveCursor( cursor, this.code.cursorState );    
+                this.code = this.openedTabs[ tabname ];
+                this.restoreCursor( cursor, this.code.cursorState );    
+                this.endSelection();
+                this._changeLanguageFromExtension( LX.getExtension( tabname ) );
+                this._refreshCodeInfo( cursor.line, cursor.position );
             }
-
-            var cursor = cursor ?? this.cursors.children[ 0 ];
-            this.saveCursor( cursor, this.code.cursorState );    
-            this.code = this.openedTabs[ tabname ];
-            this.restoreCursor( cursor, this.code.cursorState );    
-            this.endSelection();
-            this._changeLanguageFromExtension( LX.getExtension( tabname ) );
-            this._refreshCodeInfo( cursor.line, cursor.position );
-        }});
+        });
 
         // Move into the sizer..
         this.codeSizer.appendChild( code );

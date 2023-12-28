@@ -21,6 +21,9 @@
   --transition-time: 1000;
 } 
 
+/* Some global colors */
+.orange { color: orange }
+
 ::-webkit-scrollbar {
   height: 3px;
   width: 4px;
@@ -2002,6 +2005,7 @@ meter::-webkit-meter-even-less-good-value {
   -ms-user-select: none; /* IE 10+ */
   user-select: none; /* Standard syntax */
   transition: 0.2s;
+  line-height: 16px;
 }
 
 .lexareatabs.row {
@@ -2692,6 +2696,19 @@ ul.lexassetscontent {
   padding: 0px;
 }
 
+.codebasearea .lexareatab i {
+  font-size: 10px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.codebasearea .lexareatab img {
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
 .lexcodeeditor ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -2750,10 +2767,6 @@ ul.lexassetscontent {
 .lexcodeeditor .codetabsarea.with-vscrollbar {
   width: calc( 100% - 10px ) !important;
 }
-
-/* .lexcodeeditor .codetabsarea.with-hscrollbar {
-  height: calc( 100% - 72px ) !important;
-} */
 
 .lexcodeeditor .codetabsarea.dragging {
   background-color: var(--global-color-secondary);
@@ -2962,7 +2975,7 @@ pre .line-gutter {
   margin: 0;
   pointer-events: unset;
   cursor: default;
-  height: 18px;
+  height: 22px;
 }
 
 .lexcodeeditor .autocomplete pre a {

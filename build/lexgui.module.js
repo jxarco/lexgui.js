@@ -1537,11 +1537,23 @@ class Tabs {
         contentEl.style.display = isSelected ? "block" : "none";
         contentEl.classList.add("lextabcontent");
 
+        // Process icon
+        if( options.icon )
+        {
+            if( options.icon.includes( 'fa-' ) ) // It's fontawesome icon...
+                options.icon = "<i class='" + options.icon + "'></i>";
+            else // an image..
+            {
+                const rootPath = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/";
+                options.icon = "<img src='" + ( rootPath + options.icon ) + "'>";
+            }
+        }
+
         // Create tab
         let tabEl = document.createElement('span');
         tabEl.dataset["name"] = name;
         tabEl.className = "lexareatab" + (isSelected ? " selected" : "");
-        tabEl.innerHTML = name;
+        tabEl.innerHTML = (options.icon ?? "") + name;
         tabEl.id = name.replace(/\s/g, '') + Tabs.TAB_ID++;
         tabEl.title = options.title;
         tabEl.selected = isSelected ?? false;
