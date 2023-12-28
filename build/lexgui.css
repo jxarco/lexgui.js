@@ -2786,7 +2786,7 @@ ul.lexassetscontent {
   font-family: 'Inconsolata', monospace;
   font-size: inherit;
   font-weight: bold;
-  margin: 4px 0px;
+  margin: 0px 0px;
   white-space: pre;
   word-wrap: normal;
   line-height: inherit;
@@ -2794,7 +2794,7 @@ ul.lexassetscontent {
   position: relative;
   overflow: visible;
   -webkit-tap-highlight-color: transparent;
-  height: 16px;
+  height: 20px;
   pointer-events: none;
 }
 
@@ -2819,9 +2819,9 @@ ul.lexassetscontent {
 pre .line-gutter {
   color: #888;
   width: 48px;
-  height: 16px;
+  height: 20px;
   font-size: 14px;
-  line-height: 22px;
+  line-height: 20px;
   text-align: center;
   -webkit-user-select: none; /* Safari 3.1+ */
   -moz-user-select: none; /* Firefox 2+ */
@@ -2843,7 +2843,6 @@ pre .line-gutter {
   margin: 0;
   padding: 0;
   position: relative;
-  z-index: 3;
   pointer-events: none;
 }
 
@@ -2867,7 +2866,7 @@ pre .line-gutter {
   z-index: 0 !important;
   left: 0px;
   top: 0px;
-  height: 18px;
+  height: 20px;
 }
 
 .lexcodescrollbar {
@@ -2881,6 +2880,7 @@ pre .line-gutter {
   margin-top: 26px;
   z-index: 1 !important;
   right: 0px;
+  pointer-events: none;
 }
 
 .lexcodescrollbar.horizontal {
@@ -2906,6 +2906,7 @@ pre .line-gutter {
   width: 10px;
   height: 10px;
   transition: linear 0.1s background-color;
+  pointer-events: all;
 }
 
 .lexcodescrollbar div:hover { /* thumb */
