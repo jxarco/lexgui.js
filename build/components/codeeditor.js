@@ -475,7 +475,7 @@ class CodeEditor {
             if( this.selection ) {
                 this.deleteSelection( cursor );
                 // Remove entire line when selecting with triple click
-                if(this.code.lines[ ln ] != undefined && !this.code.lines[ ln ].length) 
+                if( this._tripleClickSelection ) 
                 {
                     this.actions['Backspace'].callback( ln, cursor, e );
                     this.lineDown( cursor, true );
@@ -1270,6 +1270,7 @@ class CodeEditor {
                     this.resetCursorPos( CodeEditor.CURSOR_LEFT );
                     e._shiftKey = true;
                     this.actions['End'].callback(cursor.line, cursor, e);
+                    this._tripleClickSelection = true;
                     break;
             }
         }
@@ -1571,7 +1572,6 @@ class CodeEditor {
         if( this.selection )
         {
             this.actions['Backspace'].callback(lidx, cursor, e);
-            lidx = cursor.line; // Update this, since it's from the old code
         }
 
         // Append key
@@ -2289,6 +2289,7 @@ class CodeEditor {
         this.selections.classList.remove('show');
         this.selections.innerHTML = "";
         delete this.selection;
+        delete this._tripleClickSelection;
     }
 
     cursorToRight( key, cursor ) {
