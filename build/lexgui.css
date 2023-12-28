@@ -3087,9 +3087,9 @@ pre .line-gutter {
 .cm-sym.batch { color: #dfd85e; } /* symbol */
 .cm-mtd.batch { color: inherit } /* method */
 
-/* plain color */
-.cm-str.plaintext, .cm-kwd.plaintext, .cm-com.plaintext, .cm-typ.plaintext, .cm-std.plaintext, 
-.cm-bln.plaintext, .cm-dec.plaintext, .cm-sym.plaintext, .cm-mtd.plaintext { color: inherit; }
+.cm-str.html { color: #ca7d59; } /* string */
+.cm-kwd.html { color: #2194ce; } /* keyword */
+.cm-bln.html { color: #b4d7ec; } /* builtin */
 
 
 /* Node Graph */

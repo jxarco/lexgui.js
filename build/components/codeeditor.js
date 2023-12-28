@@ -381,6 +381,7 @@ class CodeEditor {
             'JSON': { },
             'XML': { },
             'Python': { },
+            'HTML': { },
             'Batch': { blockComments: false, singleLineCommentToken: '::' }
         };
 
@@ -404,7 +405,8 @@ class CodeEditor {
                     'texture_storage_2d_array', 'texture_storage_3d'],
             'Python': ['False', 'def', 'None', 'True', 'in', 'is', 'and', 'lambda', 'nonlocal', 'not', 'or'],
             'Batch': ['set', 'SET', 'echo', 'ECHO', 'off', 'OFF', 'del', 'DEL', 'defined', 'DEFINED', 'setlocal', 'SETLOCAL', 'enabledelayedexpansion', 'ENABLEDELAYEDEXPANSION', 'driverquery', 
-                      'DRIVERQUERY', 'print', 'PRINT']
+                      'DRIVERQUERY', 'print', 'PRINT'],
+            'HTML': ['html', 'meta', 'title', 'link', 'script', 'body', 'DOCTYPE', 'head'],
         };
         this.utils = { // These ones don't have hightlight, used as suggestions to autocomplete only...
             'JavaScript': ['querySelector', 'body', 'addEventListener', 'removeEventListener', 'remove', 'sort', 'keys', 'filter', 'isNaN', 'parseFloat', 'parseInt', 'EPSILON', 'isFinite',
@@ -427,7 +429,8 @@ class CodeEditor {
         this.builtin = {
             'JavaScript': ['document', 'console', 'window', 'navigator', 'performance'],
             'CSS': ['*', '!important'],
-            'C++': ['vector', 'list', 'map']
+            'C++': ['vector', 'list', 'map'],
+            'HTML': ['type', 'xmlns', 'PUBLIC', 'http-equiv', 'src', 'lang', 'href', 'rel', 'content'], // attributes
         };
         this.statementsAndDeclarations = {
             'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'from', 'throw', 'async', 'try', 'catch', 'await'],
@@ -552,9 +555,15 @@ class CodeEditor {
                 if( this.selection ) 
                 lastX += this.selection.chars;
 
-                this.startSelection( cursor );
+                if( !this.selection )
+                    this.startSelection( cursor );
                 var string = this.code.lines[ ln ].substring( idx, lastX );
-                this.selection.selectInline( idx, cursor.line, this.measureString( string ) );
+                if( this.selection.sameLine() )
+                    this.selection.selectInline( idx, cursor.line, this.measureString( string ) );
+                else
+                {
+                    this.processSelection();
+                }
             } else if( !e.keepSelection )
                 this.endSelection();
         });
@@ -563,18 +572,25 @@ class CodeEditor {
             
             if( e.shiftKey || e._shiftKey ) {
                 
-                var string = this.code.lines[ ln ].substring(cursor.position);
+                var string = this.code.lines[ ln ].substring( cursor.position );
                 if( !this.selection )
                     this.startSelection( cursor );
-                this.selection.selectInline(cursor.position, cursor.line, this.measureString(string));
+                if( this.selection.sameLine() )
+                    this.selection.selectInline(cursor.position, cursor.line, this.measureString( string ));
+                else
+                {
+                    this.resetCursorPos( CodeEditor.CURSOR_LEFT );
+                    this.cursorToString( cursor, this.code.lines[ ln ] );            
+                    this.processSelection();
+                }
             } else 
                 this.endSelection();
 
             this.resetCursorPos( CodeEditor.CURSOR_LEFT );
             this.cursorToString( cursor, this.code.lines[ ln ] );
 
-            const last_char = (this.code.clientWidth / this.charWidth)|0;
-            this.setScrollLeft( cursor.position >= last_char ? (cursor.position - last_char) * this.charWidth : 0 );
+            const last_char = ( this.code.clientWidth / this.charWidth )|0;
+            this.setScrollLeft( cursor.position >= last_char ? ( cursor.position - last_char ) * this.charWidth : 0 );
         });
 
         this.action( 'Enter', true, ( ln, cursor, e ) => {
@@ -965,12 +981,28 @@ class CodeEditor {
 
     _addUndoStep( cursor )  {
 
+        const d = new Date();
+        const current = d.getTime();
+
+        if( !this._lastTime ) {
+            this._lastTime = current;
+        } else {
+            if( ( current - this._lastTime ) > 3000 ){
+                this._lastTime = null;
+            } else {
+                // If time not enough, reset timer
+                this._lastTime = current;
+                return;
+            }
+        }
+
         var cursor = cursor ?? this.cursors.children[ 0 ];
 
         this.code.undoSteps.push( {
             lines: LX.deepCopy( this.code.lines ),
             cursor: this.saveCursor( cursor ),
-            line: cursor.line
+            line: cursor.line,
+            position: cursor.position
         } );
     }
 
@@ -999,6 +1031,7 @@ class CodeEditor {
             case 'wgsl': return this._changeLanguage( 'WGSL' );
             case 'py': return this._changeLanguage( 'Python' );
             case 'bat': return this._changeLanguage( 'Batch' );
+            case 'html': return this._changeLanguage( 'HTML' );
             case 'txt': 
             default:
                 this._changeLanguage( 'Plain Text' );
@@ -1470,7 +1503,6 @@ class CodeEditor {
                     return;
                 const step = this.code.undoSteps.pop();
                 this.code.lines = step.lines;
-                cursor.line = step.line;
                 this.restoreCursor( cursor, step.cursor );
                 this.processLines();
                 return;
@@ -1517,23 +1549,9 @@ class CodeEditor {
 
         // Add undo steps
 
-        const d = new Date();
-        const current = d.getTime();
-
-        if( !skip_undo )
+        if( !skip_undo && this.code.lines.length )
         {
-            if( !this._lastTime ) {
-                this._lastTime = current;
-                this._addUndoStep( cursor );
-            } else {
-                if( (current - this._lastTime) > 3000 && this.code.lines.length){
-                    this._lastTime = null;
-                    this._addUndoStep( cursor );
-                }else{
-                    // If time not enough, reset timer
-                    this._lastTime = current;
-                }
-            }
+            this._addUndoStep( cursor );
         }
 
         //  Some custom cases for word enclosing (), {}, "", '', ...
@@ -1900,7 +1918,7 @@ class CodeEditor {
             tokensToEvaluate.push( t );
         };
 
-        let iter = linestring.matchAll(/(::|[\[\](){}<>.,;:*"'%@ ])/g);
+        let iter = linestring.matchAll(/(::|[\[\](){}<>.,;:*"'%@!/= ])/g);
         let subtokens = iter.next();
         if( subtokens.value )
         {
@@ -2064,6 +2082,9 @@ class CodeEditor {
 
             if( discardToken )
                 return "";
+
+            token = token.replace( "<", "&lt;" );
+            token = token.replace( ">", "&gt;" );
 
             // No highlighting, no need to put it inside another span..
             if( !token_classname.length )
@@ -2376,7 +2397,7 @@ class CodeEditor {
 
         cursor = cursor ?? this.cursors.children[ 0 ];
         cursor.line = state.line ?? 0;
-        cursor.position = state.charPos ?? 0;
+        cursor.position = state.position ?? 0;
 
         cursor._left = state.left ?? 0;
         cursor.style.left = "calc(" + (cursor._left - this.getScrollLeft()) + "px + " + this.xPadding + ")";
@@ -2657,11 +2678,11 @@ class CodeEditor {
 
         // Add language special keys...
         suggestions = suggestions.concat(   
-            Object.keys( this.builtin[ this.highlight ] ) ?? [],
-            Object.keys( this.keywords[ this.highlight ] ) ?? [],
-            Object.keys( this.statementsAndDeclarations[ this.highlight ] ) ?? [],
-            Object.keys( this.types[ this.highlight ] ) ?? [],
-            Object.keys( this.utils[ this.highlight ] ) ?? []
+            Object.keys( this.builtin[ this.highlight ] ?? {} ),
+            Object.keys( this.keywords[ this.highlight ] ?? {} ),
+            Object.keys( this.statementsAndDeclarations[ this.highlight ] ?? {} ),
+            Object.keys( this.types[ this.highlight ] ?? {} ),
+            Object.keys( this.utils[ this.highlight ] ?? {} )
         );
 
         // Add words in current tab plus remove current word
