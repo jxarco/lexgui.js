@@ -170,8 +170,57 @@ class CodeEditor {
         window.editor = this;
 
         CodeEditor.__instances.push( this );
+        
+        this.addFileExplorer = options.file_explorer ?? false;
 
-        this.base_area = area;
+        // File explorer
+        if( this.addFileExplorer )
+        {
+            var [explorerArea, codeArea] = area.split({ sizes:["15%","85%"] });
+
+            let panel = new LX.Panel();
+
+            panel.addTitle( "EXPLORER" );
+
+            let sceneData = {
+                'id': 'WORKSPACE',
+                'skipVisibility': true,
+                'children': []
+            };
+        
+            this.explorer = panel.addTree( null, sceneData, { 
+                filter: false,
+                rename: false,
+                skip_default_icon: true,
+                onevent: (event) => { 
+                    switch(event.type) {
+                        case LX.TreeEvent.NODE_SELECTED:
+                            if( !this.tabs.tabDOMs[ event.node.id ] ) break;
+                        case LX.TreeEvent.NODE_DBLCLICKED:
+                            this.tabs.tabDOMs[ event.node.id ].click()
+                            break;
+                        case LX.TreeEvent.NODE_DELETED: 
+                            this.tabs.delete( event.node.id );
+                            break;
+                        // case LX.TreeEvent.NODE_CONTEXTMENU: 
+                        //     LX.addContextMenu( event.multiple ? "Selected Nodes" : event.node.id, event.value, m => {
+                        //          
+                        //     });
+                        //     break;
+                        // case LX.TreeEvent.NODE_DRAGGED: 
+                        //     console.log(event.node.id + " is now child of " + event.value.id); 
+                        //     break;
+                    }
+                }
+            });    
+
+            explorerArea.attach( panel );
+
+            // Update area
+            area = codeArea;
+        }
+
+        this.base_area = codeArea ?? area;
         this.area = new LX.Area( { className: "lexcodeeditor", height: "auto", no_append: true } );
 
         this.tabs = this.area.addTabs( { onclose: (name) => delete this.openedTabs[ name ] } );
@@ -1130,16 +1179,23 @@ class CodeEditor {
         });
 
         this.openedTabs[ name ] = code;
-
+        
         const ext = LX.getExtension( name );
+        const tabIcon = ext == 'html' ? "fa-solid fa-code orange" : 
+        ext == 'js' ? "images/js.png" :
+        ext == 'py' ? "images/py.png" : undefined;
+
+        if( this.addFileExplorer && name !== '+' )
+        {
+            this.explorer.data.children.push( { 'id': name, 'skipVisibility': true, 'icon': tabIcon } );
+            this.explorer.frefresh( name );
+        }
 
         this.tabs.add(name, code, { 
             selected: selected, 
             fixed: (name === '+') , 
             title: code.title, 
-            icon:   ext == 'html' ? "fa-solid fa-code orange" : 
-                    ext == 'js' ? "images/js.png" :
-                    ext == 'py' ? "images/py.png" : undefined, 
+            icon: tabIcon, 
             onSelect: (e, tabname) => {
 
                 if(tabname == '+')
