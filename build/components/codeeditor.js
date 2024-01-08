@@ -1326,7 +1326,7 @@ class CodeEditor {
 
         var cursor = this.cursors.children[ 0 ];
 
-        if(e) this.processClick( e, true );
+        if( e ) this.processClick( e, true );
         if( !this.selection )
             this.startSelection( cursor );
 
@@ -1348,19 +1348,19 @@ class CodeEditor {
         // Selection goes down...
         if( deltaY >= 0 )
         {
-            while( deltaY < (this.selections.childElementCount - 1) )            
+            while( deltaY < ( this.selections.childElementCount - 1 ) )
                 deleteElement( this.selections.lastChild );
 
             for(let i = fromY; i <= toY; i++){
 
                 const sId = i - fromY;
-                const isVisible = sId >= this.visibleLinesViewport.x && sId <= this.visibleLinesViewport.y;
+                const isVisible = i >= this.visibleLinesViewport.x && i <= this.visibleLinesViewport.y;
                 let domEl = null;
 
                 if( isVisible )
                 {
                     // Make sure that the line selection is generated...
-                    domEl = this.selections.childNodes[sId];
+                    domEl = this.selections.childNodes[ sId ];
                     if(!domEl)
                     {
                         domEl = document.createElement( 'div' );
@@ -1375,18 +1375,18 @@ class CodeEditor {
                 if(sId == 0) // First line 2 cases (single line, multiline)
                 {
                     const reverse = fromX > toX;
-                    if(deltaY == 0) string = !reverse ? this.code.lines[ i ].substring(fromX, toX) : this.code.lines[ i ].substring(toX, fromX);
-                    else string = this.code.lines[ i ].substr(fromX);
+                    if(deltaY == 0) string = !reverse ? this.code.lines[ i ].substring( fromX, toX ) : this.code.lines[ i ].substring(toX, fromX);
+                    else string = this.code.lines[ i ].substr( fromX );
                     const pixels = (reverse && deltaY == 0 ? toX : fromX) * this.charWidth;
                     if( isVisible ) domEl.style.left = "calc(" + pixels + "px + " + this.xPadding + ")";
                 }
                 else
                 {
-                    string = (i == toY) ? this.code.lines[ i ].substring(0, toX) : this.code.lines[ i ]; // Last line, any multiple line...
+                    string = (i == toY) ? this.code.lines[ i ].substring( 0, toX ) : this.code.lines[ i ]; // Last line, any multiple line...
                     if( isVisible ) domEl.style.left = this.xPadding;
                 }
                 
-                const stringWidth = this.measureString(string);
+                const stringWidth = this.measureString( string );
                 this.selection.chars += stringWidth / this.charWidth;
 
                 if( isVisible )
@@ -1399,19 +1399,19 @@ class CodeEditor {
         }
         else // Selection goes up...
         {
-            while( Math.abs(deltaY) < (this.selections.childElementCount - 1) )            
+            while( Math.abs( deltaY ) < ( this.selections.childElementCount - 1 ) )            
                 deleteElement( this.selections.firstChild );
 
-            for(let i = toY; i <= fromY; i++){
+            for( let i = toY; i <= fromY; i++ ){
 
                 const sId = i - toY;
-                const isVisible = sId >= this.visibleLinesViewport.x && sId <= this.visibleLinesViewport.y;
+                const isVisible = i >= this.visibleLinesViewport.x && i <= this.visibleLinesViewport.y;
                 let domEl = null;
 
                 if( isVisible )
                 {
                     // Make sure that the line selection is generated...
-                    domEl = this.selections.childNodes[sId];
+                    domEl = this.selections.childNodes[ sId ];
                     if(!domEl)
                     {
                         domEl = document.createElement( 'div' );
@@ -1423,7 +1423,7 @@ class CodeEditor {
                 // Compute new width and selection margins
                 let string;
                 
-                if(sId == 0)
+                if( sId == 0 )
                 {
                     string = this.code.lines[ i ].substr(toX);
                     const pixels = toX * this.charWidth;
@@ -1435,7 +1435,7 @@ class CodeEditor {
                     if( isVisible ) domEl.style.left = this.xPadding;
                 }
                 
-                const stringWidth = this.measureString(string);
+                const stringWidth = this.measureString( string );
                 this.selection.chars += stringWidth / this.charWidth;
                 
                 if( isVisible )
@@ -1448,7 +1448,7 @@ class CodeEditor {
         }
     }
 
-    async processKey(e) {
+    async processKey( e ) {
 
         if( !this.code ) 
             return;
@@ -1458,7 +1458,7 @@ class CodeEditor {
         const skip_undo = e.detail.skip_undo ?? false;
 
         // keys with length > 1 are probably special keys
-        if( key.length > 1 && this.specialKeys.indexOf(key) == -1 )
+        if( key.length > 1 && this.specialKeys.indexOf( key ) == -1 )
             return;
 
         let cursor = this.cursors.children[ 0 ];
