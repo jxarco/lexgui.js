@@ -1611,6 +1611,14 @@ class CodeEditor {
         // Update only the current line, since it's only an appended key
         this.processLine( lidx );
 
+        // We are out of the viewport and max length is different? Resize scrollbars...
+        const maxLineLength = this.getMaxLineLength();
+        const numViewportChars = Math.floor( this.codeScroller.clientWidth / this.charWidth );
+        if( maxLineLength >= numViewportChars && maxLineLength != this._lastMaxLineLength )
+        {
+            this.resize( maxLineLength );
+        }
+
         // Manage autocomplete
 
         if( this.useAutoComplete )
@@ -1775,18 +1783,7 @@ class CodeEditor {
         delete this._buildingString; 
         delete this._pendingString;
 
-        setTimeout( () => {
-
-            // Update max viewport
-            const scrollWidth = this.getMaxLineLength() * this.charWidth;
-            const scrollHeight = this.code.lines.length * this.lineHeight;
-    
-            this.codeSizer.style.minWidth = scrollWidth + "px";
-            this.codeSizer.style.minHeight = scrollHeight + "px";
-
-            this.resizeScrollBars( totalLinesInViewport );
-
-        }, 10 );
+        this.resize();
     }
 
     processLine( linenum, force ) {
@@ -2305,8 +2302,8 @@ class CodeEditor {
         // Add horizontal scroll
 
         doAsync(() => {
-            var last_char = (( this.codeScroller.clientWidth + this.getScrollLeft() ) / this.charWidth)|0;
-            if( cursor.position >= last_char )
+            var viewportSizeX = ( this.codeScroller.clientWidth + this.getScrollLeft() ) - 48; // Gutter offset
+            if( (cursor.position * this.charWidth) >= viewportSizeX )
                 this.setScrollLeft( this.getScrollLeft() + this.charWidth );
         });
     }
@@ -2326,8 +2323,8 @@ class CodeEditor {
         // Add horizontal scroll
 
         doAsync(() => {
-            var first_char = ( this.getScrollLeft() / this.charWidth )|0;
-            if( (cursor.position - 1) < first_char )
+            var viewportSizeX = this.getScrollLeft(); // Gutter offset
+            if( ( ( cursor.position - 1 ) * this.charWidth ) < viewportSizeX )
                 this.setScrollLeft( this.getScrollLeft() - this.charWidth );
         });
     }
@@ -2477,9 +2474,32 @@ class CodeEditor {
         this.setScrollBarValue( 'vertical' );
     }
 
-    resizeScrollBars( numViewportLines ) {
+    resize( pMaxLength ) {
+        
+        setTimeout( () => {
 
-        if( numViewportLines > this.code.lines.length )
+            // Update max viewport
+            const maxLineLength = pMaxLength ?? this.getMaxLineLength();
+            const scrollWidth = maxLineLength * this.charWidth;
+            const scrollHeight = this.code.lines.length * this.lineHeight;
+
+            this._lastMaxLineLength = maxLineLength;
+
+            this.codeSizer.style.minWidth = scrollWidth + "px";
+            this.codeSizer.style.minHeight = scrollHeight + "px";
+
+            this.resizeScrollBars();
+
+            // console.warn("Resize editor viewport");
+
+        }, 10 );
+    }
+
+    resizeScrollBars() {
+
+        const totalLinesInViewport = ((this.codeScroller.offsetHeight - 36) / this.lineHeight)|0;
+
+        if( totalLinesInViewport > this.code.lines.length )
         {
             this.codeScroller.classList.remove( 'with-vscrollbar' );
             this.vScrollbar.root.classList.add( 'scrollbar-unused' );
@@ -2488,13 +2508,12 @@ class CodeEditor {
         {
             this.codeScroller.classList.add( 'with-vscrollbar' );
             this.vScrollbar.root.classList.remove( 'scrollbar-unused' );
-            this.vScrollbar.thumb.size = (numViewportLines / this.code.lines.length);
+            this.vScrollbar.thumb.size = (totalLinesInViewport / this.code.lines.length);
             this.vScrollbar.thumb.style.height = (this.vScrollbar.thumb.size * 100.0) + "%";
         }
 
         const numViewportChars = Math.floor( this.codeScroller.clientWidth / this.charWidth );
-        const line_lengths = this.code.lines.map( value => value.length );
-        const maxLineLength = Math.max(...line_lengths);
+        const maxLineLength = this._lastMaxLineLength;
 
         if( numViewportChars > maxLineLength )
         {
