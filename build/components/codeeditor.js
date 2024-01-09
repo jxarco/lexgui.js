@@ -422,17 +422,17 @@ class CodeEditor {
         // setInterval( this.scanWordSuggestions.bind( this ), 2000 );
 
         this.languages = {
-            'Plain Text': { },
-            'JavaScript': { },
-            'C++': { },
-            'CSS': { },
-            'GLSL': { },
-            'WGSL': { },
-            'JSON': { },
-            'XML': { },
-            'Python': { singleLineCommentToken: '#' },
-            'HTML': { },
-            'Batch': { blockComments: false, singleLineCommentToken: '::' }
+            'Plain Text': { ext: 'txt' },
+            'JavaScript': { ext: 'js' },
+            'C++': { ext: 'cpp' },
+            'CSS': { ext: 'css' },
+            'GLSL': { ext: 'glsl' },
+            'WGSL': { ext: 'wgsl' },
+            'JSON': { ext: 'json' },
+            'XML': { ext: 'xml' },
+            'Python': { ext: 'py', singleLineCommentToken: '#' },
+            'HTML': { ext: 'html' },
+            'Batch': { ext: 'bat', blockComments: false, singleLineCommentToken: '::' }
         };
 
         this.specialKeys = [

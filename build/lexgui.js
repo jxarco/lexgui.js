@@ -349,18 +349,18 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             {
                 const instances = LX.CodeEditor.getInstances();
                 if(!instances.length) return;
-
-                const languages = Object.keys( instances[0].languages );
-
-                for( let l of languages ) {
-
-                    const key = "Set language: " + l;
-                    if( key.toLowerCase().includes(filter) ) {
-                        add_element(key, () => {
+    
+                const languages = instances[0].languages;
+    
+                for( let l of Object.keys( languages ) ) {
+    
+                    const key = "Language mode: " + l + " <span class='lang-ext'>(" + languages[ l ].ext + ")</span>";
+                    if( key.toLowerCase().includes( filter ) ) {
+                        add_element( key, () => {
                             for( let i of instances ) {
                                 i._changeLanguage( l );
                             }
-                        }, "", {});
+                        }, "", {} );
                     }
                 }
             }

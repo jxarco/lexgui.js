@@ -17,7 +17,7 @@
   --global-text-primary: #f4f4ffe6;
   --global-text-secondary: #c6c6cfd9;
   --global-dark-background: #14161a;
-  --global-blur-background: #292b2da9;
+  --global-blur-background: #28292ba9;
   --transition-time: 1000;
 } 
 
@@ -132,7 +132,7 @@ body.nocursor * {
   background-color: var(--global-blur-background);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid #d0d0ec6b;
   width: 30%;
   top: 15%;
@@ -188,6 +188,11 @@ body.nocursor * {
   margin-top: 2px;
   color: var(--global-selected-light);
   float: left;
+}
+
+#global_search .searchitembox .searchitem .lang-ext {
+  color: #676e75;
+  font-size: 12px;
 }
 
 #global_search .searchitembox .searchitem.last {
