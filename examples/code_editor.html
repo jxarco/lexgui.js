@@ -24,27 +24,28 @@
         let area = LX.init();
 
         // split main area
-        var [leftArea, rightArea] = area.split({ sizes:["55%","45%"] });
+        // var [leftArea, rightArea] = area.split({ sizes:["55%","45%"] });
 
         // add canvas to leftArea
-        var canvas = document.createElement('canvas');
-        canvas.id = "mycanvas";
-        canvas.width = leftArea.root.clientWidth;
-        canvas.height = leftArea.root.clientHeight;
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
-        leftArea.attach( canvas );
+        // var canvas = document.createElement('canvas');
+        // canvas.id = "mycanvas";
+        // canvas.width = leftArea.root.clientWidth;
+        // canvas.height = leftArea.root.clientHeight;
+        // canvas.style.width = "100%";
+        // canvas.style.height = "100%";
+        // leftArea.attach( canvas );
 
         // add on resize event to control canvas size
-        leftArea.onresize = function( bounding ) {
-            canvas.width = bounding.width;
-            canvas.height = bounding.height;
-        };
+        // leftArea.onresize = function( bounding ) {
+        //     canvas.width = bounding.width;
+        //     canvas.height = bounding.height;
+        // };
 
-        let editor = new LX.CodeEditor(rightArea, {
+        let editor = new LX.CodeEditor(area, {
             // allow_add_scripts: false,
             // autocomplete: false,
-            // disable_edition: true
+            // disable_edition: true,
+            file_explorer: true
         });
 
         editor.loadFile( "../data/test.json" );
@@ -52,22 +53,22 @@
         editor.loadFile( "../data/engine.cpp" );
         editor.loadFile( "../data/script.js" );
         
-        var ctx = canvas.getContext("2d");
-        ctx.fillStyle = "#b7a9b1";
-        ctx.font = "48px Monospace";
-        ctx.strokeStyle = "#ff1999";
+        // var ctx = canvas.getContext("2d");
+        // ctx.fillStyle = "#b7a9b1";
+        // ctx.font = "48px Monospace";
+        // ctx.strokeStyle = "#ff1999";
 
-        function loop(dt) {
+        // function loop(dt) {
             
-            var ctx = canvas.getContext("2d");
+        //     var ctx = canvas.getContext("2d");
 
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeText("Lexgui.js @jxarco", 200, 300);
+        //     ctx.fillRect(0, 0, canvas.width, canvas.height);
+        //     ctx.strokeText("Lexgui.js @jxarco", 200, 300);
 
-            requestAnimationFrame(loop);
-        }
+        //     requestAnimationFrame(loop);
+        // }
 
-        requestAnimationFrame(loop);
+        // requestAnimationFrame(loop);
 
     </script>
 </html>

@@ -170,8 +170,57 @@ class CodeEditor {
         window.editor = this;
 
         CodeEditor.__instances.push( this );
+        
+        this.addFileExplorer = options.file_explorer ?? false;
 
-        this.base_area = area;
+        // File explorer
+        if( this.addFileExplorer )
+        {
+            var [explorerArea, codeArea] = area.split({ sizes:["15%","85%"] });
+
+            let panel = new LX.Panel();
+
+            panel.addTitle( "EXPLORER" );
+
+            let sceneData = {
+                'id': 'WORKSPACE',
+                'skipVisibility': true,
+                'children': []
+            };
+        
+            this.explorer = panel.addTree( null, sceneData, { 
+                filter: false,
+                rename: false,
+                skip_default_icon: true,
+                onevent: (event) => { 
+                    switch(event.type) {
+                        case LX.TreeEvent.NODE_SELECTED:
+                            if( !this.tabs.tabDOMs[ event.node.id ] ) break;
+                        case LX.TreeEvent.NODE_DBLCLICKED:
+                            this.tabs.tabDOMs[ event.node.id ].click()
+                            break;
+                        case LX.TreeEvent.NODE_DELETED: 
+                            this.tabs.delete( event.node.id );
+                            break;
+                        // case LX.TreeEvent.NODE_CONTEXTMENU: 
+                        //     LX.addContextMenu( event.multiple ? "Selected Nodes" : event.node.id, event.value, m => {
+                        //          
+                        //     });
+                        //     break;
+                        // case LX.TreeEvent.NODE_DRAGGED: 
+                        //     console.log(event.node.id + " is now child of " + event.value.id); 
+                        //     break;
+                    }
+                }
+            });    
+
+            explorerArea.attach( panel );
+
+            // Update area
+            area = codeArea;
+        }
+
+        this.base_area = codeArea ?? area;
         this.area = new LX.Area( { className: "lexcodeeditor", height: "auto", no_append: true } );
 
         this.tabs = this.area.addTabs( { onclose: (name) => delete this.openedTabs[ name ] } );
@@ -1130,16 +1179,23 @@ class CodeEditor {
         });
 
         this.openedTabs[ name ] = code;
-
+        
         const ext = LX.getExtension( name );
+        const tabIcon = ext == 'html' ? "fa-solid fa-code orange" : 
+        ext == 'js' ? "images/js.png" :
+        ext == 'py' ? "images/py.png" : undefined;
+
+        if( this.addFileExplorer && name !== '+' )
+        {
+            this.explorer.data.children.push( { 'id': name, 'skipVisibility': true, 'icon': tabIcon } );
+            this.explorer.frefresh( name );
+        }
 
         this.tabs.add(name, code, { 
             selected: selected, 
             fixed: (name === '+') , 
             title: code.title, 
-            icon:   ext == 'html' ? "fa-solid fa-code orange" : 
-                    ext == 'js' ? "images/js.png" :
-                    ext == 'py' ? "images/py.png" : undefined, 
+            icon: tabIcon, 
             onSelect: (e, tabname) => {
 
                 if(tabname == '+')
@@ -1327,7 +1383,7 @@ class CodeEditor {
 
         var cursor = this.cursors.children[ 0 ];
 
-        if(e) this.processClick( e, true );
+        if( e ) this.processClick( e, true );
         if( !this.selection )
             this.startSelection( cursor );
 
@@ -1349,19 +1405,19 @@ class CodeEditor {
         // Selection goes down...
         if( deltaY >= 0 )
         {
-            while( deltaY < (this.selections.childElementCount - 1) )            
+            while( deltaY < ( this.selections.childElementCount - 1 ) )
                 deleteElement( this.selections.lastChild );
 
             for(let i = fromY; i <= toY; i++){
 
                 const sId = i - fromY;
-                const isVisible = sId >= this.visibleLinesViewport.x && sId <= this.visibleLinesViewport.y;
+                const isVisible = i >= this.visibleLinesViewport.x && i <= this.visibleLinesViewport.y;
                 let domEl = null;
 
                 if( isVisible )
                 {
                     // Make sure that the line selection is generated...
-                    domEl = this.selections.childNodes[sId];
+                    domEl = this.selections.childNodes[ sId ];
                     if(!domEl)
                     {
                         domEl = document.createElement( 'div' );
@@ -1376,18 +1432,18 @@ class CodeEditor {
                 if(sId == 0) // First line 2 cases (single line, multiline)
                 {
                     const reverse = fromX > toX;
-                    if(deltaY == 0) string = !reverse ? this.code.lines[ i ].substring(fromX, toX) : this.code.lines[ i ].substring(toX, fromX);
-                    else string = this.code.lines[ i ].substr(fromX);
+                    if(deltaY == 0) string = !reverse ? this.code.lines[ i ].substring( fromX, toX ) : this.code.lines[ i ].substring(toX, fromX);
+                    else string = this.code.lines[ i ].substr( fromX );
                     const pixels = (reverse && deltaY == 0 ? toX : fromX) * this.charWidth;
                     if( isVisible ) domEl.style.left = "calc(" + pixels + "px + " + this.xPadding + ")";
                 }
                 else
                 {
-                    string = (i == toY) ? this.code.lines[ i ].substring(0, toX) : this.code.lines[ i ]; // Last line, any multiple line...
+                    string = (i == toY) ? this.code.lines[ i ].substring( 0, toX ) : this.code.lines[ i ]; // Last line, any multiple line...
                     if( isVisible ) domEl.style.left = this.xPadding;
                 }
                 
-                const stringWidth = this.measureString(string);
+                const stringWidth = this.measureString( string );
                 this.selection.chars += stringWidth / this.charWidth;
 
                 if( isVisible )
@@ -1400,19 +1456,19 @@ class CodeEditor {
         }
         else // Selection goes up...
         {
-            while( Math.abs(deltaY) < (this.selections.childElementCount - 1) )            
+            while( Math.abs( deltaY ) < ( this.selections.childElementCount - 1 ) )            
                 deleteElement( this.selections.firstChild );
 
-            for(let i = toY; i <= fromY; i++){
+            for( let i = toY; i <= fromY; i++ ){
 
                 const sId = i - toY;
-                const isVisible = sId >= this.visibleLinesViewport.x && sId <= this.visibleLinesViewport.y;
+                const isVisible = i >= this.visibleLinesViewport.x && i <= this.visibleLinesViewport.y;
                 let domEl = null;
 
                 if( isVisible )
                 {
                     // Make sure that the line selection is generated...
-                    domEl = this.selections.childNodes[sId];
+                    domEl = this.selections.childNodes[ sId ];
                     if(!domEl)
                     {
                         domEl = document.createElement( 'div' );
@@ -1424,7 +1480,7 @@ class CodeEditor {
                 // Compute new width and selection margins
                 let string;
                 
-                if(sId == 0)
+                if( sId == 0 )
                 {
                     string = this.code.lines[ i ].substr(toX);
                     const pixels = toX * this.charWidth;
@@ -1436,7 +1492,7 @@ class CodeEditor {
                     if( isVisible ) domEl.style.left = this.xPadding;
                 }
                 
-                const stringWidth = this.measureString(string);
+                const stringWidth = this.measureString( string );
                 this.selection.chars += stringWidth / this.charWidth;
                 
                 if( isVisible )
@@ -1449,7 +1505,7 @@ class CodeEditor {
         }
     }
 
-    async processKey(e) {
+    async processKey( e ) {
 
         if( !this.code ) 
             return;
@@ -1459,7 +1515,7 @@ class CodeEditor {
         const skip_undo = e.detail.skip_undo ?? false;
 
         // keys with length > 1 are probably special keys
-        if( key.length > 1 && this.specialKeys.indexOf(key) == -1 )
+        if( key.length > 1 && this.specialKeys.indexOf( key ) == -1 )
             return;
 
         let cursor = this.cursors.children[ 0 ];
@@ -1610,6 +1666,14 @@ class CodeEditor {
 
         // Update only the current line, since it's only an appended key
         this.processLine( lidx );
+
+        // We are out of the viewport and max length is different? Resize scrollbars...
+        const maxLineLength = this.getMaxLineLength();
+        const numViewportChars = Math.floor( this.codeScroller.clientWidth / this.charWidth );
+        if( maxLineLength >= numViewportChars && maxLineLength != this._lastMaxLineLength )
+        {
+            this.resize( maxLineLength );
+        }
 
         // Manage autocomplete
 
@@ -1775,18 +1839,7 @@ class CodeEditor {
         delete this._buildingString; 
         delete this._pendingString;
 
-        setTimeout( () => {
-
-            // Update max viewport
-            const scrollWidth = this.getMaxLineLength() * this.charWidth;
-            const scrollHeight = this.code.lines.length * this.lineHeight;
-    
-            this.codeSizer.style.minWidth = scrollWidth + "px";
-            this.codeSizer.style.minHeight = scrollHeight + "px";
-
-            this.resizeScrollBars( totalLinesInViewport );
-
-        }, 10 );
+        this.resize();
     }
 
     processLine( linenum, force ) {
@@ -2306,8 +2359,8 @@ class CodeEditor {
         // Add horizontal scroll
 
         doAsync(() => {
-            var last_char = (( this.codeScroller.clientWidth + this.getScrollLeft() ) / this.charWidth)|0;
-            if( cursor.position >= last_char )
+            var viewportSizeX = ( this.codeScroller.clientWidth + this.getScrollLeft() ) - 48; // Gutter offset
+            if( (cursor.position * this.charWidth) >= viewportSizeX )
                 this.setScrollLeft( this.getScrollLeft() + this.charWidth );
         });
     }
@@ -2327,8 +2380,8 @@ class CodeEditor {
         // Add horizontal scroll
 
         doAsync(() => {
-            var first_char = ( this.getScrollLeft() / this.charWidth )|0;
-            if( (cursor.position - 1) < first_char )
+            var viewportSizeX = this.getScrollLeft(); // Gutter offset
+            if( ( ( cursor.position - 1 ) * this.charWidth ) < viewportSizeX )
                 this.setScrollLeft( this.getScrollLeft() - this.charWidth );
         });
     }
@@ -2478,9 +2531,32 @@ class CodeEditor {
         this.setScrollBarValue( 'vertical' );
     }
 
-    resizeScrollBars( numViewportLines ) {
+    resize( pMaxLength ) {
+        
+        setTimeout( () => {
 
-        if( numViewportLines > this.code.lines.length )
+            // Update max viewport
+            const maxLineLength = pMaxLength ?? this.getMaxLineLength();
+            const scrollWidth = maxLineLength * this.charWidth;
+            const scrollHeight = this.code.lines.length * this.lineHeight;
+
+            this._lastMaxLineLength = maxLineLength;
+
+            this.codeSizer.style.minWidth = scrollWidth + "px";
+            this.codeSizer.style.minHeight = scrollHeight + "px";
+
+            this.resizeScrollBars();
+
+            // console.warn("Resize editor viewport");
+
+        }, 10 );
+    }
+
+    resizeScrollBars() {
+
+        const totalLinesInViewport = ((this.codeScroller.offsetHeight - 36) / this.lineHeight)|0;
+
+        if( totalLinesInViewport > this.code.lines.length )
         {
             this.codeScroller.classList.remove( 'with-vscrollbar' );
             this.vScrollbar.root.classList.add( 'scrollbar-unused' );
@@ -2489,13 +2565,12 @@ class CodeEditor {
         {
             this.codeScroller.classList.add( 'with-vscrollbar' );
             this.vScrollbar.root.classList.remove( 'scrollbar-unused' );
-            this.vScrollbar.thumb.size = (numViewportLines / this.code.lines.length);
+            this.vScrollbar.thumb.size = (totalLinesInViewport / this.code.lines.length);
             this.vScrollbar.thumb.style.height = (this.vScrollbar.thumb.size * 100.0) + "%";
         }
 
         const numViewportChars = Math.floor( this.codeScroller.clientWidth / this.charWidth );
-        const line_lengths = this.code.lines.map( value => value.length );
-        const maxLineLength = Math.max(...line_lengths);
+        const maxLineLength = this._lastMaxLineLength;
 
         if( numViewportChars > maxLineLength )
         {

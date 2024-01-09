@@ -8,7 +8,7 @@
 */
 
 var LX = {
-    version: "0.1.17",
+    version: "0.1.18",
     ready: false,
     components: [], // specific pre-build components
     signals: {} // events and triggers
@@ -19,6 +19,13 @@ LX.MOUSE_TRIPLE_CLICK = 3;
 
 function clamp (num, min, max) { return Math.min(Math.max(num, min), max) }
 function round(num, n) { return +num.toFixed(n); }
+
+function getSupportedDOMName( string )
+{
+    return string.replace(/\s/g, '').replaceAll('@', '_').replaceAll('+', '_plus_').replaceAll('.', ''); 
+}
+
+LX.getSupportedDOMName = getSupportedDOMName;
 
 function has( component_name )
 {
@@ -2384,17 +2391,28 @@ class NodeTree {
 
         let item = document.createElement('li');
         item.className = "lextreeitem " + "datalevel" + level + (is_parent ? " parent" : "") + (is_selected ? " selected" : "");
-        item.id = node.id;
+        item.id = LX.getSupportedDOMName( node.id );
         item.tabIndex = "0";
 
         // Select hierarchy icon
-        let icon = "fa-solid fa-square"; // Default: no childs
+        let icon = (this.options.skip_default_icon ?? true) ? "" : "fa-solid fa-square"; // Default: no childs
         if( is_parent ) icon = node.closed ? "fa-solid fa-caret-right" : "fa-solid fa-caret-down";
         item.innerHTML = "<a class='" + icon + " hierarchy'></a>";
         
         // Add display icon
         icon = node.icon;
-        if( icon ) item.innerHTML += "<a class='" + icon + "'></a>";
+
+        // Process icon
+        if( node.icon )
+        {
+            if( node.icon.includes( 'fa-' ) ) // It's fontawesome icon...
+                item.innerHTML += "<a class='" + node.icon + "' style='width: 12px; margin-right: 4px; font-size: 10px;'></a>";
+            else // an image..
+            {
+                const rootPath = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/";
+                item.innerHTML += "<img src='" + ( rootPath + node.icon ) + "'>";
+            }
+        }
 
         item.innerHTML += (node.rename ? "" : node.id);
 
@@ -2441,16 +2459,19 @@ class NodeTree {
             }
         });
 
-        if( this.options.rename ?? true )
-            item.addEventListener("dblclick", function() {
+        item.addEventListener("dblclick", function() {
+            if( that.options.rename ?? true )
+            {
                 // Trigger rename
                 node.rename = true;
                 that.refresh();
-                if(that.onevent) {
-                    const event = new TreeEvent(TreeEvent.NODE_DBLCLICKED, node);
-                    that.onevent( event );
-                }
-            });
+            }
+            if( that.onevent )
+            {
+                const event = new TreeEvent(TreeEvent.NODE_DBLCLICKED, node);
+                that.onevent( event );
+            }
+        });
 
         item.addEventListener("contextmenu", e => {
             e.preventDefault();
@@ -2488,7 +2509,7 @@ class NodeTree {
             else if( e.key == "ArrowUp" || e.key == "ArrowDown" ) // Unique or zero selected
             {
                 var selected = this.selected.length > 1 ? (e.key == "ArrowUp" ? this.selected.shift() : this.selected.pop()) : this.selected[0];
-                var el = this.domEl.querySelector("#" + selected.id);
+                var el = this.domEl.querySelector("#" + LX.getSupportedDOMName( selected.id ) );
                 var sibling = e.key == "ArrowUp" ? el.previousSibling : el.nextSibling;
                 if( sibling ) sibling.click();
             }
@@ -2516,10 +2537,10 @@ class NodeTree {
                     that.onevent( event );
                 }
 
-                node.id = this.value;
+                node.id = LX.getSupportedDOMName( this.value );
                 delete node.rename;
                 that.frefresh( node.id );
-                list.querySelector("#" + this.value).classList.add('selected');
+                list.querySelector("#" + node.id).classList.add('selected');
             }
             if(e.key == 'Escape') {
                 delete node.rename;
@@ -5848,7 +5869,7 @@ class ContextMenu {
         const hasSubmenu = o[ k ].length;
         let entry = document.createElement('div');
         entry.className = "lexcontextmenuentry" + (o[ 'className' ] ? " " + o[ 'className' ] : "" );
-        entry.id = o.id ?? ("eId" + this._getSupportedDOMName( k ));
+        entry.id = o.id ?? ("eId" + getSupportedDOMName( k ));
         entry.innerHTML = "";
         const icon = o[ 'icon' ];
         if(icon) {
@@ -5995,7 +6016,7 @@ class ContextMenu {
         for( let item of this.items )
         {
             let key = Object.keys(item)[0];
-            let pKey = "eId" + this._getSupportedDOMName( key );
+            let pKey = "eId" + getSupportedDOMName( key );
 
             // Item already created
             const id = "#" + (item.id ?? pKey);
@@ -6011,11 +6032,6 @@ class ContextMenu {
 
         this.colors[ token ] = color;
     }
-
-    _getSupportedDOMName( key ) {
-        return key.replace(/\s/g, '').replaceAll('@', '_').replaceAll('+', '_plus_');
-    }
-
 };
 
 LX.ContextMenu = ContextMenu;
