@@ -1150,6 +1150,8 @@ class CodeEditor {
             return true;
         }
 
+        const isNewTabButton = ( name === '+' );
+
         // Create code content
         let code = document.createElement( 'div' );
         code.className = 'code';
@@ -1182,10 +1184,13 @@ class CodeEditor {
         
         const ext = LX.getExtension( name );
         const tabIcon = ext == 'html' ? "fa-solid fa-code orange" : 
-        ext == 'js' ? "images/js.png" :
-        ext == 'py' ? "images/py.png" : undefined;
+        ext == "css" ? "fa-solid fa-hashtag dodgerblue" : 
+        ext == "xml" ? "fa-solid fa-rss orange" : 
+        ext == "bat" ? "fa-brands fa-windows lightblue" : 
+        [ "js", "py", "json", "cpp" ].indexOf( ext ) > -1 ? "images/" + ext + ".png" : 
+        !isNewTabButton ? "fa-solid fa-align-left gray" : undefined;
 
-        if( this.addFileExplorer && name !== '+' )
+        if( this.addFileExplorer && !isNewTabButton )
         {
             this.explorer.data.children.push( { 'id': name, 'skipVisibility': true, 'icon': tabIcon } );
             this.explorer.frefresh( name );
@@ -1193,12 +1198,12 @@ class CodeEditor {
 
         this.tabs.add(name, code, { 
             selected: selected, 
-            fixed: (name === '+') , 
+            fixed: isNewTabButton, 
             title: code.title, 
             icon: tabIcon, 
             onSelect: (e, tabname) => {
 
-                if(tabname == '+')
+                if( isNewTabButton )
                 {
                     this._onNewTab( e );
                     return;

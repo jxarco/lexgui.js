@@ -23,6 +23,9 @@
 
 /* Some global colors */
 .orange { color: orange }
+.gray { color: gray }
+.dodgerblue { color: dodgerblue }
+.lightblue { color: rgb(90, 168, 247) }
 
 ::-webkit-scrollbar {
   height: 3px;
@@ -1417,6 +1420,15 @@ input[type="range"] {
   height: 12px;
   margin-right: 4px;
   vertical-align: middle;
+  margin-top: -1px;
+}
+
+.lextree .lextreeitem .tree-item-icon {
+  width: 12px;
+  height: 12px;
+  margin-right: 4px;
+  vertical-align: middle;
+  margin-top: -1px;
 }
 
 .lextree .lextreeitem.draggingover {
@@ -2704,9 +2716,11 @@ ul.lexassetscontent {
 }
 
 .codebasearea .lexareatab i {
+  width: 12px;
   font-size: 10px;
   margin-right: 4px;
   vertical-align: middle;
+  margin-top: -3px;
 }
 
 .codebasearea .lexareatab img {
@@ -2714,6 +2728,7 @@ ul.lexassetscontent {
   height: 12px;
   margin-right: 4px;
   vertical-align: middle;
+  margin-top: -2px;
 }
 
 .lexcodeeditor ::-webkit-scrollbar {

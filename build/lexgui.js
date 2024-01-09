@@ -2410,7 +2410,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             if( node.icon )
             {
                 if( node.icon.includes( 'fa-' ) ) // It's fontawesome icon...
-                    item.innerHTML += "<a class='" + node.icon + "' style='width: 12px; margin-right: 4px; font-size: 10px;'></a>";
+                    item.innerHTML += "<a class='" + node.icon + " tree-item-icon'></a>";
                 else // an image..
                 {
                     const rootPath = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/";
@@ -2421,7 +2421,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             item.innerHTML += (node.rename ? "" : node.id);
 
             item.setAttribute('draggable', true);
-            item.style.paddingLeft = ((is_parent ? 0 : 3 ) + (3 + (level+1) * 25)) + "px";
+            item.style.paddingLeft = ((is_parent ? 0 : 3 ) + (3 + (level+1) * 15)) + "px";
             list.appendChild(item);
 
             // Callbacks
