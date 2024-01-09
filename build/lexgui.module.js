@@ -261,7 +261,16 @@ function create_global_searchbar( root ) {
             e.stopPropagation();
             global_search.classList.toggle('hidden');
             global_search.querySelector('input').focus();
-            add_elements(undefined);
+            add_elements( undefined );
+        }
+        else
+        {
+            for( let c of LX.components )
+                if( LX[c].prototype.onKeyPressed ) 
+                {
+                    const instances = LX.CodeEditor.getInstances();
+                    for( let i of instances ) i.onKeyPressed( e );
+                }
         }
     });
 

@@ -178,6 +178,7 @@ class CodeEditor {
         {
             var [explorerArea, codeArea] = area.split({ sizes:["15%","85%"] });
             explorerArea.setLimitBox( 180, 20, 512 );
+            this.explorerArea = explorerArea;
 
             let panel = new LX.Panel();
 
@@ -221,7 +222,7 @@ class CodeEditor {
             area = codeArea;
         }
 
-        this.base_area = codeArea ?? area;
+        this.base_area = area;
         this.area = new LX.Area( { className: "lexcodeeditor", height: "auto", no_append: true } );
 
         this.tabs = this.area.addTabs( { onclose: (name) => delete this.openedTabs[ name ] } );
@@ -910,6 +911,26 @@ class CodeEditor {
     static getInstances()
     {
         return CodeEditor.__instances;
+    }
+
+    // This received key inputs from the entire document...
+    onKeyPressed( e ) {
+        
+        // Toggle visibility of the file explorer
+        if( e.key == 'b' && e.ctrlKey && this.addFileExplorer )
+        {
+            this.explorerArea.root.classList.toggle( "hidden" );
+            if( this._lastBaseareaWidth )
+            {
+                this.base_area.root.style.width = this._lastBaseareaWidth;
+                delete this._lastBaseareaWidth;
+
+            } else
+            {
+                this._lastBaseareaWidth = this.base_area.root.style.width;
+                this.base_area.root.style.width = "100%";
+            }
+        }
     }
 
     getText( min ) {
