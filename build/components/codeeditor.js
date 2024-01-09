@@ -177,6 +177,7 @@ class CodeEditor {
         if( this.addFileExplorer )
         {
             var [explorerArea, codeArea] = area.split({ sizes:["15%","85%"] });
+            explorerArea.setLimitBox( 180, 20, 512 );
 
             let panel = new LX.Panel();
 

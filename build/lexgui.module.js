@@ -1358,14 +1358,14 @@ class Area {
 
     _moveSplit( dt, force_animation = false, force_width = 0 ) {
 
-        if(!this.type)
-            throw("No split area");
+        if( !this.type )
+            throw( "No split area" );
 
-        if(dt === undefined) // splitbar didn't move!
+        if( dt === undefined ) // Splitbar didn't move!
             return;
 
-        var a1 = this.sections[0];
-        var a2 = this.sections[1];
+        var a1 = this.sections[ 0 ];
+        var a2 = this.sections[ 1 ];
         var splitinfo = " - "+ LX.DEFAULT_SPLITBAR_SIZE + "px";
 
         let transition = null;
@@ -1374,29 +1374,30 @@ class Area {
             // Remove transitions for this change..
             transition = a1.root.style.transition;
             a1.root.style.transition = a2.root.style.transition = "none";
-            flushCss(a1.root);
-            flushCss(a2.root);
+            flushCss( a1.root );
+            flushCss( a2.root );
         }
 
-        if(this.type == "horizontal") {
-
-            var size = Math.max(a2.root.offsetWidth + dt, parseInt(a2.minWidth));
+        if( this.type == "horizontal" )
+        {
+            var size = Math.max( a2.root.offsetWidth + dt, parseInt( a2.minWidth ) );
             if( force_width ) size = force_width;
             a1.root.style.width = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
             a1.root.style.width = "-webkit-calc( 100% - " + size + "px " + splitinfo + " )";
             a1.root.style.width = "calc( 100% - " + size + "px " + splitinfo + " )";
-            a1.root.style.minWidth = a1.minWidth + "px";
-            a2.root.style.width = size + "px"; //other split
+            a1.root.style.minWidth = parseInt( a1.minWidth ) + "px";
+            a2.root.style.width = size + "px";
+            if( a1.maxWidth != Infinity ) a2.root.style.minWidth = "calc( 100% - " + parseInt( a1.maxWidth ) + "px" + " )";
         }
-        else {
-
+        else
+        {
             var size = Math.max((a2.root.offsetHeight + dt) + a2.offset, parseInt(a2.minHeight));
             if( force_width ) size = force_width;
             a1.root.style.height = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
             a1.root.style.height = "-webkit-calc( 100% - " + size + "px " + splitinfo + " )";
             a1.root.style.height = "calc( 100% - " + size + "px " + splitinfo + " )";
             a1.root.style.minHeight = a1.minHeight + "px";
-            a2.root.style.height = ( size - a2.offset ) + "px"; //other split
+            a2.root.style.height = ( size - a2.offset ) + "px";
         }
             
         if( !force_animation )
