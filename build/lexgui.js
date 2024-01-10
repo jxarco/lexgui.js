@@ -2703,21 +2703,21 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             }
         }
 
-        refresh(newData, selectedId) {
+        refresh( newData, selectedId ) {
             this.data = newData ?? this.data;
-            this.domEl.querySelector("ul").innerHTML = "";
+            this.domEl.querySelector( "ul" ).innerHTML = "";
             this._create_item( null, this.data, 0, selectedId );
         }
-
+    
         /* Refreshes the tree and focuses current element */
         frefresh( id ) {
             this.refresh();
-            var el = this.domEl.querySelector("#" + id);
-            if(el) el.focus();
+            var el = this.domEl.querySelector( "#" + id );
+            if( el ) el.focus();
         }
-
-        select(id) {
-            this.refresh(null, id);
+    
+        select( id ) {
+            this.refresh( null, id );
         }
     }
 

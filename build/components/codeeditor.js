@@ -409,7 +409,7 @@ class CodeEditor {
 
         this.useAutoComplete = options.autocomplete ?? true;
         this.highlight = options.highlight ?? 'Plain Text';
-        this.onsave = options.onsave ?? ((code) => {  });
+        this.onsave = options.onsave ?? ((code) => { console.log( code, "save" ) });
         this.onrun = options.onrun ?? ((code) => { this.runScript(code) });
         this.actions = {};
         this.cursorBlinkRate = 550;
@@ -1037,11 +1037,22 @@ class CodeEditor {
     loadFile( file ) {
 
         const inner_add_tab = ( text, name, title ) => {
-            this.addTab(name, true, title);
-            if( true ) // 
+
+            // Set current text and language
+            const lines = text.replaceAll( '\r', '' ).split( '\n' );
+
+            // Add item in the explorer if used
+            if( this.addFileExplorer )
             {
-                text = text.replaceAll( '\r', '' );
-                this.code.lines = text.split( '\n' );
+                this._storedLines = this._storedLines ?? {};
+                this._storedLines[ name ] = lines;
+                this.addExplorerItem( { 'id': name, 'skipVisibility': true, 'icon': this._getFileIcon( name ) } );
+                this.explorer.frefresh( name );
+            }
+            else
+            {
+                this.addTab(name, true, title);
+                this.code.lines = lines;
                 this._changeLanguageFromExtension( LX.getExtension( name ) );
             }
         };
@@ -1169,6 +1180,18 @@ class CodeEditor {
         }
     }
 
+    _getFileIcon( name ) {
+
+        const isNewTabButton = ( name === '+' );
+        const ext = LX.getExtension( name );
+        return ext == 'html' ? "fa-solid fa-code orange" : 
+            ext == "css" ? "fa-solid fa-hashtag dodgerblue" : 
+            ext == "xml" ? "fa-solid fa-rss orange" : 
+            ext == "bat" ? "fa-brands fa-windows lightblue" : 
+            [ "js", "py", "json", "cpp" ].indexOf( ext ) > -1 ? "images/" + ext + ".png" : 
+            !isNewTabButton ? "fa-solid fa-align-left gray" : undefined;
+    }
+
     _onNewTab( e ) {
 
         this.processFocus(false);
@@ -1223,13 +1246,7 @@ class CodeEditor {
         this.loadedTabs[ name ] = code;
         this.openedTabs[ name ] = code;
         
-        const ext = LX.getExtension( name );
-        const tabIcon = ext == 'html' ? "fa-solid fa-code orange" : 
-        ext == "css" ? "fa-solid fa-hashtag dodgerblue" : 
-        ext == "xml" ? "fa-solid fa-rss orange" : 
-        ext == "bat" ? "fa-brands fa-windows lightblue" : 
-        [ "js", "py", "json", "cpp" ].indexOf( ext ) > -1 ? "images/" + ext + ".png" : 
-        !isNewTabButton ? "fa-solid fa-align-left gray" : undefined;
+        const tabIcon = this._getFileIcon( name );
 
         if( this.addFileExplorer && !isNewTabButton )
         {
@@ -1289,18 +1306,22 @@ class CodeEditor {
         let code = this.loadedTabs[ name ]
 
         if( !code )
-        return;
+        {
+            this.addTab( name, true );
+            // Unload lines from file...
+            if( this._storedLines[ name ] )
+            {
+                this.code.lines = this._storedLines[ name ];
+                delete this._storedLines[ name ];
+            }
+            this._changeLanguageFromExtension( LX.getExtension( name ) );
+            return;
+        }
 
         this.openedTabs[ name ] = code;
         
         const isNewTabButton = ( name === '+' );
-        const ext = LX.getExtension( name );
-        const tabIcon = ext == 'html' ? "fa-solid fa-code orange" : 
-        ext == "css" ? "fa-solid fa-hashtag dodgerblue" : 
-        ext == "xml" ? "fa-solid fa-rss orange" : 
-        ext == "bat" ? "fa-brands fa-windows lightblue" : 
-        [ "js", "py", "json", "cpp" ].indexOf( ext ) > -1 ? "images/" + ext + ".png" : 
-        !isNewTabButton ? "fa-solid fa-align-left gray" : undefined;
+        const tabIcon = this._getFileIcon( name );
 
         this.tabs.add(name, code, { 
             selected: true, 
