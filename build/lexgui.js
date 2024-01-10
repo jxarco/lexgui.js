@@ -1621,9 +1621,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             tabEl.addEventListener("mouseup", e => {
                 e.preventDefault();
                 e.stopPropagation();
-                if(e.button == 1 ) {
-                    if(this.onclose)
-                        this.onclose( tabEl.dataset["name"] );
+                if( e.button == 1 ) {
                     this.delete( tabEl.dataset["name"] );
                 }
             });
@@ -1634,7 +1632,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     e.preventDefault();
                     return;
                 } 
-                e.dataTransfer.setData("source", e.target.id);
+                e.dataTransfer.setData( "source", e.target.id );
             });
             
             // Attach content
@@ -1662,6 +1660,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             if(!tabEl || tabEl.fixed)
             return;
+
+            if( this.onclose )
+                this.onclose( name );
 
             // Delete tab element
             this.tabDOMs[ name ].remove();

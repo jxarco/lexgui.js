@@ -1617,9 +1617,7 @@ class Tabs {
         tabEl.addEventListener("mouseup", e => {
             e.preventDefault();
             e.stopPropagation();
-            if(e.button == 1 ) {
-                if(this.onclose)
-                    this.onclose( tabEl.dataset["name"] );
+            if( e.button == 1 ) {
                 this.delete( tabEl.dataset["name"] );
             }
         });
@@ -1630,7 +1628,7 @@ class Tabs {
                 e.preventDefault();
                 return;
             } 
-            e.dataTransfer.setData("source", e.target.id);
+            e.dataTransfer.setData( "source", e.target.id );
         });
         
         // Attach content
@@ -1658,6 +1656,9 @@ class Tabs {
 
         if(!tabEl || tabEl.fixed)
         return;
+
+        if( this.onclose )
+            this.onclose( name );
 
         // Delete tab element
         this.tabDOMs[ name ].remove();

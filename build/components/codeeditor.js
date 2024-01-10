@@ -196,13 +196,14 @@ class CodeEditor {
                 skip_default_icon: true,
                 onevent: (event) => { 
                     switch(event.type) {
-                        case LX.TreeEvent.NODE_SELECTED:
-                            if( !this.tabs.tabDOMs[ event.node.id ] ) break;
+                        // case LX.TreeEvent.NODE_SELECTED:
+                        //     if( !this.tabs.tabDOMs[ event.node.id ] ) break;
                         case LX.TreeEvent.NODE_DBLCLICKED:
-                            this.tabs.tabDOMs[ event.node.id ].click()
+                            this.loadTab( event.node.id );
                             break;
                         case LX.TreeEvent.NODE_DELETED: 
                             this.tabs.delete( event.node.id );
+                            delete this.loadedTabs[ event.node.id ];
                             break;
                         // case LX.TreeEvent.NODE_CONTEXTMENU: 
                         //     LX.addContextMenu( event.multiple ? "Selected Nodes" : event.node.id, event.value, m => {
@@ -216,6 +217,12 @@ class CodeEditor {
                 }
             });    
 
+            this.addExplorerItem = function( item ) 
+            {
+                if( !this.explorer.data.children.find( (value, index) => value.id === item.id ) )
+                    this.explorer.data.children.push( item );
+            };
+
             explorerArea.attach( panel );
 
             // Update area
@@ -225,7 +232,14 @@ class CodeEditor {
         this.base_area = area;
         this.area = new LX.Area( { className: "lexcodeeditor", height: "auto", no_append: true } );
 
-        this.tabs = this.area.addTabs( { onclose: (name) => delete this.openedTabs[ name ] } );
+        this.tabs = this.area.addTabs( { onclose: (name) => {
+            delete this.openedTabs[ name ];
+            if( Object.keys( this.openedTabs ).length < 2 )
+            {
+                clearInterval( this.blinker );
+                this.cursors.classList.remove('show');
+            }
+        } } );
         this.tabs.root.addEventListener( 'dblclick', (e) => {
             if( options.allow_add_scripts ?? true ) {
                 e.preventDefault();
@@ -896,6 +910,7 @@ class CodeEditor {
 
         // Default code tab
     
+        this.loadedTabs = { };
         this.openedTabs = { };
         
         if( options.allow_add_scripts ?? true )
@@ -1022,8 +1037,8 @@ class CodeEditor {
     loadFile( file ) {
 
         const inner_add_tab = ( text, name, title ) => {
-            const existing = this.addTab(name, true, title);
-            if( !existing )
+            this.addTab(name, true, title);
+            if( true ) // 
             {
                 text = text.replaceAll( '\r', '' );
                 this.code.lines = text.split( '\n' );
@@ -1160,17 +1175,20 @@ class CodeEditor {
 
         LX.addContextMenu( null, e, m => {
             m.add( "Create", this.addTab.bind( this, "unnamed.js", true ) );
-            m.add( "Load", this.loadTab.bind( this, "unnamed.js", true ) );
+            m.add( "Load", this.loadTabFromFile.bind( this, "unnamed.js", true ) );
         });
     }
 
     addTab( name, selected, title ) {
         
-        if(this.openedTabs[ name ])
-        {
-            this.tabs.select( this.code.tabName );
-            return true;
-        }
+        // If already loaded, set new name...
+        const repeats = Object.keys( editor.loadedTabs ).slice( 1 ).reduce( ( v, key ) => {
+            const noRepeatName = key.replace( /[_\d+]/g, '');
+            return v + ( noRepeatName == name );
+        }, 0 );
+
+        if( repeats > 0 )
+            name = name.split( '.' ).join( '_' + repeats + '.' );
 
         const isNewTabButton = ( name === '+' );
 
@@ -1202,6 +1220,7 @@ class CodeEditor {
                 this.loadFile( e.dataTransfer.files[ i ] );
         });
 
+        this.loadedTabs[ name ] = code;
         this.openedTabs[ name ] = code;
         
         const ext = LX.getExtension( name );
@@ -1214,7 +1233,7 @@ class CodeEditor {
 
         if( this.addFileExplorer && !isNewTabButton )
         {
-            this.explorer.data.children.push( { 'id': name, 'skipVisibility': true, 'icon': tabIcon } );
+            this.addExplorerItem( { 'id': name, 'skipVisibility': true, 'icon': tabIcon } );
             this.explorer.frefresh( name );
         }
 
@@ -1233,7 +1252,7 @@ class CodeEditor {
 
                 var cursor = cursor ?? this.cursors.children[ 0 ];
                 this.saveCursor( cursor, this.code.cursorState );    
-                this.code = this.openedTabs[ tabname ];
+                this.code = this.loadedTabs[ tabname ];
                 this.restoreCursor( cursor, this.code.cursorState );    
                 this.endSelection();
                 this._changeLanguageFromExtension( LX.getExtension( tabname ) );
@@ -1253,9 +1272,73 @@ class CodeEditor {
             this.processLines();
             doAsync( () => this._refreshCodeInfo( 0, 0 ), 50 );
         }
+
+        // Bc it could be overrided..
+        return name;
     }
 
-    loadTab() {
+    loadTab( name ) {
+
+        // Already open...
+        if( this.openedTabs[ name ] )
+        {
+            this.tabs.select( name );
+            return;
+        }
+
+        let code = this.loadedTabs[ name ]
+
+        if( !code )
+        return;
+
+        this.openedTabs[ name ] = code;
+        
+        const isNewTabButton = ( name === '+' );
+        const ext = LX.getExtension( name );
+        const tabIcon = ext == 'html' ? "fa-solid fa-code orange" : 
+        ext == "css" ? "fa-solid fa-hashtag dodgerblue" : 
+        ext == "xml" ? "fa-solid fa-rss orange" : 
+        ext == "bat" ? "fa-brands fa-windows lightblue" : 
+        [ "js", "py", "json", "cpp" ].indexOf( ext ) > -1 ? "images/" + ext + ".png" : 
+        !isNewTabButton ? "fa-solid fa-align-left gray" : undefined;
+
+        this.tabs.add(name, code, { 
+            selected: true, 
+            fixed: isNewTabButton, 
+            title: code.title, 
+            icon: tabIcon, 
+            onSelect: (e, tabname) => {
+
+                if( isNewTabButton )
+                {
+                    this._onNewTab( e );
+                    return;
+                }
+
+                var cursor = cursor ?? this.cursors.children[ 0 ];
+                this.saveCursor( cursor, this.code.cursorState );    
+                this.code = this.loadedTabs[ tabname ];
+                this.restoreCursor( cursor, this.code.cursorState );    
+                this.endSelection();
+                this._changeLanguageFromExtension( LX.getExtension( tabname ) );
+                this._refreshCodeInfo( cursor.line, cursor.position );
+            }
+        });
+
+        // Move into the sizer..
+        this.codeSizer.appendChild( code );
+        
+        this.endSelection();
+
+        // Select as current...
+        this.code = code;  
+        this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
+        this.processLines();
+        this._changeLanguageFromExtension( LX.getExtension( name ) );
+        doAsync( () => this._refreshCodeInfo( 0, 0 ), 50 );
+    }
+
+    loadTabFromFile() {
         const input = document.createElement( 'input' );
         input.type = 'file';
         document.body.appendChild( input );
