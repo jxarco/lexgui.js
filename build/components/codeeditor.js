@@ -1109,12 +1109,32 @@ class CodeEditor {
         this._refreshCodeInfo();
         this.processLines();
 
+        const ext = this.languages[ lang ].ext;
+        const icon = this._getFileIcon( null, ext );
+
+        // Update tab icon
+        {
+            const tab = this.tabs.tabDOMs[ this.code.tabName ];
+            tab.firstChild.remove();
+            console.assert( tab != undefined );
+            var iconEl;
+            if( icon.includes( 'fa-' ) )
+            {
+                iconEl = document.createElement( 'i' );
+                iconEl.className = icon;
+            } else {
+                iconEl = document.createElement( 'img' );
+                iconEl.src = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/" + icon;
+            }
+            tab.prepend( iconEl );
+        }
+
+        // Update explorer icon
         if( this.explorer )
         {
-            const ext = this.languages[ lang ].ext;
             const item = this.explorer.data.children.filter( (v) => v.id === this.code.tabName )[ 0 ];
             console.assert( item != undefined );
-            item.icon = this._getFileIcon( null, ext );
+            item.icon = icon;
             this.explorer.frefresh( this.code.tabName );
         }
     }
