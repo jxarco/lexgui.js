@@ -190,6 +190,19 @@ body.nocursor * {
   float: left;
 }
 
+#global_search .searchitembox .searchitem i {
+  width: 12px;
+  font-size: 11px;
+  margin-right: 4px;
+  margin-top: -2px;
+  vertical-align: middle;
+}
+
+#global_search .searchitembox .searchitem img {
+  width: 12px;
+  margin-right: 4px;
+}
+
 #global_search .searchitembox .searchitem .lang-ext {
   color: #676e75;
   font-size: 12px;

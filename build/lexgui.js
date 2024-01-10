@@ -359,13 +359,19 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 const instances = LX.CodeEditor.getInstances();
                 if(!instances.length) return;
     
-                const languages = instances[0].languages;
+                const languages = instances[ 0 ].languages;
     
                 for( let l of Object.keys( languages ) ) {
     
-                    const key = "Language mode: " + l + " <span class='lang-ext'>(" + languages[ l ].ext + ")</span>";
+                    const key = "Language: " + l;
+                    const icon = instances[ 0 ]._getFileIcon( null, languages[ l ].ext );
+    
+                    let value = icon.includes( 'fa-' ) ? "<i class='" + icon + "'></i>" :
+                            "<img src='" + ( "https://raw.githubusercontent.com/jxarco/lexgui.js/master/" + icon ) + "'>";
+    
+                    value += key + " <span class='lang-ext'>(" + languages[ l ].ext + ")</span>";
                     if( key.toLowerCase().includes( filter ) ) {
-                        add_element( key, () => {
+                        add_element( value, () => {
                             for( let i of instances ) {
                                 i._changeLanguage( l );
                             }

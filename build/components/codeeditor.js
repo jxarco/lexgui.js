@@ -171,10 +171,8 @@ class CodeEditor {
 
         CodeEditor.__instances.push( this );
         
-        this.addFileExplorer = options.file_explorer ?? false;
-
         // File explorer
-        if( this.addFileExplorer )
+        if( options.file_explorer ?? false )
         {
             var [explorerArea, codeArea] = area.split({ sizes:["15%","85%"] });
             explorerArea.setLimitBox( 180, 20, 512 );
@@ -932,7 +930,7 @@ class CodeEditor {
     onKeyPressed( e ) {
         
         // Toggle visibility of the file explorer
-        if( e.key == 'b' && e.ctrlKey && this.addFileExplorer )
+        if( e.key == 'b' && e.ctrlKey && this.explorer )
         {
             this.explorerArea.root.classList.toggle( "hidden" );
             if( this._lastBaseareaWidth )
@@ -1042,7 +1040,7 @@ class CodeEditor {
             const lines = text.replaceAll( '\r', '' ).split( '\n' );
 
             // Add item in the explorer if used
-            if( this.addFileExplorer )
+            if( this.explorer )
             {
                 this._storedLines = this._storedLines ?? {};
                 this._storedLines[ name ] = lines;
@@ -1110,6 +1108,15 @@ class CodeEditor {
         this.highlight = lang;
         this._refreshCodeInfo();
         this.processLines();
+
+        if( this.explorer )
+        {
+            const ext = this.languages[ lang ].ext;
+            const item = this.explorer.data.children.filter( (v) => v.id === this.code.tabName )[ 0 ];
+            console.assert( item != undefined );
+            item.icon = this._getFileIcon( null, ext );
+            this.explorer.frefresh( this.code.tabName );
+        }
     }
 
     _changeLanguageFromExtension( ext ) {
@@ -1180,10 +1187,10 @@ class CodeEditor {
         }
     }
 
-    _getFileIcon( name ) {
+    _getFileIcon( name, extension ) {
 
-        const isNewTabButton = ( name === '+' );
-        const ext = LX.getExtension( name );
+        const isNewTabButton = name ? ( name === '+' ) : false;
+        const ext = extension ?? LX.getExtension( name );
         return ext == 'html' ? "fa-solid fa-code orange" : 
             ext == "css" ? "fa-solid fa-hashtag dodgerblue" : 
             ext == "xml" ? "fa-solid fa-rss orange" : 
@@ -1248,7 +1255,7 @@ class CodeEditor {
         
         const tabIcon = this._getFileIcon( name );
 
-        if( this.addFileExplorer && !isNewTabButton )
+        if( this.explorer && !isNewTabButton )
         {
             this.addExplorerItem( { 'id': name, 'skipVisibility': true, 'icon': tabIcon } );
             this.explorer.frefresh( name );
