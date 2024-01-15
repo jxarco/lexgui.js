@@ -1998,10 +1998,6 @@ class CodeEditor {
         
         this.code.innerHTML = code_html;
             
-        // console.log("RANGE:", this.visibleLinesViewport);
-        // console.log( "Num lines processed:",  (this.visibleLinesViewport.y - this.visibleLinesViewport.x), performance.now() - start );
-        // console.log("--------------------------------------------");
-
         // Update scroll data
         this.codeScroller.scrollTop = lastScrollTop;
         this.code.style.top = ( this.visibleLinesViewport.x * this.lineHeight ) + "px";
@@ -2013,6 +2009,7 @@ class CodeEditor {
         // Clear tmp vars
         delete this._buildingString; 
         delete this._pendingString;
+        delete this._buildingBlockComment;
 
         this.resize();
     }
@@ -2078,8 +2075,6 @@ class CodeEditor {
             {
                 if( token.substr( 0, 2 ) == '/*' )
                     this._buildingBlockComment = true;
-                if( token.substr( token.length - 2 ) == '*/' )
-                    delete this._buildingBlockComment;
             }
 
             line_inner_html += this._evaluateToken( token, prev, next, (i == tokensToEvaluate.length - 1) );
@@ -2090,7 +2085,7 @@ class CodeEditor {
 
     _processTokens( tokens, offset = 0 ) {
 
-        if( this.highlight == 'C++' )
+        if( this.highlight == 'C++' || this.highlight == 'CSS' )
         {
             var idx = tokens.slice( offset ).findIndex( ( value, index ) => this.isNumber( value ) );
             if( idx > -1 )
@@ -2146,8 +2141,6 @@ class CodeEditor {
             linestring = ogLine.substring( 0, hasCommentIdx );
         }
 
-        // const usesBlockComments = this.languages[ this.highlight ].blockComments ?? true;
-
         let tokensToEvaluate = []; // store in a temp array so we know prev and next tokens...
 
         const pushToken = function( t ) {
@@ -2156,7 +2149,7 @@ class CodeEditor {
             tokensToEvaluate.push( t );
         };
 
-        let iter = linestring.matchAll(/(::|[\[\](){}<>.,;:*"'%@!/= ])/g);
+        let iter = linestring.matchAll(/(\*\/|\/\*|::|[\[\](){}<>.,;:*"'%@!/= ])/g);
         let subtokens = iter.next();
         if( subtokens.value )
         {
@@ -2175,26 +2168,6 @@ class CodeEditor {
             }
         }
         else tokensToEvaluate.push( linestring );
-
-        // if( usesBlockComments )
-        // {
-        //     var block = false;
-
-        //     if( t.includes('/*') )
-        //     {
-        //         const idx = t.indexOf( '/*' );
-        //         tokensToEvaluate.push( t.substring( 0, idx ), '/*', t.substring( idx + 2 ) );
-        //         block |= true;
-        //     }
-        //     else if( t.includes('*/') )
-        //     {
-        //         const idx = t.indexOf( '*/' );
-        //         tokensToEvaluate.push( t.substring( 0, idx ), '*/', t.substring( idx + 2 ) );
-        //         block |= true;
-        //     }
-
-        //     if( block ) continue;
-        // }
 
         if( hasCommentIdx != undefined )
         {
@@ -2232,6 +2205,8 @@ class CodeEditor {
             this._buildingString = token;
         }
 
+        const usesBlockComments = this.languages[ this.highlight ].blockComments ?? true;
+
         if(token == ' ')
         {
             if( this._buildingString != undefined )
@@ -2244,7 +2219,6 @@ class CodeEditor {
         else
         {
             const singleLineCommentToken = this.languages[ this.highlight ].singleLineCommentToken ?? this.defaultSingleLineCommentToken;
-            const usesBlockComments = this.languages[ this.highlight ].blockComments ?? true;
             
             let token_classname = "";
             let discardToken = false;
@@ -2268,12 +2242,6 @@ class CodeEditor {
                 token_classname = "cm-sym";
 
             else if( token.substr( 0, singleLineCommentToken.length ) == singleLineCommentToken )
-                token_classname = "cm-com";
-
-            else if( usesBlockComments && token.substr( 0, 2 ) == '/*' )
-                token_classname = "cm-com";
-
-            else if( usesBlockComments && token.substr( token.length - 2 ) == '*/' )
                 token_classname = "cm-com";
 
             else if( this.isNumber( token ) || this.isNumber( token.replace(/[px]|[em]|%/g,'') ) )
@@ -2306,6 +2274,11 @@ class CodeEditor {
             else if ( token[ 0 ] != '@' && token[ 0 ] != ',' && next == '(' )
                 token_classname = "cm-mtd";
 
+
+            if( usesBlockComments && this._buildingBlockComment && token.substr( 0, 2 ) == '*/' )
+            {
+                delete this._buildingBlockComment;
+            }
 
             // We finished constructing a string
             if( this._buildingString && ( this._stringEnded || isLastToken ) )
@@ -2361,6 +2334,12 @@ class CodeEditor {
                 return this.isNumber( token.substring(0, token.length - 1) )
             else if( token.lastChar == 'u' )
                 return !(token.includes('.')) && this.isNumber( token.substring(0, token.length - 1) );
+        }
+
+        else if(this.highlight == 'CSS')
+        {
+            if( token.lastChar == '%' )
+                return this.isNumber( token.substring(0, token.length - 1) )
         }
         
         return token.length && token != ' ' && !Number.isNaN(+token);
