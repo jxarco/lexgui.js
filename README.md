@@ -3,12 +3,10 @@
 **lexgui.js** is a lightweight JavaScript library that allows you to create web interfaces using only JavaScript, HTML, and CSS. This library provides an easy-to-use API for building dynamic and interactive user interfaces without the need for complex frameworks or libraries. With lexgui.js, you can create custom UI components, handle user interactions, and update the interface dynamically.
 
 <img src="data/Screenshot.png" alt="Screenshot" style="width: 100%"/>
-<table>
-  <tr>
-    <td valign="top"><img src="data/Screenshot_Godot.png"/></td>
-    <td valign="top"><img src="data/Screenshot_Code.png"/></td>
-  </tr>
-</table>
+<img src="data/Screenshot_Godot.png"/>
+
+### Code Editor
+<img src="data/Screenshot_Code.png"/>
 
 ## Docs
 
@@ -20,13 +18,12 @@ Look at this [examples](https://jxarco.github.io/lexgui.js/examples/) to see how
 
 ## Projects using lexgui.js
 
-### [Animics](https://github.com/upf-gti/SignON-editor) (EU H2020 SignON project)
-
-<img src="data/scriptAnimation_signon.png" alt="scriptAnimation_signon"/>
-
-### [Performs](https://github.com/upf-gti/SignON-realizer) (EU H2020 SignON project)
-
-<img src="data/realizer_signon.png" alt="scriptAnimation_signon"/>
+<table>
+  <tr>
+    <td valign="top"><h3>Animics (EU H2020 SignON project)</h3><a href="https://github.com/upf-gti/SignON-editor">github.com/upf-gti/SignON-editor</a><br><br><img src="data/scriptAnimation_signon.png" alt="scriptAnimation_signon"/></td>
+    <td valign="top"><h3>Performs (EU H2020 SignON project)</h3><a href="https://github.com/upf-gti/SignON-realizer">github.com/upf-gti/SignON-realizer</a><br><br><img src="data/realizer_signon.png" alt="scriptAnimation_signon"/></td>
+  </tr>
+</table>
 
 ## Contributors
 
