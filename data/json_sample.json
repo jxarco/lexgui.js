@@ -1,0 +1,13 @@
+{
+    "type": "head",
+    "start": 0.1,
+    "ready": 0.2,
+    "strokeStart": 0.3,
+    "stroke": 0.4,
+    "strokeEnd": 0.5,
+    "relax": 0.6,
+    "end": 0.7,
+    "amount": 1,
+    "repetition": 3,
+    "lexeme": "NOD"
+}

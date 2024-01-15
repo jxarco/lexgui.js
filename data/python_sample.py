@@ -1,27 +1,27 @@
-# Python3 code to demonstrate working of 
-# Vertical Concatenation in Matrix
-# Using loop
- 
-# initializing lists
-test_list = [["Gfg", "good"], ["is", "for"], ["Best"]]
- 
-# printing original list
-print("The original list : " + str(test_list))
- 
-# using loop for iteration
-res = []
-N = 0
-while N != len(test_list):
-    temp = ''
-    for idx in test_list:
-         
-        # checking for valid index / column
-        try: temp = temp + idx[N]
-        except IndexError: pass
-    res.append(temp)
-    N = N + 1
- 
-res = [ele for ele in res if ele]
- 
-# printing result 
-print("List after column Concatenation : " + str(res))
+import sys
+from math import sqrt, ceil
+
+
+def is_prime(x):
+    if (x % 2 == 0 and x is not 2) or (x == 1):
+        return False
+    return not bool([n for n in range(3, int(ceil(sqrt(x))+1)) if x % n == 0])
+
+
+def exit_with_error():
+    print('Usage: please input a non-negative integer')
+    sys.exit(1)
+
+
+def main(args):
+    try:
+        x = int(args[0])
+        if x < 0:
+            exit_with_error()
+        print("Prime" if is_prime(x) else "Composite")
+    except (IndexError, ValueError):
+        exit_with_error()
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
