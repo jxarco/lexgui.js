@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inconsolata:wght@400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap');
 
@@ -2816,14 +2815,21 @@ ul.lexassetscontent {
 
 .lexcodeeditor .code {
   cursor: text;
-  font-size: 16px;
+  font-family: "CommitMono", monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "ss04", "ss05";
+  font-size: 0.8rem;
   padding-right: 6px;
   position: relative;
 }
 
 .codechar {
-  font-size: 16px;
-  font-family: 'Inconsolata', monospace;
+  font-family: "CommitMono", monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "ss04", "ss05";
+  font-size: 0.8rem;
   position: absolute;
   top: 0;
   left: 0;
@@ -2838,9 +2844,6 @@ ul.lexassetscontent {
   border-radius: 0;
   border-width: 0;
   background: transparent;
-  font-family: 'Inconsolata', monospace;
-  font-size: inherit;
-  font-weight: bold;
   margin: 0px 0px;
   white-space: pre;
   word-wrap: normal;
@@ -3109,6 +3112,16 @@ pre .line-gutter {
 .cm-dec.wgsl { color: #b1ce9b; } /* decimal */
 .cm-sym.wgsl { color: #f9cb20; } /* symbol */
 .cm-mtd.wgsl { color: #e0cc68; } /* method */
+
+.cm-str.rust { color: #ca7d59; } /* string */
+.cm-kwd.rust { color: #218cce; } /* keyword */
+.cm-com.rust { color: #5cab5a; } /* comment */
+.cm-typ.rust { color: #36c0b0; } /* type */
+.cm-std.rust { color: #cf6dcf; } /* statements & declarations */
+.cm-bln.rust { color: inherit; } /* builtin */
+.cm-dec.rust { color: #b1ce9b; } /* decimal */
+.cm-sym.rust { color: #e7ded2; } /* symbol */
+.cm-mtd.rust { color: #e0cc68 } /* method */
 
 .cm-str.python { color: #ca7d59; } /* string */
 .cm-kwd.python { color: #218cce; } /* keyword */

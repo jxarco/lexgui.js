@@ -415,7 +415,7 @@ class CodeEditor {
         this.maxUndoSteps = 16;
         this.lineHeight = 20;
         this.defaultSingleLineCommentToken = "//";
-        this.charWidth = 8; //this.measureChar();
+        this.charWidth = 7; //this.measureChar();
         this._lastTime = null;
 
         this.pairKeys = {
@@ -443,6 +443,7 @@ class CodeEditor {
             'WGSL': { ext: 'wgsl' },
             'JSON': { ext: 'json' },
             'XML': { ext: 'xml' },
+            'Rust': { ext: 'rs' },
             'Python': { ext: 'py', singleLineCommentToken: '#' },
             'HTML': { ext: 'html' },
             'Batch': { ext: 'bat', blockComments: false, singleLineCommentToken: '::' }
@@ -458,7 +459,7 @@ class CodeEditor {
             'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof', 'debugger', 'abstract',
                           'arguments', 'extends', 'instanceof'],
             'C++': ['int', 'float', 'double', 'bool', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'nullptr', 
-                    'NULL', 'unsigned'],
+                    'NULL', 'unsigned', 'namespace'],
             'JSON': ['true', 'false'],
             'GLSL': ['true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4', 'struct'],
             'CSS': ['body', 'html', 'canvas', 'div', 'input', 'span', '.'],
@@ -466,6 +467,8 @@ class CodeEditor {
                     'sampler', 'sampler_comparison', 'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array', 'texture_depth_multisampled_2d',
                     'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d', 'texture_storage_2d',
                     'texture_storage_2d_array', 'texture_storage_3d'],
+            'Rust': ['as', 'const', 'crate', 'enum', 'extern', 'false', 'fn', 'impl', 'in', 'let', 'mod', 'move', 'mut', 'pub', 'ref', 'self', 'Self', 'static', 'struct', 'super', 'trait', 'true', 
+                     'type', 'unsafe', 'use', 'where', 'abstract', 'become', 'box', 'final', 'macro', 'override', 'priv', 'typeof', 'unsized', 'virtual'],
             'Python': ['False', 'def', 'None', 'True', 'in', 'is', 'and', 'lambda', 'nonlocal', 'not', 'or'],
             'Batch': ['set', 'SET', 'echo', 'ECHO', 'off', 'OFF', 'del', 'DEL', 'defined', 'DEFINED', 'setlocal', 'SETLOCAL', 'enabledelayedexpansion', 'ENABLEDELAYEDEXPANSION', 'driverquery', 
                       'DRIVERQUERY', 'print', 'PRINT'],
@@ -483,6 +486,7 @@ class CodeEditor {
         };
         this.types = {
             'JavaScript': ['Object', 'String', 'Function', 'Boolean', 'Symbol', 'Error', 'Number', 'TextEncoder', 'TextDecoder'],
+            'Rust': ['u128'],
             'Python': ['int', 'type', 'float', 'map', 'list', 'ArithmeticError', 'AssertionError', 'AttributeError', 'Exception', 'EOFError', 'FloatingPointError', 'GeneratorExit', 
                       'ImportError', 'IndentationError', 'IndexError', 'KeyError', 'KeyboardInterrupt', 'LookupError', 'MemoryError', 'NameError', 'NotImplementedError', 'OSError',
                       'OverflowError', 'ReferenceError', 'RuntimeError', 'StopIteration', 'SyntaxError', 'TabError', 'SystemError', 'SystemExit', 'TypeError', 'UnboundLocalError', 
@@ -497,9 +501,10 @@ class CodeEditor {
         };
         this.statementsAndDeclarations = {
             'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'from', 'throw', 'async', 'try', 'catch', 'await'],
-            'C++': ['std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'glm', 'spdlog'],
+            'C++': ['std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'glm', 'spdlog'],
             'GLSL': ['for', 'if', 'else', 'return', 'continue', 'break'],
             'WGSL': ['const','for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'uniform'],
+            'Rust': ['break', 'else', 'continue', 'for', 'if', 'loop', 'match', 'return', 'while', 'do', 'yield'],
             'Python': ['if', 'raise', 'del', 'import', 'return', 'elif', 'try', 'else', 'while', 'as', 'except', 'with', 'assert', 'finally', 'yield', 'break', 'for', 'class', 'continue', 
                       'global', 'pass'],
             'Batch': ['if', 'IF', 'for', 'FOR', 'in', 'IN', 'do', 'DO', 'call', 'CALL', 'goto', 'GOTO', 'exit', 'EXIT']
@@ -511,6 +516,7 @@ class CodeEditor {
             'GLSL': ['[', ']', '{', '}', '(', ')'],
             'WGSL': ['[', ']', '{', '}', '(', ')', '->'],
             'CSS': ['{', '}', '(', ')', '*'],
+            'Rust': ['<', '>', '[', ']', '(', ')', '='],
             'Python': ['<', '>', '[', ']', '(', ')', '='],
             'Batch': ['[', ']', '(', ')', '%'],
             'HTML': ['<', '>', '/']
@@ -919,6 +925,27 @@ class CodeEditor {
         // Create inspector panel
         let panel = this._createPanelInfo();
         if( panel ) area.attach( panel );
+
+        const commitMono = new FontFace(
+            "CommitMono",
+            `url(/data/CommitMono-400-Regular.otf)`,
+            {
+                style: "normal",
+                weight: "400",
+                display: "swap"
+            }
+        );
+        
+        // Add to the document.fonts (FontFaceSet)
+        document.fonts.add(commitMono);
+
+        // Load the font
+        commitMono.load();
+
+        // Wait until the fonts are all loaded
+        document.fonts.ready.then(() => {
+            console.log("commitMono loaded")
+        });
     }
 
     static getInstances()
@@ -1144,23 +1171,13 @@ class CodeEditor {
         if( !ext )
         return this._changeLanguage( this.code.language );
 
-        switch( ext.toLowerCase() )
+        for( let l in this.languages )
         {
-            case 'js': return this._changeLanguage( 'JavaScript' );
-            case 'cpp': return this._changeLanguage( 'C++' );
-            case 'h': return this._changeLanguage( 'C++' );
-            case 'glsl': return this._changeLanguage( 'GLSL' );
-            case 'css': return this._changeLanguage( 'CSS' );
-            case 'json': return this._changeLanguage( 'JSON' );
-            case 'xml': return this._changeLanguage( 'XML' );
-            case 'wgsl': return this._changeLanguage( 'WGSL' );
-            case 'py': return this._changeLanguage( 'Python' );
-            case 'bat': return this._changeLanguage( 'Batch' );
-            case 'html': return this._changeLanguage( 'HTML' );
-            case 'txt': 
-            default:
-                this._changeLanguage( 'Plain Text' );
+            if( this.languages[l].ext == ext )
+                return this._changeLanguage( l );
         }
+
+        this._changeLanguage( 'Plain Text' );
     }
 
     _createPanelInfo() {
