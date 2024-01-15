@@ -1229,10 +1229,10 @@ class CodeEditor {
         const isNewTabButton = name ? ( name === '+' ) : false;
         const ext = extension ?? LX.getExtension( name );
         return ext == 'html' ? "fa-solid fa-code orange" : 
-            ext == "css" ? "fa-solid fa-hashtag dodgerblue" : 
-            ext == "xml" ? "fa-solid fa-rss orange" : 
-            ext == "bat" ? "fa-brands fa-windows lightblue" : 
-            [ "js", "py", "json", "cpp" ].indexOf( ext ) > -1 ? "images/" + ext + ".png" : 
+            ext == 'css' ? "fa-solid fa-hashtag dodgerblue" : 
+            ext == 'xml' ? "fa-solid fa-rss orange" : 
+            ext == 'bat' ? "fa-brands fa-windows lightblue" : 
+            [ 'js', 'py', 'json', 'cpp', 'rs' ].indexOf( ext ) > -1 ? "images/" + ext + ".png" : 
             !isNewTabButton ? "fa-solid fa-align-left gray" : undefined;
     }
 
