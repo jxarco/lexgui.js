@@ -23,54 +23,63 @@
         // init library and get main area
         let area = LX.init();
 
-        // split main area
-        // var [leftArea, rightArea] = area.split({ sizes:["55%","45%"] });
+        const file_explorer = true;
 
-        // add canvas to leftArea
-        // var canvas = document.createElement('canvas');
-        // canvas.id = "mycanvas";
-        // canvas.width = leftArea.root.clientWidth;
-        // canvas.height = leftArea.root.clientHeight;
-        // canvas.style.width = "100%";
-        // canvas.style.height = "100%";
-        // leftArea.attach( canvas );
+        if( !file_explorer )
+        {
+            var [leftArea, rightArea] = area.split({ sizes:["55%","45%"] });
 
-        // add on resize event to control canvas size
-        // leftArea.onresize = function( bounding ) {
-        //     canvas.width = bounding.width;
-        //     canvas.height = bounding.height;
-        // };
+            var canvas = document.createElement('canvas');
+            canvas.id = "mycanvas";
+            canvas.width = leftArea.root.clientWidth;
+            canvas.height = leftArea.root.clientHeight;
+            canvas.style.width = "100%";
+            canvas.style.height = "100%";
+            leftArea.attach( canvas );
+
+            leftArea.onresize = function( bounding ) {
+                canvas.width = bounding.width;
+                canvas.height = bounding.height;
+            };
+
+            area = rightArea;
+        }
 
         let editor = new LX.CodeEditor(area, {
             // allow_add_scripts: false,
             // autocomplete: false,
             // disable_edition: true,
-            file_explorer: true
+            file_explorer: file_explorer
         });
 
-        editor.loadFile( "../data/test.json" );
-        editor.loadFile( "../data/style.css" );
-        editor.loadFile( "../data/engine.cpp" );
-        editor.loadFile( "../data/script.js" );
-        editor.loadFile( "../data/xml_test.xml" );
+        editor.loadFile( "../data/js_sample.js" );
+        editor.loadFile( "../data/json_sample.json" );
+        editor.loadFile( "../data/css_sample.css" );
+        editor.loadFile( "../data/cpp_sample.cpp" );
+        editor.loadFile( "../data/xml_sample.xml" );
+        editor.loadFile( "../data/python_sample.py" );
+        editor.loadFile( "../data/rust_sample.rs" );
         editor.loadFile( "../localhost.bat" );
         
-        // var ctx = canvas.getContext("2d");
-        // ctx.fillStyle = "#b7a9b1";
-        // ctx.font = "48px Monospace";
-        // ctx.strokeStyle = "#ff1999";
+        if( !file_explorer )
+        {
+            var ctx = canvas.getContext("2d");
+            ctx.fillStyle = "#b7a9b1";
+            ctx.font = "48px Monospace";
+            ctx.strokeStyle = "#ff1999";
 
-        // function loop(dt) {
-            
-        //     var ctx = canvas.getContext("2d");
+            function loop(dt) {
+                
+                var ctx = canvas.getContext("2d");
 
-        //     ctx.fillRect(0, 0, canvas.width, canvas.height);
-        //     ctx.strokeText("Lexgui.js @jxarco", 200, 300);
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.strokeText("Lexgui.js @jxarco", 200, 300);
 
-        //     requestAnimationFrame(loop);
-        // }
+                requestAnimationFrame(loop);
+            }
 
-        // requestAnimationFrame(loop);
+            requestAnimationFrame(loop);
+        }
 
     </script>
 </html>
