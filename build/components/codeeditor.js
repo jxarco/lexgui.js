@@ -299,7 +299,10 @@ class CodeEditor {
 
             Object.defineProperty( cursor, 'line', {
                 get: (v) => { return this._line },
-                set: (v) => { this._line = v; }
+                set: (v) => { 
+                    this._line = v;
+                    this._setActiveLine( v );
+                }
             } );
 
             this.cursors.appendChild( cursor );
@@ -400,7 +403,8 @@ class CodeEditor {
 
         this.state = {
             focused: false,
-            selectingText: false
+            selectingText: false,
+            activeLine: null
         }
 
         // Code
@@ -1469,11 +1473,14 @@ class CodeEditor {
         {
             if( (LX.getTime() - this.lastMouseDown) < 300 ) {
                 this.state.selectingText = false;
-                this.processClick(e);
+                this.processClick( e );
                 this.endSelection();
             }
 
-            if(this.selection) this.selection.invertIfNecessary();
+            if( this.selection )
+            {
+                this.selection.invertIfNecessary();
+            }
 
             this.state.selectingText = false;
         }
@@ -1481,7 +1488,7 @@ class CodeEditor {
         else if( e.type == 'mousemove' )
         {
             if( this.state.selectingText )
-                this.processSelection(e);
+                this.processSelection( e );
         }
 
         else if ( e.type == 'click' ) // trip
@@ -1678,6 +1685,9 @@ class CodeEditor {
                 }
             }
         }
+
+        // Hide active line background
+        this.code.childNodes.forEach( e => e.classList.remove( 'active-line' ) );
     }
 
     async processKey( e ) {
@@ -2010,6 +2020,9 @@ class CodeEditor {
         delete this._buildingString; 
         delete this._pendingString;
         delete this._buildingBlockComment;
+
+        // Set active line
+        this._setActiveLine();
 
         this.resize();
     }
@@ -3056,6 +3069,27 @@ class CodeEditor {
         // Remove selected from the current word and add it to the next one
         this.autocomplete.childNodes[ idx ].classList.remove('selected');
         this.autocomplete.childNodes[ idx + offset ].classList.add('selected');
+    }
+
+    _setActiveLine( number ) {
+
+        number = number ?? this.state.activeLine;
+        const old_local = this.toLocalLine( this.state.activeLine );
+        let line = this.code.childNodes[ old_local ];
+
+        if( !line )
+        return;
+
+        line.classList.remove( 'active-line' );
+
+        // Set new active
+        {
+            this.state.activeLine = number;
+
+            const new_local = this.toLocalLine( number );
+            line = this.code.childNodes[ new_local ];
+            line.classList.add( 'active-line' );
+        }
     }
 }
 

@@ -2857,7 +2857,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor pre.active-line {
-  background-color: var(--global-blur-background);
+  background-color: #333437a9;
 }
 
 .lexcodeeditor span {
