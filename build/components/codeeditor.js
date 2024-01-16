@@ -937,9 +937,10 @@ class CodeEditor {
         let panel = this._createPanelInfo();
         if( panel ) area.attach( panel );
 
+        const fontUrl = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/" + "/data/CommitMono-400-Regular.otf";
         const commitMono = new FontFace(
             "CommitMono",
-            `url(/data/CommitMono-400-Regular.otf)`,
+            `url(${ fontUrl })`,
             {
                 style: "normal",
                 weight: "400",
@@ -1741,8 +1742,8 @@ class CodeEditor {
                     return;
                 const step = this.code.undoSteps.pop();
                 this.code.lines = step.lines;
-                this.restoreCursor( cursor, step.cursor );
                 this.processLines();
+                this.restoreCursor( cursor, step.cursor );
                 return;
             }
         }
@@ -2606,7 +2607,7 @@ class CodeEditor {
         state.top = cursor._top;
         state.left = cursor._left;
         state.line = cursor.line;
-        state.charPos = cursor.position;
+        state.position = cursor.position;
         return state;
     }
 
@@ -2636,7 +2637,7 @@ class CodeEditor {
         if( flag & CodeEditor.CURSOR_TOP )
         {
             cursor._top = 0;
-            cursor.style.top = (cursor._top - this.getScrollTop()) + "px";
+            cursor.style.top = (-this.getScrollTop()) + "px";
             cursor.line = 0;
         }
     }
