@@ -2168,8 +2168,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
         set( value ) {
 
-            if(this.onSetValue)
-                this.onSetValue(value);
+            if( this.onSetValue )
+                this.onSetValue( value );
         }
 
         oncontextmenu(e) {
@@ -3555,6 +3555,15 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         addButton( name, value, callback, options = {} ) {
 
             let widget = this.create_widget(name, Widget.BUTTON, options);
+            widget.onGetValue = () => {
+                return wValue.innerText;
+            };
+            widget.onSetValue = (new_value) => {
+                wValue.innerHTML = "<span>" + 
+                (options.icon ? "<a class='" + options.icon + "'></a>" : 
+                ( options.img  ? "<img src='" + options.img + "'>" : (new_value || ""))) + "</span>";
+            };
+            
             let element = widget.domEl;
 
             var wValue = document.createElement('button');

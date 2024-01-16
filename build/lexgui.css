@@ -2912,7 +2912,6 @@ pre .line-gutter {
 .lexcodeeditor .cursors .cursor {
   -webkit-text-size-adjust: 100%;
   font-family: monospace;
-  color: #AAA !important;
   font-size: 16px;
   cursor: text;
   box-sizing: border-box;
@@ -2921,7 +2920,7 @@ pre .line-gutter {
   border-right: none;
   width: 0;
   position: absolute;
-  border-left: 3px solid #c5c5c5d6 !important;
+  border-left: 3px solid #fff !important;
   z-index: 0 !important;
   left: 0px;
   top: 0px;
@@ -2991,7 +2990,7 @@ pre .line-gutter {
   height: 20px;
   margin-top: -2px;
   background-color: var(--global-selected);
-  opacity: 0.3;
+  opacity: 0.4;
 }
 
 .lexcodeeditor .autocomplete {
