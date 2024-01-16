@@ -293,7 +293,7 @@ class CodeEditor {
             cursor.style.left = this.xPadding;
             cursor._top = 0;
             cursor.style.top = cursor._top + "px";
-            cursor.position = 0;
+            cursor._position = 0;
             cursor._line = 0;
             cursor.print = (function() { console.log( this.line, this.position ) }).bind( cursor );
 
@@ -302,6 +302,14 @@ class CodeEditor {
                 set: (v) => { 
                     this._line = v;
                     this._setActiveLine( v );
+                }
+            } );
+
+            Object.defineProperty( cursor, 'position', {
+                get: (v) => { return this._position },
+                set: (v) => { 
+                    this._position = v;
+                    this._updateDataInfoPanel( "@cursor-pos", "Col " + v );
                 }
             } );
 
@@ -620,7 +628,6 @@ class CodeEditor {
 
             this.resetCursorPos( CodeEditor.CURSOR_LEFT );
             if(idx > 0) this.cursorToString( cursor, prestring );
-            this._refreshCodeInfo( cursor.line, cursor.position );
             this.setScrollLeft( 0 );
 
             if( e.shiftKey && !e.cancelShift )
@@ -1137,7 +1144,7 @@ class CodeEditor {
 
         this.code.language = lang;
         this.highlight = lang;
-        this._refreshCodeInfo();
+        this._updateDataInfoPanel( "@highlight", lang );
         this.processLines();
 
         const ext = this.languages[ lang ].ext;
@@ -1189,34 +1196,23 @@ class CodeEditor {
         if( !this.skipCodeInfo )
         {
             let panel = new LX.Panel({ className: "lexcodetabinfo", width: "calc(100%)", height: "auto" });
-            panel.ln = 0;
-            panel.col = 0;
 
-            this._refreshCodeInfo = ( ln = panel.ln, col = panel.col ) => {
-                panel.ln = ln + 1;
-                panel.col = col + 1;
-                panel.clear();
-                panel.sameLine();
-                panel.addLabel( this.code.title, { float: 'right' });
-                panel.addLabel( "Ln " + panel.ln, { width: "64px" });
-                panel.addLabel( "Col " + panel.col, { width: "64px" });
-                panel.addButton( "<b>{ }</b>", this.highlight, ( value, event ) => {
-                    LX.addContextMenu( "Language", event, m => {
-                        for( const lang of Object.keys(this.languages) )
-                            m.add( lang, this._changeLanguage.bind(this) );
-                    });
-                }, { width: "25%", nameWidth: "15%" });
-                panel.endLine();
-            };
-
-            this._refreshCodeInfo();
+            panel.sameLine();
+            panel.addLabel( this.code.title, { float: 'right', signal: "@tab-name" });
+            panel.addLabel( "Ln " + 1, { width: "64px", signal: "@cursor-line" });
+            panel.addLabel( "Col " + 1, { width: "64px", signal: "@cursor-pos" });
+            panel.addButton( "<b>{ }</b>", this.highlight, ( value, event ) => {
+                LX.addContextMenu( "Language", event, m => {
+                    for( const lang of Object.keys(this.languages) )
+                        m.add( lang, this._changeLanguage.bind(this) );
+                });
+            }, { width: "25%", nameWidth: "15%", signal: "@highlight" });
+            panel.endLine();
 
             return panel;
         }
         else
         {
-            this._refreshCodeInfo = () => {};
-
             doAsync( () => {
 
                 // Change css a little bit...
@@ -1321,7 +1317,7 @@ class CodeEditor {
                 this.restoreCursor( cursor, this.code.cursorState );    
                 this.endSelection();
                 this._changeLanguageFromExtension( LX.getExtension( tabname ) );
-                this._refreshCodeInfo( cursor.line, cursor.position );
+                this._updateDataInfoPanel( "@tab-name", tabname );
             }
         });
 
@@ -1335,8 +1331,9 @@ class CodeEditor {
             this.code = code;  
             this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
             this.processLines();
-            doAsync( () => this._refreshCodeInfo( 0, 0 ), 50 );
         }
+
+        this._updateDataInfoPanel( "@tab-name", name );
 
         // Bc it could be overrided..
         return name;
@@ -1390,7 +1387,7 @@ class CodeEditor {
                 this.restoreCursor( cursor, this.code.cursorState );    
                 this.endSelection();
                 this._changeLanguageFromExtension( LX.getExtension( tabname ) );
-                this._refreshCodeInfo( cursor.line, cursor.position );
+                this._updateDataInfoPanel( "@tab-name", tabname );
             }
         });
 
@@ -1404,7 +1401,7 @@ class CodeEditor {
         this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
         this.processLines();
         this._changeLanguageFromExtension( LX.getExtension( name ) );
-        doAsync( () => this._refreshCodeInfo( 0, 0 ), 50 );
+        this._updateDataInfoPanel( "@tab-name", tabname );
     }
 
     loadTabFromFile() {
@@ -1451,7 +1448,7 @@ class CodeEditor {
             // Left click only...
             if( e.button === 2 )
             {
-                this.processClick(e);
+                this.processClick( e );
 
                 this.canOpenContextMenu = !this.selection;
 
@@ -1539,7 +1536,7 @@ class CodeEditor {
         }
     }
 
-    processClick( e, skip_refresh = false ) {
+    processClick( e ) {
 
         var cursor = this.cursors.children[ 0 ];
         var code_rect = this.codeScroller.getBoundingClientRect();
@@ -1556,16 +1553,13 @@ class CodeEditor {
         this.cursorToPosition( cursor, string.length );
 
         this.hideAutoCompleteBox();
-        
-        if( !skip_refresh ) 
-            this._refreshCodeInfo( ln, cursor.position );
     }
 
     processSelection( e, keep_range ) {
 
         var cursor = this.cursors.children[ 0 ];
 
-        if( e ) this.processClick( e, true );
+        if( e ) this.processClick( e );
         if( !this.selection )
             this.startSelection( cursor );
 
@@ -1803,7 +1797,7 @@ class CodeEditor {
         const enclosableKeys = ["\"", "'", "(", "{"];
         if( enclosableKeys.indexOf( key ) > -1 )
         {
-            if( this._encloseSelectedWordWithKey(key, lidx, cursor) ) 
+            if( this._encloseSelectedWordWithKey( key, lidx, cursor ) ) 
                 return;
         }
 
@@ -1812,7 +1806,8 @@ class CodeEditor {
 
         if( this.selection )
         {
-            this.actions['Backspace'].callback(lidx, cursor, e);
+            this.actions['Backspace'].callback( lidx, cursor, e );
+            lidx = cursor.line;
         }
 
         // Append key
@@ -2497,11 +2492,8 @@ class CodeEditor {
         
         this.cursorToLine( cursor, this.selection.fromY, true );
         this.cursorToPosition( cursor, this.selection.fromX );
-        
         this.endSelection();
-
         this.processLines();
-        this._refreshCodeInfo( cursor.line, cursor.position );
     }
 
     endSelection() {
@@ -2521,7 +2513,6 @@ class CodeEditor {
         cursor.position++;
 
         this.restartBlink();
-        this._refreshCodeInfo( cursor.line, cursor.position );
 
         // Add horizontal scroll
 
@@ -2542,7 +2533,6 @@ class CodeEditor {
         cursor.position--;
         cursor.position = Math.max( cursor.position, 0 );
         this.restartBlink();
-        this._refreshCodeInfo( cursor.line, cursor.position );
 
         // Add horizontal scroll
 
@@ -2564,8 +2554,6 @@ class CodeEditor {
         if(resetLeft)
             this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
 
-        this._refreshCodeInfo( cursor.line, cursor.position );
-
         doAsync(() => {
             var first_line = ( this.getScrollTop() / this.lineHeight )|0;
             if( (cursor.line - 1) < first_line )
@@ -2582,8 +2570,6 @@ class CodeEditor {
 
         if(resetLeft)
             this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
-
-        this._refreshCodeInfo( cursor.line, cursor.position );
 
         doAsync(() => {
             var last_line = ( ( this.codeScroller.offsetHeight + this.getScrollTop() ) / this.lineHeight )|0;
@@ -3064,16 +3050,27 @@ class CodeEditor {
             if( (idx + offset) < 0 ) return;
         }
 
-        this.autocomplete.scrollTop += offset * 18;
+        this.autocomplete.scrollTop += offset * 20;
 
         // Remove selected from the current word and add it to the next one
         this.autocomplete.childNodes[ idx ].classList.remove('selected');
         this.autocomplete.childNodes[ idx + offset ].classList.add('selected');
     }
 
+    _updateDataInfoPanel( signal, value ) {
+
+        if( !this.skipCodeInfo )
+        {
+            LX.emit( signal, value );
+        }
+    }
+
     _setActiveLine( number ) {
 
         number = number ?? this.state.activeLine;
+
+        this._updateDataInfoPanel( "@cursor-line", "Ln " + ( number + 1 ) );
+
         const old_local = this.toLocalLine( this.state.activeLine );
         let line = this.code.childNodes[ old_local ];
 
