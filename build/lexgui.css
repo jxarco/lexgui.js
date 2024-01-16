@@ -2988,7 +2988,6 @@ pre .line-gutter {
   top: 0px;
   width: 100px;
   height: 20px;
-  margin-top: -2px;
   background-color: var(--global-selected);
   opacity: 0.4;
 }

@@ -59,11 +59,19 @@ class CodeSelection {
         return this.fromY === this.toY;
     }
 
+    samePosition() {
+        return this.fromX === this.toX;
+    }
+
+    isEmpty() {
+        return this.sameLine() && this.samePosition();
+    }
+
     invertIfNecessary() {
-        if(this.fromX > this.toX)
-            swapElements(this, 'fromX', 'toX');
-        if(this.fromY > this.toY)
-            swapElements(this, 'fromY', 'toY');
+        if( this.fromX > this.toX )
+            swapElements( this, 'fromX', 'toX' );
+        if( this.fromY > this.toY )
+            swapElements( this, 'fromY', 'toY' );
     }
 
     selectInline( x, y, width ) {
@@ -154,6 +162,9 @@ class CodeEditor {
     static CURSOR_LEFT  = 1;
     static CURSOR_TOP   = 2;
 
+    static SELECTION_X      = 1;
+    static SELECTION_Y      = 2
+    static SELECTION_X_Y    = CodeEditor.SELECTION_X | CodeEditor.SELECTION_Y;
     static KEEP_VISIBLE_LINES   = 1;
     static UPDATE_VISIBLE_LINES = 2;
 
@@ -296,6 +307,14 @@ class CodeEditor {
             cursor._position = 0;
             cursor._line = 0;
             cursor.print = (function() { console.log( this.line, this.position ) }).bind( cursor );
+
+            Object.defineProperty( this, 'line', {
+                get: (v) => { return cursor.line }
+            } );
+
+            Object.defineProperty( this, 'position', {
+                get: (v) => { return cursor.position }
+            } );
 
             Object.defineProperty( cursor, 'line', {
                 get: (v) => { return this._line },
@@ -788,6 +807,10 @@ class CodeEditor {
 
         this.action( 'ArrowLeft', false, ( ln, cursor, e ) => {
 
+            // Nothing to do..
+            if( cursor.line == 0 && cursor.position == 0 )
+            return;
+
             if( e.metaKey ) { // Apple devices (Command)
                 e.preventDefault();
                 this.actions[ 'Home' ].callback( ln, cursor, e );
@@ -795,13 +818,21 @@ class CodeEditor {
             else if( e.ctrlKey ) {
                 // Get next word
                 const [word, from, to] = this.getWordAtPos( cursor, -1 );
-                var diff = Math.max(cursor.position - from, 1);
-                var substr = word.substr(0, diff);
+                // If no length, we change line..
+                if( !word.length && this.lineUp( cursor, true ) ) {
+                    e.cancelShift = true;
+                    e.keepSelection = true;
+                    this.actions[ 'End' ].callback( cursor.line, cursor, e );
+                    delete e.cancelShift;
+                    delete e.keepSelection;
+                }
+                var diff = Math.max( cursor.position - from, 1 );
+                var substr = word.substr( 0, diff );
                 // Selections...
                 if( e.shiftKey ) { if( !this.selection ) this.startSelection( cursor ); }
                 else this.endSelection();
-                this.cursorToString(cursor, substr, true);
-                if( e.shiftKey ) this.processSelection();
+                this.cursorToString( cursor, substr, true );
+                if( e.shiftKey ) this.processSelection( null, false, true );
             }
             else {
                 var letter = this.getCharAtPos( cursor, -1 );
@@ -860,6 +891,8 @@ class CodeEditor {
             } else if( e.ctrlKey ) {
                 // Get next word
                 const [ word, from, to ] = this.getWordAtPos( cursor );
+                // If no length, we change line..
+                if( !word.length ) this.lineDown( cursor, true );
                 var diff = cursor.position - from;
                 var substr = word.substr( diff );
                 // Selections...
@@ -1556,7 +1589,7 @@ class CodeEditor {
         this.hideAutoCompleteBox();
     }
 
-    processSelection( e, keep_range ) {
+    processSelection( e, keep_range, ccw, flags = CodeEditor.SELECTION_X_Y ) {
 
         var cursor = this.cursors.children[ 0 ];
 
@@ -1564,11 +1597,30 @@ class CodeEditor {
         if( !this.selection )
             this.startSelection( cursor );
 
+        // Hide active line background
+        this.code.childNodes.forEach( e => e.classList.remove( 'active-line' ) );
+
+        // Check if we must change ccw or not ...
+        if( this.line >= this.selection.fromY && 
+            (this.line == this.selection.fromY ? this.position >= this.selection.fromX : 1) )
+            {
+                console.log("invert ccw")
+                ccw = !ccw;
+            }
+
         // Update selection
-        if(!keep_range)
+        if( !keep_range )
         {
-            this.selection.toX = cursor.position;
-            this.selection.toY = cursor.line;
+            if( ccw )
+            {
+                if( flags & CodeEditor.SELECTION_X ) this.selection.fromX = cursor.position;
+                if( flags & CodeEditor.SELECTION_Y ) this.selection.fromY = cursor.line;
+            }
+            else
+            {
+                if( flags & CodeEditor.SELECTION_X ) this.selection.toX = cursor.position;
+                if( flags & CodeEditor.SELECTION_Y ) this.selection.toY = cursor.line;
+            }
         }
 
         this.selection.chars = 0;
@@ -1578,6 +1630,12 @@ class CodeEditor {
                 toX = this.selection.toX,
                 toY = this.selection.toY;
         const deltaY = toY - fromY;
+
+        if( this.selection.isEmpty() )
+        {
+            this.endSelection();
+            return;
+        }
 
         // Selection goes down...
         if( deltaY >= 0 )
@@ -1680,9 +1738,6 @@ class CodeEditor {
                 }
             }
         }
-
-        // Hide active line background
-        this.code.childNodes.forEach( e => e.classList.remove( 'active-line' ) );
     }
 
     async processKey( e ) {
@@ -2427,16 +2482,28 @@ class CodeEditor {
     lineUp( cursor, resetLeft ) {
 
         cursor = cursor ?? this.cursors.children[ 0 ];
+
+        if( this.code.lines[ cursor.line - 1 ] == undefined ) 
+            return false;
+
         cursor.line--;
         cursor.line = Math.max( 0, cursor.line );
         this.cursorToTop( cursor, resetLeft );
+
+        return true;
     }
 
     lineDown( cursor, resetLeft ) {
 
         cursor = cursor ?? this.cursors.children[ 0 ];
+        
+        if( this.code.lines[ cursor.line + 1 ] == undefined ) 
+            return false;
+    
         cursor.line++;
         this.cursorToBottom( cursor, resetLeft );
+
+        return true;
     }
 
     restartBlink() {
@@ -2581,9 +2648,10 @@ class CodeEditor {
 
     cursorToString( cursor, text, reverse ) {
 
+        if( !text.length ) return;
         cursor = cursor ?? this.cursors.children[ 0 ];
         for( let char of text ) 
-            reverse ? this.cursorToLeft(char) : this.cursorToRight(char);
+            reverse ? this.cursorToLeft( char ) : this.cursorToRight( char );
     }
 
     cursorToPosition( cursor, position ) {
@@ -2598,7 +2666,7 @@ class CodeEditor {
         cursor.line = line;
         cursor._top = this.lineHeight * line;
         cursor.style.top = cursor._top + "px";
-        if(resetLeft) this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
+        if( resetLeft ) this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
     }
 
     saveCursor( cursor, state = {} ) {
@@ -2819,28 +2887,38 @@ class CodeEditor {
         
         cursor = cursor ?? this.cursors.children[ 0 ];
         const col = cursor.line;
-        const words = this.code.lines[col];
+        const words = this.code.lines[ col ];
 
-        const is_char = (char) => {
-            const exceptions = ['_', '#', '!'];
-            const code = char.charCodeAt(0);
-            return (exceptions.indexOf(char) > - 1) || (code > 47 && code < 58) || (code > 64 && code < 91) || (code > 96 && code < 123);
+        const is_char = char => {
+            const exceptions = [ '_', '#', '!' ];
+            const code = char.charCodeAt( 0 );
+            return (exceptions.indexOf( char ) > - 1) || (code > 47 && code < 58) || (code > 64 && code < 91) || (code > 96 && code < 123);
         }
 
-        let it = cursor.position + offset;
+        let from = cursor.position + offset;
+        let to = cursor.position + offset;
 
-        while( words[it] && is_char(words[it]) )
-            it--;
+        // Check left ..
 
-        const from = it + 1;
-        it = cursor.position + offset;
+        while( words[ from ] && is_char( words[ from ] ) )
+            from--;
 
-        while( words[it] && is_char(words[it]) )
-            it++;
+        from++;
 
-        const to = it;
+        // Check right ..
 
-        return [words.substring( from, to ), from, to];
+        while( words[ to ] && is_char( words[ to ] ) )
+            to++;
+
+        const word = words.substring( from, to );
+
+        if( word == ' ' )
+        {
+            ( offset == -1 ? this.cursorToLeft( word, cursor ) : this.cursorToRight( word, cursor ) );
+            return this.getWordAtPos( cursor, offset );
+        }
+
+        return [ word, from, to ];
     }
 
     measureChar( char = "a", get_bb = false ) {
