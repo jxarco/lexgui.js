@@ -90,6 +90,9 @@ class CodeSelection {
         domEl.style.left = "calc(" + domEl._left + "px + " + this.editor.xPadding + ")";
         domEl.style.width = width + "px";
         this.editor.selections.appendChild(domEl);
+
+        // Hide active line background
+        this.editor.code.childNodes.forEach( e => e.classList.remove( 'active-line' ) );
     }
 };
 
@@ -165,6 +168,7 @@ class CodeEditor {
     static SELECTION_X      = 1;
     static SELECTION_Y      = 2
     static SELECTION_X_Y    = CodeEditor.SELECTION_X | CodeEditor.SELECTION_Y;
+
     static KEEP_VISIBLE_LINES   = 1;
     static UPDATE_VISIBLE_LINES = 2;
 
@@ -670,7 +674,7 @@ class CodeEditor {
 
         this.action( 'End', false, ( ln, cursor, e ) => {
             
-            if( e.shiftKey || e._shiftKey ) {
+            if( ( e.shiftKey || e._shiftKey ) && !e.cancelShift ) {
                 
                 var string = this.code.lines[ ln ].substring( cursor.position );
                 if( !this.selection )
@@ -683,7 +687,7 @@ class CodeEditor {
                     this.cursorToString( cursor, this.code.lines[ ln ] );            
                     this.processSelection();
                 }
-            } else 
+            } else if( !e.keepSelection )
                 this.endSelection();
 
             this.resetCursorPos( CodeEditor.CURSOR_LEFT );
@@ -742,16 +746,14 @@ class CodeEditor {
                     if( !this.selection )
                         this.startSelection( cursor );
 
-                    this.selection.toY = ( this.selection.toY > 0 ) ? ( this.selection.toY - 1 ) : 0;
-                    this.cursorToLine( cursor, this.selection.toY );
+                    this.lineUp();
 
                     var letter = this.getCharAtPos( cursor );
                     if( !letter ) {
-                        this.selection.toX = this.code.lines[ cursor.line ].length;
-                        this.cursorToPosition( cursor, this.selection.toX );
+                        this.cursorToPosition( cursor, this.code.lines[ cursor.line ].length );
                     }
                     
-                    this.processSelection( null, true );
+                    this.processSelection( null, false, true );
 
                 } else {
                     this.endSelection();
@@ -777,16 +779,14 @@ class CodeEditor {
                     if( !this.selection )
                         this.startSelection( cursor );
 
-                    this.selection.toY = this.selection.toY < this.code.lines.length - 1 ? this.selection.toY + 1 : this.code.lines.length - 1;
-                    this.cursorToLine( cursor, this.selection.toY );
+                    this.lineDown( cursor );
                     
                     var letter = this.getCharAtPos( cursor );
                     if( !letter ) {
-                        this.selection.toX = Math.max(this.code.lines[ cursor.line ].length - 1, 0);
-                        this.cursorToPosition(cursor, this.selection.toX);
+                        this.cursorToPosition( cursor, Math.max(this.code.lines[ cursor.line ].length - 1, 0) );
                     }
 
-                    this.processSelection( null, true );
+                    this.processSelection();
                 } else {
     
                     if( this.code.lines[ ln + 1 ] == undefined ) 
@@ -839,16 +839,8 @@ class CodeEditor {
                 if( letter ) {
                     if( e.shiftKey ) {
                         if( !this.selection ) this.startSelection( cursor );
-                        if( ( ( cursor.position - 1 ) < this.selection.fromX ) && this.selection.sameLine() )
-                            this.selection.fromX--;
-                        else if( ( cursor.position - 1 ) == this.selection.fromX && this.selection.sameLine() ) {
-                            this.cursorToLeft( letter, cursor );
-                            this.endSelection();
-                            return;
-                        }
-                        else this.selection.toX--;
                         this.cursorToLeft( letter, cursor );
-                        this.processSelection( null, true );
+                        this.processSelection( null, false, true, CodeEditor.SELECTION_X );
                     }
                     else {
                         if( !this.selection ) {
@@ -867,23 +859,25 @@ class CodeEditor {
                 }
                 else if( cursor.line > 0 ) {
                     
-                    if( e.shiftKey ) {
-                        if( !this.selection ) this.startSelection( cursor );
-                    }
+                    if( e.shiftKey && !this.selection ) this.startSelection( cursor );
                         
                     this.lineUp( cursor );
-                    this.actions[ 'End' ].callback( cursor.line, cursor, e );
 
-                    if( e.shiftKey ) {
-                        this.selection.toX = cursor.position;
-                        this.selection.toY--;
-                        this.processSelection( null, true );
-                    }
+                    e.cancelShift = e.keepSelection = true;
+                    this.actions[ 'End' ].callback( cursor.line, cursor, e );
+                    delete e.cancelShift; delete e.keepSelection;
+
+                    if( e.shiftKey ) this.processSelection( null, false, true );
                 }
             }
         });
 
         this.action( 'ArrowRight', false, ( ln, cursor, e ) => {
+
+            // Nothing to do..
+            if( cursor.line == this.code.lines.length - 1 && 
+                cursor.position == this.code.lines[ cursor.line - 1 ].length )
+            return;
 
             if( e.metaKey ) { // Apple devices (Command)
                 e.preventDefault();
@@ -905,19 +899,8 @@ class CodeEditor {
                 if( letter ) {
                     if( e.shiftKey ) {
                         if( !this.selection ) this.startSelection( cursor );
-                        var keep_range = false;
-                        if( cursor.position == this.selection.fromX ) {
-                            if( ( cursor.position + 1 ) == this.selection.toX && this.selection.sameLine() ) {
-                                this.cursorToRight( letter, cursor );
-                                this.endSelection();
-                                return;
-                            } else if( cursor.position < this.selection.toX ) {
-                                this.selection.fromX++;
-                                keep_range = true;
-                            } else this.selection.toX++;
-                        }
                         this.cursorToRight( letter, cursor );
-                        this.processSelection( null, keep_range );
+                        this.processSelection( null, false, false, CodeEditor.SELECTION_X );
                     }else{
                         if( !this.selection ) {
                             this.cursorToRight( letter, cursor );
@@ -938,18 +921,15 @@ class CodeEditor {
                     
                     if( e.shiftKey ) {
                         if( !this.selection ) this.startSelection( cursor );
-                        e.cancelShift = true;
-                        e.keepSelection = true;
+                        e.cancelShift = e.keepSelection = true;
                     }
 
                     this.lineDown( cursor );
+
                     this.actions['Home'].callback( cursor.line, cursor, e );
+                    delete e.cancelShift; delete e.keepSelection;
                     
-                    if( e.shiftKey ) {
-                        this.selection.toX = cursor.position;
-                        this.selection.toY++;
-                        this.processSelection( null, true );
-                    }
+                    if( e.shiftKey ) this.processSelection( null, false, false );
 
                     this.hideAutoCompleteBox();
                 }
@@ -1604,7 +1584,7 @@ class CodeEditor {
         if( this.line >= this.selection.fromY && 
             (this.line == this.selection.fromY ? this.position >= this.selection.fromX : 1) )
             {
-                console.log("invert ccw")
+                // console.log("invert ccw")
                 ccw = !ccw;
             }
 
