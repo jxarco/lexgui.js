@@ -286,6 +286,9 @@ class CodeEditor {
         this.root.addEventListener( 'click', this.processMouse.bind(this) );
         this.root.addEventListener( 'contextmenu', this.processMouse.bind(this) );
 
+        // Add mouseup event to document as well to detect when selections end
+        document.body.addEventListener( 'mouseup', this._onMouseUp.bind(this) );
+
         // Cursors and selection
 
         this.cursors = document.createElement( 'div' );
@@ -1482,18 +1485,7 @@ class CodeEditor {
         
         else if( e.type == 'mouseup' )
         {
-            if( (LX.getTime() - this.lastMouseDown) < 300 ) {
-                this.state.selectingText = false;
-                this.processClick( e );
-                this.endSelection();
-            }
-
-            if( this.selection )
-            {
-                this.selection.invertIfNecessary();
-            }
-
-            this.state.selectingText = false;
+            this._onMouseUp( e );
         }
 
         else if( e.type == 'mousemove' )
@@ -1548,6 +1540,22 @@ class CodeEditor {
 
             this.canOpenContextMenu = false;
         }
+    }
+
+    _onMouseUp( e ) {
+
+        if( (LX.getTime() - this.lastMouseDown) < 300 ) {
+            this.state.selectingText = false;
+            this.processClick( e );
+            this.endSelection();
+        }
+
+        if( this.selection )
+        {
+            this.selection.invertIfNecessary();
+        }
+
+        this.state.selectingText = false;
     }
 
     processClick( e ) {
@@ -1611,7 +1619,8 @@ class CodeEditor {
                 toY = this.selection.toY;
         const deltaY = toY - fromY;
 
-        if( this.selection.isEmpty() )
+        // Only leave if not a mouse selection...
+        if( !e && this.selection.isEmpty() )
         {
             this.endSelection();
             return;
