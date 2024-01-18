@@ -2872,8 +2872,9 @@ class CodeEditor {
         return this.code.lines[ cursor.line ][cursor.position + offset];
     }
 
-    getWordAtPos( cursor, offset = 0 ) {
+    getWordAtPos( cursor, loffset = 0, roffset ) {
         
+        roffset = roffset ?? loffset;
         cursor = cursor ?? this.cursors.children[ 0 ];
         const col = cursor.line;
         const words = this.code.lines[ col ];
@@ -2884,29 +2885,42 @@ class CodeEditor {
             return (exceptions.indexOf( char ) > - 1) || (code > 47 && code < 58) || (code > 64 && code < 91) || (code > 96 && code < 123);
         }
 
-        let from = cursor.position + offset;
-        let to = cursor.position + offset;
+        let from = cursor.position + roffset;
+        let to = cursor.position + loffset;
 
-        // Check left ..
+        // Check left ...
 
         while( words[ from ] && is_char( words[ from ] ) )
             from--;
 
         from++;
 
-        // Check right ..
+        // Check right ...
 
         while( words[ to ] && is_char( words[ to ] ) )
             to++;
 
-        const word = words.substring( from, to );
+        // Skip spaces ...
 
+        let word = words.substring( from, to );
         if( word == ' ' )
         {
-            ( offset == -1 ? this.cursorToLeft( word, cursor ) : this.cursorToRight( word, cursor ) );
-            return this.getWordAtPos( cursor, offset );
-        }
-
+            if( loffset < 0 )
+            {
+                while( words[ from - 1 ] != undefined && words[ from - 1 ] == ' ' )
+                    from--;
+                to++;
+                word = words.substring( from, to + 1 );
+            }
+            else
+            {
+                while( words[ to ] != undefined && words[ to ] == ' ' )
+                    to++;
+                from--;
+                word = words.substring( from, to );
+            }
+        } 
+        
         return [ word, from, to ];
     }
 
@@ -3153,7 +3167,7 @@ class CodeEditor {
 
             const new_local = this.toLocalLine( number );
             line = this.code.childNodes[ new_local ];
-            line.classList.add( 'active-line' );
+            if( line ) line.classList.add( 'active-line' );
         }
     }
 }
