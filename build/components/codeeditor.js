@@ -68,10 +68,16 @@ class CodeSelection {
     }
 
     invertIfNecessary() {
-        if( this.fromX > this.toX )
-            swapElements( this, 'fromX', 'toX' );
+        // if( this.fromX > this.toX )
         if( this.fromY > this.toY )
+        {
+            swapElements( this, 'fromX', 'toX' );
             swapElements( this, 'fromY', 'toY' );
+        } 
+        else if( this.sameLine() && this.fromX > this.toX )
+        {
+            swapElements( this, 'fromX', 'toX' );
+        }
     }
 
     selectInline( x, y, width ) {
@@ -669,7 +675,7 @@ class CodeEditor {
                     this.selection.selectInline( idx, cursor.line, this.measureString( string ) );
                 else
                 {
-                    this.processSelection();
+                    this.processSelection( e );
                 }
             } else if( !e.keepSelection )
                 this.endSelection();
@@ -688,7 +694,7 @@ class CodeEditor {
                 {
                     this.resetCursorPos( CodeEditor.CURSOR_LEFT );
                     this.cursorToString( cursor, this.code.lines[ ln ] );            
-                    this.processSelection();
+                    this.processSelection( e );
                 }
             } else if( !e.keepSelection )
                 this.endSelection();
@@ -756,7 +762,7 @@ class CodeEditor {
                         this.cursorToPosition( cursor, this.code.lines[ cursor.line ].length );
                     }
                     
-                    this.processSelection( null, false, true );
+                    this.processSelection( e, false );
 
                 } else {
                     this.endSelection();
@@ -789,7 +795,7 @@ class CodeEditor {
                         this.cursorToPosition( cursor, Math.max(this.code.lines[ cursor.line ].length - 1, 0) );
                     }
 
-                    this.processSelection();
+                    this.processSelection( e );
                 } else {
     
                     if( this.code.lines[ ln + 1 ] == undefined ) 
@@ -835,7 +841,7 @@ class CodeEditor {
                 if( e.shiftKey ) { if( !this.selection ) this.startSelection( cursor ); }
                 else this.endSelection();
                 this.cursorToString( cursor, substr, true );
-                if( e.shiftKey ) this.processSelection( null, false, true );
+                if( e.shiftKey ) this.processSelection( e, false, true );
             }
             else {
                 var letter = this.getCharAtPos( cursor, -1 );
@@ -843,7 +849,7 @@ class CodeEditor {
                     if( e.shiftKey ) {
                         if( !this.selection ) this.startSelection( cursor );
                         this.cursorToLeft( letter, cursor );
-                        this.processSelection( null, false, true, CodeEditor.SELECTION_X );
+                        this.processSelection( e, false, CodeEditor.SELECTION_X );
                     }
                     else {
                         if( !this.selection ) {
@@ -870,7 +876,7 @@ class CodeEditor {
                     this.actions[ 'End' ].callback( cursor.line, cursor, e );
                     delete e.cancelShift; delete e.keepSelection;
 
-                    if( e.shiftKey ) this.processSelection( null, false, true );
+                    if( e.shiftKey ) this.processSelection( e, false );
                 }
             }
         });
@@ -896,14 +902,14 @@ class CodeEditor {
                 if( e.shiftKey ) { if( !this.selection ) this.startSelection( cursor ); }
                 else this.endSelection();
                 this.cursorToString( cursor, substr);
-                if( e.shiftKey ) this.processSelection();
+                if( e.shiftKey ) this.processSelection( e );
             } else {
                 var letter = this.getCharAtPos( cursor );
                 if( letter ) {
                     if( e.shiftKey ) {
                         if( !this.selection ) this.startSelection( cursor );
                         this.cursorToRight( letter, cursor );
-                        this.processSelection( null, false, false, CodeEditor.SELECTION_X );
+                        this.processSelection( e, false, CodeEditor.SELECTION_X );
                     }else{
                         if( !this.selection ) {
                             this.cursorToRight( letter, cursor );
@@ -924,15 +930,11 @@ class CodeEditor {
                     
                     if( e.shiftKey ) {
                         if( !this.selection ) this.startSelection( cursor );
-                        e.cancelShift = e.keepSelection = true;
                     }
 
-                    this.lineDown( cursor );
-
-                    this.actions['Home'].callback( cursor.line, cursor, e );
-                    delete e.cancelShift; delete e.keepSelection;
+                    this.lineDown( cursor, true );
                     
-                    if( e.shiftKey ) this.processSelection( null, false, false );
+                    if( e.shiftKey ) this.processSelection( e, false );
 
                     this.hideAutoCompleteBox();
                 }
@@ -1556,6 +1558,7 @@ class CodeEditor {
         }
 
         this.state.selectingText = false;
+        delete this._lastSelectionKeyDir;
     }
 
     processClick( e ) {
@@ -1577,28 +1580,30 @@ class CodeEditor {
         this.hideAutoCompleteBox();
     }
 
-    processSelection( e, keep_range, ccw, flags = CodeEditor.SELECTION_X_Y ) {
+    processSelection( e, keep_range, flags = CodeEditor.SELECTION_X_Y ) {
 
         var cursor = this.cursors.children[ 0 ];
+        const isMouseEvent = e && ( e.constructor == MouseEvent );
 
-        if( e ) this.processClick( e );
+        if( isMouseEvent ) this.processClick( e );
         if( !this.selection )
             this.startSelection( cursor );
 
         // Hide active line background
         this.code.childNodes.forEach( e => e.classList.remove( 'active-line' ) );
 
-        // Check if we must change ccw or not ...
-        if( this.line >= this.selection.fromY && 
-            (this.line == this.selection.fromY ? this.position >= this.selection.fromX : 1) )
-            {
-                // console.log("invert ccw")
-                ccw = !ccw;
-            }
-
         // Update selection
         if( !keep_range )
         {
+            let ccw = true;
+
+            // Check if we must change ccw or not ... (not with mouse)
+            if( !isMouseEvent && this.line >= this.selection.fromY && 
+                (this.line == this.selection.fromY ? this.position >= this.selection.fromX : true) )
+            {
+                ccw = ( e && this._lastSelectionKeyDir && ( e.key == 'ArrowRight' || e.key == 'ArrowDown' || e.key == 'End' ) );
+            }
+
             if( ccw )
             {
                 if( flags & CodeEditor.SELECTION_X ) this.selection.fromX = cursor.position;
@@ -1609,6 +1614,15 @@ class CodeEditor {
                 if( flags & CodeEditor.SELECTION_X ) this.selection.toX = cursor.position;
                 if( flags & CodeEditor.SELECTION_Y ) this.selection.toY = cursor.line;
             }
+
+            this._lastSelectionKeyDir = ccw;
+        }
+
+        // Only leave if not a mouse selection...
+        if( !isMouseEvent && this.selection.isEmpty() )
+        {
+            this.endSelection();
+            return;
         }
 
         this.selection.chars = 0;
@@ -1618,13 +1632,6 @@ class CodeEditor {
                 toX = this.selection.toX,
                 toY = this.selection.toY;
         const deltaY = toY - fromY;
-
-        // Only leave if not a mouse selection...
-        if( !e && this.selection.isEmpty() )
-        {
-            this.endSelection();
-            return;
-        }
 
         // Selection goes down...
         if( deltaY >= 0 )
@@ -1758,9 +1765,9 @@ class CodeEditor {
                 const nlines = this.code.lines.length - 1;
                 this.selection.toX = this.code.lines[ nlines ].length;
                 this.selection.toY = nlines;
-                this.processSelection( null, true );
                 this.cursorToPosition( cursor, this.selection.toX );
                 this.cursorToLine( cursor, this.selection.toY );
+                this.processSelection( null, true );
                 break;
             case 'c': // copy
                 this._copyContent();
@@ -2056,14 +2063,8 @@ class CodeEditor {
         if( this.selection )
             this.processSelection( null, true );
 
-        // Clear tmp vars
-        delete this._buildingString; 
-        delete this._pendingString;
-        delete this._buildingBlockComment;
-
-        // Set active line
+        this._clearTmpVariables();
         this._setActiveLine();
-
         this.resize();
     }
 
@@ -2074,7 +2075,10 @@ class CodeEditor {
 
         const UPDATE_LINE = ( html ) => {
             if( !force ) // Single line update
+            {
                 this.code.childNodes[ local_line_num ].innerHTML = gutter_line + html;
+                this._clearTmpVariables();
+            }
             else // Update all lines at once
                 return "<pre>" + ( gutter_line + html ) + "</pre>";
         }
@@ -2559,6 +2563,7 @@ class CodeEditor {
         this.selections.innerHTML = "";
         delete this.selection;
         delete this._tripleClickSelection;
+        delete this._lastSelectionKeyDir;
     }
 
     cursorToRight( key, cursor ) {
@@ -3169,6 +3174,13 @@ class CodeEditor {
             line = this.code.childNodes[ new_local ];
             if( line ) line.classList.add( 'active-line' );
         }
+    }
+
+    _clearTmpVariables() {
+
+        delete this._buildingString; 
+        delete this._pendingString;
+        delete this._buildingBlockComment;
     }
 }
 
