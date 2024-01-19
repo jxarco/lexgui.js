@@ -30,7 +30,7 @@ function firstNonspaceIndex( str ) {
 }
 
 function deleteElement( el ) {
-    if(el) el.remove();
+    if( el ) el.remove();
 }
 
 let ASYNC_ENABLED = true;
@@ -256,7 +256,7 @@ class CodeEditor {
             if( Object.keys( this.openedTabs ).length < 2 )
             {
                 clearInterval( this.blinker );
-                this.cursors.classList.remove('show');
+                this.cursors.classList.remove( 'show' );
             }
         } } );
         this.tabs.root.addEventListener( 'dblclick', (e) => {
@@ -459,7 +459,7 @@ class CodeEditor {
         this.maxUndoSteps = 16;
         this.lineHeight = 20;
         this.defaultSingleLineCommentToken = "//";
-        this.charWidth = 7; //this.measureChar();
+        this.charWidth = 7; //this._measureChar();
         this._lastTime = null;
 
         this.pairKeys = {
@@ -775,7 +775,7 @@ class CodeEditor {
             // Move up autocomplete selection
             else
             {
-                this.moveArrowSelectedAutoComplete('up');
+                this._moveArrowSelectedAutoComplete('up');
             }
         });
 
@@ -810,7 +810,7 @@ class CodeEditor {
             // Move down autocomplete selection
             else
             {
-                this.moveArrowSelectedAutoComplete('down');
+                this._moveArrowSelectedAutoComplete('down');
             }
         });
 
@@ -1442,7 +1442,7 @@ class CodeEditor {
             this.restartBlink();
         else {
             clearInterval( this.blinker );
-            this.cursors.classList.remove('show');
+            this.cursors.classList.remove( 'show' );
         }
     }
 
@@ -2023,7 +2023,6 @@ class CodeEditor {
         
         const start = performance.now();
 
-        var gutter_html = "";
         var code_html = "";
         
         // Reset all lines content
@@ -2049,7 +2048,6 @@ class CodeEditor {
         // Process visible lines
         for( let i = this.visibleLinesViewport.x; i < this.visibleLinesViewport.y; ++i )
         {
-            gutter_html += "<span>" + (i + 1) + "</span>";
             code_html += this.processLine( i, true );
         }
         
@@ -2503,15 +2501,15 @@ class CodeEditor {
 
         if( !this.code ) return;
 
-        clearInterval(this.blinker);
-        this.cursors.classList.add('show');
+        clearInterval( this.blinker );
+        this.cursors.classList.add( 'show' );
 
-        if (this.cursorBlinkRate > 0)
+        if( this.cursorBlinkRate > 0 )
             this.blinker = setInterval(() => {
-                this.cursors.classList.toggle('show');
+                this.cursors.classList.toggle( 'show' );
             }, this.cursorBlinkRate);
-        else if (this.cursorBlinkRate < 0)
-            this.cursors.classList.remove('show');
+        else if( this.cursorBlinkRate < 0 )
+            this.cursors.classList.remove( 'show' );
     }
 
     startSelection( cursor ) {
@@ -2520,10 +2518,10 @@ class CodeEditor {
         this.selections.innerHTML = "";
 
         // Show elements
-        this.selections.classList.add('show');
+        this.selections.classList.add( 'show' );
 
         // Create new selection instance
-        this.selection = new CodeSelection(this, cursor.position, cursor.line);
+        this.selection = new CodeSelection( this, cursor.position, cursor.line );
     }
 
     deleteSelection( cursor ) {
@@ -2540,7 +2538,7 @@ class CodeEditor {
 
         // Get linear start index
         let index = 0;
-        for(let i = 0; i <= this.selection.fromY; i++)
+        for( let i = 0; i <= this.selection.fromY; i++ )
             index += (i == this.selection.fromY ? this.selection.fromX : this.code.lines[ i ].length);
 
         index += this.selection.fromY * separator.length; 
@@ -2559,7 +2557,7 @@ class CodeEditor {
 
     endSelection() {
 
-        this.selections.classList.remove('show');
+        this.selections.classList.remove( 'show' );
         this.selections.innerHTML = "";
         delete this.selection;
         delete this._tripleClickSelection;
@@ -2587,7 +2585,7 @@ class CodeEditor {
 
     cursorToLeft( key, cursor ) {
 
-        if(!key) return;
+        if( !key ) return;
         cursor = cursor ?? this.cursors.children[ 0 ];
         cursor._left -= this.charWidth;
         cursor._left = Math.max( cursor._left, 0 );
@@ -2680,9 +2678,9 @@ class CodeEditor {
         cursor.position = state.position ?? 0;
 
         cursor._left = state.left ?? 0;
-        cursor.style.left = "calc(" + (cursor._left - this.getScrollLeft()) + "px + " + this.xPadding + ")";
+        cursor.style.left = "calc(" + ( cursor._left - this.getScrollLeft() ) + "px + " + this.xPadding + ")";
         cursor._top = state.top ?? 0;
-        cursor.style.top = "calc(" + (cursor._top - this.getScrollTop()) + "px)";
+        cursor.style.top = "calc(" + ( cursor._top - this.getScrollTop() ) + "px)";
     }
 
     resetCursorPos( flag, cursor ) {
@@ -2692,14 +2690,14 @@ class CodeEditor {
         if( flag & CodeEditor.CURSOR_LEFT )
         {
             cursor._left = 0;
-            cursor.style.left = "calc(" + (-this.getScrollLeft()) + "px + " + this.xPadding + ")";
+            cursor.style.left = "calc(" + ( -this.getScrollLeft() ) + "px + " + this.xPadding + ")";
             cursor.position = 0;
         }
 
         if( flag & CodeEditor.CURSOR_TOP )
         {
             cursor._top = 0;
-            cursor.style.top = (-this.getScrollTop()) + "px";
+            cursor.style.top = ( -this.getScrollTop() ) + "px";
             cursor.line = 0;
         }
     }
@@ -2707,14 +2705,14 @@ class CodeEditor {
     addSpaceTabs(n) {
         
         for( var i = 0; i < n; ++i ) {
-            this.actions['Tab'].callback();
+            this.actions[ 'Tab' ].callback();
         }
     }
 
     addSpaces(n) {
         
         for( var i = 0; i < n; ++i ) {
-            this.root.dispatchEvent(new CustomEvent('keydown', {'detail': {
+            this.root.dispatchEvent( new CustomEvent( 'keydown', { 'detail': {
                 skip_undo: true,
                 key: ' '
             }}));
@@ -2723,26 +2721,26 @@ class CodeEditor {
 
     getScrollLeft() {
         
-        if(!this.codeScroller) return 0;
+        if( !this.codeScroller ) return 0;
         return this.codeScroller.scrollLeft;
     }
 
     getScrollTop() {
         
-        if(!this.codeScroller) return 0;
+        if( !this.codeScroller ) return 0;
         return this.codeScroller.scrollTop;
     }
 
     setScrollLeft( value ) {
         
-        if(!this.codeScroller) return;
+        if( !this.codeScroller ) return;
         this.codeScroller.scrollLeft = value;
         this.setScrollBarValue( 'horizontal', 0 );
     }
 
     setScrollTop( value ) {
         
-        if(!this.codeScroller) return;
+        if( !this.codeScroller ) return;
         this.codeScroller.scrollTop = value;
         this.setScrollBarValue( 'vertical' );
     }
@@ -2874,7 +2872,7 @@ class CodeEditor {
     getCharAtPos( cursor, offset = 0 ) {
         
         cursor = cursor ?? this.cursors.children[ 0 ];
-        return this.code.lines[ cursor.line ][cursor.position + offset];
+        return this.code.lines[ cursor.line ][ cursor.position + offset ];
     }
 
     getWordAtPos( cursor, loffset = 0, roffset ) {
@@ -2929,15 +2927,15 @@ class CodeEditor {
         return [ word, from, to ];
     }
 
-    measureChar( char = "a", get_bb = false ) {
+    _measureChar( char = "a", get_bb = false ) {
         
-        var test = document.createElement("pre");
+        var test = document.createElement( "pre" );
         test.className = "codechar";
         test.innerHTML = char;
-        document.body.appendChild(test);
+        document.body.appendChild( test );
         var rect = test.getBoundingClientRect();
         deleteElement( test );
-        const bb = [Math.floor(rect.width), Math.floor(rect.height)];
+        const bb = [ Math.floor( rect.width ), Math.floor( rect.height ) ];
         return get_bb ? bb : bb[ 0 ];
     }
 
@@ -2948,44 +2946,46 @@ class CodeEditor {
 
     runScript( code ) {
 
-        var script = document.createElement('script');
+        var script = document.createElement( 'script' );
         script.type = 'module';
         script.innerHTML = code;
         // script.src = url[ i ] + ( version ? "?version=" + version : "" );
         script.async = false;
         // script.onload = function(e) { };
-        document.getElementsByTagName('head')[ 0 ].appendChild(script);
+        document.getElementsByTagName( 'head' )[ 0 ].appendChild( script );
     }
 
     toJSONFormat( text ) {
 
-        let params = text.split(":");
+        let params = text.split( ':' );
 
         for(let i = 0; i < params.length; i++) {
-            let key = params[ i ].split(',');
-            if(key.length > 1) {
-                if(key[key.length-1].includes("]"))
+            let key = params[ i ].split( ',' );
+            if( key.length > 1 )
+            {
+                if( key[ key.length - 1 ].includes( ']' ))
                     continue;
-                key = key[key.length-1];
+                key = key[ key.length - 1 ];
             }
-            else if(key[ 0 ].includes("}"))
+            else if( key[ 0 ].includes( '}' ) )
                 continue;
             else
                 key = key[ 0 ];
-            key = key.replaceAll(/[{}\n\r]/g,"").replaceAll(" ","")
-            if(key[ 0 ] != '"' && key[key.length - 1] != '"') {
-                params[ i ] = params[ i ].replace(key, '"' + key + '"');
+            key = key.replaceAll( /[{}\n\r]/g, '' ).replaceAll( ' ', '' )
+            if( key[ 0 ] != '"' && key[ key.length - 1 ] != '"')
+            {
+                params[ i ] = params[ i ].replace( key, '"' + key + '"' );
             }
         }
 
-        text = params.join(':');
+        text = params.join( ':' );
 
         try {
-            let json = JSON.parse(text);
-            return JSON.stringify(json, undefined, 4);
+            let json = JSON.parse( text );
+            return JSON.stringify( json, undefined, 4 );
         }
-        catch(e) {
-            alert("Invalid JSON format");
+        catch( e ) {
+            alert( "Invalid JSON format" );
             return;	
         }
     }
@@ -3025,10 +3025,10 @@ class CodeEditor {
             if( !s.toLowerCase().includes(word.toLowerCase()) )
             continue;
 
-            var pre = document.createElement('pre');
+            var pre = document.createElement( 'pre' );
             this.autocomplete.appendChild(pre);
 
-            var icon = document.createElement('a');
+            var icon = document.createElement( 'a' );
             
             if( this._mustHightlightWord( s, this.utils ) )
                 icon.className = "fa fa-cube";
@@ -3081,7 +3081,7 @@ class CodeEditor {
     hideAutoCompleteBox() {
 
         this.isAutoCompleteActive = false;
-        this.autocomplete.classList.remove('show');
+        this.autocomplete.classList.remove( 'show' );
     }
 
     autoCompleteWord( cursor, suggestion ) {
@@ -3089,7 +3089,7 @@ class CodeEditor {
         if( !this.isAutoCompleteActive )
         return;
 
-        let [suggestedWord, idx] = this.getSelectedAutoComplete();
+        let [suggestedWord, idx] = this._getSelectedAutoComplete();
         suggestedWord = suggestion ?? suggestedWord;
 
         const [word, start, end] = this.getWordAtPos( cursor, -1 );
@@ -3104,7 +3104,7 @@ class CodeEditor {
         this.hideAutoCompleteBox();
     }
 
-    getSelectedAutoComplete() {
+    _getSelectedAutoComplete() {
         
         if( !this.isAutoCompleteActive )
         return;
@@ -3123,12 +3123,12 @@ class CodeEditor {
         }
     }
 
-    moveArrowSelectedAutoComplete( dir ) {
+    _moveArrowSelectedAutoComplete( dir ) {
 
         if( !this.isAutoCompleteActive )
         return;
 
-        const [word, idx] = this.getSelectedAutoComplete();
+        const [word, idx] = this._getSelectedAutoComplete();
         const offset = dir == 'down' ? 1 : -1;
 
         if( dir == 'down' ) {
