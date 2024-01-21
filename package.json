@@ -1,6 +1,6 @@
 {
     "name": "lexgui",
-    "version": "0.1.19",
+    "version": "0.1.20",
     "description": "JS library to create web graphical user interfaces",
     "type": "module",
     "main": "./build/lexgui.js",
@@ -15,6 +15,7 @@
       "examples",
       "LICENSE",
       "package.json",
+      "changelog.md",
       "README.md",
       "demo.js"
     ],

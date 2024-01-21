@@ -5,7 +5,7 @@
 Active line is now hightlighted.
 Using CommitMono font (https://commitmono.com/) as the font for the Code Editor. 
 Added "Rust" syntax highlighting. 
-Improved selections with arrows (and some bugs fixed).
+Improved all code selections (and some bugs fixed).
 Block comments are now working again (with bugs probably). 
 Minor fixes.
 
