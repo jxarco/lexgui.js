@@ -1265,6 +1265,37 @@ class CodeEditor {
         });
     }
 
+    _onSelectTab( isNewTabButton, event, name,  ) {
+
+        if( isNewTabButton )
+        {
+            this._onNewTab( event );
+            return;
+        }
+
+        var cursor = cursor ?? this.cursors.children[ 0 ];
+        this.saveCursor( cursor, this.code.cursorState );    
+
+        this.code = this.loadedTabs[ name ];
+        this.restoreCursor( cursor, this.code.cursorState );    
+
+        this.endSelection();
+        this._changeLanguageFromExtension( LX.getExtension( name ) );
+        this._updateDataInfoPanel( "@tab-name", name );
+    }
+
+    _onContextMenuTab( isNewTabButton, event, name,  ) {
+        
+        if( isNewTabButton )
+        return;
+
+        LX.addContextMenu( null, event, m => {
+            m.add( "Close", () => { this.tabs.delete( name ) } );
+            m.add( "" );
+            m.add( "Rename", () => { console.warn( "TODO" )} );
+        });
+    }
+
     addTab( name, selected, title ) {
         
         // If already loaded, set new name...
@@ -1317,28 +1348,14 @@ class CodeEditor {
             this.explorer.frefresh( name );
         }
 
-        this.tabs.add(name, code, { 
+        this.tabs.add( name, code, { 
             selected: selected, 
             fixed: isNewTabButton, 
             title: code.title, 
             icon: tabIcon, 
-            onSelect: (e, tabname) => {
-
-                if( isNewTabButton )
-                {
-                    this._onNewTab( e );
-                    return;
-                }
-
-                var cursor = cursor ?? this.cursors.children[ 0 ];
-                this.saveCursor( cursor, this.code.cursorState );    
-                this.code = this.loadedTabs[ tabname ];
-                this.restoreCursor( cursor, this.code.cursorState );    
-                this.endSelection();
-                this._changeLanguageFromExtension( LX.getExtension( tabname ) );
-                this._updateDataInfoPanel( "@tab-name", tabname );
-            }
-        });
+            onSelect: this._onSelectTab.bind( this, isNewTabButton ),
+            onContextMenu: this._onContextMenuTab.bind( this, isNewTabButton )
+        } );
 
         // Move into the sizer..
         this.codeSizer.appendChild( code );
@@ -1392,22 +1409,8 @@ class CodeEditor {
             fixed: isNewTabButton, 
             title: code.title, 
             icon: tabIcon, 
-            onSelect: (e, tabname) => {
-
-                if( isNewTabButton )
-                {
-                    this._onNewTab( e );
-                    return;
-                }
-
-                var cursor = cursor ?? this.cursors.children[ 0 ];
-                this.saveCursor( cursor, this.code.cursorState );    
-                this.code = this.loadedTabs[ tabname ];
-                this.restoreCursor( cursor, this.code.cursorState );    
-                this.endSelection();
-                this._changeLanguageFromExtension( LX.getExtension( tabname ) );
-                this._updateDataInfoPanel( "@tab-name", tabname );
-            }
+            onSelect: this._onSelectTab.bind( this, isNewTabButton ),
+            onContextMenu: this._onContextMenuTab.bind( this, isNewTabButton )
         });
 
         // Move into the sizer..
@@ -1768,6 +1771,7 @@ class CodeEditor {
                 this.cursorToPosition( cursor, this.selection.toX );
                 this.cursorToLine( cursor, this.selection.toY );
                 this.processSelection( null, true );
+                this.hideAutoCompleteBox();
                 break;
             case 'c': // copy
                 this._copyContent();
@@ -1777,6 +1781,7 @@ class CodeEditor {
                 this.code.lines.splice( lidx, 0, this.code.lines[ lidx ] );
                 this.lineDown( cursor );
                 this.processLines();
+                this.hideAutoCompleteBox();
                 return;
             case 's': // save
                 e.preventDefault();
@@ -1787,6 +1792,7 @@ class CodeEditor {
                 return;
             case 'x': // cut line
                 this._cutContent();
+                this.hideAutoCompleteBox();
                 return;
             case 'z': // undo
                 if(!this.code.undoSteps.length)
@@ -1809,6 +1815,7 @@ class CodeEditor {
                 this.lineUp();
                 this.processLine( lidx - 1 );
                 this.processLine( lidx );
+                this.hideAutoCompleteBox();
                 return;
             case 'ArrowDown':
                 if(this.code.lines[ lidx + 1 ] == undefined)
@@ -1817,6 +1824,7 @@ class CodeEditor {
                 this.lineDown();
                 this.processLine( lidx );
                 this.processLine( lidx + 1 );
+                this.hideAutoCompleteBox();
                 return;
             }
         }
@@ -1956,11 +1964,15 @@ class CodeEditor {
         let lidx = cursor.line;
         let text_to_cut = "";
 
+        this._addUndoStep( cursor );
+
         if( !this.selection ) {
             text_to_cut = "\n" + this.code.lines[ cursor.line ];
             this.code.lines.splice( lidx, 1 );
             this.processLines();
             this.resetCursorPos( CodeEditor.CURSOR_LEFT );
+            if( this.code.lines[ lidx ] == undefined )
+                this.lineUp();
         }
         else {
             

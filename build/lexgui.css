@@ -751,7 +751,7 @@ body.nocursor * {
   display: grid;
   align-content: center;
 	background-color: var(--global-button-color);
-  border-radius: 8px;
+  border-radius: 6px;
   border: none;
   margin-top: 2px;
   height: 22px !important;
@@ -1270,7 +1270,7 @@ input[type="range"] {
   margin-top: -4px;
   width: 8px;
   height: 8px;
-  border-radius: 8px;
+  border-radius: 6px;
   background: #c9c7de;
   cursor: pointer;
 }
@@ -1279,7 +1279,7 @@ input[type="range"] {
   margin-top: -8px;
   width: 8px;
   height: 8px;
-  border-radius: 8px;
+  border-radius: 6px;
   background: #a19dc9;
   cursor: pointer;
 }
@@ -1738,7 +1738,7 @@ meter::-webkit-meter-even-less-good-value {
   background-color: var(--global-color-secondary);
   margin-top: 10px;
   margin-bottom: 8px;
-  border-radius: 10px;
+  border-radius: 8px;
   padding-left: 4px;
   padding-right: 4px;
 }

@@ -1621,7 +1621,16 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     this.area.root.classList.toggle('folded', !this.folded);
                 }
 
-                if(options.onSelect) options.onSelect(e, tabEl.dataset.name);
+                if(options.onSelect)
+                    options.onSelect(e, tabEl.dataset.name);
+            });
+
+            tabEl.addEventListener("contextmenu", e => {
+                e.preventDefault();
+                e.stopPropagation();
+    
+                if(options.onContextMenu) 
+                    options.onContextMenu( e, tabEl.dataset.name );
             });
 
             tabEl.addEventListener("mouseup", e => {
