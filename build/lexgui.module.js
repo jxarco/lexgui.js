@@ -3564,9 +3564,9 @@ class Panel {
             return wValue.innerText;
         };
         widget.onSetValue = (new_value) => {
-            wValue.innerHTML = "<span>" + 
+            wValue.innerHTML = 
             (options.icon ? "<a class='" + options.icon + "'></a>" : 
-            ( options.img  ? "<img src='" + options.img + "'>" : (new_value || ""))) + "</span>";
+            ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + (new_value || "") + "</span>" ));
         };
 
         let element = widget.domEl;
@@ -3579,9 +3579,9 @@ class Panel {
             wValue.classList.add("selected");
         if(options.buttonClass)
             wValue.classList.add(options.buttonClass);
-        wValue.innerHTML = "<span>" + 
+        wValue.innerHTML = 
             (options.icon ? "<a class='" + options.icon + "'></a>" : 
-            ( options.img  ? "<img src='" + options.img + "'>" : (value || ""))) + "</span>";
+            ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + (value || "") + "</span>" ));
 
         wValue.style.width = "calc( 100% - " + (options.nameWidth ?? LX.DEFAULT_NAME_WIDTH) + ")";
         

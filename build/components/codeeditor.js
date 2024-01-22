@@ -300,7 +300,7 @@ class CodeEditor {
 
         if( !this.disableEdition )
         {
-            this.root.addEventListener( 'keydown', this.processKey.bind( this), true );
+            this.root.addEventListener( 'keydown', this.processKey.bind( this) );
             this.root.addEventListener( 'focus', this.processFocus.bind( this, true ) );
             this.root.addEventListener( 'focusout', this.processFocus.bind( this, false ) );
         }
@@ -444,6 +444,29 @@ class CodeEditor {
             this.tabs.area.attach( box );
 
             this.isAutoCompleteActive = false;
+        }
+
+        // Add search box
+        {
+            var box = document.createElement( 'div' );
+            box.className = "searchbox";
+            
+            var searchPanel = new LX.Panel();
+            box.appendChild( searchPanel.root );
+
+            searchPanel.sameLine( 4 );
+            searchPanel.addText( null, "", null, { placeholder: "Find" } );
+            searchPanel.addButton( null, "up", () => {}, { className: 'micro', icon: "fa fa-arrow-up" } );
+            searchPanel.addButton( null, "down", () => {}, { className: 'micro', icon: "fa fa-arrow-down" } );
+            searchPanel.addButton( null, "x", this.hideSearchBox.bind( this ), { className: 'micro', icon: "fa fa-xmark" } );
+
+            box.querySelector( 'input' ).addEventListener( 'keyup', e => {
+                if( e.key == 'Escape' ) this.hideSearchBox();
+                else if( e.key == 'Enter' ) this.search( e.target.value );
+            } );
+
+            this.searchbox = box;
+            this.tabs.area.attach( box );
         }
 
         // Add code-sizer
@@ -602,6 +625,7 @@ class CodeEditor {
 
         this.action( 'Escape', false, ( ln, cursor, e ) => {
             this.hideAutoCompleteBox();
+            this.hideSearchBox();
         });
 
         this.action( 'Backspace', false, ( ln, cursor, e ) => {
@@ -1785,7 +1809,7 @@ class CodeEditor {
 
     async processKey( e ) {
 
-        if( !this.code ) 
+        if( !this.code || e.srcElement.constructor != HTMLDivElement ) 
             return;
 
         var key = e.key ?? e.detail.key;
@@ -1826,6 +1850,10 @@ class CodeEditor {
                 this.lineDown( cursor );
                 this.processLines();
                 this.hideAutoCompleteBox();
+                return;
+            case 'f': // find/search
+                e.preventDefault();
+                this.showSearchBox();
                 return;
             case 's': // save
                 e.preventDefault();
@@ -3151,15 +3179,15 @@ class CodeEditor {
         suggestions = suggestions.filter( (value, index) => value.length > 2 && suggestions.indexOf(value) === index );
 
         // Order...
-        suggestions = suggestions.sort( (a, b) => a.localeCompare(b) );
+        suggestions = suggestions.sort( ( a, b ) => a.localeCompare( b ) );
 
         for( let s of suggestions )
         {
-            if( !s.toLowerCase().includes(word.toLowerCase()) )
+            if( !s.toLowerCase().includes( word.toLowerCase() ) )
             continue;
 
             var pre = document.createElement( 'pre' );
-            this.autocomplete.appendChild(pre);
+            this.autocomplete.appendChild( pre );
 
             var icon = document.createElement( 'a' );
             
@@ -3170,27 +3198,27 @@ class CodeEditor {
             else
                 icon.className = "fa fa-font";
 
-            pre.appendChild(icon);
+            pre.appendChild( icon );
 
             pre.addEventListener( 'click', () => {
                 this.autoCompleteWord( cursor, s );
             } ); 
 
             // Highlight the written part
-            const index = s.toLowerCase().indexOf(word.toLowerCase());
+            const index = s.toLowerCase().indexOf( word.toLowerCase() );
 
-            var preWord = document.createElement('span');
-            preWord.innerHTML = s.substring(0, index);
-            pre.appendChild(preWord);
+            var preWord = document.createElement( 'span' );
+            preWord.innerHTML = s.substring( 0, index );
+            pre.appendChild( preWord );
 
             var actualWord = document.createElement('span');
-            actualWord.innerHTML = s.substr(index, word.length);
+            actualWord.innerHTML = s.substr( index, word.length );
             actualWord.classList.add( 'word-highlight' );
-            pre.appendChild(actualWord);
+            pre.appendChild( actualWord );
 
             var postWord = document.createElement('span');
-            postWord.innerHTML = s.substring(index + word.length);
-            pre.appendChild(postWord);
+            postWord.innerHTML = s.substring( index + word.length );
+            pre.appendChild( postWord );
         }
 
         if( !this.autocomplete.childElementCount )
@@ -3275,6 +3303,32 @@ class CodeEditor {
         // Remove selected from the current word and add it to the next one
         this.autocomplete.childNodes[ idx ].classList.remove('selected');
         this.autocomplete.childNodes[ idx + offset ].classList.add('selected');
+    }
+
+    showSearchBox( clear ) {
+        
+        this.searchbox.classList.add( 'opened' );
+        this.searchboxActive = true;
+
+        const input = this.searchbox.querySelector( 'input' );
+
+        if( clear )
+        {
+            input.value = "";
+        }
+
+        input.focus();
+    }
+
+    hideSearchBox() {
+
+        this.searchbox.classList.remove( 'opened' );
+        this.searchboxActive = false;
+    }
+
+    search( text ) {
+
+        console.log( text );
     }
 
     _updateDataInfoPanel( signal, value ) {

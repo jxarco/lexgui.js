@@ -2992,6 +2992,29 @@ pre .line-gutter {
   opacity: 0.4;
 }
 
+.lexcodeeditor .searchbox {
+  background-color: var(--global-branch-darker);
+  width: 256px;
+  position: absolute;
+  right: 6px;
+  top: 26px;
+  z-index: 100;
+  border-radius: 4px;
+  border: 1px solid var(--global-button-color);
+  box-shadow: 0 0px 4px #101010;
+  overflow-y: scroll;
+  transform: translateY(-72px);
+  transition: transform 0.2s ease-in;
+}
+
+.lexcodeeditor .searchbox.opened {
+  transform: translateY(0px);
+}
+
+.lexcodeeditor .searchbox .lexpanel span {
+  height: 11px;
+}
+
 .lexcodeeditor .autocomplete {
   background-color: var(--global-branch-darker);
   width: 256px;
