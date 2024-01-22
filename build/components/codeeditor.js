@@ -21,8 +21,8 @@ function swapArrayElements( array, id0, id1 ) {
     [array[id0], array[id1]] = [array[id1], array[id0]];
 };
 
-function sliceChar( str, idx ) {
-    return str.substr(0, idx) + str.substr(idx + 1);
+function sliceChars( str, idx, n = 1 ) {
+    return str.substr(0, idx) + str.substr(idx + n);
 }
 
 function firstNonspaceIndex( str ) {
@@ -595,16 +595,37 @@ class CodeEditor {
                 }
             }
             else {
+
                 var letter = this.getCharAtPos( cursor, -1 );
                 if( letter ) {
-                    this.code.lines[ ln ] = sliceChar( this.code.lines[ ln ], cursor.position - 1 );
-                    this.cursorToLeft( letter );
+
+                    var deleteFromPosition = cursor.position - 1;
+                    var numCharsDeleted = 1;
+                    
+                    // Delete full word
+                    if( e.shiftKey )
+                    {
+                        const [word, from, to] = this.getWordAtPos( cursor, -1 );
+
+                        if( word.length > 1 )
+                        {
+                            deleteFromPosition = from;
+                            numCharsDeleted = word.length;
+                        }
+                    }
+
+                    this.code.lines[ ln ] = sliceChars( this.code.lines[ ln ], deleteFromPosition, numCharsDeleted );
                     this.processLine( ln );
+
+                    this.cursorToPosition( cursor, deleteFromPosition );
+
                     if( this.useAutoComplete )
                         this.showAutoCompleteBox( 'foo', cursor );
                 } 
                 else if( this.code.lines[ ln - 1 ] != undefined ) {
+                    
                     this.lineUp();
+                    e.cancelShift = true;
                     this.actions[ 'End' ].callback( cursor.line, cursor, e );
                     // Move line on top
                     this.code.lines[ ln - 1 ] += this.code.lines[ ln ];
@@ -626,7 +647,7 @@ class CodeEditor {
             {
                 var letter = this.getCharAtPos( cursor );
                 if( letter ) {
-                    this.code.lines[ ln ] = sliceChar( this.code.lines[ ln ], cursor.position );
+                    this.code.lines[ ln ] = sliceChars( this.code.lines[ ln ], cursor.position );
                     this.processLine( ln );
                 } 
                 else if(this.code.lines[ ln + 1 ] != undefined) {
