@@ -3050,102 +3050,64 @@ pre .line-gutter {
   color: #95a0e1;
 }
 
-.cm-str.javascript { color: #ca7d59; } /* string */
-.cm-kwd.javascript { color: #218cce; } /* keyword */
-.cm-com.javascript { color: #5cab5a; } /* comment */
-.cm-typ.javascript { color: #36c0b0; } /* type */
-.cm-std.javascript { color: #cf6dcf; } /* statements & declarations */
-.cm-bln.javascript { color: inherit; } /* builtin */
-.cm-dec.javascript { color: #b1ce9b; } /* decimal */
-.cm-sym.javascript { color: #e7ded2; } /* symbol */
-.cm-mtd.javascript { color: #e0cc68 } /* method */
+/* Common */
+.cm-str { color: #ca7d59; }   /* string */
+.cm-std { color: #cf6dcf; }   /* statements & declarations */
+.cm-kwd { color: #2194ce; }   /* keyword */
+.cm-com { color: #5cab5a; }   /* comment */
 
-.cm-str.cpp { color: #ca7d59; } /* string */
-.cm-kwd.cpp { color: #218cce; } /* keyword */
-.cm-com.cpp { color: #5cab5a; } /* comment */
-.cm-typ.cpp { color: #36c0b0; } /* type */
-.cm-std.cpp { color: #cf6dcf; } /* statements & declarations */
-.cm-bln.cpp { color: #d44141; } /* builtin */
-.cm-dec.cpp { color: #2ddf53; } /* decimal */
-.cm-sym.cpp { color: #e7ded2; } /* symbol */
-.cm-mtd.cpp { color: #7a9ae0 } /* method */
-.cm-ppc.cpp { color: #969696 } /* preprocessor */
+.cm-typ.javascript { color: #36c0b0; }  /* type */
+.cm-dec.javascript { color: #b1ce9b; }  /* decimal */
+.cm-sym.javascript { color: #e7ded2; }  /* symbol */
+.cm-mtd.javascript { color: #e0cc68 }   /* method */
 
-.cm-str.css { color: #ca7d59; } /* string */
-.cm-kwd.css { color: #e8be53; } /* keyword */
-.cm-com.css { color: #5cab5a; } /* comment */
-.cm-typ.css { color: #b7c3ec; } /* type */
-.cm-std.css { color: #cf6dcf; } /* statements & declarations */
-.cm-bln.css { color: #2194ce; } /* builtin */
-.cm-dec.css { color: #b1ce9b; } /* decimal */
-.cm-sym.css { color: #f9d620; } /* symbol */
-.cm-mtd.css { color: #e0cc68; } /* method */
+.cm-typ.cpp { color: #36c0b0; }   /* type */
+.cm-bln.cpp { color: #d44141; }   /* builtin */
+.cm-dec.cpp { color: #2ddf53; }   /* decimal */
+.cm-sym.cpp { color: #e7ded2; }   /* symbol */
+.cm-mtd.cpp { color: #7a9ae0 }    /* method */
+.cm-ppc.cpp { color: #969696 }    /* preprocessor */
 
-.cm-str.json { color: #ca7d59; } /* string */
-.cm-kwd.json { color: inherit; } /* keyword */
-.cm-com.json { color: inherit; } /* comment */
-.cm-typ.json { color: inherit; } /* type */
-.cm-std.json { color: inherit; } /* statements & declarations */
-.cm-bln.json { color: inherit; } /* builtin */
-.cm-dec.json { color: #b1ce9b; } /* decimal */
-.cm-sym.json { color: #cf6dcf; } /* symbol */
-.cm-mtd.json { color: inherit; } /* method */
+.cm-kwd.css { color: #e8be53; }   /* keyword */
+.cm-typ.css { color: #b7c3ec; }   /* type */
+.cm-bln.css { color: #2194ce; }   /* builtin */
+.cm-dec.css { color: #b1ce9b; }   /* decimal */
+.cm-sym.css { color: #f9d620; }   /* symbol */
+.cm-mtd.css { color: #e0cc68; }   /* method */
 
-.cm-str.glsl { color: #ca7d59; } /* string */
-.cm-kwd.glsl { color: #2194ce; } /* keyword */
-.cm-com.glsl { color: #5cab5a; } /* comment */
-.cm-typ.glsl { color: #36c0b0; } /* type */
-.cm-std.glsl { color: #cf6dcf; } /* statements & declarations */
-.cm-bln.glsl { color: #cfc159; } /* builtin */
-.cm-dec.glsl { color: #b1ce9b; } /* decimal */
-.cm-sym.glsl { color: #f9cb20; } /* symbol */
-.cm-mtd.glsl { color: #e0cc68; } /* method */
+.cm-dec.json { color: #b1ce9b; }  /* decimal */
+.cm-sym.json { color: #cf6dcf; }  /* symbol */
 
-.cm-str.wgsl { color: #ca7d59; } /* string */
-.cm-kwd.wgsl { color: #2194ce; } /* keyword */
-.cm-com.wgsl { color: #5cab5a; } /* comment */
-.cm-typ.wgsl { color: #36c0b0; } /* type */
-.cm-std.wgsl { color: #cf6dcf; } /* statements & declarations */
-.cm-bln.wgsl { color: #cfc159; } /* builtin */
-.cm-dec.wgsl { color: #b1ce9b; } /* decimal */
-.cm-sym.wgsl { color: #f9cb20; } /* symbol */
-.cm-mtd.wgsl { color: #e0cc68; } /* method */
+.cm-typ.glsl { color: #36c0b0; }  /* type */
+.cm-bln.glsl { color: #cfc159; }  /* builtin */
+.cm-dec.glsl { color: #b1ce9b; }  /* decimal */
+.cm-sym.glsl { color: #f9cb20; }  /* symbol */
+.cm-mtd.glsl { color: #e0cc68; }  /* method */
 
-.cm-str.rust { color: #ca7d59; } /* string */
-.cm-kwd.rust { color: #218cce; } /* keyword */
-.cm-com.rust { color: #5cab5a; } /* comment */
-.cm-typ.rust { color: #36c0b0; } /* type */
-.cm-std.rust { color: #cf6dcf; } /* statements & declarations */
-.cm-bln.rust { color: inherit; } /* builtin */
-.cm-dec.rust { color: #b1ce9b; } /* decimal */
-.cm-sym.rust { color: #e7ded2; } /* symbol */
-.cm-mtd.rust { color: #e0cc68 } /* method */
+.cm-typ.wgsl { color: #36c0b0; }  /* type */
+.cm-bln.wgsl { color: #cfc159; }  /* builtin */
+.cm-dec.wgsl { color: #b1ce9b; }  /* decimal */
+.cm-sym.wgsl { color: #f9cb20; }  /* symbol */
+.cm-mtd.wgsl { color: #e0cc68; }  /* method */
 
-.cm-str.python { color: #ca7d59; } /* string */
-.cm-kwd.python { color: #218cce; } /* keyword */
-.cm-com.python { color: #5cab5a; } /* comment */
-.cm-typ.python { color: #36c0b0; } /* type */
-.cm-std.python { color: #cf6dcf; } /* statements & declarations */
-.cm-bln.python { color: inherit; } /* builtin */
-.cm-dec.python { color: #b1ce9b; } /* decimal */
-.cm-sym.python { color: #e7ded2; } /* symbol */
-.cm-mtd.python { color: #e0cc68 } /* method */
+.cm-typ.rust { color: #36c0b0; }  /* type */
+.cm-dec.rust { color: #b1ce9b; }  /* decimal */
+.cm-sym.rust { color: #e7ded2; }  /* symbol */
+.cm-mtd.rust { color: #e0cc68 }   /* method */
 
-.cm-str.batch { color: #ca7d59; } /* string */
-.cm-kwd.batch { color: #218cce; } /* keyword */
-.cm-com.batch { color: #5cab5a; } /* comment */
-.cm-typ.batch { color: #36c0b0; } /* type */
-.cm-std.batch { color: #cf6dcf; } /* statements & declarations */
-.cm-bln.batch { color: inherit; } /* builtin */
-.cm-dec.batch { color: #b1ce9b; } /* decimal */
-.cm-sym.batch { color: #dfd85e; } /* symbol */
-.cm-mtd.batch { color: inherit } /* method */
+.cm-typ.python { color: #36c0b0; }  /* type */
+.cm-dec.python { color: #b1ce9b; }  /* decimal */
+.cm-sym.python { color: #e7ded2; }  /* symbol */
+.cm-mtd.python { color: #e0cc68 }   /* method */
 
-.cm-str.html { color: #ca7d59; } /* string */
-.cm-kwd.html { color: #2194ce; } /* keyword */
-.cm-bln.html { color: #b4d7ec; } /* builtin */
-.cm-sym.html { color: #929292; } /* symbol */
+.cm-typ.batch { color: #36c0b0; }   /* type */
+.cm-dec.batch { color: #b1ce9b; }   /* decimal */
+.cm-sym.batch { color: #dfd85e; }   /* symbol */
 
+.cm-bln.html { color: #a1d2f0; }    /* builtin */
+.cm-sym.html { color: #929292; }    /* symbol */
+
+.cm-bln.markdown { color: #a1d2f0; }  /* builtin */
 
 /* Node Graph */
 

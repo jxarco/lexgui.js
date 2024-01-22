@@ -29,6 +29,25 @@ function firstNonspaceIndex( str ) {
     return str.search(/\S|$/);
 }
 
+function indexOfFrom( str, reg, from, reverse ) {
+
+    from = from ?? 0;
+
+    if( reverse )
+    {
+        str = str.substr( 0, from );
+        var k = from - 1;
+        while( str[ k ] && str[ k ] != reg )
+            k--;
+        return str[ k ] ? k : -1;
+    }
+    else
+    {
+        str = str.substr( from );
+        return from + str.indexOf( reg );
+    }
+}
+
 function deleteElement( el ) {
     if( el ) el.remove();
 }
@@ -458,7 +477,8 @@ class CodeEditor {
         this.tabSpaces = 4;
         this.maxUndoSteps = 16;
         this.lineHeight = 20;
-        this.defaultSingleLineCommentToken = "//";
+        this.defaultSingleLineCommentToken = '//';
+        this.defaultBlockCommentTokens = [ '/*', '*/' ];
         this.charWidth = 7; //this._measureChar();
         this._lastTime = null;
 
@@ -479,18 +499,19 @@ class CodeEditor {
         // setInterval( this.scanWordSuggestions.bind( this ), 2000 );
 
         this.languages = {
-            'Plain Text': { ext: 'txt' },
+            'Plain Text': { ext: 'txt', blockComments: false, singleLineComments: false },
             'JavaScript': { ext: 'js' },
             'C++': { ext: 'cpp' },
             'CSS': { ext: 'css' },
             'GLSL': { ext: 'glsl' },
             'WGSL': { ext: 'wgsl' },
-            'JSON': { ext: 'json' },
-            'XML': { ext: 'xml' },
+            'JSON': { ext: 'json', blockComments: false, singleLineComments: false },
+            'XML': { ext: 'xml', tags: true },
             'Rust': { ext: 'rs' },
             'Python': { ext: 'py', singleLineCommentToken: '#' },
-            'HTML': { ext: 'html' },
-            'Batch': { ext: 'bat', blockComments: false, singleLineCommentToken: '::' }
+            'HTML': { ext: 'html', tags: true, singleLineComments: false, blockCommentsTokens: [ '<!--', '-->' ] },
+            'Batch': { ext: 'bat', blockComments: false, singleLineCommentToken: '::' },
+            'Markdown': { ext: 'md', blockComments: false, singleLineCommentToken: '::', tags: true }
         };
 
         this.specialKeys = [
@@ -516,7 +537,8 @@ class CodeEditor {
             'Python': ['False', 'def', 'None', 'True', 'in', 'is', 'and', 'lambda', 'nonlocal', 'not', 'or'],
             'Batch': ['set', 'SET', 'echo', 'ECHO', 'off', 'OFF', 'del', 'DEL', 'defined', 'DEFINED', 'setlocal', 'SETLOCAL', 'enabledelayedexpansion', 'ENABLEDELAYEDEXPANSION', 'driverquery', 
                       'DRIVERQUERY', 'print', 'PRINT'],
-            'HTML': ['html', 'meta', 'title', 'link', 'script', 'body', 'DOCTYPE', 'head'],
+            'HTML': ['html', 'meta', 'title', 'link', 'script', 'body', 'DOCTYPE', 'head', 'br', 'i', 'a', 'li', 'img', 'tr', 'td', 'h1', 'h2', 'h3', 'h4', 'h5'],
+            'Markdown': ['br', 'i', 'a', 'li', 'img', 'table', 'title', 'tr', 'td', 'h1', 'h2', 'h3', 'h4', 'h5'],
         };
         this.utils = { // These ones don't have hightlight, used as suggestions to autocomplete only...
             'JavaScript': ['querySelector', 'body', 'addEventListener', 'removeEventListener', 'remove', 'sort', 'keys', 'filter', 'isNaN', 'parseFloat', 'parseInt', 'EPSILON', 'isFinite',
@@ -541,7 +563,8 @@ class CodeEditor {
             'JavaScript': ['document', 'console', 'window', 'navigator', 'performance'],
             'CSS': ['*', '!important'],
             'C++': ['vector', 'list', 'map'],
-            'HTML': ['type', 'xmlns', 'PUBLIC', 'http-equiv', 'src', 'lang', 'href', 'rel', 'content', 'xml'], // attributes
+            'HTML': ['type', 'xmlns', 'PUBLIC', 'http-equiv', 'src', 'style', 'lang', 'href', 'rel', 'content', 'xml', 'alt'], // attributes
+            'Markdown': ['type', 'src', 'style', 'lang', 'href', 'rel', 'content', 'valign', 'alt'], // attributes
         };
         this.statementsAndDeclarations = {
             'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'from', 'throw', 'async', 'try', 'catch', 'await'],
@@ -623,7 +646,7 @@ class CodeEditor {
                         this.showAutoCompleteBox( 'foo', cursor );
                 } 
                 else if( this.code.lines[ ln - 1 ] != undefined ) {
-                    
+
                     this.lineUp();
                     e.cancelShift = true;
                     this.actions[ 'End' ].callback( cursor.line, cursor, e );
@@ -2101,6 +2124,7 @@ class CodeEditor {
 
     processLine( linenum, force ) {
 
+        const lang = this.languages[ this.highlight ];
         const local_line_num =  this.toLocalLine( linenum );
         const gutter_line = "<span class='line-gutter'>" + (linenum + 1) + "</span>";
 
@@ -2117,6 +2141,7 @@ class CodeEditor {
         // multi-line strings not supported by now
         delete this._buildingString; 
         delete this._pendingString;
+        delete this._markdownHeader;
         
         let linestring = this.code.lines[ linenum ];
 
@@ -2159,16 +2184,111 @@ class CodeEditor {
             
             const token = tokensToEvaluate[ i ];
 
-            if( this.languages[ this.highlight ].blockComments ?? true )
+            if( lang.blockComments ?? true )
             {
-                if( token.substr( 0, 2 ) == '/*' )
+                const blockCommentsToken = ( lang.blockCommentsTokens ?? this.defaultBlockCommentTokens )[ 0 ];
+                if( token.substr( 0, blockCommentsToken.length ) == blockCommentsToken )
                     this._buildingBlockComment = true;
             }
 
-            line_inner_html += this._evaluateToken( token, prev, next, (i == tokensToEvaluate.length - 1) );
+            line_inner_html += this._evaluateToken( {
+                token: token,
+                prev: prev,
+                prevWithSpaces: tokensToEvaluate[ i - 1 ],
+                next: next,
+                nextWithSpaces: tokensToEvaluate[ i + 1 ],
+                tokenIndex: i,
+                isFirstToken: (i == 0),
+                isLastToken: (i == tokensToEvaluate.length - 1)
+            } );
         }
 
         return UPDATE_LINE( line_inner_html );
+    }
+
+    _lineHasComment( linestring ) {
+
+        const lang = this.languages[ this.highlight ];
+
+        if( !(lang.singleLineComments ?? true) )
+            return;
+
+        const singleLineCommentToken = lang.singleLineCommentToken ?? this.defaultSingleLineCommentToken;
+        const idx = linestring.indexOf( singleLineCommentToken );
+
+        if( idx > -1 )
+        {
+            const stringKeys = Object.values( this.stringKeys );
+            // Count times we started a string BEFORE the comment
+            var err = false;
+            err |= stringKeys.some( function(v) { 
+                var re = new RegExp( v, "g" ); 
+                var matches = (linestring.substring( 0, idx ).match( re ) || []);
+                return (matches.length % 2) !== 0; 
+            } );
+            err |= stringKeys.some( function(v) { 
+                var re = new RegExp( v, "g" ); 
+                var matches = (linestring.substring( idx ).match( re ) || []);
+                return (matches.length % 2) !== 0; 
+            } );
+            return err ? undefined : idx;
+        }
+    }
+
+    _getTokensFromLine( linestring, skipNonWords ) {
+
+        this._currentLineString = linestring;
+
+        // Check if line comment
+        const ogLine = linestring;
+        const hasCommentIdx = this._lineHasComment( linestring );
+
+        if( hasCommentIdx != undefined )
+        {
+            linestring = ogLine.substring( 0, hasCommentIdx );
+        }
+
+        let tokensToEvaluate = []; // store in a temp array so we know prev and next tokens...
+        let charCounterList = [];
+        let charCounter = 0;
+
+        const pushToken = function( t ) {
+            if( (skipNonWords && ( t.includes('"') || t.length < 3 )) )
+                return;
+            tokensToEvaluate.push( t );
+            charCounterList.push( charCounter );
+            // Update positions
+            charCounter += t.length;
+        };
+
+        let iter = linestring.matchAll(/(<!--|-->|\*\/|\/\*|::|[\[\](){}<>.,;:*"'%@!/= ])/g);
+        let subtokens = iter.next();
+        if( subtokens.value )
+        {
+            let idx = 0;
+            while( subtokens.value != undefined )
+            {
+                const _pt = linestring.substring(idx, subtokens.value.index);
+                if( _pt.length ) pushToken( _pt );
+                pushToken( subtokens.value[ 0 ] );
+                idx = subtokens.value.index + subtokens.value[ 0 ].length;
+                subtokens = iter.next();
+                if(!subtokens.value) {
+                    const _at = linestring.substring(idx);
+                    if( _at.length ) pushToken( _at );
+                }
+            }
+        }
+        else pushToken( linestring );
+
+        if( hasCommentIdx != undefined )
+        {
+            pushToken( ogLine.substring( hasCommentIdx ) );
+        }
+
+        this._currentTokenPositions = charCounterList;
+
+        return this._processTokens( tokensToEvaluate );
     }
 
     _processTokens( tokens, offset = 0 ) {
@@ -2194,108 +2314,68 @@ class CodeEditor {
         return tokens;
     }
 
-    _lineHasComment( linestring ) {
-
-        const singleLineCommentToken = this.languages[ this.highlight ].singleLineCommentToken ?? this.defaultSingleLineCommentToken;
-        const idx = linestring.indexOf( singleLineCommentToken );
-
-        if( idx > -1 )
-        {
-            const stringKeys = Object.values( this.stringKeys );
-            // Count times we started a string BEFORE the comment
-            var err = false;
-            err |= stringKeys.some( function(v) { 
-                var re = new RegExp( v, "g" ); 
-                var matches = (linestring.substring( 0, idx ).match( re ) || []);
-                return (matches.length % 2) !== 0; 
-            } );
-            err |= stringKeys.some( function(v) { 
-                var re = new RegExp( v, "g" ); 
-                var matches = (linestring.substring( idx ).match( re ) || []);
-                return (matches.length % 2) !== 0; 
-            } );
-            return err ? undefined : idx;
-        }
-    }
-
-    _getTokensFromLine( linestring, skipNonWords ) {
-
-        // Check if line comment
-        const ogLine = linestring;
-        const hasCommentIdx = this._lineHasComment( linestring );
-
-        if( hasCommentIdx != undefined )
-        {
-            linestring = ogLine.substring( 0, hasCommentIdx );
-        }
-
-        let tokensToEvaluate = []; // store in a temp array so we know prev and next tokens...
-
-        const pushToken = function( t ) {
-            if( (skipNonWords && ( t.includes('"') || t.length < 3 )) )
-                return;
-            tokensToEvaluate.push( t );
-        };
-
-        let iter = linestring.matchAll(/(\*\/|\/\*|::|[\[\](){}<>.,;:*"'%@!/= ])/g);
-        let subtokens = iter.next();
-        if( subtokens.value )
-        {
-            let idx = 0;
-            while( subtokens.value != undefined )
-            {
-                const _pt = linestring.substring(idx, subtokens.value.index);
-                if( _pt.length ) pushToken( _pt );
-                pushToken( subtokens.value[ 0 ] );
-                idx = subtokens.value.index + subtokens.value[ 0 ].length;
-                subtokens = iter.next();
-                if(!subtokens.value) {
-                    const _at = linestring.substring(idx);
-                    if( _at.length ) pushToken( _at );
-                }
-            }
-        }
-        else tokensToEvaluate.push( linestring );
-
-        if( hasCommentIdx != undefined )
-        {
-            pushToken( ogLine.substring( hasCommentIdx ) );
-        }
-
-        return this._processTokens( tokensToEvaluate );
-    }
-
     _mustHightlightWord( token, kindArray ) {
 
         return kindArray[this.highlight] && kindArray[this.highlight][token] != undefined;
     }
 
-    _evaluateToken( token, prev, next, isLastToken ) {
+    _evaluateToken( ctxData ) {
 
-        const highlight = this.highlight.replace(/\s/g, '').replaceAll("+", "p").toLowerCase();
-        const customStringKeys = Object.assign( {}, this.stringKeys );
+        let token        = ctxData.token,
+            prev         = ctxData.prev,
+            next         = ctxData.next,
+            tokenIndex   = ctxData.tokenIndex,
+            isFirstToken = ctxData.isFirstToken,
+            isLastToken  = ctxData.isLastToken;
 
-        if( highlight == 'cpp' && prev && prev.includes('#') ) // preprocessor code..
+        const lang = this.languages[ this.highlight ],
+              highlight = this.highlight.replace( /\s/g, '' ).replaceAll( "+", "p" ).toLowerCase(),
+              customStringKeys = Object.assign( {}, this.stringKeys );
+
+        var usePreviousTokenToCheckString = false;
+
+        if( highlight == 'cpp' && prev && prev.includes( '#' ) ) // preprocessor code..
         {
             customStringKeys['@<'] = '>';
+        } 
+        else if( highlight == 'markdown' && ( ctxData.prevWithSpaces == '[' || ctxData.nextWithSpaces == ']' ) )
+        {
+            // console.warn(prev, token, next)
+            usePreviousTokenToCheckString = true;
+            customStringKeys['@['] = ']';
         }
 
         // Manage strings
         this._stringEnded = false;
-        if( this._buildingString != undefined )
+
+        if( usePreviousTokenToCheckString || ( !this._buildingBlockComment && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) ) )
         {
-            const idx = Object.values(customStringKeys).indexOf( token );
-            this._stringEnded = (idx > -1) && (idx == Object.values(customStringKeys).indexOf( customStringKeys[ '@' + this._buildingString ] ));
-        } 
-        else if( customStringKeys[ '@' + token ] )
-        {   
-            // Start new string
-            this._buildingString = token;
+            const checkIfStringEnded = t => {
+                const idx = Object.values( customStringKeys ).indexOf( t );
+                this._stringEnded = (idx > -1) && (idx == Object.values(customStringKeys).indexOf( customStringKeys[ '@' + this._buildingString ] ));
+            };
+
+            if( this._buildingString != undefined )
+            {
+                checkIfStringEnded( usePreviousTokenToCheckString ? ctxData.nextWithSpaces : token );
+            } 
+            else if( customStringKeys[ '@' + ( usePreviousTokenToCheckString ? ctxData.prevWithSpaces : token ) ] )
+            {   
+                // Start new string
+                this._buildingString = ( usePreviousTokenToCheckString ? ctxData.prevWithSpaces : token );
+
+                // Check if string ended in same token using next...
+                if( usePreviousTokenToCheckString ) 
+                {
+                    checkIfStringEnded( ctxData.nextWithSpaces );
+                }
+            }
         }
+        
+        const usesBlockComments = lang.blockComments ?? true;
+        const blockCommentsTokens = lang.blockCommentsTokens ?? this.defaultBlockCommentTokens;
 
-        const usesBlockComments = this.languages[ this.highlight ].blockComments ?? true;
-
-        if(token == ' ')
+        if( !usePreviousTokenToCheckString && token == ' ' )
         {
             if( this._buildingString != undefined )
             {
@@ -2306,7 +2386,7 @@ class CodeEditor {
         }
         else
         {
-            const singleLineCommentToken = this.languages[ this.highlight ].singleLineCommentToken ?? this.defaultSingleLineCommentToken;
+            const singleLineCommentToken = lang.singleLineCommentToken ?? this.defaultSingleLineCommentToken;
             
             let token_classname = "";
             let discardToken = false;
@@ -2317,10 +2397,10 @@ class CodeEditor {
             else if( this._buildingString != undefined )
                 discardToken = this._appendStringToken( token );
             
-            else if( this._mustHightlightWord( token, this.keywords ) )
+            else if( this._mustHightlightWord( token, this.keywords ) && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) )
                 token_classname = "cm-kwd";
 
-            else if( this._mustHightlightWord( token, this.builtin ) )
+            else if( this._mustHightlightWord( token, this.builtin ) && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) )
                 token_classname = "cm-bln";
 
             else if( this._mustHightlightWord( token, this.statementsAndDeclarations ) )
@@ -2358,12 +2438,19 @@ class CodeEditor {
 
             else if ( highlight == 'css' && prev == undefined && next == ':' ) // CSS attribute
                 token_classname = "cm-typ";
+            
+            else if ( this._markdownHeader || ( highlight == 'markdown' && isFirstToken && token.replaceAll('#', '').length != token.length ) ) // Header
+            {
+                token_classname = "cm-kwd";
+                this._markdownHeader = true;
+            }
 
             else if ( token[ 0 ] != '@' && token[ 0 ] != ',' && next == '(' )
                 token_classname = "cm-mtd";
 
 
-            if( usesBlockComments && this._buildingBlockComment && token.substr( 0, 2 ) == '*/' )
+            if( usesBlockComments && this._buildingBlockComment 
+                && token.substr( 0, blockCommentsTokens[ 1 ].length ) == blockCommentsTokens[ 1 ] )
             {
                 delete this._buildingBlockComment;
             }
@@ -2408,6 +2495,19 @@ class CodeEditor {
         const chars = this._pendingString;
         delete this._pendingString;
         return chars;
+    }
+
+    _enclosedByTokens( token, tokenIndex, tagStart, tagEnd ) {
+
+        const tokenStartIndex = this._currentTokenPositions[ tokenIndex ];
+        const tagStartIndex = indexOfFrom(this._currentLineString, tagStart, tokenStartIndex, true );
+        if( tagStartIndex < 0 ) // Not found..
+            return;
+        const tagEndIndex = indexOfFrom(this._currentLineString, tagEnd, tokenStartIndex );
+        if( tagEndIndex < 0 ) // Not found..
+            return;
+
+        return ( tagStartIndex < tokenStartIndex ) && ( tagEndIndex >= ( tokenStartIndex + token.length ) );
     }
 
     _isCSSClass( token, prev, next ) {
@@ -3211,9 +3311,11 @@ class CodeEditor {
 
     _clearTmpVariables() {
 
+        delete this._currentLineString;
         delete this._buildingString; 
         delete this._pendingString;
         delete this._buildingBlockComment;
+        delete this._markdownHeader;
     }
 }
 

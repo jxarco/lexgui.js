@@ -1,5 +1,11 @@
 # lexgui.js changelog
 
+## 0.1.21
+
+"Shift+Backspace" deletes word at current position.
+Added "Markdown" syntax highlighting. 
+Improved hightlighting of tag languages (HTML, Markdown, XML).
+
 ## 0.1.20
 
 Active line is now hightlighted.
