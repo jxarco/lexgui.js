@@ -2971,7 +2971,7 @@ pre .line-gutter {
   background-color: #bbbbbb8c !important;
 }
 
-.lexcodeeditor .lexcodeselection {
+.lexcodeeditor .lexcodeselection, .lexcodeeditor .lexcodesearchresult {
   -webkit-text-size-adjust: 100%;
   font-family: monospace;
   color: #AAA !important;
@@ -2990,6 +2990,11 @@ pre .line-gutter {
   height: 20px;
   background-color: var(--global-selected);
   opacity: 0.4;
+}
+
+.lexcodeeditor .lexcodesearchresult {
+  background-color: #f5f115;
+  opacity: 0.5;
 }
 
 .lexcodeeditor .searchbox {
@@ -3043,6 +3048,7 @@ pre .line-gutter {
   pointer-events: unset;
   cursor: default;
   height: 22px;
+  padding-left: 6px;
 }
 
 .lexcodeeditor .autocomplete pre a {

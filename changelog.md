@@ -2,6 +2,7 @@
 
 ## 0.1.21
 
+Added "Ctrl+F" to find text in code tabs.
 "Shift+Backspace" deletes word at current position.
 Added "Markdown" syntax highlighting. 
 Improved hightlighting of tag languages (HTML, Markdown, XML).

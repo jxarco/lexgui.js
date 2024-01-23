@@ -63,10 +63,11 @@ function doAsync( fn, ms ) {
 
 class CodeSelection {
 
-    constructor( editor, ix, iy ) {
+    constructor( editor, ix, iy, className = "lexcodeselection" ) {
 
         this.editor = editor;
         this.chars  = 0;
+        this.className = className;
 
         this.fromX  = ix;
         this.toX    = ix;
@@ -107,7 +108,7 @@ class CodeSelection {
         this.fromY = this.toY = y;
 
         var domEl = document.createElement( 'div' );
-        domEl.className = "lexcodeselection";
+        domEl.className = this.className;
         
         domEl._top = y * this.editor.lineHeight;
         domEl.style.top = domEl._top + "px";
@@ -456,13 +457,13 @@ class CodeEditor {
 
             searchPanel.sameLine( 4 );
             searchPanel.addText( null, "", null, { placeholder: "Find" } );
-            searchPanel.addButton( null, "up", () => {}, { className: 'micro', icon: "fa fa-arrow-up" } );
-            searchPanel.addButton( null, "down", () => {}, { className: 'micro', icon: "fa fa-arrow-down" } );
+            searchPanel.addButton( null, "up", () => this.search( null, true ), { className: 'micro', icon: "fa fa-arrow-up" } );
+            searchPanel.addButton( null, "down", () => this.search(), { className: 'micro', icon: "fa fa-arrow-down" } );
             searchPanel.addButton( null, "x", this.hideSearchBox.bind( this ), { className: 'micro', icon: "fa fa-xmark" } );
 
             box.querySelector( 'input' ).addEventListener( 'keyup', e => {
                 if( e.key == 'Escape' ) this.hideSearchBox();
-                else if( e.key == 'Enter' ) this.search( e.target.value );
+                else if( e.key == 'Enter' ) this.search( e.target.value, !!e.shiftKey );
             } );
 
             this.searchbox = box;
@@ -3322,13 +3323,94 @@ class CodeEditor {
 
     hideSearchBox() {
 
-        this.searchbox.classList.remove( 'opened' );
-        this.searchboxActive = false;
+        if( this.searchboxActive )
+        {
+            this.searchbox.classList.remove( 'opened' );
+            this.searchboxActive = false;
+        }
+
+        else if( this._lastResult )
+        {
+            this._lastResult.dom.remove();
+            delete this._lastResult;
+        }
     }
 
-    search( text ) {
+    search( text, reverse ) {
 
-        console.log( text );
+        text = text ?? this._lastTextFound;
+
+        if( !text )
+            return;
+
+        let cursorData = new LX.vec2( this.position, this.line );
+        let found = null;
+        let idx = -1;
+
+        if( this._lastResult )
+        {
+            this._lastResult.dom.remove();
+            cursorData = this._lastResult.pos;
+            delete this._lastResult;
+        }
+
+        const getIndex = line => {
+            return this.code.lines[ line ].substr( line == cursorData.y ? cursorData.x : 0 ).indexOf( text );
+        };
+
+        if( reverse )
+        {
+            for( var j = cursorData.y; j >= 0; --j )
+            {
+                idx = getIndex( j );
+                if( idx > -1 )
+                {
+                    found = j;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            for( var j = cursorData.y; j < this.code.lines.length; ++j )
+            {
+                idx = getIndex( j );
+                if( idx > -1 )
+                {
+                    found = j;
+                    break;
+                }
+            }
+        }
+
+        if( found == null)
+        {
+            alert("No results!")
+            return;
+        }
+        
+        // Text found..
+
+        this._lastTextFound = text;
+
+        // console.warn("FOUND!! --", text, "-- at", "[" + idx + ", " + j + "]")
+
+        this.codeScroller.scrollTo( 
+            Math.max( idx * this.charWidth - this.codeScroller.clientWidth ), 
+            Math.max( found - 10 ) * this.lineHeight 
+        );
+
+        // Show elements
+        this.selections.classList.add( 'show' );
+
+        // Create new selection instance
+        this.selection = new CodeSelection( this, 0, 0, "lexcodesearchresult" );
+        this.selection.selectInline( idx, found, this.measureString( text ) );
+        this._lastResult = {
+            'dom': this.selections.lastChild,
+            'pos': new LX.vec2( idx + text.length, found )
+        };
+
     }
 
     _updateDataInfoPanel( signal, value ) {
