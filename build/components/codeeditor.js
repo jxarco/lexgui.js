@@ -1018,7 +1018,7 @@ class CodeEditor {
         if( options.allow_add_scripts ?? true )
             this.addTab("+", false, "New File");
 
-        this.addTab(options.name || "untitled", true, options.title);
+        this.addTab( options.name || "untitled", true, options.title );
 
         // Create inspector panel
         let panel = this._createPanelInfo();
@@ -1036,14 +1036,14 @@ class CodeEditor {
         );
         
         // Add to the document.fonts (FontFaceSet)
-        document.fonts.add(commitMono);
+        document.fonts.add( commitMono );
 
         // Load the font
         commitMono.load();
 
         // Wait until the fonts are all loaded
         document.fonts.ready.then(() => {
-            console.log("commitMono loaded")
+            // console.log("commitMono loaded")
         });
     }
 
@@ -3344,8 +3344,8 @@ class CodeEditor {
             return;
 
         let cursorData = new LX.vec2( this.position, this.line );
-        let found = null;
-        let idx = -1;
+        let line = null;
+        let char = -1;
 
         if( this._lastResult )
         {
@@ -3354,18 +3354,18 @@ class CodeEditor {
             delete this._lastResult;
         }
 
-        const getIndex = line => {
-            return this.code.lines[ line ].substr( line == cursorData.y ? cursorData.x : 0 ).indexOf( text );
+        const getIndex = l => {
+            return this.code.lines[ l ].substr( l == cursorData.y ? cursorData.x : 0 ).indexOf( text );
         };
 
         if( reverse )
         {
             for( var j = cursorData.y; j >= 0; --j )
             {
-                idx = getIndex( j );
-                if( idx > -1 )
+                char = getIndex( j );
+                if( char > -1 )
                 {
-                    found = j;
+                    line = j;
                     break;
                 }
             }
@@ -3374,30 +3374,36 @@ class CodeEditor {
         {
             for( var j = cursorData.y; j < this.code.lines.length; ++j )
             {
-                idx = getIndex( j );
-                if( idx > -1 )
+                char = getIndex( j );
+                if( char > -1 )
                 {
-                    found = j;
+                    line = j;
                     break;
                 }
             }
         }
 
-        if( found == null)
+        if( line == null)
         {
             alert("No results!")
             return;
         }
         
+        /*
+            Position idx is computed from last pos, which could be in same line,
+            so we search in the substring (first_ocurrence, end). That's why we 
+            have to add the length of the substring (0, first_ocurrence)
+        */
+
+        char += ( line == cursorData.y ? cursorData.x : 0 );
+
         // Text found..
 
         this._lastTextFound = text;
 
-        // console.warn("FOUND!! --", text, "-- at", "[" + idx + ", " + j + "]")
-
         this.codeScroller.scrollTo( 
-            Math.max( idx * this.charWidth - this.codeScroller.clientWidth ), 
-            Math.max( found - 10 ) * this.lineHeight 
+            Math.max( char * this.charWidth - this.codeScroller.clientWidth ), 
+            Math.max( line - 10 ) * this.lineHeight 
         );
 
         // Show elements
@@ -3405,10 +3411,10 @@ class CodeEditor {
 
         // Create new selection instance
         this.selection = new CodeSelection( this, 0, 0, "lexcodesearchresult" );
-        this.selection.selectInline( idx, found, this.measureString( text ) );
+        this.selection.selectInline( char, line, this.measureString( text ) );
         this._lastResult = {
             'dom': this.selections.lastChild,
-            'pos': new LX.vec2( idx + text.length, found )
+            'pos': new LX.vec2( char + text.length, line )
         };
 
     }
