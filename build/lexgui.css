@@ -19,6 +19,7 @@
   --global-blur-background: #28292ba9;
   --transition-time: 1000;
   --code-editor-font-size: 14px;
+  --code-editor-row-height: 20px;
 } 
 
 /* Some global colors */
@@ -2853,7 +2854,7 @@ ul.lexassetscontent {
   position: relative;
   overflow: visible;
   -webkit-tap-highlight-color: transparent;
-  height: 20px;
+  height: var(--code-editor-row-height);
   pointer-events: none;
 }
 
@@ -2872,16 +2873,15 @@ ul.lexassetscontent {
   -webkit-tap-highlight-color: transparent;
   box-sizing: border-box;
   display: inline-block;
-  height: 16px;
 }
 
 pre .line-gutter {
   color: #8a8b97;
   width: 48px;
-  height: 20px;
-  font-size: 14px;
+  height: var(--code-editor-row-height);
+  font-size: var(--code-editor-font-size);
   font-weight: 400;
-  line-height: 20px;
+  line-height: var(--code-editor-row-height);
   text-align: center;
   -webkit-user-select: none; /* Safari 3.1+ */
   -moz-user-select: none; /* Firefox 2+ */
@@ -2920,12 +2920,12 @@ pre .line-gutter {
   padding: 0;
   border-right: none;
   width: 0;
+  height: var(--code-editor-row-height);
   position: absolute;
   border-left: 3px solid #fff !important;
   z-index: 0 !important;
   left: 0px;
   top: 0px;
-  height: 20px;
 }
 
 .lexcodescrollbar {
@@ -2988,7 +2988,7 @@ pre .line-gutter {
   left: 0px;
   top: 0px;
   width: 100px;
-  height: 20px;
+  height: var(--code-editor-row-height);
   background-color: var(--global-selected);
   opacity: 0.4;
 }

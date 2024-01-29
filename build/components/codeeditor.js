@@ -201,7 +201,7 @@ class CodeEditor {
     static WORD_TYPE_METHOD = 0;
     static WORD_TYPE_CLASS  = 1;
 
-    static CODE_MAX_FONT_SIZE = 17;
+    static CODE_MAX_FONT_SIZE = 20;
     static CODE_MIN_FONT_SIZE = 11;
 
     /**
@@ -1588,6 +1588,7 @@ class CodeEditor {
             this.lastMouseDown = LX.getTime();
             this.state.selectingText = true;
             this.endSelection();
+            this.processClick( e );
         }
         
         else if( e.type == 'mouseup' )
@@ -1651,9 +1652,8 @@ class CodeEditor {
 
     _onMouseUp( e ) {
 
-        if( (LX.getTime() - this.lastMouseDown) < 300 ) {
+        if( (LX.getTime() - this.lastMouseDown) < 120 ) {
             this.state.selectingText = false;
-            this.processClick( e );
             this.endSelection();
         }
 
@@ -2974,8 +2974,6 @@ class CodeEditor {
 
             this.resizeScrollBars();
 
-            // console.warn("Resize editor viewport");
-
         }, 10 );
     }
 
@@ -3504,22 +3502,42 @@ class CodeEditor {
     }
 
     _increaseFontSize() {
+
+        // Change font size
+
         var r = document.querySelector( ':root' );
         var s = getComputedStyle( r );
         var pixels = parseInt( s.getPropertyValue( "--code-editor-font-size" ) );
         pixels = LX.UTILS.clamp( pixels + 1, CodeEditor.CODE_MIN_FONT_SIZE, CodeEditor.CODE_MAX_FONT_SIZE );
         r.style.setProperty( "--code-editor-font-size", pixels + "px" );
         this.charWidth = this._measureChar( "a", true );
+
+        // Change row size
+
+        var row_pixels = pixels + 6;
+        r.style.setProperty( "--code-editor-row-height", row_pixels + "px" );
+        this.lineHeight = row_pixels;
+
         this.processLines(); // ... it's necessary?
     }
 
     _decreaseFontSize() {
+
+        // Change font size
+
         var r = document.querySelector( ':root' );
         var s = getComputedStyle( r );
         var pixels = parseInt( s.getPropertyValue( "--code-editor-font-size" ) );
         pixels = LX.UTILS.clamp( pixels - 1, CodeEditor.CODE_MIN_FONT_SIZE, CodeEditor.CODE_MAX_FONT_SIZE );
         r.style.setProperty( "--code-editor-font-size", pixels + "px" );
         this.charWidth = this._measureChar( "a", true );
+
+        // Change row size
+
+        var row_pixels = pixels + 6;
+        r.style.setProperty( "--code-editor-row-height", row_pixels + "px" );
+        this.lineHeight = row_pixels;
+
         this.processLines(); // ... it's necessary?
     }
 
