@@ -481,6 +481,28 @@ class CodeEditor {
             this.tabs.area.attach( box );
         }
 
+        // Add search LINE box
+        {
+            var box = document.createElement( 'div' );
+            box.className = "searchbox";
+            
+            var searchPanel = new LX.Panel();
+            box.appendChild( searchPanel.root );
+
+            searchPanel.addText( null, "", ( value, event ) => {
+                input.value = ":" + value.replaceAll( ':', '' );
+                this.goToLine( input.value.slice( 1 ) );
+            }, { placeholder: "Go to line", trigger: "input" } );
+
+            let input = box.querySelector( 'input' );
+            input.addEventListener( 'keyup', e => {
+                if( e.key == 'Escape' ) this.hideSearchLineBox();
+            } );
+
+            this.searchlinebox = box;
+            this.tabs.area.attach( box );
+        }
+
         // Add code-sizer
         {
             this.codeSizer = document.createElement( 'div' );
@@ -1880,6 +1902,7 @@ class CodeEditor {
                 return;
             case 'd': // duplicate line
                 e.preventDefault();
+                this.endSelection();
                 this.code.lines.splice( lidx, 0, this.code.lines[ lidx ] );
                 this.lineDown( cursor );
                 this.processLines();
@@ -1888,6 +1911,10 @@ class CodeEditor {
             case 'f': // find/search
                 e.preventDefault();
                 this.showSearchBox();
+                return;
+            case 'g': // find line
+                e.preventDefault();
+                this.showSearchLineBox();
                 return;
             case 's': // save
                 e.preventDefault();
@@ -3467,6 +3494,33 @@ class CodeEditor {
             'pos': new LX.vec2( char + text.length, line )
         };
 
+    }
+
+    showSearchLineBox() {
+        
+        this.searchlinebox.classList.add( 'opened' );
+        this.searchlineboxActive = true;
+
+        const input = this.searchlinebox.querySelector( 'input' );
+        input.value = ":";
+        input.focus();
+    }
+
+    hideSearchLineBox() {
+
+        if( this.searchlineboxActive )
+        {
+            this.searchlinebox.classList.remove( 'opened' );
+            this.searchlineboxActive = false;
+        }
+    }
+
+    goToLine( line ) {
+
+        if( !this.isNumber( line ) )
+            return;
+
+        this.codeScroller.scrollTo( 0, Math.max( line - 15 ) * this.lineHeight );
     }
 
     _updateDataInfoPanel( signal, value ) {
