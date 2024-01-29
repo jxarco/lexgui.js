@@ -201,6 +201,9 @@ class CodeEditor {
     static WORD_TYPE_METHOD = 0;
     static WORD_TYPE_CLASS  = 1;
 
+    static CODE_MAX_FONT_SIZE = 17;
+    static CODE_MIN_FONT_SIZE = 11;
+
     /**
      * @param {*} options
      * skip_info, allow_add_scripts, name
@@ -413,8 +416,16 @@ class CodeEditor {
             });
 
             this.codeScroller.addEventListener( 'wheel', e => {
-                const dX = ( e.deltaY > 0.0 ? 10.0 : -10.0 ) * ( e.shiftKey ? 1.0 : 0.0 );
-                if( dX != 0.0 ) this.setScrollBarValue( 'horizontal', dX );
+                if( e.ctrlKey )
+                {
+                    e.preventDefault();
+                    ( e.deltaY > 0.0 ? this._decreaseFontSize() : this._increaseFontSize() );
+                }
+                else
+                {
+                    const dX = ( e.deltaY > 0.0 ? 10.0 : -10.0 ) * ( e.shiftKey ? 1.0 : 0.0 );
+                    if( dX != 0.0 ) this.setScrollBarValue( 'horizontal', dX );
+                }
             });
         }
 
@@ -503,7 +514,6 @@ class CodeEditor {
         this.lineHeight = 20;
         this.defaultSingleLineCommentToken = '//';
         this.defaultBlockCommentTokens = [ '/*', '*/' ];
-        this.charWidth = 7; //this._measureChar();
         this._lastTime = null;
 
         this.pairKeys = {
@@ -1044,6 +1054,7 @@ class CodeEditor {
         // Wait until the fonts are all loaded
         document.fonts.ready.then(() => {
             // console.log("commitMono loaded")
+            this.charWidth = this._measureChar( "a", true );
         });
     }
 
@@ -1906,6 +1917,14 @@ class CodeEditor {
                 this.code.lines = undo_step.lines;
                 this.processLines();
                 this.restoreCursor( cursor, undo_step.cursor );
+                return;
+            case '+': // increase size
+                e.preventDefault();
+                this._increaseFontSize();
+                return;
+            case '-': // decrease size
+                e.preventDefault();
+                this._decreaseFontSize();
                 return;
             }
         }
@@ -3121,15 +3140,16 @@ class CodeEditor {
         return [ word, from, to ];
     }
 
-    _measureChar( char = "a", get_bb = false ) {
+    _measureChar( char = "a", use_floating = false, get_bb = false ) {
         
-        var test = document.createElement( "pre" );
-        test.className = "codechar";
-        test.innerHTML = char;
-        document.body.appendChild( test );
-        var rect = test.getBoundingClientRect();
-        deleteElement( test );
-        const bb = [ Math.floor( rect.width ), Math.floor( rect.height ) ];
+        var line = document.createElement( "pre" );
+        var text = document.createElement( "span" );
+        line.appendChild( text );
+        text.innerText = char;
+        this.code.appendChild( line );
+        var rect = text.getBoundingClientRect();
+        deleteElement( line );
+        const bb = [ use_floating ? rect.width : Math.floor( rect.width ), use_floating ? rect.height : Math.floor( rect.height ) ];
         return get_bb ? bb : bb[ 0 ];
     }
 
@@ -3481,6 +3501,26 @@ class CodeEditor {
             line = this.code.childNodes[ new_local ];
             if( line ) line.classList.add( 'active-line' );
         }
+    }
+
+    _increaseFontSize() {
+        var r = document.querySelector( ':root' );
+        var s = getComputedStyle( r );
+        var pixels = parseInt( s.getPropertyValue( "--code-editor-font-size" ) );
+        pixels = LX.UTILS.clamp( pixels + 1, CodeEditor.CODE_MIN_FONT_SIZE, CodeEditor.CODE_MAX_FONT_SIZE );
+        r.style.setProperty( "--code-editor-font-size", pixels + "px" );
+        this.charWidth = this._measureChar( "a", true );
+        this.processLines(); // ... it's necessary?
+    }
+
+    _decreaseFontSize() {
+        var r = document.querySelector( ':root' );
+        var s = getComputedStyle( r );
+        var pixels = parseInt( s.getPropertyValue( "--code-editor-font-size" ) );
+        pixels = LX.UTILS.clamp( pixels - 1, CodeEditor.CODE_MIN_FONT_SIZE, CodeEditor.CODE_MAX_FONT_SIZE );
+        r.style.setProperty( "--code-editor-font-size", pixels + "px" );
+        this.charWidth = this._measureChar( "a", true );
+        this.processLines(); // ... it's necessary?
     }
 
     _clearTmpVariables() {

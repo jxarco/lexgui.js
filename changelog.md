@@ -1,5 +1,11 @@
 # lexgui.js changelog
 
+## 0.1.22
+
+Added REDO using "Ctrl+Y".
+Added FontSize customization. "Ctrl+PLUS", "Ctrl+MINUS" or "Ctrl+Wheel"
+General bug fixes.
+
 ## 0.1.21
 
 Added "Ctrl+F" to find text in code tabs.
