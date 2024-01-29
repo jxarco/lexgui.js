@@ -2840,9 +2840,9 @@ class CodeEditor {
         cursor.position = state.position ?? 0;
 
         cursor._left = state.left ?? 0;
-        cursor.style.left = "calc(" + ( cursor._left - this.getScrollLeft() ) + "px + " + this.xPadding + ")";
+        cursor.style.left = "calc(" + cursor._left + "px + " + this.xPadding + ")";
         cursor._top = state.top ?? 0;
-        cursor.style.top = "calc(" + ( cursor._top - this.getScrollTop() ) + "px)";
+        cursor.style.top = "calc(" + cursor._top + "px)";
     }
 
     resetCursorPos( flag, cursor ) {
