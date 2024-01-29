@@ -3013,6 +3013,10 @@ pre .line-gutter {
   transition: transform 0.2s ease-in;
 }
 
+.lexcodeeditor .searchbox.gotoline {
+  width: 124px;
+}
+
 .lexcodeeditor .searchbox.opened {
   transform: translateY(0px);
 }

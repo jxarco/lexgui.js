@@ -484,7 +484,7 @@ class CodeEditor {
         // Add search LINE box
         {
             var box = document.createElement( 'div' );
-            box.className = "searchbox";
+            box.className = "searchbox gotoline";
             
             var searchPanel = new LX.Panel();
             box.appendChild( searchPanel.root );

@@ -3,7 +3,8 @@
 ## 0.1.22
 
 Added REDO using "Ctrl+Y".
-Added FontSize customization. "Ctrl+PLUS", "Ctrl+MINUS" or "Ctrl+Wheel"
+Added FontSize customization. "Ctrl+PLUS", "Ctrl+MINUS" or "Ctrl+Wheel".
+Added "Ctrl+G" to scroll to specific line.
 General bug fixes.
 
 ## 0.1.21
