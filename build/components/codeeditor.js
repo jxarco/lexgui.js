@@ -790,7 +790,7 @@ class CodeEditor {
                 return;
             }
 
-            this._addUndoStep( cursor );
+            this._addUndoStep( cursor, true );
 
             var _c0 = this.getCharAtPos( cursor, -1 );
             var _c1 = this.getCharAtPos( cursor );
@@ -1201,26 +1201,47 @@ class CodeEditor {
         }
     }
 
-    _addUndoStep( cursor )  {
+    _addUndoStep( cursor, force, deleteRedo = true )  {
 
         const d = new Date();
         const current = d.getTime();
 
-        if( !this._lastTime ) {
-            this._lastTime = current;
-        } else {
-            if( ( current - this._lastTime ) > 3000 ){
-                this._lastTime = null;
-            } else {
-                // If time not enough, reset timer
+        if( !force )
+        {
+            if( !this._lastTime ) {
                 this._lastTime = current;
-                return;
+            } else {
+                if( ( current - this._lastTime ) > 3000 ){
+                    this._lastTime = null;
+                } else {
+                    // If time not enough, reset timer
+                    this._lastTime = current;
+                    return;
+                }
             }
+        }
+
+        if( deleteRedo ) 
+        {
+            // Remove all redo steps
+            this.code.redoSteps.length = 0;
         }
 
         var cursor = cursor ?? this.cursors.children[ 0 ];
 
         this.code.undoSteps.push( {
+            lines: LX.deepCopy( this.code.lines ),
+            cursor: this.saveCursor( cursor ),
+            line: cursor.line,
+            position: cursor.position
+        } );
+    }
+
+    _addRedoStep( cursor )  {
+
+        var cursor = cursor ?? this.cursors.children[ 0 ];
+
+        this.code.redoSteps.push( {
             lines: LX.deepCopy( this.code.lines ),
             cursor: this.saveCursor( cursor ),
             line: cursor.line,
@@ -1385,6 +1406,7 @@ class CodeEditor {
         code.language = "Plain Text";
         code.cursorState = {};
         code.undoSteps = [];
+        code.redoSteps = [];
         code.tabName = name;
         code.title = title ?? name;
         code.tokens = {};
@@ -1867,13 +1889,23 @@ class CodeEditor {
                 this._cutContent();
                 this.hideAutoCompleteBox();
                 return;
+            case 'y': // redo
+                if(!this.code.redoSteps.length)
+                    return;
+                this._addUndoStep( cursor, true, false);
+                const redo_step = this.code.redoSteps.pop();
+                this.code.lines = redo_step.lines;
+                this.processLines();
+                this.restoreCursor( cursor, redo_step.cursor );
+                return;
             case 'z': // undo
                 if(!this.code.undoSteps.length)
                     return;
-                const step = this.code.undoSteps.pop();
-                this.code.lines = step.lines;
+                this._addRedoStep( cursor );
+                const undo_step = this.code.undoSteps.pop();
+                this.code.lines = undo_step.lines;
                 this.processLines();
-                this.restoreCursor( cursor, step.cursor );
+                this.restoreCursor( cursor, undo_step.cursor );
                 return;
             }
         }
@@ -2037,7 +2069,7 @@ class CodeEditor {
         let lidx = cursor.line;
         let text_to_cut = "";
 
-        this._addUndoStep( cursor );
+        this._addUndoStep( cursor, true );
 
         if( !this.selection ) {
             text_to_cut = "\n" + this.code.lines[ cursor.line ];
