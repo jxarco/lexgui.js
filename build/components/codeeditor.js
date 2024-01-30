@@ -534,6 +534,7 @@ class CodeEditor {
         this.tabSpaces = 4;
         this.maxUndoSteps = 16;
         this.lineHeight = 20;
+        this.charWidth = 7; // To update later depending on size..
         this.defaultSingleLineCommentToken = '//';
         this.defaultBlockCommentTokens = [ '/*', '*/' ];
         this._lastTime = null;
@@ -986,7 +987,7 @@ class CodeEditor {
 
             // Nothing to do..
             if( cursor.line == this.code.lines.length - 1 && 
-                cursor.position == this.code.lines[ cursor.line - 1 ].length )
+                cursor.position == this.code.lines[ cursor.line ].length )
             return;
 
             if( e.metaKey ) { // Apple devices (Command)
