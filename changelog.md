@@ -1,5 +1,10 @@
 # lexgui.js changelog
 
+## 0.1.23
+
+Add Undo Steps to some actions that were missing.
+General bug fixes.
+
 ## 0.1.22
 
 Added REDO using "Ctrl+Y".

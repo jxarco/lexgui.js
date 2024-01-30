@@ -1888,26 +1888,14 @@ class CodeEditor {
             switch( key.toLowerCase() ) {
             case 'a': // select all
                 e.preventDefault();
-                this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
-                this.startSelection( cursor );
-                const nlines = this.code.lines.length - 1;
-                this.selection.toX = this.code.lines[ nlines ].length;
-                this.selection.toY = nlines;
-                this.cursorToPosition( cursor, this.selection.toX );
-                this.cursorToLine( cursor, this.selection.toY );
-                this.processSelection( null, true );
-                this.hideAutoCompleteBox();
+                this.selectAll( cursor );
                 break;
             case 'c': // copy
                 this._copyContent();
                 return;
             case 'd': // duplicate line
                 e.preventDefault();
-                this.endSelection();
-                this.code.lines.splice( lidx, 0, this.code.lines[ lidx ] );
-                this.lineDown( cursor );
-                this.processLines();
-                this.hideAutoCompleteBox();
+                this._duplicateLine( lidx, cursor );
                 return;
             case 'f': // find/search
                 e.preventDefault();
@@ -1963,6 +1951,7 @@ class CodeEditor {
                 case 'ArrowUp':
                 if(this.code.lines[ lidx - 1 ] == undefined)
                     return;
+                this._addUndoStep( cursor, true );
                 swapArrayElements(this.code.lines, lidx - 1, lidx);
                 this.lineUp();
                 this.processLine( lidx - 1 );
@@ -1972,6 +1961,7 @@ class CodeEditor {
             case 'ArrowDown':
                 if(this.code.lines[ lidx + 1 ] == undefined)
                     return;
+                this._addUndoStep( cursor, true );
                 swapArrayElements(this.code.lines, lidx, lidx + 1);
                 this.lineDown();
                 this.processLine( lidx );
@@ -2150,6 +2140,16 @@ class CodeEditor {
         }
 
         navigator.clipboard.writeText( text_to_cut ).then(() => console.log("Successfully cut"), (err) => console.error("Error"));
+    }
+
+    _duplicateLine( lidx, cursor ) {
+        
+        this.endSelection();
+        this._addUndoStep( cursor, true );
+        this.code.lines.splice( lidx, 0, this.code.lines[ lidx ] );
+        this.lineDown( cursor );
+        this.processLines();
+        this.hideAutoCompleteBox();
     }
 
     action( key, deleteSelection, fn ) {
@@ -2805,6 +2805,19 @@ class CodeEditor {
         delete this._lastSelectionKeyDir;
     }
 
+    selectAll( cursor ) {
+
+        this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
+        this.startSelection( cursor );
+        const nlines = this.code.lines.length - 1;
+        this.selection.toX = this.code.lines[ nlines ].length;
+        this.selection.toY = nlines;
+        this.cursorToPosition( cursor, this.selection.toX );
+        this.cursorToLine( cursor, this.selection.toY );
+        this.processSelection( null, true );
+        this.hideAutoCompleteBox();
+    }
+
     cursorToRight( key, cursor ) {
 
         if( !key ) return;
@@ -3320,8 +3333,10 @@ class CodeEditor {
 
     hideAutoCompleteBox() {
 
+        const isActive = this.isAutoCompleteActive;
         this.isAutoCompleteActive = false;
         this.autocomplete.classList.remove( 'show' );
+        return isActive != this.isAutoCompleteActive;
     }
 
     autoCompleteWord( cursor, suggestion ) {
