@@ -131,7 +131,7 @@ body.nocursor * {
 #global_search {
   position: absolute;
   background-color: var(--global-blur-background);
-  -webkit-backdrop-filter: blur(12px);
+  --webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border-radius: 8px;
   border: 1px solid #d0d0ec6b;
@@ -142,6 +142,7 @@ body.nocursor * {
   flex-wrap: wrap;
   z-index: 105;
   -webkit-mask-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAA5JREFUeNpiYGBgAAgwAAAEAAGbA+oJAAAAAElFTkSuQmCC); /* this fixes the overflow:hidden in Chrome/Opera */
+  mask-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAA5JREFUeNpiYGBgAAgwAAAEAAGbA+oJAAAAAElFTkSuQmCC); /* this fixes the overflow:hidden in Chrome/Opera */
   /* box-shadow: 0 2px 10px black; */
 }
 
@@ -1195,6 +1196,7 @@ input::-webkit-inner-spin-button {
 
 /* Firefox */
 input[type=number] {
+  appearance: textfield;
   -moz-appearance: textfield;
 }
 
@@ -2732,8 +2734,33 @@ ul.lexassetscontent {
   letter-spacing: 0em !important;
 }
 
-.codebasearea .lexareatab {
+.codebasearea .lexareatabs {
   padding: 0px;
+  margin: 0px;
+}
+
+.codebasearea .lexareatab {
+  padding: 5px;
+  border-radius: 0px !important;
+  margin: 0px !important;
+  border: 1px solid #91909036;
+  border-right: none;
+  background-color: var(--global-color-primary) !important;
+  transition: none;
+}
+
+.codebasearea .lexareatab:hover {
+  background-color: var(--global-color-secondary) !important;
+}
+
+.codebasearea .lexareatab:last-child {
+  border-right: 1px solid #91909036;
+}
+
+.codebasearea .lexareatab.selected {
+  background-color: var(--global-color-secondary) !important;
+  border-top: 1px solid var(--global-selected);
+  border-bottom: none;
 }
 
 .codebasearea .lexareatab i {
@@ -2792,7 +2819,7 @@ ul.lexassetscontent {
   width: 48px;
   height: calc(100% - 62px);
   background-color: var(--global-branch-darker);
-  margin-top: 26px;
+  margin-top: 28px;
   overflow: hidden;
   position: absolute;
 }
