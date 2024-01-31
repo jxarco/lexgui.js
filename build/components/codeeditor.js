@@ -1220,7 +1220,7 @@ class CodeEditor {
         let cursor = document.createElement( 'div' );
         cursor.className = "cursor";
         cursor.innerHTML = "&nbsp;";
-        cursor.isMainCursor = isMain;
+        cursor.isMain = isMain;
         cursor._left = position * this.charWidth;
         cursor.style.left = "calc( " + cursor._left + "px + " + this.xPadding + " )";
         cursor._top = line * this.lineHeight;
@@ -1234,7 +1234,7 @@ class CodeEditor {
             get: (v) => { return cursor._line },
             set: (v) => { 
                 cursor._line = v;
-                if( cursor.isMainCursor ) this._setActiveLine( v );
+                if( cursor.isMain ) this._setActiveLine( v );
             }
         } );
 
@@ -1242,7 +1242,7 @@ class CodeEditor {
             get: (v) => { return cursor._position },
             set: (v) => { 
                 cursor._position = v;
-                if( cursor.isMainCursor ) this._updateDataInfoPanel( "@cursor-pos", "Col " + v );
+                if( cursor.isMain ) this._updateDataInfoPanel( "@cursor-pos", "Col " + v );
             }
         } );
 
@@ -1277,6 +1277,10 @@ class CodeEditor {
 
     _addUndoStep( cursor, force, deleteRedo = true )  {
 
+        // Only the mainc cursor stores undo steps
+        if( !cursor.isMain )
+            return;
+
         const d = new Date();
         const current = d.getTime();
 
@@ -1285,7 +1289,7 @@ class CodeEditor {
             if( !this._lastTime ) {
                 this._lastTime = current;
             } else {
-                if( ( current - this._lastTime ) > 3000 ){
+                if( ( current - this._lastTime ) > 2000 ){
                     this._lastTime = null;
                 } else {
                     // If time not enough, reset timer
@@ -1303,10 +1307,7 @@ class CodeEditor {
 
         this.code.undoSteps.push( {
             lines: LX.deepCopy( this.code.lines ),
-            cursor: this.saveCursor( cursor ),
-            numCursors: this.cursors.childElementCount,
-            line: cursor.line,
-            position: cursor.position
+            cursors: this.saveCursors()
         } );
     }
 
@@ -1315,37 +1316,67 @@ class CodeEditor {
         if( !this.code.undoSteps.length )
             return;
 
-        const inner_undo = () => {
-
-            if( !this.code.undoSteps.length )
-                return;
-
-            const step = this.code.undoSteps.pop();
-            this.code.lines = step.lines;
-            this.processLines();
-            this.restoreCursor( cursor, step.cursor );
-            cursor.print();
-        };
-
         this._addRedoStep( cursor );
 
-        // If the undo step was stored using more than 1 cursor,
-        // make sure we undo all at once
+        // Extract info from the last code state
+        const step = this.code.undoSteps.pop();
 
-        const last_step = this.code.undoSteps[ this.code.undoSteps.length - 1 ];
+        // Set old state lines
+        this.code.lines = step.lines;
+        this.processLines();
 
-        for( var i = 0; i < last_step.numCursors; ++i )
-            inner_undo();
+        this._removeSecondaryCursors();
+
+        for( let i = 0; i < step.cursors.length; ++i )
+        {
+            var currentCursor = this.cursors.children[ i ];
+
+            // Generate new if needed
+            if( !currentCursor )
+                currentCursor = this._addCursor();
+
+            this.restoreCursor( currentCursor, step.cursors[ i ] );
+        }
     }
 
     _addRedoStep( cursor )  {
 
+        // Only the mainc cursor stores redo steps
+        if( !cursor.isMain )
+            return;
+
         this.code.redoSteps.push( {
             lines: LX.deepCopy( this.code.lines ),
-            cursor: this.saveCursor( cursor ),
-            line: cursor.line,
-            position: cursor.position
+            cursors: this.saveCursors()
         } );
+    }
+
+    _doRedo( cursor ) {
+
+        if( !this.code.redoSteps.length )
+            return;
+
+        this._addUndoStep( cursor, true, false);
+
+        // Extract info from the next saved code state
+        const step = this.code.redoSteps.pop();
+
+        // Set old state lines
+        this.code.lines = step.lines;
+        this.processLines();
+
+        this._removeSecondaryCursors();
+
+        for( let i = 0; i < step.cursors.length; ++i )
+        {
+            var currentCursor = this.cursors.children[ i ];
+
+            // Generate new if needed
+            if( !currentCursor )
+                currentCursor = this._addCursor();
+
+            this.restoreCursor( currentCursor, step.cursors[ i ] );
+        }
     }
 
     _changeLanguage( lang ) {
@@ -1961,15 +1992,17 @@ class CodeEditor {
             if( !cursor )
                 break;
 
-            this.processKeyAtCursor( e, key, cursor );
+            this._processKeyAtCursor( e, key, cursor );
         }
 
         // Global keys
 
-        this.processGlobalKeys( e, key );
+        this._processGlobalKeys( e, key );
     }
 
-    async processGlobalKeys( e, key ) {
+    async _processGlobalKeys( e, key ) {
+
+        let cursor = this._getCurrentCursor();
 
         if( e.ctrlKey || e.metaKey )
         {
@@ -1988,6 +2021,12 @@ class CodeEditor {
             case 's': // save
                 this.onsave( this.getText() );
                 break;
+            case 'y': // redo
+                this._doRedo( cursor );
+                break;
+            case 'z': // undo
+                this._doUndo( cursor );
+                break;
             case '+': // increase size
                 this._increaseFontSize();
                 break;
@@ -1998,7 +2037,7 @@ class CodeEditor {
         }
     }
 
-    async processKeyAtCursor( e, key, cursor ) {
+    async _processKeyAtCursor( e, key, cursor ) {
 
         const skip_undo = e.detail.skip_undo ?? false;
 
@@ -2031,18 +2070,6 @@ class CodeEditor {
             case 'x': // cut line
                 this._cutContent( cursor );
                 this.hideAutoCompleteBox();
-                return;
-            case 'y': // redo
-                if( !this.code.redoSteps.length )
-                    return;
-                this._addUndoStep( cursor, true, false);
-                const redo_step = this.code.redoSteps.pop();
-                this.code.lines = redo_step.lines;
-                this.processLines();
-                this.restoreCursor( cursor, redo_step.cursor );
-                return;
-            case 'z': // undo
-                this._doUndo( cursor );
                 return;
             case 'arrowdown': // add cursor below only for the main cursor..
                 if( isLastCursor && this.code.lines[ lidx + 1 ] != undefined )
@@ -3044,6 +3071,18 @@ class CodeEditor {
         state.position = cursor.position;
         state.line = cursor.line;
         return state;
+    }
+
+    saveCursors() {
+
+        var cursors = [];
+
+        for( let cursor of this.cursors.children )
+        {
+            cursors.push( this.saveCursor( cursor ) );
+        }
+
+        return cursors;
     }
 
     restoreCursor( cursor, state ) {
