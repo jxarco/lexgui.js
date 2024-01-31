@@ -865,16 +865,17 @@ class CodeEditor {
                     if( !this.selection )
                         this.startSelection( cursor );
 
-                    this.lineDown( cursor );
-                    
+                    const canGoDown = this.lineDown( cursor );
                     var letter = this.getCharAtPos( cursor );
-                    if( !letter ) {
-                        this.cursorToPosition( cursor, Math.max(this.code.lines[ cursor.line ].length - 1, 0) );
+
+                    if( !letter || !canGoDown ) {
+                        this.actions[ 'End' ].callback( cursor.line, cursor, e );
                     }
 
                     this.processSelection( e );
-                } else {
-    
+                }
+                else
+                {
                     if( this.code.lines[ ln + 1 ] == undefined ) 
                         return;
                     this.endSelection();
