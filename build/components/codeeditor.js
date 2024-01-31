@@ -333,42 +333,15 @@ class CodeEditor {
 
         // Add main cursor
         {
-            var cursor = document.createElement( 'div' );
-            cursor.className = "cursor";
-            cursor.innerHTML = "&nbsp;";
-            cursor._left = 0;
-            cursor.style.left = this.xPadding;
-            cursor._top = 0;
-            cursor.style.top = cursor._top + "px";
-            cursor._position = 0;
-            cursor._line = 0;
-            cursor.print = (function() { console.log( this.line, this.position ) }).bind( cursor );
+            this._addCursor( 0, 0, true );
 
             Object.defineProperty( this, 'line', {
-                get: (v) => { return cursor.line }
+                get: (v) => { return this._getCurrentCursor().line }
             } );
-
+    
             Object.defineProperty( this, 'position', {
-                get: (v) => { return cursor.position }
+                get: (v) => { return this._getCurrentCursor().position }
             } );
-
-            Object.defineProperty( cursor, 'line', {
-                get: (v) => { return this._line },
-                set: (v) => { 
-                    this._line = v;
-                    this._setActiveLine( v );
-                }
-            } );
-
-            Object.defineProperty( cursor, 'position', {
-                get: (v) => { return this._position },
-                set: (v) => { 
-                    this._position = v;
-                    this._updateDataInfoPanel( "@cursor-pos", "Col " + v );
-                }
-            } );
-
-            this.cursors.appendChild( cursor );
         }
 
         // Scroll stuff
@@ -661,6 +634,7 @@ class CodeEditor {
         this.action( 'Escape', false, ( ln, cursor, e ) => {
             this.hideAutoCompleteBox();
             this.hideSearchBox();
+            this._removeSecondaryCursors();
         });
 
         this.action( 'Backspace', false, ( ln, cursor, e ) => {
@@ -706,7 +680,7 @@ class CodeEditor {
                 } 
                 else if( this.code.lines[ ln - 1 ] != undefined ) {
 
-                    this.lineUp();
+                    this.lineUp( cursor );
                     e.cancelShift = true;
                     this.actions[ 'End' ].callback( cursor.line, cursor, e );
                     // Move line on top
@@ -761,7 +735,7 @@ class CodeEditor {
             const prestring = this.code.lines[ ln ].substring( 0, idx );
             let lastX = cursor.position;
 
-            this.resetCursorPos( CodeEditor.CURSOR_LEFT );
+            this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
             if(idx > 0) this.cursorToString( cursor, prestring );
             this.setScrollLeft( 0 );
 
@@ -795,14 +769,14 @@ class CodeEditor {
                     this.selection.selectInline(cursor.position, cursor.line, this.measureString( string ));
                 else
                 {
-                    this.resetCursorPos( CodeEditor.CURSOR_LEFT );
+                    this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
                     this.cursorToString( cursor, this.code.lines[ ln ] );            
                     this.processSelection( e );
                 }
             } else if( !e.keepSelection )
                 this.endSelection();
 
-            this.resetCursorPos( CodeEditor.CURSOR_LEFT );
+            this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
             this.cursorToString( cursor, this.code.lines[ ln ] );
 
             const last_char = ( this.code.clientWidth / this.charWidth )|0;
@@ -858,7 +832,7 @@ class CodeEditor {
                     if( !this.selection )
                         this.startSelection( cursor );
 
-                    this.lineUp();
+                    this.lineUp( cursor );
 
                     var letter = this.getCharAtPos( cursor );
                     if( !letter ) {
@@ -869,7 +843,7 @@ class CodeEditor {
 
                 } else {
                     this.endSelection();
-                    this.lineUp();
+                    this.lineUp( cursor );
                     // Go to end of line if out of line
                     var letter = this.getCharAtPos( cursor );
                     if( !letter ) this.actions['End'].callback( cursor.line, cursor, e );
@@ -962,7 +936,7 @@ class CodeEditor {
                         }
                         else {
                             this.selection.invertIfNecessary();
-                            this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
+                            this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP, cursor );
                             this.cursorToLine( cursor, this.selection.fromY, true );
                             this.cursorToPosition( cursor, this.selection.fromX );
                             this.endSelection();
@@ -1004,7 +978,7 @@ class CodeEditor {
                 // Selections...
                 if( e.shiftKey ) { if( !this.selection ) this.startSelection( cursor ); }
                 else this.endSelection();
-                this.cursorToString( cursor, substr);
+                this.cursorToString( cursor, substr );
                 if( e.shiftKey ) this.processSelection( e );
             } else {
                 var letter = this.getCharAtPos( cursor );
@@ -1022,7 +996,7 @@ class CodeEditor {
                         else 
                         {
                             this.selection.invertIfNecessary();
-                            this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
+                            this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP, cursor );
                             this.cursorToLine( cursor, this.selection.toY );
                             this.cursorToPosition( cursor, this.selection.toX );
                             this.endSelection();
@@ -1108,7 +1082,8 @@ class CodeEditor {
     }
 
     getText( min ) {
-        return this.code.lines.join(min ? ' ' : '\n');
+
+        return this.code.lines.join( min ? ' ' : '\n' );
     }
 
     // This can be used to empty all text...
@@ -1117,7 +1092,9 @@ class CodeEditor {
         let new_lines = text.split( '\n' );
         this.code.lines = [].concat( new_lines );
 
-        let cursor = this.cursors.children[ 0 ];
+        this._removeSecondaryCursors();
+
+        let cursor = this._getCurrentCursor();
         let lastLine = new_lines.pop();
 
         this.cursorToLine( cursor, new_lines.length ); // Already substracted 1
@@ -1130,9 +1107,8 @@ class CodeEditor {
         }
     }
 
-    appendText( text ) {
+    appendText( text, cursor ) {
 
-        let cursor = this.cursors.children[ 0 ];
         let lidx = cursor.line;
 
         if( this.selection ) {
@@ -1236,6 +1212,60 @@ class CodeEditor {
         }
     }
 
+    _addCursor( line = 0, position = 0, isMain = false ) {
+
+        let cursor = document.createElement( 'div' );
+        cursor.className = "cursor";
+        cursor.innerHTML = "&nbsp;";
+        cursor.isMainCursor = isMain;
+        cursor._left = position * this.charWidth;
+        cursor.style.left = "calc( " + cursor._left + "px + " + this.xPadding + " )";
+        cursor._top = line * this.lineHeight;
+        cursor.style.top = cursor._top + "px";
+        cursor._position = position;
+        cursor._line = line;
+        cursor.print = (function() { console.log( this, this._line, this._position ) }).bind( cursor );
+
+        Object.defineProperty( cursor, 'line', {
+            get: (v) => { return cursor._line },
+            set: (v) => { 
+                cursor._line = v;
+                if( cursor.isMainCursor ) this._setActiveLine( v );
+            }
+        } );
+
+        Object.defineProperty( cursor, 'position', {
+            get: (v) => { return cursor._position },
+            set: (v) => { 
+                cursor._position = v;
+                if( cursor.isMainCursor ) this._updateDataInfoPanel( "@cursor-pos", "Col " + v );
+            }
+        } );
+
+        this.cursors.appendChild( cursor );
+
+        return cursor;
+    }
+
+    _getCurrentCursor() {
+
+        return this.cursors.children[ 0 ];
+    }
+
+    _removeSecondaryCursors() {
+
+        while( this.cursors.childElementCount > 1 )
+            this.cursors.lastChild.remove();
+    }
+
+    _logCursors() {
+
+        for( let cursor of this.cursors.children )
+        {
+            cursor.print();
+        }
+    }
+
     _addUndoStep( cursor, force, deleteRedo = true )  {
 
         const d = new Date();
@@ -1262,8 +1292,6 @@ class CodeEditor {
             this.code.redoSteps.length = 0;
         }
 
-        var cursor = cursor ?? this.cursors.children[ 0 ];
-
         this.code.undoSteps.push( {
             lines: LX.deepCopy( this.code.lines ),
             cursor: this.saveCursor( cursor ),
@@ -1273,8 +1301,6 @@ class CodeEditor {
     }
 
     _addRedoStep( cursor )  {
-
-        var cursor = cursor ?? this.cursors.children[ 0 ];
 
         this.code.redoSteps.push( {
             lines: LX.deepCopy( this.code.lines ),
@@ -1390,7 +1416,7 @@ class CodeEditor {
         });
     }
 
-    _onSelectTab( isNewTabButton, event, name,  ) {
+    _onSelectTab( isNewTabButton, event, name ) {
 
         if( isNewTabButton )
         {
@@ -1398,7 +1424,9 @@ class CodeEditor {
             return;
         }
 
-        var cursor = cursor ?? this.cursors.children[ 0 ];
+        this._removeSecondaryCursors();
+        var cursor = this._getCurrentCursor();
+
         this.saveCursor( cursor, this.code.cursorState );    
 
         this.code = this.loadedTabs[ name ];
@@ -1575,12 +1603,12 @@ class CodeEditor {
         }
     }
 
-    processMouse(e) {
+    processMouse( e ) {
 
         if( !e.target.classList.contains('code') ) return;
         if( !this.code ) return;
 
-        var cursor = this.cursors.children[ 0 ];
+        var cursor = this._getCurrentCursor();
         var code_rect = this.code.getBoundingClientRect();
         var mouse_pos = [(e.clientX - code_rect.x), (e.clientY - code_rect.y)];
 
@@ -1632,7 +1660,7 @@ class CodeEditor {
             {
                 case LX.MOUSE_DOUBLE_CLICK:
                     const [word, from, to] = this.getWordAtPos( cursor );
-                    this.resetCursorPos( CodeEditor.CURSOR_LEFT );
+                    this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
                     this.cursorToPosition( cursor, from );
                     this.startSelection( cursor );
                     this.selection.selectInline( from, cursor.line, this.measureString( word ) );
@@ -1640,7 +1668,7 @@ class CodeEditor {
                     break;
                 // Select entire line
                 case LX.MOUSE_TRIPLE_CLICK:
-                    this.resetCursorPos( CodeEditor.CURSOR_LEFT );
+                    this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
                     e._shiftKey = true;
                     this.actions['End'].callback(cursor.line, cursor, e);
                     this._tripleClickSelection = true;
@@ -1656,11 +1684,11 @@ class CodeEditor {
                 return;
 
             LX.addContextMenu( null, e, m => {
-                m.add( "Copy", () => {  this._copyContent(); } );
+                m.add( "Copy", () => {  this._copyContent( cursor ); } );
                 if( !this.disableEdition )
                 {
-                    m.add( "Cut", () => {  this._cutContent(); } );
-                    m.add( "Paste", () => {  this._pasteContent(); } );
+                    m.add( "Cut", () => {  this._cutContent( cursor ); } );
+                    m.add( "Paste", () => {  this._pasteContent( cursor ); } );
                     m.add( "" );
                     m.add( "Format/JSON", () => { 
                         let json = this.toJSONFormat( this.getText() );
@@ -1692,26 +1720,39 @@ class CodeEditor {
 
     processClick( e ) {
 
-        var cursor = this.cursors.children[ 0 ];
+        var cursor = this._getCurrentCursor();
         var code_rect = this.codeScroller.getBoundingClientRect();
         var position = [( e.clientX - code_rect.x ) + this.getScrollLeft(), (e.clientY - code_rect.y) + this.getScrollTop()];
         var ln = (position[ 1 ] / this.lineHeight)|0;
 
         if( this.code.lines[ ln ] == undefined )
             return;
-        
-        this.cursorToLine( cursor, ln, true );
-        
+
         var ch = ( ( position[ 0 ] - parseInt( this.xPadding ) + 3) / this.charWidth )|0;
         var string = this.code.lines[ ln ].slice( 0, ch );
-        this.cursorToPosition( cursor, string.length );
+
+        // Move main cursor there...
+        if( !e.altKey )
+        {
+            // Make sure we only keep the main cursor..
+            this._removeSecondaryCursors();
+
+            this.cursorToLine( cursor, ln, true );
+            this.cursorToPosition( cursor, string.length );
+        }
+        
+        // Add new cursor
+        else
+        {
+            this._addCursor( ln, string.length );
+        }
 
         this.hideAutoCompleteBox();
     }
 
     processSelection( e, keep_range, flags = CodeEditor.SELECTION_X_Y ) {
 
-        var cursor = this.cursors.children[ 0 ];
+        var cursor = this._getCurrentCursor();
         const isMouseEvent = e && ( e.constructor == MouseEvent );
 
         if( isMouseEvent ) this.processClick( e );
@@ -1865,7 +1906,23 @@ class CodeEditor {
         }
     }
 
-    async processKey( e ) {
+    async processKey( event ) {
+        
+        const numCursors = this.cursors.childElementCount;
+
+        for( var i = 0; i < numCursors; i++ )
+        {
+            let cursor = this.cursors.children[ i ];
+
+            // We could delete secondary cursor while iterating..
+            if( !cursor )
+                break;
+
+            this.processKeyAtCursor( event, cursor );
+        }
+    }
+
+    async processKeyAtCursor( e, cursor ) {
 
         if( !this.code || e.srcElement.constructor != HTMLDivElement ) 
             return;
@@ -1878,7 +1935,6 @@ class CodeEditor {
         if( key.length > 1 && this.specialKeys.indexOf( key ) == -1 )
             return;
 
-        let cursor = this.cursors.children[ 0 ];
         let lidx = cursor.line;
         this.code.lines[ lidx ] = this.code.lines[ lidx ] ?? "";
 
@@ -1892,7 +1948,7 @@ class CodeEditor {
                 this.selectAll( cursor );
                 break;
             case 'c': // copy
-                this._copyContent();
+                this._copyContent( cursor );
                 return;
             case 'd': // duplicate line
                 e.preventDefault();
@@ -1911,14 +1967,14 @@ class CodeEditor {
                 this.onsave( this.getText() );
                 return;
             case 'v': // paste
-                this._pasteContent();
+                this._pasteContent( cursor );
                 return;
             case 'x': // cut line
-                this._cutContent();
+                this._cutContent( cursor );
                 this.hideAutoCompleteBox();
                 return;
             case 'y': // redo
-                if(!this.code.redoSteps.length)
+                if( !this.code.redoSteps.length )
                     return;
                 this._addUndoStep( cursor, true, false);
                 const redo_step = this.code.redoSteps.pop();
@@ -1927,7 +1983,7 @@ class CodeEditor {
                 this.restoreCursor( cursor, redo_step.cursor );
                 return;
             case 'z': // undo
-                if(!this.code.undoSteps.length)
+                if( !this.code.undoSteps.length )
                     return;
                 this._addRedoStep( cursor );
                 const undo_step = this.code.undoSteps.pop();
@@ -1943,6 +1999,13 @@ class CodeEditor {
                 e.preventDefault();
                 this._decreaseFontSize();
                 return;
+            case 'arrowdown': // add cursor below only for the main cursor..
+                if( cursor.isMainCursor )
+                {
+                    var new_cursor = this._addCursor( cursor.line, cursor.position );
+                    this.lineDown( new_cursor );
+                    return;
+                }
             }
         }
 
@@ -1953,8 +2016,8 @@ class CodeEditor {
                 if(this.code.lines[ lidx - 1 ] == undefined)
                     return;
                 this._addUndoStep( cursor, true );
-                swapArrayElements(this.code.lines, lidx - 1, lidx);
-                this.lineUp();
+                swapArrayElements( this.code.lines, lidx - 1, lidx );
+                this.lineUp( cursor );
                 this.processLine( lidx - 1 );
                 this.processLine( lidx );
                 this.hideAutoCompleteBox();
@@ -1963,8 +2026,8 @@ class CodeEditor {
                 if(this.code.lines[ lidx + 1 ] == undefined)
                     return;
                 this._addUndoStep( cursor, true );
-                swapArrayElements(this.code.lines, lidx, lidx + 1);
-                this.lineDown();
+                swapArrayElements( this.code.lines, lidx, lidx + 1 );
+                this.lineDown( cursor );
                 this.processLine( lidx );
                 this.processLine( lidx + 1 );
                 this.hideAutoCompleteBox();
@@ -1975,17 +2038,18 @@ class CodeEditor {
         // Apply binded actions...
 
         for( const actKey in this.actions ) {
+
             if( key != actKey ) continue;
             e.preventDefault();
 
-            if(this.actions[ key ].deleteSelection && this.selection)
-                this.actions['Backspace'].callback(lidx, cursor, e);
+            if( this.actions[ key ].deleteSelection && this.selection )
+                this.actions['Backspace'].callback( lidx, cursor, e );
 
             return this.actions[ key ].callback( lidx, cursor, e );
         }
 
         // From now on, don't allow ctrl, shift or meta (mac) combinations
-        if( (e.ctrlKey || e.metaKey) )
+        if( e.ctrlKey || e.metaKey )
             return;
 
         // Add undo steps
@@ -1997,7 +2061,7 @@ class CodeEditor {
 
         //  Some custom cases for word enclosing (), {}, "", '', ...
 
-        const enclosableKeys = ["\"", "'", "(", "{"];
+        const enclosableKeys = [ "\"", "'", "(", "{" ];
         if( enclosableKeys.indexOf( key ) > -1 )
         {
             if( this._encloseSelectedWordWithKey( key, lidx, cursor ) ) 
@@ -2015,19 +2079,19 @@ class CodeEditor {
 
         // Append key
 
-        const isPairKey = (Object.values( this.pairKeys ).indexOf( key ) > -1) && !this.wasKeyPaired;
-        const sameKeyNext = isPairKey && (this.code.lines[ lidx ][cursor.position] === key);
+        const isPairKey = ( Object.values( this.pairKeys ).indexOf( key ) > -1 ) && !this.wasKeyPaired;
+        const sameKeyNext = isPairKey && ( this.code.lines[ lidx ][ cursor.position ] === key );
 
         if( !sameKeyNext )
         {
             this.code.lines[ lidx ] = [
-                this.code.lines[ lidx ].slice(0, cursor.position), 
+                this.code.lines[ lidx ].slice( 0, cursor.position ), 
                 key, 
-                this.code.lines[ lidx ].slice(cursor.position)
+                this.code.lines[ lidx ].slice( cursor.position )
             ].join('');
         }
 
-        this.cursorToRight( key );
+        this.cursorToRight( key, cursor );
 
         //  Some custom cases for auto key pair (), {}, "", '', ...
         
@@ -2037,7 +2101,7 @@ class CodeEditor {
             // Make sure to detect later that the key is paired automatically to avoid loops...
             this.wasKeyPaired = true;
 
-            if(sameKeyNext) return;
+            if( sameKeyNext ) return;
 
             this.root.dispatchEvent(new KeyboardEvent('keydown', { 'key': this.pairKeys[ key ] }));
             this.cursorToLeft( key, cursor );
@@ -2064,14 +2128,14 @@ class CodeEditor {
             this.showAutoCompleteBox( key, cursor );
     }
 
-    async _pasteContent() {
+    async _pasteContent( cursor ) {
+
         let text = await navigator.clipboard.readText();
-        this.appendText(text);
+        this.appendText( text, cursor );
     }
 
-    async _copyContent() {
+    async _copyContent( cursor ) {
 
-        let cursor = this.cursors.children[ 0 ];
         let text_to_copy = "";
 
         if( !this.selection ) {
@@ -2101,9 +2165,8 @@ class CodeEditor {
         navigator.clipboard.writeText( text_to_copy ).then(() => console.log("Successfully copied"), (err) => console.error("Error"));
     }
 
-    async _cutContent() {
+    async _cutContent( cursor ) {
 
-        let cursor = this.cursors.children[ 0 ];
         let lidx = cursor.line;
         let text_to_cut = "";
 
@@ -2113,9 +2176,9 @@ class CodeEditor {
             text_to_cut = "\n" + this.code.lines[ cursor.line ];
             this.code.lines.splice( lidx, 1 );
             this.processLines();
-            this.resetCursorPos( CodeEditor.CURSOR_LEFT );
+            this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
             if( this.code.lines[ lidx ] == undefined )
-                this.lineUp();
+                this.lineUp( cursor );
         }
         else {
             
@@ -2720,8 +2783,6 @@ class CodeEditor {
 
     lineUp( cursor, resetLeft ) {
 
-        cursor = cursor ?? this.cursors.children[ 0 ];
-
         if( this.code.lines[ cursor.line - 1 ] == undefined ) 
             return false;
 
@@ -2733,8 +2794,6 @@ class CodeEditor {
     }
 
     lineDown( cursor, resetLeft ) {
-
-        cursor = cursor ?? this.cursors.children[ 0 ];
         
         if( this.code.lines[ cursor.line + 1 ] == undefined ) 
             return false;
@@ -2814,7 +2873,7 @@ class CodeEditor {
 
     selectAll( cursor ) {
 
-        this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
+        this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP, cursor );
         this.startSelection( cursor );
         const nlines = this.code.lines.length - 1;
         this.selection.toX = this.code.lines[ nlines ].length;
@@ -2828,7 +2887,7 @@ class CodeEditor {
     cursorToRight( key, cursor ) {
 
         if( !key ) return;
-        cursor = cursor ?? this.cursors.children[ 0 ];
+
         cursor._left += this.charWidth;
         cursor.style.left = "calc( " + cursor._left + "px + " + this.xPadding + " )";
         cursor.position++;
@@ -2847,7 +2906,7 @@ class CodeEditor {
     cursorToLeft( key, cursor ) {
 
         if( !key ) return;
-        cursor = cursor ?? this.cursors.children[ 0 ];
+
         cursor._left -= this.charWidth;
         cursor._left = Math.max( cursor._left, 0 );
         cursor.style.left = "calc( " + cursor._left + "px + " + this.xPadding + " )";
@@ -2866,13 +2925,12 @@ class CodeEditor {
 
     cursorToTop( cursor, resetLeft = false ) {
 
-        cursor = cursor ?? this.cursors.children[ 0 ];
         cursor._top -= this.lineHeight;
         cursor._top = Math.max(cursor._top, 0);
         cursor.style.top = "calc(" + cursor._top + "px)";
         this.restartBlink();
         
-        if(resetLeft)
+        if( resetLeft )
             this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
 
         doAsync(() => {
@@ -2884,12 +2942,12 @@ class CodeEditor {
 
     cursorToBottom( cursor, resetLeft = false ) {
 
-        cursor = cursor ?? this.cursors.children[ 0 ];
         cursor._top += this.lineHeight;
         cursor.style.top = "calc(" + cursor._top + "px)";
+
         this.restartBlink();
 
-        if(resetLeft)
+        if( resetLeft )
             this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
 
         doAsync(() => {
@@ -2901,10 +2959,11 @@ class CodeEditor {
 
     cursorToString( cursor, text, reverse ) {
 
-        if( !text.length ) return;
-        cursor = cursor ?? this.cursors.children[ 0 ];
+        if( !text.length ) 
+            return;
+
         for( let char of text ) 
-            reverse ? this.cursorToLeft( char ) : this.cursorToRight( char );
+            reverse ? this.cursorToLeft( char, cursor ) : this.cursorToRight( char, cursor );
     }
 
     cursorToPosition( cursor, position ) {
@@ -2924,17 +2983,16 @@ class CodeEditor {
 
     saveCursor( cursor, state = {} ) {
 
-        var cursor = cursor ?? this.cursors.children[ 0 ];
         state.top = cursor._top;
         state.left = cursor._left;
         state.line = cursor.line;
         state.position = cursor.position;
+
         return state;
     }
 
     restoreCursor( cursor, state ) {
 
-        cursor = cursor ?? this.cursors.children[ 0 ];
         cursor.line = state.line ?? 0;
         cursor.position = state.position ?? 0;
 
@@ -2946,7 +3004,7 @@ class CodeEditor {
 
     resetCursorPos( flag, cursor ) {
         
-        cursor = cursor ?? this.cursors.children[ 0 ];
+        cursor = cursor ?? this._getCurrentCursor();
 
         if( flag & CodeEditor.CURSOR_LEFT )
         {
@@ -2963,14 +3021,14 @@ class CodeEditor {
         }
     }
 
-    addSpaceTabs(n) {
+    addSpaceTabs( n ) {
         
         for( var i = 0; i < n; ++i ) {
             this.actions[ 'Tab' ].callback();
         }
     }
 
-    addSpaces(n) {
+    addSpaces( n ) {
         
         for( var i = 0; i < n; ++i ) {
             this.root.dispatchEvent( new CustomEvent( 'keydown', { 'detail': {
@@ -3130,14 +3188,11 @@ class CodeEditor {
 
     getCharAtPos( cursor, offset = 0 ) {
         
-        cursor = cursor ?? this.cursors.children[ 0 ];
         return this.code.lines[ cursor.line ][ cursor.position + offset ];
     }
 
-    getWordAtPos( cursor, loffset = 0, roffset ) {
+    getWordAtPos( cursor, offset = 0 ) {
         
-        roffset = roffset ?? loffset;
-        cursor = cursor ?? this.cursors.children[ 0 ];
         const col = cursor.line;
         const words = this.code.lines[ col ];
 
@@ -3147,8 +3202,8 @@ class CodeEditor {
             return (exceptions.indexOf( char ) > - 1) || (code > 47 && code < 58) || (code > 64 && code < 91) || (code > 96 && code < 123);
         }
 
-        let from = cursor.position + roffset;
-        let to = cursor.position + loffset;
+        let from = cursor.position + offset;
+        let to = cursor.position + offset;
 
         // Check left ...
 
@@ -3167,7 +3222,7 @@ class CodeEditor {
         let word = words.substring( from, to );
         if( word == ' ' )
         {
-            if( loffset < 0 )
+            if( offset < 0 )
             {
                 while( words[ from - 1 ] != undefined && words[ from - 1 ] == ' ' )
                     from--;
@@ -3550,6 +3605,11 @@ class CodeEditor {
 
         if( !this.skipCodeInfo )
         {
+            if( this.cursors.childElementCount > 1 )
+            {
+                value = "";
+            }
+
             LX.emit( signal, value );
         }
     }
@@ -3564,7 +3624,7 @@ class CodeEditor {
         let line = this.code.childNodes[ old_local ];
 
         if( !line )
-        return;
+            return;
 
         line.classList.remove( 'active-line' );
 
