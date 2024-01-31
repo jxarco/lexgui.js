@@ -2950,7 +2950,8 @@ pre .line-gutter {
   height: var(--code-editor-row-height);
   position: absolute;
   border-left: 3px solid #fff !important;
-  z-index: 0 !important;
+  z-index: 1 !important;
+  opacity: 0.6;
   left: 0px;
   top: 0px;
 }
