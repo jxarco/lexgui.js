@@ -2,7 +2,11 @@
 
 ## 0.1.23
 
+Begin integration of multiple cursors ("Ctrl+ArrowDown").
+Code tabs have new VS Code-alike style.
+Improved CSS highlighting.
 Add Undo Steps to some actions that were missing.
+When using Ctrl+G, the selected line is now highlighted.
 General bug fixes.
 
 ## 0.1.22
