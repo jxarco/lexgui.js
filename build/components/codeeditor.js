@@ -201,8 +201,8 @@ class CodeEditor {
     static WORD_TYPE_METHOD = 0;
     static WORD_TYPE_CLASS  = 1;
 
-    static CODE_MAX_FONT_SIZE = 20;
-    static CODE_MIN_FONT_SIZE = 11;
+    static CODE_MAX_FONT_SIZE = 22;
+    static CODE_MIN_FONT_SIZE = 9;
 
     /**
      * @param {*} options
