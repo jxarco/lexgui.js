@@ -625,6 +625,7 @@ class CodeEditor {
         };
         this.statementsAndDeclarations = {
             'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'from', 'throw', 'async', 'try', 'catch', 'await'],
+            'CSS': ['@', 'import'],
             'C++': ['std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'glm', 'spdlog'],
             'GLSL': ['for', 'if', 'else', 'return', 'continue', 'break'],
             'WGSL': ['const','for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'uniform'],
@@ -2619,7 +2620,13 @@ class CodeEditor {
     }
 
     _isCSSClass( token, prev, next ) {
-        return this.highlight == 'CSS' && prev == '.';
+
+        if( this.highlight != 'CSS' )
+            return false;
+
+        return  ( prev == '.' || prev == '::' 
+                || ( prev == ':' && next == '{' ) 
+                || ( token[ 0 ] == '#' && prev != ':' ) );
     }
 
     isNumber( token ) {
