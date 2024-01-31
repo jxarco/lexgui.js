@@ -1729,10 +1729,11 @@ class CodeEditor {
         var ln = (position[ 1 ] / this.lineHeight)|0;
 
         // Check out of range line
+        const outOfRange = ln > this.code.lines.length - 1;
         ln = Math.min( ln, this.code.lines.length - 1 );
 
         var ch = ( ( position[ 0 ] - parseInt( this.xPadding ) + 3) / this.charWidth )|0;
-        var string = this.code.lines[ ln ].slice( 0, ch );
+        var string = outOfRange ? this.code.lines[ ln ] : this.code.lines[ ln ].slice( 0, ch );
 
         // Move main cursor there...
         if( !e.altKey )
