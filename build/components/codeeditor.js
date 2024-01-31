@@ -1407,7 +1407,7 @@ class CodeEditor {
             ext == 'css' ? "fa-solid fa-hashtag dodgerblue" : 
             ext == 'xml' ? "fa-solid fa-rss orange" : 
             ext == 'bat' ? "fa-brands fa-windows lightblue" : 
-            [ 'js', 'py', 'json', 'cpp', 'rs' ].indexOf( ext ) > -1 ? "images/" + ext + ".png" : 
+            [ 'js', 'py', 'json', 'cpp', 'rs', 'md' ].indexOf( ext ) > -1 ? "images/" + ext + ".png" : 
             !isNewTabButton ? "fa-solid fa-align-left gray" : undefined;
     }
 
