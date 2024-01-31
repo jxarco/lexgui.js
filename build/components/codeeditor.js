@@ -1611,7 +1611,7 @@ class CodeEditor {
 
     processMouse( e ) {
 
-        if( !e.target.classList.contains('code') ) return;
+        if( !e.target.classList.contains('code') && !e.target.classList.contains('codetabsarea') ) return;
         if( !this.code ) return;
 
         var cursor = this._getCurrentCursor();
@@ -1619,11 +1619,8 @@ class CodeEditor {
         var mouse_pos = [(e.clientX - code_rect.x), (e.clientY - code_rect.y)];
 
         // Discard out of lines click...
-        if( e.type != 'contextmenu' )
-        {
-            var ln = (mouse_pos[1] / this.lineHeight)|0;
-            if(this.code.lines[ ln ] == undefined) return;
-        }
+        var ln = ( mouse_pos[ 1 ] / this.lineHeight ) | 0;
+        if( ln < 0 ) return;
 
         if( e.type == 'mousedown' )
         {
@@ -1731,8 +1728,8 @@ class CodeEditor {
         var position = [( e.clientX - code_rect.x ) + this.getScrollLeft(), (e.clientY - code_rect.y) + this.getScrollTop()];
         var ln = (position[ 1 ] / this.lineHeight)|0;
 
-        if( this.code.lines[ ln ] == undefined )
-            return;
+        // Check out of range line
+        ln = Math.min( ln, this.code.lines.length - 1 );
 
         var ch = ( ( position[ 0 ] - parseInt( this.xPadding ) + 3) / this.charWidth )|0;
         var string = this.code.lines[ ln ].slice( 0, ch );
