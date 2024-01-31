@@ -1094,7 +1094,7 @@ class CodeEditor {
 
         this._removeSecondaryCursors();
 
-        let cursor = this._getCurrentCursor();
+        let cursor = this._getCurrentCursor( true );
         let lastLine = new_lines.pop();
 
         this.cursorToLine( cursor, new_lines.length ); // Already substracted 1
@@ -1247,7 +1247,12 @@ class CodeEditor {
         return cursor;
     }
 
-    _getCurrentCursor() {
+    _getCurrentCursor( removeOthers ) {
+
+        if( removeOthers )
+        {
+            this._removeSecondaryCursors();
+        }
 
         return this.cursors.children[ 0 ];
     }
@@ -1425,7 +1430,7 @@ class CodeEditor {
         }
 
         this._removeSecondaryCursors();
-        var cursor = this._getCurrentCursor();
+        var cursor = this._getCurrentCursor( true );
 
         this.saveCursor( cursor, this.code.cursorState );    
 
@@ -2000,7 +2005,7 @@ class CodeEditor {
                 this._decreaseFontSize();
                 return;
             case 'arrowdown': // add cursor below only for the main cursor..
-                if( cursor.isMainCursor )
+                if( cursor.isMainCursor && this.code.lines[ lidx + 1 ] != undefined )
                 {
                     var new_cursor = this._addCursor( cursor.line, cursor.position );
                     this.lineDown( new_cursor );
@@ -3599,6 +3604,10 @@ class CodeEditor {
             return;
 
         this.codeScroller.scrollTo( 0, Math.max( line - 15 ) * this.lineHeight );
+
+        // Select line ?
+        var cursor = this._getCurrentCursor( true );
+        this.cursorToLine( cursor, line - 1, true );
     }
 
     _updateDataInfoPanel( signal, value ) {
