@@ -3663,6 +3663,16 @@ class CodeEditor {
         r.style.setProperty( "--code-editor-row-height", row_pixels + "px" );
         this.lineHeight = row_pixels;
 
+        // Relocate cursor
+
+        for( let cursor of this.cursors.children )
+        {
+            cursor._left = cursor.position * this.charWidth;
+            cursor.style.left = "calc(" + cursor._left + "px + " + this.xPadding + ")";
+            cursor._top = cursor.line * this.lineHeight;
+            cursor.style.top = "calc(" + cursor._top + "px)";
+        }
+
         this.processLines(); // ... it's necessary?
     }
 
@@ -3682,6 +3692,16 @@ class CodeEditor {
         var row_pixels = pixels + 6;
         r.style.setProperty( "--code-editor-row-height", row_pixels + "px" );
         this.lineHeight = row_pixels;
+
+        // Relocate cursor
+
+        for( let cursor of this.cursors.children )
+        {
+            cursor._left = cursor.position * this.charWidth;
+            cursor.style.left = "calc(" + cursor._left + "px + " + this.xPadding + ")";
+            cursor._top = cursor.line * this.lineHeight;
+            cursor.style.top = "calc(" + cursor._top + "px)";
+        }
 
         this.processLines(); // ... it's necessary?
     }
