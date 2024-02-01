@@ -864,27 +864,20 @@ class CodeEditor {
                 if( e.shiftKey ) {
                     if( !this.selection )
                         this.startSelection( cursor );
-
-                    const canGoDown = this.lineDown( cursor );
-                    var letter = this.getCharAtPos( cursor );
-
-                    if( !letter || !canGoDown ) {
-                        this.actions[ 'End' ].callback( cursor.line, cursor, e );
-                    }
-
-                    this.processSelection( e );
-                }
-                else
-                {
-                    if( this.code.lines[ ln + 1 ] == undefined ) 
-                        return;
-
+                } else {
                     this.endSelection();
-                    this.lineDown( cursor );
+                }
 
-                    // Go to end of line if out of line
-                    var letter = this.getCharAtPos( cursor );
-                    if( !letter ) this.actions['End'].callback(cursor.line, cursor, e);
+                const canGoDown = this.lineDown( cursor );
+                const letter = this.getCharAtPos( cursor );
+
+                // Go to end of line if out of range
+                if( !letter || !canGoDown ) {
+                    this.actions[ 'End' ].callback( cursor.line, cursor, e );
+                }
+
+                if( e.shiftKey ) {
+                    this.processSelection( e );
                 }
             } 
             // Move down autocomplete selection
