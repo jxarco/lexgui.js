@@ -5,6 +5,7 @@
   --global-font: 'Noto Sans', sans-serif; /*'Rubik', sans-serif; */
   --global-selected: #3e57e4;
   --global-selected-light: #7b8ae2;
+  --global-selected-dark: #344bccb7;
   --global-color-primary: #232323;
   --global-color-secondary: #343434;
   --global-color-terciary: #444;
@@ -1786,10 +1787,10 @@ meter::-webkit-meter-even-less-good-value {
   z-index: 102;
   position: absolute;
   padding-right: 20px;
-  border-bottom-left-radius: 6px;
-  border-bottom-right-radius: 6px;
-  box-shadow: 0 0 6px black !important;
+  border-radius: 4px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.788) !important;
   background-color: var(--global-blur-background);
+  border: 1px solid #91909036;
 }
 
 .lexcontextmenubox:before {
@@ -1802,13 +1803,14 @@ meter::-webkit-meter-even-less-good-value {
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   z-index:-1;
+  border-radius: 4px;
 }
 
 .lexcontextmenubox .lexcontextmenuentry {
   width: 100%;
   color: #c0c4cbe3;
   padding: 3px;
-  padding-left: 8px;
+  padding-left: 10px;
   padding-right: 10px;
   padding-bottom: 4px;
   cursor: pointer;
@@ -1816,7 +1818,16 @@ meter::-webkit-meter-even-less-good-value {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  border-left: 2px solid var(--global-selected-light);
+}
+
+.lexcontextmenubox .lexcontextmenuentry:first-child {
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+.lexcontextmenubox .lexcontextmenuentry:last-child {
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
 }
 
 .lexcontextmenubox .lexcontextmenuentry.cmtitle {
@@ -1848,17 +1859,17 @@ meter::-webkit-meter-even-less-good-value {
   float: right;
   margin-right: 0px;
   margin-top: 10px;
-  font-size: 11px;
+  font-size: 10px;
 }
 
 /* submenu specified arrow  */
 .lexcontextmenubox .lexcontextmenuentry a.fa-xs {
   float: right;
-  margin-top: -7px;
+  margin-top: -8px;
 }
 
 .lexcontextmenubox .lexcontextmenuentry:hover:not(.cmtitle) {
-  background-color: var(--global-selected);
+  background-color: var(--global-selected-dark);
   color: #f5f5f5;
 }
 
