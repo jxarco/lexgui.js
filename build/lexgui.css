@@ -1788,7 +1788,7 @@ meter::-webkit-meter-even-less-good-value {
   position: absolute;
   padding-right: 20px;
   border-radius: 4px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.788) !important;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.63) !important;
   background-color: var(--global-blur-background);
   border: 1px solid #91909036;
 }

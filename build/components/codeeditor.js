@@ -333,7 +333,7 @@ class CodeEditor {
 
         // Add main cursor
         {
-            this._addCursor( 0, 0, true );
+            this._addCursor( 0, 0, true, true );
 
             Object.defineProperty( this, 'line', {
                 get: (v) => { return this._getCurrentCursor().line }
@@ -739,14 +739,18 @@ class CodeEditor {
             if(idx > 0) this.cursorToString( cursor, prestring );
             this.setScrollLeft( 0 );
 
+            // Merge cursors
+            this.mergeCursors( ln );
+
             if( e.shiftKey && !e.cancelShift )
             {
                 // Get last selection range
                 if( this.selection ) 
-                lastX += this.selection.chars;
+                    lastX += this.selection.chars;
 
                 if( !this.selection )
                     this.startSelection( cursor );
+
                 var string = this.code.lines[ ln ].substring( idx, lastX );
                 if( this.selection.sameLine() )
                     this.selection.selectInline( idx, cursor.line, this.measureString( string ) );
@@ -781,6 +785,9 @@ class CodeEditor {
 
             const last_char = ( this.code.clientWidth / this.charWidth )|0;
             this.setScrollLeft( cursor.position >= last_char ? ( cursor.position - last_char ) * this.charWidth : 0 );
+
+            // Merge cursors
+            this.mergeCursors( ln );
         });
 
         this.action( 'Enter', true, ( ln, cursor, e ) => {
@@ -806,6 +813,7 @@ class CodeEditor {
             this.code.lines.splice( cursor.line + 1, 0, "" );
             this.code.lines[cursor.line + 1] = this.code.lines[ ln ].substr( cursor.position ); // new line (below)
             this.code.lines[ ln ] = this.code.lines[ ln ].substr( 0, cursor.position ); // line above
+
             this.lineDown( cursor, true );
 
             // Check indentation
@@ -1208,11 +1216,11 @@ class CodeEditor {
         }
     }
 
-    _addCursor( line = 0, position = 0, isMain = false ) {
+    _addCursor( line = 0, position = 0, force, isMain = false ) {
 
         // If cursor in that position exists, remove it instead..
         const exists = Array.from( this.cursors.children ).find( v => v.position == position && v.line == line );
-        if( exists )
+        if( exists && !force )
         {
             if( !exists.isMain )
                 exists.remove();
@@ -1983,9 +1991,21 @@ class CodeEditor {
         if( !this.code || e.srcElement.constructor != HTMLDivElement ) 
         return;
 
-        var key = e.key ?? e.detail.key;
+        const key = e.key ?? e.detail.key;
+        const target = e.detail.targetCursor;
+
+        if( target !== undefined )
+        {
+            this.processKeyAtTargetCursor( e, key, target );
+            return;
+        }
 
         // By cursor keys
+
+        this._lastProcessedCursorIndex = null;
+
+        var lastProcessedCursor = null;
+        var cursorOffset = new LX.vec2( 0, 0 );
 
         for( var i = 0; i < numCursors; i++ )
         {
@@ -1995,11 +2015,42 @@ class CodeEditor {
             if( !cursor )
                 break;
 
+            // Arrows don't modify code lines.. And only add offset if in the same line
+            if( lastProcessedCursor && lastProcessedCursor.line == cursor.line && !key.includes( 'Arrow' ) )
+            {
+                cursor.position += cursorOffset.x;
+                cursor.line += cursorOffset.y;
+
+                this.relocateCursors();
+            }
+
+            lastProcessedCursor = this.saveCursor( cursor );
+            this._lastProcessedCursorIndex = i;
+
             this._processKeyAtCursor( e, key, cursor );
+
+            cursorOffset.x += ( cursor.position - lastProcessedCursor.position );
+            cursorOffset.y += ( cursor.line - lastProcessedCursor.line );
         }
 
         // Global keys
 
+        this._processGlobalKeys( e, key );
+
+        // Clear tmp
+
+        delete this._lastProcessedCursorIndex;
+    }
+
+    async processKeyAtTargetCursor( e, key, targetIdx ) {
+
+        let cursor = this.cursors.children[ targetIdx ];
+
+        // We could delete secondary cursor while iterating..
+        if( !cursor )
+            return;
+
+        this._processKeyAtCursor( e, key, cursor );
         this._processGlobalKeys( e, key );
     }
 
@@ -2077,7 +2128,7 @@ class CodeEditor {
             case 'arrowdown': // add cursor below only for the main cursor..
                 if( isLastCursor && this.code.lines[ lidx + 1 ] != undefined )
                 {
-                    var new_cursor = this._addCursor( cursor.line, cursor.position );
+                    var new_cursor = this._addCursor( cursor.line, cursor.position, true );
                     this.lineDown( new_cursor );
                 }
                 return;
@@ -3086,6 +3137,26 @@ class CodeEditor {
         return cursors;
     }
 
+    relocateCursors() {
+
+        for( let cursor of this.cursors.children )
+        {
+            cursor._left = cursor.position * this.charWidth;
+            cursor.style.left = "calc(" + cursor._left + "px + " + this.xPadding + ")";
+            cursor._top = cursor.line * this.lineHeight;
+            cursor.style.top = "calc(" + cursor._top + "px)";
+        }
+    }
+
+    mergeCursors( line ) {
+
+        console.assert( line >= 0 );
+        const cursorsInLine = Array.from( this.cursors.children ).filter( v => v.line == line );
+
+        while( cursorsInLine.length > 1 )
+            cursorsInLine.pop().remove();
+    }
+
     restoreCursor( cursor, state ) {
 
         cursor.position = state.position ?? 0;
@@ -3128,7 +3199,8 @@ class CodeEditor {
         for( var i = 0; i < n; ++i ) {
             this.root.dispatchEvent( new CustomEvent( 'keydown', { 'detail': {
                 skip_undo: true,
-                key: ' '
+                key: ' ',
+                targetCursor: this._lastProcessedCursorIndex
             }}));
         }
     }
@@ -3754,15 +3826,9 @@ class CodeEditor {
         r.style.setProperty( "--code-editor-row-height", row_pixels + "px" );
         this.lineHeight = row_pixels;
 
-        // Relocate cursor
+        // Relocate cursors
 
-        for( let cursor of this.cursors.children )
-        {
-            cursor._left = cursor.position * this.charWidth;
-            cursor.style.left = "calc(" + cursor._left + "px + " + this.xPadding + ")";
-            cursor._top = cursor.line * this.lineHeight;
-            cursor.style.top = "calc(" + cursor._top + "px)";
-        }
+        this.relocateCursors();
 
         // Resize the code area
 
@@ -3786,15 +3852,9 @@ class CodeEditor {
         r.style.setProperty( "--code-editor-row-height", row_pixels + "px" );
         this.lineHeight = row_pixels;
 
-        // Relocate cursor
+        // Relocate cursors
 
-        for( let cursor of this.cursors.children )
-        {
-            cursor._left = cursor.position * this.charWidth;
-            cursor.style.left = "calc(" + cursor._left + "px + " + this.xPadding + ")";
-            cursor._top = cursor.line * this.lineHeight;
-            cursor.style.top = "calc(" + cursor._top + "px)";
-        }
+        this.relocateCursors();
 
         // Resize the code area
 
