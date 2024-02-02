@@ -3029,6 +3029,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     let domName = document.createElement('div');
                     domName.className = "lexwidgetname";
                     domName.innerHTML = name || "";
+                    domName.title = options.title ?? domName.innerHTML;
                     domName.style.width = options.nameWidth || LX.DEFAULT_NAME_WIDTH;
                     element.appendChild(domName);
                     element.domName = domName;
