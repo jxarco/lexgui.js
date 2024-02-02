@@ -1210,6 +1210,16 @@ class CodeEditor {
 
     _addCursor( line = 0, position = 0, isMain = false ) {
 
+        // If cursor in that position exists, remove it instead..
+        const exists = Array.from( this.cursors.children ).find( v => v.position == position && v.line == line );
+        if( exists )
+        {
+            if( !exists.isMain )
+                exists.remove();
+
+            return;
+        }
+
         let cursor = document.createElement( 'div' );
         cursor.className = "cursor";
         cursor.innerHTML = "&nbsp;";
@@ -2317,8 +2327,6 @@ class CodeEditor {
 
     processLines( mode ) {
         
-        const start = performance.now();
-
         var code_html = "";
         
         // Reset all lines content
@@ -3756,7 +3764,9 @@ class CodeEditor {
             cursor.style.top = "calc(" + cursor._top + "px)";
         }
 
-        this.processLines(); // ... it's necessary?
+        // Resize the code area
+
+        this.processLines();
     }
 
     _decreaseFontSize() {
@@ -3786,7 +3796,9 @@ class CodeEditor {
             cursor.style.top = "calc(" + cursor._top + "px)";
         }
 
-        this.processLines(); // ... it's necessary?
+        // Resize the code area
+
+        this.processLines();
     }
 
     _clearTmpVariables() {
