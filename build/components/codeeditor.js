@@ -118,7 +118,7 @@ class CodeSelection {
         this.editor.selections.appendChild(domEl);
 
         // Hide active line background
-        this.editor.code.childNodes.forEach( e => e.classList.remove( 'active-line' ) );
+        this._hideActiveLine();
     }
 };
 
@@ -2425,6 +2425,7 @@ class CodeEditor {
             if( !force ) // Single line update
             {
                 this.code.childNodes[ local_line_num ].innerHTML = gutter_line + html;
+                this._setActiveLine( linenum );
                 this._clearTmpVariables();
             }
             else // Update all lines at once
