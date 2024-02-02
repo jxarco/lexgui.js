@@ -550,6 +550,8 @@ class CodeEditor {
             'End', 'Tab', 'Escape'
         ];
 
+        this._blockCommentCache = [];
+
         // Convert reserved word arrays to maps so we can search tokens faster
 
         for( let lang in CodeEditor.keywords ) CodeEditor.keywords[lang] = CodeEditor.keywords[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
@@ -1278,6 +1280,8 @@ class CodeEditor {
 
             this.restoreCursor( currentCursor, step.cursors[ i ] );
         }
+
+        this._hideActiveLine();
     }
 
     _addRedoStep( cursor )  {
@@ -1767,8 +1771,7 @@ class CodeEditor {
         if( !this.selection )
             this.startSelection( cursor );
 
-        // Hide active line background
-        this.code.childNodes.forEach( e => e.classList.remove( 'active-line' ) );
+        this._hideActiveLine();
 
         // Update selection
         if( !keep_range )
@@ -2001,6 +2004,9 @@ class CodeEditor {
                 break;
             case 'g': // find line
                 this.showSearchLineBox();
+                break;
+            case 'k': // comment
+                this._commentLines();
                 break;
             case 's': // save
                 this.onsave( this.getText() );
@@ -2275,6 +2281,56 @@ class CodeEditor {
         this.hideAutoCompleteBox();
     }
 
+    _commentLines() {
+
+        if( this.selection )
+        {
+            this._addUndoStep( this._getCurrentCursor(), true );
+
+            // TODO
+            for( var i = this.selection.fromY; i <= this.selection.toY; ++i )
+            {
+                this._commentLine( i );
+            }
+        }
+        else
+        {
+            for( let cursor of this.cursors.children )
+            {
+                this._addUndoStep( cursor, true );
+                this._commentLine( cursor.line );
+            }
+        }
+
+        this.processLines();
+        this._hideActiveLine();
+    }
+
+    _commentLine( line ) {
+
+        const lang = this.languages[ this.highlight ];
+
+        if( !( lang.singleLineComments ?? true ))
+            return;
+
+        const token = lang.singleLineCommentToken ?? this.defaultSingleLineCommentToken;
+        const string = this.code.lines[ line ];
+
+        if( string.includes( token ) )
+        {
+            this.code.lines[ line ] = string.replaceAll( token + ' ', '' ).replaceAll( token, '' );
+        }
+        else
+        {
+            let idx = firstNonspaceIndex( string );
+            this.code.lines[ line ] = [
+                string.substring( 0, idx ),
+                token + ' ',
+                string.substring( idx )
+            ].join( '' );
+        }
+    }
+
     action( key, deleteSelection, fn ) {
 
         this.actions[ key ] = {
@@ -2309,6 +2365,7 @@ class CodeEditor {
     processLines( mode ) {
         
         var code_html = "";
+        this._blockCommentCache.length = 0;
         
         // Reset all lines content
         this.code.innerHTML = "";
@@ -2353,6 +2410,13 @@ class CodeEditor {
 
     processLine( linenum, force ) {
 
+        // Check if we are in block comment sections..
+        if( !force && this._inBlockCommentSection( linenum ) )
+        {
+            this.processLines();
+            return;
+        }
+
         const lang = this.languages[ this.highlight ];
         const local_line_num =  this.toLocalLine( linenum );
         const gutter_line = "<span class='line-gutter'>" + (linenum + 1) + "</span>";
@@ -2387,6 +2451,9 @@ class CodeEditor {
             return UPDATE_LINE( linestring );
         }
 
+        this._currentLineNumber = linenum;
+        this._currentLineString = linestring;
+
         const tokensToEvaluate = this._getTokensFromLine( linestring );
 
         if( !tokensToEvaluate.length )
@@ -2417,7 +2484,7 @@ class CodeEditor {
             {
                 const blockCommentsToken = ( lang.blockCommentsTokens ?? this.defaultBlockCommentTokens )[ 0 ];
                 if( token.substr( 0, blockCommentsToken.length ) == blockCommentsToken )
-                    this._buildingBlockComment = true;
+                    this._buildingBlockComment = linenum;
             }
 
             line_inner_html += this._evaluateToken( {
@@ -2465,8 +2532,6 @@ class CodeEditor {
     }
 
     _getTokensFromLine( linestring, skipNonWords ) {
-
-        this._currentLineString = linestring;
 
         // Check if line comment
         const ogLine = linestring;
@@ -2524,12 +2589,12 @@ class CodeEditor {
 
         if( this.highlight == 'C++' || this.highlight == 'CSS' )
         {
-            var idx = tokens.slice( offset ).findIndex( ( value, index ) => this.isNumber( value ) );
+            var idx = tokens.slice( offset ).findIndex( ( value, index ) => this._isNumber( value ) );
             if( idx > -1 )
             {
                 idx += offset; // Add offset to compute within the whole array of tokens
                 let data = tokens[ idx ] + tokens[ ++idx ];
-                while( this.isNumber( data ) )
+                while( this._isNumber( data ) )
                 {
                     tokens[ idx - 1 ] += tokens[ idx ];
                     tokens.splice( idx, 1 );
@@ -2577,7 +2642,7 @@ class CodeEditor {
         // Manage strings
         this._stringEnded = false;
 
-        if( usePreviousTokenToCheckString || ( !this._buildingBlockComment && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) ) )
+        if( usePreviousTokenToCheckString || ( this._buildingBlockComment === undefined && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) ) )
         {
             const checkIfStringEnded = t => {
                 const idx = Object.values( customStringKeys ).indexOf( t );
@@ -2641,7 +2706,7 @@ class CodeEditor {
             else if( token.substr( 0, singleLineCommentToken.length ) == singleLineCommentToken )
                 token_classname = "cm-com";
 
-            else if( this.isNumber( token ) || this.isNumber( token.replace(/[px]|[em]|%/g,'') ) )
+            else if( this._isNumber( token ) || this._isNumber( token.replace(/[px]|[em]|%/g,'') ) )
                 token_classname = "cm-dec";
 
             else if( this._isCSSClass( token, prev, next ) )
@@ -2678,9 +2743,10 @@ class CodeEditor {
                 token_classname = "cm-mtd";
 
 
-            if( usesBlockComments && this._buildingBlockComment 
+            if( usesBlockComments && this._buildingBlockComment != undefined 
                 && token.substr( 0, blockCommentsTokens[ 1 ].length ) == blockCommentsTokens[ 1 ] )
             {
+                this._blockCommentCache.push( new LX.vec2( this._buildingBlockComment, this._currentLineNumber ) );
                 delete this._buildingBlockComment;
             }
 
@@ -2729,14 +2795,25 @@ class CodeEditor {
     _enclosedByTokens( token, tokenIndex, tagStart, tagEnd ) {
 
         const tokenStartIndex = this._currentTokenPositions[ tokenIndex ];
-        const tagStartIndex = indexOfFrom(this._currentLineString, tagStart, tokenStartIndex, true );
+        const tagStartIndex = indexOfFrom( this._currentLineString, tagStart, tokenStartIndex, true );
         if( tagStartIndex < 0 ) // Not found..
             return;
-        const tagEndIndex = indexOfFrom(this._currentLineString, tagEnd, tokenStartIndex );
+        const tagEndIndex = indexOfFrom( this._currentLineString, tagEnd, tokenStartIndex );
         if( tagEndIndex < 0 ) // Not found..
             return;
 
         return ( tagStartIndex < tokenStartIndex ) && ( tagEndIndex >= ( tokenStartIndex + token.length ) );
+    }
+
+    _inBlockCommentSection( line ) {
+
+        for( var section of this._blockCommentCache )
+        {
+            if( line >= section.x && line <= section.y )
+                return true;
+        }
+
+        return false;
     }
 
     _isCSSClass( token, prev, next ) {
@@ -2749,20 +2826,20 @@ class CodeEditor {
                 || ( token[ 0 ] == '#' && prev != ':' ) );
     }
 
-    isNumber( token ) {
+    _isNumber( token ) {
 
         if(this.highlight == 'C++')
         {
             if( token.lastChar == 'f' )
-                return this.isNumber( token.substring(0, token.length - 1) )
+                return this._isNumber( token.substring(0, token.length - 1) )
             else if( token.lastChar == 'u' )
-                return !(token.includes('.')) && this.isNumber( token.substring(0, token.length - 1) );
+                return !(token.includes('.')) && this._isNumber( token.substring(0, token.length - 1) );
         }
 
         else if(this.highlight == 'CSS')
         {
             if( token.lastChar == '%' )
-                return this.isNumber( token.substring(0, token.length - 1) )
+                return this._isNumber( token.substring(0, token.length - 1) )
         }
         
         return token.length && token != ' ' && !Number.isNaN(+token);
@@ -3692,7 +3769,7 @@ class CodeEditor {
 
     goToLine( line ) {
 
-        if( !this.isNumber( line ) )
+        if( !this._isNumber( line ) )
             return;
 
         this.codeScroller.scrollTo( 0, Math.max( line - 15 ) * this.lineHeight );
@@ -3737,6 +3814,11 @@ class CodeEditor {
             line = this.code.childNodes[ new_local ];
             if( line ) line.classList.add( 'active-line' );
         }
+    }
+
+    _hideActiveLine() {
+
+        this.code.querySelectorAll( '.active-line' ).forEach( e => e.classList.remove( 'active-line' ) );
     }
 
     _increaseFontSize() {
@@ -3794,6 +3876,7 @@ class CodeEditor {
     _clearTmpVariables() {
 
         delete this._currentLineString;
+        delete this._currentLineNumber;
         delete this._buildingString; 
         delete this._pendingString;
         delete this._buildingBlockComment;
