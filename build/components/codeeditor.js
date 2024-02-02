@@ -26,7 +26,8 @@ function sliceChars( str, idx, n = 1 ) {
 }
 
 function firstNonspaceIndex( str ) {
-    return str.search(/\S|$/);
+    const index = str.search(/\S|$/)
+    return index < str.length ? index : -1;
 }
 
 function indexOfFrom( str, reg, from, reverse ) {
@@ -118,7 +119,7 @@ class CodeSelection {
         this.editor.selections.appendChild(domEl);
 
         // Hide active line background
-        this._hideActiveLine();
+        this.editor._hideActiveLine();
     }
 };
 
@@ -1159,7 +1160,7 @@ class CodeEditor {
 
             return;
         }
-
+         
         let cursor = document.createElement( 'div' );
         cursor.className = "cursor";
         cursor.innerHTML = "&nbsp;";
@@ -2316,13 +2317,16 @@ class CodeEditor {
         const token = lang.singleLineCommentToken ?? this.defaultSingleLineCommentToken;
         const string = this.code.lines[ line ];
 
+        let idx = firstNonspaceIndex( string );
+        if( idx == -1 )
+            return;
+
         if( string.includes( token ) )
         {
             this.code.lines[ line ] = string.replaceAll( token + ' ', '' ).replaceAll( token, '' );
         }
         else
         {
-            let idx = firstNonspaceIndex( string );
             this.code.lines[ line ] = [
                 string.substring( 0, idx ),
                 token + ' ',
