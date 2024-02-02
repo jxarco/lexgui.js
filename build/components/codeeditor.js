@@ -201,8 +201,8 @@ class CodeEditor {
     static WORD_TYPE_METHOD = 0;
     static WORD_TYPE_CLASS  = 1;
 
-    static CODE_MAX_FONT_SIZE = 22;
     static CODE_MIN_FONT_SIZE = 9;
+    static CODE_MAX_FONT_SIZE = 22;
 
     /**
      * @param {*} options
@@ -550,84 +550,14 @@ class CodeEditor {
             'End', 'Tab', 'Escape'
         ];
 
-        this.keywords = {
-            'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof', 'debugger', 'abstract',
-                          'arguments', 'extends', 'instanceof'],
-            'C++': ['int', 'float', 'double', 'bool', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'nullptr', 
-                    'NULL', 'unsigned', 'namespace'],
-            'JSON': ['true', 'false'],
-            'GLSL': ['true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4', 'struct'],
-            'CSS': ['body', 'html', 'canvas', 'div', 'input', 'span', '.'],
-            'WGSL': ['var', 'let', 'true', 'false', 'fn', 'bool', 'u32', 'i32', 'f16', 'f32', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array', 'atomic', 'struct',
-                    'sampler', 'sampler_comparison', 'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array', 'texture_depth_multisampled_2d',
-                    'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d', 'texture_storage_2d',
-                    'texture_storage_2d_array', 'texture_storage_3d'],
-            'Rust': ['as', 'const', 'crate', 'enum', 'extern', 'false', 'fn', 'impl', 'in', 'let', 'mod', 'move', 'mut', 'pub', 'ref', 'self', 'Self', 'static', 'struct', 'super', 'trait', 'true', 
-                     'type', 'unsafe', 'use', 'where', 'abstract', 'become', 'box', 'final', 'macro', 'override', 'priv', 'typeof', 'unsized', 'virtual'],
-            'Python': ['False', 'def', 'None', 'True', 'in', 'is', 'and', 'lambda', 'nonlocal', 'not', 'or'],
-            'Batch': ['set', 'SET', 'echo', 'ECHO', 'off', 'OFF', 'del', 'DEL', 'defined', 'DEFINED', 'setlocal', 'SETLOCAL', 'enabledelayedexpansion', 'ENABLEDELAYEDEXPANSION', 'driverquery', 
-                      'DRIVERQUERY', 'print', 'PRINT'],
-            'HTML': ['html', 'meta', 'title', 'link', 'script', 'body', 'DOCTYPE', 'head', 'br', 'i', 'a', 'li', 'img', 'tr', 'td', 'h1', 'h2', 'h3', 'h4', 'h5'],
-            'Markdown': ['br', 'i', 'a', 'li', 'img', 'table', 'title', 'tr', 'td', 'h1', 'h2', 'h3', 'h4', 'h5'],
-        };
-        this.utils = { // These ones don't have hightlight, used as suggestions to autocomplete only...
-            'JavaScript': ['querySelector', 'body', 'addEventListener', 'removeEventListener', 'remove', 'sort', 'keys', 'filter', 'isNaN', 'parseFloat', 'parseInt', 'EPSILON', 'isFinite',
-                          'bind', 'prototype', 'length', 'assign', 'entries', 'values', 'concat', 'substring', 'substr', 'splice', 'slice', 'buffer', 'appendChild', 'createElement', 'prompt',
-                          'alert'],
-            'WGSL': ['textureSample'],
-            'Python': ['abs', 'all', 'any', 'ascii', 'bin', 'bool', 'bytearray', 'bytes', 'callable', 'chr', 'classmethod', 'compile', 'complex', 'delattr', 'dict', 'dir', 'divmod', 
-                      'enumerate', 'eval', 'exec', 'filter', 'float', 'format', 'frozenset', 'getattr', 'globals', 'hasattr', 'hash', 'help', 'hex', 'id', 'input', 'int', 'isinstance',
-                      'issubclass', 'iter', 'len', 'list', 'locals', 'map', 'max', 'memoryview', 'min', 'next', 'object', 'oct', 'open', 'ord', 'pow', 'print', 'property', 'range', 'repr', 
-                      'reversed', 'round', 'set', 'setattr', 'slice', 'sorted', 'staticmethod', 'str', 'sum', 'super', 'tuple', 'type', 'vars', 'zip']
-        };
-        this.types = {
-            'JavaScript': ['Object', 'String', 'Function', 'Boolean', 'Symbol', 'Error', 'Number', 'TextEncoder', 'TextDecoder'],
-            'Rust': ['u128'],
-            'Python': ['int', 'type', 'float', 'map', 'list', 'ArithmeticError', 'AssertionError', 'AttributeError', 'Exception', 'EOFError', 'FloatingPointError', 'GeneratorExit', 
-                      'ImportError', 'IndentationError', 'IndexError', 'KeyError', 'KeyboardInterrupt', 'LookupError', 'MemoryError', 'NameError', 'NotImplementedError', 'OSError',
-                      'OverflowError', 'ReferenceError', 'RuntimeError', 'StopIteration', 'SyntaxError', 'TabError', 'SystemError', 'SystemExit', 'TypeError', 'UnboundLocalError', 
-                      'UnicodeError', 'UnicodeEncodeError', 'UnicodeDecodeError', 'UnicodeTranslateError', 'ValueError', 'ZeroDivisionError'],
-            'C++': ['uint8_t', 'uint16_t', 'uint32_t']
-        };
-        this.builtin = {
-            'JavaScript': ['document', 'console', 'window', 'navigator', 'performance'],
-            'CSS': ['*', '!important'],
-            'C++': ['vector', 'list', 'map'],
-            'HTML': ['type', 'xmlns', 'PUBLIC', 'http-equiv', 'src', 'style', 'lang', 'href', 'rel', 'content', 'xml', 'alt'], // attributes
-            'Markdown': ['type', 'src', 'style', 'lang', 'href', 'rel', 'content', 'valign', 'alt'], // attributes
-        };
-        this.statementsAndDeclarations = {
-            'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'from', 'throw', 'async', 'try', 'catch', 'await'],
-            'CSS': ['@', 'import'],
-            'C++': ['std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'glm', 'spdlog'],
-            'GLSL': ['for', 'if', 'else', 'return', 'continue', 'break'],
-            'WGSL': ['const','for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'uniform'],
-            'Rust': ['break', 'else', 'continue', 'for', 'if', 'loop', 'match', 'return', 'while', 'do', 'yield'],
-            'Python': ['if', 'raise', 'del', 'import', 'return', 'elif', 'try', 'else', 'while', 'as', 'except', 'with', 'assert', 'finally', 'yield', 'break', 'for', 'class', 'continue', 
-                      'global', 'pass'],
-            'Batch': ['if', 'IF', 'for', 'FOR', 'in', 'IN', 'do', 'DO', 'call', 'CALL', 'goto', 'GOTO', 'exit', 'EXIT']
-        };
-        this.symbols = {
-            'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
-            'C++': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '::', '*', '-', '+'],
-            'JSON': ['[', ']', '{', '}', '(', ')'],
-            'GLSL': ['[', ']', '{', '}', '(', ')'],
-            'WGSL': ['[', ']', '{', '}', '(', ')', '->'],
-            'CSS': ['{', '}', '(', ')', '*'],
-            'Rust': ['<', '>', '[', ']', '(', ')', '='],
-            'Python': ['<', '>', '[', ']', '(', ')', '='],
-            'Batch': ['[', ']', '(', ')', '%'],
-            'HTML': ['<', '>', '/']
-        };
-
         // Convert reserved word arrays to maps so we can search tokens faster
 
-        for( let lang in this.keywords ) this.keywords[lang] = this.keywords[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
-        for( let lang in this.utils ) this.utils[lang] = this.utils[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
-        for( let lang in this.types ) this.types[lang] = this.types[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
-        for( let lang in this.builtin ) this.builtin[lang] = this.builtin[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
-        for( let lang in this.statementsAndDeclarations ) this.statementsAndDeclarations[lang] = this.statementsAndDeclarations[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
-        for( let lang in this.symbols ) this.symbols[lang] = this.symbols[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+        for( let lang in CodeEditor.keywords ) CodeEditor.keywords[lang] = CodeEditor.keywords[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+        for( let lang in CodeEditor.utils ) CodeEditor.utils[lang] = CodeEditor.utils[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+        for( let lang in CodeEditor.types ) CodeEditor.types[lang] = CodeEditor.types[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+        for( let lang in CodeEditor.builtin ) CodeEditor.builtin[lang] = CodeEditor.builtin[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+        for( let lang in CodeEditor.statementsAndDeclarations ) CodeEditor.statementsAndDeclarations[lang] = CodeEditor.statementsAndDeclarations[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+        for( let lang in CodeEditor.symbols ) CodeEditor.symbols[lang] = CodeEditor.symbols[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
 
         // Action keys
 
@@ -2696,16 +2626,16 @@ class CodeEditor {
             else if( this._buildingString != undefined )
                 discardToken = this._appendStringToken( token );
             
-            else if( this._mustHightlightWord( token, this.keywords ) && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) )
+            else if( this._mustHightlightWord( token, CodeEditor.keywords ) && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) )
                 token_classname = "cm-kwd";
 
-            else if( this._mustHightlightWord( token, this.builtin ) && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) )
+            else if( this._mustHightlightWord( token, CodeEditor.builtin ) && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) )
                 token_classname = "cm-bln";
 
-            else if( this._mustHightlightWord( token, this.statementsAndDeclarations ) )
+            else if( this._mustHightlightWord( token, CodeEditor.statementsAndDeclarations ) )
                 token_classname = "cm-std";
 
-            else if( this._mustHightlightWord( token, this.symbols ) )
+            else if( this._mustHightlightWord( token, CodeEditor.symbols ) )
                 token_classname = "cm-sym";
 
             else if( token.substr( 0, singleLineCommentToken.length ) == singleLineCommentToken )
@@ -2841,7 +2771,7 @@ class CodeEditor {
     _isType( token, prev, next ) {
         
         // Common case
-        if( this._mustHightlightWord( token, this.types ) )
+        if( this._mustHightlightWord( token, CodeEditor.types ) )
             return true;
 
         if( this.highlight == 'JavaScript' )
@@ -2854,7 +2784,7 @@ class CodeEditor {
         }
         else if ( this.highlight == 'WGSL' )
         {
-            const is_kwd = !this._mustHightlightWord( token, this.keywords );
+            const is_kwd = !this._mustHightlightWord( token, CodeEditor.keywords );
             return (prev == 'struct' && next == '{') || 
             ( is_kwd && 
                 ( prev == ':' && next == ')' || prev == ':' && next == ',' || prev == '>' && next == '{' 
@@ -3486,11 +3416,11 @@ class CodeEditor {
 
         // Add language special keys...
         suggestions = suggestions.concat(   
-            Object.keys( this.builtin[ this.highlight ] ?? {} ),
-            Object.keys( this.keywords[ this.highlight ] ?? {} ),
-            Object.keys( this.statementsAndDeclarations[ this.highlight ] ?? {} ),
-            Object.keys( this.types[ this.highlight ] ?? {} ),
-            Object.keys( this.utils[ this.highlight ] ?? {} )
+            Object.keys( CodeEditor.builtin[ this.highlight ] ?? {} ),
+            Object.keys( CodeEditor.keywords[ this.highlight ] ?? {} ),
+            Object.keys( CodeEditor.statementsAndDeclarations[ this.highlight ] ?? {} ),
+            Object.keys( CodeEditor.types[ this.highlight ] ?? {} ),
+            Object.keys( CodeEditor.utils[ this.highlight ] ?? {} )
         );
 
         // Add words in current tab plus remove current word
@@ -3512,9 +3442,9 @@ class CodeEditor {
 
             var icon = document.createElement( 'a' );
             
-            if( this._mustHightlightWord( s, this.utils ) )
+            if( this._mustHightlightWord( s, CodeEditor.utils ) )
                 icon.className = "fa fa-cube";
-            else if( this._mustHightlightWord( s, this.types ) )
+            else if( this._mustHightlightWord( s, CodeEditor.types ) )
                 icon.className = "fa fa-code";
             else
                 icon.className = "fa fa-font";
@@ -3870,6 +3800,87 @@ class CodeEditor {
         delete this._markdownHeader;
     }
 }
+
+CodeEditor.keywords = {
+
+    'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof', 'debugger', 'abstract',
+                  'arguments', 'extends', 'instanceof'],
+    'C++': ['int', 'float', 'double', 'bool', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'nullptr', 
+            'NULL', 'unsigned', 'namespace'],
+    'JSON': ['true', 'false'],
+    'GLSL': ['true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4', 'struct'],
+    'CSS': ['body', 'html', 'canvas', 'div', 'input', 'span', '.'],
+    'WGSL': ['var', 'let', 'true', 'false', 'fn', 'bool', 'u32', 'i32', 'f16', 'f32', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array', 'atomic', 'struct',
+            'sampler', 'sampler_comparison', 'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array', 'texture_depth_multisampled_2d',
+            'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d', 'texture_storage_2d',
+            'texture_storage_2d_array', 'texture_storage_3d'],
+    'Rust': ['as', 'const', 'crate', 'enum', 'extern', 'false', 'fn', 'impl', 'in', 'let', 'mod', 'move', 'mut', 'pub', 'ref', 'self', 'Self', 'static', 'struct', 'super', 'trait', 'true', 
+             'type', 'unsafe', 'use', 'where', 'abstract', 'become', 'box', 'final', 'macro', 'override', 'priv', 'typeof', 'unsized', 'virtual'],
+    'Python': ['False', 'def', 'None', 'True', 'in', 'is', 'and', 'lambda', 'nonlocal', 'not', 'or'],
+    'Batch': ['set', 'SET', 'echo', 'ECHO', 'off', 'OFF', 'del', 'DEL', 'defined', 'DEFINED', 'setlocal', 'SETLOCAL', 'enabledelayedexpansion', 'ENABLEDELAYEDEXPANSION', 'driverquery', 
+              'DRIVERQUERY', 'print', 'PRINT'],
+    'HTML': ['html', 'meta', 'title', 'link', 'script', 'body', 'DOCTYPE', 'head', 'br', 'i', 'a', 'li', 'img', 'tr', 'td', 'h1', 'h2', 'h3', 'h4', 'h5'],
+    'Markdown': ['br', 'i', 'a', 'li', 'img', 'table', 'title', 'tr', 'td', 'h1', 'h2', 'h3', 'h4', 'h5'],
+};
+
+CodeEditor.utils = { // These ones don't have hightlight, used as suggestions to autocomplete only...
+
+    'JavaScript': ['querySelector', 'body', 'addEventListener', 'removeEventListener', 'remove', 'sort', 'keys', 'filter', 'isNaN', 'parseFloat', 'parseInt', 'EPSILON', 'isFinite',
+                  'bind', 'prototype', 'length', 'assign', 'entries', 'values', 'concat', 'substring', 'substr', 'splice', 'slice', 'buffer', 'appendChild', 'createElement', 'prompt',
+                  'alert'],
+    'WGSL': ['textureSample'],
+    'Python': ['abs', 'all', 'any', 'ascii', 'bin', 'bool', 'bytearray', 'bytes', 'callable', 'chr', 'classmethod', 'compile', 'complex', 'delattr', 'dict', 'dir', 'divmod', 
+              'enumerate', 'eval', 'exec', 'filter', 'float', 'format', 'frozenset', 'getattr', 'globals', 'hasattr', 'hash', 'help', 'hex', 'id', 'input', 'int', 'isinstance',
+              'issubclass', 'iter', 'len', 'list', 'locals', 'map', 'max', 'memoryview', 'min', 'next', 'object', 'oct', 'open', 'ord', 'pow', 'print', 'property', 'range', 'repr', 
+              'reversed', 'round', 'set', 'setattr', 'slice', 'sorted', 'staticmethod', 'str', 'sum', 'super', 'tuple', 'type', 'vars', 'zip']
+};
+
+CodeEditor.types = {
+
+    'JavaScript': ['Object', 'String', 'Function', 'Boolean', 'Symbol', 'Error', 'Number', 'TextEncoder', 'TextDecoder'],
+    'Rust': ['u128'],
+    'Python': ['int', 'type', 'float', 'map', 'list', 'ArithmeticError', 'AssertionError', 'AttributeError', 'Exception', 'EOFError', 'FloatingPointError', 'GeneratorExit', 
+              'ImportError', 'IndentationError', 'IndexError', 'KeyError', 'KeyboardInterrupt', 'LookupError', 'MemoryError', 'NameError', 'NotImplementedError', 'OSError',
+              'OverflowError', 'ReferenceError', 'RuntimeError', 'StopIteration', 'SyntaxError', 'TabError', 'SystemError', 'SystemExit', 'TypeError', 'UnboundLocalError', 
+              'UnicodeError', 'UnicodeEncodeError', 'UnicodeDecodeError', 'UnicodeTranslateError', 'ValueError', 'ZeroDivisionError'],
+    'C++': ['uint8_t', 'uint16_t', 'uint32_t']
+};
+
+CodeEditor.builtin = {
+
+    'JavaScript': ['document', 'console', 'window', 'navigator', 'performance'],
+    'CSS': ['*', '!important'],
+    'C++': ['vector', 'list', 'map'],
+    'HTML': ['type', 'xmlns', 'PUBLIC', 'http-equiv', 'src', 'style', 'lang', 'href', 'rel', 'content', 'xml', 'alt'], // attributes
+    'Markdown': ['type', 'src', 'style', 'lang', 'href', 'rel', 'content', 'valign', 'alt'], // attributes
+};
+
+CodeEditor.statementsAndDeclarations = {
+
+    'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'from', 'throw', 'async', 'try', 'catch', 'await'],
+    'CSS': ['@', 'import'],
+    'C++': ['std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'glm', 'spdlog'],
+    'GLSL': ['for', 'if', 'else', 'return', 'continue', 'break'],
+    'WGSL': ['const','for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'uniform'],
+    'Rust': ['break', 'else', 'continue', 'for', 'if', 'loop', 'match', 'return', 'while', 'do', 'yield'],
+    'Python': ['if', 'raise', 'del', 'import', 'return', 'elif', 'try', 'else', 'while', 'as', 'except', 'with', 'assert', 'finally', 'yield', 'break', 'for', 'class', 'continue', 
+              'global', 'pass'],
+    'Batch': ['if', 'IF', 'for', 'FOR', 'in', 'IN', 'do', 'DO', 'call', 'CALL', 'goto', 'GOTO', 'exit', 'EXIT']
+};
+
+CodeEditor.symbols = {
+
+    'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
+    'C++': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '::', '*', '-', '+'],
+    'JSON': ['[', ']', '{', '}', '(', ')'],
+    'GLSL': ['[', ']', '{', '}', '(', ')'],
+    'WGSL': ['[', ']', '{', '}', '(', ')', '->'],
+    'CSS': ['{', '}', '(', ')', '*'],
+    'Rust': ['<', '>', '[', ']', '(', ')', '='],
+    'Python': ['<', '>', '[', ']', '(', ')', '='],
+    'Batch': ['[', ']', '(', ')', '%'],
+    'HTML': ['<', '>', '/']
+};
 
 LX.CodeEditor = CodeEditor;
 
