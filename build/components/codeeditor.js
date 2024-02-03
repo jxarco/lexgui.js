@@ -2601,11 +2601,6 @@ class CodeEditor {
                 var matches = (linestring.substring( 0, idx ).match( re ) || []);
                 return (matches.length % 2) !== 0; 
             } );
-            err |= stringKeys.some( function(v) { 
-                var re = new RegExp( v, "g" ); 
-                var matches = (linestring.substring( idx ).match( re ) || []);
-                return (matches.length % 2) !== 0; 
-            } );
             return err ? undefined : idx;
         }
     }
