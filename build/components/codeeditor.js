@@ -814,7 +814,7 @@ class CodeEditor {
 
                 // Go to end of line if out of range
                 if( !letter || !canGoDown ) {
-                    this.actions[ 'End' ].callback( cursor.line, cursor, e );
+                    this.cursorToPosition( cursor, Math.max(this.code.lines[ cursor.line ].length, 0) );
                 }
 
                 if( e.shiftKey ) {
