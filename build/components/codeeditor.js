@@ -494,7 +494,8 @@ class CodeEditor {
         this.state = {
             focused: false,
             selectingText: false,
-            activeLine: null
+            activeLine: null,
+            keyChain: null
         }
 
         // Code
@@ -1928,13 +1929,20 @@ class CodeEditor {
         const key = e.key ?? e.detail.key;
         const target = e.detail.targetCursor;
 
+        // Global keys
+
+        if( this._processGlobalKeys( e, key ) ) {
+            // Stop propagation..
+            return;
+        }
+
+        // By cursor keys
+
         if( target !== undefined )
         {
             this.processKeyAtTargetCursor( e, key, target );
             return;
         }
-
-        // By cursor keys
 
         this._lastProcessedCursorIndex = null;
 
@@ -1967,10 +1975,6 @@ class CodeEditor {
             cursorOffset.y += ( cursor.line - lastProcessedCursor.line );
         }
 
-        // Global keys
-
-        this._processGlobalKeys( e, key );
-
         // Clear tmp
 
         delete this._lastProcessedCursorIndex;
@@ -1988,7 +1992,7 @@ class CodeEditor {
         this._processGlobalKeys( e, key );
     }
 
-    async _processGlobalKeys( e, key ) {
+    _processGlobalKeys( e, key ) {
 
         let cursor = this._getCurrentCursor();
 
@@ -1999,33 +2003,48 @@ class CodeEditor {
             switch( key.toLowerCase() ) {
             case 'a': // select all
                 this.selectAll();
-                break;
+                return true;
+            case 'c': // k+c, comment line
+                if( this.state.keyChain == 'k' ) {
+                    this._commentLines();
+                    return true;
+                }
+                return false;
             case 'f': // find/search
                 this.showSearchBox();
-                break;
+                return true;
             case 'g': // find line
                 this.showSearchLineBox();
-                break;
-            case 'k': // comment
-                this._commentLines();
-                break;
+                return true;
+            case 'k': // shortcut chain
+                this.state.keyChain = 'k';
+                return true;
             case 's': // save
                 this.onsave( this.getText() );
-                break;
+                return true;
+            case 'u': // k+u, uncomment line
+                if( this.state.keyChain == 'k' ) {
+                    this._uncommentLines();
+                    return true;
+                }
+                return false;
             case 'y': // redo
                 this._doRedo( cursor );
-                break;
+                return true;
             case 'z': // undo
                 this._doUndo( cursor );
-                break;
+                return true;
             case '+': // increase size
                 this._increaseFontSize();
-                break;
+                return true;
             case '-': // decrease size
                 this._decreaseFontSize();
-                break;
+                return true;
             }
         }
+
+        this.state.keyChain = null;
+        return false;
     }
 
     async _processKeyAtCursor( e, key, cursor ) {
@@ -2284,14 +2303,22 @@ class CodeEditor {
 
     _commentLines() {
 
+        this.state.keyChain = null;
+
         if( this.selection )
         {
-            this._addUndoStep( this._getCurrentCursor(), true );
+            var cursor = this._getCurrentCursor();
+            this._addUndoStep( cursor, true );
 
-            // TODO
+            const selectedLines = this.code.lines.slice( this.selection.fromY, this.selection.toY );
+            const minIdx = Math.min(...selectedLines.map( v => {
+                var idx = firstNonspaceIndex( v );
+                return idx < 0 ? 1e10 : idx;
+            } ));
+
             for( var i = this.selection.fromY; i <= this.selection.toY; ++i )
             {
-                this._commentLine( i );
+                this._commentLine( cursor, i, minIdx );
             }
         }
         else
@@ -2299,7 +2326,7 @@ class CodeEditor {
             for( let cursor of this.cursors.children )
             {
                 this._addUndoStep( cursor, true );
-                this._commentLine( cursor.line );
+                this._commentLine( cursor, cursor.line );
             }
         }
 
@@ -2307,7 +2334,60 @@ class CodeEditor {
         this._hideActiveLine();
     }
 
-    _commentLine( line ) {
+    _commentLine( cursor, line, minNonspaceIdx ) {
+
+        const lang = this.languages[ this.highlight ];
+
+        if( !( lang.singleLineComments ?? true ))
+            return;
+
+        const token = ( lang.singleLineCommentToken ?? this.defaultSingleLineCommentToken ) + ' ';
+        const string = this.code.lines[ line ];
+
+        let idx = firstNonspaceIndex( string );
+        if( idx > -1 )
+        {
+            // Update idx using min of the selected lines (if necessary..)
+            idx = minNonspaceIdx ?? idx;
+
+            this.code.lines[ line ] = [
+                string.substring( 0, idx ),
+                token,
+                string.substring( idx )
+            ].join( '' );
+
+            this.cursorToString( cursor, token );
+        }
+    }
+
+    _uncommentLines() {
+
+        this.state.keyChain = null;
+
+        if( this.selection )
+        {
+            var cursor = this._getCurrentCursor();
+            this._addUndoStep( cursor, true );
+
+            for( var i = this.selection.fromY; i <= this.selection.toY; ++i )
+            {
+                this._uncommentLine( cursor, i );
+            }
+        }
+        else
+        {
+            for( let cursor of this.cursors.children )
+            {
+                this._addUndoStep( cursor, true );
+                this._uncommentLine( cursor, cursor.line );
+            }
+        }
+
+        this.processLines();
+        this._hideActiveLine();
+    }
+
+    _uncommentLine( cursor, line ) {
 
         const lang = this.languages[ this.highlight ];
 
@@ -2317,21 +2397,15 @@ class CodeEditor {
         const token = lang.singleLineCommentToken ?? this.defaultSingleLineCommentToken;
         const string = this.code.lines[ line ];
 
-        let idx = firstNonspaceIndex( string );
-        if( idx == -1 )
-            return;
-
         if( string.includes( token ) )
         {
-            this.code.lines[ line ] = string.replaceAll( token + ' ', '' ).replaceAll( token, '' );
-        }
-        else
-        {
-            this.code.lines[ line ] = [
-                string.substring( 0, idx ),
-                token + ' ',
-                string.substring( idx )
-            ].join( '' );
+            this.code.lines[ line ] = string.replace( token + ' ', '' );
+
+            // try deleting token + space, and then if not, delete only the token
+            if( string.length == this.code.lines[ line ].length )
+                this.code.lines[ line ] = string.replace( token, '' );
+
+            this.cursorToString( cursor, 'X'.repeat( Math.abs( string.length - this.code.lines[ line ].length ) ), true );
         }
     }
 
