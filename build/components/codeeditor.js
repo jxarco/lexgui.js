@@ -2792,7 +2792,7 @@ class CodeEditor {
             else if ( highlight == 'batch' && ( token == '@' || prev == ':' || prev == '@' ) )
                 token_classname = "cm-kwd";
 
-            else if ( highlight == 'cpp' && token.includes( '#' ) ) // C++ preprocessor
+            else if ( [ 'cpp', 'wgsl', 'glsl' ].indexOf( highlight ) > -1 && token.includes( '#' ) ) // C++ preprocessor
                 token_classname = "cm-ppc";
 
             else if ( highlight == 'cpp' && prev == '<' && (next == '>' || next == '*') ) // Defining template type in C++
@@ -2910,6 +2910,12 @@ class CodeEditor {
                 return !(token.includes('.')) && this._isNumber( token.substring(0, token.length - 1) );
         }
 
+        else if(this.highlight == 'WGSL')
+        {
+            if( token.lastChar == 'u' )
+                return !(token.includes('.')) && this._isNumber( token.substring(0, token.length - 1) );
+        }
+
         else if(this.highlight == 'CSS')
         {
             if( token.lastChar == '%' )
@@ -2935,11 +2941,12 @@ class CodeEditor {
         }
         else if ( this.highlight == 'WGSL' )
         {
-            const is_kwd = !this._mustHightlightWord( token, CodeEditor.keywords );
-            return (prev == 'struct' && next == '{') || 
-            ( is_kwd && 
+            const not_kwd = !this._mustHightlightWord( token, CodeEditor.keywords );
+            return  (prev == 'struct' && next == '{') || 
+                    (not_kwd && prev == ':' && next == ';') || 
+            ( not_kwd && 
                 ( prev == ':' && next == ')' || prev == ':' && next == ',' || prev == '>' && next == '{' 
-                    || prev == '<' && next == ',' || prev == '<' && next == '>' || prev == '>' && !next ));
+                    || prev == '<' && next == ',' || prev == '<' && next == '>' || prev == '>' && token != ';' && !next ));
         }
     }
 
@@ -3970,7 +3977,7 @@ CodeEditor.keywords = {
     'WGSL': ['var', 'let', 'true', 'false', 'fn', 'bool', 'u32', 'i32', 'f16', 'f32', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array', 'atomic', 'struct',
             'sampler', 'sampler_comparison', 'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array', 'texture_depth_multisampled_2d',
             'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d', 'texture_storage_2d',
-            'texture_storage_2d_array', 'texture_storage_3d'],
+            'texture_storage_2d_array', 'texture_storage_3d', 'vec2u', 'vec3u', 'vec4u'],
     'Rust': ['as', 'const', 'crate', 'enum', 'extern', 'false', 'fn', 'impl', 'in', 'let', 'mod', 'move', 'mut', 'pub', 'ref', 'self', 'Self', 'static', 'struct', 'super', 'trait', 'true', 
              'type', 'unsafe', 'use', 'where', 'abstract', 'become', 'box', 'final', 'macro', 'override', 'priv', 'typeof', 'unsized', 'virtual'],
     'Python': ['False', 'def', 'None', 'True', 'in', 'is', 'and', 'lambda', 'nonlocal', 'not', 'or'],
@@ -4018,7 +4025,7 @@ CodeEditor.statementsAndDeclarations = {
     'CSS': ['@', 'import'],
     'C++': ['std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'glm', 'spdlog'],
     'GLSL': ['for', 'if', 'else', 'return', 'continue', 'break'],
-    'WGSL': ['const','for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'uniform'],
+    'WGSL': ['const','for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'read_write', 'uniform', 'function', 'workgroup'],
     'Rust': ['break', 'else', 'continue', 'for', 'if', 'loop', 'match', 'return', 'while', 'do', 'yield'],
     'Python': ['if', 'raise', 'del', 'import', 'return', 'elif', 'try', 'else', 'while', 'as', 'except', 'with', 'assert', 'finally', 'yield', 'break', 'for', 'class', 'continue', 
               'global', 'pass'],

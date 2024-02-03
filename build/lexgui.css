@@ -3125,7 +3125,7 @@ pre .line-gutter {
 
 /* Common */
 .cm-str { color: #ca7d59; }   /* string */
-.cm-std { color: #cf6dcf; }   /* statements & declarations */
+.cm-std { color: #d181d1; }   /* statements & declarations */
 .cm-kwd { color: #2194ce; }   /* keyword */
 .cm-com { color: #5cab5a; }   /* comment */
 
@@ -3152,16 +3152,16 @@ pre .line-gutter {
 .cm-sym.json { color: #cf6dcf; }  /* symbol */
 
 .cm-typ.glsl { color: #36c0b0; }  /* type */
-.cm-bln.glsl { color: #cfc159; }  /* builtin */
 .cm-dec.glsl { color: #b1ce9b; }  /* decimal */
 .cm-sym.glsl { color: #f9cb20; }  /* symbol */
 .cm-mtd.glsl { color: #e0cc68; }  /* method */
 
 .cm-typ.wgsl { color: #36c0b0; }  /* type */
-.cm-bln.wgsl { color: #cfc159; }  /* builtin */
 .cm-dec.wgsl { color: #b1ce9b; }  /* decimal */
+.cm-mtd.wgsl { color: #dfe093; }  /* method */
 .cm-sym.wgsl { color: #f9cb20; }  /* symbol */
-.cm-mtd.wgsl { color: #e0cc68; }  /* method */
+.cm-ppc.wgsl { color: #99caf1; }  /* preprocessor */
+
 
 .cm-typ.rust { color: #36c0b0; }  /* type */
 .cm-dec.rust { color: #b1ce9b; }  /* decimal */
