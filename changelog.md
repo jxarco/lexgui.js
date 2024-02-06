@@ -1,5 +1,16 @@
 # lexgui.js changelog
 
+## 0.1.25
+
+Code Editor:
+- Added Ctrl+K + C/U Shortcuts to Comment/Uncomment lines.
+- Improved WGSL highlighting.
+- Minor bug fixes.
+
+Added title attribute by default to Widget Name Dom elements.
+Added value getter/setter for LIST widget.
+Added updateValues method for modify list options in LIST widget.
+
 ## 0.1.24
 
 Code Editor:
