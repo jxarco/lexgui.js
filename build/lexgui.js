@@ -2179,6 +2179,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             if( this.onSetValue )
                 this.onSetValue( value );
+
+            console.warn("Can't set value of " + this.typeName());
         }
 
         oncontextmenu(e) {
@@ -4289,47 +4291,70 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
         addList( name, values, value, callback, options = {} ) {
 
-            let widget = this.create_widget(name, Widget.LIST, options);
-            let element = widget.domEl;
-
-            // Show list
-
-            let list_container = document.createElement('div');
-            list_container.className = "lexlist";
-            list_container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
-
-            for( let i = 0; i < values.length; ++i )
-            {
-                let icon = null;
-                let item_value = values[i];
-
-                if( item_value.constructor === Array )
+            let widget = this.create_widget( name, Widget.LIST, options );
+    
+            widget.onGetValue = () => {
+                return value;
+            };
+    
+            widget.onSetValue = ( newValue ) => {
+                listContainer.querySelectorAll( '.lexlistitem' ).forEach( e => e.classList.remove( 'selected' ) );
+                const idx = values.indexOf( newValue );
+                if( idx == -1 ) return;
+                listContainer.children[ idx ].classList.toggle( 'selected' );
+                value = newValue;
+                this._trigger( new IEvent( name, newValue ), callback );
+            };
+    
+            widget.updateValues = ( newValues ) => {
+    
+                values = newValues;
+                listContainer.innerHTML = "";
+                
+                for( let i = 0; i < values.length; ++i )
                 {
-                    icon = item_value[1];
-                    item_value = item_value[0];
+                    let icon = null;
+                    let itemValue = values[ i ];
+    
+                    if( itemValue.constructor === Array )
+                    {
+                        icon = itemValue[ 1 ];
+                        itemValue = itemValue[ 0 ];
+                    }
+    
+                    let listElement = document.createElement( 'div' );
+                    listElement.className = "lexlistitem" + ( value == itemValue ? " selected" : "" );
+                    listElement.innerHTML = "<span>" + itemValue + "</span>" + ( icon ? "<a class='" + icon + "'></a>" : "" );
+    
+                    listElement.addEventListener( 'click', e => {
+                        listContainer.querySelectorAll( '.lexlistitem' ).forEach( e => e.classList.remove( 'selected' ) );
+                        listElement.classList.toggle( 'selected' );
+                        value = itemValue;
+                        this._trigger( new IEvent( name, itemValue, e ), callback );
+                    });
+    
+                    listContainer.appendChild( listElement );
                 }
-
-                let list_item = document.createElement('div');
-                list_item.className = "lexlistitem" + (value == item_value ? " selected" : "");
-                list_item.innerHTML = "<span>" + item_value + "</span>" + (icon ? "<a class='" + icon + "'></a>" : "");
-
-                list_item.addEventListener('click', (e) => {
-                    list_container.querySelectorAll('.lexlistitem').forEach( e => e.classList.remove('selected'));
-                    list_item.classList.toggle( 'selected' );
-                    this._trigger( new IEvent(name, item_value, e), callback );
-                });
-
-                list_container.appendChild(list_item);
-            }
-
+            };
+    
+            let element = widget.domEl;
+    
+            // Show list
+    
+            let listContainer = document.createElement( 'div' );
+            listContainer.className = "lexlist";
+            listContainer.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+    
+            widget.updateValues( values );
+    
             // Remove branch padding and margins
-            if(!widget.name) {
+            if( !widget.name ) {
                 element.className += " noname";
-                list_container.style.width = "100%";
+                listContainer.style.width = "100%";
             }
-
-            element.appendChild(list_container);
-
+    
+            element.appendChild( listContainer );
+    
             return widget;
         }
 
