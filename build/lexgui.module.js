@@ -2174,7 +2174,7 @@ class Widget {
     set( value ) {
 
         if( this.onSetValue )
-            this.onSetValue( value );
+            return this.onSetValue( value );
 
         console.warn("Can't set value of " + this.typeName());
     }
