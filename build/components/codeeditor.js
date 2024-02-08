@@ -714,7 +714,7 @@ class CodeEditor {
                     cursor.selection.selectInline( idx, cursor.line, this.measureString( string ) );
                 else
                 {
-                    this.processSelections( e );
+                    this._processSelection( cursor, e );
                 }
             } else if( !e.keepSelection )
                 this.endSelection();
@@ -733,7 +733,7 @@ class CodeEditor {
                 {
                     this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
                     this.cursorToString( cursor, this.code.lines[ ln ] );            
-                    this.processSelections( e );
+                    this._processSelection( cursor, e );
                 }
             } else if( !e.keepSelection )
                 this.endSelection();
@@ -805,7 +805,7 @@ class CodeEditor {
                         this.cursorToPosition( cursor, this.code.lines[ cursor.line ].length );
                     }
                     
-                    this.processSelections( e, false );
+                    this._processSelection( cursor, e, false );
 
                 } else {
                     this.endSelection();
@@ -843,7 +843,7 @@ class CodeEditor {
                 }
 
                 if( e.shiftKey ) {
-                    this.processSelections( e );
+                    this._processSelection( cursor, e );
                 }
             } 
             // Move down autocomplete selection
@@ -880,7 +880,7 @@ class CodeEditor {
                 if( e.shiftKey ) { if( !cursor.selection ) this.startSelection( cursor ); }
                 else this.endSelection();
                 this.cursorToString( cursor, substr, true );
-                if( e.shiftKey ) this.processSelections( e, false, true );
+                if( e.shiftKey ) this._processSelection( cursor, e, false, true );
             }
             else {
                 var letter = this.getCharAtPos( cursor, -1 );
@@ -888,7 +888,7 @@ class CodeEditor {
                     if( e.shiftKey ) {
                         if( !cursor.selection ) this.startSelection( cursor );
                         this.cursorToLeft( letter, cursor );
-                        this.processSelections( e, false, CodeEditor.SELECTION_X );
+                        this._processSelection( cursor, e, false, CodeEditor.SELECTION_X );
                     }
                     else {
                         if( !cursor.selection ) {
@@ -915,7 +915,7 @@ class CodeEditor {
                     this.actions[ 'End' ].callback( cursor.line, cursor, e );
                     delete e.cancelShift; delete e.keepSelection;
 
-                    if( e.shiftKey ) this.processSelections( e, false );
+                    if( e.shiftKey ) this._processSelection( cursor, e, false );
                 }
             }
         });
@@ -941,14 +941,14 @@ class CodeEditor {
                 if( e.shiftKey ) { if( !cursor.selection ) this.startSelection( cursor ); }
                 else this.endSelection();
                 this.cursorToString( cursor, substr );
-                if( e.shiftKey ) this.processSelections( e );
+                if( e.shiftKey ) this._processSelection( cursor, e );
             } else {
                 var letter = this.getCharAtPos( cursor );
                 if( letter ) {
                     if( e.shiftKey ) {
                         if( !cursor.selection ) this.startSelection( cursor );
                         this.cursorToRight( letter, cursor );
-                        this.processSelections( e, false, CodeEditor.SELECTION_X );
+                        this._processSelection( cursor, e, false, CodeEditor.SELECTION_X );
                     }else{
                         if( !cursor.selection ) {
                             this.cursorToRight( letter, cursor );
@@ -973,7 +973,7 @@ class CodeEditor {
 
                     this.lineDown( cursor, true );
                     
-                    if( e.shiftKey ) this.processSelections( e, false );
+                    if( e.shiftKey ) this._processSelection( cursor, e, false );
 
                     this.hideAutoCompleteBox();
                 }
@@ -1276,8 +1276,7 @@ class CodeEditor {
 
         this.code.undoSteps.push( {
             lines: LX.deepCopy( this.code.lines ),
-            cursors: this.saveCursors(),
-            selection: cursor.selection ? cursor.selection.save() : null
+            cursors: this.saveCursors()
         } );
     }
 
@@ -1306,15 +1305,6 @@ class CodeEditor {
                 currentCursor = this._addCursor();
 
             this.restoreCursor( currentCursor, step.cursors[ i ] );
-        }
-
-        if( step.selection )
-        {
-            this.startSelection( cursor );
-
-            cursor.selection.load( step.selection );
-
-            this.processSelections( null, true );
         }
 
         this._hideActiveLine();
@@ -3041,7 +3031,7 @@ class CodeEditor {
         cursor.selection.fromX++; 
         cursor.selection.toX++;
 
-        this.processSelections();
+        this._processSelection( cursor );
         this.processLine( lidx );
 
         // Stop propagation
@@ -3156,7 +3146,7 @@ class CodeEditor {
         this.cursorToPosition( cursor, cursor.selection.toX );
         this.cursorToLine( cursor, cursor.selection.toY );
 
-        this.processSelections( null, true );
+        this._processSelection( cursor, null, true );
 
         this.hideAutoCompleteBox();
     }
@@ -3262,6 +3252,8 @@ class CodeEditor {
 
         state.position = cursor.position;
         state.line = cursor.line;
+        state.selection = cursor.selection ? cursor.selection.save() : undefined;
+
         return state;
     }
 
@@ -3306,6 +3298,15 @@ class CodeEditor {
         cursor.style.left = "calc(" + cursor._left + "px + " + this.xPadding + ")";
         cursor._top = cursor.line * this.lineHeight;
         cursor.style.top = "calc(" + cursor._top + "px)";
+
+        if( state.selection )
+        {
+            this.startSelection( cursor );
+
+            cursor.selection.load( state.selection );
+
+            this._processSelection( cursor, null, true );
+        }
     }
 
     resetCursorPos( flag, cursor ) {
