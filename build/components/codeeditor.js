@@ -1088,7 +1088,7 @@ class CodeEditor {
 
         this.endSelection();
 
-        const new_lines = text.split( '\n' );
+        const new_lines = text.replaceAll( '\r', '' ).split( '\n' );
 
         // Pasting Multiline...
         if( new_lines.length != 1 )
@@ -1143,8 +1143,13 @@ class CodeEditor {
 
         const inner_add_tab = ( text, name, title ) => {
 
+            // Remove Carriage Return in some cases and sub tabs using spaces
+            text = text.replaceAll( '\r', '' );
+            text = text.replaceAll( /\t|\\t/g, ' '.repeat( this.tabSpaces ) );
+
             // Set current text and language
-            const lines = text.replaceAll( '\r', '' ).split( '\n' );
+
+            const lines = text.split( '\n' );
 
             // Add item in the explorer if used
             if( this.explorer )
@@ -2264,6 +2269,9 @@ class CodeEditor {
     async _pasteContent( cursor ) {
 
         let text = await navigator.clipboard.readText();
+
+        // Remove any possible tabs (\t) and add spaces
+        text = text.replaceAll( /\t|\\t/g, ' '.repeat( this.tabSpaces ) );
 
         this._addUndoStep( cursor, true );
 
