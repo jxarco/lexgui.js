@@ -106,7 +106,7 @@ class CodeSelection {
         }
     }
 
-    selectInline( x, y, width ) {
+    selectInline( cursor, x, y, width, isSearchResult ) {
         
         this.chars = width / this.editor.charWidth;
         this.fromX = x;
@@ -121,7 +121,15 @@ class CodeSelection {
         domEl._left = x * this.editor.charWidth;
         domEl.style.left = "calc(" + domEl._left + "px + " + this.editor.xPadding + ")";
         domEl.style.width = width + "px";
-        this.editor.selections.appendChild(domEl);
+
+        if( isSearchResult )
+        {
+            this.editor.searchResultSelections.appendChild( domEl );
+        }
+        else
+        {
+            this.editor.selections[ cursor.name ].appendChild( domEl );
+        }
 
         // Hide active line background
         this.editor._hideActiveLine();
@@ -357,9 +365,13 @@ class CodeEditor {
         this.cursors.className = 'cursors';
         this.tabs.area.attach( this.cursors );
 
-        this.selections = document.createElement( 'div' );
-        this.selections.className = 'selections';
-        this.tabs.area.attach( this.selections );
+        this.searchResultSelections = document.createElement( 'div' );
+        this.searchResultSelections.id = 'search-selections';
+        this.searchResultSelections.className = 'selections';
+        this.tabs.area.attach( this.searchResultSelections );
+
+        // Store here selections per cursor
+        this.selections = {};
 
         // Css char synchronization
         this.xPadding = "48px";
@@ -719,7 +731,7 @@ class CodeEditor {
 
                 var string = this.code.lines[ ln ].substring( idx, lastX );
                 if( cursor.selection.sameLine() )
-                    cursor.selection.selectInline( idx, cursor.line, this.measureString( string ) );
+                    cursor.selection.selectInline( cursor, idx, cursor.line, this.measureString( string ) );
                 else
                 {
                     this._processSelection( cursor, e );
@@ -736,7 +748,7 @@ class CodeEditor {
                 if( !cursor.selection )
                     this.startSelection( cursor );
                 if( cursor.selection.sameLine() )
-                    cursor.selection.selectInline(cursor.position, cursor.line, this.measureString( string ));
+                    cursor.selection.selectInline( cursor, cursor.position, cursor.line, this.measureString( string ));
                 else
                 {
                     this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
@@ -935,35 +947,56 @@ class CodeEditor {
                 cursor.position == this.code.lines[ cursor.line ].length )
             return;
 
-            if( e.metaKey ) { // Apple devices (Command)
+            if( e.metaKey ) // Apple devices (Command)
+            {
                 e.preventDefault();
                 this.actions[ 'End' ].callback( ln, cursor );
-            } else if( e.ctrlKey ) {
+            }
+            else if( e.ctrlKey ) // Next word
+            {
                 // Get next word
                 const [ word, from, to ] = this.getWordAtPos( cursor );
+
                 // If no length, we change line..
                 if( !word.length ) this.lineDown( cursor, true );
                 var diff = cursor.position - from;
                 var substr = word.substr( diff );
+
                 // Selections...
-                if( e.shiftKey ) { if( !cursor.selection ) this.startSelection( cursor ); }
-                else this.endSelection();
+                if( e.shiftKey ) {
+                    if( !cursor.selection )
+                        this.startSelection( cursor );
+                }
+                else
+                    this.endSelection();
+
                 this.cursorToString( cursor, substr );
-                if( e.shiftKey ) this._processSelection( cursor, e );
-            } else {
+
+                if( e.shiftKey )
+                    this._processSelection( cursor, e );
+            }
+            else // Next char
+            {
                 var letter = this.getCharAtPos( cursor );
                 if( letter ) {
-                    if( e.shiftKey ) {
-                        if( !cursor.selection ) this.startSelection( cursor );
+
+                    // Selecting chars
+                    if( e.shiftKey )
+                    {
+                        if( !cursor.selection )
+                            this.startSelection( cursor );
+
                         this.cursorToRight( letter, cursor );
                         this._processSelection( cursor, e, false, CodeEditor.SELECTION_X );
-                    }else{
+                    }
+                    else
+                    {
                         if( !cursor.selection ) {
                             this.cursorToRight( letter, cursor );
                             if( this.useAutoComplete && this.isAutoCompleteActive )
                                 this.showAutoCompleteBox( 'foo', cursor );
                         }
-                        else 
+                        else
                         {
                             cursor.selection.invertIfNecessary();
                             this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP, cursor );
@@ -1152,6 +1185,7 @@ class CodeEditor {
             const lines = text.split( '\n' );
 
             // Add item in the explorer if used
+
             if( this.explorer )
             {
                 this._storedLines = this._storedLines ?? {};
@@ -1200,6 +1234,7 @@ class CodeEditor {
         }
          
         let cursor = document.createElement( 'div' );
+        cursor.name = "cursor" + this.cursors.childElementCount;
         cursor.className = "cursor";
         cursor.innerHTML = "&nbsp;";
         cursor.isMain = isMain;
@@ -1713,7 +1748,7 @@ class CodeEditor {
                     this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
                     this.cursorToPosition( cursor, from );
                     this.startSelection( cursor );
-                    cursor.selection.selectInline( from, cursor.line, this.measureString( word ) );
+                    cursor.selection.selectInline( cursor, from, cursor.line, this.measureString( word ) );
                     this.cursorToString( cursor, word ); // Go to the end of the word
                     break;
                 // Select entire line
@@ -1821,7 +1856,6 @@ class CodeEditor {
 
     _processSelection( cursor, e, keep_range, flags = CodeEditor.SELECTION_X_Y ) {
 
-        var cursor = this._getCurrentCursor();
         const isMouseEvent = e && ( e.constructor == MouseEvent );
 
         if( isMouseEvent ) this.processClick( e );
@@ -1872,11 +1906,13 @@ class CodeEditor {
                 toY = cursor.selection.toY;
         const deltaY = toY - fromY;
 
+        let cursorSelections = this.selections[ cursor.name ];
+
         // Selection goes down...
         if( deltaY >= 0 )
         {
-            while( deltaY < ( this.selections.childElementCount - 1 ) )
-                deleteElement( this.selections.lastChild );
+            while( deltaY < ( cursorSelections.childElementCount - 1 ) )
+                deleteElement( cursorSelections.lastChild );
 
             for(let i = fromY; i <= toY; i++){
 
@@ -1887,12 +1923,12 @@ class CodeEditor {
                 if( isVisible )
                 {
                     // Make sure that the line selection is generated...
-                    domEl = this.selections.childNodes[ sId ];
+                    domEl = cursorSelections.childNodes[ sId ];
                     if(!domEl)
                     {
                         domEl = document.createElement( 'div' );
                         domEl.className = "lexcodeselection";
-                        this.selections.appendChild( domEl );
+                        cursorSelections.appendChild( domEl );
                     }
                 }
 
@@ -1926,8 +1962,8 @@ class CodeEditor {
         }
         else // Selection goes up...
         {
-            while( Math.abs( deltaY ) < ( this.selections.childElementCount - 1 ) )            
-                deleteElement( this.selections.firstChild );
+            while( Math.abs( deltaY ) < ( cursorSelections.childElementCount - 1 ) )
+                deleteElement( cursorSelections.firstChild );
 
             for( let i = toY; i <= fromY; i++ ){
 
@@ -1938,12 +1974,12 @@ class CodeEditor {
                 if( isVisible )
                 {
                     // Make sure that the line selection is generated...
-                    domEl = this.selections.childNodes[ sId ];
+                    domEl = cursorSelections.childNodes[ sId ];
                     if(!domEl)
                     {
                         domEl = document.createElement( 'div' );
                         domEl.className = "lexcodeselection";
-                        this.selections.appendChild( domEl );
+                        cursorSelections.appendChild( domEl );
                     }
                 }
 
@@ -3096,7 +3132,12 @@ class CodeEditor {
     startSelection( cursor ) {
 
         // Show elements
-        this.selections.classList.add( 'show' );
+        let selectionContainer = document.createElement( 'div' );
+        selectionContainer.className = 'selections';
+        selectionContainer.classList.add( 'show' );
+
+        this.codeSizer.insertChildAtIndex( selectionContainer, 2 );
+        this.selections[ cursor.name ] = selectionContainer;
 
         // Create new selection instance
         cursor.selection = new CodeSelection( this, cursor );
@@ -3135,14 +3176,15 @@ class CodeEditor {
 
     endSelection() {
 
-        this.selections.classList.remove( 'show' );
-        this.selections.innerHTML = "";
-
         delete this._tripleClickSelection;
         delete this._lastSelectionKeyDir;
 
         for( let cursor of this.cursors.children )
+        {
+            deleteElement( this.selections[ cursor.name ] );
+            delete this.selections[ cursor.name ];
             delete cursor.selection;
+        }
     }
 
     selectAll() {
@@ -3302,7 +3344,7 @@ class CodeEditor {
         const cursorsInLine = Array.from( this.cursors.children ).filter( v => v.line == line );
 
         while( cursorsInLine.length > 1 )
-            cursorsInLine.pop().remove();
+            this.removeCursor( cursorsInLine.pop() );
     }
 
     restoreCursor( cursor, state ) {
@@ -3323,6 +3365,13 @@ class CodeEditor {
 
             this._processSelection( cursor, null, true );
         }
+    }
+
+    removeCursor( cursor ) {
+
+        deleteElement( this.selections[ cursor.name ] );
+        delete this.selections[ cursor.name ];
+        deleteElement( cursor );
     }
 
     resetCursorPos( flag, cursor ) {
@@ -3824,9 +3873,11 @@ class CodeEditor {
 
         else if( this._lastResult )
         {
-            this._lastResult.dom.remove();
+            deleteElement( this._lastResult.dom );
             delete this._lastResult;
         }
+
+        this.searchResultSelections.classList.remove( 'show' );
     }
 
     search( text, reverse ) {
@@ -3897,7 +3948,7 @@ class CodeEditor {
             const lastLine = this.code.lines.length - 1;
 
             this._lastResult = {
-                'dom': this.selections.lastChild,
+                'dom': this.searchResultSelections.lastChild,
                 'pos': reverse ? new LX.vec2( this.code.lines[ lastLine ].length, lastLine ) : new LX.vec2( 0, 0 )
             };
             return;
@@ -3924,13 +3975,13 @@ class CodeEditor {
         );
 
         // Show elements
-        this.selections.classList.add( 'show' );
+        this.searchResultSelections.classList.add( 'show' );
 
         // Create new selection instance
         cursor.selection = new CodeSelection( this, cursor, "lexcodesearchresult" );
-        cursor.selection.selectInline( char, line, this.measureString( text ) );
+        cursor.selection.selectInline( cursor, char, line, this.measureString( text ), true );
         this._lastResult = {
-            'dom': this.selections.lastChild,
+            'dom': this.searchResultSelections.lastChild,
             'pos': new LX.vec2( char + text.length * ( reverse ? -1 : 1 ) , line )
         };
 
