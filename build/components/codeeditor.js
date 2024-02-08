@@ -121,6 +121,24 @@ class CodeSelection {
         // Hide active line background
         this.editor._hideActiveLine();
     }
+
+    save() {
+
+        return {
+            fromX: this.fromX,
+            fromY: this.fromY,
+            toX: this.toX,
+            toY: this.toY
+        }
+    }
+
+    load( data ) {
+
+        this.fromX = data.fromX;
+        this.fromY = data.fromY;
+        this.toX = data.toX;
+        this.toY = data.toY;
+    }
 };
 
 class ScrollBar {
@@ -1252,7 +1270,8 @@ class CodeEditor {
 
         this.code.undoSteps.push( {
             lines: LX.deepCopy( this.code.lines ),
-            cursors: this.saveCursors()
+            cursors: this.saveCursors(),
+            selection: this.selection ? this.selection.save() : null
         } );
     }
 
@@ -1281,6 +1300,15 @@ class CodeEditor {
                 currentCursor = this._addCursor();
 
             this.restoreCursor( currentCursor, step.cursors[ i ] );
+        }
+
+        if( step.selection )
+        {
+            this.startSelection( cursor );
+
+            this.selection.load( step.selection );
+
+            this.processSelection( null, true );
         }
 
         this._hideActiveLine();
