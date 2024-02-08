@@ -144,6 +144,14 @@ class CodeSelection {
         this.toX = data.toX;
         this.toY = data.toY;
     }
+
+    getText() {
+
+        if( !this.editor.code || !this.sameLine() )
+            return null;
+
+        return this.editor.code.lines[ this.fromY ].substring( this.fromX, this.toX );
+    }
 };
 
 class ScrollBar {
@@ -3771,6 +3779,8 @@ class CodeEditor {
 
     showSearchBox( clear ) {
         
+        this.hideSearchLineBox();
+
         this.searchbox.classList.add( 'opened' );
         this.searchboxActive = true;
 
@@ -3780,6 +3790,18 @@ class CodeEditor {
         {
             input.value = "";
         }
+        else
+        {
+            const cursor = this._getCurrentCursor();
+
+            if( cursor.selection )
+            {
+                input.value = cursor.selection.getText() ?? input.value;
+            }
+        }
+
+        input.selectionStart = 0;
+        input.selectionEnd = input.value.length;
 
         input.focus();
     }
@@ -3908,6 +3930,8 @@ class CodeEditor {
 
     showSearchLineBox() {
         
+        this.hideSearchBox();
+
         this.searchlinebox.classList.add( 'opened' );
         this.searchlineboxActive = true;
 
