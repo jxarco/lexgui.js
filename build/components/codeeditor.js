@@ -30,6 +30,10 @@ function firstNonspaceIndex( str ) {
     return index < str.length ? index : -1;
 }
 
+function strReverse( str ) {
+    return str.split( "" ).reverse().join( "" );
+}
+
 function indexOfFrom( str, reg, from, reverse ) {
 
     from = from ?? 0;
@@ -170,8 +174,8 @@ class ScrollBar {
         function inner_mousedown( e )
         {
             var doc = editor.root.ownerDocument;
-            doc.addEventListener( "mousemove",inner_mousemove );
-            doc.addEventListener( "mouseup",inner_mouseup );
+            doc.addEventListener( "mousemove", inner_mousemove );
+            doc.addEventListener( "mouseup", inner_mouseup );
             that.lastPosition.set( e.x, e.y );
             e.stopPropagation();
             e.preventDefault();
@@ -3781,19 +3785,33 @@ class CodeEditor {
         if( !text )
             return;
 
-        let cursorData = new LX.vec2( this.position, this.line );
+        let cursor = this._getCurrentCursor();
+        let cursorData = new LX.vec2( cursor.position, cursor.line );
         let line = null;
         let char = -1;
 
         if( this._lastResult )
         {
-            this._lastResult.dom.remove();
+            deleteElement( this._lastResult.dom );
             cursorData = this._lastResult.pos;
             delete this._lastResult;
         }
 
         const getIndex = l => {
-            return this.code.lines[ l ].substr( l == cursorData.y ? cursorData.x : 0 ).indexOf( text );
+            
+            var string = this.code.lines[ l ];
+
+            if( reverse )
+            {
+                string = string.substr( 0, l == cursorData.y ? cursorData.x : string.length );
+                var reversed = strReverse( string );
+                var reversedIdx = reversed.indexOf( strReverse( text ) );
+                return reversedIdx == -1 ? -1 : string.length - reversedIdx - text.length;
+            }
+            else
+            {
+                return string.substr( l == cursorData.y ? cursorData.x : 0 ).indexOf( text );
+            }
         };
 
         if( reverse )
@@ -3823,7 +3841,14 @@ class CodeEditor {
 
         if( line == null)
         {
-            alert("No results!")
+            alert( "No results!" );
+
+            const lastLine = this.code.lines.length - 1;
+
+            this._lastResult = {
+                'dom': this.selections.lastChild,
+                'pos': reverse ? new LX.vec2( this.code.lines[ lastLine ].length, lastLine ) : new LX.vec2( 0, 0 )
+            };
             return;
         }
         
@@ -3833,15 +3858,18 @@ class CodeEditor {
             have to add the length of the substring (0, first_ocurrence)
         */
 
-        char += ( line == cursorData.y ? cursorData.x : 0 );
+
+        if( !reverse )
+            char += ( line == cursorData.y ? cursorData.x : 0 );
+
 
         // Text found..
 
         this._lastTextFound = text;
 
         this.codeScroller.scrollTo( 
-            Math.max( char * this.charWidth - this.codeScroller.clientWidth ), 
-            Math.max( line - 10 ) * this.lineHeight 
+            Math.max( char * this.charWidth - this.codeScroller.clientWidth, 0 ), 
+            Math.max( line - 10, 0 ) * this.lineHeight 
         );
 
         // Show elements
@@ -3852,7 +3880,7 @@ class CodeEditor {
         this.selection.selectInline( char, line, this.measureString( text ) );
         this._lastResult = {
             'dom': this.selections.lastChild,
-            'pos': new LX.vec2( char + text.length, line )
+            'pos': new LX.vec2( char + text.length * ( reverse ? -1 : 1 ) , line )
         };
 
     }
@@ -3990,6 +4018,7 @@ class CodeEditor {
         delete this._pendingString;
         delete this._buildingBlockComment;
         delete this._markdownHeader;
+        delete this._lastResult;
     }
 }
 
