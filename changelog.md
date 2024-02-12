@@ -1,5 +1,16 @@
 # lexgui.js changelog
 
+## 0.1.26
+
+Code Editor:
+- Search Next Ocurrence using "Ctrl+D" (Duplicate line moved to "Alt+D")
+- Previous selection is restored on undo.
+- Get text to search from selection.
+- Reverse search bugfixes.
+- Pasting content now scrolls to follow cursor.
+
+Minor fixes.
+
 ## 0.1.25
 
 Code Editor:
