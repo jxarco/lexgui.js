@@ -5,9 +5,10 @@
 Code Editor:
 - Tab key follows fixed 4 space layout indentation.
 - Support for removing indentation using "Shift+Tab".
+- Support for changing number of tab spaces from the info panel.
 - Minor bugfixes.
 
---
+Support "maxWidth" as options when creating a widget.
 
 ## 0.1.26
 

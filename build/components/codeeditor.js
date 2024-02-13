@@ -688,9 +688,15 @@ class CodeEditor {
 
         this.action( 'Tab', true, ( ln, cursor, e ) => {
             
-            if( this.isAutoCompleteActive )
+            if( this._skipTabs )
             {
-                this.autoCompleteWord( cursor );
+                this._skipTabs--;
+                if( !this._skipTabs )
+                    delete this._skipTabs;
+            }
+            else if( this.isAutoCompleteActive )
+            {
+                this.autoCompleteWord();
             }
             else
             {
@@ -719,7 +725,8 @@ class CodeEditor {
             let lastX = cursor.position;
 
             this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
-            if(idx > 0) this.cursorToString( cursor, prestring );
+            if(idx > 0)
+                this.cursorToString( cursor, prestring );
             this.setScrollLeft( 0 );
 
             // Merge cursors
@@ -778,7 +785,7 @@ class CodeEditor {
             // Add word
             if( this.isAutoCompleteActive )
             {
-                this.autoCompleteWord( cursor );
+                this.autoCompleteWord();
                 return;
             }
 
@@ -3213,6 +3220,7 @@ class CodeEditor {
         delete this._tripleClickSelection;
         delete this._lastSelectionKeyDir;
         delete this._currentOcurrences;
+        delete this._lastResult;
 
         if( cursor )
         {
@@ -3755,8 +3763,11 @@ class CodeEditor {
 
     showAutoCompleteBox( key, cursor ) {
         
+        if( !cursor.isMain )
+            return;
+
         const [word, start, end] = this.getWordAtPos( cursor, -1 );
-        if(key == ' ' || !word.length) {
+        if( key == ' ' || !word.length ) {
             this.hideAutoCompleteBox();
             return;
         }
@@ -3803,7 +3814,7 @@ class CodeEditor {
             pre.appendChild( icon );
 
             pre.addEventListener( 'click', () => {
-                this.autoCompleteWord( cursor, s );
+                this.autoCompleteWord( s );
             } ); 
 
             // Highlight the written part
@@ -3849,23 +3860,30 @@ class CodeEditor {
         return isActive != this.isAutoCompleteActive;
     }
 
-    autoCompleteWord( cursor, suggestion ) {
+    autoCompleteWord( suggestion ) {
         
         if( !this.isAutoCompleteActive )
-        return;
+            return;
 
         let [suggestedWord, idx] = this._getSelectedAutoComplete();
         suggestedWord = suggestion ?? suggestedWord;
 
-        const [word, start, end] = this.getWordAtPos( cursor, -1 );
+        for( let cursor of this.cursors.children )
+        {
+            const [word, start, end] = this.getWordAtPos( cursor, -1 );
 
-        const lineString = this.code.lines[ cursor.line ];
-        this.code.lines[ cursor.line ] = 
-            lineString.slice(0, start) + suggestedWord + lineString.slice(end);
+            const lineString = this.code.lines[ cursor.line ];
+            this.code.lines[ cursor.line ] =
+                lineString.slice(0, start) + suggestedWord + lineString.slice( end );
 
-        // Process lines and remove suggestion box
-        this.cursorToPosition(cursor, start + suggestedWord.length);
-        this.processLine(cursor.line);
+            // Process lines and remove suggestion box
+            this.cursorToPosition( cursor, start + suggestedWord.length );
+            this.processLine( cursor.line );
+        }
+
+        // Only the main cursor autocompletes, skip the "Tab" event for the rest
+        this._skipTabs = this.cursors.childElementCount - 1;
+
         this.hideAutoCompleteBox();
     }
 
