@@ -3012,6 +3012,9 @@ class Panel {
             if( options.width ) {
                 element.style.width = element.style.minWidth = options.width;
             }
+            if( options.maxWidth ) {
+                element.style.maxWidth = options.maxWidth;
+            }
             if( options.minWidth ) {
                 element.style.minWidth = options.minWidth;
             }
