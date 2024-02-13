@@ -696,7 +696,7 @@ class CodeEditor {
             {
                 this._addUndoStep( cursor );
 
-                if( e.shiftKey )
+                if( e && e.shiftKey )
                 {
                     this._removeSpaces( cursor );
                 }
@@ -805,10 +805,10 @@ class CodeEditor {
 
             if( _c0 == '{' && _c1 == '}' ) {
                 this.code.lines.splice( cursor.line, 0, "" );
-                this._addSpaceTabs( tabs + 1 );
+                this._addSpaceTabs( cursor, tabs + 1 );
                 this.code.lines[ cursor.line + 1 ] = " ".repeat(spaces) + this.code.lines[ cursor.line + 1 ];
             } else {
-                this._addSpaceTabs( tabs );
+                this._addSpaceTabs( cursor, tabs );
             }
 
             this.processLines();
@@ -1463,14 +1463,25 @@ class CodeEditor {
 
             panel.sameLine();
             panel.addLabel( this.code.title, { float: 'right', signal: "@tab-name" });
-            panel.addLabel( "Ln " + 1, { width: "64px", signal: "@cursor-line" });
-            panel.addLabel( "Col " + 1, { width: "64px", signal: "@cursor-pos" });
+            panel.addLabel( "Ln " + 1, { maxWidth: "48px", signal: "@cursor-line" });
+            panel.addLabel( "Col " + 1, { maxWidth: "48px", signal: "@cursor-pos" });
+            panel.addButton( null, "Spaces: " + this.tabSpaces, ( value, event ) => {
+                LX.addContextMenu( "Spaces", event, m => {
+                    const options = [ 2, 4, 8 ];
+                    for( const n of options )
+                        m.add( n, (v) => {
+                            this.tabSpaces = v;
+                            this.processLines();
+                            this._updateDataInfoPanel( "@tab-spaces", "Spaces: " + this.tabSpaces );
+                        } );
+                });
+            }, { width: "10%", nameWidth: "15%", signal: "@tab-spaces" });
             panel.addButton( "<b>{ }</b>", this.highlight, ( value, event ) => {
                 LX.addContextMenu( "Language", event, m => {
                     for( const lang of Object.keys(this.languages) )
                         m.add( lang, this._changeLanguage.bind(this) );
                 });
-            }, { width: "25%", nameWidth: "15%", signal: "@highlight" });
+            }, { width: "17.5%", nameWidth: "15%", signal: "@highlight" });
             panel.endLine();
 
             return panel;
@@ -2544,7 +2555,6 @@ class CodeEditor {
 
     _actionMustDelete( cursor, action, e ) {
 
-        console.log(action, action.delEventRequirement)
         return cursor.selection && action.deleteSelection &&
             ( action.eventSkipDelete ? !e[ action.eventSkipDelete ] : true );
     }
@@ -3427,10 +3437,10 @@ class CodeEditor {
         }
     }
 
-    _addSpaceTabs( n ) {
+    _addSpaceTabs( cursor, n ) {
         
         for( var i = 0; i < n; ++i ) {
-            this.actions[ 'Tab' ].callback();
+            this.actions[ 'Tab' ].callback( cursor.line, cursor, null );
         }
     }
 
