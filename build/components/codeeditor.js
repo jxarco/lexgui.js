@@ -3846,8 +3846,8 @@ class CodeEditor {
         // Show box
         this.autocomplete.classList.toggle('show', true);
         this.autocomplete.classList.toggle('no-scrollbar', !(this.autocomplete.scrollHeight > this.autocomplete.offsetHeight));
-        this.autocomplete.style.left = (cursor._left + 36 - this.getScrollLeft()) + "px";
-        this.autocomplete.style.top = (cursor._top + 48 - this.getScrollTop()) + "px";
+        this.autocomplete.style.left = (cursor._left + 48 - this.getScrollLeft()) + "px";
+        this.autocomplete.style.top = (cursor._top + 28 + this.lineHeight - this.getScrollTop()) + "px";
 
         this.isAutoCompleteActive = true;
     }
@@ -4268,7 +4268,7 @@ class CodeEditor {
 CodeEditor.keywords = {
 
     'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof', 'debugger', 'abstract',
-                  'arguments', 'extends', 'instanceof'],
+                  'arguments', 'extends', 'instanceof', 'Infinity'],
     'C++': ['int', 'float', 'double', 'bool', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'nullptr', 
             'NULL', 'unsigned', 'namespace'],
     'JSON': ['true', 'false'],
@@ -4301,7 +4301,8 @@ CodeEditor.utils = { // These ones don't have hightlight, used as suggestions to
 
 CodeEditor.types = {
 
-    'JavaScript': ['Object', 'String', 'Function', 'Boolean', 'Symbol', 'Error', 'Number', 'TextEncoder', 'TextDecoder'],
+    'JavaScript': ['Object', 'String', 'Function', 'Boolean', 'Symbol', 'Error', 'Number', 'TextEncoder', 'TextDecoder', 'Array', 'ArrayBuffer', 'InputEvent', 'MouseEvent',
+                   'Int8Array', 'Int16Array', 'Int32Array', 'Float32Array', 'Float64Array', 'Element'],
     'Rust': ['u128'],
     'Python': ['int', 'type', 'float', 'map', 'list', 'ArithmeticError', 'AssertionError', 'AttributeError', 'Exception', 'EOFError', 'FloatingPointError', 'GeneratorExit', 
               'ImportError', 'IndentationError', 'IndexError', 'KeyError', 'KeyboardInterrupt', 'LookupError', 'MemoryError', 'NameError', 'NotImplementedError', 'OSError',
