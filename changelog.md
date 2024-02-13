@@ -1,5 +1,14 @@
 # lexgui.js changelog
 
+## 0.1.27
+
+Code Editor:
+- Tab key follows fixed 4 space layout indentation.
+- Support for removing indentation using "Shift+Tab".
+- Minor bugfixes.
+
+--
+
 ## 0.1.26
 
 Code Editor:

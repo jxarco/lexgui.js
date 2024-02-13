@@ -691,11 +691,22 @@ class CodeEditor {
             if( this.isAutoCompleteActive )
             {
                 this.autoCompleteWord( cursor );
-            } else 
-            {
-                this.addSpaces( this.tabSpaces );
             }
-        });
+            else
+            {
+                this._addUndoStep( cursor );
+
+                if( e.shiftKey )
+                {
+                    this._removeSpaces( cursor );
+                }
+                else
+                {
+                    const indentSpaces = this.tabSpaces - (cursor.position % this.tabSpaces);
+                    this._addSpaces( indentSpaces );
+                }
+            }
+        }, "shiftKey");
 
         this.action( 'Home', false, ( ln, cursor, e ) => {
             
@@ -794,10 +805,10 @@ class CodeEditor {
 
             if( _c0 == '{' && _c1 == '}' ) {
                 this.code.lines.splice( cursor.line, 0, "" );
-                this.addSpaceTabs( tabs + 1 );
+                this._addSpaceTabs( tabs + 1 );
                 this.code.lines[ cursor.line + 1 ] = " ".repeat(spaces) + this.code.lines[ cursor.line + 1 ];
             } else {
-                this.addSpaceTabs( tabs );
+                this._addSpaceTabs( tabs );
             }
 
             this.processLines();
@@ -2221,10 +2232,12 @@ class CodeEditor {
 
         for( const actKey in this.actions ) {
 
-            if( key != actKey ) continue;
+            if( key != actKey )
+                continue;
+
             e.preventDefault();
 
-            if( this.actions[ key ].deleteSelection && cursor.selection )
+            if( this._actionMustDelete( cursor, this.actions[ key ], e ) )
                 this.actions['Backspace'].callback( lidx, cursor, e );
 
             return this.actions[ key ].callback( lidx, cursor, e );
@@ -2519,12 +2532,21 @@ class CodeEditor {
         }
     }
 
-    action( key, deleteSelection, fn ) {
+    action( key, deleteSelection, fn, eventSkipDelete ) {
 
         this.actions[ key ] = {
+            "key": key,
             "callback": fn,
-            "deleteSelection": deleteSelection
+            "deleteSelection": deleteSelection,
+            "eventSkipDelete": eventSkipDelete
         };
+    }
+
+    _actionMustDelete( cursor, action, e ) {
+
+        console.log(action, action.delEventRequirement)
+        return cursor.selection && action.deleteSelection &&
+            ( action.eventSkipDelete ? !e[ action.eventSkipDelete ] : true );
     }
 
     scanWordSuggestions() {
@@ -3405,14 +3427,14 @@ class CodeEditor {
         }
     }
 
-    addSpaceTabs( n ) {
+    _addSpaceTabs( n ) {
         
         for( var i = 0; i < n; ++i ) {
             this.actions[ 'Tab' ].callback();
         }
     }
 
-    addSpaces( n ) {
+    _addSpaces( n ) {
         
         for( var i = 0; i < n; ++i ) {
             this.root.dispatchEvent( new CustomEvent( 'keydown', { 'detail': {
@@ -3420,6 +3442,37 @@ class CodeEditor {
                 key: ' ',
                 targetCursor: this._lastProcessedCursorIndex
             }}));
+        }
+    }
+
+    _removeSpaces( cursor ) {
+
+        // Remove indentation
+        const lidx = cursor.line;
+        const lineStart = firstNonspaceIndex( this.code.lines[ lidx ] );
+
+        // Nothing to remove...
+        if( lineStart == 0 )
+            return;
+
+        let indentSpaces = lineStart % this.tabSpaces;
+        indentSpaces = indentSpaces == 0 ? this.tabSpaces : indentSpaces;
+        const newStart = Math.max( lineStart - indentSpaces, 0 );
+
+        this.code.lines[ lidx ] = [
+            this.code.lines[ lidx ].slice( 0, newStart ),
+            this.code.lines[ lidx ].slice( lineStart )
+        ].join('');
+
+        this.processLine( lidx );
+
+        this.cursorToString( cursor, " ".repeat( indentSpaces ), true );
+
+        if( cursor.selection )
+        {
+            cursor.selection.invertIfNecessary();
+            cursor.selection.fromX = Math.max( cursor.selection.fromX - indentSpaces, 0 );
+            this._processSelection( cursor );
         }
     }
 
