@@ -377,17 +377,7 @@ class CodeEditor {
         this.xPadding = "48px";
 
         // Add main cursor
-        {
-            this._addCursor( 0, 0, true, true );
-
-            Object.defineProperty( this, 'line', {
-                get: (v) => { return this._getCurrentCursor().line }
-            } );
-    
-            Object.defineProperty( this, 'position', {
-                get: (v) => { return this._getCurrentCursor().position }
-            } );
-        }
+        this._addCursor( 0, 0, true, true );
 
         // Scroll stuff
         {
@@ -1878,8 +1868,8 @@ class CodeEditor {
             let ccw = true;
 
             // Check if we must change ccw or not ... (not with mouse)
-            if( !isMouseEvent && this.line >= cursor.selection.fromY && 
-                (this.line == cursor.selection.fromY ? this.position >= cursor.selection.fromX : true) )
+            if( !isMouseEvent && cursor.line >= cursor.selection.fromY && 
+                (cursor.line == cursor.selection.fromY ? cursor.position >= cursor.selection.fromX : true) )
             {
                 ccw = ( e && this._lastSelectionKeyDir && ( e.key == 'ArrowRight' || e.key == 'ArrowDown' || e.key == 'End' ) );
             }
@@ -2861,111 +2851,98 @@ class CodeEditor {
         
         const usesBlockComments = lang.blockComments ?? true;
         const blockCommentsTokens = lang.blockCommentsTokens ?? this.defaultBlockCommentTokens;
+        const singleLineCommentToken = lang.singleLineCommentToken ?? this.defaultSingleLineCommentToken;
+        
+        let token_classname = "";
+        let discardToken = false;
 
-        if( !usePreviousTokenToCheckString && token == ' ' )
+        if( this._buildingBlockComment != undefined )
+            token_classname = "cm-com";
+        
+        else if( this._buildingString != undefined )
+            discardToken = this._appendStringToken( token );
+        
+        else if( this._mustHightlightWord( token, CodeEditor.keywords ) && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) )
+            token_classname = "cm-kwd";
+
+        else if( this._mustHightlightWord( token, CodeEditor.builtin ) && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) )
+            token_classname = "cm-bln";
+
+        else if( this._mustHightlightWord( token, CodeEditor.statementsAndDeclarations ) )
+            token_classname = "cm-std";
+
+        else if( this._mustHightlightWord( token, CodeEditor.symbols ) )
+            token_classname = "cm-sym";
+
+        else if( token.substr( 0, singleLineCommentToken.length ) == singleLineCommentToken )
+            token_classname = "cm-com";
+
+        else if( this._isNumber( token ) || this._isNumber( token.replace(/[px]|[em]|%/g,'') ) )
+            token_classname = "cm-dec";
+
+        else if( this._isCSSClass( token, prev, next ) )
+            token_classname = "cm-kwd";
+
+        else if ( this._isType( token, prev, next ) )
+            token_classname = "cm-typ";
+
+        else if ( highlight == 'batch' && ( token == '@' || prev == ':' || prev == '@' ) )
+            token_classname = "cm-kwd";
+
+        else if ( [ 'cpp', 'wgsl', 'glsl' ].indexOf( highlight ) > -1 && token.includes( '#' ) ) // C++ preprocessor
+            token_classname = "cm-ppc";
+
+        else if ( highlight == 'cpp' && prev == '<' && (next == '>' || next == '*') ) // Defining template type in C++
+            token_classname = "cm-typ";
+
+        else if ( highlight == 'cpp' && (next == '::' || prev == '::' && next != '(' )) // C++ Class
+            token_classname = "cm-typ";
+
+        else if ( highlight == 'css' && prev == ':' && (next == ';' || next == '!important') ) // CSS value
+            token_classname = "cm-str";
+
+        else if ( highlight == 'css' && prev == undefined && next == ':' ) // CSS attribute
+            token_classname = "cm-typ";
+        
+        else if ( this._markdownHeader || ( highlight == 'markdown' && isFirstToken && token.replaceAll('#', '').length != token.length ) ) // Header
         {
-            if( this._buildingString != undefined )
-            {
-                this._appendStringToken( token );
-                return "";
-            }
+            token_classname = "cm-kwd";
+            this._markdownHeader = true;
+        }
+
+        else if ( token[ 0 ] != '@' && token[ 0 ] != ',' && next == '(' )
+            token_classname = "cm-mtd";
+
+
+        if( usesBlockComments && this._buildingBlockComment != undefined 
+            && token.substr( 0, blockCommentsTokens[ 1 ].length ) == blockCommentsTokens[ 1 ] )
+        {
+            this._blockCommentCache.push( new LX.vec2( this._buildingBlockComment, this._currentLineNumber ) );
+            delete this._buildingBlockComment;
+        }
+
+        // We finished constructing a string
+        if( this._buildingString && ( this._stringEnded || isLastToken ) )
+        {
+            token = this._getCurrentString();
+            token_classname = "cm-str";
+            discardToken = false;
+        }
+
+        // Update state
+        this._buildingString = this._stringEnded ? undefined : this._buildingString;
+
+        if( discardToken )
+            return "";
+
+        token = token.replace( "<", "&lt;" );
+        token = token.replace( ">", "&gt;" );
+
+        // No highlighting, no need to put it inside another span..
+        if( !token_classname.length )
             return token;
-        }
-        else
-        {
-            const singleLineCommentToken = lang.singleLineCommentToken ?? this.defaultSingleLineCommentToken;
-            
-            let token_classname = "";
-            let discardToken = false;
 
-            if( this._buildingBlockComment != undefined )
-                token_classname = "cm-com";
-            
-            else if( this._buildingString != undefined )
-                discardToken = this._appendStringToken( token );
-            
-            else if( this._mustHightlightWord( token, CodeEditor.keywords ) && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) )
-                token_classname = "cm-kwd";
-
-            else if( this._mustHightlightWord( token, CodeEditor.builtin ) && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) )
-                token_classname = "cm-bln";
-
-            else if( this._mustHightlightWord( token, CodeEditor.statementsAndDeclarations ) )
-                token_classname = "cm-std";
-
-            else if( this._mustHightlightWord( token, CodeEditor.symbols ) )
-                token_classname = "cm-sym";
-
-            else if( token.substr( 0, singleLineCommentToken.length ) == singleLineCommentToken )
-                token_classname = "cm-com";
-
-            else if( this._isNumber( token ) || this._isNumber( token.replace(/[px]|[em]|%/g,'') ) )
-                token_classname = "cm-dec";
-
-            else if( this._isCSSClass( token, prev, next ) )
-                token_classname = "cm-kwd";
-
-            else if ( this._isType( token, prev, next ) )
-                token_classname = "cm-typ";
-
-            else if ( highlight == 'batch' && ( token == '@' || prev == ':' || prev == '@' ) )
-                token_classname = "cm-kwd";
-
-            else if ( [ 'cpp', 'wgsl', 'glsl' ].indexOf( highlight ) > -1 && token.includes( '#' ) ) // C++ preprocessor
-                token_classname = "cm-ppc";
-
-            else if ( highlight == 'cpp' && prev == '<' && (next == '>' || next == '*') ) // Defining template type in C++
-                token_classname = "cm-typ";
-
-            else if ( highlight == 'cpp' && (next == '::' || prev == '::' && next != '(' )) // C++ Class
-                token_classname = "cm-typ";
-
-            else if ( highlight == 'css' && prev == ':' && (next == ';' || next == '!important') ) // CSS value
-                token_classname = "cm-str";
-
-            else if ( highlight == 'css' && prev == undefined && next == ':' ) // CSS attribute
-                token_classname = "cm-typ";
-            
-            else if ( this._markdownHeader || ( highlight == 'markdown' && isFirstToken && token.replaceAll('#', '').length != token.length ) ) // Header
-            {
-                token_classname = "cm-kwd";
-                this._markdownHeader = true;
-            }
-
-            else if ( token[ 0 ] != '@' && token[ 0 ] != ',' && next == '(' )
-                token_classname = "cm-mtd";
-
-
-            if( usesBlockComments && this._buildingBlockComment != undefined 
-                && token.substr( 0, blockCommentsTokens[ 1 ].length ) == blockCommentsTokens[ 1 ] )
-            {
-                this._blockCommentCache.push( new LX.vec2( this._buildingBlockComment, this._currentLineNumber ) );
-                delete this._buildingBlockComment;
-            }
-
-            // We finished constructing a string
-            if( this._buildingString && ( this._stringEnded || isLastToken ) )
-            {
-                token = this._getCurrentString();
-                token_classname = "cm-str";
-                discardToken = false;
-            }
-
-            // Update state
-            this._buildingString = this._stringEnded ? undefined : this._buildingString;
-
-            if( discardToken )
-                return "";
-
-            token = token.replace( "<", "&lt;" );
-            token = token.replace( ">", "&gt;" );
-
-            // No highlighting, no need to put it inside another span..
-            if( !token_classname.length )
-                return token;
-
-            return "<span class='" + highlight + " " + token_classname + "'>" + token + "</span>";
-        }
+        return "<span class='" + highlight + " " + token_classname + "'>" + token + "</span>";
     }
 
     _appendStringToken( token ) {
