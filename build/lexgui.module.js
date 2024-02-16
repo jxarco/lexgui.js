@@ -1937,6 +1937,7 @@ class Menubar {
             });
 
             entry.addEventListener("mouseleave", () => {
+                this.root.querySelectorAll(".lexmenuentry").forEach( e => e.classList.remove( 'selected' ) );
                 this.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
             });
         }
