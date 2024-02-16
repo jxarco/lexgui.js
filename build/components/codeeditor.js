@@ -590,12 +590,17 @@ class CodeEditor {
 
         // Convert reserved word arrays to maps so we can search tokens faster
 
-        for( let lang in CodeEditor.keywords ) CodeEditor.keywords[lang] = CodeEditor.keywords[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
-        for( let lang in CodeEditor.utils ) CodeEditor.utils[lang] = CodeEditor.utils[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
-        for( let lang in CodeEditor.types ) CodeEditor.types[lang] = CodeEditor.types[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
-        for( let lang in CodeEditor.builtin ) CodeEditor.builtin[lang] = CodeEditor.builtin[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
-        for( let lang in CodeEditor.statementsAndDeclarations ) CodeEditor.statementsAndDeclarations[lang] = CodeEditor.statementsAndDeclarations[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
-        for( let lang in CodeEditor.symbols ) CodeEditor.symbols[lang] = CodeEditor.symbols[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+        if( !CodeEditor._staticReady )
+        {
+            for( let lang in CodeEditor.keywords ) CodeEditor.keywords[lang] = CodeEditor.keywords[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+            for( let lang in CodeEditor.utils ) CodeEditor.utils[lang] = CodeEditor.utils[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+            for( let lang in CodeEditor.types ) CodeEditor.types[lang] = CodeEditor.types[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+            for( let lang in CodeEditor.builtin ) CodeEditor.builtin[lang] = CodeEditor.builtin[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+            for( let lang in CodeEditor.statementsAndDeclarations ) CodeEditor.statementsAndDeclarations[lang] = CodeEditor.statementsAndDeclarations[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+            for( let lang in CodeEditor.symbols ) CodeEditor.symbols[lang] = CodeEditor.symbols[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+    
+            CodeEditor._staticReady = true;
+        }
 
         // Action keys
 
