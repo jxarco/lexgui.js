@@ -1,5 +1,9 @@
 # lexgui.js changelog
 
+## 0.1.28
+
+General CSS fixes.
+
 ## 0.1.27
 
 Code Editor:

@@ -1778,7 +1778,7 @@ class Menubar {
             let entry = document.createElement('div');
             entry.className = "lexmenuentry";
             entry.id = pKey;
-            entry.innerText = key;
+            entry.innerHTML = "<span>" + key + "</span>";
             if(options.position == "left") {	
                 this.root.prepend( entry );	
             }	
@@ -1928,7 +1928,11 @@ class Menubar {
                     return;
                 } 
 
-                this.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+                // Manage selected
+                this.root.querySelectorAll(".lexmenuentry").forEach( e => e.classList.remove( 'selected' ) );
+                entry.classList.add( "selected" );
+
+                this.root.querySelectorAll(".lexcontextmenu").forEach( e => e.remove() );
                 create_submenu( item, key, entry, -1 );
             });
 
@@ -3857,7 +3861,7 @@ class Panel {
             let rect = event.currentTarget.getBoundingClientRect();
             let y_pos = container.classList.contains('lexdialog') ? rect.top - 5 + rect.height : rect.y + rect.height - 5;
             element.querySelector(".lexoptions").style.top = y_pos + 'px';
-            element.querySelector(".lexoptions").style.width = (event.currentTarget.clientWidth) + 2 + 'px';
+            element.querySelector(".lexoptions").style.width = (event.currentTarget.clientWidth) + 'px';
             element.querySelector(".lexoptions").toggleAttribute('hidden');
             list.focus();
         }, { buttonClass: 'array', skipInlineCount: true });
@@ -3873,24 +3877,24 @@ class Panel {
                 selectedOption.querySelector("span").innerHTML = selectedOption.querySelector("span").innerHTML.replaceAll(selectedOption.querySelector("span").innerText, v); 
         }
 
-        //Add dropdown options container
-        let list = document.createElement('ul');
+        // Add dropdown options container
+        let list = document.createElement( 'ul' );
         list.tabIndex = -1;
         list.className = "lexoptions";
         list.hidden = true;
 
-        list.addEventListener('focusout', function(e) {
+        list.addEventListener( 'focusout', function( e ) {
             e.stopPropagation();
             e.stopImmediatePropagation();
-            if(e.relatedTarget === selectedOption.querySelector("button")) {
+            if(e.relatedTarget === selectedOption.querySelector( 'button' )) {
                 this.unfocus_event = true;
-                setTimeout(() => delete this.unfocus_event, 200);
-            } else if (e.relatedTarget && e.relatedTarget.tagName == "INPUT") {
+                setTimeout( () => delete this.unfocus_event, 200 );
+            } else if ( e.relatedTarget && e.relatedTarget.tagName == "INPUT" ) {
                 return;
-            }else if (e.target.id == 'input-filter') {
+            }else if ( e.target.id == 'input-filter' ) {
                 return;
             }
-            this.toggleAttribute('hidden', true);
+            this.toggleAttribute( 'hidden', true );
         });
 
         // Add filter options
