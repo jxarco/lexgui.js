@@ -313,7 +313,7 @@ class CodeEditor {
         }
 
         this.base_area = area;
-        this.area = new LX.Area( { className: "lexcodeeditor", height: "auto", no_append: true } );
+        this.area = new LX.Area( { className: "lexcodeeditor", height: "100%", no_append: true } );
 
         this.tabs = this.area.addTabs( { onclose: (name) => {
             delete this.openedTabs[ name ];
