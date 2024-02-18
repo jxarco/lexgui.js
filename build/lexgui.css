@@ -1,15 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Passion+One:wght@400;700;900&display=swap');
 
 :root {
-  --global-font: 'Noto Sans', sans-serif; /*'Rubik', sans-serif; */
+  --global-font: "Figtree", sans-serif;
   --global-font-size: 12px;
   --global-color-primary: #212121;
   --global-color-secondary: #2e2e2e;
   --global-color-terciary: #444;
   --global-selected: #3e57e4;
   --global-selected-light: #7b8ae2;
-  --global-selected-dark: #344bccb7;
+  --global-selected-dark: #2f42ad;
 	--global-branch-darker: #252525;
 	--branch-title-background: #2e3338;
   --branch-title-inactive-background: #42484e;
@@ -17,7 +18,7 @@
   --global-button-color-hovered: #444;
   --global-text: #d4d4dce6;
   --global-text-primary: #f4f4ffe6;
-  --global-text-secondary: #c6c6cfd9;
+  --global-text-secondary: #cacad4ea;
   --global-text-terciary: #727272b9;
   --global-dark-background: #121212;
   --global-blur-background: #28292bd5;
@@ -60,7 +61,7 @@ html, body {
   margin: 0;
   padding: 0;
   font-family: var(--global-font);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   font-weight: 400;
 }
 
@@ -454,12 +455,12 @@ body.noevents * {
 }
 
 .lexbranchtitle {
-  font-size: 13px;
-  font-weight: bold;
+  font-family: "Passion One", sans-serif;
+  font-size: 18px;
+  letter-spacing: 0em !important;
   color: var(--global-text);
   background-color: var(--global-color-secondary);
   padding: 10px;
-  text-shadow: 0px 1px 2px #000;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
   cursor: pointer;
@@ -720,7 +721,7 @@ body.noevents * {
   width: fit-content;
   width: -moz-fit-content;
   color: #ddd;
-  font-weight: 600;
+  font-weight: 800;
   font-size: 14px;
   margin: 12px;
   padding: 2px;
@@ -729,7 +730,7 @@ body.noevents * {
   display: grid;
   align-content: center;
   border-radius: 12px;
-  background-color: var(--global-color-secondary);
+  background-color: var(--global-button-color);
   display: flex;
   -webkit-user-select: none; /* Safari 3.1+ */
   -moz-user-select: none; /* Firefox 2+ */
@@ -1020,8 +1021,8 @@ input[type=checkbox]:checked:after {
 }
 
 .lexcheckbox {
-  width: 1.1em;
-  height: 1.1em;
+  width: 1.25em;
+  height: 1.25em;
   display: inline-block;
   background-color: #1f1f1f;
   color: #fff;
@@ -1140,6 +1141,10 @@ input[type=checkbox]:checked:after {
   margin-right: 2px;
   background: var(--global-button-color);
   transition: 0.1s linear;
+}
+
+.lexvector a.fa-lock {
+  min-width: 12px;
 }
 
 .lexvector .vecbox:hover{
@@ -1269,11 +1274,13 @@ input[type="range"] {
 .lexinputslider::-webkit-slider-thumb {
   appearance: none;
   -webkit-appearance: none;
-  margin-top: -4px;
-  width: 8px;
-  height: 8px;
+  margin-top: -6px;
+  width: 12px;
+  height: 12px;
+  border: 1px solid #c9c7de;
   border-radius: 6px;
-  background: #c9c7de;
+  background: var(--global-selected-dark);
+  box-shadow: 0px 0px 6px #111;
   cursor: pointer;
 }
 
@@ -1465,7 +1472,6 @@ input[type="range"] {
 .lextree .lextreeitem.selected {
   color: var(--global-text-primary);
   background: var(--global-selected);
-  background: linear-gradient(var(--global-selected), var(--global-selected-light));
 }
 
 .lextree .lextreeitem a {
@@ -1618,12 +1624,23 @@ meter::-webkit-meter-even-less-good-value {
   position: absolute;
   padding-right: 14px;
   z-index: 1001;
-  /* border-bottom-right-radius: 4px;
-  border-bottom-left-radius: 4px; */
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.63) !important;
   background-color: var(--global-blur-background);
   border: 1px solid #91909036;
-  border-radius: 4px;
+  border-radius: 6px;
+}
+
+.lexcontextmenu:before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  border-radius: 6px;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  z-index:-1;
 }
 
 .lexcontextmenu:focus {
@@ -1654,21 +1671,14 @@ meter::-webkit-meter-even-less-good-value {
   position: relative;
 }
 
-.lexcontextmenu .lexcontextmenuentry:before {
-  content:"";
-  position:absolute;
-  width: 100%;
-  height: 100%;
-  top:0;
-  left:0;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  z-index:-1;
+.lexcontextmenu .lexcontextmenuentry:first-child {
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px;
 }
 
-.lexcontextmenu .lexcontextmenuentry.last {
-  border-bottom-right-radius: 6px;
-  border-bottom-left-radius: 6px;
+.lexcontextmenu .lexcontextmenuentry:last-child {
+  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 5px;
 }
 
 .lexcontextmenu .lexcontextmenuentrycontainer {
@@ -1698,7 +1708,6 @@ meter::-webkit-meter-even-less-good-value {
 /* submenu specified arrow  */
 .lexcontextmenu .lexcontextmenuentry a.fa-xs {
   float: right;
-  /* margin-top: -8px; */
   margin-right: 8px;
 }
 
@@ -1824,13 +1833,13 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexcontextmenubox .lexcontextmenuentry:first-child {
-  border-top-left-radius: 6px;
-  border-top-right-radius: 6px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
 }
 
 .lexcontextmenubox .lexcontextmenuentry:last-child {
-  border-bottom-left-radius: 6px;
-  border-bottom-right-radius: 6px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
 }
 
 .lexcontextmenubox .lexcontextmenuentry.cmtitle {

@@ -1827,7 +1827,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     var rect = c.getBoundingClientRect();
                     contextmenu.style.left = (isSubMenu ? rect.width : rect.left) + "px";
                     // Entries use css to set top relative to parent
-                    contextmenu.style.top = (isSubMenu ? 0 : rect.bottom) + "px";
+                    contextmenu.style.top = (isSubMenu ? 0 : rect.bottom - 4) + "px";
                     c.appendChild( contextmenu );
 
                     contextmenu.focus();
