@@ -248,10 +248,11 @@ body.noevents * {
 .lexdialogtitle {
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
-  font-size: 18px;
-  font-weight: bold;
+  font-family: "Passion One", sans-serif;
+  font-size: 21px;
+  letter-spacing: 0em !important;
   color: #d9d9e3;
-  text-shadow: 0px 1px 4px #000;
+  text-shadow: 0px 1px 8px #00000075;
   width: calc( 100% - 24px);
   padding: 8px;
   padding-left: 16px;
@@ -460,6 +461,7 @@ body.noevents * {
   letter-spacing: 0em !important;
   color: var(--global-text);
   background-color: var(--global-color-secondary);
+  text-shadow: 0px 1px 8px #00000075;
   padding: 10px;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
