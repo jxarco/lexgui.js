@@ -18,6 +18,7 @@
   --global-text: #d4d4dce6;
   --global-text-primary: #f4f4ffe6;
   --global-text-secondary: #c6c6cfd9;
+  --global-text-terciary: #727272b9;
   --global-dark-background: #121212;
   --global-blur-background: #28292bd5;
   --global-color-transparent: #7b8ae200;
@@ -1892,6 +1893,64 @@ meter::-webkit-meter-even-less-good-value {
   color: #979aa0e3;
 }
 
+/* Side Bar */
+
+.lexsidebar {
+  
+}
+
+.lexsidebar .lexsidebarentry {
+  width: 64px;
+  height: 64px;
+  padding-left: 7.5px;
+  margin-top: -6px;
+}
+
+.lexsidebar .lexsidebarentry:first-child {
+  padding-top: 16px;
+}
+
+.lexsidebar .lexsidebarentry button {
+  width: calc(100% - 16px);
+  height: calc(100% - 16px);
+  background-color: var(--global-button-color);
+  color: var(--global-text);
+  font-size: 18px;
+  border-radius: 10px;
+  border: 0px solid var(--global-color-transparent);
+  transition: border 0.1s ease-in-out;
+}
+
+.lexsidebar .lexsidebarentry button:hover {
+  border: 3px solid var(--global-selected);
+  background-color: var(--global-button-color-hovered);
+}
+
+.lexsidebar .lexsidebarentry button:active {
+  font-size: 17px;
+}
+
+.lexsidebar .lexsidebarentry.selected button {
+  background-color: var(--global-button-color-hovered);
+  border: 4px solid var(--global-selected);
+}
+
+.lexsidebar .lexsidebarfooter {
+  position: absolute;
+  bottom: 0;
+}
+
+.lexsidebar .lexsidebarfooter .lexsidebarentry button {
+  width: calc(100% - 16px);
+  height: calc(100% - 16px);
+  background-color: unset;
+  font-size: 14px;
+}
+
+.lexsidebar .lexsidebarfooter .lexsidebarentry button:active {
+  font-size: 13px;
+}
+
 /* Overlay Buttons */
 
 .lexoverlaybuttons {
@@ -2821,6 +2880,7 @@ ul.lexassetscontent {
   margin-top: 28px;
   overflow: hidden;
   position: absolute;
+  top: 0;
 }
 
 .lexcodeeditor .codetabsarea {

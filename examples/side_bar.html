@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>LexGUI Area Tabs Demo</title>
+    <link rel="stylesheet" href="../build/lexgui.css">
+    <link rel="icon" href="../images/icon.png">
+    <script type="importmap">
+        {
+          "imports": {
+            "lexgui": "../build/lexgui.module.js",
+            "lexgui/components/": "../build/components/"
+          }
+        }
+    </script>
+</head>
+<body></body>
+    <script type="module">
+
+        import { LX } from 'lexgui';
+        import 'lexgui/components/codeeditor.js';
+
+        // init library and get main area
+        let area = LX.init();
+
+        area.root.style.width = "100%";
+        area.root.style.height = "100%";
+
+        function hide( el ) {
+            el.style.display = 'none';
+        }
+
+        function show( el ) {
+            el.style.display = 'block';
+        }
+
+        area.addSidebar( m => {
+            m.add( "Scene", { icon: "fa fa-cube", callback: () => { codeArea.hide(); show( canvas ); } } );
+            m.add( "Code", { icon: "fa fa-code", callback: () => { hide( canvas ); codeArea.show(); } } );
+
+            m.add( "Search", { icon: "fa fa-search", bottom: true, callback: () => { } } );
+        });
+        
+        let codeArea = new LX.Area( { width: "100%", height: "100%" } );
+        let editor = new LX.CodeEditor( codeArea );
+        editor.loadFile( "../data/js_sample.js" );
+
+        // add canvas to left upper part
+        var canvas = document.createElement('canvas');
+        canvas.id = "mycanvas";
+        canvas.width = area.root.clientWidth;
+        canvas.height = area.root.clientHeight;
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+
+        area.attach( canvas );
+        area.attach( codeArea );
+
+        function loop(dt) {
+            
+            var ctx = canvas.getContext("2d");
+
+            ctx.fillStyle =  "#def698";
+
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.font = "44px Monospace";
+
+            ctx.fillStyle = "#f13523";
+
+            const text = "lexgui @jxarco";
+            const pos2D = [200, 200];
+            ctx.fillText(text, pos2D[0], pos2D[1]);
+
+            requestAnimationFrame(loop);
+        }
+
+        requestAnimationFrame(loop);
+
+    </script>
+</html>

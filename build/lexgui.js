@@ -333,15 +333,20 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
         const propagate_add = ( item, filter, path ) => {
 
-            const key = Object.keys(item)[0];
-            if( (path + key).toLowerCase().includes(filter) ) {
-                if(item.callback)
-                    add_element(key, item.callback, path, item);
+            const key = Object.keys( item )[ 0 ];
+            let name = item.name ?? path + key;
+            if( name.toLowerCase().includes( filter ) ) {
+                if( item.callback )
+                    add_element( item.name ?? key, item.callback, path, item );
             }
+
+            // is sidebar..
+            if( item.name )
+            return;
 
             path += key + " > ";
 
-            for( let c of item[key] )
+            for( let c of item[ key ] )
                 propagate_add( c, filter, path );
         };
 
@@ -351,7 +356,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             for( let m of LX.menubars )
                 for( let i of m.items ) {
-                    propagate_add( i, filter, "");
+                    propagate_add( i, filter, "" );
                 }
 
             if( LX.has('CodeEditor') )
@@ -869,7 +874,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             }
 
             // Create areas
-            var area1 = new Area({ no_append: true, className: "split" + (options.menubar ? "" : " origin") });
+            var area1 = new Area({ no_append: true, className: "split" + (options.menubar || options.sidebar ? "" : " origin") });
             var area2 = new Area({ no_append: true, className: "split"});
 
             area1.parentArea = this;
@@ -1190,16 +1195,11 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         addMenubar( callback, options = {} ) {
             
             let menubar = new Menubar(options);
-            LX.menubars.push( menubar );
 
             if(callback) callback( menubar );
 
-            // Hack to get content height
-            // let d = document.createElement('div');
-            // d.appendChild(menubar.root);
-            // document.body.appendChild(d);
-            // const height = menubar.root.clientHeight;
-            // d.remove();
+            LX.menubars.push( menubar );
+
             const height = 48; // pixels
 
             const [bar, content] = this.split({type: 'vertical', sizes: [height, null], resize: false, menubar: true});
@@ -1207,6 +1207,27 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             bar.is_menubar = true;
             window.content = content;
             return menubar;
+        }
+
+        /**
+         * @method addSidebar
+         * @param {Function} callback Function to fill the sidebar
+         */
+
+        addSidebar( callback, options = {} ) {
+
+            let sidebar = new SideBar( options );
+
+            if( callback ) callback( sidebar );
+
+            LX.menubars.push( sidebar );
+
+            const width = 64; // pixels
+
+            const [bar, content] = this.split( { type: 'horizontal', sizes: [ width, null ], resize: false, sidebar: true } );
+            bar.attach( sidebar );
+            bar.is_sidebar = true;
+            return sidebar;
         }
 
         /**
@@ -2128,6 +2149,83 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     };
 
     LX.Menubar = Menubar;
+
+    /**
+     * @class SideBar
+     */
+
+    class SideBar {
+
+        constructor( options = {} )  {
+
+            this.root = document.createElement( 'div' );
+            this.root.className = "lexsidebar";
+
+            this.footer = document.createElement( 'div' );
+            this.footer.className = "lexsidebarfooter";
+            this.root.appendChild( this.footer );
+
+            this.items = [ ];
+        }
+
+        /**
+         * @method add
+         * @param {*} options:
+         * callback: Function to call on each item
+         * bottom: Bool to set item at the bottom as helper button (not selectable)
+         */
+
+        add( key, options = {} ) {
+
+            if( options.constructor == Function )
+                options = { callback: options };
+
+            let pKey = key.replace( /\s/g, '' ).replaceAll( '.', '' );
+
+            if( this.items.findIndex( (v, i) => v.key == pKey ) > -1 )
+            {
+                console.warn( `'${key}' already created in Sidebar` );
+                return;
+            }
+
+            let entry = document.createElement( 'div' );
+            entry.className = "lexsidebarentry";
+            entry.id = pKey;
+            entry.title = key;
+
+            if( options.bottom )
+            {
+                this.footer.appendChild( entry );
+            }else
+            {
+                this.root.appendChild( entry );
+            }
+
+            // Reappend footer in root
+            this.root.appendChild( this.footer );
+
+            let button = document.createElement( 'button' );
+            button.innerHTML = "<i class='"+ (options.icon ?? "") + "'></i>";
+            entry.appendChild( button );
+
+            entry.addEventListener("click", () => {
+
+                const f = options.callback;
+                if( f ) f.call( this, key, entry );
+
+                // Manage selected
+                if( !options.bottom )
+                {
+                    this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
+                    entry.classList.add( "selected" );
+                }
+            });
+
+            this.items.push( { name: pKey, domEl: entry, callback: options.callback } );
+        }
+    };
+
+    LX.SideBar = SideBar;
 
     /**
      * @class Widget
