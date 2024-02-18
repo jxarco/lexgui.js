@@ -3853,7 +3853,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             // Add dropdown widget button  
             let buttonName = value;
-            buttonName += "<a class='fa-solid fa-angle-down' style='float:right; margin-right: 6px;'></a>";
+            buttonName += "<a class='fa-solid fa-angle-down' style='float:right; margin-right: 3px;'></a>";
 
             this.queue(container);
 
@@ -4196,7 +4196,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             // Add dropdown array button
 
-            const itemNameWidth = "3%";
+            const itemNameWidth = "4%";
 
             var container = document.createElement('div');
             container.className = "lexarray";
@@ -4204,7 +4204,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             
             this.queue( container );
 
-            const angle_down = `<a class='fa-solid fa-angle-down' style='float:right; margin-right: 6px;'></a>`;
+            const angle_down = `<a class='fa-solid fa-angle-down' style='float:right; margin-right: 3px;'></a>`;
 
             let buttonName = "Array (size " + values.length + ")";
             buttonName += angle_down;
@@ -4272,7 +4272,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 }
 
                 buttonName = "Add item";
-                buttonName += "<a class='fa-solid fa-plus' style='float:right; margin-right: 6px; margin-top: 2px;'></a>";
+                buttonName += "<a class='fa-solid fa-plus' style='float:right; margin-right: 3px; margin-top: 2px;'></a>";
                 this.addButton(null, buttonName, (v, event) => {
                     values.push( "" );
                     updateItems();
@@ -4791,6 +4791,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 doc.addEventListener("mouseup",inner_mouseup);
                 lastY = e.pageY;
                 document.body.classList.add('nocursor');
+                document.body.classList.add('noevents');
                 drag_icon.classList.remove('hidden');
             }
 
@@ -4815,6 +4816,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 doc.removeEventListener("mousemove",inner_mousemove);
                 doc.removeEventListener("mouseup",inner_mouseup);
                 document.body.classList.remove('nocursor');
+                document.body.classList.remove('noevents');
                 drag_icon.classList.add('hidden');
             }
             
@@ -4961,6 +4963,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     doc.addEventListener("mouseup",inner_mouseup);
                     lastY = e.pageY;
                     document.body.classList.add('nocursor');
+                    document.body.classList.add('noevents');
                     drag_icon.classList.remove('hidden');
                 }
 
@@ -4993,6 +4996,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     doc.removeEventListener("mousemove",inner_mousemove);
                     doc.removeEventListener("mouseup",inner_mouseup);
                     document.body.classList.remove('nocursor');
+                    document.body.classList.remove('noevents');
                     drag_icon.classList.add('hidden');
                 }
                 
@@ -6139,8 +6143,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             element.style.minHeight = "50px";
             element.style.width = options.width || "100%";
 
-            element.bgcolor = options.bgcolor || "#15181c";
-            element.pointscolor = options.pointscolor || "#7b8ae2";
+            element.bgcolor = options.bgcolor || LX.getThemeColor("global-dark-background");
+            element.pointscolor = options.pointscolor || LX.getThemeColor("global-selected-light");
             element.linecolor = options.linecolor || "#555";
 
             element.value = value || [];

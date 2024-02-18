@@ -3,21 +3,24 @@
 
 :root {
   --global-font: 'Noto Sans', sans-serif; /*'Rubik', sans-serif; */
+  --global-font-size: 12px;
+  --global-color-primary: #212121;
+  --global-color-secondary: #2e2e2e;
+  --global-color-terciary: #444;
   --global-selected: #3e57e4;
   --global-selected-light: #7b8ae2;
   --global-selected-dark: #344bccb7;
-  --global-color-primary: #232323;
-  --global-color-secondary: #343434;
-  --global-color-terciary: #444;
 	--global-branch-darker: #252525;
 	--branch-title-background: #2e3338;
   --branch-title-inactive-background: #42484e;
-  --global-button-color: #4e4e4e;
+  --global-button-color: #3e3e3e;
+  --global-button-color-hovered: #444;
   --global-text: #d4d4dce6;
   --global-text-primary: #f4f4ffe6;
   --global-text-secondary: #c6c6cfd9;
-  --global-dark-background: #14161a;
-  --global-blur-background: #28292bc5;
+  --global-dark-background: #121212;
+  --global-blur-background: #28292bd5;
+  --global-color-transparent: #7b8ae200;
   --transition-time: 1000;
   --code-editor-font-size: 14px;
   --code-editor-row-height: 20px;
@@ -70,6 +73,10 @@ canvas {
 
 body.nocursor * {
   cursor: none !important;
+}
+
+body.noevents * {
+  pointer-events: none !important;
 }
 
 .grabbing {
@@ -163,7 +170,7 @@ body.nocursor * {
   border: none;
   font-family: var(--global-font);
   line-height: 23px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
 }
 
@@ -181,7 +188,7 @@ body.nocursor * {
   padding: 10px;
   padding-left: 50px;
   color: var(--global-text-primary);
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
 }
 
@@ -210,7 +217,7 @@ body.nocursor * {
 
 #global_search .searchitembox .searchitem .lang-ext {
   color: #676e75;
-  font-size: 12px;
+  font-size: var(--global-font-size);
 }
 
 #global_search .searchitembox .searchitem.last {
@@ -446,7 +453,7 @@ body.nocursor * {
 }
 
 .lexbranchtitle {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: bold;
   color: var(--global-text);
   background-color: var(--global-color-secondary);
@@ -504,7 +511,7 @@ body.nocursor * {
 }
 
 .lexbranch .branchicon {
-  font-size: 12px;
+  font-size: var(--global-font-size);
 }
 
 .lexbranch.first .lexbranchtitle {
@@ -532,10 +539,14 @@ body.nocursor * {
   display: flex;
   align-items: center;
   padding: 5px;
-  font-size: 13px;
+  font-size: var(--global-font-size);
   color: #DCDCDC;
   line-height: 2;
   overflow: hidden;
+}
+
+.lexwidget * {
+  font-size: var(--global-font-size);
 }
 
 .lexinlinewidgets .lexwidget {
@@ -614,15 +625,19 @@ body.nocursor * {
   background: none;
   padding: 3px;
   color: var(--global-text-primary);
-  font-size: 13px;
   font-weight: 500;
   outline: none;
-  border: none;
-  border-bottom: 1px solid #bbbbbb47;
+  border-radius: 6px;
+  border: 2px solid var(--global-color-transparent);
+  transition: border-color 0.1s linear;
 }
 
 .lexwidget .lextext, .lexwidget .lexnumber {
   padding-left: 4px;
+}
+
+.lexwidget .lextext input {
+  padding: 5px;
 }
 
 .lexwidget .lextext div {
@@ -640,36 +655,34 @@ body.nocursor * {
 }
 
 .lexwidget .lextext input:focus {
-  border-bottom: 2px solid var(--global-selected);
+  border-color: var(--global-selected);
 }
 
 .lexwidget .inputicon {
-  border-bottom: 1px solid #bbbbbb47;
   padding: 4px;
   font-size: 11px;
   margin-top: 2px;
 }
 
-.lexwidget:has(input:focus) .inputicon {
-  border-bottom: 2px solid var(--global-selected);
-}
-
 .lexwidget textarea {
   word-break: break-word;
   font-family: var(--global-font);
-  font-size: 13px;
   background: none;
-  padding: 3px;
+  padding: 5px;
   color: var(--global-text-primary);
   font-weight: 600;
-  outline:none;
-  border: none;
-  border-bottom: 1px solid #bbbbbb47;
+  outline: none;
+  border-radius: 6px;
+  border: 2px solid var(--global-color-transparent);
+  transition: 0.1s linear;
 }
 
 .lexwidget textarea:disabled {
   resize: none;
-  border-bottom: none;
+}
+
+.lexwidget textarea:focus {
+  border: 2px solid var(--global-selected);
 }
 
 .lexwidget input.colorinput {
@@ -699,7 +712,6 @@ body.nocursor * {
 }
 
 .lexfilter input {
-  font-size: 12px;
   font-family: var(--global-font);
 }
 
@@ -731,7 +743,6 @@ body.nocursor * {
 }
 
 .lextitle a {
-  font-size: 12px;
   margin-top: 0.3em;
   margin-right: 0.7em;
   color: var(--global-selected-light);
@@ -765,8 +776,8 @@ body.nocursor * {
   white-space: nowrap;
   overflow: hidden;
   cursor: pointer;
-  font-size: 12px;
   font-family: var(--global-font);
+  transition: 0.1s linear;
 }
 
 .lexbutton.accept {
@@ -792,7 +803,7 @@ body.nocursor * {
 }
 
 .lexbutton:hover {
-  background-color: #ffffff30;
+  background-color: var(--global-button-color-hovered);
   color: var(--global-text-primary);
 }
 
@@ -914,13 +925,13 @@ body.nocursor * {
   position: fixed;
   list-style: none;
 	background-color: var(--global-blur-background);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   padding: 4px 0px;
   z-index: 10;
   margin-top: 5px;
   width: 100%;
-  box-shadow: 0 2px 10px black;
+  box-shadow: 0 0px 12px rgba(0, 0, 0, 0.788);
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
   max-height: -webkit-fill-available;
@@ -932,7 +943,6 @@ body.nocursor * {
   width: 100%;
   cursor: pointer;
   color: rgba(216, 218, 230, 0.826);
-  font-size: 13px;
   height: 20px;
   line-height: 22px;
   align-content: center;
@@ -1065,7 +1075,6 @@ input[type=checkbox]:checked:after {
   width: 100%;
   padding: 6px;
   color: var(--global-text-secondary);
-  font-size: 12px;
   margin-top: -1px;
 }
 
@@ -1126,9 +1135,14 @@ input[type=checkbox]:checked:after {
   position: relative;
   width: 100%;
   border-radius: 4px;
-  border: 1px solid #908fa356;
+  border: 2px solid var(--global-color-transparent);
   margin-right: 2px;
-  background: var(--global-color-secondary);
+  background: var(--global-button-color);
+  transition: 0.1s linear;
+}
+
+.lexvector .vecbox:hover{
+  background: var(--global-button-color-hovered);
 }
 
 .lexwidget .numberbox .drag-icon, .lexwidget .vecbox .drag-icon {
@@ -1142,7 +1156,7 @@ input[type=checkbox]:checked:after {
 }
 
 .lexvector .vecbox:has(input:focus) {
-  outline: 2px solid var(--global-selected);
+  border: 2px solid var(--global-selected);
 }
 
 .lexvector .vecbox span {
@@ -1160,15 +1174,15 @@ input[type=checkbox]:checked:after {
 }
 
 .lexvector .vecbox span.x {
-  background-color:#fb8080;
+  background-color:#eb6767;
 }
 
 .lexvector .vecbox span.y {
-  background-color:#8eef97;
+  background-color:#72e27d;
 }
 
 .lexvector .vecbox span.z {
-  background-color:#8da5f3;
+  background-color:#7490eb;
 }
 
 .lexvector .vecbox span.w {
@@ -1191,7 +1205,6 @@ input[type=number] {
 }
 
 .lexvector .vecbox .vecinput, .numberbox .vecinput {
-  font-size: 12px;
   margin-left: 2px;
   border: none;
   width: 100%;
@@ -1201,30 +1214,24 @@ input[type=number] {
   color: #c1c1dbef;
 }
 
-/* .lexvector .vecbox .vecinput.v2 {
-  width: 66%;
-}
-
-.lexvector .vecbox .vecinput.v3 {
-  width: 50%;
-}
-
-.lexvector .vecbox .vecinput.v4 {
-  width: 33%;
-} */
-
 /* Number Widget */
 
 .lexwidget .numberbox {
   display: grid;
-  border-radius: 4px;
-  border: 1px solid #908fa356;
+  background-color: var(--global-button-color);
+  border: 2px solid var(--global-color-transparent);
+  border-radius: 6px;
   margin-right: 2px;
   position: relative;
+  transition: 0.1s linear;
+}
+
+.lexwidget .numberbox:hover {
+  background-color: var(--global-button-color-hovered);
 }
 
 .lexwidget .numberbox:has(input:focus) {
-  outline: 2px solid var(--global-selected-light);
+  border: 2px solid var(--global-selected);
 }
 
 .lexinputslider {
@@ -1359,7 +1366,7 @@ input[type="range"] {
   margin-bottom: -8px;
   color: var(--global-text-secondary);
   font-weight: 600;
-  font-size: 13px;
+  font-size: var(--global-font-size);
 }
 
 .lextree .lextreetools {
@@ -1373,6 +1380,10 @@ input[type="range"] {
   margin-top: 4px;
 }
 
+.lextree .lextreetools input {
+  font-size: var(--global-font-size);
+}
+
 .lextree .lextreetools.notitle {
   padding-top: 14px;
   border-top-left-radius: 8px;
@@ -1383,7 +1394,7 @@ input[type="range"] {
   margin-right: 8px;
 }
 
-.lextree span {
+.lextree span { /* Tree title */
   padding: 8px;
   display: block;
   border-top-left-radius: 8px;
@@ -1393,14 +1404,13 @@ input[type="range"] {
   -moz-user-select: none; /* Firefox 2+ */
   -ms-user-select: none; /* IE 10+ */
   user-select: none; /* Standard syntax */
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 800;
 }
 
 .lextree ul {
   padding-bottom: 16px;
   padding-inline-start: 0px;
-  font-size: 14px;
 }
 
 .lextree input {
@@ -1410,7 +1420,6 @@ input[type="range"] {
   border: none;
   font-family: var(--global-font);
   line-height: 23px;
-  font-size: 13px;
 }
 
 .lextree .lextreeitem {
@@ -1418,7 +1427,6 @@ input[type="range"] {
   align-items: center;
   margin-bottom: 3px;
   line-height: 25px;
-  font-size: 13px;
   cursor: pointer;
   outline: none;
   border-radius: 6px;
@@ -1456,6 +1464,7 @@ input[type="range"] {
 .lextree .lextreeitem.selected {
   color: var(--global-text-primary);
   background: var(--global-selected);
+  background: linear-gradient(var(--global-selected), var(--global-selected-light));
 }
 
 .lextree .lextreeitem a {
@@ -1484,10 +1493,6 @@ input[type="range"] {
   font-size: 10px;
   vertical-align: 1px;
 }
-
-/* .lextree .lextreeitem.parent a.caret {
-  margin-right: 6px;
-} */
 
 .lextree .lextreeitem .itemicon {
   font-size: 10px !important;
@@ -1573,12 +1578,11 @@ meter::-webkit-meter-even-less-good-value {
   display: flex;
   height: 100%;
   color: var(--global-text);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
 }
 
 .lexmenubar .lexmenuentry {
-  font-size: 13px;
   min-height: 48px;
   height: 100%;
   display: flex;
@@ -1626,7 +1630,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexcontextmenu .lexcontextmenuentry {
-  font-size: 12px;
+  font-size: var(--global-font-size);
   width: 100%;
   color: #d5d7dbee;
   padding: 4px;
@@ -1785,7 +1789,7 @@ meter::-webkit-meter-even-less-good-value {
   z-index: 102;
   position: absolute;
   padding-right: 20px;
-  border-radius: 4px;
+  border-radius: 6px;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.63) !important;
   background-color: var(--global-blur-background);
   border: 1px solid #91909036;
@@ -1801,7 +1805,7 @@ meter::-webkit-meter-even-less-good-value {
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   z-index:-1;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 .lexcontextmenubox .lexcontextmenuentry {
@@ -1819,17 +1823,17 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexcontextmenubox .lexcontextmenuentry:first-child {
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
 }
 
 .lexcontextmenubox .lexcontextmenuentry:last-child {
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
 }
 
 .lexcontextmenubox .lexcontextmenuentry.cmtitle {
-  background: #020205;
+  background: var(--global-dark-background);
   font-weight: bold;
   cursor: default;
 }
@@ -1845,7 +1849,7 @@ meter::-webkit-meter-even-less-good-value {
 .lexcontextmenubox .lexcontextmenuentry .lexentryname {
   margin-right: 10px;
   margin-top: 2px;
-  font-size: 12px;
+  font-size: var(--global-font-size);
 }
 
 .lexcontextmenubox .lexcontextmenuentry .lexentryname.disabled {
@@ -1953,7 +1957,7 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexoverlaybuttons .lexbutton {
   padding: 14px 10px;
-  font-size: 12px;
+  font-size: var(--global-font-size);
   border-radius: 6px;
   justify-content: center;
   background-color: #313132a5;
@@ -1964,7 +1968,7 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexoverlaybuttons .lexbutton a {
   line-height: 19px;
-  font-size: 12px;
+  font-size: var(--global-font-size);
 }
 
 .lexoverlaybuttons .lexbutton img {
@@ -2225,7 +2229,7 @@ meter::-webkit-meter-even-less-good-value {
   width: calc( 100% - 8px );
   cursor: pointer;
   color: rgba(216, 218, 230, 0.826);
-  font-size: 12px;
+  font-size: var(--global-font-size);
   border-radius: 4px;
   padding-left: 4px;
   padding-right: 4px;
@@ -2277,12 +2281,8 @@ meter::-webkit-meter-even-less-good-value {
   width: 100%;
   padding: 6px;
   color: var(--global-text-secondary);
-  font-size: 12px;
+  font-size: var(--global-font-size);
   margin-top: -1px;
-}
-
-.lexarrayitems * {
-  font-size: 11px;
 }
 
 .lexarrayitems .small .lexbutton {
@@ -2317,7 +2317,7 @@ meter::-webkit-meter-even-less-good-value {
   justify-content: center;
   color: var(--global-text);
   display: inherit;
-  font-size: 12px;
+  font-size: var(--global-font-size);
 }
 
 .lextags .lextag:hover {
@@ -2336,7 +2336,7 @@ meter::-webkit-meter-even-less-good-value {
   width: 100%;
   padding: 6px;
   color: var(--global-text-secondary);
-  font-size: 12px;
+  font-size: var(--global-font-size);
   margin-top: -1px;
 }
 
@@ -2405,11 +2405,10 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lextimeline .lextree ul {
-  /* background-color: var(--global-dark-background); */
   margin: 0;
   padding-bottom: 0px;
   padding-top: 0px;
-  font-size: 12px;
+  font-size: var(--global-font-size);
 }
 
 .lextimeline .lexsplitbar.vertical {
@@ -2417,15 +2416,6 @@ meter::-webkit-meter-even-less-good-value {
   width: unset;
   height: unset;
 }
-
-/* .lextimeline.hidden{
-  animation-name: fadeout;
-  animation-duration: 0.5s;
-} */
-
-/* .lexarea:has(.lexmin) {
-  position: relative;
-} */
 
 .lexmin {
   display: inline-block;
@@ -2547,7 +2537,7 @@ meter::-webkit-meter-even-less-good-value {
 
 ul.lexassetscontent {
   -webkit-text-size-adjust: 100%;
-  font-size: 12px;
+  font-size: var(--global-font-size);
   color: #AAA;
   box-sizing: border-box;
   overflow: auto;
@@ -2564,7 +2554,7 @@ ul.lexassetscontent {
 
 .lexassetscontent li {
   -webkit-text-size-adjust: 100%;
-  font-size: 12px;
+  font-size: var(--global-font-size);
   color: #AAA;
   -webkit-user-drag: element;
   user-select: none;
@@ -2639,7 +2629,7 @@ ul.lexassetscontent {
   width: 100%;
   bottom: 0px;
   -webkit-text-size-adjust: 100%;
-  font-size: 12px;
+  font-size: var(--global-font-size);
   color: #BBB;
   cursor: pointer;
   text-align: center;
@@ -2695,7 +2685,7 @@ ul.lexassetscontent {
 .lexassetscontent li img {
   -webkit-text-size-adjust: 100%;
   font-family: 'Arial';
-  font-size: 12px;
+  font-size: var(--global-font-size);
   cursor: pointer;
   text-align: center;
   color: white;
