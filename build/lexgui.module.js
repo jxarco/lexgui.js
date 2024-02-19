@@ -138,7 +138,7 @@ class vec2 {
     set ( x, y ) { this.x = x; this.y = y; }
     add ( v, v0 = new vec2() ) { v0.set( this.x + v.x, this.y + v.y ); return v0; }
     sub ( v, v0 = new vec2() ) { v0.set( this.x - v.x, this.y - v.y ); return v0; }
-    mul ( v, v0 = new vec2() ) { if( v.constructor == Number ) { v = new vec2(v) } v = v0.set( this.x * v.x, this.y * v.y ); return v0; }
+    mul ( v, v0 = new vec2() ) { if( v.constructor == Number ) { v = new vec2(v) } v0.set( this.x * v.x, this.y * v.y ); return v0; }
     div ( v, v0 = new vec2() ) { v0.set( this.x / v.x, this.y / v.y ); return v0; }
 };
 

@@ -1,9 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Passion+One:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
 :root {
   --global-font: "Figtree", sans-serif;
+  --global-title-font: "Poppins", sans-serif;
   --global-font-size: 12px;
   --global-color-primary: #212121;
   --global-color-secondary: #2e2e2e;
@@ -246,16 +247,16 @@ body.noevents * {
 }
 
 .lexdialogtitle {
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  font-family: "Passion One", sans-serif;
-  font-size: 21px;
-  letter-spacing: 0em !important;
+  font-family: var(--global-title-font);
+  font-weight: 700;
+  font-size: 18px;
   color: #d9d9e3;
-  text-shadow: 0px 1px 8px #00000075;
+  text-shadow: 0px 1px 6px #22222283;
   width: calc( 100% - 24px);
   padding: 8px;
   padding-left: 16px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
   display: flex;
   justify-content: space-between;
   -webkit-user-select: none; /* Safari 3.1+ */
@@ -456,12 +457,12 @@ body.noevents * {
 }
 
 .lexbranchtitle {
-  font-family: "Passion One", sans-serif;
-  font-size: 18px;
-  letter-spacing: 0em !important;
+  font-family: var(--global-title-font);
+  font-weight: 700;
+  font-size: 15px;
   color: var(--global-text);
   background-color: var(--global-color-secondary);
-  text-shadow: 0px 1px 8px #00000075;
+  text-shadow: 0px 1px 6px #1111117c;
   padding: 10px;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
@@ -724,7 +725,7 @@ body.noevents * {
   width: -moz-fit-content;
   color: #ddd;
   font-weight: 800;
-  font-size: 14px;
+  font-size: 13px;
   margin: 12px;
   padding: 2px;
   padding-left: 12px;
@@ -1426,10 +1427,12 @@ input[type="range"] {
 .lextree input {
   background: none;
   color: var(--global-text-primary);
-  outline:none;
+  outline: none;
   border: none;
+  font-size: var(--global-font-size);
   font-family: var(--global-font);
   line-height: 23px;
+  margin-left: -2px;
 }
 
 .lextree .lextreeitem {

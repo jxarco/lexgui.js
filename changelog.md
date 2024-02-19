@@ -3,7 +3,7 @@
 ## 0.1.28
 
 Support for adding big icons Sidebars.
-General CSS fixes.
+General CSS fixes and improvements.
 
 ## 0.1.27
 
