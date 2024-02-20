@@ -2,6 +2,9 @@
 
 ## 0.1.28
 
+GraphEditor:
+- Big refactor. Almost start from scratch.
+
 Support for adding big icons Sidebars.
 General CSS fixes and improvements.
 

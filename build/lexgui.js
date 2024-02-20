@@ -12,7 +12,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     */
 
     var LX = global.LX = {
-        version: "0.1.27",
+        version: "0.1.28",
         ready: false,
         components: [], // specific pre-build components
         signals: {} // events and triggers
@@ -150,16 +150,27 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
     // Other utils
 
-    function makeDraggable( domEl, targetClass ) {
+    function makeDraggable( domEl, options = { } ) {
 
         let offsetX;
         let offsetY;
         let currentTarget = null;
+        let targetClass = options.targetClass;
+
+        const moveFunc = (e) => {
+            if(!currentTarget) return;
+            let left = e.clientX - offsetX;
+            let top = e.clientY - offsetY;
+            if(left > 3 && (left + domEl.offsetWidth + 6) <= window.innerWidth)
+                domEl.style.left = left + 'px';
+            if(top > 3 && (top + domEl.offsetHeight + 6) <= window.innerHeight)
+                domEl.style.top = top + 'px';
+        };
+
+        let onMove = options.onMove ?? moveFunc;
     
         domEl.setAttribute('draggable', true);
         domEl.addEventListener("mousedown", function(e) {
-            // e.stopPropagation();
-            // e.stopImmediatePropagation();
             currentTarget = (e.target.classList.contains(targetClass) || !targetClass) ? e.target : null;
         });
     
@@ -176,23 +187,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             const rect = e.target.getBoundingClientRect();
             offsetX = e.clientX - rect.x;
             offsetY = e.clientY - rect.y;
-            document.addEventListener("mousemove", moveFunc );
+            document.addEventListener("mousemove", onMove );
         }, false);
         
-        const moveFunc = (e) => {
-            if(!currentTarget) return;
-            let left = e.clientX - offsetX;
-            let top = e.clientY - offsetY;
-            if(left > 3 && (left + domEl.offsetWidth + 6) <= window.innerWidth)
-                domEl.style.left = left + 'px';
-            if(top > 3 && (top + domEl.offsetHeight + 6) <= window.innerHeight)
-                domEl.style.top = top + 'px';
-        };
-    
         document.addEventListener('mouseup', () => {
             if(currentTarget) {
                 currentTarget = null;
-                document.removeEventListener("mousemove", moveFunc );
+                document.removeEventListener("mousemove", onMove );
             }
         });
     }
@@ -5824,8 +5825,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             this.root = root;
             this.title = titleDiv;
 
-            if(draggable)
-                makeDraggable( root, 'lexdialogtitle' );
+            if( draggable )
+                makeDraggable( root, { targetClass: 'lexdialogtitle' } );
 
             // Process position and size
             if(size.length && typeof(size[0]) != "string")
