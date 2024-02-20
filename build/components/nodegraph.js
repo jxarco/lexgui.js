@@ -39,23 +39,29 @@ function doAsync( fn, ms ) {
 }
 
 /**
- * @class GraphRenderer
+ * @class GraphEditor
  */
 
-class GraphRenderer {
+class GraphEditor {
 
     static __instances  = [];
 
+    // Canvas
+
     static MIN_SCALE    = 0.25;
-    static MAX_SCALE    = 1.5;
+    static MAX_SCALE    = 4.0;
+
+    static EVENT_MOUSEMOVE      = 0;
+    static EVENT_MOUSEWHEEL     = 1;
 
     // Node Drawing
+
     static NODE_TITLE_HEIGHT    = 24;
     static NODE_ROW_HEIGHT      = 16;
 
     static NODE_SHAPE_RADIUS    = 12;
-    static NODE_TITLE_RADIUS    = [ GraphRenderer.NODE_SHAPE_RADIUS, GraphRenderer.NODE_SHAPE_RADIUS, 0, 0 ];
-    static NODE_BODY_RADIUS     = [ GraphRenderer.NODE_SHAPE_RADIUS, GraphRenderer.NODE_SHAPE_RADIUS, GraphRenderer.NODE_SHAPE_RADIUS, GraphRenderer.NODE_SHAPE_RADIUS ];
+    static NODE_TITLE_RADIUS    = [ GraphEditor.NODE_SHAPE_RADIUS, GraphEditor.NODE_SHAPE_RADIUS, 0, 0 ];
+    static NODE_BODY_RADIUS     = [ GraphEditor.NODE_SHAPE_RADIUS, GraphEditor.NODE_SHAPE_RADIUS, GraphEditor.NODE_SHAPE_RADIUS, GraphEditor.NODE_SHAPE_RADIUS ];
 
     static DEFAULT_NODE_TITLE_COLOR     = "#4a59b0";
     static DEFAULT_NODE_BODY_COLOR      = "#111";
@@ -67,7 +73,7 @@ class GraphRenderer {
 
     constructor( area, options = {} ) {
 
-        GraphRenderer.__instances.push( this );
+        GraphEditor.__instances.push( this );
 
         this.base_area = area;
         this.area = new LX.Area( { className: "lexgraph" } );
@@ -75,6 +81,7 @@ class GraphRenderer {
         area.root.classList.add( 'grapharea' );
 
         this.root = this.area.root;
+        this.root.tabIndex = -1;
         area.attach( this.root );
 
         // Bind resize
@@ -97,11 +104,11 @@ class GraphRenderer {
 
         // Back pattern
         
-        const f = 30.0;
+        const f = 15.0;
         this._patternPosition = new LX.vec2( 0, 0 );
         this._patternSize = new LX.vec2( f );
-        this._circlePatternSize = f * 0.03;
-        this._circlePatternColor = '#71717a';
+        this._circlePatternSize = f * 0.04;
+        this._circlePatternColor = '#71717a9c';
 
         this._generatePattern();
 
@@ -109,12 +116,175 @@ class GraphRenderer {
 
         this._scale = 1.0;
 
-        // requestAnimationFrame( this.frame.bind(this) );
+        // Node container
+
+        this._domNodes = document.createElement( 'div' );
+        this._domNodes.classList.add( 'lexgraphnodes' );
+        this.root.appendChild( this._domNodes );
+
+        // requestAnimationFrame( this._frame.bind(this) );
     }
 
     static getInstances()
     {
-        return GraphRenderer.__instances;
+        return GraphEditor.__instances;
+    }
+
+    /**
+     * @method setGraph
+     * @param {Graph} graph:
+     */
+
+    setGraph( graph ) {
+
+        this.graph = graph;
+
+        if( !this.graph.nodes )
+        {
+            console.warn( 'Graph does not contain any node!' );
+            return ;
+        }
+
+        for( let node of this.graph.nodes )
+        {
+            this._createNode( node );
+        }
+    }
+
+    /**
+     * @method clear
+     */
+
+    clear() {
+
+        this._domNodes.innerHTML = "";
+    }
+
+    /**
+     * @method unSelectAll
+     */
+
+    unSelectAll() {
+
+        this._domNodes.querySelectorAll( '.lexgraphnode' ).forEach( v => v.classList.remove( 'selected' ) );
+    }
+
+    _createNode( node ) {
+
+        var nodeContainer = document.createElement( 'div' );
+        nodeContainer.classList.add( 'lexgraphnode' );
+        
+        nodeContainer.style.left = node.position.x + "px";
+        nodeContainer.style.top = node.position.y + "px";
+
+        if( node.color )
+        {
+            nodeContainer.style.backgroundColor = node.color;
+        }
+
+        nodeContainer.addEventListener( 'click', e => {
+
+            // TODO: check multiple selection
+            this.unSelectAll();
+
+            nodeContainer.classList.toggle( 'selected' );
+
+        } );
+
+        // Title header
+        var nodeHeader = document.createElement( 'div' );
+        nodeHeader.classList.add( 'lexgraphnodeheader' );
+        nodeHeader.innerText = node.name;
+        nodeContainer.appendChild( nodeHeader );
+
+        // Inputs and outputs
+        var nodeIO = document.createElement( 'div' );
+        nodeIO.classList.add( 'lexgraphnodeios' );
+        nodeContainer.appendChild( nodeIO );
+
+        const hasInputs = node.inputs && node.inputs.length;
+        const hasOutputs = node.outputs && node.outputs.length;
+
+        // Inputs
+        {
+            var nodeInputs = null;
+
+            if( node.inputs && node.inputs.length )
+            {
+                nodeInputs = document.createElement( 'div' );
+                nodeInputs.classList.add( 'lexgraphnodeinputs' );
+                nodeInputs.style.width = hasOutputs ? "50%" : "100%";
+                nodeIO.appendChild( nodeInputs );
+            }
+
+            for( let i of node.inputs )
+            {
+                if( !i.type )
+                {
+                    console.warn( `Missing type for node [${ node.name }], skipping...` );
+                    continue;
+                }
+
+                var input = document.createElement( 'div' );
+                input.classList.add( 'lexgraphnodeio' );
+
+                var type = document.createElement( 'span' );
+                type.className = 'io__type input ' + i.type;
+                type.innerText = i.type[ 0 ].toUpperCase();
+                input.appendChild( type );
+
+                if( i.name )
+                {
+                    var name = document.createElement( 'span' );
+                    name.classList.add( 'io__name' );
+                    name.innerText = i.name;
+                    input.appendChild( name );
+                }
+
+                nodeInputs.appendChild( input );
+            }
+        }
+
+        // Outputs
+        {
+            var nodeOutputs = null;
+
+            if( node.outputs && node.outputs.length )
+            {
+                nodeOutputs = document.createElement( 'div' );
+                nodeOutputs.classList.add( 'lexgraphnodeoutputs' );
+                nodeOutputs.style.width = hasInputs ? "50%" : "100%";
+                nodeIO.appendChild( nodeOutputs );
+            }
+
+            for( let o of node.outputs )
+            {
+                if( !o.type  )
+                {
+                    console.warn( `Missing type for node [${ node.name }], skipping...` );
+                }
+
+                var output = document.createElement( 'div' );
+                output.className = 'lexgraphnodeio output';
+
+                if( o.name )
+                {
+                    var name = document.createElement( 'span' );
+                    name.classList.add( 'io__name' );
+                    name.innerText = o.name;
+                    output.appendChild( name );
+                }
+
+                var type = document.createElement( 'span' );
+                type.className = 'io__type output ' + o.type;
+                type.innerText = o.type[ 0 ].toUpperCase();
+                output.appendChild( type );
+
+                nodeOutputs.appendChild( output );
+            }
+        }
+
+        this._domNodes.appendChild( nodeContainer );
     }
 
     _processFocus( active ) {
@@ -133,7 +303,7 @@ class GraphRenderer {
         const rect = this.root.getBoundingClientRect();
         
         this._mousePosition = new LX.vec2( e.clientX - rect.x , e.clientY - rect.y );
-        // this._deltaMousePosition = this._mousePosition.sub( this._lastMousePosition );
+        this._deltaMousePosition = this._mousePosition.sub( this._lastMousePosition );
 
         if( e.type == 'mousedown' )
         {
@@ -182,7 +352,16 @@ class GraphRenderer {
 
     _processClick( e ) {
 
-        
+        if( e.target.classList.contains( 'lexgraphnodes' ) )
+        {
+            this._processBackgroundClick( e );
+            return;
+        }
+    }
+
+    _processBackgroundClick( e ) {
+
+        this.unSelectAll();
     }
 
     _processMouseMove( e ) {
@@ -191,23 +370,38 @@ class GraphRenderer {
         
         if( rightPressed )
         {
-            this._updatePattern();
+            this._patternPosition.add( this._deltaMousePosition.div( this._scale ), this._patternPosition );
 
-            e.stopPropagation();
-            e.stopImmediatePropagation();
+            this._updatePattern();
         }
     }
 
     _processWheel( e ) {
 
+        // Compute zoom center in pattern space using current scale
+
+        const rect = this.root.getBoundingClientRect();
+        const zoomCenter = this._mousePosition ?? new LX.vec2( rect.width * 0.5, rect.height * 0.5 );
+
+        const center = this._getPatternPosition( zoomCenter );
+
         const delta = e.deltaY;
 
-        if( delta > 0.0 ) this._scale *= 0.95;
-        else this._scale *= 1.05;
+        if( delta > 0.0 ) this._scale *= 0.9;
+        else this._scale *= ( 1.0 / 0.9 );
 
-        this._scale = LX.UTILS.clamp( this._scale, GraphRenderer.MIN_SCALE, GraphRenderer.MAX_SCALE );
+        this._scale = LX.UTILS.clamp( this._scale, GraphEditor.MIN_SCALE, GraphEditor.MAX_SCALE );
 
-        this._updatePattern();
+        // Compute zoom center in pattern space using new scale
+        // and get delta..
+
+        const newCenter = this._getPatternPosition( zoomCenter );
+
+        const deltaCenter = newCenter.sub( center );
+
+        this._patternPosition = this._patternPosition.add( deltaCenter );
+
+        this._updatePattern( GraphEditor.EVENT_MOUSEWHEEL );
     }
 
     _processContextMenu( e ) {
@@ -219,32 +413,12 @@ class GraphRenderer {
     }
 
     /**
-     * @method setGraph
-     * @param {Graph} graph:
-     */
-
-    setGraph( graph ) {
-
-        this.graph = graph;
-    }
-
-    /**
-     * @method clear
-     */
-
-    clear(  ) {
-
-    }
-
-    /**
      * @method frame
      */
 
-    frame() {
+    _frame() {
 
-        this.update();
-
-        this.draw();
+        this._update();
 
         requestAnimationFrame( this.frame.bind(this) );
     }
@@ -253,25 +427,9 @@ class GraphRenderer {
      * @method update
      */
 
-    update() {
+    _update() {
         
         console.log("Update");
-    }
-
-    /**
-     * @method draw
-     */
-
-    draw() {
-
-        console.log("Draw");
-
-        let nodes = this._getVisibleNodes();
-
-        for( let node of nodes )
-        {
-            this._drawNode( node );
-        }
     }
 
     _generatePattern() {
@@ -323,13 +481,11 @@ class GraphRenderer {
 
         const patternSize = this._patternSize.mul( this._scale );
         const circlePatternSize = this._circlePatternSize * this._scale;
+        const patternPosition = this._patternPosition.mul( this._scale );
         
-        const deltaPosition = this._patternPosition.sub( this._mousePosition );
-        this._patternPosition = this._patternPosition.sub( deltaPosition );
-
         let pattern = this._background.querySelector( 'pattern' );
-        pattern.setAttribute( 'x', this._patternPosition.x );
-        pattern.setAttribute( 'y', this._patternPosition.y );
+        pattern.setAttribute( 'x', patternPosition.x );
+        pattern.setAttribute( 'y', patternPosition.y );
         pattern.setAttribute( 'width', patternSize.x )
         pattern.setAttribute( 'height', patternSize.y );
 
@@ -337,6 +493,24 @@ class GraphRenderer {
         circle.setAttribute( 'cx', circlePatternSize );
         circle.setAttribute( 'cy', circlePatternSize );
         circle.setAttribute( 'r', circlePatternSize );
+
+        // Nodes
+
+        const w = this._domNodes.offsetWidth * 0.5;
+        const h = this._domNodes.offsetHeight * 0.5;
+
+        const dw = w - w * this._scale;
+        const dh = h - h * this._scale;
+
+        this._domNodes.style.transform = `
+            translate(` + ( patternPosition.x - dw ) + `px, ` + ( patternPosition.y - dh ) + `px) 
+            scale(` + this._scale + `)
+        `;
+    }
+
+    _getPatternPosition( renderPosition ) {
+
+        return renderPosition.div( this._scale ).sub( this._patternPosition );
     }
 
     _computeNodeSize( node ) {
@@ -347,7 +521,7 @@ class GraphRenderer {
         let sX = 32 + textMetrics.width * 1.475;
 
         const rows = Math.max(1,  Math.max(node.inputs.length, node.outputs.length));
-        let sY = rows * GraphRenderer.NODE_ROW_HEIGHT + GraphRenderer.NODE_TITLE_HEIGHT;
+        let sY = rows * GraphEditor.NODE_ROW_HEIGHT + GraphEditor.NODE_TITLE_HEIGHT;
 
         return [sX, sY];
     }
@@ -356,20 +530,20 @@ class GraphRenderer {
 
         console.log( "_drawConnections" );
 
-        const ctx = this.dom.getContext("2d");
+        // const ctx = this.dom.getContext("2d");
 
-        let nodes = this._getVisibleNodes();
+        // let nodes = this._getVisibleNodes();
 
-        let start = { x: 50, y: 20 };
-        let cp1 = { x: 230, y: 30 };
-        let cp2 = { x: 150, y: 80 };
-        let end = { x: 250, y: 100 };
+        // let start = { x: 50, y: 20 };
+        // let cp1 = { x: 230, y: 30 };
+        // let cp2 = { x: 150, y: 80 };
+        // let end = { x: 250, y: 100 };
 
-        // Cubic Bézier curve
-        ctx.beginPath();
-        ctx.moveTo(start.x, start.y);
-        ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, end.x, end.y);
-        ctx.stroke();
+        // // Cubic Bézier curve
+        // ctx.beginPath();
+        // ctx.moveTo(start.x, start.y);
+        // ctx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, end.x, end.y);
+        // ctx.stroke();
 
         // for( let node of nodes )
         // {
@@ -385,11 +559,7 @@ class GraphRenderer {
         // }
     }
 
-    _drawNode( node ) {
-
-        
-    }
-
+    // TODO: Return the ones in the viewport
     _getVisibleNodes() {
 
         if( !this.graph )
@@ -398,13 +568,12 @@ class GraphRenderer {
             return [];
         }
 
-        // TODO: Return the ones in the viewport
         return this.graph.nodes;
     }
 
 }
 
-LX.GraphRenderer = GraphRenderer;
+LX.GraphEditor = GraphEditor;
 
 /**
  * @class Graph
@@ -424,25 +593,32 @@ class Graph {
         this.nodes = [
             new GraphNode({
                 name: "Node 1",
-                position: [200, 200],
+                position: new LX.vec2( 200, 200 ),
                 inputs: [
                     {
                         name: "Speed",
-                        type: "number"
+                        type: "float"
                     },
                     {
                         name: "Offset",
-                        type: "number"
+                        type: "vec2"
                     }
-                ],
+                ]
+            }),
+            new GraphNode({
+                name: "Node 2",
+                size: new LX.vec2( 120, 100 ),
+                position: new LX.vec2( 500, 350 ),
+                color: "#f7884c",
+                inputs: [],
                 outputs: [
                     {
                         name: "Speed",
-                        type: "number"
+                        type: "float"
                     },
                     {
                         name: "Offset",
-                        type: "number"
+                        type: "vec2"
                     },
                     {
                         name: "Loop",
@@ -451,11 +627,49 @@ class Graph {
                 ]
             }),
             new GraphNode({
-                name: "Node 2",
-                size: [120, 100],
-                position: [500, 350],
-                inputs: [],
-                outputs: []
+                name: "Node 3",
+                position: new LX.vec2( 200, 400 ),
+                inputs: [
+                    {
+                        name: "Speed",
+                        type: "float"
+                    },
+                    {
+                        name: "Offset",
+                        type: "vec2"
+                    }
+                ],
+                outputs: [
+                    {
+                        name: "Speed",
+                        type: "float"
+                    },
+                    {
+                        name: "Offset",
+                        type: "vec3"
+                    },
+                    {
+                        name: "Loop",
+                        type: "bool"
+                    }
+                ]
+            }),
+            new GraphNode({
+                name: "Add",
+                position: new LX.vec2( 300, 300 ),
+                inputs: [
+                    {
+                        type: "float"
+                    },
+                    {
+                        type: "float"
+                    }
+                ],
+                outputs: [
+                    {
+                        type: "float"
+                    }
+                ]
             })
         ];
     }
@@ -478,7 +692,8 @@ class GraphNode {
 
         this.name = options.name ?? "Unnamed";
         this.size = options.size;
-        this.position = options.position ?? [0, 0];
+        this.position = options.position ?? new LX.vec2( 0, 0 );
+        this.color = options.color;
         
         this.inputs = options.inputs ?? [];
         this.outputs = options.outputs ?? [];
@@ -489,7 +704,7 @@ class GraphNode {
         let sX = 16 + this.name.length * 10;
 
         const rows = Math.max(1, Math.max(this.inputs.length, this.outputs.length));
-        let sY = rows * GraphRenderer.NODE_ROW_HEIGHT + GraphRenderer.NODE_TITLE_HEIGHT;
+        let sY = rows * GraphEditor.NODE_ROW_HEIGHT + GraphEditor.NODE_TITLE_HEIGHT;
 
         return [sX, sY];
     }
@@ -497,4 +712,4 @@ class GraphNode {
 
 LX.GraphNode = GraphNode;
 
-export { GraphRenderer, Graph, GraphNode };
+export { GraphEditor, Graph, GraphNode };

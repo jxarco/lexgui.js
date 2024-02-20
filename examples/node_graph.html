@@ -41,11 +41,11 @@
             canvas.height = bounding.height;
         };
 
-        let graph_canvas = new LX.GraphRenderer(bottomArea, {
-            // allow_add_scripts: false
-        });
+        let graph_editor = new LX.GraphEditor( bottomArea, {
+           
+        } );
 
-        graph_canvas.setGraph( new LX.Graph() );
+        graph_editor.setGraph( new LX.Graph() );
 
         function loop(dt) {
             
