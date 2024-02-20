@@ -2903,6 +2903,10 @@ ul.lexassetscontent {
   overflow: scroll;
 }
 
+.lexcodeeditor .codetabsarea.no-code-info {
+  height: calc( 100% - 28px ) !important;
+}
+
 .lexcodeeditor .codetabsarea::-webkit-scrollbar {
   display: none;
 }

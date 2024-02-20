@@ -174,7 +174,10 @@ class ScrollBar {
 
         this.root = document.createElement( 'div' );
         this.root.className = "lexcodescrollbar";
-        if( type & ScrollBar.SCROLLBAR_HORIZONTAL ) 
+
+        if( type & ScrollBar.SCROLLBAR_VERTICAL ) 
+            this.root.classList.add( 'vertical' );
+        else if( type & ScrollBar.SCROLLBAR_HORIZONTAL ) 
             this.root.classList.add( 'horizontal' );
 
         this.thumb = document.createElement( 'div' );
@@ -1512,9 +1515,11 @@ class CodeEditor {
             doAsync( () => {
 
                 // Change css a little bit...
-                this.gutter.style.height = "calc(100% - 38px)";
+                this.gutter.style.height = "calc(100% - 28px)";
                 this.root.querySelectorAll( '.code' ).forEach( e => e.style.height = "calc(100% - 6px)" );
                 this.root.querySelector( '.lexareatabscontent' ).style.height = "calc(100% - 23px)";
+                this.base_area.root.querySelector( '.lexcodescrollbar.vertical' ).style.height = "calc(100% - 27px)";
+                this.tabs.area.root.classList.add( 'no-code-info' );
 
             }, 100);
         }
