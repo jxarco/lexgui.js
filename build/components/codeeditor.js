@@ -905,19 +905,28 @@ class CodeEditor {
                 const [word, from, to] = this.getWordAtPos( cursor, -1 );
                 // If no length, we change line..
                 if( !word.length && this.lineUp( cursor, true ) ) {
+                    const cS = e.cancelShift, kS = e.keepSelection;
                     e.cancelShift = true;
                     e.keepSelection = true;
                     this.actions[ 'End' ].callback( cursor.line, cursor, e );
-                    delete e.cancelShift;
-                    delete e.keepSelection;
+                    e.cancelShift = cS;
+                    e.keepSelection = kS;
                 }
                 var diff = Math.max( cursor.position - from, 1 );
                 var substr = word.substr( 0, diff );
+
                 // Selections...
-                if( e.shiftKey ) { if( !cursor.selection ) this.startSelection( cursor ); }
-                else this.endSelection();
+                if( e.shiftKey ) {
+                    if( !cursor.selection )
+                    this.startSelection( cursor ); 
+                }
+                else
+                    this.endSelection();
+
                 this.cursorToString( cursor, substr, true );
-                if( e.shiftKey ) this._processSelection( cursor, e, false, true );
+
+                if( e.shiftKey )
+                    this._processSelection( cursor, e );
             }
             else {
                 var letter = this.getCharAtPos( cursor, -1 );
@@ -2212,12 +2221,13 @@ class CodeEditor {
                 this.hideAutoCompleteBox();
                 return;
             case 'arrowdown': // add cursor below only for the main cursor..
-                if( isLastCursor && this.code.lines[ lidx + 1 ] != undefined )
+                // Make sure shift is not pressed..
+                if( !e.shiftKey && isLastCursor && this.code.lines[ lidx + 1 ] != undefined )
                 {
                     var new_cursor = this._addCursor( cursor.line, cursor.position, true );
                     this.lineDown( new_cursor );
+                    return;
                 }
-                return;
             }
         }
 
@@ -3472,11 +3482,16 @@ class CodeEditor {
 
         // Remove indentation
         const lidx = cursor.line;
-        const lineStart = firstNonspaceIndex( this.code.lines[ lidx ] );
+        let lineStart = firstNonspaceIndex( this.code.lines[ lidx ] );
 
-        // Nothing to remove...
+        // Nothing to remove... we are at the start of the line
         if( lineStart == 0 )
             return;
+
+        // Only tabs/spaces in the line...
+        if( lineStart == -1 ) {
+            lineStart = this.code.lines[ lidx ].length;
+        }
 
         let indentSpaces = lineStart % this.tabSpaces;
         indentSpaces = indentSpaces == 0 ? this.tabSpaces : indentSpaces;
