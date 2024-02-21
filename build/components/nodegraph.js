@@ -209,7 +209,10 @@ class GraphEditor {
             if( e.button != LX.MOUSE_LEFT_CLICK )
                 return;
 
-            this._selectNode( nodeContainer );
+            if( !nodeContainer.classList.contains( 'selected' ) )
+            {
+                this._selectNode( nodeContainer, e.shiftKey );
+            }
         } );
 
         // Title header
@@ -311,8 +314,12 @@ class GraphEditor {
 
         LX.makeDraggable( nodeContainer, { onMove: () => {
 
-            const dT = this._deltaMousePosition.div( this._scale );
-            this._translateNode( nodeContainer, dT.x, dT.y );
+            const selectedNodes = Array.from( this._domNodes.childNodes ).filter( v => v.classList.contains( 'selected' ) );
+
+            selectedNodes.forEach( el => {
+                const dT = this._deltaMousePosition.div( this._scale );
+                this._translateNode( el, dT.x, dT.y );
+            } );
 
         } } );
 
@@ -350,7 +357,7 @@ class GraphEditor {
         if( !multiSelection )
             this.unSelectAll();
 
-        dom.classList.toggle( 'selected' );
+        dom.classList.add( 'selected' );
 
         if( forceOrder )
         {
@@ -359,12 +366,18 @@ class GraphEditor {
         }
     }
 
+    _unSelectNode( dom ) {
+
+        dom.classList.remove( 'selected' );
+    }
+
     _translateNode( dom, x, y ) {
 
         dom.style.left = ( parseFloat( dom.style.left ) + x ) + "px";
         dom.style.top = ( parseFloat( dom.style.top ) + y ) + "px";
     }
 
+    // This is in pattern space!
     _getNodePosition( dom ) {
 
         return new LX.vec2( parseFloat( dom.style.left ), parseFloat( dom.style.top ) );
@@ -383,7 +396,7 @@ class GraphEditor {
             case 'Delete':
             case 'Backspace':
                 e.preventDefault();
-                this._deleteSelection();
+                this._deleteSelection( e );
                 break;
             case 'y':
                 if( e.ctrlKey )
@@ -483,8 +496,7 @@ class GraphEditor {
     _processMouseDown( e ) {
 
         // Don't box select over a node..
-
-        if( !e.target.classList.contains( 'lexgraphnode' ) )
+        if( !e.target.classList.contains( 'lexgraphnode' ) && e.button == LX.MOUSE_LEFT_CLICK )
         {
             this._boxSelecting = this._mousePosition;
         }
@@ -505,7 +517,10 @@ class GraphEditor {
 
         else if( this._boxSelecting )
         {
-            this._selectNodesInBox( this._boxSelecting, this._mousePosition );
+            if( !e.shiftKey && !e.altKey )
+                this.unSelectAll();
+
+            this._selectNodesInBox( this._boxSelecting, this._mousePosition, e.altKey );
 
             deleteElement( this._currentBoxSelectionSVG );
 
@@ -543,6 +558,9 @@ class GraphEditor {
     }
 
     _processWheel( e ) {
+
+        if( this._boxSelecting )
+            return;
 
         // Compute zoom center in pattern space using current scale
 
@@ -824,22 +842,27 @@ class GraphEditor {
         return this.graph.nodes;
     }
 
-    _selectNodesInBox( lt, rb ) {
+    _selectNodesInBox( lt, rb, remove ) {
+
+        lt = this._getPatternPosition( lt );
+        rb = this._getPatternPosition( rb );
 
         for( let nodeEl of this._domNodes.children )
         {
             let pos = this._getNodePosition( nodeEl );
-            pos = this._getPatternPosition( pos );
 
             if( pos.x >= lt.x && pos.y >= lt.y 
                 && pos.x <= rb.x && pos.y <= rb.y)
             {
-                this._selectNode( nodeEl, true, false );
+                if( remove )
+                    this._unSelectNode( nodeEl );
+                else
+                    this._selectNode( nodeEl, true, false );
             }
         }
     }
 
-    _deleteSelection() {
+    _deleteSelection( e ) {
 
         const lastNodeCount = this._domNodes.childElementCount;
 
