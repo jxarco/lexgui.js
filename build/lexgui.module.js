@@ -14,6 +14,10 @@ var LX = {
     signals: {} // events and triggers
 };
 
+LX.MOUSE_LEFT_CLICK     = 0;
+LX.MOUSE_MIDDLE_CLICK   = 1;
+LX.MOUSE_RIGHT_CLICK    = 2;
+
 LX.MOUSE_DOUBLE_CLICK = 2;
 LX.MOUSE_TRIPLE_CLICK = 3;
 
@@ -95,7 +99,7 @@ function simple_guidGenerator() {
     var S4 = function() {
         return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
     };
-    return (S4()+"-"+S4());
+    return (S4()+"-"+S4()+"-"+S4());
 }
 
 // Timer that works everywhere (from litegraph.js)
@@ -7498,7 +7502,7 @@ LX.UTILS = {
     compareThreshold( v, p, n, t ) { return Math.abs(v - p) >= t || Math.abs(v - n) >= t },
     compareThresholdRange( v0, v1, t0, t1 ) { return v0 >= t0 && v0 <= t1 || v1 >= t0 && v1 <= t1 || v0 <= t0 && v1 >= t1},
     clamp (num, min, max) { return Math.min(Math.max(num, min), max) },
-
+    uidGenerator: simple_guidGenerator,
     getControlPoints( x0, y0, x1, y1, x2, y2, t ) {
         
         //  x0,y0,x1,y1 are the coordinates of the end (knot) pts of this segment
@@ -7523,7 +7527,6 @@ LX.UTILS = {
         
         return [p1x,p1y,p2x,p2y]
     },
-
     drawSpline( ctx, pts, t ) {
     
         ctx.save();
