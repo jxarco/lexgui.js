@@ -3253,6 +3253,7 @@ pre .line-gutter {
 .lexgraph {
   overflow: hidden;
   position: relative;
+  outline: none;
 }
 
 .lexgraph .lexgraphnodes, .lexgraph .lexgraphlinks {

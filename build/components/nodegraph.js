@@ -367,21 +367,6 @@ class GraphEditor {
         return new LX.vec2( parseFloat( dom.style.left ), parseFloat( dom.style.top ) );
     }
 
-    _selectNodesInBox( lt, rb ) {
-
-        for( let nodeEl of this._domNodes.children )
-        {
-            let pos = this._getNodePosition( nodeEl );
-            pos = this._getPatternPosition( pos );
-
-            if( pos.x >= lt.x && pos.y >= lt.y 
-                && pos.x <= rb.x && pos.y <= rb.y)
-            {
-                this._selectNode( nodeEl, true, false );
-            }
-        }
-    }
-
     _processFocus( active ) {
 
         this.isFocused = active;
@@ -390,7 +375,14 @@ class GraphEditor {
     _processKey( e ) {
 
         var key = e.key ?? e.detail.key;
-        console.log( key );
+        
+        switch( key ) {
+            case 'Delete':
+            case 'Backspace':
+                e.preventDefault();
+                this._deleteSelection();
+                break;
+        }
     }
 
     _processMouse( e ) {
@@ -498,7 +490,7 @@ class GraphEditor {
         {
             this._selectNodesInBox( this._boxSelecting, this._mousePosition );
 
-            // deleteElement( this._currentBoxSelectionSVG );
+            deleteElement( this._currentBoxSelectionSVG );
 
             delete this._currentBoxSelectionSVG;
             delete this._boxSelecting;
@@ -813,6 +805,36 @@ class GraphEditor {
         }
 
         return this.graph.nodes;
+    }
+
+    _selectNodesInBox( lt, rb ) {
+
+        for( let nodeEl of this._domNodes.children )
+        {
+            let pos = this._getNodePosition( nodeEl );
+            pos = this._getPatternPosition( pos );
+
+            if( pos.x >= lt.x && pos.y >= lt.y 
+                && pos.x <= rb.x && pos.y <= rb.y)
+            {
+                this._selectNode( nodeEl, true, false );
+            }
+        }
+    }
+
+    _deleteSelection() {
+
+        const selectedNodes = Array.from( this._domNodes.childNodes ).filter( v => v.classList.contains( 'selected' ) );
+
+        while( selectedNodes[ 0 ] )
+        {
+            const el = selectedNodes.pop();
+
+            delete this.nodes[ el.dataset[ 'id' ] ];
+
+            deleteElement( el );
+        }
+
     }
 
     _addGlobalActions() {
