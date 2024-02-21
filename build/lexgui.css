@@ -3278,6 +3278,14 @@ pre .line-gutter {
   right: 0;
 }
 
+.lexgraph .box-selection-svg {
+  stroke-width: 4px;
+  stroke: var(--global-selected);
+  border-radius: 8px;
+  fill: var(--global-selected);
+  fill-opacity: 0.2;
+}
+
 .lexgraphnode {
   position: absolute;
   -webkit-user-select: none; /* Safari 3.1+ */

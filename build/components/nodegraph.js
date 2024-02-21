@@ -193,7 +193,7 @@ class GraphEditor {
         nodeContainer.style.left = "0";
         nodeContainer.style.top = "0";
         
-        this._nodeTranslate( nodeContainer, node.position.x, node.position.y );
+        this._translateNode( nodeContainer, node.position.x, node.position.y );
 
         if( node.color )
         {
@@ -206,14 +206,7 @@ class GraphEditor {
             if( e.button != LX.MOUSE_LEFT_CLICK )
                 return;
 
-            // TODO: check multiple selection
-            this.unSelectAll();
-
-            nodeContainer.classList.toggle( 'selected' );
-
-            // Reorder nodes to draw on top..
-            this._domNodes.appendChild( nodeContainer );
-
+            this._selectNode( nodeContainer );
         } );
 
         // Title header
@@ -316,7 +309,7 @@ class GraphEditor {
         LX.makeDraggable( nodeContainer, { onMove: () => {
 
             const dT = this._deltaMousePosition.div( this._scale );
-            this._nodeTranslate( nodeContainer, dT.x, dT.y );
+            this._translateNode( nodeContainer, dT.x, dT.y );
 
         } } );
 
@@ -349,10 +342,44 @@ class GraphEditor {
         this._domNodes.appendChild( nodeContainer );
     }
 
-    _nodeTranslate( dom, x, y ) {
+    _selectNode( dom, multiSelection, forceOrder = true ) {
+
+        if( !multiSelection )
+            this.unSelectAll();
+
+        dom.classList.toggle( 'selected' );
+
+        if( forceOrder )
+        {
+            // Reorder nodes to draw on top..
+            this._domNodes.appendChild( dom );
+        }
+    }
+
+    _translateNode( dom, x, y ) {
 
         dom.style.left = ( parseFloat( dom.style.left ) + x ) + "px";
         dom.style.top = ( parseFloat( dom.style.top ) + y ) + "px";
+    }
+
+    _getNodePosition( dom ) {
+
+        return new LX.vec2( parseFloat( dom.style.left ), parseFloat( dom.style.top ) );
+    }
+
+    _selectNodesInBox( lt, rb ) {
+
+        for( let nodeEl of this._domNodes.children )
+        {
+            let pos = this._getNodePosition( nodeEl );
+            pos = this._getPatternPosition( pos );
+
+            if( pos.x >= lt.x && pos.y >= lt.y 
+                && pos.x <= rb.x && pos.y <= rb.y)
+            {
+                this._selectNode( nodeEl, true, false );
+            }
+        }
     }
 
     _processFocus( active ) {
@@ -376,6 +403,8 @@ class GraphEditor {
         if( e.type == 'mousedown' )
         {
             this.lastMouseDown = LX.getTime();
+
+            this._processMouseDown( e );
         }
         
         else if( e.type == 'mouseup' )
@@ -442,6 +471,16 @@ class GraphEditor {
         this.unSelectAll();
     }
 
+    _processMouseDown( e ) {
+
+        // Don't box select over a node..
+
+        if( !e.target.classList.contains( 'lexgraphnode' ) )
+        {
+            this._boxSelecting = this._mousePosition;
+        }
+    }
+
     _processMouseUp( e ) {
 
         if( this._generatingLink )
@@ -454,12 +493,22 @@ class GraphEditor {
 
             delete this._generatingLink;
         }
+
+        else if( this._boxSelecting )
+        {
+            this._selectNodesInBox( this._boxSelecting, this._mousePosition );
+
+            // deleteElement( this._currentBoxSelectionSVG );
+
+            delete this._currentBoxSelectionSVG;
+            delete this._boxSelecting;
+        }
     }
 
     _processMouseMove( e ) {
 
         const rightPressed = ( e.which == 3 );
-        
+
         if( rightPressed )
         {
             this._patternPosition.add( this._deltaMousePosition.div( this._scale ), this._patternPosition );
@@ -469,9 +518,16 @@ class GraphEditor {
             return;
         }
 
-        if( this._generatingLink )
+        else if( this._generatingLink )
         {
             this._drawPreviewLink( e );
+
+            return;
+        }
+
+        else if( this._boxSelecting )
+        {
+            this._drawBoxSelection( e );
 
             return;
         }
@@ -707,17 +763,43 @@ class GraphEditor {
             endPos.add( new LX.vec2( e.target.offsetLeft, e.target.offsetTop ), endPos );
         }
 
-        const distanceX = LX.UTILS.clamp( Math.abs( startPos.x - endPos.x ), 0.0, 100.0 );
-        const cPDistance = 128.0 * Math.pow( distanceX / 100.0, 1.5 );
+        const distanceX = LX.UTILS.clamp( Math.abs( startPos.x - endPos.x ), 0.0, 180.0 );
+        const cPDistance = 128.0 * Math.pow( distanceX / 180.0, 1.5 );
 
         let cPoint1 = startScreenPos.add( new LX.vec2( cPDistance, 0 ) );
         cPoint1 = this._getPatternPosition( cPoint1 );
         cPoint1.add( new LX.vec2( 7, 7 ), cPoint1 );
         let cPoint2 = endPos.sub( new LX.vec2( cPDistance, 0 ) );
 
-        svg.innerHTML = `<path fill="none" stroke="red" d="
+        svg.innerHTML = `<path fill="none" d="
             M ${ startPos.x },${ startPos.y }
             C ${ cPoint1.x },${ cPoint1.y } ${ cPoint2.x },${ cPoint2.y } ${ endPos.x },${ endPos.y }
+        "/>`;
+    }
+
+    _drawBoxSelection( e ) {
+
+        var svg = this._currentBoxSelectionSVG;
+
+        if( !svg )
+        {
+            var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+            svg.classList.add( "box-selection-svg" );
+            svg.style.width = "100%";
+            svg.style.height = "100%";
+            this._domLinks.appendChild( svg );
+            this._currentBoxSelectionSVG = svg;
+        }
+
+        // Generate box
+
+        const startPos = this._getPatternPosition( this._boxSelecting );
+        const size = startPos.sub( this._getPatternPosition( this._mousePosition ) );
+
+        svg.innerHTML = `<rect
+            x="${ startPos.x }" y="${ startPos.y }"
+            rx="${ 6 }" ry="${ 6 }"
+            width="${ Math.abs( size.x ) }" height="${ Math.abs( size.y ) }"
         "/>`;
     }
 
