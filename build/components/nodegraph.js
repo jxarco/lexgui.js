@@ -110,6 +110,9 @@ class GraphEditor {
 
         this._lastMousePosition = new LX.vec2( 0, 0 );
 
+        this._undoSteps = [ ];
+        this._redoSteps = [ ];
+
         // Back pattern
         
         const f = 15.0;
@@ -381,6 +384,20 @@ class GraphEditor {
             case 'Backspace':
                 e.preventDefault();
                 this._deleteSelection();
+                break;
+            case 'y':
+                if( e.ctrlKey )
+                {
+                    e.preventDefault();
+                    this._doRedo();
+                }
+                break;
+            case 'z':
+                if( e.ctrlKey )
+                {
+                    e.preventDefault();
+                    this._doUndo();
+                }
                 break;
         }
     }
@@ -824,6 +841,8 @@ class GraphEditor {
 
     _deleteSelection() {
 
+        const lastNodeCount = this._domNodes.childElementCount;
+
         const selectedNodes = Array.from( this._domNodes.childNodes ).filter( v => v.classList.contains( 'selected' ) );
 
         while( selectedNodes[ 0 ] )
@@ -835,6 +854,63 @@ class GraphEditor {
             deleteElement( el );
         }
 
+        if( this._domNodes.childElementCount != lastNodeCount )
+        {
+            this._addUndoStep();
+        }
+
+    }
+
+    _addUndoStep( deleteRedo = true )  {
+
+        if( deleteRedo ) 
+        {
+            // Remove all redo steps
+            this._redoSteps.length = 0;
+        }
+
+        this._undoSteps.push( {
+            // TODO: Add graph state
+        } );
+    }
+
+    _doUndo() {
+
+        if( !this._undoSteps.length )
+            return;
+
+        this._addRedoStep();
+
+        // Extract info from the last state
+        const step = this._undoSteps.pop();
+
+        // Set old state
+        // TODO
+
+        console.log( "Undo!!" );
+    }
+
+    _addRedoStep()  {
+
+        this._redoSteps.push( {
+            // TODO: Add graph state
+        } );
+    }
+
+    _doRedo() {
+
+        if( !this._redoSteps.length )
+            return;
+
+        this._addUndoStep( false );
+
+        // Extract info from the next saved code state
+        const step = this._redoSteps.pop();
+
+        // Set old state
+        // TODO
+
+        console.log( "Redo!!" );
     }
 
     _addGlobalActions() {
