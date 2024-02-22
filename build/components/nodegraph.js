@@ -63,15 +63,9 @@ class GraphEditor {
     static NODE_IO_INPUT        = 0;
     static NODE_IO_OUTPUT       = 1;
 
-    static NODE_TITLE_HEIGHT    = 24;
-    static NODE_ROW_HEIGHT      = 16;
+    // Global Nodes
 
-    static NODE_SHAPE_RADIUS    = 12;
-    static NODE_TITLE_RADIUS    = [ GraphEditor.NODE_SHAPE_RADIUS, GraphEditor.NODE_SHAPE_RADIUS, 0, 0 ];
-    static NODE_BODY_RADIUS     = [ GraphEditor.NODE_SHAPE_RADIUS, GraphEditor.NODE_SHAPE_RADIUS, GraphEditor.NODE_SHAPE_RADIUS, GraphEditor.NODE_SHAPE_RADIUS ];
-
-    static DEFAULT_NODE_TITLE_COLOR     = "#4a59b0";
-    static DEFAULT_NODE_BODY_COLOR      = "#111";
+    static DEFAULT_NODES        = { };
 
     /**
      * @param {*} options
@@ -160,6 +154,17 @@ class GraphEditor {
     static getInstances()
     {
         return GraphEditor.__instances;
+    }
+
+    static registerDefaultNode( name, options = { } )
+    {
+        if( !name ) {
+            return console.error( `Can't register default node without a name parameter!` );
+        }
+
+        options.name = name;
+
+        GraphEditor.DEFAULT_NODES[ name ] = options;
     }
 
     /**
@@ -410,6 +415,31 @@ class GraphEditor {
         nodeContainer.dataset[ 'id' ] = id;
 
         this._domNodes.appendChild( nodeContainer );
+
+        return nodeContainer;
+    }
+
+    _createFromDefault( nodeName, e ) {
+
+        const nodeData = GraphEditor.DEFAULT_NODES[ nodeName ];
+
+        if( !nodeData )
+        {
+            return console.warn( `Can't create default node [${ nodeName }].` );
+        }
+
+        const domNode = this._createNode( new GraphNode( nodeData ) );
+
+        if( e )
+        {
+            const rect = this.root.getBoundingClientRect();
+        
+            let position = new LX.vec2( e.clientX - rect.x, e.clientY - rect.y );
+
+            position = this._getPatternPosition( position );
+
+            this._translateNode( domNode, position.x , position.y );
+        }
     }
 
     _onMoveNode( e ) {
@@ -526,7 +556,8 @@ class GraphEditor {
             const ios = targetDOM.querySelector( '.lexgraphnodeoutputs' );
             const targetIO = ios.childNodes[ targetIndex ];
 
-            delete targetIO.links[ srcIndex ];
+            const idx = targetIO.links[ srcIndex ].findIndex( v => v == nodeId );
+            targetIO.links[ srcIndex ].splice( idx, 1 );
 
             // No links left..
             if( !targetIO.links.reduce( c => c !== undefined, 0 ) ) {
@@ -536,6 +567,7 @@ class GraphEditor {
         }
         else // Delete ALL "to input links"
         {
+
             const numLinks = io.links.length;
 
             for( let targetIndex = 0; targetIndex < numLinks; ++targetIndex )
@@ -545,8 +577,9 @@ class GraphEditor {
                 if( !targets )
                     continue;
 
-                for( let targetId of targets )
+                for( let it = ( targets.length - 1 ); it >= 0 ; --it )
                 {
+                    const targetId = targets[ it ];
                     var links = this._getLinks( nodeId, targetId );
 
                     var linkIdx = links.findIndex( i => ( i.inputIdx == targetIndex && i.outputIdx == srcIndex ) );
@@ -555,7 +588,7 @@ class GraphEditor {
 
                     // Remove a connection from the output connections
 
-                    io.links.splice( targetIndex, 1 );
+                    io.links[ targetIndex ].splice( it, 1 );
 
                     // Input has no longer any connected link
 
@@ -566,13 +599,10 @@ class GraphEditor {
                     delete targetIO.links;
                     delete targetIO.dataset[ 'active' ];
                 }
-
-                // No links left..
-                if( !io.links.reduce( c => c !== undefined, 0 ) ) {
-                    delete io.links;
-                    delete io.dataset[ 'active' ];
-                }
             }
+
+            delete io.links;
+            delete io.dataset[ 'active' ];
         }
     }
 
@@ -791,9 +821,25 @@ class GraphEditor {
 
     _processContextMenu( e ) {
         
-        LX.addContextMenu( "Test", e, m => {
-            m.add( "option 1", () => { } );
-            m.add( "option 2", () => { } );
+        LX.addContextMenu( "ADD NODE debug", e, m => {
+            
+            for( let nodeName in GraphEditor.DEFAULT_NODES )
+            {
+                const data = GraphEditor.DEFAULT_NODES[ nodeName ];
+                if( data.type == 'logic' )
+                {
+                    m.add( 'logic/' + nodeName, this._createFromDefault.bind( this, nodeName, e ) );
+                }
+            }
+
+            for( let nodeName in GraphEditor.DEFAULT_NODES )
+            {
+                const data = GraphEditor.DEFAULT_NODES[ nodeName ];
+                if( data.type == 'math' )
+                {
+                    m.add( 'math/' + nodeName, this._createFromDefault.bind( this, nodeName, e ) );
+                }
+            }
         });
     }
 
@@ -1334,6 +1380,72 @@ class GraphEditor {
         
     }
 }
+
+GraphEditor.registerDefaultNode( "Add", {
+    type: "math",
+    inputs: [
+        { type: "float" },
+        { type: "float" }
+    ],
+    outputs: [
+        { type: "float" }
+    ]
+} );
+
+GraphEditor.registerDefaultNode( "Substract", {
+    type: "math",
+    inputs: [
+        { type: "float" },
+        { type: "float" }
+    ],
+    outputs: [
+        { type: "float" }
+    ]
+} );
+
+GraphEditor.registerDefaultNode( "Multiply", {
+    type: "math",
+    inputs: [
+        { type: "float" },
+        { type: "float" }
+    ],
+    outputs: [
+        { type: "float" }
+    ]
+} );
+
+GraphEditor.registerDefaultNode( "Divide", {
+    type: "math",
+    inputs: [
+        { type: "float" },
+        { type: "float" }
+    ],
+    outputs: [
+        { type: "float" }
+    ]
+} );
+
+GraphEditor.registerDefaultNode( "And", {
+    type: "logic",
+    inputs: [
+        { type: "bool" },
+        { type: "bool" }
+    ],
+    outputs: [
+        { type: "bool" }
+    ]
+} );
+
+GraphEditor.registerDefaultNode( "Or", {
+    type: "logic",
+    inputs: [
+        { type: "bool" },
+        { type: "bool" }
+    ],
+    outputs: [
+        { type: "bool" }
+    ]
+} );
 
 LX.GraphEditor = GraphEditor;
 
