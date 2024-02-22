@@ -914,7 +914,10 @@ class GraphEditor {
 
         // Discard same IO type
         if( linkData.ioType == ioType )
+        {
+            console.warn( `Can't link same type of data` );
             return;
+        }
 
         // Info about src node
         const src_nodeContainer = linkData.domEl;
@@ -937,7 +940,24 @@ class GraphEditor {
         const dst_ioType = dst_ios[ dst_ioIndex ].type;
 
         if( src_ioType != dst_ioType )
+        {
+            console.warn( `Can't link ${ src_ioType } to ${ dst_ioType }.` );
             return;
+        }
+
+        // Check if target it's an active input and remove the old link
+
+        if( ioType == GraphEditor.NODE_IO_INPUT && e.target.parentElement.dataset[ 'active' ] )
+        {
+            this._deleteLinks( dst_nodeId, e.target.parentElement );
+        }
+
+        // Check if source it's an active input and remove the old link
+
+        else if( linkData.ioType == GraphEditor.NODE_IO_INPUT && linkData.io.dataset[ 'active' ] )
+        {
+            this._deleteLinks( src_nodeId, linkData.io );
+        }
 
         // Mark as active 
 
