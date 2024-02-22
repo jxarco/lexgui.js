@@ -505,7 +505,9 @@ class GraphEditor {
         if( isInput ) // Only one "link to output" to delete
         {
             let targetIndex;
-            const targetId = io.links.filter( (v, i) => { targetIndex = i; return v !== undefined; } )[ 0 ];
+
+            const targets = io.links.filter( (v, i) => { targetIndex = i; return v !== undefined; } )[ 0 ];
+            const targetId = targets[ 0 ];
 
             var links = this._getLinks( targetId, nodeId );
 
@@ -538,35 +540,38 @@ class GraphEditor {
 
             for( let targetIndex = 0; targetIndex < numLinks; ++targetIndex )
             {
-                const targetId = io.links[ targetIndex ];
+                const targets = io.links[ targetIndex ];
 
-                if( !targetId )
+                if( !targets )
                     continue;
 
-                var links = this._getLinks( nodeId, targetId );
+                for( let targetId of targets )
+                {
+                    var links = this._getLinks( nodeId, targetId );
 
-                var linkIdx = links.findIndex( i => ( i.inputIdx == targetIndex && i.outputIdx == srcIndex ) );
-                deleteElement( links[ linkIdx ].path.parentElement );
-                links.splice( linkIdx, 1 );
+                    var linkIdx = links.findIndex( i => ( i.inputIdx == targetIndex && i.outputIdx == srcIndex ) );
+                    deleteElement( links[ linkIdx ].path.parentElement );
+                    links.splice( linkIdx, 1 );
 
-                // Remove a connection from the output connections
+                    // Remove a connection from the output connections
 
-                delete io.links[ targetIndex ];
+                    io.links.splice( targetIndex, 1 );
+
+                    // Input has no longer any connected link
+
+                    const targetDOM = this._getNodeDOMElement( targetId );
+                    const ios = targetDOM.querySelector( '.lexgraphnodeinputs' );
+                    const targetIO = ios.childNodes[ targetIndex ];
+
+                    delete targetIO.links;
+                    delete targetIO.dataset[ 'active' ];
+                }
 
                 // No links left..
                 if( !io.links.reduce( c => c !== undefined, 0 ) ) {
                     delete io.links;
                     delete io.dataset[ 'active' ];
                 }
-
-                // Input has no longer any connected link
-
-                const targetDOM = this._getNodeDOMElement( targetId );
-                const ios = targetDOM.querySelector( '.lexgraphnodeinputs' );
-                const targetIO = ios.childNodes[ targetIndex ];
-
-                delete targetIO.links;
-                delete targetIO.dataset[ 'active' ];
             }
         }
     }
@@ -967,18 +972,14 @@ class GraphEditor {
         // Store the end io..
 
         var srcDom = linkData.io;
-
-        if( !srcDom.links )
-            srcDom.links = [ ];
-
-        srcDom.links[ dst_ioIndex ] = dst_nodeId;
+        srcDom.links = srcDom.links ?? [ ];
+        srcDom.links[ dst_ioIndex ] = srcDom.links[ dst_ioIndex ] ?? [ ];
+        srcDom.links[ dst_ioIndex ].push( dst_nodeId );
         
         var dstDom = e.target.parentElement;
-
-        if( !dstDom.links )
-            dstDom.links = [ ];
-
-        dstDom.links[ src_ioIndex ] = src_nodeId;
+        dstDom.links = dstDom.links ?? [ ];
+        dstDom.links[ src_ioIndex ] = dstDom.links[ src_ioIndex ] ?? [ ];
+        dstDom.links[ src_ioIndex ].push( src_nodeId );
 
         // Call this using the io target to set the connection to the center of the input DOM element..
         
@@ -1104,7 +1105,8 @@ class GraphEditor {
                 continue;
 
             // Get first and only target output..
-            const targetNodeId = input.links.filter( v => v !== undefined )[ 0 ];
+            const targets = input.links.filter( v => v !== undefined )[ 0 ];
+            const targetNodeId = targets[ 0 ];
 
             const ioIndex = parseInt( input.dataset[ 'index' ] );
 
@@ -1125,7 +1127,7 @@ class GraphEditor {
 
             const outputNode = this._getNodeDOMElement( targetNodeId );
             const io = outputNode.querySelector( '.lexgraphnodeoutputs' ).childNodes[ link.outputIdx ]
-            
+
             this._updatePreviewLink( null, io );
         }
 
@@ -1141,29 +1143,32 @@ class GraphEditor {
 
             for( let targetIndex = 0; targetIndex < output.links.length; ++targetIndex )
             {
-                const targetId = output.links[ targetIndex ];
+                const targets = output.links[ targetIndex ];
 
-                if( !targetId )
-                    continue;
+                if( !targets )
+                continue;
 
-                var links = this._getLinks( nodeId, targetId );
-                var link = links.find( i => ( i.inputIdx == targetIndex && i.outputIdx == srcIndex ) );
+                for( let targetId of targets )
+                {
+                    var links = this._getLinks( nodeId, targetId );
+                    var link = links.find( i => ( i.inputIdx == targetIndex && i.outputIdx == srcIndex ) );
 
-                // Outputs can have different inputs connected
-                this._generatingLink = {
-                    index: link.outputIdx,
-                    io: output,
-                    ioType: GraphEditor.NODE_IO_OUTPUT,
-                    domEl: nodeDOM,
-                    path: link.path
-                };
+                    // Outputs can have different inputs connected
+                    this._generatingLink = {
+                        index: link.outputIdx,
+                        io: output,
+                        ioType: GraphEditor.NODE_IO_OUTPUT,
+                        domEl: nodeDOM,
+                        path: link.path
+                    };
 
-                // Get end io
+                    // Get end io
 
-                const inputNode = this._getNodeDOMElement( targetId );
-                const io = inputNode.querySelector( '.lexgraphnodeinputs' ).childNodes[ link.inputIdx ]
-                
-                this._updatePreviewLink( null, io );
+                    const inputNode = this._getNodeDOMElement( targetId );
+                    const io = inputNode.querySelector( '.lexgraphnodeinputs' ).childNodes[ link.inputIdx ]
+
+                    this._updatePreviewLink( null, io );
+                }
             }
         }
 
