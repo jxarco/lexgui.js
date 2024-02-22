@@ -3287,6 +3287,11 @@ pre .line-gutter {
   fill-opacity: 0.2;
 }
 
+.lexgraph .box-selection-svg.removing {
+  stroke-dasharray: 6px;
+  stroke-linecap: round;
+}
+
 .lexgraphnode {
   position: absolute;
   -webkit-user-select: none; /* Safari 3.1+ */

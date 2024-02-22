@@ -556,6 +556,7 @@ class GraphEditor {
         if( !e.target.classList.contains( 'lexgraphnode' ) && e.button == LX.MOUSE_LEFT_CLICK )
         {
             this._boxSelecting = this._mousePosition;
+            this._boxSelectRemoving = e.altKey;
         }
     }
 
@@ -584,6 +585,7 @@ class GraphEditor {
 
             delete this._currentBoxSelectionSVG;
             delete this._boxSelecting;
+            delete this._boxSelectRemoving;
         }
     }
 
@@ -983,6 +985,8 @@ class GraphEditor {
         {
             var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
             svg.classList.add( "box-selection-svg" );
+            if( this._boxSelectRemoving )
+                svg.classList.add( "removing" );
             svg.style.width = "100%";
             svg.style.height = "100%";
             this._domLinks.appendChild( svg );
@@ -991,13 +995,18 @@ class GraphEditor {
 
         // Generate box
 
-        const startPos = this._getPatternPosition( this._boxSelecting );
-        const size = startPos.sub( this._getPatternPosition( this._mousePosition ) );
+        let startPos = this._getPatternPosition( this._boxSelecting );
+        let size = this._getPatternPosition( this._mousePosition ).sub( startPos );
+
+        if( size.x < 0 ) startPos.x += size.x;
+        if( size.y < 0 ) startPos.y += size.y;
+
+        size = size.abs();
 
         svg.innerHTML = `<rect
             x="${ startPos.x }" y="${ startPos.y }"
             rx="${ 6 }" ry="${ 6 }"
-            width="${ Math.abs( size.x ) }" height="${ Math.abs( size.y ) }"
+            width="${ size.x }" height="${ size.y }"
         "/>`;
     }
 
@@ -1018,12 +1027,29 @@ class GraphEditor {
         lt = this._getPatternPosition( lt );
         rb = this._getPatternPosition( rb );
 
+        let size = rb.sub( lt );
+
+        if( size.x < 0 )
+        {
+            var tmp = lt.x;
+            lt.x = rb.x;
+            rb.x = tmp;
+        }
+
+        if( size.y < 0 )
+        {
+            var tmp = lt.y;
+            lt.y = rb.y;
+            rb.y = tmp;
+        }
+
         for( let nodeEl of this._domNodes.children )
         {
             let pos = this._getNodePosition( nodeEl );
+            let size = new LX.vec2( nodeEl.offsetWidth, nodeEl.offsetHeight );
 
-            if( pos.x >= lt.x && pos.y >= lt.y 
-                && pos.x <= rb.x && pos.y <= rb.y)
+            if( ( !( pos.x < lt.x && ( pos.x + size.x ) < lt.x ) && !( pos.x > rb.x && ( pos.x + size.x ) > rb.x ) ) && 
+                ( !( pos.y < lt.y && ( pos.y + size.y ) < lt.y ) && !( pos.y > rb.y && ( pos.y + size.y ) > rb.y ) ) )
             {
                 if( remove )
                     this._unSelectNode( nodeEl );
