@@ -27,6 +27,7 @@
   --transition-time: 1000;
   --code-editor-font-size: 14px;
   --code-editor-row-height: 20px;
+  --graphnode-background: 17, 17, 17;
 } 
 
 /* Some global colors */
@@ -3254,6 +3255,7 @@ pre .line-gutter {
   overflow: hidden;
   position: relative;
   outline: none;
+  cursor: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAA4lJREFUWEftl1FIk1EUx/9qOGtNU4wkC1RQEc2hD9P5oigqH1PxIQqhgYI+iHtIE0ZQKoZo6BDniFScsIcgCSEILMPhJBRCh6G+qKSopHy2iVnOudniyDdZY3NTJ/rghcvGuPvO7/zP/557Pz+c8/A75/i4cAAERNPGzTMXyFEBfwAB6+vrqoiIiMcA9gFYzhrEEeAKgKC1tbX6nZ2dh3t7e3UJCQnvAJgBWM8KxBkgWKvV3g8KCnoZFxfHZ1l2fHV1tS4vL+8rgD1OFZ+WxREgAMCN0tLSex0dHR9DQkJ4ra2tkMlkFoPBoGppaWlTqVQGrix/fUXhCEDfQwDcMRqNY9nZ2YKpqSkkJydDoVBYExMTN7a3t5vi4+M1AHZ9VRbnbXgdQOTs7OzbtrY2YV9f32GiUqkU7e3tFpPJNL6ystKckZExyvmDzHri4QxwFUDE2NhYvV6vL5HJZIHOT6ay1NTU2FiW7RoYGFBUVVWtnKYszgAU8KZarS5JSkpqEIlEfFepRUdHo7e3dzclJWVrc3NTERMT8/qkZXEGICOGSSQSYX9//yCfz6et6XYUFxdDrVbTNp1YWlpqT01NHTxuWZwB7Ea8y7LsF4ZhgicnJ90C8Hg8ZGZmQiwWo6GhAQaD4VV4ePgTDoK6qcfh6iw4MOL09PSbzs7O1O7u7v8eEhsbC4lEgtzcXLNYLPa32WyW5eXlaaPR+Hlubm64srJyAsAOAK+2qisAMuItnU73fH5+/lF5efmhEaurq9HY2GhZWFhYWlxcnNRqtd9UKtUsgF8AqEf8BLDF+eHEClDA8J6engcikahJKBReIwnS0tIwMjKyL5fLXyiVSqoLBfrDZWsCQJMyt/cIj/LTAlcKkBFDs7KykoaGhoYDAwPpkIJOp9u1Wq0fcnJyOgFscFlTMGrRdFbQpJ7glfR2OlcAjkbUMQwTWlBQgLKystWoqCgpgGVObsqYgh4roLMs7i4kZMTbMzMzGqVSmdbV1UXt+Gltbe17AD8A/PbVweQO4MCIo6OjcoFAIDWbzZ/S09ObAVDX2+Rk96rGnha5AyAjhmk0msL8/PxnDMOU6fX67wBYzmxeOdxTcHcmpN/JiILCwsLIiooKcVFR0TCX+bavpD/KhHYwHt2QAFA7JqfbHe9NYl6vOepWfHBHBECftL1o+kx6Twp4ncFpF16494LTJnTs/18qcKnAPygqQzAAgQjBAAAAAElFTkSuQmCC) 4 4, auto !important;
 }
 
 .lexgraph .lexgraphnodes, .lexgraph .lexgraphlinks {
@@ -3302,16 +3304,29 @@ pre .line-gutter {
   min-width: 96px;
   min-height: 32px;
   border-radius: 10px;
-  background-color: #111111c7;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  border: 2px solid var(--global-color-transparent);
+  background-color: rgba(var(--graphnode-background), 0.75);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  border: 3px solid var(--global-color-transparent);
   transition: border 0.05s linear;
   padding: 4px;
 }
 
+.lexgraphnode.math {
+  background: linear-gradient(25deg, #049cf4da 25%, #00ffccda);
+  background-color: unset;
+  background-origin: border-box;
+}
+
+.lexgraphnode.logic {
+  background: linear-gradient(25deg, #FB4D3Dda 25%, #A74482da);
+  background-color: unset;
+  background-origin: border-box;
+}
+
 .lexgraphnode.selected {
-  border: 2px solid var(--global-selected);
+  border: 3px solid var(--global-selected-dark);
+  border: 3px solid #ffc107;
   box-shadow: 0 2px 6px 0 rgba(0,0,0,.14);
 }
 
@@ -3320,12 +3335,19 @@ pre .line-gutter {
   font-weight: 700;
   font-size: 13px;
   color: #d9d9e3;
-  text-shadow: 0px 1px 4px #2222228f;
-  border-bottom: 1px solid var(--global-blur-background);
+  text-shadow: 0px 0px 2px #222222af;
+  border-bottom: 1px solid #ffffff46;
   margin-bottom: 2px;
   pointer-events: none;
   text-align: -webkit-center;
   text-align: center;
+  margin-left: -7px;
+  width: calc(100% + 14px);
+}
+
+.lexgraphnode.selected .lexgraphnodeheader {
+  margin-left: -4px;
+  width: calc(100% + 8px);
 }
 
 .lexgraphnode .lexgraphnodeios {
@@ -3358,18 +3380,20 @@ pre .line-gutter {
 .lexgraphnode .lexgraphnodeio .io__type {
   font-size: 7px;
   font-weight: 700;
-  line-height: 11px;
-  min-width: 12px;
-  min-height: 12px;
-  max-width: 12px;
-  max-height: 12px;
+  line-height: 10px;
+  min-width: 10px;
+  min-height: 10px;
+  max-width: 10px;
+  max-height: 10px;
   background-color: #afafaf;
   align-self: center;
   margin-right: 3px;
   border-radius: 3px;
+  padding-left: 1px;
+  padding-top: 1px;
   text-align: -webkit-center;
   text-align: center;
-  border: 1px solid var(--global-text-terciary);
+  border: 1px solid var(--global-text-secondary);
   color: var(--global-color-primary);
   pointer-events: all;
 }
@@ -3380,7 +3404,7 @@ pre .line-gutter {
 
 .lexgraphnode .lexgraphnodeio .io__type.vec2 { background-color: #63a9ee; }
 .lexgraphnode .lexgraphnodeio .io__type.vec3 { background-color: #e75d4e; }
-.lexgraphnode .lexgraphnodeio .io__type.bool { background-color: #cc8ce5; }
+.lexgraphnode .lexgraphnodeio .io__type.bool { background-color: #d856a8; }
 
 
 .lexgraphnode .lexgraphnodeio .io__name {
@@ -3396,11 +3420,15 @@ pre .line-gutter {
   filter: opacity(0.75);
 }
 
-.lexgraphnode .lexgraphnodeio .io__type:hover span {
+.lexgraphnode .lexgraphnodeio[data-active] .io__type:hover {
+  background-color: rgba(255, 58, 58, 0.829);
+}
+
+.lexgraphnode .lexgraphnodeio[data-active] .io__type:hover span {
   display: none;
 }
 
-.lexgraphnode .lexgraphnodeio .io__type:hover::after {
+.lexgraphnode .lexgraphnodeio[data-active] .io__type:hover::after {
   content: 'X';
 }
 

@@ -115,10 +115,16 @@ class GraphEditor {
 
         // Nodes and connections
 
-        this.nodes = { };
-        this.links = { };
+        this.nodes      = { };
+        this.links      = { };
+        this.nodeTypes  = { }
 
         this.selectedNodes = [ ];
+
+        this._nodeBackgroundOpacity = options.disableNodeOpacity ? 1.0 : 0.8;
+
+        this.registerNodeType( 'math' );
+        this.registerNodeType( 'logic' );
 
         // Back pattern
         
@@ -158,7 +164,7 @@ class GraphEditor {
 
     /**
      * @method setGraph
-     * @param {Graph} graph:
+     * @param {Graph} graph
      */
 
     setGraph( graph ) {
@@ -177,6 +183,16 @@ class GraphEditor {
         {
             this._createNode( node );
         }
+    }
+
+    /**
+     * @method registerNodeType
+     * @param {String} typeName
+     */
+
+    registerNodeType( typeName, options = { } ) {
+
+        this.nodeTypes[ typeName ] = options;
     }
 
     /**
@@ -209,9 +225,34 @@ class GraphEditor {
         
         this._translateNode( nodeContainer, node.position.x, node.position.y );
 
-        if( node.color )
+        var color;
+
+        // Get color from type if color if not manually specified
+        if( node.type && this.nodeTypes[ node.type ] )
         {
-            nodeContainer.style.backgroundColor = node.color;
+            color = this.nodeTypes[ node.type ].color;
+            nodeContainer.classList.add( node.type ); // Support adding color from css..
+        }
+
+        // Update with manual color
+
+        color = node.color ?? color;
+
+        if( color )
+        {
+            // RGB
+            if( color.constructor == Array )
+            {
+                color = color.join( ',' );
+            }
+            // Hex color..
+            else
+            {
+                color = LX.hexToRgb( color );
+                color.forEach( ( v, i ) => color[ i ] = v * 255 );
+            }
+
+            nodeContainer.style.backgroundColor = "rgba(" + color + ", " + this._nodeBackgroundOpacity + ")";
         }
 
         nodeContainer.addEventListener( 'mousedown', e => {
@@ -351,6 +392,17 @@ class GraphEditor {
                 e.stopImmediatePropagation();
             } );
 
+            el.addEventListener( 'click', e => {
+
+                if( !el.links )
+                    return;
+
+                const nodeId = nodeContainer.dataset[ 'id' ];
+
+                this._deleteLinks( nodeId, el );
+
+            } );
+
         } );
 
         const id = node.name.toLowerCase().replaceAll( /\s/g, '-' ) + '-' + LX.UTILS.uidGenerator();
@@ -445,6 +497,80 @@ class GraphEditor {
         return this.links[ str ];
     }
 
+    _deleteLinks( nodeId, io ) {
+
+        const isInput = io.classList.contains( 'ioinput' );
+        const srcIndex = parseInt( io.dataset[ 'index' ] );
+
+        if( isInput ) // Only one "link to output" to delete
+        {
+            let targetIndex;
+            const targetId = io.links.filter( (v, i) => { targetIndex = i; return v !== undefined; } )[ 0 ];
+
+            var links = this._getLinks( targetId, nodeId );
+
+            var linkIdx = links.findIndex( i => ( i.inputIdx == srcIndex && i.outputIdx == targetIndex ) );
+            deleteElement( links[ linkIdx ].path.parentElement );
+            links.splice( linkIdx, 1 );
+
+            // Input has no longer any connected link
+
+            delete io.links;
+            delete io.dataset[ 'active' ];
+
+            // Remove a connection from the target connections
+
+            const targetDOM = this._getNodeDOMElement( targetId );
+            const ios = targetDOM.querySelector( '.lexgraphnodeoutputs' );
+            const targetIO = ios.childNodes[ targetIndex ];
+
+            delete targetIO.links[ srcIndex ];
+
+            // No links left..
+            if( !targetIO.links.reduce( c => c !== undefined, 0 ) ) {
+                delete targetIO.links;
+                delete targetIO.dataset[ 'active' ];
+            }
+        }
+        else // Delete ALL "to input links"
+        {
+            const numLinks = io.links.length;
+
+            for( let targetIndex = 0; targetIndex < numLinks; ++targetIndex )
+            {
+                const targetId = io.links[ targetIndex ];
+
+                if( !targetId )
+                    continue;
+
+                var links = this._getLinks( nodeId, targetId );
+
+                var linkIdx = links.findIndex( i => ( i.inputIdx == targetIndex && i.outputIdx == srcIndex ) );
+                deleteElement( links[ linkIdx ].path.parentElement );
+                links.splice( linkIdx, 1 );
+
+                // Remove a connection from the output connections
+
+                delete io.links[ targetIndex ];
+
+                // No links left..
+                if( !io.links.reduce( c => c !== undefined, 0 ) ) {
+                    delete io.links;
+                    delete io.dataset[ 'active' ];
+                }
+
+                // Input has no longer any connected link
+
+                const targetDOM = this._getNodeDOMElement( targetId );
+                const ios = targetDOM.querySelector( '.lexgraphnodeinputs' );
+                const targetIO = ios.childNodes[ targetIndex ];
+
+                delete targetIO.links;
+                delete targetIO.dataset[ 'active' ];
+            }
+        }
+    }
+
     _processFocus( active ) {
 
         this.isFocused = active;
@@ -496,7 +622,9 @@ class GraphEditor {
         
         else if( e.type == 'mouseup' )
         {
-            if( (LX.getTime() - this.lastMouseDown) < 120 ) {
+            var currentTime = LX.getTime();
+
+            if( ( currentTime - this.lastMouseDown) < 120 ) {
                 this._processClick( e );
             }
 
@@ -508,7 +636,7 @@ class GraphEditor {
             this._processMouseMove( e );
         }
 
-        else if ( e.type == 'click' ) // trip
+        else if ( e.type == 'click' ) // trick
         {
             switch( e.detail )
             {
@@ -811,17 +939,30 @@ class GraphEditor {
         if( src_ioType != dst_ioType )
             return;
 
+        // Mark as active 
+
+        linkData.io.dataset[ 'active' ] = true;
+        e.target.parentElement.dataset[ 'active' ] = true;
+
         // Store the end io..
 
-        linkData.io.dataset[ 'target' ] = dst_nodeId;
-        linkData.io.dataset[ 'target_id' ] = dst_ioIndex;
+        var srcDom = linkData.io;
+
+        if( !srcDom.links )
+            srcDom.links = [ ];
+
+        srcDom.links[ dst_ioIndex ] = dst_nodeId;
         
-        e.target.parentElement.dataset[ 'target' ] = src_nodeId;
-        e.target.parentElement.dataset[ 'target_id' ] = src_ioIndex;
+        var dstDom = e.target.parentElement;
+
+        if( !dstDom.links )
+            dstDom.links = [ ];
+
+        dstDom.links[ src_ioIndex ] = src_nodeId;
 
         // Call this using the io target to set the connection to the center of the input DOM element..
         
-        let path = this._updatePreviewLink( null, e.target );
+        let path = this._updatePreviewLink( null, e.target.parentElement );
 
         // Store link
 
@@ -899,7 +1040,7 @@ class GraphEditor {
         }
         else
         {
-            const ioRect = endIO.getBoundingClientRect();
+            const ioRect = endIO.querySelector( '.io__type' ).getBoundingClientRect();
             
             endPos = new LX.vec2( ioRect.x, ioRect.y - offsetY );
             endPos = this._getPatternPosition( endPos );
@@ -939,10 +1080,11 @@ class GraphEditor {
 
         for( let input of nodeDOM.querySelectorAll( '.ioinput' ) )
         {
-            const targetNodeId = input.dataset[ 'target' ];
-
-            if( !targetNodeId )
+            if( !input.links )
                 continue;
+
+            // Get first and only target output..
+            const targetNodeId = input.links.filter( v => v !== undefined )[ 0 ];
 
             const ioIndex = parseInt( input.dataset[ 'index' ] );
 
@@ -969,18 +1111,25 @@ class GraphEditor {
 
         // Update output links
         
+        
         for( let output of nodeDOM.querySelectorAll( '.iooutput' ) )
         {
-            const targetNodeId = output.dataset[ 'target' ];
+            if( !output.links )
+            continue;
 
-            if( !targetNodeId )
-                continue;
+            const srcIndex = parseInt( output.dataset[ 'index' ] );
 
-            var links = this._getLinks( nodeId, targetNodeId );
-
-            // Outputs can have different inputs connected
-            for( var link of links )
+            for( let targetIndex = 0; targetIndex < output.links.length; ++targetIndex )
             {
+                const targetId = output.links[ targetIndex ];
+
+                if( !targetId )
+                    continue;
+
+                var links = this._getLinks( nodeId, targetId );
+                var link = links.find( i => ( i.inputIdx == targetIndex && i.outputIdx == srcIndex ) );
+
+                // Outputs can have different inputs connected
                 this._generatingLink = {
                     index: link.outputIdx,
                     io: output,
@@ -991,7 +1140,7 @@ class GraphEditor {
 
                 // Get end io
 
-                const inputNode = this._getNodeDOMElement( targetNodeId );
+                const inputNode = this._getNodeDOMElement( targetId );
                 const io = inputNode.querySelector( '.lexgraphnodeinputs' ).childNodes[ link.inputIdx ]
                 
                 this._updatePreviewLink( null, io );
@@ -1181,7 +1330,7 @@ class Graph {
         this.nodes = [
             new GraphNode({
                 name: "Node 1",
-                position: new LX.vec2( 500, 350 ),
+                position: new LX.vec2( 600, 200 ),
                 inputs: [
                     {
                         name: "Speed",
@@ -1229,22 +1378,23 @@ class Graph {
                 ],
                 outputs: [
                     {
-                        name: "Speed",
-                        type: "float"
-                    },
-                    {
                         name: "Offset",
                         type: "vec3"
                     },
                     {
                         name: "Loop",
                         type: "bool"
+                    },
+                    {
+                        name: "Speed",
+                        type: "float"
                     }
                 ]
             }),
             new GraphNode({
                 name: "Add",
-                position: new LX.vec2( 300, 300 ),
+                type: "math",
+                position: new LX.vec2( 375, 250 ),
                 inputs: [
                     {
                         type: "float"
@@ -1256,6 +1406,24 @@ class Graph {
                 outputs: [
                     {
                         type: "float"
+                    }
+                ]
+            }),
+            new GraphNode({
+                name: "Or",
+                type: "logic",
+                position: new LX.vec2( 435, 435 ),
+                inputs: [
+                    {
+                        type: "bool"
+                    },
+                    {
+                        type: "bool"
+                    }
+                ],
+                outputs: [
+                    {
+                        type: "bool"
                     }
                 ]
             })
@@ -1279,6 +1447,7 @@ class GraphNode {
     constructor( options = {} ) {
 
         this.name = options.name ?? "Unnamed";
+        this.type = options.type;
         this.size = options.size;
         this.position = options.position ?? new LX.vec2( 0, 0 );
         this.color = options.color;
