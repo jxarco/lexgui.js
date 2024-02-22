@@ -79,21 +79,25 @@ function getBase64Image(img) {
 
 LX.getBase64Image = getBase64Image;
 
-function hexToRgb(string) {
-    const red = parseInt(string.substring(1, 3), 16) / 255;
-    const green = parseInt(string.substring(3, 5), 16) / 255;
-    const blue = parseInt(string.substring(5, 7), 16) / 255;
-    return [red, green, blue];
+function hexToRgb( hexStr ) {
+    const red = parseInt( hexStr.substring( 1, 3 ), 16 ) / 255;
+    const green = parseInt( hexStr.substring( 3, 5 ), 16 ) / 255;
+    const blue = parseInt( hexStr.substring( 5, 7 ), 16 ) / 255;
+    return [ red, green, blue ];
 }
 
-function rgbToHex(rgb) {
+LX.hexToRgb = hexToRgb;
+
+function rgbToHex( rgb ) {
     let hex = "#";
-    for(let c of rgb) {
-        c = Math.floor(c * 255);
-        hex += c.toString(16);
+    for( let c of rgb ) {
+        c = Math.floor( c * 255 );
+        hex += c.toString( 16 );
     }
     return hex;
 }
+
+LX.rgbToHex = rgbToHex;
 
 function simple_guidGenerator() {
     var S4 = function() {
