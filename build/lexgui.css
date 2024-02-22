@@ -3280,7 +3280,7 @@ pre .line-gutter {
 }
 
 .lexgraph .box-selection-svg {
-  stroke-width: 4px;
+  stroke-width: 3px;
   stroke: var(--global-selected);
   border-radius: 8px;
   fill: var(--global-selected);
@@ -3328,11 +3328,11 @@ pre .line-gutter {
   pointer-events: none;
 }
 
-.lexgraphnode .lexgraphnodeios .lexgraphnodeinputs{
+.lexgraphnode .lexgraphnodeios .lexgraphnodeinputs {
   margin-right: 4px;
 }
 
-.lexgraphnode .lexgraphnodeios .lexgraphnodeoutputs{
+.lexgraphnode .lexgraphnodeios .lexgraphnodeoutputs {
   margin-left: 4px;
 }
 
@@ -3346,7 +3346,7 @@ pre .line-gutter {
   min-height: 18px;
 }
 
-.lexgraphnode .lexgraphnodeio.output {
+.lexgraphnode .lexgraphnodeio.iooutput {
   justify-content: right;
 }
 
