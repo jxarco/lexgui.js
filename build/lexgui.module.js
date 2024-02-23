@@ -5978,9 +5978,9 @@ class ContextMenu {
         this.root.style.left = (event.x - 48) + "px";
         this.root.style.top = (event.y - 8) + "px";
 
-        this.root.addEventListener("mouseleave", function() {
-            this.remove();
-        });
+        // this.root.addEventListener("mouseleave", function() {
+        //     this.remove();
+        // });
         
         this.items = [];
         this.colors = {};
@@ -6041,7 +6041,7 @@ class ContextMenu {
         contextmenu.style.marginTop =  3.5 - c.offsetHeight + "px";
 
         // Set final width
-        contextmenu.style.width = contextmenu.offsetWidth + "px";
+        // contextmenu.style.width = contextmenu.offsetWidth + "px";
         this._adjust_position( contextmenu, 6, true );
     }
 
@@ -6107,11 +6107,11 @@ class ContextMenu {
             });
         }
 
-        entry.addEventListener("mouseleave", () => {
-            d = -1; // Reset depth
-            // delete entry.built;
-            c.querySelectorAll(".lexcontextmenubox").forEach(e => e.remove());
-        });
+        // entry.addEventListener("mouseleave", () => {
+        //     d = -1; // Reset depth
+        //     // delete entry.built;
+        //     c.querySelectorAll(".lexcontextmenubox").forEach(e => e.remove());
+        // });
     }
 
     onCreate() {

@@ -119,6 +119,12 @@ class GraphEditor {
 
         this.registerNodeType( 'math' );
         this.registerNodeType( 'logic' );
+        this.registerNodeType( 'events' );
+        this.registerNodeType( 'inputs' );
+        this.registerNodeType( 'variables' );
+        this.registerNodeType( 'system' );
+
+        this.main = null;
 
         // Back pattern
         
@@ -148,7 +154,7 @@ class GraphEditor {
 
         window.ge = this;
 
-        requestAnimationFrame( this._frame.bind(this) );
+        this.start();
     }
 
     static getInstances()
@@ -156,13 +162,14 @@ class GraphEditor {
         return GraphEditor.__instances;
     }
 
-    static registerDefaultNode( name, options = { } )
+    static registerDefaultNode( name, type, options = { } )
     {
         if( !name ) {
             return console.error( `Can't register default node without a name parameter!` );
         }
 
         options.name = name;
+        options.type = type ?? 'common';
 
         GraphEditor.DEFAULT_NODES[ name ] = options;
     }
@@ -222,6 +229,8 @@ class GraphEditor {
     }
 
     _createNode( node ) {
+
+        node.graph = this;
 
         var nodeContainer = document.createElement( 'div' );
         nodeContainer.classList.add( 'lexgraphnode' );
@@ -385,6 +394,8 @@ class GraphEditor {
                 // Only for left click..
                 if( e.button != LX.MOUSE_LEFT_CLICK )
                     return;
+
+                this.lastMouseDown = LX.getTime();
     
                 this._generatingLink = {
                     index: parseInt( el.dataset[ 'index' ] ),
@@ -392,6 +403,30 @@ class GraphEditor {
                     ioType: el.classList.contains( 'ioinput' ) ? GraphEditor.NODE_IO_INPUT : GraphEditor.NODE_IO_OUTPUT,
                     domEl: nodeContainer
                 };
+
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+            } );
+
+            el.addEventListener( 'mouseup', e => {
+
+                // Single click..
+                if( ( LX.getTime() - this.lastMouseDown ) < 120 ) {
+                    delete this._generatingLink;
+                    return;
+                }
+
+                if( this._generatingLink )
+                {
+                    // Check for IO
+                    if( !this._onLink( e ) )
+                    {
+                        // Delete entire SVG if not a successful connection..
+                        deleteElement( this._generatingLink.path ? this._generatingLink.path.parentElement : null );
+                    }
+
+                    delete this._generatingLink;
+                }
 
                 e.stopPropagation();
                 e.stopImmediatePropagation();
@@ -405,16 +440,23 @@ class GraphEditor {
                 const nodeId = nodeContainer.dataset[ 'id' ];
 
                 this._deleteLinks( nodeId, el );
-
             } );
 
         } );
 
         const id = node.name.toLowerCase().replaceAll( /\s/g, '-' ) + '-' + LX.UTILS.uidGenerator();
         this.nodes[ id ] = { data: node, dom: nodeContainer };
+        
+        node.id = id;
         nodeContainer.dataset[ 'id' ] = id;
 
         this._domNodes.appendChild( nodeContainer );
+
+        // Only 1 main per graph!
+        if( node.name == 'Main' )
+        {
+            this.main = nodeContainer;
+        }
 
         return nodeContainer;
     }
@@ -657,9 +699,7 @@ class GraphEditor {
         
         else if( e.type == 'mouseup' )
         {
-            var currentTime = LX.getTime();
-
-            if( ( currentTime - this.lastMouseDown) < 120 ) {
+            if( ( LX.getTime() - this.lastMouseDown ) < 120 ) {
                 this._processClick( e );
             }
 
@@ -691,7 +731,7 @@ class GraphEditor {
 
             e.preventDefault();
             
-            if( (LX.getTime() - this.lastMouseDown) < 200 ) {
+            if( ( LX.getTime() - this.lastMouseDown ) < 120 ) {
                 this._processContextMenu( e );
             }
         }
@@ -733,15 +773,10 @@ class GraphEditor {
 
     _processMouseUp( e ) {
 
+        // It the event reaches this, the link isn't valid..
         if( this._generatingLink )
         {
-            // Check for IO
-            if( !e.target.classList.contains( 'io__type' ) || !this._onLink( e ) )
-            {
-                // Delete entire SVG if not a successful connection..
-                deleteElement( this._generatingLink.path ? this._generatingLink.path.parentElement : null );
-            }
-
+            deleteElement( this._generatingLink.path ? this._generatingLink.path.parentElement : null );
             delete this._generatingLink;
         }
 
@@ -819,49 +854,150 @@ class GraphEditor {
         this._updatePattern( GraphEditor.EVENT_MOUSEWHEEL );
     }
 
+    _showAllNodesFromType( type, contextMenu, event ) {
+
+        const keys = Object.keys( GraphEditor.DEFAULT_NODES );
+
+        const filteredNodes = keys.filter( v => GraphEditor.DEFAULT_NODES[ v ].type === type );
+
+        for( let nodeName of filteredNodes )
+        {
+            const data = GraphEditor.DEFAULT_NODES[ nodeName ];
+
+            if( data.type == type )
+            {
+                contextMenu.add( type + '/' + nodeName, this._createFromDefault.bind( this, nodeName, event ) );
+            }
+        }
+
+    }
+
     _processContextMenu( e ) {
         
         LX.addContextMenu( "ADD NODE debug", e, m => {
             
-            for( let nodeName in GraphEditor.DEFAULT_NODES )
-            {
-                const data = GraphEditor.DEFAULT_NODES[ nodeName ];
-                if( data.type == 'logic' )
-                {
-                    m.add( 'logic/' + nodeName, this._createFromDefault.bind( this, nodeName, e ) );
-                }
-            }
+            for( let type in this.nodeTypes )
+                this._showAllNodesFromType( type, m, e );
 
-            for( let nodeName in GraphEditor.DEFAULT_NODES )
-            {
-                const data = GraphEditor.DEFAULT_NODES[ nodeName ];
-                if( data.type == 'math' )
-                {
-                    m.add( 'math/' + nodeName, this._createFromDefault.bind( this, nodeName, e ) );
-                }
-            }
         });
     }
 
     /**
-     * @method frame
+     * @method start
      */
 
-    _frame() {
+    start() {
 
-        this._update();
+        this.mustStop = false;
 
         requestAnimationFrame( this._frame.bind(this) );
     }
 
     /**
-     * @method update
+     * @method stop
      */
 
-    _update() {
-        
-        
+    stop() {
+
+        this.mustStop = true;
+        this.state = GraphEditor.STOPPED;
     }
+
+    /**
+     * @method _frame
+     */
+
+    _frame() {
+
+        if( this.mustStop )
+        {
+            return;
+        }
+
+        requestAnimationFrame( this._frame.bind(this) );
+
+        this._runStep();
+    }
+
+    /**
+     * @method _runStep
+     * @param {Number} steps: Number of steps to execute
+     */
+
+    _runStep( steps = 1 ) {
+        
+        const main = this.main;
+
+        if( !main )
+            return;
+
+        const visitedNodes = [ ];
+        
+        this._executionNodes = [ ];
+
+        // MAIN
+
+        const mainId = this.main.dataset[ 'id' ];
+
+        this._executionNodes.push( mainId );
+
+        for( let linkId in this.links )
+        {
+            const idx = linkId.indexOf( '@' + mainId );
+
+            if( idx < 0 )
+                continue;
+
+            const preNodeId = linkId.substring( 0, idx );
+
+            this._executionNodes.push( preNodeId );
+        }
+
+        for( var i = this._executionNodes.length - 1; i >= 0; --i )
+        {
+            const node = this.nodes[ this._executionNodes[ i ] ];
+
+            node.data.execute();
+        }
+    }
+
+    // _runStep( steps = 1 ) {
+        
+    //     const main = this.main;
+
+    //     if( !main )
+    //         return;
+
+    //     const params = [ ];
+
+    //     const inputs = main.querySelector( '.lexgraphnodeinputs' ).childNodes;
+
+    //     for( let i = 0; i < inputs.length; ++i )
+    //     {
+    //         const input = inputs[ i ];
+
+    //         if( !input.links )
+    //             continue;
+
+    //         // Get first and only target output..
+
+    //         let targetIndex;
+
+    //         const targets = input.links.filter( (v, i) => { targetIndex = i; return v !== undefined; } )[ 0 ];
+
+    //         const target = this.nodes[ targets[ 0 ] ];
+
+    //         params[ i ] = target.data.getOutput( targetIndex );
+    //     }
+
+    //     // Nothing to do..?
+    //     if( !params.length )
+    //         return;
+
+    //     const mainNode = this.nodes[ this.main.dataset[ 'id' ] ].data;
+
+    //     mainNode.run( params );
+    // }
 
     _generatePattern() {
 
@@ -1381,73 +1517,157 @@ class GraphEditor {
     }
 }
 
-GraphEditor.registerDefaultNode( "Add", {
-    type: "math",
-    inputs: [
-        { type: "float" },
-        { type: "float" }
-    ],
-    outputs: [
-        { type: "float" }
-    ]
-} );
-
-GraphEditor.registerDefaultNode( "Substract", {
-    type: "math",
-    inputs: [
-        { type: "float" },
-        { type: "float" }
-    ],
-    outputs: [
-        { type: "float" }
-    ]
-} );
-
-GraphEditor.registerDefaultNode( "Multiply", {
-    type: "math",
-    inputs: [
-        { type: "float" },
-        { type: "float" }
-    ],
-    outputs: [
-        { type: "float" }
-    ]
-} );
-
-GraphEditor.registerDefaultNode( "Divide", {
-    type: "math",
-    inputs: [
-        { type: "float" },
-        { type: "float" }
-    ],
-    outputs: [
-        { type: "float" }
-    ]
-} );
-
-GraphEditor.registerDefaultNode( "And", {
-    type: "logic",
-    inputs: [
-        { type: "bool" },
-        { type: "bool" }
-    ],
-    outputs: [
-        { type: "bool" }
-    ]
-} );
-
-GraphEditor.registerDefaultNode( "Or", {
-    type: "logic",
-    inputs: [
-        { type: "bool" },
-        { type: "bool" }
-    ],
-    outputs: [
-        { type: "bool" }
-    ]
-} );
-
 LX.GraphEditor = GraphEditor;
+
+/*
+    Math nodes
+*/
+
+GraphEditor.registerDefaultNode( "Add", "math", {
+    inputs: [ { type: "float" }, { type: "float" } ],
+    outputs: [ { type: "float" } ]
+} );
+
+GraphEditor.registerDefaultNode( "Substract", "math", {
+    inputs: [ { type: "float" }, { type: "float" } ],
+    outputs: [ { type: "float" } ]
+} );
+
+GraphEditor.registerDefaultNode( "Multiply", "math", {
+    inputs: [ { type: "float" }, { type: "float" } ],
+    outputs: [ { type: "float" } ]
+} );
+
+GraphEditor.registerDefaultNode( "Divide", "math", {
+    inputs: [ { type: "float" }, { type: "float" } ],
+    outputs: [ { type: "float" } ]
+} );
+
+/*
+    Logical operator nodes
+*/
+
+GraphEditor.registerDefaultNode( "And", "logic", {
+    inputs: [ { type: "bool" }, { type: "bool" } ],
+    outputs: [ { type: "bool" } ]
+} );
+
+GraphEditor.registerDefaultNode( "Or", "logic", {
+    inputs: [ { type: "bool" }, { type: "bool" } ],
+    outputs: [ { type: "bool" } ]
+} );
+
+GraphEditor.registerDefaultNode( "Equal", "logic", {
+    inputs: [ { type: "float" }, { type: "float" } ],
+    outputs: [ { type: "bool" } ]
+} );
+
+GraphEditor.registerDefaultNode( "Not Equal", "logic", {
+    inputs: [ { type: "float" }, { type: "float" } ],
+    outputs: [ { type: "bool" } ]
+} );
+
+GraphEditor.registerDefaultNode( "Less", "logic", {
+    inputs: [ { type: "float" }, { type: "float" } ],
+    outputs: [ { type: "bool" } ]
+} );
+
+GraphEditor.registerDefaultNode( "Less or Equal", "logic", {
+    inputs: [ { type: "float" }, { type: "float" } ],
+    outputs: [ { type: "bool" } ]
+} );
+
+GraphEditor.registerDefaultNode( "Greater", "logic", {
+    inputs: [ { type: "float" }, { type: "float" } ],
+    outputs: [ { type: "bool" } ]
+} );
+
+GraphEditor.registerDefaultNode( "Greater or Equal", "logic", {
+    inputs: [ { type: "float" }, { type: "float" } ],
+    outputs: [ { type: "bool" } ]
+} );
+
+GraphEditor.registerDefaultNode( "Greater or Equal", "logic", {
+    inputs: [ { type: "float" }, { type: "float" } ],
+    outputs: [ { type: "bool" } ]
+} );
+
+GraphEditor.registerDefaultNode( "Select", "logic", {
+    inputs: [ { name: "A", type: "float" }, { name: "B", type: "float" }, { name: "Condition", type: "bool" } ],
+    outputs: [ { type: "float" } ]
+} );
+
+GraphEditor.registerDefaultNode( "Compare", "logic", {
+    inputs: [ { name: "A", type: "float" }, { name: "B", type: "float" }, { name: "True", type: "float" }, { name: "False", type: "float" } ],
+    outputs: [ { type: "float" } ]
+} );
+
+/*
+    Event nodes
+*/
+
+GraphEditor.registerDefaultNode( "Key Down", "events", {
+    outputs: [ { type: "bool" } ]
+} );
+
+/*
+    Input nodes
+*/
+
+GraphEditor.registerDefaultNode( "Float", "inputs", {
+    outputs: [ { type: "float" } ],
+    fn: function() { this.setOutput( 0, 1.0 ) }
+} );
+
+GraphEditor.registerDefaultNode( "Vector2", "inputs", {
+    outputs: [ { type: "vec2" } ],
+    fn: function() { this.setOutput( 0, [ 1.0, 1.0 ] ); }
+} );
+
+GraphEditor.registerDefaultNode( "Vector3", "inputs", {
+    outputs: [ { type: "vec3" } ],
+    fn: function() { this.setOutput( 0, [ 1.0, 1.0, 1.0] ); }
+} );
+
+GraphEditor.registerDefaultNode( "Vector4", "inputs", {
+    outputs: [ { type: "vec4" } ],
+    fn: function() { this.setOutput( 0, [ 1.0, 1.0, 1.0, 1.0 ] ); }
+} );
+
+/*
+    Variable nodes
+*/
+
+GraphEditor.registerDefaultNode( "Set Variable", "variables", {
+    inputs: [ { type: "float" } ],
+    outputs: [ { type: "float" } ]
+} );
+
+GraphEditor.registerDefaultNode( "Get Variable", "variables", {
+    outputs: [ { type: "float" } ]
+} );
+
+/*
+    System nodes
+*/
+
+GraphEditor.registerDefaultNode( "Console Log", "system", {
+    inputs: [ { type: "any" } ]
+} );
+
+GraphEditor.registerDefaultNode( "Main", "system", {
+    inputs: [ { type: "vec4" } ],
+    fn: function() {
+        
+        var data = this.getInput( 0 );
+
+        if( !data )
+            return;
+
+        console.log( data );
+    }
+} );
+
 
 /**
  * @class Graph
@@ -1479,6 +1699,9 @@ class Graph {
                     }
                 ]
             }),
+            new GraphNode( Object.assign( GraphEditor.DEFAULT_NODES[ 'Main' ], {
+                position: new LX.vec2( 650, 400 ),
+            } ) ),
             new GraphNode({
                 name: "Node 2",
                 size: new LX.vec2( 120, 100 ),
@@ -1492,7 +1715,7 @@ class Graph {
                     },
                     {
                         name: "Offset",
-                        type: "vec2"
+                        type: "vec4"
                     },
                     {
                         name: "Loop",
@@ -1591,16 +1814,94 @@ class GraphNode {
         
         this.inputs = options.inputs ?? [];
         this.outputs = options.outputs ?? [];
+
+        this.fn = options.fn;
+
+        if( !this.fn )
+        {
+            console.warn( `GraphNode [${ this.name }] does not have a callback attached.` );
+        }
     }
 
-    computeSize() {
+    _hasOutputsConnected() {
 
-        let sX = 16 + this.name.length * 10;
+        return true;
+    }
 
-        const rows = Math.max(1, Math.max(this.inputs.length, this.outputs.length));
-        let sY = rows * GraphEditor.NODE_ROW_HEIGHT + GraphEditor.NODE_TITLE_HEIGHT;
+    execute() {
 
-        return [sX, sY];
+        if( !this._hasOutputsConnected() )
+            return;
+
+        if( this.fn )
+        {
+            this.fn.bind(this)();
+        }
+    }
+
+    getInput( index ) {
+
+        // return this.inputs[ index ].value;
+
+        if( !this.inputs || !this.inputs.length || !this.inputs[ index ] )
+            return;
+
+        // Get data from link
+
+        for( let linkId in this.graph.links )
+        {
+            const idx = linkId.indexOf( '@' + this.id );
+
+            if( idx < 0 )
+                continue;
+
+            const nodeLinks = this.graph.links[ linkId ];
+            console.assert( nodeLinks.length <= 1 );
+
+            for ( var link of nodeLinks )
+            {
+                if( link.inputIdx != index )
+                    continue;
+
+                // This is the value!!
+                return link.data;
+            }
+        }
+    }
+
+    setOutput( index, data ) {
+
+        if( !this.outputs || !this.outputs.length || !this.outputs[ index ] )
+            return;
+
+        // it's useful??
+
+        this.outputs[ index ].value = data;
+
+        // Set data in link
+
+        for( let linkId in this.graph.links )
+        {
+            const idx = linkId.indexOf( this.id + '@' );
+
+            if( idx < 0 )
+                continue;
+
+            const nodeLinks = this.graph.links[ linkId ];
+
+            for ( var link of nodeLinks )
+            {
+                if( link.outputIdx != index )
+                    continue;
+
+                link.data = data;
+            }
+        }
+    }
+
+    getOutput( index ) {
+
+        return this.outputs[ index ].value;
     }
 }
 

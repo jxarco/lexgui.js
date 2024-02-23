@@ -6045,7 +6045,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             contextmenu.style.marginTop =  3.5 - c.offsetHeight + "px";
 
             // Set final width
-            contextmenu.style.width = contextmenu.offsetWidth + "px";
+            // contextmenu.style.width = contextmenu.offsetWidth + "px";
             this._adjust_position( contextmenu, 6, true );
         }
 
