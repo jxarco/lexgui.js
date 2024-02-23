@@ -549,7 +549,29 @@ class GraphEditor {
             if( !key.includes( nodeId ) )
                 continue;
 
-            this.links[ key ].forEach( i => deleteElement( i.path.parentElement ) );
+            const aIdx = key.indexOf( '@' );
+            const targetIsInput = key.substring( aIdx + 1 ) != nodeId;
+
+            // Remove the connection from the other before deleting..
+
+            const numLinks = this.links[ key ].length;
+
+            for( var i = 0; i < numLinks; ++i )
+            {
+                var link = this.links[ key ][ i ];
+
+                deleteElement( link.path.parentElement );
+
+                const targetNodeId = targetIsInput ? link.inputNode : link.outputNode;
+
+                const targetNodeDOM = this._getNodeDOMElement( targetNodeId );
+                const ios = targetNodeDOM.querySelector( targetIsInput ? '.lexgraphnodeinputs' : '.lexgraphnodeoutputs' );
+                const io = ios.childNodes[ targetIsInput ? link.inputIdx : link.outputIdx ];
+
+                const ioIndex = targetIsInput ? link.outputIdx : link.inputIdx;
+                const nodelinkidx = io.links[ ioIndex ].indexOf( nodeId );
+                io.links[ ioIndex ].splice( nodelinkidx, 1 );
+            }
 
             delete this.links[ key ];
         }
