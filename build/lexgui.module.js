@@ -4897,6 +4897,8 @@ class Panel {
             document.body.classList.add('nocursor');
             document.body.classList.add('noevents');
             drag_icon.classList.remove('hidden');
+            e.stopImmediatePropagation();
+            e.stopPropagation();
         }
 
         function inner_mousemove(e) {
@@ -5069,6 +5071,8 @@ class Panel {
                 document.body.classList.add('nocursor');
                 document.body.classList.add('noevents');
                 drag_icon.classList.remove('hidden');
+                e.stopImmediatePropagation();
+                e.stopPropagation();
             }
 
             function inner_mousemove(e) {

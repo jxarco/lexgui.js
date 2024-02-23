@@ -103,6 +103,11 @@ class GraphEditor {
         this.root.addEventListener( 'focus', this._processFocus.bind( this, true) );
         this.root.addEventListener( 'focusout', this._processFocus.bind( this, false ) );
 
+        this.propertiesDialog = new LX.Dialog( "Properties", null, { position: [ "12px", "12px" ] });
+
+        // Move to root..
+        this.root.appendChild( this.propertiesDialog.root );
+
         this._lastMousePosition = new LX.vec2( 0, 0 );
 
         this._undoSteps = [ ];
@@ -220,6 +225,17 @@ class GraphEditor {
         this._domLinks.innerHTML = "";
     }
 
+    propagateEventToAllNodes( eventName, params ) {
+
+        for ( let node of this.nodes )
+        {
+            if( !node.data[ eventName ] )
+                continue;
+
+            node.data[ eventName ]( params );
+        }
+    };
+
     /**
      * @method unSelectAll
      */
@@ -229,6 +245,9 @@ class GraphEditor {
         this._domNodes.querySelectorAll( '.lexgraphnode' ).forEach( v => v.classList.remove( 'selected' ) );
 
         this.selectedNodes.length = 0;
+
+        // TODO
+        // hide this.propertiesDialog
     }
 
     _createNode( node ) {
@@ -289,11 +308,57 @@ class GraphEditor {
             }
         } );
 
+        nodeContainer.addEventListener( 'dblclick', e => {
+
+            // Only for left click..
+            if( e.button != LX.MOUSE_LEFT_CLICK )
+                return;
+
+            // TODO open dialog for properties
+            // ...
+
+            var panel = this.propertiesDialog.panel;
+            panel.clear();
+
+            for( let p of node.properties )
+            {
+                panel.addNumber( p.name ?? "Value", p.value, (v) => {
+                    
+                    LX.emit( p.signal, v );
+                    
+                } );
+            }
+
+        } );
+
         // Title header
         var nodeHeader = document.createElement( 'div' );
         nodeHeader.classList.add( 'lexgraphnodeheader' );
         nodeHeader.innerText = node.name;
         nodeContainer.appendChild( nodeHeader );
+
+        // Properties
+        if( node.properties.length  )
+        {
+            var nodeProperties = document.createElement( 'div' );
+            nodeProperties.classList.add( 'lexgraphnodeproperties' );
+            
+            for( let p of node.properties )
+            {
+                var panel = new LX.Panel();
+    
+                p.signal = "@" + LX.UTILS.uidGenerator() + node.name;
+
+                panel.addNumber( null, p.value, (v) => p.value = v, { signal: p.signal } );
+    
+                // var prop = document.createElement( 'div' );
+                // prop.innerText = p.type;
+                // prop.classList.add( 'lexgraphnodeproperty' );
+                nodeProperties.appendChild( panel.root );
+            }
+    
+            nodeContainer.appendChild( nodeProperties );
+        }
 
         // Inputs and outputs
         var nodeIO = document.createElement( 'div' );
@@ -960,10 +1025,9 @@ class GraphEditor {
 
     /**
      * @method _runStep
-     * @param {Number} steps: Number of steps to execute
      */
 
-    _runStep( steps = 1 ) {
+    _runStep() {
         
         const main = this.main;
 
@@ -996,8 +1060,10 @@ class GraphEditor {
 
                 addNode( preNodeId );
             }
-
         };
+
+        // TODO: Search "no output" nodes and add to the executable list (same as main)..
+        // ...
 
         this._executionNodes.push( mainId );
 
@@ -1007,47 +1073,15 @@ class GraphEditor {
         {
             const node = this.nodes[ this._executionNodes[ i ] ];
 
+            if( node.data.onBeforeStep )
+                node.data.onBeforeStep();
+
             node.data.execute();
+
+            if( node.data.onBeforeStep )
+                node.data.onAfterStep();
         }
     }
-
-    // _runStep( steps = 1 ) {
-        
-    //     const main = this.main;
-
-    //     if( !main )
-    //         return;
-
-    //     const params = [ ];
-
-    //     const inputs = main.querySelector( '.lexgraphnodeinputs' ).childNodes;
-
-    //     for( let i = 0; i < inputs.length; ++i )
-    //     {
-    //         const input = inputs[ i ];
-
-    //         if( !input.links )
-    //             continue;
-
-    //         // Get first and only target output..
-
-    //         let targetIndex;
-
-    //         const targets = input.links.filter( (v, i) => { targetIndex = i; return v !== undefined; } )[ 0 ];
-
-    //         const target = this.nodes[ targets[ 0 ] ];
-
-    //         params[ i ] = target.data.getOutput( targetIndex );
-    //     }
-
-    //     // Nothing to do..?
-    //     if( !params.length )
-    //         return;
-
-    //     const mainNode = this.nodes[ this.main.dataset[ 'id' ] ].data;
-
-    //     mainNode.run( params );
-    // }
 
     _generatePattern() {
 
@@ -1176,7 +1210,7 @@ class GraphEditor {
         const dst_ios = dst_node[ ioType ==  GraphEditor.NODE_IO_INPUT ? 'inputs' : 'outputs' ];
         const dst_ioType = dst_ios[ dst_ioIndex ].type;
 
-        if( src_ioType != dst_ioType )
+        if( src_ioType != dst_ioType && src_ioType != "any" && dst_ioType != "any"  )
         {
             console.warn( `Can't link ${ src_ioType } to ${ dst_ioType }.` );
             return;
@@ -1702,8 +1736,9 @@ GraphEditor.registerDefaultNode( "Key Down", "events", {
 */
 
 GraphEditor.registerDefaultNode( "Float", "inputs", {
+    properties: [ { type: "number", value: 1.0 } ],
     outputs: [ { type: "float" } ],
-    fn: function() { this.setOutput( 0, 1.0 ) }
+    fn: function() { this.setOutput( 0, this.properties[ 0 ].value ) }
 } );
 
 GraphEditor.registerDefaultNode( "Vector2", "inputs", {
@@ -1739,11 +1774,17 @@ GraphEditor.registerDefaultNode( "Get Variable", "variables", {
 */
 
 GraphEditor.registerDefaultNode( "Console Log", "system", {
-    inputs: [ { type: "any" } ]
+    inputs: [ { type: "any" } ],
+    fn: function() {
+        var data = this.getInput( 0 );
+        if( data == undefined )
+            return;
+        console.log( data );
+    }
 } );
 
 GraphEditor.registerDefaultNode( "Main", "system", {
-    inputs: [ { type: "bool" }, { type: "float" }, { type: "vec4" } ],
+    inputs: [ { type: "float" }, { type: "bool" }, { type: "vec4" } ],
     fn: function() {
         var data = this.getInput( 0 );
         if( data == undefined )
@@ -1768,25 +1809,31 @@ class Graph {
 
         // Nodes
 
+        const mainNode = new GraphNode( GraphEditor.DEFAULT_NODES[ 'Main' ] );
+        mainNode.position = new LX.vec2( 650, 400 );
+
+        const addNode = new GraphNode( GraphEditor.DEFAULT_NODES[ 'Add' ] );
+        addNode.position = new LX.vec2( 425, 250 );
+
+        const floatNode = new GraphNode( GraphEditor.DEFAULT_NODES[ 'Float' ] );
+        floatNode.position = new LX.vec2( 200, 200 );
+
+        const multNode = new GraphNode( GraphEditor.DEFAULT_NODES[ 'Multiply' ] );
+        multNode.position = new LX.vec2( 200, 400 );
+
+        const keydownNode = new GraphNode( GraphEditor.DEFAULT_NODES[ 'Key Down' ] );
+        keydownNode.position = new LX.vec2( 600, 200 );
+
+        const orNode = new GraphNode( GraphEditor.DEFAULT_NODES[ 'Or' ] );
+        orNode.position = new LX.vec2( 435, 435 );
+
         this.nodes = [
-            new GraphNode( Object.assign( GraphEditor.DEFAULT_NODES[ 'Key Down' ], {
-                position: new LX.vec2( 600, 200 ),
-            } ) ),
-            new GraphNode( Object.assign( GraphEditor.DEFAULT_NODES[ 'Main' ], {
-                position: new LX.vec2( 650, 400 ),
-            } ) ),
-            new GraphNode( Object.assign( GraphEditor.DEFAULT_NODES[ 'Float' ], {
-                position: new LX.vec2( 200, 200 ),
-            } ) ),
-            new GraphNode( Object.assign( GraphEditor.DEFAULT_NODES[ 'Multiply' ], {
-                position: new LX.vec2( 200, 400 ),
-            } ) ),
-            new GraphNode( Object.assign( GraphEditor.DEFAULT_NODES[ 'Add' ], {
-                position: new LX.vec2( 375, 250 ),
-            } ) ),
-            new GraphNode( Object.assign( GraphEditor.DEFAULT_NODES[ 'Or' ], {
-                position: new LX.vec2( 435, 435 ),
-            } ) )
+            mainNode,
+            addNode,
+            floatNode,
+            multNode,
+            keydownNode,
+            orNode
         ];
     }
 }
@@ -1814,6 +1861,12 @@ class GraphNode {
         
         this.inputs = options.inputs ?? [];
         this.outputs = options.outputs ?? [];
+        this.properties = options.properties ?? [];
+
+        // Make copies to we make sure we don't mess up using same nodes..
+        this.inputs = LX.deepCopy( this.inputs );
+        this.outputs = LX.deepCopy( this.outputs );
+        this.properties = LX.deepCopy( this.properties );
 
         this.fn = options.fn;
 
@@ -1840,8 +1893,6 @@ class GraphNode {
     }
 
     getInput( index ) {
-
-        // return this.inputs[ index ].value;
 
         if( !this.inputs || !this.inputs.length || !this.inputs[ index ] )
             return;
@@ -1872,10 +1923,6 @@ class GraphNode {
 
         if( !this.outputs || !this.outputs.length || !this.outputs[ index ] )
             return;
-
-        // it's useful??
-
-        this.outputs[ index ].value = data;
 
         // Set data in link
 

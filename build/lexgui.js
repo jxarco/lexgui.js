@@ -4901,6 +4901,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 document.body.classList.add('nocursor');
                 document.body.classList.add('noevents');
                 drag_icon.classList.remove('hidden');
+                e.stopImmediatePropagation();
+                e.stopPropagation();
             }
 
             function inner_mousemove(e) {
@@ -5073,6 +5075,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     document.body.classList.add('nocursor');
                     document.body.classList.add('noevents');
                     drag_icon.classList.remove('hidden');
+                    e.stopImmediatePropagation();
+                    e.stopPropagation();
                 }
 
                 function inner_mousemove(e) {
