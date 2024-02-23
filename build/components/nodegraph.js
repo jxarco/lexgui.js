@@ -63,9 +63,8 @@ class GraphEditor {
     static NODE_IO_INPUT        = 0;
     static NODE_IO_OUTPUT       = 1;
 
-    // Global Nodes
 
-    static DEFAULT_NODES        = { };
+    static NODE_TYPES           = { };
 
     /**
      * @param {*} options
@@ -119,18 +118,11 @@ class GraphEditor {
 
         this.nodes      = { };
         this.links      = { };
-        this.nodeTypes  = { }
+        this.variables  = { };
 
         this.selectedNodes = [ ];
 
         this._nodeBackgroundOpacity = options.disableNodeOpacity ? 1.0 : 0.8;
-
-        this.registerNodeType( 'math' );
-        this.registerNodeType( 'logic' );
-        this.registerNodeType( 'events' );
-        this.registerNodeType( 'inputs' );
-        this.registerNodeType( 'variables' );
-        this.registerNodeType( 'system' );
 
         this.main = null;
 
@@ -165,21 +157,108 @@ class GraphEditor {
         this.start();
     }
 
-    static getInstances()
-    {
+    static getInstances() {
+
         return GraphEditor.__instances;
     }
 
-    static registerDefaultNode( name, type, options = { } )
-    {
-        if( !name ) {
-            return console.error( `Can't register default node without a name parameter!` );
+    /**
+     * Register a node class so it can be listed when the user wants to create a new one
+     * @method registerCustomNode
+     * @param {String} type: name of the node and path
+     * @param {Class} baseClass class containing the structure of the custom node
+     */
+
+    static registerCustomNode( type, baseClass ) {
+        
+        if ( !baseClass.prototype ) {
+            throw "Cannot register a simple object, it must be a class with a prototype!";
+        }
+        baseClass.type = type;
+
+        const className = baseClass.name;
+
+        // Get category from path
+        const pos = type.lastIndexOf( "/" );
+        baseClass.category = type.substring( 0, pos );
+
+        if ( !baseClass.title ) {
+            baseClass.title = className;
         }
 
-        options.name = name;
-        options.type = type ?? 'common';
+        // Extend GraphNode class
+        const ownPropertyNames = Object.getOwnPropertyNames( GraphNode.prototype );
+        for ( var k of ownPropertyNames ) {
+            if ( !baseClass.prototype[ k ] ) {
+                baseClass.prototype[ k ] = GraphNode.prototype[ k ];
+            }
+        }
 
-        GraphEditor.DEFAULT_NODES[ name ] = options;
+        baseClass.prototype[ 'inputs' ] = [ ];
+        baseClass.prototype[ 'outputs' ] = [ ];
+        baseClass.prototype[ 'properties' ] = [ ];
+
+        if( !baseClass.prototype.onExecute )
+        {
+            console.warn( `GraphNode [${ this.name }] does not have a callback attached.` );
+        }
+
+        const prev = GraphEditor.NODE_TYPES[ type ];
+        if(prev) {
+            console.warn( `Replacing node type [${ type }]` );
+        }
+
+        GraphEditor.NODE_TYPES[ type ] = baseClass;
+
+        // Some callbacks..
+
+        if ( this.onNodeTypeRegistered ) {
+            this.onCustomNodeRegistered( type, baseClass);
+        }
+
+        if ( prev && this.onNodeTypeReplaced ) {
+            this.onNodeTypeReplaced( type, baseClass, prev );
+        }
+    }
+
+    /**
+     * Create a node of a given type with a name. The node is not attached to any graph yet.
+     * @method createNode
+     * @param {String} type full name of the node class. p.e. "math/sin"
+     * @param {String} title a name to distinguish from other nodes
+     * @param {Object} options Store node options
+     */
+
+    static addNode( type, title, options ) {
+
+        var baseClass = GraphEditor.NODE_TYPES[ type ];
+
+        if (!baseClass) {
+            console.warn( `GraphNode type [${ type }] not registered.` );
+            return null;
+        }
+
+        title = title ?? baseClass.title;
+
+        const node = new baseClass( title );
+
+        node.type = type;
+        node.title = title;
+        node.position = new LX.vec2( 0, 0 );
+        node.color = null;
+
+        // Extra options
+        if ( options ) {
+            for (var i in options) {
+                node[ i ] = options[ i ];
+            }
+        }
+
+        if ( node.onNodeCreated ) {
+            node.onNodeCreated();
+        }
+        
+        return node;
     }
 
     /**
@@ -201,18 +280,8 @@ class GraphEditor {
 
         for( let node of this.graph.nodes )
         {
-            this._createNode( node );
+            this._createNodeDOM( node );
         }
-    }
-
-    /**
-     * @method registerNodeType
-     * @param {String} typeName
-     */
-
-    registerNodeType( typeName, options = { } ) {
-
-        this.nodeTypes[ typeName ] = options;
     }
 
     /**
@@ -223,6 +292,16 @@ class GraphEditor {
 
         this._domNodes.innerHTML = "";
         this._domLinks.innerHTML = "";
+    }
+
+    setVariable( name, value ) {
+
+        this.variables[ name ] = value;
+    }
+
+    getVariable( name ) {
+
+        return this.variables[ name ];
     }
 
     propagateEventToAllNodes( eventName, params ) {
@@ -250,7 +329,7 @@ class GraphEditor {
         // hide this.propertiesDialog
     }
 
-    _createNode( node ) {
+    _createNodeDOM( node ) {
 
         node.graph = this;
 
@@ -264,9 +343,9 @@ class GraphEditor {
         var color;
 
         // Get color from type if color if not manually specified
-        if( node.type && this.nodeTypes[ node.type ] )
+        if( node.type && GraphEditor.NODE_TYPES[ node.type ] )
         {
-            color = this.nodeTypes[ node.type ].color;
+            color = GraphEditor.NODE_TYPES[ node.type ].color;
             nodeContainer.classList.add( node.type ); // Support adding color from css..
         }
 
@@ -314,19 +393,21 @@ class GraphEditor {
             if( e.button != LX.MOUSE_LEFT_CLICK )
                 return;
 
-            // TODO open dialog for properties
-            // ...
-
             var panel = this.propertiesDialog.panel;
             panel.clear();
 
             for( let p of node.properties )
             {
-                panel.addNumber( p.name ?? "Value", p.value, (v) => {
-                    
-                    LX.emit( p.signal, v );
-                    
-                } );
+                switch( p.type )
+                {
+                case 'float':
+                case 'int':
+                    panel.addNumber( p.name, p.value, (v) => { p.value = v } );
+                    break;
+                case 'string':
+                    panel.addText( p.name, p.value, (v) => { p.value = v } );
+                break;
+                }
             }
 
         } );
@@ -334,31 +415,40 @@ class GraphEditor {
         // Title header
         var nodeHeader = document.createElement( 'div' );
         nodeHeader.classList.add( 'lexgraphnodeheader' );
-        nodeHeader.innerText = node.name;
+        nodeHeader.innerText = node.title;
         nodeContainer.appendChild( nodeHeader );
 
         // Properties
-        if( node.properties.length  )
-        {
-            var nodeProperties = document.createElement( 'div' );
-            nodeProperties.classList.add( 'lexgraphnodeproperties' );
+        // if( node.properties.length  )
+        // {
+        //     var nodeProperties = document.createElement( 'div' );
+        //     nodeProperties.classList.add( 'lexgraphnodeproperties' );
             
-            for( let p of node.properties )
-            {
-                var panel = new LX.Panel();
+        //     for( let p of node.properties )
+        //     {
+        //         var panel = new LX.Panel();
     
-                p.signal = "@" + LX.UTILS.uidGenerator() + node.name;
+        //         p.signal = "@" + LX.UTILS.uidGenerator() + node.title;
 
-                panel.addNumber( null, p.value, (v) => p.value = v, { signal: p.signal } );
+        //         switch( p.type )
+        //         {
+        //         case 'float':
+        //         case 'int':
+        //             panel.addNumber( p.name, p.value, (v) => p.value = v, { signal: p.signal } );
+        //             break;
+        //         case 'string':
+        //             panel.addText( p.name, p.value, (v) => p.value = v, { signal: p.signal } );
+        //         break;
+        //         }
+
+        //         // var prop = document.createElement( 'div' );
+        //         // prop.innerText = p.type;
+        //         // prop.classList.add( 'lexgraphnodeproperty' );
+        //         nodeProperties.appendChild( panel.root );
+        //     }
     
-                // var prop = document.createElement( 'div' );
-                // prop.innerText = p.type;
-                // prop.classList.add( 'lexgraphnodeproperty' );
-                nodeProperties.appendChild( panel.root );
-            }
-    
-            nodeContainer.appendChild( nodeProperties );
-        }
+        //     nodeContainer.appendChild( nodeProperties );
+        // }
 
         // Inputs and outputs
         var nodeIO = document.createElement( 'div' );
@@ -384,7 +474,7 @@ class GraphEditor {
             {
                 if( !i.type )
                 {
-                    console.warn( `Missing type for node [${ node.name }], skipping...` );
+                    console.warn( `Missing type for node [${ node.title }], skipping...` );
                     continue;
                 }
 
@@ -425,7 +515,7 @@ class GraphEditor {
             {
                 if( !o.type  )
                 {
-                    console.warn( `Missing type for node [${ node.name }], skipping...` );
+                    console.warn( `Missing type for node [${ node.title }], skipping...` );
                 }
 
                 var output = document.createElement( 'div' );
@@ -512,7 +602,7 @@ class GraphEditor {
 
         } );
 
-        const id = node.name.toLowerCase().replaceAll( /\s/g, '-' ) + '-' + LX.UTILS.uidGenerator();
+        const id = node.title.toLowerCase().replaceAll( /\s/g, '-' ) + '-' + LX.UTILS.uidGenerator();
         this.nodes[ id ] = { data: node, dom: nodeContainer };
         
         node.id = id;
@@ -521,35 +611,12 @@ class GraphEditor {
         this._domNodes.appendChild( nodeContainer );
 
         // Only 1 main per graph!
-        if( node.name == 'Main' )
+        if( node.title == 'Main' )
         {
             this.main = nodeContainer;
         }
 
         return nodeContainer;
-    }
-
-    _createFromDefault( nodeName, e ) {
-
-        const nodeData = GraphEditor.DEFAULT_NODES[ nodeName ];
-
-        if( !nodeData )
-        {
-            return console.warn( `Can't create default node [${ nodeName }].` );
-        }
-
-        const domNode = this._createNode( new GraphNode( nodeData ) );
-
-        if( e )
-        {
-            const rect = this.root.getBoundingClientRect();
-        
-            let position = new LX.vec2( e.clientX - rect.x, e.clientY - rect.y );
-
-            position = this._getPatternPosition( position );
-
-            this._translateNode( domNode, position.x , position.y );
-        }
     }
 
     _onMoveNode( e ) {
@@ -958,31 +1025,14 @@ class GraphEditor {
         this._updatePattern( GraphEditor.EVENT_MOUSEWHEEL );
     }
 
-    _showAllNodesFromType( type, contextMenu, event ) {
-
-        const keys = Object.keys( GraphEditor.DEFAULT_NODES );
-
-        const filteredNodes = keys.filter( v => GraphEditor.DEFAULT_NODES[ v ].type === type );
-
-        for( let nodeName of filteredNodes )
-        {
-            const data = GraphEditor.DEFAULT_NODES[ nodeName ];
-
-            if( data.type == type )
-            {
-                contextMenu.add( type + '/' + nodeName, this._createFromDefault.bind( this, nodeName, event ) );
-            }
-        }
-
-    }
-
     _processContextMenu( e ) {
         
         LX.addContextMenu( "ADD NODE debug", e, m => {
             
-            for( let type in this.nodeTypes )
-                this._showAllNodesFromType( type, m, e );
-
+            for( let type in GraphEditor.NODE_TYPES )
+            {
+                m.add( type, () => { } );
+            }
         });
     }
 
@@ -1037,6 +1087,9 @@ class GraphEditor {
         const visitedNodes = {  };
         
         this._executionNodes = [ ];
+
+        // Reser variables each step?
+        this.variables = { };
 
         const mainId = this.main.dataset[ 'id' ];
 
@@ -1168,7 +1221,7 @@ class GraphEditor {
     _computeNodeSize( node ) {
 
         const ctx = this.dom.getContext("2d");
-        var textMetrics = ctx.measureText( node.name );
+        var textMetrics = ctx.measureText( node.title );
 
         let sX = 32 + textMetrics.width * 1.475;
 
@@ -1603,196 +1656,6 @@ class GraphEditor {
 
 LX.GraphEditor = GraphEditor;
 
-/*
-    Math nodes
-*/
-
-GraphEditor.registerDefaultNode( "Add", "math", {
-    inputs: [ { type: "float" }, { type: "float" } ],
-    outputs: [ { type: "float" } ],
-    fn: function() {
-        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
-        if( a == undefined || a.constructor != Number )
-            return;
-        this.setOutput( 0, a + b );
-    }
-} );
-
-GraphEditor.registerDefaultNode( "Substract", "math", {
-    inputs: [ { type: "float" }, { type: "float" } ],
-    outputs: [ { type: "float" } ],
-    fn: function() {
-        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
-        if( a == undefined || a.constructor != Number )
-            return;
-        this.setOutput( 0, a - b );
-    }
-} );
-
-GraphEditor.registerDefaultNode( "Multiply", "math", {
-    inputs: [ { type: "float" }, { type: "float" } ],
-    outputs: [ { type: "float" } ],
-    fn: function() {
-        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 1;
-        if( a == undefined || a.constructor != Number )
-            return;
-        this.setOutput( 0, a * b );
-    }
-} );
-
-GraphEditor.registerDefaultNode( "Divide", "math", {
-    inputs: [ { type: "float" }, { type: "float" } ],
-    outputs: [ { type: "float" } ],
-    fn: function() {
-        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
-        if( a == undefined || a.constructor != Number )
-            return;
-        this.setOutput( 0, a / b );
-    }
-} );
-
-/*
-    Logical operator nodes
-*/
-
-GraphEditor.registerDefaultNode( "And", "logic", {
-    inputs: [ { type: "bool" }, { type: "bool" } ],
-    outputs: [ { type: "bool" } ],
-    fn: function() {
-        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
-        if( a == undefined || b == undefined )
-            return;
-        this.setOutput( 0, !!( a ) && !!( b ) );
-    }
-} );
-
-GraphEditor.registerDefaultNode( "Or", "logic", {
-    inputs: [ { type: "bool" }, { type: "bool" } ],
-    outputs: [ { type: "bool" } ],
-    fn: function() {
-        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
-        if( a == undefined || b == undefined )
-            return;
-        this.setOutput( 0, !!( a ) || !!( b ) );
-    }
-} );
-
-GraphEditor.registerDefaultNode( "Equal", "logic", {
-    inputs: [ { type: "float" }, { type: "float" } ],
-    outputs: [ { type: "bool" } ]
-} );
-
-GraphEditor.registerDefaultNode( "Not Equal", "logic", {
-    inputs: [ { type: "float" }, { type: "float" } ],
-    outputs: [ { type: "bool" } ]
-} );
-
-GraphEditor.registerDefaultNode( "Less", "logic", {
-    inputs: [ { type: "float" }, { type: "float" } ],
-    outputs: [ { type: "bool" } ]
-} );
-
-GraphEditor.registerDefaultNode( "Less or Equal", "logic", {
-    inputs: [ { type: "float" }, { type: "float" } ],
-    outputs: [ { type: "bool" } ]
-} );
-
-GraphEditor.registerDefaultNode( "Greater", "logic", {
-    inputs: [ { type: "float" }, { type: "float" } ],
-    outputs: [ { type: "bool" } ]
-} );
-
-GraphEditor.registerDefaultNode( "Greater or Equal", "logic", {
-    inputs: [ { type: "float" }, { type: "float" } ],
-    outputs: [ { type: "bool" } ]
-} );
-
-GraphEditor.registerDefaultNode( "Greater or Equal", "logic", {
-    inputs: [ { type: "float" }, { type: "float" } ],
-    outputs: [ { type: "bool" } ]
-} );
-
-GraphEditor.registerDefaultNode( "Select", "logic", {
-    inputs: [ { name: "A", type: "float" }, { name: "B", type: "float" }, { name: "Condition", type: "bool" } ],
-    outputs: [ { type: "float" } ]
-} );
-
-GraphEditor.registerDefaultNode( "Compare", "logic", {
-    inputs: [ { name: "A", type: "float" }, { name: "B", type: "float" }, { name: "True", type: "float" }, { name: "False", type: "float" } ],
-    outputs: [ { type: "float" } ]
-} );
-
-/*
-    Event nodes
-*/
-
-GraphEditor.registerDefaultNode( "Key Down", "events", {
-    outputs: [ { type: "bool" } ],
-    fn: function() { this.setOutput( 0, !!this.graph.keys[ ' ' ] ); }
-} );
-
-/*
-    Input nodes
-*/
-
-GraphEditor.registerDefaultNode( "Float", "inputs", {
-    properties: [ { type: "number", value: 1.0 } ],
-    outputs: [ { type: "float" } ],
-    fn: function() { this.setOutput( 0, this.properties[ 0 ].value ) }
-} );
-
-GraphEditor.registerDefaultNode( "Vector2", "inputs", {
-    outputs: [ { type: "vec2" } ],
-    fn: function() { this.setOutput( 0, [ 1.0, 1.0 ] ); }
-} );
-
-GraphEditor.registerDefaultNode( "Vector3", "inputs", {
-    outputs: [ { type: "vec3" } ],
-    fn: function() { this.setOutput( 0, [ 1.0, 1.0, 1.0] ); }
-} );
-
-GraphEditor.registerDefaultNode( "Vector4", "inputs", {
-    outputs: [ { type: "vec4" } ],
-    fn: function() { this.setOutput( 0, [ 1.0, 1.0, 1.0, 1.0 ] ); }
-} );
-
-/*
-    Variable nodes
-*/
-
-GraphEditor.registerDefaultNode( "Set Variable", "variables", {
-    inputs: [ { type: "float" } ],
-    outputs: [ { type: "float" } ]
-} );
-
-GraphEditor.registerDefaultNode( "Get Variable", "variables", {
-    outputs: [ { type: "float" } ]
-} );
-
-/*
-    System nodes
-*/
-
-GraphEditor.registerDefaultNode( "Console Log", "system", {
-    inputs: [ { type: "any" } ],
-    fn: function() {
-        var data = this.getInput( 0 );
-        if( data == undefined )
-            return;
-        console.log( data );
-    }
-} );
-
-GraphEditor.registerDefaultNode( "Main", "system", {
-    inputs: [ { type: "float" }, { type: "bool" }, { type: "vec4" } ],
-    fn: function() {
-        var data = this.getInput( 0 );
-        if( data == undefined )
-            return;
-        console.log( data );
-    }
-} );
-
 
 /**
  * @class Graph
@@ -1809,31 +1672,39 @@ class Graph {
 
         // Nodes
 
-        const mainNode = new GraphNode( GraphEditor.DEFAULT_NODES[ 'Main' ] );
+        const mainNode = GraphEditor.addNode( 'system/Main' );
         mainNode.position = new LX.vec2( 650, 400 );
 
-        const addNode = new GraphNode( GraphEditor.DEFAULT_NODES[ 'Add' ] );
+        const addNode = GraphEditor.addNode( 'math/Add' );
         addNode.position = new LX.vec2( 425, 250 );
 
-        const floatNode = new GraphNode( GraphEditor.DEFAULT_NODES[ 'Float' ] );
+        const floatNode = GraphEditor.addNode( 'inputs/Float' );
         floatNode.position = new LX.vec2( 200, 200 );
 
-        const multNode = new GraphNode( GraphEditor.DEFAULT_NODES[ 'Multiply' ] );
-        multNode.position = new LX.vec2( 200, 400 );
+        const stringNode = GraphEditor.addNode( 'inputs/String' );
+        stringNode.position = new LX.vec2( 400, 50 );
 
-        const keydownNode = new GraphNode( GraphEditor.DEFAULT_NODES[ 'Key Down' ] );
+        const setVarNode = GraphEditor.addNode( 'variables/SetVariable' );
+        setVarNode.position = new LX.vec2( 650, 50 );
+
+        // const multNode = new GraphNode( GraphEditor.DEFAULT_NODES[ 'Multiply' ] );
+        // multNode.position = new LX.vec2( 200, 400 );
+
+        const keydownNode = GraphEditor.addNode( 'events/KeyDown' );
         keydownNode.position = new LX.vec2( 600, 200 );
 
-        const orNode = new GraphNode( GraphEditor.DEFAULT_NODES[ 'Or' ] );
-        orNode.position = new LX.vec2( 435, 435 );
+        // const orNode = new GraphNode( GraphEditor.DEFAULT_NODES[ 'Or' ] );
+        // orNode.position = new LX.vec2( 435, 435 );
 
         this.nodes = [
             mainNode,
             addNode,
             floatNode,
-            multNode,
+            setVarNode,
+            stringNode,
             keydownNode,
-            orNode
+            // multNode,
+            // orNode
         ];
     }
 }
@@ -1846,35 +1717,7 @@ LX.Graph = Graph;
 
 class GraphNode {
 
-    /**
-     * @param {*} options
-     * 
-     */
-
-    constructor( options = {} ) {
-
-        this.name = options.name ?? "Unnamed";
-        this.type = options.type;
-        this.size = options.size;
-        this.position = options.position ?? new LX.vec2( 0, 0 );
-        this.color = options.color;
-        
-        this.inputs = options.inputs ?? [];
-        this.outputs = options.outputs ?? [];
-        this.properties = options.properties ?? [];
-
-        // Make copies to we make sure we don't mess up using same nodes..
-        this.inputs = LX.deepCopy( this.inputs );
-        this.outputs = LX.deepCopy( this.outputs );
-        this.properties = LX.deepCopy( this.properties );
-
-        this.fn = options.fn;
-
-        if( !this.fn )
-        {
-            console.warn( `GraphNode [${ this.name }] does not have a callback attached.` );
-        }
-    }
+    constructor() { }
 
     _hasOutputsConnected() {
 
@@ -1886,10 +1729,25 @@ class GraphNode {
         if( !this._hasOutputsConnected() )
             return;
 
-        if( this.fn )
+        if( this.onExecute )
         {
-            this.fn.bind(this)();
+            this.onExecute();
         }
+    }
+
+    addInput( name, type ) {
+
+        this.inputs.push( { name: name, type: type } );
+    }
+
+    addOutput( name, type ) {
+
+        this.outputs.push( { name: name, type: type } );
+    }
+
+    addProperty( name, type, value ) {
+
+        this.properties.push( { name: name, type: type, value: value } );
     }
 
     getInput( index ) {
@@ -1952,5 +1810,336 @@ class GraphNode {
 }
 
 LX.GraphNode = GraphNode;
+
+/*
+    Math nodes
+*/
+
+function NodeAdd()
+{
+    this.addInput( null, "float" );
+    this.addInput( null, "float" );
+    this.addOutput( null, "float" );
+}
+
+NodeAdd.title = "Add";
+NodeAdd.desc = "Add two floats";
+
+NodeAdd.prototype.onExecute = function()
+{
+    var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
+    if( a == undefined || a.constructor != Number )
+        return;
+    this.setOutput( 0, a + b );
+};
+
+GraphEditor.registerCustomNode( "math/Add", NodeAdd );
+
+// GraphEditor.registerDefaultNode( "Add", "math", {
+//     inputs: [ { type: "float" }, { type: "float" } ],
+//     outputs: [ { type: "float" } ],
+//     fn: function() {
+//         
+//     }
+// } );
+
+// GraphEditor.registerDefaultNode( "Substract", "math", {
+//     inputs: [ { type: "float" }, { type: "float" } ],
+//     outputs: [ { type: "float" } ],
+//     fn: function() {
+//         var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
+//         if( a == undefined || a.constructor != Number )
+//             return;
+//         this.setOutput( 0, a - b );
+//     }
+// } );
+
+// GraphEditor.registerDefaultNode( "Multiply", "math", {
+//     inputs: [ { type: "float" }, { type: "float" } ],
+//     outputs: [ { type: "float" } ],
+//     fn: function() {
+//         var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 1;
+//         if( a == undefined || a.constructor != Number )
+//             return;
+//         this.setOutput( 0, a * b );
+//     }
+// } );
+
+// GraphEditor.registerDefaultNode( "Divide", "math", {
+//     inputs: [ { type: "float" }, { type: "float" } ],
+//     outputs: [ { type: "float" } ],
+//     fn: function() {
+//         var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
+//         if( a == undefined || a.constructor != Number )
+//             return;
+//         this.setOutput( 0, a / b );
+//     }
+// } );
+
+/*
+    Logical operator nodes
+*/
+
+// GraphEditor.registerDefaultNode( "And", "logic", {
+//     inputs: [ { type: "bool" }, { type: "bool" } ],
+//     outputs: [ { type: "bool" } ],
+//     fn: function() {
+//         var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
+//         if( a == undefined || b == undefined )
+//             return;
+//         this.setOutput( 0, !!( a ) && !!( b ) );
+//     }
+// } );
+
+// GraphEditor.registerDefaultNode( "Or", "logic", {
+//     inputs: [ { type: "bool" }, { type: "bool" } ],
+//     outputs: [ { type: "bool" } ],
+//     fn: function() {
+//         var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
+//         if( a == undefined || b == undefined )
+//             return;
+//         this.setOutput( 0, !!( a ) || !!( b ) );
+//     }
+// } );
+
+// GraphEditor.registerDefaultNode( "Equal", "logic", {
+//     inputs: [ { type: "float" }, { type: "float" } ],
+//     outputs: [ { type: "bool" } ]
+// } );
+
+// GraphEditor.registerDefaultNode( "Not Equal", "logic", {
+//     inputs: [ { type: "float" }, { type: "float" } ],
+//     outputs: [ { type: "bool" } ]
+// } );
+
+// GraphEditor.registerDefaultNode( "Less", "logic", {
+//     inputs: [ { type: "float" }, { type: "float" } ],
+//     outputs: [ { type: "bool" } ]
+// } );
+
+// GraphEditor.registerDefaultNode( "Less or Equal", "logic", {
+//     inputs: [ { type: "float" }, { type: "float" } ],
+//     outputs: [ { type: "bool" } ]
+// } );
+
+// GraphEditor.registerDefaultNode( "Greater", "logic", {
+//     inputs: [ { type: "float" }, { type: "float" } ],
+//     outputs: [ { type: "bool" } ]
+// } );
+
+// GraphEditor.registerDefaultNode( "Greater or Equal", "logic", {
+//     inputs: [ { type: "float" }, { type: "float" } ],
+//     outputs: [ { type: "bool" } ]
+// } );
+
+// GraphEditor.registerDefaultNode( "Greater or Equal", "logic", {
+//     inputs: [ { type: "float" }, { type: "float" } ],
+//     outputs: [ { type: "bool" } ]
+// } );
+
+// GraphEditor.registerDefaultNode( "Select", "logic", {
+//     inputs: [ { name: "A", type: "float" }, { name: "B", type: "float" }, { name: "Condition", type: "bool" } ],
+//     outputs: [ { type: "float" } ]
+// } );
+
+// GraphEditor.registerDefaultNode( "Compare", "logic", {
+//     inputs: [ { name: "A", type: "float" }, { name: "B", type: "float" }, { name: "True", type: "float" }, { name: "False", type: "float" } ],
+//     outputs: [ { type: "float" } ]
+// } );
+
+/*
+    Event nodes
+*/
+
+function NodeKeyDown()
+{
+    this.addOutput( null, "bool" );
+    this.addProperty( "Key", "string", " " );
+}
+
+NodeKeyDown.title = "KeyDown";
+NodeKeyDown.desc = "Gets true if key is pressed";
+
+NodeKeyDown.prototype.onExecute = function()
+{
+    this.setOutput( 0, !!this.graph.keys[ this.properties[ 0 ].value ] );
+};
+
+GraphEditor.registerCustomNode( "events/KeyDown", NodeKeyDown );
+
+/*
+    Input nodes
+*/
+
+function NodeString()
+{
+    this.addOutput( null, "string" );
+    this.addProperty( null, "string", "text" );
+}
+
+NodeString.title = "String";
+NodeString.desc = "Gets a String constant";
+
+NodeString.prototype.onExecute = function()
+{
+    this.setOutput( 0, this.properties[ 0 ].value );
+};
+
+GraphEditor.registerCustomNode( "inputs/String", NodeString );
+
+function NodeFloat()
+{
+    this.addOutput( null, "float" );
+    this.addProperty( null, "float", 0.0 );
+}
+
+NodeFloat.title = "Float";
+NodeFloat.desc = "Gets a Float constant";
+
+NodeFloat.prototype.onExecute = function()
+{
+    this.setOutput( 0, this.properties[ 0 ].value );
+};
+
+GraphEditor.registerCustomNode( "inputs/Float", NodeFloat );
+
+function NodeVector2()
+{
+    this.addOutput( "Value", "vec2" );
+    this.addProperty( "Value", "vec2", [ 0, 0 ] );
+}
+
+NodeVector2.title = "Vector2";
+NodeVector2.desc = "Gets a Vector2 constant";
+
+NodeVector2.prototype.onExecute = function()
+{
+    this.setOutput( 0, this.properties[ 0 ].value );
+};
+
+GraphEditor.registerCustomNode( "inputs/Vector2", NodeVector2 );
+
+function NodeVector3()
+{
+    this.addOutput( "Value", "vec3" );
+    this.addProperty( "Value", "vec3", [ 0, 0, 0 ] );
+}
+
+NodeVector3.title = "Vector3";
+NodeVector3.desc = "Gets a Vector3 constant";
+
+NodeVector3.prototype.onExecute = function()
+{
+    this.setOutput( 0, this.properties[ 0 ].value );
+};
+
+GraphEditor.registerCustomNode( "inputs/Vector3", NodeVector3 );
+
+function NodeVector4()
+{
+    this.addOutput( "Value", "vec4" );
+    this.addProperty( "Value", "vec4", [ 0, 0, 0, 0 ] );
+}
+
+NodeVector4.title = "Vector4";
+NodeVector4.desc = "Gets a Vector4 constant";
+
+NodeVector4.prototype.onExecute = function()
+{
+    this.setOutput( 0, this.properties[ 0 ].value );
+};
+
+GraphEditor.registerCustomNode( "inputs/Vector4", NodeVector4 );
+
+/*
+    Variable nodes
+*/
+
+function NodeSetVariable()
+{
+    this.addInput( "Name", "string" );
+    this.addInput( "Value", "any" );
+    this.addOutput( null, "any" );
+}
+
+NodeSetVariable.title = "Set Variable";
+NodeSetVariable.desc = "Sets a value for a graph variable";
+
+NodeSetVariable.prototype.onExecute = function()
+{
+    var varName = this.getInput( 0 );
+    if( varName == undefined )
+        return;
+    var varValue = this.getInput( 1 );
+    if( varValue == undefined )
+        return;
+    this.graph.setVariable( varName, varValue );
+    this.setOutput( 0, varValue );
+};
+
+GraphEditor.registerCustomNode( "variables/SetVariable", NodeSetVariable );
+
+function NodeGetVariable()
+{
+    this.addInput( "Name", "string" );
+    this.addOutput( null, "any" );
+}
+
+NodeGetVariable.title = "Get Variable";
+NodeGetVariable.desc = "Gets a graph variable";
+
+NodeGetVariable.prototype.onExecute = function()
+{
+    var varName = this.getInput( 0 );
+    if( varName == undefined )
+        return;
+    var data = this.graph.getVariable( varName );
+    if( data != undefined )
+        this.setOutput( 0, data );
+};
+
+GraphEditor.registerCustomNode( "variables/GetVariable", NodeGetVariable );
+
+/*
+    System nodes
+*/
+
+function NodeConsoleLog()
+{
+    this.addInput( "a", "any" );
+}
+
+NodeConsoleLog.title = "Console Log";
+NodeConsoleLog.desc = "Console logs a value";
+
+NodeConsoleLog.prototype.onExecute = function()
+{
+    var data = this.getInput( 0 );
+    if( data == undefined )
+        return;
+    console.log( data );
+};
+
+GraphEditor.registerCustomNode( "system/ConsoleLog", NodeConsoleLog );
+
+function NodeMain()
+{
+    this.addInput( "a", "float" );
+    this.addInput( "b", "bool" );
+    this.addInput( "Color", "vec4" );
+}
+
+NodeMain.title = "Main";
+NodeMain.desc = "Main node";
+
+NodeMain.prototype.onExecute = function()
+{
+    var data = this.getInput( 1 );
+    if( data == undefined )
+        return;
+    console.log( data );
+};
+
+GraphEditor.registerCustomNode( "system/Main", NodeMain );
 
 export { GraphEditor, Graph, GraphNode };
