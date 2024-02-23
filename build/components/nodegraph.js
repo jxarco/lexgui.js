@@ -92,6 +92,7 @@ class GraphEditor {
         };
 
         this.root.addEventListener( 'keydown', this._processKey.bind( this ), true );
+        this.root.addEventListener( 'keyup', this._processKeyUp.bind( this ), true );
         this.root.addEventListener( 'mousedown', this._processMouse.bind( this ) );
         this.root.addEventListener( 'mouseup', this._processMouse.bind( this ) );
         this.root.addEventListener( 'mousemove', this._processMouse.bind( this ) );
@@ -106,6 +107,8 @@ class GraphEditor {
 
         this._undoSteps = [ ];
         this._redoSteps = [ ];
+
+        this.keys = { };
 
         // Nodes and connections
 
@@ -653,9 +656,14 @@ class GraphEditor {
         this.isFocused = active;
     }
 
-    _processKey( e ) {
+    _processKey( e, keyUp ) {
 
         var key = e.key ?? e.detail.key;
+
+        if( keyUp )
+        {
+            delete this.keys[ key ];
+        }
         
         switch( key ) {
             case 'Escape':
@@ -681,6 +689,15 @@ class GraphEditor {
                 }
                 break;
         }
+
+        this.keys[ key ] = true;
+    }
+
+    _processKeyUp( e ) {
+
+        var key = e.key ?? e.detail.key;
+
+        delete this.keys[ key ];
     }
 
     _processMouse( e ) {
@@ -931,27 +948,38 @@ class GraphEditor {
         if( !main )
             return;
 
-        const visitedNodes = [ ];
+        const visitedNodes = {  };
         
         this._executionNodes = [ ];
 
-        // MAIN
-
         const mainId = this.main.dataset[ 'id' ];
+
+        const addNode = ( id ) => {
+
+            if( visitedNodes[ id ] )
+                return;
+
+            visitedNodes[ id ] = true;
+
+            for( let linkId in this.links )
+            {
+                const idx = linkId.indexOf( '@' + id );
+
+                if( idx < 0 )
+                    continue;
+
+                const preNodeId = linkId.substring( 0, idx );
+
+                this._executionNodes.push( preNodeId );
+
+                addNode( preNodeId );
+            }
+
+        };
 
         this._executionNodes.push( mainId );
 
-        for( let linkId in this.links )
-        {
-            const idx = linkId.indexOf( '@' + mainId );
-
-            if( idx < 0 )
-                continue;
-
-            const preNodeId = linkId.substring( 0, idx );
-
-            this._executionNodes.push( preNodeId );
-        }
+        addNode( mainId );
 
         for( var i = this._executionNodes.length - 1; i >= 0; --i )
         {
@@ -1525,22 +1553,46 @@ LX.GraphEditor = GraphEditor;
 
 GraphEditor.registerDefaultNode( "Add", "math", {
     inputs: [ { type: "float" }, { type: "float" } ],
-    outputs: [ { type: "float" } ]
+    outputs: [ { type: "float" } ],
+    fn: function() {
+        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
+        if( a == undefined || a.constructor != Number )
+            return;
+        this.setOutput( 0, a + b );
+    }
 } );
 
 GraphEditor.registerDefaultNode( "Substract", "math", {
     inputs: [ { type: "float" }, { type: "float" } ],
-    outputs: [ { type: "float" } ]
+    outputs: [ { type: "float" } ],
+    fn: function() {
+        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
+        if( a == undefined || a.constructor != Number )
+            return;
+        this.setOutput( 0, a - b );
+    }
 } );
 
 GraphEditor.registerDefaultNode( "Multiply", "math", {
     inputs: [ { type: "float" }, { type: "float" } ],
-    outputs: [ { type: "float" } ]
+    outputs: [ { type: "float" } ],
+    fn: function() {
+        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 1;
+        if( a == undefined || a.constructor != Number )
+            return;
+        this.setOutput( 0, a * b );
+    }
 } );
 
 GraphEditor.registerDefaultNode( "Divide", "math", {
     inputs: [ { type: "float" }, { type: "float" } ],
-    outputs: [ { type: "float" } ]
+    outputs: [ { type: "float" } ],
+    fn: function() {
+        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
+        if( a == undefined || a.constructor != Number )
+            return;
+        this.setOutput( 0, a / b );
+    }
 } );
 
 /*
@@ -1549,12 +1601,24 @@ GraphEditor.registerDefaultNode( "Divide", "math", {
 
 GraphEditor.registerDefaultNode( "And", "logic", {
     inputs: [ { type: "bool" }, { type: "bool" } ],
-    outputs: [ { type: "bool" } ]
+    outputs: [ { type: "bool" } ],
+    fn: function() {
+        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
+        if( a == undefined || b == undefined )
+            return;
+        this.setOutput( 0, !!( a ) && !!( b ) );
+    }
 } );
 
 GraphEditor.registerDefaultNode( "Or", "logic", {
     inputs: [ { type: "bool" }, { type: "bool" } ],
-    outputs: [ { type: "bool" } ]
+    outputs: [ { type: "bool" } ],
+    fn: function() {
+        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
+        if( a == undefined || b == undefined )
+            return;
+        this.setOutput( 0, !!( a ) || !!( b ) );
+    }
 } );
 
 GraphEditor.registerDefaultNode( "Equal", "logic", {
@@ -1607,7 +1671,8 @@ GraphEditor.registerDefaultNode( "Compare", "logic", {
 */
 
 GraphEditor.registerDefaultNode( "Key Down", "events", {
-    outputs: [ { type: "bool" } ]
+    outputs: [ { type: "bool" } ],
+    fn: function() { this.setOutput( 0, !!this.graph.keys[ ' ' ] ); }
 } );
 
 /*
@@ -1656,14 +1721,11 @@ GraphEditor.registerDefaultNode( "Console Log", "system", {
 } );
 
 GraphEditor.registerDefaultNode( "Main", "system", {
-    inputs: [ { type: "vec4" } ],
+    inputs: [ { type: "bool" }, { type: "float" }, { type: "vec4" } ],
     fn: function() {
-        
         var data = this.getInput( 0 );
-
-        if( !data )
+        if( data == undefined )
             return;
-
         console.log( data );
     }
 } );
@@ -1685,108 +1747,24 @@ class Graph {
         // Nodes
 
         this.nodes = [
-            new GraphNode({
-                name: "Node 1",
+            new GraphNode( Object.assign( GraphEditor.DEFAULT_NODES[ 'Key Down' ], {
                 position: new LX.vec2( 600, 200 ),
-                inputs: [
-                    {
-                        name: "Speed",
-                        type: "float"
-                    },
-                    {
-                        name: "Offset",
-                        type: "vec2"
-                    }
-                ]
-            }),
+            } ) ),
             new GraphNode( Object.assign( GraphEditor.DEFAULT_NODES[ 'Main' ], {
                 position: new LX.vec2( 650, 400 ),
             } ) ),
-            new GraphNode({
-                name: "Node 2",
-                size: new LX.vec2( 120, 100 ),
+            new GraphNode( Object.assign( GraphEditor.DEFAULT_NODES[ 'Float' ], {
                 position: new LX.vec2( 200, 200 ),
-                color: "#c7284c",
-                inputs: [],
-                outputs: [
-                    {
-                        name: "Speed",
-                        type: "float"
-                    },
-                    {
-                        name: "Offset",
-                        type: "vec4"
-                    },
-                    {
-                        name: "Loop",
-                        type: "bool"
-                    }
-                ]
-            }),
-            new GraphNode({
-                name: "Node 3",
+            } ) ),
+            new GraphNode( Object.assign( GraphEditor.DEFAULT_NODES[ 'Multiply' ], {
                 position: new LX.vec2( 200, 400 ),
-                inputs: [
-                    {
-                        name: "Speed",
-                        type: "float"
-                    },
-                    {
-                        name: "Offset",
-                        type: "vec2"
-                    }
-                ],
-                outputs: [
-                    {
-                        name: "Offset",
-                        type: "vec3"
-                    },
-                    {
-                        name: "Loop",
-                        type: "bool"
-                    },
-                    {
-                        name: "Speed",
-                        type: "float"
-                    }
-                ]
-            }),
-            new GraphNode({
-                name: "Add",
-                type: "math",
+            } ) ),
+            new GraphNode( Object.assign( GraphEditor.DEFAULT_NODES[ 'Add' ], {
                 position: new LX.vec2( 375, 250 ),
-                inputs: [
-                    {
-                        type: "float"
-                    },
-                    {
-                        type: "float"
-                    }
-                ],
-                outputs: [
-                    {
-                        type: "float"
-                    }
-                ]
-            }),
-            new GraphNode({
-                name: "Or",
-                type: "logic",
+            } ) ),
+            new GraphNode( Object.assign( GraphEditor.DEFAULT_NODES[ 'Or' ], {
                 position: new LX.vec2( 435, 435 ),
-                inputs: [
-                    {
-                        type: "bool"
-                    },
-                    {
-                        type: "bool"
-                    }
-                ],
-                outputs: [
-                    {
-                        type: "bool"
-                    }
-                ]
-            })
+            } ) )
         ];
     }
 }
@@ -1856,7 +1834,6 @@ class GraphNode {
                 continue;
 
             const nodeLinks = this.graph.links[ linkId ];
-            console.assert( nodeLinks.length <= 1 );
 
             for ( var link of nodeLinks )
             {
