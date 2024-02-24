@@ -3456,103 +3456,109 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
         addText( name, value, callback, options = {} ) {
 
-            let widget = this.create_widget(name, Widget.TEXT, options);
+            let widget = this.create_widget( name, Widget.TEXT, options );
             widget.onGetValue = () => {
                 return wValue.value;
             };
-            widget.onSetValue = (new_value) => {
-                this.disabled ? wValue.innerText = new_value : wValue.value = new_value;
-                Panel._dispatch_event(wValue, "focusout");
+            widget.onSetValue = newValue => {
+                this.disabled ? wValue.innerText = newValue : wValue.value = newValue;
+                Panel._dispatch_event( wValue, "focusout" );
             };
-
+    
             let element = widget.domEl;
-
+    
             // Add reset functionality
-            if(widget.name && !(options.skipReset ?? false)) {
-                Panel._add_reset_property(element.domName, function() {
+            if( widget.name && !( options.skipReset ?? false ) ) {
+                Panel._add_reset_property( element.domName, function() {
                     wValue.value = wValue.iValue;
                     this.style.display = "none";
-                    Panel._dispatch_event(wValue, "focusout");
-                });
+                    Panel._dispatch_event( wValue, "focusout" );
+                } );
             }
             
             // Add widget value
-
-            let container = document.createElement('div');
-            container.className = "lextext" + (options.warning ? " lexwarning" : "");
+    
+            let container = document.createElement( 'div' );
+            container.className = "lextext" + ( options.warning ? " lexwarning" : "" );
             container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
             container.style.display = "flex";
-
-            this.disabled = (options.disabled || options.warning) ?? ( options.url ? true : false );
+    
+            this.disabled = ( options.disabled || options.warning ) ?? ( options.url ? true : false );
             let wValue = null;
-
+    
             if( !this.disabled )
             {
-                wValue = document.createElement('input');
+                wValue = document.createElement( 'input' );
                 wValue.type = options.type || "";
                 wValue.value = wValue.iValue = value || "";
                 wValue.style.width = "100%";
                 wValue.style.textAlign = options.float ?? "";
     
-                if(options.placeholder) wValue.setAttribute("placeholder", options.placeholder);
+                if( options.placeholder )
+                    wValue.setAttribute( "placeholder", options.placeholder );
     
-                var resolve = (function(val, event) {
-                    let btn = element.querySelector(".lexwidgetname .lexicon");
-                    if(btn) btn.style.display = (val != wValue.iValue ? "block" : "none");
-                    this._trigger( new IEvent(name, val, event), callback );
-                }).bind(this);
+                var resolve = ( function( val, event ) {
+                    let btn = element.querySelector( ".lexwidgetname .lexicon" );
+                    if( btn ) btn.style.display = ( val != wValue.iValue ? "block" : "none" );
+                    this._trigger( new IEvent( name, val, event ), callback );
+                }).bind( this );
     
                 const trigger = options.trigger ?? 'default';
     
-                if(trigger == 'default')
+                if( trigger == 'default' )
                 {
-                    wValue.addEventListener("keyup", function(e){
+                    wValue.addEventListener( "keyup", function( e ){
                         if(e.key == 'Enter')
-                            resolve(e.target.value, e);
+                            resolve( e.target.value, e );
                     });
-                    wValue.addEventListener("focusout", function(e){
-                        resolve(e.target.value, e);
+                    wValue.addEventListener( "focusout", function( e ){
+                        resolve( e.target.value, e );
                     });
                 }
-                else if(trigger == 'input')
+                else if( trigger == 'input' )
                 {
-                    wValue.addEventListener("input", function(e){
-                        resolve(e.target.value, e);
+                    wValue.addEventListener("input", function( e ){
+                        resolve( e.target.value, e );
                     });
                 }
     
-                if(options.icon)
+                wValue.addEventListener( "mousedown", function( e ){
+                    e.stopImmediatePropagation();
+                    e.stopPropagation();
+                });
+    
+                if( options.icon )
                 {
-                    let icon = document.createElement('a');
+                    let icon = document.createElement( 'a' );
                     icon.className = "inputicon " + options.icon;
-                    container.appendChild(icon);
+                    container.appendChild( icon );
                 }
-
+    
             } else
             {
-                wValue = document.createElement(options.url ? 'a' : 'div');
-                if(options.url)
+                wValue = document.createElement( options.url ? 'a' : 'div' );
+                if( options.url )
                 {
                     wValue.href = options.url;
                     wValue.target = "_blank";
                 }
                 const icon = options.warning ? '<i class="fa-solid fa-triangle-exclamation"></i>' : '';
-                wValue.innerHTML = (icon + value) || "";
+                wValue.innerHTML = ( icon + value ) || "";
                 wValue.style.width = "100%";
                 wValue.style.textAlign = options.float ?? "";
             }
-
-            Object.assign(wValue.style, options.style ?? {});
-
-            container.appendChild(wValue);
-            element.appendChild(container);
+    
+            Object.assign( wValue.style, options.style ?? {} );
+    
+            container.appendChild( wValue );
+            element.appendChild( container );
             
             // Remove branch padding and margins
-            if(!widget.name) {
+            if( !widget.name ) {
                 element.className += " noname";
                 container.style.width = "100%";
             }
-
+    
             return widget;
         }
 
@@ -5861,6 +5867,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         }
 
         destroy() {
+            
             this.root.remove();
         }
 
@@ -5874,6 +5881,14 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             
             this.root.style.left = x + "px";
             this.root.style.top = y + "px";
+        }
+
+        setTitle( title ) {
+
+            const titleDOM = this.root.querySelector( '.lexdialogtitle' );
+            if( !titleDOM )
+                return;
+            titleDOM.innerText = title;
         }
     }
 
