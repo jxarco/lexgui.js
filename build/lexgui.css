@@ -638,8 +638,18 @@ body.noevents * {
   transition: border-color 0.1s linear;
 }
 
-.lexwidget .lextext, .lexwidget .lexnumber {
-  padding-left: 4px;
+.lexwidget .lextext {
+  border-radius: 6px;
+  position: relative;
+  transition: 0.1s linear;
+}
+
+.lexwidget .lextext:not(:has(div)) {
+  background-color: var(--global-button-color);
+}
+
+.lexwidget .lextext:not(:has(div)):hover {
+  background-color: var(--global-button-color-hovered);
 }
 
 .lexwidget .lextext input {
@@ -648,6 +658,8 @@ body.noevents * {
 
 .lexwidget .lextext div {
   color: #b2b2b5d6;
+  padding: 2px;
+  padding-left: 6px;
 }
 
 .lexwidget .lextext.lexwarning div {
@@ -661,13 +673,13 @@ body.noevents * {
 }
 
 .lexwidget .lextext input:focus {
-  border-color: var(--global-selected);
+  border: 2px solid var(--global-selected);
 }
 
 .lexwidget .inputicon {
-  padding: 4px;
-  font-size: 11px;
-  margin-top: 2px;
+  padding: 6px;
+  font-size: 10px;
+  margin-top: 4px;
 }
 
 .lexwidget textarea {
@@ -3321,7 +3333,11 @@ pre .line-gutter {
   min-width: 96px;
   min-height: 32px;
   border-radius: 10px;
-  background-color: rgba(var(--graphnode-background), 0.75);
+  
+  /* background-color: rgba(var(--graphnode-background), 0.75); */
+  background: linear-gradient(15deg, #161616da 10%, #080808da);
+  background-color: unset; background-origin: border-box;
+
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   border: 3px solid var(--global-color-transparent);
@@ -3330,16 +3346,30 @@ pre .line-gutter {
 }
 
 .lexgraphnode.math {
-  background: linear-gradient(25deg, #049cf4da 25%, #00ffccda);
-  background-color: unset;
-  background-origin: border-box;
+  background: linear-gradient(15deg, #0687d1da 10%, #00ffccda);
+  background-color: unset; background-origin: border-box;
 }
 
 .lexgraphnode.logic {
-  background: linear-gradient(25deg, #FB4D3Dda 25%, #A74482da);
-  background-color: unset;
-  background-origin: border-box;
+  background: linear-gradient(15deg, #FB4D3Dda 10%, #A74482da);
+  background-color: unset; background-origin: border-box;
 }
+
+.lexgraphnode.inputs {
+  background: linear-gradient(15deg, #84e100da 10%, #79a095da);
+  background-color: unset; background-origin: border-box;
+}
+
+.lexgraphnode.variables {
+  background: linear-gradient(15deg, #f1e643da 10%, #e78b8bda);
+  background-color: unset; background-origin: border-box;
+}
+
+.lexgraphnode.events {
+  background: linear-gradient(15deg, #ec49d7da 10%, #8dc0b8da);
+  background-color: unset; background-origin: border-box;
+}
+
 
 .lexgraphnode.selected {
   border: 3px solid var(--global-selected-dark);
@@ -3352,7 +3382,7 @@ pre .line-gutter {
   font-weight: 700;
   font-size: 13px;
   color: #d9d9e3;
-  text-shadow: 0px 0px 2px #222222af;
+  text-shadow: 0px 0px 2px #1b1b1bdc;
   border-bottom: 1px solid #ffffff46;
   margin-bottom: 2px;
   pointer-events: none;
@@ -3422,11 +3452,13 @@ pre .line-gutter {
   pointer-events: none;
 }
 
-.lexgraphnode .lexgraphnodeio .io__type.int { background-color: #63ee7a; }
-.lexgraphnode .lexgraphnodeio .io__type.vec2 { background-color: #63a9ee; }
-.lexgraphnode .lexgraphnodeio .io__type.vec3 { background-color: #e75d4e; }
+/* .lexgraphnode .lexgraphnodeio .io__type.int,
+.lexgraphnode .lexgraphnodeio .io__type.float { background-color: #94daa0; }
+.lexgraphnode .lexgraphnodeio .io__type.string { background-color: #fa635e; }
+.lexgraphnode .lexgraphnodeio .io__type.bool { background-color: #eb83c5; } */
+.lexgraphnode .lexgraphnodeio .io__type.vec2,
+.lexgraphnode .lexgraphnodeio .io__type.vec3,
 .lexgraphnode .lexgraphnodeio .io__type.vec4 { background-color: #9d56d8; }
-.lexgraphnode .lexgraphnodeio .io__type.bool { background-color: #eb83c5; }
 
 
 .lexgraphnode .lexgraphnodeio .io__name {
@@ -3439,7 +3471,7 @@ pre .line-gutter {
 }
 
 .lexgraphnode .lexgraphnodeio .io__type:hover {
-  filter: brightness(1.1);
+  filter: brightness(1.2);
 }
 
 .lexgraphnode .lexgraphnodeio[data-active] .io__type:hover {
@@ -3454,6 +3486,6 @@ pre .line-gutter {
   content: 'X';
 }
 
-.lexgraphnode .lexgraphnodeio .io__type.active {
-  background-color: var(--global-text-primary);
+.lexgraphnode .lexgraphnodeio[data-active] .io__type {
+  filter: brightness(1.4);
 }

@@ -90,7 +90,7 @@ class GraphEditor {
             
         };
 
-        this.root.addEventListener( 'keydown', this._processKey.bind( this ), true );
+        this.root.addEventListener( 'keydown', this._processKeyDown.bind( this ), true );
         this.root.addEventListener( 'keyup', this._processKeyUp.bind( this ), true );
         this.root.addEventListener( 'mousedown', this._processMouse.bind( this ) );
         this.root.addEventListener( 'mouseup', this._processMouse.bind( this ) );
@@ -102,7 +102,7 @@ class GraphEditor {
         this.root.addEventListener( 'focus', this._processFocus.bind( this, true) );
         this.root.addEventListener( 'focusout', this._processFocus.bind( this, false ) );
 
-        this.propertiesDialog = new LX.Dialog( "Properties", null, { position: [ "12px", "12px" ] });
+        this.propertiesDialog = new LX.PocketDialog( "Properties", null, { size: [ "300px", null ], position: [ "12px", "12px" ], float: "left" });
 
         // Move to root..
         this.root.appendChild( this.propertiesDialog.root );
@@ -153,8 +153,6 @@ class GraphEditor {
         this.root.appendChild( this._domNodes );
 
         window.ge = this;
-
-        this.start();
     }
 
     static getInstances() {
@@ -174,29 +172,13 @@ class GraphEditor {
         if ( !baseClass.prototype ) {
             throw "Cannot register a simple object, it must be a class with a prototype!";
         }
-        baseClass.type = type;
-
-        const className = baseClass.name;
-
-        // Get category from path
+        
+        // Get info from path
         const pos = type.lastIndexOf( "/" );
+
         baseClass.category = type.substring( 0, pos );
-
-        if ( !baseClass.title ) {
-            baseClass.title = className;
-        }
-
-        // Extend GraphNode class
-        const ownPropertyNames = Object.getOwnPropertyNames( GraphNode.prototype );
-        for ( var k of ownPropertyNames ) {
-            if ( !baseClass.prototype[ k ] ) {
-                baseClass.prototype[ k ] = GraphNode.prototype[ k ];
-            }
-        }
-
-        baseClass.prototype[ 'inputs' ] = [ ];
-        baseClass.prototype[ 'outputs' ] = [ ];
-        baseClass.prototype[ 'properties' ] = [ ];
+        baseClass.title = type.substring( pos + 1 );
+        baseClass.type = type;
 
         if( !baseClass.prototype.onExecute )
         {
@@ -242,6 +224,9 @@ class GraphEditor {
 
         const node = new baseClass( title );
 
+        if( node.onCreate )
+            node.onCreate();
+
         node.type = type;
         node.title = title;
         node.position = new LX.vec2( 0, 0 );
@@ -282,6 +267,10 @@ class GraphEditor {
         {
             this._createNodeDOM( node );
         }
+
+        // TODO: REMOVE THIS (DEBUG)
+        this.start();
+        // 
     }
 
     /**
@@ -306,12 +295,15 @@ class GraphEditor {
 
     propagateEventToAllNodes( eventName, params ) {
 
-        for ( let node of this.nodes )
+        if( !this.graph )
+            return;
+
+        for ( let node of this.graph.nodes )
         {
-            if( !node.data[ eventName ] )
+            if( !node[ eventName ] )
                 continue;
 
-            node.data[ eventName ]( params );
+            node[ eventName ].apply( this, params );
         }
     };
 
@@ -345,8 +337,8 @@ class GraphEditor {
         // Get color from type if color if not manually specified
         if( node.type && GraphEditor.NODE_TYPES[ node.type ] )
         {
-            color = GraphEditor.NODE_TYPES[ node.type ].color;
-            nodeContainer.classList.add( node.type ); // Support adding color from css..
+            const category = node.constructor.category;
+            nodeContainer.classList.add( category );
         }
 
         // Update with manual color
@@ -392,24 +384,6 @@ class GraphEditor {
             // Only for left click..
             if( e.button != LX.MOUSE_LEFT_CLICK )
                 return;
-
-            var panel = this.propertiesDialog.panel;
-            panel.clear();
-
-            for( let p of node.properties )
-            {
-                switch( p.type )
-                {
-                case 'float':
-                case 'int':
-                    panel.addNumber( p.name, p.value, (v) => { p.value = v } );
-                    break;
-                case 'string':
-                    panel.addText( p.name, p.value, (v) => { p.value = v } );
-                break;
-                }
-            }
-
         } );
 
         // Title header
@@ -640,12 +614,47 @@ class GraphEditor {
 
         dom.classList.add( 'selected' );
 
-        this.selectedNodes.push( dom.dataset[ 'id' ] );
+        const id = dom.dataset[ 'id' ];
+
+        this.selectedNodes.push( id );
 
         if( forceOrder )
         {
             // Reorder nodes to draw on top..
             this._domNodes.appendChild( dom );
+        }
+
+        const node = this.nodes[ id ].data;
+
+        this.propertiesDialog.setTitle( node.title );
+
+        var panel = this.propertiesDialog.panel;
+        panel.clear();
+
+        // Add description
+        if( node.constructor.description )
+        {
+            panel.addText( null, node.constructor.description, null, { disabled: true } );
+        }
+
+        // Allow change name
+        panel.addText( 'Name', node.title, (v) => { 
+            node.title = v;
+            dom.querySelector( '.lexgraphnodeheader' ).innerText = v;
+        } );
+
+        for( let p of node.properties )
+        {
+            switch( p.type )
+            {
+            case 'float':
+            case 'int':
+                panel.addNumber( p.name, p.value, (v) => { p.value = v } );
+                break;
+            case 'string':
+                panel.addText( p.name, p.value, (v) => { p.value = v } );
+            break;
+            }
         }
     }
 
@@ -738,6 +747,10 @@ class GraphEditor {
             const targets = io.links.filter( (v, i) => { targetIndex = i; return v !== undefined; } )[ 0 ];
             const targetId = targets[ 0 ];
 
+            // It has been deleted..
+            if( !targetId )
+                return;
+
             var links = this._getLinks( targetId, nodeId );
 
             var linkIdx = links.findIndex( i => ( i.inputIdx == srcIndex && i.outputIdx == targetIndex ) );
@@ -810,14 +823,13 @@ class GraphEditor {
         this.isFocused = active;
     }
 
-    _processKey( e, keyUp ) {
+    _processKeyDown( e ) {
+
+        // Prevent processing keys on inputs and others
+        if( document.activeElement != this.root )
+            return;
 
         var key = e.key ?? e.detail.key;
-
-        if( keyUp )
-        {
-            delete this.keys[ key ];
-        }
         
         switch( key ) {
             case 'Escape':
@@ -848,6 +860,10 @@ class GraphEditor {
     }
 
     _processKeyUp( e ) {
+
+        // Prevent processing keys on inputs and others
+        if( document.activeElement != this.root )
+            return;
 
         var key = e.key ?? e.detail.key;
 
@@ -1027,11 +1043,30 @@ class GraphEditor {
 
     _processContextMenu( e ) {
         
-        LX.addContextMenu( "ADD NODE debug", e, m => {
+        LX.addContextMenu( "ADD NODE", e, m => {
             
             for( let type in GraphEditor.NODE_TYPES )
             {
-                m.add( type, () => { } );
+                m.add( type, () => {
+
+                    const newNode = GraphEditor.addNode( type );
+
+                    const dom = this._createNodeDOM( newNode );
+
+                    if( e )
+                    {
+                        const rect = this.root.getBoundingClientRect();
+            
+                        let position = new LX.vec2( e.clientX - rect.x, e.clientY - rect.y );
+            
+                        position = this._getPatternPosition( position );
+            
+                        this._translateNode( dom, position.x , position.y );
+                    }
+
+                    this.graph.nodes.push( newNode )
+
+                } );
             }
         });
     }
@@ -1044,6 +1079,8 @@ class GraphEditor {
 
         this.mustStop = false;
 
+        this.propagateEventToAllNodes( 'onStart' );
+
         requestAnimationFrame( this._frame.bind(this) );
     }
 
@@ -1055,6 +1092,8 @@ class GraphEditor {
 
         this.mustStop = true;
         this.state = GraphEditor.STOPPED;
+
+        this.propagateEventToAllNodes( 'onStop' );
     }
 
     /**
@@ -1427,6 +1466,10 @@ class GraphEditor {
             const targets = input.links.filter( v => v !== undefined )[ 0 ];
             const targetNodeId = targets[ 0 ];
 
+            // It has been deleted..
+            if( !targetNodeId )
+                continue;
+
             const ioIndex = parseInt( input.dataset[ 'index' ] );
 
             var links = this._getLinks( targetNodeId, nodeId );
@@ -1693,8 +1736,8 @@ class Graph {
         const keydownNode = GraphEditor.addNode( 'events/KeyDown' );
         keydownNode.position = new LX.vec2( 600, 200 );
 
-        // const orNode = new GraphNode( GraphEditor.DEFAULT_NODES[ 'Or' ] );
-        // orNode.position = new LX.vec2( 435, 435 );
+        const orNode = GraphEditor.addNode( 'logic/Or' );
+        orNode.position = new LX.vec2( 435, 435 );
 
         this.nodes = [
             mainNode,
@@ -1703,8 +1746,8 @@ class Graph {
             setVarNode,
             stringNode,
             keydownNode,
-            // multNode,
-            // orNode
+            orNode,
+            // multNode
         ];
     }
 }
@@ -1717,7 +1760,12 @@ LX.Graph = Graph;
 
 class GraphNode {
 
-    constructor() { }
+    constructor() { 
+
+        this.inputs     = [ ];
+        this.outputs    = [ ];
+        this.properties = [ ];
+    }
 
     _hasOutputsConnected() {
 
@@ -1811,96 +1859,176 @@ class GraphNode {
 
 LX.GraphNode = GraphNode;
 
+/* 
+    ************ PREDEFINED NODES ************
+
+    Nodes can override the following methods:
+
+        - onCreate: Add inputs, outputs and properties
+        - onStart: Callback on graph starts
+        - onStop: Callback on graph stops
+        - onExecute: Callback for node execution
+*/
+
+
 /*
     Math nodes
 */
 
-function NodeAdd()
+class NodeAdd extends GraphNode
 {
-    this.addInput( null, "float" );
-    this.addInput( null, "float" );
-    this.addOutput( null, "float" );
+    onCreate() {
+        this.addInput( null, "float" );
+        this.addInput( null, "float" );
+        this.addOutput( null, "float" );
+        this.addProperty( "A", "float", 0 );
+        this.addProperty( "B", "float", 0 );
+    }
+    
+    onExecute() {
+        var a = this.getInput( 0 ) ?? this.properties[ 0 ].value;
+        var b = this.getInput( 1 ) ?? this.properties[ 1 ].value;
+        if( a == undefined || a.constructor != Number )
+            return;
+        this.setOutput( 0, a + b );
+    }
 }
 
-NodeAdd.title = "Add";
-NodeAdd.desc = "Add two floats";
-
-NodeAdd.prototype.onExecute = function()
-{
-    var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
-    if( a == undefined || a.constructor != Number )
-        return;
-    this.setOutput( 0, a + b );
-};
+NodeAdd.description = "Addition of 2 values (A+B)."
 
 GraphEditor.registerCustomNode( "math/Add", NodeAdd );
 
-// GraphEditor.registerDefaultNode( "Add", "math", {
-//     inputs: [ { type: "float" }, { type: "float" } ],
-//     outputs: [ { type: "float" } ],
-//     fn: function() {
-//         
-//     }
-// } );
+class NodeSubstract extends GraphNode
+{
+    onCreate() {
+        this.addInput( null, "float" );
+        this.addInput( null, "float" );
+        this.addOutput( null, "float" );
+    }
+    
+    onExecute() {
+        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
+        if( a == undefined || a.constructor != Number )
+            return;
+        this.setOutput( 0, a - b );
+    }
+}
 
-// GraphEditor.registerDefaultNode( "Substract", "math", {
-//     inputs: [ { type: "float" }, { type: "float" } ],
-//     outputs: [ { type: "float" } ],
-//     fn: function() {
-//         var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
-//         if( a == undefined || a.constructor != Number )
-//             return;
-//         this.setOutput( 0, a - b );
-//     }
-// } );
+GraphEditor.registerCustomNode( "math/Substract", NodeSubstract );
 
-// GraphEditor.registerDefaultNode( "Multiply", "math", {
-//     inputs: [ { type: "float" }, { type: "float" } ],
-//     outputs: [ { type: "float" } ],
-//     fn: function() {
-//         var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 1;
-//         if( a == undefined || a.constructor != Number )
-//             return;
-//         this.setOutput( 0, a * b );
-//     }
-// } );
+class NodeMultiply extends GraphNode
+{
+    onCreate() {
+        this.addInput( null, "float" );
+        this.addInput( null, "float" );
+        this.addOutput( null, "float" );
+    }
+    
+    onExecute() {
+        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 1;
+        if( a == undefined || a.constructor != Number )
+            return;
+        this.setOutput( 0, a * b );
+    }
+}
 
-// GraphEditor.registerDefaultNode( "Divide", "math", {
-//     inputs: [ { type: "float" }, { type: "float" } ],
-//     outputs: [ { type: "float" } ],
-//     fn: function() {
-//         var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
-//         if( a == undefined || a.constructor != Number )
-//             return;
-//         this.setOutput( 0, a / b );
-//     }
-// } );
+GraphEditor.registerCustomNode( "math/Multiply", NodeMultiply );
+
+class NodeDivide extends GraphNode
+{
+    onCreate() {
+        this.addInput( null, "float" );
+        this.addInput( null, "float" );
+        this.addOutput( null, "float" );
+    }
+    
+    onExecute() {
+        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 1;
+        if( a == undefined || a.constructor != Number )
+            return;
+        this.setOutput( 0, a / b );
+    }
+}
+
+GraphEditor.registerCustomNode( "math/Divide", NodeDivide );
+
+class NodeSqrt extends GraphNode
+{
+    onCreate() {
+        this.addInput( null, "float" );
+        this.addOutput( null, "float" );
+    }
+    
+    onExecute() {
+        var a = this.getInput( 0 );
+        if( a == undefined )
+            return;
+        this.setOutput( 0, Math.sqrt( a ) );
+    }
+}
+
+GraphEditor.registerCustomNode( "math/SQRT", NodeSqrt );
+
+/*
+Math Missing:
+- abs
+- ceil
+- clamp
+- floor
+- fract
+- lerp
+- log
+- max
+- min
+- negate
+- pow
+- remainder
+- round
+- remap range
+- saturate
+- step
+*/
+
 
 /*
     Logical operator nodes
 */
 
-// GraphEditor.registerDefaultNode( "And", "logic", {
-//     inputs: [ { type: "bool" }, { type: "bool" } ],
-//     outputs: [ { type: "bool" } ],
-//     fn: function() {
-//         var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
-//         if( a == undefined || b == undefined )
-//             return;
-//         this.setOutput( 0, !!( a ) && !!( b ) );
-//     }
-// } );
+class NodeAnd extends GraphNode
+{
+    onCreate() {
+        this.addInput( null, "bool" );
+        this.addInput( null, "bool" );
+        this.addOutput( null, "bool" );
+    }
+    
+    onExecute() {
+        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? true;
+        if( a == undefined || b == undefined )
+            return;
+        this.setOutput( 0, !!( a ) && !!( b ) );
+    }
+}
 
-// GraphEditor.registerDefaultNode( "Or", "logic", {
-//     inputs: [ { type: "bool" }, { type: "bool" } ],
-//     outputs: [ { type: "bool" } ],
-//     fn: function() {
-//         var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
-//         if( a == undefined || b == undefined )
-//             return;
-//         this.setOutput( 0, !!( a ) || !!( b ) );
-//     }
-// } );
+GraphEditor.registerCustomNode( "logic/And", NodeAnd );
+
+class NodeOr extends GraphNode
+{
+    onCreate() {
+        this.addInput( null, "bool" );
+        this.addInput( null, "bool" );
+        this.addOutput( null, "bool" );
+    }
+    
+    onExecute() {
+        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? true;
+        if( a == undefined || b == undefined )
+            return;
+        this.setOutput( 0, !!( a ) || !!( b ) );
+    }
+}
+
+GraphEditor.registerCustomNode( "logic/Or", NodeOr );
 
 // GraphEditor.registerDefaultNode( "Equal", "logic", {
 //     inputs: [ { type: "float" }, { type: "float" } ],
@@ -1951,19 +2079,17 @@ GraphEditor.registerCustomNode( "math/Add", NodeAdd );
     Event nodes
 */
 
-function NodeKeyDown()
+class NodeKeyDown extends GraphNode
 {
-    this.addOutput( null, "bool" );
-    this.addProperty( "Key", "string", " " );
+    onCreate() {
+        this.addOutput( null, "bool" );
+        this.addProperty( "Key", "string", " " );
+    }
+    
+    onExecute() {
+        this.setOutput( 0, !!this.graph.keys[ this.properties[ 0 ].value ] );
+    }
 }
-
-NodeKeyDown.title = "KeyDown";
-NodeKeyDown.desc = "Gets true if key is pressed";
-
-NodeKeyDown.prototype.onExecute = function()
-{
-    this.setOutput( 0, !!this.graph.keys[ this.properties[ 0 ].value ] );
-};
 
 GraphEditor.registerCustomNode( "events/KeyDown", NodeKeyDown );
 
@@ -1971,83 +2097,73 @@ GraphEditor.registerCustomNode( "events/KeyDown", NodeKeyDown );
     Input nodes
 */
 
-function NodeString()
+class NodeString extends GraphNode
 {
-    this.addOutput( null, "string" );
-    this.addProperty( null, "string", "text" );
+    onCreate() {
+        this.addOutput( null, "string" );
+        this.addProperty( null, "string", "text" );
+    }
+    
+    onExecute() {
+        this.setOutput( 0, this.properties[ 0 ].value );
+    }
 }
-
-NodeString.title = "String";
-NodeString.desc = "Gets a String constant";
-
-NodeString.prototype.onExecute = function()
-{
-    this.setOutput( 0, this.properties[ 0 ].value );
-};
 
 GraphEditor.registerCustomNode( "inputs/String", NodeString );
 
-function NodeFloat()
+class NodeFloat extends GraphNode
 {
-    this.addOutput( null, "float" );
-    this.addProperty( null, "float", 0.0 );
+    onCreate() {
+        this.addOutput( null, "float" );
+        this.addProperty( null, "float", 0.0 );
+    }
+    
+    onExecute() {
+        this.setOutput( 0, this.properties[ 0 ].value );
+    }
 }
-
-NodeFloat.title = "Float";
-NodeFloat.desc = "Gets a Float constant";
-
-NodeFloat.prototype.onExecute = function()
-{
-    this.setOutput( 0, this.properties[ 0 ].value );
-};
 
 GraphEditor.registerCustomNode( "inputs/Float", NodeFloat );
 
-function NodeVector2()
+class NodeVector2 extends GraphNode
 {
-    this.addOutput( "Value", "vec2" );
-    this.addProperty( "Value", "vec2", [ 0, 0 ] );
+    onCreate() {
+        this.addOutput( "Value", "vec2" );
+        this.addProperty( "Value", "vec2", [ 0, 0 ] );
+    }
+    
+    onExecute() {
+        this.setOutput( 0, this.properties[ 0 ].value );
+    }
 }
-
-NodeVector2.title = "Vector2";
-NodeVector2.desc = "Gets a Vector2 constant";
-
-NodeVector2.prototype.onExecute = function()
-{
-    this.setOutput( 0, this.properties[ 0 ].value );
-};
 
 GraphEditor.registerCustomNode( "inputs/Vector2", NodeVector2 );
 
-function NodeVector3()
+class NodeVector3 extends GraphNode
 {
-    this.addOutput( "Value", "vec3" );
-    this.addProperty( "Value", "vec3", [ 0, 0, 0 ] );
+    onCreate() {
+        this.addOutput( "Value", "vec3" );
+        this.addProperty( "Value", "vec3", [ 0, 0, 0 ] );
+    }
+    
+    onExecute() {
+        this.setOutput( 0, this.properties[ 0 ].value );
+    }
 }
-
-NodeVector3.title = "Vector3";
-NodeVector3.desc = "Gets a Vector3 constant";
-
-NodeVector3.prototype.onExecute = function()
-{
-    this.setOutput( 0, this.properties[ 0 ].value );
-};
 
 GraphEditor.registerCustomNode( "inputs/Vector3", NodeVector3 );
 
-function NodeVector4()
+class NodeVector4 extends GraphNode
 {
-    this.addOutput( "Value", "vec4" );
-    this.addProperty( "Value", "vec4", [ 0, 0, 0, 0 ] );
+    onCreate() {
+        this.addOutput( "Value", "vec4" );
+        this.addProperty( "Value", "vec4", [ 0, 0, 0, 0 ] );
+    }
+    
+    onExecute() {
+        this.setOutput( 0, this.properties[ 0 ].value );
+    }
 }
-
-NodeVector4.title = "Vector4";
-NodeVector4.desc = "Gets a Vector4 constant";
-
-NodeVector4.prototype.onExecute = function()
-{
-    this.setOutput( 0, this.properties[ 0 ].value );
-};
 
 GraphEditor.registerCustomNode( "inputs/Vector4", NodeVector4 );
 
@@ -2055,48 +2171,45 @@ GraphEditor.registerCustomNode( "inputs/Vector4", NodeVector4 );
     Variable nodes
 */
 
-function NodeSetVariable()
+class NodeSetVariable extends GraphNode
 {
-    this.addInput( "Name", "string" );
-    this.addInput( "Value", "any" );
-    this.addOutput( null, "any" );
+    onCreate() {
+        this.addInput( "Name", "string" );
+        this.addInput( "Value", "any" );
+        this.addOutput( null, "any" );
+    }
+    
+    onExecute() {
+        var varName = this.getInput( 0 );
+        if( varName == undefined )
+            return;
+        var varValue = this.getInput( 1 );
+        if( varValue == undefined )
+            return;
+        this.graph.setVariable( varName, varValue );
+        this.setOutput( 0, varValue );
+    }
 }
-
-NodeSetVariable.title = "Set Variable";
-NodeSetVariable.desc = "Sets a value for a graph variable";
-
-NodeSetVariable.prototype.onExecute = function()
-{
-    var varName = this.getInput( 0 );
-    if( varName == undefined )
-        return;
-    var varValue = this.getInput( 1 );
-    if( varValue == undefined )
-        return;
-    this.graph.setVariable( varName, varValue );
-    this.setOutput( 0, varValue );
-};
 
 GraphEditor.registerCustomNode( "variables/SetVariable", NodeSetVariable );
 
-function NodeGetVariable()
+class NodeGetVariable extends GraphNode
 {
-    this.addInput( "Name", "string" );
-    this.addOutput( null, "any" );
+    onCreate() {
+        this.addInput( "Name", "string" );
+        this.addOutput( null, "any" );
+    }
+
+    onExecute() {
+        var varName = this.getInput( 0 );
+        if( varName == undefined )
+            return;
+        var data = this.graph.getVariable( varName );
+        if( data != undefined )
+            this.setOutput( 0, data );
+    }
 }
 
-NodeGetVariable.title = "Get Variable";
-NodeGetVariable.desc = "Gets a graph variable";
-
-NodeGetVariable.prototype.onExecute = function()
-{
-    var varName = this.getInput( 0 );
-    if( varName == undefined )
-        return;
-    var data = this.graph.getVariable( varName );
-    if( data != undefined )
-        this.setOutput( 0, data );
-};
 
 GraphEditor.registerCustomNode( "variables/GetVariable", NodeGetVariable );
 
@@ -2104,41 +2217,37 @@ GraphEditor.registerCustomNode( "variables/GetVariable", NodeGetVariable );
     System nodes
 */
 
-function NodeConsoleLog()
+class NodeConsoleLog extends GraphNode
 {
-    this.addInput( "a", "any" );
+    onCreate() {
+        this.addInput( "a", "any" );
+    }
+
+    onExecute() {
+        var data = this.getInput( 0 );
+        if( data == undefined )
+            return;
+        console.log( data );
+    }
 }
-
-NodeConsoleLog.title = "Console Log";
-NodeConsoleLog.desc = "Console logs a value";
-
-NodeConsoleLog.prototype.onExecute = function()
-{
-    var data = this.getInput( 0 );
-    if( data == undefined )
-        return;
-    console.log( data );
-};
 
 GraphEditor.registerCustomNode( "system/ConsoleLog", NodeConsoleLog );
 
-function NodeMain()
+class NodeMain extends GraphNode
 {
-    this.addInput( "a", "float" );
-    this.addInput( "b", "bool" );
-    this.addInput( "Color", "vec4" );
+    onCreate() {
+        this.addInput( "a", "float" );
+        this.addInput( "b", "bool" );
+        this.addInput( "Color", "vec4" );
+    }
+
+    onExecute() {
+        var data = this.getInput( 0 );
+        if( data == undefined )
+            return;
+        console.log( data );
+    };
 }
-
-NodeMain.title = "Main";
-NodeMain.desc = "Main node";
-
-NodeMain.prototype.onExecute = function()
-{
-    var data = this.getInput( 1 );
-    if( data == undefined )
-        return;
-    console.log( data );
-};
 
 GraphEditor.registerCustomNode( "system/Main", NodeMain );
 
