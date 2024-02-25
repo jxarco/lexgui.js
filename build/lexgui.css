@@ -320,7 +320,7 @@ body.noevents * {
 }
 
 .lexdialog.pocket.dockable {
-  transition: ease-out left 0.2s, ease-out top 0.2s;
+  transition: ease-out left 0.2s, ease-out top 0.2s, ease-in transform 0.2s;
 }
 
 .lexdialog.pocket .lexdialogtitle {
@@ -3488,4 +3488,12 @@ pre .line-gutter {
 
 .lexgraphnode .lexgraphnodeio[data-active] .io__type {
   filter: brightness(1.4);
+}
+
+.lexgraph .lexgraphpropdialog {
+  transform: translateY(-96px);
+}
+
+.lexgraph .lexgraphpropdialog.opened {
+  transform: translateY(0px);
 }

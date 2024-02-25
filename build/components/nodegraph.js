@@ -144,7 +144,12 @@ class GraphEditor {
         this.root.addEventListener( 'focus', this._processFocus.bind( this, true) );
         this.root.addEventListener( 'focusout', this._processFocus.bind( this, false ) );
 
-        this.propertiesDialog = new LX.PocketDialog( "Properties", null, { size: [ "300px", null ], position: [ "12px", "12px" ], float: "left" });
+        this.propertiesDialog = new LX.PocketDialog( "Properties", null, {
+            size: [ "300px", null ],
+            position: [ "12px", "12px" ],
+            float: "left",
+            class: 'lexgraphpropdialog'
+        } );
 
         // Move to root..
         this.root.appendChild( this.propertiesDialog.root );
@@ -359,14 +364,14 @@ class GraphEditor {
      * @method unSelectAll
      */
 
-    unSelectAll() {
+    unSelectAll( keepPropDialog ) {
 
         this._domNodes.querySelectorAll( '.lexgraphnode' ).forEach( v => v.classList.remove( 'selected' ) );
 
         this.selectedNodes.length = 0;
 
-        // TODO
-        // hide this.propertiesDialog
+        if( !keepPropDialog )
+            this._togglePropertiesDialog( false );
     }
 
     _createNodeDOM( node ) {
@@ -418,7 +423,7 @@ class GraphEditor {
 
             if( this.selectedNodes.length > 1 )
             {
-                this.unSelectAll();
+                this.unSelectAll( true );
             }
 
             if( !nodeContainer.classList.contains( 'selected' ) )
@@ -658,7 +663,7 @@ class GraphEditor {
     _selectNode( dom, multiSelection, forceOrder = true ) {
 
         if( !multiSelection )
-            this.unSelectAll();
+            this.unSelectAll( true );
 
         dom.classList.add( 'selected' );
 
@@ -685,11 +690,14 @@ class GraphEditor {
             panel.addText( null, node.constructor.description, null, { disabled: true } );
         }
 
-        // Allow change name
-        panel.addText( 'Name', node.title, (v) => { 
-            node.title = v;
-            dom.querySelector( '.lexgraphnodeheader' ).innerText = v;
-        } );
+        // Allow change name if input
+        if( node.constructor.category == 'inputs' )
+        {
+            panel.addText( 'Name', node.title, (v) => { 
+                node.title = v;
+                dom.querySelector( '.lexgraphnodeheader' ).innerText = v;
+            } );
+        }
 
         for( let p of node.properties )
         {
@@ -704,6 +712,8 @@ class GraphEditor {
             break;
             }
         }
+
+        this._togglePropertiesDialog( true );
     }
 
     _unSelectNode( dom ) {
@@ -1749,6 +1759,16 @@ class GraphEditor {
         console.log( "Redo!!" );
     }
 
+    _togglePropertiesDialog( force ) {
+
+        this.propertiesDialog.root.classList.toggle( 'opened', force );
+
+        if( !force )
+        {
+            this.propertiesDialog.panel.clear();
+        }
+    }
+
     _toggleSnapping() {
 
         this.snapToGrid = !this.snapToGrid;
@@ -1812,6 +1832,9 @@ class Graph {
         const orNode = GraphEditor.addNode( 'logic/Or' );
         orNode.position = new LX.vec2( 435, 435 );
 
+        const equalNode = GraphEditor.addNode( 'logic/Select' );
+        equalNode.position = new LX.vec2( 135, 400 );
+
         this.nodes = [
             mainNode,
             addNode,
@@ -1820,6 +1843,7 @@ class Graph {
             stringNode,
             keydownNode,
             orNode,
+            equalNode,
             // multNode
         ];
     }
@@ -2076,7 +2100,7 @@ class NodeAnd extends GraphNode
     }
     
     onExecute() {
-        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? true;
+        var a = this.getInput( 0 ), b = this.getInput( 1 );
         if( a == undefined || b == undefined )
             return;
         this.setOutput( 0, !!( a ) && !!( b ) );
@@ -2094,7 +2118,7 @@ class NodeOr extends GraphNode
     }
     
     onExecute() {
-        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? true;
+        var a = this.getInput( 0 ), b = this.getInput( 1 );
         if( a == undefined || b == undefined )
             return;
         this.setOutput( 0, !!( a ) || !!( b ) );
@@ -2103,46 +2127,93 @@ class NodeOr extends GraphNode
 
 GraphEditor.registerCustomNode( "logic/Or", NodeOr );
 
-// GraphEditor.registerDefaultNode( "Equal", "logic", {
-//     inputs: [ { type: "float" }, { type: "float" } ],
-//     outputs: [ { type: "bool" } ]
-// } );
+class NodeEqual extends GraphNode
+{
+    onCreate() {
+        this.addInput( null, "float" );
+        this.addInput( null, "float" );
+        this.addOutput( null, "bool" );
+    }
+    
+    logicOp( a, b ) {
+        return a == b;
+    }
 
-// GraphEditor.registerDefaultNode( "Not Equal", "logic", {
-//     inputs: [ { type: "float" }, { type: "float" } ],
-//     outputs: [ { type: "bool" } ]
-// } );
+    onExecute() {
+        var a = this.getInput( 0 ), b = this.getInput( 1 );
+        if( a == undefined || b == undefined )
+            return;
+        this.setOutput( 0, this.logicOp( a, b ) );
+    }
+}
 
-// GraphEditor.registerDefaultNode( "Less", "logic", {
-//     inputs: [ { type: "float" }, { type: "float" } ],
-//     outputs: [ { type: "bool" } ]
-// } );
+GraphEditor.registerCustomNode( "logic/Equal", NodeEqual );
 
-// GraphEditor.registerDefaultNode( "Less or Equal", "logic", {
-//     inputs: [ { type: "float" }, { type: "float" } ],
-//     outputs: [ { type: "bool" } ]
-// } );
+class NodeNotEqual extends NodeEqual
+{
+    logicOp( a, b ) {
+        return a != b;
+    }
+}
 
-// GraphEditor.registerDefaultNode( "Greater", "logic", {
-//     inputs: [ { type: "float" }, { type: "float" } ],
-//     outputs: [ { type: "bool" } ]
-// } );
+GraphEditor.registerCustomNode( "logic/NotEqual", NodeNotEqual );
 
-// GraphEditor.registerDefaultNode( "Greater or Equal", "logic", {
-//     inputs: [ { type: "float" }, { type: "float" } ],
-//     outputs: [ { type: "bool" } ]
-// } );
+class NodeLess extends NodeEqual
+{
+    logicOp( a, b ) {
+        return a < b;
+    }
+}
 
-// GraphEditor.registerDefaultNode( "Greater or Equal", "logic", {
-//     inputs: [ { type: "float" }, { type: "float" } ],
-//     outputs: [ { type: "bool" } ]
-// } );
+GraphEditor.registerCustomNode( "logic/Less", NodeLess );
 
-// GraphEditor.registerDefaultNode( "Select", "logic", {
-//     inputs: [ { name: "A", type: "float" }, { name: "B", type: "float" }, { name: "Condition", type: "bool" } ],
-//     outputs: [ { type: "float" } ]
-// } );
+class NodeLessEqual extends NodeEqual
+{
+    logicOp( a, b ) {
+        return a <= b;
+    }
+}
 
+GraphEditor.registerCustomNode( "logic/LessEqual", NodeLessEqual );
+
+class NodeGreater extends NodeEqual
+{
+    logicOp( a, b ) {
+        return a > b;
+    }
+}
+
+GraphEditor.registerCustomNode( "logic/Greater", NodeGreater );
+
+class NodeGreaterEqual extends NodeEqual
+{
+    logicOp( a, b ) {
+        return a >= b;
+    }
+}
+
+GraphEditor.registerCustomNode( "logic/GreaterEqual", NodeGreaterEqual );
+
+class NodeSelect extends GraphNode
+{
+    onCreate() {
+        this.addInput( "True", "any" );
+        this.addInput( "False", "any" );
+        this.addInput( "Condition", "bool" );
+        this.addOutput( null, "any" );
+    }
+    
+    onExecute() {
+        var a = this.getInput( 0 ), b = this.getInput( 1 ), cond = this.getInput( 2 );
+        if( a == undefined || b == undefined || cond == undefined )
+            return;
+        this.setOutput( 0, cond ? a : b );
+    }
+}
+
+GraphEditor.registerCustomNode( "logic/Select", NodeSelect );
+
+// TODO: ADD THIS WHEN DROPDOWN OPTIONS FOR PROPERTIES ARE AVAILABLE
 // GraphEditor.registerDefaultNode( "Compare", "logic", {
 //     inputs: [ { name: "A", type: "float" }, { name: "B", type: "float" }, { name: "True", type: "float" }, { name: "False", type: "float" } ],
 //     outputs: [ { type: "float" } ]
@@ -2315,7 +2386,7 @@ class NodeMain extends GraphNode
     }
 
     onExecute() {
-        var data = this.getInput( 0 );
+        var data = this.getInput( 1 );
         if( data == undefined )
             return;
         console.log( data );
