@@ -42,6 +42,44 @@ function doAsync( fn, ms ) {
         fn();
 }
 
+class BoundingBox {
+
+    constructor( o, s )
+    {
+        this.origin = o ?? new LX.vec2( 0, 0 );
+        this.size = s ?? new LX.vec2( 0, 0 );
+    }
+
+    merge ( bb ) {
+
+        console.assert( bb.constructor == BoundingBox );
+
+        const min_0 = this.origin;
+        const max_0 = this.origin.add( this.size );
+
+        const min_1 = bb.origin;
+        const max_1 = bb.origin.add( bb.size );
+
+        const merge_min = new LX.vec2( Math.min( min_0.x, min_1.x ), Math.min( min_0.y, min_1.y ) );
+        const merge_max = new LX.vec2( Math.max( max_0.x, max_1.x ), Math.max( max_0.y, max_1.y ) );
+
+        this.origin = merge_min;
+        this.size = merge_max.sub( merge_min );
+    }
+
+    inside ( bb ) {
+
+        const min_0 = this.origin;
+        const max_0 = this.origin.add( this.size );
+
+        const min_1 = bb.origin;
+        const max_1 = bb.origin.add( bb.size );
+
+        return min_1.x >= min_0.x && max_1.x <= max_0.x
+                && min_1.y >= min_0.y && max_1.y <= max_0.y;
+    }
+};
+
 /**
  * @class GraphEditor
  */
@@ -214,13 +252,13 @@ class GraphEditor {
 
         this._generatePattern();
 
-        // Link container
+        // Links
 
         this._domLinks = document.createElement( 'div' );
         this._domLinks.classList.add( 'lexgraphlinks' );
         this.root.appendChild( this._domLinks );
 
-        // Node container
+        // Nodes
 
         this._domNodes = document.createElement( 'div' );
         this._domNodes.classList.add( 'lexgraphnodes' );
@@ -477,7 +515,7 @@ class GraphEditor {
             if( e.button != LX.MOUSE_LEFT_CLICK )
                 return;
 
-            if( this.selectedNodes.length > 1 )
+            if( this.selectedNodes.length > 1 && !e.shiftKey )
             {
                 this.unSelectAll( true );
             }
@@ -712,8 +750,13 @@ class GraphEditor {
         return nodeContainer;
     }
 
-    _onMoveNode( e ) {
+    _getAllDOMNodes() {
         
+        return Array.from( this._domNodes.childNodes ).filter( v => v.classList.contains( 'lexgraphnode' ) );
+    }
+
+    _onMoveNode( target ) {
+
         let dT = this.snapToGrid ? this._snappedDeltaMousePosition : this._deltaMousePosition;
         dT.div( this._scale, dT);
 
@@ -725,6 +768,53 @@ class GraphEditor {
 
             this._updateNodeLinks( nodeId );
         }
+    }
+
+    _onMoveGroup( target ) {
+
+        // Move nodes inside the group
+
+        const groupNodeIds = target.nodes;
+
+        if( !groupNodeIds )
+            return;
+
+        let dT = this.snapToGrid ? this._snappedDeltaMousePosition : this._deltaMousePosition;
+        dT.div( this._scale, dT);
+
+        this._translateNode( target, dT );
+
+        for( let nodeId of groupNodeIds )
+        {
+            const el = this._getNodeDOMElement( nodeId );
+
+            this._translateNode( el, dT );
+
+            this._updateNodeLinks( nodeId );
+        }
+    }
+
+    _onDragGroup( target ) {
+
+        // Get nodes inside the group to be moved
+
+        const group_bb = this._getBoundingFromGroup( target );
+
+        const groupNodeIds = [ ];
+
+        for( let dom of this._getAllDOMNodes() )
+        {
+            const x = parseFloat( dom.style.left );
+            const y = parseFloat( dom.style.top );
+            const node_bb = new BoundingBox( new LX.vec2( x, y ), new LX.vec2( dom.offsetWidth - 6, dom.offsetHeight - 6 ) );
+
+            if( !group_bb.inside( node_bb ) )
+                continue;
+
+            groupNodeIds.push( dom.dataset[ 'id' ] );
+        }
+
+        target.nodes = groupNodeIds;
     }
 
     _selectNode( dom, multiSelection, forceOrder = true ) {
@@ -1000,6 +1090,13 @@ class GraphEditor {
                 e.preventDefault();
                 this._deleteSelection( e );
                 break;
+            case 'g':
+                if( e.ctrlKey )
+                {
+                    e.preventDefault();
+                    this._createGroup();
+                }
+                break;
             case 'y':
                 if( e.ctrlKey )
                 {
@@ -1127,7 +1224,8 @@ class GraphEditor {
     _processMouseDown( e ) {
 
         // Don't box select over a node..
-        if( !e.target.classList.contains( 'lexgraphnode' ) && e.button == LX.MOUSE_LEFT_CLICK )
+        if( !e.target.classList.contains( 'lexgraphnode' ) && !e.target.classList.contains( 'lexgraphgroup' )
+            && e.button == LX.MOUSE_LEFT_CLICK )
         {
             this._boxSelecting = this._mousePosition;
             this._boxSelectRemoving = e.altKey;
@@ -1781,7 +1879,7 @@ class GraphEditor {
             rb.y = tmp;
         }
 
-        for( let nodeEl of this._domNodes.children )
+        for( let nodeEl of this._getAllDOMNodes() )
         {
             let pos = this._getNodePosition( nodeEl );
             let size = new LX.vec2( nodeEl.offsetWidth, nodeEl.offsetHeight );
@@ -1815,6 +1913,76 @@ class GraphEditor {
             this._addUndoStep();
         }
 
+    }
+
+    _getBoundingFromGroup( groupDOM ) {
+
+        const x = parseFloat( groupDOM.style.left );
+        const y = parseFloat( groupDOM.style.top );
+
+        return new BoundingBox( new LX.vec2( x, y ), new LX.vec2( groupDOM.offsetWidth - 2, groupDOM.offsetHeight - 2 ) );
+    }
+
+    _getBoundingFromNodes( nodeIds ) {
+
+        let group_bb = null;
+
+        for( let nodeId of nodeIds )
+        {
+            const dom = this._getNodeDOMElement( nodeId );
+
+            const x = parseFloat( dom.style.left );
+            const y = parseFloat( dom.style.top );
+            const node_bb = new BoundingBox( new LX.vec2( x, y ), new LX.vec2( dom.offsetWidth - 6, dom.offsetHeight - 6 ) );
+
+            if( group_bb )
+            {
+                group_bb.merge( node_bb );
+            }
+            else
+            {
+                group_bb = node_bb;
+            }
+        }
+
+        // Add padding
+
+        const groupContentPadding = 12;
+
+        group_bb.origin.sub( new LX.vec2( groupContentPadding ), group_bb.origin );
+        group_bb.origin.sub( new LX.vec2( groupContentPadding ), group_bb.origin );
+
+        group_bb.size.add( new LX.vec2( groupContentPadding * 2.0 ), group_bb.size );
+        group_bb.size.add( new LX.vec2( groupContentPadding * 2.0 ), group_bb.size );
+
+        return group_bb;
+    }
+
+    /**
+     * @method _createGroup
+     * @description Creates a node group from the bounding box of the selected nodes
+     * @returns JSON data from the serialized graph
+     */
+
+    _createGroup() {
+
+        const group_bb = this._getBoundingFromNodes( this.selectedNodes );
+
+        var groupDOM = document.createElement( 'div' );
+        groupDOM.classList.add( 'lexgraphgroup' );
+        groupDOM.style.left = group_bb.origin.x + "px";
+        groupDOM.style.top = group_bb.origin.y + "px";
+        groupDOM.style.width = group_bb.size.x + "px";
+        groupDOM.style.height = group_bb.size.y + "px";
+
+        this._domNodes.prepend( groupDOM );
+
+        // Move group!!
+
+        LX.makeDraggable( groupDOM, {
+            onMove: this._onMoveGroup.bind( this ),
+            onDragStart: this._onDragGroup.bind( this )
+        } );
     }
 
     _addUndoStep( deleteRedo = true )  {
@@ -1887,7 +2055,7 @@ class GraphEditor {
 
         if( this.snapToGrid )
         {
-            for( let nodeDom of this._domNodes.children )
+            for( let nodeDom of this._getAllDOMNodes() )
             {
                 nodeDom.mustSnap = true;
             }

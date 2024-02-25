@@ -3522,3 +3522,28 @@ pre .line-gutter {
 .lexgraph .lexgraphpropdialog.opened {
   transform: translateY(0px);
 }
+
+.lexgraph .lexgraphgroups {
+  z-index: 1;
+}
+
+.lexgraphgroup {
+  position: absolute;
+  -webkit-user-select: none; /* Safari 3.1+ */
+  -moz-user-select: none; /* Firefox 2+ */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard syntax */
+  cursor: pointer;
+  min-width: 96px;
+  min-height: 32px;
+  border-radius: 8px;
+  
+  background: linear-gradient(35deg, #949292 10%, #a7c4bd);
+  background-color: unset; background-origin: border-box;
+
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--global-text-primary);
+  transition: border 0.05s linear;
+  opacity: 0.5;
+}
