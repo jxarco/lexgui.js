@@ -249,7 +249,7 @@ class GraphEditor {
         const pos = type.lastIndexOf( "/" );
 
         baseClass.category = type.substring( 0, pos );
-        baseClass.title = type.substring( pos + 1 );
+        baseClass.title = baseClass.title ?? type.substring( pos + 1 );
         baseClass.type = type;
 
         if( !baseClass.prototype.onExecute )
@@ -1907,6 +1907,8 @@ class Graph {
 
         // Nodes
 
+        this.nodes = [ ];
+
         // const mainNode = GraphEditor.addNode( 'system/Main' );
         // mainNode.position = new LX.vec2( 650, 400 );
 
@@ -1934,17 +1936,17 @@ class Graph {
         // const equalNode = GraphEditor.addNode( 'logic/Select' );
         // equalNode.position = new LX.vec2( 135, 400 );
 
-        this.nodes = [
-            // mainNode,
-            // addNode,
-            // floatNode,
-            // setVarNode,
-            // stringNode,
-            // keydownNode,
-            // orNode,
-            // equalNode,
-            // // multNode
-        ];
+        // this.nodes = [
+        //     mainNode,
+        //     addNode,
+        //     floatNode,
+        //     setVarNode,
+        //     stringNode,
+        //     keydownNode,
+        //     orNode,
+        //     equalNode,
+        //     // multNode
+        // ];
     }
 
     configure( o ) {
@@ -1960,9 +1962,9 @@ class Graph {
             newNode.color = node.color;
             newNode.position = new LX.vec2( node.position.x, node.position.y );
             newNode.type = node.type;
-            newNode.inputs = node.inputs;
-            newNode.outputs = node.outputs;
-            newNode.properties = node.properties;
+            // newNode.inputs = node.inputs;
+            // newNode.outputs = node.outputs;
+            // newNode.properties = node.properties;
 
             this.nodes.push( newNode );
         }
@@ -2171,14 +2173,11 @@ class NodeAdd extends GraphNode
     onExecute() {
         var a = this.getInput( 0 ) ?? this.properties[ 0 ].value;
         var b = this.getInput( 1 ) ?? this.properties[ 1 ].value;
-        if( a == undefined || a.constructor != Number )
-            return;
         this.setOutput( 0, a + b );
     }
 }
 
 NodeAdd.description = "Addition of 2 values (A+B)."
-
 GraphEditor.registerCustomNode( "math/Add", NodeAdd );
 
 class NodeSubstract extends GraphNode
@@ -2187,16 +2186,18 @@ class NodeSubstract extends GraphNode
         this.addInput( null, "float" );
         this.addInput( null, "float" );
         this.addOutput( null, "float" );
+        this.addProperty( "A", "float", 0 );
+        this.addProperty( "B", "float", 0 );
     }
     
     onExecute() {
-        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 0;
-        if( a == undefined || a.constructor != Number )
-            return;
+        var a = this.getInput( 0 ) ?? this.properties[ 0 ].value;
+        var b = this.getInput( 1 ) ?? this.properties[ 1 ].value;
         this.setOutput( 0, a - b );
     }
 }
 
+NodeSubstract.description = "Substraction of 2 values (A-B)."
 GraphEditor.registerCustomNode( "math/Substract", NodeSubstract );
 
 class NodeMultiply extends GraphNode
@@ -2205,16 +2206,18 @@ class NodeMultiply extends GraphNode
         this.addInput( null, "float" );
         this.addInput( null, "float" );
         this.addOutput( null, "float" );
+        this.addProperty( "A", "float", 0 );
+        this.addProperty( "B", "float", 0 );
     }
     
     onExecute() {
-        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 1;
-        if( a == undefined || a.constructor != Number )
-            return;
+        var a = this.getInput( 0 ) ?? this.properties[ 0 ].value;
+        var b = this.getInput( 1 ) ?? this.properties[ 1 ].value;
         this.setOutput( 0, a * b );
     }
 }
 
+NodeMultiply.description = "Multiplication of 2 values (A*B)."
 GraphEditor.registerCustomNode( "math/Multiply", NodeMultiply );
 
 class NodeDivide extends GraphNode
@@ -2223,16 +2226,18 @@ class NodeDivide extends GraphNode
         this.addInput( null, "float" );
         this.addInput( null, "float" );
         this.addOutput( null, "float" );
+        this.addProperty( "A", "float", 0 );
+        this.addProperty( "B", "float", 0 );
     }
     
     onExecute() {
-        var a = this.getInput( 0 ), b = this.getInput( 1 ) ?? 1;
-        if( a == undefined || a.constructor != Number )
-            return;
+        var a = this.getInput( 0 ) ?? this.properties[ 0 ].value;
+        var b = this.getInput( 1 ) ?? this.properties[ 1 ].value;
         this.setOutput( 0, a / b );
     }
 }
 
+NodeDivide.description = "Division of 2 values (A/B)."
 GraphEditor.registerCustomNode( "math/Divide", NodeDivide );
 
 class NodeSqrt extends GraphNode
@@ -2240,16 +2245,16 @@ class NodeSqrt extends GraphNode
     onCreate() {
         this.addInput( null, "float" );
         this.addOutput( null, "float" );
+        this.addProperty( "Value", "float", 0 );
     }
     
     onExecute() {
-        var a = this.getInput( 0 );
-        if( a == undefined )
-            return;
+        var a = this.getInput( 0 ) ?? this.properties[ 0 ].value;
         this.setOutput( 0, Math.sqrt( a ) );
     }
 }
 
+NodeSqrt.description = "Square root of a scalar."
 GraphEditor.registerCustomNode( "math/SQRT", NodeSqrt );
 
 /*
@@ -2504,9 +2509,9 @@ GraphEditor.registerCustomNode( "inputs/Vector4", NodeVector4 );
 class NodeSetVariable extends GraphNode
 {
     onCreate() {
-        this.addInput( "Name", "string" );
         this.addInput( "Value", "any" );
         this.addOutput( null, "any" );
+        this.addProperty( "Name", "string", "" );
     }
     
     onExecute() {
@@ -2521,13 +2526,14 @@ class NodeSetVariable extends GraphNode
     }
 }
 
+NodeSetVariable.title = "Set Variable";
 GraphEditor.registerCustomNode( "variables/SetVariable", NodeSetVariable );
 
 class NodeGetVariable extends GraphNode
 {
     onCreate() {
-        this.addInput( "Name", "string" );
         this.addOutput( null, "any" );
+        this.addProperty( "Name", "string", "" );
     }
 
     onExecute() {
@@ -2540,7 +2546,7 @@ class NodeGetVariable extends GraphNode
     }
 }
 
-
+NodeGetVariable.title = "Get Variable";
 GraphEditor.registerCustomNode( "variables/GetVariable", NodeGetVariable );
 
 /*
@@ -2550,7 +2556,7 @@ GraphEditor.registerCustomNode( "variables/GetVariable", NodeGetVariable );
 class NodeConsoleLog extends GraphNode
 {
     onCreate() {
-        this.addInput( "a", "any" );
+        this.addInput( null, "any" );
     }
 
     onExecute() {
@@ -2561,6 +2567,7 @@ class NodeConsoleLog extends GraphNode
     }
 }
 
+NodeConsoleLog.title = "Console Log";
 GraphEditor.registerCustomNode( "system/ConsoleLog", NodeConsoleLog );
 
 class NodeMain extends GraphNode
