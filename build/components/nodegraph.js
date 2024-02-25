@@ -125,11 +125,18 @@ class GraphEditor {
                     callback: value => console.log(value)
                 }
             ],
-            // {
-            //     name: "Button 4",
-            //     img: "https://webglstudio.org/latest/imgs/mini-icon-gizmo.png",
-            //     callback: (value, event) => console.log(value)
-            // }
+            [
+                {
+                    name: "Import",
+                    icon: "fa fa-upload",
+                    callback: (value, event) => { this.graph.load( "../../data/graph_sample.json", this.setGraph.bind( this ) ); }
+                },
+                {
+                    name: "Export",
+                    icon: "fa fa-diagram-project",
+                    callback: (value, event) => this.graph.export()
+                }
+            ]
         ], { float: "htc" } );
 
         this.root.addEventListener( 'keydown', this._processKeyDown.bind( this ), true );
@@ -247,7 +254,7 @@ class GraphEditor {
 
         if( !baseClass.prototype.onExecute )
         {
-            console.warn( `GraphNode [${ this.name }] does not have a callback attached.` );
+            console.warn( `GraphNode [${ this.title }] does not have a callback attached.` );
         }
 
         const prev = GraphEditor.NODE_TYPES[ type ];
@@ -336,6 +343,29 @@ class GraphEditor {
         // TODO: REMOVE THIS (DEBUG)
         this.start();
         // 
+    }
+
+    /**
+     * @method loadGraph
+     * @param {Graph} graph
+     */
+
+    loadGraph( url, callback ) {
+
+        const onComplete = ( json ) => {
+
+            var graph = new Graph();
+            graph.configure( json );
+
+            this.setGraph( graph );
+
+            if( callback )
+                callback( graph );
+        }
+
+        const onError = (v) => console.error(v);
+
+        LX.requestJSON( url, onComplete, onError );
     }
 
     /**
@@ -1877,44 +1907,104 @@ class Graph {
 
         // Nodes
 
-        const mainNode = GraphEditor.addNode( 'system/Main' );
-        mainNode.position = new LX.vec2( 650, 400 );
+        // const mainNode = GraphEditor.addNode( 'system/Main' );
+        // mainNode.position = new LX.vec2( 650, 400 );
 
-        const addNode = GraphEditor.addNode( 'math/Add' );
-        addNode.position = new LX.vec2( 425, 250 );
+        // const addNode = GraphEditor.addNode( 'math/Add' );
+        // addNode.position = new LX.vec2( 425, 250 );
 
-        const floatNode = GraphEditor.addNode( 'inputs/Float' );
-        floatNode.position = new LX.vec2( 200, 200 );
+        // const floatNode = GraphEditor.addNode( 'inputs/Float' );
+        // floatNode.position = new LX.vec2( 200, 200 );
 
-        const stringNode = GraphEditor.addNode( 'inputs/String' );
-        stringNode.position = new LX.vec2( 400, 50 );
+        // const stringNode = GraphEditor.addNode( 'inputs/String' );
+        // stringNode.position = new LX.vec2( 400, 50 );
 
-        const setVarNode = GraphEditor.addNode( 'variables/SetVariable' );
-        setVarNode.position = new LX.vec2( 650, 50 );
+        // const setVarNode = GraphEditor.addNode( 'variables/SetVariable' );
+        // setVarNode.position = new LX.vec2( 650, 50 );
 
-        // const multNode = new GraphNode( GraphEditor.DEFAULT_NODES[ 'Multiply' ] );
-        // multNode.position = new LX.vec2( 200, 400 );
+        // // const multNode = new GraphNode( GraphEditor.DEFAULT_NODES[ 'Multiply' ] );
+        // // multNode.position = new LX.vec2( 200, 400 );
 
-        const keydownNode = GraphEditor.addNode( 'events/KeyDown' );
-        keydownNode.position = new LX.vec2( 600, 200 );
+        // const keydownNode = GraphEditor.addNode( 'events/KeyDown' );
+        // keydownNode.position = new LX.vec2( 600, 200 );
 
-        const orNode = GraphEditor.addNode( 'logic/Or' );
-        orNode.position = new LX.vec2( 435, 435 );
+        // const orNode = GraphEditor.addNode( 'logic/Or' );
+        // orNode.position = new LX.vec2( 435, 435 );
 
-        const equalNode = GraphEditor.addNode( 'logic/Select' );
-        equalNode.position = new LX.vec2( 135, 400 );
+        // const equalNode = GraphEditor.addNode( 'logic/Select' );
+        // equalNode.position = new LX.vec2( 135, 400 );
 
         this.nodes = [
-            mainNode,
-            addNode,
-            floatNode,
-            setVarNode,
-            stringNode,
-            keydownNode,
-            orNode,
-            equalNode,
-            // multNode
+            // mainNode,
+            // addNode,
+            // floatNode,
+            // setVarNode,
+            // stringNode,
+            // keydownNode,
+            // orNode,
+            // equalNode,
+            // // multNode
         ];
+    }
+
+    configure( o ) {
+
+        this.nodes.length = 0;
+
+        for( let node of o.nodes )
+        {
+            const newNode = GraphEditor.addNode( node.type );
+
+            newNode.id = node.id;
+            newNode.title = node.title;
+            newNode.color = node.color;
+            newNode.position = new LX.vec2( node.position.x, node.position.y );
+            newNode.type = node.type;
+            newNode.inputs = node.inputs;
+            newNode.outputs = node.outputs;
+            newNode.properties = node.properties;
+
+            this.nodes.push( newNode );
+        }
+
+        // editor options?
+
+        // zoom/translation ??
+    }
+
+    /**
+     * @method export
+     * @param {Boolean} prettify
+     * @returns JSON data from the serialized graph
+     */
+
+    export( prettify ) {
+        
+        var o = { };
+        o.nodes = [ ];
+
+        for( let node of this.nodes )
+        {
+            o.nodes.push( node.serialize() );
+        }
+
+        // editor options?
+
+        // zoom/translation ??
+
+        try
+        {
+            o = JSON.stringify( o, null, prettify ? 2 : null );
+        }
+        catch( e )
+        {
+            o = null;
+            console.error( `Can't export GraphNode [${ this.title }] of type [${ this.type }].` );
+        }
+
+        console.log( o );
+
+        return o;
     }
 }
 
@@ -2031,6 +2121,22 @@ class GraphNode {
     getOutput( index ) {
 
         return this.outputs[ index ].value;
+    }
+
+    serialize() {
+
+        var o = { };
+
+        o.id = this.id;
+        o.title = this.title;
+        o.color = this.color;
+        o.position = this.position;
+        o.type = this.type;
+        o.inputs = this.inputs;
+        o.outputs = this.outputs;
+        o.properties = this.properties;
+
+        return o;
     }
 }
 
