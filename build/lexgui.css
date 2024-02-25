@@ -3452,14 +3452,35 @@ pre .line-gutter {
   pointer-events: none;
 }
 
-/* .lexgraphnode .lexgraphnodeio .io__type.int,
-.lexgraphnode .lexgraphnodeio .io__type.float { background-color: #94daa0; }
-.lexgraphnode .lexgraphnodeio .io__type.string { background-color: #fa635e; }
-.lexgraphnode .lexgraphnodeio .io__type.bool { background-color: #eb83c5; } */
-.lexgraphnode .lexgraphnodeio .io__type.vec2,
-.lexgraphnode .lexgraphnodeio .io__type.vec3,
-.lexgraphnode .lexgraphnodeio .io__type.vec4 { background-color: #9d56d8; }
+.lexgraphnode .lexgraphnodeio .io__typedesc {
+  position: absolute;
+  margin-left: -30px;
+  font-weight: 600;
+  margin-top: 3px;
+  background-color: #afafaf;
+  color: var(--global-color-primary);
+  font-size: 8px;
+  border-radius: 4px;
+  width: 28px;
+  text-align: center;
+  opacity: 0;
+  transition: opacity ease-in 0.1s;
+}
 
+.lexgraphnode .lexgraphnodeio .io__typedesc.output {
+  margin-right: -30px;
+}
+
+.lexgraphnode .lexgraphnodeio .io__type.vec2,
+.lexgraphnode .lexgraphnodeio .io__typedesc.vec2 { background-color: #ecea4c; }
+.lexgraphnode .lexgraphnodeio .io__type.vec3,
+.lexgraphnode .lexgraphnodeio .io__typedesc.vec3 { background-color: #ee87e5; }
+.lexgraphnode .lexgraphnodeio .io__type.vec4,
+.lexgraphnode .lexgraphnodeio .io__typedesc.vec4 { background-color: #9d56d8; }
+.lexgraphnode .lexgraphnodeio .io__type.string,
+.lexgraphnode .lexgraphnodeio .io__typedesc.string { background-color: #79cc9c; }
+.lexgraphnode .lexgraphnodeio .io__type.mat,
+.lexgraphnode .lexgraphnodeio .io__typedesc.mat { background-color: #56a8d8; }
 
 .lexgraphnode .lexgraphnodeio .io__name {
   margin-top: 2px;
@@ -3468,6 +3489,10 @@ pre .line-gutter {
 .lexgraphnode .lexgraphnodeio .io__type.output {
   margin-right: unset;
   margin-left: 3px;
+}
+
+.lexgraphnode .lexgraphnodeio:hover .io__typedesc {
+  opacity: 1;
 }
 
 .lexgraphnode .lexgraphnodeio .io__type:hover {

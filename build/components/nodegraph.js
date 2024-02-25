@@ -514,6 +514,11 @@ class GraphEditor {
                 type.innerHTML = '<span>' + i.type[ 0 ].toUpperCase() + '</span>';
                 input.appendChild( type );
 
+                var typeDesc = document.createElement( 'span' );
+                typeDesc.className = 'io__typedesc input ' + i.type;
+                typeDesc.innerHTML = i.type;
+                input.appendChild( typeDesc );
+
                 if( i.name )
                 {
                     var name = document.createElement( 'span' );
@@ -561,6 +566,11 @@ class GraphEditor {
                 type.className = 'io__type output ' + o.type;
                 type.innerHTML = '<span>' + o.type[ 0 ].toUpperCase() + '</span>';
                 output.appendChild( type );
+
+                var typeDesc = document.createElement( 'span' );
+                typeDesc.className = 'io__typedesc output ' + o.type;
+                typeDesc.innerHTML = o.type;
+                output.appendChild( typeDesc );
 
                 nodeOutputs.appendChild( output );
             }
