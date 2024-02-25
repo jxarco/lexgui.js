@@ -162,45 +162,57 @@ function makeDraggable( domEl, options = { } ) {
     let currentTarget = null;
     let targetClass = options.targetClass;
 
-    const moveFunc = (e) => {
-        if(!currentTarget) return;
+    let id = LX.UTILS.uidGenerator();
+    domEl[ 'draggable-id' ] = id;
+
+    const defaultMoveFunc = e => {
+        if( !currentTarget ) return;
         let left = e.clientX - offsetX;
         let top = e.clientY - offsetY;
-        if(left > 3 && (left + domEl.offsetWidth + 6) <= window.innerWidth)
+        if( left > 3 && ( left + domEl.offsetWidth + 6 ) <= window.innerWidth )
             domEl.style.left = left + 'px';
-        if(top > 3 && (top + domEl.offsetHeight + 6) <= window.innerHeight)
+        if( top > 3 && ( top + domEl.offsetHeight + 6 ) <= window.innerHeight )
             domEl.style.top = top + 'px';
     };
 
-    let onMove = options.onMove ?? moveFunc;
+    const customMoveFunc = e => {
+        if( !currentTarget ) return;
+        if( options.onMove )
+            options.onMove( currentTarget );
+    };
 
-    domEl.setAttribute('draggable', true);
-    domEl.addEventListener("mousedown", function(e) {
+    let onMove = options.onMove ? customMoveFunc : defaultMoveFunc;
+    let onDragStart = options.onDragStart;
+
+    domEl.setAttribute( 'draggable', true );
+    domEl.addEventListener( "mousedown", function( e ) {
         currentTarget = (e.target.classList.contains(targetClass) || !targetClass) ? e.target : null;
-    });
+    } );
 
-    domEl.addEventListener("dragstart", function(e) {
+    domEl.addEventListener( "dragstart", function( e ) {
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        if(!currentTarget) return;
+        if( !currentTarget ) return;
         // Remove image when dragging
         var img = new Image();
         img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
-        e.dataTransfer.setDragImage(img, 0, 0);
+        e.dataTransfer.setDragImage( img, 0, 0 );
         e.dataTransfer.effectAllowed = "move";
         const rect = e.target.getBoundingClientRect();
         offsetX = e.clientX - rect.x;
         offsetY = e.clientY - rect.y;
-        document.addEventListener("mousemove", onMove );
-    }, false);
+        document.addEventListener( "mousemove", onMove );
+        if( onDragStart )
+            onDragStart( currentTarget );
+    }, false );
     
-    document.addEventListener('mouseup', () => {
-        if(currentTarget) {
+    document.addEventListener( 'mouseup', () => {
+        if( currentTarget ) {
             currentTarget = null;
-            document.removeEventListener("mousemove", onMove );
+            document.removeEventListener( "mousemove", onMove );
         }
-    });
+    } );
 }
 
 LX.makeDraggable = makeDraggable;
