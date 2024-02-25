@@ -167,6 +167,8 @@ class GraphEditor {
 
         this.snapToGrid = false;
 
+        this._scale = 1.0;
+
         // Nodes and connections
 
         this.nodes      = { };
@@ -174,6 +176,20 @@ class GraphEditor {
         this.variables  = { };
 
         this.selectedNodes = [ ];
+
+        this.supportedCastTypes = { };
+
+        this.addCastType( 'float', 'vec2', ( v ) => { return [ v, v ]; } );
+        this.addCastType( 'float', 'vec3', ( v ) => { return [ v, v, v ]; } );
+        this.addCastType( 'float', 'vec4', ( v ) => { return [ v, v, v, v ]; } );
+        this.addCastType( 'float', 'bool', ( v ) => { return !!v; } );
+
+        this.addCastType( 'vec4', 'vec3', ( v ) => { v.slice( 0, 3 ); return v; } );
+        this.addCastType( 'vec4', 'vec2', ( v ) => { v.slice( 0, 2 ); return v; } );
+        this.addCastType( 'vec3', 'vec2', ( v ) => { v.slice( 0, 2 ); return v; } );
+        this.addCastType( 'vec3', 'vec4', ( v ) => { v.push( 1 ); return v; } );
+        this.addCastType( 'vec2', 'vec3', ( v ) => { v.push( 1 ); return v; } );
+        this.addCastType( 'vec2', 'vec4', ( v ) => { v.push( 0, 1 ); return v; } );
 
         this._nodeBackgroundOpacity = options.disableNodeOpacity ? 1.0 : 0.8;
 
@@ -188,10 +204,6 @@ class GraphEditor {
         this._circlePatternColor = '#71717a9c';
 
         this._generatePattern();
-
-        // Renderer state
-
-        this._scale = 1.0;
 
         // Link container
 
@@ -359,6 +371,18 @@ class GraphEditor {
             node[ eventName ].apply( this, params );
         }
     };
+
+    /**
+     * @method addCastType
+     * @param {String} type: Type to cast
+     * @param {String} targetType: Types to be casted from original type
+     * @param {Function} fn: Function to know how to cast
+     */
+
+    addCastType( type, targetType, fn ) {
+
+        this.supportedCastTypes[ type + '@' + targetType ] = fn;
+    }
 
     /**
      * @method unSelectAll
@@ -757,6 +781,12 @@ class GraphEditor {
 
         console.assert( el );
 
+        if( el == this.main )
+        {
+            console.warn( `Can't delete MAIN node!` );
+            return;
+        }
+
         deleteElement( el );
 
         delete this.nodes[ nodeId ];
@@ -790,6 +820,25 @@ class GraphEditor {
                 const ioIndex = targetIsInput ? link.outputIdx : link.inputIdx;
                 const nodelinkidx = io.links[ ioIndex ].indexOf( nodeId );
                 io.links[ ioIndex ].splice( nodelinkidx, 1 );
+
+                // Unique link, so it's done..
+                if( targetIsInput )
+                {
+                    delete io.dataset[ 'active' ];
+                }
+
+                // Check if any link left in case of output
+                else
+                {
+                    var active = false;
+                    for( var links of  io.links )
+                        for( var j of links ){
+                            console.log(j)
+                            active |= ( !!j );
+                        }
+                    if( !active )
+                        delete io.dataset[ 'active' ];
+                }
             }
 
             delete this.links[ key ];
@@ -1382,8 +1431,16 @@ class GraphEditor {
 
         if( src_ioType != dst_ioType && src_ioType != "any" && dst_ioType != "any"  )
         {
-            console.warn( `Can't link ${ src_ioType } to ${ dst_ioType }.` );
-            return;
+            // Different types, but it might be possible to cast types
+
+            const inputType = srcIsInput ? src_ioType : dst_ioType;
+            const outputType = srcIsInput ? dst_ioType : src_ioType;
+
+            if( !this.supportedCastTypes[ outputType + '@' + inputType ] )
+            {
+                console.warn( `Can't link ${ src_ioType } to ${ dst_ioType }.` );
+                return;
+            }
         }
 
         // Check if target it's an active input and remove the old link
@@ -1431,8 +1488,10 @@ class GraphEditor {
             path: path,
             inputNode: srcIsInput ? src_nodeId : dst_nodeId,
             inputIdx: srcIsInput ? src_ioIndex : dst_ioIndex,
+            inputType: srcIsInput ? src_ioType : dst_ioType,
             outputNode: srcIsInput ? dst_nodeId : src_nodeId,
-            outputIdx: srcIsInput ? dst_ioIndex : src_ioIndex
+            outputIdx: srcIsInput ? dst_ioIndex : src_ioIndex,
+            outputType: srcIsInput ? dst_ioType : src_ioType,
         } );
 
         path.dataset[ 'id' ] = pathId;
@@ -1953,6 +2012,17 @@ class GraphNode {
                 if( link.outputIdx != index )
                     continue;
 
+                if( data != undefined && link.inputType != link.outputType && link.inputType != "any" && link.outputType != "any"  )
+                {
+                    // In case of supported casting, use function to cast..
+
+                    var fn = this.graph.supportedCastTypes[ link.outputType + '@' + link.inputType ];
+
+                    // Use function if it's possible to cast!
+
+                    data = fn ? fn( LX.deepCopy( data ) ) : null;
+                }
+
                 link.data = data;
             }
         }
@@ -2396,7 +2466,7 @@ class NodeMain extends GraphNode
     }
 
     onExecute() {
-        var data = this.getInput( 1 );
+        var data = this.getInput( 2 );
         if( data == undefined )
             return;
         console.log( data );
