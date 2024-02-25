@@ -165,7 +165,9 @@ class GraphEditor {
 
         this._mousePosition = new LX.vec2( 0, 0 );
         this._deltaMousePosition = new LX.vec2( 0, 0 );
+        this._snappedDeltaMousePosition = new LX.vec2( 0, 0 );
         this._lastMousePosition = new LX.vec2( 0, 0 );
+        this._lastSnappedMousePosition = new LX.vec2( 0, 0 );
 
         this._undoSteps = [ ];
         this._redoSteps = [ ];
@@ -712,7 +714,8 @@ class GraphEditor {
 
     _onMoveNode( e ) {
         
-        let dT = this._deltaMousePosition.div( this._scale );
+        let dT = this.snapToGrid ? this._snappedDeltaMousePosition : this._deltaMousePosition;
+        dT.div( this._scale, dT);
 
         for( let nodeId of this.selectedNodes )
         {
@@ -1033,11 +1036,14 @@ class GraphEditor {
         
         this._mousePosition = new LX.vec2( e.clientX - rect.x , e.clientY - rect.y );
 
+        const snapPosition = new LX.vec2( this._mousePosition.x, this._mousePosition.y );
+
         if( this.snapToGrid )
         {
             const snapSize = this._patternSize.x * this._scale;
-            this._mousePosition.x = Math.floor( this._mousePosition.x / snapSize ) * snapSize;
-            this._mousePosition.y = Math.floor( this._mousePosition.y / snapSize ) * snapSize;
+            snapPosition.x = Math.floor( snapPosition.x / snapSize ) * snapSize;
+            snapPosition.y = Math.floor( snapPosition.y / snapSize ) * snapSize;
+            this._snappedDeltaMousePosition = snapPosition.sub( this._lastSnappedMousePosition );
         }
 
         this._deltaMousePosition = this._mousePosition.sub( this._lastMousePosition );
@@ -1094,6 +1100,11 @@ class GraphEditor {
             {
                 this._processMouseUp( e );
             }
+        }
+
+        if( this.snapToGrid )
+        {
+            this._lastSnappedMousePosition = snapPosition;
         }
 
         this._lastMousePosition = this._mousePosition;
