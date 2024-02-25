@@ -90,6 +90,48 @@ class GraphEditor {
             
         };
 
+        area.addOverlayButtons( [
+            // [
+            //     {
+            //         name: "Select",
+            //         icon: "fa fa-arrow-pointer",
+            //         callback: (value, event) => console.log(value),
+            //         selectable: true
+            //     },
+            //     {
+            //         name: "Move",
+            //         icon: "fa-solid fa-arrows-up-down-left-right",
+            //         img: "https://webglstudio.org/latest/imgs/mini-icon-gizmo.png",
+            //         callback: (value, event) => console.log(value),
+            //         selectable: true
+            //     },
+            //     {
+            //         name: "Rotate",
+            //         icon: "fa-solid fa-rotate-right",
+            //         callback: (value, event) => console.log(value),
+            //         selectable: true
+            //     }
+            // ],
+            [
+                {
+                    name: "Enable Snapping",
+                    icon: "fa fa-table-cells",
+                    callback: () => this._toggleSnapping(),
+                    selectable: true
+                },
+                {
+                    name: 10,
+                    options: [10, 100, 1000],
+                    callback: value => console.log(value)
+                }
+            ],
+            // {
+            //     name: "Button 4",
+            //     img: "https://webglstudio.org/latest/imgs/mini-icon-gizmo.png",
+            //     callback: (value, event) => console.log(value)
+            // }
+        ], { float: "htc" } );
+
         this.root.addEventListener( 'keydown', this._processKeyDown.bind( this ), true );
         this.root.addEventListener( 'keyup', this._processKeyUp.bind( this ), true );
         this.root.addEventListener( 'mousedown', this._processMouse.bind( this ) );
@@ -107,12 +149,18 @@ class GraphEditor {
         // Move to root..
         this.root.appendChild( this.propertiesDialog.root );
 
+        // Editor
+
+        this._mousePosition = new LX.vec2( 0, 0 );
+        this._deltaMousePosition = new LX.vec2( 0, 0 );
         this._lastMousePosition = new LX.vec2( 0, 0 );
 
         this._undoSteps = [ ];
         this._redoSteps = [ ];
 
         this.keys = { };
+
+        this.snapToGrid = false;
 
         // Nodes and connections
 
@@ -330,7 +378,7 @@ class GraphEditor {
         nodeContainer.style.left = "0";
         nodeContainer.style.top = "0";
         
-        this._translateNode( nodeContainer, node.position.x, node.position.y );
+        this._translateNode( nodeContainer, node.position );
 
         var color;
 
@@ -595,13 +643,13 @@ class GraphEditor {
 
     _onMoveNode( e ) {
         
+        let dT = this._deltaMousePosition.div( this._scale );
+
         for( let nodeId of this.selectedNodes )
         {
             const el = this._getNodeDOMElement( nodeId );
 
-            const dT = this._deltaMousePosition.div( this._scale );
-
-            this._translateNode( el, dT.x, dT.y );
+            this._translateNode( el, dT );
 
             this._updateNodeLinks( nodeId );
         }
@@ -667,10 +715,20 @@ class GraphEditor {
         this.selectedNodes.splice( idx, 1 );
     }
 
-    _translateNode( dom, x, y ) {
+    _translateNode( dom, deltaTranslation ) {
 
-        dom.style.left = ( parseFloat( dom.style.left ) + x ) + "px";
-        dom.style.top = ( parseFloat( dom.style.top ) + y ) + "px";
+        const translation = deltaTranslation.add( new LX.vec2( parseFloat( dom.style.left ), parseFloat( dom.style.top ) ) );
+
+        if( this.snapToGrid && dom.mustSnap )
+        {
+            const snapSize = this._patternSize.x;
+            translation.x = Math.floor( translation.x / snapSize ) * snapSize;
+            translation.y = Math.floor( translation.y / snapSize ) * snapSize;
+            dom.mustSnap = false;
+        }
+
+        dom.style.left = ( translation.x ) + "px";
+        dom.style.top = ( translation.y ) + "px";
     }
 
     _deleteNode( nodeId ) {
@@ -875,6 +933,14 @@ class GraphEditor {
         const rect = this.root.getBoundingClientRect();
         
         this._mousePosition = new LX.vec2( e.clientX - rect.x , e.clientY - rect.y );
+
+        if( this.snapToGrid )
+        {
+            const snapSize = this._patternSize.x * this._scale;
+            this._mousePosition.x = Math.floor( this._mousePosition.x / snapSize ) * snapSize;
+            this._mousePosition.y = Math.floor( this._mousePosition.y / snapSize ) * snapSize;
+        }
+
         this._deltaMousePosition = this._mousePosition.sub( this._lastMousePosition );
 
         if( e.type == 'mousedown' )
@@ -1053,6 +1119,11 @@ class GraphEditor {
 
                     const dom = this._createNodeDOM( newNode );
 
+                    if( this.snapToGrid )
+                    {
+                        dom.mustSnap = true;
+                    }
+
                     if( e )
                     {
                         const rect = this.root.getBoundingClientRect();
@@ -1061,7 +1132,7 @@ class GraphEditor {
             
                         position = this._getPatternPosition( position );
             
-                        this._translateNode( dom, position.x , position.y );
+                        this._translateNode( dom, position );
                     }
 
                     this.graph.nodes.push( newNode )
@@ -1257,19 +1328,6 @@ class GraphEditor {
         return renderPosition.div( this._scale ).sub( this._patternPosition );
     }
 
-    _computeNodeSize( node ) {
-
-        const ctx = this.dom.getContext("2d");
-        var textMetrics = ctx.measureText( node.title );
-
-        let sX = 32 + textMetrics.width * 1.475;
-
-        const rows = Math.max(1,  Math.max(node.inputs.length, node.outputs.length));
-        let sY = rows * GraphEditor.NODE_ROW_HEIGHT + GraphEditor.NODE_TITLE_HEIGHT;
-
-        return [sX, sY];
-    }
-
     _onLink( e ) {
 
         const linkData = this._generatingLink;
@@ -1387,12 +1445,12 @@ class GraphEditor {
         const type = this._generatingLink.ioType;
         const domEl = this._generatingLink.domEl;
 
-        const offsetY = this.root.offsetTop;
+        const offsetY = this.root.getBoundingClientRect().y;
 
         const ios = domEl.querySelector( type == GraphEditor.NODE_IO_INPUT ? '.lexgraphnodeinputs' : '.lexgraphnodeoutputs' );
         const ioEl = ios.childNodes[ index ].querySelector( '.io__type' );
         const startRect = ioEl.getBoundingClientRect();
-        
+
         let startScreenPos = new LX.vec2( startRect.x, startRect.y - offsetY );
         let startPos = this._getPatternPosition( startScreenPos );
         startPos.add( new LX.vec2( 7, 7 ), startPos );
@@ -1689,6 +1747,21 @@ class GraphEditor {
         // TODO
 
         console.log( "Redo!!" );
+    }
+
+    _toggleSnapping() {
+
+        this.snapToGrid = !this.snapToGrid;
+
+        // Trigger position snapping for each node if needed
+
+        if( this.snapToGrid )
+        {
+            for( let nodeDom of this._domNodes.children )
+            {
+                nodeDom.mustSnap = true;
+            }
+        }
     }
 
     _addGlobalActions() {
