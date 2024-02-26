@@ -3984,10 +3984,7 @@ class Panel {
                 delete list.unfocus_event;
                 return;
             }
-            let container = selectedOption.parentElement.parentElement.parentElement.parentElement; // there must be a nicer way...
-            let rect = event.currentTarget.getBoundingClientRect();
-            let y_pos = container.classList.contains('lexdialog') ? rect.top - 5 + rect.height : rect.y + rect.height - 5;
-            element.querySelector(".lexoptions").style.top = y_pos + 'px';
+            element.querySelector(".lexoptions").style.top = (selectedOption.offsetTop + selectedOption.offsetHeight) + 'px';
             element.querySelector(".lexoptions").style.width = (event.currentTarget.clientWidth) + 'px';
             element.querySelector(".lexoptions").toggleAttribute('hidden');
             list.focus();
@@ -5927,8 +5924,10 @@ class PocketDialog extends Dialog {
 
         // Custom 
         this.root.classList.add( "pocket" );
-        this.root.style.left = "calc(100% - " + (this.root.offsetWidth + 6) + "px)";
-        this.root.style.top = "0px";
+        if( !options.position ) {
+            this.root.style.left = "calc(100% - " + (this.root.offsetWidth + 6) + "px)";
+            this.root.style.top = "0px";
+        }
         this.panel.root.style.width = "calc( 100% - 12px )";
         this.panel.root.style.height = "calc( 100% - 40px )";
         this.dock_pos = PocketDialog.TOP;
@@ -5967,7 +5966,7 @@ class PocketDialog extends Dialog {
                         this.root.style.top = "calc(100% - " + (this.root.offsetHeight + 6) + "px)";
                         break;
                     case 'l': 
-                        this.root.style.left = "0px";
+                        this.root.style.left = options.position ? options.position[ 1 ] : "0px";
                         break;
                     }
                 }
