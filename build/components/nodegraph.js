@@ -192,10 +192,22 @@ class GraphEditor {
 
         this.propertiesDialog = new LX.PocketDialog( "Properties", null, {
             size: [ "300px", null ],
-            position: [ "12px", "12px" ],
+            position: [ "8px", "8px" ],
             float: "left",
             class: 'lexgraphpropdialog'
         } );
+
+        // Avoid closing the dialog on click..
+
+        this.propertiesDialog.root.addEventListener( "mousedown", function( e ) {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+        });
+
+        this.propertiesDialog.root.addEventListener( "mouseup", function( e ) {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+        });
 
         // Move to root..
         this.root.appendChild( this.propertiesDialog.root );
@@ -870,7 +882,10 @@ class GraphEditor {
                 break;
             case 'string':
                 panel.addText( p.name, p.value, (v) => { p.value = v } );
-            break;
+                break;
+            case 'select':
+                panel.addDropdown( p.name, p.options, p.value, (v) => { p.value = v } );
+                break;
             }
         }
 
@@ -1213,7 +1228,7 @@ class GraphEditor {
 
     _processClick( e ) {
 
-        if( e.target.classList.contains( 'lexgraphnodes' ) )
+        if( e.target.classList.contains( 'lexgraphnodes' ) || e.target.classList.contains( 'lexgraphgroup' ) )
         {
             this._processBackgroundClick( e );
             return;
@@ -2275,9 +2290,9 @@ class GraphNode {
         this.outputs.push( { name: name, type: type } );
     }
 
-    addProperty( name, type, value ) {
+    addProperty( name, type, value, selectOptions ) {
 
-        this.properties.push( { name: name, type: type, value: value } );
+        this.properties.push( { name: name, type: type, value: value, options: selectOptions } );
     }
 
     getInput( index ) {
@@ -2628,11 +2643,36 @@ class NodeSelect extends GraphNode
 
 GraphEditor.registerCustomNode( "logic/Select", NodeSelect );
 
-// TODO: ADD THIS WHEN DROPDOWN OPTIONS FOR PROPERTIES ARE AVAILABLE
-// GraphEditor.registerDefaultNode( "Compare", "logic", {
-//     inputs: [ { name: "A", type: "float" }, { name: "B", type: "float" }, { name: "True", type: "float" }, { name: "False", type: "float" } ],
-//     outputs: [ { type: "float" } ]
-// } );
+class NodeCompare extends GraphNode
+{
+    onCreate() {
+        this.addInput( "A", "any" );
+        this.addInput( "B", "any" );
+        this.addInput( "True", "any" );
+        this.addInput( "False", "any" );
+        this.addProperty( "Condition", "select", 'Equal', [ 'Equal', 'Not Equal', 'Less', 'Less Equal', 'Greater', 'Greater Equal' ] );
+        this.addOutput( null, "any" );
+    }
+    
+    onExecute() {
+        var a = this.getInput( 0 ), b = this.getInput( 1 ), TrueVal = this.getInput( 2 ), FalseVal = this.getInput( 3 );;
+        var cond = this.properties[ 0 ].value;
+        if( a == undefined || b == undefined || TrueVal == undefined || FalseVal == undefined )
+            return;
+        var output;
+        switch( cond ) {
+            case 'Equal': output = ( a == b ? TrueVal : FalseVal ); break;
+            case 'Not Equal': output = ( a != b ? TrueVal : FalseVal ); break;
+            case 'Less': output = ( a < b ? TrueVal : FalseVal ); break;
+            case 'Less Equal': output = ( a <= b ? TrueVal : FalseVal ); break;
+            case 'Greater': output = ( a > b ? TrueVal : FalseVal ); break;
+            case 'Greater Equal': output = ( a >= b ? TrueVal : FalseVal ); break;
+        }
+        this.setOutput( 0, output );
+    }
+}
+NodeCompare.description = "Compare A to B given the selected operator. If true, return value of True else return value of False."
+GraphEditor.registerCustomNode( "logic/Compare", NodeCompare );
 
 /*
     Event nodes
