@@ -3547,3 +3547,24 @@ pre .line-gutter {
   transition: border 0.05s linear;
   opacity: 0.5;
 }
+
+.lexgraphgroup .lexgraphgrouptitle {
+  font-size: 14px;
+  margin: 8px;
+  font-weight: 800;
+  color: var(--global-color-primary);
+  font-family: var(--global-title-font);
+  outline: none;
+  border: none;
+  background: none;
+  max-width: 128px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border-bottom: 1px solid var(--global-color-primary);
+}
+
+.lexgraphgroup .lexgraphgrouptitle:disabled {
+  pointer-events: none;
+  border: none;
+}

@@ -96,11 +96,12 @@ class GraphEditor {
     static EVENT_MOUSEMOVE      = 0;
     static EVENT_MOUSEWHEEL     = 1;
 
+    static LAST_GROUP_ID        = 0;
+
     // Node Drawing
 
     static NODE_IO_INPUT        = 0;
     static NODE_IO_OUTPUT       = 1;
-
 
     static NODE_TYPES           = { };
 
@@ -750,8 +751,11 @@ class GraphEditor {
         return nodeContainer;
     }
 
-    _getAllDOMNodes() {
+    _getAllDOMNodes( includeGroups ) {
         
+        if( includeGroups )
+            return this._domNodes.childNodes;
+
         return Array.from( this._domNodes.childNodes ).filter( v => v.classList.contains( 'lexgraphnode' ) );
     }
 
@@ -1968,12 +1972,51 @@ class GraphEditor {
 
         const group_bb = this._getBoundingFromNodes( this.selectedNodes );
 
-        var groupDOM = document.createElement( 'div' );
+        let groupDOM = document.createElement( 'div' );
         groupDOM.classList.add( 'lexgraphgroup' );
         groupDOM.style.left = group_bb.origin.x + "px";
         groupDOM.style.top = group_bb.origin.y + "px";
         groupDOM.style.width = group_bb.size.x + "px";
         groupDOM.style.height = group_bb.size.y + "px";
+
+        let groupTitle = document.createElement( 'input' );
+        let defaultName = `Group ${ GraphEditor.LAST_GROUP_ID }`;
+        groupTitle.value = defaultName;
+        groupTitle.classList.add( 'lexgraphgrouptitle' );
+        groupTitle.disabled = true;
+
+        // Dbl click to rename
+
+        groupTitle.addEventListener( 'mousedown', e => {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+        } );
+
+        groupTitle.addEventListener( 'focusout', e => {
+            groupTitle.disabled = true;
+            if( !groupTitle.value.length )
+                groupTitle.value = defaultName;
+        } );
+
+        groupTitle.addEventListener( 'keyup', e => {
+            if( e.key == 'Enter' ) {
+                groupTitle.blur();
+            }
+            else if( e.key == 'Escape' ) {
+                groupTitle.value = "";
+                groupTitle.blur();
+            }
+        });
+
+        groupDOM.addEventListener( 'dblclick', e => {
+            // Only for left click..
+            if( e.button != LX.MOUSE_LEFT_CLICK )
+                return;
+            groupTitle.disabled = false;
+            groupTitle.focus();
+        } );
+
+        groupDOM.appendChild( groupTitle );
 
         this._domNodes.prepend( groupDOM );
 
@@ -1983,6 +2026,8 @@ class GraphEditor {
             onMove: this._onMoveGroup.bind( this ),
             onDragStart: this._onDragGroup.bind( this )
         } );
+
+        GraphEditor.LAST_GROUP_ID++;
     }
 
     _addUndoStep( deleteRedo = true )  {
@@ -2055,7 +2100,7 @@ class GraphEditor {
 
         if( this.snapToGrid )
         {
-            for( let nodeDom of this._getAllDOMNodes() )
+            for( let nodeDom of this._getAllDOMNodes( true ) )
             {
                 nodeDom.mustSnap = true;
             }
