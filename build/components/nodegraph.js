@@ -900,6 +900,15 @@ class GraphEditor {
             case 'string':
                 panel.addText( p.name, p.value, (v) => { p.value = v } );
                 break;
+            case 'vec2':
+                panel.addVector2( p.name, p.value, (v) => { p.value = v } );
+                break;
+            case 'vec3':
+                panel.addVector3( p.name, p.value, (v) => { p.value = v } );
+                break;
+            case 'vec4':
+                panel.addVector4( p.name, p.value, (v) => { p.value = v } );
+                break;
             case 'select':
                 panel.addDropdown( p.name, p.options, p.value, (v) => { p.value = v } );
                 break;
@@ -916,6 +925,9 @@ class GraphEditor {
         // Delete from selected..
         const idx = this.selectedNodes.indexOf( dom.dataset[ 'id' ] );
         this.selectedNodes.splice( idx, 1 );
+
+        if( !this.selectedNodes.length )
+            this._togglePropertiesDialog( false );
     }
 
     _translateNode( dom, deltaTranslation ) {
