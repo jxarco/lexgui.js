@@ -1657,6 +1657,11 @@ class GraphEditor {
         return renderPosition.div( this._scale ).sub( this._patternPosition );
     }
 
+    _getRenderPosition( patternPosition ) {
+
+        return patternPosition.add( this._patternPosition ).mul( this._scale );
+    }
+
     _onLink( e ) {
 
         const linkData = this._generatingLink;
@@ -1798,18 +1803,23 @@ class GraphEditor {
             endPos = new LX.vec2( e.offsetX, e.offsetY );
 
             // Add node position, since I can't get the correct position directly from the event..
-            if( e.target.classList.contains( 'lexgraphnode' ) )
+            if( e.target.hasClass( [ 'lexgraphnode', 'lexgraphgroup' ] ) )
             {
-                endPos.add( new LX.vec2( parseFloat( e.target.style.left ), parseFloat( e.target.style.top ) ), endPos );
+                console.log( this._getNodePosition( e.target ) );
+                endPos.add( this._getNodePosition( e.target ), endPos );
+                endPos.add( new LX.vec2( 3, 3 ), endPos );
             }
-            else if( e.target.classList.contains( 'io__type' ) )
+            else if( e.target.hasClass( [ 'io__type', 'lexgraphgroupresizer' ] ) )
             {
                 var parent = e.target.offsetParent;
                 // Add parent offset
-                endPos.add( new LX.vec2( parseFloat( parent.style.left ), parseFloat( parent.style.top ) ), endPos );
+                endPos.add( this._getNodePosition( parent ), endPos );
                 // Add own offset
                 endPos.add( new LX.vec2( e.target.offsetLeft, e.target.offsetTop ), endPos );
+                endPos.add( new LX.vec2( 3, 3 ), endPos );
             }
+
+            endPos = this._getRenderPosition( endPos );
         }
         else
         {
@@ -1825,7 +1835,7 @@ class GraphEditor {
         }
 
         const color = getComputedStyle( ioEl ).backgroundColor;
-        this._createLinkPath( path, startPos, endPos, color );
+        this._createLinkPath( path, startPos, endPos, color, !!e );
 
         return path;
     }
@@ -1881,11 +1891,15 @@ class GraphEditor {
         io1.links[ link.outputIdx ].push( link.outputNode );
     }
 
-    _createLinkPath( path, startPos, endPos, color ) {
+    _createLinkPath( path, startPos, endPos, color, exactEnd ) {
 
         const dist = 6 * this._scale;
         startPos.add( new LX.vec2( dist, dist ), startPos );
-        endPos.add( new LX.vec2( dist, dist ), endPos );
+
+        if( !exactEnd )
+        {
+            endPos.add( new LX.vec2( dist, dist ), endPos );
+        }
 
         startPos = this._getPatternPosition( startPos );
         endPos = this._getPatternPosition( endPos );
