@@ -7523,9 +7523,15 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         configurable: true
     });
 
-    Element.prototype.insertChildAtIndex = function(child, index = Infinity) {
-        if (index >= this.children.length) this.appendChild(child);
-        else this.insertBefore(child, this.children[index]);
+    Element.prototype.insertChildAtIndex = function( child, index = Infinity ) {
+        if ( index >= this.children.length ) this.appendChild( child );
+        else this.insertBefore( child, this.children[index] );
+    }
+
+    Element.prototype.hasClass = function( list ) {
+        list = [].concat( list );
+        var r = list.filter( v => this.classList.contains( v ) );
+        return !!r.length;
     }
 
     Element.prototype.getComputedSize = function() {
