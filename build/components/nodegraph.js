@@ -1790,10 +1790,7 @@ class GraphEditor {
         const ioEl = ios.childNodes[ index ].querySelector( '.io__type' );
         const startRect = ioEl.getBoundingClientRect();
 
-        let startScreenPos = new LX.vec2( startRect.x, startRect.y - offsetY );
-        let startPos = this._getPatternPosition( startScreenPos );
-        startPos.add( new LX.vec2( 7, 7 ), startPos );
-        
+        let startPos = new LX.vec2( startRect.x, startRect.y - offsetY );
         let endPos = null;
 
         if( e )
@@ -1817,26 +1814,18 @@ class GraphEditor {
         else
         {
             const ioRect = endIO.querySelector( '.io__type' ).getBoundingClientRect();
-            
             endPos = new LX.vec2( ioRect.x, ioRect.y - offsetY );
-            endPos = this._getPatternPosition( endPos );
-            endPos.add( new LX.vec2( 7, 7 ), endPos );
         }
 
-        const distanceX = LX.UTILS.clamp( Math.abs( startPos.x - endPos.x ), 0.0, 180.0 );
-        const cPDistance = 128.0 * Math.pow( distanceX / 180.0, 1.5 ) * ( type == GraphEditor.NODE_IO_INPUT ? -1 : 1 );
+        if( type == GraphEditor.NODE_IO_INPUT )
+        {
+            var tmp = endPos;
+            endPos = startPos;
+            startPos = tmp;
+        }
 
-        let cPoint1 = startScreenPos.add( new LX.vec2( cPDistance, 0 ) );
-        cPoint1 = this._getPatternPosition( cPoint1 );
-        cPoint1.add( new LX.vec2( 7, 7 ), cPoint1 );
-        let cPoint2 = endPos.sub( new LX.vec2( cPDistance, 0 ) );
-
-        path.setAttribute( 'd', `
-            M ${ startPos.x },${ startPos.y }
-            C ${ cPoint1.x },${ cPoint1.y } ${ cPoint2.x },${ cPoint2.y } ${ endPos.x },${ endPos.y }
-        ` );
-
-        path.setAttribute( 'stroke', endIO ? getComputedStyle( ioEl ).backgroundColor : "#b4b4b4" );
+        const color = getComputedStyle( ioEl ).backgroundColor;
+        this._createLinkPath( path, startPos, endPos, color );
 
         return path;
     }
@@ -1864,9 +1853,7 @@ class GraphEditor {
         const io0 = outputs.childNodes[ link.outputIdx ];
         const startRect = io0.querySelector( '.io__type' ).getBoundingClientRect();
 
-        let startScreenPos = new LX.vec2( startRect.x, startRect.y - offsetY );
-        let startPos = this._getPatternPosition( startScreenPos );
-        startPos.add( new LX.vec2( 7, 7 ), startPos );
+        let startPos = new LX.vec2( startRect.x, startRect.y - offsetY + 6 );
 
         // End pos
 
@@ -1874,26 +1861,12 @@ class GraphEditor {
         const io1 = inputs.childNodes[ link.inputIdx ];
         const endRect = io1.querySelector( '.io__type' ).getBoundingClientRect();
 
-        let endPos = new LX.vec2( endRect.x, endRect.y - offsetY );
-        endPos = this._getPatternPosition( endPos );
-        endPos.add( new LX.vec2( 7, 7 ), endPos );
+        let endPos = new LX.vec2( endRect.x, endRect.y - offsetY + 6 );
 
         // Generate bezier curve
 
-        const distanceX = LX.UTILS.clamp( Math.abs( startPos.x - endPos.x ), 0.0, 180.0 );
-        const cPDistance = 128.0 * Math.pow( distanceX / 180.0, 1.5 );
-
-        let cPoint1 = startScreenPos.add( new LX.vec2( cPDistance, 0 ) );
-        cPoint1 = this._getPatternPosition( cPoint1 );
-        cPoint1.add( new LX.vec2( 7, 7 ), cPoint1 );
-        let cPoint2 = endPos.sub( new LX.vec2( cPDistance, 0 ) );
-
-        path.setAttribute( 'd', `
-            M ${ startPos.x },${ startPos.y }
-            C ${ cPoint1.x },${ cPoint1.y } ${ cPoint2.x },${ cPoint2.y } ${ endPos.x },${ endPos.y }
-        ` );
-
-        path.setAttribute( 'stroke', getComputedStyle( io1.querySelector( '.io__type' ) ).backgroundColor );
+        const color = getComputedStyle( io1.querySelector( '.io__type' ) ).backgroundColor;
+        this._createLinkPath( path, startPos, endPos, color );
 
         link.path = path;
 
@@ -1906,6 +1879,29 @@ class GraphEditor {
         io1.links = [ ];
         io1.links[ link.outputIdx ] = io1.links[ link.outputIdx ] ?? [ ];
         io1.links[ link.outputIdx ].push( link.outputNode );
+    }
+
+    _createLinkPath( path, startPos, endPos, color ) {
+
+        const dist = 6 * this._scale;
+        startPos.add( new LX.vec2( dist, dist ), startPos );
+        endPos.add( new LX.vec2( dist, dist ), endPos );
+
+        startPos = this._getPatternPosition( startPos );
+        endPos = this._getPatternPosition( endPos );
+
+        const distanceX = LX.UTILS.clamp( Math.abs( startPos.x - endPos.x ), 0.0, 256.0 );
+        const cPDistance = 128.0 * Math.pow( distanceX / 256.0, 0.5 );
+
+        let cPoint1 = startPos.add( new LX.vec2( cPDistance, 0 ) );
+        let cPoint2 = endPos.sub( new LX.vec2( cPDistance, 0 ) );
+
+        path.setAttribute( 'd', `
+            M ${ startPos.x },${ startPos.y }
+            C ${ cPoint1.x },${ cPoint1.y } ${ cPoint2.x },${ cPoint2.y } ${ endPos.x },${ endPos.y }
+        ` );
+
+        path.setAttribute( 'stroke', color );
     }
 
     _updateNodeLinks( nodeId ) {
@@ -2207,6 +2203,7 @@ class GraphEditor {
             document.body.classList.remove( 'nocursor' );
             groupResizer.classList.remove( 'nocursor' );
         }
+
         let groupTitle = document.createElement( 'input' );
         let defaultName = `Group ${ GraphEditor.LAST_GROUP_ID }`;
         groupTitle.value = defaultName;
