@@ -482,7 +482,7 @@ class GraphEditor {
 
     _createNodeDOM( node ) {
 
-        node.graph = this;
+        node.editor = this;
 
         var nodeContainer = document.createElement( 'div' );
         nodeContainer.classList.add( 'lexgraphnode' );
@@ -2421,14 +2421,14 @@ class GraphNode {
 
         // Get data from link
 
-        for( let linkId in this.graph.links )
+        for( let linkId in this.editor.graph.links )
         {
             const idx = linkId.indexOf( '@' + this.id );
 
             if( idx < 0 )
                 continue;
 
-            const nodeLinks = this.graph.links[ linkId ];
+            const nodeLinks = this.editor.graph.links[ linkId ];
 
             for ( var link of nodeLinks )
             {
@@ -2448,14 +2448,14 @@ class GraphNode {
 
         // Set data in link
 
-        for( let linkId in this.graph.links )
+        for( let linkId in this.editor.graph.links )
         {
             const idx = linkId.indexOf( this.id + '@' );
 
             if( idx < 0 )
                 continue;
 
-            const nodeLinks = this.graph.links[ linkId ];
+            const nodeLinks = this.editor.graph.links[ linkId ];
 
             for ( var link of nodeLinks )
             {
@@ -2466,7 +2466,7 @@ class GraphNode {
                 {
                     // In case of supported casting, use function to cast..
 
-                    var fn = this.graph.supportedCastTypes[ link.outputType + '@' + link.inputType ];
+                    var fn = this.editor.supportedCastTypes[ link.outputType + '@' + link.inputType ];
 
                     // Use function if it's possible to cast!
 
@@ -2805,7 +2805,7 @@ class NodeKeyDown extends GraphNode
     }
     
     onExecute() {
-        this.setOutput( 0, !!this.graph.keys[ this.properties[ 0 ].value ] );
+        this.setOutput( 0, !!this.editor.keys[ this.properties[ 0 ].value ] );
     }
 }
 
@@ -2923,7 +2923,7 @@ class NodeGetVariable extends GraphNode
         var varName = this.getInput( 0 );
         if( varName == undefined )
             return;
-        var data = this.graph.getVariable( varName );
+        var data = this.editor.getVariable( varName );
         if( data != undefined )
             this.setOutput( 0, data );
     }
