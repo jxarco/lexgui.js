@@ -208,7 +208,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             offsetY = e.clientY - rect.y;
             document.addEventListener( "mousemove", onMove );
             if( onDragStart )
-                onDragStart( currentTarget );
+                onDragStart( currentTarget, e );
         }, false );
         
         document.addEventListener( 'mouseup', () => {

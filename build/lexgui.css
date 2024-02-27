@@ -3308,6 +3308,7 @@ pre .line-gutter {
 
 .lexgraph svg {
   position: absolute;
+  overflow: visible;
   top: 0;
   left: 0;
   bottom: 0;

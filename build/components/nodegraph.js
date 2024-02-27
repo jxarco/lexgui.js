@@ -527,14 +527,21 @@ class GraphEditor {
             if( e.button != LX.MOUSE_LEFT_CLICK )
                 return;
 
-            if( this.selectedNodes.length > 1 && !e.shiftKey )
+            if( e.altKey )
             {
-                this.unSelectAll( true );
+                this._unSelectNode( nodeContainer );
             }
-
-            if( !nodeContainer.classList.contains( 'selected' ) )
+            else
             {
-                this._selectNode( nodeContainer, e.shiftKey );
+                if( this.selectedNodes.length > 1 && ( !e.ctrlKey && !e.shiftKey ) )
+                {
+                    this.unSelectAll( true );
+                }
+
+                if( !nodeContainer.classList.contains( 'selected' ) )
+                {
+                    this._selectNode( nodeContainer, ( e.ctrlKey || e.shiftKey ) );
+                }
             }
         } );
 
@@ -684,7 +691,10 @@ class GraphEditor {
 
         // Move nodes
 
-        LX.makeDraggable( nodeContainer, { onMove: this._onMoveNode.bind( this ) } );
+        LX.makeDraggable( nodeContainer, {
+            onMove: this._onMoveNodes.bind( this ),
+            onDragStart: this._onDragNode.bind( this )
+        } );
 
         // Manage links
 
@@ -770,7 +780,7 @@ class GraphEditor {
         return Array.from( this._domNodes.childNodes ).filter( v => v.classList.contains( 'lexgraphnode' ) );
     }
 
-    _onMoveNode( target ) {
+    _onMoveNodes( target ) {
 
         let dT = this.snapToGrid ? this._snappedDeltaMousePosition : this._deltaMousePosition;
         dT.div( this._scale, dT);
@@ -783,6 +793,14 @@ class GraphEditor {
 
             this._updateNodeLinks( nodeId );
         }
+    }
+
+    _onDragNode( target, e ) {
+
+        if( !e.shiftKey )
+            return;
+
+        this._cloneNodes();
     }
 
     _onMoveGroup( target ) {
@@ -983,6 +1001,34 @@ class GraphEditor {
             }
 
             delete this.graph.links[ key ];
+        }
+    }
+
+    _cloneNodes() {
+
+        // Clone all selected nodes
+        const selectedIds = LX.deepCopy( this.selectedNodes );
+
+        this.unSelectAll();
+
+        debugger;
+
+        for( let nodeId of selectedIds )
+        {
+            const nodeInfo = this.nodes[ nodeId ];
+            if( !nodeInfo )
+                return;
+
+            const el = this._getNodeDOMElement( nodeId );
+            const data = nodeInfo.data;
+            const newNode = GraphEditor.addNode( data.type );
+            const newDom = this._createNodeDOM( newNode );
+
+            this._translateNode( newDom, this._getNodePosition( el ) );
+
+            this._selectNode( newDom, true );
+
+            this.graph.nodes.push( newNode );
         }
     }
 
@@ -1270,7 +1316,7 @@ class GraphEditor {
 
         else if( this._boxSelecting )
         {
-            if( !e.shiftKey && !e.altKey )
+            if( !e.ctrlKey && !e.altKey )
                 this.unSelectAll();
 
             this._selectNodesInBox( this._boxSelecting, this._mousePosition, e.altKey );
@@ -1370,7 +1416,7 @@ class GraphEditor {
                         this._translateNode( dom, position );
                     }
 
-                    this.graph.nodes.push( newNode )
+                    this.graph.nodes.push( newNode );
 
                 } );
             }
