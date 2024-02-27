@@ -1023,8 +1023,6 @@ class GraphEditor {
 
         this.unSelectAll();
 
-        debugger;
-
         for( let nodeId of selectedIds )
         {
             const nodeInfo = this.nodes[ nodeId ];
@@ -2032,7 +2030,7 @@ class GraphEditor {
 
         // Add padding
 
-        const groupContentPadding = 12;
+        const groupContentPadding = 8;
 
         group_bb.origin.sub( new LX.vec2( groupContentPadding ), group_bb.origin );
         group_bb.origin.sub( new LX.vec2( groupContentPadding ), group_bb.origin );
@@ -2060,6 +2058,50 @@ class GraphEditor {
         groupDOM.style.width = group_bb.size.x + "px";
         groupDOM.style.height = group_bb.size.y + "px";
 
+        let groupResizer = document.createElement( 'div' );
+        groupResizer.classList.add( 'lexgraphgroupresizer' );
+
+        groupResizer.addEventListener( 'mousedown', inner_mousedown );
+
+        var that = this;
+        var lastPos = [0,0];
+
+        function inner_mousedown( e )
+        {
+            var doc = that.root.ownerDocument;
+            doc.addEventListener( 'mousemove', inner_mousemove );
+            doc.addEventListener( 'mouseup', inner_mouseup );
+            lastPos[0] = e.x;
+            lastPos[1] = e.y;
+            e.stopPropagation();
+            e.preventDefault();
+            document.body.classList.add( 'nocursor' );
+            groupResizer.classList.add( 'nocursor' );
+        }
+
+        function inner_mousemove( e )
+        {
+            let dt = new LX.vec2( lastPos[0] - e.x, lastPos[1] - e.y );
+            dt.div( that._scale, dt);
+
+            groupDOM.style.width = ( parseFloat( groupDOM.style.width ) - dt.x ) + "px";
+            groupDOM.style.height = ( parseFloat( groupDOM.style.height ) - dt.y ) + "px";
+
+            lastPos[0] = e.x;
+            lastPos[1] = e.y;
+
+            e.stopPropagation();
+            e.preventDefault();
+        }
+
+        function inner_mouseup( e )
+        {
+            var doc = that.root.ownerDocument;
+            doc.removeEventListener( 'mousemove', inner_mousemove );
+            doc.removeEventListener( 'mouseup', inner_mouseup );
+            document.body.classList.remove( 'nocursor' );
+            groupResizer.classList.remove( 'nocursor' );
+        }
         let groupTitle = document.createElement( 'input' );
         let defaultName = `Group ${ GraphEditor.LAST_GROUP_ID }`;
         groupTitle.value = defaultName;
@@ -2097,6 +2139,7 @@ class GraphEditor {
             groupTitle.focus();
         } );
 
+        groupDOM.appendChild( groupResizer );
         groupDOM.appendChild( groupTitle );
 
         this._domNodes.prepend( groupDOM );

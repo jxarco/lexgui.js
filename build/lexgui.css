@@ -3573,3 +3573,19 @@ pre .line-gutter {
   pointer-events: none;
   border: none;
 }
+
+.lexgraphgroup .lexgraphgroupresizer {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  border-bottom: 2px solid var(--global-color-primary);
+  border-right: 2px solid var(--global-color-primary);
+  border-bottom-right-radius: 8px;
+}
+
+.lexgraphgroup .lexgraphgroupresizer:hover {
+  border-bottom: 2px solid #4b4b4ba8;
+  border-right: 2px solid #4b4b4ba8;
+}
