@@ -232,7 +232,6 @@ class GraphEditor {
         // Nodes and connections
 
         this.nodes      = { };
-        this.links      = { };
         this.variables  = { };
 
         this.selectedNodes = [ ];
@@ -935,7 +934,7 @@ class GraphEditor {
 
         // Delete connected links..
         
-        for( let key in this.links )
+        for( let key in this.graph.links )
         {
             if( !key.includes( nodeId ) )
                 continue;
@@ -945,11 +944,11 @@ class GraphEditor {
 
             // Remove the connection from the other before deleting..
 
-            const numLinks = this.links[ key ].length;
+            const numLinks = this.graph.links[ key ].length;
 
             for( var i = 0; i < numLinks; ++i )
             {
-                var link = this.links[ key ][ i ];
+                var link = this.graph.links[ key ][ i ];
 
                 deleteElement( link.path.parentElement );
 
@@ -983,7 +982,7 @@ class GraphEditor {
                 }
             }
 
-            delete this.links[ key ];
+            delete this.graph.links[ key ];
         }
     }
 
@@ -1001,7 +1000,7 @@ class GraphEditor {
     _getLinks( nodeSrcId, nodeDstId ) {
 
         const str = nodeSrcId + '@' + nodeDstId;
-        return this.links[ str ];
+        return this.graph.links[ str ];
     }
 
     _deleteLinks( nodeId, io ) {
@@ -1446,7 +1445,7 @@ class GraphEditor {
 
             visitedNodes[ id ] = true;
 
-            for( let linkId in this.links )
+            for( let linkId in this.graph.links )
             {
                 const idx = linkId.indexOf( '@' + id );
 
@@ -1649,9 +1648,9 @@ class GraphEditor {
 
         const pathId = ( srcIsInput ? dst_nodeId : src_nodeId ) + '@' + ( srcIsInput ? src_nodeId : dst_nodeId );
 
-        if( !this.links[ pathId ] ) this.links[ pathId ] = [];
+        if( !this.graph.links[ pathId ] ) this.graph.links[ pathId ] = [];
 
-        this.links[ pathId ].push( {
+        this.graph.links[ pathId ].push( {
             path: path,
             inputNode: srcIsInput ? src_nodeId : dst_nodeId,
             inputIdx: srcIsInput ? src_ioIndex : dst_ioIndex,
@@ -2157,6 +2156,8 @@ class Graph {
 
         this.nodes = [ ];
 
+        this.links = { };
+
         // const mainNode = GraphEditor.addNode( 'system/Main' );
         // mainNode.position = new LX.vec2( 650, 400 );
 
@@ -2232,10 +2233,18 @@ class Graph {
         
         var o = { };
         o.nodes = [ ];
+        o.links = [ ];
 
         for( let node of this.nodes )
         {
             o.nodes.push( node.serialize() );
+        }
+
+        for( let linkId in this.links )
+        {
+            const ioLinks = LX.deepCopy( this.links[ linkId ] );
+            ioLinks.forEach( v => delete v.path );
+            o.links.push( ioLinks );
         }
 
         // editor options?
