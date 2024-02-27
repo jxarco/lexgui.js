@@ -545,6 +545,32 @@ class GraphEditor {
             }
         } );
 
+        nodeContainer.addEventListener( 'contextmenu', e => {
+
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            LX.addContextMenu(null, e, m => {
+
+                m.add( "Copy", () => {
+                    // TODO
+                    // ...
+                } );
+
+                m.add( "Paste", () => {
+                    // TODO
+                    // ...
+                } );
+
+                m.add( "" );
+
+                m.add( "Delete", () => {
+                    this._deleteNode( nodeContainer.dataset[ 'id' ] );
+                } );
+            });
+        } );
+
         nodeContainer.addEventListener( 'dblclick', e => {
 
             // Only for left click..
