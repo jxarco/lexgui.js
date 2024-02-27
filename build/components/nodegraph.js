@@ -168,7 +168,7 @@ class GraphEditor {
                 {
                     name: "Import",
                     icon: "fa fa-upload",
-                    callback: (value, event) => { this.graph.load( "../../data/graph_sample.json", this.setGraph.bind( this ) ); }
+                    callback: (value, event) => { this.loadGraph( "../../data/graph_sample.json" ); }
                 },
                 {
                     name: "Export",
@@ -377,19 +377,29 @@ class GraphEditor {
 
     setGraph( graph ) {
 
+        this.clear();
+
         this.graph = graph;
 
         if( !this.graph.nodes )
         {
             console.warn( 'Graph does not contain any node!' );
-            return ;
+            return;
         }
-
-        this.nodes = { };
 
         for( let node of this.graph.nodes )
         {
             this._createNodeDOM( node );
+        }
+
+        for( let linkId in this.graph.links )
+        {
+            const links = this.graph.links[ linkId ];
+
+            for( let link of links )
+            {
+                this._createLink( link );
+            }
         }
 
         // TODO: REMOVE THIS (DEBUG)
@@ -428,6 +438,8 @@ class GraphEditor {
 
         this._domNodes.innerHTML = "";
         this._domLinks.innerHTML = "";
+
+        this.nodes = { };
     }
 
     setVariable( name, value ) {
@@ -781,7 +793,7 @@ class GraphEditor {
 
         } );
 
-        const id = node.title.toLowerCase().replaceAll( /\s/g, '-' ) + '-' + LX.UTILS.uidGenerator();
+        const id = node.id ?? node.title.toLowerCase().replaceAll( /\s/g, '-' ) + '-' + LX.UTILS.uidGenerator();
         this.nodes[ id ] = { data: node, dom: nodeContainer };
         
         node.id = id;
@@ -1829,6 +1841,73 @@ class GraphEditor {
         return path;
     }
 
+    _createLink( link ) {
+
+        var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+        svg.classList.add( "link-svg" );
+        svg.style.width = "100%";
+        svg.style.height = "100%";
+        this._domLinks.appendChild( svg );
+
+        var path = document.createElementNS( 'http://www.w3.org/2000/svg', 'path' );
+        path.setAttribute( 'fill', 'none' );
+        svg.appendChild( path );
+
+        const inputNodeDom = this._getNodeDOMElement( link.inputNode );
+        const outputNodeDom = this._getNodeDOMElement( link.outputNode );
+
+        // Start pos
+
+        const offsetY = this.root.getBoundingClientRect().y;
+
+        const outputs = outputNodeDom.querySelector( '.lexgraphnodeoutputs' );
+        const io0 = outputs.childNodes[ link.outputIdx ];
+        const startRect = io0.querySelector( '.io__type' ).getBoundingClientRect();
+
+        let startScreenPos = new LX.vec2( startRect.x, startRect.y - offsetY );
+        let startPos = this._getPatternPosition( startScreenPos );
+        startPos.add( new LX.vec2( 7, 7 ), startPos );
+
+        // End pos
+
+        const inputs = inputNodeDom.querySelector( '.lexgraphnodeinputs' );
+        const io1 = inputs.childNodes[ link.inputIdx ];
+        const endRect = io1.querySelector( '.io__type' ).getBoundingClientRect();
+
+        let endPos = new LX.vec2( endRect.x, endRect.y - offsetY );
+        endPos = this._getPatternPosition( endPos );
+        endPos.add( new LX.vec2( 7, 7 ), endPos );
+
+        // Generate bezier curve
+
+        const distanceX = LX.UTILS.clamp( Math.abs( startPos.x - endPos.x ), 0.0, 180.0 );
+        const cPDistance = 128.0 * Math.pow( distanceX / 180.0, 1.5 );
+
+        let cPoint1 = startScreenPos.add( new LX.vec2( cPDistance, 0 ) );
+        cPoint1 = this._getPatternPosition( cPoint1 );
+        cPoint1.add( new LX.vec2( 7, 7 ), cPoint1 );
+        let cPoint2 = endPos.sub( new LX.vec2( cPDistance, 0 ) );
+
+        path.setAttribute( 'd', `
+            M ${ startPos.x },${ startPos.y }
+            C ${ cPoint1.x },${ cPoint1.y } ${ cPoint2.x },${ cPoint2.y } ${ endPos.x },${ endPos.y }
+        ` );
+
+        path.setAttribute( 'stroke', getComputedStyle( io1.querySelector( '.io__type' ) ).backgroundColor );
+
+        link.path = path;
+
+        // Store data in each IO
+
+        io0.links = [ ];
+        io0.links[ link.inputIdx ] = io0.links[ link.inputIdx ] ?? [ ];
+        io0.links[ link.inputIdx ].push( link.inputNode );
+
+        io1.links = [ ];
+        io1.links[ link.outputIdx ] = io1.links[ link.outputIdx ] ?? [ ];
+        io1.links[ link.outputIdx ].push( link.outputNode );
+    }
+
     _updateNodeLinks( nodeId ) {
 
         var node = this.nodes[ nodeId ] ? this.nodes[ nodeId ].data : null;
@@ -2277,7 +2356,9 @@ class Graph {
      * 
      */
 
-    constructor( options = {} ) {
+    constructor( name, options = {} ) {
+
+        this.name = name ?? "Unnamed Graph";
 
         // Nodes
 
@@ -2345,6 +2426,8 @@ class Graph {
             this.nodes.push( newNode );
         }
 
+        this.links = o.links;
+
         // editor options?
 
         // zoom/translation ??
@@ -2356,11 +2439,11 @@ class Graph {
      * @returns JSON data from the serialized graph
      */
 
-    export( prettify ) {
+    export( prettify = true ) {
         
         var o = { };
         o.nodes = [ ];
-        o.links = [ ];
+        o.links = { };
 
         for( let node of this.nodes )
         {
@@ -2371,7 +2454,7 @@ class Graph {
         {
             const ioLinks = LX.deepCopy( this.links[ linkId ] );
             ioLinks.forEach( v => delete v.path );
-            o.links.push( ioLinks );
+            o.links[ linkId ] = ioLinks;
         }
 
         // editor options?
@@ -2388,7 +2471,7 @@ class Graph {
             console.error( `Can't export GraphNode [${ this.title }] of type [${ this.type }].` );
         }
 
-        console.log( o );
+        LX.downloadFile( this.name + ".json", o );
 
         return o;
     }
