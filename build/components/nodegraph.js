@@ -1040,8 +1040,17 @@ class GraphEditor {
             const idx = targetIO.links[ srcIndex ].findIndex( v => v == nodeId );
             targetIO.links[ srcIndex ].splice( idx, 1 );
 
-            // No links left..
-            if( !targetIO.links.reduce( c => c !== undefined, 0 ) ) {
+            let active = false;
+
+            for( var ls of targetIO.links )
+            {
+                if( !ls ) continue;
+                // Check links left per io
+                active |= ls.reduce( c => c !== undefined, 0 );
+            }
+
+            if( !active )
+            {
                 delete targetIO.links;
                 delete targetIO.dataset[ 'active' ];
             }
