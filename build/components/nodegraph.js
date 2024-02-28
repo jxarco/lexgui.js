@@ -179,9 +179,9 @@ class GraphEditor {
                     selectable: true
                 },
                 {
-                    name: 10,
-                    options: [10, 100, 1000],
-                    callback: value => console.log(value)
+                    name: 1,
+                    options: [1, 2, 3],
+                    callback: value => this._setSnappingValue( value ),
                 }
             ],
             [
@@ -245,7 +245,8 @@ class GraphEditor {
 
         this.keys = { };
 
-        this.snapToGrid = false;
+        this._snapToGrid = false;
+        this._snapValue = 1.0;
 
         this._scale = 1.0;
 
@@ -840,7 +841,7 @@ class GraphEditor {
 
     _onMoveNodes( target ) {
 
-        let dT = this.snapToGrid ? this._snappedDeltaMousePosition : this._deltaMousePosition;
+        let dT = this._snapToGrid ? this._snappedDeltaMousePosition : this._deltaMousePosition;
         dT.div( this._scale, dT);
 
         for( let nodeId of this.selectedNodes )
@@ -870,7 +871,7 @@ class GraphEditor {
         if( !groupNodeIds )
             return;
 
-        let dT = this.snapToGrid ? this._snappedDeltaMousePosition : this._deltaMousePosition;
+        let dT = this._snapToGrid ? this._snappedDeltaMousePosition : this._deltaMousePosition;
         dT.div( this._scale, dT);
 
         this._translateNode( target, dT );
@@ -992,9 +993,9 @@ class GraphEditor {
 
         const translation = deltaTranslation.add( new LX.vec2( parseFloat( dom.style.left ), parseFloat( dom.style.top ) ) );
 
-        if( this.snapToGrid && dom.mustSnap )
+        if( this._snapToGrid && dom.mustSnap )
         {
-            const snapSize = this._patternSize.x;
+            const snapSize = this._patternSize.x * this._snapValue * this._snapValue;
             translation.x = Math.floor( translation.x / snapSize ) * snapSize;
             translation.y = Math.floor( translation.y / snapSize ) * snapSize;
             dom.mustSnap = false;
@@ -1276,9 +1277,9 @@ class GraphEditor {
 
         const snapPosition = new LX.vec2( this._mousePosition.x, this._mousePosition.y );
 
-        if( this.snapToGrid )
+        if( this._snapToGrid )
         {
-            const snapSize = this._patternSize.x * this._scale;
+            const snapSize = this._patternSize.x * this._snapValue * this._scale;
             snapPosition.x = Math.floor( snapPosition.x / snapSize ) * snapSize;
             snapPosition.y = Math.floor( snapPosition.y / snapSize ) * snapSize;
             this._snappedDeltaMousePosition = snapPosition.sub( this._lastSnappedMousePosition );
@@ -1340,7 +1341,7 @@ class GraphEditor {
             }
         }
 
-        if( this.snapToGrid )
+        if( this._snapToGrid )
         {
             this._lastSnappedMousePosition = snapPosition;
         }
@@ -1468,7 +1469,7 @@ class GraphEditor {
 
                     const dom = this._createNodeDOM( newNode );
 
-                    if( this.snapToGrid )
+                    if( this._snapToGrid )
                     {
                         dom.mustSnap = true;
                     }
@@ -2354,13 +2355,18 @@ class GraphEditor {
         }
     }
 
+    _setSnappingValue( value ) {
+
+        this._snapValue = value;
+    }
+
     _toggleSnapping() {
 
-        this.snapToGrid = !this.snapToGrid;
+        this._snapToGrid = !this._snapToGrid;
 
         // Trigger position snapping for each node if needed
 
-        if( this.snapToGrid )
+        if( this._snapToGrid )
         {
             for( let nodeDom of this._getAllDOMNodes( true ) )
             {

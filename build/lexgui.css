@@ -1926,13 +1926,12 @@ meter::-webkit-meter-even-less-good-value {
 /* Side Bar */
 
 .lexsidebar {
-  
+  text-align: center;
 }
 
 .lexsidebar .lexsidebarentry {
   width: 64px;
   height: 64px;
-  padding-left: 7.5px;
   margin-top: -6px;
 }
 
@@ -1949,6 +1948,7 @@ meter::-webkit-meter-even-less-good-value {
   border-radius: 10px;
   border: 0px solid var(--global-color-transparent);
   transition: border 0.1s ease-in-out;
+  cursor: pointer;
 }
 
 .lexsidebar .lexsidebarentry button:hover {
