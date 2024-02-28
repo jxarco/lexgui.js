@@ -4394,7 +4394,7 @@ class Panel {
             buttonName = "Add item";
             buttonName += "<a class='fa-solid fa-plus' style='float:right; margin-right: 3px; margin-top: 2px;'></a>";
             this.addButton(null, buttonName, (v, event) => {
-                values.push( "" );
+                values.push( options.innerValues ? options.innerValues[ 0 ] : "" );
                 updateItems();
                 this._trigger( new IEvent(name, values, event), callback );
             }, { buttonClass: 'array' });
