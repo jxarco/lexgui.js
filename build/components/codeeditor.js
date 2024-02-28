@@ -6,13 +6,6 @@ if(!LX) {
 
 LX.components.push( 'CodeEditor' );
 
-function flushCss(element) {
-    // By reading the offsetHeight property, we are forcing
-    // the browser to flush the pending CSS changes (which it
-    // does to ensure the value obtained is accurate).
-    element.offsetHeight;
-}
-
 function swapElements( obj, a, b ) {
     [obj[a], obj[b]] = [obj[b], obj[a]];
 }
@@ -51,10 +44,6 @@ function indexOfFrom( str, reg, from, reverse ) {
         str = str.substr( from );
         return from + str.indexOf( reg );
     }
-}
-
-function deleteElement( el ) {
-    if( el ) el.remove();
 }
 
 let ASYNC_ENABLED = true;
@@ -1957,7 +1946,7 @@ class CodeEditor {
         if( deltaY >= 0 )
         {
             while( deltaY < ( cursorSelections.childElementCount - 1 ) )
-                deleteElement( cursorSelections.lastChild );
+                LX.UTILS.deleteElement( cursorSelections.lastChild );
 
             for(let i = fromY; i <= toY; i++){
 
@@ -2008,7 +1997,7 @@ class CodeEditor {
         else // Selection goes up...
         {
             while( Math.abs( deltaY ) < ( cursorSelections.childElementCount - 1 ) )
-                deleteElement( cursorSelections.firstChild );
+                LX.UTILS.deleteElement( cursorSelections.firstChild );
 
             for( let i = toY; i <= fromY; i++ ){
 
@@ -2688,7 +2677,7 @@ class CodeEditor {
         // Single line
         if( !force )
         {
-            deleteElement( this.code.childNodes[ local_line_num ] );
+            LX.UTILS.deleteElement( this.code.childNodes[ local_line_num ] );
             this.code.insertChildAtIndex( document.createElement( 'pre' ), local_line_num );
         }
 
@@ -3244,7 +3233,7 @@ class CodeEditor {
 
         if( cursor )
         {
-            deleteElement( this.selections[ cursor.name ] );
+            LX.UTILS.deleteElement( this.selections[ cursor.name ] );
             delete this.selections[ cursor.name ];
             delete cursor.selection;
         }
@@ -3252,7 +3241,7 @@ class CodeEditor {
         {
             for( let cursor of this.cursors.children )
             {
-                deleteElement( this.selections[ cursor.name ] );
+                LX.UTILS.deleteElement( this.selections[ cursor.name ] );
                 delete this.selections[ cursor.name ];
                 delete cursor.selection;
             }
@@ -3441,9 +3430,9 @@ class CodeEditor {
 
     removeCursor( cursor ) {
 
-        deleteElement( this.selections[ cursor.name ] );
+        LX.UTILS.deleteElement( this.selections[ cursor.name ] );
         delete this.selections[ cursor.name ];
-        deleteElement( cursor );
+        LX.UTILS.deleteElement( cursor );
     }
 
     resetCursorPos( flag, cursor ) {
@@ -3730,7 +3719,7 @@ class CodeEditor {
         text.innerText = char;
         this.code.appendChild( line );
         var rect = text.getBoundingClientRect();
-        deleteElement( line );
+        LX.UTILS.deleteElement( line );
         const bb = [ use_floating ? rect.width : Math.floor( rect.width ), use_floating ? rect.height : Math.floor( rect.height ) ];
         return get_bb ? bb : bb[ 0 ];
     }
@@ -3993,7 +3982,7 @@ class CodeEditor {
 
         else if( this._lastResult )
         {
-            deleteElement( this._lastResult.dom );
+            LX.UTILS.deleteElement( this._lastResult.dom );
             delete this._lastResult;
         }
 
@@ -4016,7 +4005,7 @@ class CodeEditor {
 
         if( this._lastResult )
         {
-            deleteElement( this._lastResult.dom );
+            LX.UTILS.deleteElement( this._lastResult.dom );
             cursorData = this._lastResult.pos;
             delete this._lastResult;
         }

@@ -7553,6 +7553,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         compareThresholdRange( v0, v1, t0, t1 ) { return v0 >= t0 && v0 <= t1 || v1 >= t0 && v1 <= t1 || v0 <= t0 && v1 >= t1},
         clamp (num, min, max) { return Math.min(Math.max(num, min), max) },
         uidGenerator: simple_guidGenerator,
+        deleteElement( el ) { if( el ) el.remove(); },
+        flushCss(element) {
+            // By reading the offsetHeight property, we are forcing
+            // the browser to flush the pending CSS changes (which it
+            // does to ensure the value obtained is accurate).
+            element.offsetHeight;
+        },
         getControlPoints( x0, y0, x1, y1, x2, y2 ,t ) {
             
             //  x0,y0,x1,y1 are the coordinates of the end (knot) pts of this segment

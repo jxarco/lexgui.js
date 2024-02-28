@@ -6,42 +6,6 @@ if(!LX) {
 
 LX.components.push( 'GraphEditor' );
 
-function flushCss(element) {
-    // By reading the offsetHeight property, we are forcing
-    // the browser to flush the pending CSS changes (which it
-    // does to ensure the value obtained is accurate).
-    element.offsetHeight;
-}
-
-function swapElements (obj, a, b) {
-    [obj[a], obj[b]] = [obj[b], obj[a]];
-}
-
-function swapArrayElements (array, id0, id1) {
-    [array[id0], array[id1]] = [array[id1], array[id0]];
-};
-
-function sliceChar(str, idx) {
-    return str.substr(0, idx) + str.substr(idx + 1);
-}
-
-function firstNonspaceIndex(str) {
-    return str.search(/\S|$/);
-}
-
-function deleteElement( el ) {
-    if( el ) el.remove();
-}
-
-let ASYNC_ENABLED = true;
-
-function doAsync( fn, ms ) {
-    if( ASYNC_ENABLED )
-        setTimeout( fn, ms ?? 0 );
-    else
-        fn();
-}
-
 class BoundingBox {
 
     constructor( o, s )
@@ -792,7 +756,7 @@ class GraphEditor {
                     if( !this._onLink( e ) )
                     {
                         // Delete entire SVG if not a successful connection..
-                        deleteElement( this._generatingLink.path ? this._generatingLink.path.parentElement : null );
+                        LX.UTILS.deleteElement( this._generatingLink.path ? this._generatingLink.path.parentElement : null );
                     }
 
                     delete this._generatingLink;
@@ -1017,7 +981,7 @@ class GraphEditor {
             return;
         }
 
-        deleteElement( el );
+        LX.UTILS.deleteElement( el );
 
         delete this.nodes[ nodeId ];
 
@@ -1039,7 +1003,7 @@ class GraphEditor {
             {
                 var link = this.graph.links[ key ][ i ];
 
-                deleteElement( link.path.parentElement );
+                LX.UTILS.deleteElement( link.path.parentElement );
 
                 const targetNodeId = targetIsInput ? link.inputNode : link.outputNode;
 
@@ -1137,7 +1101,7 @@ class GraphEditor {
             var links = this._getLinks( targetId, nodeId );
 
             var linkIdx = links.findIndex( i => ( i.inputIdx == srcIndex && i.outputIdx == targetIndex ) );
-            deleteElement( links[ linkIdx ].path.parentElement );
+            LX.UTILS.deleteElement( links[ linkIdx ].path.parentElement );
             links.splice( linkIdx, 1 );
 
             // Input has no longer any connected link
@@ -1187,7 +1151,7 @@ class GraphEditor {
                     var links = this._getLinks( nodeId, targetId );
 
                     var linkIdx = links.findIndex( i => ( i.inputIdx == targetIndex && i.outputIdx == srcIndex ) );
-                    deleteElement( links[ linkIdx ].path.parentElement );
+                    LX.UTILS.deleteElement( links[ linkIdx ].path.parentElement );
                     links.splice( linkIdx, 1 );
 
                     // Remove a connection from the output connections
@@ -1379,7 +1343,7 @@ class GraphEditor {
         // It the event reaches this, the link isn't valid..
         if( this._generatingLink )
         {
-            deleteElement( this._generatingLink.path ? this._generatingLink.path.parentElement : null );
+            LX.UTILS.deleteElement( this._generatingLink.path ? this._generatingLink.path.parentElement : null );
             delete this._generatingLink;
         }
 
@@ -1390,7 +1354,7 @@ class GraphEditor {
 
             this._selectNodesInBox( this._boxSelecting, this._mousePosition, e.altKey );
 
-            deleteElement( this._currentBoxSelectionSVG );
+            LX.UTILS.deleteElement( this._currentBoxSelectionSVG );
 
             delete this._currentBoxSelectionSVG;
             delete this._boxSelecting;
@@ -1827,7 +1791,6 @@ class GraphEditor {
             // Add node position, since I can't get the correct position directly from the event..
             if( e.target.hasClass( [ 'lexgraphnode', 'lexgraphgroup' ] ) )
             {
-                console.log( this._getNodePosition( e.target ) );
                 endPos.add( this._getNodePosition( e.target ), endPos );
                 endPos.add( new LX.vec2( 3, 3 ), endPos );
             }
