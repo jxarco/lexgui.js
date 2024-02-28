@@ -2564,14 +2564,14 @@ class GraphNode {
 
         // Get data from link
 
-        for( let linkId in this.editor.graph.links )
+        for( let linkId in this.editor.currentGraph.links )
         {
             const idx = linkId.indexOf( '@' + this.id );
 
             if( idx < 0 )
                 continue;
 
-            const nodeLinks = this.editor.graph.links[ linkId ];
+            const nodeLinks = this.editor.currentGraph.links[ linkId ];
 
             for ( var link of nodeLinks )
             {
@@ -2591,14 +2591,14 @@ class GraphNode {
 
         // Set data in link
 
-        for( let linkId in this.editor.graph.links )
+        for( let linkId in this.editor.currentGraph.links )
         {
             const idx = linkId.indexOf( this.id + '@' );
 
             if( idx < 0 )
                 continue;
 
-            const nodeLinks = this.editor.graph.links[ linkId ];
+            const nodeLinks = this.editor.currentGraph.links[ linkId ];
 
             for ( var link of nodeLinks )
             {
