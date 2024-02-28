@@ -4,7 +4,7 @@ if(!LX) {
     throw("lexgui.js missing!");
 }
 
-LX.components.push( 'Graph' );
+LX.components.push( 'GraphEditor' );
 
 function flushCss(element) {
     // By reading the offsetHeight property, we are forcing
@@ -114,6 +114,14 @@ class GraphEditor {
 
         GraphEditor.__instances.push( this );
 
+        const useSidebar = options.sidebar ?? false;
+
+        area.addSidebar( m => {
+            m.add( "Scene", { icon: "fa fa-cube", callback: () => { codeArea.hide(); show( canvas ); } } );
+            m.add( "Code", { icon: "fa fa-code", callback: () => { hide( canvas ); codeArea.show(); } } );
+            m.add( "Search", { icon: "fa fa-search", bottom: true, callback: () => { } } );
+        });
+
         this.base_area = area;
         this.area = new LX.Area( { className: "lexgraph" } );
 
@@ -123,6 +131,13 @@ class GraphEditor {
         this.root.tabIndex = -1;
         area.attach( this.root );
 
+        this._graphContainer = area.sections[ 1 ].root;
+        this._sidebar = area.sections[ 0 ].root;
+        this._sidebarActive = useSidebar;
+
+        // Set sidebar state depending on options..
+        this._toggleSideBar( useSidebar );
+
         // Bind resize
 
         area.onresize = ( bb ) => {
@@ -130,6 +145,11 @@ class GraphEditor {
         };
 
         area.addOverlayButtons( [
+            {
+                name: "Toggle Sidebar",
+                icon: "fa fa-table-columns",
+                callback: () => this._toggleSideBar(),
+            },
             // [
             //     {
             //         name: "Select",
@@ -1789,13 +1809,14 @@ class GraphEditor {
         const type = this._generatingLink.ioType;
         const domEl = this._generatingLink.domEl;
 
+        const offsetX = this.root.getBoundingClientRect().x;
         const offsetY = this.root.getBoundingClientRect().y;
 
         const ios = domEl.querySelector( type == GraphEditor.NODE_IO_INPUT ? '.lexgraphnodeinputs' : '.lexgraphnodeoutputs' );
         const ioEl = ios.childNodes[ index ].querySelector( '.io__type' );
         const startRect = ioEl.getBoundingClientRect();
 
-        let startPos = new LX.vec2( startRect.x, startRect.y - offsetY );
+        let startPos = new LX.vec2( startRect.x - offsetX, startRect.y - offsetY );
         let endPos = null;
 
         if( e )
@@ -1824,7 +1845,7 @@ class GraphEditor {
         else
         {
             const ioRect = endIO.querySelector( '.io__type' ).getBoundingClientRect();
-            endPos = new LX.vec2( ioRect.x, ioRect.y - offsetY );
+            endPos = new LX.vec2( ioRect.x - offsetX, ioRect.y - offsetY );
         }
 
         if( type == GraphEditor.NODE_IO_INPUT )
@@ -1857,13 +1878,14 @@ class GraphEditor {
 
         // Start pos
 
+        const offsetX = this.root.getBoundingClientRect().x;
         const offsetY = this.root.getBoundingClientRect().y;
 
         const outputs = outputNodeDom.querySelector( '.lexgraphnodeoutputs' );
         const io0 = outputs.childNodes[ link.outputIdx ];
         const startRect = io0.querySelector( '.io__type' ).getBoundingClientRect();
 
-        let startPos = new LX.vec2( startRect.x, startRect.y - offsetY + 6 );
+        let startPos = new LX.vec2( startRect.x - offsetX, startRect.y - offsetY + 6 );
 
         // End pos
 
@@ -1871,7 +1893,7 @@ class GraphEditor {
         const io1 = inputs.childNodes[ link.inputIdx ];
         const endRect = io1.querySelector( '.io__type' ).getBoundingClientRect();
 
-        let endPos = new LX.vec2( endRect.x, endRect.y - offsetY + 6 );
+        let endPos = new LX.vec2( endRect.x - offsetX, endRect.y - offsetY + 6 );
 
         // Generate bezier curve
 
@@ -2347,6 +2369,13 @@ class GraphEditor {
         }
     }
 
+    _toggleSideBar( force ) {
+
+        this._sidebarActive = force ?? !this._sidebarActive;
+        this._sidebar.classList.toggle( 'hidden', !this._sidebarActive );
+        this._graphContainer.style.width = this._sidebarActive ? "calc( 100% - 64px )" : "100%";
+    }
+
     _addGlobalActions() {
 
         
@@ -2371,50 +2400,9 @@ class Graph {
 
         this.name = name ?? "Unnamed Graph";
 
-        // Nodes
-
         this.nodes = [ ];
 
         this.links = { };
-
-        // const mainNode = GraphEditor.addNode( 'system/Main' );
-        // mainNode.position = new LX.vec2( 650, 400 );
-
-        // const addNode = GraphEditor.addNode( 'math/Add' );
-        // addNode.position = new LX.vec2( 425, 250 );
-
-        // const floatNode = GraphEditor.addNode( 'inputs/Float' );
-        // floatNode.position = new LX.vec2( 200, 200 );
-
-        // const stringNode = GraphEditor.addNode( 'inputs/String' );
-        // stringNode.position = new LX.vec2( 400, 50 );
-
-        // const setVarNode = GraphEditor.addNode( 'variables/SetVariable' );
-        // setVarNode.position = new LX.vec2( 650, 50 );
-
-        // // const multNode = new GraphNode( GraphEditor.DEFAULT_NODES[ 'Multiply' ] );
-        // // multNode.position = new LX.vec2( 200, 400 );
-
-        // const keydownNode = GraphEditor.addNode( 'events/KeyDown' );
-        // keydownNode.position = new LX.vec2( 600, 200 );
-
-        // const orNode = GraphEditor.addNode( 'logic/Or' );
-        // orNode.position = new LX.vec2( 435, 435 );
-
-        // const equalNode = GraphEditor.addNode( 'logic/Select' );
-        // equalNode.position = new LX.vec2( 135, 400 );
-
-        // this.nodes = [
-        //     mainNode,
-        //     addNode,
-        //     floatNode,
-        //     setVarNode,
-        //     stringNode,
-        //     keydownNode,
-        //     orNode,
-        //     equalNode,
-        //     // multNode
-        // ];
     }
 
     configure( o ) {
