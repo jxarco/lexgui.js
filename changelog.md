@@ -1,5 +1,16 @@
 # lexgui.js changelog
 
+## 0.1.29
+
+GraphEditor:
+- Graphs front end (Nodes, links, groups).
+- Editor stuff (Panning, zoom, moving elements, serialize graph, Snapping...)
+- Basic execution functionality.
+
+Improved draggable elements.
+Added "onBeforeLoad" callback in File widget.
+Minor bug fixes.
+
 ## 0.1.28
 
 GraphEditor:
