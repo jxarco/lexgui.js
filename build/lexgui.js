@@ -2195,6 +2195,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
          * @param {*} options:
          * callback: Function to call on each item
          * bottom: Bool to set item at the bottom as helper button (not selectable)
+         * className: Add class to the entry DOM element
          */
 
         add( key, options = {} ) {
@@ -2211,7 +2212,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             }
 
             let entry = document.createElement( 'div' );
-            entry.className = "lexsidebarentry";
+            entry.className = "lexsidebarentry " + ( options.className ?? "" );
             entry.id = pKey;
             entry.title = key;
 
@@ -3137,7 +3138,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             if( type != Widget.TITLE )
             {
-                element.style.width = "calc(100% - " + (this.current_branch || type == Widget.FILE ? 10 : 20) + "px)";
+                element.style.width = "calc(100% - " + (this.current_branch || type == Widget.FILE || ( type == Widget.BUTTON && !name ) ? 10 : 20) + "px)";
                 if( options.width ) {
                     element.style.width = element.style.minWidth = options.width;
                 }
