@@ -62,6 +62,9 @@ class GraphEditor {
 
     static LAST_GROUP_ID        = 0;
 
+    static STOPPED              = 0;
+    static RUNNING              = 1;
+
     // Node Drawing
 
     static NODE_IO_INPUT        = 0;
@@ -114,27 +117,20 @@ class GraphEditor {
                 icon: "fa fa-table-columns",
                 callback: () => this._toggleSideBar(),
             },
-            // [
-            //     {
-            //         name: "Select",
-            //         icon: "fa fa-arrow-pointer",
-            //         callback: (value, event) => console.log(value),
-            //         selectable: true
-            //     },
-            //     {
-            //         name: "Move",
-            //         icon: "fa-solid fa-arrows-up-down-left-right",
-            //         img: "https://webglstudio.org/latest/imgs/mini-icon-gizmo.png",
-            //         callback: (value, event) => console.log(value),
-            //         selectable: true
-            //     },
-            //     {
-            //         name: "Rotate",
-            //         icon: "fa-solid fa-rotate-right",
-            //         callback: (value, event) => console.log(value),
-            //         selectable: true
-            //     }
-            // ],
+            [
+                {
+                    name: "Start Graph",
+                    icon: "fa fa-play",
+                    callback: (value, event) => this.start(),
+                    selectable: true
+                },
+                {
+                    name: "Stop Graph",
+                    icon: "fa-solid fa-stop",
+                    callback: (value, event) => this.stop(),
+                    selectable: true
+                }
+            ],
             [
                 {
                     name: "Enable Snapping",
@@ -386,10 +382,6 @@ class GraphEditor {
                 this._createLink( link );
             }
         }
-
-        // TODO: REMOVE THIS (DEBUG)
-        this.start();
-        // 
     }
 
     /**
@@ -1463,6 +1455,7 @@ class GraphEditor {
     start() {
 
         this.mustStop = false;
+        this.state = GraphEditor.RUNNING;
 
         this.propagateEventToAllNodes( 'onStart' );
 
