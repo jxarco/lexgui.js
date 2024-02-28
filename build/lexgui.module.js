@@ -5272,11 +5272,11 @@ class Panel {
 
     addFile( name, callback, options = { } ) {
 
-        if(!name) {
-            throw("Set Widget Name!");
+        if( !name ) {
+            throw( "Set Widget Name!" );
         }
 
-        let widget = this.create_widget(name, Widget.FILE, options);
+        let widget = this.create_widget( name, Widget.FILE, options );
         let element = widget.domEl;
 
         let local = options.local ?? true;
@@ -5284,31 +5284,36 @@ class Panel {
         let read = options.read ?? true; 
 
         // Create hidden input
-        let input = document.createElement('input');
+        let input = document.createElement( 'input' );
         input.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 10%)";
         input.type = 'file';
-        if(options.placeholder)
+
+        if( options.placeholder )
             input.placeholder = options.placeholder;
 
-        input.addEventListener('change', function(e) {
+        input.addEventListener( 'change', function( e ) {
+
             const files = e.target.files;
             if( !files.length ) return;
-            if(read)
+            if( read )
             {
+                if( options.onBeforeRead )
+                    options.onBeforeRead();
+
                 const reader = new FileReader();
 
-                if(type === 'text') reader.readAsText(files[0]);
-                else if(type === 'buffer') reader.readAsArrayBuffer(files[0]);
-                else if(type === 'bin') reader.readAsBinaryString(files[0]);
-                else if(type === 'url') reader.readAsDataURL(files[0]);
+                if( type === 'text' ) reader.readAsText( files[ 0 ] );
+                else if( type === 'buffer' ) reader.readAsArrayBuffer( files[ 0 ] );
+                else if( type === 'bin' ) reader.readAsBinaryString( files[ 0 ] );
+                else if( type === 'url' ) reader.readAsDataURL( files[ 0 ] );
 
-                reader.onload = (e) => { callback.call( this, e.target.result, files[0] ) } ;
+                reader.onload = e => { callback.call( this, e.target.result, files[ 0 ] ) } ;
             }
-            else callback(files[0]);
-            
+            else
+                callback( files[ 0 ] );
         });
 
-        element.appendChild(input);
+        element.appendChild( input );
 
         this.queue( element );
         
@@ -5316,9 +5321,9 @@ class Panel {
         {
             this.addButton(null, "<a style='margin-top: 0px;' class='fa-solid fa-gear'></a>", () => {
                 
-                new Dialog("Load Settings", p => {
-                    p.addDropdown("Type", ['text', 'buffer', 'bin', 'url'], type, v => { type = v } );
-                    p.addButton(null, "Reload", v => { input.dispatchEvent( new Event('change') ) } );
+                new Dialog( "Load Settings", p => {
+                    p.addDropdown( "Type", [ 'text', 'buffer', 'bin', 'url' ], type, v => { type = v } );
+                    p.addButton( null, "Reload", v => { input.dispatchEvent( new Event( 'change' ) ) } );
                 });
                 
             }, { className: "micro", skipInlineCount: true });
