@@ -81,12 +81,10 @@ class GraphEditor {
 
         GraphEditor.__instances.push( this );
 
-        const useSidebar = options.sidebar ?? false;
+        const useSidebar = options.sidebar ?? true;
 
-        area.addSidebar( m => {
-            m.add( "Scene", { icon: "fa fa-cube", callback: () => { codeArea.hide(); show( canvas ); } } );
-            m.add( "Code", { icon: "fa fa-code", callback: () => { hide( canvas ); codeArea.show(); } } );
-            m.add( "Search", { icon: "fa fa-search", bottom: true, callback: () => { } } );
+        this._sidebar = area.addSidebar( m => {
+            m.add( "Create", { icon: "fa fa-add", bottom: true, callback: (e) => this._onSidebarCreate( e ) } );
         });
 
         this.base_area = area;
@@ -99,7 +97,7 @@ class GraphEditor {
         area.attach( this.root );
 
         this._graphContainer = area.sections[ 1 ].root;
-        this._sidebar = area.sections[ 0 ].root;
+        this._sidebarDom = area.sections[ 0 ].root;
         this._sidebarActive = useSidebar;
 
         // Set sidebar state depending on options..
@@ -153,7 +151,7 @@ class GraphEditor {
                 {
                     name: "Export",
                     icon: "fa fa-diagram-project",
-                    callback: (value, event) => this.graph.export()
+                    callback: (value, event) => this.currentGraph.export()
                 }
             ]
         ], { float: "htc" } );
@@ -171,7 +169,7 @@ class GraphEditor {
         this.root.addEventListener( 'focusout', this._processFocus.bind( this, false ) );
 
         this.propertiesDialog = new LX.PocketDialog( "Properties", null, {
-            size: [ "300px", null ],
+            size: [ "350px", null ],
             position: [ "8px", "8px" ],
             float: "left",
             class: 'lexgraphpropdialog'
@@ -210,10 +208,13 @@ class GraphEditor {
 
         this._scale = 1.0;
 
-        // Nodes and connections
+        // Graphs, Nodes and connections
 
-        this.nodes      = { };
-        this.variables  = { };
+        this.currentGraph   = null;
+
+        this.graphs         = { };
+        this.nodes          = { };
+        this.variables      = { };
 
         this.selectedNodes = [ ];
 
@@ -227,6 +228,7 @@ class GraphEditor {
         this.addCastType( 'vec4', 'vec3', ( v ) => { v.slice( 0, 3 ); return v; } );
         this.addCastType( 'vec4', 'vec2', ( v ) => { v.slice( 0, 2 ); return v; } );
         this.addCastType( 'vec3', 'vec2', ( v ) => { v.slice( 0, 2 ); return v; } );
+
         this.addCastType( 'vec3', 'vec4', ( v ) => { v.push( 1 ); return v; } );
         this.addCastType( 'vec2', 'vec3', ( v ) => { v.push( 1 ); return v; } );
         this.addCastType( 'vec2', 'vec4', ( v ) => { v.push( 0, 1 ); return v; } );
@@ -358,30 +360,38 @@ class GraphEditor {
 
     setGraph( graph ) {
 
+        // Nothing to do, already there...
+        if( this.currentGraph && graph.id == this.currentGraph.id )
+            return;
+
         this.clear();
 
-        this.graph = graph;
+        graph.id = "graph-" + LX.UTILS.uidGenerator();
 
-        if( !this.graph.nodes )
+        this.graphs[ graph.id ] = graph;
+
+        if( !graph.nodes )
         {
             console.warn( 'Graph does not contain any node!' );
             return;
         }
 
-        for( let node of this.graph.nodes )
+        for( let node of graph.nodes )
         {
             this._createNodeDOM( node );
         }
 
-        for( let linkId in this.graph.links )
+        for( let linkId in graph.links )
         {
-            const links = this.graph.links[ linkId ];
+            const links = graph.links[ linkId ];
 
             for( let link of links )
             {
                 this._createLink( link );
             }
         }
+
+        this.currentGraph = graph;
     }
 
     /**
@@ -393,18 +403,47 @@ class GraphEditor {
 
         const onComplete = ( json ) => {
 
-            var graph = new Graph();
+            let graph = new Graph();
             graph.configure( json );
 
             this.setGraph( graph );
 
             if( callback )
                 callback( graph );
+
+            // Add element to sidebar
+            this._sidebar.add( graph.name, { icon: "fa fa-diagram-project", className: graph.id, callback: (e) => { this.setGraph( graph ) } } );
         }
 
         const onError = (v) => console.error(v);
 
         LX.requestJSON( url, onComplete, onError );
+    }
+
+    /**
+     * @method addGraph
+     */
+
+    addGraph() {
+
+        let graph = new Graph();
+
+        this.setGraph( graph );
+
+        this._sidebar.add( graph.name, { icon: "fa fa-diagram-project", className: graph.id, callback: (e) => { this.setGraph( graph ) } } );
+    }
+
+    /**
+     * @method addGraphFunction
+     */
+
+    addGraphFunction() {
+
+        let func = new GraphFunction();
+
+        this.setGraph( func );
+
+        this._sidebar.add( "func.name", { icon: "fa fa-florin-sign", className: func.id, callback: (e) => { this.setGraph( func ) } } );
     }
 
     /**
@@ -431,10 +470,10 @@ class GraphEditor {
 
     propagateEventToAllNodes( eventName, params ) {
 
-        if( !this.graph )
+        if( !this.currentGraph )
             return;
 
-        for ( let node of this.graph.nodes )
+        for ( let node of this.currentGraph.nodes )
         {
             if( !node[ eventName ] )
                 continue;
@@ -486,6 +525,12 @@ class GraphEditor {
         if( node.type && GraphEditor.NODE_TYPES[ node.type ] )
         {
             const category = node.constructor.category;
+            nodeContainer.classList.add( category );
+        }
+        else
+        {
+            const pos = node.type.lastIndexOf( "/" );
+            const category = node.type.substring( 0, pos );
             nodeContainer.classList.add( category );
         }
 
@@ -927,6 +972,19 @@ class GraphEditor {
             case 'select':
                 panel.addDropdown( p.name, p.options, p.value, (v) => { p.value = v } );
                 break;
+            case 'array':
+                panel.addArray( p.name, p.value, (v) => {
+                    p.value = v;
+                    if( node.type == "function/Input" )
+                    {
+                        node.setOutputs( v );
+                    }
+                    else if( node.type == "function/Output" )
+                    {
+                        node.setInputs( v );
+                    }
+                }, { innerValues: p.options } );
+                break;
             }
         }
 
@@ -979,7 +1037,7 @@ class GraphEditor {
 
         // Delete connected links..
         
-        for( let key in this.graph.links )
+        for( let key in this.currentGraph.links )
         {
             if( !key.includes( nodeId ) )
                 continue;
@@ -989,11 +1047,11 @@ class GraphEditor {
 
             // Remove the connection from the other before deleting..
 
-            const numLinks = this.graph.links[ key ].length;
+            const numLinks = this.currentGraph.links[ key ].length;
 
             for( var i = 0; i < numLinks; ++i )
             {
-                var link = this.graph.links[ key ][ i ];
+                var link = this.currentGraph.links[ key ][ i ];
 
                 LX.UTILS.deleteElement( link.path.parentElement );
 
@@ -1027,7 +1085,7 @@ class GraphEditor {
                 }
             }
 
-            delete this.graph.links[ key ];
+            delete this.currentGraph.links[ key ];
         }
     }
 
@@ -1053,7 +1111,7 @@ class GraphEditor {
 
             this._selectNode( newDom, true );
 
-            this.graph.nodes.push( newNode );
+            this.currentGraph.nodes.push( newNode );
         }
     }
 
@@ -1071,7 +1129,7 @@ class GraphEditor {
     _getLinks( nodeSrcId, nodeDstId ) {
 
         const str = nodeSrcId + '@' + nodeDstId;
-        return this.graph.links[ str ];
+        return this.currentGraph.links[ str ];
     }
 
     _deleteLinks( nodeId, io ) {
@@ -1441,7 +1499,7 @@ class GraphEditor {
                         this._translateNode( dom, position );
                     }
 
-                    this.graph.nodes.push( newNode );
+                    this.currentGraph.nodes.push( newNode );
 
                 } );
             }
@@ -1517,7 +1575,7 @@ class GraphEditor {
 
             visitedNodes[ id ] = true;
 
-            for( let linkId in this.graph.links )
+            for( let linkId in this.currentGraph.links )
             {
                 const idx = linkId.indexOf( '@' + id );
 
@@ -1725,9 +1783,9 @@ class GraphEditor {
 
         const pathId = ( srcIsInput ? dst_nodeId : src_nodeId ) + '@' + ( srcIsInput ? src_nodeId : dst_nodeId );
 
-        if( !this.graph.links[ pathId ] ) this.graph.links[ pathId ] = [];
+        if( !this.currentGraph.links[ pathId ] ) this.currentGraph.links[ pathId ] = [];
 
-        this.graph.links[ pathId ].push( {
+        this.currentGraph.links[ pathId ].push( {
             path: path,
             inputNode: srcIsInput ? src_nodeId : dst_nodeId,
             inputIdx: srcIsInput ? src_ioIndex : dst_ioIndex,
@@ -2026,13 +2084,13 @@ class GraphEditor {
     // TODO: Return the ones in the viewport
     _getVisibleNodes() {
 
-        if( !this.graph )
+        if( !this.currentGraph )
         {
             console.warn( "No graph set" );
             return [];
         }
 
-        return this.graph.nodes;
+        return this.currentGraph.nodes;
     }
 
     _selectNodesInBox( lt, rb, remove ) {
@@ -2334,8 +2392,16 @@ class GraphEditor {
     _toggleSideBar( force ) {
 
         this._sidebarActive = force ?? !this._sidebarActive;
-        this._sidebar.classList.toggle( 'hidden', !this._sidebarActive );
+        this._sidebarDom.classList.toggle( 'hidden', !this._sidebarActive );
         this._graphContainer.style.width = this._sidebarActive ? "calc( 100% - 64px )" : "100%";
+    }
+
+    _onSidebarCreate( e ) {
+
+        LX.addContextMenu(null, e, m => {
+            m.add( "Graph", () => this.addGraph() );
+            m.add( "Function", () => this.addGraphFunction() );
+        });
     }
 
     _addGlobalActions() {
@@ -2368,6 +2434,9 @@ class Graph {
     }
 
     configure( o ) {
+
+        this.id = o.id;
+        this.name = o.name;
 
         this.nodes.length = 0;
 
@@ -2403,6 +2472,10 @@ class Graph {
     export( prettify = true ) {
         
         var o = { };
+
+        o.id = this.id;
+        o.name = this.name;
+
         o.nodes = [ ];
         o.links = { };
 
@@ -2572,6 +2645,36 @@ class GraphNode {
 
 LX.GraphNode = GraphNode;
 
+/**
+ * @class GraphFunction
+ */
+
+class GraphFunction extends Graph {
+
+    constructor() {
+
+        super();
+
+        const nodeInput = new NodeFuncInput( 'Input' );
+        nodeInput.onCreate();
+
+        nodeInput.type = "function/Input";
+        nodeInput.title = "Input";
+        nodeInput.position = new LX.vec2( 150, 250 );
+
+        const nodeOutput = new NodeFuncOutput( 'Output' );
+        nodeOutput.onCreate();
+
+        nodeOutput.type = "function/Output";
+        nodeOutput.title = "Output";
+        nodeOutput.position = new LX.vec2( 650, 350 );
+
+        this.nodes.push( nodeInput, nodeOutput );
+    }
+}
+
+LX.GraphFunction = GraphFunction;
+
 /* 
     ************ PREDEFINED NODES ************
 
@@ -2583,6 +2686,57 @@ LX.GraphNode = GraphNode;
         - onExecute: Callback for node execution
 */
 
+/*
+    Function nodes
+*/
+
+class NodeFuncInput extends GraphNode
+{
+    onCreate() {
+        this.addOutput( null, "float" );
+        this.addProperty( "Outputs", "array", [ "float" ], [ 'float', 'int', 'bool', 'vec2', 'vec3', 'vec4', 'mat44' ] );
+    }
+
+    onExecute() {
+        // var a = this.getInput( 0 ) ?? this.properties[ 0 ].value;
+        // var b = this.getInput( 1 ) ?? this.properties[ 1 ].value;
+        // this.setOutput( 0, a + b );
+    }
+
+    setOutputs( v ) {
+
+        this.outputs.length = 0;
+
+        for( var i of v )
+        {
+            this.outputs.push( { name: null, type: i } );
+        }
+    }
+}
+
+class NodeFuncOutput extends GraphNode
+{
+    onCreate() {
+        this.addInput( null, "float" );
+        this.addProperty( "Inputs", "array", [ "float" ], [ 'float', 'int', 'bool', 'vec2', 'vec3', 'vec4', 'mat44' ] );
+    }
+
+    onExecute() {
+        // var a = this.getInput( 0 ) ?? this.properties[ 0 ].value;
+        // var b = this.getInput( 1 ) ?? this.properties[ 1 ].value;
+        // this.setOutput( 0, a + b );
+    }
+
+    setInputs( v ) {
+
+        this.inputs.length = 0;
+
+        for( var i of v )
+        {
+            this.inputs.push( { name: null, type: i } );
+        }
+    }
+}
 
 /*
     Math nodes
@@ -2974,7 +3128,7 @@ class NodeSetVariable extends GraphNode
         var varValue = this.getInput( 1 );
         if( varValue == undefined )
             return;
-        this.graph.setVariable( varName, varValue );
+        this.editor.setVariable( varName, varValue );
         this.setOutput( 0, varValue );
     }
 }
