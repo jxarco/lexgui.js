@@ -1,6 +1,6 @@
 {
   "id": "GraphFunction-db00-9704-2d4c",
-  "name": "Unnamed Graph Function",
+  "name": "FunctionAddOne",
   "type": "GraphFunction",
   "nodes": [
     {
@@ -74,7 +74,7 @@
         {
           "name": null,
           "type": "float",
-          "value": 14
+          "value": 1
         }
       ]
     },

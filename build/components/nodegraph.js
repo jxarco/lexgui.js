@@ -61,6 +61,7 @@ class GraphEditor {
     static EVENT_MOUSEWHEEL     = 1;
 
     static LAST_GROUP_ID        = 0;
+    static LAST_FUNCTION_ID     = 0;
 
     static STOPPED              = 0;
     static RUNNING              = 1;
@@ -1152,6 +1153,13 @@ class GraphEditor {
 
         dom.style.left = ( translation.x ) + "px";
         dom.style.top = ( translation.y ) + "px";
+
+        // Update base node position..
+        if( dom.dataset[ 'id' ] )
+        {
+            let baseNode = this.nodes[ dom.dataset[ 'id' ] ];
+            baseNode.data.position = translation;
+        }
     }
 
     _deleteNode( nodeId ) {
@@ -2815,8 +2823,10 @@ class GraphFunction extends Graph {
 
         super();
 
-        this.name = name ?? "Unnamed Graph Function";
+        this.name = name ?? ( "GraphFunction" + GraphEditor.LAST_FUNCTION_ID );
         this.type = 'GraphFunction';
+
+        GraphEditor.LAST_FUNCTION_ID++
 
         const nodeInput = GraphEditor.addNode( "function/Input" );
         nodeInput.position = new LX.vec2( 150, 250 );
