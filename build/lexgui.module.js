@@ -2242,6 +2242,23 @@ class SideBar {
 
         this.items.push( { name: pKey, domEl: entry, callback: options.callback } );
     }
+
+    /**
+     * @method select
+     * @param {String} name Element name to select
+     */
+
+    select( name ) {
+
+        let pKey = name.replace( /\s/g, '' ).replaceAll( '.', '' );
+
+        const entry = this.items.find( v => v.name === pKey );
+
+        if( !entry )
+            return;
+
+        entry.domEl.click();
+    }
 };
 
 LX.SideBar = SideBar;
