@@ -971,12 +971,21 @@ class GraphEditor {
         } );
     }
 
-    _getAllDOMNodes( includeGroups ) {
+    _getAllDOMNodes( includeGroups, exclude ) {
         
-        if( includeGroups )
-            return this._domNodes.childNodes;
+        var elements = null;
 
-        return Array.from( this._domNodes.childNodes ).filter( v => v.classList.contains( 'lexgraphnode' ) );
+        if( includeGroups )
+            elements = Array.from( this._domNodes.childNodes );
+        else
+            elements = Array.from( this._domNodes.childNodes ).filter( v => v.classList.contains( 'lexgraphnode' ) );
+
+        if( exclude )
+        {
+            elements = elements.filter( v => v != exclude );
+        }
+
+        return elements;
     }
 
     _onMoveNodes( target ) {
@@ -1018,11 +1027,14 @@ class GraphEditor {
 
         for( let nodeId of groupNodeIds )
         {
-            const el = this._getNodeDOMElement( nodeId );
+            const isGroup = nodeId.constructor !== String;
 
-            this._translateNode( el, dT );
+            const el = isGroup ? nodeId : this._getNodeDOMElement( nodeId );
 
-            this._updateNodeLinks( nodeId );
+            this._translateNode( el, dT, !isGroup );
+
+            if( !isGroup )
+                this._updateNodeLinks( nodeId );
         }
     }
 
@@ -1034,7 +1046,7 @@ class GraphEditor {
 
         const groupNodeIds = [ ];
 
-        for( let dom of this._getAllDOMNodes() )
+        for( let dom of this._getAllDOMNodes( true, target ) )
         {
             const x = parseFloat( dom.style.left );
             const y = parseFloat( dom.style.top );
@@ -1043,7 +1055,7 @@ class GraphEditor {
             if( !group_bb.inside( node_bb ) )
                 continue;
 
-            groupNodeIds.push( dom.dataset[ 'id' ] );
+            groupNodeIds.push( dom.dataset[ 'id' ] ?? dom );
         }
 
         target.nodes = groupNodeIds;
@@ -1139,7 +1151,7 @@ class GraphEditor {
             this._togglePropertiesDialog( false );
     }
 
-    _translateNode( dom, deltaTranslation ) {
+    _translateNode( dom, deltaTranslation, updateBasePosition = true ) {
 
         const translation = deltaTranslation.add( new LX.vec2( parseFloat( dom.style.left ), parseFloat( dom.style.top ) ) );
 
@@ -1155,7 +1167,7 @@ class GraphEditor {
         dom.style.top = ( translation.y ) + "px";
 
         // Update base node position..
-        if( dom.dataset[ 'id' ] )
+        if( updateBasePosition && dom.dataset[ 'id' ] )
         {
             let baseNode = this.nodes[ dom.dataset[ 'id' ] ];
             baseNode.data.position = translation;
