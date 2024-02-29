@@ -366,7 +366,7 @@ class GraphEditor {
 
         this.clear();
 
-        graph.id = "graph-" + LX.UTILS.uidGenerator();
+        graph.id = graph.id ?? graph.constructor.name  + '-' + LX.UTILS.uidGenerator();
 
         this.graphs[ graph.id ] = graph;
 
@@ -375,6 +375,9 @@ class GraphEditor {
             console.warn( 'Graph does not contain any node!' );
             return;
         }
+
+        this.currentGraph = graph;
+        graph.editor = this;
 
         for( let node of graph.nodes )
         {
@@ -390,29 +393,22 @@ class GraphEditor {
                 this._createLink( link );
             }
         }
-
-        this.currentGraph = graph;
     }
 
     /**
      * @method loadGraph
-     * @param {Graph} graph
+     * @param {String} url
+     * @param {Function} callback Function to call once the graph is loaded
      */
 
     loadGraph( url, callback ) {
 
         const onComplete = ( json ) => {
 
-            let graph = new Graph();
-            graph.configure( json );
-
-            this.setGraph( graph );
+            let graph = ( json.type == 'Graph' ) ? this.addGraph( json ) : this.addGraphFunction( json );
 
             if( callback )
                 callback( graph );
-
-            // Add element to sidebar
-            this._sidebar.add( graph.name, { icon: "fa fa-diagram-project", className: graph.id, callback: (e) => { this.setGraph( graph ) } } );
         }
 
         const onError = (v) => console.error(v);
@@ -422,28 +418,57 @@ class GraphEditor {
 
     /**
      * @method addGraph
+     * @param {Object} o Options to configure the graph
      */
 
-    addGraph() {
+    addGraph( o ) {
 
         let graph = new Graph();
+        if( o ) graph.configure( o );
 
         this.setGraph( graph );
 
         this._sidebar.add( graph.name, { icon: "fa fa-diagram-project", className: graph.id, callback: (e) => { this.setGraph( graph ) } } );
+
+        this._sidebar.select( graph.name );
+
+        return graph;
     }
 
     /**
      * @method addGraphFunction
+     * @param {Object} o Options to configure the graph
      */
 
-    addGraphFunction() {
+    addGraphFunction( o ) {
 
         let func = new GraphFunction();
+        if( o ) func.configure( o );
 
         this.setGraph( func );
 
-        this._sidebar.add( "func.name", { icon: "fa fa-florin-sign", className: func.id, callback: (e) => { this.setGraph( func ) } } );
+        // Add a new node to use this function..
+
+        class NodeFunction extends GraphNode
+        {
+            onCreate() {
+                this.addInput( null, "float" );
+                this.addOutput( null, "any" );
+            }
+
+            onExecute() {
+                const func = NodeFunction.func;
+                const value = func.getOutputData( this.getInput( 0 ) );
+                this.setOutput( 0, value );
+            }
+        }
+
+        NodeFunction.func = func;
+        GraphEditor.registerCustomNode( "functions/" + func.name, NodeFunction );
+
+        this._sidebar.add( func.name, { icon: "fa fa-florin-sign", className: func.id, callback: (e) => { this.setGraph( func ) } } );
+
+        this._sidebar.select( func.name );
     }
 
     /**
@@ -511,6 +536,7 @@ class GraphEditor {
     _createNodeDOM( node ) {
 
         node.editor = this;
+        node.graphID = this.currentGraph.id;
 
         var nodeContainer = document.createElement( 'div' );
         nodeContainer.classList.add( 'lexgraphnode' );
@@ -610,6 +636,13 @@ class GraphEditor {
             // Only for left click..
             if( e.button != LX.MOUSE_LEFT_CLICK )
                 return;
+
+            // Open graph function..
+            if( node.constructor.func )
+            {
+                this._sidebar.select( node.constructor.func.name )
+            }
+
         } );
 
         // Title header
@@ -662,7 +695,7 @@ class GraphEditor {
         {
             var nodeInputs = null;
 
-            if( node.inputs && node.inputs.length )
+            if( hasInputs )
             {
                 nodeInputs = document.createElement( 'div' );
                 nodeInputs.classList.add( 'lexgraphnodeinputs' );
@@ -708,7 +741,7 @@ class GraphEditor {
         {
             var nodeOutputs = null;
 
-            if( node.outputs && node.outputs.length )
+            if( hasOutputs )
             {
                 nodeOutputs = document.createElement( 'div' );
                 nodeOutputs.classList.add( 'lexgraphnodeoutputs' );
@@ -755,6 +788,127 @@ class GraphEditor {
             onMove: this._onMoveNodes.bind( this ),
             onDragStart: this._onDragNode.bind( this )
         } );
+
+        this._addNodeIOEvents( nodeContainer );
+
+        const id = node.id ?? node.title.toLowerCase().replaceAll( /\s/g, '-' ) + '-' + LX.UTILS.uidGenerator();
+        this.nodes[ id ] = { data: node, dom: nodeContainer };
+
+        node.id = id;
+        nodeContainer.dataset[ 'id' ] = id;
+
+        this._domNodes.appendChild( nodeContainer );
+
+        // Only 1 main per graph!
+        if( node.title == 'Main' )
+        {
+            this.main = id;
+        }
+
+        return nodeContainer;
+    }
+
+    _updateNodeDOMIOs( dom, node ) {
+
+        // Inputs and outputs
+        var nodeIO = dom.querySelector( '.lexgraphnodeios' );
+
+        const hasInputs = node.inputs && node.inputs.length;
+        const hasOutputs = node.outputs && node.outputs.length;
+
+        // Inputs
+        {
+            var nodeInputs = null;
+
+            if( hasInputs )
+            {
+                nodeInputs = nodeIO.querySelector( '.lexgraphnodeinputs' );
+                nodeInputs.innerHTML = "";
+            }
+
+            for( let i of node.inputs )
+            {
+                if( !i.type )
+                {
+                    console.warn( `Missing type for node [${ node.title }], skipping...` );
+                    continue;
+                }
+
+                var input = document.createElement( 'div' );
+                input.className = 'lexgraphnodeio ioinput';
+                input.dataset[ 'index' ] = nodeInputs.childElementCount;
+
+                var type = document.createElement( 'span' );
+                type.className = 'io__type input ' + i.type;
+                type.innerHTML = '<span>' + i.type[ 0 ].toUpperCase() + '</span>';
+                input.appendChild( type );
+
+                var typeDesc = document.createElement( 'span' );
+                typeDesc.className = 'io__typedesc input ' + i.type;
+                typeDesc.innerHTML = i.type;
+                input.appendChild( typeDesc );
+
+                if( i.name )
+                {
+                    var name = document.createElement( 'span' );
+                    name.classList.add( 'io__name' );
+                    name.innerText = i.name;
+                    input.appendChild( name );
+                }
+
+                nodeInputs.appendChild( input );
+            }
+        }
+
+        // Outputs
+        {
+            var nodeOutputs = null;
+
+            if( hasOutputs )
+            {
+                nodeOutputs = nodeIO.querySelector( '.lexgraphnodeoutputs' );
+                nodeOutputs.innerHTML = "";
+            }
+
+            for( let o of node.outputs )
+            {
+                if( !o.type  )
+                {
+                    console.warn( `Missing type for node [${ node.title }], skipping...` );
+                }
+
+                var output = document.createElement( 'div' );
+                output.className = 'lexgraphnodeio iooutput';
+                output.dataset[ 'index' ] = nodeOutputs.childElementCount;
+
+                if( o.name )
+                {
+                    var name = document.createElement( 'span' );
+                    name.classList.add( 'io__name' );
+                    name.innerText = o.name;
+                    output.appendChild( name );
+                }
+
+                var type = document.createElement( 'span' );
+                type.className = 'io__type output ' + o.type;
+                type.innerHTML = '<span>' + o.type[ 0 ].toUpperCase() + '</span>';
+                output.appendChild( type );
+
+                var typeDesc = document.createElement( 'span' );
+                typeDesc.className = 'io__typedesc output ' + o.type;
+                typeDesc.innerHTML = o.type;
+                output.appendChild( typeDesc );
+
+                nodeOutputs.appendChild( output );
+            }
+        }
+
+        this._addNodeIOEvents( dom );
+    }
+
+    _addNodeIOEvents( nodeContainer ) {
+
+        const nodeIO = nodeContainer.querySelector( '.lexgraphnodeios' );
 
         // Manage links
 
@@ -814,22 +968,6 @@ class GraphEditor {
             } );
 
         } );
-
-        const id = node.id ?? node.title.toLowerCase().replaceAll( /\s/g, '-' ) + '-' + LX.UTILS.uidGenerator();
-        this.nodes[ id ] = { data: node, dom: nodeContainer };
-        
-        node.id = id;
-        nodeContainer.dataset[ 'id' ] = id;
-
-        this._domNodes.appendChild( nodeContainer );
-
-        // Only 1 main per graph!
-        if( node.title == 'Main' )
-        {
-            this.main = nodeContainer;
-        }
-
-        return nodeContainer;
     }
 
     _getAllDOMNodes( includeGroups ) {
@@ -978,10 +1116,7 @@ class GraphEditor {
                     if( node.type == "function/Input" )
                     {
                         node.setOutputs( v );
-                    }
-                    else if( node.type == "function/Output" )
-                    {
-                        node.setInputs( v );
+                        this._updateNodeDOMIOs( dom, node );
                     }
                 }, { innerValues: p.options } );
                 break;
@@ -1021,13 +1156,15 @@ class GraphEditor {
 
     _deleteNode( nodeId ) {
 
-        const el = this._getNodeDOMElement( nodeId );
+        const nodeInfo = this.nodes[ nodeId ];
+        const node = nodeInfo.data;
+        const el = nodeInfo.dom;
 
         console.assert( el );
 
-        if( el == this.main )
+        if( node.constructor.blockDelete )
         {
-            console.warn( `Can't delete MAIN node!` );
+            console.warn( `Can't delete node!` );
             return;
         }
 
@@ -1076,10 +1213,13 @@ class GraphEditor {
                 {
                     var active = false;
                     for( var links of  io.links )
-                        for( var j of links ){
-                            console.log(j)
+                    {
+                        if( !links )
+                            continue;
+                        for( var j of links ) {
                             active |= ( !!j );
                         }
+                    }
                     if( !active )
                         delete io.dataset[ 'active' ];
                 }
@@ -1477,6 +1617,11 @@ class GraphEditor {
             
             for( let type in GraphEditor.NODE_TYPES )
             {
+                const baseClass = GraphEditor.NODE_TYPES[ type ];
+
+                if( baseClass.blockAdd )
+                    continue;
+
                 m.add( type, () => {
 
                     const newNode = GraphEditor.addNode( type );
@@ -1500,7 +1645,6 @@ class GraphEditor {
                     }
 
                     this.currentGraph.nodes.push( newNode );
-
                 } );
             }
         });
@@ -1545,70 +1689,8 @@ class GraphEditor {
 
         requestAnimationFrame( this._frame.bind(this) );
 
-        this._runStep();
-    }
-
-    /**
-     * @method _runStep
-     */
-
-    _runStep() {
-        
-        const main = this.main;
-
-        if( !main )
-            return;
-
-        const visitedNodes = {  };
-        
-        this._executionNodes = [ ];
-
-        // Reser variables each step?
-        this.variables = { };
-
-        const mainId = this.main.dataset[ 'id' ];
-
-        const addNode = ( id ) => {
-
-            if( visitedNodes[ id ] )
-                return;
-
-            visitedNodes[ id ] = true;
-
-            for( let linkId in this.currentGraph.links )
-            {
-                const idx = linkId.indexOf( '@' + id );
-
-                if( idx < 0 )
-                    continue;
-
-                const preNodeId = linkId.substring( 0, idx );
-
-                this._executionNodes.push( preNodeId );
-
-                addNode( preNodeId );
-            }
-        };
-
-        // TODO: Search "no output" nodes and add to the executable list (same as main)..
-        // ...
-
-        this._executionNodes.push( mainId );
-
-        addNode( mainId );
-
-        for( var i = this._executionNodes.length - 1; i >= 0; --i )
-        {
-            const node = this.nodes[ this._executionNodes[ i ] ];
-
-            if( node.data.onBeforeStep )
-                node.data.onBeforeStep();
-
-            node.data.execute();
-
-            if( node.data.onBeforeStep )
-                node.data.onAfterStep();
-        }
+        // Only run here main graph!
+        this.currentGraph._runStep( this.main );
     }
 
     _generatePattern() {
@@ -1758,11 +1840,6 @@ class GraphEditor {
             this._deleteLinks( src_nodeId, linkData.io );
         }
 
-        // Mark as active 
-
-        linkData.io.dataset[ 'active' ] = true;
-        e.target.parentElement.dataset[ 'active' ] = true;
-
         // Store the end io..
 
         var srcDom = linkData.io;
@@ -1796,6 +1873,11 @@ class GraphEditor {
         } );
 
         path.dataset[ 'id' ] = pathId;
+
+        // Mark as active links...
+
+        linkData.io.dataset[ 'active' ] = true;
+        e.target.parentElement.dataset[ 'active' ] = true;
 
         // Successful link..
         return true;
@@ -1834,6 +1916,7 @@ class GraphEditor {
 
         let startPos = new LX.vec2( startRect.x - offsetX, startRect.y - offsetY );
         let endPos = null;
+        let endioEl = null;
 
         if( e )
         {
@@ -1859,7 +1942,8 @@ class GraphEditor {
         }
         else
         {
-            const ioRect = endIO.querySelector( '.io__type' ).getBoundingClientRect();
+            endioEl = endIO.querySelector( '.io__type' );
+            const ioRect = endioEl.getBoundingClientRect();
             endPos = new LX.vec2( ioRect.x - offsetX, ioRect.y - offsetY );
         }
 
@@ -1870,7 +1954,11 @@ class GraphEditor {
             startPos = tmp;
         }
 
-        const color = getComputedStyle( ioEl ).backgroundColor;
+        let color = getComputedStyle( ioEl ).backgroundColor;
+
+        if( type == GraphEditor.NODE_IO_OUTPUT && endioEl )
+            color = getComputedStyle( endioEl ).backgroundColor;
+
         this._createLinkPath( path, startPos, endPos, color, !!e );
 
         return path;
@@ -1926,6 +2014,9 @@ class GraphEditor {
         io1.links = [ ];
         io1.links[ link.outputIdx ] = io1.links[ link.outputIdx ] ?? [ ];
         io1.links[ link.outputIdx ].push( link.outputNode );
+
+        io0.dataset[ 'active' ] = true;
+        io1.dataset[ 'active' ] = true;
     }
 
     _createLinkPath( path, startPos, endPos, color, exactEnd ) {
@@ -2431,6 +2522,8 @@ class Graph {
         this.nodes = [ ];
 
         this.links = { };
+
+        this.type = 'Graph';
     }
 
     configure( o ) {
@@ -2451,7 +2544,7 @@ class Graph {
             newNode.type = node.type;
             // newNode.inputs = node.inputs;
             // newNode.outputs = node.outputs;
-            // newNode.properties = node.properties;
+            newNode.properties = node.properties;
 
             this.nodes.push( newNode );
         }
@@ -2461,6 +2554,71 @@ class Graph {
         // editor options?
 
         // zoom/translation ??
+    }
+
+    /**
+     * @method _runStep
+     */
+
+    _runStep( mainId ) {
+
+        if( !mainId )
+            return;
+
+        const nodes = this.nodes.reduce( ( ac, a ) => ( {...ac, [ a.id ] : a } ), {} );
+
+        // Not main graph..
+        if( !nodes[ mainId ] )
+            return;
+
+        const visitedNodes = {  };
+
+        this._executionNodes = [ ];
+
+        // Reser variables each step?
+        this.variables = { };
+
+        const addNode = ( id ) => {
+
+            if( visitedNodes[ id ] )
+                return;
+
+            visitedNodes[ id ] = true;
+
+            for( let linkId in this.links )
+            {
+                const idx = linkId.indexOf( '@' + id );
+
+                if( idx < 0 )
+                    continue;
+
+                const preNodeId = linkId.substring( 0, idx );
+
+                this._executionNodes.push( preNodeId );
+
+                addNode( preNodeId );
+            }
+        };
+
+        // TODO: Search "no output" nodes and add to the executable list (same as main)..
+        // ...
+
+        this._executionNodes.push( mainId );
+
+        addNode( mainId );
+
+        for( var i = this._executionNodes.length - 1; i >= 0; --i )
+        {
+            const node = nodes[ this._executionNodes[ i ] ];
+
+            if( node.onBeforeStep )
+                node.onBeforeStep();
+
+            node.execute();
+
+            if( node.onBeforeStep )
+                node.onAfterStep();
+        }
     }
 
     /**
@@ -2475,6 +2633,7 @@ class Graph {
 
         o.id = this.id;
         o.name = this.name;
+        o.type = this.type;
 
         o.nodes = [ ];
         o.links = { };
@@ -2562,16 +2721,18 @@ class GraphNode {
         if( !this.inputs || !this.inputs.length || !this.inputs[ index ] )
             return;
 
+        const graph = this.editor.graphs[ this.graphID ];
+
         // Get data from link
 
-        for( let linkId in this.editor.currentGraph.links )
+        for( let linkId in graph.links )
         {
             const idx = linkId.indexOf( '@' + this.id );
 
             if( idx < 0 )
                 continue;
 
-            const nodeLinks = this.editor.currentGraph.links[ linkId ];
+            const nodeLinks = graph.links[ linkId ];
 
             for ( var link of nodeLinks )
             {
@@ -2589,23 +2750,27 @@ class GraphNode {
         if( !this.outputs || !this.outputs.length || !this.outputs[ index ] )
             return;
 
+        const graph = this.editor.graphs[ this.graphID ];
+
         // Set data in link
 
-        for( let linkId in this.editor.currentGraph.links )
+        for( let linkId in graph.links )
         {
             const idx = linkId.indexOf( this.id + '@' );
 
             if( idx < 0 )
                 continue;
 
-            const nodeLinks = this.editor.currentGraph.links[ linkId ];
+            const nodeLinks = graph.links[ linkId ];
 
             for ( var link of nodeLinks )
             {
                 if( link.outputIdx != index )
                     continue;
 
-                if( data != undefined && link.inputType != link.outputType && link.inputType != "any" && link.outputType != "any"  )
+                let innerData = data;
+
+                if( innerData != undefined && link.inputType != link.outputType && link.inputType != "any" && link.outputType != "any"  )
                 {
                     // In case of supported casting, use function to cast..
 
@@ -2613,17 +2778,12 @@ class GraphNode {
 
                     // Use function if it's possible to cast!
 
-                    data = fn ? fn( LX.deepCopy( data ) ) : null;
+                    innerData = fn ? fn( LX.deepCopy( innerData ) ) : null;
                 }
 
-                link.data = data;
+                link.data = innerData;
             }
         }
-    }
-
-    getOutput( index ) {
-
-        return this.outputs[ index ].value;
     }
 
     serialize() {
@@ -2651,25 +2811,32 @@ LX.GraphNode = GraphNode;
 
 class GraphFunction extends Graph {
 
-    constructor() {
+    constructor( name, options = { } ) {
 
         super();
 
-        const nodeInput = new NodeFuncInput( 'Input' );
-        nodeInput.onCreate();
+        this.name = name ?? "Unnamed Graph Function";
+        this.type = 'GraphFunction';
 
-        nodeInput.type = "function/Input";
-        nodeInput.title = "Input";
+        const nodeInput = GraphEditor.addNode( "function/Input" );
         nodeInput.position = new LX.vec2( 150, 250 );
 
-        const nodeOutput = new NodeFuncOutput( 'Output' );
-        nodeOutput.onCreate();
-
-        nodeOutput.type = "function/Output";
-        nodeOutput.title = "Output";
+        const nodeOutput = GraphEditor.addNode( "function/Output" );
         nodeOutput.position = new LX.vec2( 650, 350 );
 
         this.nodes.push( nodeInput, nodeOutput );
+    }
+
+    getOutputData( inputValue ) {
+
+        const inputNode = this.nodes[ 0 ];
+        inputNode.setOutput( 0, inputValue );
+
+        const outputNode = this.nodes[ 1 ];
+
+        this._runStep( outputNode.id );
+
+        return outputNode.getInput( 0 );
     }
 }
 
@@ -2714,11 +2881,14 @@ class NodeFuncInput extends GraphNode
     }
 }
 
+NodeFuncInput.blockDelete = true;
+NodeFuncInput.blockAdd = true;
+GraphEditor.registerCustomNode( "function/Input", NodeFuncInput );
+
 class NodeFuncOutput extends GraphNode
 {
     onCreate() {
-        this.addInput( null, "float" );
-        this.addProperty( "Inputs", "array", [ "float" ], [ 'float', 'int', 'bool', 'vec2', 'vec3', 'vec4', 'mat44' ] );
+        this.addInput( null, "any" );
     }
 
     onExecute() {
@@ -2726,17 +2896,11 @@ class NodeFuncOutput extends GraphNode
         // var b = this.getInput( 1 ) ?? this.properties[ 1 ].value;
         // this.setOutput( 0, a + b );
     }
-
-    setInputs( v ) {
-
-        this.inputs.length = 0;
-
-        for( var i of v )
-        {
-            this.inputs.push( { name: null, type: i } );
-        }
-    }
 }
+
+NodeFuncOutput.blockDelete = true;
+NodeFuncOutput.blockAdd = true;
+GraphEditor.registerCustomNode( "function/Output", NodeFuncOutput );
 
 /*
     Math nodes
@@ -3193,6 +3357,7 @@ class NodeMain extends GraphNode
     };
 }
 
+NodeMain.blockDelete = true;
 GraphEditor.registerCustomNode( "system/Main", NodeMain );
 
 export { GraphEditor, Graph, GraphNode };
