@@ -1,6 +1,6 @@
 {
-  "name": "demoGraph",
   "id": "Graph-372d-ad94-f505",
+  "name": "demoGraph",
   "type": "Graph",
   "nodes": [
     {
@@ -173,8 +173,8 @@
       "title": "Or",
       "color": null,
       "position": {
-        "x": 435,
-        "y": 435
+        "x": 296,
+        "y": 499
       },
       "type": "logic/Or",
       "inputs": [
@@ -225,6 +225,29 @@
         }
       ],
       "properties": []
+    },
+    {
+      "id": "functionaddone-d8dd-ba1b-be3f",
+      "title": "FunctionAddOne",
+      "color": null,
+      "position": {
+        "x": 327,
+        "y": 379
+      },
+      "type": "function/FunctionAddOne",
+      "inputs": [
+        {
+          "name": null,
+          "type": "float"
+        }
+      ],
+      "outputs": [
+        {
+          "name": null,
+          "type": "any"
+        }
+      ],
+      "properties": []
     }
   ],
   "links": {
@@ -237,6 +260,26 @@
         "outputIdx": 0,
         "outputType": "float",
         "data": false
+      }
+    ],
+    "float-ba48-0d7a-eb97@functionaddone-d8dd-ba1b-be3f": [
+      {
+        "inputNode": "functionaddone-d8dd-ba1b-be3f",
+        "inputIdx": 0,
+        "inputType": "float",
+        "outputNode": "float-ba48-0d7a-eb97",
+        "outputIdx": 0,
+        "outputType": "float"
+      }
+    ],
+    "functionaddone-d8dd-ba1b-be3f@main-aa64-e1f4-571d": [
+      {
+        "inputNode": "main-aa64-e1f4-571d",
+        "inputIdx": 2,
+        "inputType": "vec4",
+        "outputNode": "functionaddone-d8dd-ba1b-be3f",
+        "outputIdx": 0,
+        "outputType": "any"
       }
     ]
   }

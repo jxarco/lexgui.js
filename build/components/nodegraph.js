@@ -465,7 +465,7 @@ class GraphEditor {
         }
 
         NodeFunction.func = func;
-        GraphEditor.registerCustomNode( "functions/" + func.name, NodeFunction );
+        GraphEditor.registerCustomNode( "function/" + func.name, NodeFunction );
 
         this._sidebar.add( func.name, { icon: "fa fa-florin-sign", className: func.id, callback: (e) => { this.setGraph( func ) } } );
 
