@@ -405,7 +405,21 @@ panel.addTree(<span class="str">"Scene Tree"</span>, scene_data, {
 
 <h2 id="file">File</h2>
 
-<p>...TODO</p>
+<p>Represents a local file loader.</p>
+<p>Call <code class='inline'>Panel.addFile(name, value, callback)</code> to add a File Widget to your panel:</p>
+<ul>
+<li><code class='inline'>name (String)</code>: Widget name</li>
+<li><code class='inline'>callback (Function)</code>: Function called when bit mask changes</li>
+<li><code class='inline'>options (Object)</code>: Basic options<ul>
+    <li><code class='inline'>read (Bool)</code>: Return the file itself (False) or the contents (True)</li>
+    <li><code class='inline'>type (String)</code>: Type to read as [text (Default), buffer, bin, url]</li>
+    </ul></li>
+</ul>
+
+<pre><code class="lang-js">panel.addFile(<span class="str">"File name"</span>, (data, file) => {
+    console.log(data, file);
+});
+</code></pre>
 
 <h2 id="progress">Progress</h2>
 

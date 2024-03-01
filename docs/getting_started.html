@@ -20,7 +20,8 @@ MAKE_CODE( `<span class="kwd">let</span> area = LX.init();` );
 MAKE_PARAGRAPH( `Optionally, you can pass an ${INLINE_CODE("Object")} parameter to define a few properties:` );
 MAKE_BULLET_LIST( [
     [`container (String)`, `Root container for the entire UI (default is ${INLINE_CODE("document.body")})`],
-    [`id (String)`, `id of the generated Main Area (default is <em>mainarea</em>)`]
+    [`id (String)`, `id of the generated Main Area (default is <em>mainarea</em>)`],
+    [`skip_default_area (Bool)`, `Skips the creation of main area`]
 ] );
 
 MAKE_HEADER( "Namespace Globals", "h2", "namespace-globals" );

@@ -19,10 +19,16 @@
         MAKE_BULLET_LIST( [
             "Plain text",
             "JavaScript",
+            "C++",
             "CSS",
             "WGSL, GLSL",
             "JSON",
-            "XML"
+            "XML",
+            "Rust",
+            "Python",
+            "HTML",
+            "Batch",
+            "Markdown"
         ] );
 
         MAKE_HEADER( "Creating the editor", "h2", "init" );
@@ -33,10 +39,13 @@
 
         MAKE_PARAGRAPH( `When creating it, you can use different options to adapt the editor to your needs:` );
         MAKE_BULLET_LIST( [
-            ["allow_add_scripts (bool)", "Enables/Disables adding new tabs when double-clicking the tab space and doesn't add the 'New tab' tab"],
-            ["skip_info (bool)", "Show or hide the editor info panel at the bottom (Line, Column, Change Hightlighting, etc.)"],
             ["name (String)", "If defined, name of the default code tab"],
             ["highlight (String)", "Default Hightlightin"],
+            ["allow_add_scripts (bool)", "Enables/Disables adding new tabs when double-clicking the tab space and doesn't add the 'New tab' tab"],
+            ["skip_info (bool)", "Show or hide the editor info panel at the bottom (Line, Column, Change Hightlighting, etc.)"],
+            ["file_explorer (bool)", "Create a file explorer for the editor"],
+            ["disable_edition (bool)", "Disables the edition of code (To make code snippets)"],
+            ["autocomplete (bool)", "Toggle using autocomplete tool"],
             ["onsave (Function)", "Code to call when pressing <code class='inline'>Ctrl+S</code> in the editor"],
             ["onrun (Function)", "Code to call when pressing <code class='inline'>Ctrl+Enter</code> in the editor"]
         ] );

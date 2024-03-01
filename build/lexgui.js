@@ -421,33 +421,35 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
     /**
      * @method init
-     * @param {*} options 
+     * @param {Object} options 
      * container: Root location for the gui (default is the document body)
+     * id: Id of the main area
      * skip_default_area: Skip creation of main area
      */
 
-    function init(options = {})
+    function init( options = { } )
     {
-        if(this.ready)
+        if( this.ready )
             return this.main_area;
 
-        // LexGUI root 
-		var root = document.createElement("div");
-		root.id = "lexroot";
+        // LexGUI root
+
+        var root = document.createElement( 'div' );
+        root.id = "lexroot";
         root.tabIndex = -1;
         
-        var modal = document.createElement("div");
+        var modal = document.createElement( 'div' );
         modal.id = "modal";
 
         this.modal = modal;
         this.root = root;
         this.container = document.body;
 
-        this.modal.toggleAttribute('hidden', true);
-        this.modal.toggle = function(force) { this.toggleAttribute('hidden', force); };
+        this.modal.toggleAttribute( 'hidden', true );
+        this.modal.toggle = function( force ) { this.toggleAttribute( 'hidden', force ); };
 
-        if(options.container)
-            this.container = document.getElementById(options.container);
+        if( options.container )
+            this.container = document.getElementById( options.container );
             
         this.global_search = create_global_searchbar( this.container );
 
@@ -455,17 +457,17 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         this.container.appendChild( root );
 
         // Disable drag icon
-        root.addEventListener("dragover", function(e) {
+        root.addEventListener( 'dragover', function( e ) {
             e.preventDefault();
         }, false );
 
         // CSS fontawesome
-        var head = document.getElementsByTagName('HEAD')[0];
-        var link = document.createElement('link');
+        var head = document.getElementsByTagName( 'HEAD' )[ 0 ];
+        var link = document.createElement( 'link' );
         link.rel = 'stylesheet';
         link.type = 'text/css';
-        link.href = 'https://use.fontawesome.com/releases/v6.4.2/css/all.css';
-        head.appendChild(link);
+        link.href = 'https://use.fontawesome.com/releases/v6.5.1/css/all.css';
+        head.appendChild( link );
 
         // Global vars
         this.DEFAULT_NAME_WIDTH     = "30%";
@@ -473,10 +475,10 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         this.OPEN_CONTEXTMENU_ENTRY = 'click';
 
         this.ready = true;
-        this.menubars = [];
+        this.menubars = [ ];
 
-        if(!options.skip_default_area)
-            this.main_area = new Area( {id: options.id ?? "mainarea"} );
+        if( !options.skip_default_area )
+            this.main_area = new Area( { id: options.id ?? 'mainarea' } );
 
         return this.main_area;
     }
@@ -5289,6 +5291,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
          * @param {Function} callback Callback function on change
          * @param {*} options:
          * local: Ask for local file
+         * read: Return the file itself (False) or the contents (True)
          * type: type to read as [text (Default), buffer, bin, url]
          */
 

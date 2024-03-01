@@ -79,7 +79,7 @@
     <span class="com">// Fill entries...</span>
 }, { <span class="hljs-attr">float</span>: <span class="str">"center"</span> });` );
 
-        MAKE_HEADER( "Menubar Buttons", "h2", "menubar-buttons" );
+        MAKE_HEADER( "Menubar Buttons", "h3", "menubar-buttons" );
 
         MAKE_PARAGRAPH( `Inside the menubar creation callback, you can add a group of buttons to be added to your menubar using ${INLINE_CODE("Area.addButtons(callback, options)")}:` );
         MAKE_CODE( `m.addButtons( [
@@ -103,7 +103,7 @@
     }
 ]);` );
 
-        MAKE_HEADER( "Menubar Icons and Logos", "h2", "menubar-icons" );
+        MAKE_HEADER( "Menubar Icons and Logos", "h3", "menubar-icons" );
 
         MAKE_PARAGRAPH( `Inside the menubar creation callback, you can add an icon and/or a logo button to be added to your menubar using ${INLINE_CODE("Area.setButtonIcon(title, src, callback, options)")}:` );
         MAKE_CODE( `m.setButtonIcon(<span class="str">"Github"</span>, <span class="str">"fa-brands fa-github"</span>, () => { 
@@ -113,9 +113,15 @@
         MAKE_PARAGRAPH( `and ${INLINE_CODE("Area.setButtonImage(title, src, callback, options)")}:` );
         MAKE_CODE( `m.setButtonImage(<span class="str">"LexGUI"</span>, <span class="str">"path/image.png"</span>, null, {float: <span class="str">"left"</span>});` );
 
-        MAKE_HEADER( "Searchbar for Menu Entries", "h2", "searchbar-for-menu-entries" );
+        MAKE_HEADER( "Searchbar for Menu Entries", "h3", "searchbar-for-menu-entries" );
 
         MAKE_PARAGRAPH( `Pressing ${INLINE_CODE("Ctrl+Space")} you can open a search bar as a shortcut for any Menubar entry created in the whole UI.` );
+
+        MAKE_HEADER( "Sidebar", "h2", "sidebar" );
+
+        MAKE_PARAGRAPH( `You can also build a <strong>Sidebar</strong> element directly into any Area using ${INLINE_CODE("Area.addSidebar(callback, options)")}. 
+        To specify each of the menu entries, you should pass a <em>callback function</em> to be called when the Menubar is constructed. <strong>Callbacks will have a Sidebar instance as parameter</strong>, 
+        so use ${INLINE_CODE("Sidebar.add(entryName, options)")} on that instance inside your callback to build each of the entries.` );
 
     </script>
 
