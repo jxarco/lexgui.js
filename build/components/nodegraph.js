@@ -54,8 +54,8 @@ class GraphEditor {
 
     // Editor
 
-    static MIN_SCALE            = 0.25;
-    static MAX_SCALE            = 4.0;
+    static MINscale            = 0.25;
+    static MAXscale            = 4.0;
 
     static EVENT_MOUSEMOVE      = 0;
     static EVENT_MOUSEWHEEL     = 1;
@@ -207,8 +207,6 @@ class GraphEditor {
         this._snapToGrid = false;
         this._snapValue = 1.0;
 
-        this._scale = 1.0;
-
         // Graphs, Nodes and connections
 
         this.currentGraph   = null;
@@ -241,7 +239,6 @@ class GraphEditor {
         // Back pattern
         
         const f = 15.0;
-        this._patternPosition = new LX.vec2( 0, 0 );
         this._patternSize = new LX.vec2( f );
         this._circlePatternSize = f * 0.04;
         this._circlePatternColor = '#71717a9c';
@@ -379,6 +376,8 @@ class GraphEditor {
 
         this.currentGraph = graph;
         graph.editor = this;
+
+        this._updatePattern();
 
         for( let node of graph.nodes )
         {
@@ -991,7 +990,7 @@ class GraphEditor {
     _onMoveNodes( target ) {
 
         let dT = this._snapToGrid ? this._snappedDeltaMousePosition : this._deltaMousePosition;
-        dT.div( this._scale, dT);
+        dT.div( this.currentGraph.scale, dT);
 
         for( let nodeId of this.selectedNodes )
         {
@@ -1021,7 +1020,7 @@ class GraphEditor {
             return;
 
         let dT = this._snapToGrid ? this._snappedDeltaMousePosition : this._deltaMousePosition;
-        dT.div( this._scale, dT);
+        dT.div( this.currentGraph.scale, dT);
 
         this._translateNode( target, dT );
 
@@ -1453,7 +1452,7 @@ class GraphEditor {
 
         if( this._snapToGrid )
         {
-            const snapSize = this._patternSize.x * this._snapValue * this._scale;
+            const snapSize = this._patternSize.x * this._snapValue * this.currentGraph.scale;
             snapPosition.x = Math.floor( snapPosition.x / snapSize ) * snapSize;
             snapPosition.y = Math.floor( snapPosition.y / snapSize ) * snapSize;
             this._snappedDeltaMousePosition = snapPosition.sub( this._lastSnappedMousePosition );
@@ -1578,7 +1577,7 @@ class GraphEditor {
 
         if( rightPressed )
         {
-            this._patternPosition.add( this._deltaMousePosition.div( this._scale ), this._patternPosition );
+            this.currentGraph.translation.add( this._deltaMousePosition.div( this.currentGraph.scale ), this.currentGraph.translation );
 
             this._updatePattern();
 
@@ -1614,10 +1613,10 @@ class GraphEditor {
 
         const delta = e.deltaY;
 
-        if( delta > 0.0 ) this._scale *= 0.9;
-        else this._scale *= ( 1.0 / 0.9 );
+        if( delta > 0.0 ) this.currentGraph.scale *= 0.9;
+        else this.currentGraph.scale *= ( 1.0 / 0.9 );
 
-        this._scale = LX.UTILS.clamp( this._scale, GraphEditor.MIN_SCALE, GraphEditor.MAX_SCALE );
+        this.currentGraph.scale = LX.UTILS.clamp( this.currentGraph.scale, GraphEditor.MINscale, GraphEditor.MAXscale );
 
         // Compute zoom center in pattern space using new scale
         // and get delta..
@@ -1626,9 +1625,9 @@ class GraphEditor {
 
         const deltaCenter = newCenter.sub( center );
 
-        this._patternPosition = this._patternPosition.add( deltaCenter );
+        this.currentGraph.translation.add( deltaCenter, this.currentGraph.translation );
 
-        this._updatePattern( GraphEditor.EVENT_MOUSEWHEEL );
+        this._updatePattern();
     }
 
     _processContextMenu( e ) {
@@ -1719,8 +1718,8 @@ class GraphEditor {
         {
             var pattern = document.createElementNS( 'http://www.w3.org/2000/svg', 'pattern' );
             pattern.setAttribute( 'id', 'pattern-0' );
-            pattern.setAttribute( 'x', this._patternPosition.x );
-            pattern.setAttribute( 'y', this._patternPosition.y );
+            pattern.setAttribute( 'x', 0.0 );
+            pattern.setAttribute( 'y', 0.0 );
             pattern.setAttribute( 'width', this._patternSize.x )
             pattern.setAttribute( 'height', this._patternSize.y );
             pattern.setAttribute( 'patternUnits', 'userSpaceOnUse' );
@@ -1760,9 +1759,9 @@ class GraphEditor {
         if( !this._background )
             return;
 
-        const patternSize = this._patternSize.mul( this._scale );
-        const circlePatternSize = this._circlePatternSize * this._scale;
-        const patternPosition = this._patternPosition.mul( this._scale );
+        const patternSize = this._patternSize.mul( this.currentGraph.scale );
+        const circlePatternSize = this._circlePatternSize * this.currentGraph.scale;
+        const patternPosition = this.currentGraph.translation.mul( this.currentGraph.scale );
         
         let pattern = this._background.querySelector( 'pattern' );
         pattern.setAttribute( 'x', patternPosition.x );
@@ -1780,24 +1779,24 @@ class GraphEditor {
         const w = this._domNodes.offsetWidth * 0.5;
         const h = this._domNodes.offsetHeight * 0.5;
 
-        const dw = w - w * this._scale;
-        const dh = h - h * this._scale;
+        const dw = w - w * this.currentGraph.scale;
+        const dh = h - h * this.currentGraph.scale;
 
         this._domNodes.style.transform = `
             translate(` + ( patternPosition.x - dw ) + `px, ` + ( patternPosition.y - dh ) + `px) 
-            scale(` + this._scale + `)
+            scale(` + this.currentGraph.scale + `)
         `;
         this._domLinks.style.transform = this._domNodes.style.transform;
     }
 
     _getPatternPosition( renderPosition ) {
 
-        return renderPosition.div( this._scale ).sub( this._patternPosition );
+        return renderPosition.div( this.currentGraph.scale ).sub( this.currentGraph.translation );
     }
 
     _getRenderPosition( patternPosition ) {
 
-        return patternPosition.add( this._patternPosition ).mul( this._scale );
+        return patternPosition.add( this.currentGraph.translation ).mul( this.currentGraph.scale );
     }
 
     _onLink( e ) {
@@ -2041,7 +2040,7 @@ class GraphEditor {
 
     _createLinkPath( path, startPos, endPos, color, exactEnd ) {
 
-        const dist = 6 * this._scale;
+        const dist = 6 * this.currentGraph.scale;
         startPos.add( new LX.vec2( dist, dist ), startPos );
 
         if( !exactEnd )
@@ -2345,7 +2344,7 @@ class GraphEditor {
         function inner_mousemove( e )
         {
             let dt = new LX.vec2( lastPos[0] - e.x, lastPos[1] - e.y );
-            dt.div( that._scale, dt);
+            dt.div( that.currentGraph.scale, dt);
 
             groupDOM.style.width = ( parseFloat( groupDOM.style.width ) - dt.x ) + "px";
             groupDOM.style.height = ( parseFloat( groupDOM.style.height ) - dt.y ) + "px";
@@ -2538,12 +2537,13 @@ class Graph {
     constructor( name, options = {} ) {
 
         this.name = name ?? "Unnamed Graph";
+        this.type = 'Graph';
 
         this.nodes = [ ];
-
         this.links = { };
-
-        this.type = 'Graph';
+        
+        this.scale = 1.0;
+        this.translation = new LX.vec2( 0, 0 );
     }
 
     configure( o ) {
