@@ -1935,6 +1935,26 @@ meter::-webkit-meter-even-less-good-value {
   margin-top: -6px;
 }
 
+.lexsidebar .lexsidebarentry .lexsidebarentrydesc {
+  position: absolute;
+  margin-left: 56px;
+  font-weight: 600;
+  margin-top: 13px;
+  background-color: #afafaf;
+  color: var(--global-color-primary);
+  font-size: 16px;
+  border-radius: 6px;
+  text-align: center;
+  opacity: 0;
+  z-index: 1;
+  padding: 2px 6px;
+  transition: opacity ease-in 0.1s;
+}
+
+.lexsidebar .lexsidebarentry:hover .lexsidebarentrydesc {
+  opacity: 1;
+}
+
 .lexsidebar .lexsidebarentry:first-child {
   padding-top: 16px;
 }

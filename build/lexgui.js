@@ -2260,7 +2260,11 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             let entry = document.createElement( 'div' );
             entry.className = "lexsidebarentry " + ( options.className ?? "" );
             entry.id = pKey;
-            entry.title = key;
+
+            var desc = document.createElement( 'span' );
+            desc.className = 'lexsidebarentrydesc';
+            desc.innerHTML = key;
+            entry.appendChild( desc );
 
             if( options.bottom )
             {
