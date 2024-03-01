@@ -1515,7 +1515,7 @@ class Tabs {
 
         let container = document.createElement('div');
         container.className = "lexareatabs " + (options.fit ? "fit" : "row");
-        
+
         const folding = options.folding ?? false;
         if(folding) container.classList.add("folding");
 
@@ -1566,6 +1566,29 @@ class Tabs {
         this.root = container;
         this.tabs = {};
         this.tabDOMs = {};
+
+        if( options.fit )
+        {
+            // Create movable element
+            let mEl = document.createElement('span');
+            mEl.className = "lexareatab thumb";
+            this.thumb = mEl;
+            this.root.appendChild( mEl );
+
+            const resizeObserver = new ResizeObserver((entries) => {
+                const tabEl = this.thumb.item;
+                if( !tabEl ) return;
+                var transition = this.thumb.style.transition;
+                this.thumb.style.transition = "none";
+                this.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
+                this.thumb.style.width = ( tabEl.offsetWidth - 5 ) + "px";
+                this.thumb.style.height = ( tabEl.offsetHeight - 6 ) + "px";
+                flushCss( this.thumb );
+                this.thumb.style.transition = transition;
+            });
+
+            resizeObserver.observe( this.area.root );
+        }
 
         // debug
         if(folding) 
@@ -1664,6 +1687,14 @@ class Tabs {
 
             if(options.onSelect)
                 options.onSelect(e, tabEl.dataset.name);
+
+            if( this.thumb )
+            {
+                this.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
+                this.thumb.style.width = ( tabEl.offsetWidth - 5 ) + "px";
+                this.thumb.style.height = ( tabEl.offsetHeight - 6 ) + "px";
+                this.thumb.item = tabEl;
+            }
         });
 
         tabEl.addEventListener("contextmenu", e => {
@@ -1692,13 +1723,26 @@ class Tabs {
         });
         
         // Attach content
+        tabEl.childIndex = ( this.root.childElementCount - 1 );
         this.root.appendChild( tabEl );
         this.area.attach( contentEl );
         this.tabDOMs[ name ] = tabEl;
         this.tabs[ name ] = content;
 
         setTimeout( () => {
-            if( options.onCreate ) options.onCreate.call(this, this.area.root.getBoundingClientRect());
+
+            if( options.onCreate ) {
+                options.onCreate.call(this, this.area.root.getBoundingClientRect());
+            }
+
+            if( isSelected && this.thumb )
+            {
+                this.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
+                this.thumb.style.width = ( tabEl.offsetWidth - 5 ) + "px";
+                this.thumb.style.height = ( tabEl.offsetHeight - 6 ) + "px";
+                this.thumb.item = tabEl;
+            }
+
         }, 10 );
     }
 

@@ -1557,11 +1557,11 @@ input[type="range"] {
   margin-top: 2px;
 }
 
-.lexprogressbar.editable:hover{
+.lexprogressbar.editable:hover {
   cursor: grab;
 }
 
-.lexprogressbar.editable:active{
+.lexprogressbar.editable:active {
   cursor: grabbing;
 }
 
@@ -1573,10 +1573,10 @@ meter::-webkit-meter-bar {
 
 /* (optimum) */
 meter:-moz-meter-optimum::-moz-meter-bar {
-  background: var(--global-selected-light);
+  background: var(--global-selected);
 }
 meter::-webkit-meter-optimum-value {
-  background: var(--global-selected-light);
+  background: var(--global-selected);
 }
 
 /* (sub-optimum)*/
@@ -2152,6 +2152,12 @@ meter::-webkit-meter-even-less-good-value {
   line-height: 16px;
 }
 
+.lexareatabs .lexareatab.thumb {
+  position: absolute;
+  background-color: var(--global-selected-dark);
+  z-index: 0;
+}
+
 .lexareatabs.row {
   width: 100%;
 }
@@ -2170,31 +2176,35 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexareatabs.fit {
-  background-color: var(--global-color-secondary);
   width: calc(100% - 14px);
 }
 
 .lexareatabs.fit .lexareatab {
   flex: 100%;
   border-radius: 10px;
+  z-index: 1;
 }
 
 .lexareatabs .lexareatab:active {
   color: #b7b7cba4;
 }
 
-.lexareatabs.row .lexareatab.selected {
-  color: var(--global-text);
-  background-color: var(--global-selected);
+.lexareatabs.fit .lexareatab.selected {
+  color: #f8f8f8;
 }
 
-.lexareatabs.fit .lexareatab.selected, .lexareatabs.folding .lexareatab.selected {
+.lexareatabs.row .lexareatab.selected {
+  color: var(--global-text);
+  background-color: var(--global-selected-dark);
+}
+
+.lexareatabs.folding .lexareatab.selected {
   color: var(--global-text-primary);
   background-color: #555556;
 }
 
 .lexareatabs .lexareatab:hover {
-  color: white;
+  color: #f8f8f8;
 }
 
 .lexareatabscontainer {
@@ -2917,7 +2927,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .codetabsarea {
-  height: calc( 100% - 60px ) !important;
+  height: calc( 100% - 72px ) !important;
   background-color: var(--global-branch-darker);
   overflow: scroll;
 }

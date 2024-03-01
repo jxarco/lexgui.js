@@ -1278,7 +1278,7 @@ class CodeEditor {
             get: (v) => { return cursor._position },
             set: (v) => { 
                 cursor._position = v;
-                if( cursor.isMain ) this._updateDataInfoPanel( "@cursor-pos", "Col " + v );
+                if( cursor.isMain ) this._updateDataInfoPanel( "@cursor-pos", "Col " + ( v + 1 ) );
             }
         } );
 
