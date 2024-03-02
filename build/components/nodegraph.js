@@ -1233,7 +1233,15 @@ class GraphEditor {
 
         LX.UTILS.deleteElement( el );
 
+        // Delete from the editor
+
         delete this.nodes[ nodeId ];
+
+        // Delete from the graph data
+
+        const idx = this.currentGraph.nodes.findIndex( v => v.id === nodeId );
+        console.assert( idx >= 0 );
+        this.currentGraph.nodes.splice( idx, 1 );
 
         // Delete connected links..
         
@@ -1290,6 +1298,22 @@ class GraphEditor {
 
             delete this.currentGraph.links[ key ];
         }
+    }
+
+    _deleteGroup( groupId ) {
+
+        const dom = this.groups[ groupId ];
+        LX.UTILS.deleteElement( dom );
+
+        // Delete from the editor
+
+        delete this.groups[ groupId ];
+
+        // Delete from the graph data
+
+        const idx = this.currentGraph.groups.findIndex( v => v.id === groupId );
+        console.assert( idx >= 0 );
+        this.currentGraph.groups.splice( idx, 1 );
     }
 
     _cloneNodes() {
@@ -2425,7 +2449,7 @@ class GraphEditor {
     _createGroup( bb ) {
 
         const group_bb = bb ?? this._getBoundingFromNodes( this.selectedNodes );
-        const group_id = bb.id ?? "group-" + LX.UTILS.uidGenerator();
+        const group_id = bb ? bb.id : "group-" + LX.UTILS.uidGenerator();
 
         let groupDOM = document.createElement( 'div' );
         groupDOM.id = group_id;
@@ -2517,6 +2541,19 @@ class GraphEditor {
                 return;
             groupTitle.disabled = false;
             groupTitle.focus();
+        } );
+
+        groupDOM.addEventListener( 'contextmenu', e => {
+
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            LX.addContextMenu(null, e, m => {
+                m.add( "Delete", () => {
+                    this._deleteGroup( group_id );
+                } );
+            });
         } );
 
         groupDOM.appendChild( groupResizer );
