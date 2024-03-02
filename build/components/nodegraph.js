@@ -733,6 +733,7 @@ class GraphEditor {
 
                 var type = document.createElement( 'span' );
                 type.className = 'io__type input ' + i.type;
+                type.dataset[ 'type' ] = i.type;
                 type.innerHTML = '<span>' + i.type[ 0 ].toUpperCase() + '</span>';
                 input.appendChild( type );
 
@@ -786,6 +787,7 @@ class GraphEditor {
 
                 var type = document.createElement( 'span' );
                 type.className = 'io__type output ' + o.type;
+                type.dataset[ 'type' ] = o.type;
                 type.innerHTML = '<span>' + o.type[ 0 ].toUpperCase() + '</span>';
                 output.appendChild( type );
 
@@ -1583,8 +1585,14 @@ class GraphEditor {
         // It the event reaches this, the link isn't valid..
         if( this._generatingLink )
         {
+            const linkInfo = Object.assign( { }, this._generatingLink );
+
+            // Delete old link
             LX.UTILS.deleteElement( this._generatingLink.path ? this._generatingLink.path.parentElement : null );
             delete this._generatingLink;
+
+            // Open contextmenu to auto-connect something..
+            this._processContextMenu( e, linkInfo );
         }
 
         else if( this._boxSelecting )
@@ -1661,7 +1669,7 @@ class GraphEditor {
         this._updatePattern();
     }
 
-    _processContextMenu( e ) {
+    _processContextMenu( e, autoConnect ) {
         
         LX.addContextMenu( "ADD NODE", e, m => {
             
@@ -1695,6 +1703,33 @@ class GraphEditor {
                     }
 
                     this.currentGraph.nodes.push( newNode );
+
+                    if( autoConnect && newNode.inputs.length )
+                    {
+                        const srcId = autoConnect.domEl.dataset[ 'id' ];
+                        const srcType = autoConnect.io.childNodes[ autoConnect.index ].dataset[ 'type' ];
+                        const srcIsInput = autoConnect.ioType == GraphEditor.NODE_IO_INPUT;
+
+                        const newLink = {
+                            inputNode: srcIsInput ? srcId : newNode.id,
+                            inputIdx: srcIsInput ? autoConnect.index : 0,
+                            inputType: srcIsInput ? srcType : newNode.inputs[ 0 ].type,
+                            outputNode: srcIsInput ? newNode.id : srcId,
+                            outputIdx: srcIsInput ? 0 : autoConnect.index,
+                            outputType: srcIsInput ? newNode.inputs[ 0 ].type : srcType,
+                        }
+
+                        // Store link
+
+                        const pathId = newLink.outputNode + '@' + newLink.inputNode;
+
+                        if( !this.currentGraph.links[ pathId ] ) this.currentGraph.links[ pathId ] = [];
+
+                        this.currentGraph.links[ pathId ].push( newLink );
+
+                        this._createLink( newLink );
+                    }
+
                 } );
             }
         });
