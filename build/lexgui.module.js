@@ -442,8 +442,11 @@ function init( options = { } )
     this.root = root;
     this.container = document.body;
 
-    this.modal.toggleAttribute( 'hidden', true );
-    this.modal.toggle = function( force ) { this.toggleAttribute( 'hidden', force ); };
+    // this.modal.toggleAttribute( 'hidden', true );
+    // this.modal.toggle = function( force ) { this.toggleAttribute( 'hidden', force ); };
+
+    this.modal.classList.add( 'hiddenOpacity' );
+    this.modal.toggle = function( force ) { this.classList.toggle( 'hiddenOpacity', force ); };
 
     if( options.container )
         this.container = document.getElementById( options.container );
@@ -1305,7 +1308,8 @@ class Area {
                 selectable: b.selectable,
                 selected: b.selected,
                 icon: b.icon,
-                img: b.img
+                img: b.img,
+                className: b.class
             };
 
             if( group )
