@@ -2265,15 +2265,11 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             entry.className = "lexsidebarentry " + ( options.className ?? "" );
             entry.id = pKey;
 
-            var desc = document.createElement( 'span' );
-            desc.className = 'lexsidebarentrydesc';
-            desc.innerHTML = key;
-            entry.appendChild( desc );
-
             if( options.bottom )
             {
                 this.footer.appendChild( entry );
-            }else
+            }
+            else
             {
                 this.root.appendChild( entry );
             }
@@ -2284,6 +2280,11 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             let button = document.createElement( 'button' );
             button.innerHTML = "<i class='"+ (options.icon ?? "") + "'></i>";
             entry.appendChild( button );
+
+            let desc = document.createElement( 'span' );
+            desc.className = 'lexsidebarentrydesc';
+            desc.innerHTML = key;
+            entry.appendChild( desc );
 
             entry.addEventListener("click", () => {
 

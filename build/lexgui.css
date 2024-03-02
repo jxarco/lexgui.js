@@ -1944,7 +1944,7 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexsidebar .lexsidebarentry .lexsidebarentrydesc {
   position: absolute;
-  margin-left: 56px;
+  margin-left: 12px;
   font-weight: 600;
   margin-top: 13px;
   background-color: #afafaf;
@@ -1958,7 +1958,7 @@ meter::-webkit-meter-even-less-good-value {
   transition: opacity ease-in 0.1s;
 }
 
-.lexsidebar .lexsidebarentry:hover .lexsidebarentrydesc {
+.lexsidebar .lexsidebarentry button:hover + .lexsidebarentrydesc {
   opacity: 1;
 }
 
