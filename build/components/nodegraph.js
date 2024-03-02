@@ -227,6 +227,7 @@ class GraphEditor {
 
         this.graphs         = { };
         this.nodes          = { };
+        this.groups         = { };
         this.variables      = { };
 
         this.selectedNodes = [ ];
@@ -389,13 +390,19 @@ class GraphEditor {
         }
 
         this.currentGraph = graph;
-        graph.editor = this;
 
         this._updatePattern();
 
         for( let node of graph.nodes )
         {
             this._createNodeDOM( node );
+        }
+
+        for( let group of graph.groups )
+        {
+            const groupDom = this._createGroup( group );
+            groupDom.querySelector( '.lexgraphgrouptitle' ).value = group.name;
+            this._domNodes.prepend( groupDom );
         }
 
         for( let linkId in graph.links )
@@ -409,6 +416,7 @@ class GraphEditor {
         }
 
         this._updateGraphName( graph.name );
+        this._togglePropertiesDialog( false );
     }
 
     /**
@@ -440,6 +448,8 @@ class GraphEditor {
     addGraph( o ) {
 
         let graph = new Graph();
+        graph.editor = this;
+
         if( o ) graph.configure( o );
 
         this.setGraph( graph );
@@ -459,6 +469,8 @@ class GraphEditor {
     addGraphFunction( o ) {
 
         let func = new GraphFunction();
+        func.editor = this;
+
         if( o ) func.configure( o );
 
         this.setGraph( func );
@@ -2410,11 +2422,13 @@ class GraphEditor {
      * @returns JSON data from the serialized graph
      */
 
-    _createGroup() {
+    _createGroup( bb ) {
 
-        const group_bb = this._getBoundingFromNodes( this.selectedNodes );
+        const group_bb = bb ?? this._getBoundingFromNodes( this.selectedNodes );
+        const group_id = bb.id ?? "group-" + LX.UTILS.uidGenerator();
 
         let groupDOM = document.createElement( 'div' );
+        groupDOM.id = group_id;
         groupDOM.classList.add( 'lexgraphgroup' );
         groupDOM.style.left = group_bb.origin.x + "px";
         groupDOM.style.top = group_bb.origin.y + "px";
@@ -2425,6 +2439,8 @@ class GraphEditor {
         groupResizer.classList.add( 'lexgraphgroupresizer' );
 
         groupResizer.addEventListener( 'mousedown', inner_mousedown );
+
+        this.groups[ group_id ] = groupDOM;
 
         var that = this;
         var lastPos = [0,0];
@@ -2516,6 +2532,8 @@ class GraphEditor {
         } );
 
         GraphEditor.LAST_GROUP_ID++;
+
+        return groupDOM;
     }
 
     _addUndoStep( deleteRedo = true )  {
@@ -2659,8 +2677,9 @@ class Graph {
         this.name = name ?? "Unnamed Graph";
         this.type = 'Graph';
 
-        this.nodes = [ ];
-        this.links = { };
+        this.nodes  = [ ];
+        this.groups = [ ];
+        this.links  = { };
         
         this.scale = 1.0;
         this.translation = new LX.vec2( 0, 0 );
@@ -2682,13 +2701,12 @@ class Graph {
             newNode.color = node.color;
             newNode.position = new LX.vec2( node.position.x, node.position.y );
             newNode.type = node.type;
-            // newNode.inputs = node.inputs;
-            // newNode.outputs = node.outputs;
             newNode.properties = node.properties;
 
             this.nodes.push( newNode );
         }
 
+        this.groups = o.groups;
         this.links = o.links;
 
         // editor options?
@@ -2776,6 +2794,7 @@ class Graph {
         o.type = this.type;
 
         o.nodes = [ ];
+        o.groups = [ ];
         o.links = { };
 
         for( let node of this.nodes )
@@ -2788,6 +2807,15 @@ class Graph {
             const ioLinks = LX.deepCopy( this.links[ linkId ] );
             ioLinks.forEach( v => delete v.path );
             o.links[ linkId ] = ioLinks;
+        }
+
+        for( let group of this.groups )
+        {
+            const groupDom = this.editor.groups[ group.id ];
+            const group_bb = this.editor._getBoundingFromGroup( groupDom );
+            group_bb.id = group.id;
+            group_bb.name = group.name
+            o.groups.push( group_bb );
         }
 
         // editor options?
