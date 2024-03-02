@@ -965,8 +965,11 @@ class GraphEditor {
 
             el.addEventListener( 'mouseup', e => {
 
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+
                 // Single click..
-                if( ( LX.getTime() - this.lastMouseDown ) < 120 ) {
+                if( ( LX.getTime() - this.lastMouseDown ) < 200 ) {
                     delete this._generatingLink;
                     return;
                 }
@@ -982,9 +985,6 @@ class GraphEditor {
 
                     delete this._generatingLink;
                 }
-
-                e.stopPropagation();
-                e.stopImmediatePropagation();
             } );
 
             el.addEventListener( 'click', e => {
@@ -1499,7 +1499,8 @@ class GraphEditor {
         
         else if( e.type == 'mouseup' )
         {
-            if( ( LX.getTime() - this.lastMouseDown ) < 120 ) {
+            if( ( LX.getTime() - this.lastMouseDown ) < 200 ) {
+
                 this._processClick( e );
             }
 
@@ -1531,7 +1532,7 @@ class GraphEditor {
 
             e.preventDefault();
             
-            if( ( LX.getTime() - this.lastMouseDown ) < 120 ) {
+            if( ( LX.getTime() - this.lastMouseDown ) < 300 ) {
                 this._processContextMenu( e );
             }
         }
