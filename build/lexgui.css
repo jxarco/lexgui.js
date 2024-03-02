@@ -91,6 +91,11 @@ body.noevents * {
   display: none !important;
 }
 
+.hiddenOpacity {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
 ::-webkit-file-upload-button {
  display: none;
 }
@@ -102,9 +107,11 @@ body.noevents * {
   bottom: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.5);
   position: absolute;
   z-index: 99;
+  opacity: 1;
+  transition: opacity 0.2s ease-in;
 }
 
 #lexroot {
@@ -3625,4 +3632,11 @@ pre .line-gutter {
 .lexgraphgroup .lexgraphgroupresizer:hover {
   border-bottom: 2px solid #4b4b4ba8;
   border-right: 2px solid #4b4b4ba8;
+}
+
+.grapharea .graph-title button {
+  font-size: 16px;
+  font-family: var(--global-title-font);
+  font-weight: 600;
+  color: var(--global-text);
 }

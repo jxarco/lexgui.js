@@ -14,7 +14,7 @@ class BoundingBox {
         this.size = s ?? new LX.vec2( 0, 0 );
     }
 
-    merge ( bb ) {
+    merge( bb ) {
 
         console.assert( bb.constructor == BoundingBox );
 
@@ -31,7 +31,7 @@ class BoundingBox {
         this.size = merge_max.sub( merge_min );
     }
 
-    inside ( bb ) {
+    inside( bb, full = true ) {
 
         const min_0 = this.origin;
         const max_0 = this.origin.add( this.size );
@@ -39,8 +39,16 @@ class BoundingBox {
         const min_1 = bb.origin;
         const max_1 = bb.origin.add( bb.size );
 
-        return min_1.x >= min_0.x && max_1.x <= max_0.x
-                && min_1.y >= min_0.y && max_1.y <= max_0.y;
+        if( full )
+        {
+            return min_1.x >= min_0.x && max_1.x <= max_0.x
+                    && min_1.y >= min_0.y && max_1.y <= max_0.y;
+        }
+        else
+        {
+            return max_1.x >= min_0.x && min_1.x <= max_0.x
+                && max_1.y >= min_0.y && min_1.y <= max_0.y;
+        }
     }
 };
 
@@ -54,8 +62,8 @@ class GraphEditor {
 
     // Editor
 
-    static MINscale            = 0.25;
-    static MAXscale            = 4.0;
+    static MIN_SCALE            = 0.25;
+    static MAX_SCALE            = 4.0;
 
     static EVENT_MOUSEMOVE      = 0;
     static EVENT_MOUSEWHEEL     = 1;
@@ -95,6 +103,7 @@ class GraphEditor {
 
         this.root = this.area.root;
         this.root.tabIndex = -1;
+
         area.attach( this.root );
 
         this._graphContainer = area.sections[ 1 ].root;
@@ -154,7 +163,12 @@ class GraphEditor {
                     icon: "fa fa-diagram-project",
                     callback: (value, event) => this.currentGraph.export()
                 }
-            ]
+            ],
+            {
+                name: "",
+                class: "graph-title",
+                callback: (value, event) => this._showRenameGraphDialog()
+            }
         ], { float: "htc" } );
 
         this.root.addEventListener( 'keydown', this._processKeyDown.bind( this ), true );
@@ -393,6 +407,8 @@ class GraphEditor {
                 this._createLink( link );
             }
         }
+
+        this._updateGraphName( graph.name );
     }
 
     /**
@@ -804,6 +820,20 @@ class GraphEditor {
         {
             this.main = id;
         }
+
+        node.size = new LX.vec2( nodeContainer.offsetWidth, nodeContainer.offsetHeight );
+
+        node.resizeObserver = new ResizeObserver( entries => {
+
+            for( const entry of entries ) {
+                const bb = entry.contentRect;
+                if( !bb.width || !bb.height )
+                    continue;
+                node.size = new LX.vec2( nodeContainer.offsetWidth, nodeContainer.offsetHeight );
+            }
+        });
+
+        node.resizeObserver.observe( nodeContainer );
 
         return nodeContainer;
     }
@@ -1616,7 +1646,7 @@ class GraphEditor {
         if( delta > 0.0 ) this.currentGraph.scale *= 0.9;
         else this.currentGraph.scale *= ( 1.0 / 0.9 );
 
-        this.currentGraph.scale = LX.UTILS.clamp( this.currentGraph.scale, GraphEditor.MINscale, GraphEditor.MAXscale );
+        this.currentGraph.scale = LX.UTILS.clamp( this.currentGraph.scale, GraphEditor.MIN_SCALE, GraphEditor.MAX_SCALE );
 
         // Compute zoom center in pattern space using new scale
         // and get delta..
@@ -1787,6 +1817,16 @@ class GraphEditor {
             scale(` + this.currentGraph.scale + `)
         `;
         this._domLinks.style.transform = this._domNodes.style.transform;
+
+        // Hide nodes outside the viewport
+
+        const nodesOutsideViewport = this._getNonVisibleNodes();
+
+        for( let node of nodesOutsideViewport )
+        {
+            let dom = this._getNodeDOMElement( node.id );
+            dom.classList.toggle( 'hiddenOpacity', true );
+        }
     }
 
     _getPatternPosition( renderPosition ) {
@@ -2191,8 +2231,9 @@ class GraphEditor {
         "/>`;
     }
 
-    // TODO: Return the ones in the viewport
-    _getVisibleNodes() {
+    _getNonVisibleNodes() {
+
+        const nonVisibleNodes = [ ];
 
         if( !this.currentGraph )
         {
@@ -2200,7 +2241,34 @@ class GraphEditor {
             return [];
         }
 
-        return this.currentGraph.nodes;
+        const graph_bb = new BoundingBox( new LX.vec2( 0, 0 ), new LX.vec2( this.root.offsetWidth, this.root.offsetHeight ) );
+
+        for( let node of this.currentGraph.nodes )
+        {
+            let pos = this._getRenderPosition( node.position );
+
+            let dom = this._getNodeDOMElement( node.id );
+
+            if( !dom )
+                continue;
+
+            const node_bb = new BoundingBox( pos, node.size.mul( this.currentGraph.scale ) );
+
+            if( graph_bb.inside( node_bb, false ) )
+            {
+                // Show if node in viewport..
+                dom.classList.toggle( 'hiddenOpacity', false );
+
+                // And hide content if scale is very small..
+                dom.childNodes[ 1 ].classList.toggle( 'hiddenOpacity', this.currentGraph.scale < 0.5 );
+
+                continue;
+            }
+
+            nonVisibleNodes.push( node );
+        }
+
+        return nonVisibleNodes;
     }
 
     _selectNodesInBox( lt, rb, remove ) {
@@ -2274,11 +2342,8 @@ class GraphEditor {
 
         for( let nodeId of nodeIds )
         {
-            const dom = this._getNodeDOMElement( nodeId );
-
-            const x = parseFloat( dom.style.left );
-            const y = parseFloat( dom.style.top );
-            const node_bb = new BoundingBox( new LX.vec2( x, y ), new LX.vec2( dom.offsetWidth - 6, dom.offsetHeight - 6 ) );
+            const node = this.nodes[ nodeId ].data;
+            const node_bb = new BoundingBox( node.position, node.size );
 
             if( group_bb )
             {
@@ -2512,6 +2577,25 @@ class GraphEditor {
             m.add( "Graph", () => this.addGraph() );
             m.add( "Function", () => this.addGraphFunction() );
         });
+    }
+
+    _showRenameGraphDialog() {
+
+        new LX.Dialog( "Graph", p => {
+            p.addText( "Name", this.currentGraph.name, v => this._updateGraphName(v) );
+        }, { modal: true, size: [ "250px", null ] } );
+    }
+
+    _updateGraphName( name ) {
+
+        this.currentGraph.name = name;
+
+        const nameDom = LX.root.querySelector( '.graph-title button' );
+        console.assert( nameDom );
+        nameDom.innerText = name;
+
+        // TODO:
+        // Update name in sidebar and all references in current nodes..
     }
 
     _addGlobalActions() {
