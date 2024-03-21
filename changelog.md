@@ -1,5 +1,24 @@
 # lexgui.js changelog
 
+## 0.1.30
+
+GraphEditor:
+- Snap Multiplier (x1, x2, x3)
+- Added Sidebar to change between graphs/functions.
+- Start/Stop graph buttons in top buttons.
+- Initial support for creating Graph Functions.
+- Improved performance hiding nodes outside the viewport.
+- Groundwork for graph/function renaming.
+- Support "Autoconnect" nodes.
+- Import/Export Groups + Move groups inside groups.
+
+Support adding class to overlay buttons.
+Add custom "title" on hover for Sidebar elements.
+Added Sidebar.select method.
+Improved select animation "fit" tabs.
+Doc updates.
+Minor bug fixes.
+
 ## 0.1.29
 
 GraphEditor:
