@@ -2672,21 +2672,34 @@ class GraphEditor {
 
     _showRenameGraphDialog() {
 
-        new LX.Dialog( "Graph", p => {
-            p.addText( "Name", this.currentGraph.name, v => this._updateGraphName(v) );
-        }, { modal: true, size: [ "250px", null ] } );
+        const dialog = new LX.Dialog( this.currentGraph.constructor.name, p => {
+            p.addText( "Name", this.currentGraph.name, v => {
+                this._updateGraphName( v );
+                dialog.close();
+            } );
+        }, { modal: true, size: [ "350px", null ] } );
     }
 
     _updateGraphName( name ) {
 
-        this.currentGraph.name = name;
+        const newNameKey = name.replace( /\s/g, '' ).replaceAll( '.', '' );
 
+        // Change graph name button
         const nameDom = LX.root.querySelector( '.graph-title button' );
         console.assert( nameDom );
         nameDom.innerText = name;
 
-        // TODO:
-        // Update name in sidebar and all references in current nodes..
+        // Change name in sidebar
+        const graphNameKey = this.currentGraph.name.replace( /\s/g, '' ).replaceAll( '.', '' );
+        const sidebarItem = this._sidebar.items.find( v => v.name === graphNameKey );
+        if( sidebarItem )
+        {
+            sidebarItem.name = newNameKey;
+            sidebarItem.domEl.id = newNameKey;
+            sidebarItem.domEl.querySelector(".lexsidebarentrydesc").innerText = name;
+        }
+
+        this.currentGraph.name = name;
     }
 
     _addGlobalActions() {
