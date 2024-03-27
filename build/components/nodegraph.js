@@ -642,14 +642,16 @@ class GraphEditor {
             LX.addContextMenu(null, e, m => {
 
                 m.add( "Copy", () => {
-                    // TODO
-                    // ...
+                    this._clipboardData = {
+                        id: node.id,
+                        gid: this.currentGraph.id
+                    };
                 } );
 
-                m.add( "Paste", () => {
-                    // TODO
-                    // ...
-                } );
+                // TODO
+                // m.add( "Paste", () => {
+
+                // } );
 
                 m.add( "" );
 
@@ -1316,6 +1318,28 @@ class GraphEditor {
         this.currentGraph.groups.splice( idx, 1 );
     }
 
+    _cloneNode( nodeId, graphId, position ) {
+
+        const graph = this.graphs[ graphId ?? this.currentGraph.id ];
+
+        const nodeData = graph.getNodeById( nodeId );
+
+        if( !nodeData )
+            return;
+
+        const el = this._getNodeDOMElement( nodeId );
+        const newNode = GraphEditor.addNode( nodeData.type );
+        newNode.properties = LX.deepCopy( nodeData.properties );
+
+        const newDom = this._createNodeDOM( newNode );
+
+        this._translateNode( newDom, position ?? this._getNodePosition( el ) );
+
+        this._selectNode( newDom, true );
+
+        this.currentGraph.nodes.push( newNode );
+    }
+
     _cloneNodes() {
 
         // Clone all selected nodes
@@ -1325,20 +1349,7 @@ class GraphEditor {
 
         for( let nodeId of selectedIds )
         {
-            const nodeInfo = this.nodes[ nodeId ];
-            if( !nodeInfo )
-                return;
-
-            const el = this._getNodeDOMElement( nodeId );
-            const data = nodeInfo.data;
-            const newNode = GraphEditor.addNode( data.type );
-            const newDom = this._createNodeDOM( newNode );
-
-            this._translateNode( newDom, this._getNodePosition( el ) );
-
-            this._selectNode( newDom, true );
-
-            this.currentGraph.nodes.push( newNode );
+            this._cloneNode( nodeId );
         }
     }
 
@@ -1707,8 +1718,32 @@ class GraphEditor {
 
     _processContextMenu( e, autoConnect ) {
         
-        LX.addContextMenu( "ADD NODE", e, m => {
-            
+        LX.addContextMenu( null, e, m => {
+
+            var eventPosition = null;
+
+            if( e )
+            {
+                const rect = this.root.getBoundingClientRect();
+
+                const localPosition = new LX.vec2( e.clientX - rect.x, e.clientY - rect.y );
+
+                eventPosition = this._getPatternPosition( localPosition );
+            }
+
+            if( this._clipboardData )
+            {
+                m.add( "Paste", () => {
+
+                    const nodeId = this._clipboardData.id;
+                    const graphId = this._clipboardData.gid;
+
+                    this._cloneNode( nodeId, graphId, eventPosition );
+
+                } );
+                m.add( "" );
+            }
+
             for( let type in GraphEditor.NODE_TYPES )
             {
                 const baseClass = GraphEditor.NODE_TYPES[ type ];
@@ -1727,15 +1762,9 @@ class GraphEditor {
                         dom.mustSnap = true;
                     }
 
-                    if( e )
+                    if( eventPosition )
                     {
-                        const rect = this.root.getBoundingClientRect();
-            
-                        let position = new LX.vec2( e.clientX - rect.x, e.clientY - rect.y );
-            
-                        position = this._getPatternPosition( position );
-            
-                        this._translateNode( dom, position );
+                        this._translateNode( dom, eventPosition );
                     }
 
                     this.currentGraph.nodes.push( newNode );
@@ -2762,6 +2791,18 @@ class Graph {
         // editor options?
 
         // zoom/translation ??
+    }
+
+    /**
+     * @method getNodeById
+     */
+
+    getNodeById( id ) {
+
+        for( let node of this.nodes )
+        {
+            if( node.id == id ) return node;
+        }
     }
 
     /**

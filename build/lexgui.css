@@ -3406,7 +3406,7 @@ pre .line-gutter {
 }
 
 .lexgraphnode.variables {
-  background: linear-gradient(15deg, #f1e643da 10%, #e78b8bda);
+  background: linear-gradient(15deg, #f14343da 10%, #e7b88bda);
   background-color: unset; background-origin: border-box;
 }
 
