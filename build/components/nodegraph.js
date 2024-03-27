@@ -352,6 +352,11 @@ class GraphEditor {
         node.position = new LX.vec2( 0, 0 );
         node.color = null;
 
+        if( baseClass.name == 'NodeFunction' )
+        {
+            node.gid = baseClass.gid;
+        }
+
         // Extra options
         if ( options ) {
             for (var i in options) {
@@ -450,7 +455,17 @@ class GraphEditor {
         let graph = new Graph();
         graph.editor = this;
 
-        if( o ) graph.configure( o );
+        if( o )
+        {
+            // Load functions first if any..
+
+            for( let fn of o.functions ?? [] )
+            {
+                this.addGraphFunction( fn );
+            }
+
+            graph.configure( o );
+        }
 
         this.setGraph( graph );
 
@@ -492,6 +507,7 @@ class GraphEditor {
         }
 
         NodeFunction.func = func;
+        NodeFunction.gid = func.id;
         GraphEditor.registerCustomNode( "function/" + func.name, NodeFunction );
 
         this._sidebar.add( func.name, { icon: "fa fa-florin-sign", className: func.id, callback: (e) => { this.setGraph( func ) } } );
@@ -2871,12 +2887,12 @@ class Graph {
     }
 
     /**
-     * @method export
+     * @method serialize
      * @param {Boolean} prettify
      * @returns JSON data from the serialized graph
      */
 
-    export( prettify = true ) {
+    serialize( prettify = true ) {
         
         var o = { };
 
@@ -2884,13 +2900,21 @@ class Graph {
         o.name = this.name;
         o.type = this.type;
 
-        o.nodes = [ ];
-        o.groups = [ ];
-        o.links = { };
+        o.nodes     = [ ];
+        o.groups    = [ ];
+        o.functions = [ ];
+        o.links     = { };
 
         for( let node of this.nodes )
         {
             o.nodes.push( node.serialize() );
+
+            const fnOrigin = this.editor.graphs[ node.gid ];
+
+            if( fnOrigin )
+            {
+                o.functions.push( JSON.parse( fnOrigin.serialize() ) );
+            }
         }
 
         for( let linkId in this.links )
@@ -2923,9 +2947,18 @@ class Graph {
             console.error( `Can't export GraphNode [${ this.title }] of type [${ this.type }].` );
         }
 
-        LX.downloadFile( this.name + ".json", o );
-
         return o;
+    }
+
+    /**
+     * @method export
+     */
+
+    export() {
+
+        const o = this.serialize();
+
+        LX.downloadFile( this.name + ".json", o );
     }
 }
 
