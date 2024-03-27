@@ -486,7 +486,17 @@ class GraphEditor {
         let func = new GraphFunction();
         func.editor = this;
 
-        if( o ) func.configure( o );
+        if( o )
+        {
+            // Load other inner functions first if any..
+
+            for( let fn of o.functions ?? [] )
+            {
+                this.addGraphFunction( fn );
+            }
+
+            func.configure( o );
+        }
 
         this.setGraph( func );
 
