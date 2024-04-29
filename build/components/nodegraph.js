@@ -2754,6 +2754,19 @@ class GraphEditor {
             sidebarItem.domEl.querySelector(".lexsidebarentrydesc").innerText = name;
         }
 
+        // Change registered nodes function
+        const oldType = 'function/' + this.currentGraph.name;
+        const nodeClass = GraphEditor.NODE_TYPES[ oldType ];
+
+        if( nodeClass )
+        {
+            delete GraphEditor.NODE_TYPES[ oldType ];
+
+            nodeClass.title = name;
+
+            GraphEditor.registerCustomNode( "function/" + name, nodeClass );
+        }
+
         this.currentGraph.name = name;
     }
 
