@@ -4916,6 +4916,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             vecinput.step = options.step ?? "any";
             vecinput.type = "number";
             vecinput.id = "number_"+simple_guidGenerator();
+
+            if( value.constructor == Number )
+            {
+                value = clamp(value, +vecinput.min, +vecinput.max);
+                value = options.precision ? round(value, options.precision) : value;
+            }
+
             vecinput.value = vecinput.iValue = value;
             box.appendChild(vecinput);
 
@@ -5042,6 +5049,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             }
 
             let widget = this.create_widget(name, Widget.VECTOR, options);
+
             widget.onGetValue = () => {
                 let inputs = element.querySelectorAll("input");
                 let value = [];
@@ -5094,6 +5102,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 vecinput.type = "number";
                 vecinput.id = "vec"+num_components+"_"+simple_guidGenerator();
                 vecinput.idx = i;
+
+                if( value[i].constructor == Number )
+                {
+                    value[i] = clamp(value[i], +vecinput.min, +vecinput.max);
+                    value[i] = options.precision ? round(value[i], options.precision) : value[i];
+                }
+
                 vecinput.value = vecinput.iValue = value[i];
 
                 let drag_icon = document.createElement('a');
@@ -5127,13 +5142,18 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 }, {passive:false});
 
                 vecinput.addEventListener("change", e => {
-                    if(isNaN(e.target.value))
+
+                    if( isNaN( e.target.value ) )
                         return;
-                    let val = e.target.value = clamp(e.target.value, vecinput.min, vecinput.max);
-        
+
+                    console.log(e.target.value);
+                    let val = e.target.value = clamp(e.target.value, +vecinput.min, +vecinput.max);
+                    val = options.precision ? round(val, options.precision) : val;
+                    console.log(val);
+
                     // Reset button (default value)
-                    let btn = element.querySelector(".lexwidgetname .lexicon");
-                    if(btn) btn.style.display = val != vecinput.iValue ? "block": "none";
+                    let btn = element.querySelector( ".lexwidgetname .lexicon" );
+                    if( btn ) btn.style.display = val != vecinput.iValue ? "block": "none";
 
                     if( lock_icon.locked )
                     {
@@ -5142,6 +5162,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                             value[v.idx] = val;
                         }
                     } else {
+                        vecinput.value = val;
                         value[e.target.idx] = val;
                     }
 
