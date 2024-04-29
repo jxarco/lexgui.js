@@ -1,5 +1,14 @@
 # lexgui.js changelog
 
+## 0.1.31
+
+GraphEditor:
+- Graph/function renaming.
+- Copy/Paste nodes.
+
+Fixed precision in Number/Vector widgets.
+Minor bug fixes.
+
 ## 0.1.30
 
 GraphEditor:
