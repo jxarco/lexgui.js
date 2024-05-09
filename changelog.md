@@ -1,5 +1,10 @@
 # lexgui.js changelog
 
+## 0.1.32
+
+Added skipCallback for `Widget.set()`. 
+Minor bug fixes.
+
 ## 0.1.31
 
 GraphEditor:

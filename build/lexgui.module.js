@@ -2369,10 +2369,10 @@ class Widget {
         console.warn("Can't get value of " + this.typeName());
     }
 
-    set( value ) {
+    set( value, skipCallback = false ) {
 
         if( this.onSetValue )
-            return this.onSetValue( value );
+            return this.onSetValue( value, skipCallback );
 
         console.warn("Can't set value of " + this.typeName());
     }
@@ -2450,11 +2450,11 @@ function ADD_CUSTOM_WIDGET( custom_widget_name, options = {} )
         widget.onGetValue = () => {
             return instance;
         };
-        widget.onSetValue = (new_value) => {
-            instance = new_value;
+        widget.onSetValue = ( newValue, skipCallback ) => {
+            instance = newValue;
             refresh_widget();
-            element.querySelector(".lexcustomitems").toggleAttribute('hidden', false);
-            this._trigger( new IEvent(name, instance, null), callback );
+            element.querySelector( ".lexcustomitems" ).toggleAttribute( 'hidden', false );
+            if( !skipCallback ) this._trigger( new IEvent( name, instance, null ), callback );
         };
 
         let element = widget.domEl;
@@ -3172,8 +3172,8 @@ class Panel {
         return (typeof arg == 'undefined' ? def : arg);
     }
 
-    static _dispatch_event( element, type, bubbles, cancelable ) {
-        let event = new Event(type, { 'bubbles': bubbles, 'cancelable': cancelable });
+    static _dispatch_event( element, type, data, bubbles, cancelable ) {
+        let event = new CustomEvent(type, { 'detail': data, 'bubbles': bubbles, 'cancelable': cancelable });
         element.dispatchEvent(event);
     }
 
@@ -3406,11 +3406,12 @@ class Panel {
     }
 
     _trigger( event, callback ) {
-        if(callback)
-            callback.call(this, event.value, event.domEvent, event.name);
 
-        if(this.onevent)
-            this.onevent.call(this, event);
+        if( callback )
+            callback.call( this, event.value, event.domEvent, event.name );
+
+        if( this.onevent )
+            this.onevent.call( this, event );
     }
 
     /**
@@ -3538,12 +3539,13 @@ class Panel {
     addText( name, value, callback, options = {} ) {
 
         let widget = this.create_widget( name, Widget.TEXT, options );
+
         widget.onGetValue = () => {
             return wValue.value;
         };
-        widget.onSetValue = newValue => {
+        widget.onSetValue = ( newValue, skipCallback ) => {
             this.disabled ? wValue.innerText = newValue : wValue.value = newValue;
-            Panel._dispatch_event( wValue, "focusout" );
+            Panel._dispatch_event( wValue, "focusout", skipCallback );
         };
 
         let element = widget.domEl;
@@ -3579,9 +3581,10 @@ class Panel {
                 wValue.setAttribute( "placeholder", options.placeholder );
 
             var resolve = ( function( val, event ) {
+                const skipCallback = event.detail;
                 let btn = element.querySelector( ".lexwidgetname .lexicon" );
                 if( btn ) btn.style.display = ( val != wValue.iValue ? "block" : "none" );
-                this._trigger( new IEvent( name, val, event ), callback );
+                if( !skipCallback ) this._trigger( new IEvent( name, val, event ), callback );
             }).bind( this );
 
             const trigger = options.trigger ?? 'default';
@@ -3658,45 +3661,48 @@ class Panel {
 
     addTextArea( name, value, callback, options = {} ) {
 
-        let widget = this.create_widget(name, Widget.TEXTAREA, options);
+        let widget = this.create_widget( name, Widget.TEXTAREA, options );
+
         widget.onGetValue = () => {
             return wValue.value;
         };
-        widget.onSetValue = (new_value) => {
-            wValue.value = new_value;
-            Panel._dispatch_event(wValue, "focusout");
+        widget.onSetValue = ( newValue, skipCallback ) => {
+            wValue.value = newValue;
+            Panel._dispatch_event( wValue, "focusout", skipCallback );
         };
+
         let element = widget.domEl;
 
         // Add reset functionality
-        if(widget.name && !(options.skipReset ?? false)) {
-            Panel._add_reset_property(element.domName, function() {
+        if( widget.name && !( options.skipReset ?? false ) ) {
+            Panel._add_reset_property( element.domName, function() {
                 wValue.value = wValue.iValue;
                 this.style.display = "none";
-                Panel._dispatch_event(wValue, "focusout");
+                Panel._dispatch_event( wValue, "focusout" );
             });
         }
         
         // Add widget value
 
-        let container = document.createElement('div');
+        let container = document.createElement( 'div' );
         container.className = "lextextarea";
         container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
         container.style.height = options.height;
         container.style.display = "flex";
 
-        let wValue = document.createElement('textarea');
+        let wValue = document.createElement( 'textarea' );
         wValue.value = wValue.iValue = value || "";
         wValue.style.width = "100%";
-        Object.assign(wValue.style, options.style ?? {});
+        Object.assign( wValue.style, options.style ?? {} );
 
-        if(options.disabled ?? false) wValue.setAttribute("disabled", true);
-        if(options.placeholder) wValue.setAttribute("placeholder", options.placeholder);
+        if( options.disabled ?? false ) wValue.setAttribute("disabled", true);
+        if( options.placeholder ) wValue.setAttribute("placeholder", options.placeholder);
 
-        var resolve = (function(val, event) {
-            let btn = element.querySelector(".lexwidgetname .lexicon");
-            if(btn) btn.style.display = (val != wValue.iValue ? "block" : "none");
-            this._trigger( new IEvent(name, val, event), callback );
+        var resolve = (function( val, event ) {
+            const skipCallback = event.detail;
+            let btn = element.querySelector( ".lexwidgetname .lexicon" );
+            if( btn ) btn.style.display = ( val != wValue.iValue ? "block" : "none" );
+            if( !skipCallback ) this._trigger( new IEvent( name, val, event ), callback );
         }).bind(this);
 
         const trigger = options.trigger ?? 'default';
@@ -3773,10 +3779,10 @@ class Panel {
         widget.onGetValue = () => {
             return wValue.innerText;
         };
-        widget.onSetValue = (new_value) => {
+        widget.onSetValue = ( newValue, skipCallback ) => {
             wValue.innerHTML = 
             (options.icon ? "<a class='" + options.icon + "'></a>" : 
-            ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + (new_value || "") + "</span>" ));
+            ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + (newValue || "") + "</span>" ));
         };
 
         let element = widget.domEl;
@@ -3794,10 +3800,10 @@ class Panel {
             ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + (value || "") + "</span>" ));
 
         wValue.style.width = "calc( 100% - " + (options.nameWidth ?? LX.DEFAULT_NAME_WIDTH) + ")";
-        
+
         if(options.disabled)
             wValue.setAttribute("disabled", true);
-        
+
         wValue.addEventListener("click", e => {
             if( options.selectable ) {
                 if( options.parent )
@@ -3808,7 +3814,7 @@ class Panel {
         });
 
         element.appendChild(wValue);
-        
+
         // Remove branch padding and margins
         if(!widget.name) {
             wValue.className += " noname";
@@ -4015,12 +4021,12 @@ class Panel {
         widget.onGetValue = () => {
             return element.querySelector("li.selected").getAttribute('value');
         };
-        widget.onSetValue = (new_value) => {
+        widget.onSetValue = ( newValue, skipCallback ) => {
             let btn = element.querySelector(".lexwidgetname .lexicon");
-            if(btn) btn.style.display = (new_value != wValue.iValue ? "block" : "none");
-            value = new_value;
+            if(btn) btn.style.display = (newValue != wValue.iValue ? "block" : "none");
+            value = newValue;
             list.querySelectorAll('li').forEach( e => { if( e.getAttribute('value') == value ) e.click() } );
-            this._trigger( new IEvent(name, value, null), callback ); 
+            if( !skipCallback ) this._trigger( new IEvent(name, value, null), callback ); 
         };
 
         let element = widget.domEl;
@@ -4216,12 +4222,12 @@ class Panel {
         widget.onGetValue = () => {
             return JSON.parse(JSON.stringify(curve_instance.element.value));
         };
-        widget.onSetValue = (new_value) => {
+        widget.onSetValue = ( newValue, skipCallback ) => {
             let btn = element.querySelector(".lexwidgetname .lexicon");
-            if(btn) btn.style.display = (new_value != curve_instance.element.value ? "block" : "none");
-            curve_instance.element.value = JSON.parse(JSON.stringify(new_value));
+            if(btn) btn.style.display = (newValue != curve_instance.element.value ? "block" : "none");
+            curve_instance.element.value = JSON.parse(JSON.stringify(newValue));
             curve_instance.redraw();
-            that._trigger( new IEvent(name, curve_instance.element.value, null), callback );
+            if( !skipCallback ) that._trigger( new IEvent(name, curve_instance.element.value, null), callback );
         };
 
         let element = widget.domEl;
@@ -4281,12 +4287,12 @@ class Panel {
         widget.onGetValue = () => {
             return element.value;
         };
-        widget.onSetValue = (new_value) => {
+        widget.onSetValue = ( newValue, skipCallback ) => {
             let btn = element.querySelector(".lexwidgetname .lexicon");
-            if(btn) btn.style.display = (new_value != defaultValue ? "block" : "none");
-            value = element.value = new_value;
+            if(btn) btn.style.display = (newValue != defaultValue ? "block" : "none");
+            value = element.value = newValue;
             setLayers();
-            that._trigger( new IEvent(name, value), callback );
+            if( !skipCallback ) that._trigger( new IEvent(name, value), callback );
         };
 
         let element = widget.domEl;
@@ -4378,11 +4384,12 @@ class Panel {
             values.push( v.value );
             return values;
         };
-        widget.onSetValue = (new_value) => {
-            values = new_value;
+        widget.onSetValue = ( newValue, skipCallback ) => {
+            values = newValue;
             updateItems();
-            this._trigger( new IEvent(name, values, null), callback );
+            if( !skipCallback ) this._trigger( new IEvent(name, values, null), callback );
         };
+
         let element = widget.domEl;
         element.style.flexWrap = "wrap";
 
@@ -4496,14 +4503,13 @@ class Panel {
         widget.onGetValue = () => {
             return value;
         };
-
-        widget.onSetValue = ( newValue ) => {
+        widget.onSetValue = ( newValue, skipCallback ) => {
             listContainer.querySelectorAll( '.lexlistitem' ).forEach( e => e.classList.remove( 'selected' ) );
             const idx = values.indexOf( newValue );
             if( idx == -1 ) return;
             listContainer.children[ idx ].classList.toggle( 'selected' );
             value = newValue;
-            this._trigger( new IEvent( name, newValue ), callback );
+            if( !skipCallback ) this._trigger( new IEvent( name, newValue ), callback );
         };
 
         widget.updateValues = ( newValues ) => {
@@ -4568,18 +4574,19 @@ class Panel {
 
     addTags( name, value, callback, options = {} ) {
 
-        value = value.replace(/\s/g, '').split(',');
-        let defaultValue = [].concat(value);
-        let widget = this.create_widget(name, Widget.TAGS, options);
+        value = value.replace( /\s/g, '' ).split( ',' );
+        let defaultValue = [].concat( value );
+        let widget = this.create_widget( name, Widget.TAGS, options );
+
         widget.onGetValue = () => {
-            return [].concat(value);
+            return [].concat( value );
         };
-        widget.onSetValue = (new_value) => {
-            value = [].concat(new_value);
+        widget.onSetValue = ( newValue, skipCallback ) => {
+            value = [].concat( newValue );
             create_tags();
-            let btn = element.querySelector(".lexwidgetname .lexicon");
-            if(btn) btn.style.display = (new_value != defaultValue ? "block" : "none");1
-            that._trigger( new IEvent(name, value), callback );
+            let btn = element.querySelector( ".lexwidgetname .lexicon" );
+            if( btn ) btn.style.display = ( newValue != defaultValue ? "block" : "none" );
+            if( !skipCallback ) that._trigger( new IEvent( name, value ), callback );
         };
 
         let element = widget.domEl;
@@ -4613,33 +4620,33 @@ class Panel {
                 tag.className = "lextag";
                 tag.innerHTML = tag_name;
 
-                tag.addEventListener('click', function(e) {
+                tag.addEventListener('click', function( e ) {
                     this.remove();
                     value.splice( value.indexOf( tag_name ), 1 );
-                    let btn = element.querySelector(".lexwidgetname .lexicon");
-                    if(btn) btn.style.display = (value != defaultValue ? "block" : "none");
-                    that._trigger( new IEvent(name, value, e), callback );
+                    let btn = element.querySelector( ".lexwidgetname .lexicon" );
+                    if( btn ) btn.style.display = ( value != defaultValue ? "block" : "none" );
+                    that._trigger( new IEvent( name, value, e ), callback );
                 });
 
-                tags_container.appendChild(tag);
+                tags_container.appendChild( tag );
             }
 
-            let tag_input = document.createElement('input');
+            let tag_input = document.createElement( 'input' );
             tag_input.value = "";
             tag_input.placeholder = "Tag...";
-            tags_container.insertChildAtIndex(tag_input, 0);
+            tags_container.insertChildAtIndex( tag_input, 0 );
 
-            tag_input.onkeydown = function(e) {
+            tag_input.onkeydown = function( e ) {
                 const val = this.value.replace(/\s/g, '');
                 if( e.key == ' ') { 
                     e.preventDefault();
                     if( !val.length || value.indexOf( val ) > -1 )
                         return;
-                    value.push(val);
+                    value.push( val );
                     create_tags();
-                    let btn = element.querySelector(".lexwidgetname .lexicon");
+                    let btn = element.querySelector( ".lexwidgetname .lexicon" );
                     if(btn) btn.style.display = "block";
-                    that._trigger( new IEvent(name, value, e), callback );
+                    that._trigger( new IEvent( name, value, e ), callback );
                 }
             };
 
@@ -4671,24 +4678,25 @@ class Panel {
 
     addCheckbox( name, value, callback, options = {} ) {
 
-        if(!name) {
-            throw("Set Widget Name!");
+        if( !name ) {
+            throw( "Set Widget Name!" );
         }
 
-        let widget = this.create_widget(name, Widget.CHECKBOX, options);
+        let widget = this.create_widget( name, Widget.CHECKBOX, options );
+
         widget.onGetValue = () => {
             return flag.value;
         };
-        widget.onSetValue = (value) => {
-            if(flag.value !== value)
-                Panel._dispatch_event(toggle, "click");
+        widget.onSetValue = ( newValue, skipCallback ) => {
+            if( flag.value !== newValue )
+                Panel._dispatch_event( toggle, "click", skipCallback );
         };
 
         let element = widget.domEl;
 
         // Add reset functionality
-        Panel._add_reset_property(element.domName, function() {
-            Panel._dispatch_event(toggle, "click");
+        Panel._add_reset_property( element.domName, function() {
+            Panel._dispatch_event( toggle, "click" );
         });
         
         // Add widget value
@@ -4719,30 +4727,35 @@ class Panel {
         container.appendChild(toggle);
         container.appendChild(value_name);
 
-        toggle.addEventListener("click", (e) => {
+        toggle.addEventListener( "click" , e => {
 
-            let flag = toggle.querySelector(".checkbox");
-            if(flag.disabled)
-            return;
+            let flag = toggle.querySelector( ".checkbox" );
+            if( flag.disabled )
+                return;
 
-            let check = toggle.querySelector(".checkbox a");
+            const skipCallback = e.detail;
+
+            let check = toggle.querySelector( ".checkbox a" );
 
             flag.value = !flag.value;
-            flag.className = "checkbox " + (flag.value ? "on" : "");
+            flag.className = "checkbox " + ( flag.value ? "on" : "" );
             check.style.display = flag.value ? "block" : "none";
 
             // Reset button (default value)
-            let btn = element.querySelector(".lexwidgetname .lexicon");
-            if(btn) btn.style.display = flag.value != flag.iValue ? "block": "none";
+            if( !skipCallback )
+            {
+                let btn = element.querySelector( ".lexwidgetname .lexicon" );
+                if( btn ) btn.style.display = flag.value != flag.iValue ? "block": "none";
+            }
 
             // Open suboptions
-            let submenu = element.querySelector(".lexcheckboxsubmenu");
-            if(submenu) submenu.toggleAttribute('hidden', !flag.value);
+            let submenu = element.querySelector( ".lexcheckboxsubmenu" );
+            if( submenu ) submenu.toggleAttribute( 'hidden', !flag.value );
 
-            this._trigger( new IEvent(name, flag.value, e), callback );
+            if( !skipCallback ) this._trigger( new IEvent( name, flag.value, e ), callback );
         });
 
-        element.appendChild(container);
+        element.appendChild( container );
 
         if( options.suboptions )
         {
@@ -4773,70 +4786,75 @@ class Panel {
 
     addColor( name, value, callback, options = {} ) {
 
-        if(!name) {
-            throw("Set Widget Name!");
+        if( !name ) {
+            throw( "Set Widget Name!" );
         }
 
-        let widget = this.create_widget(name, Widget.COLOR, options);
+        let widget = this.create_widget( name, Widget.COLOR, options );
+
         widget.onGetValue = () => {
             return color.value;
         };
-        widget.onSetValue = (new_value) => {
-            color.value = new_value;
-            Panel._dispatch_event(color, "input");
+        widget.onSetValue = ( newValue, skipCallback ) => {
+            color.value = newValue;
+            Panel._dispatch_event( color, "input", skipCallback );
         };
+
         let element = widget.domEl;
         let change_from_input = false;
 
         // Add reset functionality
-        Panel._add_reset_property(element.domName, function() {
+        Panel._add_reset_property( element.domName, function() {
             this.style.display = "none";
             color.value = color.iValue;
-            Panel._dispatch_event(color, "input");
+            Panel._dispatch_event( color, "input" );
         });
 
         // Add widget value
 
-        var container = document.createElement('span');
+        var container = document.createElement( 'span' );
         container.className = "lexcolor";
         container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
-        let color = document.createElement('input');
+        let color = document.createElement( 'input' );
         color.style.width = "calc(30% - 6px)";
         color.type = 'color';
         color.className = "colorinput";
         color.id = "color" + simple_guidGenerator();
         color.useRGB = options.useRGB ?? false;
-        color.value = color.iValue = value.constructor === Array ? rgbToHex(value) : value;
+        color.value = color.iValue = value.constructor === Array ? rgbToHex( value ) : value;
         
-        if(options.disabled) {
+        if( options.disabled ) {
             color.disabled = true;
         }
 
-        color.addEventListener("input", e => {
+        color.addEventListener( "input", e => {
             let val = e.target.value;
+
+            const skipCallback = e.detail;
 
             // Change value (always hex)
             if( !change_from_input )
-                text_widget.set(val);
+                text_widget.set( val );
 
             // Reset button (default value)
-            if(val != color.iValue) {
-                let btn = element.querySelector(".lexwidgetname .lexicon");
-                btn.style.display = "block";
+            if( !skipCallback )
+            {
+                let btn = element.querySelector( ".lexwidgetname .lexicon" );
+                if( btn ) btn.style.display = val != color.iValue ? "block": "none";
             }
 
-            if(color.useRGB)
-                val = hexToRgb(val);
+            if( color.useRGB )
+                val = hexToRgb( val );
 
-            this._trigger( new IEvent(name, val, e), callback );
-        }, false);
+            if( !skipCallback ) this._trigger( new IEvent( name, val, e ), callback );
+        }, false );
 
-        container.appendChild(color);
+        container.appendChild( color );
 
         this.queue( container );
 
-        const text_widget = this.addText(null, color.value, (v) => {
+        const text_widget = this.addText( null, color.value, v => {
             change_from_input = true;
             widget.set( v );
             change_from_input = false;
@@ -4846,18 +4864,7 @@ class Panel {
 
         this.clearQueue();
 
-        // let valueName = document.createElement('span');
-        // valueName.className = "colorinfo";
-        // valueName.innerText = color.value;
-
-        // valueName.addEventListener("click", e => {
-        //     color.focus();
-        //     color.click();
-        // });
-
-        // container.appendChild(valueName);
-        
-        element.appendChild(container);
+        element.appendChild( container );
 
         return widget;
     }
@@ -4877,109 +4884,120 @@ class Panel {
 
     addNumber( name, value, callback, options = {} ) {
 
-        let widget = this.create_widget(name, Widget.NUMBER, options);
+        let widget = this.create_widget( name, Widget.NUMBER, options );
+
         widget.onGetValue = () => {
             return +vecinput.value;
         };
-        widget.onSetValue = (new_value) => {
-            vecinput.value = new_value;
-            Panel._dispatch_event(vecinput, "change");
+        widget.onSetValue = ( newValue, skipCallback ) => {
+            vecinput.value = newValue;
+            Panel._dispatch_event( vecinput, "change", skipCallback );
         };
+
         let element = widget.domEl;
 
         // add reset functionality
-        if(widget.name) {
-            Panel._add_reset_property(element.domName, function() {
+        if( widget.name ) {
+            Panel._add_reset_property( element.domName, function() {
                 this.style.display = "none";
                 vecinput.value = vecinput.iValue;
-                Panel._dispatch_event(vecinput, "change");
+                Panel._dispatch_event( vecinput, "change" );
             });
         }
 
         // add widget value
 
-        var container = document.createElement('div');
+        var container = document.createElement( 'div' );
         container.className = "lexnumber";        
         container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
-        let box = document.createElement('div');
+        let box = document.createElement( 'div' );
         box.className = "numberbox";
 
-        let vecinput = document.createElement('input');
+        let vecinput = document.createElement( 'input' );
         vecinput.className = "vecinput";
         vecinput.min = options.min ?? -1e24;
         vecinput.max = options.max ?? 1e24;
         vecinput.step = options.step ?? "any";
         vecinput.type = "number";
-        vecinput.id = "number_"+simple_guidGenerator();
+        vecinput.id = "number_" + simple_guidGenerator();
 
         if( value.constructor == Number )
         {
-            value = clamp(value, +vecinput.min, +vecinput.max);
-            value = options.precision ? round(value, options.precision) : value;
+            value = clamp( value, +vecinput.min, +vecinput.max );
+            value = options.precision ? round( value, options.precision ) : value;
         }
 
         vecinput.value = vecinput.iValue = value;
-        box.appendChild(vecinput);
+        box.appendChild( vecinput );
 
-        let drag_icon = document.createElement('a');
+        let drag_icon = document.createElement( 'a' );
         drag_icon.className = "fa-solid fa-arrows-up-down drag-icon hidden";
-        box.appendChild(drag_icon);
+        box.appendChild( drag_icon );
 
-        if(options.disabled) {
+        if( options.disabled ) {
             vecinput.disabled = true;
         }
 
         // add slider below
-        if(!options.skipSlider && options.min !== undefined && options.max !== undefined) {
-            let slider = document.createElement('input');
+        if( !options.skipSlider && options.min !== undefined && options.max !== undefined ) {
+            let slider = document.createElement( 'input' );
             slider.className = "lexinputslider";
             slider.step = options.step ?? 1;
             slider.min = options.min;
             slider.max = options.max;
             slider.type = "range";
             slider.value = value;
-            slider.addEventListener("input", function(e) {
+            slider.addEventListener( "input", function( e ) {
                 let new_value = +this.valueAsNumber;
-                vecinput.value = (+new_value).toFixed(4).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/,'$1');
-                Panel._dispatch_event(vecinput, "change");
-            }, false);
-            box.appendChild(slider);
+                vecinput.value = ( +new_value ).toFixed( 4 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' );
+                Panel._dispatch_event( vecinput, "change" );
+            }, false );
+            box.appendChild( slider );
         }
 
         // Add wheel input
 
-        vecinput.addEventListener("wheel", function(e) {
+        vecinput.addEventListener( "wheel", function( e ) {
             e.preventDefault();
-            if(this !== document.activeElement)
+            if( this !== document.activeElement )
                 return;
             let mult = options.step ?? 1;
-            if(e.shiftKey) mult *= 10;
-            else if(e.altKey) mult *= 0.1;
-            let new_value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1));
-            this.value = (+new_value).toFixed(4).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/,'$1');
+            if( e.shiftKey ) mult *= 10;
+            else if( e.altKey ) mult *= 0.1;
+            let new_value = ( +this.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ) );
+            this.value = ( +new_value ).toFixed( 4 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' );
             Panel._dispatch_event(vecinput, "change");
-        }, {passive:false});
+        }, { passive: false });
 
-        vecinput.addEventListener("change", e => {
-            if(isNaN(e.target.valueAsNumber))
+        vecinput.addEventListener( "change", e => {
+
+            if( isNaN( e.target.valueAsNumber ) )
                 return;
-            let val = e.target.value = clamp(+e.target.valueAsNumber, +vecinput.min, +vecinput.max);
-            val = options.precision ? round(val, options.precision) : val;
+
+            const skipCallback = e.detail;
+
+            let val = e.target.value = clamp( +e.target.valueAsNumber, +vecinput.min, +vecinput.max );
+            val = options.precision ? round( val, options.precision ) : val;
             // update slider!
-            if( box.querySelector(".lexinputslider"))
-                box.querySelector(".lexinputslider").value = val;
+            if( box.querySelector( ".lexinputslider" ) )
+                box.querySelector( ".lexinputslider" ).value = val;
 
             vecinput.value = val;
+
             // Reset button (default value)
-            let btn = element.querySelector(".lexwidgetname .lexicon");
-            if(btn) btn.style.display = val != vecinput.iValue ? "block": "none";
-            this._trigger( new IEvent(name, val, e), callback );
-        }, {passive:false});
+            if( !skipCallback )
+            {
+                let btn = element.querySelector( ".lexwidgetname .lexicon" );
+                if( btn ) btn.style.display = val != vecinput.iValue ? "block": "none";
+            }
+
+            if( !skipCallback ) this._trigger( new IEvent( name, val, e ), callback );
+        }, { passive: false });
         
         // Add drag input
 
-        vecinput.addEventListener("mousedown", inner_mousedown);
+        vecinput.addEventListener( "mousedown", inner_mousedown );
 
         var that = this;
         var lastY = 0;
@@ -5037,41 +5055,39 @@ class Panel {
 
     _add_vector( num_components, name, value, callback, options = {} ) {
 
-        num_components = clamp(num_components, 2, 4);
-        value = value ?? new Array(num_components).fill(0);
+        num_components = clamp( num_components, 2, 4 );
+        value = value ?? new Array( num_components ).fill( 0 );
 
-        if(!name) {
-            throw("Set Widget Name!");
+        if( !name ) {
+            throw( "Set Widget Name!" );
         }
 
-        let widget = this.create_widget(name, Widget.VECTOR, options);
+        let widget = this.create_widget( name, Widget.VECTOR, options );
 
         widget.onGetValue = () => {
-            let inputs = element.querySelectorAll("input");
+            let inputs = element.querySelectorAll( "input" );
             let value = [];
             for( var v of inputs )
                 value.push( +v.value );
             return value;
         };
-        widget.onSetValue = (newValue) => {
-            const inputs = element.querySelectorAll(".vecinput");
+        widget.onSetValue = ( newValue, skipCallback ) => {
+            const inputs = element.querySelectorAll( ".vecinput" );
             for( var i = 0; i < inputs.length; ++i ) {
-                let value = newValue[i];
-                value = clamp(value, +inputs[i].min, +inputs[i].max);
-                value = options.precision ? round(value, options.precision) : value;
-                inputs[i].value = value ?? 0;
-                Panel._dispatch_event(inputs[i], "change");
+                let value = newValue[ i ];
+                inputs[ i ].value = value ?? 0;
+                Panel._dispatch_event( inputs[ i ], "change", skipCallback );
             }
         };
 
         let element = widget.domEl;
 
         // Add reset functionality
-        Panel._add_reset_property(element.domName, function() {
+        Panel._add_reset_property( element.domName, function() {
             this.style.display = "none";
-            for( let v of element.querySelectorAll(".vecinput") ) {
+            for( let v of element.querySelectorAll( ".vecinput" ) ) {
                 v.value = v.iValue;
-                Panel._dispatch_event(v, "change");
+                Panel._dispatch_event( v, "change" );
             }
         });
 
@@ -5083,86 +5099,91 @@ class Panel {
 
         for( let i = 0; i < num_components; ++i ) {
 
-            let box = document.createElement('div');
+            let box = document.createElement( 'div' );
             box.className = "vecbox";
-            box.innerHTML = "<span class='" + Panel.VECTOR_COMPONENTS[i] + "'></span>";
+            box.innerHTML = "<span class='" + Panel.VECTOR_COMPONENTS[ i ] + "'></span>";
 
-            let vecinput = document.createElement('input');
+            let vecinput = document.createElement( 'input' );
             vecinput.className = "vecinput v" + num_components;
             vecinput.min = options.min ?? -1e24;
             vecinput.max = options.max ?? 1e24;
             vecinput.step = options.step ?? "any";
             vecinput.type = "number";
-            vecinput.id = "vec"+num_components+"_"+simple_guidGenerator();
+            vecinput.id = "vec" + num_components + "_" + simple_guidGenerator();
             vecinput.idx = i;
 
-            if( value[i].constructor == Number )
+            if( value[ i ].constructor == Number )
             {
-                value[i] = clamp(value[i], +vecinput.min, +vecinput.max);
-                value[i] = options.precision ? round(value[i], options.precision) : value[i];
+                value[ i ] = clamp(value[ i ], +vecinput.min, +vecinput.max);
+                value[ i ] = options.precision ? round(value[ i ], options.precision) : value[ i ];
             }
 
-            vecinput.value = vecinput.iValue = value[i];
+            vecinput.value = vecinput.iValue = value[ i ];
 
-            let drag_icon = document.createElement('a');
+            let drag_icon = document.createElement( 'a' );
             drag_icon.className = "fa-solid fa-arrows-up-down drag-icon hidden";
-            box.appendChild(drag_icon);
+            box.appendChild( drag_icon );
 
-            if(options.disabled) {
+            if( options.disabled ) {
                 vecinput.disabled = true;
             }
 
             // Add wheel input
 
-            vecinput.addEventListener("wheel", function(e) {
+            vecinput.addEventListener( "wheel", function( e ) {
                 e.preventDefault();
-                if(this !== document.activeElement)
+                if( this !== document.activeElement )
                     return;
                 let mult = options.step ?? 1;
-                if(e.shiftKey) mult = 10;
-                else if(e.altKey) mult = 0.1;
+                if( e.shiftKey ) mult = 10;
+                else if( e.altKey ) mult = 0.1;
 
                 if( lock_icon.locked )
                 {
                     for( let v of element.querySelectorAll(".vecinput") ) {
-                        v.value = (+v.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
+                        v.value = ( +v.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ) ).toPrecision( 5 );
                         Panel._dispatch_event(v, "change");
                     }
                 } else {
-                    this.value = (+this.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1)).toPrecision(5);
-                    Panel._dispatch_event(vecinput, "change");
+                    this.value = ( +this.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ) ).toPrecision( 5 );
+                    Panel._dispatch_event( vecinput, "change" );
                 }
-            }, {passive:false});
+            }, { passive: false } );
 
-            vecinput.addEventListener("change", e => {
+            vecinput.addEventListener( "change", e => {
 
                 if( isNaN( e.target.value ) )
                     return;
 
-                let val = e.target.value = clamp(e.target.value, +vecinput.min, +vecinput.max);
-                val = options.precision ? round(val, options.precision) : val;
+                const skipCallback = e.detail;
+
+                let val = e.target.value = clamp( e.target.value, +vecinput.min, +vecinput.max );
+                val = options.precision ? round( val, options.precision ) : val;
 
                 // Reset button (default value)
-                let btn = element.querySelector( ".lexwidgetname .lexicon" );
-                if( btn ) btn.style.display = val != vecinput.iValue ? "block": "none";
+                if( !skipCallback )
+                {
+                    let btn = element.querySelector( ".lexwidgetname .lexicon" );
+                    if( btn ) btn.style.display = val != vecinput.iValue ? "block": "none";
+                }
 
                 if( lock_icon.locked )
                 {
-                    for( let v of element.querySelectorAll(".vecinput") ) {
+                    for( let v of element.querySelectorAll( ".vecinput" ) ) {
                         v.value = val;
-                        value[v.idx] = val;
+                        value[ v.idx ] = val;
                     }
                 } else {
                     vecinput.value = val;
-                    value[e.target.idx] = val;
+                    value[ e.target.idx ] = val;
                 }
 
-                this._trigger( new IEvent(name, value, e), callback );
-            }, false);
+                if( !skipCallback ) this._trigger( new IEvent( name, value, e ), callback );
+            }, false );
             
             // Add drag input
 
-            vecinput.addEventListener("mousedown", inner_mousedown);
+            vecinput.addEventListener( "mousedown", inner_mousedown );
 
             var that = this;
             var lastY = 0;
@@ -5279,15 +5300,17 @@ class Panel {
             throw("Set Widget Name!");
         }
 
-        let widget = this.create_widget(name, Widget.PROGRESS, options);
+        let widget = this.create_widget( name, Widget.PROGRESS, options );
+
         widget.onGetValue = () => {
             return progress.value;
         };
-        widget.onSetValue = (new_value) => {
-            element.querySelector("meter").value = new_value;
+        widget.onSetValue = ( newValue, skipCallback ) => {
+            element.querySelector("meter").value = newValue;
             if( element.querySelector("span") )
-                element.querySelector("span").innerText = new_value;
+                element.querySelector("span").innerText = newValue;
         };
+
         let element = widget.domEl;
 
         var container = document.createElement('div');
