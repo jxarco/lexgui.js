@@ -5057,19 +5057,16 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     value.push( +v.value );
                 return value;
             };
-            widget.onSetValue = (new_value) => {
+            widget.onSetValue = (newValue) => {
                 const inputs = element.querySelectorAll(".vecinput");
                 for( var i = 0; i < inputs.length; ++i ) {
-                    inputs[i].value = new_value[i] ?? 0;
+                    let value = newValue[i];
+                    value = clamp(value, +inputs[i].min, +inputs[i].max);
+                    value = options.precision ? round(value, options.precision) : value;
+                    inputs[i].value = value ?? 0;
                     Panel._dispatch_event(inputs[i], "change");
                 }
             };
-            widget.setValue = (new_value) => {
-                const inputs = element.querySelectorAll(".vecinput");
-                for( var i = 0; i < inputs.length; ++i ) {
-                    inputs[i].value = new_value[i] ?? 0;
-                }
-            }
 
             let element = widget.domEl;
 
@@ -5146,10 +5143,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     if( isNaN( e.target.value ) )
                         return;
 
-                    console.log(e.target.value);
                     let val = e.target.value = clamp(e.target.value, +vecinput.min, +vecinput.max);
                     val = options.precision ? round(val, options.precision) : val;
-                    console.log(val);
 
                     // Reset button (default value)
                     let btn = element.querySelector( ".lexwidgetname .lexicon" );
