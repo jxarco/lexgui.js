@@ -164,8 +164,7 @@ class Timeline {
         });    
 
         header.addNumber("Speed", +this.speed.toFixed(3), (value, event) => {
-            this.setSpeed(value)}, {step: 0.01, signal: "@on_set_speed"
-        });    
+            this.setSpeed(value)}, {step: 0.01});    
 
 
         for(let i = 0; i < this.buttonsDrawn.length; i++) {
@@ -370,7 +369,7 @@ class Timeline {
     setAnimationClip( animation ) {
         this.animationClip = animation;
         this.duration = animation.duration;
-        this.speed = animation.speed || 1;
+        this.speed = animation.speed || this.speed;
         var w = Math.max(300, this.canvas.width);
         this.secondsToPixels = ( w - this.session.left_margin ) / this.duration;
         // if(this.secondsToPixels < 1)
@@ -1674,7 +1673,7 @@ class KeyFramesTimeline extends Timeline {
         this.animationClip = {
             name: animation.name,
             duration: animation.duration,
-            speed: animation.speed ?? 1,
+            speed: animation.speed ?? this.speed,
             tracks: []
         };
 
@@ -1713,6 +1712,41 @@ class KeyFramesTimeline extends Timeline {
         this.resize();
     }
 
+    updateTrack(trackIdx, track) {
+        if(!this.animationClip)
+            return;
+        this.animationClip.tracks[trackIdx].values = track.values;
+        this.animationClip.tracks[trackIdx].times = track.times;
+        this.processTrack(trackIdx);
+
+    }
+
+    processTrack(trackIdx) {
+        if(!this.animationClip)
+            return;
+
+        let track = this.animationClip.tracks[trackIdx];
+
+        const [name, type] = this.getTrackName(track.fullname || track.name);
+
+        let trackInfo = {
+            fullname: track.name,
+            name: name, type: type,
+            dim: track.values.length/track.times.length,
+            selected: [], edited: [], hovered: [], active: true,
+            times: track.times,
+            values: track.values
+        };
+        
+        for(let i = 0; i < this.tracksPerItem[name].length; i++) {
+            if(this.tracksPerItem[name][i].fullname == trackInfo.fullname) {
+                trackInfo.idx = this.tracksPerItem[name][i].idx;
+                trackInfo.clipIdx = this.tracksPerItem[name][i].clipIdx;
+                this.tracksPerItem[name][i] = trackInfo;
+                return;
+            }
+        }
+    }
 
     optimizeTrack(trackIdx) {
         const track = this.animationClip.tracks[trackIdx];
@@ -2771,7 +2805,7 @@ class ClipsTimeline extends Timeline {
         this.animationClip = {
             name: animation.name,
             duration: animation.duration,
-            speed: animation.speed ?? 1,
+            speed: animation.speed ?? this.speed,
             tracks: []
         };
 
@@ -3979,7 +4013,7 @@ class CurvesTimeline extends Timeline {
         this.animationClip = {
             name: animation.name,
             duration: animation.duration,
-            speed: animation.speed ?? 1,
+            speed: animation.speed ?? this.speed,
             tracks: []
         };
         for( let i = 0; i < animation.tracks.length; ++i ) {
