@@ -63,6 +63,7 @@ class Timeline {
         this.canvas = options.canvas ?? document.createElement('canvas');
 
         this.duration = 1;
+        this.speed = 1;
         this.position = [options.x ?? 0, options.y ?? 0];
         this.size = [ options.width ?? 400, options.height ?? 100];
         
@@ -124,7 +125,6 @@ class Timeline {
                 return;
             this.resizeCanvas( [ bounding.width, bounding.height + this.header_offset ] );
         }
-
     }
 
     /**
@@ -162,6 +162,11 @@ class Timeline {
         header.addNumber("Duration", +this.duration.toFixed(3), (value, event) => {
             this.setDuration(value, false)}, {step: 0.01, min: 0, signal: "@on_set_duration"
         });    
+
+        header.addNumber("Speed", +this.speed.toFixed(3), (value, event) => {
+            this.setSpeed(value)}, {step: 0.01, signal: "@on_set_speed"
+        });    
+
 
         for(let i = 0; i < this.buttonsDrawn.length; i++) {
             let button = this.buttonsDrawn[i];
@@ -568,9 +573,9 @@ class Timeline {
         this.drawTimeInfo(w);
 
         // Current time marker vertical line
-        let true_pos = Math.round( this.timeToX( this.currentTime ) ) + 0.5;
-        let quant_current_time = Math.round( this.currentTime * this.framerate ) / this.framerate;
-        let pos = Math.round( this.timeToX( quant_current_time ) ) + 0.5; //current_time is quantized
+        let truePos = Math.round( this.timeToX( this.currentTime ) ) + 0.5;
+        let quantCurrentTime = Math.round( this.currentTime * this.framerate ) / this.framerate;
+        let pos = Math.round( this.timeToX( quantCurrentTime ) ) + 0.5; //current_time is quantized
         if(pos >= this.session.left_margin)
         {
             // ctx.strokeStyle = "#ABA";
@@ -582,10 +587,10 @@ class Timeline {
             ctx.strokeStyle = ctx.fillStyle =  LX.getThemeColor("global-selected-light");
             ctx.globalAlpha = this.opacity;
             ctx.beginPath();
-            ctx.moveTo(true_pos, 0); ctx.lineTo(true_pos, this.canvas.height);//line
+            ctx.moveTo(truePos, 0); ctx.lineTo(truePos, this.canvas.height);//line
             ctx.stroke();
             ctx.beginPath();
-            ctx.moveTo(true_pos - 4, 0); ctx.lineTo(true_pos + 4, 0); ctx.lineTo(true_pos + 4, 10); ctx.lineTo(true_pos + 2, 12);ctx.lineTo(true_pos - 2, 12); ctx.lineTo(true_pos - 4, 10); //triangle
+            ctx.moveTo(truePos - 4, 0); ctx.lineTo(truePos + 4, 0); ctx.lineTo(truePos + 4, 10); ctx.lineTo(truePos + 2, 12);ctx.lineTo(truePos - 2, 12); ctx.lineTo(truePos - 4, 10); //triangle
             ctx.closePath();
             ctx.fill();
         }
@@ -679,6 +684,21 @@ class Timeline {
      */
     validateDuration(t) {
         return t;
+    }
+
+
+        /**
+     * @method setSpeed
+     * @param {Number} speed 
+     */
+
+    setSpeed(speed) {
+        this.speed = speed;
+        LX.emit( "@on_set_speed", +speed.toFixed(3));
+        
+
+        if( this.onSetSpeed ) 
+            this.onSetSpeed( speed );	 
     }
 
     // Converts distance in pixels to time
