@@ -7107,7 +7107,7 @@ class AssetView {
                     let textEl = document.createElement('text');
                     preview.appendChild(textEl);
                     // If no extension, e.g. Clip, use the type...
-                    textEl.innerText = extension == item.id ? item.type.toUpperCase() : ("." + extension.toUpperCase());
+                    textEl.innerText = (!extension || extension == item.id) ? item.type.toUpperCase() : ("." + extension.toUpperCase());
 
                     var newLength = textEl.innerText.length;
                     var charsPerLine = 2.5;
