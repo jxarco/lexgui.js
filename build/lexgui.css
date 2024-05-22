@@ -2546,6 +2546,11 @@ meter::-webkit-meter-even-less-good-value {
   height: unset;
 }
 
+.lextimeline .lexbutton.accept:hover{
+  background-color: var(--global-button-color-hovered);
+}
+
+/**/
 .lexmin {
   display: inline-block;
   color: var(--global-selected-light);

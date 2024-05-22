@@ -49,7 +49,6 @@ class Timeline {
         this.lastMouse = [];
         this.lastKeyFramesSelected = [];
         this.tracksDrawn = [];
-        this.buttonsDrawn = [];
         this.trackState = [];
         this.clipboard = null;
         this.grabTime = 0;
@@ -58,7 +57,11 @@ class Timeline {
         this.tracksDictionary = {};
         this._times = [];
 
+        this.onBeforeCreateTopBar = options.onBeforeCreateTopBar;
+        this.onAfterCreateTopBar = options.onAfterCreateTopBar;
+
         this.playing = false;
+        this.loop = options.loop ?? true;
 
         this.session = new Session();
 
@@ -82,6 +85,7 @@ class Timeline {
         this.active = true;
         this.skipVisibility = options.skipVisibility ?? false;
         this.skipLock = options.skipLock ?? false;
+        this.disableNewTracks = options.disableNewTracks ?? false;
 
         this.optimizeThreshold = 0.025;
 
@@ -147,12 +151,24 @@ class Timeline {
         let header = this.header;
         LX.DEFAULT_NAME_WIDTH = "50%";
         header.sameLine();
-        header.addTitle(this.name);
-               
+
+        if(this.name) {
+            header.addTitle(this.name);
+        }
+
         header.addButton('', '<i class="fa-solid fa-'+ (this.playing ? 'pause' : 'play') +'"></i>', (value, event) => {
             this.playing = !this.playing;
             this.updateHeader();
-        }, {width: "40px"});
+        }, {width: "40px", buttonClass: "accept"});
+
+        header.addButton('', '<i class="fa-solid fa-rotate"></i>', (value, event) => {
+            this.loop = !this.loop;
+
+        }, {width: "40px", selectable: true, selected: this.loop});
+        
+        if(this.onBeforeCreateTopBar)
+            this.onBeforeCreateTopBar(header);
+
         header.addNumber("Current Time", this.currentTime, (value, event) => {
             if(value > this.duration) {
                 value = this.duration;
@@ -172,12 +188,9 @@ class Timeline {
 
         header.addNumber("Speed", +this.speed.toFixed(3), (value, event) => {
             this.setSpeed(value)}, {step: 0.01});    
-
-
-        for(let i = 0; i < this.buttonsDrawn.length; i++) {
-            let button = this.buttonsDrawn[i];
-            this.header.addButton( button.title || "", button.name, button.callback, button);
-        }
+           
+        if(this.onAfterCreateTopBar)
+            this.onAfterCreateTopBar(header);      
 
         if(this.onShowOptimizeMenu)
             header.addButton("", '<i class="fa-solid fa-filter"></i>', (value, event) => {this.onShowOptimizeMenu(event)}, {width: "40px"});
@@ -204,6 +217,7 @@ class Timeline {
                 }
             })
         }, {width: "40px"})
+
         header.endLine();
         LX.DEFAULT_NAME_WIDTH = "30%";
     }
@@ -218,15 +232,25 @@ class Timeline {
         if(this.leftPanel)
             this.leftPanel.clear();
         else {
-            this.leftPanel = area.addPanel({className: 'lextimelinepanel', width: "100%"});
+            this.leftPanel = area.addPanel({className: 'lextimelinepanel', width: "100%", height: "auto"});
         }
 
         let panel = this.leftPanel;
+        panel.sameLine(2);
         let title = panel.addTitle("Tracks");
+        
+        if(!this.disableNewTracks) 
+        {
+            panel.addButton('', '<i class = "fa-solid fa-plus"></i>', (value, event) => {
+                this.addNewTrack();
+            }, {width: "40px", height: "40px"});            
+        }
+        panel.endLine();
+
         const styles = window.getComputedStyle(title);
         const titleHeight = title.clientHeight + parseFloat(styles['marginTop']) + parseFloat(styles['marginBottom']);
+        
         let p = new LX.Panel({height: "calc(100% - " + titleHeight + "px)"});
-
         if(this.animationClip && this.selectedItems)  {
             let items = {'id': '', 'children': []};
 
@@ -241,9 +265,9 @@ class Timeline {
                     let track = this.tracksPerItem[selected][j];
                     let id = track.type ? track.type : track.name;
 
-                    t.children.push({'id': id, 'skipVisibility': this.skipVisibility, visible: track.active, 'children':[], actions : this.skipLock ? null : [{
+                    t.children.push({'id': id, 'skipVisibility': this.skipVisibility, visible: track.active, selected: track.isSelected, 'children':[], actions : this.skipLock ? null : [{
                         'name':'Lock edition',
-                        'icon': 'fa-solid '+ (track.locked ? 'fa-lock' : 'fa-lock-open'),
+                        'icon': 'fa-solid '+ (track.locked ? 'fa-lock' : 'fa-lock-open'),                       
                         'callback': (el, node) => {
                             // TO DO (apply functionality)
                             let value = el.classList.contains('fa-lock');
@@ -280,6 +304,7 @@ class Timeline {
                     switch(e.type) {
                         case LX.TreeEvent.NODE_SELECTED:
                             this.selectTrack(e.node);
+                            this.updateLeftPanel();
                             break;
                         case LX.TreeEvent.NODE_VISIBILITY:    
                             this.changeTrackVisibility(e.node, e.value);
@@ -308,16 +333,6 @@ class Timeline {
     }
 
     /**
-    * @method addButtons
-    * @param buttons: array
-    */
-
-    addButtons(buttons) {
-        this.buttonsDrawn = buttons || this.buttonsDrawn;
-        this.updateHeader();
-    }
-
-    /**
      * @method addNewTrack
      */
 
@@ -333,6 +348,7 @@ class Timeline {
         };
 
         this.animationClip.tracks.push(trackInfo);
+        this.updateLeftPanel();
         return trackInfo.idx;
     }
 
@@ -386,14 +402,18 @@ class Timeline {
         if(this.animationClip && this.animationClip.tracks.length)
             this.processTracks(animation);
         
-        this.updateHeader();
+        //this.updateHeader();
         this.updateLeftPanel();
     }
 
     drawTimeInfo (w, h = this.topMargin) {
 
         let ctx = this.canvas.getContext("2d");
+        ctx.font = "11px " + Timeline.FONT;//"11px Calibri";
+        ctx.textAlign = "center";
+        
         let canvas = this.canvas;
+        
         // Draw time markers
         let startx = Math.round( this.timeToX( this.startTime ) ) + 0.5;
         let endx = Math.round( this.timeToX( this.endTime ) ) + 0.5;
@@ -405,10 +425,10 @@ class Timeline {
 
         ctx.fillStyle = Timeline.BACKGROUND_COLOR;
         ctx.fillRect( this.session.left_margin,0, canvas.width, h );
+        ctx.strokeStyle = LX.Timeline.COLOR_HOVERED;
 
         if(this.secondsToPixels > 200 )
         {
-            ctx.strokeStyle = LX.getThemeColor("global-selected-light");
             ctx.globalAlpha = 0.5 * (1.0 - LX.UTILS.clamp( 200 / this.secondsToPixels, 0, 1));
             ctx.beginPath();
             for( let time = this.startTime; time <= this.endTime; time += 1 / this.framerate )
@@ -416,18 +436,18 @@ class Timeline {
                 let x = this.timeToX( time );
                 if(x < this.session.left_margin)
                     continue;
-                ctx.moveTo(Math.round(x) + 0.5, h * 0.8);
-                ctx.lineTo(Math.round(x) + 0.5, h *0.95);
+                ctx.moveTo(Math.round(x) + 0.5, h * 0.9);
+                ctx.lineTo(Math.round(x) + 0.5, h * 0.95);
             }
             ctx.stroke();
             ctx.globalAlpha = this.opacity;
         }
 
         ctx.globalAlpha = 0.5;
-        ctx.strokeStyle = LX.getThemeColor("global-selected-light");
         ctx.beginPath();
         let times = this._times;
         this._times.length = 0;
+
         for( let time = this.startTime; time <= this.endTime; time += tick_time)
         {
             let x = this.timeToX( time );
@@ -436,31 +456,28 @@ class Timeline {
                 continue;
 
             let is_tick = time % 5 == 0;
-            if(is_tick ||  this.secondsToPixels > 70 ) {
-
+            if(is_tick || this.secondsToPixels > 70 ) {
                 times.push([x,time]);
-                ctx.moveTo(Math.round(x) + 0.5, h * 0.4 + (is_tick ? 0 : h * 0.3) );
-                ctx.lineTo(Math.round(x) + 0.5, h *0.95 );
+                ctx.moveTo(Math.round(x) + 0.5, h * 0.4 + (is_tick ? h * 0.3 : h * 0.4) );
+                ctx.lineTo(Math.round(x) + 0.5, h * 0.95 );
+                ctx.stroke();
             }
-
         }
 
         let x = startx;
-        if(x < this.session.left_margin)
-            x = this.session.left_margin;
-        ctx.moveTo( x, h - 0.5);
+        if(x < this.session.left_margin) {
+            x = this.session.left_margin;            
+        }
+        //ctx.moveTo(x, h - 0.5);
         // ctx.lineTo( endx, h - 0.5);
-        ctx.stroke();
         ctx.globalAlpha = this.opacity;
 
-        //time seconds in text
-        ctx.font = "11px " + Timeline.FONT;//"11px Calibri";
-        ctx.textAlign = "center";
+        // Time seconds in text
         ctx.fillStyle = Timeline.FONT_COLOR//"#888";
         for(var i = 0; i < times.length; ++i)
         {
             let time = times[i][1];
-            ctx.fillText( time == (time|0) ? time : time.toFixed(1), times[i][0] +12, h*0.9);
+            ctx.fillText( time == (time|0) ? time : time.toFixed(1), times[i][0], h * 0.6);
         }
 
         ctx.restore();
@@ -521,6 +538,8 @@ class Timeline {
     draw( currentTime = this.currentTime, rect ) {
 
         let ctx = this.canvas.getContext("2d");
+        ctx.textBaseline = "bottom";
+        ctx.font = "11px " + Timeline.FONT;//"11px Calibri";
         if(!rect)
             rect = [0, ctx.canvas.height - ctx.canvas.height , ctx.canvas.width, ctx.canvas.height ];
 
@@ -582,25 +601,35 @@ class Timeline {
         let truePos = Math.round( this.timeToX( this.currentTime ) ) + 0.5;
         let quantCurrentTime = Math.round( this.currentTime * this.framerate ) / this.framerate;
         let pos = Math.round( this.timeToX( quantCurrentTime ) ) + 0.5; //current_time is quantized
+        
+        let posy = this.topMargin * 0.4;
         if(pos >= this.session.left_margin)
         {
-            // ctx.strokeStyle = "#ABA";
-            // ctx.beginPath();
-            // ctx.globalAlpha = 0.3;
-            // ctx.moveTo(pos, 0); ctx.lineTo( pos, h );
-            // ctx.stroke();
-
-            ctx.strokeStyle = ctx.fillStyle =  LX.getThemeColor("global-selected-light");
+            ctx.strokeStyle = ctx.fillStyle =  LX.getThemeColor("global-selected");
             ctx.globalAlpha = this.opacity;
             ctx.beginPath();
-            ctx.moveTo(truePos, 0); ctx.lineTo(truePos, this.canvas.height);//line
+            ctx.moveTo(truePos, posy * 0.6); ctx.lineTo(truePos, this.canvas.height);//line
             ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(truePos - 4, 0); ctx.lineTo(truePos + 4, 0); ctx.lineTo(truePos + 4, 10); ctx.lineTo(truePos + 2, 12);ctx.lineTo(truePos - 2, 12); ctx.lineTo(truePos - 4, 10); //triangle
             ctx.closePath();
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = LX.getThemeColor("global-selected");
+            ctx.shadowOffsetX = 1;
+            ctx.shadowOffsetY = 1;
+
+            ctx.roundRect( truePos - 10, posy * 0.6, 20, posy, 5, true );
             ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
         }
-        
+
+        // Current time seconds in text
+        ctx.font = "11px " + Timeline.FONT;//"11px Calibri";
+        ctx.textAlign = "center";
+        //ctx.textBaseline = "middle";
+        ctx.fillStyle = Timeline.COLOR_UNACTIVE//"#888";
+        ctx.fillText( this.currentTime.toFixed(1), truePos,  this.topMargin * 0.6  );
+
         // Selections
         ctx.strokeStyle = ctx.fillStyle =  Timeline.FONT_COLOR;
         ctx.translate( this.position[0], this.position[1] + this.topMargin )
@@ -1054,27 +1083,26 @@ class Timeline {
     drawTrackWithBoxes( ctx, y, trackHeight, title, track ) {
 
         let offset = (trackHeight - trackHeight *0.6)*0.5;
-        this.tracksDrawn.push([track,y+this.topMargin,trackHeight]);
+        this.tracksDrawn.push([track, y + this.topMargin, trackHeight]);
         trackHeight *= 0.6;
         let selectedClipArea = null;
 
         if(track.enabled === false)
             ctx.globalAlpha = 0.4;
         this.canvas = this.canvas || ctx.canvas;
-        ctx.font = Math.floor( trackHeight * 0.8) + "px Arial";
+        ctx.font = Math.floor( trackHeight * 0.8) + "px" + Timeline.FONT;
         ctx.textAlign = "left";
         ctx.fillStyle = "rgba(255,255,255,0.8)";
 
-        // if(title != null)
-        // {
-        //     // var info = ctx.measureText( title );
-        //     ctx.fillStyle = "rgba(255,255,255,0.9)";
-        //     ctx.fillText( title, 25, y + trackHeight * 0.8 );
-        // }
+        ctx.globalAlpha = 0.2;
+        ctx.fillStyle = Timeline.TRACK_SELECTED//"#2c303570";
+        if(track.isSelected)
+            ctx.fillRect(0, y + offset - 2, ctx.canvas.width, trackHeight + 4 );    
 
         ctx.fillStyle = "rgba(10,200,200,1)";
         var clips = track.clips;
         let trackAlpha = 1;
+
 
         if(clips) {
      
@@ -1092,7 +1120,7 @@ class Timeline {
 
                 //background rect
                 ctx.globalAlpha = trackAlpha;
-                ctx.fillStyle = clip.clipColor || "#5e9fdd"//#333";
+                ctx.fillStyle = clip.clipColor || Timeline.COLOR;
                                 
                 if(!this.active || track.active == false)
                     ctx.fillStyle = Timeline.COLOR_UNACTIVE;
@@ -1123,20 +1151,21 @@ class Timeline {
                     ctx.globalAlpha = trackAlpha * 0.5;
                 
                 ctx.globalAlpha = trackAlpha;
-                if(this.selectedClip == clip || track.selected[j])
+                if(this.selectedClip == clip || track.selected[j]) {
                     selectedClipArea = [x, y + offset, x2-x, trackHeight];
+                }
 
-                ctx.fillStyle = "black"; //Timeline.FONT_COLOR; // clip.color || Timeline.FONT_COLOR;
+                ctx.fillStyle = Timeline.FONT_COLOR; // clip.color || Timeline.FONT_COLOR;
                 ctx.font = "12px" + Timeline.FONT;
                 //render clip selection area
                 if(selectedClipArea)
                 {
-                    ctx.strokeStyle =  track.clips[j].clipColor;
+                    ctx.strokeStyle =  track.clips[j].clipColor || Timeline.COLOR;
                     ctx.fillStyle = "white"; //(Timeline.FONT_COLOR || track.clips[j].clipColor);
                     ctx.globalAlpha = 0.6;
                     ctx.lineWidth = 2.5;
                     ctx.roundRect(selectedClipArea[0]-1,selectedClipArea[1]-1,selectedClipArea[2]+2,selectedClipArea[3]+2, 5, false, true);
-                    ctx.strokeStyle = "#888";
+                    ctx.strokeStyle = Timeline.COLOR_HOVERED;
                     ctx.lineWidth = 0.5;
                     ctx.globalAlpha = this.opacity;
                     ctx.font = "bold 13px " + Timeline.FONT;
@@ -1148,9 +1177,11 @@ class Timeline {
                     ctx.font = this.secondsToPixels*0.06  +"px" + Timeline.FONT;
             
                 let textInfo = ctx.measureText( text );
-                if(this.secondsToPixels > 100)
-                    ctx.fillText( text, x + (w - textInfo.width)*0.5,  y + offset + trackHeight/2 + textInfo.fontBoundingBoxDescent );
-
+                ctx.textBaseline = "middle";
+                if(this.secondsToPixels > 100) {
+                    ctx.fillText( text, x + (w - textInfo.width)*0.5,  y + offset + trackHeight * 0.5);
+                }
+                ctx.roundRect(x + w - 8 , y + offset , 8, trackHeight, {tl: 4, bl: 4, tr:4, br:4}, true);
                 ctx.font = "12px" + Timeline.FONT;
             }
         }
@@ -1321,12 +1352,12 @@ class Timeline {
 };
 
 Timeline.BACKGROUND_COLOR = LX.getThemeColor("global-color-primary");
-Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor("global-color-secondary");
+Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor("global-blur-background");
 Timeline.TRACK_COLOR_SECONDARY = LX.getThemeColor("global-color-terciary");
 Timeline.TRACK_SELECTED = LX.getThemeColor("global-selected");
 Timeline.FONT = LX.getThemeColor("global-font");
 Timeline.FONT_COLOR = LX.getThemeColor("global-text");
-Timeline.COLOR = "#5e9fdd";
+Timeline.COLOR = LX.getThemeColor("global-selected");//"#5e9fdd";
 Timeline.COLOR_HOVERED = "rgba(250,250,250,0.7)";
 Timeline.COLOR_SELECTED = "rgba(250,250,20,1)"///"rgba(250,250,20,1)";
 Timeline.COLOR_UNACTIVE = "rgba(250,250,250,0.7)";
@@ -1409,19 +1440,7 @@ class KeyFramesTimeline extends Timeline {
                 
             } 
             else {
-                this.unSelectAllKeyFrames();
-                let x = e.offsetX;
-                let y = e.offsetY - this.topMargin;
-                for( const b of this.buttonsDrawn ) {
-                    b.pressed = false;
-                    const bActive = x >= b[2] && x <= (b[2] + b[4]) && y >= b[3] && y <= (b[3] + b[5]);
-                    if(bActive) {
-                        const callback = b[6]; 
-                        if(callback) callback(e);
-                        else this[ b[1] ] = !this[ b[1] ];
-                        break;
-                    }
-                }
+                this.unSelectAllKeyFrames();               
             }
         }
 
@@ -1460,15 +1479,6 @@ class KeyFramesTimeline extends Timeline {
                 }
                 
                 this.timeBeforeMove = track.times[ keyFrameIndex ];
-                
-                
-            }
-        } else if(!track) {
-            let x = e.offsetX;
-            let y = e.offsetY - this.topMargin;
-            for( const b of this.buttonsDrawn ) {
-                const bActive = x >= b[2] && x <= (b[2] + b[4]) && y >= b[3] && y <= (b[3] + b[5]);
-                b.pressed = bActive;
             }
         }
     }
@@ -2485,20 +2495,8 @@ class ClipsTimeline extends Timeline {
         this.canvas.width = size[0];
         this.canvas.height = size[1];
         var w = Math.max(300, this.canvas.width);
-        // this.secondsToPixels = ( w - this.session.left_margin ) / this.duration;
-        // this.pixelsToSeconds = 1 / this.secondsToPixels;
         
-        let timeline_height = this.topMargin;
-        let line_height = this.trackHeight;
-        let max_tracks = Math.ceil( (size[1] - timeline_height) / line_height );
-        if(this.animationClip) {
-            while(this.animationClip.tracks.length < max_tracks - 1) {
-                this.addNewTrack();
-            }
-        }
-        
-        this.draw(this.currentTime);
-      
+        this.draw(this.currentTime); 
     }
 
     updateLeftPanel(area) {
@@ -2506,30 +2504,40 @@ class ClipsTimeline extends Timeline {
         if(this.leftPanel)
             this.leftPanel.clear();
         else {
-            this.leftPanel = area.addPanel({className: 'lextimelinepanel', width: "100%"});
+            this.leftPanel = area.addPanel({className: 'lextimelinepanel', width: "100%", height: "auto"});
         }
 
         let panel = this.leftPanel;
+        
+        panel.sameLine(2);
         let title = panel.addTitle("Tracks");
+        if(!this.disableNewTracks) 
+        {
+            panel.addButton('', '<i class = "fa-solid fa-plus"></i>', (value, event) => {
+                this.addNewTrack();
+            }, {width: "40px", height: "40px"});            
+        }
+        panel.endLine();
         const styles = window.getComputedStyle(title);
         const titleHeight = title.clientHeight + parseFloat(styles['marginTop']) + parseFloat(styles['marginBottom']);
         let p = new LX.Panel({height: "calc(100% - " + titleHeight + "px)"});
 
         if(this.animationClip)  {
-            let items = {'id': '', 'children': []};
 
             for(let i = 0; i < this.animationClip.tracks.length; i++ ) {
                 let track = this.animationClip.tracks[i];
                 let t = {
-                    'id': track.idx.toString(),
+                    'id': track.name ?? "Track_" + track.idx.toString(),
+                    'name': track.name,
                     'skipVisibility': this.skipVisibility,     
-                    'visible': track.active           
+                    'visible': track.active,  
+                    'selected' : track.isSelected                
                 }
                               
-                p.addTree("", t, {filter: false, rename: false, draggable: false, onevent: (e) => {
+                let tree = p.addTree(null, t, {filter: false, rename: false, draggable: false, onevent: (e) => {
                     switch(e.type) {
                         case LX.TreeEvent.NODE_SELECTED:
-                            //this.selectTrack(e.node);
+                            this.selectTrack(e.node);
                             break;
                         case LX.TreeEvent.NODE_VISIBILITY:    
                             this.changeTrackVisibility(e.node, e.value);
@@ -2539,7 +2547,6 @@ class ClipsTimeline extends Timeline {
                             break;
                     }
                 }});
-
             }
         }
         panel.attach(p.root)
@@ -2571,8 +2578,9 @@ class ClipsTimeline extends Timeline {
             type = name;
             name = trackInfo.parent ? trackInfo.parent.id : trackInfo.id;
         }
+        let id = name.split("Track_")[1];
         trackInfo = {name, type};
-        let track = this.animationClip.tracks[name];
+        let track = this.animationClip.tracks[id];
   
         track.active = visible;
         trackInfo = track;
@@ -2580,6 +2588,39 @@ class ClipsTimeline extends Timeline {
         this.draw();
         if(this.onChangeTrackVisibility)
             this.onChangeTrackVisibility(trackInfo, visible);
+    }
+
+        /**
+    * @method selectTrack
+    * @param {id, parent, children, visible} trackInfo 
+    */
+
+    selectTrack( trackInfo) {
+        this.unSelectAllTracks();
+        
+        let [name, type] = trackInfo.id.split(" (");
+        
+        if(type)
+            type = type.replaceAll(")", "").replaceAll(" ", "");
+        else {
+            type = name;
+            name = trackInfo.parent ? trackInfo.parent.id : trackInfo.id;
+        }
+        let id = name.split("Track_")[1];
+        let track = this.animationClip.tracks[id];
+        track.isSelected = true;
+        
+        trackInfo = track;
+        this.updateLeftPanel();
+        if(this.onSelectTrack)
+            this.onSelectTrack(trackInfo);
+    }
+
+    unSelectAllTracks() {
+        
+        for(let t = 0; t < this.animationClip.tracks.length; t++) {
+            this.animationClip.tracks[t].isSelected = false;
+        }    
     }
 
     onMouseUp( e ) {
@@ -2788,7 +2829,11 @@ class ClipsTimeline extends Timeline {
                         clip.fadeout = Math.max(Math.min((clip.fadeout || clip.start+clip.duration) + delta, clip.start+clip.duration), clip.start);
                     else if( this.dragClipMode == "duration" ) {
                         clip.duration += delta;
-                        clip.fadeout += delta;
+                        if(delta < 0) {
+                            clip.fadein = Math.min(Math.max((clip.fadein || 0) + delta, clip.start), clip.start+clip.duration);
+                        }
+                        clip.fadeout = Math.max(Math.min((clip.fadeout || clip.start+clip.duration) + delta, clip.start+clip.duration), clip.start);
+
                         if(this.onContentMoved) {
                             this.onContentMoved(clip, 0);
                         }
@@ -3452,6 +3497,7 @@ class ClipsTimeline extends Timeline {
         };
 
         this.animationClip.tracks.push(trackInfo);
+        this.updateLeftPanel();
         return trackInfo.idx;
     }
 
@@ -3713,22 +3759,7 @@ class CurvesTimeline extends Timeline {
             if(!discard && track) {
                 this.processCurrentKeyFrame( e, null, track, localX );
                 
-            } 
-            else {
-                let x = e.offsetX;
-                let y = e.offsetY - this.topMargin;
-                for( const b of this.buttonsDrawn ) {
-                    b.pressed = false;
-                    const bActive = x >= b[2] && x <= (b[2] + b[4]) && y >= b[3] && y <= (b[3] + b[5]);
-                    if(bActive) {
-                        const callback = b[6]; 
-                        if(callback) callback(e);
-                        else this[ b[1] ] = !this[ b[1] ];
-                        break;
-                    }
-                }
-            }
-            
+            }                       
         }
 
         this.boxSelection = false;
@@ -3772,13 +3803,7 @@ class CurvesTimeline extends Timeline {
             }
         }
         else if(!track) {
-            this.unSelectAllKeyFrames()
-            let x = e.offsetX;
-            let y = e.offsetY - this.topMargin;
-            for( const b of this.buttonsDrawn ) {
-                const bActive = x >= b[2] && x <= (b[2] + b[4]) && y >= b[3] && y <= (b[3] + b[5]);
-                b.pressed = bActive;
-            }
+            this.unSelectAllKeyFrames()           
         }
     }
 
@@ -3979,11 +4004,12 @@ class CurvesTimeline extends Timeline {
         let values = track.values;
 
         if(keyframes) {
-
-            ctx.fillStyle = "#2c303570";
+            ctx.globalAlpha = 0.2;
+            ctx.fillStyle = Timeline.TRACK_SELECTED//"#2c303570";
             if(trackInfo.isSelected)
                 ctx.fillRect(0, y - 3, ctx.canvas.width, trackHeight );      
                 
+            ctx.globalAlpha = 1;
             this.tracksDrawn.push([track,y+this.topMargin,trackHeight]);
                 
             //draw lines

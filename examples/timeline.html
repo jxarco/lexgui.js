@@ -44,7 +44,6 @@
             canvas.height = bounding.height;
         };
 
-
         let  panel = new LX.Panel();
         fillPanel( panel );
         rightArea.addPanel(panel);
@@ -55,6 +54,7 @@
         createClipsTimeline( bottomTabs );
         createCurvesTimeline( bottomTabs );
 
+        let activeTimeline = null
         function loop(dt) {
             
             var ctx = canvas.getContext("2d");
@@ -70,7 +70,10 @@
             const text = panel.getValue('Text');
             const pos2D = panel.getValue('2D Position');
             ctx.fillText(text, pos2D[0], pos2D[1]);
-
+            
+            if(activeTimeline) {
+                activeTimeline.draw();
+            }
             requestAnimationFrame(loop);
         }
 
@@ -95,30 +98,39 @@
             panel.merge();
         }
 
-
         function createKyeframeTimeline( bottomTabs ) {
             
             let keyframesPanel = new LX.Panel();            
-            bottomTabs.add( "Keyframes", keyframesPanel, {onSelect: () => kfTimeline.show()} );
+            bottomTabs.add( "Keyframes", keyframesPanel, {onSelect: () => {
+                activeTimeline = kfTimeline; 
+                kfTimeline.show();
+            }} );
 
-            let kfTimeline = new LX.KeyFramesTimeline("kf-timeline", { });
+            let kfTimeline = new LX.KeyFramesTimeline('', {
+                disableNewTracks: true,
+                onBeforeCreateTopBar: (panel) => {
+                    panel.addDropdown("Animation", ["Anim 1", "Anim 2", "Anim 3"], "Anim 1", ()=> {})
+                },
+                onAfterCreateTopBar: (panel) => {
+                    panel.addButton("", "autoKeyEnable", null, { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled', width: "40px" });
+                    panel.addButton("", "unselectAll", (value, event) => { kfTimeline.unSelectAllKeyFrames();}, { icon: 'fa-regular fa-rectangle-xmark', name: 'unselectAll', callback: (value, event) => { kfTimeline.unSelectAllKeyFrames();}, width: "40px"});
+                }
+            });
+
             keyframesPanel.attach(kfTimeline.root);
             kfTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
             kfTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [0,1,0, 1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
-            
-            kfTimeline.addButtons([
-                { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled', width: "40px" },
-                { icon: 'fa fa-filter', name: "optimize", callback: (value, event) => {   kfTimeline.onShowOptimizeMenu(event);}, width: "40px"},
-                { icon: 'fa-regular fa-rectangle-xmark', name: 'unselectAll', callback: (value, event) => { kfTimeline.unSelectAllKeyFrames();}, width: "40px"}
-            ]);
-            
+        
             kfTimeline.draw(0);
         }
 
         function createClipsTimeline( bottomTabs ) {
         
             let clipsPanel = new LX.Panel();
-            bottomTabs.add( "Clips", clipsPanel, {onSelect: () => clipsTimeline.show()});
+            bottomTabs.add( "Clips", clipsPanel, {onSelect: () => {
+                activeTimeline = clipsTimeline; 
+                clipsTimeline.show();
+            }});
             
             let clipsTimeline = new LX.ClipsTimeline("clips-timeline");
             clipsPanel.attach(clipsTimeline.root);
@@ -144,7 +156,10 @@
         function createCurvesTimeline( bottomTabs ) {
             
             let curvesPanel = new LX.Panel();
-            bottomTabs.add( "Curves", curvesPanel, {onSelect: () => curvesTimeline.show()} );
+            bottomTabs.add( "Curves", curvesPanel, {onSelect: () => {
+                activeTimeline = curvesTimeline; 
+                curvesTimeline.show(); 
+            }});
 
             let curvesTimeline = new LX.CurvesTimeline("curves-timeline", { range: [-1,1]});
             curvesPanel.attach(curvesTimeline.root);
