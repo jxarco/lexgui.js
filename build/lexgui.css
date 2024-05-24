@@ -2489,7 +2489,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lextimelinepanel {
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 /* .lextimeline .lexarea, .lextimelinepanel {
   background-color: var(--global-dark-background);
@@ -2513,7 +2513,7 @@ meter::-webkit-meter-even-less-good-value {
 .lextimeline .lexinlinewidgets {
   padding-right: 10px;
   /* background-color: var(--global-color-secondary); */
-  height: 100%;
+  /* height: 100%; */
 }
 
 .lextimeline .lexbutton:hover {

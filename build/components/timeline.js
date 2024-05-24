@@ -124,7 +124,7 @@ class Timeline {
 
         this.canvas.tabIndex = 1;
         // Process keys events
-        this.canvas.addEventListener("keydown", this.processKeys.bind(this));
+        this.canvasArea.root.addEventListener("keydown", this.processKeys.bind(this));
 
         right.onresize = bounding => {
             if(!(bounding.width && bounding.height)) 
@@ -231,7 +231,7 @@ class Timeline {
         if(this.leftPanel)
             this.leftPanel.clear();
         else {
-            this.leftPanel = area.addPanel({className: 'lextimelinepanel', width: "100%", height: "auto"});
+            this.leftPanel = area.addPanel({className: 'lextimelinepanel', width: "100%", height: "100%"});
         }
 
         let panel = this.leftPanel;
@@ -788,12 +788,12 @@ class Timeline {
 
         if(!this.canvas)
             return;
-        // e.preventDefault();
-        // e.stopPropagation();
+    
         e.multipleSelection = false;
 
         let h = this.canvas.height;
         let w = this.canvas.width;
+
         // Process mouse
         let x = e.offsetX;
         let y = e.offsetY;
@@ -802,10 +802,6 @@ class Timeline {
         let localX = e.offsetX - this.position[0];
         let localY = e.offsetY - this.position[1];
 
-        // if(!this.grabbing_timeline && !this.movingKeys)
-        //     this.canvas.style.cursor = "default";
-            
-      
         let timeX = this.timeToX( this.currentTime );
         let current_grabbing_timeline = localY < this.topMargin && localX > this.session.left_margin && 
         localX > (timeX - 6) && localX < (timeX + 6);
@@ -824,15 +820,14 @@ class Timeline {
                 this.setScale( e.wheelDelta < 0 ? 0.95 : 1.05 );
             }
             else if( h < this.scrollableHeight)
-            {
-                this.currentScroll =  LX.UTILS.clamp( this.currentScroll + (e.wheelDelta < 0 ? 0.1 : -0.1), 0, 1);
-                this.leftPanel.root.children[1].scrollTop = this.currentScroll* (this.scrollableHeight - h);
+            {              
+                this.leftPanel.root.children[1].scrollTop += e.deltaY * 0.1 ;
             }
             
             return;
         }
 
-            var time = this.xToTime(x, true);
+        var time = this.xToTime(x, true);
 
         var is_inside = x >= this.position[0] && x <= (this.position[0] + this.size[0]) &&
                         y >= this.position[1] && y <= (this.position[1] + this.size[1]);
@@ -851,8 +846,6 @@ class Timeline {
         e.track = track;
         e.localX = localX;
         e.localY = localY;
-
-       
 
         const innerSetTime = (t) => { 
             LX.emit( "@on_current_time_" + this.constructor.name, t);
@@ -887,15 +880,11 @@ class Timeline {
                 return;
             }
             
-            if( e.button == 0 && this.onMouseUp )
+            if( e.button == 0 && this.onMouseUp ) {
                 this.onMouseUp(e, time);
+            }
         }
-
-        if( !is_inside && !this.grabbing && !(e.metaKey || e.altKey ) )
-            return true;
-
-        if( this.onMouse && this.onMouse( e, time, this ) )
-            return;
+    
 
         if( e.type == "mousedown")	{
             
@@ -917,7 +906,6 @@ class Timeline {
                 this.grabTime = time - this.currentTime;
                 if(!track || track && this.getCurrentContent(track, time, 0.001) == undefined) {
                     this.grabbing_timeline = current_grabbing_timeline;
-
                 }
 
                 if(this.onMouseDown && this.active )
@@ -944,7 +932,7 @@ class Timeline {
                 }
                 else if(this.grabbingScroll )
                 {
-                    this.currentScroll = LX.UTILS.clamp( this.currentScroll + (e.movementY / h), 0, 1);
+                    this.leftPanel.root.children[1].scrollTop += e.movementY  ;
                 }
                 else
                 {
@@ -954,17 +942,26 @@ class Timeline {
                     this.session.start_time += (old - now);
                 }
             }
-            if(this.onMouseMove)
+
+            if(this.onMouseMove) {
                 this.onMouseMove(e, time);
+            }
         }
         else if (e.type == "dblclick" && this.onDblClick) {
             this.onDblClick(e);	
         }
-        else if (e.type == "contextmenu" && this.showContextMenu && this.active)
+        else if (e.type == "contextmenu" && this.showContextMenu && this.active) {
             this.showContextMenu(e);
+        }
 
         this.lastMouse[0] = x;
         this.lastMouse[1] = y;
+
+        if( !is_inside && !this.grabbing && !(e.metaKey || e.altKey ) )
+            return true;
+
+        if( this.onMouse && this.onMouse( e, time, this ) )
+            return;
 
         return true;
     }
@@ -1336,12 +1333,13 @@ class Timeline {
      */
     resize( size = [this.root.parent.root.clientWidth, this.root.parent.root.clientHeight]) {
 
-        this.root.root.style.width = size[0] + "px";
-        this.root.root.style.height = size[1] + "px";
+        // this.root.root.style.width = size[0] + "px";
+        // this.root.root.style.height = size[1] + "px";
         
         this.size = size; 
-        this.content_area.setSize([size[0], size[1] - this.header_offset]);
-        
+        //this.content_area.setSize([size[0], size[1] - this.header_offset]);
+        this.content_area.root.style.height = "calc(100% - "+ this.header_offset + "px)";
+
         let w = size[0] - this.leftPanel.root.clientWidth - 8;
         this.resizeCanvas([w , size[1]]);     
     }
@@ -1356,9 +1354,10 @@ class Timeline {
             this.pixelsToSeconds = 1 / this.secondsToPixels;
         }
         size[1] -= this.header_offset;
-        this.canvasArea.setSize(size);
-        this.canvas.width = size[0];
-        this.canvas.height = size[1];
+        //this.canvasArea.setSize(size);
+        //this.canvasArea.root.style.height = "calc(100% - "+ this.header_offset + "px)";
+        this.canvas.width = this.canvasArea.root.clientWidth;
+        this.canvas.height = this.canvasArea.root.clientHeight;
         this.draw(this.currentTime);
     }
 
@@ -2505,33 +2504,33 @@ class ClipsTimeline extends Timeline {
         this.lastClipsSelected = [];
     }
 
-    resizeCanvas( size ) {
-        if( size[0] <= 0 && size[1] <=0 )
-            return;
+    // resizeCanvas( size ) {
+    //     if( size[0] <= 0 && size[1] <=0 )
+    //         return;
 
-        size[1] -= this.header_offset;
+    //     size[1] -= this.header_offset;
 
-        if(Math.abs(this.canvas.width - size[0]) > 1) {
+    //     if(Math.abs(this.canvas.width - size[0]) > 1) {
             
-            var w = Math.max(300, size[0] );
-            this.secondsToPixels = ( w- this.session.left_margin ) / this.duration;
-            this.pixelsToSeconds = 1 / this.secondsToPixels;
-        }
+    //         var w = Math.max(300, size[0] );
+    //         this.secondsToPixels = ( w- this.session.left_margin ) / this.duration;
+    //         this.pixelsToSeconds = 1 / this.secondsToPixels;
+    //     }
 
-        this.canvasArea.setSize(size);
-        this.canvas.width = size[0];
-        this.canvas.height = size[1];
-        var w = Math.max(300, this.canvas.width);
+    //     this.canvasArea.setSize(size);
+    //     this.canvas.width = size[0];
+    //     this.canvas.height = size[1];
+    //     var w = Math.max(300, this.canvas.width);
         
-        this.draw(this.currentTime); 
-    }
+    //     this.draw(this.currentTime); 
+    // }
 
     updateLeftPanel(area) {
 
         if(this.leftPanel)
             this.leftPanel.clear();
         else {
-            this.leftPanel = area.addPanel({className: 'lextimelinepanel', width: "100%", height: "auto"});
+            this.leftPanel = area.addPanel({className: 'lextimelinepanel', width: "100%", height: "100%"});
         }
 
         let panel = this.leftPanel;
@@ -2579,8 +2578,8 @@ class ClipsTimeline extends Timeline {
         panel.attach(p.root)
         p.root.style.overflowY = "scroll";
         p.root.addEventListener("scroll", (e) => {
-           
-            this.currentScroll = e.currentTarget.scrollTop/(e.currentTarget.scrollHeight - e.currentTarget.clientHeight);
+           console.log(e.currentTarget.scrollTop)
+            this.currentScroll = e.currentTarget.scrollTop / (e.currentTarget.scrollHeight - e.currentTarget.clientHeight);
          })
         // for(let i = 0; i < this.animationClip.tracks.length; i++) {
         //     let track = this.animationClip.tracks[i];

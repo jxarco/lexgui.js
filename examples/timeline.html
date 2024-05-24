@@ -51,7 +51,9 @@
         createKyeframeTimeline( bottomTabs );
         createClipsTimeline( bottomTabs );
         createCurvesTimeline( bottomTabs );
-
+        bottomArea.onresize = (size) => {
+            activeTimeline.resize(size);
+        }
         let panel = new LX.Panel();
         panel = rightArea.addPanel(panel);
         fillPanel( panel );
@@ -124,7 +126,9 @@
                 activeTimeline = kfTimeline; 
                 kfTimeline.show();
             }} );
-
+            keyframesPanel.onresize = () => {
+                kfTimeline.resize();
+            }
             let kfTimeline = new LX.KeyFramesTimeline('', {
                 disableNewTracks: true,
                 onBeforeCreateTopBar: (panel) => {
