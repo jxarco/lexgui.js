@@ -271,7 +271,7 @@ class Timeline {
                     t.children.push({'id': id, 'skipVisibility': this.skipVisibility, visible: track.active, selected: track.isSelected, 'children':[], actions : this.skipLock ? null : [{
                         'name':'Lock edition',
                         'icon': 'fa-solid '+ (track.locked ? 'fa-lock' : 'fa-lock-open'),                       
-                        'callback': (el, node) => {
+                        'callback': (node, el) => {
                             // TO DO (apply functionality)
                             let value = el.classList.contains('fa-lock');
                          
@@ -2589,7 +2589,6 @@ class ClipsTimeline extends Timeline {
         panel.attach(p.root)
         p.root.style.overflowY = "scroll";
         p.root.addEventListener("scroll", (e) => {
-           console.log(e.currentTarget.scrollTop)
             this.currentScroll = e.currentTarget.scrollTop / (e.currentTarget.scrollHeight - e.currentTarget.clientHeight);
          })
         // for(let i = 0; i < this.animationClip.tracks.length; i++) {
