@@ -2593,9 +2593,9 @@ class NodeTree {
 
         const that = this;
         const node_filter_input = this.domEl.querySelector("#lexnodetree_filter");
-        
+
         node.children = node.children ?? [];
-        if(node_filter_input && (!node.id.includes(node_filter_input.value) || node.name && !node.name.includes(node_filter_input.value)) || (selectedId != undefined) && selectedId != node.id)
+        if(node_filter_input && !node.id.includes(node_filter_input.value) || (selectedId != undefined) && selectedId != node.id)
         {
             for( var i = 0; i < node.children.length; ++i )
                 this._create_item( node, node.children[i], level + 1, selectedId );
@@ -2640,7 +2640,7 @@ class NodeTree {
             }
         }
 
-        item.innerHTML += (node.rename ? "" : node.name ?? node.id);
+        item.innerHTML += (node.rename ? "" : node.id);
 
         item.setAttribute('draggable', true);
         item.style.paddingLeft = ((is_parent ? 0 : 3 ) + (3 + (level+1) * 15)) + "px";
@@ -2745,7 +2745,7 @@ class NodeTree {
 
         let name_input = document.createElement('input');
         name_input.toggleAttribute('hidden', !node.rename);
-        name_input.value = node.name ?? node.id;
+        name_input.value = node.id;
         item.appendChild(name_input);            
 
         if(node.rename) {

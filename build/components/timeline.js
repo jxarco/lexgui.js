@@ -44,7 +44,7 @@ class Timeline {
         this.framerate = 30;
         this.opacity = options.opacity || 1;
         this.sidebarWidth = 0// 200;
-        this.topMargin = 47;
+        this.topMargin = 40;
         this.renderOutFrames = false;
         this.lastMouse = [];
         this.lastKeyFramesSelected = [];
@@ -59,6 +59,7 @@ class Timeline {
 
         this.onBeforeCreateTopBar = options.onBeforeCreateTopBar;
         this.onAfterCreateTopBar = options.onAfterCreateTopBar;
+        this.onChangePlayMode = options.onChangePlayMode;
 
         this.playing = false;
         this.loop = options.loop ?? true;
@@ -162,6 +163,9 @@ class Timeline {
 
         header.addButton('', '<i class="fa-solid fa-rotate"></i>', (value, event) => {
             this.loop = !this.loop;
+            if(this.onChangePlayMode) {
+                this.onChangePlayMode(this.loop);
+            }
 
         }, {width: "40px", selectable: true, selected: this.loop});
         
@@ -423,7 +427,7 @@ class Timeline {
         ctx.save();
 
         ctx.fillStyle = Timeline.BACKGROUND_COLOR;
-        ctx.fillRect( this.session.left_margin,0, canvas.width, h );
+        ctx.fillRect( this.session.left_margin, 0, canvas.width, h );
         ctx.strokeStyle = LX.Timeline.FONT_COLOR;
 
         if(this.secondsToPixels > 200 )
