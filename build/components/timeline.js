@@ -887,6 +887,8 @@ class Timeline {
             if( e.button == 0 && this.onMouseUp ) {
                 this.onMouseUp(e, time);
             }
+            this.unSelectAllTracks();
+            this.updateLeftPanel();
         }
     
 
@@ -961,8 +963,9 @@ class Timeline {
         this.lastMouse[0] = x;
         this.lastMouse[1] = y;
 
-        if( !is_inside && !this.grabbing && !(e.metaKey || e.altKey ) )
+        if( !is_inside && !this.grabbing && !(e.metaKey || e.altKey ) ) {           
             return true;
+        }
 
         if( this.onMouse && this.onMouse( e, time, this ) )
             return;
@@ -990,6 +993,8 @@ class Timeline {
                         this.pasteContent();
                     break;
                 case ' ':
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
                     this.changeState();
                     break; 
             }
@@ -1154,7 +1159,7 @@ class Timeline {
             
             // Overwrite clip color state depending on its state
             ctx.globalAlpha = trackAlpha;
-            ctx.fillStyle = track.hovered[j] ? Timeline.COLOR_HOVERED : (clip.clipColor || Timeline.COLOR);
+            ctx.fillStyle = clip.clipColor || (track.hovered[j] ? Timeline.COLOR_HOVERED : (Timeline.COLOR));
             if(track.selected[j] && !clip.clipColor) {
                 ctx.fillStyle = Timeline.TRACK_SELECTED;
             }
@@ -1189,13 +1194,13 @@ class Timeline {
                 }
             }
             
-            ctx.fillStyle = Timeline.FONT_COLOR; // clip.color || Timeline.FONT_COLOR;
+            ctx.fillStyle = clip.color || Timeline.FONT_COLOR; // clip.color || Timeline.FONT_COLOR;
             //ctx.font = "12px" + Timeline.FONT;
 
             // Overwrite style and draw clip selection area if it's selected
             ctx.globalAlpha = clip.hidden ? trackAlpha * 0.5 : trackAlpha;
             
-            if(this.selectedClip == clip || track.selected[j]) {
+            if(this.selectedClip == clip || track.selected[j] || track.hovered[j]) {
                 ctx.strokeStyle = ctx.shadowColor = track.clips[j].clipColor || Timeline.TRACK_SELECTED;
                 ctx.shadowBlur = 10;
                 ctx.shadowOffsetX = 1.5;
@@ -1213,8 +1218,9 @@ class Timeline {
             }
 
             // Overwrite style with small font size if it's zoomed out
-            if( this.secondsToPixels < 200)
+            if( this.secondsToPixels < 200) {
                 ctx.font = this.secondsToPixels*0.06  +"px" + Timeline.FONT;
+            }
 
             const text = clip.id.replaceAll("_", " ").replaceAll("-", " ");
             const textInfo = ctx.measureText( text );
@@ -1224,6 +1230,7 @@ class Timeline {
                 ctx.fillText( text, x + (w - textInfo.width)*0.5,  y + offset + trackHeight * 0.5);
             }
 
+            ctx.fillStyle = track.hovered[j] ? "white" : Timeline.FONT_COLOR;
             // Draw resize bounding
             ctx.roundRect(x + w - 8 , y + offset , 8, trackHeight, {tl: 4, bl: 4, tr:4, br:4}, true);           
         }
