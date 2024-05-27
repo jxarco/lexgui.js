@@ -35,7 +35,7 @@
         canvas.height = leftArea.root.clientHeight;
         canvas.style.width = "100%";
         canvas.style.height = "100%";
-
+       
         upArea.attach(canvas);
 
         // add on resize event to control canvas size
@@ -43,20 +43,24 @@
             canvas.width = bounding.width;
             canvas.height = bounding.height;
         };
-
         
         const bottomTabs = bottomArea.addTabs();
-        
+        const types = { KEYFRAMES: 0, CLIPS: 1, CURVES: 2};
+
+        let panel = new LX.Panel();
+        panel = rightArea.addPanel(panel);        
+        fillPanel( panel );
+
         let activeTimeline = null
         createKyeframeTimeline( bottomTabs );
         createClipsTimeline( bottomTabs );
         createCurvesTimeline( bottomTabs );
+
+        let mode = types.KEYFRAMES;
+
         bottomArea.onresize = (size) => {
             activeTimeline.resize(size);
         }
-        let panel = new LX.Panel();
-        panel = rightArea.addPanel(panel);
-        fillPanel( panel );
 
         function loop(dt) {
             
@@ -66,23 +70,11 @@
             
             let elapsed = dt - lastTime;
             lastTime = dt;
-            var ctx = canvas.getContext("2d");
-
-            // Get values from panel widgets (e.g. color value)
-            ctx.fillStyle = panel.getValue('Background');
-
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.font = panel.getValue('Font Size') + "px Monospace";
-
-            ctx.fillStyle = panel.getValue('Font Color');
-
-            const text = panel.getValue('Text');
-            const pos2D = panel.getValue('2D Position');
-            ctx.fillText(text, pos2D[0], pos2D[1]);
             
             if(activeTimeline) {
                 activeTimeline.draw();
                 if(activeTimeline.playing) {
+                    
                     activeTimeline.currentTime += elapsed* 0.001;
                     activeTimeline.onSetTime(activeTimeline.currentTime);
                     if(activeTimeline.currentTime >= activeTimeline.animationClip.duration) {
@@ -91,19 +83,34 @@
                             activeTimeline.changeState();
                         }
                     }
+                   
                 }
+            }
+                        
+            if(mode == types.KEYFRAMES) {                
+                let ctx = canvas.getContext("2d");
+                ctx.fillStyle = LX.getThemeColor("global-selected-light");
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.font = panel.getValue('Font Size') + "px Monospace";
+                ctx.fillStyle = panel.getValue('Font Color');
+    
+                // Get values from panel widgets (e.g. position value)                
+                const text = panel.getValue('Text');
+                const pos2D = panel.getValue('2D Position');
+                ctx.fillText(text, pos2D[0], pos2D[1]);
             }
             requestAnimationFrame(loop);
         }
+
         let lastTime = 0;
         requestAnimationFrame(loop);
 
         // **** **** **** **** **** **** **** **** **** **** **** **** 
 
         function fillPanel( panel ) {
-
+           panel.clear();
             panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});
-            panel.addColor("Background", "#b7a9b1");
+            panel.addColor("Background", LX.getThemeColor("global-selected-light"));
             panel.addText("Track", "", null)
             panel.addText("Text", "Lexgui.js @evallsg", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
             panel.addColor("Font Color", [0.1, 0.1, 0.8], (value, event) => {
@@ -119,12 +126,49 @@
             panel.merge();
         }
 
+
+        function fillClipPanel( panel, clip ) {
+
+            panel.clear();
+
+            if(!clip) {
+                return;
+            }
+
+            panel.branch(clip.name || "Clip", {icon: "fa-solid fa-clip", filter: true});
+            panel.addNumber("Start", clip.start, (v) => {
+                const diff = v - clip.start;
+                clip.start = v;    
+                clip.fadein += diff;                 
+                clip.fadeout += diff; 
+                LX.emit("@on_start_change_fadein", clip.fadein);
+                LX.emit("@on_start_change_fadeout", clip.fadeout);
+            }, {step: 0.01});
+            if(clip.fadein != undefined) {
+                panel.addNumber("Fade-In", clip.fadein, (v) => {
+                    clip.fadein = v;                
+                }, {min: clip.start, max: clip.fadeout, step: 0.01, signal: "@on_start_change_fadein"});
+            }
+            if(clip.fadeout != undefined) {
+                panel.addNumber("Fade-Out", clip.fadeout, (v) => {
+                    clip.fadeout = v;                
+                }, {min: clip.fadein, max: clip.start + clip.duration, step: 0.01, signal: "@on_start_change_fadeout"});
+            }
+            panel.addNumber("Duration", clip.duration, (v) => {
+                clip.duration = v;                
+            }, {step: 0.01});
+            
+            panel.merge();
+        }
+
         function createKyeframeTimeline( bottomTabs ) {
             
             let keyframesPanel = new LX.Panel();            
             bottomTabs.add( "Keyframes", keyframesPanel, {onSelect: () => {
                 activeTimeline = kfTimeline; 
                 kfTimeline.show();
+                fillPanel(panel);
+                mode = types.KEYFRAMES;
             }} );
             keyframesPanel.onresize = () => {
                 kfTimeline.resize();
@@ -145,8 +189,14 @@
             kfTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [250, 350, 250, 250, 250, 350], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
             activeTimeline = kfTimeline;
             kfTimeline.show();
-
+            
+            
             kfTimeline.onSelectKeyFrame = (data, currentSelection, keyFrameIndex) => {
+                if(data.multipleSelection) {
+                    rightArea.hide();
+                    return;
+                }
+                rightArea.show();
                 let id = data.track.idx;
                 let values = kfTimeline.animationClip.tracks[id].values;
                 panel.setValue("Track", data.track.name)
@@ -155,6 +205,7 @@
             }
             
             kfTimeline.onSetTime = ( time ) => {
+                rightArea.show();
                 let keyframes = kfTimeline.getKeyFramesInRange(kfTimeline.animationClip.tracks[0], time , time, 0.15);
 
                 let values = kfTimeline.animationClip.tracks[0].values;
@@ -163,8 +214,7 @@
                 if(keyframes.length > 1) {
                     let t = Math.abs(kfTimeline.animationClip.tracks[0].times[keyframes[0] * 2] - time);
                     valueX =  valueX * (1 - t) + values[keyframes[1] * 2] * t;                    
-                    valueY =  valueY * (1 - t) + values[keyframes[1] * 2 + 1] * t;
-                    
+                    valueY =  valueY * (1 - t) + values[keyframes[1] * 2 + 1] * t;                    
                 }
                 panel.setValue("2D Position", [valueX, valueY]);
             }
@@ -176,6 +226,8 @@
             bottomTabs.add( "Clips", clipsPanel, {onSelect: () => {
                 activeTimeline = clipsTimeline; 
                 clipsTimeline.show();
+                panel.clear();
+                mode = types.CLIPS;
             }});
             
             let clipsTimeline = new LX.ClipsTimeline("clips-timeline");
@@ -196,6 +248,11 @@
             clipsTimeline.selectedItems = ["Clip 1"];
             clipsTimeline.show();
 
+            clipsTimeline.onSelectClip = (clip) => {
+                rightArea.show();
+                fillClipPanel(panel, clip);
+            }
+
             clipsTimeline.draw(0);
         }
 
@@ -205,6 +262,9 @@
             bottomTabs.add( "Curves", curvesPanel, {onSelect: () => {
                 activeTimeline = curvesTimeline; 
                 curvesTimeline.show(); 
+                panel.clear();
+                mode = types.CLIPS;
+
             }});
 
             let curvesTimeline = new LX.CurvesTimeline("curves-timeline", { range: [-1,1]});
