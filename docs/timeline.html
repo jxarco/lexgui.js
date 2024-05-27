@@ -14,6 +14,25 @@
 
         MAKE_HEADER( "Timeline", "h1", "timeline" );
         
+        MAKE_PARAGRAPH( `The Timeline has to be appended to an existing panel.` );
+
+        MAKE_CODE( `<span class="kwd">let</span> kfTimeline = <span class="kwd">new</span> LX.<span class="typ">KeyframesTimeline</span>(<span class="str">"Timeline name"</span> );
+<span>panel.attach(kfTimeline.root);</span>` );
+
+        MAKE_PARAGRAPH( `The possible ${INLINE_CODE("options (Object)")} when creating dialogs are the following:` );
+            MAKE_BULLET_LIST( [
+                ["opacity (Float)", " value representing the opacity of the timeline canvas"],
+                ["size (Array)", "[width, height]. 400 and 100 by default."],
+                ["trackHeight (Float)", " 25 by default."],
+                ["loop (Boolean)", "Set looping mode animation by default"],
+                ["skipVisibility (Boolean)", "When it's true, the un/active track button is disabled"],
+                ["skipLock (Boolean)", "When it's true, the un/lock track button is disabled"],
+                ["disableNewTracks (Boolean)", "When it's true, add new tracks option is disabled"],
+                ["onBeforeCreateTopBar (function)", "Callback to add widgets on the top bar before the default ones"],
+                ["onAfterCreateTopBar (function)", "Callback to add widgets on the top bar after the default ones"],
+                ["onChangePlayMode (function)", "Callback executed when the play/pause mode is changed"],
+            ] );
+            
         MAKE_HEADER( "Keyframes timeline", "h2", "keyframes-timeline" );
         MAKE_PARAGRAPH( `..TODO` );
 

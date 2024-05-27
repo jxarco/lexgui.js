@@ -70,7 +70,7 @@ class Timeline {
 
         this.duration = 1;
         this.speed = 1;
-        this.position = [options.x ?? 0, options.y ?? 0];
+        this.position = [0, 0];
         this.size = [ options.width ?? 400, options.height ?? 100];
         
         this.currentScroll = 0; //in percentage
@@ -407,6 +407,8 @@ class Timeline {
         
         //this.updateHeader();
         this.updateLeftPanel();
+        
+        return this.animationClip;
     }
 
     drawTimeInfo (w, h = this.topMargin) {
