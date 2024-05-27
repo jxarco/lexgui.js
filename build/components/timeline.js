@@ -2851,7 +2851,7 @@ class ClipsTimeline extends Timeline {
                     let trackIdx = this.lastClipsSelected[i][0];
                     let clipIdx = this.lastClipsSelected[i][1];
                     var clip = this.timelineClickedClips[i] ;
-                    var diff = clip.start + delta < 0 ? - clip.start : delta;//this.currentTime - this.timelineClickedClipsTime[i];//delta;
+                    let diff = clip.start + delta < 0 ? - clip.start : delta;//this.currentTime - this.timelineClickedClipsTime[i];//delta;
                     
                     if( this.dragClipMode == "move" ) {
                         let clipsInRange = this.getClipsInRange(this.animationClip.tracks[trackIdx], clip.start+diff, clip.start + clip.duration + diff, 0.01)
@@ -2881,31 +2881,39 @@ class ClipsTimeline extends Timeline {
                                 }     
                             // }
                         }
-                        if(this.onContentMoved) {
-                            this.onContentMoved(clip, diff);
-                        }
+                        // if(this.onContentMoved) {
+                        //     this.onContentMoved(clip, diff);
+                        // }
                     }
-                    else if( this.dragClipMode == "fadein" )
+                    else if( this.dragClipMode == "fadein" ) {
                         clip.fadein = Math.min(Math.max((clip.fadein || 0) + delta, clip.start), clip.start+clip.duration);
-                    else if( this.dragClipMode == "fadeout" )
+                        diff = 0;
+                    }
+                    else if( this.dragClipMode == "fadeout" ) {
                         clip.fadeout = Math.max(Math.min((clip.fadeout || clip.start+clip.duration) + delta, clip.start+clip.duration), clip.start);
+                        diff = 0;
+                    }
                     else if( this.dragClipMode == "duration" ) {
                         clip.duration += delta;
                         // if(delta < 0) {
                         //     clip.fadein = Math.min(Math.max((clip.fadein || 0) + delta, clip.start), clip.start+clip.duration);
                         // }
                         clip.fadeout = Math.max(Math.min((clip.fadeout || clip.start+clip.duration) + delta, clip.start+clip.duration), clip.start);
-
-                        if(this.onContentMoved) {
-                            this.onContentMoved(clip, 0);
-                        }
+                        diff = 0;
+                        // if(this.onContentMoved) {
+                        //     this.onContentMoved(clip, 0);
+                        // }
                     }
 
                     if(this.duration < clip.start + clip.duration  )
                     {
                         this.setDuration(clip.start + clip.duration);
                     }
+                    if(this.onContentMoved) {
+                        this.onContentMoved(clip, diff);
+                    }
                 }
+                
                 return true;
             }
             else{
