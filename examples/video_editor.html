@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>LexGUI Video Editor Demo</title>
+    <link rel="stylesheet" href="../build/lexgui.css">
+    <link rel="icon" href="../images/icon.png">
+    <script type="importmap">
+        {
+          "imports": {
+            "lexgui": "../build/lexgui.module.js",
+            "lexgui/components/": "../build/components/"
+          }
+        }
+    </script>
+</head>
+<body></body>
+    <script type="module">
+
+        import { LX } from 'lexgui';
+        import { VideoEditor } from 'lexgui/components/videoeditor.js';
+        // init library and get main area
+        let area = LX.init();
+            
+        // split main area
+        let [leftArea, rightArea] = area.split({sizes:["75%","25%"], minimizable: false});
+    
+        let videoEditor = new LX.VideoEditor(leftArea, { src: "../data/video.mp4"})
+
+        let panel = new LX.Panel();
+        panel = rightArea.addPanel(panel);        
+  
+    </script>
+</html>
