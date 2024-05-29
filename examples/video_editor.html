@@ -23,12 +23,12 @@
         let area = LX.init();
             
         // split main area
-        let [leftArea, rightArea] = area.split({sizes:["75%","25%"], minimizable: false});
-    
+        let [leftArea, rightArea] = area.split({sizes:["75%","25%"], minimizable: true});
         let videoEditor = new LX.VideoEditor(leftArea, { src: "../data/video.mp4"})
-
+        
         let panel = new LX.Panel();
         panel = rightArea.addPanel(panel);        
+        area.extend();
   
     </script>
 </html>

@@ -3657,23 +3657,40 @@ pre .line-gutter {
   height: 100%;
 }
 
-.lexvideoeditor .lexcontrolspanel {
+.lexvideoeditor .lexarea {
+  background-color: var(--global-branch-darker)!important;
+}
+
+.lexvideoeditor .lexconstrolsarea {
   background-color: var(--global-branch-darker);
   padding: 5px;
   margin: 10px;
   width: calc(100% - 30px)!important;
-  height: 30px!important;
+  height: 40px!important;
   border-radius: 8px;
   display: flex;
+  align-content: center;
 }
 
-.lexvideoeditor .lexvideotimebar {
+.lexvideoeditor .lexcontrolspanel {
+  background-color: var(--global-branch-darker);
+  margin: 0;
+  display: flex;
+  align-content: center;
+}
+
+.lexvideoeditor .lextimebar {
+  width: 100%;
+  height: inherit;
+}
+/* .lexvideoeditor .lexvideotimebar {
   width: calc(100% - 40px);
   height: 100%;
-}
+  background-color: var(--global-branch-darker);
+} */
 
-.lexvideoeditor .lexvideotimebar canvas {
-  width: calc(100% - 10px);
-  height: calc(100% - 10px);
-  padding: 5px;
-}
+/* .lexvideoeditor .lexvideotimebar canvas {
+  width: calc(100%);
+  height: calc(100% );
+  padding: 5px; 
+}  */
