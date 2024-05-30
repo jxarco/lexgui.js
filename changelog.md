@@ -2,6 +2,12 @@
 
 ## 0.1.32
 
+Timeline:
+- Allow addition of widgets in top bar.
+- General improvements.
+- Docs started.
+
+New VideoEditor component (still wip).
 Added skipCallback for `Widget.set()`. 
 Minor bug fixes.
 
