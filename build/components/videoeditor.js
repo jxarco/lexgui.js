@@ -154,37 +154,15 @@ class TimeBar {
         ctx.fillStyle = ctx.strokeStyle = options.fillColor || '#111' // "#FFF";
         
         // Current time text
-       
         y -= this.offset + 4;
         ctx.globalAlpha = 1;
-        // ctx.beginPath();
-        // ctx.moveTo(x, y);
-        // ctx.lineTo(x, y + h);
-        // ctx.stroke();
-
+       
         ctx.fillStyle = options.fillColor || '#e5e5e5';
         ctx.beginPath();
         ctx.roundRect(x - w * 0.5, y + this.offset, w, w, 5);
-        // ctx.moveTo(x - w, y - 1);
-        // ctx.lineTo(x + w, y - 1);
-        // ctx.lineTo(x, y + 10);
+       
         ctx.fill();
-        ctx.shadowBlur = 0;
-        // ctx.fillStyle = '#e5e5e5';
-        // ctx.beginPath();
-        // ctx.moveTo(x - 6, y);
-        // ctx.lineTo(x + 6, y);
-        // ctx.lineTo(x, y + 8);
-        // ctx.fill();
-
-        // let xPos = Math.max( Math.min( x - 17, this.width - 42), 5 );
-        // ctx.fillStyle = "rgba(200, 200, 200, 0.2)";
-        // ctx.lineWitdh = 0;
-        // ctx.roundRect(xPos - 5, y - 25, 47, 15);
-        // ctx.fill();
-        // ctx.fillStyle = "#e5e5e5";
-        // ctx.font = "bold 16px Calibri";
-        // ctx.fillText(String(time.toFixed(3)), xPos, y - 12);
+        ctx.shadowBlur = 0;        
     }
 
     onMouseDown (e) {
@@ -216,9 +194,7 @@ class TimeBar {
             canvas.style.cursor = "grabbing";
         } 
         else {
-            this.currentX = x;
-            // if(this.onSetTime)
-            //     this.onSetTime(t);
+            this.currentX = x;          
         }
 
         this.draw();
@@ -313,6 +289,22 @@ class TimeBar {
         this.currentX = x;
         this.draw();
     }
+
+    resize (size) {
+        this.canvas.width = size[0];
+        this.canvas.height = size[1];
+
+        const startRatio = this.startX / this.width;
+        const currentRatio = this.currentX / this.width;
+        const endRatio = this.endX / this.width;
+        this.width = this.canvas.width - this.offset * 2;
+        
+        this.startX = this.width * startRatio; 
+        this.currentX = this.width * currentRatio; 
+        this.endX = this.width * endRatio; 
+        
+        this.draw();
+    }
 }
 
 /**
@@ -337,6 +329,14 @@ class VideoEditor {
         this.loadVideo(options);
         videoArea.attach(video);
 
+        // Create playing timeline area and attach panels
+        let [leftArea, controlsRight] = controlsArea.split({ type: 'horizontal', sizes:["92%", null], minimizable: false, resize: false });
+        let [controlsLeft, timeBarArea] = leftArea.split({ type: 'horizontal', sizes:["10%", null], minimizable: false, resize: false });
+
+        const style = getComputedStyle(controlsArea.root);
+        let padding = Number(style.getPropertyValue('padding').replace("px",""));
+        this.timebar = new TimeBar(timeBarArea, TimeBar.TIMEBAR_TRIM, {offset: padding});   
+
         // Create controls panel (play/pause button and start time)
         this.controlsPanelLeft = new LX.Panel({className: 'lexcontrolspanel'});        
         this.controlsPanelLeft.refresh = () => {
@@ -355,33 +355,42 @@ class VideoEditor {
             
             this.controlsPanelLeft.addLabel(this.startTime, {width: 50});
             this.controlsPanelLeft.endLine();
+            
+            let availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;    
+            this.timebar.resize([availableWidth, timeBarArea.root.clientHeight]);
         }
 
         this.controlsPanelLeft.refresh();
+        controlsLeft.root.style.minWidth = 'fit-content';
+        controlsLeft.attach(this.controlsPanelLeft);
 
         // Create right controls panel (ens time)
         this.controlsPanelRight = new LX.Panel({className: 'lexcontrolspanel'});        
         this.controlsPanelRight.refresh = () => {
-            this.controlsPanelRight.clear();
-            
+            this.controlsPanelRight.clear();            
             this.controlsPanelRight.addLabel(this.endTime, {width: 50});
         }
         this.controlsPanelRight.refresh();
-
-        // Create playing timeline area and attach panels
-        let [leftArea, controlsRight] = controlsArea.split({ type: 'horizontal', sizes:["92%", null], minimizable: false, resize: false });
-        let [controlsLeft, timeBarArea] = leftArea.split({ type: 'horizontal', sizes:["10%", null], minimizable: false, resize: false });
-        
-        controlsLeft.attach(this.controlsPanelLeft);
-        controlsRight.attach(this.controlsPanelRight);
-
-        const style = getComputedStyle(controlsArea.root);
-        let padding = Number(style.getPropertyValue('padding').replace("px",""));
-        this.timebar = new TimeBar(timeBarArea, TimeBar.TIMEBAR_TRIM, {offset: padding});   
+        controlsRight.root.style.minWidth = 'fit-content';
+        controlsRight.attach(this.controlsPanelRight);            
        
         this.timebar.onChangeCurrent = this.setCurrentValue.bind(this); 
         this.timebar.onChangeStart = this.setStartValue.bind(this); 
         this.timebar.onChangeEnd = this.setEndValue.bind(this); 
+
+        window.addEventListener('resize', (v) => {
+            let availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;            
+            this.timebar.resize([availableWidth, timeBarArea.root.clientHeight]);
+        })
+
+        timeBarArea.onresize = (v) => {
+            let availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;
+            this.timebar.resize([availableWidth, v.height]);
+        }
+    }
+
+    resize() {
+
     }
 
     async loadVideo( ) {

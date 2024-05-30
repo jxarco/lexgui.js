@@ -3661,6 +3661,10 @@ pre .line-gutter {
   background-color: var(--global-branch-darker)!important;
 }
 
+.lexvideoeditor .lexarea.split {
+
+}
+
 .lexvideoeditor .lexconstrolsarea {
   background-color: var(--global-branch-darker);
   padding: 5px;
@@ -3683,6 +3687,7 @@ pre .line-gutter {
   width: 100%;
   height: inherit;
 }
+
 /* .lexvideoeditor .lexvideotimebar {
   width: calc(100% - 40px);
   height: 100%;
