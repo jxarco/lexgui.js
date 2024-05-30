@@ -340,11 +340,18 @@ class VideoEditor {
         controlsArea.root.classList.add('lexconstrolsarea');
         
         // Create video element and load it
-        let video = this.video = document.createElement( 'video' );
-        this.video.src = options.src ?? '';
+        let video = this.video = options.video ?? document.createElement( 'video' );
+        if(options.src) {
+            this.video.src = options.src;
+        }
         this.video.loop = true;
         this._loadVideo(options);
-        videoArea.attach(video);
+        if(options.videoArea) {
+            videoArea.attach(options.videoArea);
+        }
+        else {
+            videoArea.attach(video);
+        }
 
         // Create playing timeline area and attach panels
         let [topArea, bottomArea] = controlsArea.split({ type: 'vertical', sizes:["50%", null], minimizable: false, resize: false });
