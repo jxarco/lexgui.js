@@ -394,17 +394,17 @@ class Timeline {
      */
 
     setAnimationClip( animation, needsToProcess = true ) {
-        this.animationClip = animation;
-        this.duration = animation.duration;
-        this.speed = animation.speed || this.speed;
+        if(!animation || !animation.tracks || needsToProcess) { 
+            this.processTracks(animation); // generate default animationclip or process the user's one
+        }
+        else{
+            this.animationClip = animation;
+        }
+       
+        this.duration = this.animationClip.duration;
+        this.speed = this.animationClip.speed ?? this.speed;
         var w = Math.max(300, this.canvas.width);
         this.secondsToPixels = ( w - this.session.left_margin ) / this.duration;
-        // if(this.secondsToPixels < 1)
-        //     this.secondsToPixels = 100;
-        // this.session.start_time = -50 / this.secondsToPixels;
-
-        if(needsToProcess && this.animationClip && this.animationClip.tracks.length)
-            this.processTracks(animation);
         
         //this.updateHeader();
         this.updateLeftPanel();
@@ -1748,43 +1748,44 @@ class KeyFramesTimeline extends Timeline {
         this.tracksPerItem = {};
         this.tracksDictionary = {};
         this.animationClip = {
-            name: animation.name,
-            duration: animation.duration,
-            speed: animation.speed ?? this.speed,
+            name: (animation && animation.name) ? animation.name : "animationClip",
+            duration: animation ? animation.duration : 0,
+            speed: (animation && animation.speed ) ? animation.speed : this.speed,
             tracks: []
         };
-
-        for( let i = 0; i < animation.tracks.length; ++i ) {
-
-            let track = animation.tracks[i];
-
-            const [name, type] = this.getTrackName(track.name);
-
-            let trackInfo = {
-                fullname: track.name,
-                name: name, type: type,
-                dim: track.values.length/track.times.length,
-                selected: [], edited: [], hovered: [], active: true,
-                times: track.times,
-                values: track.values
-            };
-            
-            if(!this.tracksPerItem[name]) {
-                this.tracksPerItem[name] = [trackInfo];
-            }else {
-                this.tracksPerItem[name].push( trackInfo );
+        if (animation && animation.tracks) {
+            for( let i = 0; i < animation.tracks.length; ++i ) {
+                
+                let track = animation.tracks[i];
+                
+                const [name, type] = this.getTrackName(track.name);
+                
+                let trackInfo = {
+                    fullname: track.name,
+                    name: name, type: type,
+                    dim: track.values.length/track.times.length,
+                    selected: [], edited: [], hovered: [], active: true,
+                    times: track.times,
+                    values: track.values
+                };
+                
+                if(!this.tracksPerItem[name]) {
+                    this.tracksPerItem[name] = [trackInfo];
+                }else {
+                    this.tracksPerItem[name].push( trackInfo );
+                }
+                
+                
+                const trackIndex = this.tracksPerItem[name].length - 1;
+                this.tracksPerItem[name][trackIndex].idx = trackIndex;
+                this.tracksPerItem[name][trackIndex].clipIdx = i;
+                
+                // Save index also in original track
+                track.idx = trackIndex;
+                this.tracksDictionary[track.name] = name;
+                
+                this.animationClip.tracks.push(trackInfo);
             }
-            
-
-            const trackIndex = this.tracksPerItem[name].length - 1;
-            this.tracksPerItem[name][trackIndex].idx = trackIndex;
-            this.tracksPerItem[name][trackIndex].clipIdx = i;
-
-            // Save index also in original track
-            track.idx = trackIndex;
-            this.tracksDictionary[track.name] = name;
-
-            this.animationClip.tracks.push(trackInfo);
         }
         this.resize();
     }
@@ -3061,30 +3062,35 @@ class ClipsTimeline extends Timeline {
         this.tracksPerItem = {};
         this.tracksDictionary = {};
         this.animationClip = {
-            name: animation.name,
-            duration: animation.duration,
-            speed: animation.speed ?? this.speed,
+            name: (animation && animation.name) ? animation.name : "animationClip",
+            duration: animation ? animation.duration : 0,
+            speed: (animation && animation.speed ) ? animation.speed : this.speed,
             tracks: []
         };
 
-        for( let i = 0; i < animation.tracks.length; ++i ) {
-
-            let track = animation.tracks[i];
-
-            const name = track.name;
-            const type = track.type;
-
-            let trackInfo = {
-                fullname: track.name,
-                clips: track.clips,
-                name: name, type: type,
-                selected: [], edited: [], hovered: [], active: true,
-                times: track.times,
-            };
-            
-            this.tracksDictionary[track.name] = name;
-
-            this.animationClip.tracks.push(trackInfo);
+        if (animation && animation.tracks){
+            for( let i = 0; i < animation.tracks.length; ++i ) {
+    
+                let track = animation.tracks[i];
+    
+                const name = track.name;
+                const type = track.type;
+    
+                let trackInfo = {
+                    fullname: track.name,
+                    clips: track.clips,
+                    name: name, type: type,
+                    selected: [], edited: [], hovered: [], active: true,
+                    times: track.times,
+                };
+                
+                this.tracksDictionary[track.name] = name;
+    
+                this.animationClip.tracks.push(trackInfo);
+            }
+        }
+        else {
+            this.addNewTrack();
         }
     }
 
@@ -3169,8 +3175,9 @@ class ClipsTimeline extends Timeline {
 
         // Time slot with other clip?
         let clipInCurrentSlot = null;
-        if(!this.animationClip) 
+        if(!this.animationClip || !this.animationClip.tracks || !this.animationClip.tracks.length) {
             this.addNewTrack();
+        }
 
         for(let i = 0; i < this.animationClip.tracks.length; i++) {
             clipInCurrentSlot = this.animationClip.tracks[i].clips.find( t => { 
@@ -3326,7 +3333,7 @@ class ClipsTimeline extends Timeline {
     */
     addClips( clips, offsetTime = 0, callback = null ) {
        
-        if(!this.animationClip) 
+        if(!this.animationClip || !this.animationClip.tracks || !this.animationClip.tracks.length) 
             this.addNewTrack();
 
         //Search track where to place each new clip
@@ -3355,7 +3362,7 @@ class ClipsTimeline extends Timeline {
                         if(!this.animationClip.tracks[i+1]) {
                             this.addNewTrack();
        
-                            trackIdxs[c] = {trackIdx: i+1, stat: newStart, end: newStart + clip.duration};
+                            trackIdxs[c] = {trackIdx: i+1, start: newStart, end: newStart + clip.duration};
                         }
                         else {
 
@@ -3606,7 +3613,7 @@ class ClipsTimeline extends Timeline {
     addNewTrack() {
 
         if(!this.animationClip)
-            this.animationClip = {tracks:[]};
+            this.animationClip = {duration:0, tracks:[]};
 
         let trackInfo = {
             idx: this.animationClip.tracks.length,
@@ -4272,43 +4279,47 @@ class CurvesTimeline extends Timeline {
         this.tracksPerItem = {};
         this.tracksDictionary = {};
         this.animationClip = {
-            name: animation.name,
-            duration: animation.duration,
-            speed: animation.speed ?? this.speed,
+            name: (animation && animation.name) ? animation.name : "animationClip",
+            duration: animation ? animation.duration : 0,
+            speed: (animation && animation.speed ) ? animation.speed : this.speed,
             tracks: []
         };
-        for( let i = 0; i < animation.tracks.length; ++i ) {
 
-            let track = animation.tracks[i];
+        if (animation && animation.tracks) {
 
-            const [name, type] = this.getTrackName(track.name);
-
-            let trackInfo = {
-                fullname: track.name,
-                name: name, type: type,
-                dim: track.values.length/track.times.length,
-                selected: [], edited: [], hovered: [], active: true,
-                values: track.values,
-                times: track.times
+            for( let i = 0; i < animation.tracks.length; ++i ) {
                 
-            };
-            
-            if(!this.tracksPerItem[name]) {
-                this.tracksPerItem[name] = [trackInfo];
-            }else {
-                this.tracksPerItem[name].push( trackInfo );
+                let track = animation.tracks[i];
+                
+                const [name, type] = this.getTrackName(track.name);
+                
+                let trackInfo = {
+                    fullname: track.name,
+                    name: name, type: type,
+                    dim: track.values.length/track.times.length,
+                    selected: [], edited: [], hovered: [], active: true,
+                    values: track.values,
+                    times: track.times
+                    
+                };
+                
+                if(!this.tracksPerItem[name]) {
+                    this.tracksPerItem[name] = [trackInfo];
+                }else {
+                    this.tracksPerItem[name].push( trackInfo );
+                }
+                
+                
+                const trackIndex = this.tracksPerItem[name].length - 1;
+                this.tracksPerItem[name][trackIndex].idx = trackIndex;
+                this.tracksPerItem[name][trackIndex].clipIdx = i;
+                
+                // Save index also in original track
+                trackInfo.idx = trackIndex;
+                this.tracksDictionary[track.name] = name;
+                this.animationClip.tracks.push(trackInfo);
+                
             }
-            
-
-            const trackIndex = this.tracksPerItem[name].length - 1;
-            this.tracksPerItem[name][trackIndex].idx = trackIndex;
-            this.tracksPerItem[name][trackIndex].clipIdx = i;
-
-            // Save index also in original track
-            trackInfo.idx = trackIndex;
-            this.tracksDictionary[track.name] = name;
-            this.animationClip.tracks.push(trackInfo);
-
         }
     }
 
