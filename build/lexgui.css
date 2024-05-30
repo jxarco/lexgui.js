@@ -3658,22 +3658,26 @@ pre .line-gutter {
 }
 
 .lexvideoeditor .lexarea {
-  background-color: var(--global-branch-darker)!important;
+  /* background-color: var(--global-branch-darker)!important; */
 }
 
-.lexvideoeditor .lexarea.split {
-
+.lexvideoeditor .lexarea .lexflexarea {
+  display: flex;
+  justify-content: center;
+  padding: 4px 0px;
 }
 
 .lexvideoeditor .lexconstrolsarea {
-  background-color: var(--global-branch-darker);
-  padding: 5px;
-  margin: 10px;
-  width: calc(100% - 30px)!important;
-  height: 40px!important;
+  /* background-color: var(--global-branch-darker); */
+  /* padding: 5px;
+  margin: 10px; */
+  /* width: calc(100% - 30px)!important; */
+  min-height: 88px!important;
   border-radius: 8px;
   display: flex;
   align-content: center;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .lexvideoeditor .lexcontrolspanel {
@@ -3681,6 +3685,12 @@ pre .line-gutter {
   margin: 0;
   display: flex;
   align-content: center;
+  width: 100%!important;
+}
+
+.lexvideoeditor .lexcontrolspanel.lextime {
+  width: auto!important;
+  border-radius: 5px;
 }
 
 .lexvideoeditor .lextimebar {
@@ -3688,6 +3698,21 @@ pre .line-gutter {
   height: inherit;
 }
 
+.lexvideoeditor .lexwidget.nobranch {
+  padding: 0;
+  width: 100%!important;
+}
+.lexvideoeditor .lextext {
+  padding-left: 0;
+  padding: 6px;
+}
+
+.lexvideoeditor .lexbar {
+  height: 40px!important;
+  margin: 5px 10px;
+  padding: 5px;
+  width: calc(100% - 40px)!important;
+}
 /* .lexvideoeditor .lexvideotimebar {
   width: calc(100% - 40px);
   height: 100%;

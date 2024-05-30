@@ -23,10 +23,6 @@ class TimeBar {
 
         this.type = type;
         
-        // this.root = document.createElement( 'div' );
-        // this.root.className = "lexvideotimebar";
-        // area.attach(this.root);
-        
         // Create canvas
         this.canvas = document.createElement( 'canvas' );
         this.canvas.width = area.size[0];
@@ -45,54 +41,43 @@ class TimeBar {
         this.position = new LX.vec2( this.offset, this.canvas.height * 0.5 - this.height * 0.5);
         this.startX = this.position.x;
         this.endX = this.width;
-        this.currentX = this.startX + 5;
+        this.currentX = this.startX;
 
         const y = this.offset * 2;
         const w = this.markerWidth;
         const h = this.canvas.height - y * 2;
         this.trimRec = [this.startX, y, w, h];
 
-        this.draw();
+        this._draw();
 
         this.lastPosition = new LX.vec2( 0, 0 );
-
-        // Add canvas event listeneres
-        area.root.addEventListener( "mousedown", this.onMouseDown.bind(this) );
-        area.root.addEventListener( "mouseup", this.onMouseUp.bind(this) );
-        area.root.addEventListener( "mousemove", this.onMouseMove.bind(this) );
-
-        //return this.root;        
     }
 
-    draw() {
+    _draw() {
         const ctx = this.ctx;
     
         ctx.save();
-        // ctx.fillStyle ="red"// LX.getThemeColor("global-color-primary");
         ctx.fillStyle = TimeBar.BACKGROUND_COLOR;
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
         // // Draw background timeline
-        //ctx.globalAlpha = 0.8;
         ctx.fillStyle = TimeBar.COLOR;
         ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
 
         // Draw background trimed timeline
-        //ctx.globalAlpha = 1;
         ctx.fillStyle = TimeBar.ACTIVE_COLOR;
         ctx.fillRect(this.startX, this.position.y, this.endX - this.offset - this.startX, this.height);
         
-        // ctx.strokeStyle = ctx.fillStyle;
         ctx.restore();
 
         // Min-Max time markers
-        this.addTrim('start', this.startX, { color: null, fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9'});
-        this.addTrim('end', this.endX, { color: null, fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9'});
-        this.addMarker('current', this.currentX, { color: '#e5e5e5', fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9', width: this.markerWidth });
+        this._addTrim('start', this.startX, { color: null, fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9'});
+        this._addTrim('end', this.endX, { color: null, fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9'});
+        this._addMarker('current', this.currentX, { color: '#e5e5e5', fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9', width: this.markerWidth });
     }
 
-    addTrim(name, x, options) {
+    _addTrim(name, x, options) {
 
         options = options || {};
                        
@@ -107,7 +92,6 @@ class TimeBar {
             ctx.shadowBlur = 2;       
         }
         ctx.globalAlpha = 1;
-        //ctx.strokeStyle = markerColor;
         ctx.fillStyle = ctx.strokeStyle = options.fillColor || '#111' // "#FFF";
         
         ctx.beginPath();
@@ -125,7 +109,7 @@ class TimeBar {
 
     }
 
-    addMarker(name, x, options) {
+    _addMarker(name, x, options) {
 
         options = options || {};
                        
@@ -146,6 +130,8 @@ class TimeBar {
             ctx.shadowBlur = 2;       
         }
         
+        // Current time line
+        ctx.fillStyle = ctx.strokeStyle = "white"; 
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.lineTo(x, y + h * 0.5);
@@ -153,10 +139,9 @@ class TimeBar {
         ctx.closePath();
         ctx.fillStyle = ctx.strokeStyle = options.fillColor || '#111' // "#FFF";
         
-        // Current time text
+        
         y -= this.offset + 4;
-        ctx.globalAlpha = 1;
-       
+        // Current time ball grab
         ctx.fillStyle = options.fillColor || '#e5e5e5';
         ctx.beginPath();
         ctx.roundRect(x - w * 0.5, y + this.offset, w, w, 5);
@@ -169,7 +154,7 @@ class TimeBar {
 
         e.preventDefault();
         
-        if(!this.canvas) {
+        if(!this.canvas || e.target != this.canvas) {
             return;
         }
         const canvas = this.canvas;
@@ -185,7 +170,7 @@ class TimeBar {
             this.dragging = 'start';
             canvas.style.cursor = "grabbing";
         } 
-        else if(Math.abs(this.endX - x) < threshold) {
+        else if(Math.abs(this.endX - x) < threshold && this.trimRec[1] < y &&  y < this.trimRec[3] + this.trimRec[1] ) {
             this.dragging = 'end';
             canvas.style.cursor = "grabbing";
         } 
@@ -194,10 +179,23 @@ class TimeBar {
             canvas.style.cursor = "grabbing";
         } 
         else {
-            this.currentX = x;          
+            if(x < this.startX) {
+                this.currentX = this.startX;        
+            }
+            else if(x > this.endX) {
+                this.currentX = this.endX;
+            }
+            else {
+                this.currentX = x;
+            }
         }
 
-        this.draw();
+        this._draw();
+    }
+
+    update (x) {
+        this.currentX = Math.min(Math.max(this.startX, x), this.endX);  
+        this._draw();
     }
 
     onMouseUp (e) {
@@ -219,39 +217,59 @@ class TimeBar {
         e.preventDefault();
 
         // Process mouse
-        const x = e.offsetX;
-        const y = e.offsetY;
+        const x = e.target == this.canvas ? e.offsetX : e.offsetX - this.canvas.offsetLeft ;
+        const y = e.target == this.canvas ? e.offsetY : e.offsetY - this.canvas.offsetTop ;
         const threshold = 5;
 
         if(this.dragging) {
             switch(this.dragging) {
                 case 'start':
-                    {
-                        this.startX = x; 
-                        this.currentX = x;
+                        if(x < this.position.x) {
+                            this.currentX = this.startX = this.position.x;        
+                        }
+                        else if(x > this.endX) {
+                            this.currentX = this.startX = this.endX;        
+                        }
+                        else {
+                            this.currentX = this.startX = x; 
+                        }
+
                         if(this.onChangeStart) {
                             this.onChangeStart(this.startX);
                         }
                         if(this.onChangeCurrent) {
                             this.onChangeCurrent(this.currentX);
                         }
-                        
-                    }
                     break;
                 case 'end':
-                    {
-                        this.endX = x; 
-                        this.currentX = x;
+                        if(x > this.width || x <= 0) {
+                            this.currentX = this.endX = this.width;        
+                        }
+                        else if(x < this.startX) {
+                            this.currentX = this.endX = this.startX;        
+                        }
+                        else {
+                            this.currentX = this.endX = x; 
+                        }
+            
                         if(this.onChangeEnd) {
                             this.onChangeEnd(this.endX);
                         }
                         if(this.onChangeCurrent) {
                             this.onChangeCurrent(this.currentX);
                         }
-                    }
                     break;
                 case 'current':
-                    this.currentX = x; 
+                    
+                    if(x < this.startX) {
+                        this.currentX = this.startX;        
+                    }
+                    else if(x > this.endX) {
+                        this.currentX = this.endX;
+                    }
+                    else {
+                        this.currentX = x;
+                    }
                     if(this.onChangeCurrent) {
                         this.onChangeCurrent(this.currentX);
                     }
@@ -282,12 +300,7 @@ class TimeBar {
                 canvas.style.cursor = "default";
             }
         }
-        this.draw();
-    }
-
-    setCurrentValue( x ) {
-        this.currentX = x;
-        this.draw();
+        this._draw();
     }
 
     resize (size) {
@@ -299,11 +312,11 @@ class TimeBar {
         const endRatio = this.endX / this.width;
         this.width = this.canvas.width - this.offset * 2;
         
-        this.startX = this.width * startRatio; 
-        this.currentX = this.width * currentRatio; 
-        this.endX = this.width * endRatio; 
+        this.startX = Math.max(this.width * startRatio, this.offset); 
+        this.currentX = Math.min(Math.max(this.width * currentRatio, this.offset), this.width); 
+        this.endX = Math.min(this.width * endRatio, this.width); 
         
-        this.draw();
+        this._draw();
     }
 }
 
@@ -315,25 +328,42 @@ class VideoEditor {
 
     constructor( area, options = {} ) {
 
-        this.startTime = 0;
         this.playing = false;
+        this.requestId = null;
 
-        this.area = area;
+        this.currentTime = this.startTime = 0;
+        this.startTimeString = "0:0";
+        this.endTimeString = "0:0";
+
         area.root.classList.add("lexvideoeditor");
-        let [videoArea, controlsArea] = area.split({ type: 'vertical', sizes:["90%", null], minimizable: false, resize: false });
+        let [videoArea, controlsArea] = area.split({ type: 'vertical', sizes:["80%", null], minimizable: false, resize: false });
         controlsArea.root.classList.add('lexconstrolsarea');
         
         // Create video element and load it
         let video = this.video = document.createElement( 'video' );
         this.video.src = options.src ?? '';
-        this.loadVideo(options);
+        this.video.loop = true;
+        this._loadVideo(options);
         videoArea.attach(video);
 
         // Create playing timeline area and attach panels
-        let [leftArea, controlsRight] = controlsArea.split({ type: 'horizontal', sizes:["92%", null], minimizable: false, resize: false });
+        let [topArea, bottomArea] = controlsArea.split({ type: 'vertical', sizes:["50%", null], minimizable: false, resize: false });
+        bottomArea.setSize([bottomArea.size[0], 40]);
+        let [leftArea, controlsRight] = bottomArea.split({ type: 'horizontal', sizes:["92%", null], minimizable: false, resize: false });
         let [controlsLeft, timeBarArea] = leftArea.split({ type: 'horizontal', sizes:["10%", null], minimizable: false, resize: false });
 
-        const style = getComputedStyle(controlsArea.root);
+        topArea.root.classList.add('lexbar');
+        bottomArea.root.classList.add('lexbar');
+        this.controlsCurrentPanel = new LX.Panel({className: 'lexcontrolspanel lextime'});  
+        this.controlsCurrentPanel.refresh = () => {
+            this.controlsCurrentPanel.clear();
+            this.controlsCurrentPanel.addLabel(this.currentTimeString, {float: "center"});
+        }
+        topArea.root.classList.add('lexflexarea')
+        topArea.attach(this.controlsCurrentPanel);
+        this.controlsCurrentPanel.refresh();
+
+        const style = getComputedStyle(bottomArea.root);
         let padding = Number(style.getPropertyValue('padding').replace("px",""));
         this.timebar = new TimeBar(timeBarArea, TimeBar.TIMEBAR_TRIM, {offset: padding});   
 
@@ -345,15 +375,23 @@ class VideoEditor {
             this.controlsPanelLeft.addButton('', '<i class="fa-solid ' + (this.playing ? 'fa-pause' : 'fa-play') + '"></>', (v) => {
                 this.playing = !this.playing;
                 if(this.playing) {
+                    
                     this.video.play();
+                    if(!this.requestId) {
+                        this.requestId = requestAnimationFrame(this._update.bind(this))
+                    }
                 }
                 else {
+                    if(this.requestId) {
+                        cancelAnimationFrame(this.requestId);
+                        this.requestId = null;
+                    }
                     this.video.pause();
                 }
                 this.controlsPanelLeft.refresh();
             }, { width: '40px'});
             
-            this.controlsPanelLeft.addLabel(this.startTime, {width: 50});
+            this.controlsPanelLeft.addLabel(this.startTimeString, {width: 50});
             this.controlsPanelLeft.endLine();
             
             let availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;    
@@ -368,15 +406,15 @@ class VideoEditor {
         this.controlsPanelRight = new LX.Panel({className: 'lexcontrolspanel'});        
         this.controlsPanelRight.refresh = () => {
             this.controlsPanelRight.clear();            
-            this.controlsPanelRight.addLabel(this.endTime, {width: 50});
+            this.controlsPanelRight.addLabel(this.endTimeString, {width: 50});
         }
         this.controlsPanelRight.refresh();
         controlsRight.root.style.minWidth = 'fit-content';
         controlsRight.attach(this.controlsPanelRight);            
        
-        this.timebar.onChangeCurrent = this.setCurrentValue.bind(this); 
-        this.timebar.onChangeStart = this.setStartValue.bind(this); 
-        this.timebar.onChangeEnd = this.setEndValue.bind(this); 
+        this.timebar.onChangeCurrent = this._setCurrentValue.bind(this); 
+        this.timebar.onChangeStart = this._setStartValue.bind(this); 
+        this.timebar.onChangeEnd = this._setEndValue.bind(this); 
 
         window.addEventListener('resize', (v) => {
             let availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;            
@@ -387,63 +425,112 @@ class VideoEditor {
             let availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;
             this.timebar.resize([availableWidth, v.height]);
         }
+
+        // Add canvas event listeneres
+        area.root.addEventListener( "mousedown", this.timebar.onMouseDown.bind(this.timebar) );
+        area.root.addEventListener( "mouseup", this.timebar.onMouseUp.bind(this.timebar) );
+        area.root.addEventListener( "mousemove", this.timebar.onMouseMove.bind(this.timebar) );
     }
 
-    resize() {
-
-    }
-
-    async loadVideo( ) {
+    async _loadVideo( ) {
         while(this.video.duration === Infinity || isNaN(this.video.duration) || !this.timebar) {
             await new Promise(r => setTimeout(r, 1000));
             this.video.currentTime = 10000000 * Math.random();
         }
         this.video.currentTime = 0;
         this.endTime = this.video.duration;                             
-        this.video.ontimeupdate  = (event) => {
-            const x = this.timeToX(this.video.currentTime);
-            this.timebar.setCurrentValue(x);
-        };
-        this.setEndValue(this.timebar.endX);
-        this.setStartValue(this.timebar.startX);
-        this.timebar.draw();
+       
+        this._setEndValue(this.timebar.endX);
+        this._setStartValue(this.timebar.startX);
+        this._setCurrentValue(this.timebar.currentX);
+        this.timebar.update(this.timebar.currentX);
     }
 
-    xToTime (x) {
-        return (x / (this.timebar.width - this.timebar.offset * 2 )) *  this.video.duration;
+    _update () {
+       
+       if(this.video.currentTime >= this.endTime) {
+            this.video.currentTime = this.startTime;
+        }
+        const x = this._timeToX(this.video.currentTime);
+        this._setCurrentValue(x, false);
+        this.timebar.update(x);
+
+        if(this.playing) {
+            this.requestId = requestAnimationFrame(this._update.bind(this));
+        }
     }
 
-    timeToX (time) {
-        return (time / this.video.duration) *  (this.timebar.width - this.timebar.offset * 2) + this.timebar.offset;
+    _xToTime (x) {
+        return ((x - this.timebar.offset) / (this.timebar.width - this.timebar.offset)) *  this.video.duration;
     }
 
-    setCurrentValue ( x ) {
-        const t = this.xToTime(x);
-        this.video.currentTime = t;
+    _timeToX (time) {
+        return (time / this.video.duration) *  (this.timebar.width - this.timebar.offset ) + this.timebar.offset;
+    }
+
+    _setCurrentValue ( x, updateTime = true ) {
+        const t = this._xToTime(x);
+
+        if(updateTime) {
+            this.video.currentTime = t;
+        }
+        //console.log( "Computed: " + t)
+        let mzminutes = Math.floor(t / 60);
+        let mzseconds = Math.floor(t - (mzminutes * 60));
+        let mzmiliseconds = Math.floor((t - mzseconds)*100);
+
+        mzmiliseconds = mzmiliseconds < 10 ? ('0' + mzmiliseconds) : mzmiliseconds;
+        mzseconds = mzseconds < 10 ? ('0' + mzseconds) : mzseconds;
+        mzminutes = mzminutes < 10 ? ('0' + mzminutes) : mzminutes;
+        this.currentTimeString = mzminutes+':'+mzseconds+'.'+mzmiliseconds;
+        this.controlsCurrentPanel.refresh();
+
         if(this.onSetTime) {
             this.onSetTime(x);
         }
     }
 
-    setStartValue ( x ) {
-        const t = this.xToTime(x);
+    _setStartValue ( x ) {
+        const t = this._xToTime(x);
+        this.startTime = this.video.currentTime = t;
+        
         let mzminutes = Math.floor(t / 60);
         let mzseconds = Math.floor(t - (mzminutes * 60));
+        let mzmiliseconds = Math.floor((t - mzseconds)*100);
+        
+        mzmiliseconds = mzmiliseconds < 10 ? ('0' + mzmiliseconds) : mzmiliseconds;
         mzseconds = mzseconds < 10 ? ('0' + mzseconds) : mzseconds;
         mzminutes = mzminutes < 10 ? ('0' + mzminutes) : mzminutes;
-        this.startTime = mzminutes+':'+mzseconds;
+        this.startTimeString =  mzminutes+':'+mzseconds+'.'+mzmiliseconds;
         this.controlsPanelLeft.refresh();
     }
 
-    setEndValue ( x ) {
-        const t = this.xToTime(x);
+    _setEndValue ( x ) {
+        const t = this._xToTime(x);
+        this.endTime = this.video.currentTime = t;
+
         let mzminutes = Math.floor(t / 60);
         let mzseconds = Math.floor(t - (mzminutes * 60));
+        let mzmiliseconds = Math.floor((t - mzseconds)*100);
+        
+        mzmiliseconds = mzmiliseconds < 10 ? ('0' + mzmiliseconds) : mzmiliseconds;
         mzseconds = mzseconds < 10 ? ('0' + mzseconds) : mzseconds;
         mzminutes = mzminutes < 10 ? ('0' + mzminutes) : mzminutes;
             
-        this.endTime = mzminutes+':'+mzseconds;
+        this.endTimeString =  mzminutes+':'+mzseconds+'.'+mzmiliseconds;
         this.controlsPanelRight.refresh();
+    }
+
+    getStartTime ( ) {
+        return this.startTime;
+    }
+
+    getEndTime ( ) {
+        return this.endTime;
+    }
+
+    getTrimedTimes ( ) {
+        return {start: this.startTime, end: this.endTime};
     }
 }
 
