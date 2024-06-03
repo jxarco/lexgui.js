@@ -405,10 +405,10 @@ class Timeline {
         this.speed = this.animationClip.speed ?? this.speed;
         var w = Math.max(300, this.canvas.width);
         this.secondsToPixels = ( w - this.session.left_margin ) / this.duration;
-        
+        this.pixelsToSeconds = 1 / this.secondsToPixels;
         //this.updateHeader();
         this.updateLeftPanel();
-        
+        this.draw(this.currentTime);
         return this.animationClip;
     }
 
@@ -1563,11 +1563,6 @@ class KeyFramesTimeline extends Timeline {
             return;
         }
 
-        const removeHover = () => {
-            if(this.lastHovered)
-                this.tracksPerItem[ this.lastHovered[0] ][ this.lastHovered[1] ].hovered[ this.lastHovered[2] ] = undefined;
-        };
-
         if( this.grabbing && e.button != 2) {
 
             // fix this
@@ -1595,17 +1590,17 @@ class KeyFramesTimeline extends Timeline {
                 let t = this.tracksPerItem[ name ][track.idx];
                 if(t && t.locked)
                     return;
-                removeHover();
+                this.unHoverAll();
                                         
                 this.lastHovered = [name, track.idx, keyFrameIndex];
                 t.hovered[keyFrameIndex] = true;
 
             }else {
-                removeHover();
+                this.unHoverAll();
             }
         }
         else {
-            removeHover();
+            this.unHoverAll();
         }
     }
 
@@ -2400,6 +2395,15 @@ class KeyFramesTimeline extends Timeline {
         });
     }
 
+    unHoverAll(){
+        if(this.lastHovered) {
+            this.tracksPerItem[ this.lastHovered[0] ][ this.lastHovered[1] ].hovered[ this.lastHovered[2] ] = false;
+        }
+        let h = this.lastHovered;
+        this.lastHovered = null;
+        return h;
+    }
+
     unSelectAllKeyFrames() {
 
         for(let [name, idx, keyIndex] of this.lastKeyFramesSelected) {
@@ -2672,6 +2676,15 @@ class ClipsTimeline extends Timeline {
         }    
     }
 
+    unHoverAll(){
+        if(this.lastHovered){
+            this.animationClip.tracks[ this.lastHovered[0] ].hovered[ this.lastHovered[1] ] = false;
+        }
+        let h = this.lastHovered;
+        this.lastHovered = null;
+        return h;
+    }
+
     onMouseUp( e ) {
         
         let track = e.track;
@@ -2827,11 +2840,6 @@ class ClipsTimeline extends Timeline {
                 this.onSetTime( t );	 
         }
 
-        const removeHover = () => {
-            if(this.lastHovered)
-                this.animationClip.tracks[ this.lastHovered[0] ].hovered[ this.lastHovered[1] ] = undefined;
-        };
-
         if(e.shiftKey) {
             if(this.boxSelection) {
                 this.boxSelectionEnd = [localX,localY - this.topMargin];
@@ -2935,7 +2943,7 @@ class ClipsTimeline extends Timeline {
             let clips = this.getClipsInRange(e.track, time, time, 0.1)
             if(!e.track.locked && clips != undefined) {
                                 
-                removeHover();
+                this.unHoverAll();
                 this.lastHovered = [e.track.idx, clips[0]];
                 e.track.hovered[clips[0]] = true;
 
@@ -2964,11 +2972,11 @@ class ClipsTimeline extends Timeline {
                 }
             }
             else {
-                removeHover();
+                this.unHoverAll();
             }
         }
         else {
-            removeHover();
+            this.unHoverAll(); 
         }
 
     }
@@ -3479,11 +3487,20 @@ class ClipsTimeline extends Timeline {
                 this.setDuration(end);
             }
             
-        // Update animation action interpolation info
-        if(this.onUpdateTrack)
-            this.onUpdateTrack( trackIdx );
         }
 
+        // Update animation action interpolation info
+        if(this.onUpdateTrack && Object.keys(trackIdxs).length){
+            let tracksChanged = [];
+            for( let c in trackIdxs ) {
+                if ( tracksChanged.includes(trackIdxs[c].trackIdx) ) {
+                    continue;
+                } 
+                tracksChanged.push(trackIdxs[c].trackIdx); 
+            }
+            this.onUpdateTrack( tracksChanged );
+        }
+        
         LX.emit( "@on_current_time_" + this.constructor.name, this.currentTime);
         if(this.onSetTime)
             this.onSetTime(this.currentTime);
@@ -3992,11 +4009,6 @@ class CurvesTimeline extends Timeline {
            
         }
 
-        const removeHover = () => {
-            if(this.lastHovered)
-                this.tracksPerItem[ this.lastHovered[0] ][ this.lastHovered[1] ].hovered[ this.lastHovered[2] ] = undefined;
-        };
-
         if( this.grabbing && e.button != 2) {
 
             var curr = time - this.currentTime;
@@ -4025,7 +4037,7 @@ class CurvesTimeline extends Timeline {
                 
                 const name = this.tracksDictionary[track.fullname]; 
                 let t = this.tracksPerItem[ name ][track.idx];
-                removeHover();
+                this.unHoverAll();
                 if(t && t.locked)
                     return;
                     
@@ -4033,11 +4045,11 @@ class CurvesTimeline extends Timeline {
                 t.hovered[keyFrameIndex] = true;
 
             }else {
-                removeHover();
+                this.unHoverAll();
             }
         }
         else {
-            removeHover();
+            this.unHoverAll();
         }
     }
 
@@ -4859,6 +4871,15 @@ class CurvesTimeline extends Timeline {
         return track.times.reduce((a, b) => {
             return Math.abs(b - time) < Math.abs(a - time) ? b : a;
         });
+    }
+
+    unHoverAll() {
+        if(this.lastHovered) {
+            this.tracksPerItem[ this.lastHovered[0] ][ this.lastHovered[1] ].hovered[ this.lastHovered[2] ] = false;
+        }
+        let h = this.lastHovered;
+        this.lastHovered = null;
+        return h;
     }
 
     unSelectAllKeyFrames() {
