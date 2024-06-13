@@ -46,6 +46,8 @@
         
         const bottomTabs = bottomArea.addTabs();
         const types = { KEYFRAMES: 0, CLIPS: 1, CURVES: 2};
+        let position = [250, 350];
+        let trackName = "";
 
         let panel = new LX.Panel();
         panel = rightArea.addPanel(panel);        
@@ -108,10 +110,10 @@
         // **** **** **** **** **** **** **** **** **** **** **** **** 
 
         function fillPanel( panel ) {
-           panel.clear();
+            panel.clear();
             panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});
             panel.addColor("Background", LX.getThemeColor("global-selected-light"));
-            panel.addText("Track", "", null)
+            panel.addText("Track", trackName, null)
             panel.addText("Text", "Lexgui.js @evallsg", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
             panel.addColor("Font Color", [0.1, 0.1, 0.8], (value, event) => {
                 console.log("Font Color: ", value);
@@ -119,8 +121,9 @@
             panel.addNumber("Font Size", 36, (value, event) => {
                 console.log(value);
             }, { min: 1, max: 48, step: 1});
-            panel.addVector2("2D Position", [250, 350], (value, event) => {
-                console.log(value);
+            panel.addVector2("2D Position", position, (value, event) => {
+           
+                activeTimeline.updateSelectedKeyframe(value);
             }, { min: 0, max: 1024 });
             panel.branch_open = true;
             panel.merge();
@@ -185,8 +188,8 @@
             });
 
             keyframesPanel.attach(kfTimeline.root);
-            kfTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
-            kfTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [250, 350, 250, 250, 250, 350], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
+            kfTimeline.setSelectedItems(["Font", "Item 2", "Item 3"]);
+            kfTimeline.setAnimationClip({tracks: [{name: "Font.position", values: [250, 350, 250, 250, 250, 350], times: [0, 0.1, 0.2]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1]}, {name: "Item 3.position", values: [0,1,0,0,0,0], times: [0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [ 0.1, 0.2, 0.3]}], duration: 1});
             activeTimeline = kfTimeline;
             kfTimeline.show();
             
@@ -197,26 +200,31 @@
                     return;
                 }
                 rightArea.show();
-                let id = data.track.idx;
+                const id = data.track.idx;
                 let values = kfTimeline.animationClip.tracks[id].values;
-                panel.setValue("Track", data.track.name)
-                panel.setValue("2D Position", values.slice(keyFrameIndex, keyFrameIndex+2))
+                const dim = kfTimeline.animationClip.tracks[id].dim;
+                
+                trackName = data.track.name;
+                position = values.slice(keyFrameIndex * dim, keyFrameIndex * dim + dim);
+                fillPanel(panel);
                 //kfTimeline.animationClip.tracks[currentSelection[0][0]];
             }
             
             kfTimeline.onSetTime = ( time ) => {
                 rightArea.show();
-                let keyframes = kfTimeline.getKeyFramesInRange(kfTimeline.animationClip.tracks[0], time , time, 0.15);
-
+                const frametime = kfTimeline.getNearestKeyFrame( kfTimeline.animationClip.tracks[0], time);
+                let keyframe = kfTimeline.animationClip.tracks[0].times.indexOf(frametime);
                 let values = kfTimeline.animationClip.tracks[0].values;
-                let valueX = values[keyframes[0] * 2];
-                let valueY = values[keyframes[0] * 2 + 1];
-                if(keyframes.length > 1) {
-                    let t = Math.abs(kfTimeline.animationClip.tracks[0].times[keyframes[0] * 2] - time);
-                    valueX =  valueX * (1 - t) + values[keyframes[1] * 2] * t;                    
-                    valueY =  valueY * (1 - t) + values[keyframes[1] * 2 + 1] * t;                    
+                let valueX = values[keyframe * 2];
+                let valueY = values[keyframe * 2 + 1];
+                if(keyframe != undefined) {
+                    let t = Math.abs(frametime - time);
+                    let sign = frametime - time > 0 ? -1 : 1;
+                    valueX =  valueX * (1 - t) + values[keyframe * 2 + sign] * t;                    
+                    valueY =  valueY * (1 - t) + values[keyframe * 2 + sign + 1] * t;                    
                 }
-                panel.setValue("2D Position", [valueX, valueY]);
+                position = [valueX, valueY];
+                fillPanel( panel );
             }
         }
 
