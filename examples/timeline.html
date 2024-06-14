@@ -200,11 +200,14 @@
                     return;
                 }
                 rightArea.show();
-                const id = data.track.idx;
+                trackName = data.track.name;
+                if( trackName != "Font" || data.track.type != "position") {
+                    return
+                }
+                const id = data.track.clipIdx;
                 let values = kfTimeline.animationClip.tracks[id].values;
                 const dim = kfTimeline.animationClip.tracks[id].dim;
                 
-                trackName = data.track.name;
                 position = values.slice(keyFrameIndex * dim, keyFrameIndex * dim + dim);
                 fillPanel(panel);
                 //kfTimeline.animationClip.tracks[currentSelection[0][0]];
@@ -220,8 +223,11 @@
                 if(keyframe != undefined) {
                     let t = Math.abs(frametime - time);
                     let sign = frametime - time > 0 ? -1 : 1;
-                    valueX =  valueX * (1 - t) + values[keyframe * 2 + sign] * t;                    
-                    valueY =  valueY * (1 - t) + values[keyframe * 2 + sign + 1] * t;                    
+                    const nearestFrame = keyframe * 2 + sign;
+                    if (nearestFrame <= values.length - 2 && nearestFrame >= 0) {
+                        valueX =  valueX * (1 - t) + values[keyframe * 2 + sign] * t;                    
+                        valueY =  valueY * (1 - t) + values[keyframe * 2 + sign + 1] * t;                                        
+                    }
                 }
                 position = [valueX, valueY];
                 fillPanel( panel );
@@ -278,7 +284,7 @@
             let curvesTimeline = new LX.CurvesTimeline("curves-timeline", { range: [-1,1]});
             curvesPanel.attach(curvesTimeline.root);
             curvesTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
-            curvesTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [0,1,0,-1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,0,0,1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
+            curvesTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [0,1,0,-1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,0,1], times: [0]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.3]}], duration: 1});
             curvesTimeline.show();
             curvesTimeline.draw(0);
         }
