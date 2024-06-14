@@ -18,7 +18,7 @@
     <script type="module">
 
         import { LX } from 'lexgui';
-        import { Timeline, KeyFramesTimeline, ClipsTimeline, CurvesTimeline } from 'lexgui/components/timeline.js';
+        import { Timeline, KeyFramesTimeline, ClipsTimeline, CurvesTimeline, CurvesKeyFramesTimeline } from 'lexgui/components/timeline.js';
 
         // init library and get main area
         let area = LX.init();
@@ -78,14 +78,15 @@
                 if(activeTimeline.playing) {
                     
                     activeTimeline.currentTime += elapsed* 0.001;
-                    activeTimeline.onSetTime(activeTimeline.currentTime);
+                    if(activeTimeline.onSetTime) {
+                        activeTimeline.onSetTime(activeTimeline.currentTime);
+                    }
                     if(activeTimeline.currentTime >= activeTimeline.animationClip.duration) {
                         activeTimeline.currentTime = 0;
                         if(!activeTimeline.loop) {
                             activeTimeline.changeState();
                         }
-                    }
-                   
+                    }                   
                 }
             }
                         
@@ -281,7 +282,7 @@
 
             }});
 
-            let curvesTimeline = new LX.CurvesTimeline("curves-timeline", { range: [-1,1]});
+            let curvesTimeline = new LX.CurvesKeyFramesTimeline("curves-timeline", { range: [-1,1]});
             curvesPanel.attach(curvesTimeline.root);
             curvesTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
             curvesTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [0,1,0,-1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,0,1], times: [0]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.3]}], duration: 1});
