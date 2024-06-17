@@ -40,7 +40,6 @@ class Timeline {
         this.framerate = 30;
         this.opacity = options.opacity || 1;
         this.topMargin = 40;
-        this.renderOutFrames = false;
         this.lastMouse = [];
         this.lastKeyFramesSelected = [];
         this.tracksDrawn = [];
@@ -1394,7 +1393,7 @@ class KeyFramesTimeline extends Timeline {
         }
     }
 
-        /**
+    /**
     * @method processTrackS
     * @description Creates a map for each item -> tracks
     * @param {Object} animation 

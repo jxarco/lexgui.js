@@ -81,3 +81,10 @@ function COPY_SNIPPET( b )
     navigator.clipboard.writeText( b.dataset['snippet'] ?? b.parentElement.innerText );
     console.log("Copied!");
 }
+
+function INSERT_IMAGE(src, caption = "" ) {
+    let img = document.createElement('img');
+    img.src = src;
+    img.alt = caption;
+    document.body.appendChild(img);
+}
