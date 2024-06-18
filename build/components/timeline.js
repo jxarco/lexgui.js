@@ -195,6 +195,19 @@ class Timeline {
     }  
 
     /**
+     * @method setSpeed
+     * @param {Number} speed 
+     */
+    setSpeed(speed) {
+        this.speed = speed;
+        LX.emit( "@on_set_speed", +speed.toFixed(3));
+        
+        if( this.onSetSpeed ) {
+            this.onSetSpeed( speed );	 
+        }
+    }
+
+    /**
      * @method setScale
      * @param {Number} v
      */
@@ -221,20 +234,6 @@ class Timeline {
         this.framerate = v;
     }
        
-    /**
-     * @method setSpeed
-     * @param {Number} speed 
-     */
-
-    setSpeed(speed) {
-        this.speed = speed;
-        LX.emit( "@on_set_speed", +speed.toFixed(3));
-        
-        if( this.onSetSpeed ) {
-            this.onSetSpeed( speed );	 
-        }
-    }
-
      /** DEPRACATED??
      * @method getCurrentFrame
      * @param {Number} framerate 
@@ -244,19 +243,19 @@ class Timeline {
     }
 
      /** 
-     * @method getCurrentContent
+     * @method getContent
      * @param {Track} track 
      * @param {Number} time 
      * @param {Number} threshold 
      */
-    getCurrentContent(track, time, threshold) {
+    getContent(track, time, threshold) {
 
-        if(this.getCurrentKeyFrame) {
-            return this.getCurrentKeyFrame(track, time, threshold);
+        if(this.getKeyFrame) {
+            return this.getKeyFrame(track, time, threshold);
         }
 
-        if(this.getCurrentClip) {
-            return this.getCurrentClip(track, time, threshold);
+        if(this.getClip) {
+            return this.getClip(track, time, threshold);
         }
     }
 
@@ -1106,7 +1105,7 @@ class Timeline {
                 
                 this.grabbing = true;
                 this.grabTime = time - this.currentTime;
-                if(!track || track && this.getCurrentContent(track, time, 0.001) == undefined) {
+                if(!track || track && this.getContent(track, time, 0.001) == undefined) {
                     this.grabbing_timeline = current_grabbing_timeline;
                 }
                 if(this.onMouseDown && this.active )
@@ -1618,14 +1617,14 @@ class KeyFramesTimeline extends Timeline {
     }
 
     /**
-     * @method getCurrentKeyFrame
+     * @method getKeyFrame
      * @description Get the keyframe in the given time. If there isn't any in that timem it returns null
      * @param {Object} track {times, values, ...} 
      * @param {Number} time current time
      * @param {Number} threshold
      * @returns {Number or Null} keyframe index
      */
-    getCurrentKeyFrame( track, time, threshold ) {
+    getKeyFrame( track, time, threshold ) {
 
         if(!track || !track.times.length)
         return;
@@ -1797,7 +1796,7 @@ class KeyFramesTimeline extends Timeline {
             e.multipleSelection = true;
         }
         else if(track && !track.locked) {
-            const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
+            const keyFrameIndex = this.getKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
             if( keyFrameIndex != undefined ) {
                 this.processCurrentKeyFrame( e, keyFrameIndex, track, null, this.lastKeyFramesSelected.length > 1 || e.multipleSelection ); // Settings this as multiple so time is not being set
                 if(e.ctrlKey ) {
@@ -1895,7 +1894,7 @@ class KeyFramesTimeline extends Timeline {
         // Check if a keyframe is hovered
         else if(track) {
 
-            const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
+            const keyFrameIndex = this.getKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
             if(keyFrameIndex != undefined) {
                 
                 const name = this.tracksDictionary[track.fullname]; 
@@ -2638,7 +2637,7 @@ class KeyFramesTimeline extends Timeline {
             return;
 
         e.multipleSelection = multiple;
-        keyFrameIndex = keyFrameIndex ?? this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
+        keyFrameIndex = keyFrameIndex ?? this.getKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
 
         if(!multiple && e.button != 2) {
             this.unSelectAllKeyFrames();
@@ -2866,7 +2865,7 @@ class CurvesKeyFramesTimeline extends KeyFramesTimeline {
         }
         else if(track && !track.locked) {
 
-            const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
+            const keyFrameIndex = this.getKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
             if( keyFrameIndex != undefined ) {
                 this.processCurrentKeyFrame( e, keyFrameIndex, track, null, his.lastKeyFramesSelected.length > 1 || e.multipleSelection ); // Settings this as multiple so time is not being set
                 if(e.ctrlKey || e.altKey) {
@@ -2964,7 +2963,7 @@ class CurvesKeyFramesTimeline extends KeyFramesTimeline {
         }
         else if(track) {
 
-            const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
+            const keyFrameIndex = this.getKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
             if(keyFrameIndex != undefined) {
                 
                 const name = this.tracksDictionary[track.fullname]; 
@@ -3233,7 +3232,7 @@ class ClipsTimeline extends Timeline {
                 selectedClips = this.lastClipsSelected;
             }
             else {
-                let clipIndex = this.getCurrentClip( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
+                let clipIndex = this.getClip( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
                 if(clipIndex != undefined)
                 {
                     this.lastClipsSelected = selectedClips = [[track.idx, clipIndex]];
@@ -3279,7 +3278,7 @@ class ClipsTimeline extends Timeline {
             }
             
         }
-        else if(!track || track && this.getCurrentContent(track, time, 0.001) == undefined) {
+        else if(!track || track && this.getContent(track, time, 0.001) == undefined) {
 
             if( this.timelineClickedClips )
             {
@@ -3461,7 +3460,7 @@ class ClipsTimeline extends Timeline {
         let track = e.track;
         let localX = e.localX;
 
-        let clipIndex = this.getCurrentClip( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
+        let clipIndex = this.getClip( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
         if(clipIndex != undefined)  {
             this.lastClipsSelected = [[track.idx, clipIndex]];
 
@@ -4179,7 +4178,7 @@ class ClipsTimeline extends Timeline {
             this.onUpdateTrack( state.t.idx );
     }
     
-    getCurrentClip( track, time, threshold ) {
+    getClip( track, time, threshold ) {
 
         if(!track || !track.clips.length)
         return;
@@ -4229,7 +4228,7 @@ class ClipsTimeline extends Timeline {
     processCurrentClip( e, clipIndex, track, localX, multiple ) {
 
         e.multipleSelection = multiple;
-        clipIndex = clipIndex ?? this.getCurrentClip( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
+        clipIndex = clipIndex ?? this.getClip( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
 
         if(!multiple && e.button != 2) {
             this.unSelectAllClips();
@@ -4410,7 +4409,7 @@ class CurvesTimeline extends Timeline {
         }
         else if(track && !track.locked) {
 
-            const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
+            const keyFrameIndex = this.getKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
             if( keyFrameIndex != undefined ) {
                 this.processCurrentKeyFrame( e, keyFrameIndex, track, null, e.multipleSelection ); // Settings this as multiple so time is not being set
                 if(e.ctrlKey || e.altKey) {
@@ -4515,7 +4514,7 @@ class CurvesTimeline extends Timeline {
         }
         else if(track) {
 
-            let keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
+            let keyFrameIndex = this.getKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
             if(keyFrameIndex != undefined) {
                 
                 const name = this.tracksDictionary[track.fullname]; 
@@ -5347,7 +5346,7 @@ class CurvesTimeline extends Timeline {
         return [name, type];
     }
 
-    getCurrentKeyFrame( track, time, threshold ) {
+    getKeyFrame( track, time, threshold ) {
 
         if(!track || !track.times.length)
         return;
@@ -5433,7 +5432,7 @@ class CurvesTimeline extends Timeline {
             return;
     
         e.multipleSelection = multiple;
-        keyFrameIndex = keyFrameIndex ?? this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
+        keyFrameIndex = keyFrameIndex ?? this.getKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
 
         if(!multiple && e.button != 2) {
             this.unSelectAllKeyFrames();

@@ -74,6 +74,14 @@
         MAKE_HEADER( "Methods", "h3", "" );
         MAKE_BULLET_LIST( [             
                 [`.setAnimationClip<span class="pln">(animation: <span class ="desc">Object</span>)</span>`, `<p> Process and format the animation tracks and set it as the animationClip`],
+                [`.setDuration<span class="pln">(duration: <span class ="desc">Float</span>)</span>`, `<p> Set the duration of the animation`],
+                [`.setSpeed<span class="pln">(speed: <span class ="desc">Float</span>)</span>`, `<p> Set the playback speed of the animation`],
+                [`.setScale<span class="pln">(scale: <span class ="desc">Float</span>)</span>`, `<p> Set the scale of the timeline. Usually called when the user zooms in/out`],
+                [`.setFramerate<span class="pln">(framerate: <span class ="desc">Float</span>)</span>`, `<p> Set the playback framerate of the animation`],
+                [`.getContent<span class="pln">(track: <span class ="desc">Object</span>, time: <span class ="desc">Float</span>, threshold: <span class ="desc">Float</span>)</span>`, `<p> Get the content of the track in the specified time with a threshold`],
+                [`.getTracksInRange<span class="pln">(minY: <span class ="desc">Integer</span>, maxY: <span class ="desc">Integer</span>, threshold: <span class ="desc">Float</span>)</span>`, `<p> Get the tracks inside the specified vertical range (pixels) with a threshold`],
+                [`.addNewTrack<span class="pln">()</span>`, `<p> Add a new empty track in the timeline`],
+                [`.selectTrack<span class="pln">(trackInfo: <span class ="desc">Object</span>)</span>`, `<p> Select the track that contains the info passed`],
                             
             ] );
 
