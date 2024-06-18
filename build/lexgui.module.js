@@ -4733,7 +4733,7 @@ class Panel {
             if( flag.disabled )
                 return;
 
-            const skipCallback = e.detail;
+            const skipCallback = (e.detail.constructor == Number ? null : skipCallback);
 
             let check = toggle.querySelector( ".checkbox a" );
 

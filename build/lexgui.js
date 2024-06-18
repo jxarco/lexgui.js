@@ -4737,7 +4737,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 if( flag.disabled )
                     return;
     
-                const skipCallback = e.detail;
+                const skipCallback = (e.detail.constructor == Number ? null : skipCallback);
 
                 let check = toggle.querySelector( ".checkbox a" );
     
