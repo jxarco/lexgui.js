@@ -3231,6 +3231,10 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 {
                     let domName = document.createElement('div');
                     domName.className = "lexwidgetname";
+                    if( options.justifyName )
+                    {
+                        domName.classList.add( "float-" + options.justifyName );
+                    }
                     domName.innerHTML = name || "";
                     domName.title = options.title ?? domName.innerHTML;
                     domName.style.width = options.nameWidth || LX.DEFAULT_NAME_WIDTH;
@@ -3536,9 +3540,10 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
          * placeholder: Add input placeholder
          * trigger: Choose onchange trigger (default, input) [default]
          * inputWidth: Width of the text input
-         * float: Justify text
          * skipReset: Don't add the reset value button when value changes
-         */
+         * float: Justify input text content
+         * justifyName: Justify name content
+        */
 
         addText( name, value, callback, options = {} ) {
 

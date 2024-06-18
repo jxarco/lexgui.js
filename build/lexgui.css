@@ -567,7 +567,11 @@ body.noevents * {
   padding-right: 10px;
 }
 
-.lexinlinewidgets .lexwidgetname {
+.lexinlinewidgets .lexwidgetname.float-center {
+  justify-content: center;
+}
+
+.lexinlinewidgets .lexwidgetname.float-right {
   justify-content: end;
   -moz-transform: translateX(-1em);
   -webkit-transform: translateX(-1em);
