@@ -334,9 +334,8 @@ class VideoEditor {
         this.currentTime = this.startTime = 0;
         this.startTimeString = "0:0";
         this.endTimeString = "0:0";
-
-        area.root.classList.add("lexvideoeditor");
-        let [videoArea, controlsArea] = area.split({ type: 'vertical', sizes:["80%", null], minimizable: false, resize: false });
+   
+        let [videoArea, controlsArea] = area.split({ type: 'vertical', sizes: ["80%", null], minimizable: false, resize: false });
         controlsArea.root.classList.add('lexconstrolsarea');
         
         // Create video element and load it
@@ -347,12 +346,15 @@ class VideoEditor {
         this.video.loop = true;
         this._loadVideo(options);
         if(options.videoArea) {
+            options.videoArea.root.classList.add("lexvideoeditor");
             videoArea.attach(options.videoArea);
         }
         else {
             videoArea.attach(video);
+            videoArea.root.classList.add("lexvideoeditor");
         }
 
+        this.controlsArea = controlsArea;
         // Create playing timeline area and attach panels
         let [topArea, bottomArea] = controlsArea.split({ type: 'vertical', sizes:["50%", null], minimizable: false, resize: false });
         bottomArea.setSize([bottomArea.size[0], 40]);
@@ -437,9 +439,10 @@ class VideoEditor {
         area.root.addEventListener( "mousedown", this.timebar.onMouseDown.bind(this.timebar) );
         area.root.addEventListener( "mouseup", this.timebar.onMouseUp.bind(this.timebar) );
         area.root.addEventListener( "mousemove", this.timebar.onMouseMove.bind(this.timebar) );
+       
     }
 
-    async _loadVideo( ) {
+    async _loadVideo( options = {} ) {
         while(this.video.duration === Infinity || isNaN(this.video.duration) || !this.timebar) {
             await new Promise(r => setTimeout(r, 1000));
             this.video.currentTime = 10000000 * Math.random();
@@ -451,6 +454,15 @@ class VideoEditor {
         this._setStartValue(this.timebar.startX);
         this._setCurrentValue(this.timebar.currentX);
         this.timebar.update(this.timebar.currentX);
+
+        const controls = options.controls ?? true;
+        if(!controls) {
+            this.hideControls();
+        }
+
+        if(this.onVideoLoaded) {
+            this.onVideoLoaded();
+        }
     }
 
     _update () {
@@ -464,6 +476,10 @@ class VideoEditor {
 
         if(this.playing) {
             this.requestId = requestAnimationFrame(this._update.bind(this));
+        }
+        
+        if(this.onUpdate) {
+            this.onUpdate();
         }
     }
 
@@ -538,6 +554,14 @@ class VideoEditor {
 
     getTrimedTimes ( ) {
         return {start: this.startTime, end: this.endTime};
+    }
+
+    showControls ( ) {
+        this.controlsArea.show();
+    }
+
+    hideControls ( ) {
+        this.controlsArea.hide();
     }
 }
 

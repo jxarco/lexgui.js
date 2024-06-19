@@ -3653,7 +3653,8 @@ pre .line-gutter {
 /* Video Editor */
 
 .lexvideoeditor {
-
+  display: flex;
+  justify-content: center;
 }
 
 .lexvideoeditor video {
