@@ -33,7 +33,7 @@ class TimeBar {
         
         const barHeight = options.barHeight ?? 5;
         this.markerWidth = options.markerWidth ?? 8;
-        this.offset = options.offset ?? 5;
+        this.offset = options.offset || 4;
         
         this.width = this.canvas.width - this.offset * 2;
         this.height = barHeight;
@@ -47,10 +47,10 @@ class TimeBar {
         const w = this.markerWidth;
         const h = this.canvas.height - y * 2;
         this.trimRec = [this.startX, y, w, h];
-
-        this._draw();
-
+        
         this.lastPosition = new LX.vec2( 0, 0 );
+ 
+        this._draw();
     }
 
     _draw() {
@@ -196,6 +196,10 @@ class TimeBar {
     update (x) {
         this.currentX = Math.min(Math.max(this.startX, x), this.endX);  
         this._draw();
+        
+        if(this.onDraw) {
+            this.onDraw();
+        }
     }
 
     onMouseUp (e) {
@@ -210,6 +214,26 @@ class TimeBar {
 
         const canvas = this.canvas;
         canvas.style.cursor = "default";
+
+         // Process mouse
+        const x = e.target == this.canvas ? e.offsetX : e.offsetX - this.canvas.offsetLeft ;    
+        const y = e.target == this.canvas ? e.offsetY : e.offsetY - this.canvas.offsetTop ;
+        const threshold = 5;
+        
+        if(this.trimRec[1] < y &&  y < this.trimRec[3] + this.trimRec[1]) {
+            if(x < this.startX) {
+                this.currentX = this.startX;        
+            }
+            else if(x > this.endX) {
+                this.currentX = this.endX;
+            }
+            else {
+                this.currentX = x;
+            }
+            if(this.onChangeCurrent) {
+                this.onChangeCurrent(this.currentX);
+            }            
+        }
     }
 
     onMouseMove (e) {
@@ -386,15 +410,15 @@ class VideoEditor {
                 if(this.playing) {
                     
                     this.video.play();
-                    if(!this.requestId) {
-                        this.requestId = requestAnimationFrame(this._update.bind(this))
-                    }
+                    // if(!this.requestId) {
+                    //     this.requestId = requestAnimationFrame(this._update.bind(this))
+                    // }
                 }
                 else {
-                    if(this.requestId) {
-                        cancelAnimationFrame(this.requestId);
-                        this.requestId = null;
-                    }
+                    // if(this.requestId) {
+                    //     cancelAnimationFrame(this.requestId);
+                    //     this.requestId = null;
+                    // }
                     this.video.pause();
                 }
                 this.controlsPanelLeft.refresh();
@@ -430,15 +454,31 @@ class VideoEditor {
             this.timebar.resize([availableWidth, timeBarArea.root.clientHeight]);
         })
 
+        videoArea.onresize = (v) => {
+            bottomArea.setSize([v.width, 40]);
+        }
+
         timeBarArea.onresize = (v) => {
             let availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;
             this.timebar.resize([availableWidth, v.height]);
         }
 
         // Add canvas event listeneres
-        area.root.addEventListener( "mousedown", this.timebar.onMouseDown.bind(this.timebar) );
-        area.root.addEventListener( "mouseup", this.timebar.onMouseUp.bind(this.timebar) );
-        area.root.addEventListener( "mousemove", this.timebar.onMouseMove.bind(this.timebar) );
+        area.root.addEventListener( "mousedown", (event) => {
+            if(this.controls) {
+                this.timebar.onMouseDown(event);
+            }
+        });
+        area.root.addEventListener( "mouseup",   (event) => {
+            if(this.controls) {
+                this.timebar.onMouseUp(event);
+            }
+        });
+        area.root.addEventListener( "mousemove", (event) => {
+            if(this.controls) {
+                this.timebar.onMouseMove(event);
+            }
+        });
        
     }
 
@@ -449,38 +489,37 @@ class VideoEditor {
         }
         this.video.currentTime = 0;
         this.endTime = this.video.duration;                             
-       
+        this.timebar.currentX = this._timeToX(0);
         this._setEndValue(this.timebar.endX);
         this._setStartValue(this.timebar.startX);
         this._setCurrentValue(this.timebar.currentX);
         this.timebar.update(this.timebar.currentX);
-
-        const controls = options.controls ?? true;
-        if(!controls) {
+        this._update();
+        this.controls = options.controls ?? true;
+        if(!this.controls) {
             this.hideControls();
         }
 
         if(this.onVideoLoaded) {
-            this.onVideoLoaded();
+            this.onVideoLoaded(this.video);
         }
     }
 
     _update () {
        
-       if(this.video.currentTime >= this.endTime) {
-            this.video.currentTime = this.startTime;
+        if(this.onDraw) {
+            this.onDraw();
         }
-        const x = this._timeToX(this.video.currentTime);
-        this._setCurrentValue(x, false);
-        this.timebar.update(x);
-
         if(this.playing) {
-            this.requestId = requestAnimationFrame(this._update.bind(this));
+            if(this.video.currentTime >= this.endTime) {
+                this.video.currentTime = this.startTime;
+            }
+            const x = this._timeToX(this.video.currentTime);
+            this._setCurrentValue(x, false);
+            this.timebar.update(x);
         }
-        
-        if(this.onUpdate) {
-            this.onUpdate();
-        }
+
+        this.requestId = requestAnimationFrame(this._update.bind(this));        
     }
 
     _xToTime (x) {
@@ -509,7 +548,7 @@ class VideoEditor {
         this.controlsCurrentPanel.refresh();
 
         if(this.onSetTime) {
-            this.onSetTime(x);
+            this.onSetTime(t);
         }
     }
 
@@ -526,6 +565,9 @@ class VideoEditor {
         mzminutes = mzminutes < 10 ? ('0' + mzminutes) : mzminutes;
         this.startTimeString =  mzminutes+':'+mzseconds+'.'+mzmiliseconds;
         this.controlsPanelLeft.refresh();
+        if(this.onSetTime) {
+            this.onSetTime(t);
+        }
     }
 
     _setEndValue ( x ) {
@@ -542,6 +584,9 @@ class VideoEditor {
             
         this.endTimeString =  mzminutes+':'+mzseconds+'.'+mzmiliseconds;
         this.controlsPanelRight.refresh();
+        if(this.onSetTime) {
+            this.onSetTime(t);
+        }
     }
 
     getStartTime ( ) {
@@ -557,11 +602,20 @@ class VideoEditor {
     }
 
     showControls ( ) {
+        this.controls = true;
         this.controlsArea.show();
     }
 
     hideControls ( ) {
+        this.controls = false;
         this.controlsArea.hide();
+    }
+    
+    delete ( ) {
+        if(this.requestId) {
+            cancelAnimationFrame(this.requestId);
+            this.requestId = null;
+        }
     }
 }
 

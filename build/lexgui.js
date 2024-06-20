@@ -746,6 +746,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             if(overlay)
             {
                 this.root.classList.add("overlay-" + overlay);
+                
+                if( options.draggable )
+                    makeDraggable( root );
+
+                if( options.resizeable ) {
+                    root.classList.add("resizeable");
+                }
 
                 if(options.resize)
                 {                  

@@ -3729,3 +3729,8 @@ pre .line-gutter {
   height: calc(100% );
   padding: 5px; 
 }  */
+
+.resizeable {
+  resize: both;
+  overflow: auto;
+}

@@ -743,7 +743,14 @@ class Area {
         if(overlay)
         {
             this.root.classList.add("overlay-" + overlay);
+            const draggable = options.draggable ?? true;
+            if( draggable )
+                makeDraggable( root );
 
+            if( options.resizeable ) {
+                root.classList.add("resizeable");
+            }
+            
             if(options.resize)
             {                  
                 this.split_bar = document.createElement("div");
