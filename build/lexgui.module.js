@@ -6718,6 +6718,7 @@ class AssetViewEvent {
     static ASSET_CLONED     = 4;
     static ASSET_DBLCLICKED = 5;
     static ENTER_FOLDER     = 6;
+    static ASSET_CHECKED    = 7;
 
     constructor( type, item, value ) {
         this.type = type || TreeEvent.NONE;
@@ -6735,6 +6736,7 @@ class AssetViewEvent {
             case AssetViewEvent.ASSET_CLONED: return "assetview_event_cloned";
             case AssetViewEvent.ASSET_DBLCLICKED: return "assetview_event_dblclicked";
             case AssetViewEvent.ENTER_FOLDER: return "assetview_event_enter_folder";
+            case AssetViewEvent.ASSET_CHECKED: return "assetview_event_checked";
         }
     }
 };
@@ -6758,7 +6760,7 @@ class AssetView {
     constructor( options = {} ) {
 
         this.rootPath = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/";
-        this.layout = AssetView.LAYOUT_CONTENT;
+        this.layout = options.layout ?? AssetView.LAYOUT_CONTENT;
         this.contentPage = 1;
 
         if(options.root_path)
@@ -7093,6 +7095,27 @@ class AssetView {
             itemEl.tabIndex = -1;
             that.content.appendChild(itemEl);
 
+            if(item.selected != undefined) {
+                let span = document.createElement('span');
+                span.className = "lexcheckbox"; 
+                let checkbox_input = document.createElement('input');
+                checkbox_input.type = "checkbox";
+                checkbox_input.className = "checkbox";
+                checkbox_input.checked = item.selected;
+                checkbox_input.addEventListener('change', (e, v) => {
+                    item.selected = !item.selected;
+                    if(that.onevent) {
+                        const event = new AssetViewEvent(AssetViewEvent.ASSET_CHECKED, e.shiftKey ? [item] : item );
+                        event.multiple = !!e.shiftKey;
+                        that.onevent( event );
+                    }
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                })
+                span.appendChild(checkbox_input);
+                itemEl.appendChild(span);
+                
+            }
             let title = document.createElement('span');
             title.className = "lexassettitle";
             title.innerText = item.id;

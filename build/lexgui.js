@@ -6722,7 +6722,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         static ASSET_CLONED     = 4;
         static ASSET_DBLCLICKED = 5;
         static ENTER_FOLDER     = 6;
-
+        static ASSET_CHECKED    = 7;
+    
         constructor( type, item, value ) {
             this.type = type || TreeEvent.NONE;
             this.item = item;
@@ -6739,6 +6740,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 case AssetViewEvent.ASSET_CLONED: return "assetview_event_cloned";
                 case AssetViewEvent.ASSET_DBLCLICKED: return "assetview_event_dblclicked";
                 case AssetViewEvent.ENTER_FOLDER: return "assetview_event_enter_folder";
+                case AssetViewEvent.ASSET_CHECKED: return "assetview_event_checked";
             }
         }
     };
@@ -6762,7 +6764,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         constructor( options = {} ) {
 
             this.rootPath = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/";
-            this.layout = AssetView.LAYOUT_CONTENT;
+            this.layout = options.layout ?? AssetView.LAYOUT_CONTENT;
             this.contentPage = 1;
 
             if(options.root_path)
@@ -7078,35 +7080,56 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         _refreshContent(search_value, filter) {
 
             const is_content_layout = (this.layout == AssetView.LAYOUT_CONTENT); // default
-
+    
             this.filter = filter ?? (this.filter ?? "None");
             this.search_value = search_value ?? (this.search_value ?? "");
             this.content.innerHTML = "";
             this.content.className = (is_content_layout ? "lexassetscontent" : "lexassetscontent list");
             let that = this;
-           
+            
             const add_item = function(item) {
-
+    
                 const type = item.type.charAt(0).toUpperCase() + item.type.slice(1);
                 const extension = getExtension( item.id );
                 const is_folder = type === "Folder";
-
+    
                 let itemEl = document.createElement('li');
                 itemEl.className = "lexassetitem " + item.type.toLowerCase();
                 itemEl.title = type + ": " + item.id;
                 itemEl.tabIndex = -1;
                 that.content.appendChild(itemEl);
-
+    
+                if(item.selected != undefined) {
+                    let span = document.createElement('span');
+                    span.className = "lexcheckbox"; 
+                    let checkbox_input = document.createElement('input');
+                    checkbox_input.type = "checkbox";
+                    checkbox_input.className = "checkbox";
+                    checkbox_input.checked = item.selected;
+                    checkbox_input.addEventListener('change', (e, v) => {
+                        item.selected = !item.selected;
+                        if(that.onevent) {
+                            const event = new AssetViewEvent(AssetViewEvent.ASSET_CHECKED, e.shiftKey ? [item] : item );
+                            event.multiple = !!e.shiftKey;
+                            that.onevent( event );
+                        }
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                    })
+                    span.appendChild(checkbox_input);
+                    itemEl.appendChild(span);
+                    
+                }
                 let title = document.createElement('span');
                 title.className = "lexassettitle";
                 title.innerText = item.id;
                 itemEl.appendChild(title);
-
+    
                 if( !that.skip_preview ) {
-
+    
                     let preview = null;
                     const has_image = item.src && (['png', 'jpg'].indexOf( getExtension( item.src ) ) > -1 || item.src.includes("data:image/") ); // Support b64 image as src
-
+    
                     if( has_image || is_folder || !is_content_layout)
                     {
                         preview = document.createElement('img');
@@ -7123,13 +7146,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         let textEl = document.createElement('text');
                         preview.appendChild(textEl);
                         // If no extension, e.g. Clip, use the type...
-                        textEl.innerText = extension == item.id ? item.type.toUpperCase() : ("." + extension.toUpperCase());
-
+                        textEl.innerText = (!extension || extension == item.id) ? item.type.toUpperCase() : ("." + extension.toUpperCase());
+    
                         var newLength = textEl.innerText.length;
                         var charsPerLine = 2.5;
                         var newEmSize = charsPerLine / newLength;
                         var textBaseSize = 64;
-
+    
                         if(newEmSize < 1) {
                             var newFontSize = newEmSize * textBaseSize;
                             textEl.style.fontSize = newFontSize + "px";
@@ -7137,7 +7160,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         }
                     }
                 }
-
+    
                 if( !is_folder )
                 {
                     let info = document.createElement('span');
@@ -7145,13 +7168,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     info.innerText = type;
                     itemEl.appendChild(info);
                 }
-
+    
                 itemEl.addEventListener('click', function(e) {
                     e.stopImmediatePropagation();
                     e.stopPropagation();
-
+    
                     const is_double_click = e.detail == LX.MOUSE_DOUBLE_CLICK;
-
+    
                     if(!is_double_click)
                     {
                         if(!e.shiftKey)
@@ -7165,14 +7188,14 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         that._enterFolder( item );
                         return;
                     }
-
+    
                     if(that.onevent) {
                         const event = new AssetViewEvent(is_double_click ? AssetViewEvent.ASSET_DBLCLICKED : AssetViewEvent.ASSET_SELECTED, e.shiftKey ? [item] : item );
                         event.multiple = !!e.shiftKey;
                         that.onevent( event );
                     }
                 });
-
+    
                 if( that.context_menu )
                 {
                     itemEl.addEventListener('contextmenu', function(e) {
@@ -7193,32 +7216,32 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         });
                     });
                 }
-
+    
                 itemEl.addEventListener("dragstart", function(e) {
                     e.preventDefault();
                 }, false );
-
+    
                 return itemEl;
             }
-
+    
             const fr = new FileReader();
-
+    
             const filtered_data = this.currentData.filter( _i => {
                 return (this.filter != "None" ? _i.type.toLowerCase() == this.filter.toLowerCase() : true) &&
                     _i.id.toLowerCase().includes(this.search_value.toLowerCase())
             } );
-
+    
             if(filter || search_value) {
                 this.contentPage = 1;
             }
             // Show all data if using filters
             const start_index = (this.contentPage - 1) * AssetView.MAX_PAGE_ELEMENTS;
             const end_index = Math.min( start_index + AssetView.MAX_PAGE_ELEMENTS, filtered_data.length );
-
+    
             for( let i = start_index; i < end_index; ++i )
             {
                 let item = filtered_data[i];
-
+    
                 if( item.path )
                 {
                     LX.request({ url: item.path, dataType: 'blob', success: (f) => {
