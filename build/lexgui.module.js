@@ -743,6 +743,20 @@ class Area {
         if(overlay)
         {
             this.root.classList.add("overlay-" + overlay);
+
+            if(options.left) {
+                this.root.style.left = options.left;
+            }
+            if(options.right) {
+                this.root.style.right = options.right;
+            }
+            if(options.top) {
+                this.root.style.top = options.top;
+            }
+            if(options.bottom) {
+                this.root.style.bottom = options.bottom;
+            }
+            
             const draggable = options.draggable ?? true;
             if( draggable )
                 makeDraggable( root );

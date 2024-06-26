@@ -972,7 +972,7 @@ body.noevents * {
   width: 100%;
   cursor: pointer;
   color: rgba(216, 218, 230, 0.826);
-  height: 20px;
+  min-height: 20px;
   line-height: 22px;
   align-content: center;
   display: flow-root;
@@ -3673,8 +3673,8 @@ pre .line-gutter {
   height: 100%;
 }
 
-.lexvideoeditor .lexarea {
-  /* background-color: var(--global-branch-darker)!important; */
+.lexarea.lexvideoeditor {
+ 
 }
 
 .lexvideoeditor .lexarea .lexflexarea {
