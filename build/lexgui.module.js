@@ -3883,7 +3883,10 @@ class Panel {
 
             if(options.selected == b.value) 
                 buttonEl.classList.add("selected");
-                
+            
+            if(b.id) 
+                buttonEl.id = b.id;
+            
             buttonEl.innerHTML = (b.icon ? "<a class='" + b.icon +"'></a>" : "") + "<span>" + (b.icon ? "" : b.value) + "</span>";
             
             if(options.disabled)
@@ -5450,6 +5453,11 @@ class Panel {
             }
             else
                 callback( files[ 0 ] );
+        });
+
+        input.addEventListener( 'cancel', function( e ) {
+
+            callback( null );
         });
 
         element.appendChild( input );

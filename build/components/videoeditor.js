@@ -22,19 +22,19 @@ class TimeBar {
     constructor( area, type, options = {} ) {
 
         this.type = type;
-        
+
         // Create canvas
         this.canvas = document.createElement( 'canvas' );
         this.canvas.width = area.size[0];
         this.canvas.height = area.size[1];
         area.attach( this.canvas );
-        
+
         this.ctx = this.canvas.getContext("2d");
-        
+
         const barHeight = options.barHeight ?? 5;
         this.markerWidth = options.markerWidth ?? 8;
         this.offset = options.offset || 4;
-        
+
         this.width = this.canvas.width - this.offset * 2;
         this.height = barHeight;
 
@@ -47,20 +47,20 @@ class TimeBar {
         const w = this.markerWidth;
         const h = this.canvas.height - y * 2;
         this.trimRec = [this.startX, y, w, h];
-        
+
         this.lastPosition = new LX.vec2( 0, 0 );
- 
+
         this._draw();
     }
 
     _draw() {
         const ctx = this.ctx;
-    
+
         ctx.save();
         ctx.fillStyle = TimeBar.BACKGROUND_COLOR;
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        
+
         // // Draw background timeline
         ctx.fillStyle = TimeBar.COLOR;
         ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
@@ -68,7 +68,7 @@ class TimeBar {
         // Draw background trimed timeline
         ctx.fillStyle = TimeBar.ACTIVE_COLOR;
         ctx.fillRect(this.startX, this.position.y, this.endX - this.offset - this.startX, this.height);
-        
+
         ctx.restore();
 
         // Min-Max time markers
@@ -80,31 +80,31 @@ class TimeBar {
     _addTrim(name, x, options) {
 
         options = options || {};
-                       
+
         const y = this.trimRec[1];
         const w = this.trimRec[2];
         const h = this.trimRec[3];
-        
+
         const ctx = this.ctx;
         if(this.hovering == name) {
             // Shadow
             ctx.shadowColor = "white";
-            ctx.shadowBlur = 2;       
+            ctx.shadowBlur = 2;
         }
         ctx.globalAlpha = 1;
         ctx.fillStyle = ctx.strokeStyle = options.fillColor || '#111' // "#FFF";
-        
+
         ctx.beginPath();
         ctx.roundRect(x - w * 0.5, y, w, h, 2);
         ctx.fill();
         ctx.fillStyle = ctx.strokeStyle = options.fillColor || '#111' // "#FFF";
-    
+
         ctx.strokeStyle = "white";
         ctx.beginPath();
         ctx.lineWitdh = 2;
         ctx.moveTo(x, y + 4);
         ctx.lineTo(x, y + h - 4);
-        ctx.stroke();   
+        ctx.stroke();
         ctx.shadowBlur = 0;
 
     }
@@ -112,48 +112,48 @@ class TimeBar {
     _addMarker(name, x, options) {
 
         options = options || {};
-                       
+
         let y = this.offset;
         const w = options.width ? options.width : (this.dragging == name ? 6 : 4);
         const h = this.canvas.height - this.offset * 2;
-        
+
         let ctx = this.ctx;
-        
+
         ctx.globalAlpha = 1;
 
         ctx.fillStyle = ctx.strokeStyle = options.fillColor || '#111' // "#FFF";
 
-        
+
         if(this.hovering == name) {
            // Shadow
             ctx.shadowColor = "white";
-            ctx.shadowBlur = 2;       
+            ctx.shadowBlur = 2;
         }
-        
+
         // Current time line
-        ctx.fillStyle = ctx.strokeStyle = "white"; 
+        ctx.fillStyle = ctx.strokeStyle = "white";
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.lineTo(x, y + h * 0.5);
-        ctx.stroke();       
+        ctx.stroke();
         ctx.closePath();
         ctx.fillStyle = ctx.strokeStyle = options.fillColor || '#111' // "#FFF";
-        
-        
+
+
         y -= this.offset + 4;
         // Current time ball grab
         ctx.fillStyle = options.fillColor || '#e5e5e5';
         ctx.beginPath();
         ctx.roundRect(x - w * 0.5, y + this.offset, w, w, 5);
-       
+
         ctx.fill();
-        ctx.shadowBlur = 0;        
+        ctx.shadowBlur = 0;
     }
 
     onMouseDown (e) {
 
         e.preventDefault();
-        
+
         if(!this.canvas || e.target != this.canvas) {
             return;
         }
@@ -162,25 +162,25 @@ class TimeBar {
         // Process mouse
         const x = e.offsetX;
         const y = e.offsetY;
-   
+
         // Check if some marker is clicked
         const threshold = this.markerWidth;
 
         if(Math.abs(this.startX - x) < threshold && this.trimRec[1] < y &&  y < this.trimRec[3] + this.trimRec[1] ) {
             this.dragging = 'start';
             canvas.style.cursor = "grabbing";
-        } 
+        }
         else if(Math.abs(this.endX - x) < threshold && this.trimRec[1] < y &&  y < this.trimRec[3] + this.trimRec[1] ) {
             this.dragging = 'end';
             canvas.style.cursor = "grabbing";
-        } 
+        }
         else if(Math.abs(this.currentX - x) < threshold) {
             this.dragging = 'current';
             canvas.style.cursor = "grabbing";
-        } 
+        }
         else {
             if(x < this.startX) {
-                this.currentX = this.startX;        
+                this.currentX = this.startX;
             }
             else if(x > this.endX) {
                 this.currentX = this.endX;
@@ -194,9 +194,9 @@ class TimeBar {
     }
 
     update (x) {
-        this.currentX = Math.min(Math.max(this.startX, x), this.endX);  
+        this.currentX = Math.min(Math.max(this.startX, x), this.endX);
         this._draw();
-        
+
         if(this.onDraw) {
             this.onDraw();
         }
@@ -204,10 +204,10 @@ class TimeBar {
 
     onMouseUp (e) {
         e.preventDefault();
-        
+
         this.dragging = false;
         this.hovering = false;
-        
+
         if(!this.canvas) {
             return;
         }
@@ -216,13 +216,13 @@ class TimeBar {
         canvas.style.cursor = "default";
 
          // Process mouse
-        const x = e.target == this.canvas ? e.offsetX : e.offsetX - this.canvas.offsetLeft ;    
+        const x = e.target == this.canvas ? e.offsetX : e.offsetX - this.canvas.offsetLeft ;
         const y = e.target == this.canvas ? e.offsetY : e.offsetY - this.canvas.offsetTop ;
         const threshold = 5;
-        
+
         if(this.trimRec[1] < y &&  y < this.trimRec[3] + this.trimRec[1]) {
             if(x < this.startX) {
-                this.currentX = this.startX;        
+                this.currentX = this.startX;
             }
             else if(x > this.endX) {
                 this.currentX = this.endX;
@@ -232,7 +232,7 @@ class TimeBar {
             }
             if(this.onChangeCurrent) {
                 this.onChangeCurrent(this.currentX);
-            }            
+            }
         }
     }
 
@@ -249,13 +249,13 @@ class TimeBar {
             switch(this.dragging) {
                 case 'start':
                         if(x < this.position.x) {
-                            this.currentX = this.startX = this.position.x;        
+                            this.currentX = this.startX = this.position.x;
                         }
                         else if(x > this.endX) {
-                            this.currentX = this.startX = this.endX;        
+                            this.currentX = this.startX = this.endX;
                         }
                         else {
-                            this.currentX = this.startX = x; 
+                            this.currentX = this.startX = x;
                         }
 
                         if(this.onChangeStart) {
@@ -267,15 +267,15 @@ class TimeBar {
                     break;
                 case 'end':
                         if(x > this.width || x <= 0) {
-                            this.currentX = this.endX = this.width;        
+                            this.currentX = this.endX = this.width;
                         }
                         else if(x < this.startX) {
-                            this.currentX = this.endX = this.startX;        
+                            this.currentX = this.endX = this.startX;
                         }
                         else {
-                            this.currentX = this.endX = x; 
+                            this.currentX = this.endX = x;
                         }
-            
+
                         if(this.onChangeEnd) {
                             this.onChangeEnd(this.endX);
                         }
@@ -284,9 +284,9 @@ class TimeBar {
                         }
                     break;
                 case 'current':
-                    
+
                     if(x < this.startX) {
-                        this.currentX = this.startX;        
+                        this.currentX = this.startX;
                     }
                     else if(x > this.endX) {
                         this.currentX = this.endX;
@@ -304,7 +304,7 @@ class TimeBar {
             if(!this.canvas) {
                 return;
             }
-    
+
             const canvas = this.canvas;
 
             if(Math.abs(this.startX - x) < threshold && this.trimRec[1] < y &&  y < this.trimRec[3] + this.trimRec[1] ) {
@@ -335,11 +335,11 @@ class TimeBar {
         const currentRatio = this.currentX / this.width;
         const endRatio = this.endX / this.width;
         this.width = this.canvas.width - this.offset * 2;
-        
-        this.startX = Math.max(this.width * startRatio, this.offset); 
-        this.currentX = Math.min(Math.max(this.width * currentRatio, this.offset), this.width); 
-        this.endX = Math.min(this.width * endRatio, this.width); 
-        
+
+        this.startX = Math.max(this.width * startRatio, this.offset);
+        this.currentX = Math.min(Math.max(this.width * currentRatio, this.offset), this.width);
+        this.endX = Math.min(this.width * endRatio, this.width);
+
         this._draw();
     }
 }
@@ -358,10 +358,10 @@ class VideoEditor {
         this.currentTime = this.startTime = 0;
         this.startTimeString = "0:0";
         this.endTimeString = "0:0";
-   
+
         let [videoArea, controlsArea] = area.split({ type: 'vertical', sizes: ["80%", null], minimizable: false, resize: false });
         controlsArea.root.classList.add('lexconstrolsarea');
-        
+
         // Create video element and load it
         let video = this.video = options.video ?? document.createElement( 'video' );
         if(options.src) {
@@ -387,7 +387,7 @@ class VideoEditor {
 
         topArea.root.classList.add('lexbar');
         bottomArea.root.classList.add('lexbar');
-        this.controlsCurrentPanel = new LX.Panel({className: 'lexcontrolspanel lextime'});  
+        this.controlsCurrentPanel = new LX.Panel({className: 'lexcontrolspanel lextime'});
         this.controlsCurrentPanel.refresh = () => {
             this.controlsCurrentPanel.clear();
             this.controlsCurrentPanel.addLabel(this.currentTimeString, {float: "center"});
@@ -398,17 +398,17 @@ class VideoEditor {
 
         const style = getComputedStyle(bottomArea.root);
         let padding = Number(style.getPropertyValue('padding').replace("px",""));
-        this.timebar = new TimeBar(timeBarArea, TimeBar.TIMEBAR_TRIM, {offset: padding});   
+        this.timebar = new TimeBar(timeBarArea, TimeBar.TIMEBAR_TRIM, {offset: padding});
 
         // Create controls panel (play/pause button and start time)
-        this.controlsPanelLeft = new LX.Panel({className: 'lexcontrolspanel'});        
+        this.controlsPanelLeft = new LX.Panel({className: 'lexcontrolspanel'});
         this.controlsPanelLeft.refresh = () => {
             this.controlsPanelLeft.clear();
             this.controlsPanelLeft.sameLine();
             this.controlsPanelLeft.addButton('', '<i class="fa-solid ' + (this.playing ? 'fa-pause' : 'fa-play') + '"></>', (v) => {
                 this.playing = !this.playing;
                 if(this.playing) {
-                    
+
                     this.video.play();
                     // if(!this.requestId) {
                     //     this.requestId = requestAnimationFrame(this._update.bind(this))
@@ -423,11 +423,11 @@ class VideoEditor {
                 }
                 this.controlsPanelLeft.refresh();
             }, { width: '40px'});
-            
+
             this.controlsPanelLeft.addLabel(this.startTimeString, {width: 50});
             this.controlsPanelLeft.endLine();
-            
-            let availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;    
+
+            let availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;
             this.timebar.resize([availableWidth, timeBarArea.root.clientHeight]);
         }
 
@@ -436,21 +436,25 @@ class VideoEditor {
         controlsLeft.attach(this.controlsPanelLeft);
 
         // Create right controls panel (ens time)
-        this.controlsPanelRight = new LX.Panel({className: 'lexcontrolspanel'});        
+        this.controlsPanelRight = new LX.Panel({className: 'lexcontrolspanel'});
         this.controlsPanelRight.refresh = () => {
-            this.controlsPanelRight.clear();            
+            this.controlsPanelRight.clear();
             this.controlsPanelRight.addLabel(this.endTimeString, {width: 50});
         }
         this.controlsPanelRight.refresh();
         controlsRight.root.style.minWidth = 'fit-content';
-        controlsRight.attach(this.controlsPanelRight);            
-       
-        this.timebar.onChangeCurrent = this._setCurrentValue.bind(this); 
-        this.timebar.onChangeStart = this._setStartValue.bind(this); 
-        this.timebar.onChangeEnd = this._setEndValue.bind(this); 
+        controlsRight.attach(this.controlsPanelRight);
+
+        this.timebar.onChangeCurrent = this._setCurrentValue.bind(this);
+        this.timebar.onChangeStart = this._setStartValue.bind(this);
+        this.timebar.onChangeEnd = this._setEndValue.bind(this);
 
         window.addEventListener('resize', (v) => {
-            let availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;            
+            if(this.onResize) {
+                this.onResize([videoArea.root.clientWidth, videoArea.root.clientHeight]);
+            }
+            bottomArea.setSize([videoArea.root.clientWidth, 40]);
+            let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth - controlsRight.root.clientWidth;
             this.timebar.resize([availableWidth, timeBarArea.root.clientHeight]);
         })
 
@@ -459,7 +463,7 @@ class VideoEditor {
         }
 
         timeBarArea.onresize = (v) => {
-            let availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;
+            let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth - controlsRight.root.clientWidth;
             this.timebar.resize([availableWidth, v.height]);
         }
 
@@ -479,7 +483,7 @@ class VideoEditor {
                 this.timebar.onMouseMove(event);
             }
         });
-       
+
     }
 
     async _loadVideo( options = {} ) {
@@ -488,7 +492,7 @@ class VideoEditor {
             this.video.currentTime = 10000000 * Math.random();
         }
         this.video.currentTime = 0;
-        this.endTime = this.video.duration;                             
+        this.endTime = this.video.duration;
         this.timebar.currentX = this._timeToX(0);
         this._setEndValue(this.timebar.endX);
         this._setStartValue(this.timebar.startX);
@@ -506,7 +510,7 @@ class VideoEditor {
     }
 
     _update () {
-       
+
         if(this.onDraw) {
             this.onDraw();
         }
@@ -519,7 +523,7 @@ class VideoEditor {
             this.timebar.update(x);
         }
 
-        this.requestId = requestAnimationFrame(this._update.bind(this));        
+        this.requestId = requestAnimationFrame(this._update.bind(this));
     }
 
     _xToTime (x) {
@@ -555,11 +559,11 @@ class VideoEditor {
     _setStartValue ( x ) {
         const t = this._xToTime(x);
         this.startTime = this.video.currentTime = t;
-        
+
         let mzminutes = Math.floor(t / 60);
         let mzseconds = Math.floor(t - (mzminutes * 60));
         let mzmiliseconds = Math.floor((t - mzseconds)*100);
-        
+
         mzmiliseconds = mzmiliseconds < 10 ? ('0' + mzmiliseconds) : mzmiliseconds;
         mzseconds = mzseconds < 10 ? ('0' + mzseconds) : mzseconds;
         mzminutes = mzminutes < 10 ? ('0' + mzminutes) : mzminutes;
@@ -577,11 +581,11 @@ class VideoEditor {
         let mzminutes = Math.floor(t / 60);
         let mzseconds = Math.floor(t - (mzminutes * 60));
         let mzmiliseconds = Math.floor((t - mzseconds)*100);
-        
+
         mzmiliseconds = mzmiliseconds < 10 ? ('0' + mzmiliseconds) : mzmiliseconds;
         mzseconds = mzseconds < 10 ? ('0' + mzseconds) : mzseconds;
         mzminutes = mzminutes < 10 ? ('0' + mzminutes) : mzminutes;
-            
+
         this.endTimeString =  mzminutes+':'+mzseconds+'.'+mzmiliseconds;
         this.controlsPanelRight.refresh();
         if(this.onSetTime) {
@@ -610,12 +614,14 @@ class VideoEditor {
         this.controls = false;
         this.controlsArea.hide();
     }
-    
+
     delete ( ) {
         if(this.requestId) {
             cancelAnimationFrame(this.requestId);
             this.requestId = null;
         }
+
+        delete this;
     }
 }
 

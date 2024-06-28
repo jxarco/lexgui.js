@@ -2021,6 +2021,7 @@ meter::-webkit-meter-even-less-good-value {
   top: 0;
   justify-content: start;
   pointer-events: none;
+  z-index: 100;
 }
 
 .lexoverlaybuttons .lexwidget {
