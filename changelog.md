@@ -1,5 +1,12 @@
 # lexgui.js changelog
 
+## 0.1.33
+
+- New VideoEditor UI component.
+- Improvements Timeline.
+- Allow to select multiple options in AssetViewer.
+- Minor bug fixes.
+
 ## 0.1.32
 
 Timeline:
