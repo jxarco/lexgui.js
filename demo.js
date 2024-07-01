@@ -433,6 +433,7 @@ function fillPanel( panel ) {
     window.tree = panel.addTree("Scene Tree", sceneData, { 
         icons: treeIcons, 
         // filter: false,
+        addDefault: true,
         onevent: (event) => { 
             console.log(event.string());
 
@@ -453,19 +454,9 @@ function fillPanel( panel ) {
                     console.log(event.node.id + " dbl clicked"); 
                     break;
                 case LX.TreeEvent.NODE_CONTEXTMENU: 
-                    LX.addContextMenu( event.multiple ? "Selected Nodes" : event.node.id, event.value, m => {
-
-                        // {options}: callback, color
-
-                        m.add( "Select Children", () => console.log("select children") );
-                        m.add( "Clone", { callback: () => console.log("Clone"), color: "#0d5" } );
-                        m.add( "Components/Transform");
-                        m.add( "Components/MeshRenderer");
-                        m.add( "Move before sibling" );
-                        m.add( "Move after sibling" );
-                        m.add( "Move to parent" );
-                        m.add( "Delete" );
-                    });
+                    const m = event.panel;
+                    m.add( "Components/Transform");
+                    m.add( "Components/MeshRenderer");
                     break;
                 case LX.TreeEvent.NODE_DRAGGED: 
                     console.log(event.node.id + " is now child of " + event.value.id); 

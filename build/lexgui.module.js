@@ -624,6 +624,7 @@ class TreeEvent {
         this.node = node;
         this.value = value;
         this.multiple = false; // Multiple selection
+        this.panel = null;
     }
     
     string() {
@@ -2596,7 +2597,8 @@ LX.ADD_CUSTOM_WIDGET = ADD_CUSTOM_WIDGET;
 
 class NodeTree {
         
-    constructor(domEl, data, options) {
+    constructor( domEl, data, options ) {
+
         this.domEl = domEl;
         this.data = data;
         this.onevent = options.onevent;
@@ -2604,10 +2606,10 @@ class NodeTree {
         this.selected = [];
 
         if(data.constructor === Object)
-            this._create_item(null, data);
+            this._create_item( null, data );
         else
             for( let d of data )
-                this._create_item(null, d);
+                this._create_item( null, d );
     }
 
     _create_item( parent, node, level = 0, selectedId ) {
@@ -2674,32 +2676,32 @@ class NodeTree {
                 return;
             }
 
-            if(!e.shiftKey) {
-                list.querySelectorAll("li").forEach( e => { e.classList.remove('selected'); } );
+            if( !e.shiftKey ) {
+                list.querySelectorAll( "li" ).forEach( e => { e.classList.remove( 'selected' ); } );
                 this.selected.length = 0;
             }
             
             // Add or remove
             const idx = this.selected.indexOf( node );
             if( idx > -1 ) {
-                item.classList.remove('selected');
-                this.selected.splice(idx, 1);
+                item.classList.remove( 'selected' );
+                this.selected.splice( idx, 1 );
             }else {
-                item.classList.add('selected');
+                item.classList.add( 'selected' );
                 this.selected.push( node );
             }
 
             // Only Show children...
-            if(is_parent && node.id.length > 1 /* Strange case... */) {
+            if( is_parent && node.id.length > 1 /* Strange case... */) {
                 node.closed = false;
-                if(that.onevent) {
+                if( that.onevent ) {
                     const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed);
                     that.onevent( event );
                 }
                 that.frefresh( node.id );
             }
 
-            if(that.onevent) {
+            if( that.onevent ) {
                 const event = new TreeEvent(TreeEvent.NODE_SELECTED, e.shiftKey ? this.selected : node );
                 event.multiple = e.shiftKey;
                 that.onevent( event );
@@ -2707,15 +2709,17 @@ class NodeTree {
         });
 
         item.addEventListener("dblclick", function() {
+
             if( that.options.rename ?? true )
             {
                 // Trigger rename
                 node.rename = true;
                 that.refresh();
             }
+
             if( that.onevent )
             {
-                const event = new TreeEvent(TreeEvent.NODE_DBLCLICKED, node);
+                const event = new TreeEvent( TreeEvent.NODE_DBLCLICKED, node );
                 that.onevent( event );
             }
         });
@@ -2725,19 +2729,88 @@ class NodeTree {
             if(that.onevent) {
                 const event = new TreeEvent(TreeEvent.NODE_CONTEXTMENU, this.selected.length > 1 ? this.selected : node, e);
                 event.multiple = this.selected.length > 1;
+
+                LX.addContextMenu( event.multiple ? "Selected Nodes" : event.node.id, event.value, m => {
+                    event.panel = m;
+                });
+
                 that.onevent( event );
+
+                if( ( this.options.addDefault ?? false ) == true )
+                {
+                    if( event.panel.items )
+                    {
+                        event.panel.add( "" );
+                    }
+    
+                    event.panel.add( "Select Children", () => {
+    
+                        const selectChildren = ( n ) => {
+                            
+                            if( n.closed )
+                            {
+                                return;
+                            }
+    
+                            for( let child of n.children ?? [] )
+                            {
+                                if( !child )
+                                {
+                                    continue;   
+                                }
+    
+                                let nodeItem = this.domEl.querySelector( '#' + child.id );
+                                nodeItem.classList.add('selected');
+                                this.selected.push( child ); 
+                                selectChildren( child );
+                            }
+                        };
+    
+                        // Add childs of the clicked node
+                        selectChildren( node );
+    
+                    } );
+                    
+                    // event.panel.add( "Clone", { callback: () => {
+    
+                    // } } );
+    
+                    event.panel.add( "Delete", { callback: () => {
+    
+                        // It's the root node
+                        if( !node.parent )
+                        {
+                            return;
+                        }
+    
+                        if( that.onevent ) {
+                            const event = new TreeEvent( TreeEvent.NODE_DELETED, node, e );
+                            that.onevent( event );
+                        }
+    
+                        // Delete nodes now
+                        let childs = node.parent.children;
+                        const index = childs.indexOf( node );
+                        childs.splice( index, 1 );
+    
+                        this.refresh();
+                    } } );
+                }
             }
         });
 
         item.addEventListener("keydown", e => {
-            if(node.rename)
-            return;
+
+            if( node.rename )
+                return;
+
             e.preventDefault();
+
             if( e.key == "Delete" )
             {
                 // Send event now so we have the info in selected array..
-                if(that.onevent) {
-                    const event = new TreeEvent(TreeEvent.NODE_DELETED, this.selected.length > 1 ? this.selected : node, e);
+                if( that.onevent ) {
+                    const event = new TreeEvent( TreeEvent.NODE_DELETED, this.selected.length > 1 ? this.selected : node, e );
                     event.multiple = this.selected.length > 1;
                     that.onevent( event );
                 }
@@ -2755,8 +2828,8 @@ class NodeTree {
             }
             else if( e.key == "ArrowUp" || e.key == "ArrowDown" ) // Unique or zero selected
             {
-                var selected = this.selected.length > 1 ? (e.key == "ArrowUp" ? this.selected.shift() : this.selected.pop()) : this.selected[0];
-                var el = this.domEl.querySelector("#" + LX.getSupportedDOMName( selected.id ) );
+                var selected = this.selected.length > 1 ? ( e.key == "ArrowUp" ? this.selected.shift() : this.selected.pop() ) : this.selected[ 0 ];
+                var el = this.domEl.querySelector( "#" + LX.getSupportedDOMName( selected.id ) );
                 var sibling = e.key == "ArrowUp" ? el.previousSibling : el.nextSibling;
                 if( sibling ) sibling.click();
             }

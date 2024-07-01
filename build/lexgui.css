@@ -7,7 +7,7 @@
   --global-title-font: "Poppins", sans-serif;
   --global-font-size: 12px;
   --global-color-primary: #212121;
-  --global-color-secondary: #2e2e2e;
+  --global-color-secondary: #2c2c2c;
   --global-color-terciary: #444;
   --global-selected: #3e57e4;
   --global-selected-light: #7b8ae2;
@@ -17,12 +17,12 @@
   --branch-title-inactive-background: #42484e;
   --global-button-color: #3e3e3e;
   --global-button-color-hovered: #444;
-  --global-text: #d4d4dce6;
+  --global-text: #dedee6f0;
   --global-text-primary: #f4f4ffe6;
   --global-text-secondary: #cacad4ea;
   --global-text-terciary: #727272b9;
   --global-dark-background: #121212;
-  --global-blur-background: #28292bd5;
+  --global-blur-background: #232425d5;
   --global-color-transparent: #7b8ae200;
   --transition-time: 1000;
   --code-editor-font-size: 14px;
@@ -155,14 +155,14 @@ body.noevents * {
   border-radius: 8px;
   border: 1px solid #d0d0ec6b;
   width: 30%;
+  max-width: 740px;
   top: 15%;
-  left: calc(50% - 15%);
+  left: calc(50% - min(15%, 740px));
   display: flex;
   flex-wrap: wrap;
   z-index: 105;
   -webkit-mask-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAA5JREFUeNpiYGBgAAgwAAAEAAGbA+oJAAAAAElFTkSuQmCC); /* this fixes the overflow:hidden in Chrome/Opera */
   mask-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAA5JREFUeNpiYGBgAAgwAAAEAAGbA+oJAAAAAElFTkSuQmCC); /* this fixes the overflow:hidden in Chrome/Opera */
-  /* box-shadow: 0 2px 10px black; */
 }
 
 #global_search a {
@@ -249,7 +249,7 @@ body.noevents * {
   min-width: 256px;
   /* overflow: hidden; */
   box-shadow: 0 2px 8px #101010;
-  border-radius: 8px;
+  border-radius: 6px;
   z-index: 101;
   background-color: var(--global-color-secondary);
 }
@@ -448,7 +448,7 @@ body.noevents * {
 }
 
 .lexbranch {
-  border-radius: 8px;
+  border-radius: 6px;
   margin-bottom: 4px !important;
 }
 
@@ -1393,7 +1393,7 @@ input[type="range"] {
 /* Data Tree Widget */
 
 .lextree {
-  border-radius: 8px;
+  border-radius: 6px;
   width: calc( 100% - 6px );
   min-height: 12px;
   margin: 0 auto;
@@ -1636,7 +1636,7 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexmenubar .lexmenuentry span {
   padding: 4px 8px;
-  border-radius: 6px;
+  border-radius: 4px;
 }
 
 .lexmenubar .lexmenuentry:hover span, .lexmenubar .lexmenuentry.selected span {
@@ -1784,7 +1784,7 @@ meter::-webkit-meter-even-less-good-value {
   background-color: var(--global-color-secondary);
   margin-top: 10px;
   margin-bottom: 8px;
-  border-radius: 8px;
+  border-radius: 6px;
   padding-left: 4px;
   padding-right: 4px;
 }
@@ -2119,7 +2119,7 @@ meter::-webkit-meter-even-less-good-value {
 .lexoverlaybuttons .lexoverlaygroup {
   display: flex;
   margin-right: 6px;
-  background-color: #313132a5;
+  background-color: #313132b5;
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
   border-radius: 8px;
@@ -2204,7 +2204,7 @@ meter::-webkit-meter-even-less-good-value {
   padding-left: 16px;
   padding-right: 16px;
   margin-right: 4px;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .lexareatabs.fit {
