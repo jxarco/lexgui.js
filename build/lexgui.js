@@ -4729,19 +4729,19 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             flag.id = "checkbox"+simple_guidGenerator();
             flag.innerHTML = "<a class='fa-solid fa-check' style='display: " + (flag.value ? "block" : "none") + "'></a>";
             
-            if(options.disabled) {
+            if( options.disabled ) {
                 flag.disabled = true;
                 toggle.className += " disabled";
             }
 
-            toggle.appendChild(flag);
+            toggle.appendChild( flag );
 
-            let value_name = document.createElement('span');
+            let value_name = document.createElement( 'span' );
             value_name.id = "checkboxtext";
             value_name.innerHTML = "On";
 
-            container.appendChild(toggle);
-            container.appendChild(value_name);
+            container.appendChild( toggle );
+            container.appendChild( value_name );
 
             toggle.addEventListener( "click" , e => {
 
@@ -4749,7 +4749,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 if( flag.disabled )
                     return;
     
-                const skipCallback = (e.detail.constructor == Number ? null : skipCallback);
+                const skipCallback = ( e.detail.constructor == Number ? null : e.detail );
 
                 let check = toggle.querySelector( ".checkbox a" );
     

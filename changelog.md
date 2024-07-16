@@ -2,7 +2,7 @@
 
 ## 0.1.33
 
-- New VideoEditor UI component.
+- Work on VideoEditor UI component.
 - Improvements Timeline.
 - Allow to select multiple options in AssetViewer.
 - Minor bug fixes.
