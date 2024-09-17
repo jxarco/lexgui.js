@@ -1,11 +1,18 @@
 # lexgui.js changelog
 
+## 0.1.34
+
+Fix setValue on Checkbox.
+Fix position of Dropdown menu when content is scrolled.
+`moveOutAction` option to delete or clamp curve points.
+Minor tweaks.
+
 ## 0.1.33
 
-- Work on VideoEditor UI component.
-- Improvements Timeline.
-- Allow to select multiple options in AssetViewer.
-- Minor bug fixes.
+Work on VideoEditor UI component.
+Improvements Timeline.
+Allow to select multiple options in AssetViewer.
+Minor bug fixes.
 
 ## 0.1.32
 
