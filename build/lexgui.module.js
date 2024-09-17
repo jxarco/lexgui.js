@@ -4119,37 +4119,39 @@ class Panel {
 
     addDropdown( name, values, value, callback, options = {} ) {
 
-        let widget = this.create_widget(name, Widget.DROPDOWN, options);
+        let widget = this.create_widget( name, Widget.DROPDOWN, options );
+
         widget.onGetValue = () => {
-            return element.querySelector("li.selected").getAttribute('value');
+            return element.querySelector( "li.selected" ).getAttribute( 'value' );
         };
+
         widget.onSetValue = ( newValue, skipCallback ) => {
-            let btn = element.querySelector(".lexwidgetname .lexicon");
-            if(btn) btn.style.display = (newValue != wValue.iValue ? "block" : "none");
+            let btn = element.querySelector( ".lexwidgetname .lexicon" );
+            if( btn ) btn.style.display = ( newValue != wValue.iValue ? "block" : "none" );
             value = newValue;
-            list.querySelectorAll('li').forEach( e => { if( e.getAttribute('value') == value ) e.click() } );
-            if( !skipCallback ) this._trigger( new IEvent(name, value, null), callback ); 
+            list.querySelectorAll( 'li' ).forEach( e => { if( e.getAttribute('value') == value ) e.click() } );
+            if( !skipCallback ) this._trigger( new IEvent( name, value, null ), callback );
         };
 
         let element = widget.domEl;
         let that = this;
 
         // Add reset functionality
-        if(widget.name && !(options.skipReset ?? false))
+        if(widget.name && !( options.skipReset ?? false ))
         {
-            Panel._add_reset_property(element.domName, function() {
+            Panel._add_reset_property( element.domName, function() {
                 value = wValue.iValue;
-                list.querySelectorAll('li').forEach( e => { if( e.getAttribute('value') == value ) e.click() } );
+                list.querySelectorAll( 'li' ).forEach( e => { if( e.getAttribute('value') == value ) e.click() } );
                 this.style.display = "none";
             });
         }
 
-        let container = document.createElement('div');
+        let container = document.createElement( 'div' );
         container.className = "lexdropdown";
         container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
         
         // Add widget value
-        let wValue = document.createElement('div');
+        let wValue = document.createElement( 'div' );
         wValue.className = "lexdropdown lexoption";
         wValue.name = name;
         wValue.iValue = value;
@@ -4160,14 +4162,15 @@ class Panel {
 
         this.queue(container);
 
-        let selectedOption = this.addButton(null, buttonName, (value, event) => {
+        let selectedOption = this.addButton( null, buttonName, (value, event) => {
             if( list.unfocus_event ) {
                 delete list.unfocus_event;
                 return;
             }
-            element.querySelector(".lexoptions").style.top = (selectedOption.offsetTop + selectedOption.offsetHeight) + 'px';
-            element.querySelector(".lexoptions").style.width = (event.currentTarget.clientWidth) + 'px';
-            element.querySelector(".lexoptions").toggleAttribute('hidden');
+            const topPosition = selectedOption.getBoundingClientRect().y;
+            list.style.top = (topPosition + selectedOption.offsetHeight) + 'px';
+            list.style.width = (event.currentTarget.clientWidth) + 'px';
+            list.toggleAttribute('hidden');
             list.focus();
         }, { buttonClass: 'array', skipInlineCount: true });
 
