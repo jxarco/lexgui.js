@@ -1417,6 +1417,7 @@ input[type="range"] {
 
 .lextree .lextreetools input {
   font-size: var(--global-font-size);
+  padding-left: 8px;
 }
 
 .lextree .lextreetools.notitle {
