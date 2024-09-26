@@ -1,5 +1,10 @@
 # lexgui.js changelog
 
+## 0.1.35 (dev)
+
+Fix `moveOutAction` clamping X value.
+Add values in curve only with MOUSE_LEFT_CLICK.
+
 ## 0.1.34
 
 Fix setValue on Checkbox.

@@ -6611,11 +6611,11 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     
                 selected = computeSelected( mousex, canvas.height - mousey );
     
-                if(selected == -1 && element.allow_add_values) {
-                    var v = unconvert([ mousex, canvas.height-mousey ]);
-                    element.value.push(v);
+                if( e.button == LX.MOUSE_LEFT_CLICK && selected == -1 && element.allow_add_values ) {
+                    var v = unconvert([ mousex, canvas.height - mousey ]);
+                    element.value.push( v );
                     sortValues();
-                    selected = element.value.indexOf(v);
+                    selected = element.value.indexOf( v );
                 }
     
                 last_mouse = [ mousex, mousey ];
@@ -6647,7 +6647,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     {
                         const d = [ currentMouseDiff[ 0 ] - mousex, currentMouseDiff[ 1 ] - mousey ];
                         let value = element.value[ selected ];
-                        value[ 0 ] = ( d[ 0 ] == 0.0 ) ? value[ 0 ] : ( d[ 0 ] < 0.0 ? element.xrange[ 1 ] : element.xrange[ 0 ] );
+                        value[ 0 ] = ( d[ 0 ] == 0.0 ) ? value[ 0 ] : ( d[ 0 ] < 0.0 ? element.xrange[ 0 ] : element.xrange[ 1 ] );
                         value[ 1 ] = ( d[ 1 ] == 0.0 ) ? value[ 1 ] : ( d[ 1 ] < 0.0 ? element.yrange[ 1 ] : element.yrange[ 0 ] );
                     }
     

@@ -6702,11 +6702,11 @@ class Curve {
 
             selected = computeSelected( mousex, canvas.height - mousey );
 
-            if(selected == -1 && element.allow_add_values) {
-                var v = unconvert([ mousex, canvas.height-mousey ]);
-                element.value.push(v);
+            if( e.button == LX.MOUSE_LEFT_CLICK && selected == -1 && element.allow_add_values ) {
+                var v = unconvert([ mousex, canvas.height - mousey ]);
+                element.value.push( v );
                 sortValues();
-                selected = element.value.indexOf(v);
+                selected = element.value.indexOf( v );
             }
 
             last_mouse = [ mousex, mousey ];
