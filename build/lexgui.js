@@ -472,7 +472,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         var link = document.createElement( 'link' );
         link.rel = 'stylesheet';
         link.type = 'text/css';
-        link.href = 'https://use.fontawesome.com/releases/v6.5.1/css/all.css';
+        link.href = 'https://use.fontawesome.com/releases/v6.6.0/css/all.css';
         head.appendChild( link );
 
         // Global vars
