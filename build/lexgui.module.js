@@ -523,26 +523,29 @@ LX.message = message;
  * size: (Array) [width, height]
  */
 
-function popup(text, title, options = {})
+function popup( text, title, options = {} )
 {
-    if(!text)
+    if( !text )
+    {
         throw("No message to show");
+    }
 
-    options.size = options.size ?? ["auto", "auto"];
+    options.size = options.size ?? [ "auto", "auto" ];
     options.class = "lexpopup";
-    const time = options.timeout || 3000; 
 
-    const dialog = new Dialog(title, p => {
-        p.addTextArea(null, text, null, { disabled: true, fitHeight: true });
-    }, options);
+    const time = options.timeout || 3000; 
+    const dialog = new Dialog( title, p => {
+        p.addTextArea( null, text, null, { disabled: true, fitHeight: true } );
+    }, options );
     
-    dialog.root.classList.add("fadein");
+    dialog.root.classList.add( 'fadein' );
     setTimeout(() => {
-        dialog.root.classList.remove("fadein");
-        dialog.root.classList.add("fadeout");   
-    }, time - 1000);
+        dialog.root.classList.remove( 'fadein' );
+        dialog.root.classList.add( 'fadeout' );
+    }, time - 1000 );
     
-    setTimeout(dialog.close, time);
+    setTimeout( dialog.close, time );
+
     return dialog;
 }
 
@@ -561,36 +564,45 @@ LX.popup = popup;
  * required: Input has to be filled [true]. Default: false
  */
 
-function prompt(text, title, callback, options = {})
+function prompt( text, title, callback, options = {} )
 {
     options.modal = true;
 
     let value = "";
 
-    const dialog = new Dialog(title, p => {
-        p.addTextArea(null, text, null, { disabled: true });
-        if(options.input !== false)
-            p.addText(null, options.input || value, (v) => value = v, {placeholder: "..."} );
-        p.sameLine(2);
-        p.addButton(null, options.accept || "OK", () => { 
-            if(options.required && value === '') {
+    const dialog = new Dialog( title, p => {
 
+        p.addTextArea( null, text, null, { disabled: true, fitHeight: true } );
+
+        if( options.input ?? true )
+        {
+            p.addText( null, options.input || value, v => value = v, { placeholder: "..." } );
+        }
+
+        p.sameLine( 2 );
+
+        p.addButton( null, options.accept || "OK", () => {
+            if( options.required && value === '' )
+            {
                 text += text.includes("You must fill the input text.") ? "": "\nYou must fill the input text.";
-                dialog.close() ;
-                prompt(text, title, callback, options);
-            }else {
-
-                callback.call(this, value); 
-                dialog.close() ;
+                dialog.close();
+                prompt( text, title, callback, options );
+            }else
+            {
+                if( callback ) callback.call( this, value );
+                dialog.close();
             }
-            
         }, { buttonClass: "accept" });
+
         p.addButton(null, "Cancel", () => {if(options.on_cancel) options.on_cancel(); dialog.close();} );
-    }, options);
+
+    }, options );
 
     // Focus text prompt
-    if(options.input !== false)
-        dialog.root.querySelector('input').focus();
+    if( options.input ?? true )
+    {
+        dialog.root.querySelector( 'input' ).focus();
+    }
     
     return dialog;
 }
