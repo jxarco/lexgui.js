@@ -661,16 +661,20 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
     LX.TreeEvent = TreeEvent;
 
-    function emit( signal_name, value, target )
+    function emit( signalName, value, target )
     {
-        const data = LX.signals[ signal_name ];
+        const data = LX.signals[ signalName ];
 
         if( !data )
         return;
 
         if( target )
         {
-            if(target[signal_name]) target[signal_name].call(target, value);
+            if( target[ signalName ])
+            {
+                target[signalName].call( target, value );
+            }
+
             return;
         }
 
@@ -680,11 +684,12 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             {
                 obj.set( value );
                 
-                if(obj.options && obj.options.callback)
-                    obj.options.callback(value, data);
-            }else
+                if( obj.options && obj.options.callback )
+                    obj.options.callback( value, data );
+            }
+            else
             {
-                obj[signal_name].call(obj, value);
+                obj[ signalName ].call( obj, value );
             }
         }
     }
@@ -723,13 +728,17 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
          */
 
         constructor( options = {} ) {
-        
-            var root = document.createElement('div');
+
+            var root = document.createElement( 'div' );
             root.className = "lexarea";
-            if(options.id)
+            if( options.id )
+            {
                 root.id = options.id;
-            if(options.className)
+            }
+            if( options.className )
+            {
                 root.className += " " + options.className;
+            }
     
             var width = options.width || "calc( 100% )";
             var height = options.height || "100%";
@@ -737,10 +746,14 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             // This has default options..
             this.setLimitBox( options.minWidth, options.minHeight, options.maxWidth, options.maxHeight );
     
-            if(width.constructor == Number)
+            if( width.constructor == Number )
+            {
                 width += "px";
-            if(height.constructor == Number)
+            }
+            if( height.constructor == Number )
+            {
                 height += "px";
+            }
     
             root.style.width = width;
             root.style.height = height;
@@ -751,115 +764,136 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             this.sections = [];
             this.panels = [];
     
-            if(!options.no_append) {
+            if( !options.no_append )
+            {
                 var lexroot = document.getElementById("lexroot");
                 lexroot.appendChild( this.root );
             }
 
             let overlay = options.overlay;
 
-            if(overlay)
+            if( overlay )
             {
                 this.root.classList.add("overlay-" + overlay);
-                
-                if( options.draggable )
+
+                if( options.left )
+                {
+                    this.root.style.left = options.left;
+                }
+                else if( options.right )
+                {
+                    this.root.style.right = options.right;
+                }
+                else if( options.top )
+                {
+                    this.root.style.top = options.top;
+                }
+                else if( options.bottom )
+                {
+                    this.root.style.bottom = options.bottom;
+                }
+
+                const draggable = options.draggable ?? true;
+                if( draggable )
                     makeDraggable( root );
 
                 if( options.resizeable ) {
                     root.classList.add("resizeable");
                 }
 
-                if(options.resize)
+                if( options.resize )
                 {                  
                     this.split_bar = document.createElement("div");
-                    let type = overlay == "left" || overlay == "right" ? "horizontal" : "vertical";
+                    let type = (overlay == "left") || (overlay == "right") ? "horizontal" : "vertical";
                     this.type = overlay;;
                     this.split_bar.className = "lexsplitbar " + type;
-                    if(overlay == "right") {
+
+                    if( overlay == "right" )
+                    {
                         this.split_bar.style.width = LX.DEFAULT_SPLITBAR_SIZE + "px";
-                        this.split_bar.style.left = -LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
+                        this.split_bar.style.left = -(LX.DEFAULT_SPLITBAR_SIZE / 2.0) + "px";
                     } 
-                    else if(overlay == "left") {
+                    else if( overlay == "left" )
+                    {
                         let size = Math.min(document.body.clientWidth - LX.DEFAULT_SPLITBAR_SIZE, this.root.clientWidth);
                         this.split_bar.style.width = LX.DEFAULT_SPLITBAR_SIZE + "px";
-                        this.split_bar.style.left = size + LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
+                        this.split_bar.style.left = size + (LX.DEFAULT_SPLITBAR_SIZE / 2.0) + "px";
                     }
-                    else if (overlay == "top") {
+                    else if( overlay == "top" )
+                    {
                         let size = Math.min(document.body.clientHeight - LX.DEFAULT_SPLITBAR_SIZE, this.root.clientHeight);
                         this.split_bar.style.height = LX.DEFAULT_SPLITBAR_SIZE + "px";
-                        this.split_bar.style.top = size + LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
+                        this.split_bar.style.top = size + (LX.DEFAULT_SPLITBAR_SIZE / 2.0) + "px";
                     }
-                    else if(overlay == "bottom") {
+                    else if( overlay == "bottom" )
+                    {
                         this.split_bar.style.height = LX.DEFAULT_SPLITBAR_SIZE + "px";
-                        this.split_bar.style.top = -LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
+                        this.split_bar.style.top = -(LX.DEFAULT_SPLITBAR_SIZE / 2.0) + "px";
                     }
 
                     this.split_bar.addEventListener("mousedown", inner_mousedown);
-                    this.root.appendChild(this.split_bar);
+                    this.root.appendChild( this.split_bar );
                     
                     var that = this;
-                    var last_pos = [0,0];
+                    var last_pos = [ 0, 0 ];
                     
-                    function inner_mousedown(e)
+                    function inner_mousedown( e )
                     {
                         var doc = that.root.ownerDocument;
-                        doc.addEventListener("mousemove",inner_mousemove);
-                        doc.addEventListener("mouseup",inner_mouseup);
-                        last_pos[0] = e.x;
-                        last_pos[1] = e.y;
+                        doc.addEventListener( 'mousemove', inner_mousemove );
+                        doc.addEventListener( 'mouseup', inner_mouseup );
+                        last_pos[ 0 ] = e.x;
+                        last_pos[ 1 ] = e.y;
                         e.stopPropagation();
                         e.preventDefault();
-                        document.body.classList.add("nocursor");
-                        that.split_bar.classList.add("nocursor");
+                        document.body.classList.add( 'nocursor' );
+                        that.split_bar.classList.add( 'nocursor' );
                     }
 
-                    function inner_mousemove(e)
+                    function inner_mousemove( e )
                     {
-                        switch(that.type) {
+                        switch( that.type ) {
                             case "right":
-                                var dt = (last_pos[0] - e.x);
-                                var size = (that.root.offsetWidth + dt);
+                                var dt = ( last_pos[ 0 ] - e.x );
+                                var size = ( that.root.offsetWidth + dt );
                                 that.root.style.width = size + "px";
                                 break;
-                            
                             case "left":
-                                var dt = (last_pos[0] - e.x);
+                                var dt = ( last_pos[ 0 ] - e.x );
                                 var size = Math.min(document.body.clientWidth - LX.DEFAULT_SPLITBAR_SIZE, (that.root.offsetWidth - dt));
                                 that.root.style.width = size + "px";
                                 that.split_bar.style.left = size + LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
                                 break;
-                            
                             case "top":
-                                var dt = (last_pos[1] - e.y);
+                                var dt = ( last_pos[ 1 ] - e.y );
                                 var size = Math.min(document.body.clientHeight - LX.DEFAULT_SPLITBAR_SIZE, (that.root.offsetHeight - dt));
                                 that.root.style.height = size + "px";
                                 that.split_bar.style.top = size + LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
                                 break;
-
                             case "bottom":
-                                var dt = (last_pos[1] - e.y);
-                                var size = (that.root.offsetHeight + dt);
+                                var dt = ( last_pos[ 1 ] - e.y );
+                                var size = ( that.root.offsetHeight + dt );
                                 that.root.style.height = size + "px";
                                 break;
                         }
                         
-                        last_pos[0] = e.x;
-                        last_pos[1] = e.y;
+                        last_pos[ 0 ] = e.x;
+                        last_pos[ 1 ] = e.y;
                         e.stopPropagation();
                         e.preventDefault();
                         
                         // Resize events   
-                        if(that.onresize)
+                        if( that.onresize )
                             that.onresize( that.root.getBoundingClientRect() );
                     }
 
-                    function inner_mouseup(e)
+                    function inner_mouseup( e )
                     {
                         var doc = that.root.ownerDocument;
-                        doc.removeEventListener("mousemove",inner_mousemove);
-                        doc.removeEventListener("mouseup",inner_mouseup);
-                        document.body.classList.remove("nocursor");
-                        that.split_bar.classList.remove("nocursor");
+                        doc.removeEventListener( 'mousemove', inner_mousemove );
+                        doc.removeEventListener( 'mouseup', inner_mouseup );
+                        document.body.classList.remove( 'nocursor' );
+                        that.split_bar.classList.remove( 'nocursor' );
                     }
                 }
             }
@@ -1142,7 +1176,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             this.propagateEvent("onresize");
         }
 
-         /**
+        /**
         * @method extend
         * Hide 2nd area split
         */
@@ -2474,8 +2508,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         }
 
         refresh() {
-            // this.domEl.innerHTML = "";
-            // if( this.options.callback ) this.options.callback();
+
         }
     }
 

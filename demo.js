@@ -2,6 +2,8 @@ import { LX } from 'lexgui';
 import 'lexgui/components/codeeditor.js';
 import 'lexgui/components/timeline.js';
 
+window.LX = LX;
+
 // Init library and get main area
 let area = LX.init();
 
