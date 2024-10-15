@@ -45,43 +45,43 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
     LX.has = has;
 
-    function getExtension(s)
+    function getExtension( s )
     { 
         return s.includes('.') ? s.split('.').pop() : null;
     }
-    
+
     LX.getExtension = getExtension;
-    
-    function deepCopy(o)
+
+    function deepCopy( o )
     { 
         return JSON.parse(JSON.stringify(o)) 
     }
 
     LX.deepCopy = deepCopy;
 
-    function setThemeColor(color_name, color)
+    function setThemeColor( colorName, color )
     {
-        var r = document.querySelector(':root');
-        r.style.setProperty("--" + color_name, color);
+        var r = document.querySelector( ':root' );
+        r.style.setProperty( '--' + colorName, color );
     }
 
     LX.setThemeColor = setThemeColor;
-    
-    function getThemeColor(color_name)
+
+    function getThemeColor( colorName )
     {
-        var r = getComputedStyle(document.querySelector(':root'));
-        return r.getPropertyValue("--" + color_name);
+        var r = getComputedStyle( document.querySelector( ':root' ) );
+        return r.getPropertyValue( '--' + colorName );
     }
 
     LX.getThemeColor = getThemeColor;
 
-    function getBase64Image(img) {
-        var canvas = document.createElement("canvas");
+    function getBase64Image( img ) {
+        var canvas = document.createElement( 'canvas' );
         canvas.width = img.width;
         canvas.height = img.height;
-        var ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0);
-        return canvas.toDataURL("image/png");
+        var ctx = canvas.getContext( '2d' );
+        ctx.drawImage( img, 0, 0 );
+        return canvas.toDataURL( 'image/png' );
     }
 
     LX.getBase64Image = getBase64Image;
@@ -133,22 +133,26 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
     function doAsync( fn, ms ) {
         if( ASYNC_ENABLED )
+        {
             setTimeout( fn, ms ?? 0 );
+        }
         else
+        {
             fn();
+        }
     }
 
     // Math classes
 
     class vec2 {
 
-        constructor(x, y) {
+        constructor( x, y ) {
             this.x = x ?? 0;
-            this.y = y ?? (x ?? 0);
+            this.y = y ?? ( x ?? 0 );
         }
     
-        get xy() { return [ this.x, this.y]; }
-        get yx() { return [ this.y, this.x]; }
+        get xy() { return [ this.x, this.y ]; }
+        get yx() { return [ this.y, this.x ]; }
     
         set ( x, y ) { this.x = x; this.y = y; }
         add ( v, v0 = new vec2() ) { v0.set( this.x + v.x, this.y + v.y ); return v0; }
@@ -661,18 +665,20 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
     LX.TreeEvent = TreeEvent;
 
-    function emit( signalName, value, target )
+    function emit( signalName, value, options = {} )
     {
         const data = LX.signals[ signalName ];
 
         if( !data )
         return;
 
+        const target = options.target;
+
         if( target )
         {
             if( target[ signalName ])
             {
-                target[signalName].call( target, value );
+                target[ signalName ].call( target, value );
             }
 
             return;
@@ -682,10 +688,12 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         {
             if( obj.constructor === Widget )
             {
-                obj.set( value );
+                obj.set( value, options.skipCallback ?? true );
                 
                 if( obj.options && obj.options.callback )
+                {
                     obj.options.callback( value, data );
+                }
             }
             else
             {
@@ -1626,7 +1634,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 this.classList.remove("dockingtab");
 
                 // Change tabs instance
-                LX.emit( "@on_tab_docked", el.instance );
+                LX.emit( "@on_tab_docked" );
                 el.instance = that;
 
                 // Show on drop
@@ -1736,8 +1744,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             contentEl.id = tabEl.id + "_content";
 
             LX.addSignal( "@on_tab_docked", tabEl, function() {
-                if( this.parentElement.childNodes.length == 1 ){
-                    this.parentElement.childNodes[0].click(); // single tab!!
+                if( this.parentElement.childNodes.length == 1 )
+                {
+                    this.parentElement.childNodes[ 0 ].click(); // single tab!!
                 } 
             } );
             
@@ -5717,14 +5726,19 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     class Branch {
         
         constructor( name, options = {} ) {
+
             this.name = name;
 
-            var root = document.createElement('div');
+            var root = document.createElement( 'div' );
             root.className = "lexbranch";
-            if(options.id)
+            if( options.id )
+            {
                 root.id = options.id;
-            if(options.className)
+            }
+            if( options.className )
+            {
                 root.className += " " + options.className;
+            }
 
             root.style.width = "calc(100% - 7px)";
             root.style.margin = "0 auto";
@@ -5735,65 +5749,69 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             this.widgets = [];
 
             // create element
-            var title = document.createElement('div');
+            var title = document.createElement( 'div' );
             title.className = "lexbranchtitle";
-            
+
             title.innerHTML = "<a class='fa-solid fa-angle-up switch-branch-button'></a>";
-            if(options.icon) {
+            if( options.icon )
+            {
                 title.innerHTML += "<a class='branchicon " + options.icon + "' style='margin-right: 8px; margin-bottom: -2px;'>";
             }
             title.innerHTML += name || "Branch";
 
-            root.appendChild(title);
+            root.appendChild( title );
 
-            var branch_content = document.createElement('div');
-            branch_content.id = name.replace(/\s/g, '');
-            branch_content.className = "lexbranchcontent";
-            root.appendChild(branch_content);
-            this.content = branch_content;
+            var branchContent = document.createElement( 'div' );
+            branchContent.id = name.replace(/\s/g, '');
+            branchContent.className = "lexbranchcontent";
+            root.appendChild(branchContent);
+            this.content = branchContent;
 
             this._addBranchSeparator();
 
-            if( options.closed ) {
+            if( options.closed )
+            {
                 title.className += " closed";
                 root.className += " closed";
                 this.grabber.setAttribute('hidden', true);
                 doAsync( () => {
-                    this.content.setAttribute('hidden', true);
-                }, 15);
+                    this.content.setAttribute( 'hidden', true );
+                }, 15 );
             }
 
-            this.onclick = function(e){
+            this.onclick = function( e ) {
                 e.stopPropagation();
-                this.classList.toggle('closed');
-                this.parentElement.classList.toggle('closed');
+                this.classList.toggle( 'closed' );
+                this.parentElement.classList.toggle( 'closed' );
 
-                that.content.toggleAttribute('hidden');
-                that.grabber.toggleAttribute('hidden');
+                that.content.toggleAttribute( 'hidden' );
+                that.grabber.toggleAttribute( 'hidden' );
 
-                LX.emit("@on_branch_closed", this.classList.contains("closed"), that.panel);
+                LX.emit( "@on_branch_closed", this.classList.contains("closed"), { target: that.panel } );
             };
 
-            this.oncontextmenu = function(e) {
+            this.oncontextmenu = function( e ) {
 
                 e.preventDefault();
                 e.stopPropagation();
 
                 if( this.parentElement.classList.contains("dialog") )
-                   return;
-                   
+                {
+                    return;
+                }
+
                 addContextMenu("Dock", e, p => {
                     e.preventDefault();
                     // p.add('<i class="fa-regular fa-window-maximize">', {id: 'dock_options0'});
                     // p.add('<i class="fa-regular fa-window-maximize fa-rotate-180">', {id: 'dock_options1'});
                     // p.add('<i class="fa-regular fa-window-maximize fa-rotate-90">', {id: 'dock_options2'});
                     // p.add('<i class="fa-regular fa-window-maximize fa-rotate-270">', {id: 'dock_options3'});
-                    p.add('Floating', that._on_make_floating.bind(that));
+                    p.add( 'Floating', that._on_make_floating.bind( that ) );
                 }, { icon: "fa-regular fa-window-restore" });
             };
 
-            title.addEventListener("click", this.onclick);
-            title.addEventListener("contextmenu", this.oncontextmenu);
+            title.addEventListener( 'click', this.onclick );
+            title.addEventListener( 'contextmenu', this.oncontextmenu );
         }
 
         _on_make_floating() {

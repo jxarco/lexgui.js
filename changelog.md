@@ -1,6 +1,7 @@
 # lexgui.js changelog
 
 ## 0.1.36 (dev)
+Default skipCallback as `true` on emit widget signal.
 
 ## 0.1.35
 
