@@ -908,35 +908,36 @@ class Area {
     
     split( options = {} ) {
 
-        if(this.sections.length)
+        if( this.sections.length )
         {
             // In case Area has been split before, get 2nd section as root
-            this.offset = this.root.childNodes[0].offsetHeight; // store offset to take into account when resizing
-            this._root = this.sections[0].root;
-            this.root = this.sections[1].root;
+            this.offset = this.root.childNodes[ 0 ].offsetHeight; // store offset to take into account when resizing
+            this._root = this.sections[ 0 ].root;
+            this.root = this.sections[ 1 ].root;
         }
 
         var type = options.type || "horizontal";
-        var sizes = options.sizes || ["50%", "50%"];
+        var sizes = options.sizes || [ "50%", "50%" ];
         var infer_height = false;
-        var auto = options.sizes === 'auto';
+        var auto = (options.sizes === 'auto');
 
-        if( !sizes[1] )
+        if( !sizes[ 1 ] )
         {
-            let size = sizes[0];
+            let size = sizes[ 0 ];
             let margin = options.top ? options.top : 0;
-            if(size.constructor == Number) {
+            if( size.constructor == Number )
+            {
                 size += margin;
                 size += "px";
             }
             
-            sizes[1] = "calc( 100% - " + size + " )";
+            sizes[ 1 ] = "calc( 100% - " + size + " )";
             infer_height = true;
         }
 
         // Create areas
-        var area1 = new Area({ no_append: true, className: "split" + (options.menubar || options.sidebar ? "" : " origin") });
-        var area2 = new Area({ no_append: true, className: "split"});
+        var area1 = new Area( { no_append: true, className: "split" + ( options.menubar || options.sidebar ? "" : " origin" ) } );
+        var area2 = new Area( { no_append: true, className: "split"} );
 
         area1.parentArea = this;
         area2.parentArea = this;
@@ -947,23 +948,27 @@ class Area {
         var data = "0px";
         this.offset = 0;
 
-        if(resize)
+        if( resize )
         {
             this.resize = resize;
-            this.split_bar = document.createElement("div");
+            this.split_bar = document.createElement( "div" );
             this.split_bar.className = "lexsplitbar " + type;
 
-            if(type == "horizontal") {
+            if( type == "horizontal" )
+            {
                 this.split_bar.style.width = LX.DEFAULT_SPLITBAR_SIZE + "px";
             }
-            else {
+            else
+            {
                 this.split_bar.style.height = LX.DEFAULT_SPLITBAR_SIZE + "px";
             }
-            this.split_bar.addEventListener("mousedown", inner_mousedown);
-            data = LX.DEFAULT_SPLITBAR_SIZE/2 + "px"; // updates
+
+            this.split_bar.addEventListener( 'mousedown', inner_mousedown );
+
+            data = ( LX.DEFAULT_SPLITBAR_SIZE / 2 ) + "px"; // updates
 
             // Being minimizable means it's also resizeable!
-            if(minimizable)
+            if( minimizable )
             {
                 this.split_extended = false;
 
@@ -985,14 +990,14 @@ class Area {
             }
         }
 
-        if(type == "horizontal")
+        if( type == "horizontal" )
         {
-            var width1 = sizes[0],
-                width2 = sizes[1];
+            var width1 = sizes[ 0 ],
+                width2 = sizes[ 1 ];
 
-            if(width1.constructor == Number)
+            if( width1.constructor == Number )
                 width1 += "px";
-            if(width2.constructor == Number)
+            if( width2.constructor == Number )
                 width2 += "px";
 
             area1.root.style.width = "calc( " + width1 + " - " + data + " )";
@@ -1011,19 +1016,19 @@ class Area {
                 area1.root.style.height = "auto";
 
                 // Listen resize event on first area
-                const resizeObserver = new ResizeObserver((entries) => {
+                const resizeObserver = new ResizeObserver( entries => {
                     for (const entry of entries) {
                         const bb = entry.contentRect;
                         area2.root.style.height = "calc(100% - " + ( bb.height + 4) + "px )";
                     }
                 });
 
-                resizeObserver.observe(area1.root);
+                resizeObserver.observe( area1.root );
             }
             else
             {
-                var height1 = sizes[0],
-                    height2 = sizes[1];
+                var height1 = sizes[ 0 ],
+                    height2 = sizes[ 1 ];
 
                 if(height1.constructor == Number)
                     height1 += "px";
@@ -1038,7 +1043,7 @@ class Area {
 
         this.root.appendChild( area1.root );
 
-        if(resize) 
+        if( resize )
         {
             this.root.appendChild(this.split_bar);
         }
@@ -1050,54 +1055,66 @@ class Area {
         // Update sizes
         this._update();
 
-        if(!resize)
+        if( !resize )
         {
             return this.sections;
         }
 
-        // from litegui.js @jagenjo
-
         var that = this;
-        var last_pos = [0,0];
-        function inner_mousedown(e)
+        var last_pos = [ 0, 0 ];
+
+        function inner_mousedown( e )
         {
             var doc = that.root.ownerDocument;
-            doc.addEventListener("mousemove",inner_mousemove);
-            doc.addEventListener("mouseup",inner_mouseup);
+            doc.addEventListener( 'mousemove', inner_mousemove );
+            doc.addEventListener( 'mouseup', inner_mouseup );
             last_pos[0] = e.x;
             last_pos[1] = e.y;
             e.stopPropagation();
             e.preventDefault();
-            document.body.classList.add("nocursor");
-            that.split_bar.classList.add("nocursor");
+            document.body.classList.add( 'nocursor' );
+            that.split_bar.classList.add( 'nocursor' );
         }
 
-        function inner_mousemove(e)
+        function inner_mousemove( e )
         {
-            if(that.type == "horizontal") {
-                that._moveSplit(last_pos[0] - e.x);
+            if(that.type == "horizontal")
+            {
+                that._moveSplit( last_pos[ 0 ] - e.x );
             }
-            else {
-                that._moveSplit(last_pos[1] - e.y);
+            else
+            {
+                that._moveSplit( last_pos[ 1 ] - e.y );
             }
             
-            last_pos[0] = e.x;
-            last_pos[1] = e.y;
+            last_pos[ 0 ] = e.x;
+            last_pos[ 1 ] = e.y;
+
+            const widgets = that.root.querySelectorAll( ".lexwidget" );
+
+            // Send area resize to every widget in the area
+            for( let widget of widgets )
+            {
+                const jsInstance = widget.jsIinstance;
+
+                if( jsInstance.onresize )
+                {
+                    jsInstance.onresize();
+                }
+            }
+
             e.stopPropagation();
             e.preventDefault();
         }
 
-        function inner_mouseup(e)
+        function inner_mouseup( e )
         {
             var doc = that.root.ownerDocument;
-            doc.removeEventListener("mousemove",inner_mousemove);
-            doc.removeEventListener("mouseup",inner_mouseup);
-            document.body.classList.remove("nocursor");
-            that.split_bar.classList.remove("nocursor");
+            doc.removeEventListener( 'mousemove', inner_mousemove );
+            doc.removeEventListener( 'mouseup', inner_mouseup );
+            document.body.classList.remove( 'nocursor' );
+            that.split_bar.classList.remove( 'nocursor' );
         }
-
-        // Is this necessary?..
-        // setTimeout( () => this._moveSplit(0), 100);
 
         return this.sections;
     }
@@ -3315,7 +3332,7 @@ class Panel {
 
         if( type != Widget.TITLE )
         {
-            element.style.width = "calc(100% - " + (this.current_branch || type == Widget.FILE || ( type == Widget.BUTTON && !name ) ? 10 : 20) + "px)";
+            element.style.width = "calc(100% - " + (this.current_branch || type == Widget.FILE ? 10 : 20) + "px)";
             if( options.width ) {
                 element.style.width = element.style.minWidth = options.width;
             }
@@ -3367,6 +3384,7 @@ class Panel {
         }
 
         widget.domEl = element;
+        element.jsIinstance = widget;
 
         const insert_widget = el => {
             if(options.container)
@@ -4392,10 +4410,14 @@ class Panel {
         element.appendChild( container );
 
         // Resize
-        curveInstance.canvas.width = container.offsetWidth;
-        curveInstance.redraw();
         widget.onresize = curveInstance.redraw.bind( curveInstance );
         widget.curveInstance = curveInstance;
+
+        doAsync(() => {
+            curveInstance.canvas.width = container.offsetWidth;
+            curveInstance.redraw();
+        });
+
         return widget;
     }
 
@@ -4948,7 +4970,7 @@ class Panel {
         container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
         let color = document.createElement( 'input' );
-        color.style.width = "calc(30% - 6px)";
+        color.style.width = "32px";
         color.type = 'color';
         color.className = "colorinput";
         color.id = "color" + simple_guidGenerator();
@@ -4989,7 +5011,7 @@ class Panel {
             change_from_input = true;
             widget.set( v );
             change_from_input = false;
-        }, { width: "calc(70% - 4px)" });
+        }, { width: "calc( 100% - 32px )"});
         
         text_widget.domEl.style.marginLeft = "4px";
 
@@ -6845,6 +6867,7 @@ class Curve {
     }
 
     redraw( options = {} ) {
+        console.log("REDRAW!!");
         this.element.redraw( options );
     }
 }
