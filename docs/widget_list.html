@@ -34,6 +34,8 @@
 <li><code class='inline'>icon</code>: Icon to be added before the input</li>
 <li><code class='inline'>trigger</code>: Choose onchange trigger (default, input)</li>
 <li><code class='inline'>inputWidth</code>: Width of the text input</li>
+<li><code class='inline'>float</code>: Justify input text content</li>
+<li><code class='inline'>justifyName</code>: Justify name content</li>
 </ul>
 </li>
 </ul>
@@ -44,7 +46,12 @@
 
 <h2 id="text-area">Text Area</h2>
 <p>Represents a text area input element.</p>
-<p>Call <code class='inline'>Panel.addTextArea(name, value, callback, options)</code> to add a Text Area Widget to your panel (the <code class='inline'>options</code> are the same as the Text widget):</p>
+<p>Call <code class='inline'>Panel.addTextArea(name, value, callback, options)</code> to add a Text Area Widget to
+    your panel (the <code class='inline'>options</code> are the same as the Text widget) plus:</p>
+
+<ul>
+    <li><code class='inline'>fitHeight</code>: Make text height adapt to its bounding rect.</li>
+</ul>
 
 <pre><code class="lang-js">panel.addTextArea(<span class="str">"Text Name"</span>, <span class="str">"Text value"</span>, (value, event) =&gt;</span> {
     console.log(value);
@@ -61,6 +68,8 @@
 <li><code class='inline'>callback (Function)</code>: Function called when the button is clicked</li>
 <li><code class='inline'>options (Object)</code>:<ul>
 <li><code class='inline'>disabled</code>: Make the widget disabled</li>
+<li><code class='inline'>icon</code>: Icon class to show as button value</li>
+<li><code class='inline'>img</code>: Path to image to show as button value</li>
 </ul>
 </li>
 </ul>

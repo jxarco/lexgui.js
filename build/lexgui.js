@@ -3751,6 +3751,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
          * placeholder: Add input placeholder
          * trigger: Choose onchange trigger (default, input) [default]
          * inputWidth: Width of the text input
+         * float: Justify input text content
+         * justifyName: Justify name content
          * fitHeight: Height adapts to text
          */
 
@@ -3788,6 +3790,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             let wValue = document.createElement( 'textarea' );
             wValue.value = wValue.iValue = value || "";
             wValue.style.width = "100%";
+            wValue.style.textAlign = options.float ?? "";
             Object.assign( wValue.style, options.style ?? {} );
 
             if( options.disabled ?? false ) wValue.setAttribute("disabled", true);
@@ -3864,8 +3867,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
          * @param {String} value Button name
          * @param {Function} callback Callback function on click
          * @param {*} options:
-         * icon 
          * disabled: Make the widget disabled [false]
+         * icon: Icon class to show as button value
+         * img: Path to image to show as button value
          */
 
         addButton( name, value, callback, options = {} ) {
