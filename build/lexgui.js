@@ -5658,64 +5658,93 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
         /**
          * @method addTabs
-         * @param {Array} tabs Contains objects with {name, icon, callback}
+         * @param {Array} tabs Contains objects with {
+         *      name: Name of the tab (if icon, use as title)
+         *      icon: Icon to be used as the tab icon (optional)
+         *      onCreate: Func to be called at tab creation
+         *      onSelect: Func to be called on select tab (optional)
+         * }
          * @param {*} options 
          * vertical: Use vertical or horizontal tabs (vertical by default)
          * showNames: Show tab name only in horizontal tabs
          */
 
         addTabs( tabs, options = {} ) {
-            let root = this.current_branch ? this.current_branch.content : this.root;
-            if(!this.current_branch)
-                console.warn("No current branch!");
 
-            if(tabs.constructor != Array)
-                throw("Param @tabs must be an Array!");
+            let root = this.current_branch ? this.current_branch.content : this.root;
+
+            if( !this.current_branch )
+            {
+                console.warn("No current branch!");
+            }
+
+            if( tabs.constructor != Array )
+            {
+                throw( "Param @tabs must be an Array!" );
+            }
 
             const vertical = options.vertical ?? true;
-            const showNames = !vertical && (options.showNames ?? false);
+            const showNames = !vertical && ( options.showNames ?? false );
 
-            let container = document.createElement('div');
+            let container = document.createElement( 'div' );
             container.className = "lextabscontainer";
-            if( !vertical ) container.className += " horizontal";
+            if( !vertical )
+            {
+                container.className += " horizontal";
+            }
 
-            let tabContainer = document.createElement("div");
-            tabContainer.className = "tabs";
+            let tabContainer = document.createElement( 'div' );
+            tabContainer.className = 'tabs';
             container.appendChild( tabContainer );
             root.appendChild( container );
 
-            for( var i = 0; i < tabs.length; ++i ) 
+            for( let i = 0; i < tabs.length; ++i )
             {
-                const tab = tabs[i];
-                const selected = i == 0;
-                let tabEl = document.createElement('div');
-                tabEl.className = "lextab " + (i == tabs.length - 1 ? "last" : "") + (selected ? "selected" : "");
-                tabEl.innerHTML = (showNames ? tab.name : "") + "<a class='" + (tab.icon || "fa fa-hashtag") + " " + (showNames ? "withname" : "") + "'></a>";
+                const tab = tabs[ i ];
+                console.assert( tab.name );
+                const isSelected = ( i == 0 );
+                let tabEl = document.createElement( 'div' );
+                tabEl.className = "lextab " + (i == tabs.length - 1 ? "last" : "") + ( isSelected ? "selected" : "" );
+                tabEl.innerHTML = ( showNames ? tab.name : "" ) + "<a class='" + ( tab.icon || "fa fa-hashtag" ) + " " + (showNames ? "withname" : "") + "'></a>";
                 tabEl.title = tab.name;
 
-                let infoContainer = document.createElement("div");
-                infoContainer.id = tab.name.replace(/\s/g, '');
+                let infoContainer = document.createElement( 'div' );
+                infoContainer.id = tab.name.replace( /\s/g, '' );
                 infoContainer.className = "widgets";
-                if(!selected) infoContainer.toggleAttribute('hidden', true);
+
+                if(!isSelected)
+                {
+                    infoContainer.toggleAttribute('hidden', true);
+                }
+
                 container.appendChild( infoContainer );
 
-                tabEl.addEventListener("click", function() {
-                    // change selected tab
-                    tabContainer.querySelectorAll(".lextab").forEach( e => { e.classList.remove("selected"); } );
-                    this.classList.add("selected");
-                    // hide all tabs content
-                    container.querySelectorAll(".widgets").forEach( e => { e.toggleAttribute('hidden', true); } );
-                    // show tab content
-                    const el = container.querySelector("#" + infoContainer.id);
-                    el.toggleAttribute('hidden');
+                tabEl.addEventListener( 'click', e => {
+
+                    // Change selected tab
+                    tabContainer.querySelectorAll( '.lextab' ).forEach( e => { e.classList.remove( 'selected' ); } );
+                    e.target.classList.add( 'selected' );
+                    // Hide all tabs content
+                    container.querySelectorAll(".widgets").forEach( e => { e.toggleAttribute( 'hidden', true ); } );
+                    // Show tab content
+                    const el = container.querySelector( '#' + infoContainer.id );
+                    el.toggleAttribute( 'hidden' );
+
+                    if( tab.onSelect )
+                    {
+                        tab.onSelect( this, infoContainer );
+                    }
                 });
 
-                tabContainer.appendChild(tabEl);
+                tabContainer.appendChild( tabEl );
 
-                // push to tab space
-                this.queue( infoContainer );
-                tab.callback( this, infoContainer );
-                this.clearQueue();
+                if( tab.onCreate )
+                {
+                    // push to tab space
+                    this.queue( infoContainer );
+                    tab.onCreate( this, infoContainer );
+                    this.clearQueue();
+                }
             }
             
             this.addSeparator();

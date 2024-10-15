@@ -2146,6 +2146,7 @@ meter::-webkit-meter-even-less-good-value {
   background: none;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
+  aspect-ratio: 1;
 }
 
 .lexoverlaybuttons.vertical .lexoverlaygroup {

@@ -584,15 +584,18 @@ function fillRightBottomPanel( panel, tab ) {
             { 
                 name: "First tab",
                 icon: "fa-brands fa-discord",
-                callback: p => {
+                onCreate: p => {
                     p.addTitle("Discord tab");
                     p.addButton(null, "Connect");
+                },
+                onSelect: p => {
+                    console.log( p );
                 }
             },
             { 
                 name: "Second tab",
                 icon: "fa-brands fa-twitter",
-                callback: p => {
+                onCreate: p => {
                     p.addTitle("Twitter tab");
                     p.addText("Tweet", "", null, {placeholder: "Tyler Rake 2"});
                 }
@@ -600,7 +603,7 @@ function fillRightBottomPanel( panel, tab ) {
             { 
                 name: "Third tab",
                 icon: "fa-brands fa-github",
-                callback: p => {
+                onCreate: p => {
                     p.addTitle("Github tab");
                     p.addButton(null, "Go", () => {window.open("https://github.com/jxarco/lexgui.js/")});
                 }
@@ -623,7 +626,7 @@ function fillRightBottomPanel( panel, tab ) {
             { 
                 name: "First tab",
                 icon: "fa-brands fa-discord",
-                callback: (p, content) => {
+                onCreate: (p, content) => {
                     p.addTitle("Discord tab");
                     p.addButton("Apply", "Add button to branch", (value, event) => {
                         p.queue( content );
@@ -635,7 +638,7 @@ function fillRightBottomPanel( panel, tab ) {
             { 
                 name: "Second tab",
                 icon: "fa-brands fa-twitter",
-                callback: p => {
+                onCreate: p => {
                     p.addTitle("Twitter tab");
                     p.addText("Tweet", "", null, {placeholder: "Tyler Rake 2"});
                 }
@@ -643,7 +646,7 @@ function fillRightBottomPanel( panel, tab ) {
             { 
                 name: "Third tab",
                 icon: "fa-brands fa-github",
-                callback: p => {
+                onCreate: p => {
                     p.addTitle("Github tab");
                     p.addButton(null, "Go", (value, event) => {window.open("https://github.com/jxarco/lexgui.js/")});
                 }

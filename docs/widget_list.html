@@ -449,8 +449,8 @@ panel.addTree(<span class="str">"Scene Tree"</span>, scene_data, {
 
 <h2 id="curve">Curve</h2>
 
-<p>Represents a simple Curve Editor. It's a versatile component designed to simplify the manipulation and visualization 
-    of curves or graphs, ideal for any scenario where the smooth interpolation of values over time 
+<p>Represents a simple Curve Editor. It's a versatile component designed to simplify the manipulation and visualization
+    of curves or graphs, ideal for any scenario where the smooth interpolation of values over time
     or other parameters is essential.</p>
 <p>Call <code class='inline'>Panel.addCurve(name, values, callback)</code> to add a Curve Editor Widget to your panel:</p>
 <ul>
@@ -468,6 +468,42 @@ panel.addTree(<span class="str">"Scene Tree"</span>, scene_data, {
 panel.addCurve(<span class="str">"Opacity"</span>, opacityValues, (value, event) => {
     console.log(value);
 });
+</code></pre>
+
+<h2 id="panel-tabs">Tabs</h2>
+
+<p>Represents panel divisions as tabs, either in horizontal or vertical mode.
+    Quickly switch between the different sets of information.</p>
+<p>Call <code class='inline'>Panel.addTabs(tabs, options)</code> to add a Tabs Widget to your panel, where 
+    <code class='inline'>tabs</code> is an <code class="inline"><span class="typ">Array</span></code> of objects which have:</p>
+<ul>
+<li><code class='inline'>name (String)</code>: Name of the tab (if icon, use as title)</li>
+<li><code class='inline'>icon (String)</code>: Icon path to be used as the tab icon (optional)</li>
+<li><code class='inline'>onCreate (Function)</code>: Func to be called at tab creation</li>
+<li><code class='inline'>onSelect (Function)</code>: Func to be called on select tab (optional)</li>
+</ul>
+
+<pre><code class="lang-js">panel.addTabs([
+    { 
+        name: <span class="str">"First tab"</span>,
+        icon: <span class="str">"fa-brands fa-discord"</span>,
+        onCreate: p => {
+            p.addTitle(<span class="str">"Discord tab"</span>);
+            p.addButton(<span class="kwd">null</span>, <span class="str">"Connect"</span>);
+        },
+        onSelect: p => {
+            console.log( p );
+        }
+    },
+    { 
+        name: <span class="str">"Second tab"</span>,
+        icon: <span class="str">"fa-brands fa-github"</span>,
+        onCreate: p => {
+            p.addTitle(<span class="str">"Github tab"</span>);
+            p.addButton(<span class="kwd">null</span>, <span class="str">"Go"</span>, () => { window.open(<span class="str">"https://github.com/jxarco/lexgui.js/"</span>) });
+        }
+    }
+], { vertical: <span class="lit">false</span> });
 </code></pre>
 
 <h2 id="other-widgets">Other Widgets</h2>
