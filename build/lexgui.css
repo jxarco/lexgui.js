@@ -934,6 +934,10 @@ body.noevents * {
   padding: 2px 3px;
 }
 
+.lexdropdown .lexfilter a {
+  transform: translateX(-10px);
+}
+
 .lexdropdown .lexoptions .lexlistitem {
   font-size: 11px;
 }
@@ -960,7 +964,8 @@ body.noevents * {
 	background-color: var(--global-blur-background);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
-  padding: 4px 0px;
+  padding: 0px;
+  transform: translateY(-4px);
   z-index: 10;
   margin-top: 5px;
   width: 100%;
@@ -1662,7 +1667,7 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexcontextmenu {
   position: absolute;
-  padding-right: 14px;
+  padding-right: 8px;
   z-index: 1001;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.63) !important;
   background-color: var(--global-blur-background);
@@ -1692,7 +1697,7 @@ meter::-webkit-meter-even-less-good-value {
   width: 100%;
   color: #d5d7dbee;
   padding: 4px;
-  padding-left: 14px;
+  padding-left: 8px;
   padding-right: 0px;
   padding-bottom: 6px;
   cursor: pointer;
@@ -1782,12 +1787,9 @@ meter::-webkit-meter-even-less-good-value {
   float: right;
   margin-top: 3px;
   font-weight: bold;
-  color: var(--global-button-color);
+  color: var(--global-text-primary);
   margin-right: 12px;
-}
-
-.lexcontextmenu .lexcontextmenuentry:hover .lexentryshort {
-  color: #f5f5f5;
+  text-align: right;
 }
 
 .lexmenubar .lexmenubuttons {
