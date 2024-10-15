@@ -1,9 +1,13 @@
 # lexgui.js changelog
 
-## 0.1.35 (dev)
+## 0.1.36 (dev)
+
+## 0.1.35
 
 Fix `moveOutAction` clamping X value.
 Add values in curve only with MOUSE_LEFT_CLICK.
+Curve redraw and color widget styling fixes.
+Minor general styling improvements.
 
 ## 0.1.34
 
