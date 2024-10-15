@@ -160,6 +160,11 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         mul ( v, v0 = new vec2() ) { if( v.constructor == Number ) { v = new vec2( v ) } v0.set( this.x * v.x, this.y * v.y ); return v0; }
         div ( v, v0 = new vec2() ) { if( v.constructor == Number ) { v = new vec2( v ) } v0.set( this.x / v.x, this.y / v.y ); return v0; }
         abs ( v0 = new vec2() ) { v0.set( Math.abs( this.x ), Math.abs( this.y ) ); return v0; }
+        dot ( v ) { return this.x * v.x + this.y * v.y; }
+        len2 () { return this.dot( this ) }
+        len () { return Math.sqrt( this.len2() ); }
+        nrm ( v0 = new vec2() ) { v0.set( this.x, this.y ); return v0.mul( 1.0 / this.len(), v0 ); }
+        dst ( v ) { return v.sub( this ).len(); }
     };
 
     LX.vec2 = vec2;
