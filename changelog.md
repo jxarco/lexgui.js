@@ -6,6 +6,7 @@ Default skipCallback as `true` on emit widget signal.
 Add some vec2 math functions.
 `Panel.addTabs` support for onCreate (prev. `callback`) and onSelect callbacks.
 Minor styling tweaks.
+Documentation updates.
 
 ## 0.1.35
 

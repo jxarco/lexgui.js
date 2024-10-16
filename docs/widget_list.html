@@ -3,96 +3,122 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Docs</title>
-    <link rel="stylesheet" href="style.css">    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.2/css/all.css">
+    <script type="text/javascript" src="docmaker.js"></script>
 </head>
 
 <body>
 
-<h1 id="widget-list">Widget List</h1>
+    <button id="goUpButton" title="Go up" onclick="goUp()"><i class="fa fa-arrow-up"></i></button>
 
-<h2 id="title">Title</h2>
-<p>Represents a title section inside a <a href="branch.html">Branch</a>.</p>
-<p>Call <code class='inline'>Panel.addTitle(name, value, callback, options)</code> to add a Title Widget to your panel:</p>
-<ul>
-<li><code class='inline'>name (String)</code>: Widget name</li>
-<li><code class='inline'>options (Object)</code>: Basic options for a Widget</li>
-</ul>
-<pre><code class="lang-js">panel.addTitle(<span class="str">"A title!"</span>)<span class="hljs-comment">;</span>
-</code></pre>
+    <script type="text/javascript">
 
-<h2 id="text">Text</h2>
+        MAKE_HEADER( "Widget List", "h1", "widget-list" );
+        MAKE_LINE_BREAK();
 
-<p>Represents a text input.</p>
-<p>Call <code class='inline'>Panel.addText(name, value, callback, options)</code> to add a Text Widget to your panel:</p>
-<ul>
-<li><code class='inline'>name (String)</code>: Widget name</li>
-<li><code class='inline'>value (String)</code>: Text</li>
-<li><code class='inline'>callback (Function)</code>: Function called when the input changes</li>
-<li><code class='inline'>options (Object)</code>:<ul>
-<li><code class='inline'>disabled</code>: Make the widget disabled</li>
-<li><code class='inline'>placeholder</code>: Add input placeholder</li>
-<li><code class='inline'>icon</code>: Icon to be added before the input</li>
-<li><code class='inline'>trigger</code>: Choose onchange trigger (default, input)</li>
-<li><code class='inline'>inputWidth</code>: Width of the text input</li>
-<li><code class='inline'>float</code>: Justify input text content</li>
-<li><code class='inline'>justifyName</code>: Justify name content</li>
-</ul>
-</li>
-</ul>
-<pre><code class="lang-js">panel.addText(<span class="str">"Text Name"</span>, <span class="str">"Text value"</span>, (value, event) =&gt;</span> {
+        MAKE_BULLET_LIST( [
+            "<a href='#array'>Array</a>",
+            "<a href='#button'>Button</a>",
+            "<a href='#checkbox'>Checkbox</a>",
+            "<a href='#color'>Color</a>",
+            "<a href='#combo-buttons'>Combo Buttons</a>",
+            "<a href='#curve'>Curve</a>",
+            "<a href='#tree'>Data Tree</a>",
+            "<a href='#dropdown'>Dropdown</a>",
+            "<a href='#file'>File</a>",
+            "<a href='#layers'>Layers</a>",
+            "<a href='#list'>List</a>",
+            "<a href='#number'>Number</a>",
+            "<a href='#progress'>Progress</a>",
+            "<a href='#panel-tabs'>Tabs</a>",
+            "<a href='#tags'>Tags</a>",
+            "<a href='#text'>Text</a>",
+            "<a href='#text-area'>Text Area</a>",
+            "<a href='#title'>Title</a>",
+            "<a href='#vector'>Vector</a>",
+            "<a href='#other-widgets'>Other widgets</a>",
+        ] );
+
+        // Title
+        MAKE_HEADER( "Title", "h2", "title" );
+        MAKE_PARAGRAPH( `Represents a title section inside a <a href="branching.html">Branch</a>.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTitle(name, value, callback, options)")} to add a Title Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["options (Object)", "Basic options for a Widget"],
+        ] );
+        MAKE_CODE( `panel.addTitle(<span class="str">"A title!"</span>)<span class="hljs-comment">;</span>` );
+
+        // Text
+        MAKE_HEADER( "Text", "h2", "text" );
+        MAKE_PARAGRAPH( `Represents a text input.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addText(name, value, callback, options)")} to add a Text Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["value (String)", "Text string by default"],
+            ["callback (Function)", "Function called when the input changes"],
+            ["options (Object)", "Basic options for a Widget"],
+            [
+                ["disabled (Boolean)", "Make the widget disabled"],
+                ["placeholder (String)", "Text string as input placeholder"],
+                ["icon (String)", "Icon to be added before the input"],
+                ["trigger (String)", "Choose onchange trigger (default, input)"],
+                ["inputWidth (String/Number)", "Width of the text input"],
+                ["float (String)", "Justify input text content"],
+                ["justifyName (String)", "Justify name content"],
+            ]
+        ] );
+        MAKE_CODE( `panel.addText(<span class="str">"Text Name"</span>, <span class="str">"Text value"</span>, (value, event) =&gt;</span> {
     console.log(value);
-}, { placeholder: <span class="str">"Something"</span> });
-</code></pre>
+}, { placeholder: <span class="str">"Something"</span> });` );
 
-<h2 id="text-area">Text Area</h2>
-<p>Represents a text area input element.</p>
-<p>Call <code class='inline'>Panel.addTextArea(name, value, callback, options)</code> to add a Text Area Widget to
-    your panel (the <code class='inline'>options</code> are the same as the Text widget) plus:</p>
-
-<ul>
-    <li><code class='inline'>fitHeight</code>: Make text height adapt to its bounding rect.</li>
-</ul>
-
-<pre><code class="lang-js">panel.addTextArea(<span class="str">"Text Name"</span>, <span class="str">"Text value"</span>, (value, event) =&gt;</span> {
+        // Text area
+        MAKE_HEADER( "Text Area", "h2", "text-area" );
+        MAKE_PARAGRAPH( `Represents a text area input element.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTextArea(name, value, callback, options)")} to add a Text Area Widget to your panel 
+        (the <code class='inline'>options</code> are the same as the Text widget) plus:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["fitHeight (Boolean)", "Make text height adapt to its bounding rect."]
+        ] );
+        MAKE_CODE( `panel.addTextArea(<span class="str">"Text Name"</span>, <span class="str">"Text value"</span>, (value, event) =&gt;</span> {
     console.log(value);
-}, { placeholder: <span class="str">"Something"</span> });
-</code></pre>
+}, { placeholder: <span class="str">"Something"</span> });` );
 
-<h2 id="button">Button</h2>
-
-<p>Represents a clickable element typically used to trigger an action.</p>
-<p>Call <code class='inline'>Panel.addButton(name, value, callback, options)</code> to add a Button Widget to your panel:</p>
-<ul>
-<li><code class='inline'>name (String)</code>: Widget name</li>
-<li><code class='inline'>value (String)</code>: Button text</li>
-<li><code class='inline'>callback (Function)</code>: Function called when the button is clicked</li>
-<li><code class='inline'>options (Object)</code>:<ul>
-<li><code class='inline'>disabled</code>: Make the widget disabled</li>
-<li><code class='inline'>icon</code>: Icon class to show as button value</li>
-<li><code class='inline'>img</code>: Path to image to show as button value</li>
-</ul>
-</li>
-</ul>
-<pre><code class="lang-js">panel.addButton(<span class="str">"A Name"</span>, <span class="str">"Print event"</span>, <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+        // Button
+        MAKE_HEADER( "Button", "h2", "button" );
+        MAKE_PARAGRAPH( `Represents a clickable element typically used to trigger an action.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addButton(name, value, callback, options)")} to add a Button Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["value (String)", "Text string by default"],
+            ["callback (Function)", "Function called when the input changes"],
+            ["options (Object)", "Basic options for a Widget"],
+            [
+                ["disabled (Boolean)", "Make the widget disabled"],
+                ["icon (String)", "Icon to be added before the input"],
+                ["img (String)", "Path to image to show as button value"],
+            ]
+        ] );
+        MAKE_CODE( `panel.addButton(<span class="str">"A Name"</span>, <span class="str">"Print event"</span>, <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
     <span class="hljs-built_in">console</span>.log(event);
-});
-</code></pre>
+});` );
 
-<h2 id="combo-buttons">Combo Buttons</h2>
-
-<p>Multiple inlined <a href="#button">buttons</a> as selectable options.</p>
-<p>Call <code class='inline'>Panel.addComboButtons(name, values, options)</code> to add a ComboButtons Widget to your panel:</p>
-<ul>
-<li><code class='inline'>name (String)</code>: Widget name</li>
-<li><code class='inline'>values (Array)</code>: Each of the {value, callback} items (you can add an <code class='inline'>icon</code>)</li>
-<li><code class='inline'>options (Object)</code>:<ul>
-<li><code class='inline'>float (String)</code>: Justify content (left, center, right) [center]</li>
-<li><code class='inline'>selected</code>: One of the values</li>
-<li><code class='inline'>noSelection (Boolean)</code>: Buttons can be clicked, but they are not selectable [false]</li>
-</ul>
-</li>
-</ul>
-<pre><code class="lang-js">panel.addComboButtons(<span class="str">"Alignment"</span>, [
+        // Combo Buttons
+        MAKE_HEADER( "Combo Buttons", "h2", "combo-buttons" );
+        MAKE_PARAGRAPH( `Represents multiple inlined <a href="#button">buttons</a> as selectable options.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addComboButtons(name, values, options)")} to add a ComboButtons Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["values (Array)", "Each of the {value, callback} items (you can add an <code class='inline'>icon</code>)"],
+            ["options (Object)", "Basic options for a Widget"],
+            [
+                ["selected (*)", "Selected value by default"],
+                ["float (String)", "Justify content (left, center, right) [center]"],
+                ["noSelection (Boolean)", "Buttons can be clicked, but they are not selectable [false]"],
+            ]
+        ] );
+        MAKE_CODE( `panel.addComboButtons(<span class="str">"Alignment"</span>, [
     {
         value: <span class="str">"left"</span>,
         icon: <span class="str">"fa fa-align-left"</span>,
@@ -112,48 +138,49 @@
             <span class="hljs-built_in">console</span>.log(value);
         }
     }
-]);
-</code></pre>
-<h2 id="number">Number</h2>
-<p>Represents a number input.</p>
-<p>Call <code class='inline'>Panel.addNumber(name, value, callback, options)</code> to add a Number Widget to your panel:</p>
-<ul>
-<li><code class='inline'>name (String)</code>: Widget name</li>
-<li><code class='inline'>value (Number)</code>: Number value</li>
-<li><code class='inline'>callback (Function)</code>: Function called when the input changes</li>
-<li><code class='inline'>options (Object)</code>:<ul>
-<li><code class='inline'>disabled</code>: Make the widget disabled</li>
-<li><code class='inline'>step</code>: Change value step</li>
-<li><code class='inline'>min</code>, <code class='inline'>max</code>: Min and Max input values</li>
-</ul>
-</li>
-</ul>
-<p><sup>Note: Setting <code class='inline'>min</code>, <code class='inline'>max</code> values will automatically add a slider below the number input.<sup></p>
+]);` );
 
-<pre><code class="lang-js">panel.addNumber(<span class="str">"Font Size"</span>, <span class="dec">36</span>, (value, <span class="hljs-keyword">event</span>) =&gt; {
+        // Number
+        MAKE_HEADER( "Number", "h2", "number" );
+        MAKE_PARAGRAPH( `Represents a decimal number input.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addNumber(name, value, callback, options)")} to add a Number Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["value (Number)", "Number value"],
+            ["callback (Function)", "Function called when the input changes"],
+            ["options (Object)", "Basic options for a Widget"],
+            [
+                ["disabled (Boolean)", "Make the widget disabled"],
+                ["step (Number)", "Change Step value"],
+                ["min (Number)", "Min input value"],
+                ["max (Number)", "Max input value"]
+            ]
+        ] );
+        MAKE_PARAGRAPH( `<sup>Note: Setting <code class='inline'>min</code>, <code class='inline'>max</code> values will automatically add a slider below the number input.<sup>` );
+        MAKE_CODE( `panel.addNumber(<span class="str">"Font Size"</span>, <span class="dec">36</span>, (value, <span class="hljs-keyword">event</span>) =&gt; {
     console.<span class="hljs-keyword">log</span>(value);
-}, { <span class="hljs-keyword">min</span>: <span class="dec">1</span>, <span class="hljs-keyword">max</span>: <span class="dec">48</span> });
-</code></pre>
+}, { <span class="hljs-keyword">min</span>: <span class="dec">1</span>, <span class="hljs-keyword">max</span>: <span class="dec">48</span> });` );
+        MAKE_PARAGRAPH( `You can change the value of this widget manually, using the mouse wheel, and dragging (up/down). In the last two cases, pressing <em>Alt</em> and 
+        <em>Left Shift</em> will apply a factor of <code class='inline'>0.1</code> and <code class='inline'>10</code> in that order.` );
 
-<p>You can change the value of this widget manually, using the mouse wheel, and dragging (up/down). In the last two cases, pressing <em>Alt</em> and <em>Left Shift</em> will apply a factor of <code class='inline'>0.1</code> and <code class='inline'>10</code> in that order.</p>
-
-<h2 id="vector">Vector</h2>
-
-<p>Similar to the Number widget, it represents a numeric vector input. It&#39;s composed by multiple <a href="#number">number</a> widgets.</p>
-<p>Call <code class='inline'>Panel.addVectorN(name, value, callback, options)</code>, where N is a number in the range [2, 4], to add a Vector Widget to your panel:</p>
-<ul>
-<li><code class='inline'>name (String)</code>: Widget name</li>
-<li><code class='inline'>values (Number Array)</code>: Array containing the values for the vector</li>
-<li><code class='inline'>callback (Function)</code>: Function called when any of the N number inputs change</li>
-<li><code class='inline'>options (Object)</code>:<ul>
-<li><code class='inline'>disabled</code>: Make the widget disabled</li>
-<li><code class='inline'>step</code>: Change values step</li>
-<li><code class='inline'>min</code>, <code class='inline'>max</code>: Min and Max inputs value</li>
-</ul>
-</li>
-</ul>
-<p><sup>Note: Since a Vector Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.<sup></p>
-<pre><code class="lang-js">panel.addVector2(<span class="str">"2D Position"</span>, [<span class="dec">250</span>, <span class="dec">350</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+        // Vector
+        MAKE_HEADER( "Vector", "h2", "vector" );
+        MAKE_PARAGRAPH( `Similar to the Number widget, it represents a decimal vector input. It&#39;s composed by multiple <a href="#number">number</a> widgets.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addVectorN(name, value, callback, options)")}, where N is a number in the range [2, 4], to add a Vector Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["values (Number Array)", "Array containing the values for the vector"],
+            ["callback (Function)", "Function called when any of the N number inputs change"],
+            ["options (Object)", "Basic options for a Widget"],
+            [
+                ["disabled (Boolean)", "Make the widget disabled"],
+                ["step (Number)", "Change Step value"],
+                ["min (Number)", "Min input value"],
+                ["max (Number)", "Max input value"]
+            ]
+        ] );
+        MAKE_PARAGRAPH( `Note: Since a Vector Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.<sup>` );
+        MAKE_CODE( `panel.addVector2(<span class="str">"2D Position"</span>, [<span class="dec">250</span>, <span class="dec">350</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
     <span class="hljs-built_in">console</span>.log(value);
 }, { min: <span class="dec">0</span>, max: <span class="dec">1024</span> });
 
@@ -163,24 +190,23 @@ panel.addVector3(<span class="str">"Velocity"</span>, [<span class="dec">0.1</sp
 
 panel.addVector4(<span class="str">"Shader Color"</span>, [<span class="dec">1</span>, <span class="dec">1</span>, <span class="dec">1</span>, <span class="dec">1</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
     <span class="hljs-built_in">console</span>.log(value);
-});
-</code></pre>
+});` );
 
-<h2 id="checkbox">Checkbox</h2>
-
-<p>Represents a classic checkbox that allows users to select or deselect an option as a binary choice (either checked or unchecked).</p>
-<p>Call <code class='inline'>Panel.addCheckbox(name, value, callback, options)</code> to add a Checkbox Widget to your panel:</p>
-<ul>
-<li><code class='inline'>name (String)</code>: Widget name</li>
-<li><code class='inline'>value (Boolean)</code>: Boolean value (true/false)</li>
-<li><code class='inline'>callback (Function)</code>: Function called when the checkbox value changes</li>
-<li><code class='inline'>options (Object)</code>:<ul>
-<li><code class='inline'>disabled</code>: Make the widget disabled</li>
-<li><code class='inline'>suboptions</code>: Callback to add widgets shown if value = <code class='inline'><span class="lit">true</span></code></li>
-</ul>
-</li>
-</ul>
-<pre><code class="lang-js">panel.addCheckbox(<span class="str">"Toggle me"</span>, <span class="lit">true</span>, <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+        // Checkbox
+        MAKE_HEADER( "Checkbox", "h2", "checkbox" );
+        MAKE_PARAGRAPH( `Represents a classic checkbox to select or deselect an option as a binary choice (either checked or unchecked).` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addCheckbox(name, value, callback, options)")} to add a Checkbox Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["value (Boolean)", "Boolean value (true/false)"],
+            ["callback (Function)", "Function called when the checkbox value changes"],
+            ["options (Object)", "Basic options for a Widget"],
+            [
+                ["disabled (Boolean)", "Make the widget disabled"],
+                ["suboptions (Function)", "Callback to add widgets shown if <code class='inline'><span class='lit'>true</span></code>"]
+            ]
+        ] );
+        MAKE_CODE( `panel.addCheckbox(<span class="str">"Toggle me"</span>, <span class="lit">true</span>, <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
     <span class="hljs-built_in">console</span>.log(value);
 });
 
@@ -190,45 +216,43 @@ panel.addCheckbox(<span class="str">"Toggle me too"</span>, <span class="lit">tr
     }, { suboptions: <span class="hljs-function"><span class="hljs-params">p</span> =&gt;</span> {
         p.addText(<span class="lit">null</span>, <span class="str">"Suboption 1"</span>);
         p.addNumber(<span class="str">"Suboption 2"</span>, <span class="dec">12</span>);
-} });
-</code></pre>
+} });` );
 
-<h2 id="color">Color</h2>
-
-<p>Represents a color input. Allows users to select a color using a color picker, providing an interactive way to choose colors for various elements in your web interface.</p>
-<p>Call <code class='inline'>Panel.addColor(name, value, callback, options)</code> to add a Color Widget to your panel:</p>
-<ul>
-<li><code class='inline'>name (String)</code>: Widget name</li>
-<li><code class='inline'>value (String or Array)</code>: Color value in hex (&quot;#fff&quot;) or Array[r, g, b]</li>
-<li><code class='inline'>callback (Function)</code>: Function called when the input changes</li>
-<li><code class='inline'>options (Object)</code>:<ul>
-<li><code class='inline'>disabled</code>: Make the widget disabled</li>
-<li><code class='inline'>useRGB</code>: The callback returns color as Array[r, g, b] and not hex [<code class='inline'>FALSE</code>]</li>
-</ul>
-</li>
-</ul>
-<pre><code class="lang-js">panel.addColor(<span class="str">"Font Color"</span>, [<span class="dec">1</span>, <span class="dec">0.1</span>, <span class="dec">0.6</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+        // Color
+        MAKE_HEADER( "Color", "h2", "color" );
+        MAKE_PARAGRAPH( `Represents a color input. Allows users to select a color using the browser native color picker.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addColor(name, value, callback, options)")} to add a Color Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["value (String or Array)", "Color value in hex (&quot;#fff&quot;) or Array[r, g, b]"],
+            ["callback (Function)", "Function called when the input changes"],
+            ["options (Object)", "Basic options for a Widget"],
+            [
+                ["disabled (Boolean)", "Make the widget disabled"],
+                ["useRGB (Boolean)", "The callback returns color as Array[r, g, b] and not hex [<code class='inline'>false</code>]"]
+            ]
+        ] );
+        MAKE_CODE( `panel.addColor(<span class="str">"Font Color"</span>, [<span class="dec">1</span>, <span class="dec">0.1</span>, <span class="dec">0.6</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
     <span class="hljs-built_in">console</span>.log(<span class="str">"Font Color: "</span>, value);
 });
 
-panel.addColor(<span class="str">"Background"</span>, <span class="str">"#b7a9b1"</span>);
-</code></pre>
+panel.addColor(<span class="str">"Background"</span>, <span class="str">"#b7a9b1"</span>);` );
 
-<h2 id="dropdown">Dropdown</h2>
-
-<p>Represents a classic Drop-down list. It works as a HTML Select element, but it can handle media options.</p>
-<p>Call <code class='inline'>Panel.addDropdown(name, values, value, callback, options)</code> function to add a Dropdown Widget to your Panel:</p>
-<ul>
-<li><code class='inline'>name (String)</code>: Widget name</li>
-<li><code class='inline'>values (Array)</code>: Array of the values of the list. The values can be strings or media (images or GIFs). For the media, the entries of the array must be an object containing a <code class='inline'>value</code> and <code class='inline'>src</code> fields.</li>
-<li><code class='inline'>value (String)</code>: Current selected value from the drop-down list.</li>
-<li><code class='inline'>callback (Function)</code>: Function called when an list value is selected.</li>
-<li><code class='inline'>options (Object)</code>:<ul>
-<li><code class='inline'>filter</code>: Boolean field to specify if the drop-down needs a search bar</li>
-</ul>
-</li>
-</ul>
-<pre><code class="lang-js"><span class="com">// String values</span>
+        // Dropdown
+        MAKE_HEADER( "Dropdown", "h2", "dropdown" );
+        MAKE_PARAGRAPH( `Represents a classic drop-down list. It works as a HTML Select element, but it can also handle media options.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addDropdown(name, values, value, callback, options)")} to add a Dropdown Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["values (Array)", "Array of the values of the list. The values can be strings or media (images or GIFs). For the media, the entries of the array must be an object containing a <code class='inline'>value</code> and <code class='inline'>src</code> fields"],
+            ["value (String)", "Current selected value from the drop-down list"],
+            ["callback (Function)", "Function called when an list value is selected"],
+            ["options (Object)", "Basic options for a Widget"],
+            [
+                ["filter (Boolean)", "Specify if the drop-down needs a search bar"]
+            ]
+        ] );
+        MAKE_CODE( `<span class="com">// String values</span>
 
 panel.addDropdown(<span class="str">"String Dropdown"</span>, [<span class="str">"Option 1"</span>, <span class="str">"Option 2"</span>], <span class="str">"Option 1"</span>, (<span class="hljs-keyword">value</span>, <span class="hljs-keyword">event</span>) =&gt; {
       console.log(<span class="hljs-keyword">value</span>);
@@ -243,46 +267,41 @@ panel.addDropdown(<span class="str">"String Dropdown"</span>, [<span class="str"
 ];
 panel.addDropdown(<span class="str">"Media Dropdown"</span>, options, <span class="str">"Option 1"</span>, (<span class="hljs-keyword">value</span>, <span class="hljs-keyword">event</span>) =&gt; {
       console.log(<span class="hljs-keyword">value</span>);
-}, options);
-</code></pre>
+}, options);` );
 
-<h2 id="tags">Tags</h2>
-
-<p>Represents a collection of tags that can be added, removed, and modified dynamically. It provides a user-friendly way to manage and display multiple tags.</p>
-<p>Call <code class='inline'>Panel.addTags(name, value, callback, options)</code> to add a Tags Widget to your panel:</p>
-<ul>
-<li><code class='inline'>name (String)</code>: Widget name</li>
-<li><code class='inline'>value (String)</code>: Comma separated tags</li>
-<li><code class='inline'>callback (Function)</code>: Function called when a tag is either removed or added</li>
-<li><code class='inline'>options (Object)</code>: Basic options for a Widget</li>
-</ul>
-<pre><code class="lang-js">panel.addTags(<span class="str">"Game Tags"</span>, <span class="str">"2d, ai, engine, ps5, console"</span>, <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+        // Tags
+        MAKE_HEADER( "Tags", "h2", "tags" );
+        MAKE_PARAGRAPH( `Represents a collection of tags that can be added, removed, and modified dynamically.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTags(name, value, callback, options)")} to add a Tags Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["value (String)", "Comma separated tags"],
+            ["callback (Function)", "Function called when a tag is either removed or added"],
+            ["options (Object)", "Basic options for a Widget"]
+        ] );
+        MAKE_CODE( `panel.addTags(<span class="str">"Game Tags"</span>, <span class="str">"2d, ai, engine, ps5, console"</span>, <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
     <span class="hljs-built_in">console</span>.log(value);
-});
-</code></pre>
+});` );
 
-<h2 id="tree">Data Tree</h2>
-
-<p>Represents a <strong>Data Visualization Tree</strong>. Enables developers to display hierarchical data in an organized
+        // Data Tree
+        MAKE_HEADER( "Data Tree", "h2", "tree" );
+        MAKE_PARAGRAPH( `Represents a <strong>data hierarchy visualization Tree</strong>. Enables developers to display hierarchical data in an organized
      and visually appealing manner. This feature is especially useful when presenting data with parent-child
-      relationships, such as file directories, organizational structures, family trees, and more.</p>
-
-    <p>Call <code class='inline'>Panel.addTree(name, data, options)</code> to add a Data Tree Widget to your panel:</p>
-    <ul>
-    <li><code class='inline'>name (String)</code>: Widget name</li>
-    <li><code class='inline'>data (Object)</code>: Hierarchical data</li>
-    <li><code class='inline'>options (Object)</code>
-        <ul>
-            <li><code class='inline'>icons (Array)</code>: Array of objects with button information {name, icon, callback}</li>
-            <li><code class='inline'>filter (Boolean)</code>: Adds a filter bar [true]</li>
-            <li><code class='inline'>rename (Boolean)</code>: Allow item rename [true]</li>
-            <li><code class='inline'>onevent(TreeEvent) (Function)</code>: Function to catch the different types of Tree events</li>
-        </ul>
-    </li>
-    </ul>
-
-<pre><code class="lang-js"><span class="com">// Tree data!</span>
-<span class="kwd">const</span> scene_data = {
+      relationships, such as file directories, organizational structures, family trees, and more.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTree(name, data, options)")} to add a DataTree Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["data (Object)", "Hierarchical data"],
+            ["options (Object)", "Basic options for a Widget"],
+            [
+                ["icons (Array)", "Array of objects with button information {name, icon, callback}"],
+                ["filter (Boolean)", "Adds a filter bar [true]"],
+                ["rename (Boolean)", "Allow item rename [true]"],
+                ["onevent (Function)", "Function to catch the different types of Tree events"]
+            ]
+        ] );
+        MAKE_CODE( `<span class="com">// Tree data!</span>
+<span class="kwd">const</span> sceneData = {
     id: <span class="str">"root"</span>,
     children: [
         {
@@ -313,7 +332,7 @@ panel.addDropdown(<span class="str">"Media Dropdown"</span>, options, <span clas
 };
     
 <span class="com">// This is optional!</span>
-<span class="kwd">const</span> tree_icons = [
+<span class="kwd">const</span> dataTreeIcons = [
     {
         name: <span class="str">"Add node"</span>,
         icon: <span class="str">"fa-solid fa-plus"</span>,
@@ -326,8 +345,8 @@ panel.addDropdown(<span class="str">"Media Dropdown"</span>, options, <span clas
     }
 ];
     
-panel.addTree(<span class="str">"Scene Tree"</span>, scene_data, { 
-    icons: tree_icons, 
+panel.addTree(<span class="str">"Scene Tree"</span>, sceneData, { 
+    icons: dataTreeIcons, 
     filter: <span class="lit">false</span>,
     rename: <span class="lit">true</span>,
     onevent: (event) => { 
@@ -355,120 +374,129 @@ panel.addTree(<span class="str">"Scene Tree"</span>, scene_data, {
                 <span class="kwd">break</span>;
         }
     }
-});
-</code></pre>
+});` );
 
-<h2 id="array">Array</h2>
-
-<p>Represents a array of any basic type of elements which can be modified or deleted and new ones can be added.</p>
-<p>Call <code class='inline'>Panel.addArray(name, value, values, callback, options)</code> to add an Array Widget to your panel:</p>
-<ul>
-<li><code class='inline'>name (String)</code>: Widget name</li>
-<li><code class='inline'>values (Array)</code>: Array values</li>
-<li><code class='inline'>callback (Function)</code>: Function called when the array is modified</li>
-<li><code class='inline'>options (Object)</code>: Basic options for a Widget</li>
-</ul>
-<pre><code class="lang-js">panel.addArray(<span class="str">"Array name"</span>, [<span class="str">"GPTeam"</span>, <span class="str">"Blat Panthers"</span>], (value, event) => {
+        // Array
+        MAKE_HEADER( "Array", "h2", "array" );
+        MAKE_PARAGRAPH( `Represents a array of any basic type of elements which can be modified or deleted and new ones can be added.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addArray(name, value, values, callback, options)")} to add an Array Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["values (Array)", "Array values"],
+            ["callback (Function)", "Function called when the array is modified"],
+            ["options (Object)", "Basic options for a Widget"],
+            [
+                ["innerValues (Array)", "Use dropdown mode and use values as options"],
+            ]
+        ] );
+        MAKE_CODE( `panel.addArray(<span class="str">"Array name"</span>, [<span class="str">"GPTeam"</span>, <span class="str">"Blat Panthers"</span>], (value, event) => {
     console.log(value);
-});
-</code></pre>
+});` );
 
-<h2 id="list">List</h2>
-
-<p>Represents a list of selectable elements.</p>
-<p>Call <code class='inline'>Panel.addList(name, value, values, callback, options)</code> to add a List Widget to your panel:</p>
-<ul>
-<li><code class='inline'>name (String)</code>: Widget name</li>
-<li><code class='inline'>values (Array)</code>: List values</li>
-<li><code class='inline'>value (*)</code>: Selected list value</li>
-<li><code class='inline'>callback (Function)</code>: Function called when the list is modified</li>
-<li><code class='inline'>options (Object)</code>: Basic options for a Widget</li>
-</ul>
-<pre><code class="lang-js">panel.addList(<span class="str">"List name"</span>, [<span class="str">"GPTeam"</span>, <span class="str">"Blat Panthers"</span>], <span class="str">"Blat Panthers"</span>,  (value, event) => {
+        // List
+        MAKE_HEADER( "List", "h2", "list" );
+        MAKE_PARAGRAPH( `Represents a list of selectable elements.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addList(name, value, values, callback, options)")} to add a List Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["values (Array)", "List values"],
+            ["value (*)", "Selected list value"],
+            ["callback (Function)", "Function called when the a new item list is selected"],
+            ["options (Object)", "Basic options for a Widget"]
+        ] );
+        MAKE_CODE( `panel.addList(<span class="str">"List name"</span>, [<span class="str">"GPTeam"</span>, <span class="str">"Blat Panthers"</span>], <span class="str">"Blat Panthers"</span>,  (value, event) => {
     console.log(value);
-});
-</code></pre>
+});` );
 
-<p>It's possible to preppend an icon to the element name inside the list using an <code class='inline'>Array</code> for the item [item, icon]:</p>
+        MAKE_PARAGRAPH( `<sup>It's possible to preppend an icon to the element name inside the list using an Array for the item [item, icon]:<sup>` );
 
-<pre><code class="lang-js">panel.addList(<span class="str">"List name"</span>, [<span class="str">"GPTeam"</span>, [<span class="str">"Blat Panthers"</span>, <span class="str">"fa-solid fa-paw"</span>]], <span class="str">"Blat Panthers"</span>,  (value, event) => {
+        MAKE_CODE( `panel.addList(<span class="str">"List name"</span>, [<span class="str">"GPTeam"</span>, [<span class="str">"Blat Panthers"</span>, <span class="str">"fa-solid fa-paw"</span>]], <span class="str">"Blat Panthers"</span>,  (value, event) => {
     console.log(value);
-});
-</code></pre>
+});` );
 
-<h2 id="layers">Layers</h2>
-
-<p>Represents Bit Layers. Enables 
-    you to work with binary data and manipulate individual bits to set bit masks.</p>
-<p>Call <code class='inline'>Panel.addLayers(name, value, callback)</code> to add a Layers Widget to your panel:</p>
-<ul>
-<li><code class='inline'>name (String)</code>: Widget name</li>
-<li><code class='inline'>value (Number)</code>: Mask value (decimal) that will be decomposed into bits</li>
-<li><code class='inline'>callback (Function)</code>: Function called when bit mask changes</li>
-</ul>
-
-<pre><code class="lang-js">panel.addLayers(<span class="str">"Layer name"</span>, <span class="dec">10</span>, (value, event) => {
+        // Layers
+        MAKE_HEADER( "Layers", "h2", "layers" );
+        MAKE_PARAGRAPH( `Represents Bit Layers. Enables 
+    you to work with binary data and manipulate individual bits to set bit masks.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addLayers(name, value, callback)")} to add a Layers Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["value (Number)", "Mask value (decimal) that will be decomposed into bits"],
+            ["callback (Function)", "Function called when bit mask changes"],
+            ["options (Object)", "Basic options for a Widget"]
+        ] );
+        MAKE_CODE( `panel.addLayers(<span class="str">"Layer name"</span>, <span class="dec">10</span>, (value, event) => {
     console.log(value);
-});
-</code></pre>
+});` );
 
-<h2 id="file">File</h2>
-
-<p>Represents a local file loader.</p>
-<p>Call <code class='inline'>Panel.addFile(name, value, callback)</code> to add a File Widget to your panel:</p>
-<ul>
-<li><code class='inline'>name (String)</code>: Widget name</li>
-<li><code class='inline'>callback (Function)</code>: Function called when bit mask changes</li>
-<li><code class='inline'>options (Object)</code>: Basic options<ul>
-    <li><code class='inline'>read (Bool)</code>: Return the file itself (False) or the contents (True)</li>
-    <li><code class='inline'>type (String)</code>: Type to read as [text (Default), buffer, bin, url]</li>
-    </ul></li>
-</ul>
-
-<pre><code class="lang-js">panel.addFile(<span class="str">"File name"</span>, (data, file) => {
+        // File
+        MAKE_HEADER( "File", "h2", "file" );
+        MAKE_PARAGRAPH( `Represents a local file loader.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addFile(name, value, callback)")} to add a File Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["callback (Function)", "Function called when file is loaded"],
+            ["options (Object)", "Basic options for a Widget"],
+            [
+                ["read (Bool)", "Return the file itself (False) or the contents [true]"],
+                ["type (String)", "Type to read as {text, buffer, bin, url} [text]"]
+            ]
+        ] );
+        MAKE_CODE( `panel.addFile(<span class="str">"File name"</span>, (data, file) => {
     console.log(data, file);
-});
-</code></pre>
+});` );
 
-<h2 id="progress">Progress</h2>
-
-<p>Represents a horizontal bar that fills up gradually to indicate the completion progress of a task or operation or just show a numeric value.</p>
-<p>Call <code class='inline'>Panel.addProgress(name, value, options)</code> to add a Progress Widget to your panel:</p>
-<ul>
-<li><code class='inline'>name (String)</code>: Widget name</li>
-<li><code class='inline'>value (Number)</code>: Progress value</li>
-<li><code class='inline'>options (Object)</code>:<ul>
-<li><code class='inline'>editable</code>: Allow to edit value manually</li>
-<li><code class='inline'>callback (Function)</code>: If editable, function called when progress changes</li>
-<li><code class='inline'>showValue</code>: Show current value</li>
-<li><code class='inline'>min</code>, <code class='inline'>max</code>: Min and Max values</li>
-</ul>
-</li>
-</ul>
-<pre><code class="lang-js"><span class="hljs-selector-tag">panel</span><span class="hljs-selector-class">.addProgress</span>(<span class="str">"HeadRoll"</span>, <span class="dec">0</span>, { 
-  <span class="hljs-attribute">min</span>: -<span class="dec">1</span>, 
+        // Progress
+        MAKE_HEADER( "Progress", "h2", "progress" );
+        MAKE_PARAGRAPH( `Represents a horizontal bar that fills up gradually to indicate the completion progress of a task or operation or just show a numeric value.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addProgress(name, value, options)")} to add a Progress Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["value (Number)", "Progress value"],
+            ["options (Object)", "Basic options for a Widget"],
+            [
+                ["editable (Bool)", "Allow to edit value manually [false]"],
+                ["callback (Function)", "If editable, function called when progress changes"],
+                ["showValue (Bool)", "Show current value [false]"],
+                ["min (Number)", "Min progress value"],
+                ["max (Number)", "Max progress value"],
+                ["low (Number)", "Low boundary value"],
+                ["optimum (Number)", "Optimum value in the range"],
+                ["high (Number)", "High boundary value"],
+            ]
+        ] );
+        MAKE_CODE( `panel.addProgress</span>(<span class="str">"HeadRoll"</span>, <span class="dec">0</span>, { 
+  min</span>: -<span class="dec">1</span>, 
   max: <span class="dec">1</span>, 
   showValue: <span class="lit">true</span>, 
   editable: <span class="lit">true</span>, 
   callback: (value, event) =&gt; {
-    console.<span class="hljs-built_in">log</span>(value);
+    console.log(value);
   }
-});
-</code></pre>
+});` );
 
-<h2 id="curve">Curve</h2>
-
-<p>Represents a simple Curve Editor. It's a versatile component designed to simplify the manipulation and visualization
+        // Curve
+        MAKE_HEADER( "Curve", "h2", "curve" );
+        MAKE_PARAGRAPH( `Represents a simple Curve Editor. It's a versatile component designed to simplify the manipulation and visualization
     of curves or graphs, ideal for any scenario where the smooth interpolation of values over time
-    or other parameters is essential.</p>
-<p>Call <code class='inline'>Panel.addCurve(name, values, callback)</code> to add a Curve Editor Widget to your panel:</p>
-<ul>
-<li><code class='inline'>name (String)</code>: Widget name</li>
-<li><code class='inline'>values (Array)</code>: Values of the curve to be interpolated</li>
-<li><code class='inline'>callback (Function)</code>: Function called when the values change</li>
-</ul>
-
-<pre><code class="lang-js"><span class="kwd">const</span> opacityValues = [
+    or other parameters is essential.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addCurve(name, values, callback)")} to add a Curve Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["values (Array)", "Values of the curve to be interpolated"],
+            ["options (Object)", "Basic options for a Widget"],
+            [
+                ["skipReset (Boolean)", "Don't add the reset value button when value changes"],
+                ["bgColor (Color)", "Widget background color"],
+                ["pointsColor (Color)", "Curve points color"],
+                ["lineColor (Color)", "Curve line color"],
+                ["noOverlap (Boolean)", "Points do not overlap, replacing themselves if necessary"],
+                ["allowAddValues (Boolean)", "Support adding values on click"],
+                ["smooth (Number)", "Curve smoothness"],
+                ["moveOutAction (Number)", "Clamp or delete points moved out of the curve (LX.CURVE_MOVEOUT_CLAMP, LX.CURVE_MOVEOUT_DELETE)"],
+            ]
+        ] );
+        MAKE_CODE( `<span class="kwd">const</span> opacityValues = [
     [<span class="dec">0.2</span>, <span class="dec">0.35</span>],
     [<span class="dec">0.42</span>, <span class="dec">0.9</span>],
     [<span class="dec">0.55</span>, <span class="dec">0.67</span>],
@@ -476,23 +504,21 @@ panel.addTree(<span class="str">"Scene Tree"</span>, scene_data, {
 ];
 panel.addCurve(<span class="str">"Opacity"</span>, opacityValues, (value, event) => {
     console.log(value);
-});
-</code></pre>
+});` );
 
-<h2 id="panel-tabs">Tabs</h2>
-
-<p>Represents panel divisions as tabs, either in horizontal or vertical mode.
-    Quickly switch between the different sets of information.</p>
-<p>Call <code class='inline'>Panel.addTabs(tabs, options)</code> to add a Tabs Widget to your panel, where 
-    <code class='inline'>tabs</code> is an <code class="inline"><span class="typ">Array</span></code> of objects which have:</p>
-<ul>
-<li><code class='inline'>name (String)</code>: Name of the tab (if icon, use as title)</li>
-<li><code class='inline'>icon (String)</code>: Icon path to be used as the tab icon (optional)</li>
-<li><code class='inline'>onCreate (Function)</code>: Func to be called at tab creation</li>
-<li><code class='inline'>onSelect (Function)</code>: Func to be called on select tab (optional)</li>
-</ul>
-
-<pre><code class="lang-js">panel.addTabs([
+        // Tabs
+        MAKE_HEADER( "Tabs", "h2", "panel-tabs" );
+        MAKE_PARAGRAPH( `Represents panel divisions as tabs, either in horizontal or vertical mode.
+    Quickly switch between the different sets of information.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTabs(tabs, options)")} to add a Tabs Widget to your panel, where 
+    <code class='inline'>tabs</code> is an <code class="inline"><span class="typ">Array</span></code> of objects which have:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Name of the tab (if icon, use as title)"],
+            ["icon (String)", "Icon path to be used as the tab icon (optional)"],
+            ["onCreate (Function)", "Func to be called at tab creation"],
+            ["onSelect (Function)", "Func to be called on select tab (optional)"]
+        ] );
+        MAKE_CODE( `panel.addTabs([
     { 
         name: <span class="str">"First tab"</span>,
         icon: <span class="str">"fa-brands fa-discord"</span>,
@@ -512,13 +538,29 @@ panel.addCurve(<span class="str">"Opacity"</span>, opacityValues, (value, event)
             p.addButton(<span class="kwd">null</span>, <span class="str">"Go"</span>, () => { window.open(<span class="str">"https://github.com/jxarco/lexgui.js/"</span>) });
         }
     }
-], { vertical: <span class="lit">false</span> });
-</code></pre>
+], { vertical: <span class="lit">false</span> });` );
 
-<h2 id="other-widgets">Other Widgets</h2>
-<ul>
-<li><code class='inline'>Panel.addBlank(height)</code>: Add vertical space (in pixels) inside a branch.</li>
-</ul>
+        // Other widgets
+        MAKE_HEADER( "Other Widgets", "h2", "other-widgets" );
+        MAKE_LINE_BREAK();
+
+        MAKE_CODE_BULLET_LIST( [
+            ["Panel.addBlank(height)", "Add vertical space (in pixels) inside a branch."],
+            ["Panel.addContent(element, options)", "Append user content to a widget root."],
+            ["Panel.addImage(url, options)", "Image preview widget."],
+            ["Panel.addLabel(value, options)", "Disabled text widget without name."],
+            ["Panel.addSeparator()", "Adds an horizontal line to separate widgets."],
+        ] );
+
+    function goUp() {
+        document.scrollingElement.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'
+        });
+    }
+
+    </script>
 
 </body>
 </html>

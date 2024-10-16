@@ -338,3 +338,25 @@ a .desc {
 	color: #e2c886;
 	font-size: 21px;
 }
+
+#goUpButton {
+	position: fixed;
+	bottom: 32px;
+	right: 32px;
+	border: 1px solid #666;
+	border-radius: 4px;
+	outline: none;
+	background: none;
+	font-size: 18px;
+	padding: 6px;
+	color: #bbb;
+	transition: all 0.25s;
+	width: 32px;
+	height: 32px;
+}
+
+#goUpButton:hover {
+	color: #ccc;
+	border-color: #ccc;
+	cursor: pointer;
+}

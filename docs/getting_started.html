@@ -18,7 +18,7 @@ MAKE_PARAGRAPH( `Once you have included <strong>lexgui.js</strong> in your proje
 MAKE_PARAGRAPH( `The first thing to do is initializing the library. Calling ${INLINE_CODE("LX.init")} will initialize the necessary stuff and build the main ${INLINE_LINK("Area", "#area")}, which by default will fit the root container:` );
 MAKE_CODE( `<span class="kwd">let</span> area = LX.init();` );
 MAKE_PARAGRAPH( `Optionally, you can pass an ${INLINE_CODE("Object")} parameter to define a few properties:` );
-MAKE_BULLET_LIST( [
+MAKE_CODE_BULLET_LIST( [
     [`container (String)`, `Root container for the entire UI (default is ${INLINE_CODE("document.body")})`],
     [`id (String)`, `id of the generated Main Area (default is <em>mainarea</em>)`],
     [`skip_default_area (Bool)`, `Skips the creation of main area`]
@@ -27,7 +27,7 @@ MAKE_BULLET_LIST( [
 MAKE_HEADER( "Namespace Globals", "h2", "namespace-globals" );
 
 MAKE_PARAGRAPH( `You can modify global namespace (${INLINE_CODE("LX")}) variables before you start creating UI elements. For now, the customizable vars are the following:` );
-MAKE_BULLET_LIST( [
+MAKE_CODE_BULLET_LIST( [
     [`LX.DEFAULT_NAME_WIDTH`, `Width of the name container inside a widget (Default ${INLINE_CODE("30%")})`],
     [`LX.DEFAULT_SPLITBAR_SIZE`, `Width (in pixels) of the area resize bar created on split (Default ${INLINE_CODE("4")})`],
     [`LX.OPEN_CONTEXTMENU_ENTRY`, `Specify how the subentries of a Context Menu will be opened, '<em>mouseover</em>' or '<em>click</em>' (Default ${INLINE_CODE("click")})`]

@@ -14,7 +14,7 @@
 
         MAKE_HEADER( "Timeline", "h1", "timeline" );
         MAKE_PARAGRAPH( `Timeline is an abstrac class and it has the following derived clases:` );
-        MAKE_BULLET_LIST( [
+        MAKE_CODE_BULLET_LIST( [
             [`<a href="#keyframes-timeline">KeyframesTimeline</a>`, ""],
             [`<a href="#curves-timeline">CurvesTimeline</a>`, ""],
             [`<a href="#clips-timeline">ClipsTimeline</a>`, ""],
@@ -25,7 +25,7 @@
 
         MAKE_PARAGRAPH("Each timeline has to be appended to an existing panel.");
         MAKE_PARAGRAPH( `The possible ${INLINE_CODE(`options <span class="desc">(Object)</span>`)} when creating dialogs are the following:` );
-            MAKE_BULLET_LIST( [
+            MAKE_CODE_BULLET_LIST( [
                 [`opacity <span class="desc">(Float)</span>`, ` Value representing the opacity of the timeline canvas.`],
                 [`width <span class="desc">(Float)</span>`, " 400 by default."],
                 [`height <span class="desc">(Float)</span>`, " 100 by default."],
@@ -40,7 +40,7 @@
             ] );
 
         MAKE_PARAGRAPH( `Callback functions can be defined also in the ${INLINE_CODE("options")}. These are the possible functions that can be called after an actions is triggered:` );
-            MAKE_BULLET_LIST( [             
+            MAKE_CODE_BULLET_LIST( [
                 [`onBeforeCreateTopBar <span class="desc">(function)</span>`, "Callback to add widgets on the top bar before the default ones."],
                 [`onAfterCreateTopBar <span class="desc">(function)</span>`, "Callback to add widgets on the top bar after the default ones."],
                 [`onChangePlayMode <span class="desc">(function)</span>`, "Function called when the play mode is changed (loop or once)."],
@@ -55,7 +55,7 @@
             ] );
            
         MAKE_HEADER( "Properties", "h3", "" );
-        MAKE_BULLET_LIST( [             
+        MAKE_CODE_BULLET_LIST( [
                 [`.root`, `<span class="desc">LX.Area</span> <p> Container where the whole timeline is created`],
                 [`.animationClip`, `<span class="desc">Object</span>
                     <ul>
@@ -72,7 +72,7 @@
             ] );
 
         MAKE_HEADER( "Methods", "h3", "" );
-        MAKE_BULLET_LIST( [             
+        MAKE_CODE_BULLET_LIST( [
                 [`.setAnimationClip<span class="pln">(animation: <span class ="desc">Object</span>)</span>`, `<p> Process and format the animation tracks and set it as the animationClip`],
                 [`.setDuration<span class="pln">(duration: <span class ="desc">Float</span>)</span>`, `<p> Set the duration of the animation`],
                 [`.setSpeed<span class="pln">(speed: <span class ="desc">Float</span>)</span>`, `<p> Set the playback speed of the animation`],
@@ -88,7 +88,7 @@
         MAKE_HEADER( "Keyframes timeline", "h2", "keyframes-timeline" );
         INSERT_IMAGE(`../data/keyframes.png`, "keyframes timeline" );
         MAKE_PARAGRAPH( `Callback functions can be defined also in the ${INLINE_CODE("options")}. These are the possible functions that can be called after an actions is triggered:` );
-            MAKE_BULLET_LIST( [             
+            MAKE_CODE_BULLET_LIST( [
                 ["onShowOptimizeMenu (function)", ""],
                 ["onGetOptimizeThreshold (function)", ""]
             ] );

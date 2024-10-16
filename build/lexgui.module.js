@@ -4558,6 +4558,7 @@ class Panel {
      * @param {Array} values By default values in the array
      * @param {Function} callback Callback function on change
      * @param {*} options:
+     * innerValues (Array): Use dropdown mode and use values as options
      */
 
     addArray( name, values = [], callback, options = {} ) {
@@ -5479,9 +5480,9 @@ class Panel {
      * @param {*} options:
      * min, max: Min and Max values
      * low, optimum, high: Low and High boundary values, Optimum point in the range
-     * showValue: show current value
-     * editable: allow edit value
-     * callback: function called on change value
+     * showValue: Show current value
+     * editable: Allow edit value
+     * callback: Function called on change value
      */
 
     addProgress( name, value, options = {} ) {

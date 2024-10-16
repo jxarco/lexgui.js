@@ -48,12 +48,32 @@ function MAKE_BULLET_LIST( list )
     console.assert(list && list.length > 0);
     let ul = document.createElement('ul');
     for( var el of list ) {
+        let li = document.createElement('li');
+        li.innerHTML = el;
+        ul.appendChild( li );
+    }
+    document.body.appendChild( ul );
+}
+
+function MAKE_CODE_BULLET_LIST( list, target )
+{
+    console.assert(list && list.length > 0);
+    let ul = document.createElement('ul');
+    for( var el of list ) {
         let split = (el.constructor === Array);
+        if( split && el[0].constructor === Array ) {
+            MAKE_CODE_BULLET_LIST( el, ul );
+            continue;
+        }
         let li = document.createElement('li');
         li.innerHTML = split ? INLINE_CODE( el[0] ) + ": " + el[1] : INLINE_CODE( el );
         ul.appendChild( li );
     }
-    document.body.appendChild( ul );
+    if( target ) {
+        target.appendChild( ul );
+    } else {
+        document.body.appendChild( ul );
+    }
 }
 
 function INLINE_LINK( string, href )
@@ -82,9 +102,10 @@ function COPY_SNIPPET( b )
     console.log("Copied!");
 }
 
-function INSERT_IMAGE(src, caption = "" ) {
+function INSERT_IMAGE( src, caption = "" )
+{
     let img = document.createElement('img');
     img.src = src;
     img.alt = caption;
-    document.body.appendChild(img);
+    document.body.appendChild( img );
 }

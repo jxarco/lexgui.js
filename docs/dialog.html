@@ -18,7 +18,7 @@
         MAKE_PARAGRAPH( `LexGUI allows to create Dialogs, also known as modal windows or pop-ups, allowing developers to display
         important information, gather user input, or prompt for user actions without navigating away from the current context.
         The possible dialogs are the following:` );
-        MAKE_BULLET_LIST( [
+        MAKE_CODE_BULLET_LIST( [
             ["Classic", "General pop-up to display any kind of information or errors"],
             ["Pocket", "Tiny dialog used normally as a debugging tool. Can be docked to the window corners"],
             ["Prompt", "Classic prompt pop-up to gather user information"],
@@ -47,20 +47,20 @@
         MAKE_CODE( `LX.popup(<span class="str">"Message"</span>, <span class="str">"Title"</span>, options);` );
 
         MAKE_PARAGRAPH( `The possible ${INLINE_CODE("options (Object)")} when creating dialogs are the following:` );
-        MAKE_BULLET_LIST( [
+        MAKE_CODE_BULLET_LIST( [
             ["position (Array)", "[x, y] representing left-top values relative to the main LX root area"],
             ["size (Array)", "[width, height] in css"],
             ["draggable (Boolean)", "Set the pop-up as draggable. In case of pocket dialogs it's false, by default (they are dockables)"],
         ] );
 
         MAKE_PARAGRAPH( `Prompts:` );
-        MAKE_BULLET_LIST( [
+        MAKE_CODE_BULLET_LIST( [
             ["input (Boolean)", "Set if it has to be an input. Default: [true]"],
             ["required (Boolean)", "Set if the input must be filled. Default: [false]"]
         ] );
 
         MAKE_PARAGRAPH( `Pop-up:` );
-        MAKE_BULLET_LIST( [
+        MAKE_CODE_BULLET_LIST( [
             ["time: (Number)", "Time before the dialog fade out (ms). Default: [3000]"]
         ] );
 
