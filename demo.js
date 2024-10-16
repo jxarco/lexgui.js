@@ -538,6 +538,10 @@ function fillPanel( panel ) {
         console.log(value);
     });
 
+    panel.addDial("3d", opacityValues, (value, event) => {
+        console.log(value);
+    }, {size: "100px", allowAddValues: false});
+    
     // another branch
     panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});
     panel.addColor("Background", "#b7a9b1");

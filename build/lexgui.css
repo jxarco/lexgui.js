@@ -2284,6 +2284,15 @@ meter::-webkit-meter-even-less-good-value {
   border-radius: 2px;
 }
 
+/* Dial Widget */
+.dial {
+  justify-content: center;
+}
+
+.dial canvas {
+  border-radius: 50%;
+}
+
 /* Card Widget */
 
 .lexcard {
