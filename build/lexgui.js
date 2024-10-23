@@ -12,7 +12,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     */
 
     var LX = global.LX = {
-        version: "0.1.35",
+        version: "0.1.36",
         ready: false,
         components: [], // specific pre-build components
         signals: {} // events and triggers
@@ -1711,22 +1711,26 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             let isSelected = options.selected ?? false;
 
-            if( isSelected ) {
-                this.root.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
-                this.area.root.querySelectorAll('.lextabcontent').forEach( c => c.style.display = 'none');
+            if( isSelected )
+            {
+                this.root.querySelectorAll( 'span' ).forEach( s => s.classList.remove( 'selected' ) );
+                this.area.root.querySelectorAll( '.lextabcontent' ).forEach( c => c.style.display = 'none' );
             }
             
             isSelected = !Object.keys( this.tabs ).length && !this.folding ? true : isSelected;
 
             let contentEl = content.root ? content.root : content;
-            contentEl.style.display = isSelected ? "block" : "none";
-            contentEl.classList.add("lextabcontent");
+            contentEl.originalDisplay = contentEl.style.display;
+            contentEl.style.display = isSelected ? contentEl.originalDisplay : "none";
+            contentEl.classList.add( 'lextabcontent' );
 
             // Process icon
             if( options.icon )
             {
                 if( options.icon.includes( 'fa-' ) ) // It's fontawesome icon...
+                {
                     options.icon = "<i class='" + options.icon + "'></i>";
+                }
                 else // an image..
                 {
                     const rootPath = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/";
@@ -1735,18 +1739,21 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             }
 
             // Create tab
-            let tabEl = document.createElement('span');
-            tabEl.dataset["name"] = name;
-            tabEl.className = "lexareatab" + (isSelected ? " selected" : "");
-            tabEl.innerHTML = (options.icon ?? "") + name;
-            tabEl.id = name.replace(/\s/g, '') + Tabs.TAB_ID++;
+            let tabEl = document.createElement( 'span' );
+            tabEl.dataset[ "name" ] = name;
+            tabEl.className = "lexareatab" + ( isSelected ? " selected" : "" );
+            tabEl.innerHTML = ( options.icon ?? "" ) + name;
+            tabEl.id = name.replace( /\s/g, '' ) + Tabs.TAB_ID++;
             tabEl.title = options.title;
             tabEl.selected = isSelected ?? false;
             tabEl.fixed = options.fixed;
-            if(tabEl.selected)
-                this.selected = name;
             tabEl.instance = this;
             contentEl.id = tabEl.id + "_content";
+
+            if( tabEl.selected )
+            {
+                this.selected = name;
+            }
 
             LX.addSignal( "@on_tab_docked", tabEl, function() {
                 if( this.parentElement.childNodes.length == 1 )
@@ -1756,6 +1763,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             } );
             
             tabEl.addEventListener("click", e => {
+
                 e.preventDefault();
                 e.stopPropagation();
 
@@ -1763,25 +1771,27 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 {
                     // For folding tabs
                     const lastValue = tabEl.selected;
-                    tabEl.parentElement.querySelectorAll('span').forEach( s => s.selected = false );
+                    tabEl.parentElement.querySelectorAll( 'span' ).forEach( s => s.selected = false );
                     tabEl.selected = !lastValue; 
                     // Manage selected
-                    tabEl.parentElement.querySelectorAll('span').forEach( s => s.classList.remove('selected'));
-                    tabEl.classList.toggle('selected', (this.folding && tabEl.selected));
+                    tabEl.parentElement.querySelectorAll( 'span' ).forEach( s => s.classList.remove( 'selected' ));
+                    tabEl.classList.toggle('selected', ( this.folding && tabEl.selected ));
                     // Manage visibility 
-                    tabEl.instance.area.root.querySelectorAll('.lextabcontent').forEach( c => c.style.display = 'none');
-                    contentEl.style.display = "block";
+                    tabEl.instance.area.root.querySelectorAll( '.lextabcontent' ).forEach( c => c.style.display = 'none' );
+                    contentEl.style.display = contentEl.originalDisplay;
                     tabEl.instance.selected = tabEl.dataset.name;
                 }
 
                 if( this.folding )
                 {
                     this.folded = tabEl.selected;
-                    this.area.root.classList.toggle('folded', !this.folded);
+                    this.area.root.classList.toggle( 'folded', !this.folded );
                 }
 
-                if(options.onSelect)
+                if( options.onSelect )
+                {
                     options.onSelect(e, tabEl.dataset.name);
+                }
 
                 if( this.thumb )
                 {
@@ -1796,25 +1806,28 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 e.preventDefault();
                 e.stopPropagation();
     
-                if(options.onContextMenu) 
+                if( options.onContextMenu )
+                {
                     options.onContextMenu( e, tabEl.dataset.name );
+                }
             });
 
             tabEl.addEventListener("mouseup", e => {
                 e.preventDefault();
                 e.stopPropagation();
-                if( e.button == 1 ) {
-                    this.delete( tabEl.dataset["name"] );
+                if( e.button == 1 )
+                {
+                    this.delete( tabEl.dataset[ "name" ] );
                 }
             });
             
-            tabEl.setAttribute('draggable', true);
-            tabEl.addEventListener("dragstart", function(e) {
+            tabEl.setAttribute( 'draggable', true );
+            tabEl.addEventListener( 'dragstart', function( e ) {
                 if( this.parentElement.childNodes.length == 1 ){
                     e.preventDefault();
                     return;
                 } 
-                e.dataTransfer.setData( "source", e.target.id );
+                e.dataTransfer.setData( 'source', e.target.id );
             });
             
             // Attach content

@@ -1,10 +1,15 @@
 # lexgui.js changelog
 
-## 0.1.36 (dev)
+## 0.1.37 (dev)
+
+
+
+## 0.1.36 (master)
 
 Default skipCallback as `true` on emit widget signal.
 Add some vec2 math functions.
 `Panel.addTabs` support for onCreate (prev. `callback`) and onSelect callbacks.
+Apply original `display` when showing Areatab.
 Minor styling tweaks.
 Documentation updates.
 
