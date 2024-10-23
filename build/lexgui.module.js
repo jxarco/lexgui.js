@@ -5084,6 +5084,7 @@ class Panel {
      * precision: The number of digits to appear after the decimal point
      * min, max: Min and Max values for the input
      * skipSlider: If there are min and max values, skip the slider
+     * units: Unit as string added to the end of the value
      */
 
     addNumber( name, value, callback, options = {} ) {
@@ -5119,12 +5120,12 @@ class Panel {
         box.className = "numberbox";
 
         let vecinput = document.createElement( 'input' );
+        vecinput.id = "number_" + simple_guidGenerator();
         vecinput.className = "vecinput";
         vecinput.min = options.min ?? -1e24;
         vecinput.max = options.max ?? 1e24;
         vecinput.step = options.step ?? "any";
         vecinput.type = "number";
-        vecinput.id = "number_" + simple_guidGenerator();
 
         if( value.constructor == Number )
         {
@@ -5135,11 +5136,32 @@ class Panel {
         vecinput.value = vecinput.iValue = value;
         box.appendChild( vecinput );
 
-        let drag_icon = document.createElement( 'a' );
-        drag_icon.className = "fa-solid fa-arrows-up-down drag-icon hidden";
-        box.appendChild( drag_icon );
+        let measureRealWidth = function( value, paddingPlusMargin = 8 ) {
+            var i = document.createElement( "span" );
+            i.className = "lexinputmeasure";
+            i.innerHTML = value;
+            document.body.appendChild( i );
+            var rect = i.getBoundingClientRect();
+            LX.UTILS.deleteElement( i );
+            return rect.width + paddingPlusMargin;
+        }
 
-        if( options.disabled ) {
+        if( options.units )
+        {
+            let unitSpan = document.createElement( 'span' );
+            unitSpan.className = "lexunit";
+            unitSpan.innerText = options.units;
+            unitSpan.style.left = measureRealWidth( vecinput.value ) + "px";
+            vecinput.unitSpan = unitSpan;
+            box.appendChild( unitSpan );
+        }
+
+        let dragIcon = document.createElement( 'a' );
+        dragIcon.className = "fa-solid fa-arrows-up-down drag-icon hidden";
+        box.appendChild( dragIcon );
+
+        if( options.disabled )
+        {
             vecinput.disabled = true;
         }
 
@@ -5188,6 +5210,7 @@ class Panel {
                 box.querySelector( ".lexinputslider" ).value = val;
 
             vecinput.value = val;
+            vecinput.unitSpan.style.left = measureRealWidth( vecinput.value ) + "px";
 
             // Reset button (default value)
             if( !skipCallback )
@@ -5213,7 +5236,7 @@ class Panel {
             lastY = e.pageY;
             document.body.classList.add('nocursor');
             document.body.classList.add('noevents');
-            drag_icon.classList.remove('hidden');
+            dragIcon.classList.remove('hidden');
             e.stopImmediatePropagation();
             e.stopPropagation();
         }
@@ -5225,8 +5248,8 @@ class Panel {
                 if(e.shiftKey) mult *= 10;
                 else if(e.altKey) mult *= 0.1;
                 let new_value = (+vecinput.valueAsNumber + mult * dt);
-                vecinput.value = (+new_value).toFixed(4).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/,'$1');
-                Panel._dispatch_event(vecinput, "change");
+                vecinput.value = (+new_value).toFixed( 4 ).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/,'$1');
+                Panel._dispatch_event( vecinput, "change" );
             }
 
             lastY = e.pageY;
@@ -5240,7 +5263,7 @@ class Panel {
             doc.removeEventListener("mouseup",inner_mouseup);
             document.body.classList.remove('nocursor');
             document.body.classList.remove('noevents');
-            drag_icon.classList.add('hidden');
+            dragIcon.classList.add('hidden');
         }
         
         container.appendChild(box);
@@ -5324,9 +5347,9 @@ class Panel {
 
             vecinput.value = vecinput.iValue = value[ i ];
 
-            let drag_icon = document.createElement( 'a' );
-            drag_icon.className = "fa-solid fa-arrows-up-down drag-icon hidden";
-            box.appendChild( drag_icon );
+            let dragIcon = document.createElement( 'a' );
+            dragIcon.className = "fa-solid fa-arrows-up-down drag-icon hidden";
+            box.appendChild( dragIcon );
 
             if( options.disabled ) {
                 vecinput.disabled = true;
@@ -5399,7 +5422,7 @@ class Panel {
                 lastY = e.pageY;
                 document.body.classList.add('nocursor');
                 document.body.classList.add('noevents');
-                drag_icon.classList.remove('hidden');
+                dragIcon.classList.remove('hidden');
                 e.stopImmediatePropagation();
                 e.stopPropagation();
             }
@@ -5434,7 +5457,7 @@ class Panel {
                 doc.removeEventListener("mouseup",inner_mouseup);
                 document.body.classList.remove('nocursor');
                 document.body.classList.remove('noevents');
-                drag_icon.classList.add('hidden');
+                dragIcon.classList.add('hidden');
             }
             
             box.appendChild(vecinput);

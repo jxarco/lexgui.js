@@ -1282,6 +1282,16 @@ input[type=number] {
   border: 2px solid var(--global-selected);
 }
 
+.lexwidget .numberbox span {
+  position: absolute;
+  top: -2px;
+}
+
+.lexinputmeasure {
+  font-family: var(--global-font);
+  font-size: var(--global-font-size);
+}
+
 .lexinputslider {
   appearance: none;
   -moz-appearance: none;

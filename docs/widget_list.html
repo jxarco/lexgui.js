@@ -152,8 +152,11 @@
             [
                 ["disabled (Boolean)", "Make the widget disabled"],
                 ["step (Number)", "Change Step value"],
+                ["precision (Number)", "The number of digits to appear after the decimal point"],
                 ["min (Number)", "Min input value"],
-                ["max (Number)", "Max input value"]
+                ["max (Number)", "Max input value"],
+                ["skipSlider (Boolean)", "Skip the slider if there are min and max values"],
+                ["units (String)", "Unit as string added to the end of the value"]
             ]
         ] );
         MAKE_PARAGRAPH( `<sup>Note: Setting <code class='inline'>min</code>, <code class='inline'>max</code> values will automatically add a slider below the number input.<sup>` );

@@ -547,7 +547,7 @@ function fillPanel( panel ) {
     });
     panel.addNumber("Font Size", 36, (value, event) => {
         console.log(value);
-    }, { min: 1, max: 48, step: 1});
+    }, { min: 1, max: 48, step: 1, units: "px"});
     panel.addVector2("2D Position", [250, 350], (value, event) => {
         console.log(value);
     }, { min: 0, max: 1024 });
