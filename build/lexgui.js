@@ -113,6 +113,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         return (S4()+"-"+S4()+"-"+S4());
     }
 
+    LX.guidGenerator = simple_guidGenerator;
+
     // Timer that works everywhere (from litegraph.js)
     if (typeof performance != "undefined") {
         LX.getTime = performance.now.bind(performance);
@@ -304,11 +306,18 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             else
             {
                 for( let c of LX.components )
-                    if( LX[c].prototype.onKeyPressed ) 
+                {
+                    if( !LX[c].prototype || !LX[c].prototype.onKeyPressed )
                     {
-                        const instances = LX.CodeEditor.getInstances();
-                        for( let i of instances ) i.onKeyPressed( e );
+                        continue;
                     }
+
+                    const instances = LX.CodeEditor.getInstances();
+                    for( let i of instances )
+                    {
+                        i.onKeyPressed( e );
+                    }
+                }
             }
         });
 
@@ -633,6 +642,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             this.domEvent = domEvent;
         }
     };
+
+    LX.IEvent = IEvent;
 
     class TreeEvent {
 
@@ -2451,6 +2462,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         static CONTENT      = 20;
         static CUSTOM       = 21;
         static SEPARATOR    = 22;
+        static KNOB         = 23;
 
         static NO_CONTEXT_TYPES = [
             Widget.BUTTON,
@@ -2459,7 +2471,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             Widget.PROGRESS
         ];
 
-        constructor(name, type, options) {
+        constructor( name, type, options ) {
             this.name = name;
             this.type = type;
             this.options = options;
@@ -2467,10 +2479,12 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
         value() {
 
-            if(this.onGetValue)
+            if( this.onGetValue )
+            {
                 return this.onGetValue();
+            }
 
-            console.warn("Can't get value of " + this.typeName());
+            console.warn( "Can't get value of " + this.typeName() );
         }
 
         set( value, skipCallback = false ) {

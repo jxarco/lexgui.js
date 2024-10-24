@@ -27,6 +27,9 @@ LX.CURVE_MOVEOUT_DELETE = 1;
 function clamp( num, min, max ) { return Math.min( Math.max( num, min ), max ); }
 function round( num, n ) { return +num.toFixed( n ); }
 
+LX.clamp = clamp;
+LX.round = round;
+
 function getSupportedDOMName( string )
 {
     return string.replace(/\s/g, '').replaceAll('@', '_').replaceAll('+', '_plus_').replaceAll('.', ''); 
@@ -108,6 +111,8 @@ function simple_guidGenerator() {
     };
     return (S4()+"-"+S4()+"-"+S4());
 }
+
+LX.guidGenerator = simple_guidGenerator;
 
 // Timer that works everywhere (from litegraph.js)
 if (typeof performance != "undefined") {
@@ -300,11 +305,18 @@ function create_global_searchbar( root ) {
         else
         {
             for( let c of LX.components )
-                if( LX[c].prototype.onKeyPressed ) 
+            {
+                if( !LX[c].prototype || !LX[c].prototype.onKeyPressed )
                 {
-                    const instances = LX.CodeEditor.getInstances();
-                    for( let i of instances ) i.onKeyPressed( e );
+                    continue;
                 }
+
+                const instances = LX.CodeEditor.getInstances();
+                for( let i of instances )
+                {
+                    i.onKeyPressed( e );
+                }
+            }
         }
     });
 
@@ -630,6 +642,8 @@ class IEvent {
         this.domEvent = domEvent;
     }
 };
+
+LX.IEvent = IEvent;
 
 class TreeEvent {
 
@@ -2448,6 +2462,7 @@ class Widget {
     static CONTENT      = 20;
     static CUSTOM       = 21;
     static SEPARATOR    = 22;
+    static KNOB         = 23;
 
     static NO_CONTEXT_TYPES = [
         Widget.BUTTON,
@@ -2456,7 +2471,7 @@ class Widget {
         Widget.PROGRESS
     ];
 
-    constructor(name, type, options) {
+    constructor( name, type, options ) {
         this.name = name;
         this.type = type;
         this.options = options;
@@ -2464,10 +2479,12 @@ class Widget {
 
     value() {
 
-        if(this.onGetValue)
+        if( this.onGetValue )
+        {
             return this.onGetValue();
+        }
 
-        console.warn("Can't get value of " + this.typeName());
+        console.warn( "Can't get value of " + this.typeName() );
     }
 
     set( value, skipCallback = false, signalName = "" ) {
