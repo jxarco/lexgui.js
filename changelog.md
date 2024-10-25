@@ -6,6 +6,7 @@ Audio:
 - Start new audio widgets (Knob wip).
 
 Allow unit labels for Number widgets.
+Fix ContextMenu position on creation over window size.
 Minor bug fixes.
 
 ## 0.1.36 (master)

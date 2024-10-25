@@ -2544,6 +2544,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 case Widget.LIST: return "List";
                 case Widget.TAGS: return "Tags";
                 case Widget.CURVE: return "Curve";
+                case Widget.KNOB: return "Knob";
                 case Widget.CUSTOM: return this.customName;
             }
         }
@@ -5146,12 +5147,19 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
                 let val = e.target.value = clamp( +e.target.valueAsNumber, +vecinput.min, +vecinput.max );
                 val = options.precision ? round( val, options.precision ) : val;
-                // update slider!
+
+                // Update slider!
                 if( box.querySelector( ".lexinputslider" ) )
+                {
                     box.querySelector( ".lexinputslider" ).value = val;
+                }
 
                 vecinput.value = val;
-                vecinput.unitSpan.style.left = measureRealWidth( vecinput.value ) + "px";
+
+                if( options.units )
+                {
+                    vecinput.unitSpan.style.left = measureRealWidth( vecinput.value ) + "px";
+                }
 
                 // Reset button (default value)
                 if( !skipCallback )
