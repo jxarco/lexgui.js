@@ -307,7 +307,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             {
                 for( let c of LX.components )
                 {
-                    if( !LX[c].prototype || !LX[c].prototype.onKeyPressed )
+                    if( !LX[c] || !LX[c].prototype.onKeyPressed )
                     {
                         continue;
                     }
@@ -6339,7 +6339,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             this.items = [];
             this.colors = {};
 
-            if(title) {
+            if( title )
+            {
                 const item = {};
                 item[ title ] = [];
                 item[ 'className' ] = "cmtitle";
@@ -6354,7 +6355,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             
             if(!useAbsolute)
             {   
-                let width = rect.width + 36; // this has paddings
+                let width = rect.width;
                 if(window.innerWidth - rect.right < 0)
                     div.style.left = (window.innerWidth - width - margin) + "px";
 
@@ -6395,7 +6396,6 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             contextmenu.style.marginTop =  3.5 - c.offsetHeight + "px";
 
             // Set final width
-            // contextmenu.style.width = contextmenu.offsetWidth + "px";
             this._adjust_position( contextmenu, 6, true );
         }
 
@@ -6469,7 +6469,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         }
 
         onCreate() {
-            this._adjust_position( this.root, 6 );
+            doAsync( () => this._adjust_position( this.root, 6 ) );
         }
 
         add( path, options = {} ) {
@@ -6574,10 +6574,12 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     function addContextMenu( title, event, callback, options )
     {
         var menu = new ContextMenu( event, title, options );
-        LX.root.appendChild(menu.root);
+        LX.root.appendChild( menu.root );
 
-        if(callback)
+        if( callback )
+        {
             callback( menu );
+        }
 
         menu.onCreate();
 
