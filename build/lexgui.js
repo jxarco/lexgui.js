@@ -113,6 +113,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         return (S4()+"-"+S4()+"-"+S4());
     }
 
+    LX.guidGenerator = simple_guidGenerator;
+
     // Timer that works everywhere (from litegraph.js)
     if (typeof performance != "undefined") {
         LX.getTime = performance.now.bind(performance);
@@ -304,11 +306,18 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             else
             {
                 for( let c of LX.components )
-                    if( LX[c].prototype.onKeyPressed ) 
+                {
+                    if( !LX[c] || !LX[c].prototype.onKeyPressed )
                     {
-                        const instances = LX.CodeEditor.getInstances();
-                        for( let i of instances ) i.onKeyPressed( e );
+                        continue;
                     }
+
+                    const instances = LX.CodeEditor.getInstances();
+                    for( let i of instances )
+                    {
+                        i.onKeyPressed( e );
+                    }
+                }
             }
         });
 
@@ -633,6 +642,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             this.domEvent = domEvent;
         }
     };
+
+    LX.IEvent = IEvent;
 
     class TreeEvent {
 
@@ -2451,6 +2462,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         static CONTENT      = 20;
         static CUSTOM       = 21;
         static SEPARATOR    = 22;
+        static KNOB         = 23;
 
         static NO_CONTEXT_TYPES = [
             Widget.BUTTON,
@@ -2459,7 +2471,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             Widget.PROGRESS
         ];
 
-        constructor(name, type, options) {
+        constructor( name, type, options ) {
             this.name = name;
             this.type = type;
             this.options = options;
@@ -2467,10 +2479,12 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
         value() {
 
-            if(this.onGetValue)
+            if( this.onGetValue )
+            {
                 return this.onGetValue();
+            }
 
-            console.warn("Can't get value of " + this.typeName());
+            console.warn( "Can't get value of " + this.typeName() );
         }
 
         set( value, skipCallback = false ) {
@@ -5011,6 +5025,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
          * precision: The number of digits to appear after the decimal point
          * min, max: Min and Max values for the input
          * skipSlider: If there are min and max values, skip the slider
+         * units: Unit as string added to the end of the value
          */
 
         addNumber( name, value, callback, options = {} ) {
@@ -5046,12 +5061,12 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             box.className = "numberbox";
 
             let vecinput = document.createElement( 'input' );
+            vecinput.id = "number_" + simple_guidGenerator();
             vecinput.className = "vecinput";
             vecinput.min = options.min ?? -1e24;
             vecinput.max = options.max ?? 1e24;
             vecinput.step = options.step ?? "any";
             vecinput.type = "number";
-            vecinput.id = "number_" + simple_guidGenerator();
 
             if( value.constructor == Number )
             {
@@ -5062,11 +5077,32 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             vecinput.value = vecinput.iValue = value;
             box.appendChild( vecinput );
 
-            let drag_icon = document.createElement( 'a' );
-            drag_icon.className = "fa-solid fa-arrows-up-down drag-icon hidden";
-            box.appendChild( drag_icon );
+            let measureRealWidth = function( value, paddingPlusMargin = 8 ) {
+                var i = document.createElement( "span" );
+                i.className = "lexinputmeasure";
+                i.innerHTML = value;
+                document.body.appendChild( i );
+                var rect = i.getBoundingClientRect();
+                LX.UTILS.deleteElement( i );
+                return rect.width + paddingPlusMargin;
+            }
 
-            if( options.disabled ) {
+            if( options.units )
+            {
+                let unitSpan = document.createElement( 'span' );
+                unitSpan.className = "lexunit";
+                unitSpan.innerText = options.units;
+                unitSpan.style.left = measureRealWidth( vecinput.value ) + "px";
+                vecinput.unitSpan = unitSpan;
+                box.appendChild( unitSpan );
+            }
+
+            let dragIcon = document.createElement( 'a' );
+            dragIcon.className = "fa-solid fa-arrows-up-down drag-icon hidden";
+            box.appendChild( dragIcon );
+
+            if( options.disabled )
+            {
                 vecinput.disabled = true;
             }
 
@@ -5115,6 +5151,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     box.querySelector( ".lexinputslider" ).value = val;
 
                 vecinput.value = val;
+                vecinput.unitSpan.style.left = measureRealWidth( vecinput.value ) + "px";
 
                 // Reset button (default value)
                 if( !skipCallback )
@@ -5140,7 +5177,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 lastY = e.pageY;
                 document.body.classList.add('nocursor');
                 document.body.classList.add('noevents');
-                drag_icon.classList.remove('hidden');
+                dragIcon.classList.remove('hidden');
                 e.stopImmediatePropagation();
                 e.stopPropagation();
             }
@@ -5152,8 +5189,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     if(e.shiftKey) mult *= 10;
                     else if(e.altKey) mult *= 0.1;
                     let new_value = (+vecinput.valueAsNumber + mult * dt);
-                    vecinput.value = (+new_value).toFixed(4).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/,'$1');
-                    Panel._dispatch_event(vecinput, "change");
+                    vecinput.value = (+new_value).toFixed( 4 ).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/,'$1');
+                    Panel._dispatch_event( vecinput, "change" );
                 }
 
                 lastY = e.pageY;
@@ -5167,7 +5204,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 doc.removeEventListener("mouseup",inner_mouseup);
                 document.body.classList.remove('nocursor');
                 document.body.classList.remove('noevents');
-                drag_icon.classList.add('hidden');
+                dragIcon.classList.add('hidden');
             }
             
             container.appendChild(box);
@@ -5251,9 +5288,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
                 vecinput.value = vecinput.iValue = value[ i ];
 
-                let drag_icon = document.createElement( 'a' );
-                drag_icon.className = "fa-solid fa-arrows-up-down drag-icon hidden";
-                box.appendChild( drag_icon );
+                let dragIcon = document.createElement( 'a' );
+                dragIcon.className = "fa-solid fa-arrows-up-down drag-icon hidden";
+                box.appendChild( dragIcon );
 
                 if( options.disabled ) {
                     vecinput.disabled = true;
@@ -5326,7 +5363,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     lastY = e.pageY;
                     document.body.classList.add('nocursor');
                     document.body.classList.add('noevents');
-                    drag_icon.classList.remove('hidden');
+                    dragIcon.classList.remove('hidden');
                     e.stopImmediatePropagation();
                     e.stopPropagation();
                 }
@@ -5361,7 +5398,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     doc.removeEventListener("mouseup",inner_mouseup);
                     document.body.classList.remove('nocursor');
                     document.body.classList.remove('noevents');
-                    drag_icon.classList.add('hidden');
+                    dragIcon.classList.add('hidden');
                 }
                 
                 box.appendChild(vecinput);
@@ -6302,7 +6339,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             this.items = [];
             this.colors = {};
 
-            if(title) {
+            if( title )
+            {
                 const item = {};
                 item[ title ] = [];
                 item[ 'className' ] = "cmtitle";
@@ -6317,7 +6355,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             
             if(!useAbsolute)
             {   
-                let width = rect.width + 36; // this has paddings
+                let width = rect.width;
                 if(window.innerWidth - rect.right < 0)
                     div.style.left = (window.innerWidth - width - margin) + "px";
 
@@ -6358,7 +6396,6 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             contextmenu.style.marginTop =  3.5 - c.offsetHeight + "px";
 
             // Set final width
-            // contextmenu.style.width = contextmenu.offsetWidth + "px";
             this._adjust_position( contextmenu, 6, true );
         }
 
@@ -6432,7 +6469,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         }
 
         onCreate() {
-            this._adjust_position( this.root, 6 );
+            doAsync( () => this._adjust_position( this.root, 6 ) );
         }
 
         add( path, options = {} ) {
@@ -6537,10 +6574,12 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     function addContextMenu( title, event, callback, options )
     {
         var menu = new ContextMenu( event, title, options );
-        LX.root.appendChild(menu.root);
+        LX.root.appendChild( menu.root );
 
-        if(callback)
+        if( callback )
+        {
             callback( menu );
+        }
 
         menu.onCreate();
 

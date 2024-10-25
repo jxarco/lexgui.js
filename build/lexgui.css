@@ -776,6 +776,7 @@ body.noevents * {
   margin-top: 0.3em;
   margin-right: 0.7em;
   color: var(--global-selected-light);
+  font-size: 11px;
 }
 
 .lextitle.link {
@@ -1280,6 +1281,17 @@ input[type=number] {
 
 .lexwidget .numberbox:has(input:focus) {
   border: 2px solid var(--global-selected);
+}
+
+.lexwidget .numberbox span {
+  position: absolute;
+  top: -2px;
+  pointer-events: none;
+}
+
+.lexinputmeasure {
+  font-family: var(--global-font);
+  font-size: var(--global-font-size);
 }
 
 .lexinputslider {
@@ -2090,7 +2102,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexoverlaybuttons .lexbutton {
-  padding: 18px 12px;
+  padding: 16px 12px;
   font-size: var(--global-font-size-big);
   border-radius: 10px;
   justify-content: center;
@@ -2146,7 +2158,6 @@ meter::-webkit-meter-even-less-good-value {
   background: none;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
-  aspect-ratio: 1;
 }
 
 .lexoverlaybuttons.vertical .lexoverlaygroup {
@@ -2509,6 +2520,76 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexcustomcontainer .lexbutton span:not(:has(.menu)) {
   width: 95%;
+}
+
+/* Knob Widget */
+
+.lexknob {
+  padding: 8px;
+}
+
+.lexknob .knobcircle {
+  background: rgb(62,62,62);
+  background: linear-gradient(180deg, rgba(82,82,82,1) 0%, rgba(40,40,40,1) 100%);
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0px 3px 9px 2px #121212a9;
+}
+
+.lexknob.sm .knobcircle {
+  width: 48px;
+  height: 48px;
+}
+
+.lexknob.bg .knobcircle {
+  width: 81px;
+  height: 81px;
+}
+
+.lexknob .innerknobcircle {
+  background-color:rgba(62,62,62,1);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+}
+
+.lexknob.sm .innerknobcircle {
+  width: 39px;
+  height: 39px;
+}
+
+.lexknob.bg .innerknobcircle {
+  width: 73px;
+  height: 73px;
+}
+
+.lexknob .knobmarker {
+  background-color: var(--global-selected);
+  filter: brightness(1.5);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin: 0 auto;
+  margin-top: 6px;
+}
+
+.lexknob.sm .knobmarker {
+  width: 5px;
+  height: 5px;
+}
+
+.lexknob.bg .knobmarker {
+  width: 7px;
+  height: 7px;
+  margin-top: 8px;
 }
 
 /** Timeline */

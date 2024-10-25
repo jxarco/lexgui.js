@@ -1,6 +1,7 @@
 import { LX } from 'lexgui';
 import 'lexgui/components/codeeditor.js';
 import 'lexgui/components/timeline.js';
+import 'lexgui/components/audio.js';
 
 window.LX = LX;
 
@@ -477,6 +478,7 @@ function fillPanel( panel ) {
     panel.branch("Preferences", {icon: "fa-solid fa-gear"});
     panel.addButton(null, "Click me, Im Full Width...");
     panel.addText("Text", "Warning text", null, { warning: true });
+    panel.addKnob("A Knob", 4, 0, 200, value => { console.log(value) }, /*{ size: 'sm' }*/);
     panel.sameLine(2);
     panel.addFile("Img1", data => { console.log(data) }, {} );
     panel.addFile("Img2", data => { console.log(data) }, {} );
@@ -551,7 +553,7 @@ function fillPanel( panel ) {
     });
     panel.addNumber("Font Size", 36, (value, event) => {
         console.log(value);
-    }, { min: 1, max: 48, step: 1});
+    }, { min: 1, max: 48, step: 1, units: "px"});
     panel.addVector2("2D Position", [250, 350], (value, event) => {
         console.log(value);
     }, { min: 0, max: 1024 });

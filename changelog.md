@@ -2,7 +2,11 @@
 
 ## 0.1.37 (dev)
 
+Audio:
+- Start new audio widgets (Knob wip).
 
+Allow unit labels for Number widgets.
+Minor bug fixes.
 
 ## 0.1.36 (master)
 
