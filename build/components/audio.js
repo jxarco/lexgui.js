@@ -31,11 +31,11 @@ Panel.prototype.addKnob = function( name, value, min, max, callback, options = {
     let widget = this.create_widget( name, Widget.KNOB, options );
 
     widget.onGetValue = () => {
-        return +vecinput.value;
+        return innerKnobCircle.value;
     };
     widget.onSetValue = ( newValue, skipCallback ) => {
-        vecinput.value = newValue;
-        Panel._dispatch_event( vecinput, "change", skipCallback );
+        innerSetValue( newValue );
+        Panel._dispatch_event( innerKnobCircle, "change", skipCallback );
     };
 
     let element = widget.domEl;
@@ -44,8 +44,8 @@ Panel.prototype.addKnob = function( name, value, min, max, callback, options = {
     if( widget.name ) {
         Panel._add_reset_property( element.domName, function() {
             this.style.display = "none";
-            vecinput.value = vecinput.iValue;
-            Panel._dispatch_event( vecinput, "change" );
+            innerSetValue( innerKnobCircle.iValue );
+            Panel._dispatch_event( innerKnobCircle, "change" );
         });
     }
 
@@ -74,6 +74,13 @@ Panel.prototype.addKnob = function( name, value, min, max, callback, options = {
 
     innerKnobCircle.value = innerKnobCircle.iValue = value;
 
+    let innerSetValue = function( v ) {
+        // Convert val between (-135 and 135)
+        const angle = remapRange( v, innerKnobCircle.min, innerKnobCircle.max, -135.0, 135.0 );
+        innerKnobCircle.style.rotate = angle + 'deg';
+        innerKnobCircle.value = v;
+    }
+
     const angle = remapRange( value, min, max, -135.0, 135.0 );
     innerKnobCircle.style.rotate = angle + 'deg';
 
@@ -84,17 +91,17 @@ Panel.prototype.addKnob = function( name, value, min, max, callback, options = {
 
     // Add wheel input
 
-    // vecinput.addEventListener( "wheel", function( e ) {
-    //     e.preventDefault();
-    //     if( this !== document.activeElement )
-    //         return;
-    //     let mult = options.step ?? 1;
-    //     if( e.shiftKey ) mult *= 10;
-    //     else if( e.altKey ) mult *= 0.1;
-    //     let new_value = ( +this.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ) );
-    //     this.value = ( +new_value ).toFixed( 4 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' );
-    //     Panel._dispatch_event(vecinput, "change");
-    // }, { passive: false });
+    innerKnobCircle.addEventListener( "wheel", function( e ) {
+        e.preventDefault();
+        if( this !== document.activeElement )
+            return;
+        let mult = options.step ?? 1;
+        if( e.shiftKey ) mult *= 10;
+        else if( e.altKey ) mult *= 0.1;
+        let new_value = ( this.value - mult * ( e.deltaY > 0 ? 1 : -1 ) );
+        this.value = new_value;// .toFixed( 4 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' );
+        Panel._dispatch_event( innerKnobCircle, "change" );
+    }, { passive: false });
 
     innerKnobCircle.addEventListener( "change", e => {
 
@@ -105,27 +112,16 @@ Panel.prototype.addKnob = function( name, value, min, max, callback, options = {
         let val = knob.value = LX.clamp( knob.value, knob.min, knob.max );
         val = options.precision ? LX.round( val, options.precision ) : val;
 
-        // Convert val between (-135 and 135)
-        const angle = remapRange( val, knob.min, knob.max, -135.0, 135.0 );
+        innerSetValue( val );
 
-        console.log(angle);
+        // Reset button (default value)
+        if( !skipCallback )
+        {
+            let btn = element.querySelector( ".lexwidgetname .lexicon" );
+            if( btn ) btn.style.display = val != innerKnobCircle.iValue ? "block": "none";
+        }
 
-        knob.style.rotate = angle + 'deg';
-
-        // // Update slider!
-        // if( box.querySelector( ".lexinputslider" ) )
-        //     box.querySelector( ".lexinputslider" ).value = val;
-
-        // vecinput.value = val;
-
-        // // Reset button (default value)
-        // if( !skipCallback )
-        // {
-        //     let btn = element.querySelector( ".lexwidgetname .lexicon" );
-        //     if( btn ) btn.style.display = val != vecinput.iValue ? "block": "none";
-        // }
-
-        // if( !skipCallback ) this._trigger( new LX.IEvent( name, val, e ), callback );
+        if( !skipCallback ) this._trigger( new LX.IEvent( name, val, e ), callback );
     }, { passive: false });
     
     // Add drag input

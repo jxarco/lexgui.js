@@ -2527,7 +2527,7 @@ meter::-webkit-meter-even-less-good-value {
   margin: 0 auto;
   border-radius: 50%;
   position: relative;
-  box-shadow: 0px 3px 8px 3px #121212;
+  box-shadow: 0px 3px 9px 2px #121212a9;
 }
 
 .lexknob.sm .knobcircle {
