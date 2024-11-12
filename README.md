@@ -2,18 +2,74 @@
 
 **lexgui.js** is a lightweight JavaScript library that allows you to create web interfaces using only JavaScript, HTML, and CSS. It provides an easy-to-use API for building dynamic and interactive common and complex editor interfaces without the need for tedious frameworks or big libraries. With lexgui.js, you can create custom UI components, handle user interactions, and update the interface dynamically.
 
-<img src="data/Screenshot.png" alt="Screenshot" style="width: 100%"/>
-<img src="data/Screenshot_Godot.png"/>
+<table>
+  <tr>
+    <td valign="top"><img src="data/Screenshot.png"/></td>
+    <td valign="top"><img src="data/Screenshot_Godot.png"/></td>
+  </tr>
+</table>
 
-### Code Editor
-<img src="data/Screenshot_Code.png"/>
+<table>
+  <tr>
+    <td valign="top"><h3>Code Editor</h3><img src="data/Screenshot_Code.png"/></td>
+    <td valign="top"><h3>Node Graph Editor (WIP)</h3><img src="data/Screenshot_Graph.png"/></td>
+  </tr>
+</table>
 
-### Node Graph Editor (WIP)
-<img src="data/Screenshot_Graph.png"/>
+## Quick start
+
+`index.html`:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>My first lexgui.js app</title>
+    <link rel="stylesheet" href="https://cdn.skypack.dev/lexgui@^<version>/build/lexgui.css">
+    <script type="importmap">
+        {
+          "imports": {
+            "lexgui": "https://cdn.skypack.dev/lexgui@^<version>/build/lexgui.module.js",
+            "lexgui/components/": "https://cdn.skypack.dev/lexgui@^<version>/build/components/"
+          }
+        }
+    </script>
+</head>
+<body>
+	<script type="module" src="my_app.js"></script>
+<body>
+</html>
+```
+
+`my_app.js`:
+
+```js
+import { LX } from 'lexgui';
+
+// Using components
+import { CodeEditor } from 'lexgui/components/codeeditor.js';
+
+// Create main area
+let area = LX.init();
+
+// Create area panels
+let panel = area.addPanel();
+
+// Start branch/section
+panel.branch("Section Title");
+
+// Add some widgets
+panel.addButton(null, "Click me, Im Full Width...");
+panel.addText("Text", "Warning text", null, { warning: true });
+
+// Close section
+panel.merge();
+```
 
 ## Docs
 
-The library documentation is in progress but you can check it [here](https://jxarco.github.io/lexgui.js/docs/).
+The library documentation is available at [lexgui.js/docs/](https://jxarco.github.io/lexgui.js/docs/). 
 
 ## Examples
 
