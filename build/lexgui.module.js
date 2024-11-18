@@ -6447,28 +6447,42 @@ class ContextMenu {
         }
     }
 
-    _adjust_position(div, margin, useAbsolute = false) {
+    _adjust_position( div, margin, useAbsolute = false ) {
         
         let rect = div.getBoundingClientRect();
         
-        if(!useAbsolute)
+        if( !useAbsolute )
         {   
             let width = rect.width;
-            if(window.innerWidth - rect.right < 0)
+            if( rect.left < 0 )
+            {
+                div.style.left = margin + "px";
+            }
+            else if( window.innerWidth - rect.right < 0 )
+            {
                 div.style.left = (window.innerWidth - width - margin) + "px";
-
-            if(rect.top + rect.height > window.innerHeight)
+            }
+            
+            if( rect.top < 0 )
+            {
+                div.style.top = margin + "px";
+            }
+            else if( (rect.top + rect.height) > window.innerHeight )
+            {
                 div.style.top = (window.innerHeight - rect.height - margin) + "px";
+            }
         }
         else
         {
             let dt = window.innerWidth - rect.right;
-            if(dt < 0) {
+            if( dt < 0 )
+            {
                 div.style.left = div.offsetLeft + (dt - margin) + "px";
             }
             
             dt = window.innerHeight - (rect.top + rect.height);
-            if(dt < 0) {
+            if( dt < 0 )
+            {
                 div.style.top = div.offsetTop + (dt - margin + 20 ) + "px";
             }
         }
