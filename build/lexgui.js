@@ -29,7 +29,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     LX.CURVE_MOVEOUT_DELETE = 1;
 
     function clamp( num, min, max ) { return Math.min( Math.max( num, min ), max ); }
-    function round( num, n ) { return +num.toFixed( n ); }
+    function round( number, precision ) { return +(( number ).toFixed( precision ?? 2 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' )); }
     
     function getSupportedDOMName( string )
     {
@@ -4858,7 +4858,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             flag.className = "checkbox " + (flag.value ? "on" : "");
             flag.id = "checkbox"+simple_guidGenerator();
             flag.innerHTML = "<a class='fa-solid fa-check' style='display: " + (flag.value ? "block" : "none") + "'></a>";
-            
+
             if( options.disabled ) {
                 flag.disabled = true;
                 toggle.className += " disabled";
@@ -5037,7 +5037,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 return +vecinput.value;
             };
             widget.onSetValue = ( newValue, skipCallback ) => {
-                vecinput.value = newValue;
+                vecinput.value = round( newValue, options.precision );
                 Panel._dispatch_event( vecinput, "change", skipCallback );
             };
 
@@ -5072,7 +5072,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             if( value.constructor == Number )
             {
                 value = clamp( value, +vecinput.min, +vecinput.max );
-                value = options.precision ? round( value, options.precision ) : value;
+                value = round( value, options.precision );
             }
 
             vecinput.value = vecinput.iValue = value;
@@ -5118,7 +5118,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 slider.value = value;
                 slider.addEventListener( "input", function( e ) {
                     let new_value = +this.valueAsNumber;
-                    vecinput.value = ( +new_value ).toFixed( 4 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' );
+                    vecinput.value = round( new_value, options.precision );
                     Panel._dispatch_event( vecinput, "change" );
                 }, false );
                 box.appendChild( slider );
@@ -5134,7 +5134,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 if( e.shiftKey ) mult *= 10;
                 else if( e.altKey ) mult *= 0.1;
                 let new_value = ( +this.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ) );
-                this.value = ( +new_value ).toFixed( 4 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' );
+                this.value = round( new_value, options.precision );
                 Panel._dispatch_event(vecinput, "change");
             }, { passive: false });
 
@@ -5249,9 +5249,15 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             };
             widget.onSetValue = ( newValue, skipCallback ) => {
                 const inputs = element.querySelectorAll( ".vecinput" );
+                if( inputs.length == newValue.length )
+                {
+                    console.error( "Input length does not match vector length." );
+                    return;
+                }
+
                 for( var i = 0; i < inputs.length; ++i ) {
                     let value = newValue[ i ];
-                    inputs[ i ].value = value ?? 0;
+                    inputs[ i ].value = round( value, options.precision ) ?? 0;
                     Panel._dispatch_event( inputs[ i ], "change", skipCallback );
                 }
             };
@@ -5291,7 +5297,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 if( value[ i ].constructor == Number )
                 {
                     value[ i ] = clamp(value[ i ], +vecinput.min, +vecinput.max);
-                    value[ i ] = options.precision ? round(value[ i ], options.precision) : value[ i ];
+                    value[ i ] = round( value[ i ], options.precision );
                 }
 
                 vecinput.value = vecinput.iValue = value[ i ];
@@ -5314,14 +5320,17 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     if( e.shiftKey ) mult = 10;
                     else if( e.altKey ) mult = 0.1;
 
-                    if( lock_icon.locked )
+                    if( locker.locked )
                     {
-                        for( let v of element.querySelectorAll(".vecinput") ) {
-                            v.value = ( +v.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ) ).toPrecision( 5 );
+                        for( let v of element.querySelectorAll(".vecinput") )
+                        {
+                            v.value = round( +v.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ), options.precision );
                             Panel._dispatch_event(v, "change");
                         }
-                    } else {
-                        this.value = ( +this.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ) ).toPrecision( 5 );
+                    }
+                    else
+                    {
+                        this.value = round( +this.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ), options.precision );
                         Panel._dispatch_event( vecinput, "change" );
                     }
                 }, { passive: false } );
@@ -5334,7 +5343,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     const skipCallback = e.detail;
 
                     let val = e.target.value = clamp( e.target.value, +vecinput.min, +vecinput.max );
-                    val = options.precision ? round( val, options.precision ) : val;
+                    val = round( val, options.precision );
 
                     // Reset button (default value)
                     if( !skipCallback )
@@ -5343,7 +5352,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         if( btn ) btn.style.display = val != vecinput.iValue ? "block": "none";
                     }
 
-                    if( lock_icon.locked )
+                    if( locker.locked )
                     {
                         for( let v of element.querySelectorAll( ".vecinput" ) ) {
                             v.value = val;
@@ -5383,14 +5392,14 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         if(e.shiftKey) mult = 10;
                         else if(e.altKey) mult = 0.1;
 
-                        if( lock_icon.locked )
+                        if( locker.locked )
                         {
                             for( let v of element.querySelectorAll(".vecinput") ) {
-                                v.value = (+v.valueAsNumber + mult * dt).toPrecision(5);
+                                v.value = round( +v.valueAsNumber + mult * dt, options.precision );
                                 Panel._dispatch_event(v, "change");
                             }
                         } else {
-                            vecinput.value = (+vecinput.valueAsNumber + mult * dt).toPrecision(5);
+                            vecinput.value = round( +vecinput.valueAsNumber + mult * dt, options.precision );
                             Panel._dispatch_event(vecinput, "change");
                         }
                     }
@@ -5400,7 +5409,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     e.preventDefault();
                 }
 
-                function inner_mouseup(e) {
+                function inner_mouseup( e ) {
                     var doc = that.root.ownerDocument;
                     doc.removeEventListener("mousemove",inner_mousemove);
                     doc.removeEventListener("mouseup",inner_mouseup);
@@ -5408,15 +5417,15 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     document.body.classList.remove('noevents');
                     dragIcon.classList.add('hidden');
                 }
-                
-                box.appendChild(vecinput);
-                container.appendChild(box);
+
+                box.appendChild( vecinput );
+                container.appendChild( box );
             }
 
-            let lock_icon = document.createElement('a');
-            lock_icon.className = "fa-solid fa-lock-open lexicon";
-            container.appendChild(lock_icon);
-            lock_icon.addEventListener("click", function(e) {
+            let locker = document.createElement('a');
+            locker.className = "fa-solid fa-lock-open lexicon";
+            container.appendChild(locker);
+            locker.addEventListener("click", function(e) {
                 this.locked = !this.locked;
                 if(this.locked){
                     this.classList.add("fa-lock");
@@ -5427,7 +5436,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 }
             }, false);
             
-            element.appendChild(container);
+            element.appendChild( container );
 
             return widget;
         }
