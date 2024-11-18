@@ -1,12 +1,17 @@
 # lexgui.js changelog
 
-## 0.1.37 (dev)
+## 0.1.37
 
 Audio:
 - Start new audio widgets (Knob wip).
 
+Timeline:
+- Major refactor of Timeline
+- Fixed examples
+
 Allow unit labels for Number widgets.
-Fix ContextMenu position on creation over window size.
+Fixed Number/Vector precision.
+Fixed ContextMenu position on creation over window size.
 Minor bug fixes.
 
 ## 0.1.36 (master)
