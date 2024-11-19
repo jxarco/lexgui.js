@@ -1319,16 +1319,19 @@ class KeyFramesTimeline extends Timeline {
                 }
             }
         }
-        else if( !this.movingKeys && !discard ){ // if not moving moving timeline (just a click)
+        else if( !this.movingKeys && !discard ){ // if not moving timeline and not adding keyframes through e.shiftkey (just a click)
+
+            if ( this.lastKeyFramesSelected.length ){
+                if (this.onUnselectKeyFrames){
+                    this.onUnselectKeyFrames( this.lastKeyFramesSelected );
+                }
+                this.unSelectAllKeyFrames();         
+            }
             if (track){
                 const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
                 if( keyFrameIndex > -1 ) {
                     this.processCurrentKeyFrame( e, keyFrameIndex, track, null, e.multipleSelection ); // Settings this as multiple so time is not being set
-                }else{
-                    this.unSelectAllKeyFrames();                                    
                 }  
-            }else{
-                this.unSelectAllKeyFrames();                                    
             }
         }
 
@@ -3893,16 +3896,19 @@ class CurvesTimeline extends Timeline {
                 }
             }
         }
-        else if( !this.movingKeys && !discard ){ // if not moving moving timeline (just a click)
+        else if( !this.movingKeys && !discard ){ // if not moving timeline and not adding keyframes through e.shiftkey (just a click)
+
+            if ( this.lastKeyFramesSelected.length ){
+                if (this.onUnselectKeyFrames){
+                    this.onUnselectKeyFrames( this.lastKeyFramesSelected );
+                }
+                this.unSelectAllKeyFrames();         
+            }
             if (track){
                 const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
                 if( keyFrameIndex > -1 ) {
                     this.processCurrentKeyFrame( e, keyFrameIndex, track, null, e.multipleSelection ); // Settings this as multiple so time is not being set
-                }else{
-                    this.unSelectAllKeyFrames();                                    
                 }  
-            }else{
-                this.unSelectAllKeyFrames();                                    
             }
         }
 
