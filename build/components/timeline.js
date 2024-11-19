@@ -742,7 +742,7 @@ class Timeline {
     }
 
     setTime(time){
-        this.currentTime = Math.min(time,this.duration);
+        this.currentTime = Math.max(0,Math.min(time,this.duration));
         LX.emit( "@on_set_time_" + this.name, +this.currentTime.toFixed(2)); // skipcallback = true
 
         if(this.onSetTime)
@@ -2350,8 +2350,8 @@ class KeyFramesTimeline extends Timeline {
     }
 
     getTrack( trackInfo )  {
-        const [name, trackIndex] = trackInfo;
-        return this.animationClip.tracksPerItem[ name ][trackIndex];
+        const [name, localTrackIndex] = trackInfo;
+        return this.animationClip.tracksPerItem[ name ][localTrackIndex];
     }
 
     getTrackName( uglyName ) {
@@ -4930,8 +4930,8 @@ class CurvesTimeline extends Timeline {
     }
 
     getTrack( trackInfo )  {
-        const [name, trackIndex] = trackInfo;
-        return this.animationClip.tracksPerItem[ name ][trackIndex];
+        const [name, localTrackIndex] = trackInfo;
+        return this.animationClip.tracksPerItem[ name ][localTrackIndex];
     }
 
     getTrackName( uglyName ) {
