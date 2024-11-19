@@ -1749,6 +1749,8 @@ class KeyFramesTimeline extends Timeline {
         let lastSavedIndex = 0;
         const lastIndex = times.length-1;
 
+        this.saveState(track.clipIdx);
+
         for ( let i = 1; i < lastIndex; ++ i ) {
 
             let keep = false;
@@ -1820,11 +1822,27 @@ class KeyFramesTimeline extends Timeline {
         if(!this.animationClip)
             return;
 
+        // save all states into a single entry
+        if ( this.trackStateSaveEnabler ){
+            for( let i = 0; i < this.animationClip.tracks.length; ++i ) {
+                this.saveState(i, i!=0);
+            }
+        }
+
+        // disable state saving
+        const oldStateEnabler = this.trackStateSaveEnabler;
+        this.trackStateSaveEnabler = false;
+
+        // optimize
         for( let i = 0; i < this.animationClip.tracks.length; ++i ) {
             const track = this.animationClip.tracks[i];
             this.optimizeTrack( track.clipIdx, onlyEqualTime, false );
         }
 
+        // restore enabler status
+        this.trackStateSaveEnabler = oldStateEnabler;
+
+        // callback
         if(this.onOptimizeTracks )
             this.onOptimizeTracks(-1); // signal as "all tracks"
     }
