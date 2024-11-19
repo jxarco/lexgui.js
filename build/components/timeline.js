@@ -1433,6 +1433,7 @@ class KeyFramesTimeline extends Timeline {
                     }
                 }
                 this.lastKeyFramesSelected[idx][2] = k; // update keyframe index
+                this.lastKeyFramesSelected[idx][4] = times[k]; // update keyframe time
             }
 
             if ( this.onContentMoved ){
@@ -4014,6 +4015,7 @@ class CurvesTimeline extends Timeline {
                         }
                     }
                     this.lastKeyFramesSelected[idx][2] = k; // update keyframe index
+                    this.lastKeyFramesSelected[idx][4] = times[k]; // update keyframe time
                 }
                 
                 if ( this.onContentMoved ){
