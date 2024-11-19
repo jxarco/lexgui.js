@@ -1431,6 +1431,17 @@ class KeyFramesTimeline extends Timeline {
                 }
                 this.lastKeyFramesSelected[idx][2] = k; // update keyframe index
             }
+
+            if ( this.onContentMoved ){
+                for( let i = 0; i < this.lastKeyFramesSelected.length; ++i ){
+                    const [name, localTrackIdx, keyIndex, trackIdx, originalKeyTime] = this.lastKeyFramesSelected[i];
+                    track = this.animationClip.tracks[trackIdx];
+                    if(track && track.locked)
+                        continue;
+                    this.onContentMoved(trackIdx, keyIndex);
+                }
+            }
+
             return;
         }
 
@@ -3975,6 +3986,16 @@ class CurvesTimeline extends Timeline {
                     }
                 }
                 this.lastKeyFramesSelected[idx][2] = k; // update keyframe index
+            }
+
+            if ( this.onContentMoved ){
+                for( let i = 0; i < this.lastKeyFramesSelected.length; ++i ){
+                    const [name, localTrackIdx, keyIndex, trackIdx, originalKeyTime] = this.lastKeyFramesSelected[i];
+                    track = this.animationClip.tracks[trackIdx];
+                    if(track && track.locked)
+                        continue;
+                    this.onContentMoved(trackIdx, keyIndex);
+                }
             }
             return;
         }
