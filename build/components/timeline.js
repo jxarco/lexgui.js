@@ -2514,7 +2514,7 @@ class KeyFramesTimeline extends Timeline {
         let selection = [track.name, track.idx, frameIdx, track.clipIdx, track.times[frameIdx]];
         const trackIdx = track.clipIdx;
 
-        // sort lastkeyframeselected ascending order
+        // sort lastkeyframeselected ascending order (track and frame)
         let i = 0;
         for( ; i < this.lastKeyFramesSelected.length; ++i){
             let s = this.lastKeyFramesSelected[i];
@@ -4624,7 +4624,7 @@ class CurvesTimeline extends Timeline {
         if(!this.clipboard)
             this.clipboard = {};
 
-        this.clipboard = {
+        this.clipboard.value = {
             type: track.type,
             values: values
         };
