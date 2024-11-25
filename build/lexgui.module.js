@@ -5103,6 +5103,8 @@ class Panel {
      * min, max: Min and Max values for the input
      * skipSlider: If there are min and max values, skip the slider
      * units: Unit as string added to the end of the value
+     * onPress: Callback function on mouse down
+     * onRelease: Callback function on mouse up
      */
 
     addNumber( name, value, callback, options = {} ) {
@@ -5112,6 +5114,7 @@ class Panel {
         widget.onGetValue = () => {
             return +vecinput.value;
         };
+
         widget.onSetValue = ( newValue, skipCallback ) => {
             vecinput.value = round( newValue, options.precision );
             Panel._dispatch_event( vecinput, "change", skipCallback );
@@ -5183,13 +5186,14 @@ class Panel {
             vecinput.disabled = true;
         }
 
-        // add slider below
-        if( !options.skipSlider && options.min !== undefined && options.max !== undefined ) {
+        // Add slider below
+        if( !options.skipSlider && options.min !== undefined && options.max !== undefined )
+        {
             let slider = document.createElement( 'input' );
             slider.className = "lexinputslider";
-            slider.step = options.step ?? 1;
             slider.min = options.min;
             slider.max = options.max;
+            slider.step = options.step ?? 1;
             slider.type = "range";
             slider.value = value;
             slider.addEventListener( "input", function( e ) {
@@ -5198,6 +5202,15 @@ class Panel {
                 Panel._dispatch_event( vecinput, "change" );
             }, false );
             box.appendChild( slider );
+
+            // Method to change min, max, step parameters
+            widget.setLimits = ( newMin, newMax, newStep ) => {
+                vecinput.min = slider.min = newMin ?? vecinput.min;
+                vecinput.max = slider.max = newMax ?? vecinput.max;
+                vecinput.step = newStep ?? vecinput.step;
+                slider.step = newStep ?? slider.step;
+                Panel._dispatch_event( vecinput, "change" );
+            };
         }
 
         // Add wheel input
@@ -5253,27 +5266,39 @@ class Panel {
 
         var that = this;
         var lastY = 0;
-        function inner_mousedown(e) {
-            if(document.activeElement == vecinput) return;
+
+        function inner_mousedown( e )
+        {
+            if( document.activeElement == vecinput )
+            {
+                return;
+            }
+
             var doc = that.root.ownerDocument;
-            doc.addEventListener("mousemove",inner_mousemove);
-            doc.addEventListener("mouseup",inner_mouseup);
+            doc.addEventListener( 'mousemove', inner_mousemove );
+            doc.addEventListener( 'mouseup', inner_mouseup );
             lastY = e.pageY;
-            document.body.classList.add('nocursor');
-            document.body.classList.add('noevents');
-            dragIcon.classList.remove('hidden');
+            document.body.classList.add( 'nocursor' );
+            document.body.classList.add( 'noevents' );
+            dragIcon.classList.remove( 'hidden' );
             e.stopImmediatePropagation();
             e.stopPropagation();
+
+            if( options.onPress )
+            {
+                options.onPress.bind( vecinput )( e );
+            }
         }
 
-        function inner_mousemove(e) {
-            if (lastY != e.pageY) {
+        function inner_mousemove( e )
+        {
+            if ( lastY != e.pageY ) {
                 let dt = lastY - e.pageY;
                 let mult = options.step ?? 1;
-                if(e.shiftKey) mult *= 10;
-                else if(e.altKey) mult *= 0.1;
-                let new_value = (+vecinput.valueAsNumber + mult * dt);
-                vecinput.value = (+new_value).toFixed( 4 ).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/,'$1');
+                if( e.shiftKey ) mult *= 10;
+                else if( e.altKey ) mult *= 0.1;
+                let new_value = ( +vecinput.valueAsNumber + mult * dt );
+                vecinput.value = ( +new_value ).toFixed( 4 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' );
                 Panel._dispatch_event( vecinput, "change" );
             }
 
@@ -5282,20 +5307,27 @@ class Panel {
             e.preventDefault();
         }
 
-        function inner_mouseup(e) {
+        function inner_mouseup( e )
+        {
             var doc = that.root.ownerDocument;
-            doc.removeEventListener("mousemove",inner_mousemove);
-            doc.removeEventListener("mouseup",inner_mouseup);
-            document.body.classList.remove('nocursor');
-            document.body.classList.remove('noevents');
-            dragIcon.classList.add('hidden');
+            doc.removeEventListener( 'mousemove', inner_mousemove );
+            doc.removeEventListener( 'mouseup', inner_mouseup );
+            document.body.classList.remove( 'nocursor' );
+            document.body.classList.remove( 'noevents' );
+            dragIcon.classList.add( 'hidden' );
+
+            if( options.onRelease )
+            {
+                options.onRelease.bind( vecinput )( e );
+            }
         }
         
-        container.appendChild(box);
-        element.appendChild(container);
+        container.appendChild( box );
+        element.appendChild( container );
 
         // Remove branch padding and margins
-        if(!widget.name) {
+        if( !widget.name )
+        {
             element.className += " noname";
             container.style.width = "100%";
         }
@@ -5303,7 +5335,7 @@ class Panel {
         return widget;
     }
 
-    static VECTOR_COMPONENTS = {0: 'x', 1: 'y', 2: 'z', 3: 'w'};
+    static VECTOR_COMPONENTS = { 0: 'x', 1: 'y', 2: 'z', 3: 'w' };
 
     _add_vector( num_components, name, value, callback, options = {} ) {
 
@@ -5320,9 +5352,12 @@ class Panel {
             let inputs = element.querySelectorAll( "input" );
             let value = [];
             for( var v of inputs )
+            {
                 value.push( +v.value );
+            }
             return value;
         };
+
         widget.onSetValue = ( newValue, skipCallback ) => {
             const inputs = element.querySelectorAll( ".vecinput" );
             if( inputs.length == newValue.length )
@@ -5331,7 +5366,7 @@ class Panel {
                 return;
             }
 
-            for( var i = 0; i < inputs.length; ++i ) {
+            for( let i = 0; i < inputs.length; ++i ) {
                 let value = newValue[ i ];
                 inputs[ i ].value = round( value, options.precision ) ?? 0;
                 Panel._dispatch_event( inputs[ i ], "change", skipCallback );
@@ -5351,7 +5386,7 @@ class Panel {
 
         // Add widget value
 
-        var container = document.createElement('div');
+        var container = document.createElement( 'div' );
         container.className = "lexvector";        
         container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
@@ -5387,7 +5422,6 @@ class Panel {
             }
 
             // Add wheel input
-
             vecinput.addEventListener( "wheel", function( e ) {
                 e.preventDefault();
                 if( this !== document.activeElement )
@@ -5401,7 +5435,7 @@ class Panel {
                     for( let v of element.querySelectorAll(".vecinput") )
                     {
                         v.value = round( +v.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ), options.precision );
-                        Panel._dispatch_event(v, "change");
+                        Panel._dispatch_event( v, "change" );
                     }
                 }
                 else
@@ -5434,7 +5468,8 @@ class Panel {
                         v.value = val;
                         value[ v.idx ] = val;
                     }
-                } else {
+                } else
+                {
                     vecinput.value = val;
                     value[ e.target.idx ] = val;
                 }
@@ -5448,35 +5483,48 @@ class Panel {
 
             var that = this;
             var lastY = 0;
-            function inner_mousedown(e) {
-                if(document.activeElement == vecinput) return;
+            function inner_mousedown( e )
+            {
+                if( document.activeElement == vecinput )
+                {
+                    return;
+                }
+
                 var doc = that.root.ownerDocument;
-                doc.addEventListener("mousemove",inner_mousemove);
-                doc.addEventListener("mouseup",inner_mouseup);
+                doc.addEventListener( 'mousemove', inner_mousemove );
+                doc.addEventListener( 'mouseup', inner_mouseup );
                 lastY = e.pageY;
-                document.body.classList.add('nocursor');
-                document.body.classList.add('noevents');
-                dragIcon.classList.remove('hidden');
+                document.body.classList.add( 'nocursor' );
+                document.body.classList.add( 'noevents' );
+                dragIcon.classList.remove( 'hidden' );
                 e.stopImmediatePropagation();
                 e.stopPropagation();
+
+                if( options.onPress )
+                {
+                    options.onPress.bind( vecinput )( e );
+                }
             }
 
-            function inner_mousemove(e) {
-                if (lastY != e.pageY) {
+            function inner_mousemove( e )
+            {
+                if ( lastY != e.pageY ) {
                     let dt = lastY - e.pageY;
                     let mult = options.step ?? 1;
-                    if(e.shiftKey) mult = 10;
-                    else if(e.altKey) mult = 0.1;
+                    if( e.shiftKey ) mult = 10;
+                    else if( e.altKey ) mult = 0.1;
 
                     if( locker.locked )
                     {
-                        for( let v of element.querySelectorAll(".vecinput") ) {
+                        for( let v of element.querySelectorAll( ".vecinput" ) ) {
                             v.value = round( +v.valueAsNumber + mult * dt, options.precision );
-                            Panel._dispatch_event(v, "change");
+                            Panel._dispatch_event( v, "change" );
                         }
-                    } else {
+                    }
+                    else
+                    {
                         vecinput.value = round( +vecinput.valueAsNumber + mult * dt, options.precision );
-                        Panel._dispatch_event(vecinput, "change");
+                        Panel._dispatch_event( vecinput, "change" );
                     }
                 }
 
@@ -5485,32 +5533,57 @@ class Panel {
                 e.preventDefault();
             }
 
-            function inner_mouseup( e ) {
+            function inner_mouseup( e )
+            {
                 var doc = that.root.ownerDocument;
-                doc.removeEventListener("mousemove",inner_mousemove);
-                doc.removeEventListener("mouseup",inner_mouseup);
-                document.body.classList.remove('nocursor');
-                document.body.classList.remove('noevents');
+                doc.removeEventListener( 'mousemove', inner_mousemove );
+                doc.removeEventListener( 'mouseup', inner_mouseup );
+                document.body.classList.remove( 'nocursor' );
+                document.body.classList.remove( 'noevents' );
                 dragIcon.classList.add('hidden');
+
+                if( options.onRelease )
+                {
+                    options.onRelease.bind( vecinput )( e );
+                }
             }
             
             box.appendChild( vecinput );
             container.appendChild( box );
         }
 
-        let locker = document.createElement('a');
+        // Method to change min, max, step parameters
+        if( options.min !== undefined || options.max !== undefined )
+        {
+            widget.setLimits = ( newMin, newMax, newStep ) => {
+                const inputs = element.querySelectorAll(".vecinput");
+                for( let v of inputs )
+                {
+                    v.min = newMin ?? v.min;
+                    v.max = newMax ?? v.max;
+                    v.step = newStep ?? v.step;
+                    Panel._dispatch_event( v, "change", true );
+                }
+
+                // To call onChange callback
+                this._trigger( new IEvent( name, value ), callback );
+            };
+        }
+
+        let locker = document.createElement( 'a' );
         locker.className = "fa-solid fa-lock-open lexicon";
-        container.appendChild(locker);
-        locker.addEventListener("click", function(e) {
+        container.appendChild( locker );
+        locker.addEventListener( "click", function( e ) {
             this.locked = !this.locked;
-            if(this.locked){
-                this.classList.add("fa-lock");
-                this.classList.remove("fa-lock-open");
+            if( this.locked )
+            {
+                this.classList.add( "fa-lock" );
+                this.classList.remove( "fa-lock-open" );
             } else {
-                this.classList.add("fa-lock-open");
-                this.classList.remove("fa-lock");
+                this.classList.add( "fa-lock-open" );
+                this.classList.remove( "fa-lock" );
             }
-        }, false);
+        }, false );
         
         element.appendChild( container );
 
@@ -5526,21 +5599,23 @@ class Panel {
      * disabled: Make the widget disabled [false]
      * step: Step of the inputs
      * min, max: Min and Max values for the inputs
+     * onPress: Callback function on mouse down
+     * onRelease: Callback function on mouse is released
      */
 
     addVector2( name, value, callback, options ) {
 
-        return this._add_vector(2, name, value, callback, options);
+        return this._add_vector( 2, name, value, callback, options );
     }
 
     addVector3( name, value, callback, options ) {
 
-        return this._add_vector(3, name, value, callback, options);
+        return this._add_vector( 3, name, value, callback, options );
     }
 
     addVector4( name, value, callback, options ) {
 
-        return this._add_vector(4, name, value, callback, options);
+        return this._add_vector( 4, name, value, callback, options );
     }
 
     /**
