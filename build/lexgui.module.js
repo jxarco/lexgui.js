@@ -5196,11 +5196,27 @@ class Panel {
             slider.step = options.step ?? 1;
             slider.type = "range";
             slider.value = value;
+
             slider.addEventListener( "input", function( e ) {
                 let new_value = +this.valueAsNumber;
                 vecinput.value = round( new_value, options.precision );
                 Panel._dispatch_event( vecinput, "change" );
             }, false );
+
+            slider.addEventListener( "mousedown", function( e ) {
+                if( options.onPress )
+                {
+                    options.onPress.bind( slider )( e, slider );
+                }
+            }, false );
+
+            slider.addEventListener( "mouseup", function( e ) {
+                if( options.onRelease )
+                {
+                    options.onRelease.bind( slider )( e, slider );
+                }
+            }, false );
+
             box.appendChild( slider );
 
             // Method to change min, max, step parameters
@@ -5218,7 +5234,9 @@ class Panel {
         vecinput.addEventListener( "wheel", function( e ) {
             e.preventDefault();
             if( this !== document.activeElement )
+            {
                 return;
+            }
             let mult = options.step ?? 1;
             if( e.shiftKey ) mult *= 10;
             else if( e.altKey ) mult *= 0.1;
@@ -5230,7 +5248,9 @@ class Panel {
         vecinput.addEventListener( "change", e => {
 
             if( isNaN( e.target.valueAsNumber ) )
+            {
                 return;
+            }
 
             const skipCallback = e.detail;
 
@@ -5286,7 +5306,7 @@ class Panel {
 
             if( options.onPress )
             {
-                options.onPress.bind( vecinput )( e );
+                options.onPress.bind( vecinput )( e, vecinput );
             }
         }
 
@@ -5318,7 +5338,7 @@ class Panel {
 
             if( options.onRelease )
             {
-                options.onRelease.bind( vecinput )( e );
+                options.onRelease.bind( vecinput )( e, vecinput );
             }
         }
         
@@ -5342,7 +5362,8 @@ class Panel {
         num_components = clamp( num_components, 2, 4 );
         value = value ?? new Array( num_components ).fill( 0 );
 
-        if( !name ) {
+        if( !name )
+        {
             throw( "Set Widget Name!" );
         }
 
@@ -5417,7 +5438,8 @@ class Panel {
             dragIcon.className = "fa-solid fa-arrows-up-down drag-icon hidden";
             box.appendChild( dragIcon );
 
-            if( options.disabled ) {
+            if( options.disabled )
+            {
                 vecinput.disabled = true;
             }
 
@@ -5502,7 +5524,7 @@ class Panel {
 
                 if( options.onPress )
                 {
-                    options.onPress.bind( vecinput )( e );
+                    options.onPress.bind( vecinput )( e, vecinput );
                 }
             }
 
@@ -5544,7 +5566,7 @@ class Panel {
 
                 if( options.onRelease )
                 {
-                    options.onRelease.bind( vecinput )( e );
+                    options.onRelease.bind( vecinput )( e, vecinput );
                 }
             }
             

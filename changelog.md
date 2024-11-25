@@ -1,6 +1,13 @@
 # lexgui.js changelog
 
-## 0.1.37
+## 0.1.38 (dev)
+
+Number/Vector widgets:
+    - Support for onPress&onRelease for catching mouse events.
+    - Added `setLimits` for min, max, step parameters.
+Minor bug fixes.
+
+## 0.1.37 (master)
 
 Audio:
 - Start new audio widgets (Knob wip).
@@ -14,7 +21,7 @@ Fixed Number/Vector precision.
 Fixed ContextMenu position on creation over window size.
 Minor bug fixes.
 
-## 0.1.36 (master)
+## 0.1.36
 
 Default skipCallback as `true` on emit widget signal.
 Add some vec2 math functions.
