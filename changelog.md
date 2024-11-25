@@ -1,6 +1,8 @@
 # lexgui.js changelog
 
-## 0.1.38 (dev)
+## 0.1.39 (dev)
+
+## 0.1.38 (master)
 
 Timeline: Fixed timeline signals and added callbacks
 
@@ -11,7 +13,7 @@ Number/Vector widgets:
 Added Size Widget (N dimension number widget).
 Minor bug fixes.
 
-## 0.1.37 (master)
+## 0.1.37
 
 Audio:
 - Start new audio widgets (Knob wip).
