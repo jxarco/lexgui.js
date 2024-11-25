@@ -156,7 +156,8 @@
                 ["min (Number)", "Min input value"],
                 ["max (Number)", "Max input value"],
                 ["skipSlider (Boolean)", "Skip the slider if there are min and max values"],
-                ["units (String)", "Unit as string added to the end of the value"]
+                ["onPress (Function)", "Callback function on mouse down"],
+                ["onRelease (Function)", "Callback function on mouse up"]
             ]
         ] );
         MAKE_PARAGRAPH( `<sup>Note: Setting <code class='inline'>min</code>, <code class='inline'>max</code> values will automatically add a slider below the number input.<sup>` );
@@ -165,6 +166,9 @@
 }, { <span class="hljs-keyword">min</span>: <span class="dec">1</span>, <span class="hljs-keyword">max</span>: <span class="dec">48</span> });` );
         MAKE_PARAGRAPH( `You can change the value of this widget manually, using the mouse wheel, and dragging (up/down). In the last two cases, pressing <em>Alt</em> and 
         <em>Left Shift</em> will apply a factor of <code class='inline'>0.1</code> and <code class='inline'>10</code> in that order.` );
+
+        MAKE_PARAGRAPH( `In case you are using limits, store the widget and call <code class='inline'>numberWidget.setLimits( min, max, step )</code> to change its 
+        parameters once the widget has been created.` );
 
         // Vector
         MAKE_HEADER( "Vector", "h2", "vector" );
@@ -179,7 +183,9 @@
                 ["disabled (Boolean)", "Make the widget disabled"],
                 ["step (Number)", "Change Step value"],
                 ["min (Number)", "Min input value"],
-                ["max (Number)", "Max input value"]
+                ["max (Number)", "Max input value"],
+                ["onPress (Function)", "Callback function on mouse down"],
+                ["onRelease (Function)", "Callback function on mouse up"]
             ]
         ] );
         MAKE_PARAGRAPH( `Note: Since a Vector Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.<sup>` );
@@ -194,6 +200,9 @@ panel.addVector3(<span class="str">"Velocity"</span>, [<span class="dec">0.1</sp
 panel.addVector4(<span class="str">"Shader Color"</span>, [<span class="dec">1</span>, <span class="dec">1</span>, <span class="dec">1</span>, <span class="dec">1</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
     <span class="hljs-built_in">console</span>.log(value);
 });` );
+
+        MAKE_PARAGRAPH( `In case you are using limits, store the widget and call <code class='inline'>vectorWidget.setLimits( min, max, step )</code> to change its 
+        parameters once the widget has been created.` );
 
         // Checkbox
         MAKE_HEADER( "Checkbox", "h2", "checkbox" );
