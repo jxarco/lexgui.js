@@ -91,11 +91,6 @@ Look at this [examples](https://jxarco.github.io/lexgui.js/examples/) to see how
   </tr>
 </table>
 
-## Contributors
-
-* Alex Rodríguez @jxarco
-* Eva Valls @evallsg
-
 ## Feedback/Issues
 
 You can use the [repository issues section](https://github.com/jxarco/lexgui.js/issues) or simply write any feedback to alexroco.30@gmail.com.
