@@ -106,6 +106,18 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     
     LX.rgbToHex = rgbToHex;
 
+    function measureRealWidth( value, paddingPlusMargin = 8 ) {
+        var i = document.createElement( "span" );
+        i.className = "lexinputmeasure";
+        i.innerHTML = value;
+        document.body.appendChild( i );
+        var rect = i.getBoundingClientRect();
+        LX.UTILS.deleteElement( i );
+        return rect.width + paddingPlusMargin;
+    }
+
+    LX.measureRealWidth = measureRealWidth;
+
     function simple_guidGenerator() {
         var S4 = function() {
            return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
@@ -2463,6 +2475,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         static CUSTOM       = 21;
         static SEPARATOR    = 22;
         static KNOB         = 23;
+        static SIZE         = 24;
 
         static NO_CONTEXT_TYPES = [
             Widget.BUTTON,
@@ -2520,14 +2533,16 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
         paste() {
             if( !this._can_paste() )
-            return;
+            {
+                return;
+            }
 
             this.set(navigator.clipboard.data);
         }
 
         typeName() {
 
-            switch(this.type) {
+            switch( this.type ) {
                 case Widget.TEXT: return "Text";
                 case Widget.TEXTAREA: return "TextArea";
                 case Widget.BUTTON: return "Button";
@@ -2545,6 +2560,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 case Widget.TAGS: return "Tags";
                 case Widget.CURVE: return "Curve";
                 case Widget.KNOB: return "Knob";
+                case Widget.SIZE: return "Size";
                 case Widget.CUSTOM: return this.customName;
             }
         }
@@ -5081,16 +5097,6 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             vecinput.value = vecinput.iValue = value;
             box.appendChild( vecinput );
 
-            let measureRealWidth = function( value, paddingPlusMargin = 8 ) {
-                var i = document.createElement( "span" );
-                i.className = "lexinputmeasure";
-                i.innerHTML = value;
-                document.body.appendChild( i );
-                var rect = i.getBoundingClientRect();
-                LX.UTILS.deleteElement( i );
-                return rect.width + paddingPlusMargin;
-            }
-
             if( options.units )
             {
                 let unitSpan = document.createElement( 'span' );
@@ -5562,6 +5568,89 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         addVector4( name, value, callback, options ) {
 
             return this._add_vector( 4, name, value, callback, options );
+        }
+
+        /**
+         * @method addSize
+         * @param {String} name Widget name
+         * @param {Number} value Default number value
+         * @param {Function} callback Callback function on change
+         * @param {*} options:
+         * disabled: Make the widget disabled [false]
+         * units: Unit as string added to the end of the value
+         */
+
+        addSize( name, value, callback, options = {} ) {
+
+            let widget = this.create_widget( name, Widget.SIZE, options );
+
+            widget.onGetValue = () => {
+                const value = [];
+                for( let i = 0; i < element.dimensions.length; ++i )
+                {
+                    value.push( element.dimensions[ i ].onGetValue() );
+                }
+                return value;
+            };
+
+            widget.onSetValue = ( newValue, skipCallback ) => {
+                for( let i = 0; i < element.dimensions.length; ++i )
+                {
+                    element.dimensions[ i ].onSetValue( newValue[ i ], skipCallback );
+                }
+            };
+
+            let element = widget.domEl;
+
+            this.queue( element );
+
+            element.dimensions = [];
+
+            for( let i = 0; i < value.length; ++i )
+            {
+                const size = measureRealWidth( JSON.stringify( value[ i ] ), 24 ) + 'px';
+                element.dimensions[ i ] = this.addNumber( null, value[ i ], ( v ) => {
+
+                    const value = [];
+
+                    for( let i = 0; i < element.dimensions.length; ++i )
+                    {
+                        value.push( element.dimensions[ i ].onGetValue() );
+                    }
+
+                    if( callback )
+                    {
+                        callback( value );
+                    }
+
+                }, { width: size, min: 0, disabled: options.disabled } );
+
+                if( ( i + 1 ) != value.length )
+                {
+                    let cross = document.createElement( 'a' );
+                    cross.className = "lexsizecross fa-solid fa-xmark";
+                    element.appendChild( cross );
+                }
+            }
+
+            this.clearQueue();
+
+            if( options.units )
+            {
+                let unitSpan = document.createElement( 'span' );
+                unitSpan.className = "lexunit";
+                unitSpan.innerText = options.units;
+                element.appendChild( unitSpan );
+            }
+
+            // Remove branch padding and margins
+            if( !widget.name )
+            {
+                element.className += " noname";
+                container.style.width = "100%";
+            }
+
+            return widget;
         }
 
         /**

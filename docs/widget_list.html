@@ -31,6 +31,7 @@
             "<a href='#list'>List</a>",
             "<a href='#number'>Number</a>",
             "<a href='#progress'>Progress</a>",
+            "<a href='#size'>Size</a>",
             "<a href='#panel-tabs'>Tabs</a>",
             "<a href='#tags'>Tags</a>",
             "<a href='#text'>Text</a>",
@@ -156,6 +157,7 @@
                 ["min (Number)", "Min input value"],
                 ["max (Number)", "Max input value"],
                 ["skipSlider (Boolean)", "Skip the slider if there are min and max values"],
+                ["units", "Unit as string added to the end of the value"],
                 ["onPress (Function)", "Callback function on mouse down"],
                 ["onRelease (Function)", "Callback function on mouse up"]
             ]
@@ -188,7 +190,7 @@
                 ["onRelease (Function)", "Callback function on mouse up"]
             ]
         ] );
-        MAKE_PARAGRAPH( `Note: Since a Vector Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.<sup>` );
+        MAKE_PARAGRAPH( `<sup>Note: Since a Vector Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.<sup>` );
         MAKE_CODE( `panel.addVector2(<span class="str">"2D Position"</span>, [<span class="dec">250</span>, <span class="dec">350</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
     <span class="hljs-built_in">console</span>.log(value);
 }, { min: <span class="dec">0</span>, max: <span class="dec">1024</span> });
@@ -203,6 +205,26 @@ panel.addVector4(<span class="str">"Shader Color"</span>, [<span class="dec">1</
 
         MAKE_PARAGRAPH( `In case you are using limits, store the widget and call <code class='inline'>vectorWidget.setLimits( min, max, step )</code> to change its 
         parameters once the widget has been created.` );
+
+        // Size
+        MAKE_HEADER( "Size", "h2", "size" );
+        MAKE_PARAGRAPH( `Represents a N dimension number size input.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addSize(name, value, callback, options)")} to add a Size Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["value (Number)", "Number value"],
+            ["callback (Function)", "Function called when the input changes"],
+            ["options (Object)", "Basic options for a Widget"],
+            [
+                ["disabled (Boolean)", "Make the widget disabled"],
+                ["units", "Unit as string added to the end of the value"]
+            ]
+        ] );
+        MAKE_PARAGRAPH( `<sup>Note: Since a Size Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.
+            Minimum size is always 0.<sup>` );
+        MAKE_CODE( `panel.addNumber(<span class="str">"Screen Resolution"</span>, [<span class="dec">1280</span>, <span class="dec">720</span>], (value, <span class="hljs-keyword">event</span>) =&gt; {
+    console.<span class="hljs-keyword">log</span>(value);
+}, { units: <span class="str">"p"</span> });` );
 
         // Checkbox
         MAKE_HEADER( "Checkbox", "h2", "checkbox" );

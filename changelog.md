@@ -2,9 +2,13 @@
 
 ## 0.1.38 (dev)
 
+Timeline: Fixed timeline signals and added callbacks
+
 Number/Vector widgets:
     - Support for onPress&onRelease for catching mouse events.
     - Added `setLimits` for min, max, step parameters.
+
+Added Size Widget (N dimension number widget).
 Minor bug fixes.
 
 ## 0.1.37 (master)

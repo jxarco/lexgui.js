@@ -1351,6 +1351,20 @@ input[type="range"] {
   right: 0.8em;
 }
 
+.lexwidget .lexunit {
+  -webkit-user-select: none; /* Safari 3.1+ */
+  -moz-user-select: none; /* Firefox 2+ */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard syntax */
+}
+
+/* Size Widget */
+
+.lexwidget .lexsizecross {
+  color: var(--global-selected);
+  font-weight: 800;
+}
+
 /* Tabs Widget */
 
 .lextabscontainer {

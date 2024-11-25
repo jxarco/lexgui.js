@@ -482,6 +482,9 @@ function fillPanel( panel ) {
     panel.sameLine(2);
     panel.addFile("Img1", data => { console.log(data) }, {} );
     panel.addFile("Img2", data => { console.log(data) }, {} );
+    panel.addSize("Screen Res", [1280, 720], (value, event) => {
+        console.log(value);
+    }, { units: "p" });
     panel.addDropdown("Best Engine", ["Godot", "Unity", "Unreal Engine"], "Unity", (value, event) => {
         console.log(value);
     });
