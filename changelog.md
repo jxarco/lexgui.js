@@ -2,6 +2,10 @@
 
 ## 0.1.39 (dev)
 
+`LX.makeDraggable` now supports 'absolute' and 'fixed' positions.
+Fix passing onDragStart/onMove functions to Dialogs.
+Minor bug fixes.
+
 ## 0.1.38 (master)
 
 Timeline: Fixed timeline signals and added callbacks
