@@ -2655,40 +2655,50 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 custom_widgets.className = "lexcustomitems";
                 custom_widgets.toggleAttribute('hidden', true);
                 
-                element.appendChild(container);
-                element.appendChild(custom_widgets);
-    
-                if( instance ) {
-                    
+                element.appendChild( container );
+                element.appendChild( custom_widgets );
+
+                if( instance )
+                {
+
                     this.queue( custom_widgets );
                     
-                    const on_instance_changed = (key, value, event) => {
-                        instance[key] = value;
-                        this._trigger( new IEvent(name, instance, event), callback );
+                    const on_instance_changed = ( key, value, event ) => {
+                        instance[ key ] = value;
+                        this._trigger( new IEvent( name, instance, event ), callback );
                     };
 
                     for( let key in default_instance )
                     {
-                        const value = instance[key] ?? default_instance[key];
+                        const value = instance[ key ] ?? default_instance[ key ];
                         
-                        switch(value.constructor) {
+                        switch( value.constructor )
+                        {
                             case String:
-                                if(value[0] === '#')
-                                    this.addColor(key, value, on_instance_changed.bind(this, key));
+                                if( value[ 0 ] === '#' )
+                                {
+                                    this.addColor( key, value, on_instance_changed.bind( this, key ) );
+                                }
                                 else
-                                    this.addText(key, value, on_instance_changed.bind(this, key));
+                                {
+                                    this.addText( key, value, on_instance_changed.bind( this, key ) );
+                                }
                                 break;
                             case Number:
-                                this.addNumber(key, value, on_instance_changed.bind(this, key));
+                                this.addNumber( key, value, on_instance_changed.bind( this, key ) );
                                 break;
                             case Boolean:
-                                this.addCheckbox(key, value, on_instance_changed.bind(this, key));
+                                this.addCheckbox( key, value, on_instance_changed.bind( this, key ) );
                                 break;
                             case Array:
                                 if( value.length > 4 )
-                                    this.addArray(key, value, on_instance_changed.bind(this, key));    
+                                {
+                                    this.addArray( key, value, on_instance_changed.bind( this, key ) );
+                                }
                                 else
-                                    this._add_vector(value.length, key, value, on_instance_changed.bind(this, key));
+                                {
+                                    this._add_vector( value.length, key, value, on_instance_changed.bind( this, key ) );
+                                }
                                 break;
                         }
                     }
@@ -3306,9 +3316,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             return (typeof arg == 'undefined' ? def : arg);
         }
 
-        static _dispatch_event( element, type, bubbles, cancelable ) {
-            let event = new Event(type, { 'bubbles': bubbles, 'cancelable': cancelable });
-            element.dispatchEvent(event);
+        static _dispatch_event( element, type, data, bubbles, cancelable ) {
+            let event = new CustomEvent( type, { 'detail': data, 'bubbles': bubbles, 'cancelable': cancelable } );
+            element.dispatchEvent( event );
         }
 
         static _add_reset_property( container, callback ) {
@@ -3316,8 +3326,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             domEl.style.display = "none";
             domEl.style.marginRight = "6px";
             domEl.className = "lexicon fa fa-rotate-left";
-            domEl.addEventListener("click", callback);
-            container.appendChild(domEl);
+            domEl.addEventListener( "click", callback );
+            container.appendChild( domEl );
             return domEl;
         }
 
@@ -3327,39 +3337,45 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
         create_widget( name, type, options = {} ) {
 
-            let widget = new Widget(name, type, options);
+            let widget = new Widget( name, type, options );
 
-            let element = document.createElement('div');
+            let element = document.createElement( 'div' );
             element.className = "lexwidget";
-            if(options.id)
-                element.id = options.id;
-            if(options.className)
+            element.id = options.id ?? "";
+            element.title = options.title ?? "";
+
+            if( options.className )
+            {
                 element.className += " " + options.className;
-            if(options.title)
-                element.title = options.title;
+            }
 
             if( type != Widget.TITLE )
             {
                 element.style.width = "calc(100% - " + (this.current_branch || type == Widget.FILE ? 10 : 20) + "px)";
-                if( options.width ) {
+
+                if( options.width )
+                {
                     element.style.width = element.style.minWidth = options.width;
                 }
-                if( options.maxWidth ) {
+                if( options.maxWidth )
+                {
                     element.style.maxWidth = options.maxWidth;
                 }
-                if( options.minWidth ) {
+                if( options.minWidth )
+                {
                     element.style.minWidth = options.minWidth;
                 }
-                if( options.height ) {
+                if( options.height )
+                {
                     element.style.height = element.style.minHeight = options.height;
                 }
             }
 
-            if(name != undefined) {
-
-                if(!(options.no_name ?? false) )
+            if( name != undefined )
+            {
+                if( !(options.no_name ?? false) )
                 {
-                    let domName = document.createElement('div');
+                    let domName = document.createElement( 'div' );
                     domName.className = "lexwidgetname";
                     if( options.justifyName )
                     {
@@ -3372,22 +3388,27 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     element.domName = domName;
     
                     // Copy-paste info
-                    domName.addEventListener('contextmenu', function(e) {
+                    domName.addEventListener('contextmenu', function( e ) {
                         e.preventDefault();
-                        widget.oncontextmenu(e);
+                        widget.oncontextmenu( e );
                     });
                 }
                 
                 this.widgets[ name ] = widget;
             }
 
-            if(options.signal)
+            if( options.signal )
             {
-                if(!name) {
-                    if(!this.signals)
+                if( !name )
+                {
+                    if( !this.signals )
+                    {
                         this.signals = [];
-                    this.signals.push({[options.signal]: widget})
+                    }
+
+                    this.signals.push( { [ options.signal ]: widget } )
                 }
+
                 LX.addSignal( options.signal, widget );
             }
 
