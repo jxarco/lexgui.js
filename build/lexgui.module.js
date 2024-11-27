@@ -716,7 +716,8 @@ class TreeEvent {
     }
     
     string() {
-        switch(this.type) {
+        switch( this.type )
+        {
             case TreeEvent.NONE: return "tree_event_none";
             case TreeEvent.NODE_SELECTED: return "tree_event_selected";
             case TreeEvent.NODE_DELETED: return "tree_event_deleted";
@@ -870,7 +871,9 @@ class Area {
             
             const draggable = options.draggable ?? true;
             if( draggable )
-                makeDraggable( root );
+            {
+                makeDraggable( root, options );
+            }
 
             if( options.resizeable ) {
                 root.classList.add("resizeable");
@@ -1232,23 +1235,33 @@ class Area {
     * @method resize
     * Resize element
     */
-    setSize(size) {
+    setSize( size ) {
         
-        let [width, height] = size;
+        let [ width, height ] = size;
 
-        if(width != undefined && width.constructor == Number)
+        if( width != undefined && width.constructor == Number )
+        {
             width += "px";
-        if(height != undefined && height.constructor == Number)
+        }
+
+        if( height != undefined && height.constructor == Number )
+        {
             height += "px";
+        }
 
-        if(width)
+        if( width )
+        {
             this.root.style.width = width;
-        if(height)
+        }
+
+        if( height )
+        {
             this.root.style.height = height;
+        }
 
-        this.size = [this.root.clientWidth, this.root.clientHeight];
+        this.size = [ this.root.clientWidth, this.root.clientHeight ];
 
-        this.propagateEvent("onresize");
+        this.propagateEvent( "onresize" );
     }
 
     /**
@@ -1258,7 +1271,9 @@ class Area {
     extend() {
 
         if( this.split_extended )
-        return;
+        {
+            return;
+        }
 
         let [area1, area2] = this.sections;
         this.split_extended = true;
@@ -1927,11 +1942,15 @@ class Tabs {
 
         const tabEl = this.tabDOMs[ name ];
 
-        if(!tabEl || tabEl.fixed)
-        return;
+        if( !tabEl || tabEl.fixed )
+        {
+            return;
+        }
 
         if( this.onclose )
+        {
             this.onclose( name );
+        }
 
         // Delete tab element
         this.tabDOMs[ name ].remove();
@@ -1942,11 +1961,12 @@ class Tabs {
         delete this.tabs[ name ];
 
         // Select last tab
-        const last_tab = this.root.lastChild;
-        if(last_tab && !last_tab.fixed)
+        const lastTab = this.root.lastChild;
+        if( lastTab && !lastTab.fixed )
+        {
             this.root.lastChild.click();
+        }
     }
-
 }
 
 LX.Tabs = Tabs;
@@ -2775,37 +2795,40 @@ class NodeTree {
     _create_item( parent, node, level = 0, selectedId ) {
 
         const that = this;
-        const node_filter_input = this.domEl.querySelector("#lexnodetree_filter");
+        const node_filter_input = this.domEl.querySelector( "#lexnodetree_filter" );
 
         node.children = node.children ?? [];
-        if(node_filter_input && !node.id.includes(node_filter_input.value) || (selectedId != undefined) && selectedId != node.id)
+        if( node_filter_input && !node.id.includes( node_filter_input.value ) || (selectedId != undefined) && selectedId != node.id )
         {
             for( var i = 0; i < node.children.length; ++i )
-                this._create_item( node, node.children[i], level + 1, selectedId );
+            {
+                this._create_item( node, node.children[ i ], level + 1, selectedId );
+            }
             return;
         }
 
-        const list = this.domEl.querySelector("ul");
+        const list = this.domEl.querySelector( 'ul' );
 
         node.visible = node.visible ?? true;
         node.parent = parent;
-        let is_parent = node.children.length > 0;
-        let is_selected = this.selected.indexOf( node ) > -1 || node.selected;
+        let isParent = node.children.length > 0;
+        let isSelected = this.selected.indexOf( node ) > -1 || node.selected;
         
-        if( this.options.only_folders ) {
+        if( this.options.only_folders )
+        {
             let has_folders = false;
             node.children.forEach( c => has_folders |= (c.type == 'folder') );
-            is_parent = !!has_folders;
+            isParent = !!has_folders;
         }
 
         let item = document.createElement('li');
-        item.className = "lextreeitem " + "datalevel" + level + (is_parent ? " parent" : "") + (is_selected ? " selected" : "");
+        item.className = "lextreeitem " + "datalevel" + level + (isParent ? " parent" : "") + (isSelected ? " selected" : "");
         item.id = LX.getSupportedDOMName( node.id );
         item.tabIndex = "0";
 
         // Select hierarchy icon
         let icon = (this.options.skip_default_icon ?? true) ? "" : "fa-solid fa-square"; // Default: no childs
-        if( is_parent ) icon = node.closed ? "fa-solid fa-caret-right" : "fa-solid fa-caret-down";
+        if( isParent ) icon = node.closed ? "fa-solid fa-caret-right" : "fa-solid fa-caret-down";
         item.innerHTML = "<a class='" + icon + " hierarchy'></a>";
         
         // Add display icon
@@ -2825,18 +2848,20 @@ class NodeTree {
 
         item.innerHTML += (node.rename ? "" : node.id);
 
-        item.setAttribute('draggable', true);
-        item.style.paddingLeft = ((is_parent ? 0 : 3 ) + (3 + (level+1) * 15)) + "px";
-        list.appendChild(item);
+        item.setAttribute( 'draggable', true );
+        item.style.paddingLeft = ((isParent ? 0 : 3 ) + (3 + (level+1) * 15)) + "px";
+        list.appendChild( item );
 
         // Callbacks
         item.addEventListener("click", e => {
-            if( handled ) {
+            if( handled )
+            {
                 handled = false;
                 return;
             }
 
-            if( !e.shiftKey ) {
+            if( !e.shiftKey )
+            {
                 list.querySelectorAll( "li" ).forEach( e => { e.classList.remove( 'selected' ); } );
                 this.selected.length = 0;
             }
@@ -2852,16 +2877,18 @@ class NodeTree {
             }
 
             // Only Show children...
-            if( is_parent && node.id.length > 1 /* Strange case... */) {
+            if( isParent && node.id.length > 1 /* Strange case... */) {
                 node.closed = false;
-                if( that.onevent ) {
-                    const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed);
+                if( that.onevent )
+                {
+                    const event = new TreeEvent( TreeEvent.NODE_CARETCHANGED, node, node.closed );
                     that.onevent( event );
                 }
                 that.frefresh( node.id );
             }
 
-            if( that.onevent ) {
+            if( that.onevent )
+            {
                 const event = new TreeEvent(TreeEvent.NODE_SELECTED, e.shiftKey ? this.selected : node );
                 event.multiple = e.shiftKey;
                 that.onevent( event );
@@ -2884,85 +2911,87 @@ class NodeTree {
             }
         });
 
-        item.addEventListener("contextmenu", e => {
+        item.addEventListener( "contextmenu", e => {
+
             e.preventDefault();
-            if(that.onevent) {
-                const event = new TreeEvent(TreeEvent.NODE_CONTEXTMENU, this.selected.length > 1 ? this.selected : node, e);
-                event.multiple = this.selected.length > 1;
 
-                LX.addContextMenu( event.multiple ? "Selected Nodes" : event.node.id, event.value, m => {
-                    event.panel = m;
-                });
+            if( that.onevent )
+            {
+                return;
+            }
 
-                that.onevent( event );
+            const event = new TreeEvent(TreeEvent.NODE_CONTEXTMENU, this.selected.length > 1 ? this.selected : node, e);
+            event.multiple = this.selected.length > 1;
 
-                if( ( this.options.addDefault ?? false ) == true )
+            LX.addContextMenu( event.multiple ? "Selected Nodes" : event.node.id, event.value, m => {
+                event.panel = m;
+            });
+
+            that.onevent( event );
+
+            if( ( this.options.addDefault ?? false ) == true )
+            {
+                if( event.panel.items )
                 {
-                    if( event.panel.items )
-                    {
-                        event.panel.add( "" );
-                    }
-    
-                    event.panel.add( "Select Children", () => {
-    
-                        const selectChildren = ( n ) => {
-                            
-                            if( n.closed )
-                            {
-                                return;
-                            }
-    
-                            for( let child of n.children ?? [] )
-                            {
-                                if( !child )
-                                {
-                                    continue;   
-                                }
-    
-                                let nodeItem = this.domEl.querySelector( '#' + child.id );
-                                nodeItem.classList.add('selected');
-                                this.selected.push( child ); 
-                                selectChildren( child );
-                            }
-                        };
-    
-                        // Add childs of the clicked node
-                        selectChildren( node );
-    
-                    } );
-                    
-                    // event.panel.add( "Clone", { callback: () => {
-    
-                    // } } );
-    
-                    event.panel.add( "Delete", { callback: () => {
-    
-                        // It's the root node
-                        if( !node.parent )
+                    event.panel.add( "" );
+                }
+
+                event.panel.add( "Select Children", () => {
+
+                    const selectChildren = ( n ) => {
+
+                        if( n.closed )
                         {
                             return;
                         }
-    
-                        if( that.onevent ) {
-                            const event = new TreeEvent( TreeEvent.NODE_DELETED, node, e );
-                            that.onevent( event );
+
+                        for( let child of n.children ?? [] )
+                        {
+                            if( !child )
+                            {
+                                continue;
+                            }
+
+                            let nodeItem = this.domEl.querySelector( '#' + child.id );
+                            nodeItem.classList.add('selected');
+                            this.selected.push( child );
+                            selectChildren( child );
                         }
-    
-                        // Delete nodes now
-                        let childs = node.parent.children;
-                        const index = childs.indexOf( node );
-                        childs.splice( index, 1 );
-    
-                        this.refresh();
-                    } } );
-                }
+                    };
+
+                    // Add childs of the clicked node
+                    selectChildren( node );
+                } );
+
+                event.panel.add( "Delete", { callback: () => {
+
+                    // It's the root node
+                    if( !node.parent )
+                    {
+                        return;
+                    }
+
+                    if( that.onevent ) {
+                        const event = new TreeEvent( TreeEvent.NODE_DELETED, node, e );
+                        that.onevent( event );
+                    }
+
+                    // Delete nodes now
+                    let childs = node.parent.children;
+                    const index = childs.indexOf( node );
+                    childs.splice( index, 1 );
+
+                    this.refresh();
+                } } );
             }
         });
 
         item.addEventListener("keydown", e => {
 
             if( node.rename )
+            {
                 return;
+            }
 
             e.preventDefault();
 
@@ -2991,7 +3020,10 @@ class NodeTree {
                 var selected = this.selected.length > 1 ? ( e.key == "ArrowUp" ? this.selected.shift() : this.selected.pop() ) : this.selected[ 0 ];
                 var el = this.domEl.querySelector( "#" + LX.getSupportedDOMName( selected.id ) );
                 var sibling = e.key == "ArrowUp" ? el.previousSibling : el.nextSibling;
-                if( sibling ) sibling.click();
+                if( sibling )
+                {
+                    sibling.click();
+                }
             }
         });
 
@@ -3097,7 +3129,7 @@ class NodeTree {
         let handled = false;
 
         // Show/hide children
-        if(is_parent) {
+        if(isParent) {
             item.querySelector('a.hierarchy').addEventListener("click", function(e) {
                 
                 handled = true;
@@ -6291,8 +6323,7 @@ class Branch {
 
         this.grabber = grabber;
 
-        function getBranchHeight(){
-            
+        function getBranchHeight() {
             return that.root.offsetHeight - that.root.children[0].offsetHeight;
         }
 
@@ -6346,20 +6377,23 @@ class Branch {
         var size = this.grabber.style.marginLeft;
 
         // Update sizes of widgets inside
-        for(var i = 0; i < this.widgets.length;i++) {
+        for(var i = 0; i < this.widgets.length; i++) {
 
-            let widget = this.widgets[i];
+            let widget = this.widgets[ i ];
             let element = widget.domEl;
 
-            if(element.children.length < 2)
+            if( element.children.length < 2 )
+            {
                 continue;
+            }
 
-            var name = element.children[0];
-            var value = element.children[1];
+            var name = element.children[ 0 ];
+            var value = element.children[ 1 ];
 
             name.style.width = size;
             let padding = "0px";
-            switch(widget.type) {
+            switch( widget.type )
+            {
                 case Widget.FILE:
                     padding = "10%";
                     break;
@@ -6372,7 +6406,10 @@ class Branch {
             value.style.width = "-webkit-calc( 100% - " + size + " - " + padding + " )";
             value.style.width = "calc( 100% - " + size + " - " + padding + " )";
 
-            if(widget.onresize) widget.onresize();
+            if( widget.onresize )
+            {
+                widget.onresize();
+            }
         }
     }
 };
@@ -6389,8 +6426,10 @@ class Dialog {
 
     constructor( title, callback, options = {} ) {
         
-        if(!callback)
-        console.warn("Content is empty, add some widgets using 'callback' parameter!");
+        if( !callback )
+        {
+            console.warn("Content is empty, add some widgets using 'callback' parameter!");
+        }
 
         this._oncreate = callback;
         this.id = simple_guidGenerator();
@@ -6400,8 +6439,10 @@ class Dialog {
             draggable = options.draggable ?? true,
             modal = options.modal ?? false;
 
-        if(modal)
-            LX.modal.toggle(false);
+        if( modal )
+        {
+            LX.modal.toggle( false );
+        }
 
         var root = document.createElement('div');
         root.className = "lexdialog " + (options.class ?? "");
@@ -6412,8 +6453,8 @@ class Dialog {
 
         var titleDiv = document.createElement('div');
 
-        if(title) {
-
+        if( title )
+        {
             titleDiv.className = "lexdialogtitle";
             titleDiv.innerHTML = title;
             titleDiv.setAttribute('draggable', false);
@@ -6517,7 +6558,9 @@ class Dialog {
         this.title = titleDiv;
 
         if( draggable )
-            makeDraggable( root, { targetClass: 'lexdialogtitle' } );
+        {
+            makeDraggable( root, Object.assign( { targetClass: 'lexdialogtitle' }, options ) );
+        }
 
         // Process position and size
         if(size.length && typeof(size[0]) != "string")
