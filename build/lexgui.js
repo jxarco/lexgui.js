@@ -185,40 +185,72 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
     // Other utils
 
+    /**
+     * @method makeDraggable
+     * @param {Element} domEl
+     * @param {Object} options
+     * autoAdjust (Bool): Sets in a correct position at the beggining
+     * dragMargin (Number): Margin of drag container
+     * onMove (Function): Called each move event
+     * onDragStart (Function): Called when drag event starts
+     */
     function makeDraggable( domEl, options = { } ) {
 
-        let offsetX;
-        let offsetY;
+        let offsetX = 0;
+        let offsetY = 0;
         let currentTarget = null;
         let targetClass = options.targetClass;
-    
+        let dragMargin = options.dragMargin ?? 3;
+
+        let _computePosition = ( e, top, left ) => {
+            const nullRect = { x: 0, y: 0, width: 0, height: 0 };
+            const parentRect = domEl.parentElement ? domEl.parentElement.getBoundingClientRect() : nullRect;
+            const isFixed = ( domEl.style.position == "fixed" );
+            const fixedOffset = isFixed ? new LX.vec2( parentRect.x, parentRect.y ) : new LX.vec2();
+            left = left ?? e.clientX - offsetX - parentRect.x;
+            top = top ?? e.clientY - offsetY - parentRect.y;
+            domEl.style.left = clamp( left, dragMargin + fixedOffset.x, fixedOffset.x + parentRect.width - domEl.offsetWidth - dragMargin ) + 'px';
+            domEl.style.top = clamp( top, dragMargin + fixedOffset.y, fixedOffset.y + parentRect.height - domEl.offsetHeight - dragMargin ) + 'px';
+        };
+
+        // Initial adjustment
+        if( options.autoAdjust )
+        {
+        _computePosition( null, parseInt( domEl.style.left ), parseInt( domEl.style.top ) )
+        }
+
         let id = LX.UTILS.uidGenerator();
         domEl[ 'draggable-id' ] = id;
-    
+
         const defaultMoveFunc = e => {
-            if( !currentTarget ) return;
-            let left = e.clientX - offsetX;
-            let top = e.clientY - offsetY;
-            if( left > 3 && ( left + domEl.offsetWidth + 6 ) <= window.innerWidth )
-                domEl.style.left = left + 'px';
-            if( top > 3 && ( top + domEl.offsetHeight + 6 ) <= window.innerHeight )
-                domEl.style.top = top + 'px';
+            if( !currentTarget )
+            {
+                return;
+            }
+
+            _computePosition( e );
         };
-    
+
         const customMoveFunc = e => {
-            if( !currentTarget ) return;
+            if( !currentTarget )
+            {
+                return;
+            }
+
             if( options.onMove )
+            {
                 options.onMove( currentTarget );
+            }
         };
-    
+
         let onMove = options.onMove ? customMoveFunc : defaultMoveFunc;
         let onDragStart = options.onDragStart;
-    
+
         domEl.setAttribute( 'draggable', true );
         domEl.addEventListener( "mousedown", function( e ) {
-            currentTarget = (e.target.classList.contains(targetClass) || !targetClass) ? e.target : null;
+            currentTarget = ( e.target.classList.contains( targetClass ) || !targetClass ) ? e.target : null;
         } );
-    
+
         domEl.addEventListener( "dragstart", function( e ) {
             e.preventDefault();
             e.stopPropagation();
@@ -230,15 +262,21 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             e.dataTransfer.setDragImage( img, 0, 0 );
             e.dataTransfer.effectAllowed = "move";
             const rect = e.target.getBoundingClientRect();
-            offsetX = e.clientX - rect.x;
-            offsetY = e.clientY - rect.y;
+            const parentRect = currentTarget.parentElement.getBoundingClientRect();
+            const isFixed = ( currentTarget.style.position == "fixed" );
+            const fixedOffset = isFixed ? new LX.vec2( parentRect.x, parentRect.y ) : new LX.vec2();
+            offsetX = e.clientX - rect.x - fixedOffset.x;
+            offsetY = e.clientY - rect.y - fixedOffset.y;
             document.addEventListener( "mousemove", onMove );
             if( onDragStart )
+            {
                 onDragStart( currentTarget, e );
+            }
         }, false );
         
         document.addEventListener( 'mouseup', () => {
-            if( currentTarget ) {
+            if( currentTarget )
+            {
                 currentTarget = null;
                 document.removeEventListener( "mousemove", onMove );
             }
