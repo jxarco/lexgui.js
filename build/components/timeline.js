@@ -704,7 +704,7 @@ class Timeline {
      * @param {Number} t 
      */
 
-    setDuration( t, updateHeader = true ) {
+    setDuration( t, updateHeader = true, skipCallback = false ) {
         let v = this.validateDuration(t);
         let decimals = t.toString().split('.')[1] ? t.toString().split('.')[1].length : 0;
         updateHeader = (updateHeader || +v.toFixed(decimals) != t);
@@ -714,7 +714,7 @@ class Timeline {
             LX.emit( "@on_set_duration_" + this.name, +this.duration.toFixed(3)); // skipcallback = true
         }
 
-        if( this.onSetDuration ) 
+        if( this.onSetDuration && !skipCallback ) 
             this.onSetDuration( this.duration );	 
     }
 
@@ -733,19 +733,19 @@ class Timeline {
      * @param {Number} speed 
      */
 
-    setSpeed(speed) {
+    setSpeed(speed, skipCallback = false) {
         this.speed = speed;
         LX.emit( "@on_set_speed_" + this.name, +this.speed.toFixed(3)); // skipcallback = true
         
-        if( this.onSetSpeed ) 
+        if( this.onSetSpeed && !skipCallback) 
             this.onSetSpeed( this.speed );	 
     }
 
-    setTime(time){
+    setTime(time, skipCallback = false ){
         this.currentTime = Math.max(0,Math.min(time,this.duration));
         LX.emit( "@on_set_time_" + this.name, +this.currentTime.toFixed(2)); // skipcallback = true
 
-        if(this.onSetTime)
+        if(this.onSetTime && !skipCallback)
             this.onSetTime(this.currentTime);
     }
 
@@ -969,8 +969,8 @@ class Timeline {
             return true;
         }
 
-        if( this.onMouse && this.onMouse( e, time, this ) )
-            return;
+        if( this.onMouse )
+            this.onMouse( e, time, this );
 
         return true;
     }
@@ -2572,14 +2572,14 @@ class KeyFramesTimeline extends Timeline {
         
         const currentSelection = this.selectKeyFrame(t, keyFrameIndex, !multiple); // changes time 
 
+        if( !multiple ) {
+            this.setTime(this.animationClip.tracks[t.clipIdx].times[ keyFrameIndex ]);
+        }  
         if( this.onSelectKeyFrame && this.onSelectKeyFrame(e, currentSelection)) {
             // Event handled
             return;
         }        
-
-        if( !multiple ) {
-            this.setTime(this.animationClip.tracks[t.clipIdx].times[ keyFrameIndex ]);
-        }    
+          
     }
 
     /**
@@ -2605,7 +2605,6 @@ class KeyFramesTimeline extends Timeline {
     /**
      * @method clearTrack
      */
-
     clearTrack(idx, defaultValue) {
 
         let track =  this.animationClip.tracks[idx];
@@ -2615,11 +2614,14 @@ class KeyFramesTimeline extends Timeline {
             return;
         }
 
+        this.unHoverAll();
+        this.unSelectAllKeyFrames();
+
+        this.saveState(track.clipIdx);
         const count = track.times.length;
         for(let i = count - 1; i >= 0; i--)
         {
-            this.saveState(track.clipIdx);
-            this.#delete(track.clipIdx, i );
+            this.#delete(track.clipIdx, i);
         } 
         if(defaultValue != undefined) {
             if(typeof(defaultValue) == 'number')  {
@@ -2855,7 +2857,10 @@ class ClipsTimeline extends Timeline {
     onMouseMove( e, time ) {
         // function not called if shift is pressed (boxselection)
 
-        if(this.grabbing && e.buttons != 2) {
+        if ( this.grabbingTimeBar || this.grabbingScroll ){
+            return;
+        }
+        else if(this.grabbing && e.buttons != 2) {
             this.unHoverAll();
 
             let delta = time - this.grabTime;
@@ -2879,7 +2884,8 @@ class ClipsTimeline extends Timeline {
                         duration = Math.min( track.clips[this.lastClipsSelected[0][1] + 1].start - clip.start - 0.0001, duration );
                     }
                     clip.duration = duration;
-                    clip.fadeout = Math.max(Math.min((clip.fadeout || clip.start+clip.duration) + delta, clip.start+clip.duration), clip.start);
+                    clip.fadeout = Math.max(Math.min((clip.fadeout ?? (clip.start+clip.duration)) + delta, clip.start+clip.duration), clip.start);
+                    clip.fadein = Math.max(Math.min((clip.fadein ?? (clip.start+clip.duration)), (clip.fadeout ?? (clip.start+clip.duration))), clip.start);
                     if(this.duration < clip.start + clip.duration){
                         this.setDuration(clip.start + clip.duration);
                     }
@@ -5154,13 +5160,13 @@ class CurvesTimeline extends Timeline {
         
         const currentSelection = this.selectKeyFrame(t, keyFrameIndex, !multiple, multiple); // changes time on the first keyframe selected
 
+        if (!multiple){
+            this.setTime(this.animationClip.tracks[t.clipIdx].times[ keyFrameIndex ]);
+        }
+
         if( this.onSelectKeyFrame && this.onSelectKeyFrame(e, currentSelection)) {
             // Event handled
             return;
-        }
-
-        if (!multiple){
-            this.setTime(this.animationClip.tracks[t.clipIdx].times[ keyFrameIndex ]);
         }
     }
 
@@ -5195,12 +5201,15 @@ class CurvesTimeline extends Timeline {
         {
             return;
         }
-
+        
+        this.unHoverAll();
+        this.unSelectAllKeyFrames();
+        
+        this.saveState(track.clipIdx);
         const count = track.times.length;
         for(let i = count - 1; i >= 0; i--)
         {
-            this.saveState(track.clipIdx);
-            this.#delete(track, i );
+            this.#delete(track.clipIdx, i );
         } 
         if(defaultValue != undefined) {
             if(typeof(defaultValue) == 'number')  {
