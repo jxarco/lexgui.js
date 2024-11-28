@@ -62,7 +62,7 @@ class Timeline {
         this.onBeforeCreateTopBar = options.onBeforeCreateTopBar;
         this.onAfterCreateTopBar = options.onAfterCreateTopBar;
         this.onChangePlayMode = options.onChangePlayMode;
-        this.onConfiguration = options.onConfiguration;
+        this.onShowConfiguration = options.onShowConfiguration;
         this.onBeforeDrawContent = options.onBeforeDrawContent;
         
         this.playing = false;
@@ -197,23 +197,24 @@ class Timeline {
         if(this.onShowOptimizeMenu)
             header.addButton("", '<i class="fa-solid fa-filter"></i>', (value, event) => {this.onShowOptimizeMenu(event)}, {width: "40px"});
 
-        header.addButton("", '<i class="fa-solid fa-gear"></i>', (value, event) => {
-            if(this.configurationDialog){
-                this.configurationDialog.close();
-                this.configurationDialog = null;
-                return;
-            }
-            this.configurationDialog = new LX.Dialog("Configuration", d => {
-                if ( this.onConfiguration ){
-                    this.onConfiguration(d);
-                }               
-            }, {
-                onclose: (root) => {
-                    root.remove();
+        if(this.onShowConfiguration){
+            header.addButton("", '<i class="fa-solid fa-gear"></i>', (value, event) => {
+                if(this.configurationDialog){
+                    this.configurationDialog.close();
                     this.configurationDialog = null;
+                    return;
                 }
-            })
-        }, {width: "40px"})
+                this.configurationDialog = new LX.Dialog("Configuration", dialog => {
+                    this.onShowConfiguration(dialog);
+                }, {
+                    onclose: (root) => {
+                        this.configurationDialog.panel.clear(); // clear signals
+                        this.configurationDialog = null;
+                        root.remove();
+                    }
+                })
+            }, {width: "40px"})
+        }
 
         header.endLine();
         LX.DEFAULT_NAME_WIDTH = "30%";
