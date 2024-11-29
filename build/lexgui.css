@@ -1365,6 +1365,26 @@ input[type="range"] {
   font-weight: 800;
 }
 
+/* Pad Widget */
+
+.lexwidget .lexpad {
+  place-items: center;
+}
+
+.lexwidget .lexpad .lexinnerpad {
+  border-radius: 4px;
+  background-color: var(--global-dark-background);
+}
+
+.lexwidget .lexpad .lexinnerpad .lexpadthumb {
+  background-color: var(--global-selected-light);
+  width: 10%;
+  height: 10%;
+  border-radius: 2px;
+  transform: translate(0px, 0px);
+}
+
+
 /* Tabs Widget */
 
 .lextabscontainer {

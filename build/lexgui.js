@@ -30,6 +30,11 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
     function clamp( num, min, max ) { return Math.min( Math.max( num, min ), max ); }
     function round( number, precision ) { return +(( number ).toFixed( precision ?? 2 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' )); }
+    function remapRange( oldValue, oldMin, oldMax, newMin, newMax ) { return ((( oldValue - oldMin ) * ( newMax - newMin )) / ( oldMax - oldMin )) + newMin; }
+
+    LX.clamp = clamp;
+    LX.round = round;
+    LX.remapRange = remapRange;
     
     function getSupportedDOMName( string )
     {
@@ -179,6 +184,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         len () { return Math.sqrt( this.len2() ); }
         nrm ( v0 = new vec2() ) { v0.set( this.x, this.y ); return v0.mul( 1.0 / this.len(), v0 ); }
         dst ( v ) { return v.sub( this ).len(); }
+        clp ( min, max, v0 = new vec2() ) { v0.set( clamp( this.x, min, max ), clamp( this.y, min, max ) ); return v0; }
     };
 
     LX.vec2 = vec2;
@@ -2534,6 +2540,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         static SEPARATOR    = 22;
         static KNOB         = 23;
         static SIZE         = 24;
+        static PAD          = 25;
 
         static NO_CONTEXT_TYPES = [
             Widget.BUTTON,
@@ -2619,6 +2626,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 case Widget.CURVE: return "Curve";
                 case Widget.KNOB: return "Knob";
                 case Widget.SIZE: return "Size";
+                case Widget.PAD: return "Pad";
                 case Widget.CUSTOM: return this.customName;
             }
         }
@@ -3266,19 +3274,25 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         getValue( name ) {
 
             let widget = this.widgets[ name ];
-            if(!widget)
-                throw("No widget called " + name);
+
+            if( !widget )
+            {
+                throw( "No widget called " + name );
+            }
 
             return widget.value();
         }
 
-        setValue( name, value ) {
+        setValue( name, value, skipCallback ) {
 
             let widget = this.widgets[ name ];
-            if(!widget)
-                throw("No widget called " + name);
 
-            return widget.set(value);
+            if( !widget )
+            {
+                throw( "No widget called " + name );
+            }
+
+            return widget.set( value, skipCallback );
         }
 
         /**
@@ -5810,6 +5824,131 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             {
                 element.className += " noname";
                 container.style.width = "100%";
+            }
+
+            return widget;
+        }
+
+        /**
+         * @method addPad
+         * @param {String} name Widget name
+         * @param {Number} value Pad value
+         * @param {Function} callback Callback function on change
+         * @param {*} options:
+         * disabled: Make the widget disabled [false]
+         * min, max: Min and Max values
+         * onPress: Callback function on mouse down
+         * onRelease: Callback function on mouse up
+         */
+
+        addPad( name, value, callback, options = {} ) {
+
+            if( !name )
+            {
+                throw( "Set Widget Name!" );
+            }
+
+            let widget = this.create_widget( name, Widget.PAD, options );
+
+            widget.onGetValue = () => {
+                return thumb.value.xy;
+            };
+
+            widget.onSetValue = ( newValue, skipCallback ) => {
+                thumb.value.set( newValue[ 0 ], newValue[ 1 ] );
+                _updateValue( thumb.value );
+                if( !skipCallback )
+                {
+                    this._trigger( new IEvent( name, thumb.value.xy ), callback );
+                }
+            };
+
+            let element = widget.domEl;
+
+            var container = document.createElement( 'div' );
+            container.className = "lexpad";
+            container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+
+            let pad = document.createElement('div');
+            pad.id = "lexpad-" + name;
+            pad.className = "lexinnerpad";
+            pad.style.width = options.padSize ?? '96px';
+            pad.style.height = options.padSize ?? '96px';
+
+            let thumb = document.createElement('div');
+            thumb.className = "lexpadthumb";
+            thumb.value = new LX.vec2( value[ 0 ], value[ 1 ] );
+            thumb.min = options.min ?? 0;
+            thumb.max = options.max ?? 1;
+
+            let _updateValue = v => {
+                const [ w, h ] = [ pad.offsetWidth, pad.offsetHeight ];
+                const value0to1 = new LX.vec2( remapRange( v.x, thumb.min, thumb.max, 0.0, 1.0 ), remapRange( v.y, thumb.min, thumb.max, 0.0, 1.0 ) );
+                thumb.style.transform = `translate(calc( ${ w * value0to1.x }px - 50% ), calc( ${ h * value0to1.y }px - 50%)`;
+            }
+
+            doAsync( () => {
+                _updateValue( thumb.value )
+            } );
+
+            pad.appendChild( thumb );
+            container.appendChild( pad );
+            element.appendChild( container );
+
+            pad.addEventListener( "mousedown", innerMouseDown );
+
+            let that = this;
+
+            function innerMouseDown( e )
+            {
+                if( document.activeElement == thumb )
+                {
+                    return;
+                }
+
+                var doc = that.root.ownerDocument;
+                doc.addEventListener( 'mousemove', innerMouseMove );
+                doc.addEventListener( 'mouseup', innerMouseUp );
+                document.body.classList.add( 'nocursor' );
+                document.body.classList.add( 'noevents' );
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+
+                if( options.onPress )
+                {
+                    options.onPress.bind( thumb )( e, thumb );
+                }
+            }
+
+            function innerMouseMove( e )
+            {
+                const rect = pad.getBoundingClientRect();
+                const relativePosition = new LX.vec2( e.x - rect.x, e.y - rect.y );
+                relativePosition.clp( 0.0, pad.offsetWidth, relativePosition);
+                const [ w, h ] = [ pad.offsetWidth, pad.offsetHeight ];
+                const value0to1 = relativePosition.div( new LX.vec2( pad.offsetWidth, pad.offsetHeight ) );
+
+                thumb.style.transform = `translate(calc( ${ w * value0to1.x }px - 50% ), calc( ${ h * value0to1.y }px - 50%)`;
+                thumb.value = new LX.vec2( remapRange( value0to1.x, 0.0, 1.0, thumb.min, thumb.max ), remapRange( value0to1.y, 0.0, 1.0, thumb.min, thumb.max ) );
+
+                that._trigger( new IEvent( name, thumb.value.xy, e ), callback );
+
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            function innerMouseUp( e )
+            {
+                var doc = that.root.ownerDocument;
+                doc.removeEventListener( 'mousemove', innerMouseMove );
+                doc.removeEventListener( 'mouseup', innerMouseUp );
+                document.body.classList.remove( 'nocursor' );
+                document.body.classList.remove( 'noevents' );
+
+                if( options.onRelease )
+                {
+                    options.onRelease.bind( thumb )( e, thumb );
+                }
             }
 
             return widget;

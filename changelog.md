@@ -2,6 +2,7 @@
 
 ## 0.1.39 (dev)
 
+New widget: Pad. Bidimensional slider.
 `LX.makeDraggable` now supports 'absolute' and 'fixed' positions.
 Fix passing onDragStart/onMove functions to Dialogs.
 Minor bug fixes.
