@@ -1,13 +1,15 @@
 # lexgui.js changelog
 
-## 0.1.39 (dev)
+## 0.1.40 (dev)
+
+## 0.1.39 (master)
 
 New widget: Pad. Bidimensional slider.
 `LX.makeDraggable` now supports 'absolute' and 'fixed' positions.
 Fix passing onDragStart/onMove functions to Dialogs.
 Minor bug fixes.
 
-## 0.1.38 (master)
+## 0.1.38
 
 Timeline: Fixed timeline signals and added callbacks
 
