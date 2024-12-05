@@ -478,17 +478,18 @@ function fillPanel( panel ) {
     panel.branch("Preferences", {icon: "fa-solid fa-gear"});
     panel.addButton(null, "Click me, Im Full Width...");
     panel.addText("Text", "Warning text", null, { warning: true });
-    panel.addKnob("A Knob", 4, 0, 200, value => { console.log(value) }, /*{ size: 'sm' }*/);
     panel.sameLine(2);
     panel.addFile("Img1", data => { console.log(data) }, {} );
     panel.addFile("Img2", data => { console.log(data) }, {} );
+    panel.addPad("2D Pad", [0.5, 0.5], (value, event) => {
+        console.log(value);
+    }, { padSize: "100px", min: -1, max: 2 });
     panel.addSize("Screen Res", [1280, 720], (value, event) => {
         console.log(value);
     }, { units: "p" });
     panel.addDropdown("Best Engine", ["Godot", "Unity", "Unreal Engine"], "Unity", (value, event) => {
         console.log(value);
     });
-
     panel.addDropdown("Best Logo", [{value:"Godot", src: "https://godotengine.org/assets/press/logo_vertical_color_light.webp"}, {value: "Unity", src: "https://logos-world.net/wp-content/uploads/2023/01/Unity-Logo.png"}, {value:"Unreal Engine", src: "https://cdn2.unrealengine.com/ue-logo-stacked-unreal-engine-w-677x545-fac11de0943f.png"}], "Godot", (value, event) => {
         console.log(value);
     }, {filter: true});
@@ -697,6 +698,7 @@ function fillBottomPanel( panel ) {
     panel.addTextArea("Notes", "", (value, event) => {
         console.log(value);
     }, { placeholder: 'Some notes...' });
+    panel.addKnob("A Knob", 4, 0, 200, value => { console.log(value) }, /*{ size: 'sm' }*/);
     panel.addButton("Apply", "Add button to branch", (value, event) => {
         const branch = panel.getBranch("Information");
         panel.queue( branch.content );

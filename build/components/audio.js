@@ -6,11 +6,6 @@ if(!LX) {
 
 LX.components.push( 'Audio' );
 
-function remapRange(oldValue, oldMin, oldMax, newMin, newMax)
-{
-    return (((oldValue - oldMin) * (newMax - newMin)) / (oldMax - oldMin)) + newMin;
-}
-
 /**
  * @method addKnob
  * @param {String} name Widget name
@@ -76,12 +71,12 @@ Panel.prototype.addKnob = function( name, value, min, max, callback, options = {
 
     let innerSetValue = function( v ) {
         // Convert val between (-135 and 135)
-        const angle = remapRange( v, innerKnobCircle.min, innerKnobCircle.max, -135.0, 135.0 );
+        const angle = LX.remapRange( v, innerKnobCircle.min, innerKnobCircle.max, -135.0, 135.0 );
         innerKnobCircle.style.rotate = angle + 'deg';
         innerKnobCircle.value = v;
     }
 
-    const angle = remapRange( value, min, max, -135.0, 135.0 );
+    const angle = LX.remapRange( value, min, max, -135.0, 135.0 );
     innerKnobCircle.style.rotate = angle + 'deg';
 
     if( options.disabled )
