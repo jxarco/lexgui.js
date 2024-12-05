@@ -107,7 +107,8 @@ class Timeline {
         let height = options.height ? options.height - this.header_offset : null;
 
         let area = new LX.Area( {id: "bottom-timeline-area", width: width || "calc(100% - 7px)", height: height || "100%"});
-        area.split({ type: "horizontal", sizes: ["15%", "85%"]});
+        area.split({ type: "horizontal", sizes: ["15%", "85%"] });
+        area.split_bar.style.zIndex = 1; // for some reason this is needed here
         this.content_area = area;
         let [left, right] = area.sections;
         
@@ -510,19 +511,14 @@ class Timeline {
         let max_tracks = Math.ceil( (h - timeline_height + this.currentScrollInPixels) / line_height );
 
         ctx.save();
-        ctx.fillStyle = Timeline.BACKGROUND_COLOR;
-        for(let i = 0; i <= max_tracks; ++i)
+        ctx.fillStyle = "#f0f0f003"//Timeline.TRACK_COLOR_SECONDARY;
+        ctx.globalAlpha = 1;
+        for(let i = 0; i <= max_tracks; i+=2)
         {
-            ctx.fillStyle = i % 2 == 0 ?  Timeline.TRACK_COLOR_PRIMARY:  Timeline.BACKGROUND_COLOR;
             ctx.fillRect(0, timeline_height + i * line_height  - this.currentScrollInPixels, w, line_height );
         }
-    
-        //black bg
-        ctx.globalAlpha = 0.7;
-        ctx.fillStyle = Timeline.BACKGROUND_COLOR;
-        ctx.fillRect( margin, 0, canvas.width - margin, canvas.height);
         ctx.globalAlpha = this.opacity;
-        
+
         //bg lines
         ctx.strokeStyle = "#444";
         ctx.beginPath();
@@ -530,6 +526,7 @@ class Timeline {
         let pos = this.timeToX( 0 );
         if(pos < margin)
             pos = margin;
+        ctx.lineWidth = 1;
         ctx.moveTo( pos + 0.5, timeline_height);
         ctx.lineTo( pos + 0.5, canvas.height);
         ctx.moveTo( Math.round( this.timeToX( duration ) ) + 0.5, timeline_height);
@@ -833,6 +830,9 @@ class Timeline {
                 this.leftPanel.root.children[1].scrollTop += e.deltaY; // wheel deltaY
             }
             
+            if ( this.onMouse ){
+                this.onMouse(e, time);
+            }
             return;
         }
 

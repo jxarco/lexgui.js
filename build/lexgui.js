@@ -7231,12 +7231,12 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 if( o.xrange ) element.xrange = o.xrange;
                 if( o.yrange ) element.yrange = o.yrange;
                 if( o.smooth ) element.smooth = o.smooth;
-                var rect = canvas.parentElement.getBoundingClientRect();
-                if( canvas.parentElement.parentElement ) rect = canvas.parentElement.parentElement.getBoundingClientRect();
-                if( rect && canvas.width != rect.width && rect.width && rect.width < 1000 )
-                {
-                    canvas.width = rect.width;
-                }
+                // var rect = canvas.parentElement.getBoundingClientRect();
+                // if( canvas.parentElement.parentElement ) rect = canvas.parentElement.parentElement.getBoundingClientRect();
+                // if( rect && canvas.width != rect.width && rect.width && rect.width < 1000 )
+                // {
+                //     canvas.width = rect.width;
+                // }
     
                 var ctx = canvas.getContext( "2d" );
                 ctx.setTransform( 1, 0, 0, 1, 0, 0 );
