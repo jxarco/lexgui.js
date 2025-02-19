@@ -547,7 +547,7 @@ function fillPanel( panel ) {
     const formData = { username: "", password: { value: "", type: "password" } };
     panel.addForm("Test form", formData, (value, event) => {
         console.log(value);
-    }, {  });
+    }, { actionName: "Login" });
 
     // another branch
     panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});

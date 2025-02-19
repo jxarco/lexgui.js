@@ -4280,7 +4280,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
          * @method addForm
          * @param {String} name Widget name
          * @param {Object} data Form data
-         * @param {Function} callback Callback function on form data input changes
+         * @param {Function} callback Callback function on submit form
          * @param {*} options:
          * actionName: Text to be shown in the button
          */

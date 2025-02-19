@@ -4,6 +4,7 @@
 
 New widget: Form. Series of Text + Submit Button using form data (Object).
 Fix non-unique "input-filter" id.
+Updated docs.
 
 ## 0.1.39 (master)
 
