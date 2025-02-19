@@ -481,12 +481,6 @@ function fillPanel( panel ) {
     panel.sameLine(2);
     panel.addFile("Img1", data => { console.log(data) }, {} );
     panel.addFile("Img2", data => { console.log(data) }, {} );
-    panel.addPad("2D Pad", [0.5, 0.5], (value, event) => {
-        console.log(value);
-    }, { padSize: "100px", min: -1, max: 2 });
-    panel.addSize("Screen Res", [1280, 720], (value, event) => {
-        console.log(value);
-    }, { units: "p" });
     panel.addDropdown("Best Engine", ["Godot", "Unity", "Unreal Engine"], "Unity", (value, event) => {
         console.log(value);
     });
@@ -543,6 +537,17 @@ function fillPanel( panel ) {
     panel.addCurve("Opacity", opacityValues, (value, event) => {
         console.log(value);
     });
+    panel.addPad("2D Pad", [0.5, 0.5], (value, event) => {
+        console.log(value);
+    }, { padSize: "100px", min: -1, max: 2 });
+    panel.addSize("Screen Res", [1280, 720], (value, event) => {
+        console.log(value);
+    }, { units: "p" });
+
+    const formData = { username: "", password: { value: "", type: "password" } };
+    panel.addForm("Test form", formData, (value, event) => {
+        console.log(value);
+    }, {  });
 
     // another branch
     panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});

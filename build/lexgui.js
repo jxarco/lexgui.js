@@ -1200,7 +1200,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 // Send area resize to every widget in the area
                 for( let widget of widgets )
                 {
-                    const jsInstance = widget.jsIinstance;
+                    const jsInstance = widget.jsInstance;
 
                     if( jsInstance.onresize )
                     {
@@ -2541,6 +2541,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         static KNOB         = 23;
         static SIZE         = 24;
         static PAD          = 25;
+        static FORM         = 26;
 
         static NO_CONTEXT_TYPES = [
             Widget.BUTTON,
@@ -2627,6 +2628,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 case Widget.KNOB: return "Knob";
                 case Widget.SIZE: return "Size";
                 case Widget.PAD: return "Pad";
+                case Widget.FORM: return "Form";
                 case Widget.CUSTOM: return this.customName;
             }
         }
@@ -3528,7 +3530,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             if( name != undefined )
             {
-                if( !(options.no_name ?? false) )
+                if( !(options.hideName ?? false) )
                 {
                     let domName = document.createElement( 'div' );
                     domName.className = "lexwidgetname";
@@ -3568,6 +3570,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             }
 
             widget.domEl = element;
+            element.jsInstance = widget;
 
             const insert_widget = el => {
                 if(options.container)
@@ -3637,7 +3640,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             element.className += " lexfilter noname";
             
             let input = document.createElement('input');
-            input.id = 'input-filter';
+            input.className = 'lexinput-filter';
             input.setAttribute("placeholder", options.placeholder);
             input.style.width =  "calc( 100% - 17px )";
             input.value = options.filterValue || "";
@@ -4222,7 +4225,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
         addCard( name, options = {} ) {
 
-            options.no_name = true;
+            options.hideName = true;
             let widget = this.create_widget(name, Widget.CARD, options);
             let element = widget.domEl;
 
@@ -4274,6 +4277,89 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         }
 
         /**
+         * @method addForm
+         * @param {String} name Widget name
+         * @param {Object} data Form data
+         * @param {Function} callback Callback function on form data input changes
+         * @param {*} options:
+         * actionName: Text to be shown in the button
+         */
+
+        addForm( name, data, callback, options = {} ) {
+
+            if( data.constructor != Object )
+            {
+                console.error( "Form data must be an Object" );
+                return;
+            }
+
+            // Always hide name for this one
+            options.hideName = true;
+
+            let widget = this.create_widget( name, Widget.FORM, options );
+
+            widget.onGetValue = () => {
+                return container.formData;
+            };
+
+            widget.onSetValue = ( newValue, skipCallback ) => {
+                container.formData = newValue;
+                const entries = container.querySelectorAll( ".lexwidget" );
+                for( let i = 0; i < entries.length; ++i )
+                {
+                    const entry = entries[ i ];
+                    if( entry.jsInstance.type != LX.Widget.TEXT )
+                    {
+                        continue;
+                    }
+                    let entryName = entries[ i ].querySelector( ".lexwidgetname" ).innerText;
+                    let entryInput = entries[ i ].querySelector( ".lextext input" );
+                    entryInput.value = newValue[ entryName ] ?? "";
+                    Panel._dispatch_event( entryInput, "focusout", skipCallback );
+                }
+            };
+
+            // Add widget value
+
+            let element = widget.domEl;
+
+            let container = document.createElement( 'div' );
+            container.className = "lexformdata";
+
+            this.queue( container );
+
+            container.formData = {};
+
+            for( let entry in data )
+            {
+                const entryData = data[ entry ];
+                this.addText( entry, entryData.constructor == Object ? entryData.value : entryData, ( value ) => {
+                    container.formData[ entry ] = value;
+                }, entryData );
+
+                container.formData[ entry ] = entryData.constructor == Object ? entryData.value : entryData;
+            }
+
+            this.addButton( null, options.actionName ?? "Submit", ( value, event ) => {
+                if( callback )
+                {
+                    callback( container.formData, event );
+                }
+            } );
+
+            this.clearQueue();
+
+            element.appendChild( container );
+
+            if( !widget.name || options.hideName ) {
+                element.className += " noname";
+                container.style.width = "100%";
+            }
+
+            return widget;
+        }
+
+        /**
          * @method addContent
          * @param {HTMLElement} element
          */
@@ -4297,27 +4383,29 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         async addImage( url, options = {} ) {
 
             if( !url )
-            return;
+            {
+                return;
+            }
 
-            options.no_name = true;
-            let widget = this.create_widget(null, Widget.IMAGE, options);
+            options.hideName = true;
+            let widget = this.create_widget( null, Widget.IMAGE, options );
             let element = widget.domEl;
 
-            let container = document.createElement('div');
+            let container = document.createElement( 'div' );
             container.className = "leximage";
             container.style.width = "100%";
 
-            let img = document.createElement('img');
+            let img = document.createElement( 'img' );
             img.src = url;
 
-            for(let s in options.style) {
-
-                img.style[s] = options.style[s];
+            for( let s in options.style )
+            {
+                img.style[ s ] = options.style[ s ];
             }
 
             await img.decode();
-            container.appendChild(img);
-            element.appendChild(container);
+            container.appendChild( img );
+            element.appendChild( container );
 
             return widget;
         }
@@ -4416,7 +4504,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     setTimeout( () => delete this.unfocus_event, 200 );
                 } else if ( e.relatedTarget && e.relatedTarget.tagName == "INPUT" ) {
                     return;
-                }else if ( e.target.id == 'input-filter' ) {
+                }else if ( e.target.id == 'lexinput-filter' ) {
                     return;
                 }
                 this.toggleAttribute( 'hidden', true );

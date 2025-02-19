@@ -2,6 +2,9 @@
 
 ## 0.1.40 (dev)
 
+New widget: Form. Series of Text + Submit Button using form data (Object).
+Fix non-unique "input-filter" id.
+
 ## 0.1.39 (master)
 
 New widget: Pad. Bidimensional slider.
