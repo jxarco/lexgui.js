@@ -359,16 +359,19 @@ class VideoEditor {
         this.startTimeString = "0:0";
         this.endTimeString = "0:0";
 
-        let [videoArea, controlsArea] = area.split({ type: 'vertical', sizes: ["80%", null], minimizable: false, resize: false });
+        this.mainArea = area;
+
+        let [videoArea, controlsArea] = area.split({ type: 'vertical', sizes: ["85%", null], minimizable: false, resize: false });
         controlsArea.root.classList.add('lexconstrolsarea');
 
         // Create video element and load it
         let video = this.video = options.video ?? document.createElement( 'video' );
+        this.video.loop = true;
+        
         if(options.src) {
             this.video.src = options.src;
+            this._loadVideo(options);
         }
-        this.video.loop = true;
-        this._loadVideo(options);
         if(options.videoArea) {
             options.videoArea.root.classList.add("lexvideoeditor");
             videoArea.attach(options.videoArea);
@@ -458,6 +461,24 @@ class VideoEditor {
             this.timebar.resize([availableWidth, timeBarArea.root.clientHeight]);
         })
 
+        this.onKeyUp = (event) => {
+            if(this.controls && event.key == " ") {
+                event.preventDefault();
+                event.stopPropagation();
+
+                if(!this.playing) {
+                    this.video.play();
+                }
+                else {
+                    this.video.pause();
+                }
+                this.playing = !this.playing;
+                this.controlsPanelLeft.refresh();
+            }
+        }
+
+        window.addEventListener( "keyup", this.onKeyUp);
+
         videoArea.onresize = (v) => {
             bottomArea.setSize([v.width, 40]);
         }
@@ -483,7 +504,7 @@ class VideoEditor {
                 this.timebar.onMouseMove(event);
             }
         });
-
+        
     }
 
     async _loadVideo( options = {} ) {
@@ -491,13 +512,17 @@ class VideoEditor {
             await new Promise(r => setTimeout(r, 1000));
             this.video.currentTime = 10000000 * Math.random();
         }
-        this.video.currentTime = -1; // BUG: some videos will not play unless this line is present 
-        this.video.currentTime = 0;
+        
+        this.timebar.startX = this.timebar.position.x;
+        this.timebar.endX = this.timebar.width;
+
+        this.video.currentTime = 0.01; // BUG: some videos will not play unless this line is present 
         this.endTime = this.video.duration;
-        this.timebar.currentX = this._timeToX(0);
+        
         this._setEndValue(this.timebar.endX);
         this._setStartValue(this.timebar.startX);
-        this._setCurrentValue(this.timebar.currentX);
+        this.timebar.currentX = this._timeToX(this.video.currentTime);
+        this._setCurrentValue(this.timebar.currentX, false);
         this.timebar.update(this.timebar.currentX);
         
         if ( !this.requestId ){ // only have one update on flight
@@ -507,6 +532,8 @@ class VideoEditor {
         if(!this.controls) {
             this.hideControls();
         }
+
+        window.addEventListener( "keyup", this.onKeyUp);
 
         if(this.onVideoLoaded) {
             this.onVideoLoaded(this.video);
@@ -627,9 +654,15 @@ class VideoEditor {
         }
     }
 
-    delete ( ) {
+    unbind ( ) {
         this.stopUpdates();
-        delete this;
+        
+        this.video.pause();
+        this.playing = false;
+        this.controlsPanelLeft.refresh();
+        this.video.src = "";
+
+        window.removeEventListener("keyup", this.onKeyUp);
     }
 }
 
