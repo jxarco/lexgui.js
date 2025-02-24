@@ -1,12 +1,17 @@
 # lexgui.js changelog
 
-## 0.1.40 (dev)
+## 0.1.41 (dev)
+
+
+
+## 0.1.40 (master)
 
 New widget: Form. Series of Text + Submit Button using form data (Object).
 Fix non-unique "input-filter" id.
+Improved Number/Vector mouse interaction with `pointerLock`.
 Updated docs.
 
-## 0.1.39 (master)
+## 0.1.39
 
 New widget: Pad. Bidimensional slider.
 `LX.makeDraggable` now supports 'absolute' and 'fixed' positions.
