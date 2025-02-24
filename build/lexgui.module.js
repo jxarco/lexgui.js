@@ -8,7 +8,7 @@
 */
 
 var LX = {
-    version: "0.1.39",
+    version: "0.1.40",
     ready: false,
     components: [], // specific pre-build components
     signals: {} // events and triggers
@@ -5480,7 +5480,6 @@ class Panel {
         vecinput.addEventListener( "mousedown", inner_mousedown );
 
         var that = this;
-        var lastY = 0;
 
         function inner_mousedown( e )
         {
@@ -5492,12 +5491,15 @@ class Panel {
             var doc = that.root.ownerDocument;
             doc.addEventListener( 'mousemove', inner_mousemove );
             doc.addEventListener( 'mouseup', inner_mouseup );
-            lastY = e.pageY;
-            document.body.classList.add( 'nocursor' );
             document.body.classList.add( 'noevents' );
             dragIcon.classList.remove( 'hidden' );
             e.stopImmediatePropagation();
             e.stopPropagation();
+
+            if( !document.pointerLockElement )
+            {
+                vecinput.requestPointerLock();
+            }
 
             if( options.onPress )
             {
@@ -5507,8 +5509,10 @@ class Panel {
 
         function inner_mousemove( e )
         {
-            if ( lastY != e.pageY ) {
-                let dt = lastY - e.pageY;
+            let dt = -e.movementY;
+
+            if ( dt != 0 )
+            {
                 let mult = options.step ?? 1;
                 if( e.shiftKey ) mult *= 10;
                 else if( e.altKey ) mult *= 0.1;
@@ -5517,7 +5521,6 @@ class Panel {
                 Panel._dispatch_event( vecinput, "change" );
             }
 
-            lastY = e.pageY;
             e.stopPropagation();
             e.preventDefault();
         }
@@ -5527,9 +5530,13 @@ class Panel {
             var doc = that.root.ownerDocument;
             doc.removeEventListener( 'mousemove', inner_mousemove );
             doc.removeEventListener( 'mouseup', inner_mouseup );
-            document.body.classList.remove( 'nocursor' );
             document.body.classList.remove( 'noevents' );
             dragIcon.classList.add( 'hidden' );
+
+            if( document.pointerLockElement )
+            {
+                document.exitPointerLock();
+            }
 
             if( options.onRelease )
             {
@@ -5623,7 +5630,7 @@ class Panel {
 
             if( value[ i ].constructor == Number )
             {
-                value[ i ] = clamp(value[ i ], +vecinput.min, +vecinput.max);
+                value[ i ] = clamp( value[ i ], +vecinput.min, +vecinput.max );
                 value[ i ] = round( value[ i ], options.precision );
             }
 
@@ -5665,7 +5672,9 @@ class Panel {
             vecinput.addEventListener( "change", e => {
 
                 if( isNaN( e.target.value ) )
+                {
                     return;
+                }
 
                 const skipCallback = e.detail;
 
@@ -5676,7 +5685,7 @@ class Panel {
                 if( !skipCallback )
                 {
                     let btn = element.querySelector( ".lexwidgetname .lexicon" );
-                    if( btn ) btn.style.display = val != vecinput.iValue ? "block": "none";
+                    if( btn ) btn.style.display = val != vecinput.iValue ? "block" : "none";
                 }
 
                 if( locker.locked )
@@ -5685,7 +5694,8 @@ class Panel {
                         v.value = val;
                         value[ v.idx ] = val;
                     }
-                } else
+                }
+                else
                 {
                     vecinput.value = val;
                     value[ e.target.idx ] = val;
@@ -5699,7 +5709,7 @@ class Panel {
             vecinput.addEventListener( "mousedown", inner_mousedown );
 
             var that = this;
-            var lastY = 0;
+
             function inner_mousedown( e )
             {
                 if( document.activeElement == vecinput )
@@ -5710,12 +5720,15 @@ class Panel {
                 var doc = that.root.ownerDocument;
                 doc.addEventListener( 'mousemove', inner_mousemove );
                 doc.addEventListener( 'mouseup', inner_mouseup );
-                lastY = e.pageY;
-                document.body.classList.add( 'nocursor' );
                 document.body.classList.add( 'noevents' );
                 dragIcon.classList.remove( 'hidden' );
                 e.stopImmediatePropagation();
                 e.stopPropagation();
+
+                if( !document.pointerLockElement )
+                {
+                    vecinput.requestPointerLock();
+                }
 
                 if( options.onPress )
                 {
@@ -5725,8 +5738,10 @@ class Panel {
 
             function inner_mousemove( e )
             {
-                if ( lastY != e.pageY ) {
-                    let dt = lastY - e.pageY;
+                let dt = -e.movementY;
+
+                if ( dt != 0 )
+                {
                     let mult = options.step ?? 1;
                     if( e.shiftKey ) mult = 10;
                     else if( e.altKey ) mult = 0.1;
@@ -5745,7 +5760,6 @@ class Panel {
                     }
                 }
 
-                lastY = e.pageY;
                 e.stopPropagation();
                 e.preventDefault();
             }
@@ -5755,9 +5769,13 @@ class Panel {
                 var doc = that.root.ownerDocument;
                 doc.removeEventListener( 'mousemove', inner_mousemove );
                 doc.removeEventListener( 'mouseup', inner_mouseup );
-                document.body.classList.remove( 'nocursor' );
                 document.body.classList.remove( 'noevents' );
                 dragIcon.classList.add('hidden');
+
+                if( document.pointerLockElement )
+                {
+                    document.exitPointerLock();
+                }
 
                 if( options.onRelease )
                 {
@@ -5796,7 +5814,9 @@ class Panel {
             {
                 this.classList.add( "fa-lock" );
                 this.classList.remove( "fa-lock-open" );
-            } else {
+            }
+            else
+            {
                 this.classList.add( "fa-lock-open" );
                 this.classList.remove( "fa-lock" );
             }

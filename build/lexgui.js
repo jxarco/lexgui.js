@@ -12,7 +12,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     */
 
     var LX = global.LX = {
-        version: "0.1.39",
+        version: "0.1.40",
         ready: false,
         components: [], // specific pre-build components
         signals: {} // events and triggers
@@ -5479,7 +5479,6 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             vecinput.addEventListener( "mousedown", inner_mousedown );
 
             var that = this;
-            var lastY = 0;
 
             function inner_mousedown( e )
             {
@@ -5491,12 +5490,15 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 var doc = that.root.ownerDocument;
                 doc.addEventListener( 'mousemove', inner_mousemove );
                 doc.addEventListener( 'mouseup', inner_mouseup );
-                lastY = e.pageY;
-                document.body.classList.add( 'nocursor' );
                 document.body.classList.add( 'noevents' );
                 dragIcon.classList.remove( 'hidden' );
                 e.stopImmediatePropagation();
                 e.stopPropagation();
+
+                if( !document.pointerLockElement )
+                {
+                    vecinput.requestPointerLock();
+                }
 
                 if( options.onPress )
                 {
@@ -5506,8 +5508,10 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             function inner_mousemove( e )
             {
-                if ( lastY != e.pageY ) {
-                    let dt = lastY - e.pageY;
+                let dt = -e.movementY;
+
+                if ( dt != 0 )
+                {
                     let mult = options.step ?? 1;
                     if( e.shiftKey ) mult *= 10;
                     else if( e.altKey ) mult *= 0.1;
@@ -5516,7 +5520,6 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     Panel._dispatch_event( vecinput, "change" );
                 }
 
-                lastY = e.pageY;
                 e.stopPropagation();
                 e.preventDefault();
             }
@@ -5526,9 +5529,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 var doc = that.root.ownerDocument;
                 doc.removeEventListener( 'mousemove', inner_mousemove );
                 doc.removeEventListener( 'mouseup', inner_mouseup );
-                document.body.classList.remove( 'nocursor' );
                 document.body.classList.remove( 'noevents' );
                 dragIcon.classList.add( 'hidden' );
+
+                if( document.pointerLockElement )
+                {
+                    document.exitPointerLock();
+                }
 
                 if( options.onRelease )
                 {
@@ -5622,7 +5629,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
                 if( value[ i ].constructor == Number )
                 {
-                    value[ i ] = clamp(value[ i ], +vecinput.min, +vecinput.max);
+                    value[ i ] = clamp( value[ i ], +vecinput.min, +vecinput.max );
                     value[ i ] = round( value[ i ], options.precision );
                 }
 
@@ -5664,7 +5671,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 vecinput.addEventListener( "change", e => {
 
                     if( isNaN( e.target.value ) )
+                    {
                         return;
+                    }
 
                     const skipCallback = e.detail;
 
@@ -5675,7 +5684,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     if( !skipCallback )
                     {
                         let btn = element.querySelector( ".lexwidgetname .lexicon" );
-                        if( btn ) btn.style.display = val != vecinput.iValue ? "block": "none";
+                        if( btn ) btn.style.display = val != vecinput.iValue ? "block" : "none";
                     }
 
                     if( locker.locked )
@@ -5684,7 +5693,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                             v.value = val;
                             value[ v.idx ] = val;
                         }
-                    } else
+                    }
+                    else
                     {
                         vecinput.value = val;
                         value[ e.target.idx ] = val;
@@ -5698,7 +5708,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 vecinput.addEventListener( "mousedown", inner_mousedown );
 
                 var that = this;
-                var lastY = 0;
+
                 function inner_mousedown( e )
                 {
                     if( document.activeElement == vecinput )
@@ -5709,12 +5719,16 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     var doc = that.root.ownerDocument;
                     doc.addEventListener( 'mousemove', inner_mousemove );
                     doc.addEventListener( 'mouseup', inner_mouseup );
-                    lastY = e.pageY;
                     document.body.classList.add( 'nocursor' );
                     document.body.classList.add( 'noevents' );
                     dragIcon.classList.remove( 'hidden' );
                     e.stopImmediatePropagation();
                     e.stopPropagation();
+
+                    if( !document.pointerLockElement )
+                    {
+                        vecinput.requestPointerLock();
+                    }
 
                     if( options.onPress )
                     {
@@ -5724,8 +5738,10 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
                 function inner_mousemove( e )
                 {
-                    if ( lastY != e.pageY ) {
-                        let dt = lastY - e.pageY;
+                    let dt = -e.movementY;
+
+                    if ( dt != 0 )
+                    {
                         let mult = options.step ?? 1;
                         if( e.shiftKey ) mult = 10;
                         else if( e.altKey ) mult = 0.1;
@@ -5744,7 +5760,6 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         }
                     }
 
-                    lastY = e.pageY;
                     e.stopPropagation();
                     e.preventDefault();
                 }
@@ -5754,9 +5769,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     var doc = that.root.ownerDocument;
                     doc.removeEventListener( 'mousemove', inner_mousemove );
                     doc.removeEventListener( 'mouseup', inner_mouseup );
-                    document.body.classList.remove( 'nocursor' );
                     document.body.classList.remove( 'noevents' );
                     dragIcon.classList.add('hidden');
+
+                    if( document.pointerLockElement )
+                    {
+                        document.exitPointerLock();
+                    }
 
                     if( options.onRelease )
                     {
@@ -5795,7 +5814,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 {
                     this.classList.add( "fa-lock" );
                     this.classList.remove( "fa-lock-open" );
-                } else {
+                }
+                else {
                     this.classList.add( "fa-lock-open" );
                     this.classList.remove( "fa-lock" );
                 }
