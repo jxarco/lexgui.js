@@ -3265,16 +3265,13 @@ class ClipsTimeline extends Timeline {
     /**
      * @method optimizeTrack
      */
-
     optimizeTrack(trackIdx) {	
     }
 
     /**
      * @method optimizeTracks
      */
-
     optimizeTracks() {
-        this.addClip()
     }
 
    /**
