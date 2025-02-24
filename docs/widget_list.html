@@ -27,6 +27,7 @@
             "<a href='#tree'>Data Tree</a>",
             "<a href='#dropdown'>Dropdown</a>",
             "<a href='#file'>File</a>",
+            "<a href='#form'>Form</a>",
             "<a href='#layers'>Layers</a>",
             "<a href='#list'>List</a>",
             "<a href='#number'>Number</a>",
@@ -41,50 +42,22 @@
             "<a href='#other-widgets'>Other widgets</a>",
         ] );
 
-        // Title
-        MAKE_HEADER( "Title", "h2", "title" );
-        MAKE_PARAGRAPH( `Represents a title section inside a <a href="branching.html">Branch</a>.` );
-        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTitle(name, value, callback, options)")} to add a Title Widget to your panel:` );
+        // Array
+        MAKE_HEADER( "Array", "h2", "array" );
+        MAKE_PARAGRAPH( `Represents a array of any basic type of elements which can be modified or deleted and new ones can be added.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addArray(name, value, values, callback, options)")} to add an Array Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
-            ["options (Object)", "Basic options for a Widget"],
-        ] );
-        MAKE_CODE( `panel.addTitle(<span class="str">"A title!"</span>)<span class="hljs-comment">;</span>` );
-
-        // Text
-        MAKE_HEADER( "Text", "h2", "text" );
-        MAKE_PARAGRAPH( `Represents a text input.` );
-        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addText(name, value, callback, options)")} to add a Text Widget to your panel:` );
-        MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["value (String)", "Text string by default"],
-            ["callback (Function)", "Function called when the input changes"],
+            ["values (Array)", "Array values"],
+            ["callback (Function)", "Function called when the array is modified"],
             ["options (Object)", "Basic options for a Widget"],
             [
-                ["disabled (Boolean)", "Make the widget disabled"],
-                ["placeholder (String)", "Text string as input placeholder"],
-                ["icon (String)", "Icon to be added before the input"],
-                ["trigger (String)", "Choose onchange trigger (default, input)"],
-                ["inputWidth (String/Number)", "Width of the text input"],
-                ["float (String)", "Justify input text content"],
-                ["justifyName (String)", "Justify name content"],
+                ["innerValues (Array)", "Use dropdown mode and use values as options"],
             ]
         ] );
-        MAKE_CODE( `panel.addText(<span class="str">"Text Name"</span>, <span class="str">"Text value"</span>, (value, event) =&gt;</span> {
+        MAKE_CODE( `panel.addArray(<span class="str">"Array name"</span>, [<span class="str">"GPTeam"</span>, <span class="str">"Blat Panthers"</span>], (value, event) => {
     console.log(value);
-}, { placeholder: <span class="str">"Something"</span> });` );
-
-        // Text area
-        MAKE_HEADER( "Text Area", "h2", "text-area" );
-        MAKE_PARAGRAPH( `Represents a text area input element.` );
-        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTextArea(name, value, callback, options)")} to add a Text Area Widget to your panel 
-        (the <code class='inline'>options</code> are the same as the Text widget) plus:` );
-        MAKE_CODE_BULLET_LIST( [
-            ["fitHeight (Boolean)", "Make text height adapt to its bounding rect."]
-        ] );
-        MAKE_CODE( `panel.addTextArea(<span class="str">"Text Name"</span>, <span class="str">"Text value"</span>, (value, event) =&gt;</span> {
-    console.log(value);
-}, { placeholder: <span class="str">"Something"</span> });` );
+});` );
 
         // Button
         MAKE_HEADER( "Button", "h2", "button" );
@@ -104,127 +77,6 @@
         MAKE_CODE( `panel.addButton(<span class="str">"A Name"</span>, <span class="str">"Print event"</span>, <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
     <span class="hljs-built_in">console</span>.log(event);
 });` );
-
-        // Combo Buttons
-        MAKE_HEADER( "Combo Buttons", "h2", "combo-buttons" );
-        MAKE_PARAGRAPH( `Represents multiple inlined <a href="#button">buttons</a> as selectable options.` );
-        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addComboButtons(name, values, options)")} to add a ComboButtons Widget to your panel:` );
-        MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["values (Array)", "Each of the {value, callback} items (you can add an <code class='inline'>icon</code>)"],
-            ["options (Object)", "Basic options for a Widget"],
-            [
-                ["selected (*)", "Selected value by default"],
-                ["float (String)", "Justify content (left, center, right) [center]"],
-                ["noSelection (Boolean)", "Buttons can be clicked, but they are not selectable [false]"],
-            ]
-        ] );
-        MAKE_CODE( `panel.addComboButtons(<span class="str">"Alignment"</span>, [
-    {
-        value: <span class="str">"left"</span>,
-        icon: <span class="str">"fa fa-align-left"</span>,
-        callback: <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
-            <span class="hljs-built_in">console</span>.log(value);
-        }
-    }, {
-        value: <span class="str">"center"</span>,
-        icon: <span class="str">"fa fa-align-center"</span>,
-        callback: <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
-            <span class="hljs-built_in">console</span>.log(value);
-        }
-    }, {
-        value: <span class="str">"right"</span>,
-        icon: <span class="str">"fa fa-align-right"</span>,
-        callback: <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
-            <span class="hljs-built_in">console</span>.log(value);
-        }
-    }
-]);` );
-
-        // Number
-        MAKE_HEADER( "Number", "h2", "number" );
-        MAKE_PARAGRAPH( `Represents a decimal number input.` );
-        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addNumber(name, value, callback, options)")} to add a Number Widget to your panel:` );
-        MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["value (Number)", "Number value"],
-            ["callback (Function)", "Function called when the input changes"],
-            ["options (Object)", "Basic options for a Widget"],
-            [
-                ["disabled (Boolean)", "Make the widget disabled"],
-                ["step (Number)", "Change Step value"],
-                ["precision (Number)", "The number of digits to appear after the decimal point"],
-                ["min (Number)", "Min input value"],
-                ["max (Number)", "Max input value"],
-                ["skipSlider (Boolean)", "Skip the slider if there are min and max values"],
-                ["units", "Unit as string added to the end of the value"],
-                ["onPress (Function)", "Callback function on mouse down"],
-                ["onRelease (Function)", "Callback function on mouse up"]
-            ]
-        ] );
-        MAKE_PARAGRAPH( `<sup>Note: Setting <code class='inline'>min</code>, <code class='inline'>max</code> values will automatically add a slider below the number input.<sup>` );
-        MAKE_CODE( `panel.addNumber(<span class="str">"Font Size"</span>, <span class="dec">36</span>, (value, <span class="hljs-keyword">event</span>) =&gt; {
-    console.<span class="hljs-keyword">log</span>(value);
-}, { <span class="hljs-keyword">min</span>: <span class="dec">1</span>, <span class="hljs-keyword">max</span>: <span class="dec">48</span> });` );
-        MAKE_PARAGRAPH( `You can change the value of this widget manually, using the mouse wheel, and dragging (up/down). In the last two cases, pressing <em>Alt</em> and 
-        <em>Left Shift</em> will apply a factor of <code class='inline'>0.1</code> and <code class='inline'>10</code> in that order.` );
-
-        MAKE_PARAGRAPH( `In case you are using limits, store the widget and call <code class='inline'>numberWidget.setLimits( min, max, step )</code> to change its 
-        parameters once the widget has been created.` );
-
-        // Vector
-        MAKE_HEADER( "Vector", "h2", "vector" );
-        MAKE_PARAGRAPH( `Similar to the Number widget, it represents a decimal vector input. It&#39;s composed by multiple <a href="#number">number</a> widgets.` );
-        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addVectorN(name, value, callback, options)")}, where N is a number in the range [2, 4], to add a Vector Widget to your panel:` );
-        MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["values (Number Array)", "Array containing the values for the vector"],
-            ["callback (Function)", "Function called when any of the N number inputs change"],
-            ["options (Object)", "Basic options for a Widget"],
-            [
-                ["disabled (Boolean)", "Make the widget disabled"],
-                ["step (Number)", "Change Step value"],
-                ["min (Number)", "Min input value"],
-                ["max (Number)", "Max input value"],
-                ["onPress (Function)", "Callback function on mouse down"],
-                ["onRelease (Function)", "Callback function on mouse up"]
-            ]
-        ] );
-        MAKE_PARAGRAPH( `<sup>Note: Since a Vector Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.<sup>` );
-        MAKE_CODE( `panel.addVector2(<span class="str">"2D Position"</span>, [<span class="dec">250</span>, <span class="dec">350</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
-    <span class="hljs-built_in">console</span>.log(value);
-}, { min: <span class="dec">0</span>, max: <span class="dec">1024</span> });
-
-panel.addVector3(<span class="str">"Velocity"</span>, [<span class="dec">0.1</span>, <span class="dec">1</span>, <span class="dec">0.5</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
-    <span class="hljs-built_in">console</span>.log(value);
-});
-
-panel.addVector4(<span class="str">"Shader Color"</span>, [<span class="dec">1</span>, <span class="dec">1</span>, <span class="dec">1</span>, <span class="dec">1</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
-    <span class="hljs-built_in">console</span>.log(value);
-});` );
-
-        MAKE_PARAGRAPH( `In case you are using limits, store the widget and call <code class='inline'>vectorWidget.setLimits( min, max, step )</code> to change its 
-        parameters once the widget has been created.` );
-
-        // Size
-        MAKE_HEADER( "Size", "h2", "size" );
-        MAKE_PARAGRAPH( `Represents a N dimension number size input.` );
-        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addSize(name, value, callback, options)")} to add a Size Widget to your panel:` );
-        MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["value (Number)", "Number value"],
-            ["callback (Function)", "Function called when the input changes"],
-            ["options (Object)", "Basic options for a Widget"],
-            [
-                ["disabled (Boolean)", "Make the widget disabled"],
-                ["units", "Unit as string added to the end of the value"]
-            ]
-        ] );
-        MAKE_PARAGRAPH( `<sup>Note: Since a Size Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.
-            Minimum size is always 0.<sup>` );
-        MAKE_CODE( `panel.addNumber(<span class="str">"Screen Resolution"</span>, [<span class="dec">1280</span>, <span class="dec">720</span>], (value, <span class="hljs-keyword">event</span>) =&gt; {
-    console.<span class="hljs-keyword">log</span>(value);
-}, { units: <span class="str">"p"</span> });` );
 
         // Checkbox
         MAKE_HEADER( "Checkbox", "h2", "checkbox" );
@@ -272,49 +124,71 @@ panel.addCheckbox(<span class="str">"Toggle me too"</span>, <span class="lit">tr
 
 panel.addColor(<span class="str">"Background"</span>, <span class="str">"#b7a9b1"</span>);` );
 
-        // Dropdown
-        MAKE_HEADER( "Dropdown", "h2", "dropdown" );
-        MAKE_PARAGRAPH( `Represents a classic drop-down list. It works as a HTML Select element, but it can also handle media options.` );
-        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addDropdown(name, values, value, callback, options)")} to add a Dropdown Widget to your panel:` );
+        // Combo Buttons
+        MAKE_HEADER( "Combo Buttons", "h2", "combo-buttons" );
+        MAKE_PARAGRAPH( `Represents multiple inlined <a href="#button">buttons</a> as selectable options.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addComboButtons(name, values, options)")} to add a ComboButtons Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
-            ["values (Array)", "Array of the values of the list. The values can be strings or media (images or GIFs). For the media, the entries of the array must be an object containing a <code class='inline'>value</code> and <code class='inline'>src</code> fields"],
-            ["value (String)", "Current selected value from the drop-down list"],
-            ["callback (Function)", "Function called when an list value is selected"],
+            ["values (Array)", "Each of the {value, callback} items (you can add an <code class='inline'>icon</code>)"],
             ["options (Object)", "Basic options for a Widget"],
             [
-                ["filter (Boolean)", "Specify if the drop-down needs a search bar"]
+                ["selected (*)", "Selected value by default"],
+                ["float (String)", "Justify content (left, center, right) [center]"],
+                ["noSelection (Boolean)", "Buttons can be clicked, but they are not selectable [false]"],
             ]
         ] );
-        MAKE_CODE( `<span class="com">// String values</span>
+        MAKE_CODE( `panel.addComboButtons(<span class="str">"Alignment"</span>, [
+    {
+        value: <span class="str">"left"</span>,
+        icon: <span class="str">"fa fa-align-left"</span>,
+        callback: <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(value);
+        }
+    }, {
+        value: <span class="str">"center"</span>,
+        icon: <span class="str">"fa fa-align-center"</span>,
+        callback: <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(value);
+        }
+    }, {
+        value: <span class="str">"right"</span>,
+        icon: <span class="str">"fa fa-align-right"</span>,
+        callback: <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+            <span class="hljs-built_in">console</span>.log(value);
+        }
+    }
+]);` );
 
-panel.addDropdown(<span class="str">"String Dropdown"</span>, [<span class="str">"Option 1"</span>, <span class="str">"Option 2"</span>], <span class="str">"Option 1"</span>, (<span class="hljs-keyword">value</span>, <span class="hljs-keyword">event</span>) =&gt; {
-      console.log(<span class="hljs-keyword">value</span>);
-}, options);
-
-<span class="com">// Media values</span>
-
-<span class="kwd">const</span> options = [
-  { <span class="hljs-keyword">value</span>: <span class="str">"Option 1"</span>, src: <span class="str">"/option1.png"</span> }, 
-  { <span class="hljs-keyword">value</span>: <span class="str">"Option 2"</span>, src: <span class="str">"/option2.gif"</span> },
-  { <span class="hljs-keyword">value</span>: <span class="str">"Option 3"</span>, src: <span class="str">"/option3.jpg"</span> }
-];
-panel.addDropdown(<span class="str">"Media Dropdown"</span>, options, <span class="str">"Option 1"</span>, (<span class="hljs-keyword">value</span>, <span class="hljs-keyword">event</span>) =&gt; {
-      console.log(<span class="hljs-keyword">value</span>);
-}, options);` );
-
-        // Tags
-        MAKE_HEADER( "Tags", "h2", "tags" );
-        MAKE_PARAGRAPH( `Represents a collection of tags that can be added, removed, and modified dynamically.` );
-        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTags(name, value, callback, options)")} to add a Tags Widget to your panel:` );
+        // Curve
+        MAKE_HEADER( "Curve", "h2", "curve" );
+        MAKE_PARAGRAPH( `Represents a simple Curve Editor. It's a versatile component designed to simplify the manipulation and visualization
+    of curves or graphs, ideal for any scenario where the smooth interpolation of values over time
+    or other parameters is essential.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addCurve(name, values, callback)")} to add a Curve Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
-            ["value (String)", "Comma separated tags"],
-            ["callback (Function)", "Function called when a tag is either removed or added"],
-            ["options (Object)", "Basic options for a Widget"]
+            ["values (Array)", "Values of the curve to be interpolated"],
+            ["options (Object)", "Basic options for a Widget"],
+            [
+                ["skipReset (Boolean)", "Don't add the reset value button when value changes"],
+                ["bgColor (Color)", "Widget background color"],
+                ["pointsColor (Color)", "Curve points color"],
+                ["lineColor (Color)", "Curve line color"],
+                ["noOverlap (Boolean)", "Points do not overlap, replacing themselves if necessary"],
+                ["allowAddValues (Boolean)", "Support adding values on click"],
+                ["smooth (Number)", "Curve smoothness"],
+                ["moveOutAction (Number)", "Clamp or delete points moved out of the curve (LX.CURVE_MOVEOUT_CLAMP, LX.CURVE_MOVEOUT_DELETE)"],
+            ]
         ] );
-        MAKE_CODE( `panel.addTags(<span class="str">"Game Tags"</span>, <span class="str">"2d, ai, engine, ps5, console"</span>, <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
-    <span class="hljs-built_in">console</span>.log(value);
+        MAKE_CODE( `<span class="kwd">const</span> opacityValues = [
+    [<span class="dec">0.2</span>, <span class="dec">0.35</span>],
+    [<span class="dec">0.42</span>, <span class="dec">0.9</span>],
+    [<span class="dec">0.55</span>, <span class="dec">0.67</span>],
+    [<span class="dec">1</span>, <span class="dec">1</span>]
+];
+panel.addCurve(<span class="str">"Opacity"</span>, opacityValues, (value, event) => {
+    console.log(value);
 });` );
 
         // Data Tree
@@ -410,20 +284,84 @@ panel.addTree(<span class="str">"Scene Tree"</span>, sceneData, {
     }
 });` );
 
-        // Array
-        MAKE_HEADER( "Array", "h2", "array" );
-        MAKE_PARAGRAPH( `Represents a array of any basic type of elements which can be modified or deleted and new ones can be added.` );
-        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addArray(name, value, values, callback, options)")} to add an Array Widget to your panel:` );
+        // Dropdown
+        MAKE_HEADER( "Dropdown", "h2", "dropdown" );
+        MAKE_PARAGRAPH( `Represents a classic drop-down list. It works as a HTML Select element, but it can also handle media options.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addDropdown(name, values, value, callback, options)")} to add a Dropdown Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
-            ["values (Array)", "Array values"],
-            ["callback (Function)", "Function called when the array is modified"],
+            ["values (Array)", "Array of the values of the list. The values can be strings or media (images or GIFs). For the media, the entries of the array must be an object containing a <code class='inline'>value</code> and <code class='inline'>src</code> fields"],
+            ["value (String)", "Current selected value from the drop-down list"],
+            ["callback (Function)", "Function called when an list value is selected"],
             ["options (Object)", "Basic options for a Widget"],
             [
-                ["innerValues (Array)", "Use dropdown mode and use values as options"],
+                ["filter (Boolean)", "Specify if the drop-down needs a search bar"]
             ]
         ] );
-        MAKE_CODE( `panel.addArray(<span class="str">"Array name"</span>, [<span class="str">"GPTeam"</span>, <span class="str">"Blat Panthers"</span>], (value, event) => {
+        MAKE_CODE( `<span class="com">// String values</span>
+
+panel.addDropdown(<span class="str">"String Dropdown"</span>, [<span class="str">"Option 1"</span>, <span class="str">"Option 2"</span>], <span class="str">"Option 1"</span>, (<span class="hljs-keyword">value</span>, <span class="hljs-keyword">event</span>) =&gt; {
+      console.log(<span class="hljs-keyword">value</span>);
+}, options);
+
+<span class="com">// Media values</span>
+
+<span class="kwd">const</span> options = [
+  { <span class="hljs-keyword">value</span>: <span class="str">"Option 1"</span>, src: <span class="str">"/option1.png"</span> }, 
+  { <span class="hljs-keyword">value</span>: <span class="str">"Option 2"</span>, src: <span class="str">"/option2.gif"</span> },
+  { <span class="hljs-keyword">value</span>: <span class="str">"Option 3"</span>, src: <span class="str">"/option3.jpg"</span> }
+];
+panel.addDropdown(<span class="str">"Media Dropdown"</span>, options, <span class="str">"Option 1"</span>, (<span class="hljs-keyword">value</span>, <span class="hljs-keyword">event</span>) =&gt; {
+      console.log(<span class="hljs-keyword">value</span>);
+}, options);` );
+
+        // File
+        MAKE_HEADER( "File", "h2", "file" );
+        MAKE_PARAGRAPH( `Represents a local file loader.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addFile(name, value, callback)")} to add a File Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["callback (Function)", "Function called when file is loaded"],
+            ["options (Object)", "Basic options for a Widget"],
+            [
+                ["read (Bool)", "Return the file itself (False) or the contents [true]"],
+                ["type (String)", "Type to read as {text, buffer, bin, url} [text]"]
+            ]
+        ] );
+        MAKE_CODE( `panel.addFile(<span class="str">"File name"</span>, (data, file) => {
+    console.log(data, file);
+});` );
+
+        // Form
+        MAKE_HEADER( "Form", "h2", "form" );
+        MAKE_PARAGRAPH( `Represents a form structure with different fields and a submit button.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addForm(name, value, callback, options)")} to add a Form Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["data (Object)", "Form data"],
+            ["callback (Function)", "Function called on submit form"],
+            ["options (Object)", "Basic options for a Widget"],
+            [
+                ["actionName (String)", "Text to be shown in the button"]
+            ]
+        ] );
+        MAKE_CODE( `<span class="kwd">const</span> formData = { username: <span class="str">""</span>, password: { value: <span class="str">""</span>, type: <span class="str">"password"</span> } };
+panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => {
+    console.log(value);
+}, { actionName: <span class="str">"Login"</span> });` );
+
+        // Layers
+        MAKE_HEADER( "Layers", "h2", "layers" );
+        MAKE_PARAGRAPH( `Represents Bit Layers. Enables 
+    you to work with binary data and manipulate individual bits to set bit masks.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addLayers(name, value, callback)")} to add a Layers Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["value (Number)", "Mask value (decimal) that will be decomposed into bits"],
+            ["callback (Function)", "Function called when bit mask changes"],
+            ["options (Object)", "Basic options for a Widget"]
+        ] );
+        MAKE_CODE( `panel.addLayers(<span class="str">"Layer name"</span>, <span class="dec">10</span>, (value, event) => {
     console.log(value);
 });` );
 
@@ -448,37 +386,36 @@ panel.addTree(<span class="str">"Scene Tree"</span>, sceneData, {
     console.log(value);
 });` );
 
-        // Layers
-        MAKE_HEADER( "Layers", "h2", "layers" );
-        MAKE_PARAGRAPH( `Represents Bit Layers. Enables 
-    you to work with binary data and manipulate individual bits to set bit masks.` );
-        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addLayers(name, value, callback)")} to add a Layers Widget to your panel:` );
+        // Number
+        MAKE_HEADER( "Number", "h2", "number" );
+        MAKE_PARAGRAPH( `Represents a decimal number input.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addNumber(name, value, callback, options)")} to add a Number Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
-            ["value (Number)", "Mask value (decimal) that will be decomposed into bits"],
-            ["callback (Function)", "Function called when bit mask changes"],
-            ["options (Object)", "Basic options for a Widget"]
-        ] );
-        MAKE_CODE( `panel.addLayers(<span class="str">"Layer name"</span>, <span class="dec">10</span>, (value, event) => {
-    console.log(value);
-});` );
-
-        // File
-        MAKE_HEADER( "File", "h2", "file" );
-        MAKE_PARAGRAPH( `Represents a local file loader.` );
-        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addFile(name, value, callback)")} to add a File Widget to your panel:` );
-        MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["callback (Function)", "Function called when file is loaded"],
+            ["value (Number)", "Number value"],
+            ["callback (Function)", "Function called when the input changes"],
             ["options (Object)", "Basic options for a Widget"],
             [
-                ["read (Bool)", "Return the file itself (False) or the contents [true]"],
-                ["type (String)", "Type to read as {text, buffer, bin, url} [text]"]
+                ["disabled (Boolean)", "Make the widget disabled"],
+                ["step (Number)", "Change Step value"],
+                ["precision (Number)", "The number of digits to appear after the decimal point"],
+                ["min (Number)", "Min input value"],
+                ["max (Number)", "Max input value"],
+                ["skipSlider (Boolean)", "Skip the slider if there are min and max values"],
+                ["units", "Unit as string added to the end of the value"],
+                ["onPress (Function)", "Callback function on mouse down"],
+                ["onRelease (Function)", "Callback function on mouse up"]
             ]
         ] );
-        MAKE_CODE( `panel.addFile(<span class="str">"File name"</span>, (data, file) => {
-    console.log(data, file);
-});` );
+        MAKE_PARAGRAPH( `<sup>Note: Setting <code class='inline'>min</code>, <code class='inline'>max</code> values will automatically add a slider below the number input.<sup>` );
+        MAKE_CODE( `panel.addNumber(<span class="str">"Font Size"</span>, <span class="dec">36</span>, (value, <span class="hljs-keyword">event</span>) =&gt; {
+    console.<span class="hljs-keyword">log</span>(value);
+}, { <span class="hljs-keyword">min</span>: <span class="dec">1</span>, <span class="hljs-keyword">max</span>: <span class="dec">48</span> });` );
+        MAKE_PARAGRAPH( `You can change the value of this widget manually, using the mouse wheel, and dragging (up/down). In the last two cases, pressing <em>Alt</em> and 
+        <em>Left Shift</em> will apply a factor of <code class='inline'>0.1</code> and <code class='inline'>10</code> in that order.` );
+
+        MAKE_PARAGRAPH( `In case you are using limits, store the widget and call <code class='inline'>numberWidget.setLimits( min, max, step )</code> to change its 
+        parameters once the widget has been created.` );
 
         // Progress
         MAKE_HEADER( "Progress", "h2", "progress" );
@@ -509,36 +446,25 @@ panel.addTree(<span class="str">"Scene Tree"</span>, sceneData, {
   }
 });` );
 
-        // Curve
-        MAKE_HEADER( "Curve", "h2", "curve" );
-        MAKE_PARAGRAPH( `Represents a simple Curve Editor. It's a versatile component designed to simplify the manipulation and visualization
-    of curves or graphs, ideal for any scenario where the smooth interpolation of values over time
-    or other parameters is essential.` );
-        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addCurve(name, values, callback)")} to add a Curve Widget to your panel:` );
+        // Size
+        MAKE_HEADER( "Size", "h2", "size" );
+        MAKE_PARAGRAPH( `Represents a N dimension number size input.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addSize(name, value, callback, options)")} to add a Size Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
-            ["values (Array)", "Values of the curve to be interpolated"],
+            ["value (Number)", "Number value"],
+            ["callback (Function)", "Function called when the input changes"],
             ["options (Object)", "Basic options for a Widget"],
             [
-                ["skipReset (Boolean)", "Don't add the reset value button when value changes"],
-                ["bgColor (Color)", "Widget background color"],
-                ["pointsColor (Color)", "Curve points color"],
-                ["lineColor (Color)", "Curve line color"],
-                ["noOverlap (Boolean)", "Points do not overlap, replacing themselves if necessary"],
-                ["allowAddValues (Boolean)", "Support adding values on click"],
-                ["smooth (Number)", "Curve smoothness"],
-                ["moveOutAction (Number)", "Clamp or delete points moved out of the curve (LX.CURVE_MOVEOUT_CLAMP, LX.CURVE_MOVEOUT_DELETE)"],
+                ["disabled (Boolean)", "Make the widget disabled"],
+                ["units", "Unit as string added to the end of the value"]
             ]
         ] );
-        MAKE_CODE( `<span class="kwd">const</span> opacityValues = [
-    [<span class="dec">0.2</span>, <span class="dec">0.35</span>],
-    [<span class="dec">0.42</span>, <span class="dec">0.9</span>],
-    [<span class="dec">0.55</span>, <span class="dec">0.67</span>],
-    [<span class="dec">1</span>, <span class="dec">1</span>]
-];
-panel.addCurve(<span class="str">"Opacity"</span>, opacityValues, (value, event) => {
-    console.log(value);
-});` );
+        MAKE_PARAGRAPH( `<sup>Note: Since a Size Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.
+            Minimum size is always 0.<sup>` );
+        MAKE_CODE( `panel.addNumber(<span class="str">"Screen Resolution"</span>, [<span class="dec">1280</span>, <span class="dec">720</span>], (value, <span class="hljs-keyword">event</span>) =&gt; {
+    console.<span class="hljs-keyword">log</span>(value);
+}, { units: <span class="str">"p"</span> });` );
 
         // Tabs
         MAKE_HEADER( "Tabs", "h2", "panel-tabs" );
@@ -573,6 +499,99 @@ panel.addCurve(<span class="str">"Opacity"</span>, opacityValues, (value, event)
         }
     }
 ], { vertical: <span class="lit">false</span> });` );
+
+        // Tags
+        MAKE_HEADER( "Tags", "h2", "tags" );
+        MAKE_PARAGRAPH( `Represents a collection of tags that can be added, removed, and modified dynamically.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTags(name, value, callback, options)")} to add a Tags Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["value (String)", "Comma separated tags"],
+            ["callback (Function)", "Function called when a tag is either removed or added"],
+            ["options (Object)", "Basic options for a Widget"]
+        ] );
+        MAKE_CODE( `panel.addTags(<span class="str">"Game Tags"</span>, <span class="str">"2d, ai, engine, ps5, console"</span>, <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(value);
+});` );
+
+        // Text
+        MAKE_HEADER( "Text", "h2", "text" );
+        MAKE_PARAGRAPH( `Represents a text input.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addText(name, value, callback, options)")} to add a Text Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["value (String)", "Text string by default"],
+            ["callback (Function)", "Function called when the input changes"],
+            ["options (Object)", "Basic options for a Widget"],
+            [
+                ["disabled (Boolean)", "Make the widget disabled"],
+                ["placeholder (String)", "Text string as input placeholder"],
+                ["icon (String)", "Icon to be added before the input"],
+                ["trigger (String)", "Choose onchange trigger (default, input)"],
+                ["inputWidth (String/Number)", "Width of the text input"],
+                ["float (String)", "Justify input text content"],
+                ["justifyName (String)", "Justify name content"],
+            ]
+        ] );
+        MAKE_CODE( `panel.addText(<span class="str">"Text Name"</span>, <span class="str">"Text value"</span>, (value, event) =&gt;</span> {
+    console.log(value);
+}, { placeholder: <span class="str">"Something"</span> });` );
+
+        // Text area
+        MAKE_HEADER( "Text Area", "h2", "text-area" );
+        MAKE_PARAGRAPH( `Represents a text area input element.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTextArea(name, value, callback, options)")} to add a Text Area Widget to your panel 
+        (the <code class='inline'>options</code> are the same as the Text widget) plus:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["fitHeight (Boolean)", "Make text height adapt to its bounding rect."]
+        ] );
+        MAKE_CODE( `panel.addTextArea(<span class="str">"Text Name"</span>, <span class="str">"Text value"</span>, (value, event) =&gt;</span> {
+    console.log(value);
+}, { placeholder: <span class="str">"Something"</span> });` );
+
+        // Title
+        MAKE_HEADER( "Title", "h2", "title" );
+        MAKE_PARAGRAPH( `Represents a title section inside a <a href="branching.html">Branch</a>.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTitle(name, value, callback, options)")} to add a Title Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["options (Object)", "Basic options for a Widget"],
+        ] );
+        MAKE_CODE( `panel.addTitle(<span class="str">"A title!"</span>)<span class="hljs-comment">;</span>` );
+
+        // Vector
+        MAKE_HEADER( "Vector", "h2", "vector" );
+        MAKE_PARAGRAPH( `Similar to the Number widget, it represents a decimal vector input. It&#39;s composed by multiple <a href="#number">number</a> widgets.` );
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addVectorN(name, value, callback, options)")}, where N is a number in the range [2, 4], to add a Vector Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["values (Number Array)", "Array containing the values for the vector"],
+            ["callback (Function)", "Function called when any of the N number inputs change"],
+            ["options (Object)", "Basic options for a Widget"],
+            [
+                ["disabled (Boolean)", "Make the widget disabled"],
+                ["step (Number)", "Change Step value"],
+                ["min (Number)", "Min input value"],
+                ["max (Number)", "Max input value"],
+                ["onPress (Function)", "Callback function on mouse down"],
+                ["onRelease (Function)", "Callback function on mouse up"]
+            ]
+        ] );
+        MAKE_PARAGRAPH( `<sup>Note: Since a Vector Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.<sup>` );
+        MAKE_CODE( `panel.addVector2(<span class="str">"2D Position"</span>, [<span class="dec">250</span>, <span class="dec">350</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(value);
+}, { min: <span class="dec">0</span>, max: <span class="dec">1024</span> });
+
+panel.addVector3(<span class="str">"Velocity"</span>, [<span class="dec">0.1</span>, <span class="dec">1</span>, <span class="dec">0.5</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(value);
+});
+
+panel.addVector4(<span class="str">"Shader Color"</span>, [<span class="dec">1</span>, <span class="dec">1</span>, <span class="dec">1</span>, <span class="dec">1</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+    <span class="hljs-built_in">console</span>.log(value);
+});` );
+
+        MAKE_PARAGRAPH( `In case you are using limits, store the widget and call <code class='inline'>vectorWidget.setLimits( min, max, step )</code> to change its 
+        parameters once the widget has been created.` );
 
         // Other widgets
         MAKE_HEADER( "Other Widgets", "h2", "other-widgets" );
