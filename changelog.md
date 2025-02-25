@@ -2,7 +2,8 @@
 
 ## 0.1.41 (dev)
 
-
+More Timeline refactor and fixes.
+Update Fontawesome CSS to v6.7.2.
 
 ## 0.1.40 (master)
 
