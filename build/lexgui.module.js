@@ -7652,6 +7652,7 @@ class AssetView {
 
         this.skipBrowser = options.skipBrowser ?? false;
         this.skipPreview = options.skipPreview ?? false;
+        this.useNativeTitle = options.useNativeTitle ?? false;
         this.onlyFolders = options.onlyFolders ?? true;
         this.previewActions = options.previewActions ?? [];
         this.contextMenu = options.contextMenu ?? [];
@@ -7991,11 +7992,62 @@ class AssetView {
 
             let itemEl = document.createElement('li');
             itemEl.className = "lexassetitem " + item.type.toLowerCase();
-            itemEl.title = type + ": " + item.id;
             itemEl.tabIndex = -1;
             that.content.appendChild( itemEl );
 
-            if(item.selected != undefined) {
+            if( !that.useNativeTitle )
+            {
+                let desc = document.createElement( 'span' );
+                desc.className = 'lexitemdesc';
+                desc.innerHTML = "File: " + item.id + "<br>Type: " + type;
+                that.content.appendChild( desc );
+
+                itemEl.addEventListener("mousemove", e => {
+
+                    if( !isContentLayout )
+                    {
+                        return;
+                    }
+
+                    const rect = itemEl.getBoundingClientRect();
+                    const targetRect = e.target.getBoundingClientRect();
+                    const parentRect = desc.parentElement.getBoundingClientRect();
+
+                    let localOffsetX = targetRect.x - parentRect.x - ( targetRect.x - rect.x );
+                    let localOffsetY = targetRect.y - parentRect.y - ( targetRect.y - rect.y );
+
+                    if( e.target.classList.contains( "lexassettitle" ) )
+                    {
+                        localOffsetY += ( targetRect.y - rect.y );
+                    }
+
+                    desc.style.left = (localOffsetX + e.offsetX + 12) + "px";
+                    desc.style.top = (localOffsetY + e.offsetY) + "px";
+                });
+
+                itemEl.addEventListener("mouseenter", () => {
+                    if( isContentLayout )
+                    {
+                        desc.style.display = "unset";
+                    }
+                });
+
+                itemEl.addEventListener("mouseleave", () => {
+                    if( isContentLayout )
+                    {
+                        setTimeout( () => {
+                            desc.style.display = "none";
+                        }, 100 );
+                    }
+                });
+            }
+            else
+            {
+                itemEl.title = type + ": " + item.id;
+            }
+
+            if( item.selected != undefined )
+            {
                 let span = document.createElement('span');
                 span.className = "lexcheckbox"; 
                 let checkbox_input = document.createElement('input');
@@ -8017,6 +8069,7 @@ class AssetView {
                 itemEl.appendChild(span);
                 
             }
+
             let title = document.createElement('span');
             title.className = "lexassettitle";
             title.innerText = item.id;

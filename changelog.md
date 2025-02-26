@@ -2,6 +2,9 @@
 
 ## 0.1.42 (dev)
 
+AssetView:
+- Support custom element title on hover for Content layout mode `options.useNativeTitle`
+
 ## 0.1.41 (master)
 
 AssetView:
