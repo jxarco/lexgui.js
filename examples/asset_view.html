@@ -43,9 +43,9 @@
         };
 
         let assetView = new LX.AssetView({ 
-            // skip_browser: true,
-            // skip_preview: true,
-            // root_path: "../"
+            // skipBrowser: true,
+            // skipPreview: true,
+            // rootPath: "../"
         });
         bottomArea.attach( assetView );
 
@@ -53,17 +53,19 @@
             {
                 id: "dog.png",
                 type: "image",
-                src: "https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png"
+                path: "https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png"
             },
             {
                 id: "sigml_test.sigml",
                 type: "sigml",
-                src: "../data/sigml_test.sigml"
+                src: "../data/sigml_test.sigml",
+                lastModified: 1740588312813
             },
             {
                 id: "test.json",
                 type: "JSON",
-                src: "../data/test.json"
+                src: "../data/test.json",
+                lastModified: 1740581312813
             },
             {
                 id: "godot",
@@ -136,7 +138,8 @@
             {
                 id: "brow_lowerer.png",
                 type: "clip",
-                src: "../data/brow_lowerer.png"
+                src: "../data/brow_lowerer.png",
+                lastModified: 1740181312813
             }
         ];
 

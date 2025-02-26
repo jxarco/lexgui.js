@@ -2,6 +2,10 @@
 
 ## 0.1.41 (dev)
 
+AssetView:
+- Renamed all option parameters (remove snake_case).
+- Support showing `lastModified` file data.
+
 Knob Widget:
 - Support disabled option.
 - Add `options.snap` = # subdivisions for value snapping.

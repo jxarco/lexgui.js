@@ -2822,7 +2822,7 @@ class NodeTree {
         let isParent = node.children.length > 0;
         let isSelected = this.selected.indexOf( node ) > -1 || node.selected;
         
-        if( this.options.only_folders )
+        if( this.options.onlyFolders )
         {
             let has_folders = false;
             node.children.forEach( c => has_folders |= (c.type == 'folder') );
@@ -3201,7 +3201,7 @@ class NodeTree {
         {
             let child = node.children[i];
 
-            if( this.options.only_folders && child.type != 'folder')
+            if( this.options.onlyFolders && child.type != 'folder')
                 continue;
 
             this._create_item( node, child, level + 1 );
@@ -7621,12 +7621,12 @@ class AssetView {
         this.layout = options.layout ?? AssetView.LAYOUT_CONTENT;
         this.contentPage = 1;
 
-        if(options.root_path)
+        if( options.rootPath )
         {
-            if(options.root_path.constructor !== String)
+            if(options.rootPath.constructor !== String)
                 console.warn("Asset Root Path must be a String (now is " + path.constructor.name + ")");
             else
-                this.rootPath = options.root_path;
+                this.rootPath = options.rootPath;
         }
 
         let div = document.createElement('div');
@@ -7638,13 +7638,13 @@ class AssetView {
 
         let left, right, contentArea = area;
 
-        this.skip_browser = options.skip_browser ?? false;
-        this.skip_preview = options.skip_preview ?? false;
-        this.only_folders = options.only_folders ?? true;
-        this.preview_actions = options.preview_actions ?? [];
-        this.context_menu = options.context_menu ?? [];
+        this.skipBrowser = options.skipBrowser ?? false;
+        this.skipPreview = options.skipPreview ?? false;
+        this.onlyFolders = options.onlyFolders ?? true;
+        this.previewActions = options.previewActions ?? [];
+        this.contextMenu = options.contextMenu ?? [];
 
-        if( !this.skip_browser )
+        if( !this.skipBrowser )
         {
             [left, right] = area.split({ type: "horizontal", sizes: ["15%", "85%"]});
             contentArea = right;
@@ -7653,28 +7653,34 @@ class AssetView {
             right.setLimitBox( 512, 0 );
         }
 
-        if( !this.skip_preview )
-            [contentArea, right] = contentArea.split({ type: "horizontal", sizes: ["80%", "20%"]});
+        if( !this.skipPreview )
+        {
+            [ contentArea, right ] = contentArea.split({ type: "horizontal", sizes: ["80%", "20%"]});
+        }
         
-        this.allowedTypes = options.allowed_types || ["None", "Image", "Mesh", "Script", "JSON", "Clip"];
+        this.allowedTypes = options.allowedTypes || ["None", "Image", "Mesh", "Script", "JSON", "Clip"];
 
         this.prevData = [];
         this.nextData = [];
         this.data = [];
 
-        this._processData(this.data, null);
+        this._processData( this.data, null );
 
         this.currentData = this.data;
         this.path = ['@'];
 
-        if(!this.skip_browser)
-            this._createTreePanel(left);
+        if( !this.skipBrowser )
+        {
+            this._createTreePanel( left );
+        }
 
-        this._createContentPanel(contentArea);
+        this._createContentPanel( contentArea );
         
         // Create resource preview panel
-        if( !this.skip_preview )
-            this.previewPanel = right.addPanel({className: 'lexassetcontentpanel', style: { overflow: 'scroll' }});
+        if( !this.skipPreview )
+        {
+            this.previewPanel = right.addPanel( {className: 'lexassetcontentpanel', style: { overflow: 'scroll' }} );
+        }
     }
 
     /**
@@ -7688,12 +7694,15 @@ class AssetView {
         
         this.data = data;
 
-        this._processData(this.data, null);
+        this._processData( this.data, null );
         this.currentData = this.data;
-        this.path = ['@'];
+        this.path = [ '@' ];
 
-        if(!this.skip_browser)
-            this._createTreePanel(this.area);
+        if( !this.skipBrowser )
+        {
+            this._createTreePanel( this.area );
+        }
+
         this._refreshContent();
 
         this.onevent = onevent;
@@ -7703,12 +7712,18 @@ class AssetView {
     * @method clear
     */
     clear() {
-        if(this.previewPanel)
+        if( this.previewPanel )
+        {
             this.previewPanel.clear();
-        if(this.leftPanel)
+        }
+        if( this.leftPanel )
+        {
             this.leftPanel.clear();
-        if(this.rightPanel)
+        }
+        if( this.rightPanel )
+        {
             this.rightPanel.clear()
+        }
     }
 
     /**
@@ -7719,14 +7734,16 @@ class AssetView {
 
         if( data.constructor !== Array )
         {
-            data['folder'] = parent;
+            data[ 'folder' ] = parent;
             data.children = data.children ?? [];
         }
 
         let list = data.constructor === Array ? data : data.children;
 
         for( var i = 0; i < list.length; ++i )
-            this._processData( list[i], data );
+        {
+            this._processData( list[ i ], data );
+        }
     }
 
     /**
@@ -7738,9 +7755,9 @@ class AssetView {
         this.path.length = 0;
 
         const push_parents_id = i => {
-            if(!i) return;
+            if( !i ) return;
             let list = i.children ? i.children : i;
-            let c = list[0];
+            let c = list[ 0 ];
             if( !c ) return;
             if( !c.folder ) return;
             this.path.push( c.folder.id ?? '@' );
@@ -7749,19 +7766,22 @@ class AssetView {
 
         push_parents_id( data );
 
-        LX.emit("@on_folder_change", this.path.reverse().join('/'));
+        LX.emit( "@on_folder_change", this.path.reverse().join('/') );
     }
 
     /**
     * @method _createTreePanel
     */
 
-    _createTreePanel(area) {
+    _createTreePanel( area ) {
 
-        if(this.leftPanel)
+        if( this.leftPanel )
+        {
             this.leftPanel.clear();
-        else {
-            this.leftPanel = area.addPanel({className: 'lexassetbrowserpanel'});
+        }
+        else
+        {
+            this.leftPanel = area.addPanel({ className: 'lexassetbrowserpanel' });
         }
 
         // Process data to show in tree
@@ -7773,18 +7793,21 @@ class AssetView {
         this.tree = this.leftPanel.addTree("Content Browser", tree_data, { 
             // icons: tree_icons, 
             filter: false,
-            only_folders: this.only_folders,
-            onevent: (event) => { 
+            onlyFolders: this.onlyFolders,
+            onevent: event => {
 
                 let node = event.node;
                 let value = event.value;
 
-                switch(event.type) {
+                switch( event.type )
+                {
                     case LX.TreeEvent.NODE_SELECTED: 
-                        if(!event.multiple) {
+                        if( !event.multiple )
+                        {
                             this._enterFolder( node );
                         }
-                        if(!node.parent) {
+                        if( !node.parent )
+                        {
                             this.prevData.push( this.currentData );
                             this.currentData = this.data;
                             this._refreshContent();
@@ -7806,9 +7829,9 @@ class AssetView {
     * @method _setContentLayout
     */
 
-    _setContentLayout( layout_mode ) {
+    _setContentLayout( layoutMode ) {
 
-        this.layout = layout_mode;
+        this.layout = layoutMode;
 
         this._refreshContent();
     }
@@ -7817,12 +7840,15 @@ class AssetView {
     * @method _createContentPanel
     */
 
-    _createContentPanel(area) {
+    _createContentPanel( area ) {
 
-        if(this.rightPanel)
+        if( this.rightPanel )
+        {
             this.rightPanel.clear();
-        else {
-            this.rightPanel = area.addPanel({className: 'lexassetcontentpanel'});
+        }
+        else
+        {
+            this.rightPanel = area.addPanel({ className: 'lexassetcontentpanel' });
         }
 
         const on_sort = (value, event) => {
@@ -7850,20 +7876,24 @@ class AssetView {
         }
 
         const on_change_page = (value, event) => {
-            if(!this.allow_next_page)
+            if( !this.allowNextPage )
+            {
                 return;
-            const last_page = this.contentPage;
+            }
+            const lastPage = this.contentPage;
             this.contentPage += value;
             this.contentPage = Math.min( this.contentPage, (((this.currentData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1 );
             this.contentPage = Math.max( this.contentPage, 1 );
 
-            if( last_page != this.contentPage )
+            if( lastPage != this.contentPage )
+            {
                 this._refreshContent();
+            }
         }
 
         this.rightPanel.sameLine();
         this.rightPanel.addDropdown("Filter", this.allowedTypes, this.allowedTypes[0], (v) => this._refreshContent.call(this, null, v), { width: "20%", minWidth: "128px" });
-        this.rightPanel.addText(null, this.search_value ?? "", (v) => this._refreshContent.call(this, v, null), { placeholder: "Search assets.." });
+        this.rightPanel.addText(null, this.searchValue ?? "", (v) => this._refreshContent.call(this, v, null), { placeholder: "Search assets.." });
         this.rightPanel.addButton(null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { className: "micro", title: "Sort" });
         this.rightPanel.addButton(null, "<a class='fa-solid fa-grip'></a>", on_change_view.bind(this), { className: "micro", title: "View" });
         // Content Pages
@@ -7871,7 +7901,7 @@ class AssetView {
         this.rightPanel.addButton(null, "<a class='fa-solid fa-angles-right'></a>", on_change_page.bind(this, 1), { className: "micro", title: "Next Page" });
         this.rightPanel.endLine();
 
-        if( !this.skip_browser )
+        if( !this.skipBrowser )
         {
             this.rightPanel.sameLine();
             this.rightPanel.addComboButtons( null, [
@@ -7931,27 +7961,27 @@ class AssetView {
         this._refreshContent();
     }
 
-    _refreshContent(search_value, filter) {
+    _refreshContent( searchValue, filter ) {
 
-        const is_content_layout = (this.layout == AssetView.LAYOUT_CONTENT); // default
+        const isContentLayout = (this.layout == AssetView.LAYOUT_CONTENT); // default
 
         this.filter = filter ?? (this.filter ?? "None");
-        this.search_value = search_value ?? (this.search_value ?? "");
+        this.searchValue = searchValue ?? (this.searchValue ?? "");
         this.content.innerHTML = "";
-        this.content.className = (is_content_layout ? "lexassetscontent" : "lexassetscontent list");
+        this.content.className = (isContentLayout ? "lexassetscontent" : "lexassetscontent list");
         let that = this;
         
         const add_item = function(item) {
 
-            const type = item.type.charAt(0).toUpperCase() + item.type.slice(1);
+            const type = item.type.charAt( 0 ).toUpperCase() + item.type.slice( 1 );
             const extension = getExtension( item.id );
-            const is_folder = type === "Folder";
+            const isFolder = type === "Folder";
 
             let itemEl = document.createElement('li');
             itemEl.className = "lexassetitem " + item.type.toLowerCase();
             itemEl.title = type + ": " + item.id;
             itemEl.tabIndex = -1;
-            that.content.appendChild(itemEl);
+            that.content.appendChild( itemEl );
 
             if(item.selected != undefined) {
                 let span = document.createElement('span');
@@ -7960,9 +7990,10 @@ class AssetView {
                 checkbox_input.type = "checkbox";
                 checkbox_input.className = "checkbox";
                 checkbox_input.checked = item.selected;
-                checkbox_input.addEventListener('change', (e, v) => {
+                checkbox_input.addEventListener('change', ( e, v ) => {
                     item.selected = !item.selected;
-                    if(that.onevent) {
+                    if( that.onevent )
+                    {
                         const event = new AssetViewEvent(AssetViewEvent.ASSET_CHECKED, e.shiftKey ? [item] : item );
                         event.multiple = !!e.shiftKey;
                         that.onevent( event );
@@ -7977,19 +8008,19 @@ class AssetView {
             let title = document.createElement('span');
             title.className = "lexassettitle";
             title.innerText = item.id;
-            itemEl.appendChild(title);
+            itemEl.appendChild( title );
 
-            if( !that.skip_preview ) {
+            if( !that.skipPreview ) {
 
                 let preview = null;
-                const has_image = item.src && (['png', 'jpg'].indexOf( getExtension( item.src ) ) > -1 || item.src.includes("data:image/") ); // Support b64 image as src
+                const hasImage = item.src && (['png', 'jpg'].indexOf( getExtension( item.src ) ) > -1 || item.src.includes("data:image/") ); // Support b64 image as src
 
-                if( has_image || is_folder || !is_content_layout)
+                if( hasImage || isFolder || !isContentLayout)
                 {
                     preview = document.createElement('img');
-                    let real_src = item.unknown_extension ? that.rootPath + "images/file.png" : (is_folder ? that.rootPath + "images/folder.png" : item.src);
-                    preview.src = (is_content_layout || is_folder ? real_src : that.rootPath + "images/file.png");
-                    itemEl.appendChild(preview);
+                    let real_src = item.unknown_extension ? that.rootPath + "images/file.png" : (isFolder ? that.rootPath + "images/folder.png" : item.src);
+                    preview.src = (isContentLayout || isFolder ? real_src : that.rootPath + "images/file.png");
+                    itemEl.appendChild( preview );
                 }
                 else
                 {
@@ -8015,7 +8046,7 @@ class AssetView {
                 }
             }
 
-            if( !is_folder )
+            if( !isFolder )
             {
                 let info = document.createElement('span');
                 info.className = "lexassetinfo";
@@ -8027,30 +8058,37 @@ class AssetView {
                 e.stopImmediatePropagation();
                 e.stopPropagation();
 
-                const is_double_click = e.detail == LX.MOUSE_DOUBLE_CLICK;
+                const isDoubleClick = ( e.detail == LX.MOUSE_DOUBLE_CLICK );
 
-                if(!is_double_click)
+                if( !isDoubleClick )
                 {
-                    if(!e.shiftKey)
+                    if( !e.shiftKey )
+                    {
                         that.content.querySelectorAll('.lexassetitem').forEach( i => i.classList.remove('selected') );
+                    }
+
                     this.classList.add('selected');
-                    if( !that.skip_preview )
+
+                    if( !that.skipPreview )
+                    {
                         that._previewAsset( item );
+                    }
                 } 
-                else if(is_folder) 
+                else if( isFolder )
                 {
                     that._enterFolder( item );
                     return;
                 }
 
-                if(that.onevent) {
-                    const event = new AssetViewEvent(is_double_click ? AssetViewEvent.ASSET_DBLCLICKED : AssetViewEvent.ASSET_SELECTED, e.shiftKey ? [item] : item );
+                if( that.onevent )
+                {
+                    const event = new AssetViewEvent(isDoubleClick ? AssetViewEvent.ASSET_DBLCLICKED : AssetViewEvent.ASSET_SELECTED, e.shiftKey ? [item] : item );
                     event.multiple = !!e.shiftKey;
                     that.onevent( event );
                 }
             });
 
-            if( that.context_menu )
+            if( that.contextMenu )
             {
                 itemEl.addEventListener('contextmenu', function(e) {
                     e.preventDefault();
@@ -8058,10 +8096,10 @@ class AssetView {
                     const multiple = that.content.querySelectorAll('.selected').length;
 
                     LX.addContextMenu( multiple > 1 ? (multiple + " selected") : 
-                                is_folder ? item.id : item.type, e, m => {
+                                isFolder ? item.id : item.type, e, m => {
                         if(multiple <= 1)   
                             m.add("Rename");
-                        if( !is_folder )
+                        if( !isFolder )
                             m.add("Clone", that._clone_item.bind(that, item));
                         if(multiple <= 1)
                             m.add("Properties");
@@ -8080,21 +8118,23 @@ class AssetView {
 
         const fr = new FileReader();
 
-        const filtered_data = this.currentData.filter( _i => {
+        const filteredData = this.currentData.filter( _i => {
             return (this.filter != "None" ? _i.type.toLowerCase() == this.filter.toLowerCase() : true) &&
-                _i.id.toLowerCase().includes(this.search_value.toLowerCase())
+                _i.id.toLowerCase().includes(this.searchValue.toLowerCase())
         } );
 
-        if(filter || search_value) {
+        if( filter || searchValue )
+        {
             this.contentPage = 1;
         }
-        // Show all data if using filters
-        const start_index = (this.contentPage - 1) * AssetView.MAX_PAGE_ELEMENTS;
-        const end_index = Math.min( start_index + AssetView.MAX_PAGE_ELEMENTS, filtered_data.length );
 
-        for( let i = start_index; i < end_index; ++i )
+        // Show all data if using filters
+        const startIndex = (this.contentPage - 1) * AssetView.MAX_PAGE_ELEMENTS;
+        const endIndex = Math.min( startIndex + AssetView.MAX_PAGE_ELEMENTS, filteredData.length );
+
+        for( let i = startIndex; i < endIndex; ++i )
         {
-            let item = filtered_data[i];
+            let item = filteredData[ i ];
 
             if( item.path )
             {
@@ -8105,7 +8145,7 @@ class AssetView {
                         item.src = e.currentTarget.result;  // This is a base64 string...
                         item._path = item.path;
                         delete item.path;
-                        this._refreshContent(search_value, filter);
+                        this._refreshContent( searchValue, filter );
                     };
                 } });
             }else
@@ -8113,15 +8153,15 @@ class AssetView {
                 item.domEl = add_item( item );
             }
         }
-        this.allow_next_page = filtered_data.length - 1 > AssetView.MAX_PAGE_ELEMENTS;
-        LX.emit("@on_page_change", "Page " + this.contentPage + " / " + ((((filtered_data.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1));
+        this.allowNextPage = filteredData.length - 1 > AssetView.MAX_PAGE_ELEMENTS;
+        LX.emit("@on_page_change", "Page " + this.contentPage + " / " + ((((filteredData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1));
     }
 
     /**
     * @method _previewAsset
     */
 
-    _previewAsset(file) {
+    _previewAsset( file ) {
 
         const is_base_64 = file.src && file.src.includes("data:image/");
 
@@ -8130,34 +8170,37 @@ class AssetView {
 
         if( file.type == 'image' || file.src )
         {
-            const has_image = ['png', 'jpg'].indexOf( getExtension( file.src ) ) > -1 || is_base_64;
-            if( has_image )
-                this.previewPanel.addImage(file.src, { style: { width: "100%" } });
+            const hasImage = ['png', 'jpg'].indexOf( getExtension( file.src ) ) > -1 || is_base_64;
+            if( hasImage )
+            {
+                this.previewPanel.addImage( file.src, { style: { width: "100%" } } );
+            }
         }
 
         const options = { disabled: true };
 
         this.previewPanel.addText("Filename", file.id, null, options);
-        if(file._path || file.src ) this.previewPanel.addText("URL", file._path ? file._path : file.src, null, options);
+        if( file.lastModified ) this.previewPanel.addText("Last Modified", new Date( file.lastModified ).toLocaleString(), null, options);
+        if( file._path || file.src ) this.previewPanel.addText("URL", file._path ? file._path : file.src, null, options);
         this.previewPanel.addText("Path", this.path.join('/'), null, options);
         this.previewPanel.addText("Type", file.type, null, options);
-        if(file.bytesize) this.previewPanel.addText("Size", (file.bytesize/1024).toPrecision(3) + " KBs", null, options);
-        if(file.type == "folder") this.previewPanel.addText("Files", file.children ? file.children.length.toString() : "0", null, options);
+        if( file.bytesize ) this.previewPanel.addText("Size", (file.bytesize/1024).toPrecision(3) + " KBs", null, options);
+        if( file.type == "folder" ) this.previewPanel.addText("Files", file.children ? file.children.length.toString() : "0", null, options);
 
         this.previewPanel.addSeparator();
         
-        const preview_actions = [...this.preview_actions];
+        const previewActions = [...this.previewActions];
 
-        if( !preview_actions.length )
+        if( !previewActions.length )
         {
             // By default
-            preview_actions.push({
+            previewActions.push({
                 name: 'Download', 
                 callback: () => LX.downloadURL(file.src, file.id)
             });
         }
 
-        for( let action of preview_actions )
+        for( let action of previewActions )
         {
             if( action.type && action.type !== file.type || action.path && action.path !== this.path.join('/') )
                 continue;
@@ -8167,7 +8210,7 @@ class AssetView {
         this.previewPanel.merge();
     }
 
-    _processDrop(e) {
+    _processDrop( e ) {
 
         const fr = new FileReader();
         const num_files = e.dataTransfer.files.length;
@@ -8187,7 +8230,8 @@ class AssetView {
                 let item = {
                     "id": file.name,
                     "src": e.currentTarget.result,
-                    "extension": ext
+                    "extension": ext,
+                    "lastModified": file.lastModified
                 };
 
                 switch(ext)
@@ -8212,7 +8256,7 @@ class AssetView {
                 
                 if(i == (num_files - 1)) {
                     this._refreshContent();
-                    if( !this.skip_browser )
+                    if( !this.skipBrowser )
                         this.tree.refresh();
                 }
             };
@@ -8232,10 +8276,10 @@ class AssetView {
         this._refreshContent();
     }
 
-    _enterFolder( folder_item ) {
+    _enterFolder( folderItem ) {
 
         this.prevData.push( this.currentData );
-        this.currentData = folder_item.children;
+        this.currentData = folderItem.children;
         this.contentPage = 1;
         this._refreshContent();
 
@@ -8243,27 +8287,33 @@ class AssetView {
         this._updatePath(this.currentData);
 
         // Trigger event
-        if(this.onevent) {
-            const event = new AssetViewEvent(AssetViewEvent.ENTER_FOLDER, folder_item);
+        if( this.onevent )
+        {
+            const event = new AssetViewEvent( AssetViewEvent.ENTER_FOLDER, folderItem );
             this.onevent( event );
         }
     }
 
     _deleteItem( item ) {
 
-        const idx = this.currentData.indexOf(item);
-        if(idx > -1) {
-            this.currentData.splice(idx, 1);
-            this._refreshContent(this.search_value, this.filter);
-
-            if(this.onevent) {
-                const event = new AssetViewEvent(AssetViewEvent.ASSET_DELETED, item );
-                this.onevent( event );
-            }
-
-            this.tree.refresh();
-            this._processData(this.data);
+        const idx = this.currentData.indexOf( item );
+        if(idx < 0)
+        {
+            console.error( "[AssetView Error] Cannot delete. Item not found." );
+            return;
         }
+
+        this.currentData.splice( idx, 1 );
+        this._refreshContent( this.searchValue, this.filter );
+
+        if(this.onevent)
+        {
+            const event = new AssetViewEvent( AssetViewEvent.ASSET_DELETED, item );
+            this.onevent( event );
+        }
+
+        this.tree.refresh();
+        this._processData( this.data );
     }
 
     _cloneItem( item ) {
@@ -8274,7 +8324,7 @@ class AssetView {
             delete item.folder;
             const new_item = deepCopy( item );
             this.currentData.splice(idx, 0, new_item);
-            this._refreshContent(this.search_value, this.filter);
+            this._refreshContent(this.searchValue, this.filter);
 
             if(this.onevent) {
                 const event = new AssetViewEvent(AssetViewEvent.ASSET_CLONED, item );
