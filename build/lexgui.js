@@ -2473,6 +2473,18 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             desc.innerHTML = key;
             entry.appendChild( desc );
 
+            button.addEventListener("mouseenter", () => {
+                setTimeout( () => {
+                    desc.style.display = "unset";
+                }, 100 );
+            });
+
+            button.addEventListener("mouseleave", () => {
+                setTimeout( () => {
+                    desc.style.display = "none";
+                }, 100 );
+            });
+
             entry.addEventListener("click", () => {
 
                 const f = options.callback;
