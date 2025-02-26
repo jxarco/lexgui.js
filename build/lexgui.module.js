@@ -8097,14 +8097,20 @@ class AssetView {
 
                     LX.addContextMenu( multiple > 1 ? (multiple + " selected") : 
                                 isFolder ? item.id : item.type, e, m => {
-                        if(multiple <= 1)   
+                        if( multiple <= 1 )
+                        {
                             m.add("Rename");
+                        }
                         if( !isFolder )
-                            m.add("Clone", that._clone_item.bind(that, item));
-                        if(multiple <= 1)
+                        {
+                            m.add("Clone", that._cloneItem.bind( that, item ));
+                        }
+                        if( multiple <= 1 )
+                        {
                             m.add("Properties");
+                        }
                         m.add("");
-                        m.add("Delete", that._delete_item.bind(that, item));
+                        m.add("Delete", that._deleteItem.bind( that, item ));
                     });
                 });
             }
