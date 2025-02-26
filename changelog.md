@@ -1,6 +1,8 @@
 # lexgui.js changelog
 
-## 0.1.41 (dev)
+## 0.1.42 (dev)
+
+## 0.1.41 (master)
 
 AssetView:
 - Renamed all option parameters (remove snake_case).
@@ -14,7 +16,7 @@ More Timeline refactor and fixes.
 Removed `LX.UTILS.clamp`. Still can be used in `LX.clamp`.
 Update Fontawesome CSS to v6.7.2.
 
-## 0.1.40 (master)
+## 0.1.40
 
 New widget: Form. Series of Text + Submit Button using form data (Object).
 Fix non-unique "input-filter" id.
