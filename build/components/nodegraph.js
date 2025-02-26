@@ -1728,7 +1728,7 @@ class GraphEditor {
         if( delta > 0.0 ) this.currentGraph.scale *= 0.9;
         else this.currentGraph.scale *= ( 1.0 / 0.9 );
 
-        this.currentGraph.scale = LX.UTILS.clamp( this.currentGraph.scale, GraphEditor.MIN_SCALE, GraphEditor.MAX_SCALE );
+        this.currentGraph.scale = LX.clamp( this.currentGraph.scale, GraphEditor.MIN_SCALE, GraphEditor.MAX_SCALE );
 
         // Compute zoom center in pattern space using new scale
         // and get delta..
@@ -2218,7 +2218,7 @@ class GraphEditor {
         startPos = this._getPatternPosition( startPos );
         endPos = this._getPatternPosition( endPos );
 
-        const distanceX = LX.UTILS.clamp( Math.abs( startPos.x - endPos.x ), 0.0, 256.0 );
+        const distanceX = LX.clamp( Math.abs( startPos.x - endPos.x ), 0.0, 256.0 );
         const cPDistance = 128.0 * Math.pow( distanceX / 256.0, 0.5 );
 
         let cPoint1 = startPos.add( new LX.vec2( cPDistance, 0 ) );

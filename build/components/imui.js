@@ -195,7 +195,7 @@ class ImUI {
 
         if(active)
         {
-            value = LX.UTILS.clamp((this.mousePosition.x - min) / (max - min), 0.0, 1.0);
+            value = LX.clamp((this.mousePosition.x - min) / (max - min), 0.0, 1.0);
             this.widgets[ text ].value = value;
         }
         

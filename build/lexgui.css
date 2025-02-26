@@ -2562,6 +2562,45 @@ meter::-webkit-meter-even-less-good-value {
   border-radius: 50%;
   position: relative;
   box-shadow: 0px 3px 9px 2px #121212a9;
+  --knob-snap-mark: 45deg;
+}
+
+/* Arc Indicator */
+.lexknob .knobcircle::before {
+  content: "";
+  position: absolute;
+  width: 125%;
+  height: 125%;
+  top: -15.5%;
+  left: -15.5%;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-bottom-color: transparent;
+}
+
+/* Tick Marks */
+.lexknob.show-ticks .knobcircle::after {
+  content: "";
+  position: absolute;
+  width: 130%;
+  height: 130%;
+  top: -15.5%;
+  left: -15.5%;
+  border-radius: 50%;
+  pointer-events: none;
+  mask-image: radial-gradient(circle, transparent 60%, black 60%), conic-gradient(
+    transparent -135deg,
+    black -135deg 275deg,
+    transparent 275deg
+  );
+  -webkit-mask-composite: intersect;
+  mask-composite: intersect;
+  background: repeating-conic-gradient(
+    transparent 0deg,
+    rgba(255, 255, 255, 0.4) 1deg 3deg,
+    transparent 4deg calc( var(--knob-snap-mark) - 1deg )
+  );
+  transform: rotate(-135deg);
 }
 
 .lexknob.sm .knobcircle {
@@ -2604,6 +2643,10 @@ meter::-webkit-meter-even-less-good-value {
   border-radius: 50%;
   margin: 0 auto;
   margin-top: 6px;
+}
+
+.lexknob.disabled .knobmarker {
+  background-color: var(--global-text-terciary);
 }
 
 .lexknob.sm .knobmarker {

@@ -2,7 +2,12 @@
 
 ## 0.1.41 (dev)
 
+Knob Widget:
+- Support disabled option.
+- Add `options.snap` = # subdivisions for value snapping.
+
 More Timeline refactor and fixes.
+Removed `LX.UTILS.clamp`. Still can be used in `LX.clamp`.
 Update Fontawesome CSS to v6.7.2.
 
 ## 0.1.40 (master)

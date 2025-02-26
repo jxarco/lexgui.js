@@ -44,12 +44,29 @@ Panel.prototype.addKnob = function( name, value, min, max, callback, options = {
         });
     }
 
+    const snapEnabled = ( options.snap && options.snap.constructor == Number );
+    const ticks = [];
+    if( snapEnabled )
+    {
+        const range = (max - min) / options.snap;
+        for( let i = 0; i < ( options.snap + 1 ); ++i )
+        {
+            ticks.push( min + (i  * range) );
+        }
+    }
+
     var container = document.createElement( 'div' );
-    container.className = "lexknob " + ( options.size ?? '' );
+    container.className = "lexknob";
+    container.addClass( options.size );
+    container.addClass( snapEnabled ? "show-ticks" : null );
     container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
     let knobCircle = document.createElement( 'div' );
     knobCircle.className = "knobcircle";
+    if( snapEnabled )
+    {
+        knobCircle.style.setProperty( "--knob-snap-mark", ( 270 / options.snap ) + "deg" );
+    }
 
     let innerKnobCircle = document.createElement( 'div' );
     innerKnobCircle.className = "innerknobcircle";
@@ -69,6 +86,7 @@ Panel.prototype.addKnob = function( name, value, min, max, callback, options = {
 
     innerKnobCircle.value = innerKnobCircle.iValue = value;
 
+    let mustSnap = false;
     let innerSetValue = function( v ) {
         // Convert val between (-135 and 135)
         const angle = LX.remapRange( v, innerKnobCircle.min, innerKnobCircle.max, -135.0, 135.0 );
@@ -81,28 +99,19 @@ Panel.prototype.addKnob = function( name, value, min, max, callback, options = {
 
     if( options.disabled )
     {
-        // vecinput.disabled = true;
+        container.addClass( "disabled" );
     }
-
-    // Add wheel input
-
-    innerKnobCircle.addEventListener( "wheel", function( e ) {
-        e.preventDefault();
-        if( this !== document.activeElement )
-            return;
-        let mult = options.step ?? 1;
-        if( e.shiftKey ) mult *= 10;
-        else if( e.altKey ) mult *= 0.1;
-        let new_value = ( this.value - mult * ( e.deltaY > 0 ? 1 : -1 ) );
-        this.value = new_value;// .toFixed( 4 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' );
-        Panel._dispatch_event( innerKnobCircle, "change" );
-    }, { passive: false });
 
     innerKnobCircle.addEventListener( "change", e => {
 
         const knob = e.target;
 
         const skipCallback = e.detail;
+
+        if( mustSnap )
+        {
+            knob.value = ticks.reduce(( prev, curr ) => Math.abs( curr - knob.value ) < Math.abs( prev - knob.value ) ? curr : prev );
+        }
 
         let val = knob.value = LX.clamp( knob.value, knob.min, knob.max );
         val = options.precision ? LX.round( val, options.precision ) : val;
@@ -114,9 +123,14 @@ Panel.prototype.addKnob = function( name, value, min, max, callback, options = {
         {
             let btn = element.querySelector( ".lexwidgetname .lexicon" );
             if( btn ) btn.style.display = val != innerKnobCircle.iValue ? "block": "none";
+
+            if( !( snapEnabled && !mustSnap ) )
+            {
+                this._trigger( new LX.IEvent( name, val, e ), callback );
+                mustSnap = false;
+            }
         }
 
-        if( !skipCallback ) this._trigger( new LX.IEvent( name, val, e ), callback );
     }, { passive: false });
     
     // Add drag input
@@ -124,41 +138,64 @@ Panel.prototype.addKnob = function( name, value, min, max, callback, options = {
     innerKnobCircle.addEventListener( "mousedown", inner_mousedown );
 
     var that = this;
-    var lastY = 0;
+
     function inner_mousedown( e ) {
-        if( document.activeElement == innerKnobCircle ) return;
+
+        if( document.activeElement == innerKnobCircle || options.disabled )
+        {
+            return;
+        }
+
         var doc = that.root.ownerDocument;
         doc.addEventListener("mousemove",inner_mousemove);
         doc.addEventListener("mouseup",inner_mouseup);
-        lastY = e.pageY;
-        document.body.classList.add('nocursor');
         document.body.classList.add('noevents');
+
+        if( !document.pointerLockElement )
+        {
+            container.requestPointerLock();
+        }
+
         e.stopImmediatePropagation();
         e.stopPropagation();
     }
 
     function inner_mousemove( e ) {
-        if (lastY != e.pageY) {
-            let dt = lastY - e.pageY;
+
+        let dt = -e.movementY;
+
+        if ( dt != 0 )
+        {
             let mult = options.step ?? 1;
             if(e.shiftKey) mult *= 10;
             else if(e.altKey) mult *= 0.1;
             let new_value = (innerKnobCircle.value - mult * dt);
-            innerKnobCircle.value = new_value;//.toFixed( 4 ).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/,'$1');
+            innerKnobCircle.value = new_value;
             Panel._dispatch_event( innerKnobCircle, 'change' );
         }
 
-        lastY = e.pageY;
         e.stopPropagation();
         e.preventDefault();
     }
 
     function inner_mouseup( e ) {
+
         var doc = that.root.ownerDocument;
         doc.removeEventListener( 'mousemove', inner_mousemove );
         doc.removeEventListener( 'mouseup', inner_mouseup );
-        document.body.classList.remove( 'nocursor' );
         document.body.classList.remove( 'noevents' );
+
+        // Snap if necessary
+        if( snapEnabled )
+        {
+            mustSnap = true;
+            Panel._dispatch_event( innerKnobCircle, 'change' );
+        }
+
+        if( document.pointerLockElement )
+        {
+            document.exitPointerLock();
+        }
     }
     
     container.appendChild( knobCircle );

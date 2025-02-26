@@ -8534,6 +8534,10 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         return !!r.length;
     }
 
+    Element.prototype.addClass = function( className ) {
+        if( className ) this.classList.add( className );
+    }
+
     Element.prototype.getComputedSize = function() {
         const cs = getComputedStyle( this );
         return {
@@ -8546,7 +8550,6 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         getTime() { return new Date().getTime() },
         compareThreshold( v, p, n, t ) { return Math.abs(v - p) >= t || Math.abs(v - n) >= t },
         compareThresholdRange( v0, v1, t0, t1 ) { return v0 >= t0 && v0 <= t1 || v1 >= t0 && v1 <= t1 || v0 <= t0 && v1 >= t1},
-        clamp (num, min, max) { return Math.min(Math.max(num, min), max) },
         uidGenerator: simple_guidGenerator,
         deleteElement( el ) { if( el ) el.remove(); },
         flushCss(element) {

@@ -3624,7 +3624,7 @@ class CodeEditor {
         const scrollBarWidth = this.hScrollbar.thumb.parentElement.offsetWidth;
         const scrollThumbWidth = this.hScrollbar.thumb.offsetWidth;
 
-        this.hScrollbar.thumb._left = LX.UTILS.clamp( value, 0, ( scrollBarWidth - scrollThumbWidth ) );
+        this.hScrollbar.thumb._left = LX.clamp( value, 0, ( scrollBarWidth - scrollThumbWidth ) );
         this.hScrollbar.thumb.style.left = this.hScrollbar.thumb._left + "px";
 
         // Scroll code
@@ -3646,7 +3646,7 @@ class CodeEditor {
         const scrollBarHeight = this.vScrollbar.thumb.parentElement.offsetHeight;
         const scrollThumbHeight = this.vScrollbar.thumb.offsetHeight;
 
-        this.vScrollbar.thumb._top = LX.UTILS.clamp( value, 0, ( scrollBarHeight - scrollThumbHeight ) );
+        this.vScrollbar.thumb._top = LX.clamp( value, 0, ( scrollBarHeight - scrollThumbHeight ) );
         this.vScrollbar.thumb.style.top = this.vScrollbar.thumb._top + "px";
 
         // Scroll code
@@ -4222,7 +4222,7 @@ class CodeEditor {
         var r = document.querySelector( ':root' );
         var s = getComputedStyle( r );
         var pixels = parseInt( s.getPropertyValue( "--code-editor-font-size" ) );
-        pixels = LX.UTILS.clamp( pixels + 1, CodeEditor.CODE_MIN_FONT_SIZE, CodeEditor.CODE_MAX_FONT_SIZE );
+        pixels = LX.clamp( pixels + 1, CodeEditor.CODE_MIN_FONT_SIZE, CodeEditor.CODE_MAX_FONT_SIZE );
         r.style.setProperty( "--code-editor-font-size", pixels + "px" );
         this.charWidth = this._measureChar( "a", true );
 
@@ -4248,7 +4248,7 @@ class CodeEditor {
         var r = document.querySelector( ':root' );
         var s = getComputedStyle( r );
         var pixels = parseInt( s.getPropertyValue( "--code-editor-font-size" ) );
-        pixels = LX.UTILS.clamp( pixels - 1, CodeEditor.CODE_MIN_FONT_SIZE, CodeEditor.CODE_MAX_FONT_SIZE );
+        pixels = LX.clamp( pixels - 1, CodeEditor.CODE_MIN_FONT_SIZE, CodeEditor.CODE_MAX_FONT_SIZE );
         r.style.setProperty( "--code-editor-font-size", pixels + "px" );
         this.charWidth = this._measureChar( "a", true );
 

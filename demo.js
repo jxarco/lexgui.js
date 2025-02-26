@@ -703,7 +703,9 @@ function fillBottomPanel( panel ) {
     panel.addTextArea("Notes", "", (value, event) => {
         console.log(value);
     }, { placeholder: 'Some notes...' });
-    panel.addKnob("A Knob", 4, 0, 200, value => { console.log(value) }, /*{ size: 'sm' }*/);
+    panel.addKnob("A Small Knob", 4, 0, 200, value => { console.log( value ) }, { size: 'sm', disabled: true });
+    panel.addKnob("A Knob", 4, 0, 200, value => { console.log( value ) } );
+    panel.addKnob("A Big Knob", 4, 0, 200, value => { console.log( value ) }, { size: 'bg', snap: 4 });
     panel.addButton("Apply", "Add button to branch", (value, event) => {
         const branch = panel.getBranch("Information");
         panel.queue( branch.content );
@@ -711,8 +713,8 @@ function fillBottomPanel( panel ) {
         panel.clearQueue();
     });
 
-    panel.branch("A collapsed branch", {closed: true});
-    panel.addText(null, "Nothing here", null, {disabled: true});
+    panel.branch("A collapsed branch", { closed: true });
+    panel.addText(null, "Nothing here", null, { disabled: true });
     panel.merge();
 }
 
