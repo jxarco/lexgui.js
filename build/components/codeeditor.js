@@ -2910,7 +2910,7 @@ class CodeEditor {
         else if( this._buildingString != undefined )
             discardToken = this._appendStringToken( token );
         
-        else if( this._mustHightlightWord( token, CodeEditor.keywords ) && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) )
+        else if( ( this._mustHightlightWord( token, CodeEditor.keywords ) || highlight == 'xml' ) && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) )
             token_classname = "cm-kwd";
 
         else if( this._mustHightlightWord( token, CodeEditor.builtin ) && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) )
@@ -3016,11 +3016,14 @@ class CodeEditor {
         const tagStartIndex = indexOfFrom( this._currentLineString, tagStart, tokenStartIndex, true );
         if( tagStartIndex < 0 ) // Not found..
             return;
+        const tagStartIndexOpposite = indexOfFrom( this._currentLineString, tagEnd, tokenStartIndex, true );
+        if( tagStartIndexOpposite >= 0  && tagStartIndexOpposite > tagStartIndex ) // Found the opposite first while reversing..
+            return;
         const tagEndIndex = indexOfFrom( this._currentLineString, tagEnd, tokenStartIndex );
         if( tagEndIndex < 0 ) // Not found..
             return;
 
-        return ( tagStartIndex < tokenStartIndex ) && ( tagEndIndex >= ( tokenStartIndex + token.length ) );
+        return ( tagStartIndex < tokenStartIndex ) && ( tagEndIndex >= ( tokenStartIndex + token.length ) ) && !this._mustHightlightWord( token, CodeEditor.symbols );
     }
 
     _inBlockCommentSection( line ) {
@@ -4358,7 +4361,8 @@ CodeEditor.symbols = {
     'Rust': ['<', '>', '[', ']', '(', ')', '='],
     'Python': ['<', '>', '[', ']', '(', ')', '='],
     'Batch': ['[', ']', '(', ')', '%'],
-    'HTML': ['<', '>', '/']
+    'HTML': ['<', '>', '/'],
+    'XML': ['<', '>', '/']
 };
 
 LX.CodeEditor = CodeEditor;

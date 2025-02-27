@@ -3500,7 +3500,6 @@ pre .line-gutter {
 .cm-sym.wgsl { color: #f9cb20; }  /* symbol */
 .cm-ppc.wgsl { color: #99caf1; }  /* preprocessor */
 
-
 .cm-typ.rust { color: #36c0b0; }  /* type */
 .cm-dec.rust { color: #b1ce9b; }  /* decimal */
 .cm-sym.rust { color: #e7ded2; }  /* symbol */
@@ -3517,6 +3516,9 @@ pre .line-gutter {
 
 .cm-bln.html { color: #a1d2f0; }    /* builtin */
 .cm-sym.html { color: #929292; }    /* symbol */
+
+.cm-bln.xml { color: #a1d2f0; }    /* builtin */
+.cm-sym.xml { color: #929292; }    /* symbol */
 
 .cm-bln.markdown { color: #a1d2f0; }  /* builtin */
 
