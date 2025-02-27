@@ -7656,6 +7656,7 @@ class AssetView {
         this.onlyFolders = options.onlyFolders ?? true;
         this.previewActions = options.previewActions ?? [];
         this.contextMenu = options.contextMenu ?? [];
+        this.onRefreshContent = options.onRefreshContent;
 
         if( !this.skipBrowser )
         {
@@ -7725,14 +7726,17 @@ class AssetView {
     * @method clear
     */
     clear() {
+
         if( this.previewPanel )
         {
             this.previewPanel.clear();
         }
+
         if( this.leftPanel )
         {
             this.leftPanel.clear();
         }
+
         if( this.rightPanel )
         {
             this.rightPanel.clear()
@@ -7803,7 +7807,7 @@ class AssetView {
             children: this.data
         }
 
-        this.tree = this.leftPanel.addTree("Content Browser", tree_data, { 
+        this.tree = this.leftPanel.addTree( "Content Browser", tree_data, {
             // icons: tree_icons, 
             filter: false,
             onlyFolders: this.onlyFolders,
@@ -7864,7 +7868,7 @@ class AssetView {
             this.rightPanel = area.addPanel({ className: 'lexassetcontentpanel' });
         }
 
-        const on_sort = (value, event) => {
+        const on_sort = ( value, event ) => {
             const cmenu = addContextMenu( "Sort by", event, c => {
                 c.add("Name", () => this._sortData('id') );
                 c.add("Type", () => this._sortData('type') );
@@ -7874,10 +7878,12 @@ class AssetView {
             } );
             const parent = this.parent.root.parentElement;
             if( parent.classList.contains('lexdialog') )
+            {
                 cmenu.root.style.zIndex = (+getComputedStyle( parent ).zIndex) + 1;
+            }
         }
 
-        const on_change_view = (value, event) => {
+        const on_change_view = ( value, event ) => {
             const cmenu = addContextMenu( "Layout", event, c => {
                 c.add("Content", () => this._setContentLayout( AssetView.LAYOUT_CONTENT ) );
                 c.add("");
@@ -7888,7 +7894,7 @@ class AssetView {
                 cmenu.root.style.zIndex = (+getComputedStyle( parent ).zIndex) + 1;
         }
 
-        const on_change_page = (value, event) => {
+        const on_change_page = ( value, event ) => {
             if( !this.allowNextPage )
             {
                 return;
@@ -7905,13 +7911,13 @@ class AssetView {
         }
 
         this.rightPanel.sameLine();
-        this.rightPanel.addDropdown("Filter", this.allowedTypes, this.allowedTypes[0], (v) => this._refreshContent.call(this, null, v), { width: "20%", minWidth: "128px" });
-        this.rightPanel.addText(null, this.searchValue ?? "", (v) => this._refreshContent.call(this, v, null), { placeholder: "Search assets.." });
-        this.rightPanel.addButton(null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { className: "micro", title: "Sort" });
-        this.rightPanel.addButton(null, "<a class='fa-solid fa-grip'></a>", on_change_view.bind(this), { className: "micro", title: "View" });
+        this.rightPanel.addDropdown( "Filter", this.allowedTypes, this.allowedTypes[ 0 ], v => this._refreshContent.call(this, null, v), { width: "20%", minWidth: "128px" } );
+        this.rightPanel.addText( null, this.searchValue ?? "", v => this._refreshContent.call(this, v, null), { placeholder: "Search assets.." } );
+        this.rightPanel.addButton( null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { className: "micro", title: "Sort" } );
+        this.rightPanel.addButton( null, "<a class='fa-solid fa-grip'></a>", on_change_view.bind(this), { className: "micro", title: "View" } );
         // Content Pages
-        this.rightPanel.addButton(null, "<a class='fa-solid fa-angles-left'></a>", on_change_page.bind(this, -1), { className: "micro", title: "Previous Page" });
-        this.rightPanel.addButton(null, "<a class='fa-solid fa-angles-right'></a>", on_change_page.bind(this, 1), { className: "micro", title: "Next Page" });
+        this.rightPanel.addButton( null, "<a class='fa-solid fa-angles-left'></a>", on_change_page.bind(this, -1), { className: "micro", title: "Previous Page" } );
+        this.rightPanel.addButton( null, "<a class='fa-solid fa-angles-right'></a>", on_change_page.bind(this, 1), { className: "micro", title: "Next Page" } );
         this.rightPanel.endLine();
 
         if( !this.skipBrowser )
@@ -7921,7 +7927,7 @@ class AssetView {
                 {
                     value: "Left",
                     icon: "fa-solid fa-left-long",
-                    callback:  (domEl) => { 
+                    callback: domEl => {
                         if(!this.prevData.length) return;
                         this.nextData.push( this.currentData );
                         this.currentData = this.prevData.pop();
@@ -7932,7 +7938,7 @@ class AssetView {
                 {
                     value: "Right",
                     icon: "fa-solid fa-right-long",
-                    callback:  (domEl) => { 
+                    callback: domEl => {
                         if(!this.nextData.length) return;
                         this.prevData.push( this.currentData );
                         this.currentData = this.nextData.pop();
@@ -7943,7 +7949,7 @@ class AssetView {
                 {
                     value: "Refresh",
                     icon: "fa-solid fa-arrows-rotate",
-                    callback:  (domEl) => { this._refreshContent(); }
+                    callback: domEl => { this._refreshContent(); }
                 }
             ], { width: "auto", noSelection: true } );
             this.rightPanel.addText(null, this.path.join('/'), null, { disabled: true, signal: "@on_folder_change", style: { fontWeight: "bolder", fontSize: "16px", color: "#aaa" } });
@@ -7955,17 +7961,17 @@ class AssetView {
         this.content.className = "lexassetscontent";
         this.rightPanel.root.appendChild(this.content);
 
-        this.content.addEventListener('dragenter', function(e) {
+        this.content.addEventListener('dragenter', function( e ) {
             e.preventDefault();
             this.classList.add('dragging');
         });
-        this.content.addEventListener('dragleave', function(e) {
+        this.content.addEventListener('dragleave', function( e ) {
             e.preventDefault();
             this.classList.remove('dragging');
         });
-        this.content.addEventListener('drop', (e) => {
+        this.content.addEventListener('drop', ( e ) => {
             e.preventDefault();
-            this._processDrop(e);
+            this._processDrop( e );
         });
         this.content.addEventListener('click', function() {
             this.querySelectorAll('.lexassetitem').forEach( i => i.classList.remove('selected') );
@@ -7976,9 +7982,9 @@ class AssetView {
 
     _refreshContent( searchValue, filter ) {
 
-        const isContentLayout = (this.layout == AssetView.LAYOUT_CONTENT); // default
+        const isContentLayout = ( this.layout == AssetView.LAYOUT_CONTENT ); // default
 
-        this.filter = filter ?? (this.filter ?? "None");
+        this.filter = filter ?? ( this.filter ?? "None" );
         this.searchValue = searchValue ?? (this.searchValue ?? "");
         this.content.innerHTML = "";
         this.content.className = (isContentLayout ? "lexassetscontent" : "lexassetscontent list");
@@ -8224,8 +8230,14 @@ class AssetView {
                 item.domEl = add_item( item );
             }
         }
+
         this.allowNextPage = filteredData.length - 1 > AssetView.MAX_PAGE_ELEMENTS;
         LX.emit("@on_page_change", "Page " + this.contentPage + " / " + ((((filteredData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1));
+
+        if( this.onRefreshContent )
+        {
+            this.onRefreshContent( searchValue, filter );
+        }
     }
 
     /**
