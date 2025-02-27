@@ -6,12 +6,20 @@ AssetView:
 - Support custom element title on hover for Content layout mode `options.useNativeTitle`
 - AssetView onRefreshContent option
 
+CodeEditor:
+- Renamed all option parameters (remove snake case).
+- Fixed tab language override.
+- Support addTab() and loadFile() with options (`options.language`)
+- Fixed XML highlighting
+
+[Area] `options.no_append` -> `options.skipAppend`.
+[Area] `options.skip_default_area` -> `options.skipDefaultArea`.
 Minor bug fixes.
 
 ## 0.1.41 (master)
 
 AssetView:
-- Renamed all option parameters (remove snake_case).
+- Renamed all option parameters (remove snake case).
 - Support showing `lastModified` file data.
 
 Knob Widget:

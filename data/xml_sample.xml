@@ -1,0 +1,23 @@
+<year>1925</year>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<bookstore>
+    <book>
+        <title>The Great Gatsby</title>
+        <author>F. Scott Fitzgerald</author>
+        <year>1925</year>
+        <price currency="USD">10.99</price>
+    </book>
+    <book>
+        <title>1984</title>
+        <author>George Orwell</author>
+        <year>1949</year>
+        <price currency="USD">8.99</price>
+    </book>
+    <book>
+        <title>To Kill a Mockingbird</title>
+        <author>Harper Lee</author>
+        <year>1960</year>
+        <price currency="USD">7.99</price>
+    </book>
+</bookstore>

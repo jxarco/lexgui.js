@@ -239,7 +239,10 @@ class CodeEditor {
 
     /**
      * @param {*} options
-     * skip_info, allow_add_scripts, name
+     * name:
+     * skipInfo:
+     * fileExplorer:
+     * allowAddScripts:
      */
 
     constructor( area, options = {} ) {
@@ -249,15 +252,17 @@ class CodeEditor {
         CodeEditor.__instances.push( this );
         
         // File explorer
-        if( options.file_explorer ?? false )
+        if( options.fileExplorer ?? false )
         {
-            var [explorerArea, codeArea] = area.split({ sizes:["15%","85%"] });
+            var [ explorerArea, codeArea ] = area.split({ sizes:[ "15%","85%" ] });
             explorerArea.setLimitBox( 180, 20, 512 );
             this.explorerArea = explorerArea;
 
             let panel = new LX.Panel();
 
             panel.addTitle( "EXPLORER" );
+
+            this._tabStorage = {};
 
             let sceneData = {
                 'id': 'WORKSPACE',
@@ -315,8 +320,9 @@ class CodeEditor {
                 this.cursors.classList.remove( 'show' );
             }
         } } );
+
         this.tabs.root.addEventListener( 'dblclick', (e) => {
-            if( options.allow_add_scripts ?? true ) {
+            if( options.allowAddScripts ?? true ) {
                 e.preventDefault();
                 this.addTab("unnamed.js", true);
             }
@@ -332,8 +338,8 @@ class CodeEditor {
         this.root.tabIndex = -1;
         area.attach( this.root );
 
-        this.skipCodeInfo = options.skip_info ?? false;
-        this.disableEdition = options.disable_edition ?? false;
+        this.skipCodeInfo = options.skipInfo ?? false;
+        this.disableEdition = options.disableEdition ?? false;
 
         if( !this.disableEdition )
         {
@@ -1045,10 +1051,12 @@ class CodeEditor {
         this.loadedTabs = { };
         this.openedTabs = { };
         
-        if( options.allow_add_scripts ?? true )
+        if( options.allowAddScripts ?? true )
+        {
             this.addTab("+", false, "New File");
+        }
 
-        this.addTab( options.name || "untitled", true, options.title );
+        this.addTab( options.name || "untitled", true, options.title, { language: "CSS" } );
 
         // Create inspector panel
         let panel = this._createPanelInfo();
@@ -1191,7 +1199,7 @@ class CodeEditor {
         }
     }
 
-    loadFile( file ) {
+    loadFile( file, options = {} ) {
 
         const inner_add_tab = ( text, name, title ) => {
 
@@ -1207,16 +1215,25 @@ class CodeEditor {
 
             if( this.explorer )
             {
-                this._storedLines = this._storedLines ?? {};
-                this._storedLines[ name ] = lines;
-                this.addExplorerItem( { 'id': name, 'skipVisibility': true, 'icon': this._getFileIcon( name ) } );
+                this._tabStorage[ name ] = {
+                    lines: lines,
+                    options: options
+                };
+
+                const ext = this.languages[ options.language ] ?. ext;
+                this.addExplorerItem( { 'id': name, 'skipVisibility': true, 'icon': this._getFileIcon( name, ext ) } );
                 this.explorer.frefresh( name );
             }
             else
             {
-                this.addTab(name, true, title);
+                this.addTab( name, true, title, options );
                 this.code.lines = lines;
-                this._changeLanguageFromExtension( LX.getExtension( name ) );
+
+                // Default inferred language if not specified
+                if( !options.language )
+                {
+                    this._changeLanguageFromExtension( LX.getExtension( name ) );
+                }
             }
         };
 
@@ -1224,7 +1241,6 @@ class CodeEditor {
         {
             let filename = file;
             LX.request({ url: filename, success: text => {
-
                 const name = filename.substring(filename.lastIndexOf( '/' ) + 1);
                 inner_add_tab( text, name, filename );
             } });
@@ -1417,10 +1433,16 @@ class CodeEditor {
         }
     }
 
-    _changeLanguage( lang ) {
+    _changeLanguage( lang, override = false ) {
 
         this.code.language = lang;
         this.highlight = lang;
+
+        if( override )
+        {
+            this.code.languageOverride = lang;
+        }
+
         this._updateDataInfoPanel( "@highlight", lang );
         this.processLines();
 
@@ -1491,8 +1513,12 @@ class CodeEditor {
             }, { width: "10%", nameWidth: "15%", signal: "@tab-spaces" });
             panel.addButton( "<b>{ }</b>", this.highlight, ( value, event ) => {
                 LX.addContextMenu( "Language", event, m => {
-                    for( const lang of Object.keys(this.languages) )
-                        m.add( lang, this._changeLanguage.bind(this) );
+                    for( const lang of Object.keys( this.languages ) )
+                    {
+                        m.add( lang, v => {
+                            this._changeLanguage( v, true )
+                        } );
+                    }
                 });
             }, { width: "17.5%", nameWidth: "15%", signal: "@highlight" });
             panel.endLine();
@@ -1553,8 +1579,16 @@ class CodeEditor {
         this.restoreCursor( cursor, this.code.cursorState );    
 
         this.endSelection();
-        this._changeLanguageFromExtension( LX.getExtension( name ) );
         this._updateDataInfoPanel( "@tab-name", name );
+
+        if( this.code.languageOverride )
+        {
+            this._changeLanguage( this.code.languageOverride );
+        }
+        else
+        {
+            this._changeLanguageFromExtension( LX.getExtension( name ) );
+        }
     }
 
     _onContextMenuTab( isNewTabButton, event, name,  ) {
@@ -1569,7 +1603,7 @@ class CodeEditor {
         });
     }
 
-    addTab( name, selected, title ) {
+    addTab( name, selected, title, options = {} ) {
         
         // If already loaded, set new name...
         const repeats = Object.keys( editor.loadedTabs ).slice( 1 ).reduce( ( v, key ) => {
@@ -1586,7 +1620,7 @@ class CodeEditor {
         let code = document.createElement( 'div' );
         code.className = 'code';
         code.lines = [ "" ];
-        code.language = "Plain Text";
+        code.language = options.language ?? "Plain Text";
         code.cursorState = {};
         code.undoSteps = [];
         code.redoSteps = [];
@@ -1643,6 +1677,12 @@ class CodeEditor {
             this.processLines();
         }
 
+        if( options.language )
+        {
+            code.languageOverride = options.language;
+            this._changeLanguage( code.languageOverride );
+        }
+
         this._updateDataInfoPanel( "@tab-name", name );
 
         // Bc it could be overrided..
@@ -1663,13 +1703,25 @@ class CodeEditor {
         if( !code )
         {
             this.addTab( name, true );
-            // Unload lines from file...
-            if( this._storedLines[ name ] )
+
+            // Unload lines from storage...
+            const tabData = this._tabStorage[ name ];
+            if( tabData )
             {
-                this.code.lines = this._storedLines[ name ];
-                delete this._storedLines[ name ];
+                this.code.lines = tabData.lines;
+
+                if( tabData.options.language )
+                {
+                    this._changeLanguage( tabData.options.language, true );
+                }
+                else
+                {
+                    this._changeLanguageFromExtension( LX.getExtension( name ) );
+                }
+
+                delete this._tabStorage[ name ];
             }
-            this._changeLanguageFromExtension( LX.getExtension( name ) );
+
             return;
         }
 
@@ -1697,7 +1749,7 @@ class CodeEditor {
         this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
         this.processLines();
         this._changeLanguageFromExtension( LX.getExtension( name ) );
-        this._updateDataInfoPanel( "@tab-name", tabname );
+        this._updateDataInfoPanel( "@tab-name", code.tabname );
     }
 
     loadTabFromFile() {
