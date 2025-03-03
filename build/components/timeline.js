@@ -15,7 +15,7 @@ class Session {
 
     constructor() {
 
-        this.start_time = - 0.01;
+        this.start_time = -0.01;
         this.left_margin = 0;
         // this.current_time = 0;
         // this.last_time = 0;
@@ -74,8 +74,8 @@ class Timeline {
 
         this.duration = 1;
         this.speed = 1;
-        this.position = [0, 0];
-        this.size = [ options.width ?? 400, options.height ?? 100];
+        this.position = [ 0, 0 ];
+        this.size = [ options.width ?? 400, options.height ?? 100 ];
         
         this.currentScroll = 0; //in percentage
         this.currentScrollInPixels = 0; //in pixels
@@ -108,17 +108,16 @@ class Timeline {
 
         let area = new LX.Area( {id: "bottom-timeline-area", width: width || "calc(100% - 7px)", height: height || "100%"});
         area.split({ type: "horizontal", sizes: ["15%", "85%"] });
-        area.split_bar.style.zIndex = 1; // for some reason this is needed here
+        area.splitBar.style.zIndex = 1; // for some reason this is needed here
         this.content_area = area;
-        let [left, right] = area.sections;
+        let [ left, right ] = area.sections;
         
-        
-        right.root.appendChild(this.canvas);
+        right.root.appendChild( this.canvas );
         this.canvasArea = right;
         this.canvasArea.root.classList.add("lextimelinearea");
         this.updateHeader();
-        this.updateLeftPanel(left);
-        this.root.root.appendChild(area.root);
+        this.updateLeftPanel( left );
+        this.root.root.appendChild( area.root );
 
         if(!options.canvas && this.name != '') {
             this.root.root.id = this.name;
@@ -152,35 +151,42 @@ class Timeline {
 
     updateHeader() {
 
-        if(this.header)
+        if( this.header )
+        {
             this.header.clear();
-        else {
-            this.header = new LX.Panel({id:'lextimelineheader', height: this.header_offset+"px"});
-            this.root.root.appendChild(this.header.root);
+        }
+        else
+        {
+            this.header = new LX.Panel( { id: 'lextimelineheader', height: this.header_offset + "px" } );
+            this.root.root.appendChild( this.header.root );
         }
 
         let header = this.header;
         LX.DEFAULT_NAME_WIDTH = "50%";
         header.sameLine();
 
-        if(this.name) {
-            header.addTitle(this.name);
+        if( this.name )
+        {
+            header.addTitle(this.name );
         }
 
         header.addButton('', '<i class="fa-solid fa-'+ (this.playing ? 'pause' : 'play') +'"></i>', (value, event) => {
            this.changeState();
-        }, {width: "40px", buttonClass: "accept"});
+        }, { width: "40px", buttonClass: "accept" });
 
-        header.addButton('', '<i class="fa-solid fa-rotate"></i>', (value, event) => {
+        header.addButton('', '<i class="fa-solid fa-rotate"></i>', ( value, event ) => {
             this.loop = !this.loop;
-            if(this.onChangePlayMode) {
-                this.onChangePlayMode(this.loop);
+            if( this.onChangePlayMode )
+            {
+                this.onChangePlayMode( this.loop );
             }
 
-        }, {width: "40px", selectable: true, selected: this.loop});
+        }, { width: "40px", selectable: true, selected: this.loop });
         
-        if(this.onBeforeCreateTopBar)
-            this.onBeforeCreateTopBar(header);
+        if( this.onBeforeCreateTopBar )
+        {
+            this.onBeforeCreateTopBar( header );
+        }
 
         header.addNumber("Current Time", this.currentTime, (value, event) => {
             this.setTime(value)}, {signal: "@on_set_time_" + this.name, step: 0.01, min: 0, precision: 3, skipSlider: true});        
@@ -192,13 +198,18 @@ class Timeline {
         header.addNumber("Speed", + this.speed.toFixed(3), (value, event) => {
             this.setSpeed(value)}, {step: 0.01, signal: "@on_set_speed_" + this.name});    
            
-        if(this.onAfterCreateTopBar)
-            this.onAfterCreateTopBar(header);      
+        if( this.onAfterCreateTopBar )
+        {
+            this.onAfterCreateTopBar( header );      
+        }
 
-        if(this.onShowOptimizeMenu)
+        if( this.onShowOptimizeMenu )
+        {
             header.addButton("", '<i class="fa-solid fa-filter"></i>', (value, event) => {this.onShowOptimizeMenu(event)}, {width: "40px"});
+        }
 
-        if(this.onShowConfiguration){
+        if( this.onShowConfiguration )
+        {
             header.addButton("", '<i class="fa-solid fa-gear"></i>', (value, event) => {
                 if(this.configurationDialog){
                     this.configurationDialog.close();
@@ -214,7 +225,7 @@ class Timeline {
                         root.remove();
                     }
                 })
-            }, {width: "40px"})
+            }, { width: "40px" })
         }
 
         header.endLine();
@@ -225,46 +236,53 @@ class Timeline {
     * @method updateLeftPanel
     * 
     */
-    updateLeftPanel(area) {
-
+    updateLeftPanel( area ) {
 
         let scrollTop = 0;
-        if(this.leftPanel){
-            scrollTop = this.leftPanel.root.children[1].scrollTop;
+        if( this.leftPanel )
+        {
+            scrollTop = this.leftPanel.root.children[ 1 ].scrollTop;
             this.leftPanel.clear();
         }
-        else {
-            this.leftPanel = area.addPanel({className: 'lextimelinepanel', width: "100%", height: "100%"});
+        else
+        {
+            this.leftPanel = area.addPanel( { className: 'lextimelinepanel', width: "100%", height: "100%" } );
         }
 
         let panel = this.leftPanel;
-        panel.sameLine(2);
-        let title = panel.addTitle("Tracks");
+        panel.sameLine( 2 );
+
+        let title = panel.addTitle( "Tracks" );
         
-        if(!this.disableNewTracks) 
+        if( !this.disableNewTracks ) 
         {
             panel.addButton('', '<i class = "fa-solid fa-plus"></i>', (value, event) => {
                 this.addNewTrack();
             }, {width: "40px", height: "40px"});            
         }
+
         panel.endLine();
 
-        const styles = window.getComputedStyle(title);
+        const styles = window.getComputedStyle( title );
         const titleHeight = title.clientHeight + parseFloat(styles['marginTop']) + parseFloat(styles['marginBottom']);
         
         let p = new LX.Panel({height: "calc(100% - " + titleHeight + "px)"});
-        if(this.animationClip && this.selectedItems.length)  {
-            let items = {'id': '', 'children': []};
+
+        if( this.animationClip && this.selectedItems.length )
+        {
+            let items = { 'id': '', 'children': [] };
 
             const tracksPerItem = this.animationClip.tracksPerItem;
-            for(let i = 0; i < this.selectedItems.length; i++ ) {
-                let selected = this.selectedItems[i];
+            for( let i = 0; i < this.selectedItems.length; i++ )
+            {
+                let selected = this.selectedItems[ i ];
                 let t = {
                     'id': selected,
                     'skipVisibility': true,
                     'children': []
                 }
-                for(let j = 0; j < tracksPerItem[selected].length; j++) {
+                for( let j = 0; j < tracksPerItem[selected].length; j++ )
+                {
                     let track = tracksPerItem[selected][j];
                     let id = track.type ? track.type : track.name;
 
@@ -301,7 +319,9 @@ class Timeline {
                     }]})
                     // panel.addTitle(track.name + (track.type? '(' + track.type + ')' : ''));
                 }
-                items.children.push(t);
+
+                items.children.push( t );
+
                 let el = p.addTree(null, t, {filter: false, rename: false, draggable: false, onevent: (e) => {
                     switch(e.type) {
                         case LX.TreeEvent.NODE_SELECTED:
@@ -317,12 +337,14 @@ class Timeline {
                             }
                             break;
                         case LX.TreeEvent.NODE_VISIBILITY:   
-                            if (e.node.parent){
-                                const tracksInItem = this.animationClip.tracksPerItem[e.node.parent.id];
+                            if ( e.node.parent )
+                            {
+                                const tracksInItem = this.animationClip.tracksPerItem[ e.node.parent.id ];
                                 const type = e.node.id;
                                 for(let i = 0; i < tracksInItem.length; i++) {
-                                    if(tracksInItem[i].type == type){
-                                        this.changeTrackVisibility(tracksInItem[i].clipIdx, e.value);
+                                    if(tracksInItem[i].type == type)
+                                    {
+                                        this.changeTrackVisibility( tracksInItem[ i ].clipIdx, e.value );
                                         break;
                                     }
                                 }
@@ -330,8 +352,9 @@ class Timeline {
                             break;
                         case LX.TreeEvent.NODE_CARETCHANGED:
                             const tracksInItem = this.animationClip.tracksPerItem[e.node.id];
-                            for( let i = 0; i < tracksInItem; ++i ){
-                                this.changeTrackDisplay(tracksInItem[i].clipIdx, e.node.closed);
+                            for( let i = 0; i < tracksInItem; ++i )
+                            {
+                                this.changeTrackDisplay( tracksInItem[ i ].clipIdx, e.node.closed );
                             }
                             break;
                     }
@@ -339,19 +362,23 @@ class Timeline {
 
             }
         }
-        panel.attach(p.root)
+
+        panel.attach( p.root )
         p.root.style.overflowY = "scroll";
-        p.root.addEventListener("scroll", (e) => {
+        p.root.addEventListener("scroll", e => {
             this.currentScroll = e.currentTarget.scrollTop/(e.currentTarget.scrollHeight - e.currentTarget.clientHeight);
-         })
+        });
         // for(let i = 0; i < this.animationClip.tracks.length; i++) {
         //     let track = this.animationClip.tracks[i];
         //     panel.addTitle(track.name + (track.type? '(' + track.type + ')' : ''));
         // }
-        this.leftPanel.root.children[1].scrollTop = scrollTop;
+        this.leftPanel.root.children[ 1 ].scrollTop = scrollTop;
 
-        if(this.leftPanel.parent.root.classList.contains("hidden") || !this.root.root.parent)
+        if( this.leftPanel.parent.root.classList.contains("hidden") || !this.root.root.parent )
+        {
             return;
+        }
+
         this.resizeCanvas([ this.root.root.clientWidth - this.leftPanel.root.clientWidth  - 8, this.size[1]]);
     }
 
@@ -361,8 +388,10 @@ class Timeline {
 
     addNewTrack() {
 
-        if(!this.animationClip)
+        if( !this.animationClip )
+        {
             this.animationClip = {tracks:[]};
+        }
 
         let trackInfo = {
             idx: this.animationClip.tracks.length,
@@ -370,7 +399,7 @@ class Timeline {
             selected: [], edited: [], hovered: []
         };
 
-        this.animationClip.tracks.push(trackInfo);
+        this.animationClip.tracks.push( trackInfo );
         this.updateLeftPanel();
         return trackInfo.idx;
     }
@@ -380,30 +409,36 @@ class Timeline {
         let tracks = [];
 
         // Manage negative selection
-        if(minY > maxY) {
+        if( minY > maxY )
+        {
             let aux = minY;
             minY = maxY;
             maxY = aux;
         }
 
-        for(let i = this.tracksDrawn.length - 1; i >= 0; --i) {
-            let t = this.tracksDrawn[i];
-            let pos = t[1] - this.topMargin, size = t[2];
+        for(let i = this.tracksDrawn.length - 1; i >= 0; --i)
+        {
+            let t = this.tracksDrawn[ i ];
+            let pos = t[ 1 ] - this.topMargin, size = t[ 2 ];
             if( pos + threshold >= minY && (pos + size - threshold) <= maxY ) {
-                tracks.push( t[0] );
+                tracks.push( t[ 0 ] );
             }
         }
 
         return tracks;
     }
 
-    getCurrentContent(track, time, threshold) {
+    getCurrentContent( track, time, threshold ) {
 
-        if(this.getCurrentKeyFrame)
-            return this.getCurrentKeyFrame(track, time, threshold);
+        if( this.getCurrentKeyFrame )
+        {
+            return this.getCurrentKeyFrame( track, time, threshold );
+        }
 
-        if(this.getCurrentClip)
-            return this.getCurrentClip(track, time, threshold);
+        if( this.getCurrentClip )
+        {
+            return this.getCurrentClip( track, time, threshold );
+        }
     }
 
     /**
@@ -414,17 +449,21 @@ class Timeline {
      * [KeyFrameTimeline] - each track should contain an attribute "dim" to indicate the value dimension (e.g. vector3 -> dim=3). Otherwise dimensions will be infered from track's values and times. Default is 1
      */
     setAnimationClip( animation, needsToProcess = true ) {
-        if ( this.unSelectAllKeyFrames ){
+
+        if ( this.unSelectAllKeyFrames )
+        {
             this.unSelectAllKeyFrames();
             this.unHoverAll();
             this.unSelectAllTracks();
             this.selectedItems = [];
         }
 
-        if(!animation || !animation.tracks || needsToProcess) { 
-            this.processTracks(animation); // generate default animationclip or process the user's one
+        if( !animation || !animation.tracks || needsToProcess )
+        { 
+            this.processTracks( animation ); // generate default animationclip or process the user's one
         }
-        else{
+        else
+        {
             this.animationClip = animation;
         }
        
@@ -433,12 +472,13 @@ class Timeline {
 
         //this.updateHeader();
         this.updateLeftPanel();
+
         return this.animationClip;
     }
 
-    drawTimeInfo (w, h = this.topMargin) {
+    drawTimeInfo( w, h = this.topMargin ) {
        
-        let ctx = this.canvas.getContext("2d");
+        let ctx = this.canvas.getContext( "2d" );
         ctx.font = "11px " + Timeline.FONT;//"11px Calibri";
         ctx.textAlign = "center";
                 
@@ -451,57 +491,57 @@ class Timeline {
         ctx.strokeStyle = LX.Timeline.FONT_COLOR;
 
         // set tick and sub tick times
-        let tick_time = 4;
-        if ( this.secondsToPixels > 900 ){ tick_time = 1; }
-        else if ( this.secondsToPixels > 100 ){ tick_time = 2; }
-        else if ( this.secondsToPixels > 50 ){ tick_time = 3; }
+        let tickTime = 4;
+        if ( this.secondsToPixels > 900 ) { tickTime = 1; }
+        else if ( this.secondsToPixels > 100 ) { tickTime = 2; }
+        else if ( this.secondsToPixels > 50 ) { tickTime = 3; }
 
-        let subtick_time = this.timeSeparators[tick_time - 1];
-        tick_time = this.timeSeparators[tick_time];
+        let subtickTime = this.timeSeparators[tickTime - 1];
+        tickTime = this.timeSeparators[tickTime];
 
-        // transform times into pixel coords
-        let tick_x = this.timeToX( this.startTime + tick_time ) - this.timeToX( this.startTime );
-        let subtick_x = subtick_time * tick_x / tick_time; 
+        // Transform times into pixel coords
+        let tickX = this.timeToX( this.startTime + tickTime ) - this.timeToX( this.startTime );
+        let subtickX = subtickTime * tickX / tickTime; 
 
-        let startx = this.timeToX( Math.floor( this.startTime / tick_time) * tick_time ); // floor because might need to draw previous subticks
+        let startx = this.timeToX( Math.floor( this.startTime / tickTime) * tickTime ); // floor because might need to draw previous subticks
         let endx = this.timeToX( this.endTime ); // draw up to endTime
 
-        // begin drawing
+        // Begin drawing
         ctx.beginPath();
         ctx.fillStyle = Timeline.FONT_COLOR//"#888";
         ctx.globalAlpha = this.opacity;
 
-        for( let x = startx; x <= endx; x += tick_x){
-            
-            // draw main line
-            ctx.moveTo(Math.round(x) + 0.5, h * 0.4 + h * 0.3 );
-            ctx.lineTo(Math.round(x) + 0.5, h * 0.95 );
+        for( let x = startx; x <= endx; x += tickX )
+        {
+            // Draw main line
+            ctx.moveTo( Math.round( x ) + 0.5, h * 0.4 + h * 0.3 );
+            ctx.lineTo( Math.round( x ) + 0.5, h * 0.95 );
 
-            // draw following sub lines
-            let endsub = x + tick_x - subtick_x*0.5;
-            for (let sub_x = x; sub_x < endsub && sub_x < endx; sub_x += subtick_x){
-                ctx.moveTo(Math.round(sub_x) + 0.5, h * 0.4 + h * 0.45 );
-                ctx.lineTo(Math.round(sub_x) + 0.5, h * 0.95 );
+            // Draw following sub lines
+            let endsub = x + tickX - subtickX * 0.5;
+            for ( let subX = x; subX < endsub && subX < endx; subX += subtickX )
+            {
+                ctx.moveTo( Math.round( subX ) + 0.5, h * 0.4 + h * 0.45 );
+                ctx.lineTo( Math.round( subX ) + 0.5, h * 0.95 );
             }
 
-            // draw time number
+            // Draw time number
             let t = this.xToTime( x );
-            ctx.fillText( t.toFixed(tick_time < 1? 1 : 0), x, h * 0.6);
+            ctx.fillText( t.toFixed( tickTime < 1 ? 1 : 0 ), x, h * 0.6 );
         }
 
         ctx.stroke();                
-
-
         ctx.restore();
     }
 
-    drawTracksBackground(w, h) {
+    drawTracksBackground( w, h ) {
 
         let canvas = this.canvas;
         let ctx = canvas.getContext("2d");
         let duration = this.duration;
         ctx.globalAlpha = this.opacity;
-        //content
+
+        // Content
         let margin = this.session.left_margin;
         let timeline_height = this.topMargin;
         let line_height = this.trackHeight;
@@ -1160,21 +1200,38 @@ class Timeline {
     * // NOTE: to select a track from outside of the timeline, a this.leftPanelTrackTree.select(item) needs to be called.
     */
     selectTrack( trackIdx ) {
+
+        if( !this.animationClip )
+        {
+            return;
+        }
+
         this.unSelectAllTracks();
         
-        let track = this.animationClip.tracks[trackIdx];
+        let track = this.animationClip.tracks[ trackIdx ];
         track.isSelected = true;
         
-        if(this.onSelectTrack)
+        if( this.onSelectTrack )
+        {
             this.onSelectTrack(track);
+        }
     }
 
     unSelectAllTracks() {
-        for(let i = 0; i < this.selectedItems.length; i++) {
-            let item = this.selectedItems[i];
-            let tracks = this.animationClip.tracksPerItem[item];
-            for(let t = 0; t < tracks.length; t++) {
-                tracks[t].isSelected = false;
+
+        if( !this.animationClip )
+        {
+            return;
+        }
+
+        for(let i = 0; i < this.selectedItems.length; i++)
+        {
+            let item = this.selectedItems[ i ];
+            let tracks = this.animationClip.tracksPerItem[ item ];
+
+            for( let t = 0; t < tracks.length; t++ )
+            {
+                tracks[ t ].isSelected = false;
             }
         }
     }

@@ -181,13 +181,13 @@ bottom.addMenubar( m => {
             kfTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
             kfTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [0,1,0, 1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
             
-            kfTimeline.addButtons([
-                { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },
-                { icon: 'fa fa-filter', name: "optimize", callback: (value, event) => {   kfTimeline.onShowOptimizeMenu(event);}},
-                { icon: 'fa-regular fa-rectangle-xmark', name: 'unselectAll', callback: (value, event) => { kfTimeline.unSelectAllKeyFrames();}}
-            ]);
+            // kfTimeline.addButtons([
+            //     { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled' },
+            //     { icon: 'fa fa-filter', name: "optimize", callback: (value, event) => { kfTimeline.onShowOptimizeMenu(event); }},
+            //     { icon: 'fa-regular fa-rectangle-xmark', name: 'unselectAll', callback: (value, event) => { kfTimeline.unSelectAllKeyFrames(); }}
+            // ]);
             
-            kfTimeline.draw(0);
+            kfTimeline.draw( 0 );
         }
     });
 
