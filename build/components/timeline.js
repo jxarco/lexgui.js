@@ -172,7 +172,7 @@ class Timeline {
 
         header.addButton('', '<i class="fa-solid fa-'+ (this.playing ? 'pause' : 'play') +'"></i>', (value, event) => {
            this.changeState();
-        }, { width: "40px", buttonClass: "accept" });
+        }, { width: "40px", buttonClass: "accept", title: "Play" });
 
         header.addButton('', '<i class="fa-solid fa-rotate"></i>', ( value, event ) => {
             this.loop = !this.loop;
@@ -180,8 +180,7 @@ class Timeline {
             {
                 this.onChangePlayMode( this.loop );
             }
-
-        }, { width: "40px", selectable: true, selected: this.loop });
+        }, { width: "40px", selectable: true, selected: this.loop, title: 'Loop' });
         
         if( this.onBeforeCreateTopBar )
         {
@@ -205,7 +204,7 @@ class Timeline {
 
         if( this.onShowOptimizeMenu )
         {
-            header.addButton("", '<i class="fa-solid fa-filter"></i>', (value, event) => {this.onShowOptimizeMenu(event)}, {width: "40px"});
+            header.addButton("", '<i class="fa-solid fa-filter"></i>', (value, event) => {this.onShowOptimizeMenu(event)}, { width: "40px", title: "Optimize" });
         }
 
         if( this.onShowConfiguration )
