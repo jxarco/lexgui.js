@@ -4122,52 +4122,69 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
          * disabled: Make the widget disabled [false]
          * icon: Icon class to show as button value
          * img: Path to image to show as button value
+         * title: Text to show in native Element title
          */
 
         addButton( name, value, callback, options = {} ) {
 
-            let widget = this.create_widget(name, Widget.BUTTON, options);
+            let widget = this.create_widget( name, Widget.BUTTON, options );
+
             widget.onGetValue = () => {
                 return wValue.innerText;
             };
+
             widget.onSetValue = ( newValue, skipCallback ) => {
                 wValue.innerHTML = 
                 (options.icon ? "<a class='" + options.icon + "'></a>" : 
                 ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + (newValue || "") + "</span>" ));
             };
-            
+
             let element = widget.domEl;
 
-            var wValue = document.createElement('button');
-            if(options.icon || options.img) 
-                wValue.title = value;
+            var wValue = document.createElement( 'button' );
+            wValue.title = options.title ?? "";
             wValue.className = "lexbutton";
-            if(options.selected)
-                wValue.classList.add("selected");
-            if(options.buttonClass)
-                wValue.classList.add(options.buttonClass);
+
+            if( options.selected )
+            {
+                wValue.classList.add( "selected" );
+            }
+
+            if( options.buttonClass )
+            {
+                wValue.classList.add( options.buttonClass );
+            }
+
             wValue.innerHTML = 
                 (options.icon ? "<a class='" + options.icon + "'></a>" : 
                 ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + (value || "") + "</span>" ));
 
             wValue.style.width = "calc( 100% - " + (options.nameWidth ?? LX.DEFAULT_NAME_WIDTH) + ")";
 
-            if(options.disabled)
-                wValue.setAttribute("disabled", true);
+            if( options.disabled )
+            {
+                wValue.setAttribute( "disabled", true );
+            }
 
             wValue.addEventListener("click", e => {
-                if( options.selectable ) {
+                if( options.selectable )
+                {
                     if( options.parent )
+                    {
                         options.parent.querySelectorAll(".lexbutton.selected").forEach( e => { if(e == wValue) return; e.classList.remove("selected") } );
+                    }
+
                     wValue.classList.toggle('selected');
                 }
-                this._trigger( new IEvent(name, value, e), callback );   
+
+                this._trigger( new IEvent( name, value, e ), callback );
             });
 
-            element.appendChild(wValue);
+            element.appendChild( wValue );
 
             // Remove branch padding and margins
-            if(!widget.name) {
+            if( !widget.name )
+            {
                 wValue.className += " noname";
                 wValue.style.width = "100%";
             }
