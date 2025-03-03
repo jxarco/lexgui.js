@@ -31,7 +31,7 @@
       video.src = "../data/video.mp4";
       videoArea.attach(video);
 
-      const videoEditor = new LX.VideoEditor(leftArea, {videoArea, video})
+      const videoEditor = new LX.VideoEditor(leftArea, {videoArea, video, crop: true})
       
       const canvas = document.createElement('canvas');
       canvas.width = video.clientWidth;

@@ -3778,8 +3778,10 @@ pre .line-gutter {
 }
 
 .lexvideoeditor video {
-  width: 100%;
-  height: 100%;
+  /* width: 100%;
+  height: 100%; */
+  -webkit-clip-path: inset(0 0 0 0);
+  clip-path: inset(0 0 0 0);
 }
 
 .lexarea.lexvideoeditor {
@@ -3854,3 +3856,44 @@ pre .line-gutter {
   resize: both;
   overflow: auto;
 }
+
+.resize-area {
+  position: absolute;
+  border: 2px double var(--global-selected-light);
+  cursor: move;
+  z-index: 100;
+}
+
+.resize-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #ffffff;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.resize-handle.tl {
+  top: -5px;
+  left: -5px;
+  cursor: nwse-resize;
+}
+
+.resize-handle.tr {
+  top: -5px;
+  right: -5px;
+  cursor: nesw-resize;
+}
+
+.resize-handle.bl {
+  bottom: -5px;
+  left: -5px;
+  cursor: nesw-resize;
+}
+
+.resize-handle.br {
+  bottom: -5px;
+  right: -5px;
+  cursor: nwse-resize;
+}
+
