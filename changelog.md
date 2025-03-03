@@ -1,6 +1,10 @@
 # lexgui.js changelog
 
-## 0.1.42 (dev)
+## 0.1.43 (dev)
+
+
+
+## 0.1.42 (master)
 
 AssetView:
 - Support custom element title on hover for Content layout mode `options.useNativeTitle`
@@ -17,7 +21,7 @@ Support options.title in Panel.addButton.
 [Area] `options.skip_default_area` -> `options.skipDefaultArea`.
 Minor bug fixes.
 
-## 0.1.41 (master)
+## 0.1.41
 
 AssetView:
 - Renamed all option parameters (remove snake case).
