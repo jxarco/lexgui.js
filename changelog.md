@@ -12,6 +12,7 @@ CodeEditor:
 - Support addTab() and loadFile() with options (`options.language`)
 - Fixed XML highlighting
 
+Support options.title in Panel.addButton.
 [Area] `options.no_append` -> `options.skipAppend`.
 [Area] `options.skip_default_area` -> `options.skipDefaultArea`.
 Minor bug fixes.

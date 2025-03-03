@@ -6124,7 +6124,8 @@ class Panel {
 
     addProgress( name, value, options = {} ) {
 
-        if(!name) {
+        if( !name )
+        {
             throw("Set Widget Name!");
         }
 
@@ -6155,46 +6156,74 @@ class Panel {
         progress.max = options.max ?? 1;
         progress.value = value;
         
-        if(options.low)
+        if( options.low )
             progress.low = options.low;
-        if(options.high)
+        if( options.high )
             progress.high = options.high;
-        if(options.optimum)
+        if( options.optimum )
             progress.optimum = options.optimum;
 
-        container.appendChild(progress);
-        element.appendChild(container);
+        container.appendChild( progress );
+        element.appendChild( container );
 
-        if(options.showValue) {
-            if(document.getElementById('progressvalue-' + name ))
+        if( options.showValue )
+        {
+            if( document.getElementById('progressvalue-' + name ) )
+            {
                 document.getElementById('progressvalue-' + name ).remove();
+            }
+
             let span = document.createElement("span");
             span.id = "progressvalue-" + name;
             span.style.padding = "0px 5px";
             span.innerText = value;
-            container.appendChild(span);
+            container.appendChild( span );
         }
 
-        if(options.editable) {
-            progress.classList.add("editable");
-            progress.addEventListener("mousemove", inner_mousemove.bind(this, value));
-            progress.addEventListener("mouseup", inner_mouseup.bind(this, progress));
+        if( options.editable )
+        {
+            progress.classList.add( "editable" );
+            progress.addEventListener( "mousedown", inner_mousedown );
 
-            function inner_mousemove(value, e) {
-            
-                if(e.which < 1)
-                    return;
-                let v = this.getValue(name, value);
-                v+=e.movementX/100;
-                v = v.toFixed(2);
-                this.setValue(name, v);
+            var that = this;
 
-                if(options.callback)
-                    options.callback(v, e);
+            function inner_mousedown( e )
+            {
+                var doc = that.root.ownerDocument;
+                doc.addEventListener( 'mousemove', inner_mousemove );
+                doc.addEventListener( 'mouseup', inner_mouseup );
+                document.body.classList.add( 'noevents' );
+                e.stopImmediatePropagation();
+                e.stopPropagation();
             }
 
-            function inner_mouseup(el) {
-                el.removeEventListener("mousemove", inner_mousemove);
+            function inner_mousemove( e )
+            {
+                let dt = -e.movementX;
+
+                if ( dt != 0 )
+                {
+                    let v = that.getValue( name, value );
+                    v += e.movementX / 100;
+                    v = round( v );
+                    that.setValue( name, v );
+
+                    if( options.callback )
+                    {
+                        options.callback( v, e );
+                    }
+                }
+
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            function inner_mouseup( e )
+            {
+                var doc = that.root.ownerDocument;
+                doc.removeEventListener( 'mousemove', inner_mousemove );
+                doc.removeEventListener( 'mouseup', inner_mouseup );
+                document.body.classList.remove( 'noevents' );
             }
         }
 
