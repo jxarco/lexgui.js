@@ -1843,7 +1843,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             tabEl.className = "lexareatab" + ( isSelected ? " selected" : "" );
             tabEl.innerHTML = ( options.icon ?? "" ) + name;
             tabEl.id = name.replace( /\s/g, '' ) + Tabs.TAB_ID++;
-            tabEl.title = options.title;
+            tabEl.title = options.title ?? "";
             tabEl.selected = isSelected ?? false;
             tabEl.fixed = options.fixed;
             tabEl.instance = this;
