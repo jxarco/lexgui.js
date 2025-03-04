@@ -35,10 +35,10 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     LX.clamp = clamp;
     LX.round = round;
     LX.remapRange = remapRange;
-    
+
     function getSupportedDOMName( string )
     {
-        return string.replace(/\s/g, '').replaceAll('@', '_').replaceAll('+', '_plus_').replaceAll('.', ''); 
+        return string.replace(/\s/g, '').replaceAll('@', '_').replaceAll('+', '_plus_').replaceAll('.', '');
     }
 
     LX.getSupportedDOMName = getSupportedDOMName;
@@ -51,15 +51,15 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     LX.has = has;
 
     function getExtension( s )
-    { 
+    {
         return s.includes('.') ? s.split('.').pop() : null;
     }
 
     LX.getExtension = getExtension;
 
     function deepCopy( o )
-    { 
-        return JSON.parse(JSON.stringify(o)) 
+    {
+        return JSON.parse(JSON.stringify(o))
     }
 
     LX.deepCopy = deepCopy;
@@ -97,9 +97,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         const blue = parseInt( hexStr.substring( 5, 7 ), 16 ) / 255;
         return [ red, green, blue ];
     }
-    
+
     LX.hexToRgb = hexToRgb;
-    
+
     function rgbToHex( rgb ) {
         let hex = "#";
         for( let c of rgb ) {
@@ -108,7 +108,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         }
         return hex;
     }
-    
+
     LX.rgbToHex = rgbToHex;
 
     function measureRealWidth( value, paddingPlusMargin = 8 ) {
@@ -169,10 +169,10 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             this.x = x ?? 0;
             this.y = y ?? ( x ?? 0 );
         }
-    
+
         get xy() { return [ this.x, this.y ]; }
         get yx() { return [ this.y, this.x ]; }
-    
+
         set ( x, y ) { this.x = x; this.y = y; }
         add ( v, v0 = new vec2() ) { v0.set( this.x + v.x, this.y + v.y ); return v0; }
         sub ( v, v0 = new vec2() ) { v0.set( this.x - v.x, this.y - v.y ); return v0; }
@@ -279,7 +279,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 onDragStart( currentTarget, e );
             }
         }, false );
-        
+
         document.addEventListener( 'mouseup', () => {
             if( currentTarget )
             {
@@ -288,7 +288,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             }
         } );
     }
-    
+
     LX.makeDraggable = makeDraggable;
 
     function create_global_searchbar( root ) {
@@ -513,17 +513,17 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             {
                 const instances = LX.CodeEditor.getInstances();
                 if(!instances.length) return;
-    
+
                 const languages = instances[ 0 ].languages;
-    
+
                 for( let l of Object.keys( languages ) ) {
-    
+
                     const key = "Language: " + l;
                     const icon = instances[ 0 ]._getFileIcon( null, languages[ l ].ext );
-    
+
                     let value = icon.includes( 'fa-' ) ? "<i class='" + icon + "'></i>" :
                             "<img src='" + ( "https://raw.githubusercontent.com/jxarco/lexgui.js/master/" + icon ) + "'>";
-    
+
                     value += key + " <span class='lang-ext'>(" + languages[ l ].ext + ")</span>";
                     if( key.toLowerCase().includes( filter ) ) {
                         add_element( value, () => {
@@ -549,7 +549,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
     /**
      * @method init
-     * @param {Object} options 
+     * @param {Object} options
      * container: Root location for the gui (default is the document body)
      * id: Id of the main area
      * skipDefaultArea: Skip creation of main area
@@ -565,7 +565,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         var root = document.createElement( 'div' );
         root.id = "lexroot";
         root.tabIndex = -1;
-        
+
         var modal = document.createElement( 'div' );
         modal.id = "modal";
 
@@ -577,11 +577,11 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         // this.modal.toggle = function( force ) { this.toggleAttribute( 'hidden', force ); };
 
         this.modal.classList.add( 'hiddenOpacity' );
-        this.modal.toggle = function( force ) { this.classList.toggle( 'hiddenOpacity', force ); };  
+        this.modal.toggle = function( force ) { this.classList.toggle( 'hiddenOpacity', force ); };
 
         if( options.container )
             this.container = document.getElementById( options.container );
-            
+
         this.global_search = create_global_searchbar( this.container );
 
         this.container.appendChild( modal );
@@ -620,9 +620,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
     /**
      * @method message
-     * @param {String} text 
+     * @param {String} text
      * @param {String} title (Optional)
-     * @param {*} options 
+     * @param {*} options
      * id: Id of the message dialog
      * position: Dialog position in screen [screen centered]
      * draggable: Dialog can be dragged [false]
@@ -646,9 +646,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
     /**
      * @method popup
-     * @param {String} text 
+     * @param {String} text
      * @param {String} title (Optional)
-     * @param {*} options 
+     * @param {*} options
      * id: Id of the message dialog
      * time: (Number) Delay time before close automatically (ms). Defalut: [3000]
      * position: (Array) [x,y] Dialog position in screen. Default: [screen centered]
@@ -665,19 +665,19 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         options.size = options.size ?? [ "auto", "auto" ];
         options.class = "lexpopup";
 
-        const time = options.timeout || 3000; 
+        const time = options.timeout || 3000;
         const dialog = new Dialog( title, p => {
             p.addTextArea( null, text, null, { disabled: true, fitHeight: true } );
         }, options );
-        
+
         dialog.root.classList.add( 'fadein' );
         setTimeout(() => {
             dialog.root.classList.remove( 'fadein' );
             dialog.root.classList.add( 'fadeout' );
         }, time - 1000 );
-        
+
         setTimeout( dialog.close, time );
-        
+
         return dialog;
     }
 
@@ -685,9 +685,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
     /**
      * @method prompt
-     * @param {String} text 
+     * @param {String} text
      * @param {String} title (Optional)
-     * @param {*} options 
+     * @param {*} options
      * id: Id of the prompt dialog
      * position: Dialog position in screen [screen centered]
      * draggable: Dialog can be dragged [false]
@@ -736,7 +736,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         {
             dialog.root.querySelector( 'input' ).focus();
         }
-        
+
         return dialog;
     }
 
@@ -775,7 +775,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             this.value = value;
             this.multiple = false; // Multiple selection
         }
-        
+
         string() {
             switch( this.type )
             {
@@ -820,7 +820,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             if( obj.constructor === Widget )
             {
                 obj.set( value, options.skipCallback ?? true );
-                
+
                 if( obj.options && obj.options.callback )
                 {
                     obj.options.callback( value, data );
@@ -843,7 +843,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         {
             LX.signals[ name ] = [];
         }
-        
+
         if( LX.signals[ name ].indexOf( obj ) > -1 )
         {
             return;
@@ -862,7 +862,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
         /**
          * @constructor Area
-         * @param {*} options 
+         * @param {*} options
          * id: Id of the element
          * className: Add class to the element
          * width: Width of the area element [fit space]
@@ -882,13 +882,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             {
                 root.className += " " + options.className;
             }
-    
+
             var width = options.width || "calc( 100% )";
             var height = options.height || "100%";
-            
+
             // This has default options..
             this.setLimitBox( options.minWidth, options.minHeight, options.maxWidth, options.maxHeight );
-    
+
             if( width.constructor == Number )
             {
                 width += "px";
@@ -897,16 +897,16 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             {
                 height += "px";
             }
-    
+
             root.style.width = width;
             root.style.height = height;
-    
+
             this.offset = 0;
             this.root = root;
             this.size = [ this.root.offsetWidth, this.root.offsetHeight ];
             this.sections = [];
             this.panels = [];
-    
+
             if( !options.skipAppend )
             {
                 var lexroot = document.getElementById("lexroot");
@@ -948,7 +948,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 }
 
                 if( options.resize )
-                {                  
+                {
                     this.splitBar = document.createElement("div");
                     let type = (overlay == "left") || (overlay == "right") ? "horizontal" : "vertical";
                     this.type = overlay;
@@ -958,7 +958,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     {
                         this.splitBar.style.width = LX.DEFAULT_SPLITBAR_SIZE + "px";
                         this.splitBar.style.left = -(LX.DEFAULT_SPLITBAR_SIZE / 2.0) + "px";
-                    } 
+                    }
                     else if( overlay == "left" )
                     {
                         let size = Math.min(document.body.clientWidth - LX.DEFAULT_SPLITBAR_SIZE, this.root.clientWidth);
@@ -979,10 +979,10 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
                     this.splitBar.addEventListener("mousedown", inner_mousedown);
                     this.root.appendChild( this.splitBar );
-                    
+
                     var that = this;
                     var lastMousePosition = [ 0, 0 ];
-                    
+
                     function inner_mousedown( e )
                     {
                         var doc = that.root.ownerDocument;
@@ -1022,13 +1022,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                                 that.root.style.height = size + "px";
                                 break;
                         }
-                        
+
                         lastMousePosition[ 0 ] = e.x;
                         lastMousePosition[ 1 ] = e.y;
                         e.stopPropagation();
                         e.preventDefault();
-                        
-                        // Resize events   
+
+                        // Resize events
                         if( that.onresize )
                         {
                             that.onresize( that.root.getBoundingClientRect() );
@@ -1074,11 +1074,11 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
         /**
          * @method split
-         * @param {*} options 
+         * @param {*} options
          * type: Split mode (horizontal, vertical) ["horizontal"]
          * sizes: Size of each new area (Array) ["50%", "50%"]
          */
-        
+
         split( options = {} ) {
 
             if( this.sections.length )
@@ -1152,7 +1152,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         area2.root.style.opacity = opacity;
                         flushCss(area2.root);
                     });
-    
+
                     this.splitBar.addEventListener("contextmenu", e => {
                         e.preventDefault();
                         addContextMenu(null, e, c => {
@@ -1207,7 +1207,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         height1 += "px";
                     if(height2.constructor == Number)
                         height2 += "px";
-    
+
                     area1.root.style.width = "100%";
                     area1.root.style.height = "calc( " + height1 + " - " + data + " )";
                     area2.root.style.height = "calc( " + height2 + " - " + data + " )";
@@ -1216,7 +1216,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             this.root.appendChild( area1.root );
 
-            if( resize ) 
+            if( resize )
             {
                 this.root.appendChild(this.splitBar);
             }
@@ -1309,7 +1309,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         * Resize element
         */
         setSize( size ) {
-            
+
             let [ width, height ] = size;
 
             if( width != undefined && width.constructor == Number )
@@ -1355,10 +1355,10 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             {
                 this.offset = area2.root.offsetHeight;
                 area2.root.classList.add("fadeout-vertical");
-                this._moveSplit(-Infinity, true); 
+                this._moveSplit(-Infinity, true);
 
             }
-            else 
+            else
             {
                 this.offset = area2.root.offsetWidth - 8; // Force some height here...
                 area2.root.classList.add("fadeout-horizontal");
@@ -1377,7 +1377,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             if( !this.split_extended )
             return;
-            
+
             this.split_extended = false;
             let [area1, area2] = this.sections;
 
@@ -1456,7 +1456,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
          */
 
         addMenubar( callback, options = {} ) {
-            
+
             let menubar = new Menubar(options);
 
             if(callback) callback( menubar );
@@ -1658,7 +1658,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             {
                 this.parentArea._disableSplitResize();
                 // Compensate split bar...
-                this.root.style.paddingTop = "4px"; 
+                this.root.style.paddingTop = "4px";
             }
 
             return tabs;
@@ -1707,7 +1707,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 a1.root.style.minHeight = a1.minHeight + "px";
                 a2.root.style.height = ( size - a2.offset ) + "px";
             }
-                
+
             if( !force_animation )
             {
                 // Reapply transitions
@@ -1716,7 +1716,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             this._update();
 
-            // Resize events   
+            // Resize events
             this.propagateEvent( 'onresize' );
         }
 
@@ -1839,11 +1839,11 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             }
 
             // debug
-            if(folding) 
+            if(folding)
             {
                 this.folded = true;
                 this.folding = folding;
-                
+
                 if(folding == "up") area.root.insertChildAtIndex(area.sections[1].root, 0);
 
                 // Listen resize event on parent area
@@ -1870,7 +1870,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 this.root.querySelectorAll( 'span' ).forEach( s => s.classList.remove( 'selected' ) );
                 this.area.root.querySelectorAll( '.lextabcontent' ).forEach( c => c.style.display = 'none' );
             }
-            
+
             isSelected = !Object.keys( this.tabs ).length && !this.folding ? true : isSelected;
 
             let contentEl = content.root ? content.root : content;
@@ -1913,9 +1913,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 if( this.parentElement.childNodes.length == 1 )
                 {
                     this.parentElement.childNodes[ 0 ].click(); // single tab!!
-                } 
+                }
             } );
-            
+
             tabEl.addEventListener("click", e => {
 
                 e.preventDefault();
@@ -1926,11 +1926,11 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     // For folding tabs
                     const lastValue = tabEl.selected;
                     tabEl.parentElement.querySelectorAll( 'span' ).forEach( s => s.selected = false );
-                    tabEl.selected = !lastValue; 
+                    tabEl.selected = !lastValue;
                     // Manage selected
                     tabEl.parentElement.querySelectorAll( 'span' ).forEach( s => s.classList.remove( 'selected' ));
                     tabEl.classList.toggle('selected', ( this.folding && tabEl.selected ));
-                    // Manage visibility 
+                    // Manage visibility
                     tabEl.instance.area.root.querySelectorAll( '.lextabcontent' ).forEach( c => c.style.display = 'none' );
                     contentEl.style.display = contentEl.originalDisplay;
                     tabEl.instance.selected = tabEl.dataset.name;
@@ -1959,7 +1959,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             tabEl.addEventListener("contextmenu", e => {
                 e.preventDefault();
                 e.stopPropagation();
-    
+
                 if( options.onContextMenu )
                 {
                     options.onContextMenu( e, tabEl.dataset.name );
@@ -1974,16 +1974,16 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     this.delete( tabEl.dataset[ "name" ] );
                 }
             });
-            
+
             tabEl.setAttribute( 'draggable', true );
             tabEl.addEventListener( 'dragstart', function( e ) {
                 if( this.parentElement.childNodes.length == 1 ){
                     e.preventDefault();
                     return;
-                } 
+                }
                 e.dataTransfer.setData( 'source', e.target.id );
             });
-            
+
             // Attach content
             tabEl.childIndex = ( this.root.childElementCount - 1 );
             this.root.appendChild( tabEl );
@@ -2062,7 +2062,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             if(options.float)
                 this.root.style.justifyContent = options.float;
             this.items = [];
-            
+
             this.icons = {};
             this.shorts = {};
             this.buttons = [];
@@ -2101,7 +2101,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 } );
 
                 if(found) {
-                    insert( tokens[idx++], found );    
+                    insert( tokens[idx++], found );
                 }
                 else {
                     let item = {};
@@ -2114,7 +2114,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         item[ 'checked' ] = options.checked;
                     }
                     list.push( item );
-                    insert( next_token, item[ token ] ); 
+                    insert( next_token, item[ token ] );
                 }
             };
 
@@ -2129,7 +2129,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
                 // Item already created
                 if( this.root.querySelector("#" + pKey) )
-                    continue;   
+                    continue;
 
                 let entry = document.createElement('div');
                 entry.className = "lexmenuentry";
@@ -2177,7 +2177,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         if(subkey == '')
                             subentry.className = " lexseparator";
                         else {
-                            
+
                             subentry.id = subkey;
                             let subentrycont = document.createElement('div');
                             subentrycont.innerHTML = "";
@@ -2204,8 +2204,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                                 const f = subitem[ 'callback' ];
                                 if(f) {
                                     f.call( this, subitem.checked, subkey, subentry );
-                                    that.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());  
-                                } 
+                                    that.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+                                }
                                 e.stopPropagation();
                                 e.stopImmediatePropagation();
                             })
@@ -2235,8 +2235,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                             const f = subitem[ 'callback' ];
                             if(f) {
                                 f.call( this, checkbox_input ? subitem.checked : subkey, checkbox_input ? subkey : subentry );
-                                that.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());  
-                            } 
+                                that.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+                            }
                             e.stopPropagation();
                             e.stopImmediatePropagation();
                         });
@@ -2282,7 +2282,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     if(f) {
                         f.call( this, key, entry );
                         return;
-                    } 
+                    }
 
                     // Manage selected
                     this.root.querySelectorAll(".lexmenuentry").forEach( e => e.classList.remove( 'selected' ) );
@@ -2314,7 +2314,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
          * @param {Array} tokens: split path strings
         */
         getSubitem(item, tokens) {
-           
+
             let subitem = null;
             let path = tokens[0];
             for(let i = 0; i < item.length; i++) {
@@ -2328,7 +2328,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         tokens.splice(0,1);
                         return this.getSubitem(item[i][path], tokens);
                     }
-                     
+
                 }
             }
         }
@@ -2340,7 +2340,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         getItem( path ) {
             // process path
             const tokens = path.split("/");
-            
+
             return this.getSubitem(this.items, tokens)
         }
 
@@ -2378,7 +2378,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 else {	
                     this.root.appendChild( button );	
                 }
-    
+
                 const _b = button.querySelector('a');
                 _b.addEventListener("click", (e) => {
                     if(callback && !disabled)
@@ -2419,7 +2419,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 else {	
                     this.root.appendChild( button );	
                 }
-    
+
                 const _b = button.querySelector('a');
                 _b.addEventListener("click", (e) => {
                     if(callback && !disabled)
@@ -2452,7 +2452,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 }	
                 else {	
                     this.root.appendChild( this.buttonContainer );	
-                }      
+                }
             }
 
             for( let i = 0; i < buttons.length; ++i )
@@ -2465,7 +2465,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 button.title = title ?? "";
                 button.innerHTML = "<a class='" + data.icon + " lexicon'></a>";
                 this.buttonContainer.appendChild( button );
-    
+
                 const _b = button.querySelector('a');
                 _b.addEventListener("click", (e) => {
                     disabled = e.target.parentElement.classList.contains("disabled");
@@ -2598,7 +2598,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
      */
 
     class Widget {
-        
+
         static NONE         = 0;
         static TEXT         = 1;
         static TEXTAREA     = 2;
@@ -2654,7 +2654,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             if( this.onSetValue )
                 return this.onSetValue( value, skipCallback );
-    
+
             console.warn("Can't set value of " + this.typeName());
         }
 
@@ -2762,33 +2762,33 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 container = document.createElement('div');
                 container.className = "lexcustomcontainer";
                 container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
-    
+
                 this.queue(container);
 
                 let buttonName = "<a class='fa-solid " + (options.icon ?? "fa-cube")  + "' style='float:left'></a>";
                 buttonName += custom_widget_name + (!instance ? " [empty]" : "");
                 // Add alwayis icon to keep spacing right
                 buttonName += "<a class='fa-solid " + (instance ? "fa-bars-staggered" : " ") + " menu' style='float:right; width:5%;'></a>";
-                
+
                 let buttonEl = this.addButton(null, buttonName, (value, event) => {
 
                     if( instance ) {
                         element.querySelector(".lexcustomitems").toggleAttribute('hidden');
                     }
                     else {
-                        addContextMenu(null, event, c => {    
-                            c.add("New " + custom_widget_name, () => { 
+                        addContextMenu(null, event, c => {
+                            c.add("New " + custom_widget_name, () => {
                                 instance = {};
                                 refresh_widget();
                                 element.querySelector(".lexcustomitems").toggleAttribute('hidden', false);
                             });
                         });
                     }
-    
+
                 }, { buttonClass: 'custom' });
-                
+
                 this.clearQueue();
-    
+
                 if(instance)
                     buttonEl.querySelector('a.menu').addEventListener('click', e => {
                         e.stopImmediatePropagation();
@@ -2800,13 +2800,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                             });
                         });
                     });
-    
+
                 // Show elements
-    
+
                 custom_widgets = document.createElement('div');
                 custom_widgets.className = "lexcustomitems";
                 custom_widgets.toggleAttribute('hidden', true);
-                
+
                 element.appendChild( container );
                 element.appendChild( custom_widgets );
 
@@ -2814,7 +2814,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 {
 
                     this.queue( custom_widgets );
-                    
+
                     const on_instance_changed = ( key, value, event ) => {
                         instance[ key ] = value;
                         this._trigger( new IEvent( name, instance, event ), callback );
@@ -2823,7 +2823,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     for( let key in default_instance )
                     {
                         const value = instance[ key ] ?? default_instance[ key ];
-                        
+
                         switch( value.constructor )
                         {
                             case String:
@@ -2864,13 +2864,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     }
 
     LX.ADD_CUSTOM_WIDGET = ADD_CUSTOM_WIDGET;
-    
+
     /**
      * @class NodeTree
      */
 
     class NodeTree {
-            
+
         constructor(domEl, data, options) {
             this.domEl = domEl;
             this.data = data;
@@ -2906,7 +2906,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             node.parent = parent;
             let isParent = node.children.length > 0;
             let isSelected = this.selected.indexOf( node ) > -1;
-            
+
             if( this.options.onlyFolders )
             {
                 let has_folders = false;
@@ -2923,10 +2923,10 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             let icon = (this.options.skip_default_icon ?? true) ? "" : "fa-solid fa-square"; // Default: no childs
             if( isParent ) icon = node.closed ? "fa-solid fa-caret-right" : "fa-solid fa-caret-down";
             item.innerHTML = "<a class='" + icon + " hierarchy'></a>";
-            
+
             // Add display icon
             icon = node.icon;
-            
+
             // Process icon
             if( node.icon )
             {
@@ -2958,7 +2958,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     list.querySelectorAll("li").forEach( e => { e.classList.remove('selected'); } );
                     this.selected.length = 0;
                 }
-                
+
                 // Add or remove
                 const idx = this.selected.indexOf( node );
                 if( idx > -1 ) {
@@ -3125,7 +3125,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             let name_input = document.createElement('input');
             name_input.toggleAttribute('hidden', !node.rename);
             name_input.value = node.id;
-            item.appendChild(name_input);            
+            item.appendChild(name_input);
 
             if(node.rename) {
                 item.classList.add('selected');
@@ -3218,13 +3218,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     delete window.__tree_node_dragged;
                 });
             }
-            
+
             let handled = false;
 
             // Show/hide children
             if(isParent) {
                 item.querySelector('a.hierarchy').addEventListener("click", function(e) {
-                    
+
                     handled = true;
                     e.stopImmediatePropagation();
                     e.stopPropagation();
@@ -3258,8 +3258,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
                 item.appendChild(visibility);
             }
-            
-            if(node.actions) 
+
+            if(node.actions)
             {
                 for(var i = 0; i < node.actions.length; ++i) {
                     let a = node.actions[i];
@@ -3298,14 +3298,14 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             this.domEl.querySelector( "ul" ).innerHTML = "";
             this._create_item( null, this.data, 0, selectedId );
         }
-    
+
         /* Refreshes the tree and focuses current element */
         frefresh( id ) {
             this.refresh();
             var el = this.domEl.querySelector( "#" + id );
             if( el ) el.focus();
         }
-    
+
         select( id ) {
             this.refresh( null, id );
         }
@@ -3318,7 +3318,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     class Panel {
 
         /**
-         * @param {*} options 
+         * @param {*} options
          * id: Id of the element
          * className: Add class to the element
          * width: Width of the panel element [fit space]
@@ -3469,7 +3469,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     this._inlineContainer.style.justifyContent = justifyContent;
                 }
             }
-            
+
             // Push all elements single element or Array[element, container]
             for( let item of this._inlineWidgets )
             {
@@ -3477,17 +3477,17 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
                 if(is_pair)
                 {
-                    // eg. an array, inline items appended later to 
+                    // eg. an array, inline items appended later to
                     if(this._inline_queued_container)
                         this._inlineContainer.appendChild( item[0] );
                     // eg. a dropdown, item is appended to parent, not to inline cont.
                     else
                         item[1].appendChild(item[0]);
-                } 
+                }
                 else
                     this._inlineContainer.appendChild( item );
             }
-            
+
             if(!this._inline_queued_container)
             {
                 if(this.current_branch)
@@ -3507,7 +3507,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         /**
          * @method branch
          * @param {String} name Name of the branch/section
-         * @param {*} options 
+         * @param {*} options
          * id: Id of the branch
          * className: Add class to the branch
          * closed: Set branch collapsed/opened [false]
@@ -3627,14 +3627,14 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     domName.style.width = options.nameWidth || LX.DEFAULT_NAME_WIDTH;
                     element.appendChild(domName);
                     element.domName = domName;
-    
+
                     // Copy-paste info
                     domName.addEventListener('contextmenu', function( e ) {
                         e.preventDefault();
                         widget.oncontextmenu( e );
                     });
                 }
-                
+
                 this.widgets[ name ] = widget;
             }
 
@@ -3663,7 +3663,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
                     if(this.current_branch)
                     {
-                        if(!options.skipWidget) 
+                        if(!options.skipWidget)
                             this.current_branch.widgets.push( widget );
                         this.current_branch.content.appendChild( el );
                     }
@@ -3672,7 +3672,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         el.classList.add("nobranch");
                         this.root.appendChild( el );
                     }
-                } 
+                }
                 // Append content to queued tab container
                 else {
                     this.queuedContainer.appendChild( el );
@@ -3683,7 +3683,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
                 if(!this.queuedContainer) {
                     this._inlineWidgets.push( el );
-                } 
+                }
                 // Append content to queued tab container
                 else {
                     this._inlineWidgets.push( [el, this.queuedContainer] );
@@ -3722,7 +3722,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             let widget = this.create_widget(null, Widget.TEXT, options);
             let element = widget.domEl;
             element.className += " lexfilter noname";
-            
+
             let input = document.createElement('input');
             input.className = 'lexinput-filter';
             input.setAttribute("placeholder", options.placeholder);
@@ -3734,9 +3734,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             element.appendChild(input);
             element.appendChild(searchIcon);
 
-            input.addEventListener("input", (e) => { 
+            input.addEventListener("input", (e) => {
                 if(options.callback)
-                    options.callback(input.value, e); 
+                    options.callback(input.value, e);
             });
 
             return element;
@@ -3748,7 +3748,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
                 if(b.name !== branchName)
                     continue;
-                
+
                 // remove all widgets
                 for( let w of b.widgets ) {
                     if(w.domEl.classList.contains('lexfilter'))
@@ -3810,7 +3810,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             if( callback )
                 callback.call( this, event.value, event.domEvent, event.name );
-    
+
             if( this.onevent )
                 this.onevent.call( this, event );
         }
@@ -3949,9 +3949,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 this.disabled ? wValue.innerText = newValue : wValue.value = newValue;
                 Panel._dispatch_event( wValue, "focusout", skipCallback );
             };
-    
+
             let element = widget.domEl;
-    
+
             // Add reset functionality
             if( widget.name && !( options.skipReset ?? false ) ) {
                 Panel._add_reset_property( element.domName, function() {
@@ -3960,17 +3960,17 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     Panel._dispatch_event( wValue, "focusout" );
                 } );
             }
-            
+
             // Add widget value
-    
+
             let container = document.createElement( 'div' );
             container.className = "lextext" + ( options.warning ? " lexwarning" : "" );
             container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
             container.style.display = "flex";
-    
+
             this.disabled = ( options.disabled || options.warning ) ?? ( options.url ? true : false );
             let wValue = null;
-    
+
             if( !this.disabled )
             {
                 wValue = document.createElement( 'input' );
@@ -3978,19 +3978,19 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 wValue.value = wValue.iValue = value || "";
                 wValue.style.width = "100%";
                 wValue.style.textAlign = options.float ?? "";
-    
+
                 if( options.placeholder )
                     wValue.setAttribute( "placeholder", options.placeholder );
-    
+
                 var resolve = ( function( val, event ) {
                     const skipCallback = event.detail;
                     let btn = element.querySelector( ".lexwidgetname .lexicon" );
                     if( btn ) btn.style.display = ( val != wValue.iValue ? "block" : "none" );
                     if( !skipCallback ) this._trigger( new IEvent( name, val, event ), callback );
                 }).bind( this );
-    
+
                 const trigger = options.trigger ?? 'default';
-    
+
                 if( trigger == 'default' )
                 {
                     wValue.addEventListener( "keyup", function( e ){
@@ -4007,19 +4007,19 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         resolve( e.target.value, e );
                     });
                 }
-    
+
                 wValue.addEventListener( "mousedown", function( e ){
                     e.stopImmediatePropagation();
                     e.stopPropagation();
                 });
-    
+
                 if( options.icon )
                 {
                     let icon = document.createElement( 'a' );
                     icon.className = "inputicon " + options.icon;
                     container.appendChild( icon );
                 }
-    
+
             } else
             {
                 wValue = document.createElement( options.url ? 'a' : 'div' );
@@ -4033,18 +4033,18 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 wValue.style.width = "100%";
                 wValue.style.textAlign = options.float ?? "";
             }
-    
+
             Object.assign( wValue.style, options.style ?? {} );
-    
+
             container.appendChild( wValue );
             element.appendChild( container );
-            
+
             // Remove branch padding and margins
             if( !widget.name ) {
                 element.className += " noname";
                 container.style.width = "100%";
             }
-    
+
             return widget;
         }
 
@@ -4085,7 +4085,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     Panel._dispatch_event( wValue, "focusout" );
                 });
             }
-            
+
             // Add widget value
 
             let container = document.createElement( 'div' );
@@ -4138,7 +4138,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             container.appendChild(wValue);
             element.appendChild(container);
-            
+
             // Remove branch padding and margins
             if(!widget.name) {
                 element.className += " noname";
@@ -4167,7 +4167,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             options.disabled = true;
             return this.addText( null, value, null, options );
         }
-        
+
         /**
          * @method addButton
          * @param {String} name Widget name
@@ -4189,8 +4189,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             };
 
             widget.onSetValue = ( newValue, skipCallback ) => {
-                wValue.innerHTML = 
-                (options.icon ? "<a class='" + options.icon + "'></a>" : 
+                wValue.innerHTML =
+                (options.icon ? "<a class='" + options.icon + "'></a>" :
                 ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + (newValue || "") + "</span>" ));
             };
 
@@ -4210,8 +4210,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 wValue.classList.add( options.buttonClass );
             }
 
-            wValue.innerHTML = 
-                (options.icon ? "<a class='" + options.icon + "'></a>" : 
+            wValue.innerHTML =
+                (options.icon ? "<a class='" + options.icon + "'></a>" :
                 ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + (value || "") + "</span>" ));
 
             wValue.style.width = "calc( 100% - " + (options.nameWidth ?? LX.DEFAULT_NAME_WIDTH) + ")";
@@ -4265,7 +4265,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             let container = document.createElement('div');
             container.className = "lexcombobuttons ";
             if( options.float ) container.className += options.float;
-            container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";   
+            container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
             let should_select = !(options.noSelection ?? false);
             for( let b of values )
@@ -4278,24 +4278,24 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 if(options.buttonClass)
                     buttonEl.classList.add(options.buttonClass);
 
-                if(options.selected == b.value) 
+                if(options.selected == b.value)
                     buttonEl.classList.add("selected");
-                    
+
                 buttonEl.innerHTML = (b.icon ? "<a class='" + b.icon +"'></a>" : "") + "<span>" + (b.icon ? "" : b.value) + "</span>";
-              
+
                 if(options.disabled)
                     buttonEl.setAttribute("disabled", true);
-                
+
                 buttonEl.addEventListener("click", function(e) {
                     if(should_select) {
                         container.querySelectorAll('button').forEach( s => s.classList.remove('selected'));
                         this.classList.add('selected');
                     }
-                    that._trigger( new IEvent(name, b.value, e), b.callback );   
+                    that._trigger( new IEvent(name, b.value, e), b.callback );
                 });
-    
+
                 container.appendChild(buttonEl);
-                
+
                 // Remove branch padding and margins
                 if(widget.name === undefined) {
                     buttonEl.className += " noname";
@@ -4364,11 +4364,11 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             }
 
             container.appendChild(name_el);
-            
+
             if( options.callback ) {
                 container.style.cursor = "pointer";
                 container.addEventListener("click", (e) => {
-                    this._trigger( new IEvent(name, null, e), options.callback );   
+                    this._trigger( new IEvent(name, null, e), options.callback );
                 });
             }
 
@@ -4562,7 +4562,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             wValue.name = name;
             wValue.iValue = value;
 
-            // Add dropdown widget button  
+            // Add dropdown widget button
             let buttonName = value;
             buttonName += "<a class='fa-solid fa-angle-down' style='float:right; margin-right: 3px;'></a>";
 
@@ -4874,7 +4874,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 for(var i = 0; i < (16 - nbits); ++i) {
                     binary = '0' + binary;
                 }
-    
+
                 for( let bit = 0; bit < 16; ++bit )
                 {
                     let layer = document.createElement('div');
@@ -4882,32 +4882,32 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     if( value != undefined )
                     {
                         const valueBit = binary[ 16 - bit - 1 ];
-                        if(valueBit != undefined && valueBit == '1') 
-                            layer.classList.add('selected');    
+                        if(valueBit != undefined && valueBit == '1')
+                            layer.classList.add('selected');
                     }
                     layer.innerText = bit + 1;
                     layer.title = "Bit " + bit + ", value " + (1 << bit);
                     container.appendChild( layer );
-                    
+
                     layer.addEventListener("click", e => {
-    
+
                         e.stopPropagation();
                         e.stopImmediatePropagation();
                         e.target.classList.toggle('selected');
                         value ^= ( 1 << bit );
                         element.value = value;
-    
+
                         let btn = element.querySelector(".lexwidgetname .lexicon");
                         if(btn) btn.style.display = (value != defaultValue ? "block" : "none");
-    
+
                         this._trigger( new IEvent(name, value, e), callback );
                     });
                 }
-    
+
             };
 
             setLayers();
-            
+
             element.appendChild(container);
 
             return widget;
@@ -4952,7 +4952,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             var container = document.createElement('div');
             container.className = "lexarray";
             container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
-            
+
             this.queue( container );
 
             const angle_down = `<a class='fa-solid fa-angle-down' style='float:right; margin-right: 3px;'></a>`;
@@ -4962,7 +4962,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             this.addButton(null, buttonName, () => {
                 element.querySelector(".lexarrayitems").toggleAttribute('hidden');
             }, { buttonClass: 'array' });
-            
+
             this.clearQueue();
 
             // Show elements
@@ -4970,7 +4970,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             let array_items = document.createElement('div');
             array_items.className = "lexarrayitems";
             array_items.toggleAttribute('hidden',  true);
-            
+
             element.appendChild(container);
             element.appendChild(array_items);
 
@@ -5051,7 +5051,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         addList( name, values, value, callback, options = {} ) {
 
             let widget = this.create_widget( name, Widget.LIST, options );
-    
+
             widget.onGetValue = () => {
                 return value;
             };
@@ -5063,56 +5063,56 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 value = newValue;
                 if( !skipCallback ) this._trigger( new IEvent( name, newValue ), callback );
             };
-    
+
             widget.updateValues = ( newValues ) => {
-    
+
                 values = newValues;
                 listContainer.innerHTML = "";
-                
+
                 for( let i = 0; i < values.length; ++i )
                 {
                     let icon = null;
                     let itemValue = values[ i ];
-    
+
                     if( itemValue.constructor === Array )
                     {
                         icon = itemValue[ 1 ];
                         itemValue = itemValue[ 0 ];
                     }
-    
+
                     let listElement = document.createElement( 'div' );
                     listElement.className = "lexlistitem" + ( value == itemValue ? " selected" : "" );
                     listElement.innerHTML = "<span>" + itemValue + "</span>" + ( icon ? "<a class='" + icon + "'></a>" : "" );
-    
+
                     listElement.addEventListener( 'click', e => {
                         listContainer.querySelectorAll( '.lexlistitem' ).forEach( e => e.classList.remove( 'selected' ) );
                         listElement.classList.toggle( 'selected' );
                         value = itemValue;
                         this._trigger( new IEvent( name, itemValue, e ), callback );
                     });
-    
+
                     listContainer.appendChild( listElement );
                 }
             };
-    
+
             let element = widget.domEl;
-    
+
             // Show list
-    
+
             let listContainer = document.createElement( 'div' );
             listContainer.className = "lexlist";
             listContainer.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
-    
+
             widget.updateValues( values );
-    
+
             // Remove branch padding and margins
             if( !widget.name ) {
                 element.className += " noname";
                 listContainer.style.width = "100%";
             }
-    
+
             element.appendChild( listContainer );
-    
+
             return widget;
         }
 
@@ -5164,14 +5164,14 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             const create_tags = () => {
 
                 tags_container.innerHTML = "";
-    
+
                 for( let i = 0; i < value.length; ++i )
                 {
                     let tag_name = value[i];
                     let tag = document.createElement('span');
                     tag.className = "lextag";
                     tag.innerHTML = tag_name;
-    
+
                     tag.addEventListener('click', function( e ) {
                         this.remove();
                         value.splice( value.indexOf( tag_name ), 1 );
@@ -5179,18 +5179,18 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         if( btn ) btn.style.display = ( value != defaultValue ? "block" : "none" );
                         that._trigger( new IEvent( name, value, e ), callback );
                     });
-    
+
                     tags_container.appendChild( tag );
                 }
-    
+
                 let tag_input = document.createElement( 'input' );
                 tag_input.value = "";
                 tag_input.placeholder = "Tag...";
                 tags_container.insertChildAtIndex( tag_input, 0 );
-    
+
                 tag_input.onkeydown = function( e ) {
                     const val = this.value.replace(/\s/g, '');
-                    if( e.key == ' ') { 
+                    if( e.key == ' ') {
                         e.preventDefault();
                         if( !val.length || value.indexOf( val ) > -1 )
                             return;
@@ -5201,7 +5201,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         that._trigger( new IEvent( name, value, e ), callback );
                     }
                 };
-    
+
                 tag_input.focus();
             }
 
@@ -5233,9 +5233,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             if( !name ) {
                 throw( "Set Widget Name!" );
             }
-    
+
             let widget = this.create_widget( name, Widget.CHECKBOX, options );
-    
+
             widget.onGetValue = () => {
                 return flag.value;
             };
@@ -5243,14 +5243,14 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 if( flag.value !== newValue )
                     Panel._dispatch_event( toggle, "click", skipCallback );
             };
-    
+
             let element = widget.domEl;
-    
+
             // Add reset functionality
             Panel._add_reset_property( element.domName, function() {
                 Panel._dispatch_event( toggle, "click" );
             });
-            
+
             // Add widget value
 
             var container = document.createElement('div');
@@ -5284,29 +5284,29 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 let flag = toggle.querySelector( ".checkbox" );
                 if( flag.disabled )
                     return;
-    
+
                 const skipCallback = ( e.detail.constructor == Number ? null : e.detail );
 
                 let check = toggle.querySelector( ".checkbox a" );
-    
+
                 flag.value = !flag.value;
                 flag.className = "checkbox " + ( flag.value ? "on" : "" );
                 check.style.display = flag.value ? "block" : "none";
-    
+
                 // Reset button (default value)
                 if( !skipCallback )
                 {
                     let btn = element.querySelector( ".lexwidgetname .lexicon" );
                     if( btn ) btn.style.display = flag.value != flag.iValue ? "block": "none";
                 }
-    
+
                 // Open suboptions
                 let submenu = element.querySelector( ".lexcheckboxsubmenu" );
                 if( submenu ) submenu.toggleAttribute( 'hidden', !flag.value );
-    
+
                 if( !skipCallback ) this._trigger( new IEvent( name, flag.value, e ), callback );
             });
-    
+
             element.appendChild( container );
 
             if( options.suboptions )
@@ -5341,9 +5341,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             if( !name ) {
                 throw( "Set Widget Name!" );
             }
-    
+
             let widget = this.create_widget( name, Widget.COLOR, options );
-    
+
             widget.onGetValue = () => {
                 return color.value;
             };
@@ -5351,23 +5351,23 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 color.value = newValue;
                 Panel._dispatch_event( color, "input", skipCallback );
             };
-    
+
             let element = widget.domEl;
             let change_from_input = false;
-    
+
             // Add reset functionality
             Panel._add_reset_property( element.domName, function() {
                 this.style.display = "none";
                 color.value = color.iValue;
                 Panel._dispatch_event( color, "input" );
             });
-    
+
             // Add widget value
-    
+
             var container = document.createElement( 'span' );
             container.className = "lexcolor";
             container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
-    
+
             let color = document.createElement( 'input' );
             color.style.width = "32px";
             color.type = 'color';
@@ -5375,49 +5375,49 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             color.id = "color" + simple_guidGenerator();
             color.useRGB = options.useRGB ?? false;
             color.value = color.iValue = value.constructor === Array ? rgbToHex( value ) : value;
-            
+
             if( options.disabled ) {
                 color.disabled = true;
             }
-    
+
             color.addEventListener( "input", e => {
                 let val = e.target.value;
-    
+
                 const skipCallback = e.detail;
-    
+
                 // Change value (always hex)
                 if( !change_from_input )
                     text_widget.set( val );
-    
+
                 // Reset button (default value)
                 if( !skipCallback )
                 {
                     let btn = element.querySelector( ".lexwidgetname .lexicon" );
                     if( btn ) btn.style.display = val != color.iValue ? "block": "none";
                 }
-    
+
                 if( color.useRGB )
                     val = hexToRgb( val );
-    
+
                 if( !skipCallback ) this._trigger( new IEvent( name, val, e ), callback );
             }, false );
-    
+
             container.appendChild( color );
-    
+
             this.queue( container );
-    
+
             const text_widget = this.addText( null, color.value, v => {
                 change_from_input = true;
                 widget.set( v );
                 change_from_input = false;
             }, { width: "calc( 100% - 32px )"});
-            
+
             text_widget.domEl.style.marginLeft = "4px";
-    
+
             this.clearQueue();
-    
+
             element.appendChild( container );
-    
+
             return widget;
         }
 
@@ -5464,7 +5464,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             // add widget value
 
             var container = document.createElement( 'div' );
-            container.className = "lexnumber";        
+            container.className = "lexnumber";
             container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
             let box = document.createElement( 'div' );
@@ -5599,7 +5599,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
                 if( !skipCallback ) this._trigger( new IEvent( name, val, e ), callback );
             }, { passive: false });
-            
+
             // Add drag input
 
             vecinput.addEventListener( "mousedown", inner_mousedown );
@@ -5668,7 +5668,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     options.onRelease.bind( vecinput )( e, vecinput );
                 }
             }
-            
+
             container.appendChild( box );
             element.appendChild( container );
 
@@ -5735,7 +5735,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             // Add widget value
 
             var container = document.createElement( 'div' );
-            container.className = "lexvector";        
+            container.className = "lexvector";
             container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
             for( let i = 0; i < num_components; ++i ) {
@@ -5828,7 +5828,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
                     if( !skipCallback ) this._trigger( new IEvent( name, value, e ), callback );
                 }, false );
-                
+
                 // Add drag input
 
                 vecinput.addEventListener( "mousedown", inner_mousedown );
@@ -5946,7 +5946,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     this.classList.remove( "fa-lock" );
                 }
             }, false );
-            
+
             element.appendChild( container );
 
             return widget;
@@ -5955,7 +5955,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         /**
          * @method addVector N (2, 3, 4)
          * @param {String} name Widget name
-         * @param {Array} value Array of N components 
+         * @param {Array} value Array of N components
          * @param {Function} callback Callback function on change
          * @param {*} options:
          * disabled: Make the widget disabled [false]
@@ -6191,7 +6191,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         /**
          * @method addProgress
          * @param {String} name Widget name
-         * @param {Number} value Progress value 
+         * @param {Number} value Progress value
          * @param {*} options:
          * min, max: Min and Max values
          * low, optimum, high: Low and High boundary values, Optimum point in the range
@@ -6233,7 +6233,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             progress.min = options.min ?? 0;
             progress.max = options.max ?? 1;
             progress.value = value;
-            
+
             if( options.low )
                 progress.low = options.low;
             if( options.high )
@@ -6323,62 +6323,62 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             if( !name ) {
                 throw( "Set Widget Name!" );
             }
-    
+
             let widget = this.create_widget( name, Widget.FILE, options );
             let element = widget.domEl;
-    
+
             let local = options.local ?? true;
             let type = options.type ?? 'text';
-            let read = options.read ?? true; 
-    
+            let read = options.read ?? true;
+
             // Create hidden input
             let input = document.createElement( 'input' );
             input.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 10%)";
             input.type = 'file';
-    
+
             if( options.placeholder )
                 input.placeholder = options.placeholder;
-    
+
             input.addEventListener( 'change', function( e ) {
-    
+
                 const files = e.target.files;
                 if( !files.length ) return;
                 if( read )
                 {
                     if( options.onBeforeRead )
                         options.onBeforeRead();
-    
+
                     const reader = new FileReader();
-    
+
                     if( type === 'text' ) reader.readAsText( files[ 0 ] );
                     else if( type === 'buffer' ) reader.readAsArrayBuffer( files[ 0 ] );
                     else if( type === 'bin' ) reader.readAsBinaryString( files[ 0 ] );
                     else if( type === 'url' ) reader.readAsDataURL( files[ 0 ] );
-    
+
                     reader.onload = e => { callback.call( this, e.target.result, files[ 0 ] ) } ;
                 }
                 else
                     callback( files[ 0 ] );
             });
-    
+
             element.appendChild( input );
-    
+
             this.queue( element );
-            
+
             if( local )
             {
                 this.addButton(null, "<a style='margin-top: 0px;' class='fa-solid fa-gear'></a>", () => {
-                    
+
                     new Dialog( "Load Settings", p => {
                         p.addDropdown( "Type", [ 'text', 'buffer', 'bin', 'url' ], type, v => { type = v } );
                         p.addButton( null, "Reload", v => { input.dispatchEvent( new Event( 'change' ) ) } );
                     });
-                    
+
                 }, { className: "micro", skipInlineCount: true });
             }
-    
+
             this.clearQueue();
-    
+
             return widget;
         }
 
@@ -6436,7 +6436,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 node_filter_input.addEventListener('input', function(){
                     nodeTree.refresh();
                 });
-        
+
                 let searchIcon = document.createElement('a');
                 searchIcon.className = "lexicon fa-solid fa-magnifying-glass";
                 toolsDiv.appendChild(node_filter_input);
@@ -6470,11 +6470,11 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             element.className = "lexseparator";
             let widget = new Widget( null, Widget.SEPARATOR );
             widget.domEl = element;
-            
+
             if(this.current_branch) {
                 this.current_branch.content.appendChild( element );
                 this.current_branch.widgets.push( widget );
-            } else 
+            } else
                 this.root.appendChild(element);
         }
 
@@ -6486,7 +6486,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
          *      onCreate: Func to be called at tab creation
          *      onSelect: Func to be called on select tab (optional)
          * }
-         * @param {*} options 
+         * @param {*} options
          * vertical: Use vertical or horizontal tabs (vertical by default)
          * showNames: Show tab name only in horizontal tabs
          */
@@ -6568,7 +6568,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     this.clearQueue();
                 }
             }
-            
+
             this.addSeparator();
         }
     }
@@ -6580,7 +6580,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
      */
 
     class Branch {
-        
+
         constructor( name, options = {} ) {
 
             this.name = name;
@@ -6735,7 +6735,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 line.style.height = (h-3) + "px";
                 document.body.classList.add('nocursor');
             }
-            
+
             function inner_mousemove(e)
             {
                 if (lastXLine != e.pageX) {
@@ -6817,7 +6817,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         static _last_id = 0;
 
         constructor( title, callback, options = {} ) {
-            
+
             if( !callback )
             {
                 console.warn("Content is empty, add some widgets using 'callback' parameter!");
@@ -6854,13 +6854,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 titleDiv.oncontextmenu = function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-    
+
                     if(!LX.main_area || LX.main_area.type !== 'horizontal')
                         return;
 
                     addContextMenu("Dock", e, p => {
                         e.preventDefault();
-                        
+
                         const get_next_panel = function(area) {
                             let p = area.panels[0];
                             if( p ) return p;
@@ -6874,7 +6874,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                             let branch = panel.branches.find( b => b.name === title );
                             if( !branch ) {
                                 panel.branch(title);
-                                branch = panel.branches.find( b => b.name === title );                                    
+                                branch = panel.branches.find( b => b.name === title );
                             }else
                                 panel.root.appendChild( branch.root );
 
@@ -6889,7 +6889,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                             branch.root.classList.add('last');
                             root.remove();
                         }
-                        
+
                         // Right
                         let rpanel = get_next_panel(LX.main_area.sections[1]);
                         p.add('<i class="fa-regular fa-window-maximize fa-window-maximize fa-rotate-90">', {disabled: !rpanel, id: 'dock_options0', callback: () => {
@@ -6944,7 +6944,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             // Make branches have a distintive to manage some cases
             panel.root.querySelectorAll(".lexbranch").forEach( b => b.classList.add("dialog") );
-            
+
             this.panel = panel;
             this.root = root;
             this.title = titleDiv;
@@ -6964,7 +6964,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             root.style.height = size[1] ? (size[1]) : "auto";
 
             if(options.size) this.size = size;
-            
+
             let rect = root.getBoundingClientRect();
             root.style.left = position[0] ? (position[0]) : "calc( 50% - " + (rect.width * 0.5) + "px )";
             root.style.top = position[1] ? (position[1]) : "calc( 50% - " + (rect.height * 0.5) + "px )";
@@ -6974,7 +6974,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         }
 
         destroy() {
-            
+
             this.root.remove();
         }
 
@@ -6985,7 +6985,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         }
 
         setPosition(x, y) {
-            
+
             this.root.style.left = x + "px";
             this.root.style.top = y + "px";
         }
@@ -7014,9 +7014,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             options.draggable = options.draggable ?? false;
             options.closable = options.closable ?? false;
-            
+
             super( title, callback, options );
-            
+
             let that = this;
             // Update margins on branch title closes/opens
             LX.addSignal("@on_branch_closed", this.panel, closed => {
@@ -7024,7 +7024,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     this.root.style.top = "calc(100% - " + (this.root.offsetHeight + 6) + "px)";
             });
 
-            // Custom 
+            // Custom
             this.root.classList.add( "pocket" );
             if( !options.position ) {
                 this.root.style.left = "calc(100% - " + (this.root.offsetWidth + 6) + "px)";
@@ -7038,7 +7038,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             this.title.tabIndex = -1;
             this.title.addEventListener("click", e => {
 
-                // Sized dialogs have to keep their size 
+                // Sized dialogs have to keep their size
                 if( this.size )
                 {
                     if( !this.minimized ) this.root.style.height = "auto";
@@ -7049,7 +7049,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 this.minimized = !this.minimized;
 
                 if( this.dock_pos == PocketDialog.BOTTOM )
-                    that.root.style.top = this.root.classList.contains("minimized") ? 
+                    that.root.style.top = this.root.classList.contains("minimized") ?
                     "calc(100% - " + (that.title.offsetHeight + 6) + "px)" : "calc(100% - " + (that.root.offsetHeight + 6) + "px)";
             });
 
@@ -7064,10 +7064,10 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         const t = float[i];
                         switch( t )
                         {
-                        case 'b': 
+                        case 'b':
                             this.root.style.top = "calc(100% - " + (this.root.offsetHeight + 6) + "px)";
                             break;
-                        case 'l': 
+                        case 'l':
                             this.root.style.left = options.position ? options.position[ 1 ] : "0px";
                             break;
                         }
@@ -7101,7 +7101,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     class ContextMenu {
 
         constructor( event, title, options = {} ) {
-            
+
             // remove all context menus
             document.body.querySelectorAll(".lexcontextmenubox").forEach(e => e.remove());
 
@@ -7113,7 +7113,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             this.root.addEventListener("mouseleave", function() {
                 this.remove();
             });
-            
+
             this.items = [];
             this.colors = {};
 
@@ -7130,9 +7130,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         _adjust_position( div, margin, useAbsolute = false ) {
 
             let rect = div.getBoundingClientRect();
-            
+
             if( !useAbsolute )
-            {   
+            {
                 let width = rect.width;
                 if( rect.left < 0 )
                 {
@@ -7159,7 +7159,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 {
                     div.style.left = div.offsetLeft + (dt - margin) + "px";
                 }
-                
+
                 dt = window.innerHeight - (rect.top + rect.height);
                 if( dt < 0 )
                 {
@@ -7219,14 +7219,14 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             entry.addEventListener("click", e => {
                 e.stopPropagation();
                 e.stopImmediatePropagation();
-                
+
                 if(disabled) return;
-                
+
                 const f = o[ 'callback' ];
                 if(f) {
                     f.call( this, k, entry );
                     this.root.remove();
-                } 
+                }
 
                 if( !hasSubmenu )
                 return;
@@ -7290,7 +7290,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 } );
 
                 if(found) {
-                    insert( tokens[idx++], found );    
+                    insert( tokens[idx++], found );
                 }
                 else {
                     let item = {};
@@ -7301,10 +7301,10 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         item[ 'id' ] = options.id;
                         item[ 'callback' ] = options.callback;
                         item[ 'disabled' ] = options.disabled ?? false;
-                    } 
+                    }
 
                     list.push( item );
-                    insert( next_token, item[ token ] ); 
+                    insert( next_token, item[ token ] );
                 }
             };
 
@@ -7389,14 +7389,14 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     class Curve {
 
         constructor( panel, value, options = {} ) {
-    
+
             let element = document.createElement( "div" );
             element.className = "curve " + ( options.className ? options.className : "" );
             element.style.minHeight = "50px";
             element.style.width = options.width || "100%";
             element.style.minWidth = "50px";
             element.style.minHeight = "20px";
-    
+
             element.bgcolor = options.bgColor || LX.getThemeColor( "global-dark-background" );
             element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected-light" );
             element.linecolor = options.lineColor || "#555";
@@ -7411,24 +7411,24 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             element.draggable_y = options.draggableY ?? true;
             element.smooth = (options.smooth && typeof( options.smooth ) == 'number' ? options.smooth : 0.3) || false;
             element.move_out = options.moveOutAction ?? LX.CURVE_MOVEOUT_DELETE;
-    
+
             this.element = element;
-    
+
             let canvas = document.createElement( "canvas" );
             canvas.width = options.width || 200;
             canvas.height = options.height || 50;
             element.appendChild( canvas );
             this.canvas = canvas;
-    
+
             element.addEventListener( "mousedown", onmousedown );
-    
+
             element.getValueAt = function( x ) {
-    
+
                 if( x < element.xrange[ 0 ] || x > element.xrange[ 1 ] )
                 {
                     return element.defaulty;
                 }
-    
+
                 var last = [ element.xrange[ 0 ], element.defaulty ];
                 var f = 0;
                 for( var i = 0; i < element.value.length; i += 1 )
@@ -7440,17 +7440,17 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         f = ( x - last[ 0 ] ) / (v[ 0 ] - last[ 0 ]);
                         return last[ 1 ] * ( 1 - f ) + v[ 1 ] * f;
                     }
-    
+
                     last = v;
                 }
-    
+
                 v = [ element.xrange[ 1 ], element.defaulty ];
                 f = (x - last[ 0 ]) / (v[ 0 ] - last[ 0 ]);
                 return last[ 1 ] * ( 1 - f ) + v[ 1 ] * f;
             }
-    
+
             element.resample = function( samples ) {
-    
+
                 var r = [];
                 var dx = (element.xrange[1] - element.xrange[ 0 ]) / samples;
                 for(var i = element.xrange[0]; i <= element.xrange[1]; i += dx)
@@ -7459,9 +7459,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 }
                 return r;
             }
-    
+
             element.addValue = function(v) {
-    
+
                 for(var i = 0; i < element.value; i++) {
                     var value = element.value[i];
                     if(value[0] < v[0]) continue;
@@ -7469,27 +7469,27 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     redraw();
                     return;
                 }
-    
+
                 element.value.push(v);
                 redraw();
             }
-    
+
             //value to canvas
             function convert(v) {
                 return [ canvas.width * ( v[0] - element.xrange[0])/ (element.xrange[1]),
                     canvas.height * (v[1] - element.yrange[0])/ (element.yrange[1])];
             }
-    
+
             //canvas to value
             function unconvert(v) {
                 return [(v[0] * element.xrange[1] / canvas.width + element.xrange[0]),
                         (v[1] * element.yrange[1] / canvas.height + element.yrange[0])];
             }
-    
+
             var selected = -1;
-    
+
             element.redraw = function( o = {} )  {
-                
+
                 if( o.value ) element.value = o.value;
                 if( o.xrange ) element.xrange = o.xrange;
                 if( o.yrange ) element.yrange = o.yrange;
@@ -7500,23 +7500,23 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 {
                     canvas.width = rect.width;
                 }
-    
+
                 var ctx = canvas.getContext( "2d" );
                 ctx.setTransform( 1, 0, 0, 1, 0, 0 );
                 ctx.translate( 0, canvas.height );
                 ctx.scale( 1, -1 );
-    
+
                 ctx.fillStyle = element.bgcolor;
                 ctx.fillRect(0,0,canvas.width,canvas.height);
-    
+
                 ctx.strokeStyle = element.linecolor;
                 ctx.beginPath();
-    
+
                 //draw line
                 var pos = convert([ element.xrange[ 0 ],element.defaulty ]);
                 ctx.moveTo( pos[ 0 ], pos[ 1 ] );
                 let values = [pos[ 0 ], pos[ 1 ]];
-    
+
                 for(var i in element.value) {
                     var value = element.value[i];
                     pos = convert(value);
@@ -7525,7 +7525,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     if(!element.smooth)
                         ctx.lineTo( pos[ 0 ], pos[ 1 ] );
                 }
-    
+
                 pos = convert([ element.xrange[ 1 ], element.defaulty ]);
                 values.push(pos[ 0 ]);
                 values.push(pos[ 1 ]);
@@ -7538,7 +7538,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 {
                     LX.UTILS.drawSpline( ctx, values, element.smooth );
                 }
-    
+
                 // Draw points
                 for( var i = 0; i < element.value.length; i += 1 ) {
                     var value = element.value[ i ];
@@ -7551,7 +7551,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     ctx.arc( pos[ 0 ], pos[ 1 ], selected == i ? 4 : 3, 0, Math.PI * 2);
                     ctx.fill();
                 }
-    
+
                 if(element.show_samples) {
                     var samples = element.resample(element.show_samples);
                     ctx.fillStyle = "#888";
@@ -7565,43 +7565,43 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     }
                 }
             }
-    
+
             var last_mouse = [ 0, 0 ];
-    
+
             function onmousedown( e ) {
                 document.addEventListener( "mousemove", onmousemove );
                 document.addEventListener( "mouseup", onmouseup );
-    
+
                 var rect = canvas.getBoundingClientRect();
                 var mousex = e.clientX - rect.left;
                 var mousey = e.clientY - rect.top;
-    
+
                 selected = computeSelected( mousex, canvas.height - mousey );
-    
+
                 if( e.button == LX.MOUSE_LEFT_CLICK && selected == -1 && element.allow_add_values ) {
                     var v = unconvert([ mousex, canvas.height - mousey ]);
                     element.value.push( v );
                     sortValues();
                     selected = element.value.indexOf( v );
                 }
-    
+
                 last_mouse = [ mousex, mousey ];
                 element.redraw();
                 e.preventDefault();
                 e.stopPropagation();
             }
-    
+
             function onmousemove( e ) {
-    
+
                 var rect = canvas.getBoundingClientRect();
                 var mousex = e.clientX - rect.left;
                 var mousey = e.clientY - rect.top;
-    
+
                 if( mousex < 0 ) mousex = 0;
                 else if( mousex > canvas.width ) mousex = canvas.width;
                 if( mousey < 0 ) mousey = 0;
                 else if( mousey > canvas.height ) mousey = canvas.height;
-    
+
                 // Dragging to remove
                 const currentMouseDiff = [ e.clientX - rect.left, e.clientY - rect.top ];
                 if( selected != -1 && distance( currentMouseDiff, [ mousex, mousey ] ) > canvas.height * 0.5 )
@@ -7617,25 +7617,25 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         value[ 0 ] = ( d[ 0 ] == 0.0 ) ? value[ 0 ] : ( d[ 0 ] < 0.0 ? element.xrange[ 0 ] : element.xrange[ 1 ] );
                         value[ 1 ] = ( d[ 1 ] == 0.0 ) ? value[ 1 ] : ( d[ 1 ] < 0.0 ? element.yrange[ 1 ] : element.yrange[ 0 ] );
                     }
-    
+
                     onmouseup( e );
                     return;
                 }
-    
+
                 var dx = element.draggable_x ? last_mouse[ 0 ] - mousex : 0;
                 var dy = element.draggable_y ? last_mouse[ 1 ] - mousey : 0;
                 var delta = unconvert([ -dx, dy ]);
-    
+
                 if( selected != -1 ) {
                     var minx = element.xrange[ 0 ];
                     var maxx = element.xrange[ 1 ];
-    
+
                     if( element.no_overlap )
                     {
                         if( selected > 0) minx = element.value[ selected - 1 ][ 0 ];
                         if( selected < ( element.value.length - 1 ) ) maxx = element.value[ selected + 1 ][ 0 ];
                     }
-    
+
                     var v = element.value[selected];
                     v[ 0 ] += delta[ 0 ];
                     v[ 1 ] += delta[ 1 ];
@@ -7644,17 +7644,17 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     if(v[ 1 ] < element.yrange[ 0 ]) v[ 1 ] = element.yrange[ 0 ];
                     else if(v[ 1 ] > element.yrange[ 1 ]) v[ 1 ] = element.yrange[ 1 ];
                 }
-    
+
                 sortValues();
                 element.redraw();
                 last_mouse[ 0 ] = mousex;
                 last_mouse[ 1 ] = mousey;
                 onchange( e );
-    
+
                 e.preventDefault();
                 e.stopPropagation();
             }
-    
+
             function onmouseup( e ) {
                 selected = -1;
                 element.redraw();
@@ -7664,16 +7664,16 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 e.preventDefault();
                 e.stopPropagation();
             }
-            
+
             function onchange( e ) {
                 if( options.callback )
                     options.callback.call( element, element.value, e );
             }
-    
+
             function distance(a,b) { return Math.sqrt( Math.pow(b[0]-a[0],2) + Math.pow(b[1]-a[1],2) ); };
-    
+
             function computeSelected( x, y ) {
-    
+
                 var minDistance = 100000;
                 var maxDistance = 8; //pixels
                 var selected = -1;
@@ -7690,7 +7690,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 }
                 return selected;
             }
-    
+
             function sortValues() {
                 var v = null;
                 if( selected != -1 )
@@ -7703,11 +7703,11 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     selected = element.value.indexOf( v );
                 }
             }
-            
+
             element.redraw();
             return this;
         }
-    
+
         redraw( options = {} ) {
             this.element.redraw( options );
         }
@@ -7725,14 +7725,14 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         static ASSET_DBLCLICKED = 5;
         static ENTER_FOLDER     = 6;
         static ASSET_CHECKED    = 7;
-    
+
         constructor( type, item, value ) {
             this.type = type || TreeEvent.NONE;
             this.item = item;
             this.value = value;
             this.multiple = false; // Multiple selection
         }
-        
+
         string() {
             switch(this.type) {
                 case AssetViewEvent.NONE: return "assetview_event_none";
@@ -7807,7 +7807,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             {
                 [ contentArea, right ] = contentArea.split({ type: "horizontal", sizes: ["80%", "20%"]});
             }
-            
+
             this.allowedTypes = options.allowedTypes || ["None", "Image", "Mesh", "Script", "JSON", "Clip"];
 
             this.prevData = [];
@@ -7825,7 +7825,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             }
 
             this._createContentPanel( contentArea );
-            
+
             // Create resource preview panel
             if( !this.skipPreview )
             {
@@ -7841,7 +7841,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             this.prevData.length = 0;
             this.nextData.length = 0;
-            
+
             this.data = data;
 
             this._processData( this.data, null );
@@ -7904,7 +7904,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         */
 
         _updatePath( data ) {
-            
+
             this.path.length = 0;
 
             const push_parents_id = i => {
@@ -7944,7 +7944,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             }
 
             this.tree = this.leftPanel.addTree( "Content Browser", treeData, {
-                // icons: tree_icons, 
+                // icons: tree_icons,
                 filter: false,
                 onlyFolders: this.onlyFolders,
                 onevent: event => {
@@ -7954,7 +7954,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
                     switch( event.type )
                     {
-                        case LX.TreeEvent.NODE_SELECTED: 
+                        case LX.TreeEvent.NODE_SELECTED:
                             if( !event.multiple )
                             {
                                 this._enterFolder( node );
@@ -7969,13 +7969,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                                 LX.emit("@on_folder_change", this.path.join('/'));
                             }
                             break;
-                        case LX.TreeEvent.NODE_DRAGGED: 
+                        case LX.TreeEvent.NODE_DRAGGED:
                             node.folder = value;
                             this._refreshContent();
                             break;
                     }
                 },
-            });    
+            });
         }
 
         /**
@@ -8119,24 +8119,24 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         _refreshContent( searchValue, filter ) {
 
             const isContentLayout = ( this.layout == AssetView.LAYOUT_CONTENT ); // default
-    
+
             this.filter = filter ?? ( this.filter ?? "None" );
             this.searchValue = searchValue ?? (this.searchValue ?? "");
             this.content.innerHTML = "";
             this.content.className = (isContentLayout ? "lexassetscontent" : "lexassetscontent list");
             let that = this;
-            
+
             const add_item = function(item) {
-    
+
                 const type = item.type.charAt( 0 ).toUpperCase() + item.type.slice( 1 );
                 const extension = getExtension( item.id );
                 const isFolder = type === "Folder";
-    
+
                 let itemEl = document.createElement('li');
                 itemEl.className = "lexassetitem " + item.type.toLowerCase();
                 itemEl.tabIndex = -1;
                 that.content.appendChild( itemEl );
-    
+
                 if( !that.useNativeTitle )
                 {
                     let desc = document.createElement( 'span' );
@@ -8191,7 +8191,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 if( item.selected != undefined )
                 {
                     let span = document.createElement('span');
-                    span.className = "lexcheckbox"; 
+                    span.className = "lexcheckbox";
                     let checkbox_input = document.createElement('input');
                     checkbox_input.type = "checkbox";
                     checkbox_input.className = "checkbox";
@@ -8209,19 +8209,19 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     })
                     span.appendChild(checkbox_input);
                     itemEl.appendChild(span);
-                    
+
                 }
 
                 let title = document.createElement('span');
                 title.className = "lexassettitle";
                 title.innerText = item.id;
                 itemEl.appendChild( title );
-    
+
                 if( !that.skipPreview ) {
-    
+
                     let preview = null;
                     const hasImage = item.src && (['png', 'jpg'].indexOf( getExtension( item.src ) ) > -1 || item.src.includes("data:image/") ); // Support b64 image as src
-    
+
                     if( hasImage || isFolder || !isContentLayout)
                     {
                         preview = document.createElement('img');
@@ -8234,17 +8234,17 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         preview = document.createElement('svg');
                         preview.className = "asset-file-preview";
                         itemEl.appendChild(preview);
-                        
+
                         let textEl = document.createElement('text');
                         preview.appendChild(textEl);
                         // If no extension, e.g. Clip, use the type...
                         textEl.innerText = (!extension || extension == item.id) ? item.type.toUpperCase() : ("." + extension.toUpperCase());
-    
+
                         var newLength = textEl.innerText.length;
                         var charsPerLine = 2.5;
                         var newEmSize = charsPerLine / newLength;
                         var textBaseSize = 64;
-    
+
                         if(newEmSize < 1) {
                             var newFontSize = newEmSize * textBaseSize;
                             textEl.style.fontSize = newFontSize + "px";
@@ -8252,7 +8252,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         }
                     }
                 }
-    
+
                 if( !isFolder )
                 {
                     let info = document.createElement('span');
@@ -8260,13 +8260,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     info.innerText = type;
                     itemEl.appendChild(info);
                 }
-    
+
                 itemEl.addEventListener('click', function(e) {
                     e.stopImmediatePropagation();
                     e.stopPropagation();
-    
+
                     const isDoubleClick = ( e.detail == LX.MOUSE_DOUBLE_CLICK );
-    
+
                     if( !isDoubleClick )
                     {
                         if( !e.shiftKey )
@@ -8280,13 +8280,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         {
                             that._previewAsset( item );
                         }
-                    } 
+                    }
                     else if( isFolder )
                     {
                         that._enterFolder( item );
                         return;
                     }
-    
+
                     if( that.onevent )
                     {
                         const event = new AssetViewEvent(isDoubleClick ? AssetViewEvent.ASSET_DBLCLICKED : AssetViewEvent.ASSET_SELECTED, e.shiftKey ? [item] : item );
@@ -8294,15 +8294,15 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         that.onevent( event );
                     }
                 });
-    
+
                 if( that.contextMenu )
                 {
                     itemEl.addEventListener('contextmenu', function(e) {
                         e.preventDefault();
-    
+
                         const multiple = that.content.querySelectorAll('.selected').length;
-    
-                        LX.addContextMenu( multiple > 1 ? (multiple + " selected") : 
+
+                        LX.addContextMenu( multiple > 1 ? (multiple + " selected") :
                                     isFolder ? item.id : item.type, e, m => {
                             if( multiple <= 1 )
                             {
@@ -8321,21 +8321,21 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         });
                     });
                 }
-    
+
                 itemEl.addEventListener("dragstart", function(e) {
                     e.preventDefault();
                 }, false );
-    
+
                 return itemEl;
             }
-    
+
             const fr = new FileReader();
-    
+
             const filteredData = this.currentData.filter( _i => {
                 return (this.filter != "None" ? _i.type.toLowerCase() == this.filter.toLowerCase() : true) &&
                     _i.id.toLowerCase().includes(this.searchValue.toLowerCase())
             } );
-    
+
             if( filter || searchValue )
             {
                 this.contentPage = 1;
@@ -8344,17 +8344,17 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             // Show all data if using filters
             const startIndex = (this.contentPage - 1) * AssetView.MAX_PAGE_ELEMENTS;
             const endIndex = Math.min( startIndex + AssetView.MAX_PAGE_ELEMENTS, filteredData.length );
-    
+
             for( let i = startIndex; i < endIndex; ++i )
             {
                 let item = filteredData[ i ];
-    
+
                 if( item.path )
                 {
                     LX.request({ url: item.path, dataType: 'blob', success: (f) => {
                         item.bytesize = f.size;
                         fr.readAsDataURL( f );
-                        fr.onload = e => { 
+                        fr.onload = e => {
                             item.src = e.currentTarget.result;  // This is a base64 string...
                             item._path = item.path;
                             delete item.path;
@@ -8405,16 +8405,16 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             this.previewPanel.addText("Type", file.type, null, options);
             if( file.bytesize ) this.previewPanel.addText("Size", (file.bytesize/1024).toPrecision(3) + " KBs", null, options);
             if( file.type == "folder" ) this.previewPanel.addText("Files", file.children ? file.children.length.toString() : "0", null, options);
-            
+
             this.previewPanel.addSeparator();
-            
+
             const previewActions = [...this.previewActions];
 
             if( !previewActions.length )
             {
                 // By default
                 previewActions.push({
-                    name: 'Download', 
+                    name: 'Download',
                     callback: () => LX.downloadURL(file.src, file.id)
                 });
             }
@@ -8442,8 +8442,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 if(result) continue;
 
                 fr.readAsDataURL( file );
-                fr.onload = e => { 
-                    
+                fr.onload = e => {
+
                     let ext = file.name.substr(file.name.lastIndexOf('.') + 1).toLowerCase();
 
                     let item = {
@@ -8458,12 +8458,12 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     case 'png':
                     case 'jpg':
                         item.type = "image"; break;
-                    case 'js': 
-                    case 'css': 
+                    case 'js':
+                    case 'css':
                         item.type = "script"; break;
-                    case 'json': 
+                    case 'json':
                         item.type = "json"; break;
-                    case 'obj': 
+                    case 'obj':
                         item.type = "mesh"; break;
                     default:
                         item.type = ext;
@@ -8472,7 +8472,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     }
 
                     this.currentData.push( item );
-                    
+
                     if(i == (num_files - 1)) {
                         this._refreshContent();
                         if( !this.skipBrowser )
@@ -8561,7 +8561,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     }
 
     LX.AssetView = AssetView;
-        
+
     /*
     *   Requests
     */
@@ -8569,7 +8569,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     Object.assign(LX, {
 
         /**
-        * Request file from url (it could be a binary, text, etc.). If you want a simplied version use 
+        * Request file from url (it could be a binary, text, etc.). If you want a simplied version use
         * @method request
         * @param {Object} request object with all the parameters like data (for sending forms), dataType, success, error
         * @param {Function} on_complete
@@ -8689,7 +8689,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         requestBinary(url, on_complete, on_error ) {
             return this.request({ url: url, dataType:"binary", success: on_complete, error: on_error });
         },
-        
+
         /**
         * Request script and inserts it in the DOM
         * @method requireScript
@@ -8718,7 +8718,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 script.src = url[i] + ( version ? "?version=" + version : "" );
                 script.original_src = url[i];
                 script.async = false;
-                script.onload = function(e) { 
+                script.onload = function(e) {
                     total--;
                     loaded_scripts.push(this);
                     if(total)
@@ -8730,7 +8730,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         on_complete( loaded_scripts );
                 };
                 if(on_error)
-                    script.onerror = function(err) { 
+                    script.onerror = function(err) {
                         on_error(err, this.original_src, this.num );
                     }
                 document.getElementsByTagName('head')[0].appendChild(script);
@@ -8754,7 +8754,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             {
                 LX.request({ url: url, dataType: 'blob', success: (f) => {
                     fr.readAsDataURL( f );
-                    fr.onload = e => { 
+                    fr.onload = e => {
                         _download(e.currentTarget.result);
                     };
                 } });
@@ -8840,31 +8840,31 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             element.offsetHeight;
         },
         getControlPoints( x0, y0, x1, y1, x2, y2 ,t ) {
-            
+
             //  x0,y0,x1,y1 are the coordinates of the end (knot) pts of this segment
             //  x2,y2 is the next knot -- not connected here but needed to calculate p2
             //  p1 is the control point calculated here, from x1 back toward x0.
-            //  p2 is the next control point, calculated here and returned to become the 
+            //  p2 is the next control point, calculated here and returned to become the
             //  next segment's p1.
             //  t is the 'tension' which controls how far the control points spread.
-            
+
             //  Scaling factors: distances from this knot to the previous and following knots.
             var d01=Math.sqrt(Math.pow(x1-x0,2)+Math.pow(y1-y0,2));
             var d12=Math.sqrt(Math.pow(x2-x1,2)+Math.pow(y2-y1,2));
-        
+
             var fa=t*d01/(d01+d12);
             var fb=t-fa;
-        
+
             var p1x=x1+fa*(x0-x2);
             var p1y=y1+fa*(y0-y2);
-        
+
             var p2x=x1-fb*(x0-x2);
-            var p2y=y1-fb*(y0-y2);  
-            
+            var p2y=y1-fb*(y0-y2);
+
             return [p1x,p1y,p2x,p2y]
         },
         drawSpline( ctx, pts, t ) {
-        
+
             ctx.save();
             var cp=[];   // array of control points, as x0,y0,x1,y1,...
             var n=pts.length;
@@ -8872,7 +8872,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             // Draw an open curve, not connected at the ends
             for(var i=0;i<n-4;i+=2) {
                 cp=cp.concat(LX.UTILS.getControlPoints(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
-            }    
+            }
 
             for(var i=2;i<pts.length-5;i+=2) {
                 ctx.beginPath();
@@ -8880,7 +8880,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
                 ctx.stroke();
                 ctx.closePath();
-                
+
             }
             //  For open curves the first and last arcs are simple quadratics.
             ctx.beginPath();
@@ -8888,13 +8888,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             ctx.quadraticCurveTo(cp[0],cp[1],pts[2],pts[3]);
             ctx.stroke();
             ctx.closePath();
-        
+
             ctx.beginPath();
             ctx.moveTo(pts[n-2],pts[n-1]);
             ctx.quadraticCurveTo(cp[2*n-10],cp[2*n-9],pts[n-4],pts[n-3]);
             ctx.stroke();
             ctx.closePath();
-            
+
             ctx.restore();
         }
     };
