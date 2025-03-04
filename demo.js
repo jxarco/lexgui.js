@@ -129,6 +129,12 @@ area.addMenubar( m => {
 // split main area
 var [left, right] = area.split({ sizes:["80%","20%"], minimizable: true });
 
+// left.addSidebar( m => {
+//     m.add( "Scene", { icon: "fa fa-cube", callback: () => {  } } );
+//     m.add( "Code", { icon: "fa fa-code", callback: () => {  } } );
+//     m.add( "Search", { icon: "fa fa-search", bottom: true, callback: () => { } } );
+// });
+
 // split left area
 var [up, bottom] = left.split({ type: 'vertical', sizes:["50%", null], minimizable: true });
 

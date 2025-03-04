@@ -1091,7 +1091,6 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             var type = options.type || "horizontal";
             var sizes = options.sizes || [ "50%", "50%" ];
-            var infer_height = false;
             var auto = (options.sizes === 'auto');
 
             if( !sizes[ 1 ] )
@@ -1105,7 +1104,6 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 }
 
                 sizes[ 1 ] = "calc( 100% - " + size + " )";
-                infer_height = true;
             }
 
             // Create areas
@@ -1136,18 +1134,18 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     this.splitBar.style.height = LX.DEFAULT_SPLITBAR_SIZE + "px";
                 }
 
-                this.splitBar.addEventListener( 'mousedown', inner_mousedown );
+                this.splitBar.addEventListener( 'mousedown', innerMouseDown );
 
                 data = ( LX.DEFAULT_SPLITBAR_SIZE / 2 ) + "px"; // updates
 
                 // Being minimizable means it's also resizeable!
                 if( minimizable )
                 {
-                    this.split_extended = false;
+                    this.splitExtended = false;
 
                     // Keep state of the animation when ends...
                     area2.root.addEventListener('animationend', e => {
-                        const opacity = getComputedStyle(area2.root).opacity;
+                        const opacity = getComputedStyle( area2.root ).opacity;
                         area2.root.classList.remove( e.animationName + "-" + type );
                         area2.root.style.opacity = opacity;
                         flushCss(area2.root);
@@ -1156,8 +1154,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     this.splitBar.addEventListener("contextmenu", e => {
                         e.preventDefault();
                         addContextMenu(null, e, c => {
-                            c.add("Extend", { disabled: this.split_extended, callback: () => { this.extend() } });
-                            c.add("Reduce", { disabled: !this.split_extended, callback: () => { this.reduce() } });
+                            c.add("Extend", { disabled: this.splitExtended, callback: () => { this.extend() } });
+                            c.add("Reduce", { disabled: !this.splitExtended, callback: () => { this.reduce() } });
                         });
                     });
                 }
@@ -1169,9 +1167,14 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     width2 = sizes[ 1 ];
 
                 if( width1.constructor == Number )
+                {
                     width1 += "px";
+                }
+
                 if( width2.constructor == Number )
+                {
                     width2 += "px";
+                }
 
                 area1.root.style.width = "calc( " + width1 + " - " + data + " )";
                 area1.root.style.height = "calc(100% - 0px)";
@@ -1203,10 +1206,15 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     var height1 = sizes[ 0 ],
                         height2 = sizes[ 1 ];
 
-                    if(height1.constructor == Number)
+                    if( height1.constructor == Number )
+                    {
                         height1 += "px";
-                    if(height2.constructor == Number)
+                    }
+
+                    if( height2.constructor == Number )
+                    {
                         height2 += "px";
+                    }
 
                     area1.root.style.width = "100%";
                     area1.root.style.height = "calc( " + height1 + " - " + data + " )";
@@ -1234,34 +1242,28 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             }
 
             var that = this;
-            var lastMousePosition = [ 0, 0 ];
 
-            function inner_mousedown( e )
+            function innerMouseDown( e )
             {
                 var doc = that.root.ownerDocument;
-                doc.addEventListener( 'mousemove', inner_mousemove );
-                doc.addEventListener( 'mouseup', inner_mouseup );
-                lastMousePosition[0] = e.x;
-                lastMousePosition[1] = e.y;
+                doc.addEventListener( 'mousemove', innerMouseMove );
+                doc.addEventListener( 'mouseup', innerMouseUp );
                 e.stopPropagation();
                 e.preventDefault();
                 document.body.classList.add( 'nocursor' );
                 that.splitBar.classList.add( 'nocursor' );
             }
 
-            function inner_mousemove( e )
+            function innerMouseMove( e )
             {
-                if(that.type == "horizontal")
+                if( that.type == "horizontal" )
                 {
-                    that._moveSplit( lastMousePosition[ 0 ] - e.x );
+                    that._moveSplit( -e.movementX );
                 }
                 else
                 {
-                    that._moveSplit( lastMousePosition[ 1 ] - e.y );
+                    that._moveSplit( -e.movementY );
                 }
-
-                lastMousePosition[ 0 ] = e.x;
-                lastMousePosition[ 1 ] = e.y;
 
                 const widgets = that.root.querySelectorAll( ".lexwidget" );
 
@@ -1280,11 +1282,11 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 e.preventDefault();
             }
 
-            function inner_mouseup( e )
+            function innerMouseUp( e )
             {
                 var doc = that.root.ownerDocument;
-                doc.removeEventListener( 'mousemove', inner_mousemove );
-                doc.removeEventListener( 'mouseup', inner_mouseup );
+                doc.removeEventListener( 'mousemove', innerMouseMove );
+                doc.removeEventListener( 'mouseup', innerMouseUp );
                 document.body.classList.remove( 'nocursor' );
                 that.splitBar.classList.remove( 'nocursor' );
             }
@@ -1343,13 +1345,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         */
         extend() {
 
-            if( this.split_extended )
+            if( this.splitExtended )
             {
                 return;
             }
 
             let [area1, area2] = this.sections;
-            this.split_extended = true;
+            this.splitExtended = true;
 
             if(this.type == "vertical")
             {
@@ -1375,10 +1377,10 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         */
         reduce() {
 
-            if( !this.split_extended )
+            if( !this.splitExtended )
             return;
 
-            this.split_extended = false;
+            this.splitExtended = false;
             let [area1, area2] = this.sections;
 
             if(this.type == "vertical")
@@ -1664,54 +1666,66 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             return tabs;
         }
 
-        _moveSplit( dt, force_animation = false, force_width = 0 ) {
+        _moveSplit( dt, forceAnimation = false, forceWidth = 0 ) {
 
             if( !this.type )
+            {
                 throw( "No split area" );
+            }
 
             if( dt === undefined ) // Splitbar didn't move!
+            {
                 return;
+            }
 
-            var a1 = this.sections[ 0 ];
-            var a2 = this.sections[ 1 ];
-            var splitinfo = " - "+ LX.DEFAULT_SPLITBAR_SIZE + "px";
+            const a1 = this.sections[ 0 ];
+            var a1Root = a1.root;
+
+            if( !a1Root.classList.contains( "origin" ) )
+            {
+                a1Root = a1Root.parentElement;
+            }
+
+            const a2 = this.sections[ 1 ];
+            const a2Root = a2.root;
+            const splitData = " - "+ LX.DEFAULT_SPLITBAR_SIZE + "px";
 
             let transition = null;
-            if( !force_animation )
+            if( !forceAnimation )
             {
                 // Remove transitions for this change..
-                transition = a1.root.style.transition;
-                a1.root.style.transition = a2.root.style.transition = "none";
-                flushCss( a1.root );
-                flushCss( a2.root );
+                transition = a1Root.style.transition;
+                a1Root.style.transition = a2Root.style.transition = "none";
+                flushCss( a1Root );
+                flushCss( a2Root );
             }
 
             if( this.type == "horizontal" )
             {
-                var size = Math.max( a2.root.offsetWidth + dt, parseInt( a2.minWidth ) );
-                if( force_width ) size = force_width;
-                a1.root.style.width = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
-                a1.root.style.width = "-webkit-calc( 100% - " + size + "px " + splitinfo + " )";
-                a1.root.style.width = "calc( 100% - " + size + "px " + splitinfo + " )";
-                a1.root.style.minWidth = parseInt( a1.minWidth ) + "px";
-                a2.root.style.width = size + "px";
-                if( a1.maxWidth != Infinity ) a2.root.style.minWidth = "calc( 100% - " + parseInt( a1.maxWidth ) + "px" + " )";
+                var size = Math.max( a2Root.offsetWidth + dt, parseInt( a2.minWidth ) );
+                if( forceWidth ) size = forceWidth;
+                a1Root.style.width = "-moz-calc( 100% - " + size + "px " + splitData + " )";
+                a1Root.style.width = "-webkit-calc( 100% - " + size + "px " + splitData + " )";
+                a1Root.style.width = "calc( 100% - " + size + "px " + splitData + " )";
+                a1Root.style.minWidth = parseInt( a1.minWidth ) + "px";
+                a2Root.style.width = size + "px";
+                if( a1.maxWidth != Infinity ) a2Root.style.minWidth = "calc( 100% - " + parseInt( a1.maxWidth ) + "px" + " )";
             }
             else
             {
-                var size = Math.max((a2.root.offsetHeight + dt) + a2.offset, parseInt(a2.minHeight));
-                if( force_width ) size = force_width;
-                a1.root.style.height = "-moz-calc( 100% - " + size + "px " + splitinfo + " )";
-                a1.root.style.height = "-webkit-calc( 100% - " + size + "px " + splitinfo + " )";
-                a1.root.style.height = "calc( 100% - " + size + "px " + splitinfo + " )";
-                a1.root.style.minHeight = a1.minHeight + "px";
-                a2.root.style.height = ( size - a2.offset ) + "px";
+                var size = Math.max((a2Root.offsetHeight + dt) + a2.offset, parseInt(a2.minHeight));
+                if( forceWidth ) size = forceWidth;
+                a1Root.style.height = "-moz-calc( 100% - " + size + "px " + splitData + " )";
+                a1Root.style.height = "-webkit-calc( 100% - " + size + "px " + splitData + " )";
+                a1Root.style.height = "calc( 100% - " + size + "px " + splitData + " )";
+                a1Root.style.minHeight = a1.minHeight + "px";
+                a2Root.style.height = ( size - a2.offset ) + "px";
             }
 
-            if( !force_animation )
+            if( !forceAnimation )
             {
                 // Reapply transitions
-                a1.root.style.transition = a2.root.style.transition = transition;
+                a1Root.style.transition = a2Root.style.transition = transition;
             }
 
             this._update();
