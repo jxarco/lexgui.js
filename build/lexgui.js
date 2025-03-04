@@ -6698,23 +6698,26 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
         _addBranchSeparator() {
 
-            var element = document.createElement('div');
+            const element = document.createElement('div');
             element.className = "lexwidgetseparator";
             element.style.width = "100%";
             element.style.background = "none";
 
-            var grabber = document.createElement('div');
+            const grabber = document.createElement('div');
             grabber.innerHTML = "&#9662;";
-            grabber.style.marginLeft = LX.DEFAULT_NAME_WIDTH;
             element.appendChild(grabber);
 
-            var line = document.createElement('div');
+            doAsync( () => {
+                grabber.style.marginLeft = ((parseFloat(LX.DEFAULT_NAME_WIDTH) / 100.0) * this.content.offsetWidth) + "px";
+            }, 10 )
+
+            const line = document.createElement('div');
             line.style.width = "1px";
             line.style.marginLeft = "6px";
             line.style.marginTop = "2px";
             line.style.height = "0px"; // get in time
-            grabber.appendChild(line);
-            grabber.addEventListener("mousedown", inner_mousedown);
+            grabber.appendChild( line );
+            grabber.addEventListener( "mousedown", innerMouseDown );
 
             this.grabber = grabber;
 
@@ -6722,45 +6725,40 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 return that.root.offsetHeight - that.root.children[0].offsetHeight;
             }
 
-            var that = this;
-            var lastX = 0;
-            var lastXLine = 0;
-            function inner_mousedown(e)
+            let that = this;
+
+            function innerMouseDown( e )
             {
                 var doc = that.root.ownerDocument;
-                doc.addEventListener("mouseup",inner_mouseup);
-                doc.addEventListener("mousemove",inner_mousemove);
-                lastX = e.pageX;
-                lastXLine = e.pageX;
+                doc.addEventListener("mouseup", innerMouseUp);
+                doc.addEventListener("mousemove", innerMouseMove);
                 e.stopPropagation();
                 e.preventDefault();
-                var h = getBranchHeight();
+                const h = getBranchHeight();
                 line.style.height = (h-3) + "px";
                 document.body.classList.add('nocursor');
             }
 
-            function inner_mousemove(e)
+            function innerMouseMove(e)
             {
-                if (lastXLine != e.pageX) {
-                    var dt = lastXLine - e.pageX;
-                    var margin = parseFloat( grabber.style.marginLeft );
-                    grabber.style.marginLeft = clamp(margin - dt * 0.1, 10, 90) + "%";
-                }
+                let dt = e.movementX;
 
-                lastXLine = e.pageX;
+                if ( dt != 0 )
+                {
+                    const margin = parseFloat( grabber.style.marginLeft );
+                    grabber.style.marginLeft = clamp( margin + dt, 32, that.content.offsetWidth - 32 ) + "px";
+                }
             }
 
-            function inner_mouseup(e)
+            function innerMouseUp(e)
             {
-                if (lastX != e.pageX)
-                    that._updateWidgets();
-                lastX = e.pageX;
-                lastXLine = e.pageX;
+                that._updateWidgets();
+
                 line.style.height = "0px";
 
                 var doc = that.root.ownerDocument;
-                doc.removeEventListener("mouseup",inner_mouseup);
-                doc.removeEventListener("mousemove",inner_mousemove);
+                doc.removeEventListener("mouseup", innerMouseUp);
+                doc.removeEventListener("mousemove", innerMouseMove);
                 document.body.classList.remove('nocursor');
             }
 
