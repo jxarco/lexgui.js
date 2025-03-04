@@ -377,9 +377,9 @@ class VideoEditor {
         this.cropArea.style.height = this.video.style.height;
 
         this.brCrop = document.createElement("div");
-        this.brCrop.className = " resize-handle br"; // bottom right
-                
-        this.cropArea.append(this.brCrop);        
+        this.brCrop.className = " resize-handle br"; // bottom right                
+        this.cropArea.append(this.brCrop);
+        this.crop = options.crop;
 
         if(options.videoArea) {
             options.videoArea.root.classList.add("lexvideoeditor");
@@ -510,8 +510,23 @@ class VideoEditor {
             }
             if(this.isDragging) {
                 const rect = this.video.getBoundingClientRect();
-                const x = event.clientX - this.dragOffsetX;
-                const y = event.clientY - this.dragOffsetY;
+                let x = event.clientX - this.dragOffsetX;
+                let y = event.clientY - this.dragOffsetY;
+
+                if(x < rect.left ) {
+                    x = rect.left;
+                }
+                if( x + this.cropArea.clientWidth > rect.right ) {
+                    x = rect.right - this.cropArea.clientWidth;
+                }
+
+                if(y < rect.top ) {
+                    y = rect.top;
+                }
+                if( y + this.cropArea.clientHeight > rect.bottom ) {
+                    y = rect.bottom - this.cropArea.clientHeight;
+                }
+
                 this.cropArea.style.left = x + "px";
                 this.cropArea.style.top = y + "px";
 
@@ -524,25 +539,23 @@ class VideoEditor {
             
         });
 
-        if(options.crop) {
-            this.cropArea.classList.remove("hidden");
-            this.cropArea.addEventListener('mousedown', (event) => {
-                const rect = this.cropArea.getBoundingClientRect();
-                if (event.target === this.cropArea) {
-                    this.isDragging = true;
-                    this.dragOffsetX = event.clientX - rect.left;
-                    this.dragOffsetY = event.clientY - rect.top;
-                }
+        this.cropArea.addEventListener('mousedown', (event) => {
+            const rect = this.cropArea.getBoundingClientRect();
+            if (event.target === this.cropArea) {
+                this.isDragging = true;
+                this.dragOffsetX = event.clientX - rect.left;
+                this.dragOffsetY = event.clientY - rect.top;
+            }
+        });
+
+        document.querySelectorAll('.resize-handle').forEach(handle => {
+            handle.addEventListener('mousedown', (e) => {
+                this.resizeHandle = handle.classList[1];
+                this.isResizing = true;
+                e.stopPropagation();
             });
-    
-            document.querySelectorAll('.resize-handle').forEach(handle => {
-                handle.addEventListener('mousedown', (e) => {
-                    this.resizeHandle = handle.classList[1];
-                    this.isResizing = true;
-                    e.stopPropagation();
-                });
-            });
-        }
+        });
+
     }
     
     resizeCropArea(event) {
@@ -552,8 +565,16 @@ class VideoEditor {
         const mouseY = event.clientY;
         
        if (this.resizeHandle === 'br') {
-            const width = mouseX - rect.left;
-            const height = mouseY - rect.top;
+            let width = mouseX - rect.left;
+            let height = mouseY - rect.top;
+            if( rect.x + width > rectVideo.right ) {
+                width = rectVideo.right - rect.x;
+            }
+
+            if( rect.y + height > rectVideo.bottom ) {
+                height = rectVideo.bottom - rect.y;
+            }
+
             this.cropArea.style.width = width + "px";
             this.cropArea.style.height = height + "px";
 
@@ -584,6 +605,10 @@ class VideoEditor {
         this.cropArea.style.height = this.video.clientHeight + "px";
         this.cropArea.style.width = this.video.videoWidth * ratio + "px";
         
+        if(this.crop) {
+            this.showCropArea();
+        }
+
         if(!this.controls) {
             this.hideControls();
         }
@@ -689,6 +714,18 @@ class VideoEditor {
         return {start: this.startTime, end: this.endTime};
     }
 
+    getCroppedArea ( ) {
+        return this.cropArea.getBoundingClientRect();
+    }
+
+    showCropArea ( ) {
+        this.cropArea.classList.remove("hidden");
+    }
+
+    hideCropArea ( ) {
+        this.cropArea.classList.add("hidden");
+    }
+    
     showControls ( ) {
         this.controls = true;
         this.controlsArea.show();
