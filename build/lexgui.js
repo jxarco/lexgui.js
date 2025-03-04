@@ -29,7 +29,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     LX.CURVE_MOVEOUT_DELETE = 1;
 
     function clamp( num, min, max ) { return Math.min( Math.max( num, min ), max ); }
-    function round( number, precision ) { return +(( number ).toFixed( precision ?? 2 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' )); }
+    function round( number, precision ) { return precision == 0 ? Math.floor( number ) : +(( number ).toFixed( precision ?? 2 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' )); }
     function remapRange( oldValue, oldMin, oldMax, newMin, newMax ) { return ((( oldValue - oldMin ) * ( newMax - newMin )) / ( oldMax - oldMin )) + newMin; }
 
     LX.clamp = clamp;
