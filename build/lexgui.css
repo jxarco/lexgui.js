@@ -7,12 +7,12 @@
   --global-title-font: "Poppins", sans-serif;
   --global-font-size: 12px;
   --global-font-size-big: 14px;
-  --global-color-primary: #212121;
+  --global-color-primary: #1c1c1c;
   --global-color-secondary: #2c2c2c;
   --global-color-terciary: #444;
-  --global-selected: #3e57e4;
-  --global-selected-light: #7b8ae2;
-  --global-selected-dark: #2f42ad;
+  --global-selected: #2962dd;
+  --global-selected-light: #668ee4;
+  --global-selected-dark: #304b86;
 	--global-branch-darker: #252525;
 	--branch-title-background: #2e3338;
   --branch-title-inactive-background: #42484e;
@@ -23,7 +23,7 @@
   --global-text-secondary: #cacad4ea;
   --global-text-terciary: #727272b9;
   --global-dark-background: #121212;
-  --global-blur-background: #232425d5;
+  --global-blur-background: #1f1f1fe7;
   --global-color-transparent: #7b8ae200;
   --transition-time: 1000;
   --code-editor-font-size: 14px;
@@ -418,11 +418,11 @@ body.noevents * {
 }
 
 .lexsplitbar.horizontal {
-  cursor: col-resize;
+  cursor: ew-resize;
 }
 
 .lexsplitbar.vertical {
-	cursor: row-resize;
+	cursor: ns-resize;
   transform: translateY(-3px);
   left: calc(50% - 32px);
 }
@@ -962,7 +962,7 @@ body.noevents * {
 .lexdropdown ul {
   position: fixed;
   list-style: none;
-	background-color: var(--global-blur-background);
+	background-color: var(--global-color-primary);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   padding: 0px;
@@ -981,7 +981,7 @@ body.noevents * {
 .lexdropdown .lexdropdownitem {
   width: 100%;
   cursor: pointer;
-  color: rgba(216, 218, 230, 0.826);
+  color: var(--global-text-primary);
   min-height: 20px;
   line-height: 22px;
   align-content: center;
@@ -994,7 +994,7 @@ body.noevents * {
 }
 
 .lexdropdown .lexdropdownitem:hover {
-  background-color: var(--branch-title-inactive-background);
+  background-color: var(--global-selected);
   color: var(--global-text-primary);
 }
 
@@ -1010,7 +1010,6 @@ body.noevents * {
 
 .lexdropdown .lexdropdownitem.selected {
   font-weight: 700;
-  background-color: var(--global-selected);
 }
 
 .lexdropdown .lexdropdownitem.selected a {
@@ -2263,7 +2262,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexareatabs.row .lexareatab {
-  background-color: var(--global-color-terciary);
+  background-color: var(--global-color-secondary);
   padding-left: 16px;
   padding-right: 16px;
   margin-right: 4px;
