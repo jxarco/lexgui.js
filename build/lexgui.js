@@ -1501,10 +1501,11 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
          */
 
         addOverlayButtons( buttons, options = {} ) {
-            
+
             // Add to last split section if area has been split
-            if(this.sections.length) {
-                this.sections[1].addOverlayButtons(  buttons, options );
+            if( this.sections.length )
+            {
+                this.sections[ 1 ].addOverlayButtons(  buttons, options );
                 return;
             }
 
@@ -1514,8 +1515,14 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             this.root.style.position = "relative";
 
             options.className = "lexoverlaybuttons";
-            options.width = "calc( 100% - 24px )";
-            options.height = "auto";
+
+            let overlayPanel = this.addPanel( options );
+            let overlayGroup = null;
+
+            const container = document.createElement("div");
+            container.className = "lexoverlaybuttonscontainer";
+            container.appendChild( overlayPanel.root );
+            this.attach( container );
 
             const float = options.float;
 
@@ -1527,24 +1534,21 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     switch( t )
                     {
                     case 'h': break;
-                    case 'v': options.className += " vertical"; break;
+                    case 'v': container.className += " vertical"; break;
                     case 't': break;
-                    case 'm': options.className += " middle"; break;
-                    case 'b': options.className += " bottom"; break;
+                    case 'm': container.className += " middle"; break;
+                    case 'b': container.className += " bottom"; break;
                     case 'l': break;
-                    case 'c': options.className += " center"; break;
-                    case 'r': options.className += " right"; break;
+                    case 'c': container.className += " center"; break;
+                    case 'r': container.className += " right"; break;
                     }
                 }
             }
 
-            let overlayPanel = this.addPanel( options );
-            let overlaygroup;
-            
-            const add_button = function(b, group, last) {
+            const _addButton = function( b, group, last ) {
 
-                const _options = { 
-                    width: "auto", 
+                const _options = {
+                    width: "auto",
                     selectable: b.selectable,
                     selected: b.selected,
                     icon: b.icon,
@@ -1554,55 +1558,54 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
                 if( group )
                 {
-                    if(!overlaygroup) {
-                        overlaygroup = document.createElement('div');
-                        overlaygroup.className = "lexoverlaygroup";
-                        overlayPanel.queuedContainer = overlaygroup;
+                    if( !overlayGroup )
+                    {
+                        overlayGroup = document.createElement('div');
+                        overlayGroup.className = "lexoverlaygroup";
+                        overlayPanel.queuedContainer = overlayGroup;
                     }
 
-                    _options.parent = overlaygroup;
+                    _options.parent = overlayGroup;
                 }
 
                 let callback = b.callback;
 
                 if( b.options )
                 {
-                    callback = function(value, event) {
-                        LX.addContextMenu(null, event, function(c) {
-                            for( let o of b.options )
-                                c.add(o, () => {
-                                    if( b.name == o ) return;
-                                    b.name = o;
-                                    b.callback( o );
-                                    refresh_panel();
-                                });
-                        });
-                    };
+                    overlayPanel.addDropdown( null, b.options, b.name, callback, _options );
+                }
+                else
+                {
+                    overlayPanel.addButton( null, b.name, function( value, event ) {
+                        if( b.selectable )
+                        {
+                            if( b.group )
+                            {
+                                let _prev = b.selected;
+                                b.group.forEach( sub => sub.selected = false );
+                                b.selected = !_prev;
+                            }
+                            else
+                            {
+                                b.selected = !b.selected;
+                            }
+                        }
+
+                        callback( value, event );
+
+                    }, _options );
                 }
 
-                overlayPanel.addButton( null, b.name, function(value, event) {
-                    if(b.selectable) {
-                        if( b.group ) {
-                            let _prev = b.selected;
-                            b.group.forEach( sub => sub.selected = false );
-                            b.selected = !_prev;
-                        }
-                        else
-                            b.selected = !b.selected;
-                    }
-                    callback( value, event );
-                }, _options );
-
                 // ends the group
-                if(overlaygroup && last)
+                if( overlayGroup && last )
                 {
-                    overlayPanel.root.appendChild( overlaygroup );
-                    overlaygroup = null;
+                    overlayPanel.root.appendChild( overlayGroup );
+                    overlayGroup = null;
                     overlayPanel.clearQueue();
                 }
             }
 
-            const refresh_panel = function() {
+            const _refreshPanel = function() {
 
                 overlayPanel.clear();
 
@@ -1612,15 +1615,16 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     {
                         for( let i = 0; i < b.length; ++i )
                         {
-                            let sub = b[i];
+                            let sub = b[ i ];
                             sub.group = b;
-                            add_button(sub, true, i == (b.length - 1));
+                            _addButton(sub, true, i == ( b.length - 1 ));
                         }
-                    }else
-                    {
-                        add_button(b);
                     }
-    
+                    else
+                    {
+                        _addButton( b );
+                    }
+
                 }
 
                 // Add floating info
@@ -1629,16 +1633,16 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     var height = 0;
                     overlayPanel.root.childNodes.forEach( c => { height += c.offsetHeight; } );
 
-                    if( options.className.includes("middle") )
+                    if( container.className.includes( "middle" ) )
                     {
-                        overlayPanel.root.style.top = "-moz-calc( 50% - " + (height * 0.5) + "px )";
-                        overlayPanel.root.style.top = "-webkit-calc( 50% - " + (height * 0.5) + "px )";
-                        overlayPanel.root.style.top = "calc( 50% - " + (height * 0.5) + "px )";
+                        container.style.top = "-moz-calc( 50% - " + (height * 0.5) + "px )";
+                        container.style.top = "-webkit-calc( 50% - " + (height * 0.5) + "px )";
+                        container.style.top = "calc( 50% - " + (height * 0.5) + "px )";
                     }
                 }
             }
 
-            refresh_panel();
+            _refreshPanel();
         }
 
         /**
@@ -4564,27 +4568,40 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             this.queue(container);
 
-            let selectedOption = this.addButton( null, buttonName, (value, event) => {
-                if( list.unfocus_event ) {
+            const _getMaxListWidth = () => {
+
+                let maxWidth = 0;
+                for( let i of values )
+                {
+                    const iString = String( i );
+                    maxWidth = Math.max( iString.length, maxWidth );
+                }
+                return maxWidth * 9;
+            };
+
+            let selectedOption = this.addButton( null, buttonName, ( value, event ) => {
+                if( list.unfocus_event )
+                {
                     delete list.unfocus_event;
                     return;
                 }
                 const topPosition = selectedOption.getBoundingClientRect().y;
                 list.style.top = (topPosition + selectedOption.offsetHeight) + 'px';
                 list.style.width = (event.currentTarget.clientWidth) + 'px';
+                list.style.minWidth = (_getMaxListWidth()) + 'px';
                 list.toggleAttribute('hidden');
                 list.focus();
             }, { buttonClass: 'array', skipInlineCount: true });
 
             this.clearQueue();
 
-            selectedOption.style.width = "100%";   
+            selectedOption.style.width = "100%";
 
             selectedOption.refresh = (v) => {
                 if(selectedOption.querySelector("span").innerText == "")
                     selectedOption.querySelector("span").innerText = v;
                 else
-                    selectedOption.querySelector("span").innerHTML = selectedOption.querySelector("span").innerHTML.replaceAll(selectedOption.querySelector("span").innerText, v); 
+                    selectedOption.querySelector("span").innerHTML = selectedOption.querySelector("span").innerHTML.replaceAll(selectedOption.querySelector("span").innerText, v);
             }
 
             // Add dropdown options container
@@ -4596,12 +4613,17 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             list.addEventListener( 'focusout', function( e ) {
                 e.stopPropagation();
                 e.stopImmediatePropagation();
-                if(e.relatedTarget === selectedOption.querySelector( 'button' )) {
+                if( e.relatedTarget === selectedOption.querySelector( 'button' ) )
+                {
                     this.unfocus_event = true;
                     setTimeout( () => delete this.unfocus_event, 200 );
-                } else if ( e.relatedTarget && e.relatedTarget.tagName == "INPUT" ) {
+                }
+                else if ( e.relatedTarget && e.relatedTarget.tagName == "INPUT" )
+                {
                     return;
-                }else if ( e.target.id == 'lexinput-filter' ) {
+                }
+                else if ( e.target.className == 'lexinput-filter' )
+                {
                     return;
                 }
                 this.toggleAttribute( 'hidden', true );
@@ -4610,28 +4632,33 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             // Add filter options
             let filter = null;
             if(options.filter ?? false)
+            {
                 filter = this._addFilter("Search option", {container: list, callback: this._search_options.bind(list, values)});
+            }
 
             // Create option list to empty it easily..
-            const list_options = document.createElement('span');
-            list.appendChild(list_options);
-            
-            if( filter ) {
-                list.prepend(filter);
-                list_options.style.height = "calc(100% - 25px)";
-    
-                filter.addEventListener('focusout', function(e) {
+            const listOptions = document.createElement('span');
+            list.appendChild( listOptions );
+
+            if( filter )
+            {
+                list.prepend( filter );
+                listOptions.style.height = "calc(100% - 25px)";
+
+                filter.addEventListener('focusout', function( e ) {
                     if (e.relatedTarget && e.relatedTarget.tagName == "UL" && e.relatedTarget.classList.contains("lexoptions"))
+                    {
                         return;
-                    list.toggleAttribute('hidden', true);
+                    }
+                    list.toggleAttribute( 'hidden', true );
                 });
             }
 
             // Add dropdown options list
-            list.refresh = (options) => {
+            list.refresh = options => {
 
                 // Empty list
-                list_options.innerHTML = "";
+                listOptions.innerHTML = "";
 
                 for(let i = 0; i < options.length; i++)
                 {
@@ -4651,7 +4678,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
                         let btn = element.querySelector(".lexwidgetname .lexicon");
                         if(btn) btn.style.display = (value != wValue.iValue ? "block" : "none");
-                        that._trigger( new IEvent(name, value, null), callback ); 
+                        that._trigger( new IEvent(name, value, null), callback );
 
                         // Reset filter
                         if(filter)
@@ -4690,18 +4717,20 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         option.setAttribute("title", iValue.value);
                         if(value == iValue.value)
                             li.classList.add("selected");
-                    }      
-                    list_options.appendChild(li);
+                    }
+
+                    listOptions.appendChild( li );
                 }
             }
 
-            list.refresh(values);
+            list.refresh( values );
 
-            container.appendChild(list);
-            element.appendChild(container);
+            container.appendChild( list );
+            element.appendChild( container );
 
             // Remove branch padding and margins
-            if(!widget.name) {
+            if( !widget.name )
+            {
                 element.className += " noname";
                 container.style.width = "100%";
             }

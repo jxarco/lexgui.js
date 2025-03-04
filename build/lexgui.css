@@ -707,7 +707,8 @@ body.noevents * {
 .lexwidget .inputicon {
   padding: 6px;
   font-size: 10px;
-  margin-top: 4px;
+  margin-top: 2px;
+  margin-left: 2px;
 }
 
 .lexwidget textarea {
@@ -750,7 +751,7 @@ body.noevents * {
 
 .lexbranch .lexseparator {
   border-top: 1px solid var(--global-dark-background);
-  border-bottom: 2px solid var(--global-button-color);
+  border-bottom: 1px solid var(--global-color-terciary);
   width: -moz-calc(100% - 8px);
   width: -webkit-calc(100% - 8px);
   width: calc(100% - 8px);
@@ -895,15 +896,16 @@ body.noevents * {
   margin-right: 1px;
   border-radius: 0px;
   display: flex;
-  padding-top: 0.35em;
-  padding-bottom: 1.7em;
+  padding: 1em;
+  padding-top: 0.5em;
+  padding-bottom: 2.0em;
   transition: 0.2s;
 }
 
 .lexcombobuttons .lexbutton.combo:first-child {
- border-top-left-radius: 4px;
- border-bottom-left-radius: 4px;
- margin-left: 0px;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  margin-left: 0px;
 }
 
 .lexcombobuttons .lexbutton.combo:last-child {
@@ -920,8 +922,7 @@ body.noevents * {
 
 .lexcombobuttons .lexbutton.combo:active {
   outline: none;
-  color: #fff;
-  padding-top: 0.2em;
+  color: #ccc;
 }
 
 .lexcombobuttons .lexbutton.combo a {
@@ -978,7 +979,7 @@ body.noevents * {
 .lexdropdown ul {
   position: fixed;
   list-style: none;
-	background-color: var(--global-color-primary);
+	background-color: #1c1c1ce8;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   padding: 0px;
@@ -2088,14 +2089,25 @@ meter::-webkit-meter-even-less-good-value {
 
 /* Overlay Buttons */
 
-.lexoverlaybuttons {
+.lexoverlaybuttonscontainer {
   position: absolute;
   display: flex;
-  margin: 12px;
   top: 0;
+  width: 100%;
+}
+
+.lexoverlaybuttons {
+  display: flex;
+  width: auto !important;
+  height: auto !important;
   justify-content: start;
   pointer-events: none;
   z-index: 100;
+  background-color: var(--global-color-secondary);
+  margin: 8px;
+  padding: 0.25em;
+  padding-bottom: 0.3em;
+  border-radius: 12px;
 }
 
 .lexoverlaybuttons .lexwidget {
@@ -2109,40 +2121,43 @@ meter::-webkit-meter-even-less-good-value {
   min-width: 32px;
 }
 
-.lexoverlaybuttons.vertical {
+.lexoverlaybuttonscontainer.vertical {
   display: grid;
   justify-items: left;
 }
 
-.lexoverlaybuttons.vertical .lexwidget {
+.lexoverlaybuttonscontainer.vertical .lexoverlaybuttons {
+  display: grid;
+}
+
+.lexoverlaybuttonscontainer.vertical .lexwidget {
   margin-bottom: 6px;
   margin-right: 0px;
 }
 
-.lexoverlaybuttons.vertical .lexwidget button {
+.lexoverlaybuttonscontainer.vertical .lexwidget button {
   min-width: 32px;
-  /* max-width: 32px !important;	 */
   max-height: 32px !important;
 }
 
-.lexoverlaybuttons.bottom {
+.lexoverlaybuttonscontainer.bottom {
   top: unset;
   bottom: 0;
 }
 
-.lexoverlaybuttons.center {
+.lexoverlaybuttonscontainer.center {
   justify-content: center;
 }
 
-.lexoverlaybuttons.right {
+.lexoverlaybuttonscontainer.right {
   justify-content: right;
 }
 
-.lexoverlaybuttons.vertical.center {
+.lexoverlaybuttonscontainer.vertical.center {
   justify-items: center;
 }
 
-.lexoverlaybuttons.vertical.right {
+.lexoverlaybuttonscontainer.vertical.right {
   justify-items: right;
 }
 
@@ -2151,13 +2166,11 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexoverlaybuttons .lexbutton {
-  padding: 16px 12px;
+  padding: 14px 10px;
   font-size: var(--global-font-size-big);
   border-radius: 10px;
   justify-content: center;
-  background-color: #313132a5;
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  background: none;
   color: #d1d1d3bd;
 }
 
@@ -2166,8 +2179,13 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexoverlaybuttons .lexbutton a {
-  line-height: 19px;
+  line-height: 12px;
   font-size: var(--global-font-size-big);
+}
+
+.lexoverlaybuttons .lexbutton.array a {
+  font-size: 10px;
+  margin-left: 4px;
 }
 
 .lexoverlaybuttons .lexbutton img {
@@ -2175,7 +2193,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexoverlaybuttons .lexbutton.selected {
-  background-color: #898989d6 !important;
+  background-color: var(--global-selected) !important;
   color: #fff;
   outline: none;
   border-radius: 8px;
@@ -2187,6 +2205,7 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexoverlaybuttons .lexbutton:hover {
   color: #f5f5f5;
+  background: var(--global-button-color-hovered);
 }
 
 .lexoverlaybuttons .lexbutton:active {
@@ -2197,9 +2216,7 @@ meter::-webkit-meter-even-less-good-value {
 .lexoverlaybuttons .lexoverlaygroup {
   display: flex;
   margin-right: 6px;
-  background-color: #313132b5;
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  background-color: var(--global-color-terciary);
   border-radius: 8px;
 }
 
@@ -2209,7 +2226,7 @@ meter::-webkit-meter-even-less-good-value {
   backdrop-filter: none;
 }
 
-.lexoverlaybuttons.vertical .lexoverlaygroup {
+.lexoverlaybuttonscontainer.vertical .lexoverlaygroup {
   display: grid;
   margin-right: 0px;
   margin-bottom: 6px;
@@ -2220,12 +2237,12 @@ meter::-webkit-meter-even-less-good-value {
   margin-right: 0px;
 }
 
-.lexoverlaybuttons.vertical .lexoverlaygroup .lexwidget {
+.lexoverlaybuttonscontainer.vertical .lexoverlaygroup .lexwidget {
   margin-right: 0px;
   margin-bottom: 0px;
 }
 
-.lexoverlaybuttons.vertical .lexoverlaygroup .lexwidget button {
+.lexoverlaybuttonscontainer.vertical .lexoverlaygroup .lexwidget button {
   width: 100% !important;
 }
 
