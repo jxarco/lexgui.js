@@ -2,8 +2,10 @@
 
 ## 0.1.43 (dev)
 
+Support lock aspect ratio in Panel.addSize
 Improved CSS for overlay buttons `Area.addOverlayButtons`.
 Minor CSS general changes.
+Minor bug fixes.
 
 ## 0.1.42 (master)
 

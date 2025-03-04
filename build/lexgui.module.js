@@ -554,7 +554,9 @@ function create_global_searchbar( root ) {
 function init( options = { } )
 {
     if( this.ready )
+    {
         return this.main_area;
+    }
 
     // LexGUI root
 
@@ -585,6 +587,10 @@ function init( options = { } )
 
     // Disable drag icon
     root.addEventListener( 'dragover', function( e ) {
+        e.preventDefault();
+    }, false );
+
+    document.addEventListener( 'contextmenu', function( e ) {
         e.preventDefault();
     }, false );
 
