@@ -6320,7 +6320,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
         addFile( name, callback, options = { } ) {
 
-            if( !name ) {
+            if( !name )
+            {
                 throw( "Set Widget Name!" );
             }
 
@@ -6337,7 +6338,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             input.type = 'file';
 
             if( options.placeholder )
+            {
                 input.placeholder = options.placeholder;
+            }
 
             input.addEventListener( 'change', function( e ) {
 
@@ -6374,7 +6377,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         p.addButton( null, "Reload", v => { input.dispatchEvent( new Event( 'change' ) ) } );
                     });
 
-                }, { className: "micro", skipInlineCount: true });
+                }, { className: "micro", skipInlineCount: true, title: "Settings" });
             }
 
             this.clearQueue();

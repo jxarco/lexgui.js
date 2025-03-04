@@ -6321,7 +6321,8 @@ class Panel {
 
     addFile( name, callback, options = { } ) {
 
-        if( !name ) {
+        if( !name )
+        {
             throw( "Set Widget Name!" );
         }
 
@@ -6338,7 +6339,9 @@ class Panel {
         input.type = 'file';
 
         if( options.placeholder )
+        {
             input.placeholder = options.placeholder;
+        }
 
         input.addEventListener( 'change', function( e ) {
 
@@ -6380,7 +6383,7 @@ class Panel {
                     p.addButton( null, "Reload", v => { input.dispatchEvent( new Event( 'change' ) ) } );
                 });
 
-            }, { className: "micro", skipInlineCount: true });
+            }, { className: "micro", skipInlineCount: true, title: "Settings" });
         }
 
         this.clearQueue();
