@@ -2099,6 +2099,7 @@ meter::-webkit-meter-even-less-good-value {
   display: flex;
   top: 0;
   width: 100%;
+  pointer-events: none;
 }
 
 .lexoverlaybuttons {
@@ -2106,7 +2107,6 @@ meter::-webkit-meter-even-less-good-value {
   width: auto !important;
   height: auto !important;
   justify-content: start;
-  pointer-events: none;
   z-index: 100;
   background-color: var(--global-color-secondary);
   margin: 8px;
@@ -2249,6 +2249,10 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexoverlaybuttonscontainer.vertical .lexoverlaygroup .lexwidget button {
   width: 100% !important;
+}
+
+.lexoverlaybuttons .lexwidget:last-child {
+  margin-right: 0px;
 }
 
 /* Area Tabs */
