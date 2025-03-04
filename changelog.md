@@ -2,7 +2,8 @@
 
 ## 0.1.43 (dev)
 
-
+Improved CSS for overlay buttons `Area.addOverlayButtons`.
+Minor CSS general changes.
 
 ## 0.1.42 (master)
 
