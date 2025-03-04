@@ -5932,7 +5932,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             }
 
             let locker = document.createElement( 'a' );
-            locker.className = "fa-solid fa-lock-open lexicon";
+            locker.title = "Lock";
+            locker.className = "fa-solid fa-lock-open lexicon lock";
             container.appendChild( locker );
             locker.addEventListener( "click", function( e ) {
                 this.locked = !this.locked;
@@ -6014,18 +6015,21 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             this.queue( element );
 
+            element.aspectRatio = ( value.length == 2 ? value[ 0 ] / value[ 1 ] : null );
             element.dimensions = [];
 
             for( let i = 0; i < value.length; ++i )
             {
-                const size = measureRealWidth( JSON.stringify( value[ i ] ), 24 ) + 'px';
                 element.dimensions[ i ] = this.addNumber( null, value[ i ], ( v ) => {
 
-                    const value = [];
+                    const value = widget.onGetValue();
 
-                    for( let i = 0; i < element.dimensions.length; ++i )
+                    if( element.locked )
                     {
-                        value.push( element.dimensions[ i ].onGetValue() );
+                        const ar = ( i == 0 ? 1.0 / element.aspectRatio : element.aspectRatio );
+                        const index = ( 1 + i ) % 2;
+                        value[ index ] = v * ar;
+                        element.dimensions[ index ].onSetValue( value[ index ], true );
                     }
 
                     if( callback )
@@ -6033,7 +6037,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         callback( value );
                     }
 
-                }, { width: size, min: 0, disabled: options.disabled } );
+                }, { min: 0, disabled: options.disabled, precision: options.precision } );
 
                 if( ( i + 1 ) != value.length )
                 {
@@ -6051,6 +6055,32 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 unitSpan.className = "lexunit";
                 unitSpan.innerText = options.units;
                 element.appendChild( unitSpan );
+            }
+
+            // Lock aspect ratio
+            if( element.aspectRatio )
+            {
+                let locker = document.createElement( 'a' );
+                locker.title = "Lock Aspect Ratio";
+                locker.className = "fa-solid fa-lock-open lexicon lock";
+                element.appendChild( locker );
+                locker.addEventListener( "click", function( e ) {
+                    element.locked = !element.locked;
+                    if( element.locked )
+                    {
+                        this.classList.add( "fa-lock" );
+                        this.classList.remove( "fa-lock-open" );
+
+                        // Recompute ratio
+                        const value = widget.onGetValue();
+                        element.aspectRatio = value[ 0 ] / value[ 1 ];
+                    }
+                    else
+                    {
+                        this.classList.add( "fa-lock-open" );
+                        this.classList.remove( "fa-lock" );
+                    }
+                }, false );
             }
 
             // Remove branch padding and margins

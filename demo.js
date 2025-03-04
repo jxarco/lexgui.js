@@ -540,7 +540,7 @@ function fillPanel( panel ) {
     }, { padSize: "100px", min: -1, max: 2 });
     panel.addSize("Screen Res", [1280, 720], (value, event) => {
         console.log(value);
-    }, { units: "p" });
+    }, { units: "p", precision: 0 });
 
     const formData = { username: "", password: { value: "", type: "password" } };
     panel.addForm("Test form", formData, (value, event) => {
@@ -701,9 +701,9 @@ function fillBottomPanel( panel ) {
     panel.addTextArea("Notes", "", (value, event) => {
         console.log(value);
     }, { placeholder: 'Some notes...' });
-    panel.addKnob("A Small Knob", 4, 0, 200, value => { console.log( value ) }, { size: 'sm', disabled: true });
+    panel.addKnob("A Small but disabled Knob", 4, 0, 200, value => { console.log( value ) }, { size: 'sm', disabled: true });
     panel.addKnob("A Knob", 4, 0, 200, value => { console.log( value ) } );
-    panel.addKnob("A Big Knob", 4, 0, 200, value => { console.log( value ) }, { size: 'bg', snap: 4 });
+    panel.addKnob("A Big Knob with Snap", 4, 0, 200, value => { console.log( value ) }, { size: 'bg', snap: 4 });
     panel.addButton("Apply", "Add button to branch", (value, event) => {
         const branch = panel.getBranch("Information");
         panel.queue( branch.content );
