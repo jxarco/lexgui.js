@@ -289,77 +289,90 @@ LX.makeDraggable = makeDraggable;
 
 function create_global_searchbar( root ) {
 
-    let global_search = document.createElement("div");
-    global_search.id = "global_search";
-    global_search.className = "hidden";
-    global_search.tabIndex = -1;
-    root.appendChild( global_search );
+    let globalSearch = document.createElement("div");
+    globalSearch.id = "global-search";
+    globalSearch.className = "hidden";
+    globalSearch.tabIndex = -1;
+    root.appendChild( globalSearch );
 
     let allItems = [];
     let hoverElId = null;
 
-    global_search.addEventListener('keydown', function(e) {
+    globalSearch.addEventListener('keydown', function( e ) {
         e.stopPropagation();
         e.stopImmediatePropagation();
         hoverElId = hoverElId ?? -1;
-        if( e.key == 'Escape' ) {
+        if( e.key == 'Escape' )
+        {
             this.classList.add("hidden");
-            reset_bar(true);
+            _resetBar( true );
         }
-        else if( e.key == 'Enter' ) {
+        else if( e.key == 'Enter' )
+        {
             const el = allItems[ hoverElId ];
-            if(el) {
-                const is_checkbox = (el.item.type && el.item.type === 'checkbox');
+            if( el )
+            {
+                const isCheckbox = (el.item.type && el.item.type === 'checkbox');
                 this.classList.toggle('hidden');
-                if(is_checkbox)  {
+                if( isCheckbox )
+                {
                     el.item.checked = !el.item.checked;
-                    el.callback.call(window, el.item.checked, el.entry_name);
+                    el.callback.call( window, el.item.checked, el.entry_name );
                 }
                 else
-                    el.callback.call(window, el.entry_name);
+                {
+                    el.callback.call( window, el.entry_name );
+                }
             }
         }
-        else if ( e.key == 'ArrowDown' && hoverElId < (allItems.length - 1) ) {
+        else if ( e.key == 'ArrowDown' && hoverElId < (allItems.length - 1) )
+        {
             hoverElId++;
-            global_search.querySelectorAll(".hovered").forEach(e => e.classList.remove('hovered'));
+            globalSearch.querySelectorAll(".hovered").forEach(e => e.classList.remove('hovered'));
             allItems[ hoverElId ].classList.add('hovered');
 
             let dt = allItems[ hoverElId ].offsetHeight * (hoverElId + 1) - itemContainer.offsetHeight;
-            if( dt > 0) {
+            if( dt > 0 )
+            {
                 itemContainer.scrollTo({
                     top: dt,
                     behavior: "smooth",
                 });
             }
 
-        } else if ( e.key == 'ArrowUp' && hoverElId > 0 ) {
+        } else if ( e.key == 'ArrowUp' && hoverElId > 0 )
+        {
             hoverElId--;
-            global_search.querySelectorAll(".hovered").forEach(e => e.classList.remove('hovered'));
+            globalSearch.querySelectorAll(".hovered").forEach(e => e.classList.remove('hovered'));
             allItems[ hoverElId ].classList.add('hovered');
         }
     });
 
-    global_search.addEventListener('focusout', function(e) {
-        if(e.relatedTarget == e.currentTarget) return;
+    globalSearch.addEventListener('focusout', function( e ) {
+        if( e.relatedTarget == e.currentTarget )
+        {
+            return;
+        }
         e.stopPropagation();
         e.stopImmediatePropagation();
-        this.classList.add("hidden");
-        reset_bar(true);
+        this.classList.add( "hidden" );
+        _resetBar( true );
     });
 
     root.addEventListener('keydown', e => {
-        if( e.key == ' ' && e.ctrlKey ) {
+        if( e.key == ' ' && e.ctrlKey )
+        {
             e.stopImmediatePropagation();
             e.stopPropagation();
-            global_search.classList.toggle('hidden');
-            global_search.querySelector('input').focus();
-            add_elements( undefined );
+            globalSearch.classList.toggle('hidden');
+            globalSearch.querySelector('input').focus();
+            _addElements( undefined );
         }
         else
         {
             for( let c of LX.components )
             {
-                if( !LX[c] || !LX[c].prototype.onKeyPressed )
+                if( !LX[ c ] || !LX[ c ].prototype.onKeyPressed )
                 {
                     continue;
                 }
@@ -373,37 +386,68 @@ function create_global_searchbar( root ) {
         }
     });
 
-    let icon = document.createElement("a");
-    icon.className = "fa-solid fa-magnifying-glass";
+    const header = document.createElement( "div" );
+    header.className = "gs-header";
 
-    let input = document.createElement("input");
+    const icon = document.createElement("a");
+    icon.className = "fa-solid fa-magnifying-glass";
+    header.appendChild( icon );
+
+    const input = document.createElement("input");
     input.placeholder = "Search...";
     input.value = "";
+    header.appendChild( input );
 
-    let itemContainer = document.createElement("div");
+    const tabArea = new Area( {
+        width: "100%",
+        skipAppend: true,
+        className: "gs-tabs"
+    } );
+
+    const gsTabs = tabArea.addTabs();
+    let gsFilter = null;
+
+    // These tabs will serve as buttons by now
+    // Filter stuff depending of the type of search
+    {
+        const _onSelectTab = ( e, tabName ) => {
+            gsFilter = tabName;
+        }
+
+        gsTabs.add( "All", document.createElement('div'), { selected: true, onSelect: _onSelectTab } );
+        // gsTabs.add( "Main", document.createElement('div'), { onSelect: _onSelectTab } );
+    }
+
+    const itemContainer = document.createElement("div");
     itemContainer.className = "searchitembox";
 
-    let ref_previous;
+    let refPrevious = null;
 
-    const reset_bar = (reset_input) => {
+    const _resetBar = (reset_input) => {
         itemContainer.innerHTML = "";
         allItems.length = 0;
         hoverElId = null;
         if(reset_input) input.value = "";
     }
 
-    const add_element = (t, c, p, i) => {
+    const _addElement = ( t, c, p, i ) => {
 
-        if(!t.length) return;
+        if( !t.length )
+        {
+            return;
+        }
 
-        if(ref_previous) ref_previous.classList.remove('last');
+        if( refPrevious ) refPrevious.classList.remove('last');
 
         let searchItem = document.createElement("div");
         searchItem.className = "searchitem last";
-        const is_checkbox = (i && i.type && i.type === 'checkbox');
-        if(is_checkbox) {
+        const isCheckbox = (i && i.type && i.type === 'checkbox');
+        if( isCheckbox )
+        {
             searchItem.innerHTML = "<a class='fa fa-check'></a><span>" + p + t + "</span>"
-        } else {
+        }
+        else
+        {
             searchItem.innerHTML = p + t;
         }
         searchItem.entry_name = t;
@@ -411,29 +455,32 @@ function create_global_searchbar( root ) {
         searchItem.item = i;
         searchItem.addEventListener('click', function(e) {
             this.callback.call(window, this.entry_name);
-            global_search.classList.toggle('hidden');
-            reset_bar(true);
+            globalSearch.classList.toggle('hidden');
+            _resetBar( true );
         });
         searchItem.addEventListener('mouseenter', function(e) {
-            global_search.querySelectorAll(".hovered").forEach(e => e.classList.remove('hovered'));
+            globalSearch.querySelectorAll(".hovered").forEach(e => e.classList.remove('hovered'));
             this.classList.add('hovered');
-            hoverElId = allItems.indexOf(this);
+            hoverElId = allItems.indexOf( this );
         });
         searchItem.addEventListener('mouseleave', function(e) {
             this.classList.remove('hovered');
         });
         allItems.push( searchItem );
-        itemContainer.appendChild(searchItem);
-        ref_previous = searchItem;
+        itemContainer.appendChild( searchItem );
+        refPrevious = searchItem;
     }
 
-    const propagate_add = ( item, filter, path ) => {
+    const _propagateAdd = ( item, filter, path ) => {
 
         const key = Object.keys( item )[ 0 ];
         let name = item.name ?? path + key;
-        if( name.toLowerCase().includes( filter ) ) {
+        if( name.toLowerCase().includes( filter ) )
+        {
             if( item.callback )
-                add_element( item.name ?? key, item.callback, path, item );
+            {
+                _addElement( item.name ?? key, item.callback, path, item );
+            }
         }
 
         // is sidebar..
@@ -443,17 +490,20 @@ function create_global_searchbar( root ) {
         path += key + " > ";
 
         for( let c of item[ key ] )
-            propagate_add( c, filter, path );
+            _propagateAdd( c, filter, path );
     };
 
-    const add_elements = filter => {
+    const _addElements = filter => {
         
-        reset_bar();
+        _resetBar();
 
         for( let m of LX.menubars )
-            for( let i of m.items ) {
-                propagate_add( i, filter, "" );
+        {
+            for( let i of m.items )
+            {
+                _propagateAdd( i, filter, "" );
             }
+        }
 
         if( LX.has('CodeEditor') )
         {
@@ -483,14 +533,14 @@ function create_global_searchbar( root ) {
     }
 
     input.addEventListener('input', function(e) {
-        add_elements( this.value.toLowerCase() );
+        _addElements( this.value.toLowerCase() );
     });
     
-    global_search.appendChild(icon);
-    global_search.appendChild(input);
-    global_search.appendChild(itemContainer);
+    globalSearch.appendChild( header );
+    globalSearch.appendChild( tabArea.root );
+    globalSearch.appendChild( itemContainer );
 
-    return global_search;
+    return globalSearch;
 }
 
 /**
@@ -528,7 +578,7 @@ function init( options = { } )
     if( options.container )
         this.container = document.getElementById( options.container );
         
-    this.global_search = create_global_searchbar( this.container );
+    this.globalSearch = create_global_searchbar( this.container );
 
     this.container.appendChild( modal );
     this.container.appendChild( root );
@@ -2113,7 +2163,7 @@ class Menubar {
                     const subitem = o[k][i];
                     const subkey = Object.keys(subitem)[0];
                     const hasSubmenu = subitem[ subkey ].length;
-                    const is_checkbox = subitem[ 'type' ] == 'checkbox';
+                    const isCheckbox = subitem[ 'type' ] == 'checkbox';
                     let subentry = document.createElement('div');
                     subentry.className = "lexcontextmenuentry";
                     subentry.className += (i == o[k].length - 1 ? " last" : "");
@@ -2127,7 +2177,7 @@ class Menubar {
                         subentrycont.classList = "lexcontextmenuentrycontainer";
                         subentry.appendChild(subentrycont);
                         const icon = that.icons[ subkey ];
-                        if(is_checkbox){
+                        if(isCheckbox){
                             subentrycont.innerHTML += "<input type='checkbox' >";
                         }else if(icon) {
                             subentrycont.innerHTML += "<a class='" + icon + " fa-sm'></a>";

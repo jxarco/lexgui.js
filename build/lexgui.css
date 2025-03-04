@@ -148,13 +148,13 @@ body.noevents * {
   margin-top: 0.01em;
 }
 
-#global_search {
+#global-search {
   position: absolute;
   background-color: var(--global-blur-background);
   --webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   border-radius: 8px;
-  border: 1px solid #d0d0ec6b;
+  border: 1px solid #d0d0ec2a;
   width: 30%;
   max-width: 740px;
   top: 15%;
@@ -166,37 +166,53 @@ body.noevents * {
   mask-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAA5JREFUeNpiYGBgAAgwAAAEAAGbA+oJAAAAAElFTkSuQmCC); /* this fixes the overflow:hidden in Chrome/Opera */
 }
 
-#global_search a {
-  color: var(--global-text);
-  padding: 16px;
-  border-top-left-radius: 6px;
+#global-search .gs-header {
+  width: 100%;
+  height: 32px;
+  display: flex;
+  padding: 6px;
 }
 
-#global_search input {
-  border-top-right-radius: 6px;
+#global-search a {
+  color: var(--global-text-secondary);
+  padding: 10px;
+  background-color: var(--global-color-terciary);
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+  font-size: 12px;
+}
+
+#global-search input {
   width: 100%;
   flex: 50%;
   background: none;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
   color: var(--global-text-secondary);
+  background-color: var(--global-color-terciary);
   outline: none;
   border: none;
   font-family: var(--global-font);
   line-height: 23px;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
 }
 
-#global_search .searchitembox {
+#global-search .lexarea {
+  background: none !important;
+}
+
+#global-search .searchitembox {
   flex-basis: 100%;
   overflow-y: scroll;
   max-height: calc(512px - 48px);
 }
 
-#global_search .searchitembox::-webkit-scrollbar {
+#global-search .searchitembox::-webkit-scrollbar {
   display: none;
 }
 
-#global_search .searchitembox .searchitem {
+#global-search .searchitembox .searchitem {
   padding: 10px;
   padding-left: 50px;
   color: var(--global-text-primary);
@@ -204,7 +220,7 @@ body.noevents * {
   cursor: pointer;
 }
 
-#global_search .searchitembox .searchitem a {
+#global-search .searchitembox .searchitem a {
   padding: 0px;
   margin-left: -28px;
   margin-top: 2px;
@@ -212,7 +228,7 @@ body.noevents * {
   float: left;
 }
 
-#global_search .searchitembox .searchitem i {
+#global-search .searchitembox .searchitem i {
   width: 12px;
   font-size: 11px;
   margin-right: 4px;
@@ -220,24 +236,24 @@ body.noevents * {
   vertical-align: middle;
 }
 
-#global_search .searchitembox .searchitem img {
+#global-search .searchitembox .searchitem img {
   width: 12px;
   margin-right: 4px;
   margin-top: -2px;
   vertical-align: middle;
 }
 
-#global_search .searchitembox .searchitem .lang-ext {
+#global-search .searchitembox .searchitem .lang-ext {
   color: #676e75;
   font-size: var(--global-font-size);
 }
 
-#global_search .searchitembox .searchitem.last {
+#global-search .searchitembox .searchitem.last {
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
 }
 
-#global_search .searchitembox .searchitem.hovered {
+#global-search .searchitembox .searchitem.hovered {
   background-color: var(--global-selected);
   color: #f5f5f5;
 }
