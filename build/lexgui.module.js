@@ -6974,6 +6974,11 @@ class Dialog {
         {
             this.close = () => {
 
+                if( options.onBeforeClose )
+                {
+                    options.onBeforeClose( this );
+                }
+
                 if( !options.onclose )
                 {
                     that.panel.clear();

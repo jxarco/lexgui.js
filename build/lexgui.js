@@ -6962,6 +6962,11 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             {
                 this.close = () => {
 
+                    if( options.onBeforeClose )
+                    {
+                        options.onBeforeClose( this );
+                    }
+
                     if( !options.onclose )
                     {
                         that.panel.clear();
