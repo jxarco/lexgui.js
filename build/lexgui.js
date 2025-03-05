@@ -6414,12 +6414,19 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             if( local )
             {
+                let settingsDialog = null;
+
                 this.addButton(null, "<a style='margin-top: 0px;' class='fa-solid fa-gear'></a>", () => {
 
-                    new Dialog( "Load Settings", p => {
+                    if( settingsDialog )
+                    {
+                        return;
+                    }
+
+                    settingsDialog = new Dialog( "Load Settings", p => {
                         p.addDropdown( "Type", [ 'text', 'buffer', 'bin', 'url' ], type, v => { type = v } );
                         p.addButton( null, "Reload", v => { input.dispatchEvent( new Event( 'change' ) ) } );
-                    });
+                    }, { onclose: () => { settingsDialog.root.remove(); settingsDialog = null; } } );
 
                 }, { className: "micro", skipInlineCount: true, title: "Settings" });
             }
