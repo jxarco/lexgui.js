@@ -565,8 +565,8 @@ class CodeEditor {
         this.languages = {
             'Plain Text': { ext: 'txt', blockComments: false, singleLineComments: false },
             'JavaScript': { ext: 'js' },
-            'C': { ext: 'c' },
-            'C++': { ext: 'cpp' },
+            'C': { ext: [ 'c', 'h' ] },
+            'C++': { ext: [ 'cpp', 'hpp' ] },
             'CSS': { ext: 'css' },
             'CMake': { ext: 'cmake', singleLineCommentToken: '#', blockComments: false, ignoreCase: true },
             'GLSL': { ext: 'glsl' },
@@ -1461,7 +1461,8 @@ class CodeEditor {
             {
                 iconEl = document.createElement( 'i' );
                 iconEl.className = icon;
-            } else {
+            } else
+            {
                 iconEl = document.createElement( 'img' );
                 iconEl.src = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/" + icon;
             }
@@ -1481,12 +1482,29 @@ class CodeEditor {
     _changeLanguageFromExtension( ext ) {
 
         if( !ext )
-        return this._changeLanguage( this.code.language );
+        {
+            return this._changeLanguage( this.code.language );
+        }
 
         for( let l in this.languages )
         {
-            if( this.languages[l].ext == ext )
-                return this._changeLanguage( l );
+            const langExtension = this.languages[ l ].ext;
+
+            if( langExtension.constructor == Array )
+            {
+                if( langExtension.indexOf( ext ) > -1 )
+                {
+                    return this._changeLanguage( l );
+                }
+            }
+            else
+            {
+                if( langExtension == ext )
+                {
+                    return this._changeLanguage( l );
+                }
+            }
+
         }
 
         this._changeLanguage( 'Plain Text' );
@@ -1545,12 +1563,36 @@ class CodeEditor {
     _getFileIcon( name, extension ) {
 
         const isNewTabButton = name ? ( name === '+' ) : false;
-        const ext = extension ?? LX.getExtension( name );
-        return ext == 'html' ? "fa-solid fa-code orange" :
-            ext == 'css' ? "fa-solid fa-hashtag dodgerblue" :
-            ext == 'xml' ? "fa-solid fa-rss orange" :
-            ext == 'bat' ? "fa-brands fa-windows lightblue" :
-            [ 'js', 'py', 'json', 'cpp', 'rs', 'md' ].indexOf( ext ) > -1 ? "images/" + ext + ".png" :
+
+        if( !extension )
+        {
+            extension = LX.getExtension( name );
+        }
+        else
+        {
+            const possibleExtensions = [].concat( extension );
+
+            if( name )
+            {
+                const fileExtension = LX.getExtension( name );
+                const idx = possibleExtensions.indexOf( fileExtension );
+
+                if( idx > -1)
+                {
+                    extension = possibleExtensions[ idx ];
+                }
+            }
+            else
+            {
+                extension = possibleExtensions[ 0 ];
+            }
+        }
+
+        return extension == "html" ? "fa-solid fa-code orange" :
+            extension == "css" ? "fa-solid fa-hashtag dodgerblue" :
+            extension == "xml" ? "fa-solid fa-rss orange" :
+            extension == "bat" ? "fa-brands fa-windows lightblue" :
+            [ 'js', 'py', 'json', 'cpp', 'hpp', 'rs', 'md' ].indexOf( extension ) > -1 ? "images/" + extension + ".png" :
             !isNewTabButton ? "fa-solid fa-align-left gray" : undefined;
     }
 
