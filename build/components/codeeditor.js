@@ -3178,7 +3178,7 @@ class CodeEditor {
         }
         else if( lang.tags )
         {
-            isKwd |= this._enclosedByTokens( token, tokenIndex, '<', '>' );
+            isKwd &= ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) != undefined );
         }
 
 
