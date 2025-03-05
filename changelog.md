@@ -3,8 +3,8 @@
 ## 0.1.43 (dev)
 
 CodeEditor:
-- Support C highlight.
-- Support CMake highlight.
+- Support C and CMake highlight.
+- Support C/C++ header files highlighting.
 
 Support lock aspect ratio in Panel.addSize
 Improved CSS for overlay buttons `Area.addOverlayButtons`.
