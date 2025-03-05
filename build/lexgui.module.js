@@ -6438,7 +6438,7 @@ class Panel {
                 settingsDialog = new Dialog( "Load Settings", p => {
                     p.addDropdown( "Type", [ 'text', 'buffer', 'bin', 'url' ], type, v => { type = v } );
                     p.addButton( null, "Reload", v => { input.dispatchEvent( new Event( 'change' ) ) } );
-                }, { onclose: () => { settingsDialog.root.remove(); settingsDialog = null; } } );
+                }, { onclose: ( root ) => { root.remove(); settingsDialog = null; } } );
 
             }, { className: "micro", skipInlineCount: true, title: "Settings" });
         }
@@ -6925,24 +6925,29 @@ class Dialog {
                 addContextMenu("Dock", e, p => {
                     e.preventDefault();
 
-                    const get_next_panel = function(area) {
-                        let p = area.panels[0];
+                    const _getNextPanel = function( area ) {
+                        let p = area.panels[ 0 ];
                         if( p ) return p;
                         for(var s of area.sections){
-                            p = get_next_panel(s);
+                            p = _getNextPanel( s );
                             if( p ) return p;
                         }
                     }
 
-                    const append_branch = function(panel) {
+                    const _appendBranch = function( panel ) {
                         let branch = panel.branches.find( b => b.name === title );
-                        if( !branch ) {
-                            panel.branch(title);
+                        if( !branch )
+                        {
+                            panel.branch( title );
                             branch = panel.branches.find( b => b.name === title );
-                        }else
+                        }
+                        else
+                        {
                             panel.root.appendChild( branch.root );
+                        }
 
-                        for( let w of that.widgets ) {
+                        for( let w of that.widgets )
+                        {
                             branch.content.appendChild( w.domEl );
                         }
 
@@ -6955,14 +6960,14 @@ class Dialog {
                     }
 
                     // Right
-                    let rpanel = get_next_panel(LX.main_area.sections[1]);
+                    let rpanel = _getNextPanel(LX.main_area.sections[ 1 ]);
                     p.add('<i class="fa-regular fa-window-maximize fa-window-maximize fa-rotate-90">', {disabled: !rpanel, id: 'dock_options0', callback: () => {
-                        append_branch(rpanel);
+                        _appendBranch(rpanel);
                     }});
                     // Left
-                    let lpanel = get_next_panel(LX.main_area.sections[0]);
+                    let lpanel = _getNextPanel(LX.main_area.sections[ 0 ]);
                     p.add('<i class="fa-regular fa-window-maximize fa-window-maximize fa-rotate-270">', {disabled: !lpanel, id: 'dock_options1', callback: () => {
-                        append_branch(lpanel);
+                        _appendBranch(lpanel);
                     }});
                 }, { icon: "fa-regular fa-window-restore" });
             };
@@ -6983,33 +6988,48 @@ class Dialog {
                 {
                     that.panel.clear();
                     root.remove();
-                } else
+                }
+                else
                 {
                     options.onclose( this.root );
                 }
 
-                if(modal)
-                    LX.modal.toggle(true);
+                if( modal )
+                {
+                    LX.modal.toggle( true );
+                }
             };
 
-            var closeButton = document.createElement('a');
+            var closeButton = document.createElement( 'a' );
             closeButton.className = "lexdialogcloser fa-solid fa-xmark";
             closeButton.title = "Close";
-            closeButton.addEventListener('click', this.close);
+            closeButton.addEventListener( "click", this.close );
 
-            if(title) titleDiv.appendChild(closeButton);
-            else {
-                closeButton.classList.add("notitle");
-                root.appendChild(closeButton);
+            if( title )
+            {
+                titleDiv.appendChild( closeButton );
+            }
+            else
+            {
+                closeButton.classList.add( "notitle" );
+                root.appendChild( closeButton );
             }
         }
 
         const panel = new Panel();
-        panel.root.classList.add('lexdialogcontent');
-        if(!title) panel.root.classList.add('notitle');
-        if(callback)
-            callback.call(this, panel);
-        root.appendChild(panel.root);
+        panel.root.classList.add( "lexdialogcontent" );
+
+        if( !title )
+        {
+            panel.root.classList.add( "notitle" );
+        }
+
+        if( callback )
+        {
+            callback.call( this, panel );
+        }
+
+        root.appendChild( panel.root );
 
         // Make branches have a distintive to manage some cases
         panel.root.querySelectorAll(".lexbranch").forEach( b => b.classList.add("dialog") );
@@ -7024,22 +7044,30 @@ class Dialog {
         }
 
         // Process position and size
-        if(size.length && typeof(size[0]) != "string")
-            size[0] += "px";
-        if(size.length && typeof(size[1]) != "string")
-            size[1] += "px";
+        if( size.length && typeof(size[ 0 ]) != "string" )
+        {
+            size[ 0 ] += "px";
+        }
 
-        root.style.width = size[0] ? (size[0]) : "25%";
-        root.style.height = size[1] ? (size[1]) : "auto";
+        if( size.length && typeof(size[ 1 ]) != "string" )
+        {
+            size[ 1 ] += "px";
+        }
 
-        if(options.size) this.size = size;
+        root.style.width = size[ 0 ] ? (size[ 0 ]) : "25%";
+        root.style.height = size[ 1 ] ? (size[ 1 ]) : "auto";
+
+        if( options.size )
+        {
+            this.size = size;
+        }
 
         let rect = root.getBoundingClientRect();
-        root.style.left = position[0] ? (position[0]) : "calc( 50% - " + (rect.width * 0.5) + "px )";
-        root.style.top = position[1] ? (position[1]) : "calc( 50% - " + (rect.height * 0.5) + "px )";
+        root.style.left = position[ 0 ] ? (position[ 0 ]) : "calc( 50% - " + ( rect.width * 0.5 ) + "px )";
+        root.style.top = position[ 1 ] ? (position[ 1 ]) : "calc( 50% - " + ( rect.height * 0.5 ) + "px )";
 
         panel.root.style.width = "calc( 100% - 30px )";
-        panel.root.style.height = title ? "calc( 100% - " + (titleDiv.offsetHeight + 30) + "px )" : "calc( 100% - 51px )";
+        panel.root.style.height = title ? "calc( 100% - " + ( titleDiv.offsetHeight + 30 ) + "px )" : "calc( 100% - 51px )";
     }
 
     destroy() {
