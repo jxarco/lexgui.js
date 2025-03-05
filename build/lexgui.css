@@ -3513,12 +3513,21 @@ pre .line-gutter {
 .cm-sym.javascript { color: #e7ded2; }  /* symbol */
 .cm-mtd.javascript { color: #e0cc68 }   /* method */
 
+.cm-typ.c { color: #36c0b0; }   /* type */
+.cm-bln.c { color: #d44141; }   /* builtin */
+.cm-dec.c { color: #2ddf53; }   /* decimal */
+.cm-sym.c { color: #e7ded2; }   /* symbol */
+.cm-mtd.c { color: #7a9ae0 }    /* method */
+.cm-ppc.c { color: #969696 }    /* preprocessor */
+
 .cm-typ.cpp { color: #36c0b0; }   /* type */
 .cm-bln.cpp { color: #d44141; }   /* builtin */
 .cm-dec.cpp { color: #2ddf53; }   /* decimal */
 .cm-sym.cpp { color: #e7ded2; }   /* symbol */
 .cm-mtd.cpp { color: #7a9ae0 }    /* method */
 .cm-ppc.cpp { color: #969696 }    /* preprocessor */
+
+.cm-sym.cmake { color: #cf6dcf; }  /* symbol */
 
 .cm-kwd.css { color: #e8be53; }   /* keyword */
 .cm-typ.css { color: #b7c3ec; }   /* type */

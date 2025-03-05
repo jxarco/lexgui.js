@@ -565,8 +565,10 @@ class CodeEditor {
         this.languages = {
             'Plain Text': { ext: 'txt', blockComments: false, singleLineComments: false },
             'JavaScript': { ext: 'js' },
+            'C': { ext: 'c' },
             'C++': { ext: 'cpp' },
             'CSS': { ext: 'css' },
+            'CMake': { ext: 'cmake', singleLineCommentToken: '#', blockComments: false, ignoreCase: true },
             'GLSL': { ext: 'glsl' },
             'WGSL': { ext: 'wgsl' },
             'JSON': { ext: 'json', blockComments: false, singleLineComments: false },
@@ -593,7 +595,7 @@ class CodeEditor {
             for( let lang in CodeEditor.keywords ) CodeEditor.keywords[lang] = CodeEditor.keywords[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
             for( let lang in CodeEditor.utils ) CodeEditor.utils[lang] = CodeEditor.utils[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
             for( let lang in CodeEditor.types ) CodeEditor.types[lang] = CodeEditor.types[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
-            for( let lang in CodeEditor.builtin ) CodeEditor.builtin[lang] = CodeEditor.builtin[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+            for( let lang in CodeEditor.builtIn ) CodeEditor.builtIn[lang] = CodeEditor.builtIn[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
             for( let lang in CodeEditor.statementsAndDeclarations ) CodeEditor.statementsAndDeclarations[lang] = CodeEditor.statementsAndDeclarations[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
             for( let lang in CodeEditor.symbols ) CodeEditor.symbols[lang] = CodeEditor.symbols[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
 
@@ -2783,7 +2785,8 @@ class CodeEditor {
                 nextWithSpaces: tokensToEvaluate[ i + 1 ],
                 tokenIndex: i,
                 isFirstToken: (i == 0),
-                isLastToken: (i == tokensToEvaluate.length - 1)
+                isLastToken: (i == tokensToEvaluate.length - 1),
+                tokens: tokensToEvaluate
             } );
         }
 
@@ -2891,9 +2894,21 @@ class CodeEditor {
         return tokens;
     }
 
-    _mustHightlightWord( token, kindArray ) {
+    _mustHightlightWord( token, kindArray, lang ) {
 
-        return kindArray[this.highlight] && kindArray[this.highlight][token] != undefined;
+        if( !lang )
+        {
+            lang = this.languages[ this.highlight ];
+        }
+
+        let t = token;
+
+        if( lang.ignoreCase )
+        {
+            t = t.toLowerCase();
+        }
+
+        return kindArray[ this.highlight ] && kindArray[ this.highlight ][ t ] != undefined;
     }
 
     _evaluateToken( ctxData ) {
@@ -2911,7 +2926,7 @@ class CodeEditor {
 
         var usePreviousTokenToCheckString = false;
 
-        if( highlight == 'cpp' && prev && prev.includes( '#' ) ) // preprocessor code..
+        if( [ 'cpp', 'c' ].indexOf( highlight ) > -1 && prev && prev.includes( '#' ) ) // preprocessor code..
         {
             customStringKeys['@<'] = '>';
         }
@@ -2962,16 +2977,16 @@ class CodeEditor {
         else if( this._buildingString != undefined )
             discardToken = this._appendStringToken( token );
 
-        else if( ( this._mustHightlightWord( token, CodeEditor.keywords ) || highlight == 'xml' ) && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) )
+        else if( this._isKeyword( ctxData, lang ) )
             token_classname = "cm-kwd";
 
-        else if( this._mustHightlightWord( token, CodeEditor.builtin ) && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) )
+        else if( this._mustHightlightWord( token, CodeEditor.builtIn, lang ) && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) )
             token_classname = "cm-bln";
 
-        else if( this._mustHightlightWord( token, CodeEditor.statementsAndDeclarations ) )
+        else if( this._mustHightlightWord( token, CodeEditor.statementsAndDeclarations, lang ) )
             token_classname = "cm-std";
 
-        else if( this._mustHightlightWord( token, CodeEditor.symbols ) )
+        else if( this._mustHightlightWord( token, CodeEditor.symbols, lang ) )
             token_classname = "cm-sym";
 
         else if( token.substr( 0, singleLineCommentToken.length ) == singleLineCommentToken )
@@ -2980,16 +2995,16 @@ class CodeEditor {
         else if( this._isNumber( token ) || this._isNumber( token.replace(/[px]|[em]|%/g,'') ) )
             token_classname = "cm-dec";
 
-        else if( this._isCSSClass( token, prev, next ) )
+        else if( this._isCSSClass( ctxData ) )
             token_classname = "cm-kwd";
 
-        else if ( this._isType( token, prev, next ) )
+        else if ( this._isType( ctxData, lang ) )
             token_classname = "cm-typ";
 
         else if ( highlight == 'batch' && ( token == '@' || prev == ':' || prev == '@' ) )
             token_classname = "cm-kwd";
 
-        else if ( [ 'cpp', 'wgsl', 'glsl' ].indexOf( highlight ) > -1 && token.includes( '#' ) ) // C++ preprocessor
+        else if ( [ 'cpp', 'c', 'wgsl', 'glsl' ].indexOf( highlight ) > -1 && token.includes( '#' ) ) // C++ preprocessor
             token_classname = "cm-ppc";
 
         else if ( highlight == 'cpp' && prev == '<' && (next == '>' || next == '*') ) // Defining template type in C++
@@ -3033,14 +3048,18 @@ class CodeEditor {
         this._buildingString = this._stringEnded ? undefined : this._buildingString;
 
         if( discardToken )
+        {
             return "";
+        }
 
         token = token.replace( "<", "&lt;" );
         token = token.replace( ">", "&gt;" );
 
         // No highlighting, no need to put it inside another span..
         if( !token_classname.length )
+        {
             return token;
+        }
 
         return "<span class='" + highlight + " " + token_classname + "'>" + token + "</span>";
     }
@@ -3075,7 +3094,10 @@ class CodeEditor {
         if( tagEndIndex < 0 ) // Not found..
             return;
 
-        return ( tagStartIndex < tokenStartIndex ) && ( tagEndIndex >= ( tokenStartIndex + token.length ) ) && !this._mustHightlightWord( token, CodeEditor.symbols );
+        if( ( tagStartIndex < tokenStartIndex ) && ( tagEndIndex >= ( tokenStartIndex + token.length ) ) && !this._mustHightlightWord( token, CodeEditor.symbols ) )
+        {
+            return [ tagStartIndex, tagEndIndex ];
+        }
     }
 
     _inBlockCommentSection( line ) {
@@ -3083,16 +3105,54 @@ class CodeEditor {
         for( var section of this._blockCommentCache )
         {
             if( line >= section.x && line <= section.y )
+            {
                 return true;
+            }
         }
 
         return false;
     }
 
-    _isCSSClass( token, prev, next ) {
+    _isKeyword( ctxData, lang ) {
+
+        const token = ctxData.token;
+        const tokenIndex = ctxData.tokenIndex;
+        const tokens = ctxData.tokens;
+
+        let isKwd = this._mustHightlightWord( token, CodeEditor.keywords ) || this.highlight == 'XML';
+
+        if( this.highlight == 'CMake' )
+        {
+            // Highlight $ symbol
+            if( token == '$' && this._enclosedByTokens( tokens[ tokenIndex + 2 ], tokenIndex + 2, '{', '}' ) )
+            {
+                isKwd = true;
+            }
+            // Highlight what is between the { }
+            else if( this._enclosedByTokens( token, tokenIndex, '{', '}' ) )
+            {
+                isKwd |= ( ctxData.tokens[ tokenIndex - 2 ] == '$' );
+            }
+        }
+        else if( lang.tags )
+        {
+            isKwd |= this._enclosedByTokens( token, tokenIndex, '<', '>' );
+        }
+
+
+        return isKwd;
+    }
+
+    _isCSSClass( ctxData ) {
+
+        const token = ctxData.token;
+        const prev = ctxData.prev;
+        const next = ctxData.next;
 
         if( this.highlight != 'CSS' )
+        {
             return false;
+        }
 
         return  ( prev == '.' || prev == '::'
                 || ( prev == ':' && next == '{' )
@@ -3101,34 +3161,48 @@ class CodeEditor {
 
     _isNumber( token ) {
 
-        if(this.highlight == 'C++')
+        const subToken = token.substring( 0, token.length - 1 );
+
+        if( this.highlight == 'C++' )
         {
             if( token.lastChar == 'f' )
-                return this._isNumber( token.substring(0, token.length - 1) )
+            {
+                return this._isNumber( subToken )
+            }
             else if( token.lastChar == 'u' )
-                return !(token.includes('.')) && this._isNumber( token.substring(0, token.length - 1) );
+            {
+                return !(token.includes('.')) && this._isNumber( subToken );
+            }
         }
-
-        else if(this.highlight == 'WGSL')
+        else if( this.highlight == 'WGSL' )
         {
             if( token.lastChar == 'u' )
-                return !(token.includes('.')) && this._isNumber( token.substring(0, token.length - 1) );
+            {
+                return !(token.includes('.')) && this._isNumber( subToken );
+            }
         }
-
-        else if(this.highlight == 'CSS')
+        else if( this.highlight == 'CSS' )
         {
             if( token.lastChar == '%' )
-                return this._isNumber( token.substring(0, token.length - 1) )
+            {
+                return this._isNumber( subToken )
+            }
         }
 
-        return token.length && token != ' ' && !Number.isNaN(+token);
+        return token.length && token != ' ' && !Number.isNaN( +token );
     }
 
-    _isType( token, prev, next ) {
+    _isType( ctxData, lang ) {
+
+        const token = ctxData.token;
+        const prev = ctxData.prev;
+        const next = ctxData.next;
 
         // Common case
-        if( this._mustHightlightWord( token, CodeEditor.types ) )
+        if( this._mustHightlightWord( token, CodeEditor.types, lang ) )
+        {
             return true;
+        }
 
         if( this.highlight == 'JavaScript' )
         {
@@ -3140,7 +3214,7 @@ class CodeEditor {
         }
         else if ( this.highlight == 'WGSL' )
         {
-            const not_kwd = !this._mustHightlightWord( token, CodeEditor.keywords );
+            const not_kwd = !this._mustHightlightWord( token, CodeEditor.keywords, lang );
             return  (prev == 'struct' && next == '{') ||
                     (not_kwd && prev == ':' && next == ';') ||
             ( not_kwd &&
@@ -3847,7 +3921,7 @@ class CodeEditor {
 
         // Add language special keys...
         suggestions = suggestions.concat(
-            Object.keys( CodeEditor.builtin[ this.highlight ] ?? {} ),
+            Object.keys( CodeEditor.builtIn[ this.highlight ] ?? {} ),
             Object.keys( CodeEditor.keywords[ this.highlight ] ?? {} ),
             Object.keys( CodeEditor.statementsAndDeclarations[ this.highlight ] ?? {} ),
             Object.keys( CodeEditor.types[ this.highlight ] ?? {} ),
@@ -4338,8 +4412,13 @@ CodeEditor.keywords = {
 
     'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof', 'debugger', 'abstract',
                   'arguments', 'extends', 'instanceof', 'Infinity'],
-    'C++': ['int', 'float', 'double', 'bool', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'nullptr',
-            'NULL', 'unsigned', 'namespace'],
+    'C': ['int', 'float', 'double', 'long', 'short', 'char', 'const', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'signed', 'volatile', 'unsigned', 'static', 'extern', 'enum', 'register',
+        'union'],
+    'C++': ['int', 'float', 'double', 'bool', 'long', 'short', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'nullptr',
+            'NULL', 'signed', 'unsigned', 'namespace', 'enum', 'extern', 'union', 'sizeof', 'static'],
+    'CMake': ['cmake_minimum_required', 'set', 'not', 'if', 'endif', 'exists', 'string', 'strequal', 'add_definitions', 'macro', 'endmacro', 'file', 'list', 'source_group', 'add_executable',
+        'target_include_directories', 'set_target_properties', 'set_property', 'add_compile_options', 'add_link_options', 'include_directories', 'add_library', 'target_link_libraries',
+        'target_link_options', 'add_subdirectory', 'add_compile_definitions', 'project', 'cache'],
     'JSON': ['true', 'false'],
     'GLSL': ['true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4', 'struct'],
     'CSS': ['body', 'html', 'canvas', 'div', 'input', 'span', '.'],
@@ -4380,7 +4459,7 @@ CodeEditor.types = {
     'C++': ['uint8_t', 'uint16_t', 'uint32_t']
 };
 
-CodeEditor.builtin = {
+CodeEditor.builtIn = {
 
     'JavaScript': ['document', 'console', 'window', 'navigator', 'performance'],
     'CSS': ['*', '!important'],
@@ -4393,7 +4472,8 @@ CodeEditor.statementsAndDeclarations = {
 
     'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'from', 'throw', 'async', 'try', 'catch', 'await'],
     'CSS': ['@', 'import'],
-    'C++': ['std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'glm', 'spdlog'],
+    'C': ['for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'default', 'goto', 'do'],
+    'C++': ['std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'glm', 'spdlog', 'default'],
     'GLSL': ['for', 'if', 'else', 'return', 'continue', 'break'],
     'WGSL': ['const','for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'read_write', 'uniform', 'function', 'workgroup'],
     'Rust': ['break', 'else', 'continue', 'for', 'if', 'loop', 'match', 'return', 'while', 'do', 'yield'],
@@ -4405,7 +4485,9 @@ CodeEditor.statementsAndDeclarations = {
 CodeEditor.symbols = {
 
     'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
+    'C': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '*', '-', '+'],
     'C++': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '::', '*', '-', '+'],
+    'CMake': ['{', '}'],
     'JSON': ['[', ']', '{', '}', '(', ')'],
     'GLSL': ['[', ']', '{', '}', '(', ')'],
     'WGSL': ['[', ']', '{', '}', '(', ')', '->'],

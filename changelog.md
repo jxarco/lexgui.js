@@ -2,6 +2,10 @@
 
 ## 0.1.43 (dev)
 
+CodeEditor:
+- Support C highlight.
+- Support CMake highlight.
+
 Support lock aspect ratio in Panel.addSize
 Improved CSS for overlay buttons `Area.addOverlayButtons`.
 Minor CSS general changes.
