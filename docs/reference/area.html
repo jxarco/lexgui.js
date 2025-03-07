@@ -3,7 +3,13 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Docs</title>
-    <link rel="stylesheet" href="../style.css">    
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        body {
+            text-align: unset !important;
+            text-justify: unset !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -25,6 +31,10 @@
     <li>width: <span class="desc">Width of the area element [fit space]</span></li>
     <li>height: <span class="desc">Height of the area element [fit space]</span></li>
     <li>skipAppend: <span class="desc">Create but not append to GUI root [false]</span></li>
+    <li>minWidth: <span class="desc">Minimum width to be applied when resizing</span></li>
+    <li>minHeight: <span class="desc">Minimum height to be applied when resizing</span></li>
+    <li>maxWidth: <span class="desc">Maximum width to be applied when resizing</span></li>
+    <li>maxHeight: <span class="desc">Maximum height to be applied when resizing</span></li>
 </ul>
 
 <h2 id="properties">Properties</h2>
@@ -46,14 +56,26 @@
 <p><span class="method">.addPanel </span>( options : <span class="desc">Object</span> ) : <a href="panel.html"><span class="desc">Panel</span></a></p>
 <p>Creates a Panel and attaches automatically to the area.</p>
 
+<p><span class="method">.addSidebar </span>( callback : <span class="desc">Function</span>, options : <span class="desc">Object</span> ) : <a href="tabs.html"><span class="desc">Sidebar</span></a></p>
+<p>Creates a sidebar section inside the area. Use <code class='inline ref'><span class="typ">Sidebar</span>.add()</code> to create and append content to the sidebar.</p>
+
 <p><span class="method">.addTabs </span>( options : <span class="desc">Object</span> ) : <a href="tabs.html"><span class="desc">Tabs</span></a></p>
 <p>Creates a tab section inside the area. Use <code class='inline ref'><span class="typ">Tabs</span>.add()</code> to create and append content for each of the tabs.</p>
 
 <p><span class="method">.attach </span>( content : <span class="desc">HTMLElement</span> )</p>
 <p>Appends a child to the area (e.g. a Panel or any HTMLElement). If "content" has a root, then appends it, if not, append "content".</p>
 
+<p><span class="method">.extend </span>( )</p>
+<p>Hide 2nd area split.</p>
+
 <p><span class="method">.propagateEvent </span>( eventName : <span class="desc">String</span> )</p>
 <p>Propagates an event recursively through all the inner sections of the area in the form <code class='inline ref'>area.eventName(boundingRect)</code></p>
+
+<p><span class="method">.reduce </span>( )</p>
+<p>Show 2nd area split.</p>
+
+<p><span class="method">.setLimitBox </span>( minw : <span class="desc">Number</span>, minh : <span class="desc">Number</span>, maxw : <span class="desc">Number</span>, maxh : <span class="desc">Number</span> )</p>
+<p>Set min and max width and height limits to be applied when resizing the area.</p>
 
 <p><span class="method">.setSize </span>( size : <span class="desc">Array</span> )</p>
 <p>Resize both sections of the area using an Array [width, height].</p>

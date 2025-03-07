@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Docs</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.2/css/all.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
     <script type="text/javascript" src="docmaker.js"></script>
 </head>
 
@@ -22,7 +22,9 @@
         You can have as many Areas you need using <code class='inline'>Area.split(options)</code>, which allows you to split horizontally or vertically a given Area:` );
         MAKE_CODE_BULLET_LIST( [
             ["type (String)", "Split mode, either horizontal (default) or vertical"],
-            ["sizes (Array/String)", "Size of each new area. Default is [&quot;50%&quot;, &quot;50%&quot;]. Using 'auto' will make a vertical split to resize automatically."]
+            ["sizes (Array/String)", "Size of each new area. Default is [&quot;50%&quot;, &quot;50%&quot;]. Using 'auto' will make a vertical split to resize automatically."],
+            ["resize (Bool)", "Allow area manual resizing. Default is 'true'"],
+            ["minimizable (Bool)", "Allow the area to be minimized. Default is 'false'"]
         ] );
         MAKE_CODE( `<span class="com">// Split main area in 2 sections (2 Areas)</span>
 <span class="kwd">let</span> [left, right] = area.split({ 
@@ -120,7 +122,7 @@
         MAKE_HEADER( "Sidebar", "h2", "sidebar" );
 
         MAKE_PARAGRAPH( `You can also build a <strong>Sidebar</strong> element directly into any Area using ${INLINE_CODE("Area.addSidebar(callback, options)")}. 
-        To specify each of the menu entries, you should pass a <em>callback function</em> to be called when the Menubar is constructed. <strong>Callbacks will have a Sidebar instance as parameter</strong>, 
+        To specify each of the entries, you should pass a <em>callback function</em> to be called when the Sidebar is constructed. <strong>Callbacks will have a Sidebar instance as parameter</strong>, 
         so use ${INLINE_CODE("Sidebar.add(entryName, options)")} on that instance inside your callback to build each of the entries.` );
 
     </script>

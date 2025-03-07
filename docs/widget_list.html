@@ -3,16 +3,32 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Docs</title>
+    <link rel="stylesheet" href="../build/lexgui.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.2/css/all.css">
     <script type="text/javascript" src="docmaker.js"></script>
+    <script type="importmap">
+        {
+          "imports": {
+            "lexgui": "../build/lexgui.module.js",
+            "lexgui/components/": "../build/components/"
+          }
+        }
+    </script>
 </head>
 
 <body>
 
-    <button id="goUpButton" title="Go up" onclick="goUp()"><i class="fa fa-arrow-up"></i></button>
+    <button id="goUpButton" title="Go up" onclick="document.scrollingElement.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: 'smooth'
+    });"><i class="fa fa-arrow-up"></i></button>
 
-    <script type="text/javascript">
+    <script type="module">
+
+        import { LX } from 'lexgui';
+
+        LX.init( { skipRoot: true } );
 
         MAKE_HEADER( "Widget List", "h1", "widget-list" );
         MAKE_LINE_BREAK();
@@ -31,6 +47,7 @@
             "<a href='#layers'>Layers</a>",
             "<a href='#list'>List</a>",
             "<a href='#number'>Number</a>",
+            "<a href='#pad'>Pad</a>",
             "<a href='#progress'>Progress</a>",
             "<a href='#size'>Size</a>",
             "<a href='#panel-tabs'>Tabs</a>",
@@ -45,6 +62,16 @@
         // Array
         MAKE_HEADER( "Array", "h2", "array" );
         MAKE_PARAGRAPH( `Represents a array of any basic type of elements which can be modified or deleted and new ones can be added.` );
+        
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addArray("Array", ['GPTeam', 'Blat Panthers', 'Blat Bunny'], (value, event) => {
+                console.log(value);
+            });
+            document.body.appendChild( area.root );
+        }
+        
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addArray(name, value, values, callback, options)")} to add an Array Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
@@ -62,6 +89,16 @@
         // Button
         MAKE_HEADER( "Button", "h2", "button" );
         MAKE_PARAGRAPH( `Represents a clickable element typically used to trigger an action.` );
+
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addButton("A Button Name", "Print event", (value, event) => {
+                console.log(event);
+            });
+            document.body.appendChild( area.root );
+        }
+
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addButton(name, value, callback, options)")} to add a Button Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
@@ -74,13 +111,23 @@
                 ["img (String)", "Path to image to show as button value"],
             ]
         ] );
-        MAKE_CODE( `panel.addButton(<span class="str">"A Name"</span>, <span class="str">"Print event"</span>, <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
+        MAKE_CODE( `panel.addButton(<span class="str">"A Button Name"</span>, <span class="str">"Print event"</span>, <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
     <span class="hljs-built_in">console</span>.log(event);
 });` );
 
         // Checkbox
         MAKE_HEADER( "Checkbox", "h2", "checkbox" );
         MAKE_PARAGRAPH( `Represents a classic checkbox to select or deselect an option as a binary choice (either checked or unchecked).` );
+        
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addCheckbox("Toggle me", true, (value, event) => {
+                console.log(value);
+            });
+            document.body.appendChild( area.root );
+        }
+        
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addCheckbox(name, value, callback, options)")} to add a Checkbox Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
@@ -107,6 +154,16 @@ panel.addCheckbox(<span class="str">"Toggle me too"</span>, <span class="lit">tr
         // Color
         MAKE_HEADER( "Color", "h2", "color" );
         MAKE_PARAGRAPH( `Represents a color input. Allows users to select a color using the browser native color picker.` );
+        
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
+                console.log(value);
+            });
+            document.body.appendChild( area.root );
+        }
+
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addColor(name, value, callback, options)")} to add a Color Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
@@ -127,6 +184,34 @@ panel.addColor(<span class="str">"Background"</span>, <span class="str">"#b7a9b1
         // Combo Buttons
         MAKE_HEADER( "Combo Buttons", "h2", "combo-buttons" );
         MAKE_PARAGRAPH( `Represents multiple inlined <a href="#button">buttons</a> as selectable options.` );
+
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addComboButtons("Alignment", [
+                {
+                    value: "left",
+                    icon: "fa fa-align-left",
+                    callback: (value, event) => {
+                        console.log(value);
+                    }
+                }, {
+                    value: "center",
+                    icon: "fa fa-align-center",
+                    callback: (value, event) => {
+                        console.log(value);
+                    }
+                }, {
+                    value: "right",
+                    icon: "fa fa-align-right",
+                    callback: (value, event) => {
+                        console.log(value);
+                    }
+                }
+            ]);
+            document.body.appendChild( area.root );
+        }
+
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addComboButtons(name, values, options)")} to add a ComboButtons Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
@@ -165,6 +250,22 @@ panel.addColor(<span class="str">"Background"</span>, <span class="str">"#b7a9b1
         MAKE_PARAGRAPH( `Represents a simple Curve Editor. It's a versatile component designed to simplify the manipulation and visualization
     of curves or graphs, ideal for any scenario where the smooth interpolation of values over time
     or other parameters is essential.` );
+
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            const opacityValues = [
+                [0.2, 0.35],
+                [0.42, 0.9],
+                [0.55, 0.67],
+                [1, 1]
+            ];
+            panel.addCurve("Opacity", opacityValues, (value, event) => {
+                console.log(value);
+            });
+            document.body.appendChild( area.root );
+        }
+
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addCurve(name, values, callback)")} to add a Curve Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
@@ -196,6 +297,73 @@ panel.addCurve(<span class="str">"Opacity"</span>, opacityValues, (value, event)
         MAKE_PARAGRAPH( `Represents a <strong>data hierarchy visualization Tree</strong>. Enables developers to display hierarchical data in an organized
      and visually appealing manner. This feature is especially useful when presenting data with parent-child
       relationships, such as file directories, organizational structures, family trees, and more.` );
+      
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            // Tree data!
+            const sceneData = {
+                id: "root",
+                children: [
+                    {
+                        id: "node_1",
+                        children: [
+                            {
+                                id: "node_1_1",
+                                icon: "fa-solid fa-cube",
+                                children: [],
+                                actions: [
+                                    {
+                                        name: "Open script",
+                                        icon: "fa-solid fa-scroll",
+                                        callback: function(node) {
+                                            console.log(node.id + ": Script opened!")
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        id: "node_2",
+                        icon: "fa-solid fa-circle-play",
+                        children: []
+                    }
+                ]
+            };
+                
+            // This is optional!
+            const dataTreeIcons = [
+                {
+                    name: "Add node",
+                    icon: "fa-solid fa-plus",
+                    callback: () => { console.log("Node added!") }
+                },
+                {
+                    name: "Instantiate scene",
+                    icon: "fa-solid fa-link",
+                    callback: () => { console.log("Scene instantiated!") }
+                }
+            ];
+                
+            panel.addTree("Scene Tree", sceneData, { 
+                icons: dataTreeIcons, 
+                filter: false,
+                rename: true,
+                onevent: (event) => { 
+                    switch(event.type) {
+                        case LX.TreeEvent.NODE_SELECTED: 
+                            console.log( "Selected:" , event.node.id );
+                            break;
+                        case LX.TreeEvent.NODE_DBLCLICKED: 
+                            console.log( "Double click!" )
+                            break;
+                    }
+                }
+            });
+            document.body.appendChild( area.root );
+        }
+      
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTree(name, data, options)")} to add a DataTree Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
@@ -287,6 +455,16 @@ panel.addTree(<span class="str">"Scene Tree"</span>, sceneData, {
         // Dropdown
         MAKE_HEADER( "Dropdown", "h2", "dropdown" );
         MAKE_PARAGRAPH( `Represents a classic drop-down list. It works as a HTML Select element, but it can also handle media options.` );
+        
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addDropdown("String Dropdown", ["Option 1", "Option 2", "Option 3"], "Option 1", (value, event) => {
+                console.log(value);
+            });
+            document.body.appendChild( area.root );
+        }
+        
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addDropdown(name, values, value, callback, options)")} to add a Dropdown Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
@@ -302,7 +480,7 @@ panel.addTree(<span class="str">"Scene Tree"</span>, sceneData, {
 
 panel.addDropdown(<span class="str">"String Dropdown"</span>, [<span class="str">"Option 1"</span>, <span class="str">"Option 2"</span>], <span class="str">"Option 1"</span>, (<span class="hljs-keyword">value</span>, <span class="hljs-keyword">event</span>) =&gt; {
       console.log(<span class="hljs-keyword">value</span>);
-}, options);
+});
 
 <span class="com">// Media values</span>
 
@@ -318,6 +496,16 @@ panel.addDropdown(<span class="str">"Media Dropdown"</span>, options, <span clas
         // File
         MAKE_HEADER( "File", "h2", "file" );
         MAKE_PARAGRAPH( `Represents a local file loader.` );
+
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addFile("File name", (data, file) => {
+                console.log(data, file);
+            });
+            document.body.appendChild( area.root );
+        }
+
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addFile(name, value, callback)")} to add a File Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
@@ -335,6 +523,17 @@ panel.addDropdown(<span class="str">"Media Dropdown"</span>, options, <span clas
         // Form
         MAKE_HEADER( "Form", "h2", "form" );
         MAKE_PARAGRAPH( `Represents a form structure with different fields and a submit button.` );
+
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            const formData = { username: "", password: { value: "", type: "password" } };
+            panel.addForm("Test form", formData, (value, event) => {
+                console.log(value);
+            }, { actionName: "Login" });
+            document.body.appendChild( area.root );
+        }
+
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addForm(name, value, callback, options)")} to add a Form Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
@@ -354,6 +553,16 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
         MAKE_HEADER( "Layers", "h2", "layers" );
         MAKE_PARAGRAPH( `Represents Bit Layers. Enables 
     you to work with binary data and manipulate individual bits to set bit masks.` );
+
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addLayers("Layer name", 10, (value, event) => {
+                console.log(value);
+            });
+            document.body.appendChild( area.root );
+        }
+
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addLayers(name, value, callback)")} to add a Layers Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
@@ -368,6 +577,16 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
         // List
         MAKE_HEADER( "List", "h2", "list" );
         MAKE_PARAGRAPH( `Represents a list of selectable elements.` );
+
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addList("Volley Teams", ["GPTeam", ["Blat Panthers", "fa-solid fa-paw"], "Blat Bunny"], "Blat Panthers",  (value, event) => {
+                console.log(value);
+            });
+            document.body.appendChild( area.root );
+        }
+
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addList(name, value, values, callback, options)")} to add a List Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
@@ -389,6 +608,16 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
         // Number
         MAKE_HEADER( "Number", "h2", "number" );
         MAKE_PARAGRAPH( `Represents a decimal number input.` );
+
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addNumber("Font Size", 36, (value, event) => {
+                console.log(value);
+            }, { min: 1, max: 48 });
+            document.body.appendChild( area.root );
+        }
+
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addNumber(name, value, callback, options)")} to add a Number Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
@@ -417,9 +646,57 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
         MAKE_PARAGRAPH( `In case you are using limits, store the widget and call <code class='inline'>numberWidget.setLimits( min, max, step )</code> to change its 
         parameters once the widget has been created.` );
 
+        // Pad
+        MAKE_HEADER( "Pad", "h2", "pad" );
+        MAKE_PARAGRAPH( `Represents a 2-dimension pad.` );
+
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addPad("2D Pad", [0.5, 0.5], (value, event) => {
+                console.log(value);
+            }, { padSize: "100px", min: -1, max: 2 });
+            document.body.appendChild( area.root );
+        }
+
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addPad(name, value, callback, options)")} to add a Pad Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["value (Number)", "Pad value"],
+            ["callback (Function)", "Function called when the value changes"],
+            ["options (Object)", "Basic options for a Widget"],
+            [
+                ["disabled (Bool)", "Make the widget disabled [false]"],
+                ["min (Number)", "Min pad value"],
+                ["max (Number)", "Max pad value"],
+                ["padSize (String)", "Size of the pad (css)"],
+                ["onPress (Function)", "Callback function on mouse down"],
+                ["onRelease (Function)", "Callback function on mouse up"],
+            ]
+        ] );
+        MAKE_CODE( ` panel.addPad(<span class="str">"2D Pad"</span>, [<span class="dec">0.5</span>, <span class="dec">0.5</span>], (value, event) => {
+    console.log(value);
+}, { padSize: <span class="str">"100px"</span>, min: <span class="dec">-1</span>, max: <span class="dec">2</span> });` );
+
         // Progress
         MAKE_HEADER( "Progress", "h2", "progress" );
         MAKE_PARAGRAPH( `Represents a horizontal bar that fills up gradually to indicate the completion progress of a task or operation or just show a numeric value.` );
+        
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addProgress("HeadRoll", 0, { 
+                min: -1, 
+                max: 1, 
+                showValue: true, 
+                editable: true, 
+                callback: (value, event) => {
+                    console.log(value);
+                }
+            });
+            document.body.appendChild( area.root );
+        }
+        
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addProgress(name, value, options)")} to add a Progress Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
@@ -436,7 +713,7 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
                 ["high (Number)", "High boundary value"],
             ]
         ] );
-        MAKE_CODE( `panel.addProgress</span>(<span class="str">"HeadRoll"</span>, <span class="dec">0</span>, { 
+        MAKE_CODE( `panel.addProgress(<span class="str">"HeadRoll"</span>, <span class="dec">0</span>, { 
   min</span>: -<span class="dec">1</span>, 
   max: <span class="dec">1</span>, 
   showValue: <span class="lit">true</span>, 
@@ -449,6 +726,16 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
         // Size
         MAKE_HEADER( "Size", "h2", "size" );
         MAKE_PARAGRAPH( `Represents a N dimension number size input.` );
+
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addSize("Screen Resolution", [1280, 720], (value, event) => {
+                console.log(value);
+            }, { units: "p" });
+            document.body.appendChild( area.root );
+        }
+
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addSize(name, value, callback, options)")} to add a Size Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
@@ -462,14 +749,41 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
         ] );
         MAKE_PARAGRAPH( `<sup>Note: Since a Size Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.
             Minimum size is always 0.<sup>` );
-        MAKE_CODE( `panel.addNumber(<span class="str">"Screen Resolution"</span>, [<span class="dec">1280</span>, <span class="dec">720</span>], (value, <span class="hljs-keyword">event</span>) =&gt; {
+        MAKE_CODE( `panel.addSize(<span class="str">"Screen Resolution"</span>, [<span class="dec">1280</span>, <span class="dec">720</span>], (value, <span class="hljs-keyword">event</span>) =&gt; {
     console.<span class="hljs-keyword">log</span>(value);
 }, { units: <span class="str">"p"</span> });` );
 
         // Tabs
         MAKE_HEADER( "Tabs", "h2", "panel-tabs" );
-        MAKE_PARAGRAPH( `Represents panel divisions as tabs, either in horizontal or vertical mode.
-    Quickly switch between the different sets of information.` );
+        MAKE_PARAGRAPH( `Represents panel divisions as tabs, either in horizontal or vertical mode. Quickly switch between the different sets of information.` );
+
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addTabs([
+                { 
+                    name: "First tab",
+                    icon: "fa-brands fa-discord",
+                    onCreate: p => {
+                        p.addTitle("Discord tab");
+                        p.addButton(null, "Connect");
+                    },
+                    onSelect: p => {
+                        console.log( p );
+                    }
+                },
+                { 
+                    name: "Second tab",
+                    icon: "fa-brands fa-github",
+                    onCreate: p => {
+                        p.addTitle("Github tab");
+                        p.addButton(null, "Go", () => { window.open("https://github.com/jxarco/lexgui.js/") });
+                    }
+                }
+            ], { vertical: false });
+            document.body.appendChild( area.root );
+        }
+
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTabs(tabs, options)")} to add a Tabs Widget to your panel, where 
     <code class='inline'>tabs</code> is an <code class="inline"><span class="typ">Array</span></code> of objects which have:` );
         MAKE_CODE_BULLET_LIST( [
@@ -503,6 +817,16 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
         // Tags
         MAKE_HEADER( "Tags", "h2", "tags" );
         MAKE_PARAGRAPH( `Represents a collection of tags that can be added, removed, and modified dynamically.` );
+        
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addTags("Game Tags", "2d, ai, engine, ps5, console", (value, event) => {
+                console.log(value);
+            });
+            document.body.appendChild( area.root );
+        }
+        
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTags(name, value, callback, options)")} to add a Tags Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
@@ -517,6 +841,16 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
         // Text
         MAKE_HEADER( "Text", "h2", "text" );
         MAKE_PARAGRAPH( `Represents a text input.` );
+
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addText("Text Name", "Text value", (value, event) => {
+                console.log(value);
+            }, { placeholder: "Something" });
+            document.body.appendChild( area.root );
+        }
+
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addText(name, value, callback, options)")} to add a Text Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
@@ -540,6 +874,16 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
         // Text area
         MAKE_HEADER( "Text Area", "h2", "text-area" );
         MAKE_PARAGRAPH( `Represents a text area input element.` );
+
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addTextArea("Text Name", "Text value", (value, event) => {
+                console.log(value);
+            }, { placeholder: "Something" });
+            document.body.appendChild( area.root );
+        }
+
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTextArea(name, value, callback, options)")} to add a Text Area Widget to your panel 
         (the <code class='inline'>options</code> are the same as the Text widget) plus:` );
         MAKE_CODE_BULLET_LIST( [
@@ -552,6 +896,14 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
         // Title
         MAKE_HEADER( "Title", "h2", "title" );
         MAKE_PARAGRAPH( `Represents a title section inside a <a href="branching.html">Branch</a>.` );
+
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addTitle("A title!");
+            document.body.appendChild( area.root );
+        }
+
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTitle(name, value, callback, options)")} to add a Title Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
@@ -562,6 +914,24 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
         // Vector
         MAKE_HEADER( "Vector", "h2", "vector" );
         MAKE_PARAGRAPH( `Similar to the Number widget, it represents a decimal vector input. It&#39;s composed by multiple <a href="#number">number</a> widgets.` );
+        
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addVector2("2D Position", [250, 350], (value, event) => {
+                console.log(value);
+            }, { min: 0, max: 1024 });
+
+            panel.addVector3("Velocity", [0.1, 1, 0.5], (value, event) => {
+                console.log(value);
+            });
+
+            panel.addVector4("Shader Color", [1, 1, 1, 1], (value, event) => {
+                console.log(value);
+            });
+            document.body.appendChild( area.root );
+        }
+
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addVectorN(name, value, callback, options)")}, where N is a number in the range [2, 4], to add a Vector Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
@@ -605,13 +975,9 @@ panel.addVector4(<span class="str">"Shader Color"</span>, [<span class="dec">1</
             ["Panel.addSeparator()", "Adds an horizontal line to separate widgets."],
         ] );
 
-    function goUp() {
-        document.scrollingElement.scrollTo({
-            top: 0,
-            left: 0,
-            behavior: 'smooth'
-        });
-    }
+        
+        MAKE_LINE_BREAK();
+        MAKE_LINE_BREAK();
 
     </script>
 
