@@ -1,17 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
+@font-face {
+	font-family: "GoogleSans";
+	src: url("../data/GoogleSans.ttf");
+}
+
 :root {
-  --global-font: "Figtree", sans-serif;
-  --global-title-font: "Poppins", sans-serif;
+  --global-font: "GoogleSans", sans-serif;
+  --global-title-font: "GoogleSans", sans-serif;
   --global-font-size: 12px;
   --global-font-size-big: 14px;
   --global-color-primary: #1c1c1c;
   --global-color-secondary: #2c2c2c;
   --global-color-terciary: #444;
-  --global-selected: #2962dd;
-  --global-selected-light: #668ee4;
+  --global-selected: #2d69da;
+  --global-selected-light: #1e90ff;
   --global-selected-dark: #304b86;
 	--global-branch-darker: #252525;
 	--branch-title-background: #2e3338;
@@ -64,8 +68,8 @@ html, body {
   margin: 0;
   padding: 0;
   font-family: var(--global-font);
-  letter-spacing: -0.01em;
-  font-weight: 400;
+  /* font-weight: 400; */
+  /* letter-spacing: -0.01em; */
 }
 
 a:any-link {
@@ -273,12 +277,12 @@ body.noevents * {
 
 .lexdialogtitle {
   font-family: var(--global-title-font);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 18px;
   color: #d9d9e3;
   text-shadow: 0px 1px 6px #22222283;
   width: calc( 100% - 24px);
-  padding: 8px;
+  padding: 12px;
   padding-left: 16px;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
@@ -483,7 +487,7 @@ body.noevents * {
 
 .lexbranchtitle {
   font-family: var(--global-title-font);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 15px;
   color: var(--global-text);
   background-color: var(--global-color-secondary);
@@ -2405,9 +2409,9 @@ meter::-webkit-meter-even-less-good-value {
   padding: 8px;
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
-  font-weight: bold;
   font-size: 1.3em;
   font-family: var(--global-title-font);
+  font-weight: 600;
   text-transform: uppercase;
 }
 
@@ -3696,7 +3700,7 @@ pre .line-gutter {
 
 .lexgraphnode .lexgraphnodeheader, .lexgraphnode .lexgraphnodeproperties {
   font-family: var(--global-title-font);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 13px;
   color: #d9d9e3;
   text-shadow: 0px 0px 2px #1b1b1bdc;
@@ -3733,7 +3737,7 @@ pre .line-gutter {
 
 .lexgraphnode .lexgraphnodeio {
   font-family: var(--global-title-font);
-  font-weight: 500;
+  font-weight: 600;
   font-size: 10px;
   color: #d9d9e3;
   text-shadow: 0px 1px 6px #22222283;
@@ -3868,9 +3872,9 @@ pre .line-gutter {
 .lexgraphgroup .lexgraphgrouptitle {
   font-size: 14px;
   margin: 8px;
-  font-weight: 800;
   color: var(--global-color-primary);
   font-family: var(--global-title-font);
+  font-weight: 600;
   outline: none;
   border: none;
   background: none;
