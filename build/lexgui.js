@@ -613,7 +613,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         this.ready = true;
         this.menubars = [ ];
 
-        if( !options.skipDefaultArea )
+        if( !options.skipRoot && !options.skipDefaultArea )
         {
             this.main_area = new Area( { id: options.id ?? 'mainarea' } );
         }
