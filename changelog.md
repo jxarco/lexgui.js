@@ -1,6 +1,10 @@
 # lexgui.js changelog
 
-## 0.1.43 (dev)
+## 0.1.44 (dev)
+
+
+
+## 0.1.43 (master)
 
 CodeEditor:
 - Support C and CMake highlight.
@@ -9,10 +13,11 @@ CodeEditor:
 Support `options.skipRoot` on LX.init.
 Support lock aspect ratio in Panel.addSize
 Improved CSS for overlay buttons `Area.addOverlayButtons`.
+Docs Updated. Add interactive widget examples.
 Minor CSS general changes.
 Minor bug fixes.
 
-## 0.1.42 (master)
+## 0.1.42
 
 AssetView:
 - Support custom element title on hover for Content layout mode `options.useNativeTitle`
