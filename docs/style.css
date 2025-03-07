@@ -1,11 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
+
 :root {
 	color-scheme: light dark;
 
 	--color-blue: #049EF4;
-	--text-color: #bbb;
+	--text-color: #cfcfcf;
 	--text-color-secondary: #999;
 
-	--font-size: 18px;
+	--font-size: 17px;
 	--line-height: 26px;
 
 	--border-style: 1px solid #444;
@@ -25,7 +27,7 @@ html {
 	font-size: var(--font-size);
 	line-height: var(--line-height);
 	height: 100%;
-    overflow: unset;
+	overflow: unset;
 }
 
 body {
@@ -39,12 +41,11 @@ body {
 	word-break: break-word;
 	height: 100%;
 	text-align: justify;
-  	text-justify: inter-word;
+	text-justify: inter-word;
 }
 
 code button {
-	border: 1px solid #666;
-	border-radius: 4px;
+	border: none;
 	outline: none;
 	background: none;
 	position: absolute;
@@ -58,29 +59,27 @@ code button {
 
 code button:hover {
 	color: #ccc;
-	border-color: #ccc;
 	cursor: pointer;
 }
 
 code button.copied {
-	border: 1px solid #42d065;
 	color: #42d065;
 }
 
 ::-webkit-scrollbar {
-    height: 3px;
-    width: 4px;
-    background: none;
-    margin-right: 2px;
+	height: 3px;
+	width: 4px;
+	background: none;
+	margin-right: 2px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #aaaaaaa5;
-    border-radius: 6px;
+	background: #aaaaaaa5;
+	border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #aaaaaa;
+	background: #aaaaaa;
 }
 
 body.rtl h1,
@@ -145,6 +144,7 @@ summary {
 
 p {
 	padding-right: 16px;
+	line-height: 1.75;
 }
 
 ul, ol {
@@ -163,12 +163,13 @@ li ol {
 }
 
 code {
-	font-size: calc(var(--font-size) - 1px);
+	font-family: "Roboto Mono", monospace;
+	font-size: 14px;
 	line-height: calc(var(--line-height) - 1px);
 	margin: 16px calc(-1 * var(--page-padding));
-    background-color: #282828;
+	background-color: #282828;
 	text-align: unset !important;
-  	text-justify: unset !important;
+	text-justify: unset !important;
 }
 
 ol code,
@@ -185,7 +186,8 @@ code.inline {
 }
 
 code.inline:not(.ref) {
-    color: #e2c886;
+	color: #e2c886;
+	font-weight: 500;
 }
 
 table {
@@ -249,7 +251,7 @@ img {
 }
 
 @media all and ( min-width: 1700px ) {
-
+	
 	:root {
 		--panel-width: 360px;
 		--font-size: 18px;
@@ -309,6 +311,28 @@ img {
 
 }
 
+#goUpButton {
+	position: fixed;
+	bottom: 32px;
+	right: 32px;
+	border: 1px solid #666;
+	border-radius: 4px;
+	outline: none;
+	background: none;
+	font-size: 18px;
+	padding: 6px;
+	color: #bbb;
+	transition: all 0.25s;
+	width: 32px;
+	height: 32px;
+}
+
+#goUpButton:hover {
+	color: #ccc;
+	border-color: #ccc;
+	cursor: pointer;
+}
+
 pre .str, code .str { color: #c79369; } /* string */
 pre .kwd, code .kwd { color: #2194ce; } /* keyword */
 pre .com, code .com { color: #999999; } /* comment */
@@ -341,24 +365,81 @@ a .desc {
 	font-size: 21px;
 }
 
-#goUpButton {
-	position: fixed;
-	bottom: 32px;
-	right: 32px;
-	border: 1px solid #666;
-	border-radius: 4px;
-	outline: none;
-	background: none;
-	font-size: 18px;
-	padding: 6px;
-	color: #bbb;
-	transition: all 0.25s;
-	width: 32px;
-	height: 32px;
-}
+@media (prefers-color-scheme: light) {
+	
+	body {
+		background-color: #f9f9f9;
+		color: #202124;
+	}
+	
+	::-webkit-scrollbar {
+		background-color: #f9f9f9;
+	}
 
-#goUpButton:hover {
-	color: #ccc;
-	border-color: #ccc;
-	cursor: pointer;
+	::-webkit-scrollbar-thumb {
+		background: #5f5f5fb4;
+		border-radius: 6px;
+	}
+	
+	::-webkit-scrollbar-thumb:hover {
+		background: #575757;
+	}
+
+	code {
+		background-color: #ededed;
+	}
+	
+	code.inline:not(.ref) {
+		color: #434e53;
+	}
+	
+	code button {
+		color: #434e53;
+	}
+	
+	code button:hover {
+		color: #879094;
+	}
+
+	pre .str, code .str { color: #188038; }
+	pre .kwd, code .kwd { color: #1967d2; }
+	pre .com, code .com { color: #b80672; }
+	pre .typ, code .typ { color: #0b9484; }
+	pre .dec, code .dec { color: #c5221f; }
+	pre .mtd, code .mtd { color: #504f4c; }
+	pre .lit, code .lit { color: #1967d2; }
+	pre .tag, code .tag { color: #2183b4; }
+	pre .atn, code .atn { color: #a753c0; }
+
+/*
+	
+	
+	pre .pun, code .pun { color: #888888; }
+	pre .pln, code .pln { color: #444444; }
+	
+
+*/
+	.desc {
+		color: #70777a;
+	}
+	
+	a .desc {
+		color: var(--color-blue);
+	}
+	
+	.param {
+		color: #37474f;
+	}
+	
+	.prop, .method {
+		color: #37474f;
+	}
+
+	#goUpButton {
+		color: #37474f;
+	}
+	
+	#goUpButton:hover {
+		color: #879094;
+	}
 }
