@@ -589,6 +589,10 @@ function init( options = { } )
     {
         this.container.appendChild( root );
     }
+    else
+    {
+        this.root = document.body;
+    }
 
     // Disable drag icon
     root.addEventListener( 'dragover', function( e ) {
@@ -7215,8 +7219,8 @@ class ContextMenu {
 
         this.root = document.createElement('div');
         this.root.className = "lexcontextmenubox";
-        this.root.style.left = (event.x - 48) + "px";
-        this.root.style.top = (event.y - 8) + "px";
+        this.root.style.left = (event.x - 48 + document.scrollingElement.scrollLeft) + "px";
+        this.root.style.top = (event.y - 8 + document.scrollingElement.scrollTop) + "px";
 
         this.root.addEventListener("mouseleave", function() {
             this.remove();

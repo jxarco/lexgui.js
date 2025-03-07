@@ -7203,8 +7203,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             this.root = document.createElement('div');
             this.root.className = "lexcontextmenubox";
-            this.root.style.left = (event.x - 48) + "px";
-            this.root.style.top = (event.y - 8) + "px";
+            this.root.style.left = (event.x - 48 + document.scrollingElement.scrollLeft) + "px";
+            this.root.style.top = (event.y - 8 + document.scrollingElement.scrollTop) + "px";
 
             this.root.addEventListener("mouseleave", function() {
                 this.remove();

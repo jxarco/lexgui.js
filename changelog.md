@@ -2,7 +2,8 @@
 
 ## 0.1.44 (dev)
 
-
+Fix ContextMenu position when scroll > 0.
+Docs Updated.
 
 ## 0.1.43 (master)
 
