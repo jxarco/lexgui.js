@@ -2,3511 +2,3660 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
 @font-face {
-	font-family: "GoogleSans";
-	src: url("../data/GoogleSans.ttf");
+    font-family: "GoogleSans";
+    src: url("../data/GoogleSans.ttf");
 }
 
 :root {
-  --global-font: "GoogleSans", sans-serif;
-  --global-title-font: "GoogleSans", sans-serif;
-  --global-font-size: 12px;
-  --global-font-size-big: 14px;
-  --global-color-primary: #1c1c1c;
-  --global-color-secondary: #2c2c2c;
-  --global-color-terciary: #444;
-  --global-selected: #2d69da;
-  --global-selected-light: #1e90ff;
-  --global-selected-dark: #304b86;
-	--global-branch-darker: #252525;
-	--branch-title-background: #2e3338;
-  --branch-title-inactive-background: #42484e;
-  --global-button-color: #3e3e3e;
-  --global-button-color-hovered: #444;
-  --global-text: #dedee6f0;
-  --global-text-primary: #f4f4ffe6;
-  --global-text-secondary: #cacad4ea;
-  --global-text-terciary: #727272b9;
-  --global-dark-background: #121212;
-  --global-blur-background: #1f1f1fe7;
-  --global-color-transparent: #7b8ae200;
-  --transition-time: 1000;
-  --code-editor-font-size: 14px;
-  --code-editor-row-height: 20px;
-  --graphnode-background: 17, 17, 17;
-} 
+    /* this has to be set to switch between light or dark */
+    color-scheme: light dark;
+
+    --global-font: "GoogleSans", sans-serif;
+    --global-title-font: "GoogleSans", sans-serif;
+    --global-font-size: 12px;
+    --global-font-size-big: 14px;
+    --global-color-primary: light-dark(#f9f9f9, #1c1c1c);
+    --global-color-secondary: #2c2c2c;
+    --global-color-terciary: #444;
+    --global-selected: #2d69da;
+    --global-selected-light: #1e90ff;
+    --global-selected-dark: #304b86;
+    --global-branch-darker: #252525;
+    --branch-title-background: #2e3338;
+    --branch-title-inactive-background: #42484e;
+    --global-button-color: #3e3e3e;
+    --global-button-color-hovered: #444;
+    --global-text-primary: light-dark(#202124, #f4f4ffe6);
+    --global-text-secondary: light-dark(#434e53, #cacad4ea);
+    --global-text-terciary: #727272b9;
+    --global-dark-background: #121212;
+    --global-blur-background: #1f1f1fe7;
+    --global-color-transparent: #7b8ae200;
+    --transition-time: 1000;
+    --code-editor-font-size: 14px;
+    --code-editor-row-height: 20px;
+    --graphnode-background: 17, 17, 17;
+}
 
 /* Some global colors */
-.orange { color: orange }
-.gray { color: gray }
-.dodgerblue { color: dodgerblue }
-.lightblue { color: rgb(90, 168, 247) }
+.orange {
+    color: orange
+}
+
+.gray {
+    color: gray
+}
+
+.dodgerblue {
+    color: dodgerblue
+}
+
+.lightblue {
+    color: rgb(90, 168, 247)
+}
 
 ::-webkit-scrollbar {
-  height: 3px;
-  width: 4px;
-  background: none;
-  margin-right: 2px;
+    height: 3px;
+    width: 4px;
+    background: none;
+    margin-right: 2px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #aaaaaaa5;
-  border-radius: 6px;
+    background: #aaaaaaa5;
+    border-radius: 6px;
 }
 
 ::-webkit-scrollbar-corner {
-  display: none;
+    display: none;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #aaaaaa;
+    background: #aaaaaa;
 }
 
-html, body {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;  /* no general overflow in desktop app  */
-  margin: 0;
-  padding: 0;
-  font-family: var(--global-font);
-  /* font-weight: 400; */
-  /* letter-spacing: -0.01em; */
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    /* no general overflow in desktop app  */
+    margin: 0;
+    padding: 0;
+    font-family: var(--global-font);
+    /* font-weight: 400; */
+    /* letter-spacing: -0.01em; */
 }
 
 a:any-link {
-  color: var(--global-selected-light);
+    color: var(--global-selected-light);
 }
 
 canvas {
-  border-radius: 6px;
+    border-radius: 6px;
 }
 
 body.nocursor * {
-  cursor: none !important;
+    cursor: none !important;
 }
 
 body.noevents * {
-  pointer-events: none !important;
+    pointer-events: none !important;
 }
 
 .grabbing {
-  cursor: move;
+    cursor: move;
 }
 
 .hidden {
-  display: none !important;
+    display: none !important;
 }
 
 .hiddenOpacity {
-  opacity: 0 !important;
-  pointer-events: none;
+    opacity: 0 !important;
+    pointer-events: none;
 }
 
 ::-webkit-file-upload-button {
- display: none;
+    display: none;
 }
 
-#modal{
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  position: absolute;
-  z-index: 99;
-  opacity: 1;
-  transition: opacity 0.2s ease-in;
+#modal {
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    position: absolute;
+    z-index: 99;
+    opacity: 1;
+    transition: opacity 0.2s ease-in;
 }
 
 #lexroot {
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
-  position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
 }
 
 .leximage {
-  text-align: center;
+    text-align: center;
 }
 
 .leximage img {
-  max-width: 256px;
+    max-width: 256px;
 }
 
 .lexicon {
-  margin-left: 4px;
-  cursor: pointer;
-  line-height: inherit !important;
+    margin-left: 4px;
+    cursor: pointer;
+    line-height: inherit !important;
 }
 
 .lexicon:hover {
-  color: var(--global-text-primary);
+    color: var(--global-text-primary);
 }
 
 .lexicon:active {
-  color: var(--global-text-secondary);
-  margin-top: 0.01em;
+    color: var(--global-text-secondary);
+    margin-top: 0.01em;
 }
 
 #global-search {
-  position: absolute;
-  background-color: var(--global-blur-background);
-  --webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
-  border-radius: 8px;
-  border: 1px solid #d0d0ec2a;
-  width: 30%;
-  max-width: 740px;
-  top: 15%;
-  left: calc(50% - min(15%, 740px));
-  display: flex;
-  flex-wrap: wrap;
-  z-index: 105;
-  -webkit-mask-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAA5JREFUeNpiYGBgAAgwAAAEAAGbA+oJAAAAAElFTkSuQmCC); /* this fixes the overflow:hidden in Chrome/Opera */
-  mask-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAA5JREFUeNpiYGBgAAgwAAAEAAGbA+oJAAAAAElFTkSuQmCC); /* this fixes the overflow:hidden in Chrome/Opera */
+    position: absolute;
+    background-color: var(--global-blur-background);
+    --webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-radius: 8px;
+    border: 1px solid #d0d0ec2a;
+    width: 30%;
+    max-width: 740px;
+    top: 15%;
+    left: calc(50% - min(15%, 740px));
+    display: flex;
+    flex-wrap: wrap;
+    z-index: 105;
+    -webkit-mask-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAA5JREFUeNpiYGBgAAgwAAAEAAGbA+oJAAAAAElFTkSuQmCC);
+    /* this fixes the overflow:hidden in Chrome/Opera */
+    mask-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAA5JREFUeNpiYGBgAAgwAAAEAAGbA+oJAAAAAElFTkSuQmCC);
+    /* this fixes the overflow:hidden in Chrome/Opera */
 }
 
 #global-search .gs-header {
-  width: 100%;
-  height: 32px;
-  display: flex;
-  padding: 6px;
+    width: 100%;
+    height: 32px;
+    display: flex;
+    padding: 6px;
 }
 
 #global-search a {
-  color: var(--global-text-secondary);
-  padding: 10px;
-  background-color: var(--global-color-terciary);
-  border-top-left-radius: 6px;
-  border-bottom-left-radius: 6px;
-  font-size: 12px;
+    color: var(--global-text-secondary);
+    padding: 10px;
+    background-color: var(--global-color-terciary);
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+    font-size: 12px;
 }
 
 #global-search input {
-  width: 100%;
-  flex: 50%;
-  background: none;
-  border-top-right-radius: 6px;
-  border-bottom-right-radius: 6px;
-  color: var(--global-text-secondary);
-  background-color: var(--global-color-terciary);
-  outline: none;
-  border: none;
-  font-family: var(--global-font);
-  line-height: 23px;
-  font-size: 14px;
-  font-weight: 600;
+    width: 100%;
+    flex: 50%;
+    background: none;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    color: var(--global-text-secondary);
+    background-color: var(--global-color-terciary);
+    outline: none;
+    border: none;
+    font-family: var(--global-font);
+    line-height: 23px;
+    font-size: 14px;
+    font-weight: 600;
 }
 
 #global-search .lexarea {
-  background: none !important;
+    background: none !important;
 }
 
 #global-search .searchitembox {
-  flex-basis: 100%;
-  overflow-y: scroll;
-  max-height: calc(512px - 48px);
+    flex-basis: 100%;
+    overflow-y: scroll;
+    max-height: calc(512px - 48px);
 }
 
 #global-search .searchitembox::-webkit-scrollbar {
-  display: none;
+    display: none;
 }
 
 #global-search .searchitembox .searchitem {
-  padding: 10px;
-  padding-left: 50px;
-  color: var(--global-text-primary);
-  font-size: 13px;
-  cursor: pointer;
+    padding: 10px;
+    padding-left: 50px;
+    color: var(--global-text-primary);
+    font-size: 13px;
+    cursor: pointer;
 }
 
 #global-search .searchitembox .searchitem a {
-  padding: 0px;
-  margin-left: -28px;
-  margin-top: 2px;
-  color: var(--global-selected-light);
-  float: left;
+    padding: 0px;
+    margin-left: -28px;
+    margin-top: 2px;
+    color: var(--global-selected-light);
+    float: left;
 }
 
 #global-search .searchitembox .searchitem i {
-  width: 12px;
-  font-size: 11px;
-  margin-right: 4px;
-  margin-top: -2px;
-  vertical-align: middle;
+    width: 12px;
+    font-size: 11px;
+    margin-right: 4px;
+    margin-top: -2px;
+    vertical-align: middle;
 }
 
 #global-search .searchitembox .searchitem img {
-  width: 12px;
-  margin-right: 4px;
-  margin-top: -2px;
-  vertical-align: middle;
+    width: 12px;
+    margin-right: 4px;
+    margin-top: -2px;
+    vertical-align: middle;
 }
 
 #global-search .searchitembox .searchitem .lang-ext {
-  color: #676e75;
-  font-size: var(--global-font-size);
+    color: #676e75;
+    font-size: var(--global-font-size);
 }
 
 #global-search .searchitembox .searchitem.last {
-  border-bottom-left-radius: 6px;
-  border-bottom-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
 }
 
 #global-search .searchitembox .searchitem.hovered {
-  background-color: var(--global-selected);
-  color: #f5f5f5;
+    background-color: var(--global-selected);
+    color: #f5f5f5;
 }
 
 /* Dialogs and alerts */
 
 .lexdialog {
-  background: none;
-  position: absolute;
-  min-width: 256px;
-  /* overflow: hidden; */
-  box-shadow: 0 2px 8px #101010;
-  border-radius: 6px;
-  z-index: 101;
-  background-color: var(--global-color-secondary);
+    background: none;
+    position: absolute;
+    min-width: 256px;
+    /* overflow: hidden; */
+    box-shadow: 0 2px 8px #101010;
+    border-radius: 6px;
+    z-index: 101;
+    background-color: var(--global-color-secondary);
 }
 
 .lexdialogtitle {
-  font-family: var(--global-title-font);
-  font-weight: 600;
-  font-size: 18px;
-  color: #d9d9e3;
-  text-shadow: 0px 1px 6px #22222283;
-  width: calc( 100% - 24px);
-  padding: 12px;
-  padding-left: 16px;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  display: flex;
-  justify-content: space-between;
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
-  align-items: center;
+    font-family: var(--global-title-font);
+    font-weight: 600;
+    font-size: 18px;
+    color: #d9d9e3;
+    text-shadow: 0px 1px 6px #22222283;
+    width: calc(100% - 24px);
+    padding: 12px;
+    padding-left: 16px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    -webkit-user-select: none;
+    /* Safari 3.1+ */
+    -moz-user-select: none;
+    /* Firefox 2+ */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+    /* Standard syntax */
+    align-items: center;
 }
 
 .lexdialogcontent {
-  padding: 15px;
-  word-break: break-all;
-  color: var(--global-text-primary);
-  font-size: 14px;
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
-  margin-left: 0px !important;
+    padding: 15px;
+    word-break: break-all;
+    color: var(--global-text-primary);
+    font-size: 14px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    margin-left: 0px !important;
 }
 
 .lexdialogcontent.notitle {
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  padding-top: 36px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding-top: 36px;
 }
 
 .lexdialogcloser {
-  font-size: 16px;
-  color: #d9d9e3;
-  cursor: pointer;
-  margin-right: 0.4em;
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
+    font-size: 16px;
+    color: #d9d9e3;
+    cursor: pointer;
+    margin-right: 0.4em;
+    -webkit-user-select: none;
+    /* Safari 3.1+ */
+    -moz-user-select: none;
+    /* Firefox 2+ */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+    /* Standard syntax */
 }
 
 .lexdialogcloser.notitle {
-  position: absolute;
-  top: 0.8em;
-  right: 0.6em;
+    position: absolute;
+    top: 0.8em;
+    right: 0.6em;
 }
 
 .lexdialogcloser:hover {
-  color: #aaa;
+    color: #aaa;
 }
 
 .lexdialogcloser:active {
-  margin-top: 0.1em;
+    margin-top: 0.1em;
 }
 
 .lexdialogcloser.notitle:active {
-  margin-top: 0.05em;
+    margin-top: 0.05em;
 }
 
 /* Pocket Dialog */
 
 .lexdialog.pocket {
-  margin: 3px;
-  background-color: var(--global-color-primary);
+    margin: 3px;
+    background-color: var(--global-color-primary);
 }
 
 .lexdialog.pocket.dockable {
-  transition: ease-out left 0.2s, ease-out top 0.2s, ease-in transform 0.2s;
+    transition: ease-out left 0.2s, ease-out top 0.2s, ease-in transform 0.2s;
 }
 
 .lexdialog.pocket .lexdialogtitle {
-  background: var(--global-dark-background);
-  font-size: 14px;
+    background: var(--global-dark-background);
+    font-size: 14px;
 }
 
 .lexdialog.pocket .lexdialogcontent {
-  padding: 4px;
-  padding-left: 8px;
-  max-height: -webkit-fill-available;
-  opacity: 1;
+    padding: 4px;
+    padding-left: 8px;
+    max-height: -webkit-fill-available;
+    opacity: 1;
 
-  -webkit-transition: max-height 0.2s; 
-  -moz-transition: max-height 0.2s; 
-  -ms-transition: max-height 0.2s; 
-  -o-transition: max-height 0.2s; 
-  transition: max-height 0.2s;  
+    -webkit-transition: max-height 0.2s;
+    -moz-transition: max-height 0.2s;
+    -ms-transition: max-height 0.2s;
+    -o-transition: max-height 0.2s;
+    transition: max-height 0.2s;
 
-  -webkit-transition: opacity 0.2s; 
-  -moz-transition: opacity 0.2s; 
-  -ms-transition: opacity 0.2s; 
-  -o-transition: opacity 0.2s; 
-  transition: opacity 0.2s;   
+    -webkit-transition: opacity 0.2s;
+    -moz-transition: opacity 0.2s;
+    -ms-transition: opacity 0.2s;
+    -o-transition: opacity 0.2s;
+    transition: opacity 0.2s;
 }
 
 .lexdialog.pocket.minimized .lexdialogtitle {
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 
 .lexdialog.pocket.minimized .lexdialogcontent {
-  max-height: 0px;
-  padding: 0px;
-  opacity: 0;
+    max-height: 0px;
+    padding: 0px;
+    opacity: 0;
 
-  -webkit-transition: max-height 0.2s; 
-  -moz-transition: max-height 0.2s; 
-  -ms-transition: max-height 0.2s; 
-  -o-transition: max-height 0.2s; 
-  transition: max-height 0.2s;  
+    -webkit-transition: max-height 0.2s;
+    -moz-transition: max-height 0.2s;
+    -ms-transition: max-height 0.2s;
+    -o-transition: max-height 0.2s;
+    transition: max-height 0.2s;
 
-  -webkit-transition: opacity 0.2s; 
-  -moz-transition: opacity 0.2s; 
-  -ms-transition: opacity 0.2s; 
-  -o-transition: opacity 0.2s; 
-  transition: opacity 0.2s;  
+    -webkit-transition: opacity 0.2s;
+    -moz-transition: opacity 0.2s;
+    -ms-transition: opacity 0.2s;
+    -o-transition: opacity 0.2s;
+    transition: opacity 0.2s;
 
-  -webkit-transition: padding 0.2s; 
-  -moz-transition: padding 0.2s; 
-  -ms-transition: padding 0.2s; 
-  -o-transition: padding 0.2s; 
-  transition: padding 0.2s;  
+    -webkit-transition: padding 0.2s;
+    -moz-transition: padding 0.2s;
+    -ms-transition: padding 0.2s;
+    -o-transition: padding 0.2s;
+    transition: padding 0.2s;
 }
 
 /* Pop up dialog */
 .lexpopup {
-  background: var(--global-blur-background);
-  opacity: 0;
-  transition: opacity 1s; 
+    background: var(--global-blur-background);
+    opacity: 0;
+    transition: opacity 1s;
 }
 
 .lexpopup.fadein {
-  opacity: 1;
+    opacity: 1;
 }
 
 .lexpopup.fadeout {
-  opacity: 0;
+    opacity: 0;
 }
 
 /* Area */
 
 .lexarea {
-  background-color: var(--global-color-primary);
-  margin: 0;
+    background-color: var(--global-color-primary);
+    margin: 0;
 }
 
 /* Split bar */
 
 .lexsplitbar {
-  background: rgba(186, 188, 207, 0.01);
-  border-radius: 8px;
+    background: rgba(186, 188, 207, 0.01);
+    border-radius: 8px;
 }
 
 .lexsplitbar:hover {
-  background-color: #8e949be8;
+    background-color: #8e949be8;
 }
 
 .lexsplitbar.horizontal {
-  cursor: ew-resize;
+    cursor: ew-resize;
 }
 
 .lexsplitbar.vertical {
-	cursor: ns-resize;
-  transform: translateY(-3px);
-  left: calc(50% - 32px);
+    cursor: ns-resize;
+    transform: translateY(-3px);
+    left: calc(50% - 32px);
 }
 
 .lexsplitbar:hover {
-	background: rgba(186, 188, 207, 0.45);
+    background: rgba(186, 188, 207, 0.45);
 }
 
 .lexsplitbar.dragging-split-area {
-	background-color: var(--global-button-color);
+    background-color: var(--global-button-color);
 }
 
 /* Branches */
 
 .lexpanel {
-  margin: 0;
-  margin-left: 3px;
-  overflow: hidden;
-  overflow-y: scroll;
+    margin: 0;
+    margin-left: 3px;
+    overflow: hidden;
+    overflow-y: scroll;
 }
 
 .lexpanel::-webkit-scrollbar {
-  display: none;
+    display: none;
 }
 
 .lexbranch {
-  border-radius: 6px;
-  margin-bottom: 4px !important;
+    border-radius: 6px;
+    margin-bottom: 4px !important;
 }
 
 .lexbranch .lexbranchcontent {
-  padding: 4px;
-  background-color: var(--global-color-secondary);
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
+    padding: 4px;
+    background-color: var(--global-color-secondary);
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 
 .lexbranch.last .lexbranchcontent {
-  overflow: hidden;
-  margin-bottom: 6px;
+    overflow: hidden;
+    margin-bottom: 6px;
 }
 
 .lexbranchtitle {
-  font-family: var(--global-title-font);
-  font-weight: 600;
-  font-size: 15px;
-  color: var(--global-text);
-  background-color: var(--global-color-secondary);
-  text-shadow: 0px 1px 6px #1111117c;
-  padding: 10px;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  cursor: pointer;
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
+    font-family: var(--global-title-font);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--global-text-primary);
+    background-color: var(--global-color-secondary);
+    text-shadow: 0px 1px 6px #1111117c;
+    padding: 10px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    /* Safari 3.1+ */
+    -moz-user-select: none;
+    /* Firefox 2+ */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+    /* Standard syntax */
 }
 
 .lexbranch.closed .lexbranchtitle {
-  background-color: inherit;
+    background-color: inherit;
 }
 
 .lexbranchtitle:active {
-  padding-left: 11px;
+    padding-left: 11px;
 }
 
 .lexbranchtitle.wtabs {
-  display: flex;
-  padding: 0px;
-  cursor: default;
-  background-color: var(--branch-title-inactive-background);
-  text-shadow: none;
-  color: #5f6770;
+    display: flex;
+    padding: 0px;
+    cursor: default;
+    background-color: var(--branch-title-inactive-background);
+    text-shadow: none;
+    color: #5f6770;
 }
 
 /* Tab */
 .lexbranchtitle.wtabs span {
-  padding: 10px;
-  cursor: pointer;
+    padding: 10px;
+    cursor: pointer;
 }
 
 .lexbranchtitle.wtabs span:hover {
-  background-color: #47505872;
+    background-color: #47505872;
 }
 
 .lexbranchtitle.wtabs span:active {
-  margin-top: 1px;
+    margin-top: 1px;
 }
 
 .lexbranchtitle.wtabs span.first {
-  border-top-left-radius: 8px;
+    border-top-left-radius: 8px;
 }
 
 .lexbranchtitle.wtabs span.selected {
-  border-top: 2px solid var(--global-selected-light);
-  background-color: var(--branch-title-background);
-  color: var(--global-text);
-  text-shadow: 0px 1px 2px #000;
+    border-top: 2px solid var(--global-selected-light);
+    background-color: var(--branch-title-background);
+    color: var(--global-text-primary);
+    text-shadow: 0px 1px 2px #000;
 }
 
 .lexbranch .branchicon {
-  font-size: var(--global-font-size);
+    font-size: var(--global-font-size);
 }
 
 .lexbranch.first .lexbranchtitle {
-  margin-top: 4px;
+    margin-top: 4px;
 }
 
 .lexbranch.last.closed .lexbranchtitle {
-  margin-bottom: 6px;
+    margin-bottom: 6px;
 }
 
 .lexbranch .switch-branch-button {
-  float: right;
-  font-size: 11px;
-	margin: 8px 6px -4px 2px;
-  transition: 0.1s;
+    float: right;
+    font-size: 11px;
+    margin: 8px 6px -4px 2px;
+    transition: 0.1s;
 }
 
 .lexbranch.closed .switch-branch-button {
-  transform: rotate(180deg);
+    transform: rotate(180deg);
 }
 
 /* Widgets */
 
 .lexwidget {
-  display: flex;
-  align-items: center;
-  padding: 5px;
-  font-size: var(--global-font-size);
-  color: #DCDCDC;
-  line-height: 2;
-  overflow: hidden;
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    font-size: var(--global-font-size);
+    color: #DCDCDC;
+    line-height: 2;
+    overflow: hidden;
 }
 
 .lexwidget * {
-  font-size: var(--global-font-size);
+    font-size: var(--global-font-size);
 }
 
 .lexinlinewidgets .lexwidget {
-  padding-left: 10px;
-  padding-right: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 .lexinlinewidgets .lexwidgetname.float-center {
-  justify-content: center;
+    justify-content: center;
 }
 
 .lexinlinewidgets .lexwidgetname.float-right {
-  justify-content: end;
-  -moz-transform: translateX(-1em);
-  -webkit-transform: translateX(-1em);
-  transform: translateX(-1em);
+    justify-content: end;
+    -moz-transform: translateX(-1em);
+    -webkit-transform: translateX(-1em);
+    transform: translateX(-1em);
 }
 
 .lexwidget.nobranch {
-  padding-left: 12px;
+    padding-left: 12px;
 }
 
 .lexwidget.auto {
-  width: unset !important;
+    width: unset !important;
 }
 
 .lexwidget.micro {
-  min-width: 24px;
-  width: 3% !important;
-  padding-left: 4px;
-  padding-right: 4px;
+    min-width: 24px;
+    width: 3% !important;
+    padding-left: 4px;
+    padding-right: 4px;
 }
 
 .lexwidget.micro button {
-  padding-left: 4px;
-  padding-right: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
 }
 
 .lexwidget.small {
-  width: 5% !important;
+    width: 5% !important;
 }
 
 .lexwidget.md {
-  width: 75% !important;
+    width: 75% !important;
 }
 
 .lexinlinewidgets {
-  display: flex;
+    display: flex;
 }
 
 .lexwidgetseparator div {
-  -ms-transform: translateY(-11px);
-  -webkit-transform: translateY(-11px);
-  transform: translateY(-11px);
-  height: 2px;
-  width: 11px;
-  cursor: ew-resize;
-  color: var(--global-text-terciary);
+    -ms-transform: translateY(-11px);
+    -webkit-transform: translateY(-11px);
+    transform: translateY(-11px);
+    height: 2px;
+    width: 11px;
+    cursor: ew-resize;
+    color: var(--global-text-terciary);
 }
 
 .lexwidgetseparator div:hover {
-  color: #4d4d5ac4;
+    color: #4d4d5ac4;
 }
 
 .lexwidgetseparator div div {
-  background: #dddddd33;
+    background: #dddddd33;
 }
 
 .lexwidgetname {
-  white-space: nowrap;
-  overflow: hidden;
-  display: flex;
-  justify-content: space-between;
-  font-family: var(--global-font);
-  color: var(--global-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--global-font);
+    color: var(--global-text-secondary);
 }
 
 .lexwidget input {
-  font-family: var(--global-font);
-  background: none;
-  padding: 3px;
-  color: var(--global-text-primary);
-  font-weight: 500;
-  outline: none;
-  border-radius: 6px;
-  border: 2px solid var(--global-color-transparent);
-  transition: border-color 0.1s linear;
+    font-family: var(--global-font);
+    background: none;
+    padding: 3px;
+    color: var(--global-text-primary);
+    font-weight: 500;
+    outline: none;
+    border-radius: 6px;
+    border: 2px solid var(--global-color-transparent);
+    transition: border-color 0.1s linear;
 }
 
 .lexwidget .lextext {
-  border-radius: 6px;
-  position: relative;
-  transition: 0.1s linear;
+    border-radius: 6px;
+    position: relative;
+    transition: 0.1s linear;
 }
 
 .lexwidget .lextext:not(:has(div)) {
-  background-color: var(--global-button-color);
+    background-color: var(--global-button-color);
 }
 
 .lexwidget .lextext:not(:has(div)):hover {
-  background-color: var(--global-button-color-hovered);
+    background-color: var(--global-button-color-hovered);
 }
 
 .lexwidget .lextext input {
-  padding: 5px;
+    padding: 5px;
 }
 
 .lexwidget .lextext div {
-  color: #b2b2b5d6;
-  padding: 2px;
-  padding-left: 6px;
+    color: #b2b2b5d6;
+    padding: 2px;
+    padding-left: 6px;
 }
 
 .lexwidget .lextext.lexwarning div {
-  color: rgb(213, 208, 128);
-  font-weight: 700;
+    color: rgb(213, 208, 128);
+    font-weight: 700;
 }
 
 .lexwidget .lextext.lexwarning i {
-  color: rgb(212, 165, 63);
-  margin-right: 16px;
+    color: rgb(212, 165, 63);
+    margin-right: 16px;
 }
 
 .lexwidget .lextext input:focus {
-  border: 2px solid var(--global-selected);
+    border: 2px solid var(--global-selected);
 }
 
 .lexwidget .inputicon {
-  padding: 6px;
-  font-size: 10px;
-  margin-top: 2px;
-  margin-left: 2px;
+    padding: 6px;
+    font-size: 10px;
+    margin-top: 2px;
+    margin-left: 2px;
 }
 
 .lexwidget textarea {
-  word-break: break-word;
-  font-family: var(--global-font);
-  background: none;
-  padding: 5px;
-  color: var(--global-text-primary);
-  font-weight: 600;
-  outline: none;
-  border-radius: 6px;
-  border: 2px solid var(--global-color-transparent);
-  transition: 0.1s linear;
+    word-break: break-word;
+    font-family: var(--global-font);
+    background: none;
+    padding: 5px;
+    color: var(--global-text-primary);
+    font-weight: 600;
+    outline: none;
+    border-radius: 6px;
+    border: 2px solid var(--global-color-transparent);
+    transition: 0.1s linear;
 }
 
 .lexwidget textarea:disabled {
-  resize: none;
+    resize: none;
 }
 
 .lexwidget textarea:focus {
-  border: 2px solid var(--global-selected);
+    border: 2px solid var(--global-selected);
 }
 
 .lexwidget input.colorinput {
-  border: none;
-  margin-left: -4px;
+    border: none;
+    margin-left: -4px;
 }
 
 .lexwidget input:disabled {
-  outline: none;
-  border: none;
-  color: #919098db;
+    outline: none;
+    border: none;
+    color: #919098db;
 }
 
 .lexseparator {
-  /* border-top: 1px solid #111; */
-  border-bottom: 1px solid var(--global-button-color);
-  margin: 5px 0 5px 10px;
+    /* border-top: 1px solid #111; */
+    border-bottom: 1px solid var(--global-button-color);
+    margin: 5px 0 5px 10px;
 }
 
 .lexbranch .lexseparator {
-  border-top: 1px solid var(--global-dark-background);
-  border-bottom: 1px solid var(--global-color-terciary);
-  width: -moz-calc(100% - 8px);
-  width: -webkit-calc(100% - 8px);
-  width: calc(100% - 8px);
-  margin: 5px 0 5px 4px;
+    border-top: 1px solid var(--global-dark-background);
+    border-bottom: 1px solid var(--global-color-terciary);
+    width: -moz-calc(100% - 8px);
+    width: -webkit-calc(100% - 8px);
+    width: calc(100% - 8px);
+    margin: 5px 0 5px 4px;
 }
 
 .lexfilter input {
-  font-family: var(--global-font);
+    font-family: var(--global-font);
 }
 
 .lextitle {
-  width: fit-content;
-  width: -moz-fit-content;
-  color: #ddd;
-  font-weight: 800;
-  font-size: 13px;
-  margin: 12px;
-  padding: 2px;
-  padding-left: 12px;
-  padding-right: 12px;
-  display: grid;
-  align-content: center;
-  border-radius: 12px;
-  background-color: var(--global-button-color);
-  display: flex;
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
+    width: fit-content;
+    width: -moz-fit-content;
+    color: #ddd;
+    font-weight: 800;
+    font-size: 13px;
+    margin: 12px;
+    padding: 2px;
+    padding-left: 12px;
+    padding-right: 12px;
+    display: grid;
+    align-content: center;
+    border-radius: 12px;
+    background-color: var(--global-button-color);
+    display: flex;
+    -webkit-user-select: none;
+    /* Safari 3.1+ */
+    -moz-user-select: none;
+    /* Firefox 2+ */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+    /* Standard syntax */
 }
 
 .lexinlinewidgets .lextitle {
-  margin: 8px;
-  height: 20px;
-  flex: none;
+    margin: 8px;
+    height: 20px;
+    flex: none;
 }
 
 .lextitle a {
-  margin-top: 0.3em;
-  margin-right: 0.7em;
-  color: var(--global-selected-light);
-  font-size: 11px;
+    margin-top: 0.3em;
+    margin-right: 0.7em;
+    color: var(--global-selected-light);
+    font-size: 11px;
 }
 
 .lextitle.link {
-  color: #aaa;
-  text-decoration: none;
-  transition: padding-left 0.1s;
+    color: #aaa;
+    text-decoration: none;
+    transition: padding-left 0.1s;
 }
 
 .lextitle.link:hover {
-  color: #049EF4;
-  padding-left: 8px;
+    color: #049EF4;
+    padding-left: 8px;
 }
 
 
 /* Buttons */
 
 .lexbutton {
-  display: grid;
-  align-content: center;
-	background-color: var(--global-button-color);
-  border-radius: 6px;
-  border: none;
-  margin-top: 2px;
-  height: 22px !important;
-  color: var(--global-text);
-  font-weight: 500;
-  outline: none;
-  white-space: nowrap;
-  overflow: hidden;
-  cursor: pointer;
-  font-family: var(--global-font);
-  transition: 0.1s linear;
+    display: grid;
+    align-content: center;
+    background-color: var(--global-button-color);
+    border-radius: 6px;
+    border: none;
+    margin-top: 2px;
+    height: 22px !important;
+    color: var(--global-text-primary);
+    font-weight: 500;
+    outline: none;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+    font-family: var(--global-font);
+    transition: 0.1s linear;
 }
 
 .lexbutton.accept {
-	background-color: var(--global-selected);
+    background-color: var(--global-selected);
 }
 
 .lexbutton.foldback {
-  padding: 11px 10px;
-  padding-bottom: 14px;
-  float: right;
-  align-items: center;
-  margin-right: 4px;
-  margin-top: 2px;
+    padding: 11px 10px;
+    padding-bottom: 14px;
+    float: right;
+    align-items: center;
+    margin-right: 4px;
+    margin-top: 2px;
 }
 
 .lexbutton a {
-  margin-left: 0px;
-  font-size: 10px;
+    margin-left: 0px;
+    font-size: 10px;
 }
 
 .lexbutton.array a {
-	margin-top: 2px;
+    margin-top: 2px;
 }
 
 .lexbutton:hover {
-  background-color: var(--global-button-color-hovered);
-  color: var(--global-text-primary);
+    background-color: var(--global-button-color-hovered);
+    color: var(--global-text-primary);
 }
 
 .lexbutton.accept:hover {
-	background-color: #3b6790;
+    background-color: #3b6790;
 }
 
 .lexbutton:active:not(.lexbutton.combo) {
-	background-color: #4e4e4e;
-  color: var(--global-text-secondary);
-  transform: scale(0.99);
+    background-color: #4e4e4e;
+    color: var(--global-text-secondary);
+    transform: scale(0.99);
 }
 
 .lexbutton.selected {
-  background: #3c4145;
-  outline: 1px solid #8c9bc7;
-  color: #DDD;
+    background: #3c4145;
+    outline: 1px solid #8c9bc7;
+    color: #DDD;
 }
 
 .lexbutton.noname {
-  margin-left: 0px;
-  margin-top: 0px;
+    margin-left: 0px;
+    margin-top: 0px;
 }
 
 /* Combo Buttons */
 
 .lexcombobuttons {
-  display: flex;
-  justify-content: center;
+    display: flex;
+    justify-content: center;
 }
 
 .lexcombobuttons.right {
-  justify-content: right;
+    justify-content: right;
 }
 
 .lexcombobuttons.left {
-  justify-content: left;
+    justify-content: left;
 }
 
 .lexcombobuttons .lexbutton.combo {
-  margin-left: 1px;
-  margin-right: 1px;
-  border-radius: 0px;
-  display: flex;
-  padding: 1em;
-  padding-top: 0.5em;
-  padding-bottom: 2.0em;
-  transition: 0.2s;
+    margin-left: 1px;
+    margin-right: 1px;
+    border-radius: 0px;
+    display: flex;
+    padding: 1em;
+    padding-top: 0.5em;
+    padding-bottom: 2.0em;
+    transition: 0.2s;
 }
 
 .lexcombobuttons .lexbutton.combo:first-child {
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
-  margin-left: 0px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    margin-left: 0px;
 }
 
 .lexcombobuttons .lexbutton.combo:last-child {
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
-  margin-right: 0px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    margin-right: 0px;
 }
 
 .lexcombobuttons .lexbutton.combo.selected {
-  background-color: var(--global-selected);
-  outline: none;
-  color: #fff;
+    background-color: var(--global-selected);
+    outline: none;
+    color: #fff;
 }
 
 .lexcombobuttons .lexbutton.combo:active {
-  outline: none;
-  color: #ccc;
+    outline: none;
+    color: #ccc;
 }
 
 .lexcombobuttons .lexbutton.combo a {
-  padding: 2px;
-  /* margin-right: 2px; */
-  padding-top: 0.3em;
+    padding: 2px;
+    /* margin-right: 2px; */
+    padding-top: 0.3em;
 }
 
 .lexcombobuttons .lexbutton.combo span {
-  line-height: 18px;
+    line-height: 18px;
 }
 
 /* Dropdown (Combo) */
 
 .lexdropdown {
-  display: grid;
-  align-content: center;
+    display: grid;
+    align-content: center;
 }
 
 .lexdropdown .lexwidget {
-  padding: 0;
+    padding: 0;
 }
 
 .lexdropdown .lexfilter {
-  width: calc(100% - 6px)!important;
-  background-color: var(--global-color-primary);
-  padding: 2px 3px;
+    width: calc(100% - 6px) !important;
+    background-color: var(--global-color-primary);
+    padding: 2px 3px;
 }
 
 .lexdropdown .lexfilter a {
-  transform: translateX(-10px);
+    transform: translateX(-10px);
 }
 
 .lexdropdown .lexoptions .lexlistitem {
-  font-size: 11px;
+    font-size: 11px;
 }
 
 .lexdropdown .option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    position: relative;
 }
 
 .lexdropdown .option:not(.media) {
-  padding-left: 12px;
+    padding-left: 12px;
 }
 
 .lexdropdown .lexlistitem {
-  height: fit-content;
+    height: fit-content;
 }
 
 .lexdropdown ul {
-  position: fixed;
-  list-style: none;
-	background-color: #1c1c1ce8;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  padding: 0px;
-  transform: translateY(-4px);
-  z-index: 10;
-  margin-top: 5px;
-  width: 100%;
-  box-shadow: 0 0px 12px rgba(0, 0, 0, 0.788);
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-  max-height: -webkit-fill-available;
-  overflow-y: auto;
-  overflow-x: hidden;
+    position: fixed;
+    list-style: none;
+    background-color: #1c1c1ce8;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    padding: 0px;
+    transform: translateY(-4px);
+    z-index: 10;
+    margin-top: 5px;
+    width: 100%;
+    box-shadow: 0 0px 12px rgba(0, 0, 0, 0.788);
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    max-height: -webkit-fill-available;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .lexdropdown .lexdropdownitem {
-  width: 100%;
-  cursor: pointer;
-  color: var(--global-text-primary);
-  min-height: 20px;
-  line-height: 22px;
-  align-content: center;
-  display: flow-root;
-  padding: 2px 0px;
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
+    width: 100%;
+    cursor: pointer;
+    color: var(--global-text-primary);
+    min-height: 20px;
+    line-height: 22px;
+    align-content: center;
+    display: flow-root;
+    padding: 2px 0px;
+    -webkit-user-select: none;
+    /* Safari 3.1+ */
+    -moz-user-select: none;
+    /* Firefox 2+ */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+    /* Standard syntax */
 }
 
 .lexdropdown .lexdropdownitem:hover {
-  background-color: var(--global-selected);
-  color: var(--global-text-primary);
+    background-color: var(--global-selected);
+    color: var(--global-text-primary);
 }
 
 .lexdropdown .lexdropdownitem:active {
-  color: #fff;
+    color: #fff;
 }
 
 .lexdropdown .lexdropdownitem a {
-  display: none;
-  right: 24px;
-  position: absolute;
+    display: none;
+    right: 24px;
+    position: absolute;
 }
 
 .lexdropdown .lexdropdownitem.selected {
-  font-weight: 700;
+    font-weight: 700;
 }
 
 .lexdropdown .lexdropdownitem.selected a {
-  display: block;
+    display: block;
 }
 
 .lexdropdown img {
-  max-height: 64px;
-  margin-top: 8px;
+    max-height: 64px;
+    margin-top: 8px;
 }
 
 /* Toggle check box */
 
 input[type=checkbox] {
-  position: relative;
-  cursor: pointer;
-  appearance: none;
-  -moz-appearance: none;
-  -webkit-appearance: none;
+    position: relative;
+    cursor: pointer;
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
 }
 
 input[type=checkbox]:before {
-  content: "";
-  display: block;
-  position: absolute;
-  width: 0.8em;
-  height: 0.8em;
-  top: 0;
-  left: 0;
+    content: "";
+    display: block;
+    position: absolute;
+    width: 0.8em;
+    height: 0.8em;
+    top: 0;
+    left: 0;
 }
 
 input[type=checkbox]:checked:after {
-  content: "";
-  display: block;
-  width: 4px;
-  height: 8px;
-  border: solid var(--global-selected);
-  border-width: 0 2px 2px 0;
-  -webkit-transform: rotate(45deg);
-  -ms-transform: rotate(45deg);
-  transform: rotate(45deg);
-  position: absolute;
-  top: -1px;
-  left: 6px;
+    content: "";
+    display: block;
+    width: 4px;
+    height: 8px;
+    border: solid var(--global-selected);
+    border-width: 0 2px 2px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+    position: absolute;
+    top: -1px;
+    left: 6px;
 }
 
 .lexcheckbox {
-  width: 1.25em;
-  height: 1.25em;
-  display: inline-block;
-  background-color: #1f1f1f;
-  color: #fff;
-  border: 1px solid var(--global-dark-background);
-  vertical-align: -3px;
-  border-radius: 2px;
-  margin: 0 4px;
-  margin-top: 2px;
-  text-align: center;
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
-  cursor: pointer;
+    width: 1.25em;
+    height: 1.25em;
+    display: inline-block;
+    background-color: #1f1f1f;
+    color: #fff;
+    border: 1px solid var(--global-dark-background);
+    vertical-align: -3px;
+    border-radius: 2px;
+    margin: 0 4px;
+    margin-top: 2px;
+    text-align: center;
+    -webkit-user-select: none;
+    /* Safari 3.1+ */
+    -moz-user-select: none;
+    /* Firefox 2+ */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+    /* Standard syntax */
+    cursor: pointer;
 }
 
 .lexcheckbox a {
-  line-height: 16px;
+    line-height: 16px;
 }
 
 .lexcheckbox:has(.checkbox.on) {
-  vertical-align: 0px;
-  border: none;
+    vertical-align: 0px;
+    border: none;
 }
 
 .lexcheckbox.disabled {
-  cursor: default;
-  border: 1px solid rgba(221, 218, 218, 0.672);
+    cursor: default;
+    border: 1px solid rgba(221, 218, 218, 0.672);
 }
 
 .lexcheckbox .checkbox {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-radius: 2px;
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 2px;
+    -webkit-user-select: none;
+    /* Safari 3.1+ */
+    -moz-user-select: none;
+    /* Firefox 2+ */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+    /* Standard syntax */
 }
 
 .lexcheckbox .checkbox.on {
-  background-color: var(--global-selected);
+    background-color: var(--global-selected);
 }
 
 .lexcheckboxcont #checkboxtext {
-  font-weight: bold;
-  margin-left: 4px;
+    font-weight: bold;
+    margin-left: 4px;
 }
 
 .lexcheckboxsubmenu {
-  width: 100%;
-  padding: 6px;
-  color: var(--global-text-secondary);
-  margin-top: -1px;
+    width: 100%;
+    padding: 6px;
+    color: var(--global-text-secondary);
+    margin-top: -1px;
 }
 
 /* Input Color Widget */
 
 .lexcolor {
-  display: flex;
-  /*
+    display: flex;
+    /*
   flex-wrap: wrap;
   padding-left: 6px;
   padding-right: 6px;
   */
-  align-items: center;
+    align-items: center;
 }
 
 .lexcolor input {
-  width: 96px;
+    width: 96px;
 }
 
 .lexcolor input[type="color"]::-webkit-color-swatch-wrapper {
-  padding: 2px;
-	border-radius: 4px;
+    padding: 2px;
+    border-radius: 4px;
 
 }
+
 .lexcolor input[type="color"]::-webkit-color-swatch {
-	border-radius: 4px;
+    border-radius: 4px;
 }
 
 .lexcolor:has(input:focus) input[type="color"] {
-  outline: 2px solid var(--global-selected);
-  border-radius: 4px;
+    outline: 2px solid var(--global-selected);
+    border-radius: 4px;
 }
 
 .lexcolor .colorinfo {
-  color: var(--global-text-primary);
-  min-width: 56px;
-  margin-left: 8px;
-  font-weight: 600;
+    color: var(--global-text-primary);
+    min-width: 56px;
+    margin-left: 8px;
+    font-weight: 600;
 }
 
 .lexcolor input[type="color"] {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 .lexcolor .lexwidget {
-  padding: 0px;
+    padding: 0px;
 }
 
 /* Vector Widgets */
 
 .lexvector {
-  display: flex;
+    display: flex;
 }
 
 .lexvector a {
-  width: 48px;
-  font-size: 11px;
-  margin-left: 6px;
-  margin-right: 6px;
+    width: 48px;
+    font-size: 11px;
+    margin-left: 6px;
+    margin-right: 6px;
 }
 
 .lexvector .vecbox {
-  display: flex;
-  position: relative;
-  width: 100%;
-  border-radius: 4px;
-  border: 2px solid var(--global-color-transparent);
-  margin-right: 2px;
-  background: var(--global-button-color);
-  transition: 0.1s linear;
+    display: flex;
+    position: relative;
+    width: 100%;
+    border-radius: 4px;
+    border: 2px solid var(--global-color-transparent);
+    margin-right: 2px;
+    background: var(--global-button-color);
+    transition: 0.1s linear;
 }
 
 .lexvector a.fa-lock {
-  min-width: 12px;
+    min-width: 12px;
 }
 
-.lexvector .vecbox:hover{
-  background: var(--global-button-color-hovered);
+.lexvector .vecbox:hover {
+    background: var(--global-button-color-hovered);
 }
 
-.lexwidget .numberbox .drag-icon, .lexwidget .vecbox .drag-icon {
-  position: absolute;
-  width: 2px;
-  right: 0.25em;
-  top: 25%;
-  font-size: 11px;
-  color: var(--global-text-secondary);
-  z-index: 11;
+.lexwidget .numberbox .drag-icon,
+.lexwidget .vecbox .drag-icon {
+    position: absolute;
+    width: 2px;
+    right: 0.25em;
+    top: 25%;
+    font-size: 11px;
+    color: var(--global-text-secondary);
+    z-index: 11;
 }
 
 .lexvector .vecbox:has(input:focus) {
-  border: 2px solid var(--global-selected);
+    border: 2px solid var(--global-selected);
 }
 
 .lexvector .vecbox span {
-  min-width: 3px;
-  width: 3px;
-  justify-content: center;
-  background-color: #22292fbf;
-  display: flex;
-  font-weight: 600;
-  border-radius: 4px;
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
+    min-width: 3px;
+    width: 3px;
+    justify-content: center;
+    background-color: #22292fbf;
+    display: flex;
+    font-weight: 600;
+    border-radius: 4px;
+    -webkit-user-select: none;
+    /* Safari 3.1+ */
+    -moz-user-select: none;
+    /* Firefox 2+ */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+    /* Standard syntax */
 }
 
 .lexvector .vecbox span.x {
-  background-color:#eb6767;
+    background-color: #eb6767;
 }
 
 .lexvector .vecbox span.y {
-  background-color:#72e27d;
+    background-color: #72e27d;
 }
 
 .lexvector .vecbox span.z {
-  background-color:#7490eb;
+    background-color: #7490eb;
 }
 
 .lexvector .vecbox span.w {
-  background-color:#ffffff;
+    background-color: #ffffff;
 }
 
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  margin: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    margin: 0;
 }
 
 /* Firefox */
 input[type=number] {
-  appearance: textfield;
-  -moz-appearance: textfield;
+    appearance: textfield;
+    -moz-appearance: textfield;
 }
 
-.lexvector .vecbox .vecinput, .numberbox .vecinput {
-  margin-left: 2px;
-  border: none;
-  width: 100%;
+.lexvector .vecbox .vecinput,
+.numberbox .vecinput {
+    margin-left: 2px;
+    border: none;
+    width: 100%;
 }
 
-.lexvector .vecbox .vecinput:focus, .numberbox .vecinput:focus {
-  color: #c1c1dbef;
+.lexvector .vecbox .vecinput:focus,
+.numberbox .vecinput:focus {
+    color: #c1c1dbef;
 }
 
 /* Number Widget */
 
 .lexwidget .numberbox {
-  display: grid;
-  background-color: var(--global-button-color);
-  border: 2px solid var(--global-color-transparent);
-  border-radius: 6px;
-  margin-right: 2px;
-  position: relative;
-  transition: 0.1s linear;
+    display: grid;
+    background-color: var(--global-button-color);
+    border: 2px solid var(--global-color-transparent);
+    border-radius: 6px;
+    margin-right: 2px;
+    position: relative;
+    transition: 0.1s linear;
 }
 
 .lexwidget .numberbox:hover {
-  background-color: var(--global-button-color-hovered);
+    background-color: var(--global-button-color-hovered);
 }
 
 .lexwidget .numberbox:has(input:focus) {
-  border: 2px solid var(--global-selected);
+    border: 2px solid var(--global-selected);
 }
 
 .lexwidget .numberbox span {
-  position: absolute;
-  top: -2px;
-  pointer-events: none;
+    position: absolute;
+    top: -2px;
+    pointer-events: none;
 }
 
 .lexinputmeasure {
-  font-family: var(--global-font);
-  font-size: var(--global-font-size);
+    font-family: var(--global-font);
+    font-size: var(--global-font-size);
 }
 
 .lexinputslider {
-  appearance: none;
-  -moz-appearance: none;
-  -webkit-appearance: none;
-  border: none !important;
-  width: calc( 100% - 12px );
-  outline: none;
-  opacity: 0.7;
-  transition: opacity .2s;
-  -moz-transition: .2s;
-  -webkit-transition: .2s;
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    border: none !important;
+    width: calc(100% - 12px);
+    outline: none;
+    opacity: 0.7;
+    transition: opacity .2s;
+    -moz-transition: .2s;
+    -webkit-transition: .2s;
 }
 
 .lexinputslider:hover {
-  opacity: 1;
+    opacity: 1;
 }
 
 input[type="range"] {
-  height: 1px;
+    height: 1px;
 }
 
 .lexinputslider::-moz-range-track {
-  height: 1px;
-  background: #a19dc9;
+    height: 1px;
+    background: #a19dc9;
 }
 
 .lexinputslider::-webkit-slider-runnable-track {
-  height: 1px;
-  background: #a19dc9;
+    height: 1px;
+    background: #a19dc9;
 }
 
 .lexinputslider::-webkit-slider-thumb {
-  appearance: none;
-  -webkit-appearance: none;
-  margin-top: -6px;
-  width: 12px;
-  height: 12px;
-  border: 1px solid #c9c7de;
-  border-radius: 6px;
-  background: var(--global-selected);
-  box-shadow: 0px 0px 6px #111;
-  cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    margin-top: -6px;
+    width: 12px;
+    height: 12px;
+    border: 1px solid #c9c7de;
+    border-radius: 6px;
+    background: var(--global-selected);
+    box-shadow: 0px 0px 6px #111;
+    cursor: pointer;
 }
 
 .lexinputslider::-moz-range-thumb {
-  margin-top: -8px;
-  width: 8px;
-  height: 8px;
-  border-radius: 6px;
-  background: #a19dc9;
-  cursor: pointer;
+    margin-top: -8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 6px;
+    background: #a19dc9;
+    cursor: pointer;
 }
 
 .lexwidget .numberbox .drag-icon {
-  right: 0.8em;
+    right: 0.8em;
 }
 
 .lexwidget .lock {
-  /* color: red; */
+    /* color: red; */
 }
 
 /* Size Widget */
 
 .lexwidget .lexsizecross {
-  color: var(--global-selected);
-  font-weight: 800;
+    color: var(--global-selected);
+    font-weight: 800;
 }
 
 .lexwidget .lexunit {
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
-  margin-left: -2px;
+    -webkit-user-select: none;
+    /* Safari 3.1+ */
+    -moz-user-select: none;
+    /* Firefox 2+ */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+    /* Standard syntax */
+    margin-left: -2px;
 }
 
 /* Pad Widget */
 
 .lexwidget .lexpad {
-  place-items: center;
+    place-items: center;
 }
 
 .lexwidget .lexpad .lexinnerpad {
-  border-radius: 4px;
-  background-color: var(--global-dark-background);
+    border-radius: 4px;
+    background-color: var(--global-dark-background);
 }
 
 .lexwidget .lexpad .lexinnerpad .lexpadthumb {
-  background-color: var(--global-selected-light);
-  width: 10%;
-  height: 10%;
-  border-radius: 2px;
-  transform: translate(0px, 0px);
+    background-color: var(--global-selected-light);
+    width: 10%;
+    height: 10%;
+    border-radius: 2px;
+    transform: translate(0px, 0px);
 }
 
 
 /* Tabs Widget */
 
 .lextabscontainer {
-  width: 100%;
-  height: 100%;
-  display: flex;
+    width: 100%;
+    height: 100%;
+    display: flex;
 }
 
 .lextabscontainer.horizontal {
-  display: table;
+    display: table;
 }
 
 .lextabscontainer .tabs {
-  padding: 4px;
-  background: none !important;
-  border-right: 1px solid #a2a5c36a;
-  justify-items: center;
-  min-width: 32px;
+    padding: 4px;
+    background: none !important;
+    border-right: 1px solid #a2a5c36a;
+    justify-items: center;
+    min-width: 32px;
 }
 
 .lextabscontainer.horizontal .tabs {
-  border-right: none;
-  border-bottom: 1px solid #a2a5c36a;
-  display: flex;
+    border-right: none;
+    border-bottom: 1px solid #a2a5c36a;
+    display: flex;
 }
 
 .lextabscontainer .widgets {
-  width: 100%;
-  padding: 4px;
+    width: 100%;
+    padding: 4px;
 }
 
 .lextabscontainer .tabs .lextab {
-  padding: 4px;
-  margin-bottom: 10px;
-  border-radius: 4px;
-  color: #8184a264;
-  cursor: pointer;
-  margin-right: 4px;
-  text-align: center;
+    padding: 4px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    color: #8184a264;
+    cursor: pointer;
+    margin-right: 4px;
+    text-align: center;
 }
 
 .lextabscontainer.horizontal .tabs .lextab {
-  margin-bottom: 0px;
-  margin-right: 10px;
+    margin-bottom: 0px;
+    margin-right: 10px;
 }
 
 .lextabscontainer.horizontal .tabs .lextab a.withname {
-  margin-left: 6px;
+    margin-left: 6px;
 }
 
 .lextabscontainer .tabs .lextab:hover {
-  color: var(--global-text-primary);
+    color: var(--global-text-primary);
 }
 
 .lextabscontainer .tabs .lextab.last {
-  margin-right: 4px;
+    margin-right: 4px;
 }
 
 .lextabscontainer .tabs .lextab.selected {
-  color: var(--global-text-primary);
+    color: var(--global-text-primary);
 }
 
 .lextabscontainer .tabs .lextab:active {
-  color: var(--global-text-secondary);
+    color: var(--global-text-secondary);
 }
 
 /* Data Tree Widget */
 
 .lextree {
-  border-radius: 6px;
-  width: calc( 100% - 6px );
-  min-height: 12px;
-  margin: 0 auto;
-  margin-top: 6px;
-  margin-bottom: -8px;
-  color: var(--global-text-secondary);
-  font-weight: 600;
-  font-size: var(--global-font-size);
+    border-radius: 6px;
+    width: calc(100% - 6px);
+    min-height: 12px;
+    margin: 0 auto;
+    margin-top: 6px;
+    margin-bottom: -8px;
+    color: var(--global-text-secondary);
+    font-weight: 600;
+    font-size: var(--global-font-size);
 }
 
 .lextree .lextreetools {
-  background: var(--global-color-secondary);
-  padding: 2px;
-  padding-left: 6px;
-  padding-right: 6px;
-  display: flex;
-  align-items: center;
-  border-radius: 10px;
-  margin-top: 4px;
+    background: var(--global-color-secondary);
+    padding: 2px;
+    padding-left: 6px;
+    padding-right: 6px;
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+    margin-top: 4px;
 }
 
 .lextree .lextreetools input {
-  font-size: var(--global-font-size);
-  padding-left: 8px;
+    font-size: var(--global-font-size);
+    padding-left: 8px;
 }
 
 .lextree .lextreetools.notitle {
-  padding-top: 14px;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+    padding-top: 14px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
 }
 
 .lextree .lextreetools a {
-  margin-right: 8px;
+    margin-right: 8px;
 }
 
-.lextree span { /* Tree title */
-  padding: 8px;
-  display: block;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  color: var(--global-text-secondary);
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
-  font-size: 14px;
-  font-weight: 800;
+.lextree span {
+    /* Tree title */
+    padding: 8px;
+    display: block;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    color: var(--global-text-secondary);
+    -webkit-user-select: none;
+    /* Safari 3.1+ */
+    -moz-user-select: none;
+    /* Firefox 2+ */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+    /* Standard syntax */
+    font-size: 14px;
+    font-weight: 800;
 }
 
 .lextree ul {
-  padding-bottom: 16px;
-  padding-inline-start: 0px;
+    padding-bottom: 16px;
+    padding-inline-start: 0px;
 }
 
 .lextree input {
-  background: none;
-  color: var(--global-text-primary);
-  outline: none;
-  border: none;
-  font-size: var(--global-font-size);
-  font-family: var(--global-font);
-  line-height: 23px;
-  margin-left: -2px;
+    background: none;
+    color: var(--global-text-primary);
+    outline: none;
+    border: none;
+    font-size: var(--global-font-size);
+    font-family: var(--global-font);
+    line-height: 23px;
+    margin-left: -2px;
 }
 
 .lextree .lextreeitem {
-  list-style-type: none;
-  align-items: center;
-  margin-bottom: 3px;
-  line-height: 25px;
-  cursor: pointer;
-  outline: none;
-  border-radius: 6px;
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
+    list-style-type: none;
+    align-items: center;
+    margin-bottom: 3px;
+    line-height: 25px;
+    cursor: pointer;
+    outline: none;
+    border-radius: 6px;
+    -webkit-user-select: none;
+    /* Safari 3.1+ */
+    -moz-user-select: none;
+    /* Firefox 2+ */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+    /* Standard syntax */
 }
 
 .lextree .lextreeitem img {
-  width: 12px;
-  height: 12px;
-  margin-right: 4px;
-  vertical-align: middle;
-  margin-top: -1px;
+    width: 12px;
+    height: 12px;
+    margin-right: 4px;
+    vertical-align: middle;
+    margin-top: -1px;
 }
 
 .lextree .lextreeitem .tree-item-icon {
-  width: 12px;
-  height: 12px;
-  margin-right: 4px;
-  vertical-align: middle;
-  margin-top: -1px;
+    width: 12px;
+    height: 12px;
+    margin-right: 4px;
+    vertical-align: middle;
+    margin-top: -1px;
 }
 
 .lextree .lextreeitem.draggingover {
-  background: #7b8ae27b;
+    background: #7b8ae27b;
 }
 
 .lextree .lextreeitem:hover {
-  color: var(--global-text-primary);
-  background: rgba(129, 132, 163, 0.191);
+    color: var(--global-text-primary);
+    background: rgba(129, 132, 163, 0.191);
 }
 
 .lextree .lextreeitem.selected {
-  color: var(--global-text-primary);
-  background: var(--global-selected);
+    color: var(--global-text-primary);
+    background: var(--global-selected);
 }
 
 .lextree .lextreeitem a {
-  margin-right: 6px;
-  margin-top: 4px;
-  font-size: 10px;
+    margin-right: 6px;
+    margin-top: 4px;
+    font-size: 10px;
 }
 
 .lextree .lextreeitem a.hierarchy {
-  font-size: 5px;
-  margin-right: 6px;
-  margin-top: 4px;
-  vertical-align: 2px;
+    font-size: 5px;
+    margin-right: 6px;
+    margin-top: 4px;
+    vertical-align: 2px;
 }
 
 .lextree .lextreeitem a:hover {
-  color: var(--global-text-primary);
+    color: var(--global-text-primary);
 }
 
 .lextree .lextreeitem a:active {
-  color: var(--global-button-color);
-  margin-top: 6px;
+    color: var(--global-button-color);
+    margin-top: 6px;
 }
 
 .lextree .lextreeitem.parent a {
-  font-size: 10px;
-  vertical-align: 1px;
+    font-size: 10px;
+    vertical-align: 1px;
 }
 
 .lextree .lextreeitem .itemicon {
-  font-size: 10px !important;
-  float: right;
-  margin-top: 7px;
-  margin-right: 8px;
+    font-size: 10px !important;
+    float: right;
+    margin-top: 7px;
+    margin-right: 8px;
 }
 
 .lextree .lextreeitem .itemicon:hover {
-  color: var(--global-selected);
+    color: var(--global-selected);
 }
 
 .lextree .lextreeitem.selected .itemicon:hover {
-  color: var(--global-text-secondary);
+    color: var(--global-text-secondary);
 }
 
 .lextree .lextreeitem .itemicon:active {
-  margin-top: 7px;
+    margin-top: 7px;
 }
 
 
 /* Progress bar */
 
 .lexprogress {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .lexprogressbar {
-  border: none !important;
-  width: 90%;
-  outline: none;
-  opacity: 0.7;
-  -webkit-transition: .2s;
-  transition: opacity .2s;
-  margin-top: 2px;
+    border: none !important;
+    width: 90%;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+    margin-top: 2px;
 }
 
 .lexprogressbar.editable:hover {
-  cursor: grab;
+    cursor: grab;
 }
 
 .lexprogressbar.editable:active {
-  cursor: grabbing;
+    cursor: grabbing;
 }
 
 /* The gray background in Chrome, etc. */
 meter::-webkit-meter-bar {
-  background: var(--global-color-primary);
-  height: 12px;
+    background: var(--global-color-primary);
+    height: 12px;
 }
 
 /* (optimum) */
 meter:-moz-meter-optimum::-moz-meter-bar {
-  background: var(--global-selected);
+    background: var(--global-selected);
 }
+
 meter::-webkit-meter-optimum-value {
-  background: var(--global-selected);
+    background: var(--global-selected);
 }
 
 /* (sub-optimum)*/
 meter:-moz-meter-sub-optimum::-moz-meter-bar {
-  background: #ffc107;
+    background: #ffc107;
 }
+
 meter::-webkit-meter-suboptimum-value {
-  background: #ffc107;
+    background: #ffc107;
 }
 
 /* (even less good)*/
 meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
-  background: #dc3545;
+    background: #dc3545;
 }
+
 meter::-webkit-meter-even-less-good-value {
-  background: #dc3545;
+    background: #dc3545;
 }
 
 /* Menu Bar */
 
 .lexmenubar {
-  width: 100%;
-  background-color: var(--global-color-primary);
-  display: flex;
-  height: 100%;
-  color: var(--global-text);
-  font-size: 13px;
-  font-weight: 500;
+    width: 100%;
+    background-color: var(--global-color-primary);
+    display: flex;
+    height: 100%;
+    color: var(--global-text-primary);
+    font-size: 13px;
+    font-weight: 500;
 }
 
 .lexmenubar .lexmenuentry {
-  min-height: 48px;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding-left: 4px;
-  padding-right: 4px;
-  cursor: pointer;
-  margin-left: 4px;
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
+    min-height: 48px;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-left: 4px;
+    padding-right: 4px;
+    cursor: pointer;
+    margin-left: 4px;
+    -webkit-user-select: none;
+    /* Safari 3.1+ */
+    -moz-user-select: none;
+    /* Firefox 2+ */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+    /* Standard syntax */
 }
 
 .lexmenubar .lexmenuentry span {
-  padding: 4px 8px;
-  border-radius: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
 }
 
-.lexmenubar .lexmenuentry:hover span, .lexmenubar .lexmenuentry.selected span {
-  color: var(--global-text-primary);
-  background-color: var(--global-color-secondary);
+.lexmenubar .lexmenuentry:hover span,
+.lexmenubar .lexmenuentry.selected span {
+    color: var(--global-text-primary);
+    background-color: var(--global-color-secondary);
 }
 
-.lexmenubar .lexmenuentry:active{
-  color: #b7b7cba4;
-  margin-top: 0.05em;
+.lexmenubar .lexmenuentry:active {
+    color: #b7b7cba4;
+    margin-top: 0.05em;
 }
 
 .lexcontextmenu {
-  position: absolute;
-  padding-right: 8px;
-  z-index: 1001;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.63) !important;
-  background-color: var(--global-blur-background);
-  border: 1px solid #91909036;
-  border-radius: 6px;
+    position: absolute;
+    padding-right: 8px;
+    z-index: 1001;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.63) !important;
+    background-color: var(--global-blur-background);
+    border: 1px solid #91909036;
+    border-radius: 6px;
 }
 
 .lexcontextmenu:before {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  border-radius: 6px;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  z-index:-1;
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border-radius: 6px;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    z-index: -1;
 }
 
 .lexcontextmenu:focus {
-  outline: none;
+    outline: none;
 }
 
 .lexcontextmenu .lexcontextmenuentry {
-  font-size: var(--global-font-size);
-  width: 100%;
-  color: #d5d7dbee;
-  padding: 4px;
-  padding-left: 8px;
-  padding-right: 0px;
-  padding-bottom: 6px;
-  cursor: pointer;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  /* This makes properties like top, left to be relative to parents */
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  -moz-transform: translateZ(0);
-  display: flex;
-  flex-direction: row;
-  align-content: center;
-  justify-content: space-between;
-  position: relative;
+    font-size: var(--global-font-size);
+    width: 100%;
+    color: #d5d7dbee;
+    padding: 4px;
+    padding-left: 8px;
+    padding-right: 0px;
+    padding-bottom: 6px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    /* This makes properties like top, left to be relative to parents */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    -moz-transform: translateZ(0);
+    display: flex;
+    flex-direction: row;
+    align-content: center;
+    justify-content: space-between;
+    position: relative;
 }
 
 .lexcontextmenu .lexcontextmenuentry:first-child {
-  border-top-right-radius: 5px;
-  border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
 }
 
 .lexcontextmenu .lexcontextmenuentry:last-child {
-  border-bottom-right-radius: 5px;
-  border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
 }
 
 .lexcontextmenu .lexcontextmenuentrycontainer {
-  display: flex;
-  flex-direction: row;
+    display: flex;
+    flex-direction: row;
 }
 
 .lexcontextmenu .lexcontextmenuentry .lexentryname {
-  margin-right: 32px;
-  margin-top: 2px;
+    margin-right: 32px;
+    margin-top: 2px;
 }
 
 .lexcontextmenu .lexcontextmenuentry.noicon .lexentryname {
-  margin-left: 10px;
+    margin-left: 10px;
 }
 
 /* normal icons  */
 .lexcontextmenu .lexcontextmenuentry a {
-  font-size: 10px;
-  float: left;
-  margin-right: 13px;
-  margin-top: 9px;
-  margin-left: 9px;
-  min-width: 10px;
+    font-size: 10px;
+    float: left;
+    margin-right: 13px;
+    margin-top: 9px;
+    margin-left: 9px;
+    min-width: 10px;
 }
 
 /* submenu specified arrow  */
 .lexcontextmenu .lexcontextmenuentry a.fa-xs {
-  float: right;
-  margin-right: 8px;
+    float: right;
+    margin-right: 8px;
 }
 
 .lexcontextmenu .lexcontextmenuentry:hover {
-  background-color: var(--global-selected);
-  color: #f5f5f5;
+    background-color: var(--global-selected);
+    color: #f5f5f5;
 }
 
 .lexcontextmenu .lexcontextmenuentry:active {
-  color: var(--global-text-secondary);
+    color: var(--global-text-secondary);
 }
 
 .lexcontextmenu .lexcontextmenuentry input {
-  float: left;
-  margin-right: 28px;
-  margin-left: 5px;
+    float: left;
+    margin-right: 28px;
+    margin-left: 5px;
 }
 
 .lexcontextmenu .lexcontextmenuentry:hover input::after {
-  border-color: #f5f5f5;
+    border-color: #f5f5f5;
 }
 
 .lexcontextmenu .lexseparator {
-  margin: 2px 0 2px;
-  width: -moz-calc(100% + 14px);
-  width: -webkit-calc(100% + 14px);
-  width: calc(100% + 14px);
+    margin: 2px 0 2px;
+    width: -moz-calc(100% + 14px);
+    width: -webkit-calc(100% + 14px);
+    width: calc(100% + 14px);
 }
 
 .lexcontextmenu .lexentryshort {
-  font-size: 10px;
-  float: right;
-  margin-top: 3px;
-  font-weight: bold;
-  color: var(--global-text-primary);
-  margin-right: 12px;
-  text-align: right;
+    font-size: 10px;
+    float: right;
+    margin-top: 3px;
+    font-weight: bold;
+    color: var(--global-text-primary);
+    margin-right: 12px;
+    text-align: right;
 }
 
 .lexmenubar .lexmenubuttons {
-  display: flex;
-  background-color: var(--global-color-secondary);
-  margin-top: 10px;
-  margin-bottom: 8px;
-  border-radius: 6px;
-  padding-left: 4px;
-  padding-right: 4px;
+    display: flex;
+    background-color: var(--global-color-secondary);
+    margin-top: 10px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    padding-left: 4px;
+    padding-right: 4px;
 }
 
 .lexmenubar .lexmenubuttons.center {
-  margin: 0 auto;
-  margin-top: 10px;
-  margin-bottom: 8px;
+    margin: 0 auto;
+    margin-top: 10px;
+    margin-bottom: 8px;
 }
 
 .lexmenubar .lexmenubuttons.right {
-  margin-left: auto;
-  margin-right: 16px;
+    margin-left: auto;
+    margin-right: 16px;
 }
 
 .lexmenubar .lexmenubutton {
-  display: flex;
-  justify-content: center;
-  padding: 8px;
-  padding-top: 0.6em;
-  color: var(--global-text-secondary);
-  cursor: pointer;
-  /* margin-right: 4px; */
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
+    display: flex;
+    justify-content: center;
+    padding: 8px;
+    padding-top: 0.6em;
+    color: var(--global-text-secondary);
+    cursor: pointer;
+    /* margin-right: 4px; */
+    -webkit-user-select: none;
+    /* Safari 3.1+ */
+    -moz-user-select: none;
+    /* Firefox 2+ */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+    /* Standard syntax */
 }
 
 .lexmenubar .lexmenubutton a {
-  margin-left: 0px !important;
+    margin-left: 0px !important;
 }
 
 .lexmenubar .lexmenubutton.disabled a {
-  color: var(--global-button-color);
+    color: var(--global-button-color);
 }
 
 /* Context Menu */
 
 .lexcontextmenubox {
-  z-index: 102;
-  position: absolute;
-  padding-right: 20px;
-  border-radius: 6px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.63) !important;
-  background-color: var(--global-blur-background);
-  border: 1px solid #91909036;
+    z-index: 102;
+    position: absolute;
+    padding-right: 20px;
+    border-radius: 6px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.63) !important;
+    background-color: var(--global-blur-background);
+    border: 1px solid #91909036;
 }
 
 .lexcontextmenubox:before {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top:0;
-  left:0;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  z-index:-1;
-  border-radius: 6px;
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    z-index: -1;
+    border-radius: 6px;
 }
 
 .lexcontextmenubox .lexcontextmenuentry {
-  width: 100%;
-  color: #c0c4cbe3;
-  padding: 3px;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-bottom: 4px;
-  cursor: pointer;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+    width: 100%;
+    color: #c0c4cbe3;
+    padding: 3px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 4px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .lexcontextmenubox .lexcontextmenuentry:first-child {
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
 }
 
 .lexcontextmenubox .lexcontextmenuentry:last-child {
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
 }
 
 .lexcontextmenubox .lexcontextmenuentry.cmtitle {
-  background: var(--global-dark-background);
-  font-weight: bold;
-  cursor: default;
+    background: var(--global-dark-background);
+    font-weight: bold;
+    cursor: default;
 }
 
 .lexcontextmenubox .lexcontextmenuentry.cmseparator {
-  height: 1px;
-  border-bottom: 1px solid var(--global-color-terciary);
-  padding-bottom: 0;
-  padding-top: 0;
-  margin-top: -4px;
+    height: 1px;
+    border-bottom: 1px solid var(--global-color-terciary);
+    padding-bottom: 0;
+    padding-top: 0;
+    margin-top: -4px;
 }
 
 .lexcontextmenubox .lexcontextmenuentry .lexentryname {
-  margin-right: 10px;
-  margin-top: 2px;
-  font-size: var(--global-font-size);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+    margin-right: 10px;
+    margin-top: 2px;
+    font-size: var(--global-font-size);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .lexcontextmenubox .lexcontextmenuentry .lexentryname.disabled {
-  color: #c0c4cb53;
+    color: #c0c4cb53;
 }
 
 /* normal icons  */
 .lexcontextmenubox .lexcontextmenuentry a {
-  float: right;
-  margin-right: 0px;
-  margin-top: 10px;
-  font-size: 10px;
+    float: right;
+    margin-right: 0px;
+    margin-top: 10px;
+    font-size: 10px;
 }
 
 /* submenu specified arrow  */
 .lexcontextmenubox .lexcontextmenuentry a.fa-xs {
-  float: right;
-  margin-top: -8px;
+    float: right;
+    margin-top: -8px;
 }
 
 .lexcontextmenubox .lexcontextmenuentry:hover:not(.cmtitle) {
-  background-color: var(--global-selected);
-  color: #f5f5f5;
+    background-color: var(--global-selected);
+    color: #f5f5f5;
 }
 
 .lexcontextmenubox .lexcontextmenuentry:active:not(.cmtitle):not(.cmseparator) {
-  padding-top: 0.22em;
-  color: #b7b7cba4;
+    padding-top: 0.22em;
+    color: #b7b7cba4;
 }
 
 .lexcontextmenubox .lexseparator {
-  margin: 3px 0 3px 10px;
+    margin: 3px 0 3px 10px;
 }
 
 .lexcontextmenubox .lexentryshort {
-  font-size: 9px;
-  float: right;
-  /* margin-top: -13px; */
-  font-weight: bold;
-  color: #979aa0e3;
+    font-size: 9px;
+    float: right;
+    /* margin-top: -13px; */
+    font-weight: bold;
+    color: #979aa0e3;
 }
 
 /* Side Bar */
 
 .lexsidebar {
-  text-align: center;
+    text-align: center;
 }
 
 .lexsidebar .lexsidebarentry {
-  width: 64px;
-  height: 64px;
-  margin-top: -6px;
+    width: 64px;
+    height: 64px;
+    margin-top: -6px;
 }
 
 .lexsidebar .lexsidebarentry .lexsidebarentrydesc {
-  position: absolute;
-  margin-left: 12px;
-  font-weight: 600;
-  margin-top: 13px;
-  background-color: #afafaf;
-  color: var(--global-color-primary);
-  font-size: 16px;
-  border-radius: 6px;
-  text-align: center;
-  opacity: 0;
-  z-index: 102;
-  padding: 2px 6px;
-  transition: opacity ease-in 0.1s;
+    position: absolute;
+    margin-left: 12px;
+    font-weight: 600;
+    margin-top: 13px;
+    background-color: #afafaf;
+    color: var(--global-color-primary);
+    font-size: 16px;
+    border-radius: 6px;
+    text-align: center;
+    opacity: 0;
+    z-index: 102;
+    padding: 2px 6px;
+    transition: opacity ease-in 0.1s;
 }
 
-.lexsidebar .lexsidebarentry button:hover + .lexsidebarentrydesc {
-  opacity: 1;
+.lexsidebar .lexsidebarentry button:hover+.lexsidebarentrydesc {
+    opacity: 1;
 }
 
 .lexsidebar .lexsidebarentry:first-child {
-  padding-top: 16px;
+    padding-top: 16px;
 }
 
 .lexsidebar .lexsidebarentry button {
-  width: calc(100% - 16px);
-  height: calc(100% - 16px);
-  background-color: var(--global-button-color);
-  color: var(--global-text);
-  font-size: 18px;
-  border-radius: 10px;
-  border: 0px solid var(--global-color-transparent);
-  transition: border 0.1s ease-in-out;
-  cursor: pointer;
+    width: calc(100% - 16px);
+    height: calc(100% - 16px);
+    background-color: var(--global-button-color);
+    color: var(--global-text-primary);
+    font-size: 18px;
+    border-radius: 10px;
+    border: 0px solid var(--global-color-transparent);
+    transition: border 0.1s ease-in-out;
+    cursor: pointer;
 }
 
 .lexsidebar .lexsidebarentry button:hover {
-  border: 3px solid var(--global-selected);
-  background-color: var(--global-button-color-hovered);
+    border: 3px solid var(--global-selected);
+    background-color: var(--global-button-color-hovered);
 }
 
 .lexsidebar .lexsidebarentry button:active {
-  font-size: 17px;
+    font-size: 17px;
 }
 
 .lexsidebar .lexsidebarentry.selected button {
-  background-color: var(--global-button-color-hovered);
-  border: 4px solid var(--global-selected);
+    background-color: var(--global-button-color-hovered);
+    border: 4px solid var(--global-selected);
 }
 
 .lexsidebar .lexsidebarfooter {
-  position: absolute;
-  bottom: 0;
+    position: absolute;
+    bottom: 0;
 }
 
 .lexsidebar .lexsidebarfooter .lexsidebarentry button {
-  width: calc(100% - 16px);
-  height: calc(100% - 16px);
-  background-color: unset;
-  font-size: 14px;
+    width: calc(100% - 16px);
+    height: calc(100% - 16px);
+    background-color: unset;
+    font-size: 14px;
 }
 
 .lexsidebar .lexsidebarfooter .lexsidebarentry button:active {
-  font-size: 13px;
+    font-size: 13px;
 }
 
 /* Overlay Buttons */
 
 .lexoverlaybuttonscontainer {
-  position: absolute;
-  display: flex;
-  top: 0;
-  width: 100%;
-  pointer-events: none;
+    position: absolute;
+    display: flex;
+    top: 0;
+    width: 100%;
+    pointer-events: none;
 }
 
 .lexoverlaybuttons {
-  display: flex;
-  width: auto !important;
-  height: auto !important;
-  justify-content: start;
-  z-index: 100;
-  background-color: var(--global-color-secondary);
-  margin: 8px;
-  padding: 0.25em;
-  padding-bottom: 0.3em;
-  border-radius: 12px;
+    display: flex;
+    width: auto !important;
+    height: auto !important;
+    justify-content: start;
+    z-index: 100;
+    background-color: var(--global-color-secondary);
+    margin: 8px;
+    padding: 0.25em;
+    padding-bottom: 0.3em;
+    border-radius: 12px;
 }
 
 .lexoverlaybuttons .lexwidget {
-  padding: 0px;
-  margin-right: 6px;
-  pointer-events: auto;
-  min-width: 32px;
+    padding: 0px;
+    margin-right: 6px;
+    pointer-events: auto;
+    min-width: 32px;
 }
 
 .lexoverlaybuttons .lexwidget button {
-  min-width: 32px;
+    min-width: 32px;
 }
 
 .lexoverlaybuttonscontainer.vertical {
-  display: grid;
-  justify-items: left;
+    display: grid;
+    justify-items: left;
 }
 
 .lexoverlaybuttonscontainer.vertical .lexoverlaybuttons {
-  display: grid;
+    display: grid;
 }
 
 .lexoverlaybuttonscontainer.vertical .lexwidget {
-  margin-bottom: 6px;
-  margin-right: 0px;
+    margin-bottom: 6px;
+    margin-right: 0px;
 }
 
 .lexoverlaybuttonscontainer.vertical .lexwidget button {
-  min-width: 32px;
-  max-height: 32px !important;
+    min-width: 32px;
+    max-height: 32px !important;
 }
 
 .lexoverlaybuttonscontainer.bottom {
-  top: unset;
-  bottom: 0;
+    top: unset;
+    bottom: 0;
 }
 
 .lexoverlaybuttonscontainer.center {
-  justify-content: center;
+    justify-content: center;
 }
 
 .lexoverlaybuttonscontainer.right {
-  justify-content: right;
+    justify-content: right;
 }
 
 .lexoverlaybuttonscontainer.vertical.center {
-  justify-items: center;
+    justify-items: center;
 }
 
 .lexoverlaybuttonscontainer.vertical.right {
-  justify-items: right;
+    justify-items: right;
 }
 
 .lexoverlaybuttons .lexwidget:hover {
-  background-color: unset;
+    background-color: unset;
 }
 
 .lexoverlaybuttons .lexbutton {
-  padding: 14px 10px;
-  font-size: var(--global-font-size-big);
-  border-radius: 10px;
-  justify-content: center;
-  background: none;
-  color: #d1d1d3bd;
+    padding: 14px 10px;
+    font-size: var(--global-font-size-big);
+    border-radius: 10px;
+    justify-content: center;
+    background: none;
+    color: #d1d1d3bd;
 }
 
 .lexoverlaybuttons .lexbutton span {
-  font-size: var(--global-font-size-big);
+    font-size: var(--global-font-size-big);
 }
 
 .lexoverlaybuttons .lexbutton a {
-  line-height: 12px;
-  font-size: var(--global-font-size-big);
+    line-height: 12px;
+    font-size: var(--global-font-size-big);
 }
 
 .lexoverlaybuttons .lexbutton.array a {
-  font-size: 10px;
-  margin-left: 4px;
+    font-size: 10px;
+    margin-left: 4px;
 }
 
 .lexoverlaybuttons .lexbutton img {
-  filter: brightness(0.7)
+    filter: brightness(0.7)
 }
 
 .lexoverlaybuttons .lexbutton.selected {
-  background-color: var(--global-selected) !important;
-  color: #fff;
-  outline: none;
-  border-radius: 8px;
+    background-color: var(--global-selected) !important;
+    color: #fff;
+    outline: none;
+    border-radius: 8px;
 }
 
-.lexoverlaybuttons .lexbutton.selected img, .lexoverlaybuttons .lexbutton:hover img {
-  filter: none;
+.lexoverlaybuttons .lexbutton.selected img,
+.lexoverlaybuttons .lexbutton:hover img {
+    filter: none;
 }
 
 .lexoverlaybuttons .lexbutton:hover {
-  color: #f5f5f5;
-  background: var(--global-button-color-hovered);
+    color: #f5f5f5;
+    background: var(--global-button-color-hovered);
 }
 
 .lexoverlaybuttons .lexbutton:active {
-  outline: none !important;
-  color: #d5d5d5;
+    outline: none !important;
+    color: #d5d5d5;
 }
 
 .lexoverlaybuttons .lexoverlaygroup {
-  display: flex;
-  margin-right: 6px;
-  background-color: var(--global-color-terciary);
-  border-radius: 8px;
+    display: flex;
+    margin-right: 6px;
+    background-color: var(--global-color-terciary);
+    border-radius: 8px;
 }
 
 .lexoverlaybuttons .lexoverlaygroup .lexbutton {
-  background: none;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
+    background: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
 }
 
 .lexoverlaybuttonscontainer.vertical .lexoverlaygroup {
-  display: grid;
-  margin-right: 0px;
-  margin-bottom: 6px;
+    display: grid;
+    margin-right: 0px;
+    margin-bottom: 6px;
 }
 
 .lexoverlaybuttons .lexoverlaygroup .lexwidget {
-  padding: 0px;
-  margin-right: 0px;
+    padding: 0px;
+    margin-right: 0px;
 }
 
 .lexoverlaybuttonscontainer.vertical .lexoverlaygroup .lexwidget {
-  margin-right: 0px;
-  margin-bottom: 0px;
+    margin-right: 0px;
+    margin-bottom: 0px;
 }
 
 .lexoverlaybuttonscontainer.vertical .lexoverlaygroup .lexwidget button {
-  width: 100% !important;
+    width: 100% !important;
 }
 
 .lexoverlaybuttons .lexwidget:last-child {
-  margin-right: 0px;
+    margin-right: 0px;
 }
 
 /* Area Tabs */
 
 .lexareatabs {
-  display: flex;
-  flex-direction: row;
-  margin-left: 7px;
-  width: fit-content;
-  width: -moz-fit-content;
-  border-radius: 10px;
+    display: flex;
+    flex-direction: row;
+    margin-left: 7px;
+    width: fit-content;
+    width: -moz-fit-content;
+    border-radius: 10px;
 }
 
 .lexareatabs.dockingtab {
-  background-color: #7cb9f34e;
+    background-color: #7cb9f34e;
 }
 
 .lexareatabs .lexareatab {
-  font-size: 13px;
-  font-weight: 600;
-  text-shadow: 0.05em 0.05em 1px #0d0d109f;
-  justify-content: center;
-  text-align: center;
-  align-items: center;
-  padding: 3px;
-  color: var(--global-text-secondary);
-  cursor: pointer;
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
-  transition: 0.2s;
-  line-height: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    text-shadow: 0.05em 0.05em 1px #0d0d109f;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    padding: 3px;
+    color: var(--global-text-secondary);
+    cursor: pointer;
+    -webkit-user-select: none;
+    /* Safari 3.1+ */
+    -moz-user-select: none;
+    /* Firefox 2+ */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+    /* Standard syntax */
+    transition: 0.2s;
+    line-height: 16px;
 }
 
 .lexareatabs .lexareatab.thumb {
-  position: absolute;
-  background-color: var(--global-selected);
-  z-index: 0;
+    position: absolute;
+    background-color: var(--global-selected);
+    z-index: 0;
 }
 
 .lexareatabs.row {
-  width: 100%;
+    width: 100%;
 }
 
 .lexareatabs.row {
-  padding: 4px;
-  padding-bottom: 6px;
+    padding: 4px;
+    padding-bottom: 6px;
 }
 
 .lexareatabs.row .lexareatab {
-  background-color: var(--global-color-secondary);
-  padding-left: 16px;
-  padding-right: 16px;
-  margin-right: 4px;
-  border-radius: 4px;
+    background-color: var(--global-color-secondary);
+    padding-left: 16px;
+    padding-right: 16px;
+    margin-right: 4px;
+    border-radius: 4px;
 }
 
 .lexareatabs.fit {
-  width: calc(100% - 14px);
+    width: calc(100% - 14px);
 }
 
 .lexareatabs.fit .lexareatab {
-  flex: 100%;
-  border-radius: 10px;
-  z-index: 1;
+    flex: 100%;
+    border-radius: 10px;
+    z-index: 1;
 }
 
 .lexareatabs .lexareatab:active {
-  color: #b7b7cba4;
+    color: #b7b7cba4;
 }
 
 .lexareatabs.fit .lexareatab.selected {
-  color: #f8f8f8;
+    color: #f8f8f8;
 }
 
 .lexareatabs.row .lexareatab.selected {
-  color: var(--global-text-primary);
-  background-color: var(--global-selected);
+    color: var(--global-text-primary);
+    background-color: var(--global-selected);
 }
 
 .lexareatabs.folding .lexareatab.selected {
-  color: var(--global-text-primary);
-  background-color: #555556;
+    color: var(--global-text-primary);
+    background-color: #555556;
 }
 
 .lexareatabs .lexareatab:hover {
-  color: #f8f8f8;
+    color: #f8f8f8;
 }
 
 .lexareatabscontainer {
-  transition: height 0.1s;
-  transition-timing-function: ease-out;
+    transition: height 0.1s;
+    transition-timing-function: ease-out;
 }
 
 .lexareatabscontainer .lexpanel:not(.lexoverlaybuttons) {
-  margin: 0;
+    margin: 0;
 }
 
 .lexareatabscontainer .lexbranch {
-  margin: 4px 7px !important;
+    margin: 4px 7px !important;
 }
 
 .lexareatabscontent {
-  /* overflow-y: scroll; */
+    /* overflow-y: scroll; */
 }
 
 .lexareatabscontent.folded {
-  max-height: 0px; 
+    max-height: 0px;
 }
 
 /* Curve Widget */
 
 .curve canvas {
-  border-radius: 2px;
+    border-radius: 2px;
 }
 
 /* Card Widget */
 
 .lexcard {
-  position: relative;
-  margin-bottom: 4px;
+    position: relative;
+    margin-bottom: 4px;
 }
 
 .lexcard img {
-  width: 100%;
-  height: 128px;
-  object-fit: cover;
-  border-radius: 6px;
-  outline: 3px solid var(--global-text-terciary);
+    width: 100%;
+    height: 128px;
+    object-fit: cover;
+    border-radius: 6px;
+    outline: 3px solid var(--global-text-terciary);
 }
 
 .lexcard:hover a {
-  color: var(--global-selected);
+    color: var(--global-selected);
 }
 
 .lexcard:hover img {
-  outline: 3px solid var(--global-selected);
+    outline: 3px solid var(--global-selected);
 }
 
 .lexcard span {
-  width: calc(100% - 18px);
-  display: flex;
-  background-color: rgba(15, 16, 19, 0.8);
-  align-items: center;
-  height: 16px;
-  position: absolute;
-  top: 0;
-  left: 0;
-  padding: 8px;
-  border-top-left-radius: 6px;
-  border-top-right-radius: 6px;
-  font-size: 1.3em;
-  font-family: var(--global-title-font);
-  font-weight: 600;
-  text-transform: uppercase;
+    width: calc(100% - 18px);
+    display: flex;
+    background-color: rgba(15, 16, 19, 0.8);
+    align-items: center;
+    height: 16px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 8px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    font-size: 1.3em;
+    font-family: var(--global-title-font);
+    font-weight: 600;
+    text-transform: uppercase;
 }
 
 .lexcard span a {
-  color: var(--global-text);
-  text-decoration: none;
+    color: var(--global-text-primary);
+    text-decoration: none;
 }
 
 .lexcard span a:hover {
-  color: var(--global-selected);
+    color: var(--global-selected);
 }
 
 /* Layers Widget */
 
 .lexlayers {
-  display: grid;
-  grid-template-columns: 18px 18px 18px 18px 18px 18px 18px 18px;
-  grid-gap: 6px 8px; /* Gap between grid cells */
-  justify-content: center;
+    display: grid;
+    grid-template-columns: 18px 18px 18px 18px 18px 18px 18px 18px;
+    grid-gap: 6px 8px;
+    /* Gap between grid cells */
+    justify-content: center;
 }
 
 .lexlayer {
-  background-color: var(--global-color-primary);
-  color: var(--global-text);
-  text-align: center;
-  line-height: 19px;
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-  border-radius: 4px;
-  font-size: 11px;
+    background-color: var(--global-color-primary);
+    color: var(--global-text-primary);
+    text-align: center;
+    line-height: 19px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 11px;
 }
 
 .lexlayer.selected {
-  background-color: var(--global-selected);
-  color: white;
+    background-color: var(--global-selected);
+    color: white;
 }
 
 .lexlayer:hover {
-  background-color: #497baad4;
+    background-color: #497baad4;
 }
 
 .lexlayer:active {
-  background-color: #497baab3;
+    background-color: #497baab3;
 }
 
 /* List Widget */
 
 .lexlist {
-  background: var(--global-dark-background);
-  border-radius: 4px;
-  padding: 4px;
-  display: grid;
+    background: var(--global-dark-background);
+    border-radius: 4px;
+    padding: 4px;
+    display: grid;
 }
 
 .lexlistitem {
-  width: calc( 100% - 8px );
-  cursor: pointer;
-  color: rgba(216, 218, 230, 0.826);
-  font-size: var(--global-font-size);
-  border-radius: 4px;
-  padding-left: 4px;
-  padding-right: 4px;
-  margin-top: 1px;
-  margin-bottom: 1px;
-  height: 20px;
-  line-height: 22px;
-  align-content: center;
-  display: flow-root;
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
+    width: calc(100% - 8px);
+    cursor: pointer;
+    color: rgba(216, 218, 230, 0.826);
+    font-size: var(--global-font-size);
+    border-radius: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    height: 20px;
+    line-height: 22px;
+    align-content: center;
+    display: flow-root;
+    -webkit-user-select: none;
+    /* Safari 3.1+ */
+    -moz-user-select: none;
+    /* Firefox 2+ */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+    /* Standard syntax */
 }
 
 .lexlistitem a {
-  float: left;
-  line-height: 20px;
-  margin-right: 4px;
+    float: left;
+    line-height: 20px;
+    margin-right: 4px;
 }
 
 .lexlistitem:hover {
-  background-color: var(--branch-title-inactive-background);
-  color: var(--global-text-primary);
+    background-color: var(--branch-title-inactive-background);
+    color: var(--global-text-primary);
 }
 
 .lexlistitem:active {
-  color: rgba(216, 218, 230, 0.826);
+    color: rgba(216, 218, 230, 0.826);
 }
 
 .lexlistitem.selected {
-  color: var(--global-text-primary);
-  background-color: var(--global-selected);
+    color: var(--global-text-primary);
+    background-color: var(--global-selected);
 }
 
 /* Array Widget */
 
-.lexwidget:has(.lexarrayitems),  .lexwidget:has(.lexcheckboxsubmenu), .lexwidget:has(.lexcustomcontainer) {
-  background-color: var(--global-branch-darker);
-  border-radius: 6px;
+.lexwidget:has(.lexarrayitems),
+.lexwidget:has(.lexcheckboxsubmenu),
+.lexwidget:has(.lexcustomcontainer) {
+    background-color: var(--global-branch-darker);
+    border-radius: 6px;
 }
 
 .lexarray .lexwidget {
-  padding: 0px;
-  width: 100% !important;
+    padding: 0px;
+    width: 100% !important;
 }
 
 .lexarrayitems {
-  width: 100%;
-  padding: 6px;
-  color: var(--global-text-secondary);
-  font-size: var(--global-font-size);
-  margin-top: -1px;
+    width: 100%;
+    padding: 6px;
+    color: var(--global-text-secondary);
+    font-size: var(--global-font-size);
+    margin-top: -1px;
 }
 
 .lexarrayitems .small .lexbutton {
-  background: none;
+    background: none;
 }
 
 .lexarrayitems .lexwidgetname {
-  color: var(--global-text-secondary);
+    color: var(--global-text-secondary);
 }
 
 /* Tags Widget */
 
 .lextags {
-  display: inline-flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  line-height: 12px;
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    line-height: 12px;
 }
 
 .lextags input {
-  width: 100%;
-  margin-bottom: 0.5em;
-  text-align: center;
+    width: 100%;
+    margin-bottom: 0.5em;
+    text-align: center;
 }
 
 .lextags .lextag {
-  padding: 6px;
-  background-color: var(--global-color-primary);
-  margin: 2px;
-  border-radius: 12px;
-  min-width: 16px;
-  justify-content: center;
-  color: var(--global-text);
-  display: inherit;
-  font-size: var(--global-font-size);
+    padding: 6px;
+    background-color: var(--global-color-primary);
+    margin: 2px;
+    border-radius: 12px;
+    min-width: 16px;
+    justify-content: center;
+    color: var(--global-text-primary);
+    display: inherit;
+    font-size: var(--global-font-size);
 }
 
 .lextags .lextag:hover {
-  background-color: var(--global-selected);
-  color: #f5f5f5;
-  cursor: pointer;
+    background-color: var(--global-selected);
+    color: #f5f5f5;
+    cursor: pointer;
 }
 
 .lextags .lextag:hover::after {
-  content: "⊗";
+    content: "⊗";
 }
 
 /* Custom Widgets Widget */
 
 .lexcustomitems {
-  width: 100%;
-  padding: 6px;
-  color: var(--global-text-secondary);
-  font-size: var(--global-font-size);
-  margin-top: -1px;
+    width: 100%;
+    padding: 6px;
+    color: var(--global-text-secondary);
+    font-size: var(--global-font-size);
+    margin-top: -1px;
 }
 
 .lexcustomcontainer span {
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
 }
 
 .lexcustomcontainer .lexbutton span:not(:has(.menu)) {
-  width: 95%;
+    width: 95%;
 }
 
 /* Knob Widget */
 
 .lexknob {
-  padding: 8px;
+    padding: 8px;
 }
 
 .lexknob .knobcircle {
-  background: rgb(62,62,62);
-  background: linear-gradient(180deg, rgba(82,82,82,1) 0%, rgba(40,40,40,1) 100%);
-  width: 64px;
-  height: 64px;
-  margin: 0 auto;
-  border-radius: 50%;
-  position: relative;
-  box-shadow: 0px 3px 9px 2px #121212a9;
-  --knob-snap-mark: 45deg;
+    background: rgb(62, 62, 62);
+    background: linear-gradient(180deg, rgba(82, 82, 82, 1) 0%, rgba(40, 40, 40, 1) 100%);
+    width: 64px;
+    height: 64px;
+    margin: 0 auto;
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 0px 3px 9px 2px #121212a9;
+    --knob-snap-mark: 45deg;
 }
 
 /* Arc Indicator */
 .lexknob .knobcircle::before {
-  content: "";
-  position: absolute;
-  width: 125%;
-  height: 125%;
-  top: -15.5%;
-  left: -15.5%;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-bottom-color: transparent;
+    content: "";
+    position: absolute;
+    width: 125%;
+    height: 125%;
+    top: -15.5%;
+    left: -15.5%;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-bottom-color: transparent;
 }
 
 /* Tick Marks */
 .lexknob.show-ticks .knobcircle::after {
-  content: "";
-  position: absolute;
-  width: 130%;
-  height: 130%;
-  top: -15.5%;
-  left: -15.5%;
-  border-radius: 50%;
-  pointer-events: none;
-  mask-image: radial-gradient(circle, transparent 60%, black 60%), conic-gradient(
-    transparent -135deg,
-    black -135deg 275deg,
-    transparent 275deg
-  );
-  -webkit-mask-composite: intersect;
-  mask-composite: intersect;
-  background: repeating-conic-gradient(
-    transparent 0deg,
-    rgba(255, 255, 255, 0.4) 1deg 3deg,
-    transparent 4deg calc( var(--knob-snap-mark) - 1deg )
-  );
-  transform: rotate(-135deg);
+    content: "";
+    position: absolute;
+    width: 130%;
+    height: 130%;
+    top: -15.5%;
+    left: -15.5%;
+    border-radius: 50%;
+    pointer-events: none;
+    mask-image: radial-gradient(circle, transparent 60%, black 60%), conic-gradient(transparent -135deg,
+            black -135deg 275deg,
+            transparent 275deg);
+    -webkit-mask-composite: intersect;
+    mask-composite: intersect;
+    background: repeating-conic-gradient(transparent 0deg,
+            rgba(255, 255, 255, 0.4) 1deg 3deg,
+            transparent 4deg calc(var(--knob-snap-mark) - 1deg));
+    transform: rotate(-135deg);
 }
 
 .lexknob.sm .knobcircle {
-  width: 48px;
-  height: 48px;
+    width: 48px;
+    height: 48px;
 }
 
 .lexknob.bg .knobcircle {
-  width: 81px;
-  height: 81px;
+    width: 81px;
+    height: 81px;
 }
 
 .lexknob .innerknobcircle {
-  background-color:rgba(62,62,62,1);
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  margin: 0;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  translate: -50% -50%;
+    background-color: rgba(62, 62, 62, 1);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
 }
 
 .lexknob.sm .innerknobcircle {
-  width: 39px;
-  height: 39px;
+    width: 39px;
+    height: 39px;
 }
 
 .lexknob.bg .innerknobcircle {
-  width: 73px;
-  height: 73px;
+    width: 73px;
+    height: 73px;
 }
 
 .lexknob .knobmarker {
-  background-color: var(--global-selected);
-  filter: brightness(1.5);
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  margin: 0 auto;
-  margin-top: 6px;
+    background-color: var(--global-selected);
+    filter: brightness(1.5);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin: 0 auto;
+    margin-top: 6px;
 }
 
 .lexknob.disabled .knobmarker {
-  background-color: var(--global-text-terciary);
+    background-color: var(--global-text-terciary);
 }
 
 .lexknob.sm .knobmarker {
-  width: 5px;
-  height: 5px;
+    width: 5px;
+    height: 5px;
 }
 
 .lexknob.bg .knobmarker {
-  width: 7px;
-  height: 7px;
-  margin-top: 8px;
+    width: 7px;
+    height: 7px;
+    margin-top: 8px;
 }
 
 /** Timeline */
 
 .lextimeline {
-  flex-direction: column;
-  color: var(--global-text-primary);
-  background-color: var(--global-primary-color);
-  height: 100%;
+    flex-direction: column;
+    color: var(--global-text-primary);
+    background-color: var(--global-primary-color);
+    height: 100%;
 }
 
 .lextimelinepanel {
-  /* overflow: hidden; */
+    /* overflow: hidden; */
 }
+
 /* .lextimeline .lexarea, .lextimelinepanel {
   background-color: var(--global-dark-background);
 } */
 
 .lextimeline *::-webkit-scrollbar {
-  display: none;
+    display: none;
 }
 
 .lextimeline .lexbuttonscontainer {
-  position: absolute;
-  padding: 0 10px;
+    position: absolute;
+    padding: 0 10px;
 }
 
 .lextimeline .lexwidget:has(.lexbutton:not(.array)) {
-  padding: 1px;
-  /* padding-left: 10px;
+    padding: 1px;
+    /* padding-left: 10px;
   padding-right: 10px; */
 }
 
 .lextimeline .lexinlinewidgets {
-  padding-right: 10px;
-  /* background-color: var(--global-color-secondary); */
-  /* height: 100%; */
+    padding-right: 10px;
+    /* background-color: var(--global-color-secondary); */
+    /* height: 100%; */
 }
 
 .lextimeline .lexbutton:hover {
-  color: var(--global-selected-light);
+    color: var(--global-selected-light);
 }
 
 .lextimeline .lextree {
-  margin: 0px!important;
-  width: 100%;
+    margin: 0px !important;
+    width: 100%;
 }
 
 .lextimeline .lextree .lextreeitem {
-  margin: 0px;
+    margin: 0px;
 }
 
 .lextimeline .lextitle {
-  padding-left: 24px;
+    padding-left: 24px;
 }
 
 .lextimeline .lextree ul {
-  margin: 0;
-  padding-bottom: 0px;
-  padding-top: 0px;
-  font-size: var(--global-font-size);
+    margin: 0;
+    padding-bottom: 0px;
+    padding-top: 0px;
+    font-size: var(--global-font-size);
 }
 
 .lextimeline .lexsplitbar.vertical {
-  position: unset;
-  width: unset;
-  height: unset;
+    position: unset;
+    width: unset;
+    height: unset;
 }
 
-.lextimeline .lexbutton.accept:hover{
-  background-color: var(--global-button-color-hovered);
+.lextimeline .lexbutton.accept:hover {
+    background-color: var(--global-button-color-hovered);
 }
 
 /**/
 .lexmin {
-  display: inline-block;
-  color: var(--global-selected-light);
-  background: var(--global-color-primary);
-  border-radius: 8px;
-  padding: 4px;
-  position: absolute;
-  transition: 0.3s;
-  font-size: initial;
-  cursor: pointer;
+    display: inline-block;
+    color: var(--global-selected-light);
+    background: var(--global-color-primary);
+    border-radius: 8px;
+    padding: 4px;
+    position: absolute;
+    transition: 0.3s;
+    font-size: initial;
+    cursor: pointer;
 }
 
 .lexmin.horizontal {
-  margin-top: 48px;
-  margin-left: -12px;
-  height: fit-content;
+    margin-top: 48px;
+    margin-left: -12px;
+    height: fit-content;
 }
 
 .lexmin.vertical {
-  margin-top: -12px;
-  margin-left: 12px;
+    margin-top: -12px;
+    margin-left: 12px;
 }
 
 .lexarea .fadein-vertical {
-  animation-name: fadein;
-  animation-fill-mode: forwards;
+    animation-name: fadein;
+    animation-fill-mode: forwards;
 }
+
 .lexarea .fadeout-vertical {
-  animation-name: fadeout;
-  animation-duration: 0.25s;
-  animation-fill-mode: forwards;
-  transition: height;
+    animation-name: fadeout;
+    animation-duration: 0.25s;
+    animation-fill-mode: forwards;
+    transition: height;
 }
 
 .lexarea .fadein-horizontal {
-  animation-name: fadein;
-  animation-fill-mode: forwards;
+    animation-name: fadein;
+    animation-fill-mode: forwards;
 }
+
 .lexarea .fadeout-horizontal {
-  animation-name: fadeout;
-  animation-duration: 0.25s;
-  animation-fill-mode: forwards;
-  transition: width;
+    animation-name: fadeout;
+    animation-duration: 0.25s;
+    animation-fill-mode: forwards;
+    transition: width;
 }
 
 @keyframes fadein {
-  from { opacity: 0%; }
-  25% { opacity: 75%; }
-  to { opacity: 100%; }
+    from {
+        opacity: 0%;
+    }
+
+    25% {
+        opacity: 75%;
+    }
+
+    to {
+        opacity: 100%;
+    }
 }
 
 @keyframes fadeout {
-  from { opacity: 100%; }
-  25% { opacity: 25%; }
-  to { opacity: 0%; }
+    from {
+        opacity: 100%;
+    }
+
+    25% {
+        opacity: 25%;
+    }
+
+    to {
+        opacity: 0%;
+    }
 }
 
 /* Overlay area */
 
 .overlay-top {
-  position: absolute;
-  top: 0;
+    position: absolute;
+    top: 0;
 }
 
 .overlay-bottom {
-  position: absolute;
-  bottom: 0;
+    position: absolute;
+    bottom: 0;
 }
 
 .overlay-left {
-  position: absolute;
-  left: 0;
-  top: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
 }
 
 .overlay-right {
-  position: absolute;
-  right: 0;
-  top: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
 }
 
-.lexarea.overlay-bottom, .lexarea.overlay-top, .lexarea.overlay-left, .lexarea.overlay-right,
-.overlay-bottom .lexarea, .overlay-top  .lexarea, .overlay-left  .lexarea, .overlay-right  .lexarea,
-.overlay-bottom .lextimeline, .overlay-top  .lextimeline, .overlay-left  .lextimeline, .overlay-right  .lextimeline,
-.overlay-bottom .lextimelinearea, .overlay-top  .lextimelinearea, .overlay-left  .lextimeline, .overlay-right  .lextimelinearea {
+.lexarea.overlay-bottom,
+.lexarea.overlay-top,
+.lexarea.overlay-left,
+.lexarea.overlay-right,
+.overlay-bottom .lexarea,
+.overlay-top .lexarea,
+.overlay-left .lexarea,
+.overlay-right .lexarea,
+.overlay-bottom .lextimeline,
+.overlay-top .lextimeline,
+.overlay-left .lextimeline,
+.overlay-right .lextimeline,
+.overlay-bottom .lextimelinearea,
+.overlay-top .lextimelinearea,
+.overlay-left .lextimeline,
+.overlay-right .lextimelinearea {
 
-  background-color: var(--global-color-primary);
+    background-color: var(--global-color-primary);
 }
 
 /* Asset Browser */
 
 .lexassetbrowser {
-  height: 100%;
+    height: 100%;
 }
 
 .lexassetbrowser .lexsplitbar.horizontal {
-  position: relative;
-  height: calc(100%);
-  border-radius: 0px;
-  left: 0 !important;
-  top: 0;
-  background-color: var(--global-color-secondary);
+    position: relative;
+    height: calc(100%);
+    border-radius: 0px;
+    left: 0 !important;
+    top: 0;
+    background-color: var(--global-color-secondary);
 }
 
 .lexassetbrowser .lexsplitbar.horizontal:hover {
-  background-color: var(--global-text-secondary);
+    background-color: var(--global-text-secondary);
 }
 
 .lexassetbrowser .lexsplitbar.vertical {
-  position: unset;
-  width: unset;
-  height: unset;
+    position: unset;
+    width: unset;
+    height: unset;
 }
 
 .lexassetscontent.dragging {
-  background-color: var(--global-branch-darker);
+    background-color: var(--global-branch-darker);
 }
 
 ul.lexassetscontent {
-  position: relative;
-  -webkit-text-size-adjust: 100%;
-  font-size: var(--global-font-size);
-  color: #AAA;
-  box-sizing: border-box;
-  overflow: auto;
-  padding: 0 1em;
-  margin: 0;
-  height: calc(100% - 36px);
+    position: relative;
+    -webkit-text-size-adjust: 100%;
+    font-size: var(--global-font-size);
+    color: #AAA;
+    box-sizing: border-box;
+    overflow: auto;
+    padding: 0 1em;
+    margin: 0;
+    height: calc(100% - 36px);
 }
 
 .lexassetscontent.list {
-  display: table-cell;
-  columns: 3 256px;
-  width: 100%;
+    display: table-cell;
+    columns: 3 256px;
+    width: 100%;
 }
 
 .lexassetscontent li {
-  -webkit-text-size-adjust: 100%;
-  font-size: var(--global-font-size);
-  color: #AAA;
-  -webkit-user-drag: element;
-  user-select: none;
-  box-sizing: border-box;
-  width: 10em;
-  height: 11.4em;
-  display: inline-block;
-  vertical-align: top;
-  margin: 0.5em;
-  margin-top: 0.75em;
-  padding: 0;
-  box-shadow: 0 0 8px black;
-  overflow: hidden;
-  background-color: #555;
-  cursor: pointer;
-  text-align: center;
-  border-top-left-radius: 2px;
-  border-top-right-radius: 2px;
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-  position: relative;
-  border-top: 4px solid rgba(0,0,0,0);
+    -webkit-text-size-adjust: 100%;
+    font-size: var(--global-font-size);
+    color: #AAA;
+    -webkit-user-drag: element;
+    user-select: none;
+    box-sizing: border-box;
+    width: 10em;
+    height: 11.4em;
+    display: inline-block;
+    vertical-align: top;
+    margin: 0.5em;
+    margin-top: 0.75em;
+    padding: 0;
+    box-shadow: 0 0 8px black;
+    overflow: hidden;
+    background-color: #555;
+    cursor: pointer;
+    text-align: center;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    position: relative;
+    border-top: 4px solid rgba(0, 0, 0, 0);
 }
 
 .lexassetscontent .lexitemdesc {
-  position: absolute;
-  font-weight: 600;
-  background-color: #afafaf;
-  color: var(--global-color-primary);
-  font-size: 14px;
-  border-radius: 6px;
-  display: none;
-  opacity: 0;
-  z-index: 102;
-  padding: 2px 6px;
-  transition: opacity ease-in 0.1s;
-  pointer-events: none;
+    position: absolute;
+    font-weight: 600;
+    background-color: #afafaf;
+    color: var(--global-color-primary);
+    font-size: 14px;
+    border-radius: 6px;
+    display: none;
+    opacity: 0;
+    z-index: 102;
+    padding: 2px 6px;
+    transition: opacity ease-in 0.1s;
+    pointer-events: none;
 }
 
-.lexassetscontent li:hover + .lexitemdesc {
-  opacity: 1;
+.lexassetscontent li:hover+.lexitemdesc {
+    opacity: 1;
 }
+
 .lexassetscontent.list li {
-  width: calc(100% - 0.5em);
-  height: 1.8em;
-  border-top: 0px;
-  border-left: 4px solid rgba(0,0,0,0);
-  border-bottom-left-radius: 2px;
-  border-bottom-right-radius: 2px;
-  margin: 0;
-  margin-top: 0.4em;
-  margin-bottom: 0.4em;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.858);
+    width: calc(100% - 0.5em);
+    height: 1.8em;
+    border-top: 0px;
+    border-left: 4px solid rgba(0, 0, 0, 0);
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+    margin: 0;
+    margin-top: 0.4em;
+    margin-bottom: 0.4em;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.858);
 }
 
 .lexassetscontent .asset-file-preview {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: calc(100% - 20px);
-  padding-top: 16px; 
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 20px);
+    padding-top: 16px;
 }
 
 .lexassetscontent .asset-file-preview text {
-  font-size: 64px;
-  text-anchor: middle;
-  font-family: 'Ubuntu', sans-serif;
+    font-size: 64px;
+    text-anchor: middle;
+    font-family: 'Ubuntu', sans-serif;
 }
 
-.lexassetscontent li.image  { border-color: rgb(239, 188, 78); }
-.lexassetscontent li.script { border-color: rgb(104, 129, 195); }
-.lexassetscontent li.json   { border-color: rgb(163, 213, 225); }
-.lexassetscontent li.mesh   { border-color: rgb(156, 68, 68); }
-.lexassetscontent li.clip   { border-color: rgb(176, 97, 187); }
-.lexassetscontent li.sigml  { border-color: rgb(154, 188, 101); }
+.lexassetscontent li.image {
+    border-color: rgb(239, 188, 78);
+}
+
+.lexassetscontent li.script {
+    border-color: rgb(104, 129, 195);
+}
+
+.lexassetscontent li.json {
+    border-color: rgb(163, 213, 225);
+}
+
+.lexassetscontent li.mesh {
+    border-color: rgb(156, 68, 68);
+}
+
+.lexassetscontent li.clip {
+    border-color: rgb(176, 97, 187);
+}
+
+.lexassetscontent li.sigml {
+    border-color: rgb(154, 188, 101);
+}
 
 .lexassetscontent li:hover {
-  outline: 2px solid var(--global-selected);
+    outline: 2px solid var(--global-selected);
 }
 
 .lexassetscontent li.selected {
-  transition: none !important;
-  outline: 2px solid var(--global-selected);
-  font-weight: bold;
+    transition: none !important;
+    outline: 2px solid var(--global-selected);
+    font-weight: bold;
 }
 
 .lexassetscontent li .lexassettitle {
-  position: absolute;
-  width: 100%;
-  bottom: 0px;
-  -webkit-text-size-adjust: 100%;
-  font-size: var(--global-font-size);
-  color: #BBB;
-  cursor: pointer;
-  text-align: center;
-  box-sizing: border-box;
-  display: block;
-  height: 20px;
-  padding: 0.1em;
-  padding-top: 0.15em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  background-color: rgba(12, 12, 12, 0.8);
-  transition: all 0.1s;
-  z-index: 1;
+    position: absolute;
+    width: 100%;
+    bottom: 0px;
+    -webkit-text-size-adjust: 100%;
+    font-size: var(--global-font-size);
+    color: #BBB;
+    cursor: pointer;
+    text-align: center;
+    box-sizing: border-box;
+    display: block;
+    height: 20px;
+    padding: 0.1em;
+    padding-top: 0.15em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background-color: rgba(12, 12, 12, 0.8);
+    transition: all 0.1s;
+    z-index: 1;
 }
 
 .lexassetscontent.list li .lexassettitle {
-  width: 100%;
-  height: 100%;
-  text-align: left;
-  padding-left: 2em;
+    width: 100%;
+    height: 100%;
+    text-align: left;
+    padding-left: 2em;
 }
 
 .lexassetscontent li .lexassetinfo {
-  -webkit-text-size-adjust: 100%;
-  color: #999;
-  box-sizing: border-box;
-  position: absolute;
-  overflow: hidden;
-  text-align: left;
-  padding: 3px;
-  top: 0;
-  transition: all 0.1s;
-  display: none;
+    -webkit-text-size-adjust: 100%;
+    color: #999;
+    box-sizing: border-box;
+    position: absolute;
+    overflow: hidden;
+    text-align: left;
+    padding: 3px;
+    top: 0;
+    transition: all 0.1s;
+    display: none;
 }
 
 .lexassetscontent.list li .lexassetinfo {
-  display: block;
-  right: 6px;
-  z-index: 1;
+    display: block;
+    right: 6px;
+    z-index: 1;
 }
 
 .lexassetscontent.list li .lexcheckbox {
-  display: block;
-  left: 0 !important;
-  z-index: 100;
-  position: absolute;
+    display: block;
+    left: 0 !important;
+    z-index: 100;
+    position: absolute;
 }
 
 .lexassetscontent.list li .lexcheckbox input[type=checkbox]:checked:after {
-  left: 0!important;
+    left: 0 !important;
 }
 
 .lexassetscontent li:hover span {
-  color: #f5f5f5;
+    color: #f5f5f5;
 }
 
 .lexassetscontent li.selected .lexassettitle {
-  color: #f5f5f5;
-  text-shadow: 0 0 3px black;
-  background-color: var(--global-selected);
+    color: #f5f5f5;
+    text-shadow: 0 0 3px black;
+    background-color: var(--global-selected);
 }
 
 .lexassetscontent li img {
-  -webkit-text-size-adjust: 100%;
-  font-family: 'Arial';
-  font-size: var(--global-font-size);
-  cursor: pointer;
-  text-align: center;
-  color: white;
-  box-sizing: border-box;
-  border: 0;
-  max-width: 10em;
-  max-height: 10em;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: all 0.2s;
+    -webkit-text-size-adjust: 100%;
+    font-family: 'Arial';
+    font-size: var(--global-font-size);
+    cursor: pointer;
+    text-align: center;
+    color: white;
+    box-sizing: border-box;
+    border: 0;
+    max-width: 10em;
+    max-height: 10em;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.2s;
 }
 
 .lexassetscontent.list img {
-  width: unset;
-  height: 2em;
-  object-fit: contain;
-  float: left;
-  z-index: 1;
-  position: relative;
+    width: unset;
+    height: 2em;
+    object-fit: contain;
+    float: left;
+    z-index: 1;
+    position: relative;
 }
 
 .lexassetscontent li.folder img {
-  transform: translateY(-6px);
+    transform: translateY(-6px);
 }
 
 .lexassetscontent.list li.folder img {
-  transform: scale(0.9);
+    transform: scale(0.9);
 }
 
 .lexassetscontent li:hover img {
-  transform: scale(1.12);
+    transform: scale(1.12);
 }
 
 /* Code Editor */
 
 .codebasearea {
-  display: flex;
-  position: relative;
-  overflow: inherit;
-  background-color: var(--global-branch-darker);
+    display: flex;
+    position: relative;
+    overflow: inherit;
+    background-color: var(--global-branch-darker);
 }
 
 .codebasearea * {
-  letter-spacing: 0em !important;
+    letter-spacing: 0em !important;
 }
 
 .codebasearea .lexareatabs {
-  padding: 0px;
-  margin: 0px;
+    padding: 0px;
+    margin: 0px;
 }
 
 .codebasearea .lexareatab {
-  padding: 5px;
-  border-radius: 0px !important;
-  margin: 0px !important;
-  border: 1px solid #91909036;
-  border-right: none;
-  background-color: var(--global-color-primary) !important;
-  transition: none;
+    padding: 5px;
+    border-radius: 0px !important;
+    margin: 0px !important;
+    border: 1px solid #91909036;
+    border-right: none;
+    background-color: var(--global-color-primary) !important;
+    transition: none;
 }
 
 .codebasearea .lexareatab:hover {
-  background-color: var(--global-color-secondary) !important;
+    background-color: var(--global-color-secondary) !important;
 }
 
 .codebasearea .lexareatab:last-child {
-  border-right: 1px solid #91909036;
+    border-right: 1px solid #91909036;
 }
 
 .codebasearea .lexareatab.selected {
-  background-color: var(--global-color-secondary) !important;
-  border-top: 1px solid var(--global-selected);
-  border-bottom: none;
+    background-color: var(--global-color-secondary) !important;
+    border-top: 1px solid var(--global-selected);
+    border-bottom: none;
 }
 
 .codebasearea .lexareatab i {
-  width: 12px;
-  font-size: 10px;
-  margin-right: 4px;
-  vertical-align: middle;
-  margin-top: -3px;
+    width: 12px;
+    font-size: 10px;
+    margin-right: 4px;
+    vertical-align: middle;
+    margin-top: -3px;
 }
 
 .codebasearea .lexareatab img {
-  width: 12px;
-  height: 12px;
-  margin-right: 4px;
-  vertical-align: middle;
-  margin-top: -2px;
+    width: 12px;
+    height: 12px;
+    margin-right: 4px;
+    vertical-align: middle;
+    margin-top: -2px;
 }
 
 .lexcodeeditor ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-  background: none;
+    width: 6px;
+    height: 6px;
+    background: none;
 }
 
 .lexcodeeditor ::-webkit-scrollbar-thumb {
-  background: #8c8c909c;
+    background: #8c8c909c;
 }
 
 .lexcodeeditor ::-webkit-scrollbar-thumb:hover {
-  background: #afafb4c2;
+    background: #afafb4c2;
 }
 
 .lexcodeeditor {
-  outline: none;
-  overflow: hidden;
-  width: calc(100%);
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
+    outline: none;
+    overflow: hidden;
+    width: calc(100%);
+    -webkit-user-select: none;
+    /* Safari 3.1+ */
+    -moz-user-select: none;
+    /* Firefox 2+ */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+    /* Standard syntax */
 }
 
 .lexcodeeditor .lexareatabscontent {
-  overflow: hidden;
+    overflow: hidden;
 }
 
 .lexcodetabinfo {
-  background-color: var(--global-branch-darker);
-  position: absolute;
-  z-index: 3;
-  bottom: 0px;
-  margin-left: 0px;
+    background-color: var(--global-branch-darker);
+    position: absolute;
+    z-index: 3;
+    bottom: 0px;
+    margin-left: 0px;
 }
 
 .lexcodegutter {
-  width: 48px;
-  height: calc(100% - 62px);
-  background-color: var(--global-branch-darker);
-  margin-top: 28px;
-  overflow: hidden;
-  position: absolute;
-  top: 0;
+    width: 48px;
+    height: calc(100% - 62px);
+    background-color: var(--global-branch-darker);
+    margin-top: 28px;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
 }
 
 .lexcodeeditor .codetabsarea {
-  height: calc( 100% - 72px ) !important;
-  background-color: var(--global-branch-darker);
-  overflow: scroll;
+    height: calc(100% - 72px) !important;
+    background-color: var(--global-branch-darker);
+    overflow: scroll;
 }
 
 .lexcodeeditor .codetabsarea.no-code-info {
-  height: calc( 100% - 28px ) !important;
+    height: calc(100% - 28px) !important;
 }
 
 .lexcodeeditor .codetabsarea::-webkit-scrollbar {
-  display: none;
+    display: none;
 }
 
 .lexcodeeditor .codetabsarea.with-vscrollbar {
-  width: calc( 100% - 10px ) !important;
+    width: calc(100% - 10px) !important;
 }
 
 .lexcodeeditor .codetabsarea.dragging {
-  background-color: var(--global-color-secondary);
+    background-color: var(--global-color-secondary);
 }
 
 .lexcodeeditor .code {
-  cursor: text;
-  font-family: "CommitMono", monospace;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: "ss04", "ss05";
-  font-size: var(--code-editor-font-size);
-  padding-right: 6px;
-  position: relative;
+    cursor: text;
+    font-family: "CommitMono", monospace;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "ss04", "ss05";
+    font-size: var(--code-editor-font-size);
+    padding-right: 6px;
+    position: relative;
 }
 
 .codechar {
-  font-family: "CommitMono", monospace;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: "ss04", "ss05";
-  font-size: var(--code-editor-font-size);
-  position: absolute;
-  top: 0;
-  left: 0;
-  padding: 0;
-  margin: 0;
+    font-family: "CommitMono", monospace;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "ss04", "ss05";
+    font-size: var(--code-editor-font-size);
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0;
+    margin: 0;
 }
 
 .lexcodeeditor pre {
-  -webkit-text-size-adjust: 100%;
-  cursor: text;
-  box-sizing: border-box;
-  border-radius: 0;
-  border-width: 0;
-  background: transparent;
-  margin: 0px 0px;
-  white-space: pre;
-  word-wrap: normal;
-  line-height: inherit;
-  color: #dde1ec;
-  position: relative;
-  overflow: visible;
-  -webkit-tap-highlight-color: transparent;
-  height: var(--code-editor-row-height);
-  pointer-events: none;
+    -webkit-text-size-adjust: 100%;
+    cursor: text;
+    box-sizing: border-box;
+    border-radius: 0;
+    border-width: 0;
+    background: transparent;
+    margin: 0px 0px;
+    white-space: pre;
+    word-wrap: normal;
+    line-height: inherit;
+    color: #dde1ec;
+    position: relative;
+    overflow: visible;
+    -webkit-tap-highlight-color: transparent;
+    height: var(--code-editor-row-height);
+    pointer-events: none;
 }
 
 .lexcodeeditor pre.active-line {
-  background-color: #333437a9;
+    background-color: #333437a9;
 }
 
 .lexcodeeditor span {
-  -webkit-text-size-adjust: 100%;
-  cursor: text;
-  font-family: inherit;
-  font-size: inherit;
-  white-space: pre;
-  word-wrap: normal;
-  line-height: inherit;
-  -webkit-tap-highlight-color: transparent;
-  box-sizing: border-box;
-  display: inline-block;
+    -webkit-text-size-adjust: 100%;
+    cursor: text;
+    font-family: inherit;
+    font-size: inherit;
+    white-space: pre;
+    word-wrap: normal;
+    line-height: inherit;
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+    display: inline-block;
 }
 
 pre .line-gutter {
-  color: #8a8b97;
-  width: 48px;
-  height: var(--code-editor-row-height);
-  font-size: var(--code-editor-font-size);
-  font-weight: 400;
-  line-height: var(--code-editor-row-height);
-  text-align: center;
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
-  position: sticky;
-  left: 0;
-  z-index: 1;
+    color: #8a8b97;
+    width: 48px;
+    height: var(--code-editor-row-height);
+    font-size: var(--code-editor-font-size);
+    font-weight: 400;
+    line-height: var(--code-editor-row-height);
+    text-align: center;
+    -webkit-user-select: none;
+    /* Safari 3.1+ */
+    -moz-user-select: none;
+    /* Firefox 2+ */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+    /* Standard syntax */
+    position: sticky;
+    left: 0;
+    z-index: 1;
 }
 
-.lexcodeeditor .cursors, .lexcodeeditor .selections {
-  -webkit-text-size-adjust: 100%;
-  font-family: monospace;
-  color: #AAA !important;
-  font-size: 16px;
-  cursor: text;
-  box-sizing: border-box;
-  visibility: hidden;
-  margin: 0;
-  padding: 0;
-  position: relative;
-  pointer-events: none;
+.lexcodeeditor .cursors,
+.lexcodeeditor .selections {
+    -webkit-text-size-adjust: 100%;
+    font-family: monospace;
+    color: #AAA !important;
+    font-size: 16px;
+    cursor: text;
+    box-sizing: border-box;
+    visibility: hidden;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    pointer-events: none;
 }
 
-.lexcodeeditor .cursors.show, .lexcodeeditor .selections.show {
-  visibility: visible;
+.lexcodeeditor .cursors.show,
+.lexcodeeditor .selections.show {
+    visibility: visible;
 }
 
 .lexcodeeditor .cursors .cursor {
-  -webkit-text-size-adjust: 100%;
-  font-family: monospace;
-  font-size: 16px;
-  cursor: text;
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  border-right: none;
-  width: 0;
-  height: var(--code-editor-row-height);
-  position: absolute;
-  border-left: 3px solid #fff !important;
-  z-index: 1 !important;
-  opacity: 0.6;
-  left: 0px;
-  top: 0px;
+    -webkit-text-size-adjust: 100%;
+    font-family: monospace;
+    font-size: 16px;
+    cursor: text;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border-right: none;
+    width: 0;
+    height: var(--code-editor-row-height);
+    position: absolute;
+    border-left: 3px solid #fff !important;
+    z-index: 1 !important;
+    opacity: 0.6;
+    left: 0px;
+    top: 0px;
 }
 
 .lexcodescrollbar {
-  width: 10px;
-  height: calc(100% - 62px);
-  position: absolute;
-  background-color: transparent;
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  margin-top: 26px;
-  z-index: 1 !important;
-  right: 0px;
-  pointer-events: none;
+    width: 10px;
+    height: calc(100% - 62px);
+    position: absolute;
+    background-color: transparent;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    margin-top: 26px;
+    z-index: 1 !important;
+    right: 0px;
+    pointer-events: none;
 }
 
 .lexcodescrollbar.horizontal {
-  width: calc( 100% - 58px );
-  height: 10px;
-  bottom: 36px;
-  right: 10px;
+    width: calc(100% - 58px);
+    height: 10px;
+    bottom: 36px;
+    right: 10px;
 }
 
 .lexcodescrollbar.scrollbar-unused {
-  display: none;
+    display: none;
 }
 
-.lexcodescrollbar div { /* thumb */
-  background-color: #bbbbbb3d !important;
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  border-right: none;
-  position: absolute;
-  z-index: 0 !important;
-  top: 0px;
-  width: 10px;
-  height: 10px;
-  transition: linear 0.1s background-color;
-  pointer-events: all;
+.lexcodescrollbar div {
+    /* thumb */
+    background-color: #bbbbbb3d !important;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border-right: none;
+    position: absolute;
+    z-index: 0 !important;
+    top: 0px;
+    width: 10px;
+    height: 10px;
+    transition: linear 0.1s background-color;
+    pointer-events: all;
 }
 
-.lexcodescrollbar div:hover { /* thumb */
-  background-color: #bbbbbb8c !important;
+.lexcodescrollbar div:hover {
+    /* thumb */
+    background-color: #bbbbbb8c !important;
 }
 
-.lexcodeeditor .lexcodeselection, .lexcodeeditor .lexcodesearchresult {
-  -webkit-text-size-adjust: 100%;
-  font-family: monospace;
-  color: #AAA !important;
-  font-size: 15px;
-  cursor: text;
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  border-right: none;
-  border-radius: 1px;
-  position: absolute;
-  z-index: 0 !important;
-  left: 0px;
-  top: 0px;
-  width: 100px;
-  height: var(--code-editor-row-height);
-  background-color: var(--global-selected);
-  opacity: 0.4;
+.lexcodeeditor .lexcodeselection,
+.lexcodeeditor .lexcodesearchresult {
+    -webkit-text-size-adjust: 100%;
+    font-family: monospace;
+    color: #AAA !important;
+    font-size: 15px;
+    cursor: text;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border-right: none;
+    border-radius: 1px;
+    position: absolute;
+    z-index: 0 !important;
+    left: 0px;
+    top: 0px;
+    width: 100px;
+    height: var(--code-editor-row-height);
+    background-color: var(--global-selected);
+    opacity: 0.4;
 }
 
 .lexcodeeditor .lexcodesearchresult {
-  background-color: #f5f115;
-  opacity: 0.5;
+    background-color: #f5f115;
+    opacity: 0.5;
 }
 
 .lexcodeeditor .searchbox {
-  background-color: var(--global-branch-darker);
-  width: 256px;
-  position: absolute;
-  right: 6px;
-  top: 26px;
-  z-index: 100;
-  border-radius: 4px;
-  border: 1px solid var(--global-button-color);
-  box-shadow: 0 0px 4px #101010;
-  overflow-y: scroll;
-  transform: translateY(-72px);
-  transition: transform 0.2s ease-in;
+    background-color: var(--global-branch-darker);
+    width: 256px;
+    position: absolute;
+    right: 6px;
+    top: 26px;
+    z-index: 100;
+    border-radius: 4px;
+    border: 1px solid var(--global-button-color);
+    box-shadow: 0 0px 4px #101010;
+    overflow-y: scroll;
+    transform: translateY(-72px);
+    transition: transform 0.2s ease-in;
 }
 
 .lexcodeeditor .searchbox.gotoline {
-  width: 124px;
+    width: 124px;
 }
 
 .lexcodeeditor .searchbox.opened {
-  transform: translateY(0px);
+    transform: translateY(0px);
 }
 
 .lexcodeeditor .searchbox .lexpanel span {
-  height: 11px;
+    height: 11px;
 }
 
 .lexcodeeditor .autocomplete {
-  background-color: var(--global-branch-darker);
-  width: 256px;
-  max-height: 128px;
-  position: absolute;
-  left: 0;
-  top: 0;
-  visibility: hidden;
-  z-index: 100;
-  border-radius: 4px;
-  border: 1px solid var(--global-button-color);
-  box-shadow: 0 0px 4px #101010;
-  overflow-y: scroll;
+    background-color: var(--global-branch-darker);
+    width: 256px;
+    max-height: 128px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    visibility: hidden;
+    z-index: 100;
+    border-radius: 4px;
+    border: 1px solid var(--global-button-color);
+    box-shadow: 0 0px 4px #101010;
+    overflow-y: scroll;
 }
 
 .lexcodeeditor .autocomplete.no-scrollbar::-webkit-scrollbar {
-  display: none;
+    display: none;
 }
 
 .lexcodeeditor .autocomplete.show {
-  visibility: visible;
+    visibility: visible;
 }
 
 .lexcodeeditor .autocomplete pre {
-  margin: 0;
-  pointer-events: unset;
-  cursor: default;
-  height: 22px;
-  padding-left: 6px;
+    margin: 0;
+    pointer-events: unset;
+    cursor: default;
+    height: 22px;
+    padding-left: 6px;
 }
 
 .lexcodeeditor .autocomplete pre a {
-  font-size: 11px;
-  margin-top: 4px;
-  margin-right: 6px;
-  margin-left: 2px;
+    font-size: 11px;
+    margin-top: 4px;
+    margin-right: 6px;
+    margin-left: 2px;
 }
 
 .lexcodeeditor .autocomplete pre:hover {
-  background-color: var(--global-color-terciary);
-  cursor: pointer;
+    background-color: var(--global-color-terciary);
+    cursor: pointer;
 }
 
 .lexcodeeditor .autocomplete pre.selected {
-  background-color: var(--global-selected);
+    background-color: var(--global-selected);
 }
 
 .lexcodeeditor .autocomplete pre span {
-  cursor: inherit;
+    cursor: inherit;
 }
 
 .lexcodeeditor .autocomplete pre span.word-highlight {
-  color: var(--global-selected-light);
+    color: var(--global-selected-light);
 }
 
 .lexcodeeditor .autocomplete pre.selected span.word-highlight {
-  color: #95a0e1;
+    color: #95a0e1;
 }
 
 /* Common */
+
 .cm-str { color: #ca7d59; }   /* string */
 .cm-std { color: #d181d1; }   /* statements & declarations */
 .cm-kwd { color: #2194ce; }   /* keyword */
@@ -3579,408 +3728,431 @@ pre .line-gutter {
 /* Node Graph */
 
 .lexgraph {
-  overflow: hidden;
-  position: relative;
-  outline: none;
-  cursor: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAA4lJREFUWEftl1FIk1EUx/9qOGtNU4wkC1RQEc2hD9P5oigqH1PxIQqhgYI+iHtIE0ZQKoZo6BDniFScsIcgCSEILMPhJBRCh6G+qKSopHy2iVnOudniyDdZY3NTJ/rghcvGuPvO7/zP/557Pz+c8/A75/i4cAAERNPGzTMXyFEBfwAB6+vrqoiIiMcA9gFYzhrEEeAKgKC1tbX6nZ2dh3t7e3UJCQnvAJgBWM8KxBkgWKvV3g8KCnoZFxfHZ1l2fHV1tS4vL+8rgD1OFZ+WxREgAMCN0tLSex0dHR9DQkJ4ra2tkMlkFoPBoGppaWlTqVQGrix/fUXhCEDfQwDcMRqNY9nZ2YKpqSkkJydDoVBYExMTN7a3t5vi4+M1AHZ9VRbnbXgdQOTs7OzbtrY2YV9f32GiUqkU7e3tFpPJNL6ystKckZExyvmDzHri4QxwFUDE2NhYvV6vL5HJZIHOT6ay1NTU2FiW7RoYGFBUVVWtnKYszgAU8KZarS5JSkpqEIlEfFepRUdHo7e3dzclJWVrc3NTERMT8/qkZXEGICOGSSQSYX9//yCfz6et6XYUFxdDrVbTNp1YWlpqT01NHTxuWZwB7Ea8y7LsF4ZhgicnJ90C8Hg8ZGZmQiwWo6GhAQaD4VV4ePgTDoK6qcfh6iw4MOL09PSbzs7O1O7u7v8eEhsbC4lEgtzcXLNYLPa32WyW5eXlaaPR+Hlubm64srJyAsAOAK+2qisAMuItnU73fH5+/lF5efmhEaurq9HY2GhZWFhYWlxcnNRqtd9UKtUsgF8AqEf8BLDF+eHEClDA8J6engcikahJKBReIwnS0tIwMjKyL5fLXyiVSqoLBfrDZWsCQJMyt/cIj/LTAlcKkBFDs7KykoaGhoYDAwPpkIJOp9u1Wq0fcnJyOgFscFlTMGrRdFbQpJ7glfR2OlcAjkbUMQwTWlBQgLKystWoqCgpgGVObsqYgh4roLMs7i4kZMTbMzMzGqVSmdbV1UXt+Gltbe17AD8A/PbVweQO4MCIo6OjcoFAIDWbzZ/S09ObAVDX2+Rk96rGnha5AyAjhmk0msL8/PxnDMOU6fX67wBYzmxeOdxTcHcmpN/JiILCwsLIiooKcVFR0TCX+bavpD/KhHYwHt2QAFA7JqfbHe9NYl6vOepWfHBHBECftL1o+kx6Twp4ncFpF16494LTJnTs/18qcKnAPygqQzAAgQjBAAAAAElFTkSuQmCC) 4 4, auto !important;
+    overflow: hidden;
+    position: relative;
+    outline: none;
+    cursor: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAA4lJREFUWEftl1FIk1EUx/9qOGtNU4wkC1RQEc2hD9P5oigqH1PxIQqhgYI+iHtIE0ZQKoZo6BDniFScsIcgCSEILMPhJBRCh6G+qKSopHy2iVnOudniyDdZY3NTJ/rghcvGuPvO7/zP/557Pz+c8/A75/i4cAAERNPGzTMXyFEBfwAB6+vrqoiIiMcA9gFYzhrEEeAKgKC1tbX6nZ2dh3t7e3UJCQnvAJgBWM8KxBkgWKvV3g8KCnoZFxfHZ1l2fHV1tS4vL+8rgD1OFZ+WxREgAMCN0tLSex0dHR9DQkJ4ra2tkMlkFoPBoGppaWlTqVQGrix/fUXhCEDfQwDcMRqNY9nZ2YKpqSkkJydDoVBYExMTN7a3t5vi4+M1AHZ9VRbnbXgdQOTs7OzbtrY2YV9f32GiUqkU7e3tFpPJNL6ystKckZExyvmDzHri4QxwFUDE2NhYvV6vL5HJZIHOT6ay1NTU2FiW7RoYGFBUVVWtnKYszgAU8KZarS5JSkpqEIlEfFepRUdHo7e3dzclJWVrc3NTERMT8/qkZXEGICOGSSQSYX9//yCfz6et6XYUFxdDrVbTNp1YWlpqT01NHTxuWZwB7Ea8y7LsF4ZhgicnJ90C8Hg8ZGZmQiwWo6GhAQaD4VV4ePgTDoK6qcfh6iw4MOL09PSbzs7O1O7u7v8eEhsbC4lEgtzcXLNYLPa32WyW5eXlaaPR+Hlubm64srJyAsAOAK+2qisAMuItnU73fH5+/lF5efmhEaurq9HY2GhZWFhYWlxcnNRqtd9UKtUsgF8AqEf8BLDF+eHEClDA8J6engcikahJKBReIwnS0tIwMjKyL5fLXyiVSqoLBfrDZWsCQJMyt/cIj/LTAlcKkBFDs7KykoaGhoYDAwPpkIJOp9u1Wq0fcnJyOgFscFlTMGrRdFbQpJ7glfR2OlcAjkbUMQwTWlBQgLKystWoqCgpgGVObsqYgh4roLMs7i4kZMTbMzMzGqVSmdbV1UXt+Gltbe17AD8A/PbVweQO4MCIo6OjcoFAIDWbzZ/S09ObAVDX2+Rk96rGnha5AyAjhmk0msL8/PxnDMOU6fX67wBYzmxeOdxTcHcmpN/JiILCwsLIiooKcVFR0TCX+bavpD/KhHYwHt2QAFA7JqfbHe9NYl6vOepWfHBHBECftL1o+kx6Twp4ncFpF16494LTJnTs/18qcKnAPygqQzAAgQjBAAAAAElFTkSuQmCC) 4 4, auto !important;
 }
 
 .lexgraph .lexdropdown ul {
-  max-height: unset;
+    max-height: unset;
 }
 
-.lexgraph .lexgraphnodes, .lexgraph .lexgraphlinks {
-  width: 100%;
-  height: 100%;
-  position: absolute;
+.lexgraph .lexgraphnodes,
+.lexgraph .lexgraphlinks {
+    width: 100%;
+    height: 100%;
+    position: absolute;
 }
 
 .lexgraph .lexgraphlinks {
-  pointer-events: none;
+    pointer-events: none;
 }
 
 .lexgraph .lexgraphlinks path {
-  stroke-width: 3px;
-  stroke-opacity: 0.9;
+    stroke-width: 3px;
+    stroke-opacity: 0.9;
 }
 
 .lexgraph .lexgraphlinks path.running {
-  stroke-dasharray: 5px;
-  stroke-linecap: round;
-  stroke-dashoffset: 50;
-  animation: dash 1s linear;
-  animation-iteration-count: infinite;
+    stroke-dasharray: 5px;
+    stroke-linecap: round;
+    stroke-dashoffset: 50;
+    animation: dash 1s linear;
+    animation-iteration-count: infinite;
 }
 
 @keyframes dash {
-  to {
-    stroke-dashoffset: 0;
-  }
+    to {
+        stroke-dashoffset: 0;
+    }
 }
 
 .lexgraph svg {
-  position: absolute;
-  overflow: visible;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
+    position: absolute;
+    overflow: visible;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
 }
 
 .lexgraph .box-selection-svg {
-  stroke-width: 3px;
-  stroke: var(--global-selected);
-  border-radius: 8px;
-  fill: var(--global-selected);
-  fill-opacity: 0.2;
+    stroke-width: 3px;
+    stroke: var(--global-selected);
+    border-radius: 8px;
+    fill: var(--global-selected);
+    fill-opacity: 0.2;
 }
 
 .lexgraph .box-selection-svg.removing {
-  stroke-dasharray: 6px;
-  stroke-linecap: round;
+    stroke-dasharray: 6px;
+    stroke-linecap: round;
 }
 
 .lexgraphnode {
-  position: absolute;
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
-  cursor: pointer;
-  min-width: 96px;
-  min-height: 32px;
-  border-radius: 10px;
-  
-  /* background-color: rgba(var(--graphnode-background), 0.75); */
-  background: linear-gradient(15deg, #161616da 10%, #080808da);
-  background-color: unset; background-origin: border-box;
+    position: absolute;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: pointer;
+    min-width: 96px;
+    min-height: 32px;
+    border-radius: 10px;
 
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-  border: 3px solid var(--global-color-transparent);
-  transition: border 0.05s linear;
-  padding: 4px;
+    /* background-color: rgba(var(--graphnode-background), 0.75); */
+    background: linear-gradient(15deg, #161616da 10%, #080808da);
+    background-color: unset;
+    background-origin: border-box;
+
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    border: 3px solid var(--global-color-transparent);
+    transition: border 0.05s linear;
+    padding: 4px;
 }
 
 .lexgraphnode.math {
-  background: linear-gradient(15deg, #0687d1da 10%, #00ffccda);
-  background-color: unset; background-origin: border-box;
+    background: linear-gradient(15deg, #0687d1da 10%, #00ffccda);
+    background-color: unset;
+    background-origin: border-box;
 }
 
 .lexgraphnode.logic {
-  background: linear-gradient(15deg, #FB4D3Dda 10%, #A74482da);
-  background-color: unset; background-origin: border-box;
+    background: linear-gradient(15deg, #FB4D3Dda 10%, #A74482da);
+    background-color: unset;
+    background-origin: border-box;
 }
 
 .lexgraphnode.inputs {
-  background: linear-gradient(15deg, #84e100da 10%, #79a095da);
-  background-color: unset; background-origin: border-box;
+    background: linear-gradient(15deg, #84e100da 10%, #79a095da);
+    background-color: unset;
+    background-origin: border-box;
 }
 
 .lexgraphnode.variables {
-  background: linear-gradient(15deg, #f14343da 10%, #e7b88bda);
-  background-color: unset; background-origin: border-box;
+    background: linear-gradient(15deg, #f14343da 10%, #e7b88bda);
+    background-color: unset;
+    background-origin: border-box;
 }
 
 .lexgraphnode.events {
-  background: linear-gradient(15deg, #ec49d7da 10%, #8dc0b8da);
-  background-color: unset; background-origin: border-box;
+    background: linear-gradient(15deg, #ec49d7da 10%, #8dc0b8da);
+    background-color: unset;
+    background-origin: border-box;
 }
 
 .lexgraphnode.function {
-  background: linear-gradient(15deg, #d19b06da 10%, #ff7b00da);
-  background-color: unset; background-origin: border-box;
+    background: linear-gradient(15deg, #d19b06da 10%, #ff7b00da);
+    background-color: unset;
+    background-origin: border-box;
 }
 
 .lexgraphnode.selected {
-  border: 3px solid var(--global-selected-dark);
-  border: 3px solid #ffc107;
-  box-shadow: 0 2px 6px 0 rgba(0,0,0,.14);
+    border: 3px solid var(--global-selected-dark);
+    border: 3px solid #ffc107;
+    box-shadow: 0 2px 6px 0 rgba(0, 0, 0, .14);
 }
 
-.lexgraphnode .lexgraphnodeheader, .lexgraphnode .lexgraphnodeproperties {
-  font-family: var(--global-title-font);
-  font-weight: 600;
-  font-size: 13px;
-  color: #d9d9e3;
-  text-shadow: 0px 0px 2px #1b1b1bdc;
-  border-bottom: 1px solid #ffffff46;
-  margin-bottom: 2px;
-  pointer-events: none;
-  text-align: -webkit-center;
-  text-align: center;
-  margin-left: -7px;
-  width: calc(100% + 14px);
+.lexgraphnode .lexgraphnodeheader,
+.lexgraphnode .lexgraphnodeproperties {
+    font-family: var(--global-title-font);
+    font-weight: 600;
+    font-size: 13px;
+    color: #d9d9e3;
+    text-shadow: 0px 0px 2px #1b1b1bdc;
+    border-bottom: 1px solid #ffffff46;
+    margin-bottom: 2px;
+    pointer-events: none;
+    text-align: -webkit-center;
+    text-align: center;
+    margin-left: -7px;
+    width: calc(100% + 14px);
 }
 
-.lexgraphnode.selected .lexgraphnodeheader, .lexgraphnode.selected .lexgraphnodeproperties {
-  margin-left: -4px;
-  width: calc(100% + 8px);
+.lexgraphnode.selected .lexgraphnodeheader,
+.lexgraphnode.selected .lexgraphnodeproperties {
+    margin-left: -4px;
+    width: calc(100% + 8px);
 }
 
 .lexgraphnode .lexgraphnodeproperties {
-  pointer-events: all;
+    pointer-events: all;
 }
 
 .lexgraphnode .lexgraphnodeios {
-  display: flex;
-  pointer-events: none;
+    display: flex;
+    pointer-events: none;
 }
 
 .lexgraphnode .lexgraphnodeios .lexgraphnodeinputs {
-  margin-right: 6px;
+    margin-right: 6px;
 }
 
 .lexgraphnode .lexgraphnodeios .lexgraphnodeoutputs {
-  margin-left: 6px;
+    margin-left: 6px;
 }
 
 .lexgraphnode .lexgraphnodeio {
-  font-family: var(--global-title-font);
-  font-weight: 600;
-  font-size: 10px;
-  color: #d9d9e3;
-  text-shadow: 0px 1px 6px #22222283;
-  display: flex;
-  min-height: 18px;
+    font-family: var(--global-title-font);
+    font-weight: 600;
+    font-size: 10px;
+    color: #d9d9e3;
+    text-shadow: 0px 1px 6px #22222283;
+    display: flex;
+    min-height: 18px;
 }
 
 .lexgraphnode .lexgraphnodeio.iooutput {
-  justify-content: right;
+    justify-content: right;
 }
 
 .lexgraphnode .lexgraphnodeio .io__type {
-  font-size: 7px;
-  font-weight: 700;
-  line-height: 10px;
-  min-width: 11px;
-  max-width: 11px;
-  min-height: 10px;
-  max-height: 10px;
-  background-color: #afafaf;
-  align-self: center;
-  margin-right: 3px;
-  border-radius: 3px;
-  padding-top: 1px;
-  text-align: -webkit-center;
-  text-align: center;
-  border: 1px solid #afafaf6b;
-  color: var(--global-color-primary);
-  pointer-events: all;
+    font-size: 7px;
+    font-weight: 700;
+    line-height: 10px;
+    min-width: 11px;
+    max-width: 11px;
+    min-height: 10px;
+    max-height: 10px;
+    background-color: #afafaf;
+    align-self: center;
+    margin-right: 3px;
+    border-radius: 3px;
+    padding-top: 1px;
+    text-align: -webkit-center;
+    text-align: center;
+    border: 1px solid #afafaf6b;
+    color: var(--global-color-primary);
+    pointer-events: all;
 }
 
 .lexgraphnode .lexgraphnodeio .io__type span {
-  pointer-events: none;
+    pointer-events: none;
 }
 
 .lexgraphnode .lexgraphnodeio .io__typedesc {
-  position: absolute;
-  margin-left: -30px;
-  font-weight: 600;
-  margin-top: 3px;
-  background-color: #afafaf;
-  color: var(--global-color-primary);
-  font-size: 8px;
-  border-radius: 4px;
-  width: 28px;
-  text-align: center;
-  opacity: 0;
-  transition: opacity ease-in 0.1s;
+    position: absolute;
+    margin-left: -30px;
+    font-weight: 600;
+    margin-top: 3px;
+    background-color: #afafaf;
+    color: var(--global-color-primary);
+    font-size: 8px;
+    border-radius: 4px;
+    width: 28px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity ease-in 0.1s;
 }
 
 .lexgraphnode .lexgraphnodeio .io__typedesc.output {
-  margin-right: -30px;
+    margin-right: -30px;
 }
 
 .lexgraphnode .lexgraphnodeio .io__type.vec2,
-.lexgraphnode .lexgraphnodeio .io__typedesc.vec2 { background-color: #ecea4c; }
+.lexgraphnode .lexgraphnodeio .io__typedesc.vec2 {
+    background-color: #ecea4c;
+}
+
 .lexgraphnode .lexgraphnodeio .io__type.vec3,
-.lexgraphnode .lexgraphnodeio .io__typedesc.vec3 { background-color: #ee87e5; }
+.lexgraphnode .lexgraphnodeio .io__typedesc.vec3 {
+    background-color: #ee87e5;
+}
+
 .lexgraphnode .lexgraphnodeio .io__type.vec4,
-.lexgraphnode .lexgraphnodeio .io__typedesc.vec4 { background-color: #9d56d8; }
+.lexgraphnode .lexgraphnodeio .io__typedesc.vec4 {
+    background-color: #9d56d8;
+}
+
 .lexgraphnode .lexgraphnodeio .io__type.string,
-.lexgraphnode .lexgraphnodeio .io__typedesc.string { background-color: #79cc9c; }
+.lexgraphnode .lexgraphnodeio .io__typedesc.string {
+    background-color: #79cc9c;
+}
+
 .lexgraphnode .lexgraphnodeio .io__type.mat,
-.lexgraphnode .lexgraphnodeio .io__typedesc.mat { background-color: #56a8d8; }
+.lexgraphnode .lexgraphnodeio .io__typedesc.mat {
+    background-color: #56a8d8;
+}
 
 .lexgraphnode .lexgraphnodeio .io__name {
-  margin-top: 2px;
+    margin-top: 2px;
 }
 
 .lexgraphnode .lexgraphnodeio .io__type.output {
-  margin-right: unset;
-  margin-left: 3px;
+    margin-right: unset;
+    margin-left: 3px;
 }
 
 .lexgraphnode .lexgraphnodeio:hover .io__typedesc {
-  opacity: 1;
+    opacity: 1;
 }
 
 .lexgraphnode .lexgraphnodeio .io__type:hover {
-  filter: brightness(1.2);
+    filter: brightness(1.2);
 }
 
 .lexgraphnode .lexgraphnodeio[data-active] .io__type:hover {
-  background-color: rgba(255, 58, 58, 0.829);
+    background-color: rgba(255, 58, 58, 0.829);
 }
 
 .lexgraphnode .lexgraphnodeio[data-active] .io__type:hover span {
-  display: none;
+    display: none;
 }
 
 .lexgraphnode .lexgraphnodeio[data-active] .io__type:hover::after {
-  content: 'X';
+    content: 'X';
 }
 
 .lexgraphnode .lexgraphnodeio[data-active] .io__type {
-  filter: brightness(1.4);
+    filter: brightness(1.4);
 }
 
 .lexgraph .lexgraphpropdialog {
-  transform: translateY(-96px);
+    transform: translateY(-96px);
 }
 
 .lexgraph .lexgraphpropdialog.opened {
-  transform: translateY(0px);
+    transform: translateY(0px);
 }
 
 .lexgraph .lexgraphgroups {
-  z-index: 1;
+    z-index: 1;
 }
 
 .lexgraphgroup {
-  position: absolute;
-  -webkit-user-select: none; /* Safari 3.1+ */
-  -moz-user-select: none; /* Firefox 2+ */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
-  cursor: pointer;
-  min-width: 96px;
-  min-height: 32px;
-  border-radius: 8px;
-  
-  background: linear-gradient(35deg, #949292 10%, #a7c4bd);
-  background-color: unset; background-origin: border-box;
+    position: absolute;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: pointer;
+    min-width: 96px;
+    min-height: 32px;
+    border-radius: 8px;
 
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-  border: 1px solid var(--global-text-primary);
-  transition: border 0.05s linear;
-  opacity: 0.5;
+    background: linear-gradient(35deg, #949292 10%, #a7c4bd);
+    background-color: unset;
+    background-origin: border-box;
+
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    border: 1px solid var(--global-text-primary);
+    transition: border 0.05s linear;
+    opacity: 0.5;
 }
 
 .lexgraphgroup .lexgraphgrouptitle {
-  font-size: 14px;
-  margin: 8px;
-  color: var(--global-color-primary);
-  font-family: var(--global-title-font);
-  font-weight: 600;
-  outline: none;
-  border: none;
-  background: none;
-  max-width: 128px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  border-bottom: 1px solid var(--global-color-primary);
+    font-size: 14px;
+    margin: 8px;
+    color: var(--global-color-primary);
+    font-family: var(--global-title-font);
+    font-weight: 600;
+    outline: none;
+    border: none;
+    background: none;
+    max-width: 128px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    border-bottom: 1px solid var(--global-color-primary);
 }
 
 .lexgraphgroup .lexgraphgrouptitle:disabled {
-  pointer-events: none;
-  border: none;
+    pointer-events: none;
+    border: none;
 }
 
 .lexgraphgroup .lexgraphgroupresizer {
-  position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 12px;
-  height: 12px;
-  border-bottom: 2px solid var(--global-color-primary);
-  border-right: 2px solid var(--global-color-primary);
-  border-bottom-right-radius: 8px;
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    border-bottom: 2px solid var(--global-color-primary);
+    border-right: 2px solid var(--global-color-primary);
+    border-bottom-right-radius: 8px;
 }
 
 .lexgraphgroup .lexgraphgroupresizer:hover {
-  border-bottom: 2px solid #4b4b4ba8;
-  border-right: 2px solid #4b4b4ba8;
+    border-bottom: 2px solid #4b4b4ba8;
+    border-right: 2px solid #4b4b4ba8;
 }
 
 .grapharea .graph-title button {
-  font-size: 16px;
-  font-family: var(--global-title-font);
-  font-weight: 600;
-  color: var(--global-text);
+    font-size: 16px;
+    font-family: var(--global-title-font);
+    font-weight: 600;
+    color: var(--global-text-primary);
 }
 
 /* Video Editor */
 
 .lexvideoeditor {
-  display: flex;
-  justify-content: center;
+    display: flex;
+    justify-content: center;
 }
 
 .lexvideoeditor video {
-  width: 100%;
-  height: 100%;
-}
-
-.lexarea.lexvideoeditor {
- 
+    width: 100%;
+    height: 100%;
 }
 
 .lexvideoeditor .lexarea .lexflexarea {
-  display: flex;
-  justify-content: center;
-  padding: 4px 0px;
+    display: flex;
+    justify-content: center;
+    padding: 4px 0px;
 }
 
 .lexvideoeditor .lexconstrolsarea {
-  /* background-color: var(--global-branch-darker); */
-  /* padding: 5px;
+    /* background-color: var(--global-branch-darker); */
+    /* padding: 5px;
   margin: 10px; */
-  /* width: calc(100% - 30px)!important; */
-  min-height: 88px!important;
-  border-radius: 8px;
-  display: flex;
-  align-content: center;
-  flex-direction: column;
-  justify-content: center;
+    /* width: calc(100% - 30px)!important; */
+    min-height: 88px !important;
+    border-radius: 8px;
+    display: flex;
+    align-content: center;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .lexvideoeditor .lexcontrolspanel {
-  background-color: var(--global-branch-darker);
-  margin: 0;
-  display: flex;
-  align-content: center;
-  width: 100%!important;
+    background-color: var(--global-branch-darker);
+    margin: 0;
+    display: flex;
+    align-content: center;
+    width: 100% !important;
 }
 
 .lexvideoeditor .lexcontrolspanel.lextime {
-  width: auto!important;
-  border-radius: 5px;
+    width: auto !important;
+    border-radius: 5px;
 }
 
 .lexvideoeditor .lextimebar {
-  width: 100%;
-  height: inherit;
+    width: 100%;
+    height: inherit;
 }
 
 .lexvideoeditor .lexwidget.nobranch {
-  padding: 0;
-  width: 100%!important;
+    padding: 0;
+    width: 100% !important;
 }
+
 .lexvideoeditor .lextext {
-  padding-left: 0;
-  padding: 6px;
+    padding-left: 0;
+    padding: 6px;
 }
 
 .lexvideoeditor .lexbar {
-  height: 40px!important;
-  margin: 5px 10px;
-  padding: 5px;
-  width: calc(100% - 40px)!important;
+    height: 40px !important;
+    margin: 5px 10px;
+    padding: 5px;
+    width: calc(100% - 40px) !important;
 }
+
 /* .lexvideoeditor .lexvideotimebar {
   width: calc(100% - 40px);
   height: 100%;
@@ -3994,6 +4166,13 @@ pre .line-gutter {
 }  */
 
 .resizeable {
-  resize: both;
-  overflow: auto;
+    resize: both;
+    overflow: auto;
 }
+
+/* @media (prefers-color-scheme: light) {
+
+    .lexarea {
+        background-color: var(--global-color-primary);
+    }
+} */
