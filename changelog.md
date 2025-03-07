@@ -6,6 +6,7 @@ CodeEditor:
 - Support C and CMake highlight.
 - Support C/C++ header files highlighting.
 
+Support `options.skipRoot` on LX.init.
 Support lock aspect ratio in Panel.addSize
 Improved CSS for overlay buttons `Area.addOverlayButtons`.
 Minor CSS general changes.

@@ -552,6 +552,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
      * @param {Object} options
      * container: Root location for the gui (default is the document body)
      * id: Id of the main area
+     * skipRoot: Skip adding LX root container
      * skipDefaultArea: Skip creation of main area
      */
 
@@ -585,7 +586,11 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         this.global_search = create_global_searchbar( this.container );
 
         this.container.appendChild( modal );
-        this.container.appendChild( root );
+
+        if( !options.skipRoot )
+        {
+            this.container.appendChild( root );
+        }
 
         // Disable drag icon
         root.addEventListener( 'dragover', function( e ) {
@@ -868,6 +873,10 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
          * width: Width of the area element [fit space]
          * height: Height of the area element [fit space]
          * skipAppend: Create but not append to GUI root [false]
+         * minWidth: Minimum width to be applied when resizing
+        * minHeight: Minimum height to be applied when resizing
+        * maxWidth: Maximum width to be applied when resizing
+        * maxHeight: Maximum height to be applied when resizing
          */
 
         constructor( options = {} ) {
@@ -3337,6 +3346,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
          * className: Add class to the element
          * width: Width of the panel element [fit space]
          * height: Height of the panel element [fit space]
+         * style: CSS Style object to be applied to the panel
          */
 
         constructor( options = {} )  {
@@ -6110,11 +6120,12 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         /**
          * @method addPad
          * @param {String} name Widget name
-         * @param {Number} value Pad value
+         * @param {Array} value Pad value
          * @param {Function} callback Callback function on change
          * @param {*} options:
          * disabled: Make the widget disabled [false]
          * min, max: Min and Max values
+         * padSize: Size of the pad (css)
          * onPress: Callback function on mouse down
          * onRelease: Callback function on mouse up
          */
