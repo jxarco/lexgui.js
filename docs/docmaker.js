@@ -1,5 +1,10 @@
 // @jxarco
 
+const KEY_WORDS = ['var', 'let', 'const', 'static', 'function', 'null', 'undefined', 'new', 'delete', 'true', 'false', 'NaN'];
+const STATEMENT_WORDS = ['for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'import', 'from'];
+const HTML_ATTRIBUTES = ['html', 'charset', 'rel', 'src', 'href', 'crossorigin', 'type', 'lang'];
+const HTML_TAGS = ['html', 'DOCTYPE', 'head', 'meta', 'title', 'link', 'script', 'body', 'style'];
+
 function MAKE_LINE_BREAK()
 {
     document.body.appendChild( document.createElement('br') );
@@ -22,19 +27,115 @@ function MAKE_PARAGRAPH( string, sup )
     document.body.appendChild( paragraph );
 }
 
-function MAKE_CODE( string )
+function MAKE_CODE( text )
 {
-    console.assert(string);
+    console.assert(text);
 
-    string.replaceAll('<', '&lt;');
-    string.replaceAll('>', '&gt;');
+    text.replaceAll('<', '&lt;');
+    text.replaceAll('>', '&gt;');
+
+    let highlight = "";
+    let content = "";
+
+    const getHTML = ( h, c ) => {
+        return `<span class="${ h }">${ c }</span>`;
+    };
+
+    for( let i = 0; i < text.length; ++i )
+    {
+        const char = text[ i ];
+        const string = text.substr( i );
+
+        const endLineIdx = string.indexOf( '\n' );        
+        const line = string.substring( 0, endLineIdx > -1 ? endLineIdx : undefined );
+        
+        if( char == '@' )
+        {
+            const str = line.substr( 1 );
+            
+            if ( !( str.indexOf( '@' ) > -1 ) && !( str.indexOf( '[' ) > -1 ) )
+            {
+                continue;
+            }
+
+            let html = null;
+
+            const tagIndex = str.indexOf( '@' );
+
+            // Highlight is specified
+            if( text[ i + 1 ] == '[' )
+            {
+                highlight = str.substr( 1, 3 );
+                content = str.substring( 5, tagIndex );
+
+                const skipTag = ( str[ tagIndex - 1 ] == '|' );
+
+                if( skipTag )
+                {
+                    const newString = str.substring( 6 + content.length );
+                    const preContent = content;
+                    const postContent = newString.substring( 0, newString.indexOf( '@' ) );
+                    const finalContent = preContent.substring( 0, preContent.length - 1 ) + '@' + postContent;
+                    html = getHTML( highlight, finalContent );
+
+                    const ogContent = preContent + '@' + postContent;
+                    text = text.replace( `@[${ highlight }]${ ogContent }@`, html );
+                }
+                else
+                {
+                    html = getHTML( highlight, content );
+                    text = text.replace( `@[${ highlight }]${ content }@`, html );
+                }
+            }
+            else
+            {
+                content = str.substring( 0, tagIndex );
+
+                // if( str[ tagIndex - 1 ] == '|' )
+                // {
+                //     content = str.substring( tagIndex, str.indexOf( '@' ) );
+                // }
+
+                if( KEY_WORDS.includes( content ) )
+                {
+                    highlight = "kwd";    
+                }
+                else if( STATEMENT_WORDS.includes( content ) )
+                {
+                    highlight = "lit";    
+                }
+                else if( HTML_TAGS.includes( content ) )
+                {
+                    highlight = "tag";    
+                }
+                else if( HTML_ATTRIBUTES.includes( content ) )
+                {
+                    highlight = "atn";    
+                }
+                else if( parseFloat( content ) != NaN )
+                {
+                    highlight = "dec";    
+                }
+                else
+                {
+                    console.error( "ERROR[Code Parsing]: Unknown highlight type: " + content );
+                    return;
+                }
+
+                html = getHTML( highlight, content );
+                text = text.replace( `@${ content }@`, html );
+            }
+
+            i += ( html.length - 1 );
+        }
+    }
     
     let pre = document.createElement('pre');
     let code = document.createElement('code');
-    code.innerHTML = string;
+    code.innerHTML = text;
 
     let button = document.createElement('button');
-    button.title = "Copy";
+    button.title = "Copy code sample";
     button.innerHTML = `<i class="fa-regular fa-copy"></i>`;
     button.addEventListener('click', COPY_SNIPPET.bind(this, button));
 

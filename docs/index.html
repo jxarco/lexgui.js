@@ -3,8 +3,16 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Docs</title>
-    <link rel="stylesheet" href="https://cdn.skypack.dev/lexgui/build/lexgui.css">
+    <link rel="stylesheet" href="../build/lexgui.css">
     <link rel="icon" href="../images/icon.png"> 
+    <script type="importmap">
+        {
+          "imports": {
+            "lexgui": "../build/lexgui.module.js",
+            "lexgui/components/": "../build/components/"
+          }
+        }
+    </script>
     <style>
         iframe { border: none; }
     </style>
@@ -12,7 +20,7 @@
     <body></body>
     <script type="module">
 
-        import { LX } from 'https://cdn.skypack.dev/lexgui/build/lexgui.module.js';
+        import { LX } from 'lexgui';
 
         const mobile = navigator && /Android|iPhone/i.test(navigator.userAgent);
 

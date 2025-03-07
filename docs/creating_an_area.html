@@ -4,128 +4,130 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Docs</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
+    <link rel="stylesheet" crossorigin="anonymous" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
     <script type="text/javascript" src="docmaker.js"></script>
 </head>
 
 <body>
 
-    <script type="text/javascript">
+<script type="text/javascript">
 
-        MAKE_HEADER( "Creating an area", "h1", "area" );
-        MAKE_LINE_BREAK();
-                
-        MAKE_PARAGRAPH( `An <strong>Area</strong> is the main container used in lexgui.js. To append HTML elements to an area is enough to call <code class='inline'>Area.attach(content)</code>,
-        where <code class='inline'>content</code> could be different either any HTML element or instanced containers from LexGUI.` );
+    MAKE_HEADER( "Creating an area", "h1", "area" );
+            
+    MAKE_PARAGRAPH( `An <strong>Area</strong> is the main container used in lexgui.js. To append HTML elements to an area is enough to call <code class='inline'>Area.attach(content)</code>,
+    where <code class='inline'>content</code> could be different either any HTML element or instanced containers from LexGUI.` );
 
-        MAKE_PARAGRAPH( `From here, you can already build your UI adding <a href="panel.html">Panels</a>, but in most cases you will want to split the main Area first. 
-        You can have as many Areas you need using <code class='inline'>Area.split(options)</code>, which allows you to split horizontally or vertically a given Area:` );
-        MAKE_CODE_BULLET_LIST( [
-            ["type (String)", "Split mode, either horizontal (default) or vertical"],
-            ["sizes (Array/String)", "Size of each new area. Default is [&quot;50%&quot;, &quot;50%&quot;]. Using 'auto' will make a vertical split to resize automatically."],
-            ["resize (Bool)", "Allow area manual resizing. Default is 'true'"],
-            ["minimizable (Bool)", "Allow the area to be minimized. Default is 'false'"]
-        ] );
-        MAKE_CODE( `<span class="com">// Split main area in 2 sections (2 Areas)</span>
-<span class="kwd">let</span> [left, right] = area.split({ 
-    sizes: [<span class="str">"70%"</span>, <span class="str">"30%"</span>] 
+    MAKE_PARAGRAPH( `From here, you can already build your UI adding <a href="panel.html">Panels</a>, but in most cases you will want to split the main Area first. 
+    You can have as many Areas you need using <code class='inline'>Area.split(options)</code>, which allows you to split horizontally or vertically a given Area:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["type (String)", "Split mode, either horizontal (default) or vertical"],
+        ["sizes (Array/String)", "Size of each new area. Default is [&quot;50%&quot;, &quot;50%&quot;]. Using 'auto' will make a vertical split to resize automatically."],
+        ["resize (Bool)", "Allow area manual resizing. Default is 'true'"],
+        ["minimizable (Bool)", "Allow the area to be minimized. Default is 'false'"]
+    ] );
+    MAKE_CODE( `@[com]// Split main area in 2 sections (2 Areas)@
+@let@ [ left, right ] = area.@[mtd]split@({ 
+    sizes: [@[str]"70%"@, @[str]"30%"@] 
 });
-<span class="com">// Split again left area this time vertically</span>
-<span class="kwd">let</span> [leftUp, leftBottom] = leftArea.split({ 
-    type: <span class="str">"vertical"</span>, 
-    sizes: [<span class="str">"80vh"</span>, <span class="str">"20vh"</span>] 
+@[com]// Split again left area this time vertically@
+@let@ [ leftUp, leftBottom ] = leftArea.@[mtd]split@({ 
+type: @[str]"vertical"@, 
+    sizes: [@[str]"80vh"@, @[str]"20vh"@] 
 });` );
 
-        MAKE_HEADER( "Menubar", "h2", "menubar" );
+    MAKE_HEADER( "Menubar", "h2", "menubar" );
 
-        MAKE_PARAGRAPH( `You can build a <strong>Menubar</strong> element directly into any Area using ${INLINE_CODE("Area.addMenubar(callback, options)")}. 
-        To specify each of the menu entries, you should pass a <em>callback function</em> to be called when the Menubar is constructed. <strong>Callbacks will have a Menubar instance as parameter</strong>, 
-        so use ${INLINE_CODE("Menubar.add(entryPath, options)")} on that instance inside your callback to build each of the menu entries:` );
-        MAKE_CODE_BULLET_LIST( [
-            ["entryPath (String)", "The path menu/submenu/etc of each entry"],
-            "options (Object/Function)"
-        ] );
+    MAKE_PARAGRAPH( `You can build a <strong>Menubar</strong> element directly into any Area using ${INLINE_CODE("Area.addMenubar(callback, options)")}. 
+    To specify each of the menu entries, you should pass a <em>callback function</em> to be called when the Menubar is constructed. <strong>Callbacks will have a Menubar instance as parameter</strong>, 
+    so use ${INLINE_CODE("Menubar.add(entryPath, options)")} on that instance inside your callback to build each of the menu entries:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["entryPath (String)", "The path menu/submenu/etc of each entry"],
+        "options (Object/Function)"
+    ] );
 
-        MAKE_PARAGRAPH( `The different options to be set when adding elements to the Menubar are the following:` );
-        MAKE_CODE_BULLET_LIST( [
-            ["callback (Function)", "To be called when interacting with the entry"],
-            ["icon (String)", "(<a href='https://fontawesome.com/search'>Fontawesome</a>)"],
-            ["short (String)", "For key shortcuts"],
-            ["type (String)", "(checkbox)"],
-            ["checked (Boolean)", "for <em>checkbox</em> type"]
-        ] );
+    MAKE_PARAGRAPH( `The different options to be set when adding elements to the Menubar are the following:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["callback (Function)", "To be called when interacting with the entry"],
+        ["icon (String)", "(<a href='https://fontawesome.com/search'>Fontawesome</a>)"],
+        ["short (String)", "For key shortcuts"],
+        ["type (String)", "(checkbox)"],
+        ["checked (Boolean)", "for <em>checkbox</em> type"]
+    ] );
 
-        MAKE_PARAGRAPH( `Note: In case of no options rather than the callback, you can use ${INLINE_CODE("options")} as the ${INLINE_CODE("Function")} callback.`, true );
-        MAKE_CODE( `area.addMenubar( m =&gt; {
-    m.add( <span class="str">"Scene/Open Scene"</span> );
-    m.add( <span class="str">"Scene/New Scene"</span>, () =&gt; { console.log(<span class="str">"New scene created!"</span>) } );
-    m.add( <span class="str">"Scene/"</span> )<span class="com">; // This is a separator!</span>
-    m.add( <span class="str">"Scene/Open Recent/hello.scene"</span>);
-    m.add( <span class="str">"Scene/Open Recent/goodbye.scene"</span> );
-    m.add( <span class="str">"Project/Export/DAE"</span>, { short: <span class="str">"E"</span> } );
-    m.add( <span class="str">"Project/Export/GLTF"</span> );
-    m.add( <span class="str">"View/Show grid"</span>, { type: <span class="str">"checkbox"</span>, checked: <span class="lit">true</span>, 
-    callback: (v) => { 
-        console.log(<span class="str">"Show grid:"</span>, v);
-    }});
-    m.add( <span class="str">"Help/About"</span> );
-    m.add( <span class="str">"Help/Support"</span>, { callback: () =&gt; { 
-        console.log(<span class="str">"Support!"</span>) }, icon: <span class="str">"fa-solid fa-heart"</span> } );
+    MAKE_PARAGRAPH( `Note: In case of no options rather than the callback, you can use ${INLINE_CODE("options")} as the ${INLINE_CODE("Function")} callback.`, true );
+    MAKE_CODE( `area.@[mtd]addMenubar@( m =&gt; {
+m.@[mtd]add@( @[str]"Scene/Open Scene"@ );
+m.@[mtd]add@( @[str]"Scene/New Scene"@, () =&gt; { console.@[mtd]log@(@[str]"New scene created!"@) } );
+m.@[mtd]add@( @[str]"Scene/"@ )@[com]; // This is a separator!@
+m.@[mtd]add@( @[str]"Scene/Open Recent/hello.scene"@);
+m.@[mtd]add@( @[str]"Scene/Open Recent/goodbye.scene"@ );
+m.@[mtd]add@( @[str]"Project/Export/DAE"@, { short: @[str]"E"@ } );
+m.@[mtd]add@( @[str]"Project/Export/GLTF"@ );
+m.@[mtd]add@( @[str]"View/Show grid"@, { type: @[str]"checkbox"@, checked: @true@, 
+callback: (v) => { 
+    console.@[mtd]log@(@[str]"Show grid:"@, v);
+}});
+m.@[mtd]add@( @[str]"Help/About"@ );
+m.@[mtd]add@( @[str]"Help/Support"@, { callback: () =&gt; { 
+    console.@[mtd]log@(@[str]"Support!"@) }, icon: @[str]"fa-solid fa-heart"@ } );
 });` );
 
-        MAKE_PARAGRAPH( `The Menubar creation can be configured too, where the following ${INLINE_CODE("options")} are available when calling ${INLINE_CODE("Area.addMenubar(callback, options)")}:` );
-        MAKE_CODE_BULLET_LIST( [
-            ["float (String)", "Justify main entries to left (default), center, right"]
-        ] );
-        MAKE_CODE( `area.addMenubar( <span class="hljs-function"><span class="hljs-params">m</span> =&gt;</span> {
-    <span class="com">// Fill entries...</span>
-}, { <span class="hljs-attr">float</span>: <span class="str">"center"</span> });` );
+    MAKE_PARAGRAPH( `The Menubar creation can be configured too, where the following ${INLINE_CODE("options")} are available when calling ${INLINE_CODE("Area.addMenubar(callback, options)")}:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["float (String)", "Justify main entries to left (default), center, right"]
+    ] );
+    MAKE_CODE( `area.@[mtd]addMenubar@( m =&gt; {
+    @[com]// Fill entries...@
+}, { float: @[str]"center"@ });` );
 
-        MAKE_HEADER( "Menubar Buttons", "h3", "menubar-buttons" );
+    MAKE_HEADER( "Menubar Buttons", "h3", "menubar-buttons" );
 
-        MAKE_PARAGRAPH( `Inside the menubar creation callback, you can add a group of buttons to be added to your menubar using ${INLINE_CODE("Area.addButtons(callback, options)")}:` );
-        MAKE_CODE( `m.addButtons( [
-    {
-        title: <span class="str">"Play"</span>,
-        icon: <span class="str">"fa-solid fa-play"</span>,
-        callback:  (domEl) => { 
-            domEl.classList.toggle(<span class="str">"fa-play"</span>);
-            domEl.classList.toggle(<span class="str">"fa-stop"</span>);
-        }
-    },
-    {
-        title: <span class="str">"Pause"</span>,
-        icon: <span class="str">"fa-solid fa-pause"</span>,
-        disabled: <span class="lit">true</span>,
-        callback:  (domEl) => { }
-    },
-    {
-        icon: <span class="str">"fa-solid fa-magnifying-glass"</span>,
-        callback:  (domEl) => { }
+    MAKE_PARAGRAPH( `Inside the menubar creation callback, you can add a group of buttons to be added to your menubar using ${INLINE_CODE("Area.addButtons(callback, options)")}:` );
+    MAKE_CODE( `m.@[mtd]addButtons@( [
+{
+    title: @[str]"Play"@,
+    icon: @[str]"fa-solid fa-play"@,
+    callback:  (domEl) => { 
+        domEl.classList.@[mtd]toggle@(@[str]"fa-play"@);
+        domEl.classList.@[mtd]toggle@(@[str]"fa-stop"@);
     }
+},
+{
+    title: @[str]"Pause"@,
+    icon: @[str]"fa-solid fa-pause"@,
+    disabled: @true@,
+    callback:  (domEl) => { }
+},
+{
+    icon: @[str]"fa-solid fa-magnifying-glass"@,
+    callback:  (domEl) => { }
+}
 ]);` );
 
-        MAKE_HEADER( "Menubar Icons and Logos", "h3", "menubar-icons" );
+    MAKE_HEADER( "Menubar Icons and Logos", "h3", "menubar-icons" );
 
-        MAKE_PARAGRAPH( `Inside the menubar creation callback, you can add an icon and/or a logo button to be added to your menubar using ${INLINE_CODE("Area.setButtonIcon(title, src, callback, options)")}:` );
-        MAKE_CODE( `m.setButtonIcon(<span class="str">"Github"</span>, <span class="str">"fa-brands fa-github"</span>, () => { 
-    window.open(<span class="str">"https://github.com/jxarco/lexgui.js/"</span>) 
+    MAKE_PARAGRAPH( `Inside the menubar creation callback, you can add an icon and/or a logo button to be added to your menubar using ${INLINE_CODE("Area.setButtonIcon(title, src, callback, options)")}:` );
+    MAKE_CODE( `m.@[mtd]setButtonIcon@(@[str]"Github"@, @[str]"fa-brands fa-github"@, () => { 
+    window.@[mtd]open@(@[str]"https://github.com/jxarco/lexgui.js/"@) 
 });` );
 
-        MAKE_PARAGRAPH( `and ${INLINE_CODE("Area.setButtonImage(title, src, callback, options)")}:` );
-        MAKE_CODE( `m.setButtonImage(<span class="str">"LexGUI"</span>, <span class="str">"path/image.png"</span>, <span class="kwd">null</span>, {float: <span class="str">"left"</span>});` );
+    MAKE_PARAGRAPH( `and ${INLINE_CODE("Area.setButtonImage(title, src, callback, options)")}:` );
+    MAKE_CODE( `m.@[mtd]setButtonImage@(@[str]"LexGUI"@, @[str]"path/image.png"@, @null@, { float: @[str]"left"@ });` );
 
-        MAKE_HEADER( "Searchbar for Menu Entries", "h3", "searchbar-for-menu-entries" );
+    MAKE_HEADER( "Searchbar for Menu Entries", "h3", "searchbar-for-menu-entries" );
 
-        MAKE_PARAGRAPH( `Pressing ${INLINE_CODE("Ctrl+Space")} you can open a search bar as a shortcut for any Menubar entry created in the whole UI.` );
+    MAKE_PARAGRAPH( `Pressing ${INLINE_CODE("Ctrl+Space")} you can open a search bar as a shortcut for any Menubar entry created in the whole UI.` );
 
-        MAKE_HEADER( "Sidebar", "h2", "sidebar" );
+    MAKE_HEADER( "Sidebar", "h2", "sidebar" );
 
-        MAKE_PARAGRAPH( `You can also build a <strong>Sidebar</strong> element directly into any Area using ${INLINE_CODE("Area.addSidebar(callback, options)")}. 
-        To specify each of the entries, you should pass a <em>callback function</em> to be called when the Sidebar is constructed. <strong>Callbacks will have a Sidebar instance as parameter</strong>, 
-        so use ${INLINE_CODE("Sidebar.add(entryName, options)")} on that instance inside your callback to build each of the entries.` );
+    MAKE_PARAGRAPH( `You can also build a <strong>Sidebar</strong> element directly into any Area using ${INLINE_CODE("Area.addSidebar(callback, options)")}. 
+    To specify each of the entries, you should pass a <em>callback function</em> to be called when the Sidebar is constructed. <strong>Callbacks will have a Sidebar instance as parameter</strong>, 
+    so use ${INLINE_CODE("Sidebar.add(entryName, options)")} on that instance inside your callback to build each of the entries.` );
 
-    </script>
+    MAKE_LINE_BREAK();
+    MAKE_LINE_BREAK();
+
+</script>
 
 </body>
 </html>

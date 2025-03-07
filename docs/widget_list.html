@@ -40,6 +40,7 @@
             "<a href='#color'>Color</a>",
             "<a href='#combo-buttons'>Combo Buttons</a>",
             "<a href='#curve'>Curve</a>",
+            "<a href='#custom'>Custom</a>",
             "<a href='#tree'>Data Tree</a>",
             "<a href='#dropdown'>Dropdown</a>",
             "<a href='#file'>File</a>",
@@ -82,8 +83,8 @@
                 ["innerValues (Array)", "Use dropdown mode and use values as options"],
             ]
         ] );
-        MAKE_CODE( `panel.addArray(<span class="str">"Array name"</span>, [<span class="str">"GPTeam"</span>, <span class="str">"Blat Panthers"</span>], (value, event) => {
-    console.log(value);
+        MAKE_CODE( `panel.@[mtd]addArray@(@[str]"Array name"@, [@[str]"GPTeam"@, @[str]"Blat Panthers"@], (value, event) => {
+    console.@[mtd]log@(value);
 });` );
 
         // Button
@@ -111,8 +112,8 @@
                 ["img (String)", "Path to image to show as button value"],
             ]
         ] );
-        MAKE_CODE( `panel.addButton(<span class="str">"A Button Name"</span>, <span class="str">"Print event"</span>, <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
-    <span class="hljs-built_in">console</span>.log(event);
+        MAKE_CODE( `panel.@[mtd]addButton@(@[str]"A Button Name"@, @[str]"Print event"@, (value, event) =&gt; {
+    console.@[mtd]log@(event);
 });` );
 
         // Checkbox
@@ -136,19 +137,19 @@
             ["options (Object)", "Basic options for a Widget"],
             [
                 ["disabled (Boolean)", "Make the widget disabled"],
-                ["suboptions (Function)", "Callback to add widgets shown if <code class='inline'><span class='lit'>true</span></code>"]
+                ["suboptions (Function)", "Callback to add widgets shown if <code class='inline'><span class='lit'>true@</code>"]
             ]
         ] );
-        MAKE_CODE( `panel.addCheckbox(<span class="str">"Toggle me"</span>, <span class="lit">true</span>, <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
-    <span class="hljs-built_in">console</span>.log(value);
+        MAKE_CODE( `panel.@[mtd]addCheckbox@(@[str]"Toggle me"@, @true@, (value, event) =&gt; {
+    console.@[mtd]log@(value);
 });
 
-<span class="com">// Suboptions in case checkbox is enabled</span>
-panel.addCheckbox(<span class="str">"Toggle me too"</span>, <span class="lit">true</span>, <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
-        <span class="hljs-built_in">console</span>.log(value);
-    }, { suboptions: <span class="hljs-function"><span class="hljs-params">p</span> =&gt;</span> {
-        p.addText(<span class="lit">null</span>, <span class="str">"Suboption 1"</span>);
-        p.addNumber(<span class="str">"Suboption 2"</span>, <span class="dec">12</span>);
+@[com]// Suboptions in case checkbox is enabled@
+panel.@[mtd]addCheckbox@(@[str]"Toggle me too"@, @true@, (value, event) =&gt; {
+        console.@[mtd]log@(value);
+    }, { suboptions: p =&gt; {
+        p.@[mtd]addText@(@null@, @[str]"Suboption 1"@);
+        p.@[mtd]addNumber@(@[str]"Suboption 2"@, @12@);
 } });` );
 
         // Color
@@ -175,11 +176,11 @@ panel.addCheckbox(<span class="str">"Toggle me too"</span>, <span class="lit">tr
                 ["useRGB (Boolean)", "The callback returns color as Array[r, g, b] and not hex [<code class='inline'>false</code>]"]
             ]
         ] );
-        MAKE_CODE( `panel.addColor(<span class="str">"Font Color"</span>, [<span class="dec">1</span>, <span class="dec">0.1</span>, <span class="dec">0.6</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
-    <span class="hljs-built_in">console</span>.log(<span class="str">"Font Color: "</span>, value);
+        MAKE_CODE( `panel.@[mtd]addColor@(@[str]"Font Color"@, [@1@, @0.1@, @0.6@], (value, event) =&gt; {
+    console.@[mtd]log@(@[str]"Font Color: "@, value);
 });
 
-panel.addColor(<span class="str">"Background"</span>, <span class="str">"#b7a9b1"</span>);` );
+panel.@[mtd]addColor@(@[str]"Background"@, @[str]"#b7a9b1"@);` );
 
         // Combo Buttons
         MAKE_HEADER( "Combo Buttons", "h2", "combo-buttons" );
@@ -223,24 +224,24 @@ panel.addColor(<span class="str">"Background"</span>, <span class="str">"#b7a9b1
                 ["noSelection (Boolean)", "Buttons can be clicked, but they are not selectable [false]"],
             ]
         ] );
-        MAKE_CODE( `panel.addComboButtons(<span class="str">"Alignment"</span>, [
+        MAKE_CODE( `panel.@[mtd]addComboButtons@(@[str]"Alignment"@, [
     {
-        value: <span class="str">"left"</span>,
-        icon: <span class="str">"fa fa-align-left"</span>,
-        callback: <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
-            <span class="hljs-built_in">console</span>.log(value);
+        value: @[str]"left"@,
+        icon: @[str]"fa fa-align-left"@,
+        callback: (value, event) =&gt; {
+            console.@[mtd]log@(value);
         }
     }, {
-        value: <span class="str">"center"</span>,
-        icon: <span class="str">"fa fa-align-center"</span>,
-        callback: <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
-            <span class="hljs-built_in">console</span>.log(value);
+        value: @[str]"center"@,
+        icon: @[str]"fa fa-align-center"@,
+        callback: (value, event) =&gt; {
+            console.@[mtd]log@(value);
         }
     }, {
-        value: <span class="str">"right"</span>,
-        icon: <span class="str">"fa fa-align-right"</span>,
-        callback: <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
-            <span class="hljs-built_in">console</span>.log(value);
+        value: @[str]"right"@,
+        icon: @[str]"fa fa-align-right"@,
+        callback: (value, event) =&gt; {
+            console.@[mtd]log@(value);
         }
     }
 ]);` );
@@ -282,15 +283,69 @@ panel.addColor(<span class="str">"Background"</span>, <span class="str">"#b7a9b1
                 ["moveOutAction (Number)", "Clamp or delete points moved out of the curve (LX.CURVE_MOVEOUT_CLAMP, LX.CURVE_MOVEOUT_DELETE)"],
             ]
         ] );
-        MAKE_CODE( `<span class="kwd">const</span> opacityValues = [
-    [<span class="dec">0.2</span>, <span class="dec">0.35</span>],
-    [<span class="dec">0.42</span>, <span class="dec">0.9</span>],
-    [<span class="dec">0.55</span>, <span class="dec">0.67</span>],
-    [<span class="dec">1</span>, <span class="dec">1</span>]
+        MAKE_CODE( `@const@ opacityValues = [
+    [@0.2@, @0.35@],
+    [@0.42@, @0.9@],
+    [@0.55@, @0.67@],
+    [@1@, @1@]
 ];
-panel.addCurve(<span class="str">"Opacity"</span>, opacityValues, (value, event) => {
-    console.log(value);
+panel.@[mtd]addCurve@(@[str]"Opacity"@, opacityValues, (value, event) => {
+    console.@[mtd]log@(value);
 });` );
+
+        // Custom
+        MAKE_HEADER( "Custom", "h2", "custom" );
+        MAKE_PARAGRAPH( `Lexgui supports generating custom widgets based on specific object data. By calling ${INLINE_CODE("LX.ADD_CUSTOM_WIDGET( name, options )")}, you can register a new Panel method that will 
+        create the custom widgets.` );
+
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            LX.ADD_CUSTOM_WIDGET( 'Shader', {
+                icon: "fa-cube",
+                default: {
+                    'position': [0, 0],
+                    'velocity': [0, 0, 0],
+                    'color': [0, 0, 0, 0],
+                    'hexColor': '#000',
+                    'highRes': false
+                }
+            });
+
+            const shaderInstance = {
+                'hexColor': '#f5f505',
+                'highRes': true
+            };
+
+            panel.addShader( "PBR Shader", shaderInstance, (instance) => { console.log(instance) } );
+            panel.addShader( "Empty", null );
+            document.body.appendChild( area.root );
+        }
+
+        MAKE_PARAGRAPH( `Once the widget has been registered, call ${INLINE_CODE("Panel.add^WidgetName(name, value, callback)")} to add the custom Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name (String)", "Widget name"],
+            ["value (Object)", "The new instance data"],
+            ["callback (Function)", "Function called when the instance changes"]
+        ] );
+        MAKE_CODE( `LX.@[mtd]ADD_CUSTOM_WIDGET@( @[str]"Shader"@, {
+    icon: @[str]"fa-cube"@,
+    default: {
+        'position': [@0@, @0@],
+        'velocity': [@0@, @0@, @0@],
+        'color': [@0@, @0@, @0@, @0@],
+        'hexColor': @[str]"#000"@,
+        'highRes': @false@
+    }
+});
+
+@const@ shaderInstance = {
+    'hexColor': @[str]"#f5f505"@,
+    'highRes': @true@
+};
+
+panel.@[mtd]addShader@( @[str]"PBR Shader"@, shaderInstance, instance => { console.@[mtd]log@(instance) } );
+panel.@[mtd]addShader@( @[str]"Empty Instance"@, @null@ );` );
 
         // Data Tree
         MAKE_HEADER( "Data Tree", "h2", "tree" );
@@ -376,23 +431,23 @@ panel.addCurve(<span class="str">"Opacity"</span>, opacityValues, (value, event)
                 ["onevent (Function)", "Function to catch the different types of Tree events"]
             ]
         ] );
-        MAKE_CODE( `<span class="com">// Tree data!</span>
-<span class="kwd">const</span> sceneData = {
-    id: <span class="str">"root"</span>,
+        MAKE_CODE( `@[com]// Tree data!@
+@const@ sceneData = {
+    id: @[str]"root"@,
     children: [
         {
-            id: <span class="str">"node_1"</span>,
+            id: @[str]"node_1"@,
             children: [
                 {
-                    id: <span class="str">"node_1_1"</span>,
-                    icon: <span class="str">"fa-solid fa-cube"</span>,
+                    id: @[str]"node_1_1"@,
+                    icon: @[str]"fa-solid fa-cube"@,
                     children: [],
                     actions: [
                         {
-                            name: <span class="str">"Open script"</span>,
-                            icon: <span class="str">"fa-solid fa-scroll"</span>,
+                            name: @[str]"Open script"@,
+                            icon: @[str]"fa-solid fa-scroll"@,
                             callback: function(node) {
-                                console.log(node.id + <span class="str">": Script opened!"</span>)
+                                console.@[mtd]log@(node.id + @[str]": Script opened!"@)
                             }
                         }
                     ]
@@ -400,54 +455,54 @@ panel.addCurve(<span class="str">"Opacity"</span>, opacityValues, (value, event)
             ]
         },
         {
-            id: <span class="str">"node_2"</span>,
-            icon: <span class="str">"fa-solid fa-circle-play"</span>,
+            id: @[str]"node_2"@,
+            icon: @[str]"fa-solid fa-circle-play"@,
             children: []
         }
     ]
 };
     
-<span class="com">// This is optional!</span>
-<span class="kwd">const</span> dataTreeIcons = [
+@[com]// This is optional!@
+@const@ dataTreeIcons = [
     {
-        name: <span class="str">"Add node"</span>,
-        icon: <span class="str">"fa-solid fa-plus"</span>,
-        callback: () => { console.log(<span class="str">"Node added!"</span>) }
+        name: @[str]"Add node"@,
+        icon: @[str]"fa-solid fa-plus"@,
+        callback: () => { console.@[mtd]log@(@[str]"Node added!"@) }
     },
     {
-        name: <span class="str">"Instantiate scene"</span>,
-        icon: <span class="str">"fa-solid fa-link"</span>,
-        callback: () => { console.log(<span class="str">"Scene instantiated!"</span>) }
+        name: @[str]"Instantiate scene"@,
+        icon: @[str]"fa-solid fa-link"@,
+        callback: () => { console.@[mtd]log@(@[str]"Scene instantiated!"@) }
     }
 ];
     
-panel.addTree(<span class="str">"Scene Tree"</span>, sceneData, { 
+panel.@[mtd]addTree@(@[str]"Scene Tree"@, sceneData, { 
     icons: dataTreeIcons, 
-    filter: <span class="lit">false</span>,
-    rename: <span class="lit">true</span>,
+    filter: @false@,
+    rename: @true@,
     onevent: (event) => { 
         switch(event.type) {
-            <span class="kwd">case</span> LX.<span class="typ">TreeEvent</span>.NODE_SELECTED: 
-                <span class="com">// ...</span>
-                <span class="kwd">break</span>;
-            <span class="kwd">case</span> LX.<span class="typ">TreeEvent</span>.NODE_DELETED: 
-                <span class="com">// ...</span>
-                <span class="kwd">break</span>;
-            <span class="kwd">case</span> LX.<span class="typ">TreeEvent</span>.NODE_DBLCLICKED: 
-                <span class="com">// ...</span>
-                <span class="kwd">break</span>;
-            <span class="kwd">case</span> LX.<span class="typ">TreeEvent</span>.NODE_CONTEXTMENU: 
-                <span class="com">// ...</span>
-                <span class="kwd">break</span>;
-            <span class="kwd">case</span> LX.<span class="typ">TreeEvent</span>.NODE_DRAGGED: 
-                <span class="com">// ...</span>
-                <span class="kwd">break</span>;
-            <span class="kwd">case</span> LX.<span class="typ">TreeEvent</span>.NODE_RENAMED:
-                <span class="com">// ...</span>
-                <span class="kwd">break</span>;
-            <span class="kwd">case</span> LX.<span class="typ">TreeEvent</span>.NODE_VISIBILITY:
-                <span class="com">// ...</span>
-                <span class="kwd">break</span>;
+            @case@ LX.@[typ]TreeEvent@.NODE_SELECTED: 
+                @[com]// ...@
+                @break@;
+            @case@ LX.@[typ]TreeEvent@.NODE_DELETED: 
+                @[com]// ...@
+                @break@;
+            @case@ LX.@[typ]TreeEvent@.NODE_DBLCLICKED: 
+                @[com]// ...@
+                @break@;
+            @case@ LX.@[typ]TreeEvent@.NODE_CONTEXTMENU: 
+                @[com]// ...@
+                @break@;
+            @case@ LX.@[typ]TreeEvent@.NODE_DRAGGED: 
+                @[com]// ...@
+                @break@;
+            @case@ LX.@[typ]TreeEvent@.NODE_RENAMED:
+                @[com]// ...@
+                @break@;
+            @case@ LX.@[typ]TreeEvent@.NODE_VISIBILITY:
+                @[com]// ...@
+                @break@;
         }
     }
 });` );
@@ -476,21 +531,21 @@ panel.addTree(<span class="str">"Scene Tree"</span>, sceneData, {
                 ["filter (Boolean)", "Specify if the drop-down needs a search bar"]
             ]
         ] );
-        MAKE_CODE( `<span class="com">// String values</span>
+        MAKE_CODE( `@[com]// String values@
 
-panel.addDropdown(<span class="str">"String Dropdown"</span>, [<span class="str">"Option 1"</span>, <span class="str">"Option 2"</span>], <span class="str">"Option 1"</span>, (<span class="hljs-keyword">value</span>, <span class="hljs-keyword">event</span>) =&gt; {
-      console.log(<span class="hljs-keyword">value</span>);
+panel.@[mtd]addDropdown@(@[str]"String Dropdown"@, [@[str]"Option 1"@, @[str]"Option 2"@], @[str]"Option 1"@, (value, event) =&gt; {
+      console.@[mtd]log@(value);
 });
 
-<span class="com">// Media values</span>
+@[com]// Media values@
 
-<span class="kwd">const</span> options = [
-  { <span class="hljs-keyword">value</span>: <span class="str">"Option 1"</span>, src: <span class="str">"/option1.png"</span> }, 
-  { <span class="hljs-keyword">value</span>: <span class="str">"Option 2"</span>, src: <span class="str">"/option2.gif"</span> },
-  { <span class="hljs-keyword">value</span>: <span class="str">"Option 3"</span>, src: <span class="str">"/option3.jpg"</span> }
+@const@ options = [
+  { value: @[str]"Option 1"@, src: @[str]"/option1.png"@ }, 
+  { value: @[str]"Option 2"@, src: @[str]"/option2.gif"@ },
+  { value: @[str]"Option 3"@, src: @[str]"/option3.jpg"@ }
 ];
-panel.addDropdown(<span class="str">"Media Dropdown"</span>, options, <span class="str">"Option 1"</span>, (<span class="hljs-keyword">value</span>, <span class="hljs-keyword">event</span>) =&gt; {
-      console.log(<span class="hljs-keyword">value</span>);
+panel.@[mtd]addDropdown@(@[str]"Media Dropdown"@, options, @[str]"Option 1"@, (value, event) =&gt; {
+      console.@[mtd]log@(value);
 }, options);` );
 
         // File
@@ -516,8 +571,8 @@ panel.addDropdown(<span class="str">"Media Dropdown"</span>, options, <span clas
                 ["type (String)", "Type to read as {text, buffer, bin, url} [text]"]
             ]
         ] );
-        MAKE_CODE( `panel.addFile(<span class="str">"File name"</span>, (data, file) => {
-    console.log(data, file);
+        MAKE_CODE( `panel.@[mtd]addFile@(@[str]"File name"@, (data, file) => {
+    console.@[mtd]log@(data, file);
 });` );
 
         // Form
@@ -544,10 +599,10 @@ panel.addDropdown(<span class="str">"Media Dropdown"</span>, options, <span clas
                 ["actionName (String)", "Text to be shown in the button"]
             ]
         ] );
-        MAKE_CODE( `<span class="kwd">const</span> formData = { username: <span class="str">""</span>, password: { value: <span class="str">""</span>, type: <span class="str">"password"</span> } };
-panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => {
-    console.log(value);
-}, { actionName: <span class="str">"Login"</span> });` );
+        MAKE_CODE( `@const@ formData = { username: @[str]""@, password: { value: @[str]""@, type: @[str]"password"@ } };
+panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
+    console.@[mtd]log@(value);
+}, { actionName: @[str]"Login"@ });` );
 
         // Layers
         MAKE_HEADER( "Layers", "h2", "layers" );
@@ -570,8 +625,8 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
             ["callback (Function)", "Function called when bit mask changes"],
             ["options (Object)", "Basic options for a Widget"]
         ] );
-        MAKE_CODE( `panel.addLayers(<span class="str">"Layer name"</span>, <span class="dec">10</span>, (value, event) => {
-    console.log(value);
+        MAKE_CODE( `panel.@[mtd]addLayers@(@[str]"Layer name"@, @10@, (value, event) => {
+    console.@[mtd]log@(value);
 });` );
 
         // List
@@ -595,14 +650,14 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
             ["callback (Function)", "Function called when the a new item list is selected"],
             ["options (Object)", "Basic options for a Widget"]
         ] );
-        MAKE_CODE( `panel.addList(<span class="str">"List name"</span>, [<span class="str">"GPTeam"</span>, <span class="str">"Blat Panthers"</span>], <span class="str">"Blat Panthers"</span>,  (value, event) => {
-    console.log(value);
+        MAKE_CODE( `panel.@[mtd]addList@(@[str]"List name"@, [@[str]"GPTeam"@, @[str]"Blat Panthers"@], @[str]"Blat Panthers"@,  (value, event) => {
+    console.@[mtd]log@(value);
 });` );
 
         MAKE_PARAGRAPH( `<sup>It's possible to preppend an icon to the element name inside the list using an Array for the item [item, icon]:<sup>` );
 
-        MAKE_CODE( `panel.addList(<span class="str">"List name"</span>, [<span class="str">"GPTeam"</span>, [<span class="str">"Blat Panthers"</span>, <span class="str">"fa-solid fa-paw"</span>]], <span class="str">"Blat Panthers"</span>,  (value, event) => {
-    console.log(value);
+        MAKE_CODE( `panel.@[mtd]addList@(@[str]"List name"@, [@[str]"GPTeam"@, [@[str]"Blat Panthers"@, @[str]"fa-solid fa-paw"@]], @[str]"Blat Panthers"@,  (value, event) => {
+    console.@[mtd]log@(value);
 });` );
 
         // Number
@@ -637,9 +692,9 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
             ]
         ] );
         MAKE_PARAGRAPH( `<sup>Note: Setting <code class='inline'>min</code>, <code class='inline'>max</code> values will automatically add a slider below the number input.<sup>` );
-        MAKE_CODE( `panel.addNumber(<span class="str">"Font Size"</span>, <span class="dec">36</span>, (value, <span class="hljs-keyword">event</span>) =&gt; {
-    console.<span class="hljs-keyword">log</span>(value);
-}, { <span class="hljs-keyword">min</span>: <span class="dec">1</span>, <span class="hljs-keyword">max</span>: <span class="dec">48</span> });` );
+        MAKE_CODE( `panel.@[mtd]addNumber@(@[str]"Font Size"@, @36@, (value, event) =&gt; {
+    console.@[mtd]log@(value);
+}, { min: @1@, max: @48@ });` );
         MAKE_PARAGRAPH( `You can change the value of this widget manually, using the mouse wheel, and dragging (up/down). In the last two cases, pressing <em>Alt</em> and 
         <em>Left Shift</em> will apply a factor of <code class='inline'>0.1</code> and <code class='inline'>10</code> in that order.` );
 
@@ -674,9 +729,9 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
                 ["onRelease (Function)", "Callback function on mouse up"],
             ]
         ] );
-        MAKE_CODE( ` panel.addPad(<span class="str">"2D Pad"</span>, [<span class="dec">0.5</span>, <span class="dec">0.5</span>], (value, event) => {
-    console.log(value);
-}, { padSize: <span class="str">"100px"</span>, min: <span class="dec">-1</span>, max: <span class="dec">2</span> });` );
+        MAKE_CODE( ` panel.@[mtd]addPad@(@[str]"2D Pad"@, [@0.5@, @0.5@], (value, event) => {
+    console.@[mtd]log@(value);
+}, { padSize: @[str]"100px"@, min: @-1@, max: @2@ });` );
 
         // Progress
         MAKE_HEADER( "Progress", "h2", "progress" );
@@ -713,13 +768,13 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
                 ["high (Number)", "High boundary value"],
             ]
         ] );
-        MAKE_CODE( `panel.addProgress(<span class="str">"HeadRoll"</span>, <span class="dec">0</span>, { 
-  min</span>: -<span class="dec">1</span>, 
-  max: <span class="dec">1</span>, 
-  showValue: <span class="lit">true</span>, 
-  editable: <span class="lit">true</span>, 
+        MAKE_CODE( `panel.@[mtd]addProgress@(@[str]"HeadRoll"@, @0@, { 
+  min: -@1@, 
+  max: @1@, 
+  showValue: @true@, 
+  editable: @true@, 
   callback: (value, event) =&gt; {
-    console.log(value);
+    console.@[mtd]log@(value);
   }
 });` );
 
@@ -749,9 +804,9 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
         ] );
         MAKE_PARAGRAPH( `<sup>Note: Since a Size Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.
             Minimum size is always 0.<sup>` );
-        MAKE_CODE( `panel.addSize(<span class="str">"Screen Resolution"</span>, [<span class="dec">1280</span>, <span class="dec">720</span>], (value, <span class="hljs-keyword">event</span>) =&gt; {
-    console.<span class="hljs-keyword">log</span>(value);
-}, { units: <span class="str">"p"</span> });` );
+        MAKE_CODE( `panel.@[mtd]addSize@(@[str]"Screen Resolution"@, [@1280@, @720@], (value, event) =&gt; {
+    console.@[mtd]log@(value);
+}, { units: @[str]"p"@ });` );
 
         // Tabs
         MAKE_HEADER( "Tabs", "h2", "panel-tabs" );
@@ -785,34 +840,34 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
         }
 
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTabs(tabs, options)")} to add a Tabs Widget to your panel, where 
-    <code class='inline'>tabs</code> is an <code class="inline"><span class="typ">Array</span></code> of objects which have:` );
+    <code class='inline'>tabs</code> is an <code class="inline">Array</code> of objects which have:` );
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Name of the tab (if icon, use as title)"],
             ["icon (String)", "Icon path to be used as the tab icon (optional)"],
             ["onCreate (Function)", "Func to be called at tab creation"],
             ["onSelect (Function)", "Func to be called on select tab (optional)"]
         ] );
-        MAKE_CODE( `panel.addTabs([
+        MAKE_CODE( `panel.@[mtd]addTabs@([
     { 
-        name: <span class="str">"First tab"</span>,
-        icon: <span class="str">"fa-brands fa-discord"</span>,
+        name: @[str]"First tab"@,
+        icon: @[str]"fa-brands fa-discord"@,
         onCreate: p => {
-            p.addTitle(<span class="str">"Discord tab"</span>);
-            p.addButton(<span class="kwd">null</span>, <span class="str">"Connect"</span>);
+            p.@[mtd]addTitle@(@[str]"Discord tab"@);
+            p.@[mtd]addButton@(@null@, @[str]"Connect"@);
         },
         onSelect: p => {
-            console.log( p );
+            console.@[mtd]log@( p );
         }
     },
     { 
-        name: <span class="str">"Second tab"</span>,
-        icon: <span class="str">"fa-brands fa-github"</span>,
+        name: @[str]"Second tab"@,
+        icon: @[str]"fa-brands fa-github"@,
         onCreate: p => {
-            p.addTitle(<span class="str">"Github tab"</span>);
-            p.addButton(<span class="kwd">null</span>, <span class="str">"Go"</span>, () => { window.open(<span class="str">"https://github.com/jxarco/lexgui.js/"</span>) });
+            p.@[mtd]addTitle@(@[str]"Github tab"@);
+            p.@[mtd]addButton@(@null@, @[str]"Go"@, () => { window.@[mtd]open@(@[str]"https://github.com/jxarco/lexgui.js/"@) });
         }
     }
-], { vertical: <span class="lit">false</span> });` );
+], { vertical: @false@ });` );
 
         // Tags
         MAKE_HEADER( "Tags", "h2", "tags" );
@@ -834,8 +889,8 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
             ["callback (Function)", "Function called when a tag is either removed or added"],
             ["options (Object)", "Basic options for a Widget"]
         ] );
-        MAKE_CODE( `panel.addTags(<span class="str">"Game Tags"</span>, <span class="str">"2d, ai, engine, ps5, console"</span>, <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
-    <span class="hljs-built_in">console</span>.log(value);
+        MAKE_CODE( `panel.@[mtd]addTags@(@[str]"Game Tags"@, @[str]"2d, ai, engine, ps5, console"@, (value, event) =&gt; {
+    console.@[mtd]log@(value);
 });` );
 
         // Text
@@ -867,9 +922,9 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
                 ["justifyName (String)", "Justify name content"],
             ]
         ] );
-        MAKE_CODE( `panel.addText(<span class="str">"Text Name"</span>, <span class="str">"Text value"</span>, (value, event) =&gt;</span> {
-    console.log(value);
-}, { placeholder: <span class="str">"Something"</span> });` );
+        MAKE_CODE( `panel.@[mtd]addText@(@[str]"Text Name"@, @[str]"Text value"@, (value, event) =&gt; {
+    console.@[mtd]log@(value);
+}, { placeholder: @[str]"Something"@ });` );
 
         // Text area
         MAKE_HEADER( "Text Area", "h2", "text-area" );
@@ -889,9 +944,9 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
         MAKE_CODE_BULLET_LIST( [
             ["fitHeight (Boolean)", "Make text height adapt to its bounding rect."]
         ] );
-        MAKE_CODE( `panel.addTextArea(<span class="str">"Text Name"</span>, <span class="str">"Text value"</span>, (value, event) =&gt;</span> {
-    console.log(value);
-}, { placeholder: <span class="str">"Something"</span> });` );
+        MAKE_CODE( `panel.@[mtd]addTextArea@(@[str]"Text Name"@, @[str]"Text value"@, (value, event) =&gt; {
+    console.@[mtd]log@(value);
+}, { placeholder: @[str]"Something"@ });` );
 
         // Title
         MAKE_HEADER( "Title", "h2", "title" );
@@ -909,7 +964,7 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
             ["name (String)", "Widget name"],
             ["options (Object)", "Basic options for a Widget"],
         ] );
-        MAKE_CODE( `panel.addTitle(<span class="str">"A title!"</span>)<span class="hljs-comment">;</span>` );
+        MAKE_CODE( `panel.addTitle(@[str]"A title!"@);` );
 
         // Vector
         MAKE_HEADER( "Vector", "h2", "vector" );
@@ -948,16 +1003,16 @@ panel.addForm(<span class="str">"Test form"</span>, formData, (value, event) => 
             ]
         ] );
         MAKE_PARAGRAPH( `<sup>Note: Since a Vector Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.<sup>` );
-        MAKE_CODE( `panel.addVector2(<span class="str">"2D Position"</span>, [<span class="dec">250</span>, <span class="dec">350</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
-    <span class="hljs-built_in">console</span>.log(value);
-}, { min: <span class="dec">0</span>, max: <span class="dec">1024</span> });
+        MAKE_CODE( `panel.@[mtd]addVector2@(@[str]"2D Position"@, [@250@, @350@], (value, event) =&gt; {
+    console.@[mtd]log@(value);
+}, { min: @0@, max: @1024@ });
 
-panel.addVector3(<span class="str">"Velocity"</span>, [<span class="dec">0.1</span>, <span class="dec">1</span>, <span class="dec">0.5</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
-    <span class="hljs-built_in">console</span>.log(value);
+panel.@[mtd]addVector3@(@[str]"Velocity"@, [@0.1@, @1@, @0.5@], (value, event) =&gt; {
+    console.@[mtd]log@(value);
 });
 
-panel.addVector4(<span class="str">"Shader Color"</span>, [<span class="dec">1</span>, <span class="dec">1</span>, <span class="dec">1</span>, <span class="dec">1</span>], <span class="hljs-function"><span class="hljs-params">(value, event)</span> =&gt;</span> {
-    <span class="hljs-built_in">console</span>.log(value);
+panel.@[mtd]addVector4@(@[str]"Shader Color"@, [@1@, @1@, @1@, @1@], (value, event) =&gt; {
+    console.@[mtd]log@(value);
 });` );
 
         MAKE_PARAGRAPH( `In case you are using limits, store the widget and call <code class='inline'>vectorWidget.setLimits( min, max, step )</code> to change its 
@@ -965,7 +1020,6 @@ panel.addVector4(<span class="str">"Shader Color"</span>, [<span class="dec">1</
 
         // Other widgets
         MAKE_HEADER( "Other Widgets", "h2", "other-widgets" );
-        MAKE_LINE_BREAK();
 
         MAKE_CODE_BULLET_LIST( [
             ["Panel.addBlank(height)", "Add vertical space (in pixels) inside a branch."],
@@ -975,7 +1029,6 @@ panel.addVector4(<span class="str">"Shader Color"</span>, [<span class="dec">1</
             ["Panel.addSeparator()", "Adds an horizontal line to separate widgets."],
         ] );
 
-        
         MAKE_LINE_BREAK();
         MAKE_LINE_BREAK();
 

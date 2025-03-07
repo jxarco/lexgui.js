@@ -1,6 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-
 :root {
 	color-scheme: light dark;
 
@@ -18,8 +15,13 @@
 	--icon-size: 20px;
 }
 
+@font-face {
+	font-family: "GoogleSans";
+	src: url("../data/GoogleSans.ttf");
+}
+
 html {
-	font-family: "Figtree", sans-serif;
+	font-family: "GoogleSans", sans-serif;
 	font-size: var(--font-size);
 	line-height: var(--line-height);
 	height: 100%;
@@ -109,12 +111,12 @@ a {
 h1 {
 	font-size: 32px;
 	line-height: 48px;
-	font-weight: 800;
 	margin-left: -2px;
 	margin-top: 16px;
-	margin-bottom: -8px;
-	font-family: "Poppins", sans-serif;
-	text-transform: uppercase;
+	font-optical-sizing: auto;
+	font-weight: 600;
+	font-style: normal;
+	font-variation-settings: "wdth" 100;
 }
 
 h2 {
@@ -123,8 +125,6 @@ h2 {
 	font-weight: normal;
 	margin-left: -1px;
 	margin-top: 28px;
-	margin-bottom: -8px;
-	font-family: "Poppins", sans-serif;
 }
 
 h3 {
@@ -132,8 +132,6 @@ h3 {
 	line-height: 28px;
 	font-weight: normal;
 	margin-top: 24px;
-	margin-bottom: -8px;
-	font-family: "Poppins", sans-serif;
 }
 
 p,
@@ -311,20 +309,19 @@ img {
 
 }
 
-pre .str, code .str { color: #9e73c9; } /* string */
+pre .str, code .str { color: #c79369; } /* string */
 pre .kwd, code .kwd { color: #2194ce; } /* keyword */
 pre .com, code .com { color: #999999; } /* comment */
-pre .typ, code .typ { color: #36c0b0; } /* type */
-pre .lit, code .lit { color: #ff0080; } /* literal */
+pre .typ, code .typ { color: #4fccbd; } /* type */
+pre .lit, code .lit { color: #ce57b4; } /* literal */
 pre .pun, code .pun { color: #888888; } /* punctuation */
 pre .pln, code .pln { color: #444444; } /* plaintext */
-pre .dec, code .dec { color: #64d881; } /* decimal */
+pre .dec, code .dec { color: #a5dba0; } /* decimal */
+pre .mtd, code .mtd { color: #e6e2b8; } /* method */
 
 pre .tag, code .tag { color: #2194ce; } /* HTML tag */
-pre .atn, code .atn { color: #BB55FF; } /* HTML attribute name */
-pre .atv, code .atv { color: #dea576; } /* HTML attribute value */
-pre .com, code .com { color: #498748; } /* comment */
-pre .lit, code .lit { color: #ff3399; } /* literal */
+pre .atn, code .atn { color: #81cdf8; } /* HTML attribute name */
+pre .com, code .com { color: #4e994d; } /* comment */
 pre .pln, code .pln { color: #aaaaaa; } /* plaintext */
 
 .desc {

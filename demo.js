@@ -671,24 +671,24 @@ function fillRightBottomPanel( panel, tab ) {
         /************** */
         // Custom Widget
 
-        LX.ADD_CUSTOM_WIDGET( 'Shader', {
-            // icon: "fa-dice-d6",
+        LX.ADD_CUSTOM_WIDGET( "Shader", {
+            icon: "fa-cube",
             default: {
-                'position': [0, 0],
-                'velocity': [0, 0, 0],
-                'color': [0, 0, 0, 0],
-                'hex_color': '#000',
-                'high_res': false
+                position: [0, 0],
+                velocity: [0, 0, 0],
+                color: [0, 0, 0, 0],
+                hexColor: "#000",
+                highRes: false
             }
         });
 
         const shaderInstance = {
-            'hex_color': '#f5f505',
-            'high_res': true
+            'hexColor': "#f5f505",
+            'highRes': true
         };
 
-        panel.addShader( "PBR Shader", shaderInstance, (instance) => { console.log(instance) } );
-        panel.addShader( "Empty", null );
+        panel.addShader( "A Shader", shaderInstance, (instance) => { console.log(instance) } );
+        panel.addShader( "Empty Instance", null );
 
         /************** */
     }

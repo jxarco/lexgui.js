@@ -4,67 +4,69 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Docs</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
+    <link rel="stylesheet" crossorigin="anonymous" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
     <script type="text/javascript" src="docmaker.js"></script>
 </head>
 
 <body>
 
-    <script type="text/javascript">
+<script type="text/javascript">
 
-        MAKE_HEADER( "Dialogs", "h1", "dialogs" );
-        MAKE_LINE_BREAK();
-                
-        MAKE_PARAGRAPH( `LexGUI allows to create Dialogs, also known as modal windows or pop-ups, allowing developers to display
-        important information, gather user input, or prompt for user actions without navigating away from the current context.
-        The possible dialogs are the following:` );
-        MAKE_CODE_BULLET_LIST( [
-            ["Classic", "General pop-up to display any kind of information or errors"],
-            ["Pocket", "Tiny dialog used normally as a debugging tool. Can be docked to the window corners"],
-            ["Prompt", "Classic prompt pop-up to gather user information"],
-            ["Pop-up", "Classic prompt pop-up to gather user information that fades out after a while"]
-        ] );
+    MAKE_HEADER( "Dialogs", "h1", "dialogs" );
+            
+    MAKE_PARAGRAPH( `LexGUI allows to create Dialogs, also known as modal windows or pop-ups, allowing developers to display
+    important information, gather user input, or prompt for user actions without navigating away from the current context.
+    The possible dialogs are the following:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["Classic", "General pop-up to display any kind of information or errors"],
+        ["Pocket", "Tiny dialog used normally as a debugging tool. Can be docked to the window corners"],
+        ["Prompt", "Classic prompt pop-up to gather user information"],
+        ["Pop-up", "Classic prompt pop-up to gather user information that fades out after a while"]
+    ] );
 
-        MAKE_PARAGRAPH( `To fill the dialog content, a panel is automatically created inside the root so it's possible 
-        to begin branching and adding widgets. The same way as menubars, you can fill the panel inside the creation callback. The following code creates a classic dialog:` );
-        MAKE_CODE( `<span class="kwd">const</span> dialog = <span class="kwd">new</span> LX.<span class="typ">Dialog</span>(<span class="str">"Title"</span>, p => {
-    <span class="com">// Start adding widgets</span>
-    p.addNumber(<span class="str">"Example"</span>, <span class="dec">18</span>);
+    MAKE_PARAGRAPH( `To fill the dialog content, a panel is automatically created inside the root so it's possible 
+    to begin branching and adding widgets. The same way as menubars, you can fill the panel inside the creation callback. The following code creates a classic dialog:` );
+    MAKE_CODE( `@const@ dialog = @new@ LX.@[typ]Dialog@(@[str]"Title"@, p => {
+    @[com]// Start adding widgets@
+    p.@[mtd]addNumber@(@[str]"Example"@, @18@);
 }, options);
 
-<span class="com">// To use classic dialogs as simple messages or error alerts, they can be also created using LX.message</span>
-<span class="kwd">const</span> dialog =  LX.message(<span class="str">"Some text"</span>, <span class="str">"Title"</span>, options);` );
+@[com]// To use classic dialogs as simple messages or error alerts, they can be also created using LX.message@
+@const@ dialog = LX.@[mtd]message@(@[str]"Some text"@, @[str]"Title"@, options);` );
 
-        MAKE_PARAGRAPH( `To create a Pocket Dialog you can follow the same steps but using ${INLINE_CODE("LX.PocketDialog")} class.` );
+    MAKE_PARAGRAPH( `To create a Pocket Dialog you can follow the same steps but using ${INLINE_CODE("LX.PocketDialog")} class.` );
 
-        MAKE_PARAGRAPH( `In case of prompts, you can create them using the following code:` );
-        MAKE_CODE( `LX.prompt(<span class="str">"Message"</span>, <span class="str">"Title"</span>, (result) => {
-    <span class="com">// result is the user's response</span>
-    console.log(result);
+    MAKE_PARAGRAPH( `In case of prompts, you can create them using the following code:` );
+    MAKE_CODE( `LX.@[mtd]prompt@(@[str]"Message"@, @[str]"Title"@, result => {
+    @[com]// result is the user's response@
+    console.@[mtd]log@(result);
 }, options);` );
-        
-        MAKE_PARAGRAPH( `In case of pop-ups, you can create them using the following code:` );
-        MAKE_CODE( `LX.popup(<span class="str">"Message"</span>, <span class="str">"Title"</span>, options);` );
+    
+    MAKE_PARAGRAPH( `In case of pop-ups, you can create them using the following code:` );
+    MAKE_CODE( `LX.@[mtd]popup@(@[str]"Message"@, @[str]"Title"@, options);` );
 
-        MAKE_PARAGRAPH( `The possible ${INLINE_CODE("options (Object)")} when creating dialogs are the following:` );
-        MAKE_CODE_BULLET_LIST( [
-            ["position (Array)", "[x, y] representing left-top values relative to the main LX root area"],
-            ["size (Array)", "[width, height] in css"],
-            ["draggable (Boolean)", "Set the pop-up as draggable. In case of pocket dialogs it's false, by default (they are dockables)"],
-        ] );
+    MAKE_PARAGRAPH( `The possible ${INLINE_CODE("options (Object)")} when creating dialogs are the following:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["position (Array)", "[x, y] representing left-top values relative to the main LX root area"],
+        ["size (Array)", "[width, height] in css"],
+        ["draggable (Boolean)", "Set the pop-up as draggable. In case of pocket dialogs it's false, by default (they are dockables)"],
+    ] );
 
-        MAKE_PARAGRAPH( `Prompts:` );
-        MAKE_CODE_BULLET_LIST( [
-            ["input (Boolean)", "Set if it has to be an input. Default: [true]"],
-            ["required (Boolean)", "Set if the input must be filled. Default: [false]"]
-        ] );
+    MAKE_PARAGRAPH( `Prompts:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["input (Boolean)", "Set if it has to be an input. Default: [true]"],
+        ["required (Boolean)", "Set if the input must be filled. Default: [false]"]
+    ] );
 
-        MAKE_PARAGRAPH( `Pop-up:` );
-        MAKE_CODE_BULLET_LIST( [
-            ["time: (Number)", "Time before the dialog fade out (ms). Default: [3000]"]
-        ] );
+    MAKE_PARAGRAPH( `Pop-up:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["time: (Number)", "Time before the dialog fade out (ms). Default: [3000]"]
+    ] );
 
-    </script>
+    MAKE_LINE_BREAK();
+    MAKE_LINE_BREAK();
+
+</script>
 
 </body>
 </html>

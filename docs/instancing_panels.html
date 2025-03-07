@@ -4,39 +4,41 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Docs</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
+    <link rel="stylesheet" crossorigin="anonymous" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
     <script type="text/javascript" src="docmaker.js"></script>
 </head>
 
 <body>
 
-    <script type="text/javascript">
+<script type="text/javascript">
 
-        MAKE_HEADER( "Instancing panels", "h1", "panel" );
-        MAKE_LINE_BREAK();
-                
-        MAKE_PARAGRAPH( `Panels are the DOM elements that will enclose your UI ${INLINE_LINK("widgets", "widgets.html")}. The pipeline is simple, create a Panel, attach it to an Area and fill it!
-            An area could contain multiple panels since at the end a panel is only an specific type of container (div) element.` );
-        MAKE_PARAGRAPH( `You could do it manually instancing a new ${INLINE_CODE("LX.Panel")} and attaching it using ${INLINE_CODE("Area.attach(content)")} but you might want to call ${INLINE_CODE("Area.addPanel(options)")} to get an instanced panel already attached to that area:` );
-        MAKE_CODE( `<span class="com">// Option 1</span>
-<span class="kwd">var</span> panel = area.addPanel();
+    MAKE_HEADER( "Instancing panels", "h1", "panel" );
+            
+    MAKE_PARAGRAPH( `Panels are the DOM elements that will enclose your UI ${INLINE_LINK("widgets", "widgets.html")}. The pipeline is simple, create a Panel, attach it to an Area and fill it!
+        An area could contain multiple panels since at the end a panel is only an specific type of container (div) element.` );
+    MAKE_PARAGRAPH( `You could do it manually instancing a new ${INLINE_CODE("LX.Panel")} and attaching it using ${INLINE_CODE("Area.attach(content)")} but you might want to call ${INLINE_CODE("Area.addPanel(options)")} to get an instanced panel already attached to that area:` );
+    MAKE_CODE( `@[com]// Option 1@
+@var@ panel = area.@[mtd]addPanel@();
 
-<span class="com">// Option 2</span>
-<span class="kwd">var</span> panel = <span class="kwd">new</span> LX.<span class="typ">Panel</span>();
-area.attach( panel );
+@[com]// Option 2@
+@var@ panel = @new@ LX.@[typ]Panel@();
+area.@[mtd]attach@( panel );
 ` );
 
-        MAKE_PARAGRAPH( `As ${INLINE_CODE("options")} you can use:` );
-        MAKE_CODE_BULLET_LIST( [
-            ["id (String)", "Id of the element"],
-            ["className (String)", "Add class to the element"],
-            ["width (Number)", "Width of the panel element [fit space]"],
-            ["height (Number)", "Height of the panel element [fit space]"],
-            ["style (Object)", "CSS Style object to be applied to the panel"]
-        ] );
-        MAKE_PARAGRAPH( `Once you have an instantiated panel, you can start adding UI widgets!` );
-        
-    </script>
+    MAKE_PARAGRAPH( `As ${INLINE_CODE("options")} you can use:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["id (String)", "Id of the element"],
+        ["className (String)", "Add class to the element"],
+        ["width (Number)", "Width of the panel element [fit space]"],
+        ["height (Number)", "Height of the panel element [fit space]"],
+        ["style (Object)", "CSS Style object to be applied to the panel"]
+    ] );
+    MAKE_PARAGRAPH( `Once you have an instantiated panel, you can start adding UI widgets!` );
+    
+    MAKE_LINE_BREAK();
+    MAKE_LINE_BREAK();
+
+</script>
 
 </body>
 </html>

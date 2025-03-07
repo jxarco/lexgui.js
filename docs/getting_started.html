@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Docs</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
+    <link rel="stylesheet" crossorigin="anonymous" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
     <script type="text/javascript" src="docmaker.js"></script>
 </head>
 
@@ -16,7 +16,7 @@ MAKE_HEADER( "Getting Started", "h1", "getting-started" );
 
 MAKE_PARAGRAPH( `Once you have included <strong>lexgui.js</strong> in your project, you can start using its API to create web interfaces. The library exposes several functions and components that you can utilize to build your UI.` );
 MAKE_PARAGRAPH( `The first thing to do is initializing the library. Calling ${INLINE_CODE("LX.init")} will initialize the necessary stuff and build the main ${INLINE_LINK("Area", "#area")}, which by default will fit the root container:` );
-MAKE_CODE( `<span class="kwd">let</span> area = LX.init();` );
+MAKE_CODE( `@let@ area = @[typ]LX@.@[mtd]init@();` );
 MAKE_PARAGRAPH( `Optionally, you can pass an ${INLINE_CODE("Object")} parameter to define a few properties:` );
 MAKE_CODE_BULLET_LIST( [
     [`container (String)`, `Root container for the entire UI (default is ${INLINE_CODE("document.body")})`],
@@ -33,6 +33,9 @@ MAKE_CODE_BULLET_LIST( [
     [`LX.DEFAULT_SPLITBAR_SIZE`, `Width (in pixels) of the area resize bar created on split (Default ${INLINE_CODE("4")})`],
     [`LX.OPEN_CONTEXTMENU_ENTRY`, `Specify how the subentries of a Context Menu will be opened, '<em>mouseover</em>' or '<em>click</em>' (Default ${INLINE_CODE("click")})`]
 ] );
+
+MAKE_LINE_BREAK();
+MAKE_LINE_BREAK();
 
 </script>
 

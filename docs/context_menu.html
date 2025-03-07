@@ -4,39 +4,41 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Docs</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
+    <link rel="stylesheet" crossorigin="anonymous" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
     <script type="text/javascript" src="docmaker.js"></script>
 </head>
 
 <body>
 
-    <script type="text/javascript">
+<script type="text/javascript">
 
-        MAKE_HEADER( "Context Menu", "h1", "context-menu" );
-        MAKE_LINE_BREAK();
-                
-        MAKE_PARAGRAPH( `LexGUI offers a powerful context menu feature that allows you to create customizable context menus with ease. 
-        These menus provide quick access to relevant actions and options based on the user's current context, enhancing the overall user experience.` );
-        MAKE_PARAGRAPH( `LexGUI's context menus can be triggered not only on right-click, but in any custom event or moment is necessary. Call ${INLINE_CODE("LX.addContextMenu(title, event, callback, options)")}
-        to create a Context Menu:` );
-        MAKE_CODE( `LX.addContextMenu( <span class="str">"Selected Nodes"</span>, event, m => {
-    <span class="com">// event is the DOM event that should have position info</span>
-    m.add( <span class="str">"Select Children"</span>, () => console.log(<span class="str">"Select children"</span>) );
-    m.add( <span class="str">"Clone"</span>, { color: <span class="str">"#0d5"</span> } );
-    m.add( <span class="str">"Components/Transform"</span>);
-    m.add( <span class="str">"Components/MeshRenderer"</span>);
-    m.add( <span class="str">"Delete"</span> );
+    MAKE_HEADER( "Context Menu", "h1", "context-menu" );
+            
+    MAKE_PARAGRAPH( `LexGUI offers a powerful context menu feature that allows you to create customizable context menus with ease. 
+    These menus provide quick access to relevant actions and options based on the user's current context, enhancing the overall user experience.` );
+    MAKE_PARAGRAPH( `LexGUI's context menus can be triggered not only on right-click, but in any custom event or moment is necessary. Call ${INLINE_CODE("LX.addContextMenu(title, event, callback, options)")}
+    to create a Context Menu:` );
+    MAKE_CODE( `LX.@[mtd]addContextMenu@( @[str]"Selected Nodes"@, event, m => {
+    @[com]// Event is the DOM event that should have position info@
+    m.@[mtd]add@( @[str]"Select Children"@, () => console.@[mtd]log@(@[str]"Select children"@) );
+    m.@[mtd]add@( @[str]"Clone"@, { color: @[str]"#0d5"@ } );
+    m.@[mtd]add@( @[str]"Components/Transform"@);
+    m.@[mtd]add@( @[str]"Components/MeshRenderer"@);
+    m.@[mtd]add@( @[str]"Delete"@ );
 });` );
 
-        MAKE_PARAGRAPH( `As you can observe, the usage format resembles that of other UI elements such as dialogs or menubars. You pass the menu as a parameter, 
-        allowing the user to populate it with all the desired entries and subentries.` );
-        MAKE_PARAGRAPH( `The <code class='inline'>options (Object)</code> when creating a Context Menu are the following:` );
-        MAKE_CODE_BULLET_LIST( [
-            ["callback", "Action to call when entry is clicked"],
-            ["color", "Color of the left border of the entry (e.g. mark specific types of entries)"]
-        ] );
+    MAKE_PARAGRAPH( `As you can observe, the usage format resembles that of other UI elements such as dialogs or menubars. You pass the menu as a parameter, 
+    allowing the user to populate it with all the desired entries and subentries.` );
+    MAKE_PARAGRAPH( `The <code class='inline'>options (Object)</code> when creating a Context Menu are the following:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["callback", "Action to call when entry is clicked"],
+        ["color", "Color of the left border of the entry (e.g. mark specific types of entries)"]
+    ] );
 
-    </script>
+    MAKE_LINE_BREAK();
+    MAKE_LINE_BREAK();
+
+</script>
 
 </body>
 </html>

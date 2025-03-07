@@ -3,16 +3,28 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Docs</title>
+    <link rel="stylesheet" href="../build/lexgui.css">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
     <script type="text/javascript" src="docmaker.js"></script>
+    <script type="importmap">
+        {
+          "imports": {
+            "lexgui": "../build/lexgui.module.js",
+            "lexgui/components/": "../build/components/"
+          }
+        }
+    </script>
 </head>
 
 <body>
 
-<script type="text/javascript">
+<script type="module">
 
-    MAKE_HEADER( "Installation", "h1", "installation" );
+    import { LX } from 'lexgui';
+
+    LX.init( { skipRoot: true } );
+
+    MAKE_HEADER( `Installation (v${ LX.version })`, "h1", "installation" );
 
     MAKE_HEADER( "Project structure", "h2", "project-structure" );
 
@@ -20,50 +32,53 @@
     While the specific structure and naming conventions mentioned below are not obligatory, they will be consistently referenced throughout this guide:` );
 
     MAKE_CODE_BULLET_LIST( ["index.html"] );
-    MAKE_CODE( `<span class="typ">&lt;!DOCTYPE html&gt;</span>
-&lt;<span class="tag">html</span> lang=<span class="atv">"en"</span>&gt;
-&lt;<span class="tag">head</span>&gt;
-    &lt;<span class="tag">meta</span> charset=<span class="atv">"utf-8"</span>&gt;
-    &lt;<span class="tag">title</span>&gt;My first lexgui.js app&lt;/<span class="tag">title</span>&gt;
-	&lt;<span class="tag">link</span> rel=<span class="atv">"stylesheet"</span> crossorigin=<span class="atv">"anonymous"</span> href=<span class="atv">"https://cdn.skypack.dev/lexgui@^&lt;version&gt;/build/lexgui.css"</span>&gt;
-    &lt;<span class="tag">script</span> type=<span class="atv">"importmap"</span>&gt;
-    {
-        "imports": {
-            "lexgui": "https://cdn.skypack.dev/lexgui@^&lt;version&gt;/build/lexgui.module.js",
-            "lexgui/components/": "https://cdn.skypack.dev/lexgui@^&lt;version&gt;/build/components/"
-        }
+    MAKE_CODE( `&lt;!@DOCTYPE@ @[atn]html@&gt;
+&lt;@html@ @lang@=@[str]"en"@&gt;
+&lt;@head@&gt;
+&lt;@meta@ @charset@=@[str]"utf-8"@&gt;
+&lt;@title@&gt;My first lexgui.js app&lt;/@title@&gt;
+&lt;@link@ @rel@=@[str]"stylesheet"@ @crossorigin@=@[str]"anonymous"@ @href@=@[str]"https://cdn.skypack.dev/lexgui|@^&lt;version&gt;/build/lexgui.css"@&gt;
+&lt;@script@ @type@=@[str]"importmap"@&gt;
+{
+    @[str]"imports"@: {
+        @[str]"lexgui"@: @[str]"https://cdn.skypack.dev/lexgui|@^&lt;version&gt;/build/lexgui.module.js"@,
+        @[str]"lexgui/components/"@: @[str]"https://cdn.skypack.dev/lexgui|@^&lt;version&gt;/build/components/"@
     }
-    &lt;/<span class="tag">script</span>&gt;
-&lt;/<span class="tag">head</span>&gt;
-&lt;<span class="tag">body</span>&gt;
-	&lt;<span class="tag">script</span> type=<span class="atv">"module"</span> src=<span class="atv">"/main.js"</span>&gt;&lt;/<span class="tag">script</span>&gt;
-&lt;/<span class="tag">body</span>&gt;
-&lt;/<span class="tag">html</span>&gt;` );
+}
+&lt;/@script@&gt;
+&lt;/@head@&gt;
+&lt;@body@&gt;
+&lt;@script@ @type@=@[str]"module"@ @src@=@[str]"/main.js"@&gt;&lt;/@script@&gt;
+&lt;/@body@&gt;
+&lt;/@html@&gt;` );
 
     MAKE_PARAGRAPH( `Don't forget to replace &lt;version&gt; with an actual version of lexgui.js, like "0.1.35".
     The most recent version can be found on the ${INLINE_LINK("npm version list", "https://www.npmjs.com/package/lexgui?activeTab=versions")}}.
     Use <i>lexgui</i> without the version tag to use the latest version.`, true );
 
     MAKE_CODE_BULLET_LIST( ["main.js"] );
-    MAKE_CODE( `<span class="kwd">import</span> { <span class="typ">LX</span> } <span class="kwd">from</span> <span class="str">'lexgui'</span>;
+    MAKE_CODE( `@import@ { @[typ]LX@ } @from@ @[str]'lexgui'@;
 
-<span class="com">// Your code...</span>` );
+@[com]// Your code...@` );
 
 
     MAKE_HEADER( "Components", "h2", "components" );
     MAKE_PARAGRAPH( `By default, lexgui.js provides the core elements for creating web interfaces. Other components, such as the code editor or timelines are located in the components/ directory. 
     These ones are not required to be installed individually, but they <b>do need to be imported separately<b>:` );
-    MAKE_CODE( `<span class="kwd">import</span> { <span class="typ">LX</span> } <span class="kwd">from</span> <span class="str">'lexgui'</span>;
+    MAKE_CODE( `@import@ { @[typ]LX@ } @from@ @[str]'lexgui'@;
 
-<span class="com">// First option, importing the component</span>    
-<span class="kwd">import</span> { <span class="typ">CodeEditor</span> } <span class="kwd">from</span> <span class="str">'lexgui/components/codeeditor.js'</span>;
+@[com]// First option, importing the component@
+@import@ { @[typ]CodeEditor@ } @from@ @[str]'lexgui/components/codeeditor.js'@;
 
-<span class="kwd">const</span> editor = <span class="kwd">new</span> <span class="typ">CodeEditor</span>();
+@const@ editor = @new@ @[typ]CodeEditor@();
 
-<span class="com">// Or since it's added to the LX namespace...</span>    
-<span class="kwd">import</span> <span class="str">'lexgui/components/codeeditor.js'</span>;
+@[com]// Or since it's added to the LX namespace...@
+@import@ @[str]'lexgui/components/codeeditor.js'@;
 
-<span class="kwd">const</span> editor = <span class="kwd">new</span> LX.<span class="typ">CodeEditor</span>();` );
+@const@ editor = @new@ @[typ]LX@.@[typ]CodeEditor@();` );
+
+    MAKE_LINE_BREAK();
+    MAKE_LINE_BREAK();
 
 </script>
 
