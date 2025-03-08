@@ -15,19 +15,17 @@
     --global-font-size: 12px;
     --global-font-size-big: 14px;
     --global-color-primary: light-dark(#f9f9f9, #1c1c1c);
-    --global-color-secondary: #2c2c2c;
-    --global-color-terciary: #444;
+    --global-color-secondary: light-dark(#ececec, #2c2c2c);
+    --global-color-terciary: light-dark(#dadada, #444);
     --global-selected: #2d69da;
-    --global-selected-light: #1e90ff;
+    --global-selected-light: #0d99ff;
     --global-selected-dark: #304b86;
     --global-branch-darker: #252525;
-    --branch-title-background: #2e3338;
-    --branch-title-inactive-background: #42484e;
-    --global-button-color: #3e3e3e;
-    --global-button-color-hovered: #444;
+    --global-button-color: light-dark(#f9f9f9, #3e3e3e);
+    --global-button-color-hovered: light-dark(#ececec, #444);
     --global-text-primary: light-dark(#202124, #f4f4ffe6);
-    --global-text-secondary: light-dark(#434e53, #cacad4ea);
-    --global-text-terciary: #727272b9;
+    --global-text-secondary: light-dark(#2c2d2e, #cacad4ea);
+    --global-text-terciary: light-dark(#474747f5, #727272b9);
     --global-dark-background: #121212;
     --global-blur-background: #1f1f1fe7;
     --global-color-transparent: #7b8ae200;
@@ -516,19 +514,15 @@ body.noevents * {
     font-size: 15px;
     color: var(--global-text-primary);
     background-color: var(--global-color-secondary);
-    text-shadow: 0px 1px 6px #1111117c;
+    text-shadow: 0px 1px 6px #5554547c;
     padding: 10px;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
     cursor: pointer;
     -webkit-user-select: none;
-    /* Safari 3.1+ */
     -moz-user-select: none;
-    /* Firefox 2+ */
     -ms-user-select: none;
-    /* IE 10+ */
     user-select: none;
-    /* Standard syntax */
 }
 
 .lexbranch.closed .lexbranchtitle {
@@ -543,7 +537,7 @@ body.noevents * {
     display: flex;
     padding: 0px;
     cursor: default;
-    background-color: var(--branch-title-inactive-background);
+    background-color: var(--global-color-terciary);
     text-shadow: none;
     color: #5f6770;
 }
@@ -568,7 +562,7 @@ body.noevents * {
 
 .lexbranchtitle.wtabs span.selected {
     border-top: 2px solid var(--global-selected-light);
-    background-color: var(--branch-title-background);
+    background-color: var(--global-color-secondary);
     color: var(--global-text-primary);
     text-shadow: 0px 1px 2px #000;
 }
@@ -596,6 +590,18 @@ body.noevents * {
     transform: rotate(180deg);
 }
 
+@media (prefers-color-scheme: light) {
+    .lexbranchtitle {
+        color: var(--global-text-secondary);
+        background-color: var(--global-color-secondary);
+        text-shadow: 0px 1px 6px #afafaf7c;
+    }
+    
+    .lexbranch.closed .lexbranchtitle {
+        background-color: inherit;
+    }
+}
+
 /* Widgets */
 
 .lexwidget {
@@ -603,7 +609,7 @@ body.noevents * {
     align-items: center;
     padding: 5px;
     font-size: var(--global-font-size);
-    color: #DCDCDC;
+    color: var(--global-text-primary);
     line-height: 2;
     overflow: hidden;
 }
@@ -776,6 +782,12 @@ body.noevents * {
     color: #919098db;
 }
 
+@media (prefers-color-scheme: light) {
+    .lexwidget .lextext {
+        border: 1px solid var(--global-color-terciary) !important;
+    }
+}
+
 .lexseparator {
     /* border-top: 1px solid #111; */
     border-bottom: 1px solid var(--global-button-color);
@@ -798,7 +810,7 @@ body.noevents * {
 .lextitle {
     width: fit-content;
     width: -moz-fit-content;
-    color: #ddd;
+    color: var(--global-text-terciary);
     font-weight: 800;
     font-size: 13px;
     margin: 12px;
@@ -811,13 +823,9 @@ body.noevents * {
     background-color: var(--global-button-color);
     display: flex;
     -webkit-user-select: none;
-    /* Safari 3.1+ */
     -moz-user-select: none;
-    /* Firefox 2+ */
     -ms-user-select: none;
-    /* IE 10+ */
     user-select: none;
-    /* Standard syntax */
 }
 
 .lexinlinewidgets .lextitle {
@@ -834,7 +842,7 @@ body.noevents * {
 }
 
 .lextitle.link {
-    color: #aaa;
+    color: var(--global-text-terciary);
     text-decoration: none;
     transition: padding-left 0.1s;
 }
@@ -897,7 +905,7 @@ body.noevents * {
 }
 
 .lexbutton:active:not(.lexbutton.combo) {
-    background-color: #4e4e4e;
+    background-color: var(--global-color-terciary);
     color: var(--global-text-secondary);
     transform: scale(0.99);
 }
@@ -911,6 +919,33 @@ body.noevents * {
 .lexbutton.noname {
     margin-left: 0px;
     margin-top: 0px;
+}
+
+@media (prefers-color-scheme: light) {
+    .lexbutton {
+        background-color: var(--global-button-color);
+        color: var(--global-text-primary);
+        border: 1px solid var(--global-color-terciary) !important;
+    }
+    
+    .lexbutton.accept {
+        background-color: var(--global-selected);
+    }
+    
+    .lexbutton:hover {
+        background-color: var(--global-button-color-hovered);
+        color: var(--global-text-primary);
+    }
+    
+    .lexbutton.accept:hover {
+        background-color: #3b6790;
+    }
+    
+    .lexbutton.selected {
+        background: #3c4145;
+        outline: 1px solid #8c9bc7;
+        color: #DDD;
+    }
 }
 
 /* Combo Buttons */
@@ -952,7 +987,7 @@ body.noevents * {
 }
 
 .lexcombobuttons .lexbutton.combo.selected {
-    background-color: var(--global-selected);
+    background: light-dark(var(--global-selected-light), var(--global-selected));
     outline: none;
     color: #fff;
 }
@@ -1016,7 +1051,7 @@ body.noevents * {
 .lexdropdown ul {
     position: fixed;
     list-style: none;
-    background-color: #1c1c1ce8;
+    background-color: var(--global-color-primary);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     padding: 0px;
@@ -1042,13 +1077,9 @@ body.noevents * {
     display: flow-root;
     padding: 2px 0px;
     -webkit-user-select: none;
-    /* Safari 3.1+ */
     -moz-user-select: none;
-    /* Firefox 2+ */
     -ms-user-select: none;
-    /* IE 10+ */
     user-select: none;
-    /* Standard syntax */
 }
 
 .lexdropdown .lexdropdownitem:hover {
@@ -1077,6 +1108,23 @@ body.noevents * {
 .lexdropdown img {
     max-height: 64px;
     margin-top: 8px;
+}
+
+@media (prefers-color-scheme: light) {
+
+    .lexdropdown .lexfilter {
+        background-color: var(--global-color-primary);
+    }
+
+    .lexdropdown ul {
+        background-color: var(--global-color-primary);
+        box-shadow: 0 0px 8px rgba(175, 175, 175, 0.788);
+    }
+
+    .lexdropdown .lexdropdownitem:hover {
+        background-color: var(--global-selected-light);
+        color: #fff;
+    }
 }
 
 /* Toggle check box */
@@ -1127,13 +1175,9 @@ input[type=checkbox]:checked:after {
     margin-top: 2px;
     text-align: center;
     -webkit-user-select: none;
-    /* Safari 3.1+ */
     -moz-user-select: none;
-    /* Firefox 2+ */
     -ms-user-select: none;
-    /* IE 10+ */
     user-select: none;
-    /* Standard syntax */
     cursor: pointer;
 }
 
@@ -1157,17 +1201,13 @@ input[type=checkbox]:checked:after {
     height: 100%;
     border-radius: 2px;
     -webkit-user-select: none;
-    /* Safari 3.1+ */
     -moz-user-select: none;
-    /* Firefox 2+ */
     -ms-user-select: none;
-    /* IE 10+ */
     user-select: none;
-    /* Standard syntax */
 }
 
 .lexcheckbox .checkbox.on {
-    background-color: var(--global-selected);
+    background: light-dark(var(--global-selected-light), var(--global-selected));
 }
 
 .lexcheckboxcont #checkboxtext {
@@ -1206,6 +1246,7 @@ input[type=checkbox]:checked:after {
 
 .lexcolor input[type="color"]::-webkit-color-swatch {
     border-radius: 4px;
+    border: none;
 }
 
 .lexcolor:has(input:focus) input[type="color"] {
@@ -1252,12 +1293,20 @@ input[type=checkbox]:checked:after {
     transition: 0.1s linear;
 }
 
+.lexwidget.nobranch .lexvector .vecbox {
+    background: var(--global-button-color-hovered);
+}
+
 .lexvector a.fa-lock {
     min-width: 12px;
 }
 
 .lexvector .vecbox:hover {
     background: var(--global-button-color-hovered);
+}
+
+.lexwidget.nobranch .lexvector .vecbox:hover {
+    background: var(--global-button-color);
 }
 
 .lexwidget .numberbox .drag-icon,
@@ -1284,13 +1333,9 @@ input[type=checkbox]:checked:after {
     font-weight: 600;
     border-radius: 4px;
     -webkit-user-select: none;
-    /* Safari 3.1+ */
     -moz-user-select: none;
-    /* Firefox 2+ */
     -ms-user-select: none;
-    /* IE 10+ */
     user-select: none;
-    /* Standard syntax */
 }
 
 .lexvector .vecbox span.x {
@@ -1333,7 +1378,7 @@ input[type=number] {
 
 .lexvector .vecbox .vecinput:focus,
 .numberbox .vecinput:focus {
-    color: #c1c1dbef;
+    color: var(--global-text-secondary);
 }
 
 /* Number Widget */
@@ -1406,8 +1451,8 @@ input[type="range"] {
     height: 12px;
     border: 1px solid #c9c7de;
     border-radius: 6px;
-    background: var(--global-selected);
-    box-shadow: 0px 0px 6px #111;
+    background: light-dark(var(--global-selected-light), var(--global-selected));
+    box-shadow: 0px 0px 6px #505050;
     cursor: pointer;
 }
 
@@ -1437,13 +1482,9 @@ input[type="range"] {
 
 .lexwidget .lexunit {
     -webkit-user-select: none;
-    /* Safari 3.1+ */
     -moz-user-select: none;
-    /* Firefox 2+ */
     -ms-user-select: none;
-    /* IE 10+ */
     user-select: none;
-    /* Standard syntax */
     margin-left: -2px;
 }
 
@@ -1455,7 +1496,7 @@ input[type="range"] {
 
 .lexwidget .lexpad .lexinnerpad {
     border-radius: 4px;
-    background-color: var(--global-dark-background);
+    background-color: light-dark(var(--global-color-terciary), var(--global-dark-background));
 }
 
 .lexwidget .lexpad .lexinnerpad .lexpadthumb {
@@ -1581,13 +1622,9 @@ input[type="range"] {
     border-top-right-radius: 8px;
     color: var(--global-text-secondary);
     -webkit-user-select: none;
-    /* Safari 3.1+ */
     -moz-user-select: none;
-    /* Firefox 2+ */
     -ms-user-select: none;
-    /* IE 10+ */
     user-select: none;
-    /* Standard syntax */
     font-size: 14px;
     font-weight: 800;
 }
@@ -1617,13 +1654,9 @@ input[type="range"] {
     outline: none;
     border-radius: 6px;
     -webkit-user-select: none;
-    /* Safari 3.1+ */
     -moz-user-select: none;
-    /* Firefox 2+ */
     -ms-user-select: none;
-    /* IE 10+ */
     user-select: none;
-    /* Standard syntax */
 }
 
 .lextree .lextreeitem img {
@@ -1653,7 +1686,7 @@ input[type="range"] {
 
 .lextree .lextreeitem.selected {
     color: var(--global-text-primary);
-    background: var(--global-selected);
+    background: light-dark(var(--global-selected-light), var(--global-selected));
 }
 
 .lextree .lextreeitem a {
@@ -1981,7 +2014,8 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexmenubar .lexmenubutton.disabled a {
-    color: var(--global-button-color);
+    color: light-dark(var(--global-color-terciary), var(--global-button-color));
+    cursor: default;
 }
 
 /* Context Menu */
@@ -1991,7 +2025,7 @@ meter::-webkit-meter-even-less-good-value {
     position: absolute;
     padding-right: 20px;
     border-radius: 6px;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.63) !important;
+    box-shadow: 0 0 8px rgba(44, 44, 44, 0.63) !important;
     background-color: var(--global-blur-background);
     border: 1px solid #91909036;
 }
@@ -2258,7 +2292,7 @@ meter::-webkit-meter-even-less-good-value {
     border-radius: 10px;
     justify-content: center;
     background: none;
-    color: #d1d1d3bd;
+    color: var(--global-text-secondary);
 }
 
 .lexoverlaybuttons .lexbutton span {
@@ -2275,12 +2309,14 @@ meter::-webkit-meter-even-less-good-value {
     margin-left: 4px;
 }
 
-.lexoverlaybuttons .lexbutton img {
-    filter: brightness(0.7)
+@media (prefers-color-scheme: light) {
+    .lexoverlaybuttons .lexbutton img {
+        filter: invert(1);
+    }
 }
 
 .lexoverlaybuttons .lexbutton.selected {
-    background-color: var(--global-selected) !important;
+    background-color: light-dark(var(--global-selected-light), var(--global-selected)) !important;
     color: #fff;
     outline: none;
     border-radius: 8px;
@@ -2292,8 +2328,12 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexoverlaybuttons .lexbutton:hover {
-    color: #f5f5f5;
+    color: var(--global-text-primary);
     background: var(--global-button-color-hovered);
+}
+
+.lexoverlaybuttons .lexbutton.selected:hover {
+    color: #f4f4ffe6;
 }
 
 .lexoverlaybuttons .lexbutton:active {
@@ -2356,7 +2396,6 @@ meter::-webkit-meter-even-less-good-value {
 .lexareatabs .lexareatab {
     font-size: 13px;
     font-weight: 600;
-    text-shadow: 0.05em 0.05em 1px #0d0d109f;
     justify-content: center;
     text-align: center;
     align-items: center;
@@ -2364,20 +2403,16 @@ meter::-webkit-meter-even-less-good-value {
     color: var(--global-text-secondary);
     cursor: pointer;
     -webkit-user-select: none;
-    /* Safari 3.1+ */
     -moz-user-select: none;
-    /* Firefox 2+ */
     -ms-user-select: none;
-    /* IE 10+ */
     user-select: none;
-    /* Standard syntax */
     transition: 0.2s;
     line-height: 16px;
 }
 
 .lexareatabs .lexareatab.thumb {
     position: absolute;
-    background-color: var(--global-selected);
+    background: light-dark(var(--global-selected-light), var(--global-selected));
     z-index: 0;
 }
 
@@ -2417,8 +2452,8 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexareatabs.row .lexareatab.selected {
-    color: var(--global-text-primary);
-    background-color: var(--global-selected);
+    color: #fff;
+    background: light-dark(var(--global-selected-light), var(--global-selected));
 }
 
 .lexareatabs.folding .lexareatab.selected {
@@ -2427,7 +2462,11 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexareatabs .lexareatab:hover {
-    color: #f8f8f8;
+    color: var(--global-text-primary);
+}
+
+.lexareatabs.row .lexareatab.selected:hover {
+    color: var(--global-color-primary);
 }
 
 .lexareatabscontainer {
@@ -2530,7 +2569,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexlayer.selected {
-    background-color: var(--global-selected);
+    background: light-dark(var(--global-selected-light), var(--global-selected));
     color: white;
 }
 
@@ -2545,7 +2584,7 @@ meter::-webkit-meter-even-less-good-value {
 /* List Widget */
 
 .lexlist {
-    background: var(--global-dark-background);
+    background: var(--global-color-primary);
     border-radius: 4px;
     padding: 4px;
     display: grid;
@@ -2554,7 +2593,7 @@ meter::-webkit-meter-even-less-good-value {
 .lexlistitem {
     width: calc(100% - 8px);
     cursor: pointer;
-    color: rgba(216, 218, 230, 0.826);
+    color: var(--global-text-secondary);
     font-size: var(--global-font-size);
     border-radius: 4px;
     padding-left: 4px;
@@ -2566,13 +2605,9 @@ meter::-webkit-meter-even-less-good-value {
     align-content: center;
     display: flow-root;
     -webkit-user-select: none;
-    /* Safari 3.1+ */
     -moz-user-select: none;
-    /* Firefox 2+ */
     -ms-user-select: none;
-    /* IE 10+ */
     user-select: none;
-    /* Standard syntax */
 }
 
 .lexlistitem a {
@@ -2582,7 +2617,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexlistitem:hover {
-    background-color: var(--branch-title-inactive-background);
+    background-color: var(--global-color-secondary);
     color: var(--global-text-primary);
 }
 
@@ -2591,8 +2626,8 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexlistitem.selected {
-    color: var(--global-text-primary);
-    background-color: var(--global-selected);
+    color: #fff;
+    background-color: light-dark(var(--global-selected-light), var(--global-selected));
 }
 
 /* Array Widget */
@@ -2600,7 +2635,7 @@ meter::-webkit-meter-even-less-good-value {
 .lexwidget:has(.lexarrayitems),
 .lexwidget:has(.lexcheckboxsubmenu),
 .lexwidget:has(.lexcustomcontainer) {
-    background-color: var(--global-branch-darker);
+    background-color: light-dark(var(--global-color-terciary), var(--global-branch-darker));
     border-radius: 6px;
 }
 
@@ -2789,6 +2824,40 @@ meter::-webkit-meter-even-less-good-value {
     width: 7px;
     height: 7px;
     margin-top: 8px;
+}
+
+@media (prefers-color-scheme: light) {
+
+    .lexknob .knobcircle {
+        background: rgb(182, 182, 182);
+        background: linear-gradient(180deg, rgba(200, 200, 200, 1) 0%, rgba(160, 160, 160, 1) 100%);
+        box-shadow: 0px 3px 9px 2px #a3a3a3a9;
+    }
+
+    /* Arc Indicator */
+    .lexknob .knobcircle::before {
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Tick Marks */
+    .lexknob.show-ticks .knobcircle::after {
+        background: repeating-conic-gradient(transparent 0deg,
+                rgba(50, 50, 50, 0.493) 1deg 3deg,
+                transparent 4deg calc(var(--knob-snap-mark) - 1deg));
+    }
+
+    .lexknob .innerknobcircle {
+        background-color: rgb(182, 182, 182);
+    }
+
+    .lexknob .knobmarker {
+        background-color: var(--global-selected-dark);
+        filter: brightness(1.5);
+    }
+
+    .lexknob.disabled .knobmarker {
+        background-color: var(--global-text-primary);
+    }
 }
 
 /** Timeline */
