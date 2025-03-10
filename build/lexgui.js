@@ -3930,41 +3930,50 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         /**
          * @method addTitle
          * @param {String} name Title name
+         * @param {*} options:
+         * link: Href in case title is an hyperlink
+         * target: Target name of the iframe (if any)
+         * icon: FA class of the icon (if any)
+         * iconColor: Color of title icon (if any)
+         * style: CSS to override
          */
 
         addTitle( name, options = {} ) {
 
-            if(!name) {
-                throw("Set Widget Name!");
+            if( !name )
+            {
+                throw( "Can't create Title without text!" );
             }
 
-            let widget = this.create_widget(null, Widget.TITLE, options);
+            let widget = this.create_widget( null, Widget.TITLE, options );
             let element = widget.domEl;
             element.className = "lextitle";
 
-            if(options.icon) {
-                let icon = document.createElement('a');
-                icon.className = options.icon;
-                icon.style.color = options.icon_color || "";
-                element.appendChild(icon);
-            }
-
-            let text = document.createElement('span');
-            text.innerText = name;
-            element.appendChild(text);
-
-            Object.assign(element.style, options.style ?? {});
-
-            if(options.link != undefined)
+            if( options.icon )
             {
-                let link_el = document.createElement('a');
-                link_el.innerText = name;
-                link_el.href = options.link;
-                link_el.target = options.target ?? "";
-                link_el.className = "lextitle link";
-                Object.assign(link_el.style, options.style ?? {});
-                element.replaceWith(link_el);
+                let icon = document.createElement( 'a' );
+                icon.className = options.icon;
+                icon.style.color = options.iconColor || "";
+                element.appendChild( icon );
             }
+
+            let text = document.createElement( "span");
+            text.innerText = name;
+            element.appendChild( text );
+
+            Object.assign( element.style, options.style ?? {} );
+
+            if( options.link != undefined )
+            {
+                let linkDom = document.createElement('a');
+                linkDom.innerText = name;
+                linkDom.href = options.link;
+                linkDom.target = options.target ?? "";
+                linkDom.className = "lextitle link";
+                Object.assign( linkDom.style, options.style ?? {} );
+                element.replaceWith( linkDom );
+            }
+
             return element;
         }
 

@@ -82,11 +82,13 @@
 
         // **** **** **** **** **** **** **** **** **** **** **** **** 
 
-        function fillDocs( panel, branches_closed ) {
+        function fillDocs( panel, closedBranches ) {
             
+            const titleCss = { fontSize: "18px", background: "none" };
+
             panel.clear();
-            panel.branch("Manual", { closed: branches_closed });
-            panel.addTitle("LexGUI", { style: { fontSize: "18px" } });
+            panel.branch("Manual", { closed: closedBranches });
+            panel.addTitle("LexGUI", { style: titleCss });
             panel.addTitle("Installation", {link: "../docs/installation.html", target: 'viewer'});
             panel.addTitle("Getting started", {link: "../docs/getting_started.html", target: 'viewer'});
             panel.addTitle("Creating an area", {link: "../docs/creating_an_area.html", target: 'viewer'});
@@ -104,8 +106,8 @@
             panel.addTitle("Timeline", {link: "../docs/timeline.html", target: 'viewer'});
             panel.merge();
 
-            panel.branch("Reference", { closed: branches_closed });
-            panel.addTitle("Areas", { style: { fontSize: "18px" } });
+            panel.branch("Reference", { closed: closedBranches });
+            panel.addTitle("Areas", { style: titleCss });
             panel.addTitle("Area", {link: "../docs/reference/area.html", target: 'viewer'});
             panel.addTitle("Menubar", {link: "../docs/reference/menubar.html", target: 'viewer'});
             panel.addTitle("Sidebar", {link: "../docs/reference/sidebar.html", target: 'viewer'});

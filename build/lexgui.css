@@ -816,7 +816,7 @@ body.noevents * {
 .lextitle {
     width: fit-content;
     width: -moz-fit-content;
-    color: var(--global-text-terciary);
+    color: var(--global-text-secondary);
     font-weight: 800;
     font-size: 13px;
     margin: 12px;
@@ -848,7 +848,7 @@ body.noevents * {
 }
 
 .lextitle.link {
-    color: var(--global-text-terciary);
+    color: var(--global-text-secondary);
     text-decoration: none;
     transition: padding-left 0.1s;
 }

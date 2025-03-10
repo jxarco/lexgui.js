@@ -949,12 +949,13 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
 
         // Title
         MAKE_HEADER( "Title", "h2", "title" );
-        MAKE_PARAGRAPH( `Represents a title section inside a <a href="branching.html">Branch</a>.` );
+        MAKE_PARAGRAPH( `Represents a title section.` );
 
         {
             const area = new LX.Area( { skipAppend: true, height: "auto" } );
             const panel = area.addPanel();
-            panel.addTitle("A title!");
+            panel.addTitle("A Title!");
+            panel.addTitle("A No-Background Big Title!", { style: { background: "none", fontSize: "24px" } });
             document.body.appendChild( area.root );
         }
 
@@ -962,8 +963,16 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "Widget name"],
             ["options (Object)", "Basic options for a Widget"],
+            [
+                ["link (String)", "Href in case title is an hyperlink"],
+                ["target (String)", "Target name of the iframe (if any)"],
+                ["icon (String)", "FA class of the icon (if any)"],
+                ["iconColor (String)", "Color of title icon (if any)"],
+                ["style (String/Number)", "CSS to override"]
+            ]
         ] );
-        MAKE_CODE( `panel.addTitle(@[str]"A title!"@);` );
+        MAKE_CODE( `panel.@[mtd]addTitle@(@[str]"A title!"@);
+panel.@[mtd]addTitle@(@[str]"A No-Background Big Title!@", { style: { background: @[str]"none"@, fontSize: @[str]"24px"@ } });` );
 
         // Vector
         MAKE_HEADER( "Vector", "h2", "vector" );
