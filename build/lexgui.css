@@ -3644,7 +3644,7 @@ pre .line-gutter {
 }
 
 .lexcodeeditor .searchbox {
-    background-color: var(--global-medium-background);
+    background-color: var(--global-color-secondary);
     width: 256px;
     position: absolute;
     right: 6px;
