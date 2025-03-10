@@ -156,25 +156,73 @@ function MAKE_BULLET_LIST( list )
     document.body.appendChild( ul );
 }
 
+function ADD_CODE_LIST_ITEM( item, target )
+{
+    target = target ?? window.listQueued;
+    let split = (item.constructor === Array);
+    if( split && item[0].constructor === Array ) {
+        MAKE_CODE_BULLET_LIST( item, target );
+        return;
+    }
+    let li = document.createElement('li');
+    li.innerHTML = split ? ( item.length == 2 ? INLINE_CODE( item[0] ) + ": " + item[1] : INLINE_CODE( item[0] + " <span class='desc'>(" + item[1] + ")</span>" ) + ": " + item[2] ) : INLINE_CODE( item );
+    target.appendChild( li );
+}
+
+function MAKE_CLASS_METHOD( name, desc, params, ret )
+{
+    START_CODE_BULLET_LIST();
+    let paramsHTML = "";    
+    for( var p of params ) {
+        const name = p[ 0 ];
+        const type = p[ 1 ];
+        paramsHTML += name + ": <span class='desc'>" + type + "</span>" + ( params.indexOf( p ) != (params.length - 1) ? ', ' : '' );
+    }
+    let li = document.createElement('li');
+    li.innerHTML = INLINE_CODE( "<span class='method'>" + name + " (" + paramsHTML + ")" + ( ret ? (": " + ret) : "" ) + "</span>" );
+    window.listQueued.appendChild( li );
+    END_CODE_BULLET_LIST();
+    MAKE_PARAGRAPH( desc );
+}
+
+function MAKE_CLASS_CONSTRUCTOR( name, params )
+{
+    let paramsHTML = "";    
+    for( var p of params ) {
+        const name = p[ 0 ];
+        const type = p[ 1 ];
+        paramsHTML += name + ": <span class='desc'>" + type + "</span>" + ( params.indexOf( p ) != (params.length - 1) ? ', ' : '' );
+    }
+    let pr = document.createElement('p');
+    pr.innerHTML = INLINE_CODE( "<span class='constructor'>" + name + "(" + paramsHTML + ")" + "</span>" );
+    document.body.appendChild( pr );
+}
+
 function MAKE_CODE_BULLET_LIST( list, target )
 {
     console.assert(list && list.length > 0);
     let ul = document.createElement('ul');
     for( var el of list ) {
-        let split = (el.constructor === Array);
-        if( split && el[0].constructor === Array ) {
-            MAKE_CODE_BULLET_LIST( el, ul );
-            continue;
-        }
-        let li = document.createElement('li');
-        li.innerHTML = split ? INLINE_CODE( el[0] ) + ": " + el[1] : INLINE_CODE( el );
-        ul.appendChild( li );
+        ADD_CODE_LIST_ITEM( el, ul );
     }
     if( target ) {
         target.appendChild( ul );
     } else {
         document.body.appendChild( ul );
     }
+}
+
+function START_CODE_BULLET_LIST()
+{
+    let ul = document.createElement('ul');
+    window.listQueued = ul;
+}
+
+function END_CODE_BULLET_LIST()
+{
+    console.assert( window.listQueued );
+    document.body.appendChild( window.listQueued );
+    window.listQueued = undefined;
 }
 
 function INLINE_LINK( string, href )

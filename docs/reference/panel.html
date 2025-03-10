@@ -3,81 +3,89 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Docs</title>
-    <link rel="stylesheet" href="../style.css">    
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" crossorigin="anonymous" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
+    <script type="text/javascript" src="../docmaker.js"></script>
 </head>
 
 <body>
 
-<h1 id="panel">Panel</h1>
+<script type="text/javascript">
 
-<!-- <h2 id="examples">Examples</h2> -->
+    MAKE_HEADER( "Panel", "h1", "panel" );
+    // MAKE_PARAGRAPH( `Areas are the main container for a LexGUI interface. Inside they can contain panels and even other areas.` );
 
-<h2 id="constructor">Constructor</h2>
+    MAKE_HEADER( "Constructor", "h2", "constructor" );
+    MAKE_CLASS_CONSTRUCTOR( "Panel", [
+        ["options", "Object"]
+    ] );
 
-<h3>Panel( options : Object )</h2>
+    MAKE_PARAGRAPH( `The possible ${INLINE_CODE(`options`)} are the following:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["id", "String", "Id of the element"],
+        ["className", "String", "Add class to the element"],
+        ["width", "Number", "Width of the panel DOM element [fit space]"],
+        ["height", "Number", "Height of the panel DOM element [fit space]"],
+        ["style", "Object", "CSS Style object to be applied to the panel"],
+    ] );
 
-<br>
+    MAKE_HEADER( "Properties", "h2", "properties" );
+    MAKE_CODE_BULLET_LIST( [
+        [".branches", "Array", "Array of opened branches in the panel"],
+        [".onevent", "Function", "Function called when any of its widgets changes its value"],
+        [".root", "HTMLElement", "Container element of the panel"],
+        [".widgets", "Object", "Data of all the widgets created inside the panel"]
+    ] );
+    
+    MAKE_HEADER( "Methods", "h2", "methods" );
 
-<p>- <span class="param">options</span></p>
-<ul>
-    <li>id: <span class="desc">Id of the element</span></li>
-    <li>className: <span class="desc">Add class to the element</span></li>
-    <li>width: <span class="desc">Width of the panel DOM element [fit space]</span></li>
-    <li>height: <span class="desc">Height of the panel DOM element [fit space]</span></li>
-    <li>style: <span class="desc">CSS Style object to be applied to the panel</span></li>
-</ul>
+    MAKE_CLASS_METHOD( ".attach", `Appends a child to the panel root. If "content" has a root, then appends it, if not, append "content".`, [
+        ["content", "HTMLElement"]
+    ] );
 
-<h2 id="properties">Properties</h2>
-<br>
+    MAKE_CLASS_METHOD( ".branch", `Open new closable branch (section) inside the panel.`, [
+        ["name", "String"],
+        ["options", "Object"],
+    ] );
+    
+    MAKE_CLASS_METHOD( ".clear", `Clear the panel root and all of its widgets.`, [] );
 
-<p><span class="prop">.branches</span> : <span class="desc">Array</span></p>
-<p>Array of opened branches in the panel</p>
-<p><span class="prop">.onevent</span> : <span class="desc">Function</span></p>
-<p>Function called when any of its widgets changes its value</p>
-<p><span class="prop">.root</span> : <span class="desc">HTMLElement</span></p>
-<p>Container element of the panel (div)</p>
-<p><span class="prop">.widgets</span> : <span class="desc">Object</span></p>
-<p>Data of all the widgets created inside the panel</p>
+    MAKE_CLASS_METHOD( ".clearQueue", `Removes the queued container, so widgets will be appended in its corresponding branch/container.`, [] );
 
-<h2 id="methods">Methods</h2>
-<br>
+    MAKE_CLASS_METHOD( ".endLine", `Stop inlining widgets when created.`, [] );
 
-<p><span class="method">.attach </span>( content : <span class="desc">HTMLElement</span> )</p>
-<p>Appends a child to the panel root. If "content" has a root, then appends it, if not, append "content".</p>
+    MAKE_CLASS_METHOD( ".get", `Returns a given widget (in the panel) searched by name.`, [
+        ["name", "String"]
+    ], `<a href="widget.html">Widget</a>`);
 
-<p><span class="method">.branch </span>( name : <span class="desc">String</span>, options : <span class="desc">Object</span> ) : <a href="branch.html"><span class="desc">Branch</span></a></p>
-<p>Open new closable branch (section) inside the panel.</p>
+    MAKE_CLASS_METHOD( ".getBranch", `Returns a given branch (in the panel) searched by name.`, [
+        ["name", "String"]
+    ], `<a href="branch.html">Branch</a>` );
 
-<p><span class="method">.clear </span>( )</p>
-<p>Clear the panel root and all of its widgets.</p>
+    MAKE_CLASS_METHOD( ".getValue", `Returns the value of a given widget (in the panel) searched by name.`, [
+        ["name", "String"]
+    ], "*");
 
-<p><span class="method">.clearQueue </span>( )</p>
-<p>Removes the queued container, so widgets will be appended in its corresponding branch/container.</p>
+    MAKE_CLASS_METHOD( ".merge", `Merges current opened branch, meaning the following widgets will be created directly to the panel.`, [] );
 
-<p><span class="method">.endLine </span>( )</p>
-<p>Stop inlining widgets when created.</p>
+    MAKE_CLASS_METHOD( ".queue", `Sets a new temporal container for the newly created widgets. To stop using it, call <code class='inline'>Panel.clearQueue</code>.`, [
+        ["container", "HTMLElement"]
+    ] );
 
-<p><span class="method">.get </span>( name : <span class="desc">String</span> ) : <a href="widget.html"><span class="desc">Widget</span></a></p>
-<p>Returns a given widget (in the panel) searched by name.</p>
+    MAKE_CLASS_METHOD( ".sameLine", `Sets the following N widgets to be inlined when created. If N is <code class='inline'><span class="kwd">null</span></code>, every widget created will be 
+inlined until <code class='inline'>Panel.endLine</code> is called.`, [
+        ["numberOfWidgets", "Number"]
+    ] );
 
-<p><span class="method">.getBranch </span>( name : <span class="desc">String</span> ) : <a href="branch.html"><span class="desc">Branch</span></a></p>
-<p>Returns a given branch (in the panel) searched by name.</p>
+    MAKE_CLASS_METHOD( ".setValue", `Sets the value of a given widget (in the panel) searched by name.`, [
+        ["name", "String"],
+        ["value", "*"]
+    ] );
 
-<p><span class="method">.getValue </span>( name : <span class="desc">String</span> ) : <span class="desc">*</span></p>
-<p>Returns the value of a given widget (in the panel) searched by name.</p>
+    MAKE_LINE_BREAK();
+    MAKE_LINE_BREAK();
 
-<p><span class="method">.merge </span>( )</p>
-<p>Merges current opened branch, meaning the following widgets will be created directly to the panel.</p>
-
-<p><span class="method">.queue </span>( container : <span class="desc">HTMLElement</span> )</p>
-<p>Sets a new temporal container for the newly created widgets. To stop using it, call <code class='inline'>Panel.clearQueue</code>.</p>
-
-<p><span class="method">.sameLine </span>( n : <span class="desc">Number</span> )</p>
-<p>Sets the following N widgets to be inlined when created. If N is <code class='inline'><span class="lit">null</span></code>, every widget created will be 
-inlined until <code class='inline'>Panel.endLine</code> is called.</p>
-
-<p><span class="method">.setValue </span>( name : <span class="desc">String</span>, value : <span class="desc">*</span> )</p>
-<p>Sets the value of a given widget (in the panel) searched by name.</p>
+</script>
 
 </body>
 </html>

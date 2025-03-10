@@ -855,12 +855,12 @@ body.noevents * {
 .lextitle.link {
     color: var(--global-text-secondary);
     text-decoration: none;
-    transition: padding-left 0.1s;
+    transition: transform 0.1s;
 }
 
 .lextitle.link:hover {
     color: #049EF4;
-    padding-left: 8px;
+    transform: scale(1.02);
 }
 
 

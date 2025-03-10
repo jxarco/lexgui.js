@@ -136,7 +136,7 @@
             ["options (Object)", "Basic options for a Widget"],
             [
                 ["disabled (Boolean)", "Make the widget disabled"],
-                ["suboptions (Function)", "Callback to add widgets shown if <code class='inline'><span class='lit'>true@</code>"]
+                ["suboptions (Function)", "Callback to add widgets shown if <code class='inline'>true</code>"]
             ]
         ] );
         MAKE_CODE( `panel.@[mtd]addCheckbox@(@[str]"Toggle me"@, @true@, (value, event) =&gt; {
@@ -294,8 +294,8 @@ panel.@[mtd]addCurve@(@[str]"Opacity"@, opacityValues, (value, event) => {
 
         // Custom
         MAKE_HEADER( "Custom", "h2", "custom" );
-        MAKE_PARAGRAPH( `Lexgui supports generating custom widgets based on specific object data. By calling ${INLINE_CODE("LX.ADD_CUSTOM_WIDGET( name, options )")}, you can register a new Panel method that will 
-        create the custom widgets.` );
+        MAKE_PARAGRAPH( `Lexgui supports generating custom widgets based on specific object data. By calling ${INLINE_CODE("LX.ADD_CUSTOM_WIDGET( name, options )")}, 
+        you can register a new Panel method that will create your custom widgets.` );
 
         {
             const area = new LX.Area( { skipAppend: true, height: "auto" } );

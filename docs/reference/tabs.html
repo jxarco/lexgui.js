@@ -3,62 +3,65 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Docs</title>
-    <link rel="stylesheet" href="../style.css">    
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" crossorigin="anonymous" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
+    <script type="text/javascript" src="../docmaker.js"></script>
 </head>
 
 <body>
 
-<h1 id="tabs">Tabs</h1>
+<script type="text/javascript">
 
-<!-- <h2 id="examples">Examples</h2> -->
+    MAKE_HEADER( "Tabs", "h1", "tabs" );
+    // MAKE_PARAGRAPH( `Areas are the main container for a LexGUI interface. Inside they can contain panels and even other areas.` );
 
-<h2 id="constructor">Constructor</h2>
+    MAKE_HEADER( "Constructor", "h2", "constructor" );
+    MAKE_CLASS_CONSTRUCTOR( "Tabs", [
+        ["area", "Area"],
+        ["options", "Object"]
+    ] );
 
-<h3>Tabs( area : Area, options : Object )</h2>
+    MAKE_PARAGRAPH( `The possible ${INLINE_CODE(`options`)} are the following:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["fit", "Boolean", "Style of the tabs. Use all parent width"],
+        ["folding", "Boolean", "Tabs can be folded/minimized"],
+        ["onclose", "Function", "Function to call when a tab is closed"]
+    ] );
 
-<br>
+    MAKE_HEADER( "Properties", "h2", "properties" );
+    MAKE_CODE_BULLET_LIST( [
+        [".area", "<a href='area.html'>Area</a>", "Area of the tab container"],
+        [".root", "HTMLElement", "Container element of the menubar"],
+        [".selected", "String", "Name of the selected tab if any"],
+        [".tabs", "Object", "Map containing information for each of the generated tabs"],
+        [".tabDOMs", "Object", "Map containing the DOM elements for each of the generated tabs"],
+    ] );
+    
+    MAKE_HEADER( "Methods", "h2", "methods" );
 
-<p>- <span class="param">options</span></p>
-<ul>
-    <li>fit: <span class="desc">Style of the tabs. Use all parent width.</span></li>
-    <li>folding: <span class="desc">Tabs can be folded/minimized</span></li>
-    <li>onclose: <span class="desc">Function to be called when closing tabs.</span></li>
-</ul>
+    MAKE_CLASS_METHOD( ".add", `Adds a new tab inside the tab container. As options, you can use:`, [
+        ["name", "String"],
+        ["content", "HTMLElement"],
+        ["options", "Object"],
+    ] );
+    MAKE_CODE_BULLET_LIST( [[
+        ["selected", "Boolean", "If the tab is selected by default"],
+        ["onCreate", "Function", "Function to be called when creating the tab DOM element"],
+        ["onSelect", "Function", "Function to be called when selecting the tab"]
+    ]] );
 
-<h2 id="properties">Properties</h2>
-<br>
+    MAKE_CLASS_METHOD( ".delete", `Deletes permanently the tab.`, [
+        ["name", "String"]
+    ] );
 
-<p><span class="prop">.area</span> : <a href="area.html"><span class="desc">Area</span></a></p>
-<p>Area of the tab container.</p>
+    MAKE_CLASS_METHOD( ".select", `Selects a tab, calling onSelect option callback if used when the tab was added.`, [
+        ["name", "String"]
+    ] );
 
-<p><span class="prop">.root</span> : <span class="desc">HTMLElement</span></p>
-<p>Container element of the tabs DOM element (div)</p>
+    MAKE_LINE_BREAK();
+    MAKE_LINE_BREAK();
 
-<p><span class="prop">.selected</span> : <span class="desc">String</span></p>
-<p>Name of the selected tab if any</p>
-
-<p><span class="prop">.tabs</span> : <span class="desc">Object</span></p>
-<p>Map containing information for each of the generated tabs.</p>
-
-<p><span class="prop">.tabDOMs</span> : <span class="desc">Object</span></p>
-<p>Map containing the DOM elements for each of the generated tabs.</p>
-
-<h2 id="methods">Methods</h2>
-<br>
-
-<p><span class="method">.add </span>( name : <span class="desc">String</span>, content : <span class="desc">HTMLElement</span>, options : <span class="desc">Object</span> )</p>
-<p>Adds a new tab inside the tab container. As options, you can use: </p>
-<ul> 
-    <li><b>selected</b>: If the tab is selected by default.</li>
-    <li><b>onCreate</b>: Function to be called when creating the tab DOM element.</li>
-    <li><b>onSelect</b>: Function to be called when selecting the tab.</li>
-</ul>
-
-<p><span class="method">.select </span>( name : <span class="desc">String</span> )</p>
-<p>Selects a tab, calling onSelect option callback if used when the tab was added.</p>
-
-<p><span class="method">.delete </span>( name : <span class="desc">String</span>  )</p>
-<p>Deletes permanently the tab.</p>
+</script>
 
 </body>
 </html>

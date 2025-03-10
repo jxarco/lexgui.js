@@ -14,22 +14,20 @@
 
         MAKE_HEADER( "Code Editor", "h1", "code-editor" );
 
-        MAKE_LINE_BREAK();
         INSERT_IMAGE(`../data/Screenshot_Code.png`, "code_editor" );
         MAKE_LINE_BREAK();
 
         MAKE_PARAGRAPH( `The Code Editor component supports the following language highlightings:` );
         MAKE_CODE_BULLET_LIST( [
             "Plain text",
-            "JavaScript",
-            "C++",
-            "CSS",
+            "HTML, CSS, JavaScript",
+            "C, C++",
+            "CMake",
             "WGSL, GLSL",
             "JSON",
             "XML",
             "Rust",
             "Python",
-            "HTML",
             "Batch",
             "Markdown"
         ] );
@@ -44,23 +42,29 @@
         MAKE_CODE_BULLET_LIST( [
             ["name (String)", "If defined, name of the default code tab"],
             ["highlight (String)", "Default Hightlightin"],
-            ["allow_add_scripts (bool)", "Enables/Disables adding new tabs when double-clicking the tab space and doesn't add the 'New tab' tab"],
-            ["skip_info (bool)", "Show or hide the editor info panel at the bottom (Line, Column, Change Hightlighting, etc.)"],
-            ["file_explorer (bool)", "Create a file explorer for the editor"],
-            ["disable_edition (bool)", "Disables the edition of code (To make code snippets)"],
+            ["allowAddScripts (bool)", "Enables/Disables adding new tabs when double-clicking the tab space and doesn't add the 'New tab' tab"],
+            ["skipInfo (bool)", "Show or hide the editor info panel at the bottom (Line, Column, Change Hightlighting, etc.)"],
+            ["fileExplorer (bool)", "Create a file explorer for the editor"],
+            ["disableEdition (bool)", "Disables the edition of code (To make code snippets)"],
             ["autocomplete (bool)", "Toggle using autocomplete tool"],
             ["onsave (Function)", "Code to call when pressing <code class='inline'>Ctrl+S</code> in the editor"],
             ["onrun (Function)", "Code to call when pressing <code class='inline'>Ctrl+Enter</code> in the editor"]
         ] );
 
         MAKE_HEADER( "Opening files and new tabs", "h2", "using-tabs" );
-        MAKE_PARAGRAPH( `To load existing files you must use ${INLINE_CODE("CodeEditor.loadFile( filename )")}. This will open a new tab with the code in it.` );
+        MAKE_PARAGRAPH( `To load existing files you must use ${INLINE_CODE("CodeEditor.loadFile( filename, options )")}. This will open a new tab with the code in it using as options:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["language (String)", "Override the language highlighting for the new loaded file"]
+        ] );
 
         MAKE_PARAGRAPH( `Tab Events:` );
         MAKE_CODE_BULLET_LIST( [
             ["Double click to tab space", "Adds new empty tab"],
             ["Middle click to tab", "Closes tab"]
         ] );
+
+        MAKE_LINE_BREAK();
+        MAKE_LINE_BREAK();
 
     </script>
 

@@ -3,46 +3,57 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Docs</title>
-    <link rel="stylesheet" href="../style.css">    
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" crossorigin="anonymous" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
+    <script type="text/javascript" src="../docmaker.js"></script>
 </head>
 
 <body>
 
-<h1 id="widget">Widget</h1>
+<script type="text/javascript">
 
-<!-- <h2 id="examples">Examples</h2> -->
+    MAKE_HEADER( "Widget", "h1", "widget" );
+    // MAKE_PARAGRAPH( `Areas are the main container for a LexGUI interface. Inside they can contain panels and even other areas.` );
 
-<!-- <h2 id="constructor">Constructor</h2>
+    MAKE_HEADER( "Constructor", "h2", "constructor" );
+    MAKE_CLASS_CONSTRUCTOR( "Widget", [
+        ["name", "String"],
+        ["type", "Number"],
+        ["options", "Object"],
+    ] );
 
-<h3>Area( options : Object )</h2>
+    MAKE_PARAGRAPH( `The possible ${INLINE_CODE(`options`)} are the following:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["className", "String", "Add class to DOM element"],
+        ["id", "String", "Set DOM id to the DOM element"],
+        ["hideName", "Boolean", "Hide the widget name"],
+        ["width", "Number", "Width of the widget"],
+        ["height", "Number", "Height of the widget"],
+        ["maxWidth", "Number", "Maximum width of the widget"],
+        ["maxHeight", "Number", "Maximum height of the widget"],
+        ["signal", "String", "Add a signal listener to the widget"],
+        ["title", "String", "HTML title attribute for the DOM element"]
+    ] );
 
-<br>
+    MAKE_HEADER( "Properties", "h2", "properties" );
+    MAKE_CODE_BULLET_LIST( [
+        [".domEl", "HTMLElement", "Container element of the widget"],
+        [".name", "String", "Widget name"],
+        [".type", "Number", "Widget type"]
+    ] );
+    
+    MAKE_HEADER( "Methods", "h2", "methods" );
 
-<p>- <span class="param">options</span></p>
-<ul>
-    <li>id: <span class="desc">Id of the element</span></li>
-    <li>className: <span class="desc">Add class to the element</span></li>
-    <li>width: <span class="desc">Width of the area element [fit space]</span></li>
-    <li>height: <span class="desc">Height of the area element [fit space]</span></li>
-    <li>skipAppend: <span class="desc">Create but not append to GUI root [false]</span></li>
-</ul> -->
+    MAKE_CLASS_METHOD( ".set", `Sets the value of the widget. Type depends on the specific widget.`, [
+        ["value", "*"]
+    ] );
 
-<h2 id="properties">Properties</h2>
-<br>
+    MAKE_CLASS_METHOD( ".value", `Retrieves the value of the widget. Value type depends on the specific widget.`, [], "*" );
 
-<p><span class="prop">.name</span> : <span class="desc">String</span></p>
-<p>Widget name</p>
+    MAKE_LINE_BREAK();
+    MAKE_LINE_BREAK();
 
-<p><span class="prop">.type</span> : <span class="desc">Number</span></p>
-<p>Widget type</p>
-
-<h2 id="methods">Methods</h2>
-<br>
-<p><span class="method">.value </span>( ) : <span class="desc">*</span></p>
-<p>Returns the value of the widget. Type depends on the specific widget.</p>
-
-<p><span class="method">.set </span>( value : <span class="desc">*</span> )</p>
-<p>Sets the value of the widget. Type depends on the specific widget.</p>
+</script>
 
 </body>
 </html>

@@ -243,6 +243,7 @@ class CodeEditor {
      * skipInfo:
      * fileExplorer:
      * allowAddScripts:
+     * disableEdition:
      */
 
     constructor( area, options = {} ) {

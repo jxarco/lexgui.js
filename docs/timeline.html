@@ -10,102 +10,122 @@
 
 <body>
 
-    <script type="text/javascript">
+<script type="text/javascript">
 
-        MAKE_HEADER( "Timeline", "h1", "timeline" );
-        MAKE_PARAGRAPH( `Timeline is an abstrac class and it has the following derived clases:` );
-        MAKE_CODE_BULLET_LIST( [
-            [`<a href="#keyframes-timeline">KeyframesTimeline</a>`, ""],
-            [`<a href="#curves-timeline">CurvesTimeline</a>`, ""],
-            [`<a href="#clips-timeline">ClipsTimeline</a>`, ""],
-        ] );
-        MAKE_HEADER( "Constructor", "h3", "" );
-        MAKE_HEADER( `Timeline(name:<span class="desc">String</span>, options:<span class="desc">Object</span>)`, "h4", "" );
+    MAKE_HEADER( "Timeline", "h1", "timeline" );
+    MAKE_PARAGRAPH( `Timeline is an abstrac class and it has the following derived clases:` );
+    MAKE_CODE_BULLET_LIST( [
+        `<a href="#keyframes-timeline">KeyframesTimeline</a>`,
+        `<a href="#curves-timeline">CurvesTimeline</a>`,
+        `<a href="#clips-timeline">ClipsTimeline</a>`,
+    ] );
+    MAKE_HEADER( "Constructor", "h2", "" );
+    MAKE_CLASS_CONSTRUCTOR( "Timeline", [
+        ["name", "String"],
+        ["options", "Object"]
+    ] );
+    
+    MAKE_PARAGRAPH(`Each timeline has to be appended to an existing panel, where the possible ${INLINE_CODE(`options`)} are the following:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["opacity", "Float", " Value representing the opacity of the timeline canvas."],
+        ["width", "Float", " 400 by default."],
+        ["height", "Float", " 100 by default."],
+        ["trackHeight", "Float", " 25 by default."],
+        ["canvas", "Canvas", "HTML Canvas element where to draw the timeline."],
+        ["loop", "Boolean", "Set looping mode animation by default."],
+        ["skipVisibility", "Boolean", "When it's true, the un/active track button is disabled."],
+        ["skipLock", "Boolean", "When it's true, the un/lock track button is disabled."],
+        ["disableNewTracks", "Boolean", "When it's true, add new tracks option is disabled."],                
+        ["animationClip", "Object", "Animation with name, the array of tracks and duration."],
+        ["selectedItems", "Array", "Array with the names of the selected tracks/items."],
+    ] );
+
+    MAKE_PARAGRAPH( `Callback functions can be defined also in the ${INLINE_CODE("options")}. These are the possible functions that can be called after an actions is triggered:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["onBeforeCreateTopBar", "Function", "Callback to add widgets on the top bar before the default ones."],
+        ["onAfterCreateTopBar", "Function", "Callback to add widgets on the top bar after the default ones."],
+        ["onChangePlayMode", "Function", "Function called when the play mode is changed (loop or once)."],
+        ["onChangeState", "Function", "Function called when the play/pause mode is changed."],
+        ["onSetDuration", "Function", "Function called when the duration is changed."],
+        ["onSetSpeed", "Function", "Function called when the speed is changed."],
+        ["onSetTime", "Function", "Function called when the current time is changed."],
+        ["onSelectTrack", "Function", "Function called when a track is selected."],
+        ["onLockTrack", "Function", "Function called when a track is un/locked."],
+        ["onChangeTrackVisibility", "Function", "Function called when a un/active track mode is triggered."],
+        ["onChangeTrackDisplay", "Function", "Function called when a un/active track is shown/hidden in the timeline."],
+    ] );
         
+    MAKE_HEADER( "Properties", "h2", "" );
+    MAKE_CODE_BULLET_LIST( [
+        [".root", "LX.Area", "Container where the whole timeline is created"],
+        [".animationClip", "Object"],
+        [
+            [".idx", "Number", "Id of the clip"],
+            [".tracks", "Array", "Tracks of the animation clip"],
+            [".duration", "Number", "0 by default"],
+            [".speed", "Number", "1 by default"],
+        ],
+        [".tracksDrawn", "Array", "Contains the information of all tracks currently displayed on the timeline"],
+        [".tracksPerItem", "Object", "Contains all the information of the tracks for each item. For example, an item can has multiple tracks such as for position, for rotation or scale. "],
+        [".playing", "Boolean", ""],
+        [".duration", "Float", ""],               
+    ] );
 
-        MAKE_PARAGRAPH("Each timeline has to be appended to an existing panel.");
-        MAKE_PARAGRAPH( `The possible ${INLINE_CODE(`options <span class="desc">(Object)</span>`)} when creating dialogs are the following:` );
-            MAKE_CODE_BULLET_LIST( [
-                [`opacity <span class="desc">(Float)</span>`, ` Value representing the opacity of the timeline canvas.`],
-                [`width <span class="desc">(Float)</span>`, " 400 by default."],
-                [`height <span class="desc">(Float)</span>`, " 100 by default."],
-                [`trackHeight <span class="desc">(Float)</span>`, " 25 by default."],
-                [`canvas <span class="desc">(Canvas)</span>`, "HTML Canvas element where to draw the timeline."],
-                [`loop <span class="desc">(Boolean)</span>`, "Set looping mode animation by default."],
-                [`skipVisibility <span class="desc">(Boolean)</span>`, "When it's true, the un/active track button is disabled."],
-                [`skipLock <span class="desc">(Boolean)</span>`, "When it's true, the un/lock track button is disabled."],
-                [`disableNewTracks <span class="desc">(Boolean)</span>`, "When it's true, add new tracks option is disabled."],                
-                [`animationClip <span class="desc">(Object)</span>`, "Animation with name, the array of tracks and duration."],
-                [`selectedItems <span class="desc">(Array)</span>`, "Array with the names of the selected tracks/items."],
-            ] );
+    MAKE_HEADER( "Methods", "h2", "" );
 
-        MAKE_PARAGRAPH( `Callback functions can be defined also in the ${INLINE_CODE("options")}. These are the possible functions that can be called after an actions is triggered:` );
-            MAKE_CODE_BULLET_LIST( [
-                [`onBeforeCreateTopBar <span class="desc">(function)</span>`, "Callback to add widgets on the top bar before the default ones."],
-                [`onAfterCreateTopBar <span class="desc">(function)</span>`, "Callback to add widgets on the top bar after the default ones."],
-                [`onChangePlayMode <span class="desc">(function)</span>`, "Function called when the play mode is changed (loop or once)."],
-                [`onChangeState <span class="desc">(function)</span>`, "Function called when the play/pause mode is changed."],
-                [`onSetDuration <span class="desc">(function)</span>`, "Function called when the duration is changed."],
-                [`onSetSpeed <span class="desc">(function)</span>`, "Function called when the speed is changed."],
-                [`onSetTime <span class="desc">(function)</span>`, "Function called when the current time is changed."],
-                [`onSelectTrack <span class="desc">(function)</span>`, "Function called when a track is selected."],
-                [`onLockTrack <span class="desc">(function)</span>`, "Function called when a track is un/locked."],
-                [`onChangeTrackVisibility <span class="desc">(function)</span>`, "Function called when a un/active track mode is triggered."],
-                [`onChangeTrackDisplay <span class="desc">(function)</span>`, "Function called when a un/active track is shown/hidden in the timeline."],
-            ] );
-           
-        MAKE_HEADER( "Properties", "h3", "" );
-        MAKE_CODE_BULLET_LIST( [
-                [`.root`, `<span class="desc">LX.Area</span> <p> Container where the whole timeline is created`],
-                [`.animationClip`, `<span class="desc">Object</span>
-                    <ul>
-                        <li><span> idx: </span> <span class ="desc"> (Integer) </span></li>
-                        <li><span> tracks: </span> <span class ="desc"> (Array) </span></li>
-                        <li><span> duration: </span> <span class ="desc"> (Float)</span> 0 by default</li>
-                        <li><span> speed: </span> <span class ="desc"> (Float)</span> 1 by default</li>
-                    </ul>
-                `],
-                [`.tracksDrawn`, `<span class="desc">Array</span> <p> Contains the information of all tracks currently displayed on the timeline`],
-                [`.tracksPerItem`, `<span class="desc">Object</span> <p> Contains all the information of the tracks for each item. For example, an item can has multiple tracks such as for position, for rotation or scale. `],
-                [`.playing`, `<span class="desc">Boolean</span> <p> `],
-                [`.duration`, `<span class="desc">Float</span> <p> `],               
-            ] );
+    MAKE_CLASS_METHOD( ".addNewTrack", "Add a new empty track in the timeline.", [], "Number" );
+    MAKE_CLASS_METHOD( ".getCurrentKeyFrame", "Get the nearest keyframe to _time_ given a maximum threshold.", [
+        ["track", "Object"],
+        ["time", "Number"],
+        ["threshold", "Number"]
+    ], "Number" );
+    MAKE_CLASS_METHOD( ".getTracksInRange", "Get the tracks inside the specified vertical range (pixels) with a threshold.", [
+        ["minY", "Number"],
+        ["maxY", "Number"],
+        ["threshold", "Number"]
+    ], "Array" );
+    MAKE_CLASS_METHOD( ".selectTrack", "Select the track that contains the info passed.", [
+        ["trackInfo", "Object"]
+    ] );
+    MAKE_CLASS_METHOD( ".setAnimationClip", "Process and format the animation tracks and set it as the animationClip.", [
+        ["animation", "Object"]
+    ] );
+    MAKE_CLASS_METHOD( ".setDuration", "Set the duration of the animation.", [
+        ["duration", "Number"]
+    ] );
+    MAKE_CLASS_METHOD( ".setFramerate", "Set the playback framerate of the animation.", [
+        ["framerate", "Number"]
+    ] );
+    MAKE_CLASS_METHOD( ".setScale", "Set the scale of the timeline. Usually called when the user zooms in/out.", [
+        ["scale", "Number"]
+    ] );
+    MAKE_CLASS_METHOD( ".setSpeed", "Set the playback speed of the animation.", [
+        ["speed", "Number"]
+    ] );
 
-        MAKE_HEADER( "Methods", "h3", "" );
-        MAKE_CODE_BULLET_LIST( [
-                [`.setAnimationClip<span class="pln">(animation: <span class ="desc">Object</span>)</span>`, `<p> Process and format the animation tracks and set it as the animationClip`],
-                [`.setDuration<span class="pln">(duration: <span class ="desc">Float</span>)</span>`, `<p> Set the duration of the animation`],
-                [`.setSpeed<span class="pln">(speed: <span class ="desc">Float</span>)</span>`, `<p> Set the playback speed of the animation`],
-                [`.setScale<span class="pln">(scale: <span class ="desc">Float</span>)</span>`, `<p> Set the scale of the timeline. Usually called when the user zooms in/out`],
-                [`.setFramerate<span class="pln">(framerate: <span class ="desc">Float</span>)</span>`, `<p> Set the playback framerate of the animation`],
-                [`.getContent<span class="pln">(track: <span class ="desc">Object</span>, time: <span class ="desc">Float</span>, threshold: <span class ="desc">Float</span>)</span>`, `<p> Get the content of the track in the specified time with a threshold`],
-                [`.getTracksInRange<span class="pln">(minY: <span class ="desc">Integer</span>, maxY: <span class ="desc">Integer</span>, threshold: <span class ="desc">Float</span>)</span>`, `<p> Get the tracks inside the specified vertical range (pixels) with a threshold`],
-                [`.addNewTrack<span class="pln">()</span>`, `<p> Add a new empty track in the timeline`],
-                [`.selectTrack<span class="pln">(trackInfo: <span class ="desc">Object</span>)</span>`, `<p> Select the track that contains the info passed`],
-                            
-            ] );
+    MAKE_HEADER( "Keyframes timeline", "h2", "keyframes-timeline" );
+    INSERT_IMAGE(`../data/keyframes.png`, "keyframes timeline" );
+    MAKE_PARAGRAPH( `Callback functions can be defined also in the ${INLINE_CODE("options")}. These are the possible functions that can be called after an actions is triggered:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["onShowOptimizeMenu (function)", ""],
+        ["onGetOptimizeThreshold (function)", ""]
+    ] );
 
-        MAKE_HEADER( "Keyframes timeline", "h2", "keyframes-timeline" );
-        INSERT_IMAGE(`../data/keyframes.png`, "keyframes timeline" );
-        MAKE_PARAGRAPH( `Callback functions can be defined also in the ${INLINE_CODE("options")}. These are the possible functions that can be called after an actions is triggered:` );
-            MAKE_CODE_BULLET_LIST( [
-                ["onShowOptimizeMenu (function)", ""],
-                ["onGetOptimizeThreshold (function)", ""]
-            ] );
+    MAKE_CODE( `@let@ kfTimeline = @new@ LX.@[typ]KeyframesTimeline@(@[str]"Timeline name"@ );
+panel.attach(kfTimeline.root);` );
+    
+    MAKE_HEADER( "Curves timeline", "h2", "curves-timeline" );
+    INSERT_IMAGE(`../data/curves.png`, "curves timeline", );
+    MAKE_PARAGRAPH( `..TODO` );
+    
+    MAKE_HEADER( "Clips timeline", "h2", "clips-timeline" );
+    INSERT_IMAGE(`../data/clips.png`, "clips timeline", );
+    MAKE_PARAGRAPH( `..TODO` );
 
-        MAKE_CODE( `<span class="kwd">let</span> kfTimeline = <span class="kwd">new</span> LX.<span class="typ">KeyframesTimeline</span>(<span class="str">"Timeline name"</span> );
-        <span>panel.attach(kfTimeline.root);</span>` );
-        
-        MAKE_HEADER( "Curves timeline", "h2", "curves-timeline" );
-        INSERT_IMAGE(`../data/curves.png`, "curves timeline", );
-        MAKE_PARAGRAPH( `..TODO` );
-        
-        MAKE_HEADER( "Clips timeline", "h2", "clips-timeline" );
-        INSERT_IMAGE(`../data/clips.png`, "clips timeline", );
-        MAKE_PARAGRAPH( `..TODO` );
+    MAKE_LINE_BREAK();
+    MAKE_LINE_BREAK();
 
-
-    </script>
+</script>
 
 </body>
 </html>

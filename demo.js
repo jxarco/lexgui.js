@@ -738,7 +738,7 @@ function createLoginForm() {
             console.log(value);
         }, { actionName: "Login" });
 
-        panel.addLabel( "Or" );
+        panel.addLabel( "Or", { float: 'center' } );
 
         panel.addButton( null, "Sign up", ( value, event ) => { });
 

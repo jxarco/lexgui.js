@@ -3,40 +3,49 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Docs</title>
-    <link rel="stylesheet" href="../style.css">    
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" crossorigin="anonymous" href="https://use.fontawesome.com/releases/v6.7.2/css/all.css">
+    <script type="text/javascript" src="../docmaker.js"></script>
 </head>
 
 <body>
 
-<h1 id="menubar">Menubar</h1>
+<script type="text/javascript">
 
-<!-- <h2 id="examples">Examples</h2> -->
+    MAKE_HEADER( "Menubar", "h1", "menubar" );
+    // MAKE_PARAGRAPH( `Areas are the main container for a LexGUI interface. Inside they can contain panels and even other areas.` );
 
-<!-- <h2 id="constructor">Constructor</h2>
+    MAKE_HEADER( "Constructor", "h2", "constructor" );
+    MAKE_CLASS_CONSTRUCTOR( "Menubar", [
+        ["options", "Object"]
+    ] );
 
-<h3>Area( options : Object )</h2>
+    MAKE_PARAGRAPH( `The possible ${INLINE_CODE(`options`)} are the following:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["float", "String", "Align menubar content to a specific side"]
+    ] );
 
-<br>
+    MAKE_HEADER( "Properties", "h2", "properties" );
+    MAKE_CODE_BULLET_LIST( [
+        [".root", "HTMLElement", "Container element of the menubar"]
+    ] );
+    
+    MAKE_HEADER( "Methods", "h2", "methods" );
 
-<p>- <span class="param">options</span></p>
-<ul>
-    <li>id: <span class="desc">Id of the element</span></li>
-    <li>className: <span class="desc">Add class to the element</span></li>
-    <li>width: <span class="desc">Width of the area element [fit space]</span></li>
-    <li>height: <span class="desc">Height of the area element [fit space]</span></li>
-    <li>skipAppend: <span class="desc">Create but not append to GUI root [false]</span></li>
-</ul> -->
+    MAKE_CLASS_METHOD( ".add", `Creates a Menubar entry/subentry using the path.`, [
+        ["callback", "Function"],
+        ["options", "Object"],
+    ] );
 
-<h2 id="properties">Properties</h2>
-<br>
+    MAKE_CLASS_METHOD( ".addButtons", `Creates a button section inside the menubar.`, [
+        ["buttons", "Array"],
+        ["options", "Object"],
+    ] );
 
-<p><span class="prop">.root</span> : <span class="desc">HTMLElement</span></p>
-<p>Root container element (div)</p>
+    MAKE_LINE_BREAK();
+    MAKE_LINE_BREAK();
 
-<h2 id="methods">Methods</h2>
-<br>
-<p><span class="method">.add </span>( callback : <span class="desc">Function</span>, options : <span class="desc">Object</span> ) : <a href="menubar.html"><span class="desc">Menubar</span></a></p>
-<p>Creates a Menubar entry/subentry using the path.</p>
+</script>
 
 </body>
 </html>
