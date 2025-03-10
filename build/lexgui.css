@@ -2384,6 +2384,10 @@ meter::-webkit-meter-even-less-good-value {
     margin-right: 0px;
 }
 
+.lexoverlaybuttons .lexwidget:last-child {
+  margin-right: 0px;
+}
+
 /* Area Tabs */
 
 .lexareatabs {
@@ -2823,6 +2827,10 @@ meter::-webkit-meter-even-less-good-value {
     background-color: var(--global-text-terciary);
 }
 
+.lexknob.disabled .knobmarker {
+  background-color: var(--global-text-terciary);
+}
+
 .lexknob.sm .knobmarker {
     width: 5px;
     height: 5px;
@@ -3159,6 +3167,24 @@ ul.lexassetscontent {
     opacity: 1;
 }
 
+.lexassetscontent .lexitemdesc {
+  position: absolute;
+  font-weight: 600;
+  background-color: #afafaf;
+  color: var(--global-color-primary);
+  font-size: 14px;
+  border-radius: 6px;
+  display: none;
+  opacity: 0;
+  z-index: 102;
+  padding: 2px 6px;
+  transition: opacity ease-in 0.1s;
+  pointer-events: none;
+}
+
+.lexassetscontent li:hover + .lexitemdesc {
+  opacity: 1;
+}
 .lexassetscontent.list li {
     width: calc(100% - 0.5em);
     height: 1.8em;
@@ -4324,13 +4350,46 @@ pre .line-gutter {
 }  */
 
 .resizeable {
-    resize: both;
-    overflow: auto;
+  resize: both;
+  overflow: auto;
 }
 
-/* @media (prefers-color-scheme: light) {
+.resize-area {
+  position: absolute;
+  border: 2px double var(--global-selected-light);
+  cursor: move;
+  z-index: 100;
+}
 
-    .lexarea {
-        background-color: var(--global-color-primary);
-    }
-} */
+.resize-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #ffffff;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.resize-handle.tl {
+  top: -5px;
+  left: -5px;
+  cursor: nwse-resize;
+}
+
+.resize-handle.tr {
+  top: -5px;
+  right: -5px;
+  cursor: nesw-resize;
+}
+
+.resize-handle.bl {
+  bottom: -5px;
+  left: -5px;
+  cursor: nesw-resize;
+}
+
+.resize-handle.br {
+  bottom: -5px;
+  right: -5px;
+  cursor: nwse-resize;
+}
