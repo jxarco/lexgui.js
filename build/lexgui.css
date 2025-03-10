@@ -3334,7 +3334,6 @@ ul.lexassetscontent {
     display: flex;
     position: relative;
     overflow: inherit;
-    background-color: var(--global-branch-darker);
 }
 
 .codebasearea * {
@@ -3366,6 +3365,7 @@ ul.lexassetscontent {
 
 .codebasearea .lexareatab.selected {
     background-color: var(--global-color-secondary) !important;
+    color: var(--global-text-secondary) !important;
     border-top: 1px solid var(--global-selected);
     border-bottom: none;
 }
@@ -3405,13 +3405,9 @@ ul.lexassetscontent {
     overflow: hidden;
     width: calc(100%);
     -webkit-user-select: none;
-    /* Safari 3.1+ */
     -moz-user-select: none;
-    /* Firefox 2+ */
     -ms-user-select: none;
-    /* IE 10+ */
     user-select: none;
-    /* Standard syntax */
 }
 
 .lexcodeeditor .lexareatabscontent {
@@ -3419,7 +3415,7 @@ ul.lexassetscontent {
 }
 
 .lexcodetabinfo {
-    background-color: var(--global-branch-darker);
+    background-color: light-dark(var(--global-color-terciary), var(--global-medium-background));
     position: absolute;
     z-index: 3;
     bottom: 0px;
@@ -3429,7 +3425,7 @@ ul.lexassetscontent {
 .lexcodegutter {
     width: 48px;
     height: calc(100% - 62px);
-    background-color: var(--global-branch-darker);
+    background-color: light-dark(var(--global-color-terciary), var(--global-medium-background));
     margin-top: 28px;
     overflow: hidden;
     position: absolute;
@@ -3438,7 +3434,7 @@ ul.lexassetscontent {
 
 .lexcodeeditor .codetabsarea {
     height: calc(100% - 72px) !important;
-    background-color: var(--global-branch-darker);
+    background-color: light-dark(var(--global-color-terciary), var(--global-medium-background));
     overflow: scroll;
 }
 
@@ -3493,7 +3489,7 @@ ul.lexassetscontent {
     white-space: pre;
     word-wrap: normal;
     line-height: inherit;
-    color: #dde1ec;
+    color: var(--global-text-primary);
     position: relative;
     overflow: visible;
     -webkit-tap-highlight-color: transparent;
@@ -3519,7 +3515,7 @@ ul.lexassetscontent {
 }
 
 pre .line-gutter {
-    color: #8a8b97;
+    color: var(--global-text-terciary);
     width: 48px;
     height: var(--code-editor-row-height);
     font-size: var(--code-editor-font-size);
@@ -3527,13 +3523,9 @@ pre .line-gutter {
     line-height: var(--code-editor-row-height);
     text-align: center;
     -webkit-user-select: none;
-    /* Safari 3.1+ */
     -moz-user-select: none;
-    /* Firefox 2+ */
     -ms-user-select: none;
-    /* IE 10+ */
     user-select: none;
-    /* Standard syntax */
     position: sticky;
     left: 0;
     z-index: 1;
@@ -3571,7 +3563,7 @@ pre .line-gutter {
     width: 0;
     height: var(--code-editor-row-height);
     position: absolute;
-    border-left: 3px solid #fff !important;
+    border-left: 3px solid var(--global-text-primary) !important;
     z-index: 1 !important;
     opacity: 0.6;
     left: 0px;
@@ -3652,7 +3644,7 @@ pre .line-gutter {
 }
 
 .lexcodeeditor .searchbox {
-    background-color: var(--global-branch-darker);
+    background-color: var(--global-medium-background);
     width: 256px;
     position: absolute;
     right: 6px;
@@ -3679,7 +3671,7 @@ pre .line-gutter {
 }
 
 .lexcodeeditor .autocomplete {
-    background-color: var(--global-branch-darker);
+    background-color: var(--global-medium-background);
     width: 256px;
     max-height: 128px;
     position: absolute;
@@ -3807,6 +3799,89 @@ pre .line-gutter {
 .cm-sym.xml { color: #929292; }    /* symbol */
 
 .cm-bln.markdown { color: #a1d2f0; }  /* builtin */
+
+@media (prefers-color-scheme: light) {
+    .lexcodeeditor pre.active-line {
+        background-color: #c5c4c4ab;
+    }
+
+    .lexcodescrollbar div {
+        /* thumb */
+        background-color: #8383839d !important;
+    }
+    
+    .lexcodescrollbar div:hover {
+        /* thumb */
+        background-color: #5e5e5ea9 !important;
+    }
+
+    .cm-str { color: #a15e3e; }   /* string */
+    .cm-std { color: #a753c0; }   /* statements & declarations */
+    .cm-kwd { color: #1967d2; }   /* keyword */
+    .cm-com { color: #188038; }   /* comment */
+
+    .cm-typ.javascript { color: #0b9484; }  /* type */
+    .cm-dec.javascript { color: #c5221f; }  /* decimal */
+    .cm-sym.javascript { color: #333333; }  /* symbol */
+    .cm-mtd.javascript { color: #539ac7 }   /* method */
+
+    .cm-typ.c { color: #0b9484; }   /* type */
+    .cm-bln.c { color: #333333; }   /* builtin */
+    .cm-dec.c { color: #c5221f; }   /* decimal */
+    .cm-sym.c { color: #333333; }   /* symbol */
+    .cm-mtd.c { color: #539ac7 }    /* method */
+    .cm-ppc.c { color: #626262 }    /* preprocessor */
+
+    .cm-typ.cpp { color: #0b9484; }   /* type */
+    .cm-bln.cpp { color: #333333; }   /* builtin */
+    .cm-dec.cpp { color: #c5221f; }   /* decimal */
+    .cm-sym.cpp { color: #333333; }   /* symbol */
+    .cm-mtd.cpp { color: #539ac7 }    /* method */
+    .cm-ppc.cpp { color: #626262 }    /* preprocessor */
+
+    .cm-sym.cmake { color: #a753c0; }  /* symbol */
+
+    .cm-kwd.css { color: #c49319; }   /* keyword */
+    .cm-typ.css { color: #539ac7; }   /* type */
+    .cm-bln.css { color: #2194ce; }   /* builtin */
+    .cm-dec.css { color: #c5221f; }   /* decimal */
+    .cm-sym.css { color: #a753c0; }   /* symbol */
+
+    .cm-dec.json { color: #c5221f; }  /* decimal */
+    .cm-sym.json { color: #a753c0; }  /* symbol */
+
+    .cm-typ.glsl { color: #0b9484; }  /* type */
+    .cm-dec.glsl { color: #c5221f; }  /* decimal */
+    .cm-mtd.glsl { color: #539ac7; }  /* method */
+    .cm-sym.glsl { color: #a753c0; }  /* symbol */
+
+    .cm-typ.wgsl { color: #0b9484; }  /* type */
+    .cm-dec.wgsl { color: #c5221f; }  /* decimal */
+    .cm-mtd.wgsl { color: #539ac7; }  /* method */
+    .cm-sym.wgsl { color: #a753c0; }  /* symbol */
+    .cm-ppc.wgsl { color: #626262; }  /* preprocessor */
+
+    .cm-typ.rust { color: #0b9484; }  /* type */
+    .cm-dec.rust { color: #c5221f; }  /* decimal */
+    .cm-sym.rust { color: #333333; }  /* symbol */
+    .cm-mtd.rust { color: #539ac7 }   /* method */
+
+    .cm-typ.python { color: #0b9484; }  /* type */
+    .cm-dec.python { color: #c5221f; }  /* decimal */
+    .cm-sym.python { color: #333333; }  /* symbol */
+    .cm-mtd.python { color: #539ac7 }   /* method */
+
+    .cm-dec.batch { color: #c5221f; }   /* decimal */
+    .cm-sym.batch { color: #a753c0; }   /* symbol */
+
+    .cm-bln.html { color: #539ac7; }    /* builtin */
+    .cm-sym.html { color: #696969; }    /* symbol */
+
+    .cm-bln.xml { color: #a1d2f0; }    /* builtin */
+    .cm-sym.xml { color: #929292; }    /* symbol */
+
+    .cm-bln.markdown { color: #a1d2f0; }  /* builtin */
+}
 
 /* Node Graph */
 
@@ -4239,7 +4314,7 @@ pre .line-gutter {
 /* .lexvideoeditor .lexvideotimebar {
   width: calc(100% - 40px);
   height: 100%;
-  background-color: var(--global-branch-darker);
+  background-color: var(--global-intense-background);
 } */
 
 /* .lexvideoeditor .lexvideotimebar canvas {
