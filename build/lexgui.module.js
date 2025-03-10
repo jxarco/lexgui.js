@@ -70,8 +70,22 @@ LX.setThemeColor = setThemeColor;
 
 function getThemeColor( colorName )
 {
-    var r = getComputedStyle( document.querySelector( ':root' ) );
-    return r.getPropertyValue( '--' + colorName );
+    const r = getComputedStyle( document.querySelector( ':root' ) );
+    const value = r.getPropertyValue( '--' + colorName );
+
+    if( value.includes( "light-dark" ) && window.matchMedia )
+    {
+        if( window.matchMedia( "(prefers-color-scheme: light)" ).matches )
+        {
+            return value.substring( value.indexOf( '(' ) + 1, value.indexOf( ',' ) ).replace( /\s/g, '' );
+        }
+        else
+        {
+            return value.substring( value.indexOf( ',' ) + 1, value.indexOf( ')' ) ).replace( /\s/g, '' );
+        }
+    }
+
+    return value;
 }
 
 LX.getThemeColor = getThemeColor;
@@ -624,6 +638,11 @@ function init( options = { } )
     {
         this.main_area = new Area( { id: options.id ?? 'mainarea' } );
     }
+
+    window.matchMedia( "(prefers-color-scheme: dark)" ).addEventListener( "change", event => {
+        const newColorScheme = event.matches ? "dark" : "light";
+        LX.emit( "@on_new_color_scheme", newColorScheme );
+    });
 
     return this.main_area;
 }
@@ -7509,7 +7528,7 @@ class Curve {
         element.style.minWidth = "50px";
         element.style.minHeight = "20px";
 
-        element.bgcolor = options.bgColor || LX.getThemeColor( "global-dark-background" );
+        element.bgcolor = options.bgColor || LX.getThemeColor( "global-intense-background" );
         element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected-light" );
         element.linecolor = options.lineColor || "#555";
         element.value = value || [];
@@ -7523,6 +7542,12 @@ class Curve {
         element.draggable_y = options.draggableY ?? true;
         element.smooth = (options.smooth && typeof( options.smooth ) == 'number' ? options.smooth : 0.3) || false;
         element.move_out = options.moveOutAction ?? LX.CURVE_MOVEOUT_DELETE;
+
+        LX.addSignal( "@on_new_color_scheme", (element, value) => {
+            element.bgcolor = options.bgColor || LX.getThemeColor( "global-intense-background" );
+            element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected-light" );
+            this.redraw();
+        } );
 
         this.element = element;
 

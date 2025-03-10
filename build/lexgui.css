@@ -20,14 +20,14 @@
     --global-selected: #2d69da;
     --global-selected-light: #0d99ff;
     --global-selected-dark: #304b86;
-    --global-branch-darker: #252525;
     --global-button-color: light-dark(#f9f9f9, #3e3e3e);
     --global-button-color-hovered: light-dark(#ececec, #444);
     --global-text-primary: light-dark(#202124, #f4f4ffe6);
     --global-text-secondary: light-dark(#2c2d2e, #cacad4ea);
     --global-text-terciary: light-dark(#474747f5, #727272b9);
-    --global-dark-background: #121212;
-    --global-blur-background: #1f1f1fe7;
+    --global-intense-background: light-dark(#fefefe, #121212);
+    --global-medium-background: #252525;
+    --global-blur-background: light-dark(#f7f7f7d8, #1f1f1fe7);
     --global-color-transparent: #7b8ae200;
     --transition-time: 1000;
     --code-editor-font-size: 14px;
@@ -294,7 +294,7 @@ body.noevents * {
     font-family: var(--global-title-font);
     font-weight: 600;
     font-size: 18px;
-    color: #d9d9e3;
+    color: var(--global-text-secondary);
     text-shadow: 0px 1px 6px #22222283;
     width: calc(100% - 24px);
     padding: 12px;
@@ -304,13 +304,9 @@ body.noevents * {
     display: flex;
     justify-content: space-between;
     -webkit-user-select: none;
-    /* Safari 3.1+ */
     -moz-user-select: none;
-    /* Firefox 2+ */
     -ms-user-select: none;
-    /* IE 10+ */
     user-select: none;
-    /* Standard syntax */
     align-items: center;
 }
 
@@ -332,17 +328,13 @@ body.noevents * {
 
 .lexdialogcloser {
     font-size: 16px;
-    color: #d9d9e3;
+    color: var(--global-text-secondary);
     cursor: pointer;
     margin-right: 0.4em;
     -webkit-user-select: none;
-    /* Safari 3.1+ */
     -moz-user-select: none;
-    /* Firefox 2+ */
     -ms-user-select: none;
-    /* IE 10+ */
     user-select: none;
-    /* Standard syntax */
 }
 
 .lexdialogcloser.notitle {
@@ -352,7 +344,7 @@ body.noevents * {
 }
 
 .lexdialogcloser:hover {
-    color: #aaa;
+    color: var(--global-text-terciary);
 }
 
 .lexdialogcloser:active {
@@ -375,8 +367,9 @@ body.noevents * {
 }
 
 .lexdialog.pocket .lexdialogtitle {
-    background: var(--global-dark-background);
+    width: calc(100% - 28px);
     font-size: 14px;
+    background: var(--global-intense-background);
 }
 
 .lexdialog.pocket .lexdialogcontent {
@@ -440,6 +433,20 @@ body.noevents * {
 
 .lexpopup.fadeout {
     opacity: 0;
+}
+
+@media (prefers-color-scheme: light) {
+    .lexdialog {
+        box-shadow: 0px 2px 6px #30303083;
+    }
+
+    .lexdialogtitle {
+        text-shadow: 0px 2px 4px #8e8f9483;
+    }
+
+    .lexpopup {
+        background: var(--global-blur-background);
+    }
 }
 
 /* Area */
@@ -724,7 +731,7 @@ body.noevents * {
 }
 
 .lexwidget .lextext div {
-    color: #b2b2b5d6;
+    color: var(--global-text-secondary);
     padding: 2px;
     padding-left: 6px;
 }
@@ -789,14 +796,13 @@ body.noevents * {
 }
 
 .lexseparator {
-    /* border-top: 1px solid #111; */
     border-bottom: 1px solid var(--global-button-color);
     margin: 5px 0 5px 10px;
 }
 
 .lexbranch .lexseparator {
-    border-top: 1px solid var(--global-dark-background);
-    border-bottom: 1px solid var(--global-color-terciary);
+    border-top: 1px solid #252525;
+    border-bottom: 1px solid rgb(87, 86, 86);
     width: -moz-calc(100% - 8px);
     width: -webkit-calc(100% - 8px);
     width: calc(100% - 8px);
@@ -1168,7 +1174,7 @@ input[type=checkbox]:checked:after {
     display: inline-block;
     background-color: #1f1f1f;
     color: #fff;
-    border: 1px solid var(--global-dark-background);
+    border: 1px solid var(--global-intense-background);
     vertical-align: -3px;
     border-radius: 2px;
     margin: 0 4px;
@@ -1496,7 +1502,7 @@ input[type="range"] {
 
 .lexwidget .lexpad .lexinnerpad {
     border-radius: 4px;
-    background-color: light-dark(var(--global-color-terciary), var(--global-dark-background));
+    background-color: light-dark(var(--global-color-terciary), var(--global-intense-background));
 }
 
 .lexwidget .lexpad .lexinnerpad .lexpadthumb {
@@ -1847,7 +1853,7 @@ meter::-webkit-meter-even-less-good-value {
     position: absolute;
     padding-right: 8px;
     z-index: 1001;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.63) !important;
+    box-shadow: 0 0 8px rgba(92, 92, 92, 0.63) !important;
     background-color: var(--global-blur-background);
     border: 1px solid #91909036;
     border-radius: 6px;
@@ -1873,7 +1879,7 @@ meter::-webkit-meter-even-less-good-value {
 .lexcontextmenu .lexcontextmenuentry {
     font-size: var(--global-font-size);
     width: 100%;
-    color: #d5d7dbee;
+    color: var(--global-text-primary);
     padding: 4px;
     padding-left: 8px;
     padding-right: 0px;
@@ -2025,7 +2031,7 @@ meter::-webkit-meter-even-less-good-value {
     position: absolute;
     padding-right: 20px;
     border-radius: 6px;
-    box-shadow: 0 0 8px rgba(44, 44, 44, 0.63) !important;
+    box-shadow: 0 0 8px rgba(92, 92, 92, 0.63) !important;
     background-color: var(--global-blur-background);
     border: 1px solid #91909036;
 }
@@ -2045,7 +2051,7 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexcontextmenubox .lexcontextmenuentry {
     width: 100%;
-    color: #c0c4cbe3;
+    color: var(--global-text-secondary);
     padding: 3px;
     padding-left: 10px;
     padding-right: 10px;
@@ -2068,7 +2074,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexcontextmenubox .lexcontextmenuentry.cmtitle {
-    background: var(--global-dark-background);
+    background: light-dark(var(--global-color-terciary), var(--global-intense-background));
     font-weight: bold;
     cursor: default;
 }
@@ -2091,7 +2097,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexcontextmenubox .lexcontextmenuentry .lexentryname.disabled {
-    color: #c0c4cb53;
+    color: light-dark(#808080b0, #c0c4cb53);
 }
 
 /* normal icons  */
@@ -2520,9 +2526,11 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexcard span {
-    width: calc(100% - 18px);
+    width: calc(100% - 16px);
     display: flex;
-    background-color: rgba(15, 16, 19, 0.8);
+    background-color: var(--global-blur-background);
+    --webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
     align-items: center;
     height: 16px;
     position: absolute;
@@ -2538,7 +2546,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexcard span a {
-    color: var(--global-text-primary);
+    color: var(--global-text-secondary);
     text-decoration: none;
 }
 
@@ -2635,7 +2643,7 @@ meter::-webkit-meter-even-less-good-value {
 .lexwidget:has(.lexarrayitems),
 .lexwidget:has(.lexcheckboxsubmenu),
 .lexwidget:has(.lexcustomcontainer) {
-    background-color: light-dark(var(--global-color-terciary), var(--global-branch-darker));
+    background-color: light-dark(var(--global-color-terciary), var(--global-medium-background));
     border-radius: 6px;
 }
 
@@ -2874,7 +2882,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 /* .lextimeline .lexarea, .lextimelinepanel {
-  background-color: var(--global-dark-background);
+  background-color: var(--global-intense-background);
 } */
 
 .lextimeline *::-webkit-scrollbar {
@@ -3056,6 +3064,12 @@ meter::-webkit-meter-even-less-good-value {
 
 .lexassetbrowser {
     height: 100%;
+    border-radius: 6px;
+    background-color: var(--global-color-primary);
+}
+
+.lexassetbrowser .lexarea {
+    background: none;
 }
 
 .lexassetbrowser .lexsplitbar.horizontal {
@@ -3078,7 +3092,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexassetscontent.dragging {
-    background-color: var(--global-branch-darker);
+    background-color: var(--global-intense-background);
 }
 
 ul.lexassetscontent {
@@ -3929,7 +3943,7 @@ pre .line-gutter {
     font-family: var(--global-title-font);
     font-weight: 600;
     font-size: 13px;
-    color: #d9d9e3;
+    color: #fff;
     text-shadow: 0px 0px 2px #1b1b1bdc;
     border-bottom: 1px solid #ffffff46;
     margin-bottom: 2px;
@@ -4115,7 +4129,7 @@ pre .line-gutter {
 .lexgraphgroup .lexgraphgrouptitle {
     font-size: 14px;
     margin: 8px;
-    color: var(--global-color-primary);
+    color: var(--global-text-primary);
     font-family: var(--global-title-font);
     font-weight: 600;
     outline: none;
@@ -4175,7 +4189,7 @@ pre .line-gutter {
 }
 
 .lexvideoeditor .lexconstrolsarea {
-    /* background-color: var(--global-branch-darker); */
+    /* background-color: var(--global-intense-background); */
     /* padding: 5px;
   margin: 10px; */
     /* width: calc(100% - 30px)!important; */
@@ -4188,7 +4202,7 @@ pre .line-gutter {
 }
 
 .lexvideoeditor .lexcontrolspanel {
-    background-color: var(--global-branch-darker);
+    background-color: var(--global-intense-background);
     margin: 0;
     display: flex;
     align-content: center;
