@@ -718,6 +718,11 @@ body.noevents * {
     transition: 0.1s linear;
 }
 
+.lexwidget .lextext.formlabel {
+    margin-left: 8px;
+    margin-bottom: -12px;
+}
+
 .lexwidget .lextext:not(:has(div)) {
     background-color: var(--global-button-color);
 }
@@ -737,12 +742,12 @@ body.noevents * {
 }
 
 .lexwidget .lextext.lexwarning div {
-    color: rgb(213, 208, 128);
+    color: rgb(209, 195, 65);
     font-weight: 700;
 }
 
 .lexwidget .lextext.lexwarning i {
-    color: rgb(212, 165, 63);
+    color: rgb(209, 195, 65);
     margin-right: 16px;
 }
 
@@ -1853,7 +1858,7 @@ meter::-webkit-meter-even-less-good-value {
     position: absolute;
     padding-right: 8px;
     z-index: 1001;
-    box-shadow: 0 0 8px rgba(92, 92, 92, 0.63) !important;
+    box-shadow: 0 0 6px #2c2c2c7c !important;
     background-color: var(--global-blur-background);
     border: 1px solid #91909036;
     border-radius: 6px;

@@ -81,12 +81,8 @@ area.addMenubar( m => {
 
         }, { size: ["30%", null], float: "right", draggable: false});
     }} );
-    m.add( "Editor/Open AssetView", { icon: "fa-solid fa-rect", callback: () => {
-        createAssetDialog();
-    }} );
-    m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass", short:  "F1", callback: () => { window.open("./docs/") }});
-    m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
-    m.add( "Help/Support LexGUI/Do it" );
+    m.add( "Editor/Open AssetView", { icon: "fa-solid fa-rect", callback: () => { createAssetDialog(); }} );
+    m.add( "Account/Login", { icon: "fa-solid fa-user", callback: () => { createLoginForm(); }} );
     m.add( "Timeline/Shortcuts", { disabled: true });
     m.add( "Timeline/Shortcuts/Play-Pause", { short: "SPACE" });
     m.add( "Timeline/Shortcuts/Zoom", { short: "Wheel" });
@@ -100,6 +96,9 @@ area.addMenubar( m => {
     m.add( "Timeline/Shortcuts/Key Selection/Single", { short: "Left Click" });
     m.add( "Timeline/Shortcuts/Key Selection/Multiple", { short: "Hold LSHIFT" });
     m.add( "Timeline/Shortcuts/Key Selection/Box", { short: "Hold LSHIFT+Drag" });
+    m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass", short:  "F1", callback: () => { window.open("./docs/") }});
+    m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
+    m.add( "Help/Support LexGUI/Do it" );
     m.addButtons( [
         {
             title: "Play",
@@ -548,11 +547,6 @@ function fillPanel( panel ) {
         console.log(value);
     }, { units: "p", precision: 0 });
 
-    const formData = { username: "", password: { value: "", type: "password" } };
-    panel.addForm("Test form", formData, (value, event) => {
-        console.log(value);
-    }, { actionName: "Login" });
-
     // another branch
     panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});
     panel.addColor("Background", "#b7a9b1");
@@ -722,6 +716,35 @@ function fillBottomPanel( panel ) {
     panel.merge();
 }
 
+function createLoginForm() {
+
+    let dialog = new LX.Dialog('Login', panel => {
+
+        const formData = {
+            Username: {
+                value: "",
+                placeholder: "Enter username",
+                icon: "fa fa-user"
+            },
+            Password: {
+                value: "",
+                type: "password",
+                placeholder: "Enter password",
+                icon: "fa fa-key"
+            }
+        };
+
+        panel.addForm("Test form", formData, (value, event) => {
+            console.log(value);
+        }, { actionName: "Login" });
+
+        panel.addLabel( "Or" );
+
+        panel.addButton( null, "Sign up", ( value, event ) => { });
+
+    }, { close: true, minimize: false, size: ["25%"], scroll: true, resizable: true, draggable: true });
+}
+
 function createAssetDialog() {
 
     let dialog = new LX.Dialog('Non Manual Features lexemes', (p) => {
@@ -788,7 +811,6 @@ function createAssetDialog() {
             }
         })
     },{ title:'Lexemes', close: true, minimize: false, size: ["80%"], scroll: true, resizable: true, draggable: true });
- 
-    
 }
-LX.popup("Hello! I'm a popup :)", null, {position: ["50px", "100px"]})
+
+LX.popup("Hello! I'm a popup :)", null, {position: ["50px", "100px"]});

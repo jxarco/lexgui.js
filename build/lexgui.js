@@ -4022,6 +4022,11 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
             container.style.display = "flex";
 
+            if( options.textClass )
+            {
+                container.classList.add( options.textClass );
+            }
+
             this.disabled = ( options.disabled || options.warning ) ?? ( options.url ? true : false );
             let wValue = null;
 
@@ -4487,7 +4492,18 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             for( let entry in data )
             {
-                const entryData = data[ entry ];
+                let entryData = data[ entry ];
+
+                if( entryData.constructor != Object )
+                {
+                    entryData = { };
+                }
+
+                entryData.placeholder = entryData.placeholder ?? entry;
+                entryData.width = "calc(100% - 10px)";
+
+                this.addLabel( entry, { textClass: "formlabel" } );
+
                 this.addText( entry, entryData.constructor == Object ? entryData.value : entryData, ( value ) => {
                     container.formData[ entry ] = value;
                 }, entryData );
@@ -4495,12 +4511,14 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 container.formData[ entry ] = entryData.constructor == Object ? entryData.value : entryData;
             }
 
+            this.addBlank( );
+
             this.addButton( null, options.actionName ?? "Submit", ( value, event ) => {
                 if( callback )
                 {
                     callback( container.formData, event );
                 }
-            } );
+            }, { buttonClass: "accept", width: "calc(100% - 10px)" } );
 
             this.clearQueue();
 
