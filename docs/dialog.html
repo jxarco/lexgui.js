@@ -13,10 +13,13 @@
 <script type="text/javascript">
 
     MAKE_HEADER( "Creating windowed dialogs", "h1", "dialogs" );
-            
+
     MAKE_PARAGRAPH( `LexGUI allows to create Dialogs, also known as modal windows or pop-ups, allowing developers to display
     important information, gather user input, or prompt for user actions without navigating away from the current context.
     The possible dialogs are the following:` );
+
+    INSERT_IMAGE(`../examples/previews/dialogs.png`, "dialogs" );
+
     MAKE_CODE_BULLET_LIST( [
         ["Classic", "General pop-up to display any kind of information or errors"],
         ["Pocket", "Tiny dialog used normally as a debugging tool. Can be docked to the window corners"],
@@ -42,25 +45,32 @@
     console.@[mtd]log@(result);
 }, options);` );
     
-    MAKE_PARAGRAPH( `In case of pop-ups, you can create them using the following code:` );
+    MAKE_PARAGRAPH( `For pop-ups, you can use:` );
     MAKE_CODE( `LX.@[mtd]popup@(@[str]"Message"@, @[str]"Title"@, options);` );
 
     MAKE_PARAGRAPH( `The possible ${INLINE_CODE("options (Object)")} when creating dialogs are the following:` );
     MAKE_CODE_BULLET_LIST( [
-        ["position (Array)", "[x, y] representing left-top values relative to the main LX root area"],
-        ["size (Array)", "[width, height] in css"],
-        ["draggable (Boolean)", "Set the pop-up as draggable. In case of pocket dialogs it's false, by default (they are dockables)"],
+        ["id", "String", "DOM Id of the root element"],
+        ["class", "String", "DOM Class added to the root element"],
+        ["closable", "String", "Set if the dialog can be closed manually"],
+        ["onBeforeClose", "Function", "Function called before the dialog is closed"],
+        ["onclose", "Function", "Function to override closing behaviour"],
+        ["position", "Array", "[x, y] representing left-top values relative to the main LX root area"],
+        ["size", "Array", "[width, height] in css"],
+        ["draggable", "Boolean", `Set the pop-up as draggable. In case of pocket dialogs it's ${INLINE_CODE("false")} by default (they are dockables)` ],
+        ["modal", "Boolean", `Show black modal as background when dialog is open. Default is ${INLINE_CODE("false")}` ],
     ] );
 
     MAKE_PARAGRAPH( `Prompts:` );
     MAKE_CODE_BULLET_LIST( [
-        ["input (Boolean)", "Set if it has to be an input. Default: [true]"],
-        ["required (Boolean)", "Set if the input must be filled. Default: [false]"]
+        ["accept", "String", "Text of the confirm button. Default: ['OK']"],
+        ["input", "Boolean", "Set if it has to be an input. Default: [true]"],
+        ["required", "Boolean", "Set if the input must be filled. Default: [false]"]
     ] );
 
     MAKE_PARAGRAPH( `Pop-up:` );
     MAKE_CODE_BULLET_LIST( [
-        ["time: (Number)", "Time before the dialog fade out (ms). Default: [3000]"]
+        ["timeout", "Number", "Time before the dialog fade out (ms). Default: [3000]"]
     ] );
 
     MAKE_LINE_BREAK();

@@ -74,12 +74,12 @@
         
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addArray(name, value, values, callback, options)")} to add an Array Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["values (Array)", "Array values"],
-            ["callback (Function)", "Function called when the array is modified"],
-            ["options (Object)", "Basic options for a Widget"],
+            ["name", "String", "Widget name"],
+            ["values", "Array", "Array values"],
+            ["callback", "Function", "Function called when the array is modified"],
+            ["options", "Object", "Basic options for a Widget"],
             [
-                ["innerValues (Array)", "Use dropdown mode and use values as options"],
+                ["innerValues", "Array", "Use dropdown mode and use values as options"],
             ]
         ] );
         MAKE_CODE( `panel.@[mtd]addArray@(@[str]"Array name"@, [@[str]"GPTeam"@, @[str]"Blat Panthers"@], (value, event) => {
@@ -101,14 +101,14 @@
 
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addButton(name, value, callback, options)")} to add a Button Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["value (String)", "Text string by default"],
-            ["callback (Function)", "Function called when the input changes"],
-            ["options (Object)", "Basic options for a Widget"],
+            ["name", "String", "Widget name"],
+            ["value", "String", "Text string by default"],
+            ["callback", "Function", "Function called when the input changes"],
+            ["options", "Object", "Basic options for a Widget"],
             [
-                ["disabled (Boolean)", "Make the widget disabled"],
-                ["icon (String)", "Icon to be added before the input"],
-                ["img (String)", "Path to image to show as button value"],
+                ["disabled", "Boolean", "Make the widget disabled"],
+                ["icon", "String", "Icon to be added before the input"],
+                ["img", "String", "Path to image to show as button value"],
             ]
         ] );
         MAKE_CODE( `panel.@[mtd]addButton@(@[str]"A Button Name"@, @[str]"Print event"@, (value, event) =&gt; {
@@ -130,13 +130,13 @@
         
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addCheckbox(name, value, callback, options)")} to add a Checkbox Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["value (Boolean)", "Boolean value (true/false)"],
-            ["callback (Function)", "Function called when the checkbox value changes"],
-            ["options (Object)", "Basic options for a Widget"],
+            ["name", "String", "Widget name"],
+            ["value", "Boolean", "Boolean value (true/false)"],
+            ["callback", "Function", "Function called when the checkbox value changes"],
+            ["options", "Object", "Basic options for a Widget"],
             [
-                ["disabled (Boolean)", "Make the widget disabled"],
-                ["suboptions (Function)", "Callback to add widgets shown if <code class='inline'>true</code>"]
+                ["disabled", "Boolean", "Make the widget disabled"],
+                ["suboptions", "Function", "Callback to add widgets shown if <code class='inline'>true</code>"]
             ]
         ] );
         MAKE_CODE( `panel.@[mtd]addCheckbox@(@[str]"Toggle me"@, @true@, (value, event) =&gt; {
@@ -166,13 +166,13 @@ panel.@[mtd]addCheckbox@(@[str]"Toggle me too"@, @true@, (value, event) =&gt; {
 
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addColor(name, value, callback, options)")} to add a Color Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["value (String or Array)", "Color value in hex (&quot;#fff&quot;) or Array[r, g, b]"],
-            ["callback (Function)", "Function called when the input changes"],
-            ["options (Object)", "Basic options for a Widget"],
+            ["name", "String", "Widget name"],
+            ["value", "String/Array", "Color value in hex (&quot;#fff&quot;) or Array[r, g, b]"],
+            ["callback", "Function", "Function called when the input changes"],
+            ["options", "Object", "Basic options for a Widget"],
             [
-                ["disabled (Boolean)", "Make the widget disabled"],
-                ["useRGB (Boolean)", "The callback returns color as Array[r, g, b] and not hex [<code class='inline'>false</code>]"]
+                ["disabled", "Boolean", "Make the widget disabled"],
+                ["useRGB", "Boolean", "The callback returns color as Array[r, g, b] and not hex [<code class='inline'>false</code>]"]
             ]
         ] );
         MAKE_CODE( `panel.@[mtd]addColor@(@[str]"Font Color"@, [@1@, @0.1@, @0.6@], (value, event) =&gt; {
@@ -214,13 +214,13 @@ panel.@[mtd]addColor@(@[str]"Background"@, @[str]"#b7a9b1"@);` );
 
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addComboButtons(name, values, options)")} to add a ComboButtons Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["values (Array)", "Each of the {value, callback} items (you can add an <code class='inline'>icon</code>)"],
-            ["options (Object)", "Basic options for a Widget"],
+            ["name", "String", "Widget name"],
+            ["values", "Array", "Each of the {value, callback} items (you can add an <code class='inline'>icon</code>)"],
+            ["options", "Object", "Basic options for a Widget"],
             [
-                ["selected (*)", "Selected value by default"],
-                ["float (String)", "Justify content (left, center, right) [center]"],
-                ["noSelection (Boolean)", "Buttons can be clicked, but they are not selectable [false]"],
+                ["selected", "*", "Selected value by default"],
+                ["float", "String", "Justify content (left, center, right) [center]"],
+                ["noSelection", "Boolean", "Buttons can be clicked, but they are not selectable [false]"],
             ]
         ] );
         MAKE_CODE( `panel.@[mtd]addComboButtons@(@[str]"Alignment"@, [
@@ -268,18 +268,18 @@ panel.@[mtd]addColor@(@[str]"Background"@, @[str]"#b7a9b1"@);` );
 
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addCurve(name, values, callback)")} to add a Curve Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["values (Array)", "Values of the curve to be interpolated"],
-            ["options (Object)", "Basic options for a Widget"],
+            ["name", "String", "Widget name"],
+            ["values", "Array", "Values of the curve to be interpolated"],
+            ["options", "Object", "Basic options for a Widget"],
             [
-                ["skipReset (Boolean)", "Don't add the reset value button when value changes"],
+                ["skipReset", "Boolean", "Don't add the reset value button when value changes"],
                 ["bgColor (Color)", "Widget background color"],
                 ["pointsColor (Color)", "Curve points color"],
                 ["lineColor (Color)", "Curve line color"],
-                ["noOverlap (Boolean)", "Points do not overlap, replacing themselves if necessary"],
-                ["allowAddValues (Boolean)", "Support adding values on click"],
-                ["smooth (Number)", "Curve smoothness"],
-                ["moveOutAction (Number)", "Clamp or delete points moved out of the curve (LX.CURVE_MOVEOUT_CLAMP, LX.CURVE_MOVEOUT_DELETE)"],
+                ["noOverlap", "Boolean", "Points do not overlap, replacing themselves if necessary"],
+                ["allowAddValues", "Boolean", "Support adding values on click"],
+                ["smooth", "Number", "Curve smoothness"],
+                ["moveOutAction", "Number", "Clamp or delete points moved out of the curve (LX.CURVE_MOVEOUT_CLAMP, LX.CURVE_MOVEOUT_DELETE)"],
             ]
         ] );
         MAKE_CODE( `@const@ opacityValues = [
@@ -323,9 +323,9 @@ panel.@[mtd]addCurve@(@[str]"Opacity"@, opacityValues, (value, event) => {
 
         MAKE_PARAGRAPH( `Once the widget has been registered, call ${INLINE_CODE("Panel.add^WidgetName(name, value, callback)")} to add the custom Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["value (Object)", "The new instance data"],
-            ["callback (Function)", "Function called when the instance changes"]
+            ["name", "String", "Widget name"],
+            ["value", "Object", "The new instance data"],
+            ["callback", "Function", "Function called when the instance changes"]
         ] );
         MAKE_CODE( `LX.@[mtd]ADD_CUSTOM_WIDGET@( @[str]"Shader"@, {
     icon: @[str]"fa-cube"@,
@@ -420,14 +420,14 @@ panel.@[mtd]addShader@( @[str]"Empty Instance"@, @null@ );` );
       
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTree(name, data, options)")} to add a DataTree Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["data (Object)", "Hierarchical data"],
-            ["options (Object)", "Basic options for a Widget"],
+            ["name", "String", "Widget name"],
+            ["data", "Object", "Hierarchical data"],
+            ["options", "Object", "Basic options for a Widget"],
             [
-                ["icons (Array)", "Array of objects with button information {name, icon, callback}"],
-                ["filter (Boolean)", "Adds a filter bar [true]"],
-                ["rename (Boolean)", "Allow item rename [true]"],
-                ["onevent (Function)", "Function to catch the different types of Tree events"]
+                ["icons", "Array", "Array of objects with button information {name, icon, callback}"],
+                ["filter", "Boolean", "Adds a filter bar [true]"],
+                ["rename", "Boolean", "Allow item rename [true]"],
+                ["onevent", "Function", "Function to catch the different types of Tree events"]
             ]
         ] );
         MAKE_CODE( `@[com]// Tree data!@
@@ -521,13 +521,13 @@ panel.@[mtd]addTree@(@[str]"Scene Tree"@, sceneData, {
         
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addDropdown(name, values, value, callback, options)")} to add a Dropdown Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["values (Array)", "Array of the values of the list. The values can be strings or media (images or GIFs). For the media, the entries of the array must be an object containing a <code class='inline'>value</code> and <code class='inline'>src</code> fields"],
-            ["value (String)", "Current selected value from the drop-down list"],
-            ["callback (Function)", "Function called when an list value is selected"],
-            ["options (Object)", "Basic options for a Widget"],
+            ["name", "String", "Widget name"],
+            ["values", "Array", "Array of the values of the list. The values can be strings or media (images or GIFs). For the media, the entries of the array must be an object containing a <code class='inline'>value</code> and <code class='inline'>src</code> fields"],
+            ["value", "String", "Current selected value from the drop-down list"],
+            ["callback", "Function", "Function called when an list value is selected"],
+            ["options", "Object", "Basic options for a Widget"],
             [
-                ["filter (Boolean)", "Specify if the drop-down needs a search bar"]
+                ["filter", "Boolean", "Specify if the drop-down needs a search bar"]
             ]
         ] );
         MAKE_CODE( `@[com]// String values@
@@ -562,12 +562,12 @@ panel.@[mtd]addDropdown@(@[str]"Media Dropdown"@, options, @[str]"Option 1"@, (v
 
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addFile(name, value, callback)")} to add a File Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["callback (Function)", "Function called when file is loaded"],
-            ["options (Object)", "Basic options for a Widget"],
+            ["name", "String", "Widget name"],
+            ["callback", "Function", "Function called when file is loaded"],
+            ["options", "Object", "Basic options for a Widget"],
             [
-                ["read (Bool)", "Return the file itself (False) or the contents [true]"],
-                ["type (String)", "Type to read as {text, buffer, bin, url} [text]"]
+                ["read", "Boolean", "Return the file itself (False) or the contents [true]"],
+                ["type", "String", "Type to read as {text, buffer, bin, url} [text]"]
             ]
         ] );
         MAKE_CODE( `panel.@[mtd]addFile@(@[str]"File name"@, (data, file) => {
@@ -590,12 +590,12 @@ panel.@[mtd]addDropdown@(@[str]"Media Dropdown"@, options, @[str]"Option 1"@, (v
 
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addForm(name, value, callback, options)")} to add a Form Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["data (Object)", "Form data"],
-            ["callback (Function)", "Function called on submit form"],
-            ["options (Object)", "Basic options for a Widget"],
+            ["name", "String", "Widget name"],
+            ["data", "Object", "Form data"],
+            ["callback", "Function", "Function called on submit form"],
+            ["options", "Object", "Basic options for a Widget"],
             [
-                ["actionName (String)", "Text to be shown in the button"]
+                ["actionName", "String", "Text to be shown in the button"]
             ]
         ] );
         MAKE_CODE( `@const@ formData = { username: @[str]""@, password: { value: @[str]""@, type: @[str]"password"@ } };
@@ -619,10 +619,10 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
 
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addLayers(name, value, callback)")} to add a Layers Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["value (Number)", "Mask value (decimal) that will be decomposed into bits"],
-            ["callback (Function)", "Function called when bit mask changes"],
-            ["options (Object)", "Basic options for a Widget"]
+            ["name", "String", "Widget name"],
+            ["value", "Number", "Mask value (decimal) that will be decomposed into bits"],
+            ["callback", "Function", "Function called when bit mask changes"],
+            ["options", "Object", "Basic options for a Widget"]
         ] );
         MAKE_CODE( `panel.@[mtd]addLayers@(@[str]"Layer name"@, @10@, (value, event) => {
     console.@[mtd]log@(value);
@@ -643,11 +643,11 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
 
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addList(name, value, values, callback, options)")} to add a List Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["values (Array)", "List values"],
-            ["value (*)", "Selected list value"],
-            ["callback (Function)", "Function called when the a new item list is selected"],
-            ["options (Object)", "Basic options for a Widget"]
+            ["name", "String", "Widget name"],
+            ["values", "Array", "List values"],
+            ["value", "*", "Selected list value"],
+            ["callback", "Function", "Function called when the a new item list is selected"],
+            ["options", "Object", "Basic options for a Widget"]
         ] );
         MAKE_CODE( `panel.@[mtd]addList@(@[str]"List name"@, [@[str]"GPTeam"@, @[str]"Blat Panthers"@], @[str]"Blat Panthers"@,  (value, event) => {
     console.@[mtd]log@(value);
@@ -674,20 +674,20 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
 
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addNumber(name, value, callback, options)")} to add a Number Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["value (Number)", "Number value"],
-            ["callback (Function)", "Function called when the input changes"],
-            ["options (Object)", "Basic options for a Widget"],
+            ["name", "String", "Widget name"],
+            ["value", "Number", "Number value"],
+            ["callback", "Function", "Function called when the input changes"],
+            ["options", "Object", "Basic options for a Widget"],
             [
-                ["disabled (Boolean)", "Make the widget disabled"],
-                ["step (Number)", "Change Step value"],
-                ["precision (Number)", "The number of digits to appear after the decimal point"],
-                ["min (Number)", "Min input value"],
-                ["max (Number)", "Max input value"],
-                ["skipSlider (Boolean)", "Skip the slider if there are min and max values"],
-                ["units", "Unit as string added to the end of the value"],
-                ["onPress (Function)", "Callback function on mouse down"],
-                ["onRelease (Function)", "Callback function on mouse up"]
+                ["disabled", "Boolean", "Make the widget disabled"],
+                ["step", "Number", "Change Step value"],
+                ["precision", "Number", "The number of digits to appear after the decimal point"],
+                ["min", "Number", "Min input value"],
+                ["max", "Number", "Max input value"],
+                ["skipSlider", "Boolean", "Skip the slider if there are min and max values"],
+                ["units", "String", "Unit as string added to the end of the value"],
+                ["onPress", "Function", "Callback function on mouse down"],
+                ["onRelease", "Function", "Callback function on mouse up"]
             ]
         ] );
         MAKE_PARAGRAPH( `<sup>Note: Setting <code class='inline'>min</code>, <code class='inline'>max</code> values will automatically add a slider below the number input.<sup>` );
@@ -715,17 +715,17 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
 
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addPad(name, value, callback, options)")} to add a Pad Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["value (Number)", "Pad value"],
-            ["callback (Function)", "Function called when the value changes"],
-            ["options (Object)", "Basic options for a Widget"],
+            ["name", "String", "Widget name"],
+            ["value", "Number", "Pad value"],
+            ["callback", "Function", "Function called when the value changes"],
+            ["options", "Object", "Basic options for a Widget"],
             [
-                ["disabled (Bool)", "Make the widget disabled [false]"],
-                ["min (Number)", "Min pad value"],
-                ["max (Number)", "Max pad value"],
-                ["padSize (String)", "Size of the pad (css)"],
-                ["onPress (Function)", "Callback function on mouse down"],
-                ["onRelease (Function)", "Callback function on mouse up"],
+                ["disabled", "Boolean", "Make the widget disabled [false]"],
+                ["min", "Number", "Min pad value"],
+                ["max", "Number", "Max pad value"],
+                ["padSize", "String", "Size of the pad (css)"],
+                ["onPress", "Function", "Callback function on mouse down"],
+                ["onRelease", "Function", "Callback function on mouse up"],
             ]
         ] );
         MAKE_CODE( ` panel.@[mtd]addPad@(@[str]"2D Pad"@, [@0.5@, @0.5@], (value, event) => {
@@ -753,18 +753,18 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
         
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addProgress(name, value, options)")} to add a Progress Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["value (Number)", "Progress value"],
-            ["options (Object)", "Basic options for a Widget"],
+            ["name", "String", "Widget name"],
+            ["value", "Number", "Progress value"],
+            ["options", "Object", "Basic options for a Widget"],
             [
-                ["editable (Bool)", "Allow to edit value manually [false]"],
-                ["callback (Function)", "If editable, function called when progress changes"],
-                ["showValue (Bool)", "Show current value [false]"],
-                ["min (Number)", "Min progress value"],
-                ["max (Number)", "Max progress value"],
-                ["low (Number)", "Low boundary value"],
-                ["optimum (Number)", "Optimum value in the range"],
-                ["high (Number)", "High boundary value"],
+                ["editable", "Boolean", "Allow to edit value manually [false]"],
+                ["callback", "Function", "If editable, function called when progress changes"],
+                ["showValue", "Boolean", "Show current value [false]"],
+                ["min", "Number", "Min progress value"],
+                ["max", "Number", "Max progress value"],
+                ["low", "Number", "Low boundary value"],
+                ["optimum", "Number", "Optimum value in the range"],
+                ["high", "Number", "High boundary value"],
             ]
         ] );
         MAKE_CODE( `panel.@[mtd]addProgress@(@[str]"HeadRoll"@, @0@, { 
@@ -792,13 +792,13 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
 
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addSize(name, value, callback, options)")} to add a Size Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["value (Number)", "Number value"],
-            ["callback (Function)", "Function called when the input changes"],
-            ["options (Object)", "Basic options for a Widget"],
+            ["name", "String", "Widget name"],
+            ["value", "Number", "Number value"],
+            ["callback", "Function", "Function called when the input changes"],
+            ["options", "Object", "Basic options for a Widget"],
             [
-                ["disabled (Boolean)", "Make the widget disabled"],
-                ["units", "Unit as string added to the end of the value"]
+                ["disabled", "Boolean", "Make the widget disabled"],
+                ["units", "String", "Unit as string added to the end of the value"]
             ]
         ] );
         MAKE_PARAGRAPH( `<sup>Note: Since a Size Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.
@@ -841,10 +841,10 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTabs(tabs, options)")} to add a Tabs Widget to your panel, where 
     <code class='inline'>tabs</code> is an <code class="inline">Array</code> of objects which have:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Name of the tab (if icon, use as title)"],
-            ["icon (String)", "Icon path to be used as the tab icon (optional)"],
-            ["onCreate (Function)", "Func to be called at tab creation"],
-            ["onSelect (Function)", "Func to be called on select tab (optional)"]
+            ["name", "String", "Name of the tab (if icon, use as title)"],
+            ["icon", "String", "Icon path to be used as the tab icon (optional)"],
+            ["onCreate", "Function", "Func to be called at tab creation"],
+            ["onSelect", "Function", "Func to be called on select tab (optional)"]
         ] );
         MAKE_CODE( `panel.@[mtd]addTabs@([
     { 
@@ -883,10 +883,10 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
         
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTags(name, value, callback, options)")} to add a Tags Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["value (String)", "Comma separated tags"],
-            ["callback (Function)", "Function called when a tag is either removed or added"],
-            ["options (Object)", "Basic options for a Widget"]
+            ["name", "String", "Widget name"],
+            ["value", "String", "Comma separated tags"],
+            ["callback", "Function", "Function called when a tag is either removed or added"],
+            ["options", "Object", "Basic options for a Widget"]
         ] );
         MAKE_CODE( `panel.@[mtd]addTags@(@[str]"Game Tags"@, @[str]"2d, ai, engine, ps5, console"@, (value, event) =&gt; {
     console.@[mtd]log@(value);
@@ -907,18 +907,18 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
 
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addText(name, value, callback, options)")} to add a Text Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["value (String)", "Text string by default"],
-            ["callback (Function)", "Function called when the input changes"],
-            ["options (Object)", "Basic options for a Widget"],
+            ["name", "String", "Widget name"],
+            ["value", "String", "Text string by default"],
+            ["callback", "Function", "Function called when the input changes"],
+            ["options", "Object", "Basic options for a Widget"],
             [
-                ["disabled (Boolean)", "Make the widget disabled"],
-                ["placeholder (String)", "Text string as input placeholder"],
-                ["icon (String)", "Icon to be added before the input"],
-                ["trigger (String)", "Choose onchange trigger (default, input)"],
-                ["inputWidth (String/Number)", "Width of the text input"],
-                ["float (String)", "Justify input text content"],
-                ["justifyName (String)", "Justify name content"],
+                ["disabled", "Boolean", "Make the widget disabled"],
+                ["placeholder", "String", "Text string as input placeholder"],
+                ["icon", "String", "Icon to be added before the input"],
+                ["trigger", "String", "Choose onchange trigger (default, input)"],
+                ["inputWidth", "String/Number", "Width of the text input"],
+                ["float", "String", "Justify input text content"],
+                ["justifyName", "String", "Justify name content"],
             ]
         ] );
         MAKE_CODE( `panel.@[mtd]addText@(@[str]"Text Name"@, @[str]"Text value"@, (value, event) =&gt; {
@@ -941,7 +941,7 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTextArea(name, value, callback, options)")} to add a Text Area Widget to your panel 
         (the <code class='inline'>options</code> are the same as the Text widget) plus:` );
         MAKE_CODE_BULLET_LIST( [
-            ["fitHeight (Boolean)", "Make text height adapt to its bounding rect."]
+            ["fitHeight", "Boolean", "Make text height adapt to its bounding rect."]
         ] );
         MAKE_CODE( `panel.@[mtd]addTextArea@(@[str]"Text Name"@, @[str]"Text value"@, (value, event) =&gt; {
     console.@[mtd]log@(value);
@@ -961,14 +961,14 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
 
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTitle(name, value, callback, options)")} to add a Title Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["options (Object)", "Basic options for a Widget"],
+            ["name", "String", "Widget name"],
+            ["options", "Object", "Basic options for a Widget"],
             [
-                ["link (String)", "Href in case title is an hyperlink"],
-                ["target (String)", "Target name of the iframe (if any)"],
-                ["icon (String)", "FA class of the icon (if any)"],
-                ["iconColor (String)", "Color of title icon (if any)"],
-                ["style (String/Number)", "CSS to override"]
+                ["link", "String", "Href in case title is an hyperlink"],
+                ["target", "String", "Target name of the iframe (if any)"],
+                ["icon", "String", "FA class of the icon (if any)"],
+                ["iconColor", "String", "Color of title icon (if any)"],
+                ["style", "String/Number", "CSS to override"]
             ]
         ] );
         MAKE_CODE( `panel.@[mtd]addTitle@(@[str]"A title!"@);
@@ -997,17 +997,17 @@ panel.@[mtd]addTitle@(@[str]"A No-Background Big Title!@", { style: { background
 
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addVectorN(name, value, callback, options)")}, where N is a number in the range [2, 4], to add a Vector Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
-            ["name (String)", "Widget name"],
-            ["values (Number Array)", "Array containing the values for the vector"],
-            ["callback (Function)", "Function called when any of the N number inputs change"],
-            ["options (Object)", "Basic options for a Widget"],
+            ["name", "String", "Widget name"],
+            ["values", "Number Array", "Array containing the values for the vector"],
+            ["callback", "Function", "Function called when any of the N number inputs change"],
+            ["options", "Object", "Basic options for a Widget"],
             [
-                ["disabled (Boolean)", "Make the widget disabled"],
-                ["step (Number)", "Change Step value"],
-                ["min (Number)", "Min input value"],
-                ["max (Number)", "Max input value"],
-                ["onPress (Function)", "Callback function on mouse down"],
-                ["onRelease (Function)", "Callback function on mouse up"]
+                ["disabled", "Boolean", "Make the widget disabled"],
+                ["step", "Number", "Change Step value"],
+                ["min", "Number", "Min input value"],
+                ["max", "Number", "Max input value"],
+                ["onPress", "Function", "Callback function on mouse down"],
+                ["onRelease", "Function", "Callback function on mouse up"]
             ]
         ] );
         MAKE_PARAGRAPH( `<sup>Note: Since a Vector Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.<sup>` );

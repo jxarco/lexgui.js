@@ -20,10 +20,10 @@
     MAKE_PARAGRAPH( `From here, you can already build your UI adding <a href="panel.html">Panels</a>, but in most cases you will want to split the main Area first. 
     You can have as many Areas you need using <code class='inline'>Area.split(options)</code>, which allows you to split horizontally or vertically a given Area:` );
     MAKE_CODE_BULLET_LIST( [
-        ["type (String)", "Split mode, either horizontal (default) or vertical"],
-        ["sizes (Array/String)", "Size of each new area. Default is [&quot;50%&quot;, &quot;50%&quot;]. Using 'auto' will make a vertical split to resize automatically."],
-        ["resize (Bool)", "Allow area manual resizing. Default is 'true'"],
-        ["minimizable (Bool)", "Allow the area to be minimized. Default is 'false'"]
+        ["type", "String", "Split mode, either horizontal (default) or vertical"],
+        ["sizes", "Array/String", "Size of each new area. Default is [&quot;50%&quot;, &quot;50%&quot;]. Using 'auto' will make a vertical split to resize automatically."],
+        ["resize", "Boolean", "Allow area manual resizing. Default is 'true'"],
+        ["minimizable", "Bool", "Allow the area to be minimized. Default is 'false'"]
     ] );
     MAKE_CODE( `@[com]// Split main area in 2 sections (2 Areas)@
 @let@ [ left, right ] = area.@[mtd]split@({ 
@@ -41,17 +41,17 @@ type: @[str]"vertical"@,
     To specify each of the menu entries, you should pass a <em>callback function</em> to be called when the Menubar is constructed. <strong>Callbacks will have a Menubar instance as parameter</strong>, 
     so use ${INLINE_CODE("Menubar.add(entryPath, options)")} on that instance inside your callback to build each of the menu entries:` );
     MAKE_CODE_BULLET_LIST( [
-        ["entryPath (String)", "The path menu/submenu/etc of each entry"],
-        "options (Object/Function)"
+        ["entryPath", "String", "The path menu/submenu/etc of each entry"],
+        ["options", "Object/Function"]
     ] );
 
     MAKE_PARAGRAPH( `The different options to be set when adding elements to the Menubar are the following:` );
     MAKE_CODE_BULLET_LIST( [
-        ["callback (Function)", "To be called when interacting with the entry"],
-        ["icon (String)", "(<a href='https://fontawesome.com/search'>Fontawesome</a>)"],
-        ["short (String)", "For key shortcuts"],
-        ["type (String)", "(checkbox)"],
-        ["checked (Boolean)", "for <em>checkbox</em> type"]
+        ["callback", "Function", "To be called when interacting with the entry"],
+        ["icon", "String", "(<a href='https://fontawesome.com/search'>Fontawesome</a>)"],
+        ["short", "String", "For key shortcuts"],
+        ["type", "String", "(checkbox)"],
+        ["checked", "Boolean", "for <em>checkbox</em> type"]
     ] );
 
     MAKE_PARAGRAPH( `Note: In case of no options rather than the callback, you can use ${INLINE_CODE("options")} as the ${INLINE_CODE("Function")} callback.`, true );
@@ -74,7 +74,7 @@ m.@[mtd]add@( @[str]"Help/Support"@, { callback: () =&gt; {
 
     MAKE_PARAGRAPH( `The Menubar creation can be configured too, where the following ${INLINE_CODE("options")} are available when calling ${INLINE_CODE("Area.addMenubar(callback, options)")}:` );
     MAKE_CODE_BULLET_LIST( [
-        ["float (String)", "Justify main entries to left (default), center, right"]
+        ["float", "String", "Justify main entries to left (default), center, right"]
     ] );
     MAKE_CODE( `area.@[mtd]addMenubar@( m =&gt; {
     @[com]// Fill entries...@
