@@ -2,7 +2,11 @@
 
 ## 0.1.44 (dev)
 
+VideoEditor:
+- Support cropping video area.
+
 Fix ContextMenu position when scroll > 0.
+Begin support for light-scheme appearance.
 Docs Updated.
 
 ## 0.1.43 (master)
