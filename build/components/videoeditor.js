@@ -566,36 +566,33 @@ class VideoEditor {
     resizeCropArea(event) {
 
         const rect = this.cropArea.getBoundingClientRect();
-        const rectVideo = this.video.getBoundingClientRect();
         
         const mouseX = event.clientX;
         const mouseY = event.clientY;
-
-       if (this.resizeHandle === 'br') {
-
-            let width = mouseX - rect.left;
-            let height = mouseY - rect.top;
-
-            if( rect.x + width > rectVideo.right ) {
-                width = rectVideo.right - rect.x;
-            }
-
-            if( rect.y + height > rectVideo.bottom ) {
-                height = rectVideo.bottom - rect.y;
-            }
-
-            this.cropArea.style.width = width + "px";
-            this.cropArea.style.height = height + "px";
-
-            const videoEndX = rectVideo.left + rectVideo.width;
-            const cropEndX = rect.x + width;
-            const videoEndY = rectVideo.top + rectVideo.height;
-            const cropEndY = rect.y + height;
-
+        
+        if (this.resizeHandle === 'br') {
+                        
             const nodes = this.cropArea.parentElement.childNodes;
+
             for( let i = 0; i < nodes.length; i++ ) {
                 if( nodes[i] != this.cropArea ) {
-                    nodes[i].style.clipPath = `inset( ${rect.y - rectVideo.top}px ${videoEndX - cropEndX}px ${videoEndY - cropEndY}px ${rect.x - rectVideo.left}px)`; // (startY endX endY startX)
+                   const rectEl = nodes[i].getBoundingClientRect();
+                    let width = mouseX - rect.left;
+                    let height = mouseY - rect.top;
+         
+                    if( rect.x + width > rectEl.right ) {
+                        width = rectEl.right - rect.x;
+                    }
+         
+                    if( rect.y + height > rectEl.bottom ) {
+                        height = rectEl.bottom - rect.y;
+                    }
+         
+                    this.cropArea.style.width = width + "px";
+                    this.cropArea.style.height = height + "px";
+           
+                    nodes[i].style.webkitMask = `linear-gradient(#000 0 0) ${rect.x - rectEl.left}px ${ rect.y - rectEl.top }px / ${width}px ${height}px, linear-gradient(rgba(0, 0, 0, 0.3) 0 0)`;
+                    nodes[i].style.webkitMaskRepeat = 'no-repeat';
                 }
             }
         }
@@ -635,7 +632,9 @@ class VideoEditor {
 
         for( let i = 0; i < nodes.length; i++ ) {
             if( nodes[i] != this.cropArea ) {
-                nodes[i].style.clipPath = `inset( ${y}px ${videoEndX - cropEndX}px ${videoEndY - cropEndY}px ${x - rectVideo.left}px)`; // (startY endX endY startX)        
+                const rectEl = nodes[i].getBoundingClientRect();
+                nodes[i].style.webkitMask = `linear-gradient(#000 0 0) ${x - rectEl.left}px ${y }px / ${this.cropArea.clientWidth}px ${this.cropArea.clientHeight}px, linear-gradient(rgba(0, 0, 0, 0.3) 0 0)`;
+                nodes[i].style.webkitMaskRepeat = 'no-repeat';
             }
         }
     }
