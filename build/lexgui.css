@@ -117,10 +117,6 @@ body.noevents * {
     pointer-events: none;
 }
 
-::-webkit-file-upload-button {
-    display: none;
-}
-
 #modal {
     left: 0;
     right: 0;
@@ -793,7 +789,7 @@ body.noevents * {
 .lexwidget input:disabled:not(.lextoggle) {
     outline: none;
     border: none;
-    color: #919098db;
+    color: var(--global-text-terciary);
 }
 
 @media (prefers-color-scheme: light) {
@@ -1861,6 +1857,63 @@ input[type="range"] {
     margin-top: 7px;
 }
 
+/* File Input */
+
+/* .lexfileinput {
+    cursor: pointer;
+    border: 1px solid #0000;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: #121212;
+    vertical-align: middle;
+    webkit-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    width: clamp(3rem,20rem,100%);
+    height: var(--size);
+    border-color: var(--input-color);
+    --size: calc(var(--size-field,.25rem)*10);
+    --input-color: color-mix(in oklab,#121212 20%,#0000);
+    border-radius: 8px;
+    align-items: center;
+    padding-inline-end:.75rem;font-size: .875rem;
+    line-height: 2;
+    display: inline-flex
+} */
+
+.lexfileinput::file-selector-button {
+    align-content: center;
+    background-color: var(--global-button-color);
+    border-radius: 6px;
+    border: none;
+    margin-top: 2px;
+    min-height: 22px !important;
+    color: var(--global-text-primary);
+    font-weight: 500;
+    outline: none;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+    font-family: var(--global-font);
+    transition: 0.1s linear;
+}
+
+.lexfileinput::file-selector-button:hover {
+    background-color: var(--global-button-color-hovered);
+    color: var(--global-text-primary);
+}
+
+.lexfileinput::file-selector-button:active {
+    background-color: var(--global-color-terciary);
+    color: var(--global-text-secondary);
+    transform: scale(0.99);
+}
+
+.lexfileinput:disabled::file-selector-button {
+    cursor: not-allowed;
+    color: var(--global-text-terciary);
+}
 
 /* Progress bar */
 

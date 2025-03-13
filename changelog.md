@@ -7,7 +7,7 @@ VideoEditor:
 
 Added new `Toggle` Widget (same usage as Checkbox).
 Adding support for inline HTML badges `LX.badge(text)`.
-Checkbox, Progressbar css updated.
+Checkbox, Progressbar, FileInput css updated.
 Improved Form widget.
 Begin support for light-scheme appearance.
 Fix ContextMenu position when scroll > 0.

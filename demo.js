@@ -487,9 +487,7 @@ function fillPanel( panel ) {
     panel.addToggle("Toggle me, Please", false, (value, event) => {
         console.log(value);
     }, { className: "accent" });
-    panel.sameLine(2);
-    panel.addFile("Img1", data => { console.log(data) }, {} );
-    panel.addFile("Img2", data => { console.log(data) }, {} );
+    panel.addFile("I'm a File Input", data => { console.log(data) }, { disabled: true } );
     panel.addDropdown("Best Engine", ["Godot", "Unity", "Unreal Engine"], "Unity", (value, event) => {
         console.log(value);
     });

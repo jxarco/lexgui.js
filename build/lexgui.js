@@ -6645,6 +6645,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
          * @param {Function} callback Callback function on change
          * @param {*} options:
          * local: Ask for local file
+         * disabled: Make the widget disabled [false]
          * read: Return the file itself (False) or the contents (True)
          * type: type to read as [text (Default), buffer, bin, url]
          */
@@ -6665,8 +6666,10 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             // Create hidden input
             let input = document.createElement( 'input' );
+            input.className = "lexfileinput";
             input.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 10%)";
             input.type = 'file';
+            input.disabled = options.disabled ?? false;
 
             if( options.placeholder )
             {
