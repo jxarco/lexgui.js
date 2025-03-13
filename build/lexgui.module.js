@@ -6459,9 +6459,9 @@ class Panel {
         progress.step = "any";
         progress.min = options.min ?? 0;
         progress.max = options.max ?? 1;
-        progress.low = options.low ?? undefined;
-        progress.high = options.high ?? undefined;
-        progress.optimum = options.optimum ?? undefined;
+        progress.low = options.low ?? progress.low;
+        progress.high = options.high ?? progress.high;
+        progress.optimum = options.optimum ?? progress.optimum;
         progress.value = value;
 
         const _updateColor = () => {
