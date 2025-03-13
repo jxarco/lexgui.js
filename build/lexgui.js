@@ -871,7 +871,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             }
             else
             {
-                obj[ signalName ].call( obj, value );
+                // This is a function callback!
+                const fn = obj;
+                fn( null, value );
             }
         }
     }
@@ -7787,7 +7789,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             element.smooth = (options.smooth && typeof( options.smooth ) == 'number' ? options.smooth : 0.3) || false;
             element.move_out = options.moveOutAction ?? LX.CURVE_MOVEOUT_DELETE;
 
-            LX.addSignal( "@on_new_color_scheme", (element, value) => {
+            LX.addSignal( "@on_new_color_scheme", (el, value) => {
                 element.bgcolor = options.bgColor || LX.getThemeColor( "global-intense-background" );
                 element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected-light" );
                 this.redraw();
