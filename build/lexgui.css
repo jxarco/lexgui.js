@@ -16,7 +16,9 @@
     --global-font-size-big: 14px;
     --global-color-primary: light-dark(#f9f9f9, #1c1c1c);
     --global-color-secondary: light-dark(#ececec, #2c2c2c);
-    --global-color-terciary: light-dark(#dadada, #444);
+    --global-color-terciary: light-dark(#e0e0e0, #444);
+    --global-color-quaternary: light-dark(#c8c8c8, #555);
+    --global-color-quinary: light-dark(#b0b0b0, #666);
     --global-selected: #2d69da;
     --global-selected-light: #0d99ff;
     --global-selected-dark: #304b86;
@@ -602,7 +604,7 @@ body.noevents * {
         background-color: var(--global-color-secondary);
         text-shadow: 0px 1px 6px #afafaf7c;
     }
-    
+
     .lexbranch.closed .lexbranchtitle {
         background-color: inherit;
     }
@@ -945,20 +947,20 @@ body.noevents * {
         color: var(--global-text-primary);
         border: 1px solid var(--global-color-terciary) !important;
     }
-    
+
     .lexbutton.accept {
         background-color: var(--global-selected);
     }
-    
+
     .lexbutton:hover {
         background-color: var(--global-button-color-hovered);
         color: var(--global-text-primary);
     }
-    
+
     .lexbutton.accept:hover {
         background-color: #3b6790;
     }
-    
+
     .lexbutton.selected {
         background: #3c4145;
         outline: 1px solid #8c9bc7;
@@ -1222,9 +1224,10 @@ body.noevents * {
 /* Toggle Widget */
 
 .lextoggle {
-    /* --toggle-color: var(--global-selected); */
-    border: 1px solid currentColor;
-    color: var(--global-text-secondary);
+    --toggle-color: var(--global-button-color);
+    border: 1px solid transparent;
+    color: #f9f9f9;
+    background-color: var(--global-color-quaternary);
     cursor: pointer;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -1233,9 +1236,9 @@ body.noevents * {
     -webkit-user-select: none;
     user-select: none;
     border-radius: 12px;
-    padding: 0.16rem;
-    width: 2rem;
-    height: 1.22rem;
+    padding: 3px;
+    width: 36px;
+    height: 22px;
     flex-shrink: 0;
     grid-template-columns: 0fr 1fr 1fr;
     place-content: center;
@@ -1244,12 +1247,16 @@ body.noevents * {
     position: relative
 }
 
+.lextoggle.outline {
+    border: 1px solid transparent;
+}
+
 /* Colors */
-.lextoggle.primary { --toggle-color: var(--global-selected); color: var(--toggle-color); }
-.lextoggle.secondary { --toggle-color: var(--global-selected-light); color: var(--toggle-color);  }
-.lextoggle.accent { --toggle-color: var(--global-color-accent); color: var(--toggle-color);  }
-.lextoggle.warning { --toggle-color: var(--global-color-warning); color: var(--toggle-color);  }
-.lextoggle.error { --toggle-color: var(--global-color-error); color: var(--toggle-color);  }
+.lextoggle.primary { --toggle-color: var(--global-selected); }
+.lextoggle.secondary { --toggle-color: var(--global-selected-light);  }
+.lextoggle.accent { --toggle-color: var(--global-color-accent);  }
+.lextoggle.warning { --toggle-color: var(--global-color-warning);  }
+.lextoggle.error { --toggle-color: var(--global-color-error);  }
 
 .lextoggle > * {
     z-index: 1;
@@ -1311,8 +1318,15 @@ body.noevents * {
 }
 
 .lextoggle:checked, .lextoggle[aria-checked=true], .lextoggle:has(>input:checked) {
-    background-color: #1f1f1f;
-    grid-template-columns: 1fr 1fr 0fr
+    border: 1px solid var(--global-color-secondary);
+    background-color: var(--toggle-color);
+    grid-template-columns: 1fr 1fr 0fr;
+}
+
+.lextoggle.outline:checked, .lextoggle.outline[aria-checked=true], .lextoggle.outline:has(>input:checked) {
+    color: var(--toggle-color);
+    border: 1px solid currentColor;
+    background-color: var(--global-color-primary);
 }
 
 :is(.lextoggle:checked, .lextoggle[aria-checked=true], .lextoggle:has(>input:checked)):before {
