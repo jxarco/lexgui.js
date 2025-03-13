@@ -2666,28 +2666,29 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         static BUTTON       = 3;
         static DROPDOWN     = 4;
         static CHECKBOX     = 5;
-        static COLOR        = 6;
-        static NUMBER       = 7;
-        static TITLE        = 8;
-        static VECTOR       = 9;
-        static TREE         = 10;
-        static PROGRESS     = 11;
-        static FILE         = 12;
-        static LAYERS       = 13;
-        static ARRAY        = 14;
-        static LIST         = 15;
-        static TAGS         = 16;
-        static CURVE        = 17;
-        static CARD         = 18;
-        static IMAGE        = 19;
-        static CONTENT      = 20;
-        static CUSTOM       = 21;
-        static SEPARATOR    = 22;
-        static KNOB         = 23;
-        static SIZE         = 24;
-        static PAD          = 25;
-        static FORM         = 26;
-        static DIAL         = 27;
+        static TOGGLE       = 6;
+        static COLOR        = 7;
+        static NUMBER       = 8;
+        static TITLE        = 9;
+        static VECTOR       = 10;
+        static TREE         = 11;
+        static PROGRESS     = 12;
+        static FILE         = 13;
+        static LAYERS       = 14;
+        static ARRAY        = 15;
+        static LIST         = 16;
+        static TAGS         = 17;
+        static CURVE        = 18;
+        static CARD         = 19;
+        static IMAGE        = 20;
+        static CONTENT      = 21;
+        static CUSTOM       = 22;
+        static SEPARATOR    = 23;
+        static KNOB         = 24;
+        static SIZE         = 25;
+        static PAD          = 26;
+        static FORM         = 27;
+        static DIAL         = 28;
 
         static NO_CONTEXT_TYPES = [
             Widget.BUTTON,
@@ -2760,6 +2761,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 case Widget.BUTTON: return "Button";
                 case Widget.DROPDOWN: return "Dropdown";
                 case Widget.CHECKBOX: return "Checkbox";
+                case Widget.TOGGLE: return "Toggle";
                 case Widget.COLOR: return "Color";
                 case Widget.NUMBER: return "Number";
                 case Widget.VECTOR: return "Vector";
@@ -2778,6 +2780,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 case Widget.DIAL: return "Dial";
                 case Widget.CUSTOM: return this.customName;
             }
+
+            console.error( `Unknown Widget type: ${ this.type }` );
         }
 
         refresh() {
@@ -5458,7 +5462,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             checkbox.disabled = options.disabled ?? false;
 
             let valueName = document.createElement( 'span' );
-            valueName.id = "checkboxtext";
+            valueName.className = "checkboxtext";
             valueName.innerHTML = "On";
 
             container.appendChild( checkbox );
@@ -5490,6 +5494,102 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 let suboptions = document.createElement('div');
                 suboptions.className = "lexcheckboxsubmenu";
                 suboptions.toggleAttribute( 'hidden', !checkbox.checked );
+
+                this.queue( suboptions );
+                options.suboptions.call(this, this);
+                this.clearQueue();
+
+                element.appendChild( suboptions );
+            }
+
+            return widget;
+        }
+
+        /**
+         * @method addToggle
+         * @param {String} name Widget name
+         * @param {Boolean} value Value of the checkbox
+         * @param {Function} callback Callback function on change
+         * @param {*} options:
+         * disabled: Make the widget disabled [false]
+         * suboptions: Callback to add widgets in case of TRUE value
+         * className: Customize colors
+         */
+
+        addToggle( name, value, callback, options = {} ) {
+
+            if( !name )
+            {
+                throw( "Set Widget Name!" );
+            }
+
+            let widget = this.create_widget( name, Widget.TOGGLE, options );
+
+            widget.onGetValue = () => {
+                return toggle.checked;
+            };
+
+            widget.onSetValue = ( newValue, skipCallback ) => {
+                if( toggle.checked !== newValue )
+                {
+                    toggle.checked = newValue;
+                    Panel._dispatch_event( toggle, "change", skipCallback );
+                }
+            };
+
+            let element = widget.domEl;
+
+            // Add reset functionality
+            Panel._add_reset_property( element.domName, function() {
+                toggle.checked = !toggle.checked;
+                Panel._dispatch_event( toggle, "change" );
+            });
+
+            // Add widget value
+
+            var container = document.createElement('div');
+            container.className = "lextogglecont";
+
+            let toggle = document.createElement('input');
+            toggle.type = "checkbox";
+            toggle.className = "lextoggle " + ( options.className ?? "" );
+            toggle.checked = value;
+            toggle.iValue = value;
+            toggle.disabled = options.disabled ?? false;
+
+            let valueName = document.createElement( 'span' );
+            valueName.className = "toggletext";
+            valueName.innerHTML = "On";
+
+            container.appendChild( toggle );
+            container.appendChild( valueName );
+
+            toggle.addEventListener( "change" , e => {
+
+                const skipCallback = ( e.detail?.constructor == Number ? null : e.detail );
+
+                // Reset button (default value)
+                if( !skipCallback )
+                {
+                    let btn = element.querySelector( ".lexwidgetname .lexicon" );
+                    if( btn ) btn.style.display = toggle.checked != toggle.iValue ? "block": "none";
+                }
+
+                // Open suboptions
+                let submenu = element.querySelector( ".lextogglesubmenu" );
+                if( submenu ) submenu.toggleAttribute( 'hidden', !toggle.checked );
+
+                if( !skipCallback ) this._trigger( new IEvent( name, toggle.checked, e ), callback );
+            });
+
+            element.appendChild( container );
+
+            if( options.suboptions )
+            {
+                element.style.flexWrap = "wrap";
+                let suboptions = document.createElement('div');
+                suboptions.className = "lextogglesubmenu";
+                suboptions.toggleAttribute( 'hidden', !toggle.checked );
 
                 this.queue( suboptions );
                 options.suboptions.call(this, this);

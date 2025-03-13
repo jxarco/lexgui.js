@@ -703,7 +703,7 @@ body.noevents * {
     color: var(--global-text-secondary);
 }
 
-.lexwidget input:not(.lexcheckbox) {
+.lexwidget input:not(.lexcheckbox, .lextoggle) {
     font-family: var(--global-font);
     background: none;
     padding: 3px;
@@ -790,7 +790,7 @@ body.noevents * {
     margin-left: -4px;
 }
 
-.lexwidget input:disabled {
+.lexwidget input:disabled:not(.lextoggle) {
     outline: none;
     border: none;
     color: #919098db;
@@ -1182,8 +1182,7 @@ body.noevents * {
 .lexcheckbox.error { --checkbox-color: var(--global-color-error); }
 
 .lexcheckbox:before {
-    --tw-content: "";
-    content: var(--tw-content);
+    content: "";
     opacity: 0;
     clip-path: polygon(20% 100%,20% 80%,50% 80%,50% 80%,70% 80%,70% 100%);
     width: 100%;
@@ -1206,12 +1205,149 @@ body.noevents * {
     opacity: 1;
 }
 
-.lexcheckboxcont #checkboxtext {
+.lexcheckboxcont {
     font-weight: bold;
-    margin-left: 4px;
+    display: inline-flex;
+    gap: 8px;
+    margin: 0 auto;
+}
+
+.lexcheckboxcont .checkboxtext {
+    font-weight: bold;
 }
 
 .lexcheckboxsubmenu {
+    width: 100%;
+    padding: 6px;
+    color: var(--global-text-secondary);
+    margin-top: -1px;
+}
+
+/* Toggle Widget */
+
+.lextoggle {
+    /* --toggle-color: var(--global-selected); */
+    border: 1px solid currentColor;
+    color: var(--global-text-secondary);
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    vertical-align: middle;
+    -webkit-user-select: none;
+    user-select: none;
+    border-radius: 12px;
+    padding: 0.16rem;
+    width: 2rem;
+    height: 1.22rem;
+    flex-shrink: 0;
+    grid-template-columns: 0fr 1fr 1fr;
+    place-content: center;
+    transition: color .3s,grid-template-columns .2s;
+    display: inline-grid;
+    position: relative
+}
+
+/* Colors */
+.lextoggle.primary { --toggle-color: var(--global-selected); color: var(--toggle-color); }
+.lextoggle.secondary { --toggle-color: var(--global-selected-light); color: var(--toggle-color);  }
+.lextoggle.accent { --toggle-color: var(--global-color-accent); color: var(--toggle-color);  }
+.lextoggle.warning { --toggle-color: var(--global-color-warning); color: var(--toggle-color);  }
+.lextoggle.error { --toggle-color: var(--global-color-error); color: var(--toggle-color);  }
+
+.lextoggle > * {
+    z-index: 1;
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: #0000;
+    border: none;
+    grid-column: 2/span 1;
+    grid-row-start: 1;
+    height: 100%;
+    padding: .125rem;
+    transition: opacity .2s,rotate .4s
+}
+
+.lextoggle>:focus {
+    outline-style: none
+}
+
+.lextoggle > :nth-child(2) {
+    color: #1f1f1f;
+    rotate: none
+}
+
+.lextoggle > :nth-child(3) {
+    color: #1f1f1f;
+    opacity: 0;
+    rotate: -15deg;
+}
+
+.lextoggle:has(:checked) > :nth-child(2) {
+    opacity: 0;
+    rotate: 15deg;
+}
+
+.lextoggle:has(:checked) > :nth-child(3) {
+    opacity: 1;
+    rotate: none;
+}
+
+.lextoggle:before {
+    aspect-ratio: 1;
+    border-radius: 50%;
+    content: "";
+    height: 100%;
+    background-color: currentColor;
+    grid-row-start: 1;
+    grid-column-start: 2;
+    transition: background-color .1s,translate .2s,inset-inline-start .2s;
+    position: relative;
+    inset-inline-start: 0;
+    translate: 0
+}
+
+.lextoggle:focus-visible, .lextoggle:has(:focus-visible) {
+    outline-offset: 2px;
+    outline: 2px solid
+}
+
+.lextoggle:checked, .lextoggle[aria-checked=true], .lextoggle:has(>input:checked) {
+    background-color: #1f1f1f;
+    grid-template-columns: 1fr 1fr 0fr
+}
+
+:is(.lextoggle:checked, .lextoggle[aria-checked=true], .lextoggle:has(>input:checked)):before {
+    background-color: currentColor;
+}
+
+.lextoggle:indeterminate {
+    grid-template-columns: .5fr 1fr .5fr
+}
+
+.lextoggle:disabled {
+    border: 1px solid var(--global-text-terciary);
+    cursor: not-allowed;
+}
+
+.lextoggle:disabled:before {
+    background-color: var(--global-text-terciary);
+}
+
+.lextogglecont {
+    font-weight: bold;
+    display: inline-flex;
+    gap: 8px;
+    margin: 0 auto;
+}
+
+.lextogglecont .toggletext {
+    font-weight: bold;
+}
+
+.lextogglesubmenu {
     width: 100%;
     padding: 6px;
     color: var(--global-text-secondary);
@@ -1222,11 +1358,6 @@ body.noevents * {
 
 .lexcolor {
     display: flex;
-    /*
-  flex-wrap: wrap;
-  padding-left: 6px;
-  padding-right: 6px;
-  */
     align-items: center;
 }
 
@@ -2141,7 +2272,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     color: #f5f5f5;
 }
 
-.lexcontextmenubox .lexcontextmenuentry:active:not(.cmtitle):not(.cmseparator) {
+.lexcontextmenubox .lexcontextmenuentry:active:not(.cmtitle, .cmseparator) {
     padding-top: 0.22em;
     color: #b7b7cba4;
 }
@@ -2669,6 +2800,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexwidget:has(.lexarrayitems),
 .lexwidget:has(.lexcheckboxsubmenu),
+.lexwidget:has(.lextogglesubmenu),
 .lexwidget:has(.lexcustomcontainer) {
     background-color: light-dark(var(--global-color-terciary), var(--global-medium-background));
     border-radius: 6px;
@@ -2824,6 +2956,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     top: 50%;
     left: 50%;
     translate: -50% -50%;
+    cursor: ns-resize;
+}
+
+.lexknob.disabled .innerknobcircle {
+    cursor: not-allowed;
 }
 
 .lexknob.sm .innerknobcircle {

@@ -5,7 +5,8 @@
 VideoEditor:
 - Support cropping video area.
 
-Support for adding inline HTML badges `LX.badge(text)`.
+Added new `Toggle` Widget (same usage as Checkbox).
+Adding support for inline HTML badges `LX.badge(text)`.
 Checkbox, Progressbar css updated.
 Improved Form widget.
 Begin support for light-scheme appearance.

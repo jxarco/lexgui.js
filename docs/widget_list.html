@@ -55,6 +55,7 @@
             "<a href='#text'>Text</a>",
             "<a href='#text-area'>Text Area</a>",
             "<a href='#title'>Title</a>",
+            "<a href='#toggle'>Toggle</a>",
             "<a href='#vector'>Vector</a>",
             "<a href='#other-widgets'>Other widgets</a>",
         ] );
@@ -122,7 +123,7 @@
         {
             const area = new LX.Area( { skipAppend: true, height: "auto" } );
             const panel = area.addPanel();
-            panel.addCheckbox("Toggle me", true, (value, event) => {
+            panel.addCheckbox("Check me", true, (value, event) => {
                 console.log(value);
             });
             document.body.appendChild( area.root );
@@ -139,12 +140,12 @@
                 ["suboptions", "Function", "Callback to add widgets shown if <code class='inline'>true</code>"]
             ]
         ] );
-        MAKE_CODE( `panel.@[mtd]addCheckbox@(@[str]"Toggle me"@, @true@, (value, event) =&gt; {
+        MAKE_CODE( `panel.@[mtd]addCheckbox@(@[str]"Check me"@, @true@, (value, event) =&gt; {
     console.@[mtd]log@(value);
 });
 
 @[com]// Suboptions in case checkbox is enabled@
-panel.@[mtd]addCheckbox@(@[str]"Toggle me too"@, @true@, (value, event) =&gt; {
+panel.@[mtd]addCheckbox@(@[str]"Check me too"@, @true@, (value, event) =&gt; {
         console.@[mtd]log@(value);
     }, { suboptions: p =&gt; {
         p.@[mtd]addText@(@null@, @[str]"Suboption 1"@);
@@ -973,6 +974,42 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
         ] );
         MAKE_CODE( `panel.@[mtd]addTitle@(@[str]"A title!"@);
 panel.@[mtd]addTitle@(@[str]"A No-Background Big Title!@", { style: { background: @[str]"none"@, fontSize: @[str]"24px"@ } });` );
+
+        // Toggle
+        MAKE_HEADER( "Toggle", "h2", "toggle" );
+        MAKE_PARAGRAPH( `Represents a classic toggle. Same usage as the checbox.` );
+        
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addToggle("Toggle me", true, (value, event) => {
+                console.log(value);
+            });
+            document.body.appendChild( area.root );
+        }
+        
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addToggle(name, value, callback, options)")} to add a Toggle Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name", "String", "Widget name"],
+            ["value", "Boolean", "Boolean value (true/false)"],
+            ["callback", "Function", "Function called when the checkbox value changes"],
+            ["options", "Object", "Basic options for a Widget"],
+            [
+                ["disabled", "Boolean", "Make the widget disabled"],
+                ["suboptions", "Function", "Callback to add widgets shown if <code class='inline'>true</code>"]
+            ]
+        ] );
+        MAKE_CODE( `panel.@[mtd]addToggle@(@[str]"Toggle me"@, @true@, (value, event) =&gt; {
+    console.@[mtd]log@(value);
+});
+
+@[com]// Suboptions in case checkbox is enabled@
+panel.@[mtd]addToggle@(@[str]"Toggle me too"@, @true@, (value, event) =&gt; {
+        console.@[mtd]log@(value);
+    }, { suboptions: p =&gt; {
+        p.@[mtd]addText@(@null@, @[str]"Suboption 1"@);
+        p.@[mtd]addNumber@(@[str]"Suboption 2"@, @12@);
+} });` );
 
         // Vector
         MAKE_HEADER( "Vector", "h2", "vector" );
