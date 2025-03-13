@@ -3319,15 +3319,23 @@ ul.lexassetscontent {
     z-index: 1;
 }
 
-.lexassetscontent.list li .lexcheckbox {
+.lexassetscontent.list li:has(.lexcheckbox) .lexassetinfo {
     display: block;
-    left: 0 !important;
-    z-index: 100;
-    position: absolute;
+    right: 32px;
+    z-index: 1;
 }
 
-.lexassetscontent.list li .lexcheckbox input[type=checkbox]:checked:after {
-    left: 0 !important;
+.lexassetscontent li .lexcheckbox {
+    position: absolute;
+    display: block;
+    z-index: 100;
+    width: 1.15em;
+    height: 1.15em;
+}
+
+.lexassetscontent.list li .lexcheckbox {
+    right: 3px;
+    top: 3px;
 }
 
 .lexassetscontent li:hover span {

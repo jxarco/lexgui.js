@@ -481,6 +481,9 @@ function fillPanel( panel ) {
     panel.branch("Preferences", {icon: "fa-solid fa-gear"});
     panel.addButton(null, "Show Notifications" + LX.badge("+99", "accent sm"));
     panel.addText("Text", "Warning text", null, { warning: true });
+    panel.addCheckbox("Toggle me, Please", false, (value, event) => {
+        console.log(value);
+    }, { /* className: "accent" */ });
     panel.sameLine(2);
     panel.addFile("Img1", data => { console.log(data) }, {} );
     panel.addFile("Img2", data => { console.log(data) }, {} );

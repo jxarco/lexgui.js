@@ -8405,6 +8405,7 @@ class AssetView {
         this.skipPreview = options.skipPreview ?? false;
         this.useNativeTitle = options.useNativeTitle ?? false;
         this.onlyFolders = options.onlyFolders ?? true;
+        this.allowMultipleSelection = options.allowMultipleSelection ?? false;
         this.previewActions = options.previewActions ?? [];
         this.contextMenu = options.contextMenu ?? [];
         this.onRefreshContent = options.onRefreshContent;
@@ -8803,15 +8804,13 @@ class AssetView {
                 itemEl.title = type + ": " + item.id;
             }
 
-            if( item.selected != undefined )
+            if( that.allowMultipleSelection )
             {
-                let span = document.createElement('span');
-                span.className = "lexcheckbox";
-                let checkbox_input = document.createElement('input');
-                checkbox_input.type = "checkbox";
-                checkbox_input.className = "checkbox";
-                checkbox_input.checked = item.selected;
-                checkbox_input.addEventListener('change', ( e, v ) => {
+                let checkbox = document.createElement( 'input' );
+                checkbox.type = "checkbox";
+                checkbox.className = "lexcheckbox";
+                checkbox.checked = item.selected;
+                checkbox.addEventListener('change', ( e, v ) => {
                     item.selected = !item.selected;
                     if( that.onevent )
                     {
@@ -8821,10 +8820,9 @@ class AssetView {
                     }
                     e.stopPropagation();
                     e.stopImmediatePropagation();
-                })
-                span.appendChild(checkbox_input);
-                itemEl.appendChild(span);
+                });
 
+                itemEl.appendChild( checkbox );
             }
 
             let title = document.createElement('span');
@@ -8890,6 +8888,7 @@ class AssetView {
                     }
 
                     this.classList.add('selected');
+                    that.selectedItem = item;
 
                     if( !that.skipPreview )
                     {
