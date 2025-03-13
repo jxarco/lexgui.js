@@ -739,7 +739,6 @@ body.noevents * {
 
 .lexwidget .lextext div {
     color: var(--global-text-secondary);
-    padding: 2px;
     padding-left: 6px;
 }
 
@@ -875,7 +874,7 @@ body.noevents * {
     border-radius: 6px;
     border: none;
     margin-top: 2px;
-    height: 22px !important;
+    min-height: 22px !important;
     color: var(--global-text-primary);
     font-weight: 500;
     outline: none;
@@ -990,9 +989,7 @@ body.noevents * {
     margin-right: 1px;
     border-radius: 0px;
     display: flex;
-    padding: 1em;
-    padding-top: 0.5em;
-    padding-bottom: 2.0em;
+    padding: 0.65em;
     transition: 0.2s;
 }
 
@@ -1876,13 +1873,9 @@ meter::-webkit-meter-even-less-good-value {
     cursor: pointer;
     margin-left: 4px;
     -webkit-user-select: none;
-    /* Safari 3.1+ */
     -moz-user-select: none;
-    /* Firefox 2+ */
     -ms-user-select: none;
-    /* IE 10+ */
     user-select: none;
-    /* Standard syntax */
 }
 
 .lexmenubar .lexmenuentry span {
@@ -2056,15 +2049,10 @@ meter::-webkit-meter-even-less-good-value {
     padding-top: 0.6em;
     color: var(--global-text-secondary);
     cursor: pointer;
-    /* margin-right: 4px; */
     -webkit-user-select: none;
-    /* Safari 3.1+ */
     -moz-user-select: none;
-    /* Firefox 2+ */
     -ms-user-select: none;
-    /* IE 10+ */
     user-select: none;
-    /* Standard syntax */
 }
 
 .lexmenubar .lexmenubutton a {
@@ -2083,7 +2071,7 @@ meter::-webkit-meter-even-less-good-value {
     position: absolute;
     padding-right: 20px;
     border-radius: 6px;
-    box-shadow: 0 0 8px rgba(92, 92, 92, 0.63) !important;
+    box-shadow: 0 0 6px rgba(46, 46, 46, 0.596) !important;
     background-color: var(--global-blur-background);
     border: 1px solid #91909036;
 }
@@ -2345,7 +2333,7 @@ meter::-webkit-meter-even-less-good-value {
 }
 
 .lexoverlaybuttons .lexbutton {
-    padding: 14px 10px;
+    padding: 6px 6px;
     font-size: var(--global-font-size-big);
     border-radius: 10px;
     justify-content: center;
@@ -2410,6 +2398,7 @@ meter::-webkit-meter-even-less-good-value {
     background: none;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
+    height: 100%;
 }
 
 .lexoverlaybuttonscontainer.vertical .lexoverlaygroup {
