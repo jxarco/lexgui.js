@@ -21,6 +21,7 @@
     --global-selected-light: #0d99ff;
     --global-selected-dark: #304b86;
     --global-color-accent: #ec5377;
+    --global-color-warning: #ffc107;
     --global-color-error: #f54c4c;
     --global-button-color: light-dark(#f9f9f9, #3e3e3e);
     --global-button-color-hovered: light-dark(#ececec, #444);
@@ -743,12 +744,12 @@ body.noevents * {
 }
 
 .lexwidget .lextext.lexwarning div {
-    color: rgb(209, 195, 65);
+    color: var(--global-color-warning);
     font-weight: 700;
 }
 
 .lexwidget .lextext.lexwarning i {
-    color: rgb(209, 195, 65);
+    color: var(--global-color-warning);
     margin-right: 16px;
 }
 
@@ -1763,9 +1764,13 @@ input[type="range"] {
     align-items: center;
 }
 
+.lexprogress span {
+    width: 5%;
+}
+
 .lexprogressbar {
     border: none !important;
-    width: 90%;
+    width: 95%;
     outline: none;
     opacity: 0.7;
     -webkit-transition: .2s;
@@ -1782,9 +1787,10 @@ input[type="range"] {
 }
 
 /* The gray background in Chrome, etc. */
-meter::-webkit-meter-bar {
-    background: var(--global-color-primary);
+.lexprogressbar::-webkit-meter-bar {
+    border-radius: 0.25rem;
     height: 12px;
+    background: color-mix(in rgb, var(--global-selected) 20%, transparent);
 }
 
 /* (optimum) */
@@ -1792,26 +1798,26 @@ meter:-moz-meter-optimum::-moz-meter-bar {
     background: var(--global-selected);
 }
 
-meter::-webkit-meter-optimum-value {
+.lexprogressbar::-webkit-meter-optimum-value {
     background: var(--global-selected);
 }
 
-/* (sub-optimum)*/
+/* (high)*/
 meter:-moz-meter-sub-optimum::-moz-meter-bar {
-    background: #ffc107;
+    background: var(--global-color-warning);
 }
 
-meter::-webkit-meter-suboptimum-value {
-    background: #ffc107;
+.lexprogressbar::-webkit-meter-suboptimum-value {
+    background: var(--global-color-warning);
 }
 
-/* (even less good)*/
+/* (low)*/
 meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
-    background: #dc3545;
+    background: var(--global-color-error);
 }
 
-meter::-webkit-meter-even-less-good-value {
-    background: #dc3545;
+.lexprogressbar::-webkit-meter-even-less-good-value {
+    background: var(--global-color-error);
 }
 
 /* Badges */

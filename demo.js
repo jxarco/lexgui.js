@@ -625,7 +625,7 @@ function fillRightBottomPanel( panel, tab ) {
         panel.addNumber("HeadRoll Value", 0, (value, event) => {
             panel.setValue('HeadRoll', value);
         }, { min: -1, max: 1, step: 0.1 });
-        panel.addProgress("HeadRoll", 0, { min: -1, max: 1, showValue: true, editable: true, callback: (value, event) => {
+        panel.addProgress("HeadRoll", 0, { min: -1, max: 1, low: -0.25, high: 0.25, optimum: 0.75, showValue: true, editable: true, callback: (value, event) => {
             panel.setValue('HeadRoll Value', value);
         } });
     }

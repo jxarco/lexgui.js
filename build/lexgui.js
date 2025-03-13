@@ -6430,10 +6430,14 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             widget.onGetValue = () => {
                 return progress.value;
             };
+
             widget.onSetValue = ( newValue, skipCallback ) => {
                 element.querySelector("meter").value = newValue;
+                _updateColor();
                 if( element.querySelector("span") )
+                {
                     element.querySelector("span").innerText = newValue;
+                }
             };
 
             let element = widget.domEl;
@@ -6450,14 +6454,26 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             progress.step = "any";
             progress.min = options.min ?? 0;
             progress.max = options.max ?? 1;
+            progress.low = options.low ?? undefined;
+            progress.high = options.high ?? undefined;
+            progress.optimum = options.optimum ?? undefined;
             progress.value = value;
 
-            if( options.low )
-                progress.low = options.low;
-            if( options.high )
-                progress.high = options.high;
-            if( options.optimum )
-                progress.optimum = options.optimum;
+            const _updateColor = () => {
+
+                let backgroundColor = LX.getThemeColor( "global-selected" );
+
+                if( progress.low != undefined && progress.value < progress.low )
+                {
+                    backgroundColor = LX.getThemeColor( "global-color-error" );
+                }
+                else if( progress.high != undefined && progress.value < progress.high )
+                {
+                    backgroundColor = LX.getThemeColor( "global-color-warning" );
+                }
+
+                progress.style.background = `color-mix(in oklab, ${backgroundColor} 20%, transparent)`;
+            };
 
             container.appendChild( progress );
             element.appendChild( container );
@@ -6522,6 +6538,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     document.body.classList.remove( 'noevents' );
                 }
             }
+
+            _updateColor();
 
             return widget;
         }
