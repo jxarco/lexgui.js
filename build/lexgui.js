@@ -766,6 +766,25 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
     LX.prompt = prompt;
 
+    /**
+     * @method badge
+     * @param {String} text
+     * @param {String} className
+     * @param {*} options
+     * style: Style attributes to override
+     */
+
+    function badge( text, className, options = {} )
+    {
+        const container = document.createElement( "div" );
+        container.innerHTML = text;
+        container.className = "lexbadge " + ( className ?? "" );
+        Object.assign( container.style, options.style ?? {} );
+        return container.outerHTML;
+    }
+
+    LX.badge = badge;
+
     /*
     *   Events and Signals
     */
@@ -4534,16 +4553,32 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
         /**
          * @method addContent
-         * @param {HTMLElement} element
+         * @param {HTMLElement/String} element
          */
 
         addContent( element, options = {} ) {
 
             if( !element )
-            return;
+            {
+                return;
+            }
 
-            let widget = this.create_widget(null, Widget.CONTENT, options);
-            widget.domEl.appendChild(element);
+            if( element.constructor == String )
+            {
+                const tmp = document.createElement( "div" );
+                tmp.innerHTML = element;
+                if( tmp.childElementCount > 1 )
+                {
+                    element = tmp;
+                }
+                else
+                {
+                    element = tmp.firstElementChild;
+                }
+            }
+
+            let widget = this.create_widget( null, Widget.CONTENT, options );
+            widget.domEl.appendChild( element );
             return widget;
         }
 

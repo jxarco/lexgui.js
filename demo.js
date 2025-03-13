@@ -479,7 +479,7 @@ function fillPanel( panel ) {
 
     // add widgets to panel branch
     panel.branch("Preferences", {icon: "fa-solid fa-gear"});
-    panel.addButton(null, "Click me, Im Full Width...");
+    panel.addButton(null, "Show Notifications" + LX.badge("+99", "accent sm"));
     panel.addText("Text", "Warning text", null, { warning: true });
     panel.sameLine(2);
     panel.addFile("Img1", data => { console.log(data) }, {} );
