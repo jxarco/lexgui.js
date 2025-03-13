@@ -4683,7 +4683,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     const iString = String( i );
                     maxWidth = Math.max( iString.length, maxWidth );
                 }
-                return maxWidth * 9;
+                return Math.max( maxWidth * 10, 80 );
             };
 
             let selectedOption = this.addButton( null, buttonName, ( value, event ) => {
@@ -5724,7 +5724,14 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 };
             }
 
-            // Add wheel input
+            vecinput.addEventListener( "input", function( e ) {
+                let new_value = +this.valueAsNumber;
+                vecinput.value = round( new_value, options.precision );
+                if( options.units )
+                {
+                    vecinput.unitSpan.style.left = measureRealWidth( vecinput.value ) + "px";
+                }
+            }, false );
 
             vecinput.addEventListener( "wheel", function( e ) {
                 e.preventDefault();

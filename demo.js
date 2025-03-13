@@ -490,7 +490,7 @@ function fillPanel( panel ) {
     panel.addDropdown("Best Engine", ["Godot", "Unity", "Unreal Engine"], "Unity", (value, event) => {
         console.log(value);
     });
-    panel.addDropdown("Best Logo", [{value:"Godot", src: "https://godotengine.org/assets/press/logo_vertical_color_light.webp"}, {value: "Unity", src: "https://logos-world.net/wp-content/uploads/2023/01/Unity-Logo.png"}, {value:"Unreal Engine", src: "https://cdn2.unrealengine.com/ue-logo-stacked-unreal-engine-w-677x545-fac11de0943f.png"}], "Godot", (value, event) => {
+    panel.addDropdown("Best Logo", [{value:"Godot", src: "https://godotengine.org/assets/press/logo_vertical_color_light.png"}, {value: "Unity", src: "https://logos-world.net/wp-content/uploads/2023/01/Unity-Logo.png"}, {value:"Unreal Engine", src: "https://cdn2.unrealengine.com/ue-logo-stacked-unreal-engine-w-677x545-fac11de0943f.png"}], "Godot", (value, event) => {
         console.log(value);
     }, {filter: true});
 

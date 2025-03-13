@@ -1399,7 +1399,7 @@ input[type=number] {
 
 .lexwidget .numberbox span {
     position: absolute;
-    top: -2px;
+    top: 1px;
     pointer-events: none;
 }
 
@@ -1481,7 +1481,6 @@ input[type="range"] {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    margin-left: -2px;
 }
 
 /* Pad Widget */

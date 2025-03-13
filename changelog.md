@@ -5,11 +5,12 @@
 VideoEditor:
 - Support cropping video area.
 
-LX.Badge added.
+Support for adding inline HTML badges `LX.badge(text)`.
 Checkbox, Progressbar css updated.
-Fix ContextMenu position when scroll > 0.
+Improved Form widget.
 Begin support for light-scheme appearance.
-Checkbox
+Fix ContextMenu position when scroll > 0.
+Minor bug fixes.
 Docs Updated.
 
 ## 0.1.43 (master)
