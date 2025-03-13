@@ -703,7 +703,7 @@ body.noevents * {
     color: var(--global-text-secondary);
 }
 
-.lexwidget input {
+.lexwidget input:not(.lexcheckbox) {
     font-family: var(--global-font);
     background: none;
     padding: 3px;
@@ -1147,87 +1147,63 @@ body.noevents * {
     }
 }
 
-/* Toggle check box */
-
-input[type=checkbox] {
-    position: relative;
-    cursor: pointer;
-    appearance: none;
-    -moz-appearance: none;
-    -webkit-appearance: none;
-}
-
-input[type=checkbox]:before {
-    content: "";
-    display: block;
-    position: absolute;
-    width: 0.8em;
-    height: 0.8em;
-    top: 0;
-    left: 0;
-}
-
-input[type=checkbox]:checked:after {
-    content: "";
-    display: block;
-    width: 4px;
-    height: 8px;
-    border: solid var(--global-selected);
-    border-width: 0 2px 2px 0;
-    -webkit-transform: rotate(45deg);
-    -ms-transform: rotate(45deg);
-    transform: rotate(45deg);
-    position: absolute;
-    top: -1px;
-    left: 6px;
-}
+/* Check box */
 
 .lexcheckbox {
-    width: 1.25em;
-    height: 1.25em;
+    --checkbox-color: var(--global-selected);
+    vertical-align: middle;
+    flex-shrink: 0;
+    transition: background-color .2s,box-shadow .2s;
+    position: relative;
+    width: 1.5em;
+    height: 1.5em;
+    padding: 0.15rem;
     display: inline-block;
     background-color: #1f1f1f;
     color: #fff;
-    border: 1px solid var(--global-intense-background);
+    border-width: 1px;
+    border-style: solid;
+    border-color: color-mix(in srgb, var(--checkbox-color) 50%, transparent);
     vertical-align: -3px;
-    border-radius: 2px;
+    border-radius: 4px;
     margin: 0 4px;
-    margin-top: 2px;
     text-align: center;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
     cursor: pointer;
 }
 
-.lexcheckbox a {
-    line-height: 16px;
-}
+/* Colors */
+.lexcheckbox.primary { --checkbox-color: var(--global-selected); }
+.lexcheckbox.secondary { --checkbox-color: var(--global-selected-light); }
+.lexcheckbox.accent { --checkbox-color: var(--global-color-accent); }
+.lexcheckbox.warning { --checkbox-color: var(--global-color-warning); }
+.lexcheckbox.error { --checkbox-color: var(--global-color-error); }
 
-.lexcheckbox:has(.checkbox.on) {
-    vertical-align: 0px;
-    border: none;
-}
-
-.lexcheckbox.disabled {
-    cursor: default;
-    border: 1px solid rgba(221, 218, 218, 0.672);
-}
-
-.lexcheckbox .checkbox {
-    display: block;
+.lexcheckbox:before {
+    --tw-content: "";
+    content: var(--tw-content);
+    opacity: 0;
+    clip-path: polygon(20% 100%,20% 80%,50% 80%,50% 80%,70% 80%,70% 100%);
     width: 100%;
     height: 100%;
-    border-radius: 2px;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+    background-color: currentColor;
+    font-size: 1rem;
+    line-height: .75;
+    transition: clip-path .3s .1s,opacity .1s .1s,rotate .3s .1s,translate .3s .1s;
+    display: block;
+    rotate: 45deg
 }
 
-.lexcheckbox .checkbox.on {
-    background: light-dark(var(--global-selected-light), var(--global-selected));
+.lexcheckbox:checked,.lexcheckbox[aria-checked=true] {
+    background-color: var(--checkbox-color);
+    color: #fff !important;
+}
+
+.lexcheckbox:checked:before, .lexcheckbox[aria-checked=true]:before {
+    clip-path:polygon(20% 100%,20% 80%,50% 80%,50% 0%,70% 0%,70% 100%);
+    opacity: 1;
 }
 
 .lexcheckboxcont #checkboxtext {
@@ -1790,7 +1766,7 @@ input[type="range"] {
 .lexprogressbar::-webkit-meter-bar {
     border-radius: 0.25rem;
     height: 12px;
-    background: color-mix(in rgb, var(--global-selected) 20%, transparent);
+    background: color-mix(in srgb, var(--global-selected) 20%, transparent);
 }
 
 /* (optimum) */
@@ -1841,6 +1817,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexbadge.primary { --badge-color: var(--global-selected); }
 .lexbadge.secondary { --badge-color: var(--global-selected-light); }
 .lexbadge.accent { --badge-color: var(--global-color-accent); }
+.lexbadge.warning { --badge-color: var(--global-color-warning); }
 .lexbadge.error { --badge-color: var(--global-color-error); }
 /* Styles */
 .lexbadge.outline {

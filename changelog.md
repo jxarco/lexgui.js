@@ -5,8 +5,11 @@
 VideoEditor:
 - Support cropping video area.
 
+LX.Badge added.
+Checkbox, Progressbar css updated.
 Fix ContextMenu position when scroll > 0.
 Begin support for light-scheme appearance.
+Checkbox
 Docs Updated.
 
 ## 0.1.43 (master)

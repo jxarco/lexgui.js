@@ -5424,29 +5424,36 @@ class Panel {
      * @param {*} options:
      * disabled: Make the widget disabled [false]
      * suboptions: Callback to add widgets in case of TRUE value
+     * className: Customize colors
      */
 
     addCheckbox( name, value, callback, options = {} ) {
 
-        if( !name ) {
+        if( !name )
+        {
             throw( "Set Widget Name!" );
         }
 
         let widget = this.create_widget( name, Widget.CHECKBOX, options );
 
         widget.onGetValue = () => {
-            return flag.value;
+            return checkbox.checked;
         };
+
         widget.onSetValue = ( newValue, skipCallback ) => {
-            if( flag.value !== newValue )
-                Panel._dispatch_event( toggle, "click", skipCallback );
+            if( checkbox.checked !== newValue )
+            {
+                checkbox.checked = newValue;
+                Panel._dispatch_event( checkbox, "change", skipCallback );
+            }
         };
 
         let element = widget.domEl;
 
         // Add reset functionality
         Panel._add_reset_property( element.domName, function() {
-            Panel._dispatch_event( toggle, "click" );
+            checkbox.checked = !checkbox.checked;
+            Panel._dispatch_event( checkbox, "change" );
         });
 
         // Add widget value
@@ -5454,55 +5461,36 @@ class Panel {
         var container = document.createElement('div');
         container.className = "lexcheckboxcont";
 
-        let toggle = document.createElement('span');
-        toggle.className = "lexcheckbox";
+        let checkbox = document.createElement('input');
+        checkbox.type = "checkbox";
+        checkbox.className = "lexcheckbox " + ( options.className ?? "" );
+        checkbox.checked = value;
+        checkbox.iValue = value;
+        checkbox.disabled = options.disabled ?? false;
 
-        let flag = document.createElement('span');
-        flag.value = flag.iValue = value || false;
-        flag.className = "checkbox " + (flag.value ? "on" : "");
-        flag.id = "checkbox"+simple_guidGenerator();
-        flag.innerHTML = "<a class='fa-solid fa-check' style='display: " + (flag.value ? "block" : "none") + "'></a>";
+        let valueName = document.createElement( 'span' );
+        valueName.id = "checkboxtext";
+        valueName.innerHTML = "On";
 
-        if( options.disabled ) {
-            flag.disabled = true;
-            toggle.className += " disabled";
-        }
+        container.appendChild( checkbox );
+        container.appendChild( valueName );
 
-        toggle.appendChild( flag );
+        checkbox.addEventListener( "change" , e => {
 
-        let value_name = document.createElement( 'span' );
-        value_name.id = "checkboxtext";
-        value_name.innerHTML = "On";
-
-        container.appendChild( toggle );
-        container.appendChild( value_name );
-
-        toggle.addEventListener( "click" , e => {
-
-            let flag = toggle.querySelector( ".checkbox" );
-            if( flag.disabled )
-                return;
-
-            const skipCallback = ( e.detail.constructor == Number ? null : e.detail );
-
-            let check = toggle.querySelector( ".checkbox a" );
-
-            flag.value = !flag.value;
-            flag.className = "checkbox " + ( flag.value ? "on" : "" );
-            check.style.display = flag.value ? "block" : "none";
+            const skipCallback = ( e.detail?.constructor == Number ? null : e.detail );
 
             // Reset button (default value)
             if( !skipCallback )
             {
                 let btn = element.querySelector( ".lexwidgetname .lexicon" );
-                if( btn ) btn.style.display = flag.value != flag.iValue ? "block": "none";
+                if( btn ) btn.style.display = checkbox.checked != checkbox.iValue ? "block": "none";
             }
 
             // Open suboptions
             let submenu = element.querySelector( ".lexcheckboxsubmenu" );
-            if( submenu ) submenu.toggleAttribute( 'hidden', !flag.value );
+            if( submenu ) submenu.toggleAttribute( 'hidden', !checkbox.checked );
 
-            if( !skipCallback ) this._trigger( new IEvent( name, flag.value, e ), callback );
+            if( !skipCallback ) this._trigger( new IEvent( name, checkbox.checked, e ), callback );
         });
 
         element.appendChild( container );
@@ -5512,13 +5500,13 @@ class Panel {
             element.style.flexWrap = "wrap";
             let suboptions = document.createElement('div');
             suboptions.className = "lexcheckboxsubmenu";
-            suboptions.toggleAttribute('hidden', !flag.value);
+            suboptions.toggleAttribute( 'hidden', !checkbox.checked );
 
             this.queue( suboptions );
             options.suboptions.call(this, this);
             this.clearQueue();
 
-            element.appendChild(suboptions);
+            element.appendChild( suboptions );
         }
 
         return widget;
@@ -6482,7 +6470,7 @@ class Panel {
                 backgroundColor = LX.getThemeColor( "global-color-warning" );
             }
 
-            progress.style.background = `color-mix(in oklab, ${backgroundColor} 20%, transparent)`;
+            progress.style.background = `color-mix(in srgb, ${backgroundColor} 20%, transparent)`;
         };
 
         container.appendChild( progress );
