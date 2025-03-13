@@ -1,6 +1,8 @@
 # lexgui.js changelog
 
-## 0.1.44 (dev)
+## 0.1.45 (dev)
+
+## 0.1.44 (master)
 
 VideoEditor:
 - Support cropping video area.
@@ -14,7 +16,7 @@ Fix ContextMenu position when scroll > 0.
 Minor bug fixes.
 Docs Updated.
 
-## 0.1.43 (master)
+## 0.1.43
 
 CodeEditor:
 - Support C and CMake highlight.
