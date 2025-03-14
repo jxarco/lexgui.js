@@ -2213,7 +2213,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexmenubar .lexmenubutton {
-    display: flex;
+    /* display: flex; */
     justify-content: center;
     padding: 8px;
     padding-top: 0.6em;
@@ -3091,6 +3091,53 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     .lexknob.disabled .knobmarker {
         background-color: var(--global-text-primary);
     }
+}
+
+/* Icon swap */
+
+.swap {
+    cursor: pointer;
+    vertical-align: middle;
+    -webkit-user-select: none;
+    user-select: none;
+    place-content: center;
+    display: inline-grid;
+    position: relative;
+}
+
+.swap input {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border: none;
+}
+
+.swap > * {
+    grid-row-start: 1;
+    grid-column-start: 1;
+    transition-property: transform,rotate,opacity;
+    transition-duration: .2s;
+    transition-timing-function: cubic-bezier(0,0,.2,1);
+}
+
+.swap .swap-on,.swap .swap-indeterminate,.swap input:indeterminate~.swap-on,.swap input:is(:checked,:indeterminate)~.swap-off {
+    opacity: 0;
+}
+
+.swap input:checked~.swap-on,.swap input:indeterminate~.swap-indeterminate {
+    opacity: 1;
+}
+
+.swap .swap-on,.swap .swap-indeterminate, .swap input:indeterminate~.swap-on {
+    rotate: 45deg;
+}
+
+.swap input:is(:checked,:indeterminate)~.swap-on, .swap.swap-active .swap-on {
+    rotate: none;
+}
+
+.swap input:is(:checked,:indeterminate)~.swap-off, .swap.swap-active .swap-off {
+    rotate: -45deg;
 }
 
 /** Timeline */

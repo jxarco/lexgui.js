@@ -103,20 +103,27 @@ area.addMenubar( m => {
         {
             title: "Play",
             icon: "fa-solid fa-play",
-            callback:  (domEl) => { 
-                console.log("play!"); 
-                domEl.classList.toggle('fa-play'), domEl.classList.toggle('fa-stop');
+            swap: "fa-solid fa-stop",
+            callback:  (event, swapValue) => {
+                if( swapValue ) console.log("play!");
+                else console.log("stop!");
             }
         },
         {
             title: "Pause",
             icon: "fa-solid fa-pause",
             disabled: true,
-            callback:  (domEl) => { console.log("pause!") }
+            callback:  (event) => { console.log("pause!"); }
         },
         {
             icon: "fa-solid fa-magnifying-glass",
-            callback:  (domEl) => { console.log("glass!") }
+            callback:  (event) => { console.log("glass!"); }
+        },
+        {
+            title: "Change Theme",
+            icon: "fa-solid fa-moon",
+            swap: "fa-solid fa-sun",
+            callback:  (event, swapValue) => { LX.setTheme( swapValue ? "light" : "dark" ) }
         }
     ]);
     

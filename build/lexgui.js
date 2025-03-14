@@ -2511,44 +2511,75 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
         addButtons( buttons, options = {} ) {
 
-            if(!buttons)
-                throw("No buttons to add!");
-
-            if(!this.buttonContainer)
+            if( !buttons )
             {
-                this.buttonContainer = document.createElement('div');
+                throw( "No buttons to add!" );
+            }
+
+            if( !this.buttonContainer )
+            {
+                this.buttonContainer = document.createElement( "div" );
                 this.buttonContainer.className = "lexmenubuttons";
-                this.buttonContainer.classList.add(options.float ?? 'center');
-                if(options.position == "right")	
-                    this.buttonContainer.right = true;	
-                if(this.root.lastChild && this.root.lastChild.right) {	
-                    this.root.lastChild.before( this.buttonContainer );	
-                }	
-                else {	
-                    this.root.appendChild( this.buttonContainer );	
+                this.buttonContainer.classList.add( options.float ?? "center" );
+
+                if( options.position == "right" )
+                {
+                    this.buttonContainer.right = true;
+                }
+
+                if( this.root.lastChild && this.root.lastChild.right )
+                {
+                    this.root.lastChild.before( this.buttonContainer );
+                }
+                else
+                {
+                    this.root.appendChild( this.buttonContainer );
                 }
             }
 
             for( let i = 0; i < buttons.length; ++i )
             {
-                let data = buttons[i];
-                let button = document.createElement('div');
+                let data = buttons[ i ];
+                let button = document.createElement( "label" );
                 const title = data.title;
                 let disabled = data.disabled ?? false;
                 button.className = "lexmenubutton" + (disabled ? " disabled" : "");
                 button.title = title ?? "";
-                button.innerHTML = "<a class='" + data.icon + " lexicon'></a>";
                 this.buttonContainer.appendChild( button );
 
-                const _b = button.querySelector('a');
-                _b.addEventListener("click", (e) => {
-                    disabled = e.target.parentElement.classList.contains("disabled");
-                    if(data.callback && !disabled)
-                        data.callback.call( this, _b, e );
+                const icon = document.createElement( "a" );
+                icon.className = data.icon + " lexicon";
+                button.appendChild( icon );
+
+                let trigger = icon;
+
+                if( data.swap )
+                {
+                    button.classList.add( "swap" );
+                    icon.classList.add( "swap-off" );
+
+                    const input = document.createElement( "input" );
+                    input.type = "checkbox";
+                    button.prepend( input );
+                    trigger = input;
+
+                    const swapIcon = document.createElement( "a" );
+                    swapIcon.className = data.swap + " swap-on lexicon";
+                    button.appendChild( swapIcon );
+                }
+
+                trigger.addEventListener("click", e => {
+                    if( data.callback && !disabled )
+                    {
+                        const swapInput = button.querySelector( "input" );
+                        data.callback.call( this, e, swapInput?.checked );
+                    }
                 });
 
-                if(title)
+                if( title )
+                {
                     this.buttons[ title ] = button;
+                }
             }
         }
     };
