@@ -64,6 +64,15 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
     LX.deepCopy = deepCopy;
 
+    function setTheme( colorScheme )
+    {
+        colorScheme = ( colorScheme == "light" ) ? "light" : "dark";
+        document.documentElement.setAttribute( "data-theme", colorScheme );
+        LX.emit( "@on_new_color_scheme", colorScheme );
+    }
+
+    LX.setTheme = setTheme;
+
     function setThemeColor( colorName, color )
     {
         var r = document.querySelector( ':root' );
@@ -79,7 +88,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
         if( value.includes( "light-dark" ) && window.matchMedia )
         {
-            if( window.matchMedia( "(prefers-color-scheme: light)" ).matches )
+            const currentScheme = r.getPropertyValue( "color-scheme" );
+
+            if( ( window.matchMedia( "(prefers-color-scheme: light)" ).matches ) || ( currentScheme == "light" ) )
             {
                 return value.substring( value.indexOf( '(' ) + 1, value.indexOf( ',' ) ).replace( /\s/g, '' );
             }

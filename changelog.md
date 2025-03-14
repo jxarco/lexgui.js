@@ -2,6 +2,7 @@
 
 ## 0.1.45 (dev)
 
+Allow changing light/dark schemes manually `LX.setTheme`.
 Support for colored and sized buttons.
 Fixed editable Progress Widget.
 
