@@ -6,6 +6,7 @@ Allow changing light/dark schemes manually `LX.setTheme`.
 Start support for swap icons (now at `Menubar.addButtons`).
 Support for colored and sized buttons.
 Fixed editable Progress Widget.
+Started theme customization docs page.
 
 ## 0.1.44 (master)
 
