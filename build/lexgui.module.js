@@ -2740,6 +2740,7 @@ class Widget {
     static PAD          = 26;
     static FORM         = 27;
     static DIAL         = 28;
+    static COUNTER      = 29;
 
     static NO_CONTEXT_TYPES = [
         Widget.BUTTON,
@@ -2829,6 +2830,7 @@ class Widget {
             case Widget.PAD: return "Pad";
             case Widget.FORM: return "Form";
             case Widget.DIAL: return "Dial";
+            case Widget.COUNTER: return "Counter";
             case Widget.CUSTOM: return this.customName;
         }
 
@@ -6973,6 +6975,91 @@ class Panel {
         }
 
         this.addSeparator();
+    }
+
+    /**
+     * @method addCounter
+     * @param {String} name Widget name
+     * @param {Number} value Counter value
+     * @param {Function} callback Callback function on change
+     * @param {*} options:
+     * disabled: Make the widget disabled [false]
+     * min, max: Min and Max values
+     * step: Step for adding/substracting
+     * label: Text to show below the counter
+     */
+
+    addCounter( name, value, callback, options = { } ) {
+
+        let widget = this.create_widget( name, Widget.COUNTER, options );
+
+        widget.onGetValue = () => {
+            return counterText.count;
+        };
+
+        widget.onSetValue = ( newValue, skipCallback ) => {
+            _onChange( newValue, skipCallback );
+        };
+
+        let element = widget.domEl;
+
+        const min = options.min ?? 0;
+        const max = options.max ?? 100;
+        const step = options.step ?? 1;
+
+        const _onChange = ( value, skipCallback, event ) => {
+            value = clamp( value, min, max );
+            counterText.count = value;
+            counterText.innerHTML = value;
+            if( !skipCallback )
+            {
+                this._trigger( new IEvent( name, value, event ), callback );
+            }
+        }
+
+        const container = document.createElement( 'div' );
+        container.className = "lexcounter";
+        element.appendChild( container );
+
+        this.queue( container );
+
+        this.addButton(null, "<a style='margin-top: 0px;' class='fa-solid fa-minus'></a>", (value, e) => {
+            let mult = step ?? 1;
+            if( e.shiftKey ) mult *= 10;
+            _onChange( counterText.count - mult, false, e );
+        }, { className: "micro", skipInlineCount: true, title: "Minus" });
+
+        this.clearQueue();
+
+        const containerBox = document.createElement( 'div' );
+        containerBox.className = "lexcounterbox";
+        container.appendChild( containerBox );
+
+        const counterText = document.createElement( 'span' );
+        counterText.className = "lexcountervalue";
+        counterText.innerHTML = value;
+        counterText.count = value;
+        containerBox.appendChild( counterText );
+
+        if( options.label )
+        {
+            const counterLabel = document.createElement( 'span' );
+            counterLabel.className = "lexcounterlabel";
+            counterLabel.innerHTML = options.label;
+            containerBox.appendChild( counterLabel );
+        }
+
+        this.queue( container );
+
+        this.addButton(null, "<a style='margin-top: 0px;' class='fa-solid fa-plus'></a>", (value, e) => {
+            let mult = step ?? 1;
+            if( e.shiftKey ) mult *= 10;
+            _onChange( counterText.count + mult, false, e );
+        }, { className: "micro", skipInlineCount: true, title: "Plus" });
+
+        this.clearQueue();
+
+        return widget;
     }
 }
 

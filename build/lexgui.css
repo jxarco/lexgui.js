@@ -2923,6 +2923,34 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     content: "⊗";
 }
 
+/* Counter Widget */
+
+.lexcounter {
+    display: flex;
+    margin: 0 auto;
+}
+
+.lexcounterbox {
+    display: grid;
+    text-align: -webkit-center;
+    text-align: center;
+    margin-left: 16px;
+    margin-right: 16px;
+}
+
+.lexcounterbox .lexcountervalue {
+    width: 100%;
+    font-size: 32px;
+    font-weight: 700;
+
+}
+
+.lexcounterbox .lexcounterlabel {
+    width: 100%;
+    margin-top: -22px;
+    color: var(--global-text-secondary);
+}
+
 /* Custom Widgets Widget */
 
 .lexcustomitems {

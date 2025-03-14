@@ -487,7 +487,7 @@ function fillPanel( panel ) {
     // add widgets to panel branch
     panel.branch("Preferences", {icon: "fa-solid fa-gear"});
     panel.addButton(null, "Show Notifications" + LX.badge("+99", "accent sm"));
-    panel.addText("Text", "Warning text", null, { warning: true });
+    panel.addCounter("Calories Counter ", 350, (v) => { console.log( v + " calories!" ) }, { label: "CALORIES/DAY", max: 500 });
     panel.addButton("Colored Tiny Button", "Click here!", () => {}, { buttonClass: "primary xs" });
     panel.addButton("Colored Small Button", "Click here!", () => {}, { buttonClass: "accent sm" });
     panel.addButton("A Classic Button", "Click here!", () => {}, { buttonClass: "md" });
@@ -712,6 +712,7 @@ function fillBottomPanel( panel ) {
     // add widgets to panel branch
     panel.branch("Information", {icon: "fa fa-circle-info"});
     panel.addText("Camera", "Canon EOS 80D", null, {disabled: true}); 
+    panel.addText("Text", "Warning text", null, { warning: true });
     panel.addText("Serial number", "194E283DD", (value, event) => {
         console.log(value);
     });
