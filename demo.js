@@ -713,9 +713,10 @@ function fillBottomPanel( panel ) {
     panel.branch("Information", {icon: "fa fa-circle-info"});
     panel.addText("Camera", "Canon EOS 80D", null, {disabled: true}); 
     panel.addText("Text", "Warning text", null, { warning: true });
-    panel.addText("Serial number", "194E283DD", (value, event) => {
+    const patternOptions = { uppercase: true }
+    panel.addText("Text With Validator Pattern", "", (value, event) => {
         console.log(value);
-    });
+    }, { pattern: LX.buildTextPattern( patternOptions ) });
     panel.addTextArea("Notes", "", (value, event) => {
         console.log(value);
     }, { placeholder: 'Some notes...' });

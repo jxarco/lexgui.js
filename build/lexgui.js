@@ -157,6 +157,23 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
     LX.guidGenerator = simple_guidGenerator;
 
+    function buildTextPattern( options = {} ) {
+        let patterns = [];
+        if ( options.lowercase ) patterns.push("(?=.*[a-z])");
+        if ( options.uppercase ) patterns.push("(?=.*[A-Z])");
+        if ( options.digit ) patterns.push("(?=.*\\d)");
+        if ( options.specialChar ) patterns.push("(?=.*[@#$%^&+=!])");
+        if ( options.noSpaces ) patterns.push("(?!.*\\s)");
+
+        let minLength = options.minLength || 0;
+        let maxLength = options.maxLength || ""; // Empty means no max length restriction
+
+        let pattern = `^${ patterns.join("") }.{${ minLength },${ maxLength }}$`;
+        return options.asRegExp ? new RegExp( pattern ) : pattern;
+    }
+
+    LX.buildTextPattern = buildTextPattern;
+
     // Timer that works everywhere (from litegraph.js)
     if (typeof performance != "undefined") {
         LX.getTime = performance.now.bind(performance);
@@ -4114,10 +4131,24 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 wValue.setAttribute( "pattern", options.pattern ?? "" );
 
                 var resolve = ( function( val, event ) {
+
+                    if( wValue.pattern != "" )
+                    {
+                        const regexp = new RegExp( wValue.pattern );
+                        if( !regexp.test( val ) )
+                        {
+                            return;
+                        }
+                    }
+
                     const skipCallback = event.detail;
                     let btn = element.querySelector( ".lexwidgetname .lexicon" );
                     if( btn ) btn.style.display = ( val != wValue.iValue ? "block" : "none" );
-                    if( !skipCallback ) this._trigger( new IEvent( name, val, event ), callback );
+                    if( !skipCallback )
+                    {
+                        this._trigger( new IEvent( name, val, event ), callback );
+                    }
+
                 }).bind( this );
 
                 const trigger = options.trigger ?? 'default';

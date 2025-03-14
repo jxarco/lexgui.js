@@ -740,6 +740,14 @@ body.noevents * {
     padding: 5px;
 }
 
+.lexwidget .lextext input:focus {
+    border: 2px solid var(--global-selected);
+}
+
+.lexwidget .lextext input:invalid {
+    border: 2px solid var(--global-color-error);
+}
+
 .lexwidget .lextext div {
     color: var(--global-text-secondary);
     padding-left: 6px;
@@ -753,10 +761,6 @@ body.noevents * {
 .lexwidget .lextext.lexwarning i {
     color: var(--global-color-warning);
     margin-right: 16px;
-}
-
-.lexwidget .lextext input:focus {
-    border: 2px solid var(--global-selected);
 }
 
 .lexwidget .inputicon {

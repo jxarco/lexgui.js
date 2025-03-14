@@ -6,7 +6,9 @@ Widgets:
 - New Counter Widget added `Panel.addCounter`.
 - Support for colored and sized buttons.
 - Fixed editable Progress Widget.
+- Added 'pattern' and 'required' options to Text Widget.
 
+Added `LX.buildTextPattern(options)` for Input validation.
 Allow changing light/dark schemes manually `LX.setTheme`.
 Start support for swap icons (now at `Menubar.addButtons`).
 Started theme customization docs page.
