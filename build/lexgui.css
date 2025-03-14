@@ -869,7 +869,8 @@ body.noevents * {
 .lexbutton {
     display: grid;
     align-content: center;
-    background-color: var(--global-button-color);
+    --button-color: var(--global-button-color);
+    background-color: var(--button-color);
     border-radius: 6px;
     border: none;
     margin-top: 2px;
@@ -882,7 +883,18 @@ body.noevents * {
     cursor: pointer;
     font-family: var(--global-font);
     transition: 0.1s linear;
+    padding: 0.25rem;
 }
+
+/* Colors */
+.lexbutton.primary { --button-color: var(--global-selected); }
+.lexbutton.secondary { --button-color: var(--global-selected-light);  }
+.lexbutton.accent { --button-color: var(--global-color-accent);  }
+.lexbutton.warning { --button-color: var(--global-color-warning);  }
+.lexbutton.error { --button-color: var(--global-color-error);  }
+/* Few Sizes */
+.lexbutton.xs { width: 25% !important; margin: 0 auto; }
+.lexbutton.sm { width: 45% !important; margin: 0 auto; }
 
 .lexbutton span:has(.lexbadge) {
     display: inline-flex;
@@ -891,10 +903,6 @@ body.noevents * {
     justify-content: center;
     align-items: center;
     gap: 0.4rem;
-}
-
-.lexbutton.accept {
-    background-color: var(--global-selected);
 }
 
 .lexbutton.foldback {
@@ -916,12 +924,8 @@ body.noevents * {
 }
 
 .lexbutton:hover {
-    background-color: var(--global-button-color-hovered);
+    background-color: color-mix(in srgb, var(--button-color), #000 7%);
     color: var(--global-text-primary);
-}
-
-.lexbutton.accept:hover {
-    background-color: #3b6790;
 }
 
 .lexbutton:active:not(.lexbutton.combo) {
@@ -1873,29 +1877,6 @@ input[type="range"] {
 
 /* File Input */
 
-/* .lexfileinput {
-    cursor: pointer;
-    border: 1px solid #0000;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-color: #121212;
-    vertical-align: middle;
-    webkit-user-select: none;
-    -webkit-user-select: none;
-    user-select: none;
-    width: clamp(3rem,20rem,100%);
-    height: var(--size);
-    border-color: var(--input-color);
-    --size: calc(var(--size-field,.25rem)*10);
-    --input-color: color-mix(in oklab,#121212 20%,#0000);
-    border-radius: 8px;
-    align-items: center;
-    padding-inline-end:.75rem;font-size: .875rem;
-    line-height: 2;
-    display: inline-flex
-} */
-
 .lexfileinput::file-selector-button {
     align-content: center;
     background-color: var(--global-button-color);
@@ -2531,7 +2512,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexoverlaybuttons .lexbutton a {
-    line-height: 12px;
+    line-height: 10px;
     font-size: var(--global-font-size-big);
 }
 

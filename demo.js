@@ -481,15 +481,19 @@ function fillPanel( panel ) {
     panel.branch("Preferences", {icon: "fa-solid fa-gear"});
     panel.addButton(null, "Show Notifications" + LX.badge("+99", "accent sm"));
     panel.addText("Text", "Warning text", null, { warning: true });
+    panel.addButton("Colored Tiny Button", "Click here!", () => {}, { buttonClass: "primary xs" });
+    panel.addButton("Colored Small Button", "Click here!", () => {}, { buttonClass: "accent sm" });
+    panel.addButton("A Classic Button", "Click here!", () => {}, { buttonClass: "md" });
     panel.addCheckbox("Check me, Please", false, (value, event) => {
         console.log(value);
     }, { className: "secondary" });
+    panel.sameLine(2);
     panel.addToggle("Colored Toggle", false, (value, event) => {
         console.log(value);
-    }, { className: "accent" });
-    panel.addToggle("Outline Colored Checkbox ", false, (value, event) => {
+    }, { className: "accent", nameWidth: "50%" });
+    panel.addToggle("Outlined Checkbox ", false, (value, event) => {
         console.log(value);
-    }, { className: "secondary outline" });
+    }, { className: "secondary outline", nameWidth: "50%" });
     panel.addFile("I'm a File Input", data => { console.log(data) }, { disabled: true } );
     panel.addDropdown("Best Engine", ["Godot", "Unity", "Unreal Engine"], "Unity", (value, event) => {
         console.log(value);

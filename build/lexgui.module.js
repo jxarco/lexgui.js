@@ -756,7 +756,7 @@ function prompt( text, title, callback, options = {} )
                 if( callback ) callback.call( this, value );
                 dialog.close();
             }
-        }, { buttonClass: "accept" });
+        }, { buttonClass: "primary" });
 
         p.addButton(null, "Cancel", () => {if(options.on_cancel) options.on_cancel(); dialog.close();} );
 
@@ -4290,16 +4290,11 @@ class Panel {
 
         var wValue = document.createElement( 'button' );
         wValue.title = options.title ?? "";
-        wValue.className = "lexbutton";
+        wValue.className = "lexbutton " + ( options.buttonClass ?? "" );
 
         if( options.selected )
         {
             wValue.classList.add( "selected" );
-        }
-
-        if( options.buttonClass )
-        {
-            wValue.classList.add( options.buttonClass );
         }
 
         wValue.innerHTML =
@@ -4554,7 +4549,7 @@ class Panel {
             {
                 callback( container.formData, event );
             }
-        }, { buttonClass: "accept", width: "calc(100% - 10px)" } );
+        }, { buttonClass: "primary", width: "calc(100% - 10px)" } );
 
         this.clearQueue();
 

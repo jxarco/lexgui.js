@@ -2,6 +2,9 @@
 
 ## 0.1.45 (dev)
 
+Support for colored and sized buttons.
+Fixed editable Progress Widget.
+
 ## 0.1.44 (master)
 
 VideoEditor:
