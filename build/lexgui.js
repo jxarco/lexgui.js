@@ -2209,18 +2209,18 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 entry.className = "lexmenuentry";
                 entry.id = pKey;
                 entry.innerHTML = "<span>" + key + "</span>";
-                if(options.position == "left") {	
-                    this.root.prepend( entry );	
-                }	
-                else {	
-                    if(options.position == "right") 	
-                        entry.right = true;	
-                    if(this.root.lastChild && this.root.lastChild.right) {	
-                        this.root.lastChild.before( entry );	
-                    }	
-                    else {	
-                        this.root.appendChild( entry );	
-                    }	
+                if(options.position == "left") {
+                    this.root.prepend( entry );
+                }
+                else {
+                    if(options.position == "right")
+                        entry.right = true;
+                    if(this.root.lastChild && this.root.lastChild.right) {
+                        this.root.lastChild.before( entry );
+                    }
+                    else {
+                        this.root.appendChild( entry );
+                    }
                 }
 
                 const create_submenu = function( o, k, c, d ) {
@@ -2441,16 +2441,16 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 button.style.maxHeight = "calc(100% - 10px)";
                 button.style.alignItems = "center";
 
-                if(options.float == "right")	
-                    button.right = true;	
-                if(this.root.lastChild && this.root.lastChild.right) {	
-                    this.root.lastChild.before( button );	
+                if(options.float == "right")
+                    button.right = true;
+                if(this.root.lastChild && this.root.lastChild.right) {
+                    this.root.lastChild.before( button );
                 }
                 else if(options.float == "left") {
                     this.root.prepend(button);
-                }	
-                else {	
-                    this.root.appendChild( button );	
+                }
+                else {
+                    this.root.appendChild( button );
                 }
 
                 const _b = button.querySelector('a');
@@ -2482,16 +2482,16 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 button.style.padding = "5px";
                 button.style.alignItems = "center";
 
-                if(options.float == "right")	
-                    button.right = true;	
-                if(this.root.lastChild && this.root.lastChild.right) {	
-                    this.root.lastChild.before( button );	
-                }	
+                if(options.float == "right")
+                    button.right = true;
+                if(this.root.lastChild && this.root.lastChild.right) {
+                    this.root.lastChild.before( button );
+                }
                 else if(options.float == "left") {
                     this.root.prepend(button);
                 }
-                else {	
-                    this.root.appendChild( button );	
+                else {
+                    this.root.appendChild( button );
                 }
 
                 const _b = button.querySelector('a');
@@ -9339,7 +9339,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 //request.mimeType = "text/plain; charset=x-user-defined";
                 dataType = "arraybuffer";
                 request.mimeType = "application/octet-stream";
-            }	
+            }
 
             //regular case, use AJAX call
             var xhr = new XMLHttpRequest();

@@ -876,7 +876,7 @@ body.noevents * {
     --button-color: var(--global-button-color);
     background-color: var(--button-color);
     border-radius: 6px;
-    border: none;
+    border: 1px solid transparent;
     margin-top: 2px;
     min-height: 22px !important;
     color: var(--global-text-primary);
@@ -933,7 +933,7 @@ body.noevents * {
 }
 
 .lexbutton:active:not(.lexbutton.combo) {
-    background-color: var(--global-color-terciary);
+    background-color: color-mix(in srgb, var(--button-color), #ffffff 4%);
     color: var(--global-text-secondary);
     transform: scale(0.99);
 }

@@ -2216,18 +2216,18 @@ class Menubar {
             entry.className = "lexmenuentry";
             entry.id = pKey;
             entry.innerHTML = "<span>" + key + "</span>";
-            if(options.position == "left") {	
-                this.root.prepend( entry );	
-            }	
-            else {	
-                if(options.position == "right") 	
-                    entry.right = true;	
-                if(this.root.lastChild && this.root.lastChild.right) {	
-                    this.root.lastChild.before( entry );	
-                }	
-                else {	
-                    this.root.appendChild( entry );	
-                }	
+            if(options.position == "left") {
+                this.root.prepend( entry );
+            }
+            else {
+                if(options.position == "right")
+                    entry.right = true;
+                if(this.root.lastChild && this.root.lastChild.right) {
+                    this.root.lastChild.before( entry );
+                }
+                else {
+                    this.root.appendChild( entry );
+                }
             }
 
             const create_submenu = function( o, k, c, d ) {
@@ -2448,16 +2448,16 @@ class Menubar {
             button.style.maxHeight = "calc(100% - 10px)";
             button.style.alignItems = "center";
 
-            if(options.float == "right")	
-                button.right = true;	
-            if(this.root.lastChild && this.root.lastChild.right) {	
-                this.root.lastChild.before( button );	
+            if(options.float == "right")
+                button.right = true;
+            if(this.root.lastChild && this.root.lastChild.right) {
+                this.root.lastChild.before( button );
             }
             else if(options.float == "left") {
                 this.root.prepend(button);
-            }	
-            else {	
-                this.root.appendChild( button );	
+            }
+            else {
+                this.root.appendChild( button );
             }
 
             const _b = button.querySelector('a');
@@ -2489,16 +2489,16 @@ class Menubar {
             button.style.padding = "5px";
             button.style.alignItems = "center";
 
-            if(options.float == "right")	
-                button.right = true;	
-            if(this.root.lastChild && this.root.lastChild.right) {	
-                this.root.lastChild.before( button );	
-            }	
+            if(options.float == "right")
+                button.right = true;
+            if(this.root.lastChild && this.root.lastChild.right) {
+                this.root.lastChild.before( button );
+            }
             else if(options.float == "left") {
                 this.root.prepend(button);
             }
-            else {	
-                this.root.appendChild( button );	
+            else {
+                this.root.appendChild( button );
             }
 
             const _b = button.querySelector('a');
@@ -9354,7 +9354,7 @@ Object.assign(LX, {
             //request.mimeType = "text/plain; charset=x-user-defined";
             dataType = "arraybuffer";
             request.mimeType = "application/octet-stream";
-        }	
+        }
 
         //regular case, use AJAX call
         var xhr = new XMLHttpRequest();
