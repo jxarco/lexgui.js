@@ -1938,7 +1938,7 @@ input[type="range"] {
 }
 
 .lexprogress span {
-    width: 5%;
+    width: 10%;
 }
 
 .lexprogressbar {
@@ -1949,15 +1949,19 @@ input[type="range"] {
     -webkit-transition: .2s;
     transition: opacity .2s;
     margin-top: 2px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .lexprogressbar.editable:hover {
-    cursor: grab;
+    cursor: pointer;
 }
 
-.lexprogressbar.editable:active {
+/* .lexprogressbar.editable.grabbing {
     cursor: grabbing;
-}
+} */
 
 /* The gray background in Chrome, etc. */
 .lexprogressbar::-webkit-meter-bar {

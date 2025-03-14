@@ -6604,7 +6604,7 @@ class Panel {
             progress.classList.add( "editable" );
             progress.addEventListener( "mousedown", inner_mousedown );
 
-            var that = this;
+            const that = this;
 
             function inner_mousedown( e )
             {
@@ -6612,24 +6612,28 @@ class Panel {
                 doc.addEventListener( 'mousemove', inner_mousemove );
                 doc.addEventListener( 'mouseup', inner_mouseup );
                 document.body.classList.add( 'noevents' );
+                progress.classList.add( "grabbing" );
                 e.stopImmediatePropagation();
                 e.stopPropagation();
+
+                const rect = progress.getBoundingClientRect();
+                const newValue = round( remapRange( e.offsetX, 0, rect.width, progress.min, progress.max ) );
+                that.setValue( name, newValue );
             }
 
             function inner_mousemove( e )
             {
-                let dt = -e.movementX;
+                let dt = e.movementX;
 
                 if ( dt != 0 )
                 {
-                    let v = that.getValue( name, value );
-                    v += e.movementX / 100;
-                    v = round( v );
-                    that.setValue( name, v );
+                    const rect = progress.getBoundingClientRect();
+                    const newValue = round( remapRange( e.offsetX - rect.x, 0, rect.width, progress.min, progress.max ) );
+                    that.setValue( name, newValue );
 
                     if( options.callback )
                     {
-                        options.callback( v, e );
+                        options.callback( newValue, e );
                     }
                 }
 
@@ -6643,6 +6647,7 @@ class Panel {
                 doc.removeEventListener( 'mousemove', inner_mousemove );
                 doc.removeEventListener( 'mouseup', inner_mouseup );
                 document.body.classList.remove( 'noevents' );
+                progress.classList.remove( "grabbing" );
             }
         }
 
