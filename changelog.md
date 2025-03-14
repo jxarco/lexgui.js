@@ -7,6 +7,7 @@ Start support for swap icons (now at `Menubar.addButtons`).
 Support for colored and sized buttons.
 Fixed editable Progress Widget.
 Started theme customization docs page.
+Added theme-swap button to demo and docs.
 
 ## 0.1.44 (master)
 

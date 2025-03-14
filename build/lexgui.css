@@ -798,12 +798,6 @@ body.noevents * {
     color: var(--global-text-terciary);
 }
 
-:root[data-theme="light"] {
-    .lexwidget .lextext {
-        border: 1px solid var(--global-color-terciary) !important;
-    }
-}
-
 .lexseparator {
     border-bottom: 1px solid var(--global-button-color);
     margin: 5px 0 5px 10px;
@@ -816,6 +810,17 @@ body.noevents * {
     width: -webkit-calc(100% - 8px);
     width: calc(100% - 8px);
     margin: 5px 0 5px 4px;
+}
+
+:root[data-theme="light"] {
+    .lexwidget .lextext {
+        border: 1px solid var(--global-color-terciary) !important;
+    }
+
+    .lexbranch .lexseparator {
+        border-top: 1px solid #e7e7e7;
+        border-bottom: 1px solid #c1c1c1;
+    }
 }
 
 .lexfilter input {
@@ -940,7 +945,6 @@ body.noevents * {
 
 .lexbutton.selected {
     background: #3c4145;
-    outline: 1px solid #8c9bc7;
     color: #DDD;
 }
 
@@ -971,7 +975,6 @@ body.noevents * {
 
     .lexbutton.selected {
         background: #3c4145;
-        outline: 1px solid #8c9bc7;
         color: #DDD;
     }
 }
@@ -1281,7 +1284,7 @@ body.noevents * {
     transition: opacity .2s,rotate .4s
 }
 
-.lextoggle>:focus {
+.lextoggle > :focus {
     outline-style: none
 }
 
@@ -2197,8 +2200,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     margin-top: 10px;
     margin-bottom: 8px;
     border-radius: 6px;
-    padding-left: 4px;
-    padding-right: 4px;
+    padding-inline: 4px;
 }
 
 .lexmenubar .lexmenubuttons.center {
@@ -2596,7 +2598,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexoverlaybuttons .lexwidget:last-child {
-  margin-right: 0px;
+    margin-right: 0px;
 }
 
 /* Area Tabs */

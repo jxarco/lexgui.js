@@ -71,6 +71,12 @@
                 m.add( "Docs v" + LX.version, (v, name) => {
                     location.href = "../docs/";
                 });
+                m.addButtons( [ {
+                    title: "Change Theme",
+                    icon: "fa-solid fa-moon",
+                    swap: "fa-solid fa-sun",
+                    callback:  (event, swapValue) => { LX.setTheme( swapValue ? "light" : "dark" ) }
+                } ] );
                 m.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
             });
 
