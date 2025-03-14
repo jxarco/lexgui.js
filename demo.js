@@ -743,13 +743,15 @@ function createLoginForm() {
             Username: {
                 value: "",
                 placeholder: "Enter username",
-                icon: "fa fa-user"
+                icon: "fa fa-user",
+                pattern: LX.buildTextPattern( { minLength: 3 } )
             },
             Password: {
                 value: "",
                 type: "password",
                 placeholder: "Enter password",
-                icon: "fa fa-key"
+                icon: "fa fa-key",
+                pattern: LX.buildTextPattern( { lowercase: true, uppercase: true, digit: true, minLength: 6 } )
             }
         };
 

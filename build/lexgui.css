@@ -744,7 +744,7 @@ body.noevents * {
     border: 2px solid var(--global-selected);
 }
 
-.lexwidget .lextext input:invalid {
+.lexwidget .lextext input:invalid:focus {
     border: 2px solid var(--global-color-error);
 }
 

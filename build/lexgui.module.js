@@ -4135,8 +4135,16 @@ class Panel {
             wValue.style.textAlign = options.float ?? "";
 
             wValue.setAttribute( "placeholder", options.placeholder ?? "" );
-            wValue.setAttribute( "required", options.required ?? false );
-            wValue.setAttribute( "pattern", options.pattern ?? "" );
+
+            if( options.required )
+            {
+                wValue.setAttribute( "required", options.required );
+            }
+
+            if( options.pattern )
+            {
+                wValue.setAttribute( "pattern", options.pattern );
+            }
 
             var resolve = ( function( val, event ) {
 
