@@ -4061,7 +4061,9 @@ class Panel {
      * @param {Function} callback Callback function on change
      * @param {*} options:
      * disabled: Make the widget disabled [false]
+     * required: Make the input required
      * placeholder: Add input placeholder
+     * pattern: Regular expression that value must match
      * trigger: Choose onchange trigger (default, input) [default]
      * inputWidth: Width of the text input
      * skipReset: Don't add the reset value button when value changes
@@ -4115,8 +4117,9 @@ class Panel {
             wValue.style.width = "100%";
             wValue.style.textAlign = options.float ?? "";
 
-            if( options.placeholder )
-                wValue.setAttribute( "placeholder", options.placeholder );
+            wValue.setAttribute( "placeholder", options.placeholder ?? "" );
+            wValue.setAttribute( "required", options.required ?? false );
+            wValue.setAttribute( "pattern", options.pattern ?? "" );
 
             var resolve = ( function( val, event ) {
                 const skipCallback = event.detail;
