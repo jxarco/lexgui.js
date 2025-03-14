@@ -4087,9 +4087,16 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             widget.onGetValue = () => {
                 return wValue.value;
             };
+
             widget.onSetValue = ( newValue, skipCallback ) => {
                 this.disabled ? wValue.innerText = newValue : wValue.value = newValue;
                 Panel._dispatch_event( wValue, "focusout", skipCallback );
+            };
+
+            widget.valid = () => {
+                if( wValue.pattern == "" ) { return true; }
+                const regexp = new RegExp( wValue.pattern );
+                return regexp.test( wValue.value );
             };
 
             let element = widget.domEl;
@@ -4140,13 +4147,9 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
                 var resolve = ( function( val, event ) {
 
-                    if( wValue.pattern != "" )
+                    if( !widget.valid() )
                     {
-                        const regexp = new RegExp( wValue.pattern );
-                        if( !regexp.test( val ) )
-                        {
-                            return;
-                        }
+                        return;
                     }
 
                     const skipCallback = event.detail;
@@ -4610,7 +4613,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
                 this.addLabel( entry, { textClass: "formlabel" } );
 
-                this.addText( entry, entryData.constructor == Object ? entryData.value : entryData, ( value ) => {
+                entryData.textWidget = this.addText( null, entryData.constructor == Object ? entryData.value : entryData, ( value ) => {
                     container.formData[ entry ] = value;
                 }, entryData );
 
@@ -4620,6 +4623,17 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             this.addBlank( );
 
             this.addButton( null, options.actionName ?? "Submit", ( value, event ) => {
+
+                for( let entry in data )
+                {
+                    let entryData = data[ entry ];
+
+                    if( !entryData.textWidget.valid() )
+                    {
+                        return;
+                    }
+                }
+
                 if( callback )
                 {
                     callback( container.formData, event );
