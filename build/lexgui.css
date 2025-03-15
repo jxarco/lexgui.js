@@ -2786,7 +2786,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexlayer {
-    background-color: var(--global-color-primary);
+    --layer-color: var(--global-color-primary);
+    background-color: var(--layer-color);
     color: var(--global-text-primary);
     text-align: center;
     line-height: 19px;
@@ -2798,16 +2799,17 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexlayer.selected {
-    background: light-dark(var(--global-selected-light), var(--global-selected));
-    color: white;
+    --layer-color: light-dark(var(--global-selected-light), var(--global-selected));
+    color: #fff;
 }
 
 .lexlayer:hover {
-    background-color: #497baad4;
+    background-color: color-mix(in srgb, var(--layer-color), #000 7%);
 }
 
 .lexlayer:active {
-    background-color: #497baab3;
+    background-color: color-mix(in srgb, var(--layer-color), #ffffff 4%);
+    transform: scale(0.99);
 }
 
 /* List Widget */
