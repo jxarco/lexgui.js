@@ -8,6 +8,7 @@ Widgets:
 - Fixed editable Progress Widget.
 - Added 'pattern' and 'required' options to Text Widget.
 - Form Widget now uses entry validation (pattern) before callback.
+- Improved Tags Widget style.
 
 Added `LX.buildTextPattern(options)` for Input validation.
 Allow changing light/dark schemes manually `LX.setTheme`.

@@ -5445,40 +5445,45 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             // Show tags
 
-            let tags_container = document.createElement('div');
-            tags_container.className = "lextags";
-            tags_container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+            const tagsContainer = document.createElement('div');
+            tagsContainer.className = "lextags";
+            tagsContainer.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
             const create_tags = () => {
 
-                tags_container.innerHTML = "";
+                tagsContainer.innerHTML = "";
 
                 for( let i = 0; i < value.length; ++i )
                 {
-                    let tag_name = value[i];
-                    let tag = document.createElement('span');
+                    const tagName = value[i];
+                    const tag = document.createElement('span');
                     tag.className = "lextag";
-                    tag.innerHTML = tag_name;
+                    tag.innerHTML = tagName;
 
-                    tag.addEventListener('click', function( e ) {
-                        this.remove();
-                        value.splice( value.indexOf( tag_name ), 1 );
+                    const removeButton = document.createElement('a');
+                    removeButton.className = "lextagrmb fa-solid fa-xmark lexicon";
+                    tag.appendChild( removeButton );
+
+                    removeButton.addEventListener( 'click', e => {
+                        tag.remove();
+                        value.splice( value.indexOf( tagName ), 1 );
                         let btn = element.querySelector( ".lexwidgetname .lexicon" );
                         if( btn ) btn.style.display = ( value != defaultValue ? "block" : "none" );
                         that._trigger( new IEvent( name, value, e ), callback );
-                    });
+                    } );
 
-                    tags_container.appendChild( tag );
+                    tagsContainer.appendChild( tag );
                 }
 
-                let tag_input = document.createElement( 'input' );
-                tag_input.value = "";
-                tag_input.placeholder = "Tag...";
-                tags_container.insertChildAtIndex( tag_input, 0 );
+                let tagInput = document.createElement( 'input' );
+                tagInput.value = "";
+                tagInput.placeholder = "Add tag...";
+                tagsContainer.appendChild( tagInput );
 
-                tag_input.onkeydown = function( e ) {
+                tagInput.onkeydown = function( e ) {
                     const val = this.value.replace(/\s/g, '');
-                    if( e.key == ' ') {
+                    if( e.key == ' ' || e.key == 'Enter' )
+                    {
                         e.preventDefault();
                         if( !val.length || value.indexOf( val ) > -1 )
                             return;
@@ -5490,18 +5495,19 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     }
                 };
 
-                tag_input.focus();
+                tagInput.focus();
             }
 
             create_tags();
 
             // Remove branch padding and margins
-            if(!widget.name) {
+            if( !widget.name )
+            {
                 element.className += " noname";
-                tags_container.style.width = "100%";
+                tagsContainer.style.width = "100%";
             }
 
-            element.appendChild(tags_container);
+            element.appendChild( tagsContainer );
 
             return widget;
         }

@@ -2897,36 +2897,35 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lextags {
     display: inline-flex;
     flex-wrap: wrap;
-    justify-content: center;
     line-height: 12px;
+    background-color: light-dark(var(--global-color-terciary), var(--global-button-color));
+    border-radius: 8px;
+    padding: 4px;
 }
 
 .lextags input {
-    width: 100%;
-    margin-bottom: 0.5em;
-    text-align: center;
+    width: 60%;
 }
 
 .lextags .lextag {
     padding: 6px;
     background-color: var(--global-color-primary);
     margin: 2px;
-    border-radius: 12px;
+    border-radius: 6px;
     min-width: 16px;
     justify-content: center;
     color: var(--global-text-primary);
     display: inherit;
     font-size: var(--global-font-size);
+    cursor: default;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
 }
 
-.lextags .lextag:hover {
-    background-color: var(--global-selected);
-    color: #f5f5f5;
+.lextags .lextag a:hover {
+    color: light-dark(var(--global-text-terciary), var(--global-text-secondary));
     cursor: pointer;
-}
-
-.lextags .lextag:hover::after {
-    content: "⊗";
 }
 
 /* Counter Widget */
@@ -3135,6 +3134,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     cursor: pointer;
     vertical-align: middle;
     -webkit-user-select: none;
+    -moz-user-select: none;
     user-select: none;
     place-content: center;
     display: inline-grid;
