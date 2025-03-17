@@ -4804,13 +4804,35 @@ class Panel {
                 delete list.unfocus_event;
                 return;
             }
-            const topPosition = selectedOption.getBoundingClientRect().y;
-            list.style.top = (topPosition + selectedOption.offsetHeight) + 'px';
+
+            list.toggleAttribute( "hidden" );
+            list.classList.remove( "place-above" );
+
+            const listHeight = 26 * values.length;
+            const rect = selectedOption.getBoundingClientRect();
+            const topPosition = rect.y;
+
+            let maxY = window.innerHeight;
+
+            if( this.mainContainer )
+            {
+                const parentRect = this.mainContainer.getBoundingClientRect();
+                maxY = parentRect.y + parentRect.height;
+            }
+
+            list.style.top = ( topPosition + selectedOption.offsetHeight ) + 'px';
+
+            const showAbove = ( topPosition + listHeight ) > maxY;
+            if( showAbove )
+            {
+                list.style.top = ( topPosition - listHeight ) + 'px';
+                list.classList.add( "place-above" );
+            }
+
             list.style.width = (event.currentTarget.clientWidth) + 'px';
             list.style.minWidth = (_getMaxListWidth()) + 'px';
-            list.toggleAttribute('hidden');
             list.focus();
-        }, { buttonClass: 'array', skipInlineCount: true });
+        }, { buttonClass: "array", skipInlineCount: true });
 
         this.clearQueue();
 

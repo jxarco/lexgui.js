@@ -121,7 +121,8 @@ top_tabs.area.addOverlayButtons( [
         {
             name: "Move",
             icon: "fa-solid fa-arrows-up-down-left-right",
-            img: "https://webglstudio.org/latest/imgs/mini-icon-gizmo.png",
+            // img: "https://webglstudio.org/latest/imgs/mini-icon-gizmo.png",
+            icon: "fa fa-cube",
             callback: (value, event) => console.log(value),
             selectable: true
         },

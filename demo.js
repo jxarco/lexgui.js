@@ -313,7 +313,6 @@ topTabs.area.addOverlayButtons( [
         {
             name: "Move",
             icon: "fa-solid fa-arrows-up-down-left-right",
-            img: "https://webglstudio.org/latest/imgs/mini-icon-gizmo.png",
             callback: (value, event) => console.log(value),
             selectable: true
         },
@@ -343,7 +342,8 @@ topTabs.area.addOverlayButtons( [
         }
     ], {
         name: "Button 4",
-        img: "https://webglstudio.org/latest/imgs/mini-icon-gizmo.png",
+        // img: "https://webglstudio.org/latest/imgs/mini-icon-gizmo.png",
+        icon: "fa fa-cube",
         callback: (value, event) => console.log(value)
     }
 ], { float: "htc" } );
