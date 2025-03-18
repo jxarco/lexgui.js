@@ -313,6 +313,9 @@ class CodeEditor {
         this.base_area = area;
         this.area = new LX.Area( { className: "lexcodeeditor", height: "100%", skipAppend: true } );
 
+        this.skipCodeInfo = options.skipInfo ?? false;
+        this.disableEdition = options.disableEdition ?? false;
+
         this.tabs = this.area.addTabs( { onclose: (name) => {
             delete this.openedTabs[ name ];
             if( Object.keys( this.openedTabs ).length < 2 )
@@ -322,12 +325,15 @@ class CodeEditor {
             }
         } } );
 
-        this.tabs.root.addEventListener( 'dblclick', (e) => {
-            if( options.allowAddScripts ?? true ) {
-                e.preventDefault();
-                this.addTab("unnamed.js", true);
-            }
-        } );
+        if( !this.disableEdition )
+        {
+            this.tabs.root.addEventListener( 'dblclick', (e) => {
+                if( options.allowAddScripts ?? true ) {
+                    e.preventDefault();
+                    this.addTab("unnamed.js", true);
+                }
+            } );
+        }
 
         // Full editor
         area.root.classList.add('codebasearea');
@@ -339,14 +345,15 @@ class CodeEditor {
         this.root.tabIndex = -1;
         area.attach( this.root );
 
-        this.skipCodeInfo = options.skipInfo ?? false;
-        this.disableEdition = options.disableEdition ?? false;
-
         if( !this.disableEdition )
         {
             this.root.addEventListener( 'keydown', this.processKey.bind( this) );
             this.root.addEventListener( 'focus', this.processFocus.bind( this, true ) );
             this.root.addEventListener( 'focusout', this.processFocus.bind( this, false ) );
+        }
+        else
+        {
+            this.root.classList.add( "disabled" );
         }
 
         this.root.addEventListener( 'mousedown', this.processMouse.bind(this) );
@@ -386,54 +393,58 @@ class CodeEditor {
             window.scroller = this.codeScroller;
 
             let lastScrollTopValue = -1;
-            this.codeScroller.addEventListener( 'scroll', e => {
 
-                if( this._discardScroll )
-                {
-                    this._discardScroll = false;
-                    return;
-                }
+            if( !this.disableEdition )
+            {
+                this.codeScroller.addEventListener( 'scroll', e => {
 
-                this.setScrollBarValue( 'vertical' );
-
-                const scrollTop = this.getScrollTop();
-
-                // Scroll down...
-                if( scrollTop > lastScrollTopValue )
-                {
-                    if( this.visibleLinesViewport.y < (this.code.lines.length - 1) )
+                    if( this._discardScroll )
                     {
-                        const totalLinesInViewport = ((this.codeScroller.offsetHeight - 36) / this.lineHeight)|0;
-                        const scrollDownBoundary =
-                            ( Math.max( this.visibleLinesViewport.y - totalLinesInViewport, 0 ) - 1 ) * this.lineHeight;
+                        this._discardScroll = false;
+                        return;
+                    }
 
-                        if( scrollTop >= scrollDownBoundary )
+                    this.setScrollBarValue( 'vertical' );
+
+                    const scrollTop = this.getScrollTop();
+
+                    // Scroll down...
+                    if( scrollTop > lastScrollTopValue )
+                    {
+                        if( this.visibleLinesViewport.y < (this.code.lines.length - 1) )
+                        {
+                            const totalLinesInViewport = ((this.codeScroller.offsetHeight - 36) / this.lineHeight)|0;
+                            const scrollDownBoundary =
+                                ( Math.max( this.visibleLinesViewport.y - totalLinesInViewport, 0 ) - 1 ) * this.lineHeight;
+
+                            if( scrollTop >= scrollDownBoundary )
+                                this.processLines( CodeEditor.UPDATE_VISIBLE_LINES );
+                        }
+                    }
+                    // Scroll up...
+                    else
+                    {
+                        const scrollUpBoundary = parseInt( this.code.style.top );
+                        if( scrollTop < scrollUpBoundary )
                             this.processLines( CodeEditor.UPDATE_VISIBLE_LINES );
                     }
-                }
-                // Scroll up...
-                else
-                {
-                    const scrollUpBoundary = parseInt( this.code.style.top );
-                    if( scrollTop < scrollUpBoundary )
-                        this.processLines( CodeEditor.UPDATE_VISIBLE_LINES );
-                }
 
-                lastScrollTopValue = scrollTop;
-            });
+                    lastScrollTopValue = scrollTop;
+                });
 
-            this.codeScroller.addEventListener( 'wheel', e => {
-                if( e.ctrlKey )
-                {
-                    e.preventDefault();
-                    ( e.deltaY > 0.0 ? this._decreaseFontSize() : this._increaseFontSize() );
-                }
-                else
-                {
-                    const dX = ( e.deltaY > 0.0 ? 10.0 : -10.0 ) * ( e.shiftKey ? 1.0 : 0.0 );
-                    if( dX != 0.0 ) this.setScrollBarValue( 'horizontal', dX );
-                }
-            });
+                this.codeScroller.addEventListener( 'wheel', e => {
+                    if( e.ctrlKey )
+                    {
+                        e.preventDefault();
+                        ( e.deltaY > 0.0 ? this._decreaseFontSize() : this._increaseFontSize() );
+                    }
+                    else
+                    {
+                        const dX = ( e.deltaY > 0.0 ? 10.0 : -10.0 ) * ( e.shiftKey ? 1.0 : 0.0 );
+                        if( dX != 0.0 ) this.setScrollBarValue( 'horizontal', dX );
+                    }
+                });
+            }
         }
 
         // This is only the container, line numbers are in the same line div
@@ -455,59 +466,62 @@ class CodeEditor {
             area.attach( this.hScrollbar.root );
         }
 
-        // Add autocomplete box
+        if( !this.disableEdition )
         {
-            var box = document.createElement( 'div' );
-            box.className = "autocomplete";
-            this.autocomplete = box;
-            this.tabs.area.attach( box );
+            // Add autocomplete box
+            {
+                var box = document.createElement( 'div' );
+                box.className = "autocomplete";
+                this.autocomplete = box;
+                this.tabs.area.attach( box );
 
-            this.isAutoCompleteActive = false;
-        }
+                this.isAutoCompleteActive = false;
+            }
 
-        // Add search box
-        {
-            var box = document.createElement( 'div' );
-            box.className = "searchbox";
+            // Add search box
+            {
+                var box = document.createElement( 'div' );
+                box.className = "searchbox";
 
-            var searchPanel = new LX.Panel();
-            box.appendChild( searchPanel.root );
+                var searchPanel = new LX.Panel();
+                box.appendChild( searchPanel.root );
 
-            searchPanel.sameLine( 4 );
-            searchPanel.addText( null, "", null, { placeholder: "Find" } );
-            searchPanel.addButton( null, "up", () => this.search( null, true ), { className: 'micro', icon: "fa fa-arrow-up" } );
-            searchPanel.addButton( null, "down", () => this.search(), { className: 'micro', icon: "fa fa-arrow-down" } );
-            searchPanel.addButton( null, "x", this.hideSearchBox.bind( this ), { className: 'micro', icon: "fa fa-xmark" } );
+                searchPanel.sameLine( 4 );
+                searchPanel.addText( null, "", null, { placeholder: "Find" } );
+                searchPanel.addButton( null, "up", () => this.search( null, true ), { className: 'micro', icon: "fa fa-arrow-up" } );
+                searchPanel.addButton( null, "down", () => this.search(), { className: 'micro', icon: "fa fa-arrow-down" } );
+                searchPanel.addButton( null, "x", this.hideSearchBox.bind( this ), { className: 'micro', icon: "fa fa-xmark" } );
 
-            box.querySelector( 'input' ).addEventListener( 'keyup', e => {
-                if( e.key == 'Escape' ) this.hideSearchBox();
-                else if( e.key == 'Enter' ) this.search( e.target.value, !!e.shiftKey );
-            } );
+                box.querySelector( 'input' ).addEventListener( 'keyup', e => {
+                    if( e.key == 'Escape' ) this.hideSearchBox();
+                    else if( e.key == 'Enter' ) this.search( e.target.value, !!e.shiftKey );
+                } );
 
-            this.searchbox = box;
-            this.tabs.area.attach( box );
-        }
+                this.searchbox = box;
+                this.tabs.area.attach( box );
+            }
 
-        // Add search LINE box
-        {
-            var box = document.createElement( 'div' );
-            box.className = "searchbox gotoline";
+            // Add search LINE box
+            {
+                var box = document.createElement( 'div' );
+                box.className = "searchbox gotoline";
 
-            var searchPanel = new LX.Panel();
-            box.appendChild( searchPanel.root );
+                var searchPanel = new LX.Panel();
+                box.appendChild( searchPanel.root );
 
-            searchPanel.addText( null, "", ( value, event ) => {
-                input.value = ":" + value.replaceAll( ':', '' );
-                this.goToLine( input.value.slice( 1 ) );
-            }, { placeholder: "Go to line", trigger: "input" } );
+                searchPanel.addText( null, "", ( value, event ) => {
+                    input.value = ":" + value.replaceAll( ':', '' );
+                    this.goToLine( input.value.slice( 1 ) );
+                }, { placeholder: "Go to line", trigger: "input" } );
 
-            let input = box.querySelector( 'input' );
-            input.addEventListener( 'keyup', e => {
-                if( e.key == 'Escape' ) this.hideSearchLineBox();
-            } );
+                let input = box.querySelector( 'input' );
+                input.addEventListener( 'keyup', e => {
+                    if( e.key == 'Escape' ) this.hideSearchLineBox();
+                } );
 
-            this.searchlinebox = box;
-            this.tabs.area.attach( box );
+                this.searchlinebox = box;
+                this.tabs.area.attach( box );
+            }
         }
 
         // Add code-sizer
@@ -1059,7 +1073,7 @@ class CodeEditor {
             this.addTab("+", false, "New File");
         }
 
-        this.addTab( options.name || "untitled", true, options.title, { language: "CSS" } );
+        this.addTab( options.name || "untitled", true, options.title, { language: "Plain Text" } );
 
         // Create inspector panel
         let panel = this._createPanelInfo();
@@ -1609,6 +1623,11 @@ class CodeEditor {
 
     _onSelectTab( isNewTabButton, event, name ) {
 
+        if( this.disableEdition )
+        {
+            return;
+        }
+
         if( isNewTabButton )
         {
             this._onNewTab( event );
@@ -1657,7 +1676,9 @@ class CodeEditor {
         }, 0 );
 
         if( repeats > 0 )
+        {
             name = name.split( '.' ).join( '_' + repeats + '.' );
+        }
 
         const isNewTabButton = ( name === '+' );
 
@@ -3369,7 +3390,9 @@ class CodeEditor {
 
         // I think it's not necessary but...
         if( this.disableEdition )
+        {
             return;
+        }
 
         // Some selections don't depend on mouse up..
         if( cursor.selection ) cursor.selection.invertIfNecessary();
@@ -4039,6 +4062,11 @@ class CodeEditor {
     }
 
     hideAutoCompleteBox() {
+
+        if( !this.autocomplete )
+        {
+            return;
+        }
 
         const isActive = this.isAutoCompleteActive;
         this.isAutoCompleteActive = false;

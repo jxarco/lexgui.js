@@ -32,34 +32,103 @@ LX.clamp = clamp;
 LX.round = round;
 LX.remapRange = remapRange;
 
-function getSupportedDOMName( string )
+// Timer that works everywhere (from litegraph.js)
+if ( typeof performance != "undefined" )
 {
-    return string.replace(/\s/g, '').replaceAll('@', '_').replaceAll('+', '_plus_').replaceAll('.', '');
+    LX.getTime = performance.now.bind( performance );
+}
+else if( typeof Date != "undefined" && Date.now )
+{
+    LX.getTime = Date.now.bind( Date );
+}
+else if ( typeof process != "undefined" )
+{
+    LX.getTime = function() {
+        var t = process.hrtime();
+        return t[ 0 ] * 0.001 + t[ 1 ] * 1e-6;
+    };
+}
+else
+{
+    LX.getTime = function() {
+        return new Date().getTime();
+    };
+}
+
+let ASYNC_ENABLED = true;
+
+/**
+ * @method doAsync
+ * @description Call a function asynchronously
+ * @param {Function} fn Function to call
+ * @param {Number} ms Time to wait until calling the function (in milliseconds)
+ */
+function doAsync( fn, ms ) {
+    if( ASYNC_ENABLED )
+    {
+        setTimeout( fn, ms ?? 0 );
+    }
+    else
+    {
+        fn();
+    }
+}
+
+LX.doAsync = doAsync;
+
+/**
+ * @method getSupportedDOMName
+ * @description Convert a text string to a valid DOM name
+ * @param {String} text Original text
+ */
+function getSupportedDOMName( text )
+{
+    return text.replace(/\s/g, '').replaceAll('@', '_').replaceAll('+', '_plus_').replaceAll('.', '');
 }
 
 LX.getSupportedDOMName = getSupportedDOMName;
 
-function has( component_name )
+/**
+ * @method has
+ * @description Ask if LexGUI is using a specific component
+ * @param {String} componentName Name of the LexGUI component
+ */
+function has( componentName )
 {
-    return (LX.components.indexOf( component_name ) > -1);
+    return ( LX.components.indexOf( componentName ) > -1 );
 }
 
 LX.has = has;
 
-function getExtension( s )
+/**
+ * @method getExtension
+ * @description Get a extension from a path/url/filename
+ * @param {String} name
+ */
+function getExtension( name )
 {
-    return s.includes('.') ? s.split('.').pop() : null;
+    return name.includes('.') ? name.split('.').pop() : null;
 }
 
 LX.getExtension = getExtension;
 
-function deepCopy( o )
+/**
+ * @method deepCopy
+ * @description Create a deep copy with no references from an object
+ * @param {Object} obj
+ */
+function deepCopy( obj )
 {
-    return JSON.parse(JSON.stringify(o))
+    return JSON.parse( JSON.stringify( obj ) )
 }
 
 LX.deepCopy = deepCopy;
 
+/**
+ * @method setTheme
+ * @description Set dark or light theme
+ * @param {String} colorScheme Name of the scheme
+ */
 function setTheme( colorScheme )
 {
     colorScheme = ( colorScheme == "light" ) ? "light" : "dark";
@@ -69,6 +138,12 @@ function setTheme( colorScheme )
 
 LX.setTheme = setTheme;
 
+/**
+ * @method setThemeColor
+ * @description Sets a new value for one of the main theme variables
+ * @param {String} colorName Name of the theme variable
+ * @param {String} color Color in rgba/hex
+ */
 function setThemeColor( colorName, color )
 {
     var r = document.querySelector( ':root' );
@@ -77,6 +152,11 @@ function setThemeColor( colorName, color )
 
 LX.setThemeColor = setThemeColor;
 
+/**
+ * @method getThemeColor
+ * @description Get the value for one of the main theme variables
+ * @param {String} colorName Name of the theme variable
+ */
 function getThemeColor( colorName )
 {
     const r = getComputedStyle( document.querySelector( ':root' ) );
@@ -101,7 +181,13 @@ function getThemeColor( colorName )
 
 LX.getThemeColor = getThemeColor;
 
-function getBase64Image( img ) {
+/**
+ * @method getBase64Image
+ * @description Convert an image to a base64 string
+ * @param {Image} img
+ */
+function getBase64Image( img )
+{
     var canvas = document.createElement( 'canvas' );
     canvas.width = img.width;
     canvas.height = img.height;
@@ -112,7 +198,13 @@ function getBase64Image( img ) {
 
 LX.getBase64Image = getBase64Image;
 
-function hexToRgb( hexStr ) {
+/**
+ * @method hexToRgb
+ * @description Convert a hexadecimal string to a valid RGB color array
+ * @param {String} hexStr Hexadecimal color
+ */
+function hexToRgb( hexStr )
+{
     const red = parseInt( hexStr.substring( 1, 3 ), 16 ) / 255;
     const green = parseInt( hexStr.substring( 3, 5 ), 16 ) / 255;
     const blue = parseInt( hexStr.substring( 5, 7 ), 16 ) / 255;
@@ -121,7 +213,13 @@ function hexToRgb( hexStr ) {
 
 LX.hexToRgb = hexToRgb;
 
-function rgbToHex( rgb ) {
+/**
+ * @method rgbToHex
+ * @description Convert a RGB color array to a hexadecimal string
+ * @param {Array} rgb Array containing R, G, B, A*
+ */
+function rgbToHex( rgb )
+{
     let hex = "#";
     for( let c of rgb ) {
         c = Math.floor( c * 255 );
@@ -132,7 +230,14 @@ function rgbToHex( rgb ) {
 
 LX.rgbToHex = rgbToHex;
 
-function measureRealWidth( value, paddingPlusMargin = 8 ) {
+/**
+ * @method measureRealWidth
+ * @description Measure the pixel width of a text
+ * @param {Object} value Text to measure
+ * @param {Number} paddingPlusMargin Padding offset
+ */
+function measureRealWidth( value, paddingPlusMargin = 8 )
+{
     var i = document.createElement( "span" );
     i.className = "lexinputmeasure";
     i.innerHTML = value;
@@ -144,7 +249,12 @@ function measureRealWidth( value, paddingPlusMargin = 8 ) {
 
 LX.measureRealWidth = measureRealWidth;
 
-function simple_guidGenerator() {
+/**
+ * @method simple_guidGenerator
+ * @description Get a random unique id
+ */
+function simple_guidGenerator()
+{
     var S4 = function() {
         return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
     };
@@ -153,7 +263,21 @@ function simple_guidGenerator() {
 
 LX.guidGenerator = simple_guidGenerator;
 
-function buildTextPattern( options = {} ) {
+/**
+ * @method buildTextPattern
+ * @description Create a validation pattern using specific options
+ * @param {Object} options
+ * lowercase (Boolean): Text must contain a lowercase char
+ * uppercase (Boolean): Text must contain an uppercase char
+ * digit (Boolean): Text must contain a digit
+ * specialChar (Boolean): Text must contain a special char
+ * noSpaces (Boolean): Do not allow spaces in text
+ * minLength (Number): Text minimum length
+ * maxLength (Number): Text maximum length
+ * asRegExp (Boolean): Return pattern as Regular Expression instance
+ */
+function buildTextPattern( options = {} )
+{
     let patterns = [];
     if ( options.lowercase ) patterns.push("(?=.*[a-z])");
     if ( options.uppercase ) patterns.push("(?=.*[A-Z])");
@@ -170,67 +294,9 @@ function buildTextPattern( options = {} ) {
 
 LX.buildTextPattern = buildTextPattern;
 
-// Timer that works everywhere (from litegraph.js)
-if (typeof performance != "undefined") {
-    LX.getTime = performance.now.bind(performance);
-} else if (typeof Date != "undefined" && Date.now) {
-    LX.getTime = Date.now.bind(Date);
-} else if (typeof process != "undefined") {
-    LX.getTime = function() {
-        var t = process.hrtime();
-        return t[0] * 0.001 + t[1] * 1e-6;
-    };
-} else {
-    LX.getTime = function getTime() {
-        return new Date().getTime();
-    };
-}
-
-let ASYNC_ENABLED = true;
-
-function doAsync( fn, ms ) {
-    if( ASYNC_ENABLED )
-    {
-        setTimeout( fn, ms ?? 0 );
-    }
-    else
-    {
-        fn();
-    }
-}
-
-// Math classes
-
-class vec2 {
-
-    constructor( x, y ) {
-        this.x = x ?? 0;
-        this.y = y ?? ( x ?? 0 );
-    }
-
-    get xy() { return [ this.x, this.y ]; }
-    get yx() { return [ this.y, this.x ]; }
-
-    set ( x, y ) { this.x = x; this.y = y; }
-    add ( v, v0 = new vec2() ) { v0.set( this.x + v.x, this.y + v.y ); return v0; }
-    sub ( v, v0 = new vec2() ) { v0.set( this.x - v.x, this.y - v.y ); return v0; }
-    mul ( v, v0 = new vec2() ) { if( v.constructor == Number ) { v = new vec2( v ) } v0.set( this.x * v.x, this.y * v.y ); return v0; }
-    div ( v, v0 = new vec2() ) { if( v.constructor == Number ) { v = new vec2( v ) } v0.set( this.x / v.x, this.y / v.y ); return v0; }
-    abs ( v0 = new vec2() ) { v0.set( Math.abs( this.x ), Math.abs( this.y ) ); return v0; }
-    dot ( v ) { return this.x * v.x + this.y * v.y; }
-    len2 () { return this.dot( this ) }
-    len () { return Math.sqrt( this.len2() ); }
-    nrm ( v0 = new vec2() ) { v0.set( this.x, this.y ); return v0.mul( 1.0 / this.len(), v0 ); }
-    dst ( v ) { return v.sub( this ).len(); }
-    clp ( min, max, v0 = new vec2() ) { v0.set( clamp( this.x, min, max ), clamp( this.y, min, max ) ); return v0; }
-};
-
-LX.vec2 = vec2;
-
-// Other utils
-
 /**
  * @method makeDraggable
+ * @description Allow an element to be dragged
  * @param {Element} domEl
  * @param {Object} options
  * autoAdjust (Bool): Sets in a correct position at the beggining
@@ -238,8 +304,8 @@ LX.vec2 = vec2;
  * onMove (Function): Called each move event
  * onDragStart (Function): Called when drag event starts
  */
-function makeDraggable( domEl, options = { } ) {
-
+function makeDraggable( domEl, options = { } )
+{
     let offsetX = 0;
     let offsetY = 0;
     let currentTarget = null;
@@ -329,8 +395,93 @@ function makeDraggable( domEl, options = { } ) {
 
 LX.makeDraggable = makeDraggable;
 
-function create_global_searchbar( root ) {
+/**
+ * @method makeCodeSnippet
+ * @description Create a code snippet in a specific language
+ * @param {String} code
+ * @param {Array} size
+ * @param {Object} options
+ * language (String):
+ * windowMode (Boolean):
+ * lineNumbers (Boolean):
+ * tabName (String):
+ */
+function makeCodeSnippet( code, size, options = { } )
+{
+    if( !LX.has('CodeEditor') )
+    {
+        console.error( "Import the CodeEditor component to create snippets!" );
+        return;
+    }
 
+    const snippet = document.createElement( "div" );
+    snippet.className = "lexcodesnippet";
+    snippet.style.width = size[ 0 ];
+    snippet.style.height = size[ 1 ];
+    const area = new Area( { noAppend: true } );
+    let editor = new LX.CodeEditor( area, {
+        skipInfo: true,
+        disableEdition: true,
+        allowAddScripts: false,
+        name: options.tabName,
+        // showTab: options.showTab ?? true,
+        // lineNumbers: options.lineNumbers ?? true
+    } );
+    editor.setText( code, options.language ?? "Plain Text" );
+
+    if( options.windowMode )
+    {
+        const windowActionButtons = document.createElement( "div" );
+        windowActionButtons.className = "lexwindowbuttons";
+        const aButton = document.createElement( "span" );
+        aButton.style.background = "#ee4f50";
+        const bButton = document.createElement( "span" );
+        bButton.style.background = "#f5b720";
+        const cButton = document.createElement( "span" );
+        cButton.style.background = "#53ca29";
+        windowActionButtons.appendChild( aButton );
+        windowActionButtons.appendChild( bButton );
+        windowActionButtons.appendChild( cButton );
+        const tabs = editor.root.querySelector( ".lexareatabs" );
+        tabs.prepend( windowActionButtons );
+    }
+
+    snippet.appendChild( area.root );
+    return snippet;
+}
+
+LX.makeCodeSnippet = makeCodeSnippet;
+
+// Math classes
+
+class vec2 {
+
+    constructor( x, y ) {
+        this.x = x ?? 0;
+        this.y = y ?? ( x ?? 0 );
+    }
+
+    get xy() { return [ this.x, this.y ]; }
+    get yx() { return [ this.y, this.x ]; }
+
+    set ( x, y ) { this.x = x; this.y = y; }
+    add ( v, v0 = new vec2() ) { v0.set( this.x + v.x, this.y + v.y ); return v0; }
+    sub ( v, v0 = new vec2() ) { v0.set( this.x - v.x, this.y - v.y ); return v0; }
+    mul ( v, v0 = new vec2() ) { if( v.constructor == Number ) { v = new vec2( v ) } v0.set( this.x * v.x, this.y * v.y ); return v0; }
+    div ( v, v0 = new vec2() ) { if( v.constructor == Number ) { v = new vec2( v ) } v0.set( this.x / v.x, this.y / v.y ); return v0; }
+    abs ( v0 = new vec2() ) { v0.set( Math.abs( this.x ), Math.abs( this.y ) ); return v0; }
+    dot ( v ) { return this.x * v.x + this.y * v.y; }
+    len2 () { return this.dot( this ) }
+    len () { return Math.sqrt( this.len2() ); }
+    nrm ( v0 = new vec2() ) { v0.set( this.x, this.y ); return v0.mul( 1.0 / this.len(), v0 ); }
+    dst ( v ) { return v.sub( this ).len(); }
+    clp ( min, max, v0 = new vec2() ) { v0.set( clamp( this.x, min, max ), clamp( this.y, min, max ) ); return v0; }
+};
+
+LX.vec2 = vec2;
+
+function create_global_searchbar( root )
+{
     let globalSearch = document.createElement("div");
     globalSearch.id = "global-search";
     globalSearch.className = "hidden";

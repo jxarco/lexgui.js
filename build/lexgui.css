@@ -3930,6 +3930,14 @@ ul.lexassetscontent {
     background-color: #333437a9;
 }
 
+.lexcodeeditor.disabled pre.active-line {
+    background: none;
+}
+
+.lexcodeeditor.disabled .lexareatab {
+    cursor: default;
+}
+
 .lexcodeeditor span {
     -webkit-text-size-adjust: 100%;
     cursor: text;
@@ -4156,6 +4164,29 @@ pre .line-gutter {
 
 .lexcodeeditor .autocomplete pre.selected span.word-highlight {
     color: #95a0e1;
+}
+
+.lexcodesnippet {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 3px 8px 0 rgba(0, 0, 0, 0.6);
+}
+
+.lexcodesnippet .lexwindowbuttons {
+    width: 100px;
+    padding-inline: 16px;
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+}
+
+.lexcodesnippet .lexwindowbuttons span {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    cursor: default;
 }
 
 /* Common */
