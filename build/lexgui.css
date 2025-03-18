@@ -4171,6 +4171,7 @@ pre .line-gutter {
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 3px 8px 0 rgba(0, 0, 0, 0.6);
+    border: 2px solid var(--global-color-primary);
 }
 
 .lexcodesnippet .lexwindowbuttons {
@@ -4261,8 +4262,13 @@ pre .line-gutter {
 .cm-bln.markdown { color: #a1d2f0; }  /* builtin */
 
 :root[data-theme="light"] {
+
     .lexcodeeditor pre.active-line {
         background-color: #c5c4c4ab;
+    }
+
+    .lexcodeeditor.disabled pre.active-line {
+        background: none;
     }
 
     .lexcodescrollbar div {

@@ -21,6 +21,16 @@ let area = LX.init();
 // LX.setThemeColor('global-selected', "#a74");
 // LX.setThemeColor('global-text', "#f21");
 
+const snippet = LX.makeCodeSnippet(`
+    const snippet = LX.makeCodeSnippet("const a = 1;", 
+    ["500px", "380px"], { tabName: "script.js", language: 
+    "JavaScript", windowMode: true });
+`, ["700px", "380px"], { tabName: "script.js", language: "JavaScript", windowMode: true });
+snippet.style.left = "200px";
+snippet.style.top = "200px";
+snippet.style.position = "absolute";
+document.body.appendChild( snippet );
+
 // menu bar
 area.addMenubar( m => {
 
