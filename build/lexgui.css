@@ -1090,14 +1090,23 @@ body.noevents * {
     padding: 0px;
     transform: translateY(-4px);
     z-index: 10;
+    margin: 0;
     margin-top: 5px;
     width: 100%;
     box-shadow: 0 0px 12px rgba(0, 0, 0, 0.788);
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
     max-height: -webkit-fill-available;
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+.lexdropdown ul.place-above {
+    max-height: unset;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
 }
 
 .lexdropdown .lexdropdownitem {
@@ -2515,6 +2524,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     justify-content: center;
     background: none;
     color: var(--global-text-secondary);
+    height: 100%;
 }
 
 .lexoverlaybuttons .lexbutton span {
@@ -2574,7 +2584,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     background: none;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
-    height: 100%;
 }
 
 .lexoverlaybuttonscontainer.vertical .lexoverlaygroup {
