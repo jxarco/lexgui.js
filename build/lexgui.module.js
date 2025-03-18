@@ -4813,10 +4813,11 @@ class Panel {
             const topPosition = rect.y;
 
             let maxY = window.innerHeight;
+            let overflowContainer = list.getParentArea();
 
-            if( this.mainContainer )
+            if( overflowContainer )
             {
-                const parentRect = this.mainContainer.getBoundingClientRect();
+                const parentRect = overflowContainer.getBoundingClientRect();
                 maxY = parentRect.y + parentRect.height;
             }
 
@@ -9861,6 +9862,14 @@ Element.prototype.getComputedSize = function() {
     return {
         width: this.offsetWidth + cs.getPropertyValue('marginLeft') + cs.getPropertyValue('marginRight'),
         height: this.offsetHeight + cs.getPropertyValue('marginTop') + cs.getPropertyValue('marginBottom')
+    }
+}
+
+Element.prototype.getParentArea = function() {
+    let parent = this.parentElement;
+    while( parent ) {
+        if( parent.classList.contains( "lexarea" ) ) { return parent; }
+        parent = parent.parentElement;
     }
 }
 
