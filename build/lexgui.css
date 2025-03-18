@@ -998,12 +998,25 @@ body.noevents * {
     padding: 0.25rem;
 }
 
+:root[data-theme="light"] {
+    .lexbutton {
+        --button-color: var(--global-button-color);
+        color: var(--global-text-primary);
+        border: 1px solid var(--global-color-terciary) !important;
+    }
+
+    .lexbutton.selected {
+        background: #3c4145;
+        color: #DDD;
+    }
+}
+
 /* Colors */
-.lexbutton.primary { --button-color: var(--global-selected); }
-.lexbutton.secondary { --button-color: var(--global-selected-light);  }
-.lexbutton.accent { --button-color: var(--global-color-accent);  }
-.lexbutton.warning { --button-color: var(--global-color-warning);  }
-.lexbutton.error { --button-color: var(--global-color-error);  }
+.lexbutton.primary { --button-color: var(--global-selected) !important; color: #f9f9f9 !important; }
+.lexbutton.secondary { --button-color: var(--global-selected-light) !important; color: #f9f9f9 !important;  }
+.lexbutton.accent { --button-color: var(--global-color-accent) !important; color: #f9f9f9 !important;  }
+.lexbutton.warning { --button-color: var(--global-color-warning) !important; color: #793205 !important;  }
+.lexbutton.error { --button-color: var(--global-color-error) !important; color: #52020d !important;  }
 /* Few Sizes */
 .lexbutton.xs { width: 25% !important; margin: 0 auto; }
 .lexbutton.sm { width: 45% !important; margin: 0 auto; }
@@ -1054,32 +1067,6 @@ body.noevents * {
 .lexbutton.noname {
     margin-left: 0px;
     margin-top: 0px;
-}
-
-:root[data-theme="light"] {
-    .lexbutton {
-        background-color: var(--global-button-color);
-        color: var(--global-text-primary);
-        border: 1px solid var(--global-color-terciary) !important;
-    }
-
-    .lexbutton.accept {
-        background-color: var(--global-selected);
-    }
-
-    .lexbutton:hover {
-        background-color: var(--global-button-color-hovered);
-        color: var(--global-text-primary);
-    }
-
-    .lexbutton.accept:hover {
-        background-color: #3b6790;
-    }
-
-    .lexbutton.selected {
-        background: #3c4145;
-        color: #DDD;
-    }
 }
 
 /* Combo Buttons */
