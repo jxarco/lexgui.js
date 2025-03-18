@@ -1,6 +1,10 @@
 # lexgui.js changelog
 
-## 0.1.45 (dev)
+## 0.1.46 (dev)
+
+
+
+## 0.1.45 (master)
 
 Widgets:
 - New Counter Widget added `Panel.addCounter`.
@@ -17,7 +21,7 @@ Start support for swap icons (now at `Menubar.addButtons`).
 Started theme customization docs page.
 Added theme-swap button to demo and docs.
 
-## 0.1.44 (master)
+## 0.1.44
 
 VideoEditor:
 - Support cropping video area.
