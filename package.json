@@ -13,7 +13,6 @@
       "build",
       "build/components",
       "examples",
-      "data/GoogleSans.ttf",
       "LICENSE",
       "package.json",
       "changelog.md",

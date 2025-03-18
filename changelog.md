@@ -2,7 +2,8 @@
 
 ## 0.1.46 (dev)
 
-
+Fixed colored buttons in light theme.
+Fixed GoogleSans.ttf usage.
 
 ## 0.1.45 (master)
 

@@ -3,7 +3,7 @@
 
 @font-face {
     font-family: "GoogleSans";
-    src: url("../data/GoogleSans.ttf");
+    src: url("https://raw.githubusercontent.com/jxarco/lexgui.js/master/data/GoogleSans.ttf");
 }
 
 :root {
