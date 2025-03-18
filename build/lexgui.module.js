@@ -7381,6 +7381,104 @@ class Branch {
 LX.Branch = Branch;
 
 /**
+ * @class Footer
+ */
+
+class Footer {
+    /**
+     * @param {*} options:
+     * columns: Array with data per column { title, items: [ { title, link } ]  }
+     * credits: html string
+     * socials: Array with data per item { title, link, iconHtml }
+    */
+    constructor( options = {} ) {
+
+        const root = document.createElement( "footer" );
+        root.className = "lexfooter";
+
+        const wrapper = document.createElement( "div" );
+        wrapper.className = "wrapper";
+        root.appendChild( wrapper );
+
+        if( options.columns && options.columns.constructor == Array )
+        {
+            const cols = document.createElement( "div" );
+            cols.className = "columns";
+            cols.style.gridTemplateColumns = "1fr ".repeat( options.columns.length );
+            wrapper.appendChild( cols );
+
+            for( let col of options.columns )
+            {
+                const colDom = document.createElement( "div" );
+                colDom.className = "col";
+                cols.appendChild( colDom );
+
+                const colTitle = document.createElement( "h2" );
+                colTitle.innerHTML = col.title;
+                colDom.appendChild( colTitle );
+
+                if( !col.items || !col.items.length )
+                {
+                    continue;
+                }
+
+                const itemListDom = document.createElement( "ul" );
+                colDom.appendChild( itemListDom );
+
+                for( let item of col.items )
+                {
+                    const itemDom = document.createElement( "li" );
+                    itemDom.innerHTML = `<a class="" href="${ item.link }">${ item.title }</a>`;
+                    itemListDom.appendChild( itemDom );
+                }
+            }
+        }
+
+        if( options.credits || options.socials )
+        {
+            const hr = document.createElement( "hr" );
+            wrapper.appendChild( hr );
+
+            const creditsSocials = document.createElement( "div" );
+            creditsSocials.className = "credits-and-socials";
+            wrapper.appendChild( creditsSocials );
+
+            if( options.credits )
+            {
+                const credits = document.createElement( "p" );
+                credits.innerHTML = options.credits;
+                creditsSocials.appendChild( credits );
+            }
+
+            if( options.socials )
+            {
+                const socials = document.createElement( "div" );
+                socials.className = "social";
+
+                for( let social of options.socials )
+                {
+                    const itemDom = document.createElement( "a" );
+                    itemDom.title = social.title;
+                    itemDom.innerHTML = social.icon;
+                    itemDom.href = social.link;
+                    itemDom.target = "_blank";
+                    socials.appendChild( itemDom );
+                }
+
+                creditsSocials.appendChild( socials );
+            }
+        }
+
+        // Append directly to body
+        const parent = options.parent ?? document.body;
+        parent.appendChild( root );
+    }
+
+}
+
+LX.Footer = Footer;
+
+/**
  * @class Dialog
  */
 

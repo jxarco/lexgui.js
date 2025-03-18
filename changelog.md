@@ -10,6 +10,7 @@ Widgets:
 - Form Widget now uses entry validation (pattern) before callback.
 - Improved Tags Widget style.
 
+Added initial support for creating footers.
 Added `LX.buildTextPattern(options)` for Input validation.
 Allow changing light/dark schemes manually `LX.setTheme`.
 Start support for swap icons (now at `Menubar.addButtons`).
