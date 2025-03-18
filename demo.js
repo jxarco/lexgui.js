@@ -711,6 +711,7 @@ function fillBottomPanel( panel ) {
     
     // add widgets to panel branch
     panel.branch("Information", {icon: "fa fa-circle-info"});
+    panel.addMasonry();
     panel.addText("Camera", "Canon EOS 80D", null, {disabled: true}); 
     panel.addText("Text", "Warning text", null, { warning: true });
     const patternOptions = { uppercase: true }

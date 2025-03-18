@@ -5545,6 +5545,28 @@ class Panel {
         return widget;
     }
 
+    addMasonry() {
+
+        let widget = this.create_widget( "masonry", 999 );
+        let element = widget.domEl;
+
+        element.innerHTML = `
+            <div class="masonry">
+            <div class="mitem _1">Item 1</div>
+            <div class="mitem _2">Item 2</div>
+            <div class="mitem _3">Item 3</div>
+            <div class="mitem _4">Item 4</div>
+            <div class="mitem _5">Item 5</div>
+            <div class="mitem _6">Item 6</div>
+            <div class="mitem _7">Item 7</div>
+            <div class="mitem _8">Item 8</div>
+            <div class="mitem _9">Item 9</div>
+            <div class="mitem _10">Item 10</div>
+        </div>`;
+
+        return widget;
+    }
+
     /**
      * @method addCheckbox
      * @param {String} name Widget name
