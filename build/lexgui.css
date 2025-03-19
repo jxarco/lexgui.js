@@ -3963,7 +3963,7 @@ ul.lexassetscontent {
     display: inline-block;
 }
 
-pre .line-gutter {
+.lexcodeeditor pre .line-gutter {
     color: var(--global-text-terciary);
     width: 48px;
     height: var(--code-editor-row-height);
@@ -3978,6 +3978,10 @@ pre .line-gutter {
     position: sticky;
     left: 0;
     z-index: 1;
+}
+
+.lexcodeeditor.no-gutter pre .line-gutter {
+    opacity: 0;
 }
 
 .lexcodeeditor .cursors,

@@ -2,6 +2,9 @@
 
 ## 0.1.47 (dev)
 
+- CodeSnippet: Allow hiding line number `lineNumbers`.
+- Force dark color scheme by default.
+
 ## 0.1.46 (master)
 
 Support for creating code snippets `LX.makeCodeSnippet(options)`.

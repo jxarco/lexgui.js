@@ -21,11 +21,40 @@ let area = LX.init();
 // LX.setThemeColor('global-selected', "#a74");
 // LX.setThemeColor('global-text', "#f21");
 
-const snippet = LX.makeCodeSnippet(`
-    const snippet = LX.makeCodeSnippet("const a = 1;", 
-    ["500px", "380px"], { tabName: "script.js", language: 
-    "JavaScript", windowMode: true });
-`, ["700px", "380px"], { tabName: "script.js", language: "JavaScript", windowMode: true });
+const code = `
+import { LX } from 'lexgui';
+
+class Test {
+
+    constructor() {
+
+        this.foo = 1;
+
+        var div = document.createElement('div');
+        div.style.width = "100px"
+        div.style.height = "100px"
+
+        // single line comment
+
+        document.body.appendChild( div );
+
+        let a = 1; /* single line block comment */ let b = 2;
+
+        /*
+            multiple line block comment
+        */
+    }
+}
+`;
+
+const snippet = LX.makeCodeSnippet(code, ["780px", "auto"], {
+    tabName: "script.js",
+    language: "JavaScript",
+    linesAdded: [2, [10, 12]],
+    linesRemoved: [14, 16],
+    xlineNumbers: false,
+    windowMode: true
+});
 snippet.style.left = "200px";
 snippet.style.top = "200px";
 snippet.style.position = "absolute";

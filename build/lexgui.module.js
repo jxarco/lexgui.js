@@ -404,6 +404,9 @@ LX.makeDraggable = makeDraggable;
  * language (String):
  * windowMode (Boolean):
  * lineNumbers (Boolean):
+ * firstLine (Number): TODO
+ * linesAdded (Array):
+ * linesRemoved (Array):
  * tabName (String):
  */
 function makeCodeSnippet( code, size, options = { } )
@@ -416,16 +419,15 @@ function makeCodeSnippet( code, size, options = { } )
 
     const snippet = document.createElement( "div" );
     snippet.className = "lexcodesnippet";
-    snippet.style.width = size[ 0 ];
-    snippet.style.height = size[ 1 ];
+    snippet.style.width = size ? size[ 0 ] : "auto";
+    snippet.style.height = size ? size[ 1 ] : "auto";
     const area = new Area( { noAppend: true } );
     let editor = new LX.CodeEditor( area, {
         skipInfo: true,
         disableEdition: true,
         allowAddScripts: false,
         name: options.tabName,
-        // showTab: options.showTab ?? true,
-        // lineNumbers: options.lineNumbers ?? true
+        // showTab: options.showTab ?? true
     } );
     editor.setText( code, options.language ?? "Plain Text" );
 
@@ -482,6 +484,11 @@ function makeCodeSnippet( code, size, options = { } )
         windowActionButtons.appendChild( cButton );
         const tabs = editor.root.querySelector( ".lexareatabs" );
         tabs.prepend( windowActionButtons );
+    }
+
+    if( !( options.lineNumbers ?? true ) )
+    {
+        editor.root.classList.add( "no-gutter" );
     }
 
     snippet.appendChild( area.root );
