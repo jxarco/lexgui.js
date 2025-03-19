@@ -237,6 +237,8 @@ class CodeEditor {
     static CODE_MIN_FONT_SIZE = 9;
     static CODE_MAX_FONT_SIZE = 22;
 
+    static LINE_GUTTER_WIDTH = 48;
+
     /**
      * @param {*} options
      * name:
@@ -380,7 +382,7 @@ class CodeEditor {
         this.selections = {};
 
         // Css char synchronization
-        this.xPadding = "48px";
+        this.xPadding = CodeEditor.LINE_GUTTER_WIDTH + "px";
 
         // Add main cursor
         this._addCursor( 0, 0, true, true );
@@ -390,7 +392,6 @@ class CodeEditor {
             this.codeScroller = this.tabs.area.root;
             this.firstLineInViewport = 0;
             this.lineScrollMargin = new LX.vec2( 20, 20 ); // [ mUp, mDown ]
-            window.scroller = this.codeScroller;
 
             let lastScrollTopValue = -1;
 
@@ -2456,10 +2457,11 @@ class CodeEditor {
 
         // We are out of the viewport and max length is different? Resize scrollbars...
         const maxLineLength = this.getMaxLineLength();
-        const numViewportChars = Math.floor( this.codeScroller.clientWidth / this.charWidth );
+        const numViewportChars = Math.floor( ( this.codeScroller.clientWidth - CodeEditor.LINE_GUTTER_WIDTH ) / this.charWidth );
         if( maxLineLength >= numViewportChars && maxLineLength != this._lastMaxLineLength )
         {
             this.resize( maxLineLength );
+            this.setScrollLeft( 1e4 );
         }
 
         // Manage autocomplete
@@ -3478,7 +3480,7 @@ class CodeEditor {
         // Add horizontal scroll
 
         doAsync(() => {
-            var viewportSizeX = ( this.codeScroller.clientWidth + this.getScrollLeft() ) - 48; // Gutter offset
+            var viewportSizeX = ( this.codeScroller.clientWidth + this.getScrollLeft() ) - CodeEditor.LINE_GUTTER_WIDTH; // Gutter offset
             if( (cursor.position * this.charWidth) >= viewportSizeX )
                 this.setScrollLeft( this.getScrollLeft() + this.charWidth );
         });
@@ -3735,7 +3737,7 @@ class CodeEditor {
 
             // Update max viewport
             const maxLineLength = pMaxLength ?? this.getMaxLineLength();
-            const scrollWidth = maxLineLength * this.charWidth;
+            const scrollWidth = maxLineLength * this.charWidth + CodeEditor.LINE_GUTTER_WIDTH;
             const scrollHeight = this.code.lines.length * this.lineHeight;
 
             this._lastMaxLineLength = maxLineLength;
@@ -3750,9 +3752,9 @@ class CodeEditor {
 
     resizeScrollBars() {
 
-        const totalLinesInViewport = ((this.codeScroller.offsetHeight - 36) / this.lineHeight)|0;
+        const totalLinesInViewport = ((this.codeScroller.offsetHeight) / this.lineHeight)|0;
 
-        if( totalLinesInViewport > this.code.lines.length )
+        if( totalLinesInViewport >= this.code.lines.length )
         {
             this.codeScroller.classList.remove( 'with-vscrollbar' );
             this.vScrollbar.root.classList.add( 'scrollbar-unused' );
@@ -3765,10 +3767,10 @@ class CodeEditor {
             this.vScrollbar.thumb.style.height = (this.vScrollbar.thumb.size * 100.0) + "%";
         }
 
-        const numViewportChars = Math.floor( this.codeScroller.clientWidth / this.charWidth );
+        const numViewportChars = Math.floor( ( this.codeScroller.clientWidth - CodeEditor.LINE_GUTTER_WIDTH ) / this.charWidth );
         const maxLineLength = this._lastMaxLineLength;
 
-        if( numViewportChars > maxLineLength )
+        if( numViewportChars >= maxLineLength )
         {
             this.codeScroller.classList.remove( 'with-hscrollbar' );
             this.hScrollbar.root.classList.add( 'scrollbar-unused' );
@@ -4055,7 +4057,7 @@ class CodeEditor {
         // Show box
         this.autocomplete.classList.toggle('show', true);
         this.autocomplete.classList.toggle('no-scrollbar', !(this.autocomplete.scrollHeight > this.autocomplete.offsetHeight));
-        this.autocomplete.style.left = (cursor._left + 48 - this.getScrollLeft()) + "px";
+        this.autocomplete.style.left = (cursor._left + CodeEditor.LINE_GUTTER_WIDTH - this.getScrollLeft()) + "px";
         this.autocomplete.style.top = (cursor._top + 28 + this.lineHeight - this.getScrollTop()) + "px";
 
         this.isAutoCompleteActive = true;

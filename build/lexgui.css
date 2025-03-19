@@ -3853,7 +3853,7 @@ ul.lexassetscontent {
 
 .lexcodegutter {
     width: 48px;
-    height: calc(100% - 62px);
+    height: calc(100% - 65px);
     background-color: light-dark(var(--global-color-terciary), var(--global-medium-background));
     margin-top: 28px;
     overflow: hidden;
@@ -3862,7 +3862,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .codetabsarea {
-    height: calc(100% - 72px) !important;
+    height: calc(100% - 64px) !important;
     background-color: light-dark(var(--global-color-terciary), var(--global-medium-background));
     overflow: scroll;
 }
@@ -3879,6 +3879,10 @@ ul.lexassetscontent {
     width: calc(100% - 10px) !important;
 }
 
+.lexcodeeditor .codetabsarea.with-hscrollbar {
+    height: calc(100% - 72px) !important;
+}
+
 .lexcodeeditor .codetabsarea.dragging {
     background-color: var(--global-color-secondary);
 }
@@ -3890,7 +3894,7 @@ ul.lexassetscontent {
     -moz-osx-font-smoothing: grayscale;
     font-feature-settings: "ss04", "ss05";
     font-size: var(--code-editor-font-size);
-    padding-right: 6px;
+    /* padding-right: 6px; */
     position: relative;
 }
 
