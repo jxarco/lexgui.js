@@ -165,12 +165,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     {
         const r = getComputedStyle( document.querySelector( ':root' ) );
         const value = r.getPropertyValue( '--' + colorName );
+        const theme = document.documentElement.getAttribute( "data-theme" );
 
-        if( value.includes( "light-dark" ) && window.matchMedia )
+        if( value.includes( "light-dark" ) )
         {
             const currentScheme = r.getPropertyValue( "color-scheme" );
 
-            if( ( window.matchMedia( "(prefers-color-scheme: light)" ).matches ) || ( currentScheme == "light" ) )
+            if( currentScheme == "light" )
             {
                 return value.substring( value.indexOf( '(' ) + 1, value.indexOf( ',' ) ).replace( /\s/g, '' );
             }
@@ -857,10 +858,14 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             this.main_area = new Area( { id: options.id ?? 'mainarea' } );
         }
 
-        window.matchMedia( "(prefers-color-scheme: dark)" ).addEventListener( "change", event => {
-            const newColorScheme = event.matches ? "dark" : "light";
-            LX.emit( "@on_new_color_scheme", newColorScheme );
-        });
+        if( ( options.autoTheme ?? true ) && window.matchMedia && window.matchMedia( "(prefers-color-scheme: light)" ).matches )
+        {
+            LX.setTheme( "light" );
+
+            window.matchMedia( "(prefers-color-scheme: dark)" ).addEventListener( "change", event => {
+                LX.setTheme( event.matches ? "dark" : "light" );
+            });
+        }
 
         return this.main_area;
     }

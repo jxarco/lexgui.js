@@ -4,6 +4,7 @@
 
 - CodeSnippet: Allow hiding line number `lineNumbers`.
 - Force dark color scheme by default.
+- Support `autoTheme` at LX.init options.
 
 ## 0.1.46 (master)
 
