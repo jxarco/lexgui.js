@@ -127,7 +127,11 @@ area.addMenubar( m => {
         },
         {
             icon: "fa-solid fa-magnifying-glass",
-            callback:  (event) => { console.log("glass!"); }
+            callback:  (event) => {
+                const playButton = m.getButton( "Play" );
+                playButton.swap();
+                console.log("glass!");
+            }
         },
         {
             title: "Change Theme",

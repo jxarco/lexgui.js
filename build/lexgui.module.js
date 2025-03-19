@@ -429,6 +429,44 @@ function makeCodeSnippet( code, size, options = { } )
     } );
     editor.setText( code, options.language ?? "Plain Text" );
 
+    if( options.linesAdded )
+    {
+        const code = editor.root.querySelector( ".code" );
+        for( let l of options.linesAdded )
+        {
+            if( l.constructor == Number )
+            {
+                code.childNodes[ l - 1 ].classList.add( "added" );
+            }
+            else if( l.constructor == Array ) // It's a range
+            {
+                for( let i = ( l[0] - 1 ); i <= ( l[1] - 1 ); i++ )
+                {
+                    code.childNodes[ i ].classList.add( "added" );
+                }
+            }
+        }
+    }
+
+    if( options.linesRemoved )
+    {
+        const code = editor.root.querySelector( ".code" );
+        for( let l of options.linesRemoved )
+        {
+            if( l.constructor == Number )
+            {
+                code.childNodes[ l - 1 ].classList.add( "removed" );
+            }
+            else if( l.constructor == Array ) // It's a range
+            {
+                for( let i = ( l[0] - 1 ); i <= ( l[1] - 1 ); i++ )
+                {
+                    code.childNodes[ i ].classList.add( "removed" );
+                }
+            }
+        }
+    }
+
     if( options.windowMode )
     {
         const windowActionButtons = document.createElement( "div" );

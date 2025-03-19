@@ -3930,6 +3930,14 @@ ul.lexassetscontent {
     background-color: #333437a9;
 }
 
+.lexcodeeditor pre.added {
+    background-color: #40db212f;
+}
+
+.lexcodeeditor pre.removed {
+    background-color: #db21212f;
+}
+
 .lexcodeeditor.disabled pre.active-line {
     background: none;
 }
