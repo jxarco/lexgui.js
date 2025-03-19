@@ -2,6 +2,8 @@
 
 ## 0.1.46 (dev)
 
+Support for creating code snippets `LX.makeCodeSnippet(options)`.
+Added swapButton.swap().
 Fixed colored buttons in light theme.
 Fixed GoogleSans.ttf usage.
 
