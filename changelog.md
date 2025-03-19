@@ -1,13 +1,15 @@
 # lexgui.js changelog
 
-## 0.1.46 (dev)
+## 0.1.47 (dev)
+
+## 0.1.46 (master)
 
 Support for creating code snippets `LX.makeCodeSnippet(options)`.
 Added `swapButton.swap()` and Add `swapButton.setState(bool)`.
 Fixed colored buttons in light theme.
 Fixed GoogleSans.ttf usage.
 
-## 0.1.45 (master)
+## 0.1.45
 
 Widgets:
 - New Counter Widget added `Panel.addCounter`.
