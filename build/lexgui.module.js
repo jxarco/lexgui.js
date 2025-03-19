@@ -2741,6 +2741,11 @@ class Menubar {
                 const swapIcon = document.createElement( "a" );
                 swapIcon.className = data.swap + " swap-on lexicon";
                 button.appendChild( swapIcon );
+
+                button.swap = function() {
+                    const swapInput = button.querySelector( "input" );
+                    swapInput.checked = !swapInput.checked;
+                };
             }
 
             trigger.addEventListener("click", e => {
