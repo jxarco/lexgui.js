@@ -2775,8 +2775,14 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     button.appendChild( swapIcon );
 
                     button.swap = function() {
-                        const swapInput = button.querySelector( "input" );
+                        const swapInput = this.querySelector( "input" );
                         swapInput.checked = !swapInput.checked;
+                    };
+
+                    // Set if swap has to be performed
+                    button.setState = function( v ) {
+                        const swapInput = this.querySelector( "input" );
+                        swapInput.checked = v;
                     };
                 }
 

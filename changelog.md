@@ -3,7 +3,7 @@
 ## 0.1.46 (dev)
 
 Support for creating code snippets `LX.makeCodeSnippet(options)`.
-Added swapButton.swap().
+Added `swapButton.swap()` and Add `swapButton.setState(bool)`.
 Fixed colored buttons in light theme.
 Fixed GoogleSans.ttf usage.
 
