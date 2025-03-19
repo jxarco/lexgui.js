@@ -7,8 +7,8 @@
 }
 
 :root {
-    /* this has to be set to switch between light or dark */
-    color-scheme: light dark;
+    /* default color scheme */
+    color-scheme: dark;
 
     --global-font: "GoogleSans", sans-serif;
     --global-title-font: "GoogleSans", sans-serif;
