@@ -27,10 +27,10 @@
     MAKE_PARAGRAPH( `One of the features of LexGUI is the ability to effortlessly retrieve and modify values for any widget that has been added. 
     This functionality provides developers with a convenient way to interact with and manipulate the UI elements within their applications:` );
     MAKE_CODE( `@[com]// Getting Values by Widget Name@
-@const@ color = panel.@[mtd]getValue@(@[str]'Background'@);
+@const@ color = panel.@[mtd]getValue@(@'Background'@);
 
 @[com]// Settings Values@
-panel.@[mtd]setValue@(@[str]'Font Color'@, color);
+panel.@[mtd]setValue@(@'Font Color'@, color);
 ` );
     MAKE_PARAGRAPH( `Note: It&#39;s important to ensure that the new value provided is compatible with the widget&#39;s data type and constraints. 
     Incorrect data types or out-of-range values may result in unexpected behavior or errors.`, true );

@@ -18,13 +18,13 @@
     These menus provide quick access to relevant actions and options based on the user's current context, enhancing the overall user experience.` );
     MAKE_PARAGRAPH( `LexGUI's context menus can be triggered not only on right-click, but in any custom event or moment is necessary. Call ${INLINE_CODE("LX.addContextMenu(title, event, callback, options)")}
     to create a Context Menu:` );
-    MAKE_CODE( `LX.@[mtd]addContextMenu@( @[str]"Selected Nodes"@, event, m => {
+    MAKE_CODE( `LX.@[mtd]addContextMenu@( @"Selected Nodes"@, event, m => {
     @[com]// Event is the DOM event that should have position info@
-    m.@[mtd]add@( @[str]"Select Children"@, () => console.@[mtd]log@(@[str]"Select children"@) );
-    m.@[mtd]add@( @[str]"Clone"@, { color: @[str]"#0d5"@ } );
-    m.@[mtd]add@( @[str]"Components/Transform"@);
-    m.@[mtd]add@( @[str]"Components/MeshRenderer"@);
-    m.@[mtd]add@( @[str]"Delete"@ );
+    m.@[mtd]add@( @"Select Children"@, () => console.@[mtd]log@(@"Select children"@) );
+    m.@[mtd]add@( @"Clone"@, { color: @"#0d5"@ } );
+    m.@[mtd]add@( @"Components/Transform"@);
+    m.@[mtd]add@( @"Components/MeshRenderer"@);
+    m.@[mtd]add@( @"Delete"@ );
 });` );
 
     MAKE_PARAGRAPH( `As you can observe, the usage format resembles that of other UI elements such as dialogs or menubars. You pass the menu as a parameter, 

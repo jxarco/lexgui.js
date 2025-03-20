@@ -24,11 +24,11 @@ to create <strong>Signals</strong>. E.g. We could make a widget to be updated wh
     MAKE_HEADER( "Connect a Signal", "h3" );
     MAKE_PARAGRAPH( `The following code is creating a widget bound to a signal. That implies that it will be updated when
     it receives the corresponding signal:` );
-    MAKE_CODE( `panel.@[mtd]addNumber@(@[str]"Font Size"@, @36@, (value, event) =&gt; {
+    MAKE_CODE( `panel.@[mtd]addNumber@(@"Font Size"@, @36@, (value, event) =&gt; {
     console.@[mtd]log@(value);
-}, { signal: @[str]"|@on_set_fontsize"@, min: @1@, max: @48@ });` );
+}, { signal: @"|@on_set_fontsize"@, min: @1@, max: @48@ });` );
     MAKE_PARAGRAPH( `In the case the receiver it's not a widget we could do it using ${INLINE_CODE("LX.addSignal(name, obj, callback)")}:` );
-    MAKE_CODE( `LX.@[mtd]addSignal@( @[str]"|@on_value_changed"@, (element, value) =&gt; {
+    MAKE_CODE( `LX.@[mtd]addSignal@( @"|@on_value_changed"@, (element, value) =&gt; {
     console.@[mtd]log@(value);
 } );` );
     MAKE_PARAGRAPH( `Note that we are using a callback this time that will called within the element scope when the signal is emitted.`, true );

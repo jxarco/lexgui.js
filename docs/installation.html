@@ -33,22 +33,22 @@
 
     MAKE_CODE_BULLET_LIST( ["index.html"] );
     MAKE_CODE( `&lt;!@DOCTYPE@ @[atn]html@&gt;
-&lt;@html@ @lang@=@[str]"en"@&gt;
+&lt;@html@ @lang@=@"en"@&gt;
 &lt;@head@&gt;
-&lt;@meta@ @charset@=@[str]"utf-8"@&gt;
+&lt;@meta@ @charset@=@"utf-8"@&gt;
 &lt;@title@&gt;My first lexgui.js app&lt;/@title@&gt;
-&lt;@link@ @rel@=@[str]"stylesheet"@ @crossorigin@=@[str]"anonymous"@ @href@=@[str]"https://cdn.skypack.dev/lexgui|@^&lt;version&gt;/build/lexgui.css"@&gt;
-&lt;@script@ @type@=@[str]"importmap"@&gt;
+&lt;@link@ @rel@=@"stylesheet"@ @crossorigin@=@"anonymous"@ @href@=@"https://cdn.skypack.dev/lexgui|@^&lt;version&gt;/build/lexgui.css"@&gt;
+&lt;@script@ @type@=@"importmap"@&gt;
 {
-    @[str]"imports"@: {
-        @[str]"lexgui"@: @[str]"https://cdn.skypack.dev/lexgui|@^&lt;version&gt;/build/lexgui.module.js"@,
-        @[str]"lexgui/components/"@: @[str]"https://cdn.skypack.dev/lexgui|@^&lt;version&gt;/build/components/"@
+    @"imports"@: {
+        @"lexgui"@: @"https://cdn.skypack.dev/lexgui|@^&lt;version&gt;/build/lexgui.module.js"@,
+        @"lexgui/components/"@: @"https://cdn.skypack.dev/lexgui|@^&lt;version&gt;/build/components/"@
     }
 }
 &lt;/@script@&gt;
 &lt;/@head@&gt;
 &lt;@body@&gt;
-&lt;@script@ @type@=@[str]"module"@ @src@=@[str]"/main.js"@&gt;&lt;/@script@&gt;
+&lt;@script@ @type@=@"module"@ @src@=@"/main.js"@&gt;&lt;/@script@&gt;
 &lt;/@body@&gt;
 &lt;/@html@&gt;` );
 
@@ -57,7 +57,7 @@
     Use <i>lexgui</i> without the version tag to use the latest version.`, true );
 
     MAKE_CODE_BULLET_LIST( ["main.js"] );
-    MAKE_CODE( `@import@ { @[typ]LX@ } @from@ @[str]'lexgui'@;
+    MAKE_CODE( `@import@ { @[typ]LX@ } @from@ @'lexgui'@;
 
 @[com]// Your code...@` );
 
@@ -65,15 +65,15 @@
     MAKE_HEADER( "Building components", "h2", "components" );
     MAKE_PARAGRAPH( `By default, lexgui.js provides the core elements for creating web interfaces. Other components, such as the code editor or timelines are located in the components/ directory. 
     These ones are not required to be installed individually, but they <b>do need to be imported separately<b>:` );
-    MAKE_CODE( `@import@ { @[typ]LX@ } @from@ @[str]'lexgui'@;
+    MAKE_CODE( `@import@ { @[typ]LX@ } @from@ @'lexgui'@;
 
 @[com]// First option, importing the component@
-@import@ { @[typ]CodeEditor@ } @from@ @[str]'lexgui/components/codeeditor.js'@;
+@import@ { @[typ]CodeEditor@ } @from@ @'lexgui/components/codeeditor.js'@;
 
 @const@ editor = @new@ @[typ]CodeEditor@();
 
 @[com]// Or since it's added to the LX namespace...@
-@import@ @[str]'lexgui/components/codeeditor.js'@;
+@import@ @'lexgui/components/codeeditor.js'@;
 
 @const@ editor = @new@ @[typ]LX@.@[typ]CodeEditor@();` );
 

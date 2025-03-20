@@ -7369,6 +7369,7 @@ class Panel {
      * head: Table headers (each of the headers per column)
      * body: Table body (data per row for each column)
      * rowActions: Allow to add actions per row
+     * onMenuAction: Function callback to fill the "menu" context
      * selectable: Each row can be selected
      */
 

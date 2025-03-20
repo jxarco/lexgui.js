@@ -29,24 +29,24 @@
 
     MAKE_PARAGRAPH( `To fill the dialog content, a panel is automatically created inside the root so it's possible 
     to begin branching and adding widgets. The same way as menubars, you can fill the panel inside the creation callback. The following code creates a classic dialog:` );
-    MAKE_CODE( `@const@ dialog = @new@ LX.@[typ]Dialog@(@[str]"Title"@, p => {
+    MAKE_CODE( `@const@ dialog = @new@ LX.@[typ]Dialog@(@"Title"@, p => {
     @[com]// Start adding widgets@
-    p.@[mtd]addNumber@(@[str]"Example"@, @18@);
+    p.@[mtd]addNumber@(@"Example"@, @18@);
 }, options);
 
 @[com]// To use classic dialogs as simple messages or error alerts, they can be also created using LX.message@
-@const@ dialog = LX.@[mtd]message@(@[str]"Some text"@, @[str]"Title"@, options);` );
+@const@ dialog = LX.@[mtd]message@(@"Some text"@, @"Title"@, options);` );
 
     MAKE_PARAGRAPH( `To create a Pocket Dialog you can follow the same steps but using ${INLINE_CODE("LX.PocketDialog")} class.` );
 
     MAKE_PARAGRAPH( `In case of prompts, you can create them using the following code:` );
-    MAKE_CODE( `LX.@[mtd]prompt@(@[str]"Message"@, @[str]"Title"@, result => {
+    MAKE_CODE( `LX.@[mtd]prompt@(@"Message"@, @"Title"@, result => {
     @[com]// result is the user's response@
     console.@[mtd]log@(result);
 }, options);` );
     
     MAKE_PARAGRAPH( `For pop-ups, you can use:` );
-    MAKE_CODE( `LX.@[mtd]popup@(@[str]"Message"@, @[str]"Title"@, options);` );
+    MAKE_CODE( `LX.@[mtd]popup@(@"Message"@, @"Title"@, options);` );
 
     MAKE_PARAGRAPH( `The possible ${INLINE_CODE("options (Object)")} when creating dialogs are the following:` );
     MAKE_CODE_BULLET_LIST( [

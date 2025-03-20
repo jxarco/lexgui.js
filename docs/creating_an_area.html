@@ -27,12 +27,12 @@
     ] );
     MAKE_CODE( `@[com]// Split main area in 2 sections (2 Areas)@
 @let@ [ left, right ] = area.@[mtd]split@({ 
-    sizes: [@[str]"70%"@, @[str]"30%"@] 
+    sizes: [@"70%"@, @"30%"@] 
 });
 @[com]// Split again left area this time vertically@
 @let@ [ leftUp, leftBottom ] = leftArea.@[mtd]split@({ 
-type: @[str]"vertical"@, 
-    sizes: [@[str]"80vh"@, @[str]"20vh"@] 
+type: @"vertical"@, 
+    sizes: [@"80vh"@, @"20vh"@] 
 });` );
 
     MAKE_HEADER( "Menubar", "h2", "menubar" );
@@ -56,20 +56,20 @@ type: @[str]"vertical"@,
 
     MAKE_PARAGRAPH( `Note: In case of no options rather than the callback, you can use ${INLINE_CODE("options")} as the ${INLINE_CODE("Function")} callback.`, true );
     MAKE_CODE( `area.@[mtd]addMenubar@( m =&gt; {
-m.@[mtd]add@( @[str]"Scene/Open Scene"@ );
-m.@[mtd]add@( @[str]"Scene/New Scene"@, () =&gt; { console.@[mtd]log@(@[str]"New scene created!"@) } );
-m.@[mtd]add@( @[str]"Scene/"@ )@[com]; // This is a separator!@
-m.@[mtd]add@( @[str]"Scene/Open Recent/hello.scene"@);
-m.@[mtd]add@( @[str]"Scene/Open Recent/goodbye.scene"@ );
-m.@[mtd]add@( @[str]"Project/Export/DAE"@, { short: @[str]"E"@ } );
-m.@[mtd]add@( @[str]"Project/Export/GLTF"@ );
-m.@[mtd]add@( @[str]"View/Show grid"@, { type: @[str]"checkbox"@, checked: @true@, 
+m.@[mtd]add@( @"Scene/Open Scene"@ );
+m.@[mtd]add@( @"Scene/New Scene"@, () =&gt; { console.@[mtd]log@(@"New scene created!"@) } );
+m.@[mtd]add@( @"Scene/"@ )@[com]; // This is a separator!@
+m.@[mtd]add@( @"Scene/Open Recent/hello.scene"@);
+m.@[mtd]add@( @"Scene/Open Recent/goodbye.scene"@ );
+m.@[mtd]add@( @"Project/Export/DAE"@, { short: @"E"@ } );
+m.@[mtd]add@( @"Project/Export/GLTF"@ );
+m.@[mtd]add@( @"View/Show grid"@, { type: @"checkbox"@, checked: @true@, 
 callback: (v) => { 
-    console.@[mtd]log@(@[str]"Show grid:"@, v);
+    console.@[mtd]log@(@"Show grid:"@, v);
 }});
-m.@[mtd]add@( @[str]"Help/About"@ );
-m.@[mtd]add@( @[str]"Help/Support"@, { callback: () =&gt; { 
-    console.@[mtd]log@(@[str]"Support!"@) }, icon: @[str]"fa-solid fa-heart"@ } );
+m.@[mtd]add@( @"Help/About"@ );
+m.@[mtd]add@( @"Help/Support"@, { callback: () =&gt; { 
+    console.@[mtd]log@(@"Support!"@) }, icon: @"fa-solid fa-heart"@ } );
 });` );
 
     MAKE_PARAGRAPH( `The Menubar creation can be configured too, where the following ${INLINE_CODE("options")} are available when calling ${INLINE_CODE("Area.addMenubar(callback, options)")}:` );
@@ -78,28 +78,28 @@ m.@[mtd]add@( @[str]"Help/Support"@, { callback: () =&gt; {
     ] );
     MAKE_CODE( `area.@[mtd]addMenubar@( m =&gt; {
     @[com]// Fill entries...@
-}, { float: @[str]"center"@ });` );
+}, { float: @"center"@ });` );
 
     MAKE_HEADER( "Menubar Buttons", "h3", "menubar-buttons" );
 
     MAKE_PARAGRAPH( `Inside the menubar creation callback, you can add a group of buttons to be added to your menubar using ${INLINE_CODE("Area.addButtons(callback, options)")}:` );
     MAKE_CODE( `m.@[mtd]addButtons@( [
 {
-    title: @[str]"Play"@,
-    icon: @[str]"fa-solid fa-play"@,
+    title: @"Play"@,
+    icon: @"fa-solid fa-play"@,
     callback:  (domEl) => { 
-        domEl.classList.@[mtd]toggle@(@[str]"fa-play"@);
-        domEl.classList.@[mtd]toggle@(@[str]"fa-stop"@);
+        domEl.classList.@[mtd]toggle@(@"fa-play"@);
+        domEl.classList.@[mtd]toggle@(@"fa-stop"@);
     }
 },
 {
-    title: @[str]"Pause"@,
-    icon: @[str]"fa-solid fa-pause"@,
+    title: @"Pause"@,
+    icon: @"fa-solid fa-pause"@,
     disabled: @true@,
     callback:  (domEl) => { }
 },
 {
-    icon: @[str]"fa-solid fa-magnifying-glass"@,
+    icon: @"fa-solid fa-magnifying-glass"@,
     callback:  (domEl) => { }
 }
 ]);` );
@@ -107,12 +107,12 @@ m.@[mtd]add@( @[str]"Help/Support"@, { callback: () =&gt; {
     MAKE_HEADER( "Menubar Icons and Logos", "h3", "menubar-icons" );
 
     MAKE_PARAGRAPH( `Inside the menubar creation callback, you can add an icon and/or a logo button to be added to your menubar using ${INLINE_CODE("Area.setButtonIcon(title, src, callback, options)")}:` );
-    MAKE_CODE( `m.@[mtd]setButtonIcon@(@[str]"Github"@, @[str]"fa-brands fa-github"@, () => { 
-    window.@[mtd]open@(@[str]"https://github.com/jxarco/lexgui.js/"@) 
+    MAKE_CODE( `m.@[mtd]setButtonIcon@(@"Github"@, @"fa-brands fa-github"@, () => { 
+    window.@[mtd]open@(@"https://github.com/jxarco/lexgui.js/"@) 
 });` );
 
     MAKE_PARAGRAPH( `and ${INLINE_CODE("Area.setButtonImage(title, src, callback, options)")}:` );
-    MAKE_CODE( `m.@[mtd]setButtonImage@(@[str]"LexGUI"@, @[str]"path/image.png"@, @null@, { float: @[str]"left"@ });` );
+    MAKE_CODE( `m.@[mtd]setButtonImage@(@"LexGUI"@, @"path/image.png"@, @null@, { float: @"left"@ });` );
 
     MAKE_HEADER( "Searchbar for Menu Entries", "h3", "searchbar-for-menu-entries" );
 

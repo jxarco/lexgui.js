@@ -198,27 +198,6 @@ code.inline:not(.ref) {
 	font-weight: 500;
 }
 
-table {
-	width: 100%;
-	border-collapse: collapse;
-}
-
-table th,
-table td {
-	text-align: left;
-	vertical-align: top;
-	padding: 8px 6px;
-	border-bottom: var(--border-style);
-}
-
-table th {
-	text-decoration: none;
-}
-table th:first-child,
-table td:first-child {
-	padding-left: 0;
-}
-
 code:not(.inline) {
 	display: block;
 	padding: calc(var(--page-padding) - 6px) var(--page-padding);

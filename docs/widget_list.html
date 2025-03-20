@@ -50,6 +50,7 @@
             "<a href='#pad'>Pad</a>",
             "<a href='#progress'>Progress</a>",
             "<a href='#size'>Size</a>",
+            "<a href='#table'>Table</a>",
             "<a href='#panel-tabs'>Tabs</a>",
             "<a href='#tags'>Tags</a>",
             "<a href='#text'>Text</a>",
@@ -83,7 +84,7 @@
                 ["innerValues", "Array", "Use dropdown mode and use values as options"],
             ]
         ] );
-        MAKE_CODE( `panel.@[mtd]addArray@(@[str]"Array name"@, [@[str]"GPTeam"@, @[str]"Blat Panthers"@], (value, event) => {
+        MAKE_CODE( `panel.@[mtd]addArray@(@"Array name"@, [@"GPTeam"@, @"Blat Panthers"@], (value, event) => {
     console.@[mtd]log@(value);
 });` );
 
@@ -112,7 +113,7 @@
                 ["img", "String", "Path to image to show as button value"],
             ]
         ] );
-        MAKE_CODE( `panel.@[mtd]addButton@(@[str]"A Button Name"@, @[str]"Print event"@, (value, event) =&gt; {
+        MAKE_CODE( `panel.@[mtd]addButton@(@"A Button Name"@, @"Print event"@, (value, event) =&gt; {
     console.@[mtd]log@(event);
 });` );
 
@@ -140,16 +141,16 @@
                 ["suboptions", "Function", "Callback to add widgets shown if <code class='inline'>true</code>"]
             ]
         ] );
-        MAKE_CODE( `panel.@[mtd]addCheckbox@(@[str]"Check me"@, @true@, (value, event) =&gt; {
+        MAKE_CODE( `panel.@[mtd]addCheckbox@(@"Check me"@, @true@, (value, event) =&gt; {
     console.@[mtd]log@(value);
 });
 
 @[com]// Suboptions in case checkbox is enabled@
-panel.@[mtd]addCheckbox@(@[str]"Check me too"@, @true@, (value, event) =&gt; {
+panel.@[mtd]addCheckbox@(@"Check me too"@, @true@, (value, event) =&gt; {
         console.@[mtd]log@(value);
     }, { suboptions: p =&gt; {
-        p.@[mtd]addText@(@null@, @[str]"Suboption 1"@);
-        p.@[mtd]addNumber@(@[str]"Suboption 2"@, @12@);
+        p.@[mtd]addText@(@null@, @"Suboption 1"@);
+        p.@[mtd]addNumber@(@"Suboption 2"@, @12@);
 } });` );
 
         // Color
@@ -176,11 +177,11 @@ panel.@[mtd]addCheckbox@(@[str]"Check me too"@, @true@, (value, event) =&gt; {
                 ["useRGB", "Boolean", "The callback returns color as Array[r, g, b] and not hex [<code class='inline'>false</code>]"]
             ]
         ] );
-        MAKE_CODE( `panel.@[mtd]addColor@(@[str]"Font Color"@, [@1@, @0.1@, @0.6@], (value, event) =&gt; {
-    console.@[mtd]log@(@[str]"Font Color: "@, value);
+        MAKE_CODE( `panel.@[mtd]addColor@(@"Font Color"@, [@1@, @0.1@, @0.6@], (value, event) =&gt; {
+    console.@[mtd]log@(@"Font Color: "@, value);
 });
 
-panel.@[mtd]addColor@(@[str]"Background"@, @[str]"#b7a9b1"@);` );
+panel.@[mtd]addColor@(@"Background"@, @"#b7a9b1"@);` );
 
         // Combo Buttons
         MAKE_HEADER( "Combo Buttons", "h2", "combo-buttons" );
@@ -224,22 +225,22 @@ panel.@[mtd]addColor@(@[str]"Background"@, @[str]"#b7a9b1"@);` );
                 ["noSelection", "Boolean", "Buttons can be clicked, but they are not selectable [false]"],
             ]
         ] );
-        MAKE_CODE( `panel.@[mtd]addComboButtons@(@[str]"Alignment"@, [
+        MAKE_CODE( `panel.@[mtd]addComboButtons@(@"Alignment"@, [
     {
-        value: @[str]"left"@,
-        icon: @[str]"fa fa-align-left"@,
+        value: @"left"@,
+        icon: @"fa fa-align-left"@,
         callback: (value, event) =&gt; {
             console.@[mtd]log@(value);
         }
     }, {
-        value: @[str]"center"@,
-        icon: @[str]"fa fa-align-center"@,
+        value: @"center"@,
+        icon: @"fa fa-align-center"@,
         callback: (value, event) =&gt; {
             console.@[mtd]log@(value);
         }
     }, {
-        value: @[str]"right"@,
-        icon: @[str]"fa fa-align-right"@,
+        value: @"right"@,
+        icon: @"fa fa-align-right"@,
         callback: (value, event) =&gt; {
             console.@[mtd]log@(value);
         }
@@ -289,7 +290,7 @@ panel.@[mtd]addColor@(@[str]"Background"@, @[str]"#b7a9b1"@);` );
     [@0.55@, @0.67@],
     [@1@, @1@]
 ];
-panel.@[mtd]addCurve@(@[str]"Opacity"@, opacityValues, (value, event) => {
+panel.@[mtd]addCurve@(@"Opacity"@, opacityValues, (value, event) => {
     console.@[mtd]log@(value);
 });` );
 
@@ -328,24 +329,24 @@ panel.@[mtd]addCurve@(@[str]"Opacity"@, opacityValues, (value, event) => {
             ["value", "Object", "The new instance data"],
             ["callback", "Function", "Function called when the instance changes"]
         ] );
-        MAKE_CODE( `LX.@[mtd]ADD_CUSTOM_WIDGET@( @[str]"Shader"@, {
-    icon: @[str]"fa-cube"@,
+        MAKE_CODE( `LX.@[mtd]ADD_CUSTOM_WIDGET@( @"Shader"@, {
+    icon: @"fa-cube"@,
     default: {
         'position': [@0@, @0@],
         'velocity': [@0@, @0@, @0@],
         'color': [@0@, @0@, @0@, @0@],
-        'hexColor': @[str]"#000"@,
+        'hexColor': @"#000"@,
         'highRes': @false@
     }
 });
 
 @const@ shaderInstance = {
-    'hexColor': @[str]"#f5f505"@,
+    'hexColor': @"#f5f505"@,
     'highRes': @true@
 };
 
-panel.@[mtd]addShader@( @[str]"PBR Shader"@, shaderInstance, instance => { console.@[mtd]log@(instance) } );
-panel.@[mtd]addShader@( @[str]"Empty Instance"@, @null@ );` );
+panel.@[mtd]addShader@( @"PBR Shader"@, shaderInstance, instance => { console.@[mtd]log@(instance) } );
+panel.@[mtd]addShader@( @"Empty Instance"@, @null@ );` );
 
         // Data Tree
         MAKE_HEADER( "Data Tree", "h2", "tree" );
@@ -433,21 +434,21 @@ panel.@[mtd]addShader@( @[str]"Empty Instance"@, @null@ );` );
         ] );
         MAKE_CODE( `@[com]// Tree data!@
 @const@ sceneData = {
-    id: @[str]"root"@,
+    id: @"root"@,
     children: [
         {
-            id: @[str]"node_1"@,
+            id: @"node_1"@,
             children: [
                 {
-                    id: @[str]"node_1_1"@,
-                    icon: @[str]"fa-solid fa-cube"@,
+                    id: @"node_1_1"@,
+                    icon: @"fa-solid fa-cube"@,
                     children: [],
                     actions: [
                         {
-                            name: @[str]"Open script"@,
-                            icon: @[str]"fa-solid fa-scroll"@,
+                            name: @"Open script"@,
+                            icon: @"fa-solid fa-scroll"@,
                             callback: function(node) {
-                                console.@[mtd]log@(node.id + @[str]": Script opened!"@)
+                                console.@[mtd]log@(node.id + @": Script opened!"@)
                             }
                         }
                     ]
@@ -455,8 +456,8 @@ panel.@[mtd]addShader@( @[str]"Empty Instance"@, @null@ );` );
             ]
         },
         {
-            id: @[str]"node_2"@,
-            icon: @[str]"fa-solid fa-circle-play"@,
+            id: @"node_2"@,
+            icon: @"fa-solid fa-circle-play"@,
             children: []
         }
     ]
@@ -465,18 +466,18 @@ panel.@[mtd]addShader@( @[str]"Empty Instance"@, @null@ );` );
 @[com]// This is optional!@
 @const@ dataTreeIcons = [
     {
-        name: @[str]"Add node"@,
-        icon: @[str]"fa-solid fa-plus"@,
-        callback: () => { console.@[mtd]log@(@[str]"Node added!"@) }
+        name: @"Add node"@,
+        icon: @"fa-solid fa-plus"@,
+        callback: () => { console.@[mtd]log@(@"Node added!"@) }
     },
     {
-        name: @[str]"Instantiate scene"@,
-        icon: @[str]"fa-solid fa-link"@,
-        callback: () => { console.@[mtd]log@(@[str]"Scene instantiated!"@) }
+        name: @"Instantiate scene"@,
+        icon: @"fa-solid fa-link"@,
+        callback: () => { console.@[mtd]log@(@"Scene instantiated!"@) }
     }
 ];
     
-panel.@[mtd]addTree@(@[str]"Scene Tree"@, sceneData, { 
+panel.@[mtd]addTree@(@"Scene Tree"@, sceneData, { 
     icons: dataTreeIcons, 
     filter: @false@,
     rename: @true@,
@@ -533,18 +534,18 @@ panel.@[mtd]addTree@(@[str]"Scene Tree"@, sceneData, {
         ] );
         MAKE_CODE( `@[com]// String values@
 
-panel.@[mtd]addDropdown@(@[str]"String Dropdown"@, [@[str]"Option 1"@, @[str]"Option 2"@], @[str]"Option 1"@, (value, event) =&gt; {
+panel.@[mtd]addDropdown@(@"String Dropdown"@, [@"Option 1"@, @"Option 2"@], @"Option 1"@, (value, event) =&gt; {
       console.@[mtd]log@(value);
 });
 
 @[com]// Media values@
 
 @const@ options = [
-  { value: @[str]"Option 1"@, src: @[str]"/option1.png"@ }, 
-  { value: @[str]"Option 2"@, src: @[str]"/option2.gif"@ },
-  { value: @[str]"Option 3"@, src: @[str]"/option3.jpg"@ }
+  { value: @"Option 1"@, src: @"/option1.png"@ }, 
+  { value: @"Option 2"@, src: @"/option2.gif"@ },
+  { value: @"Option 3"@, src: @"/option3.jpg"@ }
 ];
-panel.@[mtd]addDropdown@(@[str]"Media Dropdown"@, options, @[str]"Option 1"@, (value, event) =&gt; {
+panel.@[mtd]addDropdown@(@"Media Dropdown"@, options, @"Option 1"@, (value, event) =&gt; {
       console.@[mtd]log@(value);
 }, options);` );
 
@@ -571,7 +572,7 @@ panel.@[mtd]addDropdown@(@[str]"Media Dropdown"@, options, @[str]"Option 1"@, (v
                 ["type", "String", "Type to read as {text, buffer, bin, url} [text]"]
             ]
         ] );
-        MAKE_CODE( `panel.@[mtd]addFile@(@[str]"File name"@, (data, file) => {
+        MAKE_CODE( `panel.@[mtd]addFile@(@"File name"@, (data, file) => {
     console.@[mtd]log@(data, file);
 });` );
 
@@ -599,10 +600,10 @@ panel.@[mtd]addDropdown@(@[str]"Media Dropdown"@, options, @[str]"Option 1"@, (v
                 ["actionName", "String", "Text to be shown in the button"]
             ]
         ] );
-        MAKE_CODE( `@const@ formData = { username: @[str]""@, password: { value: @[str]""@, type: @[str]"password"@ } };
-panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
+        MAKE_CODE( `@const@ formData = { username: @""@, password: { value: @""@, type: @"password"@ } };
+panel.@[mtd]addForm@(@"Test form"@, formData, (value, event) => {
     console.@[mtd]log@(value);
-}, { actionName: @[str]"Login"@ });` );
+}, { actionName: @"Login"@ });` );
 
         // Layers
         MAKE_HEADER( "Layers", "h2", "layers" );
@@ -625,7 +626,7 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
             ["callback", "Function", "Function called when bit mask changes"],
             ["options", "Object", "Basic options for a Widget"]
         ] );
-        MAKE_CODE( `panel.@[mtd]addLayers@(@[str]"Layer name"@, @10@, (value, event) => {
+        MAKE_CODE( `panel.@[mtd]addLayers@(@"Layer name"@, @10@, (value, event) => {
     console.@[mtd]log@(value);
 });` );
 
@@ -650,13 +651,13 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
             ["callback", "Function", "Function called when the a new item list is selected"],
             ["options", "Object", "Basic options for a Widget"]
         ] );
-        MAKE_CODE( `panel.@[mtd]addList@(@[str]"List name"@, [@[str]"GPTeam"@, @[str]"Blat Panthers"@], @[str]"Blat Panthers"@,  (value, event) => {
+        MAKE_CODE( `panel.@[mtd]addList@(@"List name"@, [@"GPTeam"@, @"Blat Panthers"@], @"Blat Panthers"@,  (value, event) => {
     console.@[mtd]log@(value);
 });` );
 
         MAKE_PARAGRAPH( `<sup>It's possible to preppend an icon to the element name inside the list using an Array for the item [item, icon]:<sup>` );
 
-        MAKE_CODE( `panel.@[mtd]addList@(@[str]"List name"@, [@[str]"GPTeam"@, [@[str]"Blat Panthers"@, @[str]"fa-solid fa-paw"@]], @[str]"Blat Panthers"@,  (value, event) => {
+        MAKE_CODE( `panel.@[mtd]addList@(@"List name"@, [@"GPTeam"@, [@"Blat Panthers"@, @"fa-solid fa-paw"@]], @"Blat Panthers"@,  (value, event) => {
     console.@[mtd]log@(value);
 });` );
 
@@ -692,7 +693,7 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
             ]
         ] );
         MAKE_PARAGRAPH( `<sup>Note: Setting <code class='inline'>min</code>, <code class='inline'>max</code> values will automatically add a slider below the number input.<sup>` );
-        MAKE_CODE( `panel.@[mtd]addNumber@(@[str]"Font Size"@, @36@, (value, event) =&gt; {
+        MAKE_CODE( `panel.@[mtd]addNumber@(@"Font Size"@, @36@, (value, event) =&gt; {
     console.@[mtd]log@(value);
 }, { min: @1@, max: @48@ });` );
         MAKE_PARAGRAPH( `You can change the value of this widget manually, using the mouse wheel, and dragging (up/down). In the last two cases, pressing <em>Alt</em> and 
@@ -729,9 +730,9 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
                 ["onRelease", "Function", "Callback function on mouse up"],
             ]
         ] );
-        MAKE_CODE( ` panel.@[mtd]addPad@(@[str]"2D Pad"@, [@0.5@, @0.5@], (value, event) => {
+        MAKE_CODE( ` panel.@[mtd]addPad@(@"2D Pad"@, [@0.5@, @0.5@], (value, event) => {
     console.@[mtd]log@(value);
-}, { padSize: @[str]"100px"@, min: @-1@, max: @2@ });` );
+}, { padSize: @"100px"@, min: @-1@, max: @2@ });` );
 
         // Progress
         MAKE_HEADER( "Progress", "h2", "progress" );
@@ -768,7 +769,7 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
                 ["high", "Number", "High boundary value"],
             ]
         ] );
-        MAKE_CODE( `panel.@[mtd]addProgress@(@[str]"HeadRoll"@, @0@, { 
+        MAKE_CODE( `panel.@[mtd]addProgress@(@"HeadRoll"@, @0@, { 
   min: -@1@, 
   max: @1@, 
   showValue: @true@, 
@@ -804,9 +805,73 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
         ] );
         MAKE_PARAGRAPH( `<sup>Note: Since a Size Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.
             Minimum size is always 0.<sup>` );
-        MAKE_CODE( `panel.@[mtd]addSize@(@[str]"Screen Resolution"@, [@1280@, @720@], (value, event) =&gt; {
+        MAKE_CODE( `panel.@[mtd]addSize@(@"Screen Resolution"@, [@1280@, @720@], (value, event) =&gt; {
     console.@[mtd]log@(value);
-}, { units: @[str]"p"@ });` );
+}, { units: @"p"@ });` );
+
+        // Table
+        MAKE_HEADER( "Table", "h2", "table" );
+        MAKE_PARAGRAPH( `Represents a dynamic table with user-input data.` );
+
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addTable(null, {
+                head: [ "Name", "Subject", "Grade" ],
+                body: [ 
+                    [ "Alice", "Science", "B" ],
+                    [ "Bob", "Math", "C" ],
+                    [ "Carter", "Zoology", "A" ],
+                ]
+            }, { 
+                selectable: true, 
+                rowActions: [
+                    { icon: "fa-solid fa-pen-to-square", callback: ( tableData ) => {} }, // custom: you can change the data and refresh will be called later!
+                    "delete",
+                    "menu"
+                ],
+                onMenuAction: ( context ) => {
+                    context.add("Export", (a) => console.log(a) );
+                    context.add("An Action", (a) => console.log(a) );
+                }
+            });
+            document.body.appendChild( area.root );
+        }
+
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTable(name, data, options)")} to add a Table Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name", "String", "Widget name"],
+            ["data", "Object", "Table data"],
+            ["options", "Object", "Basic options for a Widget"],
+            [
+                ["head", "Array", "Table headers (each of the headers per column)"],
+                ["body", "Array", "Table body (data per row for each column)"],
+                ["rowActions", "Array", `Allow to add actions per row ${INLINE_CODE("action: { icon, callback }")}`],
+                ["selectable", "Boolean", "Each row can be selected"],
+            ]
+        ] );
+        MAKE_PARAGRAPH( `<sup>Note: You can use default row actions as String such as 'delete' or 'menu', which have predefined icons and callbacks.
+            For the 'menu' action, you must fill the possible menus inside the created ${ INLINE_LINK("ContextMenu", "context_menu.html") } using ${INLINE_CODE("options.onMenuAction")}.<sup>` );
+        MAKE_CODE( `panel.@[mtd]addTable@(@null@, {
+    head: [ @"Name"@, @"Subject"@, @"Grade"@ ],
+    body: [ 
+        [ @"Alice"@, @"Science"@, @"B"@ ],
+        [ @"Bob"@, @"Math"@, @"C"@ ],
+        [ @"Carter"@, @"Zoology"@, @"A"@ ],
+    ]
+}, { 
+    selectable: @true@, 
+    rowActions: [
+        @[com]// custom: you can change the data and refresh will be called later!@
+        { icon: @"fa-solid fa-pen-to-square"@, callback: ( tableData ) => {} },
+        @"delete"@,
+        @"menu"@
+    ],
+    onMenuAction: ( context ) => {
+        context.add(@"Export"@, (a) => console.@[mtd]log@(a) );
+        context.add(@"An Action"@, (a) => console.@[mtd]log@(a) );
+    }
+});` );
 
         // Tabs
         MAKE_HEADER( "Tabs", "h2", "panel-tabs" );
@@ -849,22 +914,22 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
         ] );
         MAKE_CODE( `panel.@[mtd]addTabs@([
     { 
-        name: @[str]"First tab"@,
-        icon: @[str]"fa-brands fa-discord"@,
+        name: @"First tab"@,
+        icon: @"fa-brands fa-discord"@,
         onCreate: p => {
-            p.@[mtd]addTitle@(@[str]"Discord tab"@);
-            p.@[mtd]addButton@(@null@, @[str]"Connect"@);
+            p.@[mtd]addTitle@(@"Discord tab"@);
+            p.@[mtd]addButton@(@null@, @"Connect"@);
         },
         onSelect: p => {
             console.@[mtd]log@( p );
         }
     },
     { 
-        name: @[str]"Second tab"@,
-        icon: @[str]"fa-brands fa-github"@,
+        name: @"Second tab"@,
+        icon: @"fa-brands fa-github"@,
         onCreate: p => {
-            p.@[mtd]addTitle@(@[str]"Github tab"@);
-            p.@[mtd]addButton@(@null@, @[str]"Go"@, () => { window.@[mtd]open@(@[str]"https://github.com/jxarco/lexgui.js/"@) });
+            p.@[mtd]addTitle@(@"Github tab"@);
+            p.@[mtd]addButton@(@null@, @"Go"@, () => { window.@[mtd]open@(@"https://github.com/jxarco/lexgui.js/"@) });
         }
     }
 ], { vertical: @false@ });` );
@@ -889,7 +954,7 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
             ["callback", "Function", "Function called when a tag is either removed or added"],
             ["options", "Object", "Basic options for a Widget"]
         ] );
-        MAKE_CODE( `panel.@[mtd]addTags@(@[str]"Game Tags"@, @[str]"2d, ai, engine, ps5, console"@, (value, event) =&gt; {
+        MAKE_CODE( `panel.@[mtd]addTags@(@"Game Tags"@, @"2d, ai, engine, ps5, console"@, (value, event) =&gt; {
     console.@[mtd]log@(value);
 });` );
 
@@ -924,9 +989,9 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
                 ["justifyName", "String", "Justify name content"],
             ]
         ] );
-        MAKE_CODE( `panel.@[mtd]addText@(@[str]"Text Name"@, @[str]"Text value"@, (value, event) =&gt; {
+        MAKE_CODE( `panel.@[mtd]addText@(@"Text Name"@, @"Text value"@, (value, event) =&gt; {
     console.@[mtd]log@(value);
-}, { placeholder: @[str]"Something"@ });` );
+}, { placeholder: @"Something"@ });` );
 
         // Text area
         MAKE_HEADER( "Text Area", "h2", "text-area" );
@@ -946,9 +1011,9 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
         MAKE_CODE_BULLET_LIST( [
             ["fitHeight", "Boolean", "Make text height adapt to its bounding rect."]
         ] );
-        MAKE_CODE( `panel.@[mtd]addTextArea@(@[str]"Text Name"@, @[str]"Text value"@, (value, event) =&gt; {
+        MAKE_CODE( `panel.@[mtd]addTextArea@(@"Text Name"@, @"Text value"@, (value, event) =&gt; {
     console.@[mtd]log@(value);
-}, { placeholder: @[str]"Something"@ });` );
+}, { placeholder: @"Something"@ });` );
 
         // Title
         MAKE_HEADER( "Title", "h2", "title" );
@@ -974,8 +1039,8 @@ panel.@[mtd]addForm@(@[str]"Test form"@, formData, (value, event) => {
                 ["style", "String/Number", "CSS to override"]
             ]
         ] );
-        MAKE_CODE( `panel.@[mtd]addTitle@(@[str]"A title!"@);
-panel.@[mtd]addTitle@(@[str]"A No-Background Big Title!@", { style: { background: @[str]"none"@, fontSize: @[str]"24px"@ } });` );
+        MAKE_CODE( `panel.@[mtd]addTitle@(@"A title!"@);
+panel.@[mtd]addTitle@(@"A No-Background Big Title!@", { style: { background: @"none"@, fontSize: @"24px"@ } });` );
 
         // Toggle
         MAKE_HEADER( "Toggle", "h2", "toggle" );
@@ -1001,16 +1066,16 @@ panel.@[mtd]addTitle@(@[str]"A No-Background Big Title!@", { style: { background
                 ["suboptions", "Function", "Callback to add widgets shown if <code class='inline'>true</code>"]
             ]
         ] );
-        MAKE_CODE( `panel.@[mtd]addToggle@(@[str]"Toggle me"@, @true@, (value, event) =&gt; {
+        MAKE_CODE( `panel.@[mtd]addToggle@(@"Toggle me"@, @true@, (value, event) =&gt; {
     console.@[mtd]log@(value);
 });
 
 @[com]// Suboptions in case checkbox is enabled@
-panel.@[mtd]addToggle@(@[str]"Toggle me too"@, @true@, (value, event) =&gt; {
+panel.@[mtd]addToggle@(@"Toggle me too"@, @true@, (value, event) =&gt; {
         console.@[mtd]log@(value);
     }, { suboptions: p =&gt; {
-        p.@[mtd]addText@(@null@, @[str]"Suboption 1"@);
-        p.@[mtd]addNumber@(@[str]"Suboption 2"@, @12@);
+        p.@[mtd]addText@(@null@, @"Suboption 1"@);
+        p.@[mtd]addNumber@(@"Suboption 2"@, @12@);
 } });` );
 
         // Vector
@@ -1050,15 +1115,15 @@ panel.@[mtd]addToggle@(@[str]"Toggle me too"@, @true@, (value, event) =&gt; {
             ]
         ] );
         MAKE_PARAGRAPH( `<sup>Note: Since a Vector Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.<sup>` );
-        MAKE_CODE( `panel.@[mtd]addVector2@(@[str]"2D Position"@, [@250@, @350@], (value, event) =&gt; {
+        MAKE_CODE( `panel.@[mtd]addVector2@(@"2D Position"@, [@250@, @350@], (value, event) =&gt; {
     console.@[mtd]log@(value);
 }, { min: @0@, max: @1024@ });
 
-panel.@[mtd]addVector3@(@[str]"Velocity"@, [@0.1@, @1@, @0.5@], (value, event) =&gt; {
+panel.@[mtd]addVector3@(@"Velocity"@, [@0.1@, @1@, @0.5@], (value, event) =&gt; {
     console.@[mtd]log@(value);
 });
 
-panel.@[mtd]addVector4@(@[str]"Shader Color"@, [@1@, @1@, @1@, @1@], (value, event) =&gt; {
+panel.@[mtd]addVector4@(@"Shader Color"@, [@1@, @1@, @1@, @1@], (value, event) =&gt; {
     console.@[mtd]log@(value);
 });` );
 

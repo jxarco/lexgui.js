@@ -44,9 +44,9 @@
     MAKE_LINE_BREAK();
     MAKE_PARAGRAPH( `LexGUI uses a dark theme by default. You can change the theme by overriding your device or browser color scheme but the easiest way is to use ${INLINE_CODE("LX.setTheme")}
      where you can use "light" or "dark". If any of your content depends on the selected theme (usually JavaScript code, not CSS), make sure you are listening to the ${INLINE_CODE("@on_new_color_scheme")} signal being emited when the theme changes.` );
-    MAKE_CODE( `LX.@[mtd]addSignal@( @[str]"|@on_new_color_scheme"@, (el, value) => {
+    MAKE_CODE( `LX.@[mtd]addSignal@( @"|@on_new_color_scheme"@, (el, value) => {
     @[com]// Retrieve again the color using LX.getThemeColor, which checks the applied theme@
-    @const@ bgcolor = LX.@[mtd]getThemeColor@( @[str]"global-color-primary"@ );
+    @const@ bgcolor = LX.@[mtd]getThemeColor@( @"global-color-primary"@ );
     @this@.redraw();
 } );
 ` );

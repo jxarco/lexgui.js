@@ -112,6 +112,12 @@ function MAKE_CODE( text )
                 {
                     highlight = "atn";    
                 }
+                else if( ( content[ 0 ] == '"' && content[ content.length - 1 ] == '"' ) ||
+                        ( content[ 0 ] == "'" && content[ content.length - 1 ] == "'" ) ||
+                        ( content[ 0 ] == "`" && content[ content.length - 1 ] == "`" ) )
+                {
+                    highlight = "str";
+                }
                 else if( parseFloat( content ) != NaN )
                 {
                     highlight = "dec";    

@@ -2,9 +2,13 @@
 
 ## 0.1.47 (dev)
 
-- CodeSnippet: Allow hiding line number `lineNumbers`.
-- Force dark color scheme by default.
-- Support `autoTheme` at LX.init options.
+Widgets:
+- Support for new Table Widget `Panel.addTable()`.
+
+CodeSnippet: Allow hiding line number `lineNumbers`.
+Force dark color scheme by default.
+Support `autoTheme` at LX.init options.
+Docs updated.
 
 ## 0.1.46 (master)
 
