@@ -8214,9 +8214,10 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
             // Custom
             this.root.classList.add( "pocket" );
+            this.root.style.left = "unset";
+
             if( !options.position )
             {
-                this.root.style.left = "unset";
                 this.root.style.right = dragMargin + "px";
                 this.root.style.top = dragMargin + "px";
             }
@@ -8259,6 +8260,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                             this.root.style.top = "calc(100% - " + (this.root.offsetHeight + dragMargin) + "px)";
                             break;
                         case 'l':
+                            this.root.style.right = "unset";
                             this.root.style.left = options.position ? options.position[ 1 ] : ( dragMargin + "px" );
                             break;
                         }
@@ -8272,6 +8274,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     {
                         return;
                     }
+
+                    this.root.style.right = "unset";
 
                     if( e.key == 'ArrowLeft' )
                     {

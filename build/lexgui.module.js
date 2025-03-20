@@ -8225,9 +8225,10 @@ class PocketDialog extends Dialog {
 
         // Custom
         this.root.classList.add( "pocket" );
+        this.root.style.left = "unset";
+
         if( !options.position )
         {
-            this.root.style.left = "unset";
             this.root.style.right = dragMargin + "px";
             this.root.style.top = dragMargin + "px";
         }
@@ -8270,6 +8271,7 @@ class PocketDialog extends Dialog {
                         this.root.style.top = "calc(100% - " + (this.root.offsetHeight + dragMargin) + "px)";
                         break;
                     case 'l':
+                        this.root.style.right = "unset";
                         this.root.style.left = options.position ? options.position[ 1 ] : ( dragMargin + "px" );
                         break;
                     }
@@ -8283,6 +8285,8 @@ class PocketDialog extends Dialog {
                 {
                     return;
                 }
+
+                this.root.style.right = "unset";
 
                 if( e.key == 'ArrowLeft' )
                 {
