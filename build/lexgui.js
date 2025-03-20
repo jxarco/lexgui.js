@@ -547,9 +547,8 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
     function create_global_searchbar( root )
     {
 
-        let globalSearch = document.createElement("div");
+        let globalSearch = document.createElement( "dialog" );
         globalSearch.id = "global-search";
-        globalSearch.className = "hidden";
         globalSearch.tabIndex = -1;
         root.appendChild( globalSearch );
 
@@ -562,7 +561,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             hoverElId = hoverElId ?? -1;
             if( e.key == 'Escape' )
             {
-                this.classList.add("hidden");
+                this.close();
                 _resetBar( true );
             }
             else if( e.key == 'Enter' )
@@ -571,7 +570,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 if( el )
                 {
                     const isCheckbox = (el.item.type && el.item.type === 'checkbox');
-                    this.classList.toggle('hidden');
+                    this.close();
                     if( isCheckbox )
                     {
                         el.item.checked = !el.item.checked;
@@ -613,7 +612,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             }
             e.stopPropagation();
             e.stopImmediatePropagation();
-            this.classList.add( "hidden" );
+            this.close();
             _resetBar( true );
         });
 
@@ -622,7 +621,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             {
                 e.stopImmediatePropagation();
                 e.stopPropagation();
-                globalSearch.classList.toggle('hidden');
+                globalSearch.show();
                 globalSearch.querySelector('input').focus();
                 _addElements( undefined );
             }
@@ -713,7 +712,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             searchItem.item = i;
             searchItem.addEventListener('click', function(e) {
                 this.callback.call(window, this.entry_name);
-                globalSearch.classList.toggle('hidden');
+                globalSearch.close();
                 _resetBar( true );
             });
             searchItem.addEventListener('mouseenter', function(e) {
@@ -8275,7 +8274,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                         return;
                     }
 
-                    this.root.style.right = "unset";
+                    that.root.style.right = "unset";
 
                     if( e.key == 'ArrowLeft' )
                     {

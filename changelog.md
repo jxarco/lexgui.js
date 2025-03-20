@@ -8,6 +8,7 @@ Widgets:
 - Improved style of ComboButtons Widget.
 
 Improve dialog animations.
+Animated (as Dialog) Global search bar.
 CodeSnippet: Allow hiding line number `lineNumbers`.
 Added `LX.registerGlobalSearchEntry()` to add entries to the global search bar (Ctrl+Space).
 Force dark color scheme by default.

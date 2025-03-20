@@ -103,6 +103,53 @@ canvas {
     border-radius: 6px;
 }
 
+dialog {
+    transition: display 0.1s allow-discrete, overlay 0.1s allow-discrete;
+    animation: dialogHide 0.1s forwards;
+    &[open] {
+        animation: dialogShow 0.1s forwards;
+    }
+}
+
+dialog::backdrop {
+    background-color: #0000008c;
+    position: absolute;
+    opacity: 1;
+    transition: opacity 0.2s ease-in;
+}
+
+@keyframes dialogShow {
+    from {
+        opacity: 0;
+        transform: translate3d(0, -8px, 0)
+        scale3d(0.92, 0.92, 0.92)
+        rotate(0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0)
+        scale3d(1, 1, 1)
+        rotate(0);
+    }
+}
+
+@keyframes dialogHide {
+    from {
+        opacity: 1;
+        transform: translate3d(0, 0, 0)
+        scale3d(1, 1, 1)
+        rotate(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translate3d(0, -8px, 0)
+        scale3d(0.92, 0.92, 0.92)
+        rotate(0);
+    }
+}
+
 body.nocursor * {
     cursor: none !important;
 }
@@ -172,6 +219,8 @@ body.noevents * {
     margin-top: 0.01em;
 }
 
+/* Global Search bar */
+
 #global-search {
     position: absolute;
     background-color: var(--global-blur-background);
@@ -183,6 +232,8 @@ body.noevents * {
     max-width: 740px;
     top: 15%;
     left: calc(50% - min(15%, 740px));
+    margin: 0;
+    padding: 0 0 2px 0;
     display: flex;
     flex-wrap: wrap;
     z-index: 105;
@@ -400,18 +451,6 @@ body.noevents * {
     border-radius: 8px;
     z-index: 101;
     background-color: var(--global-color-secondary);
-    transition: display 0.1s allow-discrete, overlay 0.1s allow-discrete;
-    animation: dialogHide 0.1s forwards;
-    &[open] {
-        animation: dialogShow 0.1s forwards;
-    }
-}
-
-.lexdialog::backdrop {
-    background-color: #0000008c;
-    position: absolute;
-    opacity: 1;
-    transition: opacity 0.2s ease-in;
 }
 
 .lexdialogtitle {
@@ -478,38 +517,6 @@ body.noevents * {
 
 .lexdialogcloser.notitle:active {
     margin-top: 0.05em;
-}
-
-@keyframes dialogShow {
-    from {
-        opacity: 0;
-        transform: translate3d(0, -8px, 0)
-        scale3d(0.92, 0.92, 0.92)
-        rotate(0);
-    }
-
-    to {
-        opacity: 1;
-        transform: translate3d(0, 0, 0)
-        scale3d(1, 1, 1)
-        rotate(0);
-    }
-}
-
-@keyframes dialogHide {
-    from {
-        opacity: 1;
-        transform: translate3d(0, 0, 0)
-        scale3d(1, 1, 1)
-        rotate(0);
-    }
-
-    to {
-        opacity: 0;
-        transform: translate3d(0, -8px, 0)
-        scale3d(0.92, 0.92, 0.92)
-        rotate(0);
-    }
 }
 
 /* Pocket Dialog */

@@ -542,9 +542,8 @@ LX.vec2 = vec2;
 
 function create_global_searchbar( root )
 {
-    let globalSearch = document.createElement("div");
+    let globalSearch = document.createElement( "dialog" );
     globalSearch.id = "global-search";
-    globalSearch.className = "hidden";
     globalSearch.tabIndex = -1;
     root.appendChild( globalSearch );
 
@@ -557,7 +556,7 @@ function create_global_searchbar( root )
         hoverElId = hoverElId ?? -1;
         if( e.key == 'Escape' )
         {
-            this.classList.add("hidden");
+            this.close();
             _resetBar( true );
         }
         else if( e.key == 'Enter' )
@@ -566,7 +565,7 @@ function create_global_searchbar( root )
             if( el )
             {
                 const isCheckbox = (el.item.type && el.item.type === 'checkbox');
-                this.classList.toggle('hidden');
+                this.close();
                 if( isCheckbox )
                 {
                     el.item.checked = !el.item.checked;
@@ -608,7 +607,7 @@ function create_global_searchbar( root )
         }
         e.stopPropagation();
         e.stopImmediatePropagation();
-        this.classList.add( "hidden" );
+        this.close();
         _resetBar( true );
     });
 
@@ -617,7 +616,7 @@ function create_global_searchbar( root )
         {
             e.stopImmediatePropagation();
             e.stopPropagation();
-            globalSearch.classList.toggle('hidden');
+            globalSearch.show();
             globalSearch.querySelector('input').focus();
             _addElements( undefined );
         }
@@ -708,7 +707,7 @@ function create_global_searchbar( root )
         searchItem.item = i;
         searchItem.addEventListener('click', function(e) {
             this.callback.call(window, this.entry_name);
-            globalSearch.classList.toggle('hidden');
+            globalSearch.close();
             _resetBar( true );
         });
         searchItem.addEventListener('mouseenter', function(e) {
@@ -8286,7 +8285,7 @@ class PocketDialog extends Dialog {
                     return;
                 }
 
-                this.root.style.right = "unset";
+                that.root.style.right = "unset";
 
                 if( e.key == 'ArrowLeft' )
                 {
