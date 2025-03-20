@@ -625,7 +625,7 @@ function fillPanel( panel ) {
                 console.log(value);
             }
         }
-    ], {selected: "center"});
+    ], { selected: "center", /* noSelection: true */ });
     panel.addList(null, ['GPTeam', 'Blat Bunny', ['Blat Panthers', 'fa-solid fa-paw']], 'Blat Panthers',  (value, event) => {
         console.log(value);
     });

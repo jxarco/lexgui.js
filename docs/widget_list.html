@@ -219,7 +219,7 @@ panel.@[mtd]addColor@(@"Background"@, @"#b7a9b1"@);` );
                         console.log(value);
                     }
                 }
-            ]);
+            ], { selected: "center" });
             document.body.appendChild( area.root );
         }
 
@@ -229,8 +229,8 @@ panel.@[mtd]addColor@(@"Background"@, @"#b7a9b1"@);` );
             ["values", "Array", "Each of the {value, callback} items (you can add an <code class='inline'>icon</code>)"],
             ["options", "Object", "Basic options for a Widget"],
             [
-                ["selected", "*", "Selected value by default"],
                 ["float", "String", "Justify content (left, center, right) [center]"],
+                ["selected", "String", "Selected item by default by value"],
                 ["noSelection", "Boolean", "Buttons can be clicked, but they are not selectable [false]"],
             ]
         ] );
@@ -254,7 +254,7 @@ panel.@[mtd]addColor@(@"Background"@, @"#b7a9b1"@);` );
             console.@[mtd]log@(value);
         }
     }
-]);` );
+], { selected: @"center"@ });` );
 
         // Curve
         MAKE_HEADER( "Curve", "h2", "curve" );

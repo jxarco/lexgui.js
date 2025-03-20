@@ -4660,63 +4660,82 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
          * @param {Array} values Each of the {value, callback} items
          * @param {*} options:
          * float: Justify content (left, center, right) [center]
+         * selected: Selected item by default by value
          * noSelection: Buttons can be clicked, but they are not selectable
          */
 
         addComboButtons( name, values, options = {} ) {
 
-            let widget = this.create_widget(name, Widget.BUTTON, options);
+            let widget = this.create_widget( name, Widget.BUTTON, options );
             let element = widget.domEl;
 
             let that = this;
             let container = document.createElement('div');
             container.className = "lexcombobuttons ";
-            if( options.float ) container.className += options.float;
+
+            if( options.float )
+            {
+                container.className += options.float;
+            }
+
             container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
-            let should_select = !(options.noSelection ?? false);
+            let buttonsBox = document.createElement('div');
+            buttonsBox.className = "lexcombobuttonsbox ";
+
+            let shouldSelect = !( options.noSelection ?? false );
+
             for( let b of values )
             {
-                if( !b.value ) throw("Set 'value' for each button!");
+                if( !b.value )
+                {
+                    throw( "Set 'value' for each button!" );
+                }
 
                 let buttonEl = document.createElement('button');
                 buttonEl.className = "lexbutton combo";
                 buttonEl.title = b.icon ? b.value : "";
-                if(options.buttonClass)
-                    buttonEl.classList.add(options.buttonClass);
+                buttonEl.id = b.id ?? "";
 
-                if(options.selected == b.value)
+                if( options.buttonClass )
+                {
+                    buttonEl.classList.add( options.buttonClass );
+                }
+
+                if( shouldSelect && options.selected == b.value )
+                {
                     buttonEl.classList.add("selected");
+                }
 
-                buttonEl.innerHTML = (b.icon ? "<a class='" + b.icon +"'></a>" : "") + "<span>" + (b.icon ? "" : b.value) + "</span>";
+                buttonEl.innerHTML = ( b.icon ? "<a class='" + b.icon +"'></a>" : "" ) + "<span>" + ( b.icon ? "" : b.value ) + "</span>";
 
-                if(options.disabled)
-                    buttonEl.setAttribute("disabled", true);
+                if( options.disabled )
+                {
+                    buttonEl.setAttribute( "disabled", true );
+                }
 
-                buttonEl.addEventListener("click", function(e) {
-                    if(should_select) {
+                buttonEl.addEventListener("click", function( e ) {
+                    if( shouldSelect )
+                    {
                         container.querySelectorAll('button').forEach( s => s.classList.remove('selected'));
                         this.classList.add('selected');
                     }
-                    that._trigger( new IEvent(name, b.value, e), b.callback );
+
+                    that._trigger( new IEvent( name, b.value, e ), b.callback );
                 });
 
-                container.appendChild(buttonEl);
-
-                // Remove branch padding and margins
-                if(widget.name === undefined) {
-                    buttonEl.className += " noname";
-                    buttonEl.style.width =  "100%";
-                }
+                buttonsBox.appendChild( buttonEl );
             }
 
             // Remove branch padding and margins
-            if(widget.name !== undefined) {
+            if( !widget.name)
+            {
                 element.className += " noname";
                 container.style.width = "100%";
             }
 
-            element.appendChild(container);
+            container.appendChild( buttonsBox );
+            element.appendChild( container );
 
             return widget;
         }
