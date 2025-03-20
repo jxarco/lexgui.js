@@ -1047,8 +1047,15 @@ body.noevents * {
     font-size: 10px;
 }
 
+.lexbutton.array span {
+    display: inline-flex;
+    margin-left: 8px;
+}
+
 .lexbutton.array a {
     margin-top: 2px;
+    margin-right: 3px;
+    margin-left: auto;
 }
 
 .lexbutton:hover {
@@ -1181,7 +1188,7 @@ body.noevents * {
     z-index: 10;
     margin: 0;
     margin-top: 5px;
-    width: 100%;
+    width: max-content;
     box-shadow: 0 0px 12px rgba(0, 0, 0, 0.788);
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
@@ -1207,6 +1214,7 @@ body.noevents * {
     align-content: center;
     display: flow-root;
     padding: 2px 0px;
+    padding-right: 32px;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;

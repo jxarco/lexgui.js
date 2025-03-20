@@ -4,6 +4,7 @@
 
 Widgets:
 - Support for new Table Widget `Panel.addTable()`.
+- Fixed dropdown horizontal overflow through limits.
 
 CodeSnippet: Allow hiding line number `lineNumbers`.
 Added `LX.registerGlobalSearchEntry()` to add entries to the global search bar (Ctrl+Space).

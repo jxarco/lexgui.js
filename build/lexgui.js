@@ -5013,17 +5013,59 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             let buttonName = value;
             buttonName += "<a class='fa-solid fa-angle-down' style='float:right; margin-right: 3px;'></a>";
 
-            this.queue(container);
+            this.queue( container );
 
-            const _getMaxListWidth = () => {
+            const _placeOptions = () => {
 
-                let maxWidth = 0;
-                for( let i of values )
+                const overflowContainer = list.getParentArea();
+                const rect = selectedOption.getBoundingClientRect();
+
+                // Manage vertical aspect
                 {
-                    const iString = String( i );
-                    maxWidth = Math.max( iString.length, maxWidth );
+                    const listHeight = 26 * values.length;
+                    const topPosition = rect.y;
+
+                    let maxY = window.innerHeight;
+
+                    if( overflowContainer )
+                    {
+                        const parentRect = overflowContainer.getBoundingClientRect();
+                        maxY = parentRect.y + parentRect.height;
+                    }
+
+                    list.style.top = ( topPosition + selectedOption.offsetHeight ) + 'px';
+
+                    const showAbove = ( topPosition + listHeight ) > maxY;
+                    if( showAbove )
+                    {
+                        list.style.top = ( topPosition - listHeight ) + 'px';
+                        list.classList.add( "place-above" );
+                    }
                 }
-                return Math.max( maxWidth * 10, 80 );
+
+                // Manage horizontal aspect
+                {
+                    const listWidth = list.offsetWidth;
+                    const leftPosition = rect.x;
+
+                    list.style.minWidth = ( rect.width ) + 'px';
+                    list.style.left = ( leftPosition ) + 'px';
+
+                    let maxX = window.innerWidth;
+
+                    if( overflowContainer )
+                    {
+                        const parentRect = overflowContainer.getBoundingClientRect();
+                        maxX = parentRect.x + parentRect.width;
+                    }
+
+                    const showLeft = ( leftPosition + listWidth ) > maxX;
+                    if( showLeft )
+                    {
+                        list.style.left = ( leftPosition - ( listWidth - rect.width ) ) + 'px';
+                        list.classList.add( "place-above" );
+                    }
+                }
             };
 
             let selectedOption = this.addButton( null, buttonName, ( value, event ) => {
@@ -5036,31 +5078,13 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 list.toggleAttribute( "hidden" );
                 list.classList.remove( "place-above" );
 
-                const listHeight = 26 * values.length;
-                const rect = selectedOption.getBoundingClientRect();
-                const topPosition = rect.y;
-
-                let maxY = window.innerHeight;
-                let overflowContainer = list.getParentArea();
-
-                if( overflowContainer )
+                if( !list.hasAttribute( "hidden" ) )
                 {
-                    const parentRect = overflowContainer.getBoundingClientRect();
-                    maxY = parentRect.y + parentRect.height;
+                    _placeOptions();
                 }
 
-                list.style.top = ( topPosition + selectedOption.offsetHeight ) + 'px';
-
-                const showAbove = ( topPosition + listHeight ) > maxY;
-                if( showAbove )
-                {
-                    list.style.top = ( topPosition - listHeight ) + 'px';
-                    list.classList.add( "place-above" );
-                }
-
-                list.style.width = (event.currentTarget.clientWidth) + 'px';
-                list.style.minWidth = (_getMaxListWidth()) + 'px';
                 list.focus();
+
             }, { buttonClass: "array", skipInlineCount: true });
 
             this.clearQueue();
