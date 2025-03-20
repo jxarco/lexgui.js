@@ -91,11 +91,6 @@ function MAKE_CODE( text )
             {
                 content = str.substring( 0, tagIndex );
 
-                // if( str[ tagIndex - 1 ] == '|' )
-                // {
-                //     content = str.substring( tagIndex, str.indexOf( '@' ) );
-                // }
-
                 if( KEY_WORDS.includes( content ) )
                 {
                     highlight = "kwd";    
@@ -136,6 +131,8 @@ function MAKE_CODE( text )
         }
     }
     
+    let container = document.createElement('div');
+    container.className = "code-container";
     let pre = document.createElement('pre');
     let code = document.createElement('code');
     code.innerHTML = text;
@@ -144,10 +141,11 @@ function MAKE_CODE( text )
     button.title = "Copy code sample";
     button.innerHTML = `<i class="fa-regular fa-copy"></i>`;
     button.addEventListener('click', COPY_SNIPPET.bind(this, button));
+    container.appendChild( button );
 
-    code.appendChild( button );
     pre.appendChild( code );
-    document.body.appendChild( pre );
+    container.appendChild( pre );
+    document.body.appendChild( container );
 }
 
 function MAKE_BULLET_LIST( list )

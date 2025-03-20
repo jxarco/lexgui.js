@@ -37,10 +37,10 @@
             "<a href='#button'>Button</a>",
             "<a href='#checkbox'>Checkbox</a>",
             "<a href='#color'>Color</a>",
-            "<a href='#combo-buttons'>Combo Buttons</a>",
+            "<a href='#combobuttons'>Combo Buttons</a>",
             "<a href='#curve'>Curve</a>",
             "<a href='#custom'>Custom</a>",
-            "<a href='#tree'>Data Tree</a>",
+            "<a href='#datatree'>Data Tree</a>",
             "<a href='#dropdown'>Dropdown</a>",
             "<a href='#file'>File</a>",
             "<a href='#form'>Form</a>",
@@ -51,10 +51,10 @@
             "<a href='#progress'>Progress</a>",
             "<a href='#size'>Size</a>",
             "<a href='#table'>Table</a>",
-            "<a href='#panel-tabs'>Tabs</a>",
+            "<a href='#tabs'>Tabs</a>",
             "<a href='#tags'>Tags</a>",
             "<a href='#text'>Text</a>",
-            "<a href='#text-area'>Text Area</a>",
+            "<a href='#textarea'>Text Area</a>",
             "<a href='#title'>Title</a>",
             "<a href='#toggle'>Toggle</a>",
             "<a href='#vector'>Vector</a>",
@@ -184,7 +184,7 @@ panel.@[mtd]addCheckbox@(@"Check me too"@, @true@, (value, event) =&gt; {
 panel.@[mtd]addColor@(@"Background"@, @"#b7a9b1"@);` );
 
         // Combo Buttons
-        MAKE_HEADER( "Combo Buttons", "h2", "combo-buttons" );
+        MAKE_HEADER( "Combo Buttons", "h2", "combobuttons" );
         MAKE_PARAGRAPH( `Represents multiple inlined <a href="#button">buttons</a> as selectable options.` );
 
         {
@@ -349,7 +349,7 @@ panel.@[mtd]addShader@( @"PBR Shader"@, shaderInstance, instance => { console.@[
 panel.@[mtd]addShader@( @"Empty Instance"@, @null@ );` );
 
         // Data Tree
-        MAKE_HEADER( "Data Tree", "h2", "tree" );
+        MAKE_HEADER( "Data Tree", "h2", "datatree" );
         MAKE_PARAGRAPH( `Represents a <strong>data hierarchy visualization Tree</strong>. Enables developers to display hierarchical data in an organized
      and visually appealing manner. This feature is especially useful when presenting data with parent-child
       relationships, such as file directories, organizational structures, family trees, and more.` );
@@ -863,7 +863,7 @@ panel.@[mtd]addForm@(@"Test form"@, formData, (value, event) => {
     selectable: @true@, 
     rowActions: [
         @[com]// custom: you can change the data and refresh will be called later!@
-        { icon: @"fa-solid fa-pen-to-square"@, callback: ( tableData ) => {} },
+        { icon: @"fa-solid fa-pen-to-square"@, callback: ( tableData ) => {} }, @[com]// custom: you can change the data and refresh will be called later!@
         @"delete"@,
         @"menu"@
     ],
@@ -874,7 +874,7 @@ panel.@[mtd]addForm@(@"Test form"@, formData, (value, event) => {
 });` );
 
         // Tabs
-        MAKE_HEADER( "Tabs", "h2", "panel-tabs" );
+        MAKE_HEADER( "Tabs", "h2", "tabs" );
         MAKE_PARAGRAPH( `Represents panel divisions as tabs, either in horizontal or vertical mode. Quickly switch between the different sets of information.` );
 
         {
@@ -994,7 +994,7 @@ panel.@[mtd]addForm@(@"Test form"@, formData, (value, event) => {
 }, { placeholder: @"Something"@ });` );
 
         // Text area
-        MAKE_HEADER( "Text Area", "h2", "text-area" );
+        MAKE_HEADER( "Text Area", "h2", "textarea" );
         MAKE_PARAGRAPH( `Represents a text area input element.` );
 
         {

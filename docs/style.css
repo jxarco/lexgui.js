@@ -52,25 +52,31 @@ body {
 	text-justify: inter-word;
 }
 
-code button {
+.code-container {
+	position: relative;
+	margin: 16px calc(-1 * var(--page-padding));
+}
+
+.code-container button {
 	border: none;
 	outline: none;
 	background: none;
 	position: absolute;
-	top: 14px;
-	right: 14px;
+	top: 12px;
+	right: 12px;
 	font-size: 18px;
 	padding: 6px;
 	color: #bbb;
-	transition: all 0.25s;
+	transition: color 0.25s;
+	z-index: 1;
 }
 
-code button:hover {
+.code-container button:hover {
 	color: #ccc;
 	cursor: pointer;
 }
 
-code button.copied {
+.code-container button.copied {
 	color: #42d065;
 }
 
@@ -174,7 +180,7 @@ code {
 	font-family: "Roboto Mono", monospace;
 	font-size: 14px;
 	line-height: calc(var(--line-height) - 1px);
-	margin: 16px calc(-1 * var(--page-padding));
+	/* margin: 16px calc(-1 * var(--page-padding)); */
 	background-color: #282828;
 	text-align: unset !important;
 	text-justify: unset !important;
@@ -269,8 +275,8 @@ img {
 
 	:root {
 		--page-padding: 16px;
-		--icon-size: 24px;
-		--font-size: 24px;
+		--icon-size: 20px;
+		--font-size: 20px;
 	}
 
 	body {
@@ -302,7 +308,7 @@ img {
 	bottom: 32px;
 	right: 32px;
 	border: 1px solid #666;
-	border-radius: 4px;
+	border-radius: 6px;
 	outline: none;
 	background: none;
 	font-size: 18px;
