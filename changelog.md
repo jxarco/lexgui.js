@@ -6,6 +6,7 @@ Widgets:
 - Support for new Table Widget `Panel.addTable()`.
 
 CodeSnippet: Allow hiding line number `lineNumbers`.
+Added `LX.registerGlobalSearchEntry()` to add entries to the global search bar (Ctrl+Space).
 Force dark color scheme by default.
 Support `autoTheme` at LX.init options.
 Docs updated.

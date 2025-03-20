@@ -32,6 +32,15 @@
 
         MAKE_HEADER( "Widget List", "h1", "widget-list" );
 
+        const supportedWidgets = [ "Array", "Button", "Checkbox", "Color", "Combo Buttons", "Curve", "Custom", "Data Tree", "Dropdown", "File", "Form", "Layers", "List", "Number", "Pad", "Progress", "Size", "Table", "Tabs", "Tags", "Text", "Text Area", "Title", "Toggle", "Vector" ];
+
+        for( const w of supportedWidgets )
+        {
+            LX.registerGlobalSearchEntry( w, () => {
+                document.getElementById( w.toLowerCase().replace( /\s/g, '') ).scrollIntoView( { behavior: "smooth" } );
+            } );
+        }
+
         MAKE_BULLET_LIST( [
             "<a href='#array'>Array</a>",
             "<a href='#button'>Button</a>",

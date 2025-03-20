@@ -243,6 +243,7 @@ body.noevents * {
     padding-left: 50px;
     color: var(--global-text-primary);
     font-size: 13px;
+    line-height: 15px;
     cursor: pointer;
 }
 

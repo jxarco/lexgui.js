@@ -11,7 +11,8 @@ var LX = {
     version: "0.1.46",
     ready: false,
     components: [], // specific pre-build components
-    signals: {} // events and triggers
+    signals: {}, // events and triggers
+    extraGlobalSearchEntries: [] // user specific entries for global search
 };
 
 LX.MOUSE_LEFT_CLICK     = 0;
@@ -498,6 +499,19 @@ function makeCodeSnippet( code, size, options = { } )
 
 LX.makeCodeSnippet = makeCodeSnippet;
 
+/**
+ * @method registerGlobalSearchEntry
+ * @description Adds an extra global search entry
+ * @param {String} name
+ * @param {Function} callback
+ */
+function registerGlobalSearchEntry( name, callback )
+{
+    LX.extraGlobalSearchEntries.push( { name, callback } );
+}
+
+LX.registerGlobalSearchEntry = registerGlobalSearchEntry;
+
 // Math classes
 
 class vec2 {
@@ -683,11 +697,11 @@ function create_global_searchbar( root )
         const isCheckbox = (i && i.type && i.type === 'checkbox');
         if( isCheckbox )
         {
-            searchItem.innerHTML = "<a class='fa fa-check'></a><span>" + p + t + "</span>"
+            searchItem.innerHTML = "<a class='fa fa-check'></a><span>" + ( p + t ) + "</span>"
         }
         else
         {
-            searchItem.innerHTML = p + t;
+            searchItem.innerHTML = ( p + t );
         }
         searchItem.entry_name = t;
         searchItem.callback = c;
@@ -744,6 +758,16 @@ function create_global_searchbar( root )
             }
         }
 
+        for( let entry of LX.extraGlobalSearchEntries )
+        {
+            const name = entry.name;
+            if( !name.toLowerCase().includes( filter ) )
+            {
+                continue;
+            }
+            _addElement( name, entry.callback, "", {} );
+        }
+
         if( LX.has('CodeEditor') )
         {
             const instances = LX.CodeEditor.getInstances();
@@ -761,7 +785,7 @@ function create_global_searchbar( root )
 
                 value += key + " <span class='lang-ext'>(" + languages[ l ].ext + ")</span>";
                 if( key.toLowerCase().includes( filter ) ) {
-                    add_element( value, () => {
+                    _addElement( value, () => {
                         for( let i of instances ) {
                             i._changeLanguage( l );
                         }
