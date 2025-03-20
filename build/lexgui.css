@@ -28,8 +28,9 @@
     --global-button-color: light-dark(#f9f9f9, #3e3e3e);
     --global-button-color-hovered: light-dark(#ececec, #444);
     --global-text-primary: light-dark(#202124, #f4f4ffe6);
-    --global-text-secondary: light-dark(#2c2d2e, #cacad4ea);
+    --global-text-secondary: light-dark(#2c2d2e, #bfbfc0ea);
     --global-text-terciary: light-dark(#474747f5, #727272b9);
+    --global-text-quaternary: light-dark(#636262f5, #585757b9);
     --global-intense-background: light-dark(#fefefe, #121212);
     --global-medium-background: #252525;
     --global-blur-background: light-dark(#f7f7f7d8, #1f1f1fe7);
@@ -159,6 +160,7 @@ body.noevents * {
     margin-left: 4px;
     cursor: pointer;
     line-height: inherit !important;
+    color: var(--global-text-secondary);
 }
 
 .lexicon:hover {
@@ -1344,6 +1346,8 @@ body.noevents * {
     appearance: none;
     vertical-align: middle;
     -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
     border-radius: 12px;
     padding: 3px;
@@ -3015,6 +3019,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     cursor: default;
     -webkit-user-select: none;
     -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
 }
 
@@ -3049,6 +3054,104 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     width: 100%;
     margin-top: -22px;
     color: var(--global-text-secondary);
+}
+
+/* Table Widget */
+
+.lextable table {
+    width: 100%;
+    border: 2px solid;
+    border-color: light-dark(#dbd8d8c0, #5c5b5b7a);
+    border-collapse: separate;
+    /* border-left: 0; */
+    border-radius: 8px;
+    border-spacing: 0px;
+    overflow: hidden;
+    background-color: var(--global-button-color);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+thead {
+    display: table-header-group;
+    border-color: inherit;
+    border-collapse: separate;
+}
+
+tr {
+    display: table-row;
+    vertical-align: inherit;
+    border-color: inherit;
+}
+
+th {
+    --th-color: light-dark(var(--global-text-quaternary), var(--global-text-primary));
+    color: var(--th-color);
+    font-size: calc(var(--global-font-size) + 1px) !important;
+    cursor: pointer;
+    transition: all 0.1s linear;
+    background-color: color-mix(in srgb, var(--global-button-color), #000 10%);
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+tr:hover {
+    background-color: color-mix(in srgb, var(--global-button-color), #000 7%);
+}
+
+th a {
+    /* color: var(--global-selected-light); */
+    margin-left: 4px;
+    font-size: 10px !important;
+}
+
+th a:active {
+    transform: scale(1.01);
+}
+
+th:hover {
+    color: color-mix(in srgb, var(--th-color), #000 10%);
+}
+
+th, td {
+    padding: 6px;
+    padding-inline: 12px;
+    text-align: left;
+    vertical-align: top;
+    /* border-left: 2px solid red; */
+}
+
+th.sm, td.sm {
+    width: 8%;
+}
+
+th .lexcheckbox, td .lexcheckbox {
+    margin-top: 3px;
+}
+
+td {
+    border-top: 2px solid;
+    border-color: light-dark(#dbd8d8c0, #5c5b5b7a);
+}
+
+thead:first-child tr:first-child th:first-child, tbody:first-child tr:first-child td:first-child {
+    border-radius: 8px 0 0 0;
+}
+
+thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td:first-child {
+    border-radius: 0 0 0 8px;
+}
+
+.lextable .lextablebuttons {
+    display: inline-flex;
+    gap: 8px;
+}
+
+:root[data-theme="light"] {
+    .lextable table {
+        box-shadow: none;
+    }
 }
 
 /* Custom Widgets Widget */
@@ -3230,6 +3333,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     vertical-align: middle;
     -webkit-user-select: none;
     -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
     place-content: center;
     display: inline-grid;
@@ -3521,6 +3625,9 @@ ul.lexassetscontent {
     font-size: var(--global-font-size);
     color: #AAA;
     -webkit-user-drag: element;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
     box-sizing: border-box;
     width: 10em;
@@ -3934,16 +4041,16 @@ ul.lexassetscontent {
     background-color: #333437a9;
 }
 
+.lexcodeeditor.disabled pre.active-line {
+    background-color: transparent;
+}
+
 .lexcodeeditor pre.added {
-    background-color: #40db212f;
+    background-color: #40db212f !important;
 }
 
 .lexcodeeditor pre.removed {
-    background-color: #db21212f;
-}
-
-.lexcodeeditor.disabled pre.active-line {
-    background: none;
+    background-color: #db21212f !important;
 }
 
 .lexcodeeditor.disabled .lexareatab {

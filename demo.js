@@ -792,6 +792,25 @@ function fillBottomPanel( panel ) {
     
     // add widgets to panel branch
     panel.branch("Information", {icon: "fa fa-circle-info"});
+    panel.addTable("A Table", {
+        head: [ "Name", "Subject", "Grade" ],
+        body: [
+            [ "Alice", "Science", "B" ],
+            [ "Bob", "Math", "C" ],
+            [ "Carter", "Zoology", "A" ],
+        ]
+    }, {
+        selectable: true,
+        rowActions: [
+            { icon: "fa-solid fa-pen-to-square", callback: ( tableData ) => {} }, // custom: you can change the data and refresh will be called later!
+            "delete",
+            "menu"
+        ],
+        onMenuAction: ( context ) => {
+            context.add("Export", (a) => console.log(a) );
+            context.add("An Action", (a) => console.log(a) );
+        }
+    });
     panel.addText("Camera", "Canon EOS 80D", null, {disabled: true}); 
     panel.addText("Text", "Warning text", null, { warning: true });
     const patternOptions = { uppercase: true }

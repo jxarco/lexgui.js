@@ -2964,6 +2964,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
         static FORM         = 27;
         static DIAL         = 28;
         static COUNTER      = 29;
+        static TABLE        = 30;
 
         static NO_CONTEXT_TYPES = [
             Widget.BUTTON,
@@ -3054,6 +3055,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                 case Widget.FORM: return "Form";
                 case Widget.DIAL: return "Dial";
                 case Widget.COUNTER: return "Counter";
+                case Widget.TABLE: return "Table";
                 case Widget.CUSTOM: return this.customName;
             }
 
@@ -7341,6 +7343,227 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
             }, { className: "micro", skipInlineCount: true, title: "Plus" });
 
             this.clearQueue();
+
+            return widget;
+        }
+
+        /**
+         * @method addTable
+         * @param {String} name Widget name
+         * @param {Number} data Table data
+         * @param {*} options:
+         * head: Table headers (each of the headers per column)
+         * body: Table body (data per row for each column)
+         * rowActions: Allow to add actions per row
+         * selectable: Each row can be selected
+         */
+
+        addTable( name, data, options = { } ) {
+
+            if( !data )
+            {
+                throw( "Data is needed to create a table!" );
+            }
+
+            let widget = this.create_widget( name, Widget.TABLE, options );
+
+            widget.onGetValue = () => {
+
+            };
+
+            widget.onSetValue = ( newValue, skipCallback ) => {
+
+            };
+
+            let element = widget.domEl;
+
+            const container = document.createElement('div');
+            container.className = "lextable";
+            container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+
+            const table = document.createElement( 'table' );
+            container.appendChild( table );
+
+            data.head = data.head ?? [];
+            data.body = data.body ?? [];
+            data.orderMap = { };
+            data.checkMap = { };
+
+            function compareFn( idx, order, a, b) {
+                if (a[idx] < b[idx]) return -order;
+                else if (a[idx] > b[idx]) return order;
+                return 0;
+            }
+
+            widget.refreshTable = () => {
+
+                table.innerHTML = "";
+
+                // Head
+                {
+                    const head = document.createElement( 'thead' );
+                    head.className = "lextablehead";
+                    table.appendChild( head );
+
+                    const hrow = document.createElement( 'tr' );
+
+                    if( options.selectable )
+                    {
+                        const th = document.createElement( 'th' );
+                        const input = document.createElement( 'input' );
+                        input.type = "checkbox";
+                        input.className = "lexcheckbox";
+                        input.checked = data.checkMap[ ":root" ] ?? false;
+                        th.appendChild( input );
+
+                        input.addEventListener( 'change', function() {
+
+                            data.checkMap[ ":root" ] = this.checked;
+
+                            const body = table.querySelector( "tbody" );
+                            for( const el of body.childNodes )
+                            {
+                                data.checkMap[ el.getAttribute( "rowId" ) ] = this.checked;
+                                el.querySelector( "input" ).checked = this.checked;
+                            }
+                        });
+
+                        hrow.appendChild( th );
+                    }
+
+                    for( const headData of data.head )
+                    {
+                        const th = document.createElement( 'th' );
+                        th.innerHTML = `${ headData } <a class="fa-solid fa-sort"></a>`;
+
+                        th.querySelector( 'a' ).addEventListener( 'click', () => {
+
+                            if( !data.orderMap[ headData ] )
+                            {
+                                data.orderMap[ headData ] = 1;
+                            }
+
+                            const idx = data.head.indexOf(headData);
+                            data.body = data.body.sort( compareFn.bind( this, idx,data.orderMap[ headData ] ) );
+                            data.orderMap[ headData ] = -data.orderMap[ headData ];
+
+                            widget.refreshTable();
+
+                        });
+
+                        hrow.appendChild( th );
+                    }
+
+                    // Add empty header column
+                    if( options.rowActions )
+                    {
+                        const th = document.createElement( 'th' );
+                        th.className = "sm";
+                        hrow.appendChild( th );
+                    }
+
+                    head.appendChild( hrow );
+                }
+
+                // Body
+                {
+                    const body = document.createElement( 'tbody' );
+                    body.className = "lextablebody";
+                    table.appendChild( body );
+
+                    for( let r = 0; r < data.body.length; ++r )
+                    {
+                        const bodyData = data.body[ r ];
+                        const row = document.createElement( 'tr' );
+                        const rowId = LX.getSupportedDOMName( bodyData.join( '-' ) );
+                        row.setAttribute( "rowId", rowId );
+
+                        if( options.selectable )
+                        {
+                            const td = document.createElement( 'td' );
+                            const input = document.createElement( 'input' );
+                            input.type = "checkbox";
+                            input.className = "lexcheckbox";
+                            input.checked = data.checkMap[ rowId ];
+                            td.appendChild( input );
+
+                            input.addEventListener( 'change', function() {
+                                data.checkMap[ rowId ] = this.checked;
+                            });
+
+                            row.appendChild( td );
+                        }
+
+                        for( const rowData of bodyData )
+                        {
+                            const td = document.createElement( 'td' );
+                            td.innerHTML = `${ rowData }`;
+                            row.appendChild( td );
+                        }
+
+                        if( options.rowActions )
+                        {
+                            const td = document.createElement( 'td' );
+                            td.className = "sm";
+
+                            const buttons = document.createElement( 'div' );
+                            buttons.className = "lextablebuttons";
+                            td.appendChild( buttons );
+
+                            for( const action of options.rowActions )
+                            {
+                                const button = document.createElement( 'a' );
+                                button.className = "lexicon";
+
+                                if( action == "delete" )
+                                {
+                                    button.className += " fa-solid fa-trash-can";
+                                    button.addEventListener( 'click', function() {
+                                        // Don't need to refresh table..
+                                        data.body.splice( r, 1 );
+                                        row.remove();
+                                    });
+                                }
+                                else if( action == "menu" )
+                                {
+                                    button.className += " fa-solid fa-ellipsis";
+                                    button.addEventListener( 'click', function( event ) {
+                                        addContextMenu( null, event, c => {
+                                            if( options.onMenuAction )
+                                            {
+                                                options.onMenuAction( c );
+                                                return;
+                                            }
+                                            console.warn( "Using <Menu action> without action callbacks." );
+                                        } );
+                                    });
+                                }
+                                else // custom actions
+                                {
+                                    console.assert( action.constructor == Object );
+                                    button.className += ` ${ action.icon }`;
+                                }
+
+                                buttons.appendChild( button );
+                            }
+
+                            row.appendChild( td );
+                        }
+
+                        body.appendChild( row );
+                    }
+                }
+            }
+
+            widget.refreshTable();
+
+            if( !widget.name )
+            {
+                element.className += " noname";
+                container.style.width = "100%";
+            }
+
+            element.appendChild( container );
 
             return widget;
         }
