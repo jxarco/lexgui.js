@@ -387,17 +387,35 @@ body.noevents * {
 /* Dialogs and alerts */
 
 .lexdialog {
+    outline: none;
+    border: none;
     background: none;
+    margin: 0;
+    padding: 0;
     position: absolute;
     min-width: 256px;
-    /* overflow: hidden; */
+    min-height: max-content;
+    overflow: hidden;
     box-shadow: 0 2px 8px #101010;
-    border-radius: 6px;
+    border-radius: 8px;
     z-index: 101;
     background-color: var(--global-color-secondary);
+    transition: display 0.1s allow-discrete, overlay 0.1s allow-discrete;
+    animation: dialogHide 0.1s forwards;
+    &[open] {
+        animation: dialogShow 0.1s forwards;
+    }
+}
+
+.lexdialog::backdrop {
+    background-color: #0000008c;
+    position: absolute;
+    opacity: 1;
+    transition: opacity 0.2s ease-in;
 }
 
 .lexdialogtitle {
+    outline: none;
     font-family: var(--global-title-font);
     font-weight: 600;
     font-size: 18px;
@@ -462,10 +480,41 @@ body.noevents * {
     margin-top: 0.05em;
 }
 
+@keyframes dialogShow {
+    from {
+        opacity: 0;
+        transform: translate3d(0, -8px, 0)
+        scale3d(0.92, 0.92, 0.92)
+        rotate(0);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0)
+        scale3d(1, 1, 1)
+        rotate(0);
+    }
+}
+
+@keyframes dialogHide {
+    from {
+        opacity: 1;
+        transform: translate3d(0, 0, 0)
+        scale3d(1, 1, 1)
+        rotate(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translate3d(0, -8px, 0)
+        scale3d(0.92, 0.92, 0.92)
+        rotate(0);
+    }
+}
+
 /* Pocket Dialog */
 
 .lexdialog.pocket {
-    margin: 3px;
     background-color: var(--global-color-primary);
 }
 
@@ -530,16 +579,6 @@ body.noevents * {
 /* Pop up dialog */
 .lexpopup {
     background: var(--global-blur-background);
-    opacity: 0;
-    transition: opacity 1s;
-}
-
-.lexpopup.fadein {
-    opacity: 1;
-}
-
-.lexpopup.fadeout {
-    opacity: 0;
 }
 
 :root[data-theme="light"] {
@@ -1338,7 +1377,7 @@ body.noevents * {
 /* Toggle Widget */
 
 .lextoggle {
-    --toggle-color: var(--global-button-color);
+    --toggle-color: #1a1a1a;
     border: 1px solid transparent;
     color: #f9f9f9;
     background-color: var(--global-color-quaternary);
@@ -4400,7 +4439,7 @@ ul.lexassetscontent {
         /* thumb */
         background-color: #8383839d !important;
     }
-    
+
     .lexcodescrollbar div:hover {
         /* thumb */
         background-color: #5e5e5ea9 !important;
@@ -4911,7 +4950,7 @@ ul.lexassetscontent {
 /* .lexvideoeditor .lexvideotimebar canvas {
   width: calc(100%);
   height: calc(100% );
-  padding: 5px; 
+  padding: 5px;
 }  */
 
 .resizeable {

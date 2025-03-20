@@ -58,7 +58,7 @@ const snippet = LX.makeCodeSnippet(code, ["780px", "auto"], {
 snippet.style.left = "200px";
 snippet.style.top = "200px";
 snippet.style.position = "absolute";
-document.body.appendChild( snippet );
+// document.body.appendChild( snippet );
 
 // menu bar
 area.addMenubar( m => {

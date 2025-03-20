@@ -835,9 +835,6 @@ function init( options = { } )
     this.root = root;
     this.container = document.body;
 
-    // this.modal.toggleAttribute( 'hidden', true );
-    // this.modal.toggle = function( force ) { this.toggleAttribute( 'hidden', force ); };
-
     this.modal.classList.add( 'hiddenOpacity' );
     this.modal.toggle = function( force ) { this.classList.toggle( 'hiddenOpacity', force ); };
 
@@ -934,9 +931,9 @@ LX.message = message;
  * @param {String} title (Optional)
  * @param {*} options
  * id: Id of the message dialog
- * time: (Number) Delay time before close automatically (ms). Defalut: [3000]
- * position: (Array) [x,y] Dialog position in screen. Default: [screen centered]
- * size: (Array) [width, height]
+ * timeout (Number): Delay time before it closes automatically (ms). Default: [3000]
+ * position (Array): [x,y] Dialog position in screen. Default: [screen centered]
+ * size (Array): [width, height]
  */
 
 function popup( text, title, options = {} )
@@ -946,7 +943,7 @@ function popup( text, title, options = {} )
         throw("No message to show");
     }
 
-    options.size = options.size ?? [ "auto", "auto" ];
+    options.size = options.size ?? [ "max-content", "auto" ];
     options.class = "lexpopup";
 
     const time = options.timeout || 3000;
@@ -954,13 +951,9 @@ function popup( text, title, options = {} )
         p.addTextArea( null, text, null, { disabled: true, fitHeight: true } );
     }, options );
 
-    dialog.root.classList.add( 'fadein' );
-    setTimeout(() => {
-        dialog.root.classList.remove( 'fadein' );
-        dialog.root.classList.add( 'fadeout' );
-    }, time - 1000 );
-
-    setTimeout( dialog.close, time );
+    setTimeout( () => {
+        dialog.close();
+    }, Math.max( time, 150 ) );
 
     return dialog;
 }
@@ -8002,15 +7995,14 @@ class Dialog {
             draggable = options.draggable ?? true,
             modal = options.modal ?? false;
 
-        if( modal )
-        {
-            LX.modal.toggle( false );
-        }
-
-        var root = document.createElement('div');
+        var root = document.createElement('dialog');
         root.className = "lexdialog " + (options.class ?? "");
         root.id = options.id ?? "dialog" + Dialog._last_id++;
         LX.root.appendChild( root );
+
+        doAsync( () => {
+            modal ? root.showModal() : root.show();
+        }, 10 );
 
         let that = this;
 
@@ -8093,17 +8085,16 @@ class Dialog {
 
                 if( !options.onclose )
                 {
-                    that.panel.clear();
-                    root.remove();
+                    root.close();
+
+                    doAsync( () => {
+                        that.panel.clear();
+                        root.remove();
+                    }, 150 );
                 }
                 else
                 {
                     options.onclose( this.root );
-                }
-
-                if( modal )
-                {
-                    LX.modal.toggle( true );
                 }
             };
 
@@ -8219,21 +8210,28 @@ class PocketDialog extends Dialog {
         options.draggable = options.draggable ?? false;
         options.closable = options.closable ?? false;
 
+        const dragMargin = 3;
+
         super( title, callback, options );
 
         let that = this;
         // Update margins on branch title closes/opens
         LX.addSignal("@on_branch_closed", this.panel, closed => {
             if( this.dock_pos == PocketDialog.BOTTOM )
-                this.root.style.top = "calc(100% - " + (this.root.offsetHeight + 6) + "px)";
+            {
+                this.root.style.top = "calc(100% - " + (this.root.offsetHeight + dragMargin) + "px)";
+            }
         });
 
         // Custom
         this.root.classList.add( "pocket" );
-        if( !options.position ) {
-            this.root.style.left = "calc(100% - " + (this.root.offsetWidth + 6) + "px)";
-            this.root.style.top = "0px";
+        if( !options.position )
+        {
+            this.root.style.left = "unset";
+            this.root.style.right = dragMargin + "px";
+            this.root.style.top = dragMargin + "px";
         }
+
         this.panel.root.style.width = "calc( 100% - 12px )";
         this.panel.root.style.height = "calc( 100% - 40px )";
         this.dock_pos = PocketDialog.TOP;
@@ -8254,7 +8252,7 @@ class PocketDialog extends Dialog {
 
             if( this.dock_pos == PocketDialog.BOTTOM )
                 that.root.style.top = this.root.classList.contains("minimized") ?
-                "calc(100% - " + (that.title.offsetHeight + 6) + "px)" : "calc(100% - " + (that.root.offsetHeight + 6) + "px)";
+                "calc(100% - " + (that.title.offsetHeight + 6) + "px)" : "calc(100% - " + (that.root.offsetHeight + dragMargin) + "px)";
         });
 
         if( !options.draggable )
@@ -8269,26 +8267,39 @@ class PocketDialog extends Dialog {
                     switch( t )
                     {
                     case 'b':
-                        this.root.style.top = "calc(100% - " + (this.root.offsetHeight + 6) + "px)";
+                        this.root.style.top = "calc(100% - " + (this.root.offsetHeight + dragMargin) + "px)";
                         break;
                     case 'l':
-                        this.root.style.left = options.position ? options.position[ 1 ] : "0px";
+                        this.root.style.left = options.position ? options.position[ 1 ] : ( dragMargin + "px" );
                         break;
                     }
                 }
             }
 
             this.root.classList.add('dockable');
-            this.title.addEventListener("keydown", function(e) {
-                if( e.ctrlKey && e.key == 'ArrowLeft' ) {
+
+            this.title.addEventListener("keydown", function( e ) {
+                if( !e.ctrlKey )
+                {
+                    return;
+                }
+
+                if( e.key == 'ArrowLeft' )
+                {
                     that.root.style.left = '0px';
-                } else if( e.ctrlKey && e.key == 'ArrowRight' ) {
-                    that.root.style.left = "calc(100% - " + (that.root.offsetWidth + 6) + "px)";
-                }else if( e.ctrlKey && e.key == 'ArrowUp' ) {
+                }
+                else if( e.key == 'ArrowRight' )
+                {
+                    that.root.style.left = "calc(100% - " + (that.root.offsetWidth + dragMargin) + "px)";
+                }
+                else if( e.key == 'ArrowUp' )
+                {
                     that.root.style.top = "0px";
                     that.dock_pos = PocketDialog.TOP;
-                }else if( e.ctrlKey && e.key == 'ArrowDown' ) {
-                    that.root.style.top = "calc(100% - " + (that.root.offsetHeight + 6) + "px)";
+                }
+                else if( e.key == 'ArrowDown' )
+                {
+                    that.root.style.top = "calc(100% - " + (that.root.offsetHeight + dragMargin) + "px)";
                     that.dock_pos = PocketDialog.BOTTOM;
                 }
             });
