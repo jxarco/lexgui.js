@@ -32,7 +32,7 @@
 
         MAKE_HEADER( "Widget List", "h1", "widget-list" );
 
-        const supportedWidgets = [ "Array", "Button", "Checkbox", "Color", "Combo Buttons", "Curve", "Custom", "Data Tree", "Dropdown", "File", "Form", "Layers", "List", "Number", "Pad", "Progress", "Size", "Table", "Tabs", "Tags", "Text", "Text Area", "Title", "Toggle", "Vector" ];
+        const supportedWidgets = [ "Array", "Button", "Checkbox", "Color", "Combo Buttons", "Curve", "Custom", "Data Tree", "Dropdown", "File", "Form", "Layers", "List", "Number", "Pad", "Progress", "Range", "Size", "Table", "Tabs", "Tags", "Text", "Text Area", "Title", "Toggle", "Vector" ];
 
         for( const w of supportedWidgets )
         {
@@ -58,6 +58,7 @@
             "<a href='#number'>Number</a>",
             "<a href='#pad'>Pad</a>",
             "<a href='#progress'>Progress</a>",
+            "<a href='#range'>Range</a>",
             "<a href='#size'>Size</a>",
             "<a href='#table'>Table</a>",
             "<a href='#tabs'>Tabs</a>",
@@ -791,6 +792,40 @@ panel.@[mtd]addForm@(@"Test form"@, formData, (value, event) => {
     console.@[mtd]log@(value);
   }
 });` );
+
+        // Range
+        MAKE_HEADER( "Range", "h2", "range" );
+        MAKE_PARAGRAPH( `Represents a decimal range input.` );
+
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addRange("Intensity Value", 25, (value, event) => {
+                console.log(value);
+            }, { min: 1, max: 100 });
+            document.body.appendChild( area.root );
+        }
+
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addRange(name, value, callback, options)")} to add a Range Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["name", "String", "Widget name"],
+            ["value", "Number", "Range value"],
+            ["callback", "Function", "Function called when the input changes"],
+            ["options", "Object", "Basic options for a Widget"],
+            [
+                ["className", "String", "Extra classes to customize style"],
+                ["disabled", "Boolean", "Make the widget disabled [false]"],
+                ["left", "Boolean", "The slider goes to the left instead of the right [false]"],
+                ["step", "Number", "Change Step value"],
+                ["min", "Number", "Min input value"],
+                ["max", "Number", "Max input value"]
+            ]
+        ] );
+        MAKE_CODE( `panel.@[mtd]addRange@(@"Intensity Value"@, @25@, (value, event) =&gt; {
+    console.@[mtd]log@(value);
+}, { min: @1@, max: @100@ });` );
+        MAKE_PARAGRAPH( `In case you are using limits, store the widget and call <code class='inline'>rangeWidget.setLimits( min, max, step )</code> to change its 
+        parameters once the widget has been created.` );
 
         // Size
         MAKE_HEADER( "Size", "h2", "size" );

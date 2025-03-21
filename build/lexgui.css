@@ -27,10 +27,10 @@
     --global-color-error: #f54c4c;
     --global-button-color: light-dark(#f9f9f9, #3e3e3e);
     --global-button-color-hovered: light-dark(#ececec, #444);
-    --global-text-primary: light-dark(#202124, #f4f4ffe6);
-    --global-text-secondary: light-dark(#353636, #bfbfc0ea);
-    --global-text-terciary: light-dark(#5a5a5af5, #929292d8);
-    --global-text-quaternary: light-dark(#6b6a6af5, #585757e1);
+    --global-text-primary: light-dark(#202124, #efeff1);
+    --global-text-secondary: light-dark(#353636, #c8c8ca);
+    --global-text-terciary: light-dark(#5a5a5af5, #929292);
+    --global-text-quaternary: light-dark(#6b6a6af5, #777777);
     --global-intense-background: light-dark(#fefefe, #121212);
     --global-medium-background: #252525;
     --global-blur-background: light-dark(#f7f7f7d8, #1f1f1fe7);
@@ -887,7 +887,7 @@ body.noevents * {
     color: var(--global-text-secondary);
 }
 
-.lexwidget input:not(.lexcheckbox, .lextoggle) {
+.lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider) {
     font-family: var(--global-font);
     background: none;
     padding: 3px;
@@ -1782,6 +1782,7 @@ input[type=number] {
     -webkit-appearance: none;
     border: none !important;
     width: calc(100% - 12px);
+    height: 1px;
     outline: none;
     opacity: 0.7;
     transition: opacity .2s;
@@ -1791,10 +1792,6 @@ input[type=number] {
 
 .lexinputslider:hover {
     opacity: 1;
-}
-
-input[type="range"] {
-    height: 1px;
 }
 
 .lexinputslider::-moz-range-track {
@@ -1835,6 +1832,98 @@ input[type="range"] {
 
 .lexwidget .lock {
     /* color: red; */
+}
+
+/* Range Widget */
+
+.lexrangeslider {
+    --range-thumb-color: var(--global-color-primary);
+    --range-thumb-size: 1rem;
+    --range-progress: currentColor;
+    --range-fill: 1;
+    --range-thumb-padding: 0.15rem;
+    --range-bg: color-mix(in oklab,currentColor 10%,#0000);
+    --range-dir: 1;
+    --radius-selector: 0.5rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    webkit-appearance: none;
+    --radius-selector-max: calc(var(--radius-selector) + var(--radius-selector) + var(--radius-selector));
+    border-radius: calc(var(--radius-selector) + min(var(--range-thumb-padding),var(--radius-selector-max)));
+    width: calc(100% - 4px);
+    height: var(--range-thumb-size);
+    border: none;
+    outline: none;
+    color: var(--global-text-secondary);
+    background-color: #0000;
+    overflow: hidden;
+    padding: 0;
+    cursor: pointer;
+    transition: opacity .2s;
+    -moz-transition: .2s;
+    -webkit-transition: .2s;
+    vertical-align: middle;
+}
+
+/* Colors */
+.lexrangeslider.primary { color: var(--global-selected); }
+.lexrangeslider.secondary { color: var(--global-selected-light); }
+.lexrangeslider.accent { color: var(--global-color-accent); }
+.lexrangeslider.warning { color: var(--global-color-warning); }
+.lexrangeslider.error { color: var(--global-color-error); }
+
+.lexrangeslider.left {
+    --range-dir: -1;
+}
+
+.lexrangeslider:hover {
+    filter: brightness(1.1);
+}
+
+.lexrangeslider::-moz-range-track {
+    background-color: var(--range-bg);
+    border-radius: var(--radius-selector);
+    width: 100%;
+    height: calc(var(--range-thumb-size)*0.5);
+}
+
+.lexrangeslider::-webkit-slider-runnable-track {
+    background-color: var(--range-bg);
+    border-radius: var(--radius-selector);
+    width: 100%;
+    height: calc(var(--range-thumb-size)*0.5);
+}
+
+.lexrangeslider::-webkit-slider-thumb {
+    box-sizing: border-box;
+    border-radius: calc(var(--radius-selector) + min(var(--range-thumb-padding),var(--radius-selector-max)));
+    height: var(--range-thumb-size);
+    width: var(--range-thumb-size);
+    border: var(--range-thumb-padding) solid;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    webkit-appearance: none;
+    color: var(--range-progress);
+    box-shadow: 0 -1px oklch(0% 0 0/0.1) inset,0 8px 0 -4px oklch(100% 0 0/0.1) inset,0 1px color-mix(in oklab,currentColor calc(1*10%),#0000),0 0 0 2rem var(--range-thumb-color) inset,calc((var(--range-dir,1)*-100rem) - (var(--range-dir,1)*var(--range-thumb-size)/2)) 0 0 calc(100rem*var(--range-fill));
+    background-color: currentColor;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.lexrangeslider::-moz-range-thumb {
+    box-sizing: border-box;
+    border-radius: calc(var(--radius-selector) + min(var(--range-thumb-padding),var(--radius-selector-max)));
+    height: var(--range-thumb-size);
+    width: var(--range-thumb-size);
+    border: var(--range-thumb-padding) solid;
+    color: var(--range-progress);
+    box-shadow: 0 -1px oklch(0% 0 0/0.1) inset,0 8px 0 -4px oklch(100% 0 0/0.1) inset,0 1px color-mix(in oklab,currentColor calc(1*10%),#0000),0 0 0 2rem var(--range-thumb-color) inset,calc((var(--range-dir,1)*-100rem) - (var(--range-dir,1)*var(--range-thumb-size)/2)) 0 0 calc(100rem*var(--range-fill));
+    background-color: currentColor;
+    position: relative;
+    top: 50%;
 }
 
 /* Size Widget */

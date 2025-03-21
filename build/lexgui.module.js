@@ -6050,7 +6050,7 @@ class Panel {
      * @param {*} options:
      * disabled: Make the widget disabled [false]
      * suboptions: Callback to add widgets in case of TRUE value
-     * className: Customize colors
+     * className: Customize style
      */
 
     addCheckbox( name, value, callback, options = {} ) {
@@ -6327,6 +6327,135 @@ class Panel {
         this.clearQueue();
 
         element.appendChild( container );
+
+        return widget;
+    }
+
+    /**
+     * @method addRange
+     * @param {String} name Widget name
+     * @param {Number} value Default number value
+     * @param {Function} callback Callback function on change
+     * @param {*} options:
+     * className: Extra classes to customize style
+     * disabled: Make the widget disabled [false]
+     * left: The slider goes to the left instead of the right
+     * step: Step of the input
+     * min, max: Min and Max values for the input
+     */
+
+    addRange( name, value, callback, options = {} ) {
+
+        let widget = this.create_widget( name, Widget.RANGE, options );
+
+        widget.onGetValue = () => {
+            return +slider.value;
+        };
+
+        widget.onSetValue = ( newValue, skipCallback ) => {
+            slider.value = newValue;
+            Panel._dispatch_event( slider, "input", skipCallback );
+        };
+
+        let element = widget.domEl;
+
+        // add reset functionality
+        if( widget.name )
+        {
+            Panel._add_reset_property( element.domName, function() {
+                this.style.display = "none";
+                slider.value = slider.iValue;
+                Panel._dispatch_event( slider, "input" );
+            });
+        }
+
+        // add widget value
+
+        var container = document.createElement( 'div' );
+        container.className = "lexrange";
+        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+
+        let slider = document.createElement( 'input' );
+        slider.className = "lexrangeslider " + ( options.className ?? "" );
+        slider.min = options.min;
+        slider.max = options.max;
+        slider.step = options.step ?? 1;
+        slider.type = "range";
+        slider.value = slider.iValue = value;
+
+        if( options.left )
+        {
+            slider.classList.add( "left" );
+        }
+
+        if( options.disabled )
+        {
+            slider.disabled = true;
+        }
+
+        slider.addEventListener( "input", e => {
+
+            if( isNaN( e.target.valueAsNumber ) )
+            {
+                return;
+            }
+
+            const skipCallback = e.detail;
+
+            let val = e.target.value = clamp( +e.target.valueAsNumber, +slider.min, +slider.max );
+            slider.value = val;
+
+            // Reset button (default value)
+            if( !skipCallback )
+            {
+                let btn = element.querySelector( ".lexwidgetname .lexicon" );
+                if( btn ) btn.style.display = val != slider.iValue ? "block": "none";
+            }
+
+            if( options.left )
+            {
+                val = ( +slider.max ) - val + ( +slider.min );
+            }
+
+            if( !skipCallback ) this._trigger( new IEvent( name, val, e ), callback );
+        }, { passive: false });
+
+        slider.addEventListener( "mousedown", function( e ) {
+            if( options.onPress )
+            {
+                options.onPress.bind( slider )( e, slider );
+            }
+        }, false );
+
+        slider.addEventListener( "mouseup", function( e ) {
+            if( options.onRelease )
+            {
+                options.onRelease.bind( slider )( e, slider );
+            }
+        }, false );
+
+        // Method to change min, max, step parameters
+        widget.setLimits = ( newMin, newMax, newStep ) => {
+            slider.min = newMin ?? slider.min;
+            slider.max = newMax ?? slider.max;
+            slider.step = newStep ?? slider.step;
+            Panel._dispatch_event( slider, "input", true );
+        };
+
+        if( value.constructor == Number )
+        {
+            value = clamp( value, +slider.min, +slider.max );
+        }
+
+        container.appendChild( slider );
+        element.appendChild( container );
+
+        // Remove branch padding and margins
+        if( !widget.name )
+        {
+            element.className += " noname";
+            container.style.width = "100%";
+        }
 
         return widget;
     }

@@ -534,9 +534,12 @@ function fillPanel( panel ) {
     panel.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
         console.log("Font Color: ", value);
     });
-    panel.addRange("Some Range", 10, (value, event) => {
+    panel.addRange("Disabled Range", 10, (value, event) => {
         console.log(value);
-    }, { min: 1, max: 48, step: 1});
+    }, { min: 1, max: 48, step: 1, disabled: true});
+    panel.addRange("Colored Left Range", 25, (value, event) => {
+        console.log(value);
+    }, { min: 20, max: 48, step: 1, className: "warning", left: true});
     panel.addNumber("Font Size", 36, (value, event) => {
         console.log(value);
     }, { min: 1, max: 48, step: 1, units: "px"});
