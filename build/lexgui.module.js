@@ -810,6 +810,7 @@ function _createCommandbar( root )
  * id: Id of the main area
  * skipRoot: Skip adding LX root container
  * skipDefaultArea: Skip creation of main area
+ * strictViewport: Use only window area
  */
 
 function init( options = { } )
@@ -840,7 +841,7 @@ function init( options = { } )
         this.container = document.getElementById( options.container );
     }
 
-    this.globalSearch = create_global_searchbar( this.container );
+    document.documentElement.setAttribute( "data-strictVP", ( options.strictViewport ?? true ) ? "true" : "false" );
 
     this.commandbar = _createCommandbar( this.container );
 

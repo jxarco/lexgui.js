@@ -8,14 +8,16 @@ Widgets:
 - Improved style of ComboButtons Widget.
 - Support for disabled Dropdown and other improvements.
 
-Add minified build versions.
+Add `options.strictViewport` to LX.init().
 Improve dialog animations.
-Animated (as Dialog) Global search bar.
 CodeSnippet: Allow hiding line number `lineNumbers`.
-Added `LX.registerCommandbarEntry()` to add entries to the global search bar (Ctrl+Space).
+Renamed "Global search bar" to "Command bar";
+Added `LX.registerCommandbarEntry()` to add entries to the command bar (Ctrl+Space).
 Added `LX.setCommandbarState()` to show the command bar from code.
+Command bar animated (as others dialogs).
 Force dark color scheme by default.
 Support `autoTheme` at LX.init options.
+Add minified build versions.
 Docs updated.
 Minor bug fixes.
 
