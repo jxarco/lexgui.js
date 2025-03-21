@@ -1877,6 +1877,11 @@ input[type=number] {
     --range-dir: -1;
 }
 
+.lexrangeslider.no-fill {
+    --range-fill: 0;
+    --range-bg: currentColor;
+}
+
 .lexrangeslider:hover {
     filter: brightness(1.1);
 }

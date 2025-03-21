@@ -6340,6 +6340,7 @@ class Panel {
      * className: Extra classes to customize style
      * disabled: Make the widget disabled [false]
      * left: The slider goes to the left instead of the right
+     * fill: Fill slider progress [true]
      * step: Step of the input
      * min, max: Min and Max values for the input
      */
@@ -6377,20 +6378,21 @@ class Panel {
 
         let slider = document.createElement( 'input' );
         slider.className = "lexrangeslider " + ( options.className ?? "" );
+        slider.value = slider.iValue = value;
         slider.min = options.min;
         slider.max = options.max;
         slider.step = options.step ?? 1;
         slider.type = "range";
-        slider.value = slider.iValue = value;
+        slider.disabled = options.disabled ?? false;
 
-        if( options.left )
+        if( options.left ?? false )
         {
             slider.classList.add( "left" );
         }
 
-        if( options.disabled )
+        if( !( options.fill ?? true ) )
         {
-            slider.disabled = true;
+            slider.classList.add( "no-fill" );
         }
 
         slider.addEventListener( "input", e => {
