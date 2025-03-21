@@ -4100,8 +4100,8 @@ class Panel {
 
         let searchIcon = document.createElement('a');
         searchIcon.className = "fa-solid fa-magnifying-glass";
-        element.appendChild(input);
         element.appendChild(searchIcon);
+        element.appendChild(input);
 
         input.addEventListener("input", (e) => {
             if(options.callback)
@@ -4153,26 +4153,28 @@ class Panel {
         }
     }
 
-    _search_options(options, value) {
-        // push to right container
+    _filterOptions( options, value ) {
+
+        // Push to right container
         const emptyFilter = !value.length;
         let filteredOptions = [];
-        // add widgets
-        for( let i = 0; i < options.length; i++) {
-            let o = options[i];
-            if(!emptyFilter)
+
+        // Add widgets
+        for( let i = 0; i < options.length; i++ )
+        {
+            let o = options[ i ];
+            if( !emptyFilter )
             {
-                let toCompare = (typeof o == 'string') ? o : o.value;
-                ;
+                let toCompare = ( typeof o == 'string' ) ? o : o.value;
                 const filterWord = value.toLowerCase();
                 const name = toCompare.toLowerCase();
-                if(!name.includes(filterWord)) continue;
+                if( !name.includes( filterWord ) ) continue;
             }
-            // insert filtered widget
-            filteredOptions.push(o);
+
+            filteredOptions.push( o );
         }
 
-        this.refresh(filteredOptions);
+        this.refresh( filteredOptions );
     }
 
     _trigger( event, callback ) {
@@ -4986,6 +4988,8 @@ class Panel {
      * filter: Add a search bar to the widget [false]
      * disabled: Make the widget disabled [false]
      * skipReset: Don't add the reset value button when value changes
+     * placeholder: Placeholder for the filter input
+     * emptyMsg: Custom message to show when no filtered results
      */
 
     addDropdown( name, values, value, callback, options = {} ) {
@@ -5033,15 +5037,18 @@ class Panel {
 
         this.queue( container );
 
-        const _placeOptions = () => {
+        const _placeOptions = ( parent ) => {
 
-            const overflowContainer = list.getParentArea();
+            console.log("Replacing container");
+
+            const overflowContainer = parent.getParentArea();
             const rect = selectedOption.getBoundingClientRect();
+            const nestedDialog = parent.parentElement.closest( "dialog" );
 
             // Manage vertical aspect
             {
-                const listHeight = 26 * values.length;
-                const topPosition = rect.y;
+                const listHeight = parent.offsetHeight;
+                let topPosition = rect.y;
 
                 let maxY = window.innerHeight;
 
@@ -5051,23 +5058,36 @@ class Panel {
                     maxY = parentRect.y + parentRect.height;
                 }
 
-                list.style.top = ( topPosition + selectedOption.offsetHeight ) + 'px';
+                if( nestedDialog )
+                {
+                    const rect = nestedDialog.getBoundingClientRect();
+                    topPosition -= rect.y;
+                }
+
+                parent.style.top = ( topPosition + selectedOption.offsetHeight ) + 'px';
 
                 const showAbove = ( topPosition + listHeight ) > maxY;
                 if( showAbove )
                 {
-                    list.style.top = ( topPosition - listHeight ) + 'px';
-                    list.classList.add( "place-above" );
+                    parent.style.top = ( topPosition - listHeight ) + 'px';
+                    parent.classList.add( "place-above" );
                 }
             }
 
             // Manage horizontal aspect
             {
-                const listWidth = list.offsetWidth;
-                const leftPosition = rect.x;
+                const listWidth = parent.offsetWidth;
+                let leftPosition = rect.x;
 
-                list.style.minWidth = ( rect.width ) + 'px';
-                list.style.left = ( leftPosition ) + 'px';
+                parent.style.minWidth = ( rect.width ) + 'px';
+
+                if( nestedDialog )
+                {
+                    const rect = nestedDialog.getBoundingClientRect();
+                    leftPosition -= rect.x;
+                }
+
+                parent.style.left = ( leftPosition ) + 'px';
 
                 let maxX = window.innerWidth;
 
@@ -5080,7 +5100,7 @@ class Panel {
                 const showLeft = ( leftPosition + listWidth ) > maxX;
                 if( showLeft )
                 {
-                    list.style.left = ( leftPosition - ( listWidth - rect.width ) ) + 'px';
+                    parent.style.left = ( leftPosition - ( listWidth - rect.width ) ) + 'px';
                 }
             }
         };
@@ -5092,15 +5112,23 @@ class Panel {
                 return;
             }
 
-            list.toggleAttribute( "hidden" );
-            list.classList.remove( "place-above" );
+            listDialog.classList.remove( "place-above" );
+            const opened = listDialog.hasAttribute( "open" );
 
-            if( !list.hasAttribute( "hidden" ) )
+            if( !opened )
             {
-                _placeOptions();
+                listDialog.show();
+                _placeOptions( listDialog );
+            }
+            else
+            {
+                listDialog.close();
             }
 
-            list.focus();
+            if( filter )
+            {
+                filter.querySelector( "input" ).focus();
+            }
 
         }, { buttonClass: "array", skipInlineCount: true, disabled: options.disabled });
 
@@ -5109,17 +5137,25 @@ class Panel {
         selectedOption.style.width = "100%";
 
         selectedOption.refresh = (v) => {
-            if(selectedOption.querySelector("span").innerText == "")
+            if( selectedOption.querySelector("span").innerText == "" )
+            {
                 selectedOption.querySelector("span").innerText = v;
+            }
             else
+            {
                 selectedOption.querySelector("span").innerHTML = selectedOption.querySelector("span").innerHTML.replaceAll(selectedOption.querySelector("span").innerText, v);
+            }
         }
 
         // Add dropdown options container
+
+        const listDialog = document.createElement( 'dialog' );
+        listDialog.className = "lexdropdownoptions";
+
         let list = document.createElement( 'ul' );
         list.tabIndex = -1;
         list.className = "lexoptions";
-        list.hidden = true;
+        listDialog.appendChild( list )
 
         list.addEventListener( 'focusout', function( e ) {
             e.stopPropagation();
@@ -5137,97 +5173,118 @@ class Panel {
             {
                 return;
             }
-            this.toggleAttribute( 'hidden', true );
+            listDialog.close();
         });
 
         // Add filter options
         let filter = null;
-        if(options.filter ?? false)
+        if( options.filter ?? false )
         {
-            filter = this._addFilter("Search option", {container: list, callback: this._search_options.bind(list, values)});
-        }
+            filter = this._addFilter( options.placeholder ?? "Search...", { container: list, callback: this._filterOptions.bind( list, values )} );
 
-        // Create option list to empty it easily..
-        const listOptions = document.createElement('span');
-        list.appendChild( listOptions );
-
-        if( filter )
-        {
-            list.prepend( filter );
-            listOptions.style.height = "calc(100% - 25px)";
+            list.appendChild( filter );
 
             filter.addEventListener('focusout', function( e ) {
                 if (e.relatedTarget && e.relatedTarget.tagName == "UL" && e.relatedTarget.classList.contains("lexoptions"))
                 {
                     return;
                 }
-                list.toggleAttribute( 'hidden', true );
+                listDialog.close();
             });
         }
 
+        // Create option list to empty it easily..
+        const listOptions = document.createElement('span');
+        listOptions.style.height = "calc(100% - 25px)";
+        list.appendChild( listOptions );
+
         // Add dropdown options list
-        list.refresh = options => {
+        list.refresh = ( options ) => {
 
             // Empty list
             listOptions.innerHTML = "";
 
-            for(let i = 0; i < options.length; i++)
+            if( !options.length )
             {
-                let iValue = options[i];
-                let li = document.createElement('li');
-                let option = document.createElement('div');
+                let iValue = options.emptyMsg ?? "No options found.";
+
+                let option = document.createElement( "div" );
                 option.className = "option";
-                li.appendChild(option);
-                li.addEventListener("click", (e) => {
-                    element.querySelector(".lexoptions").toggleAttribute('hidden', true);
-                    const currentSelected = element.querySelector(".lexoptions .selected");
-                    if(currentSelected) currentSelected.classList.remove("selected");
-                    value = e.currentTarget.getAttribute("value");
-                    e.currentTarget.toggleAttribute('hidden', false);
-                    e.currentTarget.classList.add("selected");
+                option.style.flexDirection = "unset";
+                option.innerHTML = iValue;
+
+                let li = document.createElement( "li" );
+                li.className = "lexdropdownitem empty";
+                li.appendChild( option );
+
+                listOptions.appendChild( li );
+                return;
+            }
+
+            for( let i = 0; i < options.length; i++ )
+            {
+                let iValue = options[ i ];
+                let li = document.createElement( "li" );
+                let option = document.createElement( "div" );
+                option.className = "option";
+                li.appendChild( option );
+
+                li.addEventListener( "click", e => {
+                    listDialog.close();
+                    const currentSelected = element.querySelector( ".lexoptions .selected" );
+                    if(currentSelected) currentSelected.classList.remove( "selected" );
+                    value = e.currentTarget.getAttribute( "value" );
+                    e.currentTarget.toggleAttribute( "hidden", false );
+                    e.currentTarget.classList.add( "selected" );
                     selectedOption.refresh(value);
 
-                    let btn = element.querySelector(".lexwidgetname .lexicon");
-                    if(btn) btn.style.display = (value != wValue.iValue ? "block" : "none");
-                    that._trigger( new IEvent(name, value, null), callback );
+                    let btn = element.querySelector( ".lexwidgetname .lexicon" );
+                    if( btn ) btn.style.display = (value != wValue.iValue ? "block" : "none");
+                    that._trigger( new IEvent( name, value, null ), callback );
 
                     // Reset filter
-                    if(filter)
+                    if( filter )
                     {
-                        filter.querySelector('input').value = "";
-                        this._search_options.bind(list, values, "")();
+                        filter.querySelector( "input" ).value = "";
+                        this._filterOptions.bind( list, values, "" )();
                     }
                 });
 
                 // Add string option
-                if( iValue.constructor != Object ) {
-                    option.style.flexDirection = 'unset';
+                if( iValue.constructor != Object )
+                {
+                    option.style.flexDirection = "unset";
                     option.innerHTML = "</a><span>" + iValue + "</span><a class='fa-solid fa-check'>";
                     option.value = iValue;
-                    li.setAttribute("value", iValue);
+                    li.setAttribute( "value", iValue );
                     li.className = "lexdropdownitem";
-                    if( i == (options.length - 1) ) li.className += " last";
-                    if(iValue == value) {
-                        li.classList.add("selected");
+
+                    if( iValue == value )
+                    {
+                        li.classList.add( "selected" );
                         wValue.innerHTML = iValue;
                     }
                 }
-                else {
+                else
+                {
                     // Add image option
-                    let img = document.createElement("img");
+                    let img = document.createElement( "img" );
                     img.src = iValue.src;
-                    li.setAttribute("value", iValue.value);
+                    li.setAttribute( "value", iValue.value );
                     li.className = "lexlistitem";
                     option.innerText = iValue.value;
                     option.className += " media";
-                    option.prepend(img);
+                    option.prepend( img );
 
-                    option.setAttribute("value", iValue.value);
-                    option.setAttribute("data-index", i);
-                    option.setAttribute("data-src", iValue.src);
-                    option.setAttribute("title", iValue.value);
-                    if(value == iValue.value)
-                        li.classList.add("selected");
+                    option.setAttribute( "value", iValue.value );
+                    option.setAttribute( "data-index", i );
+                    option.setAttribute( "data-src", iValue.src );
+                    option.setAttribute( "title", iValue.value );
+
+                    if( value == iValue.value )
+                    {
+                        li.classList.add( "selected" );
+                    }
                 }
 
                 listOptions.appendChild( li );
@@ -5236,7 +5293,7 @@ class Panel {
 
         list.refresh( values );
 
-        container.appendChild( list );
+        container.appendChild( listDialog );
         element.appendChild( container );
 
         // Remove branch padding and margins
@@ -9600,7 +9657,7 @@ class AssetView {
         }
 
         this.rightPanel.sameLine();
-        this.rightPanel.addDropdown( "Filter", this.allowedTypes, this.allowedTypes[ 0 ], v => this._refreshContent.call(this, null, v), { width: "20%", minWidth: "128px" } );
+        this.rightPanel.addDropdown( "Filter", this.allowedTypes, this.allowedTypes[ 0 ], v => this._refreshContent.call(this, null, v), { width: "30%", minWidth: "128px" } );
         this.rightPanel.addText( null, this.searchValue ?? "", v => this._refreshContent.call(this, v, null), { placeholder: "Search assets.." } );
         this.rightPanel.addButton( null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { className: "micro", title: "Sort" } );
         this.rightPanel.addButton( null, "<a class='fa-solid fa-grip'></a>", on_change_view.bind(this), { className: "micro", title: "View" } );

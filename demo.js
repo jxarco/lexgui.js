@@ -176,7 +176,7 @@ area.addMenubar( m => {
 });
 
 // split main area
-var [left, right] = area.split({ sizes:["80%","20%"], minimizable: true });
+var [left, right] = area.split({ sizes:["70%","30%"], minimizable: true });
 
 // left.addSidebar( m => {
 //     m.add( "Scene", { icon: "fa fa-cube", callback: () => {  } } );
@@ -585,13 +585,13 @@ function fillPanel( panel ) {
     panel.addFile("I'm a File Input", data => { console.log(data) }, { disabled: true } );
     panel.addDropdown("Best Engine", ["Godot", "Unity", "Unreal Engine", "A very super super super large engine name"], "Unity", (value, event) => {
         console.log(value);
-    });
+    }, {filter: true, emptyMsg: "No engines found.", placeholder: "Search engines..."});
     panel.addDropdown("Best Logo", [{value:"Godot", src: "https://godotengine.org/assets/press/logo_vertical_color_light.png"}, {value: "Unity", src: "https://logos-world.net/wp-content/uploads/2023/01/Unity-Logo.png"}, {value:"Unreal Engine", src: "https://cdn2.unrealengine.com/ue-logo-stacked-unreal-engine-w-677x545-fac11de0943f.png"}], "Godot", (value, event) => {
         console.log(value);
-    }, {filter: true});
+    });
     panel.addDropdown("Best Gif", [{value:"Godot", src: "https://i.redd.it/4vepr95bye861.gif"}, {value: "Unity", src: "https://i.gifer.com/origin/db/db3cb258e9bbb78c5851a000742e5468_w200.gif"}, {value:"Unreal Engine", src: "https://d3kjluh73b9h9o.cloudfront.net/original/4X/e/0/d/e0deb23c10cc7852c6ab91c28083e27f9c8228f8.gif"}], "Godot", (value, event) => {
         console.log(value);
-    }, {filter: true});
+    });
 
     panel.addVector3("Im a Vec3", [0.1, 0.4, 0.5], (value, event) => {
         console.log(value);
@@ -894,9 +894,9 @@ function createAssetDialog() {
         ];
 
         var assetView = new LX.AssetView({ 
-            skip_browser: true,
-            skip_navigation: true,
-            preview_actions: previewActions
+            skipBrowser: true,
+            skipNavigation: true,
+            previewActions: previewActions
         });
 
         p.attach( assetView );

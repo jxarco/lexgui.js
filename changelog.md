@@ -6,6 +6,7 @@ Widgets:
 - Support for new Table Widget `Panel.addTable()`.
 - Fixed dropdown horizontal overflow through limits.
 - Improved style of ComboButtons Widget.
+- Support for disabled Dropdown and other improvements.
 
 Improve dialog animations.
 Animated (as Dialog) Global search bar.
@@ -14,6 +15,7 @@ Added `LX.registerGlobalSearchEntry()` to add entries to the global search bar (
 Force dark color scheme by default.
 Support `autoTheme` at LX.init options.
 Docs updated.
+Minor bug fixes.
 
 ## 0.1.46 (master)
 

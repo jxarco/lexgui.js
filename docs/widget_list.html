@@ -540,7 +540,9 @@ panel.@[mtd]addTree@(@"Scene Tree"@, sceneData, {
             [
                 ["filter", "Boolean", "Specify if the drop-down needs a search bar"],
                 ["disabled", "Boolean", "Make the widget disabled"],
-                ["skipReset", "Boolean", "Don't add the reset value button when value changes"]
+                ["skipReset", "Boolean", "Don't add the reset value button when value changes"],
+                ["placeholder", "String", "Placeholder for the filter input"],
+                ["emptyMsg", "String", "Custom message to show when no filtered results"]
             ]
         ] );
         MAKE_CODE( `@[com]// String values@
