@@ -1,6 +1,8 @@
 # lexgui.js changelog
 
-## 0.1.47 (dev)
+## 0.2.1 (dev)
+
+## 0.2.0 (master)
 
 Widgets:
 - Support for new Table Widget `Panel.addTable()`.
@@ -22,7 +24,7 @@ Add minified build versions.
 Docs updated.
 Minor bug fixes.
 
-## 0.1.46 (master)
+## 0.1.46
 
 Support for creating code snippets `LX.makeCodeSnippet(options)`.
 Added `swapButton.swap()` and Add `swapButton.setState(bool)`.
