@@ -1,6 +1,9 @@
 # lexgui.js changelog
 
-## 0.2.1 (dev)
+## dev
+
+Timeline theme updated support light scheme color.
+Minor CSS fixes.
 
 ## 0.2.0 (master)
 

@@ -7960,9 +7960,6 @@ class Branch {
                 case Widget.FILE:
                     padding = "10%";
                     break;
-                case Widget.TEXT:
-                    padding = "8px";
-                    break;
             };
 
             value.style.width = "-moz-calc( 100% - " + size + " - " + padding + " )";

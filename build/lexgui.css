@@ -1744,6 +1744,7 @@ input[type=number] {
 
 .lexwidget .numberbox {
     display: grid;
+    width: calc(100% - 4px);
     background-color: var(--global-button-color);
     border: 2px solid var(--global-color-transparent);
     border-radius: 6px;
@@ -1764,6 +1765,10 @@ input[type=number] {
     position: absolute;
     top: 1px;
     pointer-events: none;
+}
+
+.lexnumber .vecinput {
+    width: calc(100% - 12px); /* remove padding, margin, and border */
 }
 
 .lexinputmeasure {
