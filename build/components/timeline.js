@@ -142,6 +142,13 @@ class Timeline {
             this.resizeCanvas( [ bounding.width, bounding.height + this.header_offset ] );
         }
         this.resize(this.size);
+
+        // update color theme
+        this.updateTheme();
+        LX.addSignal( "@on_new_color_scheme", (el, value) => {
+            // Retrieve again the color using LX.getThemeColor, which checks the applied theme
+            this.updateTheme();
+        } )
     }
 
     /**
@@ -507,7 +514,7 @@ class Timeline {
 
         // Begin drawing
         ctx.beginPath();
-        ctx.fillStyle = Timeline.FONT_COLOR//"#888";
+        ctx.fillStyle = Timeline.FONT_COLOR;
         ctx.globalAlpha = this.opacity;
 
         for( let x = startx; x <= endx; x += tickX )
@@ -550,8 +557,8 @@ class Timeline {
         let max_tracks = Math.ceil( (h - timeline_height + this.currentScrollInPixels) / line_height );
 
         ctx.save();
-        ctx.fillStyle = "#f0f0f003"//Timeline.TRACK_COLOR_SECONDARY;
-        ctx.globalAlpha = 1;
+        ctx.fillStyle = Timeline.TRACK_COLOR_SECONDARY;
+        ctx.globalAlpha = 0.3 * this.opacity;
         for(let i = 0; i <= max_tracks; i+=2)
         {
             ctx.fillRect(0, timeline_height + i * line_height  - this.currentScrollInPixels, w, line_height );
@@ -559,7 +566,7 @@ class Timeline {
         ctx.globalAlpha = this.opacity;
 
         //bg lines
-        ctx.strokeStyle = "#444";
+        ctx.strokeStyle = Timeline.TRACK_COLOR_TERCIARY;
         ctx.beginPath();
     
         let pos = this.timeToX( 0 );
@@ -670,15 +677,15 @@ class Timeline {
         ctx.font = "11px " + Timeline.FONT;//"11px Calibri";
         ctx.textAlign = "center";
         //ctx.textBaseline = "middle";
-        ctx.fillStyle = Timeline.COLOR_INACTIVE//"#888";
+        ctx.fillStyle = Timeline.COLOR_INACTIVE;
         ctx.fillText( (Math.floor(this.currentTime*10)*0.1).toFixed(1), posx, this.topMargin * 0.6 );
 
         // Selections
         ctx.strokeStyle = ctx.fillStyle =  Timeline.FONT_COLOR;
         ctx.translate( this.position[0], this.position[1] + this.topMargin )
         if(this.boxSelection) {
-            ctx.globalAlpha = 0.15;
-            ctx.fillStyle = "#AAA";
+            ctx.globalAlpha = 0.15 * this.opacity;
+            ctx.fillStyle = Timeline.BOX_SELECTION_COLOR;
             ctx.strokeRect( this.boxSelectionStart[0], this.boxSelectionStart[1], this.boxSelectionEnd[0] - this.boxSelectionStart[0], this.boxSelectionEnd[1] - this.boxSelectionStart[1]);
             ctx.fillRect( this.boxSelectionStart[0], this.boxSelectionStart[1], this.boxSelectionEnd[0] - this.boxSelectionStart[0], this.boxSelectionEnd[1] - this.boxSelectionStart[1]);
             ctx.stroke();
@@ -1077,16 +1084,16 @@ class Timeline {
         let selectedClipArea = null;
 
         if(track.enabled === false) {
-            ctx.globalAlpha = 0.4;
+            ctx.globalAlpha = 0.4 * this.opacity;
         }
         else {
-            ctx.globalAlpha = 0.2;
+            ctx.globalAlpha = 0.2 * this.opacity;
         }
 
         ctx.font = Math.floor( trackHeight * 0.8) + "px" + Timeline.FONT;
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
-        ctx.fillStyle = Timeline.TRACK_SELECTED_LIGHT//"#2c303570";
+        ctx.fillStyle = Timeline.TRACK_SELECTED_LIGHT;
         
         // Fill track background if it's selected
         if(track.isSelected) {
@@ -1094,7 +1101,7 @@ class Timeline {
         }
 
         let clips = track.clips;
-        let trackAlpha = 1;
+        let trackAlpha = this.opacity;
 
         if(!clips) {
             return;
@@ -1137,7 +1144,7 @@ class Timeline {
                     ctx.fillStyle = 'rgba(' + color.join(',') + ', 0.8)';
                 }
                 else {
-                    ctx.globalAlpha = 0.8;
+                    ctx.globalAlpha = 0.8 * this.opacity;
                 }
             
                 // Draw fade-in and fade-out
@@ -1304,22 +1311,37 @@ class Timeline {
         this.updateLeftPanel();
         this.resize();        
     }
+
+    /**
+     * updates theme (light - dark) based on LX's current theme
+     */
+    updateTheme( ){
+        Timeline.BACKGROUND_COLOR = LX.getThemeColor("global-blur-background");
+        Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor("global-color-primary");
+        Timeline.TRACK_COLOR_SECONDARY = LX.getThemeColor("global-color-secondary");
+        Timeline.TRACK_COLOR_TERCIARY = LX.getThemeColor("global-color-terciary");
+        Timeline.TRACK_COLOR_QUATERNARY = LX.getThemeColor("global-color-quaternary");
+        Timeline.FONT = LX.getThemeColor("global-font");
+        Timeline.FONT_COLOR = LX.getThemeColor("global-text-primary");
+     }
 };
 
-Timeline.BACKGROUND_COLOR = LX.getThemeColor("global-color-primary");
-Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor("global-blur-background");
-Timeline.TRACK_COLOR_SECONDARY = LX.getThemeColor("global-color-terciary");
+Timeline.BACKGROUND_COLOR = LX.getThemeColor("global-blur-background");
+Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor("global-color-primary");
+Timeline.TRACK_COLOR_SECONDARY = LX.getThemeColor("global-color-secondary");
+Timeline.TRACK_COLOR_TERCIARY = LX.getThemeColor("global-color-terciary");
+Timeline.TRACK_COLOR_QUATERNARY = LX.getThemeColor("global-color-quaternary");
 Timeline.TRACK_SELECTED = LX.getThemeColor("global-selected");
 Timeline.TRACK_SELECTED_LIGHT = LX.getThemeColor("global-selected-light");
 Timeline.FONT = LX.getThemeColor("global-font");
-Timeline.FONT_COLOR = LX.getThemeColor("global-text");
-Timeline.COLOR = LX.getThemeColor("global-selected-dark");//"#5e9fdd";
+Timeline.FONT_COLOR = LX.getThemeColor("global-text-primary");
+Timeline.COLOR = LX.getThemeColor("global-selected-dark");
 Timeline.COLOR_SELECTED = Timeline.COLOR_HOVERED = "rgba(250,250,20,1)";///"rgba(250,250,20,1)";
 // Timeline.COLOR_HOVERED = LX.getThemeColor("global-selected");
 Timeline.COLOR_INACTIVE = "rgba(250,250,250,0.7)";
 Timeline.COLOR_LOCK = "rgba(255,125,125,0.7)";
 Timeline.COLOR_EDITED = "rgba(20,230,20,0.7)"//"rgba(125,250,250, 1)";
-
+Timeline.BOX_SELECTION_COLOR = "#AAA";
 LX.Timeline = Timeline;
 
 /**
@@ -1651,13 +1673,13 @@ class KeyFramesTimeline extends Timeline {
 
         
         if(track.isSelected) {
-            ctx.globalAlpha = 0.2;
-            ctx.fillStyle = Timeline.TRACK_SELECTED;//"#2c303570";
+            ctx.globalAlpha = 0.2 * this.opacity;
+            ctx.fillStyle = Timeline.TRACK_SELECTED;
             ctx.fillRect(0, 0, ctx.canvas.width, trackHeight );
         }
 
-        ctx.fillStyle = Timeline.COLOR;//"#2c303570";
-        ctx.globalAlpha = 1;
+        ctx.fillStyle = Timeline.COLOR;
+        ctx.globalAlpha = this.opacity;
 
         let keyframes = track.times;
 
@@ -4247,12 +4269,12 @@ class CurvesTimeline extends Timeline {
 
         if(keyframes) {
             if(track.isSelected){
-                ctx.globalAlpha = 0.2;
-                ctx.fillStyle = Timeline.TRACK_SELECTED_LIGHT//"#2c303570";
+                ctx.globalAlpha = 0.2 * this.opacity;
+                ctx.fillStyle = Timeline.TRACK_SELECTED_LIGHT;
                 ctx.fillRect(0, 0, ctx.canvas.width, trackHeight );      
             }
                 
-            ctx.globalAlpha = 1;
+            ctx.globalAlpha = this.opacity;
                 
             //draw lines
             ctx.strokeStyle = "white";
