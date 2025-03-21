@@ -8,6 +8,7 @@ Widgets:
 - Improved style of ComboButtons Widget.
 - Support for disabled Dropdown and other improvements.
 
+Add minified build versions.
 Improve dialog animations.
 Animated (as Dialog) Global search bar.
 CodeSnippet: Allow hiding line number `lineNumbers`.
