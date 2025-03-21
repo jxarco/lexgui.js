@@ -219,9 +219,9 @@ body.noevents * {
     margin-top: 0.01em;
 }
 
-/* Global Search bar */
+/* Commandbar */
 
-#global-search {
+.commandbar {
     position: absolute;
     background-color: var(--global-blur-background);
     --webkit-backdrop-filter: blur(12px);
@@ -242,18 +242,18 @@ body.noevents * {
     /* this fixes the overflow:hidden in Chrome/Opera */
 }
 
-#global-search[open] {
+.commandbar[open] {
     display: flex;
 }
 
-#global-search .gs-header {
+.commandbar .gs-header {
     width: 100%;
     height: 32px;
     display: flex;
     padding: 6px;
 }
 
-#global-search a {
+.commandbar a {
     color: var(--global-text-secondary);
     padding: 10px;
     background-color: var(--global-color-terciary);
@@ -262,7 +262,7 @@ body.noevents * {
     font-size: 12px;
 }
 
-#global-search input {
+.commandbar input {
     width: 100%;
     flex: 50%;
     background: none;
@@ -278,30 +278,30 @@ body.noevents * {
     font-weight: 600;
 }
 
-#global-search .lexarea {
+.commandbar .lexarea {
     background: none !important;
 }
 
-#global-search .searchitembox {
+.commandbar .searchitembox {
     flex-basis: 100%;
     overflow-y: scroll;
     max-height: calc(512px - 48px);
 }
 
-#global-search .searchitembox::-webkit-scrollbar {
+.commandbar .searchitembox::-webkit-scrollbar {
     display: none;
 }
 
-#global-search .searchitembox .searchitem {
+.commandbar .searchitembox .searchitem {
     padding: 10px;
     padding-left: 50px;
     color: var(--global-text-primary);
-    font-size: 13px;
+    font-size: var(--global-font-size);
     line-height: 15px;
     cursor: pointer;
 }
 
-#global-search .searchitembox .searchitem a {
+.commandbar .searchitembox .searchitem a {
     padding: 0px;
     margin-left: -28px;
     margin-top: 2px;
@@ -309,7 +309,7 @@ body.noevents * {
     float: left;
 }
 
-#global-search .searchitembox .searchitem i {
+.commandbar .searchitembox .searchitem i {
     width: 12px;
     font-size: 11px;
     margin-right: 4px;
@@ -317,24 +317,24 @@ body.noevents * {
     vertical-align: middle;
 }
 
-#global-search .searchitembox .searchitem img {
+.commandbar .searchitembox .searchitem img {
     width: 12px;
     margin-right: 4px;
     margin-top: -2px;
     vertical-align: middle;
 }
 
-#global-search .searchitembox .searchitem .lang-ext {
+.commandbar .searchitembox .searchitem .lang-ext {
     color: #676e75;
     font-size: var(--global-font-size);
 }
 
-#global-search .searchitembox .searchitem.last {
+.commandbar .searchitembox .searchitem.last {
     border-bottom-left-radius: 6px;
     border-bottom-right-radius: 6px;
 }
 
-#global-search .searchitembox .searchitem.hovered {
+.commandbar .searchitembox .searchitem.hovered {
     background-color: var(--global-selected);
     color: #f5f5f5;
 }

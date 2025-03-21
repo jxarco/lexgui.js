@@ -12,7 +12,7 @@ var LX = {
     ready: false,
     components: [], // specific pre-build components
     signals: {}, // events and triggers
-    extraGlobalSearchEntries: [] // user specific entries for global search
+    extraCommandbarEntries: [] // user specific entries for command bar
 };
 
 LX.MOUSE_LEFT_CLICK     = 0;
@@ -500,17 +500,17 @@ function makeCodeSnippet( code, size, options = { } )
 LX.makeCodeSnippet = makeCodeSnippet;
 
 /**
- * @method registerGlobalSearchEntry
- * @description Adds an extra global search entry
+ * @method registerCommandbarEntry
+ * @description Adds an extra command bar entry
  * @param {String} name
  * @param {Function} callback
  */
-function registerGlobalSearchEntry( name, callback )
+function registerCommandbarEntry( name, callback )
 {
-    LX.extraGlobalSearchEntries.push( { name, callback } );
+    LX.extraCommandbarEntries.push( { name, callback } );
 }
 
-LX.registerGlobalSearchEntry = registerGlobalSearchEntry;
+LX.registerCommandbarEntry = registerCommandbarEntry;
 
 // Math classes
 
@@ -540,17 +540,17 @@ class vec2 {
 
 LX.vec2 = vec2;
 
-function create_global_searchbar( root )
+function _createCommandbar( root )
 {
-    let globalSearch = document.createElement( "dialog" );
-    globalSearch.id = "global-search";
-    globalSearch.tabIndex = -1;
-    root.appendChild( globalSearch );
+    let commandbar = document.createElement( "dialog" );
+    commandbar.className = "commandbar";
+    commandbar.tabIndex = -1;
+    root.appendChild( commandbar );
 
     let allItems = [];
     let hoverElId = null;
 
-    globalSearch.addEventListener('keydown', function( e ) {
+    commandbar.addEventListener('keydown', function( e ) {
         e.stopPropagation();
         e.stopImmediatePropagation();
         hoverElId = hoverElId ?? -1;
@@ -580,7 +580,7 @@ function create_global_searchbar( root )
         else if ( e.key == 'ArrowDown' && hoverElId < (allItems.length - 1) )
         {
             hoverElId++;
-            globalSearch.querySelectorAll(".hovered").forEach(e => e.classList.remove('hovered'));
+            commandbar.querySelectorAll(".hovered").forEach(e => e.classList.remove('hovered'));
             allItems[ hoverElId ].classList.add('hovered');
 
             let dt = allItems[ hoverElId ].offsetHeight * (hoverElId + 1) - itemContainer.offsetHeight;
@@ -595,12 +595,12 @@ function create_global_searchbar( root )
         } else if ( e.key == 'ArrowUp' && hoverElId > 0 )
         {
             hoverElId--;
-            globalSearch.querySelectorAll(".hovered").forEach(e => e.classList.remove('hovered'));
+            commandbar.querySelectorAll(".hovered").forEach(e => e.classList.remove('hovered'));
             allItems[ hoverElId ].classList.add('hovered');
         }
     });
 
-    globalSearch.addEventListener('focusout', function( e ) {
+    commandbar.addEventListener('focusout', function( e ) {
         if( e.relatedTarget == e.currentTarget )
         {
             return;
@@ -616,9 +616,7 @@ function create_global_searchbar( root )
         {
             e.stopImmediatePropagation();
             e.stopPropagation();
-            globalSearch.show();
-            globalSearch.querySelector('input').focus();
-            _addElements( undefined );
+            LX.setCommandbarState( true );
         }
         else
         {
@@ -706,12 +704,12 @@ function create_global_searchbar( root )
         searchItem.callback = c;
         searchItem.item = i;
         searchItem.addEventListener('click', function(e) {
-            this.callback.call(window, this.entry_name);
-            globalSearch.close();
+            this.callback.call( window, this.entry_name );
+            LX.setCommandbarState( false );
             _resetBar( true );
         });
         searchItem.addEventListener('mouseenter', function(e) {
-            globalSearch.querySelectorAll(".hovered").forEach(e => e.classList.remove('hovered'));
+            commandbar.querySelectorAll(".hovered").forEach(e => e.classList.remove('hovered'));
             this.classList.add('hovered');
             hoverElId = allItems.indexOf( this );
         });
@@ -745,7 +743,7 @@ function create_global_searchbar( root )
             _propagateAdd( c, filter, path );
     };
 
-    const _addElements = filter => {
+    commandbar._addElements = filter => {
 
         _resetBar();
 
@@ -757,7 +755,7 @@ function create_global_searchbar( root )
             }
         }
 
-        for( let entry of LX.extraGlobalSearchEntries )
+        for( let entry of LX.extraCommandbarEntries )
         {
             const name = entry.name;
             if( !name.toLowerCase().includes( filter ) )
@@ -795,14 +793,14 @@ function create_global_searchbar( root )
     }
 
     input.addEventListener('input', function(e) {
-        _addElements( this.value.toLowerCase() );
+        commandbar._addElements( this.value.toLowerCase() );
     });
 
-    globalSearch.appendChild( header );
-    globalSearch.appendChild( tabArea.root );
-    globalSearch.appendChild( itemContainer );
+    commandbar.appendChild( header );
+    commandbar.appendChild( tabArea.root );
+    commandbar.appendChild( itemContainer );
 
-    return globalSearch;
+    return commandbar;
 }
 
 /**
@@ -838,9 +836,13 @@ function init( options = { } )
     this.modal.toggle = function( force ) { this.classList.toggle( 'hiddenOpacity', force ); };
 
     if( options.container )
+    {
         this.container = document.getElementById( options.container );
+    }
 
     this.globalSearch = create_global_searchbar( this.container );
+
+    this.commandbar = _createCommandbar( this.container );
 
     this.container.appendChild( modal );
 
@@ -897,6 +899,34 @@ function init( options = { } )
 }
 
 LX.init = init;
+
+/**
+ * @method setCommandbarState
+ * @param {Boolean} value
+ * @param {Boolean} resetEntries
+ */
+
+function setCommandbarState( value, resetEntries = true )
+{
+    const cb = this.commandbar;
+
+    if( value )
+    {
+        cb.show();
+        cb.querySelector('input').focus();
+
+        if( resetEntries )
+        {
+            cb._addElements( undefined );
+        }
+    }
+    else
+    {
+        cb.close();
+    }
+}
+
+LX.setCommandbarState = setCommandbarState;
 
 /**
  * @method message

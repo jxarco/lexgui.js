@@ -12,7 +12,8 @@ Add minified build versions.
 Improve dialog animations.
 Animated (as Dialog) Global search bar.
 CodeSnippet: Allow hiding line number `lineNumbers`.
-Added `LX.registerGlobalSearchEntry()` to add entries to the global search bar (Ctrl+Space).
+Added `LX.registerCommandbarEntry()` to add entries to the global search bar (Ctrl+Space).
+Added `LX.setCommandbarState()` to show the command bar from code.
 Force dark color scheme by default.
 Support `autoTheme` at LX.init options.
 Docs updated.
