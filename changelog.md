@@ -15,6 +15,7 @@ Renamed "Global search bar" to "Command bar";
 Added `LX.registerCommandbarEntry()` to add entries to the command bar (Ctrl+Space).
 Added `LX.setCommandbarState()` to show the command bar from code.
 Command bar animated (as others dialogs).
+Added wip for `LX.makeContainer()` to create default containers with specific class options.
 Force dark color scheme by default.
 Support `autoTheme` at LX.init options.
 Add minified build versions.

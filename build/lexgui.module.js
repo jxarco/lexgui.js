@@ -1068,6 +1068,25 @@ function badge( text, className, options = {} )
 
 LX.badge = badge;
 
+/**
+ * @method makeContainer
+ * @param {Array} size
+ * @param {String} className
+ * @param {Object} overrideStyle
+ */
+
+function makeContainer( size, className, overrideStyle = {} )
+{
+    const container = document.createElement( "div" );
+    container.className = "lexcontainer " + ( className ?? "" );
+    container.style.width = size && size[ 0 ] ? size[ 0 ] : "100%";
+    container.style.height = size && size[ 1 ] ? size[ 1 ] : "100%";
+    Object.assign( container.style, overrideStyle );
+    return container;
+}
+
+LX.makeContainer = makeContainer;
+
 /*
 *   Events and Signals
 */
@@ -1550,8 +1569,8 @@ class Area {
                 }
 
                 area1.root.style.width = "100%";
-                area1.root.style.height = "calc( " + height1 + " - " + data + " )";
-                area2.root.style.height = "calc( " + height2 + " - " + data + " )";
+                area1.root.style.height = ( height1 == "auto" ? height1 : "calc( " + height1 + " - " + data + " )");
+                area2.root.style.height = ( height2 == "auto" ? height2 : "calc( " + height2 + " - " + data + " )");
             }
         }
 
@@ -2151,7 +2170,7 @@ class Tabs {
 
         area.root.classList.add( "lexareatabscontainer" );
 
-        area.split({type: 'vertical', sizes: "auto", resize: false, top: 6});
+        area.split({type: 'vertical', sizes: options.sizes ?? "auto", resize: false, top: 6});
         area.sections[0].attach( container );
 
         this.area = area.sections[1];

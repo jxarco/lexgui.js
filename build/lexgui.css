@@ -12,13 +12,13 @@
 
     --global-font: "GoogleSans", sans-serif;
     --global-title-font: "GoogleSans", sans-serif;
-    --global-font-size: 12px;
-    --global-font-size-big: 14px;
-    --global-color-primary: light-dark(#f9f9f9, #1c1c1c);
-    --global-color-secondary: light-dark(#ececec, #2c2c2c);
-    --global-color-terciary: light-dark(#e0e0e0, #444);
-    --global-color-quaternary: light-dark(#c8c8c8, #555);
-    --global-color-quinary: light-dark(#b0b0b0, #666);
+    --global-font-size: 13px;
+    --global-font-size-big: 15px;
+    --global-color-primary: light-dark(#f9f9f9, #141414);
+    --global-color-secondary: light-dark(#ececec, #252525);
+    --global-color-terciary: light-dark(#e0e0e0, #3a3a3a);
+    --global-color-quaternary: light-dark(#c8c8c8, #494949);
+    --global-color-quinary: light-dark(#b0b0b0, #5c5c5c);
     --global-selected: #2d69da;
     --global-selected-light: #0d99ff;
     --global-selected-dark: #304b86;
@@ -91,12 +91,14 @@ body {
     margin: 0;
     padding: 0;
     font-family: var(--global-font);
-    /* font-weight: 400; */
 }
 
 :root[data-strictVP="false"] {
     overflow-y: auto;
 }
+
+blockquote, dd, dl, figure, h1, h2, h3, h4, h5, h6, hr, p, pre {
+    margin: 0;
 }
 
 a:any-link {
@@ -374,6 +376,11 @@ body.noevents * {
     margin-bottom: 12px;
 }
 
+.lexfooter h2 {
+    margin-block-start: 0.83em;
+    margin-block-end: 0.83em;
+}
+
 .lexfooter ul li {
     margin-bottom: 8px;
     font-size: 14px;
@@ -613,6 +620,17 @@ body.noevents * {
     }
 }
 
+/* Generic */
+
+.lexcontainer {
+    display: flex;
+    flex-direction: row;
+}
+
+.lexcontainer.col {
+    flex-direction: column;
+}
+
 /* Area */
 
 .lexarea {
@@ -820,6 +838,11 @@ body.noevents * {
     padding-right: 4px;
 }
 
+.lexwidget.right {
+    margin-left: auto;
+    margin-right: 8px;
+}
+
 .lexwidget.micro button {
     padding-left: 4px;
     padding-right: 4px;
@@ -991,7 +1014,7 @@ body.noevents * {
     width: -moz-fit-content;
     color: var(--global-text-secondary);
     font-weight: 800;
-    font-size: 13px;
+    font-size: 14px;
     margin: 12px;
     padding: 2px;
     padding-left: 12px;
@@ -1051,7 +1074,7 @@ body.noevents * {
     cursor: pointer;
     font-family: var(--global-font);
     transition: 0.1s linear;
-    padding: 0.25rem;
+    padding: 0.35rem;
 }
 
 :root[data-theme="light"] {
@@ -1075,6 +1098,13 @@ body.noevents * {
 /* Few Sizes */
 .lexbutton.xs { width: 25% !important; margin: 0 auto; }
 .lexbutton.sm { width: 45% !important; margin: 0 auto; }
+/* Styles */
+.lexbutton.outline { box-shadow: none; --button-color: var(--global-intense-background); border: 1px solid var(--global-color-quaternary) !important; }
+
+.lexbutton.left {
+    text-align: left;
+    padding-inline: 12px;
+}
 
 .lexbutton span:has(.lexbadge) {
     display: inline-flex;
@@ -1953,7 +1983,7 @@ input[type="range"] {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    font-size: 14px;
+    font-size: var(--global-font-size-big);
     font-weight: 800;
 }
 
@@ -2212,7 +2242,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     display: flex;
     height: 100%;
     color: var(--global-text-primary);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
 }
 
@@ -2379,9 +2409,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     display: flex;
     background-color: var(--global-color-secondary);
     margin-top: 10px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     border-radius: 6px;
     padding-inline: 4px;
+    font-size: 16px;
 }
 
 .lexmenubar .lexmenubuttons.center {
@@ -2391,17 +2422,17 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexmenubar .lexmenubuttons.right {
-    margin-left: auto;
-    margin-right: 16px;
+    margin-left: unset;
+    margin-right: 12px;
 }
 
 .lexmenubar .lexmenubutton {
-    /* display: flex; */
     justify-content: center;
     padding: 8px;
     padding-top: 0.6em;
     color: var(--global-text-secondary);
     cursor: pointer;
+    line-height: 10px;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -2821,7 +2852,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexareatabs.row {
-    width: 100%;
+    width: calc(100%-9px);
 }
 
 .lexareatabs.row {
