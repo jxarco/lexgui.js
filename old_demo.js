@@ -528,6 +528,32 @@ function fillPanel( panel ) {
     });    
 
     // add widgets to panel branch
+    panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});
+    panel.addColor("Background", "#b7a9b1");
+    panel.addText("Text", "Lexgui.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
+    panel.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
+        console.log("Font Color: ", value);
+    });
+    panel.addRange("Some Range", 10, (value, event) => {
+        console.log(value);
+    }, { min: 1, max: 48, step: 1});
+    panel.addNumber("Font Size", 36, (value, event) => {
+        console.log(value);
+    }, { min: 1, max: 48, step: 1, units: "px"});
+    panel.addVector2("2D Position", [250, 350], (value, event) => {
+        console.log(value);
+    }, { min: 0, max: 1024 });
+    panel.addSeparator();
+    panel.addTitle("Configuration (Im a title)");
+    panel.addCheckbox("Toggle me", true, (value, event) => {
+        console.log(value);
+    }, { suboptions: (p) => {
+        p.addText(null, "Suboption 1");
+        p.addNumber("Suboption 2", 12);
+    } });
+    panel.addFile("Image", data => { console.log(data) }, {} );
+    panel.merge();
+
     panel.branch("Preferences", {icon: "fa-solid fa-gear"});
     panel.addButton(null, "Show Notifications" + LX.badge("+99", "accent sm"));
     panel.addCounter("Calories Counter ", 350, (v) => { console.log( v + " calories!" ) }, { label: "CALORIES/DAY", max: 500 });
@@ -608,30 +634,6 @@ function fillPanel( panel ) {
     panel.addSize("Screen Res", [1280, 720], (value, event) => {
         console.log(value);
     }, { units: "p", precision: 0 });
-
-    // another branch
-    panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});
-    panel.addColor("Background", "#b7a9b1");
-    panel.addText("Text", "Lexgui.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
-    panel.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
-        console.log("Font Color: ", value);
-    });
-    panel.addNumber("Font Size", 36, (value, event) => {
-        console.log(value);
-    }, { min: 1, max: 48, step: 1, units: "px"});
-    panel.addVector2("2D Position", [250, 350], (value, event) => {
-        console.log(value);
-    }, { min: 0, max: 1024 });
-    panel.addSeparator();
-    panel.addTitle("Configuration (Im a title)");
-    panel.addCheckbox("Toggle me", true, (value, event) => {
-        console.log(value);
-    }, { suboptions: (p) => {
-        p.addText(null, "Suboption 1");
-        p.addNumber("Suboption 2", 12);
-    } });
-    panel.addFile("Image", data => { console.log(data) }, {} );
-    panel.merge();
 
     // This is outside a branch
     panel.addText("Im out :(", "", null, { placeholder: "Alone..." });

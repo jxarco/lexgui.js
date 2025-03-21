@@ -223,7 +223,8 @@ LX.hexToRgb = hexToRgb;
 function rgbToHex( rgb )
 {
     let hex = "#";
-    for( let c of rgb ) {
+    for( let c of rgb )
+    {
         c = Math.floor( c * 255 );
         hex += c.toString( 16 );
     }
@@ -768,12 +769,12 @@ function _createCommandbar( root )
         if( LX.has('CodeEditor') )
         {
             const instances = LX.CodeEditor.getInstances();
-            if(!instances.length) return;
+            if( !instances.length ) return;
 
             const languages = instances[ 0 ].languages;
 
-            for( let l of Object.keys( languages ) ) {
-
+            for( let l of Object.keys( languages ) )
+            {
                 const key = "Language: " + l;
                 const icon = instances[ 0 ]._getFileIcon( null, languages[ l ].ext );
 
@@ -781,9 +782,11 @@ function _createCommandbar( root )
                         "<img src='" + ( "https://raw.githubusercontent.com/jxarco/lexgui.js/master/" + icon ) + "'>";
 
                 value += key + " <span class='lang-ext'>(" + languages[ l ].ext + ")</span>";
-                if( key.toLowerCase().includes( filter ) ) {
+                if( key.toLowerCase().includes( filter ) )
+                {
                     _addElement( value, () => {
-                        for( let i of instances ) {
+                        for( let i of instances )
+                        {
                             i._changeLanguage( l );
                         }
                     }, "", {} );
@@ -1350,7 +1353,8 @@ class Area {
 
                 function inner_mousemove( e )
                 {
-                    switch( that.type ) {
+                    switch( that.type )
+                    {
                         case "right":
                             var dt = ( lastMousePosition[ 0 ] - e.x );
                             var size = ( that.root.offsetWidth + dt );
@@ -1545,7 +1549,8 @@ class Area {
 
                 // Listen resize event on first area
                 const resizeObserver = new ResizeObserver( entries => {
-                    for (const entry of entries) {
+                    for ( const entry of entries )
+                    {
                         const bb = entry.contentRect;
                         area2.root.style.height = "calc(100% - " + ( bb.height + 4) + "px )";
                     }
@@ -1705,7 +1710,7 @@ class Area {
         let [area1, area2] = this.sections;
         this.splitExtended = true;
 
-        if(this.type == "vertical")
+        if( this.type == "vertical")
         {
             this.offset = area2.root.offsetHeight;
             area2.root.classList.add("fadeout-vertical");
@@ -1735,7 +1740,7 @@ class Area {
         this.splitExtended = false;
         let [area1, area2] = this.sections;
 
-        if(this.type == "vertical")
+        if( this.type == "vertical")
         {
             area2.root.classList.add("fadein-vertical");
             this._moveSplit(this.offset);
@@ -1780,7 +1785,7 @@ class Area {
 
     propagateEvent( eventName ) {
 
-        for(var i = 0; i < this.sections.length; i++)
+        for( var i = 0; i < this.sections.length; i++ )
         {
             const area = this.sections[i];
             if(area[ eventName ])
@@ -2098,7 +2103,8 @@ class Area {
 
         this.size = [ rect.width, rect.height ];
 
-        for(var i = 0; i < this.sections.length; i++) {
+        for( var i = 0; i < this.sections.length; i++ )
+        {
             this.sections[i]._update();
         }
     }
@@ -2122,7 +2128,7 @@ class Tabs {
     static TAB_SIZE = 28;
     static TAB_ID   = 0;
 
-    constructor( area, options = {} )  {
+    constructor( area, options = {} ) {
 
         this.onclose = options.onclose;
 
@@ -2213,7 +2219,8 @@ class Tabs {
 
             // Listen resize event on parent area
             const resizeObserver = new ResizeObserver((entries) => {
-                for (const entry of entries) {
+                for (const entry of entries)
+                {
                     const bb = entry.contentRect;
                     const sibling = area.parentArea.sections[0].root;
                     const add_offset = true; // hardcoded...
@@ -2358,7 +2365,8 @@ class Tabs {
 
         setTimeout( () => {
 
-            if( options.onCreate ) {
+            if( options.onCreate )
+            {
                 options.onCreate.call(this, this.area.root.getBoundingClientRect());
             }
 
@@ -2420,7 +2428,7 @@ LX.Tabs = Tabs;
 
 class Menubar {
 
-    constructor( options = {} )  {
+    constructor( options = {} ) {
 
         this.root = document.createElement('div');
         this.root.className = "lexmenubar";
@@ -2465,15 +2473,18 @@ class Menubar {
                 if(key) found = o[ key ];
             } );
 
-            if(found) {
+            if( found )
+            {
                 insert( tokens[idx++], found );
             }
-            else {
+            else
+            {
                 let item = {};
                 item[ token ] = [];
                 const next_token = tokens[idx++];
                 // Check if last token -> add callback
-                if(!next_token) {
+                if( !next_token )
+                {
                     item[ 'callback' ] = options.callback;
                     item[ 'type' ] = options.type;
                     item[ 'checked' ] = options.checked;
@@ -2500,16 +2511,23 @@ class Menubar {
             entry.className = "lexmenuentry";
             entry.id = pKey;
             entry.innerHTML = "<span>" + key + "</span>";
-            if(options.position == "left") {
+            if( options.position == "left" )
+            {
                 this.root.prepend( entry );
             }
-            else {
-                if(options.position == "right")
+            else
+            {
+                if( options.position == "right" )
+                {
                     entry.right = true;
-                if(this.root.lastChild && this.root.lastChild.right) {
+                }
+
+                if( this.root.lastChild && this.root.lastChild.right )
+                {
                     this.root.lastChild.before( entry );
                 }
-                else {
+                else
+                {
                     this.root.appendChild( entry );
                 }
             }
@@ -2539,21 +2557,28 @@ class Menubar {
                     let subentry = document.createElement('div');
                     subentry.className = "lexcontextmenuentry";
                     subentry.className += (i == o[k].length - 1 ? " last" : "");
-                    if(subkey == '')
+                    if( subkey == '' )
+                    {
                         subentry.className = " lexseparator";
-                    else {
-
+                    }
+                    else
+                    {
                         subentry.id = subkey;
                         let subentrycont = document.createElement('div');
                         subentrycont.innerHTML = "";
                         subentrycont.classList = "lexcontextmenuentrycontainer";
                         subentry.appendChild(subentrycont);
                         const icon = that.icons[ subkey ];
-                        if(isCheckbox){
+                        if( isCheckbox )
+                        {
                             subentrycont.innerHTML += "<input type='checkbox' >";
-                        }else if(icon) {
+                        }
+                        else if( icon )
+                        {
                             subentrycont.innerHTML += "<a class='" + icon + " fa-sm'></a>";
-                        }else {
+                        }
+                        else
+                        {
                             subentrycont.innerHTML += "<a class='fa-solid fa-sm noicon'></a>";
                             subentrycont.classList.add( "noicon" );
 
@@ -2561,13 +2586,15 @@ class Menubar {
                         subentrycont.innerHTML += "<div class='lexentryname'>" + subkey + "</div>";
                     }
 
-                    let checkbox_input = subentry.querySelector('input');
-                    if(checkbox_input) {
-                        checkbox_input.checked = subitem.checked ?? false;
-                        checkbox_input.addEventListener('change', (e) => {
-                            subitem.checked = checkbox_input.checked;
+                    let checkboxInput = subentry.querySelector('input');
+                    if( checkboxInput )
+                    {
+                        checkboxInput.checked = subitem.checked ?? false;
+                        checkboxInput.addEventListener('change', e => {
+                            subitem.checked = checkboxInput.checked;
                             const f = subitem[ 'callback' ];
-                            if(f) {
+                            if( f )
+                            {
                                 f.call( this, subitem.checked, subkey, subentry );
                                 that.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
                             }
@@ -2587,19 +2614,22 @@ class Menubar {
                         if(!short) return;
                         // check if it's a letter or other key
                         short = short.length == 1 ? short.toLowerCase() : short;
-                        if(short == e.key) {
+                        if( short == e.key )
+                        {
                             subentry.click()
                         }
                     });
 
                     // Add callback
                     subentry.addEventListener("click", e => {
-                        if(checkbox_input) {
+                        if( checkboxInput )
+                        {
                             subitem.checked = !subitem.checked;
                         }
                         const f = subitem[ 'callback' ];
-                        if(f) {
-                            f.call( this, checkbox_input ? subitem.checked : subkey, checkbox_input ? subkey : subentry );
+                        if( f )
+                        {
+                            f.call( this, checkboxInput ? subitem.checked : subkey, checkboxInput ? subkey : subentry );
                             that.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
                         }
                         e.stopPropagation();
@@ -2609,7 +2639,8 @@ class Menubar {
                     // Add icon if has submenu, else check for shortcut
                     if( !hasSubmenu)
                     {
-                        if(that.shorts[ subkey ]) {
+                        if( that.shorts[ subkey ] )
+                        {
                             let shortEl = document.createElement('div');
                             shortEl.className = "lexentryshort";
                             shortEl.innerText = that.shorts[ subkey ];
@@ -2644,7 +2675,8 @@ class Menubar {
             entry.addEventListener("click", () => {
 
                 const f = item[ 'callback' ];
-                if(f) {
+                if( f )
+                {
                     f.call( this, key, entry );
                     return;
                 }
@@ -2678,20 +2710,24 @@ class Menubar {
      * @param {Object} item: parent item
      * @param {Array} tokens: split path strings
     */
-    getSubitem(item, tokens) {
+    getSubitem( item, tokens ) {
 
         let subitem = null;
-        let path = tokens[0];
-        for(let i = 0; i < item.length; i++) {
-            if(item[i][path]) {
+        let path = tokens[ 0 ];
 
-                if(tokens.length == 1) {
-                    subitem = item[i];
+        for( let i = 0; i < item.length; i++ )
+        {
+            if( item[ i ][ path ] )
+            {
+                if( tokens.length == 1 )
+                {
+                    subitem = item[ i ];
                     return subitem;
                 }
-                else {
-                    tokens.splice(0,1);
-                    return this.getSubitem(item[i][path], tokens);
+                else
+                {
+                    tokens.splice( 0, 1 );
+                    return this.getSubitem( item[ i ][ path ], tokens );
                 }
 
             }
@@ -2718,11 +2754,12 @@ class Menubar {
     setButtonIcon( title, icon, callback, options = {} ) {
 
         const button = this.buttons[ title ];
-        if(button) {
-
+        if( button )
+        {
             button.querySelector('a').className = "fa-solid" + " " + icon + " lexicon";
         }
-        else {
+        else
+        {
             let button = document.createElement('div');
             const disabled = options.disabled ?? false;
             button.className = "lexmenubutton" + (disabled ? " disabled" : "");
@@ -2732,15 +2769,21 @@ class Menubar {
             button.style.maxHeight = "calc(100% - 10px)";
             button.style.alignItems = "center";
 
-            if(options.float == "right")
+            if( options.float == "right" )
+            {
                 button.right = true;
-            if(this.root.lastChild && this.root.lastChild.right) {
+            }
+
+            if( this.root.lastChild && this.root.lastChild.right )
+            {
                 this.root.lastChild.before( button );
             }
-            else if(options.float == "left") {
-                this.root.prepend(button);
+            else if( options.float == "left" )
+            {
+                this.root.prepend( button );
             }
-            else {
+            else
+            {
                 this.root.appendChild( button );
             }
 
@@ -2760,11 +2803,12 @@ class Menubar {
 
     setButtonImage( title, src, callback, options = {} ) {
         const button = this.buttons[ title ];
-        if(button) {
-
+        if( button )
+        {
             button.querySelector('a').className = "fa-solid" + " " + icon + " lexicon";
         }
-        else {
+        else
+        {
             let button = document.createElement('div');
             const disabled = options.disabled ?? false;
             button.className = "lexmenubutton" + (disabled ? " disabled" : "");
@@ -2773,15 +2817,21 @@ class Menubar {
             button.style.padding = "5px";
             button.style.alignItems = "center";
 
-            if(options.float == "right")
+            if( options.float == "right" )
+            {
                 button.right = true;
-            if(this.root.lastChild && this.root.lastChild.right) {
+            }
+
+            if( this.root.lastChild && this.root.lastChild.right )
+            {
                 this.root.lastChild.before( button );
             }
-            else if(options.float == "left") {
-                this.root.prepend(button);
+            else if( options.float == "left" )
+            {
+                this.root.prepend( button );
             }
-            else {
+            else
+            {
                 this.root.appendChild( button );
             }
 
@@ -2894,7 +2944,7 @@ LX.Menubar = Menubar;
 
 class SideBar {
 
-    constructor( options = {} )  {
+    constructor( options = {} ) {
 
         this.root = document.createElement( 'div' );
         this.root.className = "lexsidebar";
@@ -3014,29 +3064,30 @@ class Widget {
     static CHECKBOX     = 5;
     static TOGGLE       = 6;
     static COLOR        = 7;
-    static NUMBER       = 8;
-    static TITLE        = 9;
-    static VECTOR       = 10;
-    static TREE         = 11;
-    static PROGRESS     = 12;
-    static FILE         = 13;
-    static LAYERS       = 14;
-    static ARRAY        = 15;
-    static LIST         = 16;
-    static TAGS         = 17;
-    static CURVE        = 18;
-    static CARD         = 19;
-    static IMAGE        = 20;
-    static CONTENT      = 21;
-    static CUSTOM       = 22;
-    static SEPARATOR    = 23;
-    static KNOB         = 24;
-    static SIZE         = 25;
-    static PAD          = 26;
-    static FORM         = 27;
-    static DIAL         = 28;
-    static COUNTER      = 29;
-    static TABLE        = 30;
+    static RANGE        = 8;
+    static NUMBER       = 9;
+    static TITLE        = 10;
+    static VECTOR       = 11;
+    static TREE         = 12;
+    static PROGRESS     = 13;
+    static FILE         = 14;
+    static LAYERS       = 15;
+    static ARRAY        = 16;
+    static LIST         = 17;
+    static TAGS         = 18;
+    static CURVE        = 19;
+    static CARD         = 20;
+    static IMAGE        = 21;
+    static CONTENT      = 22;
+    static CUSTOM       = 23;
+    static SEPARATOR    = 24;
+    static KNOB         = 25;
+    static SIZE         = 26;
+    static PAD          = 27;
+    static FORM         = 28;
+    static DIAL         = 29;
+    static COUNTER      = 30;
+    static TABLE        = 31;
 
     static NO_CONTEXT_TYPES = [
         Widget.BUTTON,
@@ -3103,7 +3154,8 @@ class Widget {
 
     typeName() {
 
-        switch( this.type ) {
+        switch( this.type )
+        {
             case Widget.TEXT: return "Text";
             case Widget.TEXTAREA: return "TextArea";
             case Widget.BUTTON: return "Button";
@@ -3111,6 +3163,7 @@ class Widget {
             case Widget.CHECKBOX: return "Checkbox";
             case Widget.TOGGLE: return "Toggle";
             case Widget.COLOR: return "Color";
+            case Widget.RANGE: return "Range";
             case Widget.NUMBER: return "Number";
             case Widget.VECTOR: return "Vector";
             case Widget.TREE: return "Tree";
@@ -3188,11 +3241,12 @@ function ADD_CUSTOM_WIDGET( custom_widget_name, options = {} )
             buttonName += "<a class='fa-solid " + (instance ? "fa-bars-staggered" : " ") + " menu' style='float:right; width:5%;'></a>";
 
             let buttonEl = this.addButton(null, buttonName, (value, event) => {
-
-                if( instance ) {
+                if( instance )
+                {
                     element.querySelector(".lexcustomitems").toggleAttribute('hidden');
                 }
-                else {
+                else
+                {
                     addContextMenu(null, event, c => {
                         c.add("New " + custom_widget_name, () => {
                             instance = {};
@@ -3379,16 +3433,20 @@ class NodeTree {
 
             // Add or remove
             const idx = this.selected.indexOf( node );
-            if( idx > -1 ) {
+            if( idx > -1 )
+            {
                 item.classList.remove( 'selected' );
                 this.selected.splice( idx, 1 );
-            }else {
+            }
+            else
+            {
                 item.classList.add( 'selected' );
                 this.selected.push( node );
             }
 
             // Only Show children...
-            if( isParent && node.id.length > 1 /* Strange case... */) {
+            if( isParent && node.id.length > 1 /* Strange case... */)
+            {
                 node.closed = false;
                 if( that.onevent )
                 {
@@ -3482,7 +3540,8 @@ class NodeTree {
                         return;
                     }
 
-                    if( that.onevent ) {
+                    if( that.onevent )
+                    {
                         const event = new TreeEvent( TreeEvent.NODE_DELETED, node, e );
                         that.onevent( event );
                     }
@@ -3509,7 +3568,8 @@ class NodeTree {
             if( e.key == "Delete" )
             {
                 // Send event now so we have the info in selected array..
-                if( that.onevent ) {
+                if( that.onevent )
+                {
                     const event = new TreeEvent( TreeEvent.NODE_DELETED, this.selected.length > 1 ? this.selected : node, e );
                     event.multiple = this.selected.length > 1;
                     that.onevent( event );
@@ -3540,22 +3600,24 @@ class NodeTree {
 
         // Node rename
 
-        let name_input = document.createElement('input');
-        name_input.toggleAttribute('hidden', !node.rename);
-        name_input.value = node.id;
-        item.appendChild(name_input);
+        const nameInput = document.createElement( "input" );
+        nameInput.toggleAttribute( "hidden", !node.rename );
+        nameInput.value = node.id;
+        item.appendChild(nameInput);
 
-        if(node.rename) {
+        if( node.rename )
+        {
             item.classList.add('selected');
-            name_input.focus();
+            nameInput.focus();
         }
 
-        name_input.addEventListener("keyup", function(e){
-            if(e.key == 'Enter') {
-
+        nameInput.addEventListener("keyup", function(e){
+            if( e.key == "Enter" )
+            {
                 this.value = this.value.replace(/\s/g, '_');
 
-                if(that.onevent) {
+                if( that.onevent )
+                {
                     const event = new TreeEvent(TreeEvent.NODE_RENAMED, node, this.value);
                     that.onevent( event );
                 }
@@ -3565,18 +3627,20 @@ class NodeTree {
                 that.frefresh( node.id );
                 list.querySelector("#" + node.id).classList.add('selected');
             }
-            if(e.key == 'Escape') {
+            else if(e.key == "Escape")
+            {
                 delete node.rename;
                 that.frefresh( node.id );
             }
         });
 
-        name_input.addEventListener("blur", function(e){
+        nameInput.addEventListener("blur", function(e){
             delete node.rename;
             that.refresh();
         });
 
-        if(this.options.draggable ?? true) {
+        if( this.options.draggable ?? true )
+        {
             // Drag nodes
             if(parent) // Root doesn't move!
             {
@@ -3602,29 +3666,32 @@ class NodeTree {
                     return;
                 let target = node;
                 // Can't drop to same node
-                if(dragged.id == target.id) {
+                if( dragged.id == target.id )
+                {
                     console.warn("Cannot parent node to itself!");
                     return;
                 }
 
                 // Can't drop to child node
-                const isChild = function(new_parent, node) {
+                const isChild = function( newParent, node ) {
                     var result = false;
-                    for( var c of node.children ) {
-                        if( c.id == new_parent.id )
-                            return true;
-                        result |= isChild(new_parent, c);
+                    for( var c of node.children )
+                    {
+                        if( c.id == newParent.id ) return true;
+                        result |= isChild( newParent, c );
                     }
                     return result;
                 };
 
-                if(isChild(target, dragged)) {
+                if( isChild( target, dragged ))
+                {
                     console.warn("Cannot parent node to a current child!");
                     return;
                 }
 
                 // Trigger node dragger event
-                if(that.onevent) {
+                if( that.onevent )
+                {
                     const event = new TreeEvent(TreeEvent.NODE_DRAGGED, dragged, target);
                     that.onevent( event );
                 }
@@ -3640,7 +3707,8 @@ class NodeTree {
         let handled = false;
 
         // Show/hide children
-        if(isParent) {
+        if( isParent )
+        {
             item.querySelector('a.hierarchy').addEventListener("click", function(e) {
 
                 handled = true;
@@ -3648,7 +3716,8 @@ class NodeTree {
                 e.stopPropagation();
 
                 node.closed = !node.closed;
-                if(that.onevent) {
+                if( that.onevent )
+                {
                     const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed);
                     that.onevent( event );
                 }
@@ -3668,7 +3737,8 @@ class NodeTree {
                 node.visible = node.visible === undefined ? false : !node.visible;
                 this.className = "itemicon fa-solid fa-eye" + (!node.visible ? "-slash" : "");
                 // Trigger visibility event
-                if(that.onevent) {
+                if( that.onevent )
+                {
                     const event = new TreeEvent(TreeEvent.NODE_VISIBILITY, node, node.visible);
                     that.onevent( event );
                 }
@@ -3677,9 +3747,10 @@ class NodeTree {
             item.appendChild(visibility);
         }
 
-        if(node.actions)
+        if( node.actions )
         {
-            for(var i = 0; i < node.actions.length; ++i) {
+            for( var i = 0; i < node.actions.length; ++i )
+            {
                 let a = node.actions[i];
                 var actionEl = document.createElement('a');
                 actionEl.className = "itemicon " + a.icon;
@@ -3692,20 +3763,25 @@ class NodeTree {
             }
         }
 
-        if(selectedId != undefined && node.id == selectedId) {
-            this.selected = [node];
+        if( selectedId != undefined && node.id == selectedId )
+        {
+            this.selected = [ node ];
             item.click();
         }
 
-        if(node.closed )
+        if( node.closed )
+        {
             return;
+        }
 
         for( var i = 0; i < node.children.length; ++i )
         {
-            let child = node.children[i];
+            let child = node.children[ i ];
 
-            if( this.options.onlyFolders && child.type != 'folder')
+            if( this.options.onlyFolders && child.type != 'folder' )
+            {
                 continue;
+            }
 
             this._create_item( node, child, level + 1 );
         }
@@ -3744,12 +3820,12 @@ class Panel {
      * style: CSS Style object to be applied to the panel
      */
 
-    constructor( options = {} )  {
+    constructor( options = {} ) {
         var root = document.createElement('div');
         root.className = "lexpanel";
-        if(options.id)
+        if( options.id )
             root.id = options.id;
-        if(options.className)
+        if( options.className )
             root.className += " " + options.className;
 
         root.style.width = options.width || "calc( 100% - 6px )";
@@ -3826,23 +3902,31 @@ class Panel {
         this.branches = [];
         this.current_branch = null;
 
-        for(let w in this.widgets) {
-            if(this.widgets[w].options && this.widgets[w].options.signal) {
+        for( let w in this.widgets )
+        {
+            if( this.widgets[w].options && this.widgets[w].options.signal )
+            {
                 const signal = this.widgets[w].options.signal;
-                for(let i = 0; i < LX.signals[signal].length; i++) {
-                    if(LX.signals[signal][i] == this.widgets[w]) {
+                for( let i = 0; i < LX.signals[signal].length; i++ )
+                {
+                    if( LX.signals[signal][i] == this.widgets[w] )
+                    {
                         LX.signals[signal] = [...LX.signals[signal].slice(0, i), ...LX.signals[signal].slice(i+1)];
                     }
                 }
             }
         }
 
-        if(this.signals) {
-            for(let w = 0; w < this.signals.length; w++) {
+        if( this.signals )
+        {
+            for( let w = 0; w < this.signals.length; w++ )
+            {
                 let widget = Object.values(this.signals[w])[0];
                 let signal = widget.options.signal;
-                for(let i = 0; i < LX.signals[signal].length; i++) {
-                    if(LX.signals[signal][i] == widget) {
+                for( let i = 0; i < LX.signals[signal].length; i++ )
+                {
+                    if( LX.signals[signal][i] == widget )
+                    {
                         LX.signals[signal] = [...LX.signals[signal].slice(0, i), ...LX.signals[signal].slice(i+1)];
                     }
                 }
@@ -3880,10 +3964,12 @@ class Panel {
 
         this._inline_widgets_left = -1;
 
-        if(!this._inlineContainer)  {
+        if( !this._inlineContainer )
+        {
             this._inlineContainer = document.createElement('div');
             this._inlineContainer.className = "lexinlinewidgets";
-            if(justifyContent)
+
+            if( justifyContent )
             {
                 this._inlineContainer.style.justifyContent = justifyContent;
             }
@@ -3897,7 +3983,7 @@ class Panel {
             if(is_pair)
             {
                 // eg. an array, inline items appended later to
-                if(this._inline_queued_container)
+                if( this._inline_queued_container)
                     this._inlineContainer.appendChild( item[0] );
                 // eg. a dropdown, item is appended to parent, not to inline cont.
                 else
@@ -3909,7 +3995,7 @@ class Panel {
 
         if(!this._inline_queued_container)
         {
-            if(this.current_branch)
+            if( this.current_branch)
                 this.current_branch.content.appendChild( this._inlineContainer );
             else
                 this.root.appendChild( this._inlineContainer );
@@ -3948,7 +4034,7 @@ class Panel {
         this.current_branch = branch;
 
         // Append to panel
-        if(this.branches.length == 0)
+        if( this.branches.length == 0)
             branch.root.classList.add('first');
 
         // This is the last!
@@ -3959,7 +4045,8 @@ class Panel {
         this.root.appendChild( branch.root );
 
         // Add widget filter
-        if(options.filter) {
+        if( options.filter )
+        {
             this._addFilter( options.filter, {callback: this._searchWidgets.bind(this, branch.name)} );
         }
 
@@ -4076,14 +4163,18 @@ class Panel {
         element.jsInstance = widget;
 
         const insert_widget = el => {
-            if(options.container)
-                options.container.appendChild(el);
-            else if(!this.queuedContainer) {
-
-                if(this.current_branch)
+            if( options.container )
+            {
+                options.container.appendChild( el );
+            }
+            else if( !this.queuedContainer )
+            {
+                if( this.current_branch )
                 {
-                    if(!options.skipWidget)
+                    if( !options.skipWidget )
+                    {
                         this.current_branch.widgets.push( widget );
+                    }
                     this.current_branch.content.appendChild( el );
                 }
                 else
@@ -4093,40 +4184,47 @@ class Panel {
                 }
             }
             // Append content to queued tab container
-            else {
+            else
+            {
                 this.queuedContainer.appendChild( el );
             }
         };
 
         const store_widget = el => {
 
-            if(!this.queuedContainer) {
+            if( !this.queuedContainer )
+            {
                 this._inlineWidgets.push( el );
             }
             // Append content to queued tab container
-            else {
+            else
+            {
                 this._inlineWidgets.push( [el, this.queuedContainer] );
             }
         };
 
         // Process inline widgets
-        if(this._inline_widgets_left > 0 && !options.skipInlineCount)
+        if( this._inline_widgets_left > 0 && !options.skipInlineCount )
         {
-            if(!this._inlineWidgets)  {
+            if( !this._inlineWidgets )
+            {
                 this._inlineWidgets = [];
             }
 
             // Store widget and its container
-            store_widget(element);
+            store_widget( element );
 
             this._inline_widgets_left--;
 
             // Last widget
-            if(!this._inline_widgets_left) {
+            if( !this._inline_widgets_left )
+            {
                 this.endLine();
             }
-        }else {
-            insert_widget(element);
+        }
+        else
+        {
+            insert_widget( element );
         }
 
         return widget;
@@ -4163,15 +4261,20 @@ class Panel {
 
     _searchWidgets(branchName, value) {
 
-        for( let b of this.branches ) {
-
-            if(b.name !== branchName)
+        for( let b of this.branches )
+        {
+            if( b.name !== branchName )
+            {
                 continue;
+            }
 
             // remove all widgets
-            for( let w of b.widgets ) {
-                if(w.domEl.classList.contains('lexfilter'))
+            for( let w of b.widgets )
+            {
+                if( w.domEl.classList.contains('lexfilter') )
+                {
                     continue;
+                }
                 w.domEl.remove();
             }
 
@@ -4181,9 +4284,9 @@ class Panel {
             const emptyFilter = !value.length;
 
             // add widgets
-            for( let w of b.widgets ) {
-
-                if(!emptyFilter)
+            for( let w of b.widgets )
+            {
+                if( !emptyFilter )
                 {
                     if(!w.name) continue;
                     const filterWord = value.toLowerCase();
@@ -4277,7 +4380,7 @@ class Panel {
 
     clearQueue() {
 
-        if(this._queue && this._queue.length)
+        if( this._queue && this._queue.length)
         {
             this.queuedContainer = this._queue.pop();
             return;
@@ -4503,7 +4606,8 @@ class Panel {
         element.appendChild( container );
 
         // Remove branch padding and margins
-        if( !widget.name ) {
+        if( !widget.name )
+        {
             element.className += " noname";
             container.style.width = "100%";
         }
@@ -4603,7 +4707,8 @@ class Panel {
         element.appendChild(container);
 
         // Remove branch padding and margins
-        if(!widget.name) {
+        if( !widget.name )
+        {
             element.className += " noname";
             container.style.width = "100%";
         }
@@ -4962,7 +5067,8 @@ class Panel {
 
         element.appendChild( container );
 
-        if( !widget.name || options.hideName ) {
+        if( !widget.name || options.hideName )
+        {
             element.className += " noname";
             container.style.width = "100%";
         }
@@ -5383,15 +5489,16 @@ class Panel {
 
     addCurve( name, values, callback, options = {} ) {
 
-        if(!name) {
-            throw("Set Widget Name!");
+        if( !name )
+        {
+            throw( "Set Widget Name!" );
         }
 
         let that = this;
-        let widget = this.create_widget(name, Widget.CURVE, options);
+        let widget = this.create_widget( name, Widget.CURVE, options );
 
         widget.onGetValue = () => {
-            return JSON.parse(JSON.stringify(curveInstance.element.value));
+            return JSON.parse(JSON.stringify( curveInstance.element.value ));
         };
 
         widget.onSetValue = ( newValue, skipCallback ) => {
@@ -5536,7 +5643,8 @@ class Panel {
 
     addLayers( name, value, callback, options = {} ) {
 
-        if(!name) {
+        if( !name )
+        {
             throw("Set Widget Name!");
         }
 
@@ -5578,7 +5686,8 @@ class Panel {
             let binary = value.toString( 2 );
             let nbits = binary.length;
             // fill zeros
-            for(var i = 0; i < (16 - nbits); ++i) {
+            for( var i = 0; i < (16 - nbits); ++i )
+            {
                 binary = '0' + binary;
             }
 
@@ -5631,8 +5740,9 @@ class Panel {
 
     addArray( name, values = [], callback, options = {} ) {
 
-        if(!name) {
-            throw("Set Widget Name!");
+        if( !name )
+        {
+            throw( "Set Widget Name!" );
         }
 
         let widget = this.create_widget(name, Widget.ARRAY, options);
@@ -5813,7 +5923,8 @@ class Panel {
         widget.updateValues( values );
 
         // Remove branch padding and margins
-        if( !widget.name ) {
+        if( !widget.name )
+        {
             element.className += " noname";
             listContainer.style.width = "100%";
         }
@@ -6135,7 +6246,8 @@ class Panel {
 
     addColor( name, value, callback, options = {} ) {
 
-        if( !name ) {
+        if( !name )
+        {
             throw( "Set Widget Name!" );
         }
 
@@ -6173,7 +6285,8 @@ class Panel {
         color.useRGB = options.useRGB ?? false;
         color.value = color.iValue = value.constructor === Array ? rgbToHex( value ) : value;
 
-        if( options.disabled ) {
+        if( options.disabled )
+        {
             color.disabled = true;
         }
 
@@ -6250,7 +6363,8 @@ class Panel {
         let element = widget.domEl;
 
         // add reset functionality
-        if( widget.name ) {
+        if( widget.name )
+        {
             Panel._add_reset_property( element.domName, function() {
                 this.style.display = "none";
                 vecinput.value = vecinput.iValue;
@@ -6518,7 +6632,8 @@ class Panel {
                 return;
             }
 
-            for( let i = 0; i < inputs.length; ++i ) {
+            for( let i = 0; i < inputs.length; ++i )
+            {
                 let value = newValue[ i ];
                 inputs[ i ].value = round( value, options.precision ) ?? 0;
                 Panel._dispatch_event( inputs[ i ], "change", skipCallback );
@@ -6530,7 +6645,8 @@ class Panel {
         // Add reset functionality
         Panel._add_reset_property( element.domName, function() {
             this.style.display = "none";
-            for( let v of element.querySelectorAll( ".vecinput" ) ) {
+            for( let v of element.querySelectorAll( ".vecinput" ) )
+            {
                 v.value = v.iValue;
                 Panel._dispatch_event( v, "change" );
             }
@@ -6542,8 +6658,8 @@ class Panel {
         container.className = "lexvector";
         container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
-        for( let i = 0; i < num_components; ++i ) {
-
+        for( let i = 0; i < num_components; ++i )
+        {
             let box = document.createElement( 'div' );
             box.className = "vecbox";
             box.innerHTML = "<span class='" + Panel.VECTOR_COMPONENTS[ i ] + "'></span>";
@@ -6619,7 +6735,8 @@ class Panel {
 
                 if( locker.locked )
                 {
-                    for( let v of element.querySelectorAll( ".vecinput" ) ) {
+                    for( let v of element.querySelectorAll( ".vecinput" ) )
+                    {
                         v.value = val;
                         value[ v.idx ] = val;
                     }
@@ -6677,7 +6794,8 @@ class Panel {
 
                     if( locker.locked )
                     {
-                        for( let v of element.querySelectorAll( ".vecinput" ) ) {
+                        for( let v of element.querySelectorAll( ".vecinput" ) )
+                        {
                             v.value = round( +v.valueAsNumber + mult * dt, options.precision );
                             Panel._dispatch_event( v, "change" );
                         }
@@ -7273,7 +7391,8 @@ class Panel {
         let container = document.createElement('div');
         container.className = "lextree";
 
-        if(name) {
+        if( name )
+        {
             let title = document.createElement('span');
             title.innerHTML = name;
             container.appendChild(title);
@@ -7285,8 +7404,8 @@ class Panel {
             toolsDiv.className += " notitle";
 
         // Tree icons
-        if(options.icons) {
-
+        if( options.icons )
+        {
             for( let data of options.icons )
             {
                 let iconEl = document.createElement('a');
@@ -7346,11 +7465,15 @@ class Panel {
         let widget = new Widget( null, Widget.SEPARATOR );
         widget.domEl = element;
 
-        if(this.current_branch) {
+        if( this.current_branch )
+        {
             this.current_branch.content.appendChild( element );
             this.current_branch.widgets.push( widget );
-        } else
-            this.root.appendChild(element);
+        }
+        else
+        {
+            this.root.appendChild( element );
+        }
     }
 
     /**
@@ -7856,7 +7979,8 @@ class Branch {
 
         const dialog = new Dialog(this.name, p => {
             // add widgets
-            for( let w of this.widgets ) {
+            for( let w of this.widgets )
+            {
                 p.root.appendChild( w.domEl );
             }
         });
@@ -7949,8 +8073,8 @@ class Branch {
         var size = this.grabber.style.marginLeft;
 
         // Update sizes of widgets inside
-        for(var i = 0; i < this.widgets.length; i++) {
-
+        for( var i = 0; i < this.widgets.length; i++ )
+        {
             let widget = this.widgets[ i ];
             let element = widget.domEl;
 
@@ -8529,18 +8653,21 @@ class ContextMenu {
         entry.id = o.id ?? ("eId" + getSupportedDOMName( k ));
         entry.innerHTML = "";
         const icon = o[ 'icon' ];
-        if(icon) {
+        if( icon )
+        {
             entry.innerHTML += "<a class='" + icon + " fa-sm'></a>";
         }
         const disabled = o['disabled'];
         entry.innerHTML += "<div class='lexentryname" + (disabled ? " disabled" : "") + "'>" + k + "</div>";
         c.appendChild( entry );
 
-        if( this.colors[ k ] ) {
+        if( this.colors[ k ] )
+        {
             entry.style.borderColor = this.colors[ k ];
         }
 
-        if( k == "" ) {
+        if( k == "" )
+        {
             entry.className += " cmseparator";
             return;
         }
@@ -8553,7 +8680,8 @@ class ContextMenu {
             if(disabled) return;
 
             const f = o[ 'callback' ];
-            if(f) {
+            if( f )
+            {
                 f.call( this, k, entry );
                 this.root.remove();
             }
@@ -8619,15 +8747,18 @@ class ContextMenu {
                 if(key) found = o[ key ];
             } );
 
-            if(found) {
+            if( found )
+            {
                 insert( tokens[idx++], found );
             }
-            else {
+            else
+            {
                 let item = {};
                 item[ token ] = [];
                 const next_token = tokens[idx++];
                 // Check if last token -> add callback
-                if(!next_token) {
+                if( !next_token )
+                {
                     item[ 'id' ] = options.id;
                     item[ 'callback' ] = options.callback;
                     item[ 'disabled' ] = options.disabled ?? false;
@@ -8658,7 +8789,8 @@ class ContextMenu {
                 _item[ key ].unshift( parent );
             }
 
-            for( var child of _item[ key ] ) {
+            for( var child of _item[ key ] )
+            {
                 let k = Object.keys(child)[0];
                 for( var i = 0; i < child[k].length; ++i )
                     setParent(child);
@@ -8789,7 +8921,7 @@ class Curve {
 
             var r = [];
             var dx = (element.xrange[1] - element.xrange[ 0 ]) / samples;
-            for(var i = element.xrange[0]; i <= element.xrange[1]; i += dx)
+            for( var i = element.xrange[0]; i <= element.xrange[1]; i += dx )
             {
                 r.push( element.getValueAt(i) );
             }
@@ -8798,7 +8930,8 @@ class Curve {
 
         element.addValue = function(v) {
 
-            for(var i = 0; i < element.value; i++) {
+            for( var i = 0; i < element.value; i++ )
+            {
                 var value = element.value[i];
                 if(value[0] < v[0]) continue;
                 element.value.splice(i,0,v);
@@ -8824,7 +8957,7 @@ class Curve {
 
         var selected = -1;
 
-        element.redraw = function( o = {} )  {
+        element.redraw = function( o = {} ) {
 
             if( o.value ) element.value = o.value;
             if( o.xrange ) element.xrange = o.xrange;
@@ -8853,13 +8986,16 @@ class Curve {
             ctx.moveTo( pos[ 0 ], pos[ 1 ] );
             let values = [pos[ 0 ], pos[ 1 ]];
 
-            for(var i in element.value) {
-                var value = element.value[i];
-                pos = convert(value);
-                values.push(pos[ 0 ]);
-                values.push(pos[ 1 ]);
-                if(!element.smooth)
+            for( var i in element.value )
+            {
+                var value = element.value[ i ];
+                pos = convert( value );
+                values.push( pos[ 0 ] );
+                values.push( pos[ 1 ] );
+                if( !element.smooth )
+                {
                     ctx.lineTo( pos[ 0 ], pos[ 1 ] );
+                }
             }
 
             pos = convert([ element.xrange[ 1 ], element.defaulty ]);
@@ -8876,7 +9012,8 @@ class Curve {
             }
 
             // Draw points
-            for( var i = 0; i < element.value.length; i += 1 ) {
+            for( var i = 0; i < element.value.length; i += 1 )
+            {
                 var value = element.value[ i ];
                 pos = convert( value );
                 if( selected == i )
@@ -8888,10 +9025,11 @@ class Curve {
                 ctx.fill();
             }
 
-            if(element.show_samples) {
+            if( element.show_samples )
+            {
                 var samples = element.resample(element.show_samples);
                 ctx.fillStyle = "#888";
-                for(var i = 0; i < samples.length; i += 1)
+                for( var i = 0; i < samples.length; i += 1)
                 {
                     var value = [ i * ((element.xrange[ 1 ] - element.xrange[ 0 ]) / element.show_samples) + element.xrange[ 0 ], samples[ i ] ];
                     pos = convert(value);
@@ -8914,7 +9052,8 @@ class Curve {
 
             selected = computeSelected( mousex, canvas.height - mousey );
 
-            if( e.button == LX.MOUSE_LEFT_CLICK && selected == -1 && element.allow_add_values ) {
+            if( e.button == LX.MOUSE_LEFT_CLICK && selected == -1 && element.allow_add_values )
+            {
                 var v = unconvert([ mousex, canvas.height - mousey ]);
                 element.value.push( v );
                 sortValues();
@@ -8962,7 +9101,8 @@ class Curve {
             var dy = element.draggable_y ? last_mouse[ 1 ] - mousey : 0;
             var delta = unconvert([ -dx, dy ]);
 
-            if( selected != -1 ) {
+            if( selected != -1 )
+            {
                 var minx = element.xrange[ 0 ];
                 var maxx = element.xrange[ 1 ];
 
@@ -9119,7 +9259,7 @@ class Dial {
 
             var r = [];
             var dx = (element.xrange[1] - element.xrange[ 0 ]) / samples;
-            for(var i = element.xrange[0]; i <= element.xrange[1]; i += dx)
+            for( var i = element.xrange[0]; i <= element.xrange[1]; i += dx)
             {
                 r.push( element.getValueAt(i) );
             }
@@ -9128,15 +9268,16 @@ class Dial {
 
         element.addValue = function(v) {
 
-            for(var i = 0; i < element.value; i++) {
-                var value = element.value[i];
-                if(value[0] < v[0]) continue;
-                element.value.splice(i,0,v);
+            for( var i = 0; i < element.value; i++ )
+            {
+                var value = element.value[ i ];
+                if(value[ 0 ] < v[ 0 ]) continue;
+                element.value.splice( i, 0, v );
                 redraw();
                 return;
             }
 
-            element.value.push(v);
+            element.value.push( v );
             redraw();
         }
 
@@ -9156,7 +9297,7 @@ class Dial {
 
         var selected = -1;
 
-        element.redraw = function( o = {} )  {
+        element.redraw = function( o = {} ) {
 
             if( o.value ) element.value = o.value;
             if( o.xrange ) element.xrange = o.xrange;
@@ -9185,17 +9326,17 @@ class Dial {
             ctx.moveTo( pos[ 0 ], pos[ 1 ] );
             let values = [pos[ 0 ], pos[ 1 ]];
 
-            for(var i in element.value) {
-                var value = element.value[i];
-                pos = convert(value);
-                values.push(pos[ 0 ]);
-                values.push(pos[ 1 ]);
-
+            for( var i in element.value)
+            {
+                var value = element.value[ i ];
+                pos = convert( value );
+                values.push( pos[ 0 ] );
+                values.push( pos[ 1 ] );
             }
 
             pos = convert([ element.xrange[ 1 ], element.defaulty ]);
-            values.push(pos[ 0 ]);
-            values.push(pos[ 1 ]);
+            values.push( pos[ 0 ] );
+            values.push( pos[ 1 ] );
 
             // Draw points
             const center =  [0,0];
@@ -9205,7 +9346,8 @@ class Dial {
             ctx.arc( pos[ 0 ], pos[ 1 ], 3, 0, Math.PI * 2);
             ctx.fill();
 
-            for( var i = 0; i < element.value.length; i += 1 ) {
+            for( var i = 0; i < element.value.length; i += 1 )
+            {
                 var value = element.value[ i ];
                 pos = convert( value );
                 if( selected == i )
@@ -9217,10 +9359,11 @@ class Dial {
                 ctx.fill();
             }
 
-            if(element.show_samples) {
+            if( element.show_samples )
+            {
                 var samples = element.resample(element.show_samples);
                 ctx.fillStyle = "#888";
-                for(var i = 0; i < samples.length; i += 1)
+                for( var i = 0; i < samples.length; i += 1)
                 {
                     var value = [ i * ((element.xrange[ 1 ] - element.xrange[ 0 ]) / element.show_samples) + element.xrange[ 0 ], samples[ i ] ];
                     pos = convert(value);
@@ -9243,7 +9386,8 @@ class Dial {
 
             selected = computeSelected( mousex, canvas.height - mousey );
 
-            if( e.button == LX.MOUSE_LEFT_CLICK && selected == -1 && element.allow_add_values ) {
+            if( e.button == LX.MOUSE_LEFT_CLICK && selected == -1 && element.allow_add_values )
+            {
                 var v = unconvert([ mousex, canvas.height - mousey ]);
                 element.value.push( v );
                 sortValues();
@@ -9291,7 +9435,8 @@ class Dial {
             var dy = element.draggable_y ? last_mouse[ 1 ] - mousey : 0;
             var delta = unconvert([ -dx, dy ]);
 
-            if( selected != -1 ) {
+            if( selected != -1 )
+            {
                 var minx = element.xrange[ 0 ];
                 var maxx = element.xrange[ 1 ];
 
@@ -9399,7 +9544,8 @@ class AssetViewEvent {
     }
 
     string() {
-        switch(this.type) {
+        switch(this.type)
+        {
             case AssetViewEvent.NONE: return "assetview_event_none";
             case AssetViewEvent.ASSET_SELECTED: return "assetview_event_selected";
             case AssetViewEvent.ASSET_DELETED: return "assetview_event_deleted";
@@ -9880,8 +10026,8 @@ class AssetView {
             title.innerText = item.id;
             itemEl.appendChild( title );
 
-            if( !that.skipPreview ) {
-
+            if( !that.skipPreview )
+            {
                 let preview = null;
                 const hasImage = item.src && (['png', 'jpg'].indexOf( getExtension( item.src ) ) > -1 || item.src.includes("data:image/") ); // Support b64 image as src
 
@@ -9908,7 +10054,8 @@ class AssetView {
                     var newEmSize = charsPerLine / newLength;
                     var textBaseSize = 64;
 
-                    if(newEmSize < 1) {
+                    if( newEmSize < 1 )
+                    {
                         var newFontSize = newEmSize * textBaseSize;
                         textEl.style.fontSize = newFontSize + "px";
                         preview.style.paddingTop = "calc(50% - " + (textEl.offsetHeight * 0.5 + 10) + "px)"
@@ -10137,7 +10284,8 @@ class AssetView {
 
                 this.currentData.push( item );
 
-                if(i == (num_files - 1)) {
+                if( i == (num_files - 1) )
+                {
                     this._refreshContent();
                     if( !this.skipBrowser )
                         this.tree.refresh();
@@ -10189,7 +10337,7 @@ class AssetView {
         this.currentData.splice( idx, 1 );
         this._refreshContent( this.searchValue, this.filter );
 
-        if(this.onevent)
+        if( this.onevent)
         {
             const event = new AssetViewEvent( AssetViewEvent.ASSET_DELETED, item );
             this.onevent( event );
@@ -10265,7 +10413,7 @@ Object.assign(LX, {
         xhr.onload = function(load)
         {
             var response = this.response;
-            if(this.status != 200)
+            if( this.status != 200)
             {
                 var err = "Error " + this.status;
                 if(request.error)
@@ -10313,7 +10461,7 @@ Object.assign(LX, {
         var data = new FormData();
         if( request.data )
         {
-            for(var i in request.data)
+            for( var i in request.data)
                 data.append(i,request.data[i]);
         }
 
@@ -10374,7 +10522,7 @@ Object.assign(LX, {
         var size = total;
         var loaded_scripts = [];
 
-        for(var i in url)
+        for( var i in url)
         {
             var script = document.createElement('script');
             script.num = i;
@@ -10538,17 +10686,19 @@ LX.UTILS = {
     drawSpline( ctx, pts, t ) {
 
         ctx.save();
-        var cp=[];   // array of control points, as x0,y0,x1,y1,...
-        var n=pts.length;
+        var cp = [];   // array of control points, as x0,y0,x1,y1,...
+        var n = pts.length;
 
         // Draw an open curve, not connected at the ends
-        for(var i=0;i<n-4;i+=2) {
-            cp=cp.concat(LX.UTILS.getControlPoints(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
+        for( var i = 0; i < (n - 4); i += 2 )
+        {
+            cp = cp.concat(LX.UTILS.getControlPoints(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
         }
 
-        for(var i=2;i<pts.length-5;i+=2) {
+        for( var i = 2; i < ( pts.length - 5 ); i += 2 )
+        {
             ctx.beginPath();
-            ctx.moveTo(pts[i],pts[i+1]);
+            ctx.moveTo(pts[i], pts[i+1]);
             ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
             ctx.stroke();
             ctx.closePath();
@@ -10556,14 +10706,14 @@ LX.UTILS = {
 
         //  For open curves the first and last arcs are simple quadratics.
         ctx.beginPath();
-        ctx.moveTo(pts[0],pts[1]);
-        ctx.quadraticCurveTo(cp[0],cp[1],pts[2],pts[3]);
+        ctx.moveTo( pts[ 0 ], pts[ 1 ] );
+        ctx.quadraticCurveTo( cp[ 0 ], cp[ 1 ], pts[ 2 ], pts[ 3 ]);
         ctx.stroke();
         ctx.closePath();
 
         ctx.beginPath();
-        ctx.moveTo(pts[n-2],pts[n-1]);
-        ctx.quadraticCurveTo(cp[2*n-10],cp[2*n-9],pts[n-4],pts[n-3]);
+        ctx.moveTo( pts[ n-2 ], pts[ n-1 ] );
+        ctx.quadraticCurveTo( cp[ 2*n-10 ], cp[ 2*n-9 ], pts[ n-4 ], pts[ n-3 ]);
         ctx.stroke();
         ctx.closePath();
 
