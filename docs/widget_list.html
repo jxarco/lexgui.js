@@ -226,12 +226,12 @@ panel.@[mtd]addColor@(@"Background"@, @"#b7a9b1"@);` );
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addComboButtons(name, values, options)")} to add a ComboButtons Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
             ["name", "String", "Widget name"],
-            ["values", "Array", "Each of the {value, callback} items (you can add an <code class='inline'>icon</code>)"],
+            ["values", "Array", "Each of the { value, callback, selected, disabled } items (you can add an <code class='inline'>icon</code>)"],
             ["options", "Object", "Basic options for a Widget"],
             [
                 ["float", "String", "Justify content (left, center, right) [center]"],
-                ["selected", "String", "Selected item by default by value"],
                 ["noSelection", "Boolean", "Buttons can be clicked, but they are not selectable [false]"],
+                ["toggle", "Boolean", "Buttons can be toggled insted of selecting only one [false]"]
             ]
         ] );
         MAKE_CODE( `panel.@[mtd]addComboButtons@(@"Alignment"@, [

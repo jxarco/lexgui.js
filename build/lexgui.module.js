@@ -4708,11 +4708,12 @@ class Panel {
     /**
      * @method addComboButtons
      * @param {String} name Widget name
-     * @param {Array} values Each of the {value, callback} items
+     * @param {Array} values Each of the {value, callback, selected, disabled} items
      * @param {*} options:
      * float: Justify content (left, center, right) [center]
-     * selected: Selected item by default by value
+     * @legacy selected: Selected item by default by value
      * noSelection: Buttons can be clicked, but they are not selectable
+     * toggle: Buttons can be toggled insted of selecting only one
      */
 
     addComboButtons( name, values, options = {} ) {
@@ -4734,7 +4735,8 @@ class Panel {
         let buttonsBox = document.createElement('div');
         buttonsBox.className = "lexcombobuttonsbox ";
 
-        let shouldSelect = !( options.noSelection ?? false );
+        const shouldSelect = !( options.noSelection ?? false );
+        const shouldToggle = shouldSelect && ( options.toggle ?? false );
 
         for( let b of values )
         {
@@ -4753,14 +4755,14 @@ class Panel {
                 buttonEl.classList.add( options.buttonClass );
             }
 
-            if( shouldSelect && options.selected == b.value )
+            if( shouldSelect && ( b.selected || options.selected == b.value ) )
             {
                 buttonEl.classList.add("selected");
             }
 
             buttonEl.innerHTML = ( b.icon ? "<a class='" + b.icon +"'></a>" : "" ) + "<span>" + ( b.icon ? "" : b.value ) + "</span>";
 
-            if( options.disabled )
+            if( b.disabled )
             {
                 buttonEl.setAttribute( "disabled", true );
             }
@@ -4768,8 +4770,15 @@ class Panel {
             buttonEl.addEventListener("click", function( e ) {
                 if( shouldSelect )
                 {
-                    container.querySelectorAll('button').forEach( s => s.classList.remove('selected'));
-                    this.classList.add('selected');
+                    if( shouldToggle )
+                    {
+                        this.classList.toggle('selected');
+                    }
+                    else
+                    {
+                        container.querySelectorAll('button').forEach( s => s.classList.remove('selected'));
+                        this.classList.add('selected');
+                    }
                 }
 
                 that._trigger( new IEvent( name, b.value, e ), b.callback );
@@ -4779,7 +4788,7 @@ class Panel {
         }
 
         // Remove branch padding and margins
-        if( !widget.name)
+        if( !widget.name )
         {
             element.className += " noname";
             container.style.width = "100%";

@@ -2,6 +2,9 @@
 
 ## dev
 
+Widgets:
+- Support toggle mode and button disabled in ComboButtons Widget.
+
 Timeline theme updated support light scheme color.
 Minor CSS fixes.
 

@@ -570,6 +570,7 @@ function fillPanel( panel ) {
     panel.addComboButtons("Alignment", [
         {
             value: 'left',
+            selected: true,
             icon: 'fa fa-align-left',
             callback: (value, event) => {
                 console.log(value);
@@ -582,12 +583,13 @@ function fillPanel( panel ) {
             }
         }, {
             value: 'right',
+            disabled: true,
             icon: 'fa fa-align-right',
             callback: (value, event) => {
                 console.log(value);
             }
         }
-    ], { selected: "center", /* noSelection: true */ });
+    ], { /* toggle: true, noSelection: true */ });
     panel.addList(null, ['GPTeam', 'Blat Bunny', ['Blat Panthers', 'fa-solid fa-paw']], 'Blat Panthers',  (value, event) => {
         console.log(value);
     });
