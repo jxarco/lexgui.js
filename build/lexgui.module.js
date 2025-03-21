@@ -1812,21 +1812,31 @@ class Area {
      * @param {Function} callback Function to fill the menubar
      * @param {*} options:
      * float: Justify content (left, center, right) [left]
+     * sticky: Fix menubar at the top [true]
      */
 
     addMenubar( callback, options = {} ) {
 
-        let menubar = new Menubar(options);
+        let menubar = new Menubar( options );
 
-        if(callback) callback( menubar );
+        if( callback )
+        {
+            callback( menubar );
+        }
 
         LX.menubars.push( menubar );
 
         const height = 48; // pixels
+        const [ bar, content ] = this.split({ type: 'vertical', sizes: [height, null], resize: false, menubar: true });
 
-        const [bar, content] = this.split({type: 'vertical', sizes: [height, null], resize: false, menubar: true});
         bar.attach( menubar );
         bar.is_menubar = true;
+
+        if( options.sticky ?? true )
+        {
+            bar.root.classList.add( "sticky" );
+        }
+
         return menubar;
     }
 
