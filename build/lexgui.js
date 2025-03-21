@@ -5074,7 +5074,6 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
                     if( showLeft )
                     {
                         list.style.left = ( leftPosition - ( listWidth - rect.width ) ) + 'px';
-                        list.classList.add( "place-above" );
                     }
                 }
             };
@@ -5096,7 +5095,7 @@ console.warn( 'Script "build/lexgui.js" is depracated and will be removed soon. 
 
                 list.focus();
 
-            }, { buttonClass: "array", skipInlineCount: true });
+            }, { buttonClass: "array", skipInlineCount: true, disabled: options.disabled });
 
             this.clearQueue();
 

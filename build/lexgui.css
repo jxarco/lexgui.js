@@ -28,9 +28,9 @@
     --global-button-color: light-dark(#f9f9f9, #3e3e3e);
     --global-button-color-hovered: light-dark(#ececec, #444);
     --global-text-primary: light-dark(#202124, #f4f4ffe6);
-    --global-text-secondary: light-dark(#2c2d2e, #bfbfc0ea);
-    --global-text-terciary: light-dark(#474747f5, #727272b9);
-    --global-text-quaternary: light-dark(#636262f5, #585757b9);
+    --global-text-secondary: light-dark(#353636, #bfbfc0ea);
+    --global-text-terciary: light-dark(#5a5a5af5, #929292d8);
+    --global-text-quaternary: light-dark(#6b6a6af5, #585757e1);
     --global-intense-background: light-dark(#fefefe, #121212);
     --global-medium-background: #252525;
     --global-blur-background: light-dark(#f7f7f7d8, #1f1f1fe7);
@@ -1050,7 +1050,6 @@ body.noevents * {
 :root[data-theme="light"] {
     .lexbutton {
         --button-color: var(--global-button-color);
-        color: var(--global-text-primary);
         border: 1px solid var(--global-color-terciary) !important;
     }
 
@@ -1113,6 +1112,10 @@ body.noevents * {
     background-color: color-mix(in srgb, var(--button-color), #ffffff 4%);
     color: var(--global-text-secondary);
     transform: scale(0.99);
+}
+
+.lexbutton:disabled {
+    color: var(--global-text-terciary);
 }
 
 .lexbutton.selected {

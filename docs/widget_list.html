@@ -538,7 +538,9 @@ panel.@[mtd]addTree@(@"Scene Tree"@, sceneData, {
             ["callback", "Function", "Function called when an list value is selected"],
             ["options", "Object", "Basic options for a Widget"],
             [
-                ["filter", "Boolean", "Specify if the drop-down needs a search bar"]
+                ["filter", "Boolean", "Specify if the drop-down needs a search bar"],
+                ["disabled", "Boolean", "Make the widget disabled"],
+                ["skipReset", "Boolean", "Don't add the reset value button when value changes"]
             ]
         ] );
         MAKE_CODE( `@[com]// String values@
