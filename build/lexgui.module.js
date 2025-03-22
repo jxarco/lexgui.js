@@ -864,18 +864,17 @@ function init( options = { } )
         const notifSection = document.createElement( "section" );
         notifSection.className = "notifications";
         this.notifications = document.createElement( "ol" );
-        this.notifications.className = "stack stack-top";
+        this.notifications.className = "";
+        this.notifications.iWidth = 0;
         notifSection.appendChild( this.notifications );
         this.container.appendChild( notifSection );
 
-        this.notifications.addEventListener( "mouseenter", function() {
-            this.classList.remove( "stack" );
-            this.classList.remove( "stack-top" );
+        this.notifications.addEventListener( "mouseenter", () => {
+            this.notifications.classList.add( "list" );
         } );
 
-        this.notifications.addEventListener( "mouseleave", function() {
-            this.classList.add( "stack" );
-            this.classList.add( "stack-top" );
+        this.notifications.addEventListener( "mouseleave", () => {
+            this.notifications.classList.remove( "list" );
         } );
     }
 
@@ -1077,9 +1076,9 @@ LX.prompt = prompt;
  * @param {String} title
  * @param {String} description (Optional)
  * @param {*} options
- * action: Name of the custom action
+ * action: Data of the custom action { name, callback }
  * closable: Allow closing the toast
- * accumulate: TODO
+ * timeout: Time in which the toast closed automatically, in ms. -1 means persistent. [3000]
  */
 
 function toast( title, description, options = {} )
@@ -1093,10 +1092,17 @@ function toast( title, description, options = {} )
 
     const toast = document.createElement( "li" );
     toast.className = "lextoast";
-    toast.style.transform = "translateY(calc(100% + 30px))";
-    this.notifications.appendChild( toast );
+    toast.style.translate = "0 calc(100% + 30px)";
+    this.notifications.prepend( toast );
 
     doAsync( () => {
+
+        if( this.notifications.offsetWidth > this.notifications.iWidth )
+        {
+            this.notifications.iWidth = Math.min( this.notifications.offsetWidth, 480 );
+            this.notifications.style.width = this.notifications.iWidth + "px";
+        }
+
         toast.dataset[ "open" ] = true;
     }, 10 );
 
@@ -1117,21 +1123,44 @@ function toast( title, description, options = {} )
         content.appendChild( desc );
     }
 
-    const panel = new Panel();
-    panel.addButton(null, options.action ?? "Accept", () => { LX.setCommandbarState( true ) }, { width: "auto", maxWidth: "150px", className: "right", buttonClass: "outline" });
-    toast.appendChild( panel.root.childNodes[ 0 ] );
+    if( options.action )
+    {
+        const panel = new Panel();
+        panel.addButton(null, options.action.name ?? "Accept", options.action.callback.bind( this, toast ), { width: "auto", maxWidth: "150px", className: "right", buttonClass: "outline" });
+        toast.appendChild( panel.root.childNodes[ 0 ] );
+    }
+
+    const that = this;
+
+    toast.close = function() {
+        this.dataset[ "closed" ] = true;
+        doAsync( () => {
+            this.remove();
+            if( !that.notifications.childElementCount )
+            {
+                that.notifications.style.width = "unset";
+                that.notifications.iWidth = 0;
+            }
+        }, 500 );
+    };
 
     if( options.closable ?? true )
     {
         const closeButton = document.createElement( "a" );
         closeButton.className = "fa fa-xmark lexicon closer";
         closeButton.addEventListener( "click", () => {
-            delete toast.dataset[ "open" ];
-            doAsync( () => {
-                toast.remove();
-            }, 500 );
+            toast.close();
         } );
         toast.appendChild( closeButton );
+    }
+
+    const timeout = options.timeout ?? 3000;
+
+    if( timeout != -1 )
+    {
+        doAsync( () => {
+            toast.close();
+        }, timeout );
     }
 }
 

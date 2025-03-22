@@ -22,6 +22,11 @@ let area = LX.init();
 // LX.setThemeColor('global-text', "#f21");
 
 LX.toast( "Scheduled: Catch up", "Friday, February 10, 2023 at 5:57 PM" );
+LX.toast( "Persistent Toast", "Friday, February 10, 2023 at 5:57 PM", { timeout: -1 });
+LX.toast( "Scheduled: Catch up", "Friday, February 10, 2023 at 5:57 PM", { action: { name: "Undo", callback: ( toast, actionName, event ) => {
+    console.log( toast, actionName );
+    toast.close();
+} } } );
 
 const code = `
 import { LX } from 'lexgui';

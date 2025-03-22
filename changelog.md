@@ -6,7 +6,7 @@ Widgets:
 - Support toggle mode and button disabled in ComboButtons Widget.
 - Added new Range Slider Widget.
 
-Start support for toasts `LX.toast()`;
+Support for toasts `LX.toast(title, description, options)`;
 Fixed menubar buttons vertical alignment.
 Restyled area tabs (row mode).
 Timeline theme updated support light scheme color.
