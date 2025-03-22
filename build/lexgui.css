@@ -2914,10 +2914,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexareatabs {
     display: flex;
     flex-direction: row;
-    margin-left: 7px;
     width: fit-content;
     width: -moz-fit-content;
-    border-radius: 10px;
 }
 
 .lexareatabs.dockingtab {
@@ -2949,23 +2947,24 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexareatabs.row {
     width: calc(100%-9px);
-}
-
-.lexareatabs.row {
+    background-color: light-dark(var(--global-color-terciary), var(--global-button-color));
+    border-radius: 8px;
     padding: 4px;
-    padding-bottom: 6px;
+    margin: 6px;
+    gap: 0.1em;
 }
 
 .lexareatabs.row .lexareatab {
-    background-color: var(--global-color-secondary);
-    padding-left: 16px;
-    padding-right: 16px;
-    margin-right: 4px;
-    border-radius: 4px;
+    padding: 0.45em 1.45em;
+    transition: 0.1s;
+    background: none;
+    border-radius: 6px;
+    color: var(--global-text-secondary);
 }
 
 .lexareatabs.fit {
-    width: calc(100% - 14px);
+    width: calc(100% - 12px);
+    padding-inline: 6px;
 }
 
 .lexareatabs.fit .lexareatab {
@@ -2983,8 +2982,9 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexareatabs.row .lexareatab.selected {
-    color: #fff;
-    background: light-dark(var(--global-selected-light), var(--global-selected));
+    background-color: var(--global-color-primary);
+    outline: none;
+    color: var(--global-text-primary);
 }
 
 .lexareatabs.folding .lexareatab.selected {
@@ -2997,7 +2997,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexareatabs.row .lexareatab.selected:hover {
-    color: var(--global-color-primary);
+    color: var(--global-text-secondary);
 }
 
 .lexareatabscontainer {

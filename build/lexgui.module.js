@@ -2220,25 +2220,28 @@ class Tabs {
         }
 
         // debug
-        if(folding)
+        if( folding )
         {
             this.folded = true;
             this.folding = folding;
 
-            if(folding == "up") area.root.insertChildAtIndex(area.sections[1].root, 0);
+            if( folding == "up" )
+            {
+                area.root.insertChildAtIndex(area.sections[1].root, 0);
+            }
 
             // Listen resize event on parent area
             const resizeObserver = new ResizeObserver((entries) => {
                 for (const entry of entries)
                 {
                     const bb = entry.contentRect;
-                    const sibling = area.parentArea.sections[0].root;
-                    const add_offset = true; // hardcoded...
-                    sibling.style.height = "calc(100% - " + ((add_offset ? 42 : 0) + bb.height) + "px )";
+                    const sibling = area.parentArea.sections[ 0 ].root;
+                    const addOffset = true; // hardcoded...
+                    sibling.style.height = "calc(100% - " + ((addOffset ? 42 : 0) + bb.height) + "px )";
                 }
             });
 
-            resizeObserver.observe(this.area.root);
+            resizeObserver.observe( this.area.root );
             this.area.root.classList.add('folded');
         }
     }

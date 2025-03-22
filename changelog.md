@@ -7,6 +7,7 @@ Widgets:
 - Added new Range Slider Widget.
 
 Fixed menubar buttons vertical alignment.
+Restyled area tabs (row mode).
 Timeline theme updated support light scheme color.
 Minor CSS tweaks.
 
