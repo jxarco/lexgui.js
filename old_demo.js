@@ -21,6 +21,8 @@ let area = LX.init();
 // LX.setThemeColor('global-selected', "#a74");
 // LX.setThemeColor('global-text', "#f21");
 
+LX.toast( "Scheduled: Catch up", "Friday, February 10, 2023 at 5:57 PM" );
+
 const code = `
 import { LX } from 'lexgui';
 

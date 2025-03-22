@@ -859,6 +859,26 @@ function init( options = { } )
         this.root = document.body;
     }
 
+    // Notifications
+    {
+        const notifSection = document.createElement( "section" );
+        notifSection.className = "notifications";
+        this.notifications = document.createElement( "ol" );
+        this.notifications.className = "stack stack-top";
+        notifSection.appendChild( this.notifications );
+        this.container.appendChild( notifSection );
+
+        this.notifications.addEventListener( "mouseenter", function() {
+            this.classList.remove( "stack" );
+            this.classList.remove( "stack-top" );
+        } );
+
+        this.notifications.addEventListener( "mouseleave", function() {
+            this.classList.add( "stack" );
+            this.classList.add( "stack-top" );
+        } );
+    }
+
     // Disable drag icon
     root.addEventListener( 'dragover', function( e ) {
         e.preventDefault();
@@ -1051,6 +1071,71 @@ function prompt( text, title, callback, options = {} )
 }
 
 LX.prompt = prompt;
+
+/**
+ * @method toast
+ * @param {String} title
+ * @param {String} description (Optional)
+ * @param {*} options
+ * action: Name of the custom action
+ * closable: Allow closing the toast
+ * accumulate: TODO
+ */
+
+function toast( title, description, options = {} )
+{
+    if( !title )
+    {
+        throw( "The toast needs at least a title!" );
+    }
+
+    console.assert( this.notifications );
+
+    const toast = document.createElement( "li" );
+    toast.className = "lextoast";
+    toast.style.transform = "translateY(calc(100% + 30px))";
+    this.notifications.appendChild( toast );
+
+    doAsync( () => {
+        toast.dataset[ "open" ] = true;
+    }, 10 );
+
+    const content = document.createElement( "div" );
+    content.className = "lextoastcontent";
+    toast.appendChild( content );
+
+    const titleContent = document.createElement( "div" );
+    titleContent.className = "title";
+    titleContent.innerHTML = title;
+    content.appendChild( titleContent );
+
+    if( description )
+    {
+        const desc = document.createElement( "div" );
+        desc.className = "desc";
+        desc.innerHTML = description;
+        content.appendChild( desc );
+    }
+
+    const panel = new Panel();
+    panel.addButton(null, options.action ?? "Accept", () => { LX.setCommandbarState( true ) }, { width: "auto", maxWidth: "150px", className: "right", buttonClass: "outline" });
+    toast.appendChild( panel.root.childNodes[ 0 ] );
+
+    if( options.closable ?? true )
+    {
+        const closeButton = document.createElement( "a" );
+        closeButton.className = "fa fa-xmark lexicon closer";
+        closeButton.addEventListener( "click", () => {
+            delete toast.dataset[ "open" ];
+            doAsync( () => {
+                toast.remove();
+            }, 500 );
+        } );
+        toast.appendChild( closeButton );
+    }
+}
+
+LX.toast = toast;
 
 /**
  * @method badge

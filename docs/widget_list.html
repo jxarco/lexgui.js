@@ -129,7 +129,7 @@
 
         // Checkbox
         MAKE_HEADER( "Checkbox", "h2", "checkbox" );
-        MAKE_PARAGRAPH( `Represents a classic checkbox to select or deselect an option as a binary choice (either checked or unchecked).` );
+        MAKE_PARAGRAPH( `Represents a control that allows the user to toggle between checked and not checked..` );
         
         {
             const area = new LX.Area( { skipAppend: true, height: "auto" } );
@@ -520,7 +520,7 @@ panel.@[mtd]addTree@(@"Scene Tree"@, sceneData, {
 
         // Dropdown
         MAKE_HEADER( "Dropdown", "h2", "dropdown" );
-        MAKE_PARAGRAPH( `Represents a classic drop-down list. It works as a HTML Select element, but it can also handle media options.` );
+        MAKE_PARAGRAPH( `Represents a list of options for the user to pick from—triggered by a button.` );
         
         {
             const area = new LX.Area( { skipAppend: true, height: "auto" } );
@@ -750,7 +750,7 @@ panel.@[mtd]addForm@(@"Test form"@, formData, (value, event) => {
 
         // Progress
         MAKE_HEADER( "Progress", "h2", "progress" );
-        MAKE_PARAGRAPH( `Represents a horizontal bar that fills up gradually to indicate the completion progress of a task or operation or just show a numeric value.` );
+        MAKE_PARAGRAPH( `Represents an indicator showing the completion progress of a task, displayed as a progress bar.` );
         
         {
             const area = new LX.Area( { skipAppend: true, height: "auto" } );
@@ -795,7 +795,7 @@ panel.@[mtd]addForm@(@"Test form"@, formData, (value, event) => {
 
         // Range
         MAKE_HEADER( "Range", "h2", "range" );
-        MAKE_PARAGRAPH( `Represents a decimal range input.` );
+        MAKE_PARAGRAPH( `Represents a decimal input handled by a slider.` );
 
         {
             const area = new LX.Area( { skipAppend: true, height: "auto" } );
