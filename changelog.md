@@ -6,8 +6,9 @@ Widgets:
 - Support toggle mode and button disabled in ComboButtons Widget.
 - Added new Range Slider Widget.
 
+Fixed menubar buttons vertical alignment.
 Timeline theme updated support light scheme color.
-Minor CSS fixes.
+Minor CSS tweaks.
 
 ## 0.2.0 (master)
 

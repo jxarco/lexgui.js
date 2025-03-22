@@ -2510,19 +2510,13 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexmenubar .lexmenubuttons {
-    display: flex;
+    display: inline-flex;
     background-color: var(--global-color-secondary);
-    margin-top: 10px;
-    margin-bottom: 10px;
+    height: 75%;
+    margin: auto;
     border-radius: 6px;
     padding-inline: 4px;
-    font-size: 16px;
-}
-
-.lexmenubar .lexmenubuttons.center {
-    margin: 0 auto;
-    margin-top: 10px;
-    margin-bottom: 8px;
+    font-size: 15px;
 }
 
 .lexmenubar .lexmenubuttons.right {
@@ -2531,12 +2525,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexmenubar .lexmenubutton {
-    justify-content: center;
-    padding: 8px;
-    padding-top: 0.6em;
     color: var(--global-text-secondary);
+    padding-inline: 0.45em;
     cursor: pointer;
-    line-height: 10px;
+    place-content: center;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
