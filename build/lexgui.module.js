@@ -2671,6 +2671,8 @@ class Menubar {
                 } );
                 // Menuboxes are in the root area!
                 LX.root.querySelectorAll(".lexmenubox").forEach(e => e.remove());
+                // Next time we need to click again
+                that.focused = false;
             };
 
             const create_submenu = function( o, k, c, d ) {
@@ -2861,8 +2863,6 @@ class Menubar {
                 }
 
                 _resetMenubar();
-
-                this.focused = false;
             });
         }
     }
