@@ -2557,15 +2557,19 @@ class Menubar {
 
     constructor( options = {} ) {
 
-        this.root = document.createElement('div');
+        this.root = document.createElement( "div" );
         this.root.className = "lexmenubar";
-        if(options.float)
+
+        if( options.float )
+        {
             this.root.style.justifyContent = options.float;
+        }
+
         this.items = [];
+        this.buttons = [];
 
         this.icons = {};
         this.shorts = {};
-        this.buttons = [];
     }
 
     /**
@@ -2615,6 +2619,7 @@ class Menubar {
                 if( !next_token )
                 {
                     item[ 'callback' ] = options.callback;
+                    item[ 'disabled' ] = options.disabled;
                     item[ 'type' ] = options.type;
                     item[ 'checked' ] = options.checked;
                 }
@@ -2694,6 +2699,8 @@ class Menubar {
 
                 LX.root.appendChild( menuElement );
 
+                console.log(o, k, c, d)
+
                 for( var i = 0; i < o[ k ].length; ++i )
                 {
                     const subitem = o[k][i];
@@ -2702,7 +2709,8 @@ class Menubar {
                     const isCheckbox = subitem[ 'type' ] == 'checkbox';
                     let subentry = document.createElement('div');
                     subentry.className = "lexmenuboxentry";
-                    subentry.className += (i == o[k].length - 1 ? " last" : "");
+                    subentry.className += (i == o[k].length - 1 ? " last" : "") + ( subitem.disabled ? " disabled" : "" );
+
                     if( subkey == '' )
                     {
                         subentry.className = " lexseparator";
@@ -2857,7 +2865,7 @@ class Menubar {
 
             entry.addEventListener("blur", (e) => {
 
-                if( e.relatedTarget.classList.contains( "lexmenubox" ) )
+                if( e.relatedTarget && e.relatedTarget.classList.contains( "lexmenubox" ) )
                 {
                     return;
                 }

@@ -74,7 +74,7 @@ area.addMenubar( m => {
     m.add( "Scene/Open Scene", { icon: "fa-solid fa-folder-open", short:  "S", callback: () => { console.log("Opening SCENE Dialog") } } );
     m.add( "Scene/Open Recent/hello.scene", name => { console.log("Opening " + name) });
     m.add( "Scene/Open Recent/goodbye.scene", name => { console.log("Opening " + name) });
-    m.add( "Project/Project Settings" );
+    m.add( "Project/Project Settings", { disabled: true, callback: () => { console.log("Opening Project Settings") } } );
     m.add( "Project/" );
     m.add( "Project/Export", { icon: "fa-solid fa-download" });
     m.add( "Project/Export/DAE", { icon: "fa-solid fa-cube", short: "D", callback: () => { console.log("Exporting DAE...") }} );
