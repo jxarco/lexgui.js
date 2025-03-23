@@ -2724,7 +2724,7 @@ class Menubar {
                             if( f )
                             {
                                 f.call( this, subitem.checked, subkey, subentry );
-                                that.root.querySelectorAll(".lexmenubox").forEach(e => e.remove());
+                                LX.root.querySelectorAll(".lexmenubox").forEach(e => e.remove());
                             }
                             e.stopPropagation();
                             e.stopImmediatePropagation();
@@ -2761,7 +2761,7 @@ class Menubar {
                         if( f )
                         {
                             f.call( this, checkboxInput ? subitem.checked : subkey, checkboxInput ? subkey : subentry );
-                            // that.root.querySelectorAll(".lexmenubox").forEach(e => e.remove());
+                            LX.root.querySelectorAll(".lexmenubox").forEach(e => e.remove());
                         }
                         e.stopPropagation();
                         e.stopImmediatePropagation();
@@ -3634,7 +3634,7 @@ class NodeTree {
 
             e.preventDefault();
 
-            if( that.onevent )
+            if( !that.onevent )
             {
                 return;
             }
@@ -8994,7 +8994,6 @@ class ContextMenu {
 
         entry.addEventListener("mouseleave", () => {
             d = -1; // Reset depth
-            // delete entry.built;
             c.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
         });
     }

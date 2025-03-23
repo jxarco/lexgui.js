@@ -2738,7 +2738,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 /* submenu specified arrow  */
 .lexcontextmenu .lexmenuboxentry a.fa-xs {
     float: right;
-    margin-top: -8px;
+    margin-top: -9px;
 }
 
 .lexcontextmenu .lexmenuboxentry:hover:not(.cmtitle) {
