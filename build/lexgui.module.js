@@ -2576,11 +2576,13 @@ class Menubar {
 
     add( path, options = {} ) {
 
-        if(options.constructor == Function)
+        if( options.constructor == Function )
+        {
             options = { callback: options };
+        }
 
         // process path
-        const tokens = path.split("/");
+        const tokens = path.split( "/" );
 
         // assign icons and shortcuts to last token in path
         const lastPath = tokens[tokens.length - 1];
@@ -2638,6 +2640,8 @@ class Menubar {
             entry.className = "lexmenuentry";
             entry.id = pKey;
             entry.innerHTML = "<span>" + key + "</span>";
+            entry.tabIndex = "1";
+
             if( options.position == "left" )
             {
                 this.root.prepend( entry );
@@ -2661,28 +2665,25 @@ class Menubar {
 
             const create_submenu = function( o, k, c, d ) {
 
-                let contextmenu = document.createElement('div');
-                contextmenu.className = "lexcontextmenu";
-                contextmenu.tabIndex = "0";
-                const isSubMenu = c.classList.contains('lexcontextmenuentry');
+                let menuElement = document.createElement('div');
+                menuElement.className = "lexmenubox";
+                menuElement.tabIndex = "0";
+                c.currentMenu = menuElement;
+                const isSubMenu = c.classList.contains( "lexmenuboxentry" );
                 var rect = c.getBoundingClientRect();
-                contextmenu.style.left = (isSubMenu ? rect.width : rect.left) + "px";
-                // Entries use css to set top relative to parent
-                contextmenu.style.top = (isSubMenu ? 0 : rect.bottom - 4) + "px";
-                c.appendChild( contextmenu );
+                menuElement.style.left = ( isSubMenu ? ( rect.x + rect.width ) : rect.left ) + "px";
+                menuElement.style.top = ( isSubMenu ? rect.y : rect.bottom - 4 ) + "px";
+                rect = menuElement.getBoundingClientRect();
+                LX.root.appendChild( menuElement );
 
-                contextmenu.focus();
-
-                rect = contextmenu.getBoundingClientRect();
-
-                for( var i = 0; i < o[k].length; ++i )
+                for( var i = 0; i < o[ k ].length; ++i )
                 {
                     const subitem = o[k][i];
                     const subkey = Object.keys(subitem)[0];
                     const hasSubmenu = subitem[ subkey ].length;
                     const isCheckbox = subitem[ 'type' ] == 'checkbox';
                     let subentry = document.createElement('div');
-                    subentry.className = "lexcontextmenuentry";
+                    subentry.className = "lexmenuboxentry";
                     subentry.className += (i == o[k].length - 1 ? " last" : "");
                     if( subkey == '' )
                     {
@@ -2693,7 +2694,7 @@ class Menubar {
                         subentry.id = subkey;
                         let subentrycont = document.createElement('div');
                         subentrycont.innerHTML = "";
-                        subentrycont.classList = "lexcontextmenuentrycontainer";
+                        subentrycont.classList = "lexmenuboxentrycontainer";
                         subentry.appendChild(subentrycont);
                         const icon = that.icons[ subkey ];
                         if( isCheckbox )
@@ -2723,19 +2724,22 @@ class Menubar {
                             if( f )
                             {
                                 f.call( this, subitem.checked, subkey, subentry );
-                                that.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+                                that.root.querySelectorAll(".lexmenubox").forEach(e => e.remove());
                             }
                             e.stopPropagation();
                             e.stopImmediatePropagation();
                         })
                     }
 
-                    contextmenu.appendChild( subentry );
+                    menuElement.appendChild( subentry );
 
                     // Nothing more for separators
-                    if(subkey == '') continue;
+                    if( subkey == '' )
+                    {
+                        continue;
+                    }
 
-                    contextmenu.addEventListener('keydown', function(e) {
+                    menuElement.addEventListener('keydown', function(e) {
                         e.preventDefault();
                         let short = that.shorts[ subkey ];
                         if(!short) return;
@@ -2757,7 +2761,7 @@ class Menubar {
                         if( f )
                         {
                             f.call( this, checkboxInput ? subitem.checked : subkey, checkboxInput ? subkey : subentry );
-                            that.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+                            // that.root.querySelectorAll(".lexmenubox").forEach(e => e.remove());
                         }
                         e.stopPropagation();
                         e.stopImmediatePropagation();
@@ -2781,26 +2785,38 @@ class Menubar {
                     subentry.appendChild( submenuIcon );
 
                     subentry.addEventListener("mouseover", e => {
-                        if(subentry.built)
-                        return;
+                        if( subentry.built )
+                        {
+                            return;
+                        }
                         subentry.built = true;
                         create_submenu( subitem, subkey, subentry, ++d );
                         e.stopPropagation();
                     });
 
-                    subentry.addEventListener("mouseleave", () => {
-                        d = -1; // Reset depth
-                        delete subentry.built;
-                        contextmenu.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+                    subentry.addEventListener("mouseleave", (e) => {
+                        if( subentry.currentMenu && ( e.toElement || !subentry.currentMenu.contains( e.toElement ) ) )
+                        {
+                            d = -1; // Reset depth
+                            delete subentry.built;
+                            subentry.currentMenu.remove();
+                            delete subentry.currentMenu;
+                        }
                     });
                 }
 
                 // Set final width
-                contextmenu.style.width = contextmenu.offsetWidth + "px";
+                menuElement.style.width = menuElement.offsetWidth + "px";
+            };
+
+            const _showEntry = () => {
+                this.root.querySelectorAll(".lexmenuentry").forEach( e => e.classList.remove( 'selected' ) );
+                entry.classList.add( "selected" );
+                LX.root.querySelectorAll(".lexmenubox").forEach( e => e.remove() );
+                create_submenu( item, key, entry, -1 );
             };
 
             entry.addEventListener("click", () => {
-
                 const f = item[ 'callback' ];
                 if( f )
                 {
@@ -2808,17 +2824,24 @@ class Menubar {
                     return;
                 }
 
-                // Manage selected
-                this.root.querySelectorAll(".lexmenuentry").forEach( e => e.classList.remove( 'selected' ) );
-                entry.classList.add( "selected" );
+                _showEntry();
 
-                this.root.querySelectorAll(".lexcontextmenu").forEach( e => e.remove() );
-                create_submenu( item, key, entry, -1 );
+                this.focused = true;
             });
 
-            entry.addEventListener("mouseleave", () => {
+            entry.addEventListener( "mouseover", () => {
+                if( this.focused )
+                {
+                    _showEntry();
+                }
+            });
+
+            entry.addEventListener("blur", (e) => {
+                // Menu entries are in the menubar..
                 this.root.querySelectorAll(".lexmenuentry").forEach( e => e.classList.remove( 'selected' ) );
-                this.root.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+                // Menuboxes are in the root area!
+                LX.root.querySelectorAll(".lexmenubox").forEach(e => e.remove());
+                this.focused = false;
             });
         }
     }
@@ -8815,12 +8838,12 @@ class ContextMenu {
     constructor( event, title, options = {} ) {
 
         // remove all context menus
-        document.body.querySelectorAll(".lexcontextmenubox").forEach(e => e.remove());
+        document.body.querySelectorAll( ".lexcontextmenu" ).forEach( e => e.remove() );
 
-        this.root = document.createElement('div');
-        this.root.className = "lexcontextmenubox";
-        this.root.style.left = (event.x - 48 + document.scrollingElement.scrollLeft) + "px";
-        this.root.style.top = (event.y - 8 + document.scrollingElement.scrollTop) + "px";
+        this.root = document.createElement( "div" );
+        this.root.className = "lexcontextmenu";
+        this.root.style.left = ( event.x - 48 + document.scrollingElement.scrollLeft ) + "px";
+        this.root.style.top = ( event.y - 8 + document.scrollingElement.scrollTop ) + "px";
 
         this.root.addEventListener("mouseleave", function() {
             this.remove();
@@ -8833,8 +8856,8 @@ class ContextMenu {
         {
             const item = {};
             item[ title ] = [];
-            item[ 'className' ] = "cmtitle";
-            item[ 'icon' ] = options.icon;
+            item[ "className" ] = "cmtitle";
+            item[ "icon" ] = options.icon;
             this.items.push( item );
         }
     }
@@ -8882,16 +8905,16 @@ class ContextMenu {
 
     _create_submenu( o, k, c, d ) {
 
-        this.root.querySelectorAll(".lexcontextmenubox").forEach( cm => cm.remove() );
+        this.root.querySelectorAll( ".lexcontextmenu" ).forEach( cm => cm.remove() );
 
         let contextmenu = document.createElement('div');
-        contextmenu.className = "lexcontextmenubox";
+        contextmenu.className = "lexcontextmenu";
         c.appendChild( contextmenu );
 
         for( var i = 0; i < o[k].length; ++i )
         {
             const subitem = o[k][i];
-            const subkey = Object.keys(subitem)[0];
+            const subkey = Object.keys( subitem )[ 0 ];
             this._create_entry(subitem, subkey, contextmenu, d);
         }
 
@@ -8907,7 +8930,7 @@ class ContextMenu {
 
         const hasSubmenu = o[ k ].length;
         let entry = document.createElement('div');
-        entry.className = "lexcontextmenuentry" + (o[ 'className' ] ? " " + o[ 'className' ] : "" );
+        entry.className = "lexmenuboxentry" + (o[ 'className' ] ? " " + o[ 'className' ] : "" );
         entry.id = o.id ?? ("eId" + getSupportedDOMName( k ));
         entry.innerHTML = "";
         const icon = o[ 'icon' ];
@@ -8972,7 +8995,7 @@ class ContextMenu {
         entry.addEventListener("mouseleave", () => {
             d = -1; // Reset depth
             // delete entry.built;
-            c.querySelectorAll(".lexcontextmenubox").forEach(e => e.remove());
+            c.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
         });
     }
 

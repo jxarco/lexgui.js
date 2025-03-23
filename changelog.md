@@ -8,9 +8,11 @@ Widgets:
 
 Support for toasts `LX.toast(title, description, options)`;
 Fixed menubar buttons vertical alignment.
+Fixed menubar entries when adding `OverlayButtons` in the area below.
 Restyled area tabs (row mode).
 Timeline theme updated support light scheme color.
 Minor CSS tweaks.
+Minor bug fixes.
 
 ## 0.2.0 (master)
 

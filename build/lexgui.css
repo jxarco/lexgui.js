@@ -2489,7 +2489,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     margin-top: 0.05em;
 }
 
-.lexcontextmenu {
+.lexmenubox {
     position: absolute;
     padding-right: 8px;
     z-index: 1001;
@@ -2499,7 +2499,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     border-radius: 6px;
 }
 
-.lexcontextmenu:before {
+.lexmenubox:before {
     content: "";
     position: absolute;
     width: 100%;
@@ -2512,11 +2512,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     z-index: -1;
 }
 
-.lexcontextmenu:focus {
+.lexmenubox:focus {
     outline: none;
 }
 
-.lexcontextmenu .lexcontextmenuentry {
+.lexmenubox .lexmenuboxentry {
     font-size: var(--global-font-size);
     width: 100%;
     color: var(--global-text-primary);
@@ -2540,32 +2540,32 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     position: relative;
 }
 
-.lexcontextmenu .lexcontextmenuentry:first-child {
+.lexmenubox .lexmenuboxentry:first-child {
     border-top-right-radius: 5px;
     border-top-left-radius: 5px;
 }
 
-.lexcontextmenu .lexcontextmenuentry:last-child {
+.lexmenubox .lexmenuboxentry:last-child {
     border-bottom-right-radius: 5px;
     border-bottom-left-radius: 5px;
 }
 
-.lexcontextmenu .lexcontextmenuentrycontainer {
+.lexmenubox .lexmenuboxentrycontainer {
     display: flex;
     flex-direction: row;
 }
 
-.lexcontextmenu .lexcontextmenuentry .lexentryname {
+.lexmenubox .lexmenuboxentry .lexentryname {
     margin-right: 32px;
     margin-top: 2px;
 }
 
-.lexcontextmenu .lexcontextmenuentry.noicon .lexentryname {
+.lexmenubox .lexmenuboxentry.noicon .lexentryname {
     margin-left: 10px;
 }
 
 /* normal icons  */
-.lexcontextmenu .lexcontextmenuentry a {
+.lexmenubox .lexmenuboxentry a {
     font-size: 10px;
     float: left;
     margin-right: 13px;
@@ -2575,38 +2575,38 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 /* submenu specified arrow  */
-.lexcontextmenu .lexcontextmenuentry a.fa-xs {
+.lexmenubox .lexmenuboxentry a.fa-xs {
     float: right;
     margin-right: 8px;
 }
 
-.lexcontextmenu .lexcontextmenuentry:hover {
+.lexmenubox .lexmenuboxentry:hover {
     background-color: var(--global-selected);
     color: #f5f5f5;
 }
 
-.lexcontextmenu .lexcontextmenuentry:active {
+.lexmenubox .lexmenuboxentry:active {
     color: var(--global-text-secondary);
 }
 
-.lexcontextmenu .lexcontextmenuentry input {
+.lexmenubox .lexmenuboxentry input {
     float: left;
     margin-right: 28px;
     margin-left: 5px;
 }
 
-.lexcontextmenu .lexcontextmenuentry:hover input::after {
+.lexmenubox .lexmenuboxentry:hover input::after {
     border-color: #f5f5f5;
 }
 
-.lexcontextmenu .lexseparator {
+.lexmenubox .lexseparator {
     margin: 2px 0 2px;
     width: -moz-calc(100% + 14px);
     width: -webkit-calc(100% + 14px);
     width: calc(100% + 14px);
 }
 
-.lexcontextmenu .lexentryshort {
+.lexmenubox .lexentryshort {
     font-size: 10px;
     float: right;
     margin-top: 3px;
@@ -2653,7 +2653,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 /* Context Menu */
 
-.lexcontextmenubox {
+.lexcontextmenu {
     z-index: 102;
     position: absolute;
     padding-right: 20px;
@@ -2663,7 +2663,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     border: 1px solid #91909036;
 }
 
-.lexcontextmenubox:before {
+.lexcontextmenu:before {
     content: "";
     position: absolute;
     width: 100%;
@@ -2676,7 +2676,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     border-radius: 6px;
 }
 
-.lexcontextmenubox .lexcontextmenuentry {
+.lexcontextmenu .lexmenuboxentry {
     width: 100%;
     color: var(--global-text-secondary);
     padding: 3px;
@@ -2690,23 +2690,23 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     user-select: none;
 }
 
-.lexcontextmenubox .lexcontextmenuentry:first-child {
+.lexcontextmenu .lexmenuboxentry:first-child {
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
 }
 
-.lexcontextmenubox .lexcontextmenuentry:last-child {
+.lexcontextmenu .lexmenuboxentry:last-child {
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
 }
 
-.lexcontextmenubox .lexcontextmenuentry.cmtitle {
+.lexcontextmenu .lexmenuboxentry.cmtitle {
     background: light-dark(var(--global-color-terciary), var(--global-intense-background));
     font-weight: bold;
     cursor: default;
 }
 
-.lexcontextmenubox .lexcontextmenuentry.cmseparator {
+.lexcontextmenu .lexmenuboxentry.cmseparator {
     height: 1px;
     border-bottom: 1px solid var(--global-color-terciary);
     padding-bottom: 0;
@@ -2714,7 +2714,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     margin-top: -4px;
 }
 
-.lexcontextmenubox .lexcontextmenuentry .lexentryname {
+.lexcontextmenu .lexmenuboxentry .lexentryname {
     margin-right: 10px;
     margin-top: 2px;
     font-size: var(--global-font-size);
@@ -2723,12 +2723,12 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     text-overflow: ellipsis;
 }
 
-.lexcontextmenubox .lexcontextmenuentry .lexentryname.disabled {
+.lexcontextmenu .lexmenuboxentry .lexentryname.disabled {
     color: light-dark(#808080b0, #c0c4cb53);
 }
 
 /* normal icons  */
-.lexcontextmenubox .lexcontextmenuentry a {
+.lexcontextmenu .lexmenuboxentry a {
     float: right;
     margin-right: 0px;
     margin-top: 10px;
@@ -2736,29 +2736,28 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 /* submenu specified arrow  */
-.lexcontextmenubox .lexcontextmenuentry a.fa-xs {
+.lexcontextmenu .lexmenuboxentry a.fa-xs {
     float: right;
     margin-top: -8px;
 }
 
-.lexcontextmenubox .lexcontextmenuentry:hover:not(.cmtitle) {
+.lexcontextmenu .lexmenuboxentry:hover:not(.cmtitle) {
     background-color: var(--global-selected);
     color: #f5f5f5;
 }
 
-.lexcontextmenubox .lexcontextmenuentry:active:not(.cmtitle, .cmseparator) {
+.lexcontextmenu .lexmenuboxentry:active:not(.cmtitle, .cmseparator) {
     padding-top: 0.22em;
     color: #b7b7cba4;
 }
 
-.lexcontextmenubox .lexseparator {
+.lexcontextmenu .lexseparator {
     margin: 3px 0 3px 10px;
 }
 
-.lexcontextmenubox .lexentryshort {
+.lexcontextmenu .lexentryshort {
     font-size: 9px;
     float: right;
-    /* margin-top: -13px; */
     font-weight: bold;
     color: #979aa0e3;
 }
