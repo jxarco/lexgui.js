@@ -2663,6 +2663,16 @@ class Menubar {
                 }
             }
 
+            const _resetMenubar = function() {
+                // Menu entries are in the menubar..
+                that.root.querySelectorAll(".lexmenuentry").forEach( _entry => {
+                    _entry.classList.remove( 'selected' );
+                    _entry.built = false;
+                } );
+                // Menuboxes are in the root area!
+                LX.root.querySelectorAll(".lexmenubox").forEach(e => e.remove());
+            };
+
             const create_submenu = function( o, k, c, d ) {
 
                 let menuElement = document.createElement('div');
@@ -2730,7 +2740,7 @@ class Menubar {
                             if( f )
                             {
                                 f.call( this, subitem.checked, subkey, subentry );
-                                LX.root.querySelectorAll(".lexmenubox").forEach(e => e.remove());
+                                _resetMenubar();
                             }
                             e.stopPropagation();
                             e.stopImmediatePropagation();
@@ -2767,7 +2777,7 @@ class Menubar {
                         if( f )
                         {
                             f.call( this, checkboxInput ? subitem.checked : subkey, checkboxInput ? subkey : subentry );
-                            LX.root.querySelectorAll(".lexmenubox").forEach(e => e.remove());
+                            _resetMenubar();
                         }
                         e.stopPropagation();
                         e.stopImmediatePropagation();
@@ -2816,12 +2826,8 @@ class Menubar {
             };
 
             const _showEntry = () => {
-                this.root.querySelectorAll(".lexmenuentry").forEach( _entry => {
-                    _entry.classList.remove( 'selected' );
-                    _entry.built = false;
-                } );
+                _resetMenubar();
                 entry.classList.add( "selected" );
-                LX.root.querySelectorAll(".lexmenubox").forEach( e => e.remove() );
                 entry.built = true;
                 create_submenu( item, key, entry, -1 );
             };
@@ -2840,6 +2846,7 @@ class Menubar {
             });
 
             entry.addEventListener( "mouseover", (e) => {
+
                 if( this.focused && !entry.built )
                 {
                     _showEntry();
@@ -2847,13 +2854,14 @@ class Menubar {
             });
 
             entry.addEventListener("blur", (e) => {
-                // Menu entries are in the menubar..
-                this.root.querySelectorAll(".lexmenuentry").forEach( _entry => {
-                    _entry.classList.remove( 'selected' );
-                    _entry.built = false;
-                } );
-                // Menuboxes are in the root area!
-                LX.root.querySelectorAll(".lexmenubox").forEach(e => e.remove());
+
+                if( e.relatedTarget.classList.contains( "lexmenubox" ) )
+                {
+                    return;
+                }
+
+                _resetMenubar();
+
                 this.focused = false;
             });
         }

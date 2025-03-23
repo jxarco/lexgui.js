@@ -21,8 +21,6 @@ let area = LX.init();
 // LX.setThemeColor('global-selected', "#a74");
 // LX.setThemeColor('global-text', "#f21");
 
-LX.toast( "Scheduled: Catch up", "Friday, February 10, 2023 at 5:57 PM" );
-LX.toast( "Persistent Toast", "Friday, February 10, 2023 at 5:57 PM", { timeout: -1 });
 LX.toast( "Scheduled: Catch up", "Friday, February 10, 2023 at 5:57 PM", { action: { name: "Undo", callback: ( toast, actionName, event ) => {
     console.log( toast, actionName );
     toast.close();
@@ -128,21 +126,13 @@ area.addMenubar( m => {
 
         }, { size: ["30%", null], float: "right", draggable: false});
     }} );
-    m.add( "Editor/Open AssetView", { icon: "fa-solid fa-rect", callback: () => { createAssetDialog(); }} );
-    m.add( "Account/Login", { icon: "fa-solid fa-user", callback: () => { createLoginForm(); }} );
-    m.add( "Timeline/Shortcuts", { disabled: true });
-    m.add( "Timeline/Shortcuts/Play-Pause", { short: "SPACE" });
-    m.add( "Timeline/Shortcuts/Zoom", { short: "Wheel" });
-    m.add( "Timeline/Shortcuts/Change time", { short: "Left Click+Drag" });
-    m.add( "Timeline/Shortcuts/Move keys", { short: "Hold CTRL" });
-    m.add( "Timeline/Shortcuts/Add keys", { short: "Right Click" });
-    m.add( "Timeline/Shortcuts/Delete keys");
-    m.add( "Timeline/Shortcuts/Delete keys/Single", { short: "DEL" });
-    m.add( "Timeline/Shortcuts/Delete keys/Multiple", { short: "Hold LSHIFT" });
-    m.add( "Timeline/Shortcuts/Key Selection");
-    m.add( "Timeline/Shortcuts/Key Selection/Single", { short: "Left Click" });
-    m.add( "Timeline/Shortcuts/Key Selection/Multiple", { short: "Hold LSHIFT" });
-    m.add( "Timeline/Shortcuts/Key Selection/Box", { short: "Hold LSHIFT+Drag" });
+    m.add( "Editor/Open AssetView", { icon: "fa-solid fa-rect", callback: createAssetDialog } );
+
+    m.add( "Account/Login", { icon: "fa-solid fa-user", callback: createLoginForm } );
+
+    m.add( "Notifications/Toast", { callback: createToast } );
+    m.add( "Notifications/Support LexGUI/Do it" );
+
     m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass", short:  "F1", callback: () => { window.open("./docs/") }});
     m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
     m.add( "Help/Support LexGUI/Do it" );
@@ -810,6 +800,29 @@ function fillBottomPanel( panel ) {
     panel.branch("A collapsed branch", { closed: true });
     panel.addText(null, "Nothing here", null, { disabled: true });
     panel.merge();
+}
+
+function createToast() {
+
+    const generatedToasts = [
+        ["🏆 The Lakers secured a thrilling victory!", "Saturday, March 23 2024, at 7:30 PM"],
+        ["⚽ Messi scores a last-minute goal!", "Friday, March 22 2024, at 9:15 PM"],
+        ["🎾 Nadal wins another Grand Slam title!", "Thursday, March 21 2024, at 5:00 PM"],
+        ["🏀 Warriors dominate in a stunning comeback!", "Wednesday, March 20 2024, at 8:45 PM"],
+        ["⚾ Yankees hit a walk-off home run!", "Tuesday, March 19 2024, at 10:10 PM"],
+        ["🏈 Chiefs claim another Super Bowl win!", "Monday, March 18 2024, at 6:00 PM"],
+        ["🥊 Knockout! The champion retains the title!", "Sunday, March 17 2024, at 11:00 PM"],
+        ["🏎️ Verstappen takes the checkered flag in style!", "Saturday, March 16 2024, at 3:30 PM"],
+        ["🥇 Olympic record shattered in 100m sprint!", "Friday, March 15 2024, at 4:20 PM"],
+        ["🏌️ Hole-in-one! Golf legend makes history!", "Thursday, March 14 2024, at 2:00 PM"]
+    ];
+    const idx = (Math.random() * (generatedToasts.length - 1))|0;
+
+    LX.toast( generatedToasts[idx][0], generatedToasts[idx][1], { action: { name: "Got it!", callback: ( toast, actionName, event ) => {
+        console.log( toast, actionName );
+        toast.close();
+    } } } );
+
 }
 
 function createLoginForm() {
