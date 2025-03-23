@@ -77,6 +77,7 @@ area.addMenubar( m => {
     m.add( "Scene/Open Recent/hello.scene", name => { console.log("Opening " + name) });
     m.add( "Scene/Open Recent/goodbye.scene", name => { console.log("Opening " + name) });
     m.add( "Project/Project Settings" );
+    m.add( "Project/" );
     m.add( "Project/Export", { icon: "fa-solid fa-download" });
     m.add( "Project/Export/DAE", { icon: "fa-solid fa-cube", short: "D", callback: () => { console.log("Exporting DAE...") }} );
     m.add( "Project/Export/GLTF", { short:  "G" } );

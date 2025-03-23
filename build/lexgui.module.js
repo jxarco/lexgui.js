@@ -2670,10 +2670,16 @@ class Menubar {
                 menuElement.tabIndex = "0";
                 c.currentMenu = menuElement;
                 const isSubMenu = c.classList.contains( "lexmenuboxentry" );
+                if( isSubMenu ) menuElement.dataset[ "submenu" ] = true;
                 var rect = c.getBoundingClientRect();
                 menuElement.style.left = ( isSubMenu ? ( rect.x + rect.width ) : rect.left ) + "px";
                 menuElement.style.top = ( isSubMenu ? rect.y : rect.bottom - 4 ) + "px";
                 rect = menuElement.getBoundingClientRect();
+
+                doAsync( () => {
+                    menuElement.dataset[ "open" ] = true;
+                }, 10 );
+
                 LX.root.appendChild( menuElement );
 
                 for( var i = 0; i < o[ k ].length; ++i )
@@ -2795,7 +2801,7 @@ class Menubar {
                     });
 
                     subentry.addEventListener("mouseleave", (e) => {
-                        if( subentry.currentMenu && ( e.toElement || !subentry.currentMenu.contains( e.toElement ) ) )
+                        if( subentry.currentMenu && ( subentry.currentMenu != e.toElement ) )
                         {
                             d = -1; // Reset depth
                             delete subentry.built;
@@ -2810,9 +2816,13 @@ class Menubar {
             };
 
             const _showEntry = () => {
-                this.root.querySelectorAll(".lexmenuentry").forEach( e => e.classList.remove( 'selected' ) );
+                this.root.querySelectorAll(".lexmenuentry").forEach( _entry => {
+                    _entry.classList.remove( 'selected' );
+                    _entry.built = false;
+                } );
                 entry.classList.add( "selected" );
                 LX.root.querySelectorAll(".lexmenubox").forEach( e => e.remove() );
+                entry.built = true;
                 create_submenu( item, key, entry, -1 );
             };
 
@@ -2829,8 +2839,8 @@ class Menubar {
                 this.focused = true;
             });
 
-            entry.addEventListener( "mouseover", () => {
-                if( this.focused )
+            entry.addEventListener( "mouseover", (e) => {
+                if( this.focused && !entry.built )
                 {
                     _showEntry();
                 }
@@ -2838,7 +2848,10 @@ class Menubar {
 
             entry.addEventListener("blur", (e) => {
                 // Menu entries are in the menubar..
-                this.root.querySelectorAll(".lexmenuentry").forEach( e => e.classList.remove( 'selected' ) );
+                this.root.querySelectorAll(".lexmenuentry").forEach( _entry => {
+                    _entry.classList.remove( 'selected' );
+                    _entry.built = false;
+                } );
                 // Menuboxes are in the root area!
                 LX.root.querySelectorAll(".lexmenubox").forEach(e => e.remove());
                 this.focused = false;

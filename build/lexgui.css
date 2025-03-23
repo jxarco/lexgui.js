@@ -895,7 +895,7 @@ body.noevents * {
     .lexbranchtitle {
         color: var(--global-text-secondary);
         background-color: var(--global-color-secondary);
-        text-shadow: 0px 1px 6px #afafaf7c;
+        text-shadow: 0px 0px 4px #e0e0e065;
     }
 
     .lexbranch.closed .lexbranchtitle {
@@ -2493,10 +2493,23 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     position: absolute;
     padding-right: 8px;
     z-index: 1001;
-    box-shadow: 0 0 6px #2c2c2c7c !important;
-    background-color: var(--global-blur-background);
-    border: 1px solid #91909036;
+    background-color: #111111f3;
+    border: 1px solid #aaaaaa48;
     border-radius: 6px;
+    transition: all 0.15s cubic-bezier(.42,.97,.52,1.19);
+    transform: translate(-2px, -10px);
+    opacity: 0;
+}
+
+:root[data-theme="light"] {
+    .lexmenubox {
+        background-color: #fffffff3;
+        box-shadow: 0px 6px 7px -3px #a7a7a7b7 !important;
+    }
+}
+
+.lexmenubox[data-submenu] {
+    transform: translate(-10px, -2px);
 }
 
 .lexmenubox:before {
@@ -2510,6 +2523,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     z-index: -1;
+}
+
+.lexmenubox[data-open]{
+    transform: translate(0, 0);
+    opacity: 1;
 }
 
 .lexmenubox:focus {
@@ -2601,9 +2619,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexmenubox .lexseparator {
     margin: 2px 0 2px;
-    width: -moz-calc(100% + 14px);
-    width: -webkit-calc(100% + 14px);
-    width: calc(100% + 14px);
+    width: -moz-calc(100% + 8px);
+    width: -webkit-calc(100% + 8px);
+    width: calc(100% + 8px);
+    border-color: var(--global-text-terciary);
+    opacity: 0.25;
 }
 
 .lexmenubox .lexentryshort {
@@ -2611,7 +2631,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     float: right;
     margin-top: 3px;
     font-weight: bold;
-    color: var(--global-text-primary);
+    color: var(--global-text-terciary);
     margin-right: 12px;
     text-align: right;
 }
