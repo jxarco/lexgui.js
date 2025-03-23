@@ -131,7 +131,8 @@ area.addMenubar( m => {
     m.add( "Account/Login", { icon: "fa-solid fa-user", callback: createLoginForm } );
 
     m.add( "Notifications/Toast", { callback: createToast } );
-    m.add( "Notifications/Support LexGUI/Do it" );
+    m.add( "Notifications/Prompt", { callback: () => { LX.prompt("This action cannot be undone. This will permanently delete your account and remove your data from our servers.", 
+        "Are you absolutely sure?", null, {xposition: ["50px", "100px"]}); } } );
 
     m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass", short:  "F1", callback: () => { window.open("./docs/") }});
     m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
@@ -923,5 +924,3 @@ function createAssetDialog() {
         })
     },{ title:'Lexemes', close: true, minimize: false, size: ["80%"], scroll: true, resizable: true, draggable: true });
 }
-
-LX.popup("Hello! I'm a popup :)", null, {position: ["50px", "100px"]});

@@ -1028,6 +1028,7 @@ LX.popup = popup;
 function prompt( text, title, callback, options = {} )
 {
     options.modal = true;
+    options.className = "prompt";
 
     let value = "";
 
@@ -1042,7 +1043,9 @@ function prompt( text, title, callback, options = {} )
 
         p.sameLine( 2 );
 
-        p.addButton( null, options.accept || "OK", () => {
+        p.addButton(null, "Cancel", () => {if(options.on_cancel) options.on_cancel(); dialog.close();} );
+
+        p.addButton( null, options.accept || "Continue", () => {
             if( options.required && value === '' )
             {
                 text += text.includes("You must fill the input text.") ? "": "\nYou must fill the input text.";
@@ -1055,8 +1058,6 @@ function prompt( text, title, callback, options = {} )
                 dialog.close();
             }
         }, { buttonClass: "primary" });
-
-        p.addButton(null, "Cancel", () => {if(options.on_cancel) options.on_cancel(); dialog.close();} );
 
     }, options );
 
@@ -8541,7 +8542,7 @@ class Dialog {
             modal = options.modal ?? false;
 
         var root = document.createElement('dialog');
-        root.className = "lexdialog " + (options.class ?? "");
+        root.className = "lexdialog " + (options.className ?? "");
         root.id = options.id ?? "dialog" + Dialog._last_id++;
         LX.root.appendChild( root );
 
@@ -8699,15 +8700,20 @@ class Dialog {
 
         root.style.width = size[ 0 ] ? (size[ 0 ]) : "25%";
         root.style.height = size[ 1 ] ? (size[ 1 ]) : "auto";
+        root.style.margin = "auto";
 
         if( options.size )
         {
             this.size = size;
         }
 
-        let rect = root.getBoundingClientRect();
-        root.style.left = position[ 0 ] ? (position[ 0 ]) : "calc( 50% - " + ( rect.width * 0.5 ) + "px )";
-        root.style.top = position[ 1 ] ? (position[ 1 ]) : "calc( 50% - " + ( rect.height * 0.5 ) + "px )";
+        if( options.position )
+        {
+            root.style.margin = "unset";
+        }
+
+        root.style.left = position[ 0 ] ?? "0";
+        root.style.top = position[ 1 ] ?? "0";
 
         panel.root.style.width = "calc( 100% - 30px )";
         panel.root.style.height = title ? "calc( 100% - " + ( titleDiv.offsetHeight + 30 ) + "px )" : "calc( 100% - 51px )";

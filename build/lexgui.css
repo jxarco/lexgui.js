@@ -617,7 +617,7 @@ body.noevents * {
 .lexdialogcontent.notitle {
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
-    padding-top: 36px;
+    padding-top: 24px;
 }
 
 .lexdialogcloser {
@@ -647,6 +647,11 @@ body.noevents * {
 
 .lexdialogcloser.notitle:active {
     margin-top: 0.05em;
+}
+
+.lexdialog.prompt textarea {
+    color: var(--global-text-secondary);
+    font-weight: normal;
 }
 
 /* Pocket Dialog */

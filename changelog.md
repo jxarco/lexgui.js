@@ -11,6 +11,7 @@ Improve Menubar menus look & feel.
 Fixed menubar buttons vertical alignment.
 Fixed menubar entries when adding `OverlayButtons` in the area below.
 Restyled area tabs (row mode).
+Dialog tweaks. Renamed `class` to `className` for Dialog options.
 Timeline theme updated support light scheme color.
 Minor CSS tweaks.
 Minor bug fixes.
