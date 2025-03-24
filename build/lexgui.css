@@ -2938,7 +2938,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     padding: 8px;
     border-radius: 8px;
     cursor: pointer;
-    display: flex;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -2986,12 +2985,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexsidebarsubentrycontainer {
-    width: calc(100% - 34px);
+    width: calc(100% - 48px);
     margin-block-start: 8px;
     margin-block-end: 8px;
-    margin-left: 24px;
-    padding-left: 6px;
-    padding-right: 4px;
+    margin-left: 16px;
+    padding-inline: 16px;
     font-size: 13px;
     display: flex;
     flex-direction: column;
@@ -3009,6 +3007,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     transform: translate(-8px, -8px);
     opacity: 0;
     margin: 0;
+}
+
+.lexsidebar .lexsidebarsubentrycontainer .lexsidebarentry {
+    display: flex;
+    gap: 0.8em;
 }
 
 .lexsidebar.collapsed .lexsidebarsubentrycontainer {
