@@ -3314,6 +3314,7 @@ class SideBar {
 
         this.items = [ ];
         this.icons = { };
+        this.groups = { };
     }
 
     /**
@@ -3365,11 +3366,14 @@ class SideBar {
     /**
      * @method group
      * @param {String} groupName
+     * @param {Object} action: { icon, callback }
      */
 
-    group( groupName ) {
+    group( groupName, action ) {
 
         this.currentGroup = groupName;
+
+        this.groups[ groupName ] = action;
     }
 
     /**
@@ -3492,6 +3496,20 @@ class SideBar {
                     let groupLabel = document.createElement( 'div' );
                     groupLabel.innerHTML = item.group;
                     groupEntry.appendChild( groupLabel );
+
+                    if( this.groups[ item.group ] != null )
+                    {
+                        let groupAction = document.createElement( 'a' );
+                        groupAction.className = ( this.groups[ item.group ].icon ?? "" ) + " lexicon";
+                        groupEntry.appendChild( groupAction );
+                        groupAction.addEventListener( "click", (e) => {
+                            if( this.groups[ item.group ].callback )
+                            {
+                                this.groups[ item.group ].callback( item.group, e );
+                            }
+                        } );
+                    }
+
                 }
                 else if( !currentGroup.classList.contains( "lexsidebargroup" ) )
                 {

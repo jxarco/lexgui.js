@@ -177,25 +177,27 @@ area.addMenubar( m => {
 // split main area
 var [ left, right ] = area.split({ sizes:["70%","30%"], minimizable: true });
 
+const logParams = (entryName, entry, event) => { console.log(entryName, entry, event) };
+
 const sidebar = left.addSidebar( m => {
-    m.group( "Projects", {} );
-    m.add( "Getting Started", { icon: "fa fa-cube", callback: (entryName) => { console.log(entryName) } } );
-    m.add( "Getting Started/Installation", { icon: "fa fa-cube", callback: () => {  } } );
-    m.add( "Getting Started/Project Structure", { icon: "fa fa-cube", callback: () => {  } } );
-    m.add( "Building Your Application", { icon: "fa fa-code", callback: () => {  } } );
-    m.add( "Search Blocks", { icon: "fa fa-search", callback: () => { } } );
-    m.add( "Very loooooooooooooooooooooooong sun", { icon: "fa fa-sun", callback: () => { } } );
+    m.group( "Projects", { icon: "fa fa-plus", callback: (groupName, event) => { console.log(groupName) }} );
+    m.add( "Getting Started", { icon: "fa fa-cube", callback: logParams } );
+    m.add( "Getting Started/Installation", { icon: "fa fa-cube", callback: logParams } );
+    m.add( "Getting Started/Project Structure", { icon: "fa fa-cube", callback: logParams } );
+    m.add( "Building Your Application", { icon: "fa fa-code", callback: logParams } );
+    m.add( "Search Blocks", { icon: "fa fa-search", callback: logParams } );
+    m.add( "Very loooooooooooooooooooooooong sun", { icon: "fa fa-sun",callback: logParams } );
     m.separator();
-    m.group( "API Reference", {} );
-    m.add( "Components", { icon: "fa fa-cube", callback: () => {  } } );
-    m.add( "File Conventions", { icon: "fa fa-code", callback: () => {  } } );
-    m.add( "Functions", { icon: "fa fa-search", callback: () => { } } );
-    m.add( "CLI", { icon: "fa fa-sun", callback: () => { } } );
+    m.group( "API Reference" );
+    m.add( "Components", { icon: "fa fa-cube", callback: logParams } );
+    m.add( "File Conventions", { icon: "fa fa-code", callback: logParams } );
+    m.add( "Functions", { icon: "fa fa-search",callback: logParams } );
+    m.add( "CLI", { icon: "fa fa-sun",callback: logParams } );
     m.separator();
-    m.group( "Architecture", {} );
-    m.add( "Accessibility ", { icon: "fa fa-cube", callback: () => {  } } );
-    m.add( "Fast Refresh", { icon: "fa fa-code", callback: () => {  } } );
-    m.add( "Supported Browsers", { icon: "fa fa-search", callback: () => { } } );
+    m.group( "Architecture" );
+    m.add( "Accessibility ", { icon: "fa fa-cube", callback: logParams } );
+    m.add( "Fast Refresh", { icon: "fa fa-code", callback: logParams } );
+    m.add( "Supported Browsers", { icon: "fa fa-search",callback: logParams } );
 }, { /* collapseToIcons: false, skipFooter: true, skipHeader: true,*/ onHeaderPressed: (e) => { console.log( "onHeaderPressed" ) }, onFooterPressed: (e) => { console.log( "onFooterPressed" ) }  });
 
 // split left area

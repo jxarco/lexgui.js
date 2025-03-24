@@ -2895,6 +2895,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     font-weight: 600;
     color: var(--global-text-secondary);
     overflow: hidden;
+    display: flex;
 }
 
 .lexsidebar .lexsidebargrouptitle div {
@@ -2906,13 +2907,20 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     align-content: center;
 }
 
-.lexsidebar.collapsing .lexsidebargrouptitle div {
+.lexsidebar .lexsidebargrouptitle a {
+    margin: auto 0;
+    margin-left: auto;
+    margin-right: 8px;
+    transition: transform 0.3s cubic-bezier(0,0,.2,1), opacity 0.1s cubic-bezier(0,0,.2,1), max-height 0.3s cubic-bezier(0,0,.2,1);
+}
+
+.lexsidebar.collapsing .lexsidebargrouptitle * {
     max-height: 0px;
     transform: translate(0, -24px);
     opacity: 0;
 }
 
-.lexsidebar.collapsed .lexsidebargrouptitle div {
+.lexsidebar.collapsed .lexsidebargrouptitle * {
     display: none;
 }
 
