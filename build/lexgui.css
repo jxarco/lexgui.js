@@ -2865,9 +2865,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexsidebarcontent {
     width: 100%;
-    height: calc(100% - 160px); /* this account for header, footer and all inner paddings */
-    padding-block-start: 16px;
-    padding-block-end: 16px;
+    padding-block-start: 4px;
+    padding-block-end: 4px;
     display: flex;
     flex-direction: column;
     overflow-y: scroll;
@@ -2879,7 +2878,16 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexsidebargroup:nth-child(n+2) {
-    margin-top: 1.15rem;
+    margin-top: 0.15rem;
+}
+
+.lexsidebar .lexsidebarseparator {
+    background-color: #5251514d;
+    width: 100%;
+    height: 1px;
+    margin: 0 auto;
+    margin-top: 0.4rem;
+    margin-bottom: 0.4rem;
 }
 
 .lexsidebar .lexsidebargrouptitle {

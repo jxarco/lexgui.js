@@ -183,18 +183,20 @@ const sidebar = left.addSidebar( m => {
     m.add( "Getting Started/Installation", { icon: "fa fa-cube", callback: () => {  } } );
     m.add( "Getting Started/Project Structure", { icon: "fa fa-cube", callback: () => {  } } );
     m.add( "Building Your Application", { icon: "fa fa-code", callback: () => {  } } );
-    m.add( "API Reference", { icon: "fa fa-search", callback: () => { } } );
+    m.add( "Search Blocks", { icon: "fa fa-search", callback: () => { } } );
     m.add( "Very loooooooooooooooooooooooong sun", { icon: "fa fa-sun", callback: () => { } } );
+    m.separator();
     m.group( "API Reference", {} );
     m.add( "Components", { icon: "fa fa-cube", callback: () => {  } } );
     m.add( "File Conventions", { icon: "fa fa-code", callback: () => {  } } );
     m.add( "Functions", { icon: "fa fa-search", callback: () => { } } );
     m.add( "CLI", { icon: "fa fa-sun", callback: () => { } } );
+    m.separator();
     m.group( "Architecture", {} );
     m.add( "Accessibility ", { icon: "fa fa-cube", callback: () => {  } } );
     m.add( "Fast Refresh", { icon: "fa fa-code", callback: () => {  } } );
     m.add( "Supported Browsers", { icon: "fa fa-search", callback: () => { } } );
-}, { /* collapseToIcons: false,*/ onHeaderPressed: (e) => { console.log( "onHeaderPressed" ) }, onFooterPressed: (e) => { console.log( "onFooterPressed" ) }  });
+}, { /* collapseToIcons: false, skipFooter: true, skipHeader: true,*/ onHeaderPressed: (e) => { console.log( "onHeaderPressed" ) }, onFooterPressed: (e) => { console.log( "onFooterPressed" ) }  });
 
 // split left area
 var [up, bottom] = sidebar.siblingArea.split({ type: 'vertical', sizes:["50%", null], minimizable: true });

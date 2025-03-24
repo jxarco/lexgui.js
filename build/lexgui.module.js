@@ -3167,6 +3167,8 @@ class SideBar {
      * @param {Object} options
      * inset: TODO
      * filter: TODO
+     * skipHeader: Do not use sidebar header [false]
+     * skipFooter: Do not use sidebar footer [false]
      * collapsable: Sidebar can toggle between collapsed/expanded [true]
      * collapseToIcons: When Sidebar collapses, icons remains visible  [true]
      * onHeaderPressed: Function to call when header is pressed
@@ -3198,7 +3200,11 @@ class SideBar {
 
         }, 100 );
 
+        // This account for header, footer and all inner paddings
+        let contentOffset = 32;
+
         // Header
+        if( !( options.skipHeader ?? false ) )
         {
             this.header = document.createElement( 'div' );
             this.header.className = "lexsidebarheader";
@@ -3250,6 +3256,8 @@ class SideBar {
                     this.toggleCollapsed();
                 } );
             }
+
+            contentOffset += 52;
         }
 
         // Content
@@ -3260,6 +3268,7 @@ class SideBar {
         }
 
         // Footer
+        if( !( options.skipFooter ?? false ) )
         {
             this.footer = document.createElement( 'div' );
             this.footer.className = "lexsidebarfooter";
@@ -3296,7 +3305,12 @@ class SideBar {
 
             const icon = LX.makeIcon( "More" );
             this.footer.appendChild( icon );
+
+            contentOffset += 52;
         }
+
+        // Set width depending on header/footer
+        this.content.style.height = `calc(100% - ${ contentOffset }px)`;
 
         this.items = [ ];
         this.icons = { };
@@ -3338,28 +3352,24 @@ class SideBar {
     }
 
     /**
-     * @method group
-     * @param {String} groupName
-     * @param {*} options:
-     * callback: Function to call on each item
-     * bottom: Bool to set item at the bottom as helper button (not selectable)
+     * @method separator
      */
 
-    group( groupName, options = {} ) {
+    separator() {
 
-        let groupContent = document.createElement( 'div' );
-        groupContent.className = "lexsidebargroup";
-        this.content.appendChild( groupContent );
+        this.currentGroup = null;
 
-        let groupEntry = document.createElement( 'div' );
-        groupEntry.className = "lexsidebargrouptitle";
-        groupContent.appendChild( groupEntry );
+        this.add( "" );
+    }
 
-        let groupLabel = document.createElement( 'div' );
-        groupLabel.innerHTML = groupName;
-        groupEntry.appendChild( groupLabel );
+    /**
+     * @method group
+     * @param {String} groupName
+     */
 
-        this.currentGroup = groupContent;
+    group( groupName ) {
+
+        this.currentGroup = groupName;
     }
 
     /**
@@ -3457,6 +3467,7 @@ class SideBar {
 
             let key = Object.keys( item )[ 0 ];
             let pKey = key.replace( /\s/g, '' ).replaceAll( '.', '' );
+            let currentGroup = null;
 
             let entry = document.createElement( 'div' );
             entry.className = "lexsidebarentry " + ( options.className ?? "" );
@@ -3464,7 +3475,41 @@ class SideBar {
 
             if( item.group )
             {
-                item.group.appendChild( entry );
+                const pGroupKey = item.group.replace( /\s/g, '' ).replaceAll( '.', '' );
+                currentGroup = this.content.querySelector( "#" + pGroupKey );
+
+                if( !currentGroup )
+                {
+                    currentGroup = document.createElement( 'div' );
+                    currentGroup.id = pGroupKey;
+                    currentGroup.className = "lexsidebargroup";
+                    this.content.appendChild( currentGroup );
+
+                    let groupEntry = document.createElement( 'div' );
+                    groupEntry.className = "lexsidebargrouptitle";
+                    currentGroup.appendChild( groupEntry );
+
+                    let groupLabel = document.createElement( 'div' );
+                    groupLabel.innerHTML = item.group;
+                    groupEntry.appendChild( groupLabel );
+                }
+                else if( !currentGroup.classList.contains( "lexsidebargroup" ) )
+                {
+                    throw( "Bad id: " + item.group );
+                }
+            }
+
+            if( pKey == "" )
+            {
+                let separatorDom = document.createElement( 'div' );
+                separatorDom.className = "lexsidebarseparator";
+                this.content.appendChild( separatorDom );
+                continue;
+            }
+
+            if( currentGroup )
+            {
+                currentGroup.appendChild( entry );
             }
             else
             {
@@ -3514,31 +3559,33 @@ class SideBar {
             });
 
             // Subentries
-            if( item[ key ].length )
+            if( !item[ key ].length )
             {
-                let subentryContainer = document.createElement( 'div' );
-                subentryContainer.className = "lexsidebarsubentrycontainer";
+                continue;
+            }
 
-                if( item.group )
-                {
-                    item.group.appendChild( subentryContainer );
-                }
-                else
-                {
-                    this.content.appendChild( subentryContainer );
-                }
+            let subentryContainer = document.createElement( 'div' );
+            subentryContainer.className = "lexsidebarsubentrycontainer";
 
-                for( var i = 0; i < item[ key ].length; ++i )
-                {
-                    const subitem = item[ key ][ i ];
-                    const subkey = Object.keys( subitem )[ 0 ];
+            if( currentGroup )
+            {
+                currentGroup.appendChild( subentryContainer );
+            }
+            else
+            {
+                this.content.appendChild( subentryContainer );
+            }
 
-                    let subentry = document.createElement( 'div' );
-                    subentry.innerHTML = `<span>${ subkey }</span>`;
-                    subentry.className = "lexsidebarentry";
-                    subentry.id = subkey;
-                    subentryContainer.appendChild( subentry );
-                }
+            for( var i = 0; i < item[ key ].length; ++i )
+            {
+                const subitem = item[ key ][ i ];
+                const subkey = Object.keys( subitem )[ 0 ];
+
+                let subentry = document.createElement( 'div' );
+                subentry.innerHTML = `<span>${ subkey }</span>`;
+                subentry.className = "lexsidebarentry";
+                subentry.id = subkey;
+                subentryContainer.appendChild( subentry );
             }
         }
     }
@@ -5701,8 +5748,6 @@ class Panel {
         this.queue( container );
 
         const _placeOptions = ( parent ) => {
-
-            console.log("Replacing container");
 
             const overflowContainer = parent.getParentArea();
             const rect = selectedOption.getBoundingClientRect();
