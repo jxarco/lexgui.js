@@ -231,8 +231,8 @@ body.noevents * {
     color: var(--global-text-secondary);
 }
 
-.lexicon:hover svg {
-    color: var(--global-text-primary) !important;
+.lexicon:hover svg, .lexicon:hover svg path {
+    --color: var(--global-text-primary) !important;
 }
 
 /* Notifications */
@@ -2863,6 +2863,15 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     gap: 0.2rem;
 }
 
+.lexsidebar svg, .lexsidebar svg path {
+    width: 1rem;
+    height: 1rem;
+    --color: var(--global-text-secondary);
+    fill: var(--color);
+    stroke: var(--color);
+    display: block;
+}
+
 .lexsidebarcontent {
     width: 100%;
     padding-block-start: 4px;
@@ -2930,8 +2939,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     border-radius: 8px;
     cursor: pointer;
     display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -2968,18 +2975,23 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     margin-left: -2px;
 }
 
-.lexsidebar .lexsidebarentry div a {
+.lexsidebar .lexsidebarentry div a:not(.lexicon) {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
 
+.lexsidebar .lexsidebarentry a.lexicon {
+    margin-left: auto;
+}
+
 .lexsidebar .lexsidebarsubentrycontainer {
-    width: calc(100% - 76px);
+    width: calc(100% - 34px);
     margin-block-start: 8px;
     margin-block-end: 8px;
-    margin-inline: 32px;
-    padding-inline: 6px;
+    margin-left: 24px;
+    padding-left: 6px;
+    padding-right: 4px;
     font-size: 13px;
     display: flex;
     flex-direction: column;
@@ -3110,12 +3122,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexsidebarfooter svg, .lexsidebar .lexsidebarheader svg {
-    width: 1rem;
-    height: 1rem;
-    color: var(--global-text-secondary);
-    fill: var(--global-text-secondary);
-    stroke: var(--global-text-secondary);
-    display: block;
     place-self: center;
 }
 

@@ -177,16 +177,17 @@ area.addMenubar( m => {
 // split main area
 var [ left, right ] = area.split({ sizes:["70%","30%"], minimizable: true });
 
-const logParams = (entryName, entry, event) => { console.log(entryName, entry, event) };
+const logParams = (entryName, event) => { console.log(entryName, event) };
+const actionLogParams = (entryName, event) => { console.log("Action called!", entryName, event) };
 
 const sidebar = left.addSidebar( m => {
     m.group( "Projects", { icon: "fa fa-plus", callback: (groupName, event) => { console.log(groupName) }} );
     m.add( "Getting Started", { icon: "fa fa-cube", callback: logParams } );
     m.add( "Getting Started/Installation", { icon: "fa fa-cube", callback: logParams } );
-    m.add( "Getting Started/Project Structure", { icon: "fa fa-cube", callback: logParams } );
-    m.add( "Building Your Application", { icon: "fa fa-code", callback: logParams } );
+    m.add( "Getting Started/Project Structure", { icon: "fa fa-cube", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } } );
+    m.add( "Building Your Application", { icon: "fa fa-code", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } } );
     m.add( "Search Blocks", { icon: "fa fa-search", callback: logParams } );
-    m.add( "Very loooooooooooooooooooooooong sun", { icon: "fa fa-sun",callback: logParams } );
+    m.add( "Very loooooooooooooooooooooooong sun", { icon: "fa fa-sun",callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } } );
     m.separator();
     m.group( "API Reference" );
     m.add( "Components", { icon: "fa fa-cube", callback: logParams } );

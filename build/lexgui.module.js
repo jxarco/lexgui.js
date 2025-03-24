@@ -3303,7 +3303,7 @@ class SideBar {
                 info.appendChild( infoSubtext );
             }
 
-            const icon = LX.makeIcon( "More" );
+            const icon = LX.makeIcon( "MenuArrows" );
             this.footer.appendChild( icon );
 
             contentOffset += 52;
@@ -3549,6 +3549,19 @@ class SideBar {
             itemName.innerHTML = key;
             itemDom.appendChild( itemName );
 
+            if( options.action )
+            {
+                const actionIcon = LX.makeIcon( options.action.icon ?? "MoreHorizontal", options.action.name );
+                itemDom.appendChild( actionIcon );
+
+                actionIcon.addEventListener( "click", (e) => {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    const f = options.action.callback;
+                    if( f ) f.call( this, key, e );
+                } );
+            }
+
             let desc = document.createElement( 'span' );
             desc.className = 'lexsidebarentrydesc';
             desc.innerHTML = key;
@@ -3569,7 +3582,7 @@ class SideBar {
             entry.addEventListener("click", (e) => {
 
                 const f = options.callback;
-                if( f ) f.call( this, key, entry, e );
+                if( f ) f.call( this, key, e );
 
                 // Manage selected
                 this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
@@ -3602,6 +3615,20 @@ class SideBar {
 
                 let subentry = document.createElement( 'div' );
                 subentry.innerHTML = `<span>${ subkey }</span>`;
+
+                if( suboptions.action )
+                {
+                    const actionIcon = LX.makeIcon( suboptions.action.icon ?? "MoreHorizontal", suboptions.action.name );
+                    subentry.appendChild( actionIcon );
+
+                    actionIcon.addEventListener( "click", (e) => {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        const f = suboptions.action.callback;
+                        if( f ) f.call( this, subkey, e );
+                    } );
+                }
+
                 subentry.className = "lexsidebarentry";
                 subentry.id = subkey;
                 subentryContainer.appendChild( subentry );
@@ -11445,8 +11472,11 @@ Element.prototype.getParentArea = function() {
 }
 
 LX.ICONS = {
-    "Sidebar": `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_iconCarrier"> <title>i</title> <g id="Complete"> <g id="sidebar-left"> <g> <rect id="Square-2" data-name="Square" x="3" y="3" width="18" height="18" rx="2" ry="2" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="2"></rect> <line x1="9" y1="21" x2="9" y2="3" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="2"></line> </g> </g> </g> </g></svg>`,
-    "More": `<svg fill="#000000" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_iconCarrier"> <title>i</title> <g id="Complete"> <g id="F-More"> <path id="Vertical" d="M12,16a2,2,0,1,1-2,2A2,2,0,0,1,12,16ZM10,6a2,2,0,1,0,2-2A2,2,0,0,0,10,6Zm0,6a2,2,0,1,0,2-2A2,2,0,0,0,10,12Z"></path> </g> </g> </g></svg>`
+    "Sidebar": `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_iconCarrier"> <g id="Complete"> <g id="sidebar-left"> <g> <rect id="Square-2" data-name="Square" x="3" y="3" width="18" height="18" rx="2" ry="2" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="2"></rect> <line x1="9" y1="21" x2="9" y2="3" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="2"></line> </g> </g> </g> </g></svg>`,
+    "More": `<svg fill="#000000" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_iconCarrier"> <g id="Complete"> <g id="F-More"> <path id="Vertical" d="M12,16a2,2,0,1,1-2,2A2,2,0,0,1,12,16ZM10,6a2,2,0,1,0,2-2A2,2,0,0,0,10,6Zm0,6a2,2,0,1,0,2-2A2,2,0,0,0,10,12Z"></path> </g> </g> </g></svg>`,
+    "MoreHorizontal": `<svg fill="#000000" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_iconCarrier"> <g id="Complete"> <g id="F-More"> <path id="Horizontal" d="M8,12a2,2,0,1,1-2-2A2,2,0,0,1,8,12Zm10-2a2,2,0,1,0,2,2A2,2,0,0,0,18,10Zm-6,0a2,2,0,1,0,2,2A2,2,0,0,0,12,10Z"></path> </g> </g> </g></svg>`,
+    "MenuArrows": `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#000000" transform="rotate(90)"><g id="SVGRepo_iconCarrier"> <g id="Complete"> <g id="Code"> <g> <polyline id="Right-2" data-name="Right" points="15.5 7 20.5 12 15.5 17" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></polyline> <polyline id="Left-2" data-name="Left" points="8.5 7 3.5 12 8.5 17" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></polyline> </g> </g> </g> </g></svg>`,
+    "Plus": `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#000000"<g id="SVGRepo_iconCarrier"> <g id="Complete"> <g id="add-2" data-name="add"> <g> <line x1="12" y1="19" x2="12" y2="5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></line> <line x1="5" y1="12" x2="19" y2="12" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></line> </g> </g> </g> </g></svg>`
 }
 
 LX.UTILS = {
