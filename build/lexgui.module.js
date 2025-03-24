@@ -3134,6 +3134,8 @@ class SideBar {
      * filter: TODO
      * collapsable: Sidebar can toggle between collapsed/expanded [true]
      * collapseToIcons: When Sidebar collapses, icons remains visible  [true]
+     * onHeaderPressed: Function to call when header is pressed
+     * onFooterPressed: Function to call when footer is pressed
      */
 
     constructor( options = {} ) {
@@ -3168,20 +3170,47 @@ class SideBar {
             this.header.className = "lexsidebarheader";
             this.root.appendChild( this.header );
 
+            this.header.addEventListener( "click", e => {
+                if( options.onHeaderPressed )
+                {
+                    options.onHeaderPressed( e );
+                }
+            } );
+
+            const avatar = document.createElement( 'span' );
+            avatar.className = "lexavatar";
+            this.header.appendChild( avatar );
+
+            const avatarImg = document.createElement( 'img' );
+            avatarImg.src = "https://raw.githubusercontent.com/jxarco/lexgui.js/refs/heads/master/images/icon.png";
+            avatar.appendChild( avatarImg );
+
+            // Info
+            {
+                const info = document.createElement( 'div' );
+                this.header.appendChild( info );
+
+                const infoText = document.createElement( 'span' );
+                infoText.innerHTML = "jxarco";
+                info.appendChild( infoText );
+
+                const infoSubtext = document.createElement( 'span' );
+                infoSubtext.innerHTML = "alexroco.30@gmail.com";
+                info.appendChild( infoSubtext );
+            }
+
             if( this.collapsable )
             {
-                const trigger = document.createElement( 'button' );
-                trigger.title = "Toggle Sidebar"
-                trigger.innerHTML = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <g id="SVGRepo_iconCarrier"> <title>i</title> <g id="Complete"> <g id="sidebar-left"> <g> <rect id="Square-2" data-name="Square" x="3" y="3" width="18" height="18" rx="2" ry="2" fill="none" stroke-miterlimit="10" stroke-width="2"></rect> 
-                <line x1="9" y1="21" x2="9" y2="3" fill="none" stroke-miterlimit="10" stroke-width="2"></line> </g> </g> </g> </g></svg>`;
-                trigger.className = "lexbutton";
+                const icon = document.createElement( 'a' );
+                icon.className = "fa-solid fa-table-columns lexicon";
+                icon.title = "Toggle Sidebar"
+                this.header.appendChild( icon );
 
-                trigger.addEventListener( "click", () => {
+                icon.addEventListener( "click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     this.toggleCollapsed();
-                } )
-
-                this.header.appendChild( trigger );
+                } );
             }
         }
 
@@ -3197,6 +3226,13 @@ class SideBar {
             this.footer = document.createElement( 'div' );
             this.footer.className = "lexsidebarfooter";
             this.root.appendChild( this.footer );
+
+            this.footer.addEventListener( "click", e => {
+                if( options.onFooterPressed )
+                {
+                    options.onFooterPressed( e );
+                }
+            } );
 
             const avatar = document.createElement( 'span' );
             avatar.className = "lexavatar";

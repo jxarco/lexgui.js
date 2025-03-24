@@ -193,7 +193,7 @@ left.addSidebar( m => {
     m.add( "Building Your Application", { icon: "fa fa-code", callback: () => {  } } );
     m.add( "API Reference", { icon: "fa fa-search", xbottom: true, callback: () => { } } );
     m.add( "Very loooooooooooooooooooooooong sun", { icon: "fa fa-sun", xbottom: true, callback: () => { } } );
-}, { /* collapseToIcons: false */ });
+}, { /* collapseToIcons: false,*/ onHeaderPressed: (e) => { console.log( "onHeaderPressed" ) }, onFooterPressed: (e) => { console.log( "onFooterPressed" ) }  });
 
 // split left area
 var [up, bottom] = left.split({ type: 'vertical', sizes:["50%", null], minimizable: true });

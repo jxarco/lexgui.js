@@ -2862,36 +2862,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexsidebarcontent {
     width: 100%;
-    height: calc(100% - 136px);
+    height: calc(100% - 128px);
     display: flex;
     flex-direction: column;
     gap: 1.15rem;
     overflow-y: scroll;
-}
-
-.lexsidebarheader {
-    width: 100%;
-    height: 64px;
-    background-color: #049EF4;
-}
-
-.lexsidebarheader .lexbutton {
-    float: right;
-    transition: margin 0.3s cubic-bezier(0,0,.2,1);
-}
-
-.lexsidebar.collapsing .lexsidebarheader .lexbutton {
-    float: unset;
-    margin: 0 auto;
-}
-
-.lexsidebar .lexsidebarheader svg {
-    width: 1rem;
-    height: 1rem;
-}
-
-.lexsidebar .lexsidebarheader svg g {
-    stroke: var(--global-text-primary);
 }
 
 .lexsidebar .lexsidebargroup {
@@ -2900,8 +2875,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexsidebargrouptitle {
-    /* margin-block-start: 0.1rem;
-    margin-block-end: 0.1rem; */
     font-size: 12px;
     font-weight: 600;
     color: var(--global-text-secondary);
@@ -2946,6 +2919,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     display: flex;
     gap: 0.8em;
     height: 18px;
+    opacity: 0.95;
 }
 
 .lexsidebar .lexsidebarentry div i {
@@ -2960,7 +2934,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     text-overflow: ellipsis;
 }
 
-.lexsidebar.collapsed div a {
+.lexsidebar.collapsed .lexsidebarcontent div a {
     display: none;
 }
 
@@ -3003,7 +2977,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     opacity: 1;
 } */
 
-.lexsidebar .lexsidebarfooter {
+.lexsidebar .lexsidebarfooter, .lexsidebar .lexsidebarheader {
     width: calc(100% - 16px);
     height: 36px;
     display: flex;
@@ -3016,25 +2990,20 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     user-select: none;
 }
 
-.lexsidebar .lexsidebarfooter:hover {
+.lexsidebar .lexsidebarfooter:hover, .lexsidebar .lexsidebarheader:hover {
     background-color: var(--global-color-secondary);
 }
 
-.lexsidebar .lexsidebarfooter .lexavatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    margin: auto 0;
+.lexsidebar .lexsidebarfooter:active, .lexsidebar .lexsidebarheader:active {
+    transform: scale(0.99);
+}
+
+.lexsidebar .lexavatar {
     filter: invert();
     background-color: #000;
 }
 
-.lexsidebar .lexsidebarfooter .lexavatar img {
-    width: 100%;
-    height: 100%;
-}
-
-.lexsidebar .lexsidebarfooter div {
+.lexsidebar .lexsidebarfooter div, .lexsidebar .lexsidebarheader div {
     width: calc(100% - 88px);
     height: 100%;
     padding-inline: 12px;
@@ -3043,22 +3012,27 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     flex-direction: column;
 }
 
-.lexsidebar .lexsidebarfooter div span {
+.lexsidebar .lexsidebarfooter div span, .lexsidebar .lexsidebarheader div span {
     font-size: 12px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.lexsidebar .lexsidebarfooter div span:first-child {
+.lexsidebar .lexsidebarfooter div span:first-child, .lexsidebar .lexsidebarheader div span:first-child {
     font-size: 14px;
     font-weight: 600;
 }
 
-.lexsidebar .lexsidebarfooter a {
+.lexsidebar .lexsidebarfooter a, .lexsidebar .lexsidebarheader a {
     width: 32px;
     margin: auto 0;
     text-align: center;
+}
+
+.lexsidebar.collapsed .lexsidebarfooter span, .lexsidebar.collapsed .lexsidebarfooter div,
+.lexsidebar.collapsed .lexsidebarheader span, .lexsidebar.collapsed .lexsidebarheader div {
+    display: none;
 }
 
 /* Overlay Buttons */
@@ -3351,6 +3325,20 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .curve canvas {
     border-radius: 2px;
+}
+
+/* Avatar Widget */
+
+.lexavatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    margin: auto 0;
+}
+
+.lexavatar img {
+    width: 100%;
+    height: 100%;
 }
 
 /* Card Widget */
