@@ -3171,7 +3171,13 @@ class SideBar {
             this.root.appendChild( this.header );
 
             this.header.addEventListener( "click", e => {
-                if( options.onHeaderPressed )
+                if( this.collapsed )
+                {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.toggleCollapsed();
+                }
+                else if( options.onHeaderPressed )
                 {
                     options.onHeaderPressed( e );
                 }

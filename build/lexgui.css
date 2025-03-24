@@ -3010,6 +3010,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     justify-content: center;
     display: flex;
     flex-direction: column;
+    transition: width 0.3s cubic-bezier(0,0,.2,1), padding-inline 0.3s cubic-bezier(0,0,.2,1);
 }
 
 .lexsidebar .lexsidebarfooter div span, .lexsidebar .lexsidebarheader div span {
@@ -3017,6 +3018,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    transition: width 0.3s cubic-bezier(0,0,.2,1);
 }
 
 .lexsidebar .lexsidebarfooter div span:first-child, .lexsidebar .lexsidebarheader div span:first-child {
@@ -3030,10 +3032,16 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     text-align: center;
 }
 
-.lexsidebar.collapsed .lexsidebarfooter span, .lexsidebar.collapsed .lexsidebarfooter div,
+.lexsidebar.collapsing .lexsidebarfooter span, .lexsidebar.collapsing .lexsidebarfooter div,
+.lexsidebar.collapsing .lexsidebarheader span, .lexsidebar.collapsing .lexsidebarheader div {
+    width: 0px;
+    padding-inline: 0px;
+}
+
+/* .lexsidebar.collapsed .lexsidebarfooter span, .lexsidebar.collapsed .lexsidebarfooter div,
 .lexsidebar.collapsed .lexsidebarheader span, .lexsidebar.collapsed .lexsidebarheader div {
     display: none;
-}
+} */
 
 /* Overlay Buttons */
 
