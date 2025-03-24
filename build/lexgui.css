@@ -2860,16 +2860,12 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     gap: 0.2rem;
 }
 
-.lexsidebar.collapsed {
-    /* width: 50px; */
-}
-
 .lexsidebarcontent {
     width: 100%;
-    height: calc(100% - 128px);
+    height: calc(100% - 136px);
     display: flex;
     flex-direction: column;
-    gap: 0.1rem;
+    gap: 1.15rem;
     overflow-y: scroll;
 }
 
@@ -2881,6 +2877,12 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexsidebarheader .lexbutton {
     float: right;
+    transition: margin 0.3s cubic-bezier(0,0,.2,1);
+}
+
+.lexsidebar.collapsing .lexsidebarheader .lexbutton {
+    float: unset;
+    margin: 0 auto;
 }
 
 .lexsidebar .lexsidebarheader svg {
@@ -2893,11 +2895,32 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexsidebargroup {
-    padding-top: 0.8rem;
-    padding-bottom: 0.8rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.lexsidebar .lexsidebargrouptitle {
+    /* margin-block-start: 0.1rem;
+    margin-block-end: 0.1rem; */
     font-size: 12px;
     font-weight: 600;
     color: var(--global-text-secondary);
+    overflow: hidden;
+}
+
+.lexsidebar .lexsidebargrouptitle div {
+    transform: translate(0, 0);
+    opacity: 1;
+    transition: transform 0.3s cubic-bezier(0,0,.2,1), opacity 0.1s cubic-bezier(0,0,.2,1), max-height 0.3s cubic-bezier(0,0,.2,1);
+    height: 44px;
+    max-height: 44px;
+    align-content: center;
+}
+
+.lexsidebar.collapsing .lexsidebargrouptitle div {
+    max-height: 0px;
+    transform: translate(0, -24px);
+    opacity: 0;
 }
 
 .lexsidebar .lexsidebarentry {
@@ -2922,16 +2945,23 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexsidebar .lexsidebarentry div {
     display: flex;
     gap: 0.8em;
+    height: 18px;
 }
 
 .lexsidebar .lexsidebarentry div i {
-    width: 22px;
+    min-width: 22px;
+    max-width: 22px;
+    margin: auto 0;
 }
 
 .lexsidebar .lexsidebarentry div a {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+}
+
+.lexsidebar.collapsed div a {
+    display: none;
 }
 
 .lexsidebar .lexsidebarentry > * {
@@ -2974,19 +3004,61 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 } */
 
 .lexsidebar .lexsidebarfooter {
-    height: 64px;
-    background-color: #049EF4;
-}
-
-.lexsidebar .lexsidebarfooter .lexsidebarentry a {
     width: calc(100% - 16px);
-    height: calc(100% - 16px);
-    background-color: unset;
-    font-size: 14px;
+    height: 36px;
+    display: flex;
+    border-radius: 8px;
+    padding: 8px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
-.lexsidebar .lexsidebarfooter .lexsidebarentry a:active {
-    font-size: 13px;
+.lexsidebar .lexsidebarfooter:hover {
+    background-color: var(--global-color-secondary);
+}
+
+.lexsidebar .lexsidebarfooter .lexavatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    margin: auto 0;
+    filter: invert();
+    background-color: #000;
+}
+
+.lexsidebar .lexsidebarfooter .lexavatar img {
+    width: 100%;
+    height: 100%;
+}
+
+.lexsidebar .lexsidebarfooter div {
+    width: calc(100% - 88px);
+    height: 100%;
+    padding-inline: 12px;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.lexsidebar .lexsidebarfooter div span {
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lexsidebar .lexsidebarfooter div span:first-child {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.lexsidebar .lexsidebarfooter a {
+    width: 32px;
+    margin: auto 0;
+    text-align: center;
 }
 
 /* Overlay Buttons */

@@ -1958,11 +1958,7 @@ class Area {
     /**
      * @method addSidebar
      * @param {Function} callback Function to fill the sidebar
-     * @param {*} options:
-     * inset: TODO
-     * filter: TODO
-     * collapsable: TODO
-     * collapseToIcons: TODO
+     * @param {Object} options: Sidebar options
      */
 
     addSidebar( callback, options = {} ) {
@@ -3132,6 +3128,14 @@ LX.Menubar = Menubar;
 
 class SideBar {
 
+    /**
+     * @param {Object} options
+     * inset: TODO
+     * filter: TODO
+     * collapsable: Sidebar can toggle between collapsed/expanded [true]
+     * collapseToIcons: When Sidebar collapses, icons remains visible  [true]
+     */
+
     constructor( options = {} ) {
 
         this.root = document.createElement( 'div' );
@@ -3139,12 +3143,14 @@ class SideBar {
 
         window.sidebar = this;
 
+        this.collapsable = options.collapsable ?? true;
+        this.collapseWidth = ( options.collapseToIcons ?? true ) ? "58px" : "0px";
         this.collapsed = false;
 
         doAsync( () => {
 
             this.root.parentElement.ogWidth = this.root.parentElement.style.width;
-            this.root.parentElement.style.transition = "width 0.35s cubic-bezier(0,0,.2,1)";
+            this.root.parentElement.style.transition = "width 0.25s ease-out";
 
             this.resizeObserver = new ResizeObserver( entries => {
                 for ( const entry of entries )
@@ -3162,18 +3168,21 @@ class SideBar {
             this.header.className = "lexsidebarheader";
             this.root.appendChild( this.header );
 
-            const trigger = document.createElement( 'button' );
-            trigger.title = "Toggle Sidebar"
-            trigger.innerHTML = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <g id="SVGRepo_iconCarrier"> <title>i</title> <g id="Complete"> <g id="sidebar-left"> <g> <rect id="Square-2" data-name="Square" x="3" y="3" width="18" height="18" rx="2" ry="2" fill="none" stroke-miterlimit="10" stroke-width="2"></rect> 
-            <line x1="9" y1="21" x2="9" y2="3" fill="none" stroke-miterlimit="10" stroke-width="2"></line> </g> </g> </g> </g></svg>`;
-            trigger.className = "lexbutton";
+            if( this.collapsable )
+            {
+                const trigger = document.createElement( 'button' );
+                trigger.title = "Toggle Sidebar"
+                trigger.innerHTML = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <g id="SVGRepo_iconCarrier"> <title>i</title> <g id="Complete"> <g id="sidebar-left"> <g> <rect id="Square-2" data-name="Square" x="3" y="3" width="18" height="18" rx="2" ry="2" fill="none" stroke-miterlimit="10" stroke-width="2"></rect> 
+                <line x1="9" y1="21" x2="9" y2="3" fill="none" stroke-miterlimit="10" stroke-width="2"></line> </g> </g> </g> </g></svg>`;
+                trigger.className = "lexbutton";
 
-            trigger.addEventListener( "click", () => {
-                this.toggleCollapsed();
-            } )
+                trigger.addEventListener( "click", () => {
+                    this.toggleCollapsed();
+                } )
 
-            this.header.appendChild( trigger );
+                this.header.appendChild( trigger );
+            }
         }
 
         // Content
@@ -3188,6 +3197,32 @@ class SideBar {
             this.footer = document.createElement( 'div' );
             this.footer.className = "lexsidebarfooter";
             this.root.appendChild( this.footer );
+
+            const avatar = document.createElement( 'span' );
+            avatar.className = "lexavatar";
+            this.footer.appendChild( avatar );
+
+            const avatarImg = document.createElement( 'img' );
+            avatarImg.src = "https://raw.githubusercontent.com/jxarco/lexgui.js/refs/heads/master/images/icon.png";
+            avatar.appendChild( avatarImg );
+
+            // Info
+            {
+                const info = document.createElement( 'div' );
+                this.footer.appendChild( info );
+
+                const infoText = document.createElement( 'span' );
+                infoText.innerHTML = "jxarco";
+                info.appendChild( infoText );
+
+                const infoSubtext = document.createElement( 'span' );
+                infoSubtext.innerHTML = "alexroco.30@gmail.com";
+                info.appendChild( infoSubtext );
+            }
+
+            const icon = document.createElement( 'a' );
+            icon.className = "fa-solid fa-ellipsis-vertical lexicon";
+            this.footer.appendChild( icon );
         }
 
         this.items = [ ];
@@ -3199,15 +3234,21 @@ class SideBar {
 
     toggleCollapsed() {
 
+        if( !this.collapsable )
+        {
+            return;
+        }
+
         this.collapsed = !this.collapsed;
 
         if( this.collapsed )
         {
-            this.root.classList.add( "collapsed" );
-            this.root.parentElement.style.width = "0px";
+            this.root.classList.add( "collapsing" );
+            this.root.parentElement.style.width = this.collapseWidth;
         }
         else
         {
+            this.root.classList.remove( "collapsing" );
             this.root.classList.remove( "collapsed" );
             this.root.parentElement.style.width = this.root.parentElement.ogWidth;
         }
@@ -3216,9 +3257,10 @@ class SideBar {
 
         doAsync( () => {
 
+            this.root.classList.toggle( "collapsed", this.collapsed );
             this.resizeObserver.unobserve( this.root.parentElement );
 
-        }, 350 );
+        }, 250 );
     }
 
     /**
@@ -3231,10 +3273,19 @@ class SideBar {
 
     group( groupName, options = {} ) {
 
-        let groupEntry = document.createElement( 'span' );
-        groupEntry.className = "lexsidebargroup";
-        groupEntry.innerHTML = groupName;
-        this.content.appendChild( groupEntry );
+        let groupContent = document.createElement( 'div' );
+        groupContent.className = "lexsidebargroup";
+        this.content.appendChild( groupContent );
+
+        let groupEntry = document.createElement( 'div' );
+        groupEntry.className = "lexsidebargrouptitle";
+        groupContent.appendChild( groupEntry );
+
+        let groupLabel = document.createElement( 'div' );
+        groupLabel.innerHTML = groupName;
+        groupEntry.appendChild( groupLabel );
+
+        this.currentGroup = groupContent;
     }
 
     /**
@@ -3264,7 +3315,14 @@ class SideBar {
         entry.className = "lexsidebarentry " + ( options.className ?? "" );
         entry.id = pKey;
 
-        this.content.appendChild( entry );
+        if( this.currentGroup )
+        {
+            this.currentGroup.appendChild( entry );
+        }
+        else
+        {
+            this.content.appendChild( entry );
+        }
 
         {
             let item = document.createElement( 'div' );
