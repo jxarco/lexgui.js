@@ -1,6 +1,6 @@
 # lexgui.js changelog
 
-## dev
+## 0.3.0 (master)
 
 Widgets:
 - Support toggle mode and button disabled in ComboButtons Widget.
@@ -16,7 +16,7 @@ Timeline theme updated support light scheme color.
 Minor CSS tweaks.
 Minor bug fixes.
 
-## 0.2.0 (master)
+## 0.2.0
 
 Widgets:
 - Support for new Table Widget `Panel.addTable()`.
