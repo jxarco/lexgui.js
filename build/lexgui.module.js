@@ -3715,7 +3715,9 @@ class Widget {
     set( value, skipCallback = false, signalName = "" ) {
 
         if( this.onSetValue )
+        {
             return this.onSetValue( value, skipCallback );
+        }
 
         console.warn("Can't set value of " + this.typeName());
     }
@@ -6916,7 +6918,7 @@ class Panel {
         if( options.selected )
         {
             console.assert( options.selected.constructor == Number );
-            widget.onSetValue( options.selected, true );
+            widget.set( options.selected, true );
         }
 
         element.appendChild( container );
@@ -7742,7 +7744,7 @@ class Panel {
             const value = [];
             for( let i = 0; i < element.dimensions.length; ++i )
             {
-                value.push( element.dimensions[ i ].onGetValue() );
+                value.push( element.dimensions[ i ].value() );
             }
             return value;
         };
@@ -7750,7 +7752,7 @@ class Panel {
         widget.onSetValue = ( newValue, skipCallback ) => {
             for( let i = 0; i < element.dimensions.length; ++i )
             {
-                element.dimensions[ i ].onSetValue( newValue[ i ], skipCallback );
+                element.dimensions[ i ].set( newValue[ i ], skipCallback );
             }
         };
 
@@ -7765,14 +7767,14 @@ class Panel {
         {
             element.dimensions[ i ] = this.addNumber( null, value[ i ], ( v ) => {
 
-                const value = widget.onGetValue();
+                const value = widget.value();
 
                 if( element.locked )
                 {
                     const ar = ( i == 0 ? 1.0 / element.aspectRatio : element.aspectRatio );
                     const index = ( 1 + i ) % 2;
                     value[ index ] = v * ar;
-                    element.dimensions[ index ].onSetValue( value[ index ], true );
+                    element.dimensions[ index ].set( value[ index ], true );
                 }
 
                 if( callback )
@@ -7815,7 +7817,7 @@ class Panel {
                     this.classList.remove( "fa-lock-open" );
 
                     // Recompute ratio
-                    const value = widget.onGetValue();
+                    const value = widget.value();
                     element.aspectRatio = value[ 0 ] / value[ 1 ];
                 }
                 else

@@ -1493,14 +1493,13 @@ body.noevents * {
     position: relative;
     width: 1.5em;
     height: 1.5em;
-    padding: 0.15rem;
+    padding: 0.12rem;
     display: inline-block;
     background-color: var(--global-color-primary);
     color: #fff;
     border-width: 1px;
     border-style: solid;
     border-color: color-mix(in srgb, var(--checkbox-color) 50%, transparent);
-    vertical-align: -3px;
     border-radius: 4px;
     margin: auto 4px;
     text-align: center;
@@ -2872,6 +2871,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     display: block;
 }
 
+.lexsidebar .lexwidget {
+    width: 100% !important;
+    padding: 0 !important;
+}
+
 .lexsidebarcontent {
     width: 100%;
     padding-block-start: 4px;
@@ -2879,6 +2883,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     display: flex;
     flex-direction: column;
     overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 .lexsidebar .lexsidebargroup {
@@ -2935,7 +2940,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexsidebar .lexsidebarentry {
     width: calc(100% - 16px);
-    padding: 8px;
+    padding: 6px;
+    padding-inline: 8px;
     border-radius: 8px;
     cursor: pointer;
     -webkit-user-select: none;
@@ -2949,6 +2955,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    align-self: center;
 }
 
 .lexsidebar .lexsidebarentry:hover {
@@ -2962,7 +2969,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexsidebar .lexsidebarentry div {
     display: flex;
     gap: 0.8em;
-    height: 18px;
+    margin: 0;
+    height: 20px;
     opacity: 0.95;
 }
 
@@ -2986,7 +2994,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexsidebar .lexsidebarsubentrycontainer {
     width: calc(100% - 48px);
-    margin-block-start: 8px;
+    margin-block-start: 4px;
     margin-block-end: 8px;
     margin-left: 16px;
     padding-inline: 16px;
