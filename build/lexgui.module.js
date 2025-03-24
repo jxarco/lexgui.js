@@ -3486,22 +3486,22 @@ class SideBar {
             itemName.innerHTML = key;
             itemDom.appendChild( itemName );
 
-            // let desc = document.createElement( 'span' );
-            // desc.className = 'lexsidebarentrydesc';
-            // desc.innerHTML = key;
-            // entry.appendChild( desc );
+            let desc = document.createElement( 'span' );
+            desc.className = 'lexsidebarentrydesc';
+            desc.innerHTML = key;
+            entry.appendChild( desc );
 
-            // itemName.addEventListener("mouseenter", () => {
-            //     setTimeout( () => {
-            //         desc.style.display = "unset";
-            //     }, 100 );
-            // });
+            itemDom.addEventListener("mouseenter", () => {
+                setTimeout( () => {
+                    desc.style.display = "unset";
+                }, 150 );
+            });
 
-            // itemName.addEventListener("mouseleave", () => {
-            //     setTimeout( () => {
-            //         desc.style.display = "none";
-            //     }, 100 );
-            // });
+            itemDom.addEventListener("mouseleave", () => {
+                setTimeout( () => {
+                    desc.style.display = "none";
+                }, 150 );
+            });
 
             entry.addEventListener("click", () => {
 
