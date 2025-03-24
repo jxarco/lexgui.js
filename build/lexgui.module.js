@@ -3548,10 +3548,10 @@ class SideBar {
                 }, 150 );
             });
 
-            entry.addEventListener("click", () => {
+            entry.addEventListener("click", (e) => {
 
                 const f = options.callback;
-                if( f ) f.call( this, key, entry );
+                if( f ) f.call( this, key, entry, e );
 
                 // Manage selected
                 this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
@@ -3579,6 +3579,7 @@ class SideBar {
             for( var i = 0; i < item[ key ].length; ++i )
             {
                 const subitem = item[ key ][ i ];
+                const suboptions = subitem.options ?? {};
                 const subkey = Object.keys( subitem )[ 0 ];
 
                 let subentry = document.createElement( 'div' );
@@ -3586,6 +3587,16 @@ class SideBar {
                 subentry.className = "lexsidebarentry";
                 subentry.id = subkey;
                 subentryContainer.appendChild( subentry );
+
+                subentry.addEventListener("click", (e) => {
+
+                    const f = suboptions.callback;
+                    if( f ) f.call( this, subkey, subentry, e );
+
+                    // Manage selected
+                    this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
+                    entry.classList.add( "selected" );
+                });
             }
         }
     }
