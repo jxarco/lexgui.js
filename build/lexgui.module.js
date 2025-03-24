@@ -6229,8 +6229,9 @@ class Panel {
      * @param {Function} callback Callback function on change
      * @param {*} options:
      * disabled: Make the widget disabled [false]
+     * label: Checkbox label
      * suboptions: Callback to add widgets in case of TRUE value
-     * className: Customize style
+     * className: Extra classes to customize style
      */
 
     addCheckbox( name, value, callback, options = {} ) {
@@ -6276,7 +6277,7 @@ class Panel {
 
         let valueName = document.createElement( 'span' );
         valueName.className = "checkboxtext";
-        valueName.innerHTML = "On";
+        valueName.innerHTML = options.label ?? "On";
 
         container.appendChild( checkbox );
         container.appendChild( valueName );

@@ -564,9 +564,9 @@ function fillPanel( panel ) {
     panel.addButton("Colored Tiny Button", "Click here!", () => {}, { buttonClass: "primary xs" });
     panel.addButton("Colored Small Button", "Click here!", () => {}, { buttonClass: "accent sm" });
     panel.addButton("A Classic Button", "Click here!", () => {}, { buttonClass: "md" });
-    panel.addCheckbox("Check me, Please", false, (value, event) => {
+    panel.addCheckbox("I have a label", false, (value, event) => {
         console.log(value);
-    }, { className: "secondary" });
+    }, { label: "Personal", className: "secondary" });
     panel.sameLine(2);
     panel.addToggle("Colored Toggle", false, (value, event) => {
         console.log(value);

@@ -1499,7 +1499,7 @@ body.noevents * {
     border-color: color-mix(in srgb, var(--checkbox-color) 50%, transparent);
     vertical-align: -3px;
     border-radius: 4px;
-    margin: 0 4px;
+    margin: auto 4px;
     text-align: center;
     -webkit-appearance: none;
     -moz-appearance: none;

@@ -4,6 +4,7 @@
 
 Widgets:
 - Support new RadioGroup Widget.
+- Support Checkbox `options.label`.
 
 Removed debug clog.
 Minor CSS tweaks.
