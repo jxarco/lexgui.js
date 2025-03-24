@@ -1806,9 +1806,15 @@ class Area {
             this.root.style.height = height;
         }
 
-        this.size = [ this.root.clientWidth, this.root.clientHeight ];
+        if( this.onresize )
+        {
+            this.onresize( this.root.getBoundingClientRect() );
+        }
 
-        this.propagateEvent( "onresize" );
+        doAsync( () => {
+            this.size = [ this.root.clientWidth, this.root.clientHeight ];
+            this.propagateEvent( "onresize" );
+        }, 150 );
     }
 
     /**
@@ -1839,7 +1845,6 @@ class Area {
             this._moveSplit(-Infinity, true, 8);
         }
 
-        // Async resize in some ms...
         doAsync( () => this.propagateEvent('onresize'), 150 );
     }
 
@@ -1866,7 +1871,6 @@ class Area {
             this._moveSplit(this.offset);
         }
 
-        // Async resize in some ms...
         doAsync( () => this.propagateEvent('onresize'), 150 );
     }
 
@@ -1902,9 +1906,13 @@ class Area {
 
         for( var i = 0; i < this.sections.length; i++ )
         {
-            const area = this.sections[i];
-            if(area[ eventName ])
+            const area = this.sections[ i ];
+
+            if( area[ eventName ] )
+            {
                 area[ eventName ].call( this, area.root.getBoundingClientRect() );
+            }
+
             area.propagateEvent( eventName );
         }
     }
@@ -3157,8 +3165,7 @@ class SideBar {
             this.resizeObserver = new ResizeObserver( entries => {
                 for ( const entry of entries )
                 {
-                    const bb = entry.contentRect;
-                    this.siblingArea.root.style.width = "calc(100% - " + ( bb.width) + "px )";
+                    this.siblingArea.setSize( [ "calc(100% - " + ( entry.contentRect.width ) + "px )", null ] );
                 }
             });
 

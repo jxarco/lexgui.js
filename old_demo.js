@@ -175,9 +175,9 @@ area.addMenubar( m => {
 });
 
 // split main area
-var [left, right] = area.split({ sizes:["70%","30%"], minimizable: true });
+var [ left, right ] = area.split({ sizes:["70%","30%"], minimizable: true });
 
-left.addSidebar( m => {
+const sidebar = left.addSidebar( m => {
     m.group( "Projects",  );
     m.add( "Getting Started ", { icon: "fa fa-cube", callback: () => {  } } );
     m.add( "Building Your Application", { icon: "fa fa-code", callback: () => {  } } );
@@ -196,7 +196,7 @@ left.addSidebar( m => {
 }, { /* collapseToIcons: false,*/ onHeaderPressed: (e) => { console.log( "onHeaderPressed" ) }, onFooterPressed: (e) => { console.log( "onFooterPressed" ) }  });
 
 // split left area
-var [up, bottom] = left.split({ type: 'vertical', sizes:["50%", null], minimizable: true });
+var [up, bottom] = sidebar.siblingArea.split({ type: 'vertical', sizes:["50%", null], minimizable: true });
 
 var kfTimeline = null;
 var clipsTimeline = null;
