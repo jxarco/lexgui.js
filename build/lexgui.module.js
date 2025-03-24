@@ -8619,6 +8619,12 @@ class Panel {
 
                         input.addEventListener( 'change', function() {
                             data.checkMap[ rowId ] = this.checked;
+
+                            if( !this.checked )
+                            {
+                                const input = table.querySelector( "thead input[type='checkbox']" );
+                                input.checked = data.checkMap[ ":root" ] = false;
+                            }
                         });
 
                         row.appendChild( td );
