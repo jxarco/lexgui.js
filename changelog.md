@@ -1,5 +1,10 @@
 # lexgui.js changelog
 
+## dev
+
+Removed debug clog.
+Minor CSS tweaks.
+
 ## 0.3.0 (master)
 
 Widgets:

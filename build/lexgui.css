@@ -1,5 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
 @font-face {
     font-family: "GoogleSans";
@@ -35,7 +34,6 @@
     --global-medium-background: #252525;
     --global-blur-background: light-dark(#f7f7f7d8, #1f1f1fe7);
     --global-color-transparent: #7b8ae200;
-    --transition-time: 1000;
     --code-editor-font-size: 14px;
     --code-editor-row-height: 20px;
     --graphnode-background: 17, 17, 17;
@@ -118,7 +116,7 @@ dialog {
 }
 
 dialog::backdrop {
-    background-color: #0000008c;
+    background-color: #000000ab;
     position: absolute;
     opacity: 1;
     transition: opacity 0.2s ease-in;
@@ -569,7 +567,7 @@ body.noevents * {
 
 .lexdialog {
     outline: none;
-    border: none;
+    border: 1px solid #aaaaaa48;
     background: none;
     margin: 0;
     padding: 0;
@@ -577,7 +575,7 @@ body.noevents * {
     min-width: 256px;
     min-height: max-content;
     overflow: hidden;
-    box-shadow: 0 2px 8px #101010;
+    box-shadow: 0 2px 6px #101010bb;
     border-radius: 8px;
     z-index: 101;
     background-color: var(--global-color-secondary);
@@ -729,7 +727,7 @@ body.noevents * {
     }
 
     .lexdialogtitle {
-        text-shadow: 0px 2px 4px #8e8f9483;
+        text-shadow: 0px 2px 2px #8d8d8d34;
     }
 
     .lexpopup {
@@ -900,7 +898,7 @@ body.noevents * {
     .lexbranchtitle {
         color: var(--global-text-secondary);
         background-color: var(--global-color-secondary);
-        text-shadow: 0px 0px 4px #e0e0e065;
+        text-shadow: 0px 2px 2px #e0e0e03a;
     }
 
     .lexbranch.closed .lexbranchtitle {
@@ -3082,10 +3080,9 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexareatabs.row {
-    width: calc(100%-9px);
     background-color: light-dark(var(--global-color-terciary), var(--global-button-color));
     border-radius: 8px;
-    padding: 4px;
+    padding: 3px;
     margin: 6px;
     gap: 0.1em;
 }

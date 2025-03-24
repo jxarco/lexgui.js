@@ -2700,8 +2700,6 @@ class Menubar {
 
                 LX.root.appendChild( menuElement );
 
-                console.log(o, k, c, d)
-
                 for( var i = 0; i < o[ k ].length; ++i )
                 {
                     const subitem = o[k][i];
