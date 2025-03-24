@@ -3538,16 +3538,51 @@ class SideBar {
             entry.appendChild( itemDom );
             item.dom = itemDom;
 
-            if( options.icon )
+            if( options.type == "checkbox" )
             {
-                let itemIcon = document.createElement( 'i' );
-                itemIcon.className = options.icon;
-                itemDom.appendChild( itemIcon );
+                item.value = options.value ?? false;
+                const panel = new Panel();
+                item.checkbox = panel.addCheckbox(null, item.value, (value, event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const f = options.callback;
+                    item.value = value;
+                    if( f ) f.call( this, key, value, event );
+                }, { label: key, signal: ( "@checkbox_"  + pKey ) });
+                itemDom.appendChild( panel.root.childNodes[ 0 ] );
+            }
+            else
+            {
+                if( options.icon )
+                {
+                    let itemIcon = document.createElement( 'i' );
+                    itemIcon.className = options.icon;
+                    itemDom.appendChild( itemIcon );
+                }
+
+                let itemName = document.createElement( 'a' );
+                itemName.innerHTML = key;
+                itemDom.appendChild( itemName );
             }
 
-            let itemName = document.createElement( 'a' );
-            itemName.innerHTML = key;
-            itemDom.appendChild( itemName );
+            entry.addEventListener("click", ( e ) => {
+                if( e.target && e.target.classList.contains( "lexcheckbox" ) )
+                {
+                    return;
+                }
+                const f = options.callback;
+                if( f ) f.call( this, key, item.value, e );
+
+                if( item.checkbox )
+                {
+                    item.value = !item.value;
+                    item.checkbox.set( item.value, true );
+                }
+
+                // Manage selected
+                this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
+                entry.classList.add( "selected" );
+            });
 
             if( options.action )
             {
@@ -3577,16 +3612,6 @@ class SideBar {
                 setTimeout( () => {
                     desc.style.display = "none";
                 }, 150 );
-            });
-
-            entry.addEventListener("click", (e) => {
-
-                const f = options.callback;
-                if( f ) f.call( this, key, e );
-
-                // Manage selected
-                this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
-                entry.classList.add( "selected" );
             });
 
             // Subentries
@@ -6657,9 +6682,9 @@ class Panel {
 
     addCheckbox( name, value, callback, options = {} ) {
 
-        if( !name )
+        if( !name && !options.label )
         {
-            throw( "Set Widget Name!" );
+            throw( "Set Widget Name or at least a label!" );
         }
 
         let widget = this.create_widget( name, Widget.CHECKBOX, options );
@@ -6679,10 +6704,13 @@ class Panel {
         let element = widget.domEl;
 
         // Add reset functionality
-        Panel._add_reset_property( element.domName, function() {
-            checkbox.checked = !checkbox.checked;
-            Panel._dispatch_event( checkbox, "change" );
-        });
+        if( name )
+        {
+            Panel._add_reset_property( element.domName, function() {
+                checkbox.checked = !checkbox.checked;
+                Panel._dispatch_event( checkbox, "change" );
+            });
+        }
 
         // Add widget value
 

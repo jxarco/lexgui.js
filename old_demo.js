@@ -177,7 +177,7 @@ area.addMenubar( m => {
 // split main area
 var [ left, right ] = area.split({ sizes:["70%","30%"], minimizable: true });
 
-const logParams = (entryName, event) => { console.log(entryName, event) };
+const logParams = (entryName, value, event) => { console.log(entryName, value, event) };
 const actionLogParams = (entryName, event) => { console.log("Action called!", entryName, event) };
 
 const sidebar = left.addSidebar( m => {
@@ -199,6 +199,11 @@ const sidebar = left.addSidebar( m => {
     m.add( "Accessibility ", { icon: "fa fa-cube", callback: logParams } );
     m.add( "Fast Refresh", { icon: "fa fa-code", callback: logParams } );
     m.add( "Supported Browsers", { icon: "fa fa-search",callback: logParams } );
+    m.separator();
+    m.group( "Calendar" );
+    m.add( "Personal ", { callback: logParams, type: "checkbox" } );
+    m.add( "Work", { callback: logParams, type: "checkbox", value: true } );
+    m.add( "Family", { callback: logParams, type: "checkbox" } );
 }, { /* collapseToIcons: false, skipFooter: true, skipHeader: true,*/ onHeaderPressed: (e) => { console.log( "onHeaderPressed" ) }, onFooterPressed: (e) => { console.log( "onFooterPressed" ) }  });
 
 // split left area
