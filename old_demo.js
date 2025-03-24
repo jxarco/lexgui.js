@@ -546,6 +546,8 @@ function fillPanel( panel ) {
         console.log(value);
     }, { min: 0, max: 1024 });
     panel.addSeparator();
+    window.radio = panel.addRadioGroup( "Notify me about...", [ "All new messages", "Direct messages and mentions", "Nothing" ], (v) => { console.log(v) }, { className: "accent", xdisabled: true, selected: 1 } );
+    panel.addSeparator();
     panel.addTitle("Configuration (Im a title)");
     panel.addCheckbox("Toggle me", true, (value, event) => {
         console.log(value);

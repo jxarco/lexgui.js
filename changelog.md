@@ -2,6 +2,9 @@
 
 ## dev
 
+Widgets:
+- Support new RadioGroup Widget.
+
 Removed debug clog.
 Minor CSS tweaks.
 

@@ -32,7 +32,7 @@
 
         MAKE_HEADER( "Widget List", "h1", "widget-list" );
 
-        const supportedWidgets = [ "Array", "Button", "Checkbox", "Color", "Combo Buttons", "Curve", "Custom", "Data Tree", "Dropdown", "File", "Form", "Layers", "List", "Number", "Pad", "Progress", "Range", "Size", "Table", "Tabs", "Tags", "Text", "Text Area", "Title", "Toggle", "Vector" ];
+        const supportedWidgets = [ "Array", "Button", "Checkbox", "Color", "Combo Buttons", "Curve", "Custom", "Data Tree", "Dropdown", "File", "Form", "Layers", "List", "Number", "Pad", "Progress", "Radio Group", "Range", "Size", "Table", "Tabs", "Tags", "Text", "Text Area", "Title", "Toggle", "Vector" ];
 
         for( const w of supportedWidgets )
         {
@@ -58,6 +58,7 @@
             "<a href='#number'>Number</a>",
             "<a href='#pad'>Pad</a>",
             "<a href='#progress'>Progress</a>",
+            "<a href='#radiogroup'>Radio Group</a>",
             "<a href='#range'>Range</a>",
             "<a href='#size'>Size</a>",
             "<a href='#table'>Table</a>",
@@ -792,6 +793,35 @@ panel.@[mtd]addForm@(@"Test form"@, formData, (value, event) => {
     console.@[mtd]log@(value);
   }
 });` );
+
+        // Radio Group
+        MAKE_HEADER( "Radio Group", "h2", "radiogroup" );
+        MAKE_PARAGRAPH( `Represents a set of checkable buttons where no more than one of the buttons can be checked at a time.` );
+
+        {
+            const area = new LX.Area( { skipAppend: true, height: "auto" } );
+            const panel = area.addPanel();
+            panel.addRadioGroup("View", [ "Default", "Comfortable", "Compact" ], (value, event) => {
+                    console.log(value);
+            }, { selected: 1 } );
+            document.body.appendChild( area.root );
+        }
+
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addRadioGroup(label, values, callback, options)")} to add a Radio Group Widget to your panel:` );
+        MAKE_CODE_BULLET_LIST( [
+            ["label", "String", "Radio label"],
+            ["values", "Array", "Radio options"],
+            ["callback", "Function", "Function called checks changes"],
+            ["options", "Object", "Basic options for a Widget"],
+            [
+                ["className", "String", "Extra classes to customize style"],
+                ["disabled", "Boolean", "Make the widget disabled [false]"],
+                ["selected", "Number", "Index of the default selected option"]
+            ]
+        ] );
+        MAKE_CODE( `panel.@[mtd]addRadioGroup@(@"View"@, [ @"Default"@, @"Comfortable"@, @"Compact"@ ], (value, event) => {
+    console.log(value);
+}, {} );` );
 
         // Range
         MAKE_HEADER( "Range", "h2", "range" );

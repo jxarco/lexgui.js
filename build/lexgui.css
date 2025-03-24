@@ -1195,7 +1195,7 @@ body.noevents * {
 :root[data-theme="light"] {
     .lexbutton {
         --button-color: var(--global-button-color);
-        border: 1px solid var(--global-color-terciary) !important;
+        border: 1px solid var(--global-color-terciary);
     }
 
     .lexbutton.selected {
@@ -1700,6 +1700,65 @@ body.noevents * {
     color: var(--global-text-secondary);
     margin-top: -1px;
 }
+
+/* Toggle Widget */
+
+.lexradiogroup {
+    width: 100% !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.lexradiogroup span {
+    font-weight: 600;
+}
+
+.lexradiogroup .lexradiogroupitem {
+    display: flex;
+    padding: 2px;
+    gap: 0.65em;
+}
+
+.lexradiogroup .lexradiogroupitem span {
+    font-weight: unset;
+}
+
+.lexradiogroup .lexradiogroupitem button {
+    width: 14px;
+    height: 14px;
+    min-width: 14px !important;
+    min-height: 14px !important;
+    padding: 0;
+    margin: auto 0;
+    border-radius: 7px;
+    background-color: var(--global-intense-background);
+    border: 1px solid var(--global-text-secondary) !important;
+}
+
+.lexradiogroup .lexradiogroupitem button:disabled {
+    border-color: var(--global-color-quaternary) !important;
+}
+
+.lexradiogroup .lexradiogroupitem button span {
+    width: 10px;
+    height: 10px;
+    min-width: 10px;
+    min-height: 10px;
+    border-radius: 50%;
+    pointer-events: none;
+    margin: auto;
+}
+
+.lexradiogroup .lexradiogroupitem button.checked span {
+    background-color: var(--global-text-primary);
+}
+
+/* Colors */
+.lexradiogroup.primary .lexradiogroupitem button.checked span { background-color: var(--global-selected); }
+.lexradiogroup.secondary .lexradiogroupitem button.checked span { background-color: var(--global-selected-light); }
+.lexradiogroup.accent .lexradiogroupitem button.checked span { background-color: var(--global-color-accent); }
+.lexradiogroup.warning .lexradiogroupitem button.checked span { background-color: var(--global-color-warning); }
+.lexradiogroup.error .lexradiogroupitem button.checked span { background-color: var(--global-color-error); }
 
 /* Input Color Widget */
 

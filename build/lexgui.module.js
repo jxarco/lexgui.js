@@ -3241,31 +3241,32 @@ class Widget {
     static DROPDOWN     = 4;
     static CHECKBOX     = 5;
     static TOGGLE       = 6;
-    static COLOR        = 7;
-    static RANGE        = 8;
-    static NUMBER       = 9;
-    static TITLE        = 10;
-    static VECTOR       = 11;
-    static TREE         = 12;
-    static PROGRESS     = 13;
-    static FILE         = 14;
-    static LAYERS       = 15;
-    static ARRAY        = 16;
-    static LIST         = 17;
-    static TAGS         = 18;
-    static CURVE        = 19;
-    static CARD         = 20;
-    static IMAGE        = 21;
-    static CONTENT      = 22;
-    static CUSTOM       = 23;
-    static SEPARATOR    = 24;
-    static KNOB         = 25;
-    static SIZE         = 26;
-    static PAD          = 27;
-    static FORM         = 28;
-    static DIAL         = 29;
-    static COUNTER      = 30;
-    static TABLE        = 31;
+    static RADIO        = 7;
+    static COLOR        = 8;
+    static RANGE        = 9;
+    static NUMBER       = 10;
+    static TITLE        = 11;
+    static VECTOR       = 12;
+    static TREE         = 13;
+    static PROGRESS     = 14;
+    static FILE         = 15;
+    static LAYERS       = 16;
+    static ARRAY        = 17;
+    static LIST         = 18;
+    static TAGS         = 19;
+    static CURVE        = 20;
+    static CARD         = 21;
+    static IMAGE        = 22;
+    static CONTENT      = 23;
+    static CUSTOM       = 24;
+    static SEPARATOR    = 25;
+    static KNOB         = 26;
+    static SIZE         = 27;
+    static PAD          = 28;
+    static FORM         = 29;
+    static DIAL         = 30;
+    static COUNTER      = 31;
+    static TABLE        = 32;
 
     static NO_CONTEXT_TYPES = [
         Widget.BUTTON,
@@ -3340,6 +3341,7 @@ class Widget {
             case Widget.DROPDOWN: return "Dropdown";
             case Widget.CHECKBOX: return "Checkbox";
             case Widget.TOGGLE: return "Toggle";
+            case Widget.RADIO: return "Radio";
             case Widget.COLOR: return "Color";
             case Widget.RANGE: return "Range";
             case Widget.NUMBER: return "Number";
@@ -6408,6 +6410,96 @@ class Panel {
 
             element.appendChild( suboptions );
         }
+
+        return widget;
+    }
+
+    /**
+     * @method addRadioGroup
+     * @param {String} label Radio label
+     * @param {Array} values Radio options
+     * @param {Function} callback Callback function on change
+     * @param {*} options:
+     * disabled: Make the widget disabled [false]
+     * className: Customize colors
+     */
+
+    addRadioGroup( label, values, callback, options = {} ) {
+
+        let widget = this.create_widget( null, Widget.RADIO, options );
+
+        widget.onGetValue = () => {
+            const items = container.querySelectorAll( 'button' );
+            for( let i = 0; i < items.length; ++i )
+            {
+                const optionItem = items[ i ];
+                if( optionItem.checked )
+                {
+                    return [ i, values[ i ] ];
+                }
+            }
+        };
+
+        widget.onSetValue = ( newValue, skipCallback ) => {
+            const items = container.querySelectorAll( 'button' );
+            for( let i = 0; i < items.length; ++i )
+            {
+                const optionItem = items[ i ];
+                if( newValue == i )
+                {
+                    Panel._dispatch_event( optionItem, "click", skipCallback );
+                }
+            }
+        };
+
+        let element = widget.domEl;
+
+        // Add widget value
+        var container = document.createElement( 'div' );
+        container.className = "lexradiogroup " + ( options.className ?? "" );
+
+        let labelSpan = document.createElement( 'span' );
+        labelSpan.innerHTML = label;
+        container.appendChild( labelSpan );
+
+        const that = this;
+
+        for( let i = 0; i < values.length; ++i )
+        {
+            const optionItem = document.createElement( 'div' );
+            optionItem.className = "lexradiogroupitem";
+            container.appendChild( optionItem );
+
+            const optionButton = document.createElement( 'button' );
+            optionButton.className = "lexbutton";
+            optionButton.disabled = options.disabled ?? false;
+            optionItem.appendChild( optionButton );
+
+            optionButton.addEventListener( "click", function( e ) {
+                const skipCallback = ( e.detail?.constructor == Number ? null : e.detail );
+                container.querySelectorAll( 'button' ).forEach( e => { e.checked = false; e.classList.remove( "checked" ) } );
+                this.checked = !this.checked;
+                this.classList.toggle( "checked" );
+                if( !skipCallback ) that._trigger( new IEvent( null, [ i, values[ i ] ], e ), callback );
+            } );
+
+            {
+                const checkedSpan = document.createElement( 'span' );
+                optionButton.appendChild( checkedSpan );
+            }
+
+            const optionLabel = document.createElement( 'span' );
+            optionLabel.innerHTML = values[ i ];
+            optionItem.appendChild( optionLabel );
+        }
+
+        if( options.selected )
+        {
+            console.assert( options.selected.constructor == Number );
+            widget.onSetValue( options.selected, true );
+        }
+
+        element.appendChild( container );
 
         return widget;
     }
