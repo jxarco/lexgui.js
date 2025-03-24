@@ -2852,21 +2852,112 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 /* Side Bar */
 
 .lexsidebar {
-    text-align: center;
+    width: calc(100% - 20px);
+    height: 100%;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.lexsidebar.collapsed {
+    /* width: 50px; */
+}
+
+.lexsidebarcontent {
+    width: 100%;
+    height: calc(100% - 128px);
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    overflow-y: scroll;
+}
+
+.lexsidebarheader {
+    width: 100%;
+    height: 64px;
+    background-color: #049EF4;
+}
+
+.lexsidebarheader .lexbutton {
+    float: right;
+}
+
+.lexsidebar .lexsidebarheader svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+.lexsidebar .lexsidebarheader svg g {
+    stroke: var(--global-text-primary);
+}
+
+.lexsidebar .lexsidebargroup {
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--global-text-secondary);
 }
 
 .lexsidebar .lexsidebarentry {
-    width: 64px;
-    height: 64px;
-    margin-top: -6px;
+    width: calc(100% - 16px);
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
+
+.lexsidebar .lexsidebarentry:hover {
+    background-color: var(--global-color-secondary);
+}
+
+.lexsidebar .lexsidebarentry:active {
+    transform: scale(0.99);
+}
+
+.lexsidebar .lexsidebarentry div {
+    display: flex;
+    gap: 0.8em;
+}
+
+.lexsidebar .lexsidebarentry div i {
+    width: 22px;
+}
+
+.lexsidebar .lexsidebarentry div a {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.lexsidebar .lexsidebarentry > * {
+    color: var(--global-text-primary);
+    font-size: 14px;
+}
+
+/* .lexsidebar .lexsidebarentry a:hover {
+    border: 3px solid var(--global-selected);
+    background-color: var(--global-button-color-hovered);
+}
+
+.lexsidebar .lexsidebarentry a:active {
+    font-size: 17px;
+}
+
+.lexsidebar .lexsidebarentry.selected a {
+    background-color: var(--global-button-color-hovered);
+    border: 4px solid var(--global-selected);
+} */
 
 .lexsidebar .lexsidebarentry .lexsidebarentrydesc {
     position: absolute;
     margin-left: 12px;
     font-weight: 600;
-    margin-top: 13px;
-    background-color: #afafaf;
+    background-color: var(--global-text-secondary);
     color: var(--global-color-primary);
     font-size: 16px;
     border-radius: 6px;
@@ -2875,55 +2966,26 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     z-index: 102;
     padding: 2px 6px;
     transition: opacity ease-in 0.1s;
+    pointer-events: none;
 }
 
-.lexsidebar .lexsidebarentry button:hover+.lexsidebarentrydesc {
+/* .lexsidebar .lexsidebarentry:hover .lexsidebarentrydesc {
     opacity: 1;
-}
-
-.lexsidebar .lexsidebarentry:first-child {
-    padding-top: 16px;
-}
-
-.lexsidebar .lexsidebarentry button {
-    width: calc(100% - 16px);
-    height: calc(100% - 16px);
-    background-color: var(--global-button-color);
-    color: var(--global-text-primary);
-    font-size: 18px;
-    border-radius: 10px;
-    border: 0px solid var(--global-color-transparent);
-    transition: border 0.1s ease-in-out;
-    cursor: pointer;
-}
-
-.lexsidebar .lexsidebarentry button:hover {
-    border: 3px solid var(--global-selected);
-    background-color: var(--global-button-color-hovered);
-}
-
-.lexsidebar .lexsidebarentry button:active {
-    font-size: 17px;
-}
-
-.lexsidebar .lexsidebarentry.selected button {
-    background-color: var(--global-button-color-hovered);
-    border: 4px solid var(--global-selected);
-}
+} */
 
 .lexsidebar .lexsidebarfooter {
-    position: absolute;
-    bottom: 0;
+    height: 64px;
+    background-color: #049EF4;
 }
 
-.lexsidebar .lexsidebarfooter .lexsidebarentry button {
+.lexsidebar .lexsidebarfooter .lexsidebarentry a {
     width: calc(100% - 16px);
     height: calc(100% - 16px);
     background-color: unset;
     font-size: 14px;
 }
 
-.lexsidebar .lexsidebarfooter .lexsidebarentry button:active {
+.lexsidebar .lexsidebarfooter .lexsidebarentry a:active {
     font-size: 13px;
 }
 

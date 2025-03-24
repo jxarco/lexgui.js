@@ -177,11 +177,23 @@ area.addMenubar( m => {
 // split main area
 var [left, right] = area.split({ sizes:["70%","30%"], minimizable: true });
 
-// left.addSidebar( m => {
-//     m.add( "Scene", { icon: "fa fa-cube", callback: () => {  } } );
-//     m.add( "Code", { icon: "fa fa-code", callback: () => {  } } );
-//     m.add( "Search", { icon: "fa fa-search", bottom: true, callback: () => { } } );
-// });
+left.addSidebar( m => {
+    m.group( "Projects",  );
+    m.add( "Getting Started ", { icon: "fa fa-cube", callback: () => {  } } );
+    m.add( "Building Your Application", { icon: "fa fa-code", callback: () => {  } } );
+    m.add( "API Reference", { icon: "fa fa-search", xbottom: true, callback: () => { } } );
+    m.add( "Very loooooooooooooooooooooooong sun", { icon: "fa fa-sun", xbottom: true, callback: () => { } } );
+    m.group( "Projects",  );
+    m.add( "Getting Started ", { icon: "fa fa-cube", callback: () => {  } } );
+    m.add( "Building Your Application", { icon: "fa fa-code", callback: () => {  } } );
+    m.add( "API Reference", { icon: "fa fa-search", xbottom: true, callback: () => { } } );
+    m.add( "Very loooooooooooooooooooooooong sun", { icon: "fa fa-sun", xbottom: true, callback: () => { } } );
+    m.group( "Projects",  );
+    m.add( "Getting Started ", { icon: "fa fa-cube", callback: () => {  } } );
+    m.add( "Building Your Application", { icon: "fa fa-code", callback: () => {  } } );
+    m.add( "API Reference", { icon: "fa fa-search", xbottom: true, callback: () => { } } );
+    m.add( "Very loooooooooooooooooooooooong sun", { icon: "fa fa-sun", xbottom: true, callback: () => { } } );
+});
 
 // split left area
 var [up, bottom] = left.split({ type: 'vertical', sizes:["50%", null], minimizable: true });

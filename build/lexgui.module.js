@@ -1945,7 +1945,7 @@ class Area {
         const [ bar, content ] = this.split({ type: 'vertical', sizes: [height, null], resize: false, menubar: true });
 
         bar.attach( menubar );
-        bar.is_menubar = true;
+        bar.isMenubar = true;
 
         if( options.sticky ?? true )
         {
@@ -1958,21 +1958,31 @@ class Area {
     /**
      * @method addSidebar
      * @param {Function} callback Function to fill the sidebar
+     * @param {*} options:
+     * inset: TODO
+     * filter: TODO
+     * collapsable: TODO
+     * collapseToIcons: TODO
      */
 
     addSidebar( callback, options = {} ) {
 
         let sidebar = new SideBar( options );
 
-        if( callback ) callback( sidebar );
+        if( callback )
+        {
+            callback( sidebar );
+        }
 
         LX.menubars.push( sidebar );
 
-        const width = 64; // pixels
+        const width = options.width ?? "16rem";
+        const [ bar, content ] = this.split( { type: 'horizontal', sizes: [ width, null ], resize: false, sidebar: true } );
+        sidebar.siblingArea = content;
 
-        const [bar, content] = this.split( { type: 'horizontal', sizes: [ width, null ], resize: false, sidebar: true } );
         bar.attach( sidebar );
-        bar.is_sidebar = true;
+        bar.isSidebar = true;
+
         return sidebar;
     }
 
@@ -3127,31 +3137,126 @@ class SideBar {
         this.root = document.createElement( 'div' );
         this.root.className = "lexsidebar";
 
-        this.footer = document.createElement( 'div' );
-        this.footer.className = "lexsidebarfooter";
-        this.root.appendChild( this.footer );
+        window.sidebar = this;
+
+        this.collapsed = false;
+
+        doAsync( () => {
+
+            this.root.parentElement.ogWidth = this.root.parentElement.style.width;
+            this.root.parentElement.style.transition = "width 0.35s cubic-bezier(0,0,.2,1)";
+
+            this.resizeObserver = new ResizeObserver( entries => {
+                for ( const entry of entries )
+                {
+                    const bb = entry.contentRect;
+                    this.siblingArea.root.style.width = "calc(100% - " + ( bb.width) + "px )";
+                }
+            });
+
+        }, 100 );
+
+        // Header
+        {
+            this.header = document.createElement( 'div' );
+            this.header.className = "lexsidebarheader";
+            this.root.appendChild( this.header );
+
+            const trigger = document.createElement( 'button' );
+            trigger.title = "Toggle Sidebar"
+            trigger.innerHTML = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <g id="SVGRepo_iconCarrier"> <title>i</title> <g id="Complete"> <g id="sidebar-left"> <g> <rect id="Square-2" data-name="Square" x="3" y="3" width="18" height="18" rx="2" ry="2" fill="none" stroke-miterlimit="10" stroke-width="2"></rect> 
+            <line x1="9" y1="21" x2="9" y2="3" fill="none" stroke-miterlimit="10" stroke-width="2"></line> </g> </g> </g> </g></svg>`;
+            trigger.className = "lexbutton";
+
+            trigger.addEventListener( "click", () => {
+                this.toggleCollapsed();
+            } )
+
+            this.header.appendChild( trigger );
+        }
+
+        // Content
+        {
+            this.content = document.createElement( 'div' );
+            this.content.className = "lexsidebarcontent";
+            this.root.appendChild( this.content );
+        }
+
+        // Footer
+        {
+            this.footer = document.createElement( 'div' );
+            this.footer.className = "lexsidebarfooter";
+            this.root.appendChild( this.footer );
+        }
 
         this.items = [ ];
     }
 
     /**
-     * @method add
+     * @method toggleCollapsed
+     */
+
+    toggleCollapsed() {
+
+        this.collapsed = !this.collapsed;
+
+        if( this.collapsed )
+        {
+            this.root.classList.add( "collapsed" );
+            this.root.parentElement.style.width = "0px";
+        }
+        else
+        {
+            this.root.classList.remove( "collapsed" );
+            this.root.parentElement.style.width = this.root.parentElement.ogWidth;
+        }
+
+        this.resizeObserver.observe( this.root.parentElement );
+
+        doAsync( () => {
+
+            this.resizeObserver.unobserve( this.root.parentElement );
+
+        }, 350 );
+    }
+
+    /**
+     * @method group
+     * @param {String} groupName
      * @param {*} options:
      * callback: Function to call on each item
      * bottom: Bool to set item at the bottom as helper button (not selectable)
+     */
+
+    group( groupName, options = {} ) {
+
+        let groupEntry = document.createElement( 'span' );
+        groupEntry.className = "lexsidebargroup";
+        groupEntry.innerHTML = groupName;
+        this.content.appendChild( groupEntry );
+    }
+
+    /**
+     * @method add
+     * @param {String} entryName
+     * @param {*} options:
+     * callback: Function to call on each item
      * className: Add class to the entry DOM element
      */
 
-    add( key, options = {} ) {
+    add( entryName, options = {} ) {
 
         if( options.constructor == Function )
+        {
             options = { callback: options };
+        }
 
-        let pKey = key.replace( /\s/g, '' ).replaceAll( '.', '' );
+        let pKey = entryName.replace( /\s/g, '' ).replaceAll( '.', '' );
 
         if( this.items.findIndex( (v, i) => v.key == pKey ) > -1 )
         {
-            console.warn( `'${key}' already created in Sidebar` );
+            console.warn( `'${ entryName }' already created in Sidebar` );
             return;
         }
 
@@ -3159,50 +3264,49 @@ class SideBar {
         entry.className = "lexsidebarentry " + ( options.className ?? "" );
         entry.id = pKey;
 
-        if( options.bottom )
+        this.content.appendChild( entry );
+
         {
-            this.footer.appendChild( entry );
+            let item = document.createElement( 'div' );
+            entry.appendChild( item );
+
+            if( options.icon )
+            {
+                let itemIcon = document.createElement( 'i' );
+                itemIcon.className = options.icon;
+                item.appendChild( itemIcon );
+            }
+
+            let itemName = document.createElement( 'a' );
+            itemName.innerHTML = entryName;
+            item.appendChild( itemName );
+    
+            let desc = document.createElement( 'span' );
+            desc.className = 'lexsidebarentrydesc';
+            desc.innerHTML = entryName;
+            entry.appendChild( desc );
+
+            // itemName.addEventListener("mouseenter", () => {
+            //     setTimeout( () => {
+            //         desc.style.display = "unset";
+            //     }, 100 );
+            // });
+    
+            // itemName.addEventListener("mouseleave", () => {
+            //     setTimeout( () => {
+            //         desc.style.display = "none";
+            //     }, 100 );
+            // });
         }
-        else
-        {
-            this.root.appendChild( entry );
-        }
-
-        // Reappend footer in root
-        this.root.appendChild( this.footer );
-
-        let button = document.createElement( 'button' );
-        button.innerHTML = "<i class='"+ (options.icon ?? "") + "'></i>";
-        entry.appendChild( button );
-
-        let desc = document.createElement( 'span' );
-        desc.className = 'lexsidebarentrydesc';
-        desc.innerHTML = key;
-        entry.appendChild( desc );
-
-        button.addEventListener("mouseenter", () => {
-            setTimeout( () => {
-                desc.style.display = "unset";
-            }, 100 );
-        });
-
-        button.addEventListener("mouseleave", () => {
-            setTimeout( () => {
-                desc.style.display = "none";
-            }, 100 );
-        });
-
+        
         entry.addEventListener("click", () => {
 
             const f = options.callback;
-            if( f ) f.call( this, key, entry );
+            if( f ) f.call( this, entryName, entry );
 
             // Manage selected
-            if( !options.bottom )
-            {
-                this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
-                entry.classList.add( "selected" );
-            }
+            this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
+            entry.classList.add( "selected" );
         });
 
         this.items.push( { name: pKey, domEl: entry, callback: options.callback } );
