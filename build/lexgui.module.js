@@ -501,6 +501,23 @@ function makeCodeSnippet( code, size, options = { } )
 LX.makeCodeSnippet = makeCodeSnippet;
 
 /**
+ * @method makeIcon
+ * @description Gets an SVG element using one of LX.ICONS
+ * @param {String} iconName
+ * @param {String} iconTitle
+ */
+function makeIcon( iconName, iconTitle )
+{
+    const icon = document.createElement( "a" );
+    icon.title = iconTitle ?? "";
+    icon.className = "lexicon";
+    icon.innerHTML = LX.ICONS[ iconName ] ?? "";
+    return icon;
+}
+
+LX.makeIcon = makeIcon;
+
+/**
  * @method registerCommandbarEntry
  * @description Adds an extra command bar entry
  * @param {String} name
@@ -1967,6 +1984,7 @@ class Area {
      * @method addSidebar
      * @param {Function} callback Function to fill the sidebar
      * @param {Object} options: Sidebar options
+     * width: Width of the sidebar [16rem]
      */
 
     addSidebar( callback, options = {} ) {
@@ -3214,9 +3232,7 @@ class SideBar {
 
             if( this.collapsable )
             {
-                const icon = document.createElement( 'a' );
-                icon.className = "fa-solid fa-table-columns lexicon";
-                icon.title = "Toggle Sidebar"
+                const icon = LX.makeIcon( "Sidebar", "Toggle Sidebar" );
                 this.header.appendChild( icon );
 
                 icon.addEventListener( "click", (e) => {
@@ -3269,8 +3285,7 @@ class SideBar {
                 info.appendChild( infoSubtext );
             }
 
-            const icon = document.createElement( 'a' );
-            icon.className = "fa-solid fa-ellipsis-vertical lexicon";
+            const icon = LX.makeIcon( "More" );
             this.footer.appendChild( icon );
         }
 
@@ -11261,6 +11276,11 @@ Element.prototype.getParentArea = function() {
         if( parent.classList.contains( "lexarea" ) ) { return parent; }
         parent = parent.parentElement;
     }
+}
+
+LX.ICONS = {
+    "Sidebar": `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_iconCarrier"> <title>i</title> <g id="Complete"> <g id="sidebar-left"> <g> <rect id="Square-2" data-name="Square" x="3" y="3" width="18" height="18" rx="2" ry="2" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="2"></rect> <line x1="9" y1="21" x2="9" y2="3" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="2"></line> </g> </g> </g> </g></svg>`,
+    "More": `<svg fill="#000000" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_iconCarrier"> <title>i</title> <g id="Complete"> <g id="F-More"> <path id="Vertical" d="M12,16a2,2,0,1,1-2,2A2,2,0,0,1,12,16ZM10,6a2,2,0,1,0,2-2A2,2,0,0,0,10,6Zm0,6a2,2,0,1,0,2-2A2,2,0,0,0,10,12Z"></path> </g> </g> </g></svg>`
 }
 
 LX.UTILS = {
