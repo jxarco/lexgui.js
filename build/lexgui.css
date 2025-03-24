@@ -2865,16 +2865,21 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexsidebarcontent {
     width: 100%;
-    height: calc(100% - 128px);
+    height: calc(100% - 160px); /* this account for header, footer and all inner paddings */
+    padding-block-start: 16px;
+    padding-block-end: 16px;
     display: flex;
     flex-direction: column;
-    gap: 1.15rem;
     overflow-y: scroll;
 }
 
 .lexsidebar .lexsidebargroup {
     display: flex;
     flex-direction: column;
+}
+
+.lexsidebar .lexsidebargroup:nth-child(n+2) {
+    margin-top: 1.15rem;
 }
 
 .lexsidebar .lexsidebargrouptitle {
@@ -2897,6 +2902,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     max-height: 0px;
     transform: translate(0, -24px);
     opacity: 0;
+}
+
+.lexsidebar.collapsed .lexsidebargrouptitle div {
+    display: none;
 }
 
 .lexsidebar .lexsidebarentry {
@@ -2964,6 +2973,18 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     user-select: none;
     opacity: 0.95;
     border-left: 1px solid #5251514d;
+    transition: margin 0.3 cubic-bezier(0,0,.2,1), transform 0.3s cubic-bezier(0,0,.2,1), opacity 0.1s cubic-bezier(0,0,.2,1), max-height 0.3s cubic-bezier(0,0,.2,1);
+}
+
+.lexsidebar.collapsing .lexsidebarsubentrycontainer {
+    max-height: 0px;
+    transform: translate(-8px, -8px);
+    opacity: 0;
+    margin: 0;
+}
+
+.lexsidebar.collapsed .lexsidebarsubentrycontainer {
+    display: none;
 }
 
 .lexsidebar.collapsed .lexsidebarcontent div a {
