@@ -84,7 +84,7 @@ LX.doAsync = doAsync;
  */
 function getSupportedDOMName( text )
 {
-    return text.replace(/\s/g, '').replaceAll('@', '_').replaceAll('+', '_plus_').replaceAll('.', '');
+    return text.replace( /\s/g, '' ).replaceAll('@', '_').replaceAll('+', '_plus_').replaceAll( '.', '' );
 }
 
 LX.getSupportedDOMName = getSupportedDOMName;
@@ -1996,6 +1996,9 @@ class Area {
             callback( sidebar );
         }
 
+        // Generate DOM elements after adding all entries
+        sidebar._build();
+
         LX.menubars.push( sidebar );
 
         const width = options.width ?? "16rem";
@@ -2598,17 +2601,18 @@ class Menubar {
             this.root.style.justifyContent = options.float;
         }
 
-        this.items = [];
-        this.buttons = [];
-
-        this.icons = {};
-        this.shorts = {};
+        this.items = [ ];
+        this.buttons = [ ];
+        this.icons = { };
+        this.shorts = { };
     }
 
     /**
      * @method add
-     * @param {*} options:
+     * @param {Object} options:
      * callback: Function to call on each item
+     * icon: Entry icon
+     * short: Entry shortcut name
      */
 
     add( path, options = {} ) {
@@ -2618,10 +2622,10 @@ class Menubar {
             options = { callback: options };
         }
 
-        // process path
+        // Process path
         const tokens = path.split( "/" );
 
-        // assign icons and shortcuts to last token in path
+        // Assign icons and shortcuts to last token in path
         const lastPath = tokens[tokens.length - 1];
         this.icons[ lastPath ] = options.icon;
         this.shorts[ lastPath ] = options.short;
@@ -2629,27 +2633,30 @@ class Menubar {
         let idx = 0;
         let that = this;
 
-        const insert = (token, list) => {
-            if(token == undefined) return;
+        const _insertEntry = ( token, list ) => {
+            if( token == undefined )
+            {
+                return;
+            }
 
             let found = null;
             list.forEach( o => {
-                const keys = Object.keys(o);
+                const keys = Object.keys( o );
                 const key = keys.find( t => t == token );
-                if(key) found = o[ key ];
+                if( key ) found = o[ key ];
             } );
 
             if( found )
             {
-                insert( tokens[idx++], found );
+                _insertEntry( tokens[ idx++ ], found );
             }
             else
             {
                 let item = {};
                 item[ token ] = [];
-                const next_token = tokens[idx++];
+                const nextToken = tokens[ idx++ ];
                 // Check if last token -> add callback
-                if( !next_token )
+                if( !nextToken )
                 {
                     item[ 'callback' ] = options.callback;
                     item[ 'disabled' ] = options.disabled;
@@ -2657,22 +2664,24 @@ class Menubar {
                     item[ 'checked' ] = options.checked;
                 }
                 list.push( item );
-                insert( next_token, item[ token ] );
+                _insertEntry( nextToken, item[ token ] );
             }
         };
 
-        insert( tokens[idx++], this.items );
+        _insertEntry( tokens[idx++], this.items );
 
         // Create elements
 
         for( let item of this.items )
         {
-            let key = Object.keys(item)[0];
-            let pKey = key.replace(/\s/g, '').replaceAll('.', '');
+            let key = Object.keys( item )[ 0 ];
+            let pKey = key.replace( /\s/g, '' ).replaceAll( '.', '' );
 
             // Item already created
-            if( this.root.querySelector("#" + pKey) )
+            if( this.root.querySelector( "#" + pKey ) )
+            {
                 continue;
+            }
 
             let entry = document.createElement('div');
             entry.className = "lexmenuentry";
@@ -2734,8 +2743,8 @@ class Menubar {
 
                 for( var i = 0; i < o[ k ].length; ++i )
                 {
-                    const subitem = o[k][i];
-                    const subkey = Object.keys(subitem)[0];
+                    const subitem = o[ k ][ i ];
+                    const subkey = Object.keys( subitem )[ 0 ];
                     const hasSubmenu = subitem[ subkey ].length;
                     const isCheckbox = subitem[ 'type' ] == 'checkbox';
                     let subentry = document.createElement('div');
@@ -3290,6 +3299,7 @@ class SideBar {
         }
 
         this.items = [ ];
+        this.icons = { };
     }
 
     /**
@@ -3354,84 +3364,66 @@ class SideBar {
 
     /**
      * @method add
-     * @param {String} entryName
-     * @param {*} options:
+     * @param {String} path
+     * @param {Object} options:
      * callback: Function to call on each item
+     * icon: Entry icon
      * className: Add class to the entry DOM element
      */
 
-    add( entryName, options = {} ) {
+    add( path, options = {} ) {
 
         if( options.constructor == Function )
         {
             options = { callback: options };
         }
 
-        let pKey = entryName.replace( /\s/g, '' ).replaceAll( '.', '' );
+        // Process path
+        const tokens = path.split( "/" );
 
-        if( this.items.findIndex( (v, i) => v.key == pKey ) > -1 )
-        {
-            console.warn( `'${ entryName }' already created in Sidebar` );
-            return;
-        }
+        // Assign icons and shortcuts to last token in path
+        const lastPath = tokens[tokens.length - 1];
+        this.icons[ lastPath ] = options.icon;
 
-        let entry = document.createElement( 'div' );
-        entry.className = "lexsidebarentry " + ( options.className ?? "" );
-        entry.id = pKey;
 
-        if( this.currentGroup )
-        {
-            this.currentGroup.appendChild( entry );
-        }
-        else
-        {
-            this.content.appendChild( entry );
-        }
+        let idx = 0;
 
-        {
-            let item = document.createElement( 'div' );
-            entry.appendChild( item );
+        const _insertEntry = ( token, list ) => {
 
-            if( options.icon )
+            if( token == undefined )
             {
-                let itemIcon = document.createElement( 'i' );
-                itemIcon.className = options.icon;
-                item.appendChild( itemIcon );
+                return;
             }
 
-            let itemName = document.createElement( 'a' );
-            itemName.innerHTML = entryName;
-            item.appendChild( itemName );
-    
-            let desc = document.createElement( 'span' );
-            desc.className = 'lexsidebarentrydesc';
-            desc.innerHTML = entryName;
-            entry.appendChild( desc );
+            let found = null;
+            list.forEach( o => {
+                const keys = Object.keys( o );
+                const key = keys.find( t => t == token );
+                if( key ) found = o[ key ];
+            } );
 
-            // itemName.addEventListener("mouseenter", () => {
-            //     setTimeout( () => {
-            //         desc.style.display = "unset";
-            //     }, 100 );
-            // });
-    
-            // itemName.addEventListener("mouseleave", () => {
-            //     setTimeout( () => {
-            //         desc.style.display = "none";
-            //     }, 100 );
-            // });
-        }
-        
-        entry.addEventListener("click", () => {
+            if( found )
+            {
+                _insertEntry( tokens[ idx++ ], found );
+            }
+            else
+            {
+                let item = {};
+                item[ token ] = [];
+                const nextToken = tokens[ idx++ ];
+                // Check if last token -> add callback
+                if( !nextToken )
+                {
+                    item[ 'callback' ] = options.callback;
+                    item[ 'group' ] = this.currentGroup;
+                    item[ 'options' ] = options;
+                }
+                list.push( item );
+                _insertEntry( nextToken, item[ token ] );
+            }
+        };
 
-            const f = options.callback;
-            if( f ) f.call( this, entryName, entry );
-
-            // Manage selected
-            this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
-            entry.classList.add( "selected" );
-        });
-
-        this.items.push( { name: pKey, domEl: entry, callback: options.callback } );
+        _insertEntry( tokens[idx++], this.items );
     }
 
     /**
@@ -3449,6 +3441,106 @@ class SideBar {
             return;
 
         entry.domEl.click();
+    }
+
+    _build() {
+
+        for( let item of this.items )
+        {
+            const options = item.options ?? { };
+
+            // Item already created
+            if( item.dom )
+            {
+                continue;
+            }
+
+            let key = Object.keys( item )[ 0 ];
+            let pKey = key.replace( /\s/g, '' ).replaceAll( '.', '' );
+
+            let entry = document.createElement( 'div' );
+            entry.className = "lexsidebarentry " + ( options.className ?? "" );
+            entry.id = pKey;
+
+            if( item.group )
+            {
+                item.group.appendChild( entry );
+            }
+            else
+            {
+                this.content.appendChild( entry );
+            }
+
+            let itemDom = document.createElement( 'div' );
+            entry.appendChild( itemDom );
+            item.dom = itemDom;
+
+            if( options.icon )
+            {
+                let itemIcon = document.createElement( 'i' );
+                itemIcon.className = options.icon;
+                itemDom.appendChild( itemIcon );
+            }
+
+            let itemName = document.createElement( 'a' );
+            itemName.innerHTML = key;
+            itemDom.appendChild( itemName );
+
+            // let desc = document.createElement( 'span' );
+            // desc.className = 'lexsidebarentrydesc';
+            // desc.innerHTML = key;
+            // entry.appendChild( desc );
+
+            // itemName.addEventListener("mouseenter", () => {
+            //     setTimeout( () => {
+            //         desc.style.display = "unset";
+            //     }, 100 );
+            // });
+
+            // itemName.addEventListener("mouseleave", () => {
+            //     setTimeout( () => {
+            //         desc.style.display = "none";
+            //     }, 100 );
+            // });
+
+            entry.addEventListener("click", () => {
+
+                const f = options.callback;
+                if( f ) f.call( this, key, entry );
+
+                // Manage selected
+                this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
+                entry.classList.add( "selected" );
+            });
+
+            // Subentries
+            if( item[ key ].length )
+            {
+                let subentryContainer = document.createElement( 'div' );
+                subentryContainer.className = "lexsidebarsubentrycontainer";
+
+                if( item.group )
+                {
+                    item.group.appendChild( subentryContainer );
+                }
+                else
+                {
+                    this.content.appendChild( subentryContainer );
+                }
+
+                for( var i = 0; i < item[ key ].length; ++i )
+                {
+                    const subitem = item[ key ][ i ];
+                    const subkey = Object.keys( subitem )[ 0 ];
+
+                    let subentry = document.createElement( 'div' );
+                    subentry.innerHTML = `<span>${ subkey }</span>`;
+                    subentry.className = "lexsidebarentry";
+                    subentry.id = subkey;
+                    subentryContainer.appendChild( subentry );
+                }
+            }
+        }
     }
 };
 
@@ -6417,7 +6509,7 @@ class Panel {
             tagsContainer.appendChild( tagInput );
 
             tagInput.onkeydown = function( e ) {
-                const val = this.value.replace(/\s/g, '');
+                const val = this.value.replace( /\s/g, '' );
                 if( e.key == ' ' || e.key == 'Enter' )
                 {
                     e.preventDefault();
@@ -8550,7 +8642,7 @@ class Branch {
         root.appendChild( title );
 
         var branchContent = document.createElement( 'div' );
-        branchContent.id = name.replace(/\s/g, '');
+        branchContent.id = name.replace( /\s/g, '' );
         branchContent.className = "lexbranchcontent";
         root.appendChild(branchContent);
         this.content = branchContent;
@@ -9264,7 +9356,7 @@ class ContextMenu {
 
         for( var i = 0; i < o[k].length; ++i )
         {
-            const subitem = o[k][i];
+            const subitem = o[ k ][ i ];
             const subkey = Object.keys( subitem )[ 0 ];
             this._create_entry(subitem, subkey, contextmenu, d);
         }
@@ -9386,9 +9478,9 @@ class ContextMenu {
             {
                 let item = {};
                 item[ token ] = [];
-                const next_token = tokens[idx++];
+                const nextToken = tokens[idx++];
                 // Check if last token -> add callback
-                if( !next_token )
+                if( !nextToken )
                 {
                     item[ 'id' ] = options.id;
                     item[ 'callback' ] = options.callback;
@@ -9396,7 +9488,7 @@ class ContextMenu {
                 }
 
                 list.push( item );
-                insert( next_token, item[ token ] );
+                insert( nextToken, item[ token ] );
             }
         };
 
@@ -9435,7 +9527,7 @@ class ContextMenu {
 
         for( let item of this.items )
         {
-            let key = Object.keys(item)[0];
+            let key = Object.keys( item )[ 0 ];
             let pKey = "eId" + getSupportedDOMName( key );
 
             // Item already created

@@ -2904,10 +2904,20 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     padding: 8px;
     border-radius: 8px;
     cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+.lexsidebar .lexsidebarentry span {
+    font-size: var(--global-font-size);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .lexsidebar .lexsidebarentry:hover {
@@ -2937,6 +2947,23 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+}
+
+.lexsidebar .lexsidebarsubentrycontainer {
+    width: calc(100% - 76px);
+    margin-block-start: 8px;
+    margin-block-end: 8px;
+    margin-inline: 32px;
+    padding-inline: 6px;
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    opacity: 0.95;
+    border-left: 1px solid #5251514d;
 }
 
 .lexsidebar.collapsed .lexsidebarcontent div a {
@@ -4414,8 +4441,8 @@ ul.lexassetscontent {
 }
 
 /* Code Editor */
-
 .codebasearea {
+
     display: flex;
     position: relative;
     overflow: inherit;

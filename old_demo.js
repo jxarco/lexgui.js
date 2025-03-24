@@ -178,21 +178,22 @@ area.addMenubar( m => {
 var [ left, right ] = area.split({ sizes:["70%","30%"], minimizable: true });
 
 const sidebar = left.addSidebar( m => {
-    m.group( "Projects",  );
-    m.add( "Getting Started ", { icon: "fa fa-cube", callback: () => {  } } );
+    m.group( "Projects", {} );
+    m.add( "Getting Started", { icon: "fa fa-cube", callback: (entryName) => { console.log(entryName) } } );
+    m.add( "Getting Started/Installation", { icon: "fa fa-cube", callback: () => {  } } );
+    m.add( "Getting Started/Project Structure", { icon: "fa fa-cube", callback: () => {  } } );
     m.add( "Building Your Application", { icon: "fa fa-code", callback: () => {  } } );
-    m.add( "API Reference", { icon: "fa fa-search", xbottom: true, callback: () => { } } );
-    m.add( "Very loooooooooooooooooooooooong sun", { icon: "fa fa-sun", xbottom: true, callback: () => { } } );
-    m.group( "Projects",  );
-    m.add( "Getting Started ", { icon: "fa fa-cube", callback: () => {  } } );
-    m.add( "Building Your Application", { icon: "fa fa-code", callback: () => {  } } );
-    m.add( "API Reference", { icon: "fa fa-search", xbottom: true, callback: () => { } } );
-    m.add( "Very loooooooooooooooooooooooong sun", { icon: "fa fa-sun", xbottom: true, callback: () => { } } );
-    m.group( "Projects",  );
-    m.add( "Getting Started ", { icon: "fa fa-cube", callback: () => {  } } );
-    m.add( "Building Your Application", { icon: "fa fa-code", callback: () => {  } } );
-    m.add( "API Reference", { icon: "fa fa-search", xbottom: true, callback: () => { } } );
-    m.add( "Very loooooooooooooooooooooooong sun", { icon: "fa fa-sun", xbottom: true, callback: () => { } } );
+    m.add( "API Reference", { icon: "fa fa-search", callback: () => { } } );
+    m.add( "Very loooooooooooooooooooooooong sun", { icon: "fa fa-sun", callback: () => { } } );
+    m.group( "API Reference", {} );
+    m.add( "Components", { icon: "fa fa-cube", callback: () => {  } } );
+    m.add( "File Conventions", { icon: "fa fa-code", callback: () => {  } } );
+    m.add( "Functions", { icon: "fa fa-search", callback: () => { } } );
+    m.add( "CLI", { icon: "fa fa-sun", callback: () => { } } );
+    m.group( "Architecture", {} );
+    m.add( "Accessibility ", { icon: "fa fa-cube", callback: () => {  } } );
+    m.add( "Fast Refresh", { icon: "fa fa-code", callback: () => {  } } );
+    m.add( "Supported Browsers", { icon: "fa fa-search", callback: () => { } } );
 }, { /* collapseToIcons: false,*/ onHeaderPressed: (e) => { console.log( "onHeaderPressed" ) }, onFooterPressed: (e) => { console.log( "onFooterPressed" ) }  });
 
 // split left area
