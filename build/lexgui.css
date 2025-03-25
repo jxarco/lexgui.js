@@ -107,6 +107,20 @@ canvas {
     border-radius: 6px;
 }
 
+.collapsible {
+    display: flex;
+}
+
+.collapsible a.collapser {
+    --rotation: 90deg;
+    transform: rotate(var(--rotation, 0deg));
+    transition: transform 0.2s ease-out;
+}
+
+.collapsible a.collapser[data-collapsed] {
+    --rotation: 0deg;
+}
+
 dialog {
     transition: display 0.1s allow-discrete, overlay 0.1s allow-discrete;
     animation: dialogHide 0.1s forwards;
@@ -282,11 +296,11 @@ body.noevents * {
     --stack-offset: calc(100% - var(--element-offset));
 }
 
-.lextoast[data-open]{
+.lextoast[data-open] {
     translate: 0 0 !important;
 }
 
-.lextoast[data-closed]{
+.lextoast[data-closed] {
     translate: calc(100% + 30px) 0 !important;
 }
 
@@ -2889,6 +2903,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexsidebar .lexsidebargroup {
     display: flex;
     flex-direction: column;
+    gap: 0.1em;
 }
 
 .lexsidebar .lexsidebargroup:nth-child(n+2) {
@@ -2962,7 +2977,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     background-color: var(--global-color-secondary);
 }
 
-.lexsidebar .lexsidebarentry:active * {
+.lexsidebar .lexsidebarentry:active {
     transform: scale(0.99);
 }
 
@@ -2970,7 +2985,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     display: flex;
     gap: 0.8em;
     margin: 0;
-    height: 20px;
+    height: 22px;
     opacity: 0.95;
 }
 
@@ -2986,6 +3001,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    align-content: center;
 }
 
 .lexsidebar .lexsidebarentry a.lexicon {

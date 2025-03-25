@@ -299,7 +299,7 @@ LX.buildTextPattern = buildTextPattern;
 
 /**
  * @method makeDraggable
- * @description Allow an element to be dragged
+ * @description Allows an element to be dragged
  * @param {Element} domEl
  * @param {Object} options
  * autoAdjust (Bool): Sets in a correct position at the beggining
@@ -397,6 +397,48 @@ function makeDraggable( domEl, options = { } )
 }
 
 LX.makeDraggable = makeDraggable;
+
+/**
+ * @method makeCollapsible
+ * @description Allows an element to be collapsed/expanded
+ * @param {Element} domEl: Element to be treated as collapsible
+ * @param {Element} content: Content to display/hide on collapse/extend
+ * @param {Element} parent: Element where the content will be appended (default is domEl.parent)
+ * @param {Object} options
+ */
+function makeCollapsible( domEl, content, parent, options = { } )
+{
+    domEl.classList.add( "collapsible" );
+
+    const collapsed = ( options.collapsed ?? true );
+    const actionIcon = LX.makeIcon( "Right" );
+    actionIcon.classList.add( "collapser" );
+    actionIcon.dataset[ "collapsed" ] = collapsed;
+    actionIcon.style.marginLeft = "auto";
+
+    actionIcon.addEventListener( "click", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if( this.dataset[ "collapsed" ] )
+        {
+            delete this.dataset[ "collapsed" ];
+            content.style.display = "block";
+        }
+        else
+        {
+            this.dataset[ "collapsed" ] = true;
+            content.style.display = "none";
+        }
+    } );
+
+    domEl.appendChild( actionIcon );
+
+    parent = parent ?? domEl.parentElement;
+
+    parent.appendChild( content );
+}
+
+LX.makeCollapsible = makeCollapsible;
 
 /**
  * @method makeCodeSnippet
@@ -3382,6 +3424,7 @@ class SideBar {
      * @param {Object} options:
      * callback: Function to call on each item
      * icon: Entry icon
+     * collapsable: Add entry as a collapsable section
      * className: Add class to the entry DOM element
      */
 
@@ -3525,7 +3568,17 @@ class SideBar {
                 continue;
             }
 
-            if( currentGroup )
+            if( this.collapseContainer )
+            {
+                this.collapseContainer.appendChild( entry );
+
+                this.collapseQueue--;
+                if( !this.collapseQueue )
+                {
+                    delete this.collapseContainer;
+                }
+            }
+            else if( currentGroup )
             {
                 currentGroup.appendChild( entry );
             }
@@ -3548,7 +3601,7 @@ class SideBar {
                     const f = options.callback;
                     item.value = value;
                     if( f ) f.call( this, key, value, event );
-                }, { label: key, signal: ( "@checkbox_"  + pKey ) });
+                }, { label: key, signal: ( "@checkbox_"  + key ) });
                 itemDom.appendChild( panel.root.childNodes[ 0 ] );
             }
             else
@@ -3570,13 +3623,21 @@ class SideBar {
                 {
                     return;
                 }
-                const f = options.callback;
-                if( f ) f.call( this, key, item.value, e );
 
-                if( item.checkbox )
+                if( options.collapsable )
                 {
-                    item.value = !item.value;
-                    item.checkbox.set( item.value, true );
+                    itemDom.querySelector( ".collapser" ).click();
+                }
+                else
+                {
+                    const f = options.callback;
+                    if( f ) f.call( this, key, item.value, e );
+
+                    if( item.checkbox )
+                    {
+                        item.value = !item.value;
+                        item.checkbox.set( item.value, true );
+                    }
                 }
 
                 // Manage selected
@@ -3595,6 +3656,14 @@ class SideBar {
                     const f = options.action.callback;
                     if( f ) f.call( this, key, e );
                 } );
+            }
+            else if( options.collapsable )
+            {
+                const collapsableContent = document.createElement( 'div' );
+                Object.assign( collapsableContent.style, { width: "100%", display: "none" } );
+                LX.makeCollapsible( itemDom, collapsableContent, currentGroup ?? this.content );
+                this.collapseQueue = options.collapsable;
+                this.collapseContainer = collapsableContent;
             }
 
             let desc = document.createElement( 'span' );

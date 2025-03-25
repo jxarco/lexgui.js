@@ -169,7 +169,6 @@ area.addMenubar( m => {
         }
     ]);
     
-    m.getButton("Play");
     m.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")})
     m.setButtonImage("lexgui.js", "images/icon.png", () => {window.open("https://jxarco.github.io/lexgui.js/")}, {float: "left"})
 });
@@ -200,7 +199,8 @@ const sidebar = left.addSidebar( m => {
     m.add( "Fast Refresh", { icon: "fa fa-code", callback: logParams } );
     m.add( "Supported Browsers", { icon: "fa fa-search",callback: logParams } );
     m.separator();
-    m.group( "Calendar" );
+    m.add( "Calendar ", { collapsable: 3 } );
+    // m.group( "Calendar" );
     m.add( "Personal ", { callback: logParams, type: "checkbox" } );
     m.add( "Work", { callback: logParams, type: "checkbox", value: true } );
     m.add( "Family", { callback: logParams, type: "checkbox" } );
