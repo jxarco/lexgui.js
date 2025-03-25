@@ -2,19 +2,23 @@
 
 ## dev
 
+## 0.4.0 (master)
+
 Widgets:
 - Support new RadioGroup Widget.
 - Support Checkbox `options.label`.
 - Fixed Uncheck selectAll on uncheck row (TableWidget).
 
+Removed hardcoded font-sizes. Added media queries for screeen size and ppi.
 Start support for `LX.makeCollapsible`.
 Started adding LX.ICONS to avoid using external libs for icons.
 Updated Sidebar. Cooler and better customization.
 Fixed AssetView navigation buttons.
+Fixed few dialog dragging issues.
 Removed debug clog.
 Minor CSS tweaks.
 
-## 0.3.0 (master)
+## 0.3.0
 
 Widgets:
 - Support toggle mode and button disabled in ComboButtons Widget.
