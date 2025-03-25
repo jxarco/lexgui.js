@@ -171,7 +171,7 @@ area.addMenubar( m => {
     
     m.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")})
     m.setButtonImage("lexgui.js", "images/icon.png", () => {window.open("https://jxarco.github.io/lexgui.js/")}, {float: "left"})
-});
+}, { sticky: false });
 
 // split main area
 var [ left, right ] = area.split({ sizes:["70%","30%"], minimizable: true });
