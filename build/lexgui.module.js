@@ -10,9 +10,10 @@
 var LX = {
     version: "0.3.0",
     ready: false,
-    components: [], // specific pre-build components
-    signals: {}, // events and triggers
-    extraCommandbarEntries: [] // user specific entries for command bar
+    components: [], // Specific pre-build components
+    signals: {}, // Events and triggers
+    extraCommandbarEntries: [], // User specific entries for command bar
+    activeDraggable: null // Watch for the current active draggable
 };
 
 LX.MOUSE_LEFT_CLICK     = 0;
@@ -24,6 +25,8 @@ LX.MOUSE_TRIPLE_CLICK = 3;
 
 LX.CURVE_MOVEOUT_CLAMP = 0;
 LX.CURVE_MOVEOUT_DELETE = 1;
+
+LX.DRAGGABLE_Z_INDEX = 101;
 
 function clamp( num, min, max ) { return Math.min( Math.max( num, min ), max ); }
 function round( number, precision ) { return precision == 0 ? Math.floor( number ) : +(( number ).toFixed( precision ?? 2 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' )); }
@@ -324,6 +327,7 @@ function makeDraggable( domEl, options = { } )
         top = top ?? e.clientY - offsetY - parentRect.y;
         domEl.style.left = clamp( left, dragMargin + fixedOffset.x, fixedOffset.x + parentRect.width - domEl.offsetWidth - dragMargin ) + 'px';
         domEl.style.top = clamp( top, dragMargin + fixedOffset.y, fixedOffset.y + parentRect.height - domEl.offsetHeight - dragMargin ) + 'px';
+        domEl.style.translate = "none"; // Force remove translation
     };
 
     // Initial adjustment
@@ -368,26 +372,45 @@ function makeDraggable( domEl, options = { } )
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        if( !currentTarget ) return;
+
+        if( !currentTarget )
+        {
+            return;
+        }
+
         // Remove image when dragging
         var img = new Image();
         img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
         e.dataTransfer.setDragImage( img, 0, 0 );
         e.dataTransfer.effectAllowed = "move";
+
         const rect = e.target.getBoundingClientRect();
         const parentRect = currentTarget.parentElement.getBoundingClientRect();
         const isFixed = ( currentTarget.style.position == "fixed" );
         const fixedOffset = isFixed ? new LX.vec2( parentRect.x, parentRect.y ) : new LX.vec2();
         offsetX = e.clientX - rect.x - fixedOffset.x;
         offsetY = e.clientY - rect.y - fixedOffset.y;
+
         document.addEventListener( "mousemove", onMove );
+
+        currentTarget._eventCatched = true;
+
+        // Force active dialog to show on top
+        if( LX.activeDraggable )
+        {
+            LX.activeDraggable.style.zIndex = LX.DRAGGABLE_Z_INDEX;
+        }
+
+        LX.activeDraggable = domEl;
+        LX.activeDraggable.style.zIndex = LX.DRAGGABLE_Z_INDEX + 1;
+
         if( onDragStart )
         {
             onDragStart( currentTarget, e );
         }
     }, false );
 
-    document.addEventListener( 'mouseup', () => {
+    document.addEventListener( 'mouseup', (e) => {
         if( currentTarget )
         {
             currentTarget = null;
@@ -9340,20 +9363,15 @@ class Dialog {
 
         root.style.width = size[ 0 ] ? (size[ 0 ]) : "25%";
         root.style.height = size[ 1 ] ? (size[ 1 ]) : "auto";
-        root.style.margin = "auto";
+        root.style.translate = options.position ? "unset" : "-50% -50%";
 
         if( options.size )
         {
             this.size = size;
         }
 
-        if( options.position )
-        {
-            root.style.margin = "unset";
-        }
-
-        root.style.left = position[ 0 ] ?? "0";
-        root.style.top = position[ 1 ] ?? "0";
+        root.style.left = position[ 0 ] ?? "50%";
+        root.style.top = position[ 1 ] ?? "50%";
 
         panel.root.style.width = "calc( 100% - 30px )";
         panel.root.style.height = title ? "calc( 100% - " + ( titleDiv.offsetHeight + 30 ) + "px )" : "calc( 100% - 51px )";
@@ -9370,7 +9388,7 @@ class Dialog {
         this._oncreate.call(this, this.panel);
     }
 
-    setPosition(x, y) {
+    setPosition( x, y ) {
 
         this.root.style.left = x + "px";
         this.root.style.top = y + "px";
@@ -9416,6 +9434,9 @@ class PocketDialog extends Dialog {
 
         // Custom
         this.root.classList.add( "pocket" );
+
+        this.root.style.translate = "none";
+        this.root.style.top = "0";
         this.root.style.left = "unset";
 
         if( !options.position )
@@ -9431,6 +9452,11 @@ class PocketDialog extends Dialog {
         this.minimized = false;
         this.title.tabIndex = -1;
         this.title.addEventListener("click", e => {
+            if( this.title._eventCatched )
+            {
+                this.title._eventCatched = false;
+                return;
+            }
 
             // Sized dialogs have to keep their size
             if( this.size )

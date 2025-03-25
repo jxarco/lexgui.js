@@ -657,11 +657,11 @@ body.noevents * {
 }
 
 .lexdialogcloser:active {
-    margin-top: 0.1em;
+    transform: scale(0.99);
 }
 
 .lexdialogcloser.notitle:active {
-    margin-top: 0.05em;
+    transform: scale(0.99);
 }
 
 .lexdialog.prompt textarea {
