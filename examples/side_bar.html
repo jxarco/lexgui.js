@@ -18,7 +18,6 @@
     <script type="module">
 
         import { LX } from 'lexgui';
-        import 'lexgui/components/codeeditor.js';
 
         // init library and get main area
         let area = LX.init();
@@ -34,17 +33,44 @@
             el.style.display = 'block';
         }
 
-        area.addSidebar( m => {
-            m.add( "Scene", { icon: "fa fa-cube", callback: () => { codeArea.hide(); show( canvas ); } } );
-            m.add( "Code", { icon: "fa fa-code", callback: () => { hide( canvas ); codeArea.show(); } } );
+        const logParams = (entryName, value, event) => { console.log(entryName, value, event) };
+        const actionLogParams = (entryName, event) => { console.log("Action called!", entryName, event) };
 
-            m.add( "Search", { icon: "fa fa-search", bottom: true, callback: () => { } } );
+        window.sidebar = area.addSidebar( m => {
+            m.group( "Projects", { icon: "fa fa-plus", callback: (groupName, event) => { console.log(groupName) }} );
+            m.add( "Getting Started", { icon: "fa fa-cube", callback: logParams } );
+            m.add( "Getting Started/Installation", { icon: "fa fa-cube", callback: logParams } );
+            m.add( "Getting Started/Project Structure", { icon: "fa fa-cube", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } } );
+            m.add( "Building Your Application", { icon: "fa fa-code", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } } );
+            m.add( "Search Blocks", { icon: "fa fa-search", callback: logParams } );
+            m.add( "Very loooooooooooooooooooooooong sun", { icon: "fa fa-sun",callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } } );
+            m.separator();
+            m.group( "API Reference" );
+            m.add( "Components", { icon: "fa fa-cube", callback: logParams } );
+            m.add( "File Conventions", { icon: "fa fa-code", callback: logParams } );
+            m.add( "Functions", { icon: "fa fa-search",callback: logParams } );
+            m.add( "CLI", { icon: "fa fa-sun",callback: logParams } );
+            m.separator();
+            m.group( "Architecture" );
+            m.add( "Accessibility ", { icon: "fa fa-cube", callback: logParams } );
+            m.add( "Fast Refresh", { icon: "fa fa-code", callback: logParams } );
+            m.add( "Supported Browsers", { icon: "fa fa-search",callback: logParams } );
+            m.separator();
+            m.add( "Calendar ", { collapsable: 3 } );
+            m.add( "Personal ", { callback: logParams, type: "checkbox" } );
+            m.add( "Work", { callback: logParams, type: "checkbox", value: true } );
+            m.add( "Family", { callback: logParams, type: "checkbox" } );
+        }, {
+            headerTitle: "jxarco",
+            headerSubtitle: "alexroco.30@gmail.com",
+            headerImage: "https://raw.githubusercontent.com/jxarco/lexgui.js/refs/heads/master/images/icon.png",
+            footerTitle: "jxarco",
+            footerSubtitle: "alexroco.30@gmail.com",
+            footerImage: "https://avatars.githubusercontent.com/u/25059187?s=400&u=ad8907b748c13e4e1a7cdd3882826acb6a2928b5&v=4",
+            onHeaderPressed: (e) => { console.log( "onHeaderPressed" ) }, 
+            onFooterPressed: (e) => { console.log( "onFooterPressed" ) }
         });
         
-        let codeArea = new LX.Area( { width: "100%", height: "100%" } );
-        let editor = new LX.CodeEditor( codeArea );
-        editor.loadFile( "../data/js_sample.js" );
-
         // add canvas to left upper part
         var canvas = document.createElement('canvas');
         canvas.id = "mycanvas";
@@ -53,8 +79,14 @@
         canvas.style.width = "100%";
         canvas.style.height = "100%";
 
+        area = sidebar.siblingArea;
+
+        area.onresize = ( bounding ) => {
+            canvas.width = bounding.width;
+            canvas.height = bounding.height;
+        };;
+
         area.attach( canvas );
-        area.attach( codeArea );
 
         function loop(dt) {
             
