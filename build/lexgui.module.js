@@ -2010,6 +2010,7 @@ class Area {
 
         const height = 48; // pixels
         const [ bar, content ] = this.split({ type: 'vertical', sizes: [height, null], resize: false, menubar: true });
+        menubar.siblingArea = content;
 
         bar.attach( menubar );
         bar.isMenubar = true;

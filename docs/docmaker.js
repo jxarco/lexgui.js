@@ -61,14 +61,13 @@ function MAKE_CODE( text )
             let html = null;
 
             const tagIndex = str.indexOf( '@' );
+            const skipTag = ( str[ tagIndex - 1 ] == '|' );
 
             // Highlight is specified
             if( text[ i + 1 ] == '[' )
             {
                 highlight = str.substr( 1, 3 );
                 content = str.substring( 5, tagIndex );
-
-                const skipTag = ( str[ tagIndex - 1 ] == '|' );
 
                 if( skipTag )
                 {
@@ -90,6 +89,13 @@ function MAKE_CODE( text )
             else
             {
                 content = str.substring( 0, tagIndex );
+                if( skipTag )
+                {
+                    const preContent = str.substring( 0, str.indexOf( '@' ) - 1 );
+                    content = str.substring( preContent.length + 1 );
+                    content = preContent + content.substring( 0, content.substring( 1 ).indexOf( '@' ) + 1 );
+                    text = text.substr( 0, i ) + '@' + content + '@' + text.substr( i + content.length + 3 );
+                }
 
                 if( KEY_WORDS.includes( content ) )
                 {

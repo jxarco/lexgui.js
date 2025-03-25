@@ -31,6 +31,7 @@
         iframe.src = url;
         iframe.style.width = "100%";
         iframe.style.height = "100%";
+        iframe.style.borderRadius = "12px";
 
         // Init library and get main area
         let area = LX.init();
@@ -59,70 +60,62 @@
         }
         else
         {
-            // Split main area
-            area.split({sizes:["20%","80%"], resize: false});
-            let [left,right] = area.sections;
+            const open = ( url, target, name, event ) => {
+                window.open( url, target ?? 'viewer' );
+            }
 
-            left.root.style.borderRight = "2px solid gray";
-            left.addMenubar( m => {
-                m.add( "Examples", () => {
-                    location.href = "../examples/";
-                });
-                m.add( "Docs v" + LX.version, (v, name) => {
-                    location.href = "../docs/";
-                });
-                m.addButtons( [ {
+            const sidebar = area.addSidebar( m => {
+                m.group( "Manual" );
+                m.add( "Installation", { callback: open.bind( this, "../docs/installation.html", null ) } );
+                m.add( "Getting Started", { callback: open.bind( this, "../docs/getting_started.html", null ) } );
+                m.add( "Creating an area", { callback: open.bind( this, "../docs/creating_an_area.html", null ) } );
+                m.add( "Instancing panels", { callback: open.bind( this, "../docs/instancing_panels.html", null ) } );
+                m.add( "Branching", { callback: open.bind( this, "../docs/branching.html", null ) } );
+                m.add( "Adding the First Widget", { callback: open.bind( this, "../docs/adding_first_widget.html", null ) } );
+                m.add( "Widget List", { callback: open.bind( this, "../docs/widget_list.html", null ), xcollapsable: 10 } );
+                m.add( "Dialog", { callback: open.bind( this, "../docs/dialog.html", null ) } );
+                m.add( "Notifications", { callback: open.bind( this, "../docs/notifications.html", null ) } );
+                m.add( "Context Menus", { callback: open.bind( this, "../docs/context_menu.html", null ) } );
+                m.add( "Event Handling", { callback: open.bind( this, "../docs/event_handling.html", null ) } );
+                m.add( "Theme Customization", { callback: open.bind( this, "../docs/themes.html", null ) } );
+                m.separator();
+                m.group( "Components" );
+                m.add( "Code Editor", { callback: open.bind( this, "../docs/code_editor.html", null ) } );
+                m.add( "Graph Editor", { callback: open.bind( this, "../docs/graph_editor.html", null ) } );
+                m.add( "Timeline", { callback: open.bind( this, "../docs/timeline.html", null ) } );
+                m.separator();
+                m.group( "API Reference" );
+                m.add( "Area ", { callback: open.bind( this, "../docs/reference/area.html", null ) } );
+                m.add( "Branch ", { callback: open.bind( this, "../docs/reference/branch.html", null ) } );
+                m.add( "Menubar ", { callback: open.bind( this, "../docs/reference/menubar.html", null ) } );
+                m.add( "Panel ", { callback: open.bind( this, "../docs/reference/panel.html", null ) } );
+                m.add( "Sidebar ", { callback: open.bind( this, "../docs/reference/sidebar.html", null ) } );
+                m.add( "Tabs ", { callback: open.bind( this, "../docs/reference/tabs.html", null ) } );
+                m.add( "Widget ", { callback: open.bind( this, "../docs/reference/widget.html", null ) } );
+                m.separator();
+                m.add( "LexGUI Examples", { icon: "fa-solid fa-display", callback: open.bind( this, "../examples/", "_blank" ) } );
+                m.add( "Source Code", { icon: "fa-solid fa-code", callback: open.bind( this, "https://github.com/jxarco/lexgui.js/", "_blank" ) } );
+            }, { 
+                headerTitle: "LexGUI",
+                headerSubtitle: 'v' + LX.version,
+                headerImage: "https://raw.githubusercontent.com/jxarco/lexgui.js/refs/heads/master/images/icon.png",
+                footerTitle: "jxarco",
+                footerSubtitle: "alexroco.30@gmail.com",
+                footerImage: "https://avatars.githubusercontent.com/u/25059187?s=400&u=ad8907b748c13e4e1a7cdd3882826acb6a2928b5&v=4",
+                collapsable: false
+            });
+
+            const menubar = sidebar.siblingArea.addMenubar(m => {
+                m.addButtons([{
                     title: "Change Theme",
                     icon: "fa-solid fa-moon",
                     swap: "fa-solid fa-sun",
-                    callback:  (event, swapValue) => { LX.setTheme( swapValue ? "light" : "dark" ) }
-                } ] );
-                m.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
+                    callback: (event, swapValue) => { LX.setTheme(swapValue ? "light" : "dark") }
+                }]);
+                // m.setButtonIcon("Github", "fa-brands fa-github", () => { window.open("https://github.com/jxarco/lexgui.js/") }, { float: "left" });
             });
 
-            let panel = left.addPanel();
-            fillDocs( panel );
-
-            right.root.appendChild(iframe);
-        }
-
-        // **** **** **** **** **** **** **** **** **** **** **** **** 
-
-        function fillDocs( panel, closedBranches ) {
-            
-            const titleCss = { fontSize: "18px", background: "none" };
-
-            panel.clear();
-            panel.branch("Manual", { closed: closedBranches });
-            panel.addTitle("LexGUI", { style: titleCss });
-            panel.addTitle("Installation", {link: "../docs/installation.html", target: 'viewer'});
-            panel.addTitle("Getting started", {link: "../docs/getting_started.html", target: 'viewer'});
-            panel.addTitle("Creating an area", {link: "../docs/creating_an_area.html", target: 'viewer'});
-            panel.addTitle("Instancing panels", {link: "../docs/instancing_panels.html", target: 'viewer'});
-            panel.addTitle("Branching", {link: "../docs/branching.html", target: 'viewer'});
-            panel.addTitle("Adding the first widget", {link: "../docs/adding_first_widget.html", target: 'viewer'});
-            panel.addTitle("Widget List", {link: "../docs/widget_list.html", target: 'viewer'});
-            panel.addTitle("Dialog", {link: "../docs/dialog.html", target: 'viewer'});
-            panel.addTitle("Context Menu", {link: "../docs/context_menu.html", target: 'viewer'});
-            panel.addTitle("Event Handling", {link: "../docs/event_handling.html", target: 'viewer'});
-            panel.addTitle("Theme Customization", {link: "../docs/themes.html", target: 'viewer'});
-            panel.addSeparator();
-            panel.addTitle("Components", { style: titleCss });
-            panel.addTitle("Code Editor", {link: "../docs/code_editor.html", target: 'viewer'});
-            panel.addTitle("Graph Editor", {link: "../docs/graph_editor.html", target: 'viewer'});
-            panel.addTitle("Timeline", {link: "../docs/timeline.html", target: 'viewer'});
-            panel.merge();
-
-            panel.branch("Reference", { closed: closedBranches });
-            panel.addTitle("Areas", { style: titleCss });
-            panel.addTitle("Area", {link: "../docs/reference/area.html", target: 'viewer'});
-            panel.addTitle("Menubar", {link: "../docs/reference/menubar.html", target: 'viewer'});
-            panel.addTitle("Sidebar", {link: "../docs/reference/sidebar.html", target: 'viewer'});
-            panel.addTitle("Tabs", {link: "../docs/reference/tabs.html", target: 'viewer'});
-            panel.addTitle("Panel", {link: "../docs/reference/panel.html", target: 'viewer'});
-            panel.addTitle("Branch", {link: "../docs/reference/branch.html", target: 'viewer'});
-            panel.addTitle("Widget", {link: "../docs/reference/widget.html", target: 'viewer'});
-            panel.merge();
+            menubar.siblingArea.root.appendChild( iframe );
         }
 
     </script>

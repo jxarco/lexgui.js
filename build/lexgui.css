@@ -13,11 +13,11 @@
     --global-title-font: "GoogleSans", sans-serif;
     --global-font-size: 13px;
     --global-font-size-big: 15px;
-    --global-color-primary: light-dark(#f9f9f9, #141414);
-    --global-color-secondary: light-dark(#ececec, #252525);
-    --global-color-terciary: light-dark(#e0e0e0, #3a3a3a);
-    --global-color-quaternary: light-dark(#c8c8c8, #494949);
-    --global-color-quinary: light-dark(#b0b0b0, #5c5c5c);
+    --global-color-primary: light-dark(#f3f3f3, #141414);
+    --global-color-secondary: light-dark(#e4e4e4, #252525);
+    --global-color-terciary: light-dark(#dcdcde, #3a3a3a);
+    --global-color-quaternary: light-dark(#c6c6c6, #494949);
+    --global-color-quinary: light-dark(#b5b5b5, #5c5c5c);
     --global-selected: #2d69da;
     --global-selected-light: #0d99ff;
     --global-selected-dark: #304b86;
@@ -2739,6 +2739,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     padding-inline: 0.45em;
     cursor: pointer;
     place-content: center;
+    justify-items: center;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -3115,7 +3116,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexavatar {
-    filter: invert();
     background-color: #000;
 }
 
@@ -3466,6 +3466,17 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexavatar img {
     width: 100%;
+    height: 100%;
+}
+
+.lexavatar a svg {
+    width: 60%;
+    height: 100%;
+}
+
+.lexavatar * {
+    border-radius: 8px;
+    width: 60%;
     height: 100%;
 }
 
