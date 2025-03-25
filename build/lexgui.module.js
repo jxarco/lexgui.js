@@ -3210,7 +3210,15 @@ class SideBar {
      * inset: TODO
      * filter: TODO
      * skipHeader: Do not use sidebar header [false]
+     * headerImg: Image to be shown as avatar
+     * headerIcon: Icon to be shown as avatar (from LX.ICONS)
+     * headerTitle
+     * headerSubtitle
      * skipFooter: Do not use sidebar footer [false]
+     * footerImg: Image to be shown as avatar
+     * footerIcon: Icon to be shown as avatar (from LX.ICONS)
+     * footerTitle
+     * footerSubtitle
      * collapsable: Sidebar can toggle between collapsed/expanded [true]
      * collapseToIcons: When Sidebar collapses, icons remains visible  [true]
      * onHeaderPressed: Function to call when header is pressed
@@ -3269,9 +3277,17 @@ class SideBar {
             avatar.className = "lexavatar";
             this.header.appendChild( avatar );
 
-            const avatarImg = document.createElement( 'img' );
-            avatarImg.src = "https://raw.githubusercontent.com/jxarco/lexgui.js/refs/heads/master/images/icon.png";
-            avatar.appendChild( avatarImg );
+            if( options.headerImage )
+            {
+                const avatarImg = document.createElement( 'img' );
+                avatarImg.src = options.headerImage;
+                avatar.appendChild( avatarImg );
+            }
+            else if( options.headerIcon )
+            {
+                const avatarIcon = LX.makeIcon( options.headerIcon );
+                avatar.appendChild( avatarIcon );
+            }
 
             // Info
             {
@@ -3279,11 +3295,11 @@ class SideBar {
                 this.header.appendChild( info );
 
                 const infoText = document.createElement( 'span' );
-                infoText.innerHTML = "jxarco";
+                infoText.innerHTML = options.headerTitle ?? "";
                 info.appendChild( infoText );
 
                 const infoSubtext = document.createElement( 'span' );
-                infoSubtext.innerHTML = "alexroco.30@gmail.com";
+                infoSubtext.innerHTML = options.headerSubtitle ?? "";
                 info.appendChild( infoSubtext );
             }
 
@@ -3327,9 +3343,17 @@ class SideBar {
             avatar.className = "lexavatar";
             this.footer.appendChild( avatar );
 
-            const avatarImg = document.createElement( 'img' );
-            avatarImg.src = "https://raw.githubusercontent.com/jxarco/lexgui.js/refs/heads/master/images/icon.png";
-            avatar.appendChild( avatarImg );
+            if( options.footerImage )
+            {
+                const avatarImg = document.createElement( 'img' );
+                avatarImg.src = options.footerImage;
+                avatar.appendChild( avatarImg );
+            }
+            else if( options.footerIcon )
+            {
+                const avatarIcon = LX.makeIcon( options.footerIcon );
+                avatar.appendChild( avatarIcon );
+            }
 
             // Info
             {
@@ -3337,11 +3361,11 @@ class SideBar {
                 this.footer.appendChild( info );
 
                 const infoText = document.createElement( 'span' );
-                infoText.innerHTML = "jxarco";
+                infoText.innerHTML = options.footerTitle ?? "";
                 info.appendChild( infoText );
 
                 const infoSubtext = document.createElement( 'span' );
-                infoSubtext.innerHTML = "alexroco.30@gmail.com";
+                infoSubtext.innerHTML = options.footerSubtitle ?? "";
                 info.appendChild( infoSubtext );
             }
 

@@ -204,7 +204,16 @@ const sidebar = left.addSidebar( m => {
     m.add( "Personal ", { callback: logParams, type: "checkbox" } );
     m.add( "Work", { callback: logParams, type: "checkbox", value: true } );
     m.add( "Family", { callback: logParams, type: "checkbox" } );
-}, { /* collapseToIcons: false, skipFooter: true, skipHeader: true,*/ onHeaderPressed: (e) => { console.log( "onHeaderPressed" ) }, onFooterPressed: (e) => { console.log( "onFooterPressed" ) }  });
+}, { /* collapseToIcons: false, skipFooter: true, skipHeader: true,*/ 
+    headerTitle: "jxarco",
+    headerSubtitle: "alexroco.30@gmail.com",
+    headerImage: "https://raw.githubusercontent.com/jxarco/lexgui.js/refs/heads/master/images/icon.png",
+    footerTitle: "jxarco",
+    footerSubtitle: "alexroco.30@gmail.com",
+    footerImage: "https://avatars.githubusercontent.com/u/25059187?s=400&u=ad8907b748c13e4e1a7cdd3882826acb6a2928b5&v=4",
+    onHeaderPressed: (e) => { console.log( "onHeaderPressed" ) }, 
+    onFooterPressed: (e) => { console.log( "onFooterPressed" ) }
+});
 
 // split left area
 var [up, bottom] = sidebar.siblingArea.split({ type: 'vertical', sizes:["50%", null], minimizable: true });
