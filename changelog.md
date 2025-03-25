@@ -5,7 +5,12 @@
 Widgets:
 - Support new RadioGroup Widget.
 - Support Checkbox `options.label`.
+- Fixed Uncheck selectAll on uncheck row (TableWidget).
 
+Start support for `LX.makeCollapsible`.
+Started adding LX.ICONS to avoid using external libs for icons.
+Updated Sidebar. Cooler and better customization.
+Fixed AssetView navigation buttons.
 Removed debug clog.
 Minor CSS tweaks.
 

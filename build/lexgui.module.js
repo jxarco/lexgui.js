@@ -10854,8 +10854,8 @@ class AssetView {
                     icon: "fa-solid fa-arrows-rotate",
                     callback: domEl => { this._refreshContent(); }
                 }
-            ], { width: "auto", noSelection: true } );
-            this.rightPanel.addText(null, this.path.join('/'), null, { disabled: true, signal: "@on_folder_change", style: { fontWeight: "bolder", fontSize: "16px", color: "#aaa" } });
+            ], { width: "20%", minWidth: "164px", noSelection: true } );
+            this.rightPanel.addText(null, this.path.join('/'), null, { width: "70%", maxWidth: "calc(70% - 64px)", minWidth: "164px", disabled: true, signal: "@on_folder_change", style: { fontWeight: "bolder", fontSize: "16px", color: "#aaa" } });
             this.rightPanel.addText(null, "Page " + this.contentPage + " / " + ((((this.currentData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1), null, {disabled: true, signal: "@on_page_change", width: "fit-content"})
             this.rightPanel.endLine();
         }
