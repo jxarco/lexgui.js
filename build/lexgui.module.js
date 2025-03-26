@@ -6390,8 +6390,10 @@ class Panel {
 
     addCurve( name, values, callback, options = {} ) {
 
+        let defaultValues = JSON.parse( JSON.stringify( values ) );
+
         let that = this;
-        let widget = this._createWidget( Widget.CURVE, name, values, options );
+        let widget = this._createWidget( Widget.CURVE, name, defaultValues, options );
 
         widget.onGetValue = () => {
             return JSON.parse(JSON.stringify( curveInstance.element.value ));
@@ -6406,7 +6408,6 @@ class Panel {
         };
 
         let element = widget.domEl;
-        let defaultValues = JSON.parse( JSON.stringify( values ) );
 
         // Add widget value
 
@@ -6456,8 +6457,10 @@ class Panel {
 
     addDial( name, values, callback, options = {} ) {
 
+        let defaultValues = JSON.parse( JSON.stringify( values ) );
+
         let that = this;
-        let widget = this._createWidget(name, Widget.DIAL, options);
+        let widget = this._createWidget( Widget.DIAL, name, defaultValues, options );
 
         widget.onGetValue = () => {
             return JSON.parse(JSON.stringify(curveInstance.element.value));
@@ -6472,18 +6475,6 @@ class Panel {
         };
 
         let element = widget.domEl;
-        let defaultValues = JSON.parse( JSON.stringify( values ) );
-
-        // Add reset functionality
-        if( widget.name && !(options.skipReset ?? false) )
-        {
-            Panel._add_reset_property(element.domName, function( e ) {
-                this.style.display = "none";
-                curveInstance.element.value = JSON.parse( JSON.stringify( defaultValues ) );
-                curveInstance.redraw();
-                that._trigger( new IEvent( name, curveInstance.element.value, e ), callback );
-            });
-        }
 
         // Add widget value
 
@@ -6529,10 +6520,12 @@ class Panel {
     addLayers( name, value, callback, options = {} ) {
 
         let that = this;
-        let widget = this._createWidget(name, Widget.LAYERS, options);
+        let widget = this._createWidget( Widget.LAYERS, name, value, options );
+
         widget.onGetValue = () => {
             return element.value;
         };
+
         widget.onSetValue = ( newValue, skipCallback ) => {
             let btn = element.querySelector(".lexwidgetname .lexicon");
             if(btn) btn.style.display = (newValue != defaultValue ? "block" : "none");
@@ -6542,14 +6535,6 @@ class Panel {
         };
 
         let element = widget.domEl;
-
-        // Add reset functionality
-        Panel._add_reset_property(element.domName, function( e ) {
-            this.style.display = "none";
-            value = element.value = defaultValue;
-            setLayers();
-            that._trigger( new IEvent(name, value, e), callback );
-        });
 
         // Add widget value
 
@@ -6565,6 +6550,7 @@ class Panel {
 
             let binary = value.toString( 2 );
             let nbits = binary.length;
+
             // fill zeros
             for( var i = 0; i < (16 - nbits); ++i )
             {
@@ -6604,7 +6590,7 @@ class Panel {
 
         setLayers();
 
-        element.appendChild(container);
+        element.appendChild( container );
 
         return widget;
     }
@@ -6620,7 +6606,8 @@ class Panel {
 
     addArray( name, values = [], callback, options = {} ) {
 
-        let widget = this._createWidget(name, Widget.ARRAY, options);
+        let widget = this._createWidget( Widget.ARRAY, name, null, options );
+
         widget.onGetValue = () => {
             let array_inputs = element.querySelectorAll("input");
             let values = [];
@@ -6628,6 +6615,7 @@ class Panel {
             values.push( v.value );
             return values;
         };
+
         widget.onSetValue = ( newValue, skipCallback ) => {
             values = newValue;
             updateItems();
@@ -6647,10 +6635,10 @@ class Panel {
 
         this.queue( container );
 
-        const angle_down = `<a class='fa-solid fa-angle-down' style='float:right; margin-right: 3px;'></a>`;
+        const angleDown = `<a class='fa-solid fa-angle-down' style='float:right; margin-right: 3px;'></a>`;
 
         let buttonName = "Array (size " + values.length + ")";
-        buttonName += angle_down;
+        buttonName += angleDown;
         this.addButton(null, buttonName, () => {
             element.querySelector(".lexarrayitems").toggleAttribute('hidden');
         }, { buttonClass: 'array' });
@@ -6659,24 +6647,24 @@ class Panel {
 
         // Show elements
 
-        let array_items = document.createElement('div');
-        array_items.className = "lexarrayitems";
-        array_items.toggleAttribute('hidden',  true);
+        let arrayItems = document.createElement( "div" );
+        arrayItems.className = "lexarrayitems";
+        arrayItems.toggleAttribute( "hidden",  true );
 
-        element.appendChild(container);
-        element.appendChild(array_items);
+        element.appendChild( container );
+        element.appendChild( arrayItems );
 
         const updateItems = () => {
 
             // Update num items
             let buttonEl = element.querySelector(".lexbutton.array span");
             buttonEl.innerHTML = "Array (size " + values.length + ")";
-            buttonEl.innerHTML += angle_down;
+            buttonEl.innerHTML += angleDown;
 
             // Update inputs
-            array_items.innerHTML = "";
+            arrayItems.innerHTML = "";
 
-            this.queue( array_items );
+            this.queue( arrayItems );
 
             for( let i = 0; i < values.length; ++i )
             {
@@ -6722,7 +6710,7 @@ class Panel {
                 this._trigger( new IEvent(name, values, event), callback );
             }, { buttonClass: 'array' });
 
-            // Stop pushing to array_items
+            // Stop pushing to arrayItems
             this.clearQueue();
         };
 
@@ -6738,15 +6726,17 @@ class Panel {
      * @param {String} value Selected list value
      * @param {Function} callback Callback function on change
      * @param {*} options:
+     * hideName: Don't use name as label [false]
      */
 
     addList( name, values, value, callback, options = {} ) {
 
-        let widget = this._createWidget( name, Widget.LIST, options );
+        let widget = this._createWidget( Widget.LIST, name, value, options );
 
         widget.onGetValue = () => {
             return value;
         };
+
         widget.onSetValue = ( newValue, skipCallback ) => {
             listContainer.querySelectorAll( '.lexlistitem' ).forEach( e => e.classList.remove( 'selected' ) );
             const idx = values.indexOf( newValue );
@@ -6798,7 +6788,8 @@ class Panel {
         widget.updateValues( values );
 
         // Remove branch padding and margins
-        if( !widget.name )
+        const useNameAsLabel = !( options.hideName ?? false );
+        if( !useNameAsLabel )
         {
             element.className += " noname";
             listContainer.style.width = "100%";
@@ -6815,20 +6806,23 @@ class Panel {
      * @param {String} value Comma separated tags
      * @param {Function} callback Callback function on change
      * @param {*} options:
+     * hideName: Don't use name as label [false]
      */
 
     addTags( name, value, callback, options = {} ) {
 
         value = value.replace( /\s/g, '' ).split( ',' );
+
         let defaultValue = [].concat( value );
-        let widget = this._createWidget( name, Widget.TAGS, options );
+        let widget = this._createWidget( Widget.TAGS, name, defaultValue, options );
 
         widget.onGetValue = () => {
             return [].concat( value );
         };
+
         widget.onSetValue = ( newValue, skipCallback ) => {
             value = [].concat( newValue );
-            create_tags();
+            _generateTags();
             let btn = element.querySelector( ".lexwidgetname .lexicon" );
             if( btn ) btn.style.display = ( newValue != defaultValue ? "block" : "none" );
             if( !skipCallback ) that._trigger( new IEvent( name, value ), callback );
@@ -6837,24 +6831,13 @@ class Panel {
         let element = widget.domEl;
         let that = this;
 
-        // Add reset functionality
-        if(widget.name)
-        {
-            Panel._add_reset_property(element.domName, function( e ) {
-                this.style.display = "none";
-                value = [].concat(defaultValue);
-                create_tags();
-                that._trigger( new IEvent(name, value, e), callback );
-            });
-        }
-
         // Show tags
 
         const tagsContainer = document.createElement('div');
         tagsContainer.className = "lextags";
         tagsContainer.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
-        const create_tags = () => {
+        const _generateTags = () => {
 
             tagsContainer.innerHTML = "";
 
@@ -6893,7 +6876,7 @@ class Panel {
                     if( !val.length || value.indexOf( val ) > -1 )
                         return;
                     value.push( val );
-                    create_tags();
+                    _generateTags();
                     let btn = element.querySelector( ".lexwidgetname .lexicon" );
                     if(btn) btn.style.display = "block";
                     that._trigger( new IEvent( name, value, e ), callback );
@@ -6903,10 +6886,11 @@ class Panel {
             tagInput.focus();
         }
 
-        create_tags();
+        _generateTags();
 
         // Remove branch padding and margins
-        if( !widget.name )
+        const useNameAsLabel = !( options.hideName ?? false );
+        if( !useNameAsLabel )
         {
             element.className += " noname";
             tagsContainer.style.width = "100%";
@@ -6936,10 +6920,7 @@ class Panel {
             throw( "Set Widget Name or at least a label!" );
         }
 
-        let widget = this._createWidget( name, Widget.CHECKBOX, () => {
-            checkbox.checked = !checkbox.checked;
-            Panel._dispatch_event( checkbox, "change" );
-        }, options );
+        let widget = this._createWidget( Widget.CHECKBOX, name, value, options );
 
         widget.onGetValue = () => {
             return checkbox.checked;
@@ -7024,7 +7005,7 @@ class Panel {
 
     addToggle( name, value, callback, options = {} ) {
 
-        let widget = this._createWidget( name, Widget.TOGGLE, options );
+        let widget = this._createWidget( Widget.TOGGLE, name, value, options );
 
         widget.onGetValue = () => {
             return toggle.checked;
@@ -7039,12 +7020,6 @@ class Panel {
         };
 
         let element = widget.domEl;
-
-        // Add reset functionality
-        Panel._add_reset_property( element.domName, function() {
-            toggle.checked = !toggle.checked;
-            Panel._dispatch_event( toggle, "change" );
-        });
 
         // Add widget value
 
@@ -7104,6 +7079,7 @@ class Panel {
 
     /**
      * @method addRadioGroup
+     * @param {String} name Widget name
      * @param {String} label Radio label
      * @param {Array} values Radio options
      * @param {Function} callback Callback function on change
@@ -7112,9 +7088,9 @@ class Panel {
      * className: Customize colors
      */
 
-    addRadioGroup( label, values, callback, options = {} ) {
+    addRadioGroup( name, label, values, callback, options = {} ) {
 
-        let widget = this._createWidget( null, Widget.RADIO, options );
+        let widget = this._createWidget( Widget.RADIO, name, null, options );
 
         widget.onGetValue = () => {
             const items = container.querySelectorAll( 'button' );
@@ -7204,25 +7180,19 @@ class Panel {
 
     addColor( name, value, callback, options = {} ) {
 
-        let widget = this._createWidget( name, Widget.COLOR, options );
+        let widget = this._createWidget( Widget.COLOR, name, value, options );
 
         widget.onGetValue = () => {
             return color.value;
         };
+
         widget.onSetValue = ( newValue, skipCallback ) => {
             color.value = newValue;
             Panel._dispatch_event( color, "input", skipCallback );
         };
 
         let element = widget.domEl;
-        let change_from_input = false;
-
-        // Add reset functionality
-        Panel._add_reset_property( element.domName, function() {
-            this.style.display = "none";
-            color.value = color.iValue;
-            Panel._dispatch_event( color, "input" );
-        });
+        let changeFromInput = false;
 
         // Add widget value
 
@@ -7249,8 +7219,10 @@ class Panel {
             const skipCallback = e.detail;
 
             // Change value (always hex)
-            if( !change_from_input )
-                text_widget.set( val );
+            if( !changeFromInput )
+            {
+                textWidget.set( val );
+            }
 
             // Reset button (default value)
             if( !skipCallback )
@@ -7269,13 +7241,13 @@ class Panel {
 
         this.queue( container );
 
-        const text_widget = this.addText( null, color.value, v => {
-            change_from_input = true;
+        const textWidget = this.addText( null, color.value, v => {
+            changeFromInput = true;
             widget.set( v );
-            change_from_input = false;
+            changeFromInput = false;
         }, { width: "calc( 100% - 32px )"});
 
-        text_widget.domEl.style.marginLeft = "4px";
+        textWidget.domEl.style.marginLeft = "4px";
 
         this.clearQueue();
 
@@ -7290,6 +7262,7 @@ class Panel {
      * @param {Number} value Default number value
      * @param {Function} callback Callback function on change
      * @param {*} options:
+     * hideName: Don't use name as label [false]
      * className: Extra classes to customize style
      * disabled: Make the widget disabled [false]
      * left: The slider goes to the left instead of the right
@@ -7300,7 +7273,7 @@ class Panel {
 
     addRange( name, value, callback, options = {} ) {
 
-        let widget = this._createWidget( name, Widget.RANGE, options );
+        let widget = this._createWidget( Widget.RANGE, name, value, options );
 
         widget.onGetValue = () => {
             return +slider.value;
@@ -7312,16 +7285,6 @@ class Panel {
         };
 
         let element = widget.domEl;
-
-        // add reset functionality
-        if( widget.name )
-        {
-            Panel._add_reset_property( element.domName, function() {
-                this.style.display = "none";
-                slider.value = slider.iValue;
-                Panel._dispatch_event( slider, "input" );
-            });
-        }
 
         // add widget value
 
@@ -7405,8 +7368,8 @@ class Panel {
         container.appendChild( slider );
         element.appendChild( container );
 
-        // Remove branch padding and margins
-        if( !widget.name )
+        const useNameAsLabel = !( options.hideName ?? false );
+        if( !useNameAsLabel )
         {
             element.className += " noname";
             container.style.width = "100%";
@@ -7421,6 +7384,7 @@ class Panel {
      * @param {Number} value Default number value
      * @param {Function} callback Callback function on change
      * @param {*} options:
+     * hideName: Don't use name as label [false]
      * disabled: Make the widget disabled [false]
      * step: Step of the input
      * precision: The number of digits to appear after the decimal point
@@ -7433,7 +7397,7 @@ class Panel {
 
     addNumber( name, value, callback, options = {} ) {
 
-        let widget = this._createWidget( name, Widget.NUMBER, options );
+        let widget = this._createWidget( Widget.NUMBER, name, value, options );
 
         widget.onGetValue = () => {
             return +vecinput.value;
@@ -7445,16 +7409,6 @@ class Panel {
         };
 
         let element = widget.domEl;
-
-        // add reset functionality
-        if( widget.name )
-        {
-            Panel._add_reset_property( element.domName, function() {
-                this.style.display = "none";
-                vecinput.value = vecinput.iValue;
-                Panel._dispatch_event( vecinput, "change" );
-            });
-        }
 
         // add widget value
 
@@ -7675,7 +7629,8 @@ class Panel {
         element.appendChild( container );
 
         // Remove branch padding and margins
-        if( !widget.name )
+        const useNameAsLabel = !( options.hideName ?? false );
+        if( !useNameAsLabel )
         {
             element.className += " noname";
             container.style.width = "100%";
@@ -7691,7 +7646,7 @@ class Panel {
         num_components = clamp( num_components, 2, 4 );
         value = value ?? new Array( num_components ).fill( 0 );
 
-        let widget = this._createWidget( name, Widget.VECTOR, options );
+        let widget = this._createWidget( Widget.VECTOR, name, value, options );
 
         widget.onGetValue = () => {
             let inputs = element.querySelectorAll( "input" );
@@ -7720,16 +7675,6 @@ class Panel {
         };
 
         let element = widget.domEl;
-
-        // Add reset functionality
-        Panel._add_reset_property( element.domName, function() {
-            this.style.display = "none";
-            for( let v of element.querySelectorAll( ".vecinput" ) )
-            {
-                v.value = v.iValue;
-                Panel._dispatch_event( v, "change" );
-            }
-        });
 
         // Add widget value
 
@@ -7988,13 +7933,14 @@ class Panel {
      * @param {Number} value Default number value
      * @param {Function} callback Callback function on change
      * @param {*} options:
+     * hideName: Don't use name as label [false]
      * disabled: Make the widget disabled [false]
      * units: Unit as string added to the end of the value
      */
 
     addSize( name, value, callback, options = {} ) {
 
-        let widget = this._createWidget( name, Widget.SIZE, options );
+        let widget = this._createWidget( Widget.SIZE, name, value, options );
 
         widget.onGetValue = () => {
             const value = [];
@@ -8085,7 +8031,8 @@ class Panel {
         }
 
         // Remove branch padding and margins
-        if( !widget.name )
+        const useNameAsLabel = !( options.hideName ?? false );
+        if( !useNameAsLabel )
         {
             element.className += " noname";
             container.style.width = "100%";
@@ -8109,7 +8056,7 @@ class Panel {
 
     addPad( name, value, callback, options = {} ) {
 
-        let widget = this._createWidget( name, Widget.PAD, options );
+        let widget = this._createWidget( Widget.PAD, name, null, options );
 
         widget.onGetValue = () => {
             return thumb.value.xy;
@@ -8229,11 +8176,12 @@ class Panel {
 
     addProgress( name, value, options = {} ) {
 
-        let widget = this._createWidget( name, Widget.PROGRESS, options );
+        let widget = this._createWidget( Widget.PROGRESS, name, value, options );
 
         widget.onGetValue = () => {
             return progress.value;
         };
+
         widget.onSetValue = ( newValue, skipCallback ) => {
             element.querySelector("meter").value = newValue;
             _updateColor();
@@ -8365,7 +8313,7 @@ class Panel {
 
     addFile( name, callback, options = { } ) {
 
-        let widget = this._createWidget( name, Widget.FILE, options );
+        let widget = this._createWidget( Widget.FILE, name, null, options );
         let element = widget.domEl;
 
         let local = options.local ?? true;
@@ -8526,7 +8474,7 @@ class Panel {
 
         var element = document.createElement('div');
         element.className = "lexseparator";
-        let widget = new Widget( null, Widget.SEPARATOR );
+        let widget = new Widget( Widget.SEPARATOR );
         widget.domEl = element;
 
         if( this.current_branch )
@@ -8648,7 +8596,7 @@ class Panel {
 
     addCounter( name, value, callback, options = { } ) {
 
-        let widget = this._createWidget( name, Widget.COUNTER, options );
+        let widget = this._createWidget( Widget.COUNTER, name, value, options );
 
         widget.onGetValue = () => {
             return counterText.count;
@@ -8724,6 +8672,7 @@ class Panel {
      * @param {String} name Widget name
      * @param {Number} data Table data
      * @param {*} options:
+     * hideName: Don't use name as label [false]
      * head: Table headers (each of the headers per column)
      * body: Table body (data per row for each column)
      * rowActions: Allow to add actions per row
@@ -8738,7 +8687,7 @@ class Panel {
             throw( "Data is needed to create a table!" );
         }
 
-        let widget = this._createWidget( name, Widget.TABLE, options );
+        let widget = this._createWidget( Widget.TABLE, name, null, options );
 
         widget.onGetValue = () => {
 
@@ -8936,7 +8885,8 @@ class Panel {
 
         widget.refreshTable();
 
-        if( !widget.name )
+        const useNameAsLabel = !( options.hideName ?? false );
+        if( !useNameAsLabel )
         {
             element.className += " noname";
             container.style.width = "100%";
