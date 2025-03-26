@@ -2,6 +2,7 @@
 
 ## dev
 
+Support `options.header` and `options.footer` for custom sidebar elements.
 Added `extraClass` parameter for `LX.makeIcon`.
 Fixed Menubar.getButton.
 Fixed some CSS icon alignment issues.

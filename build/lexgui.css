@@ -3195,7 +3195,9 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     display: flex;
     border-radius: 8px;
     padding: 8px;
+    font-size: var(--global-font-size);
     cursor: pointer;
+    align-items: center;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -3224,13 +3226,16 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexsidebarfooter div, .lexsidebar .lexsidebarheader div {
-    width: calc(100% - 88px);
     height: 100%;
+    transition: width 0.3s cubic-bezier(0,0,.2,1), padding-inline 0.3s cubic-bezier(0,0,.2,1);
+}
+
+.lexsidebar .lexsidebarfooter div.infodefault, .lexsidebar .lexsidebarheader div.infodefault {
+    width: calc(100% - 88px);
     padding-inline: 12px;
     justify-content: center;
     display: flex;
     flex-direction: column;
-    transition: width 0.3s cubic-bezier(0,0,.2,1), padding-inline 0.3s cubic-bezier(0,0,.2,1);
 }
 
 .lexsidebar .lexsidebarfooter div span, .lexsidebar .lexsidebarheader div span {
@@ -3250,6 +3255,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     width: 32px;
     margin-left: 0px;
     align-content: center;
+}
+
+.lexsidebar .lexsidebarheader a.toggler {
+    margin-left: auto;
 }
 
 .lexsidebar .lexsidebarfooter svg, .lexsidebar .lexsidebarheader svg {

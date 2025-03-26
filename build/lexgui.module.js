@@ -3292,11 +3292,13 @@ class SideBar {
      * headerIcon: Icon to be shown as avatar (from LX.ICONS)
      * headerTitle: Header title
      * headerSubtitle: Header subtitle
+     * header: HTMLElement to add a custom header
      * skipFooter: Do not use sidebar footer [false]
      * footerImg: Image to be shown as avatar
      * footerIcon: Icon to be shown as avatar (from LX.ICONS)
      * footerTitle: Footer title
      * footerSubtitle: Footer subtitle
+     * footer: HTMLElement to add a custom footer
      * collapsable: Sidebar can toggle between collapsed/expanded [true]
      * collapseToIcons: When Sidebar collapses, icons remains visible [true]
      * onHeaderPressed: Function to call when header is pressed
@@ -3328,62 +3330,17 @@ class SideBar {
 
         }, 10 );
 
-        // This account for header, footer and all inner paddings
-        let contentOffset = 32;
-
         // Header
         if( !( options.skipHeader ?? false ) )
         {
-            this.header = document.createElement( 'div' );
+            this.header = options.header ?? this._generateDefaultHeader( options );
+            console.assert( this.header.constructor === HTMLDivElement, "Use an HTMLDivElement to build your custom header" );
             this.header.className = "lexsidebarheader";
             this.root.appendChild( this.header );
 
-            this.header.addEventListener( "click", e => {
-                if( this.collapsed )
-                {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    this.toggleCollapsed();
-                }
-                else if( options.onHeaderPressed )
-                {
-                    options.onHeaderPressed( e );
-                }
-            } );
-
-            const avatar = document.createElement( 'span' );
-            avatar.className = "lexavatar";
-            this.header.appendChild( avatar );
-
-            if( options.headerImage )
-            {
-                const avatarImg = document.createElement( 'img' );
-                avatarImg.src = options.headerImage;
-                avatar.appendChild( avatarImg );
-            }
-            else if( options.headerIcon )
-            {
-                const avatarIcon = LX.makeIcon( options.headerIcon );
-                avatar.appendChild( avatarIcon );
-            }
-
-            // Info
-            {
-                const info = document.createElement( 'div' );
-                this.header.appendChild( info );
-
-                const infoText = document.createElement( 'span' );
-                infoText.innerHTML = options.headerTitle ?? "";
-                info.appendChild( infoText );
-
-                const infoSubtext = document.createElement( 'span' );
-                infoSubtext.innerHTML = options.headerSubtitle ?? "";
-                info.appendChild( infoSubtext );
-            }
-
             if( this.collapsable )
             {
-                const icon = LX.makeIcon( "Sidebar", "Toggle Sidebar" );
+                const icon = LX.makeIcon( "Sidebar", "Toggle Sidebar", "toggler" );
                 this.header.appendChild( icon );
 
                 icon.addEventListener( "click", (e) => {
@@ -3392,12 +3349,10 @@ class SideBar {
                     this.toggleCollapsed();
                 } );
             }
-
-            contentOffset += 52;
         }
 
         // Entry filter
-        if( !( options.filter ?? false ) )
+        if( ( options.filter ?? false ) )
         {
             const panel = new Panel();
             panel.addText(null, "", (value, event) => {
@@ -3406,7 +3361,6 @@ class SideBar {
             }, { placeholder: "Search...", icon: "fa-solid fa-magnifying-glass" });
             this.filter = panel.root.childNodes[ 0 ];
             this.root.appendChild( this.filter );
-            contentOffset += 31;
         }
 
         // Content
@@ -3419,59 +3373,123 @@ class SideBar {
         // Footer
         if( !( options.skipFooter ?? false ) )
         {
-            this.footer = document.createElement( 'div' );
+            this.footer = options.footer ?? this._generateDefaultFooter( options );
+            console.assert( this.footer.constructor === HTMLDivElement, "Use an HTMLDivElement to build your custom footer" );
             this.footer.className = "lexsidebarfooter";
             this.root.appendChild( this.footer );
-
-            this.footer.addEventListener( "click", e => {
-                if( options.onFooterPressed )
-                {
-                    options.onFooterPressed( e );
-                }
-            } );
-
-            const avatar = document.createElement( 'span' );
-            avatar.className = "lexavatar";
-            this.footer.appendChild( avatar );
-
-            if( options.footerImage )
-            {
-                const avatarImg = document.createElement( 'img' );
-                avatarImg.src = options.footerImage;
-                avatar.appendChild( avatarImg );
-            }
-            else if( options.footerIcon )
-            {
-                const avatarIcon = LX.makeIcon( options.footerIcon );
-                avatar.appendChild( avatarIcon );
-            }
-
-            // Info
-            {
-                const info = document.createElement( 'div' );
-                this.footer.appendChild( info );
-
-                const infoText = document.createElement( 'span' );
-                infoText.innerHTML = options.footerTitle ?? "";
-                info.appendChild( infoText );
-
-                const infoSubtext = document.createElement( 'span' );
-                infoSubtext.innerHTML = options.footerSubtitle ?? "";
-                info.appendChild( infoSubtext );
-            }
-
-            const icon = LX.makeIcon( "MenuArrows" );
-            this.footer.appendChild( icon );
-
-            contentOffset += 52;
         }
 
         // Set width depending on header/footer
-        this.content.style.height = `calc(100% - ${ contentOffset }px)`;
+        doAsync( () => {
+            // This account for header, footer and all inner paddings
+            const contentOffset = 32 + ( this.header?.offsetHeight ?? 0 ) +
+                ( this.filter?.offsetHeight ?? 0 ) +
+                ( this.footer?.offsetHeight ?? 0 );
+            this.content.style.height = `calc(100% - ${ contentOffset }px)`;
+        }, 10 );
 
         this.items = [ ];
         this.icons = { };
         this.groups = { };
+    }
+
+    _generateDefaultHeader( options ) {
+
+        const header = document.createElement( 'div' );
+
+        header.addEventListener( "click", e => {
+            if( this.collapsed )
+            {
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleCollapsed();
+            }
+            else if( options.onHeaderPressed )
+            {
+                options.onHeaderPressed( e );
+            }
+        } );
+
+        const avatar = document.createElement( 'span' );
+        avatar.className = "lexavatar";
+        header.appendChild( avatar );
+
+        if( options.headerImage )
+        {
+            const avatarImg = document.createElement( 'img' );
+            avatarImg.src = options.headerImage;
+            avatar.appendChild( avatarImg );
+        }
+        else if( options.headerIcon )
+        {
+            const avatarIcon = LX.makeIcon( options.headerIcon );
+            avatar.appendChild( avatarIcon );
+        }
+
+        // Info
+        {
+            const info = document.createElement( 'div' );
+            info.className = "infodefault";
+            header.appendChild( info );
+
+            const infoText = document.createElement( 'span' );
+            infoText.innerHTML = options.headerTitle ?? "";
+            info.appendChild( infoText );
+
+            const infoSubtext = document.createElement( 'span' );
+            infoSubtext.innerHTML = options.headerSubtitle ?? "";
+            info.appendChild( infoSubtext );
+        }
+
+        return header;
+    }
+
+    _generateDefaultFooter( options ) {
+
+        const footer = document.createElement( 'div' );
+
+        footer.addEventListener( "click", e => {
+            if( options.onFooterPressed )
+            {
+                options.onFooterPressed( e );
+            }
+        } );
+
+        const avatar = document.createElement( 'span' );
+        avatar.className = "lexavatar";
+        footer.appendChild( avatar );
+
+        if( options.footerImage )
+        {
+            const avatarImg = document.createElement( 'img' );
+            avatarImg.src = options.footerImage;
+            avatar.appendChild( avatarImg );
+        }
+        else if( options.footerIcon )
+        {
+            const avatarIcon = LX.makeIcon( options.footerIcon );
+            avatar.appendChild( avatarIcon );
+        }
+
+        // Info
+        {
+            const info = document.createElement( 'div' );
+            info.className = "infodefault";
+            footer.appendChild( info );
+
+            const infoText = document.createElement( 'span' );
+            infoText.innerHTML = options.footerTitle ?? "";
+            info.appendChild( infoText );
+
+            const infoSubtext = document.createElement( 'span' );
+            infoSubtext.innerHTML = options.footerSubtitle ?? "";
+            info.appendChild( infoSubtext );
+        }
+
+        const icon = LX.makeIcon( "MenuArrows" );
+        footer.appendChild( icon );
+
+        return footer;
     }
 
     /**

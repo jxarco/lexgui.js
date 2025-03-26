@@ -179,6 +179,15 @@ var [ left, right ] = area.split({ sizes:["70%","30%"], minimizable: true });
 const logParams = (entryName, value, event) => { console.log(entryName, value, event) };
 const actionLogParams = (entryName, event) => { console.log("Action called!", entryName, event) };
 
+const customFooter = document.createElement( 'div' );
+
+const fpanel = new LX.Panel();
+fpanel.addText(null, "", (value, event) => {}, { placeholder: "Search..." });
+customFooter.appendChild( fpanel.root.childNodes[ 0 ] );
+
+const customHeader = document.createElement('div');
+customHeader.innerHTML = "Custom simple header";
+
 const sidebar = left.addSidebar( m => {
     m.group( "Projects", { icon: "fa fa-plus", callback: (groupName, event) => { console.log(groupName) }} );
     m.add( "Getting Started", { icon: "fa fa-cube", callback: logParams } );
@@ -203,13 +212,16 @@ const sidebar = left.addSidebar( m => {
     m.add( "Personal ", { callback: logParams, type: "checkbox" } );
     m.add( "Work", { callback: logParams, type: "checkbox", value: true } );
     m.add( "Family", { callback: logParams, type: "checkbox" } );
-}, { /* collapseToIcons: false, skipFooter: true, skipHeader: true,*/ 
-    headerTitle: "jxarco",
-    headerSubtitle: "alexroco.30@gmail.com",
+}, { /* collapseToIcons: false, skipFooter: true, skipHeader: true,*/
+    filter: true,
+    headerTitle: "LexGUI",
+    headerSubtitle: LX.version,
     headerImage: "https://raw.githubusercontent.com/jxarco/lexgui.js/refs/heads/master/images/icon.png",
+    // header: customHeader,
     footerTitle: "jxarco",
     footerSubtitle: "alexroco.30@gmail.com",
     footerImage: "https://avatars.githubusercontent.com/u/25059187?s=400&u=ad8907b748c13e4e1a7cdd3882826acb6a2928b5&v=4",
+    // footer: customFooter,
     onHeaderPressed: (e) => { console.log( "onHeaderPressed" ) }, 
     onFooterPressed: (e) => { console.log( "onFooterPressed" ) }
 });
