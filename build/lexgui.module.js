@@ -3269,15 +3269,15 @@ class SideBar {
      * skipHeader: Do not use sidebar header [false]
      * headerImg: Image to be shown as avatar
      * headerIcon: Icon to be shown as avatar (from LX.ICONS)
-     * headerTitle
-     * headerSubtitle
+     * headerTitle: Header title
+     * headerSubtitle: Header subtitle
      * skipFooter: Do not use sidebar footer [false]
      * footerImg: Image to be shown as avatar
      * footerIcon: Icon to be shown as avatar (from LX.ICONS)
-     * footerTitle
-     * footerSubtitle
+     * footerTitle: Footer title
+     * footerSubtitle: Footer subtitle
      * collapsable: Sidebar can toggle between collapsed/expanded [true]
-     * collapseToIcons: When Sidebar collapses, icons remains visible  [true]
+     * collapseToIcons: When Sidebar collapses, icons remains visible [true]
      * onHeaderPressed: Function to call when header is pressed
      * onFooterPressed: Function to call when footer is pressed
      */
