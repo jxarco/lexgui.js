@@ -439,7 +439,7 @@ function makeCollapsible( domEl, content, parent, options = { } )
     actionIcon.dataset[ "collapsed" ] = collapsed;
     actionIcon.style.marginLeft = "auto";
 
-    actionIcon.addEventListener( "click", function(e) {
+    actionIcon.addEventListener( "click", function( e ) {
         e.preventDefault();
         e.stopPropagation();
         if( this.dataset[ "collapsed" ] )
@@ -787,17 +787,17 @@ function _createCommandbar( root )
         searchItem.entry_name = t;
         searchItem.callback = c;
         searchItem.item = i;
-        searchItem.addEventListener('click', function(e) {
+        searchItem.addEventListener('click', function( e ) {
             this.callback.call( window, this.entry_name );
             LX.setCommandbarState( false );
             _resetBar( true );
         });
-        searchItem.addEventListener('mouseenter', function(e) {
+        searchItem.addEventListener('mouseenter', function( e ) {
             commandbar.querySelectorAll(".hovered").forEach(e => e.classList.remove('hovered'));
             this.classList.add('hovered');
             hoverElId = allItems.indexOf( this );
         });
-        searchItem.addEventListener('mouseleave', function(e) {
+        searchItem.addEventListener('mouseleave', function( e ) {
             this.classList.remove('hovered');
         });
         allItems.push( searchItem );
@@ -878,7 +878,7 @@ function _createCommandbar( root )
         }
     }
 
-    input.addEventListener('input', function(e) {
+    input.addEventListener('input', function( e ) {
         commandbar._addElements( this.value.toLowerCase() );
     });
 
@@ -2379,17 +2379,17 @@ class Tabs {
 
         let that = this;
 
-        container.addEventListener("dragenter", function(e) {
+        container.addEventListener("dragenter", function( e ) {
             e.preventDefault(); // Prevent default action (open as link for some elements)
             this.classList.add("dockingtab");
         });
 
-        container.addEventListener("dragleave", function(e) {
+        container.addEventListener("dragleave", function( e ) {
             e.preventDefault(); // Prevent default action (open as link for some elements)
             this.classList.remove("dockingtab");
         });
 
-        container.addEventListener("drop", function(e) {
+        container.addEventListener("drop", function( e ) {
             e.preventDefault(); // Prevent default action (open as link for some elements)
 
             const tab_id = e.dataTransfer.getData("source");
@@ -3948,10 +3948,12 @@ class Widget {
         Widget.PROGRESS
     ];
 
-    constructor( name, type, options ) {
+    constructor( name, type, value, options ) {
         this.name = name;
         this.type = type;
         this.options = options;
+
+        this._initialValue = value;
     }
 
     value() {
@@ -4049,14 +4051,14 @@ class Widget {
 
 LX.Widget = Widget;
 
-function ADD_CUSTOM_WIDGET( custom_widget_name, options = {} )
+function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
 {
     let custom_idx = simple_guidGenerator();
 
-    Panel.prototype[ 'add' + custom_widget_name ] = function( name, instance, callback ) {
+    Panel.prototype[ 'add' + customWidgetName ] = function( name, instance, callback ) {
 
-        let widget = this.create_widget(name, Widget.CUSTOM, options);
-        widget.customName = custom_widget_name;
+        let widget = this._createWidget( name, Widget.CUSTOM, null, options );
+        widget.customName = customWidgetName;
         widget.customIdx = custom_idx;
         widget.onGetValue = () => {
             return instance;
@@ -4078,8 +4080,10 @@ function ADD_CUSTOM_WIDGET( custom_widget_name, options = {} )
 
         const refresh_widget = () => {
 
-            if(instance)
+            if( instance )
+            {
                 widget.instance = instance = Object.assign(deepCopy(default_instance), instance);
+            }
 
             if(container) container.remove();
             if(custom_widgets) custom_widgets.remove();
@@ -4091,7 +4095,7 @@ function ADD_CUSTOM_WIDGET( custom_widget_name, options = {} )
             this.queue(container);
 
             let buttonName = "<a class='fa-solid " + (options.icon ?? "fa-cube")  + "' style='float:left'></a>";
-            buttonName += custom_widget_name + (!instance ? " [empty]" : "");
+            buttonName += customWidgetName + (!instance ? " [empty]" : "");
             // Add alwayis icon to keep spacing right
             buttonName += "<a class='fa-solid " + (instance ? "fa-bars-staggered" : " ") + " menu' style='float:right; width:5%;'></a>";
 
@@ -4103,7 +4107,7 @@ function ADD_CUSTOM_WIDGET( custom_widget_name, options = {} )
                 else
                 {
                     addContextMenu(null, event, c => {
-                        c.add("New " + custom_widget_name, () => {
+                        c.add("New " + customWidgetName, () => {
                             instance = {};
                             refresh_widget();
                             element.querySelector(".lexcustomitems").toggleAttribute('hidden', false);
@@ -4215,10 +4219,10 @@ class NodeTree {
     _create_item( parent, node, level = 0, selectedId ) {
 
         const that = this;
-        const node_filter_input = this.domEl.querySelector( "#lexnodetree_filter" );
+        const nodeFilterInput = this.domEl.querySelector( "#lexnodetree_filter" );
 
         node.children = node.children ?? [];
-        if( node_filter_input && !node.id.includes( node_filter_input.value ) || (selectedId != undefined) && selectedId != node.id )
+        if( nodeFilterInput && !node.id.includes( nodeFilterInput.value ) || (selectedId != undefined) && selectedId != node.id )
         {
             for( var i = 0; i < node.children.length; ++i )
             {
@@ -4466,7 +4470,7 @@ class NodeTree {
             nameInput.focus();
         }
 
-        nameInput.addEventListener("keyup", function(e){
+        nameInput.addEventListener("keyup", function( e ) {
             if( e.key == "Enter" )
             {
                 this.value = this.value.replace(/\s/g, '_');
@@ -4489,7 +4493,7 @@ class NodeTree {
             }
         });
 
-        nameInput.addEventListener("blur", function(e){
+        nameInput.addEventListener("blur", function( e ) {
             delete node.rename;
             that.refresh();
         });
@@ -4497,7 +4501,7 @@ class NodeTree {
         if( this.options.draggable ?? true )
         {
             // Drag nodes
-            if(parent) // Root doesn't move!
+            if( parent ) // Root doesn't move!
             {
                 item.addEventListener("dragstart", e => {
                     window.__tree_node_dragged = node;
@@ -4564,7 +4568,7 @@ class NodeTree {
         // Show/hide children
         if( isParent )
         {
-            item.querySelector('a.hierarchy').addEventListener("click", function(e) {
+            item.querySelector('a.hierarchy').addEventListener("click", function( e ) {
 
                 handled = true;
                 e.stopImmediatePropagation();
@@ -4607,7 +4611,7 @@ class NodeTree {
             let visibility = document.createElement( 'a' );
             visibility.className = "lexicon fa-solid fa-eye" + ( !node.visible ? "-slash" : "" );
             visibility.title = "Toggle visible";
-            visibility.addEventListener("click", function(e) {
+            visibility.addEventListener("click", function( e ) {
                 e.stopPropagation();
                 node.visible = node.visible === undefined ? false : !node.visible;
                 this.className = "lexicon fa-solid fa-eye" + ( !node.visible ? "-slash" : "" );
@@ -4680,23 +4684,30 @@ class Panel {
      */
 
     constructor( options = {} ) {
+
         var root = document.createElement('div');
         root.className = "lexpanel";
+
         if( options.id )
+        {
             root.id = options.id;
+        }
+
         if( options.className )
+        {
             root.className += " " + options.className;
+        }
 
         root.style.width = options.width || "calc( 100% - 6px )";
         root.style.height = options.height || "100%";
-        Object.assign(root.style, options.style ?? {});
+        Object.assign( root.style, options.style ?? {} );
 
         this._inline_widgets_left = -1;
         this._inline_queued_container = null;
 
         this.root = root;
 
-        this.onevent = (e => {});
+        this.onevent = ( e => {} );
 
         // branches
         this.branch_open = false;
@@ -4763,12 +4774,12 @@ class Panel {
 
         for( let w in this.widgets )
         {
-            if( this.widgets[w].options && this.widgets[w].options.signal )
+            if( this.widgets[ w ].options && this.widgets[ w ].options.signal )
             {
-                const signal = this.widgets[w].options.signal;
+                const signal = this.widgets[ w ].options.signal;
                 for( let i = 0; i < LX.signals[signal].length; i++ )
                 {
-                    if( LX.signals[signal][i] == this.widgets[w] )
+                    if( LX.signals[signal][i] == this.widgets[ w ] )
                     {
                         LX.signals[signal] = [...LX.signals[signal].slice(0, i), ...LX.signals[signal].slice(i+1)];
                     }
@@ -4780,7 +4791,7 @@ class Panel {
         {
             for( let w = 0; w < this.signals.length; w++ )
             {
-                let widget = Object.values(this.signals[w])[0];
+                let widget = Object.values(this.signals[ w ])[0];
                 let signal = widget.options.signal;
                 for( let i = 0; i < LX.signals[signal].length; i++ )
                 {
@@ -4837,27 +4848,37 @@ class Panel {
         // Push all elements single element or Array[element, container]
         for( let item of this._inlineWidgets )
         {
-            const is_pair = item.constructor == Array;
+            const isPair = ( item.constructor == Array );
 
-            if(is_pair)
+            if( isPair )
             {
                 // eg. an array, inline items appended later to
-                if( this._inline_queued_container)
-                    this._inlineContainer.appendChild( item[0] );
+                if( this._inline_queued_container )
+                {
+                    this._inlineContainer.appendChild( item[ 0 ] );
+                }
                 // eg. a dropdown, item is appended to parent, not to inline cont.
                 else
-                    item[1].appendChild(item[0]);
+                {
+                    item[ 1 ].appendChild(item[ 0 ]);
+                }
             }
             else
+            {
                 this._inlineContainer.appendChild( item );
+            }
         }
 
-        if(!this._inline_queued_container)
+        if( !this._inline_queued_container )
         {
-            if( this.current_branch)
+            if( this.current_branch )
+            {
                 this.current_branch.content.appendChild( this._inlineContainer );
+            }
             else
+            {
                 this.root.appendChild( this._inlineContainer );
+            }
         }
         else
         {
@@ -4882,7 +4903,9 @@ class Panel {
     branch( name, options = {} ) {
 
         if( this.branch_open )
+        {
             this.merge();
+        }
 
         // Create new branch
         var branch = new Branch(name, options);
@@ -4893,8 +4916,10 @@ class Panel {
         this.current_branch = branch;
 
         // Append to panel
-        if( this.branches.length == 0)
+        if( this.branches.length == 0 )
+        {
             branch.root.classList.add('first');
+        }
 
         // This is the last!
         this.root.querySelectorAll(".lexbranch.last").forEach( e => { e.classList.remove("last"); } );
@@ -4906,14 +4931,13 @@ class Panel {
         // Add widget filter
         if( options.filter )
         {
-            this._addFilter( options.filter, {callback: this._searchWidgets.bind(this, branch.name)} );
+            this._addFilter( options.filter, {callback: this._searchWidgets.bind( this, branch.name )} );
         }
 
         return branch;
     }
 
     merge() {
-
         this.branch_open = false;
         this.current_branch = null;
     }
@@ -4941,9 +4965,9 @@ class Panel {
         Panel Widgets
     */
 
-    create_widget( name, type, options = {} ) {
+    _createWidget( type, name, value, options = {} ) {
 
-        let widget = new Widget( name, type, options );
+        let widget = new Widget( name, type, value, options );
 
         let element = document.createElement( 'div' );
         element.className = "lexwidget";
@@ -4957,6 +4981,11 @@ class Panel {
 
         if( type != Widget.TITLE )
         {
+            if( !name )
+            {
+                console.warn( `No _name_ in ${ widget.typeName() }. Widget will not be registered!` );
+            }
+
             element.style.width = "calc(100% - " + (this.current_branch || type == Widget.FILE ? 10 : 20) + "px)";
 
             if( options.width )
@@ -4998,6 +5027,21 @@ class Panel {
                     e.preventDefault();
                     widget.oncontextmenu( e );
                 });
+
+                if( !( options.skipReset ?? false ) )
+                {
+                    Panel._add_reset_property( domName, function() {
+
+                        this.style.display = "none";
+
+                        widget.set( widget._initialValue );
+
+                        if( options.onResetValue )
+                        {
+                            options.onResetValue();
+                        }
+                    });
+                }
             }
 
             this.widgets[ name ] = widget;
@@ -5095,7 +5139,7 @@ class Panel {
         options.skipWidget = options.skipWidget ?? true;
         options.skipInlineCount = true;
 
-        let widget = this.create_widget(null, Widget.TEXT, options);
+        let widget = this._createWidget( null, Widget.TEXT, null, options );
         let element = widget.domEl;
         element.className += " lexfilter noname";
 
@@ -5107,18 +5151,20 @@ class Panel {
 
         let searchIcon = document.createElement('a');
         searchIcon.className = "fa-solid fa-magnifying-glass";
-        element.appendChild(searchIcon);
-        element.appendChild(input);
+        element.appendChild( searchIcon );
+        element.appendChild( input );
 
         input.addEventListener("input", (e) => {
-            if(options.callback)
-                options.callback(input.value, e);
+            if( options.callback )
+            {
+                options.callback( input.value, e );
+            }
         });
 
         return element;
     }
 
-    _searchWidgets(branchName, value) {
+    _searchWidgets( branchName, value ) {
 
         for( let b of this.branches )
         {
@@ -5255,7 +5301,7 @@ class Panel {
 
     addBlank( height = 8, width ) {
 
-        let widget = this.create_widget(null, Widget.addBlank);
+        let widget = this._createWidget( null, Widget.addBlank );
         widget.domEl.className += " blank";
         widget.domEl.style.height = height + "px";
 
@@ -5280,10 +5326,12 @@ class Panel {
 
         if( !name )
         {
-            throw( "Can't create Title without text!" );
+            throw( "Can't create Title Widget without text!" );
         }
 
-        let widget = this.create_widget( null, Widget.TITLE, options );
+        // Note: Titles are not registered in Panel.widgets by now
+        let widget = this._createWidget( null, Widget.TITLE, null, options );
+
         let element = widget.domEl;
         element.className = "lextitle";
 
@@ -5295,7 +5343,7 @@ class Panel {
             element.appendChild( icon );
         }
 
-        let text = document.createElement( "span");
+        let text = document.createElement( "span" );
         text.innerText = name;
         element.appendChild( text );
 
@@ -5321,6 +5369,7 @@ class Panel {
      * @param {String} value Text value
      * @param {Function} callback Callback function on change
      * @param {*} options:
+     * hideName: Don't use name as label [false]
      * disabled: Make the widget disabled [false]
      * required: Make the input required
      * placeholder: Add input placeholder
@@ -5334,7 +5383,11 @@ class Panel {
 
     addText( name, value, callback, options = {} ) {
 
-        let widget = this.create_widget( name, Widget.TEXT, options );
+        let widget = this._createWidget( name, Widget.TEXT, () => {
+            wValue.value = wValue.iValue;
+            this.style.display = "none";
+            Panel._dispatch_event( wValue, "focusout" );
+        }, options );
 
         widget.onGetValue = () => {
             return wValue.value;
@@ -5352,15 +5405,6 @@ class Panel {
         };
 
         let element = widget.domEl;
-
-        // Add reset functionality
-        if( widget.name && !( options.skipReset ?? false ) ) {
-            Panel._add_reset_property( element.domName, function() {
-                wValue.value = wValue.iValue;
-                this.style.display = "none";
-                Panel._dispatch_event( wValue, "focusout" );
-            } );
-        }
 
         // Add widget value
 
@@ -5447,7 +5491,8 @@ class Panel {
                 container.appendChild( icon );
             }
 
-        } else
+        }
+        else
         {
             wValue = document.createElement( options.url ? 'a' : 'div' );
             if( options.url )
@@ -5467,7 +5512,8 @@ class Panel {
         element.appendChild( container );
 
         // Remove branch padding and margins
-        if( !widget.name )
+        const useNameAsLabel = !( options.hideName ?? false );
+        if( !useNameAsLabel )
         {
             element.className += " noname";
             container.style.width = "100%";
@@ -5481,7 +5527,8 @@ class Panel {
      * @param {String} name Widget name
      * @param {String} value Text Area value
      * @param {Function} callback Callback function on change
-     * @param {*} options:
+     * @param {Object} options:
+     * hideName: Don't use name as label [false]
      * disabled: Make the widget disabled [false]
      * placeholder: Add input placeholder
      * trigger: Choose onchange trigger (default, input) [default]
@@ -5493,7 +5540,10 @@ class Panel {
 
     addTextArea( name, value, callback, options = {} ) {
 
-        let widget = this.create_widget( name, Widget.TEXTAREA, options );
+        let widget = this._createWidget( name, Widget.TEXTAREA, () => {
+            widget.set( wValue.iValue );
+            this.style.display = "none";
+        }, options );
 
         widget.onGetValue = () => {
             return wValue.value;
@@ -5504,15 +5554,6 @@ class Panel {
         };
 
         let element = widget.domEl;
-
-        // Add reset functionality
-        if( widget.name && !( options.skipReset ?? false ) ) {
-            Panel._add_reset_property( element.domName, function() {
-                wValue.value = wValue.iValue;
-                this.style.display = "none";
-                Panel._dispatch_event( wValue, "focusout" );
-            });
-        }
 
         // Add widget value
 
@@ -5536,39 +5577,40 @@ class Panel {
             let btn = element.querySelector( ".lexwidgetname .lexicon" );
             if( btn ) btn.style.display = ( val != wValue.iValue ? "block" : "none" );
             if( !skipCallback ) this._trigger( new IEvent( name, val, event ), callback );
-        }).bind(this);
+        }).bind( this );
 
         const trigger = options.trigger ?? 'default';
 
-        if(trigger == 'default')
+        if( trigger == 'default' )
         {
-            wValue.addEventListener("keyup", function(e){
+            wValue.addEventListener("keyup", function( e ) {
                 if(e.key == 'Enter')
-                    resolve(e.target.value, e);
+                    resolve( e.target.value, e );
             });
-            wValue.addEventListener("focusout", function(e){
-                resolve(e.target.value, e);
+            wValue.addEventListener("focusout", function( e ) {
+                resolve( e.target.value, e );
             });
         }
-        else if(trigger == 'input')
+        else if( trigger == 'input' )
         {
-            wValue.addEventListener("input", function(e){
-                resolve(e.target.value, e);
+            wValue.addEventListener("input", function( e ) {
+                resolve( e.target.value, e );
             });
         }
 
-        if(options.icon)
+        if( options.icon )
         {
             let icon = document.createElement('a');
             icon.className = "inputicon " + options.icon;
             container.appendChild(icon);
         }
 
-        container.appendChild(wValue);
-        element.appendChild(container);
+        container.appendChild( wValue );
+        element.appendChild( container );
 
         // Remove branch padding and margins
-        if( !widget.name )
+        const useNameAsLabel = !( options.hideName ?? false );
+        if( !useNameAsLabel )
         {
             element.className += " noname";
             container.style.width = "100%";
@@ -5589,6 +5631,7 @@ class Panel {
     /**
      * @method addLabel
      * @param {String} value Information string
+     * @param {Object} options Text options
      */
 
     addLabel( value, options = {} ) {
@@ -5603,6 +5646,7 @@ class Panel {
      * @param {String} value Button name
      * @param {Function} callback Callback function on click
      * @param {*} options:
+     * hideName: Don't use name as label [false]
      * disabled: Make the widget disabled [false]
      * icon: Icon class to show as button value
      * img: Path to image to show as button value
@@ -5611,7 +5655,7 @@ class Panel {
 
     addButton( name, value, callback, options = {} ) {
 
-        let widget = this.create_widget( name, Widget.BUTTON, options );
+        let widget = this._createWidget( name, Widget.BUTTON, options );
 
         widget.onGetValue = () => {
             return wValue.innerText;
@@ -5619,8 +5663,8 @@ class Panel {
 
         widget.onSetValue = ( newValue, skipCallback ) => {
             wValue.innerHTML =
-            (options.icon ? "<a class='" + options.icon + "'></a>" :
-            ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + (newValue || "") + "</span>" ));
+            ( options.icon ? "<a class='" + options.icon + "'></a>" :
+            ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + ( newValue || "" ) + "</span>" ) );
         };
 
         let element = widget.domEl;
@@ -5635,22 +5679,22 @@ class Panel {
         }
 
         wValue.innerHTML =
-            (options.icon ? "<a class='" + options.icon + "'></a>" :
-            ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + (value || "") + "</span>" ));
+            ( options.icon ? "<a class='" + options.icon + "'></a>" :
+            ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + ( value || "" ) + "</span>" ) );
 
-        wValue.style.width = "calc( 100% - " + (options.nameWidth ?? LX.DEFAULT_NAME_WIDTH) + ")";
+        wValue.style.width = "calc( 100% - " + ( options.nameWidth ?? LX.DEFAULT_NAME_WIDTH ) + ")";
 
         if( options.disabled )
         {
             wValue.setAttribute( "disabled", true );
         }
 
-        wValue.addEventListener("click", e => {
+        wValue.addEventListener( "click", e => {
             if( options.selectable )
             {
                 if( options.parent )
                 {
-                    options.parent.querySelectorAll(".lexbutton.selected").forEach( e => { if(e == wValue) return; e.classList.remove("selected") } );
+                    options.parent.querySelectorAll(".lexbutton.selected").forEach( e => { if( e == wValue ) return; e.classList.remove( "selected" ) } );
                 }
 
                 wValue.classList.toggle('selected');
@@ -5661,8 +5705,9 @@ class Panel {
 
         element.appendChild( wValue );
 
-        // Remove branch padding and margins
-        if( !widget.name )
+        // Remove branch padding and 
+        const useNameAsLabel = !( options.hideName ?? false ) && !( options.icon || options.img );
+        if( !useNameAsLabel )
         {
             wValue.className += " noname";
             wValue.style.width = "100%";
@@ -5676,6 +5721,7 @@ class Panel {
      * @param {String} name Widget name
      * @param {Array} values Each of the {value, callback, selected, disabled} items
      * @param {*} options:
+     * hideName: Don't use name as label [false]
      * float: Justify content (left, center, right) [center]
      * @legacy selected: Selected item by default by value
      * noSelection: Buttons can be clicked, but they are not selectable
@@ -5684,7 +5730,7 @@ class Panel {
 
     addComboButtons( name, values, options = {} ) {
 
-        let widget = this.create_widget( name, Widget.BUTTON, options );
+        let widget = this._createWidget( name, Widget.BUTTON, options );
         let element = widget.domEl;
 
         let that = this;
@@ -5754,7 +5800,8 @@ class Panel {
         }
 
         // Remove branch padding and margins
-        if( !widget.name )
+        const useNameAsLabel = !( options.hideName ?? false );
+        if( !useNameAsLabel )
         {
             element.className += " noname";
             container.style.width = "100%";
@@ -5770,16 +5817,18 @@ class Panel {
      * @method addCard
      * @param {String} name Card Name
      * @param {*} options:
-     * title: title if any
-     * text: card text if any
-     * src: url of the image if any
+     * text: Card text
+     * link: Card link
+     * title: Card dom title
+     * src: url of the image
      * callback (Function): function to call on click
      */
 
     addCard( name, options = {} ) {
 
         options.hideName = true;
-        let widget = this.create_widget(name, Widget.CARD, options);
+
+        let widget = this._createWidget( name, Widget.CARD, options );
         let element = widget.domEl;
 
         let container = document.createElement('div');
@@ -5802,29 +5851,30 @@ class Panel {
             }
         }
 
-        let name_el = document.createElement('span');
-        name_el.innerText = name;
+        let cardNameDom = document.createElement('span');
+        cardNameDom.innerText = name;
 
-        if(options.link != undefined)
+        if( options.link != undefined )
         {
-            let link_el = document.createElement('a');
-            link_el.innerText = name;
-            link_el.href = options.link;
-            link_el.target = options.target ?? "";
-            name_el.innerText = "";
-            name_el.appendChild(link_el);
+            let cardLinkDom = document.createElement( 'a' );
+            cardLinkDom.innerText = name;
+            cardLinkDom.href = options.link;
+            cardLinkDom.target = options.target ?? "";
+            cardNameDom.innerText = "";
+            cardNameDom.appendChild( cardLinkDom );
         }
 
-        container.appendChild(name_el);
+        container.appendChild( cardNameDom );
 
-        if( options.callback ) {
+        if( options.callback )
+        {
             container.style.cursor = "pointer";
-            container.addEventListener("click", (e) => {
-                this._trigger( new IEvent(name, null, e), options.callback );
+            container.addEventListener("click", ( e ) => {
+                this._trigger( new IEvent( name, null, e ), options.callback );
             });
         }
 
-        element.appendChild(container);
+        element.appendChild( container );
 
         return widget;
     }
@@ -5849,7 +5899,7 @@ class Panel {
         // Always hide name for this one
         options.hideName = true;
 
-        let widget = this.create_widget( name, Widget.FORM, options );
+        let widget = this._createWidget( name, Widget.FORM, options );
 
         widget.onGetValue = () => {
             return container.formData;
@@ -5928,25 +5978,25 @@ class Panel {
 
         element.appendChild( container );
 
-        if( !widget.name || options.hideName )
-        {
-            element.className += " noname";
-            container.style.width = "100%";
-        }
+        // Form does not never use label
+        element.className += " noname";
+        container.style.width = "100%";
 
         return widget;
     }
 
     /**
      * @method addContent
+     * @param {String} name Widget name
      * @param {HTMLElement/String} element
+     * @param {Object} options
      */
 
-    addContent( element, options = {} ) {
+    addContent( name, element, options = {} ) {
 
         if( !element )
         {
-            return;
+            throw( "Empty content!" );
         }
 
         if( element.constructor == String )
@@ -5963,26 +6013,31 @@ class Panel {
             }
         }
 
-        let widget = this.create_widget( null, Widget.CONTENT, options );
+        options.hideName = true;
+
+        let widget = this._createWidget( name, Widget.CONTENT, options );
         widget.domEl.appendChild( element );
+
         return widget;
     }
 
     /**
      * @method addImage
+     * @param {String} name Widget name
      * @param {String} url Image Url
      * @param {*} options
      */
 
-    async addImage( url, options = {} ) {
+    async addImage( name, url, options = {} ) {
 
         if( !url )
         {
-            return;
+            throw( "Empty src/url for Image!" );
         }
 
         options.hideName = true;
-        let widget = this.create_widget( null, Widget.IMAGE, options );
+
+        let widget = this._createWidget( name, Widget.IMAGE, options );
         let element = widget.domEl;
 
         let container = document.createElement( 'div' );
@@ -5998,6 +6053,7 @@ class Panel {
         }
 
         await img.decode();
+
         container.appendChild( img );
         element.appendChild( container );
 
@@ -6020,7 +6076,7 @@ class Panel {
 
     addDropdown( name, values, value, callback, options = {} ) {
 
-        let widget = this.create_widget( name, Widget.DROPDOWN, options );
+        let widget = this._createWidget( name, Widget.DROPDOWN, options );
 
         widget.onGetValue = () => {
             return element.querySelector( "li.selected" ).getAttribute( 'value' );
@@ -6348,13 +6404,8 @@ class Panel {
 
     addCurve( name, values, callback, options = {} ) {
 
-        if( !name )
-        {
-            throw( "Set Widget Name!" );
-        }
-
         let that = this;
-        let widget = this.create_widget( name, Widget.CURVE, options );
+        let widget = this._createWidget( name, Widget.CURVE, options );
 
         widget.onGetValue = () => {
             return JSON.parse(JSON.stringify( curveInstance.element.value ));
@@ -6374,7 +6425,7 @@ class Panel {
         // Add reset functionality
         if( !(options.skipReset ?? false) )
         {
-            Panel._add_reset_property(element.domName, function(e) {
+            Panel._add_reset_property(element.domName, function( e ) {
                 this.style.display = "none";
                 curveInstance.element.value = JSON.parse( JSON.stringify( defaultValues ) );
                 curveInstance.redraw();
@@ -6431,7 +6482,7 @@ class Panel {
     addDial( name, values, callback, options = {} ) {
 
         let that = this;
-        let widget = this.create_widget(name, Widget.DIAL, options);
+        let widget = this._createWidget(name, Widget.DIAL, options);
 
         widget.onGetValue = () => {
             return JSON.parse(JSON.stringify(curveInstance.element.value));
@@ -6451,7 +6502,7 @@ class Panel {
         // Add reset functionality
         if( widget.name && !(options.skipReset ?? false) )
         {
-            Panel._add_reset_property(element.domName, function(e) {
+            Panel._add_reset_property(element.domName, function( e ) {
                 this.style.display = "none";
                 curveInstance.element.value = JSON.parse( JSON.stringify( defaultValues ) );
                 curveInstance.redraw();
@@ -6502,13 +6553,8 @@ class Panel {
 
     addLayers( name, value, callback, options = {} ) {
 
-        if( !name )
-        {
-            throw("Set Widget Name!");
-        }
-
         let that = this;
-        let widget = this.create_widget(name, Widget.LAYERS, options);
+        let widget = this._createWidget(name, Widget.LAYERS, options);
         widget.onGetValue = () => {
             return element.value;
         };
@@ -6523,7 +6569,7 @@ class Panel {
         let element = widget.domEl;
 
         // Add reset functionality
-        Panel._add_reset_property(element.domName, function(e) {
+        Panel._add_reset_property(element.domName, function( e ) {
             this.style.display = "none";
             value = element.value = defaultValue;
             setLayers();
@@ -6599,12 +6645,7 @@ class Panel {
 
     addArray( name, values = [], callback, options = {} ) {
 
-        if( !name )
-        {
-            throw( "Set Widget Name!" );
-        }
-
-        let widget = this.create_widget(name, Widget.ARRAY, options);
+        let widget = this._createWidget(name, Widget.ARRAY, options);
         widget.onGetValue = () => {
             let array_inputs = element.querySelectorAll("input");
             let values = [];
@@ -6726,7 +6767,7 @@ class Panel {
 
     addList( name, values, value, callback, options = {} ) {
 
-        let widget = this.create_widget( name, Widget.LIST, options );
+        let widget = this._createWidget( name, Widget.LIST, options );
 
         widget.onGetValue = () => {
             return value;
@@ -6805,7 +6846,7 @@ class Panel {
 
         value = value.replace( /\s/g, '' ).split( ',' );
         let defaultValue = [].concat( value );
-        let widget = this.create_widget( name, Widget.TAGS, options );
+        let widget = this._createWidget( name, Widget.TAGS, options );
 
         widget.onGetValue = () => {
             return [].concat( value );
@@ -6824,7 +6865,7 @@ class Panel {
         // Add reset functionality
         if(widget.name)
         {
-            Panel._add_reset_property(element.domName, function(e) {
+            Panel._add_reset_property(element.domName, function( e ) {
                 this.style.display = "none";
                 value = [].concat(defaultValue);
                 create_tags();
@@ -6920,7 +6961,10 @@ class Panel {
             throw( "Set Widget Name or at least a label!" );
         }
 
-        let widget = this.create_widget( name, Widget.CHECKBOX, options );
+        let widget = this._createWidget( name, Widget.CHECKBOX, () => {
+            checkbox.checked = !checkbox.checked;
+            Panel._dispatch_event( checkbox, "change" );
+        }, options );
 
         widget.onGetValue = () => {
             return checkbox.checked;
@@ -6935,15 +6979,6 @@ class Panel {
         };
 
         let element = widget.domEl;
-
-        // Add reset functionality
-        if( name )
-        {
-            Panel._add_reset_property( element.domName, function() {
-                checkbox.checked = !checkbox.checked;
-                Panel._dispatch_event( checkbox, "change" );
-            });
-        }
 
         // Add widget value
 
@@ -7014,12 +7049,7 @@ class Panel {
 
     addToggle( name, value, callback, options = {} ) {
 
-        if( !name )
-        {
-            throw( "Set Widget Name!" );
-        }
-
-        let widget = this.create_widget( name, Widget.TOGGLE, options );
+        let widget = this._createWidget( name, Widget.TOGGLE, options );
 
         widget.onGetValue = () => {
             return toggle.checked;
@@ -7109,7 +7139,7 @@ class Panel {
 
     addRadioGroup( label, values, callback, options = {} ) {
 
-        let widget = this.create_widget( null, Widget.RADIO, options );
+        let widget = this._createWidget( null, Widget.RADIO, options );
 
         widget.onGetValue = () => {
             const items = container.querySelectorAll( 'button' );
@@ -7199,12 +7229,7 @@ class Panel {
 
     addColor( name, value, callback, options = {} ) {
 
-        if( !name )
-        {
-            throw( "Set Widget Name!" );
-        }
-
-        let widget = this.create_widget( name, Widget.COLOR, options );
+        let widget = this._createWidget( name, Widget.COLOR, options );
 
         widget.onGetValue = () => {
             return color.value;
@@ -7300,7 +7325,7 @@ class Panel {
 
     addRange( name, value, callback, options = {} ) {
 
-        let widget = this.create_widget( name, Widget.RANGE, options );
+        let widget = this._createWidget( name, Widget.RANGE, options );
 
         widget.onGetValue = () => {
             return +slider.value;
@@ -7433,7 +7458,7 @@ class Panel {
 
     addNumber( name, value, callback, options = {} ) {
 
-        let widget = this.create_widget( name, Widget.NUMBER, options );
+        let widget = this._createWidget( name, Widget.NUMBER, options );
 
         widget.onGetValue = () => {
             return +vecinput.value;
@@ -7691,12 +7716,7 @@ class Panel {
         num_components = clamp( num_components, 2, 4 );
         value = value ?? new Array( num_components ).fill( 0 );
 
-        if( !name )
-        {
-            throw( "Set Widget Name!" );
-        }
-
-        let widget = this.create_widget( name, Widget.VECTOR, options );
+        let widget = this._createWidget( name, Widget.VECTOR, options );
 
         widget.onGetValue = () => {
             let inputs = element.querySelectorAll( "input" );
@@ -7999,7 +8019,7 @@ class Panel {
 
     addSize( name, value, callback, options = {} ) {
 
-        let widget = this.create_widget( name, Widget.SIZE, options );
+        let widget = this._createWidget( name, Widget.SIZE, options );
 
         widget.onGetValue = () => {
             const value = [];
@@ -8114,12 +8134,7 @@ class Panel {
 
     addPad( name, value, callback, options = {} ) {
 
-        if( !name )
-        {
-            throw( "Set Widget Name!" );
-        }
-
-        let widget = this.create_widget( name, Widget.PAD, options );
+        let widget = this._createWidget( name, Widget.PAD, options );
 
         widget.onGetValue = () => {
             return thumb.value.xy;
@@ -8239,12 +8254,7 @@ class Panel {
 
     addProgress( name, value, options = {} ) {
 
-        if( !name )
-        {
-            throw("Set Widget Name!");
-        }
-
-        let widget = this.create_widget( name, Widget.PROGRESS, options );
+        let widget = this._createWidget( name, Widget.PROGRESS, options );
 
         widget.onGetValue = () => {
             return progress.value;
@@ -8380,12 +8390,7 @@ class Panel {
 
     addFile( name, callback, options = { } ) {
 
-        if( !name )
-        {
-            throw( "Set Widget Name!" );
-        }
-
-        let widget = this.create_widget( name, Widget.FILE, options );
+        let widget = this._createWidget( name, Widget.FILE, options );
         let element = widget.domEl;
 
         let local = options.local ?? true;
@@ -8504,20 +8509,20 @@ class Panel {
 
         options.filter = options.filter ?? true;
 
-        let node_filter_input = null;
+        let nodeFilterInput = null;
         if(options.filter)
         {
-            node_filter_input = document.createElement('input');
-            node_filter_input.id = "lexnodetree_filter";
-            node_filter_input.setAttribute("placeholder", "Filter..");
-            node_filter_input.style.width =  "calc( 100% - 17px )";
-            node_filter_input.addEventListener('input', function(){
+            nodeFilterInput = document.createElement('input');
+            nodeFilterInput.id = "lexnodetree_filter";
+            nodeFilterInput.setAttribute("placeholder", "Filter..");
+            nodeFilterInput.style.width =  "calc( 100% - 17px )";
+            nodeFilterInput.addEventListener('input', function(){
                 nodeTree.refresh();
             });
 
             let searchIcon = document.createElement('a');
             searchIcon.className = "lexicon fa-solid fa-magnifying-glass";
-            toolsDiv.appendChild(node_filter_input);
+            toolsDiv.appendChild(nodeFilterInput);
             toolsDiv.appendChild(searchIcon);
         }
 
@@ -8527,7 +8532,7 @@ class Panel {
         // Tree
 
         let list = document.createElement('ul');
-        list.addEventListener("contextmenu", function(e) {
+        list.addEventListener("contextmenu", function( e ) {
             e.preventDefault();
         });
 
@@ -8668,7 +8673,7 @@ class Panel {
 
     addCounter( name, value, callback, options = { } ) {
 
-        let widget = this.create_widget( name, Widget.COUNTER, options );
+        let widget = this._createWidget( name, Widget.COUNTER, options );
 
         widget.onGetValue = () => {
             return counterText.count;
@@ -8758,7 +8763,7 @@ class Panel {
             throw( "Data is needed to create a table!" );
         }
 
-        let widget = this.create_widget( name, Widget.TABLE, options );
+        let widget = this._createWidget( name, Widget.TABLE, options );
 
         widget.onGetValue = () => {
 
@@ -9341,7 +9346,7 @@ class Dialog {
             titleDiv.innerHTML = title;
             titleDiv.setAttribute('draggable', false);
 
-            titleDiv.oncontextmenu = function(e) {
+            titleDiv.oncontextmenu = function( e ) {
                 e.preventDefault();
                 e.stopPropagation();
 
@@ -11178,7 +11183,7 @@ class AssetView {
                 itemEl.appendChild(info);
             }
 
-            itemEl.addEventListener('click', function(e) {
+            itemEl.addEventListener('click', function( e ) {
                 e.stopImmediatePropagation();
                 e.stopPropagation();
 
@@ -11215,7 +11220,7 @@ class AssetView {
 
             if( that.contextMenu )
             {
-                itemEl.addEventListener('contextmenu', function(e) {
+                itemEl.addEventListener('contextmenu', function( e ) {
                     e.preventDefault();
 
                     const multiple = that.content.querySelectorAll('.selected').length;
@@ -11240,7 +11245,7 @@ class AssetView {
                 });
             }
 
-            itemEl.addEventListener("dragstart", function(e) {
+            itemEl.addEventListener("dragstart", function( e ) {
                 e.preventDefault();
             }, false );
 
@@ -11637,7 +11642,7 @@ Object.assign(LX, {
             script.src = url[i] + ( version ? "?version=" + version : "" );
             script.original_src = url[i];
             script.async = false;
-            script.onload = function(e) {
+            script.onload = function( e ) {
                 total--;
                 loaded_scripts.push(this);
                 if(total)
