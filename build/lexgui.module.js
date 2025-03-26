@@ -2685,6 +2685,21 @@ class Menubar {
         this.shorts = { };
     }
 
+    _resetMenubar() {
+
+        // Menu entries are in the menubar..
+        this.root.querySelectorAll(".lexmenuentry").forEach( _entry => {
+            _entry.classList.remove( 'selected' );
+            _entry.built = false;
+        } );
+
+        // Menuboxes are in the root area!
+        LX.root.querySelectorAll(".lexmenubox").forEach(e => e.remove());
+
+        // Next time we need to click again
+        this.focused = false;
+    }
+
     _createSubmenu( o, k, c, d ) {
 
         let menuElement = document.createElement('div');
@@ -2774,7 +2789,7 @@ class Menubar {
                     if( f )
                     {
                         f.call( this, subitem.checked, subkey, subentry );
-                        _resetMenubar();
+                        this._resetMenubar();
                     }
                     e.stopPropagation();
                     e.stopImmediatePropagation();
@@ -2811,7 +2826,7 @@ class Menubar {
                 if( f )
                 {
                     f.call( this, checkboxInput ? subitem.checked : subkey, checkboxInput ? subkey : subentry );
-                    _resetMenubar();
+                    this._resetMenubar();
                 }
                 e.stopPropagation();
                 e.stopImmediatePropagation();
@@ -2962,20 +2977,8 @@ class Menubar {
                 }
             }
 
-            const _resetMenubar = function() {
-                // Menu entries are in the menubar..
-                that.root.querySelectorAll(".lexmenuentry").forEach( _entry => {
-                    _entry.classList.remove( 'selected' );
-                    _entry.built = false;
-                } );
-                // Menuboxes are in the root area!
-                LX.root.querySelectorAll(".lexmenubox").forEach(e => e.remove());
-                // Next time we need to click again
-                that.focused = false;
-            };
-
             const _showEntry = () => {
-                _resetMenubar();
+                this._resetMenubar();
                 entry.classList.add( "selected" );
                 entry.built = true;
                 this._createSubmenu( item, key, entry, -1 );
@@ -3009,7 +3012,7 @@ class Menubar {
                     return;
                 }
 
-                _resetMenubar();
+                this._resetMenubar();
             });
         }
     }
