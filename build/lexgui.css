@@ -804,6 +804,11 @@ body.noevents * {
     transition: opacity 0.2s;
 }
 
+/* Suppose any child will be a div.. */
+.lexdialog.pocket .lexdialogcontent:not(:has(div)) {
+    padding: 0px;
+}
+
 .lexdialog.pocket.minimized .lexdialogtitle {
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
@@ -3207,7 +3212,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexavatar {
-    background-color: light-dark(#fcfcfc, #0b0b0b);
+    background-color: var(--global-intense-background);
+}
+
+.lexsidebar .lexavatar:has(svg) {
+    border: 1px solid #ffffff18;
 }
 
 .lexsidebar .lexsidebarfooter div, .lexsidebar .lexsidebarheader div {
