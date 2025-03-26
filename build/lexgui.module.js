@@ -8,7 +8,7 @@
 */
 
 var LX = {
-    version: "0.4.0",
+    version: "0.4.1",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers

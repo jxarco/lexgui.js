@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.4.1 (master)
+
 Widgets:
 - Text: Skip callback if no changes.
 
@@ -14,7 +16,7 @@ Fixed Menubar menus with scroll > 0.
 Removed padding when no PocketDialog content.
 Sidebar docs updated.
 
-## 0.4.0 (master)
+## 0.4.0
 
 Widgets:
 - Support new RadioGroup Widget.
