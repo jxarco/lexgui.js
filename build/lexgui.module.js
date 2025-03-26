@@ -2075,7 +2075,7 @@ class Area {
         }
 
         // Generate DOM elements after adding all entries
-        sidebar._build();
+        sidebar.update();
 
         LX.menubars.push( sidebar );
 
@@ -3287,8 +3287,6 @@ class SideBar {
         this.root = document.createElement( 'div' );
         this.root.className = "lexsidebar";
 
-        window.sidebar = this;
-
         this.collapsable = options.collapsable ?? true;
         this._collapseWidth = ( options.collapseToIcons ?? true ) ? "58px" : "0px";
         this.collapsed = false;
@@ -3305,7 +3303,7 @@ class SideBar {
                 }
             });
 
-        }, 50 );
+        }, 10 );
 
         // This account for header, footer and all inner paddings
         let contentOffset = 32;
@@ -3466,7 +3464,7 @@ class SideBar {
             this.root.parentElement.style.width = this.root.parentElement.ogWidth;
         }
 
-        if( this.resizeObserver )
+        if( !this.resizeObserver )
         {
             throw( "Wait until ResizeObserver has been created!" );
         }
@@ -3587,7 +3585,9 @@ class SideBar {
         entry.domEl.click();
     }
 
-    _build() {
+    update() {
+
+        this.content.innerHTML = "";
 
         for( let item of this.items )
         {

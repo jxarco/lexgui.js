@@ -3207,7 +3207,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexavatar {
-    background-color: #000;
+    background-color: light-dark(#fcfcfc, #0b0b0b);
 }
 
 .lexsidebar .lexsidebarfooter div, .lexsidebar .lexsidebarheader div {
