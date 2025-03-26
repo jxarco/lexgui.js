@@ -3527,7 +3527,6 @@ class SideBar {
         const lastPath = tokens[tokens.length - 1];
         this.icons[ lastPath ] = options.icon;
 
-
         let idx = 0;
 
         const _insertEntry = ( token, list ) => {
@@ -3587,7 +3586,14 @@ class SideBar {
 
     update() {
 
+        // Reset first
+
         this.content.innerHTML = "";
+
+        for( let item of this.items )
+        {
+            delete item.dom;
+        }
 
         for( let item of this.items )
         {
