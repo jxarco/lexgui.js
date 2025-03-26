@@ -402,6 +402,13 @@ body.noevents * {
     gap: 0.25rem;
     height: fit-content;
     margin: auto 0;
+    max-width: 512px;
+}
+
+.lextoast .lextoastcontent div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .lextoast .lextoastcontent .title {

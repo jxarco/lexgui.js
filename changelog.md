@@ -2,6 +2,9 @@
 
 ## dev
 
+Set overflow ellipsis on large toast texts.
+Fixed Menubar menus with scroll > 0.
+
 ## 0.4.0 (master)
 
 Widgets:
