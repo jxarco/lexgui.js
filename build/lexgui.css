@@ -328,6 +328,7 @@ body.noevents * {
     cursor: pointer;
     line-height: inherit !important;
     color: var(--global-text-secondary);
+    align-content: center;
 }
 
 .lexicon:hover {
@@ -336,6 +337,7 @@ body.noevents * {
 
 .lexicon:active {
     color: var(--global-text-secondary);
+    transform: scale(0.99);
 }
 
 .lexicon:hover svg, .lexicon:hover svg path {
@@ -942,6 +944,7 @@ body.noevents * {
     background-color: var(--global-color-secondary);
     text-shadow: 0px 1px 6px #5554547c;
     padding: 10px;
+    display: flex;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
     cursor: pointer;
@@ -995,6 +998,8 @@ body.noevents * {
 
 .lexbranch .branchicon {
     font-size: var(--global-font-size);
+    margin-right: 12px;
+    align-content: center;
 }
 
 .lexbranch.first .lexbranchtitle {
@@ -1008,8 +1013,9 @@ body.noevents * {
 .lexbranch .switch-branch-button {
     float: right;
     font-size: var(--global-font-size-sm);
-    margin: 8px 6px -4px 2px;
-    transition: 0.1s;
+    transition: transform 0.1s ease-out;
+    margin-left: auto;
+    align-content: center;
 }
 
 .lexbranch.closed .switch-branch-button {
@@ -1661,14 +1667,9 @@ body.noevents * {
 }
 
 .lexcheckboxcont {
-    font-weight: bold;
     display: inline-flex;
     gap: 8px;
     margin: 0 auto;
-}
-
-.lexcheckboxcont .checkboxtext {
-    font-weight: bold;
 }
 
 .lexcheckboxsubmenu {
@@ -2385,6 +2386,9 @@ input[type=number] {
 .lextree ul {
     padding-bottom: 16px;
     padding-inline-start: 0px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
 .lextree input {
@@ -2401,8 +2405,8 @@ input[type=number] {
 .lextree .lextreeitem {
     list-style-type: none;
     align-items: center;
-    margin-bottom: 3px;
     line-height: 25px;
+    display: flex;
     cursor: pointer;
     outline: none;
     border-radius: 6px;
@@ -2410,6 +2414,13 @@ input[type=number] {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+.lextree .lextreeitem div {
+    display: flex;
+    gap: 0.25rem;
+    margin-left: auto;
+    margin-right: 8px;
 }
 
 .lextree .lextreeitem img {
@@ -2424,6 +2435,7 @@ input[type=number] {
     width: 12px;
     height: 12px;
     margin-right: 6px;
+    font-size: var(--global-font-size-sm);
 }
 
 .lextree .lextreeitem.draggingover {
@@ -2440,35 +2452,13 @@ input[type=number] {
     background: light-dark(var(--global-selected-light), var(--global-selected));
 }
 
-.lextree .lextreeitem a {
-    margin-right: 6px;
-    margin-top: 4px;
-    font-size: var(--global-font-size-sm);
-}
-
 .lextree .lextreeitem a.hierarchy {
     margin-right: 6px;
     margin-top: 4px;
 }
 
-.lextree .lextreeitem a:hover {
-    color: var(--global-text-primary);
-}
-
-.lextree .lextreeitem a:active {
-    color: var(--global-button-color);
-    margin-top: 6px;
-}
-
-.lextree .lextreeitem.parent a {
-    font-size: var(--global-font-size-xs);
-}
-
-.lextree .lextreeitem .itemicon {
-    font-size: var(--global-font-size-sm) !important;
-    float: right;
-    margin-top: 7px;
-    margin-right: 8px;
+.lextree .lextreeitem .lexicon {
+    font-size: var(--global-font-size-sm);
 }
 
 .lextree .lextreeitem .itemicon:hover {

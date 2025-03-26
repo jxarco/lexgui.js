@@ -2,6 +2,8 @@
 
 ## dev
 
+Fixed some CSS icon alignment issues.
+
 ## 0.4.1 (master)
 
 Widgets:

@@ -4421,7 +4421,7 @@ class NodeTree {
         const nameInput = document.createElement( "input" );
         nameInput.toggleAttribute( "hidden", !node.rename );
         nameInput.value = node.id;
-        item.appendChild(nameInput);
+        item.appendChild( nameInput );
 
         if( node.rename )
         {
@@ -4545,40 +4545,44 @@ class NodeTree {
 
         // Add button icons
 
+        const inputContainer = document.createElement( "div" );
+        item.appendChild( inputContainer );
+
+        if( node.actions )
+        {
+            for( let i = 0; i < node.actions.length; ++i )
+            {
+                let a = node.actions[ i ];
+                let actionEl = document.createElement('a');
+                actionEl.className = "lexicon " + a.icon;
+                actionEl.title = a.name;
+                actionEl.addEventListener("click", function( e ) {
+                    a.callback( node, actionEl );
+                    e.stopPropagation();
+                });
+
+                inputContainer.appendChild( actionEl );
+            }
+        }
+
         if( !node.skipVisibility ?? false )
         {
-            let visibility = document.createElement('a');
-            visibility.className = "itemicon fa-solid fa-eye" + (!node.visible ? "-slash" : "");
+            let visibility = document.createElement( 'a' );
+            visibility.className = "lexicon fa-solid fa-eye" + ( !node.visible ? "-slash" : "" );
             visibility.title = "Toggle visible";
             visibility.addEventListener("click", function(e) {
                 e.stopPropagation();
                 node.visible = node.visible === undefined ? false : !node.visible;
-                this.className = "itemicon fa-solid fa-eye" + (!node.visible ? "-slash" : "");
+                this.className = "lexicon fa-solid fa-eye" + ( !node.visible ? "-slash" : "" );
                 // Trigger visibility event
                 if( that.onevent )
                 {
-                    const event = new TreeEvent(TreeEvent.NODE_VISIBILITY, node, node.visible);
+                    const event = new TreeEvent( TreeEvent.NODE_VISIBILITY, node, node.visible );
                     that.onevent( event );
                 }
             });
 
-            item.appendChild(visibility);
-        }
-
-        if( node.actions )
-        {
-            for( var i = 0; i < node.actions.length; ++i )
-            {
-                let a = node.actions[i];
-                var actionEl = document.createElement('a');
-                actionEl.className = "itemicon " + a.icon;
-                actionEl.title = a.name;
-                actionEl.addEventListener("click", function(e) {
-                    a.callback(node, actionEl);
-                    e.stopPropagation();
-                });
-                item.appendChild(actionEl);
-            }
+            inputContainer.appendChild( visibility );
         }
 
         if( selectedId != undefined && node.id == selectedId )
@@ -8962,12 +8966,14 @@ class Branch {
         var title = document.createElement( 'div' );
         title.className = "lexbranchtitle";
 
-        title.innerHTML = "<a class='fa-solid fa-angle-up switch-branch-button'></a>";
         if( options.icon )
         {
-            title.innerHTML += "<a class='branchicon " + options.icon + "' style='margin-right: 8px; margin-bottom: -2px;'>";
+            title.innerHTML = "<a class='branchicon " + options.icon + "'>";
         }
-        title.innerHTML += name || "Branch";
+
+        title.innerHTML += ( name || "Branch" );
+
+        title.innerHTML += "<a class='fa-solid fa-angle-up switch-branch-button'></a>";
 
         root.appendChild( title );
 
