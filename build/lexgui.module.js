@@ -3290,7 +3290,7 @@ class SideBar {
         window.sidebar = this;
 
         this.collapsable = options.collapsable ?? true;
-        this.collapseWidth = ( options.collapseToIcons ?? true ) ? "58px" : "0px";
+        this._collapseWidth = ( options.collapseToIcons ?? true ) ? "58px" : "0px";
         this.collapsed = false;
 
         doAsync( () => {
@@ -3456,7 +3456,7 @@ class SideBar {
         if( this.collapsed )
         {
             this.root.classList.add( "collapsing" );
-            this.root.parentElement.style.width = this.collapseWidth;
+            this.root.parentElement.style.width = this._collapseWidth;
         }
         else
         {

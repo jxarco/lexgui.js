@@ -13,21 +13,41 @@
 <script type="text/javascript">
 
     MAKE_HEADER( "Sidebar", "h1", "sidebar" );
-    // MAKE_PARAGRAPH( `Areas are the main container for a LexGUI interface. Inside they can contain panels and even other areas.` );
 
     MAKE_HEADER( "Constructor", "h2", "constructor" );
     MAKE_CLASS_CONSTRUCTOR( "Sidebar", [
-        
+        [ "options", "Object" ]
     ] );
 
-    // MAKE_PARAGRAPH( `The possible ${INLINE_CODE(`options`)} are the following:` );
-    // MAKE_CODE_BULLET_LIST( [
-    //     ["float", "String", "Align menubar content to a specific side"]
-    // ] );
+    MAKE_PARAGRAPH( `Use ${INLINE_CODE(`Area.addSidebar`)} with the following options to build a Sidebar inside an area:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["skipHeader", "Boolean", "Do not use sidebar header [false]"],
+        ["headerImg", "String", "Image to be shown as avatar"],
+        ["headerIcon", "String", "Icon to be shown as avatar (from LX.ICONS)"],
+        ["headerTitle", "String", "Header title"],
+        ["headerSubtitle", "String", "Header subtitle"],
+        ["skipFooter", "Boolean", "Do not use sidebar footer [false]"],
+        ["footerImg", "String", "Image to be shown as avatar"],
+        ["footerIcon", "String", "Icon to be shown as avatar (from LX.ICONS)"],
+        ["footerTitle", "String", "Footer title"],
+        ["footerSubtitle", "String", "Footer subtitle"],
+        ["collapsable", "Boolean", "Sidebar can toggle between collapsed/expanded [true]"],
+        ["collapseToIcons", "Boolean", "When Sidebar collapses, icons remains visible [true]"],
+        ["onHeaderPressed", "Function", "Function to call when header is pressed"],
+        ["onFooterPressed", "Function", "Function to call when footer is pressed"],
+        ["width", "String", "Width of the sidebar [16rem]"],
+    ] );
 
     MAKE_HEADER( "Properties", "h2", "properties" );
     MAKE_CODE_BULLET_LIST( [
-        [".items", "Array", "List of the sidebar items with the data: name, DOM element and callback"],
+        [".collapsable", "Boolean", "Indicates whether the sidebar can be collapsed"],
+        [".collapsed", "Boolean", "Indicates whether the sidebar is collapsed"],
+        [".content", "HTMLElement", "Scrollable content element"],
+        [".footer", "HTMLElement", "Footer element"],
+        [".groups", "Object", "Map containing group data"],
+        [".header", "HTMLElement", "Header element"],
+        [".icons", "Array", "List of the sidebar items with the data: name, DOM element and callback"],
+        [".items", "Object", "Map containing the icons for each entry"],
         [".root", "HTMLElement", "Container element of the menubar"]
     ] );
     
@@ -35,12 +55,21 @@
 
     MAKE_CLASS_METHOD( ".add", `Creates a Sidebar entry/subentry.`, [
         ["key", "String"],
-        ["options", "Object"],
+        ["options", "Object"]
+    ] );
+
+    MAKE_CLASS_METHOD( ".group", `Start a new group of entries.`, [
+        ["groupName", "String"],
+        ["action", "Object"]
     ] );
 
     MAKE_CLASS_METHOD( ".select", `Select an item of the sidebar.`, [
         ["name", "String"]
     ] );
+
+    MAKE_CLASS_METHOD( ".separator", `Creates a line separator.`, [] );
+
+    MAKE_CLASS_METHOD( ".toggleCollapsed", `Toggles ${ INLINE_CODE( "collapsed" ) } property (collapsed/expanded).`, [] );
 
     MAKE_LINE_BREAK();
     MAKE_LINE_BREAK();
