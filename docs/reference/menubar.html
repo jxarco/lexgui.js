@@ -28,7 +28,11 @@
 
     MAKE_HEADER( "Properties", "h2", "properties" );
     MAKE_CODE_BULLET_LIST( [
-        [".root", "HTMLElement", "Container element of the menubar"]
+    [".collapsable", "Boolean", "Indicates whether the sidebar can be collapsed"],
+        [".icons", "Array", "List of the sidebar items with the data: name, DOM element and callback"],
+        [".items", "Object", "Map containing the icons for each entry"],
+        [".root", "HTMLElement", "Container element of the menubar"],
+        [".shorts", "Object", "Map containing the shortcuts for each entry"]
     ] );
     
     MAKE_HEADER( "Methods", "h2", "methods" );
@@ -41,6 +45,33 @@
     MAKE_CLASS_METHOD( ".addButtons", `Creates a button section inside the menubar.`, [
         ["buttons", "Array"],
         ["options", "Object"],
+    ] );
+
+    MAKE_CLASS_METHOD( ".getButton", `Creates a button section inside the menubar.`, [
+        ["name", "String"]
+    ] );
+
+    MAKE_CLASS_METHOD( ".getItem", `Creates a button section inside the menubar.`, [
+        ["path", "String"]
+    ] );
+
+    MAKE_CLASS_METHOD( ".getSubitem", `Recursive method to find subentries of a menu entry.`, [
+        ["item", "Object"],
+        ["tokens", "Array"],
+    ] );
+
+    MAKE_CLASS_METHOD( ".setButtonIcon", `Creates a main button icon inside the menubar.`, [
+        ["name", "String"],
+        ["icon", "String"],
+        ["callback", "Function"],
+        ["options", "Object"]
+    ] );
+
+    MAKE_CLASS_METHOD( ".setButtonImage", `Creates a main button image icon inside the menubar.`, [
+        ["name", "String"],
+        ["src", "String"],
+        ["callback", "Function"],
+        ["options", "Object"]
     ] );
 
     MAKE_LINE_BREAK();

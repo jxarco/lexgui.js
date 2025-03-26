@@ -2838,6 +2838,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     margin-left: 0px !important;
 }
 
+.lexmenubar .lexmenubutton.main a {
+    font-size: var(--global-font-size-xxl);
+}
+
 .lexmenubar .lexmenubutton.disabled a {
     color: light-dark(var(--global-color-terciary), var(--global-button-color));
     cursor: default;

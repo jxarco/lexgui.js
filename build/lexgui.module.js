@@ -2898,7 +2898,6 @@ class Menubar {
         this.shorts[ lastPath ] = options.short;
 
         let idx = 0;
-        let that = this;
 
         const _insertEntry = ( token, list ) => {
             if( token == undefined )
@@ -3019,15 +3018,15 @@ class Menubar {
 
     /**
      * @method getButton
-     * @param {String} title
+     * @param {String} name
      */
 
-    getButton( title ) {
-        return this.buttons[ title ];
+    getButton( name ) {
+        return this.buttons[ name ];
     }
 
     /**
-     * @method getSubitems: recursive method to find subentries of a menu entry
+     * @method getSubitems
      * @param {Object} item: parent item
      * @param {Array} tokens: split path strings
     */
@@ -3060,6 +3059,7 @@ class Menubar {
      * @param {String} path
     */
     getItem( path ) {
+
         // process path
         const tokens = path.split("/");
 
@@ -3068,100 +3068,118 @@ class Menubar {
 
     /**
      * @method setButtonIcon
-     * @param {String} title
+     * @param {String} name
      * @param {String} icon
+     * @param {Function} callback
+     * @param {Object} options
      */
 
-    setButtonIcon( title, icon, callback, options = {} ) {
+    setButtonIcon( name, icon, callback, options = {} ) {
 
-        const button = this.buttons[ title ];
+        if( !name )
+        {
+            throw( "Set Button Name!" );
+        }
+
+        let button = this.buttons[ name ];
         if( button )
         {
             button.querySelector('a').className = "fa-solid" + " " + icon + " lexicon";
+            return;
+        }
+
+        // Otherwise, create it
+        button = document.createElement('div');
+        const disabled = options.disabled ?? false;
+        button.className = "lexmenubutton main" + (disabled ? " disabled" : "");
+        button.title = name;
+        button.innerHTML = "<a class='" + icon + " lexicon'></a>";
+
+        if( options.float == "right" )
+        {
+            button.right = true;
+        }
+
+        if( this.root.lastChild && this.root.lastChild.right )
+        {
+            this.root.lastChild.before( button );
+        }
+        else if( options.float == "left" )
+        {
+            this.root.prepend( button );
         }
         else
         {
-            let button = document.createElement('div');
-            const disabled = options.disabled ?? false;
-            button.className = "lexmenubutton" + (disabled ? " disabled" : "");
-            button.title = title ?? "";
-            button.innerHTML = "<a class='" + icon + " lexicon' style='font-size:x-large;'></a>";
-            button.style.padding = "5px 10px";
-            button.style.maxHeight = "calc(100% - 10px)";
-            button.style.alignItems = "center";
-
-            if( options.float == "right" )
-            {
-                button.right = true;
-            }
-
-            if( this.root.lastChild && this.root.lastChild.right )
-            {
-                this.root.lastChild.before( button );
-            }
-            else if( options.float == "left" )
-            {
-                this.root.prepend( button );
-            }
-            else
-            {
-                this.root.appendChild( button );
-            }
-
-            const _b = button.querySelector('a');
-            _b.addEventListener("click", (e) => {
-                if(callback && !disabled)
-                    callback.call( this, _b, e );
-            });
+            this.root.appendChild( button );
         }
+
+        const _b = button.querySelector('a');
+        _b.addEventListener("click", (e) => {
+            if( callback && !disabled )
+            {
+                callback.call( this, _b, e );
+            }
+        });
+
+        this.buttons[ name ] = button;
     }
 
     /**
      * @method setButtonImage
-     * @param {String} title
+     * @param {String} name
      * @param {String} src
+     * @param {Function} callback
+     * @param {Object} options
      */
 
-    setButtonImage( title, src, callback, options = {} ) {
-        const button = this.buttons[ title ];
+    setButtonImage( name, src, callback, options = {} ) {
+
+        if( !name )
+        {
+            throw( "Set Button Name!" );
+        }
+
+        let button = this.buttons[ name ];
         if( button )
         {
-            button.querySelector('a').className = "fa-solid" + " " + icon + " lexicon";
+            button.querySelector('img').src = src;
+            return;
+        }
+
+        // Otherwise, create it
+        button = document.createElement('div');
+        const disabled = options.disabled ?? false;
+        button.className = "lexmenubutton" + (disabled ? " disabled" : "");
+        button.title = name;
+        button.innerHTML = "<a><image src='" + src + "' class='lexicon' style='height:32px;'></a>";
+
+        if( options.float == "right" )
+        {
+            button.right = true;
+        }
+
+        if( this.root.lastChild && this.root.lastChild.right )
+        {
+            this.root.lastChild.before( button );
+        }
+        else if( options.float == "left" )
+        {
+            this.root.prepend( button );
         }
         else
         {
-            let button = document.createElement('div');
-            const disabled = options.disabled ?? false;
-            button.className = "lexmenubutton" + (disabled ? " disabled" : "");
-            button.title = title ?? "";
-            button.innerHTML = "<a><image src='" + src + "' class='lexicon' style='height:32px;'></a>";
-            button.style.padding = "5px";
-            button.style.alignItems = "center";
-
-            if( options.float == "right" )
-            {
-                button.right = true;
-            }
-
-            if( this.root.lastChild && this.root.lastChild.right )
-            {
-                this.root.lastChild.before( button );
-            }
-            else if( options.float == "left" )
-            {
-                this.root.prepend( button );
-            }
-            else
-            {
-                this.root.appendChild( button );
-            }
-
-            const _b = button.querySelector('a');
-            _b.addEventListener("click", (e) => {
-                if(callback && !disabled)
-                    callback.call( this, _b, e );
-            });
+            this.root.appendChild( button );
         }
+
+        const _b = button.querySelector('a');
+        _b.addEventListener("click", (e) => {
+            if( callback && !disabled )
+            {
+                callback.call( this, _b, e );
+            }
+        });
+
+        this.buttons[ name ] = button;
     }
 
     /**

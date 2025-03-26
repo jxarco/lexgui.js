@@ -2,6 +2,7 @@
 
 ## dev
 
+Fixed Menubar.getButton.
 Fixed some CSS icon alignment issues.
 
 ## 0.4.1 (master)
