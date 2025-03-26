@@ -7,7 +7,8 @@ Widgets:
 
 Updated NodeGraph Editor sidebar.
 Expose `Sidebar.update` to rebuild from current items.
-Add `force` option to force sidebar collapse status in `Sidebar.toggleCollapsed(force)`.
+Added `force` option to force sidebar collapse status in `Sidebar.toggleCollapsed(force)`.
+Added Sidebar search bar to filter entries.
 Set overflow ellipsis on large toast texts.
 Fixed Menubar menus with scroll > 0.
 Removed padding when no PocketDialog content.

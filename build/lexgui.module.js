@@ -3264,8 +3264,7 @@ class SideBar {
 
     /**
      * @param {Object} options
-     * inset: TODO
-     * filter: TODO
+     * filter: Add search bar to filter entries [false]
      * skipHeader: Do not use sidebar header [false]
      * headerImg: Image to be shown as avatar
      * headerIcon: Icon to be shown as avatar (from LX.ICONS)
@@ -3290,6 +3289,8 @@ class SideBar {
         this.collapsable = options.collapsable ?? true;
         this._collapseWidth = ( options.collapseToIcons ?? true ) ? "58px" : "0px";
         this.collapsed = false;
+
+        this.filterString = "";
 
         doAsync( () => {
 
@@ -3371,6 +3372,19 @@ class SideBar {
             }
 
             contentOffset += 52;
+        }
+
+        // Entry filter
+        if( !( options.filter ?? false ) )
+        {
+            const panel = new Panel();
+            panel.addText(null, "", (value, event) => {
+                this.filterString = value;
+                this.update();
+            }, { placeholder: "Search...", icon: "fa-solid fa-magnifying-glass" });
+            this.filter = panel.root.childNodes[ 0 ];
+            this.root.appendChild( this.filter );
+            contentOffset += 31;
         }
 
         // Content
@@ -3606,6 +3620,12 @@ class SideBar {
             }
 
             let key = Object.keys( item )[ 0 ];
+
+            if( this.filterString.length && !key.toLowerCase().includes( this.filterString.toLowerCase() ) )
+            {
+                continue;
+            }
+
             let pKey = key.replace( /\s/g, '' ).replaceAll( '.', '' );
             let currentGroup = null;
 
@@ -3794,11 +3814,16 @@ class SideBar {
                 this.content.appendChild( subentryContainer );
             }
 
-            for( var i = 0; i < item[ key ].length; ++i )
+            for( let i = 0; i < item[ key ].length; ++i )
             {
                 const subitem = item[ key ][ i ];
                 const suboptions = subitem.options ?? {};
                 const subkey = Object.keys( subitem )[ 0 ];
+
+                if( this.filterString.length && !subkey.toLowerCase().includes( this.filterString.toLowerCase() ) )
+                {
+                    continue;
+                }
 
                 let subentry = document.createElement( 'div' );
                 subentry.innerHTML = `<span>${ subkey }</span>`;

@@ -3018,6 +3018,12 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     margin-bottom: 0.4rem;
 }
 
+.lexsidebar .lextext {
+    transform: translate(0, 0);
+    opacity: 1;
+    transition: transform 0.3s cubic-bezier(0,0,.2,1), opacity 0.1s cubic-bezier(0,0,.2,1), max-height 0.3s cubic-bezier(0,0,.2,1);
+}
+
 .lexsidebar .lexsidebargrouptitle {
     font-size: var(--global-font-size-sm);
     font-weight: 600;
@@ -3042,13 +3048,13 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     transition: transform 0.3s cubic-bezier(0,0,.2,1), opacity 0.1s cubic-bezier(0,0,.2,1), max-height 0.3s cubic-bezier(0,0,.2,1);
 }
 
-.lexsidebar.collapsing .lexsidebargrouptitle * {
+.lexsidebar.collapsing .lexsidebargrouptitle *, .lexsidebar.collapsing .lextext {
     max-height: 0px;
     transform: translate(0, -24px);
     opacity: 0;
 }
 
-.lexsidebar.collapsed .lexsidebargrouptitle * {
+.lexsidebar.collapsed .lexsidebargrouptitle *, .lexsidebar.collapsed .lextext {
     display: none;
 }
 
@@ -3126,6 +3132,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     user-select: none;
     opacity: 0.95;
     border-left: 1px solid #5251514d;
+}
+
+.lexsidebar .lexsidebarsubentrycontainer:not(:has(div)) {
+    margin: 0px;
 }
 
 .lexsidebar.collapsing .lexsidebarsubentrycontainer {
