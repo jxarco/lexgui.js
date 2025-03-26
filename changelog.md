@@ -2,6 +2,7 @@
 
 ## dev
 
+Added `extraClass` parameter for `LX.makeIcon`.
 Fixed Menubar.getButton.
 Fixed some CSS icon alignment issues.
 

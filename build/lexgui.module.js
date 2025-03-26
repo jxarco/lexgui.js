@@ -570,12 +570,13 @@ LX.makeCodeSnippet = makeCodeSnippet;
  * @description Gets an SVG element using one of LX.ICONS
  * @param {String} iconName
  * @param {String} iconTitle
+ * @param {String} extraClass
  */
-function makeIcon( iconName, iconTitle )
+function makeIcon( iconName, iconTitle, extraClass = "" )
 {
     const icon = document.createElement( "a" );
     icon.title = iconTitle ?? "";
-    icon.className = "lexicon";
+    icon.className = "lexicon " + extraClass;
     icon.innerHTML = LX.ICONS[ iconName ] ?? "";
     return icon;
 }
