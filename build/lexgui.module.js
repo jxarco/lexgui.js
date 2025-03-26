@@ -20,13 +20,13 @@ LX.MOUSE_LEFT_CLICK     = 0;
 LX.MOUSE_MIDDLE_CLICK   = 1;
 LX.MOUSE_RIGHT_CLICK    = 2;
 
-LX.MOUSE_DOUBLE_CLICK = 2;
-LX.MOUSE_TRIPLE_CLICK = 3;
+LX.MOUSE_DOUBLE_CLICK   = 2;
+LX.MOUSE_TRIPLE_CLICK   = 3;
 
-LX.CURVE_MOVEOUT_CLAMP = 0;
+LX.CURVE_MOVEOUT_CLAMP  = 0;
 LX.CURVE_MOVEOUT_DELETE = 1;
 
-LX.DRAGGABLE_Z_INDEX = 101;
+LX.DRAGGABLE_Z_INDEX    = 101;
 
 function clamp( num, min, max ) { return Math.min( Math.max( num, min ), max ); }
 function round( number, precision ) { return precision == 0 ? Math.floor( number ) : +(( number ).toFixed( precision ?? 2 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' )); }
@@ -926,7 +926,19 @@ function init( options = { } )
         this.container = document.getElementById( options.container );
     }
 
-    document.documentElement.setAttribute( "data-strictVP", ( options.strictViewport ?? true ) ? "true" : "false" );
+    this.usingStrictViewport = options.strictViewport ?? true;
+    document.documentElement.setAttribute( "data-strictVP", ( this.usingStrictViewport ) ? "true" : "false" );
+
+    if( !this.usingStrictViewport )
+    {
+        document.addEventListener( "scroll", e => {
+            // Get all active menuboxes
+            const mbs = document.body.querySelectorAll( ".lexmenubox" );
+            mbs.forEach( ( mb ) => {
+                mb._updatePosition();
+            } );
+        } );
+    }
 
     this.commandbar = _createCommandbar( this.container );
 
@@ -2673,6 +2685,180 @@ class Menubar {
         this.shorts = { };
     }
 
+    _createSubmenu( o, k, c, d ) {
+
+        let menuElement = document.createElement('div');
+        menuElement.className = "lexmenubox";
+        menuElement.tabIndex = "0";
+        c.currentMenu = menuElement;
+        menuElement.parentEntry = c;
+
+        const isSubMenu = c.classList.contains( "lexmenuboxentry" );
+        if( isSubMenu )
+        {
+            menuElement.dataset[ "submenu" ] = true;
+        }
+
+        menuElement._updatePosition = () => {
+
+            // Remove transitions for this change..
+            const transition = menuElement.style.transition;
+            menuElement.style.transition = "none";
+            flushCss( menuElement );
+
+            doAsync( () => {
+                let rect = c.getBoundingClientRect();
+                rect.x += document.scrollingElement.scrollLeft;
+                rect.y += document.scrollingElement.scrollTop;
+                menuElement.style.left = ( isSubMenu ? ( rect.x + rect.width ) : rect.x ) + "px";
+                menuElement.style.top = ( isSubMenu ? rect.y : ( ( rect.y + rect.height ) ) - 4 ) + "px";
+
+                menuElement.style.transition = transition;
+            } );
+        };
+
+        menuElement._updatePosition();
+
+        doAsync( () => {
+            menuElement.dataset[ "open" ] = true;
+        }, 10 );
+
+        LX.root.appendChild( menuElement );
+
+        for( var i = 0; i < o[ k ].length; ++i )
+        {
+            const subitem = o[ k ][ i ];
+            const subkey = Object.keys( subitem )[ 0 ];
+            const hasSubmenu = subitem[ subkey ].length;
+            const isCheckbox = subitem[ 'type' ] == 'checkbox';
+            let subentry = document.createElement('div');
+            subentry.className = "lexmenuboxentry";
+            subentry.className += (i == o[k].length - 1 ? " last" : "") + ( subitem.disabled ? " disabled" : "" );
+
+            if( subkey == '' )
+            {
+                subentry.className = " lexseparator";
+            }
+            else
+            {
+                subentry.id = subkey;
+                let subentrycont = document.createElement('div');
+                subentrycont.innerHTML = "";
+                subentrycont.classList = "lexmenuboxentrycontainer";
+                subentry.appendChild(subentrycont);
+                const icon = this.icons[ subkey ];
+                if( isCheckbox )
+                {
+                    subentrycont.innerHTML += "<input type='checkbox' >";
+                }
+                else if( icon )
+                {
+                    subentrycont.innerHTML += "<a class='" + icon + " fa-sm'></a>";
+                }
+                else
+                {
+                    subentrycont.innerHTML += "<a class='fa-solid fa-sm noicon'></a>";
+                    subentrycont.classList.add( "noicon" );
+
+                }
+                subentrycont.innerHTML += "<div class='lexentryname'>" + subkey + "</div>";
+            }
+
+            let checkboxInput = subentry.querySelector('input');
+            if( checkboxInput )
+            {
+                checkboxInput.checked = subitem.checked ?? false;
+                checkboxInput.addEventListener('change', e => {
+                    subitem.checked = checkboxInput.checked;
+                    const f = subitem[ 'callback' ];
+                    if( f )
+                    {
+                        f.call( this, subitem.checked, subkey, subentry );
+                        _resetMenubar();
+                    }
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                })
+            }
+
+            menuElement.appendChild( subentry );
+
+            // Nothing more for separators
+            if( subkey == '' )
+            {
+                continue;
+            }
+
+            menuElement.addEventListener('keydown', e => {
+                e.preventDefault();
+                let short = this.shorts[ subkey ];
+                if(!short) return;
+                // check if it's a letter or other key
+                short = short.length == 1 ? short.toLowerCase() : short;
+                if( short == e.key )
+                {
+                    subentry.click()
+                }
+            });
+
+            // Add callback
+            subentry.addEventListener("click", e => {
+                if( checkboxInput )
+                {
+                    subitem.checked = !subitem.checked;
+                }
+                const f = subitem[ 'callback' ];
+                if( f )
+                {
+                    f.call( this, checkboxInput ? subitem.checked : subkey, checkboxInput ? subkey : subentry );
+                    _resetMenubar();
+                }
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+            });
+
+            // Add icon if has submenu, else check for shortcut
+            if( !hasSubmenu)
+            {
+                if( this.shorts[ subkey ] )
+                {
+                    let shortEl = document.createElement('div');
+                    shortEl.className = "lexentryshort";
+                    shortEl.innerText = this.shorts[ subkey ];
+                    subentry.appendChild( shortEl );
+                }
+                continue;
+            }
+
+            let submenuIcon = document.createElement('a');
+            submenuIcon.className = "fa-solid fa-angle-right fa-xs";
+            subentry.appendChild( submenuIcon );
+
+            subentry.addEventListener("mouseover", e => {
+                if( subentry.built )
+                {
+                    return;
+                }
+                subentry.built = true;
+                this._createSubmenu( subitem, subkey, subentry, ++d );
+                e.stopPropagation();
+            });
+
+            subentry.addEventListener("mouseleave", e => {
+                if( subentry.currentMenu && ( subentry.currentMenu != e.toElement ) )
+                {
+                    d = -1; // Reset depth
+                    delete subentry.built;
+                    subentry.currentMenu.remove();
+                    delete subentry.currentMenu;
+                }
+            });
+        }
+
+        // Set final width
+        menuElement.style.width = menuElement.offsetWidth + "px";
+    }
+
     /**
      * @method add
      * @param {Object} options:
@@ -2788,164 +2974,11 @@ class Menubar {
                 that.focused = false;
             };
 
-            const create_submenu = function( o, k, c, d ) {
-
-                let menuElement = document.createElement('div');
-                menuElement.className = "lexmenubox";
-                menuElement.tabIndex = "0";
-                c.currentMenu = menuElement;
-                const isSubMenu = c.classList.contains( "lexmenuboxentry" );
-                if( isSubMenu ) menuElement.dataset[ "submenu" ] = true;
-                var rect = c.getBoundingClientRect();
-                menuElement.style.left = ( isSubMenu ? ( rect.x + rect.width ) : rect.left ) + "px";
-                menuElement.style.top = ( isSubMenu ? rect.y : rect.bottom - 4 ) + "px";
-                rect = menuElement.getBoundingClientRect();
-
-                doAsync( () => {
-                    menuElement.dataset[ "open" ] = true;
-                }, 10 );
-
-                LX.root.appendChild( menuElement );
-
-                for( var i = 0; i < o[ k ].length; ++i )
-                {
-                    const subitem = o[ k ][ i ];
-                    const subkey = Object.keys( subitem )[ 0 ];
-                    const hasSubmenu = subitem[ subkey ].length;
-                    const isCheckbox = subitem[ 'type' ] == 'checkbox';
-                    let subentry = document.createElement('div');
-                    subentry.className = "lexmenuboxentry";
-                    subentry.className += (i == o[k].length - 1 ? " last" : "") + ( subitem.disabled ? " disabled" : "" );
-
-                    if( subkey == '' )
-                    {
-                        subentry.className = " lexseparator";
-                    }
-                    else
-                    {
-                        subentry.id = subkey;
-                        let subentrycont = document.createElement('div');
-                        subentrycont.innerHTML = "";
-                        subentrycont.classList = "lexmenuboxentrycontainer";
-                        subentry.appendChild(subentrycont);
-                        const icon = that.icons[ subkey ];
-                        if( isCheckbox )
-                        {
-                            subentrycont.innerHTML += "<input type='checkbox' >";
-                        }
-                        else if( icon )
-                        {
-                            subentrycont.innerHTML += "<a class='" + icon + " fa-sm'></a>";
-                        }
-                        else
-                        {
-                            subentrycont.innerHTML += "<a class='fa-solid fa-sm noicon'></a>";
-                            subentrycont.classList.add( "noicon" );
-
-                        }
-                        subentrycont.innerHTML += "<div class='lexentryname'>" + subkey + "</div>";
-                    }
-
-                    let checkboxInput = subentry.querySelector('input');
-                    if( checkboxInput )
-                    {
-                        checkboxInput.checked = subitem.checked ?? false;
-                        checkboxInput.addEventListener('change', e => {
-                            subitem.checked = checkboxInput.checked;
-                            const f = subitem[ 'callback' ];
-                            if( f )
-                            {
-                                f.call( this, subitem.checked, subkey, subentry );
-                                _resetMenubar();
-                            }
-                            e.stopPropagation();
-                            e.stopImmediatePropagation();
-                        })
-                    }
-
-                    menuElement.appendChild( subentry );
-
-                    // Nothing more for separators
-                    if( subkey == '' )
-                    {
-                        continue;
-                    }
-
-                    menuElement.addEventListener('keydown', function(e) {
-                        e.preventDefault();
-                        let short = that.shorts[ subkey ];
-                        if(!short) return;
-                        // check if it's a letter or other key
-                        short = short.length == 1 ? short.toLowerCase() : short;
-                        if( short == e.key )
-                        {
-                            subentry.click()
-                        }
-                    });
-
-                    // Add callback
-                    subentry.addEventListener("click", e => {
-                        if( checkboxInput )
-                        {
-                            subitem.checked = !subitem.checked;
-                        }
-                        const f = subitem[ 'callback' ];
-                        if( f )
-                        {
-                            f.call( this, checkboxInput ? subitem.checked : subkey, checkboxInput ? subkey : subentry );
-                            _resetMenubar();
-                        }
-                        e.stopPropagation();
-                        e.stopImmediatePropagation();
-                    });
-
-                    // Add icon if has submenu, else check for shortcut
-                    if( !hasSubmenu)
-                    {
-                        if( that.shorts[ subkey ] )
-                        {
-                            let shortEl = document.createElement('div');
-                            shortEl.className = "lexentryshort";
-                            shortEl.innerText = that.shorts[ subkey ];
-                            subentry.appendChild( shortEl );
-                        }
-                        continue;
-                    }
-
-                    let submenuIcon = document.createElement('a');
-                    submenuIcon.className = "fa-solid fa-angle-right fa-xs";
-                    subentry.appendChild( submenuIcon );
-
-                    subentry.addEventListener("mouseover", e => {
-                        if( subentry.built )
-                        {
-                            return;
-                        }
-                        subentry.built = true;
-                        create_submenu( subitem, subkey, subentry, ++d );
-                        e.stopPropagation();
-                    });
-
-                    subentry.addEventListener("mouseleave", (e) => {
-                        if( subentry.currentMenu && ( subentry.currentMenu != e.toElement ) )
-                        {
-                            d = -1; // Reset depth
-                            delete subentry.built;
-                            subentry.currentMenu.remove();
-                            delete subentry.currentMenu;
-                        }
-                    });
-                }
-
-                // Set final width
-                menuElement.style.width = menuElement.offsetWidth + "px";
-            };
-
             const _showEntry = () => {
                 _resetMenubar();
                 entry.classList.add( "selected" );
                 entry.built = true;
-                create_submenu( item, key, entry, -1 );
+                this._createSubmenu( item, key, entry, -1 );
             };
 
             entry.addEventListener("click", () => {
@@ -9563,7 +9596,7 @@ class ContextMenu {
         }
     }
 
-    _adjust_position( div, margin, useAbsolute = false ) {
+    _adjustPosition( div, margin, useAbsolute = false ) {
 
         let rect = div.getBoundingClientRect();
 
@@ -9604,7 +9637,7 @@ class ContextMenu {
         }
     }
 
-    _create_submenu( o, k, c, d ) {
+    _createSubmenu( o, k, c, d ) {
 
         this.root.querySelectorAll( ".lexcontextmenu" ).forEach( cm => cm.remove() );
 
@@ -9616,7 +9649,7 @@ class ContextMenu {
         {
             const subitem = o[ k ][ i ];
             const subkey = Object.keys( subitem )[ 0 ];
-            this._create_entry(subitem, subkey, contextmenu, d);
+            this._createEntry(subitem, subkey, contextmenu, d);
         }
 
         var rect = c.getBoundingClientRect();
@@ -9624,10 +9657,10 @@ class ContextMenu {
         contextmenu.style.marginTop =  3.5 - c.offsetHeight + "px";
 
         // Set final width
-        this._adjust_position( contextmenu, 6, true );
+        this._adjustPosition( contextmenu, 6, true );
     }
 
-    _create_entry( o, k, c, d ) {
+    _createEntry( o, k, c, d ) {
 
         const hasSubmenu = o[ k ].length;
         let entry = document.createElement('div');
@@ -9672,7 +9705,7 @@ class ContextMenu {
             return;
 
             if( LX.OPEN_CONTEXTMENU_ENTRY == 'click' )
-                this._create_submenu( o, k, entry, ++d );
+                this._createSubmenu( o, k, entry, ++d );
         });
 
         if( !hasSubmenu )
@@ -9688,7 +9721,7 @@ class ContextMenu {
                 if(entry.built)
                     return;
                 entry.built = true;
-                this._create_submenu( o, k, entry, ++d );
+                this._createSubmenu( o, k, entry, ++d );
                 e.stopPropagation();
             });
         }
@@ -9700,7 +9733,7 @@ class ContextMenu {
     }
 
     onCreate() {
-        doAsync( () => this._adjust_position( this.root, 6 ) );
+        doAsync( () => this._adjustPosition( this.root, 6 ) );
     }
 
     add( path, options = {} ) {
@@ -9730,13 +9763,13 @@ class ContextMenu {
 
             if( found )
             {
-                insert( tokens[idx++], found );
+                insert( tokens[ idx++ ], found );
             }
             else
             {
                 let item = {};
                 item[ token ] = [];
-                const nextToken = tokens[idx++];
+                const nextToken = tokens[ idx++ ];
                 // Check if last token -> add callback
                 if( !nextToken )
                 {
@@ -9756,13 +9789,15 @@ class ContextMenu {
 
         const setParent = _item => {
 
-            let key = Object.keys(_item)[0];
+            let key = Object.keys( _item )[ 0 ];
             let children = _item[ key ];
 
-            if(!children.length)
+            if( !children.length )
+            {
                 return;
+            }
 
-            if(children.find( c => Object.keys(c)[0] == key ) == null)
+            if( children.find( c => Object.keys(c)[0] == key ) == null )
             {
                 const parent = {};
                 parent[ key ] = [];
@@ -9772,14 +9807,18 @@ class ContextMenu {
 
             for( var child of _item[ key ] )
             {
-                let k = Object.keys(child)[0];
-                for( var i = 0; i < child[k].length; ++i )
-                    setParent(child);
+                let k = Object.keys( child )[ 0 ];
+                for( var i = 0; i < child[ k ].length; ++i )
+                {
+                    setParent( child );
+                }
             }
         };
 
         for( let item of this.items )
-            setParent(item);
+        {
+            setParent( item );
+        }
 
         // Create elements
 
@@ -9789,9 +9828,11 @@ class ContextMenu {
             let pKey = "eId" + getSupportedDOMName( key );
 
             // Item already created
-            const id = "#" + (item.id ?? pKey);
-            if( !this.root.querySelector(id) )
-                this._create_entry(item, key, this.root, -1);
+            const id = "#" + ( item.id ?? pKey );
+            if( !this.root.querySelector( id ) )
+            {
+                this._createEntry( item, key, this.root, -1 );
+            }
         }
     }
 
