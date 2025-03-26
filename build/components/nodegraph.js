@@ -83,7 +83,7 @@ class GraphEditor {
 
     /**
      * @param {*} options
-     * 
+     *
      */
 
     constructor( area, options = {} ) {
@@ -93,7 +93,16 @@ class GraphEditor {
         const useSidebar = options.sidebar ?? true;
 
         this._sidebar = area.addSidebar( m => {
-            m.add( "Create", { icon: "fa fa-add", bottom: true, callback: (e) => this._onSidebarCreate( e ) } );
+
+        }, {
+            headerIcon: "More",
+            headerTitle: "Create",
+            headerSubtitle: "Press to rename",
+            onHeaderPressed: () => this._showRenameGraphDialog(),
+            footerIcon: "Plus",
+            footerTitle: "Create",
+            footerSubtitle: "Graph or Function",
+            onFooterPressed: (e) => this._onSidebarCreate( e )
         });
 
         this.base_area = area;
@@ -111,20 +120,17 @@ class GraphEditor {
         this._sidebarActive = useSidebar;
 
         // Set sidebar state depending on options..
-        this._toggleSideBar( useSidebar );
+        LX.doAsync( () => {
+            this._sidebar.toggleCollapsed( !this._sidebarActive );
+        }, 50 );
 
         // Bind resize
 
         area.onresize = ( bb ) => {
-            
+
         };
 
         area.addOverlayButtons( [
-            {
-                name: "Toggle Sidebar",
-                icon: "fa fa-table-columns",
-                callback: () => this._toggleSideBar(),
-            },
             [
                 {
                     name: "Start Graph",
@@ -163,12 +169,7 @@ class GraphEditor {
                     icon: "fa fa-diagram-project",
                     callback: (value, event) => this.currentGraph.export()
                 }
-            ],
-            {
-                name: "",
-                class: "graph-title",
-                callback: (value, event) => this._showRenameGraphDialog()
-            }
+            ]
         ], { float: "htc" } );
 
         this.root.addEventListener( 'keydown', this._processKeyDown.bind( this ), true );
@@ -252,7 +253,7 @@ class GraphEditor {
         this.main = null;
 
         // Back pattern
-        
+
         const f = 15.0;
         this._patternSize = new LX.vec2( f );
         this._circlePatternSize = f * 0.04;
@@ -288,11 +289,11 @@ class GraphEditor {
      */
 
     static registerCustomNode( type, baseClass ) {
-        
+
         if ( !baseClass.prototype ) {
             throw "Cannot register a simple object, it must be a class with a prototype!";
         }
-        
+
         // Get info from path
         const pos = type.lastIndexOf( "/" );
 
@@ -335,7 +336,8 @@ class GraphEditor {
 
         var baseClass = GraphEditor.NODE_TYPES[ type ];
 
-        if (!baseClass) {
+        if( !baseClass )
+        {
             console.warn( `GraphNode type [${ type }] not registered.` );
             return null;
         }
@@ -345,7 +347,9 @@ class GraphEditor {
         const node = new baseClass( title );
 
         if( node.onCreate )
+        {
             node.onCreate();
+        }
 
         node.type = type;
         node.title = title;
@@ -358,16 +362,18 @@ class GraphEditor {
         }
 
         // Extra options
-        if ( options ) {
+        if ( options )
+        {
             for (var i in options) {
                 node[ i ] = options[ i ];
             }
         }
 
-        if ( node.onNodeCreated ) {
+        if ( node.onNodeCreated )
+        {
             node.onNodeCreated();
         }
-        
+
         return node;
     }
 
@@ -380,7 +386,9 @@ class GraphEditor {
 
         // Nothing to do, already there...
         if( this.currentGraph && graph.id == this.currentGraph.id )
+        {
             return;
+        }
 
         this.clear();
 
@@ -471,6 +479,8 @@ class GraphEditor {
 
         this._sidebar.add( graph.name, { icon: "fa fa-diagram-project", className: graph.id, callback: (e) => { this.setGraph( graph ) } } );
 
+        this._sidebar.update();
+
         this._sidebar.select( graph.name );
 
         return graph;
@@ -521,6 +531,8 @@ class GraphEditor {
         GraphEditor.registerCustomNode( "function/" + func.name, NodeFunction );
 
         this._sidebar.add( func.name, { icon: "fa fa-florin-sign", className: func.id, callback: (e) => { this.setGraph( func ) } } );
+
+        this._sidebar.update();
 
         this._sidebar.select( func.name );
     }
@@ -596,7 +608,7 @@ class GraphEditor {
         nodeContainer.classList.add( 'lexgraphnode' );
         nodeContainer.style.left = "0";
         nodeContainer.style.top = "0";
-        
+
         this._translateNode( nodeContainer, node.position );
 
         var color;
@@ -712,11 +724,11 @@ class GraphEditor {
         // {
         //     var nodeProperties = document.createElement( 'div' );
         //     nodeProperties.classList.add( 'lexgraphnodeproperties' );
-            
+
         //     for( let p of node.properties )
         //     {
         //         var panel = new LX.Panel();
-    
+
         //         p.signal = "@" + LX.UTILS.uidGenerator() + node.title;
 
         //         switch( p.type )
@@ -735,7 +747,7 @@ class GraphEditor {
         //         // prop.classList.add( 'lexgraphnodeproperty' );
         //         nodeProperties.appendChild( panel.root );
         //     }
-    
+
         //     nodeContainer.appendChild( nodeProperties );
         // }
 
@@ -993,7 +1005,7 @@ class GraphEditor {
                     return;
 
                 this.lastMouseDown = LX.getTime();
-    
+
                 this._generatingLink = {
                     index: parseInt( el.dataset[ 'index' ] ),
                     io: el,
@@ -1043,7 +1055,7 @@ class GraphEditor {
     }
 
     _getAllDOMNodes( includeGroups, exclude ) {
-        
+
         var elements = null;
 
         if( includeGroups )
@@ -1165,7 +1177,7 @@ class GraphEditor {
         // Allow change name if input
         if( node.constructor.category == 'inputs' )
         {
-            panel.addText( 'Name', node.title, (v) => { 
+            panel.addText( 'Name', node.title, (v) => {
                 node.title = v;
                 dom.querySelector( '.lexgraphnodeheader' ).innerText = v;
             } );
@@ -1272,7 +1284,7 @@ class GraphEditor {
         this.currentGraph.nodes.splice( idx, 1 );
 
         // Delete connected links..
-        
+
         for( let key in this.currentGraph.links )
         {
             if( !key.includes( nodeId ) )
@@ -1500,7 +1512,7 @@ class GraphEditor {
             return;
 
         var key = e.key ?? e.detail.key;
-        
+
         switch( key ) {
             case 'Escape':
                 this.unSelectAll();
@@ -1550,7 +1562,7 @@ class GraphEditor {
     _processMouse( e ) {
 
         const rect = this.root.getBoundingClientRect();
-        
+
         this._mousePosition = new LX.vec2( e.clientX - rect.x , e.clientY - rect.y );
 
         const snapPosition = new LX.vec2( this._mousePosition.x, this._mousePosition.y );
@@ -1571,7 +1583,7 @@ class GraphEditor {
 
             this._processMouseDown( e );
         }
-        
+
         else if( e.type == 'mouseup' )
         {
             if( ( LX.getTime() - this.lastMouseDown ) < 200 ) {
@@ -1606,7 +1618,7 @@ class GraphEditor {
         else if ( e.type == 'contextmenu' ) {
 
             e.preventDefault();
-            
+
             if( ( LX.getTime() - this.lastMouseDown ) < 300 ) {
                 this._processContextMenu( e );
             }
@@ -1743,7 +1755,7 @@ class GraphEditor {
     }
 
     _processContextMenu( e, autoConnect ) {
-        
+
         LX.addContextMenu( null, e, m => {
 
             var eventPosition = null;
@@ -1889,7 +1901,7 @@ class GraphEditor {
 
             pattern.appendChild( circle );
         }
-        
+
         var svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
         svg.classList.add( "background-svg" );
         svg.style.width = "100%";
@@ -1919,7 +1931,7 @@ class GraphEditor {
         const patternSize = this._patternSize.mul( this.currentGraph.scale );
         const circlePatternSize = this._circlePatternSize * this.currentGraph.scale;
         const patternPosition = this.currentGraph.translation.mul( this.currentGraph.scale );
-        
+
         let pattern = this._background.querySelector( 'pattern' );
         pattern.setAttribute( 'x', patternPosition.x );
         pattern.setAttribute( 'y', patternPosition.y );
@@ -1940,7 +1952,7 @@ class GraphEditor {
         const dh = h - h * this.currentGraph.scale;
 
         this._domNodes.style.transform = `
-            translate(` + ( patternPosition.x - dw ) + `px, ` + ( patternPosition.y - dh ) + `px) 
+            translate(` + ( patternPosition.x - dw ) + `px, ` + ( patternPosition.y - dh ) + `px)
             scale(` + this.currentGraph.scale + `)
         `;
         this._domLinks.style.transform = this._domNodes.style.transform;
@@ -1983,7 +1995,7 @@ class GraphEditor {
         const src_nodeId = src_nodeContainer.dataset[ 'id' ];
         const src_node = this.nodes[ src_nodeId ].data;
         const src_ioIndex = this._generatingLink.index
-        
+
         // Info about dst node
         const dst_nodeContainer = e.target.offsetParent;
         const dst_nodeId = dst_nodeContainer.dataset[ 'id' ];
@@ -2032,14 +2044,14 @@ class GraphEditor {
         srcDom.links = srcDom.links ?? [ ];
         srcDom.links[ dst_ioIndex ] = srcDom.links[ dst_ioIndex ] ?? [ ];
         srcDom.links[ dst_ioIndex ].push( dst_nodeId );
-        
+
         var dstDom = e.target.parentElement;
         dstDom.links = dstDom.links ?? [ ];
         dstDom.links[ src_ioIndex ] = dstDom.links[ src_ioIndex ] ?? [ ];
         dstDom.links[ src_ioIndex ].push( src_nodeId );
 
         // Call this using the io target to set the connection to the center of the input DOM element..
-        
+
         let path = this._updatePreviewLink( null, e.target.parentElement );
 
         // Store link
@@ -2282,8 +2294,8 @@ class GraphEditor {
         }
 
         // Update output links
-        
-        
+
+
         for( let output of nodeDOM.querySelectorAll( '.iooutput' ) )
         {
             if( !output.links )
@@ -2424,7 +2436,7 @@ class GraphEditor {
             let pos = this._getNodePosition( nodeEl );
             let size = new LX.vec2( nodeEl.offsetWidth, nodeEl.offsetHeight );
 
-            if( ( !( pos.x < lt.x && ( pos.x + size.x ) < lt.x ) && !( pos.x > rb.x && ( pos.x + size.x ) > rb.x ) ) && 
+            if( ( !( pos.x < lt.x && ( pos.x + size.x ) < lt.x ) && !( pos.x > rb.x && ( pos.x + size.x ) > rb.x ) ) &&
                 ( !( pos.y < lt.y && ( pos.y + size.y ) < lt.y ) && !( pos.y > rb.y && ( pos.y + size.y ) > rb.y ) ) )
             {
                 if( remove )
@@ -2630,7 +2642,7 @@ class GraphEditor {
 
     _addUndoStep( deleteRedo = true )  {
 
-        if( deleteRedo ) 
+        if( deleteRedo )
         {
             // Remove all redo steps
             this._redoSteps.length = 0;
@@ -2710,13 +2722,6 @@ class GraphEditor {
         }
     }
 
-    _toggleSideBar( force ) {
-
-        this._sidebarActive = force ?? !this._sidebarActive;
-        this._sidebarDom.classList.toggle( 'hidden', !this._sidebarActive );
-        this._graphContainer.style.width = this._sidebarActive ? "calc( 100% - 64px )" : "100%";
-    }
-
     _onSidebarCreate( e ) {
 
         LX.addContextMenu(null, e, m => {
@@ -2740,7 +2745,7 @@ class GraphEditor {
         const newNameKey = name.replace( /\s/g, '' ).replaceAll( '.', '' );
 
         // Change graph name button
-        const nameDom = LX.root.querySelector( '.graph-title button' );
+        const nameDom = this._sidebar.root.querySelectorAll(".lexsidebarheader span")[ 1 ];
         console.assert( nameDom );
         nameDom.innerText = name;
 
@@ -2750,8 +2755,9 @@ class GraphEditor {
         if( sidebarItem )
         {
             sidebarItem.name = newNameKey;
-            sidebarItem.domEl.id = newNameKey;
-            sidebarItem.domEl.querySelector(".lexsidebarentrydesc").innerText = name;
+            sidebarItem.dom.id = newNameKey;
+            sidebarItem.dom.querySelector(".lexsidebarentrydesc").innerText = name;
+            sidebarItem.dom.querySelector("a").innerText = name;
         }
 
         // Change registered nodes function
@@ -2772,7 +2778,7 @@ class GraphEditor {
 
     _addGlobalActions() {
 
-        
+
     }
 }
 
@@ -2787,7 +2793,7 @@ class Graph {
 
     /**
      * @param {*} options
-     * 
+     *
      */
 
     constructor( name, options = {} ) {
@@ -2798,7 +2804,7 @@ class Graph {
         this.nodes  = [ ];
         this.groups = [ ];
         this.links  = { };
-        
+
         this.scale = 1.0;
         this.translation = new LX.vec2( 0, 0 );
     }
@@ -2916,7 +2922,7 @@ class Graph {
      */
 
     serialize( prettify = true ) {
-        
+
         var o = { };
 
         o.id = this.id;
@@ -2993,7 +2999,7 @@ LX.Graph = Graph;
 
 class GraphNode {
 
-    constructor() { 
+    constructor() {
 
         this.inputs     = [ ];
         this.outputs    = [ ];
@@ -3159,7 +3165,7 @@ class GraphFunction extends Graph {
 
 LX.GraphFunction = GraphFunction;
 
-/* 
+/*
     ************ PREDEFINED NODES ************
 
     Nodes can override the following methods:
@@ -3232,7 +3238,7 @@ class NodeAdd extends GraphNode
         this.addProperty( "A", "float", 0 );
         this.addProperty( "B", "float", 0 );
     }
-    
+
     onExecute() {
         var a = this.getInput( 0 ) ?? this.properties[ 0 ].value;
         var b = this.getInput( 1 ) ?? this.properties[ 1 ].value;
@@ -3252,7 +3258,7 @@ class NodeSubstract extends GraphNode
         this.addProperty( "A", "float", 0 );
         this.addProperty( "B", "float", 0 );
     }
-    
+
     onExecute() {
         var a = this.getInput( 0 ) ?? this.properties[ 0 ].value;
         var b = this.getInput( 1 ) ?? this.properties[ 1 ].value;
@@ -3272,7 +3278,7 @@ class NodeMultiply extends GraphNode
         this.addProperty( "A", "float", 0 );
         this.addProperty( "B", "float", 0 );
     }
-    
+
     onExecute() {
         var a = this.getInput( 0 ) ?? this.properties[ 0 ].value;
         var b = this.getInput( 1 ) ?? this.properties[ 1 ].value;
@@ -3292,7 +3298,7 @@ class NodeDivide extends GraphNode
         this.addProperty( "A", "float", 0 );
         this.addProperty( "B", "float", 0 );
     }
-    
+
     onExecute() {
         var a = this.getInput( 0 ) ?? this.properties[ 0 ].value;
         var b = this.getInput( 1 ) ?? this.properties[ 1 ].value;
@@ -3310,7 +3316,7 @@ class NodeSqrt extends GraphNode
         this.addOutput( null, "float" );
         this.addProperty( "Value", "float", 0 );
     }
-    
+
     onExecute() {
         var a = this.getInput( 0 ) ?? this.properties[ 0 ].value;
         this.setOutput( 0, Math.sqrt( a ) );
@@ -3352,7 +3358,7 @@ class NodeAnd extends GraphNode
         this.addInput( null, "bool" );
         this.addOutput( null, "bool" );
     }
-    
+
     onExecute() {
         var a = this.getInput( 0 ), b = this.getInput( 1 );
         if( a == undefined || b == undefined )
@@ -3370,7 +3376,7 @@ class NodeOr extends GraphNode
         this.addInput( null, "bool" );
         this.addOutput( null, "bool" );
     }
-    
+
     onExecute() {
         var a = this.getInput( 0 ), b = this.getInput( 1 );
         if( a == undefined || b == undefined )
@@ -3388,7 +3394,7 @@ class NodeEqual extends GraphNode
         this.addInput( null, "float" );
         this.addOutput( null, "bool" );
     }
-    
+
     logicOp( a, b ) {
         return a == b;
     }
@@ -3456,7 +3462,7 @@ class NodeSelect extends GraphNode
         this.addInput( "Condition", "bool" );
         this.addOutput( null, "any" );
     }
-    
+
     onExecute() {
         var a = this.getInput( 0 ), b = this.getInput( 1 ), cond = this.getInput( 2 );
         if( a == undefined || b == undefined || cond == undefined )
@@ -3477,7 +3483,7 @@ class NodeCompare extends GraphNode
         this.addProperty( "Condition", "select", 'Equal', [ 'Equal', 'Not Equal', 'Less', 'Less Equal', 'Greater', 'Greater Equal' ] );
         this.addOutput( null, "any" );
     }
-    
+
     onExecute() {
         var a = this.getInput( 0 ), b = this.getInput( 1 ), TrueVal = this.getInput( 2 ), FalseVal = this.getInput( 3 );;
         var cond = this.properties[ 0 ].value;
@@ -3508,7 +3514,7 @@ class NodeKeyDown extends GraphNode
         this.addOutput( null, "bool" );
         this.addProperty( "Key", "string", " " );
     }
-    
+
     onExecute() {
         this.setOutput( 0, !!this.editor.keys[ this.properties[ 0 ].value ] );
     }
@@ -3526,7 +3532,7 @@ class NodeString extends GraphNode
         this.addOutput( null, "string" );
         this.addProperty( null, "string", "text" );
     }
-    
+
     onExecute() {
         this.setOutput( 0, this.properties[ 0 ].value );
     }
@@ -3540,7 +3546,7 @@ class NodeFloat extends GraphNode
         this.addOutput( null, "float" );
         this.addProperty( null, "float", 0.0 );
     }
-    
+
     onExecute() {
         this.setOutput( 0, this.properties[ 0 ].value );
     }
@@ -3554,7 +3560,7 @@ class NodeVector2 extends GraphNode
         this.addOutput( "Value", "vec2" );
         this.addProperty( "Value", "vec2", [ 0, 0 ] );
     }
-    
+
     onExecute() {
         this.setOutput( 0, this.properties[ 0 ].value );
     }
@@ -3568,7 +3574,7 @@ class NodeVector3 extends GraphNode
         this.addOutput( "Value", "vec3" );
         this.addProperty( "Value", "vec3", [ 0, 0, 0 ] );
     }
-    
+
     onExecute() {
         this.setOutput( 0, this.properties[ 0 ].value );
     }
@@ -3582,7 +3588,7 @@ class NodeVector4 extends GraphNode
         this.addOutput( "Value", "vec4" );
         this.addProperty( "Value", "vec4", [ 0, 0, 0, 0 ] );
     }
-    
+
     onExecute() {
         this.setOutput( 0, this.properties[ 0 ].value );
     }
@@ -3601,7 +3607,7 @@ class NodeSetVariable extends GraphNode
         this.addOutput( null, "any" );
         this.addProperty( "Name", "string", "" );
     }
-    
+
     onExecute() {
         var varName = this.getInput( 0 );
         if( varName == undefined )

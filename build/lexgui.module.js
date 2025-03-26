@@ -3581,7 +3581,7 @@ class SideBar {
         if( !entry )
             return;
 
-        entry.domEl.click();
+        entry.dom.click();
     }
 
     update() {
@@ -3611,7 +3611,7 @@ class SideBar {
 
             let entry = document.createElement( 'div' );
             entry.className = "lexsidebarentry " + ( options.className ?? "" );
-            entry.id = pKey;
+            entry.id = item.name = pKey;
 
             if( item.group )
             {
@@ -3682,7 +3682,7 @@ class SideBar {
 
             let itemDom = document.createElement( 'div' );
             entry.appendChild( itemDom );
-            item.dom = itemDom;
+            item.dom = entry;
 
             if( options.type == "checkbox" )
             {
