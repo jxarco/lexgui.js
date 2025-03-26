@@ -3940,6 +3940,7 @@ class Widget {
     static DIAL         = 30;
     static COUNTER      = 31;
     static TABLE        = 32;
+    static BLANK        = 33;
 
     static NO_CONTEXT_TYPES = [
         Widget.BUTTON,
@@ -4038,6 +4039,7 @@ class Widget {
             case Widget.DIAL: return "Dial";
             case Widget.COUNTER: return "Counter";
             case Widget.TABLE: return "Table";
+            case Widget.BLANK: return "Blank";
             case Widget.CUSTOM: return this.customName;
         }
 
@@ -4057,7 +4059,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
 
     Panel.prototype[ 'add' + customWidgetName ] = function( name, instance, callback ) {
 
-        let widget = this._createWidget( name, Widget.CUSTOM, null, options );
+        let widget = this._createWidget( Widget.CUSTOM, name, null, options );
         widget.customName = customWidgetName;
         widget.customIdx = custom_idx;
         widget.onGetValue = () => {
@@ -5028,7 +5030,7 @@ class Panel {
                     widget.oncontextmenu( e );
                 });
 
-                if( !( options.skipReset ?? false ) )
+                if( !( options.skipReset ?? false )  && ( value != null ) )
                 {
                     Panel._add_reset_property( domName, function() {
 
@@ -5139,7 +5141,7 @@ class Panel {
         options.skipWidget = options.skipWidget ?? true;
         options.skipInlineCount = true;
 
-        let widget = this._createWidget( null, Widget.TEXT, null, options );
+        let widget = this._createWidget( Widget.TEXT, null, null, options );
         let element = widget.domEl;
         element.className += " lexfilter noname";
 
@@ -5301,12 +5303,14 @@ class Panel {
 
     addBlank( height = 8, width ) {
 
-        let widget = this._createWidget( null, Widget.addBlank );
+        let widget = this._createWidget( Widget.BLANK );
         widget.domEl.className += " blank";
         widget.domEl.style.height = height + "px";
 
-        if(width)
+        if( width )
+        {
             widget.domEl.style.width = width;
+        }
 
         return widget;
     }
@@ -5330,7 +5334,7 @@ class Panel {
         }
 
         // Note: Titles are not registered in Panel.widgets by now
-        let widget = this._createWidget( null, Widget.TITLE, null, options );
+        let widget = this._createWidget( Widget.TITLE, null, null, options );
 
         let element = widget.domEl;
         element.className = "lextitle";
@@ -5383,11 +5387,7 @@ class Panel {
 
     addText( name, value, callback, options = {} ) {
 
-        let widget = this._createWidget( name, Widget.TEXT, () => {
-            wValue.value = wValue.iValue;
-            this.style.display = "none";
-            Panel._dispatch_event( wValue, "focusout" );
-        }, options );
+        let widget = this._createWidget( Widget.TEXT, name, value, options );
 
         widget.onGetValue = () => {
             return wValue.value;
@@ -5540,14 +5540,12 @@ class Panel {
 
     addTextArea( name, value, callback, options = {} ) {
 
-        let widget = this._createWidget( name, Widget.TEXTAREA, () => {
-            widget.set( wValue.iValue );
-            this.style.display = "none";
-        }, options );
+        let widget = this._createWidget( Widget.TEXTAREA, name, value, options );
 
         widget.onGetValue = () => {
             return wValue.value;
         };
+
         widget.onSetValue = ( newValue, skipCallback ) => {
             wValue.value = newValue;
             Panel._dispatch_event( wValue, "focusout", skipCallback );
@@ -5569,8 +5567,8 @@ class Panel {
         wValue.style.textAlign = options.float ?? "";
         Object.assign( wValue.style, options.style ?? {} );
 
-        if( options.disabled ?? false ) wValue.setAttribute("disabled", true);
-        if( options.placeholder ) wValue.setAttribute("placeholder", options.placeholder);
+        if( options.disabled ?? false ) wValue.setAttribute( "disabled", true );
+        if( options.placeholder ) wValue.setAttribute( "placeholder", options.placeholder );
 
         var resolve = (function( val, event ) {
             const skipCallback = event.detail;
@@ -5655,7 +5653,7 @@ class Panel {
 
     addButton( name, value, callback, options = {} ) {
 
-        let widget = this._createWidget( name, Widget.BUTTON, options );
+        let widget = this._createWidget( Widget.BUTTON, name, null, options );
 
         widget.onGetValue = () => {
             return wValue.innerText;
@@ -5730,7 +5728,7 @@ class Panel {
 
     addComboButtons( name, values, options = {} ) {
 
-        let widget = this._createWidget( name, Widget.BUTTON, options );
+        let widget = this._createWidget( Widget.BUTTON, name, null, options );
         let element = widget.domEl;
 
         let that = this;
@@ -5828,7 +5826,7 @@ class Panel {
 
         options.hideName = true;
 
-        let widget = this._createWidget( name, Widget.CARD, options );
+        let widget = this._createWidget( Widget.CARD, name, null, options );
         let element = widget.domEl;
 
         let container = document.createElement('div');
@@ -5899,7 +5897,7 @@ class Panel {
         // Always hide name for this one
         options.hideName = true;
 
-        let widget = this._createWidget( name, Widget.FORM, options );
+        let widget = this._createWidget( Widget.FORM, name, null, options );
 
         widget.onGetValue = () => {
             return container.formData;
@@ -6015,7 +6013,7 @@ class Panel {
 
         options.hideName = true;
 
-        let widget = this._createWidget( name, Widget.CONTENT, options );
+        let widget = this._createWidget( Widget.CONTENT, name, null, options );
         widget.domEl.appendChild( element );
 
         return widget;
@@ -6037,7 +6035,7 @@ class Panel {
 
         options.hideName = true;
 
-        let widget = this._createWidget( name, Widget.IMAGE, options );
+        let widget = this._createWidget( Widget.IMAGE, name, null, options );
         let element = widget.domEl;
 
         let container = document.createElement( 'div' );
@@ -6076,15 +6074,13 @@ class Panel {
 
     addDropdown( name, values, value, callback, options = {} ) {
 
-        let widget = this._createWidget( name, Widget.DROPDOWN, options );
+        let widget = this._createWidget( Widget.DROPDOWN, name, value, options );
 
         widget.onGetValue = () => {
             return element.querySelector( "li.selected" ).getAttribute( 'value' );
         };
 
         widget.onSetValue = ( newValue, skipCallback ) => {
-            let btn = element.querySelector( ".lexwidgetname .lexicon" );
-            if( btn ) btn.style.display = ( newValue != wValue.iValue ? "block" : "none" );
             value = newValue;
             list.querySelectorAll( 'li' ).forEach( e => { if( e.getAttribute('value') == value ) e.click() } );
             if( !skipCallback ) this._trigger( new IEvent( name, value, null ), callback );
@@ -6092,16 +6088,6 @@ class Panel {
 
         let element = widget.domEl;
         let that = this;
-
-        // Add reset functionality
-        if(widget.name && !( options.skipReset ?? false ))
-        {
-            Panel._add_reset_property( element.domName, function() {
-                value = wValue.iValue;
-                list.querySelectorAll( 'li' ).forEach( e => { if( e.getAttribute('value') == value ) e.click() } );
-                this.style.display = "none";
-            });
-        }
 
         let container = document.createElement( 'div' );
         container.className = "lexdropdown";
@@ -6405,7 +6391,7 @@ class Panel {
     addCurve( name, values, callback, options = {} ) {
 
         let that = this;
-        let widget = this._createWidget( name, Widget.CURVE, options );
+        let widget = this._createWidget( Widget.CURVE, name, values, options );
 
         widget.onGetValue = () => {
             return JSON.parse(JSON.stringify( curveInstance.element.value ));
@@ -6421,17 +6407,6 @@ class Panel {
 
         let element = widget.domEl;
         let defaultValues = JSON.parse( JSON.stringify( values ) );
-
-        // Add reset functionality
-        if( !(options.skipReset ?? false) )
-        {
-            Panel._add_reset_property(element.domName, function( e ) {
-                this.style.display = "none";
-                curveInstance.element.value = JSON.parse( JSON.stringify( defaultValues ) );
-                curveInstance.redraw();
-                that._trigger( new IEvent( name, curveInstance.element.value, e ), callback );
-            });
-        }
 
         // Add widget value
 
