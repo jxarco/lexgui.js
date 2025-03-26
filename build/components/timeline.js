@@ -177,17 +177,17 @@ class Timeline {
             header.addTitle(this.name );
         }
 
-        header.addButton('', '<i class="fa-solid fa-'+ (this.playing ? 'pause' : 'play') +'"></i>', (value, event) => {
+        header.addButton('', null, (value, event) => {
            this.changeState();
-        }, { width: "40px", buttonClass: "accept", title: "Play" });
+        }, { width: "40px", buttonClass: "accept", title: "Play", icon:"fa-solid fa-"+ (this.playing ? 'pause' : 'play') });
 
-        header.addButton('', '<i class="fa-solid fa-rotate"></i>', ( value, event ) => {
+        header.addButton('', null, ( value, event ) => {
             this.loop = !this.loop;
             if( this.onChangePlayMode )
             {
                 this.onChangePlayMode( this.loop );
             }
-        }, { width: "40px", selectable: true, selected: this.loop, title: 'Loop' });
+        }, { width: "40px", selectable: true, selected: this.loop, title: 'Loop', icon: "fa-solid fa-rotate" });
         
         if( this.onBeforeCreateTopBar )
         {
@@ -1061,6 +1061,20 @@ class Timeline {
      **/
     changeState() {
         this.playing = !this.playing;
+        this.updateHeader();
+
+        if(this.onChangeState) {
+            this.onChangeState(this.playing);
+        }
+    }
+    /**
+     * @method setState
+     * @param {bool} state
+     * @description change play/pause state
+     * ...
+     **/
+    setState( state ) {
+        this.playing = state;
         this.updateHeader();
 
         if(this.onChangeState) {
