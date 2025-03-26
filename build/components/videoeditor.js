@@ -615,24 +615,21 @@ class VideoEditor {
             y = rectVideo.top;
         }
         
-        if( y + this.cropArea.clientHeight > rectVideo.height ) {
-            y = rectVideo.height - this.cropArea.clientHeight;
+        if( y + this.cropArea.clientHeight > rectVideo.bottom ) {
+            y = rectVideo.bottom - this.cropArea.clientHeight;
         }
 
-        this.cropArea.style.left = x + "px";
-        this.cropArea.style.top = y + "px";
+        const parentRect = this.cropArea.parentElement.getBoundingClientRect();
 
-        const videoEndX = rectVideo.left + rectVideo.width;
-        const cropEndX = x + this.cropArea.clientWidth;
-        const videoEndY = rectVideo.height;
-        const cropEndY = y + this.cropArea.clientHeight;
+        this.cropArea.style.left = x - parentRect.left + "px";
+        this.cropArea.style.top = y - parentRect.top + "px";
 
         const nodes = this.cropArea.parentElement.childNodes;
 
         for( let i = 0; i < nodes.length; i++ ) {
             if( nodes[i] != this.cropArea ) {
                 const rectEl = nodes[i].getBoundingClientRect();
-                nodes[i].style.webkitMask = `linear-gradient(#000 0 0) ${x - rectEl.left}px ${y }px / ${this.cropArea.clientWidth}px ${this.cropArea.clientHeight}px, linear-gradient(rgba(0, 0, 0, 0.3) 0 0)`;
+                nodes[i].style.webkitMask = `linear-gradient(#000 0 0) ${x - rectEl.left}px ${y - rectEl.top}px / ${this.cropArea.clientWidth}px ${this.cropArea.clientHeight}px, linear-gradient(rgba(0, 0, 0, 0.3) 0 0)`;
                 nodes[i].style.webkitMaskRepeat = 'no-repeat';
             }
         }
