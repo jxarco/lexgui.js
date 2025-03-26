@@ -5330,7 +5330,7 @@ class Panel {
 
             var resolve = ( function( val, event ) {
 
-                if( !widget.valid() )
+                if( !widget.valid() || ( this._lastValueTriggered == val ) )
                 {
                     return;
                 }
@@ -5342,6 +5342,8 @@ class Panel {
                 {
                     this._trigger( new IEvent( name, val, event ), callback );
                 }
+
+                this._lastValueTriggered = val;
 
             }).bind( this );
 

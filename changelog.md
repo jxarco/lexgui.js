@@ -2,6 +2,9 @@
 
 ## dev
 
+Widgets:
+- Text: Skip callback if no changes.
+
 Updated NodeGraph Editor sidebar.
 Expose `Sidebar.update` to rebuild from current items.
 Add `force` option to force sidebar collapse status in `Sidebar.toggleCollapsed(force)`.
