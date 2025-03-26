@@ -69,7 +69,9 @@
 
     MAKE_CLASS_METHOD( ".separator", `Creates a line separator.`, [] );
 
-    MAKE_CLASS_METHOD( ".toggleCollapsed", `Toggles ${ INLINE_CODE( "collapsed" ) } property (collapsed/expanded).`, [] );
+    MAKE_CLASS_METHOD( ".toggleCollapsed", `Toggles ${ INLINE_CODE( "collapsed" ) } property (collapsed/expanded).`, [
+        ["force", "Boolean"]
+    ] );
 
     MAKE_LINE_BREAK();
     MAKE_LINE_BREAK();

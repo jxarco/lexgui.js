@@ -2,6 +2,7 @@
 
 ## dev
 
+Add `force` option to force sidebar collapse status in `Sidebar.toggleCollapsed(force)`.
 Set overflow ellipsis on large toast texts.
 Fixed Menubar menus with scroll > 0.
 Sidebar docs updated.

@@ -3305,7 +3305,7 @@ class SideBar {
                 }
             });
 
-        }, 100 );
+        }, 50 );
 
         // This account for header, footer and all inner paddings
         let contentOffset = 32;
@@ -3442,16 +3442,17 @@ class SideBar {
 
     /**
      * @method toggleCollapsed
+     * @param {Boolean} force: Force collapsed state
      */
 
-    toggleCollapsed() {
+    toggleCollapsed( force ) {
 
         if( !this.collapsable )
         {
             return;
         }
 
-        this.collapsed = !this.collapsed;
+        this.collapsed = force ?? !this.collapsed;
 
         if( this.collapsed )
         {
@@ -3463,6 +3464,11 @@ class SideBar {
             this.root.classList.remove( "collapsing" );
             this.root.classList.remove( "collapsed" );
             this.root.parentElement.style.width = this.root.parentElement.ogWidth;
+        }
+
+        if( this.resizeObserver )
+        {
+            throw( "Wait until ResizeObserver has been created!" );
         }
 
         this.resizeObserver.observe( this.root.parentElement );
