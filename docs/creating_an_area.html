@@ -45,7 +45,7 @@ type: @"vertical"@,
         ["options", "Object/Function"]
     ] );
 
-    MAKE_PARAGRAPH( `The different options to be set when adding elements to the Menubar are the following:` );
+    MAKE_PARAGRAPH( `The different options to be set when adding entries to the Menubar are the following:` );
     MAKE_CODE_BULLET_LIST( [
         ["callback", "Function", "To be called when interacting with the entry"],
         ["icon", "String", "(<a href='https://fontawesome.com/search'>Fontawesome</a>)"],
@@ -122,7 +122,17 @@ m.@[mtd]add@( @"Help/Support"@, { callback: () =&gt; {
 
     MAKE_PARAGRAPH( `You can also build a <strong>Sidebar</strong> element directly into any Area using ${INLINE_CODE("Area.addSidebar(callback, options)")}. 
     To specify each of the entries, you should pass a <em>callback function</em> to be called when the Sidebar is constructed. <strong>Callbacks will have a Sidebar instance as parameter</strong>, 
-    so use ${INLINE_CODE("Sidebar.add(entryName, options)")} on that instance inside your callback to build each of the entries.` );
+    so use ${INLINE_CODE("Sidebar.add(entryName, options)")} on that instance inside your callback to add each of the entries.` );
+
+    MAKE_PARAGRAPH( `The different options to be set when adding entries to the Sidebar are the following:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["callback", "Function", "To be called when interacting with the entry"],
+        ["className", "String", "Extra classes to customize style"],
+        ["collapsable", "Boolean", "Add entry as a collapsable section"],
+        ["icon", "String", "Entry icon"],
+    ] );
+
+    MAKE_PARAGRAPH( `Note: Subentries are collapsed by default. To disable this behaviour, set ${INLINE_CODE("options.collapsable: false")} in the parent entry.`, true );
 
     MAKE_LINE_BREAK();
     MAKE_LINE_BREAK();

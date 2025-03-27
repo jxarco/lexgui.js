@@ -2,6 +2,11 @@
 
 ## dev
 
+Widgets:
+- RadioGroup: Add name parameter (1st).
+- Add `options.hideName` for supported widgets: Don't use label but add `name` to allow registering.
+
+Sidebar subentries are now collapsable (`true` by default).
 Support `options.header` and `options.footer` for custom sidebar elements.
 Added `extraClass` parameter for `LX.makeIcon`.
 Fixed Menubar.getButton.

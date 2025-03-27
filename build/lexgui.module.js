@@ -3559,9 +3559,9 @@ class SideBar {
      * @param {String} path
      * @param {Object} options:
      * callback: Function to call on each item
-     * icon: Entry icon
-     * collapsable: Add entry as a collapsable section
      * className: Add class to the entry DOM element
+     * collapsable: Add entry as a collapsable section
+     * icon: Entry icon
      */
 
     add( path, options = {} ) {
