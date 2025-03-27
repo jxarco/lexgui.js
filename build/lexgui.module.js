@@ -3284,6 +3284,7 @@ class SideBar {
     /**
      * @param {Object} options
      * filter: Add search bar to filter entries [false]
+     * displaySelected: Indicate if an entry is displayed as selected
      * skipHeader: Do not use sidebar header [false]
      * headerImg: Image to be shown as avatar
      * headerIcon: Icon to be shown as avatar (from LX.ICONS)
@@ -3304,8 +3305,23 @@ class SideBar {
 
     constructor( options = {} ) {
 
-        this.root = document.createElement( 'div' );
+        this.root = document.createElement( "div" );
         this.root.className = "lexsidebar";
+
+        this._displaySelected = options.displaySelected ?? false;
+
+        Object.defineProperty( SideBar.prototype, "displaySelected", {
+            get: function() { return this._displaySelected; },
+            set: function( v ) {
+                this._displaySelected = v;
+                if( !this._displaySelected )
+                {
+                    this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
 
         this.collapsable = options.collapsable ?? true;
         this._collapseWidth = ( options.collapseToIcons ?? true ) ? "58px" : "0px";
@@ -3791,8 +3807,11 @@ class SideBar {
                 }
 
                 // Manage selected
-                this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
-                entry.classList.add( "selected" );
+                if( this.displaySelected )
+                {
+                    this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
+                    entry.classList.add( "selected" );
+                }
             });
 
             const isCollapsable = options.collapsable != undefined ? options.collapsable : ( options.collapsable || item[ key ].length );

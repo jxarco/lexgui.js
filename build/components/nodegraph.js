@@ -95,6 +95,7 @@ class GraphEditor {
         this._sidebar = area.addSidebar( m => {
 
         }, {
+            displaySelected: true,
             headerIcon: "More",
             headerTitle: "Create",
             headerSubtitle: "Press to rename",

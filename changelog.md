@@ -2,6 +2,7 @@
 
 ## dev
 
+Added `displaySelected` option to Sidebar to display selected entry.
 Started Notifications docs.
 
 ## 0.4.2 (master)
