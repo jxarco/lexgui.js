@@ -190,7 +190,7 @@ customHeader.innerHTML = "Custom simple header";
 
 const sidebar = left.addSidebar( m => {
     m.group( "Projects", { icon: "fa fa-plus", callback: (groupName, event) => { console.log(groupName) }} );
-    m.add( "Getting Started", { icon: "fa fa-cube", callback: logParams } );
+    m.add( "Getting Started", { icon: "fa fa-cube" /*,collapsable: false*/ } );
     m.add( "Getting Started/Installation", { icon: "fa fa-cube", callback: logParams } );
     m.add( "Getting Started/Project Structure", { icon: "fa fa-cube", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } } );
     m.add( "Building Your Application", { icon: "fa fa-code", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } } );
@@ -571,11 +571,16 @@ function fillPanel( panel ) {
 
     // add widgets to panel branch
     panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});
-    panel.addColor("Background", "#b7a9b1");
+    panel.addColor("Background", "#b7a9b1", (value, event) => {
+        console.log(value);
+    });
     panel.addText("Text", "Lexgui.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
     panel.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
         console.log("Font Color: ", value);
     });
+    panel.addRange("A Default Range", 1, (value, event) => {
+        console.log(value);
+    }, { min: 0, max: 10, step: 1 });
     panel.addRange("Disabled NoFill Range", 10, (value, event) => {
         console.log(value);
     }, { min: 1, max: 48, step: 1, disabled: true, fill: false});
@@ -589,7 +594,7 @@ function fillPanel( panel ) {
         console.log(value);
     }, { min: 0, max: 1024 });
     panel.addSeparator();
-    window.radio = panel.addRadioGroup( "Notify me about...", [ "All new messages", "Direct messages and mentions", "Nothing" ], (v) => { console.log(v) }, { className: "accent", xdisabled: true, selected: 1 } );
+    panel.addRadioGroup( null, "Notify me about...", [ "All new messages", "Direct messages and mentions", "Nothing" ], (v) => { console.log(v) }, { className: "accent", xdisabled: true, selected: 1 } );
     panel.addSeparator();
     panel.addTitle("Configuration (Im a title)");
     panel.addCheckbox("Toggle me", true, (value, event) => {
@@ -628,7 +633,7 @@ function fillPanel( panel ) {
         console.log(value);
     });
 
-    panel.addVector3("Im a Vec3", [0.1, 0.4, 0.5], (value, event) => {
+    window.vec = panel.addVector3("Im a Vec3", [0.1, 0.4, 0.5], (value, event) => {
         console.log(value);
     });
     panel.addLayers("Layers", 10, (value, event) => {
@@ -681,6 +686,15 @@ function fillPanel( panel ) {
     panel.addSize("Screen Res", [1280, 720], (value, event) => {
         console.log(value);
     }, { units: "p", precision: 0 });
+
+    panel.branch("Contents", {icon: "fa-solid fa-moon"});
+    panel.addCard( "MY PERSONAL CARD", { img: "data/Screenshot_Code.png" } );
+    const anElement = document.createElement( "div" );
+    anElement.style.width = anElement.style.height = "24px";
+    anElement.style.backgroundColor = "red";
+    panel.addContent( null, anElement );
+    panel.addImage( null, "data/Screenshot_Graph.png" );
+    panel.merge();
 
     // This is outside a branch
     panel.addText("Im out :(", "", null, { placeholder: "Alone..." });

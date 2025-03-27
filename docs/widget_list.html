@@ -814,6 +814,7 @@ panel.@[mtd]addForm@(@"Test form"@, formData, (value, event) => {
 
         MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addRadioGroup(label, values, callback, options)")} to add a Radio Group Widget to your panel:` );
         MAKE_CODE_BULLET_LIST( [
+            ["name", "String", "Widget name"],
             ["label", "String", "Radio label"],
             ["values", "Array", "Radio options"],
             ["callback", "Function", "Function called checks changes"],

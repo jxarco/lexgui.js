@@ -1067,7 +1067,7 @@ body.noevents * {
 }
 
 .lexwidget.nobranch {
-    padding-left: 12px;
+    width: calc(100% - 10px) !important;
 }
 
 .lexwidget.auto {
@@ -2332,7 +2332,7 @@ input[type=number] {
 
 .lextree {
     border-radius: 6px;
-    width: calc(100% - 6px);
+    width: 100%;
     min-height: 12px;
     margin: 0 auto;
     margin-top: 6px;
@@ -3119,6 +3119,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     margin-left: 16px;
     padding-inline: 16px;
     display: flex;
+    align-self: center;
     flex-direction: column;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -4188,7 +4189,6 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
 
 .lextimeline .lextree {
     margin: 0px !important;
-    width: 100%;
 }
 
 .lextimeline .lextree .lextreeitem {
