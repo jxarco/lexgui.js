@@ -1376,17 +1376,18 @@ function emit( signalName, value, options = {} )
         if( obj.constructor === Widget )
         {
             obj.set( value, options.skipCallback ?? true );
-
-            if( obj.options && obj.options.callback )
-            {
-                obj.options.callback( value, data );
-            }
+        }
+        else if( obj.constructor === Function )
+        {
+            const fn = obj;
+            fn( null, value );
         }
         else
         {
-            // This is a function callback!
-            const fn = obj;
-            fn( null, value );
+            // This is an element
+            const fn = obj[ signalName ];
+            console.assert( fn, `No callback registered with _${ signalName }_ signal` );
+            fn.bind( obj )( value );
         }
     }
 }
@@ -1395,7 +1396,7 @@ LX.emit = emit;
 
 function addSignal( name, obj, callback )
 {
-    obj[name] = callback;
+    obj[ name ] = callback;
 
     if( !LX.signals[ name ] )
     {
@@ -8967,7 +8968,7 @@ class Branch {
             that.content.toggleAttribute( "hidden" );
             that.grabber.toggleAttribute( "hidden" );
 
-            LX.emit( "@on_branch_closed", this.classList.contains( "closed" ), { target: that.panel } );
+            LX.emit( "@on_branch_closed", this.classList.contains( "closed" ) );
         };
 
         this.oncontextmenu = function( e ) {
