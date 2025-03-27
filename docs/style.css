@@ -304,6 +304,7 @@ img {
 
 #goUpButton {
 	position: fixed;
+	z-index: 10;
 	bottom: 32px;
 	right: 32px;
 	border: 1px solid #666;

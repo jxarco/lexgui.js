@@ -37,7 +37,7 @@ if __name__ == "__main__":
         "})( typeof(window) != 'undefined' ? window : (typeof(self) != 'undefined' ? self : global ) );"
     ]
 
-    remove_top = 4
+    remove_top = 2
     remove_bottom = 2
 
     modify_js_file(input_js, output_js, lines_above, lines_below, remove_top, remove_bottom)
