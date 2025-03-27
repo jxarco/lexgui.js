@@ -3784,13 +3784,15 @@ class SideBar {
                 itemDom.appendChild( itemName );
             }
 
+            const isCollapsable = options.collapsable != undefined ? options.collapsable : ( options.collapsable || item[ key ].length );
+
             entry.addEventListener("click", ( e ) => {
                 if( e.target && e.target.classList.contains( "lexcheckbox" ) )
                 {
                     return;
                 }
 
-                if( options.collapsable )
+                if( isCollapsable )
                 {
                     itemDom.querySelector( ".collapser" ).click();
                 }
@@ -3814,8 +3816,6 @@ class SideBar {
                 }
             });
 
-            const isCollapsable = options.collapsable != undefined ? options.collapsable : ( options.collapsable || item[ key ].length );
-
             if( options.action )
             {
                 const actionIcon = LX.makeIcon( options.action.icon ?? "MoreHorizontal", options.action.name );
@@ -3831,6 +3831,7 @@ class SideBar {
             else if( isCollapsable )
             {
                 const collapsableContent = document.createElement( 'div' );
+                collapsableContent.className = "collapsablecontainer";
                 Object.assign( collapsableContent.style, { width: "100%", display: "none" } );
                 LX.makeCollapsible( itemDom, collapsableContent, currentGroup ?? this.content );
                 this.collapseQueue = options.collapsable;
@@ -3870,6 +3871,7 @@ class SideBar {
             }
             else if( currentGroup )
             {
+                subentryContainer.classList.add( "collapsablecontainer" );
                 currentGroup.appendChild( subentryContainer );
             }
             else
@@ -8935,7 +8937,7 @@ class Branch {
 
         title.innerHTML += ( name || "Branch" );
 
-        title.innerHTML += "<a class='fa-solid fa-angle-up switch-branch-button'></a>";
+        title.innerHTML += "<a class='fa-solid fa-angle-right switch-branch-button'></a>";
 
         root.appendChild( title );
 
@@ -8949,23 +8951,23 @@ class Branch {
 
         if( options.closed )
         {
-            title.className += " closed";
-            root.className += " closed";
-            this.grabber.setAttribute('hidden', true);
+            title.classList.add( "closed" );
+            root.classList.add( "closed" );
+            this.grabber.setAttribute( "hidden", true );
             doAsync( () => {
-                this.content.setAttribute( 'hidden', true );
+                this.content.setAttribute( "hidden", true );
             }, 15 );
         }
 
         this.onclick = function( e ) {
             e.stopPropagation();
-            this.classList.toggle( 'closed' );
-            this.parentElement.classList.toggle( 'closed' );
+            this.classList.toggle( "closed" );
+            this.parentElement.classList.toggle( "closed" );
 
-            that.content.toggleAttribute( 'hidden' );
-            that.grabber.toggleAttribute( 'hidden' );
+            that.content.toggleAttribute( "hidden" );
+            that.grabber.toggleAttribute( "hidden" );
 
-            LX.emit( "@on_branch_closed", this.classList.contains("closed"), { target: that.panel } );
+            LX.emit( "@on_branch_closed", this.classList.contains( "closed" ), { target: that.panel } );
         };
 
         this.oncontextmenu = function( e ) {

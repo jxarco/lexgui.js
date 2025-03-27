@@ -32,14 +32,14 @@
     --global-color-error: #f54c4c;
     --global-button-color: light-dark(#f9f9f9, #3e3e3e);
     --global-button-color-hovered: light-dark(#ececec, #444);
-    --global-text-primary: light-dark(#202124, #efeff1);
+    --global-text-primary: light-dark(#202124, #e9e9e9);
     --global-text-secondary: light-dark(#353636, #c8c8ca);
     --global-text-terciary: light-dark(#5a5a5af5, #929292);
     --global-text-quaternary: light-dark(#6b6a6af5, #777777);
     --global-intense-background: light-dark(#fefefe, #121212);
     --global-medium-background: #252525;
     --global-blur-background: light-dark(#f7f7f7d8, #1f1f1fe7);
-    --global-color-transparent: #7b8ae200;
+    --global-color-transparent: #00000000;
     --code-editor-font-size: 14px;
     --code-editor-row-height: 20px;
     --graphnode-background: 17, 17, 17;
@@ -208,7 +208,7 @@ canvas {
 .collapsible a.collapser {
     --rotation: 90deg;
     transform: rotate(var(--rotation, 0deg));
-    transition: transform 0.2s ease-out;
+    transition: transform 0.15s ease-out;
 }
 
 .collapsible a.collapser[data-collapsed] {
@@ -938,7 +938,8 @@ body.noevents * {
     font-size: var(--global-font-size-lg);
     color: var(--global-text-primary);
     background-color: var(--global-color-secondary);
-    text-shadow: 0px 1px 6px #5554547c;
+    text-shadow: 0px 1px 6px #42424260;
+    letter-spacing: calc(var(--global-font-size-lg) * 0.025);
     padding: 10px;
     display: flex;
     border-top-left-radius: 8px;
@@ -1007,15 +1008,16 @@ body.noevents * {
 }
 
 .lexbranch .switch-branch-button {
-    float: right;
     font-size: var(--global-font-size-sm);
-    transition: transform 0.1s ease-out;
+    transition: transform 0.15s ease-out;
     margin-left: auto;
+    margin-right: 8px;
     align-content: center;
+    transform: rotate(90deg);
 }
 
 .lexbranch.closed .switch-branch-button {
-    transform: rotate(180deg);
+    transform: rotate(0deg);
 }
 
 :root[data-theme="light"] .lexbranchtitle {
@@ -3118,11 +3120,16 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     border-left: 1px solid #5251514d;
 }
 
+.lexsidebar .collapsablecontainer {
+    transition: transform 0.3s cubic-bezier(0,0,.2,1), opacity 0.1s cubic-bezier(0,0,.2,1), max-height 0.3s cubic-bezier(0,0,.2,1);
+    padding-inline: 4px;
+}
+
 .lexsidebar .lexsidebarsubentrycontainer:not(:has(div)) {
     margin: 0px;
 }
 
-.lexsidebar.collapsing .lexsidebarsubentrycontainer {
+.lexsidebar.collapsing .collapsablecontainer {
     max-height: 0px;
     transform: translate(-8px, -8px);
     opacity: 0;
@@ -3134,8 +3141,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     gap: 0.8em;
 }
 
-.lexsidebar.collapsed .lexsidebarsubentrycontainer {
-    display: none;
+.lexsidebar.collapsed .collapsablecontainer {
+    display: none !important;
 }
 
 .lexsidebar.collapsed .lexsidebarcontent div a {
@@ -3526,10 +3533,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexareatabscontainer .lexbranch {
     margin: 4px 7px !important;
-}
-
-.lexareatabscontent {
-    /* overflow-y: scroll; */
 }
 
 .lexareatabscontent.folded {
