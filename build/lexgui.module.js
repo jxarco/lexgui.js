@@ -3977,11 +3977,133 @@ class Widget {
         Widget.PROGRESS
     ];
 
-    constructor( name, type, value, options ) {
-        this.name = name;
+    constructor( type, name, value, options = {} ) {
+
         this.type = type;
+        this.name = name;
         this.options = options;
         this._initialValue = value;
+
+        const root = document.createElement( 'div' );
+        root.className = "lexwidget";
+
+        if( options.id )
+        {
+            root.id = options.id;
+        }
+
+        if( options.title )
+        {
+            root.title = options.title;
+        }
+
+        if( options.className )
+        {
+            root.className += " " + options.className;
+        }
+
+        if( type != Widget.TITLE )
+        {
+            root.style.width = "calc(100% - " + (this._currentBranch || type == Widget.FILE || type == Widget.TREE ? 10 : 20) + "px)";
+
+            if( options.width )
+            {
+                root.style.width = root.style.minWidth = options.width;
+            }
+            if( options.maxWidth )
+            {
+                root.style.maxWidth = options.maxWidth;
+            }
+            if( options.minWidth )
+            {
+                root.style.minWidth = options.minWidth;
+            }
+            if( options.height )
+            {
+                root.style.height = root.style.minHeight = options.height;
+            }
+        }
+
+        if( name != undefined )
+        {
+            if( !( options.hideName ?? false ) )
+            {
+                let domName = document.createElement( 'div' );
+                domName.className = "lexwidgetname";
+
+                if( options.justifyName )
+                {
+                    domName.classList.add( "float-" + options.justifyName );
+                }
+
+                domName.innerHTML = name;
+                domName.title = options.title ?? domName.innerHTML;
+                domName.style.width = options.nameWidth || LX.DEFAULT_NAME_WIDTH;
+
+                root.appendChild( domName );
+                root.domName = domName;
+
+                const that = this;
+
+                // Copy-paste info
+                domName.addEventListener('contextmenu', function( e ) {
+                    e.preventDefault();
+                    that.oncontextmenu( e );
+                });
+
+                if( !( options.skipReset ?? false )  && ( value != null ) )
+                {
+                    this._addResetProperty( domName, function( e ) {
+                        that.set( that._initialValue, false, e );
+                        this.style.display = "none"; // Og value, don't show it
+                    });
+                }
+            }
+        }
+        else
+        {
+            options.hideName = true;
+        }
+
+        if( options.signal )
+        {
+            LX.addSignal( options.signal, this );
+        }
+
+        this.root = root;
+        this.root.jsInstance = this;
+        this.options = options;
+    }
+
+    static _dispatchEvent( element, type, data, bubbles, cancelable ) {
+        let event = new CustomEvent( type, { 'detail': data, 'bubbles': bubbles, 'cancelable': cancelable } );
+        element.dispatchEvent( event );
+    }
+
+    _addResetProperty( container, callback ) {
+
+        var domEl = document.createElement('a');
+        domEl.style.display = "none";
+        domEl.style.marginRight = "6px";
+        domEl.className = "lexicon fa fa-rotate-left";
+        domEl.addEventListener( "click", callback );
+        container.appendChild( domEl );
+        return domEl;
+    }
+
+    _canPaste() {
+        return this.type === Widget.CUSTOM ? navigator.clipboard.customIdx !== undefined && this.customIdx == navigator.clipboard.customIdx :
+            navigator.clipboard.type === this.type;
+    }
+
+    _trigger( event, callback, scope = this ) {
+
+        if( !callback )
+        {
+            return;
+        }
+
+        callback.call( scope, event.value, event.domEvent, event.name );
     }
 
     value() {
@@ -3998,7 +4120,7 @@ class Widget {
 
         if( this.onSetValue )
         {
-            let resetButton = this.domEl.querySelector( ".lexwidgetname .lexicon" );
+            let resetButton = this.root.querySelector( ".lexwidgetname .lexicon" );
             if( resetButton )
             {
                 resetButton.style.display = ( value != this.value() ? "block" : "none" );
@@ -4020,7 +4142,7 @@ class Widget {
 
         addContextMenu( this.typeName(), e, c => {
             c.add("Copy", () => { this.copy() });
-            c.add("Paste", { disabled: !this._can_paste(), callback: () => { this.paste() } } );
+            c.add("Paste", { disabled: !this._canPaste(), callback: () => { this.paste() } } );
         });
     }
 
@@ -4031,13 +4153,8 @@ class Widget {
         navigator.clipboard.writeText( navigator.clipboard.data );
     }
 
-    _can_paste() {
-        return this.type === Widget.CUSTOM ? navigator.clipboard.customIdx !== undefined && this.customIdx == navigator.clipboard.customIdx :
-            navigator.clipboard.type === this.type;
-    }
-
     paste() {
-        if( !this._can_paste() )
+        if( !this._canPaste() )
         {
             return;
         }
@@ -4096,7 +4213,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
 
     Panel.prototype[ 'add' + customWidgetName ] = function( name, instance, callback ) {
 
-        let widget = this._createWidget( Widget.CUSTOM, name, null, options );
+        let widget = this._attachWidget( Widget.CUSTOM, name, null, options );
         widget.customName = customWidgetName;
         widget.customIdx = custom_idx;
 
@@ -4114,7 +4231,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
             }
         };
 
-        const element = widget.domEl;
+        const element = widget.root;
         element.style.flexWrap = "wrap";
 
         let container, custom_widgets;
@@ -4713,6 +4830,473 @@ class NodeTree {
 }
 
 /**
+ * @class Blank
+ * @description Blank Widget
+ */
+
+class Blank extends Widget {
+
+    constructor( width, height ) {
+
+        super( Widget.BLANK );
+
+        this.root.style.width = width ?? "auto";
+        this.root.style.height = height ?? "8px";
+    }
+}
+
+LX.Blank = Blank;
+
+/**
+ * @class Title
+ * @description Title Widget
+ */
+
+class Title extends Widget {
+
+    constructor( name, options = {} ) {
+
+        console.assert( name, "Can't create Title Widget without text!" );
+
+        // Note: Titles are not registered in Panel.widgets by now
+        super( Widget.TITLE, null, null, options );
+
+        this.root.className = "lextitle";
+
+        if( options.icon )
+        {
+            let icon = document.createElement( 'a' );
+            icon.className = options.icon;
+            icon.style.color = options.iconColor || "";
+            this.root.appendChild( icon );
+        }
+
+        let text = document.createElement( "span" );
+        text.innerText = name;
+        this.root.appendChild( text );
+
+        Object.assign( this.root.style, options.style ?? {} );
+
+        if( options.link != undefined )
+        {
+            let linkDom = document.createElement('a');
+            linkDom.innerText = name;
+            linkDom.href = options.link;
+            linkDom.target = options.target ?? "";
+            linkDom.className = "lextitle link";
+            Object.assign( linkDom.style, options.style ?? {} );
+            this.root.replaceWith( linkDom );
+        }
+    }
+}
+
+LX.Title = Title;
+
+/**
+ * @class Text
+ * @description Text Widget
+ */
+
+class Text extends Widget {
+
+    constructor( name, value, callback, options = {} ) {
+
+        super( Widget.TEXT, name, String( value ), options );
+
+        this.onGetValue = () => {
+            return value;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+
+            if( !this.valid( newValue ) || ( this._lastValueTriggered == newValue ) )
+            {
+                return;
+            }
+
+            this._lastValueTriggered = value = newValue;
+
+            if( options.disabled  )
+            {
+                wValue.innerText = newValue;
+            }
+            else
+            {
+                wValue.value = newValue;
+            }
+
+            if( !skipCallback )
+            {
+                this._trigger( new IEvent( name, newValue, event ), callback );
+            }
+        };
+
+        this.valid = ( v ) => {
+            if( !v.length || wValue.pattern == "" ) return true;
+            const regexp = new RegExp( wValue.pattern );
+            return regexp.test( v );
+        };
+
+        // Add widget value
+
+        let container = document.createElement( 'div' );
+        container.className = "lextext" + ( options.warning ? " lexwarning" : "" );
+        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
+        container.style.display = "flex";
+
+        if( options.textClass )
+        {
+            container.classList.add( options.textClass );
+        }
+
+        this.disabled = ( options.disabled || options.warning ) ?? ( options.url ? true : false );
+        let wValue = null;
+
+        if( !this.disabled )
+        {
+            wValue = document.createElement( 'input' );
+            wValue.type = options.type || "";
+            wValue.value = wValue.iValue = value || "";
+            wValue.style.width = "100%";
+            wValue.style.textAlign = ( options.float ?? "" );
+
+            wValue.setAttribute( "placeholder", options.placeholder ?? "" );
+
+            if( options.required )
+            {
+                wValue.setAttribute( "required", options.required );
+            }
+
+            if( options.pattern )
+            {
+                wValue.setAttribute( "pattern", options.pattern );
+            }
+
+            const trigger = options.trigger ?? "default";
+
+            if( trigger == "default" )
+            {
+                wValue.addEventListener( "keyup", e => {
+                    if( e.key == "Enter" )
+                    {
+                        wValue.blur();
+                    }
+                });
+
+                wValue.addEventListener( "focusout", e => {
+                    this.set( e.target.value, false, e );
+                });
+            }
+            else if( trigger == "input" )
+            {
+                wValue.addEventListener("input", e => {
+                    this.set( e.target.value, false, e );
+                });
+            }
+
+            wValue.addEventListener( "mousedown", function( e ){
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+            });
+
+            if( options.icon )
+            {
+                let icon = document.createElement( 'a' );
+                icon.className = "inputicon " + options.icon;
+                container.appendChild( icon );
+            }
+
+        }
+        else
+        {
+            wValue = document.createElement( options.url ? 'a' : 'div' );
+
+            if( options.url )
+            {
+                wValue.href = options.url;
+                wValue.target = "_blank";
+            }
+
+            const icon = options.warning ? '<i class="fa-solid fa-triangle-exclamation"></i>' : '';
+            wValue.innerHTML = ( icon + value ) || "";
+            wValue.style.width = "100%";
+            wValue.style.textAlign = options.float ?? "";
+        }
+
+        Object.assign( wValue.style, options.style ?? {} );
+
+        container.appendChild( wValue );
+        this.root.appendChild( container );
+
+        // Remove branch padding and margins
+        const useNameAsLabel = !( options.hideName ?? false );
+        if( !useNameAsLabel )
+        {
+            this.root.className += " noname";
+            container.style.width = "100%";
+        }
+    }
+}
+
+LX.Text = Text;
+
+/**
+ * @class TextArea
+ * @description TextArea Widget
+ */
+
+class TextArea extends Widget {
+
+    constructor( name, value, callback, options = {} ) {
+
+        super( Widget.TEXTAREA, name, value, options );
+
+        this.onGetValue = () => {
+            return value;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+
+            wValue.value = value = newValue;
+
+            if( !skipCallback )
+            {
+                this._trigger( new IEvent( name, newValue, event ), callback );
+            }
+        };
+
+        // Add widget value
+
+        let container = document.createElement( "div" );
+        container.className = "lextextarea";
+        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
+        container.style.height = options.height;
+        container.style.display = "flex";
+
+        let wValue = document.createElement( "textarea" );
+        wValue.value = wValue.iValue = value || "";
+        wValue.style.width = "100%";
+        wValue.style.textAlign = options.float ?? "";
+        Object.assign( wValue.style, options.style ?? {} );
+
+        if( options.disabled ?? false ) wValue.setAttribute( "disabled", true );
+        if( options.placeholder ) wValue.setAttribute( "placeholder", options.placeholder );
+
+        const trigger = options.trigger ?? "default";
+
+        if( trigger == "default" )
+        {
+            wValue.addEventListener("keyup", function(e) {
+                if( e.key == "Enter" )
+                {
+                    wValue.blur();
+                }
+            });
+
+            wValue.addEventListener("focusout", e => {
+                this.set( e.target.value, false, e );
+            });
+        }
+        else if( trigger == "input" )
+        {
+            wValue.addEventListener("input", e => {
+                this.set( e.target.value, false, e );
+            });
+        }
+
+        if( options.icon )
+        {
+            let icon = document.createElement('a');
+            icon.className = "inputicon " + options.icon;
+            container.appendChild( icon );
+        }
+
+        container.appendChild( wValue );
+        this.root.appendChild( container );
+
+        // Remove branch padding and margins
+        const useNameAsLabel = !( options.hideName ?? false );
+        if( !useNameAsLabel )
+        {
+            this.root.className += " noname";
+            container.style.width = "100%";
+        }
+
+        // Do this after creating the DOM element
+        doAsync( () => {
+            if( options.fitHeight )
+            {
+                // Update height depending on the content
+                wValue.style.height = wValue.scrollHeight + "px";
+            }
+        }, 10 );
+    }
+}
+
+LX.TextArea = TextArea;
+
+/**
+ * @class Button
+ * @description Button Widget
+ */
+
+class Button extends Widget {
+
+    constructor( name, value, callback, options ) {
+
+        super( Widget.BUTTON, name, null, options );
+
+        this.onGetValue = () => {
+            return wValue.innerText;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+            wValue.innerHTML =
+            ( options.icon ? "<a class='" + options.icon + "'></a>" :
+            ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + ( newValue || "" ) + "</span>" ) );
+        };
+
+        var wValue = document.createElement( 'button' );
+        wValue.title = options.title ?? "";
+        wValue.className = "lexbutton " + ( options.buttonClass ?? "" );
+
+        if( options.selected )
+        {
+            wValue.classList.add( "selected" );
+        }
+
+        wValue.innerHTML =
+            ( options.icon ? "<a class='" + options.icon + "'></a>" :
+            ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + ( value || "" ) + "</span>" ) );
+
+        wValue.style.width = "calc( 100% - " + ( options.nameWidth ?? LX.DEFAULT_NAME_WIDTH ) + ")";
+
+        if( options.disabled )
+        {
+            wValue.setAttribute( "disabled", true );
+        }
+
+        wValue.addEventListener( "click", e => {
+            if( options.selectable )
+            {
+                if( options.parent )
+                {
+                    options.parent.querySelectorAll(".lexbutton.selected").forEach( e => { if( e == wValue ) return; e.classList.remove( "selected" ) } );
+                }
+
+                wValue.classList.toggle('selected');
+            }
+
+            this._trigger( new IEvent( name, value, e ), callback );
+        });
+
+        this.root.appendChild( wValue );
+
+        // Remove branch padding and 
+        const useNameAsLabel = !( options.hideName ?? false ) && !( options.icon || options.img );
+        if( !useNameAsLabel )
+        {
+            wValue.className += " noname";
+            wValue.style.width = "100%";
+        }
+    }
+}
+
+LX.Button = Button;
+
+/**
+ * @class ComboButtons
+ * @description ComboButtons Widget
+ */
+
+class ComboButtons extends Widget {
+
+    constructor( name, values, options ) {
+
+        super( Widget.BUTTONS, name, null, options );
+
+        let that = this;
+        let container = document.createElement('div');
+        container.className = "lexcombobuttons ";
+
+        if( options.float )
+        {
+            container.className += options.float;
+        }
+
+        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+
+        let buttonsBox = document.createElement('div');
+        buttonsBox.className = "lexcombobuttonsbox ";
+
+        const shouldSelect = !( options.noSelection ?? false );
+        const shouldToggle = shouldSelect && ( options.toggle ?? false );
+
+        for( let b of values )
+        {
+            if( !b.value )
+            {
+                throw( "Set 'value' for each button!" );
+            }
+
+            let buttonEl = document.createElement('button');
+            buttonEl.className = "lexbutton combo";
+            buttonEl.title = b.icon ? b.value : "";
+            buttonEl.id = b.id ?? "";
+
+            if( options.buttonClass )
+            {
+                buttonEl.classList.add( options.buttonClass );
+            }
+
+            if( shouldSelect && ( b.selected || options.selected == b.value ) )
+            {
+                buttonEl.classList.add("selected");
+            }
+
+            buttonEl.innerHTML = ( b.icon ? "<a class='" + b.icon +"'></a>" : "" ) + "<span>" + ( b.icon ? "" : b.value ) + "</span>";
+
+            if( b.disabled )
+            {
+                buttonEl.setAttribute( "disabled", true );
+            }
+
+            buttonEl.addEventListener("click", function( e ) {
+                if( shouldSelect )
+                {
+                    if( shouldToggle )
+                    {
+                        this.classList.toggle('selected');
+                    }
+                    else
+                    {
+                        container.querySelectorAll('button').forEach( s => s.classList.remove('selected'));
+                        this.classList.add('selected');
+                    }
+                }
+
+                that._trigger( new IEvent( name, b.value, e ), b.callback );
+            });
+
+            buttonsBox.appendChild( buttonEl );
+        }
+
+        // Remove branch padding and margins
+        const useNameAsLabel = !( options.hideName ?? false );
+        if( !useNameAsLabel )
+        {
+            this.root.className += " noname";
+            container.style.width = "100%";
+        }
+
+        container.appendChild( buttonsBox );
+        this.root.appendChild( container );
+    }
+}
+
+LX.ComboButtons = ComboButtons;
+
+/**
  * @class Panel
  */
 
@@ -4746,7 +5330,7 @@ class Panel {
         root.style.height = options.height || "100%";
         Object.assign( root.style, options.style ?? {} );
 
-        this._inline_widgets_left = -1;
+        this._inlineWidgetsLeft = -1;
         this._inline_queued_container = null;
 
         this.root = root;
@@ -4856,7 +5440,7 @@ class Panel {
     sameLine( number ) {
 
         this._inline_queued_container = this.queuedContainer;
-        this._inline_widgets_left = ( number || Infinity );
+        this._inlineWidgetsLeft = ( number || Infinity );
     }
 
     /**
@@ -4866,13 +5450,13 @@ class Panel {
 
     endLine( justifyContent ) {
 
-        if( this._inline_widgets_left == -1 )
+        if( this._inlineWidgetsLeft == -1 )
         {
             console.warn("No pending widgets to be inlined!");
             return;
         }
 
-        this._inline_widgets_left = -1;
+        this._inlineWidgetsLeft = -1;
 
         if( !this._inlineContainer )
         {
@@ -4986,126 +5570,28 @@ class Panel {
         return (typeof arg == 'undefined' ? def : arg);
     }
 
-    static _dispatch_event( element, type, data, bubbles, cancelable ) {
-        let event = new CustomEvent( type, { 'detail': data, 'bubbles': bubbles, 'cancelable': cancelable } );
-        element.dispatchEvent( event );
-    }
-
-    static _add_reset_property( container, callback ) {
-        var domEl = document.createElement('a');
-        domEl.style.display = "none";
-        domEl.style.marginRight = "6px";
-        domEl.className = "lexicon fa fa-rotate-left";
-        domEl.addEventListener( "click", callback );
-        container.appendChild( domEl );
-        return domEl;
-    }
-
     /*
         Panel Widgets
     */
 
-    _createWidget( type, name, value, options = {} ) {
+    _attachWidget( widget, options = {} ) {
 
-        if( !LX.CREATED_INSTANCES )
+        if( widget.name != undefined )
         {
-            LX.CREATED_INSTANCES = [];
+            this.widgets[ widget.name ] = widget;
         }
 
-        LX.CREATED_INSTANCES[ type ] = true;
-
-        let widget = new Widget( name, type, value, options );
-
-        let element = document.createElement( 'div' );
-        element.className = "lexwidget";
-        element.id = options.id ?? "";
-        element.title = options.title ?? "";
-
-        if( options.className )
+        if( widget.options.signal && !widget.name )
         {
-            element.className += " " + options.className;
+            if( !this.signals )
+            {
+                this.signals = [];
+            }
+
+            this.signals.push( { [ widget.options.signal ]: widget } )
         }
 
-        if( type != Widget.TITLE )
-        {
-            element.style.width = "calc(100% - " + (this._currentBranch || type == Widget.FILE || type == Widget.TREE ? 10 : 20) + "px)";
-
-            if( options.width )
-            {
-                element.style.width = element.style.minWidth = options.width;
-            }
-            if( options.maxWidth )
-            {
-                element.style.maxWidth = options.maxWidth;
-            }
-            if( options.minWidth )
-            {
-                element.style.minWidth = options.minWidth;
-            }
-            if( options.height )
-            {
-                element.style.height = element.style.minHeight = options.height;
-            }
-        }
-
-        if( name != undefined )
-        {
-            if( !( options.hideName ?? false ) )
-            {
-                let domName = document.createElement( 'div' );
-                domName.className = "lexwidgetname";
-                if( options.justifyName )
-                {
-                    domName.classList.add( "float-" + options.justifyName );
-                }
-                domName.innerHTML = name;
-                domName.title = options.title ?? domName.innerHTML;
-                domName.style.width = options.nameWidth || LX.DEFAULT_NAME_WIDTH;
-                element.appendChild( domName );
-                element.domName = domName;
-
-                // Copy-paste info
-                domName.addEventListener('contextmenu', function( e ) {
-                    e.preventDefault();
-                    widget.oncontextmenu( e );
-                });
-
-                if( !( options.skipReset ?? false )  && ( value != null ) )
-                {
-                    Panel._add_reset_property( domName, function( e ) {
-                        widget.set( widget._initialValue, false, e );
-                        // Og value, don't show it
-                        this.style.display = "none";
-                    });
-                }
-            }
-
-            this.widgets[ name ] = widget;
-        }
-        else
-        {
-            options.hideName = true;
-        }
-
-        if( options.signal )
-        {
-            if( !name )
-            {
-                if( !this.signals )
-                {
-                    this.signals = [];
-                }
-
-                this.signals.push( { [ options.signal ]: widget } )
-            }
-
-            LX.addSignal( options.signal, widget );
-        }
-
-        widget.domEl = element;
-        element.jsInstance = widget;
-
-        const insert_widget = el => {
+        const _insertWidget = el => {
             if( options.container )
             {
                 options.container.appendChild( el );
@@ -5133,7 +5619,7 @@ class Panel {
             }
         };
 
-        const store_widget = el => {
+        const _storeWidget = el => {
 
             if( !this.queuedContainer )
             {
@@ -5142,12 +5628,12 @@ class Panel {
             // Append content to queued tab container
             else
             {
-                this._inlineWidgets.push( [el, this.queuedContainer] );
+                this._inlineWidgets.push( [ el, this.queuedContainer ] );
             }
         };
 
         // Process inline widgets
-        if( this._inline_widgets_left > 0 && !options.skipInlineCount )
+        if( this._inlineWidgetsLeft > 0 && !options.skipInlineCount )
         {
             if( !this._inlineWidgets )
             {
@@ -5155,19 +5641,19 @@ class Panel {
             }
 
             // Store widget and its container
-            store_widget( element );
+            _storeWidget( widget.root );
 
-            this._inline_widgets_left--;
+            this._inlineWidgetsLeft--;
 
             // Last widget
-            if( !this._inline_widgets_left )
+            if( !this._inlineWidgetsLeft )
             {
                 this.endLine();
             }
         }
         else
         {
-            insert_widget( element );
+            _insertWidget( widget.root );
         }
 
         return widget;
@@ -5179,8 +5665,8 @@ class Panel {
         options.skipWidget = options.skipWidget ?? true;
         options.skipInlineCount = true;
 
-        let widget = this._createWidget( Widget.TEXT, null, null, options );
-        const element = widget.domEl;
+        let widget = this._attachWidget( Widget.TEXT, null, null, options );
+        const element = widget.root;
         element.className += " lexfilter noname";
 
         let input = document.createElement('input');
@@ -5275,19 +5761,6 @@ class Panel {
         this.refresh( filteredOptions );
     }
 
-    _trigger( event, callback ) {
-
-        if( callback )
-        {
-            callback.call( this, event.value, event.domEvent, event.name );
-        }
-
-        if( this.onevent )
-        {
-            this.onevent.call( this, event );
-        }
-    }
-
     /**
      * @method getBranch
      * @param {String} name if null, return current branch
@@ -5340,20 +5813,13 @@ class Panel {
 
     /**
      * @method addBlank
+     * @param {Number} width
      * @param {Number} height
      */
 
-    addBlank( height = 8, width ) {
-
-        let widget = this._createWidget( Widget.BLANK );
-        widget.domEl.className += " blank";
-        widget.domEl.style.height = height + "px";
-
-        if( width )
-        {
-            widget.domEl.style.width = width;
-        }
-
+    addBlank( width, height ) {
+        const widget = new Blank( width, height );
+        this._attachWidget( widget );
         return widget;
     }
 
@@ -5369,41 +5835,9 @@ class Panel {
      */
 
     addTitle( name, options = {} ) {
-
-        console.assert( name, "Can't create Title Widget without text!" );
-
-        // Note: Titles are not registered in Panel.widgets by now
-        let widget = this._createWidget( Widget.TITLE, null, null, options );
-
-        const element = widget.domEl;
-        element.className = "lextitle";
-
-        if( options.icon )
-        {
-            let icon = document.createElement( 'a' );
-            icon.className = options.icon;
-            icon.style.color = options.iconColor || "";
-            element.appendChild( icon );
-        }
-
-        let text = document.createElement( "span" );
-        text.innerText = name;
-        element.appendChild( text );
-
-        Object.assign( element.style, options.style ?? {} );
-
-        if( options.link != undefined )
-        {
-            let linkDom = document.createElement('a');
-            linkDom.innerText = name;
-            linkDom.href = options.link;
-            linkDom.target = options.target ?? "";
-            linkDom.className = "lextitle link";
-            Object.assign( linkDom.style, options.style ?? {} );
-            element.replaceWith( linkDom );
-        }
-
-        return element;
+        const widget = new Title( name, options );
+        this._attachWidget( widget );
+        return widget;
     }
 
     /**
@@ -5425,144 +5859,8 @@ class Panel {
      */
 
     addText( name, value, callback, options = {} ) {
-
-        let widget = this._createWidget( Widget.TEXT, name, String( value ), options );
-
-        widget.onGetValue = () => {
-            return value;
-        };
-
-        widget.onSetValue = ( newValue, skipCallback, event ) => {
-
-            if( !widget.valid( newValue ) || ( this._lastValueTriggered == newValue ) )
-            {
-                return;
-            }
-
-            this._lastValueTriggered = value = newValue;
-
-            if( options.disabled  )
-            {
-                wValue.innerText = newValue;
-            }
-            else
-            {
-                wValue.value = newValue;
-            }
-
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( name, newValue, event ), callback );
-            }
-        };
-
-        widget.valid = ( v ) => {
-            if( !v.length || wValue.pattern == "" ) return true;
-            const regexp = new RegExp( wValue.pattern );
-            return regexp.test( v );
-        };
-
-        const element = widget.domEl;
-
-        // Add widget value
-
-        let container = document.createElement( 'div' );
-        container.className = "lextext" + ( options.warning ? " lexwarning" : "" );
-        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
-        container.style.display = "flex";
-
-        if( options.textClass )
-        {
-            container.classList.add( options.textClass );
-        }
-
-        this.disabled = ( options.disabled || options.warning ) ?? ( options.url ? true : false );
-        let wValue = null;
-
-        if( !this.disabled )
-        {
-            wValue = document.createElement( 'input' );
-            wValue.type = options.type || "";
-            wValue.value = wValue.iValue = value || "";
-            wValue.style.width = "100%";
-            wValue.style.textAlign = ( options.float ?? "" );
-
-            wValue.setAttribute( "placeholder", options.placeholder ?? "" );
-
-            if( options.required )
-            {
-                wValue.setAttribute( "required", options.required );
-            }
-
-            if( options.pattern )
-            {
-                wValue.setAttribute( "pattern", options.pattern );
-            }
-
-            const trigger = options.trigger ?? "default";
-
-            if( trigger == "default" )
-            {
-                wValue.addEventListener( "keyup", function( e ){
-                    if( e.key == "Enter" )
-                    {
-                        wValue.blur();
-                    }
-                });
-
-                wValue.addEventListener( "focusout", function( e ){
-                    widget.set( e.target.value, false, e );
-                });
-            }
-            else if( trigger == "input" )
-            {
-                wValue.addEventListener("input", function( e ){
-                    widget.set( e.target.value, false, e );
-                });
-            }
-
-            wValue.addEventListener( "mousedown", function( e ){
-                e.stopImmediatePropagation();
-                e.stopPropagation();
-            });
-
-            if( options.icon )
-            {
-                let icon = document.createElement( 'a' );
-                icon.className = "inputicon " + options.icon;
-                container.appendChild( icon );
-            }
-
-        }
-        else
-        {
-            wValue = document.createElement( options.url ? 'a' : 'div' );
-
-            if( options.url )
-            {
-                wValue.href = options.url;
-                wValue.target = "_blank";
-            }
-
-            const icon = options.warning ? '<i class="fa-solid fa-triangle-exclamation"></i>' : '';
-            wValue.innerHTML = ( icon + value ) || "";
-            wValue.style.width = "100%";
-            wValue.style.textAlign = options.float ?? "";
-        }
-
-        Object.assign( wValue.style, options.style ?? {} );
-
-        container.appendChild( wValue );
-        element.appendChild( container );
-
-        // Remove branch padding and margins
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            element.className += " noname";
-            container.style.width = "100%";
-        }
-
+        const widget = new Text( name, value, callback, options );
+        this._attachWidget( widget );
         return widget;
     }
 
@@ -5583,91 +5881,8 @@ class Panel {
      */
 
     addTextArea( name, value, callback, options = {} ) {
-
-        let widget = this._createWidget( Widget.TEXTAREA, name, value, options );
-
-        widget.onGetValue = () => {
-            return value;
-        };
-
-        widget.onSetValue = ( newValue, skipCallback, event ) => {
-
-            wValue.value = value = newValue;
-
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( name, newValue, event ), callback );
-            }
-        };
-
-        const element = widget.domEl;
-
-        // Add widget value
-
-        let container = document.createElement( "div" );
-        container.className = "lextextarea";
-        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
-        container.style.height = options.height;
-        container.style.display = "flex";
-
-        let wValue = document.createElement( "textarea" );
-        wValue.value = wValue.iValue = value || "";
-        wValue.style.width = "100%";
-        wValue.style.textAlign = options.float ?? "";
-        Object.assign( wValue.style, options.style ?? {} );
-
-        if( options.disabled ?? false ) wValue.setAttribute( "disabled", true );
-        if( options.placeholder ) wValue.setAttribute( "placeholder", options.placeholder );
-
-        const trigger = options.trigger ?? "default";
-
-        if( trigger == "default" )
-        {
-            wValue.addEventListener("keyup", function( e ) {
-                if( e.key == "Enter" )
-                {
-                    wValue.blur();
-                }
-            });
-
-            wValue.addEventListener("focusout", function( e ) {
-                widget.set( e.target.value, false, e );
-            });
-        }
-        else if( trigger == "input" )
-        {
-            wValue.addEventListener("input", function( e ) {
-                widget.set( e.target.value, false, e );
-            });
-        }
-
-        if( options.icon )
-        {
-            let icon = document.createElement('a');
-            icon.className = "inputicon " + options.icon;
-            container.appendChild( icon );
-        }
-
-        container.appendChild( wValue );
-        element.appendChild( container );
-
-        // Remove branch padding and margins
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            element.className += " noname";
-            container.style.width = "100%";
-        }
-
-        // Do this after creating the DOM element
-        doAsync( () => {
-            if( options.fitHeight )
-            {
-                // Update height depending on the content
-                wValue.style.height = wValue.scrollHeight + "px";
-            }
-        }, 10 );
-
+        const widget = new TextArea( name, value, callback, options );
+        this._attachWidget( widget );
         return widget;
     }
 
@@ -5678,7 +5893,6 @@ class Panel {
      */
 
     addLabel( value, options = {} ) {
-
         options.disabled = true;
         return this.addText( null, value, null, options );
     }
@@ -5697,66 +5911,9 @@ class Panel {
      */
 
     addButton( name, value, callback, options = {} ) {
-
-        let widget = this._createWidget( Widget.BUTTON, name, null, options );
-
-        widget.onGetValue = () => {
-            return wValue.innerText;
-        };
-
-        widget.onSetValue = ( newValue, skipCallback, event ) => {
-            wValue.innerHTML =
-            ( options.icon ? "<a class='" + options.icon + "'></a>" :
-            ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + ( newValue || "" ) + "</span>" ) );
-        };
-
-        const element = widget.domEl;
-
-        var wValue = document.createElement( 'button' );
-        wValue.title = options.title ?? "";
-        wValue.className = "lexbutton " + ( options.buttonClass ?? "" );
-
-        if( options.selected )
-        {
-            wValue.classList.add( "selected" );
-        }
-
-        wValue.innerHTML =
-            ( options.icon ? "<a class='" + options.icon + "'></a>" :
-            ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + ( value || "" ) + "</span>" ) );
-
-        wValue.style.width = "calc( 100% - " + ( options.nameWidth ?? LX.DEFAULT_NAME_WIDTH ) + ")";
-
-        if( options.disabled )
-        {
-            wValue.setAttribute( "disabled", true );
-        }
-
-        wValue.addEventListener( "click", e => {
-            if( options.selectable )
-            {
-                if( options.parent )
-                {
-                    options.parent.querySelectorAll(".lexbutton.selected").forEach( e => { if( e == wValue ) return; e.classList.remove( "selected" ) } );
-                }
-
-                wValue.classList.toggle('selected');
-            }
-
-            this._trigger( new IEvent( name, value, e ), callback );
-        });
-
-        element.appendChild( wValue );
-
-        // Remove branch padding and 
-        const useNameAsLabel = !( options.hideName ?? false ) && !( options.icon || options.img );
-        if( !useNameAsLabel )
-        {
-            wValue.className += " noname";
-            wValue.style.width = "100%";
-        }
-
-        return element;
+        const widget = new Button( name, value, callback, options );
+        this._attachWidget( widget );
+        return widget;
     }
 
     /**
@@ -5772,87 +5929,8 @@ class Panel {
      */
 
     addComboButtons( name, values, options = {} ) {
-
-        let widget = this._createWidget( Widget.BUTTONS, name, null, options );
-        const element = widget.domEl;
-
-        let that = this;
-        let container = document.createElement('div');
-        container.className = "lexcombobuttons ";
-
-        if( options.float )
-        {
-            container.className += options.float;
-        }
-
-        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
-
-        let buttonsBox = document.createElement('div');
-        buttonsBox.className = "lexcombobuttonsbox ";
-
-        const shouldSelect = !( options.noSelection ?? false );
-        const shouldToggle = shouldSelect && ( options.toggle ?? false );
-
-        for( let b of values )
-        {
-            if( !b.value )
-            {
-                throw( "Set 'value' for each button!" );
-            }
-
-            let buttonEl = document.createElement('button');
-            buttonEl.className = "lexbutton combo";
-            buttonEl.title = b.icon ? b.value : "";
-            buttonEl.id = b.id ?? "";
-
-            if( options.buttonClass )
-            {
-                buttonEl.classList.add( options.buttonClass );
-            }
-
-            if( shouldSelect && ( b.selected || options.selected == b.value ) )
-            {
-                buttonEl.classList.add("selected");
-            }
-
-            buttonEl.innerHTML = ( b.icon ? "<a class='" + b.icon +"'></a>" : "" ) + "<span>" + ( b.icon ? "" : b.value ) + "</span>";
-
-            if( b.disabled )
-            {
-                buttonEl.setAttribute( "disabled", true );
-            }
-
-            buttonEl.addEventListener("click", function( e ) {
-                if( shouldSelect )
-                {
-                    if( shouldToggle )
-                    {
-                        this.classList.toggle('selected');
-                    }
-                    else
-                    {
-                        container.querySelectorAll('button').forEach( s => s.classList.remove('selected'));
-                        this.classList.add('selected');
-                    }
-                }
-
-                that._trigger( new IEvent( name, b.value, e ), b.callback );
-            });
-
-            buttonsBox.appendChild( buttonEl );
-        }
-
-        // Remove branch padding and margins
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            element.className += " noname";
-            container.style.width = "100%";
-        }
-
-        container.appendChild( buttonsBox );
-        element.appendChild( container );
-
+        const widget = new ComboButtons( name, values, options );
+        this._attachWidget( widget );
         return widget;
     }
 
@@ -5871,8 +5949,8 @@ class Panel {
 
         options.hideName = true;
 
-        let widget = this._createWidget( Widget.CARD, name, null, options );
-        const element = widget.domEl;
+        let widget = this._attachWidget( Widget.CARD, name, null, options );
+        const element = widget.root;
 
         let container = document.createElement('div');
         container.className = "lexcard";
@@ -5942,7 +6020,7 @@ class Panel {
         // Always hide name for this one
         options.hideName = true;
 
-        let widget = this._createWidget( Widget.FORM, name, null, options );
+        let widget = this._attachWidget( Widget.FORM, name, null, options );
 
         widget.onGetValue = () => {
             return container.formData;
@@ -5961,13 +6039,13 @@ class Panel {
                 let entryName = entries[ i ].querySelector( ".lexwidgetname" ).innerText;
                 let entryInput = entries[ i ].querySelector( ".lextext input" );
                 entryInput.value = newValue[ entryName ] ?? "";
-                Panel._dispatch_event( entryInput, "focusout", skipCallback );
+                Widget._dispatchEvent( entryInput, "focusout", skipCallback );
             }
         };
 
         // Add widget value
 
-        const element = widget.domEl;
+        const element = widget.root;
 
         let container = document.createElement( 'div' );
         container.className = "lexformdata";
@@ -6056,8 +6134,8 @@ class Panel {
 
         options.hideName = true;
 
-        let widget = this._createWidget( Widget.CONTENT, name, null, options );
-        widget.domEl.appendChild( element );
+        let widget = this._attachWidget( Widget.CONTENT, name, null, options );
+        widget.root.appendChild( element );
 
         return widget;
     }
@@ -6074,8 +6152,8 @@ class Panel {
 
         console.assert( url, "Empty src/url for Image!" );
 
-        let widget = this._createWidget( Widget.IMAGE, name, null, options );
-        const element = widget.domEl;
+        let widget = this._attachWidget( Widget.IMAGE, name, null, options );
+        const element = widget.root;
 
         let container = document.createElement( 'div' );
         container.className = "leximage";
@@ -6114,7 +6192,7 @@ class Panel {
 
     addDropdown( name, values, value, callback, options = {} ) {
 
-        let widget = this._createWidget( Widget.DROPDOWN, name, value, options );
+        let widget = this._attachWidget( Widget.DROPDOWN, name, value, options );
 
         widget.onGetValue = () => {
             return element.querySelector( "li.selected" ).getAttribute( 'value' );
@@ -6129,7 +6207,7 @@ class Panel {
             }
         };
 
-        const element = widget.domEl;
+        const element = widget.root;
         let that = this;
 
         let container = document.createElement( 'div' );
@@ -6440,7 +6518,7 @@ class Panel {
         let defaultValues = JSON.parse( JSON.stringify( values ) );
 
         let that = this;
-        let widget = this._createWidget( Widget.CURVE, name, defaultValues, options );
+        let widget = this._attachWidget( Widget.CURVE, name, defaultValues, options );
 
         widget.onGetValue = () => {
             return JSON.parse(JSON.stringify( curveInstance.element.value ));
@@ -6455,7 +6533,7 @@ class Panel {
             }
         };
 
-        const element = widget.domEl;
+        const element = widget.root;
 
         // Add widget value
 
@@ -6506,7 +6584,7 @@ class Panel {
         let defaultValues = JSON.parse( JSON.stringify( values ) );
 
         let that = this;
-        let widget = this._createWidget( Widget.DIAL, name, defaultValues, options );
+        let widget = this._attachWidget( Widget.DIAL, name, defaultValues, options );
 
         widget.onGetValue = () => {
             return JSON.parse( JSON.stringify( curveInstance.element.value ) );
@@ -6521,7 +6599,7 @@ class Panel {
             }
         };
 
-        const element = widget.domEl;
+        const element = widget.root;
 
         // Add widget value
 
@@ -6565,7 +6643,7 @@ class Panel {
     addLayers( name, value, callback, options = {} ) {
 
         let that = this;
-        let widget = this._createWidget( Widget.LAYERS, name, value, options );
+        let widget = this._attachWidget( Widget.LAYERS, name, value, options );
 
         widget.onGetValue = () => {
             return element.value;
@@ -6580,7 +6658,7 @@ class Panel {
             }
         };
 
-        const element = widget.domEl;
+        const element = widget.root;
 
         // Add widget value
 
@@ -6647,7 +6725,7 @@ class Panel {
 
     addArray( name, values = [], callback, options = {} ) {
 
-        let widget = this._createWidget( Widget.ARRAY, name, null, options );
+        let widget = this._attachWidget( Widget.ARRAY, name, null, options );
 
         widget.onGetValue = () => {
             let array_inputs = element.querySelectorAll("input");
@@ -6666,7 +6744,7 @@ class Panel {
             }
         };
 
-        const element = widget.domEl;
+        const element = widget.root;
         element.style.flexWrap = "wrap";
 
         // Add dropdown array button
@@ -6775,7 +6853,7 @@ class Panel {
 
     addList( name, values, value, callback, options = {} ) {
 
-        let widget = this._createWidget( Widget.LIST, name, value, options );
+        let widget = this._attachWidget( Widget.LIST, name, value, options );
 
         widget.onGetValue = () => {
             return value;
@@ -6827,7 +6905,7 @@ class Panel {
             }
         };
 
-        const element = widget.domEl;
+        const element = widget.root;
 
         // Show list
 
@@ -6864,7 +6942,7 @@ class Panel {
         value = value.replace( /\s/g, '' ).split( ',' );
 
         let defaultValue = [].concat( value );
-        let widget = this._createWidget( Widget.TAGS, name, defaultValue, options );
+        let widget = this._attachWidget( Widget.TAGS, name, defaultValue, options );
 
         widget.onGetValue = () => {
             return [].concat( value );
@@ -6879,7 +6957,7 @@ class Panel {
             }
         };
 
-        const element = widget.domEl;
+        const element = widget.root;
         let that = this;
 
         // Show tags
@@ -6966,7 +7044,7 @@ class Panel {
             throw( "Set Widget Name or at least a label!" );
         }
 
-        let widget = this._createWidget( Widget.CHECKBOX, name, value, options );
+        let widget = this._attachWidget( Widget.CHECKBOX, name, value, options );
 
         widget.onGetValue = () => {
             return value;
@@ -6990,7 +7068,7 @@ class Panel {
             }
         };
 
-        const element = widget.domEl;
+        const element = widget.root;
 
         // Add widget value
 
@@ -7046,7 +7124,7 @@ class Panel {
 
     addToggle( name, value, callback, options = {} ) {
 
-        let widget = this._createWidget( Widget.TOGGLE, name, value, options );
+        let widget = this._attachWidget( Widget.TOGGLE, name, value, options );
 
         widget.onGetValue = () => {
             return toggle.checked;
@@ -7070,7 +7148,7 @@ class Panel {
             }
         };
 
-        const element = widget.domEl;
+        const element = widget.root;
 
         // Add widget value
 
@@ -7128,7 +7206,7 @@ class Panel {
 
     addRadioGroup( name, label, values, callback, options = {} ) {
 
-        let widget = this._createWidget( Widget.RADIO, name, null, options );
+        let widget = this._attachWidget( Widget.RADIO, name, null, options );
         let currentIndex = null;
 
         widget.onGetValue = () => {
@@ -7152,7 +7230,7 @@ class Panel {
             }
         };
 
-        const element = widget.domEl;
+        const element = widget.root;
 
         // Add widget value
         var container = document.createElement( 'div' );
@@ -7213,7 +7291,7 @@ class Panel {
 
         value = ( value.constructor === Array ) ? rgbToHex( value ) : value;
 
-        let widget = this._createWidget( Widget.COLOR, name, value, options );
+        let widget = this._attachWidget( Widget.COLOR, name, value, options );
 
         widget.onGetValue = () => {
             return value;
@@ -7240,7 +7318,7 @@ class Panel {
             }
         };
 
-        const element = widget.domEl;
+        const element = widget.root;
 
         // Add widget value
 
@@ -7273,7 +7351,7 @@ class Panel {
             widget.set( v );
         }, { width: "calc( 100% - 32px )"});
 
-        textWidget.domEl.style.marginLeft = "4px";
+        textWidget.root.style.marginLeft = "4px";
 
         this.clearQueue();
 
@@ -7299,7 +7377,7 @@ class Panel {
 
     addRange( name, value, callback, options = {} ) {
 
-        let widget = this._createWidget( Widget.RANGE, name, value, options );
+        let widget = this._attachWidget( Widget.RANGE, name, value, options );
 
         widget.onGetValue = () => {
             return value;
@@ -7320,7 +7398,7 @@ class Panel {
             }
         };
 
-        const element = widget.domEl;
+        const element = widget.root;
 
         // add widget value
 
@@ -7370,7 +7448,7 @@ class Panel {
             slider.min = newMin ?? slider.min;
             slider.max = newMax ?? slider.max;
             slider.step = newStep ?? slider.step;
-            Panel._dispatch_event( slider, "input", true );
+            Widget._dispatchEvent( slider, "input", true );
         };
 
         if( value.constructor == Number )
@@ -7410,7 +7488,7 @@ class Panel {
 
     addNumber( name, value, callback, options = {} ) {
 
-        let widget = this._createWidget( Widget.NUMBER, name, value, options );
+        let widget = this._attachWidget( Widget.NUMBER, name, value, options );
 
         widget.onGetValue = () => {
             return value;
@@ -7443,7 +7521,7 @@ class Panel {
             }
         };
 
-        const element = widget.domEl;
+        const element = widget.root;
 
         // add widget value
 
@@ -7647,7 +7725,7 @@ class Panel {
         numComponents = clamp( numComponents, 2, 4 );
         value = value ?? new Array( numComponents ).fill( 0 );
 
-        let widget = this._createWidget( Widget.VECTOR, name, [].concat( value ), options );
+        let widget = this._attachWidget( Widget.VECTOR, name, [].concat( value ), options );
 
         widget.onGetValue = () => {
             let inputs = element.querySelectorAll( "input" );
@@ -7681,7 +7759,7 @@ class Panel {
             }
         };
 
-        const element = widget.domEl;
+        const element = widget.root;
         const vectorInputs = [];
 
         // Add widget value
@@ -7737,13 +7815,13 @@ class Panel {
                     for( let v of element.querySelectorAll(".vecinput") )
                     {
                         v.value = round( +v.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ), options.precision );
-                        Panel._dispatch_event( v, "change" );
+                        Widget._dispatchEvent( v, "change" );
                     }
                 }
                 else
                 {
                     this.value = round( +this.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ), options.precision );
-                    Panel._dispatch_event( vecinput, "change" );
+                    Widget._dispatchEvent( vecinput, "change" );
                 }
             }, { passive: false } );
 
@@ -7821,13 +7899,13 @@ class Panel {
                         for( let v of element.querySelectorAll( ".vecinput" ) )
                         {
                             v.value = round( +v.valueAsNumber + mult * dt, options.precision );
-                            Panel._dispatch_event( v, "change" );
+                            Widget._dispatchEvent( v, "change" );
                         }
                     }
                     else
                     {
                         vecinput.value = round( +vecinput.valueAsNumber + mult * dt, options.precision );
-                        Panel._dispatch_event( vecinput, "change" );
+                        Widget._dispatchEvent( vecinput, "change" );
                     }
                 }
 
@@ -7937,7 +8015,7 @@ class Panel {
 
     addSize( name, value, callback, options = {} ) {
 
-        let widget = this._createWidget( Widget.SIZE, name, value, options );
+        let widget = this._attachWidget( Widget.SIZE, name, value, options );
 
         widget.onGetValue = () => {
             const value = [];
@@ -7955,7 +8033,7 @@ class Panel {
             }
         };
 
-        const element = widget.domEl;
+        const element = widget.root;
 
         this.queue( element );
 
@@ -8053,7 +8131,7 @@ class Panel {
 
     addPad( name, value, callback, options = {} ) {
 
-        let widget = this._createWidget( Widget.PAD, name, null, options );
+        let widget = this._attachWidget( Widget.PAD, name, null, options );
 
         widget.onGetValue = () => {
             return thumb.value.xy;
@@ -8068,7 +8146,7 @@ class Panel {
             }
         };
 
-        const element = widget.domEl;
+        const element = widget.root;
 
         var container = document.createElement( 'div' );
         container.className = "lexpad";
@@ -8173,7 +8251,7 @@ class Panel {
 
     addProgress( name, value, options = {} ) {
 
-        let widget = this._createWidget( Widget.PROGRESS, name, value, options );
+        let widget = this._attachWidget( Widget.PROGRESS, name, value, options );
 
         widget.onGetValue = () => {
             return progress.value;
@@ -8188,7 +8266,7 @@ class Panel {
             }
         };
 
-        const element = widget.domEl;
+        const element = widget.root;
 
         var container = document.createElement('div');
         container.className = "lexprogress";
@@ -8310,8 +8388,8 @@ class Panel {
 
     addFile( name, callback, options = { } ) {
 
-        let widget = this._createWidget( Widget.FILE, name, null, options );
-        const element = widget.domEl;
+        let widget = this._attachWidget( Widget.FILE, name, null, options );
+        const element = widget.root;
 
         let local = options.local ?? true;
         let type = options.type ?? 'text';
@@ -8399,8 +8477,8 @@ class Panel {
 
         options.hideName = true;
 
-        const widget = this._createWidget( Widget.TREE, name, null, options );
-        const element = widget.domEl;
+        const widget = this._attachWidget( Widget.TREE, name, null, options );
+        const element = widget.root;
 
         let container = document.createElement('div');
         container.className = "lextree";
@@ -8482,7 +8560,7 @@ class Panel {
         element.className = "lexseparator";
 
         let widget = new Widget( Widget.SEPARATOR );
-        widget.domEl = element;
+        widget.root = element;
 
         if( this._currentBranch )
         {
@@ -8510,8 +8588,8 @@ class Panel {
 
     addTabs( tabs, options = {} ) {
 
-        const widget = this._createWidget( Widget.TABS, null, null, options );
-        const element = widget.domEl;
+        const widget = this._attachWidget( Widget.TABS, null, null, options );
+        const element = widget.root;
 
         if( tabs.constructor != Array )
         {
@@ -8598,7 +8676,7 @@ class Panel {
 
     addCounter( name, value, callback, options = { } ) {
 
-        let widget = this._createWidget( Widget.COUNTER, name, value, options );
+        let widget = this._attachWidget( Widget.COUNTER, name, value, options );
 
         widget.onGetValue = () => {
             return counterText.count;
@@ -8614,7 +8692,7 @@ class Panel {
             }
         };
 
-        const element = widget.domEl;
+        const element = widget.root;
 
         const min = options.min ?? 0;
         const max = options.max ?? 100;
@@ -8685,7 +8763,7 @@ class Panel {
             throw( "Data is needed to create a table!" );
         }
 
-        let widget = this._createWidget( Widget.TABLE, name, null, options );
+        let widget = this._attachWidget( Widget.TABLE, name, null, options );
 
         widget.onGetValue = () => {
 
@@ -8695,7 +8773,7 @@ class Panel {
 
         };
 
-        const element = widget.domEl;
+        const element = widget.root;
 
         const container = document.createElement('div');
         container.className = "lextable";
@@ -9096,7 +9174,7 @@ class Branch {
         for( var i = 0; i < this.widgets.length; i++ )
         {
             let widget = this.widgets[ i ];
-            const element = widget.domEl;
+            const element = widget.root;
 
             if( element.children.length < 2 )
             {

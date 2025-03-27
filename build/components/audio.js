@@ -39,7 +39,7 @@ Panel.prototype.addKnob = function( name, value, min, max, callback, options = {
         Panel._dispatch_event( innerKnobCircle, "change", skipCallback );
     };
 
-    let element = widget.domEl;
+    let element = widget.root;
 
     const snapEnabled = ( options.snap && options.snap.constructor == Number );
     const ticks = [];
