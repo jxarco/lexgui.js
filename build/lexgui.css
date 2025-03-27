@@ -2395,7 +2395,9 @@ input[type=number] {
     list-style-type: none;
     align-items: center;
     line-height: 25px;
-    display: flex;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     cursor: pointer;
     outline: none;
     border-radius: 6px;
