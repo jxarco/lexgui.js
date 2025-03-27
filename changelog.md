@@ -2,6 +2,8 @@
 
 ## dev
 
+Started Notifications docs.
+
 ## 0.4.2 (master)
 
 Widgets:

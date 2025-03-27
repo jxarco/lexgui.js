@@ -1047,7 +1047,7 @@ LX.setCommandbarState = setCommandbarState;
  * @method message
  * @param {String} text
  * @param {String} title (Optional)
- * @param {*} options
+ * @param {Object} options
  * id: Id of the message dialog
  * position: Dialog position in screen [screen centered]
  * draggable: Dialog can be dragged [false]
@@ -1073,7 +1073,7 @@ LX.message = message;
  * @method popup
  * @param {String} text
  * @param {String} title (Optional)
- * @param {*} options
+ * @param {Object} options
  * id: Id of the message dialog
  * timeout (Number): Delay time before it closes automatically (ms). Default: [3000]
  * position (Array): [x,y] Dialog position in screen. Default: [screen centered]
@@ -1108,7 +1108,7 @@ LX.popup = popup;
  * @method prompt
  * @param {String} text
  * @param {String} title (Optional)
- * @param {*} options
+ * @param {Object} options
  * id: Id of the prompt dialog
  * position: Dialog position in screen [screen centered]
  * draggable: Dialog can be dragged [false]
@@ -1168,7 +1168,7 @@ LX.prompt = prompt;
  * @method toast
  * @param {String} title
  * @param {String} description (Optional)
- * @param {*} options
+ * @param {Object} options
  * action: Data of the custom action { name, callback }
  * closable: Allow closing the toast
  * timeout: Time in which the toast closed automatically, in ms. -1 means persistent. [3000]
@@ -1263,7 +1263,7 @@ LX.toast = toast;
  * @method badge
  * @param {String} text
  * @param {String} className
- * @param {*} options
+ * @param {Object} options
  * style: Style attributes to override
  */
 
@@ -1420,7 +1420,7 @@ class Area {
 
     /**
      * @constructor Area
-     * @param {*} options
+     * @param {Object} options
      * id: Id of the element
      * className: Add class to the element
      * width: Width of the area element [fit space]
@@ -1637,7 +1637,7 @@ class Area {
 
     /**
      * @method split
-     * @param {*} options
+     * @param {Object} options
      * type: Split mode (horizontal, vertical) ["horizontal"]
      * sizes: Size of each new area (Array) ["50%", "50%"]
      */
@@ -2011,7 +2011,7 @@ class Area {
 
     /**
      * @method addPanel
-     * @param {*} options
+     * @param {Object} options
      * Options to create a Panel
      */
 
@@ -2025,7 +2025,7 @@ class Area {
     /**
      * @method addMenubar
      * @param {Function} callback Function to fill the menubar
-     * @param {*} options:
+     * @param {Object} options:
      * float: Justify content (left, center, right) [left]
      * sticky: Fix menubar at the top [true]
      */
@@ -2090,7 +2090,7 @@ class Area {
     /**
      * @method addOverlayButtons
      * @param {Array} buttons Buttons info
-     * @param {*} options:
+     * @param {Object} options:
      * float: Where to put the buttons (h: horizontal, v: vertical, t: top, m: middle, b: bottom, l: left, c: center, r: right) [htc]
      */
 
@@ -2241,7 +2241,7 @@ class Area {
 
     /**
      * @method addTabs
-     * @param {*} options:
+     * @param {Object} options:
      */
 
     addTabs( options = {} ) {
@@ -3183,7 +3183,7 @@ class Menubar {
     /**
      * @method addButton
      * @param {Array} buttons
-     * @param {*} options
+     * @param {Object} options
      * float: center (Default), right
      */
 
@@ -4697,7 +4697,7 @@ class NodeTree {
 class Panel {
 
     /**
-     * @param {*} options
+     * @param {Object} options
      * id: Id of the element
      * className: Add class to the element
      * width: Width of the panel element [fit space]
@@ -4910,7 +4910,7 @@ class Panel {
     /**
      * @method branch
      * @param {String} name Name of the branch/section
-     * @param {*} options
+     * @param {Object} options
      * id: Id of the branch
      * className: Add class to the branch
      * closed: Set branch collapsed/opened [false]
@@ -5338,7 +5338,7 @@ class Panel {
     /**
      * @method addTitle
      * @param {String} name Title name
-     * @param {*} options:
+     * @param {Object} options:
      * link: Href in case title is an hyperlink
      * target: Target name of the iframe (if any)
      * icon: FA class of the icon (if any)
@@ -5389,7 +5389,7 @@ class Panel {
      * @param {String} name Widget name
      * @param {String} value Text value
      * @param {Function} callback Callback function on change
-     * @param {*} options:
+     * @param {Object} options:
      * hideName: Don't use name as label [false]
      * disabled: Make the widget disabled [false]
      * required: Make the input required
@@ -5666,7 +5666,7 @@ class Panel {
      * @param {String} name Widget name
      * @param {String} value Button name
      * @param {Function} callback Callback function on click
-     * @param {*} options:
+     * @param {Object} options:
      * hideName: Don't use name as label [false]
      * disabled: Make the widget disabled [false]
      * icon: Icon class to show as button value
@@ -5741,7 +5741,7 @@ class Panel {
      * @method addComboButtons
      * @param {String} name Widget name
      * @param {Array} values Each of the {value, callback, selected, disabled} items
-     * @param {*} options:
+     * @param {Object} options:
      * hideName: Don't use name as label [false]
      * float: Justify content (left, center, right) [center]
      * @legacy selected: Selected item by default by value
@@ -5837,7 +5837,7 @@ class Panel {
     /**
      * @method addCard
      * @param {String} name Card Name
-     * @param {*} options:
+     * @param {Object} options:
      * text: Card text
      * link: Card link
      * title: Card dom title
@@ -5905,7 +5905,7 @@ class Panel {
      * @param {String} name Widget name
      * @param {Object} data Form data
      * @param {Function} callback Callback function on submit form
-     * @param {*} options:
+     * @param {Object} options:
      * actionName: Text to be shown in the button
      */
 
@@ -6044,7 +6044,7 @@ class Panel {
      * @method addImage
      * @param {String} name Widget name
      * @param {String} url Image Url
-     * @param {*} options
+     * @param {Object} options
      * hideName: Don't use name as label [false]
      */
 
@@ -6081,7 +6081,7 @@ class Panel {
      * @param {Array} values Posible options of the dropdown widget -> String (for default dropdown) or Object = {value, url} (for images, gifs..)
      * @param {String} value Select by default option
      * @param {Function} callback Callback function on change
-     * @param {*} options:
+     * @param {Object} options:
      * hideName: Don't use name as label [false]
      * filter: Add a search bar to the widget [false]
      * disabled: Make the widget disabled [false]
@@ -6402,7 +6402,7 @@ class Panel {
      * @param {String} name Widget name
      * @param {Array of Array} values Array of 2N Arrays of each value of the curve
      * @param {Function} callback Callback function on change
-     * @param {*} options:
+     * @param {Object} options:
      * skipReset: Don't add the reset value button when value changes
      * bgColor: Widget background color
      * pointsColor: Curve points color
@@ -6468,7 +6468,7 @@ class Panel {
      * @param {String} name Widget name
      * @param {Array of Array} values Array of 2N Arrays of each value of the dial
      * @param {Function} callback Callback function on change
-     * @param {*} options:
+     * @param {Object} options:
      * skipReset: Don't add the reset value button when value changes
      * bgColor: Widget background color
      * pointsColor: Curve points color
@@ -6619,7 +6619,7 @@ class Panel {
      * @param {String} name Widget name
      * @param {Array} values By default values in the array
      * @param {Function} callback Callback function on change
-     * @param {*} options:
+     * @param {Object} options:
      * innerValues (Array): Use dropdown mode and use values as options
      */
 
@@ -6747,7 +6747,7 @@ class Panel {
      * @param {Array} values List values
      * @param {String} value Selected list value
      * @param {Function} callback Callback function on change
-     * @param {*} options:
+     * @param {Object} options:
      * hideName: Don't use name as label [false]
      */
 
@@ -6833,7 +6833,7 @@ class Panel {
      * @param {String} name Widget name
      * @param {String} value Comma separated tags
      * @param {Function} callback Callback function on change
-     * @param {*} options:
+     * @param {Object} options:
      * hideName: Don't use name as label [false]
      */
 
@@ -6930,7 +6930,7 @@ class Panel {
      * @param {String} name Widget name
      * @param {Boolean} value Value of the checkbox
      * @param {Function} callback Callback function on change
-     * @param {*} options:
+     * @param {Object} options:
      * disabled: Make the widget disabled [false]
      * label: Checkbox label
      * suboptions: Callback to add widgets in case of TRUE value
@@ -7016,7 +7016,7 @@ class Panel {
      * @param {String} name Widget name
      * @param {Boolean} value Value of the checkbox
      * @param {Function} callback Callback function on change
-     * @param {*} options:
+     * @param {Object} options:
      * disabled: Make the widget disabled [false]
      * suboptions: Callback to add widgets in case of TRUE value
      * className: Customize colors
@@ -7098,7 +7098,7 @@ class Panel {
      * @param {String} label Radio label
      * @param {Array} values Radio options
      * @param {Function} callback Callback function on change
-     * @param {*} options:
+     * @param {Object} options:
      * disabled: Make the widget disabled [false]
      * className: Customize colors
      * selected: Index of the default selected option
@@ -7182,7 +7182,7 @@ class Panel {
      * @param {String} name Widget name
      * @param {String} value Default color (hex)
      * @param {Function} callback Callback function on change
-     * @param {*} options:
+     * @param {Object} options:
      * disabled: Make the widget disabled [false]
      * useRGB: The callback returns color as Array (r, g, b) and not hex [false]
      */
@@ -7265,7 +7265,7 @@ class Panel {
      * @param {String} name Widget name
      * @param {Number} value Default number value
      * @param {Function} callback Callback function on change
-     * @param {*} options:
+     * @param {Object} options:
      * hideName: Don't use name as label [false]
      * className: Extra classes to customize style
      * disabled: Make the widget disabled [false]
@@ -7374,7 +7374,7 @@ class Panel {
      * @param {String} name Widget name
      * @param {Number} value Default number value
      * @param {Function} callback Callback function on change
-     * @param {*} options:
+     * @param {Object} options:
      * hideName: Don't use name as label [false]
      * disabled: Make the widget disabled [false]
      * step: Step of the input
@@ -7879,7 +7879,7 @@ class Panel {
      * @param {String} name Widget name
      * @param {Array} value Array of N components
      * @param {Function} callback Callback function on change
-     * @param {*} options:
+     * @param {Object} options:
      * disabled: Make the widget disabled [false]
      * step: Step of the inputs
      * min, max: Min and Max values for the inputs
@@ -7907,7 +7907,7 @@ class Panel {
      * @param {String} name Widget name
      * @param {Number} value Default number value
      * @param {Function} callback Callback function on change
-     * @param {*} options:
+     * @param {Object} options:
      * hideName: Don't use name as label [false]
      * disabled: Make the widget disabled [false]
      * units: Unit as string added to the end of the value
@@ -8021,7 +8021,7 @@ class Panel {
      * @param {String} name Widget name
      * @param {Array} value Pad value
      * @param {Function} callback Callback function on change
-     * @param {*} options:
+     * @param {Object} options:
      * disabled: Make the widget disabled [false]
      * min, max: Min and Max values
      * padSize: Size of the pad (css)
@@ -8141,7 +8141,7 @@ class Panel {
      * @method addProgress
      * @param {String} name Widget name
      * @param {Number} value Progress value
-     * @param {*} options:
+     * @param {Object} options:
      * min, max: Min and Max values
      * low, optimum, high: Low and High boundary values, Optimum point in the range
      * showValue: Show current value
@@ -8279,7 +8279,7 @@ class Panel {
      * @method addFile
      * @param {String} name Widget name
      * @param {Function} callback Callback function on change
-     * @param {*} options:
+     * @param {Object} options:
      * local: Ask for local file
      * disabled: Make the widget disabled [false]
      * read: Return the file itself (False) or the contents (True)
@@ -8366,7 +8366,7 @@ class Panel {
      * @method addTree
      * @param {String} name Widget name
      * @param {Object} data Data of the tree
-     * @param {*} options:
+     * @param {Object} options:
      * icons: Array of objects with icon button information {name, icon, callback}
      * filter: Add nodes filter [true]
      * rename: Boolean to allow rename [true]
@@ -8481,7 +8481,7 @@ class Panel {
      *      onCreate: Func to be called at tab creation
      *      onSelect: Func to be called on select tab (optional)
      * }
-     * @param {*} options
+     * @param {Object} options
      * vertical: Use vertical or horizontal tabs (vertical by default)
      * showNames: Show tab name only in horizontal tabs
      */
@@ -8567,7 +8567,7 @@ class Panel {
      * @param {String} name Widget name
      * @param {Number} value Counter value
      * @param {Function} callback Callback function on change
-     * @param {*} options:
+     * @param {Object} options:
      * disabled: Make the widget disabled [false]
      * min, max: Min and Max values
      * step: Step for adding/substracting
@@ -8647,7 +8647,7 @@ class Panel {
      * @method addTable
      * @param {String} name Widget name
      * @param {Number} data Table data
-     * @param {*} options:
+     * @param {Object} options:
      * hideName: Don't use name as label [false]
      * head: Table headers (each of the headers per column)
      * body: Table body (data per row for each column)
@@ -9113,7 +9113,7 @@ LX.Branch = Branch;
 
 class Footer {
     /**
-     * @param {*} options:
+     * @param {Object} options:
      * columns: Array with data per column { title, items: [ { title, link } ]  }
      * credits: html string
      * socials: Array with data per item { title, link, iconHtml }
