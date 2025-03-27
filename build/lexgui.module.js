@@ -1,5 +1,3 @@
-'use strict';
-
 // Lexgui.js @jxarco
 
 /**
@@ -1305,7 +1303,7 @@ LX.makeContainer = makeContainer;
 
 class IEvent {
 
-    constructor(name, value, domEvent) {
+    constructor( name, value, domEvent ) {
         this.name = name;
         this.value = value;
         this.domEvent = domEvent;
@@ -4088,7 +4086,10 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
             instance = newValue;
             refresh_widget();
             element.querySelector( ".lexcustomitems" ).toggleAttribute( 'hidden', false );
-            if( !skipCallback ) this._trigger( new IEvent( name, instance, null ), callback );
+            if( !skipCallback )
+            {
+                this._trigger( new IEvent( name, instance, event ), callback );
+            }
         };
 
         const element = widget.domEl;
@@ -5255,10 +5256,14 @@ class Panel {
     _trigger( event, callback ) {
 
         if( callback )
+        {
             callback.call( this, event.value, event.domEvent, event.name );
+        }
 
         if( this.onevent )
+        {
             this.onevent.call( this, event );
+        }
     }
 
     /**
@@ -5399,21 +5404,40 @@ class Panel {
 
     addText( name, value, callback, options = {} ) {
 
-        let widget = this._createWidget( Widget.TEXT, name, value, options );
+        let widget = this._createWidget( Widget.TEXT, name, String( value ), options );
 
         widget.onGetValue = () => {
-            return wValue.value;
+            return value;
         };
 
         widget.onSetValue = ( newValue, skipCallback, event ) => {
-            this.disabled ? wValue.innerText = newValue : wValue.value = newValue;
-            Panel._dispatch_event( wValue, "focusout", skipCallback );
+
+            if( !widget.valid( newValue ) || ( this._lastValueTriggered == newValue ) )
+            {
+                return;
+            }
+
+            this._lastValueTriggered = value = newValue;
+
+            if( options.disabled  )
+            {
+                wValue.innerText = newValue;
+            }
+            else
+            {
+                wValue.value = newValue;
+            }
+
+            if( !skipCallback )
+            {
+                this._trigger( new IEvent( name, newValue, event ), callback );
+            }
         };
 
-        widget.valid = () => {
-            if( wValue.pattern == "" ) { return true; }
+        widget.valid = ( v ) => {
+            if( !v.length || wValue.pattern == "" ) return true;
             const regexp = new RegExp( wValue.pattern );
-            return regexp.test( wValue.value );
+            return regexp.test( v );
         };
 
         const element = widget.domEl;
@@ -5453,24 +5477,6 @@ class Panel {
                 wValue.setAttribute( "pattern", options.pattern );
             }
 
-            const resolve = ( val, event ) => {
-
-                if( !widget.valid() || ( this._lastValueTriggered == val ) )
-                {
-                    return;
-                }
-
-                const skipCallback = event.detail;
-                let btn = element.querySelector( ".lexwidgetname .lexicon" );
-                if( btn ) btn.style.display = ( val != wValue.iValue ? "block" : "none" );
-                if( !skipCallback )
-                {
-                    this._trigger( new IEvent( name, val, event ), callback );
-                }
-
-                this._lastValueTriggered = val;
-            };
-
             const trigger = options.trigger ?? "default";
 
             if( trigger == "default" )
@@ -5478,18 +5484,18 @@ class Panel {
                 wValue.addEventListener( "keyup", function( e ){
                     if( e.key == "Enter" )
                     {
-                        resolve( e.target.value, e );
+                        wValue.blur();
                     }
                 });
 
                 wValue.addEventListener( "focusout", function( e ){
-                    resolve( e.target.value, e );
+                    widget.set( e.target.value, false, e );
                 });
             }
             else if( trigger == "input" )
             {
                 wValue.addEventListener("input", function( e ){
-                    resolve( e.target.value, e );
+                    widget.set( e.target.value, false, e );
                 });
             }
 
@@ -5559,25 +5565,30 @@ class Panel {
         let widget = this._createWidget( Widget.TEXTAREA, name, value, options );
 
         widget.onGetValue = () => {
-            return wValue.value;
+            return value;
         };
 
         widget.onSetValue = ( newValue, skipCallback, event ) => {
-            wValue.value = newValue;
-            Panel._dispatch_event( wValue, "focusout", skipCallback );
+
+            wValue.value = value = newValue;
+
+            if( !skipCallback )
+            {
+                this._trigger( new IEvent( name, newValue, event ), callback );
+            }
         };
 
         const element = widget.domEl;
 
         // Add widget value
 
-        let container = document.createElement( 'div' );
+        let container = document.createElement( "div" );
         container.className = "lextextarea";
         container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
         container.style.height = options.height;
         container.style.display = "flex";
 
-        let wValue = document.createElement( 'textarea' );
+        let wValue = document.createElement( "textarea" );
         wValue.value = wValue.iValue = value || "";
         wValue.style.width = "100%";
         wValue.style.textAlign = options.float ?? "";
@@ -5586,29 +5597,25 @@ class Panel {
         if( options.disabled ?? false ) wValue.setAttribute( "disabled", true );
         if( options.placeholder ) wValue.setAttribute( "placeholder", options.placeholder );
 
-        var resolve = (function( val, event ) {
-            const skipCallback = event.detail;
-            let btn = element.querySelector( ".lexwidgetname .lexicon" );
-            if( btn ) btn.style.display = ( val != wValue.iValue ? "block" : "none" );
-            if( !skipCallback ) this._trigger( new IEvent( name, val, event ), callback );
-        }).bind( this );
+        const trigger = options.trigger ?? "default";
 
-        const trigger = options.trigger ?? 'default';
-
-        if( trigger == 'default' )
+        if( trigger == "default" )
         {
             wValue.addEventListener("keyup", function( e ) {
-                if(e.key == 'Enter')
-                    resolve( e.target.value, e );
+                if( e.key == "Enter" )
+                {
+                    wValue.blur();
+                }
             });
+
             wValue.addEventListener("focusout", function( e ) {
-                resolve( e.target.value, e );
+                widget.set( e.target.value, false, e );
             });
         }
-        else if( trigger == 'input' )
+        else if( trigger == "input" )
         {
             wValue.addEventListener("input", function( e ) {
-                resolve( e.target.value, e );
+                widget.set( e.target.value, false, e );
             });
         }
 
@@ -5616,7 +5623,7 @@ class Panel {
         {
             let icon = document.createElement('a');
             icon.className = "inputicon " + options.icon;
-            container.appendChild(icon);
+            container.appendChild( icon );
         }
 
         container.appendChild( wValue );
@@ -6094,7 +6101,10 @@ class Panel {
         widget.onSetValue = ( newValue, skipCallback, event ) => {
             value = newValue;
             list.querySelectorAll( 'li' ).forEach( e => { if( e.getAttribute('value') == value ) e.click() } );
-            if( !skipCallback ) this._trigger( new IEvent( name, value, null ), callback );
+            if( !skipCallback )
+            {
+                this._trigger( new IEvent( name, value, event ), callback );
+            }
         };
 
         const element = widget.domEl;
@@ -6417,7 +6427,10 @@ class Panel {
         widget.onSetValue = ( newValue, skipCallback, event ) => {
             curveInstance.element.value = JSON.parse( JSON.stringify( newValue ) );
             curveInstance.redraw();
-            if( !skipCallback ) that._trigger( new IEvent( name, curveInstance.element.value, null ), callback );
+            if( !skipCallback )
+            {
+                that._trigger( new IEvent( name, curveInstance.element.value, event ), callback );
+            }
         };
 
         const element = widget.domEl;
@@ -6480,7 +6493,10 @@ class Panel {
         widget.onSetValue = ( newValue, skipCallback, event ) => {
             curveInstance.element.value = JSON.parse( JSON.stringify( newValue ) );
             curveInstance.redraw();
-            if( !skipCallback ) that._trigger( new IEvent( name, curveInstance.element.value, null ), callback );
+            if( !skipCallback )
+            {
+                that._trigger( new IEvent( name, curveInstance.element.value, event ), callback );
+            }
         };
 
         const element = widget.domEl;
@@ -6536,7 +6552,10 @@ class Panel {
         widget.onSetValue = ( newValue, skipCallback, event ) => {
             value = element.value = newValue;
             setLayers();
-            if( !skipCallback ) that._trigger( new IEvent(name, value), callback );
+            if( !skipCallback )
+            {
+                that._trigger( new IEvent(name, value, event), callback );
+            }
         };
 
         const element = widget.domEl;
@@ -6619,7 +6638,10 @@ class Panel {
         widget.onSetValue = ( newValue, skipCallback, event ) => {
             values = newValue;
             updateItems();
-            if( !skipCallback ) this._trigger( new IEvent(name, values, null), callback );
+            if( !skipCallback )
+            {
+                this._trigger( new IEvent( name, values, event ), callback );
+            }
         };
 
         const element = widget.domEl;
@@ -6740,10 +6762,16 @@ class Panel {
         widget.onSetValue = ( newValue, skipCallback, event ) => {
             listContainer.querySelectorAll( '.lexlistitem' ).forEach( e => e.classList.remove( 'selected' ) );
             const idx = values.indexOf( newValue );
-            if( idx == -1 ) return;
+            if( idx == -1 )
+            {
+                return;
+            }
             listContainer.children[ idx ].classList.toggle( 'selected' );
             value = newValue;
-            if( !skipCallback ) this._trigger( new IEvent( name, newValue ), callback );
+            if( !skipCallback )
+            {
+                this._trigger( new IEvent( name, newValue, event ), callback );
+            }
         };
 
         widget.updateValues = ( newValues ) => {
@@ -6823,7 +6851,10 @@ class Panel {
         widget.onSetValue = ( newValue, skipCallback, event ) => {
             value = [].concat( newValue );
             _generateTags();
-            if( !skipCallback ) that._trigger( new IEvent( name, value ), callback );
+            if( !skipCallback )
+            {
+                that._trigger( new IEvent( name, value, event ), callback );
+            }
         };
 
         const element = widget.domEl;
@@ -6916,14 +6947,24 @@ class Panel {
         let widget = this._createWidget( Widget.CHECKBOX, name, value, options );
 
         widget.onGetValue = () => {
-            return checkbox.checked;
+            return value;
         };
 
         widget.onSetValue = ( newValue, skipCallback, event ) => {
-            if( checkbox.checked !== newValue )
+
+            if( newValue == value )
             {
-                checkbox.checked = newValue;
-                Panel._dispatch_event( checkbox, "change", skipCallback );
+                return;
+            }
+
+            checkbox.checked = value = newValue;
+
+            // Update suboptions menu
+            element.querySelector( ".lexcheckboxsubmenu" )?.toggleAttribute( 'hidden', !newValue );
+
+            if( !skipCallback )
+            {
+                this._trigger( new IEvent( name, newValue, event ), callback );
             }
         };
 
@@ -6931,17 +6972,16 @@ class Panel {
 
         // Add widget value
 
-        var container = document.createElement('div');
+        var container = document.createElement( "div" );
         container.className = "lexcheckboxcont";
 
-        let checkbox = document.createElement('input');
+        let checkbox = document.createElement( "input" );
         checkbox.type = "checkbox";
         checkbox.className = "lexcheckbox " + ( options.className ?? "" );
         checkbox.checked = value;
-        checkbox.iValue = value;
         checkbox.disabled = options.disabled ?? false;
 
-        let valueName = document.createElement( 'span' );
+        let valueName = document.createElement( "span" );
         valueName.className = "checkboxtext";
         valueName.innerHTML = options.label ?? "On";
 
@@ -6949,21 +6989,7 @@ class Panel {
         container.appendChild( valueName );
 
         checkbox.addEventListener( "change" , e => {
-
-            const skipCallback = ( e.detail?.constructor == Number ? null : e.detail );
-
-            // Reset button (default value)
-            if( !skipCallback )
-            {
-                let btn = element.querySelector( ".lexwidgetname .lexicon" );
-                if( btn ) btn.style.display = checkbox.checked != checkbox.iValue ? "block": "none";
-            }
-
-            // Open suboptions
-            let submenu = element.querySelector( ".lexcheckboxsubmenu" );
-            if( submenu ) submenu.toggleAttribute( 'hidden', !checkbox.checked );
-
-            if( !skipCallback ) this._trigger( new IEvent( name, checkbox.checked, e ), callback );
+            widget.set( checkbox.checked, false, e );
         });
 
         element.appendChild( container );
@@ -6971,9 +6997,9 @@ class Panel {
         if( options.suboptions )
         {
             element.style.flexWrap = "wrap";
-            let suboptions = document.createElement('div');
+            let suboptions = document.createElement( "div" );
             suboptions.className = "lexcheckboxsubmenu";
-            suboptions.toggleAttribute( 'hidden', !checkbox.checked );
+            suboptions.toggleAttribute( "hidden", !checkbox.checked );
 
             this.queue( suboptions );
             options.suboptions.call(this, this);
@@ -7005,10 +7031,20 @@ class Panel {
         };
 
         widget.onSetValue = ( newValue, skipCallback, event ) => {
-            if( toggle.checked !== newValue )
+
+            if( newValue == value )
             {
-                toggle.checked = newValue;
-                Panel._dispatch_event( toggle, "change", skipCallback );
+                return;
+            }
+
+            toggle.checked = value = newValue;
+
+            // Update suboptions menu
+            element.querySelector( ".lextogglesubmenu" )?.toggleAttribute( 'hidden', !newValue );
+
+            if( !skipCallback )
+            {
+                this._trigger( new IEvent( name, newValue, event ), callback );
             }
         };
 
@@ -7034,21 +7070,7 @@ class Panel {
         container.appendChild( valueName );
 
         toggle.addEventListener( "change" , e => {
-
-            const skipCallback = ( e.detail?.constructor == Number ? null : e.detail );
-
-            // Reset button (default value)
-            if( !skipCallback )
-            {
-                let btn = element.querySelector( ".lexwidgetname .lexicon" );
-                if( btn ) btn.style.display = toggle.checked != toggle.iValue ? "block": "none";
-            }
-
-            // Open suboptions
-            let submenu = element.querySelector( ".lextogglesubmenu" );
-            if( submenu ) submenu.toggleAttribute( 'hidden', !toggle.checked );
-
-            if( !skipCallback ) this._trigger( new IEvent( name, toggle.checked, e ), callback );
+            widget.set( toggle.checked, false, e );
         });
 
         element.appendChild( container );
