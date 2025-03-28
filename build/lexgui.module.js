@@ -4125,7 +4125,18 @@ class Widget {
             if( resetButton )
             {
                 resetButton.style.display = ( value != this.value() ? "block" : "none" );
-                resetButton.style.display = ( value != this._initialValue ? "block" : "none" );
+
+                const equalInitial = value.constructor === Array ? (function arraysEqual(a, b) {
+                    if (a === b) return true;
+                    if (a == null || b == null) return false;
+                    if (a.length !== b.length) return false;
+                    for (var i = 0; i < a.length; ++i) {
+                        if (a[i] !== b[i]) return false;
+                    }
+                    return true;
+                })( value, this._initialValue ) : ( value == this._initialValue );
+
+                resetButton.style.display = ( !equalInitial ? "block" : "none" );
             }
 
             return this.onSetValue( value, skipCallback ?? false, event );
@@ -4214,9 +4225,10 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
     let custom_idx = simple_guidGenerator();
 
     Panel.prototype[ 'add' + customWidgetName ] = function( name, instance, callback ) {
-        const w = new Widget();
-        return this._attachWidget( w );
-        let widget = this._attachWidget( Widget.CUSTOM, name, null, options );
+
+        let widget = new Widget( Widget.CUSTOM, name, null, options );
+        this._attachWidget( widget );
+
         widget.customName = customWidgetName;
         widget.customIdx = custom_idx;
 
@@ -4237,7 +4249,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
         const element = widget.root;
         element.style.flexWrap = "wrap";
 
-        let container, custom_widgets;
+        let container, customWidgetsDom;
         let default_instance = options.default ?? {};
 
         // Add instance button
@@ -4249,14 +4261,12 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                 widget.instance = instance = Object.assign(deepCopy(default_instance), instance);
             }
 
-            if(container) container.remove();
-            if(custom_widgets) custom_widgets.remove();
+            if( container ) container.remove();
+            if( customWidgetsDom ) customWidgetsDom.remove();
 
             container = document.createElement('div');
             container.className = "lexcustomcontainer";
             container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
-
-            this.queue(container);
 
             let buttonName = "<a class='fa-solid " + (options.icon ?? "fa-cube")  + "' style='float:left'></a>";
             buttonName += customWidgetName + (!instance ? " [empty]" : "");
@@ -4281,10 +4291,11 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
 
             }, { buttonClass: 'custom' });
 
-            this.clearQueue();
+            container.appendChild( buttonEl.root );
 
-            if(instance)
-                buttonEl.querySelector('a.menu').addEventListener('click', e => {
+            if( instance )
+            {
+                buttonEl.root.querySelector('a.menu').addEventListener('click', e => {
                     e.stopImmediatePropagation();
                     e.stopPropagation();
                     addContextMenu(null, e, c => {
@@ -4294,20 +4305,20 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                         });
                     });
                 });
+            }
 
             // Show elements
 
-            custom_widgets = document.createElement('div');
-            custom_widgets.className = "lexcustomitems";
-            custom_widgets.toggleAttribute('hidden', true);
+            customWidgetsDom = document.createElement('div');
+            customWidgetsDom.className = "lexcustomitems";
+            customWidgetsDom.toggleAttribute('hidden', true);
 
             element.appendChild( container );
-            element.appendChild( custom_widgets );
+            element.appendChild( customWidgetsDom );
 
             if( instance )
             {
-
-                this.queue( custom_widgets );
+                this.queue( customWidgetsDom );
 
                 const on_instance_changed = ( key, value, event ) => {
                     instance[ key ] = value;
@@ -4323,7 +4334,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                         case String:
                             if( value[ 0 ] === '#' )
                             {
-                                this.addColorInput( key, value, on_instance_changed.bind( this, key ) );
+                                this.addColor( key, value, on_instance_changed.bind( this, key ) );
                             }
                             else
                             {
@@ -4331,7 +4342,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                             }
                             break;
                         case Number:
-                            this.addNumberInput( key, value, on_instance_changed.bind( this, key ) );
+                            this.addNumber( key, value, on_instance_changed.bind( this, key ) );
                             break;
                         case Boolean:
                             this.addCheckbox( key, value, on_instance_changed.bind( this, key ) );
@@ -4339,11 +4350,11 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                         case Array:
                             if( value.length > 4 )
                             {
-                                this.addItemArray( key, value, on_instance_changed.bind( this, key ) );
+                                this.addArray( key, value, on_instance_changed.bind( this, key ) );
                             }
                             else
                             {
-                                this._add_vector( value.length, key, value, on_instance_changed.bind( this, key ) );
+                                // this._addVector( value.length, key, value, on_instance_changed.bind( this, key ) );
                             }
                             break;
                     }
@@ -5215,7 +5226,7 @@ class ComboButtons extends Widget {
 
         const shouldSelect = !( options.noSelection ?? false );
         let shouldToggle = shouldSelect && ( options.toggle ?? false );
-        
+
         let container = document.createElement('div');
         container.className = "lexcombobuttons ";
 
@@ -5231,7 +5242,7 @@ class ComboButtons extends Widget {
         let currentValue = null;
         let buttonsBox = document.createElement('div');
         buttonsBox.className = "lexcombobuttonsbox ";
-        
+
         for( let b of values )
         {
             if( !b.value )
@@ -5279,14 +5290,14 @@ class ComboButtons extends Widget {
                         buttonEl.classList.add( "selected" );
                     }
                 }
-                
+
                 container.querySelectorAll( "button" ).forEach( s => {
-                  
+
                     if( s.classList.contains( "selected" ) )
                     {
                         currentValue.push( s.dataset[ "value" ] );
                     }
-                    
+
                 } );
 
                 if( !shouldToggle && currentValue.length > 1 )
@@ -5319,7 +5330,7 @@ class ComboButtons extends Widget {
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
-            
+
             if( shouldSelect && ( event == undefined ) )
             {
                 container.querySelectorAll( "button" ).forEach( s => s.classList.remove( "selected" ));
@@ -7016,8 +7027,264 @@ class NumberInput extends Widget {
 
 LX.NumberInput = NumberInput;
 
-// TODO
-// Vector Inputs
+/**
+ * @class Vector
+ * @description Vector Widget
+ */
+
+class Vector extends Widget {
+
+    constructor( numComponents, name, value, callback, options = {} ) {
+
+        numComponents = clamp( numComponents, 2, 4 );
+        value = value ?? new Array( numComponents ).fill( 0 );
+
+        super( Widget.VECTOR, name, [].concat( value ), options );
+
+        this.onGetValue = () => {
+            let inputs = this.root.querySelectorAll( "input" );
+            let value = [];
+            for( var v of inputs )
+            {
+                value.push( +v.value );
+            }
+            return value;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+
+            if( vectorInputs.length != newValue.length )
+            {
+                console.error( "Input length does not match vector length." );
+                return;
+            }
+
+            for( let i = 0; i < vectorInputs.length; ++i )
+            {
+                let value = newValue[ i ];
+                value = clamp( value, +vectorInputs[ i ].min, +vectorInputs[ i ].max );
+                value = round( value, options.precision ) ?? 0;
+                vectorInputs[ i ].value = newValue[ i ] = value;
+            }
+
+            if( !skipCallback )
+            {
+                this._trigger( new IEvent( name, newValue, event ), callback );
+            }
+        };
+
+        const vectorInputs = [];
+
+        var container = document.createElement( 'div' );
+        container.className = "lexvector";
+        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+
+        const that = this;
+
+        for( let i = 0; i < numComponents; ++i )
+        {
+            let box = document.createElement( 'div' );
+            box.className = "vecbox";
+            box.innerHTML = "<span class='" + Panel.VECTOR_COMPONENTS[ i ] + "'></span>";
+
+            let vecinput = document.createElement( 'input' );
+            vecinput.className = "vecinput v" + numComponents;
+            vecinput.min = options.min ?? -1e24;
+            vecinput.max = options.max ?? 1e24;
+            vecinput.step = options.step ?? "any";
+            vecinput.type = "number";
+            vecinput.id = "vec" + numComponents + "_" + simple_guidGenerator();
+            vecinput.idx = i;
+            vectorInputs[ i ] = vecinput;
+
+            if( value[ i ].constructor == Number )
+            {
+                value[ i ] = clamp( value[ i ], +vecinput.min, +vecinput.max );
+                value[ i ] = round( value[ i ], options.precision );
+            }
+
+            vecinput.value = vecinput.iValue = value[ i ];
+
+            let dragIcon = document.createElement( 'a' );
+            dragIcon.className = "fa-solid fa-arrows-up-down drag-icon hidden";
+            box.appendChild( dragIcon );
+
+            if( options.disabled )
+            {
+                vecinput.disabled = true;
+            }
+
+            // Add wheel input
+            vecinput.addEventListener( "wheel", function( e ) {
+                e.preventDefault();
+                if( this !== document.activeElement )
+                    return;
+                let mult = options.step ?? 1;
+                if( e.shiftKey ) mult = 10;
+                else if( e.altKey ) mult = 0.1;
+
+                if( locker.locked )
+                {
+                    for( let v of that.querySelectorAll(".vecinput") )
+                    {
+                        v.value = round( +v.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ), options.precision );
+                        Widget._dispatchEvent( v, "change" );
+                    }
+                }
+                else
+                {
+                    this.value = round( +this.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ), options.precision );
+                    Widget._dispatchEvent( vecinput, "change" );
+                }
+            }, { passive: false } );
+
+            vecinput.addEventListener( "change", e => {
+
+                if( isNaN( e.target.value ) )
+                {
+                    return;
+                }
+
+                let val = clamp( e.target.value, +vecinput.min, +vecinput.max );
+                val = round( val, options.precision );
+
+                if( locker.locked )
+                {
+                    for( let v of vectorInputs )
+                    {
+                        v.value = val;
+                        value[ v.idx ] = val;
+                    }
+                }
+                else
+                {
+                    vecinput.value = val;
+                    value[ e.target.idx ] = val;
+                }
+
+                this.set( value, false, e );
+            }, false );
+
+            // Add drag input
+
+            function innerMouseDown( e )
+            {
+                if( document.activeElement == vecinput )
+                {
+                    return;
+                }
+
+                var doc = that.root.ownerDocument;
+                doc.addEventListener( 'mousemove', innerMouseMove );
+                doc.addEventListener( 'mouseup', innerMouseUp );
+                document.body.classList.add( 'noevents' );
+                dragIcon.classList.remove( 'hidden' );
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+
+                if( !document.pointerLockElement )
+                {
+                    vecinput.requestPointerLock();
+                }
+
+                if( options.onPress )
+                {
+                    options.onPress.bind( vecinput )( e, vecinput );
+                }
+            }
+
+            function innerMouseMove( e )
+            {
+                let dt = -e.movementY;
+
+                if ( dt != 0 )
+                {
+                    let mult = options.step ?? 1;
+                    if( e.shiftKey ) mult = 10;
+                    else if( e.altKey ) mult = 0.1;
+
+                    if( locker.locked )
+                    {
+                        for( let v of this.root.querySelectorAll( ".vecinput" ) )
+                        {
+                            v.value = round( +v.valueAsNumber + mult * dt, options.precision );
+                            Widget._dispatchEvent( v, "change" );
+                        }
+                    }
+                    else
+                    {
+                        vecinput.value = round( +vecinput.valueAsNumber + mult * dt, options.precision );
+                        Widget._dispatchEvent( vecinput, "change" );
+                    }
+                }
+
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            function innerMouseUp( e )
+            {
+                var doc = that.root.ownerDocument;
+                doc.removeEventListener( 'mousemove', innerMouseMove );
+                doc.removeEventListener( 'mouseup', innerMouseUp );
+                document.body.classList.remove( 'noevents' );
+                dragIcon.classList.add('hidden');
+
+                if( document.pointerLockElement )
+                {
+                    document.exitPointerLock();
+                }
+
+                if( options.onRelease )
+                {
+                    options.onRelease.bind( vecinput )( e, vecinput );
+                }
+            }
+
+            vecinput.addEventListener( "mousedown", innerMouseDown );
+
+            box.appendChild( vecinput );
+            container.appendChild( box );
+        }
+
+        // Method to change min, max, step parameters
+        if( options.min !== undefined || options.max !== undefined )
+        {
+            this.setLimits = ( newMin, newMax, newStep ) => {
+                for( let v of vectorInputs )
+                {
+                    v.min = newMin ?? v.min;
+                    v.max = newMax ?? v.max;
+                    v.step = newStep ?? v.step;
+                }
+
+                this.set( value, true );
+            };
+        }
+
+        let locker = document.createElement( 'a' );
+        locker.title = "Lock";
+        locker.className = "fa-solid fa-lock-open lexicon lock";
+        container.appendChild( locker );
+        locker.addEventListener( "click", function( e ) {
+            this.locked = !this.locked;
+            if( this.locked )
+            {
+                this.classList.add( "fa-lock" );
+                this.classList.remove( "fa-lock-open" );
+            }
+            else
+            {
+                this.classList.add( "fa-lock-open" );
+                this.classList.remove( "fa-lock" );
+            }
+        }, false );
+
+        this.root.appendChild( container );
+    }
+}
+
+LX.Vector = Vector;
 
 /**
  * @class SizeInput
@@ -7052,7 +7319,7 @@ class SizeInput extends Widget {
         for( let i = 0; i < value.length; ++i )
         {
             const p = new Panel();
-            this.root.dimensions[ i ] = p.addNumberInput( null, value[ i ], ( v ) => {
+            this.root.dimensions[ i ] = p.addNumber( null, value[ i ], ( v ) => {
 
                 const value = this.value();
 
@@ -7547,7 +7814,7 @@ class TabSections extends Widget {
     constructor( name, tabs, options = {} ) {
 
         options.hideName = true;
-        
+
         super( Widget.TABS, name, null, options );
 
         if( tabs.constructor != Array )
@@ -8466,7 +8733,6 @@ class Panel {
 
     addText( name, value, callback, options = {} ) {
         const widget = new TextInput( name, value, callback, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
@@ -8488,7 +8754,6 @@ class Panel {
 
     addTextArea( name, value, callback, options = {} ) {
         const widget = new TextArea( name, value, callback, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
@@ -8520,7 +8785,6 @@ class Panel {
 
     addButton( name, value, callback, options = {} ) {
         const widget = new Button( name, value, callback, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
@@ -8538,7 +8802,6 @@ class Panel {
 
     addComboButtons( name, values, options = {} ) {
         const widget = new ComboButtons( name, values, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
@@ -8569,7 +8832,6 @@ class Panel {
 
     addForm( name, data, callback, options = {} ) {
         const widget = new Form( name, data, callback, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
@@ -8654,7 +8916,6 @@ class Panel {
 
     addDropdown( name, values, value, callback, options = {} ) {
         const widget = new Dropdown( name, values, value, callback, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
@@ -8676,7 +8937,6 @@ class Panel {
 
     addCurve( name, values, callback, options = {} ) {
         const widget = new Curve( name, values, callback, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
@@ -8698,7 +8958,6 @@ class Panel {
 
     addDial( name, values, callback, options = {} ) {
         const widget = new Dial( name, values, callback, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
@@ -8712,12 +8971,11 @@ class Panel {
 
     addLayers( name, value, callback, options = {} ) {
         const widget = new Layers( name, value, callback, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
     /**
-     * @method addItemArray
+     * @method addArray
      * @param {String} name Widget name
      * @param {Array} values By default values in the array
      * @param {Function} callback Callback function on change
@@ -8725,9 +8983,8 @@ class Panel {
      * innerValues (Array): Use dropdown mode and use values as options
      */
 
-    addItemArray( name, values = [], callback, options = {} ) {
+    addArray( name, values = [], callback, options = {} ) {
         const widget = new ItemArray( name, values, callback, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
@@ -8743,7 +9000,6 @@ class Panel {
 
     addList( name, values, value, callback, options = {} ) {
         const widget = new List( name, values, value, callback, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
@@ -8758,7 +9014,6 @@ class Panel {
 
     addTags( name, value, callback, options = {} ) {
         const widget = new Tags( name, value, callback, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
@@ -8776,7 +9031,6 @@ class Panel {
 
     addCheckbox( name, value, callback, options = {} ) {
         const widget = new Checkbox( name, value, callback, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
@@ -8793,7 +9047,6 @@ class Panel {
 
     addToggle( name, value, callback, options = {} ) {
         const widget = new Toggle( name, value, callback, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
@@ -8811,12 +9064,11 @@ class Panel {
 
     addRadioGroup( name, label, values, callback, options = {} ) {
         const widget = new RadioGroup( name, label, values, callback, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
     /**
-     * @method addColorInput
+     * @method addColor
      * @param {String} name Widget name
      * @param {String} value Default color (hex)
      * @param {Function} callback Callback function on change
@@ -8825,14 +9077,13 @@ class Panel {
      * useRGB: The callback returns color as Array (r, g, b) and not hex [false]
      */
 
-    addColorInput( name, value, callback, options = {} ) {
+    addColor( name, value, callback, options = {} ) {
         const widget = new ColorInput( name, value, callback, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
     /**
-     * @method addRangeInput
+     * @method addRange
      * @param {String} name Widget name
      * @param {Number} value Default number value
      * @param {Function} callback Callback function on change
@@ -8846,14 +9097,13 @@ class Panel {
      * min, max: Min and Max values for the input
      */
 
-    addRangeInput( name, value, callback, options = {} ) {
+    addRange( name, value, callback, options = {} ) {
         const widget = new RangeInput( name, value, callback, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
     /**
-     * @method addNumberInput
+     * @method addNumber
      * @param {String} name Widget name
      * @param {Number} value Default number value
      * @param {Function} callback Callback function on change
@@ -8869,264 +9119,16 @@ class Panel {
      * onRelease: Callback function on mouse up
      */
 
-    addNumberInput( name, value, callback, options = {} ) {
+    addNumber( name, value, callback, options = {} ) {
         const widget = new NumberInput( name, value, callback, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
     static VECTOR_COMPONENTS = { 0: 'x', 1: 'y', 2: 'z', 3: 'w' };
 
-    _add_vector( numComponents, name, value, callback, options = {} ) {
-
-        numComponents = clamp( numComponents, 2, 4 );
-        value = value ?? new Array( numComponents ).fill( 0 );
-
-        let widget = this._attachWidget( Widget.VECTOR, name, [].concat( value ), options );
-
-        widget.onGetValue = () => {
-            let inputs = element.querySelectorAll( "input" );
-            let value = [];
-            for( var v of inputs )
-            {
-                value.push( +v.value );
-            }
-            return value;
-        };
-
-        widget.onSetValue = ( newValue, skipCallback, event ) => {
-
-            if( vectorInputs.length != newValue.length )
-            {
-                console.error( "Input length does not match vector length." );
-                return;
-            }
-
-            for( let i = 0; i < vectorInputs.length; ++i )
-            {
-                let value = newValue[ i ];
-                value = clamp( value, +vectorInputs[ i ].min, +vectorInputs[ i ].max );
-                value = round( value, options.precision ) ?? 0;
-                vectorInputs[ i ].value = newValue[ i ] = value;
-            }
-
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( name, newValue, event ), callback );
-            }
-        };
-
-        const element = widget.root;
-        const vectorInputs = [];
-
-        var container = document.createElement( 'div' );
-        container.className = "lexvector";
-        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
-
-        for( let i = 0; i < numComponents; ++i )
-        {
-            let box = document.createElement( 'div' );
-            box.className = "vecbox";
-            box.innerHTML = "<span class='" + Panel.VECTOR_COMPONENTS[ i ] + "'></span>";
-
-            let vecinput = document.createElement( 'input' );
-            vecinput.className = "vecinput v" + numComponents;
-            vecinput.min = options.min ?? -1e24;
-            vecinput.max = options.max ?? 1e24;
-            vecinput.step = options.step ?? "any";
-            vecinput.type = "number";
-            vecinput.id = "vec" + numComponents + "_" + simple_guidGenerator();
-            vecinput.idx = i;
-            vectorInputs[ i ] = vecinput;
-
-            if( value[ i ].constructor == Number )
-            {
-                value[ i ] = clamp( value[ i ], +vecinput.min, +vecinput.max );
-                value[ i ] = round( value[ i ], options.precision );
-            }
-
-            vecinput.value = vecinput.iValue = value[ i ];
-
-            let dragIcon = document.createElement( 'a' );
-            dragIcon.className = "fa-solid fa-arrows-up-down drag-icon hidden";
-            box.appendChild( dragIcon );
-
-            if( options.disabled )
-            {
-                vecinput.disabled = true;
-            }
-
-            // Add wheel input
-            vecinput.addEventListener( "wheel", function( e ) {
-                e.preventDefault();
-                if( this !== document.activeElement )
-                    return;
-                let mult = options.step ?? 1;
-                if( e.shiftKey ) mult = 10;
-                else if( e.altKey ) mult = 0.1;
-
-                if( locker.locked )
-                {
-                    for( let v of element.querySelectorAll(".vecinput") )
-                    {
-                        v.value = round( +v.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ), options.precision );
-                        Widget._dispatchEvent( v, "change" );
-                    }
-                }
-                else
-                {
-                    this.value = round( +this.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ), options.precision );
-                    Widget._dispatchEvent( vecinput, "change" );
-                }
-            }, { passive: false } );
-
-            vecinput.addEventListener( "change", e => {
-
-                if( isNaN( e.target.value ) )
-                {
-                    return;
-                }
-
-                let val = clamp( e.target.value, +vecinput.min, +vecinput.max );
-                val = round( val, options.precision );
-
-                if( locker.locked )
-                {
-                    for( let v of vectorInputs )
-                    {
-                        v.value = val;
-                        value[ v.idx ] = val;
-                    }
-                }
-                else
-                {
-                    vecinput.value = val;
-                    value[ e.target.idx ] = val;
-                }
-
-                widget.set( value, false, e );
-            }, false );
-
-            // Add drag input
-
-            vecinput.addEventListener( "mousedown", innerMouseDown );
-
-            var that = this;
-
-            function innerMouseDown( e )
-            {
-                if( document.activeElement == vecinput )
-                {
-                    return;
-                }
-
-                var doc = that.root.ownerDocument;
-                doc.addEventListener( 'mousemove', innerMouseMove );
-                doc.addEventListener( 'mouseup', innerMouseUp );
-                document.body.classList.add( 'noevents' );
-                dragIcon.classList.remove( 'hidden' );
-                e.stopImmediatePropagation();
-                e.stopPropagation();
-
-                if( !document.pointerLockElement )
-                {
-                    vecinput.requestPointerLock();
-                }
-
-                if( options.onPress )
-                {
-                    options.onPress.bind( vecinput )( e, vecinput );
-                }
-            }
-
-            function innerMouseMove( e )
-            {
-                let dt = -e.movementY;
-
-                if ( dt != 0 )
-                {
-                    let mult = options.step ?? 1;
-                    if( e.shiftKey ) mult = 10;
-                    else if( e.altKey ) mult = 0.1;
-
-                    if( locker.locked )
-                    {
-                        for( let v of element.querySelectorAll( ".vecinput" ) )
-                        {
-                            v.value = round( +v.valueAsNumber + mult * dt, options.precision );
-                            Widget._dispatchEvent( v, "change" );
-                        }
-                    }
-                    else
-                    {
-                        vecinput.value = round( +vecinput.valueAsNumber + mult * dt, options.precision );
-                        Widget._dispatchEvent( vecinput, "change" );
-                    }
-                }
-
-                e.stopPropagation();
-                e.preventDefault();
-            }
-
-            function innerMouseUp( e )
-            {
-                var doc = that.root.ownerDocument;
-                doc.removeEventListener( 'mousemove', innerMouseMove );
-                doc.removeEventListener( 'mouseup', innerMouseUp );
-                document.body.classList.remove( 'noevents' );
-                dragIcon.classList.add('hidden');
-
-                if( document.pointerLockElement )
-                {
-                    document.exitPointerLock();
-                }
-
-                if( options.onRelease )
-                {
-                    options.onRelease.bind( vecinput )( e, vecinput );
-                }
-            }
-
-            box.appendChild( vecinput );
-            container.appendChild( box );
-        }
-
-        // Method to change min, max, step parameters
-        if( options.min !== undefined || options.max !== undefined )
-        {
-            widget.setLimits = ( newMin, newMax, newStep ) => {
-                for( let v of vectorInputs )
-                {
-                    v.min = newMin ?? v.min;
-                    v.max = newMax ?? v.max;
-                    v.step = newStep ?? v.step;
-                }
-
-                widget.set( value, true );
-            };
-        }
-
-        let locker = document.createElement( 'a' );
-        locker.title = "Lock";
-        locker.className = "fa-solid fa-lock-open lexicon lock";
-        container.appendChild( locker );
-        locker.addEventListener( "click", function( e ) {
-            this.locked = !this.locked;
-            if( this.locked )
-            {
-                this.classList.add( "fa-lock" );
-                this.classList.remove( "fa-lock-open" );
-            }
-            else
-            {
-                this.classList.add( "fa-lock-open" );
-                this.classList.remove( "fa-lock" );
-            }
-        }, false );
-
-        element.appendChild( container );
-
-        return widget;
+    _addVector( numComponents, name, value, callback, options = {} ) {
+        const widget = new Vector( numComponents, name, value, callback, options );
+        return this._attachWidget( widget );
     }
 
     /**
@@ -9143,25 +9145,19 @@ class Panel {
      */
 
     addVector2( name, value, callback, options ) {
-        const w = new Widget();
-        return this._attachWidget( w );
-        return this._add_vector( 2, name, value, callback, options );
+        return this._addVector( 2, name, value, callback, options );
     }
 
     addVector3( name, value, callback, options ) {
-        const w = new Widget();
-        return this._attachWidget( w );
-        return this._add_vector( 3, name, value, callback, options );
+        return this._addVector( 3, name, value, callback, options );
     }
 
     addVector4( name, value, callback, options ) {
-        const w = new Widget();
-        return this._attachWidget( w );
-        return this._add_vector( 4, name, value, callback, options );
+        return this._addVector( 4, name, value, callback, options );
     }
 
     /**
-     * @method addSizeInput
+     * @method addSize
      * @param {String} name Widget name
      * @param {Number} value Default number value
      * @param {Function} callback Callback function on change
@@ -9171,9 +9167,8 @@ class Panel {
      * units: Unit as string added to the end of the value
      */
 
-    addSizeInput( name, value, callback, options = {} ) {
+    addSize( name, value, callback, options = {} ) {
         const widget = new SizeInput( name, value, callback, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
@@ -9192,7 +9187,6 @@ class Panel {
 
     addPad( name, value, callback, options = {} ) {
         const widget = new Pad( name, value, callback, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
@@ -9210,12 +9204,11 @@ class Panel {
 
     addProgress( name, value, options = {} ) {
         const widget = new Progress( name, value, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 
     /**
-     * @method addFileInput
+     * @method addFile
      * @param {String} name Widget name
      * @param {Function} callback Callback function on change
      * @param {Object} options:
@@ -9225,7 +9218,7 @@ class Panel {
      * type: type to read as [text (Default), buffer, bin, url]
      */
 
-    addFileInput( name, callback, options = { } ) {
+    addFile( name, callback, options = { } ) {
         const widget = new FileInput( name, callback, options );
         return this._attachWidget( widget );
     }
@@ -9279,7 +9272,6 @@ class Panel {
 
     addCounter( name, value, callback, options = { } ) {
         const widget = new Counter( name, value, callback, options );
-        widget.set( widget.value(), true );
         return this._attachWidget( widget );
     }
 

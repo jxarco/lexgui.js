@@ -3,8 +3,8 @@
 ## dev
 
 Widgets:
-- Renamed Widgets...
-- Tabs: Add name parameter (1st).
+- Created classes for each widget to create them at any place.
+- Tabs: Renamed to `addTabSections`. Add name parameter (1st).
 
 Added `displaySelected` option to Sidebar to display selected entry.
 Started Notifications docs.

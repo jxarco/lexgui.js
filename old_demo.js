@@ -571,23 +571,23 @@ function fillPanel( panel ) {
 
     // add widgets to panel branch
     panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});
-    panel.addColorInput("Background", "#b7a9b1", (value, event) => {
+    panel.addColor("Background", "#b7a9b1", (value, event) => {
         console.log(value);
     });
     panel.addText("Text", "Lexgui.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
-    panel.addColorInput("Font Color", [1, 0.1, 0.6], (value, event) => {
+    panel.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
         console.log("Font Color: ", value);
     });
-    panel.addRangeInput("A Default Range", 1, (value, event) => {
+    panel.addRange("A Default Range", 1, (value, event) => {
         console.log(value);
     }, { min: 0, max: 10, step: 1 });
-    panel.addRangeInput("Disabled NoFill Range", 10, (value, event) => {
+    panel.addRange("Disabled NoFill Range", 10, (value, event) => {
         console.log(value);
     }, { min: 1, max: 48, step: 1, disabled: true, fill: false});
-    panel.addRangeInput("Colored Left Range", 25, (value, event) => {
+    panel.addRange("Colored Left Range", 25, (value, event) => {
         console.log(value);
     }, { min: 20, max: 48, step: 1, className: "warning", left: true});
-    panel.addNumberInput("Font Size", 36, (value, event) => {
+    panel.addNumber("Font Size", 36, (value, event) => {
         console.log(value);
     }, { min: 1, max: 48, step: 1, units: "px"});
     panel.addVector2("2D Position", [250, 350], (value, event) => {
@@ -601,7 +601,7 @@ function fillPanel( panel ) {
         console.log(value);
     }, { suboptions: (p) => {
         p.addText(null, "Suboption 1");
-        p.addNumberInput("Suboption 2", 12);
+        p.addNumber("Suboption 2", 12);
     } });
     panel.merge();
 
@@ -621,8 +621,8 @@ function fillPanel( panel ) {
     panel.addToggle("Outlined Checkbox ", false, (value, event) => {
         console.log(value);
     }, { className: "secondary outline", nameWidth: "50%" });
-    panel.addFileInput("I'm a File Input", data => { console.log(data) }, {  } );
-    panel.addFileInput("A Disabled File Input", data => { console.log(data) }, { disabled: true } );
+    panel.addFile("I'm a File Input", data => { console.log(data) }, {  } );
+    panel.addFile("A Disabled File Input", data => { console.log(data) }, { disabled: true } );
     panel.addDropdown("Best Engine", ["Godot", "Unity", "Unreal Engine", "A very super super super large engine name"], "Unity", (value, event) => {
         console.log(value);
     }, {filter: true, emptyMsg: "No engines found.", placeholder: "Search engines..."});
@@ -639,7 +639,7 @@ function fillPanel( panel ) {
     panel.addLayers("Layers", 10, (value, event) => {
         console.log(value);
     });
-    panel.addItemArray("An Item Array", ['GPTeam', 'Blat Panthers', 'Blat Bunny'], (value, event) => {
+    panel.addArray("An Item Array", ['GPTeam', 'Blat Panthers', 'Blat Bunny'], (value, event) => {
         console.log(value);
     });
     panel.addTags("Game Tags", "2d, karate, ai, engine, ps5, console", (value, event) => {
@@ -683,7 +683,7 @@ function fillPanel( panel ) {
     panel.addPad("2D Pad", [0.5, 0.5], (value, event) => {
         console.log(value);
     }, { padSize: "100px", min: -1, max: 2 });
-    panel.addSizeInput("Screen Res", [1280, 720], (value, event) => {
+    panel.addSize("Screen Res", [1280, 720], (value, event) => {
         console.log(value);
     }, { units: "p", precision: 0 });
 
@@ -747,7 +747,7 @@ function fillRightBottomPanel( panel, tab ) {
         panel.addText(null, "Widgets below are out the tabs", null, { disabled: true })
 
         // update panel values uising widget name
-        panel.addNumberInput("HeadRoll Value", 0, (value, event) => {
+        panel.addNumber("HeadRoll Value", 0, (value, event) => {
             panel.setValue('HeadRoll', value);
         }, { min: -1, max: 1, step: 0.1 });
         panel.addProgress("HeadRoll", 0, { min: -1, max: 1, low: -0.25, high: 0.25, optimum: 0.75, showValue: true, editable: true, callback: (value, event) => {
