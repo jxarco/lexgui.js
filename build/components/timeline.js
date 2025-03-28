@@ -258,7 +258,8 @@ class Timeline {
         let panel = this.leftPanel;
         panel.sameLine( 2 );
 
-        let title = panel.addTitle( "Tracks" );
+        let titleWidget = panel.addTitle( "Tracks" );
+        let title = titleWidget.root;
         
         if( !this.disableNewTracks ) 
         {
@@ -2752,7 +2753,9 @@ class ClipsTimeline extends Timeline {
         let panel = this.leftPanel;
         
         panel.sameLine(2);
-        let title = panel.addTitle("Tracks");
+
+        let titleWidget = panel.addTitle("Tracks");
+        let title = titleWidget.root;
         if(!this.disableNewTracks) 
         {
             panel.addButton('', '<i class = "fa-solid fa-plus"></i>', (value, event) => {

@@ -1373,7 +1373,7 @@ function emit( signalName, value, options = {} )
 
     for( let obj of data )
     {
-        if( obj.constructor === Widget )
+        if( obj instanceof Widget )
         {
             obj.set( value, options.skipCallback ?? true );
         }
@@ -5239,7 +5239,7 @@ class ComboButtons extends Widget {
 
         container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
-        let currentValue = null;
+        let currentValue = [];
         let buttonsBox = document.createElement('div');
         buttonsBox.className = "lexcombobuttonsbox ";
 
@@ -5264,7 +5264,7 @@ class ComboButtons extends Widget {
             if( shouldSelect && ( b.selected || options.selected == b.value ) )
             {
                 buttonEl.classList.add("selected");
-                currentValue = ( currentValue ?? [] ).concat( [ b.value ] );
+                currentValue = ( currentValue ).concat( [ b.value ] );
             }
 
             buttonEl.innerHTML = ( b.icon ? "<a class='" + b.icon +"'></a>" : "" ) + "<span>" + ( b.icon ? "" : b.value ) + "</span>";
@@ -5320,8 +5320,10 @@ class ComboButtons extends Widget {
             shouldToggle = shouldSelect;
             console.warn( `Multiple options selected in '${ name }' ComboButtons. Enabling _toggle_ mode.` );
         }
-
-        currentValue = ( currentValue.length < 2 ) ? currentValue[ 0 ] : currentValue;
+        else
+        {
+            currentValue = currentValue[ 0 ];
+        }
 
         super( Widget.BUTTONS, name, null, options );
 

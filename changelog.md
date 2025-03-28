@@ -4,7 +4,9 @@
 
 Widgets:
 - Created classes for each widget to create them at any place.
-- Tabs: Renamed to `addTabSections`. Add name parameter (1st).
+- `Panel.addTabs`: Renamed to `addTabSections`. Added name parameter (1st). Returns `TabSections` widget.
+- Title: `Panel.addTitle` now returns `Title` widget, not its inner title HTMLElement.
+- Tree: `Panel.addTree` now returns `Tree` widget, not its inner `NodeTree`.
 
 Added `displaySelected` option to Sidebar to display selected entry.
 Started Notifications docs.
@@ -13,7 +15,7 @@ Started Notifications docs.
 
 Widgets:
 - RadioGroup: Add name parameter (1st).
-- Add `options.hideName` for supported widgets: Don't use label but add `name` to allow registering.
+- Added `options.hideName` for supported widgets: Don't use label but add `name` to allow registering.
 
 Sidebar subentries are now collapsable (`true` by default).
 Support `options.header` and `options.footer` for custom sidebar elements.
