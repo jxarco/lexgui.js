@@ -2,6 +2,10 @@
 
 ## dev
 
+Widgets:
+- Renamed Widgets...
+- Tabs: Add name parameter (1st).
+
 Added `displaySelected` option to Sidebar to display selected entry.
 Started Notifications docs.
 

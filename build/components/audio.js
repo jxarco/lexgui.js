@@ -22,7 +22,8 @@ let Panel = LX.Panel;
 let Widget = LX.Widget;
 
 Panel.prototype.addKnob = function( name, value, min, max, callback, options = {} ) {
-
+    const w = new Widget();
+    return this._attachWidget( w );
     if( value.constructor == Number )
     {
         value = LX.clamp( value, min, max );

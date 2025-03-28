@@ -1663,9 +1663,13 @@ body.noevents * {
 
 .lexcheckboxsubmenu {
     width: 100%;
-    padding: 6px;
+    padding: 4px;
+    padding-inline: 8px;
     color: var(--global-text-secondary);
-    margin-top: -1px;
+}
+
+.lexcheckboxsubmenu .lexwidget {
+    width: 100% !important;
 }
 
 /* Toggle Widget */
@@ -3431,10 +3435,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     margin-right: 0px;
 }
 
-.lexoverlaybuttons .lexwidget:last-child {
-    margin-right: 0px;
-}
-
 /* Area Tabs */
 
 .lexareatabs {
@@ -3803,6 +3803,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexcounterbox .lexcounterlabel {
     width: 100%;
     margin-top: -18px;
+    font-size: var(--global-font-size-sm);
     color: var(--global-text-secondary);
 }
 
