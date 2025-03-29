@@ -390,7 +390,7 @@ function makeDraggable( domEl, options = { } )
 
         document.addEventListener( "mousemove", onMove );
 
-        currentTarget._eventCatched = true;
+        currentTarget.eventCatched = true;
 
         // Force active dialog to show on top
         if( LX.activeDraggable )
@@ -8009,9 +8009,17 @@ class Table extends Widget {
 
                 const hrow = document.createElement( 'tr' );
 
+                if( options.sortable )
+                {
+                    const th = document.createElement( 'th' );
+                    th.style.width = "0px";
+                    hrow.appendChild( th );
+                }
+
                 if( options.selectable )
                 {
                     const th = document.createElement( 'th' );
+                    th.style.width = "0px";
                     const input = document.createElement( 'input' );
                     input.type = "checkbox";
                     input.className = "lexcheckbox";
@@ -8073,12 +8081,96 @@ class Table extends Widget {
                 body.className = "lextablebody";
                 table.appendChild( body );
 
+                let rIdx = null;
+                let eventCatched = false;
+                let movePending = null;
+
+                document.addEventListener( 'mouseup', (e) => {
+                    if( !rIdx ) return;
+                    document.removeEventListener( "mousemove", onMove );
+                    const fromRow = table.rows[ rIdx ];
+                    fromRow.dY = 0;
+                    fromRow.classList.remove( "dragging" );
+                    Array.from( table.rows ).forEach( v => {
+                        v.style.transform = ``;
+                        v.style.transition = `none`;
+                    } );
+                    flushCss( fromRow );
+                    rIdx = null;
+
+                    if( movePending )
+                    {
+                        const parent = movePending[ 0 ].parentNode;
+                        parent.insertChildAtIndex(  movePending[ 0 ],  movePending[ 1 ] );
+                        movePending = null;
+                    }
+
+                    doAsync( () => {
+                        Array.from( table.rows ).forEach( v => {
+                            v.style.transition = `transform 0.2s linear`;
+                        } );
+                    } )
+                } );
+
+                let onMove = ( e ) => {
+                    if( !rIdx ) return;
+                    const fromRow = table.rows[ rIdx ];
+                    fromRow.dY = fromRow.dY ?? 0;
+                    fromRow.dY += e.movementY;
+                    fromRow.style.transform = `translateY(${fromRow.dY}px)`;
+                };
+
+
                 for( let r = 0; r < data.body.length; ++r )
                 {
                     const bodyData = data.body[ r ];
                     const row = document.createElement( 'tr' );
                     const rowId = LX.getSupportedDOMName( bodyData.join( '-' ) );
                     row.setAttribute( "rowId", rowId );
+
+                    if( options.sortable )
+                    {
+                        const td = document.createElement( 'td' );
+                        td.style.width = "0px";
+                        const icon = LX.makeIcon( "GripVertical" );
+                        td.appendChild( icon );
+
+                        icon.draggable = true;
+
+                        icon.addEventListener("dragstart", (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.stopImmediatePropagation();
+
+                            rIdx = row.rowIndex;
+                            row.classList.add( "dragging" );
+
+                            document.addEventListener( "mousemove", onMove );
+                        }, false );
+
+                        row.addEventListener("mouseenter", function(e) {
+                            e.preventDefault();
+
+                            if( rIdx && ( this.rowIndex != rIdx ) && ( eventCatched != this.rowIndex ) )
+                            {
+                                eventCatched = this.rowIndex;
+                                const fromRow = table.rows[ rIdx ];
+                                const undo = ( this.style.transform != `` );
+                                if (this.rowIndex > rIdx) {
+                                    movePending = [ fromRow, undo ? (this.rowIndex-1) : this.rowIndex ];
+                                    this.style.transform = undo ? `` : `translateY(-${this.offsetHeight}px)`;
+                                } else {
+                                    movePending = [ fromRow, undo ? (this.rowIndex) : (this.rowIndex-1) ];
+                                    this.style.transform = undo ? `` : `translateY(${this.offsetHeight}px)`;
+                                }
+                                doAsync( () => {
+                                    eventCatched = false;
+                                } )
+                            }
+                        });
+
+                        row.appendChild( td );
+                    }
 
                     if( options.selectable )
                     {
@@ -9288,6 +9380,7 @@ class Panel {
      * rowActions: Allow to add actions per row
      * onMenuAction: Function callback to fill the "menu" context
      * selectable: Each row can be selected
+     * sortable: Rows can be sorted by the user manually
      */
 
     addTable( name, data, options = { } ) {
@@ -9387,7 +9480,7 @@ class Branch {
                 // p.add('<i class="fa-regular fa-window-maximize fa-rotate-180">', {id: 'dock_options1'});
                 // p.add('<i class="fa-regular fa-window-maximize fa-rotate-90">', {id: 'dock_options2'});
                 // p.add('<i class="fa-regular fa-window-maximize fa-rotate-270">', {id: 'dock_options3'});
-                p.add( 'Floating', that._on_make_floating.bind( that ) );
+                p.add( 'Floating', that._onMakeFloating.bind( that ) );
             }, { icon: "fa-regular fa-window-restore" });
         };
 
@@ -9395,7 +9488,7 @@ class Branch {
         title.addEventListener( 'contextmenu', this.oncontextmenu );
     }
 
-    _on_make_floating() {
+    _onMakeFloating() {
 
         const dialog = new Dialog(this.name, p => {
             // add widgets
@@ -9898,9 +9991,9 @@ class PocketDialog extends Dialog {
         this.minimized = false;
         this.title.tabIndex = -1;
         this.title.addEventListener("click", e => {
-            if( this.title._eventCatched )
+            if( this.title.eventCatched )
             {
-                this.title._eventCatched = false;
+                this.title.eventCatched = false;
                 return;
             }
 
@@ -12092,6 +12185,7 @@ LX.ICONS = {
     "Up": `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_iconCarrier"> <title>i</title> <g id="Complete"> <g id="F-Chevron"> <polyline id="Up" points="5 15.5 12 8.5 19 15.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></polyline> </g> </g> </g></svg>`,
     "Right": `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_iconCarrier"> <title>i</title> <g id="Complete"> <g id="F-Chevron"> <polyline id="Right" points="8.5 5 15.5 12 8.5 19" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></polyline> </g> </g> </g></svg>`,
     "Left": `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#000000"><g id="SVGRepo_iconCarrier"> <title>i</title> <g id="Complete"> <g id="F-Chevron"> <polyline id="Left" points="15.5 5 8.5 12 15.5 19" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></polyline> </g> </g> </g></svg>`,
+    "GripVertical": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M40 352l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0c-22.1 0-40-17.9-40-40l0-48c0-22.1 17.9-40 40-40zm192 0l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0c-22.1 0-40-17.9-40-40l0-48c0-22.1 17.9-40 40-40zM40 320c-22.1 0-40-17.9-40-40l0-48c0-22.1 17.9-40 40-40l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0zM232 192l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0c-22.1 0-40-17.9-40-40l0-48c0-22.1 17.9-40 40-40zM40 160c-22.1 0-40-17.9-40-40L0 72C0 49.9 17.9 32 40 32l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0zM232 32l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0c-22.1 0-40-17.9-40-40l0-48c0-22.1 17.9-40 40-40z"/></svg>`
 }
 
 LX.UTILS = {

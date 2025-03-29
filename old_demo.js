@@ -828,6 +828,7 @@ function fillBottomPanel( panel ) {
         ]
     }, {
         selectable: true,
+        sortable: true,
         rowActions: [
             { icon: "fa-solid fa-pen-to-square", callback: ( tableData ) => {} }, // custom: you can change the data and refresh will be called later!
             "delete",

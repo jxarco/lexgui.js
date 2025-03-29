@@ -62,7 +62,7 @@
             "<a href='#range'>Range</a>",
             "<a href='#size'>Size</a>",
             "<a href='#table'>Table</a>",
-            "<a href='#tabs'>Tabs</a>",
+            "<a href='#tabs'>TabSections</a>",
             "<a href='#tags'>Tags</a>",
             "<a href='#text'>Text</a>",
             "<a href='#textarea'>Text Area</a>",
@@ -959,13 +959,13 @@ panel.@[mtd]addForm@(@"Test form"@, formData, (value, event) => {
 });` );
 
         // Tabs
-        MAKE_HEADER( "Tabs", "h2", "tabs" );
-        MAKE_PARAGRAPH( `Represents panel divisions as tabs, either in horizontal or vertical mode. Quickly switch between the different sets of information.` );
+        MAKE_HEADER( "TabSections", "h2", "tabs" );
+        MAKE_PARAGRAPH( `Represents panel sections as tabs, either in horizontal or vertical mode. Quickly switch between the different sets of information.` );
 
         {
             const area = new LX.Area( { skipAppend: true, height: "auto" } );
             const panel = area.addPanel();
-            panel.addTabs([
+            panel.addTabSections( "tabsName", [
                 { 
                     name: "First tab",
                     icon: "fa-brands fa-discord",
@@ -989,7 +989,7 @@ panel.@[mtd]addForm@(@"Test form"@, formData, (value, event) => {
             document.body.appendChild( area.root );
         }
 
-        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTabs(tabs, options)")} to add a Tabs Widget to your panel, where 
+        MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTabSections(tabs, options)")} to add a Tabs Widget to your panel, where 
     <code class='inline'>tabs</code> is an <code class="inline">Array</code> of objects which have:` );
         MAKE_CODE_BULLET_LIST( [
             ["name", "String", "Name of the tab (if icon, use as title)"],
@@ -997,7 +997,7 @@ panel.@[mtd]addForm@(@"Test form"@, formData, (value, event) => {
             ["onCreate", "Function", "Func to be called at tab creation"],
             ["onSelect", "Function", "Func to be called on select tab (optional)"]
         ] );
-        MAKE_CODE( `panel.@[mtd]addTabs@([
+        MAKE_CODE( `panel.@[mtd]addTabSections@( "tabsName", [
     { 
         name: @"First tab"@,
         icon: @"fa-brands fa-discord"@,
