@@ -4005,7 +4005,7 @@ class Widget {
 
         if( type != Widget.TITLE )
         {
-            root.style.width = "calc(100% - " + (this._currentBranch || type == Widget.FILE || type == Widget.TREE ? 10 : 20) + "px)";
+            // root.style.width = "calc(100% - " + (this._currentBranch || type == Widget.FILE || type == Widget.TREE ? 10 : 20) + "px)";
 
             if( options.width )
             {
@@ -8204,7 +8204,7 @@ class Table extends Widget {
                     if( options.rowActions )
                     {
                         const td = document.createElement( 'td' );
-                        td.className = "sm";
+                        td.style.width = "0px";
 
                         const buttons = document.createElement( 'div' );
                         buttons.className = "lextablebuttons";

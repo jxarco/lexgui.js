@@ -1063,7 +1063,7 @@ body.noevents * {
 }
 
 .lexwidget.nobranch {
-    width: calc(100% - 10px) !important;
+    width: calc(100% - 10px);
 }
 
 .lexwidget.auto {
@@ -1368,7 +1368,6 @@ body.noevents * {
 
 .lexbutton.array span {
     display: inline-flex;
-    margin-left: 8px;
 }
 
 .lexbutton.array a {
@@ -3281,6 +3280,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     width: auto !important;
     height: auto !important;
     justify-content: start;
+    gap: 0.35em;
     z-index: 100;
     background-color: var(--global-color-secondary);
     margin: 8px;
@@ -3291,7 +3291,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexoverlaybuttons .lexwidget {
     padding: 0px;
-    margin-right: 6px;
     pointer-events: auto;
     min-width: 32px;
 }
@@ -3400,7 +3399,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexoverlaybuttons .lexoverlaygroup {
     display: flex;
-    margin-right: 6px;
+    flex: none;
     background-color: var(--global-color-terciary);
     border-radius: 8px;
 }
@@ -3918,7 +3917,11 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
 
 .lextable .lextablebuttons {
     display: inline-flex;
-    gap: 8px;
+    gap: 0.8rem;
+}
+
+.lextable .lextablebuttons .lexicon {
+    font-size: var(--global-font-size-sm) !important;
 }
 
 :root[data-theme="light"] .lextable table {
