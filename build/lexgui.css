@@ -3050,6 +3050,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     padding: 6px;
     padding-inline: 8px;
     border-radius: 8px;
+    display: flex;
+    flex: none;
     cursor: pointer;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -3157,10 +3159,9 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexsidebar .lexsidebarentry .lexsidebarentrydesc {
     position: absolute;
-    margin-top: -3px;
     margin-left: 32px;
     font-weight: 600;
-    background-color: var(--global-text-secondary);
+    background-color: var(--global-text-primary);
     color: var(--global-color-primary);
     font-size: var(--global-font-size);
     border-radius: 6px;
@@ -3839,7 +3840,7 @@ tr {
     display: table-row;
     vertical-align: inherit;
     border-color: inherit;
-    transition: transform 0.2s linear;
+    transition: transform 0.2s ease-in;
 }
 
 tr:has(input:checked) {
@@ -3856,7 +3857,7 @@ tr.dragging {
 }
 
 th {
-    --th-color: light-dark(var(--global-text-quaternary), var(--global-text-secondary));
+    --th-color: var(--global-text-secondary);
     color: var(--th-color);
     font-size: var(--global-font-size);
     cursor: pointer;

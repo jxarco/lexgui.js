@@ -2684,7 +2684,7 @@ class Menubar {
         this.shorts = { };
     }
 
-    _resetMenubar() {
+    _resetMenubar( focus ) {
 
         // Menu entries are in the menubar..
         this.root.querySelectorAll(".lexmenuentry").forEach( _entry => {
@@ -2696,7 +2696,7 @@ class Menubar {
         LX.root.querySelectorAll(".lexmenubox").forEach(e => e.remove());
 
         // Next time we need to click again
-        this.focused = false;
+        this.focused = focus ?? false;
     }
 
     _createSubmenu( o, k, c, d ) {
@@ -2746,6 +2746,7 @@ class Menubar {
             const hasSubmenu = subitem[ subkey ].length;
             const isCheckbox = subitem[ 'type' ] == 'checkbox';
             let subentry = document.createElement('div');
+            subentry.tabIndex = "1";
             subentry.className = "lexmenuboxentry";
             subentry.className += (i == o[k].length - 1 ? " last" : "") + ( subitem.disabled ? " disabled" : "" );
 
@@ -2829,6 +2830,16 @@ class Menubar {
                 }
                 e.stopPropagation();
                 e.stopImmediatePropagation();
+            });
+
+            subentry.addEventListener("blur", e => {
+
+                if( e.relatedTarget && e.relatedTarget.classList.contains( "lexmenubox" ) )
+                {
+                    return;
+                }
+
+                this._resetMenubar();
             });
 
             // Add icon if has submenu, else check for shortcut
@@ -2976,7 +2987,7 @@ class Menubar {
             }
 
             const _showEntry = () => {
-                this._resetMenubar();
+                this._resetMenubar(true);
                 entry.classList.add( "selected" );
                 entry.built = true;
                 this._createSubmenu( item, key, entry, -1 );
@@ -3003,9 +3014,9 @@ class Menubar {
                 }
             });
 
-            entry.addEventListener("blur", (e) => {
+            entry.addEventListener("blur", e => {
 
-                if( e.relatedTarget && e.relatedTarget.classList.contains( "lexmenubox" ) )
+                if( e.relatedTarget && e.relatedTarget.className.includes( "lexmenubox" ) )
                 {
                     return;
                 }
@@ -8107,7 +8118,7 @@ class Table extends Widget {
 
                     doAsync( () => {
                         Array.from( table.rows ).forEach( v => {
-                            v.style.transition = `transform 0.2s linear`;
+                            v.style.transition = `transform 0.2s ease-in`;
                         } );
                     } )
                 } );

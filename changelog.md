@@ -7,9 +7,12 @@ Widgets:
 - `Panel.addTabs`: Renamed to `addTabSections`. Added name parameter (1st). Returns `TabSections` widget.
 - Title: `Panel.addTitle` now returns `Title` widget, not its inner title HTMLElement.
 - Tree: `Panel.addTree` now returns `Tree` widget, not its inner `NodeTree`.
+- Table: Added support for `options.sortable` rows.
 
 Added `displaySelected` option to Sidebar to display selected entry.
 Started Notifications docs.
+Fixed Menubar entries auto-open when menubar is focused.
+Minor CSS tweaks.
 
 ## 0.4.2 (master)
 
