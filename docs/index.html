@@ -99,12 +99,8 @@
         else
         {
             const open = ( url, target, name, dom, event ) => {
-                event.preventDefault();
+                if( event ) event.preventDefault();
                 loadPage(url);
-                // window.open( url, target ?? "viewer" );
-                // LX.doAsync( () => {
-                //     iframe.contentWindow.focus();
-                // }, 100 );
             }
 
             const sidebar = area.addSidebar( m => {
