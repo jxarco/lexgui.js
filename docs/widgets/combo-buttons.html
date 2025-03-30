@@ -1,0 +1,71 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // Combo Buttons
+    MAKE_HEADER("Combo Buttons", "h1", "combobuttons");
+    MAKE_PARAGRAPH(`Represents multiple inlined <a href="#button">buttons</a> as selectable options.`);
+
+    {
+        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        panel.addComboButtons("Alignment", [
+            {
+                value: "left",
+                icon: "fa fa-align-left",
+                callback: (value, event) => {
+                    console.log(value);
+                }
+            }, {
+                value: "center",
+                icon: "fa fa-align-center",
+                callback: (value, event) => {
+                    console.log(value);
+                }
+            }, {
+                value: "right",
+                icon: "fa fa-align-right",
+                callback: (value, event) => {
+                    console.log(value);
+                }
+            }
+        ], { selected: "center" });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addComboButtons(name, values, options)")} to add a ComboButtons Widget to your panel:`);
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Widget name"],
+        ["values", "Array", "Each of the { value, callback, selected, disabled } items (you can add an <code class='inline'>icon</code>)"],
+        ["options", "Object", "Basic options for a Widget"],
+        [
+            ["float", "String", "Justify content (left, center, right) [center]"],
+            ["noSelection", "Boolean", "Buttons can be clicked, but they are not selectable [false]"],
+            ["toggle", "Boolean", "Buttons can be toggled insted of selecting only one [false]"]
+        ]
+    ]);
+    MAKE_CODE(`panel.@[mtd]addComboButtons@(@"Alignment"@, [
+    {
+        value: @"left"@,
+        icon: @"fa fa-align-left"@,
+        callback: (value, event) =&gt; {
+            console.@[mtd]log@(value);
+        }
+    }, {
+        value: @"center"@,
+        icon: @"fa fa-align-center"@,
+        callback: (value, event) =&gt; {
+            console.@[mtd]log@(value);
+        }
+    }, {
+        value: @"right"@,
+        icon: @"fa fa-align-right"@,
+        callback: (value, event) =&gt; {
+            console.@[mtd]log@(value);
+        }
+    }
+], { selected: @"center"@ });` );
+
+</script>

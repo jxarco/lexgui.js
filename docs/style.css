@@ -25,32 +25,31 @@
     --global-color-error: #f54c4c;
 }
 
-@font-face {
-	font-family: "GoogleSans";
-	src: url("../data/GoogleSans.ttf");
-}
-
-html {
+#content {
 	font-family: "GoogleSans", sans-serif;
 	font-size: var(--font-size);
 	line-height: var(--line-height);
-	height: 100%;
-	overflow: unset;
-}
-
-body {
 	color: var(--text-color);
 	tab-size: 4;
-	overflow: auto;
-	overflow-x: hidden;
 	max-width: var(--max-width);
+	width: 100%;
+	height: auto;
 	margin: 0 auto;
 	padding: var(--page-padding);
 	word-break: break-word;
-	height: 100%;
 	text-align: justify;
 	text-justify: inter-word;
-	background-color: light-dark(#f1f1f1, #0e0e0e);;
+	border-radius: 12px;
+}
+
+#content .lexarea {
+	padding-block: 1.5em;
+	width: 80% !important;
+	justify-self: center;
+}
+
+#content::-webkit-scrollbar {
+    display: none;
 }
 
 .code-container {
@@ -81,49 +80,17 @@ body {
 	color: #42d065;
 }
 
-::-webkit-scrollbar {
-	height: 3px;
-	width: 4px;
-	background: none;
-	margin-right: 2px;
-}
-
-::-webkit-scrollbar-thumb {
-	background: #aaaaaaa5;
-	border-radius: 6px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-	background: #aaaaaa;
-}
-
-body.rtl h1,
-body.rtl h2,
-body.rtl h3,
-body.rtl h4,
-body.rtl p,
-body.rtl ul,
-body.rtl ol,
-body.rtl table {
-	direction: rtl !important;
-}
-body.rtl code {
-	direction: ltr !important;
-	text-align: initial;
-}
-
-
-a {
+#content a {
 	color: var(--color-blue);
 	cursor: pointer;
 	text-decoration: none;
 }
 
-.lexpanel a {
+#content .lexpanel a {
 	color: unset;
 }
 
-h1 {
+#content h1 {
 	font-size: 32px;
 	line-height: 48px;
 	margin-left: -2px;
@@ -135,7 +102,7 @@ h1 {
 	font-variation-settings: "wdth" 100;
 }
 
-h2 {
+#content h2 {
 	font-size: 28px;
 	line-height: 36px;
 	font-weight: normal;
@@ -144,41 +111,12 @@ h2 {
 	margin-bottom: 0.83em;
 }
 
-h3 {
+#content h3 {
 	font-size: 20px;
 	line-height: 28px;
 	font-weight: normal;
 	margin-top: 0.95em;
 	margin-bottom: 0.95em;
-}
-
-p,
-table,
-ol,
-ul,
-summary {
-	margin-top: 16px;
-	margin-bottom: 16px;
-}
-
-p {
-	padding-right: 16px;
-	line-height: 1.75;
-}
-
-ul, ol {
-	box-sizing: border-box;
-	padding-left: 24px;
-}
-ul li,
-ol li {
-	padding-left: 4px;
-	margin-bottom: 4px;
-}
-
-li ul,
-li ol {
-	margin-top: 4px;
 }
 
 code {
@@ -189,11 +127,6 @@ code {
 	background-color: #282828;
 	text-align: unset !important;
 	text-justify: unset !important;
-}
-
-ol code,
-ul code {
-	margin: 16px 0;
 }
 
 code.inline {
@@ -219,23 +152,17 @@ code:not(.inline) {
 	border-radius: 6px;
 }
 
-table code {
-	padding: 0px;
-	margin: 0px;
-	width: auto;
-}
-
-strong {
+#content strong {
 	font-weight:900;
 }
 
-a.permalink {
+#content a.permalink {
 	float: right;
 	margin-left: 5px;
 	display: none;
 }
 
-img {
+#content img {
 	width: 100%;
 	margin: 16px calc(-1 * var(--page-padding)) ;
 	border-radius: 4px;	
@@ -251,17 +178,17 @@ img {
 		--icon-size: 24px;
 	}
 
-	h1 {
+	#content h1 {
 		font-size: 42px;
 		line-height: 50px;
 	}
 
-	h2 {
+	#content h2 {
 		font-size: 32px;
 		line-height: 40px;
 	}
 
-	h3 {
+	#content h3 {
 		font-size: 24px;
 		line-height: 32px;
 	}
@@ -278,24 +205,24 @@ img {
 		--font-size: 20px;
 	}
 
-	body {
+	#content {
 		padding: var(--page-padding);
 	}
 
-	h1 {
+	#content h1 {
 		font-size: 28px;
 		line-height: 36px;
 		padding-right: 20px;
 		margin-top: 0;
 	}
 
-	h2 {
+	#content h2 {
 		font-size: 24px;
 		line-height: 32px;
 		margin-top: 24px;
 	}
 
-	h3 {
+	#content h3 {
 		font-size: 20px;
 		line-height: 28px;
 	}
@@ -387,77 +314,52 @@ code:has(.constructor) {
 	padding-inline: 8px;
 }
 
-@media (prefers-color-scheme: light) {
-	
-	body {
-		background-color: #f9f9f9;
-		color: #202124;
-	}
-	
-	::-webkit-scrollbar {
-		background-color: #f9f9f9;
-	}
+:root[data-theme="light"] #content {
+	color: #202124;
+}
 
-	::-webkit-scrollbar-thumb {
-		background: #5f5f5fb4;
-		border-radius: 6px;
-	}
-	
-	::-webkit-scrollbar-thumb:hover {
-		background: #575757;
-	}
+:root[data-theme="light"] code {
+	background-color: #ededed;
+}
 
-	code {
-		background-color: #ededed;
-	}
-	
-	code button {
-		color: #434e53;
-	}
-	
-	code button:hover {
-		color: #879094;
-	}
+:root[data-theme="light"] code button {
+	color: #434e53;
+}
 
-	pre .str, code .str { color: #188038; }
-	pre .kwd, code .kwd { color: #1967d2; }
-	pre .com, code .com { color: #b80672; }
-	pre .typ, code .typ { color: #0b9484; }
-	pre .dec, code .dec { color: #c5221f; }
-	pre .mtd, code .mtd { color: #504f4c; }
-	pre .lit, code .lit { color: #1967d2; }
-	pre .tag, code .tag { color: #2183b4; }
-	pre .atn, code .atn { color: #a753c0; }
+:root[data-theme="light"] code button:hover {
+	color: #879094;
+}
 
-/*
-	
-	
-	pre .pun, code .pun { color: #888888; }
-	pre .pln, code .pln { color: #444444; }
-	
+:root[data-theme="light"] pre .str, :root[data-theme="light"] code .str { color: #188038; }
+:root[data-theme="light"] pre .kwd, :root[data-theme="light"] code .kwd { color: #1967d2; }
+:root[data-theme="light"] pre .com, :root[data-theme="light"] code .com { color: #b80672; }
+:root[data-theme="light"] pre .typ, :root[data-theme="light"] code .typ { color: #0b9484; }
+:root[data-theme="light"] pre .dec, :root[data-theme="light"] code .dec { color: #c5221f; }
+:root[data-theme="light"] pre .mtd, :root[data-theme="light"] code .mtd { color: #504f4c; }
+:root[data-theme="light"] pre .lit, :root[data-theme="light"] code .lit { color: #1967d2; }
+:root[data-theme="light"] pre .tag, :root[data-theme="light"] code .tag { color: #2183b4; }
+:root[data-theme="light"] pre .atn, :root[data-theme="light"] code .atn { color: #a753c0; }
 
-*/
-	.desc {
-		color: #70777a;
-	}
-	
-	a .desc {
-		color: var(--color-blue);
-	}
-	
-	.param {
-		color: #37474f;
-	}
-	
-	.prop, .method {
-		color: #37474f;
-	}
+:root[data-theme="light"] .desc {
+	color: #70777a;
+}
 
-	#goUpButton {
-		color: #37474f;
-	}
-	
-	#goUpButton:hover {
-		color: #879094;
-	}
+:root[data-theme="light"] a .desc {
+	color: var(--color-blue);
+}
+
+:root[data-theme="light"] .param {
+	color: #37474f;
+}
+
+:root[data-theme="light"] .prop, :root[data-theme="light"] .method {
+	color: #37474f;
+}
+
+:root[data-theme="light"] #goUpButton {
+	color: #37474f;
+}
+
+:root[data-theme="light"] #goUpButton:hover {
+	color: #879094;
 }

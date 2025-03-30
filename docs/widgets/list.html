@@ -1,0 +1,38 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // List
+    MAKE_HEADER("List", "h1", "list");
+    MAKE_PARAGRAPH(`Represents a list of selectable elements.`);
+
+    {
+        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        panel.addList("Volley Teams", ["GPTeam", ["Blat Panthers", "fa-solid fa-paw"], "Blat Bunny"], "Blat Panthers", (value, event) => {
+            console.log(value);
+        });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addList(name, value, values, callback, options)")} to add a List Widget to your panel:`);
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Widget name"],
+        ["values", "Array", "List values"],
+        ["value", "*", "Selected list value"],
+        ["callback", "Function", "Function called when the a new item list is selected"],
+        ["options", "Object", "Basic options for a Widget"]
+    ]);
+    MAKE_CODE(`panel.@[mtd]addList@(@"List name"@, [@"GPTeam"@, @"Blat Panthers"@], @"Blat Panthers"@,  (value, event) => {
+    console.@[mtd]log@(value);
+});` );
+
+    MAKE_PARAGRAPH(`<sup>It's possible to preppend an icon to the element name inside the list using an Array for the item [item, icon]:<sup>`);
+
+    MAKE_CODE(`panel.@[mtd]addList@(@"List name"@, [@"GPTeam"@, [@"Blat Panthers"@, @"fa-solid fa-paw"@]], @"Blat Panthers"@,  (value, event) => {
+    console.@[mtd]log@(value);
+});` );
+
+</script>

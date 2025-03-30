@@ -1,0 +1,34 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // Title
+    MAKE_HEADER("Title", "h1", "title");
+    MAKE_PARAGRAPH(`Represents a title section.`);
+
+    {
+        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        panel.addTitle("A Title!");
+        panel.addTitle("A No-Background Big Title!", { style: { background: "none", fontSize: "24px" } });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addTitle(name, value, callback, options)")} to add a Title Widget to your panel:`);
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Widget name"],
+        ["options", "Object", "Basic options for a Widget"],
+        [
+            ["link", "String", "Href in case title is an hyperlink"],
+            ["target", "String", "Target name of the iframe (if any)"],
+            ["icon", "String", "FA class of the icon (if any)"],
+            ["iconColor", "String", "Color of title icon (if any)"],
+            ["style", "String/Number", "CSS to override"]
+        ]
+    ]);
+    MAKE_CODE(`panel.@[mtd]addTitle@(@"A title!"@);
+panel.@[mtd]addTitle@(@"A No-Background Big Title!@", { style: { background: @"none"@, fontSize: @"24px"@ } });` );
+
+</script>

@@ -1,0 +1,32 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // Layers
+    MAKE_HEADER("Layers", "h1", "layers");
+    MAKE_PARAGRAPH(`Represents Bit Layers. Enables 
+    you to work with binary data and manipulate individual bits to set bit masks.` );
+
+    {
+        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        panel.addLayers("Layer name", 10, (value, event) => {
+            console.log(value);
+        });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addLayers(name, value, callback)")} to add a Layers Widget to your panel:`);
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Widget name"],
+        ["value", "Number", "Mask value (decimal) that will be decomposed into bits"],
+        ["callback", "Function", "Function called when bit mask changes"],
+        ["options", "Object", "Basic options for a Widget"]
+    ]);
+    MAKE_CODE(`panel.@[mtd]addLayers@(@"Layer name"@, @10@, (value, event) => {
+    console.@[mtd]log@(value);
+});` );
+
+</script>

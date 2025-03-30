@@ -1,0 +1,59 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // Vector
+    MAKE_HEADER("Vector", "h1", "vector");
+    MAKE_PARAGRAPH(`Similar to the Number widget, it represents a decimal vector input. It&#39;s composed by multiple <a href="#number">number</a> widgets.`);
+
+    {
+        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        panel.addVector2("2D Position", [250, 350], (value, event) => {
+            console.log(value);
+        }, { min: 0, max: 1024 });
+
+        panel.addVector3("Velocity", [0.1, 1, 0.5], (value, event) => {
+            console.log(value);
+        });
+
+        panel.addVector4("Shader Color", [1, 1, 1, 1], (value, event) => {
+            console.log(value);
+        });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addVectorN(name, value, callback, options)")}, where N is a number in the range [2, 4], to add a Vector Widget to your panel:`);
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Widget name"],
+        ["values", "Number Array", "Array containing the values for the vector"],
+        ["callback", "Function", "Function called when any of the N number inputs change"],
+        ["options", "Object", "Basic options for a Widget"],
+        [
+            ["disabled", "Boolean", "Make the widget disabled"],
+            ["step", "Number", "Change Step value"],
+            ["min", "Number", "Min input value"],
+            ["max", "Number", "Max input value"],
+            ["onPress", "Function", "Callback function on mouse down"],
+            ["onRelease", "Function", "Callback function on mouse up"]
+        ]
+    ]);
+    MAKE_PARAGRAPH(`<sup>Note: Since a Vector Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.<sup>`);
+    MAKE_CODE(`panel.@[mtd]addVector2@(@"2D Position"@, [@250@, @350@], (value, event) =&gt; {
+    console.@[mtd]log@(value);
+}, { min: @0@, max: @1024@ });
+
+panel.@[mtd]addVector3@(@"Velocity"@, [@0.1@, @1@, @0.5@], (value, event) =&gt; {
+    console.@[mtd]log@(value);
+});
+
+panel.@[mtd]addVector4@(@"Shader Color"@, [@1@, @1@, @1@, @1@], (value, event) =&gt; {
+    console.@[mtd]log@(value);
+});` );
+
+    MAKE_PARAGRAPH(`In case you are using limits, store the widget and call <code class='inline'>vectorWidget.setLimits( min, max, step )</code> to change its 
+        parameters once the widget has been created.` );
+
+</script>

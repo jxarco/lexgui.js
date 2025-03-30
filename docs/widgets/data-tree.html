@@ -1,0 +1,167 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // Data Tree
+    MAKE_HEADER("Data Tree", "h1", "datatree");
+    MAKE_PARAGRAPH(`Represents a <strong>data hierarchy visualization Tree</strong>. Enables developers to display hierarchical data in an organized
+     and visually appealing manner. This feature is especially useful when presenting data with parent-child
+      relationships, such as file directories, organizational structures, family trees, and more.` );
+
+    {
+        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        // Tree data!
+        const sceneData = {
+            id: "root",
+            children: [
+                {
+                    id: "node_1",
+                    children: [
+                        {
+                            id: "node_1_1",
+                            icon: "fa-solid fa-cube",
+                            children: [],
+                            actions: [
+                                {
+                                    name: "Open script",
+                                    icon: "fa-solid fa-scroll",
+                                    callback: function (node) {
+                                        console.log(node.id + ": Script opened!")
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: "node_2",
+                    icon: "fa-solid fa-circle-play",
+                    children: []
+                }
+            ]
+        };
+
+        // This is optional!
+        const dataTreeIcons = [
+            {
+                name: "Add node",
+                icon: "fa-solid fa-plus",
+                callback: () => { console.log("Node added!") }
+            },
+            {
+                name: "Instantiate scene",
+                icon: "fa-solid fa-link",
+                callback: () => { console.log("Scene instantiated!") }
+            }
+        ];
+
+        panel.addTree("Scene Tree", sceneData, {
+            icons: dataTreeIcons,
+            filter: false,
+            rename: true,
+            onevent: (event) => {
+                switch (event.type) {
+                    case LX.TreeEvent.NODE_SELECTED:
+                        console.log("Selected:", event.node.id);
+                        break;
+                    case LX.TreeEvent.NODE_DBLCLICKED:
+                        console.log("Double click!")
+                        break;
+                }
+            }
+        });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addTree(name, data, options)")} to add a DataTree Widget to your panel:`);
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Widget name"],
+        ["data", "Object", "Hierarchical data"],
+        ["options", "Object", "Basic options for a Widget"],
+        [
+            ["icons", "Array", "Array of objects with button information {name, icon, callback}"],
+            ["filter", "Boolean", "Adds a filter bar [true]"],
+            ["rename", "Boolean", "Allow item rename [true]"],
+            ["onevent", "Function", "Function to catch the different types of Tree events"]
+        ]
+    ]);
+    MAKE_CODE(`@[com]// Tree data!@
+@const@ sceneData = {
+    id: @"root"@,
+    children: [
+        {
+            id: @"node_1"@,
+            children: [
+                {
+                    id: @"node_1_1"@,
+                    icon: @"fa-solid fa-cube"@,
+                    children: [],
+                    actions: [
+                        {
+                            name: @"Open script"@,
+                            icon: @"fa-solid fa-scroll"@,
+                            callback: function(node) {
+                                console.@[mtd]log@(node.id + @": Script opened!"@)
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            id: @"node_2"@,
+            icon: @"fa-solid fa-circle-play"@,
+            children: []
+        }
+    ]
+};
+    
+@[com]// This is optional!@
+@const@ dataTreeIcons = [
+    {
+        name: @"Add node"@,
+        icon: @"fa-solid fa-plus"@,
+        callback: () => { console.@[mtd]log@(@"Node added!"@) }
+    },
+    {
+        name: @"Instantiate scene"@,
+        icon: @"fa-solid fa-link"@,
+        callback: () => { console.@[mtd]log@(@"Scene instantiated!"@) }
+    }
+];
+    
+panel.@[mtd]addTree@(@"Scene Tree"@, sceneData, { 
+    icons: dataTreeIcons, 
+    filter: @false@,
+    rename: @true@,
+    onevent: (event) => { 
+        switch(event.type) {
+            @case@ LX.@[typ]TreeEvent@.NODE_SELECTED: 
+                @[com]// ...@
+                @break@;
+            @case@ LX.@[typ]TreeEvent@.NODE_DELETED: 
+                @[com]// ...@
+                @break@;
+            @case@ LX.@[typ]TreeEvent@.NODE_DBLCLICKED: 
+                @[com]// ...@
+                @break@;
+            @case@ LX.@[typ]TreeEvent@.NODE_CONTEXTMENU: 
+                @[com]// ...@
+                @break@;
+            @case@ LX.@[typ]TreeEvent@.NODE_DRAGGED: 
+                @[com]// ...@
+                @break@;
+            @case@ LX.@[typ]TreeEvent@.NODE_RENAMED:
+                @[com]// ...@
+                @break@;
+            @case@ LX.@[typ]TreeEvent@.NODE_VISIBILITY:
+                @[com]// ...@
+                @break@;
+        }
+    }
+});` );
+
+</script>

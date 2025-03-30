@@ -1,0 +1,36 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // Form
+    MAKE_HEADER("Form", "h1", "form");
+    MAKE_PARAGRAPH(`Represents a form structure with different fields and a submit button.`);
+
+    {
+        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        const formData = { username: "", password: { value: "", type: "password" } };
+        panel.addForm("Test form", formData, (value, event) => {
+            console.log(value);
+        }, { actionName: "Login" });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addForm(name, value, callback, options)")} to add a Form Widget to your panel:`);
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Widget name"],
+        ["data", "Object", "Form data"],
+        ["callback", "Function", "Function called on submit form"],
+        ["options", "Object", "Basic options for a Widget"],
+        [
+            ["actionName", "String", "Text to be shown in the button"]
+        ]
+    ]);
+    MAKE_CODE(`@const@ formData = { username: @""@, password: { value: @""@, type: @"password"@ } };
+panel.@[mtd]addForm@(@"Test form"@, formData, (value, event) => {
+    console.@[mtd]log@(value);
+}, { actionName: @"Login"@ });` );
+
+</script>

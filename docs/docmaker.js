@@ -5,9 +5,16 @@ const STATEMENT_WORDS = ['for', 'if', 'else', 'return', 'continue', 'break', 'ca
 const HTML_ATTRIBUTES = ['html', 'charset', 'rel', 'src', 'href', 'crossorigin', 'type', 'lang'];
 const HTML_TAGS = ['html', 'DOCTYPE', 'head', 'meta', 'title', 'link', 'script', 'body', 'style'];
 
+let mainContainer = document.body;
+
+function SET_DOM_TARGET( element )
+{
+    mainContainer = element;
+}
+
 function MAKE_LINE_BREAK()
 {
-    document.body.appendChild( document.createElement('br') );
+    mainContainer.appendChild( document.createElement('br') );
 }
 
 function MAKE_HEADER( string, type, id )
@@ -16,7 +23,7 @@ function MAKE_HEADER( string, type, id )
     let header = document.createElement(type);
     header.innerHTML = string;
     if(id) header.id = id;
-    document.body.appendChild( header );
+    mainContainer.appendChild( header );
 }
 
 function MAKE_PARAGRAPH( string, sup )
@@ -24,7 +31,7 @@ function MAKE_PARAGRAPH( string, sup )
     console.assert(string);
     let paragraph = document.createElement(sup ? 'sup' : 'p');
     paragraph.innerHTML = string;
-    document.body.appendChild( paragraph );
+    mainContainer.appendChild( paragraph );
 }
 
 function MAKE_CODE( text )
@@ -151,7 +158,7 @@ function MAKE_CODE( text )
 
     pre.appendChild( code );
     container.appendChild( pre );
-    document.body.appendChild( container );
+    mainContainer.appendChild( container );
 }
 
 function MAKE_BULLET_LIST( list )
@@ -163,7 +170,7 @@ function MAKE_BULLET_LIST( list )
         li.innerHTML = el;
         ul.appendChild( li );
     }
-    document.body.appendChild( ul );
+    mainContainer.appendChild( ul );
 }
 
 function ADD_CODE_LIST_ITEM( item, target )
@@ -205,7 +212,7 @@ function MAKE_CLASS_CONSTRUCTOR( name, params )
     }
     let pr = document.createElement('p');
     pr.innerHTML = INLINE_CODE( "<span class='constructor'>" + name + "(" + paramsHTML + ")" + "</span>" );
-    document.body.appendChild( pr );
+    mainContainer.appendChild( pr );
 }
 
 function MAKE_CODE_BULLET_LIST( list, target )
@@ -218,7 +225,7 @@ function MAKE_CODE_BULLET_LIST( list, target )
     if( target ) {
         target.appendChild( ul );
     } else {
-        document.body.appendChild( ul );
+        mainContainer.appendChild( ul );
     }
 }
 
@@ -231,7 +238,7 @@ function START_CODE_BULLET_LIST()
 function END_CODE_BULLET_LIST()
 {
     console.assert( window.listQueued );
-    document.body.appendChild( window.listQueued );
+    mainContainer.appendChild( window.listQueued );
     window.listQueued = undefined;
 }
 
@@ -266,5 +273,5 @@ function INSERT_IMAGE( src, caption = "" )
     let img = document.createElement('img');
     img.src = src;
     img.alt = caption;
-    document.body.appendChild( img );
+    mainContainer.appendChild( img );
 }

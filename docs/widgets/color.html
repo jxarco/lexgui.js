@@ -1,0 +1,37 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // Color
+    MAKE_HEADER("Color", "h1", "color");
+    MAKE_PARAGRAPH(`Represents a color input. Allows users to select a color using the browser native color picker.`);
+
+    {
+        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        panel.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
+            console.log(value);
+        });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addColor(name, value, callback, options)")} to add a Color Widget to your panel:`);
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Widget name"],
+        ["value", "String/Array", "Color value in hex (&quot;#fff&quot;) or Array[r, g, b]"],
+        ["callback", "Function", "Function called when the input changes"],
+        ["options", "Object", "Basic options for a Widget"],
+        [
+            ["disabled", "Boolean", "Make the widget disabled"],
+            ["useRGB", "Boolean", "The callback returns color as Array[r, g, b] and not hex [<code class='inline'>false</code>]"]
+        ]
+    ]);
+    MAKE_CODE(`panel.@[mtd]addColor@(@"Font Color"@, [@1@, @0.1@, @0.6@], (value, event) =&gt; {
+    console.@[mtd]log@(@"Font Color: "@, value);
+});
+
+panel.@[mtd]addColor@(@"Background"@, @"#b7a9b1"@);` );
+
+</script>

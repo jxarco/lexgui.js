@@ -1,0 +1,48 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // Checkbox
+    MAKE_HEADER("Checkbox", "h1", "checkbox");
+    MAKE_PARAGRAPH(`Represents a control that allows the user to toggle between checked and not checked..`);
+
+    {
+        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        panel.addCheckbox("Check me", true, (value, event) => {
+            console.log(value);
+        });
+        panel.addCheckbox("Check me with Label", true, (value, event) => {
+            console.log(value);
+        }, { label: "Label" });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addCheckbox(name, value, callback, options)")} to add a Checkbox Widget to your panel:`);
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Widget name"],
+        ["value", "Boolean", "Boolean value (true/false)"],
+        ["callback", "Function", "Function called when the checkbox value changes"],
+        ["options", "Object", "Basic options for a Widget"],
+        [
+            ["disabled", "Boolean", "Make the widget disabled [false]"],
+            ["label", "String", "Checkbox label"],
+            ["suboptions", "Function", "Callback to add widgets shown if <code class='inline'>true</code>"],
+            ["className", "String", "Extra classes to customize style"],
+        ]
+    ]);
+    MAKE_CODE(`panel.@[mtd]addCheckbox@(@"Check me"@, @true@, (value, event) =&gt; {
+    console.@[mtd]log@(value);
+});
+
+@[com]// Suboptions in case checkbox is enabled@
+panel.@[mtd]addCheckbox@(@"Check me too"@, @true@, (value, event) =&gt; {
+    console.@[mtd]log@(value);
+}, { suboptions: p =&gt; {
+    p.@[mtd]addText@(@null@, @"Suboption 1"@);
+    p.@[mtd]addNumber@(@"Suboption 2"@, @12@);
+} });` );
+
+</script>

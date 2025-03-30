@@ -1,0 +1,71 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // Table
+    MAKE_HEADER("Table", "h1", "table");
+    MAKE_PARAGRAPH(`Represents a dynamic table with user-input data.`);
+
+    {
+        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        panel.addTable(null, {
+            head: ["Name", "Subject", "Grade"],
+            body: [
+                ["Alice", "Science", "B"],
+                ["Bob", "Math", "C"],
+                ["Carter", "Zoology", "A"],
+            ]
+        }, {
+            selectable: true,
+            rowActions: [
+                { icon: "fa-solid fa-pen-to-square", callback: (tableData) => { } }, // custom: you can change the data and refresh will be called later!
+                "delete",
+                "menu"
+            ],
+            onMenuAction: (context) => {
+                context.add("Export", (a) => console.log(a));
+                context.add("An Action", (a) => console.log(a));
+            }
+        });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addTable(name, data, options)")} to add a Table Widget to your panel:`);
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Widget name"],
+        ["data", "Object", "Table data"],
+        ["options", "Object", "Basic options for a Widget"],
+        [
+            ["head", "Array", "Table headers (each of the headers per column)"],
+            ["body", "Array", "Table body (data per row for each column)"],
+            ["rowActions", "Array", `Allow to add actions per row ${INLINE_CODE("action: { icon, callback }")}`],
+            ["selectable", "Boolean", "Each row can be selected"],
+        ]
+    ]);
+    MAKE_PARAGRAPH(`<sup>Note: You can use default row actions as String such as 'delete' or 'menu', which have predefined icons and callbacks.
+            For the 'menu' action, you must fill the possible menus inside the created ${INLINE_LINK("ContextMenu", "context_menu.html")} using ${INLINE_CODE("options.onMenuAction")}.<sup>`);
+    MAKE_CODE(`panel.@[mtd]addTable@(@null@, {
+    head: [ @"Name"@, @"Subject"@, @"Grade"@ ],
+    body: [ 
+        [ @"Alice"@, @"Science"@, @"B"@ ],
+        [ @"Bob"@, @"Math"@, @"C"@ ],
+        [ @"Carter"@, @"Zoology"@, @"A"@ ],
+    ]
+}, { 
+    selectable: @true@, 
+    rowActions: [
+        @[com]// custom: you can change the data and refresh will be called later!@
+        { icon: @"fa-solid fa-pen-to-square"@, callback: ( tableData ) => {} }, @[com]// custom: you can change the data and refresh will be called later!@
+        @"delete"@,
+        @"menu"@
+    ],
+    onMenuAction: ( context ) => {
+        context.add(@"Export"@, (a) => console.@[mtd]log@(a) );
+        context.add(@"An Action"@, (a) => console.@[mtd]log@(a) );
+    }
+});` );
+
+</script>

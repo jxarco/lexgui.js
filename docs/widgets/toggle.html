@@ -1,0 +1,43 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // Toggle
+    MAKE_HEADER("Toggle", "h1", "toggle");
+    MAKE_PARAGRAPH(`Represents a classic toggle. Same usage as the checbox.`);
+
+    {
+        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        panel.addToggle("Toggle me", true, (value, event) => {
+            console.log(value);
+        });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addToggle(name, value, callback, options)")} to add a Toggle Widget to your panel:`);
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Widget name"],
+        ["value", "Boolean", "Boolean value (true/false)"],
+        ["callback", "Function", "Function called when the checkbox value changes"],
+        ["options", "Object", "Basic options for a Widget"],
+        [
+            ["disabled", "Boolean", "Make the widget disabled"],
+            ["suboptions", "Function", "Callback to add widgets shown if <code class='inline'>true</code>"]
+        ]
+    ]);
+    MAKE_CODE(`panel.@[mtd]addToggle@(@"Toggle me"@, @true@, (value, event) =&gt; {
+    console.@[mtd]log@(value);
+});
+
+@[com]// Suboptions in case checkbox is enabled@
+panel.@[mtd]addToggle@(@"Toggle me too"@, @true@, (value, event) =&gt; {
+        console.@[mtd]log@(value);
+    }, { suboptions: p =&gt; {
+        p.@[mtd]addText@(@null@, @"Suboption 1"@);
+        p.@[mtd]addNumber@(@"Suboption 2"@, @12@);
+} });` );
+
+</script>

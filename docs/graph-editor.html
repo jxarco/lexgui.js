@@ -1,0 +1,18 @@
+<script type="text/javascript">
+
+    MAKE_HEADER( "Graph Editor", "h1", "graph-editor" );
+
+    MAKE_LINE_BREAK();
+    INSERT_IMAGE(`../data/Screenshot_Graph.png`, "graph_editor" );
+    MAKE_LINE_BREAK();
+            
+    MAKE_HEADER( "Creating the editor", "h2", "init" );
+
+    MAKE_PARAGRAPH( `The Editor has to be appended to an existing area. It means that it can be created anywhere in the document window (e.g. dialogs, panels, areas, etc.), since to create an area it's as easy as instancing a new
+    one. The following lines instanciate the DOM element for the editor:` );
+    MAKE_CODE( `<span class="kwd">let</span> editor = <span class="kwd">new</span> LX.<span class="typ">GraphEditor</span>( area );` );
+
+    MAKE_HEADER( "Opening graphs", "h2", "using-graphs" );
+    MAKE_PARAGRAPH( `To load existing graphs you must use ${INLINE_CODE("GraphEditor.loadGraph( filename )")}. This will open a new graph tab!` );
+
+</script>

@@ -1,0 +1,54 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // Curve
+    MAKE_HEADER("Curve", "h1", "curve");
+    MAKE_PARAGRAPH(`Represents a simple Curve Editor. It's a versatile component designed to simplify the manipulation and visualization
+of curves or graphs, ideal for any scenario where the smooth interpolation of values over time
+or other parameters is essential.` );
+
+    {
+        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        const opacityValues = [
+            [0.2, 0.35],
+            [0.42, 0.9],
+            [0.55, 0.67],
+            [1, 1]
+        ];
+        panel.addCurve("Opacity", opacityValues, (value, event) => {
+            console.log(value);
+        });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addCurve(name, values, callback)")} to add a Curve Widget to your panel:`);
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Widget name"],
+        ["values", "Array", "Values of the curve to be interpolated"],
+        ["options", "Object", "Basic options for a Widget"],
+        [
+            ["skipReset", "Boolean", "Don't add the reset value button when value changes"],
+            ["bgColor (Color)", "Widget background color"],
+            ["pointsColor (Color)", "Curve points color"],
+            ["lineColor (Color)", "Curve line color"],
+            ["noOverlap", "Boolean", "Points do not overlap, replacing themselves if necessary"],
+            ["allowAddValues", "Boolean", "Support adding values on click"],
+            ["smooth", "Number", "Curve smoothness"],
+            ["moveOutAction", "Number", "Clamp or delete points moved out of the curve (LX.CURVE_MOVEOUT_CLAMP, LX.CURVE_MOVEOUT_DELETE)"],
+        ]
+    ]);
+    MAKE_CODE(`@const@ opacityValues = [
+    [@0.2@, @0.35@],
+    [@0.42@, @0.9@],
+    [@0.55@, @0.67@],
+    [@1@, @1@]
+];
+panel.@[mtd]addCurve@(@"Opacity"@, opacityValues, (value, event) => {
+    console.@[mtd]log@(value);
+});` );
+
+</script>
