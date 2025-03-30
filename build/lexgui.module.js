@@ -2168,7 +2168,7 @@ class Area {
 
             if( b.options )
             {
-                overlayPanel.addDropdown( null, b.options, b.name, callback, _options );
+                overlayPanel.addSelect( null, b.options, b.name, callback, _options );
             }
             else
             {
@@ -3952,7 +3952,7 @@ class Widget {
     static TEXT         = 1;
     static TEXTAREA     = 2;
     static BUTTON       = 3;
-    static DROPDOWN     = 4;
+    static SELECT       = 4;
     static CHECKBOX     = 5;
     static TOGGLE       = 6;
     static RADIO        = 7;
@@ -4196,7 +4196,7 @@ class Widget {
             case Widget.TEXT: return "Text";
             case Widget.TEXTAREA: return "TextArea";
             case Widget.BUTTON: return "Button";
-            case Widget.DROPDOWN: return "Dropdown";
+            case Widget.SELECT: return "Select";
             case Widget.CHECKBOX: return "Checkbox";
             case Widget.TOGGLE: return "Toggle";
             case Widget.RADIO: return "Radio";
@@ -5547,15 +5547,15 @@ class Form extends Widget {
 LX.Form = Form;
 
 /**
- * @class Dropdown
- * @description Dropdown Widget
+ * @class Select
+ * @description Select Widget
  */
 
-class Dropdown extends Widget {
+class Select extends Widget {
 
     constructor( name, values, value, callback, options = {} ) {
 
-        super( Widget.DROPDOWN, name, value, options );
+        super( Widget.SELECT, name, value, options );
 
         this.onGetValue = () => {
             return this.root.querySelector( "li.selected" ).getAttribute( 'value' );
@@ -5574,7 +5574,7 @@ class Dropdown extends Widget {
                 }
             } );
 
-            console.assert( item, `Item ${ newValue } does not exist in the Dropdown.` );
+            console.assert( item, `Item ${ newValue } does not exist in the Select.` );
             item.classList.add( "selected" );
             selectedOption.refresh( value );
 
@@ -5593,15 +5593,15 @@ class Dropdown extends Widget {
         };
 
         let container = document.createElement( "div" );
-        container.className = "lexdropdown";
+        container.className = "lexselect";
         container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
         let wValue = document.createElement( 'div' );
-        wValue.className = "lexdropdown lexoption";
+        wValue.className = "lexselect lexoption";
         wValue.name = name;
         wValue.iValue = value;
 
-        // Add dropdown widget button
+        // Add select widget button
         let buttonName = value;
         buttonName += "<a class='fa-solid fa-angle-down' style='float:right; margin-right: 3px;'></a>";
 
@@ -5715,10 +5715,10 @@ class Dropdown extends Widget {
             }
         }
 
-        // Add dropdown options container
+        // Add select options container
 
         const listDialog = document.createElement( 'dialog' );
-        listDialog.className = "lexdropdownoptions";
+        listDialog.className = "lexselectoptions";
 
         let list = document.createElement( 'ul' );
         list.tabIndex = -1;
@@ -5780,7 +5780,7 @@ class Dropdown extends Widget {
         listOptions.style.height = "calc(100% - 25px)";
         list.appendChild( listOptions );
 
-        // Add dropdown options list
+        // Add select options list
         list.refresh = ( options ) => {
 
             // Empty list
@@ -5796,7 +5796,7 @@ class Dropdown extends Widget {
                 option.innerHTML = iValue;
 
                 let li = document.createElement( "li" );
-                li.className = "lexdropdownitem empty";
+                li.className = "lexselectitem empty";
                 li.appendChild( option );
 
                 listOptions.appendChild( li );
@@ -5823,7 +5823,7 @@ class Dropdown extends Widget {
                     option.innerHTML = "</a><span>" + iValue + "</span><a class='fa-solid fa-check'>";
                     option.value = iValue;
                     li.setAttribute( "value", iValue );
-                    li.className = "lexdropdownitem";
+                    li.className = "lexselectitem";
 
                     if( iValue == value )
                     {
@@ -5896,7 +5896,7 @@ class Dropdown extends Widget {
     }
 }
 
-LX.Dropdown = Dropdown;
+LX.Select = Select;
 
 /**
  * @class Curve
@@ -6110,7 +6110,7 @@ class ItemArray extends Widget {
 
         this.root.style.flexWrap = "wrap";
 
-        // Add dropdown array button
+        // Add open array button
 
         const itemNameWidth = "4%";
 
@@ -6151,7 +6151,7 @@ class ItemArray extends Widget {
             for( let i = 0; i < values.length; ++i )
             {
                 const value = values[ i ];
-                let baseclass = options.innerValues ? 'dropdown' : value.constructor;
+                let baseclass = options.innerValues ? 'select' : value.constructor;
 
                 // TODO
                 // this.sameLine( 2 );
@@ -6172,8 +6172,8 @@ class ItemArray extends Widget {
                             callback( values );
                         }, { nameWidth: itemNameWidth, inputWidth: "95%", skipReset: true });
                         break;
-                    case 'dropdown':
-                        widget = new Dropdown(i + "", options.innerValues, value, function(value, event) {
+                    case 'select':
+                        widget = new Select(i + "", options.innerValues, value, function(value, event) {
                             values[ i ] = value;
                             callback( values );
                         }, { nameWidth: itemNameWidth, inputWidth: "95%", skipReset: true });
@@ -7723,7 +7723,7 @@ class FileInput extends Widget {
                 }
 
                 settingsDialog = new Dialog( "Load Settings", p => {
-                    p.addDropdown( "Type", [ 'text', 'buffer', 'bin', 'url' ], type, v => { type = v } );
+                    p.addSelect( "Type", [ 'text', 'buffer', 'bin', 'url' ], type, v => { type = v } );
                     p.addButton( null, "Reload", v => { input.dispatchEvent( new Event( 'change' ) ) } );
                 }, { onclose: ( root ) => { root.remove(); settingsDialog = null; } } );
 
@@ -8466,7 +8466,7 @@ class Panel {
                 {
                     this._inlineContainer.appendChild( item[ 0 ] );
                 }
-                // eg. a dropdown, item is appended to parent, not to inline cont.
+                // eg. a select, item is appended to parent, not to inline cont.
                 else
                 {
                     item[ 1 ].appendChild( item[ 0 ] );
@@ -9009,9 +9009,9 @@ class Panel {
     }
 
     /**
-     * @method addDropdown
+     * @method addSelect
      * @param {String} name Widget name
-     * @param {Array} values Posible options of the dropdown widget -> String (for default dropdown) or Object = {value, url} (for images, gifs..)
+     * @param {Array} values Posible options of the select widget -> String (for default select) or Object = {value, url} (for images, gifs..)
      * @param {String} value Select by default option
      * @param {Function} callback Callback function on change
      * @param {Object} options:
@@ -9023,8 +9023,8 @@ class Panel {
      * emptyMsg: Custom message to show when no filtered results
      */
 
-    addDropdown( name, values, value, callback, options = {} ) {
-        const widget = new Dropdown( name, values, value, callback, options );
+    addSelect( name, values, value, callback, options = {} ) {
+        const widget = new Select( name, values, value, callback, options );
         return this._attachWidget( widget );
     }
 
@@ -9089,7 +9089,7 @@ class Panel {
      * @param {Array} values By default values in the array
      * @param {Function} callback Callback function on change
      * @param {Object} options:
-     * innerValues (Array): Use dropdown mode and use values as options
+     * innerValues (Array): Use select mode and use values as options
      */
 
     addArray( name, values = [], callback, options = {} ) {
@@ -11402,7 +11402,7 @@ class AssetView {
         }
 
         this.rightPanel.sameLine();
-        this.rightPanel.addDropdown( "Filter", this.allowedTypes, this.allowedTypes[ 0 ], v => this._refreshContent.call(this, null, v), { width: "30%", minWidth: "128px" } );
+        this.rightPanel.addSelect( "Filter", this.allowedTypes, this.allowedTypes[ 0 ], v => this._refreshContent.call(this, null, v), { width: "30%", minWidth: "128px" } );
         this.rightPanel.addText( null, this.searchValue ?? "", v => this._refreshContent.call(this, v, null), { placeholder: "Search assets.." } );
         this.rightPanel.addButton( null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { className: "micro", title: "Sort" } );
         this.rightPanel.addButton( null, "<a class='fa-solid fa-grip'></a>", on_change_view.bind(this), { className: "micro", title: "View" } );
