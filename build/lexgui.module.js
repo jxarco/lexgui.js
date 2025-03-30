@@ -5558,7 +5558,7 @@ class Select extends Widget {
         super( Widget.SELECT, name, value, options );
 
         this.onGetValue = () => {
-            return this.root.querySelector( "li.selected" ).getAttribute( 'value' );
+            return value;
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
@@ -5811,25 +5811,39 @@ class Select extends Widget {
                 option.className = "option";
                 li.appendChild( option );
 
-                li.addEventListener( "click", e => {
-                    listDialog.close();
+                const onSelect = e => {
                     this.set( e.currentTarget.getAttribute( "value" ), false, e );
-                } );
+                    listDialog.close();
+                };
+
+                li.addEventListener( "click", onSelect );
 
                 // Add string option
                 if( iValue.constructor != Object )
                 {
                     option.style.flexDirection = "unset";
-                    option.innerHTML = "</a><span>" + iValue + "</span><a class='fa-solid fa-check'>";
-                    option.value = iValue;
-                    li.setAttribute( "value", iValue );
-                    li.className = "lexselectitem";
 
-                    if( iValue == value )
+                    const asLabel = ( iValue[ 0 ] === '@' );
+
+                    if( !asLabel )
                     {
-                        li.classList.add( "selected" );
-                        wValue.innerHTML = iValue;
+                        option.innerHTML = "</a><span>" + iValue + "</span><a class='fa-solid fa-check'>";
+                        option.value = iValue;
+                        li.setAttribute( "value", iValue );
+
+                        if( iValue == value )
+                        {
+                            li.classList.add( "selected" );
+                            wValue.innerHTML = iValue;
+                        }
                     }
+                    else
+                    {
+                        option.innerHTML = "<span>" + iValue.substr( 1 ) + "</span>";
+                        li.removeEventListener( "click", onSelect );
+                    }
+
+                    li.className = asLabel ? "lexselectlabel" : "lexselectitem";
                 }
                 else
                 {

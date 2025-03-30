@@ -1550,6 +1550,18 @@ body.noevents * {
     user-select: none;
 }
 
+.lexselect .lexselectlabel {
+    width: 100%;
+    color: var(--global-text-primary);
+    min-height: 20px;
+    line-height: 22px;
+    align-content: center;
+    display: flow-root;
+    padding: 2px 0px;
+    padding-right: 32px;
+    font-weight: 600;
+}
+
 .lexselect .lexselectitem.empty {
     cursor: default;
 }
