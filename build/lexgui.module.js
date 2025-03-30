@@ -3929,8 +3929,11 @@ class SideBar {
                     if( f ) f.call( this, subkey, subentry, e );
 
                     // Manage selected
-                    this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
-                    entry.classList.add( "selected" );
+                    if( this.displaySelected )
+                    {
+                        this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
+                        entry.classList.add( "selected" );
+                    }
                 });
             }
         }
