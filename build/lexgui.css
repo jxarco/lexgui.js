@@ -19,24 +19,24 @@
     --global-font-size-xl: 1.125rem; /* 18px */
     --global-font-size-xxl: 1.375rem; /* 22px */
 
-    --global-color-primary: light-dark(#f3f3f3, #141414);
-    --global-color-secondary: light-dark(#e4e4e4, #242424);
-    --global-color-terciary: light-dark(#dcdcde, #363636);
-    --global-color-quaternary: light-dark(#c6c6c6, #494949);
-    --global-color-quinary: light-dark(#b5b5b5, #5c5c5c);
+    --global-color-primary: light-dark(#f5f5f6, #0f0f0f); /* Near White / Near Black */
+    --global-color-secondary: light-dark(#e8e8ea, #1c1c1c); /* Very Light Gray / Very Dark Gray */
+    --global-color-tertiary: light-dark(#d6d6d8, #292929); /* Soft Gray / Deep Gray */
+    --global-color-quaternary: light-dark(#bfbfc2, #404040); /* Muted Gray / Medium Dark */
+    --global-color-quinary: light-dark(#a5a5a8, #595959); /* Gentle Gray / Soft Dark Gray */
+
     --global-selected: #2d69da;
     --global-selected-light: #0d99ff;
     --global-selected-dark: #304b86;
     --global-color-accent: #ec5377;
     --global-color-warning: #ffc107;
     --global-color-error: #f54c4c;
-    --global-button-color: light-dark(#f9f9f9, #3e3e3e);
-    --global-button-color-hovered: light-dark(#ececec, #444);
-    --global-text-primary: light-dark(#202124, #e9e9e9);
-    --global-text-secondary: light-dark(#353636, #c8c8ca);
-    --global-text-terciary: light-dark(#5a5a5af5, #929292);
-    --global-text-quaternary: light-dark(#6b6a6af5, #777777);
-    --global-intense-background: light-dark(#fefefe, #121212);
+    --global-button-color: light-dark(#f9f9f9, #363636);
+    --global-text-primary: light-dark(#0d0d0e, #f0efef);
+    --global-text-secondary: light-dark(#262627, #d1d1d3);
+    --global-text-tertiary: light-dark(#3c3c3df5, #aaaaaa);
+    --global-text-quaternary: light-dark(#515152f5, #807f7f);
+    --global-intense-background: light-dark(#fefefe, #09090a);
     --global-medium-background: #252525;
     --global-blur-background: light-dark(#f7f7f7d8, #1f1f1fe7);
     --global-color-transparent: #00000000;
@@ -377,7 +377,7 @@ body.noevents * {
     position: relative;
     width: calc(100% - 1.6rem);
     background-color: var(--global-intense-background);
-    border: 1px solid var(--global-color-terciary);
+    border: 1px solid var(--global-color-tertiary);
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     -webkit-user-select: none;
@@ -499,7 +499,7 @@ body.noevents * {
 .commandbar a {
     color: var(--global-text-secondary);
     padding: 10px;
-    background-color: var(--global-color-terciary);
+    background-color: var(--global-color-tertiary);
     border-top-left-radius: 6px;
     border-bottom-left-radius: 6px;
     font-size: var(--global-font-size-sm);
@@ -512,7 +512,7 @@ body.noevents * {
     border-top-right-radius: 6px;
     border-bottom-right-radius: 6px;
     color: var(--global-text-secondary);
-    background-color: var(--global-color-terciary);
+    background-color: var(--global-color-tertiary);
     outline: none;
     border: none;
     font-family: var(--global-font);
@@ -759,7 +759,7 @@ body.noevents * {
 }
 
 .lexdialogcloser:hover {
-    color: var(--global-text-terciary);
+    color: var(--global-text-tertiary);
 }
 
 .lexdialogcloser:active {
@@ -965,7 +965,7 @@ body.noevents * {
     display: flex;
     padding: 0px;
     cursor: default;
-    background-color: var(--global-color-terciary);
+    background-color: var(--global-color-tertiary);
     text-shadow: none;
     color: #5f6770;
 }
@@ -1108,7 +1108,7 @@ body.noevents * {
     height: 2px;
     width: 11px;
     cursor: ew-resize;
-    color: var(--global-text-terciary);
+    color: var(--global-text-tertiary);
 }
 
 .lexwidgetseparator div:hover {
@@ -1155,8 +1155,8 @@ body.noevents * {
     background-color: var(--global-button-color);
 }
 
-.lexwidget .lextext:not(:has(div)):hover {
-    background-color: var(--global-button-color-hovered);
+.lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider):hover {
+    background-color: color-mix(in srgb, var(--global-button-color), #000 7%);
 }
 
 .lexwidget .lextext input {
@@ -1222,7 +1222,7 @@ body.noevents * {
 .lexwidget input:disabled:not(.lextoggle) {
     outline: none;
     border: none;
-    color: var(--global-text-terciary);
+    color: var(--global-text-tertiary);
 }
 
 .lexseparator {
@@ -1240,7 +1240,7 @@ body.noevents * {
 }
 
 :root[data-theme="light"] .lexwidget .lextext {
-    border: 1px solid var(--global-color-terciary) !important;
+    border: 1px solid var(--global-color-tertiary) !important;
 }
 
 :root[data-theme="light"] .lexbranch .lexseparator {
@@ -1318,7 +1318,7 @@ body.noevents * {
 
 :root[data-theme="light"] .lexbutton {
     --button-color: var(--global-button-color);
-    border: 1px solid var(--global-color-terciary);
+    border: 1px solid var(--global-color-tertiary);
 }
 
 :root[data-theme="light"] .lexbutton.selected {
@@ -1390,7 +1390,7 @@ body.noevents * {
 }
 
 .lexbutton:disabled {
-    color: var(--global-text-terciary);
+    color: var(--global-text-tertiary);
 }
 
 .lexbutton.selected {
@@ -1407,7 +1407,7 @@ body.noevents * {
 
 .lexcombobuttons .lexcombobuttonsbox {
     display: flex;
-    background-color: light-dark(var(--global-color-terciary), var(--global-button-color));
+    background-color: light-dark(var(--global-color-tertiary), var(--global-button-color));
     width: max-content;
     justify-self: center;
     padding: 3px;
@@ -1470,7 +1470,7 @@ body.noevents * {
     padding: 2px 3px;
     background-color: var(--global-color-primary);
     border-bottom: 1px solid;
-    border-color: color-mix(in srgb, var(--global-text-terciary), #00000000 75%);
+    border-color: color-mix(in srgb, var(--global-text-tertiary), #00000000 75%);
 }
 
 .lexselect .lexfilter a {
@@ -1804,12 +1804,12 @@ body.noevents * {
 }
 
 .lextoggle:disabled {
-    border: 1px solid var(--global-text-terciary);
+    border: 1px solid var(--global-text-tertiary);
     cursor: not-allowed;
 }
 
 .lextoggle:disabled:before {
-    background-color: var(--global-text-terciary);
+    background-color: var(--global-text-tertiary);
 }
 
 .lextogglecont {
@@ -1957,16 +1957,12 @@ body.noevents * {
     transition: 0.1s linear;
 }
 
-.lexwidget.nobranch .lexvector .vecbox {
-    background: var(--global-button-color-hovered);
-}
-
 .lexvector a.fa-lock {
     min-width: 12px;
 }
 
 .lexvector .vecbox:hover {
-    background: var(--global-button-color-hovered);
+    background-color: color-mix(in srgb, var(--global-button-color), #000 7%);
 }
 
 .lexwidget.nobranch .lexvector .vecbox:hover {
@@ -2059,7 +2055,7 @@ input[type=number] {
 }
 
 .lexwidget .numberbox:hover {
-    background-color: var(--global-button-color-hovered);
+    background-color: color-mix(in srgb, var(--global-button-color), #000 7%);
 }
 
 .lexwidget .numberbox:has(input:focus) {
@@ -2258,7 +2254,7 @@ input[type=number] {
 
 .lexwidget .lexpad .lexinnerpad {
     border-radius: 4px;
-    background-color: light-dark(var(--global-color-terciary), var(--global-intense-background));
+    background-color: light-dark(var(--global-color-tertiary), var(--global-intense-background));
 }
 
 .lexwidget .lexpad .lexinnerpad .lexpadthumb {
@@ -2504,19 +2500,19 @@ input[type=number] {
 }
 
 .lexfileinput::file-selector-button:hover {
-    background-color: var(--global-button-color-hovered);
+    background-color: color-mix(in srgb, var(--global-button-color), #fff 4%);
     color: var(--global-text-primary);
 }
 
-.lexfileinput::file-selector-button:active {
-    background-color: var(--global-color-terciary);
+.lexfileinput::file-selector-button:not(:disabled):active {
+    background-color: var(--global-color-tertiary);
     color: var(--global-text-secondary);
     transform: scale(0.99);
 }
 
 .lexfileinput:disabled::file-selector-button {
-    cursor: not-allowed;
-    color: var(--global-text-terciary);
+    cursor: default;
+    color: var(--global-text-tertiary);
 }
 
 /* Progress bar */
@@ -2735,7 +2731,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexmenubox .lexmenuboxentry.disabled {
-    color: var(--global-text-terciary);
+    color: var(--global-text-tertiary);
     cursor: default;
 }
 
@@ -2802,7 +2798,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     width: -moz-calc(100% + 8px);
     width: -webkit-calc(100% + 8px);
     width: calc(100% + 8px);
-    border-color: var(--global-text-terciary);
+    border-color: var(--global-text-tertiary);
     opacity: 0.25;
 }
 
@@ -2812,7 +2808,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     text-align: right;
     float: right;
     align-content: center;
-    color: var(--global-text-terciary);
+    color: var(--global-text-tertiary);
     margin-right: 12px;
 }
 
@@ -2852,7 +2848,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexmenubar .lexmenubutton.disabled a {
-    color: light-dark(var(--global-color-terciary), var(--global-button-color));
+    color: light-dark(var(--global-color-tertiary), var(--global-button-color));
     cursor: default;
 }
 
@@ -2906,14 +2902,14 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexcontextmenu .lexmenuboxentry.cmtitle {
-    background: light-dark(var(--global-color-terciary), var(--global-intense-background));
+    background: light-dark(var(--global-color-tertiary), var(--global-intense-background));
     font-weight: bold;
     cursor: default;
 }
 
 .lexcontextmenu .lexmenuboxentry.cmseparator {
     height: 1px;
-    border-bottom: 1px solid var(--global-color-terciary);
+    border-bottom: 1px solid var(--global-color-tertiary);
     padding-bottom: 0;
     padding-top: 0;
     margin-top: -4px;
@@ -3409,7 +3405,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexoverlaybuttons .lexbutton:hover {
     color: var(--global-text-primary);
-    background: var(--global-button-color-hovered);
+    background-color: color-mix(in srgb, var(--global-button-color), #fff 4%);
 }
 
 .lexoverlaybuttons .lexbutton.selected:hover {
@@ -3424,7 +3420,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexoverlaybuttons .lexoverlaygroup {
     display: flex;
     flex: none;
-    background-color: var(--global-color-terciary);
+    background-color: var(--global-color-tertiary);
     border-radius: 8px;
 }
 
@@ -3495,7 +3491,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexareatabs.row {
-    background-color: light-dark(var(--global-color-terciary), var(--global-button-color));
+    background-color: light-dark(var(--global-color-tertiary), var(--global-button-color));
     border-radius: 8px;
     padding: 3px;
     margin: 6px;
@@ -3608,7 +3604,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     height: 128px;
     object-fit: cover;
     border-radius: 6px;
-    outline: 3px solid var(--global-text-terciary);
+    outline: 3px solid var(--global-text-tertiary);
 }
 
 .lexcard:hover a {
@@ -3740,7 +3736,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexwidget:has(.lexcheckboxsubmenu),
 .lexwidget:has(.lextogglesubmenu),
 .lexwidget:has(.lexcustomcontainer) {
-    background-color: light-dark(var(--global-color-terciary), var(--global-medium-background));
+    background-color: light-dark(var(--global-color-tertiary), var(--global-medium-background));
     border-radius: 6px;
 }
 
@@ -3771,7 +3767,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     display: inline-flex;
     flex-wrap: wrap;
     line-height: 12px;
-    background-color: light-dark(var(--global-color-terciary), var(--global-button-color));
+    background-color: light-dark(var(--global-color-tertiary), var(--global-button-color));
     border-radius: 8px;
     padding: 4px;
 }
@@ -3798,7 +3794,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lextags .lextag a:hover {
-    color: light-dark(var(--global-text-terciary), var(--global-text-secondary));
+    color: light-dark(var(--global-text-tertiary), var(--global-text-secondary));
     cursor: pointer;
 }
 
@@ -3847,7 +3843,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lextable svg, .lextable svg path {
     width: 0.85rem;
     height: 0.85rem;
-    --color: var(--global-text-terciary);
+    --color: var(--global-text-tertiary);
     fill: var(--color);
     stroke: var(--color);
     display: block;
@@ -3867,7 +3863,7 @@ tr {
 }
 
 tr:has(input:checked) {
-    background-color: var(--global-color-terciary);
+    background-color: var(--global-color-tertiary);
 }
 
 tr:hover, tr.dragging {
@@ -3885,7 +3881,7 @@ th {
     font-size: var(--global-font-size);
     cursor: pointer;
     transition: all 0.1s linear;
-    background-color: var(--global-color-terciary);
+    background-color: var(--global-color-tertiary);
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -4071,11 +4067,11 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
 }
 
 .lexknob.disabled .knobmarker {
-    background-color: var(--global-text-terciary);
+    background-color: var(--global-text-tertiary);
 }
 
 .lexknob.disabled .knobmarker {
-  background-color: var(--global-text-terciary);
+  background-color: var(--global-text-tertiary);
 }
 
 .lexknob.sm .knobmarker {
@@ -4237,7 +4233,7 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
 }
 
 .lextimeline .lexbutton.accept:hover {
-    background-color: var(--global-button-color-hovered);
+    background-color: color-mix(in srgb, var(--global-button-color), #000 7%);
 }
 
 /**/
@@ -4725,7 +4721,7 @@ ul.lexassetscontent {
 }
 
 .lexcodetabinfo {
-    background-color: light-dark(var(--global-color-terciary), var(--global-medium-background));
+    background-color: light-dark(var(--global-color-tertiary), var(--global-medium-background));
     position: absolute;
     z-index: 3;
     bottom: 0px;
@@ -4735,7 +4731,7 @@ ul.lexassetscontent {
 .lexcodegutter {
     width: 48px;
     height: calc(100% - 65px);
-    background-color: light-dark(var(--global-color-terciary), var(--global-medium-background));
+    background-color: light-dark(var(--global-color-tertiary), var(--global-medium-background));
     margin-top: 28px;
     overflow: hidden;
     position: absolute;
@@ -4744,7 +4740,7 @@ ul.lexassetscontent {
 
 .lexcodeeditor .codetabsarea {
     height: calc(100% - 64px) !important;
-    background-color: light-dark(var(--global-color-terciary), var(--global-medium-background));
+    background-color: light-dark(var(--global-color-tertiary), var(--global-medium-background));
     overflow: scroll;
 }
 
@@ -4845,7 +4841,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor pre .line-gutter {
-    color: var(--global-text-terciary);
+    color: var(--global-text-tertiary);
     width: 48px;
     height: var(--code-editor-row-height);
     font-size: var(--code-editor-font-size);
@@ -5043,7 +5039,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .autocomplete pre:hover {
-    background-color: var(--global-color-terciary);
+    background-color: var(--global-color-tertiary);
     cursor: pointer;
 }
 
