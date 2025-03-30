@@ -435,6 +435,7 @@ function makeCollapsible( domEl, content, parent, options = { } )
     actionIcon.classList.add( "collapser" );
     actionIcon.dataset[ "collapsed" ] = collapsed;
     actionIcon.style.marginLeft = "auto";
+    actionIcon.style.marginRight = "0.2rem";
 
     actionIcon.addEventListener( "click", function( e ) {
         e.preventDefault();

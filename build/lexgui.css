@@ -202,6 +202,7 @@ canvas {
 }
 
 .collapsible {
+    width: 100%;
     display: flex;
 }
 
@@ -2960,6 +2961,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
+}
+
+.lexsidebar *::-webkit-scrollbar {
+    display: none;
 }
 
 .lexsidebar svg, .lexsidebar svg path {
