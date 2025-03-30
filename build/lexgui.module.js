@@ -2835,16 +2835,15 @@ class Menubar {
 
             subentry.addEventListener("blur", e => {
 
-                if( e.relatedTarget && e.relatedTarget.classList.contains( "lexmenubox" ) )
+                if( e.target && e.target.className.includes( "lexmenu" ) )
                 {
                     return;
                 }
-
                 this._resetMenubar();
             });
 
             // Add icon if has submenu, else check for shortcut
-            if( !hasSubmenu)
+            if( !hasSubmenu )
             {
                 if( this.shorts[ subkey ] )
                 {
