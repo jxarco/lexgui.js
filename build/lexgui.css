@@ -1824,6 +1824,7 @@ body.noevents * {
     width: 100% !important;
     display: flex;
     flex-direction: column;
+    padding: 0.1em;
 }
 
 .lexradiogroup span {
@@ -1832,7 +1833,8 @@ body.noevents * {
 
 .lexradiogroup .lexradiogroupitem {
     display: flex;
-    padding: 2px;
+    padding: 0.1em;
+    padding-inline: 1.4em;
     gap: 0.65em;
 }
 
@@ -3056,8 +3058,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     padding: 6px;
     padding-inline: 8px;
     border-radius: 8px;
-    display: flex;
-    flex: none;
     cursor: pointer;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -3115,6 +3115,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexsidebar .lexsidebarentry > * {
     color: var(--global-text-primary);
     font-size: var(--global-font-size);
+}
+
+.lexsidebar .lexcheckbox {
+    width: 1.25em;
+    height: 1.25em;
 }
 
 .lexsidebar .lexsidebarsubentrycontainer {
@@ -3267,10 +3272,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     padding-inline: 0px;
 }
 
-/* .lexsidebar.collapsed .lexsidebarfooter span, .lexsidebar.collapsed .lexsidebarfooter div,
+.lexsidebar.collapsed .lexsidebarfooter span, .lexsidebar.collapsed .lexsidebarfooter div,
 .lexsidebar.collapsed .lexsidebarheader span, .lexsidebar.collapsed .lexsidebarheader div {
     display: none;
-} */
+}
 
 /* Overlay Buttons */
 
@@ -3896,7 +3901,6 @@ th, td {
     padding-inline: 12px;
     text-align: left;
     vertical-align: top;
-    /* border-left: 2px solid red; */
 }
 
 th.sm, td.sm {

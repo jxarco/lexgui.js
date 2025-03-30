@@ -5,6 +5,7 @@
 Widgets:
 - Created classes for each widget to create them at any place.
 - `Panel.addTabs`: Renamed to `addTabSections`. Added name parameter (1st). Returns `TabSections` widget.
+- `Panel.addContent` and `Panel.addImage` now accepts name as first parameter.
 - Title: `Panel.addTitle` now returns `Title` widget, not its inner title HTMLElement.
 - Tree: `Panel.addTree` now returns `Tree` widget, not its inner `NodeTree`.
 - Table: Added support for `options.sortable` rows.
