@@ -1418,6 +1418,259 @@ LX.addSignal = addSignal;
 *   DOM Elements
 */
 
+/**
+ * @class DropdownMenu
+ */
+
+class DropdownMenu {
+
+    constructor( trigger, items, options = {} ) {
+
+        console.assert( trigger, "DropdownMenu needs a DOM element as trigger!" );
+        this._trigger = trigger;
+
+        trigger.ddm = this;
+
+        this._items = items;
+
+        this._windowPadding = 4;
+        this.side = options.side ?? "bottom";
+        this.align = options.align ?? "center";
+        this.avoidCollisions = options.avoidCollisions ?? true;
+
+        this.root = document.createElement( "div" );
+        this.root.id = "root";
+        this.root.dataset["side"] = this.side;
+        this.root.tabIndex = "1";
+        this.root.className = "lexdropdownmenu";
+        LX.root.appendChild( this.root );
+
+        this._create( this._items );
+
+
+        doAsync( () => {
+            this._adjustPosition();
+
+            this.root.focus();
+
+            this._onClick = e => {
+                if( e.target && ( e.target.className.includes( "lexdropdown" ) || e.target == this._trigger ) )
+                {
+                    return;
+                }
+                this.destroy();
+            };
+
+            document.body.addEventListener( "click", this._onClick );
+        }, 10 );
+    }
+
+    destroy() {
+
+        delete this._trigger.ddm;
+
+        document.body.removeEventListener( "click", this._onClick );
+
+        LX.root.querySelectorAll( ".lexdropdownmenu" ).forEach( m => { m.remove(); } );
+    }
+
+    _create( items, parentDom ) {
+
+        if( !parentDom )
+        {
+            parentDom = this.root;
+        }
+        else
+        {
+            const parentRect = parentDom.getBoundingClientRect();
+
+            let newParent = document.createElement( "div" );
+            newParent.tabIndex = "1";
+            newParent.className = "lexdropdownmenu";
+            newParent.id = parentDom.id;
+            newParent.dataset["side"] = "right"; // submenus always come from the right
+            LX.root.appendChild( newParent );
+
+            parentDom.currentMenu = newParent;
+            newParent.currentParent = parentDom;
+            parentDom = newParent;
+
+            doAsync( () => {
+                const position = [ parentRect.x + parentRect.width, parentRect.y ];
+
+                if( this.avoidCollisions )
+                {
+                    position[ 0 ] = LX.clamp( position[ 0 ], 0, window.innerWidth - newParent.offsetWidth - this._windowPadding );
+                    position[ 1 ] = LX.clamp( position[ 1 ], 0, window.innerHeight - newParent.offsetHeight - this._windowPadding );
+                    console.log(newParent.offsetHeight)
+                }
+
+                newParent.style.left = `${ position[ 0 ] }px`;
+                newParent.style.top = `${ position[ 1 ] }px`;
+            }, 10 );
+        }
+
+        for( let item of items )
+        {
+            if( !item )
+            {
+                this._addSeparator( parentDom );
+                continue;
+            }
+
+            const key = item.name ?? item;
+            const pKey = key.replace( /\s/g, '' ).replaceAll( '.', '' );
+
+            // Item already created
+            if( parentDom.querySelector( "#" + pKey ) )
+            {
+                continue;
+            }
+
+            const menuItem = document.createElement('div');
+            menuItem.className = "lexdropdownmenuitem" + ( item.name ? "" : " label" ) + ( item.disabled ?? false ? " disabled" : "" );
+            menuItem.id = pKey;
+            menuItem.innerHTML = key;
+            menuItem.tabIndex = "1";
+            parentDom.appendChild( menuItem );
+
+            if( item.constructor === String )
+            {
+                continue;
+            }
+
+            if( item.submenu )
+            {
+                let submenuIcon = document.createElement('a');
+                submenuIcon.className = "fa-solid fa-angle-right fa-xs";
+                menuItem.appendChild( submenuIcon );
+            }
+            else if( !( item.disabled ?? false ) )
+            {
+                menuItem.addEventListener( "click", () => {
+                    const f = item[ 'callback' ];
+                    if( f )
+                    {
+                        f.call( this, key, menuItem );
+                    }
+
+                    this.destroy();
+                } );
+            }
+
+            menuItem.addEventListener("mouseover", e => {
+
+                let path = "root/" + parentDom.id;
+                let p = parentDom.currentParent;
+                while( p )
+                {
+                    path += "/" + parentDom.currentParent.parentElement.id;
+                    p = p.currentParent;
+                }
+                // path += "/" + parentDom.id;
+
+                LX.root.querySelectorAll( ".lexdropdownmenu" ).forEach( m => {
+                    if( !path.includes( m.id ) )
+                    {
+                        m.currentParent.built = false;
+                        m.remove();
+                    }
+                } );
+
+                if( item.submenu )
+                {
+                    if( menuItem.built )
+                    {
+                        return;
+                    }
+                    menuItem.built = true;
+                    this._create( item.submenu, menuItem );
+                }
+
+                e.stopPropagation();
+            });
+        }
+    }
+
+    _adjustPosition() {
+
+        const position = [ document.scrollingElement.scrollLeft, document.scrollingElement.scrollTop ];
+
+        /*
+        - avoidCollisions
+        - side
+        - align
+        - alignOffset
+        - sideOffsetS
+        */
+
+        // Place menu using trigger position and user options
+        {
+            const rect = this._trigger.getBoundingClientRect();
+
+            let alignWidth = true;
+
+            switch( this.side )
+            {
+                case "left":
+                    position[ 0 ] += ( rect.x - this.root.offsetWidth );
+                    alignWidth = false;
+                    break;
+                case "right":
+                    position[ 0 ] += ( rect.x + rect.width );
+                    alignWidth = false;
+                    break;
+                case "top":
+                    position[ 1 ] += ( rect.y - this.root.offsetHeight );
+                    alignWidth = true;
+                    break;
+                case "bottom":
+                    position[ 1 ] += ( rect.y + rect.height );
+                    alignWidth = true;
+                    break;
+                default:
+                    break;
+            }
+
+            switch( this.align )
+            {
+                case "start":
+                    if( alignWidth ) { position[ 0 ] += rect.x; }
+                    else { position[ 1 ] += rect.y; }
+                    break;
+                case "center":
+                    if( alignWidth ) { position[ 0 ] += ( rect.x + rect.width * 0.5 ) - this.root.offsetWidth * 0.5; }
+                    else { position[ 1 ] += ( rect.y + rect.height * 0.5 ) - this.root.offsetHeight * 0.5; }
+                    break;
+                case "end":
+                    if( alignWidth ) { position[ 0 ] += rect.x - this.root.offsetWidth + rect.width; }
+                    else { position[ 1 ] += rect.y - this.root.offsetHeight + rect.height; }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if( this.avoidCollisions )
+        {
+            position[ 0 ] = LX.clamp( position[ 0 ], 0, window.innerWidth - this.root.offsetWidth - this._windowPadding );
+            position[ 1 ] = LX.clamp( position[ 1 ], 0, window.innerHeight - this.root.offsetHeight - this._windowPadding );
+        }
+
+        this.root.style.left = `${ position[ 0 ] }px`;
+        this.root.style.top = `${ position[ 1 ] }px`;
+    }
+
+    _addSeparator( parent ) {
+        const separator = document.createElement('div');
+        separator.className = "separator";
+        parent = parent ?? this.root;
+        parent.appendChild( separator );
+    }
+};
+
+LX.DropdownMenu = DropdownMenu;
+
 class Area {
 
     /**
@@ -2172,7 +2425,7 @@ class Area {
             }
             else
             {
-                overlayPanel.addButton( null, b.name, function( value, event ) {
+                const button = overlayPanel.addButton( null, b.name, function( value, event ) {
                     if( b.selectable )
                     {
                         if( b.group )
@@ -2187,7 +2440,7 @@ class Area {
                         }
                     }
 
-                    callback( value, event );
+                    callback( value, event, button.root );
 
                 }, _options );
             }
@@ -3476,7 +3729,7 @@ class SideBar {
         footer.addEventListener( "click", e => {
             if( options.onFooterPressed )
             {
-                options.onFooterPressed( e );
+                options.onFooterPressed( e, footer );
             }
         } );
 
@@ -5217,7 +5470,7 @@ class Button extends Widget {
 
         this.root.appendChild( wValue );
 
-        // Remove branch padding and 
+        // Remove branch padding and
         const useNameAsLabel = !( options.hideName ?? false ) && !( options.icon || options.img );
         if( !useNameAsLabel )
         {

@@ -223,7 +223,33 @@ const sidebar = left.addSidebar( m => {
     footerImage: "https://avatars.githubusercontent.com/u/25059187?s=400&u=ad8907b748c13e4e1a7cdd3882826acb6a2928b5&v=4",
     // footer: customFooter,
     onHeaderPressed: (e) => { console.log( "onHeaderPressed" ) }, 
-    onFooterPressed: (e) => { console.log( "onFooterPressed" ) }
+    onFooterPressed: (e, element) => {
+        if( element.ddm )
+        {
+            element.ddm.destroy();
+            return;
+        }
+
+        const ddm = new LX.DropdownMenu( element, [
+            "My Account",
+            null,
+            { name: "Profile", short: "P" },
+            { name: "Billing", disabled: true },
+            { name: "Settings", short: "S" },
+            null,
+            { name: "Team" },
+            { name: "Invite users"},
+            null,
+            { name: "Github" },
+            { name: "Support", submenu: [
+                { name: "Email" },
+                { name: "Message", submenu: [
+                    { name: "Whatsapp" },
+                    { name: "iMessage" },
+                ]},
+            ]  }
+        ], { side: "right", align: "end" });
+    }
 });
 
 // split left area

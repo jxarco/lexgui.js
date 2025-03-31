@@ -868,6 +868,134 @@ body.noevents * {
     flex-direction: column;
 }
 
+/* Dropdown Menu */
+
+.lexdropdownmenu {
+    background-color: var(--global-color-primary);
+    font-size: var(--global-font-size);
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    min-width: 164px;
+    max-width: 244px;
+    z-index: 150;
+    display: flex;
+    flex-direction: column;
+    padding: 0.2rem;
+    border-radius: 6px;
+    border: 1px solid #7a797c4f;
+    animation-duration: 400ms;
+	animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+	will-change: transform, opacity;
+}
+
+.lexdropdownmenuitem {
+    display: flex;
+    flex-direction: row;
+    padding: 0.5rem;
+    border-radius: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    transition: all 0.1s linear;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.lexdropdownmenuitem.disabled {
+    color: var(--global-text-tertiary);
+    cursor: default;
+}
+
+.lexdropdownmenuitem.label {
+    font-weight: 600;
+    cursor: default;
+}
+
+.lexdropdownmenuitem:not(.label, .disabled):hover {
+    background-color: var(--global-color-tertiary)
+}
+
+.lexdropdownmenuitem:not(.label, .disabled):active {
+    transform: scale(0.99);
+}
+
+.lexdropdownmenuitem a {
+    margin-left: auto;
+    margin-right: 4px;
+    align-content: center;
+    pointer-events: none;
+}
+
+.lexdropdownmenu .separator {
+    width: calc(100% + 0.4rem);
+    translate: -0.2rem 0;
+    border-bottom: 1px solid;
+    border-color: var(--global-text-tertiary);
+    opacity: 0.25;
+    margin-block: 0.1rem;
+}
+
+.lexdropdownmenu[data-side="top"]{
+	animation-name: slideDownAndFade;
+}
+.lexdropdownmenu[data-side="right"]{
+	animation-name: slideLeftAndFade;
+}
+.lexdropdownmenu[data-side="bottom"]{
+	animation-name: slideUpAndFade;
+}
+.lexdropdownmenu[data-side="left"]{
+	animation-name: slideRightAndFade;
+}
+
+@keyframes slideUpAndFade {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes slideRightAndFade {
+	from {
+		opacity: 0;
+		transform: translateX(-8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes slideDownAndFade {
+	from {
+		opacity: 0;
+		transform: translateY(-8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes slideLeftAndFade {
+	from {
+		opacity: 0;
+		transform: translateX(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
 /* Area */
 
 .lexarea {
@@ -1366,6 +1494,7 @@ body.noevents * {
 .lexbutton a {
     margin-left: 0px;
     font-size: var(--global-font-size-sm);
+    pointer-events: none;
 }
 
 .lexbutton.array span {
@@ -2451,7 +2580,7 @@ input[type=number] {
 
 .lextree .lextreeitem:hover {
     color: var(--global-text-primary);
-    background: rgba(129, 132, 163, 0.191);
+    background: var(--global-color-tertiary);
 }
 
 .lextree .lextreeitem.selected {
@@ -2626,6 +2755,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     width: 100%;
     background-color: var(--global-color-primary);
     display: flex;
+    overflow: hidden;
     height: 100%;
     color: var(--global-text-primary);
     font-size: var(--global-font-size);
@@ -3305,7 +3435,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     background-color: var(--global-color-secondary);
     margin: 8px;
     padding: 0.25em;
-    padding-bottom: 0.3em;
     border-radius: 12px;
 }
 
