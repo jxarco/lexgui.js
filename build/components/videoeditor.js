@@ -17,7 +17,7 @@ class TimeBar {
 
     static BACKGROUND_COLOR = LX.getThemeColor("global-branch-darker");
     static COLOR = LX.getThemeColor("global-button-color");
-    static ACTIVE_COLOR = LX.getThemeColor("global-selected-light");
+    static ACTIVE_COLOR = "#668ee4";
 
     constructor( area, type, options = {} ) {
 
@@ -31,59 +31,72 @@ class TimeBar {
 
         this.ctx = this.canvas.getContext("2d");
 
-        const barHeight = options.barHeight ?? 5;
         this.markerWidth = options.markerWidth ?? 8;
-        this.offset = options.offset || 4;
+        this.markerHeight = options.markerHeight ?? (this.canvas.height * 0.5);
+        this.offset = options.offset || (this.markerWidth*0.5 + 8);
 
-        this.width = this.canvas.width - this.offset * 2;
-        this.height = barHeight;
+        // dimensions of line (not canvas)
+        this.lineWidth = this.canvas.width - this.offset * 2;
+        this.lineHeight = options.barHeight ?? 5;
 
-        this.position = new LX.vec2( this.offset, this.canvas.height * 0.5 - this.height * 0.5);
+        this.position = new LX.vec2( this.offset, this.canvas.height * 0.5 - this.lineHeight * 0.5);
         this.startX = this.position.x;
-        this.endX = this.width;
+        this.endX = this.position.x + this.lineWidth;
         this.currentX = this.startX;
 
         const y = this.offset * 2;
         const w = this.markerWidth;
-        const h = this.canvas.height - y * 2;
+        const h = this.canvas.height *0.5;
         this.trimRec = [this.startX, y, w, h];
 
         this.lastPosition = new LX.vec2( 0, 0 );
 
         this._draw();
+
+        this.updateTheme();
+        LX.addSignal( "@on_new_color_scheme", (el, value) => {
+            // Retrieve again the color using LX.getThemeColor, which checks the applied theme
+            this.updateTheme();
+        } )
+    }
+
+    updateTheme(){
+        TimeBar.BACKGROUND_COLOR = LX.getThemeColor("global-color-secondary");
+        TimeBar.COLOR = LX.getThemeColor("global-color-quaternary");
+        TimeBar.ACTIVE_COLOR = "#668ee4";
     }
 
     _draw() {
         const ctx = this.ctx;
-
+        
         ctx.save();
         ctx.fillStyle = TimeBar.BACKGROUND_COLOR;
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // // Draw background timeline
+        // Draw background timeline
         ctx.fillStyle = TimeBar.COLOR;
-        ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+        ctx.fillRect(this.position.x, this.position.y, this.lineWidth, this.lineHeight);
 
         // Draw background trimed timeline
         ctx.fillStyle = TimeBar.ACTIVE_COLOR;
-        ctx.fillRect(this.startX, this.position.y, this.endX - this.offset - this.startX, this.height);
+        ctx.fillRect(this.startX, this.position.y, this.endX - this.startX, this.lineHeight);
 
         ctx.restore();
 
         // Min-Max time markers
-        this._addTrim('start', this.startX, { color: null, fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9'});
-        this._addTrim('end', this.endX, { color: null, fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9'});
-        this._addMarker('current', this.currentX, { color: '#e5e5e5', fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9', width: this.markerWidth });
+        this._drawTrimMarker('start', this.startX, { color: null, fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9'});
+        this._drawTrimMarker('end', this.endX, { color: null, fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9'});
+        this._drawTimeMarker('current', this.currentX, { color: '#e5e5e5', fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9', width: this.markerWidth });
     }
 
-    _addTrim(name, x, options) {
+    _drawTrimMarker(name, x, options) {
 
         options = options || {};
 
-        const y = this.trimRec[1];
-        const w = this.trimRec[2];
-        const h = this.trimRec[3];
+        const w = this.markerWidth;
+        const h = this.markerHeight;
+        const y = this.canvas.height * 0.5 - h * 0.5;
 
         const ctx = this.ctx;
         if(this.hovering == name) {
@@ -109,7 +122,7 @@ class TimeBar {
 
     }
 
-    _addMarker(name, x, options) {
+    _drawTimeMarker(name, x, options) {
 
         options = options || {};
 
@@ -150,6 +163,15 @@ class TimeBar {
         ctx.shadowBlur = 0;
     }
 
+    update (x) {
+        this.currentX = Math.min(Math.max(this.startX, x), this.endX);
+        this._draw();
+
+        if(this.onDraw) {
+            this.onDraw();
+        }
+    }
+
     onMouseDown (e) {
 
         e.preventDefault();
@@ -166,19 +188,19 @@ class TimeBar {
         // Check if some marker is clicked
         const threshold = this.markerWidth;
 
-        if(Math.abs(this.startX - x) < threshold && this.trimRec[1] < y &&  y < this.trimRec[3] + this.trimRec[1] ) {
+        // grab trim markers only from the bottom
+        if(Math.abs(this.startX - x) < threshold && this.position.y < y) {
             this.dragging = 'start';
             canvas.style.cursor = "grabbing";
         }
-        else if(Math.abs(this.endX - x) < threshold && this.trimRec[1] < y &&  y < this.trimRec[3] + this.trimRec[1] ) {
+        else if(Math.abs(this.endX - x) < threshold && this.position.y < y) {
             this.dragging = 'end';
             canvas.style.cursor = "grabbing";
         }
-        else if(Math.abs(this.currentX - x) < threshold) {
+        else {
             this.dragging = 'current';
             canvas.style.cursor = "grabbing";
-        }
-        else {
+        
             if(x < this.startX) {
                 this.currentX = this.startX;
             }
@@ -188,18 +210,13 @@ class TimeBar {
             else {
                 this.currentX = x;
             }
+
+            if(this.onChangeCurrent) {
+                this.onChangeCurrent(this.currentX);
+            }
         }
 
         this._draw();
-    }
-
-    update (x) {
-        this.currentX = Math.min(Math.max(this.startX, x), this.endX);
-        this._draw();
-
-        if(this.onDraw) {
-            this.onDraw();
-        }
     }
 
     onMouseUp (e) {
@@ -214,100 +231,49 @@ class TimeBar {
 
         const canvas = this.canvas;
         canvas.style.cursor = "default";
-
-         // Process mouse
-        const x = e.target == this.canvas ? e.offsetX : e.offsetX - this.canvas.offsetLeft ;
-        const y = e.target == this.canvas ? e.offsetY : e.offsetY - this.canvas.offsetTop ;
-        const threshold = 5;
-
-        if(this.trimRec[1] < y &&  y < this.trimRec[3] + this.trimRec[1]) {
-            if(x < this.startX) {
-                this.currentX = this.startX;
-            }
-            else if(x > this.endX) {
-                this.currentX = this.endX;
-            }
-            else {
-                this.currentX = x;
-            }
-            if(this.onChangeCurrent) {
-                this.onChangeCurrent(this.currentX);
-            }
-        }
     }
 
     onMouseMove (e) {
+        if(!this.canvas) {
+            return;
+        }
 
         e.preventDefault();
+        const canvas = this.canvas;
 
         // Process mouse
-        const x = e.target == this.canvas ? e.offsetX : e.offsetX - this.canvas.offsetLeft ;
-        const y = e.target == this.canvas ? e.offsetY : e.offsetY - this.canvas.offsetTop ;
-        const threshold = 5;
+        const x = e.target == canvas ? e.offsetX : e.clientX - canvas.offsetLeft;
+        const y = e.target == canvas ? e.offsetY : e.clientY - canvas.offsetTop;
 
         if(this.dragging) {
             switch(this.dragging) {
                 case 'start':
-                        if(x < this.position.x) {
-                            this.currentX = this.startX = this.position.x;
-                        }
-                        else if(x > this.endX) {
-                            this.currentX = this.startX = this.endX;
-                        }
-                        else {
-                            this.currentX = this.startX = x;
-                        }
-
-                        if(this.onChangeStart) {
-                            this.onChangeStart(this.startX);
-                        }
-                        if(this.onChangeCurrent) {
-                            this.onChangeCurrent(this.currentX);
-                        }
+                    this.startX = Math.max(this.position.x, Math.min(this.endX, x));                        
+                    this.currentX = this.startX;
+                    if(this.onChangeStart) {
+                        this.onChangeStart(this.startX);
+                    }
                     break;
                 case 'end':
-                        if(x > this.width || x <= 0) {
-                            this.currentX = this.endX = this.width;
-                        }
-                        else if(x < this.startX) {
-                            this.currentX = this.endX = this.startX;
-                        }
-                        else {
-                            this.currentX = this.endX = x;
-                        }
-
-                        if(this.onChangeEnd) {
-                            this.onChangeEnd(this.endX);
-                        }
-                        if(this.onChangeCurrent) {
-                            this.onChangeCurrent(this.currentX);
-                        }
-                    break;
-                case 'current':
-
-                    if(x < this.startX) {
-                        this.currentX = this.startX;
-                    }
-                    else if(x > this.endX) {
-                        this.currentX = this.endX;
-                    }
-                    else {
-                        this.currentX = x;
-                    }
-                    if(this.onChangeCurrent) {
-                        this.onChangeCurrent(this.currentX);
+                    this.endX = Math.max(this.startX, Math.min(this.position.x + this.lineWidth, x));
+                    this.currentX = this.endX;
+                    if(this.onChangeEnd) {
+                        this.onChangeEnd(this.endX);
                     }
                     break;
+                default:
+                    this.currentX = Math.max(this.startX, Math.min(this.endX, x));
+                    break;
+            }
+
+            if(this.onChangeCurrent) {
+                this.onChangeCurrent(this.currentX);
             }
         }
         else {
-            if(!this.canvas) {
-                return;
-            }
+            const threshold = this.markerWidth * 0.5;
 
-            const canvas = this.canvas;
-
-            if(Math.abs(this.startX - x) < threshold && this.trimRec[1] < y &&  y < this.trimRec[3] + this.trimRec[1] ) {
+            if(Math.abs(this.startX - x) < threshold ) {
                 this.hovering = 'start';
                 canvas.style.cursor = "grab";
             }
@@ -331,14 +297,16 @@ class TimeBar {
         this.canvas.width = size[0];
         this.canvas.height = size[1];
 
-        const startRatio = this.startX / this.width;
-        const currentRatio = this.currentX / this.width;
-        const endRatio = this.endX / this.width;
-        this.width = this.canvas.width - this.offset * 2;
-
-        this.startX = Math.max(this.width * startRatio, this.offset);
-        this.currentX = Math.min(Math.max(this.width * currentRatio, this.offset), this.width);
-        this.endX = Math.min(this.width * endRatio, this.width);
+        let newWidth = size[0] - this.offset * 2;
+        newWidth = newWidth < 0.00001 ? 0.00001 : newWidth; // actual with of the line = canvas.width - offsetleft - offsetRight 
+        const startRatio = (this.startX - this.offset) / this.lineWidth;
+        const currentRatio = (this.currentX - this.offset) / this.lineWidth;
+        const endRatio = (this.endX - this.offset) / this.lineWidth;
+        
+        this.lineWidth = newWidth;
+        this.startX = Math.min( Math.max(newWidth * startRatio, 0), newWidth ) + this.offset;
+        this.currentX = Math.min(Math.max(newWidth * currentRatio, 0), newWidth) + this.offset;
+        this.endX = Math.min( Math.max(newWidth * endRatio, 0 ), newWidth) + this.offset;
 
         this._draw();
     }
@@ -420,24 +388,16 @@ class VideoEditor {
         this.controlsPanelLeft.refresh = () => {
             this.controlsPanelLeft.clear();
             this.controlsPanelLeft.sameLine();
-            this.controlsPanelLeft.addButton('', '<i class="fa-solid ' + (this.playing ? 'fa-pause' : 'fa-play') + '"></>', (v) => {
+            this.controlsPanelLeft.addButton('', "", (v) => {
                 this.playing = !this.playing;
                 if(this.playing) {
-
                     this.video.play();
-                    // if(!this.requestId) {
-                    //     this.requestId = requestAnimationFrame(this._update.bind(this))
-                    // }
                 }
                 else {
-                    // if(this.requestId) {
-                    //     cancelAnimationFrame(this.requestId);
-                    //     this.requestId = null;
-                    // }
                     this.video.pause();
                 }
                 this.controlsPanelLeft.refresh();
-            }, { width: '40px'});
+            }, { width: '40px', icon: "fa-solid " + (this.playing ? 'fa-pause' : 'fa-play') });
 
             this.controlsPanelLeft.addLabel(this.startTimeString, {width: 50});
             this.controlsPanelLeft.endLine();
@@ -534,7 +494,6 @@ class VideoEditor {
             }
 
             if(this.isDragging) {
-
                 this.dragCropArea(event);
             }
         });
@@ -642,7 +601,7 @@ class VideoEditor {
         }
         
         this.timebar.startX = this.timebar.position.x;
-        this.timebar.endX = this.timebar.width;
+        this.timebar.endX = this.timebar.position.x + this.timebar.lineWidth;
 
         this.video.currentTime = 0.01; // BUG: some videos will not play unless this line is present 
         this.endTime = this.video.duration;
@@ -695,11 +654,11 @@ class VideoEditor {
     }
 
     _xToTime (x) {
-        return ((x - this.timebar.offset) / (this.timebar.width - this.timebar.offset)) *  this.video.duration;
+        return ((x - this.timebar.offset) / (this.timebar.lineWidth)) *  this.video.duration;
     }
 
     _timeToX (time) {
-        return (time / this.video.duration) *  (this.timebar.width - this.timebar.offset ) + this.timebar.offset;
+        return (time / this.video.duration) *  (this.timebar.lineWidth) + this.timebar.offset;
     }
 
     _setCurrentValue ( x, updateTime = true ) {
