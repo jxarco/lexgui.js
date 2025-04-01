@@ -6073,7 +6073,6 @@ class Select extends Widget {
             filter.root.querySelector( ".lextext" ).classList.remove( "lextext" );
 
             const input = filter.root.querySelector( "input" );
-            // input.style.width =  "calc( 100% - 17px )";
 
             input.addEventListener('focusout', function( e ) {
                 if (e.relatedTarget && e.relatedTarget.tagName == "UL" && e.relatedTarget.classList.contains("lexoptions"))
@@ -6088,7 +6087,7 @@ class Select extends Widget {
 
         // Create option list to empty it easily..
         const listOptions = document.createElement('span');
-        listOptions.style.height = "calc(100% - 25px)";
+        listOptions.className = "lexselectinnerlist";
         list.appendChild( listOptions );
 
         // Add select options list
@@ -6103,7 +6102,6 @@ class Select extends Widget {
 
                 let option = document.createElement( "div" );
                 option.className = "option";
-                option.style.flexDirection = "unset";
                 option.innerHTML = iValue;
 
                 let li = document.createElement( "li" );
@@ -6132,8 +6130,6 @@ class Select extends Widget {
                 // Add string option
                 if( iValue.constructor != Object )
                 {
-                    option.style.flexDirection = "unset";
-
                     const asLabel = ( iValue[ 0 ] === '@' );
 
                     if( !asLabel )
@@ -6154,7 +6150,7 @@ class Select extends Widget {
                         li.removeEventListener( "click", onSelect );
                     }
 
-                    li.className = asLabel ? "lexselectlabel" : "lexselectitem";
+                    li.classList.add( asLabel ? "lexselectlabel" : "lexselectitem" );
                 }
                 else
                 {

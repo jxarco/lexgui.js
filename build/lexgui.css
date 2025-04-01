@@ -947,7 +947,7 @@ svg path {
 }
 
 .lexdropdownmenuitem:not(.label, .disabled):hover {
-    background-color: var(--global-color-tertiary)
+    background-color: var(--global-color-tertiary);
 }
 
 .lexdropdownmenuitem:not(.label, .disabled):active {
@@ -1637,6 +1637,10 @@ svg path {
     border-color: color-mix(in srgb, var(--global-text-tertiary), #00000000 75%);
 }
 
+.lexselect .lexfilter input:hover {
+    background-color: var(--global-color-primary);
+}
+
 .lexselect .lexfilter a {
     font-size: var(--global-font-size-sm);
     padding-inline: 4px;
@@ -1648,14 +1652,13 @@ svg path {
 
 .lexselect .option {
     display: flex;
-    flex-direction: column;
     align-items: center;
     width: 100%;
     position: relative;
 }
 
-.lexselect .option:not(.media) {
-    padding-left: 12px;
+.lexselect .option.media {
+    flex-direction: column;
 }
 
 .lexselect .lexlistitem {
@@ -1668,15 +1671,14 @@ svg path {
     backdrop-filter: blur(10px);
     margin: 0;
     padding: 0;
-    border: none;
     outline: none;
     width: fit-content;
     max-height: -webkit-fill-available;
     position: fixed;
     z-index: 10000;
     box-shadow: 0 0px 6px rgba(0, 0, 0, 0.603);
-    border-bottom-left-radius: 6px;
-    border-bottom-right-radius: 6px;
+    border-radius: 6px;
+    border: 1px solid #7a797c4f;
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -1694,24 +1696,24 @@ dialog .lexselect .lexselectoptions {
     height: 100%;
 }
 
-.lexselect .lexselectoptions.place-above {
-    /* max-height: unset; */
-    border-bottom-left-radius: 0px;
-    border-bottom-right-radius: 0px;
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
+.lexselect ul .lexselectinnerlist {
+    width: calc(100% - 0.6rem);
+    height: calc(100% - 25px);
+    padding: 0.3rem;
+    display: grid;
 }
 
 .lexselect .lexselectitem {
-    width: 100%;
+    width: calc(100% - 0.7rem);
     cursor: pointer;
     color: var(--global-text-primary);
     min-height: 20px;
     line-height: 22px;
+    padding-inline: 0.35rem;
+    padding-block: 0.2rem;
+    border-radius: 6px;
     align-content: center;
     display: flow-root;
-    padding: 2px 0px;
-    padding-right: 32px;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -1719,14 +1721,14 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexselect .lexselectlabel {
-    width: 100%;
+    width: calc(100% - 1.6rem);
     color: var(--global-text-primary);
+    padding-inline: 0.8rem;
+    padding-block: 0.2rem;
     min-height: 20px;
     line-height: 22px;
     align-content: center;
     display: flow-root;
-    padding: 2px 0px;
-    padding-right: 32px;
     font-weight: 600;
 }
 
@@ -1739,8 +1741,7 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexselect .lexselectitem:not(.empty):hover {
-    background-color: var(--global-selected);
-    color: var(--global-text-primary);
+    background-color: var(--global-color-tertiary);
 }
 
 .lexselect .lexselectitem:not(.empty):active {
@@ -1749,8 +1750,8 @@ dialog .lexselect .lexselectoptions {
 
 .lexselect .lexselectitem a {
     display: none;
-    right: 24px;
-    position: absolute;
+    margin-left: auto;
+    margin-right: 8px;
 }
 
 .lexselect .lexselectitem.selected {
@@ -3870,8 +3871,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexlistitem:hover {
-    background-color: var(--global-color-secondary);
-    color: var(--global-text-primary);
+    background-color: var(--global-color-tertiary);
 }
 
 .lexlistitem:active {
