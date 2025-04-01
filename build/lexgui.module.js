@@ -1491,7 +1491,6 @@ class DropdownMenu {
             newParent.dataset["side"] = "right"; // submenus always come from the right
             LX.root.appendChild( newParent );
 
-            parentDom.currentMenu = newParent;
             newParent.currentParent = parentDom;
             parentDom = newParent;
 
@@ -1502,7 +1501,6 @@ class DropdownMenu {
                 {
                     position[ 0 ] = LX.clamp( position[ 0 ], 0, window.innerWidth - newParent.offsetWidth - this._windowPadding );
                     position[ 1 ] = LX.clamp( position[ 1 ], 0, window.innerHeight - newParent.offsetHeight - this._windowPadding );
-                    console.log(newParent.offsetHeight)
                 }
 
                 newParent.style.left = `${ position[ 0 ] }px`;
@@ -1534,7 +1532,7 @@ class DropdownMenu {
             menuItem.tabIndex = "1";
             parentDom.appendChild( menuItem );
 
-            if( item.constructor === String )
+            if( item.constructor === String || ( item.disabled ?? false ) )
             {
                 continue;
             }
@@ -1545,29 +1543,27 @@ class DropdownMenu {
                 submenuIcon.className = "fa-solid fa-angle-right fa-xs";
                 menuItem.appendChild( submenuIcon );
             }
-            else if( !( item.disabled ?? false ) )
-            {
-                menuItem.addEventListener( "click", () => {
-                    const f = item[ 'callback' ];
-                    if( f )
-                    {
-                        f.call( this, key, menuItem );
-                    }
 
-                    this.destroy();
-                } );
-            }
+            menuItem.addEventListener( "click", () => {
+                const f = item[ 'callback' ];
+                if( f )
+                {
+                    f.call( this, key, menuItem );
+                }
+
+                this.destroy();
+            } );
 
             menuItem.addEventListener("mouseover", e => {
 
-                let path = "root/" + parentDom.id;
-                let p = parentDom.currentParent;
+                let path = menuItem.id;
+                let p = parentDom;
+
                 while( p )
                 {
-                    path += "/" + parentDom.currentParent.parentElement.id;
-                    p = p.currentParent;
+                    path += "/" + p.id;
+                    p = p.currentParent?.parentElement;
                 }
-                // path += "/" + parentDom.id;
 
                 LX.root.querySelectorAll( ".lexdropdownmenu" ).forEach( m => {
                     if( !path.includes( m.id ) )
