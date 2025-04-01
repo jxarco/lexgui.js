@@ -31,6 +31,7 @@ class TimeBar {
 
         this.ctx = this.canvas.getContext("2d");
 
+        
         this.markerWidth = options.markerWidth ?? 8;
         this.markerHeight = options.markerHeight ?? (this.canvas.height * 0.5);
         this.offset = options.offset || (this.markerWidth*0.5 + 8);
@@ -621,9 +622,9 @@ class VideoEditor {
             this.hideControls();
         }
 
-        const ratio = this.video.clientHeight / this.video.videoHeight;
         this.cropArea.style.height = this.video.clientHeight + "px";
-        this.cropArea.style.width = this.video.videoWidth * ratio + "px";
+        this.cropArea.style.width =  this.video.clientWidth + "px";
+        this.dragCropArea( { clientX: -1, clientY: -1 } );
 
         if( this.crop ) {
             this.showCropArea();
