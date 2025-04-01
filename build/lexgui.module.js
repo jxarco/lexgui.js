@@ -8448,7 +8448,7 @@ class Table extends Widget {
                     const bodyData = data.body[ r ];
                     const row = document.createElement( 'tr' );
                     const rowId = LX.getSupportedDOMName( bodyData.join( '-' ) );
-                    row.setAttribute( "rowId", rowId );
+                    row.setAttribute( "rowId", rowId.substr(0, 16) );
 
                     if( options.sortable )
                     {
@@ -8563,6 +8563,11 @@ class Table extends Widget {
                             {
                                 console.assert( action.constructor == Object );
                                 button.className += ` ${ action.icon }`;
+
+                                if( action.callback )
+                                {
+                                    button.addEventListener( 'click', action.callback.bind( this, bodyData, table ));
+                                }
                             }
 
                             buttons.appendChild( button );
