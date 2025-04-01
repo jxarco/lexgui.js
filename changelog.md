@@ -1,6 +1,6 @@
 # lexgui.js changelog
 
-## dev
+## 0.5.0 (master)
 
 Widgets:
 - Created classes for each widget to create them at any place.
@@ -20,7 +20,7 @@ Added Icons/ page in docs.
 Fixed Menubar entries auto-open when menubar is focused.
 Minor CSS tweaks.
 
-## 0.4.2 (master)
+## 0.4.2
 
 Widgets:
 - RadioGroup: Add name parameter (1st).
