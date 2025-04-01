@@ -730,6 +730,10 @@ svg path {
     background-color: var(--global-color-secondary);
 }
 
+.lexdialog:has(.lexselect) {
+    overflow: visible;
+}
+
 .lexdialogtitle {
     outline: none;
     font-family: var(--global-title-font);
@@ -1675,6 +1679,10 @@ svg path {
     border-bottom-right-radius: 6px;
     overflow-y: auto;
     overflow-x: hidden;
+}
+
+dialog .lexselect .lexselectoptions {
+    max-height: none;
 }
 
 .lexselect ul {
