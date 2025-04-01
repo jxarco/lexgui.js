@@ -293,20 +293,20 @@ code:has(.constructor) {
 	font-size: 21px;
 }
 
-.primary { font-weight: 600; color: var(--global-selected); }
-.secondary { font-weight: 600; color: var(--global-selected-light);  }
-.accent { font-weight: 600; color: var(--global-color-accent);  }
-.warning { font-weight: 600; color: var(--global-color-warning);  }
-.error { font-weight: 600; color: var(--global-color-error);  }
+#content .primary { font-weight: 600; color: var(--global-selected); }
+#content .secondary { font-weight: 600; color: var(--global-selected-light);  }
+#content .accent { font-weight: 600; color: var(--global-color-accent);  }
+#content .warning { font-weight: 600; color: var(--global-color-warning);  }
+#content .error { font-weight: 600; color: var(--global-color-error);  }
 
-.solid {
+#content .solid {
 	background-color: var(--global-selected);
 	border-radius: 8px;
 	padding: 2px;
 	padding-inline: 8px;
 }
 
-.outline {
+#content .outline {
 	border: 1px solid var(--global-selected);
 	color: var(--global-selected);
 	border-radius: 8px;

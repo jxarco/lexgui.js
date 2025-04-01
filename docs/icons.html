@@ -1,0 +1,63 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    MAKE_HEADER( "Icons", "h1", "icons" );
+
+    MAKE_PARAGRAPH( `LexGUI offers a collection of the most common SVG icons used within application interfaces 
+    (mostly from ${ INLINE_LINK( "FontAwesome", "https://fontawesome.com/" ) } and ${ INLINE_LINK( "SVGRepo", "https://www.svgrepo.com/" ) }):` );
+    
+    {
+        const content = document.getElementById('content');
+        const area = new LX.Area( { skipAppend: true, height: "auto" } );
+        const panel = area.addPanel();
+
+        const tableBody = [];
+
+        for( const i in LX.ICONS )
+        {
+            if( LX.ICONS[ i ].constructor === String )
+            {
+                continue;
+            }
+
+            let name =  INLINE_CODE( i );
+            LX.ICONS[ i ][ 2 ].forEach( o => name += ` ; ${ INLINE_CODE( o ) }` );
+            tableBody.push( [name, LX.makeIcon( i, null, "lg" ).innerHTML ] );
+        }
+
+        tableBody.sort( (a, b) => { return a[0] < b[0] ?  -1 : 1 } );
+
+        function copySVG( svg, event )
+        {
+            navigator.clipboard.writeText( svg );
+            console.log("Copied!");
+
+            const b = event.target;
+            const newSvg = LX.makeIcon( "Check" ).querySelector( "svg" );
+            b.replaceWith( newSvg );
+            newSvg.classList.add('success');
+            
+            setTimeout( () => {
+                newSvg.replaceWith( b );
+            }, 2000 );
+        }
+
+        panel.addTable( null, {
+            head: [ "Name", "Icon" ],
+            body: tableBody
+        }, {
+            rowActions: [
+                { icon: "copy", callback: ( rowData, tableDom, event ) => { copySVG( rowData[ 1 ], event ) } }, // custom: you can change the data and refresh will be called later!
+            ],
+        });
+
+        content.appendChild( area.root );
+    }
+
+    MAKE_LINE_BREAK();
+    MAKE_LINE_BREAK();
+
+    </script>
+
+</body>
