@@ -902,7 +902,7 @@ svg path {
     position: fixed;
     left: 0px;
     top: 0px;
-    min-width: 164px;
+    min-width: 172px;
     max-width: 244px;
     z-index: 150;
     display: flex;
@@ -920,6 +920,7 @@ svg path {
     flex-direction: row;
     padding: 0.5rem;
     border-radius: 6px;
+    gap: 0.5rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

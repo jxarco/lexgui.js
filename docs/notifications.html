@@ -2,8 +2,6 @@
 
     import { LX } from 'lexgui';
 
-    LX.init( { skipRoot: true } );
-
     MAKE_HEADER( "Notifications", "h1", "notifications" );
 
     {
@@ -27,12 +25,13 @@
             } },  timeout: -1 } );
         }
 
+        const content = document.getElementById('content');
         const area = new LX.Area( { skipAppend: true, height: "auto" } );
         const panel = area.addPanel();
         panel.addButton("This button generated a random toast", "Create toast", (value, event) => {
             createToast();
-        });
-        document.body.appendChild( area.root );
+        }, { nameWidth: "75%" });
+        content.appendChild( area.root );
     }
 
     MAKE_PARAGRAPH( `LexGUI allows creating <strong>toast</strong> notifications, which appear at the bottom right of the screen with a timer of 3s by default.

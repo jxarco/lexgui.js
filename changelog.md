@@ -12,8 +12,10 @@ Widgets:
 - Tree: `Panel.addTree` now returns `Tree` widget instance, not its inner `NodeTree`.
 - Table: Added support for `options.sortable` rows.
 
+New `DropdownMenu` class.
 Added `displaySelected` option to Sidebar to display selected entry.
 Started Notifications docs.
+Added Icons/ page in docs.
 Fixed Menubar entries auto-open when menubar is focused.
 Minor CSS tweaks.
 

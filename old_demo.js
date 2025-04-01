@@ -233,12 +233,12 @@ const sidebar = left.addSidebar( m => {
         const ddm = new LX.DropdownMenu( element, [
             "My Account",
             null,
-            { name: "Profile", short: "P" },
+            { name: "Profile", short: "P", icon: "Sidebar" },
             { name: "Billing", disabled: true },
             { name: "Settings", short: "S" },
             null,
             { name: "Team" },
-            { name: "Invite users"},
+            { name: "Invite users", icon: "Search" },
             null,
             { name: "Github" },
             { name: "Support", submenu: [

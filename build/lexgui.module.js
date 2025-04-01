@@ -1566,7 +1566,14 @@ class DropdownMenu {
             const menuItem = document.createElement('div');
             menuItem.className = "lexdropdownmenuitem" + ( item.name ? "" : " label" ) + ( item.disabled ?? false ? " disabled" : "" );
             menuItem.id = pKey;
-            menuItem.innerHTML = key;
+            menuItem.innerHTML = `<span>${ key }</span>`;
+
+            if( item.icon )
+            {
+                const icon = LX.makeIcon( item.icon );
+                menuItem.prepend( icon );
+            }
+
             menuItem.tabIndex = "1";
             parentDom.appendChild( menuItem );
 
