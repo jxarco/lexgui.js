@@ -34,7 +34,7 @@
             console.log("Copied!");
 
             const b = event.target;
-            const newSvg = LX.makeIcon( "Check" ).querySelector( "svg" );
+            const newSvg = LX.makeIcon( "check" ).querySelector( "svg" );
             b.replaceWith( newSvg );
             newSvg.classList.add('success');
             
@@ -48,7 +48,7 @@
             body: tableBody
         }, {
             rowActions: [
-                { icon: "copy", callback: ( rowData, tableDom, event ) => { copySVG( rowData[ 1 ], event ) } }, // custom: you can change the data and refresh will be called later!
+                { icon: "copy", title: "Copy SVG", callback: ( rowData, tableDom, event ) => { copySVG( rowData[ 1 ], event ) } }, // custom: you can change the data and refresh will be called later!
             ],
         });
 

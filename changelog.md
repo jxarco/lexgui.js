@@ -10,7 +10,7 @@ Widgets:
 - `Panel.addContent` and `Panel.addImage` now accepts name as first parameter.
 - Title: `Panel.addTitle` now returns `Title` widget instance, not its inner title HTMLElement.
 - Tree: `Panel.addTree` now returns `Tree` widget instance, not its inner `NodeTree`.
-- Table: Added support for `options.sortable` rows.
+- Table: Added support for `options.sortable` rows and `title` for row action icons.
 
 New `DropdownMenu` class.
 Added `displaySelected` option to Sidebar to display selected entry.

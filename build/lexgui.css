@@ -3725,21 +3725,15 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     height: 32px;
     border-radius: 8px;
     margin: auto 0;
-}
-
-.lexavatar img {
-    width: 100%;
-    height: 100%;
-}
-
-.lexavatar a svg {
-    width: 60%;
-    height: 100%;
+    align-content: center;
 }
 
 .lexavatar * {
     border-radius: 8px;
-    width: 60%;
+}
+
+.lexavatar img {
+    width: 100%;
     height: 100%;
 }
 
@@ -3992,8 +3986,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lextable svg, .lextable svg path {
-    /* width: 0.9rem;
-    height: 0.85rem; */
     --color: var(--global-text-tertiary);
 }
 
@@ -5441,6 +5433,7 @@ ul.lexassetscontent {
     left: 0;
     bottom: 0;
     right: 0;
+    stroke: unset;
 }
 
 .lexgraph .box-selection-svg {

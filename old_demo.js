@@ -233,16 +233,16 @@ const sidebar = left.addSidebar( m => {
         const ddm = new LX.DropdownMenu( element, [
             "My Account",
             null,
-            { name: "Profile", short: "P", icon: "Sidebar" },
-            { name: "Billing", disabled: true },
+            { name: "Profile", short: "P", icon: "user" },
+            { name: "Billing", disabled: true, icon: "credit-card" },
             { name: "Settings", short: "S" },
             null,
             { name: "Team" },
-            { name: "Invite users", icon: "Search" },
+            { name: "Invite users", icon: "search" },
             null,
-            { name: "Github" },
+            { name: "Github", icon: "github" },
             { name: "Support", submenu: [
-                { name: "Email" },
+                { name: "Email", icon: "envelope" },
                 { name: "Message", submenu: [
                     { name: "Whatsapp" },
                     { name: "iMessage" },
@@ -856,7 +856,7 @@ function fillBottomPanel( panel ) {
         selectable: true,
         sortable: true,
         rowActions: [
-            { icon: "fa-solid fa-pen-to-square", callback: ( tableData ) => {} }, // custom: you can change the data and refresh will be called later!
+            { icon: "edit", title: "Edit Row", callback: ( tableData ) => {} }, // custom: you can change the data and refresh will be called later!
             "delete",
             "menu"
         ],

@@ -96,11 +96,11 @@ class GraphEditor {
 
         }, {
             displaySelected: true,
-            headerIcon: "More",
+            headerIcon: "more",
             headerTitle: "Create",
             headerSubtitle: "Press to rename",
             onHeaderPressed: () => this._showRenameGraphDialog(),
-            footerIcon: "Plus",
+            footerIcon: "plus",
             footerTitle: "Create",
             footerSubtitle: "Graph or Function",
             onFooterPressed: (e) => this._onSidebarCreate( e )

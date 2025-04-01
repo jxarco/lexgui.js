@@ -581,10 +581,13 @@ function makeIcon( iconName, iconTitle, extraClass = "" )
         data = LX.ICONS[ data ];
     }
 
-    const svg = document.createElement( "svg" );
-    svg.className = extraClass;
-    svg.setAttribute( "xmlns", "http://www.w3.org/2000/svg" );
+    const svg = document.createElementNS( "http://www.w3.org/2000/svg", "svg" );
     svg.setAttribute( "viewBox", `0 0 ${ data[ 0 ] } ${ data[ 1 ] }` );
+
+    if( extraClass )
+    {
+        svg.classList.add( extraClass );
+    }
 
     if( data[ 5 ] )
     {
@@ -3659,7 +3662,7 @@ class SideBar {
 
             if( this.collapsable )
             {
-                const icon = LX.makeIcon( "Sidebar", "Toggle Sidebar", "toggler" );
+                const icon = LX.makeIcon( "sidebar", "Toggle Sidebar", "toggler" );
                 this.header.appendChild( icon );
 
                 icon.addEventListener( "click", (e) => {
@@ -4124,7 +4127,7 @@ class SideBar {
 
             if( options.action )
             {
-                const actionIcon = LX.makeIcon( options.action.icon ?? "MoreHorizontal", options.action.name );
+                const actionIcon = LX.makeIcon( options.action.icon ?? "more-horizontal", options.action.name );
                 itemDom.appendChild( actionIcon );
 
                 actionIcon.addEventListener( "click", (e) => {
@@ -4201,7 +4204,7 @@ class SideBar {
 
                 if( suboptions.action )
                 {
-                    const actionIcon = LX.makeIcon( suboptions.action.icon ?? "MoreHorizontal", suboptions.action.name );
+                    const actionIcon = LX.makeIcon( suboptions.action.icon ?? "more-horizontal", suboptions.action.name );
                     subentry.appendChild( actionIcon );
 
                     actionIcon.addEventListener( "click", (e) => {
@@ -8454,7 +8457,7 @@ class Table extends Widget {
                     {
                         const td = document.createElement( 'td' );
                         td.style.width = "0px";
-                        const icon = LX.makeIcon( "GripVertical" );
+                        const icon = LX.makeIcon( "grip-vertical" );
                         td.appendChild( icon );
 
                         icon.draggable = true;
@@ -8534,11 +8537,11 @@ class Table extends Widget {
 
                         for( const action of options.rowActions )
                         {
-                            const button = LX.makeIcon( action.icon );
+                            let button = null;
 
                             if( action == "delete" )
                             {
-                                button.className += " fa-solid fa-trash-can";
+                                button = LX.makeIcon( "trash-can", "Delete Row" );
                                 button.addEventListener( 'click', function() {
                                     // Don't need to refresh table..
                                     data.body.splice( r, 1 );
@@ -8547,7 +8550,7 @@ class Table extends Widget {
                             }
                             else if( action == "menu" )
                             {
-                                button.className += " fa-solid fa-ellipsis";
+                                button = LX.makeIcon( "more-horizontal", "Menu" );
                                 button.addEventListener( 'click', function( event ) {
                                     addContextMenu( null, event, c => {
                                         if( options.onMenuAction )
@@ -8562,14 +8565,21 @@ class Table extends Widget {
                             else // custom actions
                             {
                                 console.assert( action.constructor == Object );
-                                button.className += ` ${ action.icon }`;
+                                button = LX.makeIcon( action.icon, action.title );
 
                                 if( action.callback )
                                 {
-                                    button.addEventListener( 'click', action.callback.bind( this, bodyData, table ));
+                                    button.addEventListener( 'click', e => {
+                                        const mustRefresh = action.callback( bodyData, table, e );
+                                        if( mustRefresh )
+                                        {
+                                            this.refreshTable();
+                                        }
+                                    });
                                 }
                             }
 
+                            console.assert( button );
                             buttons.appendChild( button );
                         }
 
@@ -12507,7 +12517,6 @@ LX.ICONS = {
     "align-left": [448, 512, [], "", "M288 64c0 17.7-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l224 0c17.7 0 32 14.3 32 32zm0 256c0 17.7-14.3 32-32 32L32 352c-17.7 0-32-14.3-32-32s14.3-32 32-32l224 0c17.7 0 32 14.3 32 32zM0 192c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 224c-17.7 0-32-14.3-32-32zM448 448c0 17.7-14.3 32-32 32L32 480c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"],
     "align-right": [448, 512, [], "", "M448 64c0 17.7-14.3 32-32 32L192 96c-17.7 0-32-14.3-32-32s14.3-32 32-32l224 0c17.7 0 32 14.3 32 32zm0 256c0 17.7-14.3 32-32 32l-224 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l224 0c17.7 0 32 14.3 32 32zM0 192c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 224c-17.7 0-32-14.3-32-32zM448 448c0 17.7-14.3 32-32 32L32 480c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"],
     "bell": [448, 512, [], "", "M224 0c-17.7 0-32 14.3-32 32l0 19.2C119 66 64 130.6 64 208l0 25.4c0 45.4-15.5 89.5-43.8 124.9L5.3 377c-5.8 7.2-6.9 17.1-2.9 25.4S14.8 416 24 416l400 0c9.2 0 17.6-5.3 21.6-13.6s2.9-18.2-2.9-25.4l-14.9-18.6C399.5 322.9 384 278.8 384 233.4l0-25.4c0-77.4-55-142-128-156.8L256 32c0-17.7-14.3-32-32-32zm0 96c61.9 0 112 50.1 112 112l0 25.4c0 47.9 13.9 94.6 39.7 134.6L72.3 368C98.1 328 112 281.3 112 233.4l0-25.4c0-61.9 50.1-112 112-112zm64 352l-64 0-64 0c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7s18.7-28.3 18.7-45.3z"],
-    "desktop": [576, 512, [], "", "M64 0C28.7 0 0 28.7 0 64L0 352c0 35.3 28.7 64 64 64l176 0-10.7 32L160 448c-17.7 0-32 14.3-32 32s14.3 32 32 32l256 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-69.3 0L336 416l176 0c35.3 0 64-28.7 64-64l0-288c0-35.3-28.7-64-64-64L64 0zM512 64l0 224L64 288 64 64l448 0z"],
     "display": [576, 512, [], "", "M64 0C28.7 0 0 28.7 0 64L0 352c0 35.3 28.7 64 64 64l176 0-10.7 32L160 448c-17.7 0-32 14.3-32 32s14.3 32 32 32l256 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-69.3 0L336 416l176 0c35.3 0 64-28.7 64-64l0-288c0-35.3-28.7-64-64-64L64 0zM512 64l0 288L64 352 64 64l448 0z"],
     "mobile-screen": [384, 512, [], "", "M16 64C16 28.7 44.7 0 80 0L304 0c35.3 0 64 28.7 64 64l0 384c0 35.3-28.7 64-64 64L80 512c-35.3 0-64-28.7-64-64L16 64zM144 448c0 8.8 7.2 16 16 16l64 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-64 0c-8.8 0-16 7.2-16 16zM304 64L80 64l0 320 224 0 0-320z"],
     "print": [512, 512, [], "", "M128 0C92.7 0 64 28.7 64 64l0 96 64 0 0-96 226.7 0L384 93.3l0 66.7 64 0 0-66.7c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0L128 0zM384 352l0 32 0 64-256 0 0-64 0-16 0-16 256 0zm64 32l32 0c17.7 0 32-14.3 32-32l0-96c0-35.3-28.7-64-64-64L64 192c-35.3 0-64 28.7-64 64l0 96c0 17.7 14.3 32 32 32l32 0 0 64c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-64zM432 248a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"],
