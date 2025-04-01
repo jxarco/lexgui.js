@@ -4568,7 +4568,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
             element.querySelector( ".lexcustomitems" ).toggleAttribute( 'hidden', false );
             if( !skipCallback )
             {
-                this._trigger( new IEvent( name, instance, event ), callback );
+                widget._trigger( new IEvent( name, instance, event ), callback );
             }
         };
 
@@ -4648,7 +4648,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
 
                 const on_instance_changed = ( key, value, event ) => {
                     instance[ key ] = value;
-                    this._trigger( new IEvent( name, instance, event ), callback );
+                    widget._trigger( new IEvent( name, instance, event ), callback );
                 };
 
                 for( let key in default_instance )
@@ -4680,7 +4680,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                             }
                             else
                             {
-                                // this._addVector( value.length, key, value, on_instance_changed.bind( this, key ) );
+                                this._addVector( value.length, key, value, on_instance_changed.bind( this, key ) );
                             }
                             break;
                     }
@@ -7072,8 +7072,8 @@ class RangeInput extends Widget {
         let slider = document.createElement( 'input' );
         slider.className = "lexrangeslider " + ( options.className ?? "" );
         slider.value = slider.iValue = value;
-        slider.min = options.min;
-        slider.max = options.max;
+        slider.min = options.min ?? 0;
+        slider.max = options.max ?? 100;
         slider.step = options.step ?? 1;
         slider.type = "range";
         slider.disabled = options.disabled ?? false;
