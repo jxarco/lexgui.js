@@ -53,6 +53,10 @@
         fillPanelB( panelB );
         rightTabs.add( "PanelB", panelB );
 
+        var panelC = new LX.Panel();
+        fillPanelC( panelC );
+        rightTabs.add( "panelC", panelC );
+
         function loop(dt) {
             
             var ctx = canvas.getContext("2d");
@@ -77,7 +81,6 @@
         // **** **** **** **** **** **** **** **** **** **** **** **** 
 
         function fillPanelA( panel ) {
-            
             panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});
             panel.addColor("Background", "#b7a9b1");
             panel.addText("Text", "Lexgui.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
@@ -94,7 +97,6 @@
         }
 
         function fillPanelB( panel ) {
-            
             panel.branch("Settings", {icon: "fa-solid fa-palette", filter: true});
             panel.addTitle("Configuration (Im a title)");
             panel.addCheckbox("Toggle me", true, (value, event) => {
@@ -104,6 +106,19 @@
                 p.addNumber("Suboption 2", 12);
             } });
             panel.addFile("Image", data => { console.log(data) }, {} );
+            panel.merge();
+        }
+
+        function fillPanelC( panel ) {
+            panel.branch("Some Branch", {icon: "fa-solid fa-palette", filter: true});
+            panel.addTitle("C title");
+            panel.addToggle("A cool Toggle", true, (value, event) => {
+                console.log(value);
+            }, { suboptions: (p) => {
+                p.addText(null, "Suboption 1");
+                p.addNumber("Suboption 2", 12);
+            } });
+            panel.addRange("Yup", 15, data => { console.log(data) }, {} );
             panel.merge();
         }
 

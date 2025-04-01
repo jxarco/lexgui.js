@@ -2682,19 +2682,34 @@ class Tabs {
 
         container.addEventListener("dragleave", function( e ) {
             e.preventDefault(); // Prevent default action (open as link for some elements)
+            if ( this.contains( e.relatedTarget ) ) return; // Still inside
             this.classList.remove("dockingtab");
         });
 
         container.addEventListener("drop", function( e ) {
             e.preventDefault(); // Prevent default action (open as link for some elements)
 
-            const tab_id = e.dataTransfer.getData("source");
-            const el = document.getElementById(tab_id);
+            const tabId = e.dataTransfer.getData( "source" );
+            const el = document.getElementById( tabId );
             if( !el ) return;
 
-            // Append tab and content
-            this.appendChild( el );
-            const content = document.getElementById(tab_id + "_content");
+            const target = e.target;
+            const rect = target.getBoundingClientRect();
+
+            if( e.offsetX < ( rect.width * 0.5 ) )
+            {
+                this.insertBefore( el, target );
+            }
+            else if( target.nextElementSibling )
+            {
+                this.insertBefore( el, target.nextElementSibling );
+            }
+            else
+            {
+                this.appendChild( el );
+            }
+
+            const content = document.getElementById( tabId + "_content" );
             that.area.attach( content );
             this.classList.remove("dockingtab");
 
@@ -2711,8 +2726,8 @@ class Tabs {
 
         area.root.classList.add( "lexareatabscontainer" );
 
-        area.split({type: 'vertical', sizes: options.sizes ?? "auto", resize: false, top: 6});
-        area.sections[0].attach( container );
+        area.split({ type: 'vertical', sizes: options.sizes ?? "auto", resize: false, top: 6 });
+        area.sections[ 0 ].attach( container );
 
         this.area = area.sections[1];
         this.area.root.className += " lexareatabscontent";
