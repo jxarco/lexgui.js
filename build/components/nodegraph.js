@@ -1205,7 +1205,7 @@ class GraphEditor {
                 panel.addVector4( p.name, p.value, (v) => { p.value = v } );
                 break;
             case 'select':
-                panel.addDropdown( p.name, p.options, p.value, (v) => { p.value = v } );
+                panel.addSelect( p.name, p.options, p.value, (v) => { p.value = v } );
                 break;
             case 'array':
                 panel.addArray( p.name, p.value, (v) => {

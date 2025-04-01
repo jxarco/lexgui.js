@@ -188,7 +188,7 @@
             let kfTimeline = new LX.KeyFramesTimeline('keyframesTimeline', {
                 disableNewTracks: true,
                 onBeforeCreateTopBar: (panel) => {
-                    panel.addDropdown("Animation", ["Anim 1", "Anim 2", "Anim 3"], "Anim 1", ()=> {})
+                    panel.addSelect("Animation", ["Anim 1", "Anim 2", "Anim 3"], "Anim 1", ()=> {})
                 },
                 onAfterCreateTopBar: (panel) => {
                     panel.addButton("", "autoKeyEnable", null, { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled', width: "40px" });

@@ -4,28 +4,28 @@
 
     const content = document.getElementById('content');
 
-    // Dropdown
-    MAKE_HEADER("Dropdown", "h1", "dropdown");
-    MAKE_PARAGRAPH(`Represents a list of options for the user to pick from—triggered by a button.`);
+    // Select
+    MAKE_HEADER("Select", "h1", "select");
+    MAKE_PARAGRAPH(`Represents a list of options for the user to pick from, triggered by a button.`);
 
     {
         const area = new LX.Area({ skipAppend: true, height: "auto" });
         const panel = area.addPanel();
-        panel.addDropdown("String Dropdown", ["Option 1", "Option 2", "Option 3"], "Option 1", (value, event) => {
+        panel.addSelect("String Select", ["Option 1", "Option 2", "Option 3"], "Option 1", (value, event) => {
             console.log(value);
         });
         content.appendChild(area.root);
     }
 
-    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addDropdown(name, values, value, callback, options)")} to add a Dropdown Widget to your panel:`);
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addSelect(name, values, value, callback, options)")} to add a Select Widget to your panel:`);
     MAKE_CODE_BULLET_LIST([
         ["name", "String", "Widget name"],
         ["values", "Array", "Array of the values of the list. The values can be strings or media (images or GIFs). For the media, the entries of the array must be an object containing a <code class='inline'>value</code> and <code class='inline'>src</code> fields"],
-        ["value", "String", "Current selected value from the drop-down list"],
+        ["value", "String", "Current selected value from the select list"],
         ["callback", "Function", "Function called when an list value is selected"],
         ["options", "Object", "Basic options for a Widget"],
         [
-            ["filter", "Boolean", "Specify if the drop-down needs a search bar"],
+            ["filter", "Boolean", "Specify if search bar is needed"],
             ["disabled", "Boolean", "Make the widget disabled"],
             ["skipReset", "Boolean", "Don't add the reset value button when value changes"],
             ["placeholder", "String", "Placeholder for the filter input"],
@@ -34,7 +34,7 @@
     ]);
     MAKE_CODE(`@[com]// String values@
 
-panel.@[mtd]addDropdown@(@"String Dropdown"@, [@"Option 1"@, @"Option 2"@], @"Option 1"@, (value, event) =&gt; {
+panel.@[mtd]addSelect@(@"String Select"@, [@"Option 1"@, @"Option 2"@], @"Option 1"@, (value, event) =&gt; {
       console.@[mtd]log@(value);
 });
 
@@ -45,7 +45,7 @@ panel.@[mtd]addDropdown@(@"String Dropdown"@, [@"Option 1"@, @"Option 2"@], @"Op
   { value: @"Option 2"@, src: @"/option2.gif"@ },
   { value: @"Option 3"@, src: @"/option3.jpg"@ }
 ];
-panel.@[mtd]addDropdown@(@"Media Dropdown"@, options, @"Option 1"@, (value, event) =&gt; {
+panel.@[mtd]addSelect@(@"Media Select"@, options, @"Option 1"@, (value, event) =&gt; {
       console.@[mtd]log@(value);
 }, options);` );
 
