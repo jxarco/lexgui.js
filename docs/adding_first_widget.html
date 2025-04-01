@@ -17,15 +17,16 @@
     MAKE_PARAGRAPH( `A widget is a <em>fundamental building block that represents a graphical user interface (GUI) element</em>. 
     Widgets are the visual components with which users interact and provide input within an application, from basic elements like buttons 
     and text fields to more complex elements such as dropdown menus, sliders, and checkboxes.` );
-    MAKE_PARAGRAPH( `LexGUI.js provides a wide range of ${INLINE_LINK("pre-built widgets", "widget_list.html")} that developers can utilize to construct intuitive and visually appealing interfaces. 
+    MAKE_PARAGRAPH( `LexGUI provides a wide range of ${INLINE_LINK("pre-built widgets", "widget_list.html")} that developers can use to construct intuitive and visually appealing interfaces. 
     These widgets are designed to be customizable, allowing developers to adjust their appearance and behavior to suit the specific requirements of their application.` );
     MAKE_PARAGRAPH( `To add a new widget you will need a ${INLINE_LINK("Panel", "instancing_panels.html")}, that at the same time is usually attached to an area. 
     All widgets can be created using ${INLINE_CODE("Panel.add<em>_WidgetName_</em>()")} and passing specific parameters.` );
 
     MAKE_HEADER( "Getter and Setters", "h2", "getter-and-setters" );
 
-    MAKE_PARAGRAPH( `One of the features of LexGUI is the ability to effortlessly retrieve and modify values for any widget that has been added. 
-    This functionality provides developers with a convenient way to interact with and manipulate the UI elements within their applications:` );
+    MAKE_PARAGRAPH( `LexGUI supports retrieving and modifying values for any widget that has been added. 
+    This functionality provides developers with a way to interact with and manipulate the UI elements within their applications. For a Widget to be accesible 
+    from the parent Panel, it has to be created using a ${INLINE_CODE("name")}. In case it is not used, the widget will no be registered and thus inaccessible. ${INLINE_CODE("getValue/setValue")} won't work!` );
     MAKE_CODE( `@[com]// Getting Values by Widget Name@
 @const@ color = panel.@[mtd]getValue@(@'Background'@);
 
@@ -37,7 +38,8 @@ panel.@[mtd]setValue@(@'Font Color'@, color);
     
     MAKE_HEADER( "Reset Value", "h2", "reset-value" );
 
-    MAKE_PARAGRAPH( `In most cases where you set a Widget Name, you will have the option to reset the Widget Value to its default value by pressing a <em>reset button</em> what will appear on changing the initial state of the widget.` );
+    MAKE_PARAGRAPH( `In most cases where you set a Widget Name, you will have the option to reset the Widget Value to its default value by pressing a <em>reset
+         button</em> what will appear on changing the initial state of the widget. To avoid using it, add ${INLINE_CODE("skipReset: true")} to your Widget options.` );
 
     MAKE_HEADER( "Copy/Paste Value", "h2", "copy-paste-value" );
 

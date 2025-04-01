@@ -2,12 +2,22 @@
 
 ## dev
 
+Added `displaySelected` option to Sidebar to display selected entry.
+Started Notifications docs.
+
+## 0.4.2 (master)
+
+Widgets:
+- RadioGroup: Add name parameter (1st).
+- Add `options.hideName` for supported widgets: Don't use label but add `name` to allow registering.
+
+Sidebar subentries are now collapsable (`true` by default).
 Support `options.header` and `options.footer` for custom sidebar elements.
 Added `extraClass` parameter for `LX.makeIcon`.
 Fixed Menubar.getButton.
 Fixed some CSS icon alignment issues.
 
-## 0.4.1 (master)
+## 0.4.1
 
 Widgets:
 - Text: Skip callback if no changes.

@@ -1,38 +1,44 @@
 {
     "name": "lexgui",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "description": "JS library to create web graphical user interfaces",
     "type": "module",
     "main": "./build/lexgui.js",
     "module": "./build/lexgui.module.js",
     "repository": {
-      "type": "git",
-      "url": "https://github.com/jxarco/lexgui.js"
+        "type": "git",
+        "url": "https://github.com/jxarco/lexgui.js"
     },
     "files": [
-      "build",
-      "build/components",
-      "examples",
-      "LICENSE",
-      "package.json",
-      "changelog.md",
-      "README.md",
-      "demo.js"
+        "build",
+        "build/components",
+        "examples",
+        "LICENSE",
+        "package.json",
+        "changelog.md",
+        "README.md",
+        "demo.js"
     ],
     "keywords": [
-      "lexgui",
-      "lexgui.js",
-      "javascript",
-      "editor",
-      "gui",
-      "interface",
-      "canvas",
-      "svg",
-      "html5"
+        "lexgui",
+        "lexgui.js",
+        "javascript",
+        "editor",
+        "gui",
+        "interface",
+        "canvas",
+        "svg",
+        "html5"
     ],
     "author": "jxarco",
     "license": "MIT",
     "bugs": {
-      "url": "https://github.com/jxarco/lexgui.js/issues"
+        "url": "https://github.com/jxarco/lexgui.js/issues"
+    },
+    "scripts": {
+        "minify-css": "cleancss -o build/lexgui.min.css build/lexgui.css",
+        "minify-js": "uglifyjs build/lexgui.module.js -o build/lexgui.module.min.js --compress --mangle --module && uglifyjs build/lexgui.js -o build/lexgui.min.js --compress --mangle --no-module",
+        "minify": "npm run minify-js && npm run minify-css",
+        "build": "python build-legacy.py && npm run minify"
     }
-  }
+}

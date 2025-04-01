@@ -23,7 +23,13 @@ let Widget = LX.Widget;
 
 Panel.prototype.addKnob = function( name, value, min, max, callback, options = {} ) {
 
-    let widget = this.create_widget( name, Widget.KNOB, options );
+    if( value.constructor == Number )
+    {
+        value = LX.clamp( value, min, max );
+        value = options.precision ? LX.round( value, options.precision ) : value;
+    }
+
+    let widget = this._createWidget( Widget.KNOB, name, value, options );
 
     widget.onGetValue = () => {
         return innerKnobCircle.value;
@@ -34,15 +40,6 @@ Panel.prototype.addKnob = function( name, value, min, max, callback, options = {
     };
 
     let element = widget.domEl;
-
-    // Add reset functionality
-    if( widget.name ) {
-        Panel._add_reset_property( element.domName, function() {
-            this.style.display = "none";
-            innerSetValue( innerKnobCircle.iValue );
-            Panel._dispatch_event( innerKnobCircle, "change" );
-        });
-    }
 
     const snapEnabled = ( options.snap && options.snap.constructor == Number );
     const ticks = [];
@@ -77,13 +74,6 @@ Panel.prototype.addKnob = function( name, value, min, max, callback, options = {
     let knobMarker = document.createElement( 'div' );
     knobMarker.className = "knobmarker";
     innerKnobCircle.appendChild( knobMarker );
-
-    if( value.constructor == Number )
-    {
-        value = LX.clamp( value, min, max );
-        value = options.precision ? LX.round( value, options.precision ) : value;
-    }
-
     innerKnobCircle.value = innerKnobCircle.iValue = value;
 
     let mustSnap = false;
@@ -202,7 +192,8 @@ Panel.prototype.addKnob = function( name, value, min, max, callback, options = {
     element.appendChild( container );
 
     // Remove branch padding and margins
-    if( !widget.name ) {
+    if( !widget.name )
+    {
         element.className += " noname";
         container.style.width = "100%";
     }
