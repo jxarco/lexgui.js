@@ -4099,6 +4099,7 @@ th .lexcheckbox, td .lexcheckbox {
 
 td {
     align-content: center;
+    justify-items: center;
     border-top: 2px solid;
     border-color: light-dark(#dbd8d8c0, #5c5b5b7a);
 }
