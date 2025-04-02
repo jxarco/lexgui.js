@@ -224,13 +224,7 @@ const sidebar = left.addSidebar( m => {
     // footer: customFooter,
     onHeaderPressed: (e) => { console.log( "onHeaderPressed" ) }, 
     onFooterPressed: (e, element) => {
-        if( element.ddm )
-        {
-            element.ddm.destroy();
-            return;
-        }
-
-        const ddm = new LX.DropdownMenu( element, [
+        new LX.DropdownMenu( element, [
             "My Account",
             null,
             { name: "Profile", short: "P", icon: "user" },

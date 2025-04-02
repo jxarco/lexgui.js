@@ -3,6 +3,7 @@
 ## dev
 
 Added `contrast` theme for supported Widgets.
+Fixed issue on open/destroy dropdown.
 
 ## 0.5.0 (master)
 

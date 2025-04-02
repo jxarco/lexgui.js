@@ -1465,11 +1465,19 @@ LX.addSignal = addSignal;
 
 class DropdownMenu {
 
+    static currentMenu = false;
+
     constructor( trigger, items, options = {} ) {
 
         console.assert( trigger, "DropdownMenu needs a DOM element as trigger!" );
-        this._trigger = trigger;
 
+        if( DropdownMenu.currentMenu )
+        {
+            DropdownMenu.currentMenu.destroy();
+            return;
+        }
+
+        this._trigger = trigger;
         trigger.ddm = this;
 
         this._items = items;
@@ -1488,6 +1496,7 @@ class DropdownMenu {
 
         this._create( this._items );
 
+        DropdownMenu.currentMenu = this;
 
         doAsync( () => {
             this._adjustPosition();
@@ -1513,6 +1522,8 @@ class DropdownMenu {
         document.body.removeEventListener( "click", this._onClick );
 
         LX.root.querySelectorAll( ".lexdropdownmenu" ).forEach( m => { m.remove(); } );
+
+        DropdownMenu.currentMenu = null;
     }
 
     _create( items, parentDom ) {
