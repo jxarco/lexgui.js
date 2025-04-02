@@ -2554,6 +2554,10 @@ input[type=number] {
     padding-left: 8px;
 }
 
+.lextree .lextreetools input:hover {
+    background: none;
+}
+
 .lextree .lextreetools.notitle {
     padding-top: 14px;
     border-top-left-radius: 8px;
@@ -2613,6 +2617,15 @@ input[type=number] {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+.lextree .lextreeitem input {
+    padding: 0;
+    border: none;
+}
+
+.lextree .lextreeitem input:hover {
+    background: none;
 }
 
 .lextree .lextreeitem div {
