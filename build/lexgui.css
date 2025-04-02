@@ -1840,9 +1840,16 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexcheckboxcont {
-    display: inline-flex;
-    gap: 8px;
+    display: flex;
+    gap: 0.4rem;
     margin: 0 auto;
+}
+
+.lexcheckboxcont span {
+    width: 95%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .lexcheckboxsubmenu {
@@ -1987,13 +1994,17 @@ dialog .lexselect .lexselectoptions {
 
 .lextogglecont {
     font-weight: bold;
-    display: inline-flex;
-    gap: 8px;
+    display: flex;
+    gap: 0.4rem;
     margin: 0 auto;
 }
 
 .lextogglecont .toggletext {
     font-weight: bold;
+    width: 95%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .lextogglesubmenu {

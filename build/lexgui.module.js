@@ -6788,6 +6788,7 @@ class Checkbox extends Widget {
 
         var container = document.createElement( "div" );
         container.className = "lexcheckboxcont";
+        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
 
         let checkbox = document.createElement( "input" );
         checkbox.type = "checkbox";
@@ -6862,6 +6863,7 @@ class Toggle extends Widget {
 
         var container = document.createElement('div');
         container.className = "lextogglecont";
+        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
 
         let toggle = document.createElement('input');
         toggle.type = "checkbox";
