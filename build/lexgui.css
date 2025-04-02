@@ -366,7 +366,7 @@ svg, svg path {
     display: block;
 }
 
-svg path {
+a svg, svg path {
     pointer-events: none;
 }
 
@@ -4048,6 +4048,10 @@ th {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+th a {
+    pointer-events: none;
 }
 
 th a, td a {
