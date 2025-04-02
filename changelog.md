@@ -2,8 +2,9 @@
 
 ## dev
 
-Added `contrast` theme for supported Widgets.
+Fixed Area tabs drag&drop when `fit` mode.
 Fixed issue on open/destroy dropdown.
+Added `contrast` theme for supported Widgets.
 
 ## 0.5.0 (master)
 

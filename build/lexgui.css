@@ -3650,7 +3650,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    transition: 0.2s;
     line-height: 16px;
 }
 
@@ -3658,6 +3657,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     position: absolute;
     background: light-dark(var(--global-selected-light), var(--global-selected));
     z-index: 0;
+    transition: linear transform 0.15s;
 }
 
 .lexareatabs.row {

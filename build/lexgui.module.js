@@ -2701,38 +2701,56 @@ class Tabs {
             e.preventDefault(); // Prevent default action (open as link for some elements)
 
             const tabId = e.dataTransfer.getData( "source" );
-            const el = document.getElementById( tabId );
-            if( !el ) return;
+            const tabDom = document.getElementById( tabId );
+            if( !tabDom ) return;
 
+            const sourceContainer = tabDom.parentElement;
             const target = e.target;
             const rect = target.getBoundingClientRect();
 
             if( e.offsetX < ( rect.width * 0.5 ) )
             {
-                this.insertBefore( el, target );
+                this.insertBefore( tabDom, target );
             }
             else if( target.nextElementSibling )
             {
-                this.insertBefore( el, target.nextElementSibling );
+                this.insertBefore( tabDom, target.nextElementSibling );
             }
             else
             {
-                this.appendChild( el );
+                this.appendChild( tabDom );
             }
+
+            {
+                // Update childIndex for fit mode tabs in source container
+                sourceContainer.childNodes.forEach( (c, idx) => c.childIndex = ( idx - 1 ) );
+
+                // If needed, set last tab of source container active
+                const sourceAsFit = (/true/).test( e.dataTransfer.getData( "fit" ) );
+                if( sourceContainer.childElementCount == ( sourceAsFit ? 2 : 1 ) )
+                {
+                    sourceContainer.lastChild.click(); // single tab or thumb first (fit mode)
+                }
+                else
+                {
+                    const sourceSelected = sourceContainer.querySelector( ".selected" );
+                    ( sourceSelected ?? sourceContainer.childNodes[ sourceAsFit ? 1 : 0 ] ).click();
+                }
+            }
+
+            // Update childIndex for fit mode tabs in target container
+            this.childNodes.forEach( (c, idx) => c.childIndex = ( idx - 1 ) );
 
             const content = document.getElementById( tabId + "_content" );
             that.area.attach( content );
             this.classList.remove("dockingtab");
 
-            // Change tabs instance
-            LX.emit( "@on_tab_docked" );
-            el.instance = that;
-
-            // Show on drop
-            el.click();
+            // Change tabs instance and select on drop
+            tabDom.instance = that;
+            tabDom.click();
 
             // Store info
-            that.tabs[ el.dataset["name"] ] = content;
+            that.tabs[ tabDom.dataset["name"] ] = content;
         });
 
         area.root.classList.add( "lexareatabscontainer" );
@@ -2778,7 +2796,7 @@ class Tabs {
 
             if( folding == "up" )
             {
-                area.root.insertChildAtIndex(area.sections[1].root, 0);
+                area.root.insertChildAtIndex( area.sections[ 1 ].root, 0 );
             }
 
             // Listen resize event on parent area
@@ -2845,17 +2863,12 @@ class Tabs {
             this.selected = name;
         }
 
-        LX.addSignal( "@on_tab_docked", tabEl, function() {
-            if( this.parentElement.childNodes.length == 1 )
-            {
-                this.parentElement.childNodes[ 0 ].click(); // single tab!!
-            }
-        } );
-
         tabEl.addEventListener("click", e => {
 
             e.preventDefault();
             e.stopPropagation();
+
+            const scope = tabEl.instance;
 
             if( !tabEl.fixed )
             {
@@ -2867,15 +2880,15 @@ class Tabs {
                 tabEl.parentElement.querySelectorAll( 'span' ).forEach( s => s.classList.remove( 'selected' ));
                 tabEl.classList.toggle('selected', ( this.folding && tabEl.selected ));
                 // Manage visibility
-                tabEl.instance.area.root.querySelectorAll( '.lextabcontent' ).forEach( c => c.style.display = 'none' );
+                scope.area.root.querySelectorAll( '.lextabcontent' ).forEach( c => c.style.display = 'none' );
                 contentEl.style.display = contentEl.originalDisplay;
-                tabEl.instance.selected = tabEl.dataset.name;
+                scope.selected = tabEl.dataset.name;
             }
 
-            if( this.folding )
+            if( scope.folding )
             {
-                this.folded = tabEl.selected;
-                this.area.root.classList.toggle( 'folded', !this.folded );
+                scope.folded = tabEl.selected;
+                scope.area.root.classList.toggle( 'folded', !scope.folded );
             }
 
             if( options.onSelect )
@@ -2883,12 +2896,12 @@ class Tabs {
                 options.onSelect(e, tabEl.dataset.name);
             }
 
-            if( this.thumb )
+            if( scope.thumb )
             {
-                this.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
-                this.thumb.style.width = ( tabEl.offsetWidth - 5 ) + "px";
-                this.thumb.style.height = ( tabEl.offsetHeight - 6 ) + "px";
-                this.thumb.item = tabEl;
+                scope.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
+                scope.thumb.style.width = ( tabEl.offsetWidth - 5 ) + "px";
+                scope.thumb.style.height = ( tabEl.offsetHeight - 6 ) + "px";
+                scope.thumb.item = tabEl;
             }
         });
 
@@ -2912,12 +2925,14 @@ class Tabs {
         });
 
         tabEl.setAttribute( 'draggable', true );
-        tabEl.addEventListener( 'dragstart', function( e ) {
-            if( this.parentElement.childNodes.length == 1 ){
+        tabEl.addEventListener( 'dragstart', e => {
+            const sourceAsFit = !!this.thumb;
+            if( tabEl.parentElement.childNodes.length == ( sourceAsFit ? 2 : 1 ) ){
                 e.preventDefault();
                 return;
             }
             e.dataTransfer.setData( 'source', e.target.id );
+            e.dataTransfer.setData( 'fit', sourceAsFit );
         });
 
         // Attach content
@@ -9818,7 +9833,7 @@ class Branch {
         var branchContent = document.createElement( 'div' );
         branchContent.id = name.replace( /\s/g, '' );
         branchContent.className = "lexbranchcontent";
-        root.appendChild(branchContent);
+        root.appendChild( branchContent );
         this.content = branchContent;
 
         this._addBranchSeparator();
