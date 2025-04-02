@@ -8335,18 +8335,25 @@ class Table extends Widget {
 
         data.head = data.head ?? [];
         data.body = data.body ?? [];
-        data.orderMap = { };
+        data.colVisibilityMap = { };
         data.checkMap = { };
 
-        function compareFn( idx, order, a, b) {
+        const compareFn = ( idx, order, a, b) => {
             if (a[idx] < b[idx]) return -order;
             else if (a[idx] > b[idx]) return order;
             return 0;
         }
 
+        const sortFn = ( idx, sign ) => {
+            data.body = data.body.sort( compareFn.bind( this, idx, sign ) );
+            this.refreshTable();
+        }
+
         this.refreshTable = () => {
 
             table.innerHTML = "";
+
+            let rowOffsetCount = 0;
 
             // Head
             {
@@ -8361,6 +8368,7 @@ class Table extends Widget {
                     const th = document.createElement( 'th' );
                     th.style.width = "0px";
                     hrow.appendChild( th );
+                    rowOffsetCount++;
                 }
 
                 if( options.selectable )
@@ -8385,27 +8393,29 @@ class Table extends Widget {
                         }
                     });
 
+                    rowOffsetCount++;
                     hrow.appendChild( th );
                 }
 
                 for( const headData of data.head )
                 {
+                    const idx = data.head.indexOf( headData );
                     const th = document.createElement( 'th' );
                     th.innerHTML = `${ headData } <a class="fa-solid fa-sort"></a>`;
 
-                    th.querySelector( 'a' ).addEventListener( 'click', () => {
-
-                        if( !data.orderMap[ headData ] )
-                        {
-                            data.orderMap[ headData ] = 1;
-                        }
-
-                        const idx = data.head.indexOf(headData);
-                        data.body = data.body.sort( compareFn.bind( this, idx,data.orderMap[ headData ] ) );
-                        data.orderMap[ headData ] = -data.orderMap[ headData ];
-
-                        this.refreshTable();
-
+                    th.addEventListener( 'click', event => {
+                        new LX.DropdownMenu( event.target, [
+                            { name: "Asc", icon: "up", callback: sortFn.bind( this, idx, 1 ) },
+                            { name: "Desc", icon: "down", callback: sortFn.bind( this, idx, -1 ) },
+                            null,
+                            { name: "Hide", icon: "eye-slash", callback: () => {
+                                data.colVisibilityMap[ idx ] = 0;
+                                const cells = table.querySelectorAll(`tr > *:nth-child(${idx + rowOffsetCount + 1})`);
+                                cells.forEach(cell => {
+                                    cell.style.display = (cell.style.display === "none") ? "" : "none";
+                                });
+                            } }
+                        ], { side: "bottom", align: "start" });
                     });
 
                     hrow.appendChild( th );
@@ -8609,6 +8619,18 @@ class Table extends Widget {
                     }
 
                     body.appendChild( row );
+                }
+            }
+
+            for( const v in data.colVisibilityMap )
+            {
+                const idx = parseInt( v );
+                if( !data.colVisibilityMap[ idx ] )
+                {
+                    const cells = table.querySelectorAll(`tr > *:nth-child(${idx + rowOffsetCount + 1})`);
+                    cells.forEach(cell => {
+                        cell.style.display = (cell.style.display === "none") ? "" : "none";
+                    });
                 }
             }
         }
