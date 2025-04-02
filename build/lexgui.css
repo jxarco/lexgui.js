@@ -1263,7 +1263,7 @@ a svg, svg path {
 .lexinlinewidgets {
     display: flex;
     gap: 0.1rem;
-    justify-content: space-around;
+    /* justify-content: space-around; */
 }
 
 .lexwidgetseparator div {
@@ -4394,14 +4394,10 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
 
 .lextimeline .lexwidget:has(.lexbutton:not(.array)) {
     padding: 1px;
-    /* padding-left: 10px;
-  padding-right: 10px; */
 }
 
 .lextimeline .lexinlinewidgets {
     padding-right: 10px;
-    /* background-color: var(--global-color-secondary); */
-    /* height: 100%; */
 }
 
 .lextimeline .lexbutton:hover {

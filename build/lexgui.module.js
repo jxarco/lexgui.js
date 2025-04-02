@@ -12193,7 +12193,7 @@ class AssetView {
             const hasImage = ['png', 'jpg'].indexOf( getExtension( file.src ) ) > -1 || is_base_64;
             if( hasImage )
             {
-                this.previewPanel.addImage( file.src, { style: { width: "100%" } } );
+                this.previewPanel.addImage( null, file.src, { style: { width: "100%" } } );
             }
         }
 
