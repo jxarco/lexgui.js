@@ -30,8 +30,7 @@ class TimeBar {
         area.attach( this.canvas );
 
         this.ctx = this.canvas.getContext("2d");
-
-        
+  
         this.markerWidth = options.markerWidth ?? 8;
         this.markerHeight = options.markerHeight ?? (this.canvas.height * 0.5);
         this.offset = options.offset || (this.markerWidth*0.5 + 8);
@@ -44,13 +43,6 @@ class TimeBar {
         this.startX = this.position.x;
         this.endX = this.position.x + this.lineWidth;
         this.currentX = this.startX;
-
-        const y = this.offset * 2;
-        const w = this.markerWidth;
-        const h = this.canvas.height *0.5;
-        this.trimRec = [this.startX, y, w, h];
-
-        this.lastPosition = new LX.vec2( 0, 0 );
 
         this._draw();
 
