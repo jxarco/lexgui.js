@@ -1,15 +1,30 @@
 # lexgui.js changelog
 
-## dev
+## 0.5.0 (master)
 
+Widgets:
+- Created classes for each widget to create them at any place.
+- `Panel.addTabs`: Renamed to `addTabSections`. Added name parameter (1st). Returns `TabSections` widget instance.
+- `Panel.addDropdown`: Renamed to `addSelect`. Returns `Select` widget instance.
+- Added support for labels in Select Widget.
+- `Panel.addContent` and `Panel.addImage` now accepts name as first parameter.
+- Title: `Panel.addTitle` now returns `Title` widget instance, not its inner title HTMLElement.
+- Tree: `Panel.addTree` now returns `Tree` widget instance, not its inner `NodeTree`.
+- Table: Added support for `options.sortable` rows and `title` for row action icons.
+
+Fixed Select Widget overflow inside dialog.
+New `DropdownMenu` class.
 Added `displaySelected` option to Sidebar to display selected entry.
 Started Notifications docs.
+Added Icons/ page in docs.
+Fixed Menubar entries auto-open when menubar is focused.
+Minor CSS tweaks.
 
-## 0.4.2 (master)
+## 0.4.2
 
 Widgets:
 - RadioGroup: Add name parameter (1st).
-- Add `options.hideName` for supported widgets: Don't use label but add `name` to allow registering.
+- Added `options.hideName` for supported widgets: Don't use label but add `name` to allow registering.
 
 Sidebar subentries are now collapsable (`true` by default).
 Support `options.header` and `options.footer` for custom sidebar elements.

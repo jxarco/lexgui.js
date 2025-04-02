@@ -1,0 +1,42 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // Text
+    MAKE_HEADER("Text", "h1", "text");
+    MAKE_PARAGRAPH(`Represents a text input.`);
+
+    {
+        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        panel.addText("Text Name", "Text value", (value, event) => {
+            console.log(value);
+        }, { placeholder: "Something" });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addText(name, value, callback, options)")} to add a Text Widget to your panel:`);
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Widget name"],
+        ["value", "String", "Text string by default"],
+        ["callback", "Function", "Function called when the input changes"],
+        ["options", "Object", "Basic options for a Widget"],
+        [
+            ["disabled", "Boolean", "Make the widget disabled"],
+            ["required", "Boolean", "Make the input required"],
+            ["placeholder", "String", "Text string as input placeholder"],
+            ["pattern", "String", "Regular expression that value must match"],
+            ["icon", "String", "Icon to be added before the input"],
+            ["trigger", "String", "Choose onchange trigger (default, input)"],
+            ["inputWidth", "String/Number", "Width of the text input"],
+            ["float", "String", "Justify input text content"],
+            ["justifyName", "String", "Justify name content"],
+        ]
+    ]);
+    MAKE_CODE(`panel.@[mtd]addText@(@"Text Name"@, @"Text value"@, (value, event) =&gt; {
+    console.@[mtd]log@(value);
+}, { placeholder: @"Something"@ });` );
+
+</script>

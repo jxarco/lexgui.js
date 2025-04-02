@@ -223,7 +223,33 @@ const sidebar = left.addSidebar( m => {
     footerImage: "https://avatars.githubusercontent.com/u/25059187?s=400&u=ad8907b748c13e4e1a7cdd3882826acb6a2928b5&v=4",
     // footer: customFooter,
     onHeaderPressed: (e) => { console.log( "onHeaderPressed" ) }, 
-    onFooterPressed: (e) => { console.log( "onFooterPressed" ) }
+    onFooterPressed: (e, element) => {
+        if( element.ddm )
+        {
+            element.ddm.destroy();
+            return;
+        }
+
+        const ddm = new LX.DropdownMenu( element, [
+            "My Account",
+            null,
+            { name: "Profile", short: "P", icon: "user" },
+            { name: "Billing", disabled: true, icon: "credit-card" },
+            { name: "Settings", short: "S" },
+            null,
+            { name: "Team" },
+            { name: "Invite users", icon: "search" },
+            null,
+            { name: "Github", icon: "github" },
+            { name: "Support", submenu: [
+                { name: "Email", icon: "envelope" },
+                { name: "Message", submenu: [
+                    { name: "Whatsapp" },
+                    { name: "iMessage" },
+                ]},
+            ]  }
+        ], { side: "right", align: "end" });
+    }
 });
 
 // split left area
@@ -603,7 +629,6 @@ function fillPanel( panel ) {
         p.addText(null, "Suboption 1");
         p.addNumber("Suboption 2", 12);
     } });
-    panel.addFile("Image", data => { console.log(data) }, {} );
     panel.merge();
 
     panel.branch("Preferences", {icon: "fa-solid fa-gear"});
@@ -622,14 +647,15 @@ function fillPanel( panel ) {
     panel.addToggle("Outlined Checkbox ", false, (value, event) => {
         console.log(value);
     }, { className: "secondary outline", nameWidth: "50%" });
-    panel.addFile("I'm a File Input", data => { console.log(data) }, { disabled: true } );
-    panel.addDropdown("Best Engine", ["Godot", "Unity", "Unreal Engine", "A very super super super large engine name"], "Unity", (value, event) => {
+    panel.addFile("I'm a File Input", data => { console.log(data) }, {  } );
+    panel.addFile("A Disabled File Input", data => { console.log(data) }, { disabled: true } );
+    panel.addSelect("Best Tool", ["@Engines", "Godot", "Unity", "Unreal Engine", "@Apps", "Visual Studio", "Visual Studio Code"], "Unity", (value, event) => {
         console.log(value);
     }, {filter: true, emptyMsg: "No engines found.", placeholder: "Search engines..."});
-    panel.addDropdown("Best Logo", [{value:"Godot", src: "https://godotengine.org/assets/press/logo_vertical_color_light.png"}, {value: "Unity", src: "https://logos-world.net/wp-content/uploads/2023/01/Unity-Logo.png"}, {value:"Unreal Engine", src: "https://cdn2.unrealengine.com/ue-logo-stacked-unreal-engine-w-677x545-fac11de0943f.png"}], "Godot", (value, event) => {
+    panel.addSelect("Best Logo", [{value:"Godot", src: "https://godotengine.org/assets/press/logo_vertical_color_light.png"}, {value: "Unity", src: "https://logos-world.net/wp-content/uploads/2023/01/Unity-Logo.png"}, {value:"Unreal Engine", src: "https://cdn2.unrealengine.com/ue-logo-stacked-unreal-engine-w-677x545-fac11de0943f.png"}], "Godot", (value, event) => {
         console.log(value);
     });
-    panel.addDropdown("Best Gif", [{value:"Godot", src: "https://i.redd.it/4vepr95bye861.gif"}, {value: "Unity", src: "https://i.gifer.com/origin/db/db3cb258e9bbb78c5851a000742e5468_w200.gif"}, {value:"Unreal Engine", src: "https://d3kjluh73b9h9o.cloudfront.net/original/4X/e/0/d/e0deb23c10cc7852c6ab91c28083e27f9c8228f8.gif"}], "Godot", (value, event) => {
+    panel.addSelect("Best Gif", [{value:"Godot", src: "https://i.redd.it/4vepr95bye861.gif"}, {value: "Unity", src: "https://i.gifer.com/origin/db/db3cb258e9bbb78c5851a000742e5468_w200.gif"}, {value:"Unreal Engine", src: "https://d3kjluh73b9h9o.cloudfront.net/original/4X/e/0/d/e0deb23c10cc7852c6ab91c28083e27f9c8228f8.gif"}], "Godot", (value, event) => {
         console.log(value);
     });
 
@@ -639,13 +665,13 @@ function fillPanel( panel ) {
     panel.addLayers("Layers", 10, (value, event) => {
         console.log(value);
     });
-    panel.addArray("Array", ['GPTeam', 'Blat Panthers', 'Blat Bunny'], (value, event) => {
+    panel.addArray("An Item Array", ['GPTeam', 'Blat Panthers', 'Blat Bunny'], (value, event) => {
         console.log(value);
     });
     panel.addTags("Game Tags", "2d, karate, ai, engine, ps5, console", (value, event) => {
         console.log(value);
     });
-    panel.addComboButtons("Alignment", [
+    window.l = panel.addComboButtons("Alignment", [
         {
             value: 'left',
             selected: true,
@@ -714,7 +740,7 @@ function fillRightBottomPanel( panel, tab ) {
 
     if(tab == 'Horizontal')
     {
-        panel.addTabs([
+        panel.addTabSections( "H_tabs", [
             { 
                 name: "First tab",
                 icon: "fa-brands fa-discord",
@@ -756,7 +782,7 @@ function fillRightBottomPanel( panel, tab ) {
     }
     else if(tab == 'Vertical')
     {
-        panel.addTabs([
+        panel.addTabSections( "V_tabs", [
             { 
                 name: "First tab",
                 icon: "fa-brands fa-discord",
@@ -828,8 +854,9 @@ function fillBottomPanel( panel ) {
         ]
     }, {
         selectable: true,
+        sortable: true,
         rowActions: [
-            { icon: "fa-solid fa-pen-to-square", callback: ( tableData ) => {} }, // custom: you can change the data and refresh will be called later!
+            { icon: "edit", title: "Edit Row", callback: ( tableData ) => {} }, // custom: you can change the data and refresh will be called later!
             "delete",
             "menu"
         ],

@@ -302,8 +302,10 @@ class CodeEditor {
 
             this.addExplorerItem = function( item )
             {
-                if( !this.explorer.data.children.find( (value, index) => value.id === item.id ) )
-                    this.explorer.data.children.push( item );
+                if( !this.explorer.innerTree.data.children.find( ( value, index ) => value.id === item.id ) )
+                {
+                    this.explorer.innerTree.data.children.push( item );
+                }
             };
 
             explorerArea.attach( panel );
@@ -1240,7 +1242,7 @@ class CodeEditor {
 
                 const ext = this.languages[ options.language ] ?. ext;
                 this.addExplorerItem( { 'id': name, 'skipVisibility': true, 'icon': this._getFileIcon( name, ext ) } );
-                this.explorer.frefresh( name );
+                this.explorer.innerTree.frefresh( name );
             }
             else
             {
@@ -1488,10 +1490,10 @@ class CodeEditor {
         // Update explorer icon
         if( this.explorer )
         {
-            const item = this.explorer.data.children.filter( (v) => v.id === this.code.tabName )[ 0 ];
+            const item = this.explorer.innerTree.data.children.filter( (v) => v.id === this.code.tabName )[ 0 ];
             console.assert( item != undefined );
             item.icon = icon;
-            this.explorer.frefresh( this.code.tabName );
+            this.explorer.innerTree.frefresh( this.code.tabName );
         }
     }
 
@@ -1720,7 +1722,7 @@ class CodeEditor {
         if( this.explorer && !isNewTabButton )
         {
             this.addExplorerItem( { 'id': name, 'skipVisibility': true, 'icon': tabIcon } );
-            this.explorer.frefresh( name );
+            this.explorer.innerTree.frefresh( name );
         }
 
         this.tabs.add( name, code, {

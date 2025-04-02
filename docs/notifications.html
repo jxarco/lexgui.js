@@ -1,28 +1,6 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-    <title>LexGUI Docs</title>
-    <link rel="stylesheet" href="../build/lexgui.css">
-    <link rel="stylesheet" href="style.css">
-    <script type="text/javascript" src="docmaker.js"></script>
-    <script type="importmap">
-        {
-          "imports": {
-            "lexgui": "../build/lexgui.module.js",
-            "lexgui/components/": "../build/components/"
-          }
-        }
-    </script>
-</head>
-
-<body>
-
 <script type="module">
 
     import { LX } from 'lexgui';
-
-    LX.init( { skipRoot: true } );
 
     MAKE_HEADER( "Notifications", "h1", "notifications" );
 
@@ -47,12 +25,13 @@
             } },  timeout: -1 } );
         }
 
+        const content = document.getElementById('content');
         const area = new LX.Area( { skipAppend: true, height: "auto" } );
         const panel = area.addPanel();
         panel.addButton("This button generated a random toast", "Create toast", (value, event) => {
             createToast();
-        });
-        document.body.appendChild( area.root );
+        }, { nameWidth: "75%" });
+        content.appendChild( area.root );
     }
 
     MAKE_PARAGRAPH( `LexGUI allows creating <strong>toast</strong> notifications, which appear at the bottom right of the screen with a timer of 3s by default.
@@ -74,4 +53,3 @@
     </script>
 
 </body>
-</html>

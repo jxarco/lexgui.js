@@ -1,0 +1,34 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // Item Array
+    MAKE_HEADER("Item Array", "h1", "array");
+    MAKE_PARAGRAPH(`Represents a array of any basic type of elements which can be modified or deleted and new ones can be added.`);
+
+    {
+        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        panel.addArray("Array", ['GPTeam', 'Blat Panthers', 'Blat Bunny'], (value, event) => {
+            console.log(value);
+        });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addArray(name, value, values, callback, options)")} to add an Array Widget to your panel:`);
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Widget name"],
+        ["values", "Array", "Array values"],
+        ["callback", "Function", "Function called when the array is modified"],
+        ["options", "Object", "Basic options for a Widget"],
+        [
+            ["innerValues", "Array", "Use dropdown mode and use values as options"],
+        ]
+    ]);
+    MAKE_CODE(`panel.@[mtd]addArray@(@"Array name"@, [@"GPTeam"@, @"Blat Panthers"@], (value, event) => {
+    console.@[mtd]log@(value);
+});` );
+
+</script>

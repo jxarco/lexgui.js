@@ -1,0 +1,36 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById( 'content' );
+
+    // Button
+    MAKE_HEADER( "Button", "h1", "button" );
+    MAKE_PARAGRAPH( `Represents a clickable element typically used to trigger an action.` );
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto" } );
+        const panel = area.addPanel();
+        panel.addButton("A Button Name", "Print event", (value, event) => {
+            console.log(event);
+        });
+        content.appendChild( area.root );
+    }
+
+    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addButton(name, value, callback, options)")} to add a Button Widget to your panel:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["name", "String", "Widget name"],
+        ["value", "String", "Text string by default"],
+        ["callback", "Function", "Function called when the input changes"],
+        ["options", "Object", "Basic options for a Widget"],
+        [
+            ["disabled", "Boolean", "Make the widget disabled"],
+            ["icon", "String", "Icon to be added before the input"],
+            ["img", "String", "Path to image to show as button value"],
+        ]
+    ] );
+    MAKE_CODE( `panel.@[mtd]addButton@(@"A Button Name"@, @"Print event"@, (value, event) =&gt; {
+    console.@[mtd]log@(event);
+});` );
+
+</script>

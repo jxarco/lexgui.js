@@ -1,0 +1,42 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // Range
+    MAKE_HEADER("Range", "h1", "range");
+    MAKE_PARAGRAPH(`Represents a decimal input handled by a slider.`);
+
+    {
+        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        panel.addRange("Intensity Value", 25, (value, event) => {
+            console.log(value);
+        }, { min: 1, max: 100 });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addRange(name, value, callback, options)")} to add a Range Widget to your panel:`);
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Widget name"],
+        ["value", "Number", "Range value"],
+        ["callback", "Function", "Function called when the input changes"],
+        ["options", "Object", "Basic options for a Widget"],
+        [
+            ["className", "String", "Extra classes to customize style"],
+            ["disabled", "Boolean", "Make the widget disabled [false]"],
+            ["left", "Boolean", "The slider goes to the left instead of the right [false]"],
+            ["fill", "Boolean", "Fill slider progress [true]"],
+            ["step", "Number", "Change Step value"],
+            ["min", "Number", "Min input value"],
+            ["max", "Number", "Max input value"]
+        ]
+    ]);
+    MAKE_CODE(`panel.@[mtd]addRange@(@"Intensity Value"@, @25@, (value, event) =&gt; {
+    console.@[mtd]log@(value);
+}, { min: @1@, max: @100@ });` );
+    MAKE_PARAGRAPH(`In case you are using limits, store the widget and call <code class='inline'>rangeWidget.setLimits( min, max, step )</code> to change its 
+        parameters once the widget has been created.` );
+
+</script>

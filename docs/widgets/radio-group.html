@@ -1,0 +1,37 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // Radio Group
+    MAKE_HEADER("Radio Group", "h1", "radiogroup");
+    MAKE_PARAGRAPH(`Represents a set of checkable buttons where no more than one of the buttons can be checked at a time.`);
+
+    {
+        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        panel.addRadioGroup("View", ["Default", "Comfortable", "Compact"], (value, event) => {
+            console.log(value);
+        }, { selected: 1 });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addRadioGroup(label, values, callback, options)")} to add a Radio Group Widget to your panel:`);
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Widget name"],
+        ["label", "String", "Radio label"],
+        ["values", "Array", "Radio options"],
+        ["callback", "Function", "Function called checks changes"],
+        ["options", "Object", "Basic options for a Widget"],
+        [
+            ["className", "String", "Extra classes to customize style"],
+            ["disabled", "Boolean", "Make the widget disabled [false]"],
+            ["selected", "Number", "Index of the default selected option"]
+        ]
+    ]);
+    MAKE_CODE(`panel.@[mtd]addRadioGroup@(@"View"@, [ @"Default"@, @"Comfortable"@, @"Compact"@ ], (value, event) => {
+    console.log(value);
+}, {} );` );
+
+</script>

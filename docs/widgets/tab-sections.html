@@ -1,0 +1,68 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // Tabs
+    MAKE_HEADER("TabSections", "h1", "tabs");
+    MAKE_PARAGRAPH(`Represents panel sections as tabs, either in horizontal or vertical mode. Quickly switch between the different sets of information.`);
+
+    {
+        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        panel.addTabSections("tabsName", [
+            {
+                name: "First tab",
+                icon: "fa-brands fa-discord",
+                onCreate: p => {
+                    p.addTitle("Discord tab");
+                    p.addButton(null, "Connect");
+                },
+                onSelect: p => {
+                    console.log(p);
+                }
+            },
+            {
+                name: "Second tab",
+                icon: "fa-brands fa-github",
+                onCreate: p => {
+                    p.addTitle("Github tab");
+                    p.addButton(null, "Go", () => { window.open("https://github.com/jxarco/lexgui.js/") });
+                }
+            }
+        ], { vertical: false });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addTabSections(tabs, options)")} to add a Tabs Widget to your panel, where 
+    <code class='inline'>tabs</code> is an <code class="inline">Array</code> of objects which have:` );
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Name of the tab (if icon, use as title)"],
+        ["icon", "String", "Icon path to be used as the tab icon (optional)"],
+        ["onCreate", "Function", "Func to be called at tab creation"],
+        ["onSelect", "Function", "Func to be called on select tab (optional)"]
+    ]);
+    MAKE_CODE(`panel.@[mtd]addTabSections@( "tabsName", [
+    { 
+        name: @"First tab"@,
+        icon: @"fa-brands fa-discord"@,
+        onCreate: p => {
+            p.@[mtd]addTitle@(@"Discord tab"@);
+            p.@[mtd]addButton@(@null@, @"Connect"@);
+        },
+        onSelect: p => {
+            console.@[mtd]log@( p );
+        }
+    },
+    { 
+        name: @"Second tab"@,
+        icon: @"fa-brands fa-github"@,
+        onCreate: p => {
+            p.@[mtd]addTitle@(@"Github tab"@);
+            p.@[mtd]addButton@(@null@, @"Go"@, () => { window.@[mtd]open@(@"https://github.com/jxarco/lexgui.js/"@) });
+        }
+    }
+], { vertical: @false@ });` );
+
+</script>

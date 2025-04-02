@@ -1,0 +1,52 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // Select
+    MAKE_HEADER("Select", "h1", "select");
+    MAKE_PARAGRAPH(`Represents a list of options for the user to pick from, triggered by a button.`);
+
+    {
+        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        panel.addSelect("String Select", ["Option 1", "Option 2", "Option 3"], "Option 1", (value, event) => {
+            console.log(value);
+        });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addSelect(name, values, value, callback, options)")} to add a Select Widget to your panel:`);
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Widget name"],
+        ["values", "Array", "Array of the values of the list. The values can be strings or media (images or GIFs). For the media, the entries of the array must be an object containing a <code class='inline'>value</code> and <code class='inline'>src</code> fields"],
+        ["value", "String", "Current selected value from the select list"],
+        ["callback", "Function", "Function called when an list value is selected"],
+        ["options", "Object", "Basic options for a Widget"],
+        [
+            ["filter", "Boolean", "Specify if search bar is needed"],
+            ["disabled", "Boolean", "Make the widget disabled"],
+            ["skipReset", "Boolean", "Don't add the reset value button when value changes"],
+            ["placeholder", "String", "Placeholder for the filter input"],
+            ["emptyMsg", "String", "Custom message to show when no filtered results"]
+        ]
+    ]);
+    MAKE_CODE(`@[com]// String values@
+
+panel.@[mtd]addSelect@(@"String Select"@, [@"Option 1"@, @"Option 2"@], @"Option 1"@, (value, event) =&gt; {
+      console.@[mtd]log@(value);
+});
+
+@[com]// Media values@
+
+@const@ options = [
+  { value: @"Option 1"@, src: @"/option1.png"@ }, 
+  { value: @"Option 2"@, src: @"/option2.gif"@ },
+  { value: @"Option 3"@, src: @"/option3.jpg"@ }
+];
+panel.@[mtd]addSelect@(@"Media Select"@, options, @"Option 1"@, (value, event) =&gt; {
+      console.@[mtd]log@(value);
+}, options);` );
+
+</script>

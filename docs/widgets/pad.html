@@ -1,0 +1,39 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // Pad
+    MAKE_HEADER("Pad", "h1", "pad");
+    MAKE_PARAGRAPH(`Represents a 2-dimension pad.`);
+
+    {
+        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        panel.addPad("2D Pad", [0.5, 0.5], (value, event) => {
+            console.log(value);
+        }, { padSize: "100px", min: -1, max: 2 });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addPad(name, value, callback, options)")} to add a Pad Widget to your panel:`);
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Widget name"],
+        ["value", "Number", "Pad value"],
+        ["callback", "Function", "Function called when the value changes"],
+        ["options", "Object", "Basic options for a Widget"],
+        [
+            ["disabled", "Boolean", "Make the widget disabled [false]"],
+            ["min", "Number", "Min pad value"],
+            ["max", "Number", "Max pad value"],
+            ["padSize", "String", "Size of the pad (css)"],
+            ["onPress", "Function", "Callback function on mouse down"],
+            ["onRelease", "Function", "Callback function on mouse up"],
+        ]
+    ]);
+    MAKE_CODE(` panel.@[mtd]addPad@(@"2D Pad"@, [@0.5@, @0.5@], (value, event) => {
+    console.@[mtd]log@(value);
+}, { padSize: @"100px"@, min: @-1@, max: @2@ });` );
+
+</script>

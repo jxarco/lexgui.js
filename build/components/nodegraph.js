@@ -96,11 +96,11 @@ class GraphEditor {
 
         }, {
             displaySelected: true,
-            headerIcon: "More",
+            headerIcon: "more",
             headerTitle: "Create",
             headerSubtitle: "Press to rename",
             onHeaderPressed: () => this._showRenameGraphDialog(),
-            footerIcon: "Plus",
+            footerIcon: "plus",
             footerTitle: "Create",
             footerSubtitle: "Graph or Function",
             onFooterPressed: (e) => this._onSidebarCreate( e )
@@ -1205,7 +1205,7 @@ class GraphEditor {
                 panel.addVector4( p.name, p.value, (v) => { p.value = v } );
                 break;
             case 'select':
-                panel.addDropdown( p.name, p.options, p.value, (v) => { p.value = v } );
+                panel.addSelect( p.name, p.options, p.value, (v) => { p.value = v } );
                 break;
             case 'array':
                 panel.addArray( p.name, p.value, (v) => {
