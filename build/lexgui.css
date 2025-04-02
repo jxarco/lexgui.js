@@ -1262,6 +1262,8 @@ a svg, svg path {
 
 .lexinlinewidgets {
     display: flex;
+    gap: 0.1rem;
+    justify-content: space-around;
 }
 
 .lexwidgetseparator div {
@@ -1289,6 +1291,11 @@ a svg, svg path {
     justify-content: space-between;
     font-family: var(--global-font);
     color: var(--global-text-secondary);
+}
+
+.lexinlinewidgets .lexwidgetname {
+    width: fit-content !important;
+    padding-inline: 0.4rem;
 }
 
 .lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider) {
@@ -1561,11 +1568,6 @@ a svg, svg path {
 .lexbutton.selected {
     background: #3c4145;
     color: #DDD;
-}
-
-.lexbutton.noname {
-    margin-left: 0px;
-    margin-top: 0px;
 }
 
 /* Combo Buttons */

@@ -4,6 +4,7 @@
 
 Widgets:
 - Added support for `text centering` all/specific columns in Table Widget.
+- Fixed widget content size when using `options.nameWidth`. First fix for sizes in inline widgets.
 
 Fixed Area tabs drag&drop when `fit` mode.
 Fixed issue on open/destroy dropdown.

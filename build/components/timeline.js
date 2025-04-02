@@ -169,7 +169,6 @@ class Timeline {
         }
 
         let header = this.header;
-        LX.DEFAULT_NAME_WIDTH = "50%";
         header.sameLine();
 
         if( this.name )
@@ -177,32 +176,54 @@ class Timeline {
             header.addTitle(this.name );
         }
 
-        header.addButton('', '<i class="fa-solid fa-'+ (this.playing ? 'pause' : 'play') +'"></i>', (value, event) => {
-           this.changeState();
-        }, { width: "40px", buttonClass: "accept", title: "Play" });
+        const buttonContainer = LX.makeContainer(["auto", "100%"], "", { display: "flex" });
 
-        header.addButton('', '<i class="fa-solid fa-rotate"></i>', ( value, event ) => {
+        header.queue( buttonContainer );
+
+        header.addButton("playBtn", '<i class="fa-solid fa-'+ (this.playing ? 'pause' : 'play') +'"></i>', (value, event) => {
+           this.changeState();
+        }, { buttonClass: "accept", title: "Play", hideName: true });
+
+        header.addButton("toggleLoopBtn", '<i class="fa-solid fa-rotate"></i>', ( value, event ) => {
             this.loop = !this.loop;
             if( this.onChangePlayMode )
             {
                 this.onChangePlayMode( this.loop );
             }
-        }, { width: "40px", selectable: true, selected: this.loop, title: 'Loop' });
+        }, { selectable: true, selected: this.loop, title: 'Loop', hideName: true });
         
         if( this.onBeforeCreateTopBar )
         {
             this.onBeforeCreateTopBar( header );
         }
 
+        header.clearQueue( buttonContainer );
+
+        header.addContent( "header-buttons", buttonContainer );
+
         header.addNumber("Current Time", this.currentTime, (value, event) => {
-            this.setTime(value)}, {signal: "@on_set_time_" + this.name, step: 0.01, min: 0, precision: 3, skipSlider: true});        
+            this.setTime(value)
+        }, {
+            units: "s",
+            signal: "@on_set_time_" + this.name,
+            step: 0.01, min: 0, precision: 3,
+            skipSlider: true
+        });
 
         header.addNumber("Duration", + this.duration.toFixed(3), (value, event) => {
-            this.setDuration(value, false)}, {step: 0.01, min: 0, signal: "@on_set_duration_" + this.name
+            this.setDuration(value, false)
+        }, {
+            units: "s",
+            step: 0.01, min: 0,
+            signal: "@on_set_duration_" + this.name
         });    
 
         header.addNumber("Speed", + this.speed.toFixed(3), (value, event) => {
-            this.setSpeed(value)}, {step: 0.01, signal: "@on_set_speed_" + this.name});    
+            this.setSpeed(value)
+        }, {
+            step: 0.01,
+            signal: "@on_set_speed_" + this.name
+        });
            
         if( this.onAfterCreateTopBar )
         {
@@ -211,12 +232,12 @@ class Timeline {
 
         if( this.onShowOptimizeMenu )
         {
-            header.addButton("", '<i class="fa-solid fa-filter"></i>', (value, event) => {this.onShowOptimizeMenu(event)}, { width: "40px", title: "Optimize" });
+            header.addButton(null, '<i class="fa-solid fa-filter"></i>', (value, event) => {this.onShowOptimizeMenu(event)}, { title: "Optimize" });
         }
 
         if( this.onShowConfiguration )
         {
-            header.addButton("", '<i class="fa-solid fa-gear"></i>', (value, event) => {
+            header.addButton(null, '<i class="fa-solid fa-gear"></i>', (value, event) => {
                 if(this.configurationDialog){
                     this.configurationDialog.close();
                     this.configurationDialog = null;
@@ -231,11 +252,10 @@ class Timeline {
                         root.remove();
                     }
                 })
-            }, { width: "40px" })
+            }, { title: "Settings" })
         }
 
         header.endLine();
-        LX.DEFAULT_NAME_WIDTH = "30%";
     }
 
     /**
@@ -263,9 +283,9 @@ class Timeline {
         
         if( !this.disableNewTracks ) 
         {
-            panel.addButton('', '<i class = "fa-solid fa-plus"></i>', (value, event) => {
+            panel.addButton("addTrackBtn", '<i class = "fa-solid fa-plus"></i>', (value, event) => {
                 this.addNewTrack();
-            }, {width: "40px", height: "40px"});            
+            }, { hideName: true, title: "Add Track" });
         }
 
         panel.endLine();
@@ -2758,9 +2778,9 @@ class ClipsTimeline extends Timeline {
         let title = titleWidget.root;
         if(!this.disableNewTracks) 
         {
-            panel.addButton('', '<i class = "fa-solid fa-plus"></i>', (value, event) => {
+            panel.addButton("addTrackBtn", '<i class = "fa-solid fa-plus"></i>', (value, event) => {
                 this.addNewTrack();
-            }, {width: "40px", height: "40px"});            
+            }, { hideName: true, title: "Add Track" });
         }
         panel.endLine();
         const styles = window.getComputedStyle(title);

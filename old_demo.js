@@ -295,7 +295,13 @@ bottom.addMenubar( m => {
         else {
             kfTimeline = new LX.KeyFramesTimeline("kf-timeline", {
                 onBeforeCreateTopBar: panel => {
-                    panel.addButton('', '<i class="fa fa-wand-magic-sparkles"></i>', ( value, event ) => { });
+                    panel.addSelect("Animation", ["walk", "run", "idle"], "idle", (v)=> {
+                        console.log(v)
+                    }, { inputWidth: "50%" })
+                },
+                onAfterCreateTopBar: panel => {
+                    panel.addButton("customBtn", '<i class="fa fa-wand-magic-sparkles"></i>', ( value, event ) => { }, { title: "Custom Action", hideName: true });
+                    panel.addButton("anotherCustomBtn", '<i class="fa fa-cube"></i>', ( value, event ) => { }, { title: "Other Custom Action", hideName: true });
                 }
             });
 

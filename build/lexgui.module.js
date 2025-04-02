@@ -4435,10 +4435,11 @@ class Widget {
 
     _addResetProperty( container, callback ) {
 
-        var domEl = document.createElement('a');
+        const domEl = LX.makeIcon( "rotate-left", "Reset" )
         domEl.style.display = "none";
         domEl.style.marginRight = "6px";
-        domEl.className = "lexicon fa fa-rotate-left";
+        domEl.style.marginLeft = "0";
+        domEl.style.paddingInline = "6px";
         domEl.addEventListener( "click", callback );
         container.appendChild( domEl );
         return domEl;
@@ -4618,7 +4619,10 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
 
             container = document.createElement('div');
             container.className = "lexcustomcontainer";
-            container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+            doAsync( () => {
+                const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+                container.style.width = `calc( 100% - ${ realNameWidth })`;
+            } );
 
             let buttonName = "<a class='fa-solid " + (options.icon ?? "fa-cube")  + "' style='float:left'></a>";
             buttonName += customWidgetName + (!instance ? " [empty]" : "");
@@ -5306,8 +5310,11 @@ class TextInput extends Widget {
 
         let container = document.createElement( 'div' );
         container.className = "lextext" + ( options.warning ? " lexwarning" : "" );
-        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
         container.style.display = "flex";
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
+        } );
 
         if( options.textClass )
         {
@@ -5391,15 +5398,8 @@ class TextInput extends Widget {
         Object.assign( wValue.style, options.style ?? {} );
 
         container.appendChild( wValue );
-        this.root.appendChild( container );
 
-        // Remove branch padding and margins
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            this.root.className += " noname";
-            container.style.width = "100%";
-        }
+        this.root.appendChild( container );
     }
 }
 
@@ -5432,9 +5432,18 @@ class TextArea extends Widget {
 
         let container = document.createElement( "div" );
         container.className = "lextextarea";
-        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
-        container.style.height = options.height;
         container.style.display = "flex";
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
+            container.style.height = options.height;
+
+            if( options.fitHeight )
+            {
+                // Update height depending on the content
+                wValue.style.height = wValue.scrollHeight + "px";
+            }
+        } );
 
         let wValue = document.createElement( "textarea" );
         wValue.value = wValue.iValue = value || "";
@@ -5475,24 +5484,8 @@ class TextArea extends Widget {
         }
 
         container.appendChild( wValue );
+
         this.root.appendChild( container );
-
-        // Remove branch padding and margins
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            this.root.className += " noname";
-            container.style.width = "100%";
-        }
-
-        // Do this after creating the DOM element
-        doAsync( () => {
-            if( options.fitHeight )
-            {
-                // Update height depending on the content
-                wValue.style.height = wValue.scrollHeight + "px";
-            }
-        }, 10 );
     }
 }
 
@@ -5532,7 +5525,10 @@ class Button extends Widget {
             ( options.icon ? "<a class='" + options.icon + "'></a>" :
             ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + ( value || "" ) + "</span>" ) );
 
-        wValue.style.width = "calc( 100% - " + ( options.nameWidth ?? LX.DEFAULT_NAME_WIDTH ) + ")";
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            wValue.style.width = `calc( 100% - ${ realNameWidth })`;
+        } );
 
         if( options.disabled )
         {
@@ -5589,7 +5585,10 @@ class ComboButtons extends Widget {
             container.className += options.float;
         }
 
-        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        } );
 
         let currentValue = [];
         let buttonsBox = document.createElement('div');
@@ -5705,15 +5704,8 @@ class ComboButtons extends Widget {
             }
         };
 
-        // Remove branch padding and margins
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            this.root.className += " noname";
-            container.style.width = "100%";
-        }
-
         container.appendChild( buttonsBox );
+
         this.root.appendChild( container );
     }
 }
@@ -5827,6 +5819,7 @@ class Form extends Widget {
 
         let container = document.createElement( 'div' );
         container.className = "lexformdata";
+        container.style.width = "100%";
         container.formData = {};
 
         for( let entry in data )
@@ -5874,10 +5867,6 @@ class Form extends Widget {
         container.appendChild( submitButton.root );
 
         this.root.appendChild( container );
-
-        // Form does not never use label
-        this.root.className += " noname";
-        container.style.width = "100%";
     }
 }
 
@@ -5931,7 +5920,10 @@ class Select extends Widget {
 
         let container = document.createElement( "div" );
         container.className = "lexselect";
-        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
+        } );
 
         let wValue = document.createElement( 'div' );
         wValue.className = "lexselect lexoption";
@@ -6207,15 +6199,8 @@ class Select extends Widget {
         list.refresh( values );
 
         container.appendChild( listDialog );
-        this.root.appendChild( container );
 
-        // Remove branch padding and margins
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            this.root.className += " noname";
-            container.style.width = "100%";
-        }
+        this.root.appendChild( container );
     }
 
     _filterOptions( options, value ) {
@@ -6273,7 +6258,10 @@ class Curve extends Widget {
 
         var container = document.createElement( "div" );
         container.className = "lexcurve";
-        container.style.width = this.name ? "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")" : "100%";
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        } );
 
         options.callback = (v, e) => {
             this._trigger( new IEvent( name, v, e ), callback );
@@ -6326,7 +6314,10 @@ class Dial extends Widget {
 
         var container = document.createElement( "div" );
         container.className = "lexcurve";
-        container.style.width = this.name ? "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")" : "100%";
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        } );
 
         options.callback = ( v, e ) => {
             this._trigger( new IEvent( name, v, e ), callback );
@@ -6380,7 +6371,10 @@ class Layers extends Widget {
 
         var container = document.createElement( "div" );
         container.className = "lexlayers";
-        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        } );
 
         const setLayers = () =>  {
 
@@ -6463,7 +6457,10 @@ class ItemArray extends Widget {
 
         var container = document.createElement('div');
         container.className = "lexarray";
-        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        } );
 
         const angleDown = `<a class='fa-solid fa-angle-down' style='float:right; margin-right: 3px;'></a>`;
 
@@ -6637,17 +6634,12 @@ class List extends Widget {
 
         let listContainer = document.createElement( 'div' );
         listContainer.className = "lexlist";
-        listContainer.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            listContainer.style.width = `calc( 100% - ${ realNameWidth })`;
+        } );
 
         this._updateValues( values );
-
-        // Remove branch padding and margins
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            this.root.className += " noname";
-            listContainer.style.width = "100%";
-        }
 
         this.root.appendChild( listContainer );
     }
@@ -6686,7 +6678,10 @@ class Tags extends Widget {
 
         const tagsContainer = document.createElement('div');
         tagsContainer.className = "lextags";
-        tagsContainer.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            tagsContainer.style.width = `calc( 100% - ${ realNameWidth })`;
+        } );
 
         const _generateTags = () => {
 
@@ -6734,14 +6729,6 @@ class Tags extends Widget {
 
         _generateTags();
 
-        // Remove branch padding and margins
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            this.root.className += " noname";
-            tagsContainer.style.width = "100%";
-        }
-
         this.root.appendChild( tagsContainer );
     }
 }
@@ -6788,7 +6775,10 @@ class Checkbox extends Widget {
 
         var container = document.createElement( "div" );
         container.className = "lexcheckboxcont";
-        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
+        } );
 
         let checkbox = document.createElement( "input" );
         checkbox.type = "checkbox";
@@ -6868,7 +6858,10 @@ class Toggle extends Widget {
 
         var container = document.createElement('div');
         container.className = "lextogglecont";
-        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
+        } );
 
         let toggle = document.createElement('input');
         toggle.type = "checkbox";
@@ -7029,7 +7022,10 @@ class ColorInput extends Widget {
 
         var container = document.createElement( 'span' );
         container.className = "lexcolor";
-        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        } );
 
         let color = document.createElement( 'input' );
         color.style.width = "32px";
@@ -7096,7 +7092,10 @@ class RangeInput extends Widget {
 
         var container = document.createElement( 'div' );
         container.className = "lexrange";
-        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
+        } );
 
         let slider = document.createElement( 'input' );
         slider.className = "lexrangeslider " + ( options.className ?? "" );
@@ -7149,14 +7148,8 @@ class RangeInput extends Widget {
         }
 
         container.appendChild( slider );
-        this.root.appendChild( container );
 
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            this.root.className += " noname";
-            container.style.width = "100%";
-        }
+        this.root.appendChild( container );
     }
 }
 
@@ -7206,7 +7199,10 @@ class NumberInput extends Widget {
 
         var container = document.createElement( 'div' );
         container.className = "lexnumber";
-        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
+        } );
 
         let box = document.createElement( 'div' );
         box.className = "numberbox";
@@ -7384,15 +7380,8 @@ class NumberInput extends Widget {
         vecinput.addEventListener( "mousedown", innerMouseDown );
 
         container.appendChild( box );
-        this.root.appendChild( container );
 
-        // Remove branch padding and margins
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            this.root.className += " noname";
-            container.style.width = "100%";
-        }
+        this.root.appendChild( container );
     }
 }
 
@@ -7448,7 +7437,10 @@ class Vector extends Widget {
 
         var container = document.createElement( 'div' );
         container.className = "lexvector";
-        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        } );
 
         const that = this;
 
@@ -7752,14 +7744,6 @@ class SizeInput extends Widget {
                 }
             }, false );
         }
-
-        // Remove branch padding and margins
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            this.root.className += " noname";
-            container.style.width = "100%";
-        }
     }
 }
 
@@ -7791,7 +7775,10 @@ class Pad extends Widget {
 
         var container = document.createElement( 'div' );
         container.className = "lexpad";
-        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        } );
 
         let pad = document.createElement('div');
         pad.id = "lexpad-" + name;
@@ -7905,7 +7892,10 @@ class Progress extends Widget {
 
         var container = document.createElement('div');
         container.className = "lexprogress";
-        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        } );
 
         // add slider (0-1 if not specified different )
 
@@ -8028,9 +8018,12 @@ class FileInput extends Widget {
         // Create hidden input
         let input = document.createElement( 'input' );
         input.className = "lexfileinput";
-        input.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 10%)";
         input.type = 'file';
         input.disabled = options.disabled ?? false;
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            input.style.width = `calc( 100% - ${ realNameWidth } - 10%)`;
+        } );
 
         if( options.placeholder )
         {
@@ -8350,7 +8343,10 @@ class Table extends Widget {
 
         const container = document.createElement('div');
         container.className = "lextable";
-        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        doAsync( () => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        } );
 
         this.centered = options.centered ?? false;
         if( this.centered === true )
@@ -8676,13 +8672,6 @@ class Table extends Widget {
         }
 
         this.refreshTable();
-
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            this.root.className += " noname";
-            container.style.width = "100%";
-        }
 
         this.root.appendChild( container );
     }
@@ -9555,6 +9544,7 @@ class Panel {
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * disabled: Make the widget disabled [false]
+     * label: Toggle label
      * suboptions: Callback to add widgets in case of TRUE value
      * className: Customize colors
      */
