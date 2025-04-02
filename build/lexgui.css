@@ -1300,13 +1300,13 @@ svg path {
     outline: none;
     border-radius: 6px;
     border: 2px solid var(--global-color-transparent);
-    transition: border-color 0.1s linear;
+    transition: background-color 0.2s linear, border-color 0.15s linear;
 }
 
 .lexwidget .lextext {
     border-radius: 6px;
     position: relative;
-    transition: 0.1s linear;
+    transition: 0.2s linear;
 }
 
 .lexwidget .lextext.formlabel {
@@ -1493,6 +1493,7 @@ svg path {
 .lexbutton.primary { --button-color: var(--global-selected) !important; color: #f9f9f9 !important; }
 .lexbutton.secondary { --button-color: var(--global-selected-light) !important; color: #f9f9f9 !important;  }
 .lexbutton.accent { --button-color: var(--global-color-accent) !important; color: #f9f9f9 !important;  }
+.lexbutton.contrast { --button-color: var(--global-text-primary) !important; color: var(--global-color-primary) !important;  }
 .lexbutton.warning { --button-color: var(--global-color-warning) !important; color: #793205 !important;  }
 .lexbutton.error { --button-color: var(--global-color-error) !important; color: #52020d !important;  }
 /* Few Sizes */
@@ -1784,7 +1785,8 @@ dialog .lexselect .lexselectoptions {
 /* Check box */
 
 .lexcheckbox {
-    --checkbox-color: var(--global-selected);
+    --checkbox-bg-color: var(--global-selected);
+    --checkbox-fg-color: #fff;
     vertical-align: middle;
     flex-shrink: 0;
     transition: background-color .2s,box-shadow .2s;
@@ -1794,10 +1796,10 @@ dialog .lexselect .lexselectoptions {
     padding: 0.12rem;
     display: inline-block;
     background-color: var(--global-color-primary);
-    color: #fff;
+    color: var(--checkbox-fg-color);
     border-width: 1px;
     border-style: solid;
-    border-color: color-mix(in srgb, var(--checkbox-color) 50%, transparent);
+    border-color: color-mix(in srgb, var(--checkbox-bg-color) 50%, transparent);
     border-radius: 4px;
     margin: auto 4px;
     text-align: center;
@@ -1808,11 +1810,12 @@ dialog .lexselect .lexselectoptions {
 }
 
 /* Colors */
-.lexcheckbox.primary { --checkbox-color: var(--global-selected); }
-.lexcheckbox.secondary { --checkbox-color: var(--global-selected-light); }
-.lexcheckbox.accent { --checkbox-color: var(--global-color-accent); }
-.lexcheckbox.warning { --checkbox-color: var(--global-color-warning); }
-.lexcheckbox.error { --checkbox-color: var(--global-color-error); }
+.lexcheckbox.primary { --checkbox-bg-color: var(--global-selected); }
+.lexcheckbox.secondary { --checkbox-bg-color: var(--global-selected-light); }
+.lexcheckbox.accent { --checkbox-bg-color: var(--global-color-accent); }
+.lexcheckbox.contrast { --checkbox-bg-color: var(--global-text-primary); --checkbox-fg-color: var(--global-color-primary); }
+.lexcheckbox.warning { --checkbox-bg-color: var(--global-color-warning); }
+.lexcheckbox.error { --checkbox-bg-color: var(--global-color-error); }
 
 .lexcheckbox:before {
     content: "";
@@ -1828,8 +1831,7 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexcheckbox:checked,.lexcheckbox[aria-checked=true] {
-    background-color: var(--checkbox-color);
-    color: #fff !important;
+    background-color: var(--checkbox-bg-color);
 }
 
 .lexcheckbox:checked:before, .lexcheckbox[aria-checked=true]:before {
@@ -1857,9 +1859,10 @@ dialog .lexselect .lexselectoptions {
 /* Toggle Widget */
 
 .lextoggle {
-    --toggle-color: #1a1a1a;
+    --toggle-bg-color: #1a1a1a;
+    --toggle-fg-color: #f9f9f9;
     border: 1px solid transparent;
-    color: #f9f9f9;
+    color: var(--toggle-fg-color);
     background-color: var(--global-color-quaternary);
     cursor: pointer;
     -webkit-appearance: none;
@@ -1887,11 +1890,12 @@ dialog .lexselect .lexselectoptions {
 }
 
 /* Colors */
-.lextoggle.primary { --toggle-color: var(--global-selected); }
-.lextoggle.secondary { --toggle-color: var(--global-selected-light);  }
-.lextoggle.accent { --toggle-color: var(--global-color-accent);  }
-.lextoggle.warning { --toggle-color: var(--global-color-warning);  }
-.lextoggle.error { --toggle-color: var(--global-color-error);  }
+.lextoggle.primary { --toggle-bg-color: var(--global-selected); }
+.lextoggle.secondary { --toggle-bg-color: var(--global-selected-light);  }
+.lextoggle.accent { --toggle-bg-color: var(--global-color-accent);  }
+.lextoggle.contrast { --toggle-bg-color: var(--global-text-primary); --toggle-fg-color: var(--global-color-primary); }
+.lextoggle.warning { --toggle-bg-color: var(--global-color-warning);  }
+.lextoggle.error { --toggle-bg-color: var(--global-color-error);  }
 
 .lextoggle > * {
     z-index: 1;
@@ -1954,12 +1958,12 @@ dialog .lexselect .lexselectoptions {
 
 .lextoggle:checked, .lextoggle[aria-checked=true], .lextoggle:has(>input:checked) {
     border: 1px solid var(--global-color-secondary);
-    background-color: var(--toggle-color);
+    background-color: var(--toggle-bg-color);
     grid-template-columns: 1fr 1fr 0fr;
 }
 
 .lextoggle.outline:checked, .lextoggle.outline[aria-checked=true], .lextoggle.outline:has(>input:checked) {
-    color: var(--toggle-color);
+    color: var(--toggle-bg-color);
     border: 1px solid currentColor;
     background-color: var(--global-color-primary);
 }
@@ -1969,7 +1973,7 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lextoggle:indeterminate {
-    grid-template-columns: .5fr 1fr .5fr
+    grid-template-columns: 0.5fr 1fr 0.5fr;
 }
 
 .lextoggle:disabled {
@@ -1999,7 +2003,7 @@ dialog .lexselect .lexselectoptions {
     margin-top: -1px;
 }
 
-/* Toggle Widget */
+/* Radio Group Widget */
 
 .lexradiogroup {
     width: 100% !important;
@@ -2024,15 +2028,15 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexradiogroup .lexradiogroupitem button {
-    width: 14px;
-    height: 14px;
-    min-width: 14px !important;
-    min-height: 14px !important;
+    width: 16px;
+    height: 16px;
+    min-width: 16px !important;
+    min-height: 16px !important;
     padding: 0;
     margin: auto 0;
-    border-radius: 7px;
+    border-radius: 8px;
     background-color: var(--global-intense-background);
-    border: 1px solid var(--global-text-secondary) !important;
+    border: 1px solid var(--global-text-tertiary) !important;
 }
 
 .lexradiogroup .lexradiogroupitem button:disabled {
@@ -2057,6 +2061,7 @@ dialog .lexselect .lexselectoptions {
 .lexradiogroup.primary .lexradiogroupitem button.checked span { background-color: var(--global-selected); }
 .lexradiogroup.secondary .lexradiogroupitem button.checked span { background-color: var(--global-selected-light); }
 .lexradiogroup.accent .lexradiogroupitem button.checked span { background-color: var(--global-color-accent); }
+.lexradiogroup.contrast .lexradiogroupitem button.checked span { background-color: var(--global-text-primary); }
 .lexradiogroup.warning .lexradiogroupitem button.checked span { background-color: var(--global-color-warning); }
 .lexradiogroup.error .lexradiogroupitem button.checked span { background-color: var(--global-color-error); }
 
@@ -2300,10 +2305,6 @@ input[type=number] {
     right: 0.8em;
 }
 
-.lexwidget .lock {
-    /* color: red; */
-}
-
 /* Range Widget */
 
 .lexrangeslider {
@@ -2312,7 +2313,7 @@ input[type=number] {
     --range-progress: currentColor;
     --range-fill: 1;
     --range-thumb-padding: 0.15rem;
-    --range-bg: color-mix(in oklab,currentColor 10%,#0000);
+    --range-bg: color-mix(in oklab,currentColor 20%,#0000);
     --range-dir: 1;
     --radius-selector: 0.5rem;
     -webkit-appearance: none;
@@ -2325,7 +2326,7 @@ input[type=number] {
     height: var(--range-thumb-size);
     border: none;
     outline: none;
-    color: var(--global-text-secondary);
+    color: var(--global-text-tertiary);
     background-color: #0000;
     overflow: hidden;
     padding: 0;
@@ -2336,10 +2337,15 @@ input[type=number] {
     vertical-align: middle;
 }
 
+.lexrangeslider:disabled {
+    cursor: default;
+}
+
 /* Colors */
 .lexrangeslider.primary { color: var(--global-selected); }
 .lexrangeslider.secondary { color: var(--global-selected-light); }
 .lexrangeslider.accent { color: var(--global-color-accent); }
+.lexrangeslider.contrast { color: var(--global-text-primary); }
 .lexrangeslider.warning { color: var(--global-color-warning); }
 .lexrangeslider.error { color: var(--global-color-error); }
 
@@ -2368,6 +2374,10 @@ input[type=number] {
     border-radius: var(--radius-selector);
     width: 100%;
     height: calc(var(--range-thumb-size)*0.5);
+}
+
+.lexrangeslider:disabled::-webkit-slider-runnable-track {
+    color: var(--global-color-quaternary);
 }
 
 .lexrangeslider::-webkit-slider-thumb {
@@ -2757,7 +2767,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexbadge {
     border-radius: 0.35rem;
     color: #fff;
-    font-weight: 500;
     border: 1px solid var(--badge-color, #14171a);
     width: fit-content;
     justify-content: center;
@@ -2773,6 +2782,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexbadge.primary { --badge-color: var(--global-selected); }
 .lexbadge.secondary { --badge-color: var(--global-selected-light); }
 .lexbadge.accent { --badge-color: var(--global-color-accent); }
+.lexbadge.contrast { --badge-color: var(--global-text-primary); color: var(--global-color-primary); }
 .lexbadge.warning { --badge-color: var(--global-color-warning); }
 .lexbadge.error { --badge-color: var(--global-color-error); }
 /* Styles */

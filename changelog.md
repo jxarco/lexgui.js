@@ -1,5 +1,9 @@
 # lexgui.js changelog
 
+## dev
+
+Added `contrast` theme for supported Widgets.
+
 ## 0.5.0 (master)
 
 Widgets:
