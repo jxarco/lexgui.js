@@ -2,6 +2,9 @@
 
 ## dev
 
+Widgets:
+- Added support for `text centering` all/specific columns in Table Widget.
+
 Fixed Area tabs drag&drop when `fit` mode.
 Fixed issue on open/destroy dropdown.
 Fixed label text wrap on Checkbox&Toggle widgets.

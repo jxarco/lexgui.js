@@ -4087,6 +4087,14 @@ th, td {
     vertical-align: top;
 }
 
+th.centered, td.centered {
+    text-align: center;
+}
+
+.lextable.centered th, .lextable.centered td {
+    text-align: center;
+}
+
 th.sm, td.sm {
     width: 8%;
 }
@@ -4101,6 +4109,8 @@ td {
     align-content: center;
     justify-items: center;
     border-top: 2px solid;
+    overflow: hidden;
+    white-space: nowrap;
     border-color: light-dark(#dbd8d8c0, #5c5b5b7a);
 }
 

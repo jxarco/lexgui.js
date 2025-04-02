@@ -8347,6 +8347,12 @@ class Table extends Widget {
         container.className = "lextable";
         container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
+        this.centered = options.centered ?? false;
+        if( this.centered === true )
+        {
+            container.classList.add( "centered" );
+        }
+
         const table = document.createElement( 'table' );
         container.appendChild( table );
 
@@ -8416,9 +8422,14 @@ class Table extends Widget {
 
                 for( const headData of data.head )
                 {
-                    const idx = data.head.indexOf( headData );
                     const th = document.createElement( 'th' );
                     th.innerHTML = `${ headData } <a class="fa-solid fa-sort"></a>`;
+
+                    const idx = data.head.indexOf( headData );
+                    if( this.centered && this.centered.indexOf( idx ) > -1 )
+                    {
+                        th.classList.add( "centered" );
+                    }
 
                     th.addEventListener( 'click', event => {
                         new LX.DropdownMenu( event.target, [
@@ -8572,6 +8583,13 @@ class Table extends Widget {
                     {
                         const td = document.createElement( 'td' );
                         td.innerHTML = `${ rowData }`;
+
+                        const idx = bodyData.indexOf( rowData );
+                        if( this.centered && this.centered.indexOf( idx ) > -1 )
+                        {
+                            td.classList.add( "centered" );
+                        }
+
                         row.appendChild( td );
                     }
 
@@ -9778,6 +9796,7 @@ class Panel {
      * onMenuAction: Function callback to fill the "menu" context
      * selectable: Each row can be selected
      * sortable: Rows can be sorted by the user manually
+     * centered: Center text within columns. true for all, Array for center selected cols.
      */
 
     addTable( name, data, options = { } ) {
@@ -9851,7 +9870,7 @@ class Branch {
         }
 
         this.onclick = function( e ) {
-            e.stopPropagation();
+            // e.stopPropagation();
             this.classList.toggle( "closed" );
             this.parentElement.classList.toggle( "closed" );
 
