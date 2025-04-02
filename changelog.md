@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.5.1 (master)
+
 Widgets:
 - Added support for `text centering` all/specific columns in Table Widget.
 - Fixed widget content size when using `options.nameWidth`. First fix for sizes in inline widgets.
@@ -13,7 +15,7 @@ Fixed issue on open/destroy dropdown.
 Fixed label text wrap on Checkbox&Toggle widgets.
 Added `contrast` theme for supported Widgets.
 
-## 0.5.0 (master)
+## 0.5.0
 
 Widgets:
 - Created classes for each widget to create them at any place.
