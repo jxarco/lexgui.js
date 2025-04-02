@@ -5187,6 +5187,7 @@ class NodeTree {
         }
 
         const _hasChild = function( parent, id ) {
+            if( !parent.length  ) return;
             for( var c of parent.children )
             {
                 if( c.id == id ) return true;
