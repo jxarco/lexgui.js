@@ -6837,6 +6837,11 @@ class Toggle extends Widget {
 
     constructor( name, value, callback, options = {} ) {
 
+        if( !name && !options.label )
+        {
+            throw( "Set Widget Name or at least a label!" );
+        }
+
         super( Widget.TOGGLE, name, value, options );
 
         this.onGetValue = () => {
@@ -6874,7 +6879,7 @@ class Toggle extends Widget {
 
         let valueName = document.createElement( 'span' );
         valueName.className = "toggletext";
-        valueName.innerHTML = "On";
+        valueName.innerHTML = options.label ?? "On";
 
         container.appendChild( toggle );
         container.appendChild( valueName );

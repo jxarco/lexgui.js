@@ -25,7 +25,9 @@
         ["options", "Object", "Basic options for a Widget"],
         [
             ["disabled", "Boolean", "Make the widget disabled"],
-            ["suboptions", "Function", "Callback to add widgets shown if <code class='inline'>true</code>"]
+            ["label", "String", "Checkbox label"],
+            ["suboptions", "Function", "Callback to add widgets shown if <code class='inline'>true</code>"],
+            ["className", "String", "Extra classes to customize style"]
         ]
     ]);
     MAKE_CODE(`panel.@[mtd]addToggle@(@"Toggle me"@, @true@, (value, event) =&gt; {
