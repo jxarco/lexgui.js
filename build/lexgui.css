@@ -2236,6 +2236,7 @@ input[type=number] {
     border-radius: 6px;
     margin-right: 2px;
     position: relative;
+    overflow-x: hidden;
     transition: 0.1s linear;
 }
 
@@ -2249,7 +2250,6 @@ input[type=number] {
 
 .lexwidget .numberbox span {
     position: absolute;
-    top: 1px;
     pointer-events: none;
 }
 
@@ -4084,7 +4084,7 @@ th, td {
     padding: 6px;
     padding-inline: 12px;
     text-align: left;
-    vertical-align: top;
+    align-content: center;
 }
 
 th.centered, td.centered {
@@ -4100,13 +4100,11 @@ th.sm, td.sm {
 }
 
 th .lexcheckbox, td .lexcheckbox {
-    margin-top: 3px;
     width: 1.25em;
     height: 1.25em;
 }
 
 td {
-    align-content: center;
     justify-items: center;
     border-top: 2px solid;
     overflow: hidden;
@@ -4401,10 +4399,6 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
 
 .lextimeline .lextree .lextreeitem {
     margin: 0px;
-}
-
-.lextimeline .lextitle {
-    padding-left: 24px;
 }
 
 .lextimeline .lextree ul {
