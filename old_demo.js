@@ -536,6 +536,21 @@ function fillPanel( panel ) {
                 'id': 'node_2',
                 'icon': 'fa-solid fa-circle-play',
                 'children': []
+            },
+            {
+                'id': 'node_3',
+                'children': [
+                    {
+                        'id': 'node_3_1',
+                        'icon': 'fa-solid fa-cube',
+                        'children': []
+                    },
+                    {
+                        'id': 'node_3_2',
+                        'icon': 'fa-solid fa-cube',
+                        'children': []
+                    }
+                ]
             }
         ]
     };

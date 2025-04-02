@@ -4740,24 +4740,32 @@ class NodeTree {
         this.options = options;
         this.selected = [];
 
-        if(data.constructor === Object)
-            this._create_item( null, data );
+        this._forceClose = false;
+
+        if( data.constructor === Object )
+        {
+            this._createItem( null, data );
+        }
         else
+        {
             for( let d of data )
-                this._create_item( null, d );
+            {
+                this._createItem( null, d );
+            }
+        }
     }
 
-    _create_item( parent, node, level = 0, selectedId ) {
+    _createItem( parent, node, level = 0, selectedId ) {
 
         const that = this;
         const nodeFilterInput = this.domEl.querySelector( "#lexnodetree_filter" );
 
         node.children = node.children ?? [];
-        if( nodeFilterInput && !node.id.includes( nodeFilterInput.value ) || (selectedId != undefined) && selectedId != node.id )
+        if( nodeFilterInput && nodeFilterInput.value != "" && !node.id.includes( nodeFilterInput.value ) )
         {
             for( var i = 0; i < node.children.length; ++i )
             {
-                this._create_item( node, node.children[ i ], level + 1, selectedId );
+                this._createItem( node, node.children[ i ], level + 1, selectedId );
             }
             return;
         }
@@ -4780,11 +4788,15 @@ class NodeTree {
         item.className = "lextreeitem " + "datalevel" + level + (isParent ? " parent" : "") + (isSelected ? " selected" : "");
         item.id = LX.getSupportedDOMName( node.id );
         item.tabIndex = "0";
+        item.treeData = node;
 
         // Select hierarchy icon
         let icon = (this.options.skip_default_icon ?? true) ? "" : "fa-solid fa-square"; // Default: no childs
-        if( isParent ) icon = node.closed ? "fa-solid fa-caret-right" : "fa-solid fa-caret-down";
-        item.innerHTML = "<a class='" + icon + " hierarchy'></a>";
+        if( isParent )
+        {
+            icon = node.closed ? "fa-solid fa-caret-right" : "fa-solid fa-caret-down";
+            item.innerHTML = "<a class='" + icon + " hierarchy'></a>";
+        }
 
         // Add display icon
         icon = node.icon;
@@ -4804,7 +4816,7 @@ class NodeTree {
         item.innerHTML += (node.rename ? "" : node.id);
 
         item.setAttribute( 'draggable', true );
-        item.style.paddingLeft = ((isParent ? 0 : 3 ) + (3 + (level+1) * 15)) + "px";
+        item.style.paddingLeft = ((3 + (level+1) * 15)) + "px";
         list.appendChild( item );
 
         // Callbacks
@@ -4888,7 +4900,7 @@ class NodeTree {
 
             that.onevent( event );
 
-            if( ( this.options.addDefault ?? false ) == true )
+            if( this.options.addDefault ?? false )
             {
                 if( event.panel.items )
                 {
@@ -4912,18 +4924,20 @@ class NodeTree {
                             }
 
                             let nodeItem = this.domEl.querySelector( '#' + child.id );
-                            nodeItem.classList.add('selected');
+                            nodeItem.classList.add( "selected" );
                             this.selected.push( child );
                             selectChildren( child );
                         }
                     };
+
+                    this.domEl.querySelectorAll( ".selected" ).forEach( i => i.classList.remove( "selected" ) );
+                    this.selected.length = 0;
 
                     // Add childs of the clicked node
                     selectChildren( node );
                 } );
 
                 event.panel.add( "Delete", { callback: () => {
-
                     // It's the root node
                     if( !node.parent )
                     {
@@ -5015,7 +5029,7 @@ class NodeTree {
                 node.id = LX.getSupportedDOMName( this.value );
                 delete node.rename;
                 that.frefresh( node.id );
-                list.querySelector("#" + node.id).classList.add('selected');
+                list.querySelector( "#" + node.id ).classList.add('selected');
             }
             else if(e.key == "Escape")
             {
@@ -5105,7 +5119,22 @@ class NodeTree {
                 e.stopImmediatePropagation();
                 e.stopPropagation();
 
-                node.closed = !node.closed;
+                if( e.altKey )
+                {
+                    const _closeNode = function( node ) {
+                        node.closed = !node.closed;
+                        for( var c of node.children )
+                        {
+                            _closeNode( c );
+                        }
+                    };
+                    _closeNode( node );
+                }
+                else
+                {
+                    node.closed = !node.closed;
+                }
+
                 if( that.onevent )
                 {
                     const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed);
@@ -5157,13 +5186,17 @@ class NodeTree {
             inputContainer.appendChild( visibility );
         }
 
-        if( selectedId != undefined && node.id == selectedId )
-        {
-            this.selected = [ node ];
-            item.click();
-        }
+        const _hasChild = function( parent, id ) {
+            for( var c of parent.children )
+            {
+                if( c.id == id ) return true;
+                return _hasChild( c, id );
+            }
+        };
 
-        if( node.closed )
+        const exists = _hasChild( node, selectedId );
+
+        if( node.closed && !exists )
         {
             return;
         }
@@ -5177,25 +5210,42 @@ class NodeTree {
                 continue;
             }
 
-            this._create_item( node, child, level + 1 );
+            this._createItem( node, child, level + 1, selectedId );
         }
     }
 
     refresh( newData, selectedId ) {
+
         this.data = newData ?? this.data;
         this.domEl.querySelector( "ul" ).innerHTML = "";
-        this._create_item( null, this.data, 0, selectedId );
+        this._createItem( null, this.data, 0, selectedId );
     }
 
     /* Refreshes the tree and focuses current element */
     frefresh( id ) {
+
         this.refresh();
         var el = this.domEl.querySelector( "#" + id );
-        if( el ) el.focus();
+        if( el )
+        {
+            el.focus();
+        }
     }
 
     select( id ) {
+
         this.refresh( null, id );
+
+        this.domEl.querySelectorAll( ".selected" ).forEach( i => i.classList.remove( "selected" ) );
+        this.selected.length = 0;
+
+        var el = this.domEl.querySelector( "#" + id );
+        if( el )
+        {
+            el.classList.add( "selected" );
+            this.selected = [ el.treeData ];
+            el.focus();
+        }
     }
 }
 
