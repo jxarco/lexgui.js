@@ -744,6 +744,7 @@ function fillPanel( panel ) {
     });
     panel.addButton(null, "Click me, Im Full Width...");
     panel.addButton("Test Button", "Reduced width...");
+    panel.addSeparator();
     panel.addBlank(12);
 }
 
