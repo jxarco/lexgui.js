@@ -4,6 +4,7 @@
 
 Widgets:
 - Fixed some resizing issues.
+- Fixed manual-sort not modifying data in Table Widget.
 
 No `justify` by default in inline widgets. Use `Panel.endLine(justify)` instead.
 Fixed preview image in AssetView.

@@ -8597,14 +8597,22 @@ class Table extends Widget {
                         v.style.transition = `none`;
                     } );
                     flushCss( fromRow );
-                    rIdx = null;
 
                     if( movePending )
                     {
+                        // Modify inner data first
+                        const fromIdx = rIdx - 1;
+                        const targetIdx = movePending[ 1 ] - 1;
+                        var b = data.body[fromIdx];
+                        data.body[fromIdx] = data.body[targetIdx];
+                        data.body[targetIdx] = b;
+
                         const parent = movePending[ 0 ].parentNode;
                         parent.insertChildAtIndex(  movePending[ 0 ],  movePending[ 1 ] );
                         movePending = null;
                     }
+
+                    rIdx = null;
 
                     doAsync( () => {
                         Array.from( table.rows ).forEach( v => {
