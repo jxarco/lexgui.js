@@ -5,6 +5,7 @@
 Widgets:
 - Fixed some resizing issues.
 - Fixed manual-sort not modifying data in Table Widget.
+- Use Dropdown for Table Widget menu actions `options.onMenuAction`.
 
 No `justify` by default in inline widgets. Use `Panel.endLine(justify)` instead.
 Fixed preview image in AssetView.

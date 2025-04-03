@@ -1489,6 +1489,7 @@ class DropdownMenu {
         }
 
         this._trigger = trigger;
+        trigger.classList.add( "triggered" );
         trigger.ddm = this;
 
         this._items = items;
@@ -1527,6 +1528,8 @@ class DropdownMenu {
     }
 
     destroy() {
+
+        this._trigger.classList.remove( "triggered" );
 
         delete this._trigger.ddm;
 
@@ -8422,7 +8425,7 @@ class Table extends Widget {
 
         const sortFn = ( idx, sign ) => {
             data.body = data.body.sort( compareFn.bind( this, idx, sign ) );
-            this.refreshTable();
+            this.refresh();
         }
 
         // Append header
@@ -8440,7 +8443,7 @@ class Table extends Widget {
                 filterOptions.textClass = "outline";
 
                 let filter = new TextInput(null, "", ( v ) => {
-                    this.refreshTable( v );
+                    this.refresh( v );
                 }, filterOptions );
 
                 headerContainer.appendChild( filter.root );
@@ -8477,7 +8480,7 @@ class Table extends Widget {
         const table = document.createElement( 'table' );
         container.appendChild( table );
 
-        this.refreshTable = ( colFilter = "" ) => {
+        this.refresh = ( colFilter = "" ) => {
 
             table.innerHTML = "";
 
@@ -8755,14 +8758,15 @@ class Table extends Widget {
                             {
                                 button = LX.makeIcon( "more-horizontal", "Menu" );
                                 button.addEventListener( 'click', function( event ) {
-                                    addContextMenu( null, event, c => {
-                                        if( options.onMenuAction )
-                                        {
-                                            options.onMenuAction( c );
-                                            return;
-                                        }
-                                        console.warn( "Using <Menu action> without action callbacks." );
-                                    } );
+                                    if( !options.onMenuAction )
+                                    {
+                                        return;
+                                    }
+
+                                    const menuOptions = options.onMenuAction( r, data );
+                                    console.assert( menuOptions.length, "Add items to the Menu Action Dropdown!" );
+
+                                    new DropdownMenu( event.target, menuOptions, { side: "bottom", align: "end" });
                                 });
                             }
                             else // custom actions
@@ -8776,7 +8780,7 @@ class Table extends Widget {
                                         const mustRefresh = action.callback( bodyData, table, e );
                                         if( mustRefresh )
                                         {
-                                            this.refreshTable();
+                                            this.refresh();
                                         }
                                     });
                                 }
@@ -8806,7 +8810,7 @@ class Table extends Widget {
             }
         }
 
-        this.refreshTable();
+        this.refresh();
 
         doAsync( this.onResize.bind( this ) );
     }

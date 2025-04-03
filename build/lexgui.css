@@ -353,6 +353,8 @@ svg.xxl { width: var(--svg-size-xxl); height: var(--svg-size-xxl); }
     line-height: inherit !important;
     color: var(--global-text-secondary);
     align-content: center;
+    border-radius: 4px;
+    transition: all 0.15s linear;
 }
 
 .lexicon:hover {
@@ -362,6 +364,10 @@ svg.xxl { width: var(--svg-size-xxl); height: var(--svg-size-xxl); }
 .lexicon:active {
     color: var(--global-text-secondary);
     transform: scale(0.99);
+}
+
+.lexicon.triggered {
+    background-color: var(--global-button-color);
 }
 
 svg, svg path {
@@ -4176,11 +4182,12 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
 
 .lextable .lextablebuttons {
     display: inline-flex;
-    gap: 0.8rem;
+    gap: 0.2rem;
 }
 
 .lextable .lextablebuttons .lexicon {
     font-size: var(--global-font-size-sm) !important;
+    padding: 0.2rem;
 }
 
 :root[data-theme="light"] .lextable table {

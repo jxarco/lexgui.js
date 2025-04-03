@@ -860,7 +860,7 @@ function fillBottomPanel( panel ) {
     
     // add widgets to panel branch
     panel.branch("Information", {icon: "fa fa-circle-info"});
-    panel.addTable("A Table", {
+    const tableWidget = panel.addTable("A Table", {
         head: [ "Name", "Subject", "Grade" ],
         body: [
             [ "Alice", "Science", "B" ],
@@ -877,9 +877,15 @@ function fillBottomPanel( panel ) {
             "delete",
             "menu"
         ],
-        onMenuAction: ( context ) => {
-            context.add("Export", (a) => console.log(a) );
-            context.add("An Action", (a) => console.log(a) );
+        onMenuAction: ( index, tableData ) => {
+            return [
+                { name: "Export", callback: (a) => {
+                    tableData.body[index][0] = "Alex";
+                    tableWidget.refresh();
+                } },
+                { name: "Make a copy", callback: (a) => console.log(a) },
+                { name: "Favourite", callback: (a) => console.log(a) }
+            ]
         }
     });
     panel.addText("Camera", "Canon EOS 80D", null, {disabled: true}); 
