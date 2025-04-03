@@ -1515,6 +1515,9 @@ a svg, svg path {
 
 .lexbutton span {
     align-items: center;
+    display: flex;
+    gap: 0.4rem;
+    pointer-events: none;
 }
 
 .lexbutton span:has(.lexbadge) {
@@ -1536,6 +1539,10 @@ a svg, svg path {
 .lexbutton a {
     margin-left: 0px;
     font-size: var(--global-font-size-sm);
+    pointer-events: none;
+}
+
+.lexbutton svg {
     pointer-events: none;
 }
 
@@ -4033,6 +4040,15 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     overflow: hidden;
     background-color: var(--global-color-primary);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.lextable .lexfilter .lextext {
+    background: var(--global-color-primary);
+    border: 1px solid #7a797c4f;
+}
+
+.lextable .lexfilter input:hover {
+    background: none;
 }
 
 .lextable svg, .lextable svg path {

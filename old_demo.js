@@ -870,6 +870,8 @@ function fillBottomPanel( panel ) {
     }, {
         selectable: true,
         sortable: true,
+        toggleColumns: true,
+        filter: "Name",
         rowActions: [
             { icon: "edit", title: "Edit Row", callback: ( tableData ) => {} }, // custom: you can change the data and refresh will be called later!
             "delete",
