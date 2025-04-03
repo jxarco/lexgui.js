@@ -48,6 +48,7 @@
             body: tableBody
         }, {
             centered: [1, 2],
+            filter: "Name",
             rowActions: [
                 { icon: "copy", title: "Copy SVG", callback: ( rowData, tableDom, event ) => { copySVG( rowData[ 1 ], event ) } }, // custom: you can change the data and refresh will be called later!
             ],

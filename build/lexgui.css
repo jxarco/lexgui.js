@@ -4141,6 +4141,11 @@ th .lexcheckbox, td .lexcheckbox {
     height: 1.25em;
 }
 
+th a {
+    display: inline-block;
+    transform: translate(4px, 4px);
+}
+
 td {
     justify-items: center;
     border-top: 2px solid;

@@ -8522,7 +8522,8 @@ class Table extends Widget {
                 for( const headData of data.head )
                 {
                     const th = document.createElement( 'th' );
-                    th.innerHTML = `${ headData } <a class="fa-solid fa-sort"></a>`;
+                    th.innerHTML = headData;
+                    th.appendChild( LX.makeIcon( "menu-arrows" ) );
 
                     const idx = data.head.indexOf( headData );
                     if( this.centered && this.centered.indexOf( idx ) > -1 )
