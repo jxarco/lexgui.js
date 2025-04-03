@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.5.2 (master)
+
 Table Widget:
 - Fixed manual-sort not modifying inner data.
 - Use Dropdown for menu actions `options.onMenuAction`.
@@ -13,7 +15,7 @@ Fixed preview image in AssetView.
 General styling fixes.
 Docs updated.
 
-## 0.5.1 (master)
+## 0.5.1
 
 Widgets:
 - Added support for `text centering` all/specific columns in Table Widget.

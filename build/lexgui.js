@@ -12,7 +12,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 var LX = {
-    version: "0.5.1",
+    version: "0.5.2",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -52,7 +52,7 @@ else if( typeof Date != "undefined" && Date.now )
 else if ( typeof process != "undefined" )
 {
     LX.getTime = function() {
-        var t = process.hrtime();
+        const t = process.hrtime();
         return t[ 0 ] * 0.001 + t[ 1 ] * 1e-6;
     };
 }
@@ -154,7 +154,7 @@ LX.setTheme = setTheme;
  */
 function setThemeColor( colorName, color )
 {
-    var r = document.querySelector( ':root' );
+    const r = document.querySelector( ':root' );
     r.style.setProperty( '--' + colorName, color );
 }
 
@@ -196,10 +196,10 @@ LX.getThemeColor = getThemeColor;
  */
 function getBase64Image( img )
 {
-    var canvas = document.createElement( 'canvas' );
+    const canvas = document.createElement( 'canvas' );
     canvas.width = img.width;
     canvas.height = img.height;
-    var ctx = canvas.getContext( '2d' );
+    const ctx = canvas.getContext( '2d' );
     ctx.drawImage( img, 0, 0 );
     return canvas.toDataURL( 'image/png' );
 }
@@ -964,8 +964,8 @@ function init( options = { } )
     this.root = root;
     this.container = document.body;
 
-    this.modal.classList.add( 'hiddenOpacity' );
-    this.modal.toggle = function( force ) { this.classList.toggle( 'hiddenOpacity', force ); };
+    this.modal.classList.add( 'hidden-opacity' );
+    this.modal.toggle = function( force ) { this.classList.toggle( 'hidden-opacity', force ); };
 
     if( options.container )
     {
@@ -1040,6 +1040,17 @@ function init( options = { } )
     this.DEFAULT_NAME_WIDTH     = "30%";
     this.DEFAULT_SPLITBAR_SIZE  = 4;
     this.OPEN_CONTEXTMENU_ENTRY = 'click';
+
+    this.widgetResizeObserver = new ResizeObserver( entries => {
+        for ( const entry of entries )
+        {
+            const widget = entry.target?.jsInstance;
+            if( widget && widget.onResize )
+            {
+                widget.onResize( entry.contentRect );
+            }
+        }
+    });
 
     this.ready = true;
     this.menubars = [ ];
@@ -1484,6 +1495,7 @@ class DropdownMenu {
         }
 
         this._trigger = trigger;
+        trigger.classList.add( "triggered" );
         trigger.ddm = this;
 
         this._items = items;
@@ -1510,7 +1522,7 @@ class DropdownMenu {
             this.root.focus();
 
             this._onClick = e => {
-                if( e.target && ( e.target.className.includes( "lexdropdown" ) || e.target == this._trigger ) )
+                if( e.target && ( this.root.contains( e.target ) || e.target == this._trigger ) )
                 {
                     return;
                 }
@@ -1522,6 +1534,8 @@ class DropdownMenu {
     }
 
     destroy() {
+
+        this._trigger.classList.remove( "triggered" );
 
         delete this._trigger.ddm;
 
@@ -1588,12 +1602,6 @@ class DropdownMenu {
             menuItem.id = pKey;
             menuItem.innerHTML = `<span>${ key }</span>`;
 
-            if( item.icon )
-            {
-                const icon = LX.makeIcon( item.icon );
-                menuItem.prepend( icon );
-            }
-
             menuItem.tabIndex = "1";
             parentDom.appendChild( menuItem );
 
@@ -1609,15 +1617,41 @@ class DropdownMenu {
                 menuItem.appendChild( submenuIcon );
             }
 
-            menuItem.addEventListener( "click", () => {
-                const f = item[ 'callback' ];
-                if( f )
-                {
-                    f.call( this, key, menuItem );
-                }
+            if( item.icon )
+            {
+                const icon = LX.makeIcon( item.icon );
+                menuItem.prepend( icon );
+            }
 
-                this.destroy();
-            } );
+            if( item.checked != undefined )
+            {
+                const checkbox = new Checkbox( pKey + "_entryChecked", item.checked, (v) => {
+                    const f = item[ 'callback' ];
+                    if( f )
+                    {
+                        f.call( this, key, menuItem, v );
+                    }
+                });
+                const input = checkbox.root.querySelector( "input" );
+                menuItem.prepend( input );
+
+                menuItem.addEventListener( "click", (e) => {
+                    if( e.target.type == "checkbox" ) return;
+                    input.checked = !input.checked;
+                    checkbox.set( input.checked );
+                } );
+            }
+            else
+            {
+                menuItem.addEventListener( "click", () => {
+                    const f = item[ 'callback' ];
+                    if( f )
+                    {
+                        f.call( this, key, menuItem );
+                    }
+                    this.destroy();
+                } );
+            }
 
             menuItem.addEventListener("mouseover", e => {
 
@@ -1787,7 +1821,7 @@ class Area {
 
         if( !options.skipAppend )
         {
-            var lexroot = document.getElementById("lexroot");
+            let lexroot = document.getElementById("lexroot");
             lexroot.appendChild( this.root );
         }
 
@@ -1858,12 +1892,12 @@ class Area {
                 this.splitBar.addEventListener("mousedown", innerMouseDown);
                 this.root.appendChild( this.splitBar );
 
-                var that = this;
-                var lastMousePosition = [ 0, 0 ];
+                const that = this;
+                let lastMousePosition = [ 0, 0 ];
 
                 function innerMouseDown( e )
                 {
-                    var doc = that.root.ownerDocument;
+                    const doc = that.root.ownerDocument;
                     doc.addEventListener( 'mousemove', innerMouseMove );
                     doc.addEventListener( 'mouseup', innerMouseUp );
                     lastMousePosition[ 0 ] = e.x;
@@ -1916,7 +1950,7 @@ class Area {
 
                 function innerMouseUp( e )
                 {
-                    var doc = that.root.ownerDocument;
+                    const doc = that.root.ownerDocument;
                     doc.removeEventListener( 'mousemove', innerMouseMove );
                     doc.removeEventListener( 'mouseup', innerMouseUp );
                     document.body.classList.remove( 'nocursor' );
@@ -1968,9 +2002,9 @@ class Area {
             this.root = this.sections[ 1 ].root;
         }
 
-        var type = options.type || "horizontal";
-        var sizes = options.sizes || [ "50%", "50%" ];
-        var auto = (options.sizes === 'auto');
+        const type = options.type || "horizontal";
+        const sizes = options.sizes || [ "50%", "50%" ];
+        const auto = (options.sizes === 'auto');
 
         if( !sizes[ 1 ] )
         {
@@ -1986,8 +2020,8 @@ class Area {
         }
 
         // Create areas
-        var area1 = new Area( { skipAppend: true, className: "split" + ( options.menubar || options.sidebar ? "" : " origin" ) } );
-        var area2 = new Area( { skipAppend: true, className: "split" } );
+        let area1 = new Area( { skipAppend: true, className: "split" + ( options.menubar || options.sidebar ? "" : " origin" ) } );
+        let area2 = new Area( { skipAppend: true, className: "split" } );
 
         area1.parentArea = this;
         area2.parentArea = this;
@@ -1995,7 +2029,7 @@ class Area {
         let minimizable = options.minimizable ?? false;
         let resize = ( options.resize ?? true ) || minimizable;
 
-        var data = "0px";
+        let data = "0px";
         this.offset = 0;
 
         if( resize )
@@ -2042,7 +2076,7 @@ class Area {
 
         if( type == "horizontal" )
         {
-            var width1 = sizes[ 0 ],
+            let width1 = sizes[ 0 ],
                 width2 = sizes[ 1 ];
 
             if( width1.constructor == Number )
@@ -2083,7 +2117,7 @@ class Area {
             }
             else
             {
-                var height1 = sizes[ 0 ],
+                let height1 = sizes[ 0 ],
                     height2 = sizes[ 1 ];
 
                 if( height1.constructor == Number )
@@ -2121,11 +2155,11 @@ class Area {
             return this.sections;
         }
 
-        var that = this;
+        const that = this;
 
         function innerMouseDown( e )
         {
-            var doc = that.root.ownerDocument;
+            const doc = that.root.ownerDocument;
             doc.addEventListener( 'mousemove', innerMouseMove );
             doc.addEventListener( 'mouseup', innerMouseUp );
             e.stopPropagation();
@@ -2145,26 +2179,13 @@ class Area {
                 that._moveSplit( -e.movementY );
             }
 
-            const widgets = that.root.querySelectorAll( ".lexwidget" );
-
-            // Send area resize to every widget in the area
-            for( let widget of widgets )
-            {
-                const jsInstance = widget.jsInstance;
-
-                if( jsInstance.onresize )
-                {
-                    jsInstance.onresize();
-                }
-            }
-
             e.stopPropagation();
             e.preventDefault();
         }
 
         function innerMouseUp( e )
         {
-            var doc = that.root.ownerDocument;
+            const doc = that.root.ownerDocument;
             doc.removeEventListener( 'mousemove', innerMouseMove );
             doc.removeEventListener( 'mouseup', innerMouseUp );
             document.body.classList.remove( 'nocursor' );
@@ -2312,7 +2333,7 @@ class Area {
 
     propagateEvent( eventName ) {
 
-        for( var i = 0; i < this.sections.length; i++ )
+        for( let i = 0; i < this.sections.length; i++ )
         {
             const area = this.sections[ i ];
 
@@ -2438,7 +2459,7 @@ class Area {
 
         if( float )
         {
-            for( var i = 0; i < float.length; i++ )
+            for( let i = 0; i < float.length; i++ )
             {
                 const t = float[i];
                 switch( t )
@@ -2657,7 +2678,7 @@ class Area {
 
         for( var i = 0; i < this.sections.length; i++ )
         {
-            this.sections[i]._update();
+            this.sections[ i ]._update();
         }
     }
 };
@@ -4381,6 +4402,8 @@ class Widget {
             {
                 root.style.height = root.style.minHeight = options.height;
             }
+
+            LX.widgetResizeObserver.observe( root );
         }
 
         if( name != undefined )
@@ -4581,15 +4604,17 @@ LX.Widget = Widget;
 
 function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
 {
-    let custom_idx = simple_guidGenerator();
+    let customIdx = simple_guidGenerator();
 
     Panel.prototype[ 'add' + customWidgetName ] = function( name, instance, callback ) {
+
+        options.nameWidth = "100%";
 
         let widget = new Widget( Widget.CUSTOM, name, null, options );
         this._attachWidget( widget );
 
         widget.customName = customWidgetName;
-        widget.customIdx = custom_idx;
+        widget.customIdx = customIdx;
 
         widget.onGetValue = () => {
             return instance;
@@ -4606,7 +4631,6 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
         };
 
         const element = widget.root;
-        element.style.flexWrap = "wrap";
 
         let container, customWidgetsDom;
         let default_instance = options.default ?? {};
@@ -4625,14 +4649,12 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
 
             container = document.createElement('div');
             container.className = "lexcustomcontainer";
-            doAsync( () => {
-                const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-                container.style.width = `calc( 100% - ${ realNameWidth })`;
-            } );
+            container.style.width = "100%";
+            element.appendChild( container );
 
             let buttonName = "<a class='fa-solid " + (options.icon ?? "fa-cube")  + "' style='float:left'></a>";
             buttonName += customWidgetName + (!instance ? " [empty]" : "");
-            // Add alwayis icon to keep spacing right
+            // Add always icon to keep spacing right
             buttonName += "<a class='fa-solid " + (instance ? "fa-bars-staggered" : " ") + " menu' style='float:right; width:5%;'></a>";
 
             let buttonEl = this.addButton(null, buttonName, (value, event) => {
@@ -4652,7 +4674,6 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                 }
 
             }, { buttonClass: 'custom' });
-
             container.appendChild( buttonEl.root );
 
             if( instance )
@@ -4674,8 +4695,6 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
             customWidgetsDom = document.createElement('div');
             customWidgetsDom.className = "lexcustomitems";
             customWidgetsDom.toggleAttribute('hidden', true);
-
-            element.appendChild( container );
             element.appendChild( customWidgetsDom );
 
             if( instance )
@@ -5193,6 +5212,7 @@ class NodeTree {
         }
 
         const _hasChild = function( parent, id ) {
+            if( !parent.length  ) return;
             for( var c of parent.children )
             {
                 if( c.id == id ) return true;
@@ -5357,6 +5377,11 @@ class TextInput extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         this.valid = ( v ) => {
             v = v ?? this.value();
             if( !v.length || wValue.pattern == "" ) return true;
@@ -5367,10 +5392,7 @@ class TextInput extends Widget {
         let container = document.createElement( 'div' );
         container.className = "lextext" + ( options.warning ? " lexwarning" : "" );
         container.style.display = "flex";
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
-        } );
+        this.root.appendChild( container );
 
         if( options.textClass )
         {
@@ -5449,13 +5471,13 @@ class TextInput extends Widget {
             wValue.innerHTML = ( icon + value ) || "";
             wValue.style.width = "100%";
             wValue.style.textAlign = options.float ?? "";
+            wValue.className = "ellipsis-overflow";
         }
 
         Object.assign( wValue.style, options.style ?? {} );
-
         container.appendChild( wValue );
 
-        this.root.appendChild( container );
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -5486,26 +5508,22 @@ class TextArea extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         let container = document.createElement( "div" );
         container.className = "lextextarea";
         container.style.display = "flex";
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
-            container.style.height = options.height;
-
-            if( options.fitHeight )
-            {
-                // Update height depending on the content
-                wValue.style.height = wValue.scrollHeight + "px";
-            }
-        } );
+        this.root.appendChild( container );
 
         let wValue = document.createElement( "textarea" );
         wValue.value = wValue.iValue = value || "";
         wValue.style.width = "100%";
         wValue.style.textAlign = options.float ?? "";
         Object.assign( wValue.style, options.style ?? {} );
+        container.appendChild( wValue );
 
         if( options.disabled ?? false ) wValue.setAttribute( "disabled", true );
         if( options.placeholder ) wValue.setAttribute( "placeholder", options.placeholder );
@@ -5539,9 +5557,17 @@ class TextArea extends Widget {
             container.appendChild( icon );
         }
 
-        container.appendChild( wValue );
+        doAsync( () => {
+            container.style.height = options.height;
 
-        this.root.appendChild( container );
+            if( options.fitHeight )
+            {
+                // Update height depending on the content
+                wValue.style.height = wValue.scrollHeight + "px";
+            }
+
+            this.onResize();
+        }, 10 );
     }
 }
 
@@ -5568,9 +5594,15 @@ class Button extends Widget {
             ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + ( newValue || "" ) + "</span>" ) );
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            wValue.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         var wValue = document.createElement( 'button' );
         wValue.title = options.title ?? "";
         wValue.className = "lexbutton " + ( options.buttonClass ?? "" );
+        this.root.appendChild( wValue );
 
         if( options.selected )
         {
@@ -5580,11 +5612,6 @@ class Button extends Widget {
         wValue.innerHTML =
             ( options.icon ? "<a class='" + options.icon + "'></a>" :
             ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + ( value || "" ) + "</span>" ) );
-
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            wValue.style.width = `calc( 100% - ${ realNameWidth })`;
-        } );
 
         if( options.disabled )
         {
@@ -5605,15 +5632,7 @@ class Button extends Widget {
             this._trigger( new IEvent( name, value, e ), callback );
         });
 
-        this.root.appendChild( wValue );
-
-        // Remove branch padding and
-        const useNameAsLabel = !( options.hideName ?? false ) && !( options.icon || options.img );
-        if( !useNameAsLabel )
-        {
-            wValue.className += " noname";
-            wValue.style.width = "100%";
-        }
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -5641,14 +5660,10 @@ class ComboButtons extends Widget {
             container.className += options.float;
         }
 
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        } );
-
         let currentValue = [];
         let buttonsBox = document.createElement('div');
         buttonsBox.className = "lexcombobuttonsbox ";
+        container.appendChild( buttonsBox );
 
         for( let b of values )
         {
@@ -5760,9 +5775,14 @@ class ComboButtons extends Widget {
             }
         };
 
-        container.appendChild( buttonsBox );
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
 
         this.root.appendChild( container );
+
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -5784,6 +5804,7 @@ class Card extends Widget {
         let container = document.createElement('div');
         container.className = "lexcard";
         container.style.width = "100%";
+        this.root.appendChild( container );
 
         if( options.img )
         {
@@ -5806,6 +5827,7 @@ class Card extends Widget {
 
         let cardNameDom = document.createElement('span');
         cardNameDom.innerText = name;
+        container.appendChild( cardNameDom );
 
         if( options.link != undefined )
         {
@@ -5824,9 +5846,6 @@ class Card extends Widget {
                 this._trigger( new IEvent( name, null, e ), options.callback );
             });
         }
-
-        container.appendChild( cardNameDom );
-        this.root.appendChild( container );
     }
 }
 
@@ -5877,6 +5896,7 @@ class Form extends Widget {
         container.className = "lexformdata";
         container.style.width = "100%";
         container.formData = {};
+        this.root.appendChild( container );
 
         for( let entry in data )
         {
@@ -5921,8 +5941,6 @@ class Form extends Widget {
         }, { buttonClass: "primary", width: "calc(100% - 10px)" } );
 
         container.appendChild( submitButton.root );
-
-        this.root.appendChild( container );
     }
 }
 
@@ -5974,12 +5992,14 @@ class Select extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         let container = document.createElement( "div" );
         container.className = "lexselect";
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
-        } );
+        this.root.appendChild( container );
 
         let wValue = document.createElement( 'div' );
         wValue.className = "lexselect lexoption";
@@ -6138,7 +6158,7 @@ class Select extends Widget {
             filterOptions.skipWidget = filterOptions.skipWidget ?? true;
             filterOptions.trigger = "input";
             filterOptions.icon = "fa-solid fa-magnifying-glass";
-            filterOptions.className = "lexfilter noname";
+            filterOptions.className = "lexfilter";
 
             let filter = new TextInput(null, options.filterValue ?? "", ( v ) => {
                 const filteredOptions = this._filterOptions( values, v );
@@ -6256,7 +6276,7 @@ class Select extends Widget {
 
         container.appendChild( listDialog );
 
-        this.root.appendChild( container );
+        doAsync( this.onResize.bind( this ) );
     }
 
     _filterOptions( options, value ) {
@@ -6312,12 +6332,17 @@ class Curve extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+            flushCss( container );
+            curveInstance.canvas.width = container.offsetWidth;
+            curveInstance.redraw();
+        };
+
         var container = document.createElement( "div" );
         container.className = "lexcurve";
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        } );
+        this.root.appendChild( container );
 
         options.callback = (v, e) => {
             this._trigger( new IEvent( name, v, e ), callback );
@@ -6327,16 +6352,9 @@ class Curve extends Widget {
 
         let curveInstance = new CanvasCurve( values, options );
         container.appendChild( curveInstance.element );
-        this.root.appendChild( container );
-
-        // Resize
-        this.onresize = curveInstance.redraw.bind( curveInstance );
         this.curveInstance = curveInstance;
 
-        doAsync(() => {
-            curveInstance.canvas.width = container.offsetWidth;
-            curveInstance.redraw();
-        });
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -6356,24 +6374,32 @@ class Dial extends Widget {
         super( Widget.DIAL, name, defaultValues, options );
 
         this.onGetValue = () => {
-            return JSON.parse( JSON.stringify( curveInstance.element.value ) );
+            return JSON.parse( JSON.stringify( dialInstance.element.value ) );
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
-            curveInstance.element.value = JSON.parse( JSON.stringify( newValue ) );
-            curveInstance.redraw();
+            dialInstance.element.value = JSON.parse( JSON.stringify( newValue ) );
+            dialInstance.redraw();
             if( !skipCallback )
             {
-                this._trigger( new IEvent( name, curveInstance.element.value, event ), callback );
+                this._trigger( new IEvent( name, dialInstance.element.value, event ), callback );
             }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+            flushCss( container );
+            dialInstance.element.style.height = dialInstance.element.offsetWidth + "px";
+            dialInstance.canvas.width = dialInstance.element.offsetWidth;
+            container.style.width = dialInstance.element.offsetWidth + "px";
+            dialInstance.canvas.height = dialInstance.canvas.width;
+            dialInstance.redraw();
         };
 
         var container = document.createElement( "div" );
         container.className = "lexcurve";
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        } );
+        this.root.appendChild( container );
 
         options.callback = ( v, e ) => {
             this._trigger( new IEvent( name, v, e ), callback );
@@ -6381,21 +6407,11 @@ class Dial extends Widget {
 
         options.name = name;
 
-        let curveInstance = new CanvasDial( this, values, options );
-        container.appendChild( curveInstance.element );
-        this.root.appendChild( container );
+        let dialInstance = new CanvasDial( this, values, options );
+        container.appendChild( dialInstance.element );
+        this.dialInstance = dialInstance;
 
-        // Resize
-        this.onresize = curveInstance.redraw.bind( curveInstance );
-        this.curveInstance = curveInstance;
-
-        doAsync(() => {
-            curveInstance.element.style.height = curveInstance.element.offsetWidth + "px";
-            curveInstance.canvas.width = curveInstance.element.offsetWidth;
-            container.style.width = curveInstance.element.offsetWidth + "px";
-            curveInstance.canvas.height = curveInstance.canvas.width;
-            curveInstance.redraw();
-        });
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -6418,25 +6434,27 @@ class Layers extends Widget {
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
             value = newValue;
-            setLayers();
+            this.setLayers( value );
             if( !skipCallback )
             {
                 this._trigger( new IEvent(name, value, event), callback );
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         var container = document.createElement( "div" );
         container.className = "lexlayers";
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        } );
+        this.root.appendChild( container );
 
-        const setLayers = () =>  {
+        this.setLayers = ( val ) =>  {
 
             container.innerHTML = "";
 
-            let binary = value.toString( 2 );
+            let binary = val.toString( 2 );
             let nbits = binary.length;
 
             // fill zeros
@@ -6450,7 +6468,7 @@ class Layers extends Widget {
                 let layer = document.createElement( "div" );
                 layer.className = "lexlayer";
 
-                if( value != undefined )
+                if( val != undefined )
                 {
                     const valueBit = binary[ 16 - bit - 1 ];
                     if( valueBit != undefined && valueBit == '1' )
@@ -6467,15 +6485,15 @@ class Layers extends Widget {
                     e.stopPropagation();
                     e.stopImmediatePropagation();
                     e.target.classList.toggle( "selected" );
-                    const newValue = value ^ ( 1 << bit );
+                    const newValue = val ^ ( 1 << bit );
                     this.set( newValue, false, e );
                 } );
             }
         };
 
-        setLayers();
+        this.setLayers( value );
 
-        this.root.appendChild( container );
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -6489,6 +6507,8 @@ LX.Layers = Layers;
 class ItemArray extends Widget {
 
     constructor( name, values = [], callback, options = {} ) {
+
+        options.nameWidth = "100%";
 
         super( Widget.ARRAY, name, null, options );
 
@@ -6505,18 +6525,14 @@ class ItemArray extends Widget {
             }
         };
 
-        this.root.style.flexWrap = "wrap";
-
         // Add open array button
 
         const itemNameWidth = "4%";
 
         var container = document.createElement('div');
         container.className = "lexarray";
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        } );
+        container.style.width = "100%";
+        this.root.appendChild( container );
 
         const angleDown = `<a class='fa-solid fa-angle-down' style='float:right; margin-right: 3px;'></a>`;
 
@@ -6526,7 +6542,6 @@ class ItemArray extends Widget {
         const toggleButton = new Button(null, buttonName, () => {
             this.root.querySelector(".lexarrayitems").toggleAttribute('hidden');
         }, { buttonClass: 'array' });
-
         container.appendChild( toggleButton.root );
 
         // Show elements
@@ -6534,8 +6549,6 @@ class ItemArray extends Widget {
         let arrayItems = document.createElement( "div" );
         arrayItems.className = "lexarrayitems";
         arrayItems.toggleAttribute( "hidden",  true );
-
-        this.root.appendChild( container );
         this.root.appendChild( arrayItems );
 
         this._updateItems = () => {
@@ -6552,10 +6565,6 @@ class ItemArray extends Widget {
             {
                 const value = values[ i ];
                 let baseclass = options.innerValues ? 'select' : value.constructor;
-
-                // TODO
-                // this.sameLine( 2 );
-
                 let widget = null;
 
                 switch( baseclass  )
@@ -6584,13 +6593,13 @@ class ItemArray extends Widget {
 
                 arrayItems.appendChild( widget.root );
 
-                widget = new Button( null, "<a class='lexicon fa-solid fa-trash'></a>", ( v, event) => {
+                const removeWidget = new Button( null, "<a class='lexicon fa-solid fa-trash'></a>", ( v, event) => {
                     values.splice( values.indexOf( value ), 1 );
                     this._updateItems();
                     this._trigger( new IEvent(name, values, event), callback );
                 }, { title: "Remove item", className: 'micro'} );
 
-                arrayItems.appendChild( widget.root );
+                widget.root.appendChild( removeWidget.root );
             }
 
             buttonName = "Add item";
@@ -6655,6 +6664,11 @@ class List extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            listContainer.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         this._updateValues = ( newValues ) => {
 
             values = newValues;
@@ -6690,14 +6704,11 @@ class List extends Widget {
 
         let listContainer = document.createElement( 'div' );
         listContainer.className = "lexlist";
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            listContainer.style.width = `calc( 100% - ${ realNameWidth })`;
-        } );
+        this.root.appendChild( listContainer );
 
         this._updateValues( values );
 
-        this.root.appendChild( listContainer );
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -6723,23 +6734,25 @@ class Tags extends Widget {
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
             value = [].concat( newValue );
-            _generateTags();
+            this.generateTags( value );
             if( !skipCallback )
             {
                 this._trigger( new IEvent( name, value, event ), callback );
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            tagsContainer.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         // Show tags
 
         const tagsContainer = document.createElement('div');
         tagsContainer.className = "lextags";
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            tagsContainer.style.width = `calc( 100% - ${ realNameWidth })`;
-        } );
+        this.root.appendChild( tagsContainer );
 
-        const _generateTags = () => {
+        this.generateTags = ( value ) => {
 
             tagsContainer.innerHTML = "";
 
@@ -6783,9 +6796,9 @@ class Tags extends Widget {
             tagInput.focus();
         }
 
-        _generateTags();
+        this.generateTags( value );
 
-        this.root.appendChild( tagsContainer );
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -6829,35 +6842,33 @@ class Checkbox extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         var container = document.createElement( "div" );
         container.className = "lexcheckboxcont";
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
-        } );
+        this.root.appendChild( container );
 
         let checkbox = document.createElement( "input" );
         checkbox.type = "checkbox";
         checkbox.className = "lexcheckbox " + ( options.className ?? "" );
         checkbox.checked = value;
         checkbox.disabled = options.disabled ?? false;
+        container.appendChild( checkbox );
 
         let valueName = document.createElement( "span" );
         valueName.className = "checkboxtext";
         valueName.innerHTML = options.label ?? "On";
-
-        container.appendChild( checkbox );
         container.appendChild( valueName );
 
         checkbox.addEventListener( "change" , e => {
             this.set( checkbox.checked, false, e );
         });
 
-        this.root.appendChild( container );
-
         if( options.suboptions )
         {
-            this.root.style.flexWrap = "wrap";
             let suboptions = document.createElement( "div" );
             suboptions.className = "lexcheckboxsubmenu";
             suboptions.toggleAttribute( "hidden", !checkbox.checked );
@@ -6869,6 +6880,8 @@ class Checkbox extends Widget {
 
             this.root.appendChild( suboptions );
         }
+
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -6912,12 +6925,14 @@ class Toggle extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         var container = document.createElement('div');
         container.className = "lextogglecont";
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
-        } );
+        this.root.appendChild( container );
 
         let toggle = document.createElement('input');
         toggle.type = "checkbox";
@@ -6925,23 +6940,19 @@ class Toggle extends Widget {
         toggle.checked = value;
         toggle.iValue = value;
         toggle.disabled = options.disabled ?? false;
+        container.appendChild( toggle );
 
         let valueName = document.createElement( 'span' );
         valueName.className = "toggletext";
         valueName.innerHTML = options.label ?? "On";
-
-        container.appendChild( toggle );
         container.appendChild( valueName );
 
         toggle.addEventListener( "change" , e => {
             this.set( toggle.checked, false, e );
         });
 
-        this.root.appendChild( container );
-
         if( options.suboptions )
         {
-            this.root.style.flexWrap = "wrap";
             let suboptions = document.createElement('div');
             suboptions.className = "lextogglesubmenu";
             suboptions.toggleAttribute( 'hidden', !toggle.checked );
@@ -6953,6 +6964,8 @@ class Toggle extends Widget {
 
             this.root.appendChild( suboptions );
         }
+
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -6997,6 +7010,7 @@ class RadioGroup extends Widget {
 
         var container = document.createElement( 'div' );
         container.className = "lexradiogroup " + ( options.className ?? "" );
+        this.root.appendChild( container );
 
         let labelSpan = document.createElement( 'span' );
         labelSpan.innerHTML = label;
@@ -7031,8 +7045,6 @@ class RadioGroup extends Widget {
             currentIndex = options.selected;
             this.set( currentIndex, true );
         }
-
-        this.root.appendChild( container );
     }
 }
 
@@ -7076,12 +7088,14 @@ class ColorInput extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         var container = document.createElement( 'span' );
         container.className = "lexcolor";
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        } );
+        this.root.appendChild( container );
 
         let color = document.createElement( 'input' );
         color.style.width = "32px";
@@ -7090,6 +7104,7 @@ class ColorInput extends Widget {
         color.id = "color" + simple_guidGenerator();
         color.useRGB = options.useRGB ?? false;
         color.value = color.iValue = value;
+        container.appendChild( color );
 
         if( options.disabled )
         {
@@ -7100,17 +7115,14 @@ class ColorInput extends Widget {
             this.set( e.target.value, false, e );
         }, false );
 
-        container.appendChild( color );
-
         const textWidget = new TextInput( null, color.value, v => {
             this.set( v );
         }, { width: "calc( 100% - 32px )"});
 
         textWidget.root.style.marginLeft = "4px";
-
         container.appendChild( textWidget.root );
 
-        this.root.appendChild( container );
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -7146,12 +7158,14 @@ class RangeInput extends Widget {
             }
         };
 
-        var container = document.createElement( 'div' );
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
+        };
+
+        const container = document.createElement( 'div' );
         container.className = "lexrange";
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
-        } );
+        this.root.appendChild( container );
 
         let slider = document.createElement( 'input' );
         slider.className = "lexrangeslider " + ( options.className ?? "" );
@@ -7161,6 +7175,7 @@ class RangeInput extends Widget {
         slider.step = options.step ?? 1;
         slider.type = "range";
         slider.disabled = options.disabled ?? false;
+        container.appendChild( slider );
 
         if( options.left ?? false )
         {
@@ -7203,9 +7218,7 @@ class RangeInput extends Widget {
             value = clamp( value, +slider.min, +slider.max );
         }
 
-        container.appendChild( slider );
-
-        this.root.appendChild( container );
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -7253,15 +7266,18 @@ class NumberInput extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         var container = document.createElement( 'div' );
         container.className = "lexnumber";
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
-        } );
+        this.root.appendChild( container );
 
         let box = document.createElement( 'div' );
         box.className = "numberbox";
+        container.appendChild( box );
 
         let vecinput = document.createElement( 'input' );
         vecinput.id = "number_" + simple_guidGenerator();
@@ -7435,9 +7451,7 @@ class NumberInput extends Widget {
 
         vecinput.addEventListener( "mousedown", innerMouseDown );
 
-        container.appendChild( box );
-
-        this.root.appendChild( container );
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -7489,14 +7503,16 @@ class Vector extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         const vectorInputs = [];
 
         var container = document.createElement( 'div' );
         container.className = "lexvector";
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        } );
+        this.root.appendChild( container );
 
         const that = this;
 
@@ -7699,7 +7715,7 @@ class Vector extends Widget {
             }
         }, false );
 
-        this.root.appendChild( container );
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -7829,38 +7845,34 @@ class Pad extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         var container = document.createElement( 'div' );
         container.className = "lexpad";
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        } );
+        this.root.appendChild( container );
 
         let pad = document.createElement('div');
         pad.id = "lexpad-" + name;
         pad.className = "lexinnerpad";
         pad.style.width = options.padSize ?? '96px';
         pad.style.height = options.padSize ?? '96px';
+        container.appendChild( pad );
 
         let thumb = document.createElement('div');
         thumb.className = "lexpadthumb";
         thumb.value = new LX.vec2( value[ 0 ], value[ 1 ] );
         thumb.min = options.min ?? 0;
         thumb.max = options.max ?? 1;
+        pad.appendChild( thumb );
 
         let _updateValue = v => {
             const [ w, h ] = [ pad.offsetWidth, pad.offsetHeight ];
             const value0to1 = new LX.vec2( remapRange( v.x, thumb.min, thumb.max, 0.0, 1.0 ), remapRange( v.y, thumb.min, thumb.max, 0.0, 1.0 ) );
             thumb.style.transform = `translate(calc( ${ w * value0to1.x }px - 50% ), calc( ${ h * value0to1.y }px - 50%)`;
         }
-
-        doAsync( () => {
-            _updateValue( thumb.value )
-        } );
-
-        pad.appendChild( thumb );
-        container.appendChild( pad );
-        this.root.appendChild( container );
 
         pad.addEventListener( "mousedown", innerMouseDown );
 
@@ -7880,6 +7892,7 @@ class Pad extends Widget {
             document.body.classList.add( 'noevents' );
             e.stopImmediatePropagation();
             e.stopPropagation();
+            thumb.classList.add( "active" );
 
             if( options.onPress )
             {
@@ -7911,12 +7924,18 @@ class Pad extends Widget {
             doc.removeEventListener( 'mouseup', innerMouseUp );
             document.body.classList.remove( 'nocursor' );
             document.body.classList.remove( 'noevents' );
+            thumb.classList.remove( "active" );
 
             if( options.onRelease )
             {
                 options.onRelease.bind( thumb )( e, thumb );
             }
         }
+
+        doAsync( () => {
+            this.onResize();
+            _updateValue( thumb.value )
+        } );
     }
 }
 
@@ -7946,12 +7965,14 @@ class Progress extends Widget {
             }
         };
 
-        var container = document.createElement('div');
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
+        const container = document.createElement('div');
         container.className = "lexprogress";
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        } );
+        this.root.appendChild( container );
 
         // add slider (0-1 if not specified different )
 
@@ -7965,6 +7986,7 @@ class Progress extends Widget {
         progress.high = options.high ?? progress.high;
         progress.optimum = options.optimum ?? progress.optimum;
         progress.value = value;
+        container.appendChild( progress );
 
         const _updateColor = () => {
 
@@ -7981,9 +8003,6 @@ class Progress extends Widget {
 
             progress.style.background = `color-mix(in srgb, ${backgroundColor} 20%, transparent)`;
         };
-
-        container.appendChild( progress );
-        this.root.appendChild( container );
 
         if( options.showValue )
         {
@@ -8051,6 +8070,8 @@ class Progress extends Widget {
         }
 
         _updateColor();
+
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -8071,15 +8092,17 @@ class FileInput extends Widget {
         let type = options.type ?? 'text';
         let read = options.read ?? true;
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            input.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         // Create hidden input
         let input = document.createElement( 'input' );
         input.className = "lexfileinput";
         input.type = 'file';
         input.disabled = options.disabled ?? false;
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            input.style.width = `calc( 100% - ${ realNameWidth } - 10%)`;
-        } );
+        this.root.appendChild( input );
 
         if( options.placeholder )
         {
@@ -8112,8 +8135,6 @@ class FileInput extends Widget {
             callback( null );
         });
 
-        this.root.appendChild( input );
-
         if( local )
         {
             let settingsDialog = null;
@@ -8134,6 +8155,8 @@ class FileInput extends Widget {
 
             this.root.appendChild( settingButton.root );
         }
+
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -8374,7 +8397,6 @@ class Counter extends Widget {
             if( e.shiftKey ) mult *= 10;
             this.set( counterText.count + mult, false, e );
         }, { className: "micro", skipInlineCount: true, title: "Plus" });
-
         container.appendChild( addButton.root );
     }
 }
@@ -8397,12 +8419,14 @@ class Table extends Widget {
 
         super( Widget.TABLE, name, null, options );
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         const container = document.createElement('div');
         container.className = "lextable";
-        doAsync( () => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 ) + "px";
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        } );
+        this.root.appendChild( container );
 
         this.centered = options.centered ?? false;
         if( this.centered === true )
@@ -8410,13 +8434,16 @@ class Table extends Widget {
             container.classList.add( "centered" );
         }
 
-        const table = document.createElement( 'table' );
-        container.appendChild( table );
+        this.filter = options.filter ?? false;
+        this.toggleColumns = options.toggleColumns ?? false;
+        this.customFilters = options.customFilters ?? false;
+        this.activeCustomFilters = {};
 
         data.head = data.head ?? [];
         data.body = data.body ?? [];
-        data.colVisibilityMap = { };
         data.checkMap = { };
+        data.colVisibilityMap = { };
+        data.head.forEach( (col, index) => { data.colVisibilityMap[ index ] = true; })
 
         const compareFn = ( idx, order, a, b) => {
             if (a[idx] < b[idx]) return -order;
@@ -8426,14 +8453,105 @@ class Table extends Widget {
 
         const sortFn = ( idx, sign ) => {
             data.body = data.body.sort( compareFn.bind( this, idx, sign ) );
-            this.refreshTable();
+            this.refresh();
         }
 
-        this.refreshTable = () => {
+        // Append header
+        if( this.filter || this.customFilters || this.toggleColumns )
+        {
+            const headerContainer = LX.makeContainer( [ "100%", "auto" ] );
+
+            if( this.filter )
+            {
+                const filterOptions = LX.deepCopy( options );
+                filterOptions.placeholder = `Filter ${ this.filter }...`;
+                filterOptions.skipWidget = true;
+                filterOptions.trigger = "input";
+                filterOptions.textClass = "outline";
+
+                let filter = new TextInput(null, "", ( v ) => {
+                    this._currentFilter = v;
+                    this.refresh();
+                }, filterOptions );
+
+                headerContainer.appendChild( filter.root );
+            }
+
+            if( this.customFilters )
+            {
+                const icon = LX.makeIcon( "circle-plus", null, "sm" );
+
+                for( let f of this.customFilters )
+                {
+                    const customFilterBtn = new Button(null, icon.innerHTML + f.name, ( v ) => {
+
+                        const menuOptions = f.options.map( ( colName, idx ) => {
+                            const item = {
+                                name: colName,
+                                checked:  !!this.activeCustomFilters[ colName ],
+                                callback: (key, dom, v) => {
+                                    if( v ) { this.activeCustomFilters[ key ] = f.name; }
+                                    else {
+                                        delete this.activeCustomFilters[ key ];
+                                    }
+                                    this.refresh();
+                                }
+                            }
+                            return item;
+                        } );
+                        new DropdownMenu( customFilterBtn.root, menuOptions, { side: "bottom", align: "start" });
+                    }, { buttonClass: "dashed" } );
+                    headerContainer.appendChild( customFilterBtn.root );
+                }
+
+                // const resetIcon = LX.makeIcon( "xmark", null, "sm" );
+                this._resetCustomFiltersBtn = new Button(null, "resetButton", ( v ) => {
+                    this.activeCustomFilters = {};
+                    this.refresh();
+                    this._resetCustomFiltersBtn.root.classList.add( "hidden" );
+                }, { title: "Reset filters", icon: "fa fa-xmark" } );
+                headerContainer.appendChild( this._resetCustomFiltersBtn.root );
+                this._resetCustomFiltersBtn.root.classList.add( "hidden" );
+            }
+
+            if( this.toggleColumns )
+            {
+                const icon = LX.makeIcon( "sliders" );
+                const toggleColumnsBtn = new Button( "toggleColumnsBtn", icon.innerHTML + "View", (value, e) => {
+                    const menuOptions = data.head.map( ( colName, idx ) => {
+                        const item = {
+                            name: colName,
+                            icon: "check",
+                            callback: () => {
+                                data.colVisibilityMap[ idx ] = !data.colVisibilityMap[ idx ];
+                                const cells = table.querySelectorAll(`tr > *:nth-child(${idx + this.rowOffsetCount + 1})`);
+                                cells.forEach(cell => {
+                                    cell.style.display = (cell.style.display === "none") ? "" : "none";
+                                });
+                            }
+                        }
+                        if( !data.colVisibilityMap[ idx ] ) delete item.icon;
+                        return item;
+                    } );
+                    new DropdownMenu( e.target, menuOptions, { side: "bottom", align: "end" });
+                }, { hideName: true } );
+                headerContainer.appendChild( toggleColumnsBtn.root );
+                toggleColumnsBtn.root.style.marginLeft = "auto";
+            }
+
+            container.appendChild( headerContainer );
+        }
+
+        const table = document.createElement( 'table' );
+        container.appendChild( table );
+
+        this.refresh = () => {
+
+            this._currentFilter = this._currentFilter ?? "";
 
             table.innerHTML = "";
 
-            let rowOffsetCount = 0;
+            this.rowOffsetCount = 0;
 
             // Head
             {
@@ -8448,7 +8566,7 @@ class Table extends Widget {
                     const th = document.createElement( 'th' );
                     th.style.width = "0px";
                     hrow.appendChild( th );
-                    rowOffsetCount++;
+                    this.rowOffsetCount++;
                 }
 
                 if( options.selectable )
@@ -8473,14 +8591,15 @@ class Table extends Widget {
                         }
                     });
 
-                    rowOffsetCount++;
+                    this.rowOffsetCount++;
                     hrow.appendChild( th );
                 }
 
                 for( const headData of data.head )
                 {
                     const th = document.createElement( 'th' );
-                    th.innerHTML = `${ headData } <a class="fa-solid fa-sort"></a>`;
+                    th.innerHTML = `<span>${ headData }</span>`;
+                    th.querySelector( "span" ).appendChild( LX.makeIcon( "menu-arrows", null, "sm" ) );
 
                     const idx = data.head.indexOf( headData );
                     if( this.centered && this.centered.indexOf( idx ) > -1 )
@@ -8488,19 +8607,29 @@ class Table extends Widget {
                         th.classList.add( "centered" );
                     }
 
-                    th.addEventListener( 'click', event => {
-                        new LX.DropdownMenu( event.target, [
-                            { name: "Asc", icon: "up", callback: sortFn.bind( this, idx, 1 ) },
-                            { name: "Desc", icon: "down", callback: sortFn.bind( this, idx, -1 ) },
+                    const menuOptions = [
+                        { name: "Asc", icon: "up", callback: sortFn.bind( this, idx, 1 ) },
+                        { name: "Desc", icon: "down", callback: sortFn.bind( this, idx, -1 ) }
+                    ];
+
+                    if( this.toggleColumns )
+                    {
+                        menuOptions.push(
                             null,
-                            { name: "Hide", icon: "eye-slash", callback: () => {
-                                data.colVisibilityMap[ idx ] = 0;
-                                const cells = table.querySelectorAll(`tr > *:nth-child(${idx + rowOffsetCount + 1})`);
-                                cells.forEach(cell => {
-                                    cell.style.display = (cell.style.display === "none") ? "" : "none";
-                                });
-                            } }
-                        ], { side: "bottom", align: "start" });
+                            {
+                                name: "Hide", icon: "eye-slash", callback: () => {
+                                    data.colVisibilityMap[ idx ] = false;
+                                    const cells = table.querySelectorAll(`tr > *:nth-child(${idx + this.rowOffsetCount + 1})`);
+                                    cells.forEach(cell => {
+                                        cell.style.display = (cell.style.display === "none") ? "" : "none";
+                                    });
+                                }
+                            }
+                        );
+                    }
+
+                    th.addEventListener( 'click', event => {
+                        new DropdownMenu( event.target, menuOptions, { side: "bottom", align: "start" });
                     });
 
                     hrow.appendChild( th );
@@ -8538,14 +8667,22 @@ class Table extends Widget {
                         v.style.transition = `none`;
                     } );
                     flushCss( fromRow );
-                    rIdx = null;
 
                     if( movePending )
                     {
+                        // Modify inner data first
+                        const fromIdx = rIdx - 1;
+                        const targetIdx = movePending[ 1 ] - 1;
+                        var b = data.body[fromIdx];
+                        data.body[fromIdx] = data.body[targetIdx];
+                        data.body[targetIdx] = b;
+
                         const parent = movePending[ 0 ].parentNode;
                         parent.insertChildAtIndex(  movePending[ 0 ],  movePending[ 1 ] );
                         movePending = null;
                     }
+
+                    rIdx = null;
 
                     doAsync( () => {
                         Array.from( table.rows ).forEach( v => {
@@ -8562,10 +8699,47 @@ class Table extends Widget {
                     fromRow.style.transform = `translateY(${fromRow.dY}px)`;
                 };
 
-
                 for( let r = 0; r < data.body.length; ++r )
                 {
                     const bodyData = data.body[ r ];
+
+                    if( this.filter )
+                    {
+                        const filterColIndex = data.head.indexOf( this.filter );
+                        if( filterColIndex > -1 )
+                        {
+                            if( !bodyData[ filterColIndex ].toLowerCase().includes( this._currentFilter.toLowerCase() ) )
+                            {
+                                continue;
+                            }
+                        }
+                    }
+
+                    if( Object.keys( this.activeCustomFilters ).length )
+                    {
+                        let acfMap = {};
+
+                        this._resetCustomFiltersBtn.root.classList.remove( "hidden" );
+
+                        for( let acfValue in this.activeCustomFilters )
+                        {
+                            const acfName = this.activeCustomFilters[ acfValue ];
+                            acfMap[ acfName ] = acfMap[ acfName ] ?? false;
+
+                            const filterColIndex = data.head.indexOf( acfName );
+                            if( filterColIndex > -1 )
+                            {
+                                acfMap[ acfName ] |= ( bodyData[ filterColIndex ] === acfValue );
+                            }
+                        }
+
+                        const show = Object.values( acfMap ).reduce( ( e, acc ) => acc *= e );
+                        if( !show )
+                        {
+                            continue;
+                        }
+                    }
+
                     const row = document.createElement( 'tr' );
                     const rowId = LX.getSupportedDOMName( bodyData.join( '-' ) );
                     row.setAttribute( "rowId", rowId.substr(0, 16) );
@@ -8676,14 +8850,15 @@ class Table extends Widget {
                             {
                                 button = LX.makeIcon( "more-horizontal", "Menu" );
                                 button.addEventListener( 'click', function( event ) {
-                                    addContextMenu( null, event, c => {
-                                        if( options.onMenuAction )
-                                        {
-                                            options.onMenuAction( c );
-                                            return;
-                                        }
-                                        console.warn( "Using <Menu action> without action callbacks." );
-                                    } );
+                                    if( !options.onMenuAction )
+                                    {
+                                        return;
+                                    }
+
+                                    const menuOptions = options.onMenuAction( r, data );
+                                    console.assert( menuOptions.length, "Add items to the Menu Action Dropdown!" );
+
+                                    new DropdownMenu( event.target, menuOptions, { side: "bottom", align: "end" });
                                 });
                             }
                             else // custom actions
@@ -8697,7 +8872,7 @@ class Table extends Widget {
                                         const mustRefresh = action.callback( bodyData, table, e );
                                         if( mustRefresh )
                                         {
-                                            this.refreshTable();
+                                            this.refresh();
                                         }
                                     });
                                 }
@@ -8719,7 +8894,7 @@ class Table extends Widget {
                 const idx = parseInt( v );
                 if( !data.colVisibilityMap[ idx ] )
                 {
-                    const cells = table.querySelectorAll(`tr > *:nth-child(${idx + rowOffsetCount + 1})`);
+                    const cells = table.querySelectorAll(`tr > *:nth-child(${idx + this.rowOffsetCount + 1})`);
                     cells.forEach(cell => {
                         cell.style.display = (cell.style.display === "none") ? "" : "none";
                     });
@@ -8727,9 +8902,9 @@ class Table extends Widget {
             }
         }
 
-        this.refreshTable();
+        this.refresh();
 
-        this.root.appendChild( container );
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -9102,7 +9277,7 @@ class Panel {
 
         let widget = new TextInput( null, null, null, options )
         const element = widget.root;
-        element.className += " lexfilter noname";
+        element.className += " lexfilter";
 
         let input = document.createElement('input');
         input.className = 'lexinput-filter';
@@ -9115,7 +9290,7 @@ class Panel {
         element.appendChild( searchIcon );
         element.appendChild( input );
 
-        input.addEventListener("input", (e) => {
+        input.addEventListener("input", e => {
             if( options.callback )
             {
                 options.callback( input.value, e );
@@ -10053,7 +10228,7 @@ class Branch {
         var size = this.grabber.style.marginLeft;
 
         // Update sizes of widgets inside
-        for( var i = 0; i < this.widgets.length; i++ )
+        for( let i = 0; i < this.widgets.length; i++ )
         {
             let widget = this.widgets[ i ];
             const element = widget.root;
@@ -10063,26 +10238,21 @@ class Branch {
                 continue;
             }
 
-            var name = element.children[ 0 ];
-            var value = element.children[ 1 ];
+            let name = element.children[ 0 ];
+            let value = element.children[ 1 ];
 
             name.style.width = size;
-            let padding = "0px";
+
             switch( widget.type )
             {
-                case Widget.FILE:
-                    padding = "10%";
-                    break;
+                case Widget.CUSTOM:
+                case Widget.ARRAY:
+                    continue;
             };
 
-            value.style.width = "-moz-calc( 100% - " + size + " - " + padding + " )";
-            value.style.width = "-webkit-calc( 100% - " + size + " - " + padding + " )";
-            value.style.width = "calc( 100% - " + size + " - " + padding + " )";
-
-            if( widget.onresize )
-            {
-                widget.onresize();
-            }
+            value.style.width = "-moz-calc( 100% - " + size + " )";
+            value.style.width = "-webkit-calc( 100% - " + size + " )";
+            value.style.width = "calc( 100% - " + size + " )";
         }
     }
 };
@@ -10210,7 +10380,7 @@ class Dialog {
             draggable = options.draggable ?? true,
             modal = options.modal ?? false;
 
-        var root = document.createElement('dialog');
+        let root = document.createElement('dialog');
         root.className = "lexdialog " + (options.className ?? "");
         root.id = options.id ?? "dialog" + Dialog._last_id++;
         LX.root.appendChild( root );
@@ -10221,7 +10391,7 @@ class Dialog {
 
         let that = this;
 
-        var titleDiv = document.createElement('div');
+        const titleDiv = document.createElement('div');
 
         if( title )
         {
@@ -10286,7 +10456,7 @@ class Dialog {
                 }, { icon: "fa-regular fa-window-restore" });
             };
 
-            root.appendChild(titleDiv);
+            root.appendChild( titleDiv );
         }
 
         if( options.closable ?? true )
@@ -10485,7 +10655,7 @@ class PocketDialog extends Dialog {
 
             if( float )
             {
-                for( var i = 0; i < float.length; i++ )
+                for( let i = 0; i < float.length; i++ )
                 {
                     const t = float[i];
                     switch( t )
@@ -10618,14 +10788,14 @@ class ContextMenu {
         contextmenu.className = "lexcontextmenu";
         c.appendChild( contextmenu );
 
-        for( var i = 0; i < o[k].length; ++i )
+        for( let i = 0; i < o[k].length; ++i )
         {
             const subitem = o[ k ][ i ];
             const subkey = Object.keys( subitem )[ 0 ];
             this._createEntry(subitem, subkey, contextmenu, d);
         }
 
-        var rect = c.getBoundingClientRect();
+        const rect = c.getBoundingClientRect();
         contextmenu.style.left = rect.width + "px";
         contextmenu.style.marginTop =  3.5 - c.offsetHeight + "px";
 
@@ -10778,10 +10948,10 @@ class ContextMenu {
                 _item[ key ].unshift( parent );
             }
 
-            for( var child of _item[ key ] )
+            for( let child of _item[ key ] )
             {
                 let k = Object.keys( child )[ 0 ];
-                for( var i = 0; i < child[ k ].length; ++i )
+                for( let i = 0; i < child[ k ].length; ++i )
                 {
                     setParent( child );
                 }
@@ -10822,7 +10992,7 @@ LX.ContextMenu = ContextMenu;
 
 function addContextMenu( title, event, callback, options )
 {
-    var menu = new ContextMenu( event, title, options );
+    const menu = new ContextMenu( event, title, options );
     LX.root.appendChild( menu.root );
 
     if( callback )
@@ -10853,7 +11023,8 @@ class CanvasCurve {
         element.style.minHeight = "20px";
 
         element.bgcolor = options.bgColor || LX.getThemeColor( "global-intense-background" );
-        element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected-light" );
+        element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected" );
+        element.activepointscolor = options.activePointsColor || LX.getThemeColor( "global-selected-light" );
         element.linecolor = options.lineColor || "#555";
         element.value = value || [];
         element.xrange = options.xrange || [ 0, 1 ]; // min, max
@@ -10869,7 +11040,8 @@ class CanvasCurve {
 
         LX.addSignal( "@on_new_color_scheme", (el, value) => {
             element.bgcolor = options.bgColor || LX.getThemeColor( "global-intense-background" );
-            element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected-light" );
+            element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected" );
+            element.activepointscolor = options.activePointsColor || LX.getThemeColor( "global-selected-light" );
             this.redraw();
         } );
 
@@ -10890,11 +11062,11 @@ class CanvasCurve {
                 return element.defaulty;
             }
 
-            var last = [ element.xrange[ 0 ], element.defaulty ];
-            var f = 0;
-            for( var i = 0; i < element.value.length; i += 1 )
+            let last = [ element.xrange[ 0 ], element.defaulty ];
+            let f = 0;
+            for( let i = 0; i < element.value.length; i += 1 )
             {
-                var v = element.value[ i ];
+                let v = element.value[ i ];
                 if( x == v[ 0 ] ) return v[ 1 ];
                 if( x < v[ 0 ] )
                 {
@@ -10912,9 +11084,9 @@ class CanvasCurve {
 
         element.resample = function( samples ) {
 
-            var r = [];
-            var dx = (element.xrange[1] - element.xrange[ 0 ]) / samples;
-            for( var i = element.xrange[0]; i <= element.xrange[1]; i += dx )
+            let r = [];
+            let dx = (element.xrange[1] - element.xrange[ 0 ]) / samples;
+            for( let i = element.xrange[0]; i <= element.xrange[1]; i += dx )
             {
                 r.push( element.getValueAt(i) );
             }
@@ -10923,9 +11095,9 @@ class CanvasCurve {
 
         element.addValue = function(v) {
 
-            for( var i = 0; i < element.value; i++ )
+            for( let i = 0; i < element.value; i++ )
             {
-                var value = element.value[i];
+                let value = element.value[i];
                 if(value[0] < v[0]) continue;
                 element.value.splice(i,0,v);
                 redraw();
@@ -10948,7 +11120,7 @@ class CanvasCurve {
                     (v[1] * element.yrange[1] / canvas.height + element.yrange[0])];
         }
 
-        var selected = -1;
+        let selected = -1;
 
         element.redraw = function( o = {} ) {
 
@@ -11010,7 +11182,7 @@ class CanvasCurve {
                 var value = element.value[ i ];
                 pos = convert( value );
                 if( selected == i )
-                    ctx.fillStyle = "white";
+                    ctx.fillStyle = element.activepointscolor;
                 else
                     ctx.fillStyle = element.pointscolor;
                 ctx.beginPath();
@@ -12198,7 +12370,7 @@ class AssetView {
             const hasImage = ['png', 'jpg'].indexOf( getExtension( file.src ) ) > -1 || is_base_64;
             if( hasImage )
             {
-                this.previewPanel.addImage( file.src, { style: { width: "100%" } } );
+                this.previewPanel.addImage( null, file.src, { style: { width: "100%" } } );
             }
         }
 
@@ -12753,6 +12925,9 @@ LX.ICONS = {
     "floppy-disk": [448, 512, ["save"], "regular", "M48 96l0 320c0 8.8 7.2 16 16 16l320 0c8.8 0 16-7.2 16-16l0-245.5c0-4.2-1.7-8.3-4.7-11.3l33.9-33.9c12 12 18.7 28.3 18.7 45.3L448 416c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96C0 60.7 28.7 32 64 32l245.5 0c17 0 33.3 6.7 45.3 18.7l74.5 74.5-33.9 33.9L320.8 84.7c-.3-.3-.5-.5-.8-.8L320 184c0 13.3-10.7 24-24 24l-192 0c-13.3 0-24-10.7-24-24L80 80 64 80c-8.8 0-16 7.2-16 16zm80-16l0 80 144 0 0-80L128 80zm32 240a64 64 0 1 1 128 0 64 64 0 1 1 -128 0z"],
     "download": [512, 512, [], "solid", "M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 242.7-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7 288 32zM64 352c-35.3 0-64 28.7-64 64l0 32c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-32c0-35.3-28.7-64-64-64l-101.5 0-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352 64 352zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"],
     "upload": [512, 512, [], "solid", "M288 109.3L288 352c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-242.7-73.4 73.4c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l128-128c12.5-12.5 32.8-12.5 45.3 0l128 128c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L288 109.3zM64 352l128 0c0 35.3 28.7 64 64 64s64-28.7 64-64l128 0c35.3 0 64 28.7 64 64l0 32c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64l0-32c0-35.3 28.7-64 64-64zM432 456a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"],
+    "gear": [512, 512, [], "solid", "M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-55.7-17.7c-13.4 10.3-28.2 18.9-44 25.4l-12.5 57.1c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-12.5-57.1c-15.8-6.5-30.6-15.1-44-25.4L83.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C64.6 273.1 64 264.6 64 256s.6-17.1 1.7-25.4L22.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l55.7 17.7c13.4-10.3 28.2-18.9 44-25.4l12.5-57.1c2-9.1 9-16.3 18.2-17.8C227.3 1.2 241.5 0 256 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l12.5 57.1c15.8 6.5 30.6 15.1 44 25.4l55.7-17.7c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM256 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"],
+    "gears": [640, 512, [], "solid", "M308.5 135.3c7.1-6.3 9.9-16.2 6.2-25c-2.3-5.3-4.8-10.5-7.6-15.5L304 89.4c-3-5-6.3-9.9-9.8-14.6c-5.7-7.6-15.7-10.1-24.7-7.1l-28.2 9.3c-10.7-8.8-23-16-36.2-20.9L199 27.1c-1.9-9.3-9.1-16.7-18.5-17.8C173.9 8.4 167.2 8 160.4 8l-.7 0c-6.8 0-13.5 .4-20.1 1.2c-9.4 1.1-16.6 8.6-18.5 17.8L115 56.1c-13.3 5-25.5 12.1-36.2 20.9L50.5 67.8c-9-3-19-.5-24.7 7.1c-3.5 4.7-6.8 9.6-9.9 14.6l-3 5.3c-2.8 5-5.3 10.2-7.6 15.6c-3.7 8.7-.9 18.6 6.2 25l22.2 19.8C32.6 161.9 32 168.9 32 176s.6 14.1 1.7 20.9L11.5 216.7c-7.1 6.3-9.9 16.2-6.2 25c2.3 5.3 4.8 10.5 7.6 15.6l3 5.2c3 5.1 6.3 9.9 9.9 14.6c5.7 7.6 15.7 10.1 24.7 7.1l28.2-9.3c10.7 8.8 23 16 36.2 20.9l6.1 29.1c1.9 9.3 9.1 16.7 18.5 17.8c6.7 .8 13.5 1.2 20.4 1.2s13.7-.4 20.4-1.2c9.4-1.1 16.6-8.6 18.5-17.8l6.1-29.1c13.3-5 25.5-12.1 36.2-20.9l28.2 9.3c9 3 19 .5 24.7-7.1c3.5-4.7 6.8-9.5 9.8-14.6l3.1-5.4c2.8-5 5.3-10.2 7.6-15.5c3.7-8.7 .9-18.6-6.2-25l-22.2-19.8c1.1-6.8 1.7-13.8 1.7-20.9s-.6-14.1-1.7-20.9l22.2-19.8zM112 176a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zM504.7 500.5c6.3 7.1 16.2 9.9 25 6.2c5.3-2.3 10.5-4.8 15.5-7.6l5.4-3.1c5-3 9.9-6.3 14.6-9.8c7.6-5.7 10.1-15.7 7.1-24.7l-9.3-28.2c8.8-10.7 16-23 20.9-36.2l29.1-6.1c9.3-1.9 16.7-9.1 17.8-18.5c.8-6.7 1.2-13.5 1.2-20.4s-.4-13.7-1.2-20.4c-1.1-9.4-8.6-16.6-17.8-18.5L583.9 307c-5-13.3-12.1-25.5-20.9-36.2l9.3-28.2c3-9 .5-19-7.1-24.7c-4.7-3.5-9.6-6.8-14.6-9.9l-5.3-3c-5-2.8-10.2-5.3-15.6-7.6c-8.7-3.7-18.6-.9-25 6.2l-19.8 22.2c-6.8-1.1-13.8-1.7-20.9-1.7s-14.1 .6-20.9 1.7l-19.8-22.2c-6.3-7.1-16.2-9.9-25-6.2c-5.3 2.3-10.5 4.8-15.6 7.6l-5.2 3c-5.1 3-9.9 6.3-14.6 9.9c-7.6 5.7-10.1 15.7-7.1 24.7l9.3 28.2c-8.8 10.7-16 23-20.9 36.2L315.1 313c-9.3 1.9-16.7 9.1-17.8 18.5c-.8 6.7-1.2 13.5-1.2 20.4s.4 13.7 1.2 20.4c1.1 9.4 8.6 16.6 17.8 18.5l29.1 6.1c5 13.3 12.1 25.5 20.9 36.2l-9.3 28.2c-3 9-.5 19 7.1 24.7c4.7 3.5 9.5 6.8 14.6 9.8l5.4 3.1c5 2.8 10.2 5.3 15.5 7.6c8.7 3.7 18.6 .9 25-6.2l19.8-22.2c6.8 1.1 13.8 1.7 20.9 1.7s14.1-.6 20.9-1.7l19.8 22.2zM464 304a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"],
+    "sliders": [512, 512, [], "solid", "M0 416c0 17.7 14.3 32 32 32l54.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 448c17.7 0 32-14.3 32-32s-14.3-32-32-32l-246.7 0c-12.3-28.3-40.5-48-73.3-48s-61 19.7-73.3 48L32 384c-17.7 0-32 14.3-32 32zm128 0a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zM320 256a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm32-80c-32.8 0-61 19.7-73.3 48L32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l246.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48l54.7 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-54.7 0c-12.3-28.3-40.5-48-73.3-48zM192 128a32 32 0 1 1 0-64 32 32 0 1 1 0 64zm73.3-64C253 35.7 224.8 16 192 16s-61 19.7-73.3 48L32 64C14.3 64 0 78.3 0 96s14.3 32 32 32l86.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 128c17.7 0 32-14.3 32-32s-14.3-32-32-32L265.3 64z"],
     "eye": [576, 512, [], "regular", "M288 80c-65.2 0-118.8 29.6-159.9 67.7C89.6 183.5 63 226 49.4 256c13.6 30 40.2 72.5 78.6 108.3C169.2 402.4 222.8 432 288 432s118.8-29.6 159.9-67.7C486.4 328.5 513 286 526.6 256c-13.6-30-40.2-72.5-78.6-108.3C406.8 109.6 353.2 80 288 80zM95.4 112.6C142.5 68.8 207.2 32 288 32s145.5 36.8 192.6 80.6c46.8 43.5 78.1 95.4 93 131.1c3.3 7.9 3.3 16.7 0 24.6c-14.9 35.7-46.2 87.7-93 131.1C433.5 443.2 368.8 480 288 480s-145.5-36.8-192.6-80.6C48.6 356 17.3 304 2.5 268.3c-3.3-7.9-3.3-16.7 0-24.6C17.3 208 48.6 156 95.4 112.6zM288 336c44.2 0 80-35.8 80-80s-35.8-80-80-80c-.7 0-1.3 0-2 0c1.3 5.1 2 10.5 2 16c0 35.3-28.7 64-64 64c-5.5 0-10.9-.7-16-2c0 .7 0 1.3 0 2c0 44.2 35.8 80 80 80zm0-208a128 128 0 1 1 0 256 128 128 0 1 1 0-256z"],
     "eye-slash": [640, 512, [], "regular", "M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zm151 118.3C226 97.7 269.5 80 320 80c65.2 0 118.8 29.6 159.9 67.7C518.4 183.5 545 226 558.6 256c-12.6 28-36.6 66.8-70.9 100.9l-53.8-42.2c9.1-17.6 14.2-37.5 14.2-58.7c0-70.7-57.3-128-128-128c-32.2 0-61.7 11.9-84.2 31.5l-46.1-36.1zM394.9 284.2l-81.5-63.9c4.2-8.5 6.6-18.2 6.6-28.3c0-5.5-.7-10.9-2-16c.7 0 1.3 0 2 0c44.2 0 80 35.8 80 80c0 9.9-1.8 19.4-5.1 28.2zm9.4 130.3C378.8 425.4 350.7 432 320 432c-65.2 0-118.8-29.6-159.9-67.7C121.6 328.5 95 286 81.4 256c8.3-18.4 21.5-41.5 39.4-64.8L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5l-41.9-33zM192 256c0 70.7 57.3 128 128 128c13.3 0 26.1-2 38.2-5.8L302 334c-23.5-5.4-43.1-21.2-53.7-42.3l-56.1-44.2c-.2 2.8-.3 5.6-.3 8.5z"],
     "comment": [512, 512, [], "regular", "M123.6 391.3c12.9-9.4 29.6-11.8 44.6-6.4c26.5 9.6 56.2 15.1 87.8 15.1c124.7 0 208-80.5 208-160s-83.3-160-208-160S48 160.5 48 240c0 32 12.4 62.8 35.7 89.2c8.6 9.7 12.8 22.5 11.8 35.5c-1.4 18.1-5.7 34.7-11.3 49.4c17-7.9 31.1-16.7 39.4-22.7zM21.2 431.9c1.8-2.7 3.5-5.4 5.1-8.1c10-16.6 19.5-38.4 21.4-62.9C17.7 326.8 0 285.1 0 240C0 125.1 114.6 32 256 32s256 93.1 256 208s-114.6 208-256 208c-37.1 0-72.3-6.4-104.1-17.9c-11.9 8.7-31.3 20.6-54.3 30.6c-15.1 6.6-32.3 12.6-50.1 16.1c-.8 .2-1.6 .3-2.4 .5c-4.4 .8-8.7 1.5-13.2 1.9c-.2 0-.5 .1-.7 .1c-5.1 .5-10.2 .8-15.3 .8c-6.5 0-12.3-3.9-14.8-9.9c-2.5-6-1.1-12.8 3.4-17.4c4.1-4.2 7.8-8.7 11.3-13.5c1.7-2.3 3.3-4.6 4.8-6.9l.3-.5z"],
@@ -12781,6 +12956,7 @@ LX.ICONS = {
     "minus": [448, 512, [], "solid", "M432 256c0 17.7-14.3 32-32 32L48 288c-17.7 0-32-14.3-32-32s14.3-32 32-32l352 0c17.7 0 32 14.3 32 32z"],
     "more-horizontal": [448, 512, [], "solid", "M8 256a56 56 0 1 1 112 0A56 56 0 1 1 8 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z"],
     "plus": [448, 512, [], "solid", "M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"],
+    "circle-plus": [24, 24, [], "regular", "M12 8V16M8 12H16M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z", null, "fill=none stroke-width=2 stroke-linecap=round stroke-linejoin=round"],
     "search": [512, 512, [], "solid", "M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"],
     "compass": [512, 512, [], "regular", "M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm306.7 69.1L162.4 380.6c-19.4 7.5-38.5-11.6-31-31l55.5-144.3c3.3-8.5 9.9-15.1 18.4-18.4l144.3-55.5c19.4-7.5 38.5 11.6 31 31L325.1 306.7c-3.2 8.5-9.9 15.1-18.4 18.4zM288 256a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"],
     "sidebar": [512, 512, [], "regular", "M64 64h384a32 32 0 0 1 32 32v320a32 32 0 0 1-32 32H64a32 32 0 0 1-32-32V96a32 32 0 0 1 32-32zm128 0v384", null, "fill=none stroke=currentColor stroke-width=50 stroke-linejoin=round stroke-linecap=round"],
