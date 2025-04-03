@@ -26,8 +26,9 @@ area.addMenubar( m => {
         {
             title: "Play",
             icon: "fa-solid fa-play",
-            callback:  (domEl) => { 
+            callback:  (event) => { 
                 console.log("play!"); 
+                const domEl = event.target;
                 domEl.classList.toggle('fa-play'), domEl.classList.toggle('fa-stop');
             }
         },
@@ -35,11 +36,11 @@ area.addMenubar( m => {
             title: "Pause",
             icon: "fa-solid fa-pause",
             disabled: true,
-            callback:  (domEl) => { console.log("pause!") }
+            callback:  (event) => { console.log("pause!") }
         },
         {
             icon: "fa-solid fa-magnifying-glass",
-            callback:  (domEl) => { console.log("glass!") }
+            callback:  (event) => { console.log("glass!") }
         }
     ]);
     

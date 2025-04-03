@@ -2150,19 +2150,6 @@ class Area {
                 that._moveSplit( -e.movementY );
             }
 
-            const widgets = that.root.querySelectorAll( ".lexwidget" );
-
-            // Send area resize to every widget in the area
-            for( let widget of widgets )
-            {
-                const jsInstance = widget.jsInstance;
-
-                if( jsInstance.onresize )
-                {
-                    jsInstance.onresize();
-                }
-            }
-
             e.stopPropagation();
             e.preventDefault();
         }
@@ -6332,9 +6319,6 @@ class Curve extends Widget {
 
         let curveInstance = new CanvasCurve( values, options );
         container.appendChild( curveInstance.element );
-
-        // Resize
-        this.onresize = curveInstance.redraw.bind( curveInstance );
         this.curveInstance = curveInstance;
 
         doAsync( this.onResize.bind( this ) );
@@ -6382,7 +6366,7 @@ class Dial extends Widget {
 
         var container = document.createElement( "div" );
         container.className = "lexcurve";
-
+        this.root.appendChild( container );
 
         options.callback = ( v, e ) => {
             this._trigger( new IEvent( name, v, e ), callback );
@@ -6392,10 +6376,6 @@ class Dial extends Widget {
 
         let dialInstance = new CanvasDial( this, values, options );
         container.appendChild( dialInstance.element );
-        this.root.appendChild( container );
-
-        // Resize
-        this.onresize = dialInstance.redraw.bind( dialInstance );
         this.dialInstance = dialInstance;
 
         doAsync( this.onResize.bind( this ) );
@@ -10062,7 +10042,7 @@ class Branch {
         var size = this.grabber.style.marginLeft;
 
         // Update sizes of widgets inside
-        for( var i = 0; i < this.widgets.length; i++ )
+        for( let i = 0; i < this.widgets.length; i++ )
         {
             let widget = this.widgets[ i ];
             const element = widget.root;
@@ -10072,26 +10052,21 @@ class Branch {
                 continue;
             }
 
-            var name = element.children[ 0 ];
-            var value = element.children[ 1 ];
+            let name = element.children[ 0 ];
+            let value = element.children[ 1 ];
 
             name.style.width = size;
-            let padding = "0px";
+
             switch( widget.type )
             {
-                case Widget.FILE:
-                    padding = "10%";
-                    break;
+                case Widget.CUSTOM:
+                case Widget.ARRAY:
+                    continue;
             };
 
-            value.style.width = "-moz-calc( 100% - " + size + " - " + padding + " )";
-            value.style.width = "-webkit-calc( 100% - " + size + " - " + padding + " )";
-            value.style.width = "calc( 100% - " + size + " - " + padding + " )";
-
-            if( widget.onresize )
-            {
-                widget.onresize();
-            }
+            value.style.width = "-moz-calc( 100% - " + size + " )";
+            value.style.width = "-webkit-calc( 100% - " + size + " )";
+            value.style.width = "calc( 100% - " + size + " )";
         }
     }
 };
