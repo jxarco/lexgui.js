@@ -1,8 +1,8 @@
 /* clean-css ignore:start */
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap');
 @font-face {
-    font-family: "GoogleSans";
-    src: url("https://raw.githubusercontent.com/jxarco/lexgui.js/master/data/GoogleSans.ttf");
+    font-family: "GeistSans";
+    src: url("../data/GeistSans.ttf");
 }
 /* clean-css ignore:end */
 
@@ -10,8 +10,8 @@
     /* default color scheme */
     color-scheme: dark;
 
-    --global-font: "GoogleSans", sans-serif;
-    --global-title-font: "GoogleSans", sans-serif;
+    --global-font: "GeistSans", sans-serif;
+    --global-title-font: "GeistSans", sans-serif;
     --global-font-size-xs: 0.625rem; /* 10px */
     --global-font-size-sm: 0.75rem; /* 12px */
     --global-font-size: 0.875rem; /* 14px */
