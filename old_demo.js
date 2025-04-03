@@ -860,18 +860,28 @@ function fillBottomPanel( panel ) {
     
     // add widgets to panel branch
     panel.branch("Information", {icon: "fa fa-circle-info"});
-    const tableWidget = panel.addTable("A Table", {
-        head: [ "Name", "Subject", "Grade" ],
+    window.tableWidget = panel.addTable("A Table", {
+        head: [ "Name", "Status", "Priority" ],
         body: [
-            [ "Alice", "Science", "B" ],
-            [ "Bob", "Math", "C" ],
-            [ "Carter", "Zoology", "A" ],
+            [ "Alice", "In Progress", "High" ],
+            [ "Bob", "Backlog", "Medium" ],
+            [ "Prince", "Canceled", "Low" ],
+            [ "Sean", "Done", "High" ],
+            [ "Carter", "In Progress", "Medium" ],
+            [ "James", "Backlog", "Low" ],
+            [ "Mickey", "Todo", "Low" ],
+            [ "Charlie", "Canceled", "Low" ],
+            [ "Potato", "Todo", "High" ]
         ]
     }, {
         selectable: true,
         sortable: true,
         toggleColumns: true,
         filter: "Name",
+        customFilters: [
+            { name: "Status", options: ["Backlog", "Todo", "In Progress", "Done", "Cancelled"] },
+            { name: "Priority", options: ["Low", "Medium", "High"] },
+        ],
         rowActions: [
             { icon: "edit", title: "Edit Row", callback: ( tableData ) => {} }, // custom: you can change the data and refresh will be called later!
             "delete",

@@ -2,11 +2,12 @@
 
 ## dev
 
-Widgets:
-- Fixed some resizing issues.
-- Fixed manual-sort not modifying data in Table Widget.
-- Use Dropdown for Table Widget menu actions `options.onMenuAction`.
+Table Widget:
+- Fixed manual-sort not modifying inner data.
+- Use Dropdown for menu actions `options.onMenuAction`.
+- Added initial support for data filters. `options.filter` and `options.customFilters`.
 
+Fixed some widget resizing issues.
 No `justify` by default in inline widgets. Use `Panel.endLine(justify)` instead.
 Fixed preview image in AssetView.
 General styling fixes.

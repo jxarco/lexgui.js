@@ -1337,6 +1337,11 @@ a svg, svg path {
     border: 1px solid #7a797c4f;
 }
 
+.lexwidget .lextext.dashed {
+    background: var(--global-color-primary);
+    border: 1px dashed #7a797c4f;
+}
+
 .lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider):hover {
     background-color: color-mix(in srgb, var(--global-button-color), #000 7%);
 }
@@ -1524,6 +1529,7 @@ a svg, svg path {
 .lexbutton.sm { width: 45% !important; margin: 0 auto; }
 /* Styles */
 .lexbutton.outline { box-shadow: none; color: var(--global-text-primary) !important; background-color: var(--global-color-primary) !important; border: 1px solid var(--button-color) !important; }
+.lexbutton.dashed { box-shadow: none; color: var(--global-text-primary) !important; background-color: var(--global-color-primary) !important; border: 1px dashed var(--button-color) !important; }
 
 .lexbutton.left {
     text-align: left;
@@ -4103,10 +4109,18 @@ tr.dragging {
     pointer-events: none;
 }
 
+th, td {
+    padding: 6px;
+    padding-inline: 12px;
+    text-align: left;
+    align-content: center;
+}
+
 th {
     --th-color: var(--global-text-secondary);
     color: var(--th-color);
     font-size: var(--global-font-size);
+    padding-block: 2px;
     cursor: pointer;
     transition: all 0.1s linear;
     background-color: var(--global-color-tertiary);
@@ -4118,6 +4132,15 @@ th {
 
 th a {
     pointer-events: none;
+}
+
+th span {
+    border-radius: 6px;
+    padding: 0.4rem;
+}
+
+th span:hover {
+    background-color: var(--global-color-secondary);
 }
 
 th a, td a {
@@ -4133,13 +4156,6 @@ th a:active {
 
 th:hover {
     color: color-mix(in srgb, var(--th-color), #000 10%);
-}
-
-th, td {
-    padding: 6px;
-    padding-inline: 12px;
-    text-align: left;
-    align-content: center;
 }
 
 th.centered, td.centered {
@@ -4161,7 +4177,7 @@ th .lexcheckbox, td .lexcheckbox {
 
 th a {
     display: inline-block;
-    transform: translate(4px, 4px);
+    transform: translate(6px, 3px);
 }
 
 td {

@@ -1516,7 +1516,7 @@ class DropdownMenu {
             this.root.focus();
 
             this._onClick = e => {
-                if( e.target && ( e.target.className.includes( "lexdropdown" ) || e.target == this._trigger ) )
+                if( e.target && ( this.root.contains( e.target ) || e.target == this._trigger ) )
                 {
                     return;
                 }
@@ -1596,12 +1596,6 @@ class DropdownMenu {
             menuItem.id = pKey;
             menuItem.innerHTML = `<span>${ key }</span>`;
 
-            if( item.icon )
-            {
-                const icon = LX.makeIcon( item.icon );
-                menuItem.prepend( icon );
-            }
-
             menuItem.tabIndex = "1";
             parentDom.appendChild( menuItem );
 
@@ -1617,15 +1611,41 @@ class DropdownMenu {
                 menuItem.appendChild( submenuIcon );
             }
 
-            menuItem.addEventListener( "click", () => {
-                const f = item[ 'callback' ];
-                if( f )
-                {
-                    f.call( this, key, menuItem );
-                }
+            if( item.icon )
+            {
+                const icon = LX.makeIcon( item.icon );
+                menuItem.prepend( icon );
+            }
 
-                this.destroy();
-            } );
+            if( item.checked != undefined )
+            {
+                const checkbox = new Checkbox( pKey + "_entryChecked", item.checked, (v) => {
+                    const f = item[ 'callback' ];
+                    if( f )
+                    {
+                        f.call( this, key, menuItem, v );
+                    }
+                });
+                const input = checkbox.root.querySelector( "input" );
+                menuItem.prepend( input );
+
+                menuItem.addEventListener( "click", (e) => {
+                    if( e.target.type == "checkbox" ) return;
+                    input.checked = !input.checked;
+                    checkbox.set( input.checked );
+                } );
+            }
+            else
+            {
+                menuItem.addEventListener( "click", () => {
+                    const f = item[ 'callback' ];
+                    if( f )
+                    {
+                        f.call( this, key, menuItem );
+                    }
+                    this.destroy();
+                } );
+            }
 
             menuItem.addEventListener("mouseover", e => {
 
@@ -8410,6 +8430,8 @@ class Table extends Widget {
 
         this.filter = options.filter ?? false;
         this.toggleColumns = options.toggleColumns ?? false;
+        this.customFilters = options.customFilters ?? false;
+        this.activeCustomFilters = {};
 
         data.head = data.head ?? [];
         data.body = data.body ?? [];
@@ -8429,24 +8451,61 @@ class Table extends Widget {
         }
 
         // Append header
-        if( this.filter || this.toggleColumns )
+        if( this.filter || this.customFilters || this.toggleColumns )
         {
             const headerContainer = LX.makeContainer( [ "100%", "auto" ] );
 
             if( this.filter )
             {
                 const filterOptions = LX.deepCopy( options );
-                filterOptions.placeholder = "Filter...";
+                filterOptions.placeholder = `Filter ${ this.filter }...`;
                 filterOptions.skipWidget = true;
                 filterOptions.trigger = "input";
-                filterOptions.icon = "fa-solid fa-magnifying-glass";
                 filterOptions.textClass = "outline";
 
                 let filter = new TextInput(null, "", ( v ) => {
-                    this.refresh( v );
+                    this._currentFilter = v;
+                    this.refresh();
                 }, filterOptions );
 
                 headerContainer.appendChild( filter.root );
+            }
+
+            if( this.customFilters )
+            {
+                const icon = LX.makeIcon( "circle-plus", null, "sm" );
+
+                for( let f of this.customFilters )
+                {
+                    const customFilterBtn = new Button(null, icon.innerHTML + f.name, ( v ) => {
+
+                        const menuOptions = f.options.map( ( colName, idx ) => {
+                            const item = {
+                                name: colName,
+                                checked:  !!this.activeCustomFilters[ colName ],
+                                callback: (key, dom, v) => {
+                                    if( v ) { this.activeCustomFilters[ key ] = f.name; }
+                                    else {
+                                        delete this.activeCustomFilters[ key ];
+                                    }
+                                    this.refresh();
+                                }
+                            }
+                            return item;
+                        } );
+                        new DropdownMenu( customFilterBtn.root, menuOptions, { side: "bottom", align: "start" });
+                    }, { buttonClass: "dashed" } );
+                    headerContainer.appendChild( customFilterBtn.root );
+                }
+
+                // const resetIcon = LX.makeIcon( "xmark", null, "sm" );
+                this._resetCustomFiltersBtn = new Button(null, "resetButton", ( v ) => {
+                    this.activeCustomFilters = {};
+                    this.refresh();
+                    this._resetCustomFiltersBtn.root.classList.add( "hidden" );
+                }, { title: "Reset filters", icon: "fa fa-xmark" } );
+                headerContainer.appendChild( this._resetCustomFiltersBtn.root );
+                this._resetCustomFiltersBtn.root.classList.add( "hidden" );
             }
 
             if( this.toggleColumns )
@@ -8480,7 +8539,9 @@ class Table extends Widget {
         const table = document.createElement( 'table' );
         container.appendChild( table );
 
-        this.refresh = ( colFilter = "" ) => {
+        this.refresh = () => {
+
+            this._currentFilter = this._currentFilter ?? "";
 
             table.innerHTML = "";
 
@@ -8531,8 +8592,8 @@ class Table extends Widget {
                 for( const headData of data.head )
                 {
                     const th = document.createElement( 'th' );
-                    th.innerHTML = headData;
-                    th.appendChild( LX.makeIcon( "menu-arrows" ) );
+                    th.innerHTML = `<span>${ headData }</span>`;
+                    th.querySelector( "span" ).appendChild( LX.makeIcon( "menu-arrows", null, "sm" ) );
 
                     const idx = data.head.indexOf( headData );
                     if( this.centered && this.centered.indexOf( idx ) > -1 )
@@ -8641,10 +8702,35 @@ class Table extends Widget {
                         const filterColIndex = data.head.indexOf( this.filter );
                         if( filterColIndex > -1 )
                         {
-                            if( !bodyData[ filterColIndex ].toLowerCase().includes( colFilter.toLowerCase() ) )
+                            if( !bodyData[ filterColIndex ].toLowerCase().includes( this._currentFilter.toLowerCase() ) )
                             {
                                 continue;
                             }
+                        }
+                    }
+
+                    if( Object.keys( this.activeCustomFilters ).length )
+                    {
+                        let acfMap = {};
+
+                        this._resetCustomFiltersBtn.root.classList.remove( "hidden" );
+
+                        for( let acfValue in this.activeCustomFilters )
+                        {
+                            const acfName = this.activeCustomFilters[ acfValue ];
+                            acfMap[ acfName ] = acfMap[ acfName ] ?? false;
+
+                            const filterColIndex = data.head.indexOf( acfName );
+                            if( filterColIndex > -1 )
+                            {
+                                acfMap[ acfName ] |= ( bodyData[ filterColIndex ] === acfValue );
+                            }
+                        }
+
+                        const show = Object.values( acfMap ).reduce( ( e, acc ) => acc *= e );
+                        if( !show )
+                        {
+                            continue;
                         }
                     }
 
@@ -12864,6 +12950,7 @@ LX.ICONS = {
     "minus": [448, 512, [], "solid", "M432 256c0 17.7-14.3 32-32 32L48 288c-17.7 0-32-14.3-32-32s14.3-32 32-32l352 0c17.7 0 32 14.3 32 32z"],
     "more-horizontal": [448, 512, [], "solid", "M8 256a56 56 0 1 1 112 0A56 56 0 1 1 8 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z"],
     "plus": [448, 512, [], "solid", "M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"],
+    "circle-plus": [24, 24, [], "regular", "M12 8V16M8 12H16M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z", null, "fill=none stroke-width=2 stroke-linecap=round stroke-linejoin=round"],
     "search": [512, 512, [], "solid", "M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"],
     "compass": [512, 512, [], "regular", "M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm306.7 69.1L162.4 380.6c-19.4 7.5-38.5-11.6-31-31l55.5-144.3c3.3-8.5 9.9-15.1 18.4-18.4l144.3-55.5c19.4-7.5 38.5 11.6 31 31L325.1 306.7c-3.2 8.5-9.9 15.1-18.4 18.4zM288 256a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"],
     "sidebar": [512, 512, [], "regular", "M64 64h384a32 32 0 0 1 32 32v320a32 32 0 0 1-32 32H64a32 32 0 0 1-32-32V96a32 32 0 0 1 32-32zm128 0v384", null, "fill=none stroke=currentColor stroke-width=50 stroke-linejoin=round stroke-linecap=round"],
