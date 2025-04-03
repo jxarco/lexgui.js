@@ -650,7 +650,7 @@ function fillPanel( panel ) {
     panel.addButton(null, "Show Notifications" + LX.badge("+99", "accent sm"));
     panel.addCounter("Calories Counter ", 350, (v) => { console.log( v + " calories!" ) }, { label: "CALORIES/DAY", max: 500 });
     panel.addButton("Colored Tiny Button", "Click here!", () => {}, { buttonClass: "primary xs" });
-    panel.addButton("Colored Small Button", "Click here!", () => {}, { buttonClass: "accent sm" });
+    panel.addButton("Small Outlined Button", "Click here!", () => {}, { buttonClass: "accent sm outline" });
     panel.addButton("A Classic Button", "Click here!", () => {}, { buttonClass: "md" });
     panel.addCheckbox("I have a label", false, (value, event) => {
         console.log(value);

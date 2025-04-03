@@ -1965,7 +1965,7 @@ class GraphEditor {
         for( let node of nodesOutsideViewport )
         {
             let dom = this._getNodeDOMElement( node.id );
-            dom.classList.toggle( 'hiddenOpacity', true );
+            dom.classList.toggle( 'hidden-opacity', true );
         }
     }
 
@@ -2397,10 +2397,10 @@ class GraphEditor {
             if( graph_bb.inside( node_bb, false ) )
             {
                 // Show if node in viewport..
-                dom.classList.toggle( 'hiddenOpacity', false );
+                dom.classList.toggle( 'hidden-opacity', false );
 
                 // And hide content if scale is very small..
-                dom.childNodes[ 1 ].classList.toggle( 'hiddenOpacity', this.currentGraph.scale < 0.5 );
+                dom.childNodes[ 1 ].classList.toggle( 'hidden-opacity', this.currentGraph.scale < 0.5 );
 
                 continue;
             }

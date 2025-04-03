@@ -7,6 +7,8 @@ Widgets:
 
 No `justify` by default in inline widgets. Use `Panel.endLine(justify)` instead.
 Fixed preview image in AssetView.
+General styling fixes.
+Docs updated.
 
 ## 0.5.1 (master)
 

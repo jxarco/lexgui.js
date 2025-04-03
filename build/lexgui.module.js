@@ -958,8 +958,8 @@ function init( options = { } )
     this.root = root;
     this.container = document.body;
 
-    this.modal.classList.add( 'hiddenOpacity' );
-    this.modal.toggle = function( force ) { this.classList.toggle( 'hiddenOpacity', force ); };
+    this.modal.classList.add( 'hidden-opacity' );
+    this.modal.toggle = function( force ) { this.classList.toggle( 'hidden-opacity', force ); };
 
     if( options.container )
     {
@@ -5442,6 +5442,7 @@ class TextInput extends Widget {
             wValue.innerHTML = ( icon + value ) || "";
             wValue.style.width = "100%";
             wValue.style.textAlign = options.float ?? "";
+            wValue.className = "ellipsis-overflow";
         }
 
         Object.assign( wValue.style, options.style ?? {} );
@@ -5481,13 +5482,6 @@ class TextArea extends Widget {
         this.onResize = ( rect ) => {
             const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
             container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
-            container.style.height = options.height;
-
-            if( options.fitHeight )
-            {
-                // Update height depending on the content
-                wValue.style.height = wValue.scrollHeight + "px";
-            }
         };
 
         let container = document.createElement( "div" );
@@ -5534,7 +5528,17 @@ class TextArea extends Widget {
             container.appendChild( icon );
         }
 
-        doAsync( this.onResize.bind( this ) );
+        doAsync( () => {
+            container.style.height = options.height;
+
+            if( options.fitHeight )
+            {
+                // Update height depending on the content
+                wValue.style.height = wValue.scrollHeight + "px";
+            }
+
+            this.onResize();
+        }, 10 );
     }
 }
 
@@ -6125,7 +6129,7 @@ class Select extends Widget {
             filterOptions.skipWidget = filterOptions.skipWidget ?? true;
             filterOptions.trigger = "input";
             filterOptions.icon = "fa-solid fa-magnifying-glass";
-            filterOptions.className = "lexfilter noname";
+            filterOptions.className = "lexfilter";
 
             let filter = new TextInput(null, options.filterValue ?? "", ( v ) => {
                 const filteredOptions = this._filterOptions( values, v );
@@ -7859,6 +7863,7 @@ class Pad extends Widget {
             document.body.classList.add( 'noevents' );
             e.stopImmediatePropagation();
             e.stopPropagation();
+            thumb.classList.add( "active" );
 
             if( options.onPress )
             {
@@ -7890,6 +7895,7 @@ class Pad extends Widget {
             doc.removeEventListener( 'mouseup', innerMouseUp );
             document.body.classList.remove( 'nocursor' );
             document.body.classList.remove( 'noevents' );
+            thumb.classList.remove( "active" );
 
             if( options.onRelease )
             {
@@ -8431,7 +8437,7 @@ class Table extends Widget {
                 filterOptions.skipWidget = true;
                 filterOptions.trigger = "input";
                 filterOptions.icon = "fa-solid fa-magnifying-glass";
-                filterOptions.className = "lexfilter";
+                filterOptions.textClass = "outline";
 
                 let filter = new TextInput(null, "", ( v ) => {
                     this.refreshTable( v );
@@ -9167,7 +9173,7 @@ class Panel {
 
         let widget = new TextInput( null, null, null, options )
         const element = widget.root;
-        element.className += " lexfilter noname";
+        element.className += " lexfilter";
 
         let input = document.createElement('input');
         input.className = 'lexinput-filter';
@@ -9180,7 +9186,7 @@ class Panel {
         element.appendChild( searchIcon );
         element.appendChild( input );
 
-        input.addEventListener("input", (e) => {
+        input.addEventListener("input", e => {
             if( options.callback )
             {
                 options.callback( input.value, e );
@@ -10913,7 +10919,8 @@ class CanvasCurve {
         element.style.minHeight = "20px";
 
         element.bgcolor = options.bgColor || LX.getThemeColor( "global-intense-background" );
-        element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected-light" );
+        element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected" );
+        element.activepointscolor = options.activePointsColor || LX.getThemeColor( "global-selected-light" );
         element.linecolor = options.lineColor || "#555";
         element.value = value || [];
         element.xrange = options.xrange || [ 0, 1 ]; // min, max
@@ -10929,7 +10936,8 @@ class CanvasCurve {
 
         LX.addSignal( "@on_new_color_scheme", (el, value) => {
             element.bgcolor = options.bgColor || LX.getThemeColor( "global-intense-background" );
-            element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected-light" );
+            element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected" );
+            element.activepointscolor = options.activePointsColor || LX.getThemeColor( "global-selected-light" );
             this.redraw();
         } );
 
@@ -11070,7 +11078,7 @@ class CanvasCurve {
                 var value = element.value[ i ];
                 pos = convert( value );
                 if( selected == i )
-                    ctx.fillStyle = "white";
+                    ctx.fillStyle = element.activepointscolor;
                 else
                     ctx.fillStyle = element.pointscolor;
                 ctx.beginPath();
