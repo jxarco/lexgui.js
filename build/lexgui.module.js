@@ -2478,7 +2478,7 @@ class Area {
                 selected: b.selected,
                 icon: b.icon,
                 img: b.img,
-                className: b.class
+                className: b.class ?? ""
             };
 
             if( group )
@@ -4645,16 +4645,18 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
             container.className = "lexcustomcontainer";
             container.style.width = "100%";
             element.appendChild( container );
+            element.dataset["opened"] = false;
 
-            let buttonName = "<a class='fa-solid " + (options.icon ?? "fa-cube")  + "' style='float:left'></a>";
+            let buttonName = "<a class='fa-solid " + (options.icon ?? "fa-cube")  + "'></a>";
             buttonName += customWidgetName + (!instance ? " [empty]" : "");
             // Add always icon to keep spacing right
-            buttonName += "<a class='fa-solid " + (instance ? "fa-bars-staggered" : " ") + " menu' style='float:right; width:5%;'></a>";
+            buttonName += "<a class='fa-solid " + (instance ? "fa-bars-staggered" : " ") + " menu'></a>";
 
             let buttonEl = this.addButton(null, buttonName, (value, event) => {
                 if( instance )
                 {
                     element.querySelector(".lexcustomitems").toggleAttribute('hidden');
+                    element.dataset["opened"] = !element.querySelector(".lexcustomitems").hasAttribute("hidden");
                 }
                 else
                 {
@@ -4663,6 +4665,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                             instance = {};
                             refresh_widget();
                             element.querySelector(".lexcustomitems").toggleAttribute('hidden', false);
+                            element.dataset["opened"] = !element.querySelector(".lexcustomitems").hasAttribute("hidden");
                         });
                     });
                 }
@@ -6002,7 +6005,7 @@ class Select extends Widget {
 
         // Add select widget button
         let buttonName = value;
-        buttonName += "<a class='fa-solid fa-angle-down' style='float:right; margin-right: 3px;'></a>";
+        buttonName += "<a class='fa-solid fa-angle-down'></a>";
 
         const _placeOptions = ( parent ) => {
 
@@ -6527,13 +6530,15 @@ class ItemArray extends Widget {
         container.className = "lexarray";
         container.style.width = "100%";
         this.root.appendChild( container );
+        this.root.dataset["opened"] = false;
 
-        const angleDown = `<a class='fa-solid fa-angle-down' style='float:right; margin-right: 3px;'></a>`;
+        const angleDown = `<a class='fa-solid fa-angle-down'></a>`;
 
         let buttonName = "Array (size " + values.length + ")";
         buttonName += angleDown;
 
         const toggleButton = new Button(null, buttonName, () => {
+            this.root.dataset["opened"] = this.root.dataset["opened"] == "true" ? false : true;
             this.root.querySelector(".lexarrayitems").toggleAttribute('hidden');
         }, { buttonClass: 'array' });
         container.appendChild( toggleButton.root );
@@ -6597,7 +6602,7 @@ class ItemArray extends Widget {
             }
 
             buttonName = "Add item";
-            buttonName += "<a class='fa-solid fa-plus' style='float:right; margin-right: 3px; margin-top: 2px;'></a>";
+            buttonName += "<a class='fa-solid fa-plus'></a>";
 
             const addButton = new Button(null, buttonName, (v, event) => {
                 values.push( options.innerValues ? options.innerValues[ 0 ] : "" );
