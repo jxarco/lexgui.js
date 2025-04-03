@@ -46,7 +46,7 @@ else if( typeof Date != "undefined" && Date.now )
 else if ( typeof process != "undefined" )
 {
     LX.getTime = function() {
-        var t = process.hrtime();
+        const t = process.hrtime();
         return t[ 0 ] * 0.001 + t[ 1 ] * 1e-6;
     };
 }
@@ -148,7 +148,7 @@ LX.setTheme = setTheme;
  */
 function setThemeColor( colorName, color )
 {
-    var r = document.querySelector( ':root' );
+    const r = document.querySelector( ':root' );
     r.style.setProperty( '--' + colorName, color );
 }
 
@@ -190,10 +190,10 @@ LX.getThemeColor = getThemeColor;
  */
 function getBase64Image( img )
 {
-    var canvas = document.createElement( 'canvas' );
+    const canvas = document.createElement( 'canvas' );
     canvas.width = img.width;
     canvas.height = img.height;
-    var ctx = canvas.getContext( '2d' );
+    const ctx = canvas.getContext( '2d' );
     ctx.drawImage( img, 0, 0 );
     return canvas.toDataURL( 'image/png' );
 }
@@ -1792,7 +1792,7 @@ class Area {
 
         if( !options.skipAppend )
         {
-            var lexroot = document.getElementById("lexroot");
+            let lexroot = document.getElementById("lexroot");
             lexroot.appendChild( this.root );
         }
 
@@ -1863,12 +1863,12 @@ class Area {
                 this.splitBar.addEventListener("mousedown", innerMouseDown);
                 this.root.appendChild( this.splitBar );
 
-                var that = this;
-                var lastMousePosition = [ 0, 0 ];
+                const that = this;
+                let lastMousePosition = [ 0, 0 ];
 
                 function innerMouseDown( e )
                 {
-                    var doc = that.root.ownerDocument;
+                    const doc = that.root.ownerDocument;
                     doc.addEventListener( 'mousemove', innerMouseMove );
                     doc.addEventListener( 'mouseup', innerMouseUp );
                     lastMousePosition[ 0 ] = e.x;
@@ -1921,7 +1921,7 @@ class Area {
 
                 function innerMouseUp( e )
                 {
-                    var doc = that.root.ownerDocument;
+                    const doc = that.root.ownerDocument;
                     doc.removeEventListener( 'mousemove', innerMouseMove );
                     doc.removeEventListener( 'mouseup', innerMouseUp );
                     document.body.classList.remove( 'nocursor' );
@@ -1973,9 +1973,9 @@ class Area {
             this.root = this.sections[ 1 ].root;
         }
 
-        var type = options.type || "horizontal";
-        var sizes = options.sizes || [ "50%", "50%" ];
-        var auto = (options.sizes === 'auto');
+        const type = options.type || "horizontal";
+        const sizes = options.sizes || [ "50%", "50%" ];
+        const auto = (options.sizes === 'auto');
 
         if( !sizes[ 1 ] )
         {
@@ -1991,8 +1991,8 @@ class Area {
         }
 
         // Create areas
-        var area1 = new Area( { skipAppend: true, className: "split" + ( options.menubar || options.sidebar ? "" : " origin" ) } );
-        var area2 = new Area( { skipAppend: true, className: "split" } );
+        let area1 = new Area( { skipAppend: true, className: "split" + ( options.menubar || options.sidebar ? "" : " origin" ) } );
+        let area2 = new Area( { skipAppend: true, className: "split" } );
 
         area1.parentArea = this;
         area2.parentArea = this;
@@ -2000,7 +2000,7 @@ class Area {
         let minimizable = options.minimizable ?? false;
         let resize = ( options.resize ?? true ) || minimizable;
 
-        var data = "0px";
+        let data = "0px";
         this.offset = 0;
 
         if( resize )
@@ -2047,7 +2047,7 @@ class Area {
 
         if( type == "horizontal" )
         {
-            var width1 = sizes[ 0 ],
+            let width1 = sizes[ 0 ],
                 width2 = sizes[ 1 ];
 
             if( width1.constructor == Number )
@@ -2088,7 +2088,7 @@ class Area {
             }
             else
             {
-                var height1 = sizes[ 0 ],
+                let height1 = sizes[ 0 ],
                     height2 = sizes[ 1 ];
 
                 if( height1.constructor == Number )
@@ -2126,11 +2126,11 @@ class Area {
             return this.sections;
         }
 
-        var that = this;
+        const that = this;
 
         function innerMouseDown( e )
         {
-            var doc = that.root.ownerDocument;
+            const doc = that.root.ownerDocument;
             doc.addEventListener( 'mousemove', innerMouseMove );
             doc.addEventListener( 'mouseup', innerMouseUp );
             e.stopPropagation();
@@ -2156,7 +2156,7 @@ class Area {
 
         function innerMouseUp( e )
         {
-            var doc = that.root.ownerDocument;
+            const doc = that.root.ownerDocument;
             doc.removeEventListener( 'mousemove', innerMouseMove );
             doc.removeEventListener( 'mouseup', innerMouseUp );
             document.body.classList.remove( 'nocursor' );
@@ -2304,7 +2304,7 @@ class Area {
 
     propagateEvent( eventName ) {
 
-        for( var i = 0; i < this.sections.length; i++ )
+        for( let i = 0; i < this.sections.length; i++ )
         {
             const area = this.sections[ i ];
 
@@ -2430,7 +2430,7 @@ class Area {
 
         if( float )
         {
-            for( var i = 0; i < float.length; i++ )
+            for( let i = 0; i < float.length; i++ )
             {
                 const t = float[i];
                 switch( t )
@@ -2649,7 +2649,7 @@ class Area {
 
         for( var i = 0; i < this.sections.length; i++ )
         {
-            this.sections[i]._update();
+            this.sections[ i ]._update();
         }
     }
 };
@@ -10194,7 +10194,7 @@ class Dialog {
             draggable = options.draggable ?? true,
             modal = options.modal ?? false;
 
-        var root = document.createElement('dialog');
+        let root = document.createElement('dialog');
         root.className = "lexdialog " + (options.className ?? "");
         root.id = options.id ?? "dialog" + Dialog._last_id++;
         LX.root.appendChild( root );
@@ -10205,7 +10205,7 @@ class Dialog {
 
         let that = this;
 
-        var titleDiv = document.createElement('div');
+        const titleDiv = document.createElement('div');
 
         if( title )
         {
@@ -10270,7 +10270,7 @@ class Dialog {
                 }, { icon: "fa-regular fa-window-restore" });
             };
 
-            root.appendChild(titleDiv);
+            root.appendChild( titleDiv );
         }
 
         if( options.closable ?? true )
@@ -10469,7 +10469,7 @@ class PocketDialog extends Dialog {
 
             if( float )
             {
-                for( var i = 0; i < float.length; i++ )
+                for( let i = 0; i < float.length; i++ )
                 {
                     const t = float[i];
                     switch( t )
@@ -10602,14 +10602,14 @@ class ContextMenu {
         contextmenu.className = "lexcontextmenu";
         c.appendChild( contextmenu );
 
-        for( var i = 0; i < o[k].length; ++i )
+        for( let i = 0; i < o[k].length; ++i )
         {
             const subitem = o[ k ][ i ];
             const subkey = Object.keys( subitem )[ 0 ];
             this._createEntry(subitem, subkey, contextmenu, d);
         }
 
-        var rect = c.getBoundingClientRect();
+        const rect = c.getBoundingClientRect();
         contextmenu.style.left = rect.width + "px";
         contextmenu.style.marginTop =  3.5 - c.offsetHeight + "px";
 
@@ -10762,10 +10762,10 @@ class ContextMenu {
                 _item[ key ].unshift( parent );
             }
 
-            for( var child of _item[ key ] )
+            for( let child of _item[ key ] )
             {
                 let k = Object.keys( child )[ 0 ];
-                for( var i = 0; i < child[ k ].length; ++i )
+                for( let i = 0; i < child[ k ].length; ++i )
                 {
                     setParent( child );
                 }
@@ -10806,7 +10806,7 @@ LX.ContextMenu = ContextMenu;
 
 function addContextMenu( title, event, callback, options )
 {
-    var menu = new ContextMenu( event, title, options );
+    const menu = new ContextMenu( event, title, options );
     LX.root.appendChild( menu.root );
 
     if( callback )
@@ -10874,11 +10874,11 @@ class CanvasCurve {
                 return element.defaulty;
             }
 
-            var last = [ element.xrange[ 0 ], element.defaulty ];
-            var f = 0;
-            for( var i = 0; i < element.value.length; i += 1 )
+            let last = [ element.xrange[ 0 ], element.defaulty ];
+            let f = 0;
+            for( let i = 0; i < element.value.length; i += 1 )
             {
-                var v = element.value[ i ];
+                let v = element.value[ i ];
                 if( x == v[ 0 ] ) return v[ 1 ];
                 if( x < v[ 0 ] )
                 {
@@ -10896,9 +10896,9 @@ class CanvasCurve {
 
         element.resample = function( samples ) {
 
-            var r = [];
-            var dx = (element.xrange[1] - element.xrange[ 0 ]) / samples;
-            for( var i = element.xrange[0]; i <= element.xrange[1]; i += dx )
+            let r = [];
+            let dx = (element.xrange[1] - element.xrange[ 0 ]) / samples;
+            for( let i = element.xrange[0]; i <= element.xrange[1]; i += dx )
             {
                 r.push( element.getValueAt(i) );
             }
@@ -10907,9 +10907,9 @@ class CanvasCurve {
 
         element.addValue = function(v) {
 
-            for( var i = 0; i < element.value; i++ )
+            for( let i = 0; i < element.value; i++ )
             {
-                var value = element.value[i];
+                let value = element.value[i];
                 if(value[0] < v[0]) continue;
                 element.value.splice(i,0,v);
                 redraw();
@@ -10932,7 +10932,7 @@ class CanvasCurve {
                     (v[1] * element.yrange[1] / canvas.height + element.yrange[0])];
         }
 
-        var selected = -1;
+        let selected = -1;
 
         element.redraw = function( o = {} ) {
 
