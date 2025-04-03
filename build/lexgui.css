@@ -1263,7 +1263,6 @@ a svg, svg path {
 .lexinlinewidgets {
     display: flex;
     gap: 0.1rem;
-    /* justify-content: space-around; */
 }
 
 .lexwidgetseparator div {
@@ -1313,7 +1312,7 @@ a svg, svg path {
 .lexwidget .lextext {
     border-radius: 6px;
     position: relative;
-    transition: 0.2s linear;
+    transition: border 0.2s linear;
 }
 
 .lexwidget .lextext.formlabel {
@@ -1855,10 +1854,11 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexcheckboxsubmenu {
-    width: 100%;
+    width: calc(100% - 16px);
     padding: 4px;
     padding-inline: 8px;
     color: var(--global-text-secondary);
+    grid-column: span 2;
 }
 
 .lexcheckboxsubmenu .lexwidget {
@@ -2010,10 +2010,12 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lextogglesubmenu {
-    width: 100%;
+    width: calc(100% - 16px);
     padding: 6px;
+    padding-inline: 8px;
     color: var(--global-text-secondary);
     margin-top: -1px;
+    grid-column: span 2;
 }
 
 /* Radio Group Widget */
@@ -3927,6 +3929,9 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexwidget:has(.lexcustomcontainer) {
     background-color: light-dark(var(--global-color-tertiary), var(--global-medium-background));
     border-radius: 6px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto auto;
 }
 
 .lexarray .lexwidget {
@@ -3940,6 +3945,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     color: var(--global-text-secondary);
     font-size: var(--global-font-size);
     margin-top: -1px;
+    grid-column: span 2;
 }
 
 .lexarrayitems .small .lexbutton {
@@ -4156,6 +4162,7 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
     color: var(--global-text-secondary);
     font-size: var(--global-font-size);
     margin-top: -1px;
+    grid-column: span 2;
 }
 
 .lexcustomcontainer span {

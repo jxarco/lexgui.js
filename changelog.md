@@ -2,6 +2,12 @@
 
 ## dev
 
+Widgets:
+- Fixed some resizing issues.
+
+No `justify` by default in inline widgets. Use `Panel.endLine(justify)` instead.
+Fixed preview image in AssetView.
+
 ## 0.5.1 (master)
 
 Widgets:
