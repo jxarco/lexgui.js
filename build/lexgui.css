@@ -1,4 +1,5 @@
 /* clean-css ignore:start */
+@import url("utilities.css");
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap');
 @font-face {
     font-family: "GeistSans";
@@ -152,13 +153,6 @@
     }
 }
 
-/* Some global colors */
-
-.orange { color: orange }
-.gray { color: gray }
-.dodgerblue { color: dodgerblue }
-.lightblue { color: #5aa8f7 }
-
 ::-webkit-scrollbar {
     height: 3px;
     width: 4px;
@@ -188,6 +182,12 @@ body {
     margin: 0;
     padding: 0;
     font-family: var(--global-font);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
 }
 
 :root[data-strictVP="false"] {
@@ -281,15 +281,6 @@ body.noevents * {
     cursor: move;
 }
 
-.hidden {
-    display: none !important;
-}
-
-.sticky {
-    position: sticky;
-    top: 0;
-}
-
 .hidden-opacity {
     opacity: 0 !important;
     pointer-events: none;
@@ -300,6 +291,13 @@ body.noevents * {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* Some global colors */
+
+.orange { color: orange }
+.gray { color: gray }
+.dodgerblue { color: dodgerblue }
+.lightblue { color: #5aa8f7 }
 
 svg.xs { width: var(--svg-size-xs); height: var(--svg-size-xs); }
 svg.sm { width: var(--svg-size-sm); height: var(--svg-size-sm); }
@@ -410,7 +408,7 @@ a svg, svg path {
     display: flex;
     flex-direction: row;
     position: relative;
-    width: calc(100% - 1.6rem);
+    width: 100%;
     background-color: var(--global-intense-background);
     border: 1px solid var(--global-color-tertiary);
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
@@ -628,10 +626,6 @@ a svg, svg path {
     line-height: 1.25rem;
 }
 
-.lexfooter .wrapper {
-    width: calc(100% - 30px);
-}
-
 .lexfooter .columns {
     display: grid;
     text-align: center;
@@ -647,6 +641,7 @@ a svg, svg path {
 .lexfooter h2 {
     margin-block-start: 0.83em;
     margin-block-end: 0.83em;
+    font-weight: 600;
 }
 
 .lexfooter ul li {
@@ -744,17 +739,17 @@ a svg, svg path {
 }
 
 .lexdialogtitle {
-    outline: none;
+    width: 100%;
     font-family: var(--global-title-font);
     font-weight: 600;
     font-size: var(--global-font-size-xl);
     color: var(--global-text-secondary);
     text-shadow: 0px 1px 6px #22222283;
-    width: calc(100% - 24px);
     padding: 12px;
     padding-left: 16px;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
+    outline: none;
     display: flex;
     justify-content: space-between;
     -webkit-user-select: none;
@@ -765,6 +760,7 @@ a svg, svg path {
 }
 
 .lexdialogcontent {
+    width: 100%;
     padding: 15px;
     word-break: break-all;
     color: var(--global-text-primary);
@@ -824,7 +820,7 @@ a svg, svg path {
 }
 
 .lexdialog.pocket .lexdialogtitle {
-    width: calc(100% - 28px);
+    width: 100%;
     font-size: var(--global-font-size-lg);
     background: var(--global-intense-background);
 }
@@ -1084,7 +1080,7 @@ a svg, svg path {
 
 .lexpanel {
     margin: 0;
-    margin-left: 3px;
+    padding: 4px;
     overflow: hidden;
     overflow-y: scroll;
 }
@@ -1094,6 +1090,7 @@ a svg, svg path {
 }
 
 .lexbranch {
+    width: 100%;
     border-radius: 6px;
     margin-bottom: 4px !important;
 }
@@ -1238,10 +1235,6 @@ a svg, svg path {
     -moz-transform: translateX(-1em);
     -webkit-transform: translateX(-1em);
     transform: translateX(-1em);
-}
-
-.lexwidget.nobranch {
-    width: calc(100% - 10px);
 }
 
 .lexwidget.auto {
@@ -1631,7 +1624,7 @@ a svg, svg path {
 }
 
 .lexselect .lexfilter {
-    width: calc(100% - 6px) !important;
+    width: 100%;
     padding: 2px 3px;
     background-color: var(--global-color-primary);
     border-bottom: 1px solid;
@@ -1698,14 +1691,14 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexselect ul .lexselectinnerlist {
-    width: calc(100% - 0.6rem);
+    width: 100%;
     height: calc(100% - 25px);
     padding: 0.3rem;
     display: grid;
 }
 
 .lexselect .lexselectitem {
-    width: calc(100% - 0.7rem);
+    width: 100%;
     cursor: pointer;
     color: var(--global-text-primary);
     min-height: 20px;
@@ -1722,7 +1715,7 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexselect .lexselectlabel {
-    width: calc(100% - 1.6rem);
+    width: 100%;
     color: var(--global-text-primary);
     padding-inline: 0.8rem;
     padding-block: 0.2rem;
@@ -1857,7 +1850,7 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexcheckboxsubmenu {
-    width: calc(100% - 16px);
+    width: 100%;
     padding: 4px;
     padding-inline: 8px;
     color: var(--global-text-secondary);
@@ -2024,7 +2017,7 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lextogglesubmenu {
-    width: calc(100% - 16px);
+    width: 100%;
     padding: 6px;
     padding-inline: 8px;
     color: var(--global-text-secondary);
@@ -2245,8 +2238,8 @@ input[type=number] {
 /* Number Widget */
 
 .lexwidget .numberbox {
+    width: 100%;
     display: grid;
-    width: calc(100% - 4px);
     background-color: var(--global-color-tertiary);
     border: 2px solid var(--global-color-transparent);
     border-radius: 6px;
@@ -2274,10 +2267,6 @@ input[type=number] {
     margin-top: -12px;
 }
 
-.lexnumber .vecinput {
-    width: calc(100% - 12px); /* remove padding, margin, and border */
-}
-
 .lexinputmeasure {
     font-family: var(--global-font);
     font-size: var(--global-font-size);
@@ -2288,7 +2277,7 @@ input[type=number] {
     -moz-appearance: none;
     -webkit-appearance: none;
     border: none !important;
-    width: calc(100% - 12px);
+    width: 100%;
     height: 1px;
     outline: none;
     opacity: 0.7;
@@ -2354,7 +2343,7 @@ input[type=number] {
     webkit-appearance: none;
     --radius-selector-max: calc(var(--radius-selector) + var(--radius-selector) + var(--radius-selector));
     border-radius: calc(var(--radius-selector) + min(var(--range-thumb-padding),var(--radius-selector-max)));
-    width: calc(100% - 4px);
+    width: 100%;
     height: var(--range-thumb-size);
     border: none;
     outline: none;
@@ -2897,7 +2886,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexmenubox {
     position: absolute;
-    padding-right: 8px;
     z-index: 1001;
     background-color: #111111f3;
     border: 1px solid #aaaaaa48;
@@ -3026,9 +3014,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexmenubox .lexseparator {
     margin: 2px 0 2px;
-    width: -moz-calc(100% + 8px);
-    width: -webkit-calc(100% + 8px);
-    width: calc(100% + 8px);
+    width: 100%;
     border-color: var(--global-text-tertiary);
     opacity: 0.25;
 }
@@ -3201,7 +3187,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 /* Side Bar */
 
 .lexsidebar {
-    width: calc(100% - 20px);
+    width: 100%;
     height: 100%;
     padding: 10px;
     display: flex;
@@ -3288,7 +3274,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexsidebarentry {
-    width: calc(100% - 16px);
+    width: 100%;
     padding: 6px;
     padding-inline: 8px;
     border-radius: 8px;
@@ -3357,7 +3343,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexsidebarsubentrycontainer {
-    width: calc(100% - 48px);
+    width: 100%;
     margin-block-start: 4px;
     margin-block-end: 8px;
     margin-left: 16px;
@@ -3425,8 +3411,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexsidebarfooter, .lexsidebar .lexsidebarheader {
-    width: calc(100% - 16px);
-    height: 36px;
+    width: 100%;
+    height: 48px;
     display: flex;
     border-radius: 8px;
     padding: 8px;
@@ -3466,7 +3452,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexsidebarfooter div.infodefault, .lexsidebar .lexsidebarheader div.infodefault {
-    width: calc(100% - 88px);
+    width: 100%;
     padding-inline: 12px;
     justify-content: center;
     display: flex;
@@ -3696,7 +3682,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexareatabs.fit {
-    width: calc(100% - 12px);
+    width: 100%;
     padding-inline: 6px;
 }
 
@@ -3738,14 +3724,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     transition-timing-function: ease-out;
 }
 
-.lexareatabscontainer .lexpanel:not(.lexoverlaybuttons) {
-    margin: 0;
-}
-
-.lexareatabscontainer .lexbranch {
-    margin: 4px 7px !important;
-}
-
 .lexareatabscontent.folded {
     max-height: 0px;
 }
@@ -3759,11 +3737,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 /* Avatar Widget */
 
 .lexavatar {
-    width: 32px;
-    height: 32px;
+    width: 48px;
     border-radius: 8px;
-    margin: auto 0;
     align-content: center;
+    aspect-ratio: 1;
 }
 
 .lexavatar * {
@@ -3801,15 +3778,15 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexcard span {
     font-size: var(--global-font-size-lg);
     font-family: var(--global-title-font);
-    font-weight: 600;
+    font-weight: 500;
     text-transform: uppercase;
-    width: calc(100% - 16px);
+    width: 100%;
+    height: 32px;
     display: flex;
     background-color: var(--global-blur-background);
     --webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     align-items: center;
-    height: 16px;
     position: absolute;
     top: 0;
     left: 0;
@@ -3874,7 +3851,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexlistitem {
-    width: calc(100% - 8px);
+    width: 100%;
+    height: 24px;
     cursor: pointer;
     color: var(--global-text-secondary);
     font-size: var(--global-font-size);
@@ -3883,7 +3861,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     padding-right: 4px;
     margin-top: 1px;
     margin-bottom: 1px;
-    height: 20px;
     line-height: 22px;
     align-content: center;
     display: flow-root;
@@ -4563,7 +4540,7 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
 
 .lexassetbrowser .lexsplitbar.horizontal {
     position: relative;
-    height: calc(100%);
+    height: 100%;
     border-radius: 0px;
     left: 0 !important;
     top: 0;
@@ -4652,7 +4629,7 @@ ul.lexassetscontent {
 }
 
 .lexassetscontent.list li {
-    width: calc(100% - 0.5em);
+    width: 100%;
     height: 1.8em;
     border-top: 0px;
     border-left: 4px solid rgba(0, 0, 0, 0);
@@ -4901,7 +4878,7 @@ ul.lexassetscontent {
 .lexcodeeditor {
     outline: none;
     overflow: hidden;
-    width: calc(100%);
+    width: 100%;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -4945,7 +4922,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .codetabsarea.with-vscrollbar {
-    width: calc(100% - 10px) !important;
+    width: 100% !important;
 }
 
 .lexcodeeditor .codetabsarea.with-hscrollbar {

@@ -7,10 +7,6 @@
     <link rel="icon" href="../images/icon.png">
     <style>
         iframe { border: none; }
-        .lexexamplespanel {
-            margin-left: 6px;
-            margin-top: 6px;
-        }
     </style>
     <script type="importmap">
         {
@@ -52,7 +48,7 @@
             "Timeline"
         ];
 
-        let panel = leftArea.addPanel({ className: "lexexamplespanel" });
+        let panel = leftArea.addPanel();
         fillExamples( panel );
 
         let iframe = document.createElement('iframe');
@@ -71,7 +67,7 @@
                     window.open("https://github.com/jxarco/lexgui.js/blob/master/examples/" + tokens[tokens.length - 1], '_blank')
                 }
             }
-        ], { float: "htc" } );
+        ], { float: "hbc" } );
 
         // **** **** **** **** **** **** **** **** **** **** **** **** 
 

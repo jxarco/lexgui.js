@@ -1789,7 +1789,7 @@ class Area {
             root.className += " " + options.className;
         }
 
-        var width = options.width || "calc( 100% )";
+        var width = options.width || "100%";
         var height = options.height || "100%";
 
         // This has default options..
@@ -2381,7 +2381,7 @@ class Area {
 
         if( options.sticky ?? true )
         {
-            bar.root.classList.add( "sticky" );
+            bar.root.className += " sticky top-0";
         }
 
         return menubar;
@@ -2478,7 +2478,8 @@ class Area {
                 selected: b.selected,
                 icon: b.icon,
                 img: b.img,
-                className: b.class ?? ""
+                className: b.class ?? "",
+                title: b.name
             };
 
             if( group )
@@ -3766,7 +3767,7 @@ class SideBar {
         // Set width depending on header/footer
         doAsync( () => {
             // This account for header, footer and all inner paddings
-            const contentOffset = 32 + ( this.header?.offsetHeight ?? 0 ) +
+            const contentOffset = ( this.header?.offsetHeight ?? 0 ) +
                 ( this.filter?.offsetHeight ?? 0 ) +
                 ( this.footer?.offsetHeight ?? 0 );
             this.content.style.height = `calc(100% - ${ contentOffset }px)`;
@@ -5910,7 +5911,7 @@ class Form extends Widget {
             }
 
             entryData.placeholder = entryData.placeholder ?? entry;
-            entryData.width = "calc(100% - 10px)";
+            entryData.width = "100%";
 
             // this.addLabel( entry, { textClass: "formlabel" } );
 
@@ -5940,7 +5941,7 @@ class Form extends Widget {
             {
                 callback( container.formData, event );
             }
-        }, { buttonClass: "primary", width: "calc(100% - 10px)" } );
+        }, { buttonClass: "primary" } );
 
         container.appendChild( submitButton.root );
     }
@@ -8227,7 +8228,7 @@ class Tree extends Widget {
             nodeFilterInput = document.createElement('input');
             nodeFilterInput.className = "lexnodetree_filter";
             nodeFilterInput.setAttribute("placeholder", "Filter..");
-            nodeFilterInput.style.width =  "calc( 100% - 17px )";
+            nodeFilterInput.style.width =  "100%";
             nodeFilterInput.addEventListener('input', () => {
                 this.innerTree.refresh();
             });
@@ -8951,7 +8952,7 @@ class Panel {
             root.className += " " + options.className;
         }
 
-        root.style.width = options.width || "calc( 100% - 6px )";
+        root.style.width = options.width || "100%";
         root.style.height = options.height || "100%";
         Object.assign( root.style, options.style ?? {} );
 
@@ -9229,7 +9230,7 @@ class Panel {
                 }
                 else
                 {
-                    el.classList.add("nobranch");
+                    el.className += " nobranch w-full";
                     this.root.appendChild( el );
                 }
             }
@@ -9293,7 +9294,7 @@ class Panel {
         let input = document.createElement('input');
         input.className = 'lexinput-filter';
         input.setAttribute( "placeholder", options.placeholder );
-        input.style.width =  "calc( 100% - 17px )";
+        input.style.width =  "100%";
         input.value = options.filterValue || "";
 
         let searchIcon = document.createElement('a');
@@ -10067,7 +10068,6 @@ class Branch {
             root.className += " " + options.className;
         }
 
-        root.style.width = "calc(100% - 7px)";
         root.style.margin = "0 auto";
 
         var that = this;
@@ -10290,7 +10290,7 @@ class Footer {
         root.className = "lexfooter";
 
         const wrapper = document.createElement( "div" );
-        wrapper.className = "wrapper";
+        wrapper.className = "w-full";
         root.appendChild( wrapper );
 
         if( options.columns && options.columns.constructor == Array )
@@ -10563,7 +10563,6 @@ class Dialog {
         root.style.left = position[ 0 ] ?? "50%";
         root.style.top = position[ 1 ] ?? "50%";
 
-        panel.root.style.width = "calc( 100% - 30px )";
         panel.root.style.height = title ? "calc( 100% - " + ( titleDiv.offsetHeight + 30 ) + "px )" : "calc( 100% - 51px )";
     }
 
@@ -10635,7 +10634,7 @@ class PocketDialog extends Dialog {
             this.root.style.top = dragMargin + "px";
         }
 
-        this.panel.root.style.width = "calc( 100% - 12px )";
+        this.panel.root.style.width = "100%";
         this.panel.root.style.height = "calc( 100% - 40px )";
         this.dock_pos = PocketDialog.TOP;
 
