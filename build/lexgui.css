@@ -4174,8 +4174,8 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
     position: absolute;
     width: 125%;
     height: 125%;
-    top: -15.5%;
-    left: -15.5%;
+    top: -12.5%;
+    left: -12.5%;
     border-radius: 50%;
     border: 2px solid rgba(255, 255, 255, 0.2);
     border-bottom-color: transparent;
