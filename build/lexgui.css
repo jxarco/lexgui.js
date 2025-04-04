@@ -526,7 +526,7 @@ a svg, svg path {
 
 .commandbar .gs-header {
     width: 100%;
-    height: 32px;
+    height: 44px;
     display: flex;
     padding: 6px;
 }
@@ -1673,7 +1673,7 @@ a svg, svg path {
     max-height: -webkit-fill-available;
     position: fixed;
     z-index: 10000;
-    box-shadow: 0 0px 6px rgba(0, 0, 0, 0.603);
+    box-shadow: 0 0px 4px rgba(0, 0, 0, 0.203);
     border-radius: 6px;
     border: 1px solid #7a797c4f;
     overflow-y: auto;
@@ -1771,11 +1771,6 @@ dialog .lexselect .lexselectoptions {
 :root[data-theme="light"] .lexselect ul {
     background-color: var(--global-color-primary);
     box-shadow: 0 0px 6px rgba(175, 175, 175, 0.788);
-}
-
-:root[data-theme="light"] .lexselect .lexselectitem:hover {
-    background-color: var(--global-color-accent);
-    color: #fff;
 }
 
 /* Check box */
