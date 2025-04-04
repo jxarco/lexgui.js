@@ -1599,7 +1599,7 @@ a svg, svg path {
 
 .lexcombobuttons .lexbutton.combo {
     display: flex;
-    padding: 0.7em 1.6em;
+    padding: 0.5em 1.6em;
     transition: 0.2s;
     --button-color: var(--global-color-tertiary);
 }
@@ -1785,7 +1785,7 @@ dialog .lexselect .lexselectoptions {
 /* Check box */
 
 .lexcheckbox {
-    --checkbox-bg-color: var(--global-color-tertiary);
+    --checkbox-bg-color: light-dark(var(--global-text-tertiary), var(--global-color-tertiary));
     --checkbox-fg-color: #fff;
     vertical-align: middle;
     flex-shrink: 0;
@@ -1812,11 +1812,14 @@ dialog .lexselect .lexselectoptions {
 
 /* Colors */
 .lexcheckbox.primary { --checkbox-bg-color: var(--global-color-primary); }
+:root[data-theme="light"] .lexcheckbox.primary { --checkbox-fg-color: var(--global-text-primary); }
 .lexcheckbox.secondary { --checkbox-bg-color: var(--global-color-secondary); }
+:root[data-theme="light"] .lexcheckbox.secondary { --checkbox-fg-color: var(--global-text-tertiary); }
 .lexcheckbox.accent { --checkbox-bg-color: var(--global-color-accent); }
 .lexcheckbox.contrast { --checkbox-bg-color: var(--global-text-primary); --checkbox-fg-color: var(--global-color-primary); }
 .lexcheckbox.warning { --checkbox-bg-color: var(--global-color-warning); }
 .lexcheckbox.error { --checkbox-bg-color: var(--global-color-error); }
+
 
 .lexcheckbox:before {
     content: "";
@@ -1869,7 +1872,7 @@ dialog .lexselect .lexselectoptions {
 
 .lextoggle {
     --toggle-bg-color: var(--global-text-tertiary); /* Color of background CHECKED */
-    --toggle-fg-color: var(--global-text-primary); /* Color of the thumb */
+    --toggle-fg-color: #f4f4f6; /* Color of the thumb */
     border: 1px solid transparent;
     color: var(--toggle-fg-color);
     background-color: var(--global-color-tertiary); /* Color of background NO check */
@@ -1883,7 +1886,6 @@ dialog .lexselect .lexselectoptions {
     -ms-user-select: none;
     user-select: none;
     border-radius: 12px;
-    /* padding: 1px; */
     width: 40px;
     height: 21px;
     flex-shrink: 0;
@@ -1899,11 +1901,11 @@ dialog .lexselect .lexselectoptions {
 }
 
 /* Colors */
-.lextoggle.primary { --toggle-bg-color: var(--global-color-primary); }
-.lextoggle.secondary { --toggle-bg-color: var(--global-color-secondary);  }
-.lextoggle.accent { --toggle-bg-color: var(--global-color-accent);  }
-.lextoggle.contrast { --toggle-bg-color: var(--global-text-primary); --toggle-fg-color: var(--global-text-primary); }
-.lextoggle.warning { --toggle-bg-color: var(--global-color-warning);  }
+.lextoggle.primary { --toggle-bg-color: var(--global-color-primary);}
+.lextoggle.secondary { --toggle-bg-color: var(--global-color-tertiary); }
+.lextoggle.accent { --toggle-bg-color: var(--global-color-accent); }
+.lextoggle.contrast { --toggle-bg-color: var(--global-text-primary); }
+.lextoggle.warning { --toggle-bg-color: var(--global-color-warning); }
 .lextoggle.error { --toggle-bg-color: var(--global-color-error);  }
 
 .lextoggle > * {
@@ -1974,17 +1976,20 @@ dialog .lexselect .lexselectoptions {
     --toggle-fg-color: var(--global-color-primary);
 }
 
+.lextoggle.outline.primary, .lextoggle.outline.secondary {
+    /* border: 1px solid var(--global-text-tertiary); */
+}
+
 .lextoggle.outline:checked, .lextoggle.outline[aria-checked=true], .lextoggle.outline:has(>input:checked) {
-    color: var(--toggle-bg-color);
     border: 1px solid currentColor;
+    color: var(--toggle-bg-color);
     background-color: var(--global-color-secondary);
 }
 
 .lextoggle.outline.primary:checked, .lextoggle.outline.primary[aria-checked=true], .lextoggle.outline.primary:has(>input:checked),
 .lextoggle.outline.secondary:checked, .lextoggle.outline.secondary[aria-checked=true], .lextoggle.outline.secondary:has(>input:checked) {
-    color: var(--toggle-bg-color);
-    border: 1px solid var(--global-text-secondary);
     background-color: var(--global-color-quaternary);
+    border: 1px solid var(--global-text-tertiary);
 }
 
 :is(.lextoggle:checked, .lextoggle[aria-checked=true], .lextoggle:has(>input:checked)):before {
