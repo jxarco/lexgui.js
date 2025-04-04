@@ -5364,14 +5364,7 @@ class TextInput extends Widget {
 
             this._lastValueTriggered = value = newValue;
 
-            if( options.disabled  )
-            {
-                wValue.innerText = newValue;
-            }
-            else
-            {
-                wValue.value = newValue;
-            }
+            wValue.value = newValue;
 
             if( !skipCallback )
             {
@@ -5477,7 +5470,7 @@ class TextInput extends Widget {
             wValue.value = value;
             wValue.style.width = "100%";
             wValue.style.textAlign = options.float ?? "";
-            wValue.className = "lextext ellipsis-overflow";
+            wValue.className = "lextext ellipsis-overflow " + ( options.inputClass ?? "" );
         }
 
         Object.assign( wValue.style, options.style ?? {} );
@@ -12055,11 +12048,11 @@ class AssetView {
         this.rightPanel.sameLine();
         this.rightPanel.addSelect( "Filter", this.allowedTypes, this.allowedTypes[ 0 ], v => this._refreshContent.call(this, null, v), { width: "30%", minWidth: "128px" } );
         this.rightPanel.addText( null, this.searchValue ?? "", v => this._refreshContent.call(this, v, null), { placeholder: "Search assets.." } );
-        this.rightPanel.addButton( null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { className: "micro", title: "Sort" } );
-        this.rightPanel.addButton( null, "<a class='fa-solid fa-grip'></a>", on_change_view.bind(this), { className: "micro", title: "View" } );
+        this.rightPanel.addButton( null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { title: "Sort" } );
+        this.rightPanel.addButton( null, "<a class='fa-solid fa-grip'></a>", on_change_view.bind(this), { title: "View" } );
         // Content Pages
-        this.rightPanel.addButton( null, "<a class='fa-solid fa-angles-left'></a>", on_change_page.bind(this, -1), { className: "micro", title: "Previous Page" } );
-        this.rightPanel.addButton( null, "<a class='fa-solid fa-angles-right'></a>", on_change_page.bind(this, 1), { className: "micro", title: "Next Page" } );
+        this.rightPanel.addButton( null, "<a class='fa-solid fa-angles-left'></a>", on_change_page.bind(this, -1), { title: "Previous Page" } );
+        this.rightPanel.addButton( null, "<a class='fa-solid fa-angles-right'></a>", on_change_page.bind(this, 1), { title: "Next Page" } );
         this.rightPanel.endLine();
 
         if( !this.skipBrowser )
@@ -12094,8 +12087,16 @@ class AssetView {
                     callback: domEl => { this._refreshContent(); }
                 }
             ], { width: "20%", minWidth: "164px", noSelection: true } );
-            this.rightPanel.addText(null, this.path.join('/'), null, { width: "70%", maxWidth: "calc(70% - 64px)", minWidth: "164px", disabled: true, signal: "@on_folder_change", style: { fontWeight: "bolder", fontSize: "16px", color: "#aaa" } });
-            this.rightPanel.addText(null, "Page " + this.contentPage + " / " + ((((this.currentData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1), null, {disabled: true, signal: "@on_page_change", width: "fit-content"})
+
+            this.rightPanel.addText(null, this.path.join('/'), null, {
+                width: "70%", maxWidth: "calc(70% - 64px)", minWidth: "164px", inputClass: "nobg", disabled: true, signal: "@on_folder_change", 
+                style: { fontWeight: "600", fontSize: "15px" } 
+            });
+
+            this.rightPanel.addText(null, "Page " + this.contentPage + " / " + ((((this.currentData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1), null, {
+                inputClass: "nobg", disabled: true, signal: "@on_page_change"}
+            )
+
             this.rightPanel.endLine();
         }
 

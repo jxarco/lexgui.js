@@ -1390,7 +1390,7 @@ a svg, svg path {
     border: 1px dashed #7a797c4f;
 }
 
-.lexwidget .lextext.outline:hover {
+.lexwidget .lextext.outline:hover, .lexwidget .lextext.nobg:hover {
     background: none;
 }
 
@@ -4586,7 +4586,7 @@ ul.lexassetscontent {
     margin: 0.5em;
     margin-top: 0.75em;
     padding: 0;
-    box-shadow: 0 0 8px black;
+    box-shadow: 0 0 2px rgba(0, 0, 0, .14);
     overflow: hidden;
     background-color: #555;
     cursor: pointer;
@@ -4622,13 +4622,11 @@ ul.lexassetscontent {
     width: 100%;
     height: 1.8em;
     border-top: 0px;
-    border-left: 4px solid rgba(0, 0, 0, 0);
-    border-bottom-left-radius: 2px;
-    border-bottom-right-radius: 2px;
+    border-left: 4px solid transparent;
+    border-radius: 4px;
     margin: 0;
     margin-top: 0.4em;
     margin-bottom: 0.4em;
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.858);
 }
 
 .lexassetscontent .asset-file-preview {
@@ -4686,7 +4684,7 @@ ul.lexassetscontent {
     bottom: 0px;
     -webkit-text-size-adjust: 100%;
     font-size: var(--global-font-size);
-    color: #BBB;
+    color: var(--global-text-primary);
     cursor: pointer;
     text-align: center;
     box-sizing: border-box;
@@ -4697,7 +4695,7 @@ ul.lexassetscontent {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    background-color: rgba(12, 12, 12, 0.8);
+    background-color: var(--global-intense-background);
     transition: all 0.1s;
     z-index: 1;
 }
