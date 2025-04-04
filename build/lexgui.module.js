@@ -6852,7 +6852,7 @@ class Checkbox extends Widget {
 
         let checkbox = document.createElement( "input" );
         checkbox.type = "checkbox";
-        checkbox.className = "lexcheckbox " + ( options.className ?? "" );
+        checkbox.className = "lexcheckbox " + ( options.className ?? "primary" );
         checkbox.checked = value;
         checkbox.disabled = options.disabled ?? false;
         container.appendChild( checkbox );

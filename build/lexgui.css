@@ -1787,7 +1787,7 @@ dialog .lexselect .lexselectoptions {
 /* Check box */
 
 .lexcheckbox {
-    --checkbox-bg-color: var(--global-color-accent);
+    --checkbox-bg-color: var(--global-color-tertiary);
     --checkbox-fg-color: #fff;
     vertical-align: middle;
     flex-shrink: 0;
@@ -1813,8 +1813,8 @@ dialog .lexselect .lexselectoptions {
 }
 
 /* Colors */
-.lexcheckbox.primary { --checkbox-bg-color: var(--global-color-accent); }
-.lexcheckbox.secondary { --checkbox-bg-color: var(--global-color-accent-light); }
+.lexcheckbox.primary { --checkbox-bg-color: var(--global-color-primary); }
+.lexcheckbox.secondary { --checkbox-bg-color: var(--global-color-secondary); }
 .lexcheckbox.accent { --checkbox-bg-color: var(--global-color-accent); }
 .lexcheckbox.contrast { --checkbox-bg-color: var(--global-text-primary); --checkbox-fg-color: var(--global-color-primary); }
 .lexcheckbox.warning { --checkbox-bg-color: var(--global-color-warning); }
@@ -1870,11 +1870,11 @@ dialog .lexselect .lexselectoptions {
 /* Toggle Widget */
 
 .lextoggle {
-    --toggle-bg-color: #1a1a1a;
-    --toggle-fg-color: #f9f9f9;
+    --toggle-bg-color: var(--global-text-tertiary); /* Color of background CHECKED */
+    --toggle-fg-color: var(--global-text-primary); /* Color of the thumb */
     border: 1px solid transparent;
     color: var(--toggle-fg-color);
-    background-color: var(--global-color-quaternary);
+    background-color: var(--global-color-tertiary); /* Color of background NO check */
     cursor: pointer;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -1885,9 +1885,9 @@ dialog .lexselect .lexselectoptions {
     -ms-user-select: none;
     user-select: none;
     border-radius: 12px;
-    padding: 3px;
-    width: 36px;
-    height: 22px;
+    /* padding: 1px; */
+    width: 40px;
+    height: 21px;
     flex-shrink: 0;
     grid-template-columns: 0fr 1fr 1fr;
     place-content: center;
@@ -1901,10 +1901,10 @@ dialog .lexselect .lexselectoptions {
 }
 
 /* Colors */
-.lextoggle.primary { --toggle-bg-color: var(--global-color-accent); }
-.lextoggle.secondary { --toggle-bg-color: var(--global-color-accent-light);  }
+.lextoggle.primary { --toggle-bg-color: var(--global-color-primary); }
+.lextoggle.secondary { --toggle-bg-color: var(--global-color-secondary);  }
 .lextoggle.accent { --toggle-bg-color: var(--global-color-accent);  }
-.lextoggle.contrast { --toggle-bg-color: var(--global-text-primary); --toggle-fg-color: var(--global-color-primary); }
+.lextoggle.contrast { --toggle-bg-color: var(--global-text-primary); --toggle-fg-color: var(--global-text-primary); }
 .lextoggle.warning { --toggle-bg-color: var(--global-color-warning);  }
 .lextoggle.error { --toggle-bg-color: var(--global-color-error);  }
 
@@ -1919,7 +1919,7 @@ dialog .lexselect .lexselectoptions {
     grid-column: 2/span 1;
     grid-row-start: 1;
     height: 100%;
-    padding: .125rem;
+    padding: 0.125rem;
     transition: opacity .2s,rotate .4s
 }
 
@@ -1968,15 +1968,25 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lextoggle:checked, .lextoggle[aria-checked=true], .lextoggle:has(>input:checked) {
-    border: 1px solid var(--global-color-secondary);
     background-color: var(--toggle-bg-color);
     grid-template-columns: 1fr 1fr 0fr;
+}
+
+.lextoggle.contrast:checked, .lextoggle.contrast[aria-checked=true], .lextoggle.contrast:has(>input:checked) {
+    --toggle-fg-color: var(--global-color-primary);
 }
 
 .lextoggle.outline:checked, .lextoggle.outline[aria-checked=true], .lextoggle.outline:has(>input:checked) {
     color: var(--toggle-bg-color);
     border: 1px solid currentColor;
-    background-color: var(--global-color-primary);
+    background-color: var(--global-color-secondary);
+}
+
+.lextoggle.outline.primary:checked, .lextoggle.outline.primary[aria-checked=true], .lextoggle.outline.primary:has(>input:checked),
+.lextoggle.outline.secondary:checked, .lextoggle.outline.secondary[aria-checked=true], .lextoggle.outline.secondary:has(>input:checked) {
+    color: var(--toggle-bg-color);
+    border: 1px solid var(--global-text-secondary);
+    background-color: var(--global-color-quaternary);
 }
 
 :is(.lextoggle:checked, .lextoggle[aria-checked=true], .lextoggle:has(>input:checked)):before {
@@ -1997,14 +2007,13 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lextogglecont {
-    font-weight: bold;
     display: flex;
     gap: 0.4rem;
     margin: 0 auto;
 }
 
 .lextogglecont .toggletext {
-    font-weight: bold;
+    font-weight: 500;
     width: 95%;
     overflow: hidden;
     text-overflow: ellipsis;
