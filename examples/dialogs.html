@@ -1,5 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Dialogs Demo</title>
@@ -14,101 +15,100 @@
         }
     </script>
 </head>
+
 <body></body>
-    <script type="module">
+<script type="module">
 
-        import { LX } from 'lexgui';
+    import { LX } from 'lexgui';
 
-        // Init library and get main area
-        let area = LX.init({ skip_default_area: true });
+    // Init library and get main area
+    let area = LX.init({ skip_default_area: true });
 
-        LX.popup("Hello! I'm a popup dialog :)", null, { position: ["45%", "20%"] })
-        
-        const pocketDialog = new LX.PocketDialog("Load Settings", p => {
-            
-            p.branch("Canvas");
-            p.addColor("Background", "#b7a9b1");
-            p.addText("Text", "Pocket Dialog Lexgui.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
-            p.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
-                console.log("Font Color: ", value);
-            });
-            p.addNumber("Font Size", 36, (value, event) => {
-                console.log(value);
-            }, { min: 1, max: 48, step: 1});
-            p.addVector2("2D Position", [250, 350], (value, event) => {
-                console.log(value);
-            }, { min: 0, max: 1024 });
+    LX.popup("Hello! I'm a popup dialog :)", null, { position: ["45%", "20%"] })
 
-            p.branch("Project");
-            p.addText("Name", "Lexgui.js");
-            p.addButton(null, "Export");
-            p.merge();
-        }, { float: 'lt' } );
+    const pocketDialog = new LX.PocketDialog("Load Settings", p => {
+        p.branch("Canvas");
+        p.addColor("Background", "#b7a9b1");
+        p.addText("Text", "Pocket Dialog Lexgui.js @jxarco", null, { placeholder: "e.g. ColorPicker", icon: "fa fa-font" });
+        p.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
+            console.log("Font Color: ", value);
+        });
+        p.addNumber("Font Size", 36, (value, event) => {
+            console.log(value);
+        }, { min: 1, max: 48, step: 1 });
+        p.addVector2("2D Position", [250, 350], (value, event) => {
+            console.log(value);
+        }, { min: 0, max: 1024 });
 
-        const dialogClosable = new LX.Dialog("Closable Dialog", p => {
-            
-            p.branch("Canvas");
-            p.addColor("Background", "#b7a9b1");
-            p.addText("Text", "Dialog Lexgui.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
-            p.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
-                console.log("Font Color: ", value);
-            });
-            p.addNumber("Font Size", 36, (value, event) => {
-                console.log(value);
-            }, { min: 1, max: 48, step: 1});
-            p.addVector2("2D Position", [250, 350], (value, event) => {
-                console.log(value);
-            }, { min: 0, max: 1024 });
-            p.merge();
-        }, { size: ["350px", null], closable: true });
+        p.branch("Project");
+        p.addText("Name", "Lexgui.js");
+        p.addButton(null, "Export");
+        p.merge();
+    }, { float: 'lt' });
 
-        const draggablePocketDialog = new LX.PocketDialog("Draggable PocketDialog", p => {
-            
-            p.branch("Canvas");
-            p.addColor("Background", "#b7a9b1");
-            p.addText("Text", "Pocket Dialog Lexgui.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
-            p.addSelect("Best Engine", ["Godot", "Unity", "Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Unreal Engine","Pepe"], "Godot", (value, event) => {
-                console.log(value);
-            }, {filter: true});
-            p.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
-                console.log("Font Color: ", value);
-            });
-            p.addNumber("Font Size", 36, (value, event) => {
-                console.log(value);
-            }, { min: 1, max: 48, step: 1});
-            p.addVector2("2D Position", [250, 350], (value, event) => {
-                console.log(value);
-            }, { min: 0, max: 1024 });
-            p.merge();
-        }, { size: ["350px", null], draggable: true });
+    const dialogClosable = new LX.Dialog("Closable Dialog", p => {
+        p.branch("Canvas");
+        p.addColor("Background", "#b7a9b1");
+        p.addText("Text", "Dialog Lexgui.js @jxarco", null, { placeholder: "e.g. ColorPicker", icon: "fa fa-font" });
+        p.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
+            console.log("Font Color: ", value);
+        });
+        p.addNumber("Font Size", 36, (value, event) => {
+            console.log(value);
+        }, { min: 1, max: 48, step: 1 });
+        p.addVector2("2D Position", [250, 350], (value, event) => {
+            console.log(value);
+        }, { min: 0, max: 1024 });
+        p.merge();
+    }, { size: ["350px", null], closable: true });
 
-        // add canvas to left upper part
-        var canvas = document.createElement('canvas');
-        canvas.id = "mycanvas";
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
-        document.body.appendChild( canvas );
+    const draggablePocketDialog = new LX.PocketDialog("Draggable PocketDialog", p => {
+        p.branch("Canvas");
+        p.addColor("Background", "#b7a9b1");
+        p.addText("Text", "Pocket Dialog Lexgui.js @jxarco", null, { placeholder: "e.g. ColorPicker", icon: "fa fa-font" });
+        p.addSelect("Best Engine", ["Godot", "Unity", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Pepe"], "Godot", (value, event) => {
+            console.log(value);
+        }, { filter: true });
+        p.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
+            console.log("Font Color: ", value);
+        });
+        p.addNumber("Font Size", 36, (value, event) => {
+            console.log(value);
+        }, { min: 1, max: 48, step: 1 });
+        p.addVector2("2D Position", [250, 350], (value, event) => {
+            console.log(value);
+        }, { min: 0, max: 1024 });
+        p.merge();
+    }, { size: ["350px", null], draggable: true });
 
-        function loop(dt) {
-            
-            var ctx = canvas.getContext("2d");
+    // add canvas to left upper part
+    let canvas = document.createElement('canvas');
+    canvas.id = "mycanvas";
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    document.body.appendChild(canvas);
 
-            // Get values from panel widgets (e.g. color value)
-            ctx.fillStyle = pocketDialog.panel.getValue('Background');
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+    function loop(dt) {
 
-            ctx.font = pocketDialog.panel.getValue('Font Size') + "px Monospace";
-            ctx.fillStyle = pocketDialog.panel.getValue('Font Color');
+        var ctx = canvas.getContext("2d");
 
-            const text = pocketDialog.panel.getValue('Text');
-            const pos2D = pocketDialog.panel.getValue('2D Position');
-            ctx.fillText(text, pos2D[0], pos2D[1]);
+        // Get values from panel widgets (e.g. color value)
+        ctx.fillStyle = pocketDialog.panel.getValue('Background');
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            requestAnimationFrame(loop);
-        }
+        ctx.font = pocketDialog.panel.getValue('Font Size') + "px Monospace";
+        ctx.fillStyle = pocketDialog.panel.getValue('Font Color');
+
+        const text = pocketDialog.panel.getValue('Text');
+        const pos2D = pocketDialog.panel.getValue('2D Position');
+        ctx.fillText(text, pos2D[0], pos2D[1]);
 
         requestAnimationFrame(loop);
-    </script>
+    }
+
+    requestAnimationFrame(loop);
+</script>
+
 </html>

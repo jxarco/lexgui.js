@@ -54,7 +54,7 @@
         fillPanel( panel );
 
         let activeTimeline = null
-        createKyeframeTimeline( bottomTabs );
+        createKeyframeTimeline( bottomTabs );
         createClipsTimeline( bottomTabs );
         createCurvesTimeline( bottomTabs );
 
@@ -173,7 +173,7 @@
             panel.merge();
         }
 
-        function createKyeframeTimeline( bottomTabs ) {
+        function createKeyframeTimeline( bottomTabs ) {
             
             let keyframesPanel = new LX.Panel();            
             bottomTabs.add( "Keyframes", keyframesPanel, {onSelect: () => {

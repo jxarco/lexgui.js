@@ -1,5 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Video Editor Demo</title>
@@ -14,105 +15,109 @@
         }
     </script>
 </head>
-<body></body>
-    <script type="module">
 
-      import { LX } from 'lexgui';
-      import { VideoEditor } from 'lexgui/components/videoeditor.js';
-      
-      // Init library and get main area
-      let area = LX.init();
-      const menubar = area.addMenubar( m => {
-        m.setButtonImage("Page", "../data/godot_pixelart.png", null, {float: "left"});
-      });
-          
-      // Split main area
-      let [leftArea, rightArea] = area.split({sizes:["75%","25%"], minimizable: true});
-      let [topArea, bottomArea] = leftArea.split({sizes:["90%", null], minimizable: false, resize: false, type: "vertical"});
-      area.extend();
-      
-      /* Create video area with a menubar */
-      const videoArea = new LX.Area({id:'video-area'});
-      
-      /* Add video editor with the video into the area*/
-      const video = document.createElement('video');
-      video.src = "../data/video.mp4";
-      videoArea.attach(video);
-      const videoEditor = new LX.VideoEditor(topArea, {videoArea, video})
-    
-      /* Add canvas above video */
-      const canvas = document.createElement('canvas');
-      canvas.width = video.clientWidth;
-      canvas.height = video.clientHeight;
-      const ctx = canvas.getContext("2d");
-      ctx.fillStyle = LX.getThemeColor("global-selected-light");
-      ctx.font = "40px Arial";
-      ctx.fillText("I'm a canvas above the video!", canvas.width/2, 100);
-      
-      canvas.style.position = "absolute";
-      canvas.style.left = "0";
-      videoArea.attach(canvas);
-      leftArea.onresize = (size) => {
-        
+<body></body>
+<script type="module">
+
+    import { LX } from 'lexgui';
+    import { VideoEditor } from 'lexgui/components/videoeditor.js';
+
+    // Init library and get main area
+    let area = LX.init();
+    const menubar = area.addMenubar(m => {
+        m.setButtonImage("Page", "../data/godot_pixelart.png", null, { float: "left" });
+    });
+
+    // Split main area
+    let [leftArea, rightArea] = area.split({ sizes: ["75%", "25%"], minimizable: true });
+    let [topArea, bottomArea] = leftArea.split({ sizes: ["90%", null], minimizable: false, resize: false, type: "vertical" });
+    area.extend();
+
+    /* Create video area with a menubar */
+    const videoArea = new LX.Area({ id: 'video-area' });
+
+    /* Add video editor with the video into the area*/
+    const video = document.createElement('video');
+    video.src = "../data/video.mp4";
+    videoArea.attach(video);
+    const videoEditor = new LX.VideoEditor(topArea, { videoArea, video })
+
+    /* Add canvas above video */
+    const canvas = document.createElement('canvas');
+    canvas.width = video.clientWidth;
+    canvas.height = video.clientHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = LX.getThemeColor("global-selected-light");
+    ctx.font = "40px Arial";
+    ctx.fillText("I'm a canvas above the video!", canvas.width / 2, 100);
+
+    canvas.style.position = "absolute";
+    canvas.style.left = "0";
+    videoArea.attach(canvas);
+    leftArea.onresize = (size) => {
+
         canvas.width = video.clientWidth;
         canvas.height = video.clientHeight;
         const ctx = canvas.getContext("2d");
         ctx.fillStyle = LX.getThemeColor("global-selected-light");
         ctx.font = "40px Arial";
-        ctx.fillText("I'm a canvas above the video!", canvas.width/2, 100);
+        ctx.fillText("I'm a canvas above the video!", canvas.width / 2, 100);
         //videoEditor.timebar.resize(size)
-      }
+    }
 
-      /* Add show/hide right panel button*/
-      videoArea.addOverlayButtons([{
+    /* Add show/hide right panel button*/
+    videoArea.addOverlayButtons([{
         selectable: true,
         selected: true,
         icon: "fa-solid fa-info",
         name: "Properties",
         callback: (v, e) => {
-          if(area.split_extended) {
-            area.reduce();
-          }
-          else {
-            area.extend();
-          }
+            if (area.split_extended) {
+                area.reduce();
+            }
+            else {
+                area.extend();
+            }
         }
-      }], {float: 'tvr'});
+    }], { float: 'tvr' });
 
-      let p = bottomArea.addPanel({width: "100%", height: "100%", style: {display: "flex", "flex-direction": "row", "justify-content": "center", "align-content": "flex-start", "flex-wrap": "wrap"}});
-      p.addButton(null, "Trim", (v) => {
+    let p = bottomArea.addPanel({ width: "100%", height: "100%", style: { display: "flex", "flex-direction": "row", "justify-content": "center", "align-content": "flex-start", "flex-wrap": "wrap" } });
+    p.addButton(null, "Trim", (v) => {
         console.log(videoEditor.getTrimedTimes())
-        
+
         videoArea.sections[1].root.resize(["20%", "20%"])
-      }, {width: "100px"})
-      p.addButton(null, null, (v) => {}, {width: "40px", icon: "fa-solid fa-rotate-left"})
-      
-      /* Create right panel */
-      let panel = new LX.Panel({id:"Properties"});
-      panel = rightArea.addPanel({id:"Properties"});    
-      createBlendShapesInspector({"Name 1": 0, "Name 2": 0, "Name 3": 0.5, "Name 4": 0, "Name 5": 1,},
-      {inspector: panel});
+    }, { width: "100px" })
+    p.addButton(null, null, (v) => { }, { width: "40px", icon: "fa-solid fa-rotate-left" })
 
-      /* Functions */
-      function createBlendShapesInspector(bsNames, options = {}) {
-      
-        let inspector = options.inspector || new LX.Panel({id:"blendshapes-inspector"});
-        
-        if(options.clear) {
-          inspector.clear();
-        }
-            
-        if(inspector.root.id) {
-          inspector.addTitle(inspector.root.id);
+    /* Create right panel */
+    let panel = new LX.Panel({ id: "Properties" });
+    panel = rightArea.addPanel({ id: "Properties" });
+    createBlendShapesInspector({ "Name 1": 0, "Name 2": 0, "Name 3": 0.5, "Name 4": 0, "Name 5": 1, },
+        { inspector: panel });
+
+    /* Functions */
+    function createBlendShapesInspector(bsNames, options = {}) {
+
+        let inspector = options.inspector || new LX.Panel({ id: "blendshapes-inspector" });
+
+        if (options.clear) {
+            inspector.clear();
         }
 
-        for(let name in bsNames) {
-            inspector.addProgress(name, bsNames[name], {min: 0, max: 1, low: 0.3, optimum: 1, high: 0.6, editable: options.editable, showNumber: options.showNumber, 
-                callback: (v,e) => {}, 
-                signal: "@on_change_au_" + name});
+        if (inspector.root.id) {
+            inspector.addTitle(inspector.root.id);
         }
-        
+
+        for (let name in bsNames) {
+            inspector.addProgress(name, bsNames[name], {
+                min: 0, max: 1, low: 0.3, optimum: 1, high: 0.6, editable: options.editable, showNumber: options.showNumber,
+                callback: (v, e) => { },
+                signal: "@on_change_au_" + name
+            });
+        }
+
         return inspector;
-      } 
-    </script>
+    } 
+</script>
+
 </html>

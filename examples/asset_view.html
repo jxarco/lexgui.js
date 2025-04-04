@@ -1,5 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI AssetView Demo</title>
@@ -14,189 +15,191 @@
         }
     </script>
 </head>
+
 <body></body>
-    <script type="module">
+<script type="module">
 
-        import { LX } from 'lexgui';
-        import 'lexgui/components/codeeditor.js';
+    import { LX } from 'lexgui';
+    import 'lexgui/components/codeeditor.js';
 
-        // Init library and get main area
-        let area = LX.init();
+    // Init library and get main area
+    let area = LX.init();
 
-        // Split main area
-        var [topArea, bottomArea] = area.split({type: 'vertical', sizes:["60vh","40vh"]});
-        bottomArea.setLimitBox(0, 450);
+    // Split main area
+    var [topArea, bottomArea] = area.split({ type: 'vertical', sizes: ["60vh", "40vh"] });
+    bottomArea.setLimitBox(0, 450);
 
-        // Add canvas to topArea
-        var canvas = document.createElement('canvas');
-        canvas.id = "mycanvas";
-        canvas.width = topArea.root.clientWidth;
-        canvas.height = topArea.root.clientHeight;
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
-        topArea.attach( canvas );
+    // Add canvas to topArea
+    var canvas = document.createElement('canvas');
+    canvas.id = "mycanvas";
+    canvas.width = topArea.root.clientWidth;
+    canvas.height = topArea.root.clientHeight;
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    topArea.attach(canvas);
 
-        // Add on resize event to control canvas size
-        topArea.onresize = function( bounding ) {
-            canvas.width = bounding.width;
-            canvas.height = bounding.height;
-        };
+    // Add on resize event to control canvas size
+    topArea.onresize = function (bounding) {
+        canvas.width = bounding.width;
+        canvas.height = bounding.height;
+    };
 
-        let assetView = new LX.AssetView({
-            // useNativeTitle: true,
-            // skipBrowser: true,
-            // skipPreview: true,
-            // rootPath: "../"
-        });
-        bottomArea.attach( assetView );
+    let assetView = new LX.AssetView({
+        // useNativeTitle: true,
+        // skipBrowser: true,
+        // skipPreview: true,
+        // rootPath: "../"
+    });
+    bottomArea.attach(assetView);
 
-        let assetData = [
-            {
-                id: "dog.png",
-                type: "image",
-                path: "https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png"
-            },
-            {
-                id: "sigml_test.sigml",
-                type: "sigml",
-                src: "../data/sigml_test.sigml",
-                lastModified: 1740588312813
-            },
-            {
-                id: "test.json",
-                type: "JSON",
-                src: "../data/test.json",
-                lastModified: 1740581312813
-            },
-            {
-                id: "godot",
-                type: "folder",
-                children: [
-                    {
-                        id: "color.png",
-                        type: "image",
-                        src: "https://godotengine.org/assets/press/icon_color.png"
-                    },
-                    {
-                        id: "monochrome_light.png",
-                        type: "image",
-                        src: "https://godotengine.org/assets/press/icon_monochrome_light.png"
-                    },
-                    {
-                        id: "example.png",
-                        type: "image",
-                        src: "../data/godot_pixelart.png"
-                    },
-                    {
-                        id: "vertical_color.png",
-                        type: "image",
-                        src: "https://godotengine.org/assets/press/logo_vertical_color_dark.png"
-                    },
-                    {
-                        id: "doggies",
-                        type: "folder",
-                        children: [
-                            {
-                                id: "pepe.png",
-                                type: "image",
-                                src: "https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png"
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                id: "blacky.png",
-                type: "image",
-                src: "https://www.pngall.com/wp-content/uploads/5/Black-Dog-PNG.png"
-            },
-            {
-                id: "german.png",
-                type: "image",
-                src: "https://static.vecteezy.com/system/resources/previews/017/420/504/original/portrait-of-a-dog-png.png"
-            },
-            {
-                id: "unreal",
-                type: "folder",
-                children: [
-                    {
-                        id: "color.png",
-                        type: "image",
-                        src: "https://cdn2.unrealengine.com/ue-logotype-2023-vertical-white-1686x2048-bbfded26daa7.png"
-                    },
-                    {
-                        id: "demo.js",
-                        type: "script",
-                        src: "../data/script.js"
-                    },
-                    {
-                        id: "empty_folder",
-                        type: "folder",
-                        children: []
-                    }
-                ]
-            },
-            {
-                id: "brow_lowerer.png",
-                type: "clip",
-                src: "../data/brow_lowerer.png",
-                lastModified: 1740181312813
-            }
-        ];
-
-        assetView.load( assetData, event => { 
-            switch(event.type) {
-                case LX.AssetViewEvent.ASSET_SELECTED: 
-                    if(event.multiple)
-                        console.log("Selected: ", event.item); 
-                    else
-                        console.log(event.item.id + " selected"); 
-                    break;
-                case LX.AssetViewEvent.ASSET_DBLCLICKED: 
-                    console.log(event.item.id + " double clicked"); 
-                    if( !event.item.src || event.item.type == "image" ) break;
-                    if(window.dialog) window.dialog.destroy();
-                    window.dialog = new LX.PocketDialog("Editor", p => {
-                        const area = new LX.Area();
-                        p.attach( area );
-                        let editor = new LX.CodeEditor(area, {
-                            allowAddScripts: false
-                        });
-                        editor.loadFile( event.item.src );
-                    }, { size: ["40%", "600px"], closable: true });
-                    break;
-                case LX.AssetViewEvent.ENTER_FOLDER: 
-                    console.log("Entering folder: " + event.item.id); 
-                    break;
-                case LX.AssetViewEvent.ASSET_DELETED: 
-                    console.log(event.item.id + " deleted"); 
-                    break;
-                case LX.AssetViewEvent.ASSET_CLONED: 
-                    console.log(event.item.id + " cloned"); 
-                    break;
-                case LX.AssetViewEvent.ASSET_RENAMED:
-                    console.log(event.item.id + " is now called " + event.value); 
-                    break;
-            }
-        } );
-
-        function loop(dt) {
-            
-            var ctx = canvas.getContext("2d");
-
-            ctx.fillStyle = "#b7a9b1";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.font = "48px Monospace";
-            ctx.fillStyle = "#ff1999";
-
-            const text = "Lexgui.js @jxarco";
-            ctx.fillText(text, 300, 300);
-
-            requestAnimationFrame(loop);
+    let assetData = [
+        {
+            id: "dog.png",
+            type: "image",
+            path: "https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png"
+        },
+        {
+            id: "sigml_test.sigml",
+            type: "sigml",
+            src: "../data/sigml_test.sigml",
+            lastModified: 1740588312813
+        },
+        {
+            id: "test.json",
+            type: "JSON",
+            src: "../data/test.json",
+            lastModified: 1740581312813
+        },
+        {
+            id: "godot",
+            type: "folder",
+            children: [
+                {
+                    id: "color.png",
+                    type: "image",
+                    src: "https://godotengine.org/assets/press/icon_color.png"
+                },
+                {
+                    id: "monochrome_light.png",
+                    type: "image",
+                    src: "https://godotengine.org/assets/press/icon_monochrome_light.png"
+                },
+                {
+                    id: "example.png",
+                    type: "image",
+                    src: "../data/godot_pixelart.png"
+                },
+                {
+                    id: "vertical_color.png",
+                    type: "image",
+                    src: "https://godotengine.org/assets/press/logo_vertical_color_dark.png"
+                },
+                {
+                    id: "doggies",
+                    type: "folder",
+                    children: [
+                        {
+                            id: "pepe.png",
+                            type: "image",
+                            src: "https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            id: "blacky.png",
+            type: "image",
+            src: "https://www.pngall.com/wp-content/uploads/5/Black-Dog-PNG.png"
+        },
+        {
+            id: "german.png",
+            type: "image",
+            src: "https://static.vecteezy.com/system/resources/previews/017/420/504/original/portrait-of-a-dog-png.png"
+        },
+        {
+            id: "unreal",
+            type: "folder",
+            children: [
+                {
+                    id: "color.png",
+                    type: "image",
+                    src: "https://cdn2.unrealengine.com/ue-logotype-2023-vertical-white-1686x2048-bbfded26daa7.png"
+                },
+                {
+                    id: "demo.js",
+                    type: "script",
+                    src: "../data/script.js"
+                },
+                {
+                    id: "empty_folder",
+                    type: "folder",
+                    children: []
+                }
+            ]
+        },
+        {
+            id: "brow_lowerer.png",
+            type: "clip",
+            src: "../data/brow_lowerer.png",
+            lastModified: 1740181312813
         }
+    ];
+
+    assetView.load(assetData, event => {
+        switch (event.type) {
+            case LX.AssetViewEvent.ASSET_SELECTED:
+                if (event.multiple)
+                    console.log("Selected: ", event.item);
+                else
+                    console.log(event.item.id + " selected");
+                break;
+            case LX.AssetViewEvent.ASSET_DBLCLICKED:
+                console.log(event.item.id + " double clicked");
+                if (!event.item.src || event.item.type == "image") break;
+                if (window.dialog) window.dialog.destroy();
+                window.dialog = new LX.PocketDialog("Editor", p => {
+                    const area = new LX.Area();
+                    p.attach(area);
+                    let editor = new LX.CodeEditor(area, {
+                        allowAddScripts: false
+                    });
+                    editor.loadFile(event.item.src);
+                }, { size: ["40%", "600px"], closable: true });
+                break;
+            case LX.AssetViewEvent.ENTER_FOLDER:
+                console.log("Entering folder: " + event.item.id);
+                break;
+            case LX.AssetViewEvent.ASSET_DELETED:
+                console.log(event.item.id + " deleted");
+                break;
+            case LX.AssetViewEvent.ASSET_CLONED:
+                console.log(event.item.id + " cloned");
+                break;
+            case LX.AssetViewEvent.ASSET_RENAMED:
+                console.log(event.item.id + " is now called " + event.value);
+                break;
+        }
+    });
+
+    function loop(dt) {
+
+        var ctx = canvas.getContext("2d");
+
+        ctx.fillStyle = "#b7a9b1";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.font = "48px Monospace";
+        ctx.fillStyle = "#ff1999";
+
+        const text = "Lexgui.js @jxarco";
+        ctx.fillText(text, 300, 300);
 
         requestAnimationFrame(loop);
+    }
 
-    </script>
+    requestAnimationFrame(loop);
+
+</script>
+
 </html>
