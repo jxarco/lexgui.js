@@ -20,11 +20,11 @@
     --global-font-size-xl: 1.125rem; /* 18px */
     --global-font-size-xxl: 1.375rem; /* 22px */
 
-    --global-color-primary: light-dark(#ffffff, #0f0f0f); /* Near White / Near Black */
-    --global-color-secondary: light-dark(#f4f4f5, #1c1c1c); /* Very Light Gray / Very Dark Gray */
-    --global-color-tertiary: light-dark(#e6e6e8, #323234); /* Soft Gray / Deep Gray */
-    --global-color-quaternary: light-dark(#cfcfd2, #404040); /* Muted Gray / Medium Dark */
-    --global-color-quinary: light-dark(#b5b5b8, #595959); /* Gentle Gray / Soft Dark Gray */
+    --global-color-primary: light-dark(#ffffff, #0b0b0c); /* Near White / Near Black */
+    --global-color-secondary: light-dark(#f4f4f5, #1c1c1d); /* Very Light Gray / Very Dark Gray */
+    --global-color-tertiary: light-dark(#e6e6e8, #2e2e2f); /* Soft Gray / Deep Gray */
+    --global-color-quaternary: light-dark(#cfcfd2, #363637); /* Muted Gray / Medium Dark */
+    --global-color-quinary: light-dark(#b5b5b8, #4e4e4f); /* Gentle Gray / Soft Dark Gray */
     --global-color-accent: #2d69da;
     --global-color-accent-light: #0d99ff;
     --global-color-accent-dark: #304b86;
@@ -34,7 +34,7 @@
     --global-text-secondary: light-dark(#262627, #d1d1d3);
     --global-text-tertiary: light-dark(#3c3c3df5, #aaaaaa);
     --global-text-quaternary: light-dark(#515152f5, #807f7f);
-    --global-intense-background: light-dark(#fefefe, #09090a);
+    --global-intense-background: light-dark(#fefefe, #030304);
     --global-medium-background: #252525;
     --global-blur-background: light-dark(#f7f7f7d8, #1f1f1fe7);
     --global-color-transparent: #00000000;
@@ -325,7 +325,9 @@ svg.xxl { width: var(--svg-size-xxl); height: var(--svg-size-xxl); }
     top: 0;
     bottom: 0;
     width: 100%;
-    height: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     position: absolute;
     outline: none;
 }
@@ -618,9 +620,8 @@ a svg, svg path {
 /* Footer */
 
 .lexfooter {
-    min-height: 96px;
     background-color: var(--global-color-primary);
-    padding: 15px;
+    padding: 0.5rem;
     width: 100%;
     font-size: var(--global-font-size);
     line-height: 1.25rem;
@@ -646,7 +647,7 @@ a svg, svg path {
 
 .lexfooter ul li {
     margin-bottom: 8px;
-    font-size: var(--global-font-size-lg);
+    font-size: var(--global-font-size);
 }
 
 .lexfooter a {
@@ -1745,7 +1746,7 @@ dialog .lexselect .lexselectoptions {
 .lexselect .lexselectitem a {
     display: none;
     margin-left: auto;
-    margin-right: 8px;
+    margin-right: 4px;
 }
 
 .lexselect .lexselectitem.selected {
@@ -3206,8 +3207,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexsidebarcontent {
     width: 100%;
-    padding-block-start: 4px;
-    padding-block-end: 4px;
     display: flex;
     flex-direction: column;
     overflow-y: scroll;
@@ -3233,10 +3232,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     margin-bottom: 0.4rem;
 }
 
-.lexsidebar .lextext {
+.lexsidebar .lexsidebarfilter {
     transform: translate(0, 0);
     opacity: 1;
-    transition: transform 0.3s cubic-bezier(0,0,.2,1), opacity 0.1s cubic-bezier(0,0,.2,1), max-height 0.3s cubic-bezier(0,0,.2,1);
+    margin-block: 0.5rem;
+    transition: all 0.2s cubic-bezier(0,0,.2,1);
 }
 
 .lexsidebar .lexsidebargrouptitle {
@@ -3251,8 +3251,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     transform: translate(0, 0);
     opacity: 1;
     transition: transform 0.3s cubic-bezier(0,0,.2,1), opacity 0.1s cubic-bezier(0,0,.2,1), max-height 0.3s cubic-bezier(0,0,.2,1);
-    height: 44px;
-    max-height: 44px;
+    height: 32px;
+    max-height: 32px;
     align-content: center;
 }
 
@@ -3267,9 +3267,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     max-height: 0px;
     transform: translate(0, -24px);
     opacity: 0;
+    margin-block: 0;
 }
 
-.lexsidebar.collapsed .lexsidebargrouptitle *, .lexsidebar.collapsed .lexsidebarfilter {
+.lexsidebar.collapsed .lexsidebargrouptitle * {
     display: none;
 }
 

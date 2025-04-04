@@ -15,9 +15,8 @@ let area = LX.init( { strictViewport: false } );
     
         m.add( "Docs", { icon: "fa-solid fa-magnifying-glass", short: "F1", callback: () => { window.open("./docs/") }});
     
-        const panel = new LX.Panel();
-        panel.addButton(null, "Search command...", () => { LX.setCommandbarState( true ) }, { width: "256px", className: "right", buttonClass: "outline left" });
-        m.root.appendChild( panel.root.childNodes[ 0 ] );
+        const commandButton = new LX.Button(null, "Search command...", () => { LX.setCommandbarState( true ) }, { width: "256px", className: "right", buttonClass: "outline left" });
+        m.root.appendChild( commandButton.root );
     
         m.addButtons( [
             {
@@ -39,17 +38,13 @@ let area = LX.init( { strictViewport: false } );
 
 // Header
 {
-    const header = LX.makeContainer( [ null, "auto" ], "col", {
-        border: "1px solid rgba(255, 255, 255, 0.08)",
-        padding: "36px 24px 36px 24px",
-        gap: "8px"
-    } );
+    const header = LX.makeContainer( [ null, "auto" ], "col border gap-2 p-8" );
     
     header.innerHTML = `
         <a>Get started with LexGUI.js</a>
         <h1>Build your application interface</h1>
-        <p style="max-width:42rem">A set of beautifully-designed, accessible components and a code distribution platform. 
-        Works with your favorite frameworks. Open Source. Open Code.</p>
+        <p style="max-width:32rem">A set of beautifully-designed, accessible widgets and components. 
+        No complex frameworks. Pure JavaScript and CSS. Open Source.</p>
     `;
     
     area.attach( header );
@@ -57,59 +52,117 @@ let area = LX.init( { strictViewport: false } );
 
 // Content
 {
-    area.attach( document.createElement('br') );
+    const tabs = area.addTabs( { sizes: [ "auto", "auto" ], contentClass: "p-6 pt-0" } );
+    tabs.root.parentElement.classList.add( "p-4" );
 
-    const tabs = area.addTabs( { sizes: [ "auto", "auto" ] } );
+    // Mail
+    {
+        const mailContainer = LX.makeContainer( [ null, "auto" ], "col bg-primary border rounded-lg p-6" );
+        tabs.add( "Mail", mailContainer, { selected: true } );
+    }
 
-    const examplesContainer = LX.makeContainer( [ "auto", "850px" ], "", {
-        backgroundColor: "red"
-    } );
+    // Tasks
+    {
+        const tasksContainer = LX.makeContainer( [ null, "auto" ], "col bg-primary border rounded-lg p-6" );
+        tabs.add( "Tasks", tasksContainer, { xselected: true } );
 
-    const tasksContainer = LX.makeContainer( [ "auto", "850px" ], "", {
-        backgroundColor: "red"
-    } );
+        const header = LX.makeContainer( [ null, "auto" ], "col rounded-lg p-6" );
+        header.innerHTML = `
+            <h2>Welcome back!</h2>
+            <p class="fg-tertiary">Here's a list of your tasks for this month!</p>
+        `;
+        tasksContainer.appendChild( header );
 
-    const codeContainer = LX.makeContainer( [ "auto", "850px" ], "", {
-        backgroundColor: "red"
-    } );
+        const tableWidget = new LX.Table(null, {
+            head: ["Name", "Status", "Priority"],
+            body: [
+                ["Alice", "In Progress", "High"],
+                ["Bob", "Backlog", "Medium"],
+                ["Prince", "Canceled", "Low"],
+                ["Sean", "Done", "High"],
+                ["Carter", "In Progress", "Medium"],
+                ["James", "Backlog", "Low"],
+                ["Mickey", "Todo", "Low"],
+                ["Charlie", "Canceled", "Low"],
+                ["Potato", "Todo", "High"]
+            ]
+        }, {
+            selectable: true,
+            sortable: true,
+            toggleColumns: true,
+            filter: "Name",
+            customFilters: [
+                { name: "Status", options: ["Backlog", "Todo", "In Progress", "Done", "Cancelled"] },
+                { name: "Priority", options: ["Low", "Medium", "High"] },
+            ],
+            rowActions: [
+                { icon: "edit", title: "Edit Row" },
+                "delete",
+                "menu"
+            ],
+            onMenuAction: (index, tableData) => {
+                return [
+                    { name: "Export" },
+                    { name: "Make a copy" },
+                    { name: "Favourite" }
+                ]
+            }
+        });
+        tasksContainer.appendChild( tableWidget.root );
+    }
 
-    const audioContainer = LX.makeContainer( [ "auto", "850px" ], "", {
-        backgroundColor: "red"
-    } );
+    // Code
+    {
+        const codeContainer = LX.makeContainer( [ "auto", "850px" ], "", {
+            backgroundColor: "red"
+        } );
 
-    tabs.add( "Examples", examplesContainer, { selected: true } );
-    tabs.add( "Tasks", tasksContainer );
-    tabs.add( "Code", codeContainer );
-    tabs.add( "Audio", audioContainer );
+        tabs.add( "Code", codeContainer );
+    }
+
+    // Audio
+    {
+        const audioContainer = LX.makeContainer( [ "auto", "850px" ], "", {
+            backgroundColor: "red"
+        } );
+
+        tabs.add( "Audio", audioContainer );
+    }
+
+    // Examples
+    {
+        const examplesContainer = LX.makeContainer( [ "auto", "850px" ], "", {
+            backgroundColor: "red"
+        } );
+
+        tabs.add( "Examples", examplesContainer );
+    }
 }
 
 // Footer
 {
     const footer = new LX.Footer( {
-        parent: area.root,
+        parent: LX.root,
         columns: [
             {
                 title: "LexGUI",
                 items: [
-                    { title: "Download", link: "" },
-                    { title: "Documentation", link: "" },
-                    { title: "Web demo", link: "" },
-                    { title: "Source code", link: "" }
+                    { title: "Documentation", link: "https://jxarco.github.io/lexgui.js/docs/" },
+                    { title: "Source code", link: "https://github.com/jxarco/lexgui.js/" }
                 ]
             },
             {
                 title: "Projects",
                 items: [
-                    { title: "Animics", link: "" },
-                    { title: "Performs", link: "" }
+                    { title: "Animics", link: "https://animics.gti.upf.edu/" },
+                    { title: "Performs", link: "https://performs.gti.upf.edu/" }
                 ]
             },
             {
-                title: "Other stuff",
+                title: "References",
                 items: [
-                    { title: "Some section", link: "" },
-                    { title: "Just filling", link: "" },
-                    { title: "No more ideas", link: "" },
+                    { title: "shadcn/ui", link: "https://ui.shadcn.com/" },
+                    { title: "Radix UI", link: "https://www.radix-ui.com/" },
                 ]
             }
         ],

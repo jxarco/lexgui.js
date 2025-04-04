@@ -6,8 +6,9 @@ Widgets:
 - Fixed Select Widget filter issues.
 - Fixed Color Widget not updating hex code on pasting value.
 
+Started support for tailwind-like utility css classes.
 Improve styling for supported widgets. Better consistency.
-Added new demo showcasing all widgets.
+Added new demo example showcasing all widgets.
 
 ## 0.5.2 (master)
 

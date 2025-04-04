@@ -2782,6 +2782,12 @@ class Tabs {
 
         this.area = area.sections[1];
         this.area.root.className += " lexareatabscontent";
+
+        if( options.contentClass )
+        {
+            this.area.root.className += ` ${ options.contentClass }`;
+        }
+
         this.selected = null;
         this.root = container;
         this.tabs = {};
@@ -2801,8 +2807,8 @@ class Tabs {
                 var transition = this.thumb.style.transition;
                 this.thumb.style.transition = "none";
                 this.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
-                this.thumb.style.width = ( tabEl.offsetWidth - 5 ) + "px";
-                this.thumb.style.height = ( tabEl.offsetHeight - 6 ) + "px";
+                this.thumb.style.width = ( tabEl.offsetWidth ) + "px";
+                this.thumb.style.height = ( tabEl.offsetHeight  ) + "px";
                 flushCss( this.thumb );
                 this.thumb.style.transition = transition;
             });
@@ -2974,8 +2980,8 @@ class Tabs {
             if( isSelected && this.thumb )
             {
                 this.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
-                this.thumb.style.width = ( tabEl.offsetWidth - 5 ) + "px";
-                this.thumb.style.height = ( tabEl.offsetHeight - 6 ) + "px";
+                this.thumb.style.width = ( tabEl.offsetWidth ) + "px";
+                this.thumb.style.height = ( tabEl.offsetHeight ) + "px";
                 this.thumb.item = tabEl;
             }
 
@@ -4378,8 +4384,6 @@ class Widget {
 
         if( type != Widget.TITLE )
         {
-            // root.style.width = "calc(100% - " + (this._currentBranch || type == Widget.FILE || type == Widget.TREE ? 10 : 20) + "px)";
-
             if( options.width )
             {
                 root.style.width = root.style.minWidth = options.width;
@@ -10295,6 +10299,7 @@ class Footer {
         root.className = "lexfooter";
 
         const wrapper = document.createElement( "div" );
+        wrapper.style.minHeight = "48px";
         wrapper.className = "w-full";
         root.appendChild( wrapper );
 
@@ -10370,6 +10375,10 @@ class Footer {
         // Append directly to body
         const parent = options.parent ?? document.body;
         parent.appendChild( root );
+
+        // Set always at bottom
+        root.previousElementSibling.style.height = "unset";
+        root.previousElementSibling.style.flexGrow = "1";
     }
 
 }
@@ -10640,7 +10649,7 @@ class PocketDialog extends Dialog {
         }
 
         this.panel.root.style.width = "100%";
-        this.panel.root.style.height = "calc( 100% - 40px )";
+        this.panel.root.style.height = "100%";
         this.dock_pos = PocketDialog.TOP;
 
         this.minimized = false;
