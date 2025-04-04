@@ -1536,8 +1536,8 @@ class CodeEditor {
 
             panel.sameLine();
             panel.addLabel( this.code.title, { float: 'right', signal: "@tab-name" });
-            panel.addLabel( "Ln " + 1, { maxWidth: "48px", signal: "@cursor-line" });
-            panel.addLabel( "Col " + 1, { maxWidth: "48px", signal: "@cursor-pos" });
+            panel.addLabel( "Ln " + 1, { xmaxWidth: "48px", signal: "@cursor-line" });
+            panel.addLabel( "Col " + 1, { xmaxWidth: "48px", signal: "@cursor-pos" });
             panel.addButton( null, "Spaces: " + this.tabSpaces, ( value, event ) => {
                 LX.addContextMenu( "Spaces", event, m => {
                     const options = [ 2, 4, 8 ];
@@ -1548,7 +1548,7 @@ class CodeEditor {
                             this._updateDataInfoPanel( "@tab-spaces", "Spaces: " + this.tabSpaces );
                         } );
                 });
-            }, { width: "10%", nameWidth: "15%", signal: "@tab-spaces" });
+            }, { nameWidth: "15%", signal: "@tab-spaces" });
             panel.addButton( "<b>{ }</b>", this.highlight, ( value, event ) => {
                 LX.addContextMenu( "Language", event, m => {
                     for( const lang of Object.keys( this.languages ) )
@@ -1558,7 +1558,7 @@ class CodeEditor {
                         } );
                     }
                 });
-            }, { width: "17.5%", nameWidth: "15%", signal: "@highlight" });
+            }, { nameWidth: "15%", signal: "@highlight" });
             panel.endLine();
 
             return panel;

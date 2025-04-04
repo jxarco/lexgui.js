@@ -1,5 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI ImUI Demo</title>
@@ -14,64 +15,65 @@
         }
     </script>
 </head>
+
 <body></body>
-    <script type="module">
+<script type="module">
 
-        import { LX } from 'lexgui';
-        import 'lexgui/components/imui.js';
+    import { LX } from 'lexgui';
+    import 'lexgui/components/imui.js';
 
-        // init library and get main area
-        let area = LX.init();
+    // init library and get main area
+    let area = LX.init();
 
-        // add canvas to area
-        var canvas = document.createElement('canvas');
-        canvas.id = "mycanvas";
-        canvas.width = area.root.clientWidth;
-        canvas.height = area.root.clientHeight;
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
-        area.attach( canvas );
+    // add canvas to area
+    var canvas = document.createElement('canvas');
+    canvas.id = "mycanvas";
+    canvas.width = area.root.clientWidth;
+    canvas.height = area.root.clientHeight;
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    area.attach(canvas);
 
-        // add on resize event to control canvas size
-        area.onresize = function( bounding ) {
-            canvas.width = bounding.width;
-            canvas.height = bounding.height;
-        };
+    // add on resize event to control canvas size
+    area.onresize = function (bounding) {
+        canvas.width = bounding.width;
+        canvas.height = bounding.height;
+    };
 
-        let im_ui = new LX.ImUI( canvas );
+    let im_ui = new LX.ImUI(canvas);
 
-        function loop( time ) {
-            
-            var ctx = canvas.getContext("2d");
+    function loop(time) {
 
-            ctx.fillStyle = "#b7a9b1";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        var ctx = canvas.getContext("2d");
 
-            ctx.font = "48px Monospace";
-            ctx.fillStyle = "#ff1999";
+        ctx.fillStyle = "#b7a9b1";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            const text = "Lexgui.js @jxarco";
-            ctx.fillText(text, 300, 225);
+        ctx.font = "48px Monospace";
+        ctx.fillStyle = "#ff1999";
 
-            if( im_ui.Button( "First button", 50, 50 ) )
-            {
-                console.log("Button clicked!");
-            }
+        const text = "Lexgui.js @jxarco";
+        ctx.fillText(text, 300, 225);
 
-            im_ui.Slider( "A very cool slider", 50, 100, false, (v) => {
-                console.log("Slider value: " + v);
-            } );
-
-            im_ui.Checkbox( "First checkbox", 50, 150, false, (v) => {
-                console.log("Checkbox value: " + v);
-            } );
-
-            im_ui.endFrame();
-
-            requestAnimationFrame(loop);
+        if (im_ui.Button("First button", 50, 50)) {
+            console.log("Button clicked!");
         }
 
-        requestAnimationFrame(loop);
+        im_ui.Slider("A very cool slider", 50, 100, false, (v) => {
+            console.log("Slider value: " + v);
+        });
 
-    </script>
+        im_ui.Checkbox("First checkbox", 50, 150, false, (v) => {
+            console.log("Checkbox value: " + v);
+        });
+
+        im_ui.endFrame();
+
+        requestAnimationFrame(loop);
+    }
+
+    requestAnimationFrame(loop);
+
+</script>
+
 </html>

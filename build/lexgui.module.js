@@ -6,7 +6,7 @@
 */
 
 var LX = {
-    version: "0.5.0",
+    version: "0.5.2",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -46,7 +46,7 @@ else if( typeof Date != "undefined" && Date.now )
 else if ( typeof process != "undefined" )
 {
     LX.getTime = function() {
-        var t = process.hrtime();
+        const t = process.hrtime();
         return t[ 0 ] * 0.001 + t[ 1 ] * 1e-6;
     };
 }
@@ -148,7 +148,7 @@ LX.setTheme = setTheme;
  */
 function setThemeColor( colorName, color )
 {
-    var r = document.querySelector( ':root' );
+    const r = document.querySelector( ':root' );
     r.style.setProperty( '--' + colorName, color );
 }
 
@@ -190,10 +190,10 @@ LX.getThemeColor = getThemeColor;
  */
 function getBase64Image( img )
 {
-    var canvas = document.createElement( 'canvas' );
+    const canvas = document.createElement( 'canvas' );
     canvas.width = img.width;
     canvas.height = img.height;
-    var ctx = canvas.getContext( '2d' );
+    const ctx = canvas.getContext( '2d' );
     ctx.drawImage( img, 0, 0 );
     return canvas.toDataURL( 'image/png' );
 }
@@ -958,8 +958,8 @@ function init( options = { } )
     this.root = root;
     this.container = document.body;
 
-    this.modal.classList.add( 'hiddenOpacity' );
-    this.modal.toggle = function( force ) { this.classList.toggle( 'hiddenOpacity', force ); };
+    this.modal.classList.add( 'hidden-opacity' );
+    this.modal.toggle = function( force ) { this.classList.toggle( 'hidden-opacity', force ); };
 
     if( options.container )
     {
@@ -1034,6 +1034,17 @@ function init( options = { } )
     this.DEFAULT_NAME_WIDTH     = "30%";
     this.DEFAULT_SPLITBAR_SIZE  = 4;
     this.OPEN_CONTEXTMENU_ENTRY = 'click';
+
+    this.widgetResizeObserver = new ResizeObserver( entries => {
+        for ( const entry of entries )
+        {
+            const widget = entry.target?.jsInstance;
+            if( widget && widget.onResize )
+            {
+                widget.onResize( entry.contentRect );
+            }
+        }
+    });
 
     this.ready = true;
     this.menubars = [ ];
@@ -1465,11 +1476,20 @@ LX.addSignal = addSignal;
 
 class DropdownMenu {
 
+    static currentMenu = false;
+
     constructor( trigger, items, options = {} ) {
 
         console.assert( trigger, "DropdownMenu needs a DOM element as trigger!" );
-        this._trigger = trigger;
 
+        if( DropdownMenu.currentMenu )
+        {
+            DropdownMenu.currentMenu.destroy();
+            return;
+        }
+
+        this._trigger = trigger;
+        trigger.classList.add( "triggered" );
         trigger.ddm = this;
 
         this._items = items;
@@ -1488,6 +1508,7 @@ class DropdownMenu {
 
         this._create( this._items );
 
+        DropdownMenu.currentMenu = this;
 
         doAsync( () => {
             this._adjustPosition();
@@ -1495,7 +1516,7 @@ class DropdownMenu {
             this.root.focus();
 
             this._onClick = e => {
-                if( e.target && ( e.target.className.includes( "lexdropdown" ) || e.target == this._trigger ) )
+                if( e.target && ( this.root.contains( e.target ) || e.target == this._trigger ) )
                 {
                     return;
                 }
@@ -1508,11 +1529,15 @@ class DropdownMenu {
 
     destroy() {
 
+        this._trigger.classList.remove( "triggered" );
+
         delete this._trigger.ddm;
 
         document.body.removeEventListener( "click", this._onClick );
 
         LX.root.querySelectorAll( ".lexdropdownmenu" ).forEach( m => { m.remove(); } );
+
+        DropdownMenu.currentMenu = null;
     }
 
     _create( items, parentDom ) {
@@ -1571,12 +1596,6 @@ class DropdownMenu {
             menuItem.id = pKey;
             menuItem.innerHTML = `<span>${ key }</span>`;
 
-            if( item.icon )
-            {
-                const icon = LX.makeIcon( item.icon );
-                menuItem.prepend( icon );
-            }
-
             menuItem.tabIndex = "1";
             parentDom.appendChild( menuItem );
 
@@ -1592,15 +1611,41 @@ class DropdownMenu {
                 menuItem.appendChild( submenuIcon );
             }
 
-            menuItem.addEventListener( "click", () => {
-                const f = item[ 'callback' ];
-                if( f )
-                {
-                    f.call( this, key, menuItem );
-                }
+            if( item.icon )
+            {
+                const icon = LX.makeIcon( item.icon );
+                menuItem.prepend( icon );
+            }
 
-                this.destroy();
-            } );
+            if( item.checked != undefined )
+            {
+                const checkbox = new Checkbox( pKey + "_entryChecked", item.checked, (v) => {
+                    const f = item[ 'callback' ];
+                    if( f )
+                    {
+                        f.call( this, key, menuItem, v );
+                    }
+                }, { className: "accent" });
+                const input = checkbox.root.querySelector( "input" );
+                menuItem.prepend( input );
+
+                menuItem.addEventListener( "click", (e) => {
+                    if( e.target.type == "checkbox" ) return;
+                    input.checked = !input.checked;
+                    checkbox.set( input.checked );
+                } );
+            }
+            else
+            {
+                menuItem.addEventListener( "click", () => {
+                    const f = item[ 'callback' ];
+                    if( f )
+                    {
+                        f.call( this, key, menuItem );
+                    }
+                    this.destroy();
+                } );
+            }
 
             menuItem.addEventListener("mouseover", e => {
 
@@ -1744,7 +1789,7 @@ class Area {
             root.className += " " + options.className;
         }
 
-        var width = options.width || "calc( 100% )";
+        var width = options.width || "100%";
         var height = options.height || "100%";
 
         // This has default options..
@@ -1770,7 +1815,7 @@ class Area {
 
         if( !options.skipAppend )
         {
-            var lexroot = document.getElementById("lexroot");
+            let lexroot = document.getElementById("lexroot");
             lexroot.appendChild( this.root );
         }
 
@@ -1841,12 +1886,12 @@ class Area {
                 this.splitBar.addEventListener("mousedown", innerMouseDown);
                 this.root.appendChild( this.splitBar );
 
-                var that = this;
-                var lastMousePosition = [ 0, 0 ];
+                const that = this;
+                let lastMousePosition = [ 0, 0 ];
 
                 function innerMouseDown( e )
                 {
-                    var doc = that.root.ownerDocument;
+                    const doc = that.root.ownerDocument;
                     doc.addEventListener( 'mousemove', innerMouseMove );
                     doc.addEventListener( 'mouseup', innerMouseUp );
                     lastMousePosition[ 0 ] = e.x;
@@ -1899,7 +1944,7 @@ class Area {
 
                 function innerMouseUp( e )
                 {
-                    var doc = that.root.ownerDocument;
+                    const doc = that.root.ownerDocument;
                     doc.removeEventListener( 'mousemove', innerMouseMove );
                     doc.removeEventListener( 'mouseup', innerMouseUp );
                     document.body.classList.remove( 'nocursor' );
@@ -1951,9 +1996,9 @@ class Area {
             this.root = this.sections[ 1 ].root;
         }
 
-        var type = options.type || "horizontal";
-        var sizes = options.sizes || [ "50%", "50%" ];
-        var auto = (options.sizes === 'auto');
+        const type = options.type || "horizontal";
+        const sizes = options.sizes || [ "50%", "50%" ];
+        const auto = (options.sizes === 'auto');
 
         if( !sizes[ 1 ] )
         {
@@ -1969,8 +2014,8 @@ class Area {
         }
 
         // Create areas
-        var area1 = new Area( { skipAppend: true, className: "split" + ( options.menubar || options.sidebar ? "" : " origin" ) } );
-        var area2 = new Area( { skipAppend: true, className: "split" } );
+        let area1 = new Area( { skipAppend: true, className: "split" + ( options.menubar || options.sidebar ? "" : " origin" ) } );
+        let area2 = new Area( { skipAppend: true, className: "split" } );
 
         area1.parentArea = this;
         area2.parentArea = this;
@@ -1978,7 +2023,7 @@ class Area {
         let minimizable = options.minimizable ?? false;
         let resize = ( options.resize ?? true ) || minimizable;
 
-        var data = "0px";
+        let data = "0px";
         this.offset = 0;
 
         if( resize )
@@ -2025,7 +2070,7 @@ class Area {
 
         if( type == "horizontal" )
         {
-            var width1 = sizes[ 0 ],
+            let width1 = sizes[ 0 ],
                 width2 = sizes[ 1 ];
 
             if( width1.constructor == Number )
@@ -2066,7 +2111,7 @@ class Area {
             }
             else
             {
-                var height1 = sizes[ 0 ],
+                let height1 = sizes[ 0 ],
                     height2 = sizes[ 1 ];
 
                 if( height1.constructor == Number )
@@ -2104,11 +2149,11 @@ class Area {
             return this.sections;
         }
 
-        var that = this;
+        const that = this;
 
         function innerMouseDown( e )
         {
-            var doc = that.root.ownerDocument;
+            const doc = that.root.ownerDocument;
             doc.addEventListener( 'mousemove', innerMouseMove );
             doc.addEventListener( 'mouseup', innerMouseUp );
             e.stopPropagation();
@@ -2128,26 +2173,13 @@ class Area {
                 that._moveSplit( -e.movementY );
             }
 
-            const widgets = that.root.querySelectorAll( ".lexwidget" );
-
-            // Send area resize to every widget in the area
-            for( let widget of widgets )
-            {
-                const jsInstance = widget.jsInstance;
-
-                if( jsInstance.onresize )
-                {
-                    jsInstance.onresize();
-                }
-            }
-
             e.stopPropagation();
             e.preventDefault();
         }
 
         function innerMouseUp( e )
         {
-            var doc = that.root.ownerDocument;
+            const doc = that.root.ownerDocument;
             doc.removeEventListener( 'mousemove', innerMouseMove );
             doc.removeEventListener( 'mouseup', innerMouseUp );
             document.body.classList.remove( 'nocursor' );
@@ -2295,7 +2327,7 @@ class Area {
 
     propagateEvent( eventName ) {
 
-        for( var i = 0; i < this.sections.length; i++ )
+        for( let i = 0; i < this.sections.length; i++ )
         {
             const area = this.sections[ i ];
 
@@ -2349,7 +2381,7 @@ class Area {
 
         if( options.sticky ?? true )
         {
-            bar.root.classList.add( "sticky" );
+            bar.root.className += " sticky top-0";
         }
 
         return menubar;
@@ -2421,7 +2453,7 @@ class Area {
 
         if( float )
         {
-            for( var i = 0; i < float.length; i++ )
+            for( let i = 0; i < float.length; i++ )
             {
                 const t = float[i];
                 switch( t )
@@ -2446,7 +2478,8 @@ class Area {
                 selected: b.selected,
                 icon: b.icon,
                 img: b.img,
-                className: b.class
+                className: b.class ?? "",
+                title: b.name
             };
 
             if( group )
@@ -2640,7 +2673,7 @@ class Area {
 
         for( var i = 0; i < this.sections.length; i++ )
         {
-            this.sections[i]._update();
+            this.sections[ i ]._update();
         }
     }
 };
@@ -2690,38 +2723,56 @@ class Tabs {
             e.preventDefault(); // Prevent default action (open as link for some elements)
 
             const tabId = e.dataTransfer.getData( "source" );
-            const el = document.getElementById( tabId );
-            if( !el ) return;
+            const tabDom = document.getElementById( tabId );
+            if( !tabDom ) return;
 
+            const sourceContainer = tabDom.parentElement;
             const target = e.target;
             const rect = target.getBoundingClientRect();
 
             if( e.offsetX < ( rect.width * 0.5 ) )
             {
-                this.insertBefore( el, target );
+                this.insertBefore( tabDom, target );
             }
             else if( target.nextElementSibling )
             {
-                this.insertBefore( el, target.nextElementSibling );
+                this.insertBefore( tabDom, target.nextElementSibling );
             }
             else
             {
-                this.appendChild( el );
+                this.appendChild( tabDom );
             }
+
+            {
+                // Update childIndex for fit mode tabs in source container
+                sourceContainer.childNodes.forEach( (c, idx) => c.childIndex = ( idx - 1 ) );
+
+                // If needed, set last tab of source container active
+                const sourceAsFit = (/true/).test( e.dataTransfer.getData( "fit" ) );
+                if( sourceContainer.childElementCount == ( sourceAsFit ? 2 : 1 ) )
+                {
+                    sourceContainer.lastChild.click(); // single tab or thumb first (fit mode)
+                }
+                else
+                {
+                    const sourceSelected = sourceContainer.querySelector( ".selected" );
+                    ( sourceSelected ?? sourceContainer.childNodes[ sourceAsFit ? 1 : 0 ] ).click();
+                }
+            }
+
+            // Update childIndex for fit mode tabs in target container
+            this.childNodes.forEach( (c, idx) => c.childIndex = ( idx - 1 ) );
 
             const content = document.getElementById( tabId + "_content" );
             that.area.attach( content );
             this.classList.remove("dockingtab");
 
-            // Change tabs instance
-            LX.emit( "@on_tab_docked" );
-            el.instance = that;
-
-            // Show on drop
-            el.click();
+            // Change tabs instance and select on drop
+            tabDom.instance = that;
+            tabDom.click();
 
             // Store info
-            that.tabs[ el.dataset["name"] ] = content;
+            that.tabs[ tabDom.dataset["name"] ] = content;
         });
 
         area.root.classList.add( "lexareatabscontainer" );
@@ -2731,6 +2782,12 @@ class Tabs {
 
         this.area = area.sections[1];
         this.area.root.className += " lexareatabscontent";
+
+        if( options.contentClass )
+        {
+            this.area.root.className += ` ${ options.contentClass }`;
+        }
+
         this.selected = null;
         this.root = container;
         this.tabs = {};
@@ -2750,8 +2807,8 @@ class Tabs {
                 var transition = this.thumb.style.transition;
                 this.thumb.style.transition = "none";
                 this.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
-                this.thumb.style.width = ( tabEl.offsetWidth - 5 ) + "px";
-                this.thumb.style.height = ( tabEl.offsetHeight - 6 ) + "px";
+                this.thumb.style.width = ( tabEl.offsetWidth ) + "px";
+                this.thumb.style.height = ( tabEl.offsetHeight  ) + "px";
                 flushCss( this.thumb );
                 this.thumb.style.transition = transition;
             });
@@ -2767,7 +2824,7 @@ class Tabs {
 
             if( folding == "up" )
             {
-                area.root.insertChildAtIndex(area.sections[1].root, 0);
+                area.root.insertChildAtIndex( area.sections[ 1 ].root, 0 );
             }
 
             // Listen resize event on parent area
@@ -2834,17 +2891,12 @@ class Tabs {
             this.selected = name;
         }
 
-        LX.addSignal( "@on_tab_docked", tabEl, function() {
-            if( this.parentElement.childNodes.length == 1 )
-            {
-                this.parentElement.childNodes[ 0 ].click(); // single tab!!
-            }
-        } );
-
         tabEl.addEventListener("click", e => {
 
             e.preventDefault();
             e.stopPropagation();
+
+            const scope = tabEl.instance;
 
             if( !tabEl.fixed )
             {
@@ -2856,15 +2908,15 @@ class Tabs {
                 tabEl.parentElement.querySelectorAll( 'span' ).forEach( s => s.classList.remove( 'selected' ));
                 tabEl.classList.toggle('selected', ( this.folding && tabEl.selected ));
                 // Manage visibility
-                tabEl.instance.area.root.querySelectorAll( '.lextabcontent' ).forEach( c => c.style.display = 'none' );
+                scope.area.root.querySelectorAll( '.lextabcontent' ).forEach( c => c.style.display = 'none' );
                 contentEl.style.display = contentEl.originalDisplay;
-                tabEl.instance.selected = tabEl.dataset.name;
+                scope.selected = tabEl.dataset.name;
             }
 
-            if( this.folding )
+            if( scope.folding )
             {
-                this.folded = tabEl.selected;
-                this.area.root.classList.toggle( 'folded', !this.folded );
+                scope.folded = tabEl.selected;
+                scope.area.root.classList.toggle( 'folded', !scope.folded );
             }
 
             if( options.onSelect )
@@ -2872,12 +2924,12 @@ class Tabs {
                 options.onSelect(e, tabEl.dataset.name);
             }
 
-            if( this.thumb )
+            if( scope.thumb )
             {
-                this.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
-                this.thumb.style.width = ( tabEl.offsetWidth - 5 ) + "px";
-                this.thumb.style.height = ( tabEl.offsetHeight - 6 ) + "px";
-                this.thumb.item = tabEl;
+                scope.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
+                scope.thumb.style.width = ( tabEl.offsetWidth - 5 ) + "px";
+                scope.thumb.style.height = ( tabEl.offsetHeight - 6 ) + "px";
+                scope.thumb.item = tabEl;
             }
         });
 
@@ -2901,12 +2953,14 @@ class Tabs {
         });
 
         tabEl.setAttribute( 'draggable', true );
-        tabEl.addEventListener( 'dragstart', function( e ) {
-            if( this.parentElement.childNodes.length == 1 ){
+        tabEl.addEventListener( 'dragstart', e => {
+            const sourceAsFit = !!this.thumb;
+            if( tabEl.parentElement.childNodes.length == ( sourceAsFit ? 2 : 1 ) ){
                 e.preventDefault();
                 return;
             }
             e.dataTransfer.setData( 'source', e.target.id );
+            e.dataTransfer.setData( 'fit', sourceAsFit );
         });
 
         // Attach content
@@ -2926,8 +2980,8 @@ class Tabs {
             if( isSelected && this.thumb )
             {
                 this.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
-                this.thumb.style.width = ( tabEl.offsetWidth - 5 ) + "px";
-                this.thumb.style.height = ( tabEl.offsetHeight - 6 ) + "px";
+                this.thumb.style.width = ( tabEl.offsetWidth ) + "px";
+                this.thumb.style.height = ( tabEl.offsetHeight ) + "px";
                 this.thumb.item = tabEl;
             }
 
@@ -3691,12 +3745,11 @@ class SideBar {
         // Entry filter
         if( ( options.filter ?? false ) )
         {
-            const panel = new Panel();
-            panel.addText(null, "", (value, event) => {
+            const filterTextInput = new TextInput(null, "", (value, event) => {
                 this.filterString = value;
                 this.update();
-            }, { placeholder: "Search...", icon: "fa-solid fa-magnifying-glass" });
-            this.filter = panel.root.childNodes[ 0 ];
+            }, { inputClass: "outline", placeholder: "Search...", icon: "fa-solid fa-magnifying-glass", className: "lexsidebarfilter" });
+            this.filter = filterTextInput.root;
             this.root.appendChild( this.filter );
         }
 
@@ -3719,7 +3772,7 @@ class SideBar {
         // Set width depending on header/footer
         doAsync( () => {
             // This account for header, footer and all inner paddings
-            const contentOffset = 32 + ( this.header?.offsetHeight ?? 0 ) +
+            const contentOffset = ( this.header?.offsetHeight ?? 0 ) +
                 ( this.filter?.offsetHeight ?? 0 ) +
                 ( this.footer?.offsetHeight ?? 0 );
             this.content.style.height = `calc(100% - ${ contentOffset }px)`;
@@ -4091,7 +4144,7 @@ class SideBar {
                     const f = options.callback;
                     item.value = value;
                     if( f ) f.call( this, key, value, event );
-                }, { label: key, signal: ( "@checkbox_"  + key ) });
+                }, { className: "accent", label: key, signal: ( "@checkbox_"  + key ) });
                 itemDom.appendChild( panel.root.childNodes[ 0 ] );
             }
             else
@@ -4331,8 +4384,6 @@ class Widget {
 
         if( type != Widget.TITLE )
         {
-            // root.style.width = "calc(100% - " + (this._currentBranch || type == Widget.FILE || type == Widget.TREE ? 10 : 20) + "px)";
-
             if( options.width )
             {
                 root.style.width = root.style.minWidth = options.width;
@@ -4349,6 +4400,8 @@ class Widget {
             {
                 root.style.height = root.style.minHeight = options.height;
             }
+
+            LX.widgetResizeObserver.observe( root );
         }
 
         if( name != undefined )
@@ -4366,6 +4419,7 @@ class Widget {
                 domName.innerHTML = name;
                 domName.title = options.title ?? domName.innerHTML;
                 domName.style.width = options.nameWidth || LX.DEFAULT_NAME_WIDTH;
+                domName.style.minWidth = domName.style.width;
 
                 root.appendChild( domName );
                 root.domName = domName;
@@ -4409,10 +4463,11 @@ class Widget {
 
     _addResetProperty( container, callback ) {
 
-        var domEl = document.createElement('a');
+        const domEl = LX.makeIcon( "rotate-left", "Reset" )
         domEl.style.display = "none";
         domEl.style.marginRight = "6px";
-        domEl.className = "lexicon fa fa-rotate-left";
+        domEl.style.marginLeft = "0";
+        domEl.style.paddingInline = "6px";
         domEl.addEventListener( "click", callback );
         container.appendChild( domEl );
         return domEl;
@@ -4548,15 +4603,17 @@ LX.Widget = Widget;
 
 function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
 {
-    let custom_idx = simple_guidGenerator();
+    let customIdx = simple_guidGenerator();
 
     Panel.prototype[ 'add' + customWidgetName ] = function( name, instance, callback ) {
+
+        options.nameWidth = "100%";
 
         let widget = new Widget( Widget.CUSTOM, name, null, options );
         this._attachWidget( widget );
 
         widget.customName = customWidgetName;
-        widget.customIdx = custom_idx;
+        widget.customIdx = customIdx;
 
         widget.onGetValue = () => {
             return instance;
@@ -4573,7 +4630,6 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
         };
 
         const element = widget.root;
-        element.style.flexWrap = "wrap";
 
         let container, customWidgetsDom;
         let default_instance = options.default ?? {};
@@ -4592,17 +4648,20 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
 
             container = document.createElement('div');
             container.className = "lexcustomcontainer";
-            container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+            container.style.width = "100%";
+            element.appendChild( container );
+            element.dataset["opened"] = false;
 
-            let buttonName = "<a class='fa-solid " + (options.icon ?? "fa-cube")  + "' style='float:left'></a>";
+            let buttonName = "<a class='fa-solid " + (options.icon ?? "fa-cube")  + "'></a>";
             buttonName += customWidgetName + (!instance ? " [empty]" : "");
-            // Add alwayis icon to keep spacing right
-            buttonName += "<a class='fa-solid " + (instance ? "fa-bars-staggered" : " ") + " menu' style='float:right; width:5%;'></a>";
+            // Add always icon to keep spacing right
+            buttonName += "<a class='fa-solid " + (instance ? "fa-bars-staggered" : " ") + " menu'></a>";
 
             let buttonEl = this.addButton(null, buttonName, (value, event) => {
                 if( instance )
                 {
                     element.querySelector(".lexcustomitems").toggleAttribute('hidden');
+                    element.dataset["opened"] = !element.querySelector(".lexcustomitems").hasAttribute("hidden");
                 }
                 else
                 {
@@ -4611,12 +4670,12 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                             instance = {};
                             refresh_widget();
                             element.querySelector(".lexcustomitems").toggleAttribute('hidden', false);
+                            element.dataset["opened"] = !element.querySelector(".lexcustomitems").hasAttribute("hidden");
                         });
                     });
                 }
 
             }, { buttonClass: 'custom' });
-
             container.appendChild( buttonEl.root );
 
             if( instance )
@@ -4638,8 +4697,6 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
             customWidgetsDom = document.createElement('div');
             customWidgetsDom.className = "lexcustomitems";
             customWidgetsDom.toggleAttribute('hidden', true);
-
-            element.appendChild( container );
             element.appendChild( customWidgetsDom );
 
             if( instance )
@@ -4710,24 +4767,32 @@ class NodeTree {
         this.options = options;
         this.selected = [];
 
-        if(data.constructor === Object)
-            this._create_item( null, data );
+        this._forceClose = false;
+
+        if( data.constructor === Object )
+        {
+            this._createItem( null, data );
+        }
         else
+        {
             for( let d of data )
-                this._create_item( null, d );
+            {
+                this._createItem( null, d );
+            }
+        }
     }
 
-    _create_item( parent, node, level = 0, selectedId ) {
+    _createItem( parent, node, level = 0, selectedId ) {
 
         const that = this;
-        const nodeFilterInput = this.domEl.querySelector( "#lexnodetree_filter" );
+        const nodeFilterInput = this.domEl.querySelector( ".lexnodetree_filter" );
 
         node.children = node.children ?? [];
-        if( nodeFilterInput && !node.id.includes( nodeFilterInput.value ) || (selectedId != undefined) && selectedId != node.id )
+        if( nodeFilterInput && nodeFilterInput.value != "" && !node.id.includes( nodeFilterInput.value ) )
         {
             for( var i = 0; i < node.children.length; ++i )
             {
-                this._create_item( node, node.children[ i ], level + 1, selectedId );
+                this._createItem( node, node.children[ i ], level + 1, selectedId );
             }
             return;
         }
@@ -4750,11 +4815,15 @@ class NodeTree {
         item.className = "lextreeitem " + "datalevel" + level + (isParent ? " parent" : "") + (isSelected ? " selected" : "");
         item.id = LX.getSupportedDOMName( node.id );
         item.tabIndex = "0";
+        item.treeData = node;
 
         // Select hierarchy icon
         let icon = (this.options.skip_default_icon ?? true) ? "" : "fa-solid fa-square"; // Default: no childs
-        if( isParent ) icon = node.closed ? "fa-solid fa-caret-right" : "fa-solid fa-caret-down";
-        item.innerHTML = "<a class='" + icon + " hierarchy'></a>";
+        if( isParent )
+        {
+            icon = node.closed ? "fa-solid fa-caret-right" : "fa-solid fa-caret-down";
+            item.innerHTML = "<a class='" + icon + " hierarchy'></a>";
+        }
 
         // Add display icon
         icon = node.icon;
@@ -4774,7 +4843,7 @@ class NodeTree {
         item.innerHTML += (node.rename ? "" : node.id);
 
         item.setAttribute( 'draggable', true );
-        item.style.paddingLeft = ((isParent ? 0 : 3 ) + (3 + (level+1) * 15)) + "px";
+        item.style.paddingLeft = ((3 + (level+1) * 15)) + "px";
         list.appendChild( item );
 
         // Callbacks
@@ -4858,7 +4927,7 @@ class NodeTree {
 
             that.onevent( event );
 
-            if( ( this.options.addDefault ?? false ) == true )
+            if( this.options.addDefault ?? false )
             {
                 if( event.panel.items )
                 {
@@ -4882,18 +4951,20 @@ class NodeTree {
                             }
 
                             let nodeItem = this.domEl.querySelector( '#' + child.id );
-                            nodeItem.classList.add('selected');
+                            nodeItem.classList.add( "selected" );
                             this.selected.push( child );
                             selectChildren( child );
                         }
                     };
+
+                    this.domEl.querySelectorAll( ".selected" ).forEach( i => i.classList.remove( "selected" ) );
+                    this.selected.length = 0;
 
                     // Add childs of the clicked node
                     selectChildren( node );
                 } );
 
                 event.panel.add( "Delete", { callback: () => {
-
                     // It's the root node
                     if( !node.parent )
                     {
@@ -4985,7 +5056,7 @@ class NodeTree {
                 node.id = LX.getSupportedDOMName( this.value );
                 delete node.rename;
                 that.frefresh( node.id );
-                list.querySelector("#" + node.id).classList.add('selected');
+                list.querySelector( "#" + node.id ).classList.add('selected');
             }
             else if(e.key == "Escape")
             {
@@ -5075,7 +5146,22 @@ class NodeTree {
                 e.stopImmediatePropagation();
                 e.stopPropagation();
 
-                node.closed = !node.closed;
+                if( e.altKey )
+                {
+                    const _closeNode = function( node ) {
+                        node.closed = !node.closed;
+                        for( var c of node.children )
+                        {
+                            _closeNode( c );
+                        }
+                    };
+                    _closeNode( node );
+                }
+                else
+                {
+                    node.closed = !node.closed;
+                }
+
                 if( that.onevent )
                 {
                     const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed);
@@ -5127,13 +5213,18 @@ class NodeTree {
             inputContainer.appendChild( visibility );
         }
 
-        if( selectedId != undefined && node.id == selectedId )
-        {
-            this.selected = [ node ];
-            item.click();
-        }
+        const _hasChild = function( parent, id ) {
+            if( !parent.length  ) return;
+            for( var c of parent.children )
+            {
+                if( c.id == id ) return true;
+                return _hasChild( c, id );
+            }
+        };
 
-        if( node.closed )
+        const exists = _hasChild( node, selectedId );
+
+        if( node.closed && !exists )
         {
             return;
         }
@@ -5147,25 +5238,42 @@ class NodeTree {
                 continue;
             }
 
-            this._create_item( node, child, level + 1 );
+            this._createItem( node, child, level + 1, selectedId );
         }
     }
 
     refresh( newData, selectedId ) {
+
         this.data = newData ?? this.data;
         this.domEl.querySelector( "ul" ).innerHTML = "";
-        this._create_item( null, this.data, 0, selectedId );
+        this._createItem( null, this.data, 0, selectedId );
     }
 
     /* Refreshes the tree and focuses current element */
     frefresh( id ) {
+
         this.refresh();
         var el = this.domEl.querySelector( "#" + id );
-        if( el ) el.focus();
+        if( el )
+        {
+            el.focus();
+        }
     }
 
     select( id ) {
+
         this.refresh( null, id );
+
+        this.domEl.querySelectorAll( ".selected" ).forEach( i => i.classList.remove( "selected" ) );
+        this.selected.length = 0;
+
+        var el = this.domEl.querySelector( "#" + id );
+        if( el )
+        {
+            el.classList.add( "selected" );
+            this.selected = [ el.treeData ];
+            el.focus();
+        }
     }
 }
 
@@ -5256,19 +5364,17 @@ class TextInput extends Widget {
 
             this._lastValueTriggered = value = newValue;
 
-            if( options.disabled  )
-            {
-                wValue.innerText = newValue;
-            }
-            else
-            {
-                wValue.value = newValue;
-            }
+            wValue.value = newValue;
 
             if( !skipCallback )
             {
                 this._trigger( new IEvent( name, newValue, event ), callback );
             }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
         };
 
         this.valid = ( v ) => {
@@ -5279,14 +5385,9 @@ class TextInput extends Widget {
         };
 
         let container = document.createElement( 'div' );
-        container.className = "lextext" + ( options.warning ? " lexwarning" : "" );
-        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
+        container.className = ( options.warning ? " lexwarning" : "" );
         container.style.display = "flex";
-
-        if( options.textClass )
-        {
-            container.classList.add( options.textClass );
-        }
+        this.root.appendChild( container );
 
         this.disabled = ( options.disabled || options.warning ) ?? ( options.url ? true : false );
         let wValue = null;
@@ -5294,6 +5395,7 @@ class TextInput extends Widget {
         if( !this.disabled )
         {
             wValue = document.createElement( 'input' );
+            wValue.className = "lextext " + ( options.inputClass ?? "" );
             wValue.type = options.type || "";
             wValue.value = wValue.iValue = value || "";
             wValue.style.width = "100%";
@@ -5346,34 +5448,35 @@ class TextInput extends Widget {
             }
 
         }
-        else
+        else if( options.url )
         {
-            wValue = document.createElement( options.url ? 'a' : 'div' );
-
-            if( options.url )
-            {
-                wValue.href = options.url;
-                wValue.target = "_blank";
-            }
+            wValue = document.createElement( 'a' );
+            wValue.href = options.url;
+            wValue.target = "_blank";
 
             const icon = options.warning ? '<i class="fa-solid fa-triangle-exclamation"></i>' : '';
             wValue.innerHTML = ( icon + value ) || "";
             wValue.style.width = "100%";
             wValue.style.textAlign = options.float ?? "";
+            wValue.className = "lextext ellipsis-overflow";
+        }
+        else
+        {
+            wValue = document.createElement( 'input' );
+
+            const icon = options.warning ? '<i class="fa-solid fa-triangle-exclamation"></i>' : '';
+            wValue.disabled = true;
+            wValue.innerHTML = icon;
+            wValue.value = value;
+            wValue.style.width = "100%";
+            wValue.style.textAlign = options.float ?? "";
+            wValue.className = "lextext ellipsis-overflow " + ( options.inputClass ?? "" );
         }
 
         Object.assign( wValue.style, options.style ?? {} );
-
         container.appendChild( wValue );
-        this.root.appendChild( container );
 
-        // Remove branch padding and margins
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            this.root.className += " noname";
-            container.style.width = "100%";
-        }
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -5404,17 +5507,22 @@ class TextArea extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         let container = document.createElement( "div" );
         container.className = "lextextarea";
-        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " )";
-        container.style.height = options.height;
         container.style.display = "flex";
+        this.root.appendChild( container );
 
         let wValue = document.createElement( "textarea" );
         wValue.value = wValue.iValue = value || "";
         wValue.style.width = "100%";
         wValue.style.textAlign = options.float ?? "";
         Object.assign( wValue.style, options.style ?? {} );
+        container.appendChild( wValue );
 
         if( options.disabled ?? false ) wValue.setAttribute( "disabled", true );
         if( options.placeholder ) wValue.setAttribute( "placeholder", options.placeholder );
@@ -5448,24 +5556,16 @@ class TextArea extends Widget {
             container.appendChild( icon );
         }
 
-        container.appendChild( wValue );
-        this.root.appendChild( container );
-
-        // Remove branch padding and margins
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            this.root.className += " noname";
-            container.style.width = "100%";
-        }
-
-        // Do this after creating the DOM element
         doAsync( () => {
+            container.style.height = options.height;
+
             if( options.fitHeight )
             {
                 // Update height depending on the content
                 wValue.style.height = wValue.scrollHeight + "px";
             }
+
+            this.onResize();
         }, 10 );
     }
 }
@@ -5493,9 +5593,21 @@ class Button extends Widget {
             ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + ( newValue || "" ) + "</span>" ) );
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            wValue.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         var wValue = document.createElement( 'button' );
         wValue.title = options.title ?? "";
         wValue.className = "lexbutton " + ( options.buttonClass ?? "" );
+
+        if( options.icon )
+        {
+            wValue.classList.add( "justify-center" );
+        }
+
+        this.root.appendChild( wValue );
 
         if( options.selected )
         {
@@ -5505,8 +5617,6 @@ class Button extends Widget {
         wValue.innerHTML =
             ( options.icon ? "<a class='" + options.icon + "'></a>" :
             ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + ( value || "" ) + "</span>" ) );
-
-        wValue.style.width = "calc( 100% - " + ( options.nameWidth ?? LX.DEFAULT_NAME_WIDTH ) + ")";
 
         if( options.disabled )
         {
@@ -5527,15 +5637,7 @@ class Button extends Widget {
             this._trigger( new IEvent( name, value, e ), callback );
         });
 
-        this.root.appendChild( wValue );
-
-        // Remove branch padding and
-        const useNameAsLabel = !( options.hideName ?? false ) && !( options.icon || options.img );
-        if( !useNameAsLabel )
-        {
-            wValue.className += " noname";
-            wValue.style.width = "100%";
-        }
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -5563,11 +5665,10 @@ class ComboButtons extends Widget {
             container.className += options.float;
         }
 
-        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
-
         let currentValue = [];
         let buttonsBox = document.createElement('div');
         buttonsBox.className = "lexcombobuttonsbox ";
+        container.appendChild( buttonsBox );
 
         for( let b of values )
         {
@@ -5679,16 +5780,14 @@ class ComboButtons extends Widget {
             }
         };
 
-        // Remove branch padding and margins
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            this.root.className += " noname";
-            container.style.width = "100%";
-        }
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
 
-        container.appendChild( buttonsBox );
         this.root.appendChild( container );
+
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -5710,6 +5809,7 @@ class Card extends Widget {
         let container = document.createElement('div');
         container.className = "lexcard";
         container.style.width = "100%";
+        this.root.appendChild( container );
 
         if( options.img )
         {
@@ -5732,6 +5832,7 @@ class Card extends Widget {
 
         let cardNameDom = document.createElement('span');
         cardNameDom.innerText = name;
+        container.appendChild( cardNameDom );
 
         if( options.link != undefined )
         {
@@ -5750,9 +5851,6 @@ class Card extends Widget {
                 this._trigger( new IEvent( name, null, e ), options.callback );
             });
         }
-
-        container.appendChild( cardNameDom );
-        this.root.appendChild( container );
     }
 }
 
@@ -5801,7 +5899,9 @@ class Form extends Widget {
 
         let container = document.createElement( 'div' );
         container.className = "lexformdata";
+        container.style.width = "100%";
         container.formData = {};
+        this.root.appendChild( container );
 
         for( let entry in data )
         {
@@ -5813,7 +5913,7 @@ class Form extends Widget {
             }
 
             entryData.placeholder = entryData.placeholder ?? entry;
-            entryData.width = "calc(100% - 10px)";
+            entryData.width = "100%";
 
             // this.addLabel( entry, { textClass: "formlabel" } );
 
@@ -5843,15 +5943,9 @@ class Form extends Widget {
             {
                 callback( container.formData, event );
             }
-        }, { buttonClass: "primary", width: "calc(100% - 10px)" } );
+        }, { buttonClass: "primary" } );
 
         container.appendChild( submitButton.root );
-
-        this.root.appendChild( container );
-
-        // Form does not never use label
-        this.root.className += " noname";
-        container.style.width = "100%";
     }
 }
 
@@ -5892,7 +5986,7 @@ class Select extends Widget {
             // Reset filter
             if( filter )
             {
-                filter.querySelector( "input" ).value = "";
+                filter.root.querySelector( "input" ).value = "";
                 const filteredOptions = this._filterOptions( values, "" );
                 list.refresh( filteredOptions );
             }
@@ -5903,9 +5997,14 @@ class Select extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         let container = document.createElement( "div" );
         container.className = "lexselect";
-        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        this.root.appendChild( container );
 
         let wValue = document.createElement( 'div' );
         wValue.className = "lexselect lexoption";
@@ -5914,7 +6013,7 @@ class Select extends Widget {
 
         // Add select widget button
         let buttonName = value;
-        buttonName += "<a class='fa-solid fa-angle-down' style='float:right; margin-right: 3px;'></a>";
+        buttonName += "<a class='fa-solid fa-angle-down'></a>";
 
         const _placeOptions = ( parent ) => {
 
@@ -6005,7 +6104,7 @@ class Select extends Widget {
 
             if( filter )
             {
-                filter.querySelector( "input" ).focus();
+                filter.root.querySelector( "input" ).focus();
             }
 
         }, { buttonClass: "array", skipInlineCount: true, disabled: options.disabled } );
@@ -6044,7 +6143,7 @@ class Select extends Widget {
                 this.unfocus_event = true;
                 setTimeout( () => delete this.unfocus_event, 200 );
             }
-            else if ( e.relatedTarget && e.relatedTarget.tagName == "INPUT" )
+            else if ( e.relatedTarget && ( e.relatedTarget.tagName == "INPUT" || e.relatedTarget.classList.contains("lexoptions") ) )
             {
                 return;
             }
@@ -6064,13 +6163,14 @@ class Select extends Widget {
             filterOptions.skipWidget = filterOptions.skipWidget ?? true;
             filterOptions.trigger = "input";
             filterOptions.icon = "fa-solid fa-magnifying-glass";
-            filterOptions.className = "lexfilter noname";
+            filterOptions.className = "lexfilter";
+            filterOptions.inputClass = "outline";
 
-            let filter = new TextInput(null, options.filterValue ?? "", ( v ) => {
+            filter = new TextInput(null, options.filterValue ?? "", ( v ) => {
                 const filteredOptions = this._filterOptions( values, v );
                 list.refresh( filteredOptions );
             }, filterOptions );
-            filter.root.querySelector( ".lextext" ).classList.remove( "lextext" );
+            filter.root.querySelector( ".lextext" ).style.border = "1px solid transparent";
 
             const input = filter.root.querySelector( "input" );
 
@@ -6091,12 +6191,12 @@ class Select extends Widget {
         list.appendChild( listOptions );
 
         // Add select options list
-        list.refresh = ( options ) => {
+        list.refresh = ( currentOptions ) => {
 
             // Empty list
             listOptions.innerHTML = "";
 
-            if( !options.length )
+            if( !currentOptions.length )
             {
                 let iValue = options.emptyMsg ?? "No options found.";
 
@@ -6112,9 +6212,9 @@ class Select extends Widget {
                 return;
             }
 
-            for( let i = 0; i < options.length; i++ )
+            for( let i = 0; i < currentOptions.length; i++ )
             {
-                let iValue = options[ i ];
+                let iValue = currentOptions[ i ];
                 let li = document.createElement( "li" );
                 let option = document.createElement( "div" );
                 option.className = "option";
@@ -6181,15 +6281,8 @@ class Select extends Widget {
         list.refresh( values );
 
         container.appendChild( listDialog );
-        this.root.appendChild( container );
 
-        // Remove branch padding and margins
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            this.root.className += " noname";
-            container.style.width = "100%";
-        }
+        doAsync( this.onResize.bind( this ) );
     }
 
     _filterOptions( options, value ) {
@@ -6245,9 +6338,17 @@ class Curve extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+            flushCss( container );
+            curveInstance.canvas.width = container.offsetWidth;
+            curveInstance.redraw();
+        };
+
         var container = document.createElement( "div" );
         container.className = "lexcurve";
-        container.style.width = this.name ? "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")" : "100%";
+        this.root.appendChild( container );
 
         options.callback = (v, e) => {
             this._trigger( new IEvent( name, v, e ), callback );
@@ -6257,16 +6358,9 @@ class Curve extends Widget {
 
         let curveInstance = new CanvasCurve( values, options );
         container.appendChild( curveInstance.element );
-        this.root.appendChild( container );
-
-        // Resize
-        this.onresize = curveInstance.redraw.bind( curveInstance );
         this.curveInstance = curveInstance;
 
-        doAsync(() => {
-            curveInstance.canvas.width = container.offsetWidth;
-            curveInstance.redraw();
-        });
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -6286,21 +6380,32 @@ class Dial extends Widget {
         super( Widget.DIAL, name, defaultValues, options );
 
         this.onGetValue = () => {
-            return JSON.parse( JSON.stringify( curveInstance.element.value ) );
+            return JSON.parse( JSON.stringify( dialInstance.element.value ) );
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
-            curveInstance.element.value = JSON.parse( JSON.stringify( newValue ) );
-            curveInstance.redraw();
+            dialInstance.element.value = JSON.parse( JSON.stringify( newValue ) );
+            dialInstance.redraw();
             if( !skipCallback )
             {
-                this._trigger( new IEvent( name, curveInstance.element.value, event ), callback );
+                this._trigger( new IEvent( name, dialInstance.element.value, event ), callback );
             }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+            flushCss( container );
+            dialInstance.element.style.height = dialInstance.element.offsetWidth + "px";
+            dialInstance.canvas.width = dialInstance.element.offsetWidth;
+            container.style.width = dialInstance.element.offsetWidth + "px";
+            dialInstance.canvas.height = dialInstance.canvas.width;
+            dialInstance.redraw();
         };
 
         var container = document.createElement( "div" );
         container.className = "lexcurve";
-        container.style.width = this.name ? "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")" : "100%";
+        this.root.appendChild( container );
 
         options.callback = ( v, e ) => {
             this._trigger( new IEvent( name, v, e ), callback );
@@ -6308,21 +6413,11 @@ class Dial extends Widget {
 
         options.name = name;
 
-        let curveInstance = new CanvasDial( this, values, options );
-        container.appendChild( curveInstance.element );
-        this.root.appendChild( container );
+        let dialInstance = new CanvasDial( this, values, options );
+        container.appendChild( dialInstance.element );
+        this.dialInstance = dialInstance;
 
-        // Resize
-        this.onresize = curveInstance.redraw.bind( curveInstance );
-        this.curveInstance = curveInstance;
-
-        doAsync(() => {
-            curveInstance.element.style.height = curveInstance.element.offsetWidth + "px";
-            curveInstance.canvas.width = curveInstance.element.offsetWidth;
-            container.style.width = curveInstance.element.offsetWidth + "px";
-            curveInstance.canvas.height = curveInstance.canvas.width;
-            curveInstance.redraw();
-        });
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -6345,22 +6440,27 @@ class Layers extends Widget {
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
             value = newValue;
-            setLayers();
+            this.setLayers( value );
             if( !skipCallback )
             {
                 this._trigger( new IEvent(name, value, event), callback );
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         var container = document.createElement( "div" );
         container.className = "lexlayers";
-        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        this.root.appendChild( container );
 
-        const setLayers = () =>  {
+        this.setLayers = ( val ) =>  {
 
             container.innerHTML = "";
 
-            let binary = value.toString( 2 );
+            let binary = val.toString( 2 );
             let nbits = binary.length;
 
             // fill zeros
@@ -6374,7 +6474,7 @@ class Layers extends Widget {
                 let layer = document.createElement( "div" );
                 layer.className = "lexlayer";
 
-                if( value != undefined )
+                if( val != undefined )
                 {
                     const valueBit = binary[ 16 - bit - 1 ];
                     if( valueBit != undefined && valueBit == '1' )
@@ -6391,15 +6491,15 @@ class Layers extends Widget {
                     e.stopPropagation();
                     e.stopImmediatePropagation();
                     e.target.classList.toggle( "selected" );
-                    const newValue = value ^ ( 1 << bit );
+                    const newValue = val ^ ( 1 << bit );
                     this.set( newValue, false, e );
                 } );
             }
         };
 
-        setLayers();
+        this.setLayers( value );
 
-        this.root.appendChild( container );
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -6413,6 +6513,8 @@ LX.Layers = Layers;
 class ItemArray extends Widget {
 
     constructor( name, values = [], callback, options = {} ) {
+
+        options.nameWidth = "100%";
 
         super( Widget.ARRAY, name, null, options );
 
@@ -6429,25 +6531,25 @@ class ItemArray extends Widget {
             }
         };
 
-        this.root.style.flexWrap = "wrap";
-
         // Add open array button
 
         const itemNameWidth = "4%";
 
         var container = document.createElement('div');
         container.className = "lexarray";
-        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        container.style.width = "100%";
+        this.root.appendChild( container );
+        this.root.dataset["opened"] = false;
 
-        const angleDown = `<a class='fa-solid fa-angle-down' style='float:right; margin-right: 3px;'></a>`;
+        const angleDown = `<a class='fa-solid fa-angle-down'></a>`;
 
         let buttonName = "Array (size " + values.length + ")";
         buttonName += angleDown;
 
         const toggleButton = new Button(null, buttonName, () => {
+            this.root.dataset["opened"] = this.root.dataset["opened"] == "true" ? false : true;
             this.root.querySelector(".lexarrayitems").toggleAttribute('hidden');
         }, { buttonClass: 'array' });
-
         container.appendChild( toggleButton.root );
 
         // Show elements
@@ -6455,8 +6557,6 @@ class ItemArray extends Widget {
         let arrayItems = document.createElement( "div" );
         arrayItems.className = "lexarrayitems";
         arrayItems.toggleAttribute( "hidden",  true );
-
-        this.root.appendChild( container );
         this.root.appendChild( arrayItems );
 
         this._updateItems = () => {
@@ -6473,10 +6573,6 @@ class ItemArray extends Widget {
             {
                 const value = values[ i ];
                 let baseclass = options.innerValues ? 'select' : value.constructor;
-
-                // TODO
-                // this.sameLine( 2 );
-
                 let widget = null;
 
                 switch( baseclass  )
@@ -6505,17 +6601,17 @@ class ItemArray extends Widget {
 
                 arrayItems.appendChild( widget.root );
 
-                widget = new Button( null, "<a class='lexicon fa-solid fa-trash'></a>", ( v, event) => {
+                const removeWidget = new Button( null, "<a class='lexicon fa-solid fa-trash'></a>", ( v, event) => {
                     values.splice( values.indexOf( value ), 1 );
                     this._updateItems();
                     this._trigger( new IEvent(name, values, event), callback );
                 }, { title: "Remove item", className: 'micro'} );
 
-                arrayItems.appendChild( widget.root );
+                widget.root.appendChild( removeWidget.root );
             }
 
             buttonName = "Add item";
-            buttonName += "<a class='fa-solid fa-plus' style='float:right; margin-right: 3px; margin-top: 2px;'></a>";
+            buttonName += "<a class='fa-solid fa-plus'></a>";
 
             const addButton = new Button(null, buttonName, (v, event) => {
                 values.push( options.innerValues ? options.innerValues[ 0 ] : "" );
@@ -6576,6 +6672,11 @@ class List extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            listContainer.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         this._updateValues = ( newValues ) => {
 
             values = newValues;
@@ -6611,19 +6712,11 @@ class List extends Widget {
 
         let listContainer = document.createElement( 'div' );
         listContainer.className = "lexlist";
-        listContainer.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        this.root.appendChild( listContainer );
 
         this._updateValues( values );
 
-        // Remove branch padding and margins
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            this.root.className += " noname";
-            listContainer.style.width = "100%";
-        }
-
-        this.root.appendChild( listContainer );
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -6649,20 +6742,25 @@ class Tags extends Widget {
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
             value = [].concat( newValue );
-            _generateTags();
+            this.generateTags( value );
             if( !skipCallback )
             {
                 this._trigger( new IEvent( name, value, event ), callback );
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            tagsContainer.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         // Show tags
 
         const tagsContainer = document.createElement('div');
         tagsContainer.className = "lextags";
-        tagsContainer.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        this.root.appendChild( tagsContainer );
 
-        const _generateTags = () => {
+        this.generateTags = ( value ) => {
 
             tagsContainer.innerHTML = "";
 
@@ -6706,17 +6804,9 @@ class Tags extends Widget {
             tagInput.focus();
         }
 
-        _generateTags();
+        this.generateTags( value );
 
-        // Remove branch padding and margins
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            this.root.className += " noname";
-            tagsContainer.style.width = "100%";
-        }
-
-        this.root.appendChild( tagsContainer );
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -6760,31 +6850,33 @@ class Checkbox extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         var container = document.createElement( "div" );
         container.className = "lexcheckboxcont";
+        this.root.appendChild( container );
 
         let checkbox = document.createElement( "input" );
         checkbox.type = "checkbox";
-        checkbox.className = "lexcheckbox " + ( options.className ?? "" );
+        checkbox.className = "lexcheckbox " + ( options.className ?? "primary" );
         checkbox.checked = value;
         checkbox.disabled = options.disabled ?? false;
+        container.appendChild( checkbox );
 
         let valueName = document.createElement( "span" );
         valueName.className = "checkboxtext";
         valueName.innerHTML = options.label ?? "On";
-
-        container.appendChild( checkbox );
         container.appendChild( valueName );
 
         checkbox.addEventListener( "change" , e => {
             this.set( checkbox.checked, false, e );
         });
 
-        this.root.appendChild( container );
-
         if( options.suboptions )
         {
-            this.root.style.flexWrap = "wrap";
             let suboptions = document.createElement( "div" );
             suboptions.className = "lexcheckboxsubmenu";
             suboptions.toggleAttribute( "hidden", !checkbox.checked );
@@ -6796,6 +6888,8 @@ class Checkbox extends Widget {
 
             this.root.appendChild( suboptions );
         }
+
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -6809,6 +6903,11 @@ LX.Checkbox = Checkbox;
 class Toggle extends Widget {
 
     constructor( name, value, callback, options = {} ) {
+
+        if( !name && !options.label )
+        {
+            throw( "Set Widget Name or at least a label!" );
+        }
 
         super( Widget.TOGGLE, name, value, options );
 
@@ -6834,8 +6933,14 @@ class Toggle extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         var container = document.createElement('div');
         container.className = "lextogglecont";
+        this.root.appendChild( container );
 
         let toggle = document.createElement('input');
         toggle.type = "checkbox";
@@ -6843,23 +6948,19 @@ class Toggle extends Widget {
         toggle.checked = value;
         toggle.iValue = value;
         toggle.disabled = options.disabled ?? false;
+        container.appendChild( toggle );
 
         let valueName = document.createElement( 'span' );
         valueName.className = "toggletext";
-        valueName.innerHTML = "On";
-
-        container.appendChild( toggle );
+        valueName.innerHTML = options.label ?? "On";
         container.appendChild( valueName );
 
         toggle.addEventListener( "change" , e => {
             this.set( toggle.checked, false, e );
         });
 
-        this.root.appendChild( container );
-
         if( options.suboptions )
         {
-            this.root.style.flexWrap = "wrap";
             let suboptions = document.createElement('div');
             suboptions.className = "lextogglesubmenu";
             suboptions.toggleAttribute( 'hidden', !toggle.checked );
@@ -6871,6 +6972,8 @@ class Toggle extends Widget {
 
             this.root.appendChild( suboptions );
         }
+
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -6915,6 +7018,7 @@ class RadioGroup extends Widget {
 
         var container = document.createElement( 'div' );
         container.className = "lexradiogroup " + ( options.className ?? "" );
+        this.root.appendChild( container );
 
         let labelSpan = document.createElement( 'span' );
         labelSpan.innerHTML = label;
@@ -6949,8 +7053,6 @@ class RadioGroup extends Widget {
             currentIndex = options.selected;
             this.set( currentIndex, true );
         }
-
-        this.root.appendChild( container );
     }
 }
 
@@ -6980,8 +7082,7 @@ class ColorInput extends Widget {
                 newValue = hexToRgb( newValue );
             }
 
-            // Means it was called from the color input listener, not the text
-            if( event )
+            if( !this._skipTextUpdate )
             {
                 textWidget.set( newValue, true, event );
             }
@@ -6994,17 +7095,22 @@ class ColorInput extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         var container = document.createElement( 'span' );
         container.className = "lexcolor";
-        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        this.root.appendChild( container );
 
         let color = document.createElement( 'input' );
         color.style.width = "32px";
         color.type = 'color';
         color.className = "colorinput";
-        color.id = "color" + simple_guidGenerator();
         color.useRGB = options.useRGB ?? false;
-        color.value = color.iValue = value;
+        color.value = value;
+        container.appendChild( color );
 
         if( options.disabled )
         {
@@ -7015,17 +7121,16 @@ class ColorInput extends Widget {
             this.set( e.target.value, false, e );
         }, false );
 
-        container.appendChild( color );
-
         const textWidget = new TextInput( null, color.value, v => {
+            this._skipTextUpdate = true;
             this.set( v );
-        }, { width: "calc( 100% - 32px )"});
+            delete this._skipTextUpdate;
+        }, { width: "calc( 100% - 32px )", disabled: options.disabled });
 
         textWidget.root.style.marginLeft = "4px";
-
         container.appendChild( textWidget.root );
 
-        this.root.appendChild( container );
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -7061,18 +7166,35 @@ class RangeInput extends Widget {
             }
         };
 
-        var container = document.createElement( 'div' );
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
+        };
+
+        const container = document.createElement( 'div' );
         container.className = "lexrange";
-        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        this.root.appendChild( container );
 
         let slider = document.createElement( 'input' );
         slider.className = "lexrangeslider " + ( options.className ?? "" );
-        slider.value = slider.iValue = value;
         slider.min = options.min ?? 0;
         slider.max = options.max ?? 100;
         slider.step = options.step ?? 1;
         slider.type = "range";
         slider.disabled = options.disabled ?? false;
+
+        if( value.constructor == Number )
+        {
+            value = clamp( value, +slider.min, +slider.max );
+        }
+
+        if( options.left )
+        {
+            value = ( ( +slider.max ) - value + ( +slider.min ) );
+        }
+
+        slider.value = value;
+        container.appendChild( slider );
 
         if( options.left ?? false )
         {
@@ -7110,20 +7232,7 @@ class RangeInput extends Widget {
             Widget._dispatchEvent( slider, "input", true );
         };
 
-        if( value.constructor == Number )
-        {
-            value = clamp( value, +slider.min, +slider.max );
-        }
-
-        container.appendChild( slider );
-        this.root.appendChild( container );
-
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            this.root.className += " noname";
-            container.style.width = "100%";
-        }
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -7171,12 +7280,18 @@ class NumberInput extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         var container = document.createElement( 'div' );
         container.className = "lexnumber";
-        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        this.root.appendChild( container );
 
         let box = document.createElement( 'div' );
         box.className = "numberbox";
+        container.appendChild( box );
 
         let vecinput = document.createElement( 'input' );
         vecinput.id = "number_" + simple_guidGenerator();
@@ -7350,16 +7465,7 @@ class NumberInput extends Widget {
 
         vecinput.addEventListener( "mousedown", innerMouseDown );
 
-        container.appendChild( box );
-        this.root.appendChild( container );
-
-        // Remove branch padding and margins
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            this.root.className += " noname";
-            container.style.width = "100%";
-        }
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -7411,11 +7517,16 @@ class Vector extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         const vectorInputs = [];
 
         var container = document.createElement( 'div' );
         container.className = "lexvector";
-        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        this.root.appendChild( container );
 
         const that = this;
 
@@ -7618,7 +7729,7 @@ class Vector extends Widget {
             }
         }, false );
 
-        this.root.appendChild( container );
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -7719,14 +7830,6 @@ class SizeInput extends Widget {
                 }
             }, false );
         }
-
-        // Remove branch padding and margins
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            this.root.className += " noname";
-            container.style.width = "100%";
-        }
     }
 }
 
@@ -7756,35 +7859,34 @@ class Pad extends Widget {
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         var container = document.createElement( 'div' );
         container.className = "lexpad";
-        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        this.root.appendChild( container );
 
         let pad = document.createElement('div');
         pad.id = "lexpad-" + name;
         pad.className = "lexinnerpad";
         pad.style.width = options.padSize ?? '96px';
         pad.style.height = options.padSize ?? '96px';
+        container.appendChild( pad );
 
         let thumb = document.createElement('div');
         thumb.className = "lexpadthumb";
         thumb.value = new LX.vec2( value[ 0 ], value[ 1 ] );
         thumb.min = options.min ?? 0;
         thumb.max = options.max ?? 1;
+        pad.appendChild( thumb );
 
         let _updateValue = v => {
             const [ w, h ] = [ pad.offsetWidth, pad.offsetHeight ];
             const value0to1 = new LX.vec2( remapRange( v.x, thumb.min, thumb.max, 0.0, 1.0 ), remapRange( v.y, thumb.min, thumb.max, 0.0, 1.0 ) );
             thumb.style.transform = `translate(calc( ${ w * value0to1.x }px - 50% ), calc( ${ h * value0to1.y }px - 50%)`;
         }
-
-        doAsync( () => {
-            _updateValue( thumb.value )
-        } );
-
-        pad.appendChild( thumb );
-        container.appendChild( pad );
-        this.root.appendChild( container );
 
         pad.addEventListener( "mousedown", innerMouseDown );
 
@@ -7804,6 +7906,7 @@ class Pad extends Widget {
             document.body.classList.add( 'noevents' );
             e.stopImmediatePropagation();
             e.stopPropagation();
+            thumb.classList.add( "active" );
 
             if( options.onPress )
             {
@@ -7835,12 +7938,18 @@ class Pad extends Widget {
             doc.removeEventListener( 'mouseup', innerMouseUp );
             document.body.classList.remove( 'nocursor' );
             document.body.classList.remove( 'noevents' );
+            thumb.classList.remove( "active" );
 
             if( options.onRelease )
             {
                 options.onRelease.bind( thumb )( e, thumb );
             }
         }
+
+        doAsync( () => {
+            this.onResize();
+            _updateValue( thumb.value )
+        } );
     }
 }
 
@@ -7870,9 +7979,14 @@ class Progress extends Widget {
             }
         };
 
-        var container = document.createElement('div');
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
+        const container = document.createElement('div');
         container.className = "lexprogress";
-        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        this.root.appendChild( container );
 
         // add slider (0-1 if not specified different )
 
@@ -7886,6 +8000,7 @@ class Progress extends Widget {
         progress.high = options.high ?? progress.high;
         progress.optimum = options.optimum ?? progress.optimum;
         progress.value = value;
+        container.appendChild( progress );
 
         const _updateColor = () => {
 
@@ -7902,9 +8017,6 @@ class Progress extends Widget {
 
             progress.style.background = `color-mix(in srgb, ${backgroundColor} 20%, transparent)`;
         };
-
-        container.appendChild( progress );
-        this.root.appendChild( container );
 
         if( options.showValue )
         {
@@ -7972,6 +8084,8 @@ class Progress extends Widget {
         }
 
         _updateColor();
+
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -7992,12 +8106,17 @@ class FileInput extends Widget {
         let type = options.type ?? 'text';
         let read = options.read ?? true;
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            input.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         // Create hidden input
         let input = document.createElement( 'input' );
         input.className = "lexfileinput";
-        input.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + " - 10%)";
         input.type = 'file';
         input.disabled = options.disabled ?? false;
+        this.root.appendChild( input );
 
         if( options.placeholder )
         {
@@ -8030,13 +8149,11 @@ class FileInput extends Widget {
             callback( null );
         });
 
-        this.root.appendChild( input );
-
         if( local )
         {
             let settingsDialog = null;
 
-            const settingButton = new Button(null, "<a style='margin-top: 0px;' class='fa-solid fa-gear'></a>", () => {
+            const settingButton = new Button(null, "", () => {
 
                 if( settingsDialog )
                 {
@@ -8048,10 +8165,12 @@ class FileInput extends Widget {
                     p.addButton( null, "Reload", v => { input.dispatchEvent( new Event( 'change' ) ) } );
                 }, { onclose: ( root ) => { root.remove(); settingsDialog = null; } } );
 
-            }, { className: "micro", skipInlineCount: true, title: "Settings" });
+            }, { skipInlineCount: true, title: "Settings", disabled: options.disabled, icon: "fa-solid fa-gear" });
 
             this.root.appendChild( settingButton.root );
         }
+
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -8109,9 +8228,9 @@ class Tree extends Widget {
         if( options.filter )
         {
             nodeFilterInput = document.createElement('input');
-            nodeFilterInput.id = "lexnodetree_filter";
+            nodeFilterInput.className = "lexnodetree_filter";
             nodeFilterInput.setAttribute("placeholder", "Filter..");
-            nodeFilterInput.style.width =  "calc( 100% - 17px )";
+            nodeFilterInput.style.width =  "100%";
             nodeFilterInput.addEventListener('input', () => {
                 this.innerTree.refresh();
             });
@@ -8261,11 +8380,11 @@ class Counter extends Widget {
         container.className = "lexcounter";
         this.root.appendChild( container );
 
-        const substrButton = new Button(null, "<a style='margin-top: 0px;' class='fa-solid fa-minus'></a>", ( value, e ) => {
+        const substrButton = new Button(null, "", ( value, e ) => {
             let mult = step ?? 1;
             if( e.shiftKey ) mult *= 10;
             this.set( counterText.count - mult, false, e );
-        }, { className: "micro", skipInlineCount: true, title: "Minus" });
+        }, { skipInlineCount: true, title: "Minus", icon: "fa-solid fa-minus" });
 
         container.appendChild( substrButton.root );
 
@@ -8287,12 +8406,11 @@ class Counter extends Widget {
             containerBox.appendChild( counterLabel );
         }
 
-        const addButton = new Button(null, "<a style='margin-top: 0px;' class='fa-solid fa-plus'></a>", ( value, e ) => {
+        const addButton = new Button(null, "", ( value, e ) => {
             let mult = step ?? 1;
             if( e.shiftKey ) mult *= 10;
             this.set( counterText.count + mult, false, e );
-        }, { className: "micro", skipInlineCount: true, title: "Plus" });
-
+        }, { skipInlineCount: true, title: "Plus", icon: "fa-solid fa-plus" });
         container.appendChild( addButton.root );
     }
 }
@@ -8315,27 +8433,139 @@ class Table extends Widget {
 
         super( Widget.TABLE, name, null, options );
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         const container = document.createElement('div');
         container.className = "lextable";
-        container.style.width = "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
+        this.root.appendChild( container );
 
-        const table = document.createElement( 'table' );
-        container.appendChild( table );
+        this.centered = options.centered ?? false;
+        if( this.centered === true )
+        {
+            container.classList.add( "centered" );
+        }
+
+        this.filter = options.filter ?? false;
+        this.toggleColumns = options.toggleColumns ?? false;
+        this.customFilters = options.customFilters ?? false;
+        this.activeCustomFilters = {};
 
         data.head = data.head ?? [];
         data.body = data.body ?? [];
-        data.orderMap = { };
         data.checkMap = { };
+        data.colVisibilityMap = { };
+        data.head.forEach( (col, index) => { data.colVisibilityMap[ index ] = true; })
 
-        function compareFn( idx, order, a, b) {
+        const compareFn = ( idx, order, a, b) => {
             if (a[idx] < b[idx]) return -order;
             else if (a[idx] > b[idx]) return order;
             return 0;
         }
 
-        this.refreshTable = () => {
+        const sortFn = ( idx, sign ) => {
+            data.body = data.body.sort( compareFn.bind( this, idx, sign ) );
+            this.refresh();
+        }
+
+        // Append header
+        if( this.filter || this.customFilters || this.toggleColumns )
+        {
+            const headerContainer = LX.makeContainer( [ "100%", "auto" ] );
+
+            if( this.filter )
+            {
+                const filterOptions = LX.deepCopy( options );
+                filterOptions.placeholder = `Filter ${ this.filter }...`;
+                filterOptions.skipWidget = true;
+                filterOptions.trigger = "input";
+                filterOptions.inputClass = "outline";
+
+                let filter = new TextInput(null, "", ( v ) => {
+                    this._currentFilter = v;
+                    this.refresh();
+                }, filterOptions );
+
+                headerContainer.appendChild( filter.root );
+            }
+
+            if( this.customFilters )
+            {
+                const icon = LX.makeIcon( "circle-plus", null, "sm" );
+
+                for( let f of this.customFilters )
+                {
+                    const customFilterBtn = new Button(null, icon.innerHTML + f.name, ( v ) => {
+
+                        const menuOptions = f.options.map( ( colName, idx ) => {
+                            const item = {
+                                name: colName,
+                                checked:  !!this.activeCustomFilters[ colName ],
+                                callback: (key, dom, v) => {
+                                    if( v ) { this.activeCustomFilters[ key ] = f.name; }
+                                    else {
+                                        delete this.activeCustomFilters[ key ];
+                                    }
+                                    this.refresh();
+                                }
+                            }
+                            return item;
+                        } );
+                        new DropdownMenu( customFilterBtn.root, menuOptions, { side: "bottom", align: "start" });
+                    }, { buttonClass: " primary dashed" } );
+                    headerContainer.appendChild( customFilterBtn.root );
+                }
+
+                // const resetIcon = LX.makeIcon( "xmark", null, "sm" );
+                this._resetCustomFiltersBtn = new Button(null, "resetButton", ( v ) => {
+                    this.activeCustomFilters = {};
+                    this.refresh();
+                    this._resetCustomFiltersBtn.root.classList.add( "hidden" );
+                }, { title: "Reset filters", icon: "fa fa-xmark" } );
+                headerContainer.appendChild( this._resetCustomFiltersBtn.root );
+                this._resetCustomFiltersBtn.root.classList.add( "hidden" );
+            }
+
+            if( this.toggleColumns )
+            {
+                const icon = LX.makeIcon( "sliders" );
+                const toggleColumnsBtn = new Button( "toggleColumnsBtn", icon.innerHTML + "View", (value, e) => {
+                    const menuOptions = data.head.map( ( colName, idx ) => {
+                        const item = {
+                            name: colName,
+                            icon: "check",
+                            callback: () => {
+                                data.colVisibilityMap[ idx ] = !data.colVisibilityMap[ idx ];
+                                const cells = table.querySelectorAll(`tr > *:nth-child(${idx + this.rowOffsetCount + 1})`);
+                                cells.forEach(cell => {
+                                    cell.style.display = (cell.style.display === "none") ? "" : "none";
+                                });
+                            }
+                        }
+                        if( !data.colVisibilityMap[ idx ] ) delete item.icon;
+                        return item;
+                    } );
+                    new DropdownMenu( e.target, menuOptions, { side: "bottom", align: "end" });
+                }, { hideName: true } );
+                headerContainer.appendChild( toggleColumnsBtn.root );
+                toggleColumnsBtn.root.style.marginLeft = "auto";
+            }
+
+            container.appendChild( headerContainer );
+        }
+
+        const table = document.createElement( 'table' );
+        container.appendChild( table );
+
+        this.refresh = () => {
+
+            this._currentFilter = this._currentFilter ?? "";
 
             table.innerHTML = "";
+
+            this.rowOffsetCount = 0;
 
             // Head
             {
@@ -8350,6 +8580,7 @@ class Table extends Widget {
                     const th = document.createElement( 'th' );
                     th.style.width = "0px";
                     hrow.appendChild( th );
+                    this.rowOffsetCount++;
                 }
 
                 if( options.selectable )
@@ -8358,7 +8589,7 @@ class Table extends Widget {
                     th.style.width = "0px";
                     const input = document.createElement( 'input' );
                     input.type = "checkbox";
-                    input.className = "lexcheckbox";
+                    input.className = "lexcheckbox accent";
                     input.checked = data.checkMap[ ":root" ] ?? false;
                     th.appendChild( input );
 
@@ -8374,27 +8605,45 @@ class Table extends Widget {
                         }
                     });
 
+                    this.rowOffsetCount++;
                     hrow.appendChild( th );
                 }
 
                 for( const headData of data.head )
                 {
                     const th = document.createElement( 'th' );
-                    th.innerHTML = `${ headData } <a class="fa-solid fa-sort"></a>`;
+                    th.innerHTML = `<span>${ headData }</span>`;
+                    th.querySelector( "span" ).appendChild( LX.makeIcon( "menu-arrows", null, "sm" ) );
 
-                    th.querySelector( 'a' ).addEventListener( 'click', () => {
+                    const idx = data.head.indexOf( headData );
+                    if( this.centered && this.centered.indexOf( idx ) > -1 )
+                    {
+                        th.classList.add( "centered" );
+                    }
 
-                        if( !data.orderMap[ headData ] )
-                        {
-                            data.orderMap[ headData ] = 1;
-                        }
+                    const menuOptions = [
+                        { name: "Asc", icon: "up", callback: sortFn.bind( this, idx, 1 ) },
+                        { name: "Desc", icon: "down", callback: sortFn.bind( this, idx, -1 ) }
+                    ];
 
-                        const idx = data.head.indexOf(headData);
-                        data.body = data.body.sort( compareFn.bind( this, idx,data.orderMap[ headData ] ) );
-                        data.orderMap[ headData ] = -data.orderMap[ headData ];
+                    if( this.toggleColumns )
+                    {
+                        menuOptions.push(
+                            null,
+                            {
+                                name: "Hide", icon: "eye-slash", callback: () => {
+                                    data.colVisibilityMap[ idx ] = false;
+                                    const cells = table.querySelectorAll(`tr > *:nth-child(${idx + this.rowOffsetCount + 1})`);
+                                    cells.forEach(cell => {
+                                        cell.style.display = (cell.style.display === "none") ? "" : "none";
+                                    });
+                                }
+                            }
+                        );
+                    }
 
-                        this.refreshTable();
-
+                    th.addEventListener( 'click', event => {
+                        new DropdownMenu( event.target, menuOptions, { side: "bottom", align: "start" });
                     });
 
                     hrow.appendChild( th );
@@ -8432,14 +8681,22 @@ class Table extends Widget {
                         v.style.transition = `none`;
                     } );
                     flushCss( fromRow );
-                    rIdx = null;
 
                     if( movePending )
                     {
+                        // Modify inner data first
+                        const fromIdx = rIdx - 1;
+                        const targetIdx = movePending[ 1 ] - 1;
+                        var b = data.body[fromIdx];
+                        data.body[fromIdx] = data.body[targetIdx];
+                        data.body[targetIdx] = b;
+
                         const parent = movePending[ 0 ].parentNode;
                         parent.insertChildAtIndex(  movePending[ 0 ],  movePending[ 1 ] );
                         movePending = null;
                     }
+
+                    rIdx = null;
 
                     doAsync( () => {
                         Array.from( table.rows ).forEach( v => {
@@ -8456,13 +8713,50 @@ class Table extends Widget {
                     fromRow.style.transform = `translateY(${fromRow.dY}px)`;
                 };
 
-
                 for( let r = 0; r < data.body.length; ++r )
                 {
                     const bodyData = data.body[ r ];
+
+                    if( this.filter )
+                    {
+                        const filterColIndex = data.head.indexOf( this.filter );
+                        if( filterColIndex > -1 )
+                        {
+                            if( !bodyData[ filterColIndex ].toLowerCase().includes( this._currentFilter.toLowerCase() ) )
+                            {
+                                continue;
+                            }
+                        }
+                    }
+
+                    if( Object.keys( this.activeCustomFilters ).length )
+                    {
+                        let acfMap = {};
+
+                        this._resetCustomFiltersBtn.root.classList.remove( "hidden" );
+
+                        for( let acfValue in this.activeCustomFilters )
+                        {
+                            const acfName = this.activeCustomFilters[ acfValue ];
+                            acfMap[ acfName ] = acfMap[ acfName ] ?? false;
+
+                            const filterColIndex = data.head.indexOf( acfName );
+                            if( filterColIndex > -1 )
+                            {
+                                acfMap[ acfName ] |= ( bodyData[ filterColIndex ] === acfValue );
+                            }
+                        }
+
+                        const show = Object.values( acfMap ).reduce( ( e, acc ) => acc *= e );
+                        if( !show )
+                        {
+                            continue;
+                        }
+                    }
+
                     const row = document.createElement( 'tr' );
                     const rowId = LX.getSupportedDOMName( bodyData.join( '-' ) );
-                    row.setAttribute( "rowId", rowId.substr(0, 16) );
+                    row.setAttribute( "rowId", rowId.substr(0, 32) );
 
                     if( options.sortable )
                     {
@@ -8513,7 +8807,7 @@ class Table extends Widget {
                         const td = document.createElement( 'td' );
                         const input = document.createElement( 'input' );
                         input.type = "checkbox";
-                        input.className = "lexcheckbox";
+                        input.className = "lexcheckbox accent";
                         input.checked = data.checkMap[ rowId ];
                         td.appendChild( input );
 
@@ -8534,6 +8828,13 @@ class Table extends Widget {
                     {
                         const td = document.createElement( 'td' );
                         td.innerHTML = `${ rowData }`;
+
+                        const idx = bodyData.indexOf( rowData );
+                        if( this.centered && this.centered.indexOf( idx ) > -1 )
+                        {
+                            td.classList.add( "centered" );
+                        }
+
                         row.appendChild( td );
                     }
 
@@ -8563,14 +8864,15 @@ class Table extends Widget {
                             {
                                 button = LX.makeIcon( "more-horizontal", "Menu" );
                                 button.addEventListener( 'click', function( event ) {
-                                    addContextMenu( null, event, c => {
-                                        if( options.onMenuAction )
-                                        {
-                                            options.onMenuAction( c );
-                                            return;
-                                        }
-                                        console.warn( "Using <Menu action> without action callbacks." );
-                                    } );
+                                    if( !options.onMenuAction )
+                                    {
+                                        return;
+                                    }
+
+                                    const menuOptions = options.onMenuAction( r, data );
+                                    console.assert( menuOptions.length, "Add items to the Menu Action Dropdown!" );
+
+                                    new DropdownMenu( event.target, menuOptions, { side: "bottom", align: "end" });
                                 });
                             }
                             else // custom actions
@@ -8584,7 +8886,7 @@ class Table extends Widget {
                                         const mustRefresh = action.callback( bodyData, table, e );
                                         if( mustRefresh )
                                         {
-                                            this.refreshTable();
+                                            this.refresh();
                                         }
                                     });
                                 }
@@ -8600,18 +8902,23 @@ class Table extends Widget {
                     body.appendChild( row );
                 }
             }
+
+            for( const v in data.colVisibilityMap )
+            {
+                const idx = parseInt( v );
+                if( !data.colVisibilityMap[ idx ] )
+                {
+                    const cells = table.querySelectorAll(`tr > *:nth-child(${idx + this.rowOffsetCount + 1})`);
+                    cells.forEach(cell => {
+                        cell.style.display = (cell.style.display === "none") ? "" : "none";
+                    });
+                }
+            }
         }
 
-        this.refreshTable();
+        this.refresh();
 
-        const useNameAsLabel = !( options.hideName ?? false );
-        if( !useNameAsLabel )
-        {
-            this.root.className += " noname";
-            container.style.width = "100%";
-        }
-
-        this.root.appendChild( container );
+        doAsync( this.onResize.bind( this ) );
     }
 }
 
@@ -8647,7 +8954,7 @@ class Panel {
             root.className += " " + options.className;
         }
 
-        root.style.width = options.width || "calc( 100% - 6px )";
+        root.style.width = options.width || "100%";
         root.style.height = options.height || "100%";
         Object.assign( root.style, options.style ?? {} );
 
@@ -8925,7 +9232,7 @@ class Panel {
                 }
                 else
                 {
-                    el.classList.add("nobranch");
+                    el.className += " nobranch w-full";
                     this.root.appendChild( el );
                 }
             }
@@ -8984,12 +9291,12 @@ class Panel {
 
         let widget = new TextInput( null, null, null, options )
         const element = widget.root;
-        element.className += " lexfilter noname";
+        element.className += " lexfilter";
 
         let input = document.createElement('input');
         input.className = 'lexinput-filter';
         input.setAttribute( "placeholder", options.placeholder );
-        input.style.width =  "calc( 100% - 17px )";
+        input.style.width =  "100%";
         input.value = options.filterValue || "";
 
         let searchIcon = document.createElement('a');
@@ -8997,7 +9304,7 @@ class Panel {
         element.appendChild( searchIcon );
         element.appendChild( input );
 
-        input.addEventListener("input", (e) => {
+        input.addEventListener("input", e => {
             if( options.callback )
             {
                 options.callback( input.value, e );
@@ -9167,6 +9474,7 @@ class Panel {
      * pattern: Regular expression that value must match
      * trigger: Choose onchange trigger (default, input) [default]
      * inputWidth: Width of the text input
+     * inputClass: Class to add to the native input element
      * skipReset: Don't add the reset value button when value changes
      * float: Justify input text content
      * justifyName: Justify name content
@@ -9222,6 +9530,7 @@ class Panel {
      * icon: Icon class to show as button value
      * img: Path to image to show as button value
      * title: Text to show in native Element title
+     * buttonClass: Class to add to the native button element
      */
 
     addButton( name, value, callback, options = {} ) {
@@ -9482,6 +9791,7 @@ class Panel {
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * disabled: Make the widget disabled [false]
+     * label: Toggle label
      * suboptions: Callback to add widgets in case of TRUE value
      * className: Customize colors
      */
@@ -9728,6 +10038,7 @@ class Panel {
      * onMenuAction: Function callback to fill the "menu" context
      * selectable: Each row can be selected
      * sortable: Rows can be sorted by the user manually
+     * centered: Center text within columns. true for all, Array for center selected cols.
      */
 
     addTable( name, data, options = { } ) {
@@ -9759,7 +10070,6 @@ class Branch {
             root.className += " " + options.className;
         }
 
-        root.style.width = "calc(100% - 7px)";
         root.style.margin = "0 auto";
 
         var that = this;
@@ -9785,7 +10095,7 @@ class Branch {
         var branchContent = document.createElement( 'div' );
         branchContent.id = name.replace( /\s/g, '' );
         branchContent.className = "lexbranchcontent";
-        root.appendChild(branchContent);
+        root.appendChild( branchContent );
         this.content = branchContent;
 
         this._addBranchSeparator();
@@ -9797,11 +10107,11 @@ class Branch {
             this.grabber.setAttribute( "hidden", true );
             doAsync( () => {
                 this.content.setAttribute( "hidden", true );
-            }, 15 );
+            }, 10 );
         }
 
         this.onclick = function( e ) {
-            e.stopPropagation();
+            // e.stopPropagation();
             this.classList.toggle( "closed" );
             this.parentElement.classList.toggle( "closed" );
 
@@ -9933,7 +10243,7 @@ class Branch {
         var size = this.grabber.style.marginLeft;
 
         // Update sizes of widgets inside
-        for( var i = 0; i < this.widgets.length; i++ )
+        for( let i = 0; i < this.widgets.length; i++ )
         {
             let widget = this.widgets[ i ];
             const element = widget.root;
@@ -9943,26 +10253,22 @@ class Branch {
                 continue;
             }
 
-            var name = element.children[ 0 ];
-            var value = element.children[ 1 ];
+            let name = element.children[ 0 ];
+            let value = element.children[ 1 ];
 
             name.style.width = size;
-            let padding = "0px";
+            name.style.minWidth = size;
+
             switch( widget.type )
             {
-                case Widget.FILE:
-                    padding = "10%";
-                    break;
+                case Widget.CUSTOM:
+                case Widget.ARRAY:
+                    continue;
             };
 
-            value.style.width = "-moz-calc( 100% - " + size + " - " + padding + " )";
-            value.style.width = "-webkit-calc( 100% - " + size + " - " + padding + " )";
-            value.style.width = "calc( 100% - " + size + " - " + padding + " )";
-
-            if( widget.onresize )
-            {
-                widget.onresize();
-            }
+            value.style.width = "-moz-calc( 100% - " + size + " )";
+            value.style.width = "-webkit-calc( 100% - " + size + " )";
+            value.style.width = "calc( 100% - " + size + " )";
         }
     }
 };
@@ -9986,7 +10292,8 @@ class Footer {
         root.className = "lexfooter";
 
         const wrapper = document.createElement( "div" );
-        wrapper.className = "wrapper";
+        wrapper.style.minHeight = "48px";
+        wrapper.className = "w-full";
         root.appendChild( wrapper );
 
         if( options.columns && options.columns.constructor == Array )
@@ -10061,6 +10368,10 @@ class Footer {
         // Append directly to body
         const parent = options.parent ?? document.body;
         parent.appendChild( root );
+
+        // Set always at bottom
+        root.previousElementSibling.style.height = "unset";
+        root.previousElementSibling.style.flexGrow = "1";
     }
 
 }
@@ -10090,7 +10401,7 @@ class Dialog {
             draggable = options.draggable ?? true,
             modal = options.modal ?? false;
 
-        var root = document.createElement('dialog');
+        let root = document.createElement('dialog');
         root.className = "lexdialog " + (options.className ?? "");
         root.id = options.id ?? "dialog" + Dialog._last_id++;
         LX.root.appendChild( root );
@@ -10101,7 +10412,7 @@ class Dialog {
 
         let that = this;
 
-        var titleDiv = document.createElement('div');
+        const titleDiv = document.createElement('div');
 
         if( title )
         {
@@ -10166,7 +10477,7 @@ class Dialog {
                 }, { icon: "fa-regular fa-window-restore" });
             };
 
-            root.appendChild(titleDiv);
+            root.appendChild( titleDiv );
         }
 
         if( options.closable ?? true )
@@ -10259,7 +10570,6 @@ class Dialog {
         root.style.left = position[ 0 ] ?? "50%";
         root.style.top = position[ 1 ] ?? "50%";
 
-        panel.root.style.width = "calc( 100% - 30px )";
         panel.root.style.height = title ? "calc( 100% - " + ( titleDiv.offsetHeight + 30 ) + "px )" : "calc( 100% - 51px )";
     }
 
@@ -10331,8 +10641,8 @@ class PocketDialog extends Dialog {
             this.root.style.top = dragMargin + "px";
         }
 
-        this.panel.root.style.width = "calc( 100% - 12px )";
-        this.panel.root.style.height = "calc( 100% - 40px )";
+        this.panel.root.style.width = "100%";
+        this.panel.root.style.height = "100%";
         this.dock_pos = PocketDialog.TOP;
 
         this.minimized = false;
@@ -10365,7 +10675,7 @@ class PocketDialog extends Dialog {
 
             if( float )
             {
-                for( var i = 0; i < float.length; i++ )
+                for( let i = 0; i < float.length; i++ )
                 {
                     const t = float[i];
                     switch( t )
@@ -10498,14 +10808,14 @@ class ContextMenu {
         contextmenu.className = "lexcontextmenu";
         c.appendChild( contextmenu );
 
-        for( var i = 0; i < o[k].length; ++i )
+        for( let i = 0; i < o[k].length; ++i )
         {
             const subitem = o[ k ][ i ];
             const subkey = Object.keys( subitem )[ 0 ];
             this._createEntry(subitem, subkey, contextmenu, d);
         }
 
-        var rect = c.getBoundingClientRect();
+        const rect = c.getBoundingClientRect();
         contextmenu.style.left = rect.width + "px";
         contextmenu.style.marginTop =  3.5 - c.offsetHeight + "px";
 
@@ -10658,10 +10968,10 @@ class ContextMenu {
                 _item[ key ].unshift( parent );
             }
 
-            for( var child of _item[ key ] )
+            for( let child of _item[ key ] )
             {
                 let k = Object.keys( child )[ 0 ];
-                for( var i = 0; i < child[ k ].length; ++i )
+                for( let i = 0; i < child[ k ].length; ++i )
                 {
                     setParent( child );
                 }
@@ -10702,7 +11012,7 @@ LX.ContextMenu = ContextMenu;
 
 function addContextMenu( title, event, callback, options )
 {
-    var menu = new ContextMenu( event, title, options );
+    const menu = new ContextMenu( event, title, options );
     LX.root.appendChild( menu.root );
 
     if( callback )
@@ -10733,7 +11043,8 @@ class CanvasCurve {
         element.style.minHeight = "20px";
 
         element.bgcolor = options.bgColor || LX.getThemeColor( "global-intense-background" );
-        element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected-light" );
+        element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected" );
+        element.activepointscolor = options.activePointsColor || LX.getThemeColor( "global-selected-light" );
         element.linecolor = options.lineColor || "#555";
         element.value = value || [];
         element.xrange = options.xrange || [ 0, 1 ]; // min, max
@@ -10749,7 +11060,8 @@ class CanvasCurve {
 
         LX.addSignal( "@on_new_color_scheme", (el, value) => {
             element.bgcolor = options.bgColor || LX.getThemeColor( "global-intense-background" );
-            element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected-light" );
+            element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected" );
+            element.activepointscolor = options.activePointsColor || LX.getThemeColor( "global-selected-light" );
             this.redraw();
         } );
 
@@ -10770,11 +11082,11 @@ class CanvasCurve {
                 return element.defaulty;
             }
 
-            var last = [ element.xrange[ 0 ], element.defaulty ];
-            var f = 0;
-            for( var i = 0; i < element.value.length; i += 1 )
+            let last = [ element.xrange[ 0 ], element.defaulty ];
+            let f = 0;
+            for( let i = 0; i < element.value.length; i += 1 )
             {
-                var v = element.value[ i ];
+                let v = element.value[ i ];
                 if( x == v[ 0 ] ) return v[ 1 ];
                 if( x < v[ 0 ] )
                 {
@@ -10792,9 +11104,9 @@ class CanvasCurve {
 
         element.resample = function( samples ) {
 
-            var r = [];
-            var dx = (element.xrange[1] - element.xrange[ 0 ]) / samples;
-            for( var i = element.xrange[0]; i <= element.xrange[1]; i += dx )
+            let r = [];
+            let dx = (element.xrange[1] - element.xrange[ 0 ]) / samples;
+            for( let i = element.xrange[0]; i <= element.xrange[1]; i += dx )
             {
                 r.push( element.getValueAt(i) );
             }
@@ -10803,9 +11115,9 @@ class CanvasCurve {
 
         element.addValue = function(v) {
 
-            for( var i = 0; i < element.value; i++ )
+            for( let i = 0; i < element.value; i++ )
             {
-                var value = element.value[i];
+                let value = element.value[i];
                 if(value[0] < v[0]) continue;
                 element.value.splice(i,0,v);
                 redraw();
@@ -10828,7 +11140,7 @@ class CanvasCurve {
                     (v[1] * element.yrange[1] / canvas.height + element.yrange[0])];
         }
 
-        var selected = -1;
+        let selected = -1;
 
         element.redraw = function( o = {} ) {
 
@@ -10890,7 +11202,7 @@ class CanvasCurve {
                 var value = element.value[ i ];
                 pos = convert( value );
                 if( selected == i )
-                    ctx.fillStyle = "white";
+                    ctx.fillStyle = element.activepointscolor;
                 else
                     ctx.fillStyle = element.pointscolor;
                 ctx.beginPath();
@@ -11736,11 +12048,11 @@ class AssetView {
         this.rightPanel.sameLine();
         this.rightPanel.addSelect( "Filter", this.allowedTypes, this.allowedTypes[ 0 ], v => this._refreshContent.call(this, null, v), { width: "30%", minWidth: "128px" } );
         this.rightPanel.addText( null, this.searchValue ?? "", v => this._refreshContent.call(this, v, null), { placeholder: "Search assets.." } );
-        this.rightPanel.addButton( null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { className: "micro", title: "Sort" } );
-        this.rightPanel.addButton( null, "<a class='fa-solid fa-grip'></a>", on_change_view.bind(this), { className: "micro", title: "View" } );
+        this.rightPanel.addButton( null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { title: "Sort" } );
+        this.rightPanel.addButton( null, "<a class='fa-solid fa-grip'></a>", on_change_view.bind(this), { title: "View" } );
         // Content Pages
-        this.rightPanel.addButton( null, "<a class='fa-solid fa-angles-left'></a>", on_change_page.bind(this, -1), { className: "micro", title: "Previous Page" } );
-        this.rightPanel.addButton( null, "<a class='fa-solid fa-angles-right'></a>", on_change_page.bind(this, 1), { className: "micro", title: "Next Page" } );
+        this.rightPanel.addButton( null, "<a class='fa-solid fa-angles-left'></a>", on_change_page.bind(this, -1), { title: "Previous Page" } );
+        this.rightPanel.addButton( null, "<a class='fa-solid fa-angles-right'></a>", on_change_page.bind(this, 1), { title: "Next Page" } );
         this.rightPanel.endLine();
 
         if( !this.skipBrowser )
@@ -11775,8 +12087,16 @@ class AssetView {
                     callback: domEl => { this._refreshContent(); }
                 }
             ], { width: "20%", minWidth: "164px", noSelection: true } );
-            this.rightPanel.addText(null, this.path.join('/'), null, { width: "70%", maxWidth: "calc(70% - 64px)", minWidth: "164px", disabled: true, signal: "@on_folder_change", style: { fontWeight: "bolder", fontSize: "16px", color: "#aaa" } });
-            this.rightPanel.addText(null, "Page " + this.contentPage + " / " + ((((this.currentData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1), null, {disabled: true, signal: "@on_page_change", width: "fit-content"})
+
+            this.rightPanel.addText(null, this.path.join('/'), null, {
+                width: "70%", maxWidth: "calc(70% - 64px)", minWidth: "164px", inputClass: "nobg", disabled: true, signal: "@on_folder_change", 
+                style: { fontWeight: "600", fontSize: "15px" } 
+            });
+
+            this.rightPanel.addText(null, "Page " + this.contentPage + " / " + ((((this.currentData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1), null, {
+                inputClass: "nobg", disabled: true, signal: "@on_page_change"}
+            )
+
             this.rightPanel.endLine();
         }
 
@@ -12078,7 +12398,7 @@ class AssetView {
             const hasImage = ['png', 'jpg'].indexOf( getExtension( file.src ) ) > -1 || is_base_64;
             if( hasImage )
             {
-                this.previewPanel.addImage( file.src, { style: { width: "100%" } } );
+                this.previewPanel.addImage( null, file.src, { style: { width: "100%" } } );
             }
         }
 
@@ -12522,69 +12842,6 @@ Element.prototype.getParentArea = function() {
     }
 }
 
-LX.ICONS = {
-    "align-center": [448, 512, [], "", "M352 64c0-17.7-14.3-32-32-32L128 32c-17.7 0-32 14.3-32 32s14.3 32 32 32l192 0c17.7 0 32-14.3 32-32zm96 128c0-17.7-14.3-32-32-32L32 160c-17.7 0-32 14.3-32 32s14.3 32 32 32l384 0c17.7 0 32-14.3 32-32zM0 448c0 17.7 14.3 32 32 32l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 416c-17.7 0-32 14.3-32 32zM352 320c0-17.7-14.3-32-32-32l-192 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l192 0c17.7 0 32-14.3 32-32z"],
-    "align-justify": [448, 512, [], "", "M448 64c0-17.7-14.3-32-32-32L32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32zm0 256c0-17.7-14.3-32-32-32L32 288c-17.7 0-32 14.3-32 32s14.3 32 32 32l384 0c17.7 0 32-14.3 32-32zM0 192c0 17.7 14.3 32 32 32l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 160c-17.7 0-32 14.3-32 32zM448 448c0-17.7-14.3-32-32-32L32 416c-17.7 0-32 14.3-32 32s14.3 32 32 32l384 0c17.7 0 32-14.3 32-32z"],
-    "align-left": [448, 512, [], "", "M288 64c0 17.7-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l224 0c17.7 0 32 14.3 32 32zm0 256c0 17.7-14.3 32-32 32L32 352c-17.7 0-32-14.3-32-32s14.3-32 32-32l224 0c17.7 0 32 14.3 32 32zM0 192c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 224c-17.7 0-32-14.3-32-32zM448 448c0 17.7-14.3 32-32 32L32 480c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"],
-    "align-right": [448, 512, [], "", "M448 64c0 17.7-14.3 32-32 32L192 96c-17.7 0-32-14.3-32-32s14.3-32 32-32l224 0c17.7 0 32 14.3 32 32zm0 256c0 17.7-14.3 32-32 32l-224 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l224 0c17.7 0 32 14.3 32 32zM0 192c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 224c-17.7 0-32-14.3-32-32zM448 448c0 17.7-14.3 32-32 32L32 480c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"],
-    "bell": [448, 512, [], "", "M224 0c-17.7 0-32 14.3-32 32l0 19.2C119 66 64 130.6 64 208l0 25.4c0 45.4-15.5 89.5-43.8 124.9L5.3 377c-5.8 7.2-6.9 17.1-2.9 25.4S14.8 416 24 416l400 0c9.2 0 17.6-5.3 21.6-13.6s2.9-18.2-2.9-25.4l-14.9-18.6C399.5 322.9 384 278.8 384 233.4l0-25.4c0-77.4-55-142-128-156.8L256 32c0-17.7-14.3-32-32-32zm0 96c61.9 0 112 50.1 112 112l0 25.4c0 47.9 13.9 94.6 39.7 134.6L72.3 368C98.1 328 112 281.3 112 233.4l0-25.4c0-61.9 50.1-112 112-112zm64 352l-64 0-64 0c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7s18.7-28.3 18.7-45.3z"],
-    "display": [576, 512, [], "", "M64 0C28.7 0 0 28.7 0 64L0 352c0 35.3 28.7 64 64 64l176 0-10.7 32L160 448c-17.7 0-32 14.3-32 32s14.3 32 32 32l256 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-69.3 0L336 416l176 0c35.3 0 64-28.7 64-64l0-288c0-35.3-28.7-64-64-64L64 0zM512 64l0 288L64 352 64 64l448 0z"],
-    "mobile-screen": [384, 512, [], "", "M16 64C16 28.7 44.7 0 80 0L304 0c35.3 0 64 28.7 64 64l0 384c0 35.3-28.7 64-64 64L80 512c-35.3 0-64-28.7-64-64L16 64zM144 448c0 8.8 7.2 16 16 16l64 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-64 0c-8.8 0-16 7.2-16 16zM304 64L80 64l0 320 224 0 0-320z"],
-    "print": [512, 512, [], "", "M128 0C92.7 0 64 28.7 64 64l0 96 64 0 0-96 226.7 0L384 93.3l0 66.7 64 0 0-66.7c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0L128 0zM384 352l0 32 0 64-256 0 0-64 0-16 0-16 256 0zm64 32l32 0c17.7 0 32-14.3 32-32l0-96c0-35.3-28.7-64-64-64L64 192c-35.3 0-64 28.7-64 64l0 96c0 17.7 14.3 32 32 32l32 0 0 64c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-64zM432 248a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"],
-    "bookmark": [384, 512, [], "", "M0 48C0 21.5 21.5 0 48 0l0 48 0 393.4 130.1-92.9c8.3-6 19.6-6 27.9 0L336 441.4 336 48 48 48 48 0 336 0c26.5 0 48 21.5 48 48l0 440c0 9-5 17.2-13 21.3s-17.6 3.4-24.9-1.8L192 397.5 37.9 507.5c-7.3 5.2-16.9 5.9-24.9 1.8S0 497 0 488L0 48z"],
-    "calendar": [448, 512, [], "", "M304 128a80 80 0 1 0 -160 0 80 80 0 1 0 160 0zM96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM49.3 464l349.5 0c-8.9-63.3-63.3-112-129-112l-91.4 0c-65.7 0-120.1 48.7-129 112zM0 482.3C0 383.8 79.8 304 178.3 304l91.4 0C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7L29.7 512C13.3 512 0 498.7 0 482.3z"],
-    "chart": [448, 512, [], "", "M160 80c0-26.5 21.5-48 48-48l32 0c26.5 0 48 21.5 48 48l0 352c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48l0-352zM0 272c0-26.5 21.5-48 48-48l32 0c26.5 0 48 21.5 48 48l0 160c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48L0 272zM368 96l32 0c26.5 0 48 21.5 48 48l0 288c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48z"],
-    "check": [448, 512, [], "", "M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"],
-    "clone": [512, 512, [], "", "M64 464l224 0c8.8 0 16-7.2 16-16l0-64 48 0 0 64c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 224c0-35.3 28.7-64 64-64l64 0 0 48-64 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16zM224 304l224 0c8.8 0 16-7.2 16-16l0-224c0-8.8-7.2-16-16-16L224 48c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16zm-64-16l0-224c0-35.3 28.7-64 64-64L448 0c35.3 0 64 28.7 64 64l0 224c0 35.3-28.7 64-64 64l-224 0c-35.3 0-64-28.7-64-64z"],
-    "copy": [448, 512, [], "", "M384 336l-192 0c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l140.1 0L400 115.9 400 320c0 8.8-7.2 16-16 16zM192 384l192 0c35.3 0 64-28.7 64-64l0-204.1c0-12.7-5.1-24.9-14.1-33.9L366.1 14.1c-9-9-21.2-14.1-33.9-14.1L192 0c-35.3 0-64 28.7-64 64l0 256c0 35.3 28.7 64 64 64zM64 128c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l192 0c35.3 0 64-28.7 64-64l0-32-48 0 0 32c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l32 0 0-48-32 0z"],
-    "paste": [512, 512, [], "", "M104.6 48L64 48C28.7 48 0 76.7 0 112L0 384c0 35.3 28.7 64 64 64l96 0 0-48-96 0c-8.8 0-16-7.2-16-16l0-272c0-8.8 7.2-16 16-16l16 0c0 17.7 14.3 32 32 32l72.4 0C202 108.4 227.6 96 256 96l62 0c-7.1-27.6-32.2-48-62-48l-40.6 0C211.6 20.9 188.2 0 160 0s-51.6 20.9-55.4 48zM144 56a16 16 0 1 1 32 0 16 16 0 1 1 -32 0zM448 464l-192 0c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l140.1 0L464 243.9 464 448c0 8.8-7.2 16-16 16zM256 512l192 0c35.3 0 64-28.7 64-64l0-204.1c0-12.7-5.1-24.9-14.1-33.9l-67.9-67.9c-9-9-21.2-14.1-33.9-14.1L256 128c-35.3 0-64 28.7-64 64l0 256c0 35.3 28.7 64 64 64z"],
-    "edit": [512, 512, [], "", "M441 58.9L453.1 71c9.4 9.4 9.4 24.6 0 33.9L424 134.1 377.9 88 407 58.9c9.4-9.4 24.6-9.4 33.9 0zM209.8 256.2L344 121.9 390.1 168 255.8 302.2c-2.9 2.9-6.5 5-10.4 6.1l-58.5 16.7 16.7-58.5c1.1-3.9 3.2-7.5 6.1-10.4zM373.1 25L175.8 222.2c-8.7 8.7-15 19.4-18.3 31.1l-28.6 100c-2.4 8.4-.1 17.4 6.1 23.6s15.2 8.5 23.6 6.1l100-28.6c11.8-3.4 22.5-9.7 31.1-18.3L487 138.9c28.1-28.1 28.1-73.7 0-101.8L474.9 25C446.8-3.1 401.2-3.1 373.1 25zM88 64C39.4 64 0 103.4 0 152L0 424c0 48.6 39.4 88 88 88l272 0c48.6 0 88-39.4 88-88l0-112c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 112c0 22.1-17.9 40-40 40L88 464c-22.1 0-40-17.9-40-40l0-272c0-22.1 17.9-40 40-40l112 0c13.3 0 24-10.7 24-24s-10.7-24-24-24L88 64z"],
-    "envelope": [512, 512, [], "", "M64 112c-8.8 0-16 7.2-16 16l0 22.1L220.5 291.7c20.7 17 50.4 17 71.1 0L464 150.1l0-22.1c0-8.8-7.2-16-16-16L64 112zM48 212.2L48 384c0 8.8 7.2 16 16 16l384 0c8.8 0 16-7.2 16-16l0-171.8L322 328.8c-38.4 31.5-93.7 31.5-132 0L48 212.2zM0 128C0 92.7 28.7 64 64 64l384 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128z"],
-    "envelope-open": [512, 512, [], "", "M255.4 48.2c.2-.1 .4-.2 .6-.2s.4 .1 .6 .2L460.6 194c2.1 1.5 3.4 3.9 3.4 6.5l0 13.6L291.5 355.7c-20.7 17-50.4 17-71.1 0L48 214.1l0-13.6c0-2.6 1.2-5 3.4-6.5L255.4 48.2zM48 276.2L190 392.8c38.4 31.5 93.7 31.5 132 0L464 276.2 464 456c0 4.4-3.6 8-8 8L56 464c-4.4 0-8-3.6-8-8l0-179.8zM256 0c-10.2 0-20.2 3.2-28.5 9.1L23.5 154.9C8.7 165.4 0 182.4 0 200.5L0 456c0 30.9 25.1 56 56 56l400 0c30.9 0 56-25.1 56-56l0-255.5c0-18.1-8.7-35.1-23.4-45.6L284.5 9.1C276.2 3.2 266.2 0 256 0z"],
-    "map": [576, 512, [], "", "M565.6 36.2C572.1 40.7 576 48.1 576 56l0 336c0 10-6.2 18.9-15.5 22.4l-168 64c-5.2 2-10.9 2.1-16.1 .3L192.5 417.5l-160 61c-7.4 2.8-15.7 1.8-22.2-2.7S0 463.9 0 456L0 120c0-10 6.1-18.9 15.5-22.4l168-64c5.2-2 10.9-2.1 16.1-.3L383.5 94.5l160-61c7.4-2.8 15.7-1.8 22.2 2.7zM48 136.5l0 284.6 120-45.7 0-284.6L48 136.5zM360 422.7l0-285.4-144-48 0 285.4 144 48zm48-1.5l120-45.7 0-284.6L408 136.5l0 284.6z"],
-    "file": [384, 512, [], "", "M320 464c8.8 0 16-7.2 16-16l0-288-80 0c-17.7 0-32-14.3-32-32l0-80L64 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16l256 0zM0 64C0 28.7 28.7 0 64 0L229.5 0c17 0 33.3 6.7 45.3 18.7l90.5 90.5c12 12 18.7 28.3 18.7 45.3L384 448c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64z"],
-    "file-code": [384, 512, [], "", "M64 464c-8.8 0-16-7.2-16-16L48 64c0-8.8 7.2-16 16-16l160 0 0 80c0 17.7 14.3 32 32 32l80 0 0 288c0 8.8-7.2 16-16 16L64 464zM64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-293.5c0-17-6.7-33.3-18.7-45.3L274.7 18.7C262.7 6.7 246.5 0 229.5 0L64 0zm97 289c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0L79 303c-9.4 9.4-9.4 24.6 0 33.9l48 48c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-31-31 31-31zM257 255c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l31 31-31 31c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l48-48c9.4-9.4 9.4-24.6 0-33.9l-48-48z"],
-    "file-zip": [384, 512, [], "", "M64 464c-8.8 0-16-7.2-16-16L48 64c0-8.8 7.2-16 16-16l48 0c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16l48 0 0 80c0 17.7 14.3 32 32 32l80 0 0 288c0 8.8-7.2 16-16 16L64 464zM64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-293.5c0-17-6.7-33.3-18.7-45.3L274.7 18.7C262.7 6.7 246.5 0 229.5 0L64 0zm48 112c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0c-8.8 0-16 7.2-16 16zm0 64c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0c-8.8 0-16 7.2-16 16zm-6.3 71.8L82.1 335.9c-1.4 5.4-2.1 10.9-2.1 16.4c0 35.2 28.8 63.7 64 63.7s64-28.5 64-63.7c0-5.5-.7-11.1-2.1-16.4l-23.5-88.2c-3.7-14-16.4-23.8-30.9-23.8l-14.8 0c-14.5 0-27.2 9.7-30.9 23.8zM128 336l32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0c-8.8 0-16-7.2-16-16s7.2-16 16-16z"],
-    "floppy-disk": [448, 512, ["save"], "", "M48 96l0 320c0 8.8 7.2 16 16 16l320 0c8.8 0 16-7.2 16-16l0-245.5c0-4.2-1.7-8.3-4.7-11.3l33.9-33.9c12 12 18.7 28.3 18.7 45.3L448 416c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96C0 60.7 28.7 32 64 32l245.5 0c17 0 33.3 6.7 45.3 18.7l74.5 74.5-33.9 33.9L320.8 84.7c-.3-.3-.5-.5-.8-.8L320 184c0 13.3-10.7 24-24 24l-192 0c-13.3 0-24-10.7-24-24L80 80 64 80c-8.8 0-16 7.2-16 16zm80-16l0 80 144 0 0-80L128 80zm32 240a64 64 0 1 1 128 0 64 64 0 1 1 -128 0z"],
-    "save": "floppy-disk",
-    "fingerprint": [512, 512, [], "", "M48 256C48 141.1 141.1 48 256 48c63.1 0 119.6 28.1 157.8 72.5c8.6 10.1 23.8 11.2 33.8 2.6s11.2-23.8 2.6-33.8C403.3 34.6 333.7 0 256 0C114.6 0 0 114.6 0 256l0 40c0 13.3 10.7 24 24 24s24-10.7 24-24l0-40zm458.5-52.9c-2.7-13-15.5-21.3-28.4-18.5s-21.3 15.5-18.5 28.4c2.9 13.9 4.5 28.3 4.5 43.1l0 40c0 13.3 10.7 24 24 24s24-10.7 24-24l0-40c0-18.1-1.9-35.8-5.5-52.9zM256 80c-19 0-37.4 3-54.5 8.6c-15.2 5-18.7 23.7-8.3 35.9c7.1 8.3 18.8 10.8 29.4 7.9c10.6-2.9 21.8-4.4 33.4-4.4c70.7 0 128 57.3 128 128l0 24.9c0 25.2-1.5 50.3-4.4 75.3c-1.7 14.6 9.4 27.8 24.2 27.8c11.8 0 21.9-8.6 23.3-20.3c3.3-27.4 5-55 5-82.7l0-24.9c0-97.2-78.8-176-176-176zM150.7 148.7c-9.1-10.6-25.3-11.4-33.9-.4C93.7 178 80 215.4 80 256l0 24.9c0 24.2-2.6 48.4-7.8 71.9C68.8 368.4 80.1 384 96.1 384c10.5 0 19.9-7 22.2-17.3c6.4-28.1 9.7-56.8 9.7-85.8l0-24.9c0-27.2 8.5-52.4 22.9-73.1c7.2-10.4 8-24.6-.2-34.2zM256 160c-53 0-96 43-96 96l0 24.9c0 35.9-4.6 71.5-13.8 106.1c-3.8 14.3 6.7 29 21.5 29c9.5 0 17.9-6.2 20.4-15.4c10.5-39 15.9-79.2 15.9-119.7l0-24.9c0-28.7 23.3-52 52-52s52 23.3 52 52l0 24.9c0 36.3-3.5 72.4-10.4 107.9c-2.7 13.9 7.7 27.2 21.8 27.2c10.2 0 19-7 21-17c7.7-38.8 11.6-78.3 11.6-118.1l0-24.9c0-53-43-96-96-96zm24 96c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 24.9c0 59.9-11 119.3-32.5 175.2l-5.9 15.3c-4.8 12.4 1.4 26.3 13.8 31s26.3-1.4 31-13.8l5.9-15.3C267.9 411.9 280 346.7 280 280.9l0-24.9z"],
-    "eye": [576, 512, [], "", "M288 80c-65.2 0-118.8 29.6-159.9 67.7C89.6 183.5 63 226 49.4 256c13.6 30 40.2 72.5 78.6 108.3C169.2 402.4 222.8 432 288 432s118.8-29.6 159.9-67.7C486.4 328.5 513 286 526.6 256c-13.6-30-40.2-72.5-78.6-108.3C406.8 109.6 353.2 80 288 80zM95.4 112.6C142.5 68.8 207.2 32 288 32s145.5 36.8 192.6 80.6c46.8 43.5 78.1 95.4 93 131.1c3.3 7.9 3.3 16.7 0 24.6c-14.9 35.7-46.2 87.7-93 131.1C433.5 443.2 368.8 480 288 480s-145.5-36.8-192.6-80.6C48.6 356 17.3 304 2.5 268.3c-3.3-7.9-3.3-16.7 0-24.6C17.3 208 48.6 156 95.4 112.6zM288 336c44.2 0 80-35.8 80-80s-35.8-80-80-80c-.7 0-1.3 0-2 0c1.3 5.1 2 10.5 2 16c0 35.3-28.7 64-64 64c-5.5 0-10.9-.7-16-2c0 .7 0 1.3 0 2c0 44.2 35.8 80 80 80zm0-208a128 128 0 1 1 0 256 128 128 0 1 1 0-256z"],
-    "eye-slash": [640, 512, [], "", "M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zm151 118.3C226 97.7 269.5 80 320 80c65.2 0 118.8 29.6 159.9 67.7C518.4 183.5 545 226 558.6 256c-12.6 28-36.6 66.8-70.9 100.9l-53.8-42.2c9.1-17.6 14.2-37.5 14.2-58.7c0-70.7-57.3-128-128-128c-32.2 0-61.7 11.9-84.2 31.5l-46.1-36.1zM394.9 284.2l-81.5-63.9c4.2-8.5 6.6-18.2 6.6-28.3c0-5.5-.7-10.9-2-16c.7 0 1.3 0 2 0c44.2 0 80 35.8 80 80c0 9.9-1.8 19.4-5.1 28.2zm9.4 130.3C378.8 425.4 350.7 432 320 432c-65.2 0-118.8-29.6-159.9-67.7C121.6 328.5 95 286 81.4 256c8.3-18.4 21.5-41.5 39.4-64.8L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5l-41.9-33zM192 256c0 70.7 57.3 128 128 128c13.3 0 26.1-2 38.2-5.8L302 334c-23.5-5.4-43.1-21.2-53.7-42.3l-56.1-44.2c-.2 2.8-.3 5.6-.3 8.5z"],
-    "folder": [512, 512, [], "", "M0 96C0 60.7 28.7 32 64 32l132.1 0c19.1 0 37.4 7.6 50.9 21.1L289.9 96 448 96c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zM64 80c-8.8 0-16 7.2-16 16l0 320c0 8.8 7.2 16 16 16l384 0c8.8 0 16-7.2 16-16l0-256c0-8.8-7.2-16-16-16l-161.4 0c-10.6 0-20.8-4.2-28.3-11.7L213.1 87c-4.5-4.5-10.6-7-17-7L64 80z"],
-    "folder-closed": [512, 512, [], "e185", "M251.7 127.6s0 0 0 0c10.5 10.5 24.7 16.4 39.6 16.4L448 144c8.8 0 16 7.2 16 16l0 32L48 192l0-96c0-8.8 7.2-16 16-16l133.5 0c4.2 0 8.3 1.7 11.3 4.7l33.9-33.9L208.8 84.7l42.9 42.9zM48 240l416 0 0 176c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16l0-176zM285.7 93.7L242.7 50.7c-12-12-28.3-18.7-45.3-18.7L64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-256c0-35.3-28.7-64-64-64L291.3 96c-2.1 0-4.2-.8-5.7-2.3z"],
-    "folder-open": [576, 512, [], "", "M384 480l48 0c11.4 0 21.9-6 27.6-15.9l112-192c5.8-9.9 5.8-22.1 .1-32.1S555.5 224 544 224l-400 0c-11.4 0-21.9 6-27.6 15.9L48 357.1 48 96c0-8.8 7.2-16 16-16l117.5 0c4.2 0 8.3 1.7 11.3 4.7l26.5 26.5c21 21 49.5 32.8 79.2 32.8L416 144c8.8 0 16 7.2 16 16l0 32 48 0 0-32c0-35.3-28.7-64-64-64L298.5 96c-17 0-33.3-6.7-45.3-18.7L226.7 50.7c-12-12-28.3-18.7-45.3-18.7L64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l23.7 0L384 480z"],
-    "github": [496, 512, [], "", "M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"],
-    "grip-vertical": [320, 512, [], "", "M40 352l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0c-22.1 0-40-17.9-40-40l0-48c0-22.1 17.9-40 40-40zm192 0l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0c-22.1 0-40-17.9-40-40l0-48c0-22.1 17.9-40 40-40zM40 320c-22.1 0-40-17.9-40-40l0-48c0-22.1 17.9-40 40-40l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0zM232 192l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0c-22.1 0-40-17.9-40-40l0-48c0-22.1 17.9-40 40-40zM40 160c-22.1 0-40-17.9-40-40L0 72C0 49.9 17.9 32 40 32l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0zM232 32l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0c-22.1 0-40-17.9-40-40l0-48c0-22.1 17.9-40 40-40z"],
-    "image": [512, 512, [], "", "M448 80c8.8 0 16 7.2 16 16l0 319.8-5-6.5-136-176c-4.5-5.9-11.6-9.3-19-9.3s-14.4 3.4-19 9.3L202 340.7l-30.5-42.7C167 291.7 159.8 288 152 288s-15 3.7-19.5 10.1l-80 112L48 416.3l0-.3L48 96c0-8.8 7.2-16 16-16l384 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zm80 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z"],
-    "images": [576, 512, [], "", "M160 80l352 0c8.8 0 16 7.2 16 16l0 224c0 8.8-7.2 16-16 16l-21.2 0L388.1 178.9c-4.4-6.8-12-10.9-20.1-10.9s-15.7 4.1-20.1 10.9l-52.2 79.8-12.4-16.9c-4.5-6.2-11.7-9.8-19.4-9.8s-14.8 3.6-19.4 9.8L175.6 336 160 336c-8.8 0-16-7.2-16-16l0-224c0-8.8 7.2-16 16-16zM96 96l0 224c0 35.3 28.7 64 64 64l352 0c35.3 0 64-28.7 64-64l0-224c0-35.3-28.7-64-64-64L160 32c-35.3 0-64 28.7-64 64zM48 120c0-13.3-10.7-24-24-24S0 106.7 0 120L0 344c0 75.1 60.9 136 136 136l320 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-320 0c-48.6 0-88-39.4-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"],
-    "left": [320, 512, [], "", "M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"],
-    "right": [320, 512, [], "", "M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"],
-    "up": [448, 512, [], "", "M201.4 137.4c12.5-12.5 32.8-12.5 45.3 0l160 160c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L224 205.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l160-160z"],
-    "down": [448, 512, [], "", "M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"],
-    "log-in": [512, 512, [], "", "M352 96l64 0c17.7 0 32 14.3 32 32l0 256c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0c53 0 96-43 96-96l0-256c0-53-43-96-96-96l-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32zm-9.4 182.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L242.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128z"],
-    "log-out": [512, 512, [], "", "M502.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 224 192 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128zM160 96c17.7 0 32-14.3 32-32s-14.3-32-32-32L96 32C43 32 0 75 0 128L0 384c0 53 43 96 96 96l64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32l64 0z"],
-    "menu-arrows": [512, 512, [], "", "M352 144l96 112-96 112M160 144L64 256l96 112", "transform=rotate(90)", "fill=none stroke=currentColor stroke-width=60 stroke-linejoin=round stroke-linecap=round"],
-    "more": [128, 512, [], "", "M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"],
-    "minus": [448, 512, [], "", "M432 256c0 17.7-14.3 32-32 32L48 288c-17.7 0-32-14.3-32-32s14.3-32 32-32l352 0c17.7 0 32 14.3 32 32z"],
-    "more-horizontal": [448, 512, [], "", "M8 256a56 56 0 1 1 112 0A56 56 0 1 1 8 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z"],
-    "plus": [448, 512, [], "", "M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"],
-    "search": [512, 512, [], "", "M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"],
-    "sidebar": [512, 512, [], "", "M64 64h384a32 32 0 0 1 32 32v320a32 32 0 0 1-32 32H64a32 32 0 0 1-32-32V96a32 32 0 0 1 32-32zm128 0v384", null, "fill=none stroke=currentColor stroke-width=50 stroke-linejoin=round stroke-linecap=round"],
-    "shuffle": [512, 512, [], "", "M403.8 34.4c12-5 25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6l0-32-32 0c-10.1 0-19.6 4.7-25.6 12.8L284 229.3 244 176l31.2-41.6C293.3 110.2 321.8 96 352 96l32 0 0-32c0-12.9 7.8-24.6 19.8-29.6zM164 282.7L204 336l-31.2 41.6C154.7 401.8 126.2 416 96 416l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l64 0c10.1 0 19.6-4.7 25.6-12.8L164 282.7zm274.6 188c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6l0-32-32 0c-30.2 0-58.7-14.2-76.8-38.4L121.6 172.8c-6-8.1-15.5-12.8-25.6-12.8l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l64 0c30.2 0 58.7 14.2 76.8 38.4L326.4 339.2c6 8.1 15.5 12.8 25.6 12.8l32 0 0-32c0-12.9 7.8-24.6 19.8-29.6s25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64z"],
-    "credit-card": [576, 512, [], "", "M512 80c8.8 0 16 7.2 16 16l0 32L48 128l0-32c0-8.8 7.2-16 16-16l448 0zm16 144l0 192c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16l0-192 480 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l448 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zm56 304c-13.3 0-24 10.7-24 24s10.7 24 24 24l48 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-48 0zm128 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l112 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-112 0z"],
-    "trash-can": [448, 512, [], "", "M170.5 51.6L151.5 80l145 0-19-28.4c-1.5-2.2-4-3.6-6.7-3.6l-93.7 0c-2.7 0-5.2 1.3-6.7 3.6zm147-26.6L354.2 80 368 80l48 0 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-8 0 0 304c0 44.2-35.8 80-80 80l-224 0c-44.2 0-80-35.8-80-80l0-304-8 0c-13.3 0-24-10.7-24-24S10.7 80 24 80l8 0 48 0 13.8 0 36.7-55.1C140.9 9.4 158.4 0 177.1 0l93.7 0c18.7 0 36.2 9.4 46.6 24.9zM80 128l0 304c0 17.7 14.3 32 32 32l224 0c17.7 0 32-14.3 32-32l0-304L80 128zm80 64l0 208c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-208c0-8.8 7.2-16 16-16s16 7.2 16 16zm80 0l0 208c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-208c0-8.8 7.2-16 16-16s16 7.2 16 16zm80 0l0 208c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-208c0-8.8 7.2-16 16-16s16 7.2 16 16z"],
-    "user": [448, 512, [], "", "M304 128a80 80 0 1 0 -160 0 80 80 0 1 0 160 0zM96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM49.3 464l349.5 0c-8.9-63.3-63.3-112-129-112l-91.4 0c-65.7 0-120.1 48.7-129 112zM0 482.3C0 383.8 79.8 304 178.3 304l91.4 0C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7L29.7 512C13.3 512 0 498.7 0 482.3z"],
-    "closed-captioning": [576, 512, ["cc"], "", "M512 80c8.8 0 16 7.2 16 16l0 320c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16L48 96c0-8.8 7.2-16 16-16l448 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l448 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zM200 208c14.2 0 27 6.1 35.8 16c8.8 9.9 24 10.7 33.9 1.9s10.7-24 1.9-33.9c-17.5-19.6-43.1-32-71.5-32c-53 0-96 43-96 96s43 96 96 96c28.4 0 54-12.4 71.5-32c8.8-9.9 8-25-1.9-33.9s-25-8-33.9 1.9c-8.8 9.9-21.6 16-35.8 16c-26.5 0-48-21.5-48-48s21.5-48 48-48zm144 48c0-26.5 21.5-48 48-48c14.2 0 27 6.1 35.8 16c8.8 9.9 24 10.7 33.9 1.9s10.7-24 1.9-33.9c-17.5-19.6-43.1-32-71.5-32c-53 0-96 43-96 96s43 96 96 96c28.4 0 54-12.4 71.5-32c8.8-9.9 8-25-1.9-33.9s-25-8-33.9 1.9c-8.8 9.9-21.6 16-35.8 16c-26.5 0-48-21.5-48-48z"],
-    "cc": "closed-captioning",
-    "heart": [512, 512, [], "", "M225.8 468.2l-2.5-2.3L48.1 303.2C17.4 274.7 0 234.7 0 192.8l0-3.3c0-70.4 50-130.8 119.2-144C158.6 37.9 198.9 47 231 69.6c9 6.4 17.4 13.8 25 22.3c4.2-4.8 8.7-9.2 13.5-13.3c3.7-3.2 7.5-6.2 11.5-9c0 0 0 0 0 0C313.1 47 353.4 37.9 392.8 45.4C462 58.6 512 119.1 512 189.5l0 3.3c0 41.9-17.4 81.9-48.1 110.4L288.7 465.9l-2.5 2.3c-8.2 7.6-19 11.9-30.2 11.9s-22-4.2-30.2-11.9zM239.1 145c-.4-.3-.7-.7-1-1.1l-17.8-20-.1-.1s0 0 0 0c-23.1-25.9-58-37.7-92-31.2C81.6 101.5 48 142.1 48 189.5l0 3.3c0 28.5 11.9 55.8 32.8 75.2L256 430.7 431.2 268c20.9-19.4 32.8-46.7 32.8-75.2l0-3.3c0-47.3-33.6-88-80.1-96.9c-34-6.5-69 5.4-92 31.2c0 0 0 0-.1 .1s0 0-.1 .1l-17.8 20c-.3 .4-.7 .7-1 1.1c-4.5 4.5-10.6 7-16.9 7s-12.4-2.5-16.9-7z"],
-    "x-mark": [384, 512, [], "", "M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"],
-    "star": [576, 512, [], "", "M287.9 0c9.2 0 17.6 5.2 21.6 13.5l68.6 141.3 153.2 22.6c9 1.3 16.5 7.6 19.3 16.3s.5 18.1-5.9 24.5L433.6 328.4l26.2 155.6c1.5 9-2.2 18.1-9.7 23.5s-17.3 6-25.3 1.7l-137-73.2L151 509.1c-8.1 4.3-17.9 3.7-25.3-1.7s-11.2-14.5-9.7-23.5l26.2-155.6L31.1 218.2c-6.5-6.4-8.7-15.9-5.9-24.5s10.3-14.9 19.3-16.3l153.2-22.6L266.3 13.5C270.4 5.2 278.7 0 287.9 0zm0 79L235.4 187.2c-3.5 7.1-10.2 12.1-18.1 13.3L99 217.9 184.9 303c5.5 5.5 8.1 13.3 6.8 21L171.4 443.7l105.2-56.2c7.1-3.8 15.6-3.8 22.6 0l105.2 56.2L384.2 324.1c-1.3-7.7 1.2-15.5 6.8-21l85.9-85.1L358.6 200.5c-7.8-1.2-14.6-6.1-18.1-13.3L287.9 79z"],
-    "square-js": [448, 512, [], "", "M448 96c0-35.3-28.7-64-64-64H64C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V96zM180.9 444.9c-33.7 0-53.2-17.4-63.2-38.5L152 385.7c6.6 11.7 12.6 21.6 27.1 21.6c13.8 0 22.6-5.4 22.6-26.5V237.7h42.1V381.4c0 43.6-25.6 63.5-62.9 63.5zm85.8-43L301 382.1c9 14.7 20.8 25.6 41.5 25.6c17.4 0 28.6-8.7 28.6-20.8c0-14.4-11.4-19.5-30.7-28l-10.5-4.5c-30.4-12.9-50.5-29.2-50.5-63.5c0-31.6 24.1-55.6 61.6-55.6c26.8 0 46 9.3 59.8 33.7L368 290c-7.2-12.9-15-18-27.1-18c-12.3 0-20.1 7.8-20.1 18c0 12.6 7.8 17.7 25.9 25.6l10.5 4.5c35.8 15.3 55.9 31 55.9 66.2c0 37.8-29.8 58.6-69.7 58.6c-39.1 0-64.4-18.6-76.7-43z"],
-    "python": [448, 512, [], "", "M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6zM286.2 404c11.1 0 20.1 9.1 20.1 20.3 0 11.3-9 20.4-20.1 20.4-11 0-20.1-9.2-20.1-20.4.1-11.3 9.1-20.3 20.1-20.3zM167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4zm-6.7-142.6c-11.1 0-20.1-9.1-20.1-20.3.1-11.3 9-20.4 20.1-20.4 11 0 20.1 9.2 20.1 20.4s-9 20.3-20.1 20.3z"],
-    "microsoft": [448, 512, [], "", "M0 32h214.6v214.6H0V32zm233.4 0H448v214.6H233.4V32zM0 265.4h214.6V480H0V265.4zm233.4 0H448V480H233.4V265.4z"],
-    "apple": [384, 512, [], "f179", "M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"],
-}
-
 LX.UTILS = {
     getTime() { return new Date().getTime() },
     compareThreshold( v, p, n, t ) { return Math.abs(v - p) >= t || Math.abs(v - n) >= t },
@@ -12658,5 +12915,131 @@ LX.UTILS = {
         ctx.restore();
     }
 };
+
+LX.ICONS = {
+    "align-center": [448, 512, [], "solid", "M352 64c0-17.7-14.3-32-32-32L128 32c-17.7 0-32 14.3-32 32s14.3 32 32 32l192 0c17.7 0 32-14.3 32-32zm96 128c0-17.7-14.3-32-32-32L32 160c-17.7 0-32 14.3-32 32s14.3 32 32 32l384 0c17.7 0 32-14.3 32-32zM0 448c0 17.7 14.3 32 32 32l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 416c-17.7 0-32 14.3-32 32zM352 320c0-17.7-14.3-32-32-32l-192 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l192 0c17.7 0 32-14.3 32-32z"],
+    "align-justify": [448, 512, [], "solid", "M448 64c0-17.7-14.3-32-32-32L32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32zm0 256c0-17.7-14.3-32-32-32L32 288c-17.7 0-32 14.3-32 32s14.3 32 32 32l384 0c17.7 0 32-14.3 32-32zM0 192c0 17.7 14.3 32 32 32l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 160c-17.7 0-32 14.3-32 32zM448 448c0-17.7-14.3-32-32-32L32 416c-17.7 0-32 14.3-32 32s14.3 32 32 32l384 0c17.7 0 32-14.3 32-32z"],
+    "align-left": [448, 512, [], "solid", "M288 64c0 17.7-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l224 0c17.7 0 32 14.3 32 32zm0 256c0 17.7-14.3 32-32 32L32 352c-17.7 0-32-14.3-32-32s14.3-32 32-32l224 0c17.7 0 32 14.3 32 32zM0 192c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 224c-17.7 0-32-14.3-32-32zM448 448c0 17.7-14.3 32-32 32L32 480c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"],
+    "align-right": [448, 512, [], "solid", "M448 64c0 17.7-14.3 32-32 32L192 96c-17.7 0-32-14.3-32-32s14.3-32 32-32l224 0c17.7 0 32 14.3 32 32zm0 256c0 17.7-14.3 32-32 32l-224 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l224 0c17.7 0 32 14.3 32 32zM0 192c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 224c-17.7 0-32-14.3-32-32zM448 448c0 17.7-14.3 32-32 32L32 480c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"],
+    "bell": [448, 512, [], "regular", "M224 0c-17.7 0-32 14.3-32 32l0 19.2C119 66 64 130.6 64 208l0 25.4c0 45.4-15.5 89.5-43.8 124.9L5.3 377c-5.8 7.2-6.9 17.1-2.9 25.4S14.8 416 24 416l400 0c9.2 0 17.6-5.3 21.6-13.6s2.9-18.2-2.9-25.4l-14.9-18.6C399.5 322.9 384 278.8 384 233.4l0-25.4c0-77.4-55-142-128-156.8L256 32c0-17.7-14.3-32-32-32zm0 96c61.9 0 112 50.1 112 112l0 25.4c0 47.9 13.9 94.6 39.7 134.6L72.3 368C98.1 328 112 281.3 112 233.4l0-25.4c0-61.9 50.1-112 112-112zm64 352l-64 0-64 0c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7s18.7-28.3 18.7-45.3z"],
+    "bell-slash": [640, 512, [], "regular", "M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L542.6 400c2.7-7.8 1.3-16.5-3.9-23l-14.9-18.6C495.5 322.9 480 278.8 480 233.4l0-33.4c0-75.8-55.5-138.6-128-150.1L352 32c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 17.9c-43.9 7-81.5 32.7-104.4 68.7L38.8 5.1zM221.7 148.4C239.6 117.1 273.3 96 312 96l8 0 8 0c57.4 0 104 46.6 104 104l0 33.4c0 32.7 6.4 64.8 18.7 94.5L221.7 148.4zM406.2 416l-60.9-48-176.9 0c21.2-32.8 34.4-70.3 38.4-109.1L160 222.1l0 11.4c0 45.4-15.5 89.5-43.8 124.9L101.3 377c-5.8 7.2-6.9 17.1-2.9 25.4s12.4 13.6 21.6 13.6l286.2 0zM384 448l-64 0-64 0c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7s18.7-28.3 18.7-45.3z"],
+    "display": [576, 512, [], "solid", "M64 0C28.7 0 0 28.7 0 64L0 352c0 35.3 28.7 64 64 64l176 0-10.7 32L160 448c-17.7 0-32 14.3-32 32s14.3 32 32 32l256 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-69.3 0L336 416l176 0c35.3 0 64-28.7 64-64l0-288c0-35.3-28.7-64-64-64L64 0zM512 64l0 288L64 352 64 64l448 0z"],
+    "fingerprint": [512, 512, [], "regular", "M48 256C48 141.1 141.1 48 256 48c63.1 0 119.6 28.1 157.8 72.5c8.6 10.1 23.8 11.2 33.8 2.6s11.2-23.8 2.6-33.8C403.3 34.6 333.7 0 256 0C114.6 0 0 114.6 0 256l0 40c0 13.3 10.7 24 24 24s24-10.7 24-24l0-40zm458.5-52.9c-2.7-13-15.5-21.3-28.4-18.5s-21.3 15.5-18.5 28.4c2.9 13.9 4.5 28.3 4.5 43.1l0 40c0 13.3 10.7 24 24 24s24-10.7 24-24l0-40c0-18.1-1.9-35.8-5.5-52.9zM256 80c-19 0-37.4 3-54.5 8.6c-15.2 5-18.7 23.7-8.3 35.9c7.1 8.3 18.8 10.8 29.4 7.9c10.6-2.9 21.8-4.4 33.4-4.4c70.7 0 128 57.3 128 128l0 24.9c0 25.2-1.5 50.3-4.4 75.3c-1.7 14.6 9.4 27.8 24.2 27.8c11.8 0 21.9-8.6 23.3-20.3c3.3-27.4 5-55 5-82.7l0-24.9c0-97.2-78.8-176-176-176zM150.7 148.7c-9.1-10.6-25.3-11.4-33.9-.4C93.7 178 80 215.4 80 256l0 24.9c0 24.2-2.6 48.4-7.8 71.9C68.8 368.4 80.1 384 96.1 384c10.5 0 19.9-7 22.2-17.3c6.4-28.1 9.7-56.8 9.7-85.8l0-24.9c0-27.2 8.5-52.4 22.9-73.1c7.2-10.4 8-24.6-.2-34.2zM256 160c-53 0-96 43-96 96l0 24.9c0 35.9-4.6 71.5-13.8 106.1c-3.8 14.3 6.7 29 21.5 29c9.5 0 17.9-6.2 20.4-15.4c10.5-39 15.9-79.2 15.9-119.7l0-24.9c0-28.7 23.3-52 52-52s52 23.3 52 52l0 24.9c0 36.3-3.5 72.4-10.4 107.9c-2.7 13.9 7.7 27.2 21.8 27.2c10.2 0 19-7 21-17c7.7-38.8 11.6-78.3 11.6-118.1l0-24.9c0-53-43-96-96-96zm24 96c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 24.9c0 59.9-11 119.3-32.5 175.2l-5.9 15.3c-4.8 12.4 1.4 26.3 13.8 31s26.3-1.4 31-13.8l5.9-15.3C267.9 411.9 280 346.7 280 280.9l0-24.9z"],
+    "mobile-screen": [384, 512, [], "solid", "M16 64C16 28.7 44.7 0 80 0L304 0c35.3 0 64 28.7 64 64l0 384c0 35.3-28.7 64-64 64L80 512c-35.3 0-64-28.7-64-64L16 64zM144 448c0 8.8 7.2 16 16 16l64 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-64 0c-8.8 0-16 7.2-16 16zM304 64L80 64l0 320 224 0 0-320z"],
+    "vr-cardboard": [640, 512, ["vr"], "solid", "M576 64L64 64C28.7 64 0 92.7 0 128L0 384c0 35.3 28.7 64 64 64l120.4 0c24.2 0 46.4-13.7 57.2-35.4l32-64c8.8-17.5 26.7-28.6 46.3-28.6s37.5 11.1 46.3 28.6l32 64c10.8 21.7 33 35.4 57.2 35.4L576 448c35.3 0 64-28.7 64-64l0-256c0-35.3-28.7-64-64-64zM96 240a64 64 0 1 1 128 0A64 64 0 1 1 96 240zm384-64a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"],
+    "gamepad": [640, 512, [], "solid", "M192 64C86 64 0 150 0 256S86 448 192 448l256 0c106 0 192-86 192-192s-86-192-192-192L192 64zM496 168a40 40 0 1 1 0 80 40 40 0 1 1 0-80zM392 304a40 40 0 1 1 80 0 40 40 0 1 1 -80 0zM168 200c0-13.3 10.7-24 24-24s24 10.7 24 24l0 32 32 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-32 0 0 32c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-32-32 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l32 0 0-32z"],
+    "keyboard": [576, 512, [], "regular", "M64 112c-8.8 0-16 7.2-16 16l0 256c0 8.8 7.2 16 16 16l448 0c8.8 0 16-7.2 16-16l0-256c0-8.8-7.2-16-16-16L64 112zM0 128C0 92.7 28.7 64 64 64l448 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128zM176 320l224 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-224 0c-8.8 0-16-7.2-16-16l0-16c0-8.8 7.2-16 16-16zm-72-72c0-8.8 7.2-16 16-16l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16zm16-96l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16c0-8.8 7.2-16 16-16zm64 96c0-8.8 7.2-16 16-16l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16zm16-96l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16c0-8.8 7.2-16 16-16zm64 96c0-8.8 7.2-16 16-16l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16zm16-96l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16c0-8.8 7.2-16 16-16zm64 96c0-8.8 7.2-16 16-16l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16zm16-96l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16c0-8.8 7.2-16 16-16zm64 96c0-8.8 7.2-16 16-16l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16zm16-96l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16c0-8.8 7.2-16 16-16z"],
+    "headset": [512, 512, [], "solid", "M256 48C141.1 48 48 141.1 48 256l0 40c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-40C0 114.6 114.6 0 256 0S512 114.6 512 256l0 144.1c0 48.6-39.4 88-88.1 88L313.6 488c-8.3 14.3-23.8 24-41.6 24l-32 0c-26.5 0-48-21.5-48-48s21.5-48 48-48l32 0c17.8 0 33.3 9.7 41.6 24l110.4 .1c22.1 0 40-17.9 40-40L464 256c0-114.9-93.1-208-208-208zM144 208l16 0c17.7 0 32 14.3 32 32l0 112c0 17.7-14.3 32-32 32l-16 0c-35.3 0-64-28.7-64-64l0-48c0-35.3 28.7-64 64-64zm224 0c35.3 0 64 28.7 64 64l0 48c0 35.3-28.7 64-64 64l-16 0c-17.7 0-32-14.3-32-32l0-112c0-17.7 14.3-32 32-32l16 0z"],
+    "camera": [512, 512, [], "solid", "M149.1 64.8L138.7 96 64 96C28.7 96 0 124.7 0 160L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-256c0-35.3-28.7-64-64-64l-74.7 0L362.9 64.8C356.4 45.2 338.1 32 317.4 32L194.6 32c-20.7 0-39 13.2-45.5 32.8zM256 192a96 96 0 1 1 0 192 96 96 0 1 1 0-192z"],
+    "print": [512, 512, [], "solid", "M128 0C92.7 0 64 28.7 64 64l0 96 64 0 0-96 226.7 0L384 93.3l0 66.7 64 0 0-66.7c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0L128 0zM384 352l0 32 0 64-256 0 0-64 0-16 0-16 256 0zm64 32l32 0c17.7 0 32-14.3 32-32l0-96c0-35.3-28.7-64-64-64L64 192c-35.3 0-64 28.7-64 64l0 96c0 17.7 14.3 32 32 32l32 0 0 64c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-64zM432 248a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"],
+    "bookmark": [384, 512, [], "regular", "M0 48C0 21.5 21.5 0 48 0l0 48 0 393.4 130.1-92.9c8.3-6 19.6-6 27.9 0L336 441.4 336 48 48 48 48 0 336 0c26.5 0 48 21.5 48 48l0 440c0 9-5 17.2-13 21.3s-17.6 3.4-24.9-1.8L192 397.5 37.9 507.5c-7.3 5.2-16.9 5.9-24.9 1.8S0 497 0 488L0 48z"],
+    "calendar": [448, 512, [], "regular", "M152 24c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40L64 64C28.7 64 0 92.7 0 128l0 16 0 48L0 448c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-256 0-48 0-16c0-35.3-28.7-64-64-64l-40 0 0-40c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40L152 64l0-40zM48 192l352 0 0 256c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16l0-256z"],
+    "chart": [448, 512, [], "solid", "M160 80c0-26.5 21.5-48 48-48l32 0c26.5 0 48 21.5 48 48l0 352c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48l0-352zM0 272c0-26.5 21.5-48 48-48l32 0c26.5 0 48 21.5 48 48l0 160c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48L0 272zM368 96l32 0c26.5 0 48 21.5 48 48l0 288c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48z"],
+    "check": [448, 512, [], "solid", "M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"],
+    "clone": [512, 512, [], "regular", "M64 464l224 0c8.8 0 16-7.2 16-16l0-64 48 0 0 64c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 224c0-35.3 28.7-64 64-64l64 0 0 48-64 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16zM224 304l224 0c8.8 0 16-7.2 16-16l0-224c0-8.8-7.2-16-16-16L224 48c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16zm-64-16l0-224c0-35.3 28.7-64 64-64L448 0c35.3 0 64 28.7 64 64l0 224c0 35.3-28.7 64-64 64l-224 0c-35.3 0-64-28.7-64-64z"],
+    "copy": [448, 512, [], "regular", "M384 336l-192 0c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l140.1 0L400 115.9 400 320c0 8.8-7.2 16-16 16zM192 384l192 0c35.3 0 64-28.7 64-64l0-204.1c0-12.7-5.1-24.9-14.1-33.9L366.1 14.1c-9-9-21.2-14.1-33.9-14.1L192 0c-35.3 0-64 28.7-64 64l0 256c0 35.3 28.7 64 64 64zM64 128c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l192 0c35.3 0 64-28.7 64-64l0-32-48 0 0 32c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l32 0 0-48-32 0z"],
+    "paste": [512, 512, [], "regular", "M104.6 48L64 48C28.7 48 0 76.7 0 112L0 384c0 35.3 28.7 64 64 64l96 0 0-48-96 0c-8.8 0-16-7.2-16-16l0-272c0-8.8 7.2-16 16-16l16 0c0 17.7 14.3 32 32 32l72.4 0C202 108.4 227.6 96 256 96l62 0c-7.1-27.6-32.2-48-62-48l-40.6 0C211.6 20.9 188.2 0 160 0s-51.6 20.9-55.4 48zM144 56a16 16 0 1 1 32 0 16 16 0 1 1 -32 0zM448 464l-192 0c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l140.1 0L464 243.9 464 448c0 8.8-7.2 16-16 16zM256 512l192 0c35.3 0 64-28.7 64-64l0-204.1c0-12.7-5.1-24.9-14.1-33.9l-67.9-67.9c-9-9-21.2-14.1-33.9-14.1L256 128c-35.3 0-64 28.7-64 64l0 256c0 35.3 28.7 64 64 64z"],
+    "edit": [512, 512, [], "regular", "M441 58.9L453.1 71c9.4 9.4 9.4 24.6 0 33.9L424 134.1 377.9 88 407 58.9c9.4-9.4 24.6-9.4 33.9 0zM209.8 256.2L344 121.9 390.1 168 255.8 302.2c-2.9 2.9-6.5 5-10.4 6.1l-58.5 16.7 16.7-58.5c1.1-3.9 3.2-7.5 6.1-10.4zM373.1 25L175.8 222.2c-8.7 8.7-15 19.4-18.3 31.1l-28.6 100c-2.4 8.4-.1 17.4 6.1 23.6s15.2 8.5 23.6 6.1l100-28.6c11.8-3.4 22.5-9.7 31.1-18.3L487 138.9c28.1-28.1 28.1-73.7 0-101.8L474.9 25C446.8-3.1 401.2-3.1 373.1 25zM88 64C39.4 64 0 103.4 0 152L0 424c0 48.6 39.4 88 88 88l272 0c48.6 0 88-39.4 88-88l0-112c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 112c0 22.1-17.9 40-40 40L88 464c-22.1 0-40-17.9-40-40l0-272c0-22.1 17.9-40 40-40l112 0c13.3 0 24-10.7 24-24s-10.7-24-24-24L88 64z"],
+    "envelope": [512, 512, [], "regular", "M64 112c-8.8 0-16 7.2-16 16l0 22.1L220.5 291.7c20.7 17 50.4 17 71.1 0L464 150.1l0-22.1c0-8.8-7.2-16-16-16L64 112zM48 212.2L48 384c0 8.8 7.2 16 16 16l384 0c8.8 0 16-7.2 16-16l0-171.8L322 328.8c-38.4 31.5-93.7 31.5-132 0L48 212.2zM0 128C0 92.7 28.7 64 64 64l384 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128z"],
+    "envelope-open": [512, 512, [], "regular", "M255.4 48.2c.2-.1 .4-.2 .6-.2s.4 .1 .6 .2L460.6 194c2.1 1.5 3.4 3.9 3.4 6.5l0 13.6L291.5 355.7c-20.7 17-50.4 17-71.1 0L48 214.1l0-13.6c0-2.6 1.2-5 3.4-6.5L255.4 48.2zM48 276.2L190 392.8c38.4 31.5 93.7 31.5 132 0L464 276.2 464 456c0 4.4-3.6 8-8 8L56 464c-4.4 0-8-3.6-8-8l0-179.8zM256 0c-10.2 0-20.2 3.2-28.5 9.1L23.5 154.9C8.7 165.4 0 182.4 0 200.5L0 456c0 30.9 25.1 56 56 56l400 0c30.9 0 56-25.1 56-56l0-255.5c0-18.1-8.7-35.1-23.4-45.6L284.5 9.1C276.2 3.2 266.2 0 256 0z"],
+    "map": [576, 512, [], "regular", "M565.6 36.2C572.1 40.7 576 48.1 576 56l0 336c0 10-6.2 18.9-15.5 22.4l-168 64c-5.2 2-10.9 2.1-16.1 .3L192.5 417.5l-160 61c-7.4 2.8-15.7 1.8-22.2-2.7S0 463.9 0 456L0 120c0-10 6.1-18.9 15.5-22.4l168-64c5.2-2 10.9-2.1 16.1-.3L383.5 94.5l160-61c7.4-2.8 15.7-1.8 22.2 2.7zM48 136.5l0 284.6 120-45.7 0-284.6L48 136.5zM360 422.7l0-285.4-144-48 0 285.4 144 48zm48-1.5l120-45.7 0-284.6L408 136.5l0 284.6z"],
+    "note-sticky": [448, 512, ["sticky-note"], "regular", "M64 80c-8.8 0-16 7.2-16 16l0 320c0 8.8 7.2 16 16 16l224 0 0-80c0-17.7 14.3-32 32-32l80 0 0-224c0-8.8-7.2-16-16-16L64 80zM288 480L64 480c-35.3 0-64-28.7-64-64L0 96C0 60.7 28.7 32 64 32l320 0c35.3 0 64 28.7 64 64l0 224 0 5.5c0 17-6.7 33.3-18.7 45.3l-90.5 90.5c-12 12-28.3 18.7-45.3 18.7l-5.5 0z"],
+    "file": [384, 512, [], "regular", "M320 464c8.8 0 16-7.2 16-16l0-288-80 0c-17.7 0-32-14.3-32-32l0-80L64 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16l256 0zM0 64C0 28.7 28.7 0 64 0L229.5 0c17 0 33.3 6.7 45.3 18.7l90.5 90.5c12 12 18.7 28.3 18.7 45.3L384 448c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64z"],
+    "file-video": [384, 512, [], "regular", "M320 464c8.8 0 16-7.2 16-16l0-288-80 0c-17.7 0-32-14.3-32-32l0-80L64 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16l256 0zM0 64C0 28.7 28.7 0 64 0L229.5 0c17 0 33.3 6.7 45.3 18.7l90.5 90.5c12 12 18.7 28.3 18.7 45.3L384 448c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64zM80 288c0-17.7 14.3-32 32-32l96 0c17.7 0 32 14.3 32 32l0 16 44.9-29.9c2-1.3 4.4-2.1 6.8-2.1c6.8 0 12.3 5.5 12.3 12.3l0 103.4c0 6.8-5.5 12.3-12.3 12.3c-2.4 0-4.8-.7-6.8-2.1L240 368l0 16c0 17.7-14.3 32-32 32l-96 0c-17.7 0-32-14.3-32-32l0-96z"],
+    "file-code": [384, 512, [], "regular", "M64 464c-8.8 0-16-7.2-16-16L48 64c0-8.8 7.2-16 16-16l160 0 0 80c0 17.7 14.3 32 32 32l80 0 0 288c0 8.8-7.2 16-16 16L64 464zM64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-293.5c0-17-6.7-33.3-18.7-45.3L274.7 18.7C262.7 6.7 246.5 0 229.5 0L64 0zm97 289c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0L79 303c-9.4 9.4-9.4 24.6 0 33.9l48 48c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-31-31 31-31zM257 255c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l31 31-31 31c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l48-48c9.4-9.4 9.4-24.6 0-33.9l-48-48z"],
+    "file-zip": [384, 512, [], "regular", "M64 464c-8.8 0-16-7.2-16-16L48 64c0-8.8 7.2-16 16-16l48 0c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16l48 0 0 80c0 17.7 14.3 32 32 32l80 0 0 288c0 8.8-7.2 16-16 16L64 464zM64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-293.5c0-17-6.7-33.3-18.7-45.3L274.7 18.7C262.7 6.7 246.5 0 229.5 0L64 0zm48 112c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0c-8.8 0-16 7.2-16 16zm0 64c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0c-8.8 0-16 7.2-16 16zm-6.3 71.8L82.1 335.9c-1.4 5.4-2.1 10.9-2.1 16.4c0 35.2 28.8 63.7 64 63.7s64-28.5 64-63.7c0-5.5-.7-11.1-2.1-16.4l-23.5-88.2c-3.7-14-16.4-23.8-30.9-23.8l-14.8 0c-14.5 0-27.2 9.7-30.9 23.8zM128 336l32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0c-8.8 0-16-7.2-16-16s7.2-16 16-16z"],
+    "file-pdf": [512, 512, [], "regular", "M64 464l48 0 0 48-48 0c-35.3 0-64-28.7-64-64L0 64C0 28.7 28.7 0 64 0L229.5 0c17 0 33.3 6.7 45.3 18.7l90.5 90.5c12 12 18.7 28.3 18.7 45.3L384 304l-48 0 0-144-80 0c-17.7 0-32-14.3-32-32l0-80L64 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16zM176 352l32 0c30.9 0 56 25.1 56 56s-25.1 56-56 56l-16 0 0 32c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-48 0-80c0-8.8 7.2-16 16-16zm32 80c13.3 0 24-10.7 24-24s-10.7-24-24-24l-16 0 0 48 16 0zm96-80l32 0c26.5 0 48 21.5 48 48l0 64c0 26.5-21.5 48-48 48l-32 0c-8.8 0-16-7.2-16-16l0-128c0-8.8 7.2-16 16-16zm32 128c8.8 0 16-7.2 16-16l0-64c0-8.8-7.2-16-16-16l-16 0 0 96 16 0zm80-112c0-8.8 7.2-16 16-16l48 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0 0 32 32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0 0 48c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-64 0-64z"],
+    "scroll": [576, 512, ["script"], "solid", "M0 80l0 48c0 17.7 14.3 32 32 32l16 0 48 0 0-80c0-26.5-21.5-48-48-48S0 53.5 0 80zM112 32c10 13.4 16 30 16 48l0 304c0 35.3 28.7 64 64 64s64-28.7 64-64l0-5.3c0-32.4 26.3-58.7 58.7-58.7L480 320l0-192c0-53-43-96-96-96L112 32zM464 480c61.9 0 112-50.1 112-112c0-8.8-7.2-16-16-16l-245.3 0c-14.7 0-26.7 11.9-26.7 26.7l0 5.3c0 53-43 96-96 96l176 0 96 0z"],
+    "floppy-disk": [448, 512, ["save"], "regular", "M48 96l0 320c0 8.8 7.2 16 16 16l320 0c8.8 0 16-7.2 16-16l0-245.5c0-4.2-1.7-8.3-4.7-11.3l33.9-33.9c12 12 18.7 28.3 18.7 45.3L448 416c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96C0 60.7 28.7 32 64 32l245.5 0c17 0 33.3 6.7 45.3 18.7l74.5 74.5-33.9 33.9L320.8 84.7c-.3-.3-.5-.5-.8-.8L320 184c0 13.3-10.7 24-24 24l-192 0c-13.3 0-24-10.7-24-24L80 80 64 80c-8.8 0-16 7.2-16 16zm80-16l0 80 144 0 0-80L128 80zm32 240a64 64 0 1 1 128 0 64 64 0 1 1 -128 0z"],
+    "download": [512, 512, [], "solid", "M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 242.7-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7 288 32zM64 352c-35.3 0-64 28.7-64 64l0 32c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-32c0-35.3-28.7-64-64-64l-101.5 0-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352 64 352zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"],
+    "upload": [512, 512, [], "solid", "M288 109.3L288 352c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-242.7-73.4 73.4c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l128-128c12.5-12.5 32.8-12.5 45.3 0l128 128c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L288 109.3zM64 352l128 0c0 35.3 28.7 64 64 64s64-28.7 64-64l128 0c35.3 0 64 28.7 64 64l0 32c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64l0-32c0-35.3 28.7-64 64-64zM432 456a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"],
+    "gear": [512, 512, [], "solid", "M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-55.7-17.7c-13.4 10.3-28.2 18.9-44 25.4l-12.5 57.1c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-12.5-57.1c-15.8-6.5-30.6-15.1-44-25.4L83.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C64.6 273.1 64 264.6 64 256s.6-17.1 1.7-25.4L22.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l55.7 17.7c13.4-10.3 28.2-18.9 44-25.4l12.5-57.1c2-9.1 9-16.3 18.2-17.8C227.3 1.2 241.5 0 256 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l12.5 57.1c15.8 6.5 30.6 15.1 44 25.4l55.7-17.7c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM256 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"],
+    "gears": [640, 512, [], "solid", "M308.5 135.3c7.1-6.3 9.9-16.2 6.2-25c-2.3-5.3-4.8-10.5-7.6-15.5L304 89.4c-3-5-6.3-9.9-9.8-14.6c-5.7-7.6-15.7-10.1-24.7-7.1l-28.2 9.3c-10.7-8.8-23-16-36.2-20.9L199 27.1c-1.9-9.3-9.1-16.7-18.5-17.8C173.9 8.4 167.2 8 160.4 8l-.7 0c-6.8 0-13.5 .4-20.1 1.2c-9.4 1.1-16.6 8.6-18.5 17.8L115 56.1c-13.3 5-25.5 12.1-36.2 20.9L50.5 67.8c-9-3-19-.5-24.7 7.1c-3.5 4.7-6.8 9.6-9.9 14.6l-3 5.3c-2.8 5-5.3 10.2-7.6 15.6c-3.7 8.7-.9 18.6 6.2 25l22.2 19.8C32.6 161.9 32 168.9 32 176s.6 14.1 1.7 20.9L11.5 216.7c-7.1 6.3-9.9 16.2-6.2 25c2.3 5.3 4.8 10.5 7.6 15.6l3 5.2c3 5.1 6.3 9.9 9.9 14.6c5.7 7.6 15.7 10.1 24.7 7.1l28.2-9.3c10.7 8.8 23 16 36.2 20.9l6.1 29.1c1.9 9.3 9.1 16.7 18.5 17.8c6.7 .8 13.5 1.2 20.4 1.2s13.7-.4 20.4-1.2c9.4-1.1 16.6-8.6 18.5-17.8l6.1-29.1c13.3-5 25.5-12.1 36.2-20.9l28.2 9.3c9 3 19 .5 24.7-7.1c3.5-4.7 6.8-9.5 9.8-14.6l3.1-5.4c2.8-5 5.3-10.2 7.6-15.5c3.7-8.7 .9-18.6-6.2-25l-22.2-19.8c1.1-6.8 1.7-13.8 1.7-20.9s-.6-14.1-1.7-20.9l22.2-19.8zM112 176a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zM504.7 500.5c6.3 7.1 16.2 9.9 25 6.2c5.3-2.3 10.5-4.8 15.5-7.6l5.4-3.1c5-3 9.9-6.3 14.6-9.8c7.6-5.7 10.1-15.7 7.1-24.7l-9.3-28.2c8.8-10.7 16-23 20.9-36.2l29.1-6.1c9.3-1.9 16.7-9.1 17.8-18.5c.8-6.7 1.2-13.5 1.2-20.4s-.4-13.7-1.2-20.4c-1.1-9.4-8.6-16.6-17.8-18.5L583.9 307c-5-13.3-12.1-25.5-20.9-36.2l9.3-28.2c3-9 .5-19-7.1-24.7c-4.7-3.5-9.6-6.8-14.6-9.9l-5.3-3c-5-2.8-10.2-5.3-15.6-7.6c-8.7-3.7-18.6-.9-25 6.2l-19.8 22.2c-6.8-1.1-13.8-1.7-20.9-1.7s-14.1 .6-20.9 1.7l-19.8-22.2c-6.3-7.1-16.2-9.9-25-6.2c-5.3 2.3-10.5 4.8-15.6 7.6l-5.2 3c-5.1 3-9.9 6.3-14.6 9.9c-7.6 5.7-10.1 15.7-7.1 24.7l9.3 28.2c-8.8 10.7-16 23-20.9 36.2L315.1 313c-9.3 1.9-16.7 9.1-17.8 18.5c-.8 6.7-1.2 13.5-1.2 20.4s.4 13.7 1.2 20.4c1.1 9.4 8.6 16.6 17.8 18.5l29.1 6.1c5 13.3 12.1 25.5 20.9 36.2l-9.3 28.2c-3 9-.5 19 7.1 24.7c4.7 3.5 9.5 6.8 14.6 9.8l5.4 3.1c5 2.8 10.2 5.3 15.5 7.6c8.7 3.7 18.6 .9 25-6.2l19.8-22.2c6.8 1.1 13.8 1.7 20.9 1.7s14.1-.6 20.9-1.7l19.8 22.2zM464 304a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"],
+    "sliders": [512, 512, [], "solid", "M0 416c0 17.7 14.3 32 32 32l54.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 448c17.7 0 32-14.3 32-32s-14.3-32-32-32l-246.7 0c-12.3-28.3-40.5-48-73.3-48s-61 19.7-73.3 48L32 384c-17.7 0-32 14.3-32 32zm128 0a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zM320 256a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm32-80c-32.8 0-61 19.7-73.3 48L32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l246.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48l54.7 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-54.7 0c-12.3-28.3-40.5-48-73.3-48zM192 128a32 32 0 1 1 0-64 32 32 0 1 1 0 64zm73.3-64C253 35.7 224.8 16 192 16s-61 19.7-73.3 48L32 64C14.3 64 0 78.3 0 96s14.3 32 32 32l86.7 0c12.3 28.3 40.5 48 73.3 48s61-19.7 73.3-48L480 128c17.7 0 32-14.3 32-32s-14.3-32-32-32L265.3 64z"],
+    "eye": [576, 512, [], "regular", "M288 80c-65.2 0-118.8 29.6-159.9 67.7C89.6 183.5 63 226 49.4 256c13.6 30 40.2 72.5 78.6 108.3C169.2 402.4 222.8 432 288 432s118.8-29.6 159.9-67.7C486.4 328.5 513 286 526.6 256c-13.6-30-40.2-72.5-78.6-108.3C406.8 109.6 353.2 80 288 80zM95.4 112.6C142.5 68.8 207.2 32 288 32s145.5 36.8 192.6 80.6c46.8 43.5 78.1 95.4 93 131.1c3.3 7.9 3.3 16.7 0 24.6c-14.9 35.7-46.2 87.7-93 131.1C433.5 443.2 368.8 480 288 480s-145.5-36.8-192.6-80.6C48.6 356 17.3 304 2.5 268.3c-3.3-7.9-3.3-16.7 0-24.6C17.3 208 48.6 156 95.4 112.6zM288 336c44.2 0 80-35.8 80-80s-35.8-80-80-80c-.7 0-1.3 0-2 0c1.3 5.1 2 10.5 2 16c0 35.3-28.7 64-64 64c-5.5 0-10.9-.7-16-2c0 .7 0 1.3 0 2c0 44.2 35.8 80 80 80zm0-208a128 128 0 1 1 0 256 128 128 0 1 1 0-256z"],
+    "eye-slash": [640, 512, [], "regular", "M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zm151 118.3C226 97.7 269.5 80 320 80c65.2 0 118.8 29.6 159.9 67.7C518.4 183.5 545 226 558.6 256c-12.6 28-36.6 66.8-70.9 100.9l-53.8-42.2c9.1-17.6 14.2-37.5 14.2-58.7c0-70.7-57.3-128-128-128c-32.2 0-61.7 11.9-84.2 31.5l-46.1-36.1zM394.9 284.2l-81.5-63.9c4.2-8.5 6.6-18.2 6.6-28.3c0-5.5-.7-10.9-2-16c.7 0 1.3 0 2 0c44.2 0 80 35.8 80 80c0 9.9-1.8 19.4-5.1 28.2zm9.4 130.3C378.8 425.4 350.7 432 320 432c-65.2 0-118.8-29.6-159.9-67.7C121.6 328.5 95 286 81.4 256c8.3-18.4 21.5-41.5 39.4-64.8L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5l-41.9-33zM192 256c0 70.7 57.3 128 128 128c13.3 0 26.1-2 38.2-5.8L302 334c-23.5-5.4-43.1-21.2-53.7-42.3l-56.1-44.2c-.2 2.8-.3 5.6-.3 8.5z"],
+    "comment": [512, 512, [], "regular", "M123.6 391.3c12.9-9.4 29.6-11.8 44.6-6.4c26.5 9.6 56.2 15.1 87.8 15.1c124.7 0 208-80.5 208-160s-83.3-160-208-160S48 160.5 48 240c0 32 12.4 62.8 35.7 89.2c8.6 9.7 12.8 22.5 11.8 35.5c-1.4 18.1-5.7 34.7-11.3 49.4c17-7.9 31.1-16.7 39.4-22.7zM21.2 431.9c1.8-2.7 3.5-5.4 5.1-8.1c10-16.6 19.5-38.4 21.4-62.9C17.7 326.8 0 285.1 0 240C0 125.1 114.6 32 256 32s256 93.1 256 208s-114.6 208-256 208c-37.1 0-72.3-6.4-104.1-17.9c-11.9 8.7-31.3 20.6-54.3 30.6c-15.1 6.6-32.3 12.6-50.1 16.1c-.8 .2-1.6 .3-2.4 .5c-4.4 .8-8.7 1.5-13.2 1.9c-.2 0-.5 .1-.7 .1c-5.1 .5-10.2 .8-15.3 .8c-6.5 0-12.3-3.9-14.8-9.9c-2.5-6-1.1-12.8 3.4-17.4c4.1-4.2 7.8-8.7 11.3-13.5c1.7-2.3 3.3-4.6 4.8-6.9l.3-.5z"],
+    "message": [512, 512, [], "regular", "M160 368c26.5 0 48 21.5 48 48l0 16 72.5-54.4c8.3-6.2 18.4-9.6 28.8-9.6L448 368c8.8 0 16-7.2 16-16l0-288c0-8.8-7.2-16-16-16L64 48c-8.8 0-16 7.2-16 16l0 288c0 8.8 7.2 16 16 16l96 0zm48 124l-.2 .2-5.1 3.8-17.1 12.8c-4.8 3.6-11.3 4.2-16.8 1.5s-8.8-8.2-8.8-14.3l0-21.3 0-6.4 0-.3 0-4 0-48-48 0-48 0c-35.3 0-64-28.7-64-64L0 64C0 28.7 28.7 0 64 0L448 0c35.3 0 64 28.7 64 64l0 288c0 35.3-28.7 64-64 64l-138.7 0L208 492z"],
+    "folder": [512, 512, [], "regular", "M0 96C0 60.7 28.7 32 64 32l132.1 0c19.1 0 37.4 7.6 50.9 21.1L289.9 96 448 96c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zM64 80c-8.8 0-16 7.2-16 16l0 320c0 8.8 7.2 16 16 16l384 0c8.8 0 16-7.2 16-16l0-256c0-8.8-7.2-16-16-16l-161.4 0c-10.6 0-20.8-4.2-28.3-11.7L213.1 87c-4.5-4.5-10.6-7-17-7L64 80z"],
+    "folder-closed": [512, 512, [], "regular", "M251.7 127.6s0 0 0 0c10.5 10.5 24.7 16.4 39.6 16.4L448 144c8.8 0 16 7.2 16 16l0 32L48 192l0-96c0-8.8 7.2-16 16-16l133.5 0c4.2 0 8.3 1.7 11.3 4.7l33.9-33.9L208.8 84.7l42.9 42.9zM48 240l416 0 0 176c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16l0-176zM285.7 93.7L242.7 50.7c-12-12-28.3-18.7-45.3-18.7L64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-256c0-35.3-28.7-64-64-64L291.3 96c-2.1 0-4.2-.8-5.7-2.3z"],
+    "folder-open": [576, 512, [], "regular", "M384 480l48 0c11.4 0 21.9-6 27.6-15.9l112-192c5.8-9.9 5.8-22.1 .1-32.1S555.5 224 544 224l-400 0c-11.4 0-21.9 6-27.6 15.9L48 357.1 48 96c0-8.8 7.2-16 16-16l117.5 0c4.2 0 8.3 1.7 11.3 4.7l26.5 26.5c21 21 49.5 32.8 79.2 32.8L416 144c8.8 0 16 7.2 16 16l0 32 48 0 0-32c0-35.3-28.7-64-64-64L298.5 96c-17 0-33.3-6.7-45.3-18.7L226.7 50.7c-12-12-28.3-18.7-45.3-18.7L64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l23.7 0L384 480z"],
+    "grip-vertical": [320, 512, [], "solid", "M40 352l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0c-22.1 0-40-17.9-40-40l0-48c0-22.1 17.9-40 40-40zm192 0l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0c-22.1 0-40-17.9-40-40l0-48c0-22.1 17.9-40 40-40zM40 320c-22.1 0-40-17.9-40-40l0-48c0-22.1 17.9-40 40-40l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0zM232 192l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0c-22.1 0-40-17.9-40-40l0-48c0-22.1 17.9-40 40-40zM40 160c-22.1 0-40-17.9-40-40L0 72C0 49.9 17.9 32 40 32l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0zM232 32l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0c-22.1 0-40-17.9-40-40l0-48c0-22.1 17.9-40 40-40z"],
+    "image": [512, 512, [], "regular", "M448 80c8.8 0 16 7.2 16 16l0 319.8-5-6.5-136-176c-4.5-5.9-11.6-9.3-19-9.3s-14.4 3.4-19 9.3L202 340.7l-30.5-42.7C167 291.7 159.8 288 152 288s-15 3.7-19.5 10.1l-80 112L48 416.3l0-.3L48 96c0-8.8 7.2-16 16-16l384 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zm80 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z"],
+    "images": [576, 512, [], "regular", "M160 80l352 0c8.8 0 16 7.2 16 16l0 224c0 8.8-7.2 16-16 16l-21.2 0L388.1 178.9c-4.4-6.8-12-10.9-20.1-10.9s-15.7 4.1-20.1 10.9l-52.2 79.8-12.4-16.9c-4.5-6.2-11.7-9.8-19.4-9.8s-14.8 3.6-19.4 9.8L175.6 336 160 336c-8.8 0-16-7.2-16-16l0-224c0-8.8 7.2-16 16-16zM96 96l0 224c0 35.3 28.7 64 64 64l352 0c35.3 0 64-28.7 64-64l0-224c0-35.3-28.7-64-64-64L160 32c-35.3 0-64 28.7-64 64zM48 120c0-13.3-10.7-24-24-24S0 106.7 0 120L0 344c0 75.1 60.9 136 136 136l320 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-320 0c-48.6 0-88-39.4-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"],
+    "photo-film": [640, 512, ["media"], "solid", "M256 0L576 0c35.3 0 64 28.7 64 64l0 224c0 35.3-28.7 64-64 64l-320 0c-35.3 0-64-28.7-64-64l0-224c0-35.3 28.7-64 64-64zM476 106.7C471.5 100 464 96 456 96s-15.5 4-20 10.7l-56 84L362.7 169c-4.6-5.7-11.5-9-18.7-9s-14.2 3.3-18.7 9l-64 80c-5.8 7.2-6.9 17.1-2.9 25.4s12.4 13.6 21.6 13.6l80 0 48 0 144 0c8.9 0 17-4.9 21.2-12.7s3.7-17.3-1.2-24.6l-96-144zM336 96a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zM64 128l96 0 0 256 0 32c0 17.7 14.3 32 32 32l128 0c17.7 0 32-14.3 32-32l0-32 160 0 0 64c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 192c0-35.3 28.7-64 64-64zm8 64c-8.8 0-16 7.2-16 16l0 16c0 8.8 7.2 16 16 16l16 0c8.8 0 16-7.2 16-16l0-16c0-8.8-7.2-16-16-16l-16 0zm0 104c-8.8 0-16 7.2-16 16l0 16c0 8.8 7.2 16 16 16l16 0c8.8 0 16-7.2 16-16l0-16c0-8.8-7.2-16-16-16l-16 0zm0 104c-8.8 0-16 7.2-16 16l0 16c0 8.8 7.2 16 16 16l16 0c8.8 0 16-7.2 16-16l0-16c0-8.8-7.2-16-16-16l-16 0zm336 16l0 16c0 8.8 7.2 16 16 16l16 0c8.8 0 16-7.2 16-16l0-16c0-8.8-7.2-16-16-16l-16 0c-8.8 0-16 7.2-16 16z"],
+    "left": [320, 512, [], "solid", "M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"],
+    "right": [320, 512, [], "solid", "M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"],
+    "up": [448, 512, [], "solid", "M201.4 137.4c12.5-12.5 32.8-12.5 45.3 0l160 160c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L224 205.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l160-160z"],
+    "down": [448, 512, [], "solid", "M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"],
+    "arrows": [512, 512, ["arrows-up-down-left-right"], "solid", "M278.6 9.4c-12.5-12.5-32.8-12.5-45.3 0l-64 64c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l9.4-9.4L224 224l-114.7 0 9.4-9.4c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-64 64c-12.5 12.5-12.5 32.8 0 45.3l64 64c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-9.4-9.4L224 288l0 114.7-9.4-9.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l64 64c12.5 12.5 32.8 12.5 45.3 0l64-64c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-9.4 9.4L288 288l114.7 0-9.4 9.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l64-64c12.5-12.5 12.5-32.8 0-45.3l-64-64c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l9.4 9.4L288 224l0-114.7 9.4 9.4c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-64-64z"],
+    "rotate": [512, 512, [], "solid", "M142.9 142.9c-17.5 17.5-30.1 38-37.8 59.8c-5.9 16.7-24.2 25.4-40.8 19.5s-25.4-24.2-19.5-40.8C55.6 150.7 73.2 122 97.6 97.6c87.2-87.2 228.3-87.5 315.8-1L455 55c6.9-6.9 17.2-8.9 26.2-5.2s14.8 12.5 14.8 22.2l0 128c0 13.3-10.7 24-24 24l-8.4 0c0 0 0 0 0 0L344 224c-9.7 0-18.5-5.8-22.2-14.8s-1.7-19.3 5.2-26.2l41.1-41.1c-62.6-61.5-163.1-61.2-225.3 1zM16 312c0-13.3 10.7-24 24-24l7.6 0 .7 0L168 288c9.7 0 18.5 5.8 22.2 14.8s1.7 19.3-5.2 26.2l-41.1 41.1c62.6 61.5 163.1 61.2 225.3-1c17.5-17.5 30.1-38 37.8-59.8c5.9-16.7 24.2-25.4 40.8-19.5s25.4 24.2 19.5 40.8c-10.8 30.6-28.4 59.3-52.9 83.8c-87.2 87.2-228.3 87.5-315.8 1L57 457c-6.9 6.9-17.2 8.9-26.2 5.2S16 449.7 16 440l0-119.6 0-.7 0-7.6z"],
+    "rotate-right": [512, 512, ["rotate-forward"], "solid", "M463.5 224l8.5 0c13.3 0 24-10.7 24-24l0-128c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1c-87.5 87.5-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8l119.5 0z"],
+    "rotate-left": [512, 512, ["rotate-back"], "solid", "M48.5 224L40 224c-13.3 0-24-10.7-24-24L16 72c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2L98.6 96.6c87.6-86.5 228.7-86.2 315.8 1c87.5 87.5 87.5 229.3 0 316.8s-229.3 87.5-316.8 0c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0c62.5 62.5 163.8 62.5 226.3 0s62.5-163.8 0-226.3c-62.2-62.2-162.7-62.5-225.3-1L185 183c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8L48.5 224z"],
+    "arrow-pointer": [320, 512, [], "solid", "M0 55.2L0 426c0 12.2 9.9 22 22 22c6.3 0 12.4-2.7 16.6-7.5L121.2 346l58.1 116.3c7.9 15.8 27.1 22.2 42.9 14.3s22.2-27.1 14.3-42.9L179.8 320l118.1 0c12.2 0 22.1-9.9 22.1-22.1c0-6.3-2.7-12.3-7.4-16.5L38.6 37.9C34.3 34.1 28.9 32 23.2 32C10.4 32 0 42.4 0 55.2z"],
+    "hand-pointer": [448, 512, [], "regular", "M160 64c0-8.8 7.2-16 16-16s16 7.2 16 16l0 136c0 10.3 6.6 19.5 16.4 22.8s20.6-.1 26.8-8.3c3-3.9 7.6-6.4 12.8-6.4c8.8 0 16 7.2 16 16c0 10.3 6.6 19.5 16.4 22.8s20.6-.1 26.8-8.3c3-3.9 7.6-6.4 12.8-6.4c7.8 0 14.3 5.6 15.7 13c1.6 8.2 7.3 15.1 15.1 18s16.7 1.6 23.3-3.6c2.7-2.1 6.1-3.4 9.9-3.4c8.8 0 16 7.2 16 16l0 16 0 104c0 39.8-32.2 72-72 72l-56 0-59.8 0-.9 0c-37.4 0-72.4-18.7-93.2-49.9L50.7 312.9c-4.9-7.4-2.9-17.3 4.4-22.2s17.3-2.9 22.2 4.4L116 353.2c5.9 8.8 16.8 12.7 26.9 9.7s17-12.4 17-23l0-19.9 0-256zM176 0c-35.3 0-64 28.7-64 64l0 197.7C91.2 238 55.5 232.8 28.5 250.7C-.9 270.4-8.9 310.1 10.8 339.5L78.3 440.8c29.7 44.5 79.6 71.2 133.1 71.2l.9 0 59.8 0 56 0c66.3 0 120-53.7 120-120l0-104 0-16c0-35.3-28.7-64-64-64c-4.5 0-8.8 .5-13 1.3c-11.7-15.4-30.2-25.3-51-25.3c-6.9 0-13.5 1.1-19.7 3.1C288.7 170.7 269.6 160 248 160c-2.7 0-5.4 .2-8 .5L240 64c0-35.3-28.7-64-64-64zm48 304c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 96c0 8.8 7.2 16 16 16s16-7.2 16-16l0-96zm48-16c-8.8 0-16 7.2-16 16l0 96c0 8.8 7.2 16 16 16s16-7.2 16-16l0-96c0-8.8-7.2-16-16-16zm80 16c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 96c0 8.8 7.2 16 16 16s16-7.2 16-16l0-96z"],
+    "log-in": [512, 512, [], "solid", "M352 96l64 0c17.7 0 32 14.3 32 32l0 256c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0c53 0 96-43 96-96l0-256c0-53-43-96-96-96l-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32zm-9.4 182.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L242.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128z"],
+    "log-out": [512, 512, [], "solid", "M502.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 224 192 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128zM160 96c17.7 0 32-14.3 32-32s-14.3-32-32-32L96 32C43 32 0 75 0 128L0 384c0 53 43 96 96 96l64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32l64 0z"],
+    "menu-arrows": [512, 512, [], "solid", "M352 144l96 112-96 112M160 144L64 256l96 112", "transform=rotate(90)", "fill=none stroke=currentColor stroke-width=60 stroke-linejoin=round stroke-linecap=round"],
+    "more": [128, 512, [], "solid", "M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"],
+    "minus": [448, 512, [], "solid", "M432 256c0 17.7-14.3 32-32 32L48 288c-17.7 0-32-14.3-32-32s14.3-32 32-32l352 0c17.7 0 32 14.3 32 32z"],
+    "more-horizontal": [448, 512, [], "solid", "M8 256a56 56 0 1 1 112 0A56 56 0 1 1 8 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z"],
+    "plus": [448, 512, [], "solid", "M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"],
+    "circle-plus": [24, 24, [], "regular", "M12 8V16M8 12H16M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z", null, "fill=none stroke-width=2 stroke-linecap=round stroke-linejoin=round"],
+    "search": [512, 512, [], "solid", "M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"],
+    "compass": [512, 512, [], "regular", "M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm306.7 69.1L162.4 380.6c-19.4 7.5-38.5-11.6-31-31l55.5-144.3c3.3-8.5 9.9-15.1 18.4-18.4l144.3-55.5c19.4-7.5 38.5 11.6 31 31L325.1 306.7c-3.2 8.5-9.9 15.1-18.4 18.4zM288 256a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"],
+    "sidebar": [512, 512, [], "regular", "M64 64h384a32 32 0 0 1 32 32v320a32 32 0 0 1-32 32H64a32 32 0 0 1-32-32V96a32 32 0 0 1 32-32zm128 0v384", null, "fill=none stroke=currentColor stroke-width=50 stroke-linejoin=round stroke-linecap=round"],
+    "table-cells": [512, 512, [], "solid", "M64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zm88 64l0 64-88 0 0-64 88 0zm56 0l88 0 0 64-88 0 0-64zm240 0l0 64-88 0 0-64 88 0zM64 224l88 0 0 64-88 0 0-64zm232 0l0 64-88 0 0-64 88 0zm64 0l88 0 0 64-88 0 0-64zM152 352l0 64-88 0 0-64 88 0zm56 0l88 0 0 64-88 0 0-64zm240 0l0 64-88 0 0-64 88 0z"],
+    "table-cells-large": [512, 512, [], "solid", "M448 96l0 128-160 0 0-128 160 0zm0 192l0 128-160 0 0-128 160 0zM224 224L64 224 64 96l160 0 0 128zM64 288l160 0 0 128L64 416l0-128zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32z"],
+    "lightbulb": [384, 512, [], "regular", "M297.2 248.9C311.6 228.3 320 203.2 320 176c0-70.7-57.3-128-128-128S64 105.3 64 176c0 27.2 8.4 52.3 22.8 72.9c3.7 5.3 8.1 11.3 12.8 17.7c0 0 0 0 0 0c12.9 17.7 28.3 38.9 39.8 59.8c10.4 19 15.7 38.8 18.3 57.5L109 384c-2.2-12-5.9-23.7-11.8-34.5c-9.9-18-22.2-34.9-34.5-51.8c0 0 0 0 0 0s0 0 0 0c-5.2-7.1-10.4-14.2-15.4-21.4C27.6 247.9 16 213.3 16 176C16 78.8 94.8 0 192 0s176 78.8 176 176c0 37.3-11.6 71.9-31.4 100.3c-5 7.2-10.2 14.3-15.4 21.4c0 0 0 0 0 0s0 0 0 0c-12.3 16.8-24.6 33.7-34.5 51.8c-5.9 10.8-9.6 22.5-11.8 34.5l-48.6 0c2.6-18.7 7.9-38.6 18.3-57.5c11.5-20.9 26.9-42.1 39.8-59.8c0 0 0 0 0 0s0 0 0 0s0 0 0 0c4.7-6.4 9-12.4 12.7-17.7zM192 128c-26.5 0-48 21.5-48 48c0 8.8-7.2 16-16 16s-16-7.2-16-16c0-44.2 35.8-80 80-80c8.8 0 16 7.2 16 16s-7.2 16-16 16zm0 384c-44.2 0-80-35.8-80-80l0-16 160 0 0 16c0 44.2-35.8 80-80 80z"],
+    "flag": [448, 512, [], "regular", "M48 24C48 10.7 37.3 0 24 0S0 10.7 0 24L0 64 0 350.5 0 400l0 88c0 13.3 10.7 24 24 24s24-10.7 24-24l0-100 80.3-20.1c41.1-10.3 84.6-5.5 122.5 13.4c44.2 22.1 95.5 24.8 141.7 7.4l34.7-13c12.5-4.7 20.8-16.6 20.8-30l0-279.7c0-23-24.2-38-44.8-27.7l-9.6 4.8c-46.3 23.2-100.8 23.2-147.1 0c-35.1-17.6-75.4-22-113.5-12.5L48 52l0-28zm0 77.5l96.6-24.2c27-6.7 55.5-3.6 80.4 8.8c54.9 27.4 118.7 29.7 175 6.8l0 241.8-24.4 9.1c-33.7 12.6-71.2 10.7-103.4-5.4c-48.2-24.1-103.3-30.1-155.6-17.1L48 338.5l0-237z"],
+    "shuffle": [512, 512, [], "solid", "M403.8 34.4c12-5 25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6l0-32-32 0c-10.1 0-19.6 4.7-25.6 12.8L284 229.3 244 176l31.2-41.6C293.3 110.2 321.8 96 352 96l32 0 0-32c0-12.9 7.8-24.6 19.8-29.6zM164 282.7L204 336l-31.2 41.6C154.7 401.8 126.2 416 96 416l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l64 0c10.1 0 19.6-4.7 25.6-12.8L164 282.7zm274.6 188c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6l0-32-32 0c-30.2 0-58.7-14.2-76.8-38.4L121.6 172.8c-6-8.1-15.5-12.8-25.6-12.8l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l64 0c30.2 0 58.7 14.2 76.8 38.4L326.4 339.2c6 8.1 15.5 12.8 25.6 12.8l32 0 0-32c0-12.9 7.8-24.6 19.8-29.6s25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64z"],
+    "credit-card": [576, 512, [], "regular", "M512 80c8.8 0 16 7.2 16 16l0 32L48 128l0-32c0-8.8 7.2-16 16-16l448 0zm16 144l0 192c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16l0-192 480 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l448 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zm56 304c-13.3 0-24 10.7-24 24s10.7 24 24 24l48 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-48 0zm128 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l112 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-112 0z"],
+    "lock": [448, 512, [], "solid", "M144 144l0 48 160 0 0-48c0-44.2-35.8-80-80-80s-80 35.8-80 80zM80 192l0-48C80 64.5 144.5 0 224 0s144 64.5 144 144l0 48 16 0c35.3 0 64 28.7 64 64l0 192c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 256c0-35.3 28.7-64 64-64l16 0z"],
+    "lock-open": [576, 512, [], "solid", "M352 144c0-44.2 35.8-80 80-80s80 35.8 80 80l0 48c0 17.7 14.3 32 32 32s32-14.3 32-32l0-48C576 64.5 511.5 0 432 0S288 64.5 288 144l0 48L64 192c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-192c0-35.3-28.7-64-64-64l-32 0 0-48z"],
+    "trash-can": [448, 512, [], "regular", "M170.5 51.6L151.5 80l145 0-19-28.4c-1.5-2.2-4-3.6-6.7-3.6l-93.7 0c-2.7 0-5.2 1.3-6.7 3.6zm147-26.6L354.2 80 368 80l48 0 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-8 0 0 304c0 44.2-35.8 80-80 80l-224 0c-44.2 0-80-35.8-80-80l0-304-8 0c-13.3 0-24-10.7-24-24S10.7 80 24 80l8 0 48 0 13.8 0 36.7-55.1C140.9 9.4 158.4 0 177.1 0l93.7 0c18.7 0 36.2 9.4 46.6 24.9zM80 128l0 304c0 17.7 14.3 32 32 32l224 0c17.7 0 32-14.3 32-32l0-304L80 128zm80 64l0 208c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-208c0-8.8 7.2-16 16-16s16 7.2 16 16zm80 0l0 208c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-208c0-8.8 7.2-16 16-16s16 7.2 16 16zm80 0l0 208c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-208c0-8.8 7.2-16 16-16s16 7.2 16 16z"],
+    "user": [448, 512, [], "regular", "M304 128a80 80 0 1 0 -160 0 80 80 0 1 0 160 0zM96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM49.3 464l349.5 0c-8.9-63.3-63.3-112-129-112l-91.4 0c-65.7 0-120.1 48.7-129 112zM0 482.3C0 383.8 79.8 304 178.3 304l91.4 0C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7L29.7 512C13.3 512 0 498.7 0 482.3z"],
+    "street-view": [512, 512, [], "solid", "M320 64A64 64 0 1 0 192 64a64 64 0 1 0 128 0zm-96 96c-35.3 0-64 28.7-64 64l0 48c0 17.7 14.3 32 32 32l1.8 0 11.1 99.5c1.8 16.2 15.5 28.5 31.8 28.5l38.7 0c16.3 0 30-12.3 31.8-28.5L318.2 304l1.8 0c17.7 0 32-14.3 32-32l0-48c0-35.3-28.7-64-64-64l-64 0zM132.3 394.2c13-2.4 21.7-14.9 19.3-27.9s-14.9-21.7-27.9-19.3c-32.4 5.9-60.9 14.2-82 24.8c-10.5 5.3-20.3 11.7-27.8 19.6C6.4 399.5 0 410.5 0 424c0 21.4 15.5 36.1 29.1 45c14.7 9.6 34.3 17.3 56.4 23.4C130.2 504.7 190.4 512 256 512s125.8-7.3 170.4-19.6c22.1-6.1 41.8-13.8 56.4-23.4c13.7-8.9 29.1-23.6 29.1-45c0-13.5-6.4-24.5-14-32.6c-7.5-7.9-17.3-14.3-27.8-19.6c-21-10.6-49.5-18.9-82-24.8c-13-2.4-25.5 6.3-27.9 19.3s6.3 25.5 19.3 27.9c30.2 5.5 53.7 12.8 69 20.5c3.2 1.6 5.8 3.1 7.9 4.5c3.6 2.4 3.6 7.2 0 9.6c-8.8 5.7-23.1 11.8-43 17.3C374.3 457 318.5 464 256 464s-118.3-7-157.7-17.9c-19.9-5.5-34.2-11.6-43-17.3c-3.6-2.4-3.6-7.2 0-9.6c2.1-1.4 4.8-2.9 7.9-4.5c15.3-7.7 38.8-14.9 69-20.5z"],
+    "closed-captioning": [576, 512, ["cc"], "regular", "M512 80c8.8 0 16 7.2 16 16l0 320c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16L48 96c0-8.8 7.2-16 16-16l448 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l448 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zM200 208c14.2 0 27 6.1 35.8 16c8.8 9.9 24 10.7 33.9 1.9s10.7-24 1.9-33.9c-17.5-19.6-43.1-32-71.5-32c-53 0-96 43-96 96s43 96 96 96c28.4 0 54-12.4 71.5-32c8.8-9.9 8-25-1.9-33.9s-25-8-33.9 1.9c-8.8 9.9-21.6 16-35.8 16c-26.5 0-48-21.5-48-48s21.5-48 48-48zm144 48c0-26.5 21.5-48 48-48c14.2 0 27 6.1 35.8 16c8.8 9.9 24 10.7 33.9 1.9s10.7-24 1.9-33.9c-17.5-19.6-43.1-32-71.5-32c-53 0-96 43-96 96s43 96 96 96c28.4 0 54-12.4 71.5-32c8.8-9.9 8-25-1.9-33.9s-25-8-33.9 1.9c-8.8 9.9-21.6 16-35.8 16c-26.5 0-48-21.5-48-48z"],
+    "bone": [576, 512, [], "solid", "M153.7 144.8c6.9 16.3 20.6 31.2 38.3 31.2l192 0c17.7 0 31.4-14.9 38.3-31.2C434.4 116.1 462.9 96 496 96c44.2 0 80 35.8 80 80c0 30.4-17 56.9-42 70.4c-3.6 1.9-6 5.5-6 9.6s2.4 7.7 6 9.6c25 13.5 42 40 42 70.4c0 44.2-35.8 80-80 80c-33.1 0-61.6-20.1-73.7-48.8C415.4 350.9 401.7 336 384 336l-192 0c-17.7 0-31.4 14.9-38.3 31.2C141.6 395.9 113.1 416 80 416c-44.2 0-80-35.8-80-80c0-30.4 17-56.9 42-70.4c3.6-1.9 6-5.5 6-9.6s-2.4-7.7-6-9.6C17 232.9 0 206.4 0 176c0-44.2 35.8-80 80-80c33.1 0 61.6 20.1 73.7 48.8z"],
+    "hands-asl-interpreting": [640, 512, ["asl"], "solid", "M156.6 46.3c7.9-15.8 1.5-35-14.3-42.9s-35-1.5-42.9 14.3L13.5 189.4C4.6 207.2 0 226.8 0 246.7L0 256c0 70.7 57.3 128 128 128l72 0 8 0 0-.3c35.2-2.7 65.4-22.8 82.1-51.7c8.8-15.3 3.6-34.9-11.7-43.7s-34.9-3.6-43.7 11.7c-7 12-19.9 20-34.7 20c-22.1 0-40-17.9-40-40s17.9-40 40-40c14.8 0 27.7 8 34.7 20c8.8 15.3 28.4 20.5 43.7 11.7s20.5-28.4 11.7-43.7c-12.8-22.1-33.6-39.1-58.4-47.1l80.8-22c17-4.6 27.1-22.2 22.5-39.3s-22.2-27.1-39.3-22.5L194.9 124.6l81.6-68c13.6-11.3 15.4-31.5 4.1-45.1S249.1-3.9 235.5 7.4L133.6 92.3l23-46zM483.4 465.7c-7.9 15.8-1.5 35 14.3 42.9s35 1.5 42.9-14.3l85.9-171.7c8.9-17.8 13.5-37.4 13.5-57.2l0-9.3c0-70.7-57.3-128-128-128l-72 0-8 0 0 .3c-35.2 2.7-65.4 22.8-82.1 51.7c-8.9 15.3-3.6 34.9 11.7 43.7s34.9 3.6 43.7-11.7c7-12 19.9-20 34.7-20c22.1 0 40 17.9 40 40s-17.9 40-40 40c-14.8 0-27.7-8-34.7-20c-8.9-15.3-28.4-20.5-43.7-11.7s-20.5 28.4-11.7 43.7c12.8 22.1 33.6 39.1 58.4 47.1l-80.8 22c-17.1 4.7-27.1 22.2-22.5 39.3s22.2 27.1 39.3 22.5l100.7-27.5-81.6 68c-13.6 11.3-15.4 31.5-4.1 45.1s31.5 15.4 45.1 4.1l101.9-84.9-23 46z"],
+    "sun": [512, 512, [], "regular", "M375.7 19.7c-1.5-8-6.9-14.7-14.4-17.8s-16.1-2.2-22.8 2.4L256 61.1 173.5 4.2c-6.7-4.6-15.3-5.5-22.8-2.4s-12.9 9.8-14.4 17.8l-18.1 98.5L19.7 136.3c-8 1.5-14.7 6.9-17.8 14.4s-2.2 16.1 2.4 22.8L61.1 256 4.2 338.5c-4.6 6.7-5.5 15.3-2.4 22.8s9.8 13 17.8 14.4l98.5 18.1 18.1 98.5c1.5 8 6.9 14.7 14.4 17.8s16.1 2.2 22.8-2.4L256 450.9l82.5 56.9c6.7 4.6 15.3 5.5 22.8 2.4s12.9-9.8 14.4-17.8l18.1-98.5 98.5-18.1c8-1.5 14.7-6.9 17.8-14.4s2.2-16.1-2.4-22.8L450.9 256l56.9-82.5c4.6-6.7 5.5-15.3 2.4-22.8s-9.8-12.9-17.8-14.4l-98.5-18.1L375.7 19.7zM269.6 110l65.6-45.2 14.4 78.3c1.8 9.8 9.5 17.5 19.3 19.3l78.3 14.4L402 242.4c-5.7 8.2-5.7 19 0 27.2l45.2 65.6-78.3 14.4c-9.8 1.8-17.5 9.5-19.3 19.3l-14.4 78.3L269.6 402c-8.2-5.7-19-5.7-27.2 0l-65.6 45.2-14.4-78.3c-1.8-9.8-9.5-17.5-19.3-19.3L64.8 335.2 110 269.6c5.7-8.2 5.7-19 0-27.2L64.8 176.8l78.3-14.4c9.8-1.8 17.5-9.5 19.3-19.3l14.4-78.3L242.4 110c8.2 5.7 19 5.7 27.2 0zM256 368a112 112 0 1 0 0-224 112 112 0 1 0 0 224zM192 256a64 64 0 1 1 128 0 64 64 0 1 1 -128 0z"],
+    "moon": [384, 512, [], "regular", "M144.7 98.7c-21 34.1-33.1 74.3-33.1 117.3c0 98 62.8 181.4 150.4 211.7c-12.4 2.8-25.3 4.3-38.6 4.3C126.6 432 48 353.3 48 256c0-68.9 39.4-128.4 96.8-157.3zm62.1-66C91.1 41.2 0 137.9 0 256C0 379.7 100 480 223.5 480c47.8 0 92-15 128.4-40.6c1.9-1.3 3.7-2.7 5.5-4c4.8-3.6 9.4-7.4 13.9-11.4c2.7-2.4 5.3-4.8 7.9-7.3c5-4.9 6.3-12.5 3.1-18.7s-10.1-9.7-17-8.5c-3.7 .6-7.4 1.2-11.1 1.6c-5 .5-10.1 .9-15.3 1c-1.2 0-2.5 0-3.7 0l-.3 0c-96.8-.2-175.2-78.9-175.2-176c0-54.8 24.9-103.7 64.1-136c1-.9 2.1-1.7 3.2-2.6c4-3.2 8.2-6.2 12.5-9c3.1-2 6.3-4 9.6-5.8c6.1-3.5 9.2-10.5 7.7-17.3s-7.3-11.9-14.3-12.5c-3.6-.3-7.1-.5-10.7-.6c-2.7-.1-5.5-.1-8.2-.1c-3.3 0-6.5 .1-9.8 .2c-2.3 .1-4.6 .2-6.9 .4z"],
+    "heart": [512, 512, [], "regular", "M225.8 468.2l-2.5-2.3L48.1 303.2C17.4 274.7 0 234.7 0 192.8l0-3.3c0-70.4 50-130.8 119.2-144C158.6 37.9 198.9 47 231 69.6c9 6.4 17.4 13.8 25 22.3c4.2-4.8 8.7-9.2 13.5-13.3c3.7-3.2 7.5-6.2 11.5-9c0 0 0 0 0 0C313.1 47 353.4 37.9 392.8 45.4C462 58.6 512 119.1 512 189.5l0 3.3c0 41.9-17.4 81.9-48.1 110.4L288.7 465.9l-2.5 2.3c-8.2 7.6-19 11.9-30.2 11.9s-22-4.2-30.2-11.9zM239.1 145c-.4-.3-.7-.7-1-1.1l-17.8-20-.1-.1s0 0 0 0c-23.1-25.9-58-37.7-92-31.2C81.6 101.5 48 142.1 48 189.5l0 3.3c0 28.5 11.9 55.8 32.8 75.2L256 430.7 431.2 268c20.9-19.4 32.8-46.7 32.8-75.2l0-3.3c0-47.3-33.6-88-80.1-96.9c-34-6.5-69 5.4-92 31.2c0 0 0 0-.1 .1s0 0-.1 .1l-17.8 20c-.3 .4-.7 .7-1 1.1c-4.5 4.5-10.6 7-16.9 7s-12.4-2.5-16.9-7z"],
+    "xmark": [384, 512, [], "solid", "M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"],
+    "wand-sparkles": [512, 512, [], "solid", "M464 6.1c9.5-8.5 24-8.1 33 .9l8 8c9 9 9.4 23.5 .9 33l-85.8 95.9c-2.6 2.9-4.1 6.7-4.1 10.7l0 21.4c0 8.8-7.2 16-16 16l-15.8 0c-4.6 0-8.9 1.9-11.9 5.3L100.7 500.9C94.3 508 85.3 512 75.8 512c-8.8 0-17.3-3.5-23.5-9.8L9.7 459.7C3.5 453.4 0 445 0 436.2c0-9.5 4-18.5 11.1-24.8l111.6-99.8c3.4-3 5.3-7.4 5.3-11.9l0-27.6c0-8.8 7.2-16 16-16l34.6 0c3.9 0 7.7-1.5 10.7-4.1L464 6.1zM432 288c3.6 0 6.7 2.4 7.7 5.8l14.8 51.7 51.7 14.8c3.4 1 5.8 4.1 5.8 7.7s-2.4 6.7-5.8 7.7l-51.7 14.8-14.8 51.7c-1 3.4-4.1 5.8-7.7 5.8s-6.7-2.4-7.7-5.8l-14.8-51.7-51.7-14.8c-3.4-1-5.8-4.1-5.8-7.7s2.4-6.7 5.8-7.7l51.7-14.8 14.8-51.7c1-3.4 4.1-5.8 7.7-5.8zM87.7 69.8l14.8 51.7 51.7 14.8c3.4 1 5.8 4.1 5.8 7.7s-2.4 6.7-5.8 7.7l-51.7 14.8L87.7 218.2c-1 3.4-4.1 5.8-7.7 5.8s-6.7-2.4-7.7-5.8L57.5 166.5 5.8 151.7c-3.4-1-5.8-4.1-5.8-7.7s2.4-6.7 5.8-7.7l51.7-14.8L72.3 69.8c1-3.4 4.1-5.8 7.7-5.8s6.7 2.4 7.7 5.8zM208 0c3.7 0 6.9 2.5 7.8 6.1l6.8 27.3 27.3 6.8c3.6 .9 6.1 4.1 6.1 7.8s-2.5 6.9-6.1 7.8l-27.3 6.8-6.8 27.3c-.9 3.6-4.1 6.1-7.8 6.1s-6.9-2.5-7.8-6.1l-6.8-27.3-27.3-6.8c-3.6-.9-6.1-4.1-6.1-7.8s2.5-6.9 6.1-7.8l27.3-6.8 6.8-27.3c.9-3.6 4.1-6.1 7.8-6.1z"],
+    "star": [576, 512, [], "regular", "M287.9 0c9.2 0 17.6 5.2 21.6 13.5l68.6 141.3 153.2 22.6c9 1.3 16.5 7.6 19.3 16.3s.5 18.1-5.9 24.5L433.6 328.4l26.2 155.6c1.5 9-2.2 18.1-9.7 23.5s-17.3 6-25.3 1.7l-137-73.2L151 509.1c-8.1 4.3-17.9 3.7-25.3-1.7s-11.2-14.5-9.7-23.5l26.2-155.6L31.1 218.2c-6.5-6.4-8.7-15.9-5.9-24.5s10.3-14.9 19.3-16.3l153.2-22.6L266.3 13.5C270.4 5.2 278.7 0 287.9 0zm0 79L235.4 187.2c-3.5 7.1-10.2 12.1-18.1 13.3L99 217.9 184.9 303c5.5 5.5 8.1 13.3 6.8 21L171.4 443.7l105.2-56.2c7.1-3.8 15.6-3.8 22.6 0l105.2 56.2L384.2 324.1c-1.3-7.7 1.2-15.5 6.8-21l85.9-85.1L358.6 200.5c-7.8-1.2-14.6-6.1-18.1-13.3L287.9 79z"],
+    "puzzle-piece": [512, 512, [], "solid", "M192 104.8c0-9.2-5.8-17.3-13.2-22.8C167.2 73.3 160 61.3 160 48c0-26.5 28.7-48 64-48s64 21.5 64 48c0 13.3-7.2 25.3-18.8 34c-7.4 5.5-13.2 13.6-13.2 22.8c0 12.8 10.4 23.2 23.2 23.2l56.8 0c26.5 0 48 21.5 48 48l0 56.8c0 12.8 10.4 23.2 23.2 23.2c9.2 0 17.3-5.8 22.8-13.2c8.7-11.6 20.7-18.8 34-18.8c26.5 0 48 28.7 48 64s-21.5 64-48 64c-13.3 0-25.3-7.2-34-18.8c-5.5-7.4-13.6-13.2-22.8-13.2c-12.8 0-23.2 10.4-23.2 23.2L384 464c0 26.5-21.5 48-48 48l-56.8 0c-12.8 0-23.2-10.4-23.2-23.2c0-9.2 5.8-17.3 13.2-22.8c11.6-8.7 18.8-20.7 18.8-34c0-26.5-28.7-48-64-48s-64 21.5-64 48c0 13.3 7.2 25.3 18.8 34c7.4 5.5 13.2 13.6 13.2 22.8c0 12.8-10.4 23.2-23.2 23.2L48 512c-26.5 0-48-21.5-48-48L0 343.2C0 330.4 10.4 320 23.2 320c9.2 0 17.3 5.8 22.8 13.2C54.7 344.8 66.7 352 80 352c26.5 0 48-28.7 48-64s-21.5-64-48-64c-13.3 0-25.3 7.2-34 18.8C40.5 250.2 32.4 256 23.2 256C10.4 256 0 245.6 0 232.8L0 176c0-26.5 21.5-48 48-48l120.8 0c12.8 0 23.2-10.4 23.2-23.2z"],
+    // brands
+    "discord": [640, 512, [], "brands", "M524.531,69.836a1.5,1.5,0,0,0-.764-.7A485.065,485.065,0,0,0,404.081,32.03a1.816,1.816,0,0,0-1.923.91,337.461,337.461,0,0,0-14.9,30.6,447.848,447.848,0,0,0-134.426,0,309.541,309.541,0,0,0-15.135-30.6,1.89,1.89,0,0,0-1.924-.91A483.689,483.689,0,0,0,116.085,69.137a1.712,1.712,0,0,0-.788.676C39.068,183.651,18.186,294.69,28.43,404.354a2.016,2.016,0,0,0,.765,1.375A487.666,487.666,0,0,0,176.02,479.918a1.9,1.9,0,0,0,2.063-.676A348.2,348.2,0,0,0,208.12,430.4a1.86,1.86,0,0,0-1.019-2.588,321.173,321.173,0,0,1-45.868-21.853,1.885,1.885,0,0,1-.185-3.126c3.082-2.309,6.166-4.711,9.109-7.137a1.819,1.819,0,0,1,1.9-.256c96.229,43.917,200.41,43.917,295.5,0a1.812,1.812,0,0,1,1.924.233c2.944,2.426,6.027,4.851,9.132,7.16a1.884,1.884,0,0,1-.162,3.126,301.407,301.407,0,0,1-45.89,21.83,1.875,1.875,0,0,0-1,2.611,391.055,391.055,0,0,0,30.014,48.815,1.864,1.864,0,0,0,2.063.7A486.048,486.048,0,0,0,610.7,405.729a1.882,1.882,0,0,0,.765-1.352C623.729,277.594,590.933,167.465,524.531,69.836ZM222.491,337.58c-28.972,0-52.844-26.587-52.844-59.239S193.056,219.1,222.491,219.1c29.665,0,53.306,26.82,52.843,59.239C275.334,310.993,251.924,337.58,222.491,337.58Zm195.38,0c-28.971,0-52.843-26.587-52.843-59.239S388.437,219.1,417.871,219.1c29.667,0,53.307,26.82,52.844,59.239C470.715,310.993,447.538,337.58,417.871,337.58Z"],
+    "github": [496, 512, [], "brands", "M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"],
+    "square-js": [448, 512, [], "brands", "M448 96c0-35.3-28.7-64-64-64H64C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V96zM180.9 444.9c-33.7 0-53.2-17.4-63.2-38.5L152 385.7c6.6 11.7 12.6 21.6 27.1 21.6c13.8 0 22.6-5.4 22.6-26.5V237.7h42.1V381.4c0 43.6-25.6 63.5-62.9 63.5zm85.8-43L301 382.1c9 14.7 20.8 25.6 41.5 25.6c17.4 0 28.6-8.7 28.6-20.8c0-14.4-11.4-19.5-30.7-28l-10.5-4.5c-30.4-12.9-50.5-29.2-50.5-63.5c0-31.6 24.1-55.6 61.6-55.6c26.8 0 46 9.3 59.8 33.7L368 290c-7.2-12.9-15-18-27.1-18c-12.3 0-20.1 7.8-20.1 18c0 12.6 7.8 17.7 25.9 25.6l10.5 4.5c35.8 15.3 55.9 31 55.9 66.2c0 37.8-29.8 58.6-69.7 58.6c-39.1 0-64.4-18.6-76.7-43z"],
+    "python": [448, 512, [], "brands", "M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6zM286.2 404c11.1 0 20.1 9.1 20.1 20.3 0 11.3-9 20.4-20.1 20.4-11 0-20.1-9.2-20.1-20.4.1-11.3 9.1-20.3 20.1-20.3zM167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4zm-6.7-142.6c-11.1 0-20.1-9.1-20.1-20.3.1-11.3 9-20.4 20.1-20.4 11 0 20.1 9.2 20.1 20.4s-9 20.3-20.1 20.3z"],
+    "microsoft": [448, 512, [], "brands", "M0 32h214.6v214.6H0V32zm233.4 0H448v214.6H233.4V32zM0 265.4h214.6V480H0V265.4zm233.4 0H448V480H233.4V265.4z"],
+    "apple": [384, 512, [], "brands", "M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"],
+    "youtube": [576, 512, [], "brands", "M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"],
+    "x-twitter": [512, 512, [], "brands", "M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"],
+    "chrome": [512, 512, [], "brands", "M0 256C0 209.4 12.47 165.6 34.27 127.1L144.1 318.3C166 357.5 207.9 384 256 384C270.3 384 283.1 381.7 296.8 377.4L220.5 509.6C95.9 492.3 0 385.3 0 256zM365.1 321.6C377.4 302.4 384 279.1 384 256C384 217.8 367.2 183.5 340.7 160H493.4C505.4 189.6 512 222.1 512 256C512 397.4 397.4 511.1 256 512L365.1 321.6zM477.8 128H256C193.1 128 142.3 172.1 130.5 230.7L54.19 98.47C101 38.53 174 0 256 0C350.8 0 433.5 51.48 477.8 128V128zM168 256C168 207.4 207.4 168 256 168C304.6 168 344 207.4 344 256C344 304.6 304.6 344 256 344C207.4 344 168 304.6 168 256z"],
+    "reddit": [512, 512, [], "brands", "M0 256C0 114.6 114.6 0 256 0S512 114.6 512 256s-114.6 256-256 256L37.1 512c-13.7 0-20.5-16.5-10.9-26.2L75 437C28.7 390.7 0 326.7 0 256zM349.6 153.6c23.6 0 42.7-19.1 42.7-42.7s-19.1-42.7-42.7-42.7c-20.6 0-37.8 14.6-41.8 34c-34.5 3.7-61.4 33-61.4 68.4l0 .2c-37.5 1.6-71.8 12.3-99 29.1c-10.1-7.8-22.8-12.5-36.5-12.5c-33 0-59.8 26.8-59.8 59.8c0 24 14.1 44.6 34.4 54.1c2 69.4 77.6 125.2 170.6 125.2s168.7-55.9 170.6-125.3c20.2-9.6 34.1-30.2 34.1-54c0-33-26.8-59.8-59.8-59.8c-13.7 0-26.3 4.6-36.4 12.4c-27.4-17-62.1-27.7-100-29.1l0-.2c0-25.4 18.9-46.5 43.4-49.9l0 0c4.4 18.8 21.3 32.8 41.5 32.8zM177.1 246.9c16.7 0 29.5 17.6 28.5 39.3s-13.5 29.6-30.3 29.6s-31.4-8.8-30.4-30.5s15.4-38.3 32.1-38.3zm190.1 38.3c1 21.7-13.7 30.5-30.4 30.5s-29.3-7.9-30.3-29.6c-1-21.7 11.8-39.3 28.5-39.3s31.2 16.6 32.1 38.3zm-48.1 56.7c-10.3 24.6-34.6 41.9-63 41.9s-52.7-17.3-63-41.9c-1.2-2.9 .8-6.2 3.9-6.5c18.4-1.9 38.3-2.9 59.1-2.9s40.7 1 59.1 2.9c3.1 .3 5.1 3.6 3.9 6.5z"],
+    "ubuntu": [576, 512, [], "brands", "M469.2 75A75.6 75.6 0 1 0 317.9 75a75.6 75.6 0 1 0 151.2 0zM154.2 240.7A75.6 75.6 0 1 0 3 240.7a75.6 75.6 0 1 0 151.2 0zM57 346C75.6 392.9 108 433 150 461.1s91.5 42.6 142 41.7c-14.7-18.6-22.9-41.5-23.2-65.2c-6.8-.9-13.3-2.1-19.5-3.4c-26.8-5.7-51.9-17.3-73.6-34s-39.3-38.1-51.7-62.5c-20.9 9.9-44.5 12.8-67.1 8.2zm395.1 89.8a75.6 75.6 0 1 0 -151.2 0 75.6 75.6 0 1 0 151.2 0zM444 351.6c18.5 14.8 31.6 35.2 37.2 58.2c33.3-41.3 52.6-92.2 54.8-145.2s-12.5-105.4-42.2-149.4c-8.6 21.5-24 39.6-43.8 51.6c15.4 28.6 22.9 60.8 21.9 93.2s-10.7 64-28 91.6zM101.1 135.4c12.4 2.7 24.3 7.5 35.1 14.3c16.6-24.2 38.9-44.1 64.8-58S255.8 70.4 285.2 70c.2-5.9 .9-11.9 2-17.7c3.6-16.7 11.1-32.3 21.8-45.5c-47.7-3.8-95.4 6-137.6 28.5S94.3 91.7 70.8 133.4c2.7-.2 5.3-.3 8-.3c7.5 0 15 .8 22.4 2.3z"],
+    "whatsapp": [448, 512, [], "brands", "M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"],
+    "linux": [448, 512, [], "brands", "M220.8 123.3c1 .5 1.8 1.7 3 1.7 1.1 0 2.8-.4 2.9-1.5.2-1.4-1.9-2.3-3.2-2.9-1.7-.7-3.9-1-5.5-.1-.4.2-.8.7-.6 1.1.3 1.3 2.3 1.1 3.4 1.7zm-21.9 1.7c1.2 0 2-1.2 3-1.7 1.1-.6 3.1-.4 3.5-1.6.2-.4-.2-.9-.6-1.1-1.6-.9-3.8-.6-5.5.1-1.3.6-3.4 1.5-3.2 2.9.1 1 1.8 1.5 2.8 1.4zM420 403.8c-3.6-4-5.3-11.6-7.2-19.7-1.8-8.1-3.9-16.8-10.5-22.4-1.3-1.1-2.6-2.1-4-2.9-1.3-.8-2.7-1.5-4.1-2 9.2-27.3 5.6-54.5-3.7-79.1-11.4-30.1-31.3-56.4-46.5-74.4-17.1-21.5-33.7-41.9-33.4-72C311.1 85.4 315.7.1 234.8 0 132.4-.2 158 103.4 156.9 135.2c-1.7 23.4-6.4 41.8-22.5 64.7-18.9 22.5-45.5 58.8-58.1 96.7-6 17.9-8.8 36.1-6.2 53.3-6.5 5.8-11.4 14.7-16.6 20.2-4.2 4.3-10.3 5.9-17 8.3s-14 6-18.5 14.5c-2.1 3.9-2.8 8.1-2.8 12.4 0 3.9.6 7.9 1.2 11.8 1.2 8.1 2.5 15.7.8 20.8-5.2 14.4-5.9 24.4-2.2 31.7 3.8 7.3 11.4 10.5 20.1 12.3 17.3 3.6 40.8 2.7 59.3 12.5 19.8 10.4 39.9 14.1 55.9 10.4 11.6-2.6 21.1-9.6 25.9-20.2 12.5-.1 26.3-5.4 48.3-6.6 14.9-1.2 33.6 5.3 55.1 4.1.6 2.3 1.4 4.6 2.5 6.7v.1c8.3 16.7 23.8 24.3 40.3 23 16.6-1.3 34.1-11 48.3-27.9 13.6-16.4 36-23.2 50.9-32.2 7.4-4.5 13.4-10.1 13.9-18.3.4-8.2-4.4-17.3-15.5-29.7zM223.7 87.3c9.8-22.2 34.2-21.8 44-.4 6.5 14.2 3.6 30.9-4.3 40.4-1.6-.8-5.9-2.6-12.6-4.9 1.1-1.2 3.1-2.7 3.9-4.6 4.8-11.8-.2-27-9.1-27.3-7.3-.5-13.9 10.8-11.8 23-4.1-2-9.4-3.5-13-4.4-1-6.9-.3-14.6 2.9-21.8zM183 75.8c10.1 0 20.8 14.2 19.1 33.5-3.5 1-7.1 2.5-10.2 4.6 1.2-8.9-3.3-20.1-9.6-19.6-8.4.7-9.8 21.2-1.8 28.1 1 .8 1.9-.2-5.9 5.5-15.6-14.6-10.5-52.1 8.4-52.1zm-13.6 60.7c6.2-4.6 13.6-10 14.1-10.5 4.7-4.4 13.5-14.2 27.9-14.2 7.1 0 15.6 2.3 25.9 8.9 6.3 4.1 11.3 4.4 22.6 9.3 8.4 3.5 13.7 9.7 10.5 18.2-2.6 7.1-11 14.4-22.7 18.1-11.1 3.6-19.8 16-38.2 14.9-3.9-.2-7-1-9.6-2.1-8-3.5-12.2-10.4-20-15-8.6-4.8-13.2-10.4-14.7-15.3-1.4-4.9 0-9 4.2-12.3zm3.3 334c-2.7 35.1-43.9 34.4-75.3 18-29.9-15.8-68.6-6.5-76.5-21.9-2.4-4.7-2.4-12.7 2.6-26.4v-.2c2.4-7.6.6-16-.6-23.9-1.2-7.8-1.8-15 .9-20 3.5-6.7 8.5-9.1 14.8-11.3 10.3-3.7 11.8-3.4 19.6-9.9 5.5-5.7 9.5-12.9 14.3-18 5.1-5.5 10-8.1 17.7-6.9 8.1 1.2 15.1 6.8 21.9 16l19.6 35.6c9.5 19.9 43.1 48.4 41 68.9zm-1.4-25.9c-4.1-6.6-9.6-13.6-14.4-19.6 7.1 0 14.2-2.2 16.7-8.9 2.3-6.2 0-14.9-7.4-24.9-13.5-18.2-38.3-32.5-38.3-32.5-13.5-8.4-21.1-18.7-24.6-29.9s-3-23.3-.3-35.2c5.2-22.9 18.6-45.2 27.2-59.2 2.3-1.7.8 3.2-8.7 20.8-8.5 16.1-24.4 53.3-2.6 82.4.6-20.7 5.5-41.8 13.8-61.5 12-27.4 37.3-74.9 39.3-112.7 1.1.8 4.6 3.2 6.2 4.1 4.6 2.7 8.1 6.7 12.6 10.3 12.4 10 28.5 9.2 42.4 1.2 6.2-3.5 11.2-7.5 15.9-9 9.9-3.1 17.8-8.6 22.3-15 7.7 30.4 25.7 74.3 37.2 95.7 6.1 11.4 18.3 35.5 23.6 64.6 3.3-.1 7 .4 10.9 1.4 13.8-35.7-11.7-74.2-23.3-84.9-4.7-4.6-4.9-6.6-2.6-6.5 12.6 11.2 29.2 33.7 35.2 59 2.8 11.6 3.3 23.7.4 35.7 16.4 6.8 35.9 17.9 30.7 34.8-2.2-.1-3.2 0-4.2 0 3.2-10.1-3.9-17.6-22.8-26.1-19.6-8.6-36-8.6-38.3 12.5-12.1 4.2-18.3 14.7-21.4 27.3-2.8 11.2-3.6 24.7-4.4 39.9-.5 7.7-3.6 18-6.8 29-32.1 22.9-76.7 32.9-114.3 7.2zm257.4-11.5c-.9 16.8-41.2 19.9-63.2 46.5-13.2 15.7-29.4 24.4-43.6 25.5s-26.5-4.8-33.7-19.3c-4.7-11.1-2.4-23.1 1.1-36.3 3.7-14.2 9.2-28.8 9.9-40.6.8-15.2 1.7-28.5 4.2-38.7 2.6-10.3 6.6-17.2 13.7-21.1.3-.2.7-.3 1-.5.8 13.2 7.3 26.6 18.8 29.5 12.6 3.3 30.7-7.5 38.4-16.3 9-.3 15.7-.9 22.6 5.1 9.9 8.5 7.1 30.3 17.1 41.6 10.6 11.6 14 19.5 13.7 24.6zM173.3 148.7c2 1.9 4.7 4.5 8 7.1 6.6 5.2 15.8 10.6 27.3 10.6 11.6 0 22.5-5.9 31.8-10.8 4.9-2.6 10.9-7 14.8-10.4s5.9-6.3 3.1-6.6-2.6 2.6-6 5.1c-4.4 3.2-9.7 7.4-13.9 9.8-7.4 4.2-19.5 10.2-29.9 10.2s-18.7-4.8-24.9-9.7c-3.1-2.5-5.7-5-7.7-6.9-1.5-1.4-1.9-4.6-4.3-4.9-1.4-.1-1.8 3.7 1.7 6.5z"],
+    "instagram": [448, 512, [], "brands", "M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z"],
+    "facebook": [512, 512, [], "brands", "M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256C0 376 82.7 476.8 194.2 504.5V334.2H141.4V256h52.8V222.3c0-87.1 39.4-127.5 125-127.5c16.2 0 44.2 3.2 55.7 6.4V172c-6-.6-16.5-1-29.6-1c-42 0-58.2 15.9-58.2 57.2V256h83.6l-14.4 78.2H287V510.1C413.8 494.8 512 386.9 512 256h0z"],
+    "safari": [512, 512, [], "brands", "M274.69,274.69l-37.38-37.38L166,346ZM256,8C119,8,8,119,8,256S119,504,256,504,504,393,504,256,393,8,256,8ZM411.85,182.79l14.78-6.13A8,8,0,0,1,437.08,181h0a8,8,0,0,1-4.33,10.46L418,197.57a8,8,0,0,1-10.45-4.33h0A8,8,0,0,1,411.85,182.79ZM314.43,94l6.12-14.78A8,8,0,0,1,331,74.92h0a8,8,0,0,1,4.33,10.45l-6.13,14.78a8,8,0,0,1-10.45,4.33h0A8,8,0,0,1,314.43,94ZM256,60h0a8,8,0,0,1,8,8V84a8,8,0,0,1-8,8h0a8,8,0,0,1-8-8V68A8,8,0,0,1,256,60ZM181,74.92a8,8,0,0,1,10.46,4.33L197.57,94a8,8,0,1,1-14.78,6.12l-6.13-14.78A8,8,0,0,1,181,74.92Zm-63.58,42.49h0a8,8,0,0,1,11.31,0L140,128.72A8,8,0,0,1,140,140h0a8,8,0,0,1-11.31,0l-11.31-11.31A8,8,0,0,1,117.41,117.41ZM60,256h0a8,8,0,0,1,8-8H84a8,8,0,0,1,8,8h0a8,8,0,0,1-8,8H68A8,8,0,0,1,60,256Zm40.15,73.21-14.78,6.13A8,8,0,0,1,74.92,331h0a8,8,0,0,1,4.33-10.46L94,314.43a8,8,0,0,1,10.45,4.33h0A8,8,0,0,1,100.15,329.21Zm4.33-136h0A8,8,0,0,1,94,197.57l-14.78-6.12A8,8,0,0,1,74.92,181h0a8,8,0,0,1,10.45-4.33l14.78,6.13A8,8,0,0,1,104.48,193.24ZM197.57,418l-6.12,14.78a8,8,0,0,1-14.79-6.12l6.13-14.78A8,8,0,1,1,197.57,418ZM264,444a8,8,0,0,1-8,8h0a8,8,0,0,1-8-8V428a8,8,0,0,1,8-8h0a8,8,0,0,1,8,8Zm67-6.92h0a8,8,0,0,1-10.46-4.33L314.43,418a8,8,0,0,1,4.33-10.45h0a8,8,0,0,1,10.45,4.33l6.13,14.78A8,8,0,0,1,331,437.08Zm63.58-42.49h0a8,8,0,0,1-11.31,0L372,383.28A8,8,0,0,1,372,372h0a8,8,0,0,1,11.31,0l11.31,11.31A8,8,0,0,1,394.59,394.59ZM286.25,286.25,110.34,401.66,225.75,225.75,401.66,110.34ZM437.08,331h0a8,8,0,0,1-10.45,4.33l-14.78-6.13a8,8,0,0,1-4.33-10.45h0A8,8,0,0,1,418,314.43l14.78,6.12A8,8,0,0,1,437.08,331ZM444,264H428a8,8,0,0,1-8-8h0a8,8,0,0,1,8-8h16a8,8,0,0,1,8,8h0A8,8,0,0,1,444,264Z"],
+    "google": [488, 512, [], "brands", "M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"],
+    "npm": [576, 512, [], "brands", "M288 288h-32v-64h32v64zm288-128v192H288v32H160v-32H0V160h576zm-416 32H32v128h64v-96h32v96h32V192zm160 0H192v160h64v-32h64V192zm224 0H352v128h64v-96h32v96h32v-96h32v96h32V192z"],
+    "bluetooth-b": [320, 512, [], "brands", "M196.48 260.023l92.626-103.333L143.125 0v206.33l-86.111-86.111-31.406 31.405 108.061 108.399L25.608 368.422l31.406 31.405 86.111-86.111L145.84 512l148.552-148.644-97.912-103.333zm40.86-102.996l-49.977 49.978-.338-100.295 50.315 50.317zM187.363 313.04l49.977 49.978-50.315 50.316.338-100.294z"],
+    // Some Aliases
+    "vr": "vr-cardboard",
+    "sticky-note": "note-sticky",
+    "script": "scroll",
+    "save": "floppy-disk",
+    "media": "photo-film",
+    "arrows-up-down-left-right": "arrows",
+    "rotate-forward": "rotate-right",
+    "rotate-back": "rotate-left",
+    "cc": "closed-captioning",
+    "asl": "hands-asl-interpreting",
+}
 
 export { LX };

@@ -54,7 +54,7 @@
         fillPanel( panel );
 
         let activeTimeline = null
-        createKyeframeTimeline( bottomTabs );
+        createKeyframeTimeline( bottomTabs );
         createClipsTimeline( bottomTabs );
         createCurvesTimeline( bottomTabs );
 
@@ -173,7 +173,7 @@
             panel.merge();
         }
 
-        function createKyeframeTimeline( bottomTabs ) {
+        function createKeyframeTimeline( bottomTabs ) {
             
             let keyframesPanel = new LX.Panel();            
             bottomTabs.add( "Keyframes", keyframesPanel, {onSelect: () => {
@@ -191,8 +191,8 @@
                     panel.addSelect("Animation", ["Anim 1", "Anim 2", "Anim 3"], "Anim 1", ()=> {})
                 },
                 onAfterCreateTopBar: (panel) => {
-                    panel.addButton("", "autoKeyEnable", null, { icon: 'fa fa-wand-magic-sparkles', name: 'autoKeyEnabled', width: "40px" });
-                    panel.addButton("", "unselectAll", (value, event) => { kfTimeline.unSelectAllKeyFrames();}, { icon: 'fa-regular fa-rectangle-xmark', name: 'unselectAll', callback: (value, event) => { kfTimeline.unSelectAllKeyFrames();}, width: "40px"});
+                    panel.addButton("autoKeyEnabled", "autoKeyEnable", null, { icon: 'fa fa-wand-magic-sparkles', hideName: true });
+                    panel.addButton("unselectAll", "unselectAll", (value, event) => { kfTimeline.unSelectAllKeyFrames();}, { icon: 'fa-regular fa-rectangle-xmark', hideName: true, callback: (value, event) => { kfTimeline.unSelectAllKeyFrames();} });
                 }
             });
 

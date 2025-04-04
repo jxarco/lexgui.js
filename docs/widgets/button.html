@@ -27,6 +27,8 @@
             ["disabled", "Boolean", "Make the widget disabled"],
             ["icon", "String", "Icon to be added before the input"],
             ["img", "String", "Path to image to show as button value"],
+            ["title", "String", "Text to show in native Element title"],
+            ["buttonClass", "String", "Class to add to the native button element"],
         ]
     ] );
     MAKE_CODE( `panel.@[mtd]addButton@(@"A Button Name"@, @"Print event"@, (value, event) =&gt; {

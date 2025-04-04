@@ -2,15 +2,11 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-    <title>LexGUI Examples</title>
+    <title>Examples - LexGUI.js </title>
     <link rel="stylesheet" href="../build/lexgui.css">
     <link rel="icon" href="../images/icon.png">
     <style>
         iframe { border: none; }
-        .lexexamplespanel {
-            margin-left: 6px;
-            margin-top: 6px;
-        }
     </style>
     <script type="importmap">
         {
@@ -41,6 +37,7 @@
         });
 
         const examples = [
+            'All Widgets',    
             'Area Tabs',
             'Asset View',
             'Code Editor',
@@ -51,7 +48,7 @@
             "Timeline"
         ];
 
-        let panel = leftArea.addPanel({ className: "lexexamplespanel" });
+        let panel = leftArea.addPanel();
         fillExamples( panel );
 
         let iframe = document.createElement('iframe');
@@ -70,7 +67,7 @@
                     window.open("https://github.com/jxarco/lexgui.js/blob/master/examples/" + tokens[tokens.length - 1], '_blank')
                 }
             }
-        ], { float: "htc" } );
+        ], { float: "hbc" } );
 
         // **** **** **** **** **** **** **** **** **** **** **** **** 
 

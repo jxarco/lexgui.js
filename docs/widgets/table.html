@@ -42,7 +42,10 @@
             ["head", "Array", "Table headers (each of the headers per column)"],
             ["body", "Array", "Table body (data per row for each column)"],
             ["rowActions", "Array", `Allow to add actions per row ${INLINE_CODE("action: { icon, callback }")}`],
+            ["onMenuAction", "Function", `Function callback to fill the "menu" context`],
             ["selectable", "Boolean", "Each row can be selected"],
+            ["sortable", "Boolean", "Rows can be sorted by the user manually"],
+            ["centered", "Boolean/Array", "Center text within columns. true for all, Array for center selected cols."],
         ]
     ]);
     MAKE_PARAGRAPH(`<sup>Note: You can use default row actions as String such as 'delete' or 'menu', which have predefined icons and callbacks.

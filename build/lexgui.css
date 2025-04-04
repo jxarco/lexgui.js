@@ -1,8 +1,9 @@
 /* clean-css ignore:start */
+@import url("utilities.css");
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap');
 @font-face {
-    font-family: "GoogleSans";
-    src: url("https://raw.githubusercontent.com/jxarco/lexgui.js/master/data/GoogleSans.ttf");
+    font-family: "GeistSans";
+    src: url("https://raw.githubusercontent.com/jxarco/lexgui.js/master/data/GeistSans.ttf");
 }
 /* clean-css ignore:end */
 
@@ -10,8 +11,8 @@
     /* default color scheme */
     color-scheme: dark;
 
-    --global-font: "GoogleSans", sans-serif;
-    --global-title-font: "GoogleSans", sans-serif;
+    --global-font: "GeistSans", sans-serif;
+    --global-title-font: "GeistSans", sans-serif;
     --global-font-size-xs: 0.625rem; /* 10px */
     --global-font-size-sm: 0.75rem; /* 12px */
     --global-font-size: 0.875rem; /* 14px */
@@ -19,24 +20,21 @@
     --global-font-size-xl: 1.125rem; /* 18px */
     --global-font-size-xxl: 1.375rem; /* 22px */
 
-    --global-color-primary: light-dark(#f5f5f6, #0f0f0f); /* Near White / Near Black */
-    --global-color-secondary: light-dark(#e8e8ea, #1c1c1c); /* Very Light Gray / Very Dark Gray */
-    --global-color-tertiary: light-dark(#d6d6d8, #292929); /* Soft Gray / Deep Gray */
-    --global-color-quaternary: light-dark(#bfbfc2, #404040); /* Muted Gray / Medium Dark */
-    --global-color-quinary: light-dark(#a5a5a8, #595959); /* Gentle Gray / Soft Dark Gray */
-
-    --global-selected: #2d69da;
-    --global-selected-light: #0d99ff;
-    --global-selected-dark: #304b86;
-    --global-color-accent: #ec5377;
+    --global-color-primary: light-dark(#ffffff, #0b0b0c); /* Near White / Near Black */
+    --global-color-secondary: light-dark(#f4f4f5, #1c1c1d); /* Very Light Gray / Very Dark Gray */
+    --global-color-tertiary: light-dark(#e6e6e8, #2e2e2f); /* Soft Gray / Deep Gray */
+    --global-color-quaternary: light-dark(#cfcfd2, #363637); /* Muted Gray / Medium Dark */
+    --global-color-quinary: light-dark(#b5b5b8, #4e4e4f); /* Gentle Gray / Soft Dark Gray */
+    --global-color-accent: #2d69da;
+    --global-color-accent-light: #0d99ff;
+    --global-color-accent-dark: #304b86;
     --global-color-warning: #ffc107;
     --global-color-error: #f54c4c;
-    --global-button-color: light-dark(#f9f9f9, #363636);
     --global-text-primary: light-dark(#0d0d0e, #f0efef);
     --global-text-secondary: light-dark(#262627, #d1d1d3);
     --global-text-tertiary: light-dark(#3c3c3df5, #aaaaaa);
     --global-text-quaternary: light-dark(#515152f5, #807f7f);
-    --global-intense-background: light-dark(#fefefe, #09090a);
+    --global-intense-background: light-dark(#fefefe, #030304);
     --global-medium-background: #252525;
     --global-blur-background: light-dark(#f7f7f7d8, #1f1f1fe7);
     --global-color-transparent: #00000000;
@@ -155,13 +153,6 @@
     }
 }
 
-/* Some global colors */
-
-.orange { color: orange }
-.gray { color: gray }
-.dodgerblue { color: dodgerblue }
-.lightblue { color: #5aa8f7 }
-
 ::-webkit-scrollbar {
     height: 3px;
     width: 4px;
@@ -193,6 +184,12 @@ body {
     font-family: var(--global-font);
 }
 
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 :root[data-strictVP="false"] {
     overflow-y: auto;
 }
@@ -202,7 +199,7 @@ blockquote, dd, dl, figure, h1, h2, h3, h4, h5, h6, hr, p, pre {
 }
 
 a:any-link {
-    color: var(--global-selected-light);
+    color: var(--global-color-accent-light);
 }
 
 canvas {
@@ -284,19 +281,23 @@ body.noevents * {
     cursor: move;
 }
 
-.hidden {
-    display: none !important;
-}
-
-.sticky {
-    position: sticky;
-    top: 0;
-}
-
-.hiddenOpacity {
+.hidden-opacity {
     opacity: 0 !important;
     pointer-events: none;
 }
+
+.ellipsis-overflow {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Some global colors */
+
+.orange { color: orange }
+.gray { color: gray }
+.dodgerblue { color: dodgerblue }
+.lightblue { color: #5aa8f7 }
 
 svg.xs { width: var(--svg-size-xs); height: var(--svg-size-xs); }
 svg.sm { width: var(--svg-size-sm); height: var(--svg-size-sm); }
@@ -324,7 +325,9 @@ svg.xxl { width: var(--svg-size-xxl); height: var(--svg-size-xxl); }
     top: 0;
     bottom: 0;
     width: 100%;
-    height: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     position: absolute;
     outline: none;
 }
@@ -347,6 +350,8 @@ svg.xxl { width: var(--svg-size-xxl); height: var(--svg-size-xxl); }
     line-height: inherit !important;
     color: var(--global-text-secondary);
     align-content: center;
+    border-radius: 4px;
+    transition: all 0.15s linear;
 }
 
 .lexicon:hover {
@@ -358,6 +363,10 @@ svg.xxl { width: var(--svg-size-xxl); height: var(--svg-size-xxl); }
     transform: scale(0.99);
 }
 
+.lexicon.triggered {
+    background-color: var(--global-color-secondary);
+}
+
 svg, svg path {
     width: 1rem;
     height: 1rem;
@@ -366,7 +375,7 @@ svg, svg path {
     display: block;
 }
 
-svg path {
+a svg, svg path {
     pointer-events: none;
 }
 
@@ -401,7 +410,7 @@ svg path {
     display: flex;
     flex-direction: row;
     position: relative;
-    width: calc(100% - 1.6rem);
+    width: 100%;
     background-color: var(--global-intense-background);
     border: 1px solid var(--global-color-tertiary);
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
@@ -574,7 +583,7 @@ svg path {
     padding: 0px;
     margin-left: -28px;
     margin-top: 2px;
-    color: var(--global-selected-light);
+    color: var(--global-color-accent-light);
     float: left;
 }
 
@@ -604,23 +613,18 @@ svg path {
 }
 
 .commandbar .searchitembox .searchitem.hovered {
-    background-color: var(--global-selected);
+    background-color: var(--global-color-accent);
     color: #f5f5f5;
 }
 
 /* Footer */
 
 .lexfooter {
-    min-height: 96px;
     background-color: var(--global-color-primary);
-    padding: 15px;
+    padding: 0.5rem;
     width: 100%;
     font-size: var(--global-font-size);
     line-height: 1.25rem;
-}
-
-.lexfooter .wrapper {
-    width: calc(100% - 30px);
 }
 
 .lexfooter .columns {
@@ -638,11 +642,12 @@ svg path {
 .lexfooter h2 {
     margin-block-start: 0.83em;
     margin-block-end: 0.83em;
+    font-weight: 600;
 }
 
 .lexfooter ul li {
     margin-bottom: 8px;
-    font-size: var(--global-font-size-lg);
+    font-size: var(--global-font-size);
 }
 
 .lexfooter a {
@@ -699,12 +704,12 @@ svg path {
 }
 
 .lexfooter a:hover {
-    color: var(--global-selected-light);
+    color: var(--global-color-accent-light);
 }
 
 .lexfooter svg:hover {
-    fill: var(--global-selected-light);
-    stroke: var(--global-selected-light);
+    fill: var(--global-color-accent-light);
+    stroke: var(--global-color-accent-light);
 }
 
 .lexfooter hr {
@@ -735,17 +740,17 @@ svg path {
 }
 
 .lexdialogtitle {
-    outline: none;
+    width: 100%;
     font-family: var(--global-title-font);
     font-weight: 600;
     font-size: var(--global-font-size-xl);
     color: var(--global-text-secondary);
     text-shadow: 0px 1px 6px #22222283;
-    width: calc(100% - 24px);
     padding: 12px;
     padding-left: 16px;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
+    outline: none;
     display: flex;
     justify-content: space-between;
     -webkit-user-select: none;
@@ -756,6 +761,7 @@ svg path {
 }
 
 .lexdialogcontent {
+    width: 100%;
     padding: 15px;
     word-break: break-all;
     color: var(--global-text-primary);
@@ -802,7 +808,6 @@ svg path {
 
 .lexdialog.prompt textarea {
     color: var(--global-text-secondary);
-    font-weight: normal;
 }
 
 /* Pocket Dialog */
@@ -816,7 +821,7 @@ svg path {
 }
 
 .lexdialog.pocket .lexdialogtitle {
-    width: calc(100% - 28px);
+    width: 100%;
     font-size: var(--global-font-size-lg);
     background: var(--global-intense-background);
 }
@@ -954,6 +959,11 @@ svg path {
     transform: scale(0.99);
 }
 
+.lexdropdownmenuitem .lexcheckbox {
+    width: 1.25em;
+    height: 1.25em;
+}
+
 .lexdropdownmenuitem a {
     margin-left: auto;
     margin-right: 4px;
@@ -1064,14 +1074,14 @@ svg path {
 }
 
 .lexsplitbar.dragging-split-area {
-    background-color: var(--global-button-color);
+    background-color: red;
 }
 
 /* Branches */
 
 .lexpanel {
     margin: 0;
-    margin-left: 3px;
+    padding: 4px;
     overflow: hidden;
     overflow-y: scroll;
 }
@@ -1081,6 +1091,7 @@ svg path {
 }
 
 .lexbranch {
+    width: 100%;
     border-radius: 6px;
     margin-bottom: 4px !important;
 }
@@ -1099,8 +1110,8 @@ svg path {
 
 .lexbranchtitle {
     font-family: var(--global-title-font);
-    font-weight: 600;
     font-size: var(--global-font-size-lg);
+    font-weight: 500;
     color: var(--global-text-primary);
     background-color: var(--global-color-secondary);
     text-shadow: 0px 1px 6px #42424260;
@@ -1152,7 +1163,7 @@ svg path {
 }
 
 .lexbranchtitle.wtabs span.selected {
-    border-top: 2px solid var(--global-selected-light);
+    border-top: 2px solid var(--global-color-accent-light);
     background-color: var(--global-color-secondary);
     color: var(--global-text-primary);
     text-shadow: 0px 1px 2px #000;
@@ -1227,10 +1238,6 @@ svg path {
     transform: translateX(-1em);
 }
 
-.lexwidget.nobranch {
-    width: calc(100% - 10px);
-}
-
 .lexwidget.auto {
     width: unset !important;
 }
@@ -1247,11 +1254,6 @@ svg path {
     margin-right: 8px;
 }
 
-.lexwidget.micro button {
-    padding-left: 4px;
-    padding-right: 4px;
-}
-
 .lexwidget.small {
     width: 5% !important;
 }
@@ -1262,6 +1264,7 @@ svg path {
 
 .lexinlinewidgets {
     display: flex;
+    gap: 0.1rem;
 }
 
 .lexwidgetseparator div {
@@ -1291,62 +1294,9 @@ svg path {
     color: var(--global-text-secondary);
 }
 
-.lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider) {
-    font-family: var(--global-font);
-    background: none;
-    padding: 3px;
-    color: var(--global-text-primary);
-    font-weight: 500;
-    outline: none;
-    border-radius: 6px;
-    border: 2px solid var(--global-color-transparent);
-    transition: border-color 0.1s linear;
-}
-
-.lexwidget .lextext {
-    border-radius: 6px;
-    position: relative;
-    transition: 0.1s linear;
-}
-
-.lexwidget .lextext.formlabel {
-    margin-left: 8px;
-    margin-bottom: -12px;
-}
-
-.lexwidget .lextext:not(:has(div)) {
-    background-color: var(--global-button-color);
-}
-
-.lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider):hover {
-    background-color: color-mix(in srgb, var(--global-button-color), #000 7%);
-}
-
-.lexwidget .lextext input {
-    padding: 5px;
-}
-
-.lexwidget .lextext input:focus {
-    border: 2px solid var(--global-selected);
-}
-
-.lexwidget .lextext input:invalid:focus {
-    border: 2px solid var(--global-color-error);
-}
-
-.lexwidget .lextext div {
-    color: var(--global-text-secondary);
-    padding-left: 6px;
-}
-
-.lexwidget .lextext.lexwarning div {
-    color: var(--global-color-warning);
-    font-weight: 700;
-}
-
-.lexwidget .lextext.lexwarning i {
-    color: var(--global-color-warning);
-    margin-right: 16px;
+.lexinlinewidgets .lexwidgetname {
+    width: fit-content !important;
+    padding-inline: 0.4rem;
 }
 
 .lexwidget .inputicon {
@@ -1356,25 +1306,39 @@ svg path {
     text-align: center;
 }
 
-.lexwidget textarea {
-    word-break: break-word;
+.lexseparator {
+    border-top: 1px solid var(--global-color-secondary);
+    border-bottom: 1px solid var(--global-color-tertiary);
+    margin: 5px 0 5px 0px;
+}
+
+.lexbranch .lexseparator {
+    border-top: 1px solid var(--global-color-primary);
+    border-bottom: 1px solid var(--global-color-tertiary);
+    width: -moz-calc(100% - 8px);
+    width: -webkit-calc(100% - 8px);
+    width: calc(100% - 8px);
+    margin: 5px 0 5px 4px;
+}
+
+:root[data-theme="light"] .lexbranch .lexseparator {
+    border-top: 1px solid #e7e7e7;
+    border-bottom: 1px solid #c1c1c1;
+}
+
+.lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider) {
     font-family: var(--global-font);
-    background: none;
-    padding: 5px;
+    padding: 4px;
     color: var(--global-text-primary);
-    font-weight: 600;
+    background-color: var(--global-color-tertiary);
     outline: none;
     border-radius: 6px;
-    border: 2px solid var(--global-color-transparent);
-    transition: 0.1s linear;
+    border: 1px solid var(--global-color-transparent);
+    transition: background-color 0.2s linear, border-color 0.15s linear;
 }
 
-.lexwidget textarea:disabled {
-    resize: none;
-}
-
-.lexwidget textarea:focus {
-    border: 2px solid var(--global-selected);
+.lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider):hover {
+    background-color: color-mix(in srgb, var(--global-color-tertiary), #000 7%);
 }
 
 .lexwidget input.colorinput {
@@ -1388,28 +1352,89 @@ svg path {
     color: var(--global-text-tertiary);
 }
 
-.lexseparator {
-    border-bottom: 1px solid var(--global-button-color);
-    margin: 5px 0 5px 10px;
+/* Text Widget */
+
+.lexwidget input.lextext, .lexwidget div.lextext {
+    border-radius: 6px;
+    position: relative;
+    border: 1px solid transparent;
+    padding: 4px 12px !important;
 }
 
-.lexbranch .lexseparator {
-    border-top: 1px solid #252525;
-    border-bottom: 1px solid rgb(87, 86, 86);
-    width: -moz-calc(100% - 8px);
-    width: -webkit-calc(100% - 8px);
-    width: calc(100% - 8px);
-    margin: 5px 0 5px 4px;
+.lexwidget .lextext:disabled {
+    background-color: var(--global-color-tertiary);
+    color: var(--global-text-tertiary);
 }
 
 :root[data-theme="light"] .lexwidget .lextext {
-    border: 1px solid var(--global-color-tertiary) !important;
+    border: 1px solid var(--global-color-tertiary);
 }
 
-:root[data-theme="light"] .lexbranch .lexseparator {
-    border-top: 1px solid #e7e7e7;
-    border-bottom: 1px solid #c1c1c1;
+.lexwidget .lextext.formlabel {
+    margin-left: 8px;
+    margin-bottom: -12px;
 }
+
+.lexwidget .lextext.outline {
+    background: var(--global-color-primary);
+    border: 1px solid #7a797c4f;
+}
+
+.lexwidget .lextext.nobg {
+    background: none;
+    border: 1px solid transparent;
+}
+
+.lexwidget .lextext.dashed {
+    background: var(--global-color-primary);
+    border: 1px dashed #7a797c4f;
+}
+
+.lexwidget .lextext.outline:hover, .lexwidget .lextext.nobg:hover {
+    background: none;
+}
+
+.lexwidget .lextext:focus {
+    border: 1px solid var(--global-color-accent) !important;
+}
+
+.lexwidget .lextext:invalid:focus {
+    border: 1px solid var(--global-color-error);
+}
+
+.lexwidget .lextext.lexwarning div {
+    color: var(--global-color-warning);
+    font-weight: 600;
+}
+
+.lexwidget .lextext.lexwarning i {
+    color: var(--global-color-warning);
+    margin-right: 16px;
+}
+
+/* TextArea Widget */
+
+.lexwidget textarea {
+    word-break: break-word;
+    font-family: var(--global-font);
+    background: none;
+    padding: 5px;
+    color: var(--global-text-primary);
+    outline: none;
+    border-radius: 6px;
+    border: 2px solid var(--global-color-transparent);
+    transition: 0.1s linear;
+}
+
+.lexwidget textarea:disabled {
+    resize: none;
+}
+
+.lexwidget textarea:focus {
+    border: 2px solid var(--global-color-accent);
+}
+
+/* Title Widget */
 
 .lextitle {
     width: fit-content;
@@ -1425,7 +1450,7 @@ svg path {
     display: grid;
     align-content: center;
     border-radius: 12px;
-    background-color: var(--global-button-color);
+    background-color: var(--global-color-tertiary);
     display: flex;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -1435,14 +1460,14 @@ svg path {
 
 .lexinlinewidgets .lextitle {
     margin: 8px;
-    height: 20px;
+    height: 24px;
     flex: none;
 }
 
 .lextitle a {
     margin-top: 0.3em;
     margin-right: 0.7em;
-    color: var(--global-selected-light);
+    color: var(--global-color-accent-light);
     font-size: var(--global-font-size-sm);
 }
 
@@ -1453,7 +1478,7 @@ svg path {
 }
 
 .lextitle.link:hover {
-    color: #049EF4;
+    color: var(--global-color-accent-light);
     transform: scale(1.02);
 }
 
@@ -1461,96 +1486,58 @@ svg path {
 /* Buttons */
 
 .lexbutton {
-    display: grid;
-    align-content: center;
-    --button-color: var(--global-button-color);
+    --button-color: var(--global-color-tertiary);
+    --border-color: var(--global-color-quinary);
     background-color: var(--button-color);
-    border-radius: 6px;
     border: 1px solid transparent;
+    border-radius: 6px;
     min-height: 22px !important;
+    align-content: center;
     color: var(--global-text-primary);
-    font-weight: 500;
     outline: none;
     white-space: nowrap;
     overflow: hidden;
     cursor: pointer;
     font-family: var(--global-font);
+    font-weight: 500;
+    display: grid;
     transition: 0.1s linear;
     padding: 0.35rem;
 }
 
-:root[data-theme="light"] .lexbutton {
-    --button-color: var(--global-button-color);
-    border: 1px solid var(--global-color-tertiary);
-}
-
-:root[data-theme="light"] .lexbutton.selected {
-    background: #3c4145;
-    color: #DDD;
-}
-
 /* Colors */
-.lexbutton.primary { --button-color: var(--global-selected) !important; color: #f9f9f9 !important; }
-.lexbutton.secondary { --button-color: var(--global-selected-light) !important; color: #f9f9f9 !important;  }
-.lexbutton.accent { --button-color: var(--global-color-accent) !important; color: #f9f9f9 !important;  }
-.lexbutton.warning { --button-color: var(--global-color-warning) !important; color: #793205 !important;  }
-.lexbutton.error { --button-color: var(--global-color-error) !important; color: #52020d !important;  }
+.lexbutton.primary { --button-color: var(--global-color-primary); --border-color: var(--global-color-quaternary); color: var(--global-text-primary); }
+.lexbutton.secondary { --button-color: var(--global-color-secondary); --border-color: var(--global-color-quaternary); color: var(--global-text-primary);  }
+.lexbutton.accent { --button-color: var(--global-color-accent); --border-color: var(--global-color-quaternary); color: #fefefe;  }
+.lexbutton.contrast { --button-color: var(--global-text-primary); --border-color: var(--global-color-quaternary); color: var(--global-color-primary);  }
+.lexbutton.warning { --button-color: var(--global-color-warning); --border-color: #793205; color: var(--border-color);  }
+.lexbutton.error { --button-color: var(--global-color-error); --border-color: #52020d; color: var(--border-color);  }
+
 /* Few Sizes */
-.lexbutton.xs { width: 25% !important; margin: 0 auto; }
-.lexbutton.sm { width: 45% !important; margin: 0 auto; }
+.lexbutton.xs { width: 35%; margin: 0 auto; }
+.lexbutton.sm { width: 65%; margin: 0 auto; }
+
 /* Styles */
-.lexbutton.outline { box-shadow: none; --button-color: var(--global-intense-background); border: 1px solid var(--global-color-quaternary) !important; }
-
-.lexbutton.left {
-    text-align: left;
-    padding-inline: 12px;
+.lexbutton.outline {
+    border-color: var(--border-color);
 }
-
-.lexbutton span {
-    align-items: center;
-}
-
-.lexbutton span:has(.lexbadge) {
-    display: inline-flex;
-    flex-wrap: nowrap;
-    justify-content: center;
-    gap: 0.4rem;
-}
-
-.lexbutton.foldback {
-    padding: 11px 10px;
-    padding-bottom: 14px;
-    float: right;
-    align-items: center;
-    margin-right: 4px;
-    margin-top: 2px;
-}
-
-.lexbutton a {
-    margin-left: 0px;
-    font-size: var(--global-font-size-sm);
-    pointer-events: none;
-}
-
-.lexbutton.array span {
-    display: inline-flex;
-}
-
-.lexbutton.array a {
-    margin-top: 2px;
-    margin-right: 3px;
-    margin-left: auto;
+.lexbutton.dashed {
+    border-style: dashed;
+    border-color: var(--border-color);
 }
 
 .lexbutton:hover {
-    background-color: color-mix(in srgb, var(--button-color), #000 7%);
-    color: var(--global-text-primary);
+    background-color: color-mix(in srgb, var(--button-color), #000 9%) !important;
+}
+:root[data-theme="light"] .lexbutton:hover {
+    background-color: color-mix(in srgb, var(--button-color), #fff 18%) !important;
 }
 
 .lexbutton:active:not(.lexbutton.combo) {
-    background-color: color-mix(in srgb, var(--button-color), #ffffff 4%);
-    color: var(--global-text-secondary);
-    transform: scale(0.99);
+    background-color: color-mix(in srgb, var(--button-color), #fff 4%) !important;
+}
+:root[data-theme="light"] .lexbutton:active:not(.lexbutton.combo) {
+    background-color: color-mix(in srgb, var(--button-color), #000 4%) !important;
 }
 
 .lexbutton:disabled {
@@ -1558,20 +1545,37 @@ svg path {
 }
 
 .lexbutton.selected {
-    background: #3c4145;
-    color: #DDD;
+    --button-color: var(--global-color-accent);
+    --border-color: var(--global-color-quaternary);
+    color: #fefefe;
 }
 
-.lexbutton.noname {
-    margin-left: 0px;
-    margin-top: 0px;
+.lexbutton * {
+    pointer-events: none;
+}
+
+.lexbutton span {
+    align-items: center;
+    display: flex;
+    place-content: center;
+    pointer-events: none;
+    gap: 0.4rem;
+}
+
+.lexbutton.left span {
+    place-content: start;
+}
+
+.lexbutton.array a {
+    margin-right: 4px;
+    margin-left: auto;
 }
 
 /* Combo Buttons */
 
 .lexcombobuttons .lexcombobuttonsbox {
     display: flex;
-    background-color: light-dark(var(--global-color-tertiary), var(--global-button-color));
+    background-color: var(--global-color-tertiary);
     width: max-content;
     justify-self: center;
     padding: 3px;
@@ -1589,9 +1593,9 @@ svg path {
 
 .lexcombobuttons .lexbutton.combo {
     display: flex;
-    padding: 0.7em 1.6em;
+    padding: 0.5em 1.6em;
     transition: 0.2s;
-    background: none;
+    --button-color: var(--global-color-tertiary);
 }
 
 .lexcombobuttons .lexbutton.combo:hover {
@@ -1599,22 +1603,13 @@ svg path {
 }
 
 .lexcombobuttons .lexbutton.combo.selected {
-    background-color: var(--global-color-primary);
-    outline: none;
+    --button-color: var(--global-color-primary);
     color: var(--global-text-primary);
-}
-
-.lexcombobuttons .lexbutton.combo:active {
     outline: none;
-    color: #ccc;
 }
 
 .lexcombobuttons .lexbutton.combo span {
     line-height: 18px;
-}
-
-.lexcombobuttons .lexbutton.combo a {
-    font-size: var(--global-font-size-sm);
 }
 
 /* Select (Combobox) */
@@ -1630,7 +1625,7 @@ svg path {
 }
 
 .lexselect .lexfilter {
-    width: calc(100% - 6px) !important;
+    width: 100%;
     padding: 2px 3px;
     background-color: var(--global-color-primary);
     border-bottom: 1px solid;
@@ -1697,14 +1692,14 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexselect ul .lexselectinnerlist {
-    width: calc(100% - 0.6rem);
+    width: 100%;
     height: calc(100% - 25px);
     padding: 0.3rem;
     display: grid;
 }
 
 .lexselect .lexselectitem {
-    width: calc(100% - 0.7rem);
+    width: 100%;
     cursor: pointer;
     color: var(--global-text-primary);
     min-height: 20px;
@@ -1721,7 +1716,7 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexselect .lexselectlabel {
-    width: calc(100% - 1.6rem);
+    width: 100%;
     color: var(--global-text-primary);
     padding-inline: 0.8rem;
     padding-block: 0.2rem;
@@ -1729,7 +1724,7 @@ dialog .lexselect .lexselectoptions {
     line-height: 22px;
     align-content: center;
     display: flow-root;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .lexselect .lexselectitem.empty {
@@ -1751,11 +1746,11 @@ dialog .lexselect .lexselectoptions {
 .lexselect .lexselectitem a {
     display: none;
     margin-left: auto;
-    margin-right: 8px;
+    margin-right: 4px;
 }
 
 .lexselect .lexselectitem.selected {
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .lexselect .lexselectitem.selected a {
@@ -1777,14 +1772,15 @@ dialog .lexselect .lexselectoptions {
 }
 
 :root[data-theme="light"] .lexselect .lexselectitem:hover {
-    background-color: var(--global-selected-light);
+    background-color: var(--global-color-accent);
     color: #fff;
 }
 
 /* Check box */
 
 .lexcheckbox {
-    --checkbox-color: var(--global-selected);
+    --checkbox-bg-color: light-dark(var(--global-text-tertiary), var(--global-color-tertiary));
+    --checkbox-fg-color: #fff;
     vertical-align: middle;
     flex-shrink: 0;
     transition: background-color .2s,box-shadow .2s;
@@ -1792,12 +1788,13 @@ dialog .lexselect .lexselectoptions {
     width: 1.5em;
     height: 1.5em;
     padding: 0.12rem;
+    padding-left: 0.13rem;
     display: inline-block;
     background-color: var(--global-color-primary);
-    color: #fff;
+    color: var(--checkbox-fg-color);
     border-width: 1px;
     border-style: solid;
-    border-color: color-mix(in srgb, var(--checkbox-color) 50%, transparent);
+    border-color: color-mix(in srgb, var(--checkbox-bg-color) 50%, transparent);
     border-radius: 4px;
     margin: auto 4px;
     text-align: center;
@@ -1808,11 +1805,15 @@ dialog .lexselect .lexselectoptions {
 }
 
 /* Colors */
-.lexcheckbox.primary { --checkbox-color: var(--global-selected); }
-.lexcheckbox.secondary { --checkbox-color: var(--global-selected-light); }
-.lexcheckbox.accent { --checkbox-color: var(--global-color-accent); }
-.lexcheckbox.warning { --checkbox-color: var(--global-color-warning); }
-.lexcheckbox.error { --checkbox-color: var(--global-color-error); }
+.lexcheckbox.primary { --checkbox-bg-color: var(--global-color-primary); }
+:root[data-theme="light"] .lexcheckbox.primary { --checkbox-fg-color: var(--global-text-primary); }
+.lexcheckbox.secondary { --checkbox-bg-color: var(--global-color-secondary); }
+:root[data-theme="light"] .lexcheckbox.secondary { --checkbox-fg-color: var(--global-text-tertiary); }
+.lexcheckbox.accent { --checkbox-bg-color: var(--global-color-accent); }
+.lexcheckbox.contrast { --checkbox-bg-color: var(--global-text-primary); --checkbox-fg-color: var(--global-color-primary); }
+.lexcheckbox.warning { --checkbox-bg-color: var(--global-color-warning); }
+.lexcheckbox.error { --checkbox-bg-color: var(--global-color-error); }
+
 
 .lexcheckbox:before {
     content: "";
@@ -1828,19 +1829,25 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexcheckbox:checked,.lexcheckbox[aria-checked=true] {
-    background-color: var(--checkbox-color);
-    color: #fff !important;
+    background-color: var(--checkbox-bg-color);
 }
 
 .lexcheckbox:checked:before, .lexcheckbox[aria-checked=true]:before {
-    clip-path:polygon(20% 100%,20% 80%,50% 80%,50% 0%,70% 0%,70% 100%);
+    clip-path: polygon(20% 100%,20% 80%,50% 80%,50% 0%,70% 0%,70% 100%);
     opacity: 1;
 }
 
 .lexcheckboxcont {
-    display: inline-flex;
-    gap: 8px;
+    display: flex;
+    gap: 0.4rem;
     margin: 0 auto;
+}
+
+.lexcheckboxcont span {
+    width: 95%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .lexcheckboxsubmenu {
@@ -1848,6 +1855,7 @@ dialog .lexselect .lexselectoptions {
     padding: 4px;
     padding-inline: 8px;
     color: var(--global-text-secondary);
+    grid-column: span 2;
 }
 
 .lexcheckboxsubmenu .lexwidget {
@@ -1857,10 +1865,11 @@ dialog .lexselect .lexselectoptions {
 /* Toggle Widget */
 
 .lextoggle {
-    --toggle-color: #1a1a1a;
+    --toggle-bg-color: var(--global-text-tertiary); /* Color of background CHECKED */
+    --toggle-fg-color: #f4f4f6; /* Color of the thumb */
     border: 1px solid transparent;
-    color: #f9f9f9;
-    background-color: var(--global-color-quaternary);
+    color: var(--toggle-fg-color);
+    background-color: var(--global-color-tertiary); /* Color of background NO check */
     cursor: pointer;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -1871,9 +1880,8 @@ dialog .lexselect .lexselectoptions {
     -ms-user-select: none;
     user-select: none;
     border-radius: 12px;
-    padding: 3px;
-    width: 36px;
-    height: 22px;
+    width: 40px;
+    height: 21px;
     flex-shrink: 0;
     grid-template-columns: 0fr 1fr 1fr;
     place-content: center;
@@ -1887,11 +1895,12 @@ dialog .lexselect .lexselectoptions {
 }
 
 /* Colors */
-.lextoggle.primary { --toggle-color: var(--global-selected); }
-.lextoggle.secondary { --toggle-color: var(--global-selected-light);  }
-.lextoggle.accent { --toggle-color: var(--global-color-accent);  }
-.lextoggle.warning { --toggle-color: var(--global-color-warning);  }
-.lextoggle.error { --toggle-color: var(--global-color-error);  }
+.lextoggle.primary { --toggle-bg-color: var(--global-color-primary);}
+.lextoggle.secondary { --toggle-bg-color: var(--global-color-tertiary); }
+.lextoggle.accent { --toggle-bg-color: var(--global-color-accent); }
+.lextoggle.contrast { --toggle-bg-color: var(--global-text-primary); }
+.lextoggle.warning { --toggle-bg-color: var(--global-color-warning); }
+.lextoggle.error { --toggle-bg-color: var(--global-color-error);  }
 
 .lextoggle > * {
     z-index: 1;
@@ -1904,7 +1913,7 @@ dialog .lexselect .lexselectoptions {
     grid-column: 2/span 1;
     grid-row-start: 1;
     height: 100%;
-    padding: .125rem;
+    padding: 0.125rem;
     transition: opacity .2s,rotate .4s
 }
 
@@ -1953,15 +1962,28 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lextoggle:checked, .lextoggle[aria-checked=true], .lextoggle:has(>input:checked) {
-    border: 1px solid var(--global-color-secondary);
-    background-color: var(--toggle-color);
+    background-color: var(--toggle-bg-color);
     grid-template-columns: 1fr 1fr 0fr;
 }
 
+.lextoggle.contrast:checked, .lextoggle.contrast[aria-checked=true], .lextoggle.contrast:has(>input:checked) {
+    --toggle-fg-color: var(--global-color-primary);
+}
+
+.lextoggle.outline.primary, .lextoggle.outline.secondary {
+    /* border: 1px solid var(--global-text-tertiary); */
+}
+
 .lextoggle.outline:checked, .lextoggle.outline[aria-checked=true], .lextoggle.outline:has(>input:checked) {
-    color: var(--toggle-color);
     border: 1px solid currentColor;
-    background-color: var(--global-color-primary);
+    color: var(--toggle-bg-color);
+    background-color: var(--global-color-secondary);
+}
+
+.lextoggle.outline.primary:checked, .lextoggle.outline.primary[aria-checked=true], .lextoggle.outline.primary:has(>input:checked),
+.lextoggle.outline.secondary:checked, .lextoggle.outline.secondary[aria-checked=true], .lextoggle.outline.secondary:has(>input:checked) {
+    background-color: var(--global-color-quaternary);
+    border: 1px solid var(--global-text-tertiary);
 }
 
 :is(.lextoggle:checked, .lextoggle[aria-checked=true], .lextoggle:has(>input:checked)):before {
@@ -1969,7 +1991,7 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lextoggle:indeterminate {
-    grid-template-columns: .5fr 1fr .5fr
+    grid-template-columns: 0.5fr 1fr 0.5fr;
 }
 
 .lextoggle:disabled {
@@ -1982,24 +2004,29 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lextogglecont {
-    font-weight: bold;
-    display: inline-flex;
-    gap: 8px;
+    display: flex;
+    gap: 0.4rem;
     margin: 0 auto;
 }
 
 .lextogglecont .toggletext {
-    font-weight: bold;
+    font-weight: 500;
+    width: 95%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .lextogglesubmenu {
     width: 100%;
     padding: 6px;
+    padding-inline: 8px;
     color: var(--global-text-secondary);
     margin-top: -1px;
+    grid-column: span 2;
 }
 
-/* Toggle Widget */
+/* Radio Group Widget */
 
 .lexradiogroup {
     width: 100% !important;
@@ -2009,7 +2036,7 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexradiogroup span {
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .lexradiogroup .lexradiogroupitem {
@@ -2024,15 +2051,15 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexradiogroup .lexradiogroupitem button {
-    width: 14px;
-    height: 14px;
-    min-width: 14px !important;
-    min-height: 14px !important;
+    width: 16px;
+    height: 16px;
+    min-width: 16px !important;
+    min-height: 16px !important;
     padding: 0;
     margin: auto 0;
-    border-radius: 7px;
+    border-radius: 8px;
     background-color: var(--global-intense-background);
-    border: 1px solid var(--global-text-secondary) !important;
+    border: 1px solid var(--global-text-tertiary) !important;
 }
 
 .lexradiogroup .lexradiogroupitem button:disabled {
@@ -2053,10 +2080,15 @@ dialog .lexselect .lexselectoptions {
     background-color: var(--global-text-primary);
 }
 
+.lexradiogroup .lexradiogroupitem button.checked:disabled span {
+    background-color: var(--global-color-tertiary) !important;
+}
+
 /* Colors */
-.lexradiogroup.primary .lexradiogroupitem button.checked span { background-color: var(--global-selected); }
-.lexradiogroup.secondary .lexradiogroupitem button.checked span { background-color: var(--global-selected-light); }
+.lexradiogroup.primary .lexradiogroupitem button.checked span { background-color: var(--global-color-accent); }
+.lexradiogroup.secondary .lexradiogroupitem button.checked span { background-color: var(--global-color-accent-light); }
 .lexradiogroup.accent .lexradiogroupitem button.checked span { background-color: var(--global-color-accent); }
+.lexradiogroup.contrast .lexradiogroupitem button.checked span { background-color: var(--global-text-primary); }
 .lexradiogroup.warning .lexradiogroupitem button.checked span { background-color: var(--global-color-warning); }
 .lexradiogroup.error .lexradiogroupitem button.checked span { background-color: var(--global-color-error); }
 
@@ -2083,7 +2115,7 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexcolor:has(input:focus) input[type="color"] {
-    outline: 2px solid var(--global-selected);
+    outline: 2px solid var(--global-color-accent);
     border-radius: 4px;
 }
 
@@ -2096,6 +2128,7 @@ dialog .lexselect .lexselectoptions {
 
 .lexcolor input[type="color"] {
     cursor: pointer;
+    background: none;
 }
 
 .lexcolor .lexwidget {
@@ -2109,10 +2142,7 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexvector a {
-    width: 48px;
     font-size: var(--global-font-size-sm);
-    margin-left: 6px;
-    margin-right: 6px;
 }
 
 .lexvector .vecbox {
@@ -2122,7 +2152,7 @@ dialog .lexselect .lexselectoptions {
     border-radius: 4px;
     border: 2px solid var(--global-color-transparent);
     margin-right: 2px;
-    background: var(--global-button-color);
+    background-color: var(--global-color-tertiary);
     transition: 0.1s linear;
 }
 
@@ -2131,11 +2161,7 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexvector .vecbox:hover {
-    background-color: color-mix(in srgb, var(--global-button-color), #000 7%);
-}
-
-.lexwidget.nobranch .lexvector .vecbox:hover {
-    background: var(--global-button-color);
+    background-color: color-mix(in srgb, var(--global-color-tertiary), #000 7%);
 }
 
 .lexwidget .numberbox .drag-icon,
@@ -2150,7 +2176,7 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexvector .vecbox:has(input:focus) {
-    border: 2px solid var(--global-selected);
+    border: 2px solid var(--global-color-accent);
 }
 
 .lexvector .vecbox span {
@@ -2213,32 +2239,33 @@ input[type=number] {
 /* Number Widget */
 
 .lexwidget .numberbox {
+    width: 100%;
     display: grid;
-    width: calc(100% - 4px);
-    background-color: var(--global-button-color);
+    background-color: var(--global-color-tertiary);
     border: 2px solid var(--global-color-transparent);
     border-radius: 6px;
     margin-right: 2px;
     position: relative;
+    overflow-x: hidden;
     transition: 0.1s linear;
 }
 
 .lexwidget .numberbox:hover {
-    background-color: color-mix(in srgb, var(--global-button-color), #000 7%);
+    background-color: color-mix(in srgb, var(--global-color-tertiary), #000 7%);
 }
 
 .lexwidget .numberbox:has(input:focus) {
-    border: 2px solid var(--global-selected);
+    border: 2px solid var(--global-color-accent);
 }
 
 .lexwidget .numberbox span {
     position: absolute;
-    top: 1px;
     pointer-events: none;
+    align-self: center;
 }
 
-.lexnumber .vecinput {
-    width: calc(100% - 12px); /* remove padding, margin, and border */
+.lexwidget .numberbox:has(input[type=range]) span {
+    margin-top: -12px;
 }
 
 .lexinputmeasure {
@@ -2251,7 +2278,7 @@ input[type=number] {
     -moz-appearance: none;
     -webkit-appearance: none;
     border: none !important;
-    width: calc(100% - 12px);
+    width: 100%;
     height: 1px;
     outline: none;
     opacity: 0.7;
@@ -2282,7 +2309,7 @@ input[type=number] {
     height: 12px;
     border: 1px solid #c9c7de;
     border-radius: 6px;
-    background: light-dark(var(--global-selected-light), var(--global-selected));
+    background: light-dark(var(--global-color-accent-light), var(--global-color-accent));
     box-shadow: 0px 0px 6px #505050;
     cursor: pointer;
 }
@@ -2300,10 +2327,6 @@ input[type=number] {
     right: 0.8em;
 }
 
-.lexwidget .lock {
-    /* color: red; */
-}
-
 /* Range Widget */
 
 .lexrangeslider {
@@ -2312,7 +2335,7 @@ input[type=number] {
     --range-progress: currentColor;
     --range-fill: 1;
     --range-thumb-padding: 0.15rem;
-    --range-bg: color-mix(in oklab,currentColor 10%,#0000);
+    --range-bg: color-mix(in oklab,currentColor 20%,#0000);
     --range-dir: 1;
     --radius-selector: 0.5rem;
     -webkit-appearance: none;
@@ -2321,11 +2344,11 @@ input[type=number] {
     webkit-appearance: none;
     --radius-selector-max: calc(var(--radius-selector) + var(--radius-selector) + var(--radius-selector));
     border-radius: calc(var(--radius-selector) + min(var(--range-thumb-padding),var(--radius-selector-max)));
-    width: calc(100% - 4px);
+    width: 100%;
     height: var(--range-thumb-size);
     border: none;
     outline: none;
-    color: var(--global-text-secondary);
+    color: var(--global-text-tertiary);
     background-color: #0000;
     overflow: hidden;
     padding: 0;
@@ -2336,10 +2359,15 @@ input[type=number] {
     vertical-align: middle;
 }
 
+.lexrangeslider:disabled {
+    cursor: default;
+}
+
 /* Colors */
-.lexrangeslider.primary { color: var(--global-selected); }
-.lexrangeslider.secondary { color: var(--global-selected-light); }
+.lexrangeslider.primary { color: var(--global-color-primary); --range-thumb-color: var(--global-text-secondary); }
+.lexrangeslider.secondary { color: var(--global-color-secondary); --range-thumb-color: var(--global-text-secondary); }
 .lexrangeslider.accent { color: var(--global-color-accent); }
+.lexrangeslider.contrast { color: var(--global-text-primary); }
 .lexrangeslider.warning { color: var(--global-color-warning); }
 .lexrangeslider.error { color: var(--global-color-error); }
 
@@ -2368,6 +2396,10 @@ input[type=number] {
     border-radius: var(--radius-selector);
     width: 100%;
     height: calc(var(--range-thumb-size)*0.5);
+}
+
+.lexrangeslider:disabled::-webkit-slider-runnable-track {
+    color: var(--global-color-quaternary);
 }
 
 .lexrangeslider::-webkit-slider-thumb {
@@ -2404,7 +2436,7 @@ input[type=number] {
 /* Size Widget */
 
 .lexwidget .lexsizecross {
-    color: var(--global-selected);
+    color: var(--global-color-accent);
     font-weight: 800;
 }
 
@@ -2427,13 +2459,16 @@ input[type=number] {
 }
 
 .lexwidget .lexpad .lexinnerpad .lexpadthumb {
-    background-color: var(--global-selected-light);
+    background-color: var(--global-color-accent);
     width: 10%;
     height: 10%;
     border-radius: 2px;
     transform: translate(0px, 0px);
 }
 
+.lexwidget .lexpad .lexinnerpad .lexpadthumb.active {
+    background-color: var(--global-color-accent-light);
+}
 
 /* Tabs Widget */
 
@@ -2508,15 +2543,21 @@ input[type=number] {
     width: 100%;
     min-height: 12px;
     margin: 0 auto;
-    margin-top: 6px;
-    margin-bottom: -8px;
     color: var(--global-text-secondary);
-    font-weight: 600;
+    font-weight: 500;
     font-size: var(--global-font-size);
 }
 
+.lextree .lexnodetree_filter {
+    background: none !important;
+}
+
+.lextree .lexnodetree_filter:hover {
+    background: none;
+}
+
 .lextree .lextreetools {
-    background: var(--global-color-secondary);
+    background: var(--global-color-tertiary);
     padding: 2px;
     padding-left: 6px;
     padding-right: 6px;
@@ -2526,13 +2567,21 @@ input[type=number] {
     margin-top: 4px;
 }
 
+.lexwidget.nobranch .lextree .lextreetools {
+    background: var(--global-color-secondary);
+}
+
 .lextree .lextreetools input {
     font-size: var(--global-font-size);
     padding-left: 8px;
 }
 
+.lextree .lextreetools input:hover {
+    background: none;
+}
+
 .lextree .lextreetools.notitle {
-    padding-top: 14px;
+    /* padding-top: 14px; */
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
 }
@@ -2542,7 +2591,6 @@ input[type=number] {
 }
 
 .lextree span {
-    /* Tree title */
     padding: 8px;
     display: block;
     border-top-left-radius: 8px;
@@ -2553,11 +2601,10 @@ input[type=number] {
     -ms-user-select: none;
     user-select: none;
     font-size: var(--global-font-size-lg);
-    font-weight: 800;
+    font-weight: 500;
 }
 
 .lextree ul {
-    padding-bottom: 16px;
     padding-inline-start: 0px;
     display: flex;
     flex-direction: column;
@@ -2592,6 +2639,15 @@ input[type=number] {
     user-select: none;
 }
 
+.lextree .lextreeitem input {
+    padding: 0;
+    border: none;
+}
+
+.lextree .lextreeitem input:hover {
+    background: none;
+}
+
 .lextree .lextreeitem div {
     display: flex;
     gap: 0.25rem;
@@ -2620,17 +2676,16 @@ input[type=number] {
 
 .lextree .lextreeitem:hover {
     color: var(--global-text-primary);
-    background: var(--global-color-tertiary);
+    background: var(--global-color-secondary);
 }
 
 .lextree .lextreeitem.selected {
     color: var(--global-text-primary);
-    background: light-dark(var(--global-selected-light), var(--global-selected));
+    background: light-dark(var(--global-color-accent-light), var(--global-color-accent));
 }
 
 .lextree .lextreeitem a.hierarchy {
     margin-right: 6px;
-    margin-top: 4px;
 }
 
 .lextree .lextreeitem .lexicon {
@@ -2638,7 +2693,7 @@ input[type=number] {
 }
 
 .lextree .lextreeitem .itemicon:hover {
-    color: var(--global-selected);
+    color: var(--global-color-accent);
 }
 
 .lextree .lextreeitem.selected .itemicon:hover {
@@ -2653,7 +2708,7 @@ input[type=number] {
 
 .lexfileinput::file-selector-button {
     align-content: center;
-    background-color: var(--global-button-color);
+    background-color: var(--global-color-tertiary);
     border-radius: 6px;
     border: none;
     margin-top: 2px;
@@ -2669,7 +2724,7 @@ input[type=number] {
 }
 
 .lexfileinput::file-selector-button:hover {
-    background-color: color-mix(in srgb, var(--global-button-color), #fff 4%);
+    background-color: color-mix(in srgb, var(--global-color-tertiary), #fff 4%);
     color: var(--global-text-primary);
 }
 
@@ -2714,24 +2769,20 @@ input[type=number] {
     cursor: pointer;
 }
 
-/* .lexprogressbar.editable.grabbing {
-    cursor: grabbing;
-} */
-
 /* The gray background in Chrome, etc. */
 .lexprogressbar::-webkit-meter-bar {
     border-radius: 0.25rem;
     height: 12px;
-    background: color-mix(in srgb, var(--global-selected) 20%, transparent);
+    background: color-mix(in srgb, var(--global-color-accent) 20%, transparent);
 }
 
 /* (optimum) */
 meter:-moz-meter-optimum::-moz-meter-bar {
-    background: var(--global-selected);
+    background: var(--global-color-accent);
 }
 
 .lexprogressbar::-webkit-meter-optimum-value {
-    background: var(--global-selected);
+    background: var(--global-color-accent);
 }
 
 /* (high)*/
@@ -2757,7 +2808,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexbadge {
     border-radius: 0.35rem;
     color: #fff;
-    font-weight: 500;
     border: 1px solid var(--badge-color, #14171a);
     width: fit-content;
     justify-content: center;
@@ -2770,9 +2820,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 /* Colors */
-.lexbadge.primary { --badge-color: var(--global-selected); }
-.lexbadge.secondary { --badge-color: var(--global-selected-light); }
+.lexbadge.primary { --badge-color: var(--global-color-accent); }
+.lexbadge.secondary { --badge-color: var(--global-color-accent-light); }
 .lexbadge.accent { --badge-color: var(--global-color-accent); }
+.lexbadge.contrast { --badge-color: var(--global-text-primary); color: var(--global-color-primary); }
 .lexbadge.warning { --badge-color: var(--global-color-warning); }
 .lexbadge.error { --badge-color: var(--global-color-error); }
 /* Styles */
@@ -2836,7 +2887,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexmenubox {
     position: absolute;
-    padding-right: 8px;
     z-index: 1001;
     background-color: #111111f3;
     border: 1px solid #aaaaaa48;
@@ -2945,7 +2995,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexmenubox .lexmenuboxentry:not(.disabled):hover {
-    background-color: var(--global-selected);
+    background-color: var(--global-color-accent);
     color: #f5f5f5;
 }
 
@@ -2965,9 +3015,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexmenubox .lexseparator {
     margin: 2px 0 2px;
-    width: -moz-calc(100% + 8px);
-    width: -webkit-calc(100% + 8px);
-    width: calc(100% + 8px);
+    width: 100%;
     border-color: var(--global-text-tertiary);
     opacity: 0.25;
 }
@@ -3009,6 +3057,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     user-select: none;
 }
 
+.lexmenubar .lexmenubutton.main:last-child {
+    margin-right: 8px;
+}
+
 .lexmenubar .lexmenubutton a {
     margin-left: 0px !important;
 }
@@ -3018,7 +3070,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexmenubar .lexmenubutton.disabled a {
-    color: light-dark(var(--global-color-tertiary), var(--global-button-color));
+    color: var(--global-color-quaternary);
     cursor: default;
 }
 
@@ -3027,9 +3079,9 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexcontextmenu {
     z-index: 102;
     position: absolute;
-    padding-right: 20px;
+    /* padding-right: 20px; */
     border-radius: 6px;
-    box-shadow: 0 0 6px rgba(46, 46, 46, 0.596) !important;
+    box-shadow: 0 0 6px rgba(46, 46, 46, 0.2) !important;
     background-color: var(--global-blur-background);
     border: 1px solid #91909036;
 }
@@ -3050,10 +3102,9 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexcontextmenu .lexmenuboxentry {
     width: 100%;
     color: var(--global-text-secondary);
-    padding: 3px;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-bottom: 4px;
+    padding: 4px;
+    padding-inline: 8px;
+    display: flex;
     cursor: pointer;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -3073,21 +3124,18 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexcontextmenu .lexmenuboxentry.cmtitle {
     background: light-dark(var(--global-color-tertiary), var(--global-intense-background));
-    font-weight: bold;
+    font-weight: 600;
     cursor: default;
 }
 
 .lexcontextmenu .lexmenuboxentry.cmseparator {
-    height: 1px;
     border-bottom: 1px solid var(--global-color-tertiary);
     padding-bottom: 0;
     padding-top: 0;
-    margin-top: -4px;
 }
 
 .lexcontextmenu .lexmenuboxentry .lexentryname {
-    margin-right: 10px;
-    margin-top: 2px;
+    margin-right: 1rem;
     font-size: var(--global-font-size);
     white-space: nowrap;
     overflow: hidden;
@@ -3100,20 +3148,13 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 /* normal icons  */
 .lexcontextmenu .lexmenuboxentry a {
-    float: right;
-    margin-right: 0px;
-    margin-top: 10px;
+    align-content: center;
+    margin-left: auto;
     font-size: var(--global-font-size-xs);
 }
 
-/* submenu specified arrow  */
-.lexcontextmenu .lexmenuboxentry a.fa-xs {
-    float: right;
-    margin-top: -9px;
-}
-
 .lexcontextmenu .lexmenuboxentry:hover:not(.cmtitle) {
-    background-color: var(--global-selected);
+    background-color: var(--global-color-accent);
     color: #f5f5f5;
 }
 
@@ -3136,7 +3177,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 /* Side Bar */
 
 .lexsidebar {
-    width: calc(100% - 20px);
+    width: 100%;
     height: 100%;
     padding: 10px;
     display: flex;
@@ -3155,8 +3196,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexsidebarcontent {
     width: 100%;
-    padding-block-start: 4px;
-    padding-block-end: 4px;
     display: flex;
     flex-direction: column;
     overflow-y: scroll;
@@ -3182,10 +3221,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     margin-bottom: 0.4rem;
 }
 
-.lexsidebar .lextext {
+.lexsidebar .lexsidebarfilter {
     transform: translate(0, 0);
     opacity: 1;
-    transition: transform 0.3s cubic-bezier(0,0,.2,1), opacity 0.1s cubic-bezier(0,0,.2,1), max-height 0.3s cubic-bezier(0,0,.2,1);
+    margin-block: 0.5rem;
+    transition: all 0.2s cubic-bezier(0,0,.2,1);
 }
 
 .lexsidebar .lexsidebargrouptitle {
@@ -3200,8 +3240,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     transform: translate(0, 0);
     opacity: 1;
     transition: transform 0.3s cubic-bezier(0,0,.2,1), opacity 0.1s cubic-bezier(0,0,.2,1), max-height 0.3s cubic-bezier(0,0,.2,1);
-    height: 44px;
-    max-height: 44px;
+    height: 32px;
+    max-height: 32px;
     align-content: center;
 }
 
@@ -3212,18 +3252,19 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     transition: transform 0.3s cubic-bezier(0,0,.2,1), opacity 0.1s cubic-bezier(0,0,.2,1), max-height 0.3s cubic-bezier(0,0,.2,1);
 }
 
-.lexsidebar.collapsing .lexsidebargrouptitle *, .lexsidebar.collapsing .lextext {
+.lexsidebar.collapsing .lexsidebargrouptitle *, .lexsidebar.collapsing .lexsidebarfilter {
     max-height: 0px;
     transform: translate(0, -24px);
     opacity: 0;
+    margin-block: 0;
 }
 
-.lexsidebar.collapsed .lexsidebargrouptitle *, .lexsidebar.collapsed .lextext {
+.lexsidebar.collapsed .lexsidebargrouptitle * {
     display: none;
 }
 
 .lexsidebar .lexsidebarentry {
-    width: calc(100% - 16px);
+    width: 100%;
     padding: 6px;
     padding-inline: 8px;
     border-radius: 8px;
@@ -3247,7 +3288,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexsidebarentry.selected {
-    background-color: var(--global-selected);
+    background-color: var(--global-color-accent);
 }
 
 .lexsidebar .lexsidebarentry:active {
@@ -3292,7 +3333,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexsidebarsubentrycontainer {
-    width: calc(100% - 48px);
+    width: 100%;
     margin-block-start: 4px;
     margin-block-end: 8px;
     margin-left: 16px;
@@ -3360,8 +3401,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexsidebarfooter, .lexsidebar .lexsidebarheader {
-    width: calc(100% - 16px);
-    height: 36px;
+    width: 100%;
+    height: 48px;
     display: flex;
     border-radius: 8px;
     padding: 8px;
@@ -3380,7 +3421,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar.collapsing .lexsidebarheader {
-    background-color: var(--global-selected);
+    background-color: var(--global-color-accent);
 }
 
 .lexsidebar .lexsidebarfooter:active, .lexsidebar .lexsidebarheader:active {
@@ -3401,7 +3442,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexsidebarfooter div.infodefault, .lexsidebar .lexsidebarheader div.infodefault {
-    width: calc(100% - 88px);
+    width: 100%;
     padding-inline: 12px;
     justify-content: center;
     display: flex;
@@ -3524,57 +3565,17 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexoverlaybuttons .lexbutton {
+    --button-color: var(--global-color-secondary);
     padding: 6px 6px;
     font-size: var(--global-font-size-lg);
     border-radius: 10px;
     justify-content: center;
-    background: none;
     color: var(--global-text-secondary);
     height: 100%;
 }
 
 .lexoverlaybuttons .lexbutton span {
     font-size: var(--global-font-size-lg);
-}
-
-.lexoverlaybuttons .lexbutton a {
-    line-height: 10px;
-    font-size: var(--global-font-size-lg);
-}
-
-.lexoverlaybuttons .lexbutton.array a {
-    font-size: var(--global-font-size-sm);
-    margin-left: 4px;
-}
-
-:root[data-theme="light"] .lexoverlaybuttons .lexbutton img {
-    filter: invert(1);
-}
-
-.lexoverlaybuttons .lexbutton.selected {
-    background-color: light-dark(var(--global-selected-light), var(--global-selected)) !important;
-    color: #fff;
-    outline: none;
-    border-radius: 8px;
-}
-
-.lexoverlaybuttons .lexbutton.selected img,
-.lexoverlaybuttons .lexbutton:hover img {
-    filter: none;
-}
-
-.lexoverlaybuttons .lexbutton:hover {
-    color: var(--global-text-primary);
-    background-color: color-mix(in srgb, var(--global-button-color), #fff 4%);
-}
-
-.lexoverlaybuttons .lexbutton.selected:hover {
-    color: #f4f4ffe6;
-}
-
-.lexoverlaybuttons .lexbutton:active {
-    outline: none !important;
-    color: #d5d5d5;
 }
 
 .lexoverlaybuttons .lexoverlaygroup {
@@ -3585,9 +3586,13 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexoverlaybuttons .lexoverlaygroup .lexbutton {
-    background: none;
+    --button-color: var(--global-color-tertiary);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
+}
+
+.lexoverlaybuttons .lexbutton.selected {
+    --button-color: var(--global-color-accent);
 }
 
 .lexoverlaybuttonscontainer.vertical .lexoverlaygroup {
@@ -3640,18 +3645,18 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    transition: 0.2s;
     line-height: 16px;
 }
 
 .lexareatabs .lexareatab.thumb {
     position: absolute;
-    background: light-dark(var(--global-selected-light), var(--global-selected));
+    background: var(--global-color-accent);
     z-index: 0;
+    transition: linear transform 0.15s;
 }
 
 .lexareatabs.row {
-    background-color: light-dark(var(--global-color-tertiary), var(--global-button-color));
+    background-color: var(--global-color-tertiary);
     border-radius: 8px;
     padding: 3px;
     margin: 6px;
@@ -3667,7 +3672,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexareatabs.fit {
-    width: calc(100% - 12px);
+    width: 100%;
     padding-inline: 6px;
 }
 
@@ -3709,14 +3714,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     transition-timing-function: ease-out;
 }
 
-.lexareatabscontainer .lexpanel:not(.lexoverlaybuttons) {
-    margin: 0;
-}
-
-.lexareatabscontainer .lexbranch {
-    margin: 4px 7px !important;
-}
-
 .lexareatabscontent.folded {
     max-height: 0px;
 }
@@ -3730,11 +3727,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 /* Avatar Widget */
 
 .lexavatar {
-    width: 32px;
-    height: 32px;
+    width: 48px;
     border-radius: 8px;
-    margin: auto 0;
     align-content: center;
+    aspect-ratio: 1;
 }
 
 .lexavatar * {
@@ -3762,25 +3758,25 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexcard:hover a {
-    color: var(--global-selected);
+    color: var(--global-color-accent);
 }
 
 .lexcard:hover img {
-    outline: 3px solid var(--global-selected);
+    outline: 3px solid var(--global-color-accent);
 }
 
 .lexcard span {
     font-size: var(--global-font-size-lg);
     font-family: var(--global-title-font);
-    font-weight: 600;
+    font-weight: 500;
     text-transform: uppercase;
-    width: calc(100% - 16px);
+    width: 100%;
+    height: 32px;
     display: flex;
     background-color: var(--global-blur-background);
     --webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     align-items: center;
-    height: 16px;
     position: absolute;
     top: 0;
     left: 0;
@@ -3795,7 +3791,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexcard span a:hover {
-    color: var(--global-selected);
+    color: var(--global-color-accent);
 }
 
 /* Layers Widget */
@@ -3804,7 +3800,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     display: grid;
     grid-template-columns: 18px 18px 18px 18px 18px 18px 18px 18px;
     grid-gap: 6px 8px;
-    /* Gap between grid cells */
     justify-content: center;
 }
 
@@ -3819,10 +3814,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     cursor: pointer;
     border-radius: 4px;
     font-size: var(--global-font-size-sm);
+    transition: background-color 0.15s linear;
 }
 
 .lexlayer.selected {
-    --layer-color: light-dark(var(--global-selected-light), var(--global-selected));
+    --layer-color: var(--global-color-accent);
     color: #fff;
 }
 
@@ -3845,7 +3841,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexlistitem {
-    width: calc(100% - 8px);
+    width: 100%;
+    height: 24px;
     cursor: pointer;
     color: var(--global-text-secondary);
     font-size: var(--global-font-size);
@@ -3854,7 +3851,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     padding-right: 4px;
     margin-top: 1px;
     margin-bottom: 1px;
-    height: 20px;
     line-height: 22px;
     align-content: center;
     display: flow-root;
@@ -3862,6 +3858,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    transition: background-color 0.15s linear;
 }
 
 .lexlistitem a {
@@ -3880,7 +3877,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexlistitem.selected {
     color: #fff;
-    background-color: light-dark(var(--global-selected-light), var(--global-selected));
+    background-color: var(--global-color-accent);
 }
 
 /* Array Widget */
@@ -3889,8 +3886,18 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexwidget:has(.lexcheckboxsubmenu),
 .lexwidget:has(.lextogglesubmenu),
 .lexwidget:has(.lexcustomcontainer) {
-    background-color: light-dark(var(--global-color-tertiary), var(--global-medium-background));
     border-radius: 6px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto auto;
+    transition: background-color 0.2s ease-out;
+}
+
+.lexwidget:has(.lexarrayitems)[data-opened=true],
+.lexwidget:has(.lexcheckboxsubmenu)[data-opened=true],
+.lexwidget:has(.lextogglesubmenu)[data-opened=true],
+.lexwidget:has(.lexcustomcontainer)[data-opened=true] {
+    background-color: light-dark(var(--global-color-tertiary), var(--global-medium-background));
 }
 
 .lexarray .lexwidget {
@@ -3904,10 +3911,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     color: var(--global-text-secondary);
     font-size: var(--global-font-size);
     margin-top: -1px;
-}
-
-.lexarrayitems .small .lexbutton {
-    background: none;
+    grid-column: span 2;
 }
 
 .lexarrayitems .lexwidgetname {
@@ -3920,7 +3924,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     display: inline-flex;
     flex-wrap: wrap;
     line-height: 12px;
-    background-color: light-dark(var(--global-color-tertiary), var(--global-button-color));
+    background-color: var(--global-color-tertiary);
     border-radius: 8px;
     padding: 4px;
 }
@@ -3955,7 +3959,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexcounter {
     display: flex;
-    margin: 0 auto;
+    place-content: center;
 }
 
 .lexcounterbox {
@@ -3984,7 +3988,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lextable table {
     width: 100%;
     border: 1px solid;
-    border-color: light-dark(#dbd8d8c0, var(--global-button-color));
+    border-color: var(--global-color-tertiary);
     border-collapse: separate;
     border-radius: 8px;
     border-spacing: 0px;
@@ -4027,10 +4031,19 @@ tr.dragging {
     pointer-events: none;
 }
 
+th, td {
+    padding: 6px;
+    padding-inline: 12px;
+    text-align: left;
+    align-content: center;
+}
+
 th {
     --th-color: var(--global-text-secondary);
+    font-weight: 600;
     color: var(--th-color);
     font-size: var(--global-font-size);
+    padding-block: 2px;
     cursor: pointer;
     transition: all 0.1s linear;
     background-color: var(--global-color-tertiary);
@@ -4038,6 +4051,19 @@ th {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+th a {
+    pointer-events: none;
+}
+
+th span {
+    border-radius: 6px;
+    padding: 0.4rem;
+}
+
+th span:hover {
+    background-color: var(--global-color-secondary);
 }
 
 th a, td a {
@@ -4055,11 +4081,12 @@ th:hover {
     color: color-mix(in srgb, var(--th-color), #000 10%);
 }
 
-th, td {
-    padding: 6px;
-    padding-inline: 12px;
-    text-align: left;
-    vertical-align: top;
+th.centered, td.centered {
+    text-align: center;
+}
+
+.lextable.centered th, .lextable.centered td {
+    text-align: center;
 }
 
 th.sm, td.sm {
@@ -4067,14 +4094,20 @@ th.sm, td.sm {
 }
 
 th .lexcheckbox, td .lexcheckbox {
-    margin-top: 3px;
     width: 1.25em;
     height: 1.25em;
 }
 
+th a {
+    display: inline-block;
+    transform: translate(6px, 3px);
+}
+
 td {
-    align-content: center;
+    justify-items: center;
     border-top: 2px solid;
+    overflow: hidden;
+    white-space: nowrap;
     border-color: light-dark(#dbd8d8c0, #5c5b5b7a);
 }
 
@@ -4088,11 +4121,12 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
 
 .lextable .lextablebuttons {
     display: inline-flex;
-    gap: 0.8rem;
+    gap: 0.2rem;
 }
 
 .lextable .lextablebuttons .lexicon {
     font-size: var(--global-font-size-sm) !important;
+    padding: 0.2rem;
 }
 
 :root[data-theme="light"] .lextable table {
@@ -4107,16 +4141,13 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
     color: var(--global-text-secondary);
     font-size: var(--global-font-size);
     margin-top: -1px;
+    grid-column: span 2;
 }
 
 .lexcustomcontainer span {
     align-items: center;
     display: flex;
     justify-content: space-between;
-}
-
-.lexcustomcontainer .lexbutton span:not(:has(.menu)) {
-    width: 95%;
 }
 
 /* Knob Widget */
@@ -4209,7 +4240,7 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
 }
 
 .lexknob .knobmarker {
-    background-color: var(--global-selected);
+    background-color: var(--global-color-accent);
     filter: brightness(1.5);
     width: 6px;
     height: 6px;
@@ -4260,7 +4291,7 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
 }
 
 :root[data-theme="light"] .lexknob .knobmarker {
-    background-color: var(--global-selected-dark);
+    background-color: var(--global-color-accent-dark);
     filter: brightness(1.5);
 }
 
@@ -4326,14 +4357,6 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
     height: 100%;
 }
 
-.lextimelinepanel {
-    /* overflow: hidden; */
-}
-
-/* .lextimeline .lexarea, .lextimelinepanel {
-  background-color: var(--global-intense-background);
-} */
-
 .lextimeline *::-webkit-scrollbar {
     display: none;
 }
@@ -4345,18 +4368,10 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
 
 .lextimeline .lexwidget:has(.lexbutton:not(.array)) {
     padding: 1px;
-    /* padding-left: 10px;
-  padding-right: 10px; */
 }
 
 .lextimeline .lexinlinewidgets {
     padding-right: 10px;
-    /* background-color: var(--global-color-secondary); */
-    /* height: 100%; */
-}
-
-.lextimeline .lexbutton:hover {
-    color: var(--global-selected-light);
 }
 
 .lextimeline .lextree {
@@ -4365,10 +4380,6 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
 
 .lextimeline .lextree .lextreeitem {
     margin: 0px;
-}
-
-.lextimeline .lextitle {
-    padding-left: 24px;
 }
 
 .lextimeline .lextree ul {
@@ -4384,14 +4395,10 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
     height: unset;
 }
 
-.lextimeline .lexbutton.accept:hover {
-    background-color: color-mix(in srgb, var(--global-button-color), #000 7%);
-}
-
 /**/
 .lexmin {
     display: inline-block;
-    color: var(--global-selected-light);
+    color: var(--global-color-accent-light);
     background: var(--global-color-primary);
     border-radius: 8px;
     padding: 4px;
@@ -4523,7 +4530,7 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
 
 .lexassetbrowser .lexsplitbar.horizontal {
     position: relative;
-    height: calc(100%);
+    height: 100%;
     border-radius: 0px;
     left: 0 !important;
     top: 0;
@@ -4579,7 +4586,7 @@ ul.lexassetscontent {
     margin: 0.5em;
     margin-top: 0.75em;
     padding: 0;
-    box-shadow: 0 0 8px black;
+    box-shadow: 0 0 2px rgba(0, 0, 0, .14);
     overflow: hidden;
     background-color: #555;
     cursor: pointer;
@@ -4612,16 +4619,14 @@ ul.lexassetscontent {
 }
 
 .lexassetscontent.list li {
-    width: calc(100% - 0.5em);
+    width: 100%;
     height: 1.8em;
     border-top: 0px;
-    border-left: 4px solid rgba(0, 0, 0, 0);
-    border-bottom-left-radius: 2px;
-    border-bottom-right-radius: 2px;
+    border-left: 4px solid transparent;
+    border-radius: 4px;
     margin: 0;
     margin-top: 0.4em;
     margin-bottom: 0.4em;
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.858);
 }
 
 .lexassetscontent .asset-file-preview {
@@ -4664,12 +4669,12 @@ ul.lexassetscontent {
 }
 
 .lexassetscontent li:hover {
-    outline: 2px solid var(--global-selected);
+    outline: 2px solid var(--global-color-accent);
 }
 
 .lexassetscontent li.selected {
     transition: none !important;
-    outline: 2px solid var(--global-selected);
+    outline: 2px solid var(--global-color-accent);
     font-weight: bold;
 }
 
@@ -4679,7 +4684,7 @@ ul.lexassetscontent {
     bottom: 0px;
     -webkit-text-size-adjust: 100%;
     font-size: var(--global-font-size);
-    color: #BBB;
+    color: var(--global-text-primary);
     cursor: pointer;
     text-align: center;
     box-sizing: border-box;
@@ -4690,7 +4695,7 @@ ul.lexassetscontent {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    background-color: rgba(12, 12, 12, 0.8);
+    background-color: var(--global-intense-background);
     transition: all 0.1s;
     z-index: 1;
 }
@@ -4747,7 +4752,7 @@ ul.lexassetscontent {
 .lexassetscontent li.selected .lexassettitle {
     color: #f5f5f5;
     text-shadow: 0 0 3px black;
-    background-color: var(--global-selected);
+    background-color: var(--global-color-accent);
 }
 
 .lexassetscontent li img {
@@ -4826,7 +4831,7 @@ ul.lexassetscontent {
 .codebasearea .lexareatab.selected {
     background-color: var(--global-color-secondary) !important;
     color: var(--global-text-secondary) !important;
-    border-top: 1px solid var(--global-selected);
+    border-top: 1px solid var(--global-color-accent);
     border-bottom: none;
 }
 
@@ -4861,7 +4866,7 @@ ul.lexassetscontent {
 .lexcodeeditor {
     outline: none;
     overflow: hidden;
-    width: calc(100%);
+    width: 100%;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -4877,7 +4882,7 @@ ul.lexassetscontent {
     position: absolute;
     z-index: 3;
     bottom: 0px;
-    margin-left: 0px;
+    justify-items: end;
 }
 
 .lexcodegutter {
@@ -4905,7 +4910,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .codetabsarea.with-vscrollbar {
-    width: calc(100% - 10px) !important;
+    width: 100% !important;
 }
 
 .lexcodeeditor .codetabsarea.with-hscrollbar {
@@ -5116,7 +5121,7 @@ ul.lexassetscontent {
     top: 0px;
     width: 100px;
     height: var(--code-editor-row-height);
-    background-color: var(--global-selected);
+    background-color: var(--global-color-accent);
     opacity: 0.4;
 }
 
@@ -5133,7 +5138,7 @@ ul.lexassetscontent {
     top: 26px;
     z-index: 100;
     border-radius: 4px;
-    border: 1px solid var(--global-button-color);
+    border: 1px solid var(--global-color-tertiary);
     box-shadow: 0 0px 4px #101010;
     overflow-y: scroll;
     transform: translateY(-72px);
@@ -5162,7 +5167,7 @@ ul.lexassetscontent {
     visibility: hidden;
     z-index: 100;
     border-radius: 4px;
-    border: 1px solid var(--global-button-color);
+    border: 1px solid var(--global-color-tertiary);
     box-shadow: 0 0px 4px #101010;
     overflow-y: scroll;
 }
@@ -5196,7 +5201,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .autocomplete pre.selected {
-    background-color: var(--global-selected);
+    background-color: var(--global-color-accent);
 }
 
 .lexcodeeditor .autocomplete pre span {
@@ -5204,7 +5209,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .autocomplete pre span.word-highlight {
-    color: var(--global-selected-light);
+    color: var(--global-color-accent-light);
 }
 
 .lexcodeeditor .autocomplete pre.selected span.word-highlight {
@@ -5446,9 +5451,9 @@ ul.lexassetscontent {
 
 .lexgraph .box-selection-svg {
     stroke-width: 3px;
-    stroke: var(--global-selected);
+    stroke: var(--global-color-accent);
     border-radius: 8px;
-    fill: var(--global-selected);
+    fill: var(--global-color-accent);
     fill-opacity: 0.2;
 }
 
@@ -5517,7 +5522,7 @@ ul.lexassetscontent {
 }
 
 .lexgraphnode.selected {
-    border: 3px solid var(--global-selected-dark);
+    border: 3px solid var(--global-color-accent-dark);
     border: 3px solid #ffc107;
     box-shadow: 0 2px 6px 0 rgba(0, 0, 0, .14);
 }
@@ -5773,10 +5778,6 @@ ul.lexassetscontent {
 }
 
 .lexvideoeditor .lexconstrolsarea {
-    /* background-color: var(--global-intense-background); */
-    /* padding: 5px;
-  margin: 10px; */
-    /* width: calc(100% - 30px)!important; */
     min-height: 88px !important;
     border-radius: 8px;
     display: flex;
@@ -5820,18 +5821,6 @@ ul.lexassetscontent {
     width: calc(100% - 40px) !important;
 }
 
-/* .lexvideoeditor .lexvideotimebar {
-  width: calc(100% - 40px);
-  height: 100%;
-  background-color: var(--global-intense-background);
-} */
-
-/* .lexvideoeditor .lexvideotimebar canvas {
-  width: calc(100%);
-  height: calc(100% );
-  padding: 5px;
-}  */
-
 .resizeable {
   resize: both;
   overflow: auto;
@@ -5839,7 +5828,7 @@ ul.lexassetscontent {
 
 .resize-area {
   position: absolute;
-  border: 2px double var(--global-selected-light);
+  border: 2px double var(--global-color-accent-light);
   cursor: move;
   z-index: 100;
 }

@@ -1,5 +1,7 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Area Tabs Demo</title>
@@ -14,113 +16,119 @@
         }
     </script>
 </head>
+
 <body></body>
-    <script type="module">
+<script type="module">
 
-        import { LX } from 'lexgui';
+    import { LX } from 'lexgui';
 
-        // init library and get main area
-        let area = LX.init();
+    // init library and get main area
+    let area = LX.init();
 
-        // split main area
-        var [leftArea, rightArea] = area.split({sizes:["75%","25%"]});
+    // split main area
+    var [leftArea, rightArea] = area.split({ sizes: ["75%", "25%"] });
 
-        // Get new content area to fill it
-        const leftTabs = leftArea.addTabs();
+    // Get new content area to fill it
+    const leftTabs = leftArea.addTabs();
 
-        // add canvas to left upper part
-        var canvas = document.createElement('canvas');
-        canvas.id = "mycanvas";
-        canvas.width = leftArea.root.clientWidth;
-        canvas.height = leftArea.root.clientHeight;
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
-        leftTabs.add( "Canvas", canvas );
+    // add canvas to left upper part
+    var canvas = document.createElement('canvas');
+    canvas.id = "mycanvas";
+    canvas.width = leftArea.root.clientWidth;
+    canvas.height = leftArea.root.clientHeight;
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    leftTabs.add("Canvas", canvas);
 
-        // add on resize event to control canvas size
-        leftArea.onresize = function( bounding ) {
-            canvas.width = bounding.width;
-            canvas.height = bounding.height;
-        };
+    // add on resize event to control canvas size
+    leftArea.onresize = function (bounding) {
+        canvas.width = bounding.width;
+        canvas.height = bounding.height;
+    };
 
-        const rightTabs = rightArea.addTabs();
+    const rightTabs = rightArea.addTabs();
 
-        var panelA = new LX.Panel();
-        fillPanelA( panelA );
-        rightTabs.add( "PanelA", panelA );
+    var panelA = new LX.Panel();
+    fillPanelA(panelA);
+    rightTabs.add("PanelA", panelA);
 
-        var panelB = new LX.Panel();
-        fillPanelB( panelB );
-        rightTabs.add( "PanelB", panelB );
+    var panelB = new LX.Panel();
+    fillPanelB(panelB);
+    rightTabs.add("PanelB", panelB);
 
-        var panelC = new LX.Panel();
-        fillPanelC( panelC );
-        rightTabs.add( "panelC", panelC );
+    var panelC = new LX.Panel();
+    fillPanelC(panelC);
+    rightTabs.add("panelC", panelC);
 
-        function loop(dt) {
-            
-            var ctx = canvas.getContext("2d");
+    function loop(dt) {
 
-            // Get values from panel widgets (e.g. color value)
-            ctx.fillStyle = panelA.getValue('Background');
+        var ctx = canvas.getContext("2d");
 
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.font = panelA.getValue('Font Size') + "px Monospace";
+        // Get values from panel widgets (e.g. color value)
+        ctx.fillStyle = panelA.getValue('Background');
 
-            ctx.fillStyle = panelA.getValue('Font Color');
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.font = panelA.getValue('Font Size') + "px Monospace";
 
-            const text = panelA.getValue('Text');
-            const pos2D = panelA.getValue('2D Position');
-            ctx.fillText(text, pos2D[0], pos2D[1]);
+        ctx.fillStyle = panelA.getValue('Font Color');
 
-            requestAnimationFrame(loop);
-        }
+        const text = panelA.getValue('Text');
+        const pos2D = panelA.getValue('2D Position');
+        ctx.fillText(text, pos2D[0], pos2D[1]);
 
         requestAnimationFrame(loop);
+    }
 
-        // **** **** **** **** **** **** **** **** **** **** **** **** 
+    requestAnimationFrame(loop);
 
-        function fillPanelA( panel ) {
-            panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});
-            panel.addColor("Background", "#b7a9b1");
-            panel.addText("Text", "Lexgui.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
-            panel.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
-                console.log("Font Color: ", value);
-            });
-            panel.addNumber("Font Size", 36, (value, event) => {
-                console.log(value);
-            }, { min: 1, max: 48, step: 1});
-            panel.addVector2("2D Position", [250, 350], (value, event) => {
-                console.log(value);
-            }, { min: 0, max: 1024 });
-            panel.merge();
-        }
+    // **** **** **** **** **** **** **** **** **** **** **** **** 
 
-        function fillPanelB( panel ) {
-            panel.branch("Settings", {icon: "fa-solid fa-palette", filter: true});
-            panel.addTitle("Configuration (Im a title)");
-            panel.addCheckbox("Toggle me", true, (value, event) => {
-                console.log(value);
-            }, { suboptions: (p) => {
+    function fillPanelA(panel) {
+        panel.branch("Canvas", { icon: "fa-solid fa-palette", filter: true });
+        panel.addColor("Background", "#b7a9b1");
+        panel.addText("Text", "Lexgui.js @jxarco", null, { placeholder: "e.g. ColorPicker", icon: "fa fa-font" });
+        panel.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
+            console.log("Font Color: ", value);
+        });
+        panel.addNumber("Font Size", 36, (value, event) => {
+            console.log(value);
+        }, { min: 1, max: 48, step: 1 });
+        panel.addVector2("2D Position", [250, 350], (value, event) => {
+            console.log(value);
+        }, { min: 0, max: 1024 });
+        panel.merge();
+    }
+
+    function fillPanelB(panel) {
+        panel.branch("Settings", { icon: "fa-solid fa-palette", filter: true });
+        panel.addTitle("Configuration (Im a title)");
+        panel.addCheckbox("Toggle me", true, (value, event) => {
+            console.log(value);
+        }, {
+            suboptions: (p) => {
                 p.addText(null, "Suboption 1");
                 p.addNumber("Suboption 2", 12);
-            } });
-            panel.addFile("Image", data => { console.log(data) }, {} );
-            panel.merge();
-        }
+            }
+        });
+        panel.addFile("Image", data => { console.log(data) }, {});
+        panel.merge();
+    }
 
-        function fillPanelC( panel ) {
-            panel.branch("Some Branch", {icon: "fa-solid fa-palette", filter: true});
-            panel.addTitle("C title");
-            panel.addToggle("A cool Toggle", true, (value, event) => {
-                console.log(value);
-            }, { suboptions: (p) => {
+    function fillPanelC(panel) {
+        panel.branch("Some Branch", { icon: "fa-solid fa-palette", filter: true });
+        panel.addTitle("C title");
+        panel.addToggle("A cool Toggle", true, (value, event) => {
+            console.log(value);
+        }, {
+            suboptions: (p) => {
                 p.addText(null, "Suboption 1");
                 p.addNumber("Suboption 2", 12);
-            } });
-            panel.addRange("Yup", 15, data => { console.log(data) }, {} );
-            panel.merge();
-        }
+            }
+        });
+        panel.addRange("Yup", 15, data => { console.log(data) }, {});
+        panel.merge();
+    }
 
-    </script>
+</script>
+
 </html>

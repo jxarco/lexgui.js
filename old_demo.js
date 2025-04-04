@@ -224,13 +224,7 @@ const sidebar = left.addSidebar( m => {
     // footer: customFooter,
     onHeaderPressed: (e) => { console.log( "onHeaderPressed" ) }, 
     onFooterPressed: (e, element) => {
-        if( element.ddm )
-        {
-            element.ddm.destroy();
-            return;
-        }
-
-        const ddm = new LX.DropdownMenu( element, [
+        new LX.DropdownMenu( element, [
             "My Account",
             null,
             { name: "Profile", short: "P", icon: "user" },
@@ -301,7 +295,13 @@ bottom.addMenubar( m => {
         else {
             kfTimeline = new LX.KeyFramesTimeline("kf-timeline", {
                 onBeforeCreateTopBar: panel => {
-                    panel.addButton('', '<i class="fa fa-wand-magic-sparkles"></i>', ( value, event ) => { });
+                    panel.addSelect("Animation", ["walk", "run", "idle"], "idle", (v)=> {
+                        console.log(v)
+                    }, { inputWidth: "50%" })
+                },
+                onAfterCreateTopBar: panel => {
+                    panel.addButton("customBtn", '<i class="fa fa-wand-magic-sparkles"></i>', ( value, event ) => { }, { title: "Custom Action", hideName: true });
+                    panel.addButton("anotherCustomBtn", '<i class="fa fa-cube"></i>', ( value, event ) => { }, { title: "Other Custom Action", hideName: true });
                 }
             });
 
@@ -536,6 +536,21 @@ function fillPanel( panel ) {
                 'id': 'node_2',
                 'icon': 'fa-solid fa-circle-play',
                 'children': []
+            },
+            {
+                'id': 'node_3',
+                'children': [
+                    {
+                        'id': 'node_3_1',
+                        'icon': 'fa-solid fa-cube',
+                        'children': []
+                    },
+                    {
+                        'id': 'node_3_2',
+                        'icon': 'fa-solid fa-cube',
+                        'children': []
+                    }
+                ]
             }
         ]
     };
@@ -635,7 +650,7 @@ function fillPanel( panel ) {
     panel.addButton(null, "Show Notifications" + LX.badge("+99", "accent sm"));
     panel.addCounter("Calories Counter ", 350, (v) => { console.log( v + " calories!" ) }, { label: "CALORIES/DAY", max: 500 });
     panel.addButton("Colored Tiny Button", "Click here!", () => {}, { buttonClass: "primary xs" });
-    panel.addButton("Colored Small Button", "Click here!", () => {}, { buttonClass: "accent sm" });
+    panel.addButton("Small Outlined Button", "Click here!", () => {}, { buttonClass: "accent sm outline" });
     panel.addButton("A Classic Button", "Click here!", () => {}, { buttonClass: "md" });
     panel.addCheckbox("I have a label", false, (value, event) => {
         console.log(value);
@@ -643,10 +658,10 @@ function fillPanel( panel ) {
     panel.sameLine(2);
     panel.addToggle("Colored Toggle", false, (value, event) => {
         console.log(value);
-    }, { className: "accent", nameWidth: "50%" });
-    panel.addToggle("Outlined Checkbox ", false, (value, event) => {
+    }, { label: "", className: "accent", nameWidth: "50%" });
+    panel.addToggle("Outlined Toggle ", false, (value, event) => {
         console.log(value);
-    }, { className: "secondary outline", nameWidth: "50%" });
+    }, { label: "", className: "secondary outline", nameWidth: "50%" });
     panel.addFile("I'm a File Input", data => { console.log(data) }, {  } );
     panel.addFile("A Disabled File Input", data => { console.log(data) }, { disabled: true } );
     panel.addSelect("Best Tool", ["@Engines", "Godot", "Unity", "Unreal Engine", "@Apps", "Visual Studio", "Visual Studio Code"], "Unity", (value, event) => {
@@ -729,6 +744,7 @@ function fillPanel( panel ) {
     });
     panel.addButton(null, "Click me, Im Full Width...");
     panel.addButton("Test Button", "Reduced width...");
+    panel.addSeparator();
     panel.addBlank(12);
 }
 
@@ -845,24 +861,42 @@ function fillBottomPanel( panel ) {
     
     // add widgets to panel branch
     panel.branch("Information", {icon: "fa fa-circle-info"});
-    panel.addTable("A Table", {
-        head: [ "Name", "Subject", "Grade" ],
+    window.tableWidget = panel.addTable("A Table", {
+        head: [ "Name", "Status", "Priority" ],
         body: [
-            [ "Alice", "Science", "B" ],
-            [ "Bob", "Math", "C" ],
-            [ "Carter", "Zoology", "A" ],
+            [ "Alice", "In Progress", "High" ],
+            [ "Bob", "Backlog", "Medium" ],
+            [ "Prince", "Canceled", "Low" ],
+            [ "Sean", "Done", "High" ],
+            [ "Carter", "In Progress", "Medium" ],
+            [ "James", "Backlog", "Low" ],
+            [ "Mickey", "Todo", "Low" ],
+            [ "Charlie", "Canceled", "Low" ],
+            [ "Potato", "Todo", "High" ]
         ]
     }, {
         selectable: true,
         sortable: true,
+        toggleColumns: true,
+        filter: "Name",
+        customFilters: [
+            { name: "Status", options: ["Backlog", "Todo", "In Progress", "Done", "Cancelled"] },
+            { name: "Priority", options: ["Low", "Medium", "High"] },
+        ],
         rowActions: [
             { icon: "edit", title: "Edit Row", callback: ( tableData ) => {} }, // custom: you can change the data and refresh will be called later!
             "delete",
             "menu"
         ],
-        onMenuAction: ( context ) => {
-            context.add("Export", (a) => console.log(a) );
-            context.add("An Action", (a) => console.log(a) );
+        onMenuAction: ( index, tableData ) => {
+            return [
+                { name: "Export", callback: (a) => {
+                    tableData.body[index][0] = "Alex";
+                    tableWidget.refresh();
+                } },
+                { name: "Make a copy", callback: (a) => console.log(a) },
+                { name: "Favourite", callback: (a) => console.log(a) }
+            ]
         }
     });
     panel.addText("Camera", "Canon EOS 80D", null, {disabled: true}); 

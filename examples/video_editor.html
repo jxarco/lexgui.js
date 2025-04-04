@@ -1,5 +1,6 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Video Editor Demo</title>
@@ -14,39 +15,41 @@
         }
     </script>
 </head>
+
 <body></body>
-    <script type="module">
+<script type="module">
 
-      import { LX } from 'lexgui';
-      import { VideoEditor } from 'lexgui/components/videoeditor.js';
-      // init library and get main area
-      let area = LX.init();
-          
-      // split main area
-      let [leftArea, rightArea] = area.split({sizes:["75%","25%"], minimizable: true});
-      area.extend();
-      
-      const videoArea = new LX.Area({id:'video-area'});
-      const video = document.createElement('video');
-      video.src = "../data/video.mp4";
-      videoArea.attach(video);
+    import { LX } from 'lexgui';
+    import { VideoEditor } from 'lexgui/components/videoeditor.js';
+    // init library and get main area
+    let area = LX.init();
 
-      const videoEditor = new LX.VideoEditor(leftArea, {videoArea, video, crop: true})
-      
-      const canvas = document.createElement('canvas');
-      canvas.width = video.clientWidth;
-      canvas.height = video.clientHeight;
-      const ctx = canvas.getContext("2d");
-      ctx.fillStyle = LX.getThemeColor("global-selected-light");
-      ctx.font = "40px Arial";
-      ctx.fillText("I'm a canvas above the video!", canvas.width/2, 100);
-      
-      canvas.style.position = "absolute";
-      canvas.style.left = "0";
-      videoArea.attach(canvas);
+    // split main area
+    let [leftArea, rightArea] = area.split({ sizes: ["75%", "25%"], minimizable: true });
+    area.extend();
 
-      let panel = new LX.Panel();
-      panel = rightArea.addPanel(panel);        
-  
-    </script>
+    const videoArea = new LX.Area({ id: 'video-area' });
+    const video = document.createElement('video');
+    video.src = "../data/video.mp4";
+    videoArea.attach(video);
+
+    const videoEditor = new LX.VideoEditor(leftArea, { videoArea, video, crop: true })
+
+    const canvas = document.createElement('canvas');
+    canvas.width = video.clientWidth;
+    canvas.height = video.clientHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = LX.getThemeColor("global-selected-light");
+    ctx.font = "40px Arial";
+    ctx.fillText("I'm a canvas above the video!", canvas.width / 2, 100);
+
+    canvas.style.position = "absolute";
+    canvas.style.left = "0";
+    videoArea.attach(canvas);
+
+    let panel = new LX.Panel();
+    panel = rightArea.addPanel(panel);
+
+</script>
+
 </html>

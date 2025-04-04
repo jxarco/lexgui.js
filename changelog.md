@@ -1,6 +1,43 @@
 # lexgui.js changelog
 
-## 0.5.0 (master)
+## dev
+
+Widgets:
+- Fixed Select Widget filter issues.
+- Fixed Color Widget not updating hex code on pasting value.
+
+Changed global font family to Geist Sans.
+Started support for tailwind-like utility css classes.
+Improve styling for supported widgets. Better consistency.
+Added new demo example showcasing all widgets.
+
+## 0.5.2 (master)
+
+Table Widget:
+- Fixed manual-sort not modifying inner data.
+- Use Dropdown for menu actions `options.onMenuAction`.
+- Added initial support for data filters. `options.filter` and `options.customFilters`.
+
+Fixed some widget resizing issues.
+No `justify` by default in inline widgets. Use `Panel.endLine(justify)` instead.
+Fixed preview image in AssetView.
+General styling fixes.
+Docs updated.
+
+## 0.5.1
+
+Widgets:
+- Added support for `text centering` all/specific columns in Table Widget.
+- Fixed widget content size when using `options.nameWidth`. First fix for sizes in inline widgets.
+- Fixed issue in Tree Widget when selecting from code using `NodeTree.select`.
+- Support for closing all Node items recursively by using `Alt+Close` on a specific node.
+
+Fixed Area tabs drag&drop when `fit` mode.
+Fixed issue on open/destroy dropdown.
+Fixed label text wrap on Checkbox&Toggle widgets.
+Added `contrast` theme for supported Widgets.
+
+## 0.5.0
 
 Widgets:
 - Created classes for each widget to create them at any place.

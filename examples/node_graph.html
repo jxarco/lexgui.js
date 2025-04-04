@@ -1,5 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Node Graph Demo</title>
@@ -14,56 +15,58 @@
         }
     </script>
 </head>
+
 <body></body>
-    <script type="module">
+<script type="module">
 
-        import { LX } from 'lexgui';
-        import 'lexgui/components/nodegraph.js';
+    import { LX } from 'lexgui';
+    import 'lexgui/components/nodegraph.js';
 
-        // init library and get main area
-        let area = LX.init();
+    // init library and get main area
+    let area = LX.init();
 
-        // split main area
-        var [topArea, bottomArea] = area.split({ type: 'vertical', sizes:["25%","75%"] });
+    // split main area
+    var [topArea, bottomArea] = area.split({ type: 'vertical', sizes: ["25%", "75%"] });
 
-        // add canvas to topArea
-        var canvas = document.createElement('canvas');
-        canvas.id = "mycanvas";
-        canvas.width = topArea.root.clientWidth;
-        canvas.height = topArea.root.clientHeight;
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
-        topArea.attach( canvas );
+    // add canvas to topArea
+    var canvas = document.createElement('canvas');
+    canvas.id = "mycanvas";
+    canvas.width = topArea.root.clientWidth;
+    canvas.height = topArea.root.clientHeight;
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    topArea.attach(canvas);
 
-        // add on resize event to control canvas size
-        topArea.onresize = function( bounding ) {
-            canvas.width = bounding.width;
-            canvas.height = bounding.height;
-        };
+    // add on resize event to control canvas size
+    topArea.onresize = function (bounding) {
+        canvas.width = bounding.width;
+        canvas.height = bounding.height;
+    };
 
-        let graph_editor = new LX.GraphEditor( bottomArea, {
-           
-        } );
+    let graph_editor = new LX.GraphEditor(bottomArea, {
 
-        graph_editor.loadGraph( "../data/graph_sample.json" );
+    });
 
-        function loop(dt) {
-            
-            var ctx = canvas.getContext("2d");
+    graph_editor.loadGraph("../data/graph_sample.json");
 
-            ctx.fillStyle = "#b7a9b1";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+    function loop(dt) {
 
-            ctx.font = "48px Monospace";
-            ctx.fillStyle = "#ff1999";
+        var ctx = canvas.getContext("2d");
 
-            const text = "Lexgui.js @jxarco";
-            ctx.fillText(text, 100, 125);
+        ctx.fillStyle = "#b7a9b1";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            requestAnimationFrame(loop);
-        }
+        ctx.font = "48px Monospace";
+        ctx.fillStyle = "#ff1999";
+
+        const text = "Lexgui.js @jxarco";
+        ctx.fillText(text, 100, 125);
 
         requestAnimationFrame(loop);
+    }
 
-    </script>
+    requestAnimationFrame(loop);
+
+</script>
+
 </html>

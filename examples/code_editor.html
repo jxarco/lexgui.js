@@ -1,5 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Code Editor Demo</title>
@@ -14,77 +15,77 @@
         }
     </script>
 </head>
-    <body></body>
-    <script type="module">
 
-        import { LX } from 'lexgui';
-        import 'lexgui/components/codeeditor.js';
+<body></body>
+<script type="module">
 
-        // init library and get main area
-        let area = LX.init();
+    import { LX } from 'lexgui';
+    import 'lexgui/components/codeeditor.js';
 
-        const fileExplorer = true;
+    // init library and get main area
+    let area = LX.init();
 
-        if( !fileExplorer )
-        {
-            var [leftArea, rightArea] = area.split({ sizes:["55%","45%"] });
+    const fileExplorer = true;
 
-            var canvas = document.createElement('canvas');
-            canvas.id = "mycanvas";
-            canvas.width = leftArea.root.clientWidth;
-            canvas.height = leftArea.root.clientHeight;
-            canvas.style.width = "100%";
-            canvas.style.height = "100%";
-            leftArea.attach( canvas );
+    if (!fileExplorer) {
+        var [leftArea, rightArea] = area.split({ sizes: ["55%", "45%"] });
 
-            leftArea.onresize = function( bounding ) {
-                canvas.width = bounding.width;
-                canvas.height = bounding.height;
-            };
+        var canvas = document.createElement('canvas');
+        canvas.id = "mycanvas";
+        canvas.width = leftArea.root.clientWidth;
+        canvas.height = leftArea.root.clientHeight;
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        leftArea.attach(canvas);
 
-            area = rightArea;
-        }
+        leftArea.onresize = function (bounding) {
+            canvas.width = bounding.width;
+            canvas.height = bounding.height;
+        };
 
-        let editor = new LX.CodeEditor(area, {
-            // allowAddScripts: false,
-            // autocomplete: false,
-            // disableEdition: true,
-            fileExplorer: fileExplorer
-        });
+        area = rightArea;
+    }
 
-        editor.loadFile( "../data/js_sample.js" );
-        editor.loadFile( "../data/json_sample.json" );
-        editor.loadFile( "../data/css_sample.css" );
-        editor.loadFile( "../data/cpp_sample.cpp" );
-        editor.loadFile( "../data/cpp_header_sample.hpp" );
-        editor.loadFile( "../data/c_sample.c" );
-        editor.loadFile( "../data/xml_sample.xml" );
-        editor.loadFile( "../data/python_sample.py" );
-        editor.loadFile( "../data/rust_sample.rs" );
-        editor.loadFile( "../data/animation.bml", { language: "JSON" } );
-        editor.loadFile( "../data/CMakeLists.txt", { language: "CMake" } );
-        editor.loadFile( "../localhost.bat" );
-        editor.loadFile( "../index.html" );
-        
-        if( !fileExplorer )
-        {
+    let editor = new LX.CodeEditor(area, {
+        // allowAddScripts: false,
+        // autocomplete: false,
+        // disableEdition: true,
+        fileExplorer: fileExplorer
+    });
+
+    editor.loadFile("../data/js_sample.js");
+    editor.loadFile("../data/json_sample.json");
+    editor.loadFile("../data/css_sample.css");
+    editor.loadFile("../data/cpp_sample.cpp");
+    editor.loadFile("../data/cpp_header_sample.hpp");
+    editor.loadFile("../data/c_sample.c");
+    editor.loadFile("../data/xml_sample.xml");
+    editor.loadFile("../data/python_sample.py");
+    editor.loadFile("../data/rust_sample.rs");
+    editor.loadFile("../data/animation.bml", { language: "JSON" });
+    editor.loadFile("../data/CMakeLists.txt", { language: "CMake" });
+    editor.loadFile("../localhost.bat");
+    editor.loadFile("../index.html");
+
+    if (!fileExplorer) {
+        var ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#b7a9b1";
+        ctx.font = "48px Monospace";
+        ctx.strokeStyle = "#ff1999";
+
+        function loop(dt) {
+
             var ctx = canvas.getContext("2d");
-            ctx.fillStyle = "#b7a9b1";
-            ctx.font = "48px Monospace";
-            ctx.strokeStyle = "#ff1999";
 
-            function loop(dt) {
-                
-                var ctx = canvas.getContext("2d");
-
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.strokeText("Lexgui.js @jxarco", 200, 300);
-
-                requestAnimationFrame(loop);
-            }
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeText("Lexgui.js @jxarco", 200, 300);
 
             requestAnimationFrame(loop);
         }
 
-    </script>
+        requestAnimationFrame(loop);
+    }
+
+</script>
+
 </html>
