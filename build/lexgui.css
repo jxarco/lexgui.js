@@ -1459,7 +1459,7 @@ a svg, svg path {
 
 .lexinlinewidgets .lextitle {
     margin: 8px;
-    height: 20px;
+    height: 24px;
     flex: none;
 }
 
@@ -3263,13 +3263,13 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     transition: transform 0.3s cubic-bezier(0,0,.2,1), opacity 0.1s cubic-bezier(0,0,.2,1), max-height 0.3s cubic-bezier(0,0,.2,1);
 }
 
-.lexsidebar.collapsing .lexsidebargrouptitle *, .lexsidebar.collapsing .lextext {
+.lexsidebar.collapsing .lexsidebargrouptitle *, .lexsidebar.collapsing .lexsidebarfilter {
     max-height: 0px;
     transform: translate(0, -24px);
     opacity: 0;
 }
 
-.lexsidebar.collapsed .lexsidebargrouptitle *, .lexsidebar.collapsed .lextext {
+.lexsidebar.collapsed .lexsidebargrouptitle *, .lexsidebar.collapsed .lexsidebarfilter {
     display: none;
 }
 

@@ -3739,12 +3739,11 @@ class SideBar {
         // Entry filter
         if( ( options.filter ?? false ) )
         {
-            const panel = new Panel();
-            panel.addText(null, "", (value, event) => {
+            const filterTextInput = new TextInput(null, "", (value, event) => {
                 this.filterString = value;
                 this.update();
-            }, { placeholder: "Search...", icon: "fa-solid fa-magnifying-glass" });
-            this.filter = panel.root.childNodes[ 0 ];
+            }, { inputClass: "outline", placeholder: "Search...", icon: "fa-solid fa-magnifying-glass", className: "lexsidebarfilter" });
+            this.filter = filterTextInput.root;
             this.root.appendChild( this.filter );
         }
 
@@ -5605,6 +5604,12 @@ class Button extends Widget {
         var wValue = document.createElement( 'button' );
         wValue.title = options.title ?? "";
         wValue.className = "lexbutton " + ( options.buttonClass ?? "" );
+
+        if( options.icon )
+        {
+            wValue.classList.add( "justify-center" );
+        }
+
         this.root.appendChild( wValue );
 
         if( options.selected )
@@ -8151,7 +8156,7 @@ class FileInput extends Widget {
         {
             let settingsDialog = null;
 
-            const settingButton = new Button(null, "<a class='fa-solid fa-gear'></a>", () => {
+            const settingButton = new Button(null, "", () => {
 
                 if( settingsDialog )
                 {
@@ -8163,7 +8168,7 @@ class FileInput extends Widget {
                     p.addButton( null, "Reload", v => { input.dispatchEvent( new Event( 'change' ) ) } );
                 }, { onclose: ( root ) => { root.remove(); settingsDialog = null; } } );
 
-            }, { className: "micro", skipInlineCount: true, title: "Settings", disabled: options.disabled });
+            }, { skipInlineCount: true, title: "Settings", disabled: options.disabled, icon: "fa-solid fa-gear" });
 
             this.root.appendChild( settingButton.root );
         }
@@ -8378,11 +8383,11 @@ class Counter extends Widget {
         container.className = "lexcounter";
         this.root.appendChild( container );
 
-        const substrButton = new Button(null, "<a style='margin-top: 0px;' class='fa-solid fa-minus'></a>", ( value, e ) => {
+        const substrButton = new Button(null, "", ( value, e ) => {
             let mult = step ?? 1;
             if( e.shiftKey ) mult *= 10;
             this.set( counterText.count - mult, false, e );
-        }, { className: "micro", skipInlineCount: true, title: "Minus" });
+        }, { skipInlineCount: true, title: "Minus", icon: "fa-solid fa-minus" });
 
         container.appendChild( substrButton.root );
 
@@ -8404,11 +8409,11 @@ class Counter extends Widget {
             containerBox.appendChild( counterLabel );
         }
 
-        const addButton = new Button(null, "<a style='margin-top: 0px;' class='fa-solid fa-plus'></a>", ( value, e ) => {
+        const addButton = new Button(null, "", ( value, e ) => {
             let mult = step ?? 1;
             if( e.shiftKey ) mult *= 10;
             this.set( counterText.count + mult, false, e );
-        }, { className: "micro", skipInlineCount: true, title: "Plus" });
+        }, { skipInlineCount: true, title: "Plus", icon: "fa-solid fa-plus" });
         container.appendChild( addButton.root );
     }
 }

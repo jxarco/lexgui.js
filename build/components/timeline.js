@@ -101,7 +101,7 @@ class Timeline {
 
         this.root = new LX.Area({className : 'lextimeline'});
         
-        this.header_offset = 38;
+        this.header_offset = 48;
         
         let width = options.width ? options.width : null;
         let height = options.height ? options.height - this.header_offset : null;
