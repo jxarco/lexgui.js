@@ -648,6 +648,7 @@ a svg, svg path {
 .lexfooter ul li {
     margin-bottom: 8px;
     font-size: var(--global-font-size);
+    color: var(--global-text-secondary);
 }
 
 .lexfooter a {
@@ -657,6 +658,7 @@ a svg, svg path {
 }
 
 .lexfooter .credits-and-socials {
+    color: var(--global-text-secondary);
     display: grid;
     align-items: center;
     grid-template-columns: 1fr 1fr;

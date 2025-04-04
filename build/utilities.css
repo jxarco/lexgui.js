@@ -1,19 +1,21 @@
 /* Colors */
-.bg-primary { background-color: var(--global-color-primary); }
-.bg-secondary { background-color: var(--global-color-secondary); }
-.bg-tertiary { background-color: var(--global-color-tertiary); }
-.bg-accent { background-color: var(--global-color-accent); }
-.bg-contrast { background-color: var(--global-text-primary); }
-.bg-warning { background-color: var(--global-color-warning); }
-.bg-error { background-color: var(--global-color-error); }
+.bg-primary { background-color: var(--global-color-primary) !important; }
+.bg-secondary { background-color: var(--global-color-secondary) !important; }
+.bg-tertiary { background-color: var(--global-color-tertiary) !important; }
+.bg-quaternary { background-color: var(--global-color-quaternary) !important; }
+.bg-accent { background-color: var(--global-color-accent) !important; }
+.bg-contrast { background-color: var(--global-text-primary) !important; }
+.bg-warning { background-color: var(--global-color-warning) !important; }
+.bg-error { background-color: var(--global-color-error) !important; }
 
-.fg-primary { color: var(--global-text-primary); }
-.fg-secondary { color: var(--global-text-secondary); }
-.fg-tertiary { color: var(--global-text-tertiary); }
-.fg-accent { color: var(--global-text-accent); }
-.fg-contrast { color: var(--global-text-primary); }
-.fg-warning { color: var(--global-text-warning); }
-.fg-error { color: var(--global-text-error); }
+.fg-primary { color: var(--global-text-primary) !important; }
+.fg-secondary { color: var(--global-text-secondary) !important; }
+.fg-tertiary { color: var(--global-text-tertiary) !important; }
+.fg-quaternary { color: var(--global-text-quaternary) !important; }
+.fg-accent { color: var(--global-text-accent) !important; }
+.fg-contrast { color: var(--global-text-primary) !important; }
+.fg-warning { color: var(--global-text-warning) !important; }
+.fg-error { color: var(--global-text-error) !important; }
 
 /* Layout */
 .flex { display: flex; }
@@ -36,9 +38,12 @@
 .justify-around { justify-content: space-around; }
 
 .self-center { align-self: center; }
+
 .gap-1 { gap: 0.25rem; }
 .gap-2 { gap: 0.5rem; }
 .gap-4 { gap: 1rem; }
+.gap-6 { gap: 1.5rem; }
+.gap-8 { gap: 2rem; }
 
 /* Spacing */
 
@@ -46,6 +51,8 @@
 .m-1 { margin: 0.25rem; }
 .m-2 { margin: 0.5rem; }
 .m-4 { margin: 1rem; }
+.m-6 { margin: 1.5rem; }
+.m-8 { margin: 2rem; }
 
 .mt-2 { margin-top: 0.5rem; }
 .mb-2 { margin-bottom: 0.5rem; }
