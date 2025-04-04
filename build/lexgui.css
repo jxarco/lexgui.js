@@ -811,7 +811,6 @@ a svg, svg path {
 
 .lexdialog.prompt textarea {
     color: var(--global-text-secondary);
-    font-weight: normal;
 }
 
 /* Pocket Dialog */
@@ -1306,115 +1305,11 @@ a svg, svg path {
     padding-inline: 0.4rem;
 }
 
-.lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider) {
-    font-family: var(--global-font);
-    background: none;
-    padding: 3px;
-    color: var(--global-text-primary);
-    outline: none;
-    border-radius: 6px;
-    border: 2px solid var(--global-color-transparent);
-    transition: background-color 0.2s linear, border-color 0.15s linear;
-}
-
-.lexwidget .lextext {
-    border-radius: 6px;
-    position: relative;
-    transition: border 0.2s linear;
-    border: 1px solid transparent;
-}
-
-.lexwidget .lextext.formlabel {
-    margin-left: 8px;
-    margin-bottom: -12px;
-}
-
-.lexwidget .lextext:not(:has(div)) {
-    background-color: var(--global-color-tertiary);
-}
-
-.lexwidget .lextext.outline {
-    background: var(--global-color-primary);
-    border: 1px solid #7a797c4f;
-}
-
-.lexwidget .lextext.dashed {
-    background: var(--global-color-primary);
-    border: 1px dashed #7a797c4f;
-}
-
-.lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider):hover {
-    background-color: color-mix(in srgb, var(--global-color-tertiary), #000 7%);
-}
-
-.lexwidget .lextext.outline input:hover {
-    background: none;
-}
-
-.lexwidget .lextext input {
-    padding: 5px;
-}
-
-.lexwidget .lextext input:focus {
-    border: 2px solid var(--global-color-accent);
-}
-
-.lexwidget .lextext input:invalid:focus {
-    border: 2px solid var(--global-color-error);
-}
-
-.lexwidget .lextext div {
-    color: var(--global-text-secondary);
-    padding-left: 6px;
-}
-
-.lexwidget .lextext.lexwarning div {
-    color: var(--global-color-warning);
-    font-weight: 700;
-}
-
-.lexwidget .lextext.lexwarning i {
-    color: var(--global-color-warning);
-    margin-right: 16px;
-}
-
 .lexwidget .inputicon {
     padding: 6px;
     font-size: var(--global-font-size-sm);
     align-self: center;
     text-align: center;
-}
-
-.lexwidget textarea {
-    word-break: break-word;
-    font-family: var(--global-font);
-    background: none;
-    padding: 5px;
-    color: var(--global-text-primary);
-    font-weight: 600;
-    outline: none;
-    border-radius: 6px;
-    border: 2px solid var(--global-color-transparent);
-    transition: 0.1s linear;
-}
-
-.lexwidget textarea:disabled {
-    resize: none;
-}
-
-.lexwidget textarea:focus {
-    border: 2px solid var(--global-color-accent);
-}
-
-.lexwidget input.colorinput {
-    border: none;
-    margin-left: -4px;
-}
-
-.lexwidget input:disabled:not(.lextoggle) {
-    outline: none;
-    border: none;
-    color: var(--global-text-tertiary);
 }
 
 .lexseparator {
@@ -1432,14 +1327,120 @@ a svg, svg path {
     margin: 5px 0 5px 4px;
 }
 
-:root[data-theme="light"] .lexwidget .lextext {
-    border: 1px solid var(--global-color-tertiary);
-}
-
 :root[data-theme="light"] .lexbranch .lexseparator {
     border-top: 1px solid #e7e7e7;
     border-bottom: 1px solid #c1c1c1;
 }
+
+.lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider) {
+    font-family: var(--global-font);
+    padding: 4px;
+    color: var(--global-text-primary);
+    background-color: var(--global-color-tertiary);
+    outline: none;
+    border-radius: 6px;
+    border: 1px solid var(--global-color-transparent);
+    transition: background-color 0.2s linear, border-color 0.15s linear;
+}
+
+.lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider):hover {
+    background-color: color-mix(in srgb, var(--global-color-tertiary), #000 7%);
+}
+
+.lexwidget input.colorinput {
+    border: none;
+    margin-left: -4px;
+}
+
+.lexwidget input:disabled:not(.lextoggle) {
+    outline: none;
+    border: none;
+    color: var(--global-text-tertiary);
+}
+
+/* Text Widget */
+
+.lexwidget input.lextext, .lexwidget div.lextext {
+    border-radius: 6px;
+    position: relative;
+    border: 1px solid transparent;
+    padding: 4px 12px !important;
+}
+
+.lexwidget .lextext:disabled {
+    background-color: var(--global-color-tertiary);
+    color: var(--global-text-tertiary);
+}
+
+:root[data-theme="light"] .lexwidget .lextext {
+    border: 1px solid var(--global-color-tertiary);
+}
+
+.lexwidget .lextext.formlabel {
+    margin-left: 8px;
+    margin-bottom: -12px;
+}
+
+.lexwidget .lextext.outline {
+    background: var(--global-color-primary);
+    border: 1px solid #7a797c4f;
+}
+
+.lexwidget .lextext.nobg {
+    background: none;
+    border: 1px solid transparent;
+}
+
+.lexwidget .lextext.dashed {
+    background: var(--global-color-primary);
+    border: 1px dashed #7a797c4f;
+}
+
+.lexwidget .lextext.outline:hover {
+    background: none;
+}
+
+.lexwidget .lextext:focus {
+    border: 1px solid var(--global-color-accent) !important;
+}
+
+.lexwidget .lextext:invalid:focus {
+    border: 1px solid var(--global-color-error);
+}
+
+.lexwidget .lextext.lexwarning div {
+    color: var(--global-color-warning);
+    font-weight: 600;
+}
+
+.lexwidget .lextext.lexwarning i {
+    color: var(--global-color-warning);
+    margin-right: 16px;
+}
+
+/* TextArea Widget */
+
+.lexwidget textarea {
+    word-break: break-word;
+    font-family: var(--global-font);
+    background: none;
+    padding: 5px;
+    color: var(--global-text-primary);
+    outline: none;
+    border-radius: 6px;
+    border: 2px solid var(--global-color-transparent);
+    transition: 0.1s linear;
+}
+
+.lexwidget textarea:disabled {
+    resize: none;
+}
+
+.lexwidget textarea:focus {
+    border: 2px solid var(--global-color-accent);
+}
+
+/* Title Widget */
 
 .lextitle {
     width: fit-content;
@@ -1491,7 +1492,7 @@ a svg, svg path {
 /* Buttons */
 
 .lexbutton {
-    --button-color: var(--global-color-secondary);
+    --button-color: var(--global-color-tertiary);
     --border-color: var(--global-color-quinary);
     background-color: var(--button-color);
     border: 1px solid transparent;
@@ -1508,10 +1509,6 @@ a svg, svg path {
     display: grid;
     transition: 0.1s linear;
     padding: 0.35rem;
-}
-
-.lexbranch .lexbutton {
-    --button-color: var(--global-color-tertiary);
 }
 
 /* Colors */
@@ -1613,6 +1610,7 @@ a svg, svg path {
 
 .lexcombobuttons .lexbutton.combo.selected {
     --button-color: var(--global-color-primary);
+    color: var(--global-text-primary);
     outline: none;
 }
 
@@ -2127,6 +2125,7 @@ dialog .lexselect .lexselectoptions {
 
 .lexcolor input[type="color"] {
     cursor: pointer;
+    background: none;
 }
 
 .lexcolor .lexwidget {
@@ -2140,10 +2139,7 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexvector a {
-    width: 48px;
     font-size: var(--global-font-size-sm);
-    margin-left: 6px;
-    margin-right: 6px;
 }
 
 .lexvector .vecbox {
@@ -2262,6 +2258,11 @@ input[type=number] {
 .lexwidget .numberbox span {
     position: absolute;
     pointer-events: none;
+    align-self: center;
+}
+
+.lexwidget .numberbox:has(input[type=range]) span {
+    margin-top: -12px;
 }
 
 .lexnumber .vecinput {
@@ -2364,8 +2365,8 @@ input[type=number] {
 }
 
 /* Colors */
-.lexrangeslider.primary { color: var(--global-color-accent); }
-.lexrangeslider.secondary { color: var(--global-color-accent-light); }
+.lexrangeslider.primary { color: var(--global-color-primary); --range-thumb-color: var(--global-text-secondary); }
+.lexrangeslider.secondary { color: var(--global-color-secondary); --range-thumb-color: var(--global-text-secondary); }
 .lexrangeslider.accent { color: var(--global-color-accent); }
 .lexrangeslider.contrast { color: var(--global-text-primary); }
 .lexrangeslider.warning { color: var(--global-color-warning); }
@@ -2548,8 +2549,16 @@ input[type=number] {
     font-size: var(--global-font-size);
 }
 
+.lextree .lexnodetree_filter {
+    background: none !important;
+}
+
+.lextree .lexnodetree_filter:hover {
+    background: none;
+}
+
 .lextree .lextreetools {
-    background: var(--global-color-secondary);
+    background: var(--global-color-tertiary);
     padding: 2px;
     padding-left: 6px;
     padding-right: 6px;
@@ -2557,6 +2566,10 @@ input[type=number] {
     align-items: center;
     border-radius: 10px;
     margin-top: 4px;
+}
+
+.lexwidget.nobranch .lextree .lextreetools {
+    background: var(--global-color-secondary);
 }
 
 .lextree .lextreetools input {
@@ -2569,7 +2582,7 @@ input[type=number] {
 }
 
 .lextree .lextreetools.notitle {
-    padding-top: 14px;
+    /* padding-top: 14px; */
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
 }
@@ -2593,7 +2606,6 @@ input[type=number] {
 }
 
 .lextree ul {
-    padding-bottom: 16px;
     padding-inline-start: 0px;
     display: flex;
     flex-direction: column;
@@ -2665,7 +2677,7 @@ input[type=number] {
 
 .lextree .lextreeitem:hover {
     color: var(--global-text-primary);
-    background: var(--global-color-tertiary);
+    background: var(--global-color-secondary);
 }
 
 .lextree .lextreeitem.selected {
@@ -2675,7 +2687,6 @@ input[type=number] {
 
 .lextree .lextreeitem a.hierarchy {
     margin-right: 6px;
-    margin-top: 4px;
 }
 
 .lextree .lextreeitem .lexicon {
@@ -3050,7 +3061,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     user-select: none;
 }
 
-.lexmenubar .lexmenubutton:last-child {
+.lexmenubar .lexmenubutton.main:last-child {
     margin-right: 8px;
 }
 
@@ -3926,10 +3937,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     margin-top: -1px;
     grid-column: span 2;
 }
-
-/* .lexarrayitems .small .lexbutton {
-    background: none;
-} */
 
 .lexarrayitems .lexwidgetname {
     color: var(--global-text-secondary);

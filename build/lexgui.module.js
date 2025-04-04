@@ -1625,7 +1625,7 @@ class DropdownMenu {
                     {
                         f.call( this, key, menuItem, v );
                     }
-                });
+                }, { className: "accent" });
                 const input = checkbox.root.querySelector( "input" );
                 menuItem.prepend( input );
 
@@ -4138,7 +4138,7 @@ class SideBar {
                     const f = options.callback;
                     item.value = value;
                     if( f ) f.call( this, key, value, event );
-                }, { label: key, signal: ( "@checkbox_"  + key ) });
+                }, { className: "accent", label: key, signal: ( "@checkbox_"  + key ) });
                 itemDom.appendChild( panel.root.childNodes[ 0 ] );
             }
             else
@@ -4780,7 +4780,7 @@ class NodeTree {
     _createItem( parent, node, level = 0, selectedId ) {
 
         const that = this;
-        const nodeFilterInput = this.domEl.querySelector( "#lexnodetree_filter" );
+        const nodeFilterInput = this.domEl.querySelector( ".lexnodetree_filter" );
 
         node.children = node.children ?? [];
         if( nodeFilterInput && nodeFilterInput.value != "" && !node.id.includes( nodeFilterInput.value ) )
@@ -5387,14 +5387,9 @@ class TextInput extends Widget {
         };
 
         let container = document.createElement( 'div' );
-        container.className = "lextext" + ( options.warning ? " lexwarning" : "" );
+        container.className = ( options.warning ? " lexwarning" : "" );
         container.style.display = "flex";
         this.root.appendChild( container );
-
-        if( options.textClass )
-        {
-            container.classList.add( options.textClass );
-        }
 
         this.disabled = ( options.disabled || options.warning ) ?? ( options.url ? true : false );
         let wValue = null;
@@ -5402,6 +5397,7 @@ class TextInput extends Widget {
         if( !this.disabled )
         {
             wValue = document.createElement( 'input' );
+            wValue.className = "lextext " + ( options.inputClass ?? "" );
             wValue.type = options.type || "";
             wValue.value = wValue.iValue = value || "";
             wValue.style.width = "100%";
@@ -5454,21 +5450,29 @@ class TextInput extends Widget {
             }
 
         }
-        else
+        else if( options.url )
         {
-            wValue = document.createElement( options.url ? 'a' : 'div' );
-
-            if( options.url )
-            {
-                wValue.href = options.url;
-                wValue.target = "_blank";
-            }
+            wValue = document.createElement( 'a' );
+            wValue.href = options.url;
+            wValue.target = "_blank";
 
             const icon = options.warning ? '<i class="fa-solid fa-triangle-exclamation"></i>' : '';
             wValue.innerHTML = ( icon + value ) || "";
             wValue.style.width = "100%";
             wValue.style.textAlign = options.float ?? "";
-            wValue.className = "ellipsis-overflow";
+            wValue.className = "lextext ellipsis-overflow";
+        }
+        else
+        {
+            wValue = document.createElement( 'input' );
+
+            const icon = options.warning ? '<i class="fa-solid fa-triangle-exclamation"></i>' : '';
+            wValue.disabled = true;
+            wValue.innerHTML = icon;
+            wValue.value = value;
+            wValue.style.width = "100%";
+            wValue.style.textAlign = options.float ?? "";
+            wValue.className = "lextext ellipsis-overflow";
         }
 
         Object.assign( wValue.style, options.style ?? {} );
@@ -5978,7 +5982,7 @@ class Select extends Widget {
             // Reset filter
             if( filter )
             {
-                filter.querySelector( "input" ).value = "";
+                filter.root.querySelector( "input" ).value = "";
                 const filteredOptions = this._filterOptions( values, "" );
                 list.refresh( filteredOptions );
             }
@@ -6096,7 +6100,7 @@ class Select extends Widget {
 
             if( filter )
             {
-                filter.querySelector( "input" ).focus();
+                filter.root.querySelector( "input" ).focus();
             }
 
         }, { buttonClass: "array", skipInlineCount: true, disabled: options.disabled } );
@@ -6135,7 +6139,7 @@ class Select extends Widget {
                 this.unfocus_event = true;
                 setTimeout( () => delete this.unfocus_event, 200 );
             }
-            else if ( e.relatedTarget && e.relatedTarget.tagName == "INPUT" )
+            else if ( e.relatedTarget && ( e.relatedTarget.tagName == "INPUT" || e.relatedTarget.classList.contains("lexoptions") ) )
             {
                 return;
             }
@@ -6156,12 +6160,13 @@ class Select extends Widget {
             filterOptions.trigger = "input";
             filterOptions.icon = "fa-solid fa-magnifying-glass";
             filterOptions.className = "lexfilter";
+            filterOptions.inputClass = "outline";
 
-            let filter = new TextInput(null, options.filterValue ?? "", ( v ) => {
+            filter = new TextInput(null, options.filterValue ?? "", ( v ) => {
                 const filteredOptions = this._filterOptions( values, v );
                 list.refresh( filteredOptions );
             }, filterOptions );
-            filter.root.querySelector( ".lextext" ).classList.remove( "lextext" );
+            filter.root.querySelector( ".lextext" ).style.border = "1px solid transparent";
 
             const input = filter.root.querySelector( "input" );
 
@@ -6182,12 +6187,12 @@ class Select extends Widget {
         list.appendChild( listOptions );
 
         // Add select options list
-        list.refresh = ( options ) => {
+        list.refresh = ( currentOptions ) => {
 
             // Empty list
             listOptions.innerHTML = "";
 
-            if( !options.length )
+            if( !currentOptions.length )
             {
                 let iValue = options.emptyMsg ?? "No options found.";
 
@@ -6203,9 +6208,9 @@ class Select extends Widget {
                 return;
             }
 
-            for( let i = 0; i < options.length; i++ )
+            for( let i = 0; i < currentOptions.length; i++ )
             {
-                let iValue = options[ i ];
+                let iValue = currentOptions[ i ];
                 let li = document.createElement( "li" );
                 let option = document.createElement( "div" );
                 option.className = "option";
@@ -7073,8 +7078,7 @@ class ColorInput extends Widget {
                 newValue = hexToRgb( newValue );
             }
 
-            // Means it was called from the color input listener, not the text
-            if( event )
+            if( !this._skipTextUpdate )
             {
                 textWidget.set( newValue, true, event );
             }
@@ -7100,9 +7104,8 @@ class ColorInput extends Widget {
         color.style.width = "32px";
         color.type = 'color';
         color.className = "colorinput";
-        color.id = "color" + simple_guidGenerator();
         color.useRGB = options.useRGB ?? false;
-        color.value = color.iValue = value;
+        color.value = value;
         container.appendChild( color );
 
         if( options.disabled )
@@ -7115,8 +7118,10 @@ class ColorInput extends Widget {
         }, false );
 
         const textWidget = new TextInput( null, color.value, v => {
+            this._skipTextUpdate = true;
             this.set( v );
-        }, { width: "calc( 100% - 32px )"});
+            delete this._skipTextUpdate;
+        }, { width: "calc( 100% - 32px )", disabled: options.disabled });
 
         textWidget.root.style.marginLeft = "4px";
         container.appendChild( textWidget.root );
@@ -7168,12 +7173,23 @@ class RangeInput extends Widget {
 
         let slider = document.createElement( 'input' );
         slider.className = "lexrangeslider " + ( options.className ?? "" );
-        slider.value = slider.iValue = value;
         slider.min = options.min ?? 0;
         slider.max = options.max ?? 100;
         slider.step = options.step ?? 1;
         slider.type = "range";
         slider.disabled = options.disabled ?? false;
+
+        if( value.constructor == Number )
+        {
+            value = clamp( value, +slider.min, +slider.max );
+        }
+
+        if( options.left )
+        {
+            value = ( ( +slider.max ) - value + ( +slider.min ) );
+        }
+
+        slider.value = value;
         container.appendChild( slider );
 
         if( options.left ?? false )
@@ -7211,11 +7227,6 @@ class RangeInput extends Widget {
             slider.step = newStep ?? slider.step;
             Widget._dispatchEvent( slider, "input", true );
         };
-
-        if( value.constructor == Number )
-        {
-            value = clamp( value, +slider.min, +slider.max );
-        }
 
         doAsync( this.onResize.bind( this ) );
     }
@@ -8138,7 +8149,7 @@ class FileInput extends Widget {
         {
             let settingsDialog = null;
 
-            const settingButton = new Button(null, "<a style='margin-top: 0px;' class='fa-solid fa-gear'></a>", () => {
+            const settingButton = new Button(null, "<a class='fa-solid fa-gear'></a>", () => {
 
                 if( settingsDialog )
                 {
@@ -8150,7 +8161,7 @@ class FileInput extends Widget {
                     p.addButton( null, "Reload", v => { input.dispatchEvent( new Event( 'change' ) ) } );
                 }, { onclose: ( root ) => { root.remove(); settingsDialog = null; } } );
 
-            }, { className: "micro", skipInlineCount: true, title: "Settings" });
+            }, { className: "micro", skipInlineCount: true, title: "Settings", disabled: options.disabled });
 
             this.root.appendChild( settingButton.root );
         }
@@ -8213,7 +8224,7 @@ class Tree extends Widget {
         if( options.filter )
         {
             nodeFilterInput = document.createElement('input');
-            nodeFilterInput.id = "lexnodetree_filter";
+            nodeFilterInput.className = "lexnodetree_filter";
             nodeFilterInput.setAttribute("placeholder", "Filter..");
             nodeFilterInput.style.width =  "calc( 100% - 17px )";
             nodeFilterInput.addEventListener('input', () => {
@@ -8466,7 +8477,7 @@ class Table extends Widget {
                 filterOptions.placeholder = `Filter ${ this.filter }...`;
                 filterOptions.skipWidget = true;
                 filterOptions.trigger = "input";
-                filterOptions.textClass = "outline";
+                filterOptions.inputClass = "outline";
 
                 let filter = new TextInput(null, "", ( v ) => {
                     this._currentFilter = v;
@@ -8499,7 +8510,7 @@ class Table extends Widget {
                             return item;
                         } );
                         new DropdownMenu( customFilterBtn.root, menuOptions, { side: "bottom", align: "start" });
-                    }, { buttonClass: "dashed" } );
+                    }, { buttonClass: " primary dashed" } );
                     headerContainer.appendChild( customFilterBtn.root );
                 }
 
@@ -8574,7 +8585,7 @@ class Table extends Widget {
                     th.style.width = "0px";
                     const input = document.createElement( 'input' );
                     input.type = "checkbox";
-                    input.className = "lexcheckbox";
+                    input.className = "lexcheckbox accent";
                     input.checked = data.checkMap[ ":root" ] ?? false;
                     th.appendChild( input );
 
@@ -8792,7 +8803,7 @@ class Table extends Widget {
                         const td = document.createElement( 'td' );
                         const input = document.createElement( 'input' );
                         input.type = "checkbox";
-                        input.className = "lexcheckbox";
+                        input.className = "lexcheckbox accent";
                         input.checked = data.checkMap[ rowId ];
                         td.appendChild( input );
 
@@ -9459,6 +9470,7 @@ class Panel {
      * pattern: Regular expression that value must match
      * trigger: Choose onchange trigger (default, input) [default]
      * inputWidth: Width of the text input
+     * inputClass: Class to add to the native input element
      * skipReset: Don't add the reset value button when value changes
      * float: Justify input text content
      * justifyName: Justify name content
@@ -9514,6 +9526,7 @@ class Panel {
      * icon: Icon class to show as button value
      * img: Path to image to show as button value
      * title: Text to show in native Element title
+     * buttonClass: Class to add to the native button element
      */
 
     addButton( name, value, callback, options = {} ) {
@@ -10091,7 +10104,7 @@ class Branch {
             this.grabber.setAttribute( "hidden", true );
             doAsync( () => {
                 this.content.setAttribute( "hidden", true );
-            }, 15 );
+            }, 10 );
         }
 
         this.onclick = function( e ) {

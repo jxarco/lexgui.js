@@ -2,6 +2,13 @@
 
 ## dev
 
+Widgets:
+- Fixed Select Widget filter issues.
+- Fixed Color Widget not updating hex code on pasting value.
+
+Improve styling for supported widgets. Better consistency.
+Added new demo showcasing all widgets.
+
 ## 0.5.2 (master)
 
 Table Widget:
