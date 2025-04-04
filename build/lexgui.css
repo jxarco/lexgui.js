@@ -3,7 +3,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap');
 @font-face {
     font-family: "GeistSans";
-    src: url("../data/GeistSans.ttf");
+    src: url("https://raw.githubusercontent.com/jxarco/lexgui.js/master/data/GeistSans.ttf");
 }
 /* clean-css ignore:end */
 
