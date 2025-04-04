@@ -2037,7 +2037,7 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexradiogroup span {
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .lexradiogroup .lexradiogroupitem {
@@ -2079,6 +2079,10 @@ dialog .lexselect .lexselectoptions {
 
 .lexradiogroup .lexradiogroupitem button.checked span {
     background-color: var(--global-text-primary);
+}
+
+.lexradiogroup .lexradiogroupitem button.checked:disabled span {
+    background-color: var(--global-color-tertiary) !important;
 }
 
 /* Colors */

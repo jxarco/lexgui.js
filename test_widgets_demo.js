@@ -127,6 +127,13 @@ function fillPanels() {
         checkLeftPanel.addCheckbox(null, true, null, { className: "error", label: "Error" });
     }
 
+    // Radiogroup
+    {
+        checkLeftPanel.branch("Radio Group", { closed: closedDefault });
+        checkLeftPanel.addRadioGroup( null, "Notify me about...", [ "All new messages", "Direct messages and mentions", "Nothing" ], null, { className: "accent", xdisabled: true, selected: 1 } );
+        checkLeftPanel.addRadioGroup( null, "Disabled Options...", [ "All new messages", "Direct messages and mentions", "Nothing" ], null, { disabled: true, selected: 1 } );
+    }
+
     // Test Toggles
     {
         checkRightPanel.branch("Classic Toggles", { closed: closedDefault });

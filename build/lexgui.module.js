@@ -4415,6 +4415,7 @@ class Widget {
                 domName.innerHTML = name;
                 domName.title = options.title ?? domName.innerHTML;
                 domName.style.width = options.nameWidth || LX.DEFAULT_NAME_WIDTH;
+                domName.style.minWidth = domName.style.width;
 
                 root.appendChild( domName );
                 root.domName = domName;
@@ -10254,6 +10255,7 @@ class Branch {
             let value = element.children[ 1 ];
 
             name.style.width = size;
+            name.style.minWidth = size;
 
             switch( widget.type )
             {
