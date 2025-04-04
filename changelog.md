@@ -6,6 +6,7 @@ Widgets:
 - Fixed Select Widget filter issues.
 - Fixed Color Widget not updating hex code on pasting value.
 
+Changed global font family to Geist Sans.
 Started support for tailwind-like utility css classes.
 Improve styling for supported widgets. Better consistency.
 Added new demo example showcasing all widgets.

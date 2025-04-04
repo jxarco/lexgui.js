@@ -8763,7 +8763,7 @@ class Table extends Widget {
 
                     const row = document.createElement( 'tr' );
                     const rowId = LX.getSupportedDOMName( bodyData.join( '-' ) );
-                    row.setAttribute( "rowId", rowId.substr(0, 16) );
+                    row.setAttribute( "rowId", rowId.substr(0, 32) );
 
                     if( options.sortable )
                     {
