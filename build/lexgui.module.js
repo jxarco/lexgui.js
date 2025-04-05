@@ -9515,6 +9515,7 @@ class Panel {
 
     addLabel( value, options = {} ) {
         options.disabled = true;
+        options.inputClass = ( options.inputClass ?? "" ) + " nobg";
         const widget = this.addText( null, value, null, options );
         widget.type = Widget.LABEL;
         return widget;

@@ -1330,7 +1330,9 @@ a svg, svg path {
     outline: none;
     border-radius: 6px;
     border: 1px solid var(--global-color-transparent);
-    transition: background-color 0.2s linear, border-color 0.15s linear;
+    transition-property: color, background-color, border-color;
+    transition-timing-function: ease-out;
+    transition-duration: .15s;
 }
 
 .lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider):hover {
@@ -1362,10 +1364,6 @@ a svg, svg path {
     color: var(--global-text-tertiary);
 }
 
-:root[data-theme="light"] .lexwidget .lextext {
-    border: 1px solid var(--global-color-tertiary);
-}
-
 .lexwidget .lextext.formlabel {
     margin-left: 8px;
     margin-bottom: -12px;
@@ -1391,7 +1389,7 @@ a svg, svg path {
 }
 
 .lexwidget .lextext:focus {
-    border: 1px solid var(--global-color-accent) !important;
+    border: 1px solid var(--global-text-quaternary);
 }
 
 .lexwidget .lextext:invalid:focus {
@@ -1418,7 +1416,7 @@ a svg, svg path {
     color: var(--global-text-primary);
     outline: none;
     border-radius: 6px;
-    border: 2px solid var(--global-color-transparent);
+    border: 1px solid var(--global-color-transparent);
     transition: 0.1s linear;
 }
 
@@ -1427,7 +1425,7 @@ a svg, svg path {
 }
 
 .lexwidget textarea:focus {
-    border: 2px solid var(--global-color-accent);
+    border: 1px solid var(--global-text-quaternary);
 }
 
 /* Title Widget */
@@ -1860,7 +1858,7 @@ dialog .lexselect .lexselectoptions {
     --toggle-fg-color: #f4f4f6; /* Color of the thumb */
     border: 1px solid transparent;
     color: var(--toggle-fg-color);
-    background-color: var(--global-color-tertiary); /* Color of background NO check */
+    background-color: var(--global-color-quaternary); /* Color of background NO check */
     cursor: pointer;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -2193,11 +2191,11 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexvector .vecbox span.z {
-    background-color: #7490eb;
+    background-color: #6081db;
 }
 
 .lexvector .vecbox span.w {
-    background-color: #ffffff;
+    background-color: var(--global-text-primary);
 }
 
 /* Chrome, Safari, Edge, Opera */
@@ -2233,7 +2231,7 @@ input[type=number] {
     width: 100%;
     display: grid;
     background-color: var(--global-color-tertiary);
-    border: 2px solid var(--global-color-transparent);
+    border: 1px solid var(--global-color-transparent);
     border-radius: 6px;
     margin-right: 2px;
     position: relative;
@@ -2246,7 +2244,7 @@ input[type=number] {
 }
 
 .lexwidget .numberbox:has(input:focus) {
-    border: 2px solid var(--global-color-accent);
+    border: 1px solid var(--global-text-quaternary);
 }
 
 .lexwidget .numberbox span {
