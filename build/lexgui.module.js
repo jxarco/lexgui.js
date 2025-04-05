@@ -12054,8 +12054,12 @@ class AssetView {
         this.rightPanel.addButton( null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { title: "Sort" } );
         this.rightPanel.addButton( null, "<a class='fa-solid fa-grip'></a>", on_change_view.bind(this), { title: "View" } );
         // Content Pages
-        this.rightPanel.addButton( null, "<a class='fa-solid fa-angles-left'></a>", on_change_page.bind(this, -1), { title: "Previous Page" } );
+        this.rightPanel.addButton( null, "<a class='fa-solid fa-angles-left'></a>", on_change_page.bind(this, -1), { title: "Previous Page", className: "ml-auto" } );
         this.rightPanel.addButton( null, "<a class='fa-solid fa-angles-right'></a>", on_change_page.bind(this, 1), { title: "Next Page" } );
+        const textString = "Page " + this.contentPage + " / " + ((((this.currentData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1);
+        this.rightPanel.addText(null, textString, null, {
+            inputClass: "nobg", disabled: true, signal: "@on_page_change", maxWidth: "16ch" }
+        );
         this.rightPanel.endLine();
 
         if( !this.skipBrowser )
@@ -12089,16 +12093,12 @@ class AssetView {
                     icon: "fa-solid fa-arrows-rotate",
                     callback: domEl => { this._refreshContent(); }
                 }
-            ], { width: "20%", minWidth: "164px", noSelection: true } );
+            ], { noSelection: true } );
 
             this.rightPanel.addText(null, this.path.join('/'), null, {
-                width: "70%", maxWidth: "calc(70% - 64px)", minWidth: "164px", inputClass: "nobg", disabled: true, signal: "@on_folder_change", 
+                inputClass: "nobg", disabled: true, signal: "@on_folder_change",
                 style: { fontWeight: "600", fontSize: "15px" } 
             });
-
-            this.rightPanel.addText(null, "Page " + this.contentPage + " / " + ((((this.currentData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1), null, {
-                inputClass: "nobg", disabled: true, signal: "@on_page_change"}
-            )
 
             this.rightPanel.endLine();
         }
@@ -12377,7 +12377,9 @@ class AssetView {
         }
 
         this.allowNextPage = filteredData.length - 1 > AssetView.MAX_PAGE_ELEMENTS;
-        LX.emit("@on_page_change", "Page " + this.contentPage + " / " + ((((filteredData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1));
+
+        const textString = "Page " + this.contentPage + " / " + ((((filteredData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1);
+        LX.emit( "@on_page_change", textString );
 
         if( this.onRefreshContent )
         {

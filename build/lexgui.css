@@ -1587,7 +1587,7 @@ a svg, svg path {
 
 .lexcombobuttons .lexbutton.combo {
     display: flex;
-    padding: 0.5em 1.6em;
+    padding: 0.45em 1.25em;
     transition: 0.2s;
     --button-color: var(--global-color-tertiary);
 }
@@ -1709,8 +1709,8 @@ dialog .lexselect .lexselectoptions {
 
 .lexselect .lexselectlabel {
     width: 100%;
-    color: var(--global-text-primary);
-    padding-inline: 0.8rem;
+    color: var(--global-text-secondary);
+    padding-inline: 0.6rem;
     padding-block: 0.2rem;
     min-height: 20px;
     line-height: 22px;
@@ -1738,7 +1738,8 @@ dialog .lexselect .lexselectoptions {
 .lexselect .lexselectitem a {
     display: none;
     margin-left: auto;
-    margin-right: 4px;
+    margin-right: 0.25rem;
+    padding-left: 1rem;
 }
 
 .lexselect .lexselectitem.selected {
@@ -1750,8 +1751,8 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexselect img {
-    max-height: 64px;
-    margin-top: 8px;
+    max-height: 4rem;
+    margin-top: 0.5rem;
 }
 
 :root[data-theme="light"] .lexselect .lexfilter {
@@ -5559,8 +5560,10 @@ ul.lexassetscontent {
     font-size: var(--global-font-size-sm);
     color: #d9d9e3;
     text-shadow: 0px 1px 6px #22222283;
-    display: flex;
     min-height: 18px;
+    display: flex;
+    gap: 0.3rem;
+    align-items: center;
 }
 
 .lexgraphnode .lexgraphnodeio.iooutput {
@@ -5570,16 +5573,14 @@ ul.lexassetscontent {
 .lexgraphnode .lexgraphnodeio .io__type {
     font-size: calc(var(--global-font-size-xs) - 1px);
     font-weight: 700;
-    line-height: 10px;
+    line-height: 1;
     min-width: 11px;
     max-width: 11px;
     min-height: 10px;
     max-height: 10px;
     background-color: #afafaf;
     align-self: center;
-    margin-right: 3px;
     border-radius: 3px;
-    padding-top: 1px;
     text-align: -webkit-center;
     text-align: center;
     border: 1px solid #afafaf6b;
@@ -5595,7 +5596,6 @@ ul.lexassetscontent {
     position: absolute;
     margin-left: -30px;
     font-weight: 600;
-    margin-top: 3px;
     background-color: #afafaf;
     color: var(--global-color-primary);
     font-size: var(--global-font-size-xs);
@@ -5633,10 +5633,6 @@ ul.lexassetscontent {
 .lexgraphnode .lexgraphnodeio .io__type.mat,
 .lexgraphnode .lexgraphnodeio .io__typedesc.mat {
     background-color: #56a8d8;
-}
-
-.lexgraphnode .lexgraphnodeio .io__name {
-    margin-top: 2px;
 }
 
 .lexgraphnode .lexgraphnodeio .io__type.output {
