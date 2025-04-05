@@ -255,7 +255,7 @@ class Timeline {
             }, { title: "Settings" })
         }
 
-        header.endLine( "space-around" );
+        header.endLine( "justify-around" );
     }
 
     /**

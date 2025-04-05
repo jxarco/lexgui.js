@@ -33,11 +33,12 @@ panel.@[mtd]setValue@(@'Font Color'@, color);
 
     MAKE_PARAGRAPH( `With mouse right click you will open a ${INLINE_LINK("Context Menu", "context_menu.html")} that will allow you to copy and paste widget values to other widgets of the <strong>same type</strong>.` );
 
-    MAKE_HEADER( "Same line", "h2", "same-line" );
+    MAKE_HEADER( "Inline Widgets", "h2", "inline-widgets" );
 
     MAKE_PARAGRAPH( `You can also add multiple widgets in the same panel row to create well-organized and visually optimized user interface layouts by calling ${INLINE_CODE("panel.sameLine(number)")}, 
     where ${INLINE_CODE("number")} is the number of widgets to be inlined.` );
-    MAKE_PARAGRAPH( `In case of adding a dynamic number of widgets, you might want to use <span class="str">null</span> as the number and call ${INLINE_CODE("panel.endLine()")} after all the widgets have been added.` );
+    MAKE_PARAGRAPH( `In case of adding a dynamic number of widgets, you might want to use <span class="str">null</span> as the number and call ${INLINE_CODE("panel.endLine(className)")} after all the widgets have been added.
+    Use ${INLINE_CODE("className")} to customize the inline widgets parent container.` );
 
     MAKE_LINE_BREAK();
     MAKE_LINE_BREAK();

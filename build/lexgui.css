@@ -1224,11 +1224,6 @@ a svg, svg path {
     font-size: var(--global-font-size);
 }
 
-.lexinlinewidgets .lexwidget {
-    padding-left: 10px;
-    padding-right: 10px;
-}
-
 .lexinlinewidgets .lexwidgetname.float-center {
     justify-content: center;
 }
@@ -1266,7 +1261,6 @@ a svg, svg path {
 
 .lexinlinewidgets {
     display: flex;
-    gap: 0.1rem;
 }
 
 .lexwidgetseparator div {

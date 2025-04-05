@@ -9069,10 +9069,11 @@ class Panel {
 
     /**
      * @method endLine
+     * @param {String} className Extra class to customize inline widgets parent container
      * @description Stop inlining widgets. Use it only if the number of widgets to be inlined is NOT specified.
      */
 
-    endLine( justifyContent ) {
+    endLine( className ) {
 
         if( this._inlineWidgetsLeft == -1 )
         {
@@ -9087,9 +9088,9 @@ class Panel {
             this._inlineContainer = document.createElement('div');
             this._inlineContainer.className = "lexinlinewidgets";
 
-            if( justifyContent )
+            if( className )
             {
-                this._inlineContainer.style.justifyContent = justifyContent;
+                this._inlineContainer.className += ` ${ className }`;
             }
         }
 

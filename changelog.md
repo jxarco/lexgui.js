@@ -6,6 +6,8 @@ Widgets:
 - Fixed Select Widget filter issues.
 - Fixed Color Widget not updating hex code on pasting value.
 
+`Panel.endLine` now accepts `className` as first param to allow more customization.
+Remove `gap` by default in inline widgets container.
 Changed global font family to Geist Sans.
 Started support for tailwind-like utility css classes.
 Improve styling for supported widgets. Better consistency.
