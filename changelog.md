@@ -10,6 +10,7 @@ Widgets:
 Remove `gap` by default in inline widgets container.
 Changed global font family to Geist Sans.
 Started support for tailwind-like utility css classes.
+Fixed Select Widget inside Dialog when opening above selector.
 Improve styling for supported widgets. Better consistency.
 Added new demo example showcasing all widgets.
 

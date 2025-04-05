@@ -6039,6 +6039,7 @@ class Select extends Widget {
                 {
                     const rect = nestedDialog.getBoundingClientRect();
                     topPosition -= rect.y;
+                    maxY -= rect.y;
                 }
 
                 parent.style.top = ( topPosition + selectRoot.offsetHeight ) + 'px';

@@ -1656,13 +1656,11 @@ a svg, svg path {
 
 .lexselect .lexselectoptions {
     background-color: var(--global-color-primary);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
     margin: 0;
     padding: 0;
     outline: none;
     width: fit-content;
-    max-height: -webkit-fill-available;
+    /* max-height: -webkit-fill-available; */
     position: fixed;
     z-index: 10000;
     box-shadow: 0 0px 4px rgba(0, 0, 0, 0.203);

@@ -59,6 +59,9 @@
         p.addVector2("2D Position", [250, 350], (value, event) => {
             console.log(value);
         }, { min: 0, max: 1024 });
+        p.addSelect("Best Tool", ["@Engines", "Godot", "Unity", "Unreal Engine", "@Apps", "Visual Studio", "Visual Studio Code"], "Unity", (value, event) => {
+            console.log(value);
+        }, {filter: true, emptyMsg: "No engines found.", placeholder: "Search engines..."});
         p.merge();
     }, { size: ["350px", null], closable: true });
 
