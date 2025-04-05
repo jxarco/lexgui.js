@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.5.3 (master)
+
 Widgets:
 - Fixed Select Widget filter issues.
 - Fixed Color Widget not updating hex code on pasting value.
@@ -14,7 +16,7 @@ Fixed Select Widget inside Dialog when opening above selector.
 Improve styling for supported widgets. Better consistency.
 Added new demo example showcasing all widgets.
 
-## 0.5.2 (master)
+## 0.5.2
 
 Table Widget:
 - Fixed manual-sort not modifying inner data.
