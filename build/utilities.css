@@ -29,13 +29,32 @@
 .inline-block { display: inline-block }
 .hidden { display: none !important }
 
+.overflow-auto { overflow: auto }
+.overflow-scroll { overflow: scroll }
+.overflow-hidden { overflow: hidden }
+.overflow-x-auto { overflow-x: auto }
+.overflow-y-auto { overflow-y: auto }
+.overflow-x-hidden { overflow-x: hidden }
+
+.truncate { overflow: hidden; text-overflow: ellipsis }
+.truncate, .whitespace-nowrap { white-space: nowrap }
+.whitespace-pre-wrap { white-space: pre-wrap }
+.whitespace-break-spaces { white-space: break-spaces }
+
+.text-balance { text-wrap: balance }
+.break-words { overflow-wrap: break-word }
+
+.line-clamp-1, .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical }
+.line-clamp-1 { -webkit-line-clamp: 1; line-clamp: 1 }
+.line-clamp-2 { -webkit-line-clamp: 2; line-clamp: 2 }
+
 .flex-col { flex-direction: column }
 .flex-row { flex-direction: row }
 .flex-wrap { flex-wrap: wrap }
 
-.items-center { align-items: center }
-.items-start { align-items: flex-start }
-.items-end { align-items: flex-end }
+.items-start { place-items: start }
+.items-center { place-items: center }
+.items-end { place-items: end }
 
 .justify-start { justify-content: start }
 .justify-center { justify-content: center }
@@ -47,6 +66,8 @@
 .self-center { place-self: center }
 .self-end { place-self: end }
 
+.gap-0 { gap: 0 }
+.gap-0\.5 { gap: 0.125rem }
 .gap-1 { gap: 0.25rem }
 .gap-2 { gap: 0.5rem }
 .gap-3 { gap: 0.75rem }
@@ -149,6 +170,13 @@
 .py-8 { padding-top: 2rem; padding-bottom: 2rem }
 
 /* Typography */
+
+.text-xs { font-size: var(--global-font-size-xs); line-height: 0.9rem }
+.text-sm { font-size: var(--global-font-size-sm); line-height: 1rem }
+.text-md { font-size: var(--global-font-size); line-height: 1.2rem }
+.text-lg { font-size: var(--global-font-size-lg); line-height: 1.3rem }
+.text-xl { font-size: var(--global-font-size-xl); line-height: 1.4rem }
+.text-xxl { font-size: var(--global-font-size-xxl); line-height: 1.6rem }
 
 .font-light { font-weight: 300 }
 .font-normal { font-weight: 400 }

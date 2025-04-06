@@ -933,6 +933,7 @@ function _createCommandbar( root )
  * @param {Object} options
  * container: Root location for the gui (default is the document body)
  * id: Id of the main area
+ * rootClass: Extra class to the root container
  * skipRoot: Skip adding LX root container
  * skipDefaultArea: Skip creation of main area
  * strictViewport: Use only window area
@@ -949,7 +950,13 @@ function init( options = { } )
 
     var root = document.createElement( 'div' );
     root.id = "lexroot";
+    root.className = "lexcontainer";
     root.tabIndex = -1;
+
+    if( options.rootClass )
+    {
+        root.className += ` ${ options.rootClass }`;
+    }
 
     var modal = document.createElement( 'div' );
     modal.id = "modal";
@@ -963,7 +970,7 @@ function init( options = { } )
 
     if( options.container )
     {
-        this.container = document.getElementById( options.container );
+        this.container = options.container.constructor === String ? document.getElementById( options.container ) : options.container;
     }
 
     this.usingStrictViewport = options.strictViewport ?? true;
@@ -1001,7 +1008,7 @@ function init( options = { } )
         this.notifications.className = "";
         this.notifications.iWidth = 0;
         notifSection.appendChild( this.notifications );
-        this.container.appendChild( notifSection );
+        document.body.appendChild( notifSection );
 
         this.notifications.addEventListener( "mouseenter", () => {
             this.notifications.classList.add( "list" );
@@ -1814,9 +1821,9 @@ class Area {
         this.sections = [];
         this.panels = [];
 
-        if( !options.skipAppend )
+        let lexroot = document.getElementById("lexroot");
+        if( lexroot && !options.skipAppend )
         {
-            let lexroot = document.getElementById("lexroot");
             lexroot.appendChild( this.root );
         }
 
@@ -1999,7 +2006,7 @@ class Area {
 
         const type = options.type || "horizontal";
         const sizes = options.sizes || [ "50%", "50%" ];
-        const auto = (options.sizes === 'auto');
+        const auto = (options.sizes === 'auto') || ( options.sizes && options.sizes[ 0 ] == "auto" && options.sizes[ 1 ] == "auto" );
 
         if( !sizes[ 1 ] )
         {
@@ -2103,8 +2110,8 @@ class Area {
                 const resizeObserver = new ResizeObserver( entries => {
                     for ( const entry of entries )
                     {
-                        const bb = entry.contentRect;
-                        area2.root.style.height = "calc(100% - " + ( bb.height + 4) + "px )";
+                        const size = entry.target.getComputedSize();
+                        area2.root.style.height = "calc(100% - " + ( size.height ) + "px )";
                     }
                 });
 
@@ -2585,6 +2592,7 @@ class Area {
     /**
      * @method addTabs
      * @param {Object} options:
+     * parentClass: Add extra class to tab buttons container
      */
 
     addTabs( options = {} ) {
@@ -2704,7 +2712,6 @@ function flushCss(element) {
 
 class Tabs {
 
-    static TAB_SIZE = 28;
     static TAB_ID   = 0;
 
     constructor( area, options = {} ) {
@@ -2714,13 +2721,8 @@ class Tabs {
         let container = document.createElement('div');
         container.className = "lexareatabs " + ( options.fit ? "fit" : "row" );
 
-        if( options.float )
-        {
-            container.style.placeSelf = options.float;
-        }
-
         const folding = options.folding ?? false;
-        if(folding) container.classList.add("folding");
+        if( folding ) container.classList.add("folding");
 
         let that = this;
 
@@ -2793,10 +2795,15 @@ class Tabs {
 
         area.root.classList.add( "lexareatabscontainer" );
 
-        area.split({ type: 'vertical', sizes: options.sizes ?? "auto", resize: false, top: 6 });
-        area.sections[ 0 ].attach( container );
+        const [ tabButtons, content ] = area.split({ type: 'vertical', sizes: options.sizes ?? "auto", resize: false, top: 2 });
+        tabButtons.attach( container );
 
-        this.area = area.sections[1];
+        if( options.parentClass )
+        {
+            container.parentElement.className += ` ${ options.parentClass }`;
+        }
+
+        this.area = content;
         this.area.root.className += " lexareatabscontent";
 
         if( options.contentClass )
@@ -2824,7 +2831,6 @@ class Tabs {
                 this.thumb.style.transition = "none";
                 this.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
                 this.thumb.style.width = ( tabEl.offsetWidth ) + "px";
-                this.thumb.style.height = ( tabEl.offsetHeight  ) + "px";
                 flushCss( this.thumb );
                 this.thumb.style.transition = transition;
             });
@@ -2943,8 +2949,7 @@ class Tabs {
             if( scope.thumb )
             {
                 scope.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
-                scope.thumb.style.width = ( tabEl.offsetWidth - 5 ) + "px";
-                scope.thumb.style.height = ( tabEl.offsetHeight - 6 ) + "px";
+                scope.thumb.style.width = ( tabEl.offsetWidth ) + "px";
                 scope.thumb.item = tabEl;
             }
         });
@@ -2997,7 +3002,6 @@ class Tabs {
             {
                 this.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
                 this.thumb.style.width = ( tabEl.offsetWidth ) + "px";
-                this.thumb.style.height = ( tabEl.offsetHeight ) + "px";
                 this.thumb.item = tabEl;
             }
 
@@ -5422,6 +5426,7 @@ class TextInput extends Widget {
         let container = document.createElement( 'div' );
         container.className = ( options.warning ? " lexwarning" : "" );
         container.style.display = "flex";
+        container.style.position = "relative";
         this.root.appendChild( container );
 
         this.disabled = ( options.disabled || options.warning ) ?? ( options.url ? true : false );
@@ -5477,6 +5482,7 @@ class TextInput extends Widget {
 
             if( options.icon )
             {
+                wValue.style.paddingLeft = "1.75rem";
                 let icon = document.createElement( 'a' );
                 icon.className = "inputicon " + options.icon;
                 container.appendChild( icon );
@@ -5515,7 +5521,7 @@ class TextInput extends Widget {
     }
 }
 
-LX.Text = Text;
+LX.TextInput = TextInput;
 
 /**
  * @class TextArea
@@ -9508,6 +9514,7 @@ class Panel {
      * disabled: Make the widget disabled [false]
      * required: Make the input required
      * placeholder: Add input placeholder
+     * icon: Icon (if any) to append at the input start
      * pattern: Regular expression that value must match
      * trigger: Choose onchange trigger (default, input) [default]
      * inputWidth: Width of the text input
@@ -12708,44 +12715,44 @@ Object.assign(LX, {
     * Request file from url
     * @method requestText
     * @param {String} url
-    * @param {Function} on_complete
-    * @param {Function} on_error
+    * @param {Function} onComplete
+    * @param {Function} onError
     **/
-    requestText(url, on_complete, on_error ) {
-        return this.request({ url: url, dataType:"text", success: on_complete, error: on_error });
+    requestText( url, onComplete, onError ) {
+        return this.request({ url: url, dataType:"text", success: onComplete, error: onError });
     },
 
     /**
     * Request file from url
     * @method requestJSON
     * @param {String} url
-    * @param {Function} on_complete
-    * @param {Function} on_error
+    * @param {Function} onComplete
+    * @param {Function} onError
     **/
-    requestJSON(url, on_complete, on_error ) {
-        return this.request({ url: url, dataType:"json", success: on_complete, error: on_error });
+    requestJSON( url, onComplete, onError ) {
+        return this.request({ url: url, dataType:"json", success: onComplete, error: onError });
     },
 
     /**
     * Request binary file from url
     * @method requestBinary
     * @param {String} url
-    * @param {Function} on_complete
-    * @param {Function} on_error
+    * @param {Function} onComplete
+    * @param {Function} onError
     **/
-    requestBinary(url, on_complete, on_error ) {
-        return this.request({ url: url, dataType:"binary", success: on_complete, error: on_error });
+    requestBinary( url, onComplete, onError ) {
+        return this.request({ url: url, dataType:"binary", success: onComplete, error: onError });
     },
 
     /**
     * Request script and inserts it in the DOM
     * @method requireScript
     * @param {String|Array} url the url of the script or an array containing several urls
-    * @param {Function} on_complete
-    * @param {Function} on_error
-    * @param {Function} on_progress (if several files are required, on_progress is called after every file is added to the DOM)
+    * @param {Function} onComplete
+    * @param {Function} onError
+    * @param {Function} onProgress (if several files are required, onProgress is called after every file is added to the DOM)
     **/
-    requireScript(url, on_complete, on_error, on_progress, version ) {
+    requireScript( url, onComplete, onError, onProgress, version ) {
 
         if(!url)
             throw("invalid URL");
@@ -12770,15 +12777,17 @@ Object.assign(LX, {
                 loaded_scripts.push(this);
                 if(total)
                 {
-                    if(on_progress)
-                        on_progress(this.original_src, this.num);
+                    if( onProgress )
+                    {
+                        onProgress( this.original_src, this.num );
+                    }
                 }
-                else if(on_complete)
-                    on_complete( loaded_scripts );
+                else if(onComplete)
+                    onComplete( loaded_scripts );
             };
-            if(on_error)
+            if(onError)
                 script.onerror = function(err) {
-                    on_error(err, this.original_src, this.num );
+                    onError(err, this.original_src, this.num );
                 }
             document.getElementsByTagName('head')[0].appendChild(script);
         }

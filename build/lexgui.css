@@ -182,6 +182,7 @@ body {
     margin: 0;
     padding: 0;
     font-family: var(--global-font);
+    background-color: var(--global-color-primary);
 }
 
 *,
@@ -899,13 +900,24 @@ a svg, svg path {
 
 /* Generic */
 
-.lexcontainer {
-    display: flex;
-    flex-direction: row;
+.lexcontainer.wrapper {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 1400px;
+    border: 0px solid var(--global-color-tertiary);
 }
 
-.lexcontainer.col {
-    flex-direction: column;
+@media (min-width: 1400px) {
+    .lexcontainer.wrapper {
+        border-left-width: 1px;
+        border-right-width: 1px;
+    }
+}
+
+@media (min-width: 1800px) {
+    .lexcontainer.wrapper {
+        max-width: 1536px;
+    }
 }
 
 /* Dropdown Menu */
@@ -1070,7 +1082,6 @@ a svg, svg path {
 
 .lexsplitbar.vertical {
     cursor: ns-resize;
-    transform: translateY(-3px);
     left: calc(50% - 32px);
 }
 
@@ -1098,6 +1109,9 @@ a svg, svg path {
 .lexbranch {
     width: 100%;
     border-radius: 6px;
+}
+
+.lexpanel .lexbranch:not(:last-of-type) {
     margin-bottom: 4px !important;
 }
 
@@ -1110,7 +1124,6 @@ a svg, svg path {
 
 .lexbranch.last .lexbranchcontent {
     overflow: hidden;
-    margin-bottom: 6px;
 }
 
 .lexbranchtitle {
@@ -1178,10 +1191,6 @@ a svg, svg path {
     font-size: var(--global-font-size);
     margin-right: 12px;
     align-content: center;
-}
-
-.lexbranch.first .lexbranchtitle {
-    margin-top: 4px;
 }
 
 .lexbranch.last.closed .lexbranchtitle {
@@ -1300,9 +1309,12 @@ a svg, svg path {
 
 .lexwidget .inputicon {
     padding: 6px;
-    font-size: var(--global-font-size-sm);
+    font-size: var(--global-font-size-xs);
     align-self: center;
     text-align: center;
+    margin-left: 4px;
+    position: absolute;
+    z-index: 1;
 }
 
 .lexseparator {
@@ -1359,7 +1371,7 @@ a svg, svg path {
     border-radius: 6px;
     position: relative;
     border: 1px solid transparent;
-    padding: 4px 12px !important;
+    padding: 6px 12px;
 }
 
 .lexwidget .lextext:disabled {
@@ -3643,9 +3655,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexareatabs .lexareatab.thumb {
-    position: absolute;
     background: var(--global-color-accent);
     z-index: 0;
+    height: 22px;
+    position: absolute;
     transition: linear transform 0.15s;
 }
 
@@ -3653,7 +3666,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     background-color: var(--global-color-tertiary);
     border-radius: 8px;
     padding: 3px;
-    margin: 6px;
     gap: 0.1em;
 }
 

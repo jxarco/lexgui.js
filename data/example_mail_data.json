@@ -1,0 +1,72 @@
+[
+  {
+    "name": "Emily Johnson",
+    "subject": "Weekend Plans?",
+    "content": "Hey! Hope everything’s going great with you. Just wanted to check in about our hike this weekend. Are we still good for Saturday morning? I was thinking of bringing some snacks and coffee for the trail. Let me know if there’s anything else you’d like me to bring. Looking forward to it! Cheers, Emily",
+    "tags": ["personal"],
+    "date": "2 days ago"
+  },
+  {
+    "name": "Michael Anderson",
+    "subject": "Quarterly Report Update",
+    "content": "Hi there, I just wanted to keep you posted regarding the Q1 report progress. Most of the data has been collected, but I'm still waiting for marketing's final numbers. Once I have those, I’ll compile everything and share the first draft with you. Let me know if you’d like to review it earlier. Best regards, Michael",
+    "tags": ["work", "important"],
+    "date": "5 days ago"
+  },
+  {
+    "name": "Olivia Martinez",
+    "subject": "Dinner Reservation Confirmed",
+    "content": "Hey! Just confirming that I’ve booked our table for Saturday night at 7 PM at The Grove. I’m super excited to catch up — feels like forever since we’ve had a proper chat. Let me know if anything changes on your end, or if you'd like to meet a bit earlier for drinks. Take care, Olivia",
+    "tags": ["personal"],
+    "date": "1 week ago"
+  },
+  {
+    "name": "James Thompson",
+    "subject": "Meeting Follow-up",
+    "content": "Hi, Thanks again for the productive meeting earlier today. I’ve listed out the main takeaways and next steps we discussed. I’ll be preparing the draft document by Thursday and sending it over for review. Please feel free to add anything I might have missed. Looking forward to your feedback. Regards, James",
+    "tags": ["meetings", "work"],
+    "date": "2 weeks ago"
+  },
+  {
+    "name": "Sophia Clark",
+    "subject": "Flight Details Attached",
+    "content": "Hello, I’ve attached your flight itinerary for the upcoming trip next month. Please double-check the dates and times to make sure everything looks good. Let me know if you’d like me to arrange transport from the airport or help out with accommodations while you’re there. Safe travels! Best, Sophia",
+    "tags": ["work", "important"],
+    "date": "3 weeks ago"
+  },
+  {
+    "name": "William Moore",
+    "subject": "Birthday Party This Friday!",
+    "content": "Hey! Just wanted to officially invite you to my birthday party this Friday night. It’s going to be pretty chill — just a few friends, some music, and good food. Hope you can make it! Let me know if you’re coming so I can get a rough headcount. It’d be awesome to catch up. Cheers, Will",
+    "tags": ["personal"],
+    "date": "1 month ago"
+  },
+  {
+    "name": "Ava Taylor",
+    "subject": "Reminder: Weekly Sync Tomorrow",
+    "content": "Hi team, Just a quick reminder about our weekly sync tomorrow at 10 AM. If you have any updates, questions, or items you'd like to discuss, please add them to the shared doc before the call. Looking forward to catching up and aligning on tasks for the week. Thanks a lot! See you tomorrow, Ava",
+    "tags": ["meetings", "work"],
+    "date": "2 months ago"
+  },
+  {
+    "name": "Ethan Harris",
+    "subject": "February Invoice Attached",
+    "content": "Hi, Hope all is well on your end. I’ve attached my invoice for February's work for your review. Please let me know if everything looks correct or if I should adjust any of the line items. Once approved, feel free to process it at your earliest convenience. Thanks again for the opportunity. Best, Ethan",
+    "tags": ["work"],
+    "date": "3 months ago"
+  },
+  {
+    "name": "Isabella Lewis",
+    "subject": "Coffee Soon?",
+    "content": "Hey! It’s been way too long since we last caught up. Would love to grab coffee sometime next week if you’re around and free. Let me know what day works best for you. I’ve got some fun stuff to share and would love to hear what you’ve been up to lately too. Hope all is great with you! Take care, Isabella",
+    "tags": ["personal", "meetings"],
+    "date": "5 months ago"
+  },
+  {
+    "name": "Benjamin Walker",
+    "subject": "Security Notice: Password Changed",
+    "content": "Hi, We noticed that your account password was recently changed. If this action was performed by you, no further action is needed. However, if you did not initiate this change, please contact our support team immediately so we can help you secure your account. Thanks for your attention. Stay safe, Benjamin",
+    "tags": ["important"],
+    "date": "1 year ago"
+  }
+]

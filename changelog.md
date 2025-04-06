@@ -2,9 +2,11 @@
 
 ## dev
 
+Added support for adding a class to LexGUI root on init `options.rootClass`.
 Added support for adding a class to Sidebar/Menubar areas on `Area.addSidebar` and `Area.addMenubar`.
 Added `options.asElement` to return `LX.badge` as HTMLElement instead of html string.
 Support for using LX.ICONS on sidebar entry icons. Keep FA icons as legacy by now.
+Minor CSS improvements. Added more class utilities.
 
 ## 0.5.3 (master)
 
