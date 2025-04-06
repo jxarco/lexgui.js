@@ -176,7 +176,7 @@ class Timeline {
             header.addTitle(this.name );
         }
 
-        const buttonContainer = LX.makeContainer(["auto", "100%"], "", { display: "flex" });
+        const buttonContainer = LX.makeContainer( ["auto", "100%"], "flex flex-row" );
 
         header.queue( buttonContainer );
 

@@ -8515,7 +8515,7 @@ class Table extends Widget {
         // Append header
         if( this.filter || this.customFilters || this.toggleColumns )
         {
-            const headerContainer = LX.makeContainer( [ "100%", "auto" ] );
+            const headerContainer = LX.makeContainer( [ "100%", "auto" ], "flex flex-row" );
 
             if( this.filter )
             {
