@@ -344,8 +344,11 @@ svg.xxl { width: var(--svg-size-xxl); height: var(--svg-size-xxl); }
     max-width: 256px;
 }
 
-.lexicon {
+.lock {
     margin-left: 4px;
+}
+
+.lexicon {
     cursor: pointer;
     line-height: inherit !important;
     color: var(--global-text-secondary);
@@ -2547,12 +2550,11 @@ input[type=number] {
 .lextree .lextreetools {
     background: var(--global-color-tertiary);
     padding: 2px;
-    padding-left: 6px;
-    padding-right: 6px;
+    padding-inline: 8px;
     display: flex;
     align-items: center;
     border-radius: 10px;
-    margin-top: 4px;
+    gap: 0.5rem;
 }
 
 .lexwidget.nobranch .lextree .lextreetools {
@@ -2572,10 +2574,6 @@ input[type=number] {
     /* padding-top: 14px; */
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
-}
-
-.lextree .lextreetools a {
-    margin-right: 8px;
 }
 
 .lextree span {
@@ -2795,7 +2793,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexbadge {
     border-radius: 0.35rem;
-    color: #fff;
+    color: var(--global-text-primary);
     border: 1px solid var(--badge-color, #14171a);
     width: fit-content;
     justify-content: center;
@@ -2820,6 +2818,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     box-shadow: none;
     background-color: #0000;
     background-image: none;
+}
+.lexbadge.no-bg {
+    background: none;
+    border: none;
 }
 /* Sizes */
 .lexbadge.xs { padding-inline: 0.4rem; font-size: var(--global-font-size-xs); }
@@ -3201,8 +3203,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexsidebarseparator {
-    background-color: #5251514d;
-    width: 100%;
+    background-color: var(--global-color-tertiary);
+    width: calc(100% + 20px);
     height: 1px;
     margin: 0 auto;
     margin-top: 0.4rem;
@@ -3253,8 +3255,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexsidebar .lexsidebarentry {
     width: 100%;
-    padding: 6px;
-    padding-inline: 8px;
+    padding: 8px;
     border-radius: 8px;
     cursor: pointer;
     -webkit-user-select: none;
@@ -3283,7 +3284,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     transform: scale(0.99);
 }
 
-.lexsidebar .lexsidebarentry div {
+.lexsidebar .lexsidebarentry .lexsidebarentrycontent {
+    font-weight: 500;
     display: flex;
     gap: 0.8em;
     margin: 0;
@@ -3291,22 +3293,26 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     opacity: 0.95;
 }
 
-.lexsidebar .lexsidebarentry div i {
+.lexsidebar .lexsidebarentry .lexsidebarentrycontent i {
     min-width: 22px;
     max-width: 22px;
     margin: auto 0;
     text-align: center;
-    margin-left: -2px;
+    font-size: var(--global-font-size-lg);
 }
 
-.lexsidebar .lexsidebarentry div a:not(.lexicon) {
+.lexsidebar .lexsidebarentry .lexsidebarentrycontent a:not(.lexicon) {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     align-content: center;
 }
 
-.lexsidebar .lexsidebarentry a.lexicon {
+.lexsidebar .lexsidebarentry .lexsidebarentryicon {
+    margin-left: 2px;
+}
+
+.lexsidebar .lexsidebarentry a.lexicon:not(.lexsidebarentryicon) {
     margin-left: auto;
 }
 
@@ -3362,7 +3368,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     display: none !important;
 }
 
-.lexsidebar.collapsed .lexsidebarcontent div a {
+.lexsidebar.collapsed .lexsidebarcontent div a:not(.lexsidebarentryicon) {
     display: none;
 }
 
@@ -3627,7 +3633,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     text-align: center;
     align-items: center;
     padding: 3px;
-    color: var(--global-text-secondary);
+    color: var(--global-text-tertiary);
     cursor: pointer;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -3656,7 +3662,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     transition: 0.1s;
     background: none;
     border-radius: 6px;
-    color: var(--global-text-secondary);
 }
 
 .lexareatabs.fit {
