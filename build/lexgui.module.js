@@ -12891,6 +12891,18 @@ Element.prototype.getParentArea = function() {
     }
 }
 
+Element.prototype.listen = function( eventName, callback, callbackName ) {
+    callbackName = callbackName ?? ( "_on" + eventName );
+    this[ callbackName ] = callback;
+    this.addEventListener( eventName, callback );
+}
+
+Element.prototype.ignore = function( eventName, callbackName ) {
+    callbackName = callbackName ?? ( "_on" + eventName );
+    const callback = this[ callbackName ];
+    this.removeEventListener( eventName, callback );
+}
+
 LX.UTILS = {
     getTime() { return new Date().getTime() },
     compareThreshold( v, p, n, t ) { return Math.abs(v - p) >= t || Math.abs(v - n) >= t },
