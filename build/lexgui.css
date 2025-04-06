@@ -526,7 +526,7 @@ a svg, svg path {
 
 .commandbar .gs-header {
     width: 100%;
-    height: 32px;
+    height: 44px;
     display: flex;
     padding: 6px;
 }
@@ -648,6 +648,7 @@ a svg, svg path {
 .lexfooter ul li {
     margin-bottom: 8px;
     font-size: var(--global-font-size);
+    color: var(--global-text-secondary);
 }
 
 .lexfooter a {
@@ -657,6 +658,7 @@ a svg, svg path {
 }
 
 .lexfooter .credits-and-socials {
+    color: var(--global-text-secondary);
     display: grid;
     align-items: center;
     grid-template-columns: 1fr 1fr;
@@ -1222,11 +1224,6 @@ a svg, svg path {
     font-size: var(--global-font-size);
 }
 
-.lexinlinewidgets .lexwidget {
-    padding-left: 10px;
-    padding-right: 10px;
-}
-
 .lexinlinewidgets .lexwidgetname.float-center {
     justify-content: center;
 }
@@ -1264,7 +1261,6 @@ a svg, svg path {
 
 .lexinlinewidgets {
     display: flex;
-    gap: 0.1rem;
 }
 
 .lexwidgetseparator div {
@@ -1334,7 +1330,9 @@ a svg, svg path {
     outline: none;
     border-radius: 6px;
     border: 1px solid var(--global-color-transparent);
-    transition: background-color 0.2s linear, border-color 0.15s linear;
+    transition-property: color, background-color, border-color;
+    transition-timing-function: ease-out;
+    transition-duration: .15s;
 }
 
 .lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider):hover {
@@ -1366,10 +1364,6 @@ a svg, svg path {
     color: var(--global-text-tertiary);
 }
 
-:root[data-theme="light"] .lexwidget .lextext {
-    border: 1px solid var(--global-color-tertiary);
-}
-
 .lexwidget .lextext.formlabel {
     margin-left: 8px;
     margin-bottom: -12px;
@@ -1395,7 +1389,7 @@ a svg, svg path {
 }
 
 .lexwidget .lextext:focus {
-    border: 1px solid var(--global-color-accent) !important;
+    border: 1px solid var(--global-text-quaternary);
 }
 
 .lexwidget .lextext:invalid:focus {
@@ -1422,7 +1416,7 @@ a svg, svg path {
     color: var(--global-text-primary);
     outline: none;
     border-radius: 6px;
-    border: 2px solid var(--global-color-transparent);
+    border: 1px solid var(--global-color-transparent);
     transition: 0.1s linear;
 }
 
@@ -1431,7 +1425,7 @@ a svg, svg path {
 }
 
 .lexwidget textarea:focus {
-    border: 2px solid var(--global-color-accent);
+    border: 1px solid var(--global-text-quaternary);
 }
 
 /* Title Widget */
@@ -1593,7 +1587,7 @@ a svg, svg path {
 
 .lexcombobuttons .lexbutton.combo {
     display: flex;
-    padding: 0.5em 1.6em;
+    padding: 0.45em 1.25em;
     transition: 0.2s;
     --button-color: var(--global-color-tertiary);
 }
@@ -1662,16 +1656,14 @@ a svg, svg path {
 
 .lexselect .lexselectoptions {
     background-color: var(--global-color-primary);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
     margin: 0;
     padding: 0;
     outline: none;
     width: fit-content;
-    max-height: -webkit-fill-available;
+    /* max-height: -webkit-fill-available; */
     position: fixed;
     z-index: 10000;
-    box-shadow: 0 0px 6px rgba(0, 0, 0, 0.603);
+    box-shadow: 0 0px 4px rgba(0, 0, 0, 0.203);
     border-radius: 6px;
     border: 1px solid #7a797c4f;
     overflow-y: auto;
@@ -1717,8 +1709,8 @@ dialog .lexselect .lexselectoptions {
 
 .lexselect .lexselectlabel {
     width: 100%;
-    color: var(--global-text-primary);
-    padding-inline: 0.8rem;
+    color: var(--global-text-secondary);
+    padding-inline: 0.6rem;
     padding-block: 0.2rem;
     min-height: 20px;
     line-height: 22px;
@@ -1746,7 +1738,8 @@ dialog .lexselect .lexselectoptions {
 .lexselect .lexselectitem a {
     display: none;
     margin-left: auto;
-    margin-right: 4px;
+    margin-right: 0.25rem;
+    padding-left: 1rem;
 }
 
 .lexselect .lexselectitem.selected {
@@ -1758,8 +1751,8 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexselect img {
-    max-height: 64px;
-    margin-top: 8px;
+    max-height: 4rem;
+    margin-top: 0.5rem;
 }
 
 :root[data-theme="light"] .lexselect .lexfilter {
@@ -1769,11 +1762,6 @@ dialog .lexselect .lexselectoptions {
 :root[data-theme="light"] .lexselect ul {
     background-color: var(--global-color-primary);
     box-shadow: 0 0px 6px rgba(175, 175, 175, 0.788);
-}
-
-:root[data-theme="light"] .lexselect .lexselectitem:hover {
-    background-color: var(--global-color-accent);
-    color: #fff;
 }
 
 /* Check box */
@@ -1869,7 +1857,7 @@ dialog .lexselect .lexselectoptions {
     --toggle-fg-color: #f4f4f6; /* Color of the thumb */
     border: 1px solid transparent;
     color: var(--toggle-fg-color);
-    background-color: var(--global-color-tertiary); /* Color of background NO check */
+    background-color: var(--global-color-quaternary); /* Color of background NO check */
     cursor: pointer;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -2202,11 +2190,11 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lexvector .vecbox span.z {
-    background-color: #7490eb;
+    background-color: #6081db;
 }
 
 .lexvector .vecbox span.w {
-    background-color: #ffffff;
+    background-color: var(--global-text-primary);
 }
 
 /* Chrome, Safari, Edge, Opera */
@@ -2242,7 +2230,7 @@ input[type=number] {
     width: 100%;
     display: grid;
     background-color: var(--global-color-tertiary);
-    border: 2px solid var(--global-color-transparent);
+    border: 1px solid var(--global-color-transparent);
     border-radius: 6px;
     margin-right: 2px;
     position: relative;
@@ -2255,7 +2243,7 @@ input[type=number] {
 }
 
 .lexwidget .numberbox:has(input:focus) {
-    border: 2px solid var(--global-color-accent);
+    border: 1px solid var(--global-text-quaternary);
 }
 
 .lexwidget .numberbox span {
@@ -4174,8 +4162,8 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
     position: absolute;
     width: 125%;
     height: 125%;
-    top: -15.5%;
-    left: -15.5%;
+    top: -12.5%;
+    left: -12.5%;
     border-radius: 50%;
     border: 2px solid rgba(255, 255, 255, 0.2);
     border-bottom-color: transparent;
@@ -5572,8 +5560,10 @@ ul.lexassetscontent {
     font-size: var(--global-font-size-sm);
     color: #d9d9e3;
     text-shadow: 0px 1px 6px #22222283;
-    display: flex;
     min-height: 18px;
+    display: flex;
+    gap: 0.3rem;
+    align-items: center;
 }
 
 .lexgraphnode .lexgraphnodeio.iooutput {
@@ -5583,16 +5573,14 @@ ul.lexassetscontent {
 .lexgraphnode .lexgraphnodeio .io__type {
     font-size: calc(var(--global-font-size-xs) - 1px);
     font-weight: 700;
-    line-height: 10px;
+    line-height: 1;
     min-width: 11px;
     max-width: 11px;
     min-height: 10px;
     max-height: 10px;
     background-color: #afafaf;
     align-self: center;
-    margin-right: 3px;
     border-radius: 3px;
-    padding-top: 1px;
     text-align: -webkit-center;
     text-align: center;
     border: 1px solid #afafaf6b;
@@ -5608,7 +5596,6 @@ ul.lexassetscontent {
     position: absolute;
     margin-left: -30px;
     font-weight: 600;
-    margin-top: 3px;
     background-color: #afafaf;
     color: var(--global-color-primary);
     font-size: var(--global-font-size-xs);
@@ -5646,10 +5633,6 @@ ul.lexassetscontent {
 .lexgraphnode .lexgraphnodeio .io__type.mat,
 .lexgraphnode .lexgraphnodeio .io__typedesc.mat {
     background-color: #56a8d8;
-}
-
-.lexgraphnode .lexgraphnodeio .io__name {
-    margin-top: 2px;
 }
 
 .lexgraphnode .lexgraphnodeio .io__type.output {

@@ -2,16 +2,21 @@
 
 ## dev
 
+## 0.5.3 (master)
+
 Widgets:
 - Fixed Select Widget filter issues.
 - Fixed Color Widget not updating hex code on pasting value.
 
+`Panel.endLine` now accepts `className` as first param to allow more customization.
+Remove `gap` by default in inline widgets container.
 Changed global font family to Geist Sans.
 Started support for tailwind-like utility css classes.
+Fixed Select Widget inside Dialog when opening above selector.
 Improve styling for supported widgets. Better consistency.
 Added new demo example showcasing all widgets.
 
-## 0.5.2 (master)
+## 0.5.2
 
 Table Widget:
 - Fixed manual-sort not modifying inner data.

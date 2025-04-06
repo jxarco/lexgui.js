@@ -33,6 +33,11 @@ class Knob extends LX.Widget {
             LX.Widget._dispatchEvent( innerKnobCircle, "change", skipCallback );
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
         const snapEnabled = ( options.snap && options.snap.constructor == Number );
         const ticks = [];
         if( snapEnabled )
@@ -48,7 +53,6 @@ class Knob extends LX.Widget {
         container.className = "lexknob";
         container.addClass( options.size );
         container.addClass( snapEnabled ? "show-ticks" : null );
-        container.style.width = options.inputWidth || "calc( 100% - " + LX.DEFAULT_NAME_WIDTH + ")";
 
         let knobCircle = document.createElement( 'div' );
         knobCircle.className = "knobcircle";
@@ -181,14 +185,10 @@ class Knob extends LX.Widget {
         }
 
         container.appendChild( knobCircle );
+
         this.root.appendChild( container );
 
-        // Remove branch padding and margins
-        if( !this.name )
-        {
-            this.root.className += " noname";
-            container.style.width = "100%";
-        }
+        LX.doAsync( this.onResize.bind( this ) );
     }
 }
 

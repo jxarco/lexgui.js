@@ -109,6 +109,12 @@
             buttonsLeftPanel.addButton(null, "Error", null, { disabled: true, buttonClass: "error" });
             buttonsLeftPanel.branch("Advanced Buttons", { closed: closedDefault });
             buttonsLeftPanel.addButton("Icon Button", "Not used", null, { icon: "fa fa-skull" });
+            buttonsLeftPanel.sameLine();
+            buttonsLeftPanel.addLabel("Customized Inline Buttons");
+            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "fa fa-skull", buttonClass: "bg-none" });
+            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "fa fa-cube", buttonClass: "bg-primary" });
+            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "fa fa-table-cells", buttonClass: "bg-tertiary fg-tertiary" });
+            buttonsLeftPanel.endLine("justify-start");
             buttonsLeftPanel.addButton(null, LX.makeIcon("circle-plus").innerHTML + "Button with Icon Start", null);
             buttonsLeftPanel.addButton(null, "Button with Icon End" + LX.makeIcon("circle-plus").innerHTML, null);
             buttonsLeftPanel.addButton(null, "With a Badge" + LX.badge("+99", "accent sm"));
@@ -187,6 +193,7 @@
             panelB.addText(null, "Outline", null, { inputClass: "outline" });
             panelB.addText(null, "Dashed", null, { inputClass: "dashed" });
             panelB.addText(null, "Disabled TextInput", null, { disabled: true });
+            panelB.addLabel("TextInput as Label");
             panelB.branch("TextArea Inputs", { closed: closedDefault });
             panelB.addTextArea("TextArea", loremText, null, { placeholder: 'Some notes...' });
             panelB.addTextArea("Fit Height TextArea", loremText, null, { placeholder: 'Some notes...', fitHeight: true });

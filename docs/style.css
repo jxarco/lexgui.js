@@ -1,4 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
+@font-face {
+    font-family: "GeistSans";
+    src: url("https://raw.githubusercontent.com/jxarco/lexgui.js/master/data/GeistSans.ttf");
+}
 
 :root {
 	color-scheme: light dark;
@@ -26,7 +30,7 @@
 }
 
 #content {
-	font-family: "GoogleSans", sans-serif;
+	font-family: "GeistSans", sans-serif;
 	font-size: var(--font-size);
 	line-height: var(--line-height);
 	color: var(--text-color);
