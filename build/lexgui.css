@@ -2926,7 +2926,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexmenubox {
-    position: absolute;
+    position: fixed;
     z-index: 1001;
     background-color: #111111f3;
     border: 1px solid #aaaaaa48;
@@ -3118,8 +3118,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexcontextmenu {
     z-index: 102;
-    position: absolute;
-    /* padding-right: 20px; */
+    position: fixed;
     border-radius: 6px;
     box-shadow: 0 0 6px rgba(46, 46, 46, 0.2) !important;
     background-color: var(--global-blur-background);
@@ -3430,7 +3429,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     font-weight: 600;
     background-color: var(--global-text-primary);
     color: var(--global-color-primary);
-    font-size: var(--global-font-size);
+    font-size: var(--global-font-size-sm);
     border-radius: 6px;
     text-align: center;
     opacity: 0;
@@ -3443,8 +3442,12 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexsidebar.collapsed .lexsidebarentry:hover .lexsidebarentrydesc {
    opacity: 1;
-   transform: translate(0, 0);
+   transform: translate(2px, 0);
 }
+
+.lexsidebar.collapsed .lexsidebarentry:hover {
+    display: flex;
+ }
 
 .lexsidebar .lexsidebarheader {
     margin-bottom: 0.5rem;
