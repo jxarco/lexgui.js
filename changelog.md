@@ -2,6 +2,10 @@
 
 ## dev
 
+Widgets:
+- Added support for disabling resize in TextArea Widget `options.resize: false`.
+- Added support for using LX.ICONS on Button Widgets.
+
 Added support for adding a class to LexGUI root on init `options.rootClass`.
 Added support for adding a class to Sidebar/Menubar areas on `Area.addSidebar` and `Area.addMenubar`.
 Added `options.asElement` to return `LX.badge` as HTMLElement instead of html string.

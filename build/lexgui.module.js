@@ -5559,6 +5559,12 @@ class TextArea extends Widget {
         this.root.appendChild( container );
 
         let wValue = document.createElement( "textarea" );
+
+        if( !( options.resize ?? true ) )
+        {
+            wValue.style.resize = "none";
+        }
+
         wValue.value = wValue.iValue = value || "";
         wValue.style.width = "100%";
         wValue.style.textAlign = options.float ?? "";
@@ -9558,6 +9564,7 @@ class Panel {
      * hideName: Don't use name as label [false]
      * disabled: Make the widget disabled [false]
      * placeholder: Add input placeholder
+     * resize: Allow resize [true]
      * trigger: Choose onchange trigger (default, input) [default]
      * inputWidth: Width of the text input
      * float: Justify input text content
