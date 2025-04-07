@@ -1647,7 +1647,7 @@ class DropdownMenu {
             }
 
             const menuItem = document.createElement('div');
-            menuItem.className = "lexdropdownmenuitem" + ( item.name ? "" : " label" ) + ( item.disabled ?? false ? " disabled" : "" );
+            menuItem.className = "lexdropdownmenuitem" + ( item.name ? "" : " label" ) + ( item.disabled ?? false ? " disabled" : "" ) + ( ` ${ item.className ?? "" }` );
             menuItem.id = pKey;
             menuItem.innerHTML = `<span>${ key }</span>`;
 
@@ -5688,7 +5688,8 @@ class Button extends Widget {
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
-            wValue.innerHTML = `<span>${ ( newValue || "" ) }</span>`;
+
+            wValue.innerHTML = `<span></span>`;
 
             if( options.icon )
             {
@@ -5712,6 +5713,10 @@ class Button extends Widget {
                 let img = document.createElement( 'img' );
                 img.src = options.img;
                 wValue.prepend( img );
+            }
+            else
+            {
+                wValue.innerHTML = `<span>${ ( newValue || "" ) }</span>`;
             }
         };
 
