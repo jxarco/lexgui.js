@@ -58,10 +58,10 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
 
     // Mail
     {
-        const mailContainer = LX.makeContainer( [ null, "800px" ], "flex flex-col bg-primary border rounded-lg" );
-        tabs.add( "Mail", mailContainer, { selected: true } );
+        const mailContainer = LX.makeContainer( [ null, "800px" ], "flex flex-col bg-primary border rounded-lg overflow-hidden" );
+        tabs.add( "Mail", mailContainer, { xselected: true } );
 
-        const mailArea = new LX.Area({ className: "rounded-lg" });
+        const mailArea = new LX.Area();
         mailContainer.appendChild( mailArea.root );
         const badgeClass = "ml-auto no-bg font-medium";
 
@@ -81,18 +81,15 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
         }, { 
             // collapseToIcons: false,
             className: "border-right",
-            parentClass: "rounded-lg",
             headerTitle: "jxarco",
             headerSubtitle: "alexroco.30@gmail.com",
             headerImage: "https://raw.githubusercontent.com/jxarco/lexgui.js/refs/heads/master/images/icon.png",
-            // header: customHeader,
             skipFooter: true,
             displaySelected: true,
             onHeaderPressed: (e, element) => { }
         });
 
         const inboxArea = sidebar.siblingArea;
-        inboxArea.root.classList.add( "rounded-lg" );
 
         var [ left, right ] = inboxArea.split({ sizes:["40%","60%"] });
         left.setLimitBox( 350, null, 650, null );
@@ -185,8 +182,6 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
 
         // Manage Message Preview
         {
-            right.root.className += " rounded-lg";
-
             // Buttons
             {
                 const mailPreviewHeader = LX.makeContainer( [ "100%", "59.59px" ], "flex flex-row border-bottom p-1" );
@@ -267,10 +262,10 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
 
     // Tasks
     {
-        const tasksContainer = LX.makeContainer( [ null, "auto" ], "col bg-primary border rounded-lg p-6" );
+        const tasksContainer = LX.makeContainer( [ null, "auto" ], "col bg-primary border rounded-lg p-6 overflow-hidden" );
         tabs.add( "Tasks", tasksContainer, { xselected: true } );
 
-        const header = LX.makeContainer( [ null, "auto" ], "col rounded-lg p-6" );
+        const header = LX.makeContainer( [ null, "auto" ], "col p-6" );
         header.innerHTML = `
             <h2>Welcome back!</h2>
             <p class="fg-tertiary">Here's a list of your tasks for this month!</p>
@@ -317,30 +312,203 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
 
     // Editor
     {
-        const editorContainer = LX.makeContainer( [ "auto", "850px" ], "", {
-            backgroundColor: "red"
-        } );
+        const editorContainer = LX.makeContainer( [ null, "800px" ], "flex flex-col bg-primary border rounded-lg overflow-hidden" );
+        tabs.add( "Editor", editorContainer, { selected: true } );
 
-        tabs.add( "Editor", editorContainer );
+        const editorArea = new LX.Area({ className: "rounded-lg" });
+        editorContainer.appendChild( editorArea.root );
+
+        editorArea.addMenubar( m => {
+            m.add( "Scene/New Scene", () => { console.log("New scene created!") });
+            m.add( "Scene/Open Scene", { icon: "fa-solid fa-folder-open", short: "S" } );
+            m.add( "Scene/Open Recent/hello.scene" );
+            m.add( "Scene/Open Recent/goodbye.scene" );
+            m.add( "Project/Project Settings", { disabled: true } );
+            m.add( "Project/" );
+            m.add( "Project/Export", { icon: "fa-solid fa-download" });
+            m.add( "Project/Export/DAE", { icon: "fa-solid fa-cube", short: "D" } );
+            m.add( "Project/Export/GLTF", { short:  "G" } );
+            m.add( "Account/Login", { icon: "fa-solid fa-user" } );
+            m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass", short:  "F1" } );
+            m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
+            m.add( "Help/Support LexGUI/Do it" );
+            m.addButtons( [
+                {
+                    title: "Play",
+                    icon: "fa-solid fa-play",
+                    swap: "fa-solid fa-stop"
+                },
+                {
+                    title: "Pause",
+                    icon: "fa-solid fa-pause",
+                    disabled: true
+                }
+            ]);
+        }, { sticky: false });
+        
+        // split main area
+        var [ left, right ] = editorArea.split({ sizes:["70%","30%"], minimizable: true });
+        
+        // add canvas to left upper part
+        var canvas = document.createElement('canvas');
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        canvas.width = left.root.offsetWidth;
+        canvas.height = left.root.offsetHeight
+
+        const resizeCanvas = ( bounding ) => {
+            canvas.width = bounding.width;
+            canvas.height = bounding.height;
+        };
+
+        left.attach( canvas );
+        left.onresize = resizeCanvas;
+        left.addOverlayButtons( [ 
+            [
+                { name: "Select", icon: "fa fa-arrow-pointer", selectable: true },
+                { name: "Move", icon: "fa-solid fa-arrows-up-down-left-right", selectable: true },
+                { name: "Rotate", icon: "fa-solid fa-rotate-right", selectable: true }
+            ],
+            { name: "Lit", options: ["Lit", "Unlit", "Wireframe"] },
+            [
+                { name: "Enable Snap", icon: "fa fa-table-cells", selectable: true },
+                { name: 10, options: [10, 100, 1000] }
+            ]
+        ], { float: "htc" } );
+        
+        // add panels
+        var sidePanel = right.addPanel();
+        fillPanel( sidePanel );
+        
+        function loop(dt) {
+            
+            var ctx = canvas.getContext("2d");
+        
+            // Get values from panel widgets (e.g. color value)
+            ctx.fillStyle = sidePanel.getValue('Background');
+        
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.font = `${ sidePanel.getValue('Font Size') }px ${ sidePanel.getValue('Font Family') }`;
+        
+            ctx.fillStyle = sidePanel.getValue('Font Color');
+        
+            const text = sidePanel.getValue('Text');
+            const pos2D = sidePanel.getValue('2D Position');
+            ctx.fillText(text, pos2D[0], pos2D[1]);
+        
+            requestAnimationFrame(loop);
+        }
+                
+        requestAnimationFrame(loop);
+        
+        // **** **** **** **** **** **** **** **** **** **** **** **** 
+        
+        function fillPanel( panel ) {
+            
+            // Add data tree
+        
+            let sceneData = {
+                'id': 'root',
+                'children': [
+                    {
+                        'id': 'node_1',
+                        'children': [
+                            {
+                                'id': 'node_1_1',
+                                'icon': 'fa-solid fa-cube',
+                                'children': [],
+                                'actions': [
+                                    {
+                                        'name': 'Open script',
+                                        'icon': 'fa-solid fa-scroll'
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        'id': 'node_2',
+                        'icon': 'fa-solid fa-circle-play',
+                        'children': []
+                    }
+                ]
+            };
+        
+            // This is optional!
+            const treeIcons = [
+                {
+                    'name':'Add node',
+                    'icon': 'fa-solid fa-plus'
+                },
+                {
+                    'name':'Instantiate scene',
+                    'icon': 'fa-solid fa-link'
+                }
+            ];
+        
+            window.tree = panel.addTree("Scene Tree", sceneData, { 
+                icons: treeIcons, 
+                addDefault: true,
+                onevent: (event) => { 
+                    switch(event.type) {
+                        case LX.TreeEvent.NODE_CONTEXTMENU: 
+                            const m = event.panel;
+                            m.add( "Components/Transform");
+                            m.add( "Components/MeshRenderer");
+                            break;
+                    }
+                }
+            });    
+        
+            // add widgets to panel branch
+            panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});
+            panel.addColor("Background", "#b7a9b1", null);
+            panel.addText("Text", "LexGUI.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
+            panel.addColor("Font Color", [1, 0.1, 0.6], null);
+            panel.addNumber("Font Size", 36, null, { min: 1, max: 48, step: 1, units: "px"});
+            panel.addSelect("Font Family", ["Arial", "GeistSans", "Monospace"], "GeistSans");
+            panel.addVector2("2D Position", [250, 350], null, { min: 0, max: 1024 });
+            const opacityValues = [
+                [0.2, 0.3146875],
+                [0.417313915857606, 0.8946875000000003],
+                [0.5495145631067961, 0.6746875],
+                [1, 1]
+            ];
+            panel.addCurve("Opacity", opacityValues);
+            panel.addSize("Resolution", [1280, 720], null, { units: "p", precision: 0 });
+            panel.merge();
+        
+            panel.branch("Node", { icon: "fa-solid fa-cube" });
+            panel.addText("Name", "node_1");
+            panel.addCheckbox("Visibility", true, null, { className: "accent" });
+            panel.addLayers("Layers", 10, null);
+
+            panel.addTitle( "Transform" );
+            panel.addVector3( "Position", [0.0, 0.0, 0.0] );
+            panel.addVector4( "Rotation", [0.0, 0.0, 0.0, 1.0] );
+            panel.addVector3( "Scale", [1.0, 1.0, 1.0] );
+            panel.addButton(null, "Export", null, { buttonClass: "contrast" });
+            panel.merge();
+        }
     }
 
     // Code
-    {
-        const codeContainer = LX.makeContainer( [ "auto", "850px" ], "", {
-            backgroundColor: "red"
-        } );
+    // {
+    //     const codeContainer = LX.makeContainer( [ "auto", "850px" ], "", {
+    //         backgroundColor: "red"
+    //     } );
 
-        tabs.add( "Code", codeContainer );
-    }
+    //     tabs.add( "Code", codeContainer );
+    // }
 
     // Audio
-    {
-        const audioContainer = LX.makeContainer( [ "auto", "850px" ], "", {
-            backgroundColor: "red"
-        } );
+    // {
+    //     const audioContainer = LX.makeContainer( [ "auto", "850px" ], "", {
+    //         backgroundColor: "red"
+    //     } );
 
-        tabs.add( "Audio", audioContainer );
-    }
+    //     tabs.add( "Audio", audioContainer );
+    // }
 }
 
 // Footer

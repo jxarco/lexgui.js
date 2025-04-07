@@ -25,19 +25,19 @@
 .fg-secondary { color: var(--global-text-secondary) !important }
 .fg-tertiary { color: var(--global-text-tertiary) !important }
 .fg-quaternary { color: var(--global-text-quaternary) !important }
-.fg-accent { color: var(--global-text-accent) !important }
-.fg-contrast { color: var(--global-text-primary) !important }
-.fg-warning { color: var(--global-text-warning) !important }
-.fg-error { color: var(--global-text-error) !important }
+.fg-accent { color: var(--global-color-accent) !important }
+.fg-contrast { color: var(--global-color-primary) !important }
+.fg-warning { color: var(--global-color-warning) !important }
+.fg-error { color: var(--global-color-error) !important }
 
 .hover\:fg-primary:hover { color: var(--global-text-primary) !important }
 .hover\:fg-secondary:hover { color: var(--global-text-secondary) !important }
 .hover\:fg-tertiary:hover { color: var(--global-text-tertiary) !important }
 .hover\:fg-quaternary:hover { color: var(--global-text-quaternary) !important }
-.hover\:fg-accent:hover { color: var(--global-text-accent) !important }
-.hover\:fg-contrast:hover { color: var(--global-text-primary) !important }
-.hover\:fg-warning:hover { color: var(--global-text-warning) !important }
-.hover\:fg-error:hover { color: var(--global-text-error) !important }
+.hover\:fg-accent:hover { color: var(--global-color-accent) !important }
+.hover\:fg-contrast:hover { color: var(--global-color-primary) !important }
+.hover\:fg-warning:hover { color: var(--global-color-warning) !important }
+.hover\:fg-error:hover { color: var(--global-color-error) !important }
 
 /* Layout */
 

@@ -11178,8 +11178,8 @@ class CanvasCurve {
         element.style.minHeight = "20px";
 
         element.bgcolor = options.bgColor || LX.getThemeColor( "global-intense-background" );
-        element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected" );
-        element.activepointscolor = options.activePointsColor || LX.getThemeColor( "global-selected-light" );
+        element.pointscolor = options.pointsColor || LX.getThemeColor( "global-color-accent" );
+        element.activepointscolor = options.activePointsColor || LX.getThemeColor( "global-color-accent-light" );
         element.linecolor = options.lineColor || "#555";
         element.value = value || [];
         element.xrange = options.xrange || [ 0, 1 ]; // min, max
@@ -11195,8 +11195,8 @@ class CanvasCurve {
 
         LX.addSignal( "@on_new_color_scheme", (el, value) => {
             element.bgcolor = options.bgColor || LX.getThemeColor( "global-intense-background" );
-            element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected" );
-            element.activepointscolor = options.activePointsColor || LX.getThemeColor( "global-selected-light" );
+            element.pointscolor = options.pointsColor || LX.getThemeColor( "global-color-accent" );
+            element.activepointscolor = options.activePointsColor || LX.getThemeColor( "global-color-accent-light" );
             this.redraw();
         } );
 
@@ -11525,7 +11525,7 @@ class CanvasDial {
         element.style.minWidth = element.style.minHeight = "50px";
 
         element.bgcolor = options.bgColor || LX.getThemeColor( "global-dark-background" );
-        element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected-light" );
+        element.pointscolor = options.pointsColor || LX.getThemeColor( "global-color-accent-light" );
         element.linecolor = options.lineColor || "#555";
         element.value = value || [];
         element.xrange = options.xrange || [ 0, 1 ]; // min, max
