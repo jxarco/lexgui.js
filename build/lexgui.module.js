@@ -777,7 +777,7 @@ function _createCommandbar( root )
         className: "gs-tabs"
     } );
 
-    const gsTabs = tabArea.addTabs();
+    const gsTabs = tabArea.addTabs( { parentClass: "p-2" } );
     let gsFilter = null;
 
     // These tabs will serve as buttons by now

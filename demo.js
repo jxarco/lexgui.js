@@ -54,8 +54,7 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
 
 // Content
 {
-    const tabs = area.addTabs( { sizes: [ "auto", "auto" ], contentClass: "p-6 pt-0" } );
-    tabs.root.parentElement.classList.add( "p-4" );
+    const tabs = area.addTabs( { parentClass: "p-4", sizes: [ "auto", "auto" ], contentClass: "p-6 pt-0" } );
 
     // Mail
     {
