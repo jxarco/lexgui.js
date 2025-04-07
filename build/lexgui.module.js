@@ -1343,16 +1343,32 @@ LX.badge = badge;
  * @method makeContainer
  * @param {Array} size
  * @param {String} className
+ * @param {String} innerHTML
+ * @param {HTMLElement} parent
  * @param {Object} overrideStyle
  */
 
-function makeContainer( size, className, overrideStyle = {} )
+function makeContainer( size, className, innerHTML, parent, overrideStyle = {} )
 {
     const container = document.createElement( "div" );
     container.className = "lexcontainer " + ( className ?? "" );
+    container.innerHTML = innerHTML ?? "";
     container.style.width = size && size[ 0 ] ? size[ 0 ] : "100%";
     container.style.height = size && size[ 1 ] ? size[ 1 ] : "100%";
     Object.assign( container.style, overrideStyle );
+
+    if( parent )
+    {
+        if( parent.attach ) // Use attach method if possible
+        {
+            parent.attach( container );
+        }
+        else // its a native HTMLElement
+        {
+            parent.appendChild( container );
+        }
+    }
+
     return container;
 }
 
@@ -2017,7 +2033,7 @@ class Area {
     attach( content ) {
 
         // Append to last split section if area has been split
-        if( this.sections.length)
+        if( this.sections.length )
         {
             this.sections[ 1 ].attach( content );
             return;

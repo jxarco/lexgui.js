@@ -40,16 +40,12 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
 
 // Header
 {
-    const header = LX.makeContainer( [ null, "auto" ], "flex flex-col border-top border-bottom gap-2 px-6 py-12" );
-
-    header.innerHTML = `
+    const header = LX.makeContainer( [ null, "auto" ], "flex flex-col border-top border-bottom gap-2 px-6 py-12", `
         <a>Get started with LexGUI.js</a>
         <h1>Build your application interface</h1>
         <p class="font-light" style="max-width:32rem">A set of beautifully-designed, accessible widgets and components.
         No complex frameworks. Pure JavaScript and CSS. Open Source.</p>
-    `;
-
-    area.attach( header );
+    `, area );
 }
 
 // Content
@@ -274,16 +270,14 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
             const inboxTabs = left.addTabs({ parentClass: "flex p-3 items-end border-bottom", sizes: [ "auto", "auto" ], float: "end" });
             const tabsRowContainer = inboxTabs.root.parentElement;
 
-            const mailSectionTitle = LX.makeContainer( [ "auto", "auto" ], "mr-auto ml-2 self-center text-xxl font-semibold" );
-            mailSectionTitle.innerHTML = "Inbox";
+            const mailSectionTitle = LX.makeContainer( [ "auto", "auto" ], "mr-auto ml-2 self-center text-xxl font-semibold", "Inbox" );
             tabsRowContainer.prepend( mailSectionTitle );
 
             window.__showMailList = ( container, unreadOnly = false ) => {
 
                 // Filter
                 {
-                    const allMailFilter = LX.makeContainer( [ "100%", "50px" ], "flex p-2" );
-                    container.appendChild( allMailFilter );
+                    const allMailFilter = LX.makeContainer( [ "100%", "50px" ], "flex p-2", "", container );
                     const filterInput = new LX.TextInput(null, "", null,
                         { inputClass: "outline", width: "100%", icon: "fa fa-magnifying-glass", placeholder: "Search..." }
                     );
@@ -292,47 +286,35 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
 
                 // Content
                 {
-                    const allMailContent = LX.makeContainer( [ "100%", "calc(100% - 50px)" ], "flex flex-col p-4 pt-0 gap-2 overflow-scroll" );
-                    container.appendChild( allMailContent );
+                    const allMailContent = LX.makeContainer( [ "100%", "calc(100% - 50px)" ], "flex flex-col p-4 pt-0 gap-2 overflow-scroll", "", container );
 
                     window.__addMail = ( mail, mailContainer ) => {
+
                         const msgContent = LX.makeContainer( [ "100%", "auto" ],
-                            "flex flex-col border p-3 rounded-lg gap-2 select-none hover:bg-secondary cursor-pointer" );
-                        mailContainer.appendChild( msgContent );
+                            "flex flex-col border p-3 rounded-lg gap-2 select-none hover:bg-secondary cursor-pointer", "", mailContainer );
 
                         // Name, subject, date
                         {
-                            const msgInfo = LX.makeContainer( [ "100%", "auto" ], "flex flex-col gap-0.5" );
-                            msgContent.appendChild( msgInfo );
-
-                            const msgNameDate = LX.makeContainer( [ "100%", "auto" ], "flex flex-row" );
-                            msgInfo.appendChild( msgNameDate );
+                            const msgInfo = LX.makeContainer( [ "100%", "auto" ], "flex flex-col gap-0.5", "", msgContent );
+                            const msgNameDate = LX.makeContainer( [ "100%", "auto" ], "flex flex-row", "", msgInfo );
 
                             // Name + Date
                             {
-                                const msgName = LX.makeContainer( [ "auto", "auto" ], "flex font-semibold text-md gap-2" );
+                                const msgName = LX.makeContainer( [ "auto", "auto" ], "flex font-semibold text-md gap-2", "", msgNameDate );
                                 msgName.innerHTML = mail.name;
                                 msgName.innerHTML += ( mail.read ? "" : `<span class="rounded-full self-center bg-accent" style="width: 8px; height: 8px"></span>` );
-                                msgNameDate.appendChild( msgName );
-
-                                const msgDate = LX.makeContainer( [ "auto", "auto" ], "fg-tertiary text-sm ml-auto self-center" );
-                                msgDate.innerHTML = mail.date;
-                                msgNameDate.appendChild( msgDate );
+                                const msgDate = LX.makeContainer( [ "auto", "auto" ], "fg-tertiary text-sm ml-auto self-center", mail.date, msgNameDate );
                             }
 
-                            const msgSubject = LX.makeContainer( [ "100%", "auto" ], "font-semibold text-sm" );
-                            msgSubject.innerHTML = mail.subject;
-                            msgInfo.appendChild( msgSubject );
+                            const msgSubject = LX.makeContainer( [ "100%", "auto" ], "font-semibold text-sm", mail.subject, msgInfo );
                         }
-                        const msgText = LX.makeContainer( [ "100%", "auto" ], "text-sm line-clamp-2 fg-tertiary" );
-                        msgText.innerHTML = mail.content;
-                        msgContent.appendChild( msgText );
-                        const msgTags = LX.makeContainer( [ "100%", "auto" ], "flex flex-row gap-0.5 font-semibold" );
+
+                        const msgText = LX.makeContainer( [ "100%", "auto" ], "text-sm line-clamp-2 fg-tertiary", mail.content, msgContent );
+                        const msgTags = LX.makeContainer( [ "100%", "auto" ], "flex flex-row gap-0.5 font-semibold", "", msgContent );
                         for( const tag of mail.tags )
                         {
                             msgTags.appendChild( LX.badge( tag, "sm", { asElement: true } ) );
                         }
-                        msgContent.appendChild( msgTags );
 
                         msgContent.listen( "click", () => {
                             window.__openMail( mail );
@@ -359,8 +341,7 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
         {
             // Buttons
             {
-                const mailPreviewHeader = LX.makeContainer( [ "100%", "59.59px" ], "flex flex-row border-bottom p-1" );
-                right.attach( mailPreviewHeader );
+                const mailPreviewHeader = LX.makeContainer( [ "100%", "59.59px" ], "flex flex-row border-bottom p-1", "", right );
 
                 mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Archive", tooltip: true, buttonClass: "bg-none", icon: "box-archive" } ).root );
                 mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Move to junk", tooltip: true, buttonClass: "bg-none", icon: "box-archive-x" } ).root );
@@ -384,42 +365,30 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
 
             // Prewiew Info
             {
-                const previewDataContent = LX.makeContainer( [ "100%", "100%" ], "" );
-                right.attach( previewDataContent );
+                const previewDataContent = LX.makeContainer( [ "100%", "100%" ], "", "", right );
 
                 window.__openMail = ( mail ) => {
 
                     previewDataContent.innerHTML = "";
 
-                    const mailPreviewInfo = LX.makeContainer( [ "100%", "auto" ], "flex flex-row border-bottom p-6" );
-                    previewDataContent.appendChild( mailPreviewInfo );
+                    const mailPreviewInfo = LX.makeContainer( [ "100%", "auto" ], "flex flex-row border-bottom p-6", "", previewDataContent );
 
-                    const senderData = LX.makeContainer( [ "100%", "auto" ], "flex flex-col gap-0.5" );
-                    senderData.innerHTML = `
+                    const senderData = LX.makeContainer( [ "100%", "auto" ], "flex flex-col gap-0.5", `
                     <div class="text-md font-semibold">${ mail.name }</div>
                     <div class="text-sm">${ mail.subject }</div>
                     <div class="text-sm">Reply-To: ${ mail.email }</div>
-                    `;
-                    mailPreviewInfo.appendChild( senderData );
+                    `, mailPreviewInfo );
 
-                    const exactDate = LX.makeContainer( [ "100%", "auto" ], "flex flex-row text-sm fg-tertiary justify-end" );
-                    exactDate.innerHTML = mail.exactDate;
-                    mailPreviewInfo.appendChild( exactDate );
-
-                    const mailPreviewContent = LX.makeContainer( [ "100%", "505px" ], "flex flex-row border-bottom text-md whitespace-pre-wrap p-4" );
-                    mailPreviewContent.innerHTML = mail.content;
-                    previewDataContent.appendChild( mailPreviewContent );
-
-                    const previewFooter = LX.makeContainer( [ "100%", "auto" ], "flex flex-col p-2" );
-                    previewDataContent.appendChild( previewFooter );
+                    const exactDate = LX.makeContainer( [ "100%", "auto" ], "flex flex-row text-sm fg-tertiary justify-end", mail.exactDate, mailPreviewInfo );
+                    const mailPreviewContent = LX.makeContainer( [ "100%", "505px" ], "flex flex-row border-bottom text-md whitespace-pre-wrap p-4", mail.content, previewDataContent );
+                    const previewFooter = LX.makeContainer( [ "100%", "auto" ], "flex flex-col p-2", "", previewDataContent );
 
                     const msgReplyTextArea = new LX.TextArea(null, "", null,
                         { className: "mt-1", inputClass: "outline", width: "100%", resize: false, placeholder: `Reply ${ mail.name }` }
                     );
                     previewFooter.appendChild( msgReplyTextArea.root );
 
-                    const previewButtons = LX.makeContainer( [ "100%", "auto" ], "flex flex-row p-1" );
-                    previewFooter.appendChild( previewButtons );
+                    const previewButtons = LX.makeContainer( [ "100%", "auto" ], "flex flex-row p-1", "", previewFooter );
 
                     const muteToggle = new LX.Toggle( null, false, null, { label: "Mute this thread", className: "contrast" } );
                     previewButtons.appendChild( muteToggle.root );
@@ -440,12 +409,10 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
         const tasksContainer = LX.makeContainer( [ null, "auto" ], "col bg-primary border rounded-lg p-6 overflow-hidden" );
         tabs.add( "Tasks", tasksContainer, { xselected: true } );
 
-        const header = LX.makeContainer( [ null, "auto" ], "col p-6" );
-        header.innerHTML = `
+        const header = LX.makeContainer( [ null, "auto" ], "col p-4", `
             <h2>Welcome back!</h2>
             <p class="fg-tertiary">Here's a list of your tasks for this month!</p>
-        `;
-        tasksContainer.appendChild( header );
+        `, tasksContainer );
 
         const tableWidget = new LX.Table(null, {
             head: ["Name", "Status", "Priority"],

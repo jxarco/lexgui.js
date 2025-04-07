@@ -7,6 +7,7 @@ Widgets:
 - Added support for using LX.ICONS on Button Widgets.
 - Tooltips supported in Button Widget `options.tooltip`. Uses either `options.title` or `name` as content.
 
+`LX.makeContainer` now accepts `innerHTML` and `parent` params.
 Started work on tooltips `LX.asTooltip(trigger, content)`.
 Added support for adding a class to LexGUI root on init `options.rootClass`.
 Added support for adding a class to Sidebar/Menubar areas on `Area.addSidebar` and `Area.addMenubar`.
