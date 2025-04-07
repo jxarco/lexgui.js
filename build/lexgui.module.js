@@ -2872,7 +2872,7 @@ class Tabs {
         if( isSelected )
         {
             this.root.querySelectorAll( 'span' ).forEach( s => s.classList.remove( 'selected' ) );
-            this.area.root.querySelectorAll( '.lextabcontent' ).forEach( c => c.style.display = 'none' );
+            this.area.root.querySelectorAll( ':scope > .lextabcontent' ).forEach( c => c.style.display = 'none' );
         }
 
         isSelected = !Object.keys( this.tabs ).length && !this.folding ? true : isSelected;
@@ -2930,7 +2930,7 @@ class Tabs {
                 tabEl.parentElement.querySelectorAll( 'span' ).forEach( s => s.classList.remove( 'selected' ));
                 tabEl.classList.toggle('selected', ( this.folding && tabEl.selected ));
                 // Manage visibility
-                scope.area.root.querySelectorAll( '.lextabcontent' ).forEach( c => c.style.display = 'none' );
+                scope.area.root.querySelectorAll( ':scope > .lextabcontent' ).forEach( c => c.style.display = 'none' );
                 contentEl.style.display = contentEl.originalDisplay;
                 scope.selected = tabEl.dataset.name;
             }
