@@ -2582,7 +2582,10 @@ class Area {
                         }
                     }
 
-                    callback( value, event, button.root );
+                    if( callback )
+                    {
+                        callback( value, event, button.root );
+                    }
 
                 }, _options );
             }
