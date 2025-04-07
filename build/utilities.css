@@ -212,6 +212,8 @@
 .px-6 { padding-left: 1.5rem; padding-right: 1.5rem }
 .px-7 { padding-left: 1.75rem; padding-right: 1.75rem }
 .px-8 { padding-left: 2rem; padding-right: 2rem }
+.px-10 { padding-left: 2.5rem; padding-right: 2.5rem }
+.px-12 { padding-left: 3rem; padding-right: 3rem }
 
 .py-0 { padding-top: 0; padding-bottom: 0 }
 .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem }
@@ -222,6 +224,8 @@
 .py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem }
 .py-7 { padding-top: 1.75rem; padding-bottom: 1.75rem }
 .py-8 { padding-top: 2rem; padding-bottom: 2rem }
+.py-10 { padding-top: 2.5rem; padding-bottom: 2.5rem }
+.py-12 { padding-top: 3rem; padding-bottom: 3rem }
 
 /* Typography */
 

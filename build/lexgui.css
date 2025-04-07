@@ -920,6 +920,25 @@ a svg, svg path {
     }
 }
 
+.lextooltip {
+    position: fixed;
+    background-color: var(--global-text-primary);
+    color: var(--global-color-primary);
+    font-size: var(--global-font-size-sm);
+    padding: 0.2rem;
+    padding-inline: 0.5rem;
+    border-radius: 0.4rem;
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    animation-duration: 400ms;
+	animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+	will-change: transform, opacity;
+    animation-name: slideUpAndFade;
+}
+
+.lextooltip[data-closed] {
+    opacity: 0;
+}
+
 /* Dropdown Menu */
 
 .lexdropdownmenu {

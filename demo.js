@@ -40,7 +40,7 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
 
 // Header
 {
-    const header = LX.makeContainer( [ null, "auto" ], "flex flex-col border-top border-bottom gap-2 p-8" );
+    const header = LX.makeContainer( [ null, "auto" ], "flex flex-col border-top border-bottom gap-2 px-6 py-12" );
     
     header.innerHTML = `
         <a>Get started with LexGUI.js</a>
@@ -69,7 +69,7 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
             m.add( "Inbox", { selected: true, icon: "inbox", content: LX.badge("128", badgeClass, { asElement: true }) } );
             m.add( "Drafts", { icon: "file", content: LX.badge("9", badgeClass, { asElement: true }) } );
             m.add( "Sent", { icon: "paper-plane" } );
-            m.add( "Junk", { icon: "box-archive", content: LX.badge("23", badgeClass, { asElement: true }) } );
+            m.add( "Junk", { icon: "box-archive-x", content: LX.badge("23", badgeClass, { asElement: true }) } );
             m.add( "Trash", { icon: "trash-can" } );
             m.add( "Archive", { icon: "box-archive" } );
             m.separator();
@@ -77,7 +77,7 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
             m.add( "Updates", { icon: "circle-info", content: LX.badge("342", badgeClass, { asElement: true }) } );
             m.add( "Forums", { icon: "comments", content: LX.badge("96", badgeClass, { asElement: true }) } );
             m.add( "Shopping ", { icon: "shopping-cart" } );
-            m.add( "Promotions", { icon: "box-archive", content: LX.badge("21", badgeClass, { asElement: true }) } );
+            m.add( "Promotions", { icon: "flag", content: LX.badge("21", badgeClass, { asElement: true }) } );
         }, { 
             // collapseToIcons: false,
             className: "border-right",
@@ -94,8 +94,8 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
         const inboxArea = sidebar.siblingArea;
         inboxArea.root.classList.add( "rounded-lg" );
 
-        var [ left, right ] = inboxArea.split({ sizes:["50%","50%"] });
-        left.setLimitBox( 360, null, 800, null );
+        var [ left, right ] = inboxArea.split({ sizes:["40%","60%"] });
+        left.setLimitBox( 350, null, 650, null );
 
         // Manage Inbox
         {
@@ -192,15 +192,15 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
                 const mailPreviewHeader = LX.makeContainer( [ "100%", "59.59px" ], "flex flex-row border-bottom p-1" );
                 right.attach( mailPreviewHeader );
 
-                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Archive", buttonClass: "bg-none", icon: "box-archive" } ).root );
-                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Move to junk", buttonClass: "bg-none", icon: "box-archive" } ).root );
-                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Move to trash", buttonClass: "bg-none", icon: "trash-can" } ).root );
+                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Archive", tooltip: true, buttonClass: "bg-none", icon: "box-archive" } ).root );
+                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Move to junk", tooltip: true, buttonClass: "bg-none", icon: "box-archive-x" } ).root );
+                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Move to trash", tooltip: true, buttonClass: "bg-none", icon: "trash-can" } ).root );
                 mailPreviewHeader.appendChild( LX.makeContainer( [ "1px", "35%" ], "border-right self-center ml-2 mr-2" ) );
-                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Snooze", buttonClass: "bg-none", icon: "clock" } ).root );
+                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Snooze", tooltip: true, buttonClass: "bg-none", icon: "clock" } ).root );
 
-                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Reply", buttonClass: "bg-none", className: "ml-auto", icon: "reply" } ).root );
-                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Reply all", buttonClass: "bg-none", icon: "reply-all" } ).root );
-                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Forward", buttonClass: "bg-none", icon: "forward" } ).root );
+                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Reply", tooltip: true, buttonClass: "bg-none", className: "ml-auto", icon: "reply" } ).root );
+                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Reply all", tooltip: true, buttonClass: "bg-none", icon: "reply-all" } ).root );
+                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Forward", tooltip: true, buttonClass: "bg-none", icon: "forward" } ).root );
                 mailPreviewHeader.appendChild( LX.makeContainer( [ "1px", "35%" ], "border-right self-center ml-2 mr-2" ) );
                 mailPreviewHeader.appendChild( new LX.Button( null, "", (value, event) => {
                     new LX.DropdownMenu( event.target, [
