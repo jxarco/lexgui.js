@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.5.4 (master)
+
 Widgets:
 - Added support for disabling resize in TextArea Widget `options.resize: false`.
 - Added support for using LX.ICONS on Button Widgets.
@@ -15,7 +17,7 @@ Added `options.asElement` to return `LX.badge` as HTMLElement instead of html st
 Support for using LX.ICONS on sidebar entry icons. Keep FA icons as legacy by now.
 Minor CSS improvements. Added more class utilities.
 
-## 0.5.3 (master)
+## 0.5.3
 
 Widgets:
 - Fixed Select Widget filter issues.
