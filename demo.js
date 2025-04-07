@@ -100,7 +100,12 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
 
         // Manage Inbox
         {
-            const inboxTabs = left.addTabs({ parentClass: "p-3 items-end border-bottom", sizes: [ "auto", "auto" ], float: "end" });
+            const inboxTabs = left.addTabs({ parentClass: "flex p-3 items-end border-bottom", sizes: [ "auto", "auto" ], float: "end" });
+            const tabsRowContainer = inboxTabs.root.parentElement;
+
+            const mailSectionTitle = LX.makeContainer( [ "auto", "auto" ], "mr-auto ml-2 self-center text-xxl font-semibold" );
+            mailSectionTitle.innerHTML = "Inbox";
+            tabsRowContainer.prepend( mailSectionTitle );
 
             window.__showMailList = ( container, unreadOnly = false ) => {
 
@@ -229,7 +234,7 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
                     mailPreviewInfo.appendChild( senderData );
     
                     const exactDate = LX.makeContainer( [ "100%", "auto" ], "flex flex-row text-sm fg-tertiary justify-end" );
-                    exactDate.innerHTML = "Mar 25, 2023, 1:15:00 PM";
+                    exactDate.innerHTML = mail.exactDate;
                     mailPreviewInfo.appendChild( exactDate );
 
                     const mailPreviewContent = LX.makeContainer( [ "100%", "505px" ], "flex flex-row border-bottom text-md whitespace-pre-wrap p-4" );
@@ -250,7 +255,11 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
                     const muteToggle = new LX.Toggle( null, false, null, { label: "Mute this thread", className: "contrast" } );
                     previewButtons.appendChild( muteToggle.root );
 
-                    const sendButton = new LX.Button( null, "Send", null, { className: "ml-auto", buttonClass: "contrast" } );
+                    const sendButton = new LX.Button( null, "Send", () => {
+                        LX.toast( "Message sent!", "To:" + mail.email, { timeout: 5000, action: { name: "Undo", callback: ( toast, actionName, event ) => {
+                            toast.close();
+                        } } } );
+                    }, { className: "ml-auto", buttonClass: "contrast" } );
                     previewButtons.appendChild( sendButton.root );
                 };
             }

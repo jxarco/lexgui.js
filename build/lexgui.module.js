@@ -10374,6 +10374,9 @@ class Footer {
         wrapper.className = "w-full";
         root.appendChild( wrapper );
 
+        // const hr = document.createElement( "hr" );
+        // wrapper.appendChild( hr );
+
         if( options.columns && options.columns.constructor == Array )
         {
             const cols = document.createElement( "div" );
@@ -10410,9 +10413,6 @@ class Footer {
 
         if( options.credits || options.socials )
         {
-            const hr = document.createElement( "hr" );
-            wrapper.appendChild( hr );
-
             const creditsSocials = document.createElement( "div" );
             creditsSocials.className = "credits-and-socials";
             wrapper.appendChild( creditsSocials );
