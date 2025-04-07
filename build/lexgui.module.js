@@ -5565,6 +5565,7 @@ class TextArea extends Widget {
             wValue.style.resize = "none";
         }
 
+        wValue.className = ( options.inputClass ?? "" );
         wValue.value = wValue.iValue = value || "";
         wValue.style.width = "100%";
         wValue.style.textAlign = options.float ?? "";
