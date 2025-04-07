@@ -3180,7 +3180,7 @@ class Menubar {
             const hasSubmenu = subitem[ subkey ].length;
             const isCheckbox = subitem[ 'type' ] == 'checkbox';
             let subentry = document.createElement('div');
-            subentry.tabIndex = "1";
+            subentry.tabIndex = "-1";
             subentry.className = "lexmenuboxentry";
             subentry.className += (i == o[k].length - 1 ? " last" : "") + ( subitem.disabled ? " disabled" : "" );
 
@@ -3267,12 +3267,10 @@ class Menubar {
             });
 
             subentry.addEventListener("blur", e => {
-
-                if( e.target && e.target.className.includes( "lexmenu" ) )
+                if( e.relatedTarget && !e.relatedTarget.className.includes( "lexmenu" ) )
                 {
-                    return;
+                    this._resetMenubar();
                 }
-                this._resetMenubar();
             });
 
             // Add icon if has submenu, else check for shortcut
