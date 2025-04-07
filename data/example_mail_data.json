@@ -1,72 +1,126 @@
 [
-  {
-    "name": "Emily Johnson",
-    "subject": "Weekend Plans?",
-    "content": "Hey! Hope everything’s going great with you. Just wanted to check in about our hike this weekend. Are we still good for Saturday morning? I was thinking of bringing some snacks and coffee for the trail. Let me know if there’s anything else you’d like me to bring. Looking forward to it! Cheers, Emily",
-    "tags": ["personal"],
-    "date": "2 days ago"
-  },
-  {
-    "name": "Michael Anderson",
-    "subject": "Quarterly Report Update",
-    "content": "Hi there, I just wanted to keep you posted regarding the Q1 report progress. Most of the data has been collected, but I'm still waiting for marketing's final numbers. Once I have those, I’ll compile everything and share the first draft with you. Let me know if you’d like to review it earlier. Best regards, Michael",
-    "tags": ["work", "important"],
-    "date": "5 days ago"
-  },
-  {
-    "name": "Olivia Martinez",
-    "subject": "Dinner Reservation Confirmed",
-    "content": "Hey! Just confirming that I’ve booked our table for Saturday night at 7 PM at The Grove. I’m super excited to catch up — feels like forever since we’ve had a proper chat. Let me know if anything changes on your end, or if you'd like to meet a bit earlier for drinks. Take care, Olivia",
-    "tags": ["personal"],
-    "date": "1 week ago"
-  },
-  {
-    "name": "James Thompson",
-    "subject": "Meeting Follow-up",
-    "content": "Hi, Thanks again for the productive meeting earlier today. I’ve listed out the main takeaways and next steps we discussed. I’ll be preparing the draft document by Thursday and sending it over for review. Please feel free to add anything I might have missed. Looking forward to your feedback. Regards, James",
-    "tags": ["meetings", "work"],
-    "date": "2 weeks ago"
-  },
-  {
-    "name": "Sophia Clark",
-    "subject": "Flight Details Attached",
-    "content": "Hello, I’ve attached your flight itinerary for the upcoming trip next month. Please double-check the dates and times to make sure everything looks good. Let me know if you’d like me to arrange transport from the airport or help out with accommodations while you’re there. Safe travels! Best, Sophia",
-    "tags": ["work", "important"],
-    "date": "3 weeks ago"
-  },
-  {
-    "name": "William Moore",
-    "subject": "Birthday Party This Friday!",
-    "content": "Hey! Just wanted to officially invite you to my birthday party this Friday night. It’s going to be pretty chill — just a few friends, some music, and good food. Hope you can make it! Let me know if you’re coming so I can get a rough headcount. It’d be awesome to catch up. Cheers, Will",
-    "tags": ["personal"],
-    "date": "1 month ago"
-  },
-  {
-    "name": "Ava Taylor",
-    "subject": "Reminder: Weekly Sync Tomorrow",
-    "content": "Hi team, Just a quick reminder about our weekly sync tomorrow at 10 AM. If you have any updates, questions, or items you'd like to discuss, please add them to the shared doc before the call. Looking forward to catching up and aligning on tasks for the week. Thanks a lot! See you tomorrow, Ava",
-    "tags": ["meetings", "work"],
-    "date": "2 months ago"
-  },
-  {
-    "name": "Ethan Harris",
-    "subject": "February Invoice Attached",
-    "content": "Hi, Hope all is well on your end. I’ve attached my invoice for February's work for your review. Please let me know if everything looks correct or if I should adjust any of the line items. Once approved, feel free to process it at your earliest convenience. Thanks again for the opportunity. Best, Ethan",
-    "tags": ["work"],
-    "date": "3 months ago"
-  },
-  {
-    "name": "Isabella Lewis",
-    "subject": "Coffee Soon?",
-    "content": "Hey! It’s been way too long since we last caught up. Would love to grab coffee sometime next week if you’re around and free. Let me know what day works best for you. I’ve got some fun stuff to share and would love to hear what you’ve been up to lately too. Hope all is great with you! Take care, Isabella",
-    "tags": ["personal", "meetings"],
-    "date": "5 months ago"
-  },
-  {
-    "name": "Benjamin Walker",
-    "subject": "Security Notice: Password Changed",
-    "content": "Hi, We noticed that your account password was recently changed. If this action was performed by you, no further action is needed. However, if you did not initiate this change, please contact our support team immediately so we can help you secure your account. Thanks for your attention. Stay safe, Benjamin",
-    "tags": ["important"],
-    "date": "1 year ago"
-  }
+    {
+        "name": "Emily Johnson",
+        "email": "emily.johnson@example.com",
+        "subject": "Dinner Plans This Weekend",
+        "content": "Hey!\n\nI was wondering if you’d be free this weekend to grab dinner together. It’s been a while since we caught up and I’d love to hear how things are going with you.\n\nLet me know what works for you. We could try that new Italian place downtown.\n\nLooking forward to it!\n\nCheers,\nEmily",
+        "tags": [
+            "personal"
+        ],
+        "date": "2 days ago",
+        "exactDate": "Apr 5, 2025, 7:45:00 PM",
+        "read": false
+    },
+    {
+        "name": "Michael Thompson",
+        "email": "michael.thompson@example.com",
+        "subject": "Project Status Update",
+        "content": "Hi team,\n\nJust wanted to give a quick update on the current project. We’ve completed the initial phase and are moving into testing next week.\n\nIf you have any blockers or concerns, please let me know as soon as possible.\n\nThanks everyone for your hard work so far.\nLet’s keep the momentum going!\n\nBest,\nMichael",
+        "tags": [
+            "work",
+            "important"
+        ],
+        "date": "5 days ago",
+        "exactDate": "Apr 2, 2025, 10:30:00 AM",
+        "read": true
+    },
+    {
+        "name": "Sarah Mitchell",
+        "email": "sarah.mitchell@example.com",
+        "subject": "Birthday Party Invitation",
+        "content": "Hey!\n\nI’m organizing a small birthday party next Saturday at my place. It would mean a lot if you could come! There will be food, drinks, and of course cake.\n\nFeel free to bring someone with you. Just let me know if you can make it so I can plan accordingly.\n\nHope to see you there!\n\nHugs,\nSarah",
+        "tags": [
+            "personal"
+        ],
+        "date": "1 week ago",
+        "exactDate": "Mar 30, 2025, 6:00:00 PM",
+        "read": false
+    },
+    {
+        "name": "David Anderson",
+        "email": "david.anderson@example.com",
+        "subject": "Client Meeting Notes",
+        "content": "Hello team,\n\nHere are the notes from our last client meeting. Please review and let me know if I missed anything important.\n\nNext steps involve preparing a proposal by the end of next week. Let’s align early to avoid surprises or last-minute issues.\n\nThanks,\nDavid",
+        "tags": [
+            "work",
+            "meetings"
+        ],
+        "date": "2 weeks ago",
+        "exactDate": "Mar 23, 2025, 3:15:00 PM",
+        "read": true
+    },
+    {
+        "name": "Olivia White",
+        "email": "olivia.white@example.com",
+        "subject": "Travel Recommendations?",
+        "content": "Hi!\n\nI heard you recently went to Italy and I’m planning a trip there soon. Do you have any recommendations for places to visit, restaurants or things I absolutely shouldn’t miss?\n\nAny advice or tips would be super appreciated.\n\nThanks so much in advance!\n\nBest,\nOlivia",
+        "tags": [
+            "personal"
+        ],
+        "date": "3 weeks ago",
+        "exactDate": "Mar 16, 2025, 11:00:00 AM",
+        "read": false
+    },
+    {
+        "name": "James Wilson",
+        "email": "james.wilson@example.com",
+        "subject": "Quarterly Report Attached",
+        "content": "Good afternoon,\n\nAttached you’ll find the quarterly report with all relevant metrics, KPIs, and performance indicators.\n\nPlease review at your earliest convenience and let me know if you have any questions, concerns, or would like to schedule a follow-up meeting.\n\nRegards,\nJames",
+        "tags": [
+            "work",
+            "important"
+        ],
+        "date": "1 month ago",
+        "exactDate": "Mar 7, 2025, 9:00:00 AM",
+        "read": true
+    },
+    {
+        "name": "Sophia Martinez",
+        "email": "sophia.martinez@example.com",
+        "subject": "Coffee Next Week?",
+        "content": "Hey!\n\nIt’s been too long since we’ve seen each other. Want to grab coffee next week sometime?\n\nI’d love to catch up and hear what you’ve been up to lately. Let me know what days work best for you and we’ll figure something out.\n\nTake care!\nSophia",
+        "tags": [
+            "personal"
+        ],
+        "date": "2 months ago",
+        "exactDate": "Feb 7, 2025, 4:30:00 PM",
+        "read": false
+    },
+    {
+        "name": "Christopher Brown",
+        "email": "christopher.brown@example.com",
+        "subject": "Meeting Rescheduled",
+        "content": "Hi all,\n\nQuick note that the meeting originally scheduled for tomorrow has been moved to Friday at 2PM due to scheduling conflicts.\n\nApologies for the short notice. I’ll send out an updated invite shortly.\n\nThanks for understanding!\n\nBest,\nChris",
+        "tags": [
+            "work",
+            "meetings"
+        ],
+        "date": "2 months ago",
+        "exactDate": "Feb 5, 2025, 1:00:00 PM",
+        "read": true
+    },
+    {
+        "name": "Isabella Davis",
+        "email": "isabella.davis@example.com",
+        "subject": "Loved Your Presentation",
+        "content": "Hi!\n\nI just wanted to say I really enjoyed your presentation yesterday. It was clear, engaging, and very insightful.\n\nLooking forward to collaborating more with you in the near future. Keep up the great work!\n\nCheers,\nIsabella",
+        "tags": [
+            "work"
+        ],
+        "date": "4 months ago",
+        "exactDate": "Dec 7, 2024, 11:45:00 AM",
+        "read": true
+    },
+    {
+        "name": "William Harris",
+        "email": "william.harris@example.com",
+        "subject": "Holiday Plans?",
+        "content": "Hey!\n\nAre you doing anything special for the holidays this year? I was thinking of organizing a little get-together if people are around.\n\nWould love to catch up and spend some time together. Let me know your plans and availability.\n\nTake care!\nWill",
+        "tags": [
+            "personal"
+        ],
+        "date": "6 months ago",
+        "exactDate": "Oct 7, 2024, 5:20:00 PM",
+        "read": false
+    }
 ]

@@ -11,6 +11,16 @@
 .bg-error { background-color: var(--global-color-error) !important }
 .bg-none { background: none !important }
 
+.hover\:bg-primary:hover { background-color: var(--global-color-primary) !important }
+.hover\:bg-secondary:hover { background-color: var(--global-color-secondary) !important }
+.hover\:bg-tertiary:hover { background-color: var(--global-color-tertiary) !important }
+.hover\:bg-quaternary:hover { background-color: var(--global-color-quaternary) !important }
+.hover\:bg-accent:hover { background-color: var(--global-color-accent) !important }
+.hover\:bg-contrast:hover { background-color: var(--global-text-primary) !important }
+.hover\:bg-warning:hover { background-color: var(--global-color-warning) !important }
+.hover\:bg-error:hover { background-color: var(--global-color-error) !important }
+.hover\:bg-none:hover { background: none !important }
+
 .fg-primary { color: var(--global-text-primary) !important }
 .fg-secondary { color: var(--global-text-secondary) !important }
 .fg-tertiary { color: var(--global-text-tertiary) !important }
@@ -19,6 +29,15 @@
 .fg-contrast { color: var(--global-text-primary) !important }
 .fg-warning { color: var(--global-text-warning) !important }
 .fg-error { color: var(--global-text-error) !important }
+
+.hover\:fg-primary:hover { color: var(--global-text-primary) !important }
+.hover\:fg-secondary:hover { color: var(--global-text-secondary) !important }
+.hover\:fg-tertiary:hover { color: var(--global-text-tertiary) !important }
+.hover\:fg-quaternary:hover { color: var(--global-text-quaternary) !important }
+.hover\:fg-accent:hover { color: var(--global-text-accent) !important }
+.hover\:fg-contrast:hover { color: var(--global-text-primary) !important }
+.hover\:fg-warning:hover { color: var(--global-text-warning) !important }
+.hover\:fg-error:hover { color: var(--global-text-error) !important }
 
 /* Layout */
 
@@ -94,10 +113,45 @@
 .m-7 { margin: 1.75rem }
 .m-8 { margin: 2rem }
 
+.mt-0 { margin-top: 0 }
+.mt-1 { margin-top: 0.25rem }
 .mt-2 { margin-top: 0.5rem }
+.mt-3 { margin-top: 0.75rem }
+.mt-4 { margin-top: 1rem }
+.mt-5 { margin-top: 1.25rem }
+.mt-6 { margin-top: 1.5rem }
+.mt-7 { margin-top: 1.75rem }
+.mt-8 { margin-top: 2rem }
+
+.mb-0 { margin-bottom: 0 }
+.mb-1 { margin-bottom: 0.25rem }
 .mb-2 { margin-bottom: 0.5rem }
+.mb-3 { margin-bottom: 0.75rem }
+.mb-4 { margin-bottom: 1rem }
+.mb-5 { margin-bottom: 1.25rem }
+.mb-6 { margin-bottom: 1.5rem }
+.mb-7 { margin-bottom: 1.75rem }
+.mb-8 { margin-bottom: 2rem }
+
+.ml-0 { margin-left: 0 }
+.ml-1 { margin-left: 0.25rem }
 .ml-2 { margin-left: 0.5rem }
+.ml-3 { margin-left: 0.75rem }
+.ml-4 { margin-left: 1rem }
+.ml-5 { margin-left: 1.25rem }
+.ml-6 { margin-left: 1.5rem }
+.ml-7 { margin-left: 1.75rem }
+.ml-8 { margin-left: 2rem }
+
+.mr-0 { margin-right: 0 }
+.mr-1 { margin-right: 0.25rem }
 .mr-2 { margin-right: 0.5rem }
+.mr-3 { margin-right: 0.75rem }
+.mr-4 { margin-right: 1rem }
+.mr-5 { margin-right: 1.25rem }
+.mr-6 { margin-right: 1.5rem }
+.mr-7 { margin-right: 1.75rem }
+.mr-8 { margin-right: 2rem }
 
 .p-0 { padding: 0 }
 .p-1 { padding: 0.25rem }
@@ -218,6 +272,12 @@
 /* Borders / Radius / Shadow */
 
 .border { border: 1px solid var(--global-color-tertiary) }
+
+.border-top { border-top: 1px solid var(--global-color-tertiary) }
+.border-bottom { border-bottom: 1px solid var(--global-color-tertiary) }
+.border-left { border-left: 1px solid var(--global-color-tertiary) }
+.border-right { border-right: 1px solid var(--global-color-tertiary) }
+
 .border-2 { border-width: 2px }
 
 .border-t-0 { border-top-width: 0 }

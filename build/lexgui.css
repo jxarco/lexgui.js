@@ -3286,7 +3286,9 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexsidebar .lexsidebarentry {
     width: 100%;
-    padding: 8px;
+    padding-inline: 8px;
+    padding-block: 6px;
+    margin-block: 0.15rem;
     border-radius: 8px;
     cursor: pointer;
     -webkit-user-select: none;

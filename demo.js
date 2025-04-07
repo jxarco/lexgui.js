@@ -40,7 +40,7 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
 
 // Header
 {
-    const header = LX.makeContainer( [ null, "auto" ], "flex flex-col border border-l-0 border-r-0 gap-2 p-8" );
+    const header = LX.makeContainer( [ null, "auto" ], "flex flex-col border-top border-bottom gap-2 p-8" );
     
     header.innerHTML = `
         <a>Get started with LexGUI.js</a>
@@ -64,12 +64,10 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
 
         const mailArea = new LX.Area({ className: "rounded-lg" });
         mailContainer.appendChild( mailArea.root );
-        // const customHeader = document.createElement('div');
-        // customHeader.innerHTML = "Custom simple header";
         const badgeClass = "ml-auto no-bg font-medium";
 
         const sidebar = mailArea.addSidebar( m => {
-            m.add( "Inbox", { icon: "inbox", content: LX.badge("128", badgeClass, { asElement: true }) } );
+            m.add( "Inbox", { selected: true, icon: "inbox", content: LX.badge("128", badgeClass, { asElement: true }) } );
             m.add( "Drafts", { icon: "file", content: LX.badge("9", badgeClass, { asElement: true }) } );
             m.add( "Sent", { icon: "paper-plane" } );
             m.add( "Junk", { icon: "box-archive", content: LX.badge("23", badgeClass, { asElement: true }) } );
@@ -83,116 +81,179 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
             m.add( "Promotions", { icon: "box-archive", content: LX.badge("21", badgeClass, { asElement: true }) } );
         }, { 
             // collapseToIcons: false,
-            className: "border border-l-0 border-t-0 border-b-0",
+            className: "border-right",
             parentClass: "rounded-lg",
             headerTitle: "jxarco",
             headerSubtitle: "alexroco.30@gmail.com",
             headerImage: "https://raw.githubusercontent.com/jxarco/lexgui.js/refs/heads/master/images/icon.png",
             // header: customHeader,
             skipFooter: true,
-            onHeaderPressed: (e, element) => {
-                new LX.DropdownMenu( element, [
-                    "My Account",
-                    null,
-                    { name: "Profile", short: "P", icon: "user" },
-                    { name: "Billing", disabled: true, icon: "credit-card" },
-                    { name: "Settings", short: "S" },
-                    null,
-                    { name: "Team" },
-                    { name: "Invite users", icon: "search" },
-                    null,
-                    { name: "Github", icon: "github" },
-                    { name: "Support", submenu: [
-                        { name: "Email", icon: "envelope" },
-                        { name: "Message", submenu: [
-                            { name: "Whatsapp" },
-                            { name: "iMessage" },
-                        ]},
-                    ]  }
-                ], { side: "right", align: "end" });
-            }
+            displaySelected: true,
+            onHeaderPressed: (e, element) => { }
         });
 
         const inboxArea = sidebar.siblingArea;
         inboxArea.root.classList.add( "rounded-lg" );
 
         var [ left, right ] = inboxArea.split({ sizes:["50%","50%"] });
+        left.setLimitBox( 360, null, 800, null );
 
         // Manage Inbox
         {
-            const inboxTabs = left.addTabs({ parentClass: "p-3 items-end border border-t-0 border-l-0 border-r-0", sizes: [ "auto", "auto" ], float: "end" });
+            const inboxTabs = left.addTabs({ parentClass: "p-3 items-end border-bottom", sizes: [ "auto", "auto" ], float: "end" });
+
+            window.__showMailList = ( container, unreadOnly = false ) => {
+
+                // Filter
+                {
+                    const allMailFilter = LX.makeContainer( [ "100%", "50px" ], "flex p-2" );
+                    container.appendChild( allMailFilter );
+                    const filterInput = new LX.TextInput(null, "", null, 
+                        { inputClass: "outline", width: "100%", icon: "fa fa-magnifying-glass", placeholder: "Search..." } 
+                    );
+                    allMailFilter.appendChild( filterInput.root );
+                }
+    
+                // Content
+                {
+                    const allMailContent = LX.makeContainer( [ "100%", "calc(100% - 50px)" ], "flex flex-col p-4 pt-0 gap-2 overflow-scroll" );
+                    container.appendChild( allMailContent );
+    
+                    window.__addMail = ( mail, mailContainer ) => {
+                        const msgContent = LX.makeContainer( [ "100%", "auto" ], 
+                            "flex flex-col border p-3 rounded-lg gap-2 select-none hover:bg-secondary cursor-pointer" );
+                        mailContainer.appendChild( msgContent );
+    
+                        // Name, subject, date
+                        {
+                            const msgInfo = LX.makeContainer( [ "100%", "auto" ], "flex flex-col gap-0.5" );
+                            msgContent.appendChild( msgInfo );
+    
+                            const msgNameDate = LX.makeContainer( [ "100%", "auto" ], "flex flex-row" );
+                            msgInfo.appendChild( msgNameDate );
+    
+                            // Name + Date
+                            {
+                                const msgName = LX.makeContainer( [ "auto", "auto" ], "flex font-semibold text-md gap-2" );
+                                msgName.innerHTML = mail.name;
+                                msgName.innerHTML += ( mail.read ? "" : `<span class="rounded-full self-center bg-accent" style="width: 8px; height: 8px"></span>` );
+                                msgNameDate.appendChild( msgName );
+    
+                                const msgDate = LX.makeContainer( [ "auto", "auto" ], "fg-tertiary text-sm ml-auto self-center" );
+                                msgDate.innerHTML = mail.date;
+                                msgNameDate.appendChild( msgDate );
+                            }
+    
+                            const msgSubject = LX.makeContainer( [ "100%", "auto" ], "font-semibold text-sm" );
+                            msgSubject.innerHTML = mail.subject;
+                            msgInfo.appendChild( msgSubject );
+                        }
+                        const msgText = LX.makeContainer( [ "100%", "auto" ], "text-sm line-clamp-2 fg-tertiary" );
+                        msgText.innerHTML = mail.content;
+                        msgContent.appendChild( msgText );
+                        const msgTags = LX.makeContainer( [ "100%", "auto" ], "flex flex-row gap-0.5 font-semibold" );
+                        for( const tag of mail.tags )
+                        {
+                            msgTags.appendChild( LX.badge( tag, "sm", { asElement: true } ) );
+                        }
+                        msgContent.appendChild( msgTags );
+    
+                        msgContent.listen( "click", () => {
+                            window.__openMail( mail );
+                        } );
+                    };
+    
+                    LX.requestJSON( "data/example_mail_data.json", data => {
+                        data.forEach( e => { if( !unreadOnly || ( unreadOnly && !e.read ) ) window.__addMail( e, allMailContent ) } );
+                        window.__openMail( data[ 0 ] );
+                    } )
+                }
+            }
 
             const allMailContainer = LX.makeContainer( [ "100%", "100%" ], "flex flex-col" );
             inboxTabs.add( "All mail", allMailContainer, { selected: true } );
+            window.__showMailList( allMailContainer );
 
-            // Filter
-            {
-                const allMailFilter = LX.makeContainer( [ "100%", "64px" ], "p-2" );
-                allMailContainer.appendChild( allMailFilter );
-                const filterInput = new LX.TextInput(null, "", null, 
-                    { inputClass: "outline", width: "100%", icon: "fa fa-magnifying-glass", placeholder: "Search..." } 
-                );
-                allMailFilter.appendChild( filterInput.root );
-            }
-
-            // Content
-            {
-                const allMailContent = LX.makeContainer( [ "100%", "calc(100% - 64px)" ], "flex flex-col p-4 gap-2 overflow-scroll" );
-                allMailContainer.appendChild( allMailContent );
-
-                const addMail = ( sender, subject, content, date, tags ) => {
-                    const msgContent = LX.makeContainer( [ "100%", "auto" ], 
-                        "flex flex-col border p-3 rounded-lg gap-2 select-none" );
-                    allMailContent.appendChild( msgContent );
-
-                    // Name, subject, date
-                    {
-                        const msgInfo = LX.makeContainer( [ "100%", "auto" ], "flex flex-col gap-0.5" );
-                        msgContent.appendChild( msgInfo );
-
-                        const msgNameDate = LX.makeContainer( [ "100%", "auto" ], "flex flex-row" );
-                        msgInfo.appendChild( msgNameDate );
-
-                        // Name + Date
-                        {
-                            const msgName = LX.makeContainer( [ "auto", "auto" ], "font-semibold text-md" );
-                            msgName.innerHTML = sender;
-                            msgNameDate.appendChild( msgName );
-
-                            const msgDate = LX.makeContainer( [ "auto", "auto" ], "fg-tertiary text-sm ml-auto self-center" );
-                            msgDate.innerHTML = date;
-                            msgNameDate.appendChild( msgDate );
-                        }
-
-                        const msgSubject = LX.makeContainer( [ "100%", "auto" ], "font-semibold text-sm" );
-                        msgSubject.innerHTML = subject;
-                        msgInfo.appendChild( msgSubject );
-                    }
-                    const msgText = LX.makeContainer( [ "100%", "auto" ], "text-sm line-clamp-2 fg-tertiary" );
-                    msgText.innerHTML = content;
-                    msgContent.appendChild( msgText );
-                    const msgTags = LX.makeContainer( [ "100%", "auto" ], "flex flex-row gap-0.5 font-semibold" );
-                    for( const tag of tags )
-                    {
-                        msgTags.appendChild( LX.badge( tag, "sm", { asElement: true } ) );
-                    }
-                    msgContent.appendChild( msgTags );
-                };
-
-                LX.requestJSON( "data/example_mail_data.json", (data) => {
-                    for( const item of data )
-                    {
-                        addMail( item.name, item.subject, item.content, item.date, item.tags );
-                    }
-                } )
-            }
-
-            inboxTabs.add( "Unread", document.createElement('div'));
+            const unreadMailContainer = LX.makeContainer( [ "100%", "100%" ], "flex flex-col" );
+            inboxTabs.add( "Unread", unreadMailContainer );
+            window.__showMailList( unreadMailContainer, true );
         }
 
         // Manage Message Preview
         {
             right.root.className += " rounded-lg";
+
+            // Buttons
+            {
+                const mailPreviewHeader = LX.makeContainer( [ "100%", "59.59px" ], "flex flex-row border-bottom p-1" );
+                right.attach( mailPreviewHeader );
+
+                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Archive", buttonClass: "bg-none", icon: "box-archive" } ).root );
+                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Move to junk", buttonClass: "bg-none", icon: "box-archive" } ).root );
+                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Move to trash", buttonClass: "bg-none", icon: "trash-can" } ).root );
+                mailPreviewHeader.appendChild( LX.makeContainer( [ "1px", "35%" ], "border-right self-center ml-2 mr-2" ) );
+                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Snooze", buttonClass: "bg-none", icon: "clock" } ).root );
+
+                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Reply", buttonClass: "bg-none", className: "ml-auto", icon: "reply" } ).root );
+                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Reply all", buttonClass: "bg-none", icon: "reply-all" } ).root );
+                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Forward", buttonClass: "bg-none", icon: "forward" } ).root );
+                mailPreviewHeader.appendChild( LX.makeContainer( [ "1px", "35%" ], "border-right self-center ml-2 mr-2" ) );
+                mailPreviewHeader.appendChild( new LX.Button( null, "", (value, event) => {
+                    new LX.DropdownMenu( event.target, [
+                        { name: "Mark as unread" },
+                        { name: "Star thread" },
+                        { name: "Add label" },
+                        { name: "Mute thread" }
+                    ], { side: "bottom", align: "end" });
+                }, { buttonClass: "bg-none", icon: "more" } ).root );
+            }
+
+            // Prewiew Info
+            {
+                const previewDataContent = LX.makeContainer( [ "100%", "100%" ], "" );
+                right.attach( previewDataContent );
+
+                window.__openMail = ( mail ) => {
+
+                    previewDataContent.innerHTML = "";
+
+                    const mailPreviewInfo = LX.makeContainer( [ "100%", "auto" ], "flex flex-row border-bottom p-6" );
+                    previewDataContent.appendChild( mailPreviewInfo );
+    
+                    const senderData = LX.makeContainer( [ "100%", "auto" ], "flex flex-col gap-0.5" );
+                    senderData.innerHTML = `
+                    <div class="text-md font-semibold">${ mail.name }</div>
+                    <div class="text-sm">${ mail.subject }</div>
+                    <div class="text-sm">Reply-To: ${ mail.email }</div>
+                    `;
+                    mailPreviewInfo.appendChild( senderData );
+    
+                    const exactDate = LX.makeContainer( [ "100%", "auto" ], "flex flex-row text-sm fg-tertiary justify-end" );
+                    exactDate.innerHTML = "Mar 25, 2023, 1:15:00 PM";
+                    mailPreviewInfo.appendChild( exactDate );
+
+                    const mailPreviewContent = LX.makeContainer( [ "100%", "505px" ], "flex flex-row border-bottom text-md whitespace-pre-wrap p-4" );
+                    mailPreviewContent.innerHTML = mail.content;
+                    previewDataContent.appendChild( mailPreviewContent );
+
+                    const previewFooter = LX.makeContainer( [ "100%", "auto" ], "flex flex-col p-2" );
+                    previewDataContent.appendChild( previewFooter );
+
+                    const msgReplyTextArea = new LX.TextArea(null, "", null, 
+                        { className: "mt-1", inputClass: "outline", width: "100%", resize: false, placeholder: `Reply ${ mail.name }` } 
+                    );
+                    previewFooter.appendChild( msgReplyTextArea.root );
+
+                    const previewButtons = LX.makeContainer( [ "100%", "auto" ], "flex flex-row p-1" );
+                    previewFooter.appendChild( previewButtons );
+
+                    const muteToggle = new LX.Toggle( null, false, null, { label: "Mute this thread", className: "contrast" } );
+                    previewButtons.appendChild( muteToggle.root );
+
+                    const sendButton = new LX.Button( null, "Send", null, { className: "ml-auto", buttonClass: "contrast" } );
+                    previewButtons.appendChild( sendButton.root );
+                };
+            }
         }
     }
 
@@ -246,6 +307,15 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
         tasksContainer.appendChild( tableWidget.root );
     }
 
+    // Editor
+    {
+        const editorContainer = LX.makeContainer( [ "auto", "850px" ], "", {
+            backgroundColor: "red"
+        } );
+
+        tabs.add( "Editor", editorContainer );
+    }
+
     // Code
     {
         const codeContainer = LX.makeContainer( [ "auto", "850px" ], "", {
@@ -262,15 +332,6 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
         } );
 
         tabs.add( "Audio", audioContainer );
-    }
-
-    // Examples
-    {
-        const examplesContainer = LX.makeContainer( [ "auto", "850px" ], "", {
-            backgroundColor: "red"
-        } );
-
-        tabs.add( "Examples", examplesContainer );
     }
 }
 
