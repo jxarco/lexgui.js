@@ -3792,10 +3792,10 @@ class SideBar {
 
         // Set width depending on header/footer
         doAsync( () => {
-            // This account for header, footer and all inner paddings
-            const contentOffset = ( this.header?.offsetHeight ?? 0 ) +
-                ( this.filter?.offsetHeight ?? 0 ) +
-                ( this.footer?.offsetHeight ?? 0 );
+            // This account for header, footer and all inner margins
+            const contentOffset = ( parseInt( this.header?.getComputedSize().height ) ?? 0 ) +
+            ( parseInt( this.filter?.getComputedSize().height ) ?? 0 ) +
+            ( parseInt( this.footer?.getComputedSize().height ) ?? 0 );
             this.content.style.height = `calc(100% - ${ contentOffset }px)`;
         }, 10 );
 
@@ -12876,10 +12876,11 @@ Element.prototype.addClass = function( className ) {
 }
 
 Element.prototype.getComputedSize = function() {
-    const cs = getComputedStyle( this );
+    // Since we use "box-sizing: border-box" now, 
+    // it's all included in offsetWidth/offsetHeight
     return {
-        width: this.offsetWidth + cs.getPropertyValue('marginLeft') + cs.getPropertyValue('marginRight'),
-        height: this.offsetHeight + cs.getPropertyValue('marginTop') + cs.getPropertyValue('marginBottom')
+        width: this.offsetWidth,
+        height: this.offsetHeight
     }
 }
 

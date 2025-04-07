@@ -3184,7 +3184,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     padding: 10px;
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
+    /* gap: 0.2rem; */
 }
 
 .lexsidebar *::-webkit-scrollbar {
@@ -3226,7 +3226,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexsidebar .lexsidebarfilter {
     transform: translate(0, 0);
     opacity: 1;
-    margin-block: 0.5rem;
+    margin-bottom: 0.5rem;
     transition: all 0.2s cubic-bezier(0,0,.2,1);
 }
 
@@ -3404,6 +3404,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexsidebar.collapsed .lexsidebarentry:hover .lexsidebarentrydesc {
    opacity: 1;
    transform: translate(0, 0);
+}
+
+.lexsidebar .lexsidebarheader {
+    margin-bottom: 0.5rem;
 }
 
 .lexsidebar .lexsidebarfooter, .lexsidebar .lexsidebarheader {
