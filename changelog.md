@@ -3,6 +3,7 @@
 ## dev
 
 Fixed all "popup" menus position in scrolled window.
+Icons and Customization docs updated.
 
 ## 0.5.4 (master)
 

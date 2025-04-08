@@ -2,17 +2,34 @@
 
     MAKE_HEADER( "Theme customization", "h1", "theme-customization" );
             
-    MAKE_PARAGRAPH( `Even though LexGUI has a pretty locked appearance, there are a few things you can customize. Some ${INLINE_LINK("widgets", "widget_list.html")} can be created using a specific class that will colorize, 
+    MAKE_PARAGRAPH( `Even though LexGUI has a pretty locked appearance, you can still customize it. HTML elements and some ${INLINE_LINK("widgets", "widget_list.html")} can be created using a specific class that will colorize, 
     change style or resize it. Below is the guide for the possible options:` );
 
-    MAKE_HEADER( "Colors <span class='desc'>(for supported widgets)</span>", "h3" );
-    MAKE_BULLET_LIST( [
-        "<span class='primary'>primary</span>",
-        "<span class='secondary'>secondary</span>",
-        "<span class='accent'>accent</span>",
-        "<span class='warning'>warning</span>",
-        "<span class='error'>error</span>"
-    ] );
+    MAKE_HEADER( "Background Color <span class='desc'></span>", "h3" );
+    MAKE_PARAGRAPH( `
+        <div class="flex gap-2">
+        <span class="p-1 px-2 bg-primary rounded-lg">primary</span>
+        <span class="p-1 px-2 bg-secondary rounded-lg">secondary</span>
+        <span class="p-1 px-2 bg-tertiary rounded-lg">tertiary</span>
+        <span class="p-1 px-2 bg-quaternary rounded-lg">quaternary</span>
+        <span class="p-1 px-2 bg-accent rounded-lg">accent</span>
+        <span class="p-1 px-2 bg-warning rounded-lg fg-contrast">warning</span>
+        <span class="p-1 px-2 bg-error rounded-lg">error</span>
+        </div>
+    ` );
+
+    MAKE_HEADER( "Foreground Color <span class='desc'></span>", "h3" );
+    MAKE_PARAGRAPH( `
+        <div class="flex gap-2">
+        <span class="p-1 px-2 fg-primary rounded-lg">primary</span>
+        <span class="p-1 px-2 fg-secondary rounded-lg">secondary</span>
+        <span class="p-1 px-2 fg-tertiary rounded-lg">tertiary</span>
+        <span class="p-1 px-2 fg-quaternary rounded-lg">quaternary</span>
+        <span class="p-1 px-2 fg-accent rounded-lg">accent</span>
+        <span class="p-1 px-2 fg-warning rounded-lg fg-tertiary">warning</span>
+        <span class="p-1 px-2 fg-error rounded-lg">error</span>
+        </div>
+    ` );
 
     MAKE_HEADER( "Sizes <span class='desc'>(for supported widgets)</span>", "h3" );
     MAKE_BULLET_LIST( [
@@ -24,10 +41,12 @@
     ] );
 
     MAKE_HEADER( "Styles <span class='desc'>(for supported widgets)</span>", "h3" );
-    MAKE_BULLET_LIST( [
-        "<span class='solid'>solid (default)</span>",
-        "<span class='outline'>outline</span>"
-    ] );
+    MAKE_PARAGRAPH( `
+        <div class="flex gap-2">
+        <span class="p-1 px-2 bg-accent rounded-lg">solid</span>
+        <span class="p-1 px-2 fg-accent rounded-lg border-colored">outline</span>
+        </div>
+    ` );
     
     MAKE_LINE_BREAK();
     MAKE_PARAGRAPH( `LexGUI uses a dark theme by default. You can change the theme by overriding your device or browser color scheme but the easiest way is to use ${INLINE_CODE("LX.setTheme")}

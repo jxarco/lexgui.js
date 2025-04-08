@@ -49,6 +49,9 @@
         }, {
             centered: [1, 2],
             filter: "Name",
+            customFilters: [
+                { name: "Category", options: ["brands", "regular", "solid"] }
+            ],
             rowActions: [
                 { icon: "copy", title: "Copy SVG", callback: ( rowData, tableDom, event ) => { copySVG( rowData[ 1 ], event ) } }, // custom: you can change the data and refresh will be called later!
             ],

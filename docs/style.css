@@ -20,13 +20,6 @@
 	--max-width: 960px;
 	--icon-size: 20px;
 	--stylish-color: light-dark(#fd18a5, #e2c886);
-
-    --global-selected: #2d69da;
-	--global-selected-light: #0d99ff;
-    --global-selected-dark: #304b86;
-    --global-color-accent: #ec5377;
-    --global-color-warning: #ffc107;
-    --global-color-error: #f54c4c;
 }
 
 #content {
@@ -297,22 +290,16 @@ code:has(.constructor) {
 	font-size: 21px;
 }
 
-#content .primary { font-weight: 600; color: var(--global-selected); }
-#content .secondary { font-weight: 600; color: var(--global-selected-light);  }
-#content .accent { font-weight: 600; color: var(--global-color-accent);  }
-#content .warning { font-weight: 600; color: var(--global-color-warning);  }
-#content .error { font-weight: 600; color: var(--global-color-error);  }
-
-#content .solid {
-	background-color: var(--global-selected);
+#content span.solid {
+	/* background-color: var(--global-selected); */
 	border-radius: 8px;
 	padding: 2px;
 	padding-inline: 8px;
 }
 
-#content .outline {
-	border: 1px solid var(--global-selected);
-	color: var(--global-selected);
+#content span.outline {
+	/* border: 1px solid var(--global-accent); */
+	/* color: var(--global-selected); */
 	border-radius: 8px;
 	padding: 2px;
 	padding-inline: 8px;
