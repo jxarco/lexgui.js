@@ -59,8 +59,10 @@ class Timeline {
         this.movingKeys = false;
         this.timeBeforeMove = 0;
 
-        this.onBeforeCreateTopBar = options.onBeforeCreateTopBar;
-        this.onAfterCreateTopBar = options.onAfterCreateTopBar;
+        this.onCreateBeforeTopBar = options.onCreateBeforeTopBar;
+        this.onCreateAfterTopBar = options.onCreateAfterTopBar;
+        this.onCreateControlsButtons = options.onCreateControlsButtons;
+        this.onCreateSettingsButtons = options.onCreateSettingsButtons;
         this.onChangePlayMode = options.onChangePlayMode;
         this.onShowConfiguration = options.onShowConfiguration;
         this.onBeforeDrawContent = options.onBeforeDrawContent;
@@ -174,13 +176,25 @@ class Timeline {
             header.addTitle(this.name );
         }
 
-        const buttonContainer = LX.makeContainer(["auto", "100%"], "", { display: "flex" });
+        // time control buttons - play, stop, loop
 
+        const buttonContainer = LX.makeContainer(["auto", "100%"], "", { display: "flex" });
         header.queue( buttonContainer );
 
         header.addButton("playBtn", '', (value, event) => {
            this.changeState();
         }, { buttonClass: "accept", title: "Play", hideName: true, icon: ("fa-solid fa-"+ (this.playing ? 'pause' : 'play')) });
+        
+        header.addBlank("0.05em", "auto");
+
+        header.addButton("stopBtn", '', (value, event) => {
+            this.setState(false, true); // skip callback of set state
+            if ( this.onStateStop ){
+                this.onStateStop();
+            }
+        }, { buttonClass: "accept", title: "Stop", hideName: true, icon: "fa-solid fa-stop" });
+
+        header.addBlank("0.05em", "auto");
 
         header.addButton("toggleLoopBtn", '', ( value, event ) => {
             this.loop = !this.loop;
@@ -190,14 +204,19 @@ class Timeline {
             }
         }, { selectable: true, selected: this.loop, title: 'Loop', hideName: true, icon: "fa-solid fa-rotate" });
         
-        if( this.onBeforeCreateTopBar )
-        {
-            this.onBeforeCreateTopBar( header );
+        if( this.onCreateControlsButtons ){
+            this.onCreateControlsButtons( header );
         }
-
+        
         header.clearQueue( buttonContainer );
-
         header.addContent( "header-buttons", buttonContainer );
+
+        // time number inputs - duration, speed, current time, etc
+
+        if( this.onCreateBeforeTopBar )
+        {
+            this.onCreateBeforeTopBar( header );
+        }
 
         header.addNumber("Current Time", this.currentTime, (value, event) => {
             this.setTime(value)
@@ -223,19 +242,30 @@ class Timeline {
             signal: "@on_set_speed_" + this.name
         });
            
-        if( this.onAfterCreateTopBar )
+        if( this.onCreateAfterTopBar )
         {
-            this.onAfterCreateTopBar( header );      
+            this.onCreateAfterTopBar( header );      
+        }
+        
+        // settings buttons - optimize, settings, etc
+
+        const buttonContainerEnd = LX.makeContainer(["auto", "100%"], "", { display: "flex" });
+        header.queue( buttonContainerEnd );
+
+        if( this.onCreateSettingsButtons ){
+            this.onCreateSettingsButtons( header );
+            header.addBlank("0.05em", "auto");
         }
 
         if( this.onShowOptimizeMenu )
         {
-            header.addButton(null, '<i class="fa-solid fa-filter"></i>', (value, event) => {this.onShowOptimizeMenu(event)}, { title: "Optimize" });
+            header.addButton(null, "", (value, event) => {this.onShowOptimizeMenu(event)}, { title: "Optimize", icon:"fa-solid fa-filter" });
         }
+        header.addBlank("0.05em", "auto");
 
         if( this.onShowConfiguration )
         {
-            header.addButton(null, '<i class="fa-solid fa-gear"></i>', (value, event) => {
+            header.addButton(null, "", (value, event) => {
                 if(this.configurationDialog){
                     this.configurationDialog.close();
                     this.configurationDialog = null;
@@ -250,8 +280,11 @@ class Timeline {
                         root.remove();
                     }
                 })
-            }, { title: "Settings" })
+            }, { title: "Settings", icon: "fa-solid fa-gear" })
         }
+
+        header.clearQueue( buttonContainerEnd );
+        header.addContent( "header-buttons-end", buttonContainerEnd );
 
         header.endLine( "justify-around" );
     }
@@ -1090,12 +1123,12 @@ class Timeline {
      * @description change play/pause state
      * ...
      **/
-    changeState() {
+    changeState(skipCallback = false) {
         this.playing = !this.playing;
         this.updateHeader();
 
-        if(this.onChangeState) {
-            this.onChangeState(this.playing);
+        if(this.onStateChange && !skipCallback) {
+            this.onStateChange(this.playing);
         }
     }
     /**
@@ -1104,12 +1137,12 @@ class Timeline {
      * @description change play/pause state
      * ...
      **/
-    setState( state ) {
+    setState( state, skipCallback =false ) {
         this.playing = state;
         this.updateHeader();
 
-        if(this.onChangeState) {
-            this.onChangeState(this.playing);
+        if(this.onStateChange && !skipCallback) {
+            this.onStateChange(this.playing);
         }
     }
 
