@@ -63,7 +63,7 @@ class Timeline {
         this.onCreateAfterTopBar = options.onCreateAfterTopBar;
         this.onCreateControlsButtons = options.onCreateControlsButtons;
         this.onCreateSettingsButtons = options.onCreateSettingsButtons;
-        this.onChangePlayMode = options.onChangePlayMode;
+        this.onChangeLoopMode = options.onChangeLoopMode;
         this.onShowConfiguration = options.onShowConfiguration;
         this.onBeforeDrawContent = options.onBeforeDrawContent;
         
@@ -196,12 +196,8 @@ class Timeline {
 
         header.addBlank("0.05em", "auto");
 
-        header.addButton("toggleLoopBtn", '', ( value, event ) => {
-            this.loop = !this.loop;
-            if( this.onChangePlayMode )
-            {
-                this.onChangePlayMode( this.loop );
-            }
+        header.addButton("loopBtn", '', ( value, event ) => {
+            this.setLoopMode(!this.loop);
         }, { selectable: true, selected: this.loop, title: 'Loop', hideName: true, icon: "fa-solid fa-rotate" });
         
         if( this.onCreateControlsButtons ){
@@ -533,7 +529,6 @@ class Timeline {
         this.duration = this.animationClip.duration;
         this.speed = this.animationClip.speed ?? this.speed;
 
-        //this.updateHeader();
         this.updateLeftPanel();
 
         return this.animationClip;
@@ -654,7 +649,6 @@ class Timeline {
         // this.canvas = ctx.canvas;
         const w = ctx.canvas.width;
         const h = ctx.canvas.height;
-        // this.updateHeader();
 
         const scrollableHeight = this.leftPanelTrackTreeWidget.root.scrollHeight;
         const treeOffset = this.leftPanelTrackTreeWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop;
@@ -1120,29 +1114,49 @@ class Timeline {
     
     /**
      * @method changeState
+     * @param {bool} skipCallback defaults false
      * @description change play/pause state
-     * ...
      **/
     changeState(skipCallback = false) {
-        this.playing = !this.playing;
-        this.updateHeader();
+        this.setState(!this.playing, skipCallback);
+    }
+    /**
+     * @method setState
+     * @param {bool} state
+     * @param {bool} skipCallback defaults false
+     * @description change play/pause state
+     **/
+    setState(state, skipCallback = false) {
+        this.playing = state;
+
+        if ( this.playing ){
+            this.header.widgets.playBtn.root.children[0].children[0].classList.add("fa-pause");
+            this.header.widgets.playBtn.root.children[0].children[0].classList.remove("fa-play");
+        }else{
+            this.header.widgets.playBtn.root.children[0].children[0].classList.add("fa-play");
+            this.header.widgets.playBtn.root.children[0].children[0].classList.remove("fa-pause");
+        }
 
         if(this.onStateChange && !skipCallback) {
             this.onStateChange(this.playing);
         }
     }
-    /**
-     * @method setState
-     * @param {bool} state
-     * @description change play/pause state
-     * ...
-     **/
-    setState( state, skipCallback =false ) {
-        this.playing = state;
-        this.updateHeader();
 
-        if(this.onStateChange && !skipCallback) {
-            this.onStateChange(this.playing);
+    /**
+     * @method setLoopMode
+     * @param {bool} loopState 
+     * @param {bool} skipCallback defaults false
+     * @description change loop mode of the timeline
+     */
+    setLoopMode(loopState, skipCallback = false){
+        this.loop = loopState;
+        if ( this.loop ){
+            this.header.widgets.loopBtn.root.children[0].classList.add("selected");
+        }else{
+            this.header.widgets.loopBtn.root.children[0].classList.remove("selected")
+        }
+        if( this.onChangeLoopMode && !skipCallback ){
+            this.onChangeLoopMode( this.loop );
         }
     }
 
