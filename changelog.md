@@ -2,9 +2,11 @@
 
 ## dev
 
-Widgets:
-- Added support `options.filterValue` in Table Widget.
+Table Widget:
+- Added support `options.filterValue`..
+- Fixed filtering when row data contains HTML tags.
 
+Added `LX.stripHTML(html)` to get clean text from HTML string.
 Fixed all "popup" menus position in scrolled window.
 Icons and Customization docs updated.
 

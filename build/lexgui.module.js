@@ -115,6 +115,20 @@ function getExtension( name )
 LX.getExtension = getExtension;
 
 /**
+ * @method stripHTML
+ * @description Cleans any DOM element string to get only the text
+ * @param {String} html
+ */
+function stripHTML( html )
+{
+    const div = document.createElement( "div" );
+    div.innerHTML = html;
+    return div.textContent || div.innerText || '';
+}
+
+LX.stripHTML = stripHTML;
+
+/**
  * @method deepCopy
  * @description Create a deep copy with no references from an object
  * @param {Object} obj
@@ -8862,7 +8876,8 @@ class Table extends Widget {
                         const filterColIndex = data.head.indexOf( this.filter );
                         if( filterColIndex > -1 )
                         {
-                            if( !bodyData[ filterColIndex ].toLowerCase().includes( this._currentFilter.toLowerCase() ) )
+                            const validRowValue = stripHTML( bodyData[ filterColIndex ] ).toLowerCase();
+                            if( !validRowValue.includes( this._currentFilter.toLowerCase() ) )
                             {
                                 continue;
                             }

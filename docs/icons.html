@@ -22,7 +22,7 @@
                 continue;
             }
 
-            let name =  INLINE_CODE( i );
+            let name = INLINE_CODE( i );
             LX.ICONS[ i ][ 2 ].forEach( o => name += ` ; ${ INLINE_CODE( o ) }` );
             tableBody.push( [name, LX.makeIcon( i, null, "lg" ).innerHTML, LX.ICONS[ i ][ 3 ] ] );
         }
