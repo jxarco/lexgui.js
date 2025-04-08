@@ -1460,11 +1460,15 @@ LX.makeContainer = makeContainer;
  * @param {String} content
  * @param {Object} options
  * side: Side of the tooltip
+ * offset: Tooltip margin offset
+ * active: Tooltip active by default [true]
  */
 
 function asTooltip( trigger, content, options = {} )
 {
     console.assert( trigger, "You need a trigger to generate a tooltip!" );
+
+    trigger.dataset[ "disableTooltip" ] = !( options.active ?? true );
 
     let tooltipDom = null;
 
@@ -1485,24 +1489,25 @@ function asTooltip( trigger, content, options = {} )
 
             const position = [ 0, 0 ];
             const rect = this.getBoundingClientRect();
+            const offset = options.offset ?? 6;
             let alignWidth = true;
 
             switch( options.side ?? "top" )
             {
                 case "left":
-                    position[ 0 ] += ( rect.x - tooltipDom.offsetWidth - 6 );
+                    position[ 0 ] += ( rect.x - tooltipDom.offsetWidth - offset );
                     alignWidth = false;
                     break;
                 case "right":
-                    position[ 0 ] += ( rect.x + rect.width + 6 );
+                    position[ 0 ] += ( rect.x + rect.width + offset );
                     alignWidth = false;
                     break;
                 case "top":
-                    position[ 1 ] += ( rect.y - tooltipDom.offsetHeight - 6 );
+                    position[ 1 ] += ( rect.y - tooltipDom.offsetHeight - offset );
                     alignWidth = true;
                     break;
                 case "bottom":
-                    position[ 1 ] += ( rect.y + rect.height + 6 );
+                    position[ 1 ] += ( rect.y + rect.height + offset );
                     alignWidth = true;
                     break;
             }
@@ -4102,10 +4107,9 @@ class SideBar {
         this.resizeObserver.observe( this.root.parentElement );
 
         doAsync( () => {
-
             this.root.classList.toggle( "collapsed", this.collapsed );
             this.resizeObserver.unobserve( this.root.parentElement );
-
+            this.root.querySelectorAll( ".lexsidebarentrycontent" ).forEach( e => e.dataset[ "disableTooltip" ] = !this.collapsed );
         }, 250 );
     }
 
@@ -4358,6 +4362,7 @@ class SideBar {
 
                     itemIcon.classList.add( "lexsidebarentryicon" );
                     itemDom.appendChild( itemIcon );
+                    LX.asTooltip( itemDom, key, { side: "right", offset: 16, active: false } );
                 }
 
                 let itemName = document.createElement( 'a' );
@@ -4423,23 +4428,6 @@ class SideBar {
                 this.collapseQueue = options.collapsable;
                 this.collapseContainer = collapsableContent;
             }
-
-            let desc = document.createElement( 'span' );
-            desc.className = 'lexsidebarentrydesc';
-            desc.innerHTML = key;
-            entry.appendChild( desc );
-
-            itemDom.addEventListener("mouseenter", () => {
-                setTimeout( () => {
-                    desc.style.display = "unset";
-                }, 150 );
-            });
-
-            itemDom.addEventListener("mouseleave", () => {
-                setTimeout( () => {
-                    desc.style.display = "none";
-                }, 150 );
-            });
 
             // Subentries
             if( !item[ key ].length )
