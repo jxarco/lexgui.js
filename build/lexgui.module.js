@@ -1388,19 +1388,14 @@ function asTooltip( trigger, content )
 
     trigger.addEventListener( "mouseenter", function(e) {
 
-        console.log(e.target);
-
         LX.root.querySelectorAll( ".lextooltip" ).forEach( e => e.remove() );
-
-        let rect = this.getBoundingClientRect();
-        rect.x += document.scrollingElement.scrollLeft;
-        rect.y += document.scrollingElement.scrollTop;
 
         tooltipDom = document.createElement( "div" );
         tooltipDom.className = "lextooltip";
         tooltipDom.innerHTML = content;
 
         doAsync( () => {
+            let rect = this.getBoundingClientRect();
             tooltipDom.style.top = ( rect.y - tooltipDom.offsetHeight - 6 ) + "px";
             tooltipDom.style.left = ( rect.x + rect.width * 0.5 - tooltipDom.offsetWidth * 0.5 ) + "px";
         } )
@@ -1754,7 +1749,7 @@ class DropdownMenu {
 
     _adjustPosition() {
 
-        const position = [ document.scrollingElement.scrollLeft, document.scrollingElement.scrollTop ];
+        const position = [ 0, 0 ];
 
         /*
         - avoidCollisions
@@ -3167,7 +3162,6 @@ class Menubar {
         }
 
         menuElement._updatePosition = () => {
-
             // Remove transitions for this change..
             const transition = menuElement.style.transition;
             menuElement.style.transition = "none";
@@ -3175,11 +3169,8 @@ class Menubar {
 
             doAsync( () => {
                 let rect = c.getBoundingClientRect();
-                rect.x += document.scrollingElement.scrollLeft;
-                rect.y += document.scrollingElement.scrollTop;
                 menuElement.style.left = ( isSubMenu ? ( rect.x + rect.width ) : rect.x ) + "px";
                 menuElement.style.top = ( isSubMenu ? rect.y : ( ( rect.y + rect.height ) ) - 4 ) + "px";
-
                 menuElement.style.transition = transition;
             } );
         };
@@ -10891,8 +10882,8 @@ class ContextMenu {
 
         this.root = document.createElement( "div" );
         this.root.className = "lexcontextmenu";
-        this.root.style.left = ( event.x - 48 + document.scrollingElement.scrollLeft ) + "px";
-        this.root.style.top = ( event.y - 8 + document.scrollingElement.scrollTop ) + "px";
+        this.root.style.left = ( event.x - 48 ) + "px";
+        this.root.style.top = ( event.y - 8 ) + "px";
 
         this.root.addEventListener("mouseleave", function() {
             this.remove();
@@ -10960,19 +10951,19 @@ class ContextMenu {
         contextmenu.className = "lexcontextmenu";
         c.appendChild( contextmenu );
 
-        for( let i = 0; i < o[k].length; ++i )
+        for( let i = 0; i < o[ k ].length; ++i )
         {
             const subitem = o[ k ][ i ];
             const subkey = Object.keys( subitem )[ 0 ];
-            this._createEntry(subitem, subkey, contextmenu, d);
+            this._createEntry( subitem, subkey, contextmenu, d );
         }
 
         const rect = c.getBoundingClientRect();
-        contextmenu.style.left = rect.width + "px";
-        contextmenu.style.marginTop =  3.5 - c.offsetHeight + "px";
+        contextmenu.style.left = ( rect.x + rect.width ) + "px";
+        contextmenu.style.marginTop = "-31px"; // Force to be at the first element level
 
         // Set final width
-        this._adjustPosition( contextmenu, 6, true );
+        this._adjustPosition( contextmenu, 6 );
     }
 
     _createEntry( o, k, c, d ) {

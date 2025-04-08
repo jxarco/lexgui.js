@@ -2,6 +2,8 @@
 
 ## dev
 
+Fixed all "popup" menus position in scrolled window.
+
 ## 0.5.4 (master)
 
 Widgets:
