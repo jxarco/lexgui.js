@@ -623,7 +623,7 @@ function makeIcon( iconName, iconTitle, extraClass = "" )
         } );
     }
 
-    const faLicense = `<!-- !Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc. -->`;
+    const faLicense = `<!-- This icon might belong to a collection from Iconify - https://iconify.design/ - or !Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc. -->`;
     svg.innerHTML += faLicense;
 
     const icon = document.createElement( "a" );
@@ -635,6 +635,72 @@ function makeIcon( iconName, iconTitle, extraClass = "" )
 }
 
 LX.makeIcon = makeIcon;
+
+/**
+ * @method registerIcon
+ * @description Register an SVG icon to LX.ICONS
+ * @param {String} iconName
+ * @param {String} svgString
+ * @param {String} category
+ * @param {Array} aliases
+ */
+function registerIcon( iconName, svgString, category = "none", aliases = [] )
+{
+    const svg = new DOMParser().parseFromString( svgString, 'image/svg+xml' ).documentElement;
+    const path = svg.querySelector( "path" );
+    const viewBox = svg.getAttribute( "viewBox" ).split( ' ' );
+    const pathData = path.getAttribute( 'd' );
+
+    let svgAttributes = [];
+    let pathAttributes = [];
+
+    for( const attr of svg.attributes )
+    {
+        switch( attr.name )
+        {
+        case "transform":
+        case "fill":
+        case "stroke-width":
+        case "stroke-linecap":
+        case "stroke-linejoin":
+            svgAttributes.push( `${ attr.name }=${ attr.value }` );
+            break;
+        }
+    }
+
+    for( const attr of path.attributes )
+    {
+        switch( attr.name )
+        {
+        case "transform":
+        case "fill":
+        case "stroke-width":
+        case "stroke-linecap":
+        case "stroke-linejoin":
+            pathAttributes.push( `${ attr.name }=${ attr.value }` );
+            break;
+        }
+    }
+
+    const iconData = [
+        parseInt( viewBox[ 2 ] ),
+        parseInt( viewBox[ 3 ] ),
+        aliases,
+        category,
+        pathData,
+        svgAttributes.length ? svgAttributes.join( ' ' ) : null,
+        pathAttributes.length ? pathAttributes.join( ' ' ) : null
+    ];
+
+    if( LX.ICONS[ iconName ] )
+    {
+        console.warn( `${ iconName } will be replaced in LX.ICONS` );
+    }
+
+    LX.ICONS[ iconName ] = iconData;
+}
+
+LX.registerIcon = registerIcon;
 
 /**
  * @method registerCommandbarEntry

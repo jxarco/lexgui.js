@@ -8,6 +8,7 @@ Table Widget:
 
 Added `LX.stripHTML(html)` to get clean text from HTML string.
 Fixed all "popup" menus position in scrolled window.
+Allowed users to register extra icons in LX.ICONS using `LX.registerIcon`;
 Icons and Customization docs updated.
 
 ## 0.5.4 (master)

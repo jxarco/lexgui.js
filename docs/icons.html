@@ -4,8 +4,11 @@
 
     MAKE_HEADER( "Icons", "h1", "icons" );
 
-    MAKE_PARAGRAPH( `LexGUI offers a collection of the most common SVG icons used within application interfaces 
-    (mostly from ${ INLINE_LINK( "FontAwesome", "https://fontawesome.com/" ) } and ${ INLINE_LINK( "SVGRepo", "https://www.svgrepo.com/" ) }):` );
+    MAKE_PARAGRAPH( `LexGUI offers a collection of the most common SVG icons used within application interfaces. All the icons have been collected mostly from
+    ${ INLINE_LINK( "FontAwesome", "https://fontawesome.com/" ) }, ${ INLINE_LINK( "SVGRepo", "https://www.svgrepo.com/" ) } and ${ INLINE_LINK( "Iconify.design", "https://iconify.design/" ) }.` );
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH( `If LexGUI doesn't have the icon you are looking for, get the SVG string of your icon from anywhere (it must contain one path) and use ${ INLINE_CODE( "LX.registerIcon(name, svgString, category, aliases)" ) }
+     to allow using it inside LexGUI. ` );
     
     {
         const params = new URLSearchParams( document.location.search );
