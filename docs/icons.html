@@ -8,6 +8,7 @@
     (mostly from ${ INLINE_LINK( "FontAwesome", "https://fontawesome.com/" ) } and ${ INLINE_LINK( "SVGRepo", "https://www.svgrepo.com/" ) }):` );
     
     {
+        const params = new URLSearchParams( document.location.search );
         const content = document.getElementById('content');
         const area = new LX.Area( { skipAppend: true, height: "auto" } );
         const panel = area.addPanel();
@@ -49,6 +50,7 @@
         }, {
             centered: [1, 2],
             filter: "Name",
+            filterValue: params.get( "filter" ),
             customFilters: [
                 { name: "Category", options: ["brands", "regular", "solid"] }
             ],

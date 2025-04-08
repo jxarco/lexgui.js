@@ -8591,6 +8591,7 @@ class Table extends Widget {
         this.toggleColumns = options.toggleColumns ?? false;
         this.customFilters = options.customFilters ?? false;
         this.activeCustomFilters = {};
+        this._currentFilter = options.filterValue;
 
         data.head = data.head ?? [];
         data.body = data.body ?? [];
@@ -8622,7 +8623,7 @@ class Table extends Widget {
                 filterOptions.trigger = "input";
                 filterOptions.inputClass = "outline";
 
-                let filter = new TextInput(null, "", ( v ) => {
+                let filter = new TextInput(null, this._currentFilter ?? "", ( v ) => {
                     this._currentFilter = v;
                     this.refresh();
                 }, filterOptions );
@@ -10181,7 +10182,11 @@ class Panel {
      * onMenuAction: Function callback to fill the "menu" context
      * selectable: Each row can be selected
      * sortable: Rows can be sorted by the user manually
-     * centered: Center text within columns. true for all, Array for center selected cols.
+     * centered: Center text within columns. true for all, Array for center selected cols
+     * toggleColumns: Columns visibility can be toggled
+     * filter: Name of the column to filter by text input (if any)
+     * filterValue: Initial filter value
+     * customFilters: Add selectors to filter by specific option values
      */
 
     addTable( name, data, options = { } ) {

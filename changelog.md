@@ -2,6 +2,9 @@
 
 ## dev
 
+Widgets:
+- Added support `options.filterValue` in Table Widget.
+
 Fixed all "popup" menus position in scrolled window.
 Icons and Customization docs updated.
 
