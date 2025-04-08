@@ -250,7 +250,6 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
             m.add( "Shopping ", { icon: "shopping-cart" } );
             m.add( "Promotions", { icon: "flag", content: LX.badge("21", badgeClass, { asElement: true }) } );
         }, {
-            // collapseToIcons: false,
             className: "border-right",
             headerTitle: "jxarco",
             headerSubtitle: "alexroco.30@gmail.com",

@@ -1458,15 +1458,22 @@ LX.makeContainer = makeContainer;
  * @method asTooltip
  * @param {HTMLElement} trigger
  * @param {String} content
+ * @param {Object} options
+ * side: Side of the tooltip
  */
 
-function asTooltip( trigger, content )
+function asTooltip( trigger, content, options = {} )
 {
     console.assert( trigger, "You need a trigger to generate a tooltip!" );
 
     let tooltipDom = null;
 
     trigger.addEventListener( "mouseenter", function(e) {
+
+        if( trigger.dataset[ "disableTooltip" ] == "true" )
+        {
+            return;
+        }
 
         LX.root.querySelectorAll( ".lextooltip" ).forEach( e => e.remove() );
 
@@ -1475,9 +1482,40 @@ function asTooltip( trigger, content )
         tooltipDom.innerHTML = content;
 
         doAsync( () => {
-            let rect = this.getBoundingClientRect();
-            tooltipDom.style.top = ( rect.y - tooltipDom.offsetHeight - 6 ) + "px";
-            tooltipDom.style.left = ( rect.x + rect.width * 0.5 - tooltipDom.offsetWidth * 0.5 ) + "px";
+
+            const position = [ 0, 0 ];
+            const rect = this.getBoundingClientRect();
+            let alignWidth = true;
+
+            switch( options.side ?? "top" )
+            {
+                case "left":
+                    position[ 0 ] += ( rect.x - tooltipDom.offsetWidth - 6 );
+                    alignWidth = false;
+                    break;
+                case "right":
+                    position[ 0 ] += ( rect.x + rect.width + 6 );
+                    alignWidth = false;
+                    break;
+                case "top":
+                    position[ 1 ] += ( rect.y - tooltipDom.offsetHeight - 6 );
+                    alignWidth = true;
+                    break;
+                case "bottom":
+                    position[ 1 ] += ( rect.y + rect.height + 6 );
+                    alignWidth = true;
+                    break;
+            }
+
+            if( alignWidth ) { position[ 0 ] += ( rect.x + rect.width * 0.5 ) - tooltipDom.offsetWidth * 0.5; }
+            else { position[ 1 ] += ( rect.y + rect.height * 0.5 ) - tooltipDom.offsetHeight * 0.5; }
+
+            // Avoid collisions
+            position[ 0 ] = LX.clamp( position[ 0 ], 0, window.innerWidth - tooltipDom.offsetWidth - 4 );
+            position[ 1 ] = LX.clamp( position[ 1 ], 0, window.innerHeight - tooltipDom.offsetHeight - 4 );
+
+            tooltipDom.style.left = `${ position[ 0 ] }px`;
+            tooltipDom.style.top = `${ position[ 1 ] }px`;
         } )
 
         LX.root.appendChild( tooltipDom );
@@ -1830,14 +1868,6 @@ class DropdownMenu {
     _adjustPosition() {
 
         const position = [ 0, 0 ];
-
-        /*
-        - avoidCollisions
-        - side
-        - align
-        - alignOffset
-        - sideOffsetS
-        */
 
         // Place menu using trigger position and user options
         {
