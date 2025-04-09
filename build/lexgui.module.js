@@ -3284,8 +3284,8 @@ class Menubar {
 
             doAsync( () => {
                 let rect = c.getBoundingClientRect();
-                menuElement.style.left = ( isSubMenu ? ( rect.x + rect.width ) : rect.x ) + "px";
-                menuElement.style.top = ( isSubMenu ? rect.y : ( ( rect.y + rect.height ) ) - 4 ) + "px";
+                menuElement.style.left = ( isSubMenu ? ( rect.width ) : rect.x ) + "px";
+                menuElement.style.top = ( isSubMenu ? 0 : ( ( rect.y + rect.height ) ) - 4 ) + "px";
                 menuElement.style.transition = transition;
             } );
         };
@@ -3296,7 +3296,7 @@ class Menubar {
             menuElement.dataset[ "open" ] = true;
         }, 10 );
 
-        LX.root.appendChild( menuElement );
+        c.appendChild( menuElement );
 
         for( var i = 0; i < o[ k ].length; ++i )
         {
@@ -3428,10 +3428,13 @@ class Menubar {
             subentry.addEventListener("mouseleave", e => {
                 if( subentry.currentMenu && ( subentry.currentMenu != e.toElement ) )
                 {
-                    d = -1; // Reset depth
-                    delete subentry.built;
-                    subentry.currentMenu.remove();
-                    delete subentry.currentMenu;
+                    const rect = menuElement.getBoundingClientRect();
+                    if ( e.clientX > rect.left && e.clientX < rect.right && e.clientY > rect.top && e.clientY < rect.bottom){
+                        d = -1; // Reset depth
+                        delete subentry.built;
+                        subentry.currentMenu.remove();
+                        delete subentry.currentMenu;
+                    }
                 }
             });
         }
