@@ -7,8 +7,18 @@
     and text fields to more complex elements such as dropdown menus, sliders, and checkboxes.` );
     MAKE_PARAGRAPH( `LexGUI provides a wide range of ${INLINE_LINK("pre-built widgets", "widget_list.html")} that developers can use to construct intuitive and visually appealing interfaces. 
     These widgets are designed to be customizable, allowing developers to adjust their appearance and behavior to suit the specific requirements of their application.` );
-    MAKE_PARAGRAPH( `To add a new widget you will need a ${INLINE_LINK("Panel", "instancing_panels.html")}, that at the same time is usually attached to an area. 
-    All widgets can be created using ${INLINE_CODE("Panel.add<em>_WidgetName_</em>()")} and passing specific parameters.` );
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH( `To add a new widget you can use a ${INLINE_LINK("Panel", "instancing_panels.html")}, that at the same time is usually attached to an area,
+    calling ${INLINE_CODE("Panel.add<em>_WidgetName_</em>()")} and passing specific parameters. You can also create Widgets instancing them using ${INLINE_CODE("new")}
+    and appending its root wherever you need.`);
+
+    MAKE_CODE( `@[com]// Using a panel the widget will be appended automatically:@
+@const@ buttonWidget = panel.@[mtd]addButton@(@"widgetName"@, @"buttonName"@, callback, options);
+
+@[com]// Without panel:@
+@const@ buttonWidget = new LX.@[typ]Button@(@"widgetName"@, @"buttonName"@, callback, options);
+yourContainer.@[mtd]appendChild@( buttonWidget.root );
+` );
 
     MAKE_HEADER( "Getter and Setters", "h2", "getter-and-setters" );
 
