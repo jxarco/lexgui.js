@@ -12,22 +12,38 @@
         const area = new LX.Area({ skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.addTable(null, {
-            head: ["Name", "Subject", "Grade"],
+            head: ["Name", "Status", "Priority"],
             body: [
-                ["Alice", "Science", "B"],
-                ["Bob", "Math", "C"],
-                ["Carter", "Zoology", "A"],
+                ["Alice", "In Progress", "High"],
+                ["Bob", "Backlog", "Medium"],
+                ["Prince", "Canceled", "Low"],
+                ["Sean", "Done", "High"],
+                ["Carter", "In Progress", "Medium"],
+                ["James", "Backlog", "Low"],
+                ["Mickey", "Todo", "Low"],
+                ["Charlie", "Canceled", "Low"],
+                ["Potato", "Todo", "High"]
             ]
         }, {
             selectable: true,
+            sortable: true,
+            toggleColumns: true,
+            filter: "Name",
+            customFilters: [
+                { name: "Status", options: ["Backlog", "Todo", "In Progress", "Done", "Cancelled"] },
+                { name: "Priority", options: ["Low", "Medium", "High"] },
+            ],
             rowActions: [
-                { icon: "fa-solid fa-pen-to-square", callback: (tableData) => { } }, // custom: you can change the data and refresh will be called later!
+                { icon: "edit", title: "Edit Row" },
                 "delete",
                 "menu"
             ],
-            onMenuAction: (context) => {
-                context.add("Export", (a) => console.log(a));
-                context.add("An Action", (a) => console.log(a));
+            onMenuAction: (index, tableData) => {
+                return [
+                    { name: "Export" },
+                    { name: "Make a copy" },
+                    { name: "Favourite" }
+                ]
             }
         });
         content.appendChild(area.root);
@@ -45,23 +61,40 @@
             ["onMenuAction", "Function", `Function callback to fill the "menu" context`],
             ["selectable", "Boolean", "Each row can be selected"],
             ["sortable", "Boolean", "Rows can be sorted by the user manually"],
-            ["centered", "Boolean/Array", "Center text within columns. true for all, Array for center selected cols."],
+            ["centered", "Boolean/Array", "Center text within columns. true for all, Array for center selected cols"],
+            ["toggleColumns", "Boolean", "Columns visibility can be toggled"],
+            ["filter", "String", "Name of the column to filter by text input (if any)"],
+            ["filterValue", "String", "Initial filter value"],
+            ["customFilters", "Array", "Add selectors to filter by specific option values"],
         ]
     ]);
     MAKE_PARAGRAPH(`<sup>Note: You can use default row actions as String such as 'delete' or 'menu', which have predefined icons and callbacks.
             For the 'menu' action, you must fill the possible menus inside the created ${INLINE_LINK("ContextMenu", "context_menu.html")} using ${INLINE_CODE("options.onMenuAction")}.<sup>`);
     MAKE_CODE(`panel.@[mtd]addTable@(@null@, {
-    head: [ @"Name"@, @"Subject"@, @"Grade"@ ],
-    body: [ 
-        [ @"Alice"@, @"Science"@, @"B"@ ],
-        [ @"Bob"@, @"Math"@, @"C"@ ],
-        [ @"Carter"@, @"Zoology"@, @"A"@ ],
+    head: [@"Name"@, @"Status"@, @"Priority"@],
+    body: [
+        [@"Alice"@, @"In Progress"@, @"High"@],
+        [@"Bob"@, @"Backlog"@, @"Medium"@],
+        [@"Prince"@, @"Canceled"@, @"Low"@],
+        [@"Sean"@, @"Done"@, @"High"@],
+        [@"Carter"@, @"In Progress"@, @"Medium"@],
+        [@"James"@, @"Backlog"@, @"Low"@],
+        [@"Mickey"@, @"Todo"@, @"Low"@],
+        [@"Charlie"@, @"Canceled"@, @"Low"@],
+        [@"Potato"@, @"Todo"@, @"High"@]
     ]
 }, { 
-    selectable: @true@, 
+    selectable: @true@,
+    sortable: @true@,
+    toggleColumns: @true@,
+    filter: @"Name"@,
+    customFilters: [
+        { name: @"Status"@, options: [@"Backlog"@, @"Todo"@, @"In Progress"@, @"Done"@, @"Cancelled"@] },
+        { name: @"Priority"@, options: [@"Low"@, @"Medium"@, @"High"@] },
+    ],
     rowActions: [
-        @[com]// custom: you can change the data and refresh will be called later!@
-        { icon: @"fa-solid fa-pen-to-square"@, callback: ( tableData ) => {} }, @[com]// custom: you can change the data and refresh will be called later!@
+        @[com]// Custom: you can change the data and refresh will be called later if returning _true_!@
+        { icon: @"edit"@, callback: ( tableData ) => {} },
         @"delete"@,
         @"menu"@
     ],

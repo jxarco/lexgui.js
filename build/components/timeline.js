@@ -176,9 +176,8 @@ class Timeline {
             header.addTitle(this.name );
         }
 
-        // time control buttons - play, stop, loop
+        const buttonContainer = LX.makeContainer( ["auto", "100%"], "flex flex-row" );
 
-        const buttonContainer = LX.makeContainer(["auto", "100%"], "", { display: "flex" });
         header.queue( buttonContainer );
 
         header.addButton("playBtn", '', (value, event) => {
@@ -245,7 +244,7 @@ class Timeline {
         
         // settings buttons - optimize, settings, etc
 
-        const buttonContainerEnd = LX.makeContainer(["auto", "100%"], "", { display: "flex" });
+        const buttonContainerEnd = LX.makeContainer( ["auto", "100%"], "flex flex-row" );
         header.queue( buttonContainerEnd );
 
         if( this.onCreateSettingsButtons ){

@@ -12,7 +12,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 var LX = {
-    version: "0.5.3",
+    version: "0.5.4",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -783,7 +783,7 @@ function _createCommandbar( root )
         className: "gs-tabs"
     } );
 
-    const gsTabs = tabArea.addTabs();
+    const gsTabs = tabArea.addTabs( { parentClass: "p-2" } );
     let gsFilter = null;
 
     // These tabs will serve as buttons by now
@@ -939,6 +939,7 @@ function _createCommandbar( root )
  * @param {Object} options
  * container: Root location for the gui (default is the document body)
  * id: Id of the main area
+ * rootClass: Extra class to the root container
  * skipRoot: Skip adding LX root container
  * skipDefaultArea: Skip creation of main area
  * strictViewport: Use only window area
@@ -955,7 +956,13 @@ function init( options = { } )
 
     var root = document.createElement( 'div' );
     root.id = "lexroot";
+    root.className = "lexcontainer";
     root.tabIndex = -1;
+
+    if( options.rootClass )
+    {
+        root.className += ` ${ options.rootClass }`;
+    }
 
     var modal = document.createElement( 'div' );
     modal.id = "modal";
@@ -969,7 +976,7 @@ function init( options = { } )
 
     if( options.container )
     {
-        this.container = document.getElementById( options.container );
+        this.container = options.container.constructor === String ? document.getElementById( options.container ) : options.container;
     }
 
     this.usingStrictViewport = options.strictViewport ?? true;
@@ -1007,7 +1014,7 @@ function init( options = { } )
         this.notifications.className = "";
         this.notifications.iWidth = 0;
         notifSection.appendChild( this.notifications );
-        this.container.appendChild( notifSection );
+        document.body.appendChild( notifSection );
 
         this.notifications.addEventListener( "mouseenter", () => {
             this.notifications.classList.add( "list" );
@@ -1324,6 +1331,7 @@ LX.toast = toast;
  * @param {String} className
  * @param {Object} options
  * style: Style attributes to override
+ * asElement: Returns the badge as HTMLElement [false]
  */
 
 function badge( text, className, options = {} )
@@ -1332,7 +1340,7 @@ function badge( text, className, options = {} )
     container.innerHTML = text;
     container.className = "lexbadge " + ( className ?? "" );
     Object.assign( container.style, options.style ?? {} );
-    return container.outerHTML;
+    return ( options.asElement ?? false ) ? container : container.outerHTML;
 }
 
 LX.badge = badge;
@@ -1341,20 +1349,83 @@ LX.badge = badge;
  * @method makeContainer
  * @param {Array} size
  * @param {String} className
+ * @param {String} innerHTML
+ * @param {HTMLElement} parent
  * @param {Object} overrideStyle
  */
 
-function makeContainer( size, className, overrideStyle = {} )
+function makeContainer( size, className, innerHTML, parent, overrideStyle = {} )
 {
     const container = document.createElement( "div" );
     container.className = "lexcontainer " + ( className ?? "" );
+    container.innerHTML = innerHTML ?? "";
     container.style.width = size && size[ 0 ] ? size[ 0 ] : "100%";
     container.style.height = size && size[ 1 ] ? size[ 1 ] : "100%";
     Object.assign( container.style, overrideStyle );
+
+    if( parent )
+    {
+        if( parent.attach ) // Use attach method if possible
+        {
+            parent.attach( container );
+        }
+        else // its a native HTMLElement
+        {
+            parent.appendChild( container );
+        }
+    }
+
     return container;
 }
 
 LX.makeContainer = makeContainer;
+
+/**
+ * @method asTooltip
+ * @param {HTMLElement} trigger
+ * @param {String} content
+ */
+
+function asTooltip( trigger, content )
+{
+    console.assert( trigger, "You need a trigger to generate a tooltip!" );
+
+    let tooltipDom = null;
+
+    trigger.addEventListener( "mouseenter", function(e) {
+
+        console.log(e.target);
+
+        LX.root.querySelectorAll( ".lextooltip" ).forEach( e => e.remove() );
+
+        let rect = this.getBoundingClientRect();
+        rect.x += document.scrollingElement.scrollLeft;
+        rect.y += document.scrollingElement.scrollTop;
+
+        tooltipDom = document.createElement( "div" );
+        tooltipDom.className = "lextooltip";
+        tooltipDom.innerHTML = content;
+
+        doAsync( () => {
+            tooltipDom.style.top = ( rect.y - tooltipDom.offsetHeight - 6 ) + "px";
+            tooltipDom.style.left = ( rect.x + rect.width * 0.5 - tooltipDom.offsetWidth * 0.5 ) + "px";
+        } )
+
+        LX.root.appendChild( tooltipDom );
+    } );
+
+    trigger.addEventListener( "mouseleave", function(e) {
+        if( !tooltipDom ) return;
+
+        tooltipDom.dataset[ "closed" ] = true;
+
+        doAsync( () => {
+            tooltipDom.remove();
+        }, 300 )
+    } )
+}
+
+LX.asTooltip = asTooltip;
 
 /*
 *   Events and Signals
@@ -1598,7 +1669,7 @@ class DropdownMenu {
             }
 
             const menuItem = document.createElement('div');
-            menuItem.className = "lexdropdownmenuitem" + ( item.name ? "" : " label" ) + ( item.disabled ?? false ? " disabled" : "" );
+            menuItem.className = "lexdropdownmenuitem" + ( item.name ? "" : " label" ) + ( item.disabled ?? false ? " disabled" : "" ) + ( ` ${ item.className ?? "" }` );
             menuItem.id = pKey;
             menuItem.innerHTML = `<span>${ key }</span>`;
 
@@ -1819,9 +1890,9 @@ class Area {
         this.sections = [];
         this.panels = [];
 
-        if( !options.skipAppend )
+        let lexroot = document.getElementById("lexroot");
+        if( lexroot && !options.skipAppend )
         {
-            let lexroot = document.getElementById("lexroot");
             lexroot.appendChild( this.root );
         }
 
@@ -1968,7 +2039,7 @@ class Area {
     attach( content ) {
 
         // Append to last split section if area has been split
-        if( this.sections.length)
+        if( this.sections.length )
         {
             this.sections[ 1 ].attach( content );
             return;
@@ -2004,7 +2075,7 @@ class Area {
 
         const type = options.type || "horizontal";
         const sizes = options.sizes || [ "50%", "50%" ];
-        const auto = (options.sizes === 'auto');
+        const auto = (options.sizes === 'auto') || ( options.sizes && options.sizes[ 0 ] == "auto" && options.sizes[ 1 ] == "auto" );
 
         if( !sizes[ 1 ] )
         {
@@ -2108,8 +2179,8 @@ class Area {
                 const resizeObserver = new ResizeObserver( entries => {
                     for ( const entry of entries )
                     {
-                        const bb = entry.contentRect;
-                        area2.root.style.height = "calc(100% - " + ( bb.height + 4) + "px )";
+                        const size = entry.target.getComputedSize();
+                        area2.root.style.height = "calc(100% - " + ( size.height ) + "px )";
                     }
                 });
 
@@ -2390,6 +2461,11 @@ class Area {
             bar.root.className += " sticky top-0";
         }
 
+        if( options.parentClass )
+        {
+            bar.root.className += ` ${ options.parentClass }`;
+        }
+
         return menubar;
     }
 
@@ -2420,6 +2496,11 @@ class Area {
 
         bar.attach( sidebar );
         bar.isSidebar = true;
+
+        if( options.parentClass )
+        {
+            bar.root.className += ` ${ options.parentClass }`;
+        }
 
         return sidebar;
     }
@@ -2523,7 +2604,10 @@ class Area {
                         }
                     }
 
-                    callback( value, event, button.root );
+                    if( callback )
+                    {
+                        callback( value, event, button.root );
+                    }
 
                 }, _options );
             }
@@ -2580,6 +2664,7 @@ class Area {
     /**
      * @method addTabs
      * @param {Object} options:
+     * parentClass: Add extra class to tab buttons container
      */
 
     addTabs( options = {} ) {
@@ -2699,7 +2784,6 @@ function flushCss(element) {
 
 class Tabs {
 
-    static TAB_SIZE = 28;
     static TAB_ID   = 0;
 
     constructor( area, options = {} ) {
@@ -2707,10 +2791,10 @@ class Tabs {
         this.onclose = options.onclose;
 
         let container = document.createElement('div');
-        container.className = "lexareatabs " + (options.fit ? "fit" : "row");
+        container.className = "lexareatabs " + ( options.fit ? "fit" : "row" );
 
         const folding = options.folding ?? false;
-        if(folding) container.classList.add("folding");
+        if( folding ) container.classList.add("folding");
 
         let that = this;
 
@@ -2783,10 +2867,15 @@ class Tabs {
 
         area.root.classList.add( "lexareatabscontainer" );
 
-        area.split({ type: 'vertical', sizes: options.sizes ?? "auto", resize: false, top: 6 });
-        area.sections[ 0 ].attach( container );
+        const [ tabButtons, content ] = area.split({ type: 'vertical', sizes: options.sizes ?? "auto", resize: false, top: 2 });
+        tabButtons.attach( container );
 
-        this.area = area.sections[1];
+        if( options.parentClass )
+        {
+            container.parentElement.className += ` ${ options.parentClass }`;
+        }
+
+        this.area = content;
         this.area.root.className += " lexareatabscontent";
 
         if( options.contentClass )
@@ -2814,7 +2903,6 @@ class Tabs {
                 this.thumb.style.transition = "none";
                 this.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
                 this.thumb.style.width = ( tabEl.offsetWidth ) + "px";
-                this.thumb.style.height = ( tabEl.offsetHeight  ) + "px";
                 flushCss( this.thumb );
                 this.thumb.style.transition = transition;
             });
@@ -2856,7 +2944,7 @@ class Tabs {
         if( isSelected )
         {
             this.root.querySelectorAll( 'span' ).forEach( s => s.classList.remove( 'selected' ) );
-            this.area.root.querySelectorAll( '.lextabcontent' ).forEach( c => c.style.display = 'none' );
+            this.area.root.querySelectorAll( ':scope > .lextabcontent' ).forEach( c => c.style.display = 'none' );
         }
 
         isSelected = !Object.keys( this.tabs ).length && !this.folding ? true : isSelected;
@@ -2914,7 +3002,7 @@ class Tabs {
                 tabEl.parentElement.querySelectorAll( 'span' ).forEach( s => s.classList.remove( 'selected' ));
                 tabEl.classList.toggle('selected', ( this.folding && tabEl.selected ));
                 // Manage visibility
-                scope.area.root.querySelectorAll( '.lextabcontent' ).forEach( c => c.style.display = 'none' );
+                scope.area.root.querySelectorAll( ':scope > .lextabcontent' ).forEach( c => c.style.display = 'none' );
                 contentEl.style.display = contentEl.originalDisplay;
                 scope.selected = tabEl.dataset.name;
             }
@@ -2933,8 +3021,7 @@ class Tabs {
             if( scope.thumb )
             {
                 scope.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
-                scope.thumb.style.width = ( tabEl.offsetWidth - 5 ) + "px";
-                scope.thumb.style.height = ( tabEl.offsetHeight - 6 ) + "px";
+                scope.thumb.style.width = ( tabEl.offsetWidth ) + "px";
                 scope.thumb.item = tabEl;
             }
         });
@@ -2987,7 +3074,6 @@ class Tabs {
             {
                 this.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
                 this.thumb.style.width = ( tabEl.offsetWidth ) + "px";
-                this.thumb.style.height = ( tabEl.offsetHeight ) + "px";
                 this.thumb.item = tabEl;
             }
 
@@ -3119,7 +3205,7 @@ class Menubar {
             const hasSubmenu = subitem[ subkey ].length;
             const isCheckbox = subitem[ 'type' ] == 'checkbox';
             let subentry = document.createElement('div');
-            subentry.tabIndex = "1";
+            subentry.tabIndex = "-1";
             subentry.className = "lexmenuboxentry";
             subentry.className += (i == o[k].length - 1 ? " last" : "") + ( subitem.disabled ? " disabled" : "" );
 
@@ -3206,12 +3292,10 @@ class Menubar {
             });
 
             subentry.addEventListener("blur", e => {
-
-                if( e.target && e.target.className.includes( "lexmenu" ) )
+                if( e.relatedTarget && !e.relatedTarget.className.includes( "lexmenu" ) )
                 {
-                    return;
+                    this._resetMenubar();
                 }
-                this._resetMenubar();
             });
 
             // Add icon if has submenu, else check for shortcut
@@ -3667,6 +3751,7 @@ class SideBar {
 
     /**
      * @param {Object} options
+     * className: Extra class to customize root element
      * filter: Add search bar to filter entries [false]
      * displaySelected: Indicate if an entry is displayed as selected
      * skipHeader: Do not use sidebar header [false]
@@ -3690,7 +3775,7 @@ class SideBar {
     constructor( options = {} ) {
 
         this.root = document.createElement( "div" );
-        this.root.className = "lexsidebar";
+        this.root.className = "lexsidebar " + ( options.className ?? "" );
 
         this._displaySelected = options.displaySelected ?? false;
 
@@ -3777,10 +3862,10 @@ class SideBar {
 
         // Set width depending on header/footer
         doAsync( () => {
-            // This account for header, footer and all inner paddings
-            const contentOffset = ( this.header?.offsetHeight ?? 0 ) +
-                ( this.filter?.offsetHeight ?? 0 ) +
-                ( this.footer?.offsetHeight ?? 0 );
+            // This account for header, footer and all inner margins
+            const contentOffset = ( parseInt( this.header?.getComputedSize().height ) ?? 0 ) +
+            ( parseInt( this.filter?.getComputedSize().height ) ?? 0 ) +
+            ( parseInt( this.footer?.getComputedSize().height ) ?? 0 );
             this.content.style.height = `calc(100% - ${ contentOffset }px)`;
         }, 10 );
 
@@ -4066,8 +4151,13 @@ class SideBar {
             let currentGroup = null;
 
             let entry = document.createElement( 'div' );
-            entry.className = "lexsidebarentry " + ( options.className ?? "" );
             entry.id = item.name = pKey;
+            entry.className = "lexsidebarentry " + ( options.className ?? "" );
+
+            if( this.displaySelected && options.selected )
+            {
+                entry.classList.add( "selected" );
+            }
 
             if( item.group )
             {
@@ -4137,6 +4227,7 @@ class SideBar {
             }
 
             let itemDom = document.createElement( 'div' );
+            itemDom.className = "lexsidebarentrycontent";
             entry.appendChild( itemDom );
             item.dom = entry;
 
@@ -4157,14 +4248,31 @@ class SideBar {
             {
                 if( options.icon )
                 {
-                    let itemIcon = document.createElement( 'i' );
-                    itemIcon.className = options.icon;
+                    let itemIcon = null;
+
+                    // @legacy
+                    if( options.icon.includes( "fa-" ) )
+                    {
+                        itemIcon = document.createElement( 'i' );
+                        itemIcon.className = options.icon;
+                    }
+                    else
+                    {
+                        itemIcon = LX.makeIcon( options.icon );
+                    }
+
+                    itemIcon.classList.add( "lexsidebarentryicon" );
                     itemDom.appendChild( itemIcon );
                 }
 
                 let itemName = document.createElement( 'a' );
                 itemName.innerHTML = key;
                 itemDom.appendChild( itemName );
+
+                if( options.content )
+                {
+                    itemDom.appendChild( options.content );
+                }
             }
 
             const isCollapsable = options.collapsable != undefined ? options.collapsable : ( options.collapsable || item[ key ].length );
@@ -5393,6 +5501,7 @@ class TextInput extends Widget {
         let container = document.createElement( 'div' );
         container.className = ( options.warning ? " lexwarning" : "" );
         container.style.display = "flex";
+        container.style.position = "relative";
         this.root.appendChild( container );
 
         this.disabled = ( options.disabled || options.warning ) ?? ( options.url ? true : false );
@@ -5448,6 +5557,7 @@ class TextInput extends Widget {
 
             if( options.icon )
             {
+                wValue.style.paddingLeft = "1.75rem";
                 let icon = document.createElement( 'a' );
                 icon.className = "inputicon " + options.icon;
                 container.appendChild( icon );
@@ -5486,7 +5596,7 @@ class TextInput extends Widget {
     }
 }
 
-LX.Text = Text;
+LX.TextInput = TextInput;
 
 /**
  * @class TextArea
@@ -5524,6 +5634,13 @@ class TextArea extends Widget {
         this.root.appendChild( container );
 
         let wValue = document.createElement( "textarea" );
+
+        if( !( options.resize ?? true ) )
+        {
+            wValue.style.resize = "none";
+        }
+
+        wValue.className = ( options.inputClass ?? "" );
         wValue.value = wValue.iValue = value || "";
         wValue.style.width = "100%";
         wValue.style.textAlign = options.float ?? "";
@@ -5594,9 +5711,36 @@ class Button extends Widget {
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
-            wValue.innerHTML =
-            ( options.icon ? "<a class='" + options.icon + "'></a>" :
-            ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + ( newValue || "" ) + "</span>" ) );
+
+            wValue.innerHTML = `<span></span>`;
+
+            if( options.icon )
+            {
+                let icon = null;
+
+                // @legacy
+                if( options.icon.includes( "fa-" ) )
+                {
+                    icon = document.createElement( 'a' );
+                    icon.className = options.icon;
+                }
+                else
+                {
+                    icon = LX.makeIcon( options.icon );
+                }
+
+                wValue.prepend( icon );
+            }
+            else if( options.img )
+            {
+                let img = document.createElement( 'img' );
+                img.src = options.img;
+                wValue.prepend( img );
+            }
+            else
+            {
+                wValue.innerHTML = `<span>${ ( newValue || "" ) }</span>`;
+            }
         };
 
         this.onResize = ( rect ) => {
@@ -5605,7 +5749,7 @@ class Button extends Widget {
         };
 
         var wValue = document.createElement( 'button' );
-        wValue.title = options.title ?? "";
+        wValue.title = options.tooltip ? "" : ( options.title ?? "" );
         wValue.className = "lexbutton " + ( options.buttonClass ?? "" );
 
         if( options.icon )
@@ -5620,9 +5764,7 @@ class Button extends Widget {
             wValue.classList.add( "selected" );
         }
 
-        wValue.innerHTML =
-            ( options.icon ? "<a class='" + options.icon + "'></a>" :
-            ( options.img  ? "<img src='" + options.img + "'>" : "<span>" + ( value || "" ) + "</span>" ) );
+        this.onSetValue( value, true );
 
         if( options.disabled )
         {
@@ -5642,6 +5784,11 @@ class Button extends Widget {
 
             this._trigger( new IEvent( name, value, e ), callback );
         });
+
+        if( options.tooltip )
+        {
+            LX.asTooltip( wValue, options.title ?? name );
+        }
 
         doAsync( this.onResize.bind( this ) );
     }
@@ -8480,7 +8627,7 @@ class Table extends Widget {
         // Append header
         if( this.filter || this.customFilters || this.toggleColumns )
         {
-            const headerContainer = LX.makeContainer( [ "100%", "auto" ] );
+            const headerContainer = LX.makeContainer( [ "100%", "auto" ], "flex flex-row" );
 
             if( this.filter )
             {
@@ -9479,6 +9626,7 @@ class Panel {
      * disabled: Make the widget disabled [false]
      * required: Make the input required
      * placeholder: Add input placeholder
+     * icon: Icon (if any) to append at the input start
      * pattern: Regular expression that value must match
      * trigger: Choose onchange trigger (default, input) [default]
      * inputWidth: Width of the text input
@@ -9502,6 +9650,7 @@ class Panel {
      * hideName: Don't use name as label [false]
      * disabled: Make the widget disabled [false]
      * placeholder: Add input placeholder
+     * resize: Allow resize [true]
      * trigger: Choose onchange trigger (default, input) [default]
      * inputWidth: Width of the text input
      * float: Justify input text content
@@ -10305,6 +10454,9 @@ class Footer {
         wrapper.className = "w-full";
         root.appendChild( wrapper );
 
+        // const hr = document.createElement( "hr" );
+        // wrapper.appendChild( hr );
+
         if( options.columns && options.columns.constructor == Array )
         {
             const cols = document.createElement( "div" );
@@ -10341,9 +10493,6 @@ class Footer {
 
         if( options.credits || options.socials )
         {
-            const hr = document.createElement( "hr" );
-            wrapper.appendChild( hr );
-
             const creditsSocials = document.createElement( "div" );
             creditsSocials.className = "credits-and-socials";
             wrapper.appendChild( creditsSocials );
@@ -11052,8 +11201,8 @@ class CanvasCurve {
         element.style.minHeight = "20px";
 
         element.bgcolor = options.bgColor || LX.getThemeColor( "global-intense-background" );
-        element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected" );
-        element.activepointscolor = options.activePointsColor || LX.getThemeColor( "global-selected-light" );
+        element.pointscolor = options.pointsColor || LX.getThemeColor( "global-color-accent" );
+        element.activepointscolor = options.activePointsColor || LX.getThemeColor( "global-color-accent-light" );
         element.linecolor = options.lineColor || "#555";
         element.value = value || [];
         element.xrange = options.xrange || [ 0, 1 ]; // min, max
@@ -11069,8 +11218,8 @@ class CanvasCurve {
 
         LX.addSignal( "@on_new_color_scheme", (el, value) => {
             element.bgcolor = options.bgColor || LX.getThemeColor( "global-intense-background" );
-            element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected" );
-            element.activepointscolor = options.activePointsColor || LX.getThemeColor( "global-selected-light" );
+            element.pointscolor = options.pointsColor || LX.getThemeColor( "global-color-accent" );
+            element.activepointscolor = options.activePointsColor || LX.getThemeColor( "global-color-accent-light" );
             this.redraw();
         } );
 
@@ -11399,7 +11548,7 @@ class CanvasDial {
         element.style.minWidth = element.style.minHeight = "50px";
 
         element.bgcolor = options.bgColor || LX.getThemeColor( "global-dark-background" );
-        element.pointscolor = options.pointsColor || LX.getThemeColor( "global-selected-light" );
+        element.pointscolor = options.pointsColor || LX.getThemeColor( "global-color-accent-light" );
         element.linecolor = options.lineColor || "#555";
         element.value = value || [];
         element.xrange = options.xrange || [ 0, 1 ]; // min, max
@@ -12679,44 +12828,44 @@ Object.assign(LX, {
     * Request file from url
     * @method requestText
     * @param {String} url
-    * @param {Function} on_complete
-    * @param {Function} on_error
+    * @param {Function} onComplete
+    * @param {Function} onError
     **/
-    requestText(url, on_complete, on_error ) {
-        return this.request({ url: url, dataType:"text", success: on_complete, error: on_error });
+    requestText( url, onComplete, onError ) {
+        return this.request({ url: url, dataType:"text", success: onComplete, error: onError });
     },
 
     /**
     * Request file from url
     * @method requestJSON
     * @param {String} url
-    * @param {Function} on_complete
-    * @param {Function} on_error
+    * @param {Function} onComplete
+    * @param {Function} onError
     **/
-    requestJSON(url, on_complete, on_error ) {
-        return this.request({ url: url, dataType:"json", success: on_complete, error: on_error });
+    requestJSON( url, onComplete, onError ) {
+        return this.request({ url: url, dataType:"json", success: onComplete, error: onError });
     },
 
     /**
     * Request binary file from url
     * @method requestBinary
     * @param {String} url
-    * @param {Function} on_complete
-    * @param {Function} on_error
+    * @param {Function} onComplete
+    * @param {Function} onError
     **/
-    requestBinary(url, on_complete, on_error ) {
-        return this.request({ url: url, dataType:"binary", success: on_complete, error: on_error });
+    requestBinary( url, onComplete, onError ) {
+        return this.request({ url: url, dataType:"binary", success: onComplete, error: onError });
     },
 
     /**
     * Request script and inserts it in the DOM
     * @method requireScript
     * @param {String|Array} url the url of the script or an array containing several urls
-    * @param {Function} on_complete
-    * @param {Function} on_error
-    * @param {Function} on_progress (if several files are required, on_progress is called after every file is added to the DOM)
+    * @param {Function} onComplete
+    * @param {Function} onError
+    * @param {Function} onProgress (if several files are required, onProgress is called after every file is added to the DOM)
     **/
-    requireScript(url, on_complete, on_error, on_progress, version ) {
+    requireScript( url, onComplete, onError, onProgress, version ) {
 
         if(!url)
             throw("invalid URL");
@@ -12741,15 +12890,17 @@ Object.assign(LX, {
                 loaded_scripts.push(this);
                 if(total)
                 {
-                    if(on_progress)
-                        on_progress(this.original_src, this.num);
+                    if( onProgress )
+                    {
+                        onProgress( this.original_src, this.num );
+                    }
                 }
-                else if(on_complete)
-                    on_complete( loaded_scripts );
+                else if(onComplete)
+                    onComplete( loaded_scripts );
             };
-            if(on_error)
+            if(onError)
                 script.onerror = function(err) {
-                    on_error(err, this.original_src, this.num );
+                    onError(err, this.original_src, this.num );
                 }
             document.getElementsByTagName('head')[0].appendChild(script);
         }
@@ -12838,10 +12989,11 @@ Element.prototype.addClass = function( className ) {
 }
 
 Element.prototype.getComputedSize = function() {
-    const cs = getComputedStyle( this );
+    // Since we use "box-sizing: border-box" now, 
+    // it's all included in offsetWidth/offsetHeight
     return {
-        width: this.offsetWidth + cs.getPropertyValue('marginLeft') + cs.getPropertyValue('marginRight'),
-        height: this.offsetHeight + cs.getPropertyValue('marginTop') + cs.getPropertyValue('marginBottom')
+        width: this.offsetWidth,
+        height: this.offsetHeight
     }
 }
 
@@ -12851,6 +13003,18 @@ Element.prototype.getParentArea = function() {
         if( parent.classList.contains( "lexarea" ) ) { return parent; }
         parent = parent.parentElement;
     }
+}
+
+Element.prototype.listen = function( eventName, callback, callbackName ) {
+    callbackName = callbackName ?? ( "_on" + eventName );
+    this[ callbackName ] = callback;
+    this.addEventListener( eventName, callback );
+}
+
+Element.prototype.ignore = function( eventName, callbackName ) {
+    callbackName = callbackName ?? ( "_on" + eventName );
+    const callback = this[ callbackName ];
+    this.removeEventListener( eventName, callback );
 }
 
 LX.UTILS = {
@@ -12953,6 +13117,7 @@ LX.ICONS = {
     "edit": [512, 512, [], "regular", "M441 58.9L453.1 71c9.4 9.4 9.4 24.6 0 33.9L424 134.1 377.9 88 407 58.9c9.4-9.4 24.6-9.4 33.9 0zM209.8 256.2L344 121.9 390.1 168 255.8 302.2c-2.9 2.9-6.5 5-10.4 6.1l-58.5 16.7 16.7-58.5c1.1-3.9 3.2-7.5 6.1-10.4zM373.1 25L175.8 222.2c-8.7 8.7-15 19.4-18.3 31.1l-28.6 100c-2.4 8.4-.1 17.4 6.1 23.6s15.2 8.5 23.6 6.1l100-28.6c11.8-3.4 22.5-9.7 31.1-18.3L487 138.9c28.1-28.1 28.1-73.7 0-101.8L474.9 25C446.8-3.1 401.2-3.1 373.1 25zM88 64C39.4 64 0 103.4 0 152L0 424c0 48.6 39.4 88 88 88l272 0c48.6 0 88-39.4 88-88l0-112c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 112c0 22.1-17.9 40-40 40L88 464c-22.1 0-40-17.9-40-40l0-272c0-22.1 17.9-40 40-40l112 0c13.3 0 24-10.7 24-24s-10.7-24-24-24L88 64z"],
     "envelope": [512, 512, [], "regular", "M64 112c-8.8 0-16 7.2-16 16l0 22.1L220.5 291.7c20.7 17 50.4 17 71.1 0L464 150.1l0-22.1c0-8.8-7.2-16-16-16L64 112zM48 212.2L48 384c0 8.8 7.2 16 16 16l384 0c8.8 0 16-7.2 16-16l0-171.8L322 328.8c-38.4 31.5-93.7 31.5-132 0L48 212.2zM0 128C0 92.7 28.7 64 64 64l384 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128z"],
     "envelope-open": [512, 512, [], "regular", "M255.4 48.2c.2-.1 .4-.2 .6-.2s.4 .1 .6 .2L460.6 194c2.1 1.5 3.4 3.9 3.4 6.5l0 13.6L291.5 355.7c-20.7 17-50.4 17-71.1 0L48 214.1l0-13.6c0-2.6 1.2-5 3.4-6.5L255.4 48.2zM48 276.2L190 392.8c38.4 31.5 93.7 31.5 132 0L464 276.2 464 456c0 4.4-3.6 8-8 8L56 464c-4.4 0-8-3.6-8-8l0-179.8zM256 0c-10.2 0-20.2 3.2-28.5 9.1L23.5 154.9C8.7 165.4 0 182.4 0 200.5L0 456c0 30.9 25.1 56 56 56l400 0c30.9 0 56-25.1 56-56l0-255.5c0-18.1-8.7-35.1-23.4-45.6L284.5 9.1C276.2 3.2 266.2 0 256 0z"],
+    "inbox": [24, 24, [], "regular", "M22 12H16l-2 3h-4l-2-3H2M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z", null, "fill=none stroke-width=2 stroke-linejoin=round stroke-linecap=round"],
     "map": [576, 512, [], "regular", "M565.6 36.2C572.1 40.7 576 48.1 576 56l0 336c0 10-6.2 18.9-15.5 22.4l-168 64c-5.2 2-10.9 2.1-16.1 .3L192.5 417.5l-160 61c-7.4 2.8-15.7 1.8-22.2-2.7S0 463.9 0 456L0 120c0-10 6.1-18.9 15.5-22.4l168-64c5.2-2 10.9-2.1 16.1-.3L383.5 94.5l160-61c7.4-2.8 15.7-1.8 22.2 2.7zM48 136.5l0 284.6 120-45.7 0-284.6L48 136.5zM360 422.7l0-285.4-144-48 0 285.4 144 48zm48-1.5l120-45.7 0-284.6L408 136.5l0 284.6z"],
     "note-sticky": [448, 512, ["sticky-note"], "regular", "M64 80c-8.8 0-16 7.2-16 16l0 320c0 8.8 7.2 16 16 16l224 0 0-80c0-17.7 14.3-32 32-32l80 0 0-224c0-8.8-7.2-16-16-16L64 80zM288 480L64 480c-35.3 0-64-28.7-64-64L0 96C0 60.7 28.7 32 64 32l320 0c35.3 0 64 28.7 64 64l0 224 0 5.5c0 17-6.7 33.3-18.7 45.3l-90.5 90.5c-12 12-28.3 18.7-45.3 18.7l-5.5 0z"],
     "file": [384, 512, [], "regular", "M320 464c8.8 0 16-7.2 16-16l0-288-80 0c-17.7 0-32-14.3-32-32l0-80L64 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16l256 0zM0 64C0 28.7 28.7 0 64 0L229.5 0c17 0 33.3 6.7 45.3 18.7l90.5 90.5c12 12 18.7 28.3 18.7 45.3L384 448c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64z"],
@@ -12960,7 +13125,10 @@ LX.ICONS = {
     "file-code": [384, 512, [], "regular", "M64 464c-8.8 0-16-7.2-16-16L48 64c0-8.8 7.2-16 16-16l160 0 0 80c0 17.7 14.3 32 32 32l80 0 0 288c0 8.8-7.2 16-16 16L64 464zM64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-293.5c0-17-6.7-33.3-18.7-45.3L274.7 18.7C262.7 6.7 246.5 0 229.5 0L64 0zm97 289c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0L79 303c-9.4 9.4-9.4 24.6 0 33.9l48 48c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-31-31 31-31zM257 255c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l31 31-31 31c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l48-48c9.4-9.4 9.4-24.6 0-33.9l-48-48z"],
     "file-zip": [384, 512, [], "regular", "M64 464c-8.8 0-16-7.2-16-16L48 64c0-8.8 7.2-16 16-16l48 0c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16l48 0 0 80c0 17.7 14.3 32 32 32l80 0 0 288c0 8.8-7.2 16-16 16L64 464zM64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-293.5c0-17-6.7-33.3-18.7-45.3L274.7 18.7C262.7 6.7 246.5 0 229.5 0L64 0zm48 112c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0c-8.8 0-16 7.2-16 16zm0 64c0 8.8 7.2 16 16 16l32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0c-8.8 0-16 7.2-16 16zm-6.3 71.8L82.1 335.9c-1.4 5.4-2.1 10.9-2.1 16.4c0 35.2 28.8 63.7 64 63.7s64-28.5 64-63.7c0-5.5-.7-11.1-2.1-16.4l-23.5-88.2c-3.7-14-16.4-23.8-30.9-23.8l-14.8 0c-14.5 0-27.2 9.7-30.9 23.8zM128 336l32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0c-8.8 0-16-7.2-16-16s7.2-16 16-16z"],
     "file-pdf": [512, 512, [], "regular", "M64 464l48 0 0 48-48 0c-35.3 0-64-28.7-64-64L0 64C0 28.7 28.7 0 64 0L229.5 0c17 0 33.3 6.7 45.3 18.7l90.5 90.5c12 12 18.7 28.3 18.7 45.3L384 304l-48 0 0-144-80 0c-17.7 0-32-14.3-32-32l0-80L64 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16zM176 352l32 0c30.9 0 56 25.1 56 56s-25.1 56-56 56l-16 0 0 32c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-48 0-80c0-8.8 7.2-16 16-16zm32 80c13.3 0 24-10.7 24-24s-10.7-24-24-24l-16 0 0 48 16 0zm96-80l32 0c26.5 0 48 21.5 48 48l0 64c0 26.5-21.5 48-48 48l-32 0c-8.8 0-16-7.2-16-16l0-128c0-8.8 7.2-16 16-16zm32 128c8.8 0 16-7.2 16-16l0-64c0-8.8-7.2-16-16-16l-16 0 0 96 16 0zm80-112c0-8.8 7.2-16 16-16l48 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0 0 32 32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0 0 48c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-64 0-64z"],
+    "box-archive": [24, 24, [], "regular", "M2 3a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2V3Zm2 5h16v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Zm6 4h4", null, "fill=none stroke-width=2 stroke-linecap=round stroke-linejoin=round"],
+    "box-archive-x": [24, 24, [], "regular", "M3 3h18a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1ZM4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M9.5 17l5-5m-5-0l5 5", null, "fill=none stroke-width=2 stroke-linecap=round stroke-linejoin=round"],
     "scroll": [576, 512, ["script"], "solid", "M0 80l0 48c0 17.7 14.3 32 32 32l16 0 48 0 0-80c0-26.5-21.5-48-48-48S0 53.5 0 80zM112 32c10 13.4 16 30 16 48l0 304c0 35.3 28.7 64 64 64s64-28.7 64-64l0-5.3c0-32.4 26.3-58.7 58.7-58.7L480 320l0-192c0-53-43-96-96-96L112 32zM464 480c61.9 0 112-50.1 112-112c0-8.8-7.2-16-16-16l-245.3 0c-14.7 0-26.7 11.9-26.7 26.7l0 5.3c0 53-43 96-96 96l176 0 96 0z"],
+    "paper-plane": [512, 512, [], "", "M16.1 260.2c-22.6 12.9-20.5 47.3 3.6 57.3L160 376l0 103.3c0 18.1 14.6 32.7 32.7 32.7c9.7 0 18.9-4.3 25.1-11.8l62-74.3 123.9 51.6c18.9 7.9 40.8-4.5 43.9-24.7l64-416c1.9-12.1-3.4-24.3-13.5-31.2s-23.3-7.5-34-1.4l-448 256zm52.1 25.5L409.7 90.6 190.1 336l1.2 1L68.2 285.7zM403.3 425.4L236.7 355.9 450.8 116.6 403.3 425.4z"],
     "floppy-disk": [448, 512, ["save"], "regular", "M48 96l0 320c0 8.8 7.2 16 16 16l320 0c8.8 0 16-7.2 16-16l0-245.5c0-4.2-1.7-8.3-4.7-11.3l33.9-33.9c12 12 18.7 28.3 18.7 45.3L448 416c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96C0 60.7 28.7 32 64 32l245.5 0c17 0 33.3 6.7 45.3 18.7l74.5 74.5-33.9 33.9L320.8 84.7c-.3-.3-.5-.5-.8-.8L320 184c0 13.3-10.7 24-24 24l-192 0c-13.3 0-24-10.7-24-24L80 80 64 80c-8.8 0-16 7.2-16 16zm80-16l0 80 144 0 0-80L128 80zm32 240a64 64 0 1 1 128 0 64 64 0 1 1 -128 0z"],
     "download": [512, 512, [], "solid", "M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 242.7-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7 288 32zM64 352c-35.3 0-64 28.7-64 64l0 32c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-32c0-35.3-28.7-64-64-64l-101.5 0-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352 64 352zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"],
     "upload": [512, 512, [], "solid", "M288 109.3L288 352c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-242.7-73.4 73.4c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l128-128c12.5-12.5 32.8-12.5 45.3 0l128 128c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L288 109.3zM64 352l128 0c0 35.3 28.7 64 64 64s64-28.7 64-64l128 0c35.3 0 64 28.7 64 64l0 32c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64l0-32c0-35.3 28.7-64 64-64zM432 456a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"],
@@ -12970,6 +13138,7 @@ LX.ICONS = {
     "eye": [576, 512, [], "regular", "M288 80c-65.2 0-118.8 29.6-159.9 67.7C89.6 183.5 63 226 49.4 256c13.6 30 40.2 72.5 78.6 108.3C169.2 402.4 222.8 432 288 432s118.8-29.6 159.9-67.7C486.4 328.5 513 286 526.6 256c-13.6-30-40.2-72.5-78.6-108.3C406.8 109.6 353.2 80 288 80zM95.4 112.6C142.5 68.8 207.2 32 288 32s145.5 36.8 192.6 80.6c46.8 43.5 78.1 95.4 93 131.1c3.3 7.9 3.3 16.7 0 24.6c-14.9 35.7-46.2 87.7-93 131.1C433.5 443.2 368.8 480 288 480s-145.5-36.8-192.6-80.6C48.6 356 17.3 304 2.5 268.3c-3.3-7.9-3.3-16.7 0-24.6C17.3 208 48.6 156 95.4 112.6zM288 336c44.2 0 80-35.8 80-80s-35.8-80-80-80c-.7 0-1.3 0-2 0c1.3 5.1 2 10.5 2 16c0 35.3-28.7 64-64 64c-5.5 0-10.9-.7-16-2c0 .7 0 1.3 0 2c0 44.2 35.8 80 80 80zm0-208a128 128 0 1 1 0 256 128 128 0 1 1 0-256z"],
     "eye-slash": [640, 512, [], "regular", "M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zm151 118.3C226 97.7 269.5 80 320 80c65.2 0 118.8 29.6 159.9 67.7C518.4 183.5 545 226 558.6 256c-12.6 28-36.6 66.8-70.9 100.9l-53.8-42.2c9.1-17.6 14.2-37.5 14.2-58.7c0-70.7-57.3-128-128-128c-32.2 0-61.7 11.9-84.2 31.5l-46.1-36.1zM394.9 284.2l-81.5-63.9c4.2-8.5 6.6-18.2 6.6-28.3c0-5.5-.7-10.9-2-16c.7 0 1.3 0 2 0c44.2 0 80 35.8 80 80c0 9.9-1.8 19.4-5.1 28.2zm9.4 130.3C378.8 425.4 350.7 432 320 432c-65.2 0-118.8-29.6-159.9-67.7C121.6 328.5 95 286 81.4 256c8.3-18.4 21.5-41.5 39.4-64.8L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5l-41.9-33zM192 256c0 70.7 57.3 128 128 128c13.3 0 26.1-2 38.2-5.8L302 334c-23.5-5.4-43.1-21.2-53.7-42.3l-56.1-44.2c-.2 2.8-.3 5.6-.3 8.5z"],
     "comment": [512, 512, [], "regular", "M123.6 391.3c12.9-9.4 29.6-11.8 44.6-6.4c26.5 9.6 56.2 15.1 87.8 15.1c124.7 0 208-80.5 208-160s-83.3-160-208-160S48 160.5 48 240c0 32 12.4 62.8 35.7 89.2c8.6 9.7 12.8 22.5 11.8 35.5c-1.4 18.1-5.7 34.7-11.3 49.4c17-7.9 31.1-16.7 39.4-22.7zM21.2 431.9c1.8-2.7 3.5-5.4 5.1-8.1c10-16.6 19.5-38.4 21.4-62.9C17.7 326.8 0 285.1 0 240C0 125.1 114.6 32 256 32s256 93.1 256 208s-114.6 208-256 208c-37.1 0-72.3-6.4-104.1-17.9c-11.9 8.7-31.3 20.6-54.3 30.6c-15.1 6.6-32.3 12.6-50.1 16.1c-.8 .2-1.6 .3-2.4 .5c-4.4 .8-8.7 1.5-13.2 1.9c-.2 0-.5 .1-.7 .1c-5.1 .5-10.2 .8-15.3 .8c-6.5 0-12.3-3.9-14.8-9.9c-2.5-6-1.1-12.8 3.4-17.4c4.1-4.2 7.8-8.7 11.3-13.5c1.7-2.3 3.3-4.6 4.8-6.9l.3-.5z"],
+    "comments": [640, 512, [], "regular", "M88.2 309.1c9.8-18.3 6.8-40.8-7.5-55.8C59.4 230.9 48 204 48 176c0-63.5 63.8-128 160-128s160 64.5 160 128s-63.8 128-160 128c-13.1 0-25.8-1.3-37.8-3.6c-10.4-2-21.2-.6-30.7 4.2c-4.1 2.1-8.3 4.1-12.6 6c-16 7.2-32.9 13.5-49.9 18c2.8-4.6 5.4-9.1 7.9-13.6c1.1-1.9 2.2-3.9 3.2-5.9zM208 352c114.9 0 208-78.8 208-176S322.9 0 208 0S0 78.8 0 176c0 41.8 17.2 80.1 45.9 110.3c-.9 1.7-1.9 3.5-2.8 5.1c-10.3 18.4-22.3 36.5-36.6 52.1c-6.6 7-8.3 17.2-4.6 25.9C5.8 378.3 14.4 384 24 384c43 0 86.5-13.3 122.7-29.7c4.8-2.2 9.6-4.5 14.2-6.8c15.1 3 30.9 4.5 47.1 4.5zM432 480c16.2 0 31.9-1.6 47.1-4.5c4.6 2.3 9.4 4.6 14.2 6.8C529.5 498.7 573 512 616 512c9.6 0 18.2-5.7 22-14.5c3.8-8.8 2-19-4.6-25.9c-14.2-15.6-26.2-33.7-36.6-52.1c-.9-1.7-1.9-3.4-2.8-5.1C622.8 384.1 640 345.8 640 304c0-94.4-87.9-171.5-198.2-175.8c4.1 15.2 6.2 31.2 6.2 47.8l0 .6c87.2 6.7 144 67.5 144 127.4c0 28-11.4 54.9-32.7 77.2c-14.3 15-17.3 37.6-7.5 55.8c1.1 2 2.2 4 3.2 5.9c2.5 4.5 5.2 9 7.9 13.6c-17-4.5-33.9-10.7-49.9-18c-4.3-1.9-8.5-3.9-12.6-6c-9.5-4.8-20.3-6.2-30.7-4.2c-12.1 2.4-24.8 3.6-37.8 3.6c-61.7 0-110-26.5-136.8-62.3c-16 5.4-32.8 9.4-50 11.8C279 439.8 350 480 432 480z"],
     "message": [512, 512, [], "regular", "M160 368c26.5 0 48 21.5 48 48l0 16 72.5-54.4c8.3-6.2 18.4-9.6 28.8-9.6L448 368c8.8 0 16-7.2 16-16l0-288c0-8.8-7.2-16-16-16L64 48c-8.8 0-16 7.2-16 16l0 288c0 8.8 7.2 16 16 16l96 0zm48 124l-.2 .2-5.1 3.8-17.1 12.8c-4.8 3.6-11.3 4.2-16.8 1.5s-8.8-8.2-8.8-14.3l0-21.3 0-6.4 0-.3 0-4 0-48-48 0-48 0c-35.3 0-64-28.7-64-64L0 64C0 28.7 28.7 0 64 0L448 0c35.3 0 64 28.7 64 64l0 288c0 35.3-28.7 64-64 64l-138.7 0L208 492z"],
     "folder": [512, 512, [], "regular", "M0 96C0 60.7 28.7 32 64 32l132.1 0c19.1 0 37.4 7.6 50.9 21.1L289.9 96 448 96c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zM64 80c-8.8 0-16 7.2-16 16l0 320c0 8.8 7.2 16 16 16l384 0c8.8 0 16-7.2 16-16l0-256c0-8.8-7.2-16-16-16l-161.4 0c-10.6 0-20.8-4.2-28.3-11.7L213.1 87c-4.5-4.5-10.6-7-17-7L64 80z"],
     "folder-closed": [512, 512, [], "regular", "M251.7 127.6s0 0 0 0c10.5 10.5 24.7 16.4 39.6 16.4L448 144c8.8 0 16 7.2 16 16l0 32L48 192l0-96c0-8.8 7.2-16 16-16l133.5 0c4.2 0 8.3 1.7 11.3 4.7l33.9-33.9L208.8 84.7l42.9 42.9zM48 240l416 0 0 176c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16l0-176zM285.7 93.7L242.7 50.7c-12-12-28.3-18.7-45.3-18.7L64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-256c0-35.3-28.7-64-64-64L291.3 96c-2.1 0-4.2-.8-5.7-2.3z"],
@@ -12983,27 +13152,33 @@ LX.ICONS = {
     "up": [448, 512, [], "solid", "M201.4 137.4c12.5-12.5 32.8-12.5 45.3 0l160 160c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L224 205.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l160-160z"],
     "down": [448, 512, [], "solid", "M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"],
     "arrows": [512, 512, ["arrows-up-down-left-right"], "solid", "M278.6 9.4c-12.5-12.5-32.8-12.5-45.3 0l-64 64c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l9.4-9.4L224 224l-114.7 0 9.4-9.4c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-64 64c-12.5 12.5-12.5 32.8 0 45.3l64 64c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-9.4-9.4L224 288l0 114.7-9.4-9.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l64 64c12.5 12.5 32.8 12.5 45.3 0l64-64c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-9.4 9.4L288 288l114.7 0-9.4 9.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l64-64c12.5-12.5 12.5-32.8 0-45.3l-64-64c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l9.4 9.4L288 224l0-114.7 9.4 9.4c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-64-64z"],
+    "arrow-pointer": [320, 512, [], "solid", "M0 55.2L0 426c0 12.2 9.9 22 22 22c6.3 0 12.4-2.7 16.6-7.5L121.2 346l58.1 116.3c7.9 15.8 27.1 22.2 42.9 14.3s22.2-27.1 14.3-42.9L179.8 320l118.1 0c12.2 0 22.1-9.9 22.1-22.1c0-6.3-2.7-12.3-7.4-16.5L38.6 37.9C34.3 34.1 28.9 32 23.2 32C10.4 32 0 42.4 0 55.2z"],
+    "reply": [24, 24, [], "regular", "M9 17L4 12L9 7M4 12H16A4 4 0 0 1 20 16V18", null, "fill=none stroke-width=2 stroke-linejoin=round stroke-linecap=round"],
+    "reply-all": [24, 24, [], "regular", "M7 17L2 12L7 7M12 17L7 12L12 7M7 12H18A4 4 0 0 1 22 16V18", null, "fill=none stroke-width=2 stroke-linejoin=round stroke-linecap=round"],
+    "forward": [24, 24, [], "regular", "M15 17L20 12L15 7M4 18V16A4 4 0 0 1 8 12H20", null, "fill=none stroke-width=2 stroke-linejoin=round stroke-linecap=round"],
     "rotate": [512, 512, [], "solid", "M142.9 142.9c-17.5 17.5-30.1 38-37.8 59.8c-5.9 16.7-24.2 25.4-40.8 19.5s-25.4-24.2-19.5-40.8C55.6 150.7 73.2 122 97.6 97.6c87.2-87.2 228.3-87.5 315.8-1L455 55c6.9-6.9 17.2-8.9 26.2-5.2s14.8 12.5 14.8 22.2l0 128c0 13.3-10.7 24-24 24l-8.4 0c0 0 0 0 0 0L344 224c-9.7 0-18.5-5.8-22.2-14.8s-1.7-19.3 5.2-26.2l41.1-41.1c-62.6-61.5-163.1-61.2-225.3 1zM16 312c0-13.3 10.7-24 24-24l7.6 0 .7 0L168 288c9.7 0 18.5 5.8 22.2 14.8s1.7 19.3-5.2 26.2l-41.1 41.1c62.6 61.5 163.1 61.2 225.3-1c17.5-17.5 30.1-38 37.8-59.8c5.9-16.7 24.2-25.4 40.8-19.5s25.4 24.2 19.5 40.8c-10.8 30.6-28.4 59.3-52.9 83.8c-87.2 87.2-228.3 87.5-315.8 1L57 457c-6.9 6.9-17.2 8.9-26.2 5.2S16 449.7 16 440l0-119.6 0-.7 0-7.6z"],
     "rotate-right": [512, 512, ["rotate-forward"], "solid", "M463.5 224l8.5 0c13.3 0 24-10.7 24-24l0-128c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1c-87.5 87.5-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8l119.5 0z"],
     "rotate-left": [512, 512, ["rotate-back"], "solid", "M48.5 224L40 224c-13.3 0-24-10.7-24-24L16 72c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2L98.6 96.6c87.6-86.5 228.7-86.2 315.8 1c87.5 87.5 87.5 229.3 0 316.8s-229.3 87.5-316.8 0c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0c62.5 62.5 163.8 62.5 226.3 0s62.5-163.8 0-226.3c-62.2-62.2-162.7-62.5-225.3-1L185 183c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8L48.5 224z"],
-    "arrow-pointer": [320, 512, [], "solid", "M0 55.2L0 426c0 12.2 9.9 22 22 22c6.3 0 12.4-2.7 16.6-7.5L121.2 346l58.1 116.3c7.9 15.8 27.1 22.2 42.9 14.3s22.2-27.1 14.3-42.9L179.8 320l118.1 0c12.2 0 22.1-9.9 22.1-22.1c0-6.3-2.7-12.3-7.4-16.5L38.6 37.9C34.3 34.1 28.9 32 23.2 32C10.4 32 0 42.4 0 55.2z"],
     "hand-pointer": [448, 512, [], "regular", "M160 64c0-8.8 7.2-16 16-16s16 7.2 16 16l0 136c0 10.3 6.6 19.5 16.4 22.8s20.6-.1 26.8-8.3c3-3.9 7.6-6.4 12.8-6.4c8.8 0 16 7.2 16 16c0 10.3 6.6 19.5 16.4 22.8s20.6-.1 26.8-8.3c3-3.9 7.6-6.4 12.8-6.4c7.8 0 14.3 5.6 15.7 13c1.6 8.2 7.3 15.1 15.1 18s16.7 1.6 23.3-3.6c2.7-2.1 6.1-3.4 9.9-3.4c8.8 0 16 7.2 16 16l0 16 0 104c0 39.8-32.2 72-72 72l-56 0-59.8 0-.9 0c-37.4 0-72.4-18.7-93.2-49.9L50.7 312.9c-4.9-7.4-2.9-17.3 4.4-22.2s17.3-2.9 22.2 4.4L116 353.2c5.9 8.8 16.8 12.7 26.9 9.7s17-12.4 17-23l0-19.9 0-256zM176 0c-35.3 0-64 28.7-64 64l0 197.7C91.2 238 55.5 232.8 28.5 250.7C-.9 270.4-8.9 310.1 10.8 339.5L78.3 440.8c29.7 44.5 79.6 71.2 133.1 71.2l.9 0 59.8 0 56 0c66.3 0 120-53.7 120-120l0-104 0-16c0-35.3-28.7-64-64-64c-4.5 0-8.8 .5-13 1.3c-11.7-15.4-30.2-25.3-51-25.3c-6.9 0-13.5 1.1-19.7 3.1C288.7 170.7 269.6 160 248 160c-2.7 0-5.4 .2-8 .5L240 64c0-35.3-28.7-64-64-64zm48 304c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 96c0 8.8 7.2 16 16 16s16-7.2 16-16l0-96zm48-16c-8.8 0-16 7.2-16 16l0 96c0 8.8 7.2 16 16 16s16-7.2 16-16l0-96c0-8.8-7.2-16-16-16zm80 16c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 96c0 8.8 7.2 16 16 16s16-7.2 16-16l0-96z"],
     "log-in": [512, 512, [], "solid", "M352 96l64 0c17.7 0 32 14.3 32 32l0 256c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0c53 0 96-43 96-96l0-256c0-53-43-96-96-96l-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32zm-9.4 182.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L242.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128z"],
     "log-out": [512, 512, [], "solid", "M502.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 224 192 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128zM160 96c17.7 0 32-14.3 32-32s-14.3-32-32-32L96 32C43 32 0 75 0 128L0 384c0 53 43 96 96 96l64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32l64 0z"],
-    "menu-arrows": [512, 512, [], "solid", "M352 144l96 112-96 112M160 144L64 256l96 112", "transform=rotate(90)", "fill=none stroke=currentColor stroke-width=60 stroke-linejoin=round stroke-linecap=round"],
+    "menu-arrows": [512, 512, [], "solid", "M352 144l96 112-96 112M160 144L64 256l96 112", "transform=rotate(90)", "fill=none stroke-width=60 stroke-linejoin=round stroke-linecap=round"],
     "more": [128, 512, [], "solid", "M64 360a56 56 0 1 0 0 112 56 56 0 1 0 0-112zm0-160a56 56 0 1 0 0 112 56 56 0 1 0 0-112zM120 96A56 56 0 1 0 8 96a56 56 0 1 0 112 0z"],
     "minus": [448, 512, [], "solid", "M432 256c0 17.7-14.3 32-32 32L48 288c-17.7 0-32-14.3-32-32s14.3-32 32-32l352 0c17.7 0 32 14.3 32 32z"],
     "more-horizontal": [448, 512, [], "solid", "M8 256a56 56 0 1 1 112 0A56 56 0 1 1 8 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z"],
     "plus": [448, 512, [], "solid", "M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"],
     "circle-plus": [24, 24, [], "regular", "M12 8V16M8 12H16M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z", null, "fill=none stroke-width=2 stroke-linecap=round stroke-linejoin=round"],
+    "circle-info": [24, 24, [], "regular", "M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20ZM12 8v4M12 16h.01", null, "fill=none stroke-width=2 stroke-linejoin=round stroke-linecap=round"],
     "search": [512, 512, [], "solid", "M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"],
     "compass": [512, 512, [], "regular", "M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm306.7 69.1L162.4 380.6c-19.4 7.5-38.5-11.6-31-31l55.5-144.3c3.3-8.5 9.9-15.1 18.4-18.4l144.3-55.5c19.4-7.5 38.5 11.6 31 31L325.1 306.7c-3.2 8.5-9.9 15.1-18.4 18.4zM288 256a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"],
-    "sidebar": [512, 512, [], "regular", "M64 64h384a32 32 0 0 1 32 32v320a32 32 0 0 1-32 32H64a32 32 0 0 1-32-32V96a32 32 0 0 1 32-32zm128 0v384", null, "fill=none stroke=currentColor stroke-width=50 stroke-linejoin=round stroke-linecap=round"],
+    "clock": [512, 512, [], "regular", "M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120l0 136c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2 280 120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"],
+    "sidebar": [512, 512, [], "regular", "M64 64h384a32 32 0 0 1 32 32v320a32 32 0 0 1-32 32H64a32 32 0 0 1-32-32V96a32 32 0 0 1 32-32zm128 0v384", null, "fill=none stroke-width=50 stroke-linejoin=round stroke-linecap=round"],
     "table-cells": [512, 512, [], "solid", "M64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zm88 64l0 64-88 0 0-64 88 0zm56 0l88 0 0 64-88 0 0-64zm240 0l0 64-88 0 0-64 88 0zM64 224l88 0 0 64-88 0 0-64zm232 0l0 64-88 0 0-64 88 0zm64 0l88 0 0 64-88 0 0-64zM152 352l0 64-88 0 0-64 88 0zm56 0l88 0 0 64-88 0 0-64zm240 0l0 64-88 0 0-64 88 0z"],
     "table-cells-large": [512, 512, [], "solid", "M448 96l0 128-160 0 0-128 160 0zm0 192l0 128-160 0 0-128 160 0zM224 224L64 224 64 96l160 0 0 128zM64 288l160 0 0 128L64 416l0-128zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32z"],
     "lightbulb": [384, 512, [], "regular", "M297.2 248.9C311.6 228.3 320 203.2 320 176c0-70.7-57.3-128-128-128S64 105.3 64 176c0 27.2 8.4 52.3 22.8 72.9c3.7 5.3 8.1 11.3 12.8 17.7c0 0 0 0 0 0c12.9 17.7 28.3 38.9 39.8 59.8c10.4 19 15.7 38.8 18.3 57.5L109 384c-2.2-12-5.9-23.7-11.8-34.5c-9.9-18-22.2-34.9-34.5-51.8c0 0 0 0 0 0s0 0 0 0c-5.2-7.1-10.4-14.2-15.4-21.4C27.6 247.9 16 213.3 16 176C16 78.8 94.8 0 192 0s176 78.8 176 176c0 37.3-11.6 71.9-31.4 100.3c-5 7.2-10.2 14.3-15.4 21.4c0 0 0 0 0 0s0 0 0 0c-12.3 16.8-24.6 33.7-34.5 51.8c-5.9 10.8-9.6 22.5-11.8 34.5l-48.6 0c2.6-18.7 7.9-38.6 18.3-57.5c11.5-20.9 26.9-42.1 39.8-59.8c0 0 0 0 0 0s0 0 0 0s0 0 0 0c4.7-6.4 9-12.4 12.7-17.7zM192 128c-26.5 0-48 21.5-48 48c0 8.8-7.2 16-16 16s-16-7.2-16-16c0-44.2 35.8-80 80-80c8.8 0 16 7.2 16 16s-7.2 16-16 16zm0 384c-44.2 0-80-35.8-80-80l0-16 160 0 0 16c0 44.2-35.8 80-80 80z"],
     "flag": [448, 512, [], "regular", "M48 24C48 10.7 37.3 0 24 0S0 10.7 0 24L0 64 0 350.5 0 400l0 88c0 13.3 10.7 24 24 24s24-10.7 24-24l0-100 80.3-20.1c41.1-10.3 84.6-5.5 122.5 13.4c44.2 22.1 95.5 24.8 141.7 7.4l34.7-13c12.5-4.7 20.8-16.6 20.8-30l0-279.7c0-23-24.2-38-44.8-27.7l-9.6 4.8c-46.3 23.2-100.8 23.2-147.1 0c-35.1-17.6-75.4-22-113.5-12.5L48 52l0-28zm0 77.5l96.6-24.2c27-6.7 55.5-3.6 80.4 8.8c54.9 27.4 118.7 29.7 175 6.8l0 241.8-24.4 9.1c-33.7 12.6-71.2 10.7-103.4-5.4c-48.2-24.1-103.3-30.1-155.6-17.1L48 338.5l0-237z"],
     "shuffle": [512, 512, [], "solid", "M403.8 34.4c12-5 25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6l0-32-32 0c-10.1 0-19.6 4.7-25.6 12.8L284 229.3 244 176l31.2-41.6C293.3 110.2 321.8 96 352 96l32 0 0-32c0-12.9 7.8-24.6 19.8-29.6zM164 282.7L204 336l-31.2 41.6C154.7 401.8 126.2 416 96 416l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l64 0c10.1 0 19.6-4.7 25.6-12.8L164 282.7zm274.6 188c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6l0-32-32 0c-30.2 0-58.7-14.2-76.8-38.4L121.6 172.8c-6-8.1-15.5-12.8-25.6-12.8l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l64 0c30.2 0 58.7 14.2 76.8 38.4L326.4 339.2c6 8.1 15.5 12.8 25.6 12.8l32 0 0-32c0-12.9 7.8-24.6 19.8-29.6s25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64z"],
+    "shopping-cart": [24, 24, [], "regular", "M8 20a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM19 20a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12", null, "fill=none stroke-width=2 stroke-linecap=round stroke-linejoin=round"],
     "credit-card": [576, 512, [], "regular", "M512 80c8.8 0 16 7.2 16 16l0 32L48 128l0-32c0-8.8 7.2-16 16-16l448 0zm16 144l0 192c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16l0-192 480 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l448 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zm56 304c-13.3 0-24 10.7-24 24s10.7 24 24 24l48 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-48 0zm128 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l112 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-112 0z"],
     "lock": [448, 512, [], "solid", "M144 144l0 48 160 0 0-48c0-44.2-35.8-80-80-80s-80 35.8-80 80zM80 192l0-48C80 64.5 144.5 0 224 0s144 64.5 144 144l0 48 16 0c35.3 0 64 28.7 64 64l0 192c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 256c0-35.3 28.7-64 64-64l16 0z"],
     "lock-open": [576, 512, [], "solid", "M352 144c0-44.2 35.8-80 80-80s80 35.8 80 80l0 48c0 17.7 14.3 32 32 32s32-14.3 32-32l0-48C576 64.5 511.5 0 432 0S288 64.5 288 144l0 48L64 192c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-192c0-35.3-28.7-64-64-64l-32 0 0-48z"],

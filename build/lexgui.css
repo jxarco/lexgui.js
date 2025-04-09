@@ -34,7 +34,7 @@
     --global-text-secondary: light-dark(#262627, #d1d1d3);
     --global-text-tertiary: light-dark(#3c3c3df5, #aaaaaa);
     --global-text-quaternary: light-dark(#515152f5, #807f7f);
-    --global-intense-background: light-dark(#fefefe, #030304);
+    --global-intense-background: light-dark(#fefefe, #040405);
     --global-medium-background: #252525;
     --global-blur-background: light-dark(#f7f7f7d8, #1f1f1fe7);
     --global-color-transparent: #00000000;
@@ -182,6 +182,7 @@ body {
     margin: 0;
     padding: 0;
     font-family: var(--global-font);
+    background-color: var(--global-color-primary);
 }
 
 *,
@@ -332,7 +333,7 @@ svg.xxl { width: var(--svg-size-xxl); height: var(--svg-size-xxl); }
     outline: none;
 }
 
-:root[data-strictVP="false"] {
+:root[data-strictVP="false"] #lexroot {
     bottom: unset;
 }
 
@@ -344,8 +345,11 @@ svg.xxl { width: var(--svg-size-xxl); height: var(--svg-size-xxl); }
     max-width: 256px;
 }
 
-.lexicon {
+.lock {
     margin-left: 4px;
+}
+
+.lexicon {
     cursor: pointer;
     line-height: inherit !important;
     color: var(--global-text-secondary);
@@ -896,13 +900,43 @@ a svg, svg path {
 
 /* Generic */
 
-.lexcontainer {
-    display: flex;
-    flex-direction: row;
+.lexcontainer.wrapper {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 1400px;
+    border: 0px solid var(--global-color-tertiary);
 }
 
-.lexcontainer.col {
-    flex-direction: column;
+@media (min-width: 1400px) {
+    .lexcontainer.wrapper {
+        border-left-width: 1px;
+        border-right-width: 1px;
+    }
+}
+
+@media (min-width: 1800px) {
+    .lexcontainer.wrapper {
+        max-width: 1536px;
+    }
+}
+
+.lextooltip {
+    position: fixed;
+    background-color: var(--global-text-primary);
+    color: var(--global-color-primary);
+    font-size: var(--global-font-size-sm);
+    padding: 0.2rem;
+    padding-inline: 0.5rem;
+    border-radius: 0.4rem;
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    animation-duration: 400ms;
+	animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+	will-change: transform, opacity;
+    animation-name: slideUpAndFade;
+}
+
+.lextooltip[data-closed] {
+    opacity: 0;
 }
 
 /* Dropdown Menu */
@@ -1067,7 +1101,6 @@ a svg, svg path {
 
 .lexsplitbar.vertical {
     cursor: ns-resize;
-    transform: translateY(-3px);
     left: calc(50% - 32px);
 }
 
@@ -1095,6 +1128,9 @@ a svg, svg path {
 .lexbranch {
     width: 100%;
     border-radius: 6px;
+}
+
+.lexpanel .lexbranch:not(:last-of-type) {
     margin-bottom: 4px !important;
 }
 
@@ -1107,7 +1143,6 @@ a svg, svg path {
 
 .lexbranch.last .lexbranchcontent {
     overflow: hidden;
-    margin-bottom: 6px;
 }
 
 .lexbranchtitle {
@@ -1175,10 +1210,6 @@ a svg, svg path {
     font-size: var(--global-font-size);
     margin-right: 12px;
     align-content: center;
-}
-
-.lexbranch.first .lexbranchtitle {
-    margin-top: 4px;
 }
 
 .lexbranch.last.closed .lexbranchtitle {
@@ -1297,9 +1328,12 @@ a svg, svg path {
 
 .lexwidget .inputicon {
     padding: 6px;
-    font-size: var(--global-font-size-sm);
+    font-size: var(--global-font-size-xs);
     align-self: center;
     text-align: center;
+    margin-left: 4px;
+    position: absolute;
+    z-index: 1;
 }
 
 .lexseparator {
@@ -1356,7 +1390,7 @@ a svg, svg path {
     border-radius: 6px;
     position: relative;
     border: 1px solid transparent;
-    padding: 4px 12px !important;
+    padding: 6px 12px;
 }
 
 .lexwidget .lextext:disabled {
@@ -1418,6 +1452,25 @@ a svg, svg path {
     border-radius: 6px;
     border: 1px solid var(--global-color-transparent);
     transition: 0.1s linear;
+}
+
+.lexwidget textarea.outline {
+    background: var(--global-color-primary);
+    border: 1px solid #7a797c4f;
+}
+
+.lexwidget textarea.nobg {
+    background: none;
+    border: 1px solid transparent;
+}
+
+.lexwidget textarea.dashed {
+    background: var(--global-color-primary);
+    border: 1px dashed #7a797c4f;
+}
+
+.lexwidget textarea.outline:hover, .lexwidget .lextext.nobg:hover {
+    background: none;
 }
 
 .lexwidget textarea:disabled {
@@ -2547,12 +2600,11 @@ input[type=number] {
 .lextree .lextreetools {
     background: var(--global-color-tertiary);
     padding: 2px;
-    padding-left: 6px;
-    padding-right: 6px;
+    padding-inline: 8px;
     display: flex;
     align-items: center;
     border-radius: 10px;
-    margin-top: 4px;
+    gap: 0.5rem;
 }
 
 .lexwidget.nobranch .lextree .lextreetools {
@@ -2572,10 +2624,6 @@ input[type=number] {
     /* padding-top: 14px; */
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
-}
-
-.lextree .lextreetools a {
-    margin-right: 8px;
 }
 
 .lextree span {
@@ -2795,7 +2843,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexbadge {
     border-radius: 0.35rem;
-    color: #fff;
+    color: var(--global-text-primary);
     border: 1px solid var(--badge-color, #14171a);
     width: fit-content;
     justify-content: center;
@@ -2820,6 +2868,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     box-shadow: none;
     background-color: #0000;
     background-image: none;
+}
+.lexbadge.no-bg {
+    background: none;
+    border: none;
 }
 /* Sizes */
 .lexbadge.xs { padding-inline: 0.4rem; font-size: var(--global-font-size-xs); }
@@ -2874,7 +2926,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexmenubox {
-    position: absolute;
+    position: fixed;
     z-index: 1001;
     background-color: #111111f3;
     border: 1px solid #aaaaaa48;
@@ -3066,8 +3118,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexcontextmenu {
     z-index: 102;
-    position: absolute;
-    /* padding-right: 20px; */
+    position: fixed;
     border-radius: 6px;
     box-shadow: 0 0 6px rgba(46, 46, 46, 0.2) !important;
     background-color: var(--global-blur-background);
@@ -3170,7 +3221,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     padding: 10px;
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
 }
 
 .lexsidebar *::-webkit-scrollbar {
@@ -3201,8 +3251,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexsidebarseparator {
-    background-color: #5251514d;
-    width: 100%;
+    background-color: var(--global-color-tertiary);
+    width: calc(100% + 20px);
     height: 1px;
     margin: 0 auto;
     margin-top: 0.4rem;
@@ -3212,7 +3262,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexsidebar .lexsidebarfilter {
     transform: translate(0, 0);
     opacity: 1;
-    margin-block: 0.5rem;
+    margin-bottom: 0.5rem;
     transition: all 0.2s cubic-bezier(0,0,.2,1);
 }
 
@@ -3253,8 +3303,9 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexsidebar .lexsidebarentry {
     width: 100%;
-    padding: 6px;
     padding-inline: 8px;
+    padding-block: 6px;
+    margin-block: 0.15rem;
     border-radius: 8px;
     cursor: pointer;
     -webkit-user-select: none;
@@ -3283,7 +3334,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     transform: scale(0.99);
 }
 
-.lexsidebar .lexsidebarentry div {
+.lexsidebar .lexsidebarentry .lexsidebarentrycontent {
+    font-weight: 500;
     display: flex;
     gap: 0.8em;
     margin: 0;
@@ -3291,22 +3343,26 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     opacity: 0.95;
 }
 
-.lexsidebar .lexsidebarentry div i {
+.lexsidebar .lexsidebarentry .lexsidebarentrycontent i {
     min-width: 22px;
     max-width: 22px;
     margin: auto 0;
     text-align: center;
-    margin-left: -2px;
+    font-size: var(--global-font-size-lg);
 }
 
-.lexsidebar .lexsidebarentry div a:not(.lexicon) {
+.lexsidebar .lexsidebarentry .lexsidebarentrycontent a:not(.lexicon) {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     align-content: center;
 }
 
-.lexsidebar .lexsidebarentry a.lexicon {
+.lexsidebar .lexsidebarentry .lexsidebarentryicon {
+    margin-left: 2px;
+}
+
+.lexsidebar .lexsidebarentry a.lexicon:not(.lexsidebarentryicon) {
     margin-left: auto;
 }
 
@@ -3362,30 +3418,16 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     display: none !important;
 }
 
-.lexsidebar.collapsed .lexsidebarcontent div a {
+.lexsidebar.collapsed .lexsidebarentrycontent div, .lexsidebar.collapsed .lexsidebarcontent div a:not(.lexsidebarentryicon) {
     display: none;
 }
 
-.lexsidebar .lexsidebarentry .lexsidebarentrydesc {
-    position: absolute;
-    margin-left: 32px;
-    font-weight: 600;
-    background-color: var(--global-text-primary);
-    color: var(--global-color-primary);
-    font-size: var(--global-font-size);
-    border-radius: 6px;
-    text-align: center;
-    opacity: 0;
-    transform: translate(-12px, 0);
-    z-index: 102;
-    padding: 4px 8px;
-    transition: opacity ease-in 0.15s, transform ease-in 0.15s;
-    pointer-events: none;
-}
+.lexsidebar.collapsed .lexsidebarentry:hover {
+    display: flex;
+ }
 
-.lexsidebar.collapsed .lexsidebarentry:hover .lexsidebarentrydesc {
-   opacity: 1;
-   transform: translate(0, 0);
+.lexsidebar .lexsidebarheader {
+    margin-bottom: 0.5rem;
 }
 
 .lexsidebar .lexsidebarfooter, .lexsidebar .lexsidebarheader {
@@ -3627,7 +3669,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     text-align: center;
     align-items: center;
     padding: 3px;
-    color: var(--global-text-secondary);
+    color: var(--global-text-tertiary);
     cursor: pointer;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -3637,9 +3679,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexareatabs .lexareatab.thumb {
-    position: absolute;
     background: var(--global-color-accent);
     z-index: 0;
+    height: 22px;
+    position: absolute;
     transition: linear transform 0.15s;
 }
 
@@ -3647,7 +3690,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     background-color: var(--global-color-tertiary);
     border-radius: 8px;
     padding: 3px;
-    margin: 6px;
     gap: 0.1em;
 }
 
@@ -3656,7 +3698,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     transition: 0.1s;
     background: none;
     border-radius: 6px;
-    color: var(--global-text-secondary);
 }
 
 .lexareatabs.fit {

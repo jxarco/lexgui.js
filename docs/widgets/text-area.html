@@ -20,7 +20,8 @@
     MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addTextArea(name, value, callback, options)")} to add a Text Area Widget to your panel 
         (the <code class='inline'>options</code> are the same as the Text widget) plus:` );
     MAKE_CODE_BULLET_LIST([
-        ["fitHeight", "Boolean", "Make text height adapt to its bounding rect."]
+        ["fitHeight", "Boolean", "Make text height adapt to its bounding rect"],
+        ["resize", "Boolean", " Allow resize [true]"]
     ]);
     MAKE_CODE(`panel.@[mtd]addTextArea@(@"Text Name"@, @"Text value"@, (value, event) =&gt; {
     console.@[mtd]log@(value);

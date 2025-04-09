@@ -4,10 +4,14 @@
 
     MAKE_HEADER( "Icons", "h1", "icons" );
 
-    MAKE_PARAGRAPH( `LexGUI offers a collection of the most common SVG icons used within application interfaces 
-    (mostly from ${ INLINE_LINK( "FontAwesome", "https://fontawesome.com/" ) } and ${ INLINE_LINK( "SVGRepo", "https://www.svgrepo.com/" ) }):` );
+    MAKE_PARAGRAPH( `LexGUI offers a collection of the most common SVG icons used within application interfaces. All the icons have been collected mostly from
+    ${ INLINE_LINK( "FontAwesome", "https://fontawesome.com/" ) }, ${ INLINE_LINK( "SVGRepo", "https://www.svgrepo.com/" ) } and ${ INLINE_LINK( "Iconify.design", "https://iconify.design/" ) }.` );
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH( `If LexGUI doesn't have the icon you are looking for, get the SVG string of your icon from anywhere (it must contain one path) and use ${ INLINE_CODE( "LX.registerIcon(name, svgString, category, aliases)" ) }
+     to allow using it inside LexGUI. ` );
     
     {
+        const params = new URLSearchParams( document.location.search );
         const content = document.getElementById('content');
         const area = new LX.Area( { skipAppend: true, height: "auto" } );
         const panel = area.addPanel();
@@ -21,7 +25,7 @@
                 continue;
             }
 
-            let name =  INLINE_CODE( i );
+            let name = INLINE_CODE( i );
             LX.ICONS[ i ][ 2 ].forEach( o => name += ` ; ${ INLINE_CODE( o ) }` );
             tableBody.push( [name, LX.makeIcon( i, null, "lg" ).innerHTML, LX.ICONS[ i ][ 3 ] ] );
         }
@@ -49,6 +53,10 @@
         }, {
             centered: [1, 2],
             filter: "Name",
+            filterValue: params.get( "filter" ),
+            customFilters: [
+                { name: "Category", options: ["brands", "regular", "solid"] }
+            ],
             rowActions: [
                 { icon: "copy", title: "Copy SVG", callback: ( rowData, tableDom, event ) => { copySVG( rowData[ 1 ], event ) } }, // custom: you can change the data and refresh will be called later!
             ],
