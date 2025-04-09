@@ -255,6 +255,11 @@
 .h-full { height: 100% }
 .h-screen { height: 100vh }
 
+.resize-none { resize: none }
+
+.size-fixed { field-sizing: fixed }
+.size-content { field-sizing: content }
+
 /* Positioning */
 
 .relative { position: relative }

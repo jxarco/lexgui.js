@@ -5611,7 +5611,6 @@ class TextInput extends Widget {
             wValue.className = "lextext " + ( options.inputClass ?? "" );
             wValue.type = options.type || "";
             wValue.value = value || "";
-            wValue.style.width = "100%";
             wValue.style.textAlign = ( options.float ?? "" );
 
             wValue.setAttribute( "placeholder", options.placeholder ?? "" );
@@ -5670,7 +5669,6 @@ class TextInput extends Widget {
 
             const icon = options.warning ? '<i class="fa-solid fa-triangle-exclamation"></i>' : '';
             wValue.innerHTML = ( icon + value ) || "";
-            wValue.style.width = "100%";
             wValue.style.textAlign = options.float ?? "";
             wValue.className = "lextext ellipsis-overflow";
         }
@@ -5682,14 +5680,13 @@ class TextInput extends Widget {
             wValue.disabled = true;
             wValue.innerHTML = icon;
             wValue.value = value;
-            wValue.style.width = "100%";
             wValue.style.textAlign = options.float ?? "";
             wValue.className = "lextext ellipsis-overflow " + ( options.inputClass ?? "" );
         }
 
         if( options.fit )
         {
-            wValue.style.fieldSizing = "content";
+            wValue.classList.add( "size-content" );
         }
 
         Object.assign( wValue.style, options.style ?? {} );
@@ -5737,17 +5734,21 @@ class TextArea extends Widget {
         this.root.appendChild( container );
 
         let wValue = document.createElement( "textarea" );
+        wValue.value = value ?? "";
+        wValue.className = ( options.inputClass ?? "" );
+        wValue.style.textAlign = options.float ?? "";
+        Object.assign( wValue.style, options.style ?? {} );
+
+        if( options.fitHeight )
+        {
+            wValue.classList.add( "size-content" );
+        }
 
         if( !( options.resize ?? true ) )
         {
-            wValue.style.resize = "none";
+            wValue.classList.add( "resize-none" );
         }
 
-        wValue.className = ( options.inputClass ?? "" );
-        wValue.value = wValue.iValue = value || "";
-        wValue.style.width = "100%";
-        wValue.style.textAlign = options.float ?? "";
-        Object.assign( wValue.style, options.style ?? {} );
         container.appendChild( wValue );
 
         if( options.disabled ?? false ) wValue.setAttribute( "disabled", true );
@@ -5783,14 +5784,7 @@ class TextArea extends Widget {
         }
 
         doAsync( () => {
-            container.style.height = options.height;
-
-            if( options.fitHeight )
-            {
-                // Update height depending on the content
-                wValue.style.height = wValue.scrollHeight + "px";
-            }
-
+            container.style.height = options.height ?? "";
             this.onResize();
         }, 10 );
     }

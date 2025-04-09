@@ -1387,6 +1387,7 @@ a svg, svg path {
 /* Text Widget */
 
 .lexwidget input.lextext, .lexwidget div.lextext {
+    width: 100%;
     border-radius: 6px;
     position: relative;
     border: 1px solid transparent;
@@ -1443,6 +1444,7 @@ a svg, svg path {
 /* TextArea Widget */
 
 .lexwidget textarea {
+    width: 100%;
     word-break: break-word;
     font-family: var(--global-font);
     background: none;
