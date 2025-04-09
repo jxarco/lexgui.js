@@ -474,6 +474,7 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
 // Footer
 {
     const footer = new LX.Footer( {
+        className: "border-top",
         parent: LX.root,
         columns: [
             {

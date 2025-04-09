@@ -333,7 +333,7 @@ svg.xxl { width: var(--svg-size-xxl); height: var(--svg-size-xxl); }
     outline: none;
 }
 
-:root[data-strictVP="false"] {
+:root[data-strictVP="false"] #lexroot {
     bottom: unset;
 }
 

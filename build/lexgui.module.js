@@ -10532,11 +10532,12 @@ class Footer {
      * columns: Array with data per column { title, items: [ { title, link } ]  }
      * credits: html string
      * socials: Array with data per item { title, link, iconHtml }
+     * className: Extra class to customize
     */
     constructor( options = {} ) {
 
         const root = document.createElement( "footer" );
-        root.className = "lexfooter";
+        root.className = "lexfooter" + ` ${ options.className ?? "" }`;
 
         const wrapper = document.createElement( "div" );
         wrapper.style.minHeight = "48px";
@@ -10619,8 +10620,9 @@ class Footer {
         // Set always at bottom
         root.previousElementSibling.style.height = "unset";
         root.previousElementSibling.style.flexGrow = "1";
-    }
 
+        this.root = root;
+    }
 }
 
 LX.Footer = Footer;
