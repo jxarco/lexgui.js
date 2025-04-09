@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Represents a array of any basic type of elements which can be modified or deleted and new ones can be added.`);
 
     {
-        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.addArray("Array", ['GPTeam', 'Blat Panthers', 'Blat Bunny'], (value, event) => {
             console.log(value);

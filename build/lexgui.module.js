@@ -488,6 +488,7 @@ LX.makeCollapsible = makeCollapsible;
  * linesAdded (Array):
  * linesRemoved (Array):
  * tabName (String):
+ * className (String): Extra class to customize snippet
  */
 function makeCodeSnippet( code, size, options = { } )
 {
@@ -498,7 +499,7 @@ function makeCodeSnippet( code, size, options = { } )
     }
 
     const snippet = document.createElement( "div" );
-    snippet.className = "lexcodesnippet";
+    snippet.className = "lexcodesnippet " + ( options.className ?? "" );
     snippet.style.width = size ? size[ 0 ] : "auto";
     snippet.style.height = size ? size[ 1 ] : "auto";
     const area = new Area( { noAppend: true } );

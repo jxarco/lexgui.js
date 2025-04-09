@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Represents a list of selectable elements.`);
 
     {
-        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.addList("Volley Teams", ["GPTeam", ["Blat Panthers", "fa-solid fa-paw"], "Blat Bunny"], "Blat Panthers", (value, event) => {
             console.log(value);

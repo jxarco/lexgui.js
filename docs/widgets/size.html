@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Represents a N dimension number size input.`);
 
     {
-        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.addSize("Screen Resolution", [1280, 720], (value, event) => {
             console.log(value);

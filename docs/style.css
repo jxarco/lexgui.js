@@ -39,7 +39,7 @@
 	border-radius: 12px;
 }
 
-#content .lexarea {
+#content .lexarea.docs {
 	padding-block: 1.5em;
 	width: 80% !important;
 	justify-self: center;
@@ -159,7 +159,7 @@ code:not(.inline) {
 	display: none;
 }
 
-#content img {
+#content > img {
 	width: 100%;
 	margin: 16px calc(-1 * var(--page-padding)) ;
 	border-radius: 4px;	

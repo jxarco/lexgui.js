@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Represents a color input. Allows users to select a color using the browser native color picker.`);
 
     {
-        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
             console.log(value);

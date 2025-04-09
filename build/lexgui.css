@@ -4924,7 +4924,7 @@ ul.lexassetscontent {
     width: 48px;
     height: calc(100% - 65px);
     background-color: light-dark(var(--global-color-tertiary), var(--global-medium-background));
-    margin-top: 28px;
+    margin-top: 31px;
     overflow: hidden;
     position: absolute;
     top: 0;
@@ -5099,7 +5099,7 @@ ul.lexassetscontent {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    margin-top: 26px;
+    margin-top: 31px;
     z-index: 1 !important;
     right: 0px;
     pointer-events: none;
@@ -5258,6 +5258,10 @@ ul.lexassetscontent {
     overflow: hidden;
     box-shadow: 0 3px 8px 0 rgba(0, 0, 0, 0.6);
     border: 2px solid var(--global-color-primary);
+}
+
+.lexcodesnippet .lexareatabs.row {
+    border-radius: 0;
 }
 
 .lexcodesnippet .lexwindowbuttons {

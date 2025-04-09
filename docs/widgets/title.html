@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Represents a title section.`);
 
     {
-        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.addTitle("A Title!");
         panel.addTitle("A No-Background Big Title!", { style: { background: "none", fontSize: "24px" } });

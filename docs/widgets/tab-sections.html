@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Represents panel sections as tabs, either in horizontal or vertical mode. Quickly switch between the different sets of information.`);
 
     {
-        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.addTabSections("tabsName", [
             {

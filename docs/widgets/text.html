@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Represents a text input.`);
 
     {
-        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.addText("Text Name", "Text value", (value, event) => {
             console.log(value);
