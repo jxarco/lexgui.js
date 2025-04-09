@@ -3426,7 +3426,7 @@ class Menubar {
             });
 
             subentry.addEventListener("mouseleave", e => {
-                if( subentry.currentMenu && ( subentry.currentMenu != e.toElement ) )
+                if( subentry.currentMenu && ( subentry.currentMenu != e.toElement ) && !( subentry.currentMenu.contains( e.toElement ) ) )
                 {
                     d = -1; // Reset depth
                     delete subentry.built;
