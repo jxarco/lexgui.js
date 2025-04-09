@@ -2670,7 +2670,8 @@ class Area {
                 icon: b.icon,
                 img: b.img,
                 className: b.class ?? "",
-                title: b.name
+                title: b.name,
+                overflowContainerX: overlayPanel.root
             };
 
             if( group )
@@ -6270,15 +6271,20 @@ class Select extends Widget {
         let buttonName = value;
         buttonName += "<a class='fa-solid fa-angle-down'></a>";
 
+        if( options.overflowContainer )
+        {
+            options.overflowContainerX = options.overflowContainerY = options.overflowContainer;
+        }
+
         const _placeOptions = ( parent ) => {
 
             const selectRoot = selectedOption.root;
-            const overflowContainer = parent.getParentArea();
             const rect = selectRoot.getBoundingClientRect();
             const nestedDialog = parent.parentElement.closest( "dialog" );
 
             // Manage vertical aspect
             {
+                const overflowContainer = options.overflowContainerY ?? parent.getParentArea();
                 const listHeight = parent.offsetHeight;
                 let topPosition = rect.y;
 
@@ -6309,6 +6315,7 @@ class Select extends Widget {
 
             // Manage horizontal aspect
             {
+                const overflowContainer = options.overflowContainerX ?? parent.getParentArea();
                 const listWidth = parent.offsetWidth;
                 let leftPosition = rect.x;
 

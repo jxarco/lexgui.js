@@ -8,7 +8,10 @@ Table Widget:
 
 Other Widgets:
 - Support for TextInput `options.fit`.
+- Select Widget box alignment using custom overflow container (default is closer Area).
+  - `options.overflowContainer`, `options.overflowContainerX`, `options.overflowContainerY`
 
+Added Area Tabs option `allowDelete`, `false` by default.
 Fixed some minor CodeEditor issues.
 Added `LX.stripHTML(html)` to get clean text from HTML string.
 Fixed all "popup" menus position in scrolled window.
