@@ -3076,8 +3076,9 @@ class ClipsTimeline extends Timeline {
 
                 this.movingKeys = true;
 
-                let newTrackClipsMove = Math.floor( (e.localY - this.topMargin + this.leftPanel.root.children[1].scrollTop) / this.trackHeight );
-
+                const treeOffset = this.leftPanelTrackTreeWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop;
+                let newTrackClipsMove = Math.floor( (e.localY - treeOffset) / this.trackHeight );
+                
                 // move clips vertically
                 if ( e.altKey ){  
                     let deltaTracks = newTrackClipsMove - this.lastTrackClipsMove;
