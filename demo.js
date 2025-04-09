@@ -453,13 +453,20 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
     }
 
     // Code
-    // {
-    //     const codeContainer = LX.makeContainer( [ "auto", "850px" ], "", {
-    //         backgroundColor: "red"
-    //     } );
+    {
+        const codeContainer = LX.makeContainer( [ "auto", "800px" ], "flex flex-col border rounded-lg overflow-hidden" );
+        tabs.add( "Code", codeContainer );
 
-    //     tabs.add( "Code", codeContainer );
-    // }
+        const codeArea = new LX.Area();
+        codeContainer.appendChild( codeArea.root );
+
+        let editor = new LX.CodeEditor(codeArea, {
+            // allowAddScripts: false,
+            // autocomplete: false,
+            // disableEdition: true,
+            // fileExplorer: false
+        });
+    }
 
     // Audio
     // {

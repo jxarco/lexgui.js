@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Similar to the Number widget, it represents a decimal vector input. It&#39;s composed by multiple <a href="#number">number</a> widgets.`);
 
     {
-        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.addVector2("2D Position", [250, 350], (value, event) => {
             console.log(value);

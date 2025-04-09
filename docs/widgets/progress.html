@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Represents an indicator showing the completion progress of a task, displayed as a progress bar.`);
 
     {
-        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.addProgress("HeadRoll", 0, {
             min: -1,

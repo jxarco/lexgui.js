@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Represents a decimal number input.`);
 
     {
-        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.addNumber("Font Size", 36, (value, event) => {
             console.log(value);

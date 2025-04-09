@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Represents a classic toggle. Same usage as the checbox.`);
 
     {
-        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.addToggle("Toggle me", true, (value, event) => {
             console.log(value);

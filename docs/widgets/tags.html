@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Represents a collection of tags that can be added, removed, and modified dynamically.`);
 
     {
-        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.addTags("Game Tags", "2d, ai, engine, ps5, console", (value, event) => {
             console.log(value);

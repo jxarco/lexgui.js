@@ -6,7 +6,7 @@
 */
 
 var LX = {
-    version: "0.5.4",
+    version: "0.5.5",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -488,6 +488,7 @@ LX.makeCollapsible = makeCollapsible;
  * linesAdded (Array):
  * linesRemoved (Array):
  * tabName (String):
+ * className (String): Extra class to customize snippet
  */
 function makeCodeSnippet( code, size, options = { } )
 {
@@ -498,7 +499,7 @@ function makeCodeSnippet( code, size, options = { } )
     }
 
     const snippet = document.createElement( "div" );
-    snippet.className = "lexcodesnippet";
+    snippet.className = "lexcodesnippet " + ( options.className ?? "" );
     snippet.style.width = size ? size[ 0 ] : "auto";
     snippet.style.height = size ? size[ 1 ] : "auto";
     const area = new Area( { noAppend: true } );
@@ -1011,12 +1012,13 @@ function _createCommandbar( root )
 /**
  * @method init
  * @param {Object} options
+ * autoTheme: Use theme depending on browser-system default theme [true]
  * container: Root location for the gui (default is the document body)
  * id: Id of the main area
  * rootClass: Extra class to the root container
  * skipRoot: Skip adding LX root container
  * skipDefaultArea: Skip creation of main area
- * strictViewport: Use only window area
+ * strictViewport: Use only window area (no scroll)
  */
 
 function init( options = { } )
@@ -2165,6 +2167,8 @@ class Area {
      * @param {Object} options
      * type: Split mode (horizontal, vertical) ["horizontal"]
      * sizes: Size of each new area (Array) ["50%", "50%"]
+     * resize: Allow area manual resizing [true]
+     * sizes: "Allow the area to be minimized [false]
      */
 
     split( options = {} ) {
@@ -2315,7 +2319,7 @@ class Area {
 
         if( resize )
         {
-            this.root.appendChild(this.splitBar);
+            this.root.appendChild( this.splitBar );
         }
 
         this.root.appendChild( area2.root );
@@ -2670,7 +2674,8 @@ class Area {
                 icon: b.icon,
                 img: b.img,
                 className: b.class ?? "",
-                title: b.name
+                title: b.name,
+                overflowContainerX: overlayPanel.root
             };
 
             if( group )
@@ -3048,7 +3053,9 @@ class Tabs {
         if( isSelected )
         {
             this.root.querySelectorAll( 'span' ).forEach( s => s.classList.remove( 'selected' ) );
-            this.area.root.querySelectorAll( ':scope > .lextabcontent' ).forEach( c => c.style.display = 'none' );
+            const pseudoParent = this.area.root.querySelector( ":scope > .pseudoparent-tabs" );
+            const contentRoot = pseudoParent ?? this.area.root;
+            contentRoot.querySelectorAll( ':scope > .lextabcontent' ).forEach( c => c.style.display = 'none' );
         }
 
         isSelected = !Object.keys( this.tabs ).length && !this.folding ? true : isSelected;
@@ -3104,9 +3111,11 @@ class Tabs {
                 tabEl.selected = !lastValue;
                 // Manage selected
                 tabEl.parentElement.querySelectorAll( 'span' ).forEach( s => s.classList.remove( 'selected' ));
-                tabEl.classList.toggle('selected', ( this.folding && tabEl.selected ));
+                tabEl.classList.toggle('selected', ( scope.folding && tabEl.selected ));
                 // Manage visibility
-                scope.area.root.querySelectorAll( ':scope > .lextabcontent' ).forEach( c => c.style.display = 'none' );
+                const pseudoParent = scope.area.root.querySelector( ":scope > .pseudoparent-tabs" );
+                const contentRoot = pseudoParent ?? scope.area.root;
+                contentRoot.querySelectorAll( ':scope > .lextabcontent' ).forEach( c => c.style.display = 'none' );
                 contentEl.style.display = contentEl.originalDisplay;
                 scope.selected = tabEl.dataset.name;
             }
@@ -3140,14 +3149,24 @@ class Tabs {
             }
         });
 
-        tabEl.addEventListener("mouseup", e => {
-            e.preventDefault();
-            e.stopPropagation();
-            if( e.button == 1 )
-            {
-                this.delete( tabEl.dataset[ "name" ] );
-            }
-        });
+        if( options.allowDelete ?? false )
+        {
+            tabEl.addEventListener("mousedown", e => {
+                if( e.button == LX.MOUSE_MIDDLE_CLICK )
+                {
+                    e.preventDefault();
+                }
+            });
+
+            tabEl.addEventListener("mouseup", e => {
+                e.preventDefault();
+                e.stopPropagation();
+                if( e.button == LX.MOUSE_MIDDLE_CLICK )
+                {
+                    this.delete( tabEl.dataset[ "name" ] );
+                }
+            });
+        }
 
         tabEl.setAttribute( 'draggable', true );
         tabEl.addEventListener( 'dragstart', e => {
@@ -5230,6 +5249,7 @@ class NodeTree {
 
         const nameInput = document.createElement( "input" );
         nameInput.toggleAttribute( "hidden", !node.rename );
+        nameInput.className = "bg-none";
         nameInput.value = node.id;
         item.appendChild( nameInput );
 
@@ -5595,8 +5615,7 @@ class TextInput extends Widget {
             wValue = document.createElement( 'input' );
             wValue.className = "lextext " + ( options.inputClass ?? "" );
             wValue.type = options.type || "";
-            wValue.value = wValue.iValue = value || "";
-            wValue.style.width = "100%";
+            wValue.value = value || "";
             wValue.style.textAlign = ( options.float ?? "" );
 
             wValue.setAttribute( "placeholder", options.placeholder ?? "" );
@@ -5655,7 +5674,6 @@ class TextInput extends Widget {
 
             const icon = options.warning ? '<i class="fa-solid fa-triangle-exclamation"></i>' : '';
             wValue.innerHTML = ( icon + value ) || "";
-            wValue.style.width = "100%";
             wValue.style.textAlign = options.float ?? "";
             wValue.className = "lextext ellipsis-overflow";
         }
@@ -5667,9 +5685,13 @@ class TextInput extends Widget {
             wValue.disabled = true;
             wValue.innerHTML = icon;
             wValue.value = value;
-            wValue.style.width = "100%";
             wValue.style.textAlign = options.float ?? "";
             wValue.className = "lextext ellipsis-overflow " + ( options.inputClass ?? "" );
+        }
+
+        if( options.fit )
+        {
+            wValue.classList.add( "size-content" );
         }
 
         Object.assign( wValue.style, options.style ?? {} );
@@ -5717,17 +5739,21 @@ class TextArea extends Widget {
         this.root.appendChild( container );
 
         let wValue = document.createElement( "textarea" );
+        wValue.value = value ?? "";
+        wValue.className = ( options.inputClass ?? "" );
+        wValue.style.textAlign = options.float ?? "";
+        Object.assign( wValue.style, options.style ?? {} );
+
+        if( options.fitHeight )
+        {
+            wValue.classList.add( "size-content" );
+        }
 
         if( !( options.resize ?? true ) )
         {
-            wValue.style.resize = "none";
+            wValue.classList.add( "resize-none" );
         }
 
-        wValue.className = ( options.inputClass ?? "" );
-        wValue.value = wValue.iValue = value || "";
-        wValue.style.width = "100%";
-        wValue.style.textAlign = options.float ?? "";
-        Object.assign( wValue.style, options.style ?? {} );
         container.appendChild( wValue );
 
         if( options.disabled ?? false ) wValue.setAttribute( "disabled", true );
@@ -5763,14 +5789,7 @@ class TextArea extends Widget {
         }
 
         doAsync( () => {
-            container.style.height = options.height;
-
-            if( options.fitHeight )
-            {
-                // Update height depending on the content
-                wValue.style.height = wValue.scrollHeight + "px";
-            }
-
+            container.style.height = options.height ?? "";
             this.onResize();
         }, 10 );
     }
@@ -5795,7 +5814,7 @@ class Button extends Widget {
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
 
-            wValue.innerHTML = `<span></span>`;
+            wValue.innerHTML = "";
 
             if( options.icon )
             {
@@ -6251,15 +6270,20 @@ class Select extends Widget {
         let buttonName = value;
         buttonName += "<a class='fa-solid fa-angle-down'></a>";
 
+        if( options.overflowContainer )
+        {
+            options.overflowContainerX = options.overflowContainerY = options.overflowContainer;
+        }
+
         const _placeOptions = ( parent ) => {
 
             const selectRoot = selectedOption.root;
-            const overflowContainer = parent.getParentArea();
             const rect = selectRoot.getBoundingClientRect();
             const nestedDialog = parent.parentElement.closest( "dialog" );
 
             // Manage vertical aspect
             {
+                const overflowContainer = options.overflowContainerY ?? parent.getParentArea();
                 const listHeight = parent.offsetHeight;
                 let topPosition = rect.y;
 
@@ -6290,6 +6314,7 @@ class Select extends Widget {
 
             // Manage horizontal aspect
             {
+                const overflowContainer = options.overflowContainerX ?? parent.getParentArea();
                 const listWidth = parent.offsetWidth;
                 let leftPosition = rect.x;
 
@@ -9715,6 +9740,7 @@ class Panel {
      * pattern: Regular expression that value must match
      * trigger: Choose onchange trigger (default, input) [default]
      * inputWidth: Width of the text input
+     * fit: Input widts fits content [false]
      * inputClass: Class to add to the native input element
      * skipReset: Don't add the reset value button when value changes
      * float: Justify input text content
@@ -13321,8 +13347,8 @@ LX.ICONS = {
     "circle-pause": [512, 512, [], "regular", "M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm224-72l0 144c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-144c0-13.3 10.7-24 24-24s24 10.7 24 24zm112 0l0 144c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-144c0-13.3 10.7-24 24-24s24 10.7 24 24z"],
     "circle-xmark": [512, 512, [], "regular", "M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c-9.4 9.4-9.4 24.6 0 33.9l47 47-47 47c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l47-47 47 47c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-47-47 47-47c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-47 47-47-47c-9.4-9.4-24.6-9.4-33.9 0z"],
     "circle-user": [512, 512, [], "regular", "M406.5 399.6C387.4 352.9 341.5 320 288 320l-64 0c-53.5 0-99.4 32.9-118.5 79.6C69.9 362.2 48 311.7 48 256C48 141.1 141.1 48 256 48s208 93.1 208 208c0 55.7-21.9 106.2-57.5 143.6zm-40.1 32.7C334.4 452.4 296.6 464 256 464s-78.4-11.6-110.5-31.7c7.3-36.7 39.7-64.3 78.5-64.3l64 0c38.8 0 71.2 27.6 78.5 64.3zM256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-272a40 40 0 1 1 0-80 40 40 0 1 1 0 80zm-88-40a88 88 0 1 0 176 0 88 88 0 1 0 -176 0z"],
-    "circle-dot": [512, 512, [128280, "dot-circle"], "regular", "M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm256-96a96 96 0 1 1 0 192 96 96 0 1 1 0-192z"],
-    "circle-right": [512, 512, [61838, "arrow-alt-circle-right"], "regular", "M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM294.6 151.2c-4.2-4.6-10.1-7.2-16.4-7.2C266 144 256 154 256 166.3l0 41.7-96 0c-17.7 0-32 14.3-32 32l0 32c0 17.7 14.3 32 32 32l96 0 0 41.7c0 12.3 10 22.3 22.3 22.3c6.2 0 12.1-2.6 16.4-7.2l84-91c3.5-3.8 5.4-8.7 5.4-13.9s-1.9-10.1-5.4-13.9l-84-91z"],
+    "circle-dot": [512, 512, [], "regular", "M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm256-96a96 96 0 1 1 0 192 96 96 0 1 1 0-192z"],
+    "circle-right": [512, 512, [], "regular", "M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM294.6 151.2c-4.2-4.6-10.1-7.2-16.4-7.2C266 144 256 154 256 166.3l0 41.7-96 0c-17.7 0-32 14.3-32 32l0 32c0 17.7 14.3 32 32 32l96 0 0 41.7c0 12.3 10 22.3 22.3 22.3c6.2 0 12.1-2.6 16.4-7.2l84-91c3.5-3.8 5.4-8.7 5.4-13.9s-1.9-10.1-5.4-13.9l-84-91z"],
     "circle-up": [512, 512, [], "regular", "M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM151.2 217.4c-4.6 4.2-7.2 10.1-7.2 16.4c0 12.3 10 22.3 22.3 22.3l41.7 0 0 96c0 17.7 14.3 32 32 32l32 0c17.7 0 32-14.3 32-32l0-96 41.7 0c12.3 0 22.3-10 22.3-22.3c0-6.2-2.6-12.1-7.2-16.4l-91-84c-3.8-3.5-8.7-5.4-13.9-5.4s-10.1 1.9-13.9 5.4l-91 84z"],
     "circle-question": [512, 512, [], "regular", "M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm169.8-90.7c7.9-22.3 29.1-37.3 52.8-37.3l58.3 0c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L280 264.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24l0-13.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1l-58.3 0c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"],
     "circle-left": [512, 512, [], "regular", "M48 256a208 208 0 1 1 416 0A208 208 0 1 1 48 256zm464 0A256 256 0 1 0 0 256a256 256 0 1 0 512 0zM217.4 376.9c4.2 4.5 10.1 7.1 16.3 7.1c12.3 0 22.3-10 22.3-22.3l0-57.7 96 0c17.7 0 32-14.3 32-32l0-32c0-17.7-14.3-32-32-32l-96 0 0-57.7c0-12.3-10-22.3-22.3-22.3c-6.2 0-12.1 2.6-16.3 7.1L117.5 242.2c-3.5 3.8-5.5 8.7-5.5 13.8s2 10.1 5.5 13.8l99.9 107.1z"],

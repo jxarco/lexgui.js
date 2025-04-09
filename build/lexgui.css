@@ -1387,6 +1387,7 @@ a svg, svg path {
 /* Text Widget */
 
 .lexwidget input.lextext, .lexwidget div.lextext {
+    width: 100%;
     border-radius: 6px;
     position: relative;
     border: 1px solid transparent;
@@ -1443,6 +1444,7 @@ a svg, svg path {
 /* TextArea Widget */
 
 .lexwidget textarea {
+    width: 100%;
     word-break: break-word;
     font-family: var(--global-font);
     background: none;
@@ -2209,7 +2211,7 @@ dialog .lexselect .lexselectoptions {
 .lexwidget .vecbox .drag-icon {
     position: absolute;
     width: 2px;
-    right: 0.25em;
+    right: 1em;
     top: 25%;
     font-size: var(--global-font-size-sm);
     color: var(--global-text-secondary);
@@ -2621,7 +2623,6 @@ input[type=number] {
 }
 
 .lextree .lextreetools.notitle {
-    /* padding-top: 14px; */
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
 }
@@ -2673,9 +2674,13 @@ input[type=number] {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    transition-property: color, background-color, border-color;
+    transition-timing-function: ease-out;
+    transition-duration: .15s;
 }
 
 .lextree .lextreeitem input {
+    color: var(--global-color-primary);
     padding: 0;
     border: none;
 }
@@ -2716,8 +2721,12 @@ input[type=number] {
 }
 
 .lextree .lextreeitem.selected {
-    color: var(--global-text-primary);
-    background: light-dark(var(--global-color-accent-light), var(--global-color-accent));
+    color: #f4f4f5;
+    background: var(--global-color-accent);
+}
+
+.lextree .lextreeitem.selected a.lexicon {
+    color: #f4f4f5;
 }
 
 .lextree .lextreeitem a.hierarchy {
@@ -2726,18 +2735,6 @@ input[type=number] {
 
 .lextree .lextreeitem .lexicon {
     font-size: var(--global-font-size-sm);
-}
-
-.lextree .lextreeitem .itemicon:hover {
-    color: var(--global-color-accent);
-}
-
-.lextree .lextreeitem.selected .itemicon:hover {
-    color: var(--global-text-secondary);
-}
-
-.lextree .lextreeitem .itemicon:active {
-    margin-top: 7px;
 }
 
 /* File Input */
@@ -4824,7 +4821,6 @@ ul.lexassetscontent {
 
 /* Code Editor */
 .codebasearea {
-
     display: flex;
     position: relative;
     overflow: inherit;
@@ -4912,20 +4908,25 @@ ul.lexassetscontent {
     z-index: 3;
     bottom: 0px;
     justify-items: end;
+    padding-inline: 1rem;
+}
+
+.lexcodetabinfo .lexinlinewidgets {
+    justify-content: end;
 }
 
 .lexcodegutter {
     width: 48px;
     height: calc(100% - 65px);
     background-color: light-dark(var(--global-color-tertiary), var(--global-medium-background));
-    margin-top: 28px;
+    margin-top: 31px;
     overflow: hidden;
     position: absolute;
     top: 0;
 }
 
 .lexcodeeditor .codetabsarea {
-    height: calc(100% - 64px) !important;
+    height: calc(100% - 80px) !important;
     background-color: light-dark(var(--global-color-tertiary), var(--global-medium-background));
     overflow: scroll;
 }
@@ -4957,7 +4958,6 @@ ul.lexassetscontent {
     -moz-osx-font-smoothing: grayscale;
     font-feature-settings: "ss04", "ss05";
     font-size: var(--code-editor-font-size);
-    /* padding-right: 6px; */
     position: relative;
 }
 
@@ -5094,7 +5094,7 @@ ul.lexassetscontent {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    margin-top: 26px;
+    margin-top: 31px;
     z-index: 1 !important;
     right: 0px;
     pointer-events: none;
@@ -5161,7 +5161,7 @@ ul.lexassetscontent {
 
 .lexcodeeditor .searchbox {
     background-color: var(--global-color-secondary);
-    width: 256px;
+    /* width: 256px; */
     position: absolute;
     right: 6px;
     top: 26px;
@@ -5170,8 +5170,9 @@ ul.lexassetscontent {
     border: 1px solid var(--global-color-tertiary);
     box-shadow: 0 0px 4px #101010;
     overflow-y: scroll;
-    transform: translateY(-72px);
-    transition: transform 0.2s ease-in;
+    transform: translateY(-96px);
+    opacity: 0;
+    transition: transform 0.2s ease-in, opacity 0.2s ease-in;
 }
 
 .lexcodeeditor .searchbox.gotoline {
@@ -5180,6 +5181,7 @@ ul.lexassetscontent {
 
 .lexcodeeditor .searchbox.opened {
     transform: translateY(0px);
+    opacity: 1;
 }
 
 .lexcodeeditor .searchbox .lexpanel span {
@@ -5251,6 +5253,10 @@ ul.lexassetscontent {
     overflow: hidden;
     box-shadow: 0 3px 8px 0 rgba(0, 0, 0, 0.6);
     border: 2px solid var(--global-color-primary);
+}
+
+.lexcodesnippet .lexareatabs.row {
+    border-radius: 0;
 }
 
 .lexcodesnippet .lexwindowbuttons {

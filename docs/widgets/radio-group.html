@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Represents a set of checkable buttons where no more than one of the buttons can be checked at a time.`);
 
     {
-        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.addRadioGroup("View", ["Default", "Comfortable", "Compact"], (value, event) => {
             console.log(value);

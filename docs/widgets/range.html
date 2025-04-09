@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Represents a decimal input handled by a slider.`);
 
     {
-        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.addRange("Intensity Value", 25, (value, event) => {
             console.log(value);

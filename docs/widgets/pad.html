@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Represents a 2-dimension pad.`);
 
     {
-        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.addPad("2D Pad", [0.5, 0.5], (value, event) => {
             console.log(value);

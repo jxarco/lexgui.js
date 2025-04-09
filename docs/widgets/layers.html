@@ -10,7 +10,7 @@
     you to work with binary data and manipulate individual bits to set bit masks.` );
 
     {
-        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.addLayers("Layer name", 10, (value, event) => {
             console.log(value);

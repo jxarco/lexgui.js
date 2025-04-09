@@ -2,15 +2,18 @@
 
 MAKE_HEADER( "Getting Started", "h1", "getting-started" );
 
-MAKE_PARAGRAPH( `Once you have included <strong>lexgui.js</strong> in your project, you can start using its API to create web interfaces. The library exposes several functions and components that you can utilize to build your UI.` );
+MAKE_PARAGRAPH( `Once you have included <b>lexgui.js</b> in your project, you can start using its API to create web interfaces. The library exposes several functions and components that you can utilize to build your UI.` );
 MAKE_PARAGRAPH( `The first thing to do is initializing the library. Calling ${INLINE_CODE("LX.init")} will initialize the necessary stuff and build the main ${INLINE_LINK("Area", "#area")}, which by default will fit the root container:` );
 MAKE_CODE( `@let@ area = @[typ]LX@.@[mtd]init@();` );
 MAKE_PARAGRAPH( `Optionally, you can pass an ${INLINE_CODE("Object")} parameter to define a few properties:` );
 MAKE_CODE_BULLET_LIST( [
-    ["container", "String", `Root container for the entire UI (default is ${INLINE_CODE("document.body")})`],
+    ["autoTheme", "Boolean", `Use theme depending on browser-system default theme [true]`],
+    ["container", "String|HTMLElement", `Root container for the entire UI (default is ${INLINE_CODE("document.body")})`],
     ["id", "String", `id of the generated Main Area (default is <em>mainarea</em>)`],
     ["skipRoot", "Boolean", `Skip adding LX root container`],
-    ["skipDefaultArea", "Boolean", `Skips the creation of main area`]
+    ["rootClass", "String", `Extra class to the root container`],
+    ["skipDefaultArea", "Boolean", `Skips the creation of main area`],
+    ["strictViewport", "Boolean", `Use only window area (no scroll)`]
 ] );
 
 MAKE_HEADER( "Namespace Globals", "h2", "namespace-globals" );

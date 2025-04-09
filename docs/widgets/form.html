@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Represents a form structure with different fields and a submit button.`);
 
     {
-        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         const formData = { username: "", password: { value: "", type: "password" } };
         panel.addForm("Test form", formData, (value, event) => {

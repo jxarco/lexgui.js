@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Represents a list of options for the user to pick from, triggered by a button.`);
 
     {
-        const area = new LX.Area({ skipAppend: true, height: "auto" });
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.addSelect("String Select", ["Option 1", "Option 2", "Option 3"], "Option 1", (value, event) => {
             console.log(value);
