@@ -2,10 +2,12 @@
 
 ## dev
 
+Fixed Badges theming issues.
+
 ## 0.5.5 (master)
 
 Table Widget:
-- Added support `options.filterValue`..
+- Added support `options.filterValue`.
 - Fixed filtering when row data contains HTML tags.
 
 Other Widgets:
@@ -18,7 +20,7 @@ Fixed some minor CodeEditor issues.
 Added `LX.stripHTML(html)` to get clean text from HTML string.
 Fixed all "popup" menus position in scrolled window.
 Added support for options `side`, `active` and `offset` in `LX.asTooltip(trigger, content, options)`.
-Allowed users to register extra icons in LX.ICONS using `LX.registerIcon`;
+Allowed users to register extra icons in LX.ICONS using `LX.registerIcon`.
 Icons and Customization docs updated.
 Minor CSS improvements. Added more class utilities.
 
