@@ -5595,7 +5595,7 @@ class TextInput extends Widget {
             wValue = document.createElement( 'input' );
             wValue.className = "lextext " + ( options.inputClass ?? "" );
             wValue.type = options.type || "";
-            wValue.value = wValue.iValue = value || "";
+            wValue.value = value || "";
             wValue.style.width = "100%";
             wValue.style.textAlign = ( options.float ?? "" );
 
@@ -5670,6 +5670,11 @@ class TextInput extends Widget {
             wValue.style.width = "100%";
             wValue.style.textAlign = options.float ?? "";
             wValue.className = "lextext ellipsis-overflow " + ( options.inputClass ?? "" );
+        }
+
+        if( options.fit )
+        {
+            wValue.style.fieldSizing = "content";
         }
 
         Object.assign( wValue.style, options.style ?? {} );
@@ -9715,6 +9720,7 @@ class Panel {
      * pattern: Regular expression that value must match
      * trigger: Choose onchange trigger (default, input) [default]
      * inputWidth: Width of the text input
+     * fit: Input widts fits content [false]
      * inputClass: Class to add to the native input element
      * skipReset: Don't add the reset value button when value changes
      * float: Justify input text content
