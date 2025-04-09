@@ -18,6 +18,7 @@ Fixed all "popup" menus position in scrolled window.
 Added support for options `side`, `active` and `offset` in `LX.asTooltip(trigger, content, options)`.
 Allowed users to register extra icons in LX.ICONS using `LX.registerIcon`;
 Icons and Customization docs updated.
+Minor CSS improvements. Added more class utilities.
 
 ## 0.5.4 (master)
 

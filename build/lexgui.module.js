@@ -5249,6 +5249,7 @@ class NodeTree {
 
         const nameInput = document.createElement( "input" );
         nameInput.toggleAttribute( "hidden", !node.rename );
+        nameInput.className = "bg-none";
         nameInput.value = node.id;
         item.appendChild( nameInput );
 

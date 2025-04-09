@@ -2211,7 +2211,7 @@ dialog .lexselect .lexselectoptions {
 .lexwidget .vecbox .drag-icon {
     position: absolute;
     width: 2px;
-    right: 0.25em;
+    right: 1em;
     top: 25%;
     font-size: var(--global-font-size-sm);
     color: var(--global-text-secondary);
@@ -2623,7 +2623,6 @@ input[type=number] {
 }
 
 .lextree .lextreetools.notitle {
-    /* padding-top: 14px; */
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
 }
@@ -2675,9 +2674,13 @@ input[type=number] {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    transition-property: color, background-color, border-color;
+    transition-timing-function: ease-out;
+    transition-duration: .15s;
 }
 
 .lextree .lextreeitem input {
+    color: var(--global-color-primary);
     padding: 0;
     border: none;
 }
@@ -2718,8 +2721,12 @@ input[type=number] {
 }
 
 .lextree .lextreeitem.selected {
-    color: var(--global-text-primary);
-    background: light-dark(var(--global-color-accent-light), var(--global-color-accent));
+    color: #f4f4f5;
+    background: var(--global-color-accent);
+}
+
+.lextree .lextreeitem.selected a.lexicon {
+    color: #f4f4f5;
 }
 
 .lextree .lextreeitem a.hierarchy {
@@ -2728,18 +2735,6 @@ input[type=number] {
 
 .lextree .lextreeitem .lexicon {
     font-size: var(--global-font-size-sm);
-}
-
-.lextree .lextreeitem .itemicon:hover {
-    color: var(--global-color-accent);
-}
-
-.lextree .lextreeitem.selected .itemicon:hover {
-    color: var(--global-text-secondary);
-}
-
-.lextree .lextreeitem .itemicon:active {
-    margin-top: 7px;
 }
 
 /* File Input */
