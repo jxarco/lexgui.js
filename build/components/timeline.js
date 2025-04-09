@@ -708,14 +708,14 @@ class Timeline {
         let posy = this.topMargin * 0.4;
         if(posx >= this.session.left_margin)
         {
-            ctx.strokeStyle = ctx.fillStyle =  LX.getThemeColor("global-selected");
+            ctx.strokeStyle = ctx.fillStyle = Timeline.TIME_MARKER_COLOR;
             ctx.globalAlpha = this.opacity;
             ctx.beginPath();
             ctx.moveTo(posx, posy * 0.6); ctx.lineTo(posx, this.canvas.height);//line
             ctx.stroke();
             ctx.closePath();
             ctx.shadowBlur = 8;
-            ctx.shadowColor = LX.getThemeColor("global-selected");
+            ctx.shadowColor = Timeline.TIME_MARKER_COLOR;
             ctx.shadowOffsetX = 1;
             ctx.shadowOffsetY = 1;
 
@@ -730,7 +730,7 @@ class Timeline {
         ctx.font = "11px " + Timeline.FONT;//"11px Calibri";
         ctx.textAlign = "center";
         //ctx.textBaseline = "middle";
-        ctx.fillStyle = Timeline.COLOR_INACTIVE;
+        ctx.fillStyle = Timeline.TIME_MARKER_COLOR_TEXT;
         ctx.fillText( (Math.floor(this.currentTime*10)*0.1).toFixed(1), posx, this.topMargin * 0.6 );
 
         // Selections
@@ -1207,12 +1207,12 @@ class Timeline {
             
             // Overwrite clip color state depending on its state
             ctx.globalAlpha = trackAlpha;
-            ctx.fillStyle = clip.clipColor || (track.hovered[j] ? Timeline.COLOR_HOVERED : (Timeline.COLOR));
+            ctx.fillStyle = clip.clipColor || (track.hovered[j] ? Timeline.KEYFRAME_COLOR_HOVERED : (Timeline.KEYFRAME_COLOR));
             if(track.selected[j] && !clip.clipColor) {
                 ctx.fillStyle = Timeline.TRACK_SELECTED;
             }
             if(!this.active || track.active == false) {
-                ctx.fillStyle = Timeline.COLOR_INACTIVE;
+                ctx.fillStyle = Timeline.KEYFRAME_COLOR_INACTIVE;
             }
 
             // Draw clip background
@@ -1410,7 +1410,13 @@ class Timeline {
         Timeline.FONT = LX.getThemeColor("global-font");
         Timeline.FONT_COLOR_PRIMARY = LX.getThemeColor("global-text-primary");
         Timeline.FONT_COLOR_QUATERNARY = LX.getThemeColor("global-text-quaternary");
-     }
+        
+        Timeline.KEYFRAME_COLOR = LX.getThemeColor("lxTimeline-keyframe");
+        Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = LX.getThemeColor("lxTimeline-keyframe-selected");
+        Timeline.KEYFRAME_COLOR_LOCK = LX.getThemeColor("lxTimeline-keyframe-locked");
+        Timeline.KEYFRAME_COLOR_EDITED = LX.getThemeColor("lxTimeline-keyframe-edited");
+        Timeline.KEYFRAME_COLOR_INACTIVE =LX.getThemeColor("lxTimeline-keyframe-inactive");
+    }
 };
 
 Timeline.BACKGROUND_COLOR = LX.getThemeColor("global-blur-background");
@@ -1423,12 +1429,20 @@ Timeline.TRACK_SELECTED_LIGHT = LX.getThemeColor("global-color-accent-light");
 Timeline.FONT = LX.getThemeColor("global-font");
 Timeline.FONT_COLOR_PRIMARY = LX.getThemeColor("global-text-primary");
 Timeline.FONT_COLOR_QUATERNARY = LX.getThemeColor("global-text-quaternary");
-Timeline.COLOR = LX.getThemeColor("global-selected-dark");
-Timeline.COLOR_SELECTED = Timeline.COLOR_HOVERED = "rgba(250,250,20,1)";///"rgba(250,250,20,1)";
-// Timeline.COLOR_HOVERED = LX.getThemeColor("global-selected");
-Timeline.COLOR_INACTIVE = "rgba(250,250,250,0.7)";
-Timeline.COLOR_LOCK = "rgba(255,125,125,0.7)";
-Timeline.COLOR_EDITED = "rgba(20,230,20,0.7)"//"rgba(125,250,250, 1)";
+Timeline.TIME_MARKER_COLOR = LX.getThemeColor("global-color-accent");
+Timeline.TIME_MARKER_COLOR_TEXT = "#ffffff";
+
+LX.setThemeColor("lxTimeline-keyframe", "light-dark(#2d69da,#2d69da)");
+LX.setThemeColor("lxTimeline-keyframe-selected", "light-dark(#f5c700,#fafa14)");
+LX.setThemeColor("lxTimeline-keyframe-hovered", "light-dark(#f5c700,#fafa14)");
+LX.setThemeColor("lxTimeline-keyframe-locked", "light-dark(#c62e2e,#ff7d7d)");
+LX.setThemeColor("lxTimeline-keyframe-edited", "light-dark(#00d000,#00d000)");
+LX.setThemeColor("lxTimeline-keyframe-inactive", "light-dark(#706b6b,#706b6b)");
+Timeline.KEYFRAME_COLOR = LX.getThemeColor("lxTimeline-keyframe");
+Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = LX.getThemeColor("lxTimeline-keyframe-selected");
+Timeline.KEYFRAME_COLOR_LOCK = LX.getThemeColor("lxTimeline-keyframe-locked");
+Timeline.KEYFRAME_COLOR_EDITED = LX.getThemeColor("lxTimeline-keyframe-edited");
+Timeline.KEYFRAME_COLOR_INACTIVE =LX.getThemeColor("lxTimeline-keyframe-inactive");
 Timeline.BOX_SELECTION_COLOR = "#AAA";
 LX.Timeline = Timeline;
 
@@ -1763,7 +1777,7 @@ class KeyFramesTimeline extends Timeline {
             ctx.fillRect(0, 0, ctx.canvas.width, trackHeight );
         }
 
-        ctx.fillStyle = Timeline.COLOR;
+        ctx.fillStyle = Timeline.KEYFRAME_COLOR;
         ctx.globalAlpha = this.opacity;
 
         const keyframes = track.times;
@@ -1783,23 +1797,23 @@ class KeyFramesTimeline extends Timeline {
             let size = trackHeight * 0.3;
             
             if(!this.active || track.active == false) {
-                ctx.fillStyle = Timeline.COLOR_INACTIVE;
+                ctx.fillStyle = Timeline.KEYFRAME_COLOR_INACTIVE;
             }
             else if(track.locked) {
-                ctx.fillStyle = Timeline.COLOR_LOCK;
+                ctx.fillStyle = Timeline.KEYFRAME_COLOR_LOCK;
             }
             else if(track.hovered[j]) {
                 size = trackHeight * 0.45;
-                ctx.fillStyle = Timeline.COLOR_HOVERED;
+                ctx.fillStyle = Timeline.KEYFRAME_COLOR_HOVERED;
             }
             else if(track.selected[j]) {
-                ctx.fillStyle = Timeline.COLOR_SELECTED;
+                ctx.fillStyle = Timeline.KEYFRAME_COLOR_SELECTED;
             }
             else if(track.edited[j]) {
-                ctx.fillStyle = Timeline.COLOR_EDITED;
+                ctx.fillStyle = Timeline.KEYFRAME_COLOR_EDITED;
             }
             else {
-                ctx.fillStyle = Timeline.COLOR;
+                ctx.fillStyle = Timeline.KEYFRAME_COLOR;
             }
             
             ctx.save();
@@ -3078,7 +3092,7 @@ class ClipsTimeline extends Timeline {
 
                 const treeOffset = this.leftPanelTrackTreeWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop;
                 let newTrackClipsMove = Math.floor( (e.localY - treeOffset) / this.trackHeight );
-                
+
                 // move clips vertically
                 if ( e.altKey ){  
                     let deltaTracks = newTrackClipsMove - this.lastTrackClipsMove;
@@ -4398,7 +4412,7 @@ class CurvesTimeline extends Timeline {
             ctx.stroke();
 
             //draw points
-            ctx.fillStyle = Timeline.COLOR;
+            ctx.fillStyle = Timeline.KEYFRAME_COLOR;
             for(let j = 0; j < keyframes.length; ++j)
             {
                 let time = keyframes[j];
@@ -4409,19 +4423,19 @@ class CurvesTimeline extends Timeline {
                 let keyframePosX = this.timeToX( time );
                     
                 if(!this.active || !track.active)
-                    ctx.fillStyle = Timeline.COLOR_INACTIVE;
+                    ctx.fillStyle = Timeline.KEYFRAME_COLOR_INACTIVE;
                 else if(track.locked)
-                    ctx.fillStyle = Timeline.COLOR_LOCK;
+                    ctx.fillStyle = Timeline.KEYFRAME_COLOR_LOCK;
                 else if(track.hovered[j]) {
                     size = hoverPointSize;
-                    ctx.fillStyle = Timeline.COLOR_HOVERED;
+                    ctx.fillStyle = Timeline.KEYFRAME_COLOR_HOVERED;
                 }
                 else if(track.selected[j])
-                    ctx.fillStyle = Timeline.COLOR_SELECTED;
+                    ctx.fillStyle = Timeline.KEYFRAME_COLOR_SELECTED;
                 else if(track.edited[j])
-                    ctx.fillStyle = Timeline.COLOR_EDITED;
+                    ctx.fillStyle = Timeline.KEYFRAME_COLOR_EDITED;
                 else 
-                    ctx.fillStyle = Timeline.COLOR
+                    ctx.fillStyle = Timeline.KEYFRAME_COLOR
                 
                 let value = values[j];
                 value = ((value - this.range[0]) / (this.range[1] - this.range[0])) *(-displayRange) + (trackHeight - defaultPointSize); // normalize and offset
