@@ -3048,7 +3048,9 @@ class Tabs {
         if( isSelected )
         {
             this.root.querySelectorAll( 'span' ).forEach( s => s.classList.remove( 'selected' ) );
-            this.area.root.querySelectorAll( ':scope > .lextabcontent' ).forEach( c => c.style.display = 'none' );
+            const pseudoParent = this.area.root.querySelector( ".pseudoparent-tabs" );
+            const contentRoot = pseudoParent ?? this.area.root;
+            contentRoot.querySelectorAll( ':scope > .lextabcontent' ).forEach( c => c.style.display = 'none' );
         }
 
         isSelected = !Object.keys( this.tabs ).length && !this.folding ? true : isSelected;
@@ -3104,9 +3106,11 @@ class Tabs {
                 tabEl.selected = !lastValue;
                 // Manage selected
                 tabEl.parentElement.querySelectorAll( 'span' ).forEach( s => s.classList.remove( 'selected' ));
-                tabEl.classList.toggle('selected', ( this.folding && tabEl.selected ));
+                tabEl.classList.toggle('selected', ( scope.folding && tabEl.selected ));
                 // Manage visibility
-                scope.area.root.querySelectorAll( ':scope > .lextabcontent' ).forEach( c => c.style.display = 'none' );
+                const pseudoParent = scope.area.root.querySelector( ".pseudoparent-tabs" );
+                const contentRoot = pseudoParent ?? scope.area.root;
+                contentRoot.querySelectorAll( ':scope > .lextabcontent' ).forEach( c => c.style.display = 'none' );
                 contentEl.style.display = contentEl.originalDisplay;
                 scope.selected = tabEl.dataset.name;
             }
@@ -5800,7 +5804,7 @@ class Button extends Widget {
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
 
-            wValue.innerHTML = `<span></span>`;
+            wValue.innerHTML = "";
 
             if( options.icon )
             {

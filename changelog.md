@@ -9,6 +9,7 @@ Table Widget:
 Other Widgets:
 - Support for TextInput `options.fit`.
 
+Fixed some minor CodeEditor issues.
 Added `LX.stripHTML(html)` to get clean text from HTML string.
 Fixed all "popup" menus position in scrolled window.
 Added support for options `side`, `active` and `offset` in `LX.asTooltip(trigger, content, options)`.
