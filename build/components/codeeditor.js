@@ -1619,7 +1619,7 @@ class CodeEditor {
         this.processFocus(false);
 
         LX.addContextMenu( null, e, m => {
-            m.add( "Create", this.addTab.bind( this, "unnamed.js", true ) );
+            m.add( "Create", this.addTab.bind( this, "unnamed.js", true, "", { language: "JavaScript" } ) );
             m.add( "Load", this.loadTabFromFile.bind( this, "unnamed.js", true ) );
         });
     }
@@ -1731,7 +1731,8 @@ class CodeEditor {
             title: code.title,
             icon: tabIcon,
             onSelect: this._onSelectTab.bind( this, isNewTabButton ),
-            onContextMenu: this._onContextMenuTab.bind( this, isNewTabButton )
+            onContextMenu: this._onContextMenuTab.bind( this, isNewTabButton ),
+            allowDelete: true
         } );
 
         // Move into the sizer..
@@ -1805,7 +1806,8 @@ class CodeEditor {
             title: code.title,
             icon: tabIcon,
             onSelect: this._onSelectTab.bind( this, isNewTabButton ),
-            onContextMenu: this._onContextMenuTab.bind( this, isNewTabButton )
+            onContextMenu: this._onContextMenuTab.bind( this, isNewTabButton ),
+            allowDelete: true
         });
 
         // Move into the sizer..
@@ -3911,14 +3913,15 @@ class CodeEditor {
     }
 
     _measureChar( char = "a", use_floating = false, get_bb = false ) {
-
-        var line = document.createElement( "pre" );
-        var text = document.createElement( "span" );
+        const parentContainer = LX.makeContainer( null, "lexcodeeditor", "", document.body );
+        const container = LX.makeContainer( null, "code", "", parentContainer );
+        const line = document.createElement( "pre" );
+        container.appendChild( line );
+        const text = document.createElement( "span" );
         line.appendChild( text );
         text.innerText = char;
-        this.code.appendChild( line );
         var rect = text.getBoundingClientRect();
-        LX.UTILS.deleteElement( line );
+        LX.UTILS.deleteElement( parentContainer );
         const bb = [ use_floating ? rect.width : Math.floor( rect.width ), use_floating ? rect.height : Math.floor( rect.height ) ];
         return get_bb ? bb : bb[ 0 ];
     }

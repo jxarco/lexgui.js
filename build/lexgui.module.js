@@ -3048,7 +3048,7 @@ class Tabs {
         if( isSelected )
         {
             this.root.querySelectorAll( 'span' ).forEach( s => s.classList.remove( 'selected' ) );
-            const pseudoParent = this.area.root.querySelector( ".pseudoparent-tabs" );
+            const pseudoParent = this.area.root.querySelector( ":scope > .pseudoparent-tabs" );
             const contentRoot = pseudoParent ?? this.area.root;
             contentRoot.querySelectorAll( ':scope > .lextabcontent' ).forEach( c => c.style.display = 'none' );
         }
@@ -3108,7 +3108,7 @@ class Tabs {
                 tabEl.parentElement.querySelectorAll( 'span' ).forEach( s => s.classList.remove( 'selected' ));
                 tabEl.classList.toggle('selected', ( scope.folding && tabEl.selected ));
                 // Manage visibility
-                const pseudoParent = scope.area.root.querySelector( ".pseudoparent-tabs" );
+                const pseudoParent = scope.area.root.querySelector( ":scope > .pseudoparent-tabs" );
                 const contentRoot = pseudoParent ?? scope.area.root;
                 contentRoot.querySelectorAll( ':scope > .lextabcontent' ).forEach( c => c.style.display = 'none' );
                 contentEl.style.display = contentEl.originalDisplay;
@@ -3144,14 +3144,24 @@ class Tabs {
             }
         });
 
-        tabEl.addEventListener("mouseup", e => {
-            e.preventDefault();
-            e.stopPropagation();
-            if( e.button == 1 )
-            {
-                this.delete( tabEl.dataset[ "name" ] );
-            }
-        });
+        if( options.allowDelete ?? false )
+        {
+            tabEl.addEventListener("mousedown", e => {
+                if( e.button == LX.MOUSE_MIDDLE_CLICK )
+                {
+                    e.preventDefault();
+                }
+            });
+
+            tabEl.addEventListener("mouseup", e => {
+                e.preventDefault();
+                e.stopPropagation();
+                if( e.button == LX.MOUSE_MIDDLE_CLICK )
+                {
+                    this.delete( tabEl.dataset[ "name" ] );
+                }
+            });
+        }
 
         tabEl.setAttribute( 'draggable', true );
         tabEl.addEventListener( 'dragstart', e => {
