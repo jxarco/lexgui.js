@@ -6,7 +6,7 @@
 */
 
 var LX = {
-    version: "0.5.4",
+    version: "0.5.5",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers

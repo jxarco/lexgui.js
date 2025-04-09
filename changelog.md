@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.5.5 (master)
+
 Table Widget:
 - Added support `options.filterValue`..
 - Fixed filtering when row data contains HTML tags.
@@ -20,7 +22,7 @@ Allowed users to register extra icons in LX.ICONS using `LX.registerIcon`;
 Icons and Customization docs updated.
 Minor CSS improvements. Added more class utilities.
 
-## 0.5.4 (master)
+## 0.5.4
 
 Widgets:
 - Added support for disabling resize in TextArea Widget `options.resize: false`.
