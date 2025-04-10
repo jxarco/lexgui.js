@@ -2559,6 +2559,12 @@ input[type=number] {
     user-select: none;
 }
 
+/* Size Widget */
+
+.lexotpslot.active {
+    border: 2px solid var(--global-text-primary);
+}
+
 /* Pad Widget */
 
 .lexwidget .lexpad {

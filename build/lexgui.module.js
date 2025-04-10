@@ -5180,14 +5180,15 @@ class Widget {
     static SEPARATOR    = 26;
     static KNOB         = 27;
     static SIZE         = 28;
-    static PAD          = 29;
-    static FORM         = 30;
-    static DIAL         = 31;
-    static COUNTER      = 32;
-    static TABLE        = 33;
-    static TABS         = 34;
-    static LABEL        = 35;
-    static BLANK        = 36;
+    static OTP          = 29;
+    static PAD          = 30;
+    static FORM         = 31;
+    static DIAL         = 32;
+    static COUNTER      = 33;
+    static TABLE        = 34;
+    static TABS         = 35;
+    static LABEL        = 36;
+    static BLANK        = 37;
 
     static NO_CONTEXT_TYPES = [
         Widget.BUTTON,
@@ -8762,6 +8763,126 @@ class SizeInput extends Widget {
 LX.SizeInput = SizeInput;
 
 /**
+ * @class OTPInput
+ * @description OTPInput Widget
+ */
+
+class OTPInput extends Widget {
+
+    constructor( name, value, callback, options = {} ) {
+
+        super( Widget.OTP, name, value, options );
+
+        this.onGetValue = () => {
+            return value;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+
+            value = newValue;
+
+            _refreshInput( String( value ) );
+
+            if( !skipCallback )
+            {
+                this._trigger( new IEvent( name, newValue, event ), callback );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
+        const container = document.createElement( 'div' );
+        container.className = "lexotp flex flex-row items-center";
+        this.root.appendChild( container );
+
+        const pattern = options.pattern ?? "xxx-xxx";
+        const groups = pattern.split( '-' );
+
+        const _refreshInput = ( valueString ) => {
+
+            container.innerHTML = "";
+
+            let itemsCount = 0;
+            let activeSlot = 0;
+
+            for( let i = 0; i < groups.length; ++i )
+            {
+                const g = groups[ i ];
+
+                for( let j = 0; j < g.length; ++j )
+                {
+                    const slotDom = LX.makeContainer( ["auto", "auto"],
+                        "lexotpslot border-top border-bottom border-left px-3 cursor-text select-none font-medium outline-none", valueString[ itemsCount++ ], container );
+                    slotDom.tabIndex = "1";
+                    const otpIndex = itemsCount;
+
+                    if( j == 0 )
+                    {
+                        slotDom.className += " rounded-l";
+                    }
+                    else if( j == ( g.length - 1 ) )
+                    {
+                        slotDom.className += " rounded-r border-right";
+                    }
+
+                    slotDom.addEventListener( "click", () => {
+                        container.querySelectorAll( ".lexotpslot" ).forEach( s => s.classList.remove( "active" ) );
+                        const activeDom = container.querySelectorAll( ".lexotpslot" )[ activeSlot ];
+                        activeDom.classList.add( "active" );
+                        activeDom.focus();
+                    } );
+
+                    slotDom.addEventListener( "keyup", e => {
+
+                        if( !/[^0-9]+/g.test( e.key ) )
+                        {
+                            slotDom.innerHTML = e.key;
+                            valueString = valueString.substring( 0, otpIndex - 1 ) + slotDom.innerHTML + valueString.substring( otpIndex );
+                            this.set( +valueString );
+
+                            const nexActiveDom = container.querySelectorAll( ".lexotpslot" )[ activeSlot + 1 ];
+                            if( nexActiveDom )
+                            {
+                                container.querySelectorAll( ".lexotpslot" )[ activeSlot ].classList.remove( "active" );
+                                nexActiveDom.classList.add( "active" );
+                                nexActiveDom.focus();
+                                activeSlot++;
+                            }
+                        }
+                        else if( e.key == "ArrowLeft" || e.key == "ArrowRight" )
+                        {
+                            const dt = ( e.key == "ArrowLeft" ) ? -1 : 1;
+                            const newActiveDom = container.querySelectorAll( ".lexotpslot" )[ activeSlot + dt ];
+                            if( newActiveDom )
+                            {
+                                container.querySelectorAll( ".lexotpslot" )[ activeSlot ].classList.remove( "active" );
+                                newActiveDom.classList.add( "active" );
+                                newActiveDom.focus();
+                                activeSlot += dt;
+                            }
+                        }
+                    } );
+                }
+
+                if( i < ( groups.length - 1 ) )
+                {
+                    LX.makeContainer( ["auto", "auto"], "mx-2", `-`, container );
+                }
+            }
+
+            console.assert( itemsCount == valueString.length, "OTP Value/Pattern Mismatch!" )
+        }
+
+        _refreshInput( String( value ) );
+    }
+}
+
+LX.OTPInput = OTPInput;
+
+/**
  * @class Pad
  * @description Pad Widget
  */
@@ -10853,6 +10974,22 @@ class Panel {
 
     addSize( name, value, callback, options = {} ) {
         const widget = new SizeInput( name, value, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addOTP
+     * @param {String} name Widget name
+     * @param {Number} value Default number value
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * hideName: Don't use name as label [false]
+     * disabled: Make the widget disabled [false]
+     * pattern: OTP numeric pattern
+     */
+
+    addOTP( name, value, callback, options = {} ) {
+        const widget = new OTPInput( name, value, callback, options );
         return this._attachWidget( widget );
     }
 
@@ -13033,7 +13170,7 @@ class AssetView {
 
             this.rightPanel.addText(null, this.path.join('/'), null, {
                 inputClass: "nobg", disabled: true, signal: "@on_folder_change",
-                style: { fontWeight: "600", fontSize: "15px" } 
+                style: { fontWeight: "600", fontSize: "15px" }
             });
 
             this.rightPanel.endLine();
@@ -13770,7 +13907,7 @@ Element.prototype.addClass = function( className ) {
 }
 
 Element.prototype.getComputedSize = function() {
-    // Since we use "box-sizing: border-box" now, 
+    // Since we use "box-sizing: border-box" now,
     // it's all included in offsetWidth/offsetHeight
     return {
         width: this.offsetWidth,

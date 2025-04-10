@@ -59,7 +59,7 @@
     var panelB = center.addPanel();
     var panelC = right.addPanel();
 
-    let closedDefault = false;
+    let closedDefault = true;
 
     fillPanels();
 
@@ -207,6 +207,9 @@
             panelB.addVector2("Classic Vec2", [0, 0], null);
             panelB.addVector3("Disabled Vec3", [0, 0, 0], null, { disabled: true });
             panelB.addVector4("Classic Vec4", [0, 0, 0, 0], null);
+            panelB.branch("OTP Inputs", { xclosed: closedDefault });
+            panelB.addOTP("Default Pattern", 464346);
+            // panelB.addOTP("Custom Pattern", 23423411, null, { pattern: "xxxx-xxxx" });
             panelB.branch("Color Inputs", { closed: closedDefault });
             panelB.addColor("From Hex Color", "#b7a9b1");
             panelB.addColor("From RGB Color", { r: 1, g: 0.1, b: 0.6 });
