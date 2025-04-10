@@ -10424,7 +10424,7 @@ class Branch {
             // add widgets
             for( let w of this.widgets )
             {
-                p.root.appendChild( w.domEl );
+                p.root.appendChild( w.root );
             }
         });
         dialog.widgets = this.widgets;
@@ -10728,7 +10728,7 @@ class Dialog {
 
                         for( let w of that.widgets )
                         {
-                            branch.content.appendChild( w.domEl );
+                            branch.content.appendChild( w.root );
                         }
 
                         branch.widgets = that.widgets;
