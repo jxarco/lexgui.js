@@ -2023,14 +2023,20 @@ class ColorPicker {
 
     constructor( hexValue, trigger, options = {} ) {
 
+        console.assert( trigger, "ColorPicker needs a DOM element as trigger!" );
+
         this._windowPadding = 4;
         this.side = options.side ?? "bottom";
         this.align = options.align ?? "center";
         this.avoidCollisions = options.avoidCollisions ?? true;
-        this.colorMode = options.colorMode ?? "Hex";
+        this.colorModel = options.colorModel ?? "Hex";
+        this.callback = options.onChange;
+        this.hexValue = hexValue;
 
-        console.assert( trigger, "ColorPicker needs a DOM element as trigger!" );
-        console.assert( trigger._onInput, "Trigger needs an input callback [_onInput]!" );
+        if( !this.callback )
+        {
+            console.warn( "Define a callback in _options.onChange_ to allow getting new Color values!" );
+        }
 
         if( ColorPicker.currentPicker )
         {
@@ -2059,50 +2065,27 @@ class ColorPicker {
 
         ColorPicker.currentPicker = this;
 
-        if( hexValue.constructor === Array )
+        if( this.hexValue.constructor === Array )
         {
-            hexValue = rgbToHex( hexValue );
+            this.hexValue = rgbToHex( this.hexValue );
         }
 
-        let [ h, s, v ] = hexToHsv( hexValue );
-        const hueRGB = hsvToRgb( [ h, 1, 1 ] );
-        const markerHalfSize = 8;
-
-        const _updateColorValue = ( newHexValue, skipCallback = false ) => {
-            hexValue = newHexValue ?? rgbToHex( hsvToRgb( [ h, s, v ] ), 1 );
-            if( trigger._onInput && !skipCallback ) trigger._onInput( hexValue );
-            intSatMarker.style.backgroundColor = hexValue;
-
-            labelWidget.set( this.colorMode == "Hex" ? hexValue :
-                ( this.colorMode == "RGB" ? hexToRgb( hexValue, 255 ).join( ',' ) :
-                [ Math.floor( h ) + 'º', s.toFixed( 1 ), v.toFixed( 1 ) ].join( ',' ) )
-            );
-        };
+        this.hsv = hexToHsv( this.hexValue );
+        const hueRGB = hsvToRgb( [ this.hsv[ 0 ], 1, 1 ] );
+        this.markerHalfSize = 8;
 
         // Intensity, Sat
-        const colorPickerBackground = document.createElement( 'div' );
-        colorPickerBackground.className = "lexcolorpickerbg";
-        colorPickerBackground.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
-        this.root.appendChild( colorPickerBackground );
+        this.colorPickerBackground = document.createElement( 'div' );
+        this.colorPickerBackground.className = "lexcolorpickerbg";
+        this.colorPickerBackground.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
+        this.root.appendChild( this.colorPickerBackground );
 
-        const intSatMarker = document.createElement( 'div' );
-        intSatMarker.className = "lexcolormarker";
-        intSatMarker.style.backgroundColor = hexValue;
-        colorPickerBackground.appendChild( intSatMarker );
+        this.intSatMarker = document.createElement( 'div' );
+        this.intSatMarker.className = "lexcolormarker";
+        this.intSatMarker.style.backgroundColor = hexValue;
+        this.colorPickerBackground.appendChild( this.intSatMarker );
 
-        const _svToPosition = ( s, v ) => {
-            const saturationTop = LX.remapRange( s, 0, 1, -markerHalfSize, colorPickerBackground.offsetWidth - markerHalfSize );
-            intSatMarker.style.left = saturationTop + "px";
-            const valueTop = LX.remapRange( 1 - v, 0, 1, -markerHalfSize, colorPickerBackground.offsetHeight - markerHalfSize );
-            intSatMarker.style.top = valueTop + "px";
-        };
-
-        const _positionToSv = ( left, top ) => {
-            s = LX.remapRange( left, -markerHalfSize, colorPickerBackground.offsetWidth - markerHalfSize, 0, 1 );
-            v = 1 - LX.remapRange( top, -markerHalfSize, colorPickerBackground.offsetHeight - markerHalfSize, 0, 1 );
-        };
-
-        doAsync( _svToPosition.bind( this, s, v ) );
+        doAsync( this._svToPosition.bind( this, this.hsv[ 1 ], this.hsv[ 2 ] ) );
 
         let innerMouseDown = e => {
             var doc = this.root.ownerDocument;
@@ -2112,34 +2095,34 @@ class ColorPicker {
             e.stopImmediatePropagation();
             e.stopPropagation();
 
-            const currentLeft = ( e.offsetX - markerHalfSize );
-            intSatMarker.style.left = currentLeft + "px";
-            const currentTop = ( e.offsetY - markerHalfSize );
-            intSatMarker.style.top = currentTop + "px";
-            _positionToSv( currentLeft, currentTop );
-            _updateColorValue();
+            const currentLeft = ( e.offsetX - this.markerHalfSize );
+            this.intSatMarker.style.left = currentLeft + "px";
+            const currentTop = ( e.offsetY - this.markerHalfSize );
+            this.intSatMarker.style.top = currentTop + "px";
+            this._positionToSv( currentLeft, currentTop );
+            this._updateColorValue();
         }
 
         let innerMouseMove = e => {
             const dX = e.movementX;
             const dY = e.movementY;
 
-            const rect = colorPickerBackground.getBoundingClientRect();
+            const rect = this.colorPickerBackground.getBoundingClientRect();
             const mouseX = e.offsetX - rect.x;
             const mouseY = e.offsetY - rect.y;
 
-            if ( dX != 0 && ( mouseX >= 0 || dX < 0 ) && ( mouseX < colorPickerBackground.offsetWidth || dX > 0 ) )
+            if ( dX != 0 && ( mouseX >= 0 || dX < 0 ) && ( mouseX < this.colorPickerBackground.offsetWidth || dX > 0 ) )
             {
-                intSatMarker.style.left = LX.clamp( parseInt( intSatMarker.style.left ) + dX, -markerHalfSize, colorPickerBackground.offsetWidth - markerHalfSize ) + "px";
+                this.intSatMarker.style.left = LX.clamp( parseInt( this.intSatMarker.style.left ) + dX, -this.markerHalfSize, this.colorPickerBackground.offsetWidth - this.markerHalfSize ) + "px";
             }
 
-            if ( dY != 0 && ( mouseY >= 0 || dY < 0 ) && ( mouseY < colorPickerBackground.offsetHeight || dY > 0 ) )
+            if ( dY != 0 && ( mouseY >= 0 || dY < 0 ) && ( mouseY < this.colorPickerBackground.offsetHeight || dY > 0 ) )
             {
-                intSatMarker.style.top = LX.clamp( parseInt( intSatMarker.style.top ) + dY, -markerHalfSize, colorPickerBackground.offsetHeight - markerHalfSize ) + "px";
+                this.intSatMarker.style.top = LX.clamp( parseInt( this.intSatMarker.style.top ) + dY, -this.markerHalfSize, this.colorPickerBackground.offsetHeight - this.markerHalfSize ) + "px";
             }
 
-            _positionToSv( parseInt( intSatMarker.style.left ), parseInt( intSatMarker.style.top ) );
-            _updateColorValue();
+            this._positionToSv( parseInt( this.intSatMarker.style.left ), parseInt( this.intSatMarker.style.top ) );
+            this._updateColorValue();
 
             e.stopPropagation();
             e.preventDefault();
@@ -2152,22 +2135,21 @@ class ColorPicker {
             document.body.classList.remove( 'noevents' );
         }
 
-        colorPickerBackground.addEventListener( "mousedown", innerMouseDown );
+        this.colorPickerBackground.addEventListener( "mousedown", innerMouseDown );
 
         // Hue
-        const colorPickerTracker = document.createElement( 'div' );
-        colorPickerTracker.className = "lexhuetracker";
-        this.root.appendChild( colorPickerTracker );
+        this.colorPickerTracker = document.createElement( 'div' );
+        this.colorPickerTracker.className = "lexhuetracker";
+        this.root.appendChild( this.colorPickerTracker );
 
-        const hueMarker = document.createElement( 'div' );
-        hueMarker.className = "lexcolormarker";
-        hueMarker.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
-        hueMarker.style.top = "-0.05rem";
-        colorPickerTracker.appendChild( hueMarker );
+        this.hueMarker = document.createElement( 'div' );
+        this.hueMarker.className = "lexcolormarker";
+        this.hueMarker.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
+        this.colorPickerTracker.appendChild( this.hueMarker );
 
         doAsync( () => {
-            const hueLeft = LX.remapRange( h, 0, 360, -markerHalfSize, colorPickerTracker.offsetWidth - markerHalfSize );
-            hueMarker.style.left = hueLeft + "px";
+            const hueLeft = LX.remapRange( this.hsv[ 0 ], 0, 360, -this.markerHalfSize, this.colorPickerTracker.offsetWidth - this.markerHalfSize );
+            this.hueMarker.style.left = hueLeft + "px";
         } );
 
         let innerMouseDownHue = e => {
@@ -2175,30 +2157,34 @@ class ColorPicker {
             doc.addEventListener( 'mousemove', innerMouseMoveHue );
             doc.addEventListener( 'mouseup', innerMouseUpHue );
             document.body.classList.add( 'noevents' );
+            document.body.classList.add( 'noevents' );
             e.stopImmediatePropagation();
             e.stopPropagation();
 
-            const hueLeft = ( e.offsetX - markerHalfSize );
-            hueMarker.style.left = hueLeft + "px";
-            h = LX.remapRange( hueLeft, -markerHalfSize, colorPickerTracker.offsetWidth - markerHalfSize, 0, 360 );
-            const hueRGB = hsvToRgb( [ h, 1, 1 ], 255 );
-            hueMarker.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
-            colorPickerBackground.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
-            _updateColorValue();
+            const hueLeft = ( e.offsetX - this.markerHalfSize );
+            this.hueMarker.style.left = hueLeft + "px";
+            this.hsv[ 0 ] = LX.remapRange( hueLeft, -this.markerHalfSize, this.colorPickerTracker.offsetWidth - this.markerHalfSize, 0, 360 );
+            const hueRGB = hsvToRgb( [ this.hsv[ 0 ], 1, 1 ], 255 );
+            this.hueMarker.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
+            this.colorPickerBackground.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
+            this._updateColorValue();
         }
 
         let innerMouseMoveHue = e => {
-            let dt = e.movementX;
+            let dX = e.movementX;
 
-            if ( dt != 0 )
+            const rect = this.colorPickerBackground.getBoundingClientRect();
+            const mouseX = e.offsetX - rect.x;
+
+            if ( dX != 0 && ( mouseX >= 0 || dX < 0 ) && ( mouseX < this.colorPickerBackground.offsetWidth || dX > 0 ) )
             {
-                const hueLeft = LX.clamp( parseInt( hueMarker.style.left ) + dt, -markerHalfSize, colorPickerTracker.offsetWidth - markerHalfSize );
-                hueMarker.style.left = hueLeft + "px";
-                h = LX.remapRange( hueLeft, -markerHalfSize, colorPickerTracker.offsetWidth - markerHalfSize, 0, 360 );
-                const hueRGB = hsvToRgb( [ h, 1, 1 ], 255 );
-                hueMarker.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
-                colorPickerBackground.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
-                _updateColorValue();
+                const hueLeft = LX.clamp( parseInt( this.hueMarker.style.left ) + dX, -this.markerHalfSize, this.colorPickerTracker.offsetWidth - this.markerHalfSize );
+                this.hueMarker.style.left = hueLeft + "px";
+                this.hsv[ 0 ] = LX.remapRange( hueLeft, -this.markerHalfSize, this.colorPickerTracker.offsetWidth - this.markerHalfSize, 0, 360 );
+                const hueRGB = hsvToRgb( [ this.hsv[ 0 ], 1, 1 ], 255 );
+                this.hueMarker.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
+                this.colorPickerBackground.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
+                this._updateColorValue();
             }
 
             e.stopPropagation();
@@ -2212,7 +2198,7 @@ class ColorPicker {
             document.body.classList.remove( 'noevents' );
         }
 
-        colorPickerTracker.addEventListener( "mousedown", innerMouseDownHue );
+        this.colorPickerTracker.addEventListener( "mousedown", innerMouseDownHue );
 
         const colorLabel = LX.makeContainer( ["100%", "auto"], "flex flex-row text-sm", "", this.root );
 
@@ -2227,38 +2213,30 @@ class ColorPicker {
             const eyeDropper = new EyeDropper()
             try {
                 const result = await eyeDropper.open();
-
-                // Decompose into HSV
-                [ h, s, v ] = rgbToHsv( hexToRgb( result.sRGBHex ) );
-                _svToPosition( s, v );
-
-                const hueRGB = hsvToRgb( [ h, 1, 1 ] );
-                hueMarker.style.backgroundColor = colorPickerBackground.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
-                hueMarker.style.left = LX.remapRange( h, 0, 360, -markerHalfSize, colorPickerTracker.offsetWidth - markerHalfSize ) + "px";
-
-                _updateColorValue( result.sRGBHex );
-
-            } catch (err) {
+                this.fromHexColor( result.sRGBHex );
+            } catch ( err ) {
                 // console.error("EyeDropper cancelled or failed: ", err)
             }
         }, { icon: "eye-dropper", buttonClass: "bg-none", title: "Sample Color" }).root );
 
-        colorLabel.appendChild( new Select( null, [ "Hex", "HSV", "RGB" ], this.colorMode, v => {
-            this.colorMode = v;
-            _updateColorValue( hexValue, true );
+        colorLabel.appendChild( new Select( null, [ "Hex", "HSV", "RGB" ], this.colorModel, v => {
+            this.colorModel = v;
+            this._updateColorValue( hexValue, true );
         } ).root );
 
-        const labelWidget = new TextInput( null, "", null, { inputClass: "bg-none", fit: true, disabled: true } );
-        colorLabel.appendChild( labelWidget.root );
+        this.labelWidget = new TextInput( null, "", null, { inputClass: "bg-none", fit: true, disabled: true } );
+        colorLabel.appendChild( this.labelWidget.root );
 
         colorLabel.appendChild( new Button(null, "eyedrop",  async () => {
-            navigator.clipboard.writeText( labelWidget.value() );
+            navigator.clipboard.writeText( this.labelWidget.value() );
         }, { icon: "copy", buttonClass: "bg-none", className: "ml-auto", title: "Copy" }).root );
 
-        _updateColorValue( hexValue );
+        this._updateColorValue( hexValue );
 
         doAsync( () => {
             this._adjustPosition();
+
+            this.root.focus();
 
             this._onClick = e => {
                 if( e.target && ( this.root.contains( e.target ) || e.target == this._trigger ) )
@@ -2268,8 +2246,23 @@ class ColorPicker {
                 this.destroy();
             };
 
-            document.body.addEventListener( "mousedown", this._onClick );
+            document.body.addEventListener( "mousedown", this._onClick, true );
+            document.body.addEventListener( "focusin", this._onClick, true );
         }, 10 );
+    }
+
+    fromHexColor( hexColor ) {
+
+        // Decompose into HSV
+        const [ h, s, v ] = rgbToHsv( hexToRgb( hexColor ) );
+        this._svToPosition( s, v );
+        this.hsv = [ h, s, v ];
+
+        const hueRGB = hsvToRgb( [ h, 1, 1 ] );
+        this.hueMarker.style.backgroundColor = this.colorPickerBackground.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
+        this.hueMarker.style.left = LX.remapRange( h, 0, 360, -this.markerHalfSize, this.colorPickerTracker.offsetWidth - this.markerHalfSize ) + "px";
+
+        this._updateColorValue( hexColor );
     }
 
     destroy() {
@@ -2278,12 +2271,40 @@ class ColorPicker {
 
         delete this._trigger.picker;
 
-        document.body.removeEventListener( "mousedown", this._onClick );
+        document.body.removeEventListener( "mousedown", this._onClick, true );
+        document.body.removeEventListener( "focusin", this._onClick, true );
 
         LX.root.querySelectorAll( ".lexcolorpicker" ).forEach( m => { m.remove(); } );
 
         ColorPicker.currentPicker = null;
     }
+
+    _svToPosition( s, v ) {
+        this.intSatMarker.style.left = `${ LX.remapRange( s, 0, 1, -this.markerHalfSize, this.colorPickerBackground.offsetWidth - this.markerHalfSize ) }px`;
+        this.intSatMarker.style.top = `${ LX.remapRange( 1 - v, 0, 1, -this.markerHalfSize, this.colorPickerBackground.offsetHeight - this.markerHalfSize ) }px`
+    };
+
+    _positionToSv( left, top ) {
+        this.hsv[ 1 ] = LX.remapRange( left, -this.markerHalfSize, this.colorPickerBackground.offsetWidth - this.markerHalfSize, 0, 1 );
+        this.hsv[ 2 ] = 1 - LX.remapRange( top, -this.markerHalfSize, this.colorPickerBackground.offsetHeight - this.markerHalfSize, 0, 1 );
+    };
+
+    _updateColorValue( newHexValue, skipCallback = false ) {
+
+        this.hexValue = newHexValue ?? rgbToHex( hsvToRgb( this.hsv ), 1 );
+
+        if( this.callback && !skipCallback )
+        {
+            this.callback( this.hexValue );
+        }
+
+        this.intSatMarker.style.backgroundColor = this.hexValue;
+
+        this.labelWidget.set( this.colorModel == "Hex" ? this.hexValue :
+            ( this.colorModel == "RGB" ? hexToRgb( this.hexValue, 255 ).join( ',' ) :
+            [ Math.floor( this.hsv[ 0 ] ) + 'º', this.hsv[ 1 ].toFixed( 1 ), this.hsv[ 2 ].toFixed( 1 ) ].join( ',' ) )
+        );
+    };
 
     _adjustPosition() {
 
@@ -7793,18 +7814,18 @@ class ColorInput extends Widget {
         colorSample.className = "lexcolorsample";
         colorSample.style.color = value;
         colorSample.tabIndex = "-1";
-        colorSample._onInput = ( hexColor ) => {
-            this._fromColorPicker = true;
-            this.set( hexColor );
-            delete this._fromColorPicker;
-        };
         container.appendChild( colorSample );
 
         colorSample.addEventListener( "click", e => {
-            if( !( options.disabled ?? false ) )
+            if( ( options.disabled ?? false ) )
             {
-                new ColorPicker( value, colorSample, { colorMode: options.useRGB ? "RGB" : "Hex" } );
+                return;
             }
+            new ColorPicker( value, colorSample, { colorModel: options.useRGB ? "RGB" : "Hex", onChange: ( hexColor ) => {
+                this._fromColorPicker = true;
+                this.set( hexColor );
+                delete this._fromColorPicker;
+            } } );
         } );
 
         const textWidget = new TextInput( null, value, v => {
