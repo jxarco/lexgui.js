@@ -209,7 +209,8 @@
             panelB.addVector4("Classic Vec4", [0, 0, 0, 0], null);
             panelB.branch("Color Inputs", { closed: closedDefault });
             panelB.addColor("From Hex Color", "#b7a9b1");
-            panelB.addColor("From RGB Color", [1, 0.1, 0.6]);
+            panelB.addColor("From RGB Color", { r: 1, g: 0.1, b: 0.6 });
+            panelB.addColor("Color With Alpha", "#47c1b7ff");
             panelB.addColor("Disabled Color", "#b7a9b1", null, { disabled: true });
             panelB.branch("Range Inputs", { closed: closedDefault });
             panelB.addRange("Classic", 1, null, { min: 0, max: 10, step: 1 });
