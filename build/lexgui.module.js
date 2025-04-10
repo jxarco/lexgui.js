@@ -2059,6 +2059,11 @@ class ColorPicker {
 
         ColorPicker.currentPicker = this;
 
+        if( hexValue.constructor === Array )
+        {
+            hexValue = rgbToHex( hexValue );
+        }
+
         let [ h, s, v ] = hexToHsv( hexValue );
         const hueRGB = hsvToRgb( [ h, 1, 1 ] );
         const markerHalfSize = 8;
@@ -2069,7 +2074,7 @@ class ColorPicker {
             intSatMarker.style.backgroundColor = hexValue;
 
             labelWidget.set( this.colorMode == "Hex" ? hexValue :
-                ( this.colorMode == "RGB" ? hexToRgb( hexValue, 255 ).join( ' , ' ) :
+                ( this.colorMode == "RGB" ? hexToRgb( hexValue, 255 ).join( ',' ) :
                 [ Math.floor( h ) + 'º', s.toFixed( 1 ), v.toFixed( 1 ) ].join( ',' ) )
             );
         };
@@ -2243,12 +2248,14 @@ class ColorPicker {
             _updateColorValue( hexValue, true );
         } ).root );
 
-        const labelWidget = new TextInput( null, hexValue, null, { inputClass: "bg-none", fit: true, disabled: true } );
+        const labelWidget = new TextInput( null, "", null, { inputClass: "bg-none", fit: true, disabled: true } );
         colorLabel.appendChild( labelWidget.root );
 
         colorLabel.appendChild( new Button(null, "eyedrop",  async () => {
             navigator.clipboard.writeText( labelWidget.value() );
         }, { icon: "copy", buttonClass: "bg-none", className: "ml-auto", title: "Copy" }).root );
+
+        _updateColorValue( hexValue );
 
         doAsync( () => {
             this._adjustPosition();
@@ -7728,7 +7735,11 @@ class ColorInput extends Widget {
 
     constructor( name, value, callback, options = {} ) {
 
-        value = ( value.constructor === Array ) ? rgbToHex( value ) : value;
+        if( value.constructor === Array )
+        {
+            options.useRGB = true;
+            value = rgbToHex( value );
+        }
 
         super( Widget.COLOR, name, value, options );
 
@@ -7792,7 +7803,7 @@ class ColorInput extends Widget {
         colorSample.addEventListener( "click", e => {
             if( !( options.disabled ?? false ) )
             {
-                new ColorPicker( value, colorSample );
+                new ColorPicker( value, colorSample, { colorMode: options.useRGB ? "RGB" : "Hex" } );
             }
         } );
 

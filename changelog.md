@@ -2,6 +2,7 @@
 
 ## dev
 
+Added new custom `ColorPicker` for general use and ColorInput widgets.
 Fixed Badges theming issues.
 
 ## 0.5.5 (master)
