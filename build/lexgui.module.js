@@ -2048,20 +2048,29 @@ class ColorPicker {
         this.root.dataset["side"] = this.side;
         LX.root.appendChild( this.root );
 
+        this.root.addEventListener( "keydown", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if( e.key == "Escape" )
+            {
+                this.destroy();
+            }
+        } )
+
         ColorPicker.currentPicker = this;
 
         let [ h, s, v ] = hexToHsv( hexValue );
         const hueRGB = hsvToRgb( [ h, 1, 1 ] );
         const markerHalfSize = 8;
 
-        const _updateColorValue = ( hexValue ) => {
-            hexValue = hexValue ?? rgbToHex( hsvToRgb( [ h, s, v ] ), 1 );
-            if( trigger._onInput ) trigger._onInput( hexValue );
+        const _updateColorValue = ( newHexValue, skipCallback = false ) => {
+            hexValue = newHexValue ?? rgbToHex( hsvToRgb( [ h, s, v ] ), 1 );
+            if( trigger._onInput && !skipCallback ) trigger._onInput( hexValue );
             intSatMarker.style.backgroundColor = hexValue;
 
             labelWidget.set( this.colorMode == "Hex" ? hexValue :
                 ( this.colorMode == "RGB" ? hexToRgb( hexValue, 255 ).join( ' , ' ) :
-                [ Math.floor( h ), s.toFixed( 1 ), v.toFixed( 1 ) ].join( ' , ' ) )
+                [ Math.floor( h ) + 'º', s.toFixed( 1 ), v.toFixed( 1 ) ].join( ',' ) )
             );
         };
 
@@ -2231,7 +2240,7 @@ class ColorPicker {
 
         colorLabel.appendChild( new Select( null, [ "Hex", "HSV", "RGB" ], this.colorMode, v => {
             this.colorMode = v;
-            _updateColorValue( hexValue );
+            _updateColorValue( hexValue, true );
         } ).root );
 
         const labelWidget = new TextInput( null, hexValue, null, { inputClass: "bg-none", fit: true, disabled: true } );
