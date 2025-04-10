@@ -2480,7 +2480,7 @@ class ColorPicker {
         if( this.colorModel == "CSS" )
         {
             const { r, g, b, a } = this.currentColor.css;
-            this.labelWidget.set( `rgba(${ r },${ g },${ b },${ toFixed( a ) })` );
+            this.labelWidget.set( `rgba(${ r },${ g },${ b }${ this.useAlpha ? ',' + toFixed( a ) : '' })` );
         }
         else if( this.colorModel == "Hex" )
         {
@@ -2489,12 +2489,16 @@ class ColorPicker {
         else if( this.colorModel == "HSV" )
         {
             const { h, s, v, a } = this.currentColor.hsv;
-            this.labelWidget.set( [ Math.floor( h ) + 'º', Math.floor( s * 100 ) + '%', Math.floor( v * 100 ) + '%', toFixed( a ) ].join( ' ' ) );
+            const components = [ Math.floor( h ) + 'º', Math.floor( s * 100 ) + '%', Math.floor( v * 100 ) + '%' ];
+            if( this.useAlpha ) components.push( toFixed( a ) );
+            this.labelWidget.set( components.join( ' ' ) );
         }
         else // RGB
         {
             const { r, g, b, a } = this.currentColor.rgb;
-            this.labelWidget.set( [ toFixed( r ), toFixed( g ), toFixed( b ), toFixed( a ) ].join( ' ' ) );
+            const components = [ toFixed( r ), toFixed( g ), toFixed( b ) ];
+            if( this.useAlpha ) components.push( toFixed( a ) );
+            this.labelWidget.set( components.join( ' ' ) );
         }
     };
 
