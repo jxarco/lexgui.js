@@ -614,11 +614,11 @@ function fillPanel( panel ) {
     panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});
     panel.addColor("Background", "#b7a9b1", (value, event) => {
         console.log(value);
-    });
+    }, { xuseAlpha: true });
     panel.addText("Text", "Lexgui.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
-    panel.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
+    panel.addColor("Font Color", { r: 1, g: 0.1, b: 0.6, a: 1 }, (value, event) => {
         console.log("Font Color: ", value);
-    });
+    }, { xuseAlpha: true, xuseRGB: true });
     panel.addRange("A Default Range", 1, (value, event) => {
         console.log(value);
     }, { min: 0, max: 10, step: 1 });

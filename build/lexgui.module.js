@@ -216,16 +216,33 @@ LX.getBase64Image = getBase64Image;
 
 /**
  * @method hexToRgb
- * @description Convert a hexadecimal string to a valid RGB color array
- * @param {String} hexStr Hexadecimal color
- * @param {Number} scale Use 255 for 0..255 range or 1 for 0..1 range
+ * @description Convert a hexadecimal string to a valid RGB color
+ * @param {String} hex Hexadecimal color
  */
-function hexToRgb( hexStr, scale = 1 )
+function hexToRgb( hex )
 {
-    const red = parseInt( hexStr.substring( 1, 3 ), 16 ) * ( scale / 255 );
-    const green = parseInt( hexStr.substring( 3, 5 ), 16 ) * ( scale / 255 );
-    const blue = parseInt( hexStr.substring( 5, 7 ), 16 ) * ( scale / 255 );
-    return [ red, green, blue ];
+    const hexPattern = /^#(?:[A-Fa-f0-9]{3,4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/;
+    if( !hexPattern.test( hex ) )
+    {
+        throw( `Invalid Hex Color: ${ hex }` );
+    }
+
+    hex = hex.replace( /^#/, '' );
+
+    // Expand shorthand form (#RGB or #RGBA)
+    if( hex.length === 3 || hex.length === 4 )
+    {
+        hex = hex.split( '' ).map( c => c + c ).join( '' );
+    }
+
+    const bigint = parseInt( hex, 16 );
+
+    const r = ( ( bigint >> ( hex.length === 8 ? 24 : 16 ) ) & 255 ) / 255;
+    const g = ( ( bigint >> ( hex.length === 8 ? 16 : 8 ) ) & 255 ) / 255;
+    const b = ( ( bigint >> ( hex.length === 8 ? 8 : 0 ) ) & 255 ) / 255;
+    const a = ( hex.length === 8 ? ( bigint & 255 ) : ( hex.length === 4 ? parseInt( hex.slice( -2 ), 16 ) : 255 ) ) / 255;
+
+    return { r, g, b, a };
 }
 
 LX.hexToRgb = hexToRgb;
@@ -245,15 +262,18 @@ LX.hexToHsv = hexToHsv;
 
 /**
  * @method rgbToHex
- * @description Convert a RGB color array to a hexadecimal string
- * @param {Array} rgb Array containing R, G, B, A*
+ * @description Convert a RGB color to a hexadecimal string
+ * @param {Object} rgb Object containing RGB color
  * @param {Number} scale Use 255 for 0..255 range or 1 for 0..1 range
  */
 function rgbToHex( rgb, scale = 255 )
 {
+    const rgbArray = [ rgb.r, rgb.g, rgb.b ];
+    if( rgb.a != undefined ) rgbArray.push( rgb.a );
+
     return (
         "#" +
-        rgb.map( c => {
+        rgbArray.map( c => {
             c = Math.floor( c * scale );
             const hex = c.toString(16);
             return hex.length === 1 ? ( '0' + hex ) : hex;
@@ -264,13 +284,27 @@ function rgbToHex( rgb, scale = 255 )
 LX.rgbToHex = rgbToHex;
 
 /**
+ * @method rgbToCss
+ * @description Convert a RGB color (0..1) to a CSS color format
+ * @param {Object} rgb Object containing RGB color
+ */
+function rgbToCss( rgb )
+{
+    return { r: Math.floor( rgb.r * 255 ), g: Math.floor( rgb.g * 255 ), b: Math.floor( rgb.b * 255 ), a: rgb.a };
+}
+
+LX.rgbToCss = rgbToCss;
+
+/**
  * @method rgbToHsv
  * @description Convert a RGB color (0..1) array to HSV (0..360|0..1|0..1)
- * @param {Array} rgb Array containing R, G, B
+ * @param {Object} rgb Array containing R, G, B
  */
 function rgbToHsv( rgb )
 {
-    const [r, g, b] = rgb;
+    let { r, g, b, a } = rgb;
+    a = a ?? 1;
+
     const max = Math.max(r, g, b);
     const min = Math.min(r, g, b);
     const d = max - min;
@@ -287,7 +321,7 @@ function rgbToHsv( rgb )
     const s = max === 0 ? 0 : (d / max);
     const v = max;
 
-    return [h, s, v];
+    return { h, s, v, a };
 }
 
 LX.rgbToHsv = rgbToHsv;
@@ -299,7 +333,7 @@ LX.rgbToHsv = rgbToHsv;
  */
 function hsvToRgb( hsv )
 {
-    const [ h, s, v ] = hsv;
+    const { h, s, v, a } = hsv;
     const c = v * s;
     const x = c * (1 - Math.abs( ( (h / 60) % 2 ) - 1) )
     const m = v - c;
@@ -312,7 +346,7 @@ function hsvToRgb( hsv )
     else if ( h < 300 ) { r = x; g = 0; b = c; }
     else { r = c; g = 0; b = x; }
 
-    return [ Math.round( ( r + m ) * 255 ), Math.round( ( g + m ) * 255 ), Math.round( ( b + m ) * 255 ) ];
+    return { r: ( r + m ), g: ( g + m ), b: ( b + m ), a };
 }
 
 LX.hsvToRgb = hsvToRgb;
@@ -786,7 +820,7 @@ function registerCommandbarEntry( name, callback )
 
 LX.registerCommandbarEntry = registerCommandbarEntry;
 
-// Math classes
+// Utils classes
 
 class vec2 {
 
@@ -813,6 +847,77 @@ class vec2 {
 };
 
 LX.vec2 = vec2;
+
+class Color {
+
+	constructor( value ) {
+
+        Object.defineProperty( Color.prototype, "rgb", {
+            get: function() { return this._rgb; },
+            set: function( v ) { this._fromRGB( v ) }, enumerable: true, configurable: true
+        });
+
+        Object.defineProperty( Color.prototype, "hex", {
+            get: function() { return this._hex; },
+            set: function( v ) { this._fromHex( v ) }, enumerable: true, configurable: true
+        });
+
+        Object.defineProperty( Color.prototype, "hsv", {
+            get: function() { return this._hsv; },
+            set: function( v ) { this._fromHSV( v ) }, enumerable: true, configurable: true
+        });
+
+		this.set( value );
+	}
+
+	set( value ) {
+
+		if ( typeof value === 'string' && value.startsWith( '#' ) )
+        {
+			this._fromHex( value );
+		}
+        else if( 'r' in value && 'g' in value && 'b' in value)
+        {
+            value.a = value.a ?? 1.0;
+			this._fromRGB( value );
+		}
+        else if( 'h' in value && 's' in value && 'v' in value )
+        {
+            value.a = value.a ?? 1.0;
+			this._fromHSV( value );
+		}
+        else
+        {
+            throw( "Bad color model!", value );
+        }
+	}
+
+    setHSV( hsv ) { this._fromHSV( hsv ); }
+    setRGB( rgb ) { this._fromRGB( rgb ); }
+    setHex( hex ) { this._fromHex( hex ); }
+
+	_fromHex( hex ) {
+		this._fromRGB( hexToRgb( hex ) );
+	}
+
+	_fromRGB( rgb ) {
+		this._rgb = rgb;
+		this._hsv = rgbToHsv( rgb );
+		this._hex = rgbToHex( rgb );
+        this.css = rgbToCss( this._rgb );
+	}
+
+	_fromHSV( hsv ) {
+		this._hsv = hsv;
+		this._rgb = hsvToRgb( hsv );
+		this._hex = rgbToHex( this._rgb );
+        this.css = rgbToCss( this._rgb );
+	}
+}
+
+LX.Color = Color;
+
+// Command bar creation
 
 function _createCommandbar( root )
 {
@@ -2030,8 +2135,8 @@ class ColorPicker {
         this.align = options.align ?? "center";
         this.avoidCollisions = options.avoidCollisions ?? true;
         this.colorModel = options.colorModel ?? "Hex";
+        this.useAlpha = options.useAlpha ?? false;
         this.callback = options.onChange;
-        this.hexValue = hexValue;
 
         if( !this.callback )
         {
@@ -2065,27 +2170,24 @@ class ColorPicker {
 
         ColorPicker.currentPicker = this;
 
-        if( this.hexValue.constructor === Array )
-        {
-            this.hexValue = rgbToHex( this.hexValue );
-        }
-
-        this.hsv = hexToHsv( this.hexValue );
-        const hueRGB = hsvToRgb( [ this.hsv[ 0 ], 1, 1 ] );
         this.markerHalfSize = 8;
+        this.markerSize = this.markerHalfSize * 2;
+        this.currentColor = new Color( hexValue );
+
+        const hueColor = new Color( { h: this.currentColor.hsv.h, s: 1, v: 1 } );
 
         // Intensity, Sat
         this.colorPickerBackground = document.createElement( 'div' );
         this.colorPickerBackground.className = "lexcolorpickerbg";
-        this.colorPickerBackground.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
+        this.colorPickerBackground.style.backgroundColor = `rgb(${ hueColor.css.r }, ${ hueColor.css.g }, ${ hueColor.css.b })`;
         this.root.appendChild( this.colorPickerBackground );
 
         this.intSatMarker = document.createElement( 'div' );
         this.intSatMarker.className = "lexcolormarker";
-        this.intSatMarker.style.backgroundColor = hexValue;
+        this.intSatMarker.style.backgroundColor = this.currentColor.hex;
         this.colorPickerBackground.appendChild( this.intSatMarker );
 
-        doAsync( this._svToPosition.bind( this, this.hsv[ 1 ], this.hsv[ 2 ] ) );
+        doAsync( this._svToPosition.bind( this, this.currentColor.hsv.s, this.currentColor.hsv.v ) );
 
         let innerMouseDown = e => {
             var doc = this.root.ownerDocument;
@@ -2137,72 +2239,9 @@ class ColorPicker {
 
         this.colorPickerBackground.addEventListener( "mousedown", innerMouseDown );
 
-        // Hue
-        this.colorPickerTracker = document.createElement( 'div' );
-        this.colorPickerTracker.className = "lexhuetracker";
-        this.root.appendChild( this.colorPickerTracker );
+        const hueAlphaContainer = LX.makeContainer( ["100%", "auto"], "flex flex-row gap-1 items-center", "", this.root );
 
-        this.hueMarker = document.createElement( 'div' );
-        this.hueMarker.className = "lexcolormarker";
-        this.hueMarker.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
-        this.colorPickerTracker.appendChild( this.hueMarker );
-
-        doAsync( () => {
-            const hueLeft = LX.remapRange( this.hsv[ 0 ], 0, 360, -this.markerHalfSize, this.colorPickerTracker.offsetWidth - this.markerHalfSize );
-            this.hueMarker.style.left = hueLeft + "px";
-        } );
-
-        let innerMouseDownHue = e => {
-            var doc = this.root.ownerDocument;
-            doc.addEventListener( 'mousemove', innerMouseMoveHue );
-            doc.addEventListener( 'mouseup', innerMouseUpHue );
-            document.body.classList.add( 'noevents' );
-            document.body.classList.add( 'noevents' );
-            e.stopImmediatePropagation();
-            e.stopPropagation();
-
-            const hueLeft = ( e.offsetX - this.markerHalfSize );
-            this.hueMarker.style.left = hueLeft + "px";
-            this.hsv[ 0 ] = LX.remapRange( hueLeft, -this.markerHalfSize, this.colorPickerTracker.offsetWidth - this.markerHalfSize, 0, 360 );
-            const hueRGB = hsvToRgb( [ this.hsv[ 0 ], 1, 1 ], 255 );
-            this.hueMarker.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
-            this.colorPickerBackground.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
-            this._updateColorValue();
-        }
-
-        let innerMouseMoveHue = e => {
-            let dX = e.movementX;
-
-            const rect = this.colorPickerBackground.getBoundingClientRect();
-            const mouseX = e.offsetX - rect.x;
-
-            if ( dX != 0 && ( mouseX >= 0 || dX < 0 ) && ( mouseX < this.colorPickerBackground.offsetWidth || dX > 0 ) )
-            {
-                const hueLeft = LX.clamp( parseInt( this.hueMarker.style.left ) + dX, -this.markerHalfSize, this.colorPickerTracker.offsetWidth - this.markerHalfSize );
-                this.hueMarker.style.left = hueLeft + "px";
-                this.hsv[ 0 ] = LX.remapRange( hueLeft, -this.markerHalfSize, this.colorPickerTracker.offsetWidth - this.markerHalfSize, 0, 360 );
-                const hueRGB = hsvToRgb( [ this.hsv[ 0 ], 1, 1 ], 255 );
-                this.hueMarker.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
-                this.colorPickerBackground.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
-                this._updateColorValue();
-            }
-
-            e.stopPropagation();
-            e.preventDefault();
-        }
-
-        let innerMouseUpHue = e => {
-            var doc = this.root.ownerDocument;
-            doc.removeEventListener( 'mousemove', innerMouseMoveHue );
-            doc.removeEventListener( 'mouseup', innerMouseUpHue );
-            document.body.classList.remove( 'noevents' );
-        }
-
-        this.colorPickerTracker.addEventListener( "mousedown", innerMouseDownHue );
-
-        const colorLabel = LX.makeContainer( ["100%", "auto"], "flex flex-row text-sm", "", this.root );
-
-        colorLabel.appendChild( new Button(null, "eyedrop",  async () => {
+        hueAlphaContainer.appendChild( new Button(null, "eyedrop",  async () => {
 
             if( !window.EyeDropper )
             {
@@ -2219,9 +2258,139 @@ class ColorPicker {
             }
         }, { icon: "eye-dropper", buttonClass: "bg-none", title: "Sample Color" }).root );
 
-        colorLabel.appendChild( new Select( null, [ "Hex", "HSV", "RGB" ], this.colorModel, v => {
+        const innerHueAlpha = LX.makeContainer( ["100%", "100%"], "flex flex-col gap-2", "", hueAlphaContainer );
+
+        // Hue
+        this.colorPickerTracker = document.createElement( 'div' );
+        this.colorPickerTracker.className = "lexhuetracker";
+        innerHueAlpha.appendChild( this.colorPickerTracker );
+
+        this.hueMarker = document.createElement( 'div' );
+        this.hueMarker.className = "lexcolormarker";
+        this.hueMarker.style.backgroundColor = `rgb(${ hueColor.css.r }, ${ hueColor.css.g }, ${ hueColor.css.b })`;
+        this.colorPickerTracker.appendChild( this.hueMarker );
+
+        doAsync( () => {
+            const hueLeft = LX.remapRange( this.currentColor.hsv.h, 0, 360, 0, this.colorPickerTracker.offsetWidth - this.markerSize );
+            this.hueMarker.style.left = hueLeft + "px";
+        } );
+
+        const _fromHueX = ( hueX ) => {
+            this.hueMarker.style.left = hueX + "px";
+            this.currentColor.hsv.h = LX.remapRange( hueX, 0, this.colorPickerTracker.offsetWidth - this.markerSize, 0, 360 );
+
+            const hueColor = new Color( { h: this.currentColor.hsv.h, s: 1, v: 1 } );
+            this.hueMarker.style.backgroundColor = `rgb(${ hueColor.css.r }, ${ hueColor.css.g }, ${ hueColor.css.b })`;
+            this.colorPickerBackground.style.backgroundColor = `rgb(${ hueColor.css.r }, ${ hueColor.css.g }, ${ hueColor.css.b })`;
+            this._updateColorValue();
+        };
+
+        let innerMouseDownHue = e => {
+            const doc = this.root.ownerDocument;
+            doc.addEventListener( 'mousemove', innerMouseMoveHue );
+            doc.addEventListener( 'mouseup', innerMouseUpHue );
+            document.body.classList.add( 'noevents' );
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+
+            const hueX = clamp( e.offsetX - this.markerHalfSize, 0, this.colorPickerTracker.offsetWidth - this.markerSize );
+            _fromHueX( hueX );
+        }
+
+        let innerMouseMoveHue = e => {
+            let dX = e.movementX;
+
+            const rect = this.colorPickerTracker.getBoundingClientRect();
+            const mouseX = e.offsetX - rect.x;
+
+            if ( dX != 0 && ( mouseX >= 0 || dX < 0 ) && ( mouseX < this.colorPickerTracker.offsetWidth || dX > 0 ) )
+            {
+                const hueX = LX.clamp( parseInt( this.hueMarker.style.left ) + dX, 0, this.colorPickerTracker.offsetWidth - this.markerSize );
+                _fromHueX( hueX )
+            }
+
+            e.stopPropagation();
+            e.preventDefault();
+        }
+
+        let innerMouseUpHue = e => {
+            var doc = this.root.ownerDocument;
+            doc.removeEventListener( 'mousemove', innerMouseMoveHue );
+            doc.removeEventListener( 'mouseup', innerMouseUpHue );
+            document.body.classList.remove( 'noevents' );
+        }
+
+        this.colorPickerTracker.addEventListener( "mousedown", innerMouseDownHue );
+
+        // Alpha
+        if( this.useAlpha )
+        {
+            this.alphaTracker = document.createElement( 'div' );
+            this.alphaTracker.className = "lexalphatracker";
+            this.alphaTracker.style.color = `rgb(${ this.currentColor.css.r }, ${ this.currentColor.css.g }, ${ this.currentColor.css.b })`;
+            innerHueAlpha.appendChild( this.alphaTracker );
+
+            this.alphaMarker = document.createElement( 'div' );
+            this.alphaMarker.className = "lexcolormarker";
+            this.alphaMarker.style.backgroundColor = `rgb(${ this.currentColor.css.r }, ${ this.currentColor.css.g }, ${ this.currentColor.css.b },${ this.currentColor.css.a })`;
+            this.alphaTracker.appendChild( this.alphaMarker );
+
+            doAsync( () => {
+                const alphaLeft = LX.remapRange( this.currentColor.hsv.a, 0, 1, 0, this.alphaTracker.offsetWidth - this.markerSize );
+                this.alphaMarker.style.left = alphaLeft + "px";
+            } );
+
+            const _fromAlphaX = ( alphaX ) => {
+                this.alphaMarker.style.left = alphaX + "px";
+                this.currentColor.hsv.a = LX.remapRange( alphaX, 0, this.alphaTracker.offsetWidth - this.markerSize, 0, 1 );
+                this._updateColorValue();
+                // Update alpha marker once the color is updated
+                this.alphaMarker.style.backgroundColor = `rgb(${ this.currentColor.css.r }, ${ this.currentColor.css.g }, ${ this.currentColor.css.b },${ this.currentColor.css.a })`;
+            };
+
+            let innerMouseDownAlpha = e => {
+                const doc = this.root.ownerDocument;
+                doc.addEventListener( 'mousemove', innerMouseMoveAlpha );
+                doc.addEventListener( 'mouseup', innerMouseUpAlpha );
+                document.body.classList.add( 'noevents' );
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+                const alphaX = clamp( e.offsetX - this.markerHalfSize, 0, this.alphaTracker.offsetWidth - this.markerSize );
+                _fromAlphaX( alphaX );
+            }
+
+            let innerMouseMoveAlpha = e => {
+                let dX = e.movementX;
+
+                const rect = this.alphaTracker.getBoundingClientRect();
+                const mouseX = e.offsetX - rect.x;
+
+                if ( dX != 0 && ( mouseX >= 0 || dX < 0 ) && ( mouseX < this.alphaTracker.offsetWidth || dX > 0 ) )
+                {
+                    const alphaX = LX.clamp( parseInt( this.alphaMarker.style.left ) + dX, 0, this.alphaTracker.offsetWidth - this.markerSize );
+                    _fromAlphaX( alphaX );
+                }
+
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            let innerMouseUpAlpha = e => {
+                var doc = this.root.ownerDocument;
+                doc.removeEventListener( 'mousemove', innerMouseMoveAlpha );
+                doc.removeEventListener( 'mouseup', innerMouseUpAlpha );
+                document.body.classList.remove( 'noevents' );
+            }
+
+            this.alphaTracker.addEventListener( "mousedown", innerMouseDownAlpha );
+        }
+
+        // Info display
+        const colorLabel = LX.makeContainer( ["100%", "auto"], "flex flex-row gap-1", "", this.root );
+
+        colorLabel.appendChild( new Select( null, [ "CSS", "Hex", "HSV", "RGB" ], this.colorModel, v => {
             this.colorModel = v;
-            this._updateColorValue( hexValue, true );
+            this._updateColorValue( null, true );
         } ).root );
 
         this.labelWidget = new TextInput( null, "", null, { inputClass: "bg-none", fit: true, disabled: true } );
@@ -2253,13 +2422,14 @@ class ColorPicker {
 
     fromHexColor( hexColor ) {
 
-        // Decompose into HSV
-        const [ h, s, v ] = rgbToHsv( hexToRgb( hexColor ) );
-        this._svToPosition( s, v );
-        this.hsv = [ h, s, v ];
+        this.currentColor.setHex( hexColor );
 
-        const hueRGB = hsvToRgb( [ h, 1, 1 ] );
-        this.hueMarker.style.backgroundColor = this.colorPickerBackground.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
+        // Decompose into HSV
+        const { h, s, v } = this.currentColor.hsv;
+        this._svToPosition( s, v );
+
+        const hueColor = new Color( { h, s: 1, v: 1 } );
+        this.hueMarker.style.backgroundColor = this.colorPickerBackground.style.backgroundColor = `rgb(${ hueColor.css.r }, ${ hueColor.css.g }, ${ hueColor.css.b })`;
         this.hueMarker.style.left = LX.remapRange( h, 0, 360, -this.markerHalfSize, this.colorPickerTracker.offsetWidth - this.markerHalfSize ) + "px";
 
         this._updateColorValue( hexColor );
@@ -2285,25 +2455,47 @@ class ColorPicker {
     };
 
     _positionToSv( left, top ) {
-        this.hsv[ 1 ] = LX.remapRange( left, -this.markerHalfSize, this.colorPickerBackground.offsetWidth - this.markerHalfSize, 0, 1 );
-        this.hsv[ 2 ] = 1 - LX.remapRange( top, -this.markerHalfSize, this.colorPickerBackground.offsetHeight - this.markerHalfSize, 0, 1 );
+        this.currentColor.hsv.s = LX.remapRange( left, -this.markerHalfSize, this.colorPickerBackground.offsetWidth - this.markerHalfSize, 0, 1 );
+        this.currentColor.hsv.v = 1 - LX.remapRange( top, -this.markerHalfSize, this.colorPickerBackground.offsetHeight - this.markerHalfSize, 0, 1 );
     };
 
     _updateColorValue( newHexValue, skipCallback = false ) {
 
-        this.hexValue = newHexValue ?? rgbToHex( hsvToRgb( this.hsv ), 1 );
+        this.currentColor.set( newHexValue ?? this.currentColor.hsv );
 
         if( this.callback && !skipCallback )
         {
-            this.callback( this.hexValue );
+            this.callback( this.currentColor );
         }
 
-        this.intSatMarker.style.backgroundColor = this.hexValue;
+        this.intSatMarker.style.backgroundColor = this.currentColor.hex;
 
-        this.labelWidget.set( this.colorModel == "Hex" ? this.hexValue :
-            ( this.colorModel == "RGB" ? hexToRgb( this.hexValue, 255 ).join( ',' ) :
-            [ Math.floor( this.hsv[ 0 ] ) + 'º', this.hsv[ 1 ].toFixed( 1 ), this.hsv[ 2 ].toFixed( 1 ) ].join( ',' ) )
-        );
+        if( this.useAlpha )
+        {
+            this.alphaTracker.style.color = `rgb(${ this.currentColor.css.r }, ${ this.currentColor.css.g }, ${ this.currentColor.css.b },${ this.currentColor.css.a })`;
+        }
+
+        const toFixed = ( s, n = 2) => { return s.toFixed( n ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' ) };
+
+        if( this.colorModel == "CSS" )
+        {
+            const { r, g, b, a } = this.currentColor.css;
+            this.labelWidget.set( `rgba(${ r },${ g },${ b },${ toFixed( a ) })` );
+        }
+        else if( this.colorModel == "Hex" )
+        {
+            this.labelWidget.set( ( this.useAlpha ? this.currentColor.hex : this.currentColor.hex.substr( 0, 7 ) ).toUpperCase() );
+        }
+        else if( this.colorModel == "HSV" )
+        {
+            const { h, s, v, a } = this.currentColor.hsv;
+            this.labelWidget.set( [ Math.floor( h ) + 'º', Math.floor( s * 100 ) + '%', Math.floor( v * 100 ) + '%', toFixed( a ) ].join( ' ' ) );
+        }
+        else // RGB
+        {
+            const { r, g, b, a } = this.currentColor.rgb;
+            this.labelWidget.set( [ toFixed( r ), toFixed( g ), toFixed( b ), toFixed( a ) ].join( ' ' ) );
+        }
     };
 
     _adjustPosition() {
@@ -7756,48 +7948,52 @@ class ColorInput extends Widget {
 
     constructor( name, value, callback, options = {} ) {
 
-        if( value.constructor === Array )
-        {
-            options.useRGB = true;
-            value = rgbToHex( value );
-        }
+        const useAlpha = options.useAlpha ??
+            ( ( value.constructor === Object && 'a' in value ) || ( value.constructor === String && [ 5, 9 ].includes( value.length ) ) );
+
+        const widgetColor = new Color( value );
+
+        // Force always hex internally
+        value = useAlpha ? widgetColor.hex : widgetColor.hex.substr( 0, 7 );
 
         super( Widget.COLOR, name, value, options );
 
         this.onGetValue = () => {
-            return value;
+            const currentColor = new Color( value );
+            return options.useRGB ? currentColor.rgb : value;
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
 
-            let rgbColor = null;
+            const newColor = new Color( newValue );
 
-            if( newValue.constructor === String )
+            colorSampleRGB.style.color = value = newColor.hex.substr( 0, 7 );
+
+            if( useAlpha )
             {
-                rgbColor = hexToRgb( newValue );
-            }
-            else // RGB array
-            {
-                rgbColor = newValue;
-                newValue = rgbToHex( newValue );
+                colorSampleAlpha.style.color = value = newColor.hex;
             }
 
             if( !this._skipTextUpdate )
             {
-                textWidget.set( newValue, true, event );
-            }
-
-            colorSample.style.color = value = newValue;
-
-            // Convert to RGB Array if passing a hex color string
-            if( options.useRGB )
-            {
-                value = rgbColor;
+                textWidget.set( value, true, event );
             }
 
             if( !skipCallback )
             {
-                this._trigger( new IEvent( name, newValue, event ), callback );
+                let retValue = value;
+
+                if( options.useRGB )
+                {
+                    retValue = newColor.rgb;
+
+                    if( !useAlpha )
+                    {
+                        delete retValue.a;
+                    }
+                }
+
+                this._trigger( new IEvent( name, retValue, event ), callback );
             }
         };
 
@@ -7810,23 +8006,42 @@ class ColorInput extends Widget {
         container.className = "lexcolor";
         this.root.appendChild( container );
 
-        let colorSample = document.createElement( 'div' );
-        colorSample.className = "lexcolorsample";
-        colorSample.style.color = value;
-        colorSample.tabIndex = "-1";
-        container.appendChild( colorSample );
-
-        colorSample.addEventListener( "click", e => {
+        let sampleContainer = LX.makeContainer( ["18px", "18px"], "flex flex-row bg-contrast rounded overflow-hidden", "", container );
+        sampleContainer.tabIndex = "1";
+        sampleContainer.addEventListener( "click", e => {
             if( ( options.disabled ?? false ) )
             {
                 return;
             }
-            new ColorPicker( value, colorSample, { colorModel: options.useRGB ? "RGB" : "Hex", onChange: ( hexColor ) => {
-                this._fromColorPicker = true;
-                this.set( hexColor );
-                delete this._fromColorPicker;
-            } } );
+            new ColorPicker( value, sampleContainer, {
+                colorModel: options.useRGB ? "RGB" : "Hex",
+                useAlpha,
+                onChange: ( color ) => {
+                    this._fromColorPicker = true;
+                    this.set( color.hex );
+                    delete this._fromColorPicker;
+                }
+            } );
         } );
+
+        let colorSampleRGB = document.createElement( 'div' );
+        colorSampleRGB.className = "lexcolorsample";
+        colorSampleRGB.style.color = value;
+        sampleContainer.appendChild( colorSampleRGB );
+
+        let colorSampleAlpha = null;
+
+        if( useAlpha )
+        {
+            colorSampleAlpha = document.createElement( 'div' );
+            colorSampleAlpha.className = "lexcolorsample";
+            colorSampleAlpha.style.color = value;
+            sampleContainer.appendChild( colorSampleAlpha );
+        }
+        else
+        {
+            colorSampleRGB.style.width = "18px";
+        }
 
         const textWidget = new TextInput( null, value, v => {
             this._skipTextUpdate = true;

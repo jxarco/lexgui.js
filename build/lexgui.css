@@ -1490,16 +1490,15 @@ a svg, svg path {
     align-items: center;
 }
 
-.lexcolor .lexcolorsample {
-    width: 18px;
-    height: 18px;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    background-color: currentColor;
+.lexcolor > div:first-child {
+    background: repeating-conic-gradient(#ccc 0% 25%, #fff 0% 50%) 50% / 12px 12px;
 }
 
-.lexcolor .lexcolorsample:hover {
-    background-color: color-mix(in srgb, currentColor, #000 9%) !important;
+.lexcolor .lexcolorsample {
+    width: 9px;
+    height: 18px;
+    cursor: pointer;
+    background-color: currentColor;
 }
 
 .lexcolor .colorinfo {
@@ -1567,14 +1566,33 @@ a svg, svg path {
 .lexhuetracker {
     width: 100%;
     height: 1rem;
-    border-radius: 0.3rem;
+    border-radius: 0.5rem;
     background-image: linear-gradient(-90deg, red, #f0f 17%, #00f 33%, #0ff, #0f0 67%, #ff0 83%, red);
+    position: relative;
+    cursor: pointer;
+}
+
+.lexalphatracker {
+    width: 100%;
+    height: 1rem;
+    border-radius: 0.5rem;
+    /* color: rgba(0, 0, 0, 1); */
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0), currentColor), repeating-conic-gradient(#ccc 0% 25%, #fff 0% 50%) 50% / 12px 12px;
+    background-color: white; /* fallback */
     position: relative;
     cursor: pointer;
 }
 
 .lexcolorpicker * {
     font-size: var(--global-font-size-sm);
+}
+
+.lexcolorpicker .lextext {
+    letter-spacing: 0.02rem;
+}
+
+.lexcolorpicker .lexwidget {
+    padding: 2px !important;
 }
 
 /* Title Widget */
