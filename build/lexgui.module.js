@@ -218,34 +218,104 @@ LX.getBase64Image = getBase64Image;
  * @method hexToRgb
  * @description Convert a hexadecimal string to a valid RGB color array
  * @param {String} hexStr Hexadecimal color
+ * @param {Number} scale Use 255 for 0..255 range or 1 for 0..1 range
  */
-function hexToRgb( hexStr )
+function hexToRgb( hexStr, scale = 1 )
 {
-    const red = parseInt( hexStr.substring( 1, 3 ), 16 ) / 255;
-    const green = parseInt( hexStr.substring( 3, 5 ), 16 ) / 255;
-    const blue = parseInt( hexStr.substring( 5, 7 ), 16 ) / 255;
+    const red = parseInt( hexStr.substring( 1, 3 ), 16 ) * ( scale / 255 );
+    const green = parseInt( hexStr.substring( 3, 5 ), 16 ) * ( scale / 255 );
+    const blue = parseInt( hexStr.substring( 5, 7 ), 16 ) * ( scale / 255 );
     return [ red, green, blue ];
 }
 
 LX.hexToRgb = hexToRgb;
 
 /**
+ * @method hexToHsv
+ * @description Convert a hexadecimal string to HSV (0..360|0..1|0..1)
+ * @param {String} hexStr Hexadecimal color
+ */
+function hexToHsv( hexStr )
+{
+    const rgb = hexToRgb( hexStr );
+    return rgbToHsv( rgb );
+}
+
+LX.hexToHsv = hexToHsv;
+
+/**
  * @method rgbToHex
  * @description Convert a RGB color array to a hexadecimal string
  * @param {Array} rgb Array containing R, G, B, A*
+ * @param {Number} scale Use 255 for 0..255 range or 1 for 0..1 range
  */
-function rgbToHex( rgb )
+function rgbToHex( rgb, scale = 255 )
 {
-    let hex = "#";
-    for( let c of rgb )
-    {
-        c = Math.floor( c * 255 );
-        hex += c.toString( 16 );
-    }
-    return hex;
+    return (
+        "#" +
+        rgb.map( c => {
+            c = Math.floor( c * scale );
+            const hex = c.toString(16);
+            return hex.length === 1 ? ( '0' + hex ) : hex;
+        }).join("")
+    );
 }
 
 LX.rgbToHex = rgbToHex;
+
+/**
+ * @method rgbToHsv
+ * @description Convert a RGB color (0..1) array to HSV (0..360|0..1|0..1)
+ * @param {Array} rgb Array containing R, G, B
+ */
+function rgbToHsv( rgb )
+{
+    const [r, g, b] = rgb;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const d = max - min;
+    let h = 0;
+
+    if (d !== 0) {
+        if (max === r) { h = ((g - b) / d) % 6 }
+        else if (max === g) { h = (b - r) / d + 2 }
+        else { h = (r - g) / d + 4 }
+        h *= 60
+        if (h < 0) { h += 360 }
+    }
+
+    const s = max === 0 ? 0 : (d / max);
+    const v = max;
+
+    return [h, s, v];
+}
+
+LX.rgbToHsv = rgbToHsv;
+
+/**
+ * @method hsvToRgb
+ * @description Convert an HSV color (0..360|0..1|0..1) array to RGB (0..1|0..255)
+ * @param {Array} hsv Array containing H, S, V
+ */
+function hsvToRgb( hsv )
+{
+    const [ h, s, v ] = hsv;
+    const c = v * s;
+    const x = c * (1 - Math.abs( ( (h / 60) % 2 ) - 1) )
+    const m = v - c;
+    let r = 0, g = 0, b = 0;
+
+    if( h < 60 ) { r = c; g = x; b = 0; }
+    else if ( h < 120 ) { r = x; g = c; b = 0; }
+    else if ( h < 180 ) { r = 0; g = c; b = x; }
+    else if ( h < 240 ) { r = 0; g = x; b = c; }
+    else if ( h < 300 ) { r = x; g = 0; b = c; }
+    else { r = c; g = 0; b = x; }
+
+    return [ Math.round( ( r + m ) * 255 ), Math.round( ( g + m ) * 255 ), Math.round( ( b + m ) * 255 ) ];
+}
+
+LX.hsvToRgb = hsvToRgb;
 
 /**
  * @method measureRealWidth
@@ -1942,6 +2012,326 @@ class DropdownMenu {
 };
 
 LX.DropdownMenu = DropdownMenu;
+
+/**
+ * @class ColorPicker
+ */
+
+class ColorPicker {
+
+    static currentPicker = false;
+
+    constructor( hexValue, trigger, options = {} ) {
+
+        this._windowPadding = 4;
+        this.side = options.side ?? "bottom";
+        this.align = options.align ?? "center";
+        this.avoidCollisions = options.avoidCollisions ?? true;
+        this.colorMode = options.colorMode ?? "Hex";
+
+        console.assert( trigger, "ColorPicker needs a DOM element as trigger!" );
+        console.assert( trigger._onInput, "Trigger needs an input callback [_onInput]!" );
+
+        if( ColorPicker.currentPicker )
+        {
+            ColorPicker.currentPicker.destroy();
+            return;
+        }
+
+        this._trigger = trigger;
+        trigger.classList.add( "triggered" );
+        trigger.picker = this;
+
+        this.root = document.createElement( "div" );
+        this.root.tabIndex = "1";
+        this.root.className = "lexcolorpicker";
+        this.root.dataset["side"] = this.side;
+        LX.root.appendChild( this.root );
+
+        ColorPicker.currentPicker = this;
+
+        let [ h, s, v ] = hexToHsv( hexValue );
+        const hueRGB = hsvToRgb( [ h, 1, 1 ] );
+        const markerHalfSize = 8;
+
+        const _updateColorValue = ( hexValue ) => {
+            hexValue = hexValue ?? rgbToHex( hsvToRgb( [ h, s, v ] ), 1 );
+            if( trigger._onInput ) trigger._onInput( hexValue );
+            intSatMarker.style.backgroundColor = hexValue;
+
+            labelWidget.set( this.colorMode == "Hex" ? hexValue :
+                ( this.colorMode == "RGB" ? hexToRgb( hexValue, 255 ).join( ' , ' ) :
+                [ Math.floor( h ), s.toFixed( 1 ), v.toFixed( 1 ) ].join( ' , ' ) )
+            );
+        };
+
+        // Intensity, Sat
+        const colorPickerBackground = document.createElement( 'div' );
+        colorPickerBackground.className = "lexcolorpickerbg";
+        colorPickerBackground.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
+        this.root.appendChild( colorPickerBackground );
+
+        const intSatMarker = document.createElement( 'div' );
+        intSatMarker.className = "lexcolormarker";
+        intSatMarker.style.backgroundColor = hexValue;
+        colorPickerBackground.appendChild( intSatMarker );
+
+        const _svToPosition = ( s, v ) => {
+            const saturationTop = LX.remapRange( s, 0, 1, -markerHalfSize, colorPickerBackground.offsetWidth - markerHalfSize );
+            intSatMarker.style.left = saturationTop + "px";
+            const valueTop = LX.remapRange( 1 - v, 0, 1, -markerHalfSize, colorPickerBackground.offsetHeight - markerHalfSize );
+            intSatMarker.style.top = valueTop + "px";
+        };
+
+        const _positionToSv = ( left, top ) => {
+            s = LX.remapRange( left, -markerHalfSize, colorPickerBackground.offsetWidth - markerHalfSize, 0, 1 );
+            v = 1 - LX.remapRange( top, -markerHalfSize, colorPickerBackground.offsetHeight - markerHalfSize, 0, 1 );
+        };
+
+        doAsync( _svToPosition.bind( this, s, v ) );
+
+        let innerMouseDown = e => {
+            var doc = this.root.ownerDocument;
+            doc.addEventListener( 'mousemove', innerMouseMove );
+            doc.addEventListener( 'mouseup', innerMouseUp );
+            document.body.classList.add( 'noevents' );
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+
+            const currentLeft = ( e.offsetX - markerHalfSize );
+            intSatMarker.style.left = currentLeft + "px";
+            const currentTop = ( e.offsetY - markerHalfSize );
+            intSatMarker.style.top = currentTop + "px";
+            _positionToSv( currentLeft, currentTop );
+            _updateColorValue();
+        }
+
+        let innerMouseMove = e => {
+            const dX = e.movementX;
+            const dY = e.movementY;
+
+            const rect = colorPickerBackground.getBoundingClientRect();
+            const mouseX = e.offsetX - rect.x;
+            const mouseY = e.offsetY - rect.y;
+
+            if ( dX != 0 && ( mouseX >= 0 || dX < 0 ) && ( mouseX < colorPickerBackground.offsetWidth || dX > 0 ) )
+            {
+                intSatMarker.style.left = LX.clamp( parseInt( intSatMarker.style.left ) + dX, -markerHalfSize, colorPickerBackground.offsetWidth - markerHalfSize ) + "px";
+            }
+
+            if ( dY != 0 && ( mouseY >= 0 || dY < 0 ) && ( mouseY < colorPickerBackground.offsetHeight || dY > 0 ) )
+            {
+                intSatMarker.style.top = LX.clamp( parseInt( intSatMarker.style.top ) + dY, -markerHalfSize, colorPickerBackground.offsetHeight - markerHalfSize ) + "px";
+            }
+
+            _positionToSv( parseInt( intSatMarker.style.left ), parseInt( intSatMarker.style.top ) );
+            _updateColorValue();
+
+            e.stopPropagation();
+            e.preventDefault();
+        }
+
+        let innerMouseUp = e => {
+            var doc = this.root.ownerDocument;
+            doc.removeEventListener( 'mousemove', innerMouseMove );
+            doc.removeEventListener( 'mouseup', innerMouseUp );
+            document.body.classList.remove( 'noevents' );
+        }
+
+        colorPickerBackground.addEventListener( "mousedown", innerMouseDown );
+
+        // Hue
+        const colorPickerTracker = document.createElement( 'div' );
+        colorPickerTracker.className = "lexhuetracker";
+        this.root.appendChild( colorPickerTracker );
+
+        const hueMarker = document.createElement( 'div' );
+        hueMarker.className = "lexcolormarker";
+        hueMarker.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
+        hueMarker.style.top = "-0.05rem";
+        colorPickerTracker.appendChild( hueMarker );
+
+        doAsync( () => {
+            const hueLeft = LX.remapRange( h, 0, 360, -markerHalfSize, colorPickerTracker.offsetWidth - markerHalfSize );
+            hueMarker.style.left = hueLeft + "px";
+        } );
+
+        let innerMouseDownHue = e => {
+            var doc = this.root.ownerDocument;
+            doc.addEventListener( 'mousemove', innerMouseMoveHue );
+            doc.addEventListener( 'mouseup', innerMouseUpHue );
+            document.body.classList.add( 'noevents' );
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+
+            const hueLeft = ( e.offsetX - markerHalfSize );
+            hueMarker.style.left = hueLeft + "px";
+            h = LX.remapRange( hueLeft, -markerHalfSize, colorPickerTracker.offsetWidth - markerHalfSize, 0, 360 );
+            const hueRGB = hsvToRgb( [ h, 1, 1 ], 255 );
+            hueMarker.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
+            colorPickerBackground.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
+            _updateColorValue();
+        }
+
+        let innerMouseMoveHue = e => {
+            let dt = e.movementX;
+
+            if ( dt != 0 )
+            {
+                const hueLeft = LX.clamp( parseInt( hueMarker.style.left ) + dt, -markerHalfSize, colorPickerTracker.offsetWidth - markerHalfSize );
+                hueMarker.style.left = hueLeft + "px";
+                h = LX.remapRange( hueLeft, -markerHalfSize, colorPickerTracker.offsetWidth - markerHalfSize, 0, 360 );
+                const hueRGB = hsvToRgb( [ h, 1, 1 ], 255 );
+                hueMarker.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
+                colorPickerBackground.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
+                _updateColorValue();
+            }
+
+            e.stopPropagation();
+            e.preventDefault();
+        }
+
+        let innerMouseUpHue = e => {
+            var doc = this.root.ownerDocument;
+            doc.removeEventListener( 'mousemove', innerMouseMoveHue );
+            doc.removeEventListener( 'mouseup', innerMouseUpHue );
+            document.body.classList.remove( 'noevents' );
+        }
+
+        colorPickerTracker.addEventListener( "mousedown", innerMouseDownHue );
+
+        const colorLabel = LX.makeContainer( ["100%", "auto"], "flex flex-row text-sm", "", this.root );
+
+        colorLabel.appendChild( new Button(null, "eyedrop",  async () => {
+
+            if( !window.EyeDropper )
+            {
+                console.error( "Your browser does not support the EyeDropper API" );
+                return;
+            }
+
+            const eyeDropper = new EyeDropper()
+            try {
+                const result = await eyeDropper.open();
+
+                // Decompose into HSV
+                [ h, s, v ] = rgbToHsv( hexToRgb( result.sRGBHex ) );
+                _svToPosition( s, v );
+
+                const hueRGB = hsvToRgb( [ h, 1, 1 ] );
+                hueMarker.style.backgroundColor = colorPickerBackground.style.backgroundColor = `rgb(${ hueRGB[ 0 ] }, ${ hueRGB[ 1 ] }, ${ hueRGB[ 2 ] })`;
+                hueMarker.style.left = LX.remapRange( h, 0, 360, -markerHalfSize, colorPickerTracker.offsetWidth - markerHalfSize ) + "px";
+
+                _updateColorValue( result.sRGBHex );
+
+            } catch (err) {
+                // console.error("EyeDropper cancelled or failed: ", err)
+            }
+        }, { icon: "eye-dropper", buttonClass: "bg-none", title: "Sample Color" }).root );
+
+        colorLabel.appendChild( new Select( null, [ "Hex", "HSV", "RGB" ], this.colorMode, v => {
+            this.colorMode = v;
+            _updateColorValue( hexValue );
+        } ).root );
+
+        const labelWidget = new TextInput( null, hexValue, null, { inputClass: "bg-none", fit: true, disabled: true } );
+        colorLabel.appendChild( labelWidget.root );
+
+        colorLabel.appendChild( new Button(null, "eyedrop",  async () => {
+            navigator.clipboard.writeText( labelWidget.value() );
+        }, { icon: "copy", buttonClass: "bg-none", className: "ml-auto", title: "Copy" }).root );
+
+        doAsync( () => {
+            this._adjustPosition();
+
+            this._onClick = e => {
+                if( e.target && ( this.root.contains( e.target ) || e.target == this._trigger ) )
+                {
+                    return;
+                }
+                this.destroy();
+            };
+
+            document.body.addEventListener( "mousedown", this._onClick );
+        }, 10 );
+    }
+
+    destroy() {
+
+        this._trigger.classList.remove( "triggered" );
+
+        delete this._trigger.picker;
+
+        document.body.removeEventListener( "mousedown", this._onClick );
+
+        LX.root.querySelectorAll( ".lexcolorpicker" ).forEach( m => { m.remove(); } );
+
+        ColorPicker.currentPicker = null;
+    }
+
+    _adjustPosition() {
+
+        const position = [ 0, 0 ];
+
+        // Place menu using trigger position and user options
+        {
+            const rect = this._trigger.getBoundingClientRect();
+
+            let alignWidth = true;
+
+            switch( this.side )
+            {
+                case "left":
+                    position[ 0 ] += ( rect.x - this.root.offsetWidth );
+                    alignWidth = false;
+                    break;
+                case "right":
+                    position[ 0 ] += ( rect.x + rect.width );
+                    alignWidth = false;
+                    break;
+                case "top":
+                    position[ 1 ] += ( rect.y - this.root.offsetHeight );
+                    alignWidth = true;
+                    break;
+                case "bottom":
+                    position[ 1 ] += ( rect.y + rect.height );
+                    alignWidth = true;
+                    break;
+                default:
+                    break;
+            }
+
+            switch( this.align )
+            {
+                case "start":
+                    if( alignWidth ) { position[ 0 ] += rect.x; }
+                    else { position[ 1 ] += rect.y; }
+                    break;
+                case "center":
+                    if( alignWidth ) { position[ 0 ] += ( rect.x + rect.width * 0.5 ) - this.root.offsetWidth * 0.5; }
+                    else { position[ 1 ] += ( rect.y + rect.height * 0.5 ) - this.root.offsetHeight * 0.5; }
+                    break;
+                case "end":
+                    if( alignWidth ) { position[ 0 ] += rect.x - this.root.offsetWidth + rect.width; }
+                    else { position[ 1 ] += rect.y - this.root.offsetHeight + rect.height; }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if( this.avoidCollisions )
+        {
+            position[ 0 ] = LX.clamp( position[ 0 ], 0, window.innerWidth - this.root.offsetWidth - this._windowPadding );
+            position[ 1 ] = LX.clamp( position[ 1 ], 0, window.innerHeight - this.root.offsetHeight - this._windowPadding );
+        }
+
+        this.root.style.left = `${ position[ 0 ] }px`;
+        this.root.style.top = `${ position[ 1 ] }px`;
+    }
+};
+
+LX.ColorPicker = ColorPicker;
 
 class Area {
 
@@ -6279,7 +6669,7 @@ class Select extends Widget {
 
             const selectRoot = selectedOption.root;
             const rect = selectRoot.getBoundingClientRect();
-            const nestedDialog = parent.parentElement.closest( "dialog" );
+            const nestedDialog = parent.parentElement.closest( "dialog" ) ?? parent.parentElement.closest( ".lexcolorpicker" );
 
             // Manage vertical aspect
             {
@@ -7339,9 +7729,16 @@ class ColorInput extends Widget {
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
 
-            if( color.useRGB )
+            let rgbColor = null;
+
+            if( newValue.constructor === String )
             {
-                newValue = hexToRgb( newValue );
+                rgbColor = hexToRgb( newValue );
+            }
+            else // RGB array
+            {
+                rgbColor = newValue;
+                newValue = rgbToHex( newValue );
             }
 
             if( !this._skipTextUpdate )
@@ -7349,7 +7746,13 @@ class ColorInput extends Widget {
                 textWidget.set( newValue, true, event );
             }
 
-            color.value = value = newValue;
+            colorSample.style.color = value = newValue;
+
+            // Convert to RGB Array if passing a hex color string
+            if( options.useRGB )
+            {
+                value = rgbColor;
+            }
 
             if( !skipCallback )
             {
@@ -7366,30 +7769,31 @@ class ColorInput extends Widget {
         container.className = "lexcolor";
         this.root.appendChild( container );
 
-        let color = document.createElement( 'input' );
-        color.style.width = "32px";
-        color.type = 'color';
-        color.className = "colorinput";
-        color.useRGB = options.useRGB ?? false;
-        color.value = value;
-        container.appendChild( color );
+        let colorSample = document.createElement( 'div' );
+        colorSample.className = "lexcolorsample";
+        colorSample.style.color = value;
+        colorSample.tabIndex = "-1";
+        colorSample._onInput = ( hexColor ) => {
+            this._fromColorPicker = true;
+            this.set( hexColor );
+            delete this._fromColorPicker;
+        };
+        container.appendChild( colorSample );
 
-        if( options.disabled )
-        {
-            color.disabled = true;
-        }
+        colorSample.addEventListener( "click", e => {
+            if( !( options.disabled ?? false ) )
+            {
+                new ColorPicker( value, colorSample );
+            }
+        } );
 
-        color.addEventListener( "input", e => {
-            this.set( e.target.value, false, e );
-        }, false );
-
-        const textWidget = new TextInput( null, color.value, v => {
+        const textWidget = new TextInput( null, value, v => {
             this._skipTextUpdate = true;
             this.set( v );
             delete this._skipTextUpdate;
-        }, { width: "calc( 100% - 32px )", disabled: options.disabled });
+        }, { width: "calc( 100% - 24px )", disabled: options.disabled });
 
-        textWidget.root.style.marginLeft = "4px";
+        textWidget.root.style.marginLeft = "6px";
         container.appendChild( textWidget.root );
 
         doAsync( this.onResize.bind( this ) );
@@ -13248,6 +13652,7 @@ LX.ICONS = {
     "copy": [448, 512, [], "regular", "M384 336l-192 0c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l140.1 0L400 115.9 400 320c0 8.8-7.2 16-16 16zM192 384l192 0c35.3 0 64-28.7 64-64l0-204.1c0-12.7-5.1-24.9-14.1-33.9L366.1 14.1c-9-9-21.2-14.1-33.9-14.1L192 0c-35.3 0-64 28.7-64 64l0 256c0 35.3 28.7 64 64 64zM64 128c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l192 0c35.3 0 64-28.7 64-64l0-32-48 0 0 32c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l32 0 0-48-32 0z"],
     "paste": [512, 512, [], "regular", "M104.6 48L64 48C28.7 48 0 76.7 0 112L0 384c0 35.3 28.7 64 64 64l96 0 0-48-96 0c-8.8 0-16-7.2-16-16l0-272c0-8.8 7.2-16 16-16l16 0c0 17.7 14.3 32 32 32l72.4 0C202 108.4 227.6 96 256 96l62 0c-7.1-27.6-32.2-48-62-48l-40.6 0C211.6 20.9 188.2 0 160 0s-51.6 20.9-55.4 48zM144 56a16 16 0 1 1 32 0 16 16 0 1 1 -32 0zM448 464l-192 0c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l140.1 0L464 243.9 464 448c0 8.8-7.2 16-16 16zM256 512l192 0c35.3 0 64-28.7 64-64l0-204.1c0-12.7-5.1-24.9-14.1-33.9l-67.9-67.9c-9-9-21.2-14.1-33.9-14.1L256 128c-35.3 0-64 28.7-64 64l0 256c0 35.3 28.7 64 64 64z"],
     "clipboard": [384, 512, [], "regular", "M280 64l40 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 128C0 92.7 28.7 64 64 64l40 0 9.6 0C121 27.5 153.3 0 192 0s71 27.5 78.4 64l9.6 0zM64 112c-8.8 0-16 7.2-16 16l0 320c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16l0-320c0-8.8-7.2-16-16-16l-16 0 0 24c0 13.3-10.7 24-24 24l-88 0-88 0c-13.3 0-24-10.7-24-24l0-24-16 0zm128-8a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"],
+    "eye-dropper": [512, 512, [], "solid", "M341.6 29.2L240.1 130.8l-9.4-9.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-9.4-9.4L482.8 170.4c39-39 39-102.2 0-141.1s-102.2-39-141.1 0zM55.4 323.3c-15 15-23.4 35.4-23.4 56.6l0 42.4L5.4 462.2c-8.5 12.7-6.8 29.6 4 40.4s27.7 12.5 40.4 4L89.7 480l42.4 0c21.2 0 41.6-8.4 56.6-23.4L309.4 335.9l-45.3-45.3L143.4 411.3c-3 3-7.1 4.7-11.3 4.7L96 416l0-36.1c0-4.2 1.7-8.3 4.7-11.3L221.4 247.9l-45.3-45.3L55.4 323.3z"],
     "edit": [512, 512, [], "regular", "M441 58.9L453.1 71c9.4 9.4 9.4 24.6 0 33.9L424 134.1 377.9 88 407 58.9c9.4-9.4 24.6-9.4 33.9 0zM209.8 256.2L344 121.9 390.1 168 255.8 302.2c-2.9 2.9-6.5 5-10.4 6.1l-58.5 16.7 16.7-58.5c1.1-3.9 3.2-7.5 6.1-10.4zM373.1 25L175.8 222.2c-8.7 8.7-15 19.4-18.3 31.1l-28.6 100c-2.4 8.4-.1 17.4 6.1 23.6s15.2 8.5 23.6 6.1l100-28.6c11.8-3.4 22.5-9.7 31.1-18.3L487 138.9c28.1-28.1 28.1-73.7 0-101.8L474.9 25C446.8-3.1 401.2-3.1 373.1 25zM88 64C39.4 64 0 103.4 0 152L0 424c0 48.6 39.4 88 88 88l272 0c48.6 0 88-39.4 88-88l0-112c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 112c0 22.1-17.9 40-40 40L88 464c-22.1 0-40-17.9-40-40l0-272c0-22.1 17.9-40 40-40l112 0c13.3 0 24-10.7 24-24s-10.7-24-24-24L88 64z"],
     "envelope": [512, 512, [], "regular", "M64 112c-8.8 0-16 7.2-16 16l0 22.1L220.5 291.7c20.7 17 50.4 17 71.1 0L464 150.1l0-22.1c0-8.8-7.2-16-16-16L64 112zM48 212.2L48 384c0 8.8 7.2 16 16 16l384 0c8.8 0 16-7.2 16-16l0-171.8L322 328.8c-38.4 31.5-93.7 31.5-132 0L48 212.2zM0 128C0 92.7 28.7 64 64 64l384 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128z"],
     "envelope-open": [512, 512, [], "regular", "M255.4 48.2c.2-.1 .4-.2 .6-.2s.4 .1 .6 .2L460.6 194c2.1 1.5 3.4 3.9 3.4 6.5l0 13.6L291.5 355.7c-20.7 17-50.4 17-71.1 0L48 214.1l0-13.6c0-2.6 1.2-5 3.4-6.5L255.4 48.2zM48 276.2L190 392.8c38.4 31.5 93.7 31.5 132 0L464 276.2 464 456c0 4.4-3.6 8-8 8L56 464c-4.4 0-8-3.6-8-8l0-179.8zM256 0c-10.2 0-20.2 3.2-28.5 9.1L23.5 154.9C8.7 165.4 0 182.4 0 200.5L0 456c0 30.9 25.1 56 56 56l400 0c30.9 0 56-25.1 56-56l0-255.5c0-18.1-8.7-35.1-23.4-45.6L284.5 9.1C276.2 3.2 266.2 0 256 0z"],
