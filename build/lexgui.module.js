@@ -2049,10 +2049,10 @@ class ColorPicker {
         LX.root.appendChild( this.root );
 
         this.root.addEventListener( "keydown", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
             if( e.key == "Escape" )
             {
+                e.preventDefault();
+                e.stopPropagation();
                 this.destroy();
             }
         } )

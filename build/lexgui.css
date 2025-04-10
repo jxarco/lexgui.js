@@ -1552,6 +1552,7 @@ a svg, svg path {
     background-color: transparent;
     position: absolute;
     border: 3px solid #fff;
+    pointer-events: none;
 }
 
 .lexcolorpickerbg {
