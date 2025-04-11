@@ -8767,21 +8767,30 @@ class OTPInput extends Widget {
 
     constructor( name, value, callback, options = {} ) {
 
+        const pattern = options.pattern ?? "xxx-xxx";
+        const patternSize = ( pattern.match(/x/g) || [] ).length;
+
+        value = String( value );
+        if( !value.length )
+        {
+            value = "x".repeat( patternSize );
+        }
+
         super( Widget.OTP, name, value, options );
 
         this.onGetValue = () => {
-            return value;
+            return +value;
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
 
             value = newValue;
 
-            _refreshInput( String( value ) );
+            _refreshInput( value );
 
             if( !skipCallback )
             {
-                this._trigger( new IEvent( name, newValue, event ), callback );
+                this._trigger( new IEvent( name, +newValue, event ), callback );
             }
         };
 
@@ -8790,11 +8799,12 @@ class OTPInput extends Widget {
             container.style.width = `calc( 100% - ${ realNameWidth }px)`;
         };
 
+        this.disabled = options.disabled ?? false;
+
         const container = document.createElement( 'div' );
         container.className = "lexotp flex flex-row items-center";
         this.root.appendChild( container );
 
-        const pattern = options.pattern ?? "xxx-xxx";
         const groups = pattern.split( '-' );
 
         const _refreshInput = ( valueString ) => {
@@ -8810,9 +8820,18 @@ class OTPInput extends Widget {
 
                 for( let j = 0; j < g.length; ++j )
                 {
-                    const slotDom = LX.makeContainer( ["auto", "auto"],
-                        "lexotpslot border-top border-bottom border-left px-3 cursor-text select-none font-medium outline-none", valueString[ itemsCount++ ], container );
+                    let number = valueString[ itemsCount++ ];
+                    number = ( number == 'x' ? '' : number );
+
+                    const slotDom = LX.makeContainer( ["36px", "30px"],
+                        "lexotpslot border-top border-bottom border-left px-3 cursor-text select-none font-medium outline-none", number, container );
                     slotDom.tabIndex = "1";
+
+                    if( this.disabled )
+                    {
+                        slotDom.classList.add( "disabled" );
+                    }
+
                     const otpIndex = itemsCount;
 
                     if( j == 0 )
@@ -8825,19 +8844,30 @@ class OTPInput extends Widget {
                     }
 
                     slotDom.addEventListener( "click", () => {
+                        if( this.disabled ) { return; }
                         container.querySelectorAll( ".lexotpslot" ).forEach( s => s.classList.remove( "active" ) );
                         const activeDom = container.querySelectorAll( ".lexotpslot" )[ activeSlot ];
                         activeDom.classList.add( "active" );
                         activeDom.focus();
                     } );
 
-                    slotDom.addEventListener( "keyup", e => {
+                    slotDom.addEventListener( "blur", () => {
+                        if( this.disabled ) { return; }
+                        doAsync( () => {
+                            if( container.contains( document.activeElement ) ) { return; }
+                            container.querySelectorAll( ".lexotpslot" ).forEach( s => s.classList.remove( "active" ) );
+                        }, 10 );
+                    } );
 
+                    slotDom.addEventListener( "keyup", e => {
+                        if( this.disabled ) { return; }
                         if( !/[^0-9]+/g.test( e.key ) )
                         {
-                            slotDom.innerHTML = e.key;
-                            valueString = valueString.substring( 0, otpIndex - 1 ) + slotDom.innerHTML + valueString.substring( otpIndex );
-                            this.set( +valueString );
+                            const number = e.key;
+                            console.assert( parseInt( number ) != NaN );
+
+                            slotDom.innerHTML = number;
+                            valueString = valueString.substring( 0, otpIndex - 1 ) + number + valueString.substring( otpIndex );
 
                             const nexActiveDom = container.querySelectorAll( ".lexotpslot" )[ activeSlot + 1 ];
                             if( nexActiveDom )
@@ -8846,6 +8876,10 @@ class OTPInput extends Widget {
                                 nexActiveDom.classList.add( "active" );
                                 nexActiveDom.focus();
                                 activeSlot++;
+                            }
+                            else
+                            {
+                                this.set( valueString );
                             }
                         }
                         else if( e.key == "ArrowLeft" || e.key == "ArrowRight" )
@@ -8860,6 +8894,10 @@ class OTPInput extends Widget {
                                 activeSlot += dt;
                             }
                         }
+                        else if( e.key == "Enter" && !valueString.includes( 'x' ) )
+                        {
+                            this.set( valueString );
+                        }
                     } );
                 }
 
@@ -8872,7 +8910,7 @@ class OTPInput extends Widget {
             console.assert( itemsCount == valueString.length, "OTP Value/Pattern Mismatch!" )
         }
 
-        _refreshInput( String( value ) );
+        _refreshInput( value );
     }
 }
 
@@ -10986,7 +11024,7 @@ class Panel {
     /**
      * @method addOTP
      * @param {String} name Widget name
-     * @param {Number} value Default number value
+     * @param {String} value Default numeric value in string format
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * hideName: Don't use name as label [false]

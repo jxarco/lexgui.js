@@ -1,0 +1,37 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // Input OTP
+    MAKE_HEADER("Input OTP", "h1", "otp");
+    MAKE_PARAGRAPH(`Represents a one-time password input component.`);
+
+    {
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        panel.addOTP("Auth OTP", "65x321", (value, event) => {
+            console.log(value);
+        });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addSize(name, value, callback, options)")} to add a Size Widget to your panel:`);
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Widget name"],
+        ["value", "Number", "Default numeric value in string format (fill with 'x' for empty slots)"],
+        ["callback", "Function", "Function called when the input is completed or _Enter_ pressed"],
+        ["options", "Object", "Basic options for a Widget"],
+        [
+            ["disabled", "Boolean", "Make the widget disabled"],
+            ["pattern", "String", "OTP numeric pattern (Ex. 'xxxx-xxxx')"]
+        ]
+    ]);
+    MAKE_PARAGRAPH(`<sup>Note: Since a Size Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.
+            Minimum size is always 0.<sup>` );
+    MAKE_CODE(`panel.@[mtd]addOTP@(@"Auth OTP"@, @"65x321"@, (value, event) =&gt; {
+    console.@[mtd]log@(value);
+});` );
+
+</script>

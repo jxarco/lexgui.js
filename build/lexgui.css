@@ -2562,7 +2562,13 @@ input[type=number] {
 /* Size Widget */
 
 .lexotpslot.active {
-    border: 2px solid var(--global-text-primary);
+    border: 1px solid var(--global-text-primary);
+    transition: border-color 0.1s ease-in;
+}
+
+.lexotpslot.disabled {
+    color: var(--global-text-tertiary);
+    cursor: not-allowed;
 }
 
 /* Pad Widget */
