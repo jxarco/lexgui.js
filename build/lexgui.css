@@ -4714,7 +4714,7 @@ ul.lexassetscontent {
     padding: 0;
     box-shadow: 0 0 2px rgba(0, 0, 0, .14);
     overflow: hidden;
-    background-color: #555;
+    background-color: var(--global-color-quaternary);
     cursor: pointer;
     text-align: center;
     border-top-left-radius: 2px;
@@ -4768,6 +4768,7 @@ ul.lexassetscontent {
     font-size: 4rem;
     text-anchor: middle;
     font-family: 'Ubuntu', sans-serif;
+    color: var(--global-text-tertiary);
 }
 
 .lexassetscontent li.image {
@@ -4869,10 +4870,6 @@ ul.lexassetscontent {
 .lexassetscontent.list li .lexcheckbox {
     right: 3px;
     top: 3px;
-}
-
-.lexassetscontent li:hover span {
-    color: #f5f5f5;
 }
 
 .lexassetscontent li.selected .lexassettitle {
