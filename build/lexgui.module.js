@@ -683,6 +683,42 @@ function makeCodeSnippet( code, size, options = { } )
 LX.makeCodeSnippet = makeCodeSnippet;
 
 /**
+ * @method makeKbd
+ * @description Kbd element to display a keyboard key.
+ * @param {Array} keys
+ * @param {String} extraClass
+ */
+function makeKbd( keys, extraClass = "" )
+{
+    const specialKeys = {
+        "Ctrl": '⌃',
+        "Enter": '↩',
+        "Shift": '⇧',
+        "CapsLock": '⇪',
+        "Meta": '⌘',
+        "Option": '⌥',
+        "Alt": '⌥',
+        "Tab": '⇥',
+        "ArrowUp": '↑',
+        "ArrowDown": '↓',
+        "ArrowLeft": '←',
+        "ArrowRight": '→',
+        "Space": '␣'
+    };
+
+    const kbd = LX.makeContainer( ["auto", "auto"], "flex flex-row ml-auto" );
+
+    for( const k of keys )
+    {
+        LX.makeContainer( ["auto", "auto"], "self-center text-xs fg-secondary select-none", specialKeys[ k ] ?? k, kbd );
+    }
+
+    return kbd;
+}
+
+LX.makeKbd = makeKbd;
+
+/**
  * @method makeIcon
  * @description Gets an SVG element using one of LX.ICONS
  * @param {String} iconName
@@ -1975,6 +2011,13 @@ class DropdownMenu {
                 let submenuIcon = document.createElement('a');
                 submenuIcon.className = "fa-solid fa-angle-right fa-xs";
                 menuItem.appendChild( submenuIcon );
+            }
+            else if( item.kbd )
+            {
+                item.kbd = [].concat( item.kbd );
+
+                const kbd = LX.makeKbd( item.kbd );
+                menuItem.appendChild( kbd );
             }
 
             if( item.icon )

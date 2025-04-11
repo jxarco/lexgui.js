@@ -227,9 +227,9 @@ const sidebar = left.addSidebar( m => {
         new LX.DropdownMenu( element, [
             "My Account",
             null,
-            { name: "Profile", short: "P", icon: "user" },
+            { name: "Profile", kbd: ["Meta", "P"], icon: "user" },
             { name: "Billing", disabled: true, icon: "credit-card" },
-            { name: "Settings", short: "S" },
+            { name: "Settings", kbd: "S" },
             null,
             { name: "Team" },
             { name: "Invite users", icon: "search" },
@@ -238,8 +238,8 @@ const sidebar = left.addSidebar( m => {
             { name: "Support", submenu: [
                 { name: "Email", icon: "envelope" },
                 { name: "Message", submenu: [
-                    { name: "Whatsapp" },
-                    { name: "iMessage" },
+                    { name: "Whatsapp", kbd: "W" },
+                    { name: "iMessage", kbd: "M" },
                 ]},
             ]  }
         ], { side: "right", align: "end" });

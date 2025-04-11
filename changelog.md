@@ -3,10 +3,11 @@
 ## dev
 
 Widgets:
+- ColorInput Widget now uses a new custom `ColorPicker`.
 - `selectAll` input is now checked when every row is selected in Table Widget.
 - Added new OTPInput widget.
 
-Added new custom `ColorPicker` for general use and ColorInput widgets.
+Added `LX.makeKbd(keys, extraClass)` to create keyboard shortcuts.
 Fixed Badges theming issues.
 Docs updated.
 
