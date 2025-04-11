@@ -116,7 +116,7 @@
             panel.addColor("Background", LX.getThemeColor("global-selected-light"));
             panel.addText("Track", trackName, null)
             panel.addText("Text", "Lexgui.js @evallsg", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
-            panel.addColor("Font Color", [0.1, 0.1, 0.8], (value, event) => {
+            panel.addColor("Font Color", { r: 1, g: 0.1, b: 0.6 }, (value, event) => {
                 console.log("Font Color: ", value);
             });
             panel.addNumber("Font Size", 36, (value, event) => {
