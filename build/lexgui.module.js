@@ -2519,7 +2519,7 @@ class ColorPicker {
         if( this.colorModel == "CSS" )
         {
             const { r, g, b, a } = this.currentColor.css;
-            this.labelWidget.set( `rgba(${ r },${ g },${ b }${ this.useAlpha ? ',' + toFixed( a ) : '' })` );
+            this.labelWidget.set( `rgb${ this.useAlpha ? 'a' : '' }(${ r },${ g },${ b }${ this.useAlpha ? ',' + toFixed( a ) : '' })` );
         }
         else if( this.colorModel == "Hex" )
         {
