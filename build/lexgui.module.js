@@ -2241,22 +2241,18 @@ class ColorPicker {
 
         const hueAlphaContainer = LX.makeContainer( ["100%", "auto"], "flex flex-row gap-1 items-center", "", this.root );
 
-        hueAlphaContainer.appendChild( new Button(null, "eyedrop",  async () => {
-
-            if( !window.EyeDropper )
-            {
-                console.error( "Your browser does not support the EyeDropper API" );
-                return;
-            }
-
-            const eyeDropper = new EyeDropper()
-            try {
-                const result = await eyeDropper.open();
-                this.fromHexColor( result.sRGBHex );
-            } catch ( err ) {
-                // console.error("EyeDropper cancelled or failed: ", err)
-            }
-        }, { icon: "eye-dropper", buttonClass: "bg-none", title: "Sample Color" }).root );
+        if( window.EyeDropper )
+        {
+            hueAlphaContainer.appendChild( new Button(null, "eyedrop",  async () => {
+                const eyeDropper = new EyeDropper()
+                try {
+                    const result = await eyeDropper.open();
+                    this.fromHexColor( result.sRGBHex );
+                } catch ( err ) {
+                    // console.error("EyeDropper cancelled or failed: ", err)
+                }
+            }, { icon: "eye-dropper", buttonClass: "bg-none", title: "Sample Color" }).root );
+        }
 
         const innerHueAlpha = LX.makeContainer( ["100%", "100%"], "flex flex-col gap-2", "", hueAlphaContainer );
 
