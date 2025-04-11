@@ -85,6 +85,10 @@
 .self-center { place-self: center }
 .self-end { place-self: end }
 
+.content-start { align-content: start }
+.content-center { align-content: center }
+.content-end { align-content: end }
+
 .gap-0 { gap: 0 }
 .gap-0\.5 { gap: 0.125rem }
 .gap-1 { gap: 0.25rem }
