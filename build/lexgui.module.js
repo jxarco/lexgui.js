@@ -2396,7 +2396,7 @@ class ColorPicker {
             navigator.clipboard.writeText( this.labelWidget.value() );
         }, { icon: "copy", buttonClass: "bg-none", className: "ml-auto", title: "Copy" }).root );
 
-        this._updateColorValue( hexValue );
+        this._updateColorValue( hexValue, true );
 
         doAsync( () => {
             this._adjustPosition();
