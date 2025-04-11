@@ -180,10 +180,11 @@ class Timeline {
 
         header.queue( buttonContainer );
 
-        header.addButton("playBtn", '', (value, event) => {
+        const playbtn = header.addButton("playBtn", '', (value, event) => {
            this.changeState();
-        }, { buttonClass: "accept", title: "Play", hideName: true, icon: ("fa-solid fa-"+ (this.playing ? 'pause' : 'play')) });
-        
+        }, { buttonClass: "accept", title: "Play", hideName: true, icon: "fa-solid fa-play", swap: "fa-solid fa-pause" });
+        playbtn.root.setState(this.playing, true);
+
         header.addBlank("0.05em", "auto");
 
         header.addButton("stopBtn", '', (value, event) => {
@@ -1128,13 +1129,7 @@ class Timeline {
     setState(state, skipCallback = false) {
         this.playing = state;
 
-        if ( this.playing ){
-            this.header.widgets.playBtn.root.children[0].children[0].classList.add("fa-pause");
-            this.header.widgets.playBtn.root.children[0].children[0].classList.remove("fa-play");
-        }else{
-            this.header.widgets.playBtn.root.children[0].children[0].classList.add("fa-play");
-            this.header.widgets.playBtn.root.children[0].children[0].classList.remove("fa-pause");
-        }
+        this.header.widgets.playBtn.root.setState(this.playing, true);
 
         if(this.onStateChange && !skipCallback) {
             this.onStateChange(this.playing);
