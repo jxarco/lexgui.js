@@ -2,6 +2,9 @@
 
 ## dev
 
+Widgets:
+- `selectAll` input is now checked when every row is selected in Table Widget.
+
 Added new custom `ColorPicker` for general use and ColorInput widgets.
 Fixed Badges theming issues.
 

@@ -9645,7 +9645,7 @@ class Table extends Widget {
                         for( const el of body.childNodes )
                         {
                             data.checkMap[ el.getAttribute( "rowId" ) ] = this.checked;
-                            el.querySelector( "input" ).checked = this.checked;
+                            el.querySelector( "input[type='checkbox']" ).checked = this.checked;
                         }
                     });
 
@@ -9859,10 +9859,20 @@ class Table extends Widget {
                         input.addEventListener( 'change', function() {
                             data.checkMap[ rowId ] = this.checked;
 
+                            const headInput = table.querySelector( "thead input[type='checkbox']" );
+
                             if( !this.checked )
                             {
-                                const input = table.querySelector( "thead input[type='checkbox']" );
-                                input.checked = data.checkMap[ ":root" ] = false;
+                                headInput.checked = data.checkMap[ ":root" ] = false;
+                            }
+                            else
+                            {
+                                const rowInputs = Array.from( table.querySelectorAll( "tbody input[type='checkbox']" ) );
+                                const uncheckedRowInputs = rowInputs.filter( i => { return !i.checked; } );
+                                if( !uncheckedRowInputs.length )
+                                {
+                                    headInput.checked = data.checkMap[ ":root" ] = true;
+                                }
                             }
                         });
 
