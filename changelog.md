@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.5.6 (master)
+
 Widgets:
 - ColorInput Widget now uses a new custom `ColorPicker`.
 - `selectAll` input is now checked when every row is selected in Table Widget.
@@ -12,7 +14,7 @@ Added `LX.makeKbd(keys, extraClass)` to create keyboard shortcuts.
 Fixed Badges theming issues.
 Docs updated.
 
-## 0.5.5 (master)
+## 0.5.5
 
 Table Widget:
 - Added support `options.filterValue`.
