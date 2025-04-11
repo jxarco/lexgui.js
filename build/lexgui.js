@@ -12,7 +12,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 var LX = {
-    version: "0.5.5",
+    version: "0.5.6",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -222,36 +222,140 @@ LX.getBase64Image = getBase64Image;
 
 /**
  * @method hexToRgb
- * @description Convert a hexadecimal string to a valid RGB color array
- * @param {String} hexStr Hexadecimal color
+ * @description Convert a hexadecimal string to a valid RGB color
+ * @param {String} hex Hexadecimal color
  */
-function hexToRgb( hexStr )
+function hexToRgb( hex )
 {
-    const red = parseInt( hexStr.substring( 1, 3 ), 16 ) / 255;
-    const green = parseInt( hexStr.substring( 3, 5 ), 16 ) / 255;
-    const blue = parseInt( hexStr.substring( 5, 7 ), 16 ) / 255;
-    return [ red, green, blue ];
+    const hexPattern = /^#(?:[A-Fa-f0-9]{3,4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/;
+    if( !hexPattern.test( hex ) )
+    {
+        throw( `Invalid Hex Color: ${ hex }` );
+    }
+
+    hex = hex.replace( /^#/, '' );
+
+    // Expand shorthand form (#RGB or #RGBA)
+    if( hex.length === 3 || hex.length === 4 )
+    {
+        hex = hex.split( '' ).map( c => c + c ).join( '' );
+    }
+
+    const bigint = parseInt( hex, 16 );
+
+    const r = ( ( bigint >> ( hex.length === 8 ? 24 : 16 ) ) & 255 ) / 255;
+    const g = ( ( bigint >> ( hex.length === 8 ? 16 : 8 ) ) & 255 ) / 255;
+    const b = ( ( bigint >> ( hex.length === 8 ? 8 : 0 ) ) & 255 ) / 255;
+    const a = ( hex.length === 8 ? ( bigint & 255 ) : ( hex.length === 4 ? parseInt( hex.slice( -2 ), 16 ) : 255 ) ) / 255;
+
+    return { r, g, b, a };
 }
 
 LX.hexToRgb = hexToRgb;
 
 /**
- * @method rgbToHex
- * @description Convert a RGB color array to a hexadecimal string
- * @param {Array} rgb Array containing R, G, B, A*
+ * @method hexToHsv
+ * @description Convert a hexadecimal string to HSV (0..360|0..1|0..1)
+ * @param {String} hexStr Hexadecimal color
  */
-function rgbToHex( rgb )
+function hexToHsv( hexStr )
 {
-    let hex = "#";
-    for( let c of rgb )
-    {
-        c = Math.floor( c * 255 );
-        hex += c.toString( 16 );
-    }
-    return hex;
+    const rgb = hexToRgb( hexStr );
+    return rgbToHsv( rgb );
+}
+
+LX.hexToHsv = hexToHsv;
+
+/**
+ * @method rgbToHex
+ * @description Convert a RGB color to a hexadecimal string
+ * @param {Object} rgb Object containing RGB color
+ * @param {Number} scale Use 255 for 0..255 range or 1 for 0..1 range
+ */
+function rgbToHex( rgb, scale = 255 )
+{
+    const rgbArray = [ rgb.r, rgb.g, rgb.b ];
+    if( rgb.a != undefined ) rgbArray.push( rgb.a );
+
+    return (
+        "#" +
+        rgbArray.map( c => {
+            c = Math.floor( c * scale );
+            const hex = c.toString(16);
+            return hex.length === 1 ? ( '0' + hex ) : hex;
+        }).join("")
+    );
 }
 
 LX.rgbToHex = rgbToHex;
+
+/**
+ * @method rgbToCss
+ * @description Convert a RGB color (0..1) to a CSS color format
+ * @param {Object} rgb Object containing RGB color
+ */
+function rgbToCss( rgb )
+{
+    return { r: Math.floor( rgb.r * 255 ), g: Math.floor( rgb.g * 255 ), b: Math.floor( rgb.b * 255 ), a: rgb.a };
+}
+
+LX.rgbToCss = rgbToCss;
+
+/**
+ * @method rgbToHsv
+ * @description Convert a RGB color (0..1) array to HSV (0..360|0..1|0..1)
+ * @param {Object} rgb Array containing R, G, B
+ */
+function rgbToHsv( rgb )
+{
+    let { r, g, b, a } = rgb;
+    a = a ?? 1;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const d = max - min;
+    let h = 0;
+
+    if (d !== 0) {
+        if (max === r) { h = ((g - b) / d) % 6 }
+        else if (max === g) { h = (b - r) / d + 2 }
+        else { h = (r - g) / d + 4 }
+        h *= 60
+        if (h < 0) { h += 360 }
+    }
+
+    const s = max === 0 ? 0 : (d / max);
+    const v = max;
+
+    return { h, s, v, a };
+}
+
+LX.rgbToHsv = rgbToHsv;
+
+/**
+ * @method hsvToRgb
+ * @description Convert an HSV color (0..360|0..1|0..1) array to RGB (0..1|0..255)
+ * @param {Array} hsv Array containing H, S, V
+ */
+function hsvToRgb( hsv )
+{
+    const { h, s, v, a } = hsv;
+    const c = v * s;
+    const x = c * (1 - Math.abs( ( (h / 60) % 2 ) - 1) )
+    const m = v - c;
+    let r = 0, g = 0, b = 0;
+
+    if( h < 60 ) { r = c; g = x; b = 0; }
+    else if ( h < 120 ) { r = x; g = c; b = 0; }
+    else if ( h < 180 ) { r = 0; g = c; b = x; }
+    else if ( h < 240 ) { r = 0; g = x; b = c; }
+    else if ( h < 300 ) { r = x; g = 0; b = c; }
+    else { r = c; g = 0; b = x; }
+
+    return { r: ( r + m ), g: ( g + m ), b: ( b + m ), a };
+}
+
+LX.hsvToRgb = hsvToRgb;
 
 /**
  * @method measureRealWidth
@@ -585,6 +689,42 @@ function makeCodeSnippet( code, size, options = { } )
 LX.makeCodeSnippet = makeCodeSnippet;
 
 /**
+ * @method makeKbd
+ * @description Kbd element to display a keyboard key.
+ * @param {Array} keys
+ * @param {String} extraClass
+ */
+function makeKbd( keys, extraClass = "" )
+{
+    const specialKeys = {
+        "Ctrl": '⌃',
+        "Enter": '↩',
+        "Shift": '⇧',
+        "CapsLock": '⇪',
+        "Meta": '⌘',
+        "Option": '⌥',
+        "Alt": '⌥',
+        "Tab": '⇥',
+        "ArrowUp": '↑',
+        "ArrowDown": '↓',
+        "ArrowLeft": '←',
+        "ArrowRight": '→',
+        "Space": '␣'
+    };
+
+    const kbd = LX.makeContainer( ["auto", "auto"], "flex flex-row ml-auto" );
+
+    for( const k of keys )
+    {
+        LX.makeContainer( ["auto", "auto"], "self-center text-xs fg-secondary select-none", specialKeys[ k ] ?? k, kbd );
+    }
+
+    return kbd;
+}
+
+LX.makeKbd = makeKbd;
+
+/**
  * @method makeIcon
  * @description Gets an SVG element using one of LX.ICONS
  * @param {String} iconName
@@ -722,7 +862,7 @@ function registerCommandbarEntry( name, callback )
 
 LX.registerCommandbarEntry = registerCommandbarEntry;
 
-// Math classes
+// Utils classes
 
 class vec2 {
 
@@ -749,6 +889,77 @@ class vec2 {
 };
 
 LX.vec2 = vec2;
+
+class Color {
+
+	constructor( value ) {
+
+        Object.defineProperty( Color.prototype, "rgb", {
+            get: function() { return this._rgb; },
+            set: function( v ) { this._fromRGB( v ) }, enumerable: true, configurable: true
+        });
+
+        Object.defineProperty( Color.prototype, "hex", {
+            get: function() { return this._hex; },
+            set: function( v ) { this._fromHex( v ) }, enumerable: true, configurable: true
+        });
+
+        Object.defineProperty( Color.prototype, "hsv", {
+            get: function() { return this._hsv; },
+            set: function( v ) { this._fromHSV( v ) }, enumerable: true, configurable: true
+        });
+
+		this.set( value );
+	}
+
+	set( value ) {
+
+		if ( typeof value === 'string' && value.startsWith( '#' ) )
+        {
+			this._fromHex( value );
+		}
+        else if( 'r' in value && 'g' in value && 'b' in value)
+        {
+            value.a = value.a ?? 1.0;
+			this._fromRGB( value );
+		}
+        else if( 'h' in value && 's' in value && 'v' in value )
+        {
+            value.a = value.a ?? 1.0;
+			this._fromHSV( value );
+		}
+        else
+        {
+            throw( "Bad color model!", value );
+        }
+	}
+
+    setHSV( hsv ) { this._fromHSV( hsv ); }
+    setRGB( rgb ) { this._fromRGB( rgb ); }
+    setHex( hex ) { this._fromHex( hex ); }
+
+	_fromHex( hex ) {
+		this._fromRGB( hexToRgb( hex ) );
+	}
+
+	_fromRGB( rgb ) {
+		this._rgb = rgb;
+		this._hsv = rgbToHsv( rgb );
+		this._hex = rgbToHex( rgb );
+        this.css = rgbToCss( this._rgb );
+	}
+
+	_fromHSV( hsv ) {
+		this._hsv = hsv;
+		this._rgb = hsvToRgb( hsv );
+		this._hex = rgbToHex( this._rgb );
+        this.css = rgbToCss( this._rgb );
+	}
+}
+
+LX.Color = Color;
+
+// Command bar creation
 
 function _createCommandbar( root )
 {
@@ -1807,6 +2018,13 @@ class DropdownMenu {
                 submenuIcon.className = "fa-solid fa-angle-right fa-xs";
                 menuItem.appendChild( submenuIcon );
             }
+            else if( item.kbd )
+            {
+                item.kbd = [].concat( item.kbd );
+
+                const kbd = LX.makeKbd( item.kbd );
+                menuItem.appendChild( kbd );
+            }
 
             if( item.icon )
             {
@@ -1948,6 +2166,450 @@ class DropdownMenu {
 };
 
 LX.DropdownMenu = DropdownMenu;
+
+/**
+ * @class ColorPicker
+ */
+
+class ColorPicker {
+
+    static currentPicker = false;
+
+    constructor( hexValue, trigger, options = {} ) {
+
+        console.assert( trigger, "ColorPicker needs a DOM element as trigger!" );
+
+        this._windowPadding = 4;
+        this.side = options.side ?? "bottom";
+        this.align = options.align ?? "center";
+        this.avoidCollisions = options.avoidCollisions ?? true;
+        this.colorModel = options.colorModel ?? "Hex";
+        this.useAlpha = options.useAlpha ?? false;
+        this.callback = options.onChange;
+
+        if( !this.callback )
+        {
+            console.warn( "Define a callback in _options.onChange_ to allow getting new Color values!" );
+        }
+
+        if( ColorPicker.currentPicker )
+        {
+            ColorPicker.currentPicker.destroy();
+            return;
+        }
+
+        this._trigger = trigger;
+        trigger.classList.add( "triggered" );
+        trigger.picker = this;
+
+        this.root = document.createElement( "div" );
+        this.root.tabIndex = "1";
+        this.root.className = "lexcolorpicker";
+        this.root.dataset["side"] = this.side;
+        LX.root.appendChild( this.root );
+
+        this.root.addEventListener( "keydown", (e) => {
+            if( e.key == "Escape" )
+            {
+                e.preventDefault();
+                e.stopPropagation();
+                this.destroy();
+            }
+        } )
+
+        ColorPicker.currentPicker = this;
+
+        this.markerHalfSize = 8;
+        this.markerSize = this.markerHalfSize * 2;
+        this.currentColor = new Color( hexValue );
+
+        const hueColor = new Color( { h: this.currentColor.hsv.h, s: 1, v: 1 } );
+
+        // Intensity, Sat
+        this.colorPickerBackground = document.createElement( 'div' );
+        this.colorPickerBackground.className = "lexcolorpickerbg";
+        this.colorPickerBackground.style.backgroundColor = `rgb(${ hueColor.css.r }, ${ hueColor.css.g }, ${ hueColor.css.b })`;
+        this.root.appendChild( this.colorPickerBackground );
+
+        this.intSatMarker = document.createElement( 'div' );
+        this.intSatMarker.className = "lexcolormarker";
+        this.intSatMarker.style.backgroundColor = this.currentColor.hex;
+        this.colorPickerBackground.appendChild( this.intSatMarker );
+
+        doAsync( this._svToPosition.bind( this, this.currentColor.hsv.s, this.currentColor.hsv.v ) );
+
+        let innerMouseDown = e => {
+            var doc = this.root.ownerDocument;
+            doc.addEventListener( 'mousemove', innerMouseMove );
+            doc.addEventListener( 'mouseup', innerMouseUp );
+            document.body.classList.add( 'noevents' );
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+
+            const currentLeft = ( e.offsetX - this.markerHalfSize );
+            this.intSatMarker.style.left = currentLeft + "px";
+            const currentTop = ( e.offsetY - this.markerHalfSize );
+            this.intSatMarker.style.top = currentTop + "px";
+            this._positionToSv( currentLeft, currentTop );
+            this._updateColorValue();
+        }
+
+        let innerMouseMove = e => {
+            const dX = e.movementX;
+            const dY = e.movementY;
+
+            const rect = this.colorPickerBackground.getBoundingClientRect();
+            const mouseX = e.offsetX - rect.x;
+            const mouseY = e.offsetY - rect.y;
+
+            if ( dX != 0 && ( mouseX >= 0 || dX < 0 ) && ( mouseX < this.colorPickerBackground.offsetWidth || dX > 0 ) )
+            {
+                this.intSatMarker.style.left = LX.clamp( parseInt( this.intSatMarker.style.left ) + dX, -this.markerHalfSize, this.colorPickerBackground.offsetWidth - this.markerHalfSize ) + "px";
+            }
+
+            if ( dY != 0 && ( mouseY >= 0 || dY < 0 ) && ( mouseY < this.colorPickerBackground.offsetHeight || dY > 0 ) )
+            {
+                this.intSatMarker.style.top = LX.clamp( parseInt( this.intSatMarker.style.top ) + dY, -this.markerHalfSize, this.colorPickerBackground.offsetHeight - this.markerHalfSize ) + "px";
+            }
+
+            this._positionToSv( parseInt( this.intSatMarker.style.left ), parseInt( this.intSatMarker.style.top ) );
+            this._updateColorValue();
+
+            e.stopPropagation();
+            e.preventDefault();
+        }
+
+        let innerMouseUp = e => {
+            var doc = this.root.ownerDocument;
+            doc.removeEventListener( 'mousemove', innerMouseMove );
+            doc.removeEventListener( 'mouseup', innerMouseUp );
+            document.body.classList.remove( 'noevents' );
+        }
+
+        this.colorPickerBackground.addEventListener( "mousedown", innerMouseDown );
+
+        const hueAlphaContainer = LX.makeContainer( ["100%", "auto"], "flex flex-row gap-1 items-center", "", this.root );
+
+        if( window.EyeDropper )
+        {
+            hueAlphaContainer.appendChild( new Button(null, "eyedrop",  async () => {
+                const eyeDropper = new EyeDropper()
+                try {
+                    const result = await eyeDropper.open();
+                    this.fromHexColor( result.sRGBHex );
+                } catch ( err ) {
+                    // console.error("EyeDropper cancelled or failed: ", err)
+                }
+            }, { icon: "eye-dropper", buttonClass: "bg-none", title: "Sample Color" }).root );
+        }
+
+        const innerHueAlpha = LX.makeContainer( ["100%", "100%"], "flex flex-col gap-2", "", hueAlphaContainer );
+
+        // Hue
+        this.colorPickerTracker = document.createElement( 'div' );
+        this.colorPickerTracker.className = "lexhuetracker";
+        innerHueAlpha.appendChild( this.colorPickerTracker );
+
+        this.hueMarker = document.createElement( 'div' );
+        this.hueMarker.className = "lexcolormarker";
+        this.hueMarker.style.backgroundColor = `rgb(${ hueColor.css.r }, ${ hueColor.css.g }, ${ hueColor.css.b })`;
+        this.colorPickerTracker.appendChild( this.hueMarker );
+
+        doAsync( () => {
+            const hueLeft = LX.remapRange( this.currentColor.hsv.h, 0, 360, 0, this.colorPickerTracker.offsetWidth - this.markerSize );
+            this.hueMarker.style.left = hueLeft + "px";
+        } );
+
+        const _fromHueX = ( hueX ) => {
+            this.hueMarker.style.left = hueX + "px";
+            this.currentColor.hsv.h = LX.remapRange( hueX, 0, this.colorPickerTracker.offsetWidth - this.markerSize, 0, 360 );
+
+            const hueColor = new Color( { h: this.currentColor.hsv.h, s: 1, v: 1 } );
+            this.hueMarker.style.backgroundColor = `rgb(${ hueColor.css.r }, ${ hueColor.css.g }, ${ hueColor.css.b })`;
+            this.colorPickerBackground.style.backgroundColor = `rgb(${ hueColor.css.r }, ${ hueColor.css.g }, ${ hueColor.css.b })`;
+            this._updateColorValue();
+        };
+
+        let innerMouseDownHue = e => {
+            const doc = this.root.ownerDocument;
+            doc.addEventListener( 'mousemove', innerMouseMoveHue );
+            doc.addEventListener( 'mouseup', innerMouseUpHue );
+            document.body.classList.add( 'noevents' );
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+
+            const hueX = clamp( e.offsetX - this.markerHalfSize, 0, this.colorPickerTracker.offsetWidth - this.markerSize );
+            _fromHueX( hueX );
+        }
+
+        let innerMouseMoveHue = e => {
+            let dX = e.movementX;
+
+            const rect = this.colorPickerTracker.getBoundingClientRect();
+            const mouseX = e.offsetX - rect.x;
+
+            if ( dX != 0 && ( mouseX >= 0 || dX < 0 ) && ( mouseX < this.colorPickerTracker.offsetWidth || dX > 0 ) )
+            {
+                const hueX = LX.clamp( parseInt( this.hueMarker.style.left ) + dX, 0, this.colorPickerTracker.offsetWidth - this.markerSize );
+                _fromHueX( hueX )
+            }
+
+            e.stopPropagation();
+            e.preventDefault();
+        }
+
+        let innerMouseUpHue = e => {
+            var doc = this.root.ownerDocument;
+            doc.removeEventListener( 'mousemove', innerMouseMoveHue );
+            doc.removeEventListener( 'mouseup', innerMouseUpHue );
+            document.body.classList.remove( 'noevents' );
+        }
+
+        this.colorPickerTracker.addEventListener( "mousedown", innerMouseDownHue );
+
+        // Alpha
+        if( this.useAlpha )
+        {
+            this.alphaTracker = document.createElement( 'div' );
+            this.alphaTracker.className = "lexalphatracker";
+            this.alphaTracker.style.color = `rgb(${ this.currentColor.css.r }, ${ this.currentColor.css.g }, ${ this.currentColor.css.b })`;
+            innerHueAlpha.appendChild( this.alphaTracker );
+
+            this.alphaMarker = document.createElement( 'div' );
+            this.alphaMarker.className = "lexcolormarker";
+            this.alphaMarker.style.backgroundColor = `rgb(${ this.currentColor.css.r }, ${ this.currentColor.css.g }, ${ this.currentColor.css.b },${ this.currentColor.css.a })`;
+            this.alphaTracker.appendChild( this.alphaMarker );
+
+            doAsync( () => {
+                const alphaLeft = LX.remapRange( this.currentColor.hsv.a, 0, 1, 0, this.alphaTracker.offsetWidth - this.markerSize );
+                this.alphaMarker.style.left = alphaLeft + "px";
+            } );
+
+            const _fromAlphaX = ( alphaX ) => {
+                this.alphaMarker.style.left = alphaX + "px";
+                this.currentColor.hsv.a = LX.remapRange( alphaX, 0, this.alphaTracker.offsetWidth - this.markerSize, 0, 1 );
+                this._updateColorValue();
+                // Update alpha marker once the color is updated
+                this.alphaMarker.style.backgroundColor = `rgb(${ this.currentColor.css.r }, ${ this.currentColor.css.g }, ${ this.currentColor.css.b },${ this.currentColor.css.a })`;
+            };
+
+            let innerMouseDownAlpha = e => {
+                const doc = this.root.ownerDocument;
+                doc.addEventListener( 'mousemove', innerMouseMoveAlpha );
+                doc.addEventListener( 'mouseup', innerMouseUpAlpha );
+                document.body.classList.add( 'noevents' );
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+                const alphaX = clamp( e.offsetX - this.markerHalfSize, 0, this.alphaTracker.offsetWidth - this.markerSize );
+                _fromAlphaX( alphaX );
+            }
+
+            let innerMouseMoveAlpha = e => {
+                let dX = e.movementX;
+
+                const rect = this.alphaTracker.getBoundingClientRect();
+                const mouseX = e.offsetX - rect.x;
+
+                if ( dX != 0 && ( mouseX >= 0 || dX < 0 ) && ( mouseX < this.alphaTracker.offsetWidth || dX > 0 ) )
+                {
+                    const alphaX = LX.clamp( parseInt( this.alphaMarker.style.left ) + dX, 0, this.alphaTracker.offsetWidth - this.markerSize );
+                    _fromAlphaX( alphaX );
+                }
+
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            let innerMouseUpAlpha = e => {
+                var doc = this.root.ownerDocument;
+                doc.removeEventListener( 'mousemove', innerMouseMoveAlpha );
+                doc.removeEventListener( 'mouseup', innerMouseUpAlpha );
+                document.body.classList.remove( 'noevents' );
+            }
+
+            this.alphaTracker.addEventListener( "mousedown", innerMouseDownAlpha );
+        }
+
+        // Info display
+        const colorLabel = LX.makeContainer( ["100%", "auto"], "flex flex-row gap-1", "", this.root );
+
+        colorLabel.appendChild( new Select( null, [ "CSS", "Hex", "HSV", "RGB" ], this.colorModel, v => {
+            this.colorModel = v;
+            this._updateColorValue( null, true );
+        } ).root );
+
+        this.labelWidget = new TextInput( null, "", null, { inputClass: "bg-none", fit: true, disabled: true } );
+        colorLabel.appendChild( this.labelWidget.root );
+
+        colorLabel.appendChild( new Button(null, "eyedrop",  async () => {
+            navigator.clipboard.writeText( this.labelWidget.value() );
+        }, { icon: "copy", buttonClass: "bg-none", className: "ml-auto", title: "Copy" }).root );
+
+        this._updateColorValue( hexValue, true );
+
+        doAsync( () => {
+            this._adjustPosition();
+
+            this.root.focus();
+
+            this._onClick = e => {
+                if( e.target && ( this.root.contains( e.target ) || e.target == this._trigger ) )
+                {
+                    return;
+                }
+                this.destroy();
+            };
+
+            document.body.addEventListener( "mousedown", this._onClick, true );
+            document.body.addEventListener( "focusin", this._onClick, true );
+        }, 10 );
+    }
+
+    fromHexColor( hexColor ) {
+
+        this.currentColor.setHex( hexColor );
+
+        // Decompose into HSV
+        const { h, s, v } = this.currentColor.hsv;
+        this._svToPosition( s, v );
+
+        const hueColor = new Color( { h, s: 1, v: 1 } );
+        this.hueMarker.style.backgroundColor = this.colorPickerBackground.style.backgroundColor = `rgb(${ hueColor.css.r }, ${ hueColor.css.g }, ${ hueColor.css.b })`;
+        this.hueMarker.style.left = LX.remapRange( h, 0, 360, -this.markerHalfSize, this.colorPickerTracker.offsetWidth - this.markerHalfSize ) + "px";
+
+        this._updateColorValue( hexColor );
+    }
+
+    destroy() {
+
+        this._trigger.classList.remove( "triggered" );
+
+        delete this._trigger.picker;
+
+        document.body.removeEventListener( "mousedown", this._onClick, true );
+        document.body.removeEventListener( "focusin", this._onClick, true );
+
+        LX.root.querySelectorAll( ".lexcolorpicker" ).forEach( m => { m.remove(); } );
+
+        ColorPicker.currentPicker = null;
+    }
+
+    _svToPosition( s, v ) {
+        this.intSatMarker.style.left = `${ LX.remapRange( s, 0, 1, -this.markerHalfSize, this.colorPickerBackground.offsetWidth - this.markerHalfSize ) }px`;
+        this.intSatMarker.style.top = `${ LX.remapRange( 1 - v, 0, 1, -this.markerHalfSize, this.colorPickerBackground.offsetHeight - this.markerHalfSize ) }px`
+    };
+
+    _positionToSv( left, top ) {
+        this.currentColor.hsv.s = LX.remapRange( left, -this.markerHalfSize, this.colorPickerBackground.offsetWidth - this.markerHalfSize, 0, 1 );
+        this.currentColor.hsv.v = 1 - LX.remapRange( top, -this.markerHalfSize, this.colorPickerBackground.offsetHeight - this.markerHalfSize, 0, 1 );
+    };
+
+    _updateColorValue( newHexValue, skipCallback = false ) {
+
+        this.currentColor.set( newHexValue ?? this.currentColor.hsv );
+
+        if( this.callback && !skipCallback )
+        {
+            this.callback( this.currentColor );
+        }
+
+        this.intSatMarker.style.backgroundColor = this.currentColor.hex;
+
+        if( this.useAlpha )
+        {
+            this.alphaTracker.style.color = `rgb(${ this.currentColor.css.r }, ${ this.currentColor.css.g }, ${ this.currentColor.css.b },${ this.currentColor.css.a })`;
+        }
+
+        const toFixed = ( s, n = 2) => { return s.toFixed( n ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' ) };
+
+        if( this.colorModel == "CSS" )
+        {
+            const { r, g, b, a } = this.currentColor.css;
+            this.labelWidget.set( `rgba(${ r },${ g },${ b }${ this.useAlpha ? ',' + toFixed( a ) : '' })` );
+        }
+        else if( this.colorModel == "Hex" )
+        {
+            this.labelWidget.set( ( this.useAlpha ? this.currentColor.hex : this.currentColor.hex.substr( 0, 7 ) ).toUpperCase() );
+        }
+        else if( this.colorModel == "HSV" )
+        {
+            const { h, s, v, a } = this.currentColor.hsv;
+            const components = [ Math.floor( h ) + 'º', Math.floor( s * 100 ) + '%', Math.floor( v * 100 ) + '%' ];
+            if( this.useAlpha ) components.push( toFixed( a ) );
+            this.labelWidget.set( components.join( ' ' ) );
+        }
+        else // RGB
+        {
+            const { r, g, b, a } = this.currentColor.rgb;
+            const components = [ toFixed( r ), toFixed( g ), toFixed( b ) ];
+            if( this.useAlpha ) components.push( toFixed( a ) );
+            this.labelWidget.set( components.join( ' ' ) );
+        }
+    };
+
+    _adjustPosition() {
+
+        const position = [ 0, 0 ];
+
+        // Place menu using trigger position and user options
+        {
+            const rect = this._trigger.getBoundingClientRect();
+
+            let alignWidth = true;
+
+            switch( this.side )
+            {
+                case "left":
+                    position[ 0 ] += ( rect.x - this.root.offsetWidth );
+                    alignWidth = false;
+                    break;
+                case "right":
+                    position[ 0 ] += ( rect.x + rect.width );
+                    alignWidth = false;
+                    break;
+                case "top":
+                    position[ 1 ] += ( rect.y - this.root.offsetHeight );
+                    alignWidth = true;
+                    break;
+                case "bottom":
+                    position[ 1 ] += ( rect.y + rect.height );
+                    alignWidth = true;
+                    break;
+                default:
+                    break;
+            }
+
+            switch( this.align )
+            {
+                case "start":
+                    if( alignWidth ) { position[ 0 ] += rect.x; }
+                    else { position[ 1 ] += rect.y; }
+                    break;
+                case "center":
+                    if( alignWidth ) { position[ 0 ] += ( rect.x + rect.width * 0.5 ) - this.root.offsetWidth * 0.5; }
+                    else { position[ 1 ] += ( rect.y + rect.height * 0.5 ) - this.root.offsetHeight * 0.5; }
+                    break;
+                case "end":
+                    if( alignWidth ) { position[ 0 ] += rect.x - this.root.offsetWidth + rect.width; }
+                    else { position[ 1 ] += rect.y - this.root.offsetHeight + rect.height; }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if( this.avoidCollisions )
+        {
+            position[ 0 ] = LX.clamp( position[ 0 ], 0, window.innerWidth - this.root.offsetWidth - this._windowPadding );
+            position[ 1 ] = LX.clamp( position[ 1 ], 0, window.innerHeight - this.root.offsetHeight - this._windowPadding );
+        }
+
+        this.root.style.left = `${ position[ 0 ] }px`;
+        this.root.style.top = `${ position[ 1 ] }px`;
+    }
+};
+
+LX.ColorPicker = ColorPicker;
 
 class Area {
 
@@ -3810,57 +4472,14 @@ class Menubar {
 
         for( let i = 0; i < buttons.length; ++i )
         {
-            let data = buttons[ i ];
-            let button = document.createElement( "label" );
+            const data = buttons[ i ];
             const title = data.title;
-            let disabled = data.disabled ?? false;
-            button.className = "lexmenubutton" + (disabled ? " disabled" : "");
-            button.title = title ?? "";
-            this.buttonContainer.appendChild( button );
-
-            const icon = document.createElement( "a" );
-            icon.className = data.icon + " lexicon";
-            button.appendChild( icon );
-
-            let trigger = icon;
-
-            if( data.swap )
-            {
-                button.classList.add( "swap" );
-                icon.classList.add( "swap-off" );
-
-                const input = document.createElement( "input" );
-                input.type = "checkbox";
-                button.prepend( input );
-                trigger = input;
-
-                const swapIcon = document.createElement( "a" );
-                swapIcon.className = data.swap + " swap-on lexicon";
-                button.appendChild( swapIcon );
-
-                button.swap = function() {
-                    const swapInput = this.querySelector( "input" );
-                    swapInput.checked = !swapInput.checked;
-                };
-
-                // Set if swap has to be performed
-                button.setState = function( v ) {
-                    const swapInput = this.querySelector( "input" );
-                    swapInput.checked = v;
-                };
-            }
-
-            trigger.addEventListener("click", e => {
-                if( data.callback && !disabled )
-                {
-                    const swapInput = button.querySelector( "input" );
-                    data.callback.call( this, e, swapInput?.checked );
-                }
-            });
+            const button = new Button( title, "", data.callback, { title, buttonClass: "bg-none", disabled: data.disabled, icon: data.icon, hideName: true, swap: data.swap } )
+            this.buttonContainer.appendChild( button.root );
 
             if( title )
             {
-                this.buttons[ title ] = button;
+                this.buttons[ title ] = button.root;
             }
         }
     }
@@ -4563,14 +5182,15 @@ class Widget {
     static SEPARATOR    = 26;
     static KNOB         = 27;
     static SIZE         = 28;
-    static PAD          = 29;
-    static FORM         = 30;
-    static DIAL         = 31;
-    static COUNTER      = 32;
-    static TABLE        = 33;
-    static TABS         = 34;
-    static LABEL        = 35;
-    static BLANK        = 36;
+    static OTP          = 29;
+    static PAD          = 30;
+    static FORM         = 31;
+    static DIAL         = 32;
+    static COUNTER      = 33;
+    static TABLE        = 34;
+    static TABS         = 35;
+    static LABEL        = 36;
+    static BLANK        = 37;
 
     static NO_CONTEXT_TYPES = [
         Widget.BUTTON,
@@ -5815,40 +6435,17 @@ class Button extends Widget {
         super( Widget.BUTTON, name, null, options );
 
         this.onGetValue = () => {
-            return wValue.innerText;
+            return wValue.querySelector( "input" )?.checked;
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
 
-            wValue.innerHTML = "";
-
-            if( options.icon )
+            if( !( options.swap ?? false ) )
             {
-                let icon = null;
+                return;
+            }
 
-                // @legacy
-                if( options.icon.includes( "fa-" ) )
-                {
-                    icon = document.createElement( 'a' );
-                    icon.className = options.icon;
-                }
-                else
-                {
-                    icon = LX.makeIcon( options.icon );
-                }
-
-                wValue.prepend( icon );
-            }
-            else if( options.img )
-            {
-                let img = document.createElement( 'img' );
-                img.src = options.img;
-                wValue.prepend( img );
-            }
-            else
-            {
-                wValue.innerHTML = `<span>${ ( newValue || "" ) }</span>`;
-            }
+            this.root.setState( newValue, skipCallback );
         };
 
         this.onResize = ( rect ) => {
@@ -5872,25 +6469,88 @@ class Button extends Widget {
             wValue.classList.add( "selected" );
         }
 
-        this.onSetValue( value, true );
+        if( options.icon )
+        {
+            let icon = null;
+
+            // @legacy
+            if( options.icon.includes( "fa-" ) )
+            {
+                icon = document.createElement( 'a' );
+                icon.className = options.icon + " lexicon";
+            }
+            else
+            {
+                icon = LX.makeIcon( options.icon );
+            }
+
+            wValue.prepend( icon );
+        }
+        else if( options.img )
+        {
+            let img = document.createElement( 'img' );
+            img.src = options.img;
+            wValue.prepend( img );
+        }
+        else
+        {
+            wValue.innerHTML = `<span>${ ( value || "" ) }</span>`;
+        }
 
         if( options.disabled )
         {
             wValue.setAttribute( "disabled", true );
         }
 
-        wValue.addEventListener( "click", e => {
+        let trigger = wValue;
+
+        if( options.swap )
+        {
+            wValue.classList.add( "swap" );
+            wValue.querySelector( "a" ).classList.add( "swap-off" );
+
+            const input = document.createElement( "input" );
+            input.type = "checkbox";
+            wValue.prepend( input );
+            // trigger = input;
+
+            const swapIcon = document.createElement( "a" );
+            swapIcon.className = options.swap + " swap-on lexicon";
+            wValue.appendChild( swapIcon );
+
+            this.root.swap = function( skipCallback ) {
+                const swapInput = wValue.querySelector( "input" );
+                swapInput.checked = !swapInput.checked;
+                if( !skipCallback )
+                {
+                    trigger.click();
+                }
+            };
+
+            // Set if swap has to be performed
+            this.root.setState = function( v, skipCallback ) {
+                const swapInput = wValue.querySelector( "input" );
+                swapInput.checked = v;
+                if( !skipCallback )
+                {
+                    trigger.click();
+                }
+            };
+        }
+
+        trigger.addEventListener( "click", e => {
             if( options.selectable )
             {
                 if( options.parent )
                 {
-                    options.parent.querySelectorAll(".lexbutton.selected").forEach( e => { if( e == wValue ) return; e.classList.remove( "selected" ) } );
+                    options.parent.querySelectorAll(".lexbutton.selected").forEach( b => { if( b == wValue ) return; b.classList.remove( "selected" ) } );
                 }
 
                 wValue.classList.toggle('selected');
             }
 
-            this._trigger( new IEvent( name, value, e ), callback );
+            const swapInput = wValue.querySelector( "input" );
+            this._trigger( new IEvent( name, swapInput?.checked ?? value, e ), callback );
         });
 
         if( options.tooltip )
@@ -6285,7 +6945,7 @@ class Select extends Widget {
 
             const selectRoot = selectedOption.root;
             const rect = selectRoot.getBoundingClientRect();
-            const nestedDialog = parent.parentElement.closest( "dialog" );
+            const nestedDialog = parent.parentElement.closest( "dialog" ) ?? parent.parentElement.closest( ".lexcolorpicker" );
 
             // Manage vertical aspect
             {
@@ -7335,31 +7995,52 @@ class ColorInput extends Widget {
 
     constructor( name, value, callback, options = {} ) {
 
-        value = ( value.constructor === Array ) ? rgbToHex( value ) : value;
+        const useAlpha = options.useAlpha ??
+            ( ( value.constructor === Object && 'a' in value ) || ( value.constructor === String && [ 5, 9 ].includes( value.length ) ) );
+
+        const widgetColor = new Color( value );
+
+        // Force always hex internally
+        value = useAlpha ? widgetColor.hex : widgetColor.hex.substr( 0, 7 );
 
         super( Widget.COLOR, name, value, options );
 
         this.onGetValue = () => {
-            return value;
+            const currentColor = new Color( value );
+            return options.useRGB ? currentColor.rgb : value;
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
 
-            if( color.useRGB )
+            const newColor = new Color( newValue );
+
+            colorSampleRGB.style.color = value = newColor.hex.substr( 0, 7 );
+
+            if( useAlpha )
             {
-                newValue = hexToRgb( newValue );
+                colorSampleAlpha.style.color = value = newColor.hex;
             }
 
             if( !this._skipTextUpdate )
             {
-                textWidget.set( newValue, true, event );
+                textWidget.set( value, true, event );
             }
-
-            color.value = value = newValue;
 
             if( !skipCallback )
             {
-                this._trigger( new IEvent( name, newValue, event ), callback );
+                let retValue = value;
+
+                if( options.useRGB )
+                {
+                    retValue = newColor.rgb;
+
+                    if( !useAlpha )
+                    {
+                        delete retValue.a;
+                    }
+                }
+
+                this._trigger( new IEvent( name, retValue, event ), callback );
             }
         };
 
@@ -7372,30 +8053,50 @@ class ColorInput extends Widget {
         container.className = "lexcolor";
         this.root.appendChild( container );
 
-        let color = document.createElement( 'input' );
-        color.style.width = "32px";
-        color.type = 'color';
-        color.className = "colorinput";
-        color.useRGB = options.useRGB ?? false;
-        color.value = value;
-        container.appendChild( color );
+        let sampleContainer = LX.makeContainer( ["18px", "18px"], "flex flex-row bg-contrast rounded overflow-hidden", "", container );
+        sampleContainer.tabIndex = "1";
+        sampleContainer.addEventListener( "click", e => {
+            if( ( options.disabled ?? false ) )
+            {
+                return;
+            }
+            new ColorPicker( value, sampleContainer, {
+                colorModel: options.useRGB ? "RGB" : "Hex",
+                useAlpha,
+                onChange: ( color ) => {
+                    this._fromColorPicker = true;
+                    this.set( color.hex );
+                    delete this._fromColorPicker;
+                }
+            } );
+        } );
 
-        if( options.disabled )
+        let colorSampleRGB = document.createElement( 'div' );
+        colorSampleRGB.className = "lexcolorsample";
+        colorSampleRGB.style.color = value;
+        sampleContainer.appendChild( colorSampleRGB );
+
+        let colorSampleAlpha = null;
+
+        if( useAlpha )
         {
-            color.disabled = true;
+            colorSampleAlpha = document.createElement( 'div' );
+            colorSampleAlpha.className = "lexcolorsample";
+            colorSampleAlpha.style.color = value;
+            sampleContainer.appendChild( colorSampleAlpha );
+        }
+        else
+        {
+            colorSampleRGB.style.width = "18px";
         }
 
-        color.addEventListener( "input", e => {
-            this.set( e.target.value, false, e );
-        }, false );
-
-        const textWidget = new TextInput( null, color.value, v => {
+        const textWidget = new TextInput( null, value, v => {
             this._skipTextUpdate = true;
             this.set( v );
             delete this._skipTextUpdate;
-        }, { width: "calc( 100% - 32px )", disabled: options.disabled });
+        }, { width: "calc( 100% - 24px )", disabled: options.disabled });
 
-        textWidget.root.style.marginLeft = "4px";
+        textWidget.root.style.marginLeft = "6px";
         container.appendChild( textWidget.root );
 
         doAsync( this.onResize.bind( this ) );
@@ -8102,6 +8803,164 @@ class SizeInput extends Widget {
 }
 
 LX.SizeInput = SizeInput;
+
+/**
+ * @class OTPInput
+ * @description OTPInput Widget
+ */
+
+class OTPInput extends Widget {
+
+    constructor( name, value, callback, options = {} ) {
+
+        const pattern = options.pattern ?? "xxx-xxx";
+        const patternSize = ( pattern.match(/x/g) || [] ).length;
+
+        value = String( value );
+        if( !value.length )
+        {
+            value = "x".repeat( patternSize );
+        }
+
+        super( Widget.OTP, name, value, options );
+
+        this.onGetValue = () => {
+            return +value;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+
+            value = newValue;
+
+            _refreshInput( value );
+
+            if( !skipCallback )
+            {
+                this._trigger( new IEvent( name, +newValue, event ), callback );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
+            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+        };
+
+        this.disabled = options.disabled ?? false;
+
+        const container = document.createElement( 'div' );
+        container.className = "lexotp flex flex-row items-center";
+        this.root.appendChild( container );
+
+        const groups = pattern.split( '-' );
+
+        const _refreshInput = ( valueString ) => {
+
+            container.innerHTML = "";
+
+            let itemsCount = 0;
+            let activeSlot = 0;
+
+            for( let i = 0; i < groups.length; ++i )
+            {
+                const g = groups[ i ];
+
+                for( let j = 0; j < g.length; ++j )
+                {
+                    let number = valueString[ itemsCount++ ];
+                    number = ( number == 'x' ? '' : number );
+
+                    const slotDom = LX.makeContainer( ["36px", "30px"],
+                        "lexotpslot border-top border-bottom border-left px-3 cursor-text select-none font-medium outline-none", number, container );
+                    slotDom.tabIndex = "1";
+
+                    if( this.disabled )
+                    {
+                        slotDom.classList.add( "disabled" );
+                    }
+
+                    const otpIndex = itemsCount;
+
+                    if( j == 0 )
+                    {
+                        slotDom.className += " rounded-l";
+                    }
+                    else if( j == ( g.length - 1 ) )
+                    {
+                        slotDom.className += " rounded-r border-right";
+                    }
+
+                    slotDom.addEventListener( "click", () => {
+                        if( this.disabled ) { return; }
+                        container.querySelectorAll( ".lexotpslot" ).forEach( s => s.classList.remove( "active" ) );
+                        const activeDom = container.querySelectorAll( ".lexotpslot" )[ activeSlot ];
+                        activeDom.classList.add( "active" );
+                        activeDom.focus();
+                    } );
+
+                    slotDom.addEventListener( "blur", () => {
+                        if( this.disabled ) { return; }
+                        doAsync( () => {
+                            if( container.contains( document.activeElement ) ) { return; }
+                            container.querySelectorAll( ".lexotpslot" ).forEach( s => s.classList.remove( "active" ) );
+                        }, 10 );
+                    } );
+
+                    slotDom.addEventListener( "keyup", e => {
+                        if( this.disabled ) { return; }
+                        if( !/[^0-9]+/g.test( e.key ) )
+                        {
+                            const number = e.key;
+                            console.assert( parseInt( number ) != NaN );
+
+                            slotDom.innerHTML = number;
+                            valueString = valueString.substring( 0, otpIndex - 1 ) + number + valueString.substring( otpIndex );
+
+                            const nexActiveDom = container.querySelectorAll( ".lexotpslot" )[ activeSlot + 1 ];
+                            if( nexActiveDom )
+                            {
+                                container.querySelectorAll( ".lexotpslot" )[ activeSlot ].classList.remove( "active" );
+                                nexActiveDom.classList.add( "active" );
+                                nexActiveDom.focus();
+                                activeSlot++;
+                            }
+                            else
+                            {
+                                this.set( valueString );
+                            }
+                        }
+                        else if( e.key == "ArrowLeft" || e.key == "ArrowRight" )
+                        {
+                            const dt = ( e.key == "ArrowLeft" ) ? -1 : 1;
+                            const newActiveDom = container.querySelectorAll( ".lexotpslot" )[ activeSlot + dt ];
+                            if( newActiveDom )
+                            {
+                                container.querySelectorAll( ".lexotpslot" )[ activeSlot ].classList.remove( "active" );
+                                newActiveDom.classList.add( "active" );
+                                newActiveDom.focus();
+                                activeSlot += dt;
+                            }
+                        }
+                        else if( e.key == "Enter" && !valueString.includes( 'x' ) )
+                        {
+                            this.set( valueString );
+                        }
+                    } );
+                }
+
+                if( i < ( groups.length - 1 ) )
+                {
+                    LX.makeContainer( ["auto", "auto"], "mx-2", `-`, container );
+                }
+            }
+
+            console.assert( itemsCount == valueString.length, "OTP Value/Pattern Mismatch!" )
+        }
+
+        _refreshInput( value );
+    }
+}
+
+LX.OTPInput = OTPInput;
 
 /**
  * @class Pad
@@ -8870,7 +9729,7 @@ class Table extends Widget {
                         for( const el of body.childNodes )
                         {
                             data.checkMap[ el.getAttribute( "rowId" ) ] = this.checked;
-                            el.querySelector( "input" ).checked = this.checked;
+                            el.querySelector( "input[type='checkbox']" ).checked = this.checked;
                         }
                     });
 
@@ -9084,10 +9943,20 @@ class Table extends Widget {
                         input.addEventListener( 'change', function() {
                             data.checkMap[ rowId ] = this.checked;
 
+                            const headInput = table.querySelector( "thead input[type='checkbox']" );
+
                             if( !this.checked )
                             {
-                                const input = table.querySelector( "thead input[type='checkbox']" );
-                                input.checked = data.checkMap[ ":root" ] = false;
+                                headInput.checked = data.checkMap[ ":root" ] = false;
+                            }
+                            else
+                            {
+                                const rowInputs = Array.from( table.querySelectorAll( "tbody input[type='checkbox']" ) );
+                                const uncheckedRowInputs = rowInputs.filter( i => { return !i.checked; } );
+                                if( !uncheckedRowInputs.length )
+                                {
+                                    headInput.checked = data.checkMap[ ":root" ] = true;
+                                }
                             }
                         });
 
@@ -10199,6 +11068,22 @@ class Panel {
     }
 
     /**
+     * @method addOTP
+     * @param {String} name Widget name
+     * @param {String} value Default numeric value in string format
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * hideName: Don't use name as label [false]
+     * disabled: Make the widget disabled [false]
+     * pattern: OTP numeric pattern
+     */
+
+    addOTP( name, value, callback, options = {} ) {
+        const widget = new OTPInput( name, value, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
      * @method addPad
      * @param {String} name Widget name
      * @param {Array} value Pad value
@@ -10430,7 +11315,7 @@ class Branch {
             // add widgets
             for( let w of this.widgets )
             {
-                p.root.appendChild( w.domEl );
+                p.root.appendChild( w.root );
             }
         });
         dialog.widgets = this.widgets;
@@ -10734,7 +11619,7 @@ class Dialog {
 
                         for( let w of that.widgets )
                         {
-                            branch.content.appendChild( w.domEl );
+                            branch.content.appendChild( w.root );
                         }
 
                         branch.widgets = that.widgets;
@@ -12375,7 +13260,7 @@ class AssetView {
 
             this.rightPanel.addText(null, this.path.join('/'), null, {
                 inputClass: "nobg", disabled: true, signal: "@on_folder_change",
-                style: { fontWeight: "600", fontSize: "15px" } 
+                style: { fontWeight: "600", fontSize: "15px" }
             });
 
             this.rightPanel.endLine();
@@ -13112,7 +13997,7 @@ Element.prototype.addClass = function( className ) {
 }
 
 Element.prototype.getComputedSize = function() {
-    // Since we use "box-sizing: border-box" now, 
+    // Since we use "box-sizing: border-box" now,
     // it's all included in offsetWidth/offsetHeight
     return {
         width: this.offsetWidth,
@@ -13254,6 +14139,7 @@ LX.ICONS = {
     "copy": [448, 512, [], "regular", "M384 336l-192 0c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l140.1 0L400 115.9 400 320c0 8.8-7.2 16-16 16zM192 384l192 0c35.3 0 64-28.7 64-64l0-204.1c0-12.7-5.1-24.9-14.1-33.9L366.1 14.1c-9-9-21.2-14.1-33.9-14.1L192 0c-35.3 0-64 28.7-64 64l0 256c0 35.3 28.7 64 64 64zM64 128c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l192 0c35.3 0 64-28.7 64-64l0-32-48 0 0 32c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l32 0 0-48-32 0z"],
     "paste": [512, 512, [], "regular", "M104.6 48L64 48C28.7 48 0 76.7 0 112L0 384c0 35.3 28.7 64 64 64l96 0 0-48-96 0c-8.8 0-16-7.2-16-16l0-272c0-8.8 7.2-16 16-16l16 0c0 17.7 14.3 32 32 32l72.4 0C202 108.4 227.6 96 256 96l62 0c-7.1-27.6-32.2-48-62-48l-40.6 0C211.6 20.9 188.2 0 160 0s-51.6 20.9-55.4 48zM144 56a16 16 0 1 1 32 0 16 16 0 1 1 -32 0zM448 464l-192 0c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l140.1 0L464 243.9 464 448c0 8.8-7.2 16-16 16zM256 512l192 0c35.3 0 64-28.7 64-64l0-204.1c0-12.7-5.1-24.9-14.1-33.9l-67.9-67.9c-9-9-21.2-14.1-33.9-14.1L256 128c-35.3 0-64 28.7-64 64l0 256c0 35.3 28.7 64 64 64z"],
     "clipboard": [384, 512, [], "regular", "M280 64l40 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 128C0 92.7 28.7 64 64 64l40 0 9.6 0C121 27.5 153.3 0 192 0s71 27.5 78.4 64l9.6 0zM64 112c-8.8 0-16 7.2-16 16l0 320c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16l0-320c0-8.8-7.2-16-16-16l-16 0 0 24c0 13.3-10.7 24-24 24l-88 0-88 0c-13.3 0-24-10.7-24-24l0-24-16 0zm128-8a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"],
+    "eye-dropper": [512, 512, [], "solid", "M341.6 29.2L240.1 130.8l-9.4-9.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-9.4-9.4L482.8 170.4c39-39 39-102.2 0-141.1s-102.2-39-141.1 0zM55.4 323.3c-15 15-23.4 35.4-23.4 56.6l0 42.4L5.4 462.2c-8.5 12.7-6.8 29.6 4 40.4s27.7 12.5 40.4 4L89.7 480l42.4 0c21.2 0 41.6-8.4 56.6-23.4L309.4 335.9l-45.3-45.3L143.4 411.3c-3 3-7.1 4.7-11.3 4.7L96 416l0-36.1c0-4.2 1.7-8.3 4.7-11.3L221.4 247.9l-45.3-45.3L55.4 323.3z"],
     "edit": [512, 512, [], "regular", "M441 58.9L453.1 71c9.4 9.4 9.4 24.6 0 33.9L424 134.1 377.9 88 407 58.9c9.4-9.4 24.6-9.4 33.9 0zM209.8 256.2L344 121.9 390.1 168 255.8 302.2c-2.9 2.9-6.5 5-10.4 6.1l-58.5 16.7 16.7-58.5c1.1-3.9 3.2-7.5 6.1-10.4zM373.1 25L175.8 222.2c-8.7 8.7-15 19.4-18.3 31.1l-28.6 100c-2.4 8.4-.1 17.4 6.1 23.6s15.2 8.5 23.6 6.1l100-28.6c11.8-3.4 22.5-9.7 31.1-18.3L487 138.9c28.1-28.1 28.1-73.7 0-101.8L474.9 25C446.8-3.1 401.2-3.1 373.1 25zM88 64C39.4 64 0 103.4 0 152L0 424c0 48.6 39.4 88 88 88l272 0c48.6 0 88-39.4 88-88l0-112c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 112c0 22.1-17.9 40-40 40L88 464c-22.1 0-40-17.9-40-40l0-272c0-22.1 17.9-40 40-40l112 0c13.3 0 24-10.7 24-24s-10.7-24-24-24L88 64z"],
     "envelope": [512, 512, [], "regular", "M64 112c-8.8 0-16 7.2-16 16l0 22.1L220.5 291.7c20.7 17 50.4 17 71.1 0L464 150.1l0-22.1c0-8.8-7.2-16-16-16L64 112zM48 212.2L48 384c0 8.8 7.2 16 16 16l384 0c8.8 0 16-7.2 16-16l0-171.8L322 328.8c-38.4 31.5-93.7 31.5-132 0L48 212.2zM0 128C0 92.7 28.7 64 64 64l384 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128z"],
     "envelope-open": [512, 512, [], "regular", "M255.4 48.2c.2-.1 .4-.2 .6-.2s.4 .1 .6 .2L460.6 194c2.1 1.5 3.4 3.9 3.4 6.5l0 13.6L291.5 355.7c-20.7 17-50.4 17-71.1 0L48 214.1l0-13.6c0-2.6 1.2-5 3.4-6.5L255.4 48.2zM48 276.2L190 392.8c38.4 31.5 93.7 31.5 132 0L464 276.2 464 456c0 4.4-3.6 8-8 8L56 464c-4.4 0-8-3.6-8-8l0-179.8zM256 0c-10.2 0-20.2 3.2-28.5 9.1L23.5 154.9C8.7 165.4 0 182.4 0 200.5L0 456c0 30.9 25.1 56 56 56l400 0c30.9 0 56-25.1 56-56l0-255.5c0-18.1-8.7-35.1-23.4-45.6L284.5 9.1C276.2 3.2 266.2 0 256 0z"],

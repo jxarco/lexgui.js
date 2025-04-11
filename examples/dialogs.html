@@ -30,7 +30,7 @@
         p.branch("Canvas");
         p.addColor("Background", "#b7a9b1");
         p.addText("Text", "Pocket Dialog Lexgui.js @jxarco", null, { placeholder: "e.g. ColorPicker", icon: "fa fa-font" });
-        p.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
+        p.addColor("Font Color", { r: 1, g: 0.1, b: 0.6 }, (value, event) => {
             console.log("Font Color: ", value);
         });
         p.addNumber("Font Size", 36, (value, event) => {
@@ -50,7 +50,7 @@
         p.branch("Canvas");
         p.addColor("Background", "#b7a9b1");
         p.addText("Text", "Dialog Lexgui.js @jxarco", null, { placeholder: "e.g. ColorPicker", icon: "fa fa-font" });
-        p.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
+        p.addColor("Font Color", { r: 1, g: 0.1, b: 0.6 }, (value, event) => {
             console.log("Font Color: ", value);
         });
         p.addNumber("Font Size", 36, (value, event) => {
@@ -72,7 +72,7 @@
         p.addSelect("Best Engine", ["Godot", "Unity", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Pepe"], "Godot", (value, event) => {
             console.log(value);
         }, { filter: true });
-        p.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
+        p.addColor("Font Color", { r: 1, g: 0.1, b: 0.6 }, (value, event) => {
             console.log("Font Color: ", value);
         });
         p.addNumber("Font Size", 36, (value, event) => {

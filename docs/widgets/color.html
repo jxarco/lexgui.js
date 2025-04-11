@@ -11,7 +11,7 @@
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
-        panel.addColor("Font Color", [1, 0.1, 0.6], (value, event) => {
+        panel.addColor("Font Color", { r: 1, g: 0.1, b: 0.6 }, (value, event) => {
             console.log(value);
         });
         content.appendChild(area.root);
@@ -28,7 +28,7 @@
             ["useRGB", "Boolean", "The callback returns color as Array[r, g, b] and not hex [<code class='inline'>false</code>]"]
         ]
     ]);
-    MAKE_CODE(`panel.@[mtd]addColor@(@"Font Color"@, [@1@, @0.1@, @0.6@], (value, event) =&gt; {
+    MAKE_CODE(`panel.@[mtd]addColor@(@"Font Color"@, { r: @1@, g: @0.1@, b: @0.6@ }, (value, event) =&gt; {
     console.@[mtd]log@(@"Font Color: "@, value);
 });
 
