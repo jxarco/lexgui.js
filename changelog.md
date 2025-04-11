@@ -2,6 +2,8 @@
 
 ## dev
 
+Fixed ColorPicker minor issues.
+
 ## 0.5.6 (master)
 
 Widgets:
