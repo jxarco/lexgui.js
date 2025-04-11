@@ -142,8 +142,8 @@ area.addMenubar( m => {
             title: "Play",
             icon: "fa-solid fa-play",
             swap: "fa-solid fa-stop",
-            callback:  (event, swapValue) => {
-                if( swapValue ) console.log("play!");
+            callback:  (value, event) => {
+                if( value ) console.log("play!");
                 else console.log("stop!");
             }
         },
@@ -151,21 +151,20 @@ area.addMenubar( m => {
             title: "Pause",
             icon: "fa-solid fa-pause",
             disabled: true,
-            callback:  (event) => { console.log("pause!"); }
+            callback:  (value, event) => { console.log("pause!"); }
         },
         {
-            icon: "fa-solid fa-magnifying-glass",
-            callback:  (event) => {
+            icon: "fa-solid fa-rotate-left",
+            callback:  (value, event) => {
                 const playButton = m.getButton( "Play" );
                 playButton.swap();
-                console.log("glass!");
             }
         },
         {
             title: "Change Theme",
             icon: "fa-solid fa-moon",
             swap: "fa-solid fa-sun",
-            callback:  (event, swapValue) => { LX.setTheme( swapValue ? "light" : "dark" ) }
+            callback:  (value, event) => { LX.setTheme( value ? "light" : "dark" ) }
         }
     ]);
     

@@ -4466,57 +4466,14 @@ class Menubar {
 
         for( let i = 0; i < buttons.length; ++i )
         {
-            let data = buttons[ i ];
-            let button = document.createElement( "label" );
+            const data = buttons[ i ];
             const title = data.title;
-            let disabled = data.disabled ?? false;
-            button.className = "lexmenubutton" + (disabled ? " disabled" : "");
-            button.title = title ?? "";
-            this.buttonContainer.appendChild( button );
-
-            const icon = document.createElement( "a" );
-            icon.className = data.icon + " lexicon";
-            button.appendChild( icon );
-
-            let trigger = icon;
-
-            if( data.swap )
-            {
-                button.classList.add( "swap" );
-                icon.classList.add( "swap-off" );
-
-                const input = document.createElement( "input" );
-                input.type = "checkbox";
-                button.prepend( input );
-                trigger = input;
-
-                const swapIcon = document.createElement( "a" );
-                swapIcon.className = data.swap + " swap-on lexicon";
-                button.appendChild( swapIcon );
-
-                button.swap = function() {
-                    const swapInput = this.querySelector( "input" );
-                    swapInput.checked = !swapInput.checked;
-                };
-
-                // Set if swap has to be performed
-                button.setState = function( v ) {
-                    const swapInput = this.querySelector( "input" );
-                    swapInput.checked = v;
-                };
-            }
-
-            trigger.addEventListener("click", e => {
-                if( data.callback && !disabled )
-                {
-                    const swapInput = button.querySelector( "input" );
-                    data.callback.call( this, e, swapInput?.checked );
-                }
-            });
+            const button = new Button( title, "", data.callback, { title, buttonClass: "bg-none", disabled: data.disabled, icon: data.icon, hideName: true, swap: data.swap } )
+            this.buttonContainer.appendChild( button.root );
 
             if( title )
             {
-                this.buttons[ title ] = button;
+                this.buttons[ title ] = button.root;
             }
         }
     }
@@ -6472,40 +6429,17 @@ class Button extends Widget {
         super( Widget.BUTTON, name, null, options );
 
         this.onGetValue = () => {
-            return wValue.innerText;
+            return wValue.querySelector( "input" )?.checked;
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
 
-            wValue.innerHTML = "";
-
-            if( options.icon )
+            if( !( options.swap ?? false ) )
             {
-                let icon = null;
+                return;
+            }
 
-                // @legacy
-                if( options.icon.includes( "fa-" ) )
-                {
-                    icon = document.createElement( 'a' );
-                    icon.className = options.icon;
-                }
-                else
-                {
-                    icon = LX.makeIcon( options.icon );
-                }
-
-                wValue.prepend( icon );
-            }
-            else if( options.img )
-            {
-                let img = document.createElement( 'img' );
-                img.src = options.img;
-                wValue.prepend( img );
-            }
-            else
-            {
-                wValue.innerHTML = `<span>${ ( newValue || "" ) }</span>`;
-            }
+            this.root.setState( newValue, skipCallback );
         };
 
         this.onResize = ( rect ) => {
@@ -6529,25 +6463,88 @@ class Button extends Widget {
             wValue.classList.add( "selected" );
         }
 
-        this.onSetValue( value, true );
+        if( options.icon )
+        {
+            let icon = null;
+
+            // @legacy
+            if( options.icon.includes( "fa-" ) )
+            {
+                icon = document.createElement( 'a' );
+                icon.className = options.icon + " lexicon";
+            }
+            else
+            {
+                icon = LX.makeIcon( options.icon );
+            }
+
+            wValue.prepend( icon );
+        }
+        else if( options.img )
+        {
+            let img = document.createElement( 'img' );
+            img.src = options.img;
+            wValue.prepend( img );
+        }
+        else
+        {
+            wValue.innerHTML = `<span>${ ( value || "" ) }</span>`;
+        }
 
         if( options.disabled )
         {
             wValue.setAttribute( "disabled", true );
         }
 
-        wValue.addEventListener( "click", e => {
+        let trigger = wValue;
+
+        if( options.swap )
+        {
+            wValue.classList.add( "swap" );
+            wValue.querySelector( "a" ).classList.add( "swap-off" );
+
+            const input = document.createElement( "input" );
+            input.type = "checkbox";
+            wValue.prepend( input );
+            // trigger = input;
+
+            const swapIcon = document.createElement( "a" );
+            swapIcon.className = options.swap + " swap-on lexicon";
+            wValue.appendChild( swapIcon );
+
+            this.root.swap = function( skipCallback ) {
+                const swapInput = wValue.querySelector( "input" );
+                swapInput.checked = !swapInput.checked;
+                if( !skipCallback )
+                {
+                    trigger.click();
+                }
+            };
+
+            // Set if swap has to be performed
+            this.root.setState = function( v, skipCallback ) {
+                const swapInput = wValue.querySelector( "input" );
+                swapInput.checked = v;
+                if( !skipCallback )
+                {
+                    trigger.click();
+                }
+            };
+        }
+
+        trigger.addEventListener( "click", e => {
             if( options.selectable )
             {
                 if( options.parent )
                 {
-                    options.parent.querySelectorAll(".lexbutton.selected").forEach( e => { if( e == wValue ) return; e.classList.remove( "selected" ) } );
+                    options.parent.querySelectorAll(".lexbutton.selected").forEach( b => { if( b == wValue ) return; b.classList.remove( "selected" ) } );
                 }
 
                 wValue.classList.toggle('selected');
             }
 
-            this._trigger( new IEvent( name, value, e ), callback );
+            const swapInput = wValue.querySelector( "input" );
+            this._trigger( new IEvent( name, swapInput?.checked ?? value, e ), callback );
         });
 
         if( options.tooltip )

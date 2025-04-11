@@ -59,7 +59,7 @@
     var panelB = center.addPanel();
     var panelC = right.addPanel();
 
-    let closedDefault = true;
+    let closedDefault = false;
 
     fillPanels();
 
@@ -115,8 +115,12 @@
             buttonsLeftPanel.addButton(null, "Not used", null, { icon: "fa fa-cube", buttonClass: "bg-primary" });
             buttonsLeftPanel.addButton(null, "Not used", null, { icon: "fa fa-table-cells", buttonClass: "bg-tertiary fg-tertiary" });
             buttonsLeftPanel.endLine("justify-start");
-            buttonsLeftPanel.addButton(null, LX.makeIcon("circle-plus").innerHTML + "Button with Icon Start", null);
-            buttonsLeftPanel.addButton(null, "Button with Icon End" + LX.makeIcon("circle-plus").innerHTML, null);
+            buttonsLeftPanel.sameLine();
+            buttonsLeftPanel.addLabel("Swap Buttons");
+            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "fa fa-moon", swap: "fa fa-sun", buttonClass: "bg-none" });
+            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "fa fa-eye", swap: "fa fa-eye-slash" });
+            buttonsLeftPanel.endLine("justify-start");
+            buttonsLeftPanel.addButton(null, LX.makeIcon("circle-plus").innerHTML + "Button with Inlined Icon", null);
             buttonsLeftPanel.addButton(null, "With a Badge" + LX.badge("+99", "accent sm"));
             buttonsRightPanel.branch("Outline Buttons", { closed: closedDefault });
             buttonsRightPanel.addButton(null, "Classic Outline", null, { buttonClass: "outline" });

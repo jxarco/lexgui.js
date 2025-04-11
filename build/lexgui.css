@@ -31,9 +31,9 @@
     --global-color-warning: #ffc107;
     --global-color-error: #f54c4c;
     --global-text-primary: light-dark(#0d0d0e, #f0efef);
-    --global-text-secondary: light-dark(#262627, #d1d1d3);
-    --global-text-tertiary: light-dark(#3c3c3df5, #aaaaaa);
-    --global-text-quaternary: light-dark(#515152f5, #807f7f);
+    --global-text-secondary: light-dark(#232324, #d1d1d3);
+    --global-text-tertiary: light-dark(#4e4e4f, #aaaaaa);
+    --global-text-quaternary: light-dark(#6a6a6b, #807f7f);
     --global-intense-background: light-dark(#fefefe, #040405);
     --global-medium-background: #252525;
     --global-blur-background: light-dark(#f7f7f7d8, #1f1f1fe7);
@@ -356,6 +356,7 @@ svg.xxl { width: var(--svg-size-xxl); height: var(--svg-size-xxl); }
     align-content: center;
     border-radius: 4px;
     transition: all 0.15s linear;
+    place-self: center;
 }
 
 .lexicon:hover {
@@ -1696,14 +1697,14 @@ a svg, svg path {
 }
 
 .lexbutton:active:not(.lexbutton.combo) {
-    background-color: color-mix(in srgb, var(--button-color), #fff 4%) !important;
+    background-color: color-mix(in srgb, var(--button-color), #fff 4%);
 }
 :root[data-theme="light"] .lexbutton:active:not(.lexbutton.combo) {
-    background-color: color-mix(in srgb, var(--button-color), #000 4%) !important;
+    background-color: color-mix(in srgb, var(--button-color), #000 4%);
 }
 
-.lexbutton:disabled {
-    color: var(--global-text-tertiary);
+.lexbutton:disabled, .lexbutton:disabled a {
+    color: var(--global-text-quaternary);
 }
 
 .lexbutton.selected {
@@ -3163,6 +3164,18 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     margin-right: 12px;
 }
 
+.lexmenubar .lexbutton {
+    padding-inline: 0.15rem;
+}
+
+.lexmenubar .lexbutton:hover, :root[data-theme="light"] .lexmenubar .lexbutton:hover {
+    background-color: transparent !important;
+}
+
+.lexmenubar .lexbutton:active, :root[data-theme="light"] .lexmenubar .lexbutton:active {
+    background-color: transparent !important;
+}
+
 .lexmenubar .lexmenubutton {
     color: var(--global-text-secondary);
     padding-inline: 0.45em;
@@ -4409,22 +4422,28 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
 /* Icon swap */
 
 .swap {
-    cursor: pointer;
     vertical-align: middle;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    place-content: center;
+    place-self: center;
     display: inline-grid;
     position: relative;
+    pointer-events: none;
 }
 
 .swap input {
+    pointer-events: auto;
+    cursor: pointer;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
     border: none;
+    width: 100%;
+    height: 100%;
+    transform: translate(-0.2rem, -0.2rem);
+    background: none !important;
 }
 
 .swap > * {
