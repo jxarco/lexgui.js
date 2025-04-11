@@ -202,7 +202,7 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
             panel.addText("Text", "LexGUI.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
             panel.addColor("Font Color", "#303b8d", null);
             panel.addNumber("Font Size", 36, null, { min: 1, max: 48, step: 1, units: "px"});
-            panel.addSelect("Font Family", ["Arial", "GeistSans", "Monospace"], "GeistSans");
+            panel.addSelect("Font Family", ["Arial", "GeistSans", "Monospace", "Ubuntu"], "GeistSans");
             panel.addVector2("2D Position", [300, 350], null, { min: 0, max: 1024 });
             const opacityValues = [
                 [0.2, 0.3146875],

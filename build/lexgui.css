@@ -1360,7 +1360,8 @@ a svg, svg path {
     font-family: var(--global-font);
     padding: 4px;
     color: var(--global-text-primary);
-    background-color: var(--global-color-tertiary);
+    --background-color: var(--global-color-tertiary);
+    background-color: var(--background-color);
     outline: none;
     border-radius: 6px;
     border: 1px solid var(--global-color-transparent);
@@ -1370,7 +1371,7 @@ a svg, svg path {
 }
 
 .lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider):hover {
-    background-color: color-mix(in srgb, var(--global-color-tertiary), #000 7%);
+    background-color: color-mix(in srgb, var(--background-color), #000 5%);
 }
 
 .lexwidget input.colorinput {
@@ -1691,7 +1692,7 @@ a svg, svg path {
     background-color: color-mix(in srgb, var(--button-color), #000 9%) !important;
 }
 :root[data-theme="light"] .lexbutton:hover {
-    background-color: color-mix(in srgb, var(--button-color), #fff 18%) !important;
+    background-color: color-mix(in srgb, var(--button-color), #fff 9%) !important;
 }
 
 .lexbutton:active:not(.lexbutton.combo) {
@@ -2421,8 +2422,7 @@ input[type=number] {
     height: 12px;
     border: 1px solid #c9c7de;
     border-radius: 6px;
-    background: light-dark(var(--global-color-accent-light), var(--global-color-accent));
-    box-shadow: 0px 0px 6px #505050;
+    background: var(--global-color-accent);
     cursor: pointer;
 }
 
