@@ -660,6 +660,7 @@ a svg, svg path {
 	display: flex;
 	gap: 0.4rem;
 	align-items: center;
+    place-content: center;
 }
 
 .lexfooter a {

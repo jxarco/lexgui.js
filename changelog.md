@@ -4,6 +4,7 @@
 
 Exposed `LX.setStrictViewport(value)` to allow switching manually.
 Fixed ColorPicker minor issues.
+Fixed Examples and SourceCode links in docs.
 Added more CSS class utilities.
 
 ## 0.5.6 (master)

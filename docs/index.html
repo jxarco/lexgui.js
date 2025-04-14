@@ -100,7 +100,14 @@
         {
             const open = ( url, target, name, dom, event ) => {
                 if( event ) event.preventDefault();
-                loadPage(url);
+                if( target )
+                {
+                    window.open( url, target );
+                }
+                else
+                {
+                    loadPage( url );
+                }
             }
 
             const sidebar = area.addSidebar( m => {
