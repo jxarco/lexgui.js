@@ -27,7 +27,7 @@
 
             let name = INLINE_CODE( i );
             LX.ICONS[ i ][ 2 ].forEach( o => name += ` ; ${ INLINE_CODE( o ) }` );
-            tableBody.push( [name, LX.makeIcon( i, null, "lg" ).innerHTML, LX.ICONS[ i ][ 3 ] ] );
+            tableBody.push( [name, LX.makeIcon( i, { svgClass: "lg" } ).innerHTML, LX.ICONS[ i ][ 3 ] ] );
         }
 
         tableBody.sort( (a, b) => { return a[0] < b[0] ?  -1 : 1 } );

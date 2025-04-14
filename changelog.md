@@ -2,6 +2,7 @@
 
 ## dev
 
+`LX.makeIcon` now accepts `options` as second parameter (`title`, `iconClass`, `svgClass`).
 Exposed `LX.setStrictViewport(value)` to allow switching manually.
 Fixed ColorPicker minor issues.
 Fixed Examples and SourceCode links in docs.
