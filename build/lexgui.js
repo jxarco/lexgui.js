@@ -12,7 +12,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 var LX = {
-    version: "0.5.6",
+    version: "0.5.7",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -728,13 +728,19 @@ LX.makeKbd = makeKbd;
  * @method makeIcon
  * @description Gets an SVG element using one of LX.ICONS
  * @param {String} iconName
- * @param {String} iconTitle
- * @param {String} extraClass
+ * @param {Object} options
+ * iconTitle
+ * extraClass
+ * svgClass
  */
-function makeIcon( iconName, iconTitle, extraClass = "" )
+function makeIcon( iconName, options = { } )
 {
     let data = LX.ICONS[ iconName ];
     console.assert( data, `No icon named _${ iconName }_` );
+
+    const iconTitle = options.iconTitle;
+    const iconClass = options.iconClass;
+    const svgClass = options.svgClass;
 
     // Just another name for the same icon..
     if( data.constructor == String )
@@ -745,9 +751,9 @@ function makeIcon( iconName, iconTitle, extraClass = "" )
     const svg = document.createElementNS( "http://www.w3.org/2000/svg", "svg" );
     svg.setAttribute( "viewBox", `0 0 ${ data[ 0 ] } ${ data[ 1 ] }` );
 
-    if( extraClass )
+    if( svgClass )
     {
-        svg.classList.add( extraClass );
+        svg.classList.add( svgClass );
     }
 
     if( data[ 5 ] )
@@ -775,7 +781,7 @@ function makeIcon( iconName, iconTitle, extraClass = "" )
 
     const icon = document.createElement( "a" );
     icon.title = iconTitle ?? "";
-    icon.className = "lexicon " + extraClass;
+    icon.className = "lexicon " + ( iconClass ?? "" );
     icon.appendChild( svg );
 
     return icon;
@@ -1373,6 +1379,19 @@ function init( options = { } )
 }
 
 LX.init = init;
+
+/**
+ * @method setStrictViewport
+ * @param {Boolean} value
+ */
+
+function setStrictViewport( value )
+{
+    this.usingStrictViewport = value ?? true;
+    document.documentElement.setAttribute( "data-strictVP", ( this.usingStrictViewport ) ? "true" : "false" );
+}
+
+LX.setStrictViewport = setStrictViewport;
 
 /**
  * @method setCommandbarState
@@ -2441,9 +2460,23 @@ class ColorPicker {
         this.labelWidget = new TextInput( null, "", null, { inputClass: "bg-none", fit: true, disabled: true } );
         colorLabel.appendChild( this.labelWidget.root );
 
-        colorLabel.appendChild( new Button(null, "eyedrop",  async () => {
-            navigator.clipboard.writeText( this.labelWidget.value() );
-        }, { icon: "copy", buttonClass: "bg-none", className: "ml-auto", title: "Copy" }).root );
+        // Copy button
+        {
+            const copyButtonWidget = new Button(null, "copy",  async () => {
+                navigator.clipboard.writeText( this.labelWidget.value() );
+                copyButtonWidget.root.querySelector( "input[type='checkbox']" ).style.pointerEvents = "none";
+
+                doAsync( () => {
+                    copyButtonWidget.root.swap( true );
+                    copyButtonWidget.root.querySelector( "input[type='checkbox']" ).style.pointerEvents = "auto";
+                }, 3000 );
+
+            }, { swap: "check", icon: "copy", buttonClass: "bg-none", className: "ml-auto", title: "Copy" })
+
+            copyButtonWidget.root.querySelector( ".swap-on svg path" ).style.fill = "#42d065";
+
+            colorLabel.appendChild( copyButtonWidget.root );
+        }
 
         this._updateColorValue( hexValue, true );
 
@@ -2517,7 +2550,7 @@ class ColorPicker {
 
         if( this.useAlpha )
         {
-            this.alphaTracker.style.color = `rgb(${ this.currentColor.css.r }, ${ this.currentColor.css.g }, ${ this.currentColor.css.b },${ this.currentColor.css.a })`;
+            this.alphaTracker.style.color = `rgb(${ this.currentColor.css.r }, ${ this.currentColor.css.g }, ${ this.currentColor.css.b })`;
         }
 
         const toFixed = ( s, n = 2) => { return s.toFixed( n ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' ) };
@@ -2525,7 +2558,7 @@ class ColorPicker {
         if( this.colorModel == "CSS" )
         {
             const { r, g, b, a } = this.currentColor.css;
-            this.labelWidget.set( `rgba(${ r },${ g },${ b }${ this.useAlpha ? ',' + toFixed( a ) : '' })` );
+            this.labelWidget.set( `rgb${ this.useAlpha ? 'a' : '' }(${ r },${ g },${ b }${ this.useAlpha ? ',' + toFixed( a ) : '' })` );
         }
         else if( this.colorModel == "Hex" )
         {
@@ -4402,7 +4435,7 @@ class Menubar {
         // Otherwise, create it
         button = document.createElement('div');
         const disabled = options.disabled ?? false;
-        button.className = "lexmenubutton" + (disabled ? " disabled" : "");
+        button.className = "lexmenubutton main" + (disabled ? " disabled" : "");
         button.title = name;
         button.innerHTML = "<a><image src='" + src + "' class='lexicon' style='height:32px;'></a>";
 
@@ -4566,7 +4599,7 @@ class SideBar {
 
             if( this.collapsable )
             {
-                const icon = LX.makeIcon( "sidebar", "Toggle Sidebar", "toggler" );
+                const icon = LX.makeIcon( "sidebar", { title: "Toggle Sidebar", iconClass: "toggler" } );
                 this.header.appendChild( icon );
 
                 icon.addEventListener( "click", (e) => {
@@ -5053,7 +5086,7 @@ class SideBar {
 
             if( options.action )
             {
-                const actionIcon = LX.makeIcon( options.action.icon ?? "more-horizontal", options.action.name );
+                const actionIcon = LX.makeIcon( options.action.icon ?? "more-horizontal", { title: options.action.name } );
                 itemDom.appendChild( actionIcon );
 
                 actionIcon.addEventListener( "click", (e) => {
@@ -5113,7 +5146,7 @@ class SideBar {
 
                 if( suboptions.action )
                 {
-                    const actionIcon = LX.makeIcon( suboptions.action.icon ?? "more-horizontal", suboptions.action.name );
+                    const actionIcon = LX.makeIcon( suboptions.action.icon ?? "more-horizontal", { title: suboptions.action.name } );
                     subentry.appendChild( actionIcon );
 
                     actionIcon.addEventListener( "click", (e) => {
@@ -5305,7 +5338,7 @@ class Widget {
 
     _addResetProperty( container, callback ) {
 
-        const domEl = LX.makeIcon( "rotate-left", "Reset" )
+        const domEl = LX.makeIcon( "rotate-left", { title: "Reset" } )
         domEl.style.display = "none";
         domEl.style.marginRight = "6px";
         domEl.style.marginLeft = "0";
@@ -6512,10 +6545,20 @@ class Button extends Widget {
             const input = document.createElement( "input" );
             input.type = "checkbox";
             wValue.prepend( input );
-            // trigger = input;
 
-            const swapIcon = document.createElement( "a" );
-            swapIcon.className = options.swap + " swap-on lexicon";
+            let swapIcon = null;
+
+            // @legacy
+            if( options.swap.includes( "fa-" ) )
+            {
+                swapIcon = document.createElement( 'a' );
+                swapIcon.className = options.swap + " swap-on lexicon";
+            }
+            else
+            {
+                swapIcon = LX.makeIcon( options.swap, { iconClass: "swap-on" } );
+            }
+
             wValue.appendChild( swapIcon );
 
             this.root.swap = function( skipCallback ) {
@@ -8406,7 +8449,6 @@ class NumberInput extends Widget {
                 else if( e.altKey ) mult *= 0.1;
                 value = ( +vecinput.valueAsNumber + mult * dt );
                 this.set( value, false, e );
-                // vecinput.value = ( +new_value ).toFixed( 4 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' );
             }
 
             e.stopPropagation();
@@ -9621,7 +9663,7 @@ class Table extends Widget {
 
             if( this.customFilters )
             {
-                const icon = LX.makeIcon( "circle-plus", null, "sm" );
+                const icon = LX.makeIcon( "circle-plus", { svgClass: "sm" } );
 
                 for( let f of this.customFilters )
                 {
@@ -9646,7 +9688,6 @@ class Table extends Widget {
                     headerContainer.appendChild( customFilterBtn.root );
                 }
 
-                // const resetIcon = LX.makeIcon( "xmark", null, "sm" );
                 this._resetCustomFiltersBtn = new Button(null, "resetButton", ( v ) => {
                     this.activeCustomFilters = {};
                     this.refresh();
@@ -9658,7 +9699,7 @@ class Table extends Widget {
 
             if( this.toggleColumns )
             {
-                const icon = LX.makeIcon( "sliders" );
+                const icon = LX.makeIcon( "sliders-large" );
                 const toggleColumnsBtn = new Button( "toggleColumnsBtn", icon.innerHTML + "View", (value, e) => {
                     const menuOptions = data.head.map( ( colName, idx ) => {
                         const item = {
@@ -9741,7 +9782,7 @@ class Table extends Widget {
                 {
                     const th = document.createElement( 'th' );
                     th.innerHTML = `<span>${ headData }</span>`;
-                    th.querySelector( "span" ).appendChild( LX.makeIcon( "menu-arrows", null, "sm" ) );
+                    th.querySelector( "span" ).appendChild( LX.makeIcon( "menu-arrows", { svgClass: "sm" } ) );
 
                     const idx = data.head.indexOf( headData );
                     if( this.centered && this.centered.indexOf( idx ) > -1 )
@@ -9992,7 +10033,7 @@ class Table extends Widget {
 
                             if( action == "delete" )
                             {
-                                button = LX.makeIcon( "trash-can", "Delete Row" );
+                                button = LX.makeIcon( "trash-can", { title: "Delete Row" } );
                                 button.addEventListener( 'click', function() {
                                     // Don't need to refresh table..
                                     data.body.splice( r, 1 );
@@ -10001,7 +10042,7 @@ class Table extends Widget {
                             }
                             else if( action == "menu" )
                             {
-                                button = LX.makeIcon( "more-horizontal", "Menu" );
+                                button = LX.makeIcon( "more-horizontal", { title: "Menu" } );
                                 button.addEventListener( 'click', function( event ) {
                                     if( !options.onMenuAction )
                                     {
@@ -10017,7 +10058,7 @@ class Table extends Widget {
                             else // custom actions
                             {
                                 console.assert( action.constructor == Object );
-                                button = LX.makeIcon( action.icon, action.title );
+                                button = LX.makeIcon( action.icon, { title: action.title } );
 
                                 if( action.callback )
                                 {
