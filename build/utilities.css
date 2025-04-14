@@ -1,14 +1,14 @@
 /* Colors */
 /* Using !important to override anything written in main stylesheet */
 
-.bg-primary { background-color: var(--global-color-primary) !important }
-.bg-secondary { background-color: var(--global-color-secondary) !important }
-.bg-tertiary { background-color: var(--global-color-tertiary) !important }
-.bg-quaternary { background-color: var(--global-color-quaternary) !important }
-.bg-accent { background-color: var(--global-color-accent) !important }
-.bg-contrast { background-color: var(--global-text-primary) !important }
-.bg-warning { background-color: var(--global-color-warning) !important }
-.bg-error { background-color: var(--global-color-error) !important }
+.bg-primary { --background-color: var(--global-color-primary); background-color: var(--background-color)!important }
+.bg-secondary { --background-color: var(--global-color-secondary); background-color: var(--background-color)!important }
+.bg-tertiary { --background-color: var(--global-color-tertiary); background-color: var(--background-color)!important }
+.bg-quaternary { --background-color: var(--global-color-quaternary); background-color: var(--background-color)!important }
+.bg-accent { --background-color: var(--global-color-accent); background-color: var(--background-color)!important }
+.bg-contrast { --background-color: var(--global-text-primary); background-color: var(--background-color)!important }
+.bg-warning { --background-color: var(--global-color-warning); background-color: var(--background-color)!important }
+.bg-error { --background-color: var(--global-color-error); background-color: var(--background-color)!important }
 .bg-none { background: none !important }
 
 .hover\:bg-primary:hover { background-color: var(--global-color-primary) !important }
@@ -19,6 +19,8 @@
 .hover\:bg-contrast:hover { background-color: var(--global-text-primary) !important }
 .hover\:bg-warning:hover { background-color: var(--global-color-warning) !important }
 .hover\:bg-error:hover { background-color: var(--global-color-error) !important }
+.hover\:bg-mix:hover { background-color: color-mix(in srgb, var(--background-color), var(--global-text-primary) 5%) !important }
+.hover\:bg-mix-contrast:hover { background-color: color-mix(in srgb, var(--background-color), var(--global-color-primary) 5%) !important }
 .hover\:bg-none:hover { background: none !important }
 
 .fg-primary { color: var(--global-text-primary) !important }
@@ -334,12 +336,20 @@
 .border { border: 1px solid var(--global-color-tertiary) }
 .border-colored { border: 1px solid currentColor }
 
+.border-solid { border-style: solid }
+.border-dashed { border-style: dashed }
+.border-dotted { border-style: dotted }
+.border-double { border-style: double }
+
 .border-top { border-top: 1px solid var(--global-color-tertiary) }
 .border-bottom { border-bottom: 1px solid var(--global-color-tertiary) }
 .border-left { border-left: 1px solid var(--global-color-tertiary) }
 .border-right { border-right: 1px solid var(--global-color-tertiary) }
 
 .border-2 { border-width: 2px }
+.border-4 { border-width: 4px }
+.border-6 { border-width: 6px }
+.border-8 { border-width: 8px }
 
 .border-t-0 { border-top-width: 0 }
 .border-b-0 { border-bottom-width: 0 }
@@ -347,9 +357,15 @@
 .border-r-0 { border-right-width: 0 }
 
 .rounded-none { border-radius: 0 }
+.rounded-sm { border-radius: 0.125rem }
 .rounded { border-radius: 0.25rem }
+.rounded-md { border-radius: 0.375rem }
 .rounded-lg { border-radius: 0.5rem }
+.rounded-xl { border-radius: 0.75rem }
+.rounded-2xl { border-radius: 1rem }
+.rounded-3xl { border-radius: 1.5rem }
 .rounded-full { border-radius: 9999px }
+.rounded-inherit { border-radius: inherit }
 
 .rounded-t-none   { border-top-left-radius: 0; border-top-right-radius: 0 }
 .rounded-r-none   { border-top-right-radius: 0; border-bottom-right-radius: 0 }

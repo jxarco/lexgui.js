@@ -292,7 +292,7 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
 
                         const selected = ( idx == 0 );
                         const msgContent = LX.makeContainer( [ "100%", "auto" ],
-                            `flex flex-col border p-3 rounded-lg gap-2 select-none hover:bg-secondary cursor-pointer ${ selected ? "bg-secondary" : "" }`, "", mailContainer );
+                            `flex flex-col border p-3 rounded-lg gap-2 select-none hover:bg-mix cursor-pointer ${ selected ? "bg-secondary" : "" }`, "", mailContainer );
 
                         // Name, subject, date
                         {
