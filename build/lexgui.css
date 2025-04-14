@@ -656,6 +656,12 @@ a svg, svg path {
     color: var(--global-text-secondary);
 }
 
+.lexfooter ul li a {
+	display: flex;
+	gap: 0.4rem;
+	align-items: center;
+}
+
 .lexfooter a {
     text-decoration: none;
     color: var(--global-text-secondary);
@@ -3165,7 +3171,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexmenubar .lexbutton {
-    padding-inline: 0.15rem;
+    padding-inline: 0.1rem;
 }
 
 .lexmenubar .lexbutton:hover, :root[data-theme="light"] .lexmenubar .lexbutton:hover {
@@ -3186,6 +3192,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+.lexmenubar .lexmenubutton.main:first-child {
+    margin-left: 8px;
 }
 
 .lexmenubar .lexmenubutton.main:last-child {

@@ -60,12 +60,35 @@
 .whitespace-pre-wrap { white-space: pre-wrap }
 .whitespace-break-spaces { white-space: break-spaces }
 
+.text-start { text-align: start }
+.text-center { text-align: center }
+.text-end { text-align: end }
+
+.leading-none { line-height: 1 }
+.leading-tight { line-height: 1.25 }
+.leading-snug { line-height: 1.375 }
+.leading-normal { line-height: 1.5 }
+.leading-relaxed { line-height: 1.625 }
+.leading-loose { line-height: 2 }
+.leading-inherit { line-height: inherit }
+
+.leading-3 { line-height: 0.75rem }
+.leading-4 { line-height: 1rem }
+.leading-5 { line-height: 1.25rem }
+.leading-6 { line-height: 1.5rem }
+.leading-7 { line-height: 1.75rem }
+.leading-8 { line-height: 2rem }
+.leading-9 { line-height: 2.25rem }
+.leading-10 { line-height: 2.5rem }
+
 .text-balance { text-wrap: balance }
 .break-words { overflow-wrap: break-word }
 
 .line-clamp-1, .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical }
 .line-clamp-1 { -webkit-line-clamp: 1; line-clamp: 1 }
 .line-clamp-2 { -webkit-line-clamp: 2; line-clamp: 2 }
+.line-clamp-3 { -webkit-line-clamp: 3; line-clamp: 3 }
+.line-clamp-4 { -webkit-line-clamp: 4; line-clamp: 4 }
 
 .flex-col { flex-direction: column }
 .flex-row { flex-direction: row }
