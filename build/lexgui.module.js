@@ -1369,6 +1369,19 @@ function init( options = { } )
 LX.init = init;
 
 /**
+ * @method setStrictViewport
+ * @param {Boolean} value
+ */
+
+function setStrictViewport( value )
+{
+    this.usingStrictViewport = value ?? true;
+    document.documentElement.setAttribute( "data-strictVP", ( this.usingStrictViewport ) ? "true" : "false" );
+}
+
+LX.setStrictViewport = setStrictViewport;
+
+/**
  * @method setCommandbarState
  * @param {Boolean} value
  * @param {Boolean} resetEntries
