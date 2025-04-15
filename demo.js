@@ -288,10 +288,11 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
                 {
                     const allMailContent = LX.makeContainer( [ "100%", "calc(100% - 50px)" ], "flex flex-col p-4 pt-0 gap-2 overflow-scroll", "", container );
 
-                    window.__addMail = ( mail, mailContainer ) => {
+                    window.__addMail = ( mail, mailContainer, idx ) => {
 
+                        const selected = ( idx == 0 );
                         const msgContent = LX.makeContainer( [ "100%", "auto" ],
-                            "flex flex-col border p-3 rounded-lg gap-2 select-none hover:bg-secondary cursor-pointer", "", mailContainer );
+                            `flex flex-col border p-3 rounded-lg gap-2 select-none hover:bg-mix cursor-pointer ${ selected ? "bg-secondary" : "" }`, "", mailContainer );
 
                         // Name, subject, date
                         {
@@ -316,13 +317,15 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
                             msgTags.appendChild( LX.badge( tag, "sm", { asElement: true } ) );
                         }
 
-                        msgContent.listen( "click", () => {
+                        msgContent.listen( "click", function() {
+                            mailContainer.childNodes.forEach( e => e.classList.remove( "bg-secondary" ) );
+                            this.classList.add( "bg-secondary" );
                             window.__openMail( mail );
                         } );
                     };
 
                     LX.requestJSON( "data/example_mail_data.json", data => {
-                        data.forEach( e => { if( !unreadOnly || ( unreadOnly && !e.read ) ) window.__addMail( e, allMailContent ) } );
+                        data.forEach( ( e, idx ) => { if( !unreadOnly || ( unreadOnly && !e.read ) ) window.__addMail( e, allMailContent, idx ) } );
                         window.__openMail( data[ 0 ] );
                     } )
                 }
@@ -371,20 +374,24 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
 
                     previewDataContent.innerHTML = "";
 
-                    const mailPreviewInfo = LX.makeContainer( [ "100%", "auto" ], "flex flex-row border-bottom p-6", "", previewDataContent );
+                    const mailPreviewInfo = LX.makeContainer( [ "100%", "auto" ], "flex flex-row border-bottom p-4 gap-3", "", previewDataContent );
+                    const avatarContainer = LX.makeContainer( [ "40px", "40px" ], "bg-tertiary rounded-full content-center", "", mailPreviewInfo );
 
-                    const senderData = LX.makeContainer( [ "100%", "auto" ], "flex flex-col gap-0.5", `
+                    const mailNames = mail.name.split( ' ' );
+                    const avatarIcon = LX.makeContainer( [ "auto", "auto" ], "font-medium text-lg self-center", mailNames[ 0 ][ 0 ] + mailNames[ 1 ][ 0 ], avatarContainer );
+
+                    const senderData = LX.makeContainer( [ "auto", "auto" ], "flex flex-col gap-0.5", `
                     <div class="text-md font-semibold">${ mail.name }</div>
                     <div class="text-sm">${ mail.subject }</div>
                     <div class="text-sm">Reply-To: ${ mail.email }</div>
                     `, mailPreviewInfo );
 
-                    const exactDate = LX.makeContainer( [ "100%", "auto" ], "flex flex-row text-sm fg-tertiary justify-end", mail.exactDate, mailPreviewInfo );
-                    const mailPreviewContent = LX.makeContainer( [ "100%", "505px" ], "flex flex-row border-bottom text-md whitespace-pre-wrap p-4", mail.content, previewDataContent );
+                    const exactDate = LX.makeContainer( [ "auto", "auto" ], "flex flex-row text-sm fg-tertiary ml-auto", mail.exactDate, mailPreviewInfo );
+                    const mailPreviewContent = LX.makeContainer( [ "100%", "515px" ], "flex flex-row border-bottom text-md whitespace-pre-wrap p-4", mail.content, previewDataContent );
                     const previewFooter = LX.makeContainer( [ "100%", "auto" ], "flex flex-col p-2", "", previewDataContent );
 
                     const msgReplyTextArea = new LX.TextArea(null, "", null,
-                        { className: "mt-1", inputClass: "outline", width: "100%", resize: false, placeholder: `Reply ${ mail.name }` }
+                        { className: "mt-1", inputClass: "outline", width: "100%", resize: false, placeholder: `Reply ${ mail.name }...` }
                     );
                     previewFooter.appendChild( msgReplyTextArea.root );
 
