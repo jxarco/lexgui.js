@@ -312,7 +312,7 @@ class Timeline {
 
         if( this.animationClip && this.selectedItems.length )
         {
-            let items = { 'id': '', 'children': [] };
+            let items = [];
 
             const tracksPerItem = this.animationClip.tracksPerItem;
             for( let i = 0; i < this.selectedItems.length; i++ )
@@ -362,47 +362,49 @@ class Timeline {
                     // panel.addTitle(track.name + (track.type? '(' + track.type + ')' : ''));
                 }
 
-                items.children.push( t );
-
-                this.leftPanelTrackTreeWidget = p.addTree(null, t, {filter: false, rename: false, draggable: false, onevent: (e) => {
-                    switch(e.type) {
-                        case LX.TreeEvent.NODE_SELECTED:
-                            if (e.node.parent){
-                                const tracksInItem = this.animationClip.tracksPerItem[e.node.parent.id];
-                                const type = e.node.id;
-                                for(let i = 0; i < tracksInItem.length; i++) {
-                                    if(tracksInItem[i].type == type){
-                                        this.selectTrack(tracksInItem[i].clipIdx);
-                                        break;
-                                    }
-                                }
-                            }
-                            break;
-                        case LX.TreeEvent.NODE_VISIBILITY:   
-                            if ( e.node.parent )
-                            {
-                                const tracksInItem = this.animationClip.tracksPerItem[ e.node.parent.id ];
-                                const type = e.node.id;
-                                for(let i = 0; i < tracksInItem.length; i++) {
-                                    if(tracksInItem[i].type == type)
-                                    {
-                                        this.changeTrackVisibility( tracksInItem[ i ].clipIdx, e.value );
-                                        break;
-                                    }
-                                }
-                            } 
-                            break;
-                        case LX.TreeEvent.NODE_CARETCHANGED:
-                            const tracksInItem = this.animationClip.tracksPerItem[e.node.id];
-                            for( let i = 0; i < tracksInItem; ++i )
-                            {
-                                this.changeTrackDisplay( tracksInItem[ i ].clipIdx, e.node.closed );
-                            }
-                            break;
-                    }
-                }});
-
+                items.push( t );
             }
+
+            this.leftPanelTrackTreeWidget = p.addTree(null, items, {filter: false, rename: false, draggable: false, onevent: (e) => {
+                switch(e.type) {
+                    case LX.TreeEvent.NODE_SELECTED:
+                        if (e.node.parent){
+                            const tracksInItem = this.animationClip.tracksPerItem[e.node.parent.id];
+                            const type = e.node.id;
+                            for(let i = 0; i < tracksInItem.length; i++) {
+                                if(tracksInItem[i].type == type){
+                                    this.selectTrack(tracksInItem[i].clipIdx);
+                                    break;
+                                }
+                            }
+                        }
+                        break;
+                    case LX.TreeEvent.NODE_VISIBILITY:   
+                        if ( e.node.parent )
+                        {
+                            const tracksInItem = this.animationClip.tracksPerItem[ e.node.parent.id ];
+                            const type = e.node.id;
+                            for(let i = 0; i < tracksInItem.length; i++) {
+                                if(tracksInItem[i].type == type)
+                                {
+                                    this.changeTrackVisibility( tracksInItem[ i ].clipIdx, e.value );
+                                    break;
+                                }
+                            }
+                        } 
+                        break;
+                    case LX.TreeEvent.NODE_CARETCHANGED:
+                        const tracksInItem = this.animationClip.tracksPerItem[e.node.id];
+                        for( let i = 0; i < tracksInItem; ++i )
+                        {
+                            this.changeTrackDisplay( tracksInItem[ i ].clipIdx, e.node.closed );
+                        }
+                        break;
+                }
+            }});
+            // setting a name in the addTree function adds an undesired node
+            this.leftPanelTrackTreeWidget.name = "tracksTrees";
+            p.widgets[this.leftPanelTrackTreeWidget.name] = this.leftPanelTrackTreeWidget;
         }
 
         this.trackTreesPanel = p;
@@ -2851,8 +2853,7 @@ class ClipsTimeline extends Timeline {
                     'skipVisibility': this.skipVisibility,     
                     'visible': track.active,  
                     // 'selected' : track.isSelected                
-                } );
-                              
+                } );        
             }
 
         }
@@ -2869,6 +2870,9 @@ class ClipsTimeline extends Timeline {
                     break;
             }
         }});
+        // setting a name in the addTree function adds an undesired node
+        this.leftPanelTrackTreeWidget.name = "tracksTrees"; 
+        p.widgets[this.leftPanelTrackTreeWidget.name] = this.leftPanelTrackTreeWidget;
 
         this.trackTreesPanel = p;
         panel.attach(p.root)
