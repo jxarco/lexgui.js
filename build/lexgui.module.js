@@ -6116,7 +6116,17 @@ class NodeTree {
 
         this.data = newData ?? this.data;
         this.domEl.querySelector( "ul" ).innerHTML = "";
-        this._createItem( null, this.data, 0, selectedId );
+        if( this.data.constructor === Object )
+        {
+            this._createItem( null, this.data, 0, selectedId );
+        }
+        else
+        {
+            for( let d of this.data )
+            {
+                this._createItem( null, d, 0, selectedId );
+            }
+        }
     }
 
     /* Refreshes the tree and focuses current element */
