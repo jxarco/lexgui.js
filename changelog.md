@@ -2,6 +2,8 @@
 
 ## dev
 
+Expose `LX.NodeTree` in global namespace.
+
 ## 0.5.8 (master)
 
 Widgets:
