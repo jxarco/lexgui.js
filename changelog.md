@@ -3,6 +3,7 @@
 ## dev
 
 Fixed area resizing issues. Improved performance (less layout trashing).
+Added missing support for swap functionality in OverlayButtons.
 Added tracking (`letter-spacing`) CSS class utilities.
 Fixed minor issues with ColorPicker mouse tracking.
 

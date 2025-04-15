@@ -3433,7 +3433,8 @@ class Area {
                 img: b.img,
                 className: b.class ?? "",
                 title: b.name,
-                overflowContainerX: overlayPanel.root
+                overflowContainerX: overlayPanel.root,
+                swap: b.swap
             };
 
             if( group )
