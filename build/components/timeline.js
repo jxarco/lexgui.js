@@ -20,7 +20,7 @@ class Session {
         // this.current_time = 0;
         // this.last_time = 0;
         // this.seconds_to_pixels = 50;
-        this.scroll_y = 0;
+        // this.scroll_y = 0;
         // this.offset_y = 0;
         // this.selection = null;
     }
@@ -99,28 +99,34 @@ class Timeline {
 
         this.optimizeThreshold = 0.01;
 
-        this.root = new LX.Area({className : 'lextimeline'});
-        
         this.header_offset = 48;
-        
-        let width = options.width ? options.width : null;
-        let height = options.height ? options.height - this.header_offset : null;
 
-        let area = new LX.Area( {id: "bottom-timeline-area", width: width || "calc(100% - 7px)", height: height || "100%"});
-        area.split({ type: "horizontal", sizes: ["15%", "85%"] });
-        area.splitBar.style.zIndex = 1; // for some reason this is needed here
-        this.content_area = area;
-        let [ left, right ] = area.sections;
+        // main area -- root
+        this.mainArea = new LX.Area({className : 'lextimeline'});
+        this.mainArea.split({ type: "vertical", sizes: [this.header_offset, "auto"],  resize: false});
+
+        // header
+        this.header = new LX.Panel( { id: 'lextimelineheader' } );
+        this.mainArea.sections[0].attach( this.header );
+        this.updateHeader();
         
-        right.root.appendChild( this.canvas );
+        // content area
+        const contentArea = this.mainArea.sections[1];
+        contentArea.root.id = "bottom-timeline-area";
+        contentArea.split({ type: "horizontal", sizes: ["15%", "85%"] });
+        contentArea.splitBar.style.zIndex = 1; // for some reason this is needed here
+        let [ left, right ] = contentArea.sections;
+        
+        right.attach( this.canvas );
         this.canvasArea = right;
         this.canvasArea.root.classList.add("lextimelinearea");
-        this.updateHeader();
-        this.updateLeftPanel( left );
-        this.root.root.appendChild( area.root );
+
+        this.leftPanel = left.addPanel( { className: 'lextimelinepanel', width: "100%", height: "100%" } );
+        this.trackTreesPanel = null;
+        this.updateLeftPanel();
 
         if(!options.canvas && this.name != '') {
-            this.root.root.id = this.name;
+            this.mainArea.root.id = this.name;
             this.canvas.id = this.name + '-canvas';
         }
 
@@ -136,7 +142,7 @@ class Timeline {
         // Process keys events
         this.canvasArea.root.addEventListener("keydown", this.processKeys.bind(this));
 
-        right.onresize = bounding => {
+        this.canvasArea.onresize = bounding => {
             if(!(bounding.width && bounding.height)) 
                 return;
             this.resizeCanvas( [ bounding.width, bounding.height + this.header_offset ] );
@@ -157,18 +163,9 @@ class Timeline {
      */
 
     updateHeader() {
+        this.header.clear();
 
-        if( this.header )
-        {
-            this.header.clear();
-        }
-        else
-        {
-            this.header = new LX.Panel( { id: 'lextimelineheader', height: this.header_offset + "px" } );
-            this.root.root.appendChild( this.header.root );
-        }
-
-        let header = this.header;
+        const header = this.header;
         header.sameLine();
 
         if( this.name )
@@ -289,22 +286,14 @@ class Timeline {
     * @method updateLeftPanel
     * 
     */
-    updateLeftPanel( area ) {
+    updateLeftPanel( ) {
 
-        let scrollTop = 0;
-        if( this.leftPanel )
-        {
-            scrollTop = this.leftPanel.root.children[ 1 ].scrollTop;
-            this.leftPanel.clear();
-        }
-        else
-        {
-            this.leftPanel = area.addPanel( { className: 'lextimelinepanel', width: "100%", height: "100%" } );
-        }
+        const scrollTop = this.trackTreesPanel ? this.trackTreesPanel.root.scrollTop : 0;
+        this.leftPanel.clear();
 
-        let panel = this.leftPanel;
+        const panel = this.leftPanel;
+        
         panel.sameLine( 2 );
-
         let titleWidget = panel.addTitle( "Tracks" );
         let title = titleWidget.root;
         
@@ -314,7 +303,6 @@ class Timeline {
                 this.addNewTrack();
             }, { hideName: true, title: "Add Track" });
         }
-
         panel.endLine();
 
         const styles = window.getComputedStyle( title );
@@ -417,28 +405,27 @@ class Timeline {
             }
         }
 
+        this.trackTreesPanel = p;
         panel.attach( p.root )
         p.root.style.overflowY = "scroll";
         p.root.addEventListener("scroll", e => {
             if (e.currentTarget.scrollHeight > e.currentTarget.clientHeight){
                 this.currentScroll = e.currentTarget.scrollTop / (e.currentTarget.scrollHeight - e.currentTarget.clientHeight);
+                this.currentScrollInPixels = e.currentTarget.scrollTop;
             }
             else{
                 this.currentScroll = 0;
+                this.currentScrollInPixels = 0;
             }
         });
-        // for(let i = 0; i < this.animationClip.tracks.length; i++) {
-        //     let track = this.animationClip.tracks[i];
-        //     panel.addTitle(track.name + (track.type? '(' + track.type + ')' : ''));
-        // }
-        this.leftPanel.root.children[ 1 ].scrollTop = scrollTop;
 
-        if( this.leftPanel.parent.root.classList.contains("hidden") || !this.root.root.parent )
-        {
+        this.trackTreesPanel.scrollTop = scrollTop;
+
+        if( this.leftPanel.parent.root.classList.contains("hidden") || !this.mainArea.root.parent ){
             return;
         }
 
-        this.resizeCanvas([ this.root.root.clientWidth - this.leftPanel.root.clientWidth  - 8, this.size[1]]);
+        this.resizeCanvas([ this.mainArea.root.clientWidth - this.leftPanel.root.clientWidth  - 8, this.size[1]]);
     }
 
     /**
@@ -653,13 +640,11 @@ class Timeline {
         const scrollableHeight = this.leftPanelTrackTreeWidget.root.scrollHeight;
         const treeOffset = this.leftPanelTrackTreeWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop;
 
-        if ( this.leftPanelTrackTreeWidget.root.scrollHeight > 0 ){
+        if ( this.trackTreesPanel.root.scrollHeight > 0 ){
             const ul = this.leftPanelTrackTreeWidget.innerTree.domEl.children[0];
             this.trackHeight = ul.children.length < 1 ? 25 : (ul.offsetHeight / ul.children.length);
         }
         
-        this.currentScrollInPixels = scrollableHeight <= (h-this.topMargin) ? 0 : (this.currentScroll * (scrollableHeight - (ctx.canvas.height-this.topMargin)));
-
         //zoom
         this.startTime = this.session.start_time; //seconds
         if(this.startTime < 0)
@@ -697,7 +682,7 @@ class Timeline {
 
             ctx.fillStyle = this.grabbingScroll ? Timeline.FONT_COLOR_PRIMARY : Timeline.FONT_COLOR_QUATERNARY;
            
-            let scrollBarHeight = Math.max( 10, (h-this.topMargin)* (h-this.topMargin)/ this.leftPanel.root.children[1].scrollHeight);
+            let scrollBarHeight = Math.max( 10, (h-this.topMargin)* (h-this.topMargin)/ this.trackTreesPanel.root.scrollHeight);
             let scrollLoc = this.currentScroll * ( h - this.topMargin - scrollBarHeight ) + this.topMargin;
             ctx.roundRect( w - 10, scrollLoc, 10, scrollBarHeight, 5, true );
         }
@@ -927,7 +912,7 @@ class Timeline {
             }
             else if( h < this.leftPanelTrackTreeWidget.root.scrollHeight)
             {              
-                this.leftPanel.root.children[1].scrollTop += e.deltaY; // wheel deltaY
+                this.trackTreesPanel.root.scrollTop += e.deltaY; // wheel deltaY
             }
             
             if ( this.onMouse ){
@@ -1032,17 +1017,13 @@ class Timeline {
                 }
                 else if(this.grabbingScroll)
                 {
+                    // will automatically call scroll event
                     if ( y < this.topMargin ){
-                        this.currentScroll = 0;
+                        this.trackTreesPanel.root.scrollTop = 0;
                     }
                     else{
-                        let h = this.leftPanel.root.clientHeight;
-                        let scrollBarHeight = Math.max( 10, (h-this.topMargin)* (h-this.topMargin)/this.leftPanel.root.children[1].scrollHeight);
-                        let minScrollLoc = this.topMargin;
-                        let maxScrollLoc = h - scrollBarHeight; // - sizeScrollBar
-                        this.currentScroll = Math.min( 1, Math.max(this.currentScroll + e.deltay / (maxScrollLoc - minScrollLoc), 0) );    
+                        this.trackTreesPanel.root.scrollTop += this.trackTreesPanel.root.scrollHeight * e.deltay / (h-this.topMargin);
                     }
-                    this.leftPanel.root.children[1].scrollTop = this.currentScroll * (this.leftPanel.root.children[1].scrollHeight-this.leftPanel.root.children[1].clientHeight);
                 }
                 else
                 {
@@ -1051,7 +1032,7 @@ class Timeline {
                     var now = this.xToTime( e.offsetX );
                     this.session.start_time += (old - now);
 
-                    this.leftPanel.root.children[1].scrollTop -= e.deltay; // will automatically call scroll event
+                    this.trackTreesPanel.root.scrollTop -= e.deltay; // will automatically call scroll event
 
                 }
             }
@@ -1353,14 +1334,11 @@ class Timeline {
      * @method resize
      * @param {*} size
      */
-    resize( size = [this.root.parent.root.clientWidth, this.root.parent.root.clientHeight]) {
+    resize( size = [this.mainArea.parent.root.clientWidth, this.mainArea.parent.root.clientHeight]) {
 
-        // this.root.root.style.width = size[0] + "px";
-        // this.root.root.style.height = size[1] + "px";
-        
         this.size = size; 
         //this.content_area.setSize([size[0], size[1] - this.header_offset]);
-        this.content_area.root.style.height = "calc(100% - "+ this.header_offset + "px)";
+        this.mainArea.sections[1].root.style.height = "calc(100% - "+ this.header_offset + "px)";
 
         let w = size[0] - this.leftPanel.root.clientWidth - 8;
         this.resizeCanvas([w , size[1]]);     
@@ -1379,7 +1357,7 @@ class Timeline {
     * Hide timeline area
     */
     hide() {
-        this.root.hide();
+        this.mainArea.hide();
     }
 
     /**
@@ -1388,7 +1366,7 @@ class Timeline {
     */
     show() {
         
-        this.root.show();
+        this.mainArea.show();
         this.updateLeftPanel();
         this.resize();        
     }
@@ -2838,23 +2816,17 @@ class ClipsTimeline extends Timeline {
         this.lastTrackClipsMove = 0; // vertical movement of clips, onMouseMove onMousedown
     }
 
-    updateLeftPanel(area) {
+    updateLeftPanel() {
 
-        let scrollTop = 0;
-        if(this.leftPanel){
-            scrollTop = this.leftPanel.root.children[1].scrollTop;
-            this.leftPanel.clear();
-        }
-        else {
-            this.leftPanel = area.addPanel({className: 'lextimelinepanel', width: "100%", height: "100%"});
-        }
+        const scrollTop = this.trackTreesPanel.root.scrollTop;
+        this.leftPanel.clear();
 
-        let panel = this.leftPanel;
-        
+        const panel = this.leftPanel;
+
         panel.sameLine(2);
-
         let titleWidget = panel.addTitle("Tracks");
         let title = titleWidget.root;
+
         if(!this.disableNewTracks) 
         {
             panel.addButton("addTrackBtn", '<i class = "fa-solid fa-plus"></i>', (value, event) => {
@@ -2862,8 +2834,10 @@ class ClipsTimeline extends Timeline {
             }, { hideName: true, title: "Add Track" });
         }
         panel.endLine();
+
         const styles = window.getComputedStyle(title);
         const titleHeight = title.clientHeight + parseFloat(styles['marginTop']) + parseFloat(styles['marginBottom']);
+
         let p = new LX.Panel({height: "calc(100% - " + titleHeight + "px)"});
 
         let treeTracks = [];
@@ -2895,22 +2869,28 @@ class ClipsTimeline extends Timeline {
                     break;
             }
         }});
+
+        this.trackTreesPanel = p;
         panel.attach(p.root)
         p.root.style.overflowY = "scroll";
         p.root.addEventListener("scroll", (e) => {
             if (e.currentTarget.scrollHeight > e.currentTarget.clientHeight){
                 this.currentScroll = e.currentTarget.scrollTop / (e.currentTarget.scrollHeight - e.currentTarget.clientHeight);
+                this.currentScrollInPixels = e.currentTarget.scrollTop;
             }
             else{
                 this.currentScroll = 0;
+                this.currentScrollInPixels = 0;
             }
-        })
+        });
        
-        this.leftPanel.root.children[1].scrollTop = scrollTop;
+        this.trackTreesPanel.root.scrollTop = scrollTop;
 
-        if(this.leftPanel.parent.root.classList.contains("hidden") || !this.root.root.parent)
+        if(this.leftPanel.parent.root.classList.contains("hidden") || !this.mainArea.root.parent){
             return;
-        this.resizeCanvas([ this.root.root.clientWidth - this.leftPanel.root.clientWidth  - 8, this.size[1]]);
+        }
+        
+        this.resizeCanvas([ this.mainArea.root.clientWidth - this.leftPanel.root.clientWidth  - 8, this.size[1]]);
     }
 
     unSelectAllTracks() {
@@ -3001,7 +2981,7 @@ class ClipsTimeline extends Timeline {
             this.canvas.style.cursor = "grab";  
             let curTrackIdx = -1;
 
-            this.lastTrackClipsMove = Math.floor( (e.localY - this.topMargin + this.leftPanel.root.children[1].scrollTop) / this.trackHeight );
+            this.lastTrackClipsMove = Math.floor( (e.localY - this.topMargin + this.trackTreesPanel.root.scrollTop) / this.trackHeight );
 
             for(let i = 0; i < selectedClips.length; i++)
             {
