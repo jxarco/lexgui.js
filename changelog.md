@@ -2,6 +2,8 @@
 
 ## dev
 
+Added tracking (`letter-spacing`) CSS class utilities.
+
 ## 0.5.7 (master)
 
 `LX.makeIcon` now accepts `options` as second parameter (`title`, `iconClass`, `svgClass`).
