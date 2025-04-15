@@ -943,6 +943,82 @@ a svg, svg path {
     opacity: 0;
 }
 
+/* Generic Popover */
+
+.lexpopover {
+    font-size: var(--global-font-size);
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    z-index: 150;
+    display: flex;
+    flex-direction: column;
+    animation-duration: 400ms;
+	animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+	will-change: transform, opacity;
+}
+
+@keyframes slideUpAndFade {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes slideRightAndFade {
+	from {
+		opacity: 0;
+		transform: translateX(-8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes slideDownAndFade {
+	from {
+		opacity: 0;
+		transform: translateY(-8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes slideLeftAndFade {
+	from {
+		opacity: 0;
+		transform: translateX(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+.lexpopover[data-side="top"]{
+	animation-name: slideDownAndFade;
+}
+
+.lexpopover[data-side="right"]{
+	animation-name: slideLeftAndFade;
+}
+
+.lexpopover[data-side="bottom"]{
+	animation-name: slideUpAndFade;
+}
+
+.lexpopover[data-side="left"]{
+	animation-name: slideRightAndFade;
+}
+
+
 /* Dropdown Menu */
 
 .lexdropdownmenu {
@@ -1027,58 +1103,17 @@ a svg, svg path {
 .lexdropdownmenu[data-side="top"]{
 	animation-name: slideDownAndFade;
 }
+
 .lexdropdownmenu[data-side="right"]{
 	animation-name: slideLeftAndFade;
 }
+
 .lexdropdownmenu[data-side="bottom"]{
 	animation-name: slideUpAndFade;
 }
+
 .lexdropdownmenu[data-side="left"]{
 	animation-name: slideRightAndFade;
-}
-
-@keyframes slideUpAndFade {
-	from {
-		opacity: 0;
-		transform: translateY(8px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
-}
-
-@keyframes slideRightAndFade {
-	from {
-		opacity: 0;
-		transform: translateX(-8px);
-	}
-	to {
-		opacity: 1;
-		transform: translateX(0);
-	}
-}
-
-@keyframes slideDownAndFade {
-	from {
-		opacity: 0;
-		transform: translateY(-8px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
-}
-
-@keyframes slideLeftAndFade {
-	from {
-		opacity: 0;
-		transform: translateX(8px);
-	}
-	to {
-		opacity: 1;
-		transform: translateX(0);
-	}
 }
 
 /* Area */
