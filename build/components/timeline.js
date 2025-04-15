@@ -64,8 +64,8 @@ class Timeline {
         this.currentScroll = 0; //in percentage
         this.currentScrollInPixels = 0; //in pixels
        
-        this.secondsToPixels = Math.max( 0.00001, this.size[0]/1 );
-        this.pixelsToSeconds = 1 / this.secondsToPixels;
+        this.pixelsPerSecond = Math.max( 0.00001, this.size[0]/1 );
+        this.secondsPerPixel = 1 / this.pixelsPerSecond;
         this.selectedItems = options.selectedItems ?? [];
         this.animationClip = options.animationClip ?? null;
         this.trackHeight = options.trackHeight ?? 25;
@@ -520,9 +520,9 @@ class Timeline {
 
         // set tick and sub tick times
         let tickTime = 4;
-        if ( this.secondsToPixels > 900 ) { tickTime = 1; }
-        else if ( this.secondsToPixels > 100 ) { tickTime = 2; }
-        else if ( this.secondsToPixels > 50 ) { tickTime = 3; }
+        if ( this.pixelsPerSecond > 900 ) { tickTime = 1; }
+        else if ( this.pixelsPerSecond > 100 ) { tickTime = 2; }
+        else if ( this.pixelsPerSecond > 50 ) { tickTime = 3; }
 
         let subtickTime = this.timeSeparators[tickTime - 1];
         tickTime = this.timeSeparators[tickTime];
@@ -632,7 +632,7 @@ class Timeline {
         //zoom
         let startTime = this.visualOriginTime; //seconds
         startTime = Math.min( this.duration, Math.max( 0, startTime ) );
-        let endTime = this.visualOriginTime + w * this.pixelsToSeconds; //seconds
+        let endTime = this.visualOriginTime + w * this.secondsPerPixel; //seconds
         endTime = Math.max( startTime, Math.min( this.duration, endTime ) );
         this.visualTimeRange[0] = startTime;
         this.visualTimeRange[1] = endTime;
@@ -729,7 +729,7 @@ class Timeline {
         let markersPos = [];
         for (let i = 0; i < markers.length; ++i) {
             let marker = markers[i];
-            if (marker.time < this.visualTimeRange[0] - this.pixelsToSeconds * 100 ||
+            if (marker.time < this.visualTimeRange[0] - this.secondsPerPixel * 100 ||
                 marker.time > this.visualTimeRange[1])
                 continue;
             var x = this.timeToX(marker.time);
@@ -813,25 +813,25 @@ class Timeline {
 
     // Converts distance in pixels to time
     xToTime( x ) {
-        return x / this.secondsToPixels + this.visualOriginTime;
+        return x * this.secondsPerPixel + this.visualOriginTime;
     }
 
     // Converts time to disance in pixels
     timeToX( t ) {
-        return (t - this.visualOriginTime) * this.secondsToPixels;
+        return (t - this.visualOriginTime) * this.pixelsPerSecond;
     }
     
     /**
      * @method setScale
-     * @param {*} v
+     * @param {*} pixelsPerSecond >0.  totalVisiblePixels / totalVisibleSeconds.  
      */
 
-    setScale( v ) {
+    setScale( pixelsPerSecond ) {
         const xCurrentTime = this.timeToX(this.currentTime);
-        this.secondsToPixels *= v;
-        this.secondsToPixels = Math.max( 0.00001, this.secondsToPixels );
+        this.pixelsPerSecond = pixelsPerSecond;
+        this.pixelsPerSecond = Math.max( 0.00001, this.pixelsPerSecond );
 
-        this.pixelsToSeconds = 1 / this.secondsToPixels;
+        this.secondsPerPixel = 1 / this.pixelsPerSecond;
         this.visualOriginTime += this.currentTime - this.xToTime(xCurrentTime);
     }
 
@@ -878,9 +878,12 @@ class Timeline {
         if( e.type == "wheel" ) {
             if(e.shiftKey)
             {
-                let mouseTime = this.xToTime(localX);
-                this.setScale( e.wheelDelta < 0 ? 0.95 : 1.05 );
-                this.visualOriginTime = mouseTime - localX / this.secondsToPixels;
+                if ( e.wheelDelta ){
+                    let mouseTime = this.xToTime(localX);
+                    this.setScale( this.pixelsPerSecond * (e.wheelDelta < 0 ? 0.95 : 1.05) );
+                    this.visualOriginTime = mouseTime - localX * this.secondsPerPixel;
+                }
+
             }
             else if( (h-this.topMargin) < this.trackTreesWidget.root.scrollHeight)
             {              
@@ -1167,8 +1170,8 @@ class Timeline {
             ctx.roundRect( x, y + offset, w, trackHeight , 5, true);
             
             // Compute timeline position of fade-in and fade-out clip times
-            let fadeinX = this.secondsToPixels * ((clip.fadein || 0) - clip.start);
-            let fadeoutX = this.secondsToPixels * (clip.start + clip.duration - (clip.fadeout || (clip.start + clip.duration)));
+            let fadeinX = this.pixelsPerSecond * ((clip.fadein || 0) - clip.start);
+            let fadeoutX = this.pixelsPerSecond * (clip.start + clip.duration - (clip.fadeout || (clip.start + clip.duration)));
             
             if(this.active && track.active) {
                 // Transform fade-in and fade-out fill color to RGBA
@@ -1214,15 +1217,15 @@ class Timeline {
             }
 
             // Overwrite style with small font size if it's zoomed out
-            if( this.secondsToPixels < 200) {
-                ctx.font = this.secondsToPixels*0.06  +"px" + Timeline.FONT;
+            if( this.pixelsPerSecond < 200) {
+                ctx.font = this.pixelsPerSecond*0.06  +"px" + Timeline.FONT;
             }
 
             const text = clip.id.replaceAll("_", " ").replaceAll("-", " ");
             const textInfo = ctx.measureText( text );
             
             // Draw clip name if it's readable
-            if(this.secondsToPixels > 100) {
+            if(this.pixelsPerSecond > 100) {
                 ctx.fillText( text, x + (w - textInfo.width)*0.5,  y + offset + trackHeight * 0.5);
             }
 
@@ -1417,7 +1420,7 @@ class KeyFramesTimeline extends Timeline {
             e.multipleSelection = true;
             // Manual multiple selection
             if(!discard && track) {
-                const keyFrameIdx = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );   
+                const keyFrameIdx = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * 5 );   
                 if ( keyFrameIdx > -1 ){
                     track.selected[keyFrameIdx] ?
                     this.unSelectKeyFrame(track, keyFrameIdx) :
@@ -1426,13 +1429,13 @@ class KeyFramesTimeline extends Timeline {
             }
             // Box selection
             else if(this.boxSelection) {                
-                let tracks = this.getTracksInRange(this.boxSelectionStart[1], this.boxSelectionEnd[1], this.pixelsToSeconds * 5);
+                let tracks = this.getTracksInRange(this.boxSelectionStart[1], this.boxSelectionEnd[1], this.secondsPerPixel * 5);
                 
                 for(let t of tracks) {
                     let keyFrameIndices = this.getKeyFramesInRange(t, 
                         this.xToTime( this.boxSelectionStart[0] ), 
                         this.xToTime( this.boxSelectionEnd[0] ),
-                        this.pixelsToSeconds * 5);
+                        this.secondsPerPixel * 5);
                         
                     if(keyFrameIndices) {
                         for(let index = keyFrameIndices[0]; index <= keyFrameIndices[1]; ++index){
@@ -1451,7 +1454,7 @@ class KeyFramesTimeline extends Timeline {
                 this.unSelectAllKeyFrames();         
             }
             if (track){
-                const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
+                const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * 5 );
                 if( keyFrameIndex > -1 ) {
                     this.processCurrentKeyFrame( e, keyFrameIndex, track, null, e.multipleSelection ); // Settings this as multiple so time is not being set
                 }  
@@ -1578,7 +1581,7 @@ class KeyFramesTimeline extends Timeline {
         else if(track) {
 
             this.unHoverAll();
-            let keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
+            let keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * 5 );
             if(keyFrameIndex > -1 ) {
                 
                 const name = this.animationClip.tracksDictionary[track.fullname]; 
@@ -2696,7 +2699,7 @@ class KeyFramesTimeline extends Timeline {
             this.unSelectAllKeyFrames();
         }
 
-        keyFrameIndex = keyFrameIndex ?? this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );   
+        keyFrameIndex = keyFrameIndex ?? this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * 5 );   
         if(keyFrameIndex < 0)
             return;
 
@@ -2897,7 +2900,7 @@ class ClipsTimeline extends Timeline {
             // Manual Multiple selection
             if(!discard) {
                 if ( track ){
-                    let clipIndex = this.getCurrentClip( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
+                    let clipIndex = this.getCurrentClip( track, this.xToTime( localX ), this.secondsPerPixel * 5 );
                     if ( clipIndex > -1 ){
                         track.selected[clipIndex] ? 
                             this.unselectClip( track, clipIndex, null ) :
@@ -2908,13 +2911,13 @@ class ClipsTimeline extends Timeline {
             // Box selection
             else if (this.boxSelection){
                 
-                let tracks = this.getTracksInRange(this.boxSelectionStart[1], this.boxSelectionEnd[1], this.pixelsToSeconds * 5);
+                let tracks = this.getTracksInRange(this.boxSelectionStart[1], this.boxSelectionEnd[1], this.secondsPerPixel * 5);
                 
                 for(let t of tracks) {
                     let clipsIndices = this.getClipsInRange(t, 
                         this.xToTime( this.boxSelectionStart[0] ), 
                         this.xToTime( this.boxSelectionEnd[0] ),
-                        this.pixelsToSeconds * 5);
+                        this.secondsPerPixel * 5);
                         
                     if(clipsIndices) {
                         for(let index of clipsIndices)
@@ -3879,7 +3882,7 @@ class ClipsTimeline extends Timeline {
 
     selectClip( track, clipIndex = null, localX = null, unselect = true, skipCallback = false ) {
 
-        clipIndex = clipIndex ?? this.getCurrentClip( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
+        clipIndex = clipIndex ?? this.getCurrentClip( track, this.xToTime( localX ), this.secondsPerPixel * 5 );
 
         if(unselect){
             this.unSelectAllClips();
@@ -3911,7 +3914,7 @@ class ClipsTimeline extends Timeline {
     }
 
     unselectClip( track, clipIndex, localX = null ){
-        clipIndex = clipIndex ?? this.getCurrentClip( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
+        clipIndex = clipIndex ?? this.getCurrentClip( track, this.xToTime( localX ), this.secondsPerPixel * 5 );
                         
         if(clipIndex == -1)
             return -1;
@@ -4015,7 +4018,7 @@ class CurvesTimeline extends Timeline {
             e.multipleSelection = true;
             // Manual multiple selection
             if(!discard && track) {
-                const keyFrameIdx = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );   
+                const keyFrameIdx = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * 5 );   
                 if ( keyFrameIdx > -1 ){
                     track.selected[keyFrameIdx] ?
                     this.unSelectKeyFrame(track, keyFrameIdx) :
@@ -4024,13 +4027,13 @@ class CurvesTimeline extends Timeline {
             }
             // Box selection
             else if(this.boxSelection) {                
-                let tracks = this.getTracksInRange(this.boxSelectionStart[1], this.boxSelectionEnd[1], this.pixelsToSeconds * 5);
+                let tracks = this.getTracksInRange(this.boxSelectionStart[1], this.boxSelectionEnd[1], this.secondsPerPixel * 5);
                 
                 for(let t of tracks) {
                     let keyFrameIndices = this.getKeyFramesInRange(t, 
                         this.xToTime( this.boxSelectionStart[0] ), 
                         this.xToTime( this.boxSelectionEnd[0] ),
-                        this.pixelsToSeconds * 5);
+                        this.secondsPerPixel * 5);
                         
                     if(keyFrameIndices) {
                         for(let index = keyFrameIndices[0]; index <= keyFrameIndices[1]; ++index){
@@ -4049,7 +4052,7 @@ class CurvesTimeline extends Timeline {
                 this.unSelectAllKeyFrames();         
             }
             if (track){
-                const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
+                const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * 5 );
                 if( keyFrameIndex > -1 ) {
                     this.processCurrentKeyFrame( e, keyFrameIndex, track, null, e.multipleSelection ); // Settings this as multiple so time is not being set
                 }  
@@ -4199,7 +4202,7 @@ class CurvesTimeline extends Timeline {
         else if(track) {
 
             this.unHoverAll();
-            let keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
+            let keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * 5 );
             if(keyFrameIndex > -1 ) {
                 
                 const name = this.animationClip.tracksDictionary[track.fullname]; 
@@ -5302,7 +5305,7 @@ class CurvesTimeline extends Timeline {
             this.unSelectAllKeyFrames();
         }
         
-        keyFrameIndex = keyFrameIndex ?? this.getCurrentKeyFrame( track, this.xToTime( localX ), this.pixelsToSeconds * 5 );
+        keyFrameIndex = keyFrameIndex ?? this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * 5 );
         if (keyFrameIndex < 0)
             return;
                         
