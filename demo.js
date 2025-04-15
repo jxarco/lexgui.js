@@ -32,7 +32,7 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
                 title: "Change Theme",
                 icon: "fa-solid fa-sun",
                 swap: "fa-solid fa-moon",
-                callback:  (event, swapValue) => { LX.setTheme( swapValue ? "light" : "dark" ) }
+                callback:  (swapValue) => { LX.setTheme( swapValue ? "light" : "dark" ) }
             }
         ], { float: "right" });
     });
