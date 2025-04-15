@@ -73,6 +73,9 @@ class Timeline {
         this.session = new Session();
 
         this.canvas = options.canvas ?? document.createElement('canvas');
+        this.canvas.style.width = "100%";
+        this.canvas.style.height = "100%";
+
 
         this.duration = 1;
         this.speed = 1;
@@ -1364,8 +1367,8 @@ class Timeline {
     show() {
         
         this.mainArea.show();
-        this.updateLeftPanel();
         this.resize();        
+        this.updateLeftPanel();
     }
 
     /**
@@ -1710,6 +1713,10 @@ class KeyFramesTimeline extends Timeline {
             
             offset += trackHeight;
             ctx.translate(0, trackHeight);
+
+            if ( this.trackTreesWidget.innerTree.data[t].closed ){
+                continue;
+            }
 
             for(let i = 0; i < tracks.length; i++) {
                 let track = tracks[i];
@@ -2815,7 +2822,7 @@ class ClipsTimeline extends Timeline {
 
     updateLeftPanel() {
 
-        const scrollTop = this.trackTreesPanel.root.scrollTop;
+        const scrollTop = this.trackTreesPanel ? this.trackTreesPanel.root.scrollTop : 0;
         this.leftPanel.clear();
 
         const panel = this.leftPanel;
@@ -4326,6 +4333,10 @@ class CurvesTimeline extends Timeline {
             offset += trackHeight;
             ctx.translate(0, trackHeight);
 
+            if ( this.trackTreesWidget.innerTree.data[t].closed ){
+                continue;
+            }
+            
             for(let i = 0; i < tracks.length; i++) {
                 let track = tracks[i];
                 if(track.hide) {
