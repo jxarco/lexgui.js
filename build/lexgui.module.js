@@ -6136,8 +6136,11 @@ class NodeTree {
                 actionEl.className = "lexicon " + a.icon;
                 actionEl.title = a.name;
                 actionEl.addEventListener("click", function( e ) {
-                    a.callback( node, actionEl );
-                    e.stopPropagation();
+                    if( a.callback )
+                    {
+                        a.callback( node, actionEl );
+                        e.stopPropagation();
+                    }
                 });
 
                 inputContainer.appendChild( actionEl );
