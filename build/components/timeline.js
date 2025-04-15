@@ -7,26 +7,6 @@ if(!LX) {
 LX.components.push( 'Timeline' );
 
 /**
- * @class Session
- * @description Store info about timeline session
- */
-
-class Session {
-
-    constructor() {
-
-        this.start_time = -0.01;
-        this.left_margin = 0;
-        // this.current_time = 0;
-        // this.last_time = 0;
-        // this.seconds_to_pixels = 50;
-        // this.scroll_y = 0;
-        // this.offset_y = 0;
-        // this.selection = null;
-    }
-};
-
-/**
  * @class Timeline
  * @description Agnostic timeline, do not impose any timeline content. Renders to a canvas
  */
@@ -40,8 +20,10 @@ class Timeline {
     constructor( name, options = {} ) {
 
         this.name = name ?? '';
-        this.currentTime = 0;
         this.opacity = options.opacity || 1;
+        this.currentTime = 0;
+        this.visualTimeRange = [0,0]; // [start time, end time] - visible range of time. 0 <= time <= duration
+        this.visualOriginTime = 0; // time visible at pixel 0. -infinity < time < infinity
         this.topMargin = 40;
         this.clickDiscardTimeout = 200; // ms
         this.lastMouse = [];
@@ -69,8 +51,6 @@ class Timeline {
         
         this.playing = false;
         this.loop = options.loop ?? true;
-
-        this.session = new Session();
 
         this.canvas = options.canvas ?? document.createElement('canvas');
         this.canvas.style.width = "100%";
@@ -217,16 +197,16 @@ class Timeline {
         header.addNumber("Current Time", this.currentTime, (value, event) => {
             this.setTime(value)
         }, {
-            units: "s",
+            // units: "s", // commented until lexgui is refactored. There is a performance hit while using units
             signal: "@on_set_time_" + this.name,
             step: 0.01, min: 0, precision: 3,
             skipSlider: true
         });
 
         header.addNumber("Duration", + this.duration.toFixed(3), (value, event) => {
-            this.setDuration(value, false)
+            this.setDuration(value, false, false);
         }, {
-            units: "s",
+            // units: "s", // commented until lexgui is refactored. There is a performance hit while using units
             step: 0.01, min: 0,
             signal: "@on_set_duration_" + this.name
         });    
@@ -535,7 +515,7 @@ class Timeline {
 
         // background of timeinfo
         ctx.fillStyle = Timeline.BACKGROUND_COLOR;
-        ctx.fillRect( this.session.left_margin, 0, this.canvas.width, h );
+        ctx.fillRect( 0, 0, this.canvas.width, h );
         ctx.strokeStyle = Timeline.FONT_COLOR_PRIMARY;
 
         // set tick and sub tick times
@@ -547,12 +527,14 @@ class Timeline {
         let subtickTime = this.timeSeparators[tickTime - 1];
         tickTime = this.timeSeparators[tickTime];
 
+        const startTime = this.visualTimeRange[0];
+        const endTime = this.visualTimeRange[1];
         // Transform times into pixel coords
-        let tickX = this.timeToX( this.startTime + tickTime ) - this.timeToX( this.startTime );
+        let tickX = this.timeToX( startTime + tickTime ) - this.timeToX( startTime );
         let subtickX = subtickTime * tickX / tickTime; 
 
-        let startx = this.timeToX( Math.floor( this.startTime / tickTime) * tickTime ); // floor because might need to draw previous subticks
-        let endx = this.timeToX( this.endTime ); // draw up to endTime
+        let startx = this.timeToX( Math.floor( startTime / tickTime) * tickTime ); // floor because might need to draw previous subticks
+        let endx = this.timeToX( endTime ); // draw up to endTime
 
         // Begin drawing
         ctx.beginPath();
@@ -591,7 +573,6 @@ class Timeline {
 
         // Content
         const topMargin = this.topMargin; 
-        const leftMargin = this.session.left_margin;
         const treeOffset = this.trackTreesWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop;
         const line_height = this.trackHeight;
     
@@ -614,8 +595,8 @@ class Timeline {
         ctx.beginPath();
     
         let pos = this.timeToX( 0 );
-        if(pos < leftMargin)
-            pos = leftMargin;
+        if(pos < 0)
+            pos = 0;
         ctx.lineWidth = 1;
         ctx.moveTo( pos + 0.5, topMargin);
         ctx.lineTo( pos + 0.5, canvas.height);
@@ -649,15 +630,12 @@ class Timeline {
         }
         
         //zoom
-        this.startTime = this.session.start_time; //seconds
-        if(this.startTime < 0)
-            this.startTime = 0;
-        this.endTime = this.session.start_time + (w - this.session.left_margin) * this.pixelsToSeconds;
-        if(this.endTime > this.duration)
-            this.endTime = this.duration;
-        if(this.startTime > this.endTime)
-            this.endTime = this.startTime;
-
+        let startTime = this.visualOriginTime; //seconds
+        startTime = Math.min( this.duration, Math.max( 0, startTime ) );
+        let endTime = this.visualOriginTime + w * this.pixelsToSeconds; //seconds
+        endTime = Math.max( startTime, Math.min( this.duration, endTime ) );
+        this.visualTimeRange[0] = startTime;
+        this.visualTimeRange[1] = endTime;
         
         this.tracksDrawn.length = 0;
 
@@ -681,7 +659,7 @@ class Timeline {
         //scrollbar
         if( (h-this.topMargin) < scrollableHeight ){
             ctx.fillStyle = "#222";
-            ctx.fillRect( w - this.session.left_margin - 10, 0, 10, h );
+            ctx.fillRect( w - 10, 0, 10, h );
 
             ctx.fillStyle = this.grabbingScroll ? Timeline.FONT_COLOR_PRIMARY : Timeline.FONT_COLOR_QUATERNARY;
            
@@ -695,7 +673,7 @@ class Timeline {
         // Current time marker vertical line
         let posx = Math.round( this.timeToX( this.currentTime ) );
         let posy = this.topMargin * 0.4;
-        if(posx >= this.session.left_margin)
+        if(posx >= 0)
         {
             ctx.strokeStyle = ctx.fillStyle = Timeline.TIME_MARKER_COLOR;
             ctx.globalAlpha = this.opacity;
@@ -751,8 +729,8 @@ class Timeline {
         let markersPos = [];
         for (let i = 0; i < markers.length; ++i) {
             let marker = markers[i];
-            if (marker.time < this.startTime - this.pixelsToSeconds * 100 ||
-                marker.time > this.endTime)
+            if (marker.time < this.visualTimeRange[0] - this.pixelsToSeconds * 100 ||
+                marker.time > this.visualTimeRange[1])
                 continue;
             var x = this.timeToX(marker.time);
             markersPos.push(x);
@@ -790,14 +768,12 @@ class Timeline {
      * @param {Number} t 
      */
 
-    setDuration( t, updateHeader = true, skipCallback = false ) {
+    setDuration( t, skipCallback = false, updateHeader = true ) {
         let v = this.validateDuration(t);
-        let decimals = t.toString().split('.')[1] ? t.toString().split('.')[1].length : 0;
-        updateHeader = (updateHeader || +v.toFixed(decimals) != t);
         this.duration = this.animationClip.duration = v; 
 
         if(updateHeader) {
-            LX.emit( "@on_set_duration_" + this.name, +this.duration.toFixed(3)); // skipcallback = true
+            LX.emit( "@on_set_duration_" + this.name, +this.duration.toFixed(2)); // skipcallback = true
         }
 
         if( this.onSetDuration && !skipCallback ) 
@@ -837,12 +813,12 @@ class Timeline {
 
     // Converts distance in pixels to time
     xToTime( x ) {
-        return (x - this.session.left_margin) / this.secondsToPixels + this.session.start_time;
+        return x / this.secondsToPixels + this.visualOriginTime;
     }
 
     // Converts time to disance in pixels
     timeToX( t ) {
-        return this.session.left_margin + (t - this.session.start_time) * this.secondsToPixels;
+        return (t - this.visualOriginTime) * this.secondsToPixels;
     }
     
     /**
@@ -851,16 +827,12 @@ class Timeline {
      */
 
     setScale( v ) {
-
-        if(!this.session)
-            return;
-
         const xCurrentTime = this.timeToX(this.currentTime);
         this.secondsToPixels *= v;
         this.secondsToPixels = Math.max( 0.00001, this.secondsToPixels );
 
         this.pixelsToSeconds = 1 / this.secondsToPixels;
-        this.session.start_time += this.currentTime - this.xToTime(xCurrentTime);
+        this.visualOriginTime += this.currentTime - this.xToTime(xCurrentTime);
     }
 
     /**
@@ -887,8 +859,8 @@ class Timeline {
         let localY = e.offsetY;
 
         let timeX = this.timeToX( this.currentTime );
-        let isHoveringTimeBar = localY < this.topMargin && localX > this.session.left_margin && 
-        localX > (timeX - 6) && localX < (timeX + 6);
+        let isHoveringTimeBar = localY < this.topMargin && 
+                                localX > (timeX - 6) && localX < (timeX + 6);
 
         if( isHoveringTimeBar ) {
             this.canvas.style.cursor = "col-resize";
@@ -906,12 +878,9 @@ class Timeline {
         if( e.type == "wheel" ) {
             if(e.shiftKey)
             {
-                // mouseTime = xToTime(localX)_prev = xToTime(localX)_after
-                //(x - this.session.left_margin) / this.secondsToPixels_prev + this.session.start_time_prev = (x - this.session.left_margin) / this.secondsToPixels_after + this.session.start_time_after
-                // start_time = xToTime(localX)_prev - (x - this.session.left_margin) / this.secondsToPixels_after
                 let mouseTime = this.xToTime(localX);
                 this.setScale( e.wheelDelta < 0 ? 0.95 : 1.05 );
-                this.session.start_time = mouseTime - (localX - this.session.left_margin) / this.secondsToPixels;
+                this.visualOriginTime = mouseTime - localX / this.secondsToPixels;
             }
             else if( (h-this.topMargin) < this.trackTreesWidget.root.scrollHeight)
             {              
@@ -1033,7 +1002,7 @@ class Timeline {
                     // Move timeline in X (independent of current time)
                     var old = this.xToTime( this.lastMouse[0] );
                     var now = this.xToTime( e.offsetX );
-                    this.session.start_time += (old - now);
+                    this.visualOriginTime += (old - now);
 
                     this.trackTreesPanel.root.scrollTop -= e.deltay; // will automatically call scroll event
 
@@ -1763,10 +1732,13 @@ class KeyFramesTimeline extends Timeline {
             return;
         }
          
+        const startTime = this.visualTimeRange[0];
+        const endTime = this.visualTimeRange[1];
+
         for(let j = 0; j < keyframes.length; ++j)
         {
             let time = keyframes[j];
-            if( time < this.startTime || time > this.endTime ) {
+            if( time < startTime || time > endTime ) {
                 continue;
             }
 
@@ -4371,6 +4343,8 @@ class CurvesTimeline extends Timeline {
             const hoverPointSize = 7;
             const valueRange = this.range; //[min, max]
             const displayRange = trackHeight - defaultPointSize * 2;
+            const startTime = this.visualTimeRange[0];
+            const endTime = this.visualTimeRange[1];
             //draw lines
             ctx.strokeStyle = "white";
             ctx.beginPath();
@@ -4381,7 +4355,7 @@ class CurvesTimeline extends Timeline {
                 let value = values[j];                
                 value = ((value - valueRange[0]) / (valueRange[1] - valueRange[0])) * (-displayRange) + (trackHeight - defaultPointSize); // normalize and offset
 
-                if( time < this.startTime ){
+                if( time < startTime ){
                     ctx.moveTo( keyframePosX, value ); 
                     continue;
                 }
@@ -4389,7 +4363,7 @@ class CurvesTimeline extends Timeline {
                 //convert to timeline track range
                 ctx.lineTo( keyframePosX, value );  
                 
-                if ( time > this.endTime ){
+                if ( time > endTime ){
                     break; //end loop, but print line
                 }
             }
@@ -4400,7 +4374,7 @@ class CurvesTimeline extends Timeline {
             for(let j = 0; j < keyframes.length; ++j)
             {
                 let time = keyframes[j];
-                if( time < this.startTime || time > this.endTime )
+                if( time < startTime || time > endTime )
                     continue;
 
                 let size = defaultPointSize;
