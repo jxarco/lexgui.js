@@ -2844,11 +2844,7 @@ class Calendar {
 
         if( dateString )
         {
-            const tokens = dateString.split( '/' );
-
-            this.day = parseInt( tokens[ 0 ] );
-            this.month = parseInt( tokens[ 1 ] );
-            this.year = parseInt( tokens[ 2 ] );
+            this.fromDateString( dateString );
         }
         else
         {
@@ -2856,9 +2852,8 @@ class Calendar {
             this.day = date.getDate();
             this.month = date.getMonth() + 1;
             this.year = date.getFullYear();
+            this.fromMonthYear( this.month, this.year );
         }
-
-        this.fromMonthYear( this.month, this.year );
 
         this.refresh();
     }
@@ -2962,24 +2957,37 @@ class Calendar {
                     for( const dayData of weekDays )
                     {
                         const th = document.createElement( 'th' );
-                        th.className = `${ dayData.currentMonth ? "fg-primary" : "fg-tertiary" } font-normal
-                            rounded select-none cursor-pointer hover:bg-secondary`;
+                        th.className = `${ dayData.currentMonth ? "fg-primary" : "fg-tertiary" } leading-loose font-normal rounded select-none cursor-pointer hover:bg-secondary`;
                         th.innerHTML = `<span>${ dayData.day }</span>`;
                         hrow.appendChild( th );
 
-                        th.addEventListener( "click", () => {
-                            this.day = dayData.day;
-                            if( this.onChange )
-                            {
-                                this.onChange( this._getCurrentDate() );
-                            }
-                        } );
+                        if( dayData.currentMonth )
+                        {
+                            th.addEventListener( "click", () => {
+                                this.day = dayData.day;
+                                if( this.onChange )
+                                {
+                                    this.onChange( this._getCurrentDate() );
+                                }
+                            } );
+                        }
                     }
 
                     body.appendChild( hrow );
                 }
             }
         }
+    }
+
+    fromDateString( dateString ) {
+
+        const tokens = dateString.split( '/' );
+
+        this.day = parseInt( tokens[ 0 ] );
+        this.month = parseInt( tokens[ 1 ] );
+        this.year = parseInt( tokens[ 2 ] );
+
+        this.fromMonthYear( this.month, this.year );
     }
 
     fromMonthYear( month, year ) {
@@ -10580,6 +10588,10 @@ class DatePicker extends Widget {
 
             dateString = newValue;
 
+            this.calendar.fromDateString( newValue );
+
+            refresh( this.calendar.getFullDate() );
+
             if( !skipCallback )
             {
                 this._trigger( new IEvent( name, newValue, event ), callback );
@@ -10596,8 +10608,7 @@ class DatePicker extends Widget {
         this.root.appendChild( container );
 
         this.calendar = new Calendar( dateString, { onChange: ( date ) => {
-            console.log( date );
-            refresh( date.fullDate );
+            this._popover.destroy();
             this.set( `${ date.day }/${ date.month }/${ date.year }` )
         } });
 
@@ -10605,12 +10616,13 @@ class DatePicker extends Widget {
             container.innerHTML = "";
             const calendarIcon = LX.makeIcon( "calendar" );
             const calendarButton = new Button( null, currentDate ?? "Pick a date", () => {
-
+                this._popover = new Popover( calendarButton.root, ( popoverRoot ) => {
+                    popoverRoot.appendChild( this.calendar.root );
+                } );
             }, { buttonClass: `flex flex-row px-2 ${ currentDate ? "" : "fg-tertiary" } justify-between` } );
 
             calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
             container.appendChild( calendarButton.root );
-            container.appendChild( this.calendar.root );
         };
 
         refresh( dateString ? this.calendar.getFullDate(): null );
