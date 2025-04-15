@@ -34,8 +34,8 @@ class Knob extends LX.Widget {
         };
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
         const snapEnabled = ( options.snap && options.snap.constructor == Number );

@@ -1734,6 +1734,7 @@ a svg, svg path {
 
 .lexbutton.left span {
     place-content: start;
+    margin-left: 0.5rem;
 }
 
 .lexbutton.array a {
@@ -3432,6 +3433,14 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     background-color: var(--global-color-accent);
 }
 
+.lexsidebar .lexsidebarentry.selected .lexsidebarentrycontent > a {
+    color: #f4f4f4;
+}
+
+.lexsidebar .lexsidebarentry.selected svg path {
+    --color: #f4f4f4;
+}
+
 .lexsidebar .lexsidebarentry:active {
     transform: scale(0.99);
 }
@@ -3554,6 +3563,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexsidebar.collapsing .lexsidebarheader {
     background-color: var(--global-color-accent);
+}
+
+.lexsidebar.collapsing .lexsidebarheader svg path {
+    --color: #f4f4f4;
 }
 
 .lexsidebar .lexsidebarfooter:active, .lexsidebar .lexsidebarheader:active {
