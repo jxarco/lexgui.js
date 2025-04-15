@@ -362,7 +362,6 @@ svg.xxl { width: var(--svg-size-xxl); height: var(--svg-size-xxl); }
 
 .lexicon:active {
     color: var(--global-text-secondary);
-    transform: scale(0.99);
 }
 
 .lexicon.triggered {
@@ -1254,10 +1253,6 @@ a svg, svg path {
     color: var(--global-text-primary);
     line-height: 2;
     overflow: hidden;
-}
-
-.lexwidget * {
-    font-size: var(--global-font-size);
 }
 
 .lexinlinewidgets .lexwidgetname.float-center {
@@ -4146,40 +4141,40 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     --color: #42d065 !important;
 }
 
-thead {
+.lextable thead {
     display: table-header-group;
     border-color: inherit;
     border-collapse: separate;
 }
 
-tr {
+.lextable tr {
     display: table-row;
     vertical-align: inherit;
     border-color: inherit;
     transition: transform 0.2s ease-in;
 }
 
-tr:has(input:checked) {
+.lextable tr:has(input:checked) {
     background-color: var(--global-color-tertiary);
 }
 
-tr:hover, tr.dragging {
+.lextable tr:hover, .lextable tr.dragging {
     background-color: var(--global-color-secondary);
 }
 
-tr.dragging {
+.lextable tr.dragging {
     transition: none !important;
     pointer-events: none;
 }
 
-th, td {
+.lextable th, .lextable td {
     padding: 6px;
     padding-inline: 12px;
     text-align: left;
     align-content: center;
 }
 
-th {
+.lextable th {
     --th-color: var(--global-text-secondary);
     font-weight: 600;
     color: var(--th-color);
@@ -4194,35 +4189,35 @@ th {
     user-select: none;
 }
 
-th a {
+.lextable th a {
     pointer-events: none;
 }
 
-th span {
+.lextable th span {
     border-radius: 6px;
     padding: 0.4rem;
 }
 
-th span:hover {
+.lextable th span:hover {
     background-color: var(--global-color-secondary);
 }
 
-th a, td a {
+.lextable th a, .lextable td a {
     font-size: var(--global-font-size-xs) !important;
     display: flex;
     margin-left: 0px !important;
     place-self: center;
 }
 
-th a:active {
+.lextable th a:active {
     transform: scale(1.01);
 }
 
-th:hover {
+.lextable th:hover {
     color: color-mix(in srgb, var(--th-color), #000 10%);
 }
 
-th.centered, td.centered {
+.lextable th.centered, .lextable td.centered {
     text-align: center;
 }
 
@@ -4230,21 +4225,21 @@ th.centered, td.centered {
     text-align: center;
 }
 
-th.sm, td.sm {
+.lextable th.sm, .lextable td.sm {
     width: 8%;
 }
 
-th .lexcheckbox, td .lexcheckbox {
+.lextable th .lexcheckbox, .lextable td .lexcheckbox {
     width: 1.25em;
     height: 1.25em;
 }
 
-th a {
+.lextable th a {
     display: inline-block;
     transform: translate(6px, 3px);
 }
 
-td {
+.lextable td {
     justify-items: center;
     border-top: 2px solid;
     overflow: hidden;
@@ -4252,11 +4247,11 @@ td {
     border-color: light-dark(#dbd8d8c0, #5c5b5b7a);
 }
 
-thead:first-child tr:first-child th:first-child, tbody:first-child tr:first-child td:first-child {
+.lextable thead:first-child tr:first-child th:first-child, .lextable tbody:first-child tr:first-child td:first-child {
     border-radius: 8px 0 0 0;
 }
 
-thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td:first-child {
+.lextable thead:last-child tr:last-child th:first-child, .lextable tbody:last-child tr:last-child td:first-child {
     border-radius: 0 0 0 8px;
 }
 
@@ -6150,6 +6145,10 @@ ul.lexassetscontent {
 .gap-6 { gap: 1.5rem }
 .gap-7 { gap: 1.75rem }
 .gap-8 { gap: 2rem }
+.gap-9 { gap: 2.25rem }
+.gap-10 { gap: 2.5rem }
+.gap-11 { gap: 2.75rem }
+.gap-12 { gap: 3rem }
 
 /* Spacing */
 
@@ -6436,8 +6435,9 @@ ul.lexassetscontent {
 .select-none { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none }
 
 .opacity-0 { opacity: 0 }
-.opacity-50 { opacity: 0.5 }
-.opacity-100 { opacity: 1 }
+.opacity-0\.5 { opacity: 0.5 }
+.opacity-1 { opacity: 1 }
 
+.linear { transition-timing-function: linear }
 .ease-in { transition-timing-function: ease-in }
 .ease-out { transition-timing-function: ease-out }

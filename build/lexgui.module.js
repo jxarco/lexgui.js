@@ -773,7 +773,7 @@ LX.makeKbd = makeKbd;
  * @description Gets an SVG element using one of LX.ICONS
  * @param {String} iconName
  * @param {Object} options
- * iconTitle
+ * title
  * extraClass
  * svgClass
  */
@@ -782,7 +782,7 @@ function makeIcon( iconName, options = { } )
     let data = LX.ICONS[ iconName ];
     console.assert( data, `No icon named _${ iconName }_` );
 
-    const iconTitle = options.iconTitle;
+    const iconTitle = options.title;
     const iconClass = options.iconClass;
     const svgClass = options.svgClass;
 
@@ -2692,6 +2692,230 @@ class ColorPicker {
 };
 
 LX.ColorPicker = ColorPicker;
+
+class Calendar {
+
+    /**
+     * @constructor Calendar
+     * @param {String} dateString D/M/Y
+     * @param {Object} options
+     * onChange: Function to call on date changes
+     */
+
+    constructor( dateString, options = {} ) {
+
+        this.root = LX.makeContainer( ["256px", "auto"], "border p-3 bg-primary rounded-lg" );
+
+        this.onChange = options.onChange;
+
+        if( dateString )
+        {
+            const tokens = dateString.split( '/' );
+
+            this.day = parseInt( tokens[ 0 ] );
+            this.month = parseInt( tokens[ 1 ] );
+            this.year = parseInt( tokens[ 2 ] );
+        }
+        else
+        {
+            const date = new Date();
+            this.day = date.getDate();
+            this.month = date.getMonth() + 1;
+            this.year = date.getFullYear();
+        }
+
+        this.fromMonthYear( this.month, this.year );
+
+        this.refresh();
+    }
+
+    _getCurrentDate() {
+        return {
+            day: this.day,
+            month: this.month,
+            year: this.year,
+            fullDate: this.getFullDate()
+        }
+    }
+
+    _previousMonth() {
+
+        this.month = Math.max( 0, this.month - 1 );
+
+        if( this.month == 0 )
+        {
+            this.month = 12;
+            this.year--;
+        }
+
+        this.fromMonthYear( this.month, this.year );
+
+        this.refresh();
+    }
+
+    _nextMonth() {
+
+        this.month = Math.min( this.month + 1, 12 );
+
+        if( this.month == 12 )
+        {
+            this.month = 0;
+            this.year++;
+        }
+
+        this.fromMonthYear( this.month, this.year );
+
+        this.refresh();
+    }
+
+    refresh() {
+
+        this.root.innerHTML = "";
+
+        // Header
+        {
+            const header = LX.makeContainer( ["100%", "auto"], "flex flex-row p-1", "", this.root );
+
+            const prevMonthIcon = LX.makeIcon( "left", { title: "Previous Month", iconClass: "border p-1 rounded hover:bg-secondary", svgClass: "sm" } );
+            header.appendChild( prevMonthIcon );
+            prevMonthIcon.addEventListener( "click", () => {
+                this._previousMonth();
+            } );
+
+            const monthYearLabel = LX.makeContainer( ["100%", "auto"], "text-center font-medium select-none", `${ this.monthName } ${ this.year }`, header );
+
+            const nextMonthIcon = LX.makeIcon( "right", { title: "Next Month", iconClass: "border p-1 rounded hover:bg-secondary", svgClass: "sm" } );
+            header.appendChild( nextMonthIcon );
+            nextMonthIcon.addEventListener( "click", () => {
+                this._nextMonth();
+            } );
+        }
+
+        // Body
+        {
+            const daysTable = document.createElement( "table" );
+            daysTable.className = "w-full";
+            this.root.appendChild( daysTable );
+
+            // Table Head
+            {
+                const head = document.createElement( 'thead' );
+                daysTable.appendChild( head );
+
+                const hrow = document.createElement( 'tr' );
+
+                for( const headData of [ "Mo", "Tu", "We", "Th", "Fr", "Sa", "Su" ] )
+                {
+                    const th = document.createElement( 'th' );
+                    th.className = "fg-tertiary text-sm font-normal select-none";
+                    th.innerHTML = `<span>${ headData }</span>`;
+                    hrow.appendChild( th );
+                }
+
+                head.appendChild( hrow );
+            }
+
+            // Table Body
+            {
+                const body = document.createElement( 'tbody' );
+                daysTable.appendChild( body );
+
+                for( let week = 0; week < 6; week++ )
+                {
+                    const hrow = document.createElement( 'tr' );
+                    const weekDays = this.calendarDays.slice( week * 7, week * 7 + 7 );
+
+                    for( const dayData of weekDays )
+                    {
+                        const th = document.createElement( 'th' );
+                        th.className = `${ dayData.currentMonth ? "fg-primary" : "fg-tertiary" } font-normal
+                            rounded select-none cursor-pointer hover:bg-secondary`;
+                        th.innerHTML = `<span>${ dayData.day }</span>`;
+                        hrow.appendChild( th );
+
+                        th.addEventListener( "click", () => {
+                            this.day = dayData.day;
+                            if( this.onChange )
+                            {
+                                this.onChange( this._getCurrentDate() );
+                            }
+                        } );
+                    }
+
+                    body.appendChild( hrow );
+                }
+            }
+        }
+    }
+
+    fromMonthYear( month, year ) {
+
+        // Month is 0-based (0 = January, ... 11 = December)
+        month--;
+
+        year = year ?? new Date().getFullYear();
+
+        const weekDay = new Date( year, month, 1 ).getDay();
+        const firstDay = weekDay === 0 ? 6 : weekDay - 1; // 0 = Monday, 1 = Tuesday...
+        const daysInMonth = new Date( year, month + 1, 0 ).getDate();
+
+        // Previous month
+        const prevMonth = month === 0 ? 11 : month - 1;
+        const prevYear = month === 0 ? year - 1 : year;
+        const daysInPrevMonth = new Date( prevYear, prevMonth + 1, 0 ).getDate();
+
+        // Prepare full grid (up to 6 weeks = 42 days)
+        const calendarDays = [];
+
+        // Fill in days from previous month
+        for( let i = firstDay - 1; i >= 0; i--)
+        {
+            calendarDays.push( { day: daysInPrevMonth - i, currentMonth: false } );
+        }
+
+        // Fill in current month days
+        for ( let i = 1; i <= daysInMonth; i++ )
+        {
+            calendarDays.push( { day: i, currentMonth: true } );
+        }
+
+        // Fill in next month days to complete the grid (if needed)
+        const remaining = 42 - calendarDays.length;
+        for( let i = 1; i <= remaining; i++ )
+        {
+            calendarDays.push( { day: i, currentMonth: false } );
+        }
+
+        this.monthName = this.getMonthName( month );
+        this.firstDay = firstDay;
+        this.daysInMonth = daysInMonth;
+        this.calendarDays = calendarDays;
+    }
+
+    getMonthName( monthIndex, locale = "en-US" ) {
+        const formatter = new Intl.DateTimeFormat( locale, { month: "long" } );
+        return formatter.format( new Date( 2000, monthIndex, 1 ) );
+    }
+
+    getFullDate() {
+        return `${ this.monthName } ${ this.day }${ this._getOrdinalSuffix( this.day ) }, ${ this.year }`;
+    }
+
+    _getOrdinalSuffix( day ) {
+        if ( day > 3 && day < 21 ) return "th";
+        switch ( day % 10 )
+        {
+            case 1: return "st";
+            case 2: return "nd";
+            case 3: return "rd";
+            default: return "th";
+        }
+    }
+}
+
+LX.Calendar = Calendar;
+
+/* Layout Classes */
 
 class Area {
 
@@ -5297,8 +5521,9 @@ class Widget {
     static COUNTER      = 33;
     static TABLE        = 34;
     static TABS         = 35;
-    static LABEL        = 36;
-    static BLANK        = 37;
+    static DATE         = 36;
+    static LABEL        = 37;
+    static BLANK        = 38;
 
     static NO_CONTEXT_TYPES = [
         Widget.BUTTON,
@@ -5536,6 +5761,7 @@ class Widget {
             case Widget.COUNTER: return "Counter";
             case Widget.TABLE: return "Table";
             case Widget.TABS: return "Tabs";
+            case Widget.DATE: return "Date";
             case Widget.LABEL: return "Label";
             case Widget.BLANK: return "Blank";
             case Widget.CUSTOM: return this.customName;
@@ -10202,6 +10428,66 @@ class Table extends Widget {
 LX.Table = Table;
 
 /**
+ * @class DatePicker
+ * @description DatePicker Widget
+ */
+
+class DatePicker extends Widget {
+
+    constructor( name, dateString, callback, options = { } ) {
+
+        super( Widget.DATE, name, null, options );
+
+        this.onGetValue = () => {
+            return dateString;
+        }
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+
+            dateString = newValue;
+
+            if( !skipCallback )
+            {
+                this._trigger( new IEvent( name, newValue, event ), callback );
+            }
+        }
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
+        const container = document.createElement('div');
+        container.className = "lexdate";
+        this.root.appendChild( container );
+
+        this.calendar = new Calendar( dateString, { onChange: ( date ) => {
+            console.log( date );
+            refresh( date.fullDate );
+            this.set( `${ date.day }/${ date.month }/${ date.year }` )
+        } });
+
+        const refresh = ( currentDate ) => {
+            container.innerHTML = "";
+            const calendarIcon = LX.makeIcon( "calendar" );
+            const calendarButton = new Button( null, currentDate ?? "Pick a date", () => {
+
+            }, { buttonClass: `flex flex-row px-2 ${ currentDate ? "" : "fg-tertiary" } justify-between` } );
+
+            calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
+            container.appendChild( calendarButton.root );
+            container.appendChild( this.calendar.root );
+        };
+
+        refresh( dateString ? this.calendar.getFullDate(): null );
+
+        doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.DatePicker = DatePicker;
+
+/**
  * @class Panel
  */
 
@@ -11345,6 +11631,20 @@ class Panel {
 
     addTable( name, data, options = { } ) {
         const widget = new Table( name, data, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addDate
+     * @param {String} name Widget name
+     * @param {String} dateString
+     * @param {Function} callback
+     * @param {Object} options:
+     * hideName: Don't use name as label [false]
+     */
+
+    addDate( name, dateString, callback, options = { } ) {
+        const widget = new DatePicker( name, dateString, callback, options );
         return this._attachWidget( widget );
     }
 }
@@ -14379,6 +14679,7 @@ LX.ICONS = {
     "sidebar": [512, 512, [], "regular", "M64 64h384a32 32 0 0 1 32 32v320a32 32 0 0 1-32 32H64a32 32 0 0 1-32-32V96a32 32 0 0 1 32-32zm128 0v384", null, "fill=none stroke-width=50 stroke-linejoin=round stroke-linecap=round"],
     "table-cells": [512, 512, [], "solid", "M64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zm88 64l0 64-88 0 0-64 88 0zm56 0l88 0 0 64-88 0 0-64zm240 0l0 64-88 0 0-64 88 0zM64 224l88 0 0 64-88 0 0-64zm232 0l0 64-88 0 0-64 88 0zm64 0l88 0 0 64-88 0 0-64zM152 352l0 64-88 0 0-64 88 0zm56 0l88 0 0 64-88 0 0-64zm240 0l0 64-88 0 0-64 88 0z"],
     "table-cells-large": [512, 512, [], "solid", "M448 96l0 128-160 0 0-128 160 0zm0 192l0 128-160 0 0-128 160 0zM224 224L64 224 64 96l160 0 0 128zM64 288l160 0 0 128L64 416l0-128zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32z"],
+    "frame": [24, 24, [], "solid", "M2 6h20M2 18h20M6 2v20M18 2v20", null, "fill=none stroke-width=2 stroke-linejoin=round stroke-linecap=round"],
     "lightbulb": [384, 512, [], "regular", "M297.2 248.9C311.6 228.3 320 203.2 320 176c0-70.7-57.3-128-128-128S64 105.3 64 176c0 27.2 8.4 52.3 22.8 72.9c3.7 5.3 8.1 11.3 12.8 17.7c0 0 0 0 0 0c12.9 17.7 28.3 38.9 39.8 59.8c10.4 19 15.7 38.8 18.3 57.5L109 384c-2.2-12-5.9-23.7-11.8-34.5c-9.9-18-22.2-34.9-34.5-51.8c0 0 0 0 0 0s0 0 0 0c-5.2-7.1-10.4-14.2-15.4-21.4C27.6 247.9 16 213.3 16 176C16 78.8 94.8 0 192 0s176 78.8 176 176c0 37.3-11.6 71.9-31.4 100.3c-5 7.2-10.2 14.3-15.4 21.4c0 0 0 0 0 0s0 0 0 0c-12.3 16.8-24.6 33.7-34.5 51.8c-5.9 10.8-9.6 22.5-11.8 34.5l-48.6 0c2.6-18.7 7.9-38.6 18.3-57.5c11.5-20.9 26.9-42.1 39.8-59.8c0 0 0 0 0 0s0 0 0 0s0 0 0 0c4.7-6.4 9-12.4 12.7-17.7zM192 128c-26.5 0-48 21.5-48 48c0 8.8-7.2 16-16 16s-16-7.2-16-16c0-44.2 35.8-80 80-80c8.8 0 16 7.2 16 16s-7.2 16-16 16zm0 384c-44.2 0-80-35.8-80-80l0-16 160 0 0 16c0 44.2-35.8 80-80 80z"],
     "flag": [448, 512, [], "regular", "M48 24C48 10.7 37.3 0 24 0S0 10.7 0 24L0 64 0 350.5 0 400l0 88c0 13.3 10.7 24 24 24s24-10.7 24-24l0-100 80.3-20.1c41.1-10.3 84.6-5.5 122.5 13.4c44.2 22.1 95.5 24.8 141.7 7.4l34.7-13c12.5-4.7 20.8-16.6 20.8-30l0-279.7c0-23-24.2-38-44.8-27.7l-9.6 4.8c-46.3 23.2-100.8 23.2-147.1 0c-35.1-17.6-75.4-22-113.5-12.5L48 52l0-28zm0 77.5l96.6-24.2c27-6.7 55.5-3.6 80.4 8.8c54.9 27.4 118.7 29.7 175 6.8l0 241.8-24.4 9.1c-33.7 12.6-71.2 10.7-103.4-5.4c-48.2-24.1-103.3-30.1-155.6-17.1L48 338.5l0-237z"],
     "newspaper": [512, 512, [], "regular", "M168 80c-13.3 0-24 10.7-24 24l0 304c0 8.4-1.4 16.5-4.1 24L440 432c13.3 0 24-10.7 24-24l0-304c0-13.3-10.7-24-24-24L168 80zM72 480c-39.8 0-72-32.2-72-72L0 112C0 98.7 10.7 88 24 88s24 10.7 24 24l0 296c0 13.3 10.7 24 24 24s24-10.7 24-24l0-304c0-39.8 32.2-72 72-72l272 0c39.8 0 72 32.2 72 72l0 304c0 39.8-32.2 72-72 72L72 480zM176 136c0-13.3 10.7-24 24-24l96 0c13.3 0 24 10.7 24 24l0 80c0 13.3-10.7 24-24 24l-96 0c-13.3 0-24-10.7-24-24l0-80zm200-24l32 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-32 0c-13.3 0-24-10.7-24-24s10.7-24 24-24zm0 80l32 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-32 0c-13.3 0-24-10.7-24-24s10.7-24 24-24zM200 272l208 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-208 0c-13.3 0-24-10.7-24-24s10.7-24 24-24zm0 80l208 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-208 0c-13.3 0-24-10.7-24-24s10.7-24 24-24z"],
