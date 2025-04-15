@@ -12,7 +12,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 var LX = {
-    version: "0.5.7",
+    version: "0.5.8",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -133,6 +133,56 @@ function stripHTML( html )
 }
 
 LX.stripHTML = stripHTML;
+
+/**
+ * @method parsePixelSize
+ * @description Parses any css size and returns a number of pixels
+ * @param {Number|String} size
+ * @param {Number} total
+ */
+const parsePixelSize = ( size, total ) => {
+
+    if( size.constructor === Number ) { return size; } // Assuming pixels..
+
+    if( size.constructor === String )
+    {
+        const value = parseFloat( size );
+
+        if( size.endsWith( "px" ) ) { return value; } // String pixels
+        if( size.endsWith( '%' ) ) { return ( value / 100 ) * total; } // Percentage
+        if( size.endsWith( "rem" ) || size.endsWith( "em" ) ) { const rootFontSize = 16; /*parseFloat(getComputedStyle(document.documentElement).fontSize);*/ return value * rootFontSize; } // rem unit: assume 16px = 1rem
+        if( size.endsWith( "vw" ) ) { return ( value / 100 ) * window.innerWidth; } // wViewport units
+        if( size.endsWith( "vh" ) ) { return ( value / 100 ) * window.innerHeight; } // hViewport units
+
+        // Any CSS calc expression (e.g., "calc(30% - 4px)")
+        if( size.startsWith( "calc(" ) )
+        {
+            const expr = size.slice( 5, -1 );
+            const parts = expr.split( /([+\-])/ ); // ["30% ", "-", "4px"]
+            let result = 0;
+            let op = "+";
+            for( let part of parts )
+            {
+                part = part.trim();
+                if( part === "+" || part === "-" )
+                {
+                    op = part;
+                }
+                else
+                {
+                    let value = parsePixelSize( part, total );
+                    result = ( op === "+" ) ? result + value : result - value;
+                }
+            }
+
+            return result;
+        }
+    }
+
+    throw( "Bad size format!" );
+}
+
+LX.parsePixelSize = parsePixelSize;
 
 /**
  * @method deepCopy
@@ -2257,6 +2307,8 @@ class ColorPicker {
 
         doAsync( this._svToPosition.bind( this, this.currentColor.hsv.s, this.currentColor.hsv.v ) );
 
+        let pickerRect = null;
+
         let innerMouseDown = e => {
             var doc = this.root.ownerDocument;
             doc.addEventListener( 'mousemove', innerMouseMove );
@@ -2271,15 +2323,15 @@ class ColorPicker {
             this.intSatMarker.style.top = currentTop + "px";
             this._positionToSv( currentLeft, currentTop );
             this._updateColorValue();
+
+            pickerRect = this.colorPickerBackground.getBoundingClientRect();
         }
 
         let innerMouseMove = e => {
             const dX = e.movementX;
             const dY = e.movementY;
-
-            const rect = this.colorPickerBackground.getBoundingClientRect();
-            const mouseX = e.offsetX - rect.x;
-            const mouseY = e.offsetY - rect.y;
+            const mouseX = e.x - pickerRect.x;
+            const mouseY = e.y - pickerRect.y;
 
             if ( dX != 0 && ( mouseX >= 0 || dX < 0 ) && ( mouseX < this.colorPickerBackground.offsetWidth || dX > 0 ) )
             {
@@ -2349,6 +2401,8 @@ class ColorPicker {
             this._updateColorValue();
         };
 
+        let hueTrackerRect = null;
+
         let innerMouseDownHue = e => {
             const doc = this.root.ownerDocument;
             doc.addEventListener( 'mousemove', innerMouseMoveHue );
@@ -2359,15 +2413,15 @@ class ColorPicker {
 
             const hueX = clamp( e.offsetX - this.markerHalfSize, 0, this.colorPickerTracker.offsetWidth - this.markerSize );
             _fromHueX( hueX );
+
+            hueTrackerRect = this.colorPickerTracker.getBoundingClientRect();
         }
 
         let innerMouseMoveHue = e => {
-            let dX = e.movementX;
+            const dX = e.movementX;
+            const mouseX = e.x - hueTrackerRect.x;
 
-            const rect = this.colorPickerTracker.getBoundingClientRect();
-            const mouseX = e.offsetX - rect.x;
-
-            if ( dX != 0 && ( mouseX >= 0 || dX < 0 ) && ( mouseX < this.colorPickerTracker.offsetWidth || dX > 0 ) )
+            if ( dX != 0 && ( mouseX >= this.markerHalfSize || dX < 0 ) && ( mouseX < ( this.colorPickerTracker.offsetWidth - this.markerHalfSize ) || dX > 0 ) )
             {
                 const hueX = LX.clamp( parseInt( this.hueMarker.style.left ) + dX, 0, this.colorPickerTracker.offsetWidth - this.markerSize );
                 _fromHueX( hueX )
@@ -2412,6 +2466,8 @@ class ColorPicker {
                 this.alphaMarker.style.backgroundColor = `rgb(${ this.currentColor.css.r }, ${ this.currentColor.css.g }, ${ this.currentColor.css.b },${ this.currentColor.css.a })`;
             };
 
+            let alphaTrackerRect = null;
+
             let innerMouseDownAlpha = e => {
                 const doc = this.root.ownerDocument;
                 doc.addEventListener( 'mousemove', innerMouseMoveAlpha );
@@ -2421,15 +2477,14 @@ class ColorPicker {
                 e.stopPropagation();
                 const alphaX = clamp( e.offsetX - this.markerHalfSize, 0, this.alphaTracker.offsetWidth - this.markerSize );
                 _fromAlphaX( alphaX );
+                alphaTrackerRect = this.alphaTracker.getBoundingClientRect();
             }
 
             let innerMouseMoveAlpha = e => {
-                let dX = e.movementX;
+                const dX = e.movementX;
+                const mouseX = e.x - alphaTrackerRect.x;
 
-                const rect = this.alphaTracker.getBoundingClientRect();
-                const mouseX = e.offsetX - rect.x;
-
-                if ( dX != 0 && ( mouseX >= 0 || dX < 0 ) && ( mouseX < this.alphaTracker.offsetWidth || dX > 0 ) )
+                if ( dX != 0 && ( mouseX >= this.markerHalfSize || dX < 0 ) && ( mouseX < ( this.alphaTracker.offsetWidth - this.markerHalfSize ) || dX > 0 ) )
                 {
                     const alphaX = LX.clamp( parseInt( this.alphaMarker.style.left ) + dX, 0, this.alphaTracker.offsetWidth - this.markerSize );
                     _fromAlphaX( alphaX );
@@ -2867,7 +2922,7 @@ class Area {
      * @method split
      * @param {Object} options
      * type: Split mode (horizontal, vertical) ["horizontal"]
-     * sizes: Size of each new area (Array) ["50%", "50%"]
+     * sizes: CSS Size of each new area (Array) ["50%", "50%"]
      * resize: Allow area manual resizing [true]
      * sizes: "Allow the area to be minimized [false]
      */
@@ -2882,11 +2937,12 @@ class Area {
             this.root = this.sections[ 1 ].root;
         }
 
-        const type = options.type || "horizontal";
+        const type = options.type ?? "horizontal";
         const sizes = options.sizes || [ "50%", "50%" ];
         const auto = (options.sizes === 'auto') || ( options.sizes && options.sizes[ 0 ] == "auto" && options.sizes[ 1 ] == "auto" );
 
-        if( !sizes[ 1 ] )
+        // Secondary area fills space
+        if( !sizes[ 1 ] || ( sizes[ 0 ] != "auto" && sizes[ 1 ] == "auto" ) )
         {
             let size = sizes[ 0 ];
             let margin = options.top ? options.top : 0;
@@ -2899,17 +2955,13 @@ class Area {
             sizes[ 1 ] = "calc( 100% - " + size + " )";
         }
 
-        // Create areas
-        let area1 = new Area( { skipAppend: true, className: "split" + ( options.menubar || options.sidebar ? "" : " origin" ) } );
-        let area2 = new Area( { skipAppend: true, className: "split" } );
-
-        area1.parentArea = this;
-        area2.parentArea = this;
-
         let minimizable = options.minimizable ?? false;
         let resize = ( options.resize ?? true ) || minimizable;
+        let fixedSize = options.fixedSize ?? !resize;
+        let splitbarOffset = 0;
+        let primarySize = [];
+        let secondarySize = [];
 
-        let data = "0px";
         this.offset = 0;
 
         if( resize )
@@ -2929,92 +2981,103 @@ class Area {
 
             this.splitBar.addEventListener( 'mousedown', innerMouseDown );
 
-            data = ( LX.DEFAULT_SPLITBAR_SIZE / 2 ) + "px"; // updates
-
-            // Being minimizable means it's also resizeable!
-            if( minimizable )
-            {
-                this.splitExtended = false;
-
-                // Keep state of the animation when ends...
-                area2.root.addEventListener('animationend', e => {
-                    const opacity = getComputedStyle( area2.root ).opacity;
-                    area2.root.classList.remove( e.animationName + "-" + type );
-                    area2.root.style.opacity = opacity;
-                    flushCss(area2.root);
-                });
-
-                this.splitBar.addEventListener("contextmenu", e => {
-                    e.preventDefault();
-                    addContextMenu(null, e, c => {
-                        c.add("Extend", { disabled: this.splitExtended, callback: () => { this.extend() } });
-                        c.add("Reduce", { disabled: !this.splitExtended, callback: () => { this.reduce() } });
-                    });
-                });
-            }
+            splitbarOffset = ( LX.DEFAULT_SPLITBAR_SIZE / 2 ); // updates
         }
 
         if( type == "horizontal" )
         {
-            let width1 = sizes[ 0 ],
-                width2 = sizes[ 1 ];
-
-            if( width1.constructor == Number )
-            {
-                width1 += "px";
-            }
-
-            if( width2.constructor == Number )
-            {
-                width2 += "px";
-            }
-
-            area1.root.style.width = "calc( " + width1 + " - " + data + " )";
-            area1.root.style.height = "calc(100% - 0px)";
-            area2.root.style.width = "calc( " + width2 + " - " + data + " )";
-            area2.root.style.height = "calc(100% - 0px)";
             this.root.style.display = "flex";
-        }
-        else // vertical
-        {
-            area1.root.style.width = "100%";
-            area2.root.style.width = "100%";
 
-            if( auto )
+            if( !fixedSize )
             {
-                area1.root.style.height = "auto";
+                const parentWidth = this.root.offsetWidth;
+                const leftPx = parsePixelSize( sizes[ 0 ], parentWidth );
+                const rightPx = parsePixelSize(  sizes[ 1 ], parentWidth );
+                const leftPercent = ( leftPx / parentWidth ) * 100;
+                const rightPercent = ( rightPx / parentWidth ) * 100;
 
-                // Listen resize event on first area
-                const resizeObserver = new ResizeObserver( entries => {
-                    for ( const entry of entries )
-                    {
-                        const size = entry.target.getComputedSize();
-                        area2.root.style.height = "calc(100% - " + ( size.height ) + "px )";
-                    }
-                });
-
-                resizeObserver.observe( area1.root );
+                // Style using percentages
+                primarySize[ 0 ] = `calc(${ leftPercent }% - ${ splitbarOffset }px)`;
+                secondarySize[ 0 ] = `calc(${ rightPercent }% - ${ splitbarOffset }px)`;
             }
             else
             {
-                let height1 = sizes[ 0 ],
-                    height2 = sizes[ 1 ];
-
-                if( height1.constructor == Number )
-                {
-                    height1 += "px";
-                }
-
-                if( height2.constructor == Number )
-                {
-                    height2 += "px";
-                }
-
-                area1.root.style.width = "100%";
-                area1.root.style.height = ( height1 == "auto" ? height1 : "calc( " + height1 + " - " + data + " )");
-                area2.root.style.height = ( height2 == "auto" ? height2 : "calc( " + height2 + " - " + data + " )");
+                primarySize[ 0 ] = `calc(${ sizes[ 0 ] } - ${ splitbarOffset }px)`;
+                secondarySize[ 0 ] = `calc(${ sizes[ 1 ] } - ${ splitbarOffset }px)`;
             }
+
+            primarySize[ 1 ] = "100%";
+            secondarySize[ 1 ] = "100%";
         }
+        else // vertical
+        {
+            if( auto )
+            {
+                primarySize[ 1 ] = "auto";
+            }
+            else if( !fixedSize )
+            {
+                const parentHeight = this.root.offsetHeight;
+                const topPx = parsePixelSize( sizes[ 0 ], parentHeight );
+                const bottomPx = parsePixelSize( sizes[ 1 ], parentHeight );
+                const topPercent = ( topPx / parentHeight ) * 100;
+                const bottomPercent = ( bottomPx / parentHeight ) * 100;
+
+                primarySize[ 1 ] = ( sizes[ 0 ] == "auto" ? "auto" : `calc(${ topPercent }% - ${ splitbarOffset }px)`);
+                secondarySize[ 1 ] = ( sizes[ 1 ] == "auto" ? "auto" : `calc(${ bottomPercent }% - ${ splitbarOffset }px)`);
+            }
+            else
+            {
+                primarySize[ 1 ] = ( sizes[ 0 ] == "auto" ? "auto" : `calc(${ sizes[ 0 ] } - ${ splitbarOffset }px)`);
+                secondarySize[ 1 ] = ( sizes[ 1 ] == "auto" ? "auto" : `calc(${ sizes[ 1 ] } - ${ splitbarOffset }px)`);
+            }
+
+            primarySize[ 0 ] = "100%";
+            secondarySize[ 0 ] = "100%";
+        }
+
+        // Create areas
+        let area1 = new Area( { width: primarySize[ 0 ], height: primarySize[ 1 ], skipAppend: true, className: "split" + ( options.menubar || options.sidebar ? "" : " origin" ) } );
+        let area2 = new Area( { width: secondarySize[ 0 ], height: secondarySize[ 1 ], skipAppend: true, className: "split" } );
+
+        if( auto && type == "vertical" )
+        {
+            // Listen resize event on first area
+            const resizeObserver = new ResizeObserver( entries => {
+                for ( const entry of entries )
+                {
+                    const size = entry.target.getComputedSize();
+                    area2.root.style.height = "calc(100% - " + ( size.height ) + "px )";
+                }
+            });
+
+            resizeObserver.observe( area1.root );
+        }
+
+        // Being minimizable means it's also resizeable!
+        if( resize && minimizable )
+        {
+            this.splitExtended = false;
+
+            // Keep state of the animation when ends...
+            area2.root.addEventListener('animationend', e => {
+                const opacity = getComputedStyle( area2.root ).opacity;
+                area2.root.classList.remove( e.animationName + "-" + type );
+                area2.root.style.opacity = opacity;
+                flushCss( area2.root );
+            });
+
+            this.splitBar.addEventListener("contextmenu", e => {
+                e.preventDefault();
+                addContextMenu(null, e, c => {
+                    c.add("Extend", { disabled: this.splitExtended, callback: () => { this.extend() } });
+                    c.add("Reduce", { disabled: !this.splitExtended, callback: () => { this.reduce() } });
+                });
+            });
+        }
+
+        area1.parentArea = this;
+        area2.parentArea = this;
 
         this.root.appendChild( area1.root );
 
@@ -3024,6 +3087,7 @@ class Area {
         }
 
         this.root.appendChild( area2.root );
+
         this.sections = [ area1, area2 ];
         this.type = type;
 
@@ -3137,10 +3201,10 @@ class Area {
             return;
         }
 
-        let [area1, area2] = this.sections;
+        let [ area1, area2 ] = this.sections;
         this.splitExtended = true;
 
-        if( this.type == "vertical")
+        if( this.type == "vertical" )
         {
             this.offset = area2.root.offsetHeight;
             area2.root.classList.add("fadeout-vertical");
@@ -3151,7 +3215,7 @@ class Area {
         {
             this.offset = area2.root.offsetWidth - 8; // Force some height here...
             area2.root.classList.add("fadeout-horizontal");
-            this._moveSplit(-Infinity, true, 8);
+            this._moveSplit( -Infinity, true, 8 );
         }
 
         doAsync( () => this.propagateEvent('onresize'), 150 );
@@ -3258,8 +3322,7 @@ class Area {
 
         LX.menubars.push( menubar );
 
-        const height = 48; // pixels
-        const [ bar, content ] = this.split({ type: 'vertical', sizes: [height, null], resize: false, menubar: true });
+        const [ bar, content ] = this.split({ type: 'vertical', sizes: ["48px", null], resize: false, menubar: true });
         menubar.siblingArea = content;
 
         bar.attach( menubar );
@@ -3376,7 +3439,8 @@ class Area {
                 img: b.img,
                 className: b.class ?? "",
                 title: b.name,
-                overflowContainerX: overlayPanel.root
+                overflowContainerX: overlayPanel.root,
+                swap: b.swap
             };
 
             if( group )
@@ -3513,7 +3577,7 @@ class Area {
 
         const a2 = this.sections[ 1 ];
         const a2Root = a2.root;
-        const splitData = " - "+ LX.DEFAULT_SPLITBAR_SIZE + "px";
+        const splitData = "- "+ LX.DEFAULT_SPLITBAR_SIZE + "px";
 
         let transition = null;
         if( !forceAnimation )
@@ -3521,30 +3585,47 @@ class Area {
             // Remove transitions for this change..
             transition = a1Root.style.transition;
             a1Root.style.transition = a2Root.style.transition = "none";
-            flushCss( a1Root );
-            flushCss( a2Root );
+            // flushCss( a1Root );
         }
 
         if( this.type == "horizontal" )
         {
             var size = Math.max( a2Root.offsetWidth + dt, parseInt( a2.minWidth ) );
             if( forceWidth ) size = forceWidth;
-            a1Root.style.width = "-moz-calc( 100% - " + size + "px " + splitData + " )";
-            a1Root.style.width = "-webkit-calc( 100% - " + size + "px " + splitData + " )";
-            a1Root.style.width = "calc( 100% - " + size + "px " + splitData + " )";
-            a1Root.style.minWidth = parseInt( a1.minWidth ) + "px";
-            a2Root.style.width = size + "px";
-            if( a1.maxWidth != Infinity ) a2Root.style.minWidth = "calc( 100% - " + parseInt( a1.maxWidth ) + "px" + " )";
+
+            const parentWidth = this.size[ 0 ];
+            const rightPercent = ( size / parentWidth ) * 100;
+            const leftPercent = Math.max( 0, 100 - rightPercent );
+
+            a1Root.style.width = `-moz-calc(${ leftPercent }% ${ splitData })`;
+            a1Root.style.width = `-webkit-calc( ${ leftPercent }% ${ splitData })`;
+            a1Root.style.width = `calc( ${ leftPercent }% ${ splitData })`;
+            a2Root.style.width = `${ rightPercent }%`;
+            a2Root.style.width = `${ rightPercent }%`;
+            a2Root.style.width = `${ rightPercent }%`;
+
+            if( a1.maxWidth != Infinity )
+            {
+                a2Root.style.minWidth = "calc( 100% - " + parseInt( a1.maxWidth ) + "px" + " )";
+            }
         }
         else
         {
-            var size = Math.max((a2Root.offsetHeight + dt) + a2.offset, parseInt(a2.minHeight));
+            var size = Math.max( ( a2Root.offsetHeight + dt ) + a2.offset, parseInt(a2.minHeight) );
             if( forceWidth ) size = forceWidth;
-            a1Root.style.height = "-moz-calc( 100% - " + size + "px " + splitData + " )";
-            a1Root.style.height = "-webkit-calc( 100% - " + size + "px " + splitData + " )";
-            a1Root.style.height = "calc( 100% - " + size + "px " + splitData + " )";
+
+            const parentHeight = this.size[ 1 ];
+            const bottomPercent = ( size / parentHeight ) * 100;
+            const topPercent = Math.max( 0, 100 - bottomPercent );
+
+            a1Root.style.height = `-moz-calc(${ topPercent }% ${ splitData })`;
+            a1Root.style.height = `-webkit-calc( ${ topPercent }% ${ splitData })`;
+            a1Root.style.height = `calc( ${ topPercent }% ${ splitData })`;
+            a2Root.style.height = `${ bottomPercent }%`;
+            a2Root.style.height = `${ bottomPercent }%`;
+            a2Root.style.height = `${ bottomPercent }%`;
+
             a1Root.style.minHeight = a1.minHeight + "px";
-            a2Root.style.height = ( size - a2.offset ) + "px";
         }
 
         if( !forceAnimation )
@@ -3553,10 +3634,10 @@ class Area {
             a1Root.style.transition = a2Root.style.transition = transition;
         }
 
-        this._update();
-
-        // Resize events
-        this.propagateEvent( 'onresize' );
+        doAsync( () => {
+            this._update();
+            this.propagateEvent( 'onresize' );
+        }, 10 );
     }
 
     _disableSplitResize() {
@@ -6122,7 +6203,17 @@ class NodeTree {
 
         this.data = newData ?? this.data;
         this.domEl.querySelector( "ul" ).innerHTML = "";
-        this._createItem( null, this.data, 0, selectedId );
+        if( this.data.constructor === Object )
+        {
+            this._createItem( null, this.data, 0, selectedId );
+        }
+        else
+        {
+            for( let d of this.data )
+            {
+                this._createItem( null, d, 0, selectedId );
+            }
+        }
     }
 
     /* Refreshes the tree and focuses current element */
@@ -6249,8 +6340,8 @@ class TextInput extends Widget {
         };
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
         };
 
         this.valid = ( v ) => {
@@ -6388,8 +6479,8 @@ class TextArea extends Widget {
         };
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
         };
 
         let container = document.createElement( "div" );
@@ -6482,8 +6573,8 @@ class Button extends Widget {
         };
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            wValue.style.width = `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            wValue.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
         var wValue = document.createElement( 'button' );
@@ -6745,8 +6836,8 @@ class ComboButtons extends Widget {
         };
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
         this.root.appendChild( container );
@@ -6962,8 +7053,8 @@ class Select extends Widget {
         };
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
         };
 
         let container = document.createElement( "div" );
@@ -7310,11 +7401,8 @@ class Curve extends Widget {
         };
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
-            flushCss( container );
-            curveInstance.canvas.width = container.offsetWidth;
-            curveInstance.redraw();
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
         var container = document.createElement( "div" );
@@ -7330,6 +7418,16 @@ class Curve extends Widget {
         let curveInstance = new CanvasCurve( values, options );
         container.appendChild( curveInstance.element );
         this.curveInstance = curveInstance;
+
+        const observer = new ResizeObserver( entries => {
+            for ( const entry of entries )
+            {
+                curveInstance.canvas.width = entry.contentRect.width;
+                curveInstance.redraw();
+            }
+        });
+
+        observer.observe( container );
 
         doAsync( this.onResize.bind( this ) );
     }
@@ -7364,8 +7462,8 @@ class Dial extends Widget {
         };
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
             flushCss( container );
             dialInstance.element.style.height = dialInstance.element.offsetWidth + "px";
             dialInstance.canvas.width = dialInstance.element.offsetWidth;
@@ -7419,8 +7517,8 @@ class Layers extends Widget {
         };
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
         var container = document.createElement( "div" );
@@ -7644,8 +7742,8 @@ class List extends Widget {
         };
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            listContainer.style.width = `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            listContainer.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
         this._updateValues = ( newValues ) => {
@@ -7721,8 +7819,8 @@ class Tags extends Widget {
         };
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            tagsContainer.style.width = `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            tagsContainer.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
         // Show tags
@@ -7822,8 +7920,8 @@ class Checkbox extends Widget {
         };
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
         };
 
         var container = document.createElement( "div" );
@@ -7905,8 +8003,8 @@ class Toggle extends Widget {
         };
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
         };
 
         var container = document.createElement('div');
@@ -8088,8 +8186,8 @@ class ColorInput extends Widget {
         };
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
         var container = document.createElement( 'span' );
@@ -8179,8 +8277,8 @@ class RangeInput extends Widget {
         };
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
         };
 
         const container = document.createElement( 'div' );
@@ -8293,8 +8391,8 @@ class NumberInput extends Widget {
         };
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
         };
 
         var container = document.createElement( 'div' );
@@ -8529,8 +8627,8 @@ class Vector extends Widget {
         };
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
         const vectorInputs = [];
@@ -8883,8 +8981,8 @@ class OTPInput extends Widget {
         };
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
         this.disabled = options.disabled ?? false;
@@ -9029,8 +9127,8 @@ class Pad extends Widget {
         };
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
         var container = document.createElement( 'div' );
@@ -9149,8 +9247,8 @@ class Progress extends Widget {
         };
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
         const container = document.createElement('div');
@@ -9276,8 +9374,8 @@ class FileInput extends Widget {
         let read = options.read ?? true;
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            input.style.width = `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            input.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
         // Create hidden input
@@ -9603,8 +9701,8 @@ class Table extends Widget {
         super( Widget.TABLE, name, null, options );
 
         this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.offsetWidth ?? 0 );
-            container.style.width = `calc( 100% - ${ realNameWidth }px)`;
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
         const container = document.createElement('div');
@@ -12355,12 +12453,6 @@ class CanvasCurve {
             if( o.xrange ) element.xrange = o.xrange;
             if( o.yrange ) element.yrange = o.yrange;
             if( o.smooth ) element.smooth = o.smooth;
-            var rect = canvas.parentElement.getBoundingClientRect();
-            if( canvas.parentElement.parentElement ) rect = canvas.parentElement.parentElement.getBoundingClientRect();
-            if( rect && canvas.width != rect.width && rect.width && rect.width < 1000 )
-            {
-                canvas.width = rect.width;
-            }
 
             var ctx = canvas.getContext( "2d" );
             ctx.setTransform( 1, 0, 0, 1, 0, 0 );
@@ -12695,12 +12787,6 @@ class CanvasDial {
             if( o.xrange ) element.xrange = o.xrange;
             if( o.yrange ) element.yrange = o.yrange;
             if( o.smooth ) element.smooth = o.smooth;
-            var rect = canvas.parentElement.getBoundingClientRect();
-            if( canvas.parentElement.parentElement ) rect = canvas.parentElement.parentElement.getBoundingClientRect();
-            if( rect && canvas.width != rect.width && rect.width && rect.width < 1000 )
-            {
-                canvas.width = rect.width;
-            }
 
             var ctx = canvas.getContext( "2d" );
             ctx.setTransform( 1, 0, 0, 1, 0, 0 );

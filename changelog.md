@@ -2,12 +2,29 @@
 
 ## dev
 
+## 0.5.8 (master)
+
+Widgets:
+- Added missing support for `NodeTree.refresh()` on Array data.
+
+Timeline:
+- Fix setSelectedItems.
+- Keyframe colors.
+- Integrate swap buttons.
+- Fixed scroll bar and zoom.
+- Hiding tracks on left panel also hides canvas tracks.
+- Fix track lines match the left panel tree.
+
+VideoEditor:
+- Fix crop and area reload crop.
+- Timebar fixes.
+
 Fixed area resizing issues. Improved performance (less layout trashing).
 Added missing support for swap functionality in OverlayButtons.
 Added tracking (`letter-spacing`) CSS class utilities.
 Fixed minor issues with ColorPicker mouse tracking.
 
-## 0.5.7 (master)
+## 0.5.7
 
 `LX.makeIcon` now accepts `options` as second parameter (`title`, `iconClass`, `svgClass`).
 Exposed `LX.setStrictViewport(value)` to allow switching manually.
