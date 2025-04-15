@@ -3,6 +3,7 @@
 ## dev
 
 Added tracking (`letter-spacing`) CSS class utilities.
+Fixed minor issues with ColorPicker mouse tracking.
 
 ## 0.5.7 (master)
 

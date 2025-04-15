@@ -2251,6 +2251,8 @@ class ColorPicker {
 
         doAsync( this._svToPosition.bind( this, this.currentColor.hsv.s, this.currentColor.hsv.v ) );
 
+        let pickerRect = null;
+
         let innerMouseDown = e => {
             var doc = this.root.ownerDocument;
             doc.addEventListener( 'mousemove', innerMouseMove );
@@ -2265,15 +2267,15 @@ class ColorPicker {
             this.intSatMarker.style.top = currentTop + "px";
             this._positionToSv( currentLeft, currentTop );
             this._updateColorValue();
+
+            pickerRect = this.colorPickerBackground.getBoundingClientRect();
         }
 
         let innerMouseMove = e => {
             const dX = e.movementX;
             const dY = e.movementY;
-
-            const rect = this.colorPickerBackground.getBoundingClientRect();
-            const mouseX = e.offsetX - rect.x;
-            const mouseY = e.offsetY - rect.y;
+            const mouseX = e.x - pickerRect.x;
+            const mouseY = e.y - pickerRect.y;
 
             if ( dX != 0 && ( mouseX >= 0 || dX < 0 ) && ( mouseX < this.colorPickerBackground.offsetWidth || dX > 0 ) )
             {
@@ -2343,6 +2345,8 @@ class ColorPicker {
             this._updateColorValue();
         };
 
+        let hueTrackerRect = null;
+
         let innerMouseDownHue = e => {
             const doc = this.root.ownerDocument;
             doc.addEventListener( 'mousemove', innerMouseMoveHue );
@@ -2353,15 +2357,15 @@ class ColorPicker {
 
             const hueX = clamp( e.offsetX - this.markerHalfSize, 0, this.colorPickerTracker.offsetWidth - this.markerSize );
             _fromHueX( hueX );
+
+            hueTrackerRect = this.colorPickerTracker.getBoundingClientRect();
         }
 
         let innerMouseMoveHue = e => {
-            let dX = e.movementX;
+            const dX = e.movementX;
+            const mouseX = e.x - hueTrackerRect.x;
 
-            const rect = this.colorPickerTracker.getBoundingClientRect();
-            const mouseX = e.offsetX - rect.x;
-
-            if ( dX != 0 && ( mouseX >= 0 || dX < 0 ) && ( mouseX < this.colorPickerTracker.offsetWidth || dX > 0 ) )
+            if ( dX != 0 && ( mouseX >= this.markerHalfSize || dX < 0 ) && ( mouseX < ( this.colorPickerTracker.offsetWidth - this.markerHalfSize ) || dX > 0 ) )
             {
                 const hueX = LX.clamp( parseInt( this.hueMarker.style.left ) + dX, 0, this.colorPickerTracker.offsetWidth - this.markerSize );
                 _fromHueX( hueX )
@@ -2406,6 +2410,8 @@ class ColorPicker {
                 this.alphaMarker.style.backgroundColor = `rgb(${ this.currentColor.css.r }, ${ this.currentColor.css.g }, ${ this.currentColor.css.b },${ this.currentColor.css.a })`;
             };
 
+            let alphaTrackerRect = null;
+
             let innerMouseDownAlpha = e => {
                 const doc = this.root.ownerDocument;
                 doc.addEventListener( 'mousemove', innerMouseMoveAlpha );
@@ -2415,15 +2421,14 @@ class ColorPicker {
                 e.stopPropagation();
                 const alphaX = clamp( e.offsetX - this.markerHalfSize, 0, this.alphaTracker.offsetWidth - this.markerSize );
                 _fromAlphaX( alphaX );
+                alphaTrackerRect = this.alphaTracker.getBoundingClientRect();
             }
 
             let innerMouseMoveAlpha = e => {
-                let dX = e.movementX;
+                const dX = e.movementX;
+                const mouseX = e.x - alphaTrackerRect.x;
 
-                const rect = this.alphaTracker.getBoundingClientRect();
-                const mouseX = e.offsetX - rect.x;
-
-                if ( dX != 0 && ( mouseX >= 0 || dX < 0 ) && ( mouseX < this.alphaTracker.offsetWidth || dX > 0 ) )
+                if ( dX != 0 && ( mouseX >= this.markerHalfSize || dX < 0 ) && ( mouseX < ( this.alphaTracker.offsetWidth - this.markerHalfSize ) || dX > 0 ) )
                 {
                     const alphaX = LX.clamp( parseInt( this.alphaMarker.style.left ) + dX, 0, this.alphaTracker.offsetWidth - this.markerSize );
                     _fromAlphaX( alphaX );
