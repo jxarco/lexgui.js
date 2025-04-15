@@ -24,8 +24,9 @@
     --global-color-accent: #2d69da;
     --global-color-accent-light: #0d99ff;
     --global-color-accent-dark: #304b86;
-    --global-color-warning: #ffc107;
+    --global-color-success: #54cf73;
     --global-color-error: #f54c4c;
+    --global-color-warning: #ffc107;
     --global-text-primary: light-dark(#0d0d0e, #f0efef);
     --global-text-secondary: light-dark(#232324, #d1d1d3);
     --global-text-tertiary: light-dark(#4e4e4f, #aaaaaa);
@@ -6024,8 +6025,9 @@ ul.lexassetscontent {
 .bg-quaternary { --background-color: var(--global-color-quaternary); background-color: var(--background-color)!important }
 .bg-accent { --background-color: var(--global-color-accent); background-color: var(--background-color)!important }
 .bg-contrast { --background-color: var(--global-text-primary); background-color: var(--background-color)!important }
-.bg-warning { --background-color: var(--global-color-warning); background-color: var(--background-color)!important }
+.bg-success { --background-color: var(--global-color-success); background-color: var(--background-color)!important }
 .bg-error { --background-color: var(--global-color-error); background-color: var(--background-color)!important }
+.bg-warning { --background-color: var(--global-color-warning); background-color: var(--background-color)!important }
 .bg-white { --background-color: white; background-color: var(--background-color)!important }
 .bg-black { --background-color: black; background-color: var(--background-color)!important }
 .bg-none { background: none !important }
@@ -6036,8 +6038,9 @@ ul.lexassetscontent {
 .hover\:bg-quaternary:hover { background-color: var(--global-color-quaternary) !important }
 .hover\:bg-accent:hover { background-color: var(--global-color-accent) !important }
 .hover\:bg-contrast:hover { background-color: var(--global-text-primary) !important }
-.hover\:bg-warning:hover { background-color: var(--global-color-warning) !important }
+.hover\:bg-success:hover { background-color: var(--global-color-success) !important }
 .hover\:bg-error:hover { background-color: var(--global-color-error) !important }
+.hover\:bg-warning:hover { background-color: var(--global-color-warning) !important }
 .hover\:bg-mix:hover { background-color: color-mix(in srgb, var(--background-color), var(--global-text-primary) 5%) !important }
 .hover\:bg-mix-contrast:hover { background-color: color-mix(in srgb, var(--background-color), var(--global-color-primary) 5%) !important }
 .hover\:bg-none:hover { background: none !important }
@@ -6048,8 +6051,9 @@ ul.lexassetscontent {
 .fg-quaternary { color: var(--global-text-quaternary) !important }
 .fg-accent { color: var(--global-color-accent) !important }
 .fg-contrast { color: var(--global-color-primary) !important }
-.fg-warning { color: var(--global-color-warning) !important }
+.fg-success { color: var(--global-color-success) !important }
 .fg-error { color: var(--global-color-error) !important }
+.fg-warning { color: var(--global-color-warning) !important }
 .fg-white { color: white !important }
 .fg-black { color: black !important }
 
@@ -6059,8 +6063,9 @@ ul.lexassetscontent {
 .hover\:fg-quaternary:hover { color: var(--global-text-quaternary) !important }
 .hover\:fg-accent:hover { color: var(--global-color-accent) !important }
 .hover\:fg-contrast:hover { color: var(--global-color-primary) !important }
-.hover\:fg-warning:hover { color: var(--global-color-warning) !important }
+.hover\:fg-success:hover { color: var(--global-color-success) !important }
 .hover\:fg-error:hover { color: var(--global-color-error) !important }
+.hover\:fg-warning:hover { color: var(--global-color-warning) !important }
 
 /* Layout */
 
