@@ -114,7 +114,6 @@ class Timeline {
         const contentArea = this.mainArea.sections[1];
         contentArea.root.id = "bottom-timeline-area";
         contentArea.split({ type: "horizontal", sizes: ["15%", "85%"] });
-        contentArea.splitBar.style.zIndex = 1; // for some reason this is needed here
         let [ left, right ] = contentArea.sections;
         
         right.attach( this.canvas );
@@ -123,6 +122,7 @@ class Timeline {
 
         this.leftPanel = left.addPanel( { className: 'lextimelinepanel', width: "100%", height: "100%" } );
         this.trackTreesPanel = null;
+        this.trackTreesWidget = null;
         this.updateLeftPanel();
 
         if(!options.canvas && this.name != '') {
@@ -145,7 +145,7 @@ class Timeline {
         this.canvasArea.onresize = bounding => {
             if(!(bounding.width && bounding.height)) 
                 return;
-            this.resizeCanvas( [ bounding.width, bounding.height + this.header_offset ] );
+            this.resizeCanvas();
         }
         this.resize(this.size);
 
@@ -310,10 +310,9 @@ class Timeline {
         
         let p = new LX.Panel({height: "calc(100% - " + titleHeight + "px)"});
 
+        let treeTracks = [];
         if( this.animationClip && this.selectedItems.length )
         {
-            let items = [];
-
             const tracksPerItem = this.animationClip.tracksPerItem;
             for( let i = 0; i < this.selectedItems.length; i++ )
             {
@@ -362,54 +361,53 @@ class Timeline {
                     // panel.addTitle(track.name + (track.type? '(' + track.type + ')' : ''));
                 }
 
-                items.push( t );
+                treeTracks.push( t );
             }
 
-            this.leftPanelTrackTreeWidget = p.addTree(null, items, {filter: false, rename: false, draggable: false, onevent: (e) => {
-                switch(e.type) {
-                    case LX.TreeEvent.NODE_SELECTED:
-                        if (e.node.parent){
-                            const tracksInItem = this.animationClip.tracksPerItem[e.node.parent.id];
-                            const type = e.node.id;
-                            for(let i = 0; i < tracksInItem.length; i++) {
-                                if(tracksInItem[i].type == type){
-                                    this.selectTrack(tracksInItem[i].clipIdx);
-                                    break;
-                                }
-                            }
-                        }
-                        break;
-                    case LX.TreeEvent.NODE_VISIBILITY:   
-                        if ( e.node.parent )
-                        {
-                            const tracksInItem = this.animationClip.tracksPerItem[ e.node.parent.id ];
-                            const type = e.node.id;
-                            for(let i = 0; i < tracksInItem.length; i++) {
-                                if(tracksInItem[i].type == type)
-                                {
-                                    this.changeTrackVisibility( tracksInItem[ i ].clipIdx, e.value );
-                                    break;
-                                }
-                            }
-                        } 
-                        break;
-                    case LX.TreeEvent.NODE_CARETCHANGED:
-                        const tracksInItem = this.animationClip.tracksPerItem[e.node.id];
-                        for( let i = 0; i < tracksInItem; ++i )
-                        {
-                            this.changeTrackDisplay( tracksInItem[ i ].clipIdx, e.node.closed );
-                        }
-                        break;
-                }
-            }});
-            // setting a name in the addTree function adds an undesired node
-            this.leftPanelTrackTreeWidget.name = "tracksTrees";
-            p.widgets[this.leftPanelTrackTreeWidget.name] = this.leftPanelTrackTreeWidget;
         }
+        this.trackTreesWidget = p.addTree(null, treeTracks, {filter: false, rename: false, draggable: false, onevent: (e) => {
+            switch(e.type) {
+                case LX.TreeEvent.NODE_SELECTED:
+                    if (e.node.parent){
+                        const tracksInItem = this.animationClip.tracksPerItem[e.node.parent.id];
+                        const type = e.node.id;
+                        for(let i = 0; i < tracksInItem.length; i++) {
+                            if(tracksInItem[i].type == type){
+                                this.selectTrack(tracksInItem[i].clipIdx);
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                case LX.TreeEvent.NODE_VISIBILITY:   
+                    if ( e.node.parent )
+                    {
+                        const tracksInItem = this.animationClip.tracksPerItem[ e.node.parent.id ];
+                        const type = e.node.id;
+                        for(let i = 0; i < tracksInItem.length; i++) {
+                            if(tracksInItem[i].type == type)
+                            {
+                                this.changeTrackVisibility( tracksInItem[ i ].clipIdx, e.value );
+                                break;
+                            }
+                        }
+                    } 
+                    break;
+                case LX.TreeEvent.NODE_CARETCHANGED:
+                    const tracksInItem = this.animationClip.tracksPerItem[e.node.id];
+                    for( let i = 0; i < tracksInItem; ++i )
+                    {
+                        this.changeTrackDisplay( tracksInItem[ i ].clipIdx, e.node.closed );
+                    }
+                    break;
+            }
+        }});
+        // setting a name in the addTree function adds an undesired node
+        this.trackTreesWidget.name = "tracksTrees";
+        p.widgets[this.trackTreesWidget.name] = this.trackTreesWidget;
 
         this.trackTreesPanel = p;
-        panel.attach( p.root )
-        p.root.style.overflowY = "scroll";
+        panel.attach( p.root );
         p.root.addEventListener("scroll", e => {
             if (e.currentTarget.scrollHeight > e.currentTarget.clientHeight){
                 this.currentScroll = e.currentTarget.scrollTop / (e.currentTarget.scrollHeight - e.currentTarget.clientHeight);
@@ -427,7 +425,7 @@ class Timeline {
             return;
         }
 
-        this.resizeCanvas([ this.mainArea.root.clientWidth - this.leftPanel.root.clientWidth  - 8, this.size[1]]);
+        this.resizeCanvas();
     }
 
     /**
@@ -591,7 +589,7 @@ class Timeline {
         // Content
         const topMargin = this.topMargin; 
         const leftMargin = this.session.left_margin;
-        const treeOffset = this.leftPanelTrackTreeWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop;
+        const treeOffset = this.trackTreesWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop;
         const line_height = this.trackHeight;
     
         //fill track lines
@@ -639,11 +637,11 @@ class Timeline {
         const w = ctx.canvas.width;
         const h = ctx.canvas.height;
 
-        const scrollableHeight = this.leftPanelTrackTreeWidget.root.scrollHeight;
-        const treeOffset = this.leftPanelTrackTreeWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop;
+        const scrollableHeight = this.trackTreesWidget.root.scrollHeight;
+        const treeOffset = this.trackTreesWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop;
 
         if ( this.trackTreesPanel.root.scrollHeight > 0 ){
-            const ul = this.leftPanelTrackTreeWidget.innerTree.domEl.children[0];
+            const ul = this.trackTreesWidget.innerTree.domEl.children[0];
             this.trackHeight = ul.children.length < 1 ? 25 : (ul.offsetHeight / ul.children.length);
         }
         
@@ -678,7 +676,7 @@ class Timeline {
         }
 
         //scrollbar
-        if( h < scrollableHeight ){
+        if( (h-this.topMargin) < scrollableHeight ){
             ctx.fillStyle = "#222";
             ctx.fillRect( w - this.session.left_margin - 10, 0, 10, h );
 
@@ -912,7 +910,7 @@ class Timeline {
                 this.setScale( e.wheelDelta < 0 ? 0.95 : 1.05 );
                 this.session.start_time = mouseTime - (localX - this.session.left_margin) / this.secondsToPixels;
             }
-            else if( h < this.leftPanelTrackTreeWidget.root.scrollHeight)
+            else if( (h-this.topMargin) < this.trackTreesWidget.root.scrollHeight)
             {              
                 this.trackTreesPanel.root.scrollTop += e.deltaY; // wheel deltaY
             }
@@ -991,7 +989,7 @@ class Timeline {
                 this.grabbingTimeBar = true;
                 this.setTime(time);
             }
-            else if( h < this.leftPanelTrackTreeWidget.root.scrollHeight && x > w - 10 ) { // grabbing scroll bar
+            else if( (h-this.topMargin) < this.trackTreesWidget.root.scrollHeight && x > w - 10 ) { // grabbing scroll bar
                 this.grabbing = true;
                 this.grabbingScroll = true;
             }
@@ -1144,7 +1142,7 @@ class Timeline {
 
     drawTrackWithBoxes( ctx, y, trackHeight, title, track ) {
 
-        const treeOffset = this.leftPanelTrackTreeWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop;
+        const treeOffset = this.trackTreesWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop;
         this.tracksDrawn.push([track, y + treeOffset, trackHeight]);
 
         // Fill track background if it's selected
@@ -1267,7 +1265,7 @@ class Timeline {
     /**
     * @method selectTrack
     * @param {int} trackIdx
-    * // NOTE: to select a track from outside of the timeline, a this.leftPanelTrackTreeWidget.innerTree.select(item) needs to be called.
+    * // NOTE: to select a track from outside of the timeline, a this.trackTreesWidget.innerTree.select(item) needs to be called.
     */
     selectTrack( trackIdx ) {
 
@@ -1343,13 +1341,10 @@ class Timeline {
         this.mainArea.sections[1].root.style.height = "calc(100% - "+ this.header_offset + "px)";
 
         let w = size[0] - this.leftPanel.root.clientWidth - 8;
-        this.resizeCanvas([w , size[1]]);     
+        this.resizeCanvas();     
     }
 
-    resizeCanvas( size ) {
-        if( size[0] <= 0 && size[1] <=0 )
-            return;
-        size[1] -= this.header_offset;
+    resizeCanvas( ) {
         this.canvas.width = this.canvasArea.root.clientWidth;
         this.canvas.height = this.canvasArea.root.clientHeight;
     }
@@ -1704,7 +1699,7 @@ class KeyFramesTimeline extends Timeline {
         const trackHeight = this.trackHeight;
         const tracksPerItem = this.animationClip.tracksPerItem;
         const scrollY = - this.currentScrollInPixels;
-        const treeOffset = this.leftPanelTrackTreeWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop;
+        const treeOffset = this.trackTreesWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop;
 
         let offset = scrollY;
         ctx.translate(0, offset);
@@ -2857,7 +2852,7 @@ class ClipsTimeline extends Timeline {
             }
 
         }
-        this.leftPanelTrackTreeWidget = p.addTree(null, treeTracks, {filter: false, rename: false, draggable: false, onevent: (e) => {
+        this.trackTreesWidget = p.addTree(null, treeTracks, {filter: false, rename: false, draggable: false, onevent: (e) => {
             switch(e.type) {
                 case LX.TreeEvent.NODE_SELECTED:
                     this.selectTrack( parseInt( e.node.id.split("Track_")[1] ) );
@@ -2871,12 +2866,11 @@ class ClipsTimeline extends Timeline {
             }
         }});
         // setting a name in the addTree function adds an undesired node
-        this.leftPanelTrackTreeWidget.name = "tracksTrees"; 
-        p.widgets[this.leftPanelTrackTreeWidget.name] = this.leftPanelTrackTreeWidget;
+        this.trackTreesWidget.name = "tracksTrees"; 
+        p.widgets[this.trackTreesWidget.name] = this.trackTreesWidget;
 
         this.trackTreesPanel = p;
         panel.attach(p.root)
-        p.root.style.overflowY = "scroll";
         p.root.addEventListener("scroll", (e) => {
             if (e.currentTarget.scrollHeight > e.currentTarget.clientHeight){
                 this.currentScroll = e.currentTarget.scrollTop / (e.currentTarget.scrollHeight - e.currentTarget.clientHeight);
@@ -2894,7 +2888,7 @@ class ClipsTimeline extends Timeline {
             return;
         }
         
-        this.resizeCanvas([ this.mainArea.root.clientWidth - this.leftPanel.root.clientWidth  - 8, this.size[1]]);
+        this.resizeCanvas();
     }
 
     unSelectAllTracks() {
@@ -3069,7 +3063,7 @@ class ClipsTimeline extends Timeline {
 
                 this.movingKeys = true;
 
-                const treeOffset = this.leftPanelTrackTreeWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop;
+                const treeOffset = this.trackTreesWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop;
                 let newTrackClipsMove = Math.floor( (e.localY - treeOffset) / this.trackHeight );
 
                 // move clips vertically
@@ -4320,7 +4314,7 @@ class CurvesTimeline extends Timeline {
         const trackHeight = this.trackHeight;
         const tracksPerItem = this.animationClip.tracksPerItem;
         const scrollY = - this.currentScrollInPixels;
-        const treeOffset = this.leftPanelTrackTreeWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop;
+        const treeOffset = this.trackTreesWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop;
 
         let offset = scrollY;
         ctx.translate(0, offset);
