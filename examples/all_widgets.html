@@ -36,13 +36,13 @@
     menubar.addButtons([
         {
             title: "Toggle Sections",
-            icon: "fa-solid fa-eye",
+            icon: "Eye",
             callback: (swapValue) => { closedDefault = !closedDefault; fillPanels(); }
         },
         {
             title: "Change Theme",
-            icon: "fa-solid fa-moon",
-            swap: "fa-solid fa-sun",
+            icon: "Moon",
+            swap: "Sun",
             callback: (swapValue) => { LX.setTheme(swapValue ? "light" : "dark") }
         }
     ]);
@@ -71,9 +71,9 @@
         panelC.root.innerHTML = "";
 
         const comboValues = [
-            { value: 'left', selected: true, icon: 'fa fa-align-left' },
-            { value: 'center', icon: 'fa fa-align-center' },
-            { value: 'right', icon: 'fa fa-align-right' }
+            { value: 'left', selected: true, icon: 'AlignLeft' },
+            { value: 'center', icon: 'AlignCenter' },
+            { value: 'right', icon: 'AlignRight' }
         ];
 
         const selectValues = ["Godot", "Unity", "Unreal Engine", "Visual Studio", "Visual Studio Code"];
@@ -107,19 +107,19 @@
             buttonsLeftPanel.addButton(null, "Warning", null, { disabled: true, buttonClass: "warning" });
             buttonsLeftPanel.addButton(null, "Error", null, { disabled: true, buttonClass: "error" });
             buttonsLeftPanel.branch("Advanced Buttons", { closed: closedDefault });
-            buttonsLeftPanel.addButton("Icon Button", "Not used", null, { icon: "fa fa-skull" });
+            buttonsLeftPanel.addButton("Icon Button", "Not used", null, { icon: "Skull" });
             buttonsLeftPanel.sameLine();
             buttonsLeftPanel.addLabel("Customized Inline Buttons");
-            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "fa fa-skull", buttonClass: "bg-none" });
-            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "fa fa-cube", buttonClass: "bg-primary" });
-            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "fa fa-table-cells", buttonClass: "bg-tertiary fg-tertiary" });
+            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "Skull", buttonClass: "bg-none" });
+            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "Box", buttonClass: "bg-primary" });
+            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "TableCells", buttonClass: "bg-tertiary fg-tertiary" });
             buttonsLeftPanel.endLine("justify-start");
             buttonsLeftPanel.sameLine();
             buttonsLeftPanel.addLabel("Swap Buttons");
-            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "fa fa-moon", swap: "fa fa-sun", buttonClass: "bg-none" });
-            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "fa fa-eye", swap: "fa fa-eye-slash" });
+            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "Moon", swap: "Sun", buttonClass: "bg-none" });
+            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "Eye", swap: "EyeOff" });
             buttonsLeftPanel.endLine("justify-start");
-            buttonsLeftPanel.addButton(null, LX.makeIcon("circle-plus").innerHTML + "Button with Inlined Icon", null);
+            buttonsLeftPanel.addButton(null, LX.makeIcon("CirclePlus").innerHTML + "Button with Inlined Icon", null);
             buttonsLeftPanel.addButton(null, "With a Badge" + LX.badge("+99", "accent sm"));
             buttonsRightPanel.branch("Outline Buttons", { closed: closedDefault });
             buttonsRightPanel.addButton(null, "Classic Outline", null, { buttonClass: "outline" });
@@ -356,7 +356,7 @@
                     { name: "Priority", options: ["Low", "Medium", "High"] },
                 ],
                 rowActions: [
-                    { icon: "edit", title: "Edit Row" },
+                    { icon: "Edit", title: "Edit Row" },
                     "delete",
                     "menu"
                 ],

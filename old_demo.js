@@ -132,10 +132,10 @@ const menubar = area.addMenubar( [
 
             }, { size: ["30%", null], float: "right", draggable: false});
         }},
-        { name: "Open AssetView", icon: "display", callback: createAssetDialog },
+        { name: "Open AssetView", icon: "Display", callback: createAssetDialog },
     ] },
     { name: "Account", submenu: [
-        { name: "Login", icon: "user", callback: createLoginForm },
+        { name: "Login", icon: "User", callback: createLoginForm },
     ] },
     { name: "Notifications", submenu: [
         { name: "Toast", callback: createToast },
@@ -143,8 +143,8 @@ const menubar = area.addMenubar( [
             "Are you absolutely sure?", null, {xposition: ["50px", "100px"]}); } },
     ] },
     { name: "Help", submenu: [
-        { name: "Search Help", icon: "search", kbd:  "F1", callback: () => { window.open("./docs/") }},
-        { name: "Support LexGUI", icon: "heart" },
+        { name: "Search Help", icon: "Search", kbd:  "F1", callback: () => { window.open("./docs/") }},
+        { name: "Support LexGUI", icon: "Heart" },
     ] },
 
 ], { sticky: false });
@@ -152,8 +152,8 @@ const menubar = area.addMenubar( [
 menubar.addButtons( [
     {
         title: "Play",
-        icon: "fa-solid fa-play",
-        swap: "fa-solid fa-stop",
+        icon: "Play",
+        swap: "Stop",
         callback:  (value, event) => {
             if( value ) console.log("play!");
             else console.log("stop!");
@@ -161,12 +161,12 @@ menubar.addButtons( [
     },
     {
         title: "Pause",
-        icon: "fa-solid fa-pause",
+        icon: "Pause",
         disabled: true,
         callback:  (value, event) => { console.log("pause!"); }
     },
     {
-        icon: "fa-solid fa-rotate-left",
+        icon: "RotateLeft",
         callback:  (value, event) => {
             const playButton = m.getButton( "Play" );
             playButton.swap();
@@ -174,8 +174,8 @@ menubar.addButtons( [
     },
     {
         title: "Change Theme",
-        icon: "fa-solid fa-moon",
-        swap: "fa-solid fa-sun",
+        icon: "Moon",
+        swap: "Sun",
         callback:  (value, event) => { LX.setTheme( value ? "light" : "dark" ) }
     }
 ]);
@@ -237,16 +237,16 @@ const sidebar = left.addSidebar( m => {
         new LX.DropdownMenu( element, [
             "My Account",
             null,
-            { name: "Profile", kbd: ["Meta", "P"], icon: "user" },
-            { name: "Billing", disabled: true, icon: "credit-card" },
+            { name: "Profile", kbd: ["Meta", "P"], icon: "User" },
+            { name: "Billing", disabled: true, icon: "CreditCard" },
             { name: "Settings", kbd: "S" },
             null,
             { name: "Team" },
-            { name: "Invite users", icon: "search" },
+            { name: "Invite users", icon: "Search" },
             null,
-            { name: "Github", icon: "github" },
+            { name: "Github", icon: "Github" },
             { name: "Support", submenu: [
-                { name: "Email", icon: "envelope" },
+                { name: "Email", icon: "Envelope" },
                 { name: "Message", submenu: [
                     { name: "Whatsapp", kbd: "W" },
                     { name: "iMessage", kbd: "M" },
@@ -427,19 +427,19 @@ topTabs.area.addOverlayButtons( [
     [
         {
             name: "Select",
-            icon: "fa fa-arrow-pointer",
+            icon: "ArrowPointer",
             callback: (value, event) => console.log(value),
             selectable: true
         },
         {
             name: "Move",
-            icon: "fa-solid fa-arrows-up-down-left-right",
+            icon: "ArrowsUpDownLeftRight",
             callback: (value, event) => console.log(value),
             selectable: true
         },
         {
             name: "Rotate",
-            icon: "fa-solid fa-rotate-right",
+            icon: "RotateRight",
             callback: (value, event) => console.log(value),
             selectable: true
         }
@@ -452,7 +452,7 @@ topTabs.area.addOverlayButtons( [
     [
         {
             name: "Enable Snap",
-            icon: "fa fa-table-cells",
+            icon: "Frame",
             callback: (value, event) => console.log(value),
             selectable: true
         },
@@ -463,8 +463,7 @@ topTabs.area.addOverlayButtons( [
         }
     ], {
         name: "Button 4",
-        // img: "https://webglstudio.org/latest/imgs/mini-icon-gizmo.png",
-        icon: "fa fa-cube",
+        icon: "Box",
         callback: (value, event) => console.log(value)
     }
 ], { float: "htc" } );
@@ -621,7 +620,7 @@ function fillPanel( panel ) {
     });
 
     // add widgets to panel branch
-    panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});
+    panel.branch("Canvas", {icon: "Palette", filter: true});
     panel.addColor("Background", "#b7a9b1", (value, event) => {
         console.log(value);
     }, { xuseAlpha: true });
@@ -656,7 +655,7 @@ function fillPanel( panel ) {
     } });
     panel.merge();
 
-    panel.branch("Preferences", {icon: "fa-solid fa-gear"});
+    panel.branch("Preferences", {icon: "Settings"});
     panel.addButton(null, "Show Notifications" + LX.badge("+99", "accent sm"));
     panel.addCounter("Calories Counter ", 350, (v) => { console.log( v + " calories!" ) }, { label: "CALORIES/DAY", max: 500 });
     panel.addButton("Colored Tiny Button", "Click here!", () => {}, { buttonClass: "primary xs" });
@@ -696,24 +695,24 @@ function fillPanel( panel ) {
     panel.addTags("Game Tags", "2d, karate, ai, engine, ps5, console", (value, event) => {
         console.log(value);
     });
-    window.l = panel.addComboButtons("Alignment", [
+    panel.addComboButtons("Alignment", [
         {
             value: 'left',
             selected: true,
-            icon: 'fa fa-align-left',
+            icon: "AlignLeft",
             callback: (value, event) => {
                 console.log(value);
             }
         }, {
             value: 'center',
-            icon: 'fa fa-align-center',
+            icon: "AlignCenter",
             callback: (value, event) => {
                 console.log(value);
             }
         }, {
             value: 'right',
             disabled: true,
-            icon: 'fa fa-align-right',
+            icon: "AlignRight",
             callback: (value, event) => {
                 console.log(value);
             }
@@ -738,7 +737,7 @@ function fillPanel( panel ) {
         console.log(value);
     }, { units: "p", precision: 0 });
 
-    panel.branch("Contents", {icon: "fa-solid fa-moon"});
+    panel.branch("Contents", {icon: "Book"});
     panel.addCard( "MY PERSONAL CARD", { img: "data/Screenshot_Code.png" } );
     const anElement = document.createElement( "div" );
     anElement.style.width = anElement.style.height = "24px";
@@ -762,7 +761,7 @@ function fillRightBottomPanel( panel, tab ) {
 
     panel.clear();
 
-    panel.branch("Bottom", {icon: "fa-solid fa-table-list"});
+    panel.branch("Bottom", { icon: "TableCells" });
 
     if(tab == 'Horizontal')
     {
@@ -870,7 +869,7 @@ function fillRightBottomPanel( panel, tab ) {
 function fillBottomPanel( panel ) {
 
     // add widgets to panel branch
-    panel.branch("Information", {icon: "fa fa-circle-info"});
+    panel.branch("Information", {icon: "CircleInfo"});
     window.tableWidget = panel.addTable("A Table", {
         head: [ "Name", "Status", "Priority" ],
         body: [
@@ -894,7 +893,7 @@ function fillBottomPanel( panel ) {
             { name: "Priority", options: ["Low", "Medium", "High"] },
         ],
         rowActions: [
-            { icon: "edit", title: "Edit Row", callback: ( tableData ) => {} }, // custom: you can change the data and refresh will be called later!
+            { icon: "Edit", title: "Edit Row", callback: ( tableData ) => {} }, // custom: you can change the data and refresh will be called later!
             "delete",
             "menu"
         ],

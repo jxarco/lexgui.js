@@ -491,9 +491,9 @@ class CodeEditor {
 
                 searchPanel.sameLine( 4 );
                 searchPanel.addText( null, "", null, { placeholder: "Find" } );
-                searchPanel.addButton( null, "up", () => this.search( null, true ), { icon: "fa fa-arrow-up" } );
-                searchPanel.addButton( null, "down", () => this.search(), { icon: "fa fa-arrow-down" } );
-                searchPanel.addButton( null, "x", this.hideSearchBox.bind( this ), { icon: "fa fa-xmark" } );
+                searchPanel.addButton( null, "up", () => this.search( null, true ), { icon: "ArrowUp" } );
+                searchPanel.addButton( null, "down", () => this.search(), { icon: "ArrowDown" } );
+                searchPanel.addButton( null, "x", this.hideSearchBox.bind( this ), { icon: "X" } );
 
                 box.querySelector( 'input' ).addEventListener( 'keyup', e => {
                     if( e.key == 'Escape' ) this.hideSearchBox();
