@@ -2888,6 +2888,8 @@ class Calendar {
         this.month = parseInt( tokens[ 1 ] );
         this.year = parseInt( tokens[ 2 ] );
 
+        this.currentDate = this._getCurrentDate();
+
         this.fromMonthYear( this.month, this.year );
     }
 
