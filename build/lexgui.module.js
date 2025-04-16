@@ -6825,7 +6825,7 @@ class ComboButtons extends Widget {
                 buttonEl.classList.add( options.buttonClass );
             }
 
-            if( shouldSelect && ( b.selected || options.selected == b.value ) )
+            if( shouldSelect && b.selected )
             {
                 buttonEl.classList.add("selected");
                 currentValue = ( currentValue ).concat( [ b.value ] );
@@ -10982,7 +10982,6 @@ class Panel {
      * @param {Object} options:
      * hideName: Don't use name as label [false]
      * float: Justify content (left, center, right) [center]
-     * @legacy selected: Selected item by default by value
      * noSelection: Buttons can be clicked, but they are not selectable
      * toggle: Buttons can be toggled insted of selecting only one
      */

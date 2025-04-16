@@ -20,6 +20,7 @@
                 }
             }, {
                 value: "center",
+                selected: true,
                 icon: "fa fa-align-center",
                 callback: (value, event) => {
                     console.log(value);
@@ -31,7 +32,7 @@
                     console.log(value);
                 }
             }
-        ], { selected: "center" });
+        ], {});
         content.appendChild(area.root);
     }
 
@@ -55,6 +56,7 @@
         }
     }, {
         value: @"center"@,
+        selected: @true@,
         icon: @"fa fa-align-center"@,
         callback: (value, event) =&gt; {
             console.@[mtd]log@(value);
@@ -66,6 +68,6 @@
             console.@[mtd]log@(value);
         }
     }
-], { selected: @"center"@ });` );
+], {} );` );
 
 </script>
