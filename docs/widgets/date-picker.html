@@ -1,0 +1,31 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+
+    // Date Picker
+    MAKE_HEADER("Date Picker", "h1", "date-picker");
+    MAKE_PARAGRAPH(`Represents a date field that allows users to enter and edit dates.`);
+
+    {
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
+        const panel = area.addPanel();
+        panel.addDate("Event Date", "16/04/2025", ( date ) => {
+            console.log(date);
+        });
+        content.appendChild(area.root);
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addDate(name, dateString, callback, options)")} to add a File Widget to your panel:`);
+    MAKE_CODE_BULLET_LIST([
+        ["name", "String", "Widget name"],
+        ["dateString", "String", "Date in String format DD/MM/YYYY"],
+        ["callback", "Function", "Function called when date changes"],
+        ["options", "Object", "Basic options for a Widget"]
+    ]);
+    MAKE_CODE(`panel.@[mtd]addDate@(@"Event Date"@, @"16/04/2025"@, (date) => {
+    console.@[mtd]log@(date);
+});` );
+
+</script>

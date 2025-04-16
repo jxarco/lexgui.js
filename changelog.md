@@ -2,7 +2,11 @@
 
 ## dev
 
+Widgets:
+- Added new `DatePicker` Widget (also via `Panel.addDate` and using `LX.Calendar` class).
+
 Expose `LX.NodeTree` in global namespace.
+Docs updated.
 
 ## 0.5.8 (master)
 

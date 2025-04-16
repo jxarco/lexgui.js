@@ -2849,13 +2849,10 @@ class Calendar {
         else
         {
             const date = new Date();
-            this.day = date.getDate();
             this.month = date.getMonth() + 1;
             this.year = date.getFullYear();
             this.fromMonthYear( this.month, this.year );
         }
-
-        this.refresh();
     }
 
     _getCurrentDate() {
@@ -2878,8 +2875,6 @@ class Calendar {
         }
 
         this.fromMonthYear( this.month, this.year );
-
-        this.refresh();
     }
 
     _nextMonth() {
@@ -2893,8 +2888,6 @@ class Calendar {
         }
 
         this.fromMonthYear( this.month, this.year );
-
-        this.refresh();
     }
 
     refresh() {
@@ -2957,7 +2950,17 @@ class Calendar {
                     for( const dayData of weekDays )
                     {
                         const th = document.createElement( 'th' );
-                        th.className = `${ dayData.currentMonth ? "fg-primary" : "fg-tertiary" } leading-loose font-normal rounded select-none cursor-pointer hover:bg-secondary`;
+                        th.className = "leading-loose font-normal rounded select-none cursor-pointer hover:bg-secondary";
+
+                        if( dayData.day == this.day && dayData.currentMonth )
+                        {
+                            th.className += ` bg-contrast fg-contrast`;
+                        }
+                        else
+                        {
+                            th.className += ` ${ dayData.currentMonth ? "fg-primary" : "fg-tertiary" }`;
+                        }
+
                         th.innerHTML = `<span>${ dayData.day }</span>`;
                         hrow.appendChild( th );
 
@@ -3032,6 +3035,8 @@ class Calendar {
         this.firstDay = firstDay;
         this.daysInMonth = daysInMonth;
         this.calendarDays = calendarDays;
+
+        this.refresh();
     }
 
     getMonthName( monthIndex, locale = "en-US" ) {
@@ -10619,7 +10624,7 @@ class DatePicker extends Widget {
                 this._popover = new Popover( calendarButton.root, ( popoverRoot ) => {
                     popoverRoot.appendChild( this.calendar.root );
                 } );
-            }, { buttonClass: `flex flex-row px-2 ${ currentDate ? "" : "fg-tertiary" } justify-between` } );
+            }, { buttonClass: `flex flex-row px-3 ${ currentDate ? "" : "fg-tertiary" } justify-between` } );
 
             calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
             container.appendChild( calendarButton.root );

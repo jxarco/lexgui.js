@@ -244,6 +244,13 @@
             panelB.addFile("Disabled", null, { disabled: true });
         }
 
+        // DatePicker
+        {
+            panelC.branch("Date Picker", { closed: closedDefault });
+            panelC.addDate("Using Default Date", "15/04/2025");
+            panelC.addDate("No Default Date", null);
+        }
+
         // Tree
         {
             panelC.branch("Data Tree", { closed: closedDefault });
