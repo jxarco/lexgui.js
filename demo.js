@@ -41,7 +41,7 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
 // Header
 {
     const header = LX.makeContainer( [ null, "auto" ], "flex flex-col border-top border-bottom gap-2 px-6 py-12", `
-        <a>Get started with LexGUI.js</a>
+        <a>Get started with LexGUI.js <span class="text-sm fg-secondary">${ LX.version }</span></a>
         <h1>Build your application interface</h1>
         <p class="font-light" style="max-width:32rem">A set of beautifully-designed, accessible widgets and components.
         No complex frameworks. Pure JavaScript and CSS. Open Source.</p>
