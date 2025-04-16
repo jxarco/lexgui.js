@@ -22,7 +22,12 @@
         ["name", "String", "Widget name"],
         ["dateString", "String", "Date in String format DD/MM/YYYY"],
         ["callback", "Function", "Function called when date changes"],
-        ["options", "Object", "Basic options for a Widget"]
+        ["options", "Object", "Basic options for a Widget"],
+        [
+            ["today", "Boolean", "Set current day as selected by default"],
+            ["untilToday", "Boolean", "Allow dates only until current day"],
+            ["fromToday", "Boolean", "Allow dates only from current day"]
+        ]
     ]);
     MAKE_CODE(`panel.@[mtd]addDate@(@"Event Date"@, @"16/04/2025"@, (date) => {
     console.@[mtd]log@(date);

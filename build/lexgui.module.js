@@ -2848,7 +2848,8 @@ class Calendar {
                         const afterToday = this.fromToday ? ( dayDate.getTime() > date.getTime() ) : true;
                         const selectable = dayData.currentMonth && beforeToday && afterToday;
 
-                        if( dayData.day == this.day && dayData.currentMonth )
+                        if( this.currentDate && ( dayData.day == this.currentDate.day ) && ( this.month == this.currentDate.month )
+                            && ( this.year == this.currentDate.year ) && dayData.currentMonth )
                         {
                             th.className += ` bg-contrast fg-contrast`;
                         }
@@ -2864,9 +2865,10 @@ class Calendar {
                         {
                             th.addEventListener( "click", () => {
                                 this.day = dayData.day;
+                                this.currentDate = this._getCurrentDate();
                                 if( this.onChange )
                                 {
-                                    this.onChange( this._getCurrentDate() );
+                                    this.onChange( this.currentDate );
                                 }
                             } );
                         }
