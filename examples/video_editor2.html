@@ -24,9 +24,8 @@
 
     // Init library and get main area
     let area = LX.init();
-    const menubar = area.addMenubar(m => {
-        m.setButtonImage("Page", "../data/godot_pixelart.png", null, { float: "left" });
-    });
+    const menubar = area.addMenubar();
+    menubar.setButtonImage("Page", "../data/godot_pixelart.png", null, { float: "left" });
 
     // Split main area
     let [leftArea, rightArea] = area.split({ sizes: ["75%", "25%"], minimizable: true });

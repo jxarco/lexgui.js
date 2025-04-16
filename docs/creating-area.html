@@ -2,10 +2,10 @@
 
     MAKE_HEADER( "Creating the first Area", "h1", "area" );
             
-    MAKE_PARAGRAPH( `An <strong>Area</strong> is the main container used in lexgui.js. To append HTML elements to an area is enough to call <code class='inline'>Area.attach(content)</code>,
+    MAKE_PARAGRAPH( `An ${ INLINE_PAGE( "Area", "reference/area.html" ) } is the main container used in lexgui.js. To append HTML elements to an area is enough to call <code class='inline'>Area.attach(content)</code>,
     where <code class='inline'>content</code> could be different either any HTML element or instanced containers from LexGUI.` );
     MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH( `From here, you can already build your UI adding <a href="panel.html">Panels</a>, but in most cases you will want to split the main Area first. 
+    MAKE_PARAGRAPH( `From here, you can already build your UI adding ${ INLINE_PAGE( "panels", "reference/panel.html" ) }, but in most cases you will want to split the main Area first. 
     You can have as many Areas you need using <code class='inline'>Area.split(options)</code>, which allows you to split horizontally or vertically a given Area:` );
     MAKE_CODE_BULLET_LIST( [
         ["type", "String", "Split mode, either horizontal (default) or vertical"],
@@ -19,88 +19,83 @@
 });
 @[com]// Split again left area this time vertically@
 @let@ [ leftUp, leftBottom ] = leftArea.@[mtd]split@({ 
-type: @"vertical"@, 
+    type: @"vertical"@, 
     sizes: [@"80vh"@, @"20vh"@] 
 });` );
 
     MAKE_HEADER( "Menubar", "h2", "menubar" );
 
-    MAKE_PARAGRAPH( `You can build a <strong>Menubar</strong> element directly into any Area using ${INLINE_CODE("Area.addMenubar(callback, options)")}. 
-    To specify each of the menu entries, you should pass a <em>callback function</em> to be called when the Menubar is constructed. <strong>Callbacks will have a Menubar instance as parameter</strong>, 
-    so use ${INLINE_CODE("Menubar.add(entryPath, options)")} on that instance inside your callback to build each of the menu entries:` );
+    MAKE_PARAGRAPH( `You can build a <strong>Menubar</strong> element directly into any Area using ${INLINE_CODE("Area.addMenubar(items, options)")}. 
+    To specify each of the menu entries, you should pass an <em>Array</em> filled with every entry, which can contain the following options:` );
     MAKE_CODE_BULLET_LIST( [
-        ["entryPath", "String", "The path menu/submenu/etc of each entry"],
-        ["options", "Object/Function"]
-    ] );
-
-    MAKE_PARAGRAPH( `The different options to be set when adding entries to the Menubar are the following:` );
-    MAKE_CODE_BULLET_LIST( [
+        ["name", "String", "Name of the entry"],
         ["callback", "Function", "To be called when interacting with the entry"],
-        ["icon", "String", "(<a href='https://fontawesome.com/search'>Fontawesome</a>)"],
-        ["short", "String", "For key shortcuts"],
-        ["type", "String", "(checkbox)"],
-        ["checked", "Boolean", "for <em>checkbox</em> type"]
+        ["icon", "String", "LX.ICONS name"],
+        ["kbd", "String", "For key shortcuts"],
+        ["checked", "Boolean", "for <em>checkbox</em> entry types"]
     ] );
 
     MAKE_PARAGRAPH( `Note: In case of no options rather than the callback, you can use ${INLINE_CODE("options")} as the ${INLINE_CODE("Function")} callback.`, true );
-    MAKE_CODE( `area.@[mtd]addMenubar@( m =&gt; {
-m.@[mtd]add@( @"Scene/Open Scene"@ );
-m.@[mtd]add@( @"Scene/New Scene"@, () =&gt; { console.@[mtd]log@(@"New scene created!"@) } );
-m.@[mtd]add@( @"Scene/"@ )@[com]; // This is a separator!@
-m.@[mtd]add@( @"Scene/Open Recent/hello.scene"@);
-m.@[mtd]add@( @"Scene/Open Recent/goodbye.scene"@ );
-m.@[mtd]add@( @"Project/Export/DAE"@, { short: @"E"@ } );
-m.@[mtd]add@( @"Project/Export/GLTF"@ );
-m.@[mtd]add@( @"View/Show grid"@, { type: @"checkbox"@, checked: @true@, 
-callback: (v) => { 
-    console.@[mtd]log@(@"Show grid:"@, v);
-}});
-m.@[mtd]add@( @"Help/About"@ );
-m.@[mtd]add@( @"Help/Support"@, { callback: () =&gt; { 
-    console.@[mtd]log@(@"Support!"@) }, icon: @"fa-solid fa-heart"@ } );
-});` );
+    MAKE_CODE( `area.@[mtd]addMenubar@( [
+    { name: @"Scene"@, submenu: [
+        { name: @"New Scene"@ },
+        { name: @"Open Scene"@, icon: @"folder-open"@, kbd: @"S"@ },
+        { name: @"Open Recent"@, icon: @"file"@,  submenu: [
+            { name: @"hello.scene"@ },
+            { name: @"goodbye.scene"@ }
+        ] }
+    ] },
+    { name: @"Editor"@, submenu: [
+        { name: @"Autosave"@, checked: @true@, icon: @"floppy-disk"@ },
+        { name: @"Settings"@, icon: @"sliders-large"@ },
+    ] },
+    { name: @"Help"@, submenu: [
+        { name: @"Search Help"@, icon: @"search"@, kbd: @"F1"@ },
+        { name: @"Support LexGUI"@, icon: @"heart"@ },
+    ] },
+]);` );
 
-    MAKE_PARAGRAPH( `The Menubar creation can be configured too, where the following ${INLINE_CODE("options")} are available when calling ${INLINE_CODE("Area.addMenubar(callback, options)")}:` );
+    MAKE_PARAGRAPH( `The Menubar creation can be configured too, where the following ${INLINE_CODE("options")} are available when calling ${INLINE_CODE("Area.addMenubar(items, options)")}:` );
     MAKE_CODE_BULLET_LIST( [
         ["float", "String", "Justify main entries to left (default), center, right"]
     ] );
-    MAKE_CODE( `area.@[mtd]addMenubar@( m =&gt; {
+    MAKE_CODE( `area.@[mtd]addMenubar@( [
     @[com]// Fill entries...@
-}, { float: @"center"@ });` );
+], { float: @"center"@ });` );
 
     MAKE_HEADER( "Menubar Buttons", "h3", "menubar-buttons" );
 
-    MAKE_PARAGRAPH( `Inside the menubar creation callback, you can add a group of buttons to be added to your menubar using ${INLINE_CODE("Area.addButtons(callback, options)")}:` );
-    MAKE_CODE( `m.@[mtd]addButtons@( [
-{
-    title: @"Play"@,
-    icon: @"fa-solid fa-play"@,
-    callback:  (domEl) => { 
-        domEl.classList.@[mtd]toggle@(@"fa-play"@);
-        domEl.classList.@[mtd]toggle@(@"fa-stop"@);
+    MAKE_PARAGRAPH( `You can add a group of buttons to your menubar using ${INLINE_CODE("Menubar.addButtons(callback, options)")}:` );
+    MAKE_CODE( `menubar.@[mtd]addButtons@( [
+    {
+        title: @"Play"@,
+        icon: @"fa-solid fa-play"@,
+        callback:  (domEl) => { 
+            domEl.classList.@[mtd]toggle@(@"fa-play"@);
+            domEl.classList.@[mtd]toggle@(@"fa-stop"@);
+        }
+    },
+    {
+        title: @"Pause"@,
+        icon: @"fa-solid fa-pause"@,
+        disabled: @true@,
+        callback:  (domEl) => { }
+    },
+    {
+        icon: @"fa-solid fa-magnifying-glass"@,
+        callback:  (domEl) => { }
     }
-},
-{
-    title: @"Pause"@,
-    icon: @"fa-solid fa-pause"@,
-    disabled: @true@,
-    callback:  (domEl) => { }
-},
-{
-    icon: @"fa-solid fa-magnifying-glass"@,
-    callback:  (domEl) => { }
-}
 ]);` );
 
     MAKE_HEADER( "Menubar Icons and Logos", "h3", "menubar-icons" );
 
-    MAKE_PARAGRAPH( `Inside the menubar creation callback, you can add an icon and/or a logo button to be added to your menubar using ${INLINE_CODE("Area.setButtonIcon(title, src, callback, options)")}:` );
-    MAKE_CODE( `m.@[mtd]setButtonIcon@(@"Github"@, @"fa-brands fa-github"@, () => { 
+    MAKE_PARAGRAPH( `You can also add an icon and/or a logo button to your menubar using ${INLINE_CODE("Menubar.setButtonIcon(title, src, callback, options)")}:` );
+    MAKE_CODE( `menubar.@[mtd]setButtonIcon@(@"Github"@, @"fa-brands fa-github"@, () => { 
     window.@[mtd]open@(@"https://github.com/jxarco/lexgui.js/"@) 
 });` );
 
-    MAKE_PARAGRAPH( `and ${INLINE_CODE("Area.setButtonImage(title, src, callback, options)")}:` );
-    MAKE_CODE( `m.@[mtd]setButtonImage@(@"LexGUI"@, @"path/image.png"@, @null@, { float: @"left"@ });` );
+    MAKE_PARAGRAPH( `and ${INLINE_CODE("Menubar.setButtonImage(title, src, callback, options)")}:` );
+    MAKE_CODE( `menubar.@[mtd]setButtonImage@(@"LexGUI"@, @"path/image.png"@, @null@, { float: @"left"@ });` );
 
     MAKE_HEADER( "Searchbar for Menu Entries", "h3", "searchbar-for-menu-entries" );
 
@@ -108,8 +103,8 @@ m.@[mtd]add@( @"Help/Support"@, { callback: () =&gt; {
 
     MAKE_HEADER( "Sidebar", "h2", "sidebar" );
 
-    MAKE_PARAGRAPH( `You can also build a <strong>Sidebar</strong> element directly into any Area using ${INLINE_CODE("Area.addSidebar(callback, options)")}. 
-    To specify each of the entries, you should pass a <em>callback function</em> to be called when the Sidebar is constructed. <strong>Callbacks will have a Sidebar instance as parameter</strong>, 
+    MAKE_PARAGRAPH( `You can also build a Sidebar element directly into any Area using ${INLINE_CODE("Area.addSidebar(callback, options)")}. 
+    To specify each of the entries, you should pass a <em>callback function</em> to be called when the Sidebar is constructed. Callbacks will have a Sidebar instance as parameter, 
     so use ${INLINE_CODE("Sidebar.add(entryName, options)")} on that instance inside your callback to add each of the entries.` );
 
     MAKE_PARAGRAPH( `The different options to be set when adding entries to the Sidebar are the following:` );

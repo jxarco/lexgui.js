@@ -30,10 +30,10 @@
     
     MAKE_HEADER( "Methods", "h2", "methods" );
 
-    MAKE_CLASS_METHOD( ".addMenubar", `Creates a Menubar inside the area using the callback to create each of the entries and subentries.`, [
-        ["callback", "Function"],
+    MAKE_CLASS_METHOD( ".addMenubar", `Creates a Menubar inside the area using data in Array format to create each of the entries and subentries.`, [
+        ["items", "Array"],
         ["options", "Object"],
-    ], `<a href="menubar.html">Menubar</a>` );
+    ], `${ INLINE_PAGE( "Menubar", "reference/menubar.html" ) }` );
 
     MAKE_CLASS_METHOD( ".addOverlayButtons", `Creates a group of buttons that can be positioned at specific area locations. 
 <code class='inline ref'>options.float = <span class="str">"htc"</span></code> where h: horizontal; v: vertical; t: top; m: middle; b: bottom; l: left; c: center; r: right.`, [
@@ -43,16 +43,16 @@
 
     MAKE_CLASS_METHOD( ".addPanel", `Creates a Panel and attaches automatically to the area.`, [
         ["options", "Object"],
-    ], `<a href="panel.html">Panel</a>` );
+    ], `${ INLINE_PAGE( "Panel", "reference/panel.html" ) }` );
 
     MAKE_CLASS_METHOD( ".addSidebar", `Creates a sidebar section inside the area. Use <code class='inline ref'><span class="typ">Sidebar</span>.add()</code> to create and append content to the sidebar.`, [
         ["callback", "Function"],
         ["options", "Object"],
-    ], `<a href="sidebar.html">Sidebar</a>` );
+    ], `${ INLINE_PAGE( "Sidebar", "reference/sidebar.html" ) }` );
 
     MAKE_CLASS_METHOD( ".addTabs", `Creates a tab section inside the area. Use <code class='inline ref'><span class="typ">Tabs</span>.add()</code> to create and append content for each of the tabs.`, [
         ["options", "Object"],
-    ], `<a href="tabs.html">Tabs</a>` );
+    ], `${ INLINE_PAGE( "Tabs", "reference/tabs.html" ) }` );
 
     MAKE_CLASS_METHOD( ".attach", `Appends a child to the area (e.g. a Panel or any HTMLElement). If "content" has a root, then appends it, if not, append "content".`, [
         ["content", "HTMLElement"],

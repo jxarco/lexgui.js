@@ -66,111 +66,122 @@ snippet.style.position = "absolute";
 // document.body.appendChild( snippet );
 
 // menu bar
-area.addMenubar( m => {
+const menubar = area.addMenubar( [
 
-    // {options}: callback, icon, short
-
-    m.add( "Scene/New Scene", () => { console.log("New scene created!") });
-    m.add( "Scene/Open Scene", { icon: "fa-solid fa-folder-open", short:  "S", callback: () => { console.log("Opening SCENE Dialog") } } );
-    m.add( "Scene/Open Recent/hello.scene", name => { console.log("Opening " + name) });
-    m.add( "Scene/Open Recent/goodbye.scene", name => { console.log("Opening " + name) });
-    m.add( "Project/Project Settings", { disabled: true, callback: () => { console.log("Opening Project Settings") } } );
-    m.add( "Project/" );
-    m.add( "Project/Export", { icon: "fa-solid fa-download" });
-    m.add( "Project/Export/DAE", { icon: "fa-solid fa-cube", short: "D", callback: () => { console.log("Exporting DAE...") }} );
-    m.add( "Project/Export/GLTF", { short:  "G" } );
-    m.add( "Editor/Autosave", { type: 'checkbox', icon: "fa fa-floppy-disk", callback: (v, name) => { console.log(name + ": " + v ) } });
-    m.add( "Editor/Test", () => LX.prompt("Write in the text area below the bml instructions to move the avatar from the web application. A sample of BML instructions can be tested through the helper tabs in the right panel.", "Test?"));
-    m.add( "Editor/Settings", { icon: "fa-solid fa-gears", callback: () => {
-        const dialog = new LX.Dialog( "Settings", p => {
-            p.addText("A Text", "Testing first widget");
-            p.sameLine(3);
-            p.addLabel("Buttons:");
-            p.addButton(null, "Click me", () => {
-                console.log( p.getValue("A Text") );
+    { name: "Scene", submenu: [
+        { name: "New Scene", callback: () => { console.log("New scene created!") }},
+        { name: "Open Scene", icon: "folder-open", kbd: "S", callback: () => { console.log("Opening SCENE Dialog") } },
+        { name: "Open Recent", icon: "file",  submenu: [
+            { name: "hello.scene", callback: name => { console.log("Opening " + name) }},
+            { name: "goodbye.scene", callback: name => { console.log("Opening " + name) }}
+        ] }
+    ] },
+    { name: "Project", submenu: [
+        { name: "Project Settings", disabled: true, callback: () => { console.log("Opening Project Settings") } },
+        null,
+        { name: "Export", submenu: [
+            { name: "DAE", icon: "frame", kbd: "D", callback: () => { console.log("Exporting DAE...") }},
+            { name: "GLTF", kbd:  "G" }
+        ] },
+        { name: "Export", icon: "download" }
+    ] },
+    { name: "Editor", submenu: [
+        { name: "Autosave", checked: true, icon: "floppy-disk", callback: (key, v, menuItem) => { console.log(key, v) } },
+        { name: "Settings",  icon: "sliders-large", callback: () => {
+            const dialog = new LX.Dialog( "Settings", p => {
+                p.addText("A Text", "Testing first widget");
+                p.sameLine(3);
+                p.addLabel("Buttons:");
+                p.addButton(null, "Click me", () => {
+                    console.log( p.getValue("A Text") );
+                });
+                p.addButton(null, "Click me v2!", () => {
+                    console.log( p.getValue("A Text") );
+                });
             });
-            p.addButton(null, "Click me v2!", () => {
-                console.log( p.getValue("A Text") );
-            });
-        });
-    }} );
-    m.add( "Editor/Write BML", { icon: "fa-solid fa-gears", callback: () => {
+        }},
+        { name: "Write BML", icon: "file-code", callback: () => {
 
-        new LX.PocketDialog( "BML Instruction", p => {
+            new LX.PocketDialog( "BML Instruction", p => {
 
-            let htmlStr = "Write in the text area below the bml instructions to move the avatar from the web application. A sample of BML instructions can be tested through the helper tabs in the right panel.";
-            p.addTextArea(null, htmlStr, null, {disabled: true, fitHeight: true});
+                let htmlStr = "Write in the text area below the bml instructions to move the avatar from the web application. A sample of BML instructions can be tested through the helper tabs in the right panel.";
+                p.addTextArea(null, htmlStr, null, {disabled: true, fitHeight: true});
 
-            p.addButton(null, "Click here to see BML instructions and attributes", () => {
-                window.open("https://github.com/upf-gti/SignON-realizer/blob/SiGMLExperiments/docs/InstructionsBML.md");
-            });
+                p.addButton(null, "Click here to see BML instructions and attributes", () => {
+                    window.open("https://github.com/upf-gti/SignON-realizer/blob/SiGMLExperiments/docs/InstructionsBML.md");
+                });
 
-            htmlStr = "Note: In 'speech', all text between '%' is treated as actual words. An automatic translation from words (dutch) to phonemes (arpabet) is performed.";
-            htmlStr += "\n\nNote: Each instruction is inside '{}'. Each instruction is separated by a coma ',' except que last one.";
-            p.addTextArea(null, htmlStr, null, {disabled: true, fitHeight: true});
+                htmlStr = "Note: In 'speech', all text between '%' is treated as actual words. An automatic translation from words (dutch) to phonemes (arpabet) is performed.";
+                htmlStr += "\n\nNote: Each instruction is inside '{}'. Each instruction is separated by a coma ',' except que last one.";
+                p.addTextArea(null, htmlStr, null, {disabled: true, fitHeight: true});
 
-            htmlStr = 'An example: { "type":"speech", "start": 0, "text": "%hallo%.", "sentT": 1, "sentInt": 0.5 }, { "type": "gesture", "start": 0, "attackPeak": 0.5, "relax": 1, "end": 2, "locationBodyArm": "shoulder", "lrSym": true, "hand": "both", "distance": 0.1 }';
-            p.addTextArea(null, htmlStr, null, {disabled: true, fitHeight: true});
+                htmlStr = 'An example: { "type":"speech", "start": 0, "text": "%hallo%.", "sentT": 1, "sentInt": 0.5 }, { "type": "gesture", "start": 0, "attackPeak": 0.5, "relax": 1, "end": 2, "locationBodyArm": "shoulder", "lrSym": true, "hand": "both", "distance": 0.1 }';
+                p.addTextArea(null, htmlStr, null, {disabled: true, fitHeight: true});
 
-            const area = new LX.Area({ height: "250px" });
-            p.attach( area.root );
+                const area = new LX.Area({ height: "250px" });
+                p.attach( area.root );
 
-            window.editor = new LX.CodeEditor(area, {
-                highlight: 'JSON',
-                skip_info: true
-            });
+                window.editor = new LX.CodeEditor(area, {
+                    highlight: 'JSON',
+                    skip_info: true
+                });
 
-            p.addButton(null, "Send", () => {
-                console.log(":)")
-            });
+                p.addButton(null, "Send", () => {
+                    console.log(":)")
+                });
 
-        }, { size: ["30%", null], float: "right", draggable: false});
-    }} );
-    m.add( "Editor/Open AssetView", { icon: "fa-solid fa-rect", callback: createAssetDialog } );
+            }, { size: ["30%", null], float: "right", draggable: false});
+        }},
+        { name: "Open AssetView", icon: "display", callback: createAssetDialog },
+    ] },
+    { name: "Account", submenu: [
+        { name: "Login", icon: "user", callback: createLoginForm },
+    ] },
+    { name: "Notifications", submenu: [
+        { name: "Toast", callback: createToast },
+        { name: "Prompt",  callback: () => { LX.prompt("This action cannot be undone. This will permanently delete your account and remove your data from our servers.",
+            "Are you absolutely sure?", null, {xposition: ["50px", "100px"]}); } },
+    ] },
+    { name: "Help", submenu: [
+        { name: "Search Help", icon: "search", kbd:  "F1", callback: () => { window.open("./docs/") }},
+        { name: "Support LexGUI", icon: "heart" },
+    ] },
 
-    m.add( "Account/Login", { icon: "fa-solid fa-user", callback: createLoginForm } );
+], { sticky: false });
 
-    m.add( "Notifications/Toast", { callback: createToast } );
-    m.add( "Notifications/Prompt", { callback: () => { LX.prompt("This action cannot be undone. This will permanently delete your account and remove your data from our servers.", 
-        "Are you absolutely sure?", null, {xposition: ["50px", "100px"]}); } } );
-
-    m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass", short:  "F1", callback: () => { window.open("./docs/") }});
-    m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
-    m.add( "Help/Support LexGUI/Do it" );
-    m.addButtons( [
-        {
-            title: "Play",
-            icon: "fa-solid fa-play",
-            swap: "fa-solid fa-stop",
-            callback:  (value, event) => {
-                if( value ) console.log("play!");
-                else console.log("stop!");
-            }
-        },
-        {
-            title: "Pause",
-            icon: "fa-solid fa-pause",
-            disabled: true,
-            callback:  (value, event) => { console.log("pause!"); }
-        },
-        {
-            icon: "fa-solid fa-rotate-left",
-            callback:  (value, event) => {
-                const playButton = m.getButton( "Play" );
-                playButton.swap();
-            }
-        },
-        {
-            title: "Change Theme",
-            icon: "fa-solid fa-moon",
-            swap: "fa-solid fa-sun",
-            callback:  (value, event) => { LX.setTheme( value ? "light" : "dark" ) }
+menubar.addButtons( [
+    {
+        title: "Play",
+        icon: "fa-solid fa-play",
+        swap: "fa-solid fa-stop",
+        callback:  (value, event) => {
+            if( value ) console.log("play!");
+            else console.log("stop!");
         }
-    ]);
-    
-    m.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")})
-    m.setButtonImage("lexgui.js", "images/icon.png", () => {window.open("https://jxarco.github.io/lexgui.js/")}, {float: "left"})
-}, { sticky: false });
+    },
+    {
+        title: "Pause",
+        icon: "fa-solid fa-pause",
+        disabled: true,
+        callback:  (value, event) => { console.log("pause!"); }
+    },
+    {
+        icon: "fa-solid fa-rotate-left",
+        callback:  (value, event) => {
+            const playButton = m.getButton( "Play" );
+            playButton.swap();
+        }
+    },
+    {
+        title: "Change Theme",
+        icon: "fa-solid fa-moon",
+        swap: "fa-solid fa-sun",
+        callback:  (value, event) => { LX.setTheme( value ? "light" : "dark" ) }
+    }
+]);
+
+menubar.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")})
+menubar.setButtonImage("lexgui.js", "images/icon.png", () => {window.open("https://jxarco.github.io/lexgui.js/")}, {float: "left"})
 
 // split main area
 var [ left, right ] = area.split({ sizes:["70%","30%"], minimizable: true });
@@ -221,7 +232,7 @@ const sidebar = left.addSidebar( m => {
     footerSubtitle: "alexroco.30@gmail.com",
     footerImage: "https://avatars.githubusercontent.com/u/25059187?s=400&u=ad8907b748c13e4e1a7cdd3882826acb6a2928b5&v=4",
     // footer: customFooter,
-    onHeaderPressed: (e) => { console.log( "onHeaderPressed" ) }, 
+    onHeaderPressed: (e) => { console.log( "onHeaderPressed" ) },
     onFooterPressed: (e, element) => {
         new LX.DropdownMenu( element, [
             "My Account",
@@ -259,9 +270,9 @@ bottom.onresize = bounding => {
 }
 
 // another menu bar
-bottom.addMenubar( m => {
-    m.add( "Information", e => { 
-        console.log(e); 
+const bottomMenubar = bottom.addMenubar([
+    { name: "Information", callback: e => {
+        console.log(e);
         var el = document.getElementById('kf-timeline');
         if(el)
             el.style.display = 'none';
@@ -273,9 +284,8 @@ bottom.addMenubar( m => {
             el.style.display = 'none';
         var bottomPanel = document.getElementById('bottom-panel');
         bottomPanel.style.display = 'block';
-    });
-
-    m.add( "Keyframes Timeline", e => { 
+    } },
+    { name: "Keyframes Timeline", callback: e => {
         console.log(e);
         let el = document.getElementById('bottom-panel');
         if(el)
@@ -286,7 +296,7 @@ bottom.addMenubar( m => {
         el = document.getElementById('curves-timeline');
         if(el)
             el.style.display = 'none';
-        var timeline = document.getElementById('kf-timeline');            
+        var timeline = document.getElementById('kf-timeline');
         if(timeline) {
             timeline.style.display = 'block';
             kfTimeline.resize();
@@ -304,33 +314,33 @@ bottom.addMenubar( m => {
                 }
             });
 
-            bottom.attach(kfTimeline.root);
-            kfTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
+            bottom.attach(kfTimeline.mainArea);
             kfTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [0,1,0, 1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
+            kfTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
+            kfTimeline.resize();
             kfTimeline.draw( 0 );
         }
-    });
-
-    m.add( "Clips Timeline", e => { 
+    } },
+    { name: "Clips Timeline", callback: e => {
         console.log(e);
         let el = document.getElementById('bottom-panel');
         if(el)
             el.style.display = 'none';
-        
+
         el = document.getElementById('kf-timeline');
         if(el)
             el.style.display = 'none';
         el = document.getElementById('curves-timeline');
         if(el)
             el.style.display = 'none';
-        var ctimeline = document.getElementById('clips-timeline');            
+        var ctimeline = document.getElementById('clips-timeline');
         if(ctimeline) {
             ctimeline.style.display = 'block';
             clipsTimeline.resize();
         }
         else {
-            clipsTimeline = new LX.ClipsTimeline("clips-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight});
-            bottom.attach(clipsTimeline.root);
+            clipsTimeline = new LX.ClipsTimeline("clips-timeline");
+            bottom.attach(clipsTimeline.mainArea);
             var clip = {id:"Clip1", start:0, duration:1, type:""};
             clipsTimeline.addClip(clip);
             var clip = {id:"Clip2", start:0, fadein: 0.5, fadeout: 0.8, duration:1, type:""};
@@ -341,15 +351,14 @@ bottom.addMenubar( m => {
             clipsTimeline.addClip(clip);
             var clip = {id:"Clip5", start:0, fadein: 0.5, fadeout: 0.8, duration:1, type:""};
             clipsTimeline.addClip(clip);
-           
+
             // clipsTimeline.setAnimationClip({tracks: [{clips: [clip]}], duration: 2});
             clipsTimeline.selectedItems = ["Clip1"];
-  
+            clipsTimeline.resize();
             clipsTimeline.draw(0);
         }
-    });
-
-    m.add( "Curves Timeline", e => { 
+    } },
+    { name: "Curves Timeline", callback: e => {
         console.log(e);
         let el = document.getElementById('bottom-panel');
         if(el)
@@ -360,35 +369,37 @@ bottom.addMenubar( m => {
         el = document.getElementById('clips-timeline');
         if(el)
             el.style.display = 'none';
-        
+
         var timeline = document.getElementById('curves-timeline');
         if(timeline) {
             timeline.style.display = 'block';
             curvesTimeline.resize();
         }
         else {
-            curvesTimeline = new LX.CurvesTimeline("curves-timeline", {width: m.root.clientWidth, height: m.parent.root.parentElement.clientHeight - m.root.clientHeight, range: [-1,1]});
-            curvesTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
+            curvesTimeline = new LX.CurvesTimeline("curves-timeline");
             curvesTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [0,1,0,-1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,0,0,1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.2, 0.3]}], duration: 1});
-            bottom.attach(curvesTimeline.root);
+            curvesTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
+            bottom.attach(curvesTimeline.mainArea);
+            curvesTimeline.resize();
             curvesTimeline.draw(0);
         }
-    });
+    } },
 
-    bottom.onresize = bounding => {
-        if(clipsTimeline)
-            clipsTimeline.resize(  );
-        
-        if(kfTimeline)
-            kfTimeline.resize();
-        
-        if(curvesTimeline)
-            curvesTimeline.resize();
-    }
-} );
+]);
+
+bottom.onresize = bounding => {
+    if(clipsTimeline)
+        clipsTimeline.resize(  );
+
+    if(kfTimeline)
+        kfTimeline.resize();
+
+    if(curvesTimeline)
+        curvesTimeline.resize();
+}
 
 var bottomPanel = bottom.addPanel({id: "bottom-panel"});
-fillBottomPanel( bottomPanel ); 
+fillBottomPanel( bottomPanel );
 
 // split right area
 var [rup, rbottom] = right.split({type: 'vertical', sizes:["70%","30%"]});
@@ -412,7 +423,7 @@ topTabs.add( "Debug", document.createElement('div'));
 // add on resize event to control canvas size
 topTabs.area.onresize = resizeCanvas;
 
-topTabs.area.addOverlayButtons( [ 
+topTabs.area.addOverlayButtons( [
     [
         {
             name: "Select",
@@ -472,7 +483,7 @@ bottomTabs.add( "Panel V", sideBottomPanel );
 bottomTabs.add( "Panel H", sideBottomPanelH );
 
 function loop(dt) {
-    
+
     var ctx = canvas.getContext("2d");
 
     // Get values from panel widgets (e.g. color value)
@@ -503,10 +514,10 @@ function loop(dt) {
 
 requestAnimationFrame(loop);
 
-// **** **** **** **** **** **** **** **** **** **** **** **** 
+// **** **** **** **** **** **** **** **** **** **** **** ****
 
 function fillPanel( panel ) {
-    
+
     // Add data tree
 
     let sceneData = {
@@ -568,46 +579,46 @@ function fillPanel( panel ) {
         }
     ];
 
-    window.tree = panel.addTree("Scene Tree", sceneData, { 
-        icons: treeIcons, 
+    window.tree = panel.addTree("Scene Tree", sceneData, {
+        icons: treeIcons,
         // filter: false,
         addDefault: true,
-        onevent: (event) => { 
+        onevent: (event) => {
             console.log(event.string());
 
             switch(event.type) {
-                case LX.TreeEvent.NODE_SELECTED: 
+                case LX.TreeEvent.NODE_SELECTED:
                     if(event.multiple)
-                        console.log("Selected: ", event.node); 
+                        console.log("Selected: ", event.node);
                     else
-                        console.log(event.node.id + " selected"); 
+                        console.log(event.node.id + " selected");
                     break;
-                case LX.TreeEvent.NODE_DELETED: 
+                case LX.TreeEvent.NODE_DELETED:
                     if(event.multiple)
-                        console.log("Deleted: ", event.node); 
+                        console.log("Deleted: ", event.node);
                     else
-                        console.log(event.node.id + " deleted"); 
+                        console.log(event.node.id + " deleted");
                     break;
-                case LX.TreeEvent.NODE_DBLCLICKED: 
-                    console.log(event.node.id + " dbl clicked"); 
+                case LX.TreeEvent.NODE_DBLCLICKED:
+                    console.log(event.node.id + " dbl clicked");
                     break;
-                case LX.TreeEvent.NODE_CONTEXTMENU: 
+                case LX.TreeEvent.NODE_CONTEXTMENU:
                     const m = event.panel;
                     m.add( "Components/Transform");
                     m.add( "Components/MeshRenderer");
                     break;
-                case LX.TreeEvent.NODE_DRAGGED: 
-                    console.log(event.node.id + " is now child of " + event.value.id); 
+                case LX.TreeEvent.NODE_DRAGGED:
+                    console.log(event.node.id + " is now child of " + event.value.id);
                     break;
                 case LX.TreeEvent.NODE_RENAMED:
-                    console.log(event.node.id + " is now called " + event.value); 
+                    console.log(event.node.id + " is now called " + event.value);
                     break;
                 case LX.TreeEvent.NODE_VISIBILITY:
-                    console.log(event.node.id + " visibility: " + event.value); 
+                    console.log(event.node.id + " visibility: " + event.value);
                     break;
             }
         }
-    });    
+    });
 
     // add widgets to panel branch
     panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});
@@ -748,7 +759,7 @@ function fillPanel( panel ) {
 }
 
 function fillRightBottomPanel( panel, tab ) {
-    
+
     panel.clear();
 
     panel.branch("Bottom", {icon: "fa-solid fa-table-list"});
@@ -756,7 +767,7 @@ function fillRightBottomPanel( panel, tab ) {
     if(tab == 'Horizontal')
     {
         panel.addTabSections( "H_tabs", [
-            { 
+            {
                 name: "First tab",
                 icon: "fa-brands fa-discord",
                 onCreate: p => {
@@ -767,7 +778,7 @@ function fillRightBottomPanel( panel, tab ) {
                     console.log( p );
                 }
             },
-            { 
+            {
                 name: "Second tab",
                 icon: "fa-brands fa-twitter",
                 onCreate: p => {
@@ -775,7 +786,7 @@ function fillRightBottomPanel( panel, tab ) {
                     p.addText("Tweet", "", null, {placeholder: "Tyler Rake 2"});
                 }
             },
-            { 
+            {
                 name: "Third tab",
                 icon: "fa-brands fa-github",
                 onCreate: p => {
@@ -798,7 +809,7 @@ function fillRightBottomPanel( panel, tab ) {
     else if(tab == 'Vertical')
     {
         panel.addTabSections( "V_tabs", [
-            { 
+            {
                 name: "First tab",
                 icon: "fa-brands fa-discord",
                 onCreate: (p, content) => {
@@ -810,7 +821,7 @@ function fillRightBottomPanel( panel, tab ) {
                     });
                 }
             },
-            { 
+            {
                 name: "Second tab",
                 icon: "fa-brands fa-twitter",
                 onCreate: p => {
@@ -818,7 +829,7 @@ function fillRightBottomPanel( panel, tab ) {
                     p.addText("Tweet", "", null, {placeholder: "Tyler Rake 2"});
                 }
             },
-            { 
+            {
                 name: "Third tab",
                 icon: "fa-brands fa-github",
                 onCreate: p => {
@@ -857,7 +868,7 @@ function fillRightBottomPanel( panel, tab ) {
 }
 
 function fillBottomPanel( panel ) {
-    
+
     // add widgets to panel branch
     panel.branch("Information", {icon: "fa fa-circle-info"});
     window.tableWidget = panel.addTable("A Table", {
@@ -898,7 +909,7 @@ function fillBottomPanel( panel ) {
             ]
         }
     });
-    panel.addText("Camera", "Canon EOS 80D", null, {disabled: true}); 
+    panel.addText("Camera", "Canon EOS 80D", null, {disabled: true});
     panel.addText("Text", "Warning text", null, { warning: true });
     const patternOptions = { uppercase: true }
     panel.addText("Text With Validator Pattern", "", (value, event) => {
@@ -1003,7 +1014,7 @@ function createAssetDialog() {
             }
         ];
 
-        var assetView = new LX.AssetView({ 
+        var assetView = new LX.AssetView({
             skipBrowser: true,
             skipNavigation: true,
             previewActions: previewActions
@@ -1015,7 +1026,7 @@ function createAssetDialog() {
 
         for(let i = 0; i < values.length; i++){
             let data = {
-                id: values[i], 
+                id: values[i],
                 type: i == 0 ? "clip" : "image",
                 src: "data/" + values[i].toLowerCase(),
             }
@@ -1024,20 +1035,20 @@ function createAssetDialog() {
 
         assetView.load( assetData, (e,v) => {
             switch(e.type) {
-                case LX.AssetViewEvent.ASSET_SELECTED: 
+                case LX.AssetViewEvent.ASSET_SELECTED:
                     if(e.multiple)
-                        console.log("Selected: ", e.item); 
+                        console.log("Selected: ", e.item);
                     else
-                        console.log(e.item.id + " selected"); 
+                        console.log(e.item.id + " selected");
                     break;
-                case LX.AssetViewEvent.ASSET_DELETED: 
-                    console.log(e.item.id + " deleted"); 
+                case LX.AssetViewEvent.ASSET_DELETED:
+                    console.log(e.item.id + " deleted");
                     break;
-                case LX.AssetViewEvent.ASSET_CLONED: 
-                    console.log(e.item.id + " cloned"); 
+                case LX.AssetViewEvent.ASSET_CLONED:
+                    console.log(e.item.id + " cloned");
                     break;
                 case LX.AssetViewEvent.ASSET_RENAMED:
-                    console.log(e.item.id + " is now called " + e.value); 
+                    console.log(e.item.id + " is now called " + e.value);
                     break;
             }
         })

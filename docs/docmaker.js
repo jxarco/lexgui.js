@@ -248,6 +248,12 @@ function INLINE_LINK( string, href )
     return `<a href="` + href + `">` + string + `</a>`;
 }
 
+function INLINE_PAGE( string, page )
+{
+    console.assert(string && page);
+    return `<a onclick="loadPage('` + page + `')">` + string + `</a>`;
+}
+
 function INLINE_CODE( string )
 {
     console.assert(string);

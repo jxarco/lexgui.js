@@ -28,7 +28,7 @@
 
         SET_DOM_TARGET( content );
 
-        function loadPage(page, addToHistory = true) {
+        window.loadPage = function(page, addToHistory = true) {
             fetch(page)
                 .then(response => response.text())
                 .then(html => {
@@ -77,15 +77,12 @@
         if( false )
         {
             area.root.style.borderRight = "2px solid gray";
-            area.addMenubar( m => {
-                m.add( "Examples", () => {
-                    location.href = "../examples/";
-                });
-                m.add( "Docs v" + LX.version, (v, name) => {
-                    location.href = "../docs/";
-                });
-                m.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
-            });
+            const menubar = area.addMenubar( [
+                { name: "Examples", callback: () => { location.href = "../examples/"; } },
+                { name: "Docs v" + LX.version, callback: () => { location.href = "../docs/"; } }
+            ]);
+
+            menubar.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
 
             // Split main area
             area.split({ type: 'vertical', sizes: "auto", resize: false });
@@ -195,14 +192,14 @@
                 collapsable: false
             });
 
-            const menubar = sidebar.siblingArea.addMenubar(m => {
-                m.addButtons([{
-                    title: "Change Theme",
-                    icon: "fa-solid fa-moon",
-                    swap: "fa-solid fa-sun",
-                    callback: (swapValue) => { LX.setTheme(swapValue ? "light" : "dark") }
-                }]);
-            });
+            const menubar = sidebar.siblingArea.addMenubar();
+
+            menubar.addButtons([{
+                title: "Change Theme",
+                icon: "fa-solid fa-moon",
+                swap: "fa-solid fa-sun",
+                callback: (swapValue) => { LX.setTheme(swapValue ? "light" : "dark") }
+            }]);
 
             menubar.siblingArea.root.style.overflowY = "scroll";
             menubar.siblingArea.root.appendChild( content );

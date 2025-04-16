@@ -29,12 +29,12 @@
         let [leftArea, rightArea] = area.split({ sizes: ["20%","80%"], resize: false });
 
         leftArea.root.style.borderRight = "2px solid gray";
-        leftArea.addMenubar( m => {
-            m.add( "Docs v" + LX.version, (v, name) => {
-                location.href = "../docs/";
-            });
-            m.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
-        });
+
+        const menubar = leftArea.addMenubar( [
+            { name: "Docs v" + LX.version, callback: (v, name) => { location.href = "../docs/"; } }
+        ] );
+
+        menubar.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
 
         const examples = [
             'All Widgets',    

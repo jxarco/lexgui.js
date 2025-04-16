@@ -44,11 +44,11 @@
 
     MAKE_CLASS_METHOD( ".get", `Returns a given widget (in the panel) searched by name.`, [
         ["name", "String"]
-    ], `<a href="widget.html">Widget</a>`);
+    ], `${ INLINE_PAGE( "Widget", "reference/widget.html" ) }`);
 
     MAKE_CLASS_METHOD( ".getBranch", `Returns a given branch (in the panel) searched by name.`, [
         ["name", "String"]
-    ], `<a href="branch.html">Branch</a>` );
+    ], `${ INLINE_PAGE( "Branch", "reference/branch.html" ) }` );
 
     MAKE_CLASS_METHOD( ".getValue", `Returns the value of a given widget (in the panel) searched by name.`, [
         ["name", "String"]

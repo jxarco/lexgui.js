@@ -807,7 +807,7 @@ function makeIcon( iconName, options = { } )
     }
 
     const path = document.createElement( "path" );
-    path.setAttribute( "fill",  "var(--color)" );
+    path.setAttribute( "fill",  "currentColor" );
     path.setAttribute( "d",  data[ 4 ] );
     svg.appendChild( path );
 
@@ -1035,17 +1035,14 @@ function _createCommandbar( root )
             const el = allItems[ hoverElId ];
             if( el )
             {
-                const isCheckbox = (el.item.type && el.item.type === 'checkbox');
-                this.close();
-                if( isCheckbox )
+                if( el.item.checked != undefined )
                 {
                     el.item.checked = !el.item.checked;
-                    el.callback.call( window, el.item.checked, el.entry_name );
                 }
-                else
-                {
-                    el.callback.call( window, el.entry_name );
-                }
+
+                this.close();
+
+                el.callback.call( window, el.item.name, el.item.checked );
             }
         }
         else if ( e.key == 'ArrowDown' && hoverElId < (allItems.length - 1) )
@@ -1162,56 +1159,65 @@ function _createCommandbar( root )
 
         let searchItem = document.createElement("div");
         searchItem.className = "searchitem last";
-        const isCheckbox = (i && i.type && i.type === 'checkbox');
-        if( isCheckbox )
-        {
-            searchItem.innerHTML = "<a class='fa fa-check'></a><span>" + ( p + t ) + "</span>"
-        }
-        else
-        {
-            searchItem.innerHTML = ( p + t );
-        }
-        searchItem.entry_name = t;
+        searchItem.innerHTML = ( p + t );
         searchItem.callback = c;
         searchItem.item = i;
-        searchItem.addEventListener('click', function( e ) {
-            this.callback.call( window, this.entry_name );
+
+        searchItem.addEventListener('click', e => {
+
+            if( i.checked != undefined )
+            {
+                i.checked = !i.checked;
+            }
+
+            c.call( window, t, i.checked );
             LX.setCommandbarState( false );
             _resetBar( true );
         });
+
         searchItem.addEventListener('mouseenter', function( e ) {
             commandbar.querySelectorAll(".hovered").forEach(e => e.classList.remove('hovered'));
             this.classList.add('hovered');
             hoverElId = allItems.indexOf( this );
         });
+
         searchItem.addEventListener('mouseleave', function( e ) {
             this.classList.remove('hovered');
         });
+
         allItems.push( searchItem );
         itemContainer.appendChild( searchItem );
         refPrevious = searchItem;
     }
 
-    const _propagateAdd = ( item, filter, path ) => {
+    const _propagateAdd = ( item, filter, path, skipPropagation ) => {
 
-        const key = Object.keys( item )[ 0 ];
-        let name = item.name ?? path + key;
+        if( !item )
+        {
+            return;
+        }
+
+        let name = item.name;
         if( name.toLowerCase().includes( filter ) )
         {
             if( item.callback )
             {
-                _addElement( item.name ?? key, item.callback, path, item );
+                _addElement( name, item.callback, path, item );
             }
         }
 
-        // is sidebar..
-        if( item.name )
-        return;
+        const submenu = item.submenu ?? item[ name ];
+        if( skipPropagation || !submenu )
+        {
+            return;
+        }
 
-        path += key + " > ";
+        path += name + " > ";
 
-        for( let c of item[ key ] )
+        for( let c of submenu )
+        {
             _propagateAdd( c, filter, path );
+        }
     };
 
     commandbar._addElements = filter => {
@@ -1219,6 +1225,14 @@ function _createCommandbar( root )
         _resetBar();
 
         for( let m of LX.menubars )
+        {
+            for( let i of m.items )
+            {
+                _propagateAdd( i, filter, "" );
+            }
+        }
+
+        for( let m of LX.sidebars )
         {
             for( let i of m.items )
             {
@@ -1329,7 +1343,7 @@ function init( options = { } )
     {
         document.addEventListener( "scroll", e => {
             // Get all active menuboxes
-            const mbs = document.body.querySelectorAll( ".lexmenubox" );
+            const mbs = document.body.querySelectorAll( ".lexdropdownmenu" );
             mbs.forEach( ( mb ) => {
                 mb._updatePosition();
             } );
@@ -1404,6 +1418,7 @@ function init( options = { } )
 
     this.ready = true;
     this.menubars = [ ];
+    this.sidebars = [ ];
 
     if( !options.skipRoot && !options.skipDefaultArea )
     {
@@ -2108,6 +2123,7 @@ class DropdownMenu {
         if( DropdownMenu.currentMenu )
         {
             DropdownMenu.currentMenu.destroy();
+            this.invalid = true;
             return;
         }
 
@@ -2121,6 +2137,7 @@ class DropdownMenu {
         this.side = options.side ?? "bottom";
         this.align = options.align ?? "center";
         this.avoidCollisions = options.avoidCollisions ?? true;
+        this.onBlur = options.onBlur;
 
         this.root = document.createElement( "div" );
         this.root.id = "root";
@@ -2139,18 +2156,20 @@ class DropdownMenu {
             this.root.focus();
 
             this._onClick = e => {
+
                 if( e.target && ( this.root.contains( e.target ) || e.target == this._trigger ) )
                 {
                     return;
                 }
-                this.destroy();
+
+                this.destroy( true );
             };
 
             document.body.addEventListener( "click", this._onClick );
         }, 10 );
     }
 
-    destroy() {
+    destroy( blurEvent ) {
 
         this._trigger.classList.remove( "triggered" );
 
@@ -2161,6 +2180,11 @@ class DropdownMenu {
         LX.root.querySelectorAll( ".lexdropdownmenu" ).forEach( m => { m.remove(); } );
 
         DropdownMenu.currentMenu = null;
+
+        if( blurEvent && this.onBlur )
+        {
+            this.onBlur();
+        }
     }
 
     _create( items, parentDom ) {
@@ -2216,13 +2240,12 @@ class DropdownMenu {
 
             const menuItem = document.createElement('div');
             menuItem.className = "lexdropdownmenuitem" + ( item.name ? "" : " label" ) + ( item.disabled ?? false ? " disabled" : "" ) + ( ` ${ item.className ?? "" }` );
-            menuItem.id = pKey;
+            menuItem.id = item.key = pKey;
             menuItem.innerHTML = `<span>${ key }</span>`;
-
             menuItem.tabIndex = "1";
             parentDom.appendChild( menuItem );
 
-            if( item.constructor === String || ( item.disabled ?? false ) )
+            if( item.constructor === String ) // Label case
             {
                 continue;
             }
@@ -2239,12 +2262,35 @@ class DropdownMenu {
 
                 const kbd = LX.makeKbd( item.kbd );
                 menuItem.appendChild( kbd );
+
+                document.addEventListener( "keydown", e => {
+                    if( !this._trigger.ddm ) return;
+                    e.preventDefault();
+                    // Check if it's a letter or other key
+                    let kdbKey = item.kbd.join("");
+                    kdbKey = kdbKey.length == 1 ? kdbKey.toLowerCase() : kdbKey;
+                    if( kdbKey == e.key )
+                    {
+                        menuItem.click()
+                    }
+                } );
             }
+
+            const disabled = item.disabled ?? false;
 
             if( item.icon )
             {
-                const icon = LX.makeIcon( item.icon );
+                const icon = LX.makeIcon( item.icon, { svgClass: disabled ? "fg-tertiary" : "" } );
                 menuItem.prepend( icon );
+            }
+            else if( item.checked == undefined ) // no checkbox, no icon
+            {
+                menuItem.classList.add( "pl-8" );
+            }
+
+            if( disabled )
+            {
+                continue;
             }
 
             if( item.checked != undefined )
@@ -2253,11 +2299,12 @@ class DropdownMenu {
                     const f = item[ 'callback' ];
                     if( f )
                     {
-                        f.call( this, key, menuItem, v );
+                        f.call( this, key, v, menuItem );
                     }
                 }, { className: "accent" });
                 const input = checkbox.root.querySelector( "input" );
-                menuItem.prepend( input );
+                input.classList.add( "ml-auto" );
+                menuItem.appendChild( input );
 
                 menuItem.addEventListener( "click", (e) => {
                     if( e.target.type == "checkbox" ) return;
@@ -2273,7 +2320,8 @@ class DropdownMenu {
                     {
                         f.call( this, key, menuItem );
                     }
-                    this.destroy();
+
+                    this.destroy( true );
                 } );
             }
 
@@ -2381,6 +2429,18 @@ class DropdownMenu {
 };
 
 LX.DropdownMenu = DropdownMenu;
+
+function addDropdownMenu( trigger, items, options )
+{
+    const menu = new DropdownMenu( trigger, items, options );
+    if( !menu.invalid )
+    {
+        return menu;
+    }
+    return null;
+}
+
+LX.addDropdownMenu = addDropdownMenu;
 
 /**
  * @class ColorPicker
@@ -3584,20 +3644,15 @@ class Area {
 
     /**
      * @method addMenubar
-     * @param {Function} callback Function to fill the menubar
+     * @param {Array} items Items to fill the menubar
      * @param {Object} options:
      * float: Justify content (left, center, right) [left]
      * sticky: Fix menubar at the top [true]
      */
 
-    addMenubar( callback, options = {} ) {
+    addMenubar( items, options = {} ) {
 
-        let menubar = new Menubar( options );
-
-        if( callback )
-        {
-            callback( menubar );
-        }
+        let menubar = new Menubar( items, options );
 
         LX.menubars.push( menubar );
 
@@ -3639,7 +3694,7 @@ class Area {
         // Generate DOM elements after adding all entries
         sidebar.update();
 
-        LX.menubars.push( sidebar );
+        LX.sidebars.push( sidebar );
 
         const width = options.width ?? "16rem";
         const [ bar, content ] = this.split( { type: 'horizontal', sizes: [ width, null ], resize: false, sidebar: true } );
@@ -4311,7 +4366,7 @@ LX.Tabs = Tabs;
 
 class Menubar {
 
-    constructor( options = {} ) {
+    constructor( items, options = {} ) {
 
         this.root = document.createElement( "div" );
         this.root.className = "lexmenubar";
@@ -4321,272 +4376,40 @@ class Menubar {
             this.root.style.justifyContent = options.float;
         }
 
-        this.items = [ ];
         this.buttons = [ ];
         this.icons = { };
         this.shorts = { };
+        this.items = items ?? [];
+
+        this.createEntries();
     }
 
     _resetMenubar( focus ) {
 
-        // Menu entries are in the menubar..
-        this.root.querySelectorAll(".lexmenuentry").forEach( _entry => {
-            _entry.classList.remove( 'selected' );
-            _entry.built = false;
+        this.root.querySelectorAll(".lexmenuentry").forEach( e => {
+            e.classList.remove( 'selected' );
+            e.built = false;
         } );
 
-        // Menuboxes are in the root area!
-        LX.root.querySelectorAll(".lexmenubox").forEach(e => e.remove());
+        if( this._currentDropdown )
+        {
+            this._currentDropdown.destroy();
+            this._currentDropdown = null;
+        }
 
         // Next time we need to click again
         this.focused = focus ?? false;
     }
 
-    _createSubmenu( o, k, c, d ) {
-
-        let menuElement = document.createElement('div');
-        menuElement.className = "lexmenubox";
-        menuElement.tabIndex = "0";
-        c.currentMenu = menuElement;
-        menuElement.parentEntry = c;
-
-        const isSubMenu = c.classList.contains( "lexmenuboxentry" );
-        if( isSubMenu )
-        {
-            menuElement.dataset[ "submenu" ] = true;
-        }
-
-        menuElement._updatePosition = () => {
-            // Remove transitions for this change..
-            const transition = menuElement.style.transition;
-            menuElement.style.transition = "none";
-            flushCss( menuElement );
-
-            doAsync( () => {
-                let rect = c.getBoundingClientRect();
-                menuElement.style.left = ( isSubMenu ? ( rect.x + rect.width ) : rect.x ) + "px";
-                menuElement.style.top = ( isSubMenu ? rect.y : ( ( rect.y + rect.height ) ) - 4 ) + "px";
-                menuElement.style.transition = transition;
-            } );
-        };
-
-        menuElement._updatePosition();
-
-        doAsync( () => {
-            menuElement.dataset[ "open" ] = true;
-        }, 10 );
-
-        LX.root.appendChild( menuElement );
-
-        for( var i = 0; i < o[ k ].length; ++i )
-        {
-            const subitem = o[ k ][ i ];
-            const subkey = Object.keys( subitem )[ 0 ];
-            const hasSubmenu = subitem[ subkey ].length;
-            const isCheckbox = subitem[ 'type' ] == 'checkbox';
-            let subentry = document.createElement('div');
-            subentry.tabIndex = "-1";
-            subentry.className = "lexmenuboxentry";
-            subentry.className += (i == o[k].length - 1 ? " last" : "") + ( subitem.disabled ? " disabled" : "" );
-
-            if( subkey == '' )
-            {
-                subentry.className = " lexseparator";
-            }
-            else
-            {
-                subentry.id = subkey;
-                let subentrycont = document.createElement('div');
-                subentrycont.innerHTML = "";
-                subentrycont.classList = "lexmenuboxentrycontainer";
-                subentry.appendChild(subentrycont);
-                const icon = this.icons[ subkey ];
-                if( isCheckbox )
-                {
-                    subentrycont.innerHTML += "<input type='checkbox' >";
-                }
-                else if( icon )
-                {
-                    subentrycont.innerHTML += "<a class='" + icon + " fa-sm'></a>";
-                }
-                else
-                {
-                    subentrycont.innerHTML += "<a class='fa-solid fa-sm noicon'></a>";
-                    subentrycont.classList.add( "noicon" );
-
-                }
-                subentrycont.innerHTML += "<div class='lexentryname'>" + subkey + "</div>";
-            }
-
-            let checkboxInput = subentry.querySelector('input');
-            if( checkboxInput )
-            {
-                checkboxInput.checked = subitem.checked ?? false;
-                checkboxInput.addEventListener('change', e => {
-                    subitem.checked = checkboxInput.checked;
-                    const f = subitem[ 'callback' ];
-                    if( f )
-                    {
-                        f.call( this, subitem.checked, subkey, subentry );
-                        this._resetMenubar();
-                    }
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                })
-            }
-
-            menuElement.appendChild( subentry );
-
-            // Nothing more for separators
-            if( subkey == '' )
-            {
-                continue;
-            }
-
-            menuElement.addEventListener('keydown', e => {
-                e.preventDefault();
-                let short = this.shorts[ subkey ];
-                if(!short) return;
-                // check if it's a letter or other key
-                short = short.length == 1 ? short.toLowerCase() : short;
-                if( short == e.key )
-                {
-                    subentry.click()
-                }
-            });
-
-            // Add callback
-            subentry.addEventListener("click", e => {
-                if( checkboxInput )
-                {
-                    subitem.checked = !subitem.checked;
-                }
-                const f = subitem[ 'callback' ];
-                if( f )
-                {
-                    f.call( this, checkboxInput ? subitem.checked : subkey, checkboxInput ? subkey : subentry );
-                    this._resetMenubar();
-                }
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-            });
-
-            subentry.addEventListener("blur", e => {
-                if( e.relatedTarget && !e.relatedTarget.className.includes( "lexmenu" ) )
-                {
-                    this._resetMenubar();
-                }
-            });
-
-            // Add icon if has submenu, else check for shortcut
-            if( !hasSubmenu )
-            {
-                if( this.shorts[ subkey ] )
-                {
-                    let shortEl = document.createElement('div');
-                    shortEl.className = "lexentryshort";
-                    shortEl.innerText = this.shorts[ subkey ];
-                    subentry.appendChild( shortEl );
-                }
-                continue;
-            }
-
-            let submenuIcon = document.createElement('a');
-            submenuIcon.className = "fa-solid fa-angle-right fa-xs";
-            subentry.appendChild( submenuIcon );
-
-            subentry.addEventListener("mouseover", e => {
-                if( subentry.built )
-                {
-                    return;
-                }
-                subentry.built = true;
-                this._createSubmenu( subitem, subkey, subentry, ++d );
-                e.stopPropagation();
-            });
-
-            subentry.addEventListener("mouseleave", e => {
-                if( subentry.currentMenu && ( subentry.currentMenu != e.toElement ) && !( subentry.currentMenu.contains( e.toElement ) ) )
-                {
-                    d = -1; // Reset depth
-                    delete subentry.built;
-                    subentry.currentMenu.remove();
-                    delete subentry.currentMenu;
-                }
-            });
-        }
-
-        // Set final width
-        menuElement.style.width = menuElement.offsetWidth + "px";
-    }
-
     /**
-     * @method add
-     * @param {Object} options:
-     * callback: Function to call on each item
-     * icon: Entry icon
-     * short: Entry shortcut name
+     * @method createEntries
      */
 
-    add( path, options = {} ) {
-
-        if( options.constructor == Function )
-        {
-            options = { callback: options };
-        }
-
-        // Process path
-        const tokens = path.split( "/" );
-
-        // Assign icons and shortcuts to last token in path
-        const lastPath = tokens[tokens.length - 1];
-        this.icons[ lastPath ] = options.icon;
-        this.shorts[ lastPath ] = options.short;
-
-        let idx = 0;
-
-        const _insertEntry = ( token, list ) => {
-            if( token == undefined )
-            {
-                return;
-            }
-
-            let found = null;
-            list.forEach( o => {
-                const keys = Object.keys( o );
-                const key = keys.find( t => t == token );
-                if( key ) found = o[ key ];
-            } );
-
-            if( found )
-            {
-                _insertEntry( tokens[ idx++ ], found );
-            }
-            else
-            {
-                let item = {};
-                item[ token ] = [];
-                const nextToken = tokens[ idx++ ];
-                // Check if last token -> add callback
-                if( !nextToken )
-                {
-                    item[ 'callback' ] = options.callback;
-                    item[ 'disabled' ] = options.disabled;
-                    item[ 'type' ] = options.type;
-                    item[ 'checked' ] = options.checked;
-                }
-                list.push( item );
-                _insertEntry( nextToken, item[ token ] );
-            }
-        };
-
-        _insertEntry( tokens[idx++], this.items );
-
-        // Create elements
+    createEntries() {
 
         for( let item of this.items )
         {
-            let key = Object.keys( item )[ 0 ];
+            let key = item.name;
             let pKey = key.replace( /\s/g, '' ).replaceAll( '.', '' );
 
             // Item already created
@@ -4601,32 +4424,15 @@ class Menubar {
             entry.innerHTML = "<span>" + key + "</span>";
             entry.tabIndex = "1";
 
-            if( options.position == "left" )
-            {
-                this.root.prepend( entry );
-            }
-            else
-            {
-                if( options.position == "right" )
-                {
-                    entry.right = true;
-                }
-
-                if( this.root.lastChild && this.root.lastChild.right )
-                {
-                    this.root.lastChild.before( entry );
-                }
-                else
-                {
-                    this.root.appendChild( entry );
-                }
-            }
+            this.root.appendChild( entry );
 
             const _showEntry = () => {
                 this._resetMenubar(true);
                 entry.classList.add( "selected" );
                 entry.built = true;
-                this._createSubmenu( item, key, entry, -1 );
+                this._currentDropdown = addDropdownMenu( entry, item.submenu, { side: "bottom", align: "start", onBlur: () => {
+                    this._resetMenubar();
+                } });
             };
 
             entry.addEventListener("click", () => {
@@ -4648,16 +4454,6 @@ class Menubar {
                 {
                     _showEntry();
                 }
-            });
-
-            entry.addEventListener("blur", e => {
-
-                if( e.relatedTarget && e.relatedTarget.className.includes( "lexmenubox" ) )
-                {
-                    return;
-                }
-
-                this._resetMenubar();
             });
         }
     }
@@ -5276,7 +5072,7 @@ class SideBar {
                 continue;
             }
 
-            let key = Object.keys( item )[ 0 ];
+            let key = item.name = Object.keys( item )[ 0 ];
 
             if( this.filterString.length && !key.toLowerCase().includes( this.filterString.toLowerCase() ) )
             {
@@ -5287,7 +5083,7 @@ class SideBar {
             let currentGroup = null;
 
             let entry = document.createElement( 'div' );
-            entry.id = item.name = pKey;
+            entry.id = pKey;
             entry.className = "lexsidebarentry " + ( options.className ?? "" );
 
             if( this.displaySelected && options.selected )
@@ -5494,7 +5290,7 @@ class SideBar {
             {
                 const subitem = item[ key ][ i ];
                 const suboptions = subitem.options ?? {};
-                const subkey = Object.keys( subitem )[ 0 ];
+                const subkey = subitem.name = Object.keys( subitem )[ 0 ];
 
                 if( this.filterString.length && !subkey.toLowerCase().includes( this.filterString.toLowerCase() ) )
                 {
@@ -10060,7 +9856,7 @@ class Table extends Widget {
                             const item = {
                                 name: colName,
                                 checked:  !!this.activeCustomFilters[ colName ],
-                                callback: (key, dom, v) => {
+                                callback: (key, v, dom) => {
                                     if( v ) { this.activeCustomFilters[ key ] = f.name; }
                                     else {
                                         delete this.activeCustomFilters[ key ];

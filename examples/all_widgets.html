@@ -32,24 +32,23 @@
     // Init library and get main area
     let area = LX.init();
 
-    area.addMenubar(m => {
-        m.addButtons([
-            {
-                title: "Toggle Sections",
-                icon: "fa-solid fa-eye",
-                callback: (swapValue) => { closedDefault = !closedDefault; fillPanels(); }
-            },
-            {
-                title: "Change Theme",
-                icon: "fa-solid fa-moon",
-                swap: "fa-solid fa-sun",
-                callback: (swapValue) => { LX.setTheme(swapValue ? "light" : "dark") }
-            }
-        ]);
+    const menubar = area.addMenubar( [], { sticky: false } );
+    menubar.addButtons([
+        {
+            title: "Toggle Sections",
+            icon: "fa-solid fa-eye",
+            callback: (swapValue) => { closedDefault = !closedDefault; fillPanels(); }
+        },
+        {
+            title: "Change Theme",
+            icon: "fa-solid fa-moon",
+            swap: "fa-solid fa-sun",
+            callback: (swapValue) => { LX.setTheme(swapValue ? "light" : "dark") }
+        }
+    ]);
 
-        m.setButtonIcon("Github", "fa-brands fa-github", () => { window.open("https://github.com/jxarco/lexgui.js/") })
-        m.setButtonImage("lexgui.js", "../images/icon.png", () => { window.open("https://jxarco.github.io/lexgui.js/") }, { float: "left" })
-    }, { sticky: false });
+    menubar.setButtonIcon("Github", "fa-brands fa-github", () => { window.open("https://github.com/jxarco/lexgui.js/") })
+    menubar.setButtonImage("lexgui.js", "../images/icon.png", () => { window.open("https://jxarco.github.io/lexgui.js/") }, { float: "left" })
 
     var [middle, right] = area.split({ sizes: ["70%", "30%"], minimizable: true });
     var [left, center] = middle.split({ sizes: ["50%", null], minimizable: true });

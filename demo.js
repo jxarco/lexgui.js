@@ -7,35 +7,35 @@ window.LX = LX;
 
 const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
 
+
 // Menubar
 {
-    area.addMenubar( m => {
+    const menubar = area.addMenubar( [
+        { name: "Docs", icon: "search", kbd: "F1", callback: () => { window.open("./docs/") } }
+    ] );
 
-        m.setButtonImage("lexgui.js", "images/icon.png", () => {window.open("https://jxarco.github.io/lexgui.js/")}, {float: "left"})
+    menubar.setButtonImage("lexgui.js", "images/icon.png", () => {window.open("https://jxarco.github.io/lexgui.js/")}, {float: "left"})
 
-        m.add( "Docs", { icon: "fa-solid fa-magnifying-glass", short: "F1", callback: () => { window.open("./docs/") }});
+    const commandButton = new LX.Button(null, "Search command...", () => { LX.setCommandbarState( true ) }, {
+        width: "256px", className: "right", buttonClass: "border left fg-tertiary bg-secondary" }
+    );
+    menubar.root.appendChild( commandButton.root );
 
-        const commandButton = new LX.Button(null, "Search command...", () => { LX.setCommandbarState( true ) }, {
-            width: "256px", className: "right", buttonClass: "border left fg-tertiary bg-secondary" }
-        );
-        m.root.appendChild( commandButton.root );
-
-        m.addButtons( [
-            {
-                title: "Github",
-                icon: "fa-brands fa-github",
-                callback:  (event) => {
-                    window.open( "https://github.com/jxarco/lexgui.js/", "_blank" );
-                }
-            },
-            {
-                title: "Change Theme",
-                icon: "fa-solid fa-sun",
-                swap: "fa-solid fa-moon",
-                callback:  (swapValue) => { LX.setTheme( swapValue ? "light" : "dark" ) }
+    menubar.addButtons( [
+        {
+            title: "Github",
+            icon: "fa-brands fa-github",
+            callback:  (event) => {
+                window.open( "https://github.com/jxarco/lexgui.js/", "_blank" );
             }
-        ], { float: "right" });
-    });
+        },
+        {
+            title: "Change Theme",
+            icon: "fa-solid fa-sun",
+            swap: "fa-solid fa-moon",
+            callback:  (swapValue) => { LX.setTheme( swapValue ? "light" : "dark" ) }
+        }
+    ], { float: "right" });
 }
 
 // Header
@@ -60,34 +60,49 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
         const editorArea = new LX.Area({ className: "rounded-lg" });
         editorContainer.appendChild( editorArea.root );
 
-        editorArea.addMenubar( m => {
-            m.add( "Scene/New Scene", () => { console.log("New scene created!") });
-            m.add( "Scene/Open Scene", { icon: "fa-solid fa-folder-open", short: "S" } );
-            m.add( "Scene/Open Recent/hello.scene" );
-            m.add( "Scene/Open Recent/Old/goodbye.scene" );
-            m.add( "Scene/Open Recent/Old/salute.scene" );
-            m.add( "Project/Project Settings", { disabled: true } );
-            m.add( "Project/" );
-            m.add( "Project/Export", { icon: "fa-solid fa-download" });
-            m.add( "Project/Export/DAE", { icon: "fa-solid fa-cube", short: "D" } );
-            m.add( "Project/Export/GLTF", { short:  "G" } );
-            m.add( "Account/Login", { icon: "fa-solid fa-user" } );
-            m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass", short:  "F1" } );
-            m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
-            m.add( "Help/Support LexGUI/Do it" );
-            m.addButtons( [
-                {
-                    title: "Play",
-                    icon: "fa-solid fa-play",
-                    swap: "fa-solid fa-stop"
-                },
-                {
-                    title: "Pause",
-                    icon: "fa-solid fa-pause",
-                    disabled: true
-                }
-            ]);
-        }, { sticky: false });
+        const menubar = editorArea.addMenubar( [
+            { name: "Scene", submenu: [
+                { name: "New Scene" },
+                { name: "Open Scene", icon: "folder-open", kbd: "S" },
+                { name: "Open Recent", icon: "file",  submenu: [
+                    { name: "hello.scene" },
+                    { name: "goodbye.scene" }
+                ] }
+            ] },
+            { name: "Project", submenu: [
+                { name: "Project Settings", disabled: true },
+                null,
+                { name: "Export", submenu: [
+                    { name: "DAE", icon: "frame", kbd: "D" },
+                    { name: "GLTF", kbd:  "G" }
+                ] },
+                { name: "Export", icon: "download" }
+            ] },
+            { name: "Editor", submenu: [
+                { name: "Autosave", checked: true, icon: "floppy-disk" },
+                { name: "Settings",  icon: "sliders-large" },
+            ] },
+            { name: "Account", submenu: [
+                { name: "Login", icon: "user" },
+            ] },
+            { name: "Help", submenu: [
+                { name: "Search Help", icon: "search", kbd:  "F1" },
+                { name: "Support LexGUI", icon: "heart" },
+            ] },
+        ], { sticky: false });
+
+        menubar.addButtons( [
+            {
+                title: "Play",
+                icon: "fa-solid fa-play",
+                swap: "fa-solid fa-stop"
+            },
+            {
+                title: "Pause",
+                icon: "fa-solid fa-pause",
+                disabled: true
+            }
+        ]);
 
         // split main area
         const [ left, right ] = editorArea.split({ sizes:["70%","30%"], minimizable: true });
