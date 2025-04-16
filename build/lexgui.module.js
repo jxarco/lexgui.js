@@ -1974,12 +1974,21 @@ class Popover {
         this.root.className = "lexpopover";
         LX.root.appendChild( this.root );
 
+        this.root.addEventListener( "keydown", (e) => {
+            if( e.key == "Escape" )
+            {
+                e.preventDefault();
+                e.stopPropagation();
+                this.destroy();
+            }
+        } )
+
         if( onCreate )
         {
             onCreate( this.root );
         }
 
-        DropdownMenu.activeElement = this;
+        Popover.activeElement = this;
 
         doAsync( () => {
             this._adjustPosition();
@@ -1994,7 +2003,8 @@ class Popover {
                 this.destroy();
             };
 
-            document.body.addEventListener( "click", this._onClick );
+            document.body.addEventListener( "mousedown", this._onClick, true );
+            document.body.addEventListener( "focusin", this._onClick, true );
         }, 10 );
     }
 
@@ -2008,7 +2018,7 @@ class Popover {
 
         this.root.remove();
 
-        DropdownMenu.activeElement = null;
+        Popover.activeElement = null;
     }
 
     _adjustPosition() {
@@ -2372,14 +2382,8 @@ class ColorPicker {
 
     static currentPicker = false;
 
-    constructor( hexValue, trigger, options = {} ) {
+    constructor( hexValue, options = {} ) {
 
-        console.assert( trigger, "ColorPicker needs a DOM element as trigger!" );
-
-        this._windowPadding = 4;
-        this.side = options.side ?? "bottom";
-        this.align = options.align ?? "center";
-        this.avoidCollisions = options.avoidCollisions ?? true;
         this.colorModel = options.colorModel ?? "Hex";
         this.useAlpha = options.useAlpha ?? false;
         this.callback = options.onChange;
@@ -2389,32 +2393,8 @@ class ColorPicker {
             console.warn( "Define a callback in _options.onChange_ to allow getting new Color values!" );
         }
 
-        if( ColorPicker.currentPicker )
-        {
-            ColorPicker.currentPicker.destroy();
-            return;
-        }
-
-        this._trigger = trigger;
-        trigger.classList.add( "triggered" );
-        trigger.picker = this;
-
         this.root = document.createElement( "div" );
-        this.root.tabIndex = "1";
         this.root.className = "lexcolorpicker";
-        this.root.dataset["side"] = this.side;
-        LX.root.appendChild( this.root );
-
-        this.root.addEventListener( "keydown", (e) => {
-            if( e.key == "Escape" )
-            {
-                e.preventDefault();
-                e.stopPropagation();
-                this.destroy();
-            }
-        } )
-
-        ColorPicker.currentPicker = this;
 
         this.markerHalfSize = 8;
         this.markerSize = this.markerHalfSize * 2;
@@ -2662,23 +2642,6 @@ class ColorPicker {
         }
 
         this._updateColorValue( hexValue, true );
-
-        doAsync( () => {
-            this._adjustPosition();
-
-            this.root.focus();
-
-            this._onClick = e => {
-                if( e.target && ( this.root.contains( e.target ) || e.target == this._trigger ) )
-                {
-                    return;
-                }
-                this.destroy();
-            };
-
-            document.body.addEventListener( "mousedown", this._onClick, true );
-            document.body.addEventListener( "focusin", this._onClick, true );
-        }, 10 );
     }
 
     fromHexColor( hexColor ) {
@@ -2694,20 +2657,6 @@ class ColorPicker {
         this.hueMarker.style.left = LX.remapRange( h, 0, 360, -this.markerHalfSize, this.colorPickerTracker.offsetWidth - this.markerHalfSize ) + "px";
 
         this._updateColorValue( hexColor );
-    }
-
-    destroy() {
-
-        this._trigger.classList.remove( "triggered" );
-
-        delete this._trigger.picker;
-
-        document.body.removeEventListener( "mousedown", this._onClick, true );
-        document.body.removeEventListener( "focusin", this._onClick, true );
-
-        LX.root.querySelectorAll( ".lexcolorpicker" ).forEach( m => { m.remove(); } );
-
-        ColorPicker.currentPicker = null;
     }
 
     _svToPosition( s, v ) {
@@ -2762,67 +2711,6 @@ class ColorPicker {
             this.labelWidget.set( components.join( ' ' ) );
         }
     };
-
-    _adjustPosition() {
-
-        const position = [ 0, 0 ];
-
-        // Place menu using trigger position and user options
-        {
-            const rect = this._trigger.getBoundingClientRect();
-
-            let alignWidth = true;
-
-            switch( this.side )
-            {
-                case "left":
-                    position[ 0 ] += ( rect.x - this.root.offsetWidth );
-                    alignWidth = false;
-                    break;
-                case "right":
-                    position[ 0 ] += ( rect.x + rect.width );
-                    alignWidth = false;
-                    break;
-                case "top":
-                    position[ 1 ] += ( rect.y - this.root.offsetHeight );
-                    alignWidth = true;
-                    break;
-                case "bottom":
-                    position[ 1 ] += ( rect.y + rect.height );
-                    alignWidth = true;
-                    break;
-                default:
-                    break;
-            }
-
-            switch( this.align )
-            {
-                case "start":
-                    if( alignWidth ) { position[ 0 ] += rect.x; }
-                    else { position[ 1 ] += rect.y; }
-                    break;
-                case "center":
-                    if( alignWidth ) { position[ 0 ] += ( rect.x + rect.width * 0.5 ) - this.root.offsetWidth * 0.5; }
-                    else { position[ 1 ] += ( rect.y + rect.height * 0.5 ) - this.root.offsetHeight * 0.5; }
-                    break;
-                case "end":
-                    if( alignWidth ) { position[ 0 ] += rect.x - this.root.offsetWidth + rect.width; }
-                    else { position[ 1 ] += rect.y - this.root.offsetHeight + rect.height; }
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        if( this.avoidCollisions )
-        {
-            position[ 0 ] = LX.clamp( position[ 0 ], 0, window.innerWidth - this.root.offsetWidth - this._windowPadding );
-            position[ 1 ] = LX.clamp( position[ 1 ], 0, window.innerHeight - this.root.offsetHeight - this._windowPadding );
-        }
-
-        this.root.style.left = `${ position[ 0 ] }px`;
-        this.root.style.top = `${ position[ 1 ] }px`;
-    }
 };
 
 LX.ColorPicker = ColorPicker;
@@ -2838,7 +2726,7 @@ class Calendar {
 
     constructor( dateString, options = {} ) {
 
-        this.root = LX.makeContainer( ["256px", "auto"], "border p-3 bg-primary rounded-lg" );
+        this.root = LX.makeContainer( ["256px", "auto"], "border p-3 bg-primary rounded-lg text-md" );
 
         this.onChange = options.onChange;
 
@@ -2950,7 +2838,7 @@ class Calendar {
                     for( const dayData of weekDays )
                     {
                         const th = document.createElement( 'th' );
-                        th.className = "leading-loose font-normal rounded select-none cursor-pointer hover:bg-secondary";
+                        th.className = "leading-loose font-normal rounded select-none cursor-pointer";
 
                         if( dayData.day == this.day && dayData.currentMonth )
                         {
@@ -2958,7 +2846,7 @@ class Calendar {
                         }
                         else
                         {
-                            th.className += ` ${ dayData.currentMonth ? "fg-primary" : "fg-tertiary" }`;
+                            th.className += ` ${ dayData.currentMonth ? "fg-primary" : "fg-tertiary" } hover:bg-secondary`;
                         }
 
                         th.innerHTML = `<span>${ dayData.day }</span>`;
@@ -8566,6 +8454,16 @@ class ColorInput extends Widget {
         container.className = "lexcolor";
         this.root.appendChild( container );
 
+        this.picker = new ColorPicker( value, {
+            colorModel: options.useRGB ? "RGB" : "Hex",
+            useAlpha,
+            onChange: ( color ) => {
+                this._fromColorPicker = true;
+                this.set( color.hex );
+                delete this._fromColorPicker;
+            }
+        } );
+
         let sampleContainer = LX.makeContainer( ["18px", "18px"], "flex flex-row bg-contrast rounded overflow-hidden", "", container );
         sampleContainer.tabIndex = "1";
         sampleContainer.addEventListener( "click", e => {
@@ -8573,14 +8471,9 @@ class ColorInput extends Widget {
             {
                 return;
             }
-            new ColorPicker( value, sampleContainer, {
-                colorModel: options.useRGB ? "RGB" : "Hex",
-                useAlpha,
-                onChange: ( color ) => {
-                    this._fromColorPicker = true;
-                    this.set( color.hex );
-                    delete this._fromColorPicker;
-                }
+
+            this._popover = new Popover( sampleContainer, ( popoverRoot ) => {
+                popoverRoot.appendChild( this.picker.root );
             } );
         } );
 
@@ -10613,7 +10506,6 @@ class DatePicker extends Widget {
         this.root.appendChild( container );
 
         this.calendar = new Calendar( dateString, { onChange: ( date ) => {
-            this._popover.destroy();
             this.set( `${ date.day }/${ date.month }/${ date.year }` )
         } });
 

@@ -4,7 +4,9 @@
 
 Widgets:
 - Added new `DatePicker` Widget (also via `Panel.addDate` and using `LX.Calendar` class).
+- Adapt `ColorPicker` as popover in ColorInput Widget.
 
+Added `LX.Popover` class to create generic popovers with custom content.
 Expose `LX.NodeTree` in global namespace.
 Docs updated.
 

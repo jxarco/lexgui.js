@@ -28,9 +28,9 @@
     --global-color-error: #f54c4c;
     --global-color-warning: #ffc107;
     --global-text-primary: light-dark(#0d0d0e, #f0efef);
-    --global-text-secondary: light-dark(#232324, #d1d1d3);
-    --global-text-tertiary: light-dark(#4e4e4f, #aaaaaa);
-    --global-text-quaternary: light-dark(#6a6a6b, #807f7f);
+    --global-text-secondary: light-dark(#262627, #cacacc);
+    --global-text-tertiary: light-dark(#545455, #9e9ea0);
+    --global-text-quaternary: light-dark(#6c6c6d, #777779);
     --global-intense-background: light-dark(#fefefe, #040405);
     --global-medium-background: #252525;
     --global-blur-background: light-dark(#f7f7f7d8, #1f1f1fe7);
@@ -946,13 +946,10 @@ a svg, svg path {
 /* Generic Popover */
 
 .lexpopover {
-    font-size: var(--global-font-size);
     position: fixed;
     left: 0px;
     top: 0px;
     z-index: 150;
-    display: flex;
-    flex-direction: column;
     animation-duration: 400ms;
 	animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 	will-change: transform, opacity;
@@ -1551,11 +1548,7 @@ a svg, svg path {
 .lexcolorpicker {
     background-color: var(--global-color-primary);
     font-size: var(--global-font-size);
-    position: fixed;
-    left: 0px;
-    top: 0px;
     width: 256px;
-    z-index: 150;
     display: flex;
     flex-direction: column;
     padding: 0.2rem;
@@ -1563,16 +1556,7 @@ a svg, svg path {
     border: 1px solid #7a797c4f;
     padding: 0.5rem;
     gap: 0.5rem;
-    animation-duration: 400ms;
-	animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-	will-change: transform, opacity;
-    outline: none;
 }
-
-.lexcolorpicker[data-side="top"] { animation-name: slideDownAndFade }
-.lexcolorpicker[data-side="right"] { animation-name: slideLeftAndFade }
-.lexcolorpicker[data-side="bottom"] { animation-name: slideUpAndFade }
-.lexcolorpicker[data-side="left"] { animation-name: slideRightAndFade }
 
 .lexcolorpicker input.lextext {
     padding-inline: 0 !important;

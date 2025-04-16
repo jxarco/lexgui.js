@@ -200,7 +200,7 @@
                     title: "Change Theme",
                     icon: "fa-solid fa-moon",
                     swap: "fa-solid fa-sun",
-                    callback: (event, swapValue) => { LX.setTheme(swapValue ? "light" : "dark") }
+                    callback: (swapValue) => { LX.setTheme(swapValue ? "light" : "dark") }
                 }]);
             });
 
