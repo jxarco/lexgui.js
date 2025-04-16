@@ -1402,7 +1402,7 @@ a svg, svg path {
     transition-duration: .15s;
 }
 
-.lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider):hover {
+.lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider, .outline):hover {
     background-color: color-mix(in srgb, var(--background-color), #000 5%);
 }
 
@@ -1452,7 +1452,7 @@ a svg, svg path {
     border: 1px dashed #7a797c4f;
 }
 
-.lexwidget .lextext.outline:hover, .lexwidget .lextext.nobg:hover {
+.lexwidget .lextext.nobg:hover {
     background: none;
 }
 
@@ -1700,18 +1700,29 @@ a svg, svg path {
 
 /* Styles */
 .lexbutton.outline {
-    border-color: var(--border-color);
+    border-color: var(--button-color);
+    color: var(--button-color);
+    background: none;
 }
 .lexbutton.dashed {
     border-style: dashed;
     border-color: var(--border-color);
 }
 
-.lexbutton:hover {
+.lexbutton:hover:not(.outline) {
     background-color: color-mix(in srgb, var(--button-color), #000 9%) !important;
 }
-:root[data-theme="light"] .lexbutton:hover {
+
+:root[data-theme="light"] .lexbutton:hover:not(.outline) {
     background-color: color-mix(in srgb, var(--button-color), #fff 9%) !important;
+}
+
+.lexbutton.outline:hover {
+    color: color-mix(in srgb, var(--button-color), #000 9%) !important;
+}
+
+:root[data-theme="light"] .lexbutton.outline:hover {
+    color: color-mix(in srgb, var(--button-color), #fff 9%) !important;
 }
 
 .lexbutton:active:not(.lexbutton.combo) {
@@ -4097,6 +4108,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     justify-content: center;
     color: var(--global-text-primary);
     display: inherit;
+    gap: 0.2rem;
     font-size: var(--global-font-size);
     cursor: default;
     -webkit-user-select: none;

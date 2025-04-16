@@ -1641,7 +1641,7 @@ function toast( title, description, options = {} )
     if( options.action )
     {
         const panel = new Panel();
-        panel.addButton(null, options.action.name ?? "Accept", options.action.callback.bind( this, toast ), { width: "auto", maxWidth: "150px", className: "right", buttonClass: "outline" });
+        panel.addButton(null, options.action.name ?? "Accept", options.action.callback.bind( this, toast ), { width: "auto", maxWidth: "150px", className: "right", buttonClass: "border" });
         toast.appendChild( panel.root.childNodes[ 0 ] );
     }
 

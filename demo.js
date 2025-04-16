@@ -16,7 +16,7 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
         m.add( "Docs", { icon: "fa-solid fa-magnifying-glass", short: "F1", callback: () => { window.open("./docs/") }});
 
         const commandButton = new LX.Button(null, "Search command...", () => { LX.setCommandbarState( true ) }, {
-            width: "256px", className: "right", buttonClass: "outline left fg-tertiary bg-secondary" }
+            width: "256px", className: "right", buttonClass: "border left fg-tertiary bg-secondary" }
         );
         m.root.appendChild( commandButton.root );
 
