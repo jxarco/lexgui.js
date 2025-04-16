@@ -2729,6 +2729,8 @@ class Calendar {
         this.root = LX.makeContainer( ["256px", "auto"], "border p-3 bg-primary rounded-lg text-md" );
 
         this.onChange = options.onChange;
+        this.untilToday = options.untilToday;
+        this.fromToday = options.fromToday;
 
         if( dateString )
         {
@@ -2840,19 +2842,25 @@ class Calendar {
                         const th = document.createElement( 'th' );
                         th.className = "leading-loose font-normal rounded select-none cursor-pointer";
 
+                        const dayDate = new Date( `${ this.month }/${ dayData.day }/${ this.year }` );
+                        const date = new Date();
+                        const beforeToday = this.untilToday ? ( dayDate.getTime() < date.getTime() ) : true;
+                        const afterToday = this.fromToday ? ( dayDate.getTime() > date.getTime() ) : true;
+                        const selectable = dayData.currentMonth && beforeToday && afterToday;
+
                         if( dayData.day == this.day && dayData.currentMonth )
                         {
                             th.className += ` bg-contrast fg-contrast`;
                         }
                         else
                         {
-                            th.className += ` ${ dayData.currentMonth ? "fg-primary" : "fg-tertiary" } hover:bg-secondary`;
+                            th.className += ` ${ selectable ? "fg-primary" : "fg-tertiary" } hover:bg-secondary`;
                         }
 
                         th.innerHTML = `<span>${ dayData.day }</span>`;
                         hrow.appendChild( th );
 
-                        if( dayData.currentMonth )
+                        if( selectable )
                         {
                             th.addEventListener( "click", () => {
                                 this.day = dayData.day;
@@ -10478,6 +10486,12 @@ class DatePicker extends Widget {
 
         super( Widget.DATE, name, null, options );
 
+        if( options.today )
+        {
+            const date = new Date();
+            dateString = `${ date.getDate() }/${ date.getMonth() + 1 }/${ date.getFullYear() }`;
+        }
+
         this.onGetValue = () => {
             return dateString;
         }
@@ -10507,7 +10521,7 @@ class DatePicker extends Widget {
 
         this.calendar = new Calendar( dateString, { onChange: ( date ) => {
             this.set( `${ date.day }/${ date.month }/${ date.year }` )
-        } });
+        }, ...options });
 
         const refresh = ( currentDate ) => {
             container.innerHTML = "";
@@ -11684,6 +11698,9 @@ class Panel {
      * @param {Function} callback
      * @param {Object} options:
      * hideName: Don't use name as label [false]
+     * today: Set current day as selected by default
+     * untilToday: Allow dates only until current day
+     * fromToday: Allow dates only from current day
      */
 
     addDate( name, dateString, callback, options = { } ) {

@@ -249,6 +249,9 @@
             panelC.branch("Date Picker", { closed: closedDefault });
             panelC.addDate("Using Default Date", "15/04/2025");
             panelC.addDate("No Default Date", null);
+            panelC.addDate("Using Today's Date", null, null, { today: true });
+            panelC.addDate("Allow Until Today", null, null, { untilToday: true });
+            panelC.addDate("Allow From Today", null, null, { fromToday: true });
         }
 
         // Tree
