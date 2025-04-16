@@ -1949,7 +1949,7 @@ class Popover {
 
     static activeElement = false;
 
-    constructor( trigger, onCreate, options = {} ) {
+    constructor( trigger, content, options = {} ) {
 
         console.assert( trigger, "Popover needs a DOM element as trigger!" );
 
@@ -1983,9 +1983,17 @@ class Popover {
             }
         } )
 
-        if( onCreate )
+        if( content )
         {
-            onCreate( this.root );
+            content = [].concat( content );
+            content.forEach( e => {
+                const domNode = e.root ?? e;
+                this.root.appendChild( domNode );
+                if( e.onPopover )
+                {
+                    e.onPopover();
+                }
+            } );
         }
 
         Popover.activeElement = this;
@@ -2413,8 +2421,6 @@ class ColorPicker {
         this.intSatMarker.style.backgroundColor = this.currentColor.hex;
         this.colorPickerBackground.appendChild( this.intSatMarker );
 
-        doAsync( this._svToPosition.bind( this, this.currentColor.hsv.s, this.currentColor.hsv.v ) );
-
         let pickerRect = null;
 
         let innerMouseDown = e => {
@@ -2494,11 +2500,6 @@ class ColorPicker {
         this.hueMarker.style.backgroundColor = `rgb(${ hueColor.css.r }, ${ hueColor.css.g }, ${ hueColor.css.b })`;
         this.colorPickerTracker.appendChild( this.hueMarker );
 
-        doAsync( () => {
-            const hueLeft = LX.remapRange( this.currentColor.hsv.h, 0, 360, 0, this.colorPickerTracker.offsetWidth - this.markerSize );
-            this.hueMarker.style.left = hueLeft + "px";
-        } );
-
         const _fromHueX = ( hueX ) => {
             this.hueMarker.style.left = hueX + "px";
             this.currentColor.hsv.h = LX.remapRange( hueX, 0, this.colorPickerTracker.offsetWidth - this.markerSize, 0, 360 );
@@ -2560,11 +2561,6 @@ class ColorPicker {
             this.alphaMarker.className = "lexcolormarker";
             this.alphaMarker.style.backgroundColor = `rgb(${ this.currentColor.css.r }, ${ this.currentColor.css.g }, ${ this.currentColor.css.b },${ this.currentColor.css.a })`;
             this.alphaTracker.appendChild( this.alphaMarker );
-
-            doAsync( () => {
-                const alphaLeft = LX.remapRange( this.currentColor.hsv.a, 0, 1, 0, this.alphaTracker.offsetWidth - this.markerSize );
-                this.alphaMarker.style.left = alphaLeft + "px";
-            } );
 
             const _fromAlphaX = ( alphaX ) => {
                 this.alphaMarker.style.left = alphaX + "px";
@@ -2642,32 +2638,35 @@ class ColorPicker {
         }
 
         this._updateColorValue( hexValue, true );
+
+        doAsync( this._placeMarkers.bind( this ) );
+
+        this.onPopover = this._placeMarkers.bind( this );
     }
 
-    fromHexColor( hexColor ) {
+    _placeMarkers() {
 
-        this.currentColor.setHex( hexColor );
+        this._svToPosition( this.currentColor.hsv.s, this.currentColor.hsv.v );
 
-        // Decompose into HSV
-        const { h, s, v } = this.currentColor.hsv;
-        this._svToPosition( s, v );
+        const hueLeft = LX.remapRange( this.currentColor.hsv.h, 0, 360, 0, this.colorPickerTracker.offsetWidth - this.markerSize );
+        this.hueMarker.style.left = hueLeft + "px";
 
-        const hueColor = new Color( { h, s: 1, v: 1 } );
-        this.hueMarker.style.backgroundColor = this.colorPickerBackground.style.backgroundColor = `rgb(${ hueColor.css.r }, ${ hueColor.css.g }, ${ hueColor.css.b })`;
-        this.hueMarker.style.left = LX.remapRange( h, 0, 360, -this.markerHalfSize, this.colorPickerTracker.offsetWidth - this.markerHalfSize ) + "px";
-
-        this._updateColorValue( hexColor );
+        if( this.useAlpha )
+        {
+            const alphaLeft = LX.remapRange( this.currentColor.hsv.a, 0, 1, 0, this.alphaTracker.offsetWidth - this.markerSize );
+            this.alphaMarker.style.left = alphaLeft + "px";
+        }
     }
 
     _svToPosition( s, v ) {
         this.intSatMarker.style.left = `${ LX.remapRange( s, 0, 1, -this.markerHalfSize, this.colorPickerBackground.offsetWidth - this.markerHalfSize ) }px`;
         this.intSatMarker.style.top = `${ LX.remapRange( 1 - v, 0, 1, -this.markerHalfSize, this.colorPickerBackground.offsetHeight - this.markerHalfSize ) }px`
-    };
+    }
 
     _positionToSv( left, top ) {
         this.currentColor.hsv.s = LX.remapRange( left, -this.markerHalfSize, this.colorPickerBackground.offsetWidth - this.markerHalfSize, 0, 1 );
         this.currentColor.hsv.v = 1 - LX.remapRange( top, -this.markerHalfSize, this.colorPickerBackground.offsetHeight - this.markerHalfSize, 0, 1 );
-    };
+    }
 
     _updateColorValue( newHexValue, skipCallback = false ) {
 
@@ -2710,7 +2709,22 @@ class ColorPicker {
             if( this.useAlpha ) components.push( toFixed( a ) );
             this.labelWidget.set( components.join( ' ' ) );
         }
-    };
+    }
+
+    fromHexColor( hexColor ) {
+
+        this.currentColor.setHex( hexColor );
+
+        // Decompose into HSV
+        const { h, s, v } = this.currentColor.hsv;
+        this._svToPosition( s, v );
+
+        const hueColor = new Color( { h, s: 1, v: 1 } );
+        this.hueMarker.style.backgroundColor = this.colorPickerBackground.style.backgroundColor = `rgb(${ hueColor.css.r }, ${ hueColor.css.g }, ${ hueColor.css.b })`;
+        this.hueMarker.style.left = LX.remapRange( h, 0, 360, -this.markerHalfSize, this.colorPickerTracker.offsetWidth - this.markerHalfSize ) + "px";
+
+        this._updateColorValue( hexColor );
+    }
 };
 
 LX.ColorPicker = ColorPicker;
@@ -8484,9 +8498,7 @@ class ColorInput extends Widget {
                 return;
             }
 
-            this._popover = new Popover( sampleContainer, ( popoverRoot ) => {
-                popoverRoot.appendChild( this.picker.root );
-            } );
+            this._popover = new Popover( sampleContainer, [ this.picker ] );
         } );
 
         let colorSampleRGB = document.createElement( 'div' );
