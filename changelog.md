@@ -2,6 +2,8 @@
 
 ## dev
 
+- Fixed Date Calendar popover not opening.
+
 ## 0.5.9 (master)
 
 Widgets:

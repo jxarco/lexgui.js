@@ -10544,9 +10544,7 @@ class DatePicker extends Widget {
             container.innerHTML = "";
             const calendarIcon = LX.makeIcon( "calendar" );
             const calendarButton = new Button( null, currentDate ?? "Pick a date", () => {
-                this._popover = new Popover( calendarButton.root, ( popoverRoot ) => {
-                    popoverRoot.appendChild( this.calendar.root );
-                } );
+                this._popover = new Popover( calendarButton.root, [ this.calendar ] );
             }, { buttonClass: `flex flex-row px-3 ${ currentDate ? "" : "fg-tertiary" } justify-between` } );
 
             calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
