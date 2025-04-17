@@ -24,8 +24,8 @@ const menubar = area.addMenubar( [
         { name: "Export", icon: "Download" }
     ] },
     { name: "Editor", submenu: [
-        { name: "Autosave", checked: true, icon: "FloppyDisk", callback: (key, v, menuItem) => { console.log(key, v) } },
-        { name: "Settings",  icon: "SlidersLarge", callback: () => {
+        { name: "Autosave", checked: true, icon: "Save", callback: (key, v, menuItem) => { console.log(key, v) } },
+        { name: "Settings",  icon: "Settings2", callback: () => {
             const dialog = new LX.Dialog( "Settings", p => {
                 p.addText("A Text", "Testing first widget");
                 p.sameLine(3);
@@ -137,13 +137,13 @@ top_tabs.area.addOverlayButtons( [
     [
         {
             name: "Select",
-            icon: "ArrowPointer",
+            icon: "MousePointer",
             callback: (value, event) => console.log(value),
             selectable: true
         },
         {
             name: "Move",
-            icon: "Arrows",
+            icon: "Move",
             callback: (value, event) => console.log(value),
             selectable: true
         },

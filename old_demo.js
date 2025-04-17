@@ -86,8 +86,8 @@ const menubar = area.addMenubar( [
         { name: "Export", icon: "Download" }
     ] },
     { name: "Editor", submenu: [
-        { name: "Autosave", checked: true, icon: "FloppyDisk", callback: (key, v, menuItem) => { console.log(key, v) } },
-        { name: "Settings",  icon: "SlidersLarge", callback: () => {
+        { name: "Autosave", checked: true, icon: "Save", callback: (key, v, menuItem) => { console.log(key, v) } },
+        { name: "Settings",  icon: "Settings2", callback: () => {
             const dialog = new LX.Dialog( "Settings", p => {
                 p.addText("A Text", "Testing first widget");
                 p.sameLine(3);
@@ -132,7 +132,7 @@ const menubar = area.addMenubar( [
 
             }, { size: ["30%", null], float: "right", draggable: false});
         }},
-        { name: "Open AssetView", icon: "Display", callback: createAssetDialog },
+        { name: "Open AssetView", icon: "Monitor", callback: createAssetDialog },
     ] },
     { name: "Account", submenu: [
         { name: "Login", icon: "User", callback: createLoginForm },
@@ -246,7 +246,7 @@ const sidebar = left.addSidebar( m => {
             null,
             { name: "Github", icon: "Github" },
             { name: "Support", submenu: [
-                { name: "Email", icon: "Envelope" },
+                { name: "Email", icon: "Mail" },
                 { name: "Message", submenu: [
                     { name: "Whatsapp", kbd: "W" },
                     { name: "iMessage", kbd: "M" },
@@ -427,13 +427,13 @@ topTabs.area.addOverlayButtons( [
     [
         {
             name: "Select",
-            icon: "ArrowPointer",
+            icon: "MousePointer",
             callback: (value, event) => console.log(value),
             selectable: true
         },
         {
             name: "Move",
-            icon: "ArrowsUpDownLeftRight",
+            icon: "Move",
             callback: (value, event) => console.log(value),
             selectable: true
         },
@@ -625,7 +625,7 @@ function fillPanel( panel ) {
     panel.addColor("Background", "#b7a9b1", (value, event) => {
         console.log(value);
     }, { xuseAlpha: true });
-    panel.addText("Text", "Lexgui.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "Font"});
+    panel.addText("Text", "Lexgui.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "Type"});
     panel.addColor("Font Color", { r: 1, g: 0.1, b: 0.6, a: 1 }, (value, event) => {
         console.log("Font Color: ", value);
     }, { xuseAlpha: true, xuseRGB: true });
@@ -647,7 +647,7 @@ function fillPanel( panel ) {
     panel.addSeparator();
     panel.addRadioGroup( null, "Notify me about...", [ "All new messages", "Direct messages and mentions", "Nothing" ], (v) => { console.log(v) }, { className: "accent", xdisabled: true, selected: 1 } );
     panel.addSeparator();
-    panel.addTitle("Configuration (Im a title)", { icon: "Gears" });
+    panel.addTitle("Configuration (Im a title)", { icon: "Settings3" });
     panel.addCheckbox("Toggle me", true, (value, event) => {
         console.log(value);
     }, { suboptions: (p) => {
@@ -762,7 +762,7 @@ function fillRightBottomPanel( panel, tab ) {
 
     panel.clear();
 
-    panel.branch("Bottom", { icon: "TableCells" });
+    panel.branch("Bottom", { icon: "Grid3x3" });
 
     if(tab == 'Horizontal')
     {
@@ -870,7 +870,7 @@ function fillRightBottomPanel( panel, tab ) {
 function fillBottomPanel( panel ) {
 
     // add widgets to panel branch
-    panel.branch("Information", {icon: "CircleInfo"});
+    panel.branch("Information", {icon: "Info"});
     window.tableWidget = panel.addTable("A Table", {
         head: [ "Name", "Status", "Priority" ],
         body: [

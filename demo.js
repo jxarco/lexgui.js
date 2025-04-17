@@ -79,8 +79,8 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
                 { name: "Export", icon: "Download" }
             ] },
             { name: "Editor", submenu: [
-                { name: "Autosave", checked: true, icon: "FloppyDisk" },
-                { name: "Settings",  icon: "SlidersLarge" },
+                { name: "Autosave", checked: true, icon: "Save" },
+                { name: "Settings",  icon: "Settings2" },
             ] },
             { name: "Account", submenu: [
                 { name: "Login", icon: "User" },
@@ -123,8 +123,8 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
         left.onresize = resizeCanvas;
         left.addOverlayButtons( [
             [
-                { name: "Select", icon: "ArrowPointer", selectable: true },
-                { name: "Move", icon: "ArrowsUpDownLeftRight", selectable: true },
+                { name: "Select", icon: "MousePointer", selectable: true },
+                { name: "Move", icon: "Move", selectable: true },
                 { name: "Rotate", icon: "RotateRight", selectable: true }
             ],
             { name: "Lit", options: ["Lit", "Unlit", "Wireframe"] },
@@ -214,7 +214,7 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
             // add widgets to panel branch
             panel.branch("Canvas", { icon: "Palette", filter: true });
             panel.addColor("Background", "#b7a9b1", null);
-            panel.addText("Text", "LexGUI.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "Font"});
+            panel.addText("Text", "LexGUI.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "Type"});
             panel.addColor("Font Color", "#303b8d", null);
             panel.addNumber("Font Size", 36, null, { min: 1, max: 48, step: 1, units: "px"});
             panel.addSelect("Font Family", ["Arial", "GeistSans", "Monospace", "Ubuntu"], "GeistSans");
@@ -257,12 +257,12 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
             m.add( "Drafts", { icon: "File", content: LX.badge("9", badgeClass, { asElement: true }) } );
             m.add( "Sent", { icon: "PaperPlane" } );
             m.add( "Junk", { icon: "ArchiveX", content: LX.badge("23", badgeClass, { asElement: true }) } );
-            m.add( "Trash", { icon: "TrashCan" } );
+            m.add( "Trash", { icon: "Trash3" } );
             m.add( "Archive", { icon: "Archive" } );
             m.separator();
             m.add( "Social", { icon: "User", content: LX.badge("972", badgeClass, { asElement: true }) } );
-            m.add( "Updates", { icon: "CircleInfo", content: LX.badge("342", badgeClass, { asElement: true }) } );
-            m.add( "Forums", { icon: "Comments", content: LX.badge("96", badgeClass, { asElement: true }) } );
+            m.add( "Updates", { icon: "Info", content: LX.badge("342", badgeClass, { asElement: true }) } );
+            m.add( "Forums", { icon: "MessagesCircle", content: LX.badge("96", badgeClass, { asElement: true }) } );
             m.add( "Shopping ", { icon: "ShoppingCart" } );
             m.add( "Promotions", { icon: "Flag", content: LX.badge("21", badgeClass, { asElement: true }) } );
         }, {
@@ -363,7 +363,7 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
 
                 mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Archive", tooltip: true, buttonClass: "bg-none", icon: "Archive" } ).root );
                 mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Move to junk", tooltip: true, buttonClass: "bg-none", icon: "ArchiveX" } ).root );
-                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Move to trash", tooltip: true, buttonClass: "bg-none", icon: "TrashCan" } ).root );
+                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Move to trash", tooltip: true, buttonClass: "bg-none", icon: "Trash3" } ).root );
                 mailPreviewHeader.appendChild( LX.makeContainer( [ "1px", "35%" ], "border-right self-center ml-2 mr-2" ) );
                 mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Snooze", tooltip: true, buttonClass: "bg-none", icon: "Clock" } ).root );
 
@@ -378,7 +378,7 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
                         { name: "Add label" },
                         { name: "Mute thread" }
                     ], { side: "bottom", align: "end" });
-                }, { buttonClass: "bg-none", icon: "More" } ).root );
+                }, { buttonClass: "bg-none", icon: "EllipsisVertical" } ).root );
             }
 
             // Prewiew Info

@@ -96,7 +96,7 @@ class GraphEditor {
 
         }, {
             displaySelected: true,
-            headerIcon: "More",
+            headerIcon: "EllipsisVertical",
             headerTitle: "Create",
             headerSubtitle: "Press to rename",
             onHeaderPressed: () => this._showRenameGraphDialog(),

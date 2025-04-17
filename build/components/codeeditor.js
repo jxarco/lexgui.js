@@ -4018,7 +4018,7 @@ class CodeEditor {
             var pre = document.createElement( 'pre' );
             this.autocomplete.appendChild( pre );
 
-            var icon = "Font";
+            var icon = "Type";
 
             if( this._mustHightlightWord( s, CodeEditor.utils ) )
                 icon = "Box";

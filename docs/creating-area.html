@@ -39,19 +39,19 @@
     MAKE_CODE( `area.@[mtd]addMenubar@( [
     { name: @"Scene"@, submenu: [
         { name: @"New Scene"@ },
-        { name: @"Open Scene"@, icon: @"folder-open"@, kbd: @"S"@ },
-        { name: @"Open Recent"@, icon: @"file"@,  submenu: [
+        { name: @"Open Scene"@, icon: @"FolderOpen"@, kbd: @"S"@ },
+        { name: @"Open Recent"@, icon: @"File"@,  submenu: [
             { name: @"hello.scene"@ },
             { name: @"goodbye.scene"@ }
         ] }
     ] },
     { name: @"Editor"@, submenu: [
-        { name: @"Autosave"@, checked: @true@, icon: @"floppy-disk"@ },
-        { name: @"Settings"@, icon: @"sliders-large"@ },
+        { name: @"Autosave"@, checked: @true@, icon: @"Save"@ },
+        { name: @"Settings"@, icon: @"Settings2"@ },
     ] },
     { name: @"Help"@, submenu: [
-        { name: @"Search Help"@, icon: @"search"@, kbd: @"F1"@ },
-        { name: @"Support LexGUI"@, icon: @"heart"@ },
+        { name: @"Search Help"@, icon: @"Search"@, kbd: @"F1"@ },
+        { name: @"Support LexGUI"@, icon: @"Heart"@ },
     ] },
 ]);` );
 
@@ -70,17 +70,17 @@
     {
         title: @"Play"@,
         icon: @"Play"@,
-        callback:  (domEl) => { }
+        callback: (domEl) => { }
     },
     {
         title: @"Pause"@,
         icon: @"Pause"@,
         disabled: @true@,
-        callback:  (domEl) => { }
+        callback: (domEl) => { }
     },
     {
         icon: @"Search"@,
-        callback:  (domEl) => { }
+        callback: (domEl) => { }
     }
 ]);` );
 
