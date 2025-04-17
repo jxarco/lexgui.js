@@ -11,7 +11,7 @@
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
-        panel.addList("Volley Teams", ["GPTeam", ["Blat Panthers", "fa-solid fa-paw"], "Blat Bunny"], "Blat Panthers", (value, event) => {
+        panel.addList("Volley Teams", ["GPTeam", ["Blat Panthers", "PawPrint"], "Blat Bunny"], "Blat Panthers", (value, event) => {
             console.log(value);
         });
         content.appendChild(area.root);
@@ -31,7 +31,7 @@
 
     MAKE_PARAGRAPH(`<sup>It's possible to preppend an icon to the element name inside the list using an Array for the item [item, icon]:<sup>`);
 
-    MAKE_CODE(`panel.@[mtd]addList@(@"List name"@, [@"GPTeam"@, [@"Blat Panthers"@, @"fa-solid fa-paw"@]], @"Blat Panthers"@,  (value, event) => {
+    MAKE_CODE(`panel.@[mtd]addList@(@"List name"@, [@"GPTeam"@, [@"Blat Panthers"@, @"PawPrint"@]], @"Blat Panthers"@,  (value, event) => {
     console.@[mtd]log@(value);
 });` );
 

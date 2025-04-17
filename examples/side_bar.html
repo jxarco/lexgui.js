@@ -39,24 +39,24 @@
     const actionLogParams = (entryName, event) => { console.log("Action called!", entryName, event) };
 
     window.sidebar = area.addSidebar(m => {
-        m.group("Projects", { icon: "fa fa-plus", callback: (groupName, event) => { console.log(groupName) } });
-        m.add("Getting Started", { icon: "fa fa-cube", callback: logParams });
-        m.add("Getting Started/Installation", { icon: "fa fa-cube", callback: logParams });
-        m.add("Getting Started/Project Structure", { icon: "fa fa-cube", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } });
-        m.add("Building Your Application", { icon: "fa fa-code", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } });
-        m.add("Search Blocks", { icon: "fa fa-search", callback: logParams });
-        m.add("Very loooooooooooooooooooooooong sun", { icon: "fa fa-sun", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } });
+        m.group("Projects", { icon: "Plus", callback: (groupName, event) => { console.log(groupName) } });
+        m.add("Getting Started", { icon: "Box", callback: logParams });
+        m.add("Getting Started/Installation", { icon: "Box", callback: logParams });
+        m.add("Getting Started/Project Structure", { icon: "Box", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } });
+        m.add("Building Your Application", { icon: "Code", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } });
+        m.add("Search Blocks", { icon: "Search", callback: logParams });
+        m.add("Very loooooooooooooooooooooooong sun", { icon: "Sun", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } });
         m.separator();
         m.group("API Reference");
-        m.add("Components", { icon: "fa fa-cube", callback: logParams });
-        m.add("File Conventions", { icon: "fa fa-code", callback: logParams });
-        m.add("Functions", { icon: "fa fa-search", callback: logParams });
-        m.add("CLI", { icon: "fa fa-sun", callback: logParams });
+        m.add("Components", { icon: "Box", callback: logParams });
+        m.add("File Conventions", { icon: "Code", callback: logParams });
+        m.add("Functions", { icon: "Search", callback: logParams });
+        m.add("CLI", { icon: "Sun", callback: logParams });
         m.separator();
         m.group("Architecture");
-        m.add("Accessibility ", { icon: "fa fa-cube", callback: logParams });
-        m.add("Fast Refresh", { icon: "fa fa-code", callback: logParams });
-        m.add("Supported Browsers", { icon: "fa fa-search", callback: logParams });
+        m.add("Accessibility ", { icon: "Box", callback: logParams });
+        m.add("Fast Refresh", { icon: "Code", callback: logParams });
+        m.add("Supported Browsers", { icon: "Search", callback: logParams });
         m.separator();
         m.add("Calendar ", { collapsable: 3 });
         m.add("Personal ", { callback: logParams, type: "checkbox" });

@@ -390,7 +390,7 @@ class VideoEditor {
                     this.video.pause();
                 }
                 this.controlsPanelLeft.refresh();
-            }, { width: '40px', icon: "fa-solid " + (this.playing ? 'fa-pause' : 'fa-play') });
+            }, { width: '40px', icon: (this.playing ? 'Pause' : 'Play') });
 
             this.controlsPanelLeft.addLabel(this.startTimeString, {width: 50});
             this.controlsPanelLeft.endLine();

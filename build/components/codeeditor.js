@@ -276,7 +276,7 @@ class CodeEditor {
             this.explorer = panel.addTree( null, sceneData, {
                 filter: false,
                 rename: false,
-                skip_default_icon: true,
+                skipDefaultIcon: true,
                 onevent: (event) => {
                     switch(event.type) {
                         // case LX.TreeEvent.NODE_SELECTED:
@@ -1241,7 +1241,7 @@ class CodeEditor {
                 };
 
                 const ext = this.languages[ options.language ] ?. ext;
-                this.addExplorerItem( { 'id': name, 'skipVisibility': true, 'icon': this._getFileIcon( name, ext ) } );
+                this.addExplorerItem( { id: name, skipVisibility: true, xicon: this._getFileIcon( name, ext ) } );
                 this.explorer.innerTree.frefresh( name );
             }
             else
@@ -1475,10 +1475,10 @@ class CodeEditor {
             tab.firstChild.remove();
             console.assert( tab != undefined );
             var iconEl;
-            if( icon.includes( 'fa-' ) )
+            if( !icon.includes( '.' ) ) // Not a file
             {
-                iconEl = document.createElement( 'i' );
-                iconEl.className = icon;
+                const classes = icon.split( ' ' );
+                iconEl = LX.makeIcon( classes[ 0 ], { svgClass: classes.slice( 0 ).join( ' ' ) } );
             } else
             {
                 iconEl = document.createElement( 'img' );
@@ -1606,12 +1606,12 @@ class CodeEditor {
             }
         }
 
-        return extension == "html" ? "fa-solid fa-code orange" :
-            extension == "css" ? "fa-solid fa-hashtag dodgerblue" :
-            extension == "xml" ? "fa-solid fa-rss orange" :
-            extension == "bat" ? "fa-brands fa-windows lightblue" :
+        return extension == "html" ? "Code orange" :
+            extension == "css" ? "Hash dodgerblue" :
+            extension == "xml" ? "Rss orange" :
+            extension == "bat" ? "Microsoft lightblue" :
             [ 'js', 'py', 'json', 'cpp', 'hpp', 'rs', 'md' ].indexOf( extension ) > -1 ? "images/" + extension + ".png" :
-            !isNewTabButton ? "fa-solid fa-align-left gray" : undefined;
+            !isNewTabButton ? "AlignLeft gray" : undefined;
     }
 
     _onNewTab( e ) {
@@ -1721,7 +1721,7 @@ class CodeEditor {
 
         if( this.explorer && !isNewTabButton )
         {
-            this.addExplorerItem( { 'id': name, 'skipVisibility': true, 'icon': tabIcon } );
+            this.addExplorerItem( { id: name, skipVisibility: true, icon: tabIcon } );
             this.explorer.innerTree.frefresh( name );
         }
 
@@ -4018,16 +4018,14 @@ class CodeEditor {
             var pre = document.createElement( 'pre' );
             this.autocomplete.appendChild( pre );
 
-            var icon = document.createElement( 'a' );
+            var icon = "Font";
 
             if( this._mustHightlightWord( s, CodeEditor.utils ) )
-                icon.className = "fa fa-cube";
+                icon = "Box";
             else if( this._mustHightlightWord( s, CodeEditor.types ) )
-                icon.className = "fa fa-code";
-            else
-                icon.className = "fa fa-font";
+                icon = "Code";
 
-            pre.appendChild( icon );
+            pre.appendChild( LX.makeIcon( icon, { iconClass: "mr-1", svgClass: "xs" } ) );
 
             pre.addEventListener( 'click', () => {
                 this.autoCompleteWord( s );
@@ -4111,7 +4109,9 @@ class CodeEditor {
     _getSelectedAutoComplete() {
 
         if( !this.isAutoCompleteActive )
-        return;
+        {
+            return;
+        }
 
         for( let i = 0; i < this.autocomplete.childElementCount; ++i )
         {
@@ -4120,7 +4120,13 @@ class CodeEditor {
             {
                 var word = "";
                 for( let childSpan of child.childNodes )
+                {
+                    if( childSpan.constructor != HTMLSpanElement )
+                    {
+                        continue;
+                    }
                     word += childSpan.innerHTML;
+                }
 
                 return [ word, i ]; // Get text of the span inside the 'pre' element
             }

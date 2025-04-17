@@ -47,7 +47,7 @@
         }
     ]);
 
-    menubar.setButtonIcon("Github", "fa-brands fa-github", () => { window.open("https://github.com/jxarco/lexgui.js/") })
+    menubar.setButtonIcon("Github", "Github", () => { window.open("https://github.com/jxarco/lexgui.js/") })
     menubar.setButtonImage("lexgui.js", "../images/icon.png", () => { window.open("https://jxarco.github.io/lexgui.js/") }, { float: "left" })
 
     var [middle, right] = area.split({ sizes: ["70%", "30%"], minimizable: true });
@@ -264,12 +264,12 @@
                         'children': [
                             {
                                 'id': 'node_1_1',
-                                'icon': 'fa-solid fa-cube',
+                                'icon': 'Box',
                                 'children': [],
                                 'actions': [
                                     {
                                         'name': 'Open script',
-                                        'icon': 'fa-solid fa-scroll',
+                                        'icon': 'Script',
                                         'callback': function (node) {
                                             console.log(node.id + ": Script opened!")
                                         }
@@ -280,7 +280,7 @@
                     },
                     {
                         'id': 'node_2',
-                        'icon': 'fa-solid fa-circle-play',
+                        'icon': 'CirclePlay',
                         'children': []
                     },
                     {
@@ -288,12 +288,12 @@
                         'children': [
                             {
                                 'id': 'node_3_1',
-                                'icon': 'fa-solid fa-cube',
+                                'icon': 'Box',
                                 'children': []
                             },
                             {
                                 'id': 'node_3_2',
-                                'icon': 'fa-solid fa-cube',
+                                'icon': 'Box',
                                 'children': []
                             }
                         ]
@@ -305,12 +305,12 @@
             const treeIcons = [
                 {
                     'name': 'Add node',
-                    'icon': 'fa-solid fa-plus',
+                    'icon': 'Plus',
                     'callback': () => { console.log("Node added!") }
                 },
                 {
                     'name': 'Instantiate scene',
-                    'icon': 'fa-solid fa-link',
+                    'icon': 'Link',
                     'callback': () => { console.log("Scene instantiated!") }
                 }
             ];

@@ -29,7 +29,7 @@
     const pocketDialog = new LX.PocketDialog("Load Settings", p => {
         p.branch("Canvas");
         p.addColor("Background", "#b7a9b1");
-        p.addText("Text", "Pocket Dialog Lexgui.js @jxarco", null, { placeholder: "e.g. ColorPicker", icon: "fa fa-font" });
+        p.addText("Text", "Pocket Dialog Lexgui.js @jxarco", null, { placeholder: "e.g. ColorPicker", icon: "Font" });
         p.addColor("Font Color", { r: 1, g: 0.1, b: 0.6 }, (value, event) => {
             console.log("Font Color: ", value);
         });
@@ -49,7 +49,7 @@
     const dialogClosable = new LX.Dialog("Closable Dialog", p => {
         p.branch("Canvas");
         p.addColor("Background", "#b7a9b1");
-        p.addText("Text", "Dialog Lexgui.js @jxarco", null, { placeholder: "e.g. ColorPicker", icon: "fa fa-font" });
+        p.addText("Text", "Dialog Lexgui.js @jxarco", null, { placeholder: "e.g. ColorPicker", icon: "Font" });
         p.addColor("Font Color", { r: 1, g: 0.1, b: 0.6 }, (value, event) => {
             console.log("Font Color: ", value);
         });
@@ -68,7 +68,7 @@
     const draggablePocketDialog = new LX.PocketDialog("Draggable PocketDialog", p => {
         p.branch("Canvas");
         p.addColor("Background", "#b7a9b1");
-        p.addText("Text", "Pocket Dialog Lexgui.js @jxarco", null, { placeholder: "e.g. ColorPicker", icon: "fa fa-font" });
+        p.addText("Text", "Pocket Dialog Lexgui.js @jxarco", null, { placeholder: "e.g. ColorPicker", icon: "Font" });
         p.addSelect("Best Engine", ["Godot", "Unity", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Unreal Engine", "Pepe"], "Godot", (value, event) => {
             console.log(value);
         }, { filter: true });

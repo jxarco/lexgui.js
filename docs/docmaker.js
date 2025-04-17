@@ -152,7 +152,7 @@ function MAKE_CODE( text )
 
     let button = document.createElement('button');
     button.title = "Copy code sample";
-    button.innerHTML = `<i class="fa-regular fa-copy"></i>`;
+    button.appendChild(LX.makeIcon( "Copy" ));
     button.addEventListener('click', COPY_SNIPPET.bind(this, button));
     container.appendChild( button );
 
@@ -262,11 +262,13 @@ function INLINE_CODE( string )
 
 function COPY_SNIPPET( b )
 {
-    b.innerHTML = '<i class="fa-solid fa-check"></i>';
+    b.innerHTML = "";
+    b.appendChild(LX.makeIcon( "Check" ));
     b.classList.add('copied');
 
     setTimeout( () => {
-        b.innerHTML = '<i class="fa-regular fa-copy"></i>';
+        b.innerHTML = "";
+        b.appendChild(LX.makeIcon( "Copy" ));
         b.classList.remove('copied');
     }, 2000 );
 

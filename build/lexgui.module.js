@@ -831,9 +831,9 @@ function makeIcon( iconName, options = { } )
         svg = lucide.createElement( lucideIcon, options );
     }
 
-    if( options.svgClass )
+    if( options.svgClass && options.svgClass.length )
     {
-        svg.classList.add( options.svgClass );
+        options.svgClass.split( " " ).forEach( c => svg.classList.add( c ) );
     }
 
     const icon = document.createElement( "a" );
@@ -1273,12 +1273,21 @@ function _createCommandbar( root )
             {
                 const key = "Language: " + l;
                 const icon = instances[ 0 ]._getFileIcon( null, languages[ l ].ext );
+                let value = null;
 
-                // @legacy FONTAWESOME
-                let value = icon.includes( 'fa-' ) ? "<i class='" + icon + "'></i>" :
-                        "<img src='" + ( "https://raw.githubusercontent.com/jxarco/lexgui.js/master/" + icon ) + "'>";
+                if( !icon.includes( '.' ) ) // Not a file
+                {
+                    const classes = icon.split( ' ' );
+                    value = LX.makeIcon( classes[ 0 ], { svgClass: `${ classes.slice( 0 ).join( ' ' ) }` } ).innerHTML;
+                }
+                else // an image..
+                {
+                    const rootPath = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/";
+                    value = "<img src='" + ( rootPath + icon ) + "'>";
+                }
 
                 value += key + " <span class='lang-ext'>(" + languages[ l ].ext + ")</span>";
+
                 if( key.toLowerCase().includes( filter ) )
                 {
                     _addElement( value, () => {
@@ -2243,7 +2252,7 @@ class DropdownMenu {
 
             const menuItem = document.createElement('div');
             menuItem.className = "lexdropdownmenuitem" + ( item.name ? "" : " label" ) + ( item.disabled ?? false ? " disabled" : "" ) + ( ` ${ item.className ?? "" }` );
-            menuItem.id = item.key = pKey;
+            menuItem.id = pKey;
             menuItem.innerHTML = `<span>${ key }</span>`;
             menuItem.tabIndex = "1";
             parentDom.appendChild( menuItem );
@@ -2255,9 +2264,7 @@ class DropdownMenu {
 
             if( item.submenu )
             {
-                // @legacy FONTAWESOME
-                let submenuIcon = document.createElement('a');
-                submenuIcon.className = "fa-solid fa-angle-right fa-xs";
+                const submenuIcon = LX.makeIcon( "Right", { svgClass: "sm" } );
                 menuItem.appendChild( submenuIcon );
             }
             else if( item.kbd )
@@ -4188,10 +4195,10 @@ class Tabs {
         // Process icon
         if( options.icon )
         {
-            // @legacy FONTAWESOME
-            if( options.icon.includes( 'fa-' ) )
+            if( !options.icon.includes( '.' ) ) // Not a file
             {
-                options.icon = "<i class='" + options.icon + "'></i>";
+                const classes = options.icon.split( ' ' );
+                options.icon = LX.makeIcon( classes[ 0 ], { svgClass: "sm " + classes.slice( 0 ).join( ' ' ) } ).innerHTML;
             }
             else // an image..
             {
@@ -4203,7 +4210,7 @@ class Tabs {
         // Create tab
         let tabEl = document.createElement( 'span' );
         tabEl.dataset[ "name" ] = name;
-        tabEl.className = "lexareatab" + ( isSelected ? " selected" : "" );
+        tabEl.className = "lexareatab flex flex-row gap-1" + ( isSelected ? " selected" : "" );
         tabEl.innerHTML = ( options.icon ?? "" ) + name;
         tabEl.id = name.replace( /\s/g, '' ) + Tabs.TAB_ID++;
         tabEl.title = options.title ?? "";
@@ -4531,8 +4538,8 @@ class Menubar {
         let button = this.buttons[ name ];
         if( button )
         {
-            // @legacy FONTAWESOME
-            button.querySelector('a').className = "fa-solid" + " " + icon + " lexicon";
+            button.innerHTML = "";
+            button.appendChild( LX.makeIcon( icon, { svgClass: "xl" } ) );
             return;
         }
 
@@ -4541,7 +4548,7 @@ class Menubar {
         const disabled = options.disabled ?? false;
         button.className = "lexmenubutton main" + (disabled ? " disabled" : "");
         button.title = name;
-        button.innerHTML = "<a class='" + icon + " lexicon'></a>";
+        button.appendChild( LX.makeIcon( icon, { svgClass: "xl" } ) );
 
         if( options.float == "right" )
         {
@@ -4775,11 +4782,10 @@ class SideBar {
         // Entry filter
         if( ( options.filter ?? false ) )
         {
-            // @legacy FONTAWESOME
             const filterTextInput = new TextInput(null, "", (value, event) => {
                 this.filterString = value;
                 this.update();
-            }, { inputClass: "outline", placeholder: "Search...", icon: "fa-solid fa-magnifying-glass", className: "lexsidebarfilter" });
+            }, { inputClass: "outline", placeholder: "Search...", icon: "Search", className: "lexsidebarfilter" });
             this.filter = filterTextInput.root;
             this.root.appendChild( this.filter );
         }
@@ -4804,8 +4810,8 @@ class SideBar {
         doAsync( () => {
             // This account for header, footer and all inner margins
             const contentOffset = ( parseInt( this.header?.getComputedSize().height ) ?? 0 ) +
-            ( parseInt( this.filter?.getComputedSize().height ) ?? 0 ) +
-            ( parseInt( this.footer?.getComputedSize().height ) ?? 0 );
+            ( parseInt( this.filter?.getComputedSize().height ?? 0 ) ) +
+            ( parseInt( this.footer?.getComputedSize().height ?? 0 ) );
             this.content.style.height = `calc(100% - ${ contentOffset }px)`;
         }, 10 );
 
@@ -5120,10 +5126,9 @@ class SideBar {
 
                     if( this.groups[ item.group ] != null )
                     {
-                        let groupAction = document.createElement( 'a' );
-                        groupAction.className = ( this.groups[ item.group ].icon ?? "" ) + " lexicon";
-                        groupEntry.appendChild( groupAction );
-                        groupAction.addEventListener( "click", (e) => {
+                        const groupActionIcon = LX.makeIcon( this.groups[ item.group ].icon, { svgClass: "sm" } )
+                        groupEntry.appendChild( groupActionIcon );
+                        groupActionIcon.addEventListener( "click", e => {
                             if( this.groups[ item.group ].callback )
                             {
                                 this.groups[ item.group ].callback( item.group, e );
@@ -5187,20 +5192,7 @@ class SideBar {
             {
                 if( options.icon )
                 {
-                    let itemIcon = null;
-
-                    // @legacy FONTAWESOME
-                    if( options.icon.includes( "fa-" ) )
-                    {
-                        itemIcon = document.createElement( 'i' );
-                        itemIcon.className = options.icon;
-                    }
-                    else
-                    {
-                        itemIcon = LX.makeIcon( options.icon );
-                    }
-
-                    itemIcon.classList.add( "lexsidebarentryicon" );
+                    const itemIcon = LX.makeIcon( options.icon, { iconClass: "lexsidebarentryicon" } );
                     itemDom.appendChild( itemIcon );
                     LX.asTooltip( itemDom, key, { side: "right", offset: 16, active: false } );
                 }
@@ -5692,12 +5684,10 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
             element.appendChild( container );
             element.dataset["opened"] = false;
 
-            // @legacy FONTAWESOME
-            let buttonName = "<a class='fa-solid " + (options.icon ?? "fa-cube")  + "'></a>";
-            buttonName += customWidgetName + (!instance ? " [empty]" : "");
-            // Add always icon to keep spacing right
-            buttonName += "<a class='fa-solid " + (instance ? "fa-bars-staggered" : " ") + " menu'></a>";
+            const customIcon = LX.makeIcon( options.icon ?? "Box" );
+            const menuIcon = LX.makeIcon( "Menu" );
 
+            let buttonName = customWidgetName + (!instance ? " [empty]" : "");
             let buttonEl = this.addButton(null, buttonName, (value, event) => {
                 if( instance )
                 {
@@ -5717,11 +5707,15 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                 }
 
             }, { buttonClass: 'custom' });
+
+            const buttonSpan = buttonEl.root.querySelector( "span" );
+            buttonSpan.prepend( customIcon );
+            buttonSpan.appendChild( menuIcon );
             container.appendChild( buttonEl.root );
 
             if( instance )
             {
-                buttonEl.root.querySelector('a.menu').addEventListener('click', e => {
+                menuIcon.addEventListener( "click", e => {
                     e.stopImmediatePropagation();
                     e.stopPropagation();
                     addContextMenu(null, e, c => {
@@ -5826,7 +5820,7 @@ class NodeTree {
     _createItem( parent, node, level = 0, selectedId ) {
 
         const that = this;
-        const nodeFilterInput = this.domEl.querySelector( ".lexnodetree_filter" );
+        const nodeFilterInput = this.domEl.querySelector( ".lexnodetreefilter" );
 
         node.children = node.children ?? [];
         if( nodeFilterInput && nodeFilterInput.value != "" && !node.id.includes( nodeFilterInput.value ) )
@@ -5859,23 +5853,29 @@ class NodeTree {
         item.treeData = node;
 
         // Select hierarchy icon
-        // @legacy FONTAWESOME
-        let icon = (this.options.skip_default_icon ?? true) ? "" : "fa-solid fa-square"; // Default: no childs
+        let icon = (this.options.skipDefaultIcon ?? true) ? null : "Dot"; // Default: no childs
         if( isParent )
         {
-            icon = node.closed ? "fa-solid fa-caret-right" : "fa-solid fa-caret-down";
-            item.innerHTML = "<a class='" + icon + " hierarchy'></a>";
+            icon = node.closed ? "Right" : "Down";
+        }
+
+        if( icon )
+        {
+            item.appendChild( LX.makeIcon( icon, { iconClass: "hierarchy", svgClass: "xs" } ) );
         }
 
         // Add display icon
         icon = node.icon;
 
         // Process icon
-        if( node.icon )
+        if( icon )
         {
-            // @legacy FONTAWESOME
-            if( node.icon.includes( 'fa-' ) )
-                item.innerHTML += "<a class='" + node.icon + " tree-item-icon'></a>";
+            if( !node.icon.includes( '.' ) ) // Not a file
+            {
+                const classes = node.icon.split( ' ' );
+                const nodeIcon = LX.makeIcon( classes[ 0 ], { iconClass: "tree-item-icon mr-2", svgClass: "sm" + ( classes.length > 1 ? ` ${ classes.slice( 0 ).join( ' ' ) }` : '' ) } );
+                item.appendChild( nodeIcon );
+            }
             else // an image..
             {
                 const rootPath = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/";
@@ -6224,41 +6224,33 @@ class NodeTree {
         {
             for( let i = 0; i < node.actions.length; ++i )
             {
-                let a = node.actions[ i ];
-                let actionEl = document.createElement('a');
-                actionEl.className = "lexicon " + a.icon;
-                actionEl.title = a.name;
-                actionEl.addEventListener("click", function( e ) {
-                    if( a.callback )
+                const action = node.actions[ i ];
+                const actionIcon = LX.makeIcon( action.icon, { title: action.name } );
+                actionIcon.addEventListener("click", function( e ) {
+                    if( action.callback )
                     {
-                        a.callback( node, actionEl );
+                        action.callback( node, actionIcon );
                         e.stopPropagation();
                     }
                 });
 
-                inputContainer.appendChild( actionEl );
+                inputContainer.appendChild( actionIcon );
             }
         }
 
         if( !node.skipVisibility ?? false )
         {
-            // @legacy FONTAWESOME
-            let visibility = document.createElement( 'a' );
-            visibility.className = "lexicon fa-solid fa-eye" + ( !node.visible ? "-slash" : "" );
-            visibility.title = "Toggle visible";
-            visibility.addEventListener("click", function( e ) {
-                e.stopPropagation();
+            const visibilityBtn = new Button( null, "", ( swapValue, event ) => {
+                event.stopPropagation();
                 node.visible = node.visible === undefined ? false : !node.visible;
-                this.className = "lexicon fa-solid fa-eye" + ( !node.visible ? "-slash" : "" );
                 // Trigger visibility event
                 if( that.onevent )
                 {
                     const event = new TreeEvent( TreeEvent.NODE_VISIBILITY, node, node.visible );
                     that.onevent( event );
                 }
-            });
-
-            inputContainer.appendChild( visibility );
+            }, { icon: node.visible ? "Eye" : "EyeOff", swap: node.visible ? "EyeOff" : "Eye", title: "Toggle visible", className: "p-0 m-0", buttonClass: "bg-none" } );
+            inputContainer.appendChild( visibilityBtn.root );
         }
 
         const _hasChild = function( parent, id ) {
@@ -6371,12 +6363,10 @@ class Title extends Widget {
 
         this.root.className = "lextitle";
 
-        // @legacy FONTAWESOME
         if( options.icon )
         {
-            let icon = document.createElement( 'a' );
-            icon.className = options.icon;
-            icon.style.color = options.iconColor || "";
+            let icon = LX.makeIcon( options.icon, { iconClass: "mr-2" } );
+            icon.querySelector( "svg" ).style.color = options.iconColor || "";
             this.root.appendChild( icon );
         }
 
@@ -6503,10 +6493,8 @@ class TextInput extends Widget {
 
             if( options.icon )
             {
-                // @legacy FONTAWESOME
                 wValue.style.paddingLeft = "1.75rem";
-                let icon = document.createElement( 'a' );
-                icon.className = "inputicon " + options.icon;
+                const icon = LX.makeIcon( options.icon, { iconClass: "absolute z-1 ml-2", svgClass: "sm" } );
                 container.appendChild( icon );
             }
 
@@ -6516,21 +6504,14 @@ class TextInput extends Widget {
             wValue = document.createElement( 'a' );
             wValue.href = options.url;
             wValue.target = "_blank";
-
-            // @legacy FONTAWESOME
-            const icon = options.warning ? '<i class="fa-solid fa-triangle-exclamation"></i>' : '';
-            wValue.innerHTML = ( icon + value ) || "";
+            wValue.innerHTML = value ?? "";
             wValue.style.textAlign = options.float ?? "";
             wValue.className = "lextext ellipsis-overflow";
         }
         else
         {
             wValue = document.createElement( 'input' );
-
-            // @legacy FONTAWESOME
-            const icon = options.warning ? '<i class="fa-solid fa-triangle-exclamation"></i>' : '';
             wValue.disabled = true;
-            wValue.innerHTML = icon;
             wValue.value = value;
             wValue.style.textAlign = options.float ?? "";
             wValue.className = "lextext ellipsis-overflow " + ( options.inputClass ?? "" );
@@ -6630,9 +6611,7 @@ class TextArea extends Widget {
 
         if( options.icon )
         {
-            // @legacy FONTAWESOME
-            let icon = document.createElement('a');
-            icon.className = "inputicon " + options.icon;
+            const icon = LX.makeIcon( options.icon, { iconClass: "absolute z-1 ml-2", svgClass: "sm" } );
             container.appendChild( icon );
         }
 
@@ -6723,19 +6702,7 @@ class Button extends Widget {
             input.type = "checkbox";
             wValue.prepend( input );
 
-            let swapIcon = null;
-
-            // @legacy FONTAWESOME
-            if( options.swap.includes( "fa-" ) )
-            {
-                swapIcon = document.createElement( 'a' );
-                swapIcon.className = options.swap + " swap-on lexicon";
-            }
-            else
-            {
-                swapIcon = LX.makeIcon( options.swap, { iconClass: "swap-on" } );
-            }
-
+            const swapIcon = LX.makeIcon( options.swap, { iconClass: "swap-on" } );
             wValue.appendChild( swapIcon );
 
             this.root.swap = function( skipCallback ) {
@@ -7092,7 +7059,7 @@ class Form extends Widget {
             {
                 callback( container.formData, event );
             }
-        }, { buttonClass: "primary" } );
+        }, { buttonClass: "contrast" } );
 
         container.appendChild( submitButton.root );
     }
@@ -7159,11 +7126,6 @@ class Select extends Widget {
         wValue.className = "lexselect lexoption";
         wValue.name = name;
         wValue.iValue = value;
-
-        // Add select widget button
-        let buttonName = value;
-        // @legacy FONTAWESOME
-        buttonName += "<a class='fa-solid fa-angle-down'></a>";
 
         if( options.overflowContainer )
         {
@@ -7239,7 +7201,7 @@ class Select extends Widget {
             }
         };
 
-        let selectedOption = new Button( null, buttonName, ( value, event ) => {
+        let selectedOption = new Button( null, value, ( value, event ) => {
             if( list.unfocus_event )
             {
                 delete list.unfocus_event;
@@ -7266,9 +7228,10 @@ class Select extends Widget {
 
         }, { buttonClass: "array", skipInlineCount: true, disabled: options.disabled } );
 
-        container.appendChild( selectedOption.root );
-
         selectedOption.root.style.width = "100%";
+        selectedOption.root.querySelector( "span" ).appendChild( LX.makeIcon( "Down", { svgClass: "sm" } ) );
+
+        container.appendChild( selectedOption.root );
 
         selectedOption.refresh = (v) => {
             const buttonSpan = selectedOption.root.querySelector("span");
@@ -7292,24 +7255,24 @@ class Select extends Widget {
         list.className = "lexoptions";
         listDialog.appendChild( list )
 
-        list.addEventListener( 'focusout', function( e ) {
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            if( e.relatedTarget === selectedOption.root.querySelector( 'button' ) )
-            {
-                this.unfocus_event = true;
-                setTimeout( () => delete this.unfocus_event, 200 );
-            }
-            else if ( e.relatedTarget && ( e.relatedTarget.tagName == "INPUT" || e.relatedTarget.classList.contains("lexoptions") ) )
-            {
-                return;
-            }
-            else if ( e.target.className == 'lexinput-filter' )
-            {
-                return;
-            }
-            listDialog.close();
-        });
+        // list.addEventListener( 'focusout', function( e ) {
+        //     e.stopPropagation();
+        //     e.stopImmediatePropagation();
+        //     if( e.relatedTarget === selectedOption.root.querySelector( 'button' ) )
+        //     {
+        //         this.unfocus_event = true;
+        //         setTimeout( () => delete this.unfocus_event, 200 );
+        //     }
+        //     else if ( e.relatedTarget && ( e.relatedTarget.tagName == "INPUT" || e.relatedTarget.classList.contains("lexoptions") ) )
+        //     {
+        //         return;
+        //     }
+        //     else if ( e.target.className == 'lexinput-filter' )
+        //     {
+        //         return;
+        //     }
+        //     listDialog.close();
+        // });
 
         // Add filter options
         let filter = null;
@@ -7319,8 +7282,7 @@ class Select extends Widget {
             filterOptions.placeholder = filterOptions.placeholder ?? "Search...";
             filterOptions.skipWidget = filterOptions.skipWidget ?? true;
             filterOptions.trigger = "input";
-            // @legacy FONTAWESOME
-            filterOptions.icon = "fa-solid fa-magnifying-glass";
+            filterOptions.icon = "Search";
             filterOptions.className = "lexfilter";
             filterOptions.inputClass = "outline";
 
@@ -7392,8 +7354,8 @@ class Select extends Widget {
 
                     if( !asLabel )
                     {
-                        // @legacy FONTAWESOME
-                        option.innerHTML = "</a><span>" + iValue + "</span><a class='fa-solid fa-check'>";
+                        option.innerHTML = `<span>${ iValue }</span>`;
+                        option.appendChild( LX.makeIcon( "Check" ) )
                         option.value = iValue;
                         li.setAttribute( "value", iValue );
 
@@ -7707,16 +7669,13 @@ class ItemArray extends Widget {
         this.root.appendChild( container );
         this.root.dataset["opened"] = false;
 
-        // @legacy FONTAWESOME
-        const angleDown = `<a class='fa-solid fa-angle-down'></a>`;
-
-        let buttonName = "Array (size " + values.length + ")";
-        buttonName += angleDown;
+        let buttonName = `Array (size ${ values.length })`;
 
         const toggleButton = new Button(null, buttonName, () => {
             this.root.dataset["opened"] = this.root.dataset["opened"] == "true" ? false : true;
             this.root.querySelector(".lexarrayitems").toggleAttribute('hidden');
         }, { buttonClass: 'array' });
+        toggleButton.root.querySelector( "span" ).appendChild( LX.makeIcon( "Down", { svgClass: "sm" } ) );
         container.appendChild( toggleButton.root );
 
         // Show elements
@@ -7729,9 +7688,11 @@ class ItemArray extends Widget {
         this._updateItems = () => {
 
             // Update num items
-            let buttonEl = this.root.querySelector(".lexbutton.array span");
-            buttonEl.innerHTML = "Array (size " + values.length + ")";
-            buttonEl.innerHTML += angleDown;
+            let buttonSpan = this.root.querySelector(".lexbutton.array span");
+            for( let node of buttonSpan.childNodes )
+            {
+                if ( node.nodeType === Node.TEXT_NODE ) { node.textContent = `Array (size ${ values.length })`; break; }
+            }
 
             // Update inputs
             arrayItems.innerHTML = "";
@@ -7768,21 +7729,16 @@ class ItemArray extends Widget {
 
                 arrayItems.appendChild( widget.root );
 
-                // @legacy FONTAWESOME
-                const removeWidget = new Button( null, "<a class='lexicon fa-solid fa-trash'></a>", ( v, event) => {
+                const removeWidget = new Button( null, "", ( v, event) => {
                     values.splice( values.indexOf( value ), 1 );
                     this._updateItems();
                     this._trigger( new IEvent(name, values, event), callback );
-                }, { title: "Remove item", className: 'micro'} );
+                }, { title: "Remove item", icon: "TrashCan"} );
 
                 widget.root.appendChild( removeWidget.root );
             }
 
-            buttonName = "Add item";
-            // @legacy FONTAWESOME
-            buttonName += "<a class='fa-solid fa-plus'></a>";
-
-            const addButton = new Button(null, buttonName, (v, event) => {
+            const addButton = new Button(null, LX.makeIcon( "Plus", { svgClass: "sm" } ).innerHTML + "Add item", (v, event) => {
                 values.push( options.innerValues ? options.innerValues[ 0 ] : "" );
                 this._updateItems();
                 this._trigger( new IEvent(name, values, event), callback );
@@ -7864,7 +7820,13 @@ class List extends Widget {
 
                 let listElement = document.createElement( 'div' );
                 listElement.className = "lexlistitem" + ( value == itemValue ? " selected" : "" );
-                listElement.innerHTML = "<span>" + itemValue + "</span>" + ( icon ? "<a class='" + icon + "'></a>" : "" );
+
+                if( icon )
+                {
+                    listElement.appendChild( LX.makeIcon( icon ) );
+                }
+
+                listElement.innerHTML += `<span>${ itemValue }</span>`;
 
                 listElement.addEventListener( 'click', e => {
                     listContainer.querySelectorAll( '.lexlistitem' ).forEach( e => e.classList.remove( 'selected' ) );
@@ -7940,9 +7902,7 @@ class Tags extends Widget {
                 tag.className = "lextag";
                 tag.innerHTML = tagName;
 
-                // @legacy FONTAWESOME
-                const removeButton = document.createElement('a');
-                removeButton.className = "lextagrmb fa-solid fa-xmark lexicon";
+                const removeButton = LX.makeIcon( "X", { svgClass: "sm" } );
                 tag.appendChild( removeButton );
 
                 removeButton.addEventListener( 'click', e => {
@@ -8534,9 +8494,7 @@ class NumberInput extends Widget {
             box.appendChild( unitSpan );
         }
 
-        let dragIcon = document.createElement( 'a' );
-        // @legacy FONTAWESOME
-        dragIcon.className = "fa-solid fa-arrows-up-down drag-icon hidden";
+        const dragIcon = LX.makeIcon( "ArrowsVertical", { iconClass: "drag-icon hidden", svgClass: "sm" } );
         box.appendChild( dragIcon );
 
         if( options.disabled )
@@ -8768,9 +8726,7 @@ class Vector extends Widget {
 
             vecinput.value = vecinput.iValue = value[ i ];
 
-            // @legacy FONTAWESOME
-            let dragIcon = document.createElement( 'a' );
-            dragIcon.className = "fa-solid fa-arrows-up-down drag-icon hidden";
+            const dragIcon = LX.makeIcon( "ArrowsVertical", { iconClass: "drag-icon hidden", svgClass: "sm" } );
             box.appendChild( dragIcon );
 
             if( options.disabled )
@@ -8787,7 +8743,7 @@ class Vector extends Widget {
                 if( e.shiftKey ) mult = 10;
                 else if( e.altKey ) mult = 0.1;
 
-                if( locker.locked )
+                if( lockerButton.locked )
                 {
                     for( let v of that.querySelectorAll(".vecinput") )
                     {
@@ -8812,7 +8768,7 @@ class Vector extends Widget {
                 let val = clamp( e.target.value, +vecinput.min, +vecinput.max );
                 val = round( val, options.precision );
 
-                if( locker.locked )
+                if( lockerButton.locked )
                 {
                     for( let v of vectorInputs )
                     {
@@ -8867,9 +8823,9 @@ class Vector extends Widget {
                     if( e.shiftKey ) mult = 10;
                     else if( e.altKey ) mult = 0.1;
 
-                    if( locker.locked )
+                    if( lockerButton.locked )
                     {
-                        for( let v of this.root.querySelectorAll( ".vecinput" ) )
+                        for( let v of that.root.querySelectorAll( ".vecinput" ) )
                         {
                             v.value = round( +v.valueAsNumber + mult * dt, options.precision );
                             Widget._dispatchEvent( v, "change" );
@@ -8926,24 +8882,10 @@ class Vector extends Widget {
             };
         }
 
-        // @legacy FONTAWESOME
-        let locker = document.createElement( 'a' );
-        locker.title = "Lock";
-        locker.className = "fa-solid fa-lock-open lexicon lock";
-        container.appendChild( locker );
-        locker.addEventListener( "click", function( e ) {
-            this.locked = !this.locked;
-            if( this.locked )
-            {
-                this.classList.add( "fa-lock" );
-                this.classList.remove( "fa-lock-open" );
-            }
-            else
-            {
-                this.classList.add( "fa-lock-open" );
-                this.classList.remove( "fa-lock" );
-            }
-        }, false );
+        const lockerButton = new Button( null, "", (swapValue) => {
+            lockerButton.locked = swapValue;
+        }, { title: "Lock", icon: "LockOpen", swap: "Lock", buttonClass: "bg-none p-0" } );
+        container.appendChild( lockerButton.root );
 
         doAsync( this.onResize.bind( this ) );
     }
@@ -9001,23 +8943,21 @@ class SizeInput extends Widget {
                     callback( value );
                 }
 
-            }, { min: 0, disabled: options.disabled, precision: options.precision } );
+            }, { min: 0, disabled: options.disabled, precision: options.precision, className: "flex-fill" } );
 
             this.root.appendChild( this.root.dimensions[ i ].root );
 
             if( ( i + 1 ) != value.length )
             {
-                // @legacy FONTAWESOME
-                let cross = document.createElement( 'a' );
-                cross.className = "lexsizecross fa-solid fa-xmark";
-                this.root.appendChild( cross );
+                const xIcon = LX.makeIcon( "X", { svgClass: "fg-accent font-bold" } );
+                this.root.appendChild( xIcon );
             }
         }
 
         if( options.units )
         {
             let unitSpan = document.createElement( 'span' );
-            unitSpan.className = "lexunit";
+            unitSpan.className = "select-none";
             unitSpan.innerText = options.units;
             this.root.appendChild( unitSpan );
         }
@@ -9025,28 +8965,16 @@ class SizeInput extends Widget {
         // Lock aspect ratio
         if( this.root.aspectRatio )
         {
-            // @legacy FONTAWESOME
-            let locker = document.createElement( 'a' );
-            locker.title = "Lock Aspect Ratio";
-            locker.className = "fa-solid fa-lock-open lexicon lock";
-            this.root.appendChild( locker );
-            locker.addEventListener( "click", e => {
-                this.root.locked = !this.root.locked;
-                if( this.root.locked )
+            const lockerButton = new Button( null, "", (swapValue) => {
+                this.root.locked = swapValue;
+                if( swapValue )
                 {
-                    locker.classList.add( "fa-lock" );
-                    locker.classList.remove( "fa-lock-open" );
-
                     // Recompute ratio
                     const value = this.value();
                     this.root.aspectRatio = value[ 0 ] / value[ 1 ];
                 }
-                else
-                {
-                    locker.classList.add( "fa-lock-open" );
-                    locker.classList.remove( "fa-lock" );
-                }
-            }, false );
+            }, { title: "Lock Aspect Ratio", icon: "LockOpen", swap: "Lock", buttonClass: "bg-none p-0" } );
+            this.root.appendChild( lockerButton.root );
         }
     }
 }
@@ -9541,8 +9469,6 @@ class FileInput extends Widget {
                     p.addButton( null, "Reload", v => { input.dispatchEvent( new Event( 'change' ) ) } );
                 }, { onclose: ( root ) => { root.remove(); settingsDialog = null; } } );
 
-                // @legacy FONTAWESOME
-
             }, { skipInlineCount: true, title: "Settings", disabled: options.disabled, icon: "Settings" });
 
             this.root.appendChild( settingButton.root );
@@ -9588,13 +9514,10 @@ class Tree extends Widget {
         // Tree icons
         if( options.icons )
         {
-            // @legacy FONTAWESOME
             for( let data of options.icons )
             {
-                let iconEl = document.createElement('a');
-                iconEl.title = data.name;
-                iconEl.className = "lexicon " + data.icon;
-                iconEl.addEventListener("click", data.callback);
+                const iconEl = LX.makeIcon( data.icon, { title: data.name } );
+                iconEl.addEventListener( "click", data.callback );
                 toolsDiv.appendChild( iconEl );
             }
         }
@@ -9606,17 +9529,15 @@ class Tree extends Widget {
         let nodeFilterInput = null;
         if( options.filter )
         {
-            nodeFilterInput = document.createElement('input');
-            nodeFilterInput.className = "lexnodetree_filter";
+            nodeFilterInput = document.createElement( "input" );
+            nodeFilterInput.className = "lexnodetreefilter";
             nodeFilterInput.setAttribute("placeholder", "Filter..");
             nodeFilterInput.style.width =  "100%";
             nodeFilterInput.addEventListener('input', () => {
                 this.innerTree.refresh();
             });
 
-            // @legacy FONTAWESOME
-            let searchIcon = document.createElement('a');
-            searchIcon.className = "lexicon fa-solid fa-magnifying-glass";
+            let searchIcon = LX.makeIcon( "Search" );
             toolsDiv.appendChild( nodeFilterInput );
             toolsDiv.appendChild( searchIcon );
         }
@@ -9681,9 +9602,8 @@ class TabSections extends Widget {
             const isSelected = ( i == 0 );
             let tabEl = document.createElement( "div" );
             tabEl.className = "lextab " + (i == tabs.length - 1 ? "last" : "") + ( isSelected ? "selected" : "" );
-            // @legacy FONTAWESOME
-            tabEl.innerHTML = ( showNames ? tab.name : "" ) + "<a class='" + ( tab.icon || "fa fa-hashtag" ) + " " + (showNames ? "withname" : "") + "'></a>";
-            tabEl.title = tab.name;
+            tabEl.innerHTML = ( showNames ? tab.name : "" );
+            tabEl.appendChild( LX.makeIcon( tab.icon ?? "Hash", { title: tab.name } ) );
 
             let infoContainer = document.createElement( "div" );
             infoContainer.id = tab.name.replace( /\s/g, '' );
@@ -9765,7 +9685,6 @@ class Counter extends Widget {
             let mult = step ?? 1;
             if( e.shiftKey ) mult *= 10;
             this.set( counterText.count - mult, false, e );
-            // @legacy FONTAWESOME
         }, { skipInlineCount: true, title: "Minus", icon: "Minus" });
 
         container.appendChild( substrButton.root );
@@ -9792,7 +9711,6 @@ class Counter extends Widget {
             let mult = step ?? 1;
             if( e.shiftKey ) mult *= 10;
             this.set( counterText.count + mult, false, e );
-            // @legacy FONTAWESOME
         }, { skipInlineCount: true, title: "Plus", icon: "Plus" });
         container.appendChild( addButton.root );
     }
@@ -11636,15 +11554,10 @@ class Branch {
                 return;
             }
 
-            // @legacy FONTAWESOME
             addContextMenu("Dock", e, p => {
                 e.preventDefault();
-                // p.add('<i class="fa-regular fa-window-maximize">', {id: 'dock_options0'});
-                // p.add('<i class="fa-regular fa-window-maximize fa-rotate-180">', {id: 'dock_options1'});
-                // p.add('<i class="fa-regular fa-window-maximize fa-rotate-90">', {id: 'dock_options2'});
-                // p.add('<i class="fa-regular fa-window-maximize fa-rotate-270">', {id: 'dock_options3'});
                 p.add( 'Floating', that._onMakeFloating.bind( that ) );
-            }, { icon: "fa-regular fa-window-restore" });
+            }, { icon: "WindowRestore" });
         };
 
         title.addEventListener( 'click', this.onclick );
@@ -11790,7 +11703,7 @@ class Footer {
      * @param {Object} options:
      * columns: Array with data per column { title, items: [ { title, link } ]  }
      * credits: html string
-     * socials: Array with data per item { title, link, iconHtml }
+     * socials: Array with data per item { title, link, icon }
      * className: Extra class to customize
     */
     constructor( options = {} ) {
@@ -11856,16 +11769,14 @@ class Footer {
             if( options.socials )
             {
                 const socials = document.createElement( "div" );
-                socials.className = "social";
+                socials.className = "socials flex flex-row gap-1 my-2 justify-end";
 
                 for( let social of options.socials )
                 {
-                    const itemDom = document.createElement( "a" );
-                    itemDom.title = social.title;
-                    itemDom.innerHTML = social.icon;
-                    itemDom.href = social.link;
-                    itemDom.target = "_blank";
-                    socials.appendChild( itemDom );
+                    const socialIcon = LX.makeIcon( social.icon, { title: social.title, svgClass: "xl" } );
+                    socialIcon.href = social.link;
+                    socialIcon.target = "_blank";
+                    socials.appendChild( socialIcon );
                 }
 
                 creditsSocials.appendChild( socials );
@@ -11972,18 +11883,17 @@ class Dialog {
                         root.remove();
                     }
 
-                    // @legacy FONTAWESOME
                     // Right
                     let rpanel = _getNextPanel(LX.main_area.sections[ 1 ]);
-                    p.add('<i class="fa-regular fa-window-maximize fa-window-maximize fa-rotate-90">', {disabled: !rpanel, id: 'dock_options0', callback: () => {
+                    p.add('<i class="This goes to the right">', { icon: "PanelRightDashed", disabled: !rpanel, id: 'dock_options0', callback: () => {
                         _appendBranch(rpanel);
                     }});
                     // Left
                     let lpanel = _getNextPanel(LX.main_area.sections[ 0 ]);
-                    p.add('<i class="fa-regular fa-window-maximize fa-window-maximize fa-rotate-270">', {disabled: !lpanel, id: 'dock_options1', callback: () => {
+                    p.add('<i class="This goes to the left">', { icon: "PanelLeftDashed", disabled: !lpanel, id: 'dock_options1', callback: () => {
                         _appendBranch(lpanel);
                     }});
-                }, { icon: "fa-regular fa-window-restore" });
+                }, { icon: "WindowRestore" });
             };
 
             root.appendChild( titleDiv );
@@ -12013,10 +11923,7 @@ class Dialog {
                 }
             };
 
-            // @legacy FONTAWESOME
-            var closeButton = document.createElement( 'a' );
-            closeButton.className = "lexdialogcloser fa-solid fa-xmark";
-            closeButton.title = "Close";
+            const closeButton = LX.makeIcon( "X", { title: "Close", iconClass: "lexdialogcloser" } );
             closeButton.addEventListener( "click", this.close );
 
             if( title )
@@ -12343,8 +12250,7 @@ class ContextMenu {
         const icon = o[ 'icon' ];
         if( icon )
         {
-            // @legacy FONTAWESOME
-            entry.innerHTML += "<a class='" + icon + " fa-sm'></a>";
+            entry.appendChild( LX.makeIcon( icon, { svgClass: "sm" } ) );
         }
         const disabled = o['disabled'];
         entry.innerHTML += "<div class='lexentryname" + (disabled ? " disabled" : "") + "'>" + k + "</div>";
@@ -12366,7 +12272,10 @@ class ContextMenu {
             e.stopPropagation();
             e.stopImmediatePropagation();
 
-            if(disabled) return;
+            if( disabled )
+            {
+                return;
+            }
 
             const f = o[ 'callback' ];
             if( f )
@@ -12376,18 +12285,20 @@ class ContextMenu {
             }
 
             if( !hasSubmenu )
-            return;
+            {
+                return;
+            }
 
             if( LX.OPEN_CONTEXTMENU_ENTRY == 'click' )
                 this._createSubmenu( o, k, entry, ++d );
         });
 
         if( !hasSubmenu )
+        {
             return;
+        }
 
-        // @legacy FONTAWESOME
-        let submenuIcon = document.createElement('a');
-        submenuIcon.className = "fa-solid fa-bars-staggered fa-xs";
+        const submenuIcon = LX.makeIcon( "Menu", { svgClass: "sm" } )
         entry.appendChild( submenuIcon );
 
         if( LX.OPEN_CONTEXTMENU_ENTRY == 'mouseover' )
@@ -12449,6 +12360,7 @@ class ContextMenu {
                 if( !nextToken )
                 {
                     item[ 'id' ] = options.id;
+                    item[ 'icon' ] = options.icon;
                     item[ 'callback' ] = options.callback;
                     item[ 'disabled' ] = options.disabled ?? false;
                 }
@@ -13545,15 +13457,14 @@ class AssetView {
             }
         }
 
-        // @legacy FONTAWESOME
         this.rightPanel.sameLine();
         this.rightPanel.addSelect( "Filter", this.allowedTypes, this.allowedTypes[ 0 ], v => this._refreshContent.call(this, null, v), { width: "30%", minWidth: "128px" } );
         this.rightPanel.addText( null, this.searchValue ?? "", v => this._refreshContent.call(this, v, null), { placeholder: "Search assets.." } );
-        this.rightPanel.addButton( null, "<a class='fa fa-arrow-up-short-wide'></a>", on_sort.bind(this), { title: "Sort" } );
-        this.rightPanel.addButton( null, "<a class='fa-solid fa-grip'></a>", on_change_view.bind(this), { title: "View" } );
+        this.rightPanel.addButton( null, "", on_sort.bind(this), { title: "Sort", icon: "ArrowUpNarrowWide" } );
+        this.rightPanel.addButton( null, "", on_change_view.bind(this), { title: "View", icon: "GripHorizontal" } );
         // Content Pages
-        this.rightPanel.addButton( null, "<a class='fa-solid fa-angles-left'></a>", on_change_page.bind(this, -1), { title: "Previous Page", className: "ml-auto" } );
-        this.rightPanel.addButton( null, "<a class='fa-solid fa-angles-right'></a>", on_change_page.bind(this, 1), { title: "Next Page" } );
+        this.rightPanel.addButton( null, "", on_change_page.bind(this, -1), { title: "Previous Page", icon: "ChevronsLeft", className: "ml-auto" } );
+        this.rightPanel.addButton( null, "", on_change_page.bind(this, 1), { title: "Next Page", icon: "ChevronsRight" } );
         const textString = "Page " + this.contentPage + " / " + ((((this.currentData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1);
         this.rightPanel.addText(null, textString, null, {
             inputClass: "nobg", disabled: true, signal: "@on_page_change", maxWidth: "16ch" }
@@ -13563,11 +13474,10 @@ class AssetView {
         if( !this.skipBrowser )
         {
             this.rightPanel.sameLine();
-            // @legacy FONTAWESOME
             this.rightPanel.addComboButtons( null, [
                 {
                     value: "Left",
-                    icon: "fa-solid fa-left-long",
+                    icon: "ArrowLeft",
                     callback: domEl => {
                         if(!this.prevData.length) return;
                         this.nextData.push( this.currentData );
@@ -13578,7 +13488,7 @@ class AssetView {
                 },
                 {
                     value: "Right",
-                    icon: "fa-solid fa-right-long",
+                    icon: "ArrowRight",
                     callback: domEl => {
                         if(!this.nextData.length) return;
                         this.prevData.push( this.currentData );
@@ -13589,7 +13499,7 @@ class AssetView {
                 },
                 {
                     value: "Refresh",
-                    icon: "fa-solid fa-arrows-rotate",
+                    icon: "Refresh",
                     callback: domEl => { this._refreshContent(); }
                 }
             ], { noSelection: true } );
@@ -14466,7 +14376,6 @@ LX.ICONS = {
     "Chart": [448, 512, [], "solid", "M160 80c0-26.5 21.5-48 48-48l32 0c26.5 0 48 21.5 48 48l0 352c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48l0-352zM0 272c0-26.5 21.5-48 48-48l32 0c26.5 0 48 21.5 48 48l0 160c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48L0 272zM368 96l32 0c26.5 0 48 21.5 48 48l0 288c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48z"],
     "ChartLine": [512, 512, [], "solid", "M64 64c0-17.7-14.3-32-32-32S0 46.3 0 64L0 400c0 44.2 35.8 80 80 80l400 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L80 416c-8.8 0-16-7.2-16-16L64 64zm406.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L320 210.7l-57.4-57.4c-12.5-12.5-32.8-12.5-45.3 0l-112 112c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L240 221.3l57.4 57.4c12.5 12.5 32.8 12.5 45.3 0l128-128z"],
     "ChartBar": [512, 512, [], "regular", "M24 32c13.3 0 24 10.7 24 24l0 352c0 13.3 10.7 24 24 24l416 0c13.3 0 24 10.7 24 24s-10.7 24-24 24L72 480c-39.8 0-72-32.2-72-72L0 56C0 42.7 10.7 32 24 32zM128 136c0-13.3 10.7-24 24-24l208 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-208 0c-13.3 0-24-10.7-24-24zm24 72l144 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-144 0c-13.3 0-24-10.7-24-24s10.7-24 24-24zm0 96l272 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-272 0c-13.3 0-24-10.7-24-24s10.7-24 24-24z"],
-    "Check": [448, 512, [], "solid", "M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"],
     "Clone": [512, 512, [], "regular", "M64 464l224 0c8.8 0 16-7.2 16-16l0-64 48 0 0 64c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 224c0-35.3 28.7-64 64-64l64 0 0 48-64 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16zM224 304l224 0c8.8 0 16-7.2 16-16l0-224c0-8.8-7.2-16-16-16L224 48c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16zm-64-16l0-224c0-35.3 28.7-64 64-64L448 0c35.3 0 64 28.7 64 64l0 224c0 35.3-28.7 64-64 64l-224 0c-35.3 0-64-28.7-64-64z"],
     "Copy": [448, 512, [], "regular", "M384 336l-192 0c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l140.1 0L400 115.9 400 320c0 8.8-7.2 16-16 16zM192 384l192 0c35.3 0 64-28.7 64-64l0-204.1c0-12.7-5.1-24.9-14.1-33.9L366.1 14.1c-9-9-21.2-14.1-33.9-14.1L192 0c-35.3 0-64 28.7-64 64l0 256c0 35.3 28.7 64 64 64zM64 128c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l192 0c35.3 0 64-28.7 64-64l0-32-48 0 0 32c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l32 0 0-48-32 0z"],
     "Paste": [512, 512, [], "regular", "M104.6 48L64 48C28.7 48 0 76.7 0 112L0 384c0 35.3 28.7 64 64 64l96 0 0-48-96 0c-8.8 0-16-7.2-16-16l0-272c0-8.8 7.2-16 16-16l16 0c0 17.7 14.3 32 32 32l72.4 0C202 108.4 227.6 96 256 96l62 0c-7.1-27.6-32.2-48-62-48l-40.6 0C211.6 20.9 188.2 0 160 0s-51.6 20.9-55.4 48zM144 56a16 16 0 1 1 32 0 16 16 0 1 1 -32 0zM448 464l-192 0c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l140.1 0L464 243.9 464 448c0 8.8-7.2 16-16 16zM256 512l192 0c35.3 0 64-28.7 64-64l0-204.1c0-12.7-5.1-24.9-14.1-33.9l-67.9-67.9c-9-9-21.2-14.1-33.9-14.1L256 128c-35.3 0-64 28.7-64 64l0 256c0 35.3 28.7 64 64 64z"],
@@ -14489,8 +14398,6 @@ LX.ICONS = {
     "FileWord": [384, 512, [], "regular", "M48 448L48 64c0-8.8 7.2-16 16-16l160 0 0 80c0 17.7 14.3 32 32 32l80 0 0 288c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16zM64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-293.5c0-17-6.7-33.3-18.7-45.3L274.7 18.7C262.7 6.7 246.5 0 229.5 0L64 0zm55 241.1c-3.8-12.7-17.2-19.9-29.9-16.1s-19.9 17.2-16.1 29.9l48 160c3 10.2 12.4 17.1 23 17.1s19.9-7 23-17.1l25-83.4 25 83.4c3 10.2 12.4 17.1 23 17.1s19.9-7 23-17.1l48-160c3.8-12.7-3.4-26.1-16.1-29.9s-26.1 3.4-29.9 16.1l-25 83.4-25-83.4c-3-10.2-12.4-17.1-23-17.1s-19.9 7-23 17.1l-25 83.4-25-83.4z"],
     "FilePowerpoint": [384, 512, [], "regular", "M64 464c-8.8 0-16-7.2-16-16L48 64c0-8.8 7.2-16 16-16l160 0 0 80c0 17.7 14.3 32 32 32l80 0 0 288c0 8.8-7.2 16-16 16L64 464zM64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-293.5c0-17-6.7-33.3-18.7-45.3L274.7 18.7C262.7 6.7 246.5 0 229.5 0L64 0zm72 208c-13.3 0-24 10.7-24 24l0 104 0 56c0 13.3 10.7 24 24 24s24-10.7 24-24l0-32 44 0c42 0 76-34 76-76s-34-76-76-76l-68 0zm68 104l-44 0 0-56 44 0c15.5 0 28 12.5 28 28s-12.5 28-28 28z"],
     "FileExcel": [384, 512, [], "regular", "M48 448L48 64c0-8.8 7.2-16 16-16l160 0 0 80c0 17.7 14.3 32 32 32l80 0 0 288c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16zM64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-293.5c0-17-6.7-33.3-18.7-45.3L274.7 18.7C262.7 6.7 246.5 0 229.5 0L64 0zm90.9 233.3c-8.1-10.5-23.2-12.3-33.7-4.2s-12.3 23.2-4.2 33.7L161.6 320l-44.5 57.3c-8.1 10.5-6.3 25.5 4.2 33.7s25.5 6.3 33.7-4.2L192 359.1l37.1 47.6c8.1 10.5 23.2 12.3 33.7 4.2s12.3-23.2 4.2-33.7L222.4 320l44.5-57.3c8.1-10.5 6.3-25.5-4.2-33.7s-25.5-6.3-33.7 4.2L192 280.9l-37.1-47.6z"],
-    "BoxArchive": [24, 24, [], "regular", "M2 3a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2V3Zm2 5h16v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Zm6 4h4", null, "fill=none stroke-width=2 stroke-linecap=round stroke-linejoin=round"],
-    "BoxArchiveX": [24, 24, [], "regular", "M3 3h18a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1ZM4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8M9.5 17l5-5m-5-0l5 5", null, "fill=none stroke-width=2 stroke-linecap=round stroke-linejoin=round"],
     "CodePullRequest": [512, 512, [], "solid", "M305.8 2.1C314.4 5.9 320 14.5 320 24l0 40 16 0c70.7 0 128 57.3 128 128l0 166.7c28.3 12.3 48 40.5 48 73.3c0 44.2-35.8 80-80 80s-80-35.8-80-80c0-32.8 19.7-61 48-73.3L400 192c0-35.3-28.7-64-64-64l-16 0 0 40c0 9.5-5.6 18.1-14.2 21.9s-18.8 2.3-25.8-4.1l-80-72c-5.1-4.6-7.9-11-7.9-17.8s2.9-13.3 7.9-17.8l80-72c7-6.3 17.2-7.9 25.8-4.1zM104 80A24 24 0 1 0 56 80a24 24 0 1 0 48 0zm8 73.3l0 205.3c28.3 12.3 48 40.5 48 73.3c0 44.2-35.8 80-80 80s-80-35.8-80-80c0-32.8 19.7-61 48-73.3l0-205.3C19.7 141 0 112.8 0 80C0 35.8 35.8 0 80 0s80 35.8 80 80c0 32.8-19.7 61-48 73.3zM104 432a24 24 0 1 0 -48 0 24 24 0 1 0 48 0zm328 24a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"],
     "CodeFork": [448, 512, [], "solid", "M80 104a24 24 0 1 0 0-48 24 24 0 1 0 0 48zm80-24c0 32.8-19.7 61-48 73.3l0 38.7c0 17.7 14.3 32 32 32l160 0c17.7 0 32-14.3 32-32l0-38.7C307.7 141 288 112.8 288 80c0-44.2 35.8-80 80-80s80 35.8 80 80c0 32.8-19.7 61-48 73.3l0 38.7c0 53-43 96-96 96l-48 0 0 70.7c28.3 12.3 48 40.5 48 73.3c0 44.2-35.8 80-80 80s-80-35.8-80-80c0-32.8 19.7-61 48-73.3l0-70.7-48 0c-53 0-96-43-96-96l0-38.7C19.7 141 0 112.8 0 80C0 35.8 35.8 0 80 0s80 35.8 80 80zm208 24a24 24 0 1 0 0-48 24 24 0 1 0 0 48zM248 432a24 24 0 1 0 -48 0 24 24 0 1 0 48 0z"],
     "CodeBranch": [448, 512, [], "solid", "M80 104a24 24 0 1 0 0-48 24 24 0 1 0 0 48zm80-24c0 32.8-19.7 61-48 73.3l0 87.8c18.8-10.9 40.7-17.1 64-17.1l96 0c35.3 0 64-28.7 64-64l0-6.7C307.7 141 288 112.8 288 80c0-44.2 35.8-80 80-80s80 35.8 80 80c0 32.8-19.7 61-48 73.3l0 6.7c0 70.7-57.3 128-128 128l-96 0c-35.3 0-64 28.7-64 64l0 6.7c28.3 12.3 48 40.5 48 73.3c0 44.2-35.8 80-80 80s-80-35.8-80-80c0-32.8 19.7-61 48-73.3l0-6.7 0-198.7C19.7 141 0 112.8 0 80C0 35.8 35.8 0 80 0s80 35.8 80 80zm232 0a24 24 0 1 0 -48 0 24 24 0 1 0 48 0zM80 456a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"],
@@ -14512,14 +14419,11 @@ LX.ICONS = {
     "Comments": [640, 512, [], "regular", "M88.2 309.1c9.8-18.3 6.8-40.8-7.5-55.8C59.4 230.9 48 204 48 176c0-63.5 63.8-128 160-128s160 64.5 160 128s-63.8 128-160 128c-13.1 0-25.8-1.3-37.8-3.6c-10.4-2-21.2-.6-30.7 4.2c-4.1 2.1-8.3 4.1-12.6 6c-16 7.2-32.9 13.5-49.9 18c2.8-4.6 5.4-9.1 7.9-13.6c1.1-1.9 2.2-3.9 3.2-5.9zM208 352c114.9 0 208-78.8 208-176S322.9 0 208 0S0 78.8 0 176c0 41.8 17.2 80.1 45.9 110.3c-.9 1.7-1.9 3.5-2.8 5.1c-10.3 18.4-22.3 36.5-36.6 52.1c-6.6 7-8.3 17.2-4.6 25.9C5.8 378.3 14.4 384 24 384c43 0 86.5-13.3 122.7-29.7c4.8-2.2 9.6-4.5 14.2-6.8c15.1 3 30.9 4.5 47.1 4.5zM432 480c16.2 0 31.9-1.6 47.1-4.5c4.6 2.3 9.4 4.6 14.2 6.8C529.5 498.7 573 512 616 512c9.6 0 18.2-5.7 22-14.5c3.8-8.8 2-19-4.6-25.9c-14.2-15.6-26.2-33.7-36.6-52.1c-.9-1.7-1.9-3.4-2.8-5.1C622.8 384.1 640 345.8 640 304c0-94.4-87.9-171.5-198.2-175.8c4.1 15.2 6.2 31.2 6.2 47.8l0 .6c87.2 6.7 144 67.5 144 127.4c0 28-11.4 54.9-32.7 77.2c-14.3 15-17.3 37.6-7.5 55.8c1.1 2 2.2 4 3.2 5.9c2.5 4.5 5.2 9 7.9 13.6c-17-4.5-33.9-10.7-49.9-18c-4.3-1.9-8.5-3.9-12.6-6c-9.5-4.8-20.3-6.2-30.7-4.2c-12.1 2.4-24.8 3.6-37.8 3.6c-61.7 0-110-26.5-136.8-62.3c-16 5.4-32.8 9.4-50 11.8C279 439.8 350 480 432 480z"],
     "CommentDots": [512, 512, [], "regular", "M168.2 384.9c-15-5.4-31.7-3.1-44.6 6.4c-8.2 6-22.3 14.8-39.4 22.7c5.6-14.7 9.9-31.3 11.3-49.4c1-12.9-3.3-25.7-11.8-35.5C60.4 302.8 48 272 48 240c0-79.5 83.3-160 208-160s208 80.5 208 160s-83.3 160-208 160c-31.6 0-61.3-5.5-87.8-15.1zM26.3 423.8c-1.6 2.7-3.3 5.4-5.1 8.1l-.3 .5c-1.6 2.3-3.2 4.6-4.8 6.9c-3.5 4.7-7.3 9.3-11.3 13.5c-4.6 4.6-5.9 11.4-3.4 17.4c2.5 6 8.3 9.9 14.8 9.9c5.1 0 10.2-.3 15.3-.8l.7-.1c4.4-.5 8.8-1.1 13.2-1.9c.8-.1 1.6-.3 2.4-.5c17.8-3.5 34.9-9.5 50.1-16.1c22.9-10 42.4-21.9 54.3-30.6c31.8 11.5 67 17.9 104.1 17.9c141.4 0 256-93.1 256-208S397.4 32 256 32S0 125.1 0 240c0 45.1 17.7 86.8 47.7 120.9c-1.9 24.5-11.4 46.3-21.4 62.9zM144 272a32 32 0 1 0 0-64 32 32 0 1 0 0 64zm144-32a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zm80 32a32 32 0 1 0 0-64 32 32 0 1 0 0 64z"],
     "Message": [512, 512, [], "regular", "M160 368c26.5 0 48 21.5 48 48l0 16 72.5-54.4c8.3-6.2 18.4-9.6 28.8-9.6L448 368c8.8 0 16-7.2 16-16l0-288c0-8.8-7.2-16-16-16L64 48c-8.8 0-16 7.2-16 16l0 288c0 8.8 7.2 16 16 16l96 0zm48 124l-.2 .2-5.1 3.8-17.1 12.8c-4.8 3.6-11.3 4.2-16.8 1.5s-8.8-8.2-8.8-14.3l0-21.3 0-6.4 0-.3 0-4 0-48-48 0-48 0c-35.3 0-64-28.7-64-64L0 64C0 28.7 28.7 0 64 0L448 0c35.3 0 64 28.7 64 64l0 288c0 35.3-28.7 64-64 64l-138.7 0L208 492z"],
-    "Folder": [512, 512, [], "regular", "M0 96C0 60.7 28.7 32 64 32l132.1 0c19.1 0 37.4 7.6 50.9 21.1L289.9 96 448 96c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zM64 80c-8.8 0-16 7.2-16 16l0 320c0 8.8 7.2 16 16 16l384 0c8.8 0 16-7.2 16-16l0-256c0-8.8-7.2-16-16-16l-161.4 0c-10.6 0-20.8-4.2-28.3-11.7L213.1 87c-4.5-4.5-10.6-7-17-7L64 80z"],
-    "FolderClosed": [512, 512, [], "regular", "M251.7 127.6s0 0 0 0c10.5 10.5 24.7 16.4 39.6 16.4L448 144c8.8 0 16 7.2 16 16l0 32L48 192l0-96c0-8.8 7.2-16 16-16l133.5 0c4.2 0 8.3 1.7 11.3 4.7l33.9-33.9L208.8 84.7l42.9 42.9zM48 240l416 0 0 176c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16l0-176zM285.7 93.7L242.7 50.7c-12-12-28.3-18.7-45.3-18.7L64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-256c0-35.3-28.7-64-64-64L291.3 96c-2.1 0-4.2-.8-5.7-2.3z"],
     "FolderOpen": [576, 512, [], "regular", "M384 480l48 0c11.4 0 21.9-6 27.6-15.9l112-192c5.8-9.9 5.8-22.1 .1-32.1S555.5 224 544 224l-400 0c-11.4 0-21.9 6-27.6 15.9L48 357.1 48 96c0-8.8 7.2-16 16-16l117.5 0c4.2 0 8.3 1.7 11.3 4.7l26.5 26.5c21 21 49.5 32.8 79.2 32.8L416 144c8.8 0 16 7.2 16 16l0 32 48 0 0-32c0-35.3-28.7-64-64-64L298.5 96c-17 0-33.3-6.7-45.3-18.7L226.7 50.7c-12-12-28.3-18.7-45.3-18.7L64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l23.7 0L384 480z"],
     "Play": [384, 512, [], "solid", "M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80L0 432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"],
     "Pause": [320, 512, [], "solid", "M48 64C21.5 64 0 85.5 0 112L0 400c0 26.5 21.5 48 48 48l32 0c26.5 0 48-21.5 48-48l0-288c0-26.5-21.5-48-48-48L48 64zm192 0c-26.5 0-48 21.5-48 48l0 288c0 26.5 21.5 48 48 48l32 0c26.5 0 48-21.5 48-48l0-288c0-26.5-21.5-48-48-48l-32 0z"],
     "Stop": [384, 512, [], "solid", "M0 128C0 92.7 28.7 64 64 64H320c35.3 0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V128z"],
     "Font": [448, 512, [], "solid", "M254 52.8C249.3 40.3 237.3 32 224 32s-25.3 8.3-30 20.8L57.8 416 32 416c-17.7 0-32 14.3-32 32s14.3 32 32 32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-1.8 0 18-48 159.6 0 18 48-1.8 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-25.8 0L254 52.8zM279.8 304l-111.6 0L224 155.1 279.8 304z"],
-    "GripVertical": [320, 512, [], "solid", "M40 352l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0c-22.1 0-40-17.9-40-40l0-48c0-22.1 17.9-40 40-40zm192 0l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0c-22.1 0-40-17.9-40-40l0-48c0-22.1 17.9-40 40-40zM40 320c-22.1 0-40-17.9-40-40l0-48c0-22.1 17.9-40 40-40l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0zM232 192l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0c-22.1 0-40-17.9-40-40l0-48c0-22.1 17.9-40 40-40zM40 160c-22.1 0-40-17.9-40-40L0 72C0 49.9 17.9 32 40 32l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0zM232 32l48 0c22.1 0 40 17.9 40 40l0 48c0 22.1-17.9 40-40 40l-48 0c-22.1 0-40-17.9-40-40l0-48c0-22.1 17.9-40 40-40z"],
     "Image": [512, 512, [], "regular", "M448 80c8.8 0 16 7.2 16 16l0 319.8-5-6.5-136-176c-4.5-5.9-11.6-9.3-19-9.3s-14.4 3.4-19 9.3L202 340.7l-30.5-42.7C167 291.7 159.8 288 152 288s-15 3.7-19.5 10.1l-80 112L48 416.3l0-.3L48 96c0-8.8 7.2-16 16-16l384 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zm80 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z"],
     "Images": [576, 512, [], "regular", "M160 80l352 0c8.8 0 16 7.2 16 16l0 224c0 8.8-7.2 16-16 16l-21.2 0L388.1 178.9c-4.4-6.8-12-10.9-20.1-10.9s-15.7 4.1-20.1 10.9l-52.2 79.8-12.4-16.9c-4.5-6.2-11.7-9.8-19.4-9.8s-14.8 3.6-19.4 9.8L175.6 336 160 336c-8.8 0-16-7.2-16-16l0-224c0-8.8 7.2-16 16-16zM96 96l0 224c0 35.3 28.7 64 64 64l352 0c35.3 0 64-28.7 64-64l0-224c0-35.3-28.7-64-64-64L160 32c-35.3 0-64 28.7-64 64zM48 120c0-13.3-10.7-24-24-24S0 106.7 0 120L0 344c0 75.1 60.9 136 136 136l320 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-320 0c-48.6 0-88-39.4-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"],
     "PhotoFilm": [640, 512, ["Media"], "solid", "M256 0L576 0c35.3 0 64 28.7 64 64l0 224c0 35.3-28.7 64-64 64l-320 0c-35.3 0-64-28.7-64-64l0-224c0-35.3 28.7-64 64-64zM476 106.7C471.5 100 464 96 456 96s-15.5 4-20 10.7l-56 84L362.7 169c-4.6-5.7-11.5-9-18.7-9s-14.2 3.3-18.7 9l-64 80c-5.8 7.2-6.9 17.1-2.9 25.4s12.4 13.6 21.6 13.6l80 0 48 0 144 0c8.9 0 17-4.9 21.2-12.7s3.7-17.3-1.2-24.6l-96-144zM336 96a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zM64 128l96 0 0 256 0 32c0 17.7 14.3 32 32 32l128 0c17.7 0 32-14.3 32-32l0-32 160 0 0 64c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 192c0-35.3 28.7-64 64-64zm8 64c-8.8 0-16 7.2-16 16l0 16c0 8.8 7.2 16 16 16l16 0c8.8 0 16-7.2 16-16l0-16c0-8.8-7.2-16-16-16l-16 0zm0 104c-8.8 0-16 7.2-16 16l0 16c0 8.8 7.2 16 16 16l16 0c8.8 0 16-7.2 16-16l0-16c0-8.8-7.2-16-16-16l-16 0zm0 104c-8.8 0-16 7.2-16 16l0 16c0 8.8 7.2 16 16 16l16 0c8.8 0 16-7.2 16-16l0-16c0-8.8-7.2-16-16-16l-16 0zm336 16l0 16c0 8.8 7.2 16 16 16l16 0c8.8 0 16-7.2 16-16l0-16c0-8.8-7.2-16-16-16l-16 0c-8.8 0-16 7.2-16 16z"],
@@ -14530,15 +14434,16 @@ LX.ICONS = {
     "Right": [320, 512, [], "solid", "M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"],
     "Up": [448, 512, [], "solid", "M201.4 137.4c12.5-12.5 32.8-12.5 45.3 0l160 160c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L224 205.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l160-160z"],
     "Down": [448, 512, [], "solid", "M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"],
-    "Arrows": [512, 512, ["arrows-up-down-left-right"], "solid", "M278.6 9.4c-12.5-12.5-32.8-12.5-45.3 0l-64 64c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l9.4-9.4L224 224l-114.7 0 9.4-9.4c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-64 64c-12.5 12.5-12.5 32.8 0 45.3l64 64c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-9.4-9.4L224 288l0 114.7-9.4-9.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l64 64c12.5 12.5 32.8 12.5 45.3 0l64-64c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-9.4 9.4L288 288l114.7 0-9.4 9.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l64-64c12.5-12.5 12.5-32.8 0-45.3l-64-64c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l9.4 9.4L288 224l0-114.7 9.4 9.4c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-64-64z"],
+    "Arrows": [512, 512, ["ArrowsUpDownLeftRight"], "solid", "M278.6 9.4c-12.5-12.5-32.8-12.5-45.3 0l-64 64c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l9.4-9.4L224 224l-114.7 0 9.4-9.4c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-64 64c-12.5 12.5-12.5 32.8 0 45.3l64 64c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-9.4-9.4L224 288l0 114.7-9.4-9.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l64 64c12.5 12.5 32.8 12.5 45.3 0l64-64c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-9.4 9.4L288 288l114.7 0-9.4 9.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l64-64c12.5-12.5 12.5-32.8 0-45.3l-64-64c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l9.4 9.4L288 224l0-114.7 9.4 9.4c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-64-64z"],
     "ArrowPointer": [320, 512, [], "solid", "M0 55.2L0 426c0 12.2 9.9 22 22 22c6.3 0 12.4-2.7 16.6-7.5L121.2 346l58.1 116.3c7.9 15.8 27.1 22.2 42.9 14.3s22.2-27.1 14.3-42.9L179.8 320l118.1 0c12.2 0 22.1-9.9 22.1-22.1c0-6.3-2.7-12.3-7.4-16.5L38.6 37.9C34.3 34.1 28.9 32 23.2 32C10.4 32 0 42.4 0 55.2z"],
     "AxisArrow": [24, 24, [], "solid", "m12 2l4 4h-3v7.85l6.53 3.76L21 15.03l1.5 5.47l-5.5 1.46l1.53-2.61L12 15.58l-6.53 3.77L7 21.96L1.5 20.5L3 15.03l1.47 2.58L11 13.85V6H8z"],
+    "ArrowsVertical": [320, 512, [], "solid", "M182.6 9.4c-12.5-12.5-32.8-12.5-45.3 0l-96 96c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L128 109.3l0 293.5L86.6 361.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l96 96c12.5 12.5 32.8 12.5 45.3 0l96-96c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 402.7l0-293.5 41.4 41.4c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-96-96z"],
     "Reply": [24, 24, [], "regular", "M9 17L4 12L9 7M4 12H16A4 4 0 0 1 20 16V18", null, "fill=none stroke-width=2 stroke-linejoin=round stroke-linecap=round"],
     "ReplyAll": [24, 24, [], "regular", "M7 17L2 12L7 7M12 17L7 12L12 7M7 12H18A4 4 0 0 1 22 16V18", null, "fill=none stroke-width=2 stroke-linejoin=round stroke-linecap=round"],
     "Forward": [24, 24, [], "regular", "M15 17L20 12L15 7M4 18V16A4 4 0 0 1 8 12H20", null, "fill=none stroke-width=2 stroke-linejoin=round stroke-linecap=round"],
-    "Rotate": [512, 512, [], "solid", "M142.9 142.9c-17.5 17.5-30.1 38-37.8 59.8c-5.9 16.7-24.2 25.4-40.8 19.5s-25.4-24.2-19.5-40.8C55.6 150.7 73.2 122 97.6 97.6c87.2-87.2 228.3-87.5 315.8-1L455 55c6.9-6.9 17.2-8.9 26.2-5.2s14.8 12.5 14.8 22.2l0 128c0 13.3-10.7 24-24 24l-8.4 0c0 0 0 0 0 0L344 224c-9.7 0-18.5-5.8-22.2-14.8s-1.7-19.3 5.2-26.2l41.1-41.1c-62.6-61.5-163.1-61.2-225.3 1zM16 312c0-13.3 10.7-24 24-24l7.6 0 .7 0L168 288c9.7 0 18.5 5.8 22.2 14.8s1.7 19.3-5.2 26.2l-41.1 41.1c62.6 61.5 163.1 61.2 225.3-1c17.5-17.5 30.1-38 37.8-59.8c5.9-16.7 24.2-25.4 40.8-19.5s25.4 24.2 19.5 40.8c-10.8 30.6-28.4 59.3-52.9 83.8c-87.2 87.2-228.3 87.5-315.8 1L57 457c-6.9 6.9-17.2 8.9-26.2 5.2S16 449.7 16 440l0-119.6 0-.7 0-7.6z"],
-    "RotateRight": [512, 512, ["rotate-forward"], "solid", "M463.5 224l8.5 0c13.3 0 24-10.7 24-24l0-128c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1c-87.5 87.5-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8l119.5 0z"],
-    "RotateLeft": [512, 512, ["rotate-back"], "solid", "M48.5 224L40 224c-13.3 0-24-10.7-24-24L16 72c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2L98.6 96.6c87.6-86.5 228.7-86.2 315.8 1c87.5 87.5 87.5 229.3 0 316.8s-229.3 87.5-316.8 0c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0c62.5 62.5 163.8 62.5 226.3 0s62.5-163.8 0-226.3c-62.2-62.2-162.7-62.5-225.3-1L185 183c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8L48.5 224z"],
+    "Refresh": [512, 512, [], "solid", "M142.9 142.9c-17.5 17.5-30.1 38-37.8 59.8c-5.9 16.7-24.2 25.4-40.8 19.5s-25.4-24.2-19.5-40.8C55.6 150.7 73.2 122 97.6 97.6c87.2-87.2 228.3-87.5 315.8-1L455 55c6.9-6.9 17.2-8.9 26.2-5.2s14.8 12.5 14.8 22.2l0 128c0 13.3-10.7 24-24 24l-8.4 0c0 0 0 0 0 0L344 224c-9.7 0-18.5-5.8-22.2-14.8s-1.7-19.3 5.2-26.2l41.1-41.1c-62.6-61.5-163.1-61.2-225.3 1zM16 312c0-13.3 10.7-24 24-24l7.6 0 .7 0L168 288c9.7 0 18.5 5.8 22.2 14.8s1.7 19.3-5.2 26.2l-41.1 41.1c62.6 61.5 163.1 61.2 225.3-1c17.5-17.5 30.1-38 37.8-59.8c5.9-16.7 24.2-25.4 40.8-19.5s25.4 24.2 19.5 40.8c-10.8 30.6-28.4 59.3-52.9 83.8c-87.2 87.2-228.3 87.5-315.8 1L57 457c-6.9 6.9-17.2 8.9-26.2 5.2S16 449.7 16 440l0-119.6 0-.7 0-7.6z"],
+    "RotateRight": [512, 512, ["RotateForward"], "solid", "M463.5 224l8.5 0c13.3 0 24-10.7 24-24l0-128c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1c-87.5 87.5-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8l119.5 0z"],
+    "RotateLeft": [512, 512, ["RotateBack"], "solid", "M48.5 224L40 224c-13.3 0-24-10.7-24-24L16 72c0-9.7 5.8-18.5 14.8-22.2s19.3-1.7 26.2 5.2L98.6 96.6c87.6-86.5 228.7-86.2 315.8 1c87.5 87.5 87.5 229.3 0 316.8s-229.3 87.5-316.8 0c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0c62.5 62.5 163.8 62.5 226.3 0s62.5-163.8 0-226.3c-62.2-62.2-162.7-62.5-225.3-1L185 183c6.9 6.9 8.9 17.2 5.2 26.2s-12.5 14.8-22.2 14.8L48.5 224z"],
     "Hand": [512, 512, [], "regular", "M256 0c-25.3 0-47.2 14.7-57.6 36c-7-2.6-14.5-4-22.4-4c-35.3 0-64 28.7-64 64l0 165.5-2.7-2.7c-25-25-65.5-25-90.5 0s-25 65.5 0 90.5L106.5 437c48 48 113.1 75 181 75l8.5 0 8 0c1.5 0 3-.1 4.5-.4c91.7-6.2 165-79.4 171.1-171.1c.3-1.5 .4-3 .4-4.5l0-176c0-35.3-28.7-64-64-64c-5.5 0-10.9 .7-16 2l0-2c0-35.3-28.7-64-64-64c-7.9 0-15.4 1.4-22.4 4C303.2 14.7 281.3 0 256 0zM240 96.1l0-.1 0-32c0-8.8 7.2-16 16-16s16 7.2 16 16l0 31.9 0 .1 0 136c0 13.3 10.7 24 24 24s24-10.7 24-24l0-136c0 0 0 0 0-.1c0-8.8 7.2-16 16-16s16 7.2 16 16l0 55.9c0 0 0 .1 0 .1l0 80c0 13.3 10.7 24 24 24s24-10.7 24-24l0-71.9c0 0 0-.1 0-.1c0-8.8 7.2-16 16-16s16 7.2 16 16l0 172.9c-.1 .6-.1 1.3-.2 1.9c-3.4 69.7-59.3 125.6-129 129c-.6 0-1.3 .1-1.9 .2l-4.9 0-8.5 0c-55.2 0-108.1-21.9-147.1-60.9L52.7 315.3c-6.2-6.2-6.2-16.4 0-22.6s16.4-6.2 22.6 0L119 336.4c6.9 6.9 17.2 8.9 26.2 5.2s14.8-12.5 14.8-22.2L160 96c0-8.8 7.2-16 16-16c8.8 0 16 7.1 16 15.9L192 232c0 13.3 10.7 24 24 24s24-10.7 24-24l0-135.9z"],
     "HandPointer": [448, 512, [], "regular", "M160 64c0-8.8 7.2-16 16-16s16 7.2 16 16l0 136c0 10.3 6.6 19.5 16.4 22.8s20.6-.1 26.8-8.3c3-3.9 7.6-6.4 12.8-6.4c8.8 0 16 7.2 16 16c0 10.3 6.6 19.5 16.4 22.8s20.6-.1 26.8-8.3c3-3.9 7.6-6.4 12.8-6.4c7.8 0 14.3 5.6 15.7 13c1.6 8.2 7.3 15.1 15.1 18s16.7 1.6 23.3-3.6c2.7-2.1 6.1-3.4 9.9-3.4c8.8 0 16 7.2 16 16l0 16 0 104c0 39.8-32.2 72-72 72l-56 0-59.8 0-.9 0c-37.4 0-72.4-18.7-93.2-49.9L50.7 312.9c-4.9-7.4-2.9-17.3 4.4-22.2s17.3-2.9 22.2 4.4L116 353.2c5.9 8.8 16.8 12.7 26.9 9.7s17-12.4 17-23l0-19.9 0-256zM176 0c-35.3 0-64 28.7-64 64l0 197.7C91.2 238 55.5 232.8 28.5 250.7C-.9 270.4-8.9 310.1 10.8 339.5L78.3 440.8c29.7 44.5 79.6 71.2 133.1 71.2l.9 0 59.8 0 56 0c66.3 0 120-53.7 120-120l0-104 0-16c0-35.3-28.7-64-64-64c-4.5 0-8.8 .5-13 1.3c-11.7-15.4-30.2-25.3-51-25.3c-6.9 0-13.5 1.1-19.7 3.1C288.7 170.7 269.6 160 248 160c-2.7 0-5.4 .2-8 .5L240 64c0-35.3-28.7-64-64-64zm48 304c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 96c0 8.8 7.2 16 16 16s16-7.2 16-16l0-96zm48-16c-8.8 0-16 7.2-16 16l0 96c0 8.8 7.2 16 16 16s16-7.2 16-16l0-96c0-8.8-7.2-16-16-16zm80 16c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 96c0 8.8 7.2 16 16 16s16-7.2 16-16l0-96z"],
     "HandPointRight": [512, 512, [], "regular", "M448 128l-177.6 0c1 5.2 1.6 10.5 1.6 16l0 16 32 0 144 0c8.8 0 16-7.2 16-16s-7.2-16-16-16zM224 144c0-17.7-14.3-32-32-32c0 0 0 0 0 0l-24 0c-66.3 0-120 53.7-120 120l0 48c0 52.5 33.7 97.1 80.7 113.4c-.5-3.1-.7-6.2-.7-9.4c0-20 9.2-37.9 23.6-49.7c-4.9-9-7.6-19.4-7.6-30.3c0-15.1 5.3-29 14-40c-8.8-11-14-24.9-14-40l0-40c0-13.3 10.7-24 24-24s24 10.7 24 24l0 40c0 8.8 7.2 16 16 16s16-7.2 16-16l0-40 0-40zM192 64s0 0 0 0c18 0 34.6 6 48 16l208 0c35.3 0 64 28.7 64 64s-28.7 64-64 64l-82 0c1.3 5.1 2 10.5 2 16c0 25.3-14.7 47.2-36 57.6c2.6 7 4 14.5 4 22.4c0 20-9.2 37.9-23.6 49.7c4.9 9 7.6 19.4 7.6 30.3c0 35.3-28.7 64-64 64l-64 0-24 0C75.2 448 0 372.8 0 280l0-48C0 139.2 75.2 64 168 64l24 0zm64 336c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0-16 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l64 0zm16-176c0 5.5-.7 10.9-2 16l2 0 32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0 0 16zm-24 64l-40 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l48 0 16 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-24 0z"],
@@ -14562,6 +14467,7 @@ LX.ICONS = {
     "MoreHorizontal": [448, 512, [], "solid", "M8 256a56 56 0 1 1 112 0A56 56 0 1 1 8 256zm160 0a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm216-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z"],
     "Plus": [448, 512, [], "solid", "M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 144L48 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l144 0 0 144c0 17.7 14.3 32 32 32s32-14.3 32-32l0-144 144 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-144 0 0-144z"],
     "Equals": [448, 512, [], "solid", "M48 128c-17.7 0-32 14.3-32 32s14.3 32 32 32l352 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L48 128zm0 192c-17.7 0-32 14.3-32 32s14.3 32 32 32l352 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L48 320z"],
+    "Function": [384, 512, [], "solid", "M314.7 32c-38.8 0-73.7 23.3-88.6 59.1L170.7 224 64 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l80 0L98.9 396.3c-5 11.9-16.6 19.7-29.5 19.7L32 416c-17.7 0-32 14.3-32 32s14.3 32 32 32l37.3 0c38.8 0 73.7-23.3 88.6-59.1L213.3 288 320 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-80 0 45.1-108.3c5-11.9 16.6-19.7 29.5-19.7L352 96c17.7 0 32-14.3 32-32s-14.3-32-32-32l-37.3 0z"],
     "CircleNodes": [512, 512, [], "solid", "M418.4 157.9c35.3-8.3 61.6-40 61.6-77.9c0-44.2-35.8-80-80-80c-43.4 0-78.7 34.5-80 77.5L136.2 151.1C121.7 136.8 101.9 128 80 128c-44.2 0-80 35.8-80 80s35.8 80 80 80c12.2 0 23.8-2.7 34.1-7.6L259.7 407.8c-2.4 7.6-3.7 15.8-3.7 24.2c0 44.2 35.8 80 80 80s80-35.8 80-80c0-27.7-14-52.1-35.4-66.4l37.8-207.7zM156.3 232.2c2.2-6.9 3.5-14.2 3.7-21.7l183.8-73.5c3.6 3.5 7.4 6.7 11.6 9.5L317.6 354.1c-5.5 1.3-10.8 3.1-15.8 5.5L156.3 232.2z"],
     "CirclePlus": [24, 24, [], "regular", "M12 8V16M8 12H16M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z", null, "fill=none stroke-width=2 stroke-linecap=round stroke-linejoin=round"],
     "CircleInfo": [24, 24, [], "regular", "M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20ZM12 8v4M12 16h.01", null, "fill=none stroke-width=2 stroke-linejoin=round stroke-linecap=round"],
@@ -14585,6 +14491,8 @@ LX.ICONS = {
     "TableCells": [512, 512, [], "solid", "M64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zm88 64l0 64-88 0 0-64 88 0zm56 0l88 0 0 64-88 0 0-64zm240 0l0 64-88 0 0-64 88 0zM64 224l88 0 0 64-88 0 0-64zm232 0l0 64-88 0 0-64 88 0zm64 0l88 0 0 64-88 0 0-64zM152 352l0 64-88 0 0-64 88 0zm56 0l88 0 0 64-88 0 0-64zm240 0l0 64-88 0 0-64 88 0z"],
     "TableCellsLarge": [512, 512, [], "solid", "M448 96l0 128-160 0 0-128 160 0zm0 192l0 128-160 0 0-128 160 0zM224 224L64 224 64 96l160 0 0 128zM64 288l160 0 0 128L64 416l0-128zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32z"],
     "Frame": [24, 24, [], "solid", "M2 6h20M2 18h20M6 2v20M18 2v20", null, "fill=none stroke-width=2 stroke-linejoin=round stroke-linecap=round"],
+    "Link": [640, 512, ["Chain"], "solid", "M579.8 267.7c56.5-56.5 56.5-148 0-204.5c-50-50-128.8-56.5-186.3-15.4l-1.6 1.1c-14.4 10.3-17.7 30.3-7.4 44.6s30.3 17.7 44.6 7.4l1.6-1.1c32.1-22.9 76-19.3 103.8 8.6c31.5 31.5 31.5 82.5 0 114L422.3 334.8c-31.5 31.5-82.5 31.5-114 0c-27.9-27.9-31.5-71.8-8.6-103.8l1.1-1.6c10.3-14.4 6.9-34.4-7.4-44.6s-34.4-6.9-44.6 7.4l-1.1 1.6C206.5 251.2 213 330 263 380c56.5 56.5 148 56.5 204.5 0L579.8 267.7zM60.2 244.3c-56.5 56.5-56.5 148 0 204.5c50 50 128.8 56.5 186.3 15.4l1.6-1.1c14.4-10.3 17.7-30.3 7.4-44.6s-30.3-17.7-44.6-7.4l-1.6 1.1c-32.1 22.9-76 19.3-103.8-8.6C74 372 74 321 105.5 289.5L217.7 177.2c31.5-31.5 82.5-31.5 114 0c27.9 27.9 31.5 71.8 8.6 103.9l-1.1 1.6c-10.3 14.4-6.9 34.4 7.4 44.6s34.4 6.9 44.6-7.4l1.1-1.6C433.5 260.8 427 182 377 132c-56.5-56.5-148-56.5-204.5 0L60.2 244.3z"],
+    "LinkSlash": [640, 512, ["ChainBroken", "ChainSlash", "Unlink"], "solid", "M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L489.3 358.2l90.5-90.5c56.5-56.5 56.5-148 0-204.5c-50-50-128.8-56.5-186.3-15.4l-1.6 1.1c-14.4 10.3-17.7 30.3-7.4 44.6s30.3 17.7 44.6 7.4l1.6-1.1c32.1-22.9 76-19.3 103.8 8.6c31.5 31.5 31.5 82.5 0 114l-96 96-31.9-25C430.9 239.6 420.1 175.1 377 132c-52.2-52.3-134.5-56.2-191.3-11.7L38.8 5.1zM239 162c30.1-14.9 67.7-9.9 92.8 15.3c20 20 27.5 48.3 21.7 74.5L239 162zM406.6 416.4L220.9 270c-2.1 39.8 12.2 80.1 42.2 110c38.9 38.9 94.4 51 143.6 36.3zm-290-228.5L60.2 244.3c-56.5 56.5-56.5 148 0 204.5c50 50 128.8 56.5 186.3 15.4l1.6-1.1c14.4-10.3 17.7-30.3 7.4-44.6s-30.3-17.7-44.6-7.4l-1.6 1.1c-32.1 22.9-76 19.3-103.8-8.6C74 372 74 321 105.5 289.5l61.8-61.8-50.6-39.9z"],
     "Lightbulb": [384, 512, [], "regular", "M297.2 248.9C311.6 228.3 320 203.2 320 176c0-70.7-57.3-128-128-128S64 105.3 64 176c0 27.2 8.4 52.3 22.8 72.9c3.7 5.3 8.1 11.3 12.8 17.7c0 0 0 0 0 0c12.9 17.7 28.3 38.9 39.8 59.8c10.4 19 15.7 38.8 18.3 57.5L109 384c-2.2-12-5.9-23.7-11.8-34.5c-9.9-18-22.2-34.9-34.5-51.8c0 0 0 0 0 0s0 0 0 0c-5.2-7.1-10.4-14.2-15.4-21.4C27.6 247.9 16 213.3 16 176C16 78.8 94.8 0 192 0s176 78.8 176 176c0 37.3-11.6 71.9-31.4 100.3c-5 7.2-10.2 14.3-15.4 21.4c0 0 0 0 0 0s0 0 0 0c-12.3 16.8-24.6 33.7-34.5 51.8c-5.9 10.8-9.6 22.5-11.8 34.5l-48.6 0c2.6-18.7 7.9-38.6 18.3-57.5c11.5-20.9 26.9-42.1 39.8-59.8c0 0 0 0 0 0s0 0 0 0s0 0 0 0c4.7-6.4 9-12.4 12.7-17.7zM192 128c-26.5 0-48 21.5-48 48c0 8.8-7.2 16-16 16s-16-7.2-16-16c0-44.2 35.8-80 80-80c8.8 0 16 7.2 16 16s-7.2 16-16 16zm0 384c-44.2 0-80-35.8-80-80l0-16 160 0 0 16c0 44.2-35.8 80-80 80z"],
     "Flag": [448, 512, [], "regular", "M48 24C48 10.7 37.3 0 24 0S0 10.7 0 24L0 64 0 350.5 0 400l0 88c0 13.3 10.7 24 24 24s24-10.7 24-24l0-100 80.3-20.1c41.1-10.3 84.6-5.5 122.5 13.4c44.2 22.1 95.5 24.8 141.7 7.4l34.7-13c12.5-4.7 20.8-16.6 20.8-30l0-279.7c0-23-24.2-38-44.8-27.7l-9.6 4.8c-46.3 23.2-100.8 23.2-147.1 0c-35.1-17.6-75.4-22-113.5-12.5L48 52l0-28zm0 77.5l96.6-24.2c27-6.7 55.5-3.6 80.4 8.8c54.9 27.4 118.7 29.7 175 6.8l0 241.8-24.4 9.1c-33.7 12.6-71.2 10.7-103.4-5.4c-48.2-24.1-103.3-30.1-155.6-17.1L48 338.5l0-237z"],
     "Newspaper": [512, 512, [], "regular", "M168 80c-13.3 0-24 10.7-24 24l0 304c0 8.4-1.4 16.5-4.1 24L440 432c13.3 0 24-10.7 24-24l0-304c0-13.3-10.7-24-24-24L168 80zM72 480c-39.8 0-72-32.2-72-72L0 112C0 98.7 10.7 88 24 88s24 10.7 24 24l0 296c0 13.3 10.7 24 24 24s24-10.7 24-24l0-304c0-39.8 32.2-72 72-72l272 0c39.8 0 72 32.2 72 72l0 304c0 39.8-32.2 72-72 72L72 480zM176 136c0-13.3 10.7-24 24-24l96 0c13.3 0 24 10.7 24 24l0 80c0 13.3-10.7 24-24 24l-96 0c-13.3 0-24-10.7-24-24l0-80zm200-24l32 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-32 0c-13.3 0-24-10.7-24-24s10.7-24 24-24zm0 80l32 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-32 0c-13.3 0-24-10.7-24-24s10.7-24 24-24zM200 272l208 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-208 0c-13.3 0-24-10.7-24-24s10.7-24 24-24zm0 80l208 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-208 0c-13.3 0-24-10.7-24-24s10.7-24 24-24z"],
@@ -14606,8 +14514,6 @@ LX.ICONS = {
     "StreetView": [512, 512, [], "solid", "M320 64A64 64 0 1 0 192 64a64 64 0 1 0 128 0zm-96 96c-35.3 0-64 28.7-64 64l0 48c0 17.7 14.3 32 32 32l1.8 0 11.1 99.5c1.8 16.2 15.5 28.5 31.8 28.5l38.7 0c16.3 0 30-12.3 31.8-28.5L318.2 304l1.8 0c17.7 0 32-14.3 32-32l0-48c0-35.3-28.7-64-64-64l-64 0zM132.3 394.2c13-2.4 21.7-14.9 19.3-27.9s-14.9-21.7-27.9-19.3c-32.4 5.9-60.9 14.2-82 24.8c-10.5 5.3-20.3 11.7-27.8 19.6C6.4 399.5 0 410.5 0 424c0 21.4 15.5 36.1 29.1 45c14.7 9.6 34.3 17.3 56.4 23.4C130.2 504.7 190.4 512 256 512s125.8-7.3 170.4-19.6c22.1-6.1 41.8-13.8 56.4-23.4c13.7-8.9 29.1-23.6 29.1-45c0-13.5-6.4-24.5-14-32.6c-7.5-7.9-17.3-14.3-27.8-19.6c-21-10.6-49.5-18.9-82-24.8c-13-2.4-25.5 6.3-27.9 19.3s6.3 25.5 19.3 27.9c30.2 5.5 53.7 12.8 69 20.5c3.2 1.6 5.8 3.1 7.9 4.5c3.6 2.4 3.6 7.2 0 9.6c-8.8 5.7-23.1 11.8-43 17.3C374.3 457 318.5 464 256 464s-118.3-7-157.7-17.9c-19.9-5.5-34.2-11.6-43-17.3c-3.6-2.4-3.6-7.2 0-9.6c2.1-1.4 4.8-2.9 7.9-4.5c15.3-7.7 38.8-14.9 69-20.5z"],
     "ClosedCaptioning": [576, 512, ["CC"], "regular", "M512 80c8.8 0 16 7.2 16 16l0 320c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16L48 96c0-8.8 7.2-16 16-16l448 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l448 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zM200 208c14.2 0 27 6.1 35.8 16c8.8 9.9 24 10.7 33.9 1.9s10.7-24 1.9-33.9c-17.5-19.6-43.1-32-71.5-32c-53 0-96 43-96 96s43 96 96 96c28.4 0 54-12.4 71.5-32c8.8-9.9 8-25-1.9-33.9s-25-8-33.9 1.9c-8.8 9.9-21.6 16-35.8 16c-26.5 0-48-21.5-48-48s21.5-48 48-48zm144 48c0-26.5 21.5-48 48-48c14.2 0 27 6.1 35.8 16c8.8 9.9 24 10.7 33.9 1.9s10.7-24 1.9-33.9c-17.5-19.6-43.1-32-71.5-32c-53 0-96 43-96 96s43 96 96 96c28.4 0 54-12.4 71.5-32c8.8-9.9 8-25-1.9-33.9s-25-8-33.9 1.9c-8.8 9.9-21.6 16-35.8 16c-26.5 0-48-21.5-48-48z"],
     "Bone": [576, 512, [], "solid", "M153.7 144.8c6.9 16.3 20.6 31.2 38.3 31.2l192 0c17.7 0 31.4-14.9 38.3-31.2C434.4 116.1 462.9 96 496 96c44.2 0 80 35.8 80 80c0 30.4-17 56.9-42 70.4c-3.6 1.9-6 5.5-6 9.6s2.4 7.7 6 9.6c25 13.5 42 40 42 70.4c0 44.2-35.8 80-80 80c-33.1 0-61.6-20.1-73.7-48.8C415.4 350.9 401.7 336 384 336l-192 0c-17.7 0-31.4 14.9-38.3 31.2C141.6 395.9 113.1 416 80 416c-44.2 0-80-35.8-80-80c0-30.4 17-56.9 42-70.4c3.6-1.9 6-5.5 6-9.6s-2.4-7.7-6-9.6C17 232.9 0 206.4 0 176c0-44.2 35.8-80 80-80c33.1 0 61.6 20.1 73.7 48.8z"],
-    "Sun": [512, 512, [], "regular", "M375.7 19.7c-1.5-8-6.9-14.7-14.4-17.8s-16.1-2.2-22.8 2.4L256 61.1 173.5 4.2c-6.7-4.6-15.3-5.5-22.8-2.4s-12.9 9.8-14.4 17.8l-18.1 98.5L19.7 136.3c-8 1.5-14.7 6.9-17.8 14.4s-2.2 16.1 2.4 22.8L61.1 256 4.2 338.5c-4.6 6.7-5.5 15.3-2.4 22.8s9.8 13 17.8 14.4l98.5 18.1 18.1 98.5c1.5 8 6.9 14.7 14.4 17.8s16.1 2.2 22.8-2.4L256 450.9l82.5 56.9c6.7 4.6 15.3 5.5 22.8 2.4s12.9-9.8 14.4-17.8l18.1-98.5 98.5-18.1c8-1.5 14.7-6.9 17.8-14.4s2.2-16.1-2.4-22.8L450.9 256l56.9-82.5c4.6-6.7 5.5-15.3 2.4-22.8s-9.8-12.9-17.8-14.4l-98.5-18.1L375.7 19.7zM269.6 110l65.6-45.2 14.4 78.3c1.8 9.8 9.5 17.5 19.3 19.3l78.3 14.4L402 242.4c-5.7 8.2-5.7 19 0 27.2l45.2 65.6-78.3 14.4c-9.8 1.8-17.5 9.5-19.3 19.3l-14.4 78.3L269.6 402c-8.2-5.7-19-5.7-27.2 0l-65.6 45.2-14.4-78.3c-1.8-9.8-9.5-17.5-19.3-19.3L64.8 335.2 110 269.6c5.7-8.2 5.7-19 0-27.2L64.8 176.8l78.3-14.4c9.8-1.8 17.5-9.5 19.3-19.3l14.4-78.3L242.4 110c8.2 5.7 19 5.7 27.2 0zM256 368a112 112 0 1 0 0-224 112 112 0 1 0 0 224zM192 256a64 64 0 1 1 128 0 64 64 0 1 1 -128 0z"],
-    "Moon": [384, 512, [], "regular", "M144.7 98.7c-21 34.1-33.1 74.3-33.1 117.3c0 98 62.8 181.4 150.4 211.7c-12.4 2.8-25.3 4.3-38.6 4.3C126.6 432 48 353.3 48 256c0-68.9 39.4-128.4 96.8-157.3zm62.1-66C91.1 41.2 0 137.9 0 256C0 379.7 100 480 223.5 480c47.8 0 92-15 128.4-40.6c1.9-1.3 3.7-2.7 5.5-4c4.8-3.6 9.4-7.4 13.9-11.4c2.7-2.4 5.3-4.8 7.9-7.3c5-4.9 6.3-12.5 3.1-18.7s-10.1-9.7-17-8.5c-3.7 .6-7.4 1.2-11.1 1.6c-5 .5-10.1 .9-15.3 1c-1.2 0-2.5 0-3.7 0l-.3 0c-96.8-.2-175.2-78.9-175.2-176c0-54.8 24.9-103.7 64.1-136c1-.9 2.1-1.7 3.2-2.6c4-3.2 8.2-6.2 12.5-9c3.1-2 6.3-4 9.6-5.8c6.1-3.5 9.2-10.5 7.7-17.3s-7.3-11.9-14.3-12.5c-3.6-.3-7.1-.5-10.7-.6c-2.7-.1-5.5-.1-8.2-.1c-3.3 0-6.5 .1-9.8 .2c-2.3 .1-4.6 .2-6.9 .4z"],
     "Heart": [512, 512, [], "regular", "M225.8 468.2l-2.5-2.3L48.1 303.2C17.4 274.7 0 234.7 0 192.8l0-3.3c0-70.4 50-130.8 119.2-144C158.6 37.9 198.9 47 231 69.6c9 6.4 17.4 13.8 25 22.3c4.2-4.8 8.7-9.2 13.5-13.3c3.7-3.2 7.5-6.2 11.5-9c0 0 0 0 0 0C313.1 47 353.4 37.9 392.8 45.4C462 58.6 512 119.1 512 189.5l0 3.3c0 41.9-17.4 81.9-48.1 110.4L288.7 465.9l-2.5 2.3c-8.2 7.6-19 11.9-30.2 11.9s-22-4.2-30.2-11.9zM239.1 145c-.4-.3-.7-.7-1-1.1l-17.8-20-.1-.1s0 0 0 0c-23.1-25.9-58-37.7-92-31.2C81.6 101.5 48 142.1 48 189.5l0 3.3c0 28.5 11.9 55.8 32.8 75.2L256 430.7 431.2 268c20.9-19.4 32.8-46.7 32.8-75.2l0-3.3c0-47.3-33.6-88-80.1-96.9c-34-6.5-69 5.4-92 31.2c0 0 0 0-.1 .1s0 0-.1 .1l-17.8 20c-.3 .4-.7 .7-1 1.1c-4.5 4.5-10.6 7-16.9 7s-12.4-2.5-16.9-7z"],
     "FaceSmile": [512, 512, ["smile"], "regular", "M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm177.6 62.1C192.8 334.5 218.8 352 256 352s63.2-17.5 78.4-33.9c9-9.7 24.2-10.4 33.9-1.4s10.4 24.2 1.4 33.9c-22 23.8-60 49.4-113.6 49.4s-91.7-25.5-113.6-49.4c-9-9.7-8.4-24.9 1.4-33.9s24.9-8.4 33.9 1.4zM144.4 208a32 32 0 1 1 64 0 32 32 0 1 1 -64 0zm192-32a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"],
     "WandSparkles": [512, 512, [], "solid", "M464 6.1c9.5-8.5 24-8.1 33 .9l8 8c9 9 9.4 23.5 .9 33l-85.8 95.9c-2.6 2.9-4.1 6.7-4.1 10.7l0 21.4c0 8.8-7.2 16-16 16l-15.8 0c-4.6 0-8.9 1.9-11.9 5.3L100.7 500.9C94.3 508 85.3 512 75.8 512c-8.8 0-17.3-3.5-23.5-9.8L9.7 459.7C3.5 453.4 0 445 0 436.2c0-9.5 4-18.5 11.1-24.8l111.6-99.8c3.4-3 5.3-7.4 5.3-11.9l0-27.6c0-8.8 7.2-16 16-16l34.6 0c3.9 0 7.7-1.5 10.7-4.1L464 6.1zM432 288c3.6 0 6.7 2.4 7.7 5.8l14.8 51.7 51.7 14.8c3.4 1 5.8 4.1 5.8 7.7s-2.4 6.7-5.8 7.7l-51.7 14.8-14.8 51.7c-1 3.4-4.1 5.8-7.7 5.8s-6.7-2.4-7.7-5.8l-14.8-51.7-51.7-14.8c-3.4-1-5.8-4.1-5.8-7.7s2.4-6.7 5.8-7.7l51.7-14.8 14.8-51.7c1-3.4 4.1-5.8 7.7-5.8zM87.7 69.8l14.8 51.7 51.7 14.8c3.4 1 5.8 4.1 5.8 7.7s-2.4 6.7-5.8 7.7l-51.7 14.8L87.7 218.2c-1 3.4-4.1 5.8-7.7 5.8s-6.7-2.4-7.7-5.8L57.5 166.5 5.8 151.7c-3.4-1-5.8-4.1-5.8-7.7s2.4-6.7 5.8-7.7l51.7-14.8L72.3 69.8c1-3.4 4.1-5.8 7.7-5.8s6.7 2.4 7.7 5.8zM208 0c3.7 0 6.9 2.5 7.8 6.1l6.8 27.3 27.3 6.8c3.6 .9 6.1 4.1 6.1 7.8s-2.5 6.9-6.1 7.8l-27.3 6.8-6.8 27.3c-.9 3.6-4.1 6.1-7.8 6.1s-6.9-2.5-7.8-6.1l-6.8-27.3-27.3-6.8c-3.6-.9-6.1-4.1-6.1-7.8s2.5-6.9 6.1-7.8l27.3-6.8 6.8-27.3c.9-3.6 4.1-6.1 7.8-6.1z"],
@@ -14646,7 +14552,11 @@ LX.ICONS = {
     "CC": "ClosedCaptioning",
     "ASL": "HandsAslInterpreting",
     "Smile": "FaceSmile",
-    "HandRock": "HandBackFist"
+    "HandRock": "HandBackFist",
+    "Chain": "Link",
+    "ChainBroken": "LinkSlash",
+    "ChainSlash": "LinkSlash",
+    "Unlink": "LinkSlash"
 }
 
 export { LX };

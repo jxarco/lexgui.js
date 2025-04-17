@@ -14,20 +14,20 @@
         panel.addComboButtons("Alignment", [
             {
                 value: "left",
-                icon: "fa fa-align-left",
+                icon: "AlignLeft",
                 callback: (value, event) => {
                     console.log(value);
                 }
             }, {
                 value: "center",
                 selected: true,
-                icon: "fa fa-align-center",
+                icon: "AlignCenter",
                 callback: (value, event) => {
                     console.log(value);
                 }
             }, {
                 value: "right",
-                icon: "fa fa-align-right",
+                icon: "AlignRight",
                 callback: (value, event) => {
                     console.log(value);
                 }
@@ -50,20 +50,20 @@
     MAKE_CODE(`panel.@[mtd]addComboButtons@(@"Alignment"@, [
     {
         value: @"left"@,
-        icon: @"fa fa-align-left"@,
+        icon: @"AlignLeft"@,
         callback: (value, event) =&gt; {
             console.@[mtd]log@(value);
         }
     }, {
         value: @"center"@,
         selected: @true@,
-        icon: @"fa fa-align-center"@,
+        icon: @"AlignCenter"@,
         callback: (value, event) =&gt; {
             console.@[mtd]log@(value);
         }
     }, {
         value: @"right"@,
-        icon: @"fa fa-align-right"@,
+        icon: @"AlignRight"@,
         callback: (value, event) =&gt; {
             console.@[mtd]log@(value);
         }

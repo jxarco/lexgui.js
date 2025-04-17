@@ -92,7 +92,7 @@
                         
             if(mode == types.KEYFRAMES) {                
                 let ctx = canvas.getContext("2d");
-                ctx.fillStyle = LX.getThemeColor("global-selected-light");
+                ctx.fillStyle = LX.getThemeColor("global-color-accent");
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.font = panel.getValue('Font Size') + "px Monospace";
                 ctx.fillStyle = panel.getValue('Font Color');
@@ -112,10 +112,10 @@
 
         function fillPanel( panel ) {
             panel.clear();
-            panel.branch("Canvas", {icon: "fa-solid fa-palette", filter: true});
-            panel.addColor("Background", LX.getThemeColor("global-selected-light"));
+            panel.branch("Canvas", {icon: "Palette", filter: true});
+            panel.addColor("Background", LX.getThemeColor("global-color-accent"));
             panel.addText("Track", trackName, null)
-            panel.addText("Text", "Lexgui.js @evallsg", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
+            panel.addText("Text", "Lexgui.js @evallsg", null, {placeholder: "e.g. ColorPicker", icon: "Font"});
             panel.addColor("Font Color", { r: 1, g: 0.1, b: 0.6 }, (value, event) => {
                 console.log("Font Color: ", value);
             });
@@ -147,7 +147,7 @@
                 return;
             }
 
-            panel.branch(clip.name || "Clip", {icon: "fa-solid fa-clip", filter: true});
+            panel.branch(clip.name || "Clip", {filter: true});
             panel.addNumber("Start", clip.start, (v) => {
                 const diff = v - clip.start;
                 clip.start = v;    
@@ -191,12 +191,12 @@
                     panel.addSelect("Animation", ["Anim 1", "Anim 2", "Anim 3"], "Anim 1", ()=> {})
                 },
                 onAfterCreateTopBar: (panel) => {
-                    panel.addButton("autoKeyEnabled", "autoKeyEnable", null, { icon: 'fa fa-wand-magic-sparkles', hideName: true });
-                    panel.addButton("unselectAll", "unselectAll", (value, event) => { kfTimeline.unSelectAllKeyFrames();}, { icon: 'fa-regular fa-rectangle-xmark', hideName: true, callback: (value, event) => { kfTimeline.unSelectAllKeyFrames();} });
+                    panel.addButton("autoKeyEnabled", "autoKeyEnable", null, { icon: 'WandSparkles', hideName: true });
+                    panel.addButton("unselectAll", "unselectAll", (value, event) => { kfTimeline.unSelectAllKeyFrames();}, { icon: 'X', hideName: true, callback: (value, event) => { kfTimeline.unSelectAllKeyFrames();} });
                 }
             });
 
-            keyframesPanel.attach(kfTimeline.root);
+            keyframesPanel.attach(kfTimeline.mainArea);
             kfTimeline.setAnimationClip({tracks: [{name: "Font.position", values: [250, 450, 250, 250, 250, 450], times: [0, 0.5, 1.0]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1]}, {name: "Item 3.position", values: [0,1,0,0,0,0], times: [0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [ 0.1, 0.2, 0.3]}], duration: 1});
             kfTimeline.setSelectedItems(["Font", "Item 2", "Item 3"]);
             activeTimeline = kfTimeline;

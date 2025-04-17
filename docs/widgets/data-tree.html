@@ -22,12 +22,12 @@
                     children: [
                         {
                             id: "node_1_1",
-                            icon: "fa-solid fa-cube",
+                            icon: "Cube",
                             children: [],
                             actions: [
                                 {
                                     name: "Open script",
-                                    icon: "fa-solid fa-scroll",
+                                    icon: "Script",
                                     callback: function (node) {
                                         console.log(node.id + ": Script opened!")
                                     }
@@ -38,7 +38,7 @@
                 },
                 {
                     id: "node_2",
-                    icon: "fa-solid fa-circle-play",
+                    icon: "CirclePlay",
                     children: []
                 }
             ]
@@ -48,12 +48,12 @@
         const dataTreeIcons = [
             {
                 name: "Add node",
-                icon: "fa-solid fa-plus",
+                icon: "Plus",
                 callback: () => { console.log("Node added!") }
             },
             {
                 name: "Instantiate scene",
-                icon: "fa-solid fa-link",
+                icon: "Link",
                 callback: () => { console.log("Scene instantiated!") }
             }
         ];
@@ -97,12 +97,12 @@
             children: [
                 {
                     id: @"node_1_1"@,
-                    icon: @"fa-solid fa-cube"@,
+                    icon: @"Cube"@,
                     children: [],
                     actions: [
                         {
                             name: @"Open script"@,
-                            icon: @"fa-solid fa-scroll"@,
+                            icon: @"Script"@,
                             callback: function(node) {
                                 console.@[mtd]log@(node.id + @": Script opened!"@)
                             }
@@ -113,7 +113,7 @@
         },
         {
             id: @"node_2"@,
-            icon: @"fa-solid fa-circle-play"@,
+            icon: @"CirclePlay"@,
             children: []
         }
     ]
@@ -123,12 +123,12 @@
 @const@ dataTreeIcons = [
     {
         name: @"Add node"@,
-        icon: @"fa-solid fa-plus"@,
+        icon: @"Plus"@,
         callback: () => { console.@[mtd]log@(@"Node added!"@) }
     },
     {
         name: @"Instantiate scene"@,
-        icon: @"fa-solid fa-link"@,
+        icon: @"Link"@,
         callback: () => { console.@[mtd]log@(@"Scene instantiated!"@) }
     }
 ];

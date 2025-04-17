@@ -96,11 +96,11 @@ class GraphEditor {
 
         }, {
             displaySelected: true,
-            headerIcon: "more",
+            headerIcon: "More",
             headerTitle: "Create",
             headerSubtitle: "Press to rename",
             onHeaderPressed: () => this._showRenameGraphDialog(),
-            footerIcon: "plus",
+            footerIcon: "Plus",
             footerTitle: "Create",
             footerSubtitle: "Graph or Function",
             onFooterPressed: (e) => this._onSidebarCreate( e )
@@ -135,13 +135,13 @@ class GraphEditor {
             [
                 {
                     name: "Start Graph",
-                    icon: "fa fa-play",
+                    icon: "Play",
                     callback: (value, event) => this.start(),
                     selectable: true
                 },
                 {
                     name: "Stop Graph",
-                    icon: "fa-solid fa-stop",
+                    icon: "Stop",
                     callback: (value, event) => this.stop(),
                     selectable: true
                 }
@@ -149,7 +149,7 @@ class GraphEditor {
             [
                 {
                     name: "Enable Snapping",
-                    icon: "fa fa-table-cells",
+                    icon: "Frame",
                     callback: () => this._toggleSnapping(),
                     selectable: true
                 },
@@ -162,12 +162,12 @@ class GraphEditor {
             [
                 {
                     name: "Import",
-                    icon: "fa fa-upload",
+                    icon: "Upload",
                     callback: (value, event) => { this.loadGraph( "../../data/graph_sample.json" ); }
                 },
                 {
                     name: "Export",
-                    icon: "fa fa-diagram-project",
+                    icon: "CircleNodes",
                     callback: (value, event) => this.currentGraph.export()
                 }
             ]
@@ -478,7 +478,7 @@ class GraphEditor {
 
         this.setGraph( graph );
 
-        this._sidebar.add( graph.name, { icon: "fa fa-diagram-project", className: graph.id, callback: (e) => { this.setGraph( graph ) } } );
+        this._sidebar.add( graph.name, { icon: "CircleNodes", className: graph.id, callback: (e) => { this.setGraph( graph ) } } );
 
         this._sidebar.update();
 
@@ -531,7 +531,7 @@ class GraphEditor {
         NodeFunction.gid = func.id;
         GraphEditor.registerCustomNode( "function/" + func.name, NodeFunction );
 
-        this._sidebar.add( func.name, { icon: "fa fa-florin-sign", className: func.id, callback: (e) => { this.setGraph( func ) } } );
+        this._sidebar.add( func.name, { icon: "Function", className: func.id, callback: (e) => { this.setGraph( func ) } } );
 
         this._sidebar.update();
 
@@ -2757,8 +2757,8 @@ class GraphEditor {
         {
             sidebarItem.name = newNameKey;
             sidebarItem.dom.id = newNameKey;
-            sidebarItem.dom.querySelector(".lexsidebarentrydesc").innerText = name;
-            sidebarItem.dom.querySelector("a").innerText = name;
+            // sidebarItem.dom.querySelector(".lexsidebarentrydesc").innerText = name;
+            // sidebarItem.dom.querySelector("a").innerText = name;
         }
 
         // Change registered nodes function

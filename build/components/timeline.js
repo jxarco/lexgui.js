@@ -162,7 +162,7 @@ class Timeline {
 
         const playbtn = header.addButton("playBtn", '', (value, event) => {
            this.changeState();
-        }, { buttonClass: "accept", title: "Play", hideName: true, icon: "fa-solid fa-play", swap: "fa-solid fa-pause" });
+        }, { buttonClass: "accept", title: "Play", hideName: true, icon: "Play", swap: "Pause" });
         playbtn.root.setState(this.playing, true);
 
         header.addBlank("0.05em", "auto");
@@ -172,13 +172,13 @@ class Timeline {
             if ( this.onStateStop ){
                 this.onStateStop();
             }
-        }, { buttonClass: "accept", title: "Stop", hideName: true, icon: "fa-solid fa-stop" });
+        }, { buttonClass: "accept", title: "Stop", hideName: true, icon: "Stop" });
 
         header.addBlank("0.05em", "auto");
 
         header.addButton("loopBtn", '', ( value, event ) => {
             this.setLoopMode(!this.loop);
-        }, { selectable: true, selected: this.loop, title: 'Loop', hideName: true, icon: "fa-solid fa-rotate" });
+        }, { selectable: true, selected: this.loop, title: 'Loop', hideName: true, icon: "Refresh" });
         
         if( this.onCreateControlsButtons ){
             this.onCreateControlsButtons( header );
@@ -235,7 +235,7 @@ class Timeline {
 
         if( this.onShowOptimizeMenu )
         {
-            header.addButton(null, "", (value, event) => {this.onShowOptimizeMenu(event)}, { title: "Optimize", icon:"fa-solid fa-filter" });
+            header.addButton(null, "", (value, event) => {this.onShowOptimizeMenu(event)}, { title: "Optimize", icon:"Funnel" });
         }
         header.addBlank("0.05em", "auto");
 
@@ -256,7 +256,7 @@ class Timeline {
                         root.remove();
                     }
                 })
-            }, { title: "Settings", icon: "fa-solid fa-gear" })
+            }, { title: "Settings", icon: "Settings" })
         }
 
         header.clearQueue( buttonContainerEnd );

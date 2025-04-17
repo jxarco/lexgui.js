@@ -166,12 +166,12 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
                         'children': [
                             {
                                 'id': 'node_1_1',
-                                'icon': 'fa-solid fa-cube',
+                                'icon': 'Box',
                                 'children': [],
                                 'actions': [
                                     {
                                         'name': 'Open script',
-                                        'icon': 'fa-solid fa-scroll'
+                                        'icon': 'Script'
                                     }
                                 ]
                             }
@@ -179,7 +179,7 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
                     },
                     {
                         'id': 'node_2',
-                        'icon': 'fa-solid fa-circle-play',
+                        'icon': 'CirclePlay',
                         'children': []
                     }
                 ]
@@ -189,11 +189,11 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
             const treeIcons = [
                 {
                     'name':'Add node',
-                    'icon': 'fa-solid fa-plus'
+                    'icon': 'Plus'
                 },
                 {
                     'name':'Instantiate scene',
-                    'icon': 'fa-solid fa-link'
+                    'icon': 'Link'
                 }
             ];
 
@@ -214,7 +214,7 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
             // add widgets to panel branch
             panel.branch("Canvas", { icon: "Palette", filter: true });
             panel.addColor("Background", "#b7a9b1", null);
-            panel.addText("Text", "LexGUI.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
+            panel.addText("Text", "LexGUI.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "Font"});
             panel.addColor("Font Color", "#303b8d", null);
             panel.addNumber("Font Size", 36, null, { min: 1, max: 48, step: 1, units: "px"});
             panel.addSelect("Font Family", ["Arial", "GeistSans", "Monospace", "Ubuntu"], "GeistSans");
@@ -256,9 +256,9 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
             m.add( "Inbox", { selected: true, icon: "Inbox", content: LX.badge("128", badgeClass, { asElement: true }) } );
             m.add( "Drafts", { icon: "File", content: LX.badge("9", badgeClass, { asElement: true }) } );
             m.add( "Sent", { icon: "PaperPlane" } );
-            m.add( "Junk", { icon: "BoxArchiveX", content: LX.badge("23", badgeClass, { asElement: true }) } );
+            m.add( "Junk", { icon: "ArchiveX", content: LX.badge("23", badgeClass, { asElement: true }) } );
             m.add( "Trash", { icon: "TrashCan" } );
-            m.add( "Archive", { icon: "BoxArchive" } );
+            m.add( "Archive", { icon: "Archive" } );
             m.separator();
             m.add( "Social", { icon: "User", content: LX.badge("972", badgeClass, { asElement: true }) } );
             m.add( "Updates", { icon: "CircleInfo", content: LX.badge("342", badgeClass, { asElement: true }) } );
@@ -294,7 +294,7 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
                 {
                     const allMailFilter = LX.makeContainer( [ "100%", "50px" ], "flex p-2", "", container );
                     const filterInput = new LX.TextInput(null, "", null,
-                        { inputClass: "outline", width: "100%", icon: "fa fa-magnifying-glass", placeholder: "Search..." }
+                        { inputClass: "outline", width: "100%", icon: "Search", placeholder: "Search..." }
                     );
                     allMailFilter.appendChild( filterInput.root );
                 }
@@ -361,8 +361,8 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
             {
                 const mailPreviewHeader = LX.makeContainer( [ "100%", "59.59px" ], "flex flex-row border-bottom p-1", "", right );
 
-                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Archive", tooltip: true, buttonClass: "bg-none", icon: "BoxArchive" } ).root );
-                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Move to junk", tooltip: true, buttonClass: "bg-none", icon: "BoxArchiveX" } ).root );
+                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Archive", tooltip: true, buttonClass: "bg-none", icon: "Archive" } ).root );
+                mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Move to junk", tooltip: true, buttonClass: "bg-none", icon: "ArchiveX" } ).root );
                 mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Move to trash", tooltip: true, buttonClass: "bg-none", icon: "TrashCan" } ).root );
                 mailPreviewHeader.appendChild( LX.makeContainer( [ "1px", "35%" ], "border-right self-center ml-2 mr-2" ) );
                 mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Snooze", tooltip: true, buttonClass: "bg-none", icon: "Clock" } ).root );
@@ -530,8 +530,8 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
         ],
         credits: `2019-${ new Date().getUTCFullYear() } Alex Rodríguez and contributors. Website source code on GitHub.`,
         socials: [
-            { title: "Github", link: "https://github.com/jxarco/lexgui.js/", icon: `<a class="fa-brands fa-github"></a>` },
-            { title: "Discord", link: "https://discord.gg/vwqVrMZBXv", icon: `<a class="fa-brands fa-discord"></a>` }
+            { title: "Github", link: "https://github.com/jxarco/lexgui.js/", icon: "Github" },
+            { title: "Discord", link: "https://discord.gg/vwqVrMZBXv", icon: "Discord" }
         ]
     } );
 }

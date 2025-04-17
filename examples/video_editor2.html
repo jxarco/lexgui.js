@@ -68,7 +68,7 @@
     videoArea.addOverlayButtons([{
         selectable: true,
         selected: true,
-        icon: "fa-solid fa-info",
+        icon: "CircleInfo",
         name: "Properties",
         callback: (v, e) => {
             if (area.split_extended) {
@@ -86,7 +86,7 @@
 
         videoArea.sections[1].root.resize(["20%", "20%"])
     }, { width: "100px" })
-    p.addButton(null, null, (v) => { }, { width: "40px", icon: "fa-solid fa-rotate-left" })
+    p.addButton(null, null, (v) => { }, { width: "40px", icon: "RotateLeft" })
 
     /* Create right panel */
     let panel = new LX.Panel({ id: "Properties" });

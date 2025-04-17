@@ -70,8 +70,8 @@ const menubar = area.addMenubar( [
 
     { name: "Scene", submenu: [
         { name: "New Scene", callback: () => { console.log("New scene created!") }},
-        { name: "Open Scene", icon: "folder-open", kbd: "S", callback: () => { console.log("Opening SCENE Dialog") } },
-        { name: "Open Recent", icon: "file",  submenu: [
+        { name: "Open Scene", icon: "FolderOpen", kbd: "S", callback: () => { console.log("Opening SCENE Dialog") } },
+        { name: "Open Recent", icon: "File",  submenu: [
             { name: "hello.scene", callback: name => { console.log("Opening " + name) }},
             { name: "goodbye.scene", callback: name => { console.log("Opening " + name) }}
         ] }
@@ -80,14 +80,14 @@ const menubar = area.addMenubar( [
         { name: "Project Settings", disabled: true, callback: () => { console.log("Opening Project Settings") } },
         null,
         { name: "Export", submenu: [
-            { name: "DAE", icon: "frame", kbd: "D", callback: () => { console.log("Exporting DAE...") }},
+            { name: "DAE", icon: "Frame", kbd: "D", callback: () => { console.log("Exporting DAE...") }},
             { name: "GLTF", kbd:  "G" }
         ] },
-        { name: "Export", icon: "download" }
+        { name: "Export", icon: "Download" }
     ] },
     { name: "Editor", submenu: [
-        { name: "Autosave", checked: true, icon: "floppy-disk", callback: (key, v, menuItem) => { console.log(key, v) } },
-        { name: "Settings",  icon: "sliders-large", callback: () => {
+        { name: "Autosave", checked: true, icon: "FloppyDisk", callback: (key, v, menuItem) => { console.log(key, v) } },
+        { name: "Settings",  icon: "SlidersLarge", callback: () => {
             const dialog = new LX.Dialog( "Settings", p => {
                 p.addText("A Text", "Testing first widget");
                 p.sameLine(3);
@@ -100,7 +100,7 @@ const menubar = area.addMenubar( [
                 });
             });
         }},
-        { name: "Write BML", icon: "file-code", callback: () => {
+        { name: "Write BML", icon: "FileCode", callback: () => {
 
             new LX.PocketDialog( "BML Instruction", p => {
 
@@ -180,7 +180,7 @@ menubar.addButtons( [
     }
 ]);
 
-menubar.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")})
+menubar.setButtonIcon("Github", "Github", () => {window.open("https://github.com/jxarco/lexgui.js/")})
 menubar.setButtonImage("lexgui.js", "images/icon.png", () => {window.open("https://jxarco.github.io/lexgui.js/")}, {float: "left"})
 
 // split main area
@@ -199,26 +199,26 @@ const customHeader = document.createElement('div');
 customHeader.innerHTML = "Custom simple header";
 
 const sidebar = left.addSidebar( m => {
-    m.group( "Projects", { icon: "fa fa-plus", callback: (groupName, event) => { console.log(groupName) }} );
-    m.add( "Getting Started", { icon: "fa fa-cube" /*,collapsable: false*/ } );
-    m.add( "Getting Started/Installation", { icon: "fa fa-cube", callback: logParams } );
-    m.add( "Getting Started/Project Structure", { icon: "fa fa-cube", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } } );
-    m.add( "Building Your Application", { icon: "fa fa-code", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } } );
-    m.add( "Search Blocks", { icon: "fa fa-search", callback: logParams } );
-    m.add( "Very loooooooooooooooooooooooong sun", { icon: "fa fa-sun",callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } } );
+    m.group( "Projects", { icon: "Plus", callback: (groupName, event) => { console.log(groupName) }} );
+    m.add( "Getting Started", { icon: "Box" /*,collapsable: false*/ } );
+    m.add( "Getting Started/Installation", { icon: "Box", callback: logParams } );
+    m.add( "Getting Started/Project Structure", { icon: "Box", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } } );
+    m.add( "Building Your Application", { icon: "Code", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } } );
+    m.add( "Search Blocks", { icon: "Search", callback: logParams } );
+    m.add( "Very loooooooooooooooooooooooong sun", { icon: "Sun",callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } } );
     m.separator();
     m.group( "API Reference" );
-    m.add( "Components", { icon: "fa fa-cube", callback: logParams } );
-    m.add( "File Conventions", { icon: "fa fa-code", callback: logParams } );
-    m.add( "Functions", { icon: "fa fa-search",callback: logParams } );
-    m.add( "CLI", { icon: "fa fa-sun",callback: logParams } );
+    m.add( "Components", { icon: "Box", callback: logParams } );
+    m.add( "File Conventions", { icon: "Code", callback: logParams } );
+    m.add( "Functions", { icon: "Search",callback: logParams } );
+    m.add( "CLI", { icon: "Sun",callback: logParams } );
     m.separator();
     m.group( "Architecture" );
-    m.add( "Accessibility ", { icon: "fa fa-cube", callback: logParams } );
-    m.add( "Fast Refresh", { icon: "fa fa-code", callback: logParams } );
-    m.add( "Supported Browsers", { icon: "fa fa-search",callback: logParams } );
+    m.add( "Accessibility ", { icon: "Box", callback: logParams } );
+    m.add( "Fast Refresh", { icon: "Code", callback: logParams } );
+    m.add( "Supported Browsers", { icon: "Search",callback: logParams } );
     m.separator();
-    m.add( "Calendar ", { icon: "fa-regular fa-calendar", collapsable: 3 } );
+    m.add( "Calendar ", { icon: "Calendar", collapsable: 3 } );
     m.add( "Personal ", { callback: logParams, type: "checkbox" } );
     m.add( "Work", { callback: logParams, type: "checkbox", value: true } );
     m.add( "Family", { callback: logParams, type: "checkbox" } );
@@ -309,8 +309,8 @@ const bottomMenubar = bottom.addMenubar([
                     }, { inputWidth: "50%" })
                 },
                 onAfterCreateTopBar: panel => {
-                    panel.addButton("customBtn", '<i class="fa fa-wand-magic-sparkles"></i>', ( value, event ) => { }, { title: "Custom Action", hideName: true });
-                    panel.addButton("anotherCustomBtn", '<i class="fa fa-cube"></i>', ( value, event ) => { }, { title: "Other Custom Action", hideName: true });
+                    panel.addButton("customBtn", '', ( value, event ) => { }, { title: "Custom Action", icon: "WandSparkles", hideName: true });
+                    panel.addButton("anotherCustomBtn", '', ( value, event ) => { }, { title: "Other Custom Action", icon: "Box", hideName: true });
                 }
             });
 
@@ -417,7 +417,7 @@ const resizeCanvas = ( bounding ) => {
     canvas.height = bounding.height;
 };
 
-topTabs.add( "Canvas", canvas, { selected: true, onCreate: resizeCanvas } );
+topTabs.add( "Canvas", canvas, { icon: "Palette", selected: true, onCreate: resizeCanvas } );
 topTabs.add( "Debug", document.createElement('div'));
 
 // add on resize event to control canvas size
@@ -527,12 +527,12 @@ function fillPanel( panel ) {
                 'children': [
                     {
                         'id': 'node_1_1',
-                        'icon': 'fa-solid fa-cube',
+                        'icon': 'Box',
                         'children': [],
                         'actions': [
                             {
                                 'name': 'Open script',
-                                'icon': 'fa-solid fa-scroll',
+                                'icon': 'Scroll',
                                 'callback': function(node) {
                                     console.log(node.id + ": Script opened!")
                                 }
@@ -543,7 +543,8 @@ function fillPanel( panel ) {
             },
             {
                 'id': 'node_2',
-                'icon': 'fa-solid fa-circle-play',
+                'icon': 'CirclePlay',
+                'visible': false,
                 'children': []
             },
             {
@@ -551,12 +552,12 @@ function fillPanel( panel ) {
                 'children': [
                     {
                         'id': 'node_3_1',
-                        'icon': 'fa-solid fa-cube',
+                        'icon': 'Box',
                         'children': []
                     },
                     {
                         'id': 'node_3_2',
-                        'icon': 'fa-solid fa-cube',
+                        'icon': 'Box',
                         'children': []
                     }
                 ]
@@ -568,12 +569,12 @@ function fillPanel( panel ) {
     const treeIcons = [
         {
             'name':'Add node',
-            'icon': 'fa-solid fa-plus',
+            'icon': 'Plus',
             'callback': () => { console.log("Node added!") }
         },
         {
             'name':'Instantiate scene',
-            'icon': 'fa-solid fa-link',
+            'icon': 'Link',
             'callback': () => { console.log("Scene instantiated!") }
         }
     ];
@@ -624,7 +625,7 @@ function fillPanel( panel ) {
     panel.addColor("Background", "#b7a9b1", (value, event) => {
         console.log(value);
     }, { xuseAlpha: true });
-    panel.addText("Text", "Lexgui.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "fa fa-font"});
+    panel.addText("Text", "Lexgui.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "Font"});
     panel.addColor("Font Color", { r: 1, g: 0.1, b: 0.6, a: 1 }, (value, event) => {
         console.log("Font Color: ", value);
     }, { xuseAlpha: true, xuseRGB: true });
@@ -646,7 +647,7 @@ function fillPanel( panel ) {
     panel.addSeparator();
     panel.addRadioGroup( null, "Notify me about...", [ "All new messages", "Direct messages and mentions", "Nothing" ], (v) => { console.log(v) }, { className: "accent", xdisabled: true, selected: 1 } );
     panel.addSeparator();
-    panel.addTitle("Configuration (Im a title)");
+    panel.addTitle("Configuration (Im a title)", { icon: "Gears" });
     panel.addCheckbox("Toggle me", true, (value, event) => {
         console.log(value);
     }, { suboptions: (p) => {
@@ -718,7 +719,7 @@ function fillPanel( panel ) {
             }
         }
     ], { /* toggle: true, noSelection: true */ });
-    panel.addList(null, ['GPTeam', 'Blat Bunny', ['Blat Panthers', 'fa-solid fa-paw']], 'Blat Panthers',  (value, event) => {
+    panel.addList(null, ['GPTeam', 'Blat Bunny', ['Blat Panthers', 'PawPrint']], 'Blat Panthers',  (value, event) => {
         console.log(value);
     });
     const opacityValues = [
@@ -768,7 +769,7 @@ function fillRightBottomPanel( panel, tab ) {
         panel.addTabSections( "H_tabs", [
             {
                 name: "First tab",
-                icon: "fa-brands fa-discord",
+                icon: "Discord",
                 onCreate: p => {
                     p.addTitle("Discord tab");
                     p.addButton(null, "Connect");
@@ -779,7 +780,7 @@ function fillRightBottomPanel( panel, tab ) {
             },
             {
                 name: "Second tab",
-                icon: "fa-brands fa-twitter",
+                icon: "X-Twitter",
                 onCreate: p => {
                     p.addTitle("Twitter tab");
                     p.addText("Tweet", "", null, {placeholder: "Tyler Rake 2"});
@@ -787,7 +788,7 @@ function fillRightBottomPanel( panel, tab ) {
             },
             {
                 name: "Third tab",
-                icon: "fa-brands fa-github",
+                icon: "Github",
                 onCreate: p => {
                     p.addTitle("Github tab");
                     p.addButton(null, "Go", () => {window.open("https://github.com/jxarco/lexgui.js/")});
@@ -810,7 +811,7 @@ function fillRightBottomPanel( panel, tab ) {
         panel.addTabSections( "V_tabs", [
             {
                 name: "First tab",
-                icon: "fa-brands fa-discord",
+                icon: "Discord",
                 onCreate: (p, content) => {
                     p.addTitle("Discord tab");
                     p.addButton("Apply", "Add button to branch", (value, event) => {
@@ -822,7 +823,7 @@ function fillRightBottomPanel( panel, tab ) {
             },
             {
                 name: "Second tab",
-                icon: "fa-brands fa-twitter",
+                icon: "X-Twitter",
                 onCreate: p => {
                     p.addTitle("Twitter tab");
                     p.addText("Tweet", "", null, {placeholder: "Tyler Rake 2"});
@@ -830,7 +831,7 @@ function fillRightBottomPanel( panel, tab ) {
             },
             {
                 name: "Third tab",
-                icon: "fa-brands fa-github",
+                icon: "Github",
                 onCreate: p => {
                     p.addTitle("Github tab");
                     p.addButton(null, "Go", (value, event) => {window.open("https://github.com/jxarco/lexgui.js/")});
@@ -842,7 +843,7 @@ function fillRightBottomPanel( panel, tab ) {
         // Custom Widget
 
         LX.ADD_CUSTOM_WIDGET( "Shader", {
-            icon: "fa-cube",
+            icon: "Box",
             default: {
                 position: [0, 0],
                 velocity: [0, 0, 0],
@@ -963,14 +964,14 @@ function createLoginForm() {
             Username: {
                 value: "",
                 placeholder: "Enter username",
-                icon: "fa fa-user",
+                icon: "User",
                 pattern: LX.buildTextPattern( { minLength: 3 } )
             },
             Password: {
                 value: "",
                 type: "password",
                 placeholder: "Enter password",
-                icon: "fa fa-key",
+                icon: "KeyRound",
                 pattern: LX.buildTextPattern( { lowercase: true, uppercase: true, digit: true, minLength: 6 } )
             }
         };

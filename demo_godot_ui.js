@@ -4,49 +4,71 @@ import { LX } from 'lexgui';
 let area = LX.init();
 
 // menu bar
-area.addMenubar( m => {
+const menubar = area.addMenubar( [
 
-    // {options}: callback, icon, short
+    { name: "Scene", submenu: [
+        { name: "New Scene", callback: () => { console.log("New scene created!") }},
+        { name: "Open Scene", icon: "FolderOpen", kbd: "S", callback: () => { console.log("Opening SCENE Dialog") } },
+        { name: "Open Recent", icon: "File",  submenu: [
+            { name: "hello.scene", callback: name => { console.log("Opening " + name) }},
+            { name: "goodbye.scene", callback: name => { console.log("Opening " + name) }}
+        ] }
+    ] },
+    { name: "Project", submenu: [
+        { name: "Project Settings", disabled: true, callback: () => { console.log("Opening Project Settings") } },
+        null,
+        { name: "Export", submenu: [
+            { name: "DAE", icon: "Frame", kbd: "D", callback: () => { console.log("Exporting DAE...") }},
+            { name: "GLTF", kbd:  "G" }
+        ] },
+        { name: "Export", icon: "Download" }
+    ] },
+    { name: "Editor", submenu: [
+        { name: "Autosave", checked: true, icon: "FloppyDisk", callback: (key, v, menuItem) => { console.log(key, v) } },
+        { name: "Settings",  icon: "SlidersLarge", callback: () => {
+            const dialog = new LX.Dialog( "Settings", p => {
+                p.addText("A Text", "Testing first widget");
+                p.sameLine(3);
+                p.addLabel("Buttons:");
+                p.addButton(null, "Click me", () => {
+                    console.log( p.getValue("A Text") );
+                });
+                p.addButton(null, "Click me v2!", () => {
+                    console.log( p.getValue("A Text") );
+                });
+            });
+        }},
+    ] },
+    { name: "Help", submenu: [
+        { name: "Search Help", icon: "Search", kbd:  "F1", callback: () => { window.open("./docs/") }},
+        { name: "Support LexGUI", icon: "Heart" },
+    ] },
 
-    m.add( "Add/");
-    m.add( "Scene/New Scene", () => { console.log("New scene created!") });
-    m.add( "Scene/");
-    m.add( "Scene/Open Scene", { icon: "fa-solid fa-folder-open", short:  "S", callback: () => { console.log("Opening SCENE Dialog") } } );
-    m.add( "Scene/Open Recent/hello.scene", name => { console.log("Opening " + name) });
-    m.add( "Scene/Open Recent/goodbye.scene", name => { console.log("Opening " + name) });
-    m.add( "Project/Project Settings" );
-    m.add( "Project/Export", { icon: "fa-solid fa-download" });
-    m.add( "Project/Export/DAE", { icon: "fa-solid fa-cube", short: "D", callback: () => { console.log("Exporting DAE...") }} );
-    m.add( "Project/Export/GLTF", { short:  "G" } );
-    m.add( "Debug/Search Help", { icon: "fa-solid fa-magnifying-glass", short:  "F1", callback: () => { window.open("./docs/") }});
-    m.add( "Debug/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
-    m.add( "Debug/Support LexGUI/Do it" );
-   
-    m.addButtons( [
-        {
-            title: "Play",
-            icon: "fa-solid fa-play",
-            callback:  (event) => { 
-                console.log("play!"); 
-                const domEl = event.target;
-                domEl.classList.toggle('fa-play'), domEl.classList.toggle('fa-stop');
-            }
-        },
-        {
-            title: "Pause",
-            icon: "fa-solid fa-pause",
-            disabled: true,
-            callback:  (event) => { console.log("pause!") }
-        },
-        {
-            icon: "fa-solid fa-magnifying-glass",
-            callback:  (event) => { console.log("glass!") }
+], { sticky: false });
+
+menubar.addButtons( [
+    {
+        title: "Play",
+        icon: "Play",
+        swap: "Stop",
+        callback:  (value, event) => {
+            if( value ) console.log("play!");
+            else console.log("stop!");
         }
-    ]);
-    
-    m.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")})
-    m.setButtonImage("lexgui.js", "data/icon_godot_version.png", () => {window.open("https://github.com/jxarco/lexgui.js/")}, {float: "left"})
-});
+    },
+    {
+        title: "Pause",
+        icon: "Pause",
+        disabled: true,
+        callback:  (value, event) => { console.log("pause!"); }
+    },
+    {
+        icon: "Search",
+        callback:  (event) => { console.log("glass!") }
+    }
+]);
+menubar.setButtonIcon("Github", "Github", () => { window.open("https://github.com/jxarco/lexgui.js/")})
+menubar.setButtonImage("lexgui.js", "data/icon_godot_version.png", () => { window.open("https://github.com/jxarco/lexgui.js/")}, {float: "left"})
 
 // split main area
 var [_left,right] = area.split({sizes:["83%","17%"]});
@@ -115,27 +137,25 @@ top_tabs.area.addOverlayButtons( [
     [
         {
             name: "Select",
-            icon: "fa fa-arrow-pointer",
+            icon: "ArrowPointer",
             callback: (value, event) => console.log(value),
             selectable: true
         },
         {
             name: "Move",
-            icon: "fa-solid fa-arrows-up-down-left-right",
-            // img: "https://webglstudio.org/latest/imgs/mini-icon-gizmo.png",
-            icon: "fa fa-cube",
+            icon: "Arrows",
             callback: (value, event) => console.log(value),
             selectable: true
         },
         {
             name: "Rotate",
-            icon: "fa-solid fa-rotate-right",
+            icon: "RotateRight",
             callback: (value, event) => console.log(value),
             selectable: true
         },
         {
             name: "Unselect",
-            icon: "fa-solid fa-x",
+            icon: "X",
             callback: (value, event) => console.log(value),
             selectable: true
         }
@@ -183,7 +203,7 @@ function fillRightSide( area ) {
     var historyPanel = new LX.Panel();
     
     LX.ADD_CUSTOM_WIDGET( 'Skeleton', {
-        // icon: "fa-dice-d6",
+        icon: "Bone",
         default: {
             'position': [0, 0],
             'velocity': [0, 0, 0],
@@ -198,7 +218,7 @@ function fillRightSide( area ) {
         'high_res': true
     };
 
-    inspPanel.addTitle("Mesh Instance 3D", {icon: "fa-brands fa-hashnode"});
+    inspPanel.addTitle("Mesh Instance 3D", {icon: "Torus"});
 
     inspPanel.addFile("Mesh");
     inspPanel.branch("Skeleton");
@@ -207,12 +227,12 @@ function fillRightSide( area ) {
     inspPanel.addSkeleton("Skeleton", skeleton_instance);
     inspPanel.merge();
 
-    inspPanel.addTitle("Geometry Instance 3D", {icon: "fa-regular fa-square-full", icon_color: "#d63434"});
+    inspPanel.addTitle("Geometry Instance 3D", {icon: "Square", icon_color: "#d63434"});
     inspPanel.branch("Geometry", {closed: true});
     inspPanel.branch("Global Illumination", {closed: true});
     inspPanel.branch("Visibility Range", {closed: true});
     inspPanel.merge();
-    inspPanel.addTitle("Node 3D", {icon: "fa-regular fa-circle", icon_color: "#fff"});
+    inspPanel.addTitle("Node 3D", {icon: "Circle", icon_color: "#fff"});
     inspPanel.branch("Transform", {closed: true});
     inspPanel.branch("Visibility", {closed: true});
     inspPanel.merge();
@@ -241,17 +261,17 @@ function fillLeftSide( area ) {
         'children': [
             {
                 'id': 'WorldEnvironment',
-                'icon': 'fa-solid fa-globe',
+                'icon': 'Globe',
                 'closed': true,
                 'children': [
                     {
                         'id': 'node_1_1',
-                        'icon': 'fa-solid fa-cube',
+                        'icon': 'Box',
                         'children': [],
                         'actions': [
                             {
                                 'name': 'Open script',
-                                'icon': 'fa-solid fa-scroll',
+                                'icon': 'Script',
                                 'callback': function(node) {
                                     console.log(node.id + ": Script opened!")
                                 }
@@ -262,12 +282,12 @@ function fillLeftSide( area ) {
             },
             {
                 'id': 'AnimatedSprite3D',
-                'icon': 'fa-solid fa-film',
+                'icon': 'Film',
                 'closed': true,
                 'children': [
                     {
                         'id': 'node_2_1',
-                        'icon': 'fa-solid fa-circle',
+                        'icon': 'Circle',
                         'children': []
                     }
                 ]
@@ -279,12 +299,12 @@ function fillLeftSide( area ) {
     const treeIcons = [
         {
             'name':'Add node',
-            'icon': 'fa-solid fa-plus',
+            'icon': 'Plus',
             'callback': () => { console.log("Node added!") }
         },
         {
             'name':'Instantiate scene',
-            'icon': 'fa-solid fa-link',
+            'icon': 'Link',
             'callback': () => { console.log("Scene instantiated!") }
         }
     ];

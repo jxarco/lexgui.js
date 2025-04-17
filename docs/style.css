@@ -73,7 +73,7 @@
 	cursor: pointer;
 }
 
-.code-container button.copied {
+.code-container button.copied svg {
 	color: #42d065;
 }
 

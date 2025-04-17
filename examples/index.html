@@ -34,7 +34,7 @@
             { name: "Docs v" + LX.version, callback: (v, name) => { location.href = "../docs/"; } }
         ] );
 
-        menubar.setButtonIcon("Github", "fa-brands fa-github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
+        menubar.setButtonIcon("Github", "Github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
 
         const examples = [
             'All Widgets',    
@@ -61,7 +61,7 @@
         rightArea.addOverlayButtons([
             {
                 name: "View Source Code",
-                icon: "fa fa-code",
+                icon: "Code",
                 callback: (value, event) => { 
                     const tokens = iframe.src.split('/');
                     window.open("https://github.com/jxarco/lexgui.js/blob/master/examples/" + tokens[tokens.length - 1], '_blank')

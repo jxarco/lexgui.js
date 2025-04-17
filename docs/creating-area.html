@@ -69,20 +69,17 @@
     MAKE_CODE( `menubar.@[mtd]addButtons@( [
     {
         title: @"Play"@,
-        icon: @"fa-solid fa-play"@,
-        callback:  (domEl) => { 
-            domEl.classList.@[mtd]toggle@(@"fa-play"@);
-            domEl.classList.@[mtd]toggle@(@"fa-stop"@);
-        }
+        icon: @"Play"@,
+        callback:  (domEl) => { }
     },
     {
         title: @"Pause"@,
-        icon: @"fa-solid fa-pause"@,
+        icon: @"Pause"@,
         disabled: @true@,
         callback:  (domEl) => { }
     },
     {
-        icon: @"fa-solid fa-magnifying-glass"@,
+        icon: @"Search"@,
         callback:  (domEl) => { }
     }
 ]);` );
@@ -90,7 +87,7 @@
     MAKE_HEADER( "Menubar Icons and Logos", "h3", "menubar-icons" );
 
     MAKE_PARAGRAPH( `You can also add an icon and/or a logo button to your menubar using ${INLINE_CODE("Menubar.setButtonIcon(title, src, callback, options)")}:` );
-    MAKE_CODE( `menubar.@[mtd]setButtonIcon@(@"Github"@, @"fa-brands fa-github"@, () => { 
+    MAKE_CODE( `menubar.@[mtd]setButtonIcon@(@"Github"@, @"Github"@, () => { 
     window.@[mtd]open@(@"https://github.com/jxarco/lexgui.js/"@) 
 });` );
 
