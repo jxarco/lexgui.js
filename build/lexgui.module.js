@@ -6920,6 +6920,7 @@ class Button extends Widget {
             wValue.querySelector( "a" ).classList.add( "swap-off" );
 
             const input = document.createElement( "input" );
+            input.className = "p-0 border-0";
             input.type = "checkbox";
             wValue.prepend( input );
 

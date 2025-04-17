@@ -1672,6 +1672,7 @@ a svg, svg path {
     background-color: var(--button-color);
     border: 1px solid transparent;
     border-radius: 6px;
+    min-width: 1.8rem;
     min-height: 22px !important;
     align-content: center;
     color: var(--global-text-primary);
@@ -1683,7 +1684,7 @@ a svg, svg path {
     font-weight: 500;
     display: grid;
     transition: 0.1s linear;
-    padding: 0.35rem;
+    padding: 0.3rem;
 }
 
 /* Colors */
@@ -3195,7 +3196,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexmenubar .lexbutton {
-    padding-inline: 0.1rem;
+    padding-inline: 0.2rem;
+    min-width: 0rem;
 }
 
 .lexmenubar .lexbutton:hover, :root[data-theme="light"] .lexmenubar .lexbutton:hover {
@@ -6409,6 +6411,7 @@ ul.lexassetscontent {
 .border-left { border-left: 1px solid var(--global-color-tertiary) }
 .border-right { border-right: 1px solid var(--global-color-tertiary) }
 
+.border-0 { border-width: 0px }
 .border-2 { border-width: 2px }
 .border-4 { border-width: 4px }
 .border-6 { border-width: 6px }
