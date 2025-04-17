@@ -8,7 +8,7 @@ import 'https://unpkg.com/lucide@latest';
 */
 
 var LX = {
-    version: "0.5.8",
+    version: "0.5.9",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -6695,6 +6695,7 @@ class Button extends Widget {
             wValue.querySelector( "a" ).classList.add( "swap-off" );
 
             const input = document.createElement( "input" );
+            input.className = "p-0 border-0";
             input.type = "checkbox";
             wValue.prepend( input );
 
