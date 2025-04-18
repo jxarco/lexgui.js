@@ -804,8 +804,16 @@ function makeIcon( iconName, options = { } )
 
         if( data[ 5 ] )
         {
-            const attr = data[ 5 ].split( '=' );
-            svg.setAttribute( attr[ 0 ], attr[ 1 ] );
+            const classes = data[ 5 ].svgClass;
+            classes?.split( ' ' ).forEach( c => {
+                svg.classList.add( c )
+            } );
+
+            const attrs = data[ 5 ].svgAttributes;
+            attrs?.split( ' ' ).forEach( attr => {
+                const t = attr.split( '=' );
+                svg.setAttribute( t[ 0 ], t[ 1 ] );
+            } );
         }
 
         const path = document.createElement( "path" );
@@ -815,8 +823,13 @@ function makeIcon( iconName, options = { } )
 
         if( data[ 6 ] )
         {
-            const attrs = data[ 6 ].split( ' ' );
-            attrs.forEach( attr => {
+            const classes = data[ 6 ].pathClass;
+            classes?.split( ' ' ).forEach( c => {
+                path.classList.add( c )
+            } );
+
+            const attrs = data[ 6 ].pathAttributes;
+            attrs?.split( ' ' ).forEach( attr => {
                 const t = attr.split( '=' );
                 path.setAttribute( t[ 0 ], t[ 1 ] );
             } );
