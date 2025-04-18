@@ -1241,7 +1241,7 @@ class CodeEditor {
                 };
 
                 const ext = this.languages[ options.language ] ?. ext;
-                this.addExplorerItem( { id: name, skipVisibility: true, xicon: this._getFileIcon( name, ext ) } );
+                this.addExplorerItem( { id: name, skipVisibility: true, icon: this._getFileIcon( name, ext ) } );
                 this.explorer.innerTree.frefresh( name );
             }
             else
@@ -1453,7 +1453,7 @@ class CodeEditor {
         }
     }
 
-    _changeLanguage( lang, override = false ) {
+    _changeLanguage( lang, langExtension, override = false ) {
 
         this.code.language = lang;
         this.highlight = lang;
@@ -1466,7 +1466,7 @@ class CodeEditor {
         this._updateDataInfoPanel( "@highlight", lang );
         this.processLines();
 
-        const ext = this.languages[ lang ].ext;
+        const ext = langExtension ?? this.languages[ lang ].ext;
         const icon = this._getFileIcon( null, ext );
 
         // Update tab icon
@@ -1512,7 +1512,7 @@ class CodeEditor {
             {
                 if( langExtension.indexOf( ext ) > -1 )
                 {
-                    return this._changeLanguage( l );
+                    return this._changeLanguage( l, ext );
                 }
             }
             else
@@ -1554,7 +1554,7 @@ class CodeEditor {
                     for( const lang of Object.keys( this.languages ) )
                     {
                         m.add( lang, v => {
-                            this._changeLanguage( v, true )
+                            this._changeLanguage( v, null, true )
                         } );
                     }
                 });
@@ -1610,7 +1610,12 @@ class CodeEditor {
             extension == "css" ? "Hash dodgerblue" :
             extension == "xml" ? "Rss orange" :
             extension == "bat" ? "Microsoft lightblue" :
-            [ 'js', 'py', 'json', 'cpp', 'hpp', 'rs', 'md' ].indexOf( extension ) > -1 ? "images/" + extension + ".png" :
+            extension == "json" ? "Braces fg-primary" :
+            extension == "js" ? "SquareJs yellow" :
+            extension == "py" ? "Python munsellblue" :
+            extension == "rs" ? "Rust fg-primary" :
+            extension == "md" ? "Markdown fg-primary" :
+            [ 'cpp', 'hpp' ].indexOf( extension ) > -1 ? "images/" + extension + ".png" :
             !isNewTabButton ? "AlignLeft gray" : undefined;
     }
 
@@ -1782,7 +1787,7 @@ class CodeEditor {
 
                 if( tabData.options.language )
                 {
-                    this._changeLanguage( tabData.options.language, true );
+                    this._changeLanguage( tabData.options.language, null, true );
                 }
                 else
                 {

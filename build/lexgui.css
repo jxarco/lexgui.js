@@ -295,7 +295,9 @@ body.noevents * {
 .orange { color: orange }
 .gray { color: gray }
 .dodgerblue { color: dodgerblue }
+.munsellblue { color: #0093af }
 .lightblue { color: #5aa8f7 }
+.yellow { color: yellow }
 
 svg.xs { width: var(--svg-size-xs); height: var(--svg-size-xs); }
 svg.sm { width: var(--svg-size-sm); height: var(--svg-size-sm); }
@@ -2718,16 +2720,10 @@ input[type=number] {
 }
 
 .lextree .lextreeitem img {
-    width: 12px;
-    height: 12px;
-    margin-right: 4px;
+    width: 16px;
+    height: 16px;
+    margin-right: 0.5rem;
     vertical-align: middle;
-    margin-top: -1px;
-}
-
-.lextree .lextreeitem .tree-item-icon {
-    width: 12px;
-    height: 12px;
 }
 
 .lextree .lextreeitem.draggingover {
@@ -2750,10 +2746,6 @@ input[type=number] {
 
 .lextree .lextreeitem a.hierarchy {
     margin-right: 6px;
-}
-
-.lextree .lextreeitem .lexicon {
-    font-size: var(--global-font-size-sm);
 }
 
 /* File Input */
@@ -4834,7 +4826,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .codetabsarea {
-    height: calc(100% - 80px) !important;
+    height: calc(100% - 78px) !important;
     background-color: light-dark(var(--global-color-tertiary), var(--global-medium-background));
     overflow: scroll;
 }
