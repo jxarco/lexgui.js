@@ -10285,9 +10285,7 @@ class DatePicker extends Widget {
             container.innerHTML = "";
             const calendarIcon = LX.makeIcon( "Calendar" );
             const calendarButton = new Button( null, currentDate ?? "Pick a date", () => {
-                this._popover = new Popover( calendarButton.root, ( popoverRoot ) => {
-                    popoverRoot.appendChild( this.calendar.root );
-                } );
+                this._popover = new Popover( calendarButton.root, [ this.calendar ] );
             }, { buttonClass: `flex flex-row px-3 ${ currentDate ? "" : "fg-tertiary" } justify-between` } );
 
             calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
@@ -13186,8 +13184,8 @@ class AssetView {
         div.className = 'lexassetbrowser';
         this.root = div;
 
-        let area = new LX.Area({height: "100%"});
-        div.appendChild(area.root);
+        let area = new LX.Area( { width: "100%", height: "100%" } );
+        div.appendChild( area.root );
 
         let left, right, contentArea = area;
 
@@ -13199,6 +13197,9 @@ class AssetView {
         this.previewActions = options.previewActions ?? [];
         this.contextMenu = options.contextMenu ?? [];
         this.onRefreshContent = options.onRefreshContent;
+
+        // Append temporarily to the dom
+        document.body.appendChild( this.root );
 
         if( !this.skipBrowser )
         {
@@ -13237,6 +13238,9 @@ class AssetView {
         {
             this.previewPanel = right.addPanel( {className: 'lexassetcontentpanel', style: { overflow: 'scroll' }} );
         }
+
+        // Clean up
+        document.body.removeChild( this.root );
     }
 
     /**
