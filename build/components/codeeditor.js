@@ -1609,13 +1609,16 @@ class CodeEditor {
         return extension == "html" ? "Code orange" :
             extension == "css" ? "Hash dodgerblue" :
             extension == "xml" ? "Rss orange" :
-            extension == "bat" ? "Microsoft lightblue" :
+            extension == "bat" ? "Windows lightblue" :
             extension == "json" ? "Braces fg-primary" :
-            extension == "js" ? "SquareJs yellow" :
+            extension == "js" ? "Js yellow" :
             extension == "py" ? "Python munsellblue" :
             extension == "rs" ? "Rust fg-primary" :
             extension == "md" ? "Markdown fg-primary" :
-            [ 'cpp', 'hpp' ].indexOf( extension ) > -1 ? "images/" + extension + ".png" :
+            extension == "cpp" ? "CPlusPlus pictonblue" :
+            extension == "hpp" ? "CPlusPlus heliotrope" :
+            extension == "c" ? "C pictonblue" :
+            extension == "h" ? "C heliotrope" :
             !isNewTabButton ? "AlignLeft gray" : undefined;
     }
 

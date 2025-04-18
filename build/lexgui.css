@@ -296,8 +296,10 @@ body.noevents * {
 .gray { color: gray }
 .dodgerblue { color: dodgerblue }
 .munsellblue { color: #0093af }
+.pictonblue { color: #45B1E8 }
 .lightblue { color: #5aa8f7 }
 .yellow { color: yellow }
+.heliotrope { color: #d460ff }
 
 svg.xs { width: var(--svg-size-xs); height: var(--svg-size-xs); }
 svg.sm { width: var(--svg-size-sm); height: var(--svg-size-sm); }
@@ -3919,7 +3921,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.lextable svg, .lextable svg path {
+.lextable svg {
     color: var(--global-text-tertiary);
 }
 
@@ -5843,6 +5845,8 @@ ul.lexassetscontent {
 .hover\:fg-success:hover { color: var(--global-color-success) !important }
 .hover\:fg-error:hover { color: var(--global-color-error) !important }
 .hover\:fg-warning:hover { color: var(--global-color-warning) !important }
+
+.stroke-none { stroke: none }
 
 /* Layout */
 
