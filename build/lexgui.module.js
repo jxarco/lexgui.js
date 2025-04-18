@@ -13444,8 +13444,8 @@ class AssetView {
         div.className = 'lexassetbrowser';
         this.root = div;
 
-        let area = new LX.Area({height: "100%"});
-        div.appendChild(area.root);
+        let area = new LX.Area( { width: "100%", height: "100%" } );
+        div.appendChild( area.root );
 
         let left, right, contentArea = area;
 
@@ -13457,6 +13457,9 @@ class AssetView {
         this.previewActions = options.previewActions ?? [];
         this.contextMenu = options.contextMenu ?? [];
         this.onRefreshContent = options.onRefreshContent;
+
+        // Append temporarily to the dom
+        document.body.appendChild( this.root );
 
         if( !this.skipBrowser )
         {
@@ -13495,6 +13498,9 @@ class AssetView {
         {
             this.previewPanel = right.addPanel( {className: 'lexassetcontentpanel', style: { overflow: 'scroll' }} );
         }
+
+        // Clean up
+        document.body.removeChild( this.root );
     }
 
     /**

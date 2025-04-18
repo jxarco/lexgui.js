@@ -3,6 +3,7 @@
 ## dev
 
 - Fixed Date Calendar popover not opening.
+- Fixed creation of AssetView inner areas.
 
 ## 0.5.9 (master)
 
