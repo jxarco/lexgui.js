@@ -21,6 +21,8 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
     );
     menubar.root.appendChild( commandButton.root );
 
+    const starterTheme = LX.getTheme();
+
     menubar.addButtons( [
         {
             title: "Github",
@@ -30,10 +32,10 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
             }
         },
         {
-            title: "Change Theme",
-            icon: "Sun",
-            swap: "Moon",
-            callback:  (swapValue) => { LX.setTheme( swapValue ? "light" : "dark" ) }
+            title: "Switch Theme",
+            icon: starterTheme == "dark" ? "Moon" : "Sun",
+            swap: starterTheme == "dark" ? "Sun" : "Moon",
+            callback:  (value, event) => { LX.switchTheme() }
         }
     ], { float: "right" });
 }

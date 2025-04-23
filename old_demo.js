@@ -149,6 +149,8 @@ const menubar = area.addMenubar( [
 
 ], { sticky: false });
 
+const starterTheme = LX.getTheme();
+
 menubar.addButtons( [
     {
         title: "Play",
@@ -173,10 +175,10 @@ menubar.addButtons( [
         }
     },
     {
-        title: "Change Theme",
-        icon: "Moon",
-        swap: "Sun",
-        callback:  (value, event) => { LX.setTheme( value ? "light" : "dark" ) }
+        title: "Switch Theme",
+        icon: starterTheme == "dark" ? "Moon" : "Sun",
+        swap: starterTheme == "dark" ? "Sun" : "Moon",
+        callback:  (value, event) => { LX.switchTheme() }
     }
 ]);
 
