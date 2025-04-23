@@ -2116,10 +2116,6 @@ dialog .lexselect .lexselectoptions {
     --toggle-fg-color: var(--global-color-primary);
 }
 
-.lextoggle.outline.primary, .lextoggle.outline.secondary {
-    /* border: 1px solid var(--global-text-tertiary); */
-}
-
 .lextoggle.outline:checked, .lextoggle.outline[aria-checked=true], .lextoggle.outline:has(>input:checked) {
     border: 1px solid currentColor;
     color: var(--toggle-bg-color);
@@ -2435,7 +2431,6 @@ input[type=number] {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    webkit-appearance: none;
     --radius-selector-max: calc(var(--radius-selector) + var(--radius-selector) + var(--radius-selector));
     border-radius: calc(var(--radius-selector) + min(var(--range-thumb-padding),var(--radius-selector-max)));
     width: 100%;
@@ -2505,7 +2500,6 @@ input[type=number] {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    webkit-appearance: none;
     color: var(--range-progress);
     box-shadow: 0 -1px oklch(0% 0 0/0.1) inset,0 8px 0 -4px oklch(100% 0 0/0.1) inset,0 1px color-mix(in oklab,currentColor calc(1*10%),#0000),0 0 0 2rem var(--range-thumb-color) inset,calc((var(--range-dir,1)*-100rem) - (var(--range-dir,1)*var(--range-thumb-size)/2)) 0 0 calc(100rem*var(--range-fill));
     background-color: currentColor;
@@ -5809,6 +5803,7 @@ ul.lexassetscontent {
 .bg-warning { --background-color: var(--global-color-warning); background-color: var(--background-color)!important }
 .bg-white { --background-color: white; background-color: var(--background-color)!important }
 .bg-black { --background-color: black; background-color: var(--background-color)!important }
+.bg-blur { --background-color: var(--global-blur-background); background-color: var(--background-color)!important }
 .bg-none { background: none !important }
 
 .hover\:bg-primary:hover { background-color: var(--global-color-primary) !important }
@@ -5894,7 +5889,7 @@ ul.lexassetscontent {
 .text-balance { text-wrap: balance }
 .break-words { overflow-wrap: break-word }
 
-.line-clamp-1, .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical }
+.line-clamp-1, .line-clamp-2, .line-clamp-3, .line-clamp-4 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical }
 .line-clamp-1 { -webkit-line-clamp: 1; line-clamp: 1 }
 .line-clamp-2 { -webkit-line-clamp: 2; line-clamp: 2 }
 .line-clamp-3 { -webkit-line-clamp: 3; line-clamp: 3 }

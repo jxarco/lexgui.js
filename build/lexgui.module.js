@@ -1277,7 +1277,7 @@ function _createCommandbar( root )
         if( LX.has('CodeEditor') )
         {
             const instances = LX.CodeEditor.getInstances();
-            if( !instances.length ) return;
+            if( !instances.length || !instances[ 0 ].area.root.offsetHeight ) return;
 
             const languages = instances[ 0 ].languages;
 
@@ -11811,7 +11811,6 @@ class Footer {
         parent.appendChild( root );
 
         // Set always at bottom
-        root.previousElementSibling.style.height = "unset";
         root.previousElementSibling.style.flexGrow = "1";
 
         this.root = root;
