@@ -20,6 +20,8 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
         );
         m.root.appendChild( commandButton.root );
 
+        const starterTheme = LX.getTheme();
+
         m.addButtons( [
             {
                 title: "Github",
@@ -29,10 +31,10 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
                 }
             },
             {
-                title: "Change Theme",
-                icon: "fa-solid fa-sun",
-                swap: "fa-solid fa-moon",
-                callback:  (swapValue) => { LX.setTheme( swapValue ? "light" : "dark" ) }
+                title: "Switch Theme",
+                icon: starterTheme == "dark" ? "fa-solid fa-moon" : "fa-solid fa-sun",
+                swap: starterTheme == "dark" ? "fa-solid fa-sun" : "fa-solid fa-moon",
+                callback:  (value, event) => { LX.switchTheme() }
             }
         ], { float: "right" });
     });

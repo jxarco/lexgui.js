@@ -68,8 +68,6 @@ snippet.style.position = "absolute";
 // menu bar
 area.addMenubar( m => {
 
-    // {options}: callback, icon, short
-
     m.add( "Scene/New Scene", () => { console.log("New scene created!") });
     m.add( "Scene/Open Scene", { icon: "fa-solid fa-folder-open", short:  "S", callback: () => { console.log("Opening SCENE Dialog") } } );
     m.add( "Scene/Open Recent/hello.scene", name => { console.log("Opening " + name) });
@@ -137,6 +135,9 @@ area.addMenubar( m => {
     m.add( "Help/Search Help", { icon: "fa-solid fa-magnifying-glass", short:  "F1", callback: () => { window.open("./docs/") }});
     m.add( "Help/Support LexGUI/Please", { icon: "fa-solid fa-heart" } );
     m.add( "Help/Support LexGUI/Do it" );
+
+    const starterTheme = LX.getTheme();
+
     m.addButtons( [
         {
             title: "Play",
@@ -161,10 +162,10 @@ area.addMenubar( m => {
             }
         },
         {
-            title: "Change Theme",
-            icon: "fa-solid fa-moon",
-            swap: "fa-solid fa-sun",
-            callback:  (value, event) => { LX.setTheme( value ? "light" : "dark" ) }
+            title: "Switch Theme",
+            icon: starterTheme == "dark" ? "fa-solid fa-moon" : "fa-solid fa-sun",
+            swap: starterTheme == "dark" ? "fa-solid fa-sun" : "fa-solid fa-moon",
+            callback:  (value, event) => { LX.switchTheme() }
         }
     ]);
     

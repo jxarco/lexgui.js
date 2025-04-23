@@ -205,6 +205,29 @@ function setTheme( colorScheme )
 LX.setTheme = setTheme;
 
 /**
+ * @method getTheme
+ * @description Gets either "dark" or "light" theme value
+ */
+function getTheme()
+{
+    return document.documentElement.getAttribute( "data-theme" ) ?? "dark";
+}
+
+LX.getTheme = getTheme;
+
+/**
+ * @method switchTheme
+ * @description Toggles between "dark" and "light" themes
+ */
+function switchTheme()
+{
+    const currentTheme = getTheme();
+    setTheme( currentTheme == "dark" ? "light" : "dark" );
+}
+
+LX.switchTheme = switchTheme;
+
+/**
  * @method setThemeColor
  * @description Sets a new value for one of the main theme variables
  * @param {String} colorName Name of the theme variable
