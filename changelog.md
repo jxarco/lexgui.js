@@ -5,6 +5,7 @@
 Fixed Date Calendar popover not opening.
 Fixed creation of AssetView inner areas.
 Fixed Sidebar content resize issue on creation.
+ChangeLanguage CodeEditor commands are no longer shown if no opened editor.
 Minor css fixes.
 
 ## 0.5.9 (master)
