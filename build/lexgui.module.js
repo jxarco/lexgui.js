@@ -8,7 +8,7 @@ import 'https://unpkg.com/lucide@latest';
 */
 
 var LX = {
-    version: "0.5.9",
+    version: "0.5.10",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers

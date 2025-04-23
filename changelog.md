@@ -2,13 +2,15 @@
 
 ## dev
 
+## 0.5.10 (master)
+
 Fixed Date Calendar popover not opening.
 Fixed creation of AssetView inner areas.
 Fixed Sidebar content resize issue on creation.
 ChangeLanguage CodeEditor commands are no longer shown if no opened editor.
 Minor css fixes.
 
-## 0.5.9 (master)
+## 0.5.9
 
 Widgets:
 - Added new `DatePicker` Widget (also via `Panel.addDate` and using `LX.Calendar` class).
