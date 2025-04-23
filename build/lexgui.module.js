@@ -12048,7 +12048,6 @@ class Footer {
         parent.appendChild( root );
 
         // Set always at bottom
-        root.previousElementSibling.style.height = "unset";
         root.previousElementSibling.style.flexGrow = "1";
 
         this.root = root;
