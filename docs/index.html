@@ -195,12 +195,13 @@
             });
 
             const menubar = sidebar.siblingArea.addMenubar();
+            const starterTheme = LX.getTheme();
 
             menubar.addButtons([{
                 title: "Change Theme",
-                icon: "Moon",
-                swap: "Sun",
-                callback: (swapValue) => { LX.setTheme(swapValue ? "light" : "dark") }
+                icon: starterTheme == "dark" ? "Moon" : "Sun",
+                swap: starterTheme == "dark" ? "Sun" : "Moon",
+                callback:  (value, event) => { LX.switchTheme() }
             }]);
 
             menubar.siblingArea.root.style.overflowY = "scroll";
