@@ -2,6 +2,7 @@
 
 ## dev
 
+Added `LX.makeElement` to expand support for creating other HTML types.
 Minor css fixes.
 
 ## 0.5.10 (master)
