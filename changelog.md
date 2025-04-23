@@ -2,6 +2,8 @@
 
 ## dev
 
+Minor css fixes.
+
 ## 0.5.10 (master)
 
 Fixed Date Calendar popover not opening.
