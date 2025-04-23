@@ -4997,14 +4997,14 @@ class SideBar {
             this.root.appendChild( this.footer );
         }
 
-        // Set width depending on header/footer
-        doAsync( () => {
-            // This account for header, footer and all inner margins
-            const contentOffset = ( parseInt( this.header?.getComputedSize().height ) ?? 0 ) +
-            ( parseInt( this.filter?.getComputedSize().height ) ?? 0 ) +
-            ( parseInt( this.footer?.getComputedSize().height ) ?? 0 );
+        const resizeObserver = new ResizeObserver( entries => {
+            const contentOffset = ( this.header?.offsetHeight ?? 0 ) +
+            ( this.filter?.offsetHeight ?? 0 ) +
+            ( this.footer?.offsetHeight ?? 0 );
             this.content.style.height = `calc(100% - ${ contentOffset }px)`;
-        }, 10 );
+        } );
+
+        resizeObserver.observe( this.root );
 
         this.items = [ ];
         this.icons = { };
