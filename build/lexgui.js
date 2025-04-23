@@ -12,7 +12,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 var LX = {
-    version: "0.5.9",
+    version: "0.5.10",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -1245,7 +1245,7 @@ function _createCommandbar( root )
         if( LX.has('CodeEditor') )
         {
             const instances = LX.CodeEditor.getInstances();
-            if( !instances.length ) return;
+            if( !instances.length || !instances[ 0 ].area.root.offsetHeight ) return;
 
             const languages = instances[ 0 ].languages;
 
@@ -5003,14 +5003,14 @@ class SideBar {
             this.root.appendChild( this.footer );
         }
 
-        // Set width depending on header/footer
-        doAsync( () => {
-            // This account for header, footer and all inner margins
-            const contentOffset = ( parseInt( this.header?.getComputedSize().height ) ?? 0 ) +
-            ( parseInt( this.filter?.getComputedSize().height ) ?? 0 ) +
-            ( parseInt( this.footer?.getComputedSize().height ) ?? 0 );
+        const resizeObserver = new ResizeObserver( entries => {
+            const contentOffset = ( this.header?.offsetHeight ?? 0 ) +
+            ( this.filter?.offsetHeight ?? 0 ) +
+            ( this.footer?.offsetHeight ?? 0 );
             this.content.style.height = `calc(100% - ${ contentOffset }px)`;
-        }, 10 );
+        } );
+
+        resizeObserver.observe( this.root );
 
         this.items = [ ];
         this.icons = { };
@@ -10550,9 +10550,7 @@ class DatePicker extends Widget {
             container.innerHTML = "";
             const calendarIcon = LX.makeIcon( "calendar" );
             const calendarButton = new Button( null, currentDate ?? "Pick a date", () => {
-                this._popover = new Popover( calendarButton.root, ( popoverRoot ) => {
-                    popoverRoot.appendChild( this.calendar.root );
-                } );
+                this._popover = new Popover( calendarButton.root, [ this.calendar ] );
             }, { buttonClass: `flex flex-row px-3 ${ currentDate ? "" : "fg-tertiary" } justify-between` } );
 
             calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
@@ -12056,7 +12054,6 @@ class Footer {
         parent.appendChild( root );
 
         // Set always at bottom
-        root.previousElementSibling.style.height = "unset";
         root.previousElementSibling.style.flexGrow = "1";
 
         this.root = root;
@@ -13452,8 +13449,8 @@ class AssetView {
         div.className = 'lexassetbrowser';
         this.root = div;
 
-        let area = new LX.Area({height: "100%"});
-        div.appendChild(area.root);
+        let area = new LX.Area( { width: "100%", height: "100%" } );
+        div.appendChild( area.root );
 
         let left, right, contentArea = area;
 
@@ -13465,6 +13462,9 @@ class AssetView {
         this.previewActions = options.previewActions ?? [];
         this.contextMenu = options.contextMenu ?? [];
         this.onRefreshContent = options.onRefreshContent;
+
+        // Append temporarily to the dom
+        document.body.appendChild( this.root );
 
         if( !this.skipBrowser )
         {
@@ -13503,6 +13503,9 @@ class AssetView {
         {
             this.previewPanel = right.addPanel( {className: 'lexassetcontentpanel', style: { overflow: 'scroll' }} );
         }
+
+        // Clean up
+        document.body.removeChild( this.root );
     }
 
     /**
