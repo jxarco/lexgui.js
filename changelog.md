@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.5.11 (master)
+
 Widgets:
 - Form: Add more custom options. Fixed issue using a String as Form field.
 
@@ -9,7 +11,7 @@ Added `LX.makeElement` to expand support for creating other HTML types.
 Added more theme utils methods: `LX.getTheme` and `LX.switchTheme`.
 Minor css fixes.
 
-## 0.5.10 (master)
+## 0.5.10
 
 Fixed Date Calendar popover not opening.
 Fixed creation of AssetView inner areas.
