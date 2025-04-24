@@ -1374,7 +1374,7 @@ function _createCommandbar( root )
  * rootClass: Extra class to the root container
  * skipRoot: Skip adding LX root container
  * skipDefaultArea: Skip creation of main area
- * strictViewport: Use only window area (no scroll)
+ * layoutMode: Sets page layout mode (document | app)
  */
 
 function init( options = { } )
@@ -1411,10 +1411,10 @@ function init( options = { } )
         this.container = options.container.constructor === String ? document.getElementById( options.container ) : options.container;
     }
 
-    this.usingStrictViewport = options.strictViewport ?? true;
-    document.documentElement.setAttribute( "data-strictVP", ( this.usingStrictViewport ) ? "true" : "false" );
+    this.layoutMode = options.layoutMode ?? "app";
+    document.documentElement.setAttribute( "data-layout", this.layoutMode );
 
-    if( !this.usingStrictViewport )
+    if( this.layoutMode == "document" )
     {
         document.addEventListener( "scroll", e => {
             // Get all active menuboxes
@@ -1506,17 +1506,17 @@ function init( options = { } )
 LX.init = init;
 
 /**
- * @method setStrictViewport
- * @param {Boolean} value
+ * @method setLayoutMode
+ * @param {String} mode: document | app
  */
 
-function setStrictViewport( value )
+function setLayoutMode( mode )
 {
-    this.usingStrictViewport = value ?? true;
-    document.documentElement.setAttribute( "data-strictVP", ( this.usingStrictViewport ) ? "true" : "false" );
+    this.layoutMode = mode;
+    document.documentElement.setAttribute( "data-layout", this.layoutMode );
 }
 
-LX.setStrictViewport = setStrictViewport;
+LX.setLayoutMode = setLayoutMode;
 
 /**
  * @method setCommandbarState

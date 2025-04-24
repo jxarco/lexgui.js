@@ -5,7 +5,7 @@ import 'lexgui/components/audio.js';
 
 window.LX = LX;
 
-const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
+const area = LX.init( { layoutMode: "document", rootClass: "wrapper" } );
 
 
 // Menubar
@@ -26,7 +26,7 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
     menubar.addButtons( [
         {
             title: "Github",
-            icon: "Github",
+            icon: "Github@solid",
             callback:  (event) => {
                 window.open( "https://github.com/jxarco/lexgui.js/", "_blank" );
             }
@@ -96,12 +96,12 @@ const area = LX.init( { strictViewport: false, rootClass: "wrapper" } );
         menubar.addButtons( [
             {
                 title: "Play",
-                icon: "Play",
+                icon: "Play@solid",
                 swap: "Stop"
             },
             {
                 title: "Pause",
-                icon: "Pause",
+                icon: "Pause@solid",
                 disabled: true
             }
         ]);

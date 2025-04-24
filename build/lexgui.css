@@ -170,26 +170,46 @@
     background: #aaaaaa;
 }
 
+/* default app layout (editor-like) */
+
 html,
 body {
     width: 100%;
     height: 100%;
-    overflow: hidden;
-    /* no general overflow in desktop app  */
     margin: 0;
     padding: 0;
+    overflow: hidden;
     font-family: var(--global-font);
     background-color: var(--global-color-primary);
+}
+
+#lexroot {
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    outline: none;
+}
+
+/* document layout (scrolling page) */
+
+:root[data-layout="document"] #lexroot {
+    bottom: unset;
+}
+
+:root[data-layout="document"], :root[data-layout="document"] body {
+    overflow-y: auto;
 }
 
 *,
 *::before,
 *::after {
     box-sizing: border-box;
-}
-
-:root[data-strictVP="false"] {
-    overflow-y: auto;
 }
 
 blockquote, dd, dl, figure, h1, h2, h3, h4, h5, h6, hr, p, pre {
@@ -319,23 +339,6 @@ svg.xxl { width: var(--svg-size-xxl); height: var(--svg-size-xxl); }
     z-index: 99;
     opacity: 1;
     transition: opacity 0.2s ease-in;
-}
-
-#lexroot {
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 100%;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    position: absolute;
-    outline: none;
-}
-
-:root[data-strictVP="false"] #lexroot {
-    bottom: unset;
 }
 
 .leximage {
