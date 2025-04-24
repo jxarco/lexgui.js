@@ -154,8 +154,8 @@ const starterTheme = LX.getTheme();
 menubar.addButtons( [
     {
         title: "Play",
-        icon: "Play",
-        swap: "Stop",
+        icon: "Play@solid",
+        swap: "Stop@solid",
         callback:  (value, event) => {
             if( value ) console.log("play!");
             else console.log("stop!");
@@ -163,7 +163,7 @@ menubar.addButtons( [
     },
     {
         title: "Pause",
-        icon: "Pause",
+        icon: "Pause@solid",
         disabled: true,
         callback:  (value, event) => { console.log("pause!"); }
     },
@@ -182,7 +182,7 @@ menubar.addButtons( [
     }
 ]);
 
-menubar.setButtonIcon("Github", "Github", () => {window.open("https://github.com/jxarco/lexgui.js/")})
+menubar.setButtonIcon("Github", "Github@solid", () => {window.open("https://github.com/jxarco/lexgui.js/")})
 menubar.setButtonImage("lexgui.js", "images/icon.png", () => {window.open("https://jxarco.github.io/lexgui.js/")}, {float: "left"})
 
 // split main area

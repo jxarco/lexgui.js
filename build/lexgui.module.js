@@ -801,6 +801,7 @@ LX.makeKbd = makeKbd;
  * title
  * extraClass
  * svgClass
+ * variant
  * ...Any Lucide icon options
  */
 function makeIcon( iconName, options = { } )
@@ -818,6 +819,13 @@ function makeIcon( iconName, options = { } )
         icon.appendChild( svg );
         svg.dataset[ "name" ] = iconName;
         return icon;
+    }
+
+    if( iconName.includes( "@" ) )
+    {
+        const parts = iconName.split( "@" );
+        iconName = parts[ 0 ];
+        options.variant = parts[ 1 ];
     }
 
     let data = LX.ICONS[ iconName ];
@@ -860,7 +868,7 @@ function makeIcon( iconName, options = { } )
             path.setAttribute( "d",  data[ 4 ] );
             svg.appendChild( path );
 
-            if( data[ 6 ] )
+            if( data[ 5 ] )
             {
                 const classes = data[ 5 ].pathClass;
                 classes?.split( ' ' ).forEach( c => {
