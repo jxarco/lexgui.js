@@ -980,7 +980,7 @@ function createLoginForm() {
 
         panel.addForm("Test form", formData, (value, event) => {
             console.log(value);
-        }, { actionName: "Login" });
+        }, { skipLabels: false, primaryActionName: "Login", secondaryActionName: "Sign Up", secondaryActionCallback: () => { console.log("Signed up") } });
 
         panel.addLabel( "Or", { float: 'center' } );
 

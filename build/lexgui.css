@@ -1399,7 +1399,10 @@ a svg, svg path {
 
 .lexwidget .lextext.formlabel {
     margin-left: 8px;
-    margin-bottom: -12px;
+    margin-bottom: -6px;
+    font-weight: 500;
+    padding: 0;
+    font-size: var(--global-font-size-sm);
 }
 
 .lexwidget .lextext.outline {
