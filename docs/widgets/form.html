@@ -25,7 +25,12 @@
         ["callback", "Function", "Function called on submit form"],
         ["options", "Object", "Basic options for a Widget"],
         [
-            ["actionName", "String", "Text to be shown in the button"]
+            ["primaryActionName", "String", "Text to be shown in the primary action button ['Submit']"],
+            ["primaryButtonClass", "String", "Button class for primary action button ['contrast']"],
+            ["secondaryActionName", "String", "Text to be shown in the secondary action button ['Cancel']"],
+            ["secondaryActionCallback", "Function", "Callback function on press secondary button"],
+            ["secondaryButtonClass", "String", "Button class for secondary action button ['primary']"],
+            ["skipLabels", "Boolean", "Do not show input field labels [false]"]
         ]
     ]);
     MAKE_CODE(`@const@ formData = { username: @""@, password: { value: @""@, type: @"password"@ } };

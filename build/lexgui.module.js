@@ -7292,12 +7292,17 @@ class Form extends Widget {
             if( entryData.constructor != Object )
             {
                 entryData = { };
+                data[ entry ] = entryData;
             }
 
             entryData.placeholder = entryData.placeholder ?? entry;
             entryData.width = "100%";
 
-            // this.addLabel( entry, { textClass: "formlabel" } );
+            if( !( options.skipLabels ?? false ) )
+            {
+                const label = new TextInput( null, entry, null, { disabled: true, inputClass: "formlabel nobg" } );
+                container.appendChild( label.root );
+            }
 
             entryData.textWidget = new TextInput( null, entryData.constructor == Object ? entryData.value : entryData, ( value ) => {
                 container.formData[ entry ] = value;
@@ -7307,9 +7312,21 @@ class Form extends Widget {
             container.formData[ entry ] = entryData.constructor == Object ? entryData.value : entryData;
         }
 
-        container.appendChild( new Blank().root );
+        const buttonContainer = LX.makeContainer( ["100%", "auto"], "flex flex-row", "", container );
 
-        const submitButton = new Button( null, options.actionName ?? "Submit", ( value, event ) => {
+        if( options.secondaryActionName || options.secondaryActionCallback )
+        {
+            const secondaryButton = new Button( null, options.secondaryActionName ?? "Cancel", ( value, event ) => {
+                if( callback )
+                {
+                    callback( container.formData, event );
+                }
+            }, { width: "100%", minWidth: "0", buttonClass: options.secondaryButtonClass ?? "primary" } );
+
+            buttonContainer.appendChild( secondaryButton.root );
+        }
+
+        const primaryButton = new Button( null, options.primaryActionName ?? "Submit", ( value, event ) => {
 
             for( let entry in data )
             {
@@ -7325,9 +7342,9 @@ class Form extends Widget {
             {
                 callback( container.formData, event );
             }
-        }, { buttonClass: "primary" } );
+        }, { width: "100%", minWidth: "0", buttonClass: options.primaryButtonClass ?? "contrast" } );
 
-        container.appendChild( submitButton.root );
+        buttonContainer.appendChild( primaryButton.root );
     }
 }
 
@@ -11257,7 +11274,12 @@ class Panel {
      * @param {Object} data Form data
      * @param {Function} callback Callback function on submit form
      * @param {Object} options:
-     * actionName: Text to be shown in the button
+     * primaryActionName: Text to be shown in the primary action button ['Submit']
+     * primaryButtonClass: Button class for primary action button ['contrast']
+     * secondaryActionName: Text to be shown in the secondary action button ['Cancel']
+     * secondaryActionCallback: Callback function on press secondary button
+     * secondaryButtonClass: Button class for secondary action button ['primary']
+     * skipLabels: Do not show input field labels [false]
      */
 
     addForm( name, data, callback, options = {} ) {

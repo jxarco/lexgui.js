@@ -2,6 +2,9 @@
 
 ## dev
 
+Widgets:
+- Form: Add more custom options. Fixed issue using a String as Form field.
+
 Added `LX.makeElement` to expand support for creating other HTML types.
 Added more theme utils methods: `LX.getTheme` and `LX.switchTheme`.
 Minor css fixes.
