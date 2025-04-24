@@ -1170,35 +1170,31 @@ function _createCommandbar( root )
         }
     });
 
-    const header = document.createElement( "div" );
-    header.className = "gs-header";
+    const header = LX.makeContainer( ["100%", "auto"], "flex flex-row" );
 
-    const icon = LX.makeIcon( "Search" )
-    header.appendChild( icon );
-
-    const input = document.createElement("input");
-    input.placeholder = "Search...";
-    input.value = "";
-    header.appendChild( input );
+    const filter = new TextInput( null, "", (v) => {
+        commandbar._addElements( v.toLowerCase() );
+    }, { width: "100%", icon: "Search", trigger: "input", placeholder: "Search..." } );
+    header.appendChild( filter.root );
 
     const tabArea = new Area( {
         width: "100%",
         skipAppend: true,
-        className: "gs-tabs"
+        className: "cb-tabs"
     } );
 
-    const gsTabs = tabArea.addTabs( { parentClass: "p-2" } );
-    let gsFilter = null;
+    const cbTabs = tabArea.addTabs( { parentClass: "p-2" } );
+    let cbFilter = null;
 
     // These tabs will serve as buttons by now
     // Filter stuff depending of the type of search
     {
         const _onSelectTab = ( e, tabName ) => {
-            gsFilter = tabName;
+            cbFilter = tabName;
         }
 
-        gsTabs.add( "All", document.createElement('div'), { selected: true, onSelect: _onSelectTab } );
-        // gsTabs.add( "Main", document.createElement('div'), { onSelect: _onSelectTab } );
+        cbTabs.add( "All", document.createElement('div'), { selected: true, onSelect: _onSelectTab } );
+        // cbTabs.add( "Main", document.createElement('div'), { onSelect: _onSelectTab } );
     }
 
     const itemContainer = document.createElement("div");
@@ -1206,11 +1202,14 @@ function _createCommandbar( root )
 
     let refPrevious = null;
 
-    const _resetBar = (reset_input) => {
+    const _resetBar = resetInput => {
         itemContainer.innerHTML = "";
         allItems.length = 0;
         hoverElId = null;
-        if(reset_input) input.value = "";
+        if( resetInput )
+        {
+            filter.set( "", true );
+        }
     }
 
     const _addElement = ( t, c, p, i ) => {
@@ -1224,7 +1223,15 @@ function _createCommandbar( root )
 
         let searchItem = document.createElement("div");
         searchItem.className = "searchitem last";
-        searchItem.innerHTML = ( p + t );
+        if( i?.checked !== undefined )
+        {
+            const iconHtml = i.checked ? LX.makeIcon( "Check" ).innerHTML : "";
+            searchItem.innerHTML = iconHtml + ( p + t );
+        }
+        else
+        {
+            searchItem.innerHTML = ( p + t );
+        }
         searchItem.callback = c;
         searchItem.item = i;
 
@@ -1277,7 +1284,8 @@ function _createCommandbar( root )
             return;
         }
 
-        path += name + " > ";
+        const icon = LX.makeIcon( "ChevronRight", { svgClass: "sm fg-secondary separator" } );
+        path += name + icon.innerHTML;
 
         for( let c of submenu )
         {
@@ -1326,19 +1334,9 @@ function _createCommandbar( root )
             {
                 const key = "Language: " + l;
                 const icon = instances[ 0 ]._getFileIcon( null, languages[ l ].ext );
-                let value = null;
+                const classes = icon.split( ' ' );
 
-                if( !icon.includes( '.' ) ) // Not a file
-                {
-                    const classes = icon.split( ' ' );
-                    value = LX.makeIcon( classes[ 0 ], { svgClass: `${ classes.slice( 0 ).join( ' ' ) }` } ).innerHTML;
-                }
-                else // an image..
-                {
-                    const rootPath = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/";
-                    value = "<img src='" + ( rootPath + icon ) + "'>";
-                }
-
+                let value = LX.makeIcon( classes[ 0 ], { svgClass: `${ classes.slice( 0 ).join( ' ' ) }` } ).innerHTML;
                 value += key + " <span class='lang-ext'>(" + languages[ l ].ext + ")</span>";
 
                 if( key.toLowerCase().includes( filter ) )
@@ -1353,10 +1351,6 @@ function _createCommandbar( root )
             }
         }
     }
-
-    input.addEventListener('input', function( e ) {
-        commandbar._addElements( this.value.toLowerCase() );
-    });
 
     commandbar.appendChild( header );
     commandbar.appendChild( tabArea.root );
@@ -1425,8 +1419,6 @@ function init( options = { } )
         } );
     }
 
-    this.commandbar = _createCommandbar( this.container );
-
     this.container.appendChild( modal );
 
     if( !options.skipRoot )
@@ -1485,6 +1477,7 @@ function init( options = { } )
     this.ready = true;
     this.menubars = [ ];
     this.sidebars = [ ];
+    this.commandbar = _createCommandbar( this.container );
 
     if( !options.skipRoot && !options.skipDefaultArea )
     {
