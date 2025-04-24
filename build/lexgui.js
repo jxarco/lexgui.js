@@ -12,7 +12,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 var LX = {
-    version: "0.5.10",
+    version: "0.5.11",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -209,6 +209,29 @@ function setTheme( colorScheme )
 }
 
 LX.setTheme = setTheme;
+
+/**
+ * @method getTheme
+ * @description Gets either "dark" or "light" theme value
+ */
+function getTheme()
+{
+    return document.documentElement.getAttribute( "data-theme" ) ?? "dark";
+}
+
+LX.getTheme = getTheme;
+
+/**
+ * @method switchTheme
+ * @description Toggles between "dark" and "light" themes
+ */
+function switchTheme()
+{
+    const currentTheme = getTheme();
+    setTheme( currentTheme == "dark" ? "light" : "dark" );
+}
+
+LX.switchTheme = switchTheme;
 
 /**
  * @method setThemeColor
@@ -1708,6 +1731,39 @@ function badge( text, className, options = {} )
 LX.badge = badge;
 
 /**
+ * @method makeElement
+ * @param {String} htmlType
+ * @param {String} className
+ * @param {String} innerHTML
+ * @param {HTMLElement} parent
+ * @param {Object} overrideStyle
+ */
+
+function makeElement( htmlType, className, innerHTML, parent, overrideStyle = {} )
+{
+    const element = document.createElement( htmlType );
+    element.className = className ?? ""
+    element.innerHTML = innerHTML ?? "";
+    Object.assign( element.style, overrideStyle );
+
+    if( parent )
+    {
+        if( parent.attach ) // Use attach method if possible
+        {
+            parent.attach( element );
+        }
+        else // its a native HTMLElement
+        {
+            parent.appendChild( element );
+        }
+    }
+
+    return element;
+}
+
+LX.makeElement = makeElement;
+
+/**
  * @method makeContainer
  * @param {Array} size
  * @param {String} className
@@ -1718,25 +1774,9 @@ LX.badge = badge;
 
 function makeContainer( size, className, innerHTML, parent, overrideStyle = {} )
 {
-    const container = document.createElement( "div" );
-    container.className = "lexcontainer " + ( className ?? "" );
-    container.innerHTML = innerHTML ?? "";
+    const container = LX.makeElement( "div", "lexcontainer " + ( className ?? "" ), innerHTML, parent, overrideStyle );
     container.style.width = size && size[ 0 ] ? size[ 0 ] : "100%";
     container.style.height = size && size[ 1 ] ? size[ 1 ] : "100%";
-    Object.assign( container.style, overrideStyle );
-
-    if( parent )
-    {
-        if( parent.attach ) // Use attach method if possible
-        {
-            parent.attach( container );
-        }
-        else // its a native HTMLElement
-        {
-            parent.appendChild( container );
-        }
-    }
-
     return container;
 }
 
@@ -7258,12 +7298,17 @@ class Form extends Widget {
             if( entryData.constructor != Object )
             {
                 entryData = { };
+                data[ entry ] = entryData;
             }
 
             entryData.placeholder = entryData.placeholder ?? entry;
             entryData.width = "100%";
 
-            // this.addLabel( entry, { textClass: "formlabel" } );
+            if( !( options.skipLabels ?? false ) )
+            {
+                const label = new TextInput( null, entry, null, { disabled: true, inputClass: "formlabel nobg" } );
+                container.appendChild( label.root );
+            }
 
             entryData.textWidget = new TextInput( null, entryData.constructor == Object ? entryData.value : entryData, ( value ) => {
                 container.formData[ entry ] = value;
@@ -7273,9 +7318,21 @@ class Form extends Widget {
             container.formData[ entry ] = entryData.constructor == Object ? entryData.value : entryData;
         }
 
-        container.appendChild( new Blank().root );
+        const buttonContainer = LX.makeContainer( ["100%", "auto"], "flex flex-row", "", container );
 
-        const submitButton = new Button( null, options.actionName ?? "Submit", ( value, event ) => {
+        if( options.secondaryActionName || options.secondaryActionCallback )
+        {
+            const secondaryButton = new Button( null, options.secondaryActionName ?? "Cancel", ( value, event ) => {
+                if( callback )
+                {
+                    callback( container.formData, event );
+                }
+            }, { width: "100%", minWidth: "0", buttonClass: options.secondaryButtonClass ?? "primary" } );
+
+            buttonContainer.appendChild( secondaryButton.root );
+        }
+
+        const primaryButton = new Button( null, options.primaryActionName ?? "Submit", ( value, event ) => {
 
             for( let entry in data )
             {
@@ -7291,9 +7348,9 @@ class Form extends Widget {
             {
                 callback( container.formData, event );
             }
-        }, { buttonClass: "primary" } );
+        }, { width: "100%", minWidth: "0", buttonClass: options.primaryButtonClass ?? "contrast" } );
 
-        container.appendChild( submitButton.root );
+        buttonContainer.appendChild( primaryButton.root );
     }
 }
 
@@ -11223,7 +11280,12 @@ class Panel {
      * @param {Object} data Form data
      * @param {Function} callback Callback function on submit form
      * @param {Object} options:
-     * actionName: Text to be shown in the button
+     * primaryActionName: Text to be shown in the primary action button ['Submit']
+     * primaryButtonClass: Button class for primary action button ['contrast']
+     * secondaryActionName: Text to be shown in the secondary action button ['Cancel']
+     * secondaryActionCallback: Callback function on press secondary button
+     * secondaryButtonClass: Button class for secondary action button ['primary']
+     * skipLabels: Do not show input field labels [false]
      */
 
     addForm( name, data, callback, options = {} ) {
