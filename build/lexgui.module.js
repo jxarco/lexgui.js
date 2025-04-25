@@ -8386,6 +8386,8 @@ class ColorInput extends Widget {
 
     constructor( name, value, callback, options = {} ) {
 
+        value = value ?? "#000000";
+
         const useAlpha = options.useAlpha ??
             ( ( value.constructor === Object && 'a' in value ) || ( value.constructor === String && [ 5, 9 ].includes( value.length ) ) );
 
@@ -10112,8 +10114,8 @@ class Table extends Widget {
                     }
 
                     const menuOptions = [
-                        { name: "Asc", icon: "up", callback: sortFn.bind( this, idx, 1 ) },
-                        { name: "Desc", icon: "down", callback: sortFn.bind( this, idx, -1 ) }
+                        { name: "Asc", icon: "ArrowUpAZ", callback: sortFn.bind( this, idx, 1 ) },
+                        { name: "Desc", icon: "ArrowDownAZ", callback: sortFn.bind( this, idx, -1 ) }
                     ];
 
                     if( this.toggleColumns )
@@ -10121,7 +10123,7 @@ class Table extends Widget {
                         menuOptions.push(
                             null,
                             {
-                                name: "Hide", icon: "eye-slash", callback: () => {
+                                name: "Hide", icon: "EyeOff", callback: () => {
                                     data.colVisibilityMap[ idx ] = false;
                                     const cells = table.querySelectorAll(`tr > *:nth-child(${idx + this.rowOffsetCount + 1})`);
                                     cells.forEach(cell => {
