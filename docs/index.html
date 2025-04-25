@@ -74,7 +74,7 @@
         });
 
         // Init library and get main area
-        let area = LX.init();
+        let area = LX.init( { rootClass: "wrapper" } );
 
         if( false )
         {
@@ -117,55 +117,51 @@
                 m.add( "Instancing panels", { callback: open.bind( this, "instancing-panels.html", null ) } );
                 m.add( "Branching", { callback: open.bind( this, "branching.html", null ) } );
                 m.add( "Adding the First Widget", { callback: open.bind( this, "first-widget.html", null ) } );
-                m.add( "Widget List" );
-
-                const supportedWidgets = [
-                    "Button",
-                    "Checkbox",
-                    "Color",
-                    "Combo Buttons",
-                    "Curve",
-                    "Custom",
-                    "Data Tree",
-                    "Date Picker",
-                    "File",
-                    "Form",
-                    "Input OTP",
-                    "Item Array",
-                    "Layers",
-                    "List",
-                    "Number",
-                    "Pad",
-                    "Progress",
-                    "Radio Group",
-                    "Range",
-                    "Select",
-                    "Size",
-                    "Tab Sections",
-                    "Table",
-                    "Tags",
-                    "Text",
-                    "Text Area",
-                    "Title",
-                    "Toggle",
-                    "Vector",
-                    "Other Widgets"
-                ];
-
-                for( const w of supportedWidgets )
-                {
-                    const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
-                    m.add( "Widget List/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );
-
-                    LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
-                }
-
                 m.add( "Dialog", { callback: open.bind( this, "dialog.html", null ) } );
                 m.add( "Notifications", { callback: open.bind( this, "notifications.html", null ) } );
                 m.add( "Context Menus", { callback: open.bind( this, "context-menu.html", null ) } );
                 m.add( "Event Handling", { callback: open.bind( this, "event-handling.html", null ) } );
                 m.add( "Theme Customization", { callback: open.bind( this, "themes.html", null ) } );
                 m.add( "Icons", { callback: open.bind( this, "icons.html", null ) } );
+                m.separator();
+                m.group( "Widgets" );
+
+                m.add( "Buttons and Toggles" );
+                for( const w of [ "Button", "Checkbox", "Combo Buttons", "Radio Group", "Toggle" ] )
+                {
+                    const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
+                    m.add( "Buttons and Toggles/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );
+
+                    LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
+                }
+
+                m.add( "Data Inputs" );
+                for( const w of [ "Color", "Curve", "Date Picker", "File", "Input OTP", "Item Array", "Layers", "Number", "Pad", "Range", "Select", "Size", "Tags", "Text", "Text Area", "Vector" ] )
+                {
+                    const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
+                    m.add( "Data Inputs/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );
+
+                    LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
+                }
+
+                m.add( "Layout and Structure" );
+                for( const w of [ "Tab Sections", "Form", "Title", "List", "Table", "Data Tree" ] )
+                {
+                    const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
+                    m.add( "Layout and Structure/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );
+
+                    LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
+                }
+
+                m.add( "Misc" );
+                for( const w of [ "Custom", "Progress", "Other Widgets" ] )
+                {
+                    const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
+                    m.add( "Misc/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );
+
+                    LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
+                }
+
                 m.separator();
                 m.group( "Components" );
                 m.add( "Code Editor", { callback: open.bind( this, "components/code-editor.html", null ) } );
@@ -174,13 +170,13 @@
                 m.add( "Video Editor", { callback: open.bind( this, "components/video-editor.html", null ) } );
                 m.separator();
                 m.group( "API Reference" );
-                m.add( "Area ", { callback: open.bind( this, "reference/area.html", null ) } );
-                m.add( "Branch ", { callback: open.bind( this, "reference/branch.html", null ) } );
-                m.add( "Menubar ", { callback: open.bind( this, "reference/menubar.html", null ) } );
-                m.add( "Panel ", { callback: open.bind( this, "reference/panel.html", null ) } );
-                m.add( "Sidebar ", { callback: open.bind( this, "reference/sidebar.html", null ) } );
-                m.add( "Tabs ", { callback: open.bind( this, "reference/tabs.html", null ) } );
-                m.add( "Widget ", { callback: open.bind( this, "reference/widget.html", null ) } );
+                m.add( "Area", { callback: open.bind( this, "reference/area.html", null ) } );
+                m.add( "Branch", { callback: open.bind( this, "reference/branch.html", null ) } );
+                m.add( "Menubar", { callback: open.bind( this, "reference/menubar.html", null ) } );
+                m.add( "Panel", { callback: open.bind( this, "reference/panel.html", null ) } );
+                m.add( "Sidebar", { callback: open.bind( this, "reference/sidebar.html", null ) } );
+                m.add( "Tabs", { callback: open.bind( this, "reference/tabs.html", null ) } );
+                m.add( "Widget", { callback: open.bind( this, "reference/widget.html", null ) } );
                 m.separator();
                 m.add( "LexGUI Examples", { icon: "Monitor", callback: open.bind( this, "../examples/", "_blank" ) } );
                 m.add( "Source Code", { icon: "Code", callback: open.bind( this, "https://github.com/jxarco/lexgui.js/", "_blank" ) } );
