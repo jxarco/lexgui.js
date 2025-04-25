@@ -5,28 +5,51 @@
     const content = document.getElementById('content');
 
     // Layers
-    MAKE_HEADER("Layers", "h1", "layers");
+    MAKE_HEADER("Layers.", "h1", "layers");
     MAKE_PARAGRAPH(`Represents Bit Layers. Enables 
     you to work with binary data and manipulate individual bits to set bit masks.` );
 
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
+        panel.branch("Layers");
         panel.addLayers("Layer name", 10, (value, event) => {
             console.log(value);
         });
         content.appendChild(area.root);
     }
 
-    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addLayers(name, value, callback)")} to add a Layers Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["value", "Number", "Mask value (decimal) that will be decomposed into bits"],
-        ["callback", "Function", "Function called when bit mask changes"],
-        ["options", "Object", "Basic options for a Widget"]
-    ]);
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["value", "Number", "Mask value (decimal) that will be decomposed into bits", "—"],
+                ["callback", "Function", "Function called when bit mask changes", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        // panel.addBlank( null, "24px" );
+        // panel.addTable( null, {
+        //     head: [ "Option", "Type", "Description", "Default" ],
+        //     body: [
+                
+        //     ].map( v => {
+        //         return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+        //     } )
+        // }, {});
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addLayers(name, value, callback, options)")} to add a Layers Widget to your panel:`);
     MAKE_CODE(`panel.@[mtd]addLayers@(@"Layer name"@, @10@, (value, event) => {
     console.@[mtd]log@(value);
 });` );
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.Layers(name, value, callback, options)")} and append its root to any container.` );
 
 </script>

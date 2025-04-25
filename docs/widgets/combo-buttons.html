@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Represents multiple inlined ${ INLINE_PAGE( "buttons", "widgets/button.html" ) } as selectable options.`);
 
     {
-        const area = new LX.Area( { skipAppend: true, width: "75%", height: "auto", className: "self-center mt-4" } );
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.branch("Combo Buttons");
         panel.addComboButtons("Alignment", [
@@ -38,7 +38,7 @@
     }
 
     {
-        const area = new LX.Area( { skipAppend: true, height: "auto", className: "my-6" } );
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
         const panel = area.addPanel();
         content.appendChild( area.root );
 
@@ -56,7 +56,7 @@
         panel.addTable( null, {
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
-                ["float", "String", "Justify content (left|center|right)", "center"],
+                ["float", "<span class='cursor-pointer' title='left | center | right'>Enum</span>", "Justify content", `"center"`],
                 ["noSelection", "Boolean", "Buttons can be clicked, but they are not selectable", "false"],
                 ["toggle", "Boolean", "Buttons can be toggled insted of selecting only one", "false"]
             ].map( v => {

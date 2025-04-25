@@ -5,12 +5,13 @@
     const content = document.getElementById('content');
 
     // Form
-    MAKE_HEADER("Form", "h1", "form");
+    MAKE_HEADER("Form.", "h1", "form");
     MAKE_PARAGRAPH(`Represents a form structure with different fields and a submit button.`);
 
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
+        panel.branch("Form");
         const formData = { username: "", password: { value: "", type: "password" } };
         panel.addForm("Test form", formData, (value, event) => {
             console.log(value);
@@ -18,24 +19,43 @@
         content.appendChild(area.root);
     }
 
-    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addForm(name, value, callback, options)")} to add a Form Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["data", "Object", "Form data"],
-        ["callback", "Function", "Function called on submit form"],
-        ["options", "Object", "Basic options for a Widget"],
-        [
-            ["primaryActionName", "String", "Text to be shown in the primary action button ['Submit']"],
-            ["primaryButtonClass", "String", "Button class for primary action button ['contrast']"],
-            ["secondaryActionName", "String", "Text to be shown in the secondary action button ['Cancel']"],
-            ["secondaryActionCallback", "Function", "Callback function on press secondary button"],
-            ["secondaryButtonClass", "String", "Button class for secondary action button ['primary']"],
-            ["skipLabels", "Boolean", "Do not show input field labels [false]"]
-        ]
-    ]);
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["data", "Object", "Form data", "—"],
+                ["callback", "Function", "Function called on submit form", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "24px" );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["primaryActionName", "String", "Text to be shown in the primary action button", `"Submit"`],
+                ["primaryButtonClass", "String", "Button class for primary action button", `"contrast"`],
+                ["secondaryActionName", "String", "Text to be shown in the secondary action button", `"Cancel"`],
+                ["secondaryActionCallback", "Function", "Text to show in native Element title", "—"],
+                ["secondaryButtonClass", "String", "Button class for secondary action button", `"primary"`],
+                ["skipLabels", "Boolean", "Do not show input field labels", "false"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addForm(name, data, callback, options)")} to add a Form Widget to your panel:`);
     MAKE_CODE(`@const@ formData = { username: @""@, password: { value: @""@, type: @"password"@ } };
 panel.@[mtd]addForm@(@"Test form"@, formData, (value, event) => {
     console.@[mtd]log@(value);
 }, { actionName: @"Login"@ });` );
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.Button(name, data, callback, options)")} and append its root to any container.` );
 
 </script>

@@ -5,33 +5,51 @@
     const content = document.getElementById('content');
 
     // Select
-    MAKE_HEADER("Select", "h1", "select");
+    MAKE_HEADER("Select.", "h1", "select");
     MAKE_PARAGRAPH(`Represents a list of options for the user to pick from, triggered by a button.`);
 
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
+        panel.branch("Select");
         panel.addSelect("String Select", ["Option 1", "Option 2", "Option 3"], "Option 1", (value, event) => {
             console.log(value);
         });
         content.appendChild(area.root);
     }
 
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["values", "Array", "Select options (String, images/GIFs). For media, entries must be { value, src }", "—"],
+                ["value", "String", "Current selected value from the available options", "—"],
+                ["callback", "Function", "Function called when an option is selected", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "24px" );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["disabled", "Boolean", "Make the widget disabled", "false"],
+                ["filter", "Boolean", "Specify if search bar is needed", "false"],
+                ["placeholder", "String", "Placeholder for the filter input", "—"],
+                ["emptyMsg", "String", "Custom message to show when no filtered results", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
     MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addSelect(name, values, value, callback, options)")} to add a Select Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["values", "Array", "Array of the values of the list. The values can be strings or media (images or GIFs). For the media, the entries of the array must be an object containing a <code class='inline'>value</code> and <code class='inline'>src</code> fields"],
-        ["value", "String", "Current selected value from the select list"],
-        ["callback", "Function", "Function called when an list value is selected"],
-        ["options", "Object", "Basic options for a Widget"],
-        [
-            ["filter", "Boolean", "Specify if search bar is needed"],
-            ["disabled", "Boolean", "Make the widget disabled"],
-            ["skipReset", "Boolean", "Don't add the reset value button when value changes"],
-            ["placeholder", "String", "Placeholder for the filter input"],
-            ["emptyMsg", "String", "Custom message to show when no filtered results"]
-        ]
-    ]);
     MAKE_CODE(`@[com]// String values@
 
 panel.@[mtd]addSelect@(@"String Select"@, [@"Option 1"@, @"Option 2"@], @"Option 1"@, (value, event) =&gt; {
@@ -48,5 +66,6 @@ panel.@[mtd]addSelect@(@"String Select"@, [@"Option 1"@, @"Option 2"@], @"Option
 panel.@[mtd]addSelect@(@"Media Select"@, options, @"Option 1"@, (value, event) =&gt; {
       console.@[mtd]log@(value);
 }, options);` );
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.Select(name, values, value, callback, options)")} and append its root to any container.` );
 
 </script>

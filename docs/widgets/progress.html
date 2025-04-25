@@ -5,12 +5,13 @@
     const content = document.getElementById('content');
 
     // Progress
-    MAKE_HEADER("Progress", "h1", "progress");
+    MAKE_HEADER("Progress.", "h1", "progress");
     MAKE_PARAGRAPH(`Represents an indicator showing the completion progress of a task, displayed as a progress bar.`);
 
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
+        panel.branch("Progress");
         panel.addProgress("HeadRoll", 0, {
             min: -1,
             max: 1,
@@ -23,22 +24,40 @@
         content.appendChild(area.root);
     }
 
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["value", "Number", "Progress value", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "24px" );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["editable", "Boolean", "Allow to edit value manually", "false"],
+                ["callback", "Function", "If editable, function called when progress changes", "—"],
+                ["showValue", "Boolean", "Show current value", "false"],
+                ["min", "Number", "Min progress value", "0"],
+                ["max", "Number", "Max progress value", "1"],
+                ["low", "Number", "Low boundary value", "—"],
+                ["optimum", "Number", "Optimum value in the range", "—"],
+                ["high", "Number", "High boundary value", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
     MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addProgress(name, value, options)")} to add a Progress Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["value", "Number", "Progress value"],
-        ["options", "Object", "Basic options for a Widget"],
-        [
-            ["editable", "Boolean", "Allow to edit value manually [false]"],
-            ["callback", "Function", "If editable, function called when progress changes"],
-            ["showValue", "Boolean", "Show current value [false]"],
-            ["min", "Number", "Min progress value"],
-            ["max", "Number", "Max progress value"],
-            ["low", "Number", "Low boundary value"],
-            ["optimum", "Number", "Optimum value in the range"],
-            ["high", "Number", "High boundary value"],
-        ]
-    ]);
     MAKE_CODE(`panel.@[mtd]addProgress@(@"HeadRoll"@, @0@, { 
     min: -@1@, 
     max: @1@, 
@@ -48,5 +67,5 @@
         console.@[mtd]log@(value);
     }
 });` );
-
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.Progress(name, value, options)")} and append its root to any container.` );
 </script>

@@ -7444,24 +7444,24 @@ class Select extends Widget {
         list.className = "lexoptions";
         listDialog.appendChild( list )
 
-        // list.addEventListener( 'focusout', function( e ) {
-        //     e.stopPropagation();
-        //     e.stopImmediatePropagation();
-        //     if( e.relatedTarget === selectedOption.root.querySelector( 'button' ) )
-        //     {
-        //         this.unfocus_event = true;
-        //         setTimeout( () => delete this.unfocus_event, 200 );
-        //     }
-        //     else if ( e.relatedTarget && ( e.relatedTarget.tagName == "INPUT" || e.relatedTarget.classList.contains("lexoptions") ) )
-        //     {
-        //         return;
-        //     }
-        //     else if ( e.target.className == 'lexinput-filter' )
-        //     {
-        //         return;
-        //     }
-        //     listDialog.close();
-        // });
+        list.addEventListener( 'focusout', function( e ) {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            if( e.relatedTarget === selectedOption.root.querySelector( 'button' ) )
+            {
+                this.unfocus_event = true;
+                setTimeout( () => delete this.unfocus_event, 200 );
+            }
+            else if ( e.relatedTarget && ( e.relatedTarget.tagName == "INPUT" || e.relatedTarget.classList.contains("lexoptions") ) )
+            {
+                return;
+            }
+            else if ( e.target.className == 'lexinput-filter' )
+            {
+                return;
+            }
+            listDialog.close();
+        });
 
         // Add filter options
         let filter = null;
@@ -9527,7 +9527,7 @@ class Progress extends Widget {
             container.appendChild( span );
         }
 
-        if( options.editable )
+        if( options.editable ?? false )
         {
             progress.classList.add( "editable" );
 

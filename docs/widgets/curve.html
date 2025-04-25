@@ -5,7 +5,7 @@
     const content = document.getElementById('content');
 
     // Curve
-    MAKE_HEADER("Curve", "h1", "curve");
+    MAKE_HEADER("Curve.", "h1", "curve");
     MAKE_PARAGRAPH(`Represents a simple Curve Editor. It's a versatile component designed to simplify the manipulation and visualization
 of curves or graphs, ideal for any scenario where the smooth interpolation of values over time
 or other parameters is essential.` );
@@ -13,6 +13,7 @@ or other parameters is essential.` );
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
+        panel.branch("Curve");
         const opacityValues = [
             [0.2, 0.35],
             [0.42, 0.9],
@@ -25,22 +26,40 @@ or other parameters is essential.` );
         content.appendChild(area.root);
     }
 
-    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addCurve(name, values, callback)")} to add a Curve Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["values", "Array", "Values of the curve to be interpolated"],
-        ["options", "Object", "Basic options for a Widget"],
-        [
-            ["skipReset", "Boolean", "Don't add the reset value button when value changes"],
-            ["bgColor (Color)", "Widget background color"],
-            ["pointsColor (Color)", "Curve points color"],
-            ["lineColor (Color)", "Curve line color"],
-            ["noOverlap", "Boolean", "Points do not overlap, replacing themselves if necessary"],
-            ["allowAddValues", "Boolean", "Support adding values on click"],
-            ["smooth", "Number", "Curve smoothness"],
-            ["moveOutAction", "Number", "Clamp or delete points moved out of the curve (LX.CURVE_MOVEOUT_CLAMP, LX.CURVE_MOVEOUT_DELETE)"],
-        ]
-    ]);
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["values", "Array", "Values of the curve to be interpolated", "—"],
+                ["callback", "Function", "Function to be called when the curve changes", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "24px" );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["bgColor", "String", "Curve background color", "root:global-intense-background"],
+                ["pointsColor", "String", "Curve points color", "root:global-color-accent"],
+                ["lineColor", "String", "Curve line color", `"#555"`],
+                ["noOverlap", "Boolean", "Points do not overlap, replacing themselves if necessary", "false"],
+                ["allowAddValues", "Boolean", "Support adding values on click", "true"],
+                ["smooth", "Number", "Curve smoothness", "0.3"],
+                ["moveOutAction", "<span class='cursor-pointer' title='LX.CURVE_MOVEOUT_CLAMP | LX.CURVE_MOVEOUT_DELETE'>Enum</span>", "Clamp or delete points moved out of the curve", "LX.CURVE_MOVEOUT_DELETE"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addCurve(name, values, callback, options)")} to add a Curve Widget to your panel:`);
     MAKE_CODE(`@const@ opacityValues = [
     [@0.2@, @0.35@],
     [@0.42@, @0.9@],
@@ -50,5 +69,6 @@ or other parameters is essential.` );
 panel.@[mtd]addCurve@(@"Opacity"@, opacityValues, (value, event) => {
     console.@[mtd]log@(value);
 });` );
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.Curve(name, values, callback, options)")} and append its root to any container.` );
 
 </script>

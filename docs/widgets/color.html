@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Represents a color input. Allows users to select a color using a custom color picker.`);
 
     {
-        const area = new LX.Area( { skipAppend: true, width: "75%", height: "auto", className: "self-center mt-4" } );
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.branch("Color");
         panel.addColor("Font Color", { r: 1, g: 0.1, b: 0.6 }, (value, event) => {
@@ -19,7 +19,7 @@
     }
 
     {
-        const area = new LX.Area( { skipAppend: true, height: "auto", className: "my-6" } );
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
         const panel = area.addPanel();
         content.appendChild( area.root );
 
@@ -27,7 +27,7 @@
             head: [ "Parameter", "Type", "Description", "Default" ],
             body: [
                 ["name", "String", "Widget name", "—"],
-                ["value", "String|Array", "Color value in hex (&quot;#fff&quot;) or Array[r, g, b]", "#000000"],
+                ["value", "String|Array", "Color value in hex (&quot;#fff&quot;) or Array[r, g, b]", `"#000000"`],
                 ["callback", "Function", "Function called when the color changes", "—"],
                 ["options", "Object", "Basic options for a Widget", "—"]
             ].map( v => {

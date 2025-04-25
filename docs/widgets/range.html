@@ -5,38 +5,57 @@
     const content = document.getElementById('content');
 
     // Range
-    MAKE_HEADER("Range", "h1", "range");
+    MAKE_HEADER("Range.", "h1", "range");
     MAKE_PARAGRAPH(`Represents a decimal input handled by a slider.`);
 
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
+        panel.branch("Range");
         panel.addRange("Intensity Value", 25, (value, event) => {
             console.log(value);
         }, { min: 1, max: 100 });
         content.appendChild(area.root);
     }
 
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["value", "Number", "Range value", "—"],
+                ["callback", "Function", "Function called when the input changes", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "24px" );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["disabled", "Boolean", "Make the widget disabled", "false"],
+                ["className", "String", "Extra classes to customize style", "—"],
+                ["left", "Boolean", "The slider goes to the left instead of the right", "false"],
+                ["fill", "Boolean", "Fill slider progress", "true"],
+                ["step", "Number", "Step value", "1"],
+                ["min", "Number", "Min range value", "0"],
+                ["max", "Number", "Max range value", "100"],
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
     MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addRange(name, value, callback, options)")} to add a Range Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["value", "Number", "Range value"],
-        ["callback", "Function", "Function called when the input changes"],
-        ["options", "Object", "Basic options for a Widget"],
-        [
-            ["className", "String", "Extra classes to customize style"],
-            ["disabled", "Boolean", "Make the widget disabled [false]"],
-            ["left", "Boolean", "The slider goes to the left instead of the right [false]"],
-            ["fill", "Boolean", "Fill slider progress [true]"],
-            ["step", "Number", "Change Step value"],
-            ["min", "Number", "Min input value"],
-            ["max", "Number", "Max input value"]
-        ]
-    ]);
     MAKE_CODE(`panel.@[mtd]addRange@(@"Intensity Value"@, @25@, (value, event) =&gt; {
     console.@[mtd]log@(value);
 }, { min: @1@, max: @100@ });` );
     MAKE_PARAGRAPH(`In case you are using limits, store the widget and call <code class='inline'>rangeWidget.setLimits( min, max, step )</code> to change its 
         parameters once the widget has been created.` );
-
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.RangeInput(name, value, callback, options)")} and append its root to any container.` );
 </script>

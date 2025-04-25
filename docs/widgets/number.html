@@ -5,36 +5,55 @@
     const content = document.getElementById('content');
 
     // Number
-    MAKE_HEADER("Number", "h1", "number");
+    MAKE_HEADER("Number.", "h1", "number");
     MAKE_PARAGRAPH(`Represents a decimal number input.`);
 
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
+        panel.branch("Number");
         panel.addNumber("Font Size", 36, (value, event) => {
             console.log(value);
         }, { min: 1, max: 48 });
         content.appendChild(area.root);
     }
 
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["value", "Number", "Number value", "—"],
+                ["callback", "Function", "Function called when the input changes", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "24px" );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["disabled", "Boolean", "Make the widget disabled", "false"],
+                ["step", "Number|String", "Step value", `"any"`],
+                ["precision", "Number", "The number of digits to appear after the decimal point", "2"],
+                ["min", "Number", "Min input value", "-1e24"],
+                ["max", "Number", "Max input value", "1e24"],
+                ["skipSlider", "Boolean", "Skip the slider if there are min and max values", "false"],
+                ["units", "String", "Unit as string added to the end of the value", "—"],
+                ["onPress", "Function", "Callback function on mouse down", "—"],
+                ["onRelease", "Function", "Callback function on mouse up", "—"],
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
     MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addNumber(name, value, callback, options)")} to add a Number Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["value", "Number", "Number value"],
-        ["callback", "Function", "Function called when the input changes"],
-        ["options", "Object", "Basic options for a Widget"],
-        [
-            ["disabled", "Boolean", "Make the widget disabled"],
-            ["step", "Number", "Change Step value"],
-            ["precision", "Number", "The number of digits to appear after the decimal point"],
-            ["min", "Number", "Min input value"],
-            ["max", "Number", "Max input value"],
-            ["skipSlider", "Boolean", "Skip the slider if there are min and max values"],
-            ["units", "String", "Unit as string added to the end of the value"],
-            ["onPress", "Function", "Callback function on mouse down"],
-            ["onRelease", "Function", "Callback function on mouse up"]
-        ]
-    ]);
     MAKE_PARAGRAPH(`<sup>Note: Setting <code class='inline'>min</code>, <code class='inline'>max</code> values will automatically add a slider below the number input.<sup>`);
     MAKE_CODE(`panel.@[mtd]addNumber@(@"Font Size"@, @36@, (value, event) =&gt; {
     console.@[mtd]log@(value);
@@ -44,5 +63,5 @@
 
     MAKE_PARAGRAPH(`In case you are using limits, store the widget and call <code class='inline'>numberWidget.setLimits( min, max, step )</code> to change its 
         parameters once the widget has been created.` );
-
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.Number(name, value, callback, options)")} and append its root to any container.` );
 </script>

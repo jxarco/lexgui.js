@@ -5,26 +5,48 @@
     const content = document.getElementById('content');
 
     // List
-    MAKE_HEADER("List", "h1", "list");
+    MAKE_HEADER("List.", "h1", "list");
     MAKE_PARAGRAPH(`Represents a list of selectable elements.`);
 
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
+        panel.branch("List");
         panel.addList("Volley Teams", ["GPTeam", ["Blat Panthers", "PawPrint"], "Blat Bunny"], "Blat Panthers", (value, event) => {
             console.log(value);
         });
         content.appendChild(area.root);
     }
 
-    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addList(name, value, values, callback, options)")} to add a List Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["values", "Array", "List values"],
-        ["value", "*", "Selected list value"],
-        ["callback", "Function", "Function called when the a new item list is selected"],
-        ["options", "Object", "Basic options for a Widget"]
-    ]);
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["values", "Array", "List values", "—"],
+                ["value", "*", "Selected list value", "—"],
+                ["callback", "Function", "Function called when the a new item list is selected", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        // panel.addBlank( null, "24px" );
+        // panel.addTable( null, {
+        //     head: [ "Option", "Type", "Description", "Default" ],
+        //     body: [
+                
+        //     ].map( v => {
+        //         return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+        //     } )
+        // }, {});
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addList(name, values, value, callback, options)")} to add a List Widget to your panel:`);
     MAKE_CODE(`panel.@[mtd]addList@(@"List name"@, [@"GPTeam"@, @"Blat Panthers"@], @"Blat Panthers"@,  (value, event) => {
     console.@[mtd]log@(value);
 });` );
@@ -34,5 +56,6 @@
     MAKE_CODE(`panel.@[mtd]addList@(@"List name"@, [@"GPTeam"@, [@"Blat Panthers"@, @"PawPrint"@]], @"Blat Panthers"@,  (value, event) => {
     console.@[mtd]log@(value);
 });` );
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.List(name, values, value, callback, options)")} and append its root to any container.` );
 
 </script>

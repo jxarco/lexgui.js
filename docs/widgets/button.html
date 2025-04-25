@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH( `Represents a clickable element typically used to trigger an action.` );
 
     {
-        const area = new LX.Area( { skipAppend: true, width: "75%", height: "auto", className: "self-center mt-4" } );
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.branch("Button");
         panel.addButton(null, "A Button Name", (value, event) => {
@@ -22,7 +22,7 @@
     }
 
     {
-        const area = new LX.Area( { skipAppend: true, height: "auto", className: "my-6" } );
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
         const panel = area.addPanel();
         content.appendChild( area.root );
 

@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Represents a control that allows the user to toggle between checked and not checked.`);
 
     {
-        const area = new LX.Area( { skipAppend: true, width: "75%", height: "auto", className: "self-center mt-4" } );
+        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
         panel.branch("Checkbox");
         panel.addCheckbox("Check me", true, (value, event) => {
@@ -22,7 +22,7 @@
     }
 
     {
-        const area = new LX.Area( { skipAppend: true, height: "auto", className: "my-6" } );
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
         const panel = area.addPanel();
         content.appendChild( area.root );
 

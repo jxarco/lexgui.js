@@ -5,32 +5,52 @@
     const content = document.getElementById('content');
 
     // Date Picker
-    MAKE_HEADER("Date Picker", "h1", "date-picker");
+    MAKE_HEADER("Date Picker.", "h1", "date-picker");
     MAKE_PARAGRAPH(`Represents a date field that allows users to enter and edit dates.`);
 
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
+        panel.branch("Date Picker");
         panel.addDate("Event Date", "16/04/2025", ( date ) => {
             console.log(date);
-        });
+        }, {today: true});
         content.appendChild(area.root);
     }
 
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["dateString", "String", "Date in String format DD/MM/YYYY", "—"],
+                ["callback", "Function", "Function called when date changes", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "24px" );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["today", "Boolean", "Set current day as selected by default", "false"],
+                ["untilToday", "Boolean", "Allow dates only until current day", "false"],
+                ["fromToday", "Boolean", "Allow dates only from current day", "false"],
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
     MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addDate(name, dateString, callback, options)")} to add a File Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["dateString", "String", "Date in String format DD/MM/YYYY"],
-        ["callback", "Function", "Function called when date changes"],
-        ["options", "Object", "Basic options for a Widget"],
-        [
-            ["today", "Boolean", "Set current day as selected by default"],
-            ["untilToday", "Boolean", "Allow dates only until current day"],
-            ["fromToday", "Boolean", "Allow dates only from current day"]
-        ]
-    ]);
     MAKE_CODE(`panel.@[mtd]addDate@(@"Event Date"@, @"16/04/2025"@, (date) => {
     console.@[mtd]log@(date);
 });` );
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.DatePicker(name, dateString, callback, options)")} and append its root to any container.` );
 
 </script>

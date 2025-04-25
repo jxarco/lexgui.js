@@ -5,30 +5,50 @@
     const content = document.getElementById('content');
 
     // File
-    MAKE_HEADER("File", "h1", "file");
+    MAKE_HEADER("File.", "h1", "file");
     MAKE_PARAGRAPH(`Represents a local file loader.`);
 
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
+        panel.branch("File");
         panel.addFile("File name", (data, file) => {
             console.log(data, file);
         });
         content.appendChild(area.root);
     }
 
-    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addFile(name, value, callback)")} to add a File Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["callback", "Function", "Function called when file is loaded"],
-        ["options", "Object", "Basic options for a Widget"],
-        [
-            ["read", "Boolean", "Return the file itself (False) or the contents [true]"],
-            ["type", "String", "Type to read as {text, buffer, bin, url} [text]"]
-        ]
-    ]);
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["callback", "Function", "Function called when file is loaded", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "24px" );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["read", "Boolean", "Return the file itself (false) or the contents (true)", "true"],
+                ["type", "<span class='cursor-pointer' title='text | buffer | bin | url'>Enum</span>", "Expected file type", `"text"`],
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addFile(name, callback, options)")} to add a File Widget to your panel:`);
     MAKE_CODE(`panel.@[mtd]addFile@(@"File name"@, (data, file) => {
     console.@[mtd]log@(data, file);
 });` );
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.FileInput(name, callback, options)")} and append its root to any container.` );
 
 </script>

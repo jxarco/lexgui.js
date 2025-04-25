@@ -5,33 +5,52 @@
     const content = document.getElementById('content');
 
     // Radio Group
-    MAKE_HEADER("Radio Group", "h1", "radiogroup");
+    MAKE_HEADER("Radio Group.", "h1", "radiogroup");
     MAKE_PARAGRAPH(`Represents a set of checkable buttons where no more than one of the buttons can be checked at a time.`);
 
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
-        panel.addRadioGroup("View", ["Default", "Comfortable", "Compact"], (value, event) => {
+        panel.branch("Radio Group");
+        panel.addRadioGroup("View", "A Label:", ["Default", "Comfortable", "Compact"], (value, event) => {
             console.log(value);
         }, { selected: 1 });
         content.appendChild(area.root);
     }
 
-    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addRadioGroup(label, values, callback, options)")} to add a Radio Group Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["label", "String", "Radio label"],
-        ["values", "Array", "Radio options"],
-        ["callback", "Function", "Function called checks changes"],
-        ["options", "Object", "Basic options for a Widget"],
-        [
-            ["className", "String", "Extra classes to customize style"],
-            ["disabled", "Boolean", "Make the widget disabled [false]"],
-            ["selected", "Number", "Index of the default selected option"]
-        ]
-    ]);
-    MAKE_CODE(`panel.@[mtd]addRadioGroup@(@"View"@, [ @"Default"@, @"Comfortable"@, @"Compact"@ ], (value, event) => {
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["label", "String", "Radio label", "—"],
+                ["values", "Array", "Radio options", "—"],
+                ["callback", "Function", "Function called checks changes", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "24px" );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["disabled", "Boolean", "Make the widget disabled", "false"],
+                ["className", "String", "Extra classes to customize style", "—"],
+                ["selected", "Number", "Index of the default selected option", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addRadioGroup(name, label, values, callback, options)")} to add a Radio Group Widget to your panel:`);
+    MAKE_CODE(`panel.@[mtd]addRadioGroup@(@"View"@, @"A Label:"@, [ @"Default"@, @"Comfortable"@, @"Compact"@ ], (value, event) => {
     console.log(value);
 }, {} );` );
-
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.RadioGroup(name, label, values, callback, options)")} and append its root to any container.` );
 </script>

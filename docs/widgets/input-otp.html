@@ -5,33 +5,50 @@
     const content = document.getElementById('content');
 
     // Input OTP
-    MAKE_HEADER("Input OTP", "h1", "otp");
+    MAKE_HEADER("Input OTP.", "h1", "otp");
     MAKE_PARAGRAPH(`Represents a one-time password input component.`);
 
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
+        panel.branch("Input OTP");
         panel.addOTP("Auth OTP", "65x321", (value, event) => {
             console.log(value);
         });
         content.appendChild(area.root);
     }
 
-    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addSize(name, value, callback, options)")} to add a Size Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["value", "Number", "Default numeric value in string format (fill with 'x' for empty slots)"],
-        ["callback", "Function", "Function called when the input is completed or _Enter_ pressed"],
-        ["options", "Object", "Basic options for a Widget"],
-        [
-            ["disabled", "Boolean", "Make the widget disabled"],
-            ["pattern", "String", "OTP numeric pattern (Ex. 'xxxx-xxxx')"]
-        ]
-    ]);
-    MAKE_PARAGRAPH(`<sup>Note: Since a Size Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.
-            Minimum size is always 0.<sup>` );
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["value", "Number", "Default numeric value in string format (fill with 'x' for empty slots)", "—"],
+                ["callback", "Function", "Function called when the input is completed or _Enter_ pressed", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "24px" );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["disabled", "Boolean", "Make the widget disabled", "false"],
+                ["pattern", "String", "OTP numeric pattern", `"xxx-xxx"`],
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addOTP(name, value, callback, options)")} to add a Size Widget to your panel:`);
     MAKE_CODE(`panel.@[mtd]addOTP@(@"Auth OTP"@, @"65x321"@, (value, event) =&gt; {
     console.@[mtd]log@(value);
 });` );
-
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.OTPInput(name, value, callback, options)")} and append its root to any container.` );
 </script>

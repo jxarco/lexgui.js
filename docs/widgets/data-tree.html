@@ -5,7 +5,7 @@
     const content = document.getElementById('content');
 
     // Data Tree
-    MAKE_HEADER("Data Tree", "h1", "datatree");
+    MAKE_HEADER("Data Tree.", "h1", "datatree");
     MAKE_PARAGRAPH(`Represents a <strong>data hierarchy visualization Tree</strong>. Enables developers to display hierarchical data in an organized
      and visually appealing manner. This feature is especially useful when presenting data with parent-child
       relationships, such as file directories, organizational structures, family trees, and more.` );
@@ -13,6 +13,7 @@
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
+        panel.branch("Data Tree");
         // Tree data!
         const sceneData = {
             id: "root",
@@ -22,7 +23,7 @@
                     children: [
                         {
                             id: "node_1_1",
-                            icon: "Cube",
+                            icon: "Box",
                             children: [],
                             actions: [
                                 {
@@ -76,61 +77,62 @@
         content.appendChild(area.root);
     }
 
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["data", "Object", "Hierarchical data", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "24px" );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["icons", "Array", "Array of objects with button information {name, icon, callback}", "—"],
+                ["filter", "Boolean", "Adds a filter bar", "true"],
+                ["rename", "Boolean", "Allow item rename", "true"],
+                ["onevent", "Function", "Function to catch the different types of Tree events", "—"],
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
     MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addTree(name, data, options)")} to add a DataTree Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["data", "Object", "Hierarchical data"],
-        ["options", "Object", "Basic options for a Widget"],
-        [
-            ["icons", "Array", "Array of objects with button information {name, icon, callback}"],
-            ["filter", "Boolean", "Adds a filter bar [true]"],
-            ["rename", "Boolean", "Allow item rename [true]"],
-            ["onevent", "Function", "Function to catch the different types of Tree events"]
-        ]
-    ]);
     MAKE_CODE(`@[com]// Tree data!@
 @const@ sceneData = {
     id: @"root"@,
     children: [
         {
             id: @"node_1"@,
-            children: [
-                {
-                    id: @"node_1_1"@,
-                    icon: @"Cube"@,
-                    children: [],
-                    actions: [
-                        {
-                            name: @"Open script"@,
-                            icon: @"Scroll"@,
-                            callback: function(node) {
-                                console.@[mtd]log@(node.id + @": Script opened!"@)
-                            }
-                        }
-                    ]
-                }
-            ]
+            children: [{
+                id: @"node_1_1"@, icon: @"Box"@, children: [], actions: [{
+                    name: @"Open script"@,
+                    icon: @"Scroll"@,
+                    callback: function(node) {
+                        console.@[mtd]log@(node.id + @": Script opened!"@)
+                    }
+                }]
+            }]
         },
         {
-            id: @"node_2"@,
-            icon: @"CirclePlay"@,
-            children: []
+            id: @"node_2"@, icon: @"CirclePlay"@, children: []
         }
     ]
 };
     
 @[com]// This is optional!@
 @const@ dataTreeIcons = [
-    {
-        name: @"Add node"@,
-        icon: @"Plus"@,
-        callback: () => { console.@[mtd]log@(@"Node added!"@) }
-    },
-    {
-        name: @"Instantiate scene"@,
-        icon: @"Link"@,
-        callback: () => { console.@[mtd]log@(@"Scene instantiated!"@) }
-    }
+    { name: @"Add node"@, icon: @"Plus"@, callback: () => { console.@[mtd]log@(@"Node added!"@) } },
+    { name: @"Instantiate scene"@, icon: @"Link"@, callback: () => { console.@[mtd]log@(@"Scene instantiated!"@) } }
 ];
     
 panel.@[mtd]addTree@(@"Scene Tree"@, sceneData, { 
@@ -163,5 +165,6 @@ panel.@[mtd]addTree@(@"Scene Tree"@, sceneData, {
         }
     }
 });` );
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.Tree(name, data, options)")} and append its root to any container.` );
 
 </script>

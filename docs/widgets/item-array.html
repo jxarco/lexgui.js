@@ -5,30 +5,50 @@
     const content = document.getElementById('content');
 
     // Item Array
-    MAKE_HEADER("Item Array", "h1", "array");
+    MAKE_HEADER("Item Array.", "h1", "array");
     MAKE_PARAGRAPH(`Represents a array of any basic type of elements which can be modified or deleted and new ones can be added.`);
 
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
+        panel.branch("Item Array");
         panel.addArray("Array", ['GPTeam', 'Blat Panthers', 'Blat Bunny'], (value, event) => {
             console.log(value);
         });
         content.appendChild(area.root);
     }
 
-    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addArray(name, value, values, callback, options)")} to add an Array Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["values", "Array", "Array values"],
-        ["callback", "Function", "Function called when the array is modified"],
-        ["options", "Object", "Basic options for a Widget"],
-        [
-            ["innerValues", "Array", "Use dropdown mode and use values as options"],
-        ]
-    ]);
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["values", "Array", "Array values", "—"],
+                ["callback", "Function", "Function called when the array is modified", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "24px" );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["innerValues", "Array", "Use _select_ mode and use values as options", "—"],
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addArray(name, values, callback, options)")} to add an Array Widget to your panel:`);
     MAKE_CODE(`panel.@[mtd]addArray@(@"Array name"@, [@"GPTeam"@, @"Blat Panthers"@], (value, event) => {
     console.@[mtd]log@(value);
 });` );
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.ItemArray(name, values, callback, options)")} and append its root to any container.` );
 
 </script>
