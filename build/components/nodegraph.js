@@ -135,13 +135,13 @@ class GraphEditor {
             [
                 {
                     name: "Start Graph",
-                    icon: "Play",
+                    icon: "Play@solid",
                     callback: (value, event) => this.start(),
                     selectable: true
                 },
                 {
                     name: "Stop Graph",
-                    icon: "Stop",
+                    icon: "Stop@solid",
                     callback: (value, event) => this.stop(),
                     selectable: true
                 }
@@ -167,7 +167,7 @@ class GraphEditor {
                 },
                 {
                     name: "Export",
-                    icon: "CircleNodes",
+                    icon: "ArrowRightFromLine",
                     callback: (value, event) => this.currentGraph.export()
                 }
             ]
@@ -2495,15 +2495,18 @@ class GraphEditor {
             }
         }
 
-        // Add padding
+        if( group_bb )
+        {
+            // Add padding
 
-        const groupContentPadding = 8;
+            const groupContentPadding = 8;
 
-        group_bb.origin.sub( new LX.vec2( groupContentPadding ), group_bb.origin );
-        group_bb.origin.sub( new LX.vec2( groupContentPadding ), group_bb.origin );
+            group_bb.origin.sub( new LX.vec2( groupContentPadding ), group_bb.origin );
+            group_bb.origin.sub( new LX.vec2( groupContentPadding ), group_bb.origin );
 
-        group_bb.size.add( new LX.vec2( groupContentPadding * 2.0 ), group_bb.size );
-        group_bb.size.add( new LX.vec2( groupContentPadding * 2.0 ), group_bb.size );
+            group_bb.size.add( new LX.vec2( groupContentPadding * 2.0 ), group_bb.size );
+            group_bb.size.add( new LX.vec2( groupContentPadding * 2.0 ), group_bb.size );
+        }
 
         return group_bb;
     }
@@ -2517,6 +2520,11 @@ class GraphEditor {
     _createGroup( bb ) {
 
         const group_bb = bb ?? this._getBoundingFromNodes( this.selectedNodes );
+        if( !group_bb )
+        {
+            return;
+        }
+
         const group_id = bb ? bb.id : "group-" + LX.UTILS.uidGenerator();
 
         let groupDOM = document.createElement( 'div' );
@@ -2633,7 +2641,8 @@ class GraphEditor {
 
         LX.makeDraggable( groupDOM, {
             onMove: this._onMoveGroup.bind( this ),
-            onDragStart: this._onDragGroup.bind( this )
+            onDragStart: this._onDragGroup.bind( this ),
+            updateLayers: false
         } );
 
         GraphEditor.LAST_GROUP_ID++;
@@ -2725,10 +2734,10 @@ class GraphEditor {
 
     _onSidebarCreate( e ) {
 
-        LX.addContextMenu(null, e, m => {
-            m.add( "Graph", () => this.addGraph() );
-            m.add( "Function", () => this.addGraphFunction() );
-        });
+        new LX.DropdownMenu( e.target, [
+            { name: "Create Graph", icon: "Workflow", callback: () => this.addGraph() },
+            { name: "Create Function", icon: "Function", callback: () => this.addGraphFunction() },
+        ], { side: "right", align: "start" });
     }
 
     _showRenameGraphDialog() {
@@ -2757,8 +2766,7 @@ class GraphEditor {
         {
             sidebarItem.name = newNameKey;
             sidebarItem.dom.id = newNameKey;
-            // sidebarItem.dom.querySelector(".lexsidebarentrydesc").innerText = name;
-            // sidebarItem.dom.querySelector("a").innerText = name;
+            sidebarItem.dom.innerHTML = sidebarItem.dom.innerHTML.replace( sidebarItem.dom.innerText, name );
         }
 
         // Change registered nodes function

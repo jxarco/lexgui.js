@@ -5398,6 +5398,10 @@ ul.lexassetscontent {
     stroke: unset;
 }
 
+.lexgraph svg.link-svg {
+    stroke: white;
+}
+
 .lexgraph .box-selection-svg {
     stroke-width: 3px;
     stroke: var(--global-color-accent);
