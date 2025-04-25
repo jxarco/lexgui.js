@@ -499,6 +499,7 @@ LX.buildTextPattern = buildTextPattern;
  * dragMargin (Number): Margin of drag container
  * onMove (Function): Called each move event
  * onDragStart (Function): Called when drag event starts
+ * updateLayers (Function): Update Zindex of elements to update layers
  */
 function makeDraggable( domEl, options = { } )
 {
@@ -585,14 +586,17 @@ function makeDraggable( domEl, options = { } )
 
         currentTarget.eventCatched = true;
 
-        // Force active dialog to show on top
-        if( LX.activeDraggable )
+        if( options.updateLayers ?? true )
         {
-            LX.activeDraggable.style.zIndex = LX.DRAGGABLE_Z_INDEX;
-        }
+            // Force active dialog to show on top
+            if( LX.activeDraggable )
+            {
+                LX.activeDraggable.style.zIndex = LX.DRAGGABLE_Z_INDEX;
+            }
 
-        LX.activeDraggable = domEl;
-        LX.activeDraggable.style.zIndex = LX.DRAGGABLE_Z_INDEX + 1;
+            LX.activeDraggable = domEl;
+            LX.activeDraggable.style.zIndex = LX.DRAGGABLE_Z_INDEX + 1;
+        }
 
         if( onDragStart )
         {
