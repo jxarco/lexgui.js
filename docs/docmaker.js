@@ -254,10 +254,10 @@ function INLINE_PAGE( string, page )
     return `<a onclick="loadPage('` + page + `')">` + string + `</a>`;
 }
 
-function INLINE_CODE( string )
+function INLINE_CODE( string, codeClass )
 {
     console.assert(string);
-    return `<code class="inline">` + string + `</code>`;
+    return `<code class="inline ${ codeClass ?? "" }">` + string + `</code>`;
 }
 
 function COPY_SNIPPET( b )

@@ -5,33 +5,53 @@
     const content = document.getElementById('content');
 
     // Color
-    MAKE_HEADER("Color", "h1", "color");
-    MAKE_PARAGRAPH(`Represents a color input. Allows users to select a color using the browser native color picker.`);
+    MAKE_HEADER("Color.", "h1", "color");
+    MAKE_PARAGRAPH(`Represents a color input. Allows users to select a color using a custom color picker.`);
 
     {
-        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
+        const area = new LX.Area( { skipAppend: true, width: "75%", height: "auto", className: "self-center mt-4" } );
         const panel = area.addPanel();
+        panel.branch("Color");
         panel.addColor("Font Color", { r: 1, g: 0.1, b: 0.6 }, (value, event) => {
             console.log(value);
         });
         content.appendChild(area.root);
     }
 
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "my-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["value", "String|Array", "Color value in hex (&quot;#fff&quot;) or Array[r, g, b]", "#000000"],
+                ["callback", "Function", "Function called when the color changes", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "24px" );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["disabled", "Boolean", "Make the widget disabled", "false"],
+                ["useRGB", "Boolean", "The callback returns color as Array[r, g, b] and not hex", "false"],
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
     MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addColor(name, value, callback, options)")} to add a Color Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["value", "String/Array", "Color value in hex (&quot;#fff&quot;) or Array[r, g, b]"],
-        ["callback", "Function", "Function called when the input changes"],
-        ["options", "Object", "Basic options for a Widget"],
-        [
-            ["disabled", "Boolean", "Make the widget disabled"],
-            ["useRGB", "Boolean", "The callback returns color as Array[r, g, b] and not hex [<code class='inline'>false</code>]"]
-        ]
-    ]);
     MAKE_CODE(`panel.@[mtd]addColor@(@"Font Color"@, { r: @1@, g: @0.1@, b: @0.6@ }, (value, event) =&gt; {
     console.@[mtd]log@(@"Font Color: "@, value);
 });
 
 panel.@[mtd]addColor@(@"Background"@, @"#b7a9b1"@);` );
+MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.ColorInput(name, value, callback, options)")} and append its root to any container.` );
 
 </script>

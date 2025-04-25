@@ -5,12 +5,13 @@
     const content = document.getElementById('content');
 
     // Checkbox
-    MAKE_HEADER("Checkbox", "h1", "checkbox");
-    MAKE_PARAGRAPH(`Represents a control that allows the user to toggle between checked and not checked..`);
+    MAKE_HEADER("Checkbox.", "h1", "checkbox");
+    MAKE_PARAGRAPH(`Represents a control that allows the user to toggle between checked and not checked.`);
 
     {
-        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
+        const area = new LX.Area( { skipAppend: true, width: "75%", height: "auto", className: "self-center mt-4" } );
         const panel = area.addPanel();
+        panel.branch("Checkbox");
         panel.addCheckbox("Check me", true, (value, event) => {
             console.log(value);
         });
@@ -20,19 +21,37 @@
         content.appendChild(area.root);
     }
 
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "my-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["value", "Boolean", "Checkbox value", "false"],
+                ["callback", "Function", "Function called when the checkbox value changes", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "24px" );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["disabled", "Boolean", "Make the widget disabled", "false"],
+                ["label", "String", "Checkbox label", "—"],
+                ["suboptions", "Function", "Callback to add widgets shown if checked", "—"],
+                ["className", "String", "Extra classes to customize style", "—"],
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
     MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addCheckbox(name, value, callback, options)")} to add a Checkbox Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["value", "Boolean", "Boolean value (true/false)"],
-        ["callback", "Function", "Function called when the checkbox value changes"],
-        ["options", "Object", "Basic options for a Widget"],
-        [
-            ["disabled", "Boolean", "Make the widget disabled [false]"],
-            ["label", "String", "Checkbox label"],
-            ["suboptions", "Function", "Callback to add widgets shown if <code class='inline'>true</code>"],
-            ["className", "String", "Extra classes to customize style"]
-        ]
-    ]);
     MAKE_CODE(`panel.@[mtd]addCheckbox@(@"Check me"@, @true@, (value, event) =&gt; {
     console.@[mtd]log@(value);
 });
@@ -44,5 +63,6 @@ panel.@[mtd]addCheckbox@(@"Check me too"@, @true@, (value, event) =&gt; {
     p.@[mtd]addText@(@null@, @"Suboption 1"@);
     p.@[mtd]addNumber@(@"Suboption 2"@, @12@);
 } });` );
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.Checkbox(name, value, callback, options)")} and append its root to any container.` );
 
 </script>

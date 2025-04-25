@@ -5,12 +5,13 @@
     const content = document.getElementById('content');
 
     // Combo Buttons
-    MAKE_HEADER("Combo Buttons", "h1", "combobuttons");
+    MAKE_HEADER("Combo Buttons.", "h1", "combobuttons");
     MAKE_PARAGRAPH(`Represents multiple inlined ${ INLINE_PAGE( "buttons", "widgets/button.html" ) } as selectable options.`);
 
     {
-        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
+        const area = new LX.Area( { skipAppend: true, width: "75%", height: "auto", className: "self-center mt-4" } );
         const panel = area.addPanel();
+        panel.branch("Combo Buttons");
         panel.addComboButtons("Alignment", [
             {
                 value: "left",
@@ -36,17 +37,35 @@
         content.appendChild(area.root);
     }
 
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "my-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["values", "Array", "Each of the { value, callback, selected, icon, disabled } items", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "24px" );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["float", "String", "Justify content (left|center|right)", "center"],
+                ["noSelection", "Boolean", "Buttons can be clicked, but they are not selectable", "false"],
+                ["toggle", "Boolean", "Buttons can be toggled insted of selecting only one", "false"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
     MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addComboButtons(name, values, options)")} to add a ComboButtons Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["values", "Array", "Each of the { value, callback, selected, disabled } items (you can add an <code class='inline'>icon</code>)"],
-        ["options", "Object", "Basic options for a Widget"],
-        [
-            ["float", "String", "Justify content (left, center, right) [center]"],
-            ["noSelection", "Boolean", "Buttons can be clicked, but they are not selectable [false]"],
-            ["toggle", "Boolean", "Buttons can be toggled insted of selecting only one [false]"]
-        ]
-    ]);
     MAKE_CODE(`panel.@[mtd]addComboButtons@(@"Alignment"@, [
     {
         value: @"left"@,
@@ -69,5 +88,6 @@
         }
     }
 ], {} );` );
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.ComboButtons(name, values, options)")} and append its root to any container.` );
 
 </script>

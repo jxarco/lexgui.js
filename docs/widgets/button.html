@@ -5,34 +5,57 @@
     const content = document.getElementById( 'content' );
 
     // Button
-    MAKE_HEADER( "Button", "h1", "button" );
+    MAKE_HEADER( "Button.", "h1", "button" );
     MAKE_PARAGRAPH( `Represents a clickable element typically used to trigger an action.` );
 
     {
-        const area = new LX.Area( { skipAppend: true, height: "auto" } );
+        const area = new LX.Area( { skipAppend: true, width: "75%", height: "auto", className: "self-center mt-4" } );
         const panel = area.addPanel();
-        panel.addButton("A Button Name", "Print event", (value, event) => {
+        panel.branch("Button");
+        panel.addButton(null, "A Button Name", (value, event) => {
+            console.log(event);
+        });
+        panel.addButton("A Button Label", "Print event", (value, event) => {
             console.log(event);
         });
         content.appendChild( area.root );
     }
 
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "my-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["value", "String", "Text string by default", "—"],
+                ["callback", "Function", "Function called when the button is pressed", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "24px" );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["disabled", "Boolean", "Make the widget disabled", "false"],
+                ["icon", "String", "Icon to be added before the input", "—"],
+                ["img", "String", "Path to image to show as button value", "—"],
+                ["title", "String", "Text to show in native Element title", "—"],
+                ["buttonClass", "String", "Class to add to the native button element", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
     MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addButton(name, value, callback, options)")} to add a Button Widget to your panel:` );
-    MAKE_CODE_BULLET_LIST( [
-        ["name", "String", "Widget name"],
-        ["value", "String", "Text string by default"],
-        ["callback", "Function", "Function called when the input changes"],
-        ["options", "Object", "Basic options for a Widget"],
-        [
-            ["disabled", "Boolean", "Make the widget disabled"],
-            ["icon", "String", "Icon to be added before the input"],
-            ["img", "String", "Path to image to show as button value"],
-            ["title", "String", "Text to show in native Element title"],
-            ["buttonClass", "String", "Class to add to the native button element"],
-        ]
-    ] );
-    MAKE_CODE( `panel.@[mtd]addButton@(@"A Button Name"@, @"Print event"@, (value, event) =&gt; {
+    MAKE_CODE( `panel.@[mtd]addButton@(@"A Button Label"@, @"Print event"@, (value, event) =&gt; {
     console.@[mtd]log@(event);
 });` );
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.Button(name, value, callback, options)")} and append its root to any container.` );
 
 </script>

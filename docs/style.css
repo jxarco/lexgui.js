@@ -149,6 +149,17 @@ code:not(.inline) {
 	border-radius: 6px;
 }
 
+code.inline.table {
+	padding: 0px 2px;
+	line-height: unset;
+	font-size: 13px;
+}
+
+code.inline.desc {
+	background-color: var(--global-color-tertiary);
+	color: var(--global-text-tertiary);
+}
+
 #content strong {
 	font-weight:900;
 }
