@@ -318,7 +318,7 @@ body.noevents * {
 .munsellblue { color: #0093af }
 .pictonblue { color: #45B1E8 }
 .lightblue { color: #5aa8f7 }
-.yellow { color: yellow }
+.goldenrod { color: goldenrod }
 .heliotrope { color: #d460ff }
 
 svg.xs { width: var(--svg-size-xs); height: var(--svg-size-xs); }
@@ -4822,7 +4822,7 @@ ul.lexassetscontent {
 }
 
 .lexcodetabinfo {
-    background-color: light-dark(var(--global-color-tertiary), var(--global-medium-background));
+    background-color: light-dark(var(--global-color-secondary), var(--global-medium-background));
     position: absolute;
     z-index: 3;
     bottom: 0px;
@@ -4837,7 +4837,7 @@ ul.lexassetscontent {
 .lexcodegutter {
     width: 48px;
     height: calc(100% - 65px);
-    background-color: light-dark(var(--global-color-tertiary), var(--global-medium-background));
+    background-color: light-dark(var(--global-color-secondary), var(--global-medium-background));
     margin-top: 31px;
     overflow: hidden;
     position: absolute;
@@ -4846,7 +4846,7 @@ ul.lexassetscontent {
 
 .lexcodeeditor .codetabsarea {
     height: calc(100% - 77px) !important;
-    background-color: light-dark(var(--global-color-tertiary), var(--global-medium-background));
+    background-color: light-dark(var(--global-color-secondary), var(--global-medium-background));
     overflow: scroll;
 }
 
@@ -5261,7 +5261,7 @@ ul.lexassetscontent {
 .cm-bln.markdown { color: #a1d2f0; }  /* builtin */
 
 :root[data-theme="light"] .lexcodeeditor pre.active-line {
-    background-color: #c5c4c4ab;
+    background-color: #e4e0e0ab;
 }
 
 :root[data-theme="light"] .lexcodeeditor.disabled pre.active-line {

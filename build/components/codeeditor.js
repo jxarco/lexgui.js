@@ -1611,7 +1611,7 @@ class CodeEditor {
             extension == "xml" ? "Rss orange" :
             extension == "bat" ? "Windows lightblue" :
             extension == "json" ? "Braces fg-primary" :
-            extension == "js" ? "Js yellow" :
+            extension == "js" ? "Js goldenrod" :
             extension == "py" ? "Python munsellblue" :
             extension == "rs" ? "Rust fg-primary" :
             extension == "md" ? "Markdown fg-primary" :
