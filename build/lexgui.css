@@ -5022,8 +5022,12 @@ ul.lexassetscontent {
 .lexcodescrollbar.horizontal {
     width: calc(100% - 58px);
     height: 10px;
-    bottom: 36px;
+    bottom: 47px;
     right: 10px;
+}
+
+.codebasearea:has(.codetabsarea.no-code-info) .lexcodescrollbar.horizontal {
+    bottom: 0px;
 }
 
 .lexcodescrollbar.scrollbar-unused {
