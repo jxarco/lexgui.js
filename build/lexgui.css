@@ -4758,6 +4758,7 @@ ul.lexassetscontent {
     margin: 0px !important;
     border: 1px solid #91909036;
     border-right: none;
+    border-bottom: none;
     background-color: var(--global-color-primary) !important;
     transition: none;
     display: flex !important;
@@ -4844,7 +4845,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .codetabsarea {
-    height: calc(100% - 78px) !important;
+    height: calc(100% - 77px) !important;
     background-color: light-dark(var(--global-color-tertiary), var(--global-medium-background));
     overflow: scroll;
 }

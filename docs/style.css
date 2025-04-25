@@ -7,13 +7,6 @@
 :root {
 	color-scheme: light dark;
 
-	--color-blue: #049EF4;
-	--text-color: #cfcfcf;
-	--text-color-secondary: #999;
-
-	--font-size: 17px;
-	--line-height: 26px;
-
 	--border-style: 1px solid #444;
 	--panel-width: 300px;
 	--page-padding: 24px;
@@ -24,9 +17,6 @@
 
 #content {
 	font-family: "GeistSans", sans-serif;
-	font-size: var(--font-size);
-	line-height: var(--line-height);
-	color: var(--text-color);
 	tab-size: 4;
 	max-width: var(--max-width);
 	width: 100%;
@@ -40,7 +30,7 @@
 }
 
 #content .lexarea.docs {
-	padding-block: 1.5em;
+	margin-block: 1.5em;
 	width: 80% !important;
 	justify-self: center;
 }
@@ -78,7 +68,7 @@
 }
 
 #content a {
-	color: var(--color-blue);
+	color: var(--global-color-accent);
 	cursor: pointer;
 	text-decoration: none;
 }
@@ -180,7 +170,6 @@ code.inline.desc {
 	
 	:root {
 		--panel-width: 360px;
-		--font-size: 18px;
 		--line-height: 28px;
 		--page-padding: 28px;
 		--icon-size: 24px;
@@ -210,7 +199,6 @@ code.inline.desc {
 	:root {
 		--page-padding: 16px;
 		--icon-size: 20px;
-		--font-size: 20px;
 	}
 
 	#content {
@@ -276,11 +264,11 @@ pre .com, code .com { color: #4e994d; } /* comment */
 pre .pln, code .pln { color: #aaaaaa; } /* plaintext */
 
 .desc {
-	color: var(--text-color-secondary);
+	color: var(--global-text-tertiary);
 }
 
 a .desc {
-	color: var(--color-blue);
+	color: var(--global-color-accent);
 }
 
 .param {
@@ -347,7 +335,7 @@ code:has(.constructor) {
 }
 
 :root[data-theme="light"] a .desc {
-	color: var(--color-blue);
+	color: var(--global-color-accent);
 }
 
 :root[data-theme="light"] .param {

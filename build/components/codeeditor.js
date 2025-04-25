@@ -317,7 +317,7 @@ class CodeEditor {
         this.base_area = area;
         this.area = new LX.Area( { className: "lexcodeeditor", height: "100%", skipAppend: true } );
 
-        this.skipCodeInfo = options.skipInfo ?? false;
+        this.skipInfo = options.skipInfo ?? false;
         this.disableEdition = options.disableEdition ?? false;
 
         this.tabs = this.area.addTabs( { onclose: (name) => {
@@ -1530,7 +1530,7 @@ class CodeEditor {
 
     _createPanelInfo() {
 
-        if( !this.skipCodeInfo )
+        if( !this.skipInfo )
         {
             let panel = new LX.Panel({ className: "lexcodetabinfo", width: "calc(100%)", height: "auto" });
 
@@ -3941,7 +3941,7 @@ class CodeEditor {
 
     runScript( code ) {
 
-        var script = document.createElement( 'script' );
+        const script = document.createElement( 'script' );
         script.type = 'module';
         script.innerHTML = code;
         // script.src = url[ i ] + ( version ? "?version=" + version : "" );
@@ -4396,7 +4396,7 @@ class CodeEditor {
 
     _updateDataInfoPanel( signal, value ) {
 
-        if( !this.skipCodeInfo )
+        if( !this.skipInfo )
         {
             if( this.cursors.childElementCount > 1 )
             {
