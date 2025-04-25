@@ -1,45 +1,24 @@
 <script type="module">
     import { LX } from 'lexgui';
-    import 'lexgui/components/codeeditor.js';
 
     const content = document.getElementById( 'content' );
+    const widgetName = "Button";
 
-    // Button
-    MAKE_HEADER( "Button.", "h1", "button" );
+    MAKE_HEADER(widgetName + ".", "h1", widgetName.toLowerCase());
     MAKE_PARAGRAPH( `Represents a clickable element typically used to trigger an action.` );
     MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addButton(name, value, callback, options)")} to add a Button Widget to your panel or
-    create it anywhere using ${INLINE_CODE("new LX.Button")} to append its root to any container.` );
+    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addButton(name, value, callback, options)")} to add a ${ widgetName } Widget to your panel or
+    create it anywhere using ${INLINE_CODE(`new LX.${ widgetName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
 
     {
-        const area = new LX.Area({ className: "flex flex-col gap-3 docs", skipAppend: true, height: "auto" });
-        content.appendChild( area.root );
-        const panel = window.__panel = area.addPanel();
-        panel.branch("Button");
-        panel.addButton(null, "A Button Name", (value, event) => {
-            console.log(event);
-        });
-        panel.addButton("A Button Label", "Print event", (value, event) => {
-            console.log(event);
-        });
-
-        const runCode = () => {
-            const script = document.createElement( 'script' );
-            script.type = 'module';
-            script.innerHTML = `
-                const panel = window.__panel;
-                panel.clear();
-                panel.branch("Button");
-                ${ codeEditor.getText() }
-            `;
-            script.async = false;
-            document.getElementsByTagName( 'head' )[ 0 ].appendChild( script );
-        }
-
-        const codeArea = new LX.Area({ className: "rounded overflow-hidden", skipAppend: true, height: "auto" });
-        area.attach( codeArea.root );
-        const codeEditor = new LX.CodeEditor( codeArea, { name: "button.js", onrun: runCode, skipInfo: true, allowAddScripts: false, language: "JavaScript" } );
-        codeEditor.setText( `
+        window.__addInteractiveCodeExample( content, widgetName, panel => {
+            panel.addButton(null, "A Button Name", (value, event) => {
+                console.log(event);
+            });
+            panel.addButton("A Button Label", "Print event", (value, event) => {
+                console.log(event);
+            });
+        },`
 panel.addButton(null, "A Button Name", (value, event) => {
     console.log(event);
 });
@@ -47,12 +26,7 @@ panel.addButton(null, "A Button Name", (value, event) => {
 panel.addButton("A Button Label", "Print event", (value, event) => {
     console.log(event);
 });
-`, "JavaScript" );
-
-        const runButton = new LX.Button( null, "Run", (value, event) => {
-            runCode();
-        }, { buttonClass: "contrast" } );
-        area.attach( runButton.root );
+` );
     }
 
     {

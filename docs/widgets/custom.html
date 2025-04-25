@@ -1,61 +1,81 @@
 <script type="module">
-
     import { LX } from 'lexgui';
 
     const content = document.getElementById('content');
+    const widgetName = "Custom";
 
-    // Custom
-    MAKE_HEADER("Custom", "h1", "custom");
+    MAKE_HEADER(widgetName + ".", "h1", widgetName.toLowerCase());
     MAKE_PARAGRAPH(`Lexgui supports generating custom widgets based on specific object data. By calling ${INLINE_CODE("LX.ADD_CUSTOM_WIDGET( name, options )")}, 
         you can register a new Panel method that will create your custom widgets.` );
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH(`Once the widget has been registered, call ${INLINE_CODE("Panel.add_WidgetName_(name, value, callback)")} to add the custom Widget to your panel.`);
 
     {
-        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
-        const panel = area.addPanel();
-        LX.ADD_CUSTOM_WIDGET('Shader', {
-            icon: "Box",
-            default: {
-                'position': [0, 0],
-                'velocity': [0, 0, 0],
-                'color': [0, 0, 0, 0],
-                'hexColor': '#000',
-                'highRes': false
-            }
-        });
+        window.__addInteractiveCodeExample( content, widgetName, panel => {
+            LX.ADD_CUSTOM_WIDGET('Shader', {
+                icon: "Box",
+                default: {
+                    'position': [0, 0],
+                    'velocity': [0, 0, 0],
+                    'color': [0, 0, 0, 0],
+                    'hexColor': '#000',
+                    'highRes': false
+                }
+            });
 
-        const shaderInstance = {
-            'hexColor': '#f5f505',
-            'highRes': true
-        };
+            const shaderInstance = {
+                'hexColor': '#f5f505',
+                'highRes': true
+            };
 
-        panel.addShader("PBR Shader", shaderInstance, (instance) => { console.log(instance) });
-        panel.addShader("Empty", null);
-        content.appendChild(area.root);
-    }
-
-    MAKE_PARAGRAPH(`Once the widget has been registered, call ${INLINE_CODE("Panel.add^WidgetName(name, value, callback)")} to add the custom Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["value", "Object", "The new instance data"],
-        ["callback", "Function", "Function called when the instance changes"]
-    ]);
-    MAKE_CODE(`LX.@[mtd]ADD_CUSTOM_WIDGET@( @"Shader"@, {
-    icon: @"Box"@,
+            panel.addShader("PBR Shader", shaderInstance, (instance) => { console.log(instance) });
+            panel.addShader("Empty", null);
+        },`
+LX.ADD_CUSTOM_WIDGET('Shader', {
+    icon: "Box",
     default: {
-        'position': [@0@, @0@],
-        'velocity': [@0@, @0@, @0@],
-        'color': [@0@, @0@, @0@, @0@],
-        'hexColor': @"#000"@,
-        'highRes': @false@
+        'position': [0, 0],
+        'velocity': [0, 0, 0],
+        'color': [0, 0, 0, 0],
+        'hexColor': '#000',
+        'highRes': false
     }
 });
 
-@const@ shaderInstance = {
-    'hexColor': @"#f5f505"@,
-    'highRes': @true@
+const shaderInstance = {
+    'hexColor': '#f5f505',
+    'highRes': true
 };
 
-panel.@[mtd]addShader@( @"PBR Shader"@, shaderInstance, instance => { console.@[mtd]log@(instance) } );
-panel.@[mtd]addShader@( @"Empty Instance"@, @null@ );` );
+panel.addShader("PBR Shader", shaderInstance, (instance) => { console.log(instance) });
+panel.addShader("Empty", null);
+` );
+    }
 
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["value", "Object", "The new instance data", "—"],
+                ["callback", "Function", "Function called when the instance changes", "—"],
+                // ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        // panel.addBlank( null, "24px" );
+        // panel.addTable( null, {
+        //     head: [ "Option", "Type", "Description", "Default" ],
+        //     body: [
+                
+        //     ].map( v => {
+        //         return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+        //     } )
+        // }, {});
+    }
 </script>

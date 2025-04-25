@@ -1,27 +1,37 @@
 <script type="module">
-
     import { LX } from 'lexgui';
 
     const content = document.getElementById('content');
+    const widgetName = "Progress";
 
-    // Progress
     MAKE_HEADER("Progress.", "h1", "progress");
     MAKE_PARAGRAPH(`Represents an indicator showing the completion progress of a task, displayed as a progress bar.`);
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addProgress(name, value, options)")} to add a ${ widgetName } Widget to your panel or
+    create it anywhere using ${INLINE_CODE(`new LX.${ widgetName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
 
     {
-        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
-        const panel = area.addPanel();
-        panel.branch("Progress");
-        panel.addProgress("HeadRoll", 0, {
-            min: -1,
-            max: 1,
-            showValue: true,
-            editable: true,
-            callback: (value, event) => {
-                console.log(value);
-            }
-        });
-        content.appendChild(area.root);
+        window.__addInteractiveCodeExample( content, widgetName, panel => {
+            panel.addProgress("HeadRoll", 0, {
+                min: -1,
+                max: 1,
+                showValue: true,
+                editable: true,
+                callback: (value, event) => {
+                    console.log(value);
+                }
+            });
+        },`
+panel.addProgress("HeadRoll", 0, {
+    min: -1,
+    max: 1,
+    showValue: true,
+    editable: true,
+    callback: (value, event) => {
+        console.log(value);
+    }
+});
+` );
     }
 
     {
@@ -56,16 +66,4 @@
             } )
         }, {});
     }
-
-    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addProgress(name, value, options)")} to add a Progress Widget to your panel:`);
-    MAKE_CODE(`panel.@[mtd]addProgress@(@"HeadRoll"@, @0@, { 
-    min: -@1@, 
-    max: @1@, 
-    showValue: @true@, 
-    editable: @true@, 
-    callback: (value, event) =&gt; {
-        console.@[mtd]log@(value);
-    }
-});` );
-    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.Progress(name, value, options)")} and append its root to any container.` );
 </script>

@@ -1,21 +1,31 @@
 <script type="module">
-
     import { LX } from 'lexgui';
 
     const content = document.getElementById('content');
+    const widgetName = "Number Input";
 
-    // Number
-    MAKE_HEADER("Number.", "h1", "number");
+    MAKE_HEADER(widgetName + ".", "h1", widgetName.toLowerCase());
     MAKE_PARAGRAPH(`Represents a decimal number input.`);
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addNumber(name, value, callback, options)")} to add a ${ widgetName } Widget to your panel or
+    create it anywhere using ${INLINE_CODE(`new LX.${ widgetName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH(`You can change the value of this widget manually, using the mouse wheel, and dragging (up/down). In the last two cases, pressing <em>Alt</em> and 
+        <em>Left Shift</em> will apply a factor of <code class='inline'>0.1</code> and <code class='inline'>10</code> in that order. In case you are using limits, store the widget and call <code class='inline'>numberWidget.setLimits( min, max, step )</code> to change its 
+        parameters once the widget has been created.` );
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH( `Note: Setting <code class='inline'>min</code>, <code class='inline'>max</code> values will automatically add a slider below the number input.`, true );
 
     {
-        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
-        const panel = area.addPanel();
-        panel.branch("Number");
-        panel.addNumber("Font Size", 36, (value, event) => {
-            console.log(value);
-        }, { min: 1, max: 48 });
-        content.appendChild(area.root);
+        window.__addInteractiveCodeExample( content, widgetName, panel => {
+            panel.addNumber("Font Size", 36, (value, event) => {
+                console.log(value);
+            }, { min: 1, max: 48 });
+        },`
+panel.addNumber("Font Size", 36, (value, event) => {
+    console.log(value);
+}, { min: 1, max: 48 });
+` );
     }
 
     {
@@ -51,17 +61,6 @@
                 return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
-    }
-
-    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addNumber(name, value, callback, options)")} to add a Number Widget to your panel:`);
-    MAKE_PARAGRAPH(`<sup>Note: Setting <code class='inline'>min</code>, <code class='inline'>max</code> values will automatically add a slider below the number input.<sup>`);
-    MAKE_CODE(`panel.@[mtd]addNumber@(@"Font Size"@, @36@, (value, event) =&gt; {
-    console.@[mtd]log@(value);
-}, { min: @1@, max: @48@ });` );
-    MAKE_PARAGRAPH(`You can change the value of this widget manually, using the mouse wheel, and dragging (up/down). In the last two cases, pressing <em>Alt</em> and 
-        <em>Left Shift</em> will apply a factor of <code class='inline'>0.1</code> and <code class='inline'>10</code> in that order.` );
-
-    MAKE_PARAGRAPH(`In case you are using limits, store the widget and call <code class='inline'>numberWidget.setLimits( min, max, step )</code> to change its 
-        parameters once the widget has been created.` );
-    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.Number(name, value, callback, options)")} and append its root to any container.` );
+    }    
+    
 </script>

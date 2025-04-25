@@ -68,7 +68,7 @@
 }
 
 #content a {
-	color: var(--global-color-accent);
+	color: var(--global-color-accent-light);
 	cursor: pointer;
 	text-decoration: none;
 }

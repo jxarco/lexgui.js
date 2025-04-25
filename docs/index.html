@@ -21,6 +21,7 @@
     <script type="module">
 
         import { LX } from 'lexgui';
+        import 'lexgui/components/codeeditor.js';
 
         window.LX = LX;
 
@@ -65,6 +66,38 @@
                     }
                 })
                 .catch(() => content.innerHTML = "<p>Error loading content.</p>");
+        }
+
+        window.__addInteractiveCodeExample = function( content, widgetName, onPanel, code ) {
+
+            const area = new LX.Area({ className: "flex flex-col gap-3 docs", skipAppend: true, height: "auto" });
+            content.appendChild( area.root );
+            const panel = window.__panel = area.addPanel();
+            panel.branch( widgetName );
+            onPanel( panel );
+
+            const runCode = () => {
+                const script = document.createElement( 'script' );
+                script.type = 'module';
+                script.innerHTML = `
+                    const panel = window.__panel;
+                    panel.clear();
+                    panel.branch("${ widgetName }");
+                    ${ codeEditor.getText() }
+                `;
+                script.async = false;
+                document.getElementsByTagName( 'head' )[ 0 ].appendChild( script );
+            }
+
+            const codeArea = new LX.Area({ className: "rounded overflow-hidden", skipAppend: true, height: "auto" });
+            area.attach( codeArea.root );
+            const codeEditor = new LX.CodeEditor( codeArea, { name: `${widgetName.toLowerCase().replace( /\s/g, '_' )}.js`, onrun: runCode, skipInfo: true, allowAddScripts: false, language: "JavaScript" } );
+            codeEditor.setText( code, "JavaScript" );
+
+            const runButton = new LX.Button( null, "Run", (value, event) => {
+                runCode();
+            }, { buttonClass: "contrast" } );
+            area.attach( runButton.root );
         }
 
         window.addEventListener("popstate", function (event) {
@@ -136,7 +169,7 @@
                 }
 
                 m.add( "Data Inputs" );
-                for( const w of [ "Color", "Curve", "Date Picker", "File", "Input OTP", "Item Array", "Layers", "Number", "Pad", "Range", "Select", "Size", "Tags", "Text", "Text Area", "Vector" ] )
+                for( const w of [ "Color", "Curve", "Date Picker", "File", "Item Array", "Layers", "Number", "OTP Input", "Pad", "Range", "Select", "Size", "Tags", "Text", "Text Area", "Vector" ] )
                 {
                     const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
                     m.add( "Data Inputs/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );
@@ -145,7 +178,7 @@
                 }
 
                 m.add( "Layout and Structure" );
-                for( const w of [ "Tab Sections", "Form", "Title", "List", "Table", "Data Tree" ] )
+                for( const w of [ "Data Tree", "Form", "List", "Tab Sections", "Table", "Title" ] )
                 {
                     const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
                     m.add( "Layout and Structure/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );

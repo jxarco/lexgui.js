@@ -2,19 +2,24 @@
     import { LX } from 'lexgui';
 
     const content = document.getElementById('content');
+    const widgetName = "Text Area";
 
-    // Text area
-    MAKE_HEADER("Text Area.", "h1", "textarea");
+    MAKE_HEADER(widgetName + ".", "h1", widgetName.toLowerCase());
     MAKE_PARAGRAPH(`Represents a text area input element.`);
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addButton(name, value, callback, options)")} to add a ${ widgetName } Widget to your panel or
+    create it anywhere using ${INLINE_CODE(`new LX.${ widgetName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
 
     {
-        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
-        const panel = area.addPanel();
-        panel.branch("Text area");
-        panel.addTextArea("Text Name", "Text value", (value, event) => {
-            console.log(value);
-        }, { placeholder: "Something" });
-        content.appendChild(area.root);
+        window.__addInteractiveCodeExample( content, widgetName, panel => {
+            panel.addTextArea("TextArea Name", "", (value, event) => {
+                console.log(value);
+            }, { placeholder: "Some text..." });
+        },`
+panel.addTextArea("TextArea Name", "", (value, event) => {
+    console.log(value);
+}, { placeholder: "Some text..." });
+` );
     }
 
     {
@@ -45,11 +50,4 @@
             } )
         }, {});
     }
-
-    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addTextArea(name, value, callback, options)")} to add a Text Area Widget to your panel 
-        (the <code class='inline'>options</code> are the same as the Text widget) plus:` );
-    MAKE_CODE(`panel.@[mtd]addTextArea@(@"Text Name"@, @"Text value"@, (value, event) =&gt; {
-    console.@[mtd]log@(value);
-}, { placeholder: @"Something"@ });` );
-    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.TextArea(name, value, callback, options)")} and append its root to any container.` );
 </script>

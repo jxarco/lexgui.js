@@ -1,21 +1,28 @@
 <script type="module">
-
     import { LX } from 'lexgui';
 
     const content = document.getElementById('content');
+    const widgetName = "Range Input";
 
-    // Range
-    MAKE_HEADER("Range.", "h1", "range");
+    MAKE_HEADER(widgetName + ".", "h1", widgetName.toLowerCase());
     MAKE_PARAGRAPH(`Represents a decimal input handled by a slider.`);
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addRange(name, value, callback, options)")} to add a ${ widgetName } Widget to your panel or
+    create it anywhere using ${INLINE_CODE(`new LX.${ widgetName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH(`In case you are using limits, store the widget and call <code class='inline'>rangeWidget.setLimits( min, max, step )</code> to change its 
+        parameters once the widget has been created.` );
 
     {
-        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
-        const panel = area.addPanel();
-        panel.branch("Range");
-        panel.addRange("Intensity Value", 25, (value, event) => {
-            console.log(value);
-        }, { min: 1, max: 100 });
-        content.appendChild(area.root);
+        window.__addInteractiveCodeExample( content, widgetName, panel => {
+            panel.addRange("Intensity Value", 25, (value, event) => {
+                console.log(value);
+            }, { min: 1, max: 100 });
+        },`
+panel.addRange("Intensity Value", 25, (value, event) => {
+    console.log(value);
+}, { min: 1, max: 100 });
+` );
     }
 
     {
@@ -50,12 +57,4 @@
             } )
         }, {});
     }
-
-    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addRange(name, value, callback, options)")} to add a Range Widget to your panel:`);
-    MAKE_CODE(`panel.@[mtd]addRange@(@"Intensity Value"@, @25@, (value, event) =&gt; {
-    console.@[mtd]log@(value);
-}, { min: @1@, max: @100@ });` );
-    MAKE_PARAGRAPH(`In case you are using limits, store the widget and call <code class='inline'>rangeWidget.setLimits( min, max, step )</code> to change its 
-        parameters once the widget has been created.` );
-    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.RangeInput(name, value, callback, options)")} and append its root to any container.` );
 </script>

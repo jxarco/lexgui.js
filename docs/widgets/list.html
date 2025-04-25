@@ -1,21 +1,26 @@
 <script type="module">
-
     import { LX } from 'lexgui';
 
     const content = document.getElementById('content');
+    const widgetName = "List";
 
-    // List
-    MAKE_HEADER("List.", "h1", "list");
+    MAKE_HEADER(widgetName + ".", "h1", widgetName.toLowerCase());
     MAKE_PARAGRAPH(`Represents a list of selectable elements.`);
-
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addList(name, values, value, callback, options)")} to add a ${ widgetName } Widget to your panel or
+    create it anywhere using ${INLINE_CODE(`new LX.${ widgetName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH(`Note: It's possible to preppend an icon to the element name inside the list using an Array for the item [item, icon].`, true );
     {
-        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
-        const panel = area.addPanel();
-        panel.branch("List");
-        panel.addList("Volley Teams", ["GPTeam", ["Blat Panthers", "PawPrint"], "Blat Bunny"], "Blat Panthers", (value, event) => {
-            console.log(value);
-        });
-        content.appendChild(area.root);
+        window.__addInteractiveCodeExample( content, widgetName, panel => {
+            panel.addList("Volley Teams", ["GPTeam", ["Blat Panthers", "PawPrint"], "Blat Bunny"], "Blat Panthers", (value, event) => {
+                console.log(value);
+            });
+        },`
+panel.addList("Volley Teams", ["GPTeam", ["Blat Panthers", "PawPrint"], "Blat Bunny"], "Blat Panthers", (value, event) => {
+    console.log(value);
+});
+` );
     }
 
     {
@@ -45,17 +50,4 @@
         //     } )
         // }, {});
     }
-
-    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addList(name, values, value, callback, options)")} to add a List Widget to your panel:`);
-    MAKE_CODE(`panel.@[mtd]addList@(@"List name"@, [@"GPTeam"@, @"Blat Panthers"@], @"Blat Panthers"@,  (value, event) => {
-    console.@[mtd]log@(value);
-});` );
-
-    MAKE_PARAGRAPH(`<sup>It's possible to preppend an icon to the element name inside the list using an Array for the item [item, icon]:<sup>`);
-
-    MAKE_CODE(`panel.@[mtd]addList@(@"List name"@, [@"GPTeam"@, [@"Blat Panthers"@, @"PawPrint"@]], @"Blat Panthers"@,  (value, event) => {
-    console.@[mtd]log@(value);
-});` );
-    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.List(name, values, value, callback, options)")} and append its root to any container.` );
-
 </script>

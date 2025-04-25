@@ -1,20 +1,23 @@
 <script type="module">
-
     import { LX } from 'lexgui';
 
     const content = document.getElementById('content');
+    const widgetName = "Title";
 
-    // Title
-    MAKE_HEADER("Title.", "h1", "title");
+    MAKE_HEADER(widgetName + ".", "h1", widgetName.toLowerCase());
     MAKE_PARAGRAPH(`Represents a title section.`);
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTitle(name, options)")} to add a ${ widgetName } Widget to your panel or
+    create it anywhere using ${INLINE_CODE(`new LX.${ widgetName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
 
     {
-        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
-        const panel = area.addPanel();
-        panel.branch("Title");
-        panel.addTitle("A Title!");
-        panel.addTitle("A No-Background Big Title!", { style: { background: "none", fontSize: "24px" } });
-        content.appendChild(area.root);
+        window.__addInteractiveCodeExample( content, widgetName, panel => {
+            panel.addTitle("A Title!");
+            panel.addTitle("A No-Background Big Title!", { style: { background: "none", fontSize: "24px" } });
+        },`
+panel.addTitle("A Title!");
+panel.addTitle("A No-Background Big Title!", { style: { background: "none", fontSize: "24px" } });
+` );
     }
 
     {
@@ -45,9 +48,4 @@
             } )
         }, {});
     }
-
-    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addTitle(name, options)")} to add a Title Widget to your panel:`);
-    MAKE_CODE(`panel.@[mtd]addTitle@(@"A title!"@);
-panel.@[mtd]addTitle@(@"A No-Background Big Title!@", { style: { background: @"none"@, fontSize: @"24px"@ } });` );
-    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.Title(name, options)")} and append its root to any container.` );
 </script>

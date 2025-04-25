@@ -1,21 +1,26 @@
 <script type="module">
-
     import { LX } from 'lexgui';
 
     const content = document.getElementById('content');
+    const widgetName = "Color Input";
 
     // Color
-    MAKE_HEADER("Color.", "h1", "color");
+    MAKE_HEADER(widgetName + ".", "h1", widgetName.toLowerCase());
     MAKE_PARAGRAPH(`Represents a color input. Allows users to select a color using a custom color picker.`);
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addColor(name, value, callback, options)")} to add a ${ widgetName } Widget to your panel or
+    create it anywhere using ${INLINE_CODE(`new LX.${ widgetName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
 
     {
-        const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
-        const panel = area.addPanel();
-        panel.branch("Color");
-        panel.addColor("Font Color", { r: 1, g: 0.1, b: 0.6 }, (value, event) => {
-            console.log(value);
-        });
-        content.appendChild(area.root);
+        window.__addInteractiveCodeExample( content, widgetName, panel => {
+            panel.addColor("Font Color", { r: 1, g: 0.1, b: 0.6 }, (value, event) => {
+                console.log(value);
+            });
+        },`
+panel.addColor("Font Color", { r: 1, g: 0.1, b: 0.6 }, (value, event) => {
+    console.log(value);
+});
+` );
     }
 
     {
@@ -45,13 +50,4 @@
             } )
         }, {});
     }
-
-    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addColor(name, value, callback, options)")} to add a Color Widget to your panel:`);
-    MAKE_CODE(`panel.@[mtd]addColor@(@"Font Color"@, { r: @1@, g: @0.1@, b: @0.6@ }, (value, event) =&gt; {
-    console.@[mtd]log@(@"Font Color: "@, value);
-});
-
-panel.@[mtd]addColor@(@"Background"@, @"#b7a9b1"@);` );
-MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.ColorInput(name, value, callback, options)")} and append its root to any container.` );
-
 </script>
