@@ -5,12 +5,13 @@
     const content = document.getElementById('content');
 
     // Table
-    MAKE_HEADER("Table", "h1", "table");
+    MAKE_HEADER("Table.", "h1", "table");
     MAKE_PARAGRAPH(`Represents a dynamic table with user-input data.`);
 
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
+        panel.branch("Table");
         panel.addTable(null, {
             head: ["Name", "Status", "Priority"],
             body: [
@@ -34,7 +35,7 @@
                 { name: "Priority", options: ["Low", "Medium", "High"] },
             ],
             rowActions: [
-                { icon: "edit", title: "Edit Row" },
+                { icon: "Edit", title: "Edit Row" },
                 "delete",
                 "menu"
             ],
@@ -49,27 +50,45 @@
         content.appendChild(area.root);
     }
 
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["data", "Object", "Table data", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "24px" );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["head", "Array", "Table headers (each of the headers per column)", "—"],
+                ["body", "Array", "Table body (data per row for each column)", "—"],
+                ["rowActions", "Array", `Allow to add actions per row ${INLINE_CODE("action: { icon, callback }")}`, "—"],
+                ["onMenuAction", "Function", `Function callback to fill the "menu" context`, "—"],
+                ["selectable", "Boolean", "Each row can be selected", "false"],
+                ["sortable", "Boolean", "Rows can be sorted by the user manually", "false"],
+                ["centered", "Boolean/Array", "Center text within columns. true for all, Array for center selected cols", "—"],
+                ["toggleColumns", "Boolean", "Columns visibility can be toggled", "false"],
+                ["filter", "String", "Name of the column to filter by text input (if any)", "false"],
+                ["filterValue", "String", "Initial filter value", "—"],
+                ["customFilters", "Array", "Add selectors to filter by specific option values", "false"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
     MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addTable(name, data, options)")} to add a Table Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["data", "Object", "Table data"],
-        ["options", "Object", "Basic options for a Widget"],
-        [
-            ["head", "Array", "Table headers (each of the headers per column)"],
-            ["body", "Array", "Table body (data per row for each column)"],
-            ["rowActions", "Array", `Allow to add actions per row ${INLINE_CODE("action: { icon, callback }")}`],
-            ["onMenuAction", "Function", `Function callback to fill the "menu" context`],
-            ["selectable", "Boolean", "Each row can be selected"],
-            ["sortable", "Boolean", "Rows can be sorted by the user manually"],
-            ["centered", "Boolean/Array", "Center text within columns. true for all, Array for center selected cols"],
-            ["toggleColumns", "Boolean", "Columns visibility can be toggled"],
-            ["filter", "String", "Name of the column to filter by text input (if any)"],
-            ["filterValue", "String", "Initial filter value"],
-            ["customFilters", "Array", "Add selectors to filter by specific option values"],
-        ]
-    ]);
     MAKE_PARAGRAPH(`<sup>Note: You can use default row actions as String such as 'delete' or 'menu', which have predefined icons and callbacks.
-            For the 'menu' action, you must fill the possible menus inside the created ${INLINE_LINK("ContextMenu", "context_menu.html")} using ${INLINE_CODE("options.onMenuAction")}.<sup>`);
+            For the 'menu' action, you must fill the possible menus inside the created Dropdown using ${INLINE_CODE("options.onMenuAction")}.<sup>`);
     MAKE_CODE(`panel.@[mtd]addTable@(@null@, {
     head: [@"Name"@, @"Status"@, @"Priority"@],
     body: [
@@ -94,14 +113,17 @@
     ],
     rowActions: [
         @[com]// Custom: you can change the data and refresh will be called later if returning _true_!@
-        { icon: @"edit"@, callback: ( tableData ) => {} },
+        { icon: @"Edit"@, callback: ( tableData ) => {} },
         @"delete"@,
         @"menu"@
     ],
-    onMenuAction: ( context ) => {
-        context.add(@"Export"@, (a) => console.@[mtd]log@(a) );
-        context.add(@"An Action"@, (a) => console.@[mtd]log@(a) );
+    onMenuAction: ( index, tableData ) => {
+        @return@ [
+            { name: @"Export"@ },
+            { name: @"Make a copy"@ },
+            { name: @"Favourite"@ }
+        ];
     }
 });` );
-
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.Table(name, data, options)")} and append its root to any container.` );
 </script>

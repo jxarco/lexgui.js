@@ -1,30 +1,55 @@
 <script type="module">
-
     import { LX } from 'lexgui';
 
     const content = document.getElementById('content');
 
     // Text area
-    MAKE_HEADER("Text Area", "h1", "textarea");
+    MAKE_HEADER("Text Area.", "h1", "textarea");
     MAKE_PARAGRAPH(`Represents a text area input element.`);
 
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
+        panel.branch("Text area");
         panel.addTextArea("Text Name", "Text value", (value, event) => {
             console.log(value);
         }, { placeholder: "Something" });
         content.appendChild(area.root);
     }
 
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["value", "String", "Text Area value", "—"],
+                ["callback", "Function", "Function called when input changes", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "12px" );
+        panel.addLabel( "Note: Options are the same as the Text Widget plus the ones below." );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["fitHeight", "Boolean", "Make text height adapt to its content", "false"],
+                ["resize", "Boolean", "Allow resize", "true"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
     MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addTextArea(name, value, callback, options)")} to add a Text Area Widget to your panel 
         (the <code class='inline'>options</code> are the same as the Text widget) plus:` );
-    MAKE_CODE_BULLET_LIST([
-        ["fitHeight", "Boolean", "Make text height adapt to its bounding rect"],
-        ["resize", "Boolean", " Allow resize [true]"]
-    ]);
     MAKE_CODE(`panel.@[mtd]addTextArea@(@"Text Name"@, @"Text value"@, (value, event) =&gt; {
     console.@[mtd]log@(value);
 }, { placeholder: @"Something"@ });` );
-
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.TextArea(name, value, callback, options)")} and append its root to any container.` );
 </script>

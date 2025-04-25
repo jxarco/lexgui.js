@@ -3,7 +3,7 @@
 MAKE_HEADER( "Getting Started", "h1", "getting-started" );
 
 MAKE_PARAGRAPH( `Once you have included <b>lexgui.js</b> in your project, you can start using its API to create web interfaces. The library exposes several functions and components that you can utilize to build your UI.` );
-MAKE_PARAGRAPH( `The first thing to do is initializing the library. Calling ${INLINE_CODE("LX.init")} will initialize the necessary stuff and build the main ${INLINE_LINK("Area", "#area")}, which by default will fit the root container:` );
+MAKE_PARAGRAPH( `The first thing to do is initializing the library. Calling ${INLINE_CODE("LX.init")} will initialize the necessary stuff and build the main ${ INLINE_PAGE( "Area", "reference/area.html" ) }, which by default will fit the root container:` );
 MAKE_CODE( `@let@ area = @[typ]LX@.@[mtd]init@();` );
 MAKE_PARAGRAPH( `Optionally, you can pass an ${INLINE_CODE("Object")} parameter to define a few properties:` );
 MAKE_CODE_BULLET_LIST( [

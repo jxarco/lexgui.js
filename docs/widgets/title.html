@@ -5,30 +5,49 @@
     const content = document.getElementById('content');
 
     // Title
-    MAKE_HEADER("Title", "h1", "title");
+    MAKE_HEADER("Title.", "h1", "title");
     MAKE_PARAGRAPH(`Represents a title section.`);
 
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
+        panel.branch("Title");
         panel.addTitle("A Title!");
         panel.addTitle("A No-Background Big Title!", { style: { background: "none", fontSize: "24px" } });
         content.appendChild(area.root);
     }
 
-    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addTitle(name, value, callback, options)")} to add a Title Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["options", "Object", "Basic options for a Widget"],
-        [
-            ["link", "String", "Href in case title is an hyperlink"],
-            ["target", "String", "Target name of the iframe (if any)"],
-            ["icon", "String", "FA class of the icon (if any)"],
-            ["iconColor", "String", "Color of title icon (if any)"],
-            ["style", "String/Number", "CSS to override"]
-        ]
-    ]);
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "24px" );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["link", "String", "Href in case title is an hyperlink", "—"],
+                ["target", "String", "Target name of the iframe (if any)", "—"],
+                ["icon", "String", "Title icon (if any)", "—"],
+                ["iconColor", "String", "Color of title icon (if any)", "—"],
+                ["style", "String", "CSS to override", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addTitle(name, options)")} to add a Title Widget to your panel:`);
     MAKE_CODE(`panel.@[mtd]addTitle@(@"A title!"@);
 panel.@[mtd]addTitle@(@"A No-Background Big Title!@", { style: { background: @"none"@, fontSize: @"24px"@ } });` );
-
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.Title(name, options)")} and append its root to any container.` );
 </script>

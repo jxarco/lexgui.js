@@ -5,33 +5,52 @@
     const content = document.getElementById('content');
 
     // Size
-    MAKE_HEADER("Size", "h1", "size");
+    MAKE_HEADER("Size.", "h1", "size");
     MAKE_PARAGRAPH(`Represents a N dimension number size input.`);
 
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
+        panel.branch("Size");
         panel.addSize("Screen Resolution", [1280, 720], (value, event) => {
             console.log(value);
         }, { units: "p" });
         content.appendChild(area.root);
     }
 
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["value", "Array", "Size value", "—"],
+                ["callback", "Function", "Function called when the input changes", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "24px" );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["disabled", "Boolean", "Make the widget disabled", "false"],
+                ["units", "String", "Unit as string added to the end of the value", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
     MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addSize(name, value, callback, options)")} to add a Size Widget to your panel:`);
-    MAKE_CODE_BULLET_LIST([
-        ["name", "String", "Widget name"],
-        ["value", "Number", "Number value"],
-        ["callback", "Function", "Function called when the input changes"],
-        ["options", "Object", "Basic options for a Widget"],
-        [
-            ["disabled", "Boolean", "Make the widget disabled"],
-            ["units", "String", "Unit as string added to the end of the value"]
-        ]
-    ]);
     MAKE_PARAGRAPH(`<sup>Note: Since a Size Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.
             Minimum size is always 0.<sup>` );
     MAKE_CODE(`panel.@[mtd]addSize@(@"Screen Resolution"@, [@1280@, @720@], (value, event) =&gt; {
     console.@[mtd]log@(value);
 }, { units: @"p"@ });` );
-
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.SizeInput(name, value, callback, options)")} and append its root to any container.` );
 </script>

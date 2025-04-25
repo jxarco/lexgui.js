@@ -6728,7 +6728,7 @@ class TextArea extends Widget {
         wValue.style.textAlign = options.float ?? "";
         Object.assign( wValue.style, options.style ?? {} );
 
-        if( options.fitHeight )
+        if( options.fitHeight ?? false )
         {
             wValue.classList.add( "size-content" );
         }
@@ -10067,7 +10067,7 @@ class Table extends Widget {
 
                 const hrow = document.createElement( 'tr' );
 
-                if( options.sortable )
+                if( options.sortable ?? false )
                 {
                     const th = document.createElement( 'th' );
                     th.style.width = "0px";
@@ -10075,7 +10075,7 @@ class Table extends Widget {
                     this.rowOffsetCount++;
                 }
 
-                if( options.selectable )
+                if( options.selectable ?? false )
                 {
                     const th = document.createElement( 'th' );
                     th.style.width = "0px";
@@ -10251,7 +10251,7 @@ class Table extends Widget {
                     const rowId = LX.getSupportedDOMName( bodyData.join( '-' ) );
                     row.setAttribute( "rowId", rowId.substr(0, 32) );
 
-                    if( options.sortable )
+                    if( options.sortable ?? false )
                     {
                         const td = document.createElement( 'td' );
                         td.style.width = "0px";
@@ -10295,7 +10295,7 @@ class Table extends Widget {
                         row.appendChild( td );
                     }
 
-                    if( options.selectable )
+                    if( options.selectable ?? false )
                     {
                         const td = document.createElement( 'td' );
                         const input = document.createElement( 'input' );

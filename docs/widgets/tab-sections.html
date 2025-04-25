@@ -5,12 +5,13 @@
     const content = document.getElementById('content');
 
     // Tabs
-    MAKE_HEADER("TabSections", "h1", "tabs");
+    MAKE_HEADER("Tab Sections.", "h1", "tabs");
     MAKE_PARAGRAPH(`Represents panel sections as tabs, either in horizontal or vertical mode. Quickly switch between the different sets of information.`);
 
     {
         const area = new LX.Area({ className: "docs", skipAppend: true, height: "auto" });
         const panel = area.addPanel();
+        panel.branch("Tab Sections");
         panel.addTabSections("tabsName", [
             {
                 name: "First tab",
@@ -35,7 +36,34 @@
         content.appendChild(area.root);
     }
 
-    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addTabSections(tabs, options)")} to add a Tabs Widget to your panel, where 
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Widget name", "—"],
+                ["tabs", "Array", "Tab items", "—"],
+                ["options", "Object", "Basic options for a Widget", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        panel.addBlank( null, "24px" );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["vertical", "Boolean", "Use vertical instead of horizontal tabs", "true"],
+                ["showNames", "String", "Show tab name only in horizontal tabs", "false"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
+    MAKE_PARAGRAPH(`Call ${INLINE_CODE("Panel.addTabSections(name, tabs, options)")} to add a Tabs Widget to your panel, where 
     <code class='inline'>tabs</code> is an <code class="inline">Array</code> of objects which have:` );
     MAKE_CODE_BULLET_LIST([
         ["name", "String", "Name of the tab (if icon, use as title)"],
@@ -64,5 +92,6 @@
         }
     }
 ], { vertical: @false@ });` );
+    MAKE_PARAGRAPH( `Or create it anywhere using ${INLINE_CODE("new LX.TabSections(name, tabs, options)")} and append its root to any container.` );
 
 </script>
