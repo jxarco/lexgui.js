@@ -342,6 +342,18 @@ class CodeEditor {
         // Full editor
         area.root.classList.add('codebasearea');
 
+        const observer = new MutationObserver((e) => {
+            if( e[0].attributeName == "style" )
+            {
+                this.resize();
+            }
+        });
+
+        observer.observe( area.root.parentNode, {
+            attributes: true,
+            attributeFilter: ['class', 'style'],
+        });
+
         // Code area
         this.tabs.area.root.classList.add( 'codetabsarea' );
 
@@ -1219,6 +1231,12 @@ class CodeEditor {
             this.cursorToPosition( cursor, ( cursor.position + new_lines[ 0 ].length ) );
             this.processLine( lidx );
         }
+
+        this.resize( null, ( scrollWidth, scrollHeight ) => {
+            var viewportSizeX = ( this.codeScroller.clientWidth + this.getScrollLeft() ) - CodeEditor.LINE_GUTTER_WIDTH; // Gutter offset
+            if( ( cursor.position * this.charWidth ) >= viewportSizeX )
+                this.setScrollLeft( this.code.lines[ lidx ].length * this.charWidth );
+        } );
     }
 
     loadFile( file, options = {} ) {
@@ -2474,14 +2492,20 @@ class CodeEditor {
         const numViewportChars = Math.floor( ( this.codeScroller.clientWidth - CodeEditor.LINE_GUTTER_WIDTH ) / this.charWidth );
         if( maxLineLength >= numViewportChars && maxLineLength != this._lastMaxLineLength )
         {
-            this.resize( maxLineLength );
-            this.setScrollLeft( 1e4 );
+            this.resize( maxLineLength, () => {
+                if( cursor.position > numViewportChars )
+                {
+                    this.setScrollLeft( cursor.position * this.charWidth );
+                }
+            } );
         }
 
         // Manage autocomplete
 
         if( this.useAutoComplete )
+        {
             this.showAutoCompleteBox( key, cursor );
+        }
     }
 
     async _pasteContent( cursor ) {
@@ -2507,11 +2531,12 @@ class CodeEditor {
 
         let text_to_copy = "";
 
-        if( !cursor.selection ) {
+        if( !cursor.selection )
+        {
             text_to_copy = "\n" + this.code.lines[ cursor.line ];
         }
-        else {
-
+        else
+        {
             // Some selections don't depend on mouse up..
             if( cursor.selection ) cursor.selection.invertIfNecessary();
 
@@ -2541,7 +2566,8 @@ class CodeEditor {
 
         this._addUndoStep( cursor, true );
 
-        if( !cursor.selection ) {
+        if( !cursor.selection )
+        {
             text_to_cut = "\n" + this.code.lines[ cursor.line ];
             this.code.lines.splice( lidx, 1 );
             this.processLines();
@@ -2549,8 +2575,8 @@ class CodeEditor {
             if( this.code.lines[ lidx ] == undefined )
                 this.lineUp( cursor );
         }
-        else {
-
+        else
+        {
             // Some selections don't depend on mouse up..
             if( cursor.selection ) cursor.selection.invertIfNecessary();
 
@@ -3745,7 +3771,7 @@ class CodeEditor {
         this.setScrollBarValue( 'vertical' );
     }
 
-    resize( pMaxLength ) {
+    resize( pMaxLength, onResize ) {
 
         setTimeout( () => {
 
@@ -3760,6 +3786,11 @@ class CodeEditor {
             this.codeSizer.style.minHeight = scrollHeight + "px";
 
             this.resizeScrollBars();
+
+            if( onResize )
+            {
+                onResize( scrollWidth, scrollHeight );
+            }
 
         }, 10 );
     }
