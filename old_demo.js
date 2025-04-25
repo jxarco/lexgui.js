@@ -464,9 +464,47 @@ topTabs.area.addOverlayButtons( [
             callback: value => console.log(value)
         }
     ], {
-        name: "Button 4",
-        icon: "Box",
-        callback: (value, event) => console.log(value)
+        name: "Open Sidebar Sheet",
+        icon: "PanelLeftDashed",
+        callback: (value, event) => {
+
+            // create an area and append a sidebar:
+            const area = new LX.Area({ skipAppend: true });
+
+            const sidebar = area.addSidebar( m => {
+                m.group( "Projects", { icon: "Plus", callback: (groupName, event) => { console.log(groupName) }} );
+                m.add( "Getting Started", { icon: "Box" /*,collapsable: false*/ } );
+                m.add( "Getting Started/Installation", { icon: "Box", callback: logParams } );
+                m.add( "Getting Started/Project Structure", { icon: "Box", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } } );
+                m.add( "Building Your Application", { icon: "Code", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } } );
+                m.add( "Search Blocks", { icon: "Search", callback: logParams } );
+                m.add( "Very loooooooooooooooooooooooong sun", { icon: "Sun",callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } } );
+                m.separator();
+                m.group( "API Reference" );
+                m.add( "Components", { icon: "Box", callback: logParams } );
+                m.add( "File Conventions", { icon: "Code", callback: logParams } );
+                m.add( "Functions", { icon: "Search",callback: logParams } );
+                m.add( "CLI", { icon: "Sun",callback: logParams } );
+                m.separator();
+                m.group( "Architecture" );
+                m.add( "Accessibility ", { icon: "Box", callback: logParams } );
+                m.add( "Fast Refresh", { icon: "Code", callback: logParams } );
+                m.add( "Supported Browsers", { icon: "Search",callback: logParams } );
+                m.separator();
+                m.add( "Calendar ", { icon: "Calendar", collapsable: 3 } );
+                m.add( "Personal ", { callback: logParams, type: "checkbox" } );
+                m.add( "Work", { callback: logParams, type: "checkbox", value: true } );
+                m.add( "Family", { callback: logParams, type: "checkbox" } );
+            }, { /* collapseToIcons: false, */
+                skipHeader: true,
+                filter: true,
+                footerTitle: "jxarco",
+                footerSubtitle: "alexroco.30@gmail.com",
+                footerImage: "https://avatars.githubusercontent.com/u/25059187?s=400&u=ad8907b748c13e4e1a7cdd3882826acb6a2928b5&v=4",
+            });
+
+            new LX.Sheet( "256px", [ area ] );
+        }
     }
 ], { float: "htc" } );
 
