@@ -671,7 +671,9 @@ class CodeEditor {
                     this.cursorToPosition( cursor, deleteFromPosition );
 
                     if( this.useAutoComplete )
+                    {
                         this.showAutoCompleteBox( 'foo', cursor );
+                    }
                 }
                 else if( this.code.lines[ ln - 1 ] != undefined ) {
 
@@ -4084,6 +4086,8 @@ class CodeEditor {
         const isActive = this.isAutoCompleteActive;
         this.isAutoCompleteActive = false;
         this.autocomplete.classList.remove( 'show' );
+        this.autocomplete.innerHTML = ""; // Clear all suggestions
+
         return isActive != this.isAutoCompleteActive;
     }
 
