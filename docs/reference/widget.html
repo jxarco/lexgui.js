@@ -1,7 +1,6 @@
 <script type="text/javascript">
 
     MAKE_HEADER( "Widget", "h1", "widget" );
-    // MAKE_PARAGRAPH( `Areas are the main container for a LexGUI interface. Inside they can contain panels and even other areas.` );
 
     MAKE_HEADER( "Constructor", "h2", "constructor" );
     MAKE_CLASS_CONSTRUCTOR( "Widget", [
@@ -10,6 +9,7 @@
         ["options", "Object"],
     ] );
 
+    MAKE_LINE_BREAK();
     MAKE_PARAGRAPH( `The possible ${INLINE_CODE(`options`)} are the following:` );
     MAKE_CODE_BULLET_LIST( [
         ["className", "String", "Add class to DOM element"],

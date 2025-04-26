@@ -73,7 +73,7 @@
 	text-decoration: none;
 }
 
-#content .lexpanel a {
+#content .lexpanel a, #content .lexarea a {
 	color: unset;
 }
 

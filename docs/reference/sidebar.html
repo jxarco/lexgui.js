@@ -1,12 +1,80 @@
 <script type="text/javascript">
 
+    const content = document.getElementById( 'content' );
+
     MAKE_HEADER( "Sidebar", "h1", "sidebar" );
 
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto" } );
+        content.appendChild( area.root );
+
+        const sidebar = area.addSidebar( m => {
+            m.group( "Projects", { icon: "Plus" } );
+            m.add( "Getting Started", { icon: "Box" /*,collapsable: false*/ } );
+            m.add( "Getting Started/Installation", { icon: "Box" } );
+            m.add( "Getting Started/Project Structure", { icon: "Box", action: { name: "ShowMenu", icon: null } } );
+            m.add( "Building Your Application", { icon: "Code", action: { name: "ShowMenu", icon: null } } );
+            m.add( "Search Blocks", { icon: "Search" } );
+            m.add( "Very loooooooooooooooooooooooong sun", { icon: "Sun", action: { name: "ShowMenu", icon: null } } );
+            m.separator();
+            m.group( "API Reference" );
+            m.add( "Components", { icon: "Box" } );
+            m.add( "File Conventions", { icon: "Code" } );
+            m.add( "Functions", { icon: "Search" } );
+            m.add( "CLI", { icon: "Sun", } );
+            m.separator();
+            m.group( "Architecture" );
+            m.add( "Accessibility ", { icon: "Box" } );
+            m.add( "Fast Refresh", { icon: "Code",  } );
+            m.add( "Supported Browsers", { icon: "Search", } );
+            m.separator();
+            m.add( "Calendar ", { icon: "Calendar", collapsable: 3 } );
+            m.add( "Personal ", { type: "checkbox" } );
+            m.add( "Work", { type: "checkbox", value: true } );
+            m.add( "Family", { type: "checkbox" } );
+        }, { /* collapseToIcons: false, skipFooter: true, skipHeader: true,*/
+            // side: "right",
+            filter: true,
+            headerTitle: "LexGUI",
+            headerSubtitle: LX.version,
+            headerImage: "https://raw.githubusercontent.com/jxarco/lexgui.js/refs/heads/master/images/icon.png",
+            // header: customHeader,
+            footerTitle: "jxarco",
+            footerSubtitle: "alexroco.30@gmail.com",
+            footerImage: "https://avatars.githubusercontent.com/u/25059187?s=400&u=ad8907b748c13e4e1a7cdd3882826acb6a2928b5&v=4",
+            // footer: customFooter,
+            onHeaderPressed: (e) => { console.log( "onHeaderPressed" ) },
+            onFooterPressed: (e, element) => {
+                new LX.DropdownMenu( element, [
+                    "My Account",
+                    null,
+                    { name: "Profile", kbd: ["Meta", "P"], icon: "User" },
+                    { name: "Billing", disabled: true, icon: "CreditCard" },
+                    { name: "Settings", kbd: "S" },
+                    null,
+                    { name: "Team" },
+                    { name: "Invite users", icon: "Search" },
+                    null,
+                    { name: "Github", icon: "Github" },
+                    { name: "Support", submenu: [
+                        { name: "Email", icon: "Mail" },
+                        { name: "Message", submenu: [
+                            { name: "Whatsapp", kbd: "W" },
+                            { name: "iMessage", kbd: "M" },
+                        ]},
+                    ]  }
+                ], { side: "right", align: "end" });
+            }
+        });
+        area.root.className += " border rounded-lg shadow-lg bg-secondary overflow-hidden";
+    }
+    
     MAKE_HEADER( "Constructor", "h2", "constructor" );
     MAKE_CLASS_CONSTRUCTOR( "Sidebar", [
         [ "options", "Object" ]
     ] );
 
+    MAKE_LINE_BREAK();
     MAKE_PARAGRAPH( `Use ${INLINE_CODE(`Area.addSidebar`)} with the following options to build a Sidebar inside an area:` );
     MAKE_CODE_BULLET_LIST( [
         ["className", "String", " Extra class to customize root element"],

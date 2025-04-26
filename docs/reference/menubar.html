@@ -1,13 +1,66 @@
 <script type="text/javascript">
 
+    const content = document.getElementById( 'content' );
+
     MAKE_HEADER( "Menubar", "h1", "menubar" );
-    // MAKE_PARAGRAPH( `Areas are the main container for a LexGUI interface. Inside they can contain panels and even other areas.` );
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "200px" } );
+        content.appendChild( area.root );
+
+        const menubar = area.addMenubar( [
+            { name: "Scene", submenu: [
+                { name: "New Scene" },
+                { name: "Open Scene", icon: "FolderOpen", kbd: "S" },
+                { name: "Open Recent", icon: "File",  submenu: [
+                    { name: "hello.scene" },
+                    { name: "goodbye.scene" }
+                ] }
+            ] },
+            { name: "Project", submenu: [
+                { name: "Project Settings", disabled: true },
+                null,
+                { name: "Export", submenu: [
+                    { name: "DAE", icon: "Frame", kbd: "D" },
+                    { name: "GLTF", kbd:  "G" }
+                ] },
+                { name: "Export", icon: "Download" }
+            ] },
+            { name: "Editor", submenu: [
+                { name: "Autosave", checked: true, icon: "Save" },
+                { name: "Settings",  icon: "Settings2" },
+            ] },
+            { name: "Account", submenu: [
+                { name: "Login", icon: "User" },
+            ] },
+            { name: "Help", submenu: [
+                { name: "Search Help", icon: "Search", kbd:  "F1" },
+                { name: "Support LexGUI", icon: "Heart" },
+            ] },
+        ], { sticky: false });
+
+        menubar.addButtons( [
+            {
+                title: "Play",
+                icon: "Play@solid",
+                swap: "Stop"
+            },
+            {
+                title: "Pause",
+                icon: "Pause@solid",
+                disabled: true
+            }
+        ]);
+        area.root.className += " border rounded-lg shadow-lg bg-secondary overflow-hidden";
+        area.sections[ 1 ].root.className += " bg-none";
+    }
 
     MAKE_HEADER( "Constructor", "h2", "constructor" );
     MAKE_CLASS_CONSTRUCTOR( "Menubar", [
         ["options", "Object"]
     ] );
 
+    MAKE_LINE_BREAK();
     MAKE_PARAGRAPH( `The possible ${INLINE_CODE(`options`)} are the following:` );
     MAKE_CODE_BULLET_LIST( [
         ["float", "String", "Align menubar content to a specific side"],
