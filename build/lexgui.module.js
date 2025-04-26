@@ -2396,6 +2396,8 @@ class DropdownMenu {
             }, 10 );
         }
 
+        let applyIconPadding = items.filter( i => { return ( i?.icon != undefined ) || ( i?.checked != undefined ) } ).length > 0;
+
         for( let item of items )
         {
             if( !item )
@@ -2457,7 +2459,7 @@ class DropdownMenu {
                 const icon = LX.makeIcon( item.icon, { svgClass: disabled ? "fg-tertiary" : "" } );
                 menuItem.prepend( icon );
             }
-            else if( item.checked == undefined ) // no checkbox, no icon
+            else if( item.checked == undefined && applyIconPadding ) // no checkbox, no icon, apply padding if there's checkbox or icon in other items
             {
                 menuItem.classList.add( "pl-8" );
             }
@@ -10031,7 +10033,7 @@ class Table extends Widget {
                     const menuOptions = data.head.map( ( colName, idx ) => {
                         const item = {
                             name: colName,
-                            icon: "check",
+                            icon: "Check",
                             callback: () => {
                                 data.colVisibilityMap[ idx ] = !data.colVisibilityMap[ idx ];
                                 const cells = table.querySelectorAll(`tr > *:nth-child(${idx + this.rowOffsetCount + 1})`);
@@ -11025,7 +11027,7 @@ class Panel {
      * @param {Object} options:
      * link: Href in case title is an hyperlink
      * target: Target name of the iframe (if any)
-     * icon: FA class of the icon (if any)
+     * icon: Name of the icon (if any)
      * iconColor: Color of title icon (if any)
      * style: CSS to override
      */
