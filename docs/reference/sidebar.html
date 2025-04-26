@@ -9,6 +9,8 @@
 
     MAKE_PARAGRAPH( `Use ${INLINE_CODE(`Area.addSidebar`)} with the following options to build a Sidebar inside an area:` );
     MAKE_CODE_BULLET_LIST( [
+        ["className", "String", " Extra class to customize root element"],
+        ["side", "String", "Side to attach the sidebar (left|right) [left]"],
         ["filter", "Boolean", "Add search bar to filter entries [false]"],
         ["displaySelected", "Boolean", "Indicate if an entry is displayed as selected [false]"],
         ["skipHeader", "Boolean", "Do not use sidebar header [false]"],

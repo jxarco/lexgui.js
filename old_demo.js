@@ -225,6 +225,7 @@ const sidebar = left.addSidebar( m => {
     m.add( "Work", { callback: logParams, type: "checkbox", value: true } );
     m.add( "Family", { callback: logParams, type: "checkbox" } );
 }, { /* collapseToIcons: false, skipFooter: true, skipHeader: true,*/
+    // side: "right",
     filter: true,
     headerTitle: "LexGUI",
     headerSubtitle: LX.version,

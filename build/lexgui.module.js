@@ -3856,6 +3856,7 @@ class Area {
      * @param {Function} callback Function to fill the sidebar
      * @param {Object} options: Sidebar options
      * width: Width of the sidebar [16rem]
+     * side: Side to attach the sidebar (left|right) [left]
      */
 
     addSidebar( callback, options = {} ) {
@@ -3872,10 +3873,16 @@ class Area {
 
         LX.sidebars.push( sidebar );
 
-        const width = options.width ?? "16rem";
-        const [ bar, content ] = this.split( { type: 'horizontal', sizes: [ width, null ], resize: false, sidebar: true } );
-        sidebar.siblingArea = content;
+        const side = options.side ?? "left";
+        console.assert( side == "left" || side == "right", "Invalid sidebar side: " + side );
+        const leftSidebar = ( side == "left" );
 
+        const width = options.width ?? "16rem";
+        const sizes = leftSidebar ? [ width, null ] : [ null, width ];
+        const [ left, right ] = this.split( { type: 'horizontal', sizes, resize: false, sidebar: true } );
+        sidebar.siblingArea = leftSidebar ? right : left;
+
+        let bar = leftSidebar ? left : right;
         bar.attach( sidebar );
         bar.isSidebar = true;
 
@@ -4903,6 +4910,7 @@ class SideBar {
             configurable: true
         });
 
+        this.side = options.side ?? "left";
         this.collapsable = options.collapsable ?? true;
         this._collapseWidth = ( options.collapseToIcons ?? true ) ? "58px" : "0px";
         this.collapsed = false;
@@ -4933,7 +4941,7 @@ class SideBar {
 
             if( this.collapsable )
             {
-                const icon = LX.makeIcon( "PanelLeft", { title: "Toggle Sidebar", iconClass: "toggler" } );
+                const icon = LX.makeIcon( this.side == "left" ? "PanelLeft" : "PanelRight", { title: "Toggle Sidebar", iconClass: "toggler" } );
                 this.header.appendChild( icon );
 
                 icon.addEventListener( "click", (e) => {
