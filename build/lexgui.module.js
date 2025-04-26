@@ -10634,13 +10634,15 @@ class Panel {
     /**
      * @method sameLine
      * @param {Number} number Of widgets that will be placed in the same line
+     * @param {String} className Extra class to customize inline widgets parent container
      * @description Next N widgets will be in the same line. If no number, it will inline all until calling nextLine()
      */
 
-    sameLine( number ) {
+    sameLine( number, className ) {
 
         this._inline_queued_container = this.queuedContainer;
-        this._inlineWidgetsLeft = ( number || Infinity );
+        this._inlineWidgetsLeft = ( number ?? Infinity );
+        this._inlineExtraClass = className ?? null;
     }
 
     /**
@@ -10650,6 +10652,8 @@ class Panel {
      */
 
     endLine( className ) {
+
+        className = className ?? this._inlineExtraClass;
 
         if( this._inlineWidgetsLeft == -1 )
         {
@@ -10712,6 +10716,7 @@ class Panel {
 
         delete this._inlineWidgets;
         delete this._inlineContainer;
+        delete this._inlineExtraClass;
     }
 
     /**

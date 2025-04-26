@@ -705,13 +705,13 @@ function fillPanel( panel ) {
     panel.addCheckbox("I have a label", false, (value, event) => {
         console.log(value);
     }, { label: "Personal", className: "secondary" });
-    panel.sameLine(2);
+    panel.sameLine( 2 );
     panel.addToggle("Colored Toggle", false, (value, event) => {
         console.log(value);
-    }, { label: "", className: "accent", nameWidth: "50%" });
+    }, { label: "", className: "accent", width: "50%", nameWidth: "50%" });
     panel.addToggle("Outlined Toggle ", false, (value, event) => {
         console.log(value);
-    }, { label: "", className: "secondary outline", nameWidth: "50%" });
+    }, { label: "", className: "secondary outline", width: "50%", nameWidth: "50%" });
     panel.addFile("I'm a File Input", data => { console.log(data) }, {  } );
     panel.addFile("A Disabled File Input", data => { console.log(data) }, { disabled: true } );
     panel.addSelect("Best Tool", ["@Engines", "Godot", "Unity", "Unreal Engine", "@Apps", "Visual Studio", "Visual Studio Code"], "Unity", (value, event) => {
