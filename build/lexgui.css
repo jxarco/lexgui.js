@@ -3846,7 +3846,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexarrayitems {
     width: 100%;
-    padding: 6px;
+    padding: 2px;
     color: var(--global-text-secondary);
     font-size: var(--global-font-size);
     margin-top: -1px;
@@ -3854,7 +3854,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexarrayitems .lexwidgetname {
-    color: var(--global-text-secondary);
+    color: var(--global-text-tertiary);
+    font-size: var(--global-font-size-sm);
+    justify-content: center;
+    margin-right: 0.4rem;
+    font-weight: 600;
 }
 
 /* Tags Widget */

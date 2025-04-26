@@ -7856,9 +7856,7 @@ class ItemArray extends Widget {
 
         // Add open array button
 
-        const itemNameWidth = "4%";
-
-        var container = document.createElement('div');
+        let container = document.createElement( "div" );
         container.className = "lexarray";
         container.style.width = "100%";
         this.root.appendChild( container );
@@ -7868,8 +7866,8 @@ class ItemArray extends Widget {
 
         const toggleButton = new Button(null, buttonName, () => {
             this.root.dataset["opened"] = this.root.dataset["opened"] == "true" ? false : true;
-            this.root.querySelector(".lexarrayitems").toggleAttribute('hidden');
-        }, { buttonClass: 'array' });
+            this.root.querySelector(".lexarrayitems").toggleAttribute( "hidden" );
+        }, { buttonClass: "array" });
         toggleButton.root.querySelector( "span" ).appendChild( LX.makeIcon( "Down", { svgClass: "sm" } ) );
         container.appendChild( toggleButton.root );
 
@@ -7904,19 +7902,19 @@ class ItemArray extends Widget {
                         widget = new TextInput(i + "", value, function(value, event) {
                             values[ i ] = value;
                             callback( values );
-                        }, { nameWidth: itemNameWidth, inputWidth: "95%", skipReset: true });
+                        }, { nameWidth: "12px", className: "p-0", skipReset: true });
                         break;
                     case Number:
                         widget = new NumberInput(i + "", value, function(value, event) {
                             values[ i ] = value;
                             callback( values );
-                        }, { nameWidth: itemNameWidth, inputWidth: "95%", skipReset: true });
+                        }, { nameWidth: "12px", className: "p-0", skipReset: true });
                         break;
                     case 'select':
                         widget = new Select(i + "", options.innerValues, value, function(value, event) {
                             values[ i ] = value;
                             callback( values );
-                        }, { nameWidth: itemNameWidth, inputWidth: "95%", skipReset: true });
+                        }, { nameWidth: "12px", className: "p-0", skipReset: true });
                         break;
                 }
 
