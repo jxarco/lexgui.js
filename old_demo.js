@@ -945,7 +945,9 @@ function fillBottomPanel( panel ) {
                     tableWidget.refresh();
                 } },
                 { name: "Make a copy", callback: (a) => console.log(a) },
-                { name: "Favourite", callback: (a) => console.log(a) }
+                { name: "Favourite", callback: (a) => console.log(a) },
+                null,
+                { name: "Delete", icon: "Trash2", className: "fg-error", callback: (a) => console.log(a) },
             ]
         }
     });
