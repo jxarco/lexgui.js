@@ -2,7 +2,35 @@
 
 ## dev
 
-## 0.5.11 (master)
+## 0.6.0 (master)
+
+`LX.init` now has to called using `await`.
+Use Dropdowns elements in menubar.
+Remove legacy:
+  - Removed `options.selected` in ComboButtons Widget.
+  - Removed FA icons.
+Added LucideIcons as main icon provider.
+`LX.makeIcon`: Support for solid variants in supported icons (also using `iconName@variant`).
+`LX.registerIcon`: Support for classes and attributes for svg and path elements.
+Refactor `strictViewport` to `layoutMode` (app|document) in `LX.init`.
+Added support for Sheet element (hiding dialog at the window sides).
+Support disabling layer (zindex) update in `LX.makeDraggable` using `options.updateLayers`.
+Fixed minor issues with some Nodegraph elements.
+Added `className` to `LX.sameLine(numberOfWidgets, class)` to allow customization when using `numberOfWidgets`.
+Added support for right sidebar.
+Restyled Number Widget units to avoid layout trashing when recomputing units span location.
+
+CodeEditor:
+  - Remove language images and use SVG instead.
+  - Scrolling fixes.
+  - Fixed minor css issues.
+
+Docs updated:
+  - Added interactive code examples for widgets.
+  - Improved widget list parameters and options.
+  - Added live examples for sidebar and menubar.
+
+## 0.5.11
 
 Widgets:
 - Form: Add more custom options. Fixed issue using a String as Form field.
