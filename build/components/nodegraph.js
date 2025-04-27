@@ -1907,6 +1907,7 @@ class GraphEditor {
         svg.classList.add( "background-svg" );
         svg.style.width = "100%";
         svg.style.height = "100%";
+        svg.style.stroke = "none";
 
         svg.appendChild( pattern );
 
@@ -2242,7 +2243,7 @@ class GraphEditor {
             C ${ cPoint1.x },${ cPoint1.y } ${ cPoint2.x },${ cPoint2.y } ${ endPos.x },${ endPos.y }
         ` );
 
-        path.setAttribute( 'stroke', color );
+        path.parentElement.style.color = color;
     }
 
     _updateNodeLinks( nodeId ) {
