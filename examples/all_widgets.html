@@ -30,7 +30,7 @@
     window.LX = LX;
 
     // Init library and get main area
-    let area = LX.init();
+    let area = await LX.init();
 
     const menubar = area.addMenubar( [], { sticky: false } );
     menubar.addButtons([

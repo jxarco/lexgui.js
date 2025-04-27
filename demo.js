@@ -5,7 +5,7 @@ import 'lexgui/components/audio.js';
 
 window.LX = LX;
 
-const area = LX.init( { layoutMode: "document", rootClass: "wrapper" } );
+const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
 
 
 // Menubar

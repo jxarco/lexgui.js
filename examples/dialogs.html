@@ -22,7 +22,7 @@
     import { LX } from 'lexgui';
 
     // Init library and get main area
-    let area = LX.init({ skip_default_area: true });
+    let area = await LX.init({ skip_default_area: true });
 
     LX.popup("Hello! I'm a popup dialog :)", null, { position: ["45%", "20%"] })
 

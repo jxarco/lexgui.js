@@ -23,7 +23,7 @@
         import { LX } from 'lexgui';
 
         // Init library and get main area
-        let area = LX.init();
+        let area = await LX.init();
 
         // Split main area
         let [leftArea, rightArea] = area.split({ sizes: ["20%","80%"], resize: false });

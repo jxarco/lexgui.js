@@ -6,7 +6,7 @@ import 'lexgui/components/audio.js';
 window.LX = LX;
 
 // Init library and get main area
-let area = LX.init();
+let area = await LX.init();
 
 // Change global properties after init
 // LX.DEFAULT_NAME_WIDTH = "10%";

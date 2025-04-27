@@ -1,7 +1,5 @@
 // Lexgui.js @jxarco
 
-import 'https://unpkg.com/lucide@latest';
-
 /**
  * Main namespace
  * @namespace LX
@@ -1375,14 +1373,17 @@ function _createCommandbar( root )
  * layoutMode: Sets page layout mode (document | app)
  */
 
-function init( options = { } )
+async function init( options = { } )
 {
     if( this.ready )
     {
         return this.main_area;
     }
 
+    await LX.loadScriptSync( "https://unpkg.com/lucide@latest" );
+
     // LexGUI root
+    console.log( `LexGUI v${ this.version }` );
 
     var root = document.createElement( 'div' );
     root.id = "lexroot";
@@ -14364,6 +14365,17 @@ Object.assign(LX, {
                 }
             document.getElementsByTagName('head')[0].appendChild(script);
         }
+    },
+
+    loadScriptSync( url ) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement( "script" );
+            script.src = url;
+            script.async = false;
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error(`Failed to load ${url}`));
+            document.head.appendChild( script );
+        });
     },
 
     downloadURL( url, filename ) {

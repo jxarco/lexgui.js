@@ -22,7 +22,7 @@
     import { LX } from 'lexgui';
     import { VideoEditor } from 'lexgui/components/videoeditor.js';
     // init library and get main area
-    let area = LX.init();
+    let area = await LX.init();
 
     // split main area
     let [leftArea, rightArea] = area.split({ sizes: ["75%", "25%"], minimizable: true });

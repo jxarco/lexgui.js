@@ -60,7 +60,7 @@ import { LX } from 'lexgui';
 import { CodeEditor } from 'lexgui/components/codeeditor.js';
 
 // Create main area
-let area = LX.init();
+let area = await LX.init();
 
 // Create area panels
 let panel = area.addPanel();

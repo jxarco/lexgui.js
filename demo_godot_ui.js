@@ -1,7 +1,7 @@
 import { LX } from 'lexgui';
 
 // init library and get main area
-let area = LX.init();
+let area = await LX.init();
 
 // menu bar
 const menubar = area.addMenubar( [

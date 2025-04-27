@@ -23,7 +23,7 @@
     import 'lexgui/components/codeeditor.js';
 
     // Init library and get main area
-    let area = LX.init();
+    let area = await LX.init();
 
     // Split main area
     var [topArea, bottomArea] = area.split({ type: 'vertical', sizes: ["60vh", "40vh"] });

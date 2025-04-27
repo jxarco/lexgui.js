@@ -23,7 +23,7 @@
     import 'lexgui/components/nodegraph.js';
 
     // init library and get main area
-    let area = LX.init();
+    let area = await LX.init();
 
     // split main area
     var [topArea, bottomArea] = area.split({ type: 'vertical', sizes: ["25%", "75%"] });
