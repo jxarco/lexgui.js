@@ -30,6 +30,7 @@ function MAKE_PARAGRAPH( string, sup )
 {
     console.assert(string);
     let paragraph = document.createElement(sup ? 'sup' : 'p');
+    paragraph.className = "leading-relaxed";
     paragraph.innerHTML = string;
     mainContainer.appendChild( paragraph );
 }
