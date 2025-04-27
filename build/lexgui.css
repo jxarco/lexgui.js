@@ -3658,7 +3658,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     transition-timing-function: ease-out;
 }
 
-.lexareatabscontainer > .lexarea.origin {
+.lexareatabscontainer:not(.lexcodeeditor) > .lexarea.origin {
     padding-block: 0.25rem;
 }
 
