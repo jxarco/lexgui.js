@@ -2868,7 +2868,7 @@ class ColorPicker {
 
             }, { swap: "Check", icon: "Copy", buttonClass: "bg-none", className: "ml-auto", title: "Copy" })
 
-            copyButtonWidget.root.querySelector( ".swap-on svg path" ).style.fill = "#42d065";
+            copyButtonWidget.root.querySelector( ".swap-on svg" ).addClass( "fg-success" );
 
             colorLabel.appendChild( copyButtonWidget.root );
         }

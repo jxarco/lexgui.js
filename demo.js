@@ -97,7 +97,7 @@ const area = LX.init( { layoutMode: "document", rootClass: "wrapper" } );
             {
                 title: "Play",
                 icon: "Play@solid",
-                swap: "Stop"
+                swap: "Stop@solid"
             },
             {
                 title: "Pause",

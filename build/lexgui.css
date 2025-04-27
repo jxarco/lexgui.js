@@ -636,6 +636,10 @@ a svg, svg path {
     font-size: var(--global-font-size);
 }
 
+.lexfooter .credits-and-socials p {
+    font-size: var(--global-font-size-sm);
+}
+
 @media (max-width: 768px) {
     .lexfooter .credits-and-socials {
         display: block;
@@ -857,7 +861,7 @@ a svg, svg path {
     padding: 0.2rem;
     padding-inline: 0.5rem;
     border-radius: 0.4rem;
-    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     animation-duration: 400ms;
 	animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 	will-change: transform, opacity;
@@ -3652,6 +3656,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexareatabscontainer {
     transition: height 0.1s;
     transition-timing-function: ease-out;
+}
+
+.lexareatabscontainer > .lexarea.origin {
+    padding-block: 0.25rem;
 }
 
 .lexareatabscontent.folded {
