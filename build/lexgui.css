@@ -2288,12 +2288,10 @@ dialog .lexselect .lexselectoptions {
 
 .lexwidget .numberbox .drag-icon,
 .lexwidget .vecbox .drag-icon {
-    position: absolute;
-    width: 2px;
-    right: 1.25em;
     font-size: var(--global-font-size-sm);
     color: var(--global-text-secondary);
     z-index: 11;
+    margin-right: 0.25rem
 }
 
 .lexvector .vecbox:has(input:focus) {
@@ -2361,7 +2359,8 @@ input[type=number] {
 
 .lexwidget .numberbox {
     width: 100%;
-    display: grid;
+    display: flex;
+    flex-direction: column;
     background-color: var(--global-color-tertiary);
     border: 1px solid var(--global-color-transparent);
     border-radius: 6px;
@@ -2684,6 +2683,7 @@ input[type=number] {
     user-select: none;
     font-size: var(--global-font-size-lg);
     font-weight: 500;
+    white-space: nowrap;
 }
 
 .lextree ul {

@@ -8646,11 +8646,6 @@ class NumberInput extends Widget {
                 box.querySelector( ".lexinputslider" ).value = value;
             }
 
-            if( options.units )
-            {
-                vecinput.unitSpan.style.left = measureRealWidth( value ) + "px";
-            }
-
             if( !skipCallback )
             {
                 this._trigger( new IEvent( name, value, event ), callback );
@@ -8670,6 +8665,8 @@ class NumberInput extends Widget {
         box.className = "numberbox";
         container.appendChild( box );
 
+        let valueBox = LX.makeContainer( [ "auto", "100%" ], "relative flex flex-row", "", box );
+
         let vecinput = document.createElement( 'input' );
         vecinput.id = "number_" + simple_guidGenerator();
         vecinput.className = "vecinput";
@@ -8685,20 +8682,16 @@ class NumberInput extends Widget {
         }
 
         vecinput.value = vecinput.iValue = value;
-        box.appendChild( vecinput );
+        valueBox.appendChild( vecinput );
+
+        const dragIcon = LX.makeIcon( "MoveVertical", { iconClass: "drag-icon hidden", svgClass: "sm" } );
+        valueBox.appendChild( dragIcon );
 
         if( options.units )
         {
-            let unitSpan = document.createElement( 'span' );
-            unitSpan.className = "lexunit";
-            unitSpan.innerText = options.units;
-            unitSpan.style.left = measureRealWidth( vecinput.value ) + "px";
-            vecinput.unitSpan = unitSpan;
-            box.appendChild( unitSpan );
+            let unitBox = LX.makeContainer( [ "auto", "auto" ], "px-2 bg-secondary content-center", options.units, valueBox );
+            vecinput.unitBox = unitBox;
         }
-
-        const dragIcon = LX.makeIcon( "MoveVertical", { iconClass: "drag-icon hidden", svgClass: "sm" } );
-        box.appendChild( dragIcon );
 
         if( options.disabled )
         {
@@ -8708,6 +8701,7 @@ class NumberInput extends Widget {
         // Add slider below
         if( !options.skipSlider && options.min !== undefined && options.max !== undefined )
         {
+            let sliderBox = LX.makeContainer( [ "100%", "auto" ], "", "", box );
             let slider = document.createElement( 'input' );
             slider.className = "lexinputslider";
             slider.min = options.min;
@@ -8734,7 +8728,7 @@ class NumberInput extends Widget {
                 }
             }, false );
 
-            box.appendChild( slider );
+            sliderBox.appendChild( slider );
 
             // Method to change min, max, step parameters
             this.setLimits = ( newMin, newMax, newStep ) => {
@@ -8749,10 +8743,6 @@ class NumberInput extends Widget {
         vecinput.addEventListener( "input", function( e ) {
             value = +this.valueAsNumber;
             value = round( value, options.precision );
-            if( options.units )
-            {
-                vecinput.unitSpan.style.left = measureRealWidth( vecinput.value ) + "px";
-            }
         }, false );
 
         vecinput.addEventListener( "wheel", e => {
@@ -9160,7 +9150,7 @@ class SizeInput extends Widget {
         if( options.units )
         {
             let unitSpan = document.createElement( 'span' );
-            unitSpan.className = "select-none";
+            unitSpan.className = "select-none fg-tertiary font-medium";
             unitSpan.innerText = options.units;
             this.root.appendChild( unitSpan );
         }
