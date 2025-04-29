@@ -2,6 +2,8 @@
 
 ## dev
 
+Fix Dropdown issue sometimes opening all submenus on open Menubar entries.
+
 ## 0.6.0 (master)
 
 `LX.init` now has to called using `await`.

@@ -2314,6 +2314,7 @@ class DropdownMenu {
         this.align = options.align ?? "center";
         this.avoidCollisions = options.avoidCollisions ?? true;
         this.onBlur = options.onBlur;
+        this.inPlace = false;
 
         this.root = document.createElement( "div" );
         this.root.id = "root";
@@ -2333,7 +2334,8 @@ class DropdownMenu {
 
             this._onClick = e => {
 
-                if( e.target && ( this.root.contains( e.target ) || e.target == this._trigger ) )
+                // Check if the click is inside a menu or on the trigger
+                if( e.target && ( e.target.closest( ".lexdropdownmenu" ) != undefined || e.target == this._trigger ) )
                 {
                     return;
                 }
@@ -2341,7 +2343,8 @@ class DropdownMenu {
                 this.destroy( true );
             };
 
-            document.body.addEventListener( "click", this._onClick );
+            document.body.addEventListener( "mousedown", this._onClick, true );
+            document.body.addEventListener( "focusin", this._onClick, true );
         }, 10 );
     }
 
@@ -2351,7 +2354,8 @@ class DropdownMenu {
 
         delete this._trigger.ddm;
 
-        document.body.removeEventListener( "click", this._onClick );
+        document.body.removeEventListener( "mousedown", this._onClick, true );
+        document.body.removeEventListener( "focusin", this._onClick, true );
 
         LX.root.querySelectorAll( ".lexdropdownmenu" ).forEach( m => { m.remove(); } );
 
@@ -2376,7 +2380,7 @@ class DropdownMenu {
             let newParent = document.createElement( "div" );
             newParent.tabIndex = "1";
             newParent.className = "lexdropdownmenu";
-            newParent.id = parentDom.id;
+            newParent.dataset["id"] = parentDom.dataset["id"];
             newParent.dataset["side"] = "right"; // submenus always come from the right
             LX.root.appendChild( newParent );
 
@@ -2418,7 +2422,7 @@ class DropdownMenu {
 
             const menuItem = document.createElement('div');
             menuItem.className = "lexdropdownmenuitem" + ( item.name ? "" : " label" ) + ( item.disabled ?? false ? " disabled" : "" ) + ( ` ${ item.className ?? "" }` );
-            menuItem.id = pKey;
+            menuItem.dataset["id"] = pKey;
             menuItem.innerHTML = `<span>${ key }</span>`;
             menuItem.tabIndex = "1";
             parentDom.appendChild( menuItem );
@@ -2504,24 +2508,24 @@ class DropdownMenu {
 
             menuItem.addEventListener("mouseover", e => {
 
-                let path = menuItem.id;
+                let path = menuItem.dataset["id"];
                 let p = parentDom;
 
                 while( p )
                 {
-                    path += "/" + p.id;
+                    path += "/" + p.dataset["id"];
                     p = p.currentParent?.parentElement;
                 }
 
                 LX.root.querySelectorAll( ".lexdropdownmenu" ).forEach( m => {
-                    if( !path.includes( m.id ) )
+                    if( !path.includes( m.dataset["id"] ) )
                     {
                         m.currentParent.built = false;
                         m.remove();
                     }
                 } );
 
-                if( item.submenu )
+                if( item.submenu && this.inPlace )
                 {
                     if( menuItem.built )
                     {
@@ -2595,6 +2599,7 @@ class DropdownMenu {
 
         this.root.style.left = `${ position[ 0 ] }px`;
         this.root.style.top = `${ position[ 1 ] }px`;
+        this.inPlace = true;
     }
 
     _addSeparator( parent ) {
@@ -4573,7 +4578,7 @@ class Menubar {
 
         this.root.querySelectorAll(".lexmenuentry").forEach( e => {
             e.classList.remove( 'selected' );
-            e.built = false;
+            delete e.dataset[ "built" ];
         } );
 
         if( this._currentDropdown )
@@ -4614,7 +4619,7 @@ class Menubar {
             const _showEntry = () => {
                 this._resetMenubar(true);
                 entry.classList.add( "selected" );
-                entry.built = true;
+                entry.dataset["built"] = "true";
                 this._currentDropdown = addDropdownMenu( entry, item.submenu, { side: "bottom", align: "start", onBlur: () => {
                     this._resetMenubar();
                 } });
@@ -4635,7 +4640,7 @@ class Menubar {
 
             entry.addEventListener( "mouseover", (e) => {
 
-                if( this.focused && !entry.built )
+                if( this.focused && !( entry.dataset[ "built" ] ?? false ) )
                 {
                     _showEntry();
                 }
