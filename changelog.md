@@ -3,8 +3,9 @@
 ## dev
 
 Support back `options.selected` in ComboButtons Widget as `ValueType|Array<ValueType>`.
-Fix Dropdown issue sometimes opening all submenus on open Menubar entries.
-Fix Drag icon in Number/Vector widgets modifying layout.
+Fixed Dropdown issue sometimes opening all submenus on open Menubar entries.
+Fixed Dropdown creation crash when no input items.
+Fixed Drag icon in Number/Vector widgets modifying layout.
 
 ## 0.6.0 (master)
 

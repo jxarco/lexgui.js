@@ -2296,7 +2296,7 @@ class DropdownMenu {
 
         console.assert( trigger, "DropdownMenu needs a DOM element as trigger!" );
 
-        if( DropdownMenu.currentMenu )
+        if( DropdownMenu.currentMenu || !items?.length )
         {
             DropdownMenu.currentMenu.destroy();
             this.invalid = true;
@@ -4620,7 +4620,7 @@ class Menubar {
                 this._resetMenubar(true);
                 entry.classList.add( "selected" );
                 entry.dataset["built"] = "true";
-                this._currentDropdown = addDropdownMenu( entry, item.submenu, { side: "bottom", align: "start", onBlur: () => {
+                this._currentDropdown = addDropdownMenu( entry, item.submenu ?? [], { side: "bottom", align: "start", onBlur: () => {
                     this._resetMenubar();
                 } });
             };
