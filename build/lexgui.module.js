@@ -13627,7 +13627,7 @@ class AssetView {
         }
         else
         {
-            this.rightPanel = area.addPanel({ className: 'lexassetcontentpanel' });
+            this.rightPanel = area.addPanel({ className: 'lexassetcontentpanel flex flex-col overflow-hidden' });
         }
 
         const on_sort = ( value, event ) => {

@@ -4510,15 +4510,15 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 ul.lexassetscontent {
-    position: relative;
+    height: 100%;
     -webkit-text-size-adjust: 100%;
-    font-size: var(--global-font-size);
-    color: #AAA;
-    box-sizing: border-box;
-    overflow: auto;
     padding: 0 1em;
     margin: 0;
-    height: calc(100% - 36px);
+    font-size: var(--global-font-size);
+    color: #AAA;
+    position: relative;
+    box-sizing: border-box;
+    overflow: auto;
 }
 
 .lexassetscontent.list {
