@@ -3,6 +3,7 @@
 ## dev
 
 Fix Dropdown issue sometimes opening all submenus on open Menubar entries.
+Fix Drag icon in Number/Vector widgets modifying layout.
 
 ## 0.6.0 (master)
 

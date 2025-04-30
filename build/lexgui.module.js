@@ -8690,7 +8690,7 @@ class NumberInput extends Widget {
         vecinput.value = vecinput.iValue = value;
         valueBox.appendChild( vecinput );
 
-        const dragIcon = LX.makeIcon( "MoveVertical", { iconClass: "drag-icon hidden", svgClass: "sm" } );
+        const dragIcon = LX.makeIcon( "MoveVertical", { iconClass: "drag-icon hidden-opacity", svgClass: "sm" } );
         valueBox.appendChild( dragIcon );
 
         if( options.units )
@@ -8783,7 +8783,7 @@ class NumberInput extends Widget {
             doc.addEventListener( 'mousemove', innerMouseMove );
             doc.addEventListener( 'mouseup', innerMouseUp );
             document.body.classList.add( 'noevents' );
-            dragIcon.classList.remove( 'hidden' );
+            dragIcon.classList.remove( 'hidden-opacity' );
             e.stopImmediatePropagation();
             e.stopPropagation();
 
@@ -8821,7 +8821,7 @@ class NumberInput extends Widget {
             doc.removeEventListener( 'mousemove', innerMouseMove );
             doc.removeEventListener( 'mouseup', innerMouseUp );
             document.body.classList.remove( 'noevents' );
-            dragIcon.classList.add( 'hidden' );
+            dragIcon.classList.add( 'hidden-opacity' );
 
             if( document.pointerLockElement )
             {
@@ -8925,7 +8925,7 @@ class Vector extends Widget {
 
             vecinput.value = vecinput.iValue = value[ i ];
 
-            const dragIcon = LX.makeIcon( "MoveVertical", { iconClass: "drag-icon hidden", svgClass: "sm" } );
+            const dragIcon = LX.makeIcon( "MoveVertical", { iconClass: "drag-icon hidden-opacity", svgClass: "sm" } );
             box.appendChild( dragIcon );
 
             if( options.disabled )
@@ -8997,7 +8997,7 @@ class Vector extends Widget {
                 doc.addEventListener( 'mousemove', innerMouseMove );
                 doc.addEventListener( 'mouseup', innerMouseUp );
                 document.body.classList.add( 'noevents' );
-                dragIcon.classList.remove( 'hidden' );
+                dragIcon.classList.remove( 'hidden-opacity' );
                 e.stopImmediatePropagation();
                 e.stopPropagation();
 
@@ -9047,7 +9047,7 @@ class Vector extends Widget {
                 doc.removeEventListener( 'mousemove', innerMouseMove );
                 doc.removeEventListener( 'mouseup', innerMouseUp );
                 document.body.classList.remove( 'noevents' );
-                dragIcon.classList.add('hidden');
+                dragIcon.classList.add('hidden-opacity');
 
                 if( document.pointerLockElement )
                 {
