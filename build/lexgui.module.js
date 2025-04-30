@@ -8919,6 +8919,7 @@ class Vector extends Widget {
             vecinput.id = "vec" + numComponents + "_" + simple_guidGenerator();
             vecinput.idx = i;
             vectorInputs[ i ] = vecinput;
+            box.appendChild( vecinput );
 
             if( value[ i ].constructor == Number )
             {
@@ -9064,8 +9065,6 @@ class Vector extends Widget {
             }
 
             vecinput.addEventListener( "mousedown", innerMouseDown );
-
-            box.appendChild( vecinput );
             container.appendChild( box );
         }
 
