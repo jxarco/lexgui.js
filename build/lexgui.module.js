@@ -6988,7 +6988,7 @@ class ComboButtons extends Widget {
                 buttonEl.classList.add( options.buttonClass );
             }
 
-            if( shouldSelect && b.selected )
+            if( shouldSelect && ( b.selected || options.selected?.includes( b.value ) ) )
             {
                 buttonEl.classList.add("selected");
                 currentValue = ( currentValue ).concat( [ b.value ] );
@@ -7037,7 +7037,7 @@ class ComboButtons extends Widget {
 
                 if( !shouldToggle && currentValue.length > 1 )
                 {
-                    console.error( `Enable _options.toggle_ to allow selecting multiple options in ComboButtons.` )
+                    console.error( `Enable _options.toggle_ to allow selecting multiple options in ComboButtons.` );
                     return;
                 }
 
@@ -7051,9 +7051,12 @@ class ComboButtons extends Widget {
 
         if( currentValue.length > 1 )
         {
-            options.toggle = true;
-            shouldToggle = shouldSelect;
-            console.warn( `Multiple options selected in '${ name }' ComboButtons. Enabling _toggle_ mode.` );
+            if( !shouldToggle )
+            {
+                options.toggle = true;
+                shouldToggle = shouldSelect;
+                console.warn( `Multiple options selected in '${ name }' ComboButtons. Enabling _toggle_ mode.` );
+            }
         }
         else
         {
@@ -11132,6 +11135,7 @@ class Panel {
      * @param {Object} options:
      * hideName: Don't use name as label [false]
      * float: Justify content (left, center, right) [center]
+     * selected: Selected button by default (String|Array)
      * noSelection: Buttons can be clicked, but they are not selectable
      * toggle: Buttons can be toggled insted of selecting only one
      */
