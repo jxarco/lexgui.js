@@ -85,7 +85,21 @@ LX.doAsync = doAsync;
  */
 function getSupportedDOMName( text )
 {
-    return text.replace( /\s/g, '' ).replaceAll('@', '_').replaceAll('+', '_plus_').replaceAll( '.', '' );
+    console.assert( typeof text == "string", "getSupportedDOMName: Text is not a string!" );
+
+    let name = text.trim();
+
+    // Replace specific known symbols
+    name = name.replace( /@/g, '_at_' ).replace( /\+/g, '_plus_' ).replace( /\./g, '_dot_' );
+    name = name.replace( /[^a-zA-Z0-9_-]/g, '_' );
+
+    // prefix with an underscore if needed
+    if( /^[0-9]/.test( name ) )
+    {
+        name = '_' + name;
+    }
+
+    return name;
 }
 
 LX.getSupportedDOMName = getSupportedDOMName;
@@ -2412,7 +2426,7 @@ class DropdownMenu {
             }
 
             const key = item.name ?? item;
-            const pKey = key.replace( /\s/g, '' ).replaceAll( '.', '' );
+            const pKey = LX.getSupportedDOMName( key );
 
             // Item already created
             if( parentDom.querySelector( "#" + pKey ) )
@@ -4675,7 +4689,7 @@ class Menubar {
         for( let item of this.items )
         {
             let key = item.name;
-            let pKey = key.replace( /\s/g, '' ).replaceAll( '.', '' );
+            let pKey = LX.getSupportedDOMName( key );
 
             // Item already created
             if( this.root.querySelector( "#" + pKey ) )
@@ -5308,7 +5322,7 @@ class SideBar {
 
     select( name ) {
 
-        let pKey = name.replace( /\s/g, '' ).replaceAll( '.', '' );
+        let pKey = LX.getSupportedDOMName( name );
 
         const entry = this.items.find( v => v.name === pKey );
 
@@ -5346,7 +5360,7 @@ class SideBar {
                 continue;
             }
 
-            let pKey = key.replace( /\s/g, '' ).replaceAll( '.', '' );
+            let pKey = LX.getSupportedDOMName( key );
             let currentGroup = null;
 
             let entry = document.createElement( 'div' );

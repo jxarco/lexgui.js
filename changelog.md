@@ -9,6 +9,7 @@ Widgets:
 Fixed Dropdown issue sometimes opening all submenus on open Menubar entries.
 Fixed Dropdown creation crash when no input items.
 Fixed AssetView content on max height and scroll.
+Improved robustness of `LX.getSupportedDOMName`.
 
 ## 0.6.0 (master)
 
