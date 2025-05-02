@@ -3550,6 +3550,7 @@ class Area {
             if( auto )
             {
                 primarySize[ 1 ] = "auto";
+                secondarySize[ 1 ] = "auto";
             }
             else if( !fixedSize )
             {
@@ -3594,35 +3595,39 @@ class Area {
 
                 this._update( [ rect.width, rect.height ], false );
 
-                if( type == "horizontal" )
+                // On auto splits, we only need to set the size of the parent area
+                if( !auto )
                 {
-                    const parentWidth = rect.width;
-                    const leftPx = parsePixelSize( sizes[ 0 ], parentWidth );
-                    const rightPx = parsePixelSize(  sizes[ 1 ], parentWidth );
-                    const leftPercent = ( leftPx / parentWidth ) * 100;
-                    const rightPercent = ( rightPx / parentWidth ) * 100;
+                    if( type == "horizontal" )
+                    {
+                        const parentWidth = rect.width;
+                        const leftPx = parsePixelSize( sizes[ 0 ], parentWidth );
+                        const rightPx = parsePixelSize(  sizes[ 1 ], parentWidth );
+                        const leftPercent = ( leftPx / parentWidth ) * 100;
+                        const rightPercent = ( rightPx / parentWidth ) * 100;
 
-                    // Style using percentages
-                    primarySize[ 0 ] = `calc(${ leftPercent }% - ${ splitbarOffset }px)`;
-                    secondarySize[ 0 ] = `calc(${ rightPercent }% - ${ splitbarOffset }px)`;
+                        // Style using percentages
+                        primarySize[ 0 ] = `calc(${ leftPercent }% - ${ splitbarOffset }px)`;
+                        secondarySize[ 0 ] = `calc(${ rightPercent }% - ${ splitbarOffset }px)`;
+                    }
+                    else // vertical
+                    {
+                        const parentHeight = rect.height;
+                        const topPx = parsePixelSize( sizes[ 0 ], parentHeight );
+                        const bottomPx = parsePixelSize( sizes[ 1 ], parentHeight );
+                        const topPercent = ( topPx / parentHeight ) * 100;
+                        const bottomPercent = ( bottomPx / parentHeight ) * 100;
+
+                        primarySize[ 1 ] = ( sizes[ 0 ] == "auto" ? "auto" : `calc(${ topPercent }% - ${ splitbarOffset }px)`);
+                        secondarySize[ 1 ] = ( sizes[ 1 ] == "auto" ? "auto" : `calc(${ bottomPercent }% - ${ splitbarOffset }px)`);
+                    }
+
+                    area1.root.style.width = primarySize[ 0 ];
+                    area1.root.style.height = primarySize[ 1 ];
+
+                    area2.root.style.width = secondarySize[ 0 ];
+                    area2.root.style.height = secondarySize[ 1 ];
                 }
-                else // vertical
-                {
-                    const parentHeight = rect.height;
-                    const topPx = parsePixelSize( sizes[ 0 ], parentHeight );
-                    const bottomPx = parsePixelSize( sizes[ 1 ], parentHeight );
-                    const topPercent = ( topPx / parentHeight ) * 100;
-                    const bottomPercent = ( bottomPx / parentHeight ) * 100;
-
-                    primarySize[ 1 ] = ( sizes[ 0 ] == "auto" ? "auto" : `calc(${ topPercent }% - ${ splitbarOffset }px)`);
-                    secondarySize[ 1 ] = ( sizes[ 1 ] == "auto" ? "auto" : `calc(${ bottomPercent }% - ${ splitbarOffset }px)`);
-                }
-
-                area1.root.style.width = primarySize[ 0 ];
-                area1.root.style.height = primarySize[ 1 ];
-
-                area2.root.style.width = secondarySize[ 0 ];
-                area2.root.style.height = secondarySize[ 1 ];
 
                 area1._update();
                 area2._update();
@@ -3643,6 +3648,7 @@ class Area {
                     const size = entry.target.getComputedSize();
                     area2.root.style.height = "calc(100% - " + ( size.height ) + "px )";
                 }
+                resizeObserver.disconnect();
             });
 
             resizeObserver.observe( area1.root );
@@ -3686,7 +3692,7 @@ class Area {
         this.type = type;
 
         // Update sizes
-        this._update( [ rect.width, rect.height ] );
+        this._update( rect.width || rect.height ? [ rect.width, rect.height ] : undefined );
 
         if( !resize )
         {
@@ -4227,7 +4233,7 @@ class Area {
 
             if( a1.maxHeight != Infinity )
             {
-                a2Root.style.minWidth = `calc( 100% - ${ parseInt( a1.maxHeight ) }px )`;
+                a2Root.style.minHeight = `calc( 100% - ${ parseInt( a1.maxHeight ) }px )`;
             }
         }
 

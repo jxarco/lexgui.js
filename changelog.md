@@ -6,6 +6,7 @@ Widgets:
 - Support back `options.selected` in ComboButtons Widget as `ValueType|Array<ValueType>`.
 - Fixed Drag icon in Number/Vector widgets modifying layout.
 
+Fixed some issues when resizing initially hidden Areas.
 Fixed Dropdown issue sometimes opening all submenus on open Menubar entries.
 Fixed Dropdown creation crash when no input items.
 Fixed AssetView content on max height and scroll.
