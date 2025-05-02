@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.6.1 (master)
+
 Widgets:
 - Support back `options.selected` in ComboButtons Widget as `ValueType|Array<ValueType>`.
 - Fixed Drag icon in Number/Vector widgets modifying layout.
@@ -12,7 +14,7 @@ Fixed Dropdown creation crash when no input items.
 Fixed AssetView content on max height and scroll.
 Improved robustness of `LX.getSupportedDOMName`.
 
-## 0.6.0 (master)
+## 0.6.0
 
 `LX.init` now has to called using `await`.
 Use Dropdowns elements in menubar.

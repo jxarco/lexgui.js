@@ -12,7 +12,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 var LX = {
-    version: "0.6.0",
+    version: "0.6.1",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -91,7 +91,21 @@ LX.doAsync = doAsync;
  */
 function getSupportedDOMName( text )
 {
-    return text.replace( /\s/g, '' ).replaceAll('@', '_').replaceAll('+', '_plus_').replaceAll( '.', '' );
+    console.assert( typeof text == "string", "getSupportedDOMName: Text is not a string!" );
+
+    let name = text.trim();
+
+    // Replace specific known symbols
+    name = name.replace( /@/g, '_at_' ).replace( /\+/g, '_plus_' ).replace( /\./g, '_dot_' );
+    name = name.replace( /[^a-zA-Z0-9_-]/g, '_' );
+
+    // prefix with an underscore if needed
+    if( /^[0-9]/.test( name ) )
+    {
+        name = '_' + name;
+    }
+
+    return name;
 }
 
 LX.getSupportedDOMName = getSupportedDOMName;
@@ -2302,7 +2316,7 @@ class DropdownMenu {
 
         console.assert( trigger, "DropdownMenu needs a DOM element as trigger!" );
 
-        if( DropdownMenu.currentMenu )
+        if( DropdownMenu.currentMenu || !items?.length )
         {
             DropdownMenu.currentMenu.destroy();
             this.invalid = true;
@@ -2320,6 +2334,7 @@ class DropdownMenu {
         this.align = options.align ?? "center";
         this.avoidCollisions = options.avoidCollisions ?? true;
         this.onBlur = options.onBlur;
+        this.inPlace = false;
 
         this.root = document.createElement( "div" );
         this.root.id = "root";
@@ -2339,7 +2354,8 @@ class DropdownMenu {
 
             this._onClick = e => {
 
-                if( e.target && ( this.root.contains( e.target ) || e.target == this._trigger ) )
+                // Check if the click is inside a menu or on the trigger
+                if( e.target && ( e.target.closest( ".lexdropdownmenu" ) != undefined || e.target == this._trigger ) )
                 {
                     return;
                 }
@@ -2347,7 +2363,8 @@ class DropdownMenu {
                 this.destroy( true );
             };
 
-            document.body.addEventListener( "click", this._onClick );
+            document.body.addEventListener( "mousedown", this._onClick, true );
+            document.body.addEventListener( "focusin", this._onClick, true );
         }, 10 );
     }
 
@@ -2357,7 +2374,8 @@ class DropdownMenu {
 
         delete this._trigger.ddm;
 
-        document.body.removeEventListener( "click", this._onClick );
+        document.body.removeEventListener( "mousedown", this._onClick, true );
+        document.body.removeEventListener( "focusin", this._onClick, true );
 
         LX.root.querySelectorAll( ".lexdropdownmenu" ).forEach( m => { m.remove(); } );
 
@@ -2382,7 +2400,7 @@ class DropdownMenu {
             let newParent = document.createElement( "div" );
             newParent.tabIndex = "1";
             newParent.className = "lexdropdownmenu";
-            newParent.id = parentDom.id;
+            newParent.dataset["id"] = parentDom.dataset["id"];
             newParent.dataset["side"] = "right"; // submenus always come from the right
             LX.root.appendChild( newParent );
 
@@ -2414,7 +2432,7 @@ class DropdownMenu {
             }
 
             const key = item.name ?? item;
-            const pKey = key.replace( /\s/g, '' ).replaceAll( '.', '' );
+            const pKey = LX.getSupportedDOMName( key );
 
             // Item already created
             if( parentDom.querySelector( "#" + pKey ) )
@@ -2424,7 +2442,7 @@ class DropdownMenu {
 
             const menuItem = document.createElement('div');
             menuItem.className = "lexdropdownmenuitem" + ( item.name ? "" : " label" ) + ( item.disabled ?? false ? " disabled" : "" ) + ( ` ${ item.className ?? "" }` );
-            menuItem.id = pKey;
+            menuItem.dataset["id"] = pKey;
             menuItem.innerHTML = `<span>${ key }</span>`;
             menuItem.tabIndex = "1";
             parentDom.appendChild( menuItem );
@@ -2510,24 +2528,24 @@ class DropdownMenu {
 
             menuItem.addEventListener("mouseover", e => {
 
-                let path = menuItem.id;
+                let path = menuItem.dataset["id"];
                 let p = parentDom;
 
                 while( p )
                 {
-                    path += "/" + p.id;
+                    path += "/" + p.dataset["id"];
                     p = p.currentParent?.parentElement;
                 }
 
                 LX.root.querySelectorAll( ".lexdropdownmenu" ).forEach( m => {
-                    if( !path.includes( m.id ) )
+                    if( !path.includes( m.dataset["id"] ) )
                     {
                         m.currentParent.built = false;
                         m.remove();
                     }
                 } );
 
-                if( item.submenu )
+                if( item.submenu && this.inPlace )
                 {
                     if( menuItem.built )
                     {
@@ -2601,6 +2619,7 @@ class DropdownMenu {
 
         this.root.style.left = `${ position[ 0 ] }px`;
         this.root.style.top = `${ position[ 1 ] }px`;
+        this.inPlace = true;
     }
 
     _addSeparator( parent ) {
@@ -3462,6 +3481,7 @@ class Area {
         const type = options.type ?? "horizontal";
         const sizes = options.sizes || [ "50%", "50%" ];
         const auto = (options.sizes === 'auto') || ( options.sizes && options.sizes[ 0 ] == "auto" && options.sizes[ 1 ] == "auto" );
+        const rect = this.root.getBoundingClientRect();
 
         // Secondary area fills space
         if( !sizes[ 1 ] || ( sizes[ 0 ] != "auto" && sizes[ 1 ] == "auto" ) )
@@ -3512,7 +3532,7 @@ class Area {
 
             if( !fixedSize )
             {
-                const parentWidth = this.root.offsetWidth;
+                const parentWidth = rect.width;
                 const leftPx = parsePixelSize( sizes[ 0 ], parentWidth );
                 const rightPx = parsePixelSize(  sizes[ 1 ], parentWidth );
                 const leftPercent = ( leftPx / parentWidth ) * 100;
@@ -3536,10 +3556,11 @@ class Area {
             if( auto )
             {
                 primarySize[ 1 ] = "auto";
+                secondarySize[ 1 ] = "auto";
             }
             else if( !fixedSize )
             {
-                const parentHeight = this.root.offsetHeight;
+                const parentHeight = rect.height;
                 const topPx = parsePixelSize( sizes[ 0 ], parentHeight );
                 const bottomPx = parsePixelSize( sizes[ 1 ], parentHeight );
                 const topPercent = ( topPx / parentHeight ) * 100;
@@ -3562,6 +3583,72 @@ class Area {
         let area1 = new Area( { width: primarySize[ 0 ], height: primarySize[ 1 ], skipAppend: true, className: "split" + ( options.menubar || options.sidebar ? "" : " origin" ) } );
         let area2 = new Area( { width: secondarySize[ 0 ], height: secondarySize[ 1 ], skipAppend: true, className: "split" } );
 
+        /*
+            If the parent area is not in the DOM, we need to wait for the resize event to get the its correct size
+            and set the sizes of the split areas accordingly.
+        */
+        if( !fixedSize && ( !rect.width || !rect.height ) )
+        {
+            const observer = new ResizeObserver( entries => {
+
+                console.assert( entries.length == 1, "AreaResizeObserver: more than one entry" );
+
+                const rect = entries[ 0 ].contentRect;
+                if( !rect.width || !rect.height )
+                {
+                    return;
+                }
+
+                this._update( [ rect.width, rect.height ], false );
+
+                // On auto splits, we only need to set the size of the parent area
+                if( !auto )
+                {
+                    if( type == "horizontal" )
+                    {
+                        const parentWidth = rect.width;
+                        const leftPx = parsePixelSize( sizes[ 0 ], parentWidth );
+                        const rightPx = parsePixelSize(  sizes[ 1 ], parentWidth );
+                        const leftPercent = ( leftPx / parentWidth ) * 100;
+                        const rightPercent = ( rightPx / parentWidth ) * 100;
+
+                        // Style using percentages
+                        primarySize[ 0 ] = `calc(${ leftPercent }% - ${ splitbarOffset }px)`;
+                        secondarySize[ 0 ] = `calc(${ rightPercent }% - ${ splitbarOffset }px)`;
+                    }
+                    else // vertical
+                    {
+                        const parentHeight = rect.height;
+                        const topPx = parsePixelSize( sizes[ 0 ], parentHeight );
+                        const bottomPx = parsePixelSize( sizes[ 1 ], parentHeight );
+                        const topPercent = ( topPx / parentHeight ) * 100;
+                        const bottomPercent = ( bottomPx / parentHeight ) * 100;
+
+                        primarySize[ 1 ] = ( sizes[ 0 ] == "auto" ? "auto" : `calc(${ topPercent }% - ${ splitbarOffset }px)`);
+                        secondarySize[ 1 ] = ( sizes[ 1 ] == "auto" ? "auto" : `calc(${ bottomPercent }% - ${ splitbarOffset }px)`);
+                    }
+
+                    area1.root.style.width = primarySize[ 0 ];
+                    area1.root.style.height = primarySize[ 1 ];
+
+                    area2.root.style.width = secondarySize[ 0 ];
+                    area2.root.style.height = secondarySize[ 1 ];
+                }
+
+                area1._update();
+                area2._update();
+
+                // Stop observing
+                observer.disconnect();
+            });
+
+            // Observe the parent area until the DOM is ready
+            // and the size is set correctly.
+            doAsync( () => {
+                observer.observe( this.root );
+            }, 100 );
+        }
+
         if( auto && type == "vertical" )
         {
             // Listen resize event on first area
@@ -3571,6 +3658,7 @@ class Area {
                     const size = entry.target.getComputedSize();
                     area2.root.style.height = "calc(100% - " + ( size.height ) + "px )";
                 }
+                resizeObserver.disconnect();
             });
 
             resizeObserver.observe( area1.root );
@@ -3614,7 +3702,7 @@ class Area {
         this.type = type;
 
         // Update sizes
-        this._update();
+        this._update( rect.width || rect.height ? [ rect.width, rect.height ] : undefined );
 
         if( !resize )
         {
@@ -3671,6 +3759,11 @@ class Area {
         this.minHeight  = minh;
         this.maxWidth   = maxw;
         this.maxHeight  = maxh;
+
+        if( minw != 0 ) this.root.style.minWidth = `${ minw }px`;
+        if( minh != 0 ) this.root.style.minHeight = `${ minh }px`;
+        if( maxw != Infinity ) this.root.style.maxWidth = `${ maxw }px`;
+        if( maxh != Infinity ) this.root.style.maxHeight = `${ maxh }px`;
     }
 
     /**
@@ -3730,7 +3823,7 @@ class Area {
         {
             this.offset = area2.root.offsetHeight;
             area2.root.classList.add("fadeout-vertical");
-            this._moveSplit(-Infinity, true);
+            this._moveSplit( -Infinity, true );
 
         }
         else
@@ -4038,7 +4131,6 @@ class Area {
                 {
                     _addButton( b );
                 }
-
             }
 
             // Add floating info
@@ -4130,12 +4222,12 @@ class Area {
 
             if( a1.maxWidth != Infinity )
             {
-                a2Root.style.minWidth = "calc( 100% - " + parseInt( a1.maxWidth ) + "px" + " )";
+                a2Root.style.minWidth = `calc( 100% - ${ parseInt( a1.maxWidth ) }px )`;
             }
         }
         else
         {
-            var size = Math.max( ( a2Root.offsetHeight + dt ) + a2.offset, parseInt(a2.minHeight) );
+            var size = Math.max( ( a2Root.offsetHeight + dt ) + a2.offset, parseInt( a2.minHeight ) );
             if( forceWidth ) size = forceWidth;
 
             const parentHeight = this.size[ 1 ];
@@ -4149,7 +4241,10 @@ class Area {
             a2Root.style.height = `${ bottomPercent }%`;
             a2Root.style.height = `${ bottomPercent }%`;
 
-            a1Root.style.minHeight = a1.minHeight + "px";
+            if( a1.maxHeight != Infinity )
+            {
+                a2Root.style.minHeight = `calc( 100% - ${ parseInt( a1.maxHeight ) }px )`;
+            }
         }
 
         if( !forceAnimation )
@@ -4171,15 +4266,24 @@ class Area {
         delete this.splitBar;
     }
 
-    _update() {
+    _update( newSize, propagate = true ) {
 
-        const rect = this.root.getBoundingClientRect();
-
-        this.size = [ rect.width, rect.height ];
-
-        for( var i = 0; i < this.sections.length; i++ )
+        if( !newSize )
         {
-            this.sections[ i ]._update();
+            const rect = this.root.getBoundingClientRect();
+            this.size = [ rect.width, rect.height ];
+        }
+        else
+        {
+            this.size = newSize;
+        }
+
+        if( propagate )
+        {
+            for( var i = 0; i < this.sections.length; i++ )
+            {
+                this.sections[ i ]._update();
+            }
         }
     }
 };
@@ -4579,7 +4683,7 @@ class Menubar {
 
         this.root.querySelectorAll(".lexmenuentry").forEach( e => {
             e.classList.remove( 'selected' );
-            e.built = false;
+            delete e.dataset[ "built" ];
         } );
 
         if( this._currentDropdown )
@@ -4601,7 +4705,7 @@ class Menubar {
         for( let item of this.items )
         {
             let key = item.name;
-            let pKey = key.replace( /\s/g, '' ).replaceAll( '.', '' );
+            let pKey = LX.getSupportedDOMName( key );
 
             // Item already created
             if( this.root.querySelector( "#" + pKey ) )
@@ -4620,8 +4724,8 @@ class Menubar {
             const _showEntry = () => {
                 this._resetMenubar(true);
                 entry.classList.add( "selected" );
-                entry.built = true;
-                this._currentDropdown = addDropdownMenu( entry, item.submenu, { side: "bottom", align: "start", onBlur: () => {
+                entry.dataset["built"] = "true";
+                this._currentDropdown = addDropdownMenu( entry, item.submenu ?? [], { side: "bottom", align: "start", onBlur: () => {
                     this._resetMenubar();
                 } });
             };
@@ -4641,7 +4745,7 @@ class Menubar {
 
             entry.addEventListener( "mouseover", (e) => {
 
-                if( this.focused && !entry.built )
+                if( this.focused && !( entry.dataset[ "built" ] ?? false ) )
                 {
                     _showEntry();
                 }
@@ -5234,7 +5338,7 @@ class SideBar {
 
     select( name ) {
 
-        let pKey = name.replace( /\s/g, '' ).replaceAll( '.', '' );
+        let pKey = LX.getSupportedDOMName( name );
 
         const entry = this.items.find( v => v.name === pKey );
 
@@ -5272,7 +5376,7 @@ class SideBar {
                 continue;
             }
 
-            let pKey = key.replace( /\s/g, '' ).replaceAll( '.', '' );
+            let pKey = LX.getSupportedDOMName( key );
             let currentGroup = null;
 
             let entry = document.createElement( 'div' );
@@ -6989,7 +7093,7 @@ class ComboButtons extends Widget {
                 buttonEl.classList.add( options.buttonClass );
             }
 
-            if( shouldSelect && b.selected )
+            if( shouldSelect && ( b.selected || options.selected?.includes( b.value ) ) )
             {
                 buttonEl.classList.add("selected");
                 currentValue = ( currentValue ).concat( [ b.value ] );
@@ -7038,7 +7142,7 @@ class ComboButtons extends Widget {
 
                 if( !shouldToggle && currentValue.length > 1 )
                 {
-                    console.error( `Enable _options.toggle_ to allow selecting multiple options in ComboButtons.` )
+                    console.error( `Enable _options.toggle_ to allow selecting multiple options in ComboButtons.` );
                     return;
                 }
 
@@ -7052,9 +7156,12 @@ class ComboButtons extends Widget {
 
         if( currentValue.length > 1 )
         {
-            options.toggle = true;
-            shouldToggle = shouldSelect;
-            console.warn( `Multiple options selected in '${ name }' ComboButtons. Enabling _toggle_ mode.` );
+            if( !shouldToggle )
+            {
+                options.toggle = true;
+                shouldToggle = shouldSelect;
+                console.warn( `Multiple options selected in '${ name }' ComboButtons. Enabling _toggle_ mode.` );
+            }
         }
         else
         {
@@ -8691,7 +8798,7 @@ class NumberInput extends Widget {
         vecinput.value = vecinput.iValue = value;
         valueBox.appendChild( vecinput );
 
-        const dragIcon = LX.makeIcon( "MoveVertical", { iconClass: "drag-icon hidden", svgClass: "sm" } );
+        const dragIcon = LX.makeIcon( "MoveVertical", { iconClass: "drag-icon hidden-opacity", svgClass: "sm" } );
         valueBox.appendChild( dragIcon );
 
         if( options.units )
@@ -8784,7 +8891,7 @@ class NumberInput extends Widget {
             doc.addEventListener( 'mousemove', innerMouseMove );
             doc.addEventListener( 'mouseup', innerMouseUp );
             document.body.classList.add( 'noevents' );
-            dragIcon.classList.remove( 'hidden' );
+            dragIcon.classList.remove( 'hidden-opacity' );
             e.stopImmediatePropagation();
             e.stopPropagation();
 
@@ -8822,7 +8929,7 @@ class NumberInput extends Widget {
             doc.removeEventListener( 'mousemove', innerMouseMove );
             doc.removeEventListener( 'mouseup', innerMouseUp );
             document.body.classList.remove( 'noevents' );
-            dragIcon.classList.add( 'hidden' );
+            dragIcon.classList.add( 'hidden-opacity' );
 
             if( document.pointerLockElement )
             {
@@ -8917,6 +9024,7 @@ class Vector extends Widget {
             vecinput.id = "vec" + numComponents + "_" + simple_guidGenerator();
             vecinput.idx = i;
             vectorInputs[ i ] = vecinput;
+            box.appendChild( vecinput );
 
             if( value[ i ].constructor == Number )
             {
@@ -8926,7 +9034,7 @@ class Vector extends Widget {
 
             vecinput.value = vecinput.iValue = value[ i ];
 
-            const dragIcon = LX.makeIcon( "MoveVertical", { iconClass: "drag-icon hidden", svgClass: "sm" } );
+            const dragIcon = LX.makeIcon( "MoveVertical", { iconClass: "drag-icon hidden-opacity", svgClass: "sm" } );
             box.appendChild( dragIcon );
 
             if( options.disabled )
@@ -8998,7 +9106,7 @@ class Vector extends Widget {
                 doc.addEventListener( 'mousemove', innerMouseMove );
                 doc.addEventListener( 'mouseup', innerMouseUp );
                 document.body.classList.add( 'noevents' );
-                dragIcon.classList.remove( 'hidden' );
+                dragIcon.classList.remove( 'hidden-opacity' );
                 e.stopImmediatePropagation();
                 e.stopPropagation();
 
@@ -9048,7 +9156,7 @@ class Vector extends Widget {
                 doc.removeEventListener( 'mousemove', innerMouseMove );
                 doc.removeEventListener( 'mouseup', innerMouseUp );
                 document.body.classList.remove( 'noevents' );
-                dragIcon.classList.add('hidden');
+                dragIcon.classList.add('hidden-opacity');
 
                 if( document.pointerLockElement )
                 {
@@ -9062,8 +9170,6 @@ class Vector extends Widget {
             }
 
             vecinput.addEventListener( "mousedown", innerMouseDown );
-
-            box.appendChild( vecinput );
             container.appendChild( box );
         }
 
@@ -11133,6 +11239,7 @@ class Panel {
      * @param {Object} options:
      * hideName: Don't use name as label [false]
      * float: Justify content (left, center, right) [center]
+     * selected: Selected button by default (String|Array)
      * noSelection: Buttons can be clicked, but they are not selectable
      * toggle: Buttons can be toggled insted of selecting only one
      */
@@ -13415,7 +13522,7 @@ class AssetView {
 
         if( !this.skipBrowser )
         {
-            [left, right] = area.split({ type: "horizontal", sizes: ["15%", "85%"]});
+            [ left, right ] = area.split({ type: "horizontal", sizes: ["15%", "85%"]});
             contentArea = right;
 
             left.setLimitBox( 210, 0 );
@@ -13625,7 +13732,7 @@ class AssetView {
         }
         else
         {
-            this.rightPanel = area.addPanel({ className: 'lexassetcontentpanel' });
+            this.rightPanel = area.addPanel({ className: 'lexassetcontentpanel flex flex-col overflow-hidden' });
         }
 
         const on_sort = ( value, event ) => {
