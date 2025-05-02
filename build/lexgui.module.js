@@ -3636,7 +3636,11 @@ class Area {
                 observer.disconnect();
             });
 
-            observer.observe( this.root );
+            // Observe the parent area until the DOM is ready
+            // and the size is set correctly.
+            doAsync( () => {
+                observer.observe( this.root );
+            }, 100 );
         }
 
         if( auto && type == "vertical" )
