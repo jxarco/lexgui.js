@@ -3461,6 +3461,7 @@ class Area {
         const type = options.type ?? "horizontal";
         const sizes = options.sizes || [ "50%", "50%" ];
         const auto = (options.sizes === 'auto') || ( options.sizes && options.sizes[ 0 ] == "auto" && options.sizes[ 1 ] == "auto" );
+        const rect = this.root.getBoundingClientRect();
 
         // Secondary area fills space
         if( !sizes[ 1 ] || ( sizes[ 0 ] != "auto" && sizes[ 1 ] == "auto" ) )
@@ -3511,7 +3512,7 @@ class Area {
 
             if( !fixedSize )
             {
-                const parentWidth = this.root.offsetWidth;
+                const parentWidth = rect.width;
                 const leftPx = parsePixelSize( sizes[ 0 ], parentWidth );
                 const rightPx = parsePixelSize(  sizes[ 1 ], parentWidth );
                 const leftPercent = ( leftPx / parentWidth ) * 100;
@@ -3538,7 +3539,7 @@ class Area {
             }
             else if( !fixedSize )
             {
-                const parentHeight = this.root.offsetHeight;
+                const parentHeight = rect.height;
                 const topPx = parsePixelSize( sizes[ 0 ], parentHeight );
                 const bottomPx = parsePixelSize( sizes[ 1 ], parentHeight );
                 const topPercent = ( topPx / parentHeight ) * 100;
@@ -3560,6 +3561,64 @@ class Area {
         // Create areas
         let area1 = new Area( { width: primarySize[ 0 ], height: primarySize[ 1 ], skipAppend: true, className: "split" + ( options.menubar || options.sidebar ? "" : " origin" ) } );
         let area2 = new Area( { width: secondarySize[ 0 ], height: secondarySize[ 1 ], skipAppend: true, className: "split" } );
+
+        /*
+            If the parent area is not in the DOM, we need to wait for the resize event to get the its correct size
+            and set the sizes of the split areas accordingly.
+        */
+        if( !fixedSize && ( !rect.width || !rect.height ) )
+        {
+            const observer = new ResizeObserver( entries => {
+
+                console.assert( entries.length == 1, "AreaResizeObserver: more than one entry" );
+
+                const rect = entries[ 0 ].contentRect;
+                if( !rect.width || !rect.height )
+                {
+                    return;
+                }
+
+                this._update( [ rect.width, rect.height ], false );
+
+                if( type == "horizontal" )
+                {
+                    const parentWidth = rect.width;
+                    const leftPx = parsePixelSize( sizes[ 0 ], parentWidth );
+                    const rightPx = parsePixelSize(  sizes[ 1 ], parentWidth );
+                    const leftPercent = ( leftPx / parentWidth ) * 100;
+                    const rightPercent = ( rightPx / parentWidth ) * 100;
+
+                    // Style using percentages
+                    primarySize[ 0 ] = `calc(${ leftPercent }% - ${ splitbarOffset }px)`;
+                    secondarySize[ 0 ] = `calc(${ rightPercent }% - ${ splitbarOffset }px)`;
+                }
+                else // vertical
+                {
+                    const parentHeight = rect.height;
+                    const topPx = parsePixelSize( sizes[ 0 ], parentHeight );
+                    const bottomPx = parsePixelSize( sizes[ 1 ], parentHeight );
+                    const topPercent = ( topPx / parentHeight ) * 100;
+                    const bottomPercent = ( bottomPx / parentHeight ) * 100;
+
+                    primarySize[ 1 ] = ( sizes[ 0 ] == "auto" ? "auto" : `calc(${ topPercent }% - ${ splitbarOffset }px)`);
+                    secondarySize[ 1 ] = ( sizes[ 1 ] == "auto" ? "auto" : `calc(${ bottomPercent }% - ${ splitbarOffset }px)`);
+                }
+
+                area1.root.style.width = primarySize[ 0 ];
+                area1.root.style.height = primarySize[ 1 ];
+
+                area2.root.style.width = secondarySize[ 0 ];
+                area2.root.style.height = secondarySize[ 1 ];
+
+                area1._update();
+                area2._update();
+
+                // Stop observing
+                observer.disconnect();
+            });
+
+            observer.observe( this.root );
+        }
 
         if( auto && type == "vertical" )
         {
@@ -3613,7 +3672,7 @@ class Area {
         this.type = type;
 
         // Update sizes
-        this._update();
+        this._update( [ rect.width, rect.height ] );
 
         if( !resize )
         {
@@ -3670,6 +3729,11 @@ class Area {
         this.minHeight  = minh;
         this.maxWidth   = maxw;
         this.maxHeight  = maxh;
+
+        if( minw != 0 ) this.root.style.minWidth = `${ minw }px`;
+        if( minh != 0 ) this.root.style.minHeight = `${ minh }px`;
+        if( maxw != Infinity ) this.root.style.maxWidth = `${ maxw }px`;
+        if( maxh != Infinity ) this.root.style.maxHeight = `${ maxh }px`;
     }
 
     /**
@@ -3729,7 +3793,7 @@ class Area {
         {
             this.offset = area2.root.offsetHeight;
             area2.root.classList.add("fadeout-vertical");
-            this._moveSplit(-Infinity, true);
+            this._moveSplit( -Infinity, true );
 
         }
         else
@@ -4037,7 +4101,6 @@ class Area {
                 {
                     _addButton( b );
                 }
-
             }
 
             // Add floating info
@@ -4129,12 +4192,12 @@ class Area {
 
             if( a1.maxWidth != Infinity )
             {
-                a2Root.style.minWidth = "calc( 100% - " + parseInt( a1.maxWidth ) + "px" + " )";
+                a2Root.style.minWidth = `calc( 100% - ${ parseInt( a1.maxWidth ) }px )`;
             }
         }
         else
         {
-            var size = Math.max( ( a2Root.offsetHeight + dt ) + a2.offset, parseInt(a2.minHeight) );
+            var size = Math.max( ( a2Root.offsetHeight + dt ) + a2.offset, parseInt( a2.minHeight ) );
             if( forceWidth ) size = forceWidth;
 
             const parentHeight = this.size[ 1 ];
@@ -4148,7 +4211,10 @@ class Area {
             a2Root.style.height = `${ bottomPercent }%`;
             a2Root.style.height = `${ bottomPercent }%`;
 
-            a1Root.style.minHeight = a1.minHeight + "px";
+            if( a1.maxHeight != Infinity )
+            {
+                a2Root.style.minWidth = `calc( 100% - ${ parseInt( a1.maxHeight ) }px )`;
+            }
         }
 
         if( !forceAnimation )
@@ -4170,15 +4236,24 @@ class Area {
         delete this.splitBar;
     }
 
-    _update() {
+    _update( newSize, propagate = true ) {
 
-        const rect = this.root.getBoundingClientRect();
-
-        this.size = [ rect.width, rect.height ];
-
-        for( var i = 0; i < this.sections.length; i++ )
+        if( !newSize )
         {
-            this.sections[ i ]._update();
+            const rect = this.root.getBoundingClientRect();
+            this.size = [ rect.width, rect.height ];
+        }
+        else
+        {
+            this.size = newSize;
+        }
+
+        if( propagate )
+        {
+            for( var i = 0; i < this.sections.length; i++ )
+            {
+                this.sections[ i ]._update();
+            }
         }
     }
 };
@@ -13417,7 +13492,7 @@ class AssetView {
 
         if( !this.skipBrowser )
         {
-            [left, right] = area.split({ type: "horizontal", sizes: ["15%", "85%"]});
+            [ left, right ] = area.split({ type: "horizontal", sizes: ["15%", "85%"]});
             contentArea = right;
 
             left.setLimitBox( 210, 0 );
