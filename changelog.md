@@ -6,6 +6,7 @@ Widgets:
 - Fixed Title Widget class override.
 
 Added a few more icon solid variants.
+Minor CSS tweaks.
 
 ## 0.6.1 (master)
 
