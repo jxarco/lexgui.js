@@ -6636,7 +6636,7 @@ class Title extends Widget {
         // Note: Titles are not registered in Panel.widgets by now
         super( Widget.TITLE, null, null, options );
 
-        this.root.className = "lextitle";
+        this.root.className = `lextitle ${ this.root.className }`;
 
         if( options.icon )
         {

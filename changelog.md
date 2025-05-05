@@ -2,7 +2,10 @@
 
 ## dev
 
-- Added a few more icon solid variants.
+Widgets:
+- Fixed Title Widget class override.
+
+Added a few more icon solid variants.
 
 ## 0.6.1 (master)
 
