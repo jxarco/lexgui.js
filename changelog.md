@@ -5,6 +5,7 @@
 Widgets:
 - Fixed Title Widget class override.
 - Fixed Select list focusout issue.
+- Added `success` theme color to supported widgets.
 
 Added a few more icon solid variants.
 Minor CSS tweaks.

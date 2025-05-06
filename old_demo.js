@@ -705,7 +705,7 @@ function fillPanel( panel ) {
     panel.addButton("A Classic Button", "Click here!", () => {}, { buttonClass: "md" });
     panel.addCheckbox("I have a label", false, (value, event) => {
         console.log(value);
-    }, { label: "Personal", className: "secondary" });
+    }, { label: "Personal", className: "success" });
     panel.sameLine( 2 );
     panel.addToggle("Colored Toggle", false, (value, event) => {
         console.log(value);

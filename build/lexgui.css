@@ -1668,7 +1668,6 @@ a svg, svg path {
     font-weight: 500;
     display: grid;
     transition: 0.1s linear;
-    padding: 0.3rem;
 }
 
 /* Colors */
@@ -1676,8 +1675,9 @@ a svg, svg path {
 .lexbutton.secondary { --button-color: var(--global-color-secondary); --border-color: var(--global-color-quaternary); color: var(--global-text-primary);  }
 .lexbutton.accent { --button-color: var(--global-color-accent); --border-color: var(--global-color-quaternary); color: #fefefe;  }
 .lexbutton.contrast { --button-color: var(--global-text-primary); --border-color: var(--global-color-quaternary); color: var(--global-color-primary);  }
-.lexbutton.warning { --button-color: var(--global-color-warning); --border-color: #793205; color: var(--border-color);  }
+.lexbutton.success { --button-color: var(--global-color-success); --border-color: #013101; color: var(--border-color);  }
 .lexbutton.error { --button-color: var(--global-color-error); --border-color: #310108; color: var(--border-color);  }
+.lexbutton.warning { --button-color: var(--global-color-warning); --border-color: #793205; color: var(--border-color);  }
 
 /* Few Sizes */
 .lexbutton.xs { width: 35%; margin: 0 auto; }
@@ -1978,8 +1978,9 @@ dialog .lexselect .lexselectoptions {
 :root[data-theme="light"] .lexcheckbox.secondary { --checkbox-fg-color: var(--global-text-tertiary); }
 .lexcheckbox.accent { --checkbox-bg-color: var(--global-color-accent); }
 .lexcheckbox.contrast { --checkbox-bg-color: var(--global-text-primary); --checkbox-fg-color: var(--global-color-primary); }
-.lexcheckbox.warning { --checkbox-bg-color: var(--global-color-warning); }
+.lexcheckbox.success { --checkbox-bg-color: var(--global-color-success); }
 .lexcheckbox.error { --checkbox-bg-color: var(--global-color-error); }
+.lexcheckbox.warning { --checkbox-bg-color: var(--global-color-warning); }
 
 
 .lexcheckbox:before {
@@ -2066,8 +2067,9 @@ dialog .lexselect .lexselectoptions {
 .lextoggle.secondary { --toggle-bg-color: var(--global-color-tertiary); }
 .lextoggle.accent { --toggle-bg-color: var(--global-color-accent); }
 .lextoggle.contrast { --toggle-bg-color: var(--global-text-primary); }
-.lextoggle.warning { --toggle-bg-color: var(--global-color-warning); }
+.lextoggle.success { --toggle-bg-color: var(--global-color-success);  }
 .lextoggle.error { --toggle-bg-color: var(--global-color-error);  }
+.lextoggle.warning { --toggle-bg-color: var(--global-color-warning); }
 
 .lextoggle > * {
     z-index: 1;
@@ -2207,6 +2209,7 @@ dialog .lexselect .lexselectoptions {
     padding: 0.1em;
     padding-inline: 1.4em;
     gap: 0.65em;
+    align-items: center;
 }
 
 .lexradiogroup .lexradiogroupitem span {
@@ -2218,9 +2221,6 @@ dialog .lexselect .lexselectoptions {
     height: 16px;
     min-width: 16px !important;
     min-height: 16px !important;
-    padding: 0;
-    margin: auto 0;
-    border-radius: 8px;
     background-color: var(--global-intense-background);
     border: 1px solid var(--global-text-tertiary) !important;
 }
@@ -2252,8 +2252,9 @@ dialog .lexselect .lexselectoptions {
 .lexradiogroup.secondary .lexradiogroupitem button.checked span { background-color: var(--global-color-accent-light); }
 .lexradiogroup.accent .lexradiogroupitem button.checked span { background-color: var(--global-color-accent); }
 .lexradiogroup.contrast .lexradiogroupitem button.checked span { background-color: var(--global-text-primary); }
-.lexradiogroup.warning .lexradiogroupitem button.checked span { background-color: var(--global-color-warning); }
+.lexradiogroup.success .lexradiogroupitem button.checked span { background-color: var(--global-color-success); }
 .lexradiogroup.error .lexradiogroupitem button.checked span { background-color: var(--global-color-error); }
+.lexradiogroup.warning .lexradiogroupitem button.checked span { background-color: var(--global-color-warning); }
 
 /* Vector Widgets */
 
@@ -2477,8 +2478,9 @@ input[type=number] {
 .lexrangeslider.secondary { color: var(--global-color-secondary); --range-thumb-color: var(--global-text-secondary); }
 .lexrangeslider.accent { color: var(--global-color-accent); }
 .lexrangeslider.contrast { color: var(--global-text-primary); }
-.lexrangeslider.warning { color: var(--global-color-warning); }
+.lexrangeslider.success { color: var(--global-color-success); }
 .lexrangeslider.error { color: var(--global-color-error); }
+.lexrangeslider.warning { color: var(--global-color-warning); }
 
 .lexrangeslider.left {
     --range-dir: -1;
@@ -2885,8 +2887,9 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexbadge.secondary { --badge-color: var(--global-color-secondary); color: var(--global-text-primary); }
 .lexbadge.accent { --badge-color: var(--global-color-accent); }
 .lexbadge.contrast { --badge-color: var(--global-text-primary); color: var(--global-color-primary); }
-.lexbadge.warning { --badge-color: var(--global-color-warning); color: #793205; }
+.lexbadge.success { --badge-color: var(--global-color-success); color: #013101; }
 .lexbadge.error { --badge-color: var(--global-color-error); color: #310108; }
+.lexbadge.warning { --badge-color: var(--global-color-warning); color: #793205; }
 /* Styles */
 .lexbadge.outline {
     color: var(--badge-color, var(--global-text-primary));

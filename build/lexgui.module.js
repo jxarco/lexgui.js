@@ -6950,7 +6950,7 @@ class Button extends Widget {
 
         var wValue = document.createElement( 'button' );
         wValue.title = options.tooltip ? "" : ( options.title ?? "" );
-        wValue.className = "lexbutton " + ( options.buttonClass ?? "" );
+        wValue.className = "lexbutton p-1 " + ( options.buttonClass ?? "" );
 
         this.root.appendChild( wValue );
 
@@ -8470,7 +8470,7 @@ class RadioGroup extends Widget {
             container.appendChild( optionItem );
 
             const optionButton = document.createElement( 'button' );
-            optionButton.className = "lexbutton";
+            optionButton.className = "flex p-0 rounded-lg cursor-pointer";
             optionButton.disabled = options.disabled ?? false;
             optionItem.appendChild( optionButton );
 
