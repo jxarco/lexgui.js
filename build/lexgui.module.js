@@ -10102,6 +10102,8 @@ class Table extends Widget {
                 {
                     f.widget = new Button(null, icon.innerHTML + f.name, ( v ) => {
 
+                        const spanName = f.widget.root.querySelector( "span" );
+
                         if( f.options )
                         {
                             const menuOptions = f.options.map( ( colName, idx ) => {
@@ -10115,7 +10117,7 @@ class Table extends Widget {
                                         }
                                         const activeFilters = Object.keys( this.activeCustomFilters ).filter(  k => this.activeCustomFilters[ k ] == f.name );
                                         const filterBadgesHtml = activeFilters.reduce( ( acc, key ) => acc += LX.badge( key, "bg-tertiary text-sm" ), "" );
-                                        f.widget.root.querySelector( "span" ).innerHTML = icon.innerHTML + f.name + ( activeFilters.length ? separatorHtml : "" ) + filterBadgesHtml;
+                                        spanName.innerHTML = icon.innerHTML + f.name + ( activeFilters.length ? separatorHtml : "" ) + filterBadgesHtml;
                                         this.refresh();
                                     }
                                 }
@@ -10129,14 +10131,29 @@ class Table extends Widget {
                             const container = LX.makeContainer( ["240px", "auto"], "border bg-primary rounded-lg text-md" );
                             const panel = new Panel();
                             LX.makeContainer( ["100%", "auto"], "px-3 p-2 pb-0 text-md font-medium", f.name, container );
+
+                            f.start = f.start ?? f.min;
+                            f.end = f.end ?? f.max;
+
                             panel.refresh = () => {
                                 panel.clear();
                                 panel.sameLine( 2, "justify-center" );
-                                panel.addNumber( null, f.start ?? f.min, (v) => { f.start = v; this.refresh(); }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
-                                panel.addNumber( null, f.end ?? f.max, (v) => { f.end = v; this.refresh(); }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
+                                panel.addNumber( null, f.start, (v) => {
+                                    f.start = v;
+                                    const inUse = ( f.start != f.min || f.end != f.max );
+                                    spanName.innerHTML = icon.innerHTML + f.name + ( inUse ? separatorHtml + LX.badge( `${ f.start } - ${ f.end } ${ f.units ?? "" }`, "bg-tertiary text-sm" ) : "" );
+                                    this.refresh();
+                                }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
+                                panel.addNumber( null, f.end, (v) => {
+                                    f.end = v;
+                                    const inUse = ( f.start != f.min || f.end != f.max );
+                                    spanName.innerHTML = icon.innerHTML + f.name + ( inUse ? separatorHtml + LX.badge( `${ f.start } - ${ f.end } ${ f.units ?? "" }`, "bg-tertiary text-sm" ) : "" );
+                                    this.refresh();
+                                }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
                                 panel.addButton( null, "Reset", () => {
                                     f.start = f.min;
                                     f.end = f.max;
+                                    spanName.innerHTML = icon.innerHTML + f.name;
                                     panel.refresh();
                                     this.refresh();
                                 }, { buttonClass: "contrast" } );
