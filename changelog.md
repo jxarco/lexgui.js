@@ -7,6 +7,8 @@ Widgets:
 - Fixed Select list focusout issue.
 - Added `success` theme color to supported widgets.
 - Table active filters are now displayed in each filter button.
+- Added support for Range Filter in Table Widget.
+- Fixed dragging over drag-icon location in Number&Vector Widget inputs.
 
 Added a few more icon solid variants.
 Minor CSS tweaks.

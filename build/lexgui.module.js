@@ -10102,24 +10102,50 @@ class Table extends Widget {
                 {
                     f.widget = new Button(null, icon.innerHTML + f.name, ( v ) => {
 
-                        const menuOptions = f.options.map( ( colName, idx ) => {
-                            const item = {
-                                name: colName,
-                                checked:  !!this.activeCustomFilters[ colName ],
-                                callback: (key, v, dom) => {
-                                    if( v ) { this.activeCustomFilters[ key ] = f.name; }
-                                    else {
-                                        delete this.activeCustomFilters[ key ];
+                        if( f.options )
+                        {
+                            const menuOptions = f.options.map( ( colName, idx ) => {
+                                const item = {
+                                    name: colName,
+                                    checked:  !!this.activeCustomFilters[ colName ],
+                                    callback: (key, v, dom) => {
+                                        if( v ) { this.activeCustomFilters[ key ] = f.name; }
+                                        else {
+                                            delete this.activeCustomFilters[ key ];
+                                        }
+                                        const activeFilters = Object.keys( this.activeCustomFilters ).filter(  k => this.activeCustomFilters[ k ] == f.name );
+                                        const filterBadgesHtml = activeFilters.reduce( ( acc, key ) => acc += LX.badge( key, "bg-tertiary text-sm" ), "" );
+                                        f.widget.root.querySelector( "span" ).innerHTML = icon.innerHTML + f.name + ( activeFilters.length ? separatorHtml : "" ) + filterBadgesHtml;
+                                        this.refresh();
                                     }
-                                    const activeFilters = Object.keys( this.activeCustomFilters ).filter(  k => this.activeCustomFilters[ k ] == f.name );
-                                    const filterBadgesHtml = activeFilters.reduce( ( acc, key ) => acc += LX.badge( key, "bg-tertiary text-sm" ), "" );
-                                    f.widget.root.querySelector( "span" ).innerHTML = icon.innerHTML + f.name + ( activeFilters.length ? separatorHtml : "" ) + filterBadgesHtml;
-                                    this.refresh();
                                 }
+                                return item;
+                            } );
+                            new DropdownMenu( f.widget.root, menuOptions, { side: "bottom", align: "start" });
+                        }
+                        else if( f.type == "range" )
+                        {
+                            console.assert( f.min != undefined && f.max != undefined, "Range filter needs min and max values!" );
+                            const container = LX.makeContainer( ["240px", "auto"], "border bg-primary rounded-lg text-md" );
+                            const panel = new Panel();
+                            LX.makeContainer( ["100%", "auto"], "px-3 p-2 pb-0 text-md font-medium", f.name, container );
+                            panel.refresh = () => {
+                                panel.clear();
+                                panel.sameLine( 2, "justify-center" );
+                                panel.addNumber( null, f.start ?? f.min, (v) => { f.start = v; this.refresh(); }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
+                                panel.addNumber( null, f.end ?? f.max, (v) => { f.end = v; this.refresh(); }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
+                                panel.addButton( null, "Reset", () => {
+                                    f.start = f.min;
+                                    f.end = f.max;
+                                    panel.refresh();
+                                    this.refresh();
+                                }, { buttonClass: "contrast" } );
                             }
-                            return item;
-                        } );
-                        new DropdownMenu( f.widget.root, menuOptions, { side: "bottom", align: "start" });
+                            panel.refresh();
+                            container.appendChild( panel.root );
+                            new Popover( f.widget.root, [ container ], { side: "bottom" } );
+                        }
+
                     }, { buttonClass: "px-2 primary dashed" } );
                     headerContainer.appendChild( f.widget.root );
                 }
@@ -10354,6 +10380,41 @@ class Table extends Widget {
                             if( filterColIndex > -1 )
                             {
                                 acfMap[ acfName ] |= ( bodyData[ filterColIndex ] === acfValue );
+                            }
+                        }
+
+                        const show = Object.values( acfMap ).reduce( ( e, acc ) => acc *= e );
+                        if( !show )
+                        {
+                            continue;
+                        }
+                    }
+
+                    // Check range/date filters
+                    if( this.customFilters )
+                    {
+                        let acfMap = {};
+
+                        for( let f of this.customFilters )
+                        {
+                            const acfName = f.name;
+
+                            if( f.type == "range" )
+                            {
+                                acfMap[ acfName ] = acfMap[ acfName ] ?? false;
+
+                                const filterColIndex = data.head.indexOf( acfName );
+                                if( filterColIndex > -1 )
+                                {
+                                    const validRowValue = parseFloat( bodyData[ filterColIndex ] );
+                                    const min = f.start ?? f.min;
+                                    const max = f.end ?? f.max;
+                                    acfMap[ acfName ] |= ( validRowValue >= min ) && ( validRowValue <= max );
+                                }
+                            }
+                            else if( f.type == "date" )
+                            {
+                                // TODO
                             }
                         }
 
