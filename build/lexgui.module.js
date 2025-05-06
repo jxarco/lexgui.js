@@ -10169,12 +10169,17 @@ class Table extends Widget {
 
                 this._resetCustomFiltersBtn = new Button(null, "resetButton", ( v ) => {
                     this.activeCustomFilters = {};
-                    this.refresh();
                     this._resetCustomFiltersBtn.root.classList.add( "hidden" );
                     for( let f of this.customFilters )
                     {
-                        f.widget.root.querySelector( "span" ).innerHTML = icon.innerHTML + f.name;
+                        f.widget.root.querySelector( "span" ).innerHTML = ( icon.innerHTML + f.name );
+                        if( f.type == "range" )
+                        {
+                            f.start = f.min;
+                            f.end = f.max;
+                        }
                     }
+                    this.refresh();
                 }, { title: "Reset filters", icon: "X" } );
                 headerContainer.appendChild( this._resetCustomFiltersBtn.root );
                 this._resetCustomFiltersBtn.root.classList.add( "hidden" );
