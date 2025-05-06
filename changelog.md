@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.6.2 (master)
+
 Widgets:
 - Fixed Title Widget class override.
 - Fixed Select list focusout issue.
@@ -13,7 +15,7 @@ Widgets:
 Added a few more icon solid variants.
 Minor CSS tweaks.
 
-## 0.6.1 (master)
+## 0.6.1
 
 Widgets:
 - Support back `options.selected` in ComboButtons Widget as `ValueType|Array<ValueType>`.
