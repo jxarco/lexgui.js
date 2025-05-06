@@ -1814,11 +1814,6 @@ a svg, svg path {
     background-color: var(--global-color-primary);
 }
 
-.lexselect .lexfilter a {
-    font-size: var(--global-font-size-sm);
-    padding-inline: 4px;
-}
-
 .lexselect ul .lexlistitem {
     font-size: var(--global-font-size-sm);
 }

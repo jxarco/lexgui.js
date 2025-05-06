@@ -4,6 +4,7 @@
 
 Widgets:
 - Fixed Title Widget class override.
+- Fixed Select list focusout issue.
 
 Added a few more icon solid variants.
 Minor CSS tweaks.

@@ -7574,7 +7574,7 @@ class Select extends Widget {
                 this.unfocus_event = true;
                 setTimeout( () => delete this.unfocus_event, 200 );
             }
-            else if ( e.relatedTarget && ( e.relatedTarget.tagName == "INPUT" || e.relatedTarget.classList.contains("lexoptions") ) )
+            else if ( e.relatedTarget && listDialog.contains( e.relatedTarget ) )
             {
                 return;
             }
