@@ -8773,7 +8773,7 @@ class NumberInput extends Widget {
         box.className = "numberbox";
         container.appendChild( box );
 
-        let valueBox = LX.makeContainer( [ "auto", "100%" ], "relative flex flex-row", "", box );
+        let valueBox = LX.makeContainer( [ "auto", "100%" ], "relative flex flex-row cursor-text", "", box );
 
         let vecinput = document.createElement( 'input' );
         vecinput.id = "number_" + simple_guidGenerator();
@@ -8876,7 +8876,7 @@ class NumberInput extends Widget {
 
         let innerMouseDown = e => {
 
-            if( document.activeElement == vecinput )
+            if( ( document.activeElement == vecinput ) || ( e.button != LX.MOUSE_LEFT_CLICK ) )
             {
                 return;
             }
@@ -8891,7 +8891,7 @@ class NumberInput extends Widget {
 
             if( !document.pointerLockElement )
             {
-                vecinput.requestPointerLock();
+                valueBox.requestPointerLock();
             }
 
             if( options.onPress )
@@ -8936,7 +8936,7 @@ class NumberInput extends Widget {
             }
         }
 
-        vecinput.addEventListener( "mousedown", innerMouseDown );
+        valueBox.addEventListener( "mousedown", innerMouseDown );
 
         doAsync( this.onResize.bind( this ) );
     }
@@ -9091,7 +9091,7 @@ class Vector extends Widget {
 
             function innerMouseDown( e )
             {
-                if( document.activeElement == vecinput )
+                if( ( document.activeElement == vecinput ) || ( e.button != LX.MOUSE_LEFT_CLICK ) )
                 {
                     return;
                 }
@@ -9106,7 +9106,7 @@ class Vector extends Widget {
 
                 if( !document.pointerLockElement )
                 {
-                    vecinput.requestPointerLock();
+                    box.requestPointerLock();
                 }
 
                 if( options.onPress )
@@ -9163,7 +9163,7 @@ class Vector extends Widget {
                 }
             }
 
-            vecinput.addEventListener( "mousedown", innerMouseDown );
+            box.addEventListener( "mousedown", innerMouseDown );
             container.appendChild( box );
         }
 

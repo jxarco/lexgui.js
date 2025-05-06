@@ -2276,6 +2276,7 @@ dialog .lexselect .lexselectoptions {
     margin-right: 2px;
     background-color: var(--global-color-tertiary);
     transition: 0.1s linear;
+    cursor: text;
 }
 
 .lexvector .vecbox:hover {
@@ -2287,7 +2288,8 @@ dialog .lexselect .lexselectoptions {
     font-size: var(--global-font-size-sm);
     color: var(--global-text-secondary);
     z-index: 11;
-    margin-right: 0.25rem
+    margin-right: 0.25rem;
+    pointer-events: none;
 }
 
 .lexvector .vecbox:has(input:focus) {
