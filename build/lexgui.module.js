@@ -10096,10 +10096,11 @@ class Table extends Widget {
             if( this.customFilters )
             {
                 const icon = LX.makeIcon( "CirclePlus", { svgClass: "sm" } );
+                const separatorHtml = `<div class="lexcontainer border-right self-center mx-1" style="width: 1px; height: 70%;"></div>`;
 
                 for( let f of this.customFilters )
                 {
-                    const customFilterBtn = new Button(null, icon.innerHTML + f.name, ( v ) => {
+                    f.widget = new Button(null, icon.innerHTML + f.name, ( v ) => {
 
                         const menuOptions = f.options.map( ( colName, idx ) => {
                             const item = {
@@ -10110,20 +10111,27 @@ class Table extends Widget {
                                     else {
                                         delete this.activeCustomFilters[ key ];
                                     }
+                                    const activeFilters = Object.keys( this.activeCustomFilters ).filter(  k => this.activeCustomFilters[ k ] == f.name );
+                                    const filterBadgesHtml = activeFilters.reduce( ( acc, key ) => acc += LX.badge( key, "bg-tertiary text-sm" ), "" );
+                                    f.widget.root.querySelector( "span" ).innerHTML = icon.innerHTML + f.name + ( activeFilters.length ? separatorHtml : "" ) + filterBadgesHtml;
                                     this.refresh();
                                 }
                             }
                             return item;
                         } );
-                        new DropdownMenu( customFilterBtn.root, menuOptions, { side: "bottom", align: "start" });
-                    }, { buttonClass: " primary dashed" } );
-                    headerContainer.appendChild( customFilterBtn.root );
+                        new DropdownMenu( f.widget.root, menuOptions, { side: "bottom", align: "start" });
+                    }, { buttonClass: "px-2 primary dashed" } );
+                    headerContainer.appendChild( f.widget.root );
                 }
 
                 this._resetCustomFiltersBtn = new Button(null, "resetButton", ( v ) => {
                     this.activeCustomFilters = {};
                     this.refresh();
                     this._resetCustomFiltersBtn.root.classList.add( "hidden" );
+                    for( let f of this.customFilters )
+                    {
+                        f.widget.root.querySelector( "span" ).innerHTML = icon.innerHTML + f.name;
+                    }
                 }, { title: "Reset filters", icon: "X" } );
                 headerContainer.appendChild( this._resetCustomFiltersBtn.root );
                 this._resetCustomFiltersBtn.root.classList.add( "hidden" );

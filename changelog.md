@@ -6,6 +6,7 @@ Widgets:
 - Fixed Title Widget class override.
 - Fixed Select list focusout issue.
 - Added `success` theme color to supported widgets.
+- Table active filters are now displayed in each filter button.
 
 Added a few more icon solid variants.
 Minor CSS tweaks.
