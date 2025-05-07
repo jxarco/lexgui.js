@@ -65,9 +65,9 @@ class Timeline {
        
         this.pixelsPerSecond = 300;
         this.secondsPerPixel = 1 / this.pixelsPerSecond;
-        this.selectedItems = options.selectedItems ?? [];
-        this.animationClip = options.animationClip ?? null;
-        this.trackHeight = options.trackHeight ?? 25;
+        this.selectedItems = [];
+        this.animationClip = null;
+        this.trackHeight = 25;
         this.timeSeparators = [0.01, 0.1, 0.5, 1, 5];
 
         this.boxSelection = false;
