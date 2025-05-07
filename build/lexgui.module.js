@@ -6101,12 +6101,14 @@ class NodeTree {
         const nodeFilterInput = this.domEl.querySelector( ".lexnodetreefilter" );
 
         node.children = node.children ?? [];
+
         if( nodeFilterInput && nodeFilterInput.value != "" && !node.id.includes( nodeFilterInput.value ) )
         {
             for( var i = 0; i < node.children.length; ++i )
             {
                 this._createItem( node, node.children[ i ], level + 1, selectedId );
             }
+
             return;
         }
 
@@ -6531,13 +6533,14 @@ class NodeTree {
             inputContainer.appendChild( visibilityBtn.root );
         }
 
-        const _hasChild = function( parent, id ) {
-            if( !parent.length  ) return;
-            for( var c of parent.children )
+        const _hasChild = function( node, id ) {
+            if( node.id == id ) return true;
+            let found = false;
+            for( var c of ( node?.children ?? [] ) )
             {
-                if( c.id == id ) return true;
-                return _hasChild( c, id );
+                found |= _hasChild( c, id );
             }
+            return found;
         };
 
         const exists = _hasChild( node, selectedId );
@@ -6564,6 +6567,7 @@ class NodeTree {
 
         this.data = newData ?? this.data;
         this.domEl.querySelector( "ul" ).innerHTML = "";
+
         if( this.data.constructor === Object )
         {
             this._createItem( null, this.data, 0, selectedId );
@@ -6593,15 +6597,14 @@ class NodeTree {
         this.refresh( null, id );
 
         this.domEl.querySelectorAll( ".selected" ).forEach( i => i.classList.remove( "selected" ) );
-        this.selected.length = 0;
 
-        var el = this.domEl.querySelector( "#" + id );
-        if( el )
-        {
-            el.classList.add( "selected" );
-            this.selected = [ el.treeData ];
-            el.focus();
-        }
+        // Element should exist, since tree was refreshed to show it
+        const el = this.domEl.querySelector( "#" + id );
+        console.assert(  el, "NodeTree: Can't select node " + id );
+
+        el.classList.add( "selected" );
+        this.selected = [ el.treeData ];
+        el.focus();
     }
 }
 

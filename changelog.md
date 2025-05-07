@@ -2,6 +2,11 @@
 
 ## dev
 
+Widgets:
+- Fixed `NodeTree.select` when item is not shown.
+
+Fixed `autoTheme` on start with `dark` color scheme.
+
 ## 0.6.2 (master)
 
 Widgets:
