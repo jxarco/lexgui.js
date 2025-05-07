@@ -1501,9 +1501,12 @@ async function init( options = { } )
         this.main_area = new Area( { id: options.id ?? 'mainarea' } );
     }
 
-    if( ( options.autoTheme ?? true ) && window.matchMedia && window.matchMedia( "(prefers-color-scheme: light)" ).matches )
+    if( ( options.autoTheme ?? true ) )
     {
-        LX.setTheme( "light" );
+        if( window.matchMedia && window.matchMedia( "(prefers-color-scheme: light)" ).matches )
+        {
+            LX.setTheme( "light" );
+        }
 
         window.matchMedia( "(prefers-color-scheme: dark)" ).addEventListener( "change", event => {
             LX.setTheme( event.matches ? "dark" : "light" );
