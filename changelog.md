@@ -6,6 +6,7 @@ Widgets:
 - Fixed `NodeTree.select` when item is not shown.
 
 Fixed `autoTheme` on start with `dark` color scheme.
+Minor fixes.
 
 ## 0.6.2 (master)
 

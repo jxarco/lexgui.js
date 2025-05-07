@@ -13,8 +13,9 @@
         <span class="p-1 px-2 bg-tertiary rounded-lg">tertiary</span>
         <span class="p-1 px-2 bg-quaternary rounded-lg">quaternary</span>
         <span class="p-1 px-2 bg-accent rounded-lg">accent</span>
-        <span class="p-1 px-2 bg-warning rounded-lg fg-contrast">warning</span>
+        <span class="p-1 px-2 bg-success rounded-lg fg-contrast">success</span>
         <span class="p-1 px-2 bg-error rounded-lg">error</span>
+        <span class="p-1 px-2 bg-warning rounded-lg fg-contrast">warning</span>
         </div>
     ` );
 
@@ -26,8 +27,9 @@
         <span class="p-1 px-2 fg-tertiary rounded-lg">tertiary</span>
         <span class="p-1 px-2 fg-quaternary rounded-lg">quaternary</span>
         <span class="p-1 px-2 fg-accent rounded-lg">accent</span>
-        <span class="p-1 px-2 fg-warning rounded-lg fg-tertiary">warning</span>
+        <span class="p-1 px-2 fg-success rounded-lg">success</span>
         <span class="p-1 px-2 fg-error rounded-lg">error</span>
+        <span class="p-1 px-2 fg-warning rounded-lg">warning</span>
         </div>
     ` );
 
@@ -45,6 +47,7 @@
         <div class="flex gap-2">
         <span class="p-1 px-2 bg-accent fg-white rounded-lg">solid</span>
         <span class="p-1 px-2 fg-accent rounded-lg border-colored">outline</span>
+        <span class="p-1 px-2 fg-accent rounded-lg border-dashed border-colored">dashed</span>
         </div>
     ` );
     
@@ -53,8 +56,8 @@
      where you can use "light" or "dark". If any of your content depends on the selected theme (usually JavaScript code, not CSS), make sure you are listening to the ${INLINE_CODE("@on_new_color_scheme")} signal being emited when the theme changes.` );
     MAKE_CODE( `LX.@[mtd]addSignal@( @"|@on_new_color_scheme"@, (el, value) => {
     @[com]// Retrieve again the color using LX.getThemeColor, which checks the applied theme@
-    @const@ bgcolor = LX.@[mtd]getThemeColor@( @"global-color-primary"@ );
-    @this@.redraw();
+    @const@ bgColor = LX.@[mtd]getThemeColor@( @"global-color-primary"@ );
+    @this@.redraw( bgColor );
 } );
 ` );
     
