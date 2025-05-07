@@ -1771,7 +1771,7 @@ a svg, svg path {
 
 .lexcombobuttons .lexbutton.combo {
     display: flex;
-    padding: 0.45em 1.25em;
+    padding: 0.35em 1em;
     transition: 0.2s;
     --button-color: var(--global-color-tertiary);
 }

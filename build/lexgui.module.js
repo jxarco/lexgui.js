@@ -5783,8 +5783,17 @@ class Widget {
     }
 
     _canPaste() {
-        return this.type === Widget.CUSTOM ? navigator.clipboard.customIdx !== undefined && this.customIdx == navigator.clipboard.customIdx :
-            navigator.clipboard.type === this.type;
+        let pasteAllowed = this.type === Widget.CUSTOM ?
+            ( navigator.clipboard.customIdx !== undefined && this.customIdx == navigator.clipboard.customIdx ) : navigator.clipboard.type === this.type;
+
+        pasteAllowed &= ( this.disabled !== true );
+
+        if( this.onAllowPaste )
+        {
+            pasteAllowed = this.onAllowPaste( pasteAllowed );
+        }
+
+        return pasteAllowed;
     }
 
     _trigger( event, callback, scope = this ) {
@@ -6865,8 +6874,16 @@ class TextArea extends Widget {
 
         container.appendChild( wValue );
 
-        if( options.disabled ?? false ) wValue.setAttribute( "disabled", true );
-        if( options.placeholder ) wValue.setAttribute( "placeholder", options.placeholder );
+        if( options.disabled ?? false )
+        {
+            this.disabled = true;
+            wValue.setAttribute( "disabled", true );
+        }
+
+        if( options.placeholder )
+        {
+            wValue.setAttribute( "placeholder", options.placeholder );
+        }
 
         const trigger = options.trigger ?? "default";
 
@@ -6984,6 +7001,7 @@ class Button extends Widget {
 
         if( options.disabled )
         {
+            this.disabled = true;
             wValue.setAttribute( "disabled", true );
         }
 
@@ -8809,7 +8827,7 @@ class NumberInput extends Widget {
 
         if( options.disabled )
         {
-            vecinput.disabled = true;
+            this.disabled = vecinput.disabled = true;
         }
 
         // Add slider below
@@ -8965,7 +8983,7 @@ class Vector extends Widget {
         super( Widget.VECTOR, name, [].concat( value ), options );
 
         this.onGetValue = () => {
-            let inputs = this.root.querySelectorAll( "input" );
+            let inputs = this.root.querySelectorAll( "input[type='number']" );
             let value = [];
             for( var v of inputs )
             {
@@ -9007,6 +9025,7 @@ class Vector extends Widget {
         container.className = "lexvector";
         this.root.appendChild( container );
 
+        this.disabled = ( options.disabled ?? false );
         const that = this;
 
         for( let i = 0; i < numComponents; ++i )
@@ -9037,7 +9056,7 @@ class Vector extends Widget {
             const dragIcon = LX.makeIcon( "MoveVertical", { iconClass: "drag-icon hidden-opacity", svgClass: "sm" } );
             box.appendChild( dragIcon );
 
-            if( options.disabled )
+            if( this.disabled )
             {
                 vecinput.disabled = true;
             }
@@ -10411,7 +10430,7 @@ class Table extends Widget {
                             }
                         }
 
-                        const show = Object.values( acfMap ).reduce( ( e, acc ) => acc *= e );
+                        const show = Object.values( acfMap ).reduce( ( e, acc ) => acc *= e, true );
                         if( !show )
                         {
                             continue;
@@ -10446,7 +10465,7 @@ class Table extends Widget {
                             }
                         }
 
-                        const show = Object.values( acfMap ).reduce( ( e, acc ) => acc *= e );
+                        const show = Object.values( acfMap ).reduce( ( e, acc ) => acc *= e, true );
                         if( !show )
                         {
                             continue;
