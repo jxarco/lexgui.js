@@ -76,6 +76,12 @@
 
             for( const iconName in allIconsSorted )
             {
+                // Custom variant
+                if( iconName.includes( '@' ) )
+                {
+                    continue;
+                }
+
                 const iconDiv = LX.makeContainer( ["56px", "56px"], "icon flex rounded content-center justify-center cursor-pointer bg-secondary hover:bg-tertiary", "", allIconsContainer );
                 iconDiv.style.transition = "background-color 0.2s ease-out";
                 LX.asTooltip( iconDiv, iconName, { side: "bottom" } );
