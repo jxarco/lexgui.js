@@ -7,6 +7,7 @@ Widgets:
 
 Fixed `autoTheme` on start with `dark` color scheme.
 Improved Context Menu docs section.
+Added ArrowCircle directions solid variants.
 Minor fixes.
 
 ## 0.6.2 (master)
