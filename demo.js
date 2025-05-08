@@ -7,6 +7,17 @@ window.LX = LX;
 
 const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
 
+const points = [
+    { "name": "angry", "pos": [-0.29348334680286725,-0.8813498603327697] },
+    { "name": "happy", "pos": [0.5728906393051147,-0.2508566975593567] },
+    { "name": "sad", "pos": [-0.542498156289837,0.3795300176749039] },
+    { "name": "calm", "pos": [0.46099435955317536,0.6203009288162395] },
+    { "name": "bored", "pos": [-0.349232931016368,0.8103832270857154] },
+    { "name": "frustrated", "pos": [-0.49046521102390306,-0.5708814736724744] },
+    { "name": "smile", "pos": [0.5762101669277435,0.20211987262339348] },
+    { "name": "upset", "pos": [-0.5796645457655041,-0.1907168771335228] }
+];
+const map2d = new LX.Map2D( points, { circular: true, size: [500, 500]} );
 
 // Menubar
 {
@@ -48,6 +59,8 @@ const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
         <p class="font-light" style="max-width:32rem">A set of beautifully-designed, accessible widgets and components.
         No complex frameworks. Pure JavaScript and CSS. Open Source.</p>
     `, area );
+
+    area.attach( map2d.root );
 }
 
 // Content
@@ -173,7 +186,7 @@ const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
                                 'actions': [
                                     {
                                         'name': 'Open script',
-                                        'icon': 'Script'
+                                        'icon': 'Scroll'
                                     }
                                 ]
                             }

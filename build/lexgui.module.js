@@ -718,7 +718,7 @@ function makeCodeSnippet( code, size, options = { } )
             }
             else if( l.constructor == Array ) // It's a range
             {
-                for( let i = ( l[0] - 1 ); i <= ( l[1] - 1 ); i++ )
+                for( let i = ( l[ 0 ] - 1 ); i <= ( l[ 1 ] - 1 ); i++ )
                 {
                     code.childNodes[ i ].classList.add( "added" );
                 }
@@ -737,7 +737,7 @@ function makeCodeSnippet( code, size, options = { } )
             }
             else if( l.constructor == Array ) // It's a range
             {
-                for( let i = ( l[0] - 1 ); i <= ( l[1] - 1 ); i++ )
+                for( let i = ( l[ 0 ] - 1 ); i <= ( l[ 1 ] - 1 ); i++ )
                 {
                     code.childNodes[ i ].classList.add( "removed" );
                 }
@@ -1019,6 +1019,9 @@ class vec2 {
     nrm ( v0 = new vec2() ) { v0.set( this.x, this.y ); return v0.mul( 1.0 / this.len(), v0 ); }
     dst ( v ) { return v.sub( this ).len(); }
     clp ( min, max, v0 = new vec2() ) { v0.set( clamp( this.x, min, max ), clamp( this.y, min, max ) ); return v0; }
+
+    fromArray ( array ) { this.x = array[ 0 ]; this.y = array[ 1 ]; }
+    toArray () { return this.xy }
 };
 
 LX.vec2 = vec2;
@@ -3236,6 +3239,578 @@ class Calendar {
 
 LX.Calendar = Calendar;
 
+// Based on LGraphMap2D from @tamats (jagenjo)
+// https://github.com/jagenjo/litescene.js
+class Map2D {
+
+    static COLORS = [ [255, 0, 0], [0, 255, 0], [0, 0, 255], [0, 128, 128, 0], [128, 0, 128], [128, 128, 0], [255, 128, 0], [255, 0, 128], [0, 128, 255], [128, 0, 255] ];
+    static GRID_SIZE = 64;
+
+    /**
+     * @constructor Map2D
+     * @param {Array} initialPoints
+     * @param {Object} options
+     * circular
+     * showNames
+     * size
+     */
+
+    constructor( initialPoints, options = {} ) {
+
+        // this.addInput("x","number");
+        // this.addInput("y","number");
+
+        // this.addOutput("[]","array");
+        // this.addOutput("obj","object");
+        // this.addOutput("img","image");
+
+        this.circular = options.circular ?? false;
+        this.showNames = options.showNames ?? true;
+        this.size = options.size ?? [ 200, 200 ];
+
+        this.points = initialPoints ?? [];
+        this.weights = [];
+        this.weightsObj = {};
+        this.currentPosition = new LX.vec2( 0.5, 0.5 );
+        this.circleCenter = [ 0, 0 ];
+        this.circleRadius = 1;
+        this.margin = 20;
+        this.dragging = false;
+
+        this._valuesChanged = true;
+        this._visualizeWeights = false;
+        this._selectedPoint = null;
+
+        this.computeWeights( this.currentPosition );
+
+        this.root = LX.makeContainer( ["auto", "auto"] );
+        this.root.tabIndex = "1";
+
+        this.root.addEventListener( "mousedown", innerMouseDown );
+
+        const that = this;
+
+        function innerMouseDown( e )
+        {
+            var doc = that.root.ownerDocument;
+            doc.addEventListener("mouseup", innerMouseUp);
+            doc.addEventListener("mousemove", innerMouseMove);
+            e.stopPropagation();
+            e.preventDefault();
+
+            // let pos = that.currentPosition;
+
+            // if( that.flags?.collapsed || pos.y < 0 || pos[ 0 ] < that.margin || pos[ 0 ] > (that.size[ 0 ] - that.margin) || pos.y < that.margin )
+            // {
+            //     return false;
+            // }
+
+            // if( pos.y > ( that.size[ 1 ] - that.margin ))
+            // {
+            //     that._visualizeWeights = !that._visualizeWeights;
+            //     return true;
+            // }
+
+            that.dragging = true;
+            return true;
+        }
+
+        function innerMouseMove( e )
+        {
+            let dt = e.movementX;
+
+            if( !that.dragging || that.flags?.collapsed )
+            {
+                return;
+            }
+
+            const rect = that.root.getBoundingClientRect();
+            let pos = new LX.vec2();
+            pos.set( e.x - rect.x, e.y - rect.y );
+
+            var margin = that.margin;
+            var center = new LX.vec2( 0, 0 );
+            var cpos = that.currentPosition;
+            cpos.set(
+                LX.clamp(( pos.x - margin) / ( that.size[ 0 ] - margin * 2 ), 0, 1 ),
+                LX.clamp(( pos.y - margin) / ( that.size[ 1 ] - margin * 2 ), 0, 1 )
+            );
+
+            if( that.circular )
+            {
+                cpos.x = cpos.x * 2 - 1;
+                cpos.y = cpos.y * 2 - 1;
+                const dist = cpos.dst( center );
+                if( dist > 1 )
+                {
+                    cpos = cpos.nrm();
+                }
+            }
+
+            return true;
+        }
+
+        function innerMouseUp( e )
+        {
+            that.dragging = false;
+
+            var doc = that.root.ownerDocument;
+            doc.removeEventListener("mouseup", innerMouseUp);
+            doc.removeEventListener("mousemove", innerMouseMove);
+        }
+
+        this.canvas = document.createElement( "canvas" );
+        this.canvas.className = "w-full h-full";
+        this.canvas.width = this.size[ 0 ];
+        this.canvas.height = this.size[ 1 ];
+        this.root.appendChild( this.canvas );
+
+        const ctx = this.canvas.getContext( "2d" );
+        this.renderToCanvas( ctx, this.canvas );
+    }
+
+    /**
+     * @method computeWeights
+     * @param {LX.vec2} p
+     * @description Iterate for every cell to see if our point is nearer to the cell than the nearest point of the cell,
+     * If that is the case we increase the weight of the nearest point. At the end we normalize the weights of the points by the number of near points
+     * and that give us the weight for every point
+     */
+    
+    computeWeights( p ) {
+
+        if( !this.points.length )
+        {
+            return;
+        }
+
+        let values = this._precomputedWeights;
+        if( !values || this._valuesChanged )
+        {
+            values = this.precomputeWeights();
+        }
+
+        let pos2 = new LX.vec2();
+        let weights = this.weights;
+        weights.length = this.points.length;
+
+        const gridSize = Map2D.GRID_SIZE;
+
+        for(var i = 0; i < weights.length; ++i)
+        {
+            weights[ i ] = 0;
+        }
+
+        var totalInside = 0;
+        for( var y = 0; y < gridSize; ++y )
+        {
+            for( var x = 0; x < gridSize; ++x )
+            {
+                pos2.set( x / gridSize, y / gridSize );
+
+                if( this.circular )
+                {
+                    pos2.set( pos2.x * 2 - 1, pos2.y * 2 - 1 );
+                }
+
+                var dataPos = x * 2 + y * gridSize * 2;
+                var pointIdx = values[ dataPos ];
+
+                var isInside = p.dst( pos2 ) < ( values[ dataPos + 1] + 0.001 ); // epsilon
+                if( isInside )
+                {
+                    weights[ pointIdx ] += 1;
+                    totalInside++;
+                }
+            }
+        }
+            
+        for( var i = 0; i < weights.length; ++i )
+        {
+            weights[ i ] /= totalInside;
+            this.weightsObj[ this.points[ i ].name ] = weights[ i ];
+        }
+
+        return weights;
+    }
+
+    /**
+     * @method precomputeWeights
+     * @description Precompute for every cell, which is the closest point of the points set and how far it is from the center of the cell
+     * We store point index and distance in this._precomputedWeights. This is done only when the points set change
+     */
+
+    precomputeWeights() {
+
+        this._valuesChanged = false;
+
+        const numPoints = this.points.length;
+        const gridSize = Map2D.GRID_SIZE;
+        const totalNums = 2 * gridSize * gridSize;
+
+        let position = new LX.vec2();
+
+        if( !this._precomputedWeights || this._precomputedWeights.length != totalNums )
+        {
+            this._precomputedWeights = new Float32Array( totalNums );
+        }
+
+        let values = this._precomputedWeights;
+        this._precomputedWeightsGridSize = gridSize;
+
+        for( let y = 0; y < gridSize; ++y )
+        {
+            for( let x = 0; x < gridSize; ++x )
+            {
+                let nearest = -1;
+                let minDistance = 100000;
+
+                for( let i = 0; i < numPoints; ++i )
+                {
+                    position.set( x / gridSize, y / gridSize );
+
+                    if( this.circular )
+                    {
+                        position.set( position.x * 2 - 1, position.y * 2 - 1 );
+                    }
+
+                    let pointPosition = new LX.vec2();
+                    pointPosition.fromArray( this.points[ i ].pos );
+                    let dist = position.dst( pointPosition );
+                    if( dist > minDistance )
+                    {
+                        continue;
+                    }
+
+                    nearest = i;
+                    minDistance = dist;
+                }
+
+                values[ x * 2 + y * 2 * gridSize ] = nearest;
+                values[ x * 2 + y * 2 * gridSize + 1 ] = minDistance;
+            }
+        }
+
+        return values;
+    }
+
+    /**
+     * @method precomputeWeightsToImage
+     * @param {LX.vec2} p
+     */
+
+    precomputeWeightsToImage( p ) {
+
+        if( !this.points.length )
+        {
+            return null;
+        }
+
+        const gridSize = Map2D.GRID_SIZE;
+        var values = this._precomputedWeights;
+        if( !values || this._valuesChanged || this._precomputedWeightsGridSize != gridSize )
+        {
+            values = this.precomputeWeights();
+        }
+
+        var canvas = this.imageCanvas;
+        if( !canvas )
+        {
+            canvas = this.imageCanvas = document.createElement( "canvas" );
+        }
+
+        canvas.width = canvas.height = gridSize;
+        var ctx = canvas.getContext("2d");
+        var pos2 = new LX.vec2();
+        var weights = this.weights;
+        weights.length = this.points.length;
+        for (var i = 0; i < weights.length; ++i)
+        {
+            weights[ i ] = 0;
+        }
+        var totalInside = 0;
+        var pixels = ctx.getImageData( 0, 0, gridSize, gridSize );
+        for( var y = 0; y < gridSize; ++y )
+        {
+            for( var x = 0; x < gridSize; ++x )
+            {
+                pos2.set( x / gridSize, y / gridSize );
+                if( this.circular )
+                {
+                    pos2.set( pos2.x * 2 - 1, pos2.y * 2 - 1 );
+                }
+
+                var pixelPos = x * 4 + y * gridSize * 4;
+                var dataPos = x * 2 + y * gridSize * 2;
+                var pointIdx = values[ dataPos ];
+                var c = Map2D.COLORS[ pointIdx % Map2D.COLORS.length ];
+                var isInside = p.dst( pos2 ) < ( values[ dataPos + 1 ] + 0.001 );
+                if( isInside )
+                {
+                    weights[ pointIdx ] += 1;
+                    totalInside++;
+                }
+                pixels.data[ pixelPos ] = c[ 0 ] + ( isInside ? 128 : 0 );
+                pixels.data[ pixelPos + 1 ] = c[ 1 ] + ( isInside ? 128 : 0 );
+                pixels.data[ pixelPos + 2 ] = c[ 2 ] + ( isInside ? 128 : 0 );
+                pixels.data[ pixelPos + 3 ] = 255;
+            }
+        }
+
+        for( let i = 0; i < weights.length; ++i )
+        {
+            weights[ i ] /= totalInside;
+        }
+
+        ctx.putImageData( pixels, 0, 0 );
+        return canvas;
+    }
+
+    addPoint( name, pos ) {
+        if( this.findPoint( name ) )
+        {
+            console.warn("Map2D.addPoint: There is already a point with that name" );
+            return;
+        }
+
+        if( !pos )
+        {
+            pos = [ this.currentPosition[ 0 ], this.currentPosition[ 1 ] ];
+        }
+
+        pos[ 0 ] = LX.clamp( pos[ 0 ], -1, 1 );
+        pos[ 1 ] = LX.clamp( pos[ 1 ], -1, 1 );
+
+        const point = { name, pos };
+        this.points.push( point );
+        this._valuesChanged = true;
+        // this.setDirtyCanvas( true );
+        return point;
+    }
+
+    removePoint( name ) {
+        const removeIdx = this.points.findIndex( (p) => p.name == name );
+        if( removeIdx > -1 )
+        {
+            this.points.splice( removeIdx, 1 );
+            this._valuesChanged = true;
+        }
+    }
+
+    findPoint( name ) {
+        return this.points.find( p => p.name == name );
+    }
+
+    clear() {
+        this.points.length = 0;
+        this._precomputedWeights = null;
+        this._canvas = null;
+        this._selectedPoint = null;
+        // this.setDirtyCanvas( true );
+    }
+
+    renderToCanvas( ctx, canvas ) {
+
+        const margin = this.margin;
+        const w = this.size[ 0 ];
+        const h = this.size[ 1 ];
+
+        let pos = this.currentPosition;
+
+        ctx.fillStyle = "black";
+        ctx.strokeStyle = "#BBB";
+
+        if( this.circular )
+        {
+            this.circleCenter[ 0 ] = w * 0.5;
+            this.circleCenter[ 1 ] = h * 0.5;
+            this.circleRadius = h * 0.5 - margin;
+
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc( this.circleCenter[ 0 ], this.circleCenter[ 1 ], this.circleRadius, 0, Math.PI * 2 );
+            ctx.fill();
+            ctx.stroke();
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo( this.circleCenter[ 0 ] + 0.5, this.circleCenter[ 1 ] - this.circleRadius );
+            ctx.lineTo( this.circleCenter[ 0 ] + 0.5, this.circleCenter[ 1 ] + this.circleRadius );
+            ctx.moveTo( this.circleCenter[ 0 ] - this.circleRadius, this.circleCenter[ 1 ]);
+            ctx.lineTo( this.circleCenter[ 0 ] + this.circleRadius, this.circleCenter[ 1 ]);
+            ctx.stroke();
+        }
+        else
+        {
+            ctx.fillRect( margin, margin, w - margin * 2, h - margin * 2 );
+            ctx.strokeRect( margin, margin, w - margin * 2, h - margin * 2 );
+        }
+
+        var image = this.precomputeWeightsToImage( pos );
+        if( image )
+        {
+            ctx.globalAlpha = 0.5;
+            ctx.imageSmoothingEnabled = false;
+            if( this.circular )
+            {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc( this.circleCenter[ 0 ], this.circleCenter[ 1 ], this.circleRadius, 0, Math.PI * 2 );
+                ctx.clip();
+                ctx.drawImage( image, this.circleCenter[ 0 ] - this.circleRadius, this.circleCenter[ 1 ] - this.circleRadius, this.circleRadius*2, this.circleRadius*2 );
+                ctx.restore();
+            }
+            else
+            {
+                ctx.drawImage( image, margin, margin, w - margin * 2, h - margin * 2 );
+            }
+            ctx.imageSmoothingEnabled = true;
+            ctx.globalAlpha = 1;
+        }
+
+        for( let i = 0; i < this.points.length; ++i )
+        {
+            const point = this.points[ i ];
+            let x = point.pos[ 0 ];
+            let y = point.pos[ 1 ];
+            if( this.circular )
+            {
+                x = x * 0.5 + 0.5;
+                y = y * 0.5 + 0.5;
+            }
+            x = x * ( w - margin * 2 ) + margin;
+            y = y * ( h - margin * 2 ) + margin;
+            x = LX.clamp( x, margin, w - margin );
+            y = LX.clamp( y, margin, h - margin );
+            ctx.fillStyle = point == this._selectedPoint ? "#9DF" : "#789";
+            ctx.beginPath();
+            ctx.arc( x, y, 3, 0, Math.PI * 2 );
+            ctx.fill();
+            if( this.showNames )
+            {
+                ctx.fillText( point.name, x + 5, y + 5 );
+            }
+        }
+
+        ctx.fillStyle = "white";
+        ctx.beginPath();
+        var x = pos[ 0 ];
+        var y = pos[ 1 ];
+        if( this.circular )
+        {
+            x = x * 0.5 + 0.5;
+            y = y * 0.5 + 0.5;
+        }
+        x = x * ( w - margin * 2 ) + margin;
+        y = y * ( h - margin * 2 ) + margin;
+        x = LX.clamp( x, margin, w - margin );
+        y = LX.clamp( y, margin, h - margin );
+        ctx.arc( x, y, 5, 0, Math.PI * 2 );
+        ctx.fill();
+
+        if( canvas )
+        {
+            canvas.mustUpdate = true;
+        }
+    }
+}
+
+/*
+LGraphMap2D.prototype.onDrawBackground = function( ctx )
+{
+    if(this.flags.collapsed)
+        return;
+
+    this.renderToCanvas( ctx );
+
+    //weights
+    var margin = this.margin;
+    var w = this.size[ 0 ];
+    var h = this.size[ 1 ];
+
+    ctx.save();
+    ctx.fillStyle = "black";
+    ctx.fillRect( margin, h - margin + 2, w - margin * 2, margin - 4);
+    ctx.strokeStyle = "white";
+    ctx.strokeRect( margin, h - margin + 2, w - margin * 2, margin - 4);
+    ctx.textAlign = "center";
+    ctx.fillStyle = "white";
+    ctx.fillText( "Visualize Weights", w * 0.5, h - margin * 0.3 );
+    ctx.textAlign = "left";
+
+    if(this.weights.length && this._visualize_weights)
+    {
+        var x = w + 5;
+        var y = 16; //h - this.weights.length * 5 - 10;
+        for(var i = 0; i < this.weights.length; ++i)
+        {
+            var c = LGraphMap2D.colors[i % LGraphMap2D.colors.length];
+            ctx.fillStyle = "black";
+            ctx.fillRect(x, y + i*5, 100,4 );
+            ctx.fillStyle = "rgb(" + ((c[ 0 ]*255)|0) + "," + ((c[ 1 ]*255)|0) + "," + ((c[ 2 ]*255)|0) + ")";
+            ctx.fillRect(x, y + i*5, this.weights[ i ]*100,4 );
+        }
+    }
+    ctx.restore();
+}
+
+LGraphMap2D.prototype.onInspect = function( inspector )
+{
+    var node = this;
+    if(!this._selected_point && this.points.length)
+        this._selected_point = this.points[ 0 ];
+    inspector.addTitle("Points");
+
+    inspector.widgets_per_row = 4;
+
+    for(var i = 0; i < this.points.length; ++i)
+    {
+        var point = this.points[ i ];
+        inspector.addString( null, point.name, { point: point, width: "40%", callback: function(v){
+            this.options.point.name = v;
+            node.setDirtyCanvas(true);
+        }});
+        var posX_widget = inspector.addNumber(null, point.pos[ 0 ], { point: point, width: "20%", min:-1, max:1, step: 0.01, callback: function(v){
+            this.options.point.pos[ 0 ] = Math.clamp( v, -1, 1 );
+            node._values_changed = true;
+        }});
+        var posY_widget = inspector.addNumber(null,point.pos[ 1 ], { point: point, width: "20%", min:-1, max:1, step: 0.01, callback: function(v){
+            this.options.point.pos[ 1 ] = Math.clamp( v, -1, 1 );
+            node._values_changed = true;
+        }});
+        inspector.addButton(null,"o", { point: point, width: "10%", callback: function(){
+            this.options.point.pos[ 0 ] = node.currentPosition[ 0 ];
+            this.options.point.pos[ 1 ] = node.currentPosition[ 1 ];
+            node._values_changed = true;
+        }});
+        inspector.addButton(null,"X", { point: point, width: "10%", callback: function(){
+            LiteGUI.confirm("Are you sure? Removing one point could mess up the whole weights order", (function(v){
+                if(!v)
+                    return;
+                node.removePoint( this.point.name );	
+                inspector.refresh();
+            }).bind(this.options));
+        }});
+    }
+    inspector.widgets_per_row = 1;
+
+    var new_point_name = "";
+    inspector.widgets_per_row = 2;
+    inspector.addString("New Point","",{ width:"75%", callback: function(v){
+        new_point_name = v;
+    }});
+    inspector.addButton(null,"Create",{ width:"25%",callback: function(v){
+        if(new_point_name)
+            node.addPoint( new_point_name );
+        inspector.refresh();
+    }});
+    inspector.widgets_per_row = 1;
+
+    inspector.addSeparator();
+}
+*/
+
+LX.Map2D = Map2D;
+
 /* Layout Classes */
 
 class Area {
@@ -4029,7 +4604,7 @@ class Area {
         {
             for( let i = 0; i < float.length; i++ )
             {
-                const t = float[i];
+                const t = float[ i ];
                 switch( t )
                 {
                 case 'h': break;
@@ -5831,7 +6406,7 @@ class Widget {
                     if (a == null || b == null) return false;
                     if (a.length !== b.length) return false;
                     for (var i = 0; i < a.length; ++i) {
-                        if (a[i] !== b[i]) return false;
+                        if (a[ i ] !== b[ i ]) return false;
                     }
                     return true;
                 })( value, this._initialValue ) : ( value == this._initialValue );
@@ -6463,7 +7038,7 @@ class NodeTree {
 
                 const index = dragged.parent.children.findIndex(n => n.id == dragged.id);
                 const removed = dragged.parent.children.splice(index, 1);
-                target.children.push( removed[0] );
+                target.children.push( removed[ 0 ] );
                 that.refresh();
                 delete window.__tree_node_dragged;
             });
@@ -8231,7 +8806,7 @@ class Tags extends Widget {
 
             for( let i = 0; i < value.length; ++i )
             {
-                const tagName = value[i];
+                const tagName = value[ i ];
                 const tag = document.createElement('span');
                 tag.className = "lextag";
                 tag.innerHTML = tagName;
@@ -10823,7 +11398,7 @@ class Panel {
                 const signal = this.widgets[ w ].options.signal;
                 for( let i = 0; i < LX.signals[signal].length; i++ )
                 {
-                    if( LX.signals[signal][i] == this.widgets[ w ] )
+                    if( LX.signals[signal][ i ] == this.widgets[ w ] )
                     {
                         LX.signals[signal] = [...LX.signals[signal].slice(0, i), ...LX.signals[signal].slice(i+1)];
                     }
@@ -10835,11 +11410,11 @@ class Panel {
         {
             for( let w = 0; w < this.signals.length; w++ )
             {
-                let widget = Object.values(this.signals[ w ])[0];
+                let widget = Object.values(this.signals[ w ])[ 0 ];
                 let signal = widget.options.signal;
                 for( let i = 0; i < LX.signals[signal].length; i++ )
                 {
-                    if( LX.signals[signal][i] == widget )
+                    if( LX.signals[signal][ i ] == widget )
                     {
                         LX.signals[signal] = [...LX.signals[signal].slice(0, i), ...LX.signals[signal].slice(i+1)];
                     }
@@ -11892,6 +12467,19 @@ class Panel {
         const widget = new DatePicker( name, dateString, callback, options );
         return this._attachWidget( widget );
     }
+
+    /**
+     * @method addMap2D
+     * @param {String} name Widget name
+     * @param {Array} points
+     * @param {Function} callback
+     * @param {Object} options:
+     */
+
+    // addMap2D( name, points, callback, options = { } ) {
+    //     const widget = new Map2D( points, callback, options );
+    //     return this._attachWidget( widget );
+    // }
 }
 
 LX.Panel = Panel;
@@ -12040,7 +12628,7 @@ class Branch {
         this.grabber = grabber;
 
         function getBranchHeight() {
-            return that.root.offsetHeight - that.root.children[0].offsetHeight;
+            return that.root.offsetHeight - that.root.children[ 0 ].offsetHeight;
         }
 
         let that = this;
@@ -12500,7 +13088,7 @@ class PocketDialog extends Dialog {
             if( this.size )
             {
                 if( !this.minimized ) this.root.style.height = "auto";
-                else this.root.style.height = this.size[1];
+                else this.root.style.height = this.size[ 1 ];
             }
 
             this.root.classList.toggle("minimized");
@@ -12519,7 +13107,7 @@ class PocketDialog extends Dialog {
             {
                 for( let i = 0; i < float.length; i++ )
                 {
-                    const t = float[i];
+                    const t = float[ i ];
                     switch( t )
                     {
                     case 'b':
@@ -12809,7 +13397,7 @@ class ContextMenu {
                 return;
             }
 
-            if( children.find( c => Object.keys(c)[0] == key ) == null )
+            if( children.find( c => Object.keys(c)[ 0 ] == key ) == null )
             {
                 const parent = {};
                 parent[ key ] = [];
@@ -12850,7 +13438,7 @@ class ContextMenu {
 
     setColor( token, color ) {
 
-        if(color[0] !== '#')
+        if(color[ 0 ] !== '#')
             color = rgbToHex(color);
 
         this.colors[ token ] = color;
@@ -12954,8 +13542,8 @@ class CanvasCurve {
         element.resample = function( samples ) {
 
             let r = [];
-            let dx = (element.xrange[1] - element.xrange[ 0 ]) / samples;
-            for( let i = element.xrange[0]; i <= element.xrange[1]; i += dx )
+            let dx = (element.xrange[ 1 ] - element.xrange[ 0 ]) / samples;
+            for( let i = element.xrange[ 0 ]; i <= element.xrange[ 1 ]; i += dx )
             {
                 r.push( element.getValueAt(i) );
             }
@@ -12966,8 +13554,8 @@ class CanvasCurve {
 
             for( let i = 0; i < element.value; i++ )
             {
-                let value = element.value[i];
-                if(value[0] < v[0]) continue;
+                let value = element.value[ i ];
+                if(value[ 0 ] < v[ 0 ]) continue;
                 element.value.splice(i,0,v);
                 redraw();
                 return;
@@ -12979,14 +13567,14 @@ class CanvasCurve {
 
         //value to canvas
         function convert(v) {
-            return [ canvas.width * ( v[0] - element.xrange[0])/ (element.xrange[1]),
-                canvas.height * (v[1] - element.yrange[0])/ (element.yrange[1])];
+            return [ canvas.width * ( v[ 0 ] - element.xrange[ 0 ])/ (element.xrange[ 1 ]),
+                canvas.height * (v[ 1 ] - element.yrange[ 0 ])/ (element.yrange[ 1 ])];
         }
 
         //canvas to value
         function unconvert(v) {
-            return [(v[0] * element.xrange[1] / canvas.width + element.xrange[0]),
-                    (v[1] * element.yrange[1] / canvas.height + element.yrange[0])];
+            return [(v[ 0 ] * element.xrange[ 1 ] / canvas.width + element.xrange[ 0 ]),
+                    (v[ 1 ] * element.yrange[ 1 ] / canvas.height + element.yrange[ 0 ])];
         }
 
         let selected = -1;
@@ -13174,7 +13762,7 @@ class CanvasCurve {
                 options.callback.call( element, element.value, e );
         }
 
-        function distance(a,b) { return Math.sqrt( Math.pow(b[0]-a[0],2) + Math.pow(b[1]-a[1],2) ); };
+        function distance(a,b) { return Math.sqrt( Math.pow(b[ 0 ]-a[ 0 ],2) + Math.pow(b[ 1 ]-a[ 1 ],2) ); };
 
         function computeSelected( x, y ) {
 
@@ -13286,8 +13874,8 @@ class CanvasDial {
         element.resample = function( samples ) {
 
             var r = [];
-            var dx = (element.xrange[1] - element.xrange[ 0 ]) / samples;
-            for( var i = element.xrange[0]; i <= element.xrange[1]; i += dx)
+            var dx = (element.xrange[ 1 ] - element.xrange[ 0 ]) / samples;
+            for( var i = element.xrange[ 0 ]; i <= element.xrange[ 1 ]; i += dx)
             {
                 r.push( element.getValueAt(i) );
             }
@@ -13312,15 +13900,15 @@ class CanvasDial {
         //value to canvas
         function convert(v, r) {
 
-            Math.pow(v[0],2)
-            return [ canvas.width * ( v[0] - element.xrange[0])/ (element.xrange[1]),
-                canvas.height * (v[1] - element.yrange[0])/ (element.yrange[1])];
+            Math.pow(v[ 0 ],2)
+            return [ canvas.width * ( v[ 0 ] - element.xrange[ 0 ])/ (element.xrange[ 1 ]),
+                canvas.height * (v[ 1 ] - element.yrange[ 0 ])/ (element.yrange[ 1 ])];
         }
 
         //canvas to value
         function unconvert(v) {
-            return [(v[0] * element.xrange[1] / canvas.width + element.xrange[0]),
-                    (v[1] * element.yrange[1] / canvas.height + element.yrange[0])];
+            return [(v[ 0 ] * element.xrange[ 1 ] / canvas.width + element.xrange[ 0 ]),
+                    (v[ 1 ] * element.yrange[ 1 ] / canvas.height + element.yrange[ 0 ])];
         }
 
         var selected = -1;
@@ -13502,7 +14090,7 @@ class CanvasDial {
                 options.callback.call( element, element.value, e );
         }
 
-        function distance(a,b) { return Math.sqrt( Math.pow(b[0]-a[0],2) + Math.pow(b[1]-a[1],2) ); };
+        function distance(a,b) { return Math.sqrt( Math.pow(b[ 0 ]-a[ 0 ],2) + Math.pow(b[ 1 ]-a[ 1 ],2) ); };
 
         function computeSelected( x, y ) {
 
@@ -14287,7 +14875,7 @@ class AssetView {
 
         for( let i = 0; i < e.dataTransfer.files.length; ++i )
         {
-            const file = e.dataTransfer.files[i];
+            const file = e.dataTransfer.files[ i ];
 
             const result = this.currentData.find( e => e.id === file.name );
             if(result) continue;
@@ -14502,7 +15090,7 @@ Object.assign(LX, {
         if( request.data )
         {
             for( var i in request.data)
-                data.append(i,request.data[i]);
+                data.append(i,request.data[ i ]);
         }
 
         xhr.send( data );
@@ -14567,8 +15155,8 @@ Object.assign(LX, {
             var script = document.createElement('script');
             script.num = i;
             script.type = 'text/javascript';
-            script.src = url[i] + ( version ? "?version=" + version : "" );
-            script.original_src = url[i];
+            script.src = url[ i ] + ( version ? "?version=" + version : "" );
+            script.original_src = url[ i ];
             script.async = false;
             script.onload = function( e ) {
                 total--;
@@ -14587,7 +15175,7 @@ Object.assign(LX, {
                 script.onerror = function(err) {
                     onError(err, this.original_src, this.num );
                 }
-            document.getElementsByTagName('head')[0].appendChild(script);
+            document.getElementsByTagName('head')[ 0 ].appendChild(script);
         }
     },
 
@@ -14758,13 +15346,13 @@ LX.UTILS = {
         // Draw an open curve, not connected at the ends
         for( var i = 0; i < (n - 4); i += 2 )
         {
-            cp = cp.concat(LX.UTILS.getControlPoints(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
+            cp = cp.concat(LX.UTILS.getControlPoints(pts[ i ],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
         }
 
         for( var i = 2; i < ( pts.length - 5 ); i += 2 )
         {
             ctx.beginPath();
-            ctx.moveTo(pts[i], pts[i+1]);
+            ctx.moveTo(pts[ i ], pts[i+1]);
             ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
             ctx.stroke();
             ctx.closePath();
