@@ -372,7 +372,7 @@ const map2Dpoints = [
         {
             // Buttons
             {
-                const mailPreviewHeader = LX.makeContainer( [ "100%", "59.59px" ], "flex flex-row border-bottom p-1", "", right );
+                const mailPreviewHeader = LX.makeContainer( [ "100%", "43.5px" ], "flex flex-row border-bottom p-1", "", right );
 
                 mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Archive", tooltip: true, buttonClass: "bg-none", icon: "Archive" } ).root );
                 mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Move to junk", tooltip: true, buttonClass: "bg-none", icon: "ArchiveX" } ).root );
@@ -432,7 +432,7 @@ const map2Dpoints = [
                         LX.toast( "Message sent!", "To:" + mail.email, { timeout: 5000, action: { name: "Undo", callback: ( toast, actionName, event ) => {
                             toast.close();
                         } } } );
-                    }, { className: "ml-auto", buttonClass: "contrast" } );
+                    }, { className: "ml-auto", buttonClass: "contrast px-2" } );
                     previewButtons.appendChild( sendButton.root );
                 };
             }
