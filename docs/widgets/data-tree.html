@@ -49,42 +49,7 @@
                     }
                 }
             });
-        },`
-const sceneData = {
-    id: "root",
-    children: [ {
-        id: "node_1", children: [{
-            id: "node_1_1", icon: "Box", children: [],
-            actions: [ {
-                name: "Open script", icon: "Scroll",
-                callback: function (node) { console.log(node.id + ": Script opened!") }
-            }]
-        }]
-    }, {
-        id: "node_2", icon: "CirclePlay", children: []
-    }]
-};
-
-const dataTreeIcons = [
-    { name: "Add node", icon: "Plus", callback: () => { console.log("Node added!") } },
-    { name: "Instantiate scene", icon: "Link", callback: () => { console.log("Scene instantiated!") } }
-];
-
-panel.addTree("Scene Tree", sceneData, {
-    icons: dataTreeIcons,
-    rename: true,
-    onevent: (event) => {
-        switch (event.type) {
-            case LX.TreeEvent.NODE_SELECTED:
-                console.log("Selected:", event.node.id);
-                break;
-            case LX.TreeEvent.NODE_DBLCLICKED:
-                console.log("Double click!")
-                break;
-        }
-    }
-});
-` );
+        });
     }
 
     {

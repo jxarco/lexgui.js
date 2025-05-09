@@ -17,12 +17,7 @@
             panel.addForm("Test form", formData, (value, event) => {
                 console.log(value);
             }, { primaryActionName: "Login", secondaryActionName: "Sign Up" });
-        },`
-const formData = { username: "", password: { icon: "Key", value: "", type: "password" } };
-panel.addForm("Test form", formData, (value, event) => {
-    console.log(value);
-}, { primaryActionName: "Login", secondaryActionName: "Sign Up" });
-` );
+        });
     }
 
     {

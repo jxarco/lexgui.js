@@ -25,21 +25,7 @@
             panel.addSelect("Media Select", options, "Option 1", (value, event) => {
                 console.log(value);
             }, options);
-        },`
-// String values
-panel.addSelect("String Select", ["Option 1", "Option 2", "Option 3"], "Option 1", (value, event) => {
-    console.log(value);
-});
-
-// Media values
-const options = [
-  { value: "Option 1", src: "/option1.png" }, 
-  { value: "Option 2", src: "/option2.gif" }
-];
-panel.addSelect("Media Select", options, "Option 1", (value, event) => {
-      console.log(value);
-}, options);
-` );
+        });
     }
 
     {

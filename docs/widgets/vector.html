@@ -20,25 +20,15 @@
             panel.addVector2("2D Position", [250, 350], (value, event) => {
                 console.log(value);
             }, { min: 0, max: 1024 });
+
             panel.addVector3("Velocity", [0.1, 1, 0.5], (value, event) => {
                 console.log(value);
             });
+
             panel.addVector4("Shader Color", [1, 1, 1, 1], (value, event) => {
                 console.log(value);
             });
-        },`
-panel.addVector2("2D Position", [250, 350], (value, event) => {
-    console.log(value);
-}, { min: 0, max: 1024 });
-
-panel.addVector3("Velocity", [0.1, 1, 0.5], (value, event) => {
-    console.log(value);
-});
-
-panel.addVector4("Shader Color", [1, 1, 1, 1], (value, event) => {
-    console.log(value);
-});
-` );
+        });
     }
 
     {

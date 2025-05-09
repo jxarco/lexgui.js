@@ -68,7 +68,7 @@
                 .catch(() => content.innerHTML = "<p>Error loading content.</p>");
         }
 
-        window.__addInteractiveCodeExample = function( content, widgetName, onPanel, code ) {
+        window.__addInteractiveCodeExample = function( content, widgetName, onPanel ) {
 
             const area = new LX.Area({ className: "flex flex-col gap-3 docs", skipAppend: true, height: "auto" });
             content.appendChild( area.root );
@@ -92,6 +92,10 @@
             const codeArea = new LX.Area({ className: "rounded overflow-hidden", skipAppend: true, height: "auto" });
             area.attach( codeArea.root );
             const codeEditor = new LX.CodeEditor( codeArea, { name: `${widgetName.toLowerCase().replace( /\s/g, '_' )}.js`, onrun: runCode, skipInfo: true, allowAddScripts: false, language: "JavaScript" } );
+
+            let code = onPanel.toString();
+            let lines = code.split( '\n' ).slice( 1, -1 );
+            code = lines.map( line => line.substr( 12 ) ).join( '\n' );
             codeEditor.setText( code, "JavaScript" );
 
             const runButton = new LX.Button( null, "Run", (value, event) => {
