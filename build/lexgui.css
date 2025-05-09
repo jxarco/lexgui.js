@@ -875,6 +875,10 @@ a svg, svg path {
 /* Generic Popover */
 
 .lexpopover {
+    background-color: var(--global-color-primary);
+    border-radius: 0.5rem;
+    border: 1px solid #7a797c4f;
+    padding: 0.25rem;
     position: fixed;
     left: 0px;
     top: 0px;
@@ -1542,11 +1546,8 @@ a svg, svg path {
     width: 256px;
     display: flex;
     flex-direction: column;
-    padding: 0.2rem;
-    border-radius: 0.5rem;
-    border: 1px solid #7a797c4f;
-    padding: 0.5rem;
     gap: 0.5rem;
+    padding: 0.25rem;
 }
 
 .lexcolorpicker input.lextext {

@@ -169,7 +169,7 @@
                 }
 
                 m.add( "Data Inputs" );
-                for( const w of [ "Color", "Curve", "Date Picker", "File", "Item Array", "Layers", "Number", "OTP Input", "Pad", "Range", "Select", "Size", "Tags", "Text", "Text Area", "Vector" ] )
+                for( const w of [ "Color", "Curve", "Date Picker", "File", "Item Array", "Layers", "Map 2D", "Number", "OTP Input", "Pad", "Range", "Select", "Size", "Tags", "Text", "Text Area", "Vector" ] )
                 {
                     const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
                     m.add( "Data Inputs/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );

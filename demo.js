@@ -7,7 +7,7 @@ window.LX = LX;
 
 const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
 
-const points = [
+const map2Dpoints = [
     { "name": "angry", "pos": [-0.29348334680286725,-0.8813498603327697] },
     { "name": "happy", "pos": [0.5728906393051147,-0.2508566975593567] },
     { "name": "sad", "pos": [-0.542498156289837,0.3795300176749039] },
@@ -17,7 +17,6 @@ const points = [
     { "name": "smile", "pos": [0.5762101669277435,0.20211987262339348] },
     { "name": "upset", "pos": [-0.5796645457655041,-0.1907168771335228] }
 ];
-const map2d = new LX.Map2D( points, { circular: true, size: [500, 500]} );
 
 // Menubar
 {
@@ -59,8 +58,6 @@ const map2d = new LX.Map2D( points, { circular: true, size: [500, 500]} );
         <p class="font-light" style="max-width:32rem">A set of beautifully-designed, accessible widgets and components.
         No complex frameworks. Pure JavaScript and CSS. Open Source.</p>
     `, area );
-
-    area.attach( map2d.root );
 }
 
 // Content
@@ -248,6 +245,7 @@ const map2d = new LX.Map2D( points, { circular: true, size: [500, 500]} );
             panel.addText("Name", "node_1");
             panel.addCheckbox("Visibility", true, null, { className: "accent" });
             panel.addLayers("Layers", 10, null);
+            panel.addMap2D("Map2D", map2Dpoints, null, { size: [ 300, 300 ] });
 
             panel.addTitle( "Transform" );
             panel.addVector3( "Position", [0.0, 0.0, 0.0] );

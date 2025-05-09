@@ -3003,7 +3003,7 @@ class Calendar {
 
     constructor( dateString, options = {} ) {
 
-        this.root = LX.makeContainer( ["256px", "auto"], "border p-3 bg-primary rounded-lg text-md" );
+        this.root = LX.makeContainer( ["256px", "auto"], "p-1 text-md" );
 
         this.onChange = options.onChange;
         this.untilToday = options.untilToday;
@@ -3238,578 +3238,6 @@ class Calendar {
 }
 
 LX.Calendar = Calendar;
-
-// Based on LGraphMap2D from @tamats (jagenjo)
-// https://github.com/jagenjo/litescene.js
-class Map2D {
-
-    static COLORS = [ [255, 0, 0], [0, 255, 0], [0, 0, 255], [0, 128, 128, 0], [128, 0, 128], [128, 128, 0], [255, 128, 0], [255, 0, 128], [0, 128, 255], [128, 0, 255] ];
-    static GRID_SIZE = 64;
-
-    /**
-     * @constructor Map2D
-     * @param {Array} initialPoints
-     * @param {Object} options
-     * circular
-     * showNames
-     * size
-     */
-
-    constructor( initialPoints, options = {} ) {
-
-        // this.addInput("x","number");
-        // this.addInput("y","number");
-
-        // this.addOutput("[]","array");
-        // this.addOutput("obj","object");
-        // this.addOutput("img","image");
-
-        this.circular = options.circular ?? false;
-        this.showNames = options.showNames ?? true;
-        this.size = options.size ?? [ 200, 200 ];
-
-        this.points = initialPoints ?? [];
-        this.weights = [];
-        this.weightsObj = {};
-        this.currentPosition = new LX.vec2( 0.5, 0.5 );
-        this.circleCenter = [ 0, 0 ];
-        this.circleRadius = 1;
-        this.margin = 20;
-        this.dragging = false;
-
-        this._valuesChanged = true;
-        this._visualizeWeights = false;
-        this._selectedPoint = null;
-
-        this.computeWeights( this.currentPosition );
-
-        this.root = LX.makeContainer( ["auto", "auto"] );
-        this.root.tabIndex = "1";
-
-        this.root.addEventListener( "mousedown", innerMouseDown );
-
-        const that = this;
-
-        function innerMouseDown( e )
-        {
-            var doc = that.root.ownerDocument;
-            doc.addEventListener("mouseup", innerMouseUp);
-            doc.addEventListener("mousemove", innerMouseMove);
-            e.stopPropagation();
-            e.preventDefault();
-
-            // let pos = that.currentPosition;
-
-            // if( that.flags?.collapsed || pos.y < 0 || pos[ 0 ] < that.margin || pos[ 0 ] > (that.size[ 0 ] - that.margin) || pos.y < that.margin )
-            // {
-            //     return false;
-            // }
-
-            // if( pos.y > ( that.size[ 1 ] - that.margin ))
-            // {
-            //     that._visualizeWeights = !that._visualizeWeights;
-            //     return true;
-            // }
-
-            that.dragging = true;
-            return true;
-        }
-
-        function innerMouseMove( e )
-        {
-            let dt = e.movementX;
-
-            if( !that.dragging || that.flags?.collapsed )
-            {
-                return;
-            }
-
-            const rect = that.root.getBoundingClientRect();
-            let pos = new LX.vec2();
-            pos.set( e.x - rect.x, e.y - rect.y );
-
-            var margin = that.margin;
-            var center = new LX.vec2( 0, 0 );
-            var cpos = that.currentPosition;
-            cpos.set(
-                LX.clamp(( pos.x - margin) / ( that.size[ 0 ] - margin * 2 ), 0, 1 ),
-                LX.clamp(( pos.y - margin) / ( that.size[ 1 ] - margin * 2 ), 0, 1 )
-            );
-
-            if( that.circular )
-            {
-                cpos.x = cpos.x * 2 - 1;
-                cpos.y = cpos.y * 2 - 1;
-                const dist = cpos.dst( center );
-                if( dist > 1 )
-                {
-                    cpos = cpos.nrm();
-                }
-            }
-
-            return true;
-        }
-
-        function innerMouseUp( e )
-        {
-            that.dragging = false;
-
-            var doc = that.root.ownerDocument;
-            doc.removeEventListener("mouseup", innerMouseUp);
-            doc.removeEventListener("mousemove", innerMouseMove);
-        }
-
-        this.canvas = document.createElement( "canvas" );
-        this.canvas.className = "w-full h-full";
-        this.canvas.width = this.size[ 0 ];
-        this.canvas.height = this.size[ 1 ];
-        this.root.appendChild( this.canvas );
-
-        const ctx = this.canvas.getContext( "2d" );
-        this.renderToCanvas( ctx, this.canvas );
-    }
-
-    /**
-     * @method computeWeights
-     * @param {LX.vec2} p
-     * @description Iterate for every cell to see if our point is nearer to the cell than the nearest point of the cell,
-     * If that is the case we increase the weight of the nearest point. At the end we normalize the weights of the points by the number of near points
-     * and that give us the weight for every point
-     */
-    
-    computeWeights( p ) {
-
-        if( !this.points.length )
-        {
-            return;
-        }
-
-        let values = this._precomputedWeights;
-        if( !values || this._valuesChanged )
-        {
-            values = this.precomputeWeights();
-        }
-
-        let pos2 = new LX.vec2();
-        let weights = this.weights;
-        weights.length = this.points.length;
-
-        const gridSize = Map2D.GRID_SIZE;
-
-        for(var i = 0; i < weights.length; ++i)
-        {
-            weights[ i ] = 0;
-        }
-
-        var totalInside = 0;
-        for( var y = 0; y < gridSize; ++y )
-        {
-            for( var x = 0; x < gridSize; ++x )
-            {
-                pos2.set( x / gridSize, y / gridSize );
-
-                if( this.circular )
-                {
-                    pos2.set( pos2.x * 2 - 1, pos2.y * 2 - 1 );
-                }
-
-                var dataPos = x * 2 + y * gridSize * 2;
-                var pointIdx = values[ dataPos ];
-
-                var isInside = p.dst( pos2 ) < ( values[ dataPos + 1] + 0.001 ); // epsilon
-                if( isInside )
-                {
-                    weights[ pointIdx ] += 1;
-                    totalInside++;
-                }
-            }
-        }
-            
-        for( var i = 0; i < weights.length; ++i )
-        {
-            weights[ i ] /= totalInside;
-            this.weightsObj[ this.points[ i ].name ] = weights[ i ];
-        }
-
-        return weights;
-    }
-
-    /**
-     * @method precomputeWeights
-     * @description Precompute for every cell, which is the closest point of the points set and how far it is from the center of the cell
-     * We store point index and distance in this._precomputedWeights. This is done only when the points set change
-     */
-
-    precomputeWeights() {
-
-        this._valuesChanged = false;
-
-        const numPoints = this.points.length;
-        const gridSize = Map2D.GRID_SIZE;
-        const totalNums = 2 * gridSize * gridSize;
-
-        let position = new LX.vec2();
-
-        if( !this._precomputedWeights || this._precomputedWeights.length != totalNums )
-        {
-            this._precomputedWeights = new Float32Array( totalNums );
-        }
-
-        let values = this._precomputedWeights;
-        this._precomputedWeightsGridSize = gridSize;
-
-        for( let y = 0; y < gridSize; ++y )
-        {
-            for( let x = 0; x < gridSize; ++x )
-            {
-                let nearest = -1;
-                let minDistance = 100000;
-
-                for( let i = 0; i < numPoints; ++i )
-                {
-                    position.set( x / gridSize, y / gridSize );
-
-                    if( this.circular )
-                    {
-                        position.set( position.x * 2 - 1, position.y * 2 - 1 );
-                    }
-
-                    let pointPosition = new LX.vec2();
-                    pointPosition.fromArray( this.points[ i ].pos );
-                    let dist = position.dst( pointPosition );
-                    if( dist > minDistance )
-                    {
-                        continue;
-                    }
-
-                    nearest = i;
-                    minDistance = dist;
-                }
-
-                values[ x * 2 + y * 2 * gridSize ] = nearest;
-                values[ x * 2 + y * 2 * gridSize + 1 ] = minDistance;
-            }
-        }
-
-        return values;
-    }
-
-    /**
-     * @method precomputeWeightsToImage
-     * @param {LX.vec2} p
-     */
-
-    precomputeWeightsToImage( p ) {
-
-        if( !this.points.length )
-        {
-            return null;
-        }
-
-        const gridSize = Map2D.GRID_SIZE;
-        var values = this._precomputedWeights;
-        if( !values || this._valuesChanged || this._precomputedWeightsGridSize != gridSize )
-        {
-            values = this.precomputeWeights();
-        }
-
-        var canvas = this.imageCanvas;
-        if( !canvas )
-        {
-            canvas = this.imageCanvas = document.createElement( "canvas" );
-        }
-
-        canvas.width = canvas.height = gridSize;
-        var ctx = canvas.getContext("2d");
-        var pos2 = new LX.vec2();
-        var weights = this.weights;
-        weights.length = this.points.length;
-        for (var i = 0; i < weights.length; ++i)
-        {
-            weights[ i ] = 0;
-        }
-        var totalInside = 0;
-        var pixels = ctx.getImageData( 0, 0, gridSize, gridSize );
-        for( var y = 0; y < gridSize; ++y )
-        {
-            for( var x = 0; x < gridSize; ++x )
-            {
-                pos2.set( x / gridSize, y / gridSize );
-                if( this.circular )
-                {
-                    pos2.set( pos2.x * 2 - 1, pos2.y * 2 - 1 );
-                }
-
-                var pixelPos = x * 4 + y * gridSize * 4;
-                var dataPos = x * 2 + y * gridSize * 2;
-                var pointIdx = values[ dataPos ];
-                var c = Map2D.COLORS[ pointIdx % Map2D.COLORS.length ];
-                var isInside = p.dst( pos2 ) < ( values[ dataPos + 1 ] + 0.001 );
-                if( isInside )
-                {
-                    weights[ pointIdx ] += 1;
-                    totalInside++;
-                }
-                pixels.data[ pixelPos ] = c[ 0 ] + ( isInside ? 128 : 0 );
-                pixels.data[ pixelPos + 1 ] = c[ 1 ] + ( isInside ? 128 : 0 );
-                pixels.data[ pixelPos + 2 ] = c[ 2 ] + ( isInside ? 128 : 0 );
-                pixels.data[ pixelPos + 3 ] = 255;
-            }
-        }
-
-        for( let i = 0; i < weights.length; ++i )
-        {
-            weights[ i ] /= totalInside;
-        }
-
-        ctx.putImageData( pixels, 0, 0 );
-        return canvas;
-    }
-
-    addPoint( name, pos ) {
-        if( this.findPoint( name ) )
-        {
-            console.warn("Map2D.addPoint: There is already a point with that name" );
-            return;
-        }
-
-        if( !pos )
-        {
-            pos = [ this.currentPosition[ 0 ], this.currentPosition[ 1 ] ];
-        }
-
-        pos[ 0 ] = LX.clamp( pos[ 0 ], -1, 1 );
-        pos[ 1 ] = LX.clamp( pos[ 1 ], -1, 1 );
-
-        const point = { name, pos };
-        this.points.push( point );
-        this._valuesChanged = true;
-        // this.setDirtyCanvas( true );
-        return point;
-    }
-
-    removePoint( name ) {
-        const removeIdx = this.points.findIndex( (p) => p.name == name );
-        if( removeIdx > -1 )
-        {
-            this.points.splice( removeIdx, 1 );
-            this._valuesChanged = true;
-        }
-    }
-
-    findPoint( name ) {
-        return this.points.find( p => p.name == name );
-    }
-
-    clear() {
-        this.points.length = 0;
-        this._precomputedWeights = null;
-        this._canvas = null;
-        this._selectedPoint = null;
-        // this.setDirtyCanvas( true );
-    }
-
-    renderToCanvas( ctx, canvas ) {
-
-        const margin = this.margin;
-        const w = this.size[ 0 ];
-        const h = this.size[ 1 ];
-
-        let pos = this.currentPosition;
-
-        ctx.fillStyle = "black";
-        ctx.strokeStyle = "#BBB";
-
-        if( this.circular )
-        {
-            this.circleCenter[ 0 ] = w * 0.5;
-            this.circleCenter[ 1 ] = h * 0.5;
-            this.circleRadius = h * 0.5 - margin;
-
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc( this.circleCenter[ 0 ], this.circleCenter[ 1 ], this.circleRadius, 0, Math.PI * 2 );
-            ctx.fill();
-            ctx.stroke();
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo( this.circleCenter[ 0 ] + 0.5, this.circleCenter[ 1 ] - this.circleRadius );
-            ctx.lineTo( this.circleCenter[ 0 ] + 0.5, this.circleCenter[ 1 ] + this.circleRadius );
-            ctx.moveTo( this.circleCenter[ 0 ] - this.circleRadius, this.circleCenter[ 1 ]);
-            ctx.lineTo( this.circleCenter[ 0 ] + this.circleRadius, this.circleCenter[ 1 ]);
-            ctx.stroke();
-        }
-        else
-        {
-            ctx.fillRect( margin, margin, w - margin * 2, h - margin * 2 );
-            ctx.strokeRect( margin, margin, w - margin * 2, h - margin * 2 );
-        }
-
-        var image = this.precomputeWeightsToImage( pos );
-        if( image )
-        {
-            ctx.globalAlpha = 0.5;
-            ctx.imageSmoothingEnabled = false;
-            if( this.circular )
-            {
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc( this.circleCenter[ 0 ], this.circleCenter[ 1 ], this.circleRadius, 0, Math.PI * 2 );
-                ctx.clip();
-                ctx.drawImage( image, this.circleCenter[ 0 ] - this.circleRadius, this.circleCenter[ 1 ] - this.circleRadius, this.circleRadius*2, this.circleRadius*2 );
-                ctx.restore();
-            }
-            else
-            {
-                ctx.drawImage( image, margin, margin, w - margin * 2, h - margin * 2 );
-            }
-            ctx.imageSmoothingEnabled = true;
-            ctx.globalAlpha = 1;
-        }
-
-        for( let i = 0; i < this.points.length; ++i )
-        {
-            const point = this.points[ i ];
-            let x = point.pos[ 0 ];
-            let y = point.pos[ 1 ];
-            if( this.circular )
-            {
-                x = x * 0.5 + 0.5;
-                y = y * 0.5 + 0.5;
-            }
-            x = x * ( w - margin * 2 ) + margin;
-            y = y * ( h - margin * 2 ) + margin;
-            x = LX.clamp( x, margin, w - margin );
-            y = LX.clamp( y, margin, h - margin );
-            ctx.fillStyle = point == this._selectedPoint ? "#9DF" : "#789";
-            ctx.beginPath();
-            ctx.arc( x, y, 3, 0, Math.PI * 2 );
-            ctx.fill();
-            if( this.showNames )
-            {
-                ctx.fillText( point.name, x + 5, y + 5 );
-            }
-        }
-
-        ctx.fillStyle = "white";
-        ctx.beginPath();
-        var x = pos[ 0 ];
-        var y = pos[ 1 ];
-        if( this.circular )
-        {
-            x = x * 0.5 + 0.5;
-            y = y * 0.5 + 0.5;
-        }
-        x = x * ( w - margin * 2 ) + margin;
-        y = y * ( h - margin * 2 ) + margin;
-        x = LX.clamp( x, margin, w - margin );
-        y = LX.clamp( y, margin, h - margin );
-        ctx.arc( x, y, 5, 0, Math.PI * 2 );
-        ctx.fill();
-
-        if( canvas )
-        {
-            canvas.mustUpdate = true;
-        }
-    }
-}
-
-/*
-LGraphMap2D.prototype.onDrawBackground = function( ctx )
-{
-    if(this.flags.collapsed)
-        return;
-
-    this.renderToCanvas( ctx );
-
-    //weights
-    var margin = this.margin;
-    var w = this.size[ 0 ];
-    var h = this.size[ 1 ];
-
-    ctx.save();
-    ctx.fillStyle = "black";
-    ctx.fillRect( margin, h - margin + 2, w - margin * 2, margin - 4);
-    ctx.strokeStyle = "white";
-    ctx.strokeRect( margin, h - margin + 2, w - margin * 2, margin - 4);
-    ctx.textAlign = "center";
-    ctx.fillStyle = "white";
-    ctx.fillText( "Visualize Weights", w * 0.5, h - margin * 0.3 );
-    ctx.textAlign = "left";
-
-    if(this.weights.length && this._visualize_weights)
-    {
-        var x = w + 5;
-        var y = 16; //h - this.weights.length * 5 - 10;
-        for(var i = 0; i < this.weights.length; ++i)
-        {
-            var c = LGraphMap2D.colors[i % LGraphMap2D.colors.length];
-            ctx.fillStyle = "black";
-            ctx.fillRect(x, y + i*5, 100,4 );
-            ctx.fillStyle = "rgb(" + ((c[ 0 ]*255)|0) + "," + ((c[ 1 ]*255)|0) + "," + ((c[ 2 ]*255)|0) + ")";
-            ctx.fillRect(x, y + i*5, this.weights[ i ]*100,4 );
-        }
-    }
-    ctx.restore();
-}
-
-LGraphMap2D.prototype.onInspect = function( inspector )
-{
-    var node = this;
-    if(!this._selected_point && this.points.length)
-        this._selected_point = this.points[ 0 ];
-    inspector.addTitle("Points");
-
-    inspector.widgets_per_row = 4;
-
-    for(var i = 0; i < this.points.length; ++i)
-    {
-        var point = this.points[ i ];
-        inspector.addString( null, point.name, { point: point, width: "40%", callback: function(v){
-            this.options.point.name = v;
-            node.setDirtyCanvas(true);
-        }});
-        var posX_widget = inspector.addNumber(null, point.pos[ 0 ], { point: point, width: "20%", min:-1, max:1, step: 0.01, callback: function(v){
-            this.options.point.pos[ 0 ] = Math.clamp( v, -1, 1 );
-            node._values_changed = true;
-        }});
-        var posY_widget = inspector.addNumber(null,point.pos[ 1 ], { point: point, width: "20%", min:-1, max:1, step: 0.01, callback: function(v){
-            this.options.point.pos[ 1 ] = Math.clamp( v, -1, 1 );
-            node._values_changed = true;
-        }});
-        inspector.addButton(null,"o", { point: point, width: "10%", callback: function(){
-            this.options.point.pos[ 0 ] = node.currentPosition[ 0 ];
-            this.options.point.pos[ 1 ] = node.currentPosition[ 1 ];
-            node._values_changed = true;
-        }});
-        inspector.addButton(null,"X", { point: point, width: "10%", callback: function(){
-            LiteGUI.confirm("Are you sure? Removing one point could mess up the whole weights order", (function(v){
-                if(!v)
-                    return;
-                node.removePoint( this.point.name );	
-                inspector.refresh();
-            }).bind(this.options));
-        }});
-    }
-    inspector.widgets_per_row = 1;
-
-    var new_point_name = "";
-    inspector.widgets_per_row = 2;
-    inspector.addString("New Point","",{ width:"75%", callback: function(v){
-        new_point_name = v;
-    }});
-    inspector.addButton(null,"Create",{ width:"25%",callback: function(v){
-        if(new_point_name)
-            node.addPoint( new_point_name );
-        inspector.refresh();
-    }});
-    inspector.widgets_per_row = 1;
-
-    inspector.addSeparator();
-}
-*/
-
-LX.Map2D = Map2D;
 
 /* Layout Classes */
 
@@ -6235,8 +5663,9 @@ class Widget {
     static TABLE        = 34;
     static TABS         = 35;
     static DATE         = 36;
-    static LABEL        = 37;
-    static BLANK        = 38;
+    static MAP2D        = 37;
+    static LABEL        = 38;
+    static BLANK        = 39;
 
     static NO_CONTEXT_TYPES = [
         Widget.BUTTON,
@@ -6481,6 +5910,7 @@ class Widget {
             case Widget.TABLE: return "Table";
             case Widget.TABS: return "Tabs";
             case Widget.DATE: return "Date";
+            case Widget.MAP2D: return "Map2D";
             case Widget.LABEL: return "Label";
             case Widget.BLANK: return "Blank";
             case Widget.CUSTOM: return this.customName;
@@ -10729,7 +10159,7 @@ class Table extends Widget {
                         else if( f.type == "range" )
                         {
                             console.assert( f.min != undefined && f.max != undefined, "Range filter needs min and max values!" );
-                            const container = LX.makeContainer( ["240px", "auto"], "border bg-primary rounded-lg text-md" );
+                            const container = LX.makeContainer( ["240px", "auto"], "text-md" );
                             const panel = new Panel();
                             LX.makeContainer( ["100%", "auto"], "px-3 p-2 pb-0 text-md font-medium", f.name, container );
 
@@ -11294,6 +10724,53 @@ class DatePicker extends Widget {
 }
 
 LX.DatePicker = DatePicker;
+
+/**
+ * @class Map2D
+ * @description Map2D Widget
+ */
+
+class Map2D extends Widget {
+
+    constructor( name, points, callback, options = {} ) {
+
+        super( Widget.MAP2D, name, null, options );
+
+        this.onGetValue = () => {
+            return this.map2d.weightsObj;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+            // if( !skipCallback )
+            // {
+            //     this._trigger( new IEvent( name, curveInstance.element.value, event ), callback );
+            // }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
+        var container = document.createElement( "div" );
+        container.className = "lexmap2d";
+        this.root.appendChild( container );
+
+        this.map2d = new CanvasMap2D( points, callback, options );
+
+        const calendarIcon = LX.makeIcon( "SquareMousePointer" );
+        const calendarButton = new Button( null, "Open Map", () => {
+            this._popover = new Popover( calendarButton.root, [ this.map2d ] );
+        }, { buttonClass: `flex flex-row px-3 fg-secondary justify-between` } );
+
+        calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
+        container.appendChild( calendarButton.root );
+
+        doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.Map2D = Map2D;
 
 /**
  * @class Panel
@@ -12476,10 +11953,10 @@ class Panel {
      * @param {Object} options:
      */
 
-    // addMap2D( name, points, callback, options = { } ) {
-    //     const widget = new Map2D( points, callback, options );
-    //     return this._attachWidget( widget );
-    // }
+    addMap2D( name, points, callback, options = { } ) {
+        const widget = new Map2D( name, points, callback, options );
+        return this._attachWidget( widget );
+    }
 }
 
 LX.Panel = Panel;
@@ -14134,6 +13611,439 @@ class CanvasDial {
 }
 
 LX.Dial = Dial;
+
+// Based on LGraphMap2D from @tamats (jagenjo)
+// https://github.com/jagenjo/litescene.js
+class CanvasMap2D {
+
+    static COLORS = [ [255, 0, 0], [0, 255, 0], [0, 0, 255], [0, 128, 128], [128, 0, 128], [128, 128, 0], [255, 128, 0], [255, 0, 128], [0, 128, 255], [128, 0, 255] ];
+    static GRID_SIZE = 64;
+
+    /**
+     * @constructor Map2D
+     * @param {Array} initialPoints
+     * @param {Function} callback
+     * @param {Object} options
+     * circular
+     * showNames
+     * size
+     */
+
+    constructor( initialPoints, callback, options = {} ) {
+
+        this.circular = options.circular ?? false;
+        this.showNames = options.showNames ?? true;
+        this.size = options.size ?? [ 200, 200 ];
+
+        this.points = initialPoints ?? [];
+        this.callback = callback;
+        this.weights = [];
+        this.weightsObj = {};
+        this.currentPosition = new LX.vec2( 0.5, 0.5 );
+        this.circleCenter = [ 0, 0 ];
+        this.circleRadius = 1;
+        this.margin = 8;
+        this.dragging = false;
+
+        this._valuesChanged = true;
+        this._selectedPoint = null;
+
+        this.root = LX.makeContainer( ["auto", "auto"] );
+        this.root.tabIndex = "1";
+
+        this.root.addEventListener( "mousedown", innerMouseDown );
+
+        const that = this;
+
+        function innerMouseDown( e )
+        {
+            var doc = that.root.ownerDocument;
+            doc.addEventListener("mouseup", innerMouseUp);
+            doc.addEventListener("mousemove", innerMouseMove);
+            e.stopPropagation();
+            e.preventDefault();
+
+            that.dragging = true;
+            return true;
+        }
+
+        function innerMouseMove( e )
+        {
+            if( !that.dragging )
+            {
+                return;
+            }
+
+            const margin = that.margin;
+            const rect = that.root.getBoundingClientRect();
+
+            let pos = new LX.vec2();
+            pos.set( e.x - rect.x - that.size[ 0 ] * 0.5, e.y - rect.y - that.size[ 1 ] * 0.5 );
+            var cpos = that.currentPosition;
+            cpos.set(
+                LX.clamp( pos.x / ( that.size[ 0 ] * 0.5 - margin ), -1, 1 ),
+                LX.clamp( pos.y / ( that.size[ 1 ] * 0.5 - margin ), -1, 1 )
+            );
+
+            if( that.circular )
+            {
+                const center = new LX.vec2( 0, 0 );
+                const dist = cpos.dst( center );
+                if( dist > 1 )
+                {
+                    cpos = cpos.nrm();
+                }
+            }
+
+            that.renderToCanvas( that.canvas.getContext( "2d", { willReadFrequently: true } ), that.canvas );
+
+            that.computeWeights( cpos );
+
+            if( that.callback )
+            {
+                that.callback( that.weightsObj, that.weights, cpos );
+            }
+
+            return true;
+        }
+
+        function innerMouseUp( e )
+        {
+            that.dragging = false;
+
+            var doc = that.root.ownerDocument;
+            doc.removeEventListener("mouseup", innerMouseUp);
+            doc.removeEventListener("mousemove", innerMouseMove);
+        }
+
+        this.canvas = document.createElement( "canvas" );
+        this.canvas.width = this.size[ 0 ];
+        this.canvas.height = this.size[ 1 ];
+        this.root.appendChild( this.canvas );
+
+        const ctx = this.canvas.getContext( "2d", { willReadFrequently: true } );
+        this.renderToCanvas( ctx, this.canvas );
+    }
+
+    /**
+     * @method computeWeights
+     * @param {LX.vec2} p
+     * @description Iterate for every cell to see if our point is nearer to the cell than the nearest point of the cell,
+     * If that is the case we increase the weight of the nearest point. At the end we normalize the weights of the points by the number of near points
+     * and that give us the weight for every point
+     */
+
+    computeWeights( p ) {
+
+        if( !this.points.length )
+        {
+            return;
+        }
+
+        let values = this._precomputedWeights;
+        if( !values || this._valuesChanged )
+        {
+            values = this.precomputeWeights();
+        }
+
+        let weights = this.weights;
+        weights.length = this.points.length;
+        for(var i = 0; i < weights.length; ++i)
+        {
+            weights[ i ] = 0;
+        }
+
+        const gridSize = CanvasMap2D.GRID_SIZE;
+
+        let totalInside = 0;
+        let pos2 = new LX.vec2();
+
+        for( var y = 0; y < gridSize; ++y )
+        {
+            for( var x = 0; x < gridSize; ++x )
+            {
+                pos2.set( ( x / gridSize) * 2 - 1, ( y / gridSize ) * 2 - 1 );
+
+                var dataPos = x * 2 + y * gridSize * 2;
+                var pointIdx = values[ dataPos ];
+
+                var isInside = p.dst( pos2 ) < ( values[ dataPos + 1] + 0.001 ); // epsilon
+                if( isInside )
+                {
+                    weights[ pointIdx ] += 1;
+                    totalInside++;
+                }
+            }
+        }
+
+        for( var i = 0; i < weights.length; ++i )
+        {
+            weights[ i ] /= totalInside;
+            this.weightsObj[ this.points[ i ].name ] = weights[ i ];
+        }
+
+        return weights;
+    }
+
+    /**
+     * @method precomputeWeights
+     * @description Precompute for every cell, which is the closest point of the points set and how far it is from the center of the cell
+     * We store point index and distance in this._precomputedWeights. This is done only when the points set change
+     */
+
+    precomputeWeights() {
+
+        this._valuesChanged = false;
+
+        const numPoints = this.points.length;
+        const gridSize = CanvasMap2D.GRID_SIZE;
+        const totalNums = 2 * gridSize * gridSize;
+
+        let position = new LX.vec2();
+
+        if( !this._precomputedWeights || this._precomputedWeights.length != totalNums )
+        {
+            this._precomputedWeights = new Float32Array( totalNums );
+        }
+
+        let values = this._precomputedWeights;
+        this._precomputedWeightsGridSize = gridSize;
+
+        for( let y = 0; y < gridSize; ++y )
+        {
+            for( let x = 0; x < gridSize; ++x )
+            {
+                let nearest = -1;
+                let minDistance = 100000;
+
+                for( let i = 0; i < numPoints; ++i )
+                {
+                    position.set( ( x / gridSize ) * 2 - 1, ( y / gridSize ) * 2 - 1 );
+
+                    let pointPosition = new LX.vec2();
+                    pointPosition.fromArray( this.points[ i ].pos );
+                    let dist = position.dst( pointPosition );
+                    if( dist > minDistance )
+                    {
+                        continue;
+                    }
+
+                    nearest = i;
+                    minDistance = dist;
+                }
+
+                values[ x * 2 + y * 2 * gridSize ] = nearest;
+                values[ x * 2 + y * 2 * gridSize + 1 ] = minDistance;
+            }
+        }
+
+        return values;
+    }
+
+    /**
+     * @method precomputeWeightsToImage
+     * @param {LX.vec2} p
+     */
+
+    precomputeWeightsToImage( p ) {
+
+        if( !this.points.length )
+        {
+            return null;
+        }
+
+        const gridSize = CanvasMap2D.GRID_SIZE;
+        var values = this._precomputedWeights;
+        if( !values || this._valuesChanged || this._precomputedWeightsGridSize != gridSize )
+        {
+            values = this.precomputeWeights();
+        }
+
+        var canvas = this.imageCanvas;
+        if( !canvas )
+        {
+            canvas = this.imageCanvas = document.createElement( "canvas" );
+        }
+
+        canvas.width = canvas.height = gridSize;
+        var ctx = canvas.getContext( "2d", { willReadFrequently: true } );
+
+        var weights = this.weights;
+        weights.length = this.points.length;
+        for (var i = 0; i < weights.length; ++i)
+        {
+            weights[ i ] = 0;
+        }
+
+        let totalInside = 0;
+        let pixels = ctx.getImageData( 0, 0, gridSize, gridSize );
+        let pos2 = new LX.vec2();
+
+        for( var y = 0; y < gridSize; ++y )
+        {
+            for( var x = 0; x < gridSize; ++x )
+            {
+                pos2.set( ( x / gridSize ) * 2 - 1, ( y / gridSize ) * 2 - 1 );
+
+                const pixelPos = x * 4 + y * gridSize * 4;
+                const dataPos = x * 2 + y * gridSize * 2;
+                const pointIdx = values[ dataPos ];
+                const c = CanvasMap2D.COLORS[ pointIdx % CanvasMap2D.COLORS.length ];
+
+                var isInside = p.dst( pos2 ) < ( values[ dataPos + 1 ] + 0.001 );
+                if( isInside )
+                {
+                    weights[ pointIdx ] += 1;
+                    totalInside++;
+                }
+
+                pixels.data[ pixelPos ] = c[ 0 ] + ( isInside ? 128 : 0 );
+                pixels.data[ pixelPos + 1 ] = c[ 1 ] + ( isInside ? 128 : 0 );
+                pixels.data[ pixelPos + 2 ] = c[ 2 ] + ( isInside ? 128 : 0 );
+                pixels.data[ pixelPos + 3 ] = 255;
+            }
+        }
+
+        for( let i = 0; i < weights.length; ++i )
+        {
+            weights[ i ] /= totalInside;
+        }
+
+        ctx.putImageData( pixels, 0, 0 );
+        return canvas;
+    }
+
+    addPoint( name, pos ) {
+        if( this.findPoint( name ) )
+        {
+            console.warn("CanvasMap2D.addPoint: There is already a point with that name" );
+            return;
+        }
+
+        if( !pos )
+        {
+            pos = [ this.currentPosition[ 0 ], this.currentPosition[ 1 ] ];
+        }
+
+        pos[ 0 ] = LX.clamp( pos[ 0 ], -1, 1 );
+        pos[ 1 ] = LX.clamp( pos[ 1 ], -1, 1 );
+
+        const point = { name, pos };
+        this.points.push( point );
+        this._valuesChanged = true;
+        return point;
+    }
+
+    removePoint( name ) {
+        const removeIdx = this.points.findIndex( (p) => p.name == name );
+        if( removeIdx > -1 )
+        {
+            this.points.splice( removeIdx, 1 );
+            this._valuesChanged = true;
+        }
+    }
+
+    findPoint( name ) {
+        return this.points.find( p => p.name == name );
+    }
+
+    clear() {
+        this.points.length = 0;
+        this._precomputedWeights = null;
+        this._canvas = null;
+        this._selectedPoint = null;
+    }
+
+    renderToCanvas( ctx, canvas ) {
+
+        const margin = this.margin;
+        const w = this.size[ 0 ];
+        const h = this.size[ 1 ];
+
+        ctx.fillStyle = "black";
+        ctx.strokeStyle = "#BBB";
+
+        ctx.clearRect( 0, 0, w, h );
+
+        if( this.circular )
+        {
+            this.circleCenter[ 0 ] = w * 0.5;
+            this.circleCenter[ 1 ] = h * 0.5;
+            this.circleRadius = h * 0.5 - margin;
+
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc( this.circleCenter[ 0 ], this.circleCenter[ 1 ], this.circleRadius, 0, Math.PI * 2 );
+            ctx.fill();
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo( this.circleCenter[ 0 ] + 0.5, this.circleCenter[ 1 ] - this.circleRadius );
+            ctx.lineTo( this.circleCenter[ 0 ] + 0.5, this.circleCenter[ 1 ] + this.circleRadius );
+            ctx.moveTo( this.circleCenter[ 0 ] - this.circleRadius, this.circleCenter[ 1 ]);
+            ctx.lineTo( this.circleCenter[ 0 ] + this.circleRadius, this.circleCenter[ 1 ]);
+            ctx.stroke();
+        }
+        else
+        {
+            ctx.fillRect( margin, margin, w - margin * 2, h - margin * 2 );
+            ctx.strokeRect( margin, margin, w - margin * 2, h - margin * 2 );
+        }
+
+        var image = this.precomputeWeightsToImage( this.currentPosition );
+        if( image )
+        {
+            ctx.globalAlpha = 0.5;
+            ctx.imageSmoothingEnabled = false;
+            if( this.circular )
+            {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc( this.circleCenter[ 0 ], this.circleCenter[ 1 ], this.circleRadius, 0, Math.PI * 2 );
+                ctx.clip();
+                ctx.drawImage( image, this.circleCenter[ 0 ] - this.circleRadius, this.circleCenter[ 1 ] - this.circleRadius, this.circleRadius * 2, this.circleRadius * 2 );
+                ctx.restore();
+            }
+            else
+            {
+                ctx.drawImage( image, margin, margin, w - margin * 2, h - margin * 2 );
+            }
+            ctx.imageSmoothingEnabled = true;
+            ctx.globalAlpha = 1;
+        }
+
+        for( let i = 0; i < this.points.length; ++i )
+        {
+            const point = this.points[ i ];
+            let x = point.pos[ 0 ] * 0.5 + 0.5;
+            let y = point.pos[ 1 ] * 0.5 + 0.5;
+            x = x * ( w - margin * 2 ) + margin;
+            y = y * ( h - margin * 2 ) + margin;
+            x = LX.clamp( x, margin, w - margin );
+            y = LX.clamp( y, margin, h - margin );
+            ctx.fillStyle = ( point == this._selectedPoint ) ? "#CDF" : "#BCD";
+            ctx.beginPath();
+            ctx.arc( x, y, 3, 0, Math.PI * 2 );
+            ctx.fill();
+            if( this.showNames )
+            {
+                ctx.fillText( point.name, x + 5, y + 5 );
+            }
+        }
+
+        ctx.fillStyle = "white";
+        ctx.beginPath();
+        var x = this.currentPosition.x * 0.5 + 0.5;
+        var y = this.currentPosition.y * 0.5 + 0.5;
+        x = x * ( w - margin * 2 ) + margin;
+        y = y * ( h - margin * 2 ) + margin;
+        x = LX.clamp( x, margin, w - margin );
+        y = LX.clamp( y, margin, h - margin );
+        ctx.arc( x, y, 4, 0, Math.PI * 2 );
+        ctx.fill();
+    }
+}
+
+LX.CanvasMap2D = CanvasMap2D;
 
 class AssetViewEvent {
 

@@ -3,11 +3,12 @@
 ## dev
 
 Widgets:
+- New Map2D Widget (For NNI).
 - Fixed `NodeTree.select` when item is not shown.
 
 Fixed `autoTheme` on start with `dark` color scheme.
 Improved Context Menu docs section.
-Added ArrowCircle directions solid variants.
+Added a few more icon solid variants.
 Minor fixes.
 
 ## 0.6.2 (master)
