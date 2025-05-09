@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.6.3 (master)
+
 Widgets:
 - New Map2D Widget (For NNI).
 - Fixed `NodeTree.select` when item is not shown.
@@ -12,7 +14,7 @@ Improved Context Menu docs section.
 Added a few more icon solid variants.
 Minor fixes.
 
-## 0.6.2 (master)
+## 0.6.2
 
 Widgets:
 - Fixed Title Widget class override.
