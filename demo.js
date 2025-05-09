@@ -450,17 +450,17 @@ const map2Dpoints = [
         `, tasksContainer );
 
         const tableWidget = new LX.Table(null, {
-            head: ["Name", "Status", "Priority"],
+            head: [ "Name", "Status", "Priority", "ID" ],
             body: [
-                ["Alice", "In Progress", "High"],
-                ["Bob", "Backlog", "Medium"],
-                ["Prince", "Canceled", "Low"],
-                ["Sean", "Done", "High"],
-                ["Carter", "In Progress", "Medium"],
-                ["James", "Backlog", "Low"],
-                ["Mickey", "Todo", "Low"],
-                ["Charlie", "Canceled", "Low"],
-                ["Potato", "Todo", "High"]
+                [ "Alice", "In Progress", "High", 1 ],
+                [ "Bob", "Backlog", "Medium", 2 ],
+                [ "Prince", "Canceled", "Low", 3 ],
+                [ "Sean", "Done", "High", 4 ],
+                [ "Carter", "In Progress", "Medium", 5 ],
+                [ "James", "Backlog", "Low", 6 ],
+                [ "Mickey", "Todo", "Low", 7 ],
+                [ "Charlie", "Canceled", "Low", 8 ],
+                [ "Potato", "Todo", "High", 9 ]
             ]
         }, {
             selectable: true,
@@ -470,6 +470,7 @@ const map2Dpoints = [
             customFilters: [
                 { name: "Status", options: ["Backlog", "Todo", "In Progress", "Done", "Cancelled"] },
                 { name: "Priority", options: ["Low", "Medium", "High"] },
+                { name: "ID", type: "range", min: 0, max: 9, step: 1, units: "hr" },
             ],
             rowActions: [
                 { icon: "Edit", title: "Edit Row" },
@@ -480,7 +481,9 @@ const map2Dpoints = [
                 return [
                     { name: "Export" },
                     { name: "Make a copy" },
-                    { name: "Favourite" }
+                    { name: "Favourite" },
+                    null,
+                    { name: "Delete", icon: "Trash2", className: "fg-error" },
                 ]
             }
         });

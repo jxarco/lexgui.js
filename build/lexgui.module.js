@@ -10211,7 +10211,7 @@ class Table extends Widget {
                         }
                     }
                     this.refresh();
-                }, { title: "Reset filters", icon: "X" } );
+                }, { title: "Reset filters", tooltip: true, icon: "X" } );
                 headerContainer.appendChild( this._resetCustomFiltersBtn.root );
                 this._resetCustomFiltersBtn.root.classList.add( "hidden" );
             }
