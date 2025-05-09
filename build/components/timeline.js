@@ -385,27 +385,18 @@ class Timeline {
     }
 
     /**
-     * 
-     * @param {trackInfo} newTrack must be a valid instance of a track. If null, a track is automatically created
-     * @param {boolean} updatePanel 
+     * @param {object} options options for the new track 
+     *  { id: string, active: bool, locked: bool, } 
      * @returns 
      */
-    addNewTrack( newTrack = null ) {
+    addNewTrack( options = {} ) {
 
         if( !this.animationClip ){
             this.animationClip = this.instantiateAnimationClip();
         }
 
-        let trackInfo = null;
-        if (newTrack){
-            trackInfo = newTrack;
-            trackInfo.trackIdx = this.animationClip.tracks.length;
-        }
-        else{
-            trackInfo = this.instantiateTrack();
-            trackInfo.id = Math.floor(performance.now().toString()) + "_" + Math.floor(Math.random() * 0xffff);
-        }
-
+        const trackInfo = this.instantiateTrack(options);
+        trackInfo.trackIdx = this.animationClip.tracks.length;
         this.animationClip.tracks.push( trackInfo );
         
         return trackInfo.trackIdx;
@@ -1140,18 +1131,39 @@ class Timeline {
      */
     setTracksGroup( groupId, groupTracks = null ){
         const tracks = this.animationClip.tracks;
+        const tracksPerGroup = this.animationClip.tracksPerGroup;
         const result = [];
 
-        // if group exists, ungroup tracks.
-        if ( this.animationClip.tracksPerGroup[groupId] ){
-            this.animationClip.tracksPerGroup[groupId].forEach(t => {
+        let selectedItemsCounter = -1;
+        let selectedItemsFlatCounter = 0; // find place where to
+
+        if ( tracksPerGroup[groupId] ){
+            // if group exists, ungroup tracks.
+            tracksPerGroup[groupId].forEach(t => {
                 t.groupId = null;
                 t.groupTrackIdx = -1;
             });
+
+            // modify groups cannot appear more than once
+            for( let i = 0; i < this.selectedItems.length; ++i ){
+                let item = this.selectedItems[i];
+                
+                if (item === groupId){
+                    this._selectedItemsFlat.splice(selectedItemsFlatCounter, tracksPerGroup[groupId].length);
+                    selectedItemsCounter = i;
+                    break;
+                }
+
+                selectedItemsFlatCounter += item.isTrack ? 1 : tracksPerGroup[item].length;
+            }
         }
 
         if ( !groupTracks ){
-            delete this.animationClip.tracksPerGroup.groupId;
+            delete tracksPerGroup.groupId;
+            // remove entry from selectedItems
+            if( selectedItemsCounter > -1 ){
+                this.selectedItems.splice(selectedItemsCounter, 1); 
+            }
             return;
         }
 
@@ -1169,7 +1181,6 @@ class Timeline {
                 }
             }
             else if( tracks[v] ) {
-
                 track = tracks[v];
             }
 
@@ -1180,7 +1191,13 @@ class Timeline {
             }
         }
 
-        this.animationClip.tracksPerGroup[ groupId ] = result;
+        tracksPerGroup[ groupId ] = result;
+
+        // if group is currently visible, add tracks to selectedItemsFlat
+        if ( selectedItemsCounter > -1){
+            this._selectedItemsFlat.splice( selectedItemsFlatCounter, 0, ...result );
+            this.updateLeftPanel();
+        }
     }
 
     /**
@@ -1315,38 +1332,46 @@ class Timeline {
     }
 
 
-    // ABSTRACT FUNCTIONS
+    // ----- BASE FUNCTIONS -----
     /**
-        Tracks ust have, at least, these attributes
+        These functions might be overriden by child classes. Nonetheless, they must have the same attributes, at least.
+        Usually call a super.whateverFunction to generate its base form, and expand it with extra attributes
     */
-    instantiateTrack() { 
+    
+    /**
+     * 
+     * @param {obj} options set some values for the track instance (groups and trackIdx not included)
+     * @returns 
+     */
+    instantiateTrack(options = {}) { 
         return {
             isTrack: true,
-            id: "", //must be unique, at least inside a group
-            active: true,
-            locked: false,
+            id: options.id ?? ( Math.floor(performance.now().toString()) + "_" + Math.floor(Math.random() * 0xffff) ), //must be unique, at least inside a group
+            active: options.active ?? true,
+            locked: options.locked ?? false,
             isSelected: false, // render only
         
             groupId: null,
             groupTrackIdx: -1, // track Idx inside group only if in group
         
-            trackIdx: this.animationClip ? this.animationClip.tracks.length : 0
+            trackIdx: -1
         }
     }
 
     /**
-     * Animations must have, at least, these attributes 
+     * @param {obj} options sets some attributes. Tracks and tracksPerGroup are directly assigned, not sliced 
+     * @returns 
      */
-    instantiateAnimationClip() {
+    instantiateAnimationClip(options = {}) {
         return {
-            name: "animationClip",
-            duration: 0,
-            speed: this.speed,
-            tracks: [],
-            tracksPerGroup: {}
+            name: options.name ?? "animationClip",
+            duration: options.duration ?? 0,
+            speed: options.speed ?? this.speed,
+            tracks: options.tracks ?? [],
+            tracksPerGroup: options.tracksPerGroup ?? {}
         };
     }
-
+    // ----- END OF BASE FUNCTIONS -----
 };
 
 Timeline.BACKGROUND_COLOR = LX.getThemeColor("global-blur-background");
@@ -1396,17 +1421,39 @@ class KeyFramesTimeline extends Timeline {
         }
     }
 
-    instantiateTrack(){
-        const track = super.instantiateTrack();
-        track.dim = 1; // >= 1
+    instantiateTrack(options ={}){
+        const track = super.instantiateTrack(options);
+        track.dim = Math.max(1,options.dim ?? 1); // >= 1
         track.values = []; 
         track.times = [];
         track.selected = [];
         track.edited = [];
         track.hovered = [];
-    
-        track.curves = false; // only works if dim == 1
-        track.curvesRange = [0,1];
+
+        if ( options.values && options.times ){
+            track.values = options.values;
+            track.times = options.times;
+            
+            const numFrames = track.times.length;
+            if ( options.selected && options.selected.length == numFrames ){
+                track.selected = options.selected;
+            }else{ 
+                track.selected = (new Array(numFrames)).fill(false);
+            }
+            if ( options.edited && options.edited.length == numFrames ){
+                track.edited = options.edited;
+            }else{ 
+                track.edited = (new Array(numFrames)).fill(false);
+            }
+            if ( options.hovered && options.hovered.length == numFrames ){
+                track.hovered = options.hovered;
+            }else{ 
+                track.hovered = (new Array(numFrames)).fill(false);
+            }
+        }
+
+        track.curves = options.curves ?? false; // only works if dim == 1
+        track.curvesRange = options.curvesRange ?? [0,1];
         return track;
     }
 
@@ -2734,7 +2781,6 @@ class KeyFramesTimeline extends Timeline {
 }
 
 LX.KeyFramesTimeline = KeyFramesTimeline;
-
 /**
  * @class ClipsTimeline
  */
