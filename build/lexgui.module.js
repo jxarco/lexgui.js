@@ -1923,13 +1923,10 @@ function asTooltip( trigger, content, options = {} )
     } );
 
     trigger.addEventListener( "mouseleave", function(e) {
-        if( !tooltipDom ) return;
-
-        tooltipDom.dataset[ "closed" ] = true;
-
-        doAsync( () => {
+        if( tooltipDom )
+        {
             tooltipDom.remove();
-        }, 300 )
+        }
     } )
 }
 
@@ -10147,7 +10144,7 @@ class Table extends Widget {
                                             delete this.activeCustomFilters[ key ];
                                         }
                                         const activeFilters = Object.keys( this.activeCustomFilters ).filter(  k => this.activeCustomFilters[ k ] == f.name );
-                                        const filterBadgesHtml = activeFilters.reduce( ( acc, key ) => acc += LX.badge( key, "bg-tertiary text-sm" ), "" );
+                                        const filterBadgesHtml = activeFilters.reduce( ( acc, key ) => acc += LX.badge( key, "bg-tertiary fg-secondary text-sm border-0" ), "" );
                                         spanName.innerHTML = icon.innerHTML + f.name + ( activeFilters.length ? separatorHtml : "" ) + filterBadgesHtml;
                                         this.refresh();
                                     }
@@ -10172,13 +10169,13 @@ class Table extends Widget {
                                 panel.addNumber( null, f.start, (v) => {
                                     f.start = v;
                                     const inUse = ( f.start != f.min || f.end != f.max );
-                                    spanName.innerHTML = icon.innerHTML + f.name + ( inUse ? separatorHtml + LX.badge( `${ f.start } - ${ f.end } ${ f.units ?? "" }`, "bg-tertiary text-sm" ) : "" );
+                                    spanName.innerHTML = icon.innerHTML + f.name + ( inUse ? separatorHtml + LX.badge( `${ f.start } - ${ f.end } ${ f.units ?? "" }`, "bg-tertiary fg-secondary text-sm border-0" ) : "" );
                                     this.refresh();
                                 }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
                                 panel.addNumber( null, f.end, (v) => {
                                     f.end = v;
                                     const inUse = ( f.start != f.min || f.end != f.max );
-                                    spanName.innerHTML = icon.innerHTML + f.name + ( inUse ? separatorHtml + LX.badge( `${ f.start } - ${ f.end } ${ f.units ?? "" }`, "bg-tertiary text-sm" ) : "" );
+                                    spanName.innerHTML = icon.innerHTML + f.name + ( inUse ? separatorHtml + LX.badge( `${ f.start } - ${ f.end } ${ f.units ?? "" }`, "bg-tertiary fg-secondary text-sm border-0" ) : "" );
                                     this.refresh();
                                 }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
                                 panel.addButton( null, "Reset", () => {
