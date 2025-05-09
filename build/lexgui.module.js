@@ -8824,7 +8824,7 @@ class NumberInput extends Widget {
 
         if( options.units )
         {
-            let unitBox = LX.makeContainer( [ "auto", "auto" ], "px-2 bg-secondary content-center", options.units, valueBox );
+            let unitBox = LX.makeContainer( [ "auto", "auto" ], "px-2 bg-secondary content-center", options.units, valueBox, { "word-break": "keep-all" } );
             vecinput.unitBox = unitBox;
         }
 
@@ -11033,16 +11033,6 @@ class Panel {
         this._branchOpen = true;
         this._currentBranch = branch;
 
-        // Append to panel
-        if( this.branches.length == 0 )
-        {
-            branch.root.classList.add('first');
-        }
-
-        // This is the last!
-        this.root.querySelectorAll(".lexbranch.last").forEach( e => { e.classList.remove("last"); } );
-        branch.root.classList.add('last');
-
         this.branches.push( branch );
         this.root.appendChild( branch.root );
 
@@ -12002,6 +11992,7 @@ class Branch {
 
         var that = this;
 
+        this.closed = options.closed ?? false;
         this.root = root;
         this.widgets = [];
 
@@ -12030,7 +12021,7 @@ class Branch {
 
         this._addBranchSeparator();
 
-        if( options.closed )
+        if( this.closed )
         {
             title.classList.add( "closed" );
             root.classList.add( "closed" );
@@ -12073,26 +12064,26 @@ class Branch {
 
     _onMakeFloating() {
 
-        const dialog = new Dialog(this.name, p => {
+        const dialog = new Dialog( this.name, p => {
             // add widgets
             for( let w of this.widgets )
             {
                 p.root.appendChild( w.root );
             }
-        });
-        dialog.widgets = this.widgets;
+        }, { dockable: true });
 
-        const parent = this.root.parentElement;
+        const childIndex = Array.from( this.root.parentElement.childNodes ).indexOf( this.root );
+        console.assert( childIndex >= 0, "Branch not found!" );
+
+        dialog.branchData = {
+            name: this.name,
+            widgets: this.widgets,
+            closed: this.closed,
+            panel: this.panel,
+            childIndex
+        };
 
         this.root.remove();
-
-        // Make next the first branch
-        const next_branch = parent.querySelector(".lexbranch");
-        if(next_branch) next_branch.classList.add('first');
-
-        // Make new last the last branch
-        const last_branch = parent.querySelectorAll(".lexbranch");
-        if(last_branch.length) last_branch[last_branch.length - 1].classList.add('last');
     }
 
     _addBranchSeparator() {
@@ -12324,6 +12315,7 @@ class Dialog {
         const size = options.size ?? [],
             position = options.position ?? [],
             draggable = options.draggable ?? true,
+            dockable = options.dockable ?? false,
             modal = options.modal ?? false;
 
         let root = document.createElement('dialog');
@@ -12343,65 +12335,7 @@ class Dialog {
         {
             titleDiv.className = "lexdialogtitle";
             titleDiv.innerHTML = title;
-            titleDiv.setAttribute('draggable', false);
-
-            titleDiv.oncontextmenu = function( e ) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                if(!LX.main_area || LX.main_area.type !== 'horizontal')
-                    return;
-
-                addContextMenu("Dock", e, p => {
-                    e.preventDefault();
-
-                    const _getNextPanel = function( area ) {
-                        let p = area.panels[ 0 ];
-                        if( p ) return p;
-                        for(var s of area.sections){
-                            p = _getNextPanel( s );
-                            if( p ) return p;
-                        }
-                    }
-
-                    const _appendBranch = function( panel ) {
-                        let branch = panel.branches.find( b => b.name === title );
-                        if( !branch )
-                        {
-                            panel.branch( title );
-                            branch = panel.branches.find( b => b.name === title );
-                        }
-                        else
-                        {
-                            panel.root.appendChild( branch.root );
-                        }
-
-                        for( let w of that.widgets )
-                        {
-                            branch.content.appendChild( w.root );
-                        }
-
-                        branch.widgets = that.widgets;
-
-                        // Make new last the last branch
-                        panel.root.querySelectorAll(".lexbranch.last").forEach( e => { e.classList.remove("last"); } );
-                        branch.root.classList.add('last');
-                        root.remove();
-                    }
-
-                    // Right
-                    let rpanel = _getNextPanel(LX.main_area.sections[ 1 ]);
-                    p.add('<i class="This goes to the right">', { icon: "PanelRightDashed", disabled: !rpanel, id: 'dock_options0', callback: () => {
-                        _appendBranch(rpanel);
-                    }});
-                    // Left
-                    let lpanel = _getNextPanel(LX.main_area.sections[ 0 ]);
-                    p.add('<i class="This goes to the left">', { icon: "PanelLeftDashed", disabled: !lpanel, id: 'dock_options1', callback: () => {
-                        _appendBranch(lpanel);
-                    }});
-                }, { icon: "WindowRestore" });
-            };
-
+            titleDiv.setAttribute( "draggable", false );
             root.appendChild( titleDiv );
         }
 
@@ -12432,8 +12366,32 @@ class Dialog {
             const closeButton = LX.makeIcon( "X", { title: "Close", iconClass: "lexdialogcloser" } );
             closeButton.addEventListener( "click", this.close );
 
+            const dockButton = LX.makeIcon( "Minus", { title: "Dock", iconClass: "ml-auto mr-2" } );
+            dockButton.addEventListener( "click", () => {
+
+                const data = this.branchData;
+                const panel = data.panel;
+                const panelChildCount = panel.root.childElementCount;
+
+                const branch = panel.branch( data.name, { closed: data.closed } );
+                branch.widgets = data.widgets;
+
+                for( let w of branch.widgets )
+                {
+                    branch.content.appendChild( w.root );
+                }
+
+                if( data.childIndex < panelChildCount )
+                {
+                    panel.root.insertChildAtIndex( branch.root, data.childIndex );
+                }
+
+                this.close();
+            } );
+
             if( title )
             {
+                if( dockable ) titleDiv.appendChild( dockButton );
                 titleDiv.appendChild( closeButton );
             }
             else

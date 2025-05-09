@@ -2,6 +2,8 @@
 
 ## dev
 
+Fixed making floating branch + docking to panel.
+
 ## 0.6.3 (master)
 
 Widgets:
