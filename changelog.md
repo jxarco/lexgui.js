@@ -5,6 +5,7 @@
 Widgets:
 - New Map2D Widget (For NNI).
 - Fixed `NodeTree.select` when item is not shown.
+- Fixed issue corrupting table body when manual sorting in Table Widget.
 
 Fixed `autoTheme` on start with `dark` color scheme.
 Improved Context Menu docs section.

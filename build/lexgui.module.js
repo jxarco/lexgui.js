@@ -10356,7 +10356,7 @@ class Table extends Widget {
                 let movePending = null;
 
                 document.addEventListener( 'mouseup', (e) => {
-                    if( !rIdx ) return;
+                    if( rIdx === null ) return;
                     document.removeEventListener( "mousemove", onMove );
                     const fromRow = table.rows[ rIdx ];
                     fromRow.dY = 0;
@@ -10370,14 +10370,33 @@ class Table extends Widget {
                     if( movePending )
                     {
                         // Modify inner data first
+                        // Origin row should go to the target row, and the rest should be moved up/down
                         const fromIdx = rIdx - 1;
                         const targetIdx = movePending[ 1 ] - 1;
-                        var b = data.body[fromIdx];
-                        data.body[fromIdx] = data.body[targetIdx];
+                        const b = data.body[ fromIdx ];
+                        let targetOffset = 0;
+
+                        if( fromIdx == targetIdx ) return;
+                        if( fromIdx > targetIdx ) // Move up
+                        {
+                            for( let i = fromIdx; i > targetIdx; --i )
+                            {
+                                data.body[ i ] = data.body[ i - 1 ];
+                            }
+                        }
+                        else // Move down
+                        {
+                            targetOffset = 1;
+                            for( let i = fromIdx; i < targetIdx; ++i )
+                            {
+                                data.body[ i ] = data.body[ i + 1 ];
+                            }
+                        }
+
                         data.body[targetIdx] = b;
 
                         const parent = movePending[ 0 ].parentNode;
-                        parent.insertChildAtIndex(  movePending[ 0 ],  movePending[ 1 ] );
+                        parent.insertChildAtIndex(  movePending[ 0 ], targetIdx + targetOffset );
                         movePending = null;
                     }
 
@@ -10502,7 +10521,7 @@ class Table extends Widget {
                         row.addEventListener("mouseenter", function(e) {
                             e.preventDefault();
 
-                            if( rIdx && ( this.rowIndex != rIdx ) && ( eventCatched != this.rowIndex ) )
+                            if( rIdx != null && ( this.rowIndex != rIdx ) && ( eventCatched != this.rowIndex ) )
                             {
                                 eventCatched = this.rowIndex;
                                 const fromRow = table.rows[ rIdx ];
@@ -10511,7 +10530,7 @@ class Table extends Widget {
                                     movePending = [ fromRow, undo ? (this.rowIndex-1) : this.rowIndex ];
                                     this.style.transform = undo ? `` : `translateY(-${this.offsetHeight}px)`;
                                 } else {
-                                    movePending = [ fromRow, undo ? (this.rowIndex) : (this.rowIndex-1) ];
+                                    movePending = [ fromRow, undo ? (this.rowIndex+1) : (this.rowIndex) ];
                                     this.style.transform = undo ? `` : `translateY(${this.offsetHeight}px)`;
                                 }
                                 doAsync( () => {
