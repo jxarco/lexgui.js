@@ -461,6 +461,7 @@ class Timeline {
         let subtickX = subtickTime * tickX / tickTime; 
 
         let startx = this.timeToX( Math.floor( startTime / tickTime) * tickTime ); // floor because might need to draw previous subticks
+        startx += 0.0000001; // slight offset to avoid "-0.0"
         let endx = this.timeToX( endTime ); // draw up to endTime
 
         // Begin drawing
@@ -549,11 +550,12 @@ class Timeline {
         const h = ctx.canvas.height;
 
         const scrollableHeight = this.trackTreesWidget.root.scrollHeight;
-        const treeOffset = this.lastTrackTreesWidgetOffset = this.trackTreesWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop;
+        // tree has gaps of 0.25rem (4px) inbetween entries but not in the beginning nor ending. Move half gap upwards.
+        const treeOffset = this.lastTrackTreesWidgetOffset = this.trackTreesWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop -2;
 
         if ( this.trackTreesPanel.root.scrollHeight > 0 ){
             const ul = this.trackTreesWidget.innerTree.domEl.children[0];
-            this.trackHeight = ul.children.length < 1 ? 25 : (ul.offsetHeight / ul.children.length);
+            this.trackHeight = ul.children.length < 1 ? 25 : ((ul.offsetHeight+4) / ul.children.length);
         }
         
         //zoom
@@ -577,7 +579,7 @@ class Timeline {
 
         if(this.animationClip) {
             ctx.translate( 0, treeOffset );
-            // this.drawContent( ctx, this.timeStart, this.timeEnd, this );
+            this.drawContent( ctx, this.timeStart, this.timeEnd, this );
             ctx.translate( 0, -treeOffset );
         }
 
@@ -1775,38 +1777,30 @@ class KeyFramesTimeline extends Timeline {
 
     drawContent( ctx ) { // TODO
     
-        if(!this.animationClip || !this.animationClip.tracksPerGroup) 
+        if(!this.animationClip) 
             return;
         
         ctx.save();
 
         const trackHeight = this.trackHeight;
-        const tracksPerGroup = this.animationClip.tracksPerGroup;
         const scrollY = - this.currentScrollInPixels;
         const treeOffset = this.lastTrackTreesWidgetOffset;
+
+        // elements from "ul" should match the visible tracks (and groups) as if this.selectedItems was flattened
+        const visibleElements = this.trackTreesWidget.innerTree.domEl.children[0].children; 
 
         let offset = scrollY;
         ctx.translate(0, offset);
 
-        for(let t = 0; t < this.selectedItems.length; t++) {
-            let tracks = tracksPerGroup[this.selectedItems[t]];
-            if(!tracks) continue;
+        for(let t = 0; t < visibleElements.length; t++) {
+            const track = visibleElements[t].treeData.trackData;
+            
+            if(track){
+                this.drawTrackWithKeyframes(ctx, trackHeight, track);
+            } 
             
             offset += trackHeight;
             ctx.translate(0, trackHeight);
-
-            if ( this.trackTreesWidget.innerTree.data[t].closed ){
-                continue;
-            }
-
-            for(let i = 0; i < tracks.length; i++) {
-                const track = tracks[i];
-
-                this.drawTrackWithKeyframes(ctx, trackHeight, track);
-                
-                offset += trackHeight;
-                ctx.translate(0, trackHeight);
-            }
         }
          
         ctx.restore();
@@ -1834,12 +1828,7 @@ class KeyFramesTimeline extends Timeline {
         ctx.fillStyle = Timeline.KEYFRAME_COLOR;
         ctx.globalAlpha = 1;
 
-        const keyframes = track.times;
-
-        if(!keyframes) {
-            return;
-        }
-         
+        const keyframes = track.times;         
         const startTime = this.visualTimeRange[0];
         const endTime = this.visualTimeRange[1];
 
@@ -1892,49 +1881,51 @@ class KeyFramesTimeline extends Timeline {
         this.animationClip.speed = (animation && animation.speed ) ? animation.speed : this.speed;
 
         if (animation && animation.tracks) {
-            let tracksPerGroup = {};
+            const tracksPerGroup = {};
             for( let i = 0; i < animation.tracks.length; ++i ) {
                 
                 let track = animation.tracks[i];
-                
-                const [name, type] = this.getTrackName(track.name);
+                let times = track.times ?? [];
+                let values = track.values ?? [];
                 
                 let valueDim = track.dim;
                 if ( !valueDim || valueDim < 0 ){
-                    if ( track.times.length && track.values.length ){ valueDim = track.values.length/track.times.length; }
+                    if ( times.length && values.length ){ valueDim = Math.round(values.length/times.length); }
                     else{ valueDim = 1; }
                 }
 
-                let leftOver = track.values.length % valueDim; // just in case values have an incorrect length
-                let amounEntries = Math.min( track.times.length, track.values.length - leftOver );
-                let times = track.times.slice(0, amounEntries); 
-                let values = track.values.slice(0, amounEntries * valueDim);
-                let boolArray = (new Array(amounEntries)).fill(false);
+                let leftOver = values.length % valueDim; // just in case values have an incorrect length
+                let amounEntries = Math.min( times.length, values.length - leftOver );
+                times = times.slice(0, amounEntries); 
+                values = values.slice(0, amounEntries * valueDim);
 
-                let trackInfo = {
-                    fullname: track.name,
-                    name: name, type: type,
-                    active: true,
-                    locked: false,
-                    dim: valueDim,
-                    selected: boolArray.slice(), edited: boolArray.slice(), hovered: boolArray.slice(), 
-                    times: times,
-                    values: values
-                };
+                let baseName = track.id ?? track.name;
+                const [groupId, trackId] = baseName ? this._getValidTrackName(baseName) : [null, null];
+
+                const trackInfo = this.instantiateTrack({
+                    id: trackId, 
+                    dim: valueDim, 
+                    times, 
+                    values,
+                    selected: track.selected, 
+                    hovered: track.hovered, 
+                    edited: track.edited
+                });
                 
-                if(!tracksPerGroup[name]) {
-                    tracksPerGroup[name] = [trackInfo];
-                }else {
-                    tracksPerGroup[name].push( trackInfo );
+                // manual group insertion
+                if ( groupId ){
+                    if(!tracksPerGroup[groupId]) {
+                        tracksPerGroup[groupId] = [trackInfo];
+                    }else {
+                        tracksPerGroup[groupId].push( trackInfo );
+                    }
+                    
+                    trackInfo.groupId = groupId;
+                    trackInfo.groupTrackIdx = tracksPerGroup[groupId].length - 1; // index of track in group
                 }
-                
-                const trackIndex = tracksPerGroup[name].length - 1;
-                trackInfo.groupTrackIdx = trackIndex; // index of track in "name"
+
                 trackInfo.trackIdx = i; // index of track in the entire animation
-                
-                // Save index also in original track
-                track.groupTrackIdx = trackIndex;
-                
+                                
                 this.animationClip.tracks.push(trackInfo);
             }
 
@@ -1943,25 +1934,28 @@ class KeyFramesTimeline extends Timeline {
         this.resize();
     }
     
-    getTrackName( uglyName ) {
+    _getValidTrackName( uglyName ) {
 
-        let name, type;
-
+        let groupId = null;
+        let trackId = null;
+        let trackNameInfo;
         // Support other versions
         if(uglyName.includes("[")) {
-            const nameIndex = uglyName.indexOf('['),
-                trackNameInfo = uglyName.substr(nameIndex+1).split("].");
-            name = trackNameInfo[0].replaceAll(/[\[\]]/g,"");
-            name = name.replaceAll("_", " ");
-            type = trackNameInfo[1];
+            const nameIndex = uglyName.indexOf('[');
+            trackNameInfo = uglyName.substr(nameIndex+1).split("].");
         }else {
-            const trackNameInfo = uglyName.split(".");
-            name = trackNameInfo[0].replaceAll(/[\[\]]/g,"");
-            name = name.replaceAll("_", " ");
-            type = trackNameInfo[1];
+            trackNameInfo = uglyName.split(".");
         }
 
-        return [name, type];
+        if ( trackNameInfo.length > 1 ){
+            groupId = trackNameInfo[0].replaceAll(/[\[\]]/g,"");
+            groupId = groupId.replaceAll("_", " ");
+            trackId = trackNameInfo[1];
+        }else{
+            trackId = trackNameInfo[0];
+        }
+
+        return [groupId, trackId];
     }
 
     /**
