@@ -414,8 +414,7 @@ class Timeline {
             this.selectedItems = [];
         }
 
-        this.trackStateRedo = [];
-        this.trackStateUndo = [];
+        this.clearState();
 
         if( !animation || !animation.tracks || needsToProcess )
         { 
@@ -1638,7 +1637,7 @@ class KeyFramesTimeline extends Timeline {
             this.moveKeyMinTime = Infinity;
             const tracks = this.animationClip.tracks;
             for(let selectedKey of this.lastKeyFramesSelected) {
-                let [name, localTrackIdx, keyIndex, trackIdx, keyTime] = selectedKey;
+                let [trackIdx, keyIndex, keyTime] = selectedKey;
                 const track = tracks[trackIdx];
                 
                 // save track states only once
@@ -1686,7 +1685,7 @@ class KeyFramesTimeline extends Timeline {
                     idx = this.lastKeyFramesSelected.length - 1 - i;
                 }
                 
-                const [name, localTrackIdx, keyIndex, trackIdx, originalKeyTime] = this.lastKeyFramesSelected[idx];
+                const [trackIdx, keyIndex, originalKeyTime] = this.lastKeyFramesSelected[idx];
                 track = tracks[trackIdx];
                 if(track && track.locked)
                     continue;
@@ -1716,13 +1715,13 @@ class KeyFramesTimeline extends Timeline {
                         this.swapKeyFrames(track, k-1, k);
                     }
                 }
-                this.lastKeyFramesSelected[idx][2] = k; // update keyframe index
-                this.lastKeyFramesSelected[idx][4] = times[k]; // update keyframe time
+                this.lastKeyFramesSelected[idx][1] = k; // update keyframe index
+                this.lastKeyFramesSelected[idx][2] = times[k]; // update keyframe time
             }
 
             if ( this.onContentMoved ){
                 for( let i = 0; i < this.lastKeyFramesSelected.length; ++i ){
-                    const [name, localTrackIdx, keyIndex, trackIdx, originalKeyTime] = this.lastKeyFramesSelected[i];
+                    const [trackIdx, keyIndex, originalKeyTime] = this.lastKeyFramesSelected[i];
                     track = this.animationClip.tracks[trackIdx];
                     if(track && track.locked)
                         continue;
@@ -2307,7 +2306,7 @@ class KeyFramesTimeline extends Timeline {
         let toCopy = {};
         const tracks = this.animationClip.tracks;
         for(let i = 0; i < this.lastKeyFramesSelected.length; i++){
-            let [id, localTrackIdx, keyIdx, trackIdx] = this.lastKeyFramesSelected[i];
+            let [trackIdx, keyIdx] = this.lastKeyFramesSelected[i];
             const track = tracks[trackIdx];
 
             if(toCopy[trackIdx]) {
@@ -2388,7 +2387,7 @@ class KeyFramesTimeline extends Timeline {
         // copy the value into the only selected keyframe
         if(this.clipboard.value && this.lastKeyFramesSelected.length == 1) {
 
-            let [id, localTrackIdx, keyIdx, trackIdx] = this.lastKeyFramesSelected[0];
+            let [trackIdx, keyIdx] = this.lastKeyFramesSelected[0];
             this.pasteKeyFrameValue({}, this.animationClip.tracks[trackIdx], keyIdx);
             return true;
         }
@@ -2404,10 +2403,16 @@ class KeyFramesTimeline extends Timeline {
         if(this.clipboard.keyframes) {
 
             for( let trackIdx in this.clipboard.keyframes ){
-                let clipboardItem = this.animationClip.tracks[trackIdx].name;
+                const clipboardItem = this.animationClip.tracks[trackIdx];
     
                 // ensure all tracks are visible
-                if ( this.selectedItems.findIndex( (item) => item == clipboardItem ) == -1 ){
+                const idx = this.selectedItems.findIndex( (item) => 
+                    { 
+                        if ( item.isTrack ){ return ( item === clipboardItem ) } 
+                        return item === clipboardItem.groupId;
+                    } );
+
+                if ( idx == -1 ){
                     return false; 
                 }
             }
@@ -2440,7 +2445,7 @@ class KeyFramesTimeline extends Timeline {
         this.clearState();
 
         // Copy to every selected key
-        for(let [name, groupTrackIdx, keyIndex, trackIdx] of this.lastKeyFramesSelected) {
+        for(let [trackIdx, keyIndex] of this.lastKeyFramesSelected) {
             this.#paste( this.animationClip.tracks[trackIdx], keyIndex, this.clipboard.value.values );
         }
     }
@@ -2471,8 +2476,6 @@ class KeyFramesTimeline extends Timeline {
             const values = clipboardInfo.values;
             const track = this.animationClip.tracks[trackIdx];
             
-  
-
             this.saveState(trackIdx);
             let oldTrackStateEnabler = this.trackStateSaveEnabler;
             this.trackStateSaveEnabler = false; // do not save state while in addkeyframe
@@ -2489,7 +2492,6 @@ class KeyFramesTimeline extends Timeline {
                 }
             }
 
-            
             this.trackStateSaveEnabler = oldTrackStateEnabler;
         }
         
@@ -2633,7 +2635,7 @@ class KeyFramesTimeline extends Timeline {
             // start removing from the last keyframe 
             let prevTrackRemoved = -1;
             for( let i = this.lastKeyFramesSelected.length-1; i > -1; --i ){
-                let [trackName, trackLocalIdx, frameIdx, trackIdx] = this.lastKeyFramesSelected[i];
+                let [trackIdx, frameIdx] = this.lastKeyFramesSelected[i];
                 if ( prevTrackRemoved != trackIdx ){
                     this.saveState(trackIdx, prevTrackRemoved != -1);
                     prevTrackRemoved = trackIdx;
@@ -2753,8 +2755,8 @@ class KeyFramesTimeline extends Timeline {
 
     unSelectAllKeyFrames() {
 
-        for(let [name, localTrackIdx, keyIndex] of this.lastKeyFramesSelected) {
-            this.animationClip.tracksPerGroup[name][localTrackIdx].selected[keyIndex] = false;
+        for(let [trackIdx, keyIndex] of this.lastKeyFramesSelected) {
+            this.animationClip.tracks[trackIdx].selected[keyIndex] = false;
         }
 
         // Something has been unselected
@@ -2785,15 +2787,15 @@ class KeyFramesTimeline extends Timeline {
             return false;
         }
 
-        // [ track name string, track idx in item, keyframe, track idx in animation, keyframe time]
-        let selection = [track.name, track.groupTrackIdx, frameIdx, track.trackIdx, track.times[frameIdx]];
         const trackIdx = track.trackIdx;
+        // [track idx, keyframe, keyframe time]
+        let selection = [track.trackIdx, frameIdx, track.times[frameIdx]];
 
         // sort lastkeyframeselected ascending order (track and frame)
         let i = 0;
         for( ; i < this.lastKeyFramesSelected.length; ++i){
             let s = this.lastKeyFramesSelected[i];
-            if(s[3] > trackIdx || (s[3] == trackIdx && s[2] > frameIdx)){
+            if(s[0] > trackIdx || (s[0] == trackIdx && s[1] > frameIdx)){
                 break;
             }
         }
@@ -2812,10 +2814,10 @@ class KeyFramesTimeline extends Timeline {
         }
         track.selected[frameIdx] = false;
         
-        const localTrackIdx = track.groupTrackIdx;
+        const trackIdx = track.trackIdx;
         for( let i = 0; i < this.lastKeyFramesSelected.length; ++i ){
-            let sk = this.lastKeyFramesSelected[i];
-            if ( sk[1] == localTrackIdx && sk[2] == frameIdx ){ 
+            const sk = this.lastKeyFramesSelected[i];
+            if ( sk[0] === trackIdx && sk[1] === frameIdx ){
                 this.lastKeyFramesSelected.splice(i, 1);
                 break;
             }
