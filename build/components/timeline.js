@@ -414,6 +414,9 @@ class Timeline {
             this.selectedItems = [];
         }
 
+        this.trackStateRedo = [];
+        this.trackStateUndo = [];
+
         if( !animation || !animation.tracks || needsToProcess )
         { 
             this.processTracks( animation ); // generate default animationclip or process the user's one
@@ -1020,8 +1023,8 @@ class Timeline {
 
 
     /**
-     * [ trackIdx, "groupId" ]
-     * @param {Array} itemsName array of strings and/or number identifying groups and/or tracks
+     * [ trackIdx ]
+     * @param {Array} itemsName array of numbers identifying tracks
      */
     setSelectedItems( items ) {
 
@@ -1034,8 +1037,8 @@ class Timeline {
     }
 
     /**
-     * @param {*} itemsToAdd [ trackIdx, "groupId" ], array of strings and/or number identifying groups and/or tracks
-     * @param {*} itemsToRemove [ trackIdx, "groupId" ], array of strings and/or number identifying groups and/or tracks
+     * @param {*} itemsToAdd [ trackIdx ], array of numbers identifying tracks by their index
+     * @param {*} itemsToRemove [ trackIdx ], array of numbers identifying tracks by their index
      */
     changeSelectedItems( itemsToAdd = null, itemsToRemove = null, skipCallback = false ) {
 
@@ -1043,16 +1046,13 @@ class Timeline {
         this.unHoverAll();
         
         const tracks = this.animationClip.tracks;
-        const tracksPerGroup = this.animationClip.tracksPerGroup;
 
         if ( itemsToRemove ){
             for( let i = 0; i < itemsToRemove.length; ++i){
-                const isGroup = isNaN(itemsToRemove[i]);
-                let compareObj = isGroup ? itemsToRemove[i] : tracks[itemsToRemove[i]]; // trackData or groupId
+                const compareObj = itemsToRemove[i];
                 for( let s = 0; s < this.selectedItems.length; ++s){
                     if (this.selectedItems[s] === compareObj){
-                        const size = isGroup ? tracksPerGroup[ compareObj ].length : 1;
-                        this.selectedItems.splice(s, size);
+                        this.selectedItems.splice(s, 1);
                         break;
                     }
                 }
@@ -1062,11 +1062,7 @@ class Timeline {
         if ( itemsToAdd ){
             for( let i = 0; i < itemsToAdd.length; ++i ){
                 const v = itemsToAdd[i];
-                if ( isNaN(v) ){ // assuming it is a string
-                    if ( tracksPerGroup[ v ] ){  
-                        this.selectedItems.push( v );
-                    }
-                }else if ( tracks[v] ) {
+                if ( tracks[v] ) {
                     this.selectedItems.push( tracks[v] );
                 }
             }
@@ -1081,88 +1077,12 @@ class Timeline {
     }
 
     /**
-     * 
-     * @param {string} groupId unique identifier
-     * @param {array} groupTracks [ "trackID", trackIdx ] array of strings and/or numbers of the existing tracks to include in this group. A track can only be part of 1 group
-     *  if groupTracks == null, groupId is removed from the list
+     * It will find the first occurrence of trackId in animationClip.tracks
+     * @param {string} trackId 
+     * @returns 
      */
-    setTracksGroup( groupId, groupTracks = null ){
+    getTrack( trackId ){
         const tracks = this.animationClip.tracks;
-        const tracksPerGroup = this.animationClip.tracksPerGroup;
-        const result = [];
-
-        let selectedItemsCounter = -1;
-
-        if ( tracksPerGroup[groupId] ){
-            // if group exists, ungroup tracks.
-            tracksPerGroup[groupId].forEach(t => {
-                t.groupId = null;
-                t.groupTrackIdx = -1;
-            });
-
-            // modify groups cannot appear more than once
-            for( let i = 0; i < this.selectedItems.length; ++i ){                
-                if (this.selectedItems[i] === groupId){
-                    selectedItemsCounter = i;
-                    break;
-                }
-            }
-        }
-
-        if ( !groupTracks ){
-            delete tracksPerGroup.groupId;
-            // remove entry from selectedItems
-            if( selectedItemsCounter > -1 ){
-                this.selectedItems.splice(selectedItemsCounter, 1); 
-            }
-            return;
-        }
-
-        // find tracks and group them
-        for (let i = 0; i < groupTracks.length; ++i){
-            const v = groupTracks[i];
-            let track = null;
-            if ( isNaN(v) ){
-                // v is an id  (string)
-                for( let t = 0; t < tracks.length; ++t ){ 
-                    if (tracks[t].id == v){
-                        track = tracks[t];
-                        break;
-                    }
-                }
-            }
-            else if( tracks[v] ) {
-                track = tracks[v];
-            }
-
-            if ( track ){
-                track.groupId = groupId;
-                track.groupTrackIdx = result.length;
-                result.push( track );
-            }
-        }
-
-        tracksPerGroup[ groupId ] = result;
-
-        // if group is currently visible
-        if ( selectedItemsCounter > -1){
-            this.updateLeftPanel();
-        }
-    }
-
-    /**
-     * @param {string} groupId
-     * @returns array of tracks or null 
-     */
-    getTracksGroup( groupId ){
-        return this.animationClip.tracksPerGroup[ groupId ] ?? null;
-    }
-
-    getTrack( trackId, groupId = null ){
-        let tracks = this.animationClip.tracks;
-        if (groupId){
-            tracks = this.animationClip.tracksPerGroup[ groupId ];
-        }
         for( let i = 0; i < tracks.length; ++i){
             if ( tracks[i].id == trackId ){ 
                 return tracks[i];
@@ -1411,7 +1331,7 @@ class KeyFramesTimeline extends Timeline {
         }
     }
 
-    // ----- BASE FUNCTIONS OVERWRITTEN -----
+    // OVERRIDE
     generateSelectedItemsTreeData(){
         const treeTracks = [];
         const tracksPerGroup = this.animationClip.tracksPerGroup;
@@ -1462,6 +1382,12 @@ class KeyFramesTimeline extends Timeline {
         return treeTracks;
     }
 
+    /**
+     * OVERRIDE
+     * @param {obj} options track information that wants to be set to the new track
+     *  id, dim, values, times, selected, edited, hovered
+     * @returns 
+     */
     instantiateTrack(options ={}){
         const track = super.instantiateTrack(options);
         track.dim = Math.max(1,options.dim ?? 1); // >= 1
@@ -1498,7 +1424,149 @@ class KeyFramesTimeline extends Timeline {
         return track;
     }
 
-    // ----- END OF BASE FUNCTIONS -----
+    /**
+     * OVERRIDE
+     * @param {*} itemsToAdd [ trackIdx, "groupId" ], array of strings and/or number identifying groups and/or tracks
+     * @param {*} itemsToRemove [ trackIdx, "groupId" ], array of strings and/or number identifying groups and/or tracks
+     */
+    changeSelectedItems( itemsToAdd = null, itemsToRemove = null, skipCallback = false ) {
+
+        this.unSelectAllKeyFrames();
+        this.unHoverAll();
+        
+        const tracks = this.animationClip.tracks;
+        const tracksPerGroup = this.animationClip.tracksPerGroup;
+
+        if ( itemsToRemove ){
+            for( let i = 0; i < itemsToRemove.length; ++i){
+                const isGroup = isNaN(itemsToRemove[i]);
+                let compareObj = isGroup ? itemsToRemove[i] : tracks[itemsToRemove[i]]; // trackData or groupId
+                for( let s = 0; s < this.selectedItems.length; ++s){
+                    if (this.selectedItems[s] === compareObj){
+                        const size = isGroup ? tracksPerGroup[ compareObj ].length : 1;
+                        this.selectedItems.splice(s, size);
+                        break;
+                    }
+                }
+            }
+        }
+
+        if ( itemsToAdd ){
+            for( let i = 0; i < itemsToAdd.length; ++i ){
+                const v = itemsToAdd[i];
+                if ( isNaN(v) ){ // assuming it is a string
+                    if ( tracksPerGroup[ v ] ){  
+                        this.selectedItems.push( v );
+                    }
+                }else if ( tracks[v] ) {
+                    this.selectedItems.push( tracks[v] );
+                }
+            }
+        }
+
+        
+        this.updateLeftPanel();
+
+        if(this.onItemSelected && !skipCallback){
+            this.onItemSelected(this.selectedItems, itemsToAdd, itemsToAdd);
+        }
+    }
+
+    /**
+     * @param {string} groupId unique identifier
+     * @param {array} groupTracks [ "trackID", trackIdx ] array of strings and/or numbers of the existing tracks to include in this group. A track can only be part of 1 group
+     *  if groupTracks == null, groupId is removed from the list
+     */
+    setTracksGroup( groupId, groupTracks = null ){
+        const tracks = this.animationClip.tracks;
+        const tracksPerGroup = this.animationClip.tracksPerGroup;
+        const result = [];
+
+        let selectedItemsCounter = -1;
+
+        if ( tracksPerGroup[groupId] ){
+            // if group exists, ungroup tracks.
+            tracksPerGroup[groupId].forEach(t => {
+                t.groupId = null;
+                t.groupTrackIdx = -1;
+            });
+
+            // modify groups cannot appear more than once
+            for( let i = 0; i < this.selectedItems.length; ++i ){                
+                if (this.selectedItems[i] === groupId){
+                    selectedItemsCounter = i;
+                    break;
+                }
+            }
+        }
+
+        if ( !groupTracks ){
+            delete tracksPerGroup.groupId;
+            // remove entry from selectedItems
+            if( selectedItemsCounter > -1 ){
+                this.selectedItems.splice(selectedItemsCounter, 1); 
+            }
+            return;
+        }
+
+        // find tracks and group them
+        for (let i = 0; i < groupTracks.length; ++i){
+            const v = groupTracks[i];
+            let track = null;
+            if ( isNaN(v) ){
+                // v is an id  (string)
+                for( let t = 0; t < tracks.length; ++t ){ 
+                    if (tracks[t].id == v){
+                        track = tracks[t];
+                        break;
+                    }
+                }
+            }
+            else if( tracks[v] ) {
+                track = tracks[v];
+            }
+
+            if ( track ){
+                track.groupId = groupId;
+                track.groupTrackIdx = result.length;
+                result.push( track );
+            }
+        }
+
+        tracksPerGroup[ groupId ] = result;
+
+        // if group is currently visible
+        if ( selectedItemsCounter > -1){
+            this.updateLeftPanel();
+        }
+    }
+
+    /**
+     * @param {string} groupId
+     * @returns array of tracks or null 
+     */
+    getTracksGroup( groupId ){
+        return this.animationClip.tracksPerGroup[ groupId ] ?? null;
+    }
+
+    /**
+     * OVERRIDE
+     * @param {string} trackId 
+     * @param {string} groupId optionl. If not set, it will find the first occurrence of trackId in animationClip.tracks
+     * @returns 
+     */
+    getTrack( trackId, groupId = null ){
+        let tracks = this.animationClip.tracks;
+        if (groupId){
+            tracks = this.animationClip.tracksPerGroup[ groupId ] ?? [];
+        }
+        for( let i = 0; i < tracks.length; ++i){
+            if ( tracks[i].id == trackId ){ 
+                return tracks[i];
+            }
+        }
+        return null;
+    }
 
     onMouseUp( e, time )  {
 
@@ -1775,7 +1843,7 @@ class KeyFramesTimeline extends Timeline {
 
     }
 
-    drawContent( ctx ) { // TODO
+    drawContent( ctx ) {
     
         if(!this.animationClip) 
             return;
@@ -1784,7 +1852,6 @@ class KeyFramesTimeline extends Timeline {
 
         const trackHeight = this.trackHeight;
         const scrollY = - this.currentScrollInPixels;
-        const treeOffset = this.lastTrackTreesWidgetOffset;
 
         // elements from "ul" should match the visible tracks (and groups) as if this.selectedItems was flattened
         const visibleElements = this.trackTreesWidget.innerTree.domEl.children[0].children; 
@@ -1811,14 +1878,12 @@ class KeyFramesTimeline extends Timeline {
      * @param {*} ctx
      * ...
      * @description helper function, you can call it from drawContent to render all the keyframes
-     */
-
+    */
     drawTrackWithKeyframes( ctx, trackHeight, track ) {
 
         ctx.font = Math.floor( trackHeight * 0.8) + "px" + Timeline.FONT;
         ctx.textAlign = "left";
 
-        
         if(track.isSelected) {
             ctx.globalAlpha = 0.2;
             ctx.fillStyle = Timeline.TRACK_SELECTED;
@@ -1972,9 +2037,9 @@ class KeyFramesTimeline extends Timeline {
         track.values = newTrack.values;
         track.times = newTrack.times;
 
-        track.selected = (new Array(track.times.length)).fill(false);
-        track.hovered = track.selected.slice();
-        track.edited = track.selected.slice();
+        track.selected = newTrack.selected ?? (new Array(track.times.length)).fill(false);
+        track.hovered = newTrack.hovered ?? (new Array(track.times.length)).fill(false);
+        track.edited = newTrack.edited ?? (new Array(track.times.length)).fill(false);
         return true;
     }
 
@@ -2087,7 +2152,7 @@ class KeyFramesTimeline extends Timeline {
             this.optimizeTrack( track.trackIdx, onlyEqualTime, false );
         }
 
-        // restore enabler status
+        // restore old enabler status
         this.trackStateSaveEnabler = oldStateEnabler;
 
         // callback
