@@ -1083,7 +1083,7 @@ class Timeline {
     getTrack( trackId ){
         const tracks = this.animationClip.tracks;
         for( let i = 0; i < tracks.length; ++i){
-            if ( tracks[i].id == trackId ){ 
+            if ( tracks[i].id == trackId ){
                 return tracks[i];
             }
         }
@@ -1325,6 +1325,9 @@ class KeyFramesTimeline extends Timeline {
 
         super(name, options);
                
+        this.keyValuePerPixel = 1/200; // used onMouseMove, vertical move
+        this.defaultCurves = true; // whn a track with dim == 1 has no curves attribute, defaultCurves will be used instead. If true, track is rendered using curves
+
         if(this.animationClip && this.animationClip.tracks.length) {
             this.processTracks(this.animationClip);
         }
@@ -1418,7 +1421,7 @@ class KeyFramesTimeline extends Timeline {
             }
         }
 
-        track.curves = options.curves ?? false; // only works if dim == 1
+        track.curves = options.curves ?? this.defaultCurves; // only works if dim == 1
         track.curvesRange = options.curvesRange ?? [0,1];
         return track;
     }
@@ -1861,9 +1864,13 @@ class KeyFramesTimeline extends Timeline {
         for(let t = 0; t < visibleElements.length; t++) {
             const track = visibleElements[t].treeData.trackData;
             
-            if(track){
-                this.drawTrackWithKeyframes(ctx, trackHeight, track);
-            } 
+            if (track){ 
+                if (track.dim == 1 && track.curves){
+                    this.drawTrackWithCurves(ctx, trackHeight, track);
+                }else{
+                    this.drawTrackWithKeyframes(ctx, trackHeight, track);
+                }
+            }
             
             offset += trackHeight;
             ctx.translate(0, trackHeight);
@@ -1876,12 +1883,9 @@ class KeyFramesTimeline extends Timeline {
      * @method drawTrackWithKeyframes
      * @param {*} ctx
      * ...
-     * @description helper function, you can call it from drawContent to render all the keyframes
+     * @description helper function, you can call it from drawContent to render all the keyframes 
     */
     drawTrackWithKeyframes( ctx, trackHeight, track ) {
-
-        ctx.font = Math.floor( trackHeight * 0.8) + "px" + Timeline.FONT;
-        ctx.textAlign = "left";
 
         if(track.isSelected) {
             ctx.globalAlpha = 0.2;
@@ -1936,6 +1940,82 @@ class KeyFramesTimeline extends Timeline {
         ctx.globalAlpha = 1;
     }
 
+    drawTrackWithCurves (ctx, trackHeight, track) {
+        if(track.isSelected){
+            ctx.globalAlpha = 0.2;
+            ctx.fillStyle = Timeline.TRACK_SELECTED_LIGHT;
+            ctx.fillRect(0, 0, ctx.canvas.width, trackHeight );      
+        }
+
+        ctx.globalAlpha = 1;
+        const keyframes = track.times;
+        const values = track.values;
+        const defaultPointSize = 5;
+        const hoverPointSize = 7;
+        const valueRange = track.curvesRange; //[min, max]
+        const displayRange = trackHeight - defaultPointSize * 2;
+        const startTime = this.visualTimeRange[0];
+        const endTime = this.visualTimeRange[1];
+        //draw lines
+        ctx.strokeStyle = "white";
+        ctx.beginPath();
+        for(let j = 0; j < keyframes.length; ++j){
+
+            let time = keyframes[j];
+            let keyframePosX = this.timeToX( time );
+            let value = values[j];                
+            value = ((value - valueRange[0]) / (valueRange[1] - valueRange[0])) * (-displayRange) + (trackHeight - defaultPointSize); // normalize and offset
+
+            if( time < startTime ){
+                ctx.moveTo( keyframePosX, value ); 
+                continue;
+            }
+                            
+            //convert to timeline track range
+            ctx.lineTo( keyframePosX, value );  
+            
+            if ( time > endTime ){
+                break; //end loop, but print line
+            }
+        }
+        ctx.stroke();
+
+        //draw points
+        ctx.fillStyle = Timeline.KEYFRAME_COLOR;
+        for(let j = 0; j < keyframes.length; ++j)
+        {
+            let time = keyframes[j];
+            if( time < startTime || time > endTime )
+                continue;
+
+            let size = defaultPointSize;
+            let keyframePosX = this.timeToX( time );
+                
+            if(!this.active || !track.active)
+                ctx.fillStyle = Timeline.KEYFRAME_COLOR_INACTIVE;
+            else if(track.locked)
+                ctx.fillStyle = Timeline.KEYFRAME_COLOR_LOCK;
+            else if(track.hovered[j]) {
+                size = hoverPointSize;
+                ctx.fillStyle = Timeline.KEYFRAME_COLOR_HOVERED;
+            }
+            else if(track.selected[j])
+                ctx.fillStyle = Timeline.KEYFRAME_COLOR_SELECTED;
+            else if(track.edited[j])
+                ctx.fillStyle = Timeline.KEYFRAME_COLOR_EDITED;
+            else 
+                ctx.fillStyle = Timeline.KEYFRAME_COLOR
+            
+            let value = values[j];
+            value = ((value - valueRange[0]) / (valueRange[1] - valueRange[0])) *(-displayRange) + (trackHeight - defaultPointSize); // normalize and offset
+
+            ctx.beginPath();
+            ctx.arc( keyframePosX, value, size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.closePath();
+        }
+    }
+
     // Creates a map for each item -> tracks
     processTracks(animation) {
 
@@ -1966,15 +2046,10 @@ class KeyFramesTimeline extends Timeline {
                 let baseName = track.id ?? track.name;
                 const [groupId, trackId] = baseName ? this._getValidTrackName(baseName) : [null, null];
 
-                const trackInfo = this.instantiateTrack({
-                    id: trackId, 
-                    dim: valueDim, 
-                    times, 
-                    values,
-                    selected: track.selected, 
-                    hovered: track.hovered, 
-                    edited: track.edited
-                });
+                const toInstantiate = Object.assign({}, track);
+                toInstantiate.id = trackId;
+                toInstantiate.dim = valueDim;
+                const trackInfo = this.instantiateTrack(toInstantiate);
                 
                 // manual group insertion
                 if ( groupId ){
