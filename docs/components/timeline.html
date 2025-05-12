@@ -1,4 +1,6 @@
-<script type="text/javascript">
+<script type="module">
+    import {LX} from "lexgui"
+    import {KeyFramesTimeline, ClipsTimeline} from "lexgui/components/timeline.js"
 
     MAKE_HEADER( "Timeline", "h1", "timeline" );
     MAKE_PARAGRAPH( `Timeline is an abstrac class and it has the following derived clases:` );
@@ -15,17 +17,10 @@
     
     MAKE_PARAGRAPH(`Each timeline has to be appended to an existing panel, where the possible ${INLINE_CODE(`options`)} are the following:` );
     MAKE_CODE_BULLET_LIST( [
-        ["opacity", "Float", " Value representing the opacity of the timeline canvas."],
-        ["width", "Float", " 400 by default."],
-        ["height", "Float", " 100 by default."],
-        ["trackHeight", "Float", " 25 by default."],
-        ["canvas", "Canvas", "HTML Canvas element where to draw the timeline."],
         ["loop", "Boolean", "Set looping mode animation by default."],
         ["skipVisibility", "Boolean", "When it's true, the un/active track button is disabled."],
         ["skipLock", "Boolean", "When it's true, the un/lock track button is disabled."],
         ["disableNewTracks", "Boolean", "When it's true, add new tracks option is disabled."],                
-        ["animationClip", "Object", "Animation with name, the array of tracks and duration."],
-        ["selectedItems", "Array", "Array with the names of the selected tracks/items."],
     ] );
 
     MAKE_PARAGRAPH( `Callback functions can be defined also in the ${INLINE_CODE("options")}. These are the possible functions that can be called after an actions is triggered:` );
@@ -92,7 +87,39 @@
     ] );
 
     MAKE_HEADER( "Keyframes timeline", "h2", "keyframes-timeline" );
-    INSERT_IMAGE(`../data/keyframes.png`, "keyframes timeline" );
+
+    {
+        const keyframestimeline = new KeyFramesTimeline( "Keyframes Timeline" );
+        const content = document.getElementById( 'content' );
+        const area = new LX.Area( { skipAppend: true, height: "350px" } );
+        area.attach(keyframestimeline);
+        content.appendChild( area.root );
+        keyframestimeline.resize();
+        window.keyframeTimeline = keyframestimeline;
+        
+        const animation = {
+            duration: 10,
+            tracks: [
+                { id: "track1" },
+                { id: "group.track2", times: [0,1,2,3] },
+                { id: "group.track3", times: [0,1,2,3], values:[0,11,22,33], curvesRange:[0,33] },
+                { id: "group.track333", times: [0,1,2,3], values:[0,11,22,33], curves: false, curvesRange:[0,33] },
+                { id: "group.track4", times: [0,1,2,3], values:[0,0,0,1,11,111,2,22,222,3,33,333], dim:3 },
+                { id: "track5", times: [0,1,2,3] },
+                { times: [0,1,2,3], values: [0,1,2,3], curvesRange:[0,3]  },
+            ]
+        }
+        keyframestimeline.setAnimationClip(animation, true);
+        keyframestimeline.setSelectedItems( ["group", 0, 6] );
+
+        function render(){
+            requestAnimationFrame( render );
+            keyframestimeline.draw();
+        }
+
+        render();
+    }
+
     MAKE_PARAGRAPH( `Callback functions can be defined also in the ${INLINE_CODE("options")}. These are the possible functions that can be called after an actions is triggered:` );
     MAKE_CODE_BULLET_LIST( [
         ["onShowOptimizeMenu (function)", ""],
@@ -101,13 +128,40 @@
 
     MAKE_CODE( `@let@ kfTimeline = @new@ LX.@[typ]KeyframesTimeline@(@"Timeline name"@ );
 panel.attach(kfTimeline.root);` );
-    
-    MAKE_HEADER( "Curves timeline", "h2", "curves-timeline" );
-    INSERT_IMAGE(`../data/curves.png`, "curves timeline", );
-    MAKE_PARAGRAPH( `..TODO` );
-    
+        
     MAKE_HEADER( "Clips timeline", "h2", "clips-timeline" );
-    INSERT_IMAGE(`../data/clips.png`, "clips timeline", );
+    {
+        const clipstimeline = new ClipsTimeline( "Clips Timeline" );
+        const content = document.getElementById( 'content' );
+        const area = new LX.Area( { skipAppend: true, height: "350px" } );
+        area.attach(clipstimeline);
+        content.appendChild( area.root );
+        clipstimeline.resize();
+        window.clipsTimeline = clipstimeline;
+        
+        const animation = {
+            duration: 10,
+            tracks: [
+                { id: "track0" },
+                { id: "track1", clips: [{id:"clip1", start: 0, duration:1, clipColor:"#800"}] },
+                { id: "track2", clips: [{id:"clip1", start: 1, fadein: 1.2, fadeout: 1.7, duration:1, clipColor:"#080"}] },
+                { id: "My Track", clips: [{id:"clip1", start: 1, fadein: 1.2, fadeout: 1.7, duration:1, clipColor:"#008", fadeColor: "#003"}] },
+            ]
+        }
+        clipstimeline.setAnimationClip(animation, true);
+
+        clipsTimeline.onAddNewTrack = function( trackInfo ){
+            trackInfo.id = "Track_" + (this.animationClip.tracks.length-1);
+        }
+
+        function render(){
+            requestAnimationFrame( render );
+            clipstimeline.draw();
+        }
+
+        render();
+    }
+
     MAKE_PARAGRAPH( `..TODO` );
 
     MAKE_LINE_BREAK();

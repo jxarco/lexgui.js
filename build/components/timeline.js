@@ -354,7 +354,7 @@ class Timeline {
         this.animationClip.tracks.push( trackInfo );
         
         if ( this.onAddNewTrack && !skipCallback ){
-            this.onAddNewTrack( trackInfo );
+            this.onAddNewTrack( trackInfo, options );
         }
         return trackInfo.trackIdx;
     }
@@ -1266,7 +1266,8 @@ class Timeline {
      * @param {obj} options sets some attributes. Tracks and tracksPerGroup are directly assigned, not sliced 
      * @returns 
      */
-    instantiateAnimationClip(options = {}) {
+    instantiateAnimationClip(options) {
+        options = options ?? {};
         return {
             name: options.name ?? "animationClip",
             duration: options.duration ?? 0,
@@ -1345,7 +1346,7 @@ class KeyFramesTimeline extends Timeline {
         this.animationClip.tracks.push( trackInfo );
         
         if ( this.onAddNewTrack && !skipCallback ){
-            this.onAddNewTrack( trackInfo ); // if user wants it on a group, they should use these callback 
+            this.onAddNewTrack( trackInfo, options ); // if user wants it on a group, they should use these callback 
         }
 
         return trackInfo.trackIdx;
@@ -3051,19 +3052,21 @@ class ClipsTimeline extends Timeline {
     // use default updateleftpanel
     // generateSelectedItemsTreeData(){}
 
-    addNewTrack( options = {}, skipCallback = false ) {
+    addNewTrack( options = {}, updateLeftPanel = true, skipCallback = false ) {
 
-        const trackInfo = this.instantiateTrack(options);
+        const trackInfo = this.instantiateTrack(options ?? {});
         trackInfo.trackIdx = this.animationClip.tracks.length;
         this.animationClip.tracks.push( trackInfo );
         
-        this.selectedItems.push(trackInfo);
-        this.updateLeftPanel();
-        
         if ( this.onAddNewTrack && !skipCallback ){
-            this.onAddNewTrack( trackInfo );
+            this.onAddNewTrack( trackInfo, options );
         }
-
+        
+        this.selectedItems.push(trackInfo);
+        if( updateLeftPanel ){
+            this.updateLeftPanel();
+        }
+        
         return trackInfo.trackIdx;
     }
 
@@ -3334,7 +3337,7 @@ class ClipsTimeline extends Timeline {
                             this.lastClipsSelected = []; // avoid delete and addclips index reassignment loop (not necessary because of order of operations in for)
 
                             for( let i = selectedClips[selectedClips.length-1][0] + deltaTracks - this.animationClip.tracks.length + 1; i > 0; --i ){
-                                this.addNewTrack();
+                                this.addNewTrack(null, i == 1);
                                 if ( i == 1 ){ 
                                     this.updateLeftPanel();
                                 }
@@ -3678,9 +3681,6 @@ class ClipsTimeline extends Timeline {
             }
             
             ctx.fillStyle = Timeline.TRACK_COLOR_PRIMARY;
-
-            // Overwrite style and draw clip selection area if it's selected
-            ctx.globalAlpha = clip.hidden ? 0.5 : 1;
             
             if(track.selected[j] || track.hovered[j]) {
                 ctx.strokeStyle = ctx.shadowColor = clip.clipColor || Timeline.TRACK_SELECTED;
@@ -3726,7 +3726,7 @@ class ClipsTimeline extends Timeline {
     // Creates a map for each item -> tracks
     processTracks(animation) {
 
-        const animationClip = this.instantiateAnimationClip(animation);
+        const animationClip = this.instantiateAnimationClip();
 
         if (animation && animation.tracks){
             for( let i = 0; i < animation.tracks.length; ++i ) {
@@ -3774,7 +3774,6 @@ class ClipsTimeline extends Timeline {
         // find appropriate track
         if ( trackIdx >= this.animationClip.tracks.length ){ // new track ad the end
             trackIdx = this.addNewTrack();
-            this.changeSelectedItems(); // update panel
         }
         else if ( trackIdx < 0 ){ // find first free track slot
             for(let i = 0; i < this.animationClip.tracks.length; i++) {
@@ -3790,7 +3789,6 @@ class ClipsTimeline extends Timeline {
             }
             if(trackIdx < 0){
                 trackIdx = this.addNewTrack();
-                this.changeSelectedItems(); // update panel
             }
         }else{ // check specific track slot
             // commented to avoid double checks with "addclips" fn
@@ -3855,7 +3853,7 @@ class ClipsTimeline extends Timeline {
             if ( c == 0 ){ // last search failed, move one track down and check again
                 ++baseTrackIdx; 
                 currTrackIdx = baseTrackIdx;
-                if ( currTrackIdx >= tracks.length ){ this.addNewTrack(); }
+                if ( currTrackIdx >= tracks.length ){ this.addNewTrack(null, false); }
                 let clipsInCurrentSlot = tracks[baseTrackIdx].clips.find( t => { return LX.UTILS.compareThresholdRange(clipStart, clipEnd, t.start, t.start+t.duration); });
                 
                 // reset search
@@ -3880,7 +3878,7 @@ class ClipsTimeline extends Timeline {
                 // check if it fits in the next track
                 if ( clipsInCurrentSlot ){
                     ++currTrackIdx;
-                    if ( currTrackIdx >= tracks.length ){ this.addNewTrack(); }
+                    if ( currTrackIdx >= tracks.length ){ this.addNewTrack(null, false); }
                     clipsInCurrentSlot = tracks[currTrackIdx].clips.find( t => { return LX.UTILS.compareThresholdRange(clipStart, clipEnd, t.start, t.start+t.duration); });
                 }
                 
