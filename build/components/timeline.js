@@ -347,12 +347,15 @@ class Timeline {
      *  { id: string, active: bool, locked: bool, } 
      * @returns 
      */
-    addNewTrack( options = {} ) {
+    addNewTrack( options = {}, skipCallback = false ) {
 
         const trackInfo = this.instantiateTrack(options);
         trackInfo.trackIdx = this.animationClip.tracks.length;
         this.animationClip.tracks.push( trackInfo );
         
+        if ( this.onAddNewTrack && !skipCallback ){
+            this.onAddNewTrack( trackInfo );
+        }
         return trackInfo.trackIdx;
     }
 
@@ -1327,6 +1330,25 @@ class KeyFramesTimeline extends Timeline {
         if(this.animationClip) {
             this.setAnimationClip(this.animationClip);
         }
+    }
+
+    
+    /**
+     * @param {object} options options for the new track 
+     *  { id: string, active: bool, locked: bool, } 
+     * @returns 
+     */
+    addNewTrack( options = {}, skipCallback = false ) {
+
+        const trackInfo = this.instantiateTrack(options);
+        trackInfo.trackIdx = this.animationClip.tracks.length;
+        this.animationClip.tracks.push( trackInfo );
+        
+        if ( this.onAddNewTrack && !skipCallback ){
+            this.onAddNewTrack( trackInfo ); // if user wants it on a group, they should use these callback 
+        }
+
+        return trackInfo.trackIdx;
     }
 
     // OVERRIDE
@@ -3029,7 +3051,7 @@ class ClipsTimeline extends Timeline {
     // use default updateleftpanel
     // generateSelectedItemsTreeData(){}
 
-    addNewTrack( options = {} ) {
+    addNewTrack( options = {}, skipCallback = false ) {
 
         const trackInfo = this.instantiateTrack(options);
         trackInfo.trackIdx = this.animationClip.tracks.length;
@@ -3037,6 +3059,11 @@ class ClipsTimeline extends Timeline {
         
         this.selectedItems.push(trackInfo);
         this.updateLeftPanel();
+        
+        if ( this.onAddNewTrack && !skipCallback ){
+            this.onAddNewTrack( trackInfo );
+        }
+
         return trackInfo.trackIdx;
     }
 
@@ -3307,7 +3334,10 @@ class ClipsTimeline extends Timeline {
                             this.lastClipsSelected = []; // avoid delete and addclips index reassignment loop (not necessary because of order of operations in for)
 
                             for( let i = selectedClips[selectedClips.length-1][0] + deltaTracks - this.animationClip.tracks.length + 1; i > 0; --i ){
-                                this.addNewTrack(i == 1);
+                                this.addNewTrack();
+                                if ( i == 1 ){ 
+                                    this.updateLeftPanel();
+                                }
                             }
 
                             // selected clips MUST be ordered (ascendently) 
@@ -3634,16 +3664,8 @@ class ClipsTimeline extends Timeline {
             ctx.roundRect( x, y + offset, w, trackHeight , 5, true);
                         
             if(this.active && track.active) {
-                // Transform fade-in and fade-out fill color to RGBA
-                if(ctx.fillStyle[0] == "#") {
-                    let color = LX.UTILS.HexToRgb(ctx.fillStyle);
-                    color = color.map(x => x*=0.8);
-                    ctx.fillStyle = 'rgba(' + color.join(',') + ', 0.8)';
-                }
-                else {
-                    ctx.globalAlpha = 0.8;
-                }
-            
+                
+                ctx.fillStyle = clip.fadeColor ?? "#0004";
 
                 if ( clip.fadein != undefined ){
                     const fadeinX = this.pixelsPerSecond * (clip.fadein - clip.start);
@@ -3752,6 +3774,7 @@ class ClipsTimeline extends Timeline {
         // find appropriate track
         if ( trackIdx >= this.animationClip.tracks.length ){ // new track ad the end
             trackIdx = this.addNewTrack();
+            this.changeSelectedItems(); // update panel
         }
         else if ( trackIdx < 0 ){ // find first free track slot
             for(let i = 0; i < this.animationClip.tracks.length; i++) {
@@ -3767,6 +3790,7 @@ class ClipsTimeline extends Timeline {
             }
             if(trackIdx < 0){
                 trackIdx = this.addNewTrack();
+                this.changeSelectedItems(); // update panel
             }
         }else{ // check specific track slot
             // commented to avoid double checks with "addclips" fn
@@ -3831,7 +3855,7 @@ class ClipsTimeline extends Timeline {
             if ( c == 0 ){ // last search failed, move one track down and check again
                 ++baseTrackIdx; 
                 currTrackIdx = baseTrackIdx;
-                if ( currTrackIdx >= tracks.length ){ this.addNewTrack(false); }
+                if ( currTrackIdx >= tracks.length ){ this.addNewTrack(); }
                 let clipsInCurrentSlot = tracks[baseTrackIdx].clips.find( t => { return LX.UTILS.compareThresholdRange(clipStart, clipEnd, t.start, t.start+t.duration); });
                 
                 // reset search
@@ -3856,7 +3880,7 @@ class ClipsTimeline extends Timeline {
                 // check if it fits in the next track
                 if ( clipsInCurrentSlot ){
                     ++currTrackIdx;
-                    if ( currTrackIdx >= tracks.length ){ this.addNewTrack(false); }
+                    if ( currTrackIdx >= tracks.length ){ this.addNewTrack(); }
                     clipsInCurrentSlot = tracks[currTrackIdx].clips.find( t => { return LX.UTILS.compareThresholdRange(clipStart, clipEnd, t.start, t.start+t.duration); });
                 }
                 
@@ -3975,7 +3999,7 @@ class ClipsTimeline extends Timeline {
         let clipsToReturn = JSON.parse(JSON.stringify(clipsToClone))
         for(let i = 0; i < clipsToReturn.length; ++i){
             let clip = clipsToReturn[i];
-            clip.start -= timeOffset;
+            clip.start += timeOffset;
             if (clip.fadein == null || clip.fadein == undefined ){ clip.fadein = undefined; }
             else{ clip.fadein += timeOffset; }
             if (clip.fadeout == null || clip.fadeout == undefined ){ clip.fadeout = undefined; }
