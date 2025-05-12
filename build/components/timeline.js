@@ -26,7 +26,6 @@ class Timeline {
         this.topMargin = 40;
         this.clickDiscardTimeout = 200; // ms
         this.lastMouse = [0,0];
-        this.lastKeyFramesSelected = [];
         this.trackStateUndo = [];
         this.trackStateRedo = [];
         this.trackStateSaveEnabler = true; // used in saveState
@@ -39,6 +38,7 @@ class Timeline {
         this.movingKeys = false;
         this.timeBeforeMove = 0;
 
+        // required before updateHeader
         this.onCreateBeforeTopBar = options.onCreateBeforeTopBar;
         this.onCreateAfterTopBar = options.onCreateAfterTopBar;
         this.onCreateControlsButtons = options.onCreateControlsButtons;
@@ -137,7 +137,7 @@ class Timeline {
         LX.addSignal( "@on_new_color_scheme", (el, value) => {
             // Retrieve again the color using LX.getThemeColor, which checks the applied theme
             this.updateTheme();
-        } )
+        } );
     }
 
     /**
@@ -280,8 +280,12 @@ class Timeline {
         if( !this.disableNewTracks ) 
         {
             panel.addButton("addTrackBtn", '', (value, event) => {
-                const trackIdx = this.addNewTrack();
-                this.changeSelectedItems( [trackIdx] );
+                if ( this.onAddNewTrackButton ){
+                    this.onAddNewTrackButton();
+                }else{
+                    const trackIdx = this.addNewTrack();
+                    this.changeSelectedItems( [trackIdx] );
+                }
             }, { hideName: true, title: "Add Track", icon: "Plus" });
         }
         panel.endLine();
@@ -345,10 +349,6 @@ class Timeline {
      */
     addNewTrack( options = {} ) {
 
-        if( !this.animationClip ){
-            this.animationClip = this.instantiateAnimationClip();
-        }
-
         const trackInfo = this.instantiateTrack(options);
         trackInfo.trackIdx = this.animationClip.tracks.length;
         this.animationClip.tracks.push( trackInfo );
@@ -406,13 +406,14 @@ class Timeline {
      */
     setAnimationClip( animation, needsToProcess = true ) {
 
-        if ( this.unSelectAllKeyFrames )
-        {
-            this.unSelectAllKeyFrames();
-            this.unHoverAll();
-            this.unSelectAllTracks();
-            this.selectedItems = [];
+        if ( this.unSelectAllKeyFrames ){
+            this.unSelectAllKeyFrames();    
         }
+        if ( this.unHoverAll ){
+            this.unHoverAll();
+        }
+        this.unSelectAllTracks();
+        this.selectedItems = [];
 
         this.clearState();
 
@@ -1028,12 +1029,7 @@ class Timeline {
      * @param {Array} itemsName array of numbers identifying tracks
      */
     setSelectedItems( items ) {
-
-        this.unSelectAllKeyFrames();
-        this.unHoverAll();
-
-        this.selectedItems = [];
-        
+        this.selectedItems = [];      
         this.changeSelectedItems( items, null );
     }
 
@@ -1043,9 +1039,6 @@ class Timeline {
      */
     changeSelectedItems( itemsToAdd = null, itemsToRemove = null, skipCallback = false ) {
 
-        this.unSelectAllKeyFrames();
-        this.unHoverAll();
-        
         const tracks = this.animationClip.tracks;
 
         if ( itemsToRemove ){
@@ -1260,12 +1253,9 @@ class Timeline {
             id: options.id ?? ( Math.floor(performance.now().toString()) + "_" + Math.floor(Math.random() * 0xffff) ), //must be unique, at least inside a group
             active: options.active ?? true,
             locked: options.locked ?? false,
-            isSelected: false, // render only
-        
-            groupId: null,
-            groupTrackIdx: -1, // track Idx inside group only if in group
-        
-            trackIdx: -1
+            isSelected: false, // render only        
+            trackIdx: -1,
+            data: options.data ?? null// user defined data
         }
     }
 
@@ -1278,8 +1268,9 @@ class Timeline {
             name: options.name ?? "animationClip",
             duration: options.duration ?? 0,
             speed: options.speed ?? this.speed,
-            tracks: options.tracks ?? [],
-            tracksPerGroup: options.tracksPerGroup ?? {}
+            tracks: [],
+            tracksPerGroup: options.tracksPerGroup ?? {},
+            data: options.data ?? null,
         };
     }
     // ----- END OF BASE FUNCTIONS -----
@@ -1326,12 +1317,15 @@ class KeyFramesTimeline extends Timeline {
     constructor(name, options = {}) {
 
         super(name, options);
-               
+        
+        this.lastKeyFramesSelected = [];
+
+        // curves --- track.dim == 1
         this.keyValuePerPixel = 1/this.trackHeight; // used onMouseMove, vertical move only for dim==1. Normalized value movement / pixels
         this.defaultCurves = true; // whn a track with dim == 1 has no curves attribute, defaultCurves will be used instead. If true, track is rendered using curves
 
-        if(this.animationClip && this.animationClip.tracks.length) {
-            this.processTracks(this.animationClip);
+        if(this.animationClip) {
+            this.setAnimationClip(this.animationClip);
         }
     }
 
@@ -1395,6 +1389,9 @@ class KeyFramesTimeline extends Timeline {
     instantiateTrack(options ={}){
         const track = super.instantiateTrack(options);
         track.dim = Math.max(1,options.dim ?? 1); // >= 1
+        track.groupId = null,
+        track.groupTrackIdx = -1, // track Idx inside group only if in group
+
         track.values = []; 
         track.times = [];
         track.selected = [];
@@ -1435,6 +1432,7 @@ class KeyFramesTimeline extends Timeline {
      */
     changeSelectedItems( itemsToAdd = null, itemsToRemove = null, skipCallback = false ) {
 
+        // TODO: maybe make this un-functions more general
         this.unSelectAllKeyFrames();
         this.unHoverAll();
         
@@ -2053,10 +2051,7 @@ class KeyFramesTimeline extends Timeline {
     // Creates a map for each item -> tracks
     processTracks(animation) {
 
-        const animationClip = this.instantiateAnimationClip();
-        animationClip.name = (animation && animation.name) ? animation.name : "animationClip";
-        animationClip.duration = animation ? animation.duration : 0;
-        animationClip.speed = (animation && animation.speed ) ? animation.speed : this.speed;
+        const animationClip = this.instantiateAnimationClip(animation);
 
         if (animation && animation.tracks) {
             const tracksPerGroup = {};
@@ -3024,94 +3019,82 @@ class ClipsTimeline extends Timeline {
 
         super(name, options);
                     
-        this.addNewTrack();
         this.lastClipsSelected = [];
         this.lastTrackClipsMove = 0; // vertical movement of clips, onMouseMove onMousedown
+        this.dragClipMode = "";
+
+        this.setAnimationClip(this.animationClip);
     }
 
-    updateLeftPanel() {
+    // use default updateleftpanel
+    // generateSelectedItemsTreeData(){}
 
-        const scrollTop = this.trackTreesPanel ? this.trackTreesPanel.root.scrollTop : 0;
-        this.leftPanel.clear();
+    addNewTrack( options = {} ) {
 
-        const panel = this.leftPanel;
-
-        panel.sameLine(2);
-        let titleWidget = panel.addTitle( "Tracks", { style: { background: "none"}, className: "fg-secondary text-lg px-4"} );
-        let title = titleWidget.root;
-
-        if(!this.disableNewTracks) 
-        {
-            panel.addButton("addTrackBtn", '', (value, event) => {
-                this.addNewTrack();
-            }, { hideName: true, title: "Add Track", icon: "Plus" });
-        }
-        panel.endLine();
-
-        const styles = window.getComputedStyle(title);
-        const titleHeight = title.clientHeight + parseFloat(styles['marginTop']) + parseFloat(styles['marginBottom']);
-
-        let p = new LX.Panel({height: "calc(100% - " + titleHeight + "px)"});
-
-        let treeTracks = [];
-        if(this.animationClip)  {
-
-            for(let i = 0; i < this.animationClip.tracks.length; i++ ) {
-                let track = this.animationClip.tracks[i];
-                treeTracks.push( {
-                    'id': track.name ?? "Track_" + track.idx.toString(),
-                    'name': track.name,
-                    'skipVisibility': this.skipVisibility,     
-                    'visible': track.active,  
-                    // 'selected' : track.isSelected                
-                } );        
-            }
-
-        }
-        this.trackTreesWidget = p.addTree(null, treeTracks, {filter: false, rename: false, draggable: false, onevent: (e) => {
-            switch(e.type) {
-                case LX.TreeEvent.NODE_SELECTED:
-                    this.selectTrack( parseInt( e.node.id.split("Track_")[1] ) );
-                    break;
-                case LX.TreeEvent.NODE_VISIBILITY:    
-                    this.changeTrackVisibility(parseInt( e.node.id.split("Track_")[1] ), e.value);
-                    break;
-                case LX.TreeEvent.NODE_CARETCHANGED:
-                    this.changeTrackDisplay(parseInt( e.node.id.split("Track_")[1] ), e.node.closed);
-                    break;
-            }
-        }});
-        // setting a name in the addTree function adds an undesired node
-        this.trackTreesWidget.name = "tracksTrees"; 
-        p.widgets[this.trackTreesWidget.name] = this.trackTreesWidget;
-
-        this.trackTreesPanel = p;
-        panel.attach(p.root)
-        p.root.addEventListener("scroll", (e) => {
-            if (e.currentTarget.scrollHeight > e.currentTarget.clientHeight){
-                this.currentScroll = e.currentTarget.scrollTop / (e.currentTarget.scrollHeight - e.currentTarget.clientHeight);
-                this.currentScrollInPixels = e.currentTarget.scrollTop;
-            }
-            else{
-                this.currentScroll = 0;
-                this.currentScrollInPixels = 0;
-            }
-        });
-       
-        this.trackTreesPanel.root.scrollTop = scrollTop;
-
-        if(this.leftPanel.parent.root.classList.contains("hidden") || !this.root.parentElement){
-            return;
-        }
+        const trackInfo = this.instantiateTrack(options);
+        trackInfo.trackIdx = this.animationClip.tracks.length;
+        this.animationClip.tracks.push( trackInfo );
         
-        this.resizeCanvas();
+        this.selectedItems.push(trackInfo);
+        this.updateLeftPanel();
+        return trackInfo.trackIdx;
     }
 
-    unSelectAllTracks() {
+    // OVERRIDE ITEM SELECTION - ClipsTimeline will not offer any selection. Alltracks are visible
+    setAnimationClip( animation, needsToProcess ){
+        super.setAnimationClip(animation, needsToProcess);
+        this.changeSelectedItems();
+    }
+
+    /**
+     * OVERRIDE ITEM SELECTION.
+     * CLIPS WILL OFFER NO SELECTION. All tracks are visible
+     */
+    changeSelectedItems( ) {
+
+        // TODO: maybe make this un-functions more general
+        this.unSelectAllClips();
+        this.unHoverAll();
+
+        this.selectedItems = this.animationClip.tracks.slice();
+
+        this.updateLeftPanel();
+    }
+            
+    /**
+     * 
+     * @param {obj} options set some values for the track instance (groups and trackIdx not included)
+     * @returns 
+    */
+    instantiateTrack(options = {}) {
+        const track = super.instantiateTrack(options);
+
+        track.trackIdx = this.animationClip.tracks.length;
+
+        track.clips = options.clips ?? [];
+        track.selected = [];
+        track.edited = [];
+        track.hovered = [];
         
-        for(let t = 0; t < this.animationClip.tracks.length; t++) {
-            this.animationClip.tracks[t].isSelected = false;
-        }    
+        const numClips = track.clips.length;
+
+        if ( options.selected && options.selected.length == numClips ){
+            track.selected = options.selected;
+        }else{ 
+            track.selected = (new Array(numClips)).fill(false);
+        }
+        if ( options.edited && options.edited.length == numClips ){
+            track.edited = options.edited;
+        }else{ 
+            track.edited = (new Array(numClips)).fill(false);
+        }
+        if ( options.hovered && options.hovered.length == numClips ){
+            track.hovered = options.hovered;
+        }else{ 
+            track.hovered = (new Array(numClips)).fill(false);
+        }
+
+        return track;
     }
 
     unHoverAll(){
@@ -3187,10 +3170,8 @@ class ClipsTimeline extends Timeline {
         if(e.ctrlKey && track) { // move clips
             
             let x = e.offsetX;
-            let selectedClips = [];
-
             // clip selection is done on MouseUP
-            selectedClips = this.lastClipsSelected;
+            const selectedClips = this.lastClipsSelected;
 
             this.canvas.style.cursor = "grab";  
             let curTrackIdx = -1;
@@ -3199,7 +3180,7 @@ class ClipsTimeline extends Timeline {
 
             for(let i = 0; i < selectedClips.length; i++)
             {
-                this.movingKeys = false
+                this.movingKeys = false;
                 let [trackIndex, clipIndex] = selectedClips[i];
                 const clip = this.animationClip.tracks[trackIndex].clips[clipIndex];
 
@@ -3221,7 +3202,7 @@ class ClipsTimeline extends Timeline {
             }
 
         }
-        else if( !track || track && this.getCurrentContent(track, time, 0.001) == -1) { // clicked on empty space
+        else if( !track || track && this.getCurrentClip(track, time, 0.001) == -1) { // clicked on empty space
             this.unSelectAllClips();
             if(this.onSelectClip)
                 this.onSelectClip(null);
@@ -3229,7 +3210,7 @@ class ClipsTimeline extends Timeline {
         else if (track && (this.dragClipMode == "duration" || this.dragClipMode == "fadein" || this.dragClipMode == "fadeout" )) { // clicked while mouse was over fadeIn, fadeOut, duration
             this.selectClip( track, null, localX ); // select current clip if any (unselect others)
             if ( this.lastClipsSelected.length ){ 
-                this.saveState(track.idx);
+                this.saveState(track.trackIdx);
             }
         }
     }
@@ -3279,7 +3260,7 @@ class ClipsTimeline extends Timeline {
 
                 this.movingKeys = true;
 
-                const treeOffset = this.trackTreesWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop;
+                const treeOffset = this.lastTrackTreesWidgetOffset;
                 let newTrackClipsMove = Math.floor( (e.localY - treeOffset) / this.trackHeight );
 
                 // move clips vertically
@@ -3497,7 +3478,7 @@ class ClipsTimeline extends Timeline {
             let clips = this.getClipsInRange(e.track, time, time, 0.1)
             if(!e.track.locked && clips) {
                                 
-                this.lastHovered = [e.track.idx, clips[0]];
+                this.lastHovered = [e.track.trackIdx, clips[0]];
                 e.track.hovered[clips[0]] = true;
 
                 let clip = e.track.clips[clips[0]];
@@ -3587,7 +3568,7 @@ class ClipsTimeline extends Timeline {
 
     drawContent( ctx )  {
 
-        if(!this.animationClip || !this.animationClip.tracks)  
+        if(!this.animationClip)  
             return;
         
         const tracks = this.animationClip.tracks;          
@@ -3597,45 +3578,149 @@ class ClipsTimeline extends Timeline {
         ctx.save();
         for(let i = 0; i < tracks.length; i++) {
             let track = tracks[i];
-            this.drawTrackWithBoxes(ctx, i * trackHeight + scrollY, trackHeight, track.name || "", track);
+            this.drawTrackWithBoxes(ctx, i * trackHeight + scrollY, trackHeight, track.id, track);
         }
         
         ctx.restore();
       
     }
 
+    /**
+     * @method drawTrackWithBoxes
+     * @param {*} ctx
+     */
+    drawTrackWithBoxes( ctx, y, trackHeight, title, track ) {
+
+        // Fill track background if it's selected
+        ctx.globalAlpha = 0.2;
+        ctx.fillStyle = Timeline.TRACK_SELECTED_LIGHT;
+        if(track.isSelected) {
+            ctx.fillRect(0, y, ctx.canvas.width, trackHeight );    
+        }
+
+        const clips = track.clips;
+
+        // set clip box size
+        const offset = (trackHeight * 0.4) * 0.5;
+        trackHeight *= 0.6;
+        
+        let selectedClipArea = null;
+
+        ctx.font = Math.floor( trackHeight * 0.8) + "px" + Timeline.FONT;
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+    
+        for(var j = 0; j < clips.length; ++j)
+        {
+            selectedClipArea = null;
+            let clip = clips[j];
+            //let selected = track.selected[j];
+            var x = Math.floor( this.timeToX(clip.start) ) + 0.5;
+            var x2 = Math.floor( this.timeToX( clip.start + clip.duration ) ) + 0.5;
+            var w = x2-x;
+
+            if( x2 < 0 || x > this.canvas.width )
+                continue;
+            
+            // Overwrite clip color state depending on its state
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = clip.clipColor || (track.hovered[j] ? Timeline.KEYFRAME_COLOR_HOVERED : (Timeline.KEYFRAME_COLOR));
+            if(track.selected[j] && !clip.clipColor) {
+                ctx.fillStyle = Timeline.TRACK_SELECTED;
+            }
+            if(!this.active || track.active == false) {
+                ctx.fillStyle = Timeline.KEYFRAME_COLOR_INACTIVE;
+            }
+
+            // Draw clip background
+            ctx.roundRect( x, y + offset, w, trackHeight , 5, true);
+            
+            // Compute timeline position of fade-in and fade-out clip times
+            let fadeinX = this.pixelsPerSecond * ((clip.fadein || 0) - clip.start);
+            let fadeoutX = this.pixelsPerSecond * (clip.start + clip.duration - (clip.fadeout || (clip.start + clip.duration)));
+            
+            if(this.active && track.active) {
+                // Transform fade-in and fade-out fill color to RGBA
+                if(ctx.fillStyle[0] == "#") {
+                    let color = LX.UTILS.HexToRgb(ctx.fillStyle);
+                    color = color.map(x => x*=0.8);
+                    ctx.fillStyle = 'rgba(' + color.join(',') + ', 0.8)';
+                }
+                else {
+                    ctx.globalAlpha = 0.8;
+                }
+            
+                // Draw fade-in and fade-out
+                if(fadeinX >= 0) {
+                    ctx.roundRect(x, y + offset, fadeinX, trackHeight, {tl: 5, bl: 5, tr:0, br:0}, true);
+                }
+                if(fadeoutX) {
+                    ctx.roundRect( x + w - fadeoutX, y + offset, fadeoutX, trackHeight, {tl: 0, bl: 0, tr:5, br:5}, true);
+                }
+            }
+            
+            ctx.fillStyle = Timeline.TRACK_COLOR_PRIMARY;
+
+            // Overwrite style and draw clip selection area if it's selected
+            ctx.globalAlpha = clip.hidden ? 0.5 : 1;
+            
+            if(track.selected[j] || track.hovered[j]) {
+                ctx.strokeStyle = ctx.shadowColor = track.clips[j].clipColor || Timeline.TRACK_SELECTED;
+                ctx.shadowBlur = 10;
+                ctx.shadowOffsetX = 1.5;
+                ctx.shadowOffsetY = 1.5;
+                
+                selectedClipArea = [x - 1, y + offset -1, x2 - x + 2, trackHeight + 2];
+                ctx.roundRect(selectedClipArea[0], selectedClipArea[1], selectedClipArea[2], selectedClipArea[3], 5, false, true);
+
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+
+                ctx.font = "bold" + Math.floor( trackHeight) + "px " + Timeline.FONT;
+                ctx.fillStyle = Timeline.FONT_COLOR_PRIMARY;
+            }
+            
+
+            // Overwrite style with small font size if it's zoomed out
+            if( this.pixelsPerSecond < 200) {
+                ctx.font = this.pixelsPerSecond*0.06  +"px" + Timeline.FONT;
+            }
+
+            const text = clip.id.replaceAll("_", " ").replaceAll("-", " ");
+            const textInfo = ctx.measureText( text );
+            
+            // Draw clip name if it's readable
+            if(this.pixelsPerSecond > 100) {
+                ctx.fillText( text, x + (w - textInfo.width)*0.5,  y + offset + trackHeight * 0.5);
+            }
+
+            ctx.fillStyle = track.hovered[j] ? "white" : "#f5f5f5"//track.hovered[j] ? "white" : Timeline.FONT_COLOR_QUATERNARY;
+            ctx.strokeStyle = "rgba(125,125,125,0.4)";
+            
+            // Draw resize bounding
+            ctx.roundRect(x + w - 8 , y + offset , 8, trackHeight, {tl: 4, bl: 4, tr:4, br:4}, true, true);           
+        }
+
+        ctx.font = "12px" + Timeline.FONT;
+    }
+
     // Creates a map for each item -> tracks
     processTracks(animation) {
 
-        this.animationClip = {
-            name: (animation && animation.name) ? animation.name : "animationClip",
-            duration: animation ? animation.duration : 0,
-            speed: (animation && animation.speed ) ? animation.speed : this.speed,
-            tracks: []
-        };
+        const animationClip = this.instantiateAnimationClip(animation);
 
         if (animation && animation.tracks){
             for( let i = 0; i < animation.tracks.length; ++i ) {
     
-                let track = animation.tracks[i];
-                let arr = [];
-                arr.length = track.clips.length;
-                arr.fill( false );
+                const trackInfo = this.instantiateTrack( animation.tracks[i] );
+                trackInfo.trackIdx = animationClip.tracks.length;
 
-                let trackInfo = {
-                    idx: this.animationClip.tracks.length,
-                    clips: track.clips,
-                    selected: arr.slice(), edited: arr.slice(), hovered: arr, 
-                    active: true,
-                    isSelected: false,
-                    // locked: false,
-                };    
-                this.animationClip.tracks.push(trackInfo);
+                animationClip.tracks.push(trackInfo);
             }
         }
-        else {
-            this.addNewTrack();
-        }
+        
+        return animationClip;
     }
 
     /**
@@ -3828,7 +3913,7 @@ class ClipsTimeline extends Timeline {
             //*********** WARNING: RELIES ON SORTED lastClipsSelected ***********
 
             // delete selected clips from last to first. lastClipsSelected is sorted
-            let selected = this.lastClipsSelected;
+            const selected = this.lastClipsSelected;
             this.lastClipsSelected = []; // so this.#delete does not check clipsselected on each loop (all will be destroyed)
             let prevTrack = -1;
             for( let i = selected.length-1; i > -1; --i ){
@@ -3938,31 +4023,6 @@ class ClipsTimeline extends Timeline {
     }
 
     /**
-     * @method addNewTrack
-     */
-
-    addNewTrack( updatePanel = true ) {
-
-        if(!this.animationClip)
-            this.animationClip = {duration:0, tracks:[]};
-
-        let trackInfo = {
-            idx: this.animationClip.tracks.length,
-            clips: [],
-            selected: [], edited: [], hovered: [],
-            active: true,
-            isSelected: false,
-            // locked: false
-        }; 
-
-        this.animationClip.tracks.push(trackInfo);
-        if ( updatePanel ){ 
-            this.updateLeftPanel(); 
-        }
-        return trackInfo.idx;
-    }
-
-    /**
      * @method clearTrack
      */
 
@@ -3986,7 +4046,7 @@ class ClipsTimeline extends Timeline {
         
         // remove from selected clips
         for(let i = 0; i < this.lastClipsSelected.length; i++) {
-            let [selectedTrackIdx, selectedClipIdx] = this.lastClipsSelected[i];
+            const [selectedTrackIdx, selectedClipIdx] = this.lastClipsSelected[i];
             if(selectedTrackIdx == trackIdx){
                 this.lastClipsSelected.splice(i--,1);
             }
@@ -4025,7 +4085,6 @@ class ClipsTimeline extends Timeline {
         this.trackStateRedo = [];
     }
 
-    // TODO
     #undoRedo(isUndo = true) {
         
         let toBeShown = isUndo ? this.trackStateUndo : this.trackStateRedo;
@@ -4092,7 +4151,7 @@ class ClipsTimeline extends Timeline {
 
     unSelectAllClips() {
 
-        for(let [ idx, keyIndex] of this.lastClipsSelected) {
+        for(let [idx, keyIndex] of this.lastClipsSelected) {
             this.animationClip.tracks[idx].selected[keyIndex]= false;
         }
         // Something has been unselected
@@ -4134,10 +4193,10 @@ class ClipsTimeline extends Timeline {
         let i = 0;
         for( ; i < this.lastClipsSelected.length; ++i){
             let t = this.lastClipsSelected[i];
-            if ( t[0] < track.idx ){ continue; }
-            if ( t[0] > track.idx || t[1] > clipIndex ){ break;}
+            if ( t[0] < track.trackIdx ){ continue; }
+            if ( t[0] > track.trackIdx || t[1] > clipIndex ){ break;}
         }
-        this.lastClipsSelected.splice(i,0, [track.idx, clipIndex] ); //
+        this.lastClipsSelected.splice(i,0, [track.trackIdx, clipIndex] ); //
         track.selected[clipIndex] = true;
 
         if( !skipCallback && this.onSelectClip ){
@@ -4159,7 +4218,7 @@ class ClipsTimeline extends Timeline {
         track.selected[clipIndex] = false;
 
         // unselect 
-        let trackIdx = track.idx;
+        let trackIdx = track.trackIdx;
         for( let i = 0; i < this.lastClipsSelected.length; ++i){
             let t = this.lastClipsSelected[i];
             if ( t[0] == trackIdx && t[1] == clipIndex ){
@@ -4215,6 +4274,10 @@ class ClipsTimeline extends Timeline {
             t = Math.max(t, clip.start + clip.duration);
         }
         return t;
+    }
+
+    setDuration( t, skipCallback = false, updateHeader = true ){
+        super.setDuration( this.validateDuration(t), skipCallback, updateHeader );
     }
 }
 
@@ -4293,4 +4356,4 @@ LX.UTILS.concatTypedArray = (arrays, ArrayType) => {
     return result;
 }
 
-export { Timeline, KeyFramesTimeline };
+export { Timeline, KeyFramesTimeline, ClipsTimeline };
