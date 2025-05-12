@@ -418,17 +418,19 @@ class Timeline {
 
         if( !animation || !animation.tracks || needsToProcess )
         { 
-            this.processTracks( animation ); // generate default animationclip or process the user's one
+            this.animationClip = this.processTracks( animation ); // generate default animationclip or process the user's one
         }
         else
         {
             this.animationClip = animation;
         }
        
-        this.duration = this.animationClip.duration;
-        this.speed = this.animationClip.speed ?? this.speed;
+        this.setDuration(this.animationClip.duration, true, true);
+        this.setSpeed( this.animationClip.speed, true);
 
         this.updateLeftPanel();
+
+        this.resize();
 
         return this.animationClip;
     }
@@ -1970,7 +1972,7 @@ class KeyFramesTimeline extends Timeline {
                 ctx.moveTo( keyframePosX, value ); 
                 continue;
             }
-                            
+
             //convert to timeline track range
             ctx.lineTo( keyframePosX, value );  
             
@@ -2019,13 +2021,14 @@ class KeyFramesTimeline extends Timeline {
     // Creates a map for each item -> tracks
     processTracks(animation) {
 
-        this.animationClip = this.instantiateAnimationClip();
-        this.animationClip.name = (animation && animation.name) ? animation.name : "animationClip";
-        this.animationClip.duration = animation ? animation.duration : 0;
-        this.animationClip.speed = (animation && animation.speed ) ? animation.speed : this.speed;
+        const animationClip = this.instantiateAnimationClip();
+        animationClip.name = (animation && animation.name) ? animation.name : "animationClip";
+        animationClip.duration = animation ? animation.duration : 0;
+        animationClip.speed = (animation && animation.speed ) ? animation.speed : this.speed;
 
         if (animation && animation.tracks) {
             const tracksPerGroup = {};
+            let duration = 0;
             for( let i = 0; i < animation.tracks.length; ++i ) {
                 
                 let track = animation.tracks[i];
@@ -2065,12 +2068,18 @@ class KeyFramesTimeline extends Timeline {
 
                 trackInfo.trackIdx = i; // index of track in the entire animation
                                 
-                this.animationClip.tracks.push(trackInfo);
+                animationClip.tracks.push(trackInfo);
+
+                if ( times.length ){ duration = Math.max( duration, times[times.length-1]); }
             }
 
-            this.animationClip.tracksPerGroup = tracksPerGroup;
+            animationClip.tracksPerGroup = tracksPerGroup;
+            if ( !animation || !animation.duration ){
+                animationClip.duration = duration;
+            }
         }
-        this.resize();
+
+        return animationClip;
     }
     
     _getValidTrackName( uglyName ) {
