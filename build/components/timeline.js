@@ -1327,7 +1327,7 @@ class KeyFramesTimeline extends Timeline {
 
         super(name, options);
                
-        this.keyValuePerPixel = 1/200; // used onMouseMove, vertical move
+        this.keyValuePerPixel = 1/this.trackHeight; // used onMouseMove, vertical move only for dim==1. Normalized value movement / pixels
         this.defaultCurves = true; // whn a track with dim == 1 has no curves attribute, defaultCurves will be used instead. If true, track is rendered using curves
 
         if(this.animationClip && this.animationClip.tracks.length) {
@@ -1665,6 +1665,10 @@ class KeyFramesTimeline extends Timeline {
             
             this.timeBeforeMove = this.xToTime( localX );
         }
+        else if( e.altKey ){ // if only altkey, do not grab timeline
+            this.grabbing = false;
+            this.grabbingTimeBar = false;
+        }
     }
 
     onMouseMove( e, time ) {
@@ -1682,58 +1686,86 @@ class KeyFramesTimeline extends Timeline {
                 deltaTime = -this.moveKeyMinTime;
             }
             this.timeBeforeMove = this.timeBeforeMove + deltaTime;
-            this.moveKeyMinTime += deltaTime;
-            const tracks = this.animationClip.tracks;
-            for( let i = 0; i < this.lastKeyFramesSelected.length; ++i ){
-                let idx = i;
-                if ( deltaTime > 0 ){
-                    idx = this.lastKeyFramesSelected.length - 1 - i;
-                }
-                
-                const [trackIdx, keyIndex, originalKeyTime] = this.lastKeyFramesSelected[idx];
-                track = tracks[trackIdx];
-                if(track && track.locked)
-                    continue;
 
-                this.canvas.style.cursor = "grabbing";
-
-                const times = this.animationClip.tracks[ track.trackIdx ].times;
-                times[ keyIndex ] = Math.max(0,times[keyIndex] + deltaTime);
-                if (times[ keyIndex ] > this.duration){ 
-                    this.setDuration(times[ keyIndex ]); 
-                }
-
-                // sort keyframe
-                let k = keyIndex;
-                if ( deltaTime > 0 ){
-                    for( ; k < times.length-1; ++k ){
-                        if ( times[k] < times[k+1] ){ 
-                            break; 
-                        }
-                        this.swapKeyFrames(track, k+1, k);
-                    }
-                }else{
-                    for( ; k > 0; --k ){
-                        if ( times[k-1] < times[k] ){ 
-                            break; 
-                        }
-                        this.swapKeyFrames(track, k-1, k);
-                    }
-                }
-                this.lastKeyFramesSelected[idx][1] = k; // update keyframe index
-                this.lastKeyFramesSelected[idx][2] = times[k]; // update keyframe time
-            }
-
-            if ( this.onContentMoved ){
+            if ( e.ctrlKey ){
+                this.moveKeyMinTime += deltaTime;
+                const tracks = this.animationClip.tracks;
                 for( let i = 0; i < this.lastKeyFramesSelected.length; ++i ){
-                    const [trackIdx, keyIndex, originalKeyTime] = this.lastKeyFramesSelected[i];
-                    track = this.animationClip.tracks[trackIdx];
+                    let idx = i;
+                    if ( deltaTime > 0 ){
+                        idx = this.lastKeyFramesSelected.length - 1 - i;
+                    }
+                    
+                    const [trackIdx, keyIndex, originalKeyTime] = this.lastKeyFramesSelected[idx];
+                    track = tracks[trackIdx];
                     if(track && track.locked)
                         continue;
-                    this.onContentMoved(trackIdx, keyIndex);
+
+                    this.canvas.style.cursor = "grabbing";
+
+                    const times = this.animationClip.tracks[ track.trackIdx ].times;
+                    times[ keyIndex ] = Math.max(0,times[keyIndex] + deltaTime);
+                    if (times[ keyIndex ] > this.duration){ 
+                        this.setDuration(times[ keyIndex ]); 
+                    }
+
+                    // sort keyframe
+                    let k = keyIndex;
+                    if ( deltaTime > 0 ){
+                        for( ; k < times.length-1; ++k ){
+                            if ( times[k] < times[k+1] ){ 
+                                break; 
+                            }
+                            this.swapKeyFrames(track, k+1, k);
+                        }
+                    }else{
+                        for( ; k > 0; --k ){
+                            if ( times[k-1] < times[k] ){ 
+                                break; 
+                            }
+                            this.swapKeyFrames(track, k-1, k);
+                        }
+                    }
+                    this.lastKeyFramesSelected[idx][1] = k; // update keyframe index
+                    this.lastKeyFramesSelected[idx][2] = times[k]; // update keyframe time
+                }
+
+                if ( this.onContentMoved ){
+                    for( let i = 0; i < this.lastKeyFramesSelected.length; ++i ){
+                        const [trackIdx, keyIndex, originalKeyTime] = this.lastKeyFramesSelected[i];
+                        track = this.animationClip.tracks[trackIdx];
+                        if(track && track.locked)
+                            continue;
+                        this.onContentMoved(trackIdx, keyIndex);
+                    }
                 }
             }
+            if ( !e.altKey || !(e.buttons & 0x01) ){
+                return;
+            }
+        }
 
+        // Track.dim == 1:  move keyframes vertically (change values instead of time) 
+        if ( e.altKey && e.buttons & 0x01 ){
+            const tracks = this.animationClip.tracks;
+            let lastTrackChanged = -1;
+            for( let i = 0; i < this.lastKeyFramesSelected.length; ++i ){
+                const [trackIdx, keyIndex, originalKeyTime] = this.lastKeyFramesSelected[i];
+                track = tracks[trackIdx];
+                if(track.locked || track.dim != 1 || !track.curves){
+                    continue;
+                }
+
+                let value = track.values[keyIndex];
+                let delta = e.deltay * this.keyValuePerPixel * (track.curvesRange[1]-track.curvesRange[0]); 
+                track.values[keyIndex] = Math.max(track.curvesRange[0], Math.min(track.curvesRange[1], value - delta)); // invert delta because of screen y
+                track.edited[keyIndex] = true;
+
+                if ( this.onUpdateTrack && track.trackIdx != lastTrackChanged && lastTrackChanged > -1){
+                    this.onUpdateTrack( [track.trackIdx] );
+                    lastTrackChanged = track.trackIdx;
+                }
+            }
             return;
         }
 
