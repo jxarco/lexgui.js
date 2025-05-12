@@ -3245,8 +3245,12 @@ class ClipsTimeline extends Timeline {
                         duration = Math.min( track.clips[this.lastClipsSelected[0][1] + 1].start - clip.start - 0.0001, duration );
                     }
                     clip.duration = duration;
-                    clip.fadeout = Math.max(Math.min((clip.fadeout ?? (clip.start+clip.duration)) + delta, clip.start+clip.duration), clip.start);
-                    clip.fadein = Math.max(Math.min((clip.fadein ?? (clip.start+clip.duration)), (clip.fadeout ?? (clip.start+clip.duration))), clip.start);
+                    if ( clip.fadeout != undefined ){
+                        clip.fadeout = Math.max(Math.min((clip.fadeout ?? (clip.start+clip.duration)) + delta, clip.start+clip.duration), clip.start);
+                    }
+                    if ( clip.fadein != undefined ){
+                        clip.fadein = Math.max(Math.min((clip.fadein ?? (clip.start+clip.duration)), (clip.fadeout ?? (clip.start+clip.duration))), clip.start);
+                    }
                     if(this.duration < clip.start + clip.duration){
                         this.setDuration(clip.start + clip.duration);
                     }
@@ -3420,8 +3424,8 @@ class ClipsTimeline extends Timeline {
                     let clipIdx = lcs[1];
                     const clip = track.clips[clipIdx];
                     clip.start += leastDelta;
-                    clip.fadein += leastDelta;
-                    clip.fadeout += leastDelta;
+                    if (clip.fadein != undefined ){ clip.fadein += leastDelta; }
+                    if (clip.fadeout != undefined ){ clip.fadeout += leastDelta; }
 
                     // prepare swap
                     const editedFlag = track.edited[clipIdx]; 
@@ -3486,18 +3490,15 @@ class ClipsTimeline extends Timeline {
                     return;
                 }
                 
-                const durationX = this.timeToX(clip.start + clip.duration);
-                const fadeinX = this.timeToX(clip.fadein);
-                const fadeoutX = this.timeToX(clip.fadeout);
-                if(Math.abs(e.localX - durationX) < 8) {
+                if(Math.abs(e.localX - this.timeToX(clip.start + clip.duration)) < 8) { // duration
                     this.canvas.style.cursor = "col-resize";
                     this.dragClipMode = "duration";
                 }
-                else if(Math.abs(e.localX - fadeinX) < 8) {
+                else if(clip.fadein != undefined && Math.abs(e.localX - this.timeToX(clip.fadein)) < 8) { // fadein
                     this.canvas.style.cursor = "e-resize";
                     this.dragClipMode = "fadein";
                 }
-                else if(Math.abs(e.localX - fadeoutX) < 8) {
+                else if(clip.fadeout != undefined && Math.abs(e.localX - this.timeToX(clip.fadeout)) < 8) { // fadeout
                     this.canvas.style.cursor = "e-resize";
                     this.dragClipMode = "fadeout";
                 }
@@ -3613,7 +3614,7 @@ class ClipsTimeline extends Timeline {
         for(var j = 0; j < clips.length; ++j)
         {
             selectedClipArea = null;
-            let clip = clips[j];
+            const clip = clips[j];
             //let selected = track.selected[j];
             var x = Math.floor( this.timeToX(clip.start) ) + 0.5;
             var x2 = Math.floor( this.timeToX( clip.start + clip.duration ) ) + 0.5;
@@ -3624,21 +3625,14 @@ class ClipsTimeline extends Timeline {
             
             // Overwrite clip color state depending on its state
             ctx.globalAlpha = 1;
-            ctx.fillStyle = clip.clipColor || (track.hovered[j] ? Timeline.KEYFRAME_COLOR_HOVERED : (Timeline.KEYFRAME_COLOR));
-            if(track.selected[j] && !clip.clipColor) {
-                ctx.fillStyle = Timeline.TRACK_SELECTED;
-            }
-            if(!this.active || track.active == false) {
+            ctx.fillStyle = clip.clipColor || (track.hovered[j] ? Timeline.KEYFRAME_COLOR_HOVERED : (track.selected[j] ? Timeline.TRACK_SELECTED : Timeline.KEYFRAME_COLOR));
+            if(!this.active || !track.active) {
                 ctx.fillStyle = Timeline.KEYFRAME_COLOR_INACTIVE;
             }
 
             // Draw clip background
             ctx.roundRect( x, y + offset, w, trackHeight , 5, true);
-            
-            // Compute timeline position of fade-in and fade-out clip times
-            let fadeinX = this.pixelsPerSecond * ((clip.fadein || 0) - clip.start);
-            let fadeoutX = this.pixelsPerSecond * (clip.start + clip.duration - (clip.fadeout || (clip.start + clip.duration)));
-            
+                        
             if(this.active && track.active) {
                 // Transform fade-in and fade-out fill color to RGBA
                 if(ctx.fillStyle[0] == "#") {
@@ -3650,11 +3644,13 @@ class ClipsTimeline extends Timeline {
                     ctx.globalAlpha = 0.8;
                 }
             
-                // Draw fade-in and fade-out
-                if(fadeinX >= 0) {
+
+                if ( clip.fadein != undefined ){
+                    const fadeinX = this.pixelsPerSecond * (clip.fadein - clip.start);
                     ctx.roundRect(x, y + offset, fadeinX, trackHeight, {tl: 5, bl: 5, tr:0, br:0}, true);
                 }
-                if(fadeoutX) {
+                if ( clip.fadein != undefined ){
+                    const fadeoutX = this.pixelsPerSecond * (clip.start + clip.duration - (clip.fadeout));
                     ctx.roundRect( x + w - fadeoutX, y + offset, fadeoutX, trackHeight, {tl: 0, bl: 0, tr:5, br:5}, true);
                 }
             }
@@ -3665,7 +3661,7 @@ class ClipsTimeline extends Timeline {
             ctx.globalAlpha = clip.hidden ? 0.5 : 1;
             
             if(track.selected[j] || track.hovered[j]) {
-                ctx.strokeStyle = ctx.shadowColor = track.clips[j].clipColor || Timeline.TRACK_SELECTED;
+                ctx.strokeStyle = ctx.shadowColor = clip.clipColor || Timeline.TRACK_SELECTED;
                 ctx.shadowBlur = 10;
                 ctx.shadowOffsetX = 1.5;
                 ctx.shadowOffsetY = 1.5;
@@ -3684,10 +3680,10 @@ class ClipsTimeline extends Timeline {
 
             // Overwrite style with small font size if it's zoomed out
             if( this.pixelsPerSecond < 200) {
-                ctx.font = this.pixelsPerSecond*0.06  +"px" + Timeline.FONT;
+                ctx.font = this.pixelsPerSecond * 0.06  +"px" + Timeline.FONT;
             }
 
-            const text = clip.id.replaceAll("_", " ").replaceAll("-", " ");
+            const text = clip.id; //clip.id.replaceAll("_", " ").replaceAll("-", " ");
             const textInfo = ctx.measureText( text );
             
             // Draw clip name if it's readable
@@ -3980,8 +3976,10 @@ class ClipsTimeline extends Timeline {
         for(let i = 0; i < clipsToReturn.length; ++i){
             let clip = clipsToReturn[i];
             clip.start -= timeOffset;
-            if ( clip.fadein != undefined ){ clip.fadein += timeOffset; } 
-            if ( clip.fadeout != undefined ){ clip.fadeout += timeOffset; } 
+            if (clip.fadein == null || clip.fadein == undefined ){ clip.fadein = undefined; }
+            else{ clip.fadein += timeOffset; }
+            if (clip.fadeout == null || clip.fadeout == undefined ){ clip.fadeout = undefined; }
+            else{ clip.fadeout += timeOffset; }
         }
         return clipsToReturn;
     }
