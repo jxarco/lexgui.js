@@ -786,6 +786,8 @@ class Timeline {
         let isHoveringTimeBar = localY < this.topMargin && 
                                 localX > (timeX - 6) && localX < (timeX + 6);
 
+        const time = this.xToTime(x, true);
+
         if( isHoveringTimeBar ) {
             this.canvas.style.cursor = "col-resize";
         }
@@ -819,8 +821,6 @@ class Timeline {
             }
             return;
         }
-
-        const time = this.xToTime(x, true);
 
         const is_inside = x >= 0 && x <= this.size[0] &&
                         y >= 0 && y <= this.size[1];
@@ -1765,6 +1765,7 @@ class KeyFramesTimeline extends Timeline {
         }
 
         // Track.dim == 1:  move keyframes vertically (change values instead of time) 
+        // RELIES ON SORTED ARRAY OF lastKeyFramesSelected
         if ( e.altKey && e.buttons & 0x01 ){
             const tracks = this.animationClip.tracks;
             let lastTrackChanged = -1;
@@ -1780,10 +1781,13 @@ class KeyFramesTimeline extends Timeline {
                 track.values[keyIndex] = Math.max(track.curvesRange[0], Math.min(track.curvesRange[1], value - delta)); // invert delta because of screen y
                 track.edited[keyIndex] = true;
 
-                if ( this.onUpdateTrack && track.trackIdx != lastTrackChanged && lastTrackChanged > -1){
+                if ( this.onUpdateTrack && track.trackIdx != lastTrackChanged && lastTrackChanged > -1){ // do it only once all keyframes of the same track have been modified
                     this.onUpdateTrack( [track.trackIdx] );
-                    lastTrackChanged = track.trackIdx;
                 }
+                lastTrackChanged = track.trackIdx;
+            }
+            if( lastTrackChanged > -1 ){ // do the last update, once the last track has been processed
+                this.onUpdateTrack( [track.trackIdx] );
             }
             return;
         }
@@ -1852,7 +1856,7 @@ class KeyFramesTimeline extends Timeline {
                         if ( !e.track ){ return; }
                         const arr = new Float32Array( e.track.dim );
                         arr.fill(0);
-                        this.addKeyFrame( e.track, 0, this.xToTime(e.localX) );
+                        this.addKeyFrame( e.track, arr, this.xToTime(e.localX) );
                     }
                 }
             );
@@ -2144,8 +2148,7 @@ class KeyFramesTimeline extends Timeline {
         }
 
         if ( trackNameInfo.length > 1 ){
-            groupId = trackNameInfo[0].replaceAll(/[\[\]]/g,"");
-            groupId = groupId.replaceAll("_", " ");
+            groupId = trackNameInfo[0];
             trackId = trackNameInfo[1];
         }else{
             trackId = trackNameInfo[0];
@@ -2729,8 +2732,8 @@ class KeyFramesTimeline extends Timeline {
         const track = this.animationClip.tracks[trackIdx];
 
         // Don't remove by now the first key (and avoid impossible indices)
-        if(index < 1 || index >= track.times.length ) {
-            console.warn("Operation not supported! " + (index==0 ?"[removing first keyframe track]":"[removing invalid keyframe " + index + " from " + track.times.length + "]"));
+        if(index < 0 || index >= track.times.length ) {
+            console.warn("Operation not supported! " + "[removing invalid keyframe " + index + " from " + track.times.length + "]");
             return false;
         }
 
