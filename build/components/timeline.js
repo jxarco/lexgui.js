@@ -361,7 +361,7 @@ class Timeline {
 
     /**
      * Finds tracks (wholy and partially) inside the range minY maxY.
-     * Canvas local coordinates.
+     * (Full) Canvas local coordinates.
      * @param {number} minY 
      * @param {number} maxY 
      * @returns array of trackDatas
@@ -637,7 +637,6 @@ class Timeline {
 
         // Selections
         ctx.strokeStyle = ctx.fillStyle = Timeline.FONT_COLOR_PRIMARY;
-        ctx.translate( 0, this.topMargin );
         if(this.boxSelection) {
             ctx.globalAlpha = 0.15;
             ctx.fillStyle = Timeline.BOX_SELECTION_COLOR;
@@ -646,7 +645,6 @@ class Timeline {
             ctx.stroke();
             ctx.globalAlpha = 1;
         }
-        ctx.translate( 0, -this.topMargin );
 
     }
 
@@ -872,7 +870,7 @@ class Timeline {
             if(e.shiftKey && this.active) {
                 this.boxSelection = true;
                 this.boxSelectionEnd[0] = this.boxSelectionStart[0] = localX; 
-                this.boxSelectionEnd[1] = this.boxSelectionStart[1] = localY - this.topMargin;
+                this.boxSelectionEnd[1] = this.boxSelectionStart[1] = localY;
                 return; // Handled
             }
             else if( e.localY < this.topMargin ){
@@ -897,7 +895,7 @@ class Timeline {
 
             if(e.shiftKey && this.active && this.boxSelection) {
                 this.boxSelectionEnd[0] = localX; 
-                this.boxSelectionEnd[1] = localY - this.topMargin;
+                this.boxSelectionEnd[1] = localY;
                 return; // Handled
             }
             else if(this.grabbing && e.button !=2 && !this.movingKeys ) { // e.buttons != 2 on mousemove needs to be plural
@@ -1612,7 +1610,7 @@ class KeyFramesTimeline extends Timeline {
             }
             // Box selection
             else if(this.boxSelection) {                
-                let tracks = this.getTracksInRange(this.boxSelectionStart[1] + this.topMargin, this.boxSelectionEnd[1] + this.topMargin);
+                let tracks = this.getTracksInRange(this.boxSelectionStart[1], this.boxSelectionEnd[1]);
                 
                 for(let t of tracks) {
                     let keyFrameIndices = this.getKeyFramesInRange(t, 
@@ -3158,13 +3156,13 @@ class ClipsTimeline extends Timeline {
             // Box selection
             else if (this.boxSelection){
                 
-                let tracks = this.getTracksInRange(this.boxSelectionStart[1], this.boxSelectionEnd[1], this.secondsPerPixel * 5);
+                let tracks = this.getTracksInRange(this.boxSelectionStart[1], this.boxSelectionEnd[1]);
                 
                 for(let t of tracks) {
                     let clipsIndices = this.getClipsInRange(t, 
                         this.xToTime( this.boxSelectionStart[0] ), 
                         this.xToTime( this.boxSelectionEnd[0] ),
-                        this.secondsPerPixel * 5);
+                        0.000001);
                         
                     if(clipsIndices) {
                         for(let index of clipsIndices)
@@ -3210,7 +3208,6 @@ class ClipsTimeline extends Timeline {
 
             for(let i = 0; i < selectedClips.length; i++)
             {
-                this.movingKeys = false;
                 let [trackIndex, clipIndex] = selectedClips[i];
                 const clip = this.animationClip.tracks[trackIndex].clips[clipIndex];
 
@@ -3231,6 +3228,7 @@ class ClipsTimeline extends Timeline {
                 }
             }
 
+            this.movingKeys = true;
         }
         else if( !track || track && this.getCurrentClip(track, time, 0.001) == -1) { // clicked on empty space
             this.unSelectAllClips();
@@ -3512,7 +3510,7 @@ class ClipsTimeline extends Timeline {
         else if(e.track && e.buttons == 0) { // mouse not dragging, just hovering
 
             this.unHoverAll();
-            let clips = this.getClipsInRange(e.track, time, time, 0.1)
+            let clips = this.getClipsInRange(e.track, time, time, 0.00001);
             if(!e.track.locked && clips) {
                                 
                 this.lastHovered = [e.track.trackIdx, clips[0]];
