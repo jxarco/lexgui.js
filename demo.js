@@ -7,21 +7,11 @@ window.LX = LX;
 
 const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
 
-const map2Dpoints = [
-    { "name": "angry", "pos": [-0.29348334680286725,-0.8813498603327697] },
-    { "name": "happy", "pos": [0.5728906393051147,-0.2508566975593567] },
-    { "name": "sad", "pos": [-0.542498156289837,0.3795300176749039] },
-    { "name": "calm", "pos": [0.46099435955317536,0.6203009288162395] },
-    { "name": "bored", "pos": [-0.349232931016368,0.8103832270857154] },
-    { "name": "frustrated", "pos": [-0.49046521102390306,-0.5708814736724744] },
-    { "name": "smile", "pos": [0.5762101669277435,0.20211987262339348] },
-    { "name": "upset", "pos": [-0.5796645457655041,-0.1907168771335228] }
-];
-
 // Menubar
 {
     const menubar = area.addMenubar( [
-        { name: "Docs", icon: "search", kbd: "F1", callback: () => { window.open("./docs/") } }
+        { name: "Docs", callback: () => { window.open("./docs/") } },
+        { name: "Examples", callback: () => { window.open("./examples/") } },
     ] );
 
     menubar.setButtonImage("lexgui.js", "images/icon.png", () => {window.open("https://jxarco.github.io/lexgui.js/")}, {float: "left"})
@@ -245,6 +235,17 @@ const map2Dpoints = [
             panel.addText("Name", "node_1");
             panel.addCheckbox("Visibility", true, null, { className: "accent" });
             panel.addLayers("Layers", 10, null);
+
+            const map2Dpoints = [
+                { "name": "angry", "pos": [-0.29348334680286725,-0.8813498603327697] },
+                { "name": "happy", "pos": [0.5728906393051147,-0.2508566975593567] },
+                { "name": "sad", "pos": [-0.542498156289837,0.3795300176749039] },
+                { "name": "calm", "pos": [0.46099435955317536,0.6203009288162395] },
+                { "name": "bored", "pos": [-0.349232931016368,0.8103832270857154] },
+                { "name": "frustrated", "pos": [-0.49046521102390306,-0.5708814736724744] },
+                { "name": "smile", "pos": [0.5762101669277435,0.20211987262339348] },
+                { "name": "upset", "pos": [-0.5796645457655041,-0.1907168771335228] }
+            ];
             panel.addMap2D("Map2D", map2Dpoints, null, { size: [ 300, 300 ] });
 
             panel.addTitle( "Transform" );
