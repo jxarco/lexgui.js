@@ -1312,6 +1312,7 @@ LX.Timeline = Timeline;
 
 class KeyFramesTimeline extends Timeline {       
 
+    static ADDKEY_VALUEARRAYS = 0x01;
     /**
      * @param {string} name unique string
      * @param {object} options = {animationClip, selectedItems, x, y, width, height, canvas, trackHeight}
@@ -1786,7 +1787,7 @@ class KeyFramesTimeline extends Timeline {
                 }
                 lastTrackChanged = track.trackIdx;
             }
-            if( lastTrackChanged > -1 ){ // do the last update, once the last track has been processed
+            if( this.onUpdateTrack && lastTrackChanged > -1 ){ // do the last update, once the last track has been processed
                 this.onUpdateTrack( [track.trackIdx] );
             }
             return;
@@ -1856,7 +1857,7 @@ class KeyFramesTimeline extends Timeline {
                         if ( !e.track ){ return; }
                         const arr = new Float32Array( e.track.dim );
                         arr.fill(0);
-                        this.addKeyFrame( e.track, arr, this.xToTime(e.localX) );
+                        this.addKeyFrames( e.track.trackIdx, arr, [this.xToTime(e.localX)] );
                     }
                 }
             );
@@ -1867,7 +1868,7 @@ class KeyFramesTimeline extends Timeline {
                         if ( !e.track ){ return; }
                         const arr = new Float32Array( e.track.dim );
                         arr.fill(0);
-                        this.addKeyFrame( e.track, arr );
+                        this.addKeyFrames( e.track, arr, [this.currentTime] );
                     }
                 }
             );
@@ -2611,23 +2612,8 @@ class KeyFramesTimeline extends Timeline {
             const values = clipboardInfo.values;
             const track = this.animationClip.tracks[trackIdx];
             
-            this.saveState(trackIdx);
-            let oldTrackStateEnabler = this.trackStateSaveEnabler;
-            this.trackStateSaveEnabler = false; // do not save state while in addkeyframe
-
-            for(let i = 0; i < clipboardInfo.times.length; i++) {
-                let value = values[i];
-                let time = times[i];
-                if(typeof value == 'number')
-                    value = [value];
-                time = time - globalStart + pasteTime;
-                if ( -1 == this.addKeyFrame( track, value, time ) ){
-                    const frameIndex = this.getNearestKeyFrame(track, time);
-                    this.#paste(track, frameIndex, value);
-                }
-            }
-
-            this.trackStateSaveEnabler = oldTrackStateEnabler;
+            this.addKeyFrames( track.trackIdx, values, times, -globalStart + pasteTime  );
+                       
         }
         
         // do only one update
@@ -2639,81 +2625,93 @@ class KeyFramesTimeline extends Timeline {
         return true;
     }
 
-    addKeyFrame( track, value = undefined, time = this.currentTime ) {
+    /**
+     * 
+     * @param {int} trackIdx 
+     * @param {array} newValues array of values for each keyframe. It should be a flat array of size track.dim*numKeyframes. Check ADDKEY_VALUESINARRAYS flag
+     * @param {array of numbers} newTimes 
+     * @param {number} timeOffset 
+     * @param {int} flags     
+     *      KeyFramesTimeline.ADDKEY_VALUESINARRAYS: if set, newValues is an array of arrays, one for each entry [ [1,2,3], [5,6,7] ]. Times is still a flat array of values [ 0, 0.2 ]
+ 
+     * @returns 
+     */
+    addKeyFrames( trackIdx, newValues, newTimes, timeOffset = 0, flags = 0x00 ){
+        const track = this.animationClip.tracks[trackIdx];
 
-        if(!track) {
-            return -1;
-        }
+        if ( !newTimes.length ){ return; }
 
-        // Update animationClip information
-        const trackIdx = track.trackIdx;
-        track = this.animationClip.tracks[trackIdx];
+        const valueDim = track.dim;
+        const trackTimes = track.times;
+        const trackValues = track.values;
+        const times = new Float32Array( trackTimes.length + newTimes.length );
+        const values = new Float32Array( trackValues.length + newTimes.length * valueDim );
 
-        let newIdx = this.getNearestKeyFrame( track, time ); 
-        
-        // Time slot with other key?
-        if( newIdx > -1 && Math.abs(track.times[newIdx] - time) < 0.001 ) {
-            console.warn("There is already a keyframe [", newIdx, "] stored in time slot [", track.times[newIdx], "]");
-            return -1;
-        }
-
+        // let newIdx = this.getNearestKeyFrame( track, newTimes[newTimes.length-1], -1 ); 
         this.saveState(trackIdx);
 
-        // Find index that t[idx] > time
-        if(newIdx < 0) { 
-            newIdx = 0;
-        }
-        else if ( track.times[newIdx] < time ){ 
-            newIdx++; 
-        }
+        let newIdx = newTimes.length-1;
+        let oldIdx = trackTimes.length-1;
 
-        // TODO allow undefined value and compute the interpolation between adjacent keyframes?
+        if ( KeyFramesTimeline.ADDKEY_VALUEARRAYS & flags ){
+            
+            for( let i = times.length-1; i > -1; --i ){
+                // copy new value in this place if needed
+                if ( oldIdx<0 || (newIdx>-1 && trackTimes[oldIdx] < (newTimes[newIdx]+timeOffset)) ){
+                    const vals = newValues[newIdx];
+                    for( let v = 0; v < valueDim; ++v ){
+                        values[i * valueDim + v] = vals[v];
+                    }
+                    times[i] = newTimes[newIdx--]+timeOffset;
+                    // Add new entry into each control array
+                    track.hovered.splice(oldIdx+1, 0, false);
+                    track.selected.splice(oldIdx+1, 0, false);
+                    track.edited.splice(oldIdx+1, 0, true);
+                    continue;
+                }
+                
+                // copy old values instead
+                for( let v = 0; v < valueDim; ++v ){ 
+                    values[i * valueDim + v] = trackValues[oldIdx * valueDim + v]; 
+                }
+                times[i] = trackTimes[oldIdx--];
+            }    
+        } 
+        else{
+            for( let i = times.length-1; i > -1; --i ){
+                // copy new value in this place if needed
+                if ( oldIdx<0 || (newIdx>-1 && trackTimes[oldIdx] < (newTimes[newIdx]+timeOffset)) ){
+                    // ----------- this is different from the 'if' -----------
+                    for( let v = 0; v < valueDim; ++v ){ 
+                        values[i * valueDim + v] = newValues[newIdx * valueDim + v]; 
+                    }
+                    times[i] = newTimes[newIdx--] + timeOffset;
+                    // Add new entry into each control array
+                    track.hovered.splice(oldIdx+1, 0, false);
+                    track.selected.splice(oldIdx+1, 0, false);
+                    track.edited.splice(oldIdx+1, 0, true);
+                    continue;
+                }
+                
+                // copy old values instead
+                for( let v = 0; v < valueDim; ++v ){ 
+                    values[i * valueDim + v] = trackValues[oldIdx * valueDim + v]; 
+                }
+                times[i] = trackTimes[oldIdx--];
+            }
 
-        // new arrays
-        let times = new Float32Array( track.times.length + 1 );
-        let values = new Float32Array( track.values.length + track.dim );
-
-        let valueDim = track.dim;
-
-        // copy times/values before the new index
-        for( let i = 0; i < newIdx; ++i ){ 
-            times[i] = track.times[i]; 
-        }
-        for( let i = 0; i < newIdx * valueDim; ++i ){ 
-            values[i] = track.values[i]; 
-        }
-
-        // new keyframe
-        times[newIdx] = time;
-        for( let i = 0; i < valueDim; ++i ){ 
-            values[newIdx * valueDim + i] = value[i]; 
-        }
-
-        // copy remaining keyframes
-        for( let i = newIdx; i < track.times.length; ++i ){ 
-            times[i+1] = track.times[i]; 
-        }
-        for( let i = newIdx * valueDim; i < track.values.length; ++i ){ 
-            values[i + valueDim] = track.values[i]; 
         }
 
         // update track pointers
         track.times = times;
         track.values = values;
-                    
-        // Add new entry into each control array
-        track.hovered.splice(newIdx, 0, false);
-        track.selected.splice(newIdx, 0, false);
-        track.edited.splice(newIdx, 0, true);
-    
+
+        if ( (newTimes[newTimes.length - 1] + timeOffset) > this.duration ){
+            this.setDuration(newTimes[newTimes.length - 1] + timeOffset);
+        }
+
         if(this.onUpdateTrack)
             this.onUpdateTrack( [trackIdx] );
-
-        if ( time > this.duration ){
-            this.setDuration(time);
-        }
-       
-        return newIdx;
     }
 
     deleteSelectedContent() {
@@ -2730,12 +2728,6 @@ class KeyFramesTimeline extends Timeline {
     #delete( trackIdx, index ) {
         
         const track = this.animationClip.tracks[trackIdx];
-
-        // Don't remove by now the first key (and avoid impossible indices)
-        if(index < 0 || index >= track.times.length ) {
-            console.warn("Operation not supported! " + "[removing invalid keyframe " + index + " from " + track.times.length + "]");
-            return false;
-        }
 
         // Delete time key (TypedArrays do not have splice )
         track.times = track.times.filter( (v, i) => i != index);
@@ -2995,7 +2987,7 @@ class KeyFramesTimeline extends Timeline {
     /**
      * @method clearTrack
      */
-    clearTrack(trackIdx, defaultValue) {
+    clearTrack(trackIdx) {
 
         let track =  this.animationClip.tracks[trackIdx];
 
@@ -3013,17 +3005,7 @@ class KeyFramesTimeline extends Timeline {
         {
             this.#delete(track.trackIdx, i);
         } 
-        if(defaultValue != undefined) {
-            if(typeof(defaultValue) == 'number')  {
-                track.values[0] = defaultValue;
-            }
-            else {
-                for(let i = 0; i < defaultValue.length; i++) {
-                    track.values[i] = defaultValue[i];
-                }
-            }
-
-        }
+        
         return trackIdx;
     }
 }
@@ -3564,16 +3546,15 @@ class ClipsTimeline extends Timeline {
         if(this.lastClipsSelected.length) {
             actions.push(
                 {
-                    title: "Copy",// + " <i class='bi bi-clipboard-fill float-right'></i>",
+                    title: "Copy",
                     callback: () => { this.copySelectedContent();}
                 }
             )
             actions.push(
                 {
-                    title: "Delete",// + " <i class='bi bi-trash float-right'></i>",
+                    title: "Delete",
                     callback: () => {
                         this.deleteSelectedContent({});
-                        // this.optimizeTracks();
                     }
                 }
             )
@@ -3584,7 +3565,7 @@ class ClipsTimeline extends Timeline {
             {
                 actions.push(
                     {
-                        title: "Paste",// + " <i class='bi bi-clipboard-fill float-right'></i>",
+                        title: "Paste",
                         callback: () => {
                             this.pasteContent();
                         }
@@ -4013,7 +3994,6 @@ class ClipsTimeline extends Timeline {
     copySelectedContent() {
 
         if ( this.lastClipsSelected.length == 0 ){
-            // this.clipboard = null;
             return;
         }
 
