@@ -2,7 +2,9 @@
 
 ## dev
 
+Separate source into files. Generate module using `npm rollup`.
 Fixed making floating branch + docking to panel.
+Fixed graph renaming bug in NodeGraph editor.
 
 ## 0.6.3 (master)
 
