@@ -23,6 +23,7 @@ if __name__ == "__main__":
     output_js = "build/lexgui.js"
 
     lines_above = [
+        "// This is a generated file. Do not edit.",
         "\'use strict';",
         "",
         "console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. Please use ES Modules or alternatives: https://jxarco.github.io/lexgui.js/docs/' );",

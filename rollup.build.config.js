@@ -6,7 +6,8 @@ export default [
         output: [
             {
                 file: 'build/lexgui.module.js',
-                format: 'esm'
+                format: 'esm',
+                banner: '// This is a generated file. Do not edit.'
             },
             {
                 file: 'build/lexgui.module.min.js',
@@ -20,7 +21,8 @@ export default [
     //     output: [
     //         {
     //             file: 'build/lexgui.module.all.js',
-    //             format: 'esm'
+    //             format: 'esm',
+    //             banner: '// This is a generated file. Do not edit.'
     //         },
     //         {
     //             file: 'build/lexgui.module.all.min.js',
