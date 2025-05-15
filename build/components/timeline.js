@@ -56,7 +56,6 @@ class Timeline {
 
 
         this.duration = 1;
-        this.speed = 1;
         this.size = [0.000001, 0.000001];
         
         this.currentScroll = 0; //in percentage
@@ -183,7 +182,7 @@ class Timeline {
         header.clearQueue( buttonContainer );
         header.addContent( "header-buttons", buttonContainer );
 
-        // time number inputs - duration, speed, current time, etc
+        // time number inputs - duration, current time, etc
 
         if( this.onCreateBeforeTopBar )
         {
@@ -206,14 +205,6 @@ class Timeline {
             units: "s",
             step: 0.01, min: 0,
             signal: "@on_set_duration_" + this.uniqueID,
-            nameWidth: "auto"
-        });    
-
-        header.addNumber("Speed", + this.speed.toFixed(3), (value, event) => {
-            this.setSpeed(value)
-        }, {
-            step: 0.01,
-            signal: "@on_set_speed_" + this.uniqueID,
             nameWidth: "auto"
         });
            
@@ -430,7 +421,6 @@ class Timeline {
         }
        
         this.setDuration(this.animationClip.duration, true, true);
-        this.setSpeed( this.animationClip.speed, true);
 
         this.updateLeftPanel();
 
@@ -711,20 +701,6 @@ class Timeline {
 
         if( this.onSetDuration && !skipCallback ) 
             this.onSetDuration( this.duration );	 
-    }
-
-
-        /**
-     * @method setSpeed
-     * @param {Number} speed 
-     */
-
-    setSpeed(speed, skipCallback = false) {
-        this.speed = speed;
-        LX.emit( "@on_set_speed_" + this.uniqueID, +this.speed.toFixed(3)); // skipcallback = true
-        
-        if( this.onSetSpeed && !skipCallback) 
-            this.onSetSpeed( this.speed );	 
     }
 
     setTime(time, skipCallback = false ){
@@ -1269,7 +1245,6 @@ class Timeline {
         return {
             name: options.name ?? "animationClip",
             duration: options.duration ?? 0,
-            speed: options.speed ?? this.speed,
             tracks: [],
             tracksPerGroup: options.tracksPerGroup ?? {},
             data: options.data ?? null,
