@@ -190,7 +190,7 @@ class Timeline {
         }
 
         header.addNumber("Current Time", this.currentTime, (value, event) => {
-            this.setTime(value)
+            this.setTime(value);
         }, {
             units: "s",
             signal: "@on_set_time_" + this.uniqueID,
@@ -369,7 +369,7 @@ class Timeline {
             maxY = aux;
         }
 
-        const elements = this.trackTreesWidget.innerTree.domEl.children[0].children; // children of 'ul'
+        const elements = this.getVisibleItems();
         if ( elements.length < 1 ){
             return [];
         }
@@ -1011,6 +1011,15 @@ class Timeline {
     }
 
     /**
+     * @returns the tree elements (tracks and grouops) shown in the timeline.
+     *  Each item has { treeData: { trackData: track } }, where track is the actual track information of the animationClip.
+     *  If not a track, trackData will be undefined
+     */
+    getVisibleItems(){
+        return this.trackTreesWidget.innerTree.domEl.children[0].children; // children of 'ul'
+    }
+
+    /**
      * @param {*} itemsToAdd [ trackIdx ], array of numbers identifying tracks by their index
      * @param {*} itemsToRemove [ trackIdx ], array of numbers identifying tracks by their index
      */
@@ -1301,6 +1310,7 @@ class KeyFramesTimeline extends Timeline {
         // curves --- track.dim == 1
         this.keyValuePerPixel = 1/this.trackHeight; // used onMouseMove, vertical move only for dim==1. Normalized value movement / pixels
         this.defaultCurves = true; // whn a track with dim == 1 has no curves attribute, defaultCurves will be used instead. If true, track is rendered using curves
+        this.defaultCurvesRange = [0,1]; // whn a track with dim == 1 has no curves attribute, defaultCurves will be used instead. If true, track is rendered using curves
 
         if(this.animationClip) {
             this.setAnimationClip(this.animationClip);
@@ -1418,7 +1428,7 @@ class KeyFramesTimeline extends Timeline {
         }
 
         track.curves = options.curves ?? this.defaultCurves; // only works if dim == 1
-        track.curvesRange = options.curvesRange ?? [0,1];
+        track.curvesRange = options.curvesRange ?? this.defaultCurvesRange.slice(0);
         return track;
     }
 
@@ -1889,7 +1899,7 @@ class KeyFramesTimeline extends Timeline {
         const scrollY = - this.currentScrollInPixels;
 
         // elements from "ul" should match the visible tracks (and groups) as if this.selectedItems was flattened
-        const visibleElements = this.trackTreesWidget.innerTree.domEl.children[0].children; 
+        const visibleElements = this.getVisibleItems(); 
 
         let offset = scrollY;
         ctx.translate(0, offset);
@@ -4278,7 +4288,9 @@ class ClipsTimeline extends Timeline {
     }
 
     setDuration( t, skipCallback = false, updateHeader = true ){
-        super.setDuration( this.validateDuration(t), skipCallback, updateHeader );
+        const oldT = t;
+        const newT = this.validateDuration(t);
+        super.setDuration( this.validateDuration(t), skipCallback, oldT != newT || updateHeader );
     }
 }
 

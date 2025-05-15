@@ -18,7 +18,7 @@
     <script type="module">
 
         import { LX } from 'lexgui';
-        import { Timeline, KeyFramesTimeline, ClipsTimeline, CurvesTimeline } from 'lexgui/components/timeline.js';
+        import { Timeline, KeyFramesTimeline, ClipsTimeline } from 'lexgui/components/timeline.js';
 
         // init library and get main area
         let area = await LX.init();
@@ -57,6 +57,8 @@
         createKeyframeTimeline( bottomTabs );
         createClipsTimeline( bottomTabs );
         createCurvesTimeline( bottomTabs );
+        debugger;
+        activeTimeline.resize();
 
         let mode = types.KEYFRAMES;
 
@@ -77,14 +79,12 @@
                 activeTimeline.draw();
                 if(activeTimeline.playing) {
                     
-                    activeTimeline.currentTime += elapsed* 0.001;
-                    if(activeTimeline.onSetTime) {
-                        activeTimeline.onSetTime(activeTimeline.currentTime);
-                    }
+                    activeTimeline.setTime(activeTimeline.currentTime + elapsed*0.001);
+
                     if(activeTimeline.currentTime >= activeTimeline.animationClip.duration) {
                         activeTimeline.currentTime = 0;
                         if(!activeTimeline.loop) {
-                            activeTimeline.changeState();
+                            activeTimeline.setState(false);
                         }
                     }                   
                 }
@@ -114,7 +114,17 @@
             panel.clear();
             panel.branch("Canvas", {icon: "Palette", filter: true});
             panel.addColor("Background", LX.getThemeColor("global-color-accent"));
-            panel.addText("Track", trackName, null)
+            panel.addText("Track", trackName, (value, event) =>{
+                const visibleItems = activeTimeline.getVisibleItems();
+                for ( let i = 0; i < visibleItems.length; ++i ) {
+                    const track = visibleItems[i].treeData.trackData;
+                    if ( track ){
+                        track.id = value;
+                        activeTimeline.updateLeftPanel();
+                        break;
+                    }
+                }
+            });
             panel.addText("Text", "Lexgui.js @evallsg", null, {placeholder: "e.g. ColorPicker", icon: "Type"});
             panel.addColor("Font Color", { r: 1, g: 0.1, b: 0.6 }, (value, event) => {
                 console.log("Font Color: ", value);
@@ -123,10 +133,10 @@
                 console.log(value);
             }, { min: 1, max: 48, step: 1});
             panel.addVector2("2D Position", position, (value, event) => {
-                let currentSelection = activeTimeline.lastKeyFramesSelected[0];
-                if( currentSelection ){
-                    const track = activeTimeline.animationClip.tracks[0];
-                    const keyframe = currentSelection[2];
+                if( activeTimeline.lastKeyFramesSelected.length ){
+                    const currentSelection =activeTimeline.lastKeyFramesSelected[0];
+                    const track = activeTimeline.animationClip.tracks[currentSelection[0]];
+                    const keyframe = currentSelection[1];
                     const dim = track.dim;
                     
                     track.values[keyframe * track.dim] = value[0];
@@ -169,7 +179,17 @@
             panel.addNumber("Duration", clip.duration, (v) => {
                 clip.duration = v;                
             }, {step: 0.01});
+
+            panel.addColor( "Color", clip.clipColor ?? "#000", (value, event)=>{
+                clip.clipColor = value; 
+            } );
             
+            if ( clip.fadein != undefined ){
+                panel.addColor( "Fade Color", clip.fadeColor ?? "#000", (value, event)=>{
+                    clip.fadeColor = value; 
+                } );
+            }
+
             panel.merge();
         }
 
@@ -178,6 +198,7 @@
             let keyframesPanel = new LX.Panel();            
             bottomTabs.add( "Keyframes", keyframesPanel, {onSelect: () => {
                 activeTimeline = kfTimeline; 
+                kfTimeline.resize();
                 kfTimeline.show();
                 fillPanel(panel);
                 mode = types.KEYFRAMES;
@@ -185,19 +206,19 @@
             keyframesPanel.onresize = () => {
                 kfTimeline.resize();
             }
-            let kfTimeline = new LX.KeyFramesTimeline('keyframesTimeline', {
+            let kfTimeline = new LX.KeyFramesTimeline('Keyframes Timeline', {
                 disableNewTracks: true,
-                onBeforeCreateTopBar: (panel) => {
+                onCreateBeforeTopBar: (panel) => {
                     panel.addSelect("Animation", ["Anim 1", "Anim 2", "Anim 3"], "Anim 1", ()=> {})
                 },
-                onAfterCreateTopBar: (panel) => {
+                onCreateAfterTopBar: (panel) => {
                     panel.addButton("autoKeyEnabled", "autoKeyEnable", null, { icon: 'WandSparkles', hideName: true });
                     panel.addButton("unselectAll", "unselectAll", (value, event) => { kfTimeline.unSelectAllKeyFrames();}, { icon: 'X', hideName: true, callback: (value, event) => { kfTimeline.unSelectAllKeyFrames();} });
                 }
             });
 
             keyframesPanel.attach(kfTimeline.mainArea);
-            kfTimeline.setAnimationClip({tracks: [{name: "Font.position", values: [250, 450, 250, 250, 250, 450], times: [0, 0.5, 1.0]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1]}, {name: "Item 3.position", values: [0,1,0,0,0,0], times: [0.1, 0.2, 0.3]}, {name: "Item 3.scale", values: [0,1,0], times: [ 0.1, 0.2, 0.3]}], duration: 1});
+            kfTimeline.setAnimationClip({tracks: [{id: "Font.position", values: [250, 450, 250, 250, 250, 450], times: [0, 0.5, 1.0]}, {id: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {id: "Item 2", values: [0,1,0,1], times: [0.1]}, {id: "Item 3.position", values: [0,1,0,0,0,0], times: [0.1, 0.2, 0.3]}, {id: "Item 3.scale", values: [0,1,0], times: [ 0.1, 0.2, 0.3]}], duration: 1}, true);
             kfTimeline.setSelectedItems(["Font", "Item 2", "Item 3"]);
             activeTimeline = kfTimeline;
             kfTimeline.show();
@@ -209,16 +230,16 @@
                     return;
                 }
                 rightArea.show();
-                trackName = data.track.name;
-                if( trackName != "Font" || data.track.type != "position") {
+                trackName = data.track.id ;
+                if(  data.track.groupId != "Font" || data.track.id != "position") {
                     return
                 }
-                const id = data.track.clipIdx;
+                const id = data.track.trackIdx;
                 let values = kfTimeline.animationClip.tracks[id].values;
                 const dim = kfTimeline.animationClip.tracks[id].dim;
                 
                 //currentSelection == [track.name, track.idx, frameIdx, track.clipIdx, track.times[frameIdx]]
-                const keyFrameIndex = currentSelection[2];
+                const keyFrameIndex = currentSelection[1];
                 position = values.slice(keyFrameIndex * dim, keyFrameIndex * dim + dim);
                 fillPanel(panel);
                 //kfTimeline.animationClip.tracks[currentSelection[0][0]];
@@ -252,13 +273,18 @@
             let clipsPanel = new LX.Panel();
             bottomTabs.add( "Clips", clipsPanel, {onSelect: () => {
                 activeTimeline = clipsTimeline; 
+                clipsTimeline.resize();
                 clipsTimeline.show();
                 panel.clear();
                 mode = types.CLIPS;
             }});
             
-            let clipsTimeline = new LX.ClipsTimeline("clips-timeline");
+            let clipsTimeline = new LX.ClipsTimeline("Clips Timeline");
             clipsPanel.attach(clipsTimeline.root);
+            clipsTimeline.setAnimationClip({name: "animation" });
+            clipsTimeline.onAddNewTrack = (track, options)=>{
+                track.id = "Track " + clipsTimeline.animationClip.tracks.length;
+            }
 
             let clip = {id:"Clip 1", start:0, duration:1, type:""};
             clipsTimeline.addClip(clip);
@@ -271,8 +297,6 @@
             clip = {id:"Clip 5", start:0, fadein: 0.5, fadeout: 0.8, duration:1, type:""};
             clipsTimeline.addClip(clip);
            
-            // clipsTimeline.setAnimationClip({tracks: [{clips: [clip]}], duration: 2});
-            clipsTimeline.selectedItems = ["Clip 1"];
             clipsTimeline.show();
 
             clipsTimeline.onSelectClip = (clip) => {
@@ -280,26 +304,28 @@
                 fillClipPanel(panel, clip);
             }
 
-            clipsTimeline.draw(0);
+            clipsTimeline.draw();
         }
 
         function createCurvesTimeline( bottomTabs ) {
             
             let curvesPanel = new LX.Panel();
             bottomTabs.add( "Curves", curvesPanel, {onSelect: () => {
-                activeTimeline = curvesTimeline; 
-                curvesTimeline.show(); 
+                activeTimeline = curvesTimeline;
+                curvesTimeline.resize(); 
+                curvesTimeline.show();
                 panel.clear();
                 mode = types.CLIPS;
 
             }});
 
-            let curvesTimeline = new LX.CurvesTimeline("curves-timeline", { range: [-1,1]});
+            let curvesTimeline = new LX.KeyFramesTimeline("curves-timeline");
+            curvesTimeline.defaultCurvesRange = [-1,1];
             curvesPanel.attach(curvesTimeline.root);
             curvesTimeline.setAnimationClip({tracks: [{name: "Item 1.position", values: [0,1,0,-1], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 1.scale", values: [0,1,0, 0.5], times: [0, 0.1, 0.2, 0.3]}, {name: "Item 2", values: [0,1,0,1], times: [0.1, 0.2, 0.3, 0.8]}, {name: "Item 3.position", values: [0,0,1], times: [0]}, {name: "Item 3.scale", values: [0,1,0], times: [0, 0.1, 0.3]}], duration: 1});
             curvesTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
             curvesTimeline.show();
-            curvesTimeline.draw(0);
+            curvesTimeline.draw();
         }
 
     </script>
