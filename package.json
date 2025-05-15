@@ -36,9 +36,12 @@
         "url": "https://github.com/jxarco/lexgui.js/issues"
     },
     "scripts": {
+        "rollup-js": "rollup -c rollup.build.config.js",
         "minify-css": "cleancss -o build/lexgui.min.css build/lexgui.css",
-        "minify-js": "uglifyjs build/lexgui.module.js -o build/lexgui.module.min.js --compress --mangle --module && uglifyjs build/lexgui.js -o build/lexgui.min.js --compress --mangle --no-module",
-        "minify": "npm run minify-js && npm run minify-css",
+        "minify": "npm run rollup-js && npm run minify-css",
         "build": "python build-legacy.py && npm run minify"
+    },
+    "devDependencies": {
+        "@rollup/plugin-terser": "^0.4.4"
     }
 }
