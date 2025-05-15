@@ -1414,8 +1414,8 @@ class KeyFramesTimeline extends Timeline {
         track.groupId = null,
         track.groupTrackIdx = -1, // track Idx inside group only if in group
 
-        track.values = []; 
-        track.times = [];
+        track.values = new Float32Array(0); 
+        track.times = new Float32Array(0);
         track.selected = [];
         track.edited = [];
         track.hovered = [];
@@ -1679,8 +1679,8 @@ class KeyFramesTimeline extends Timeline {
                     this.saveState(track.trackIdx, false);               
                 }
 
-                selectedKey[4] = track.times[keyIndex]; // update original time just in case 
-                this.moveKeyMinTime = Math.min( this.moveKeyMinTime, selectedKey[4] );
+                selectedKey[2] = track.times[keyIndex]; // update original time just in case 
+                this.moveKeyMinTime = Math.min( this.moveKeyMinTime, selectedKey[2] );
             }
             
             this.timeBeforeMove = this.xToTime( localX );
@@ -2398,8 +2398,8 @@ class KeyFramesTimeline extends Timeline {
     * @param {Number} trgIdx keyFrame index  
     */
     swapKeyFrames(track, srcIdx, trgIdx){
-        let times = track.times;
-        let values = track.values;
+        const times = track.times;
+        const values = track.values;
 
         let tmp = times[srcIdx];
         times[srcIdx] = times[trgIdx];
@@ -2465,8 +2465,8 @@ class KeyFramesTimeline extends Timeline {
     copyKeyFrameValue( track, index ) {
 
         // 1 element clipboard by now
-        let start = index * track.dim;
-        let values = this.animationClip.tracks[ track.trackIdx ].values.slice(start, start + track.dim);
+        const start = index * track.dim;
+        const values = this.animationClip.tracks[ track.trackIdx ].values.slice(start, start + track.dim);
 
         if(!this.clipboard)
             this.clipboard = {};
@@ -2653,6 +2653,7 @@ class KeyFramesTimeline extends Timeline {
         let newIdx = newTimes.length-1;
         let oldIdx = trackTimes.length-1;
 
+        let t1 = performance.now();
         if ( KeyFramesTimeline.ADDKEY_VALUEARRAYS & flags ){
             
             for( let i = times.length-1; i > -1; --i ){
@@ -2716,67 +2717,91 @@ class KeyFramesTimeline extends Timeline {
 
     deleteSelectedContent() {
         
-        this.deleteKeyFrame(null);
+        //*********** WARNING: RELIES ON SORTED lastKeyFramesSelected ***********
+            
+        if (!this.lastKeyFramesSelected.length){ 
+            return; 
+        }
+
+        const firstTrack = this.lastKeyFramesSelected[0][0];
+        let trackToRemove = firstTrack;
+        let toDelete = []; // indices to delete of the same track
+
+        const oldSaveEnabler = this.trackStateSaveEnabler;
+        
+        const numSelected = this.lastKeyFramesSelected.length; 
+        for( let i = 0; i < numSelected; ++i ){
+            const [trackIdx, frameIdx] = this.lastKeyFramesSelected[i];
+            if ( trackToRemove != trackIdx ){
+                this.saveState(trackToRemove, trackToRemove != firstTrack);
+
+                this.trackStateSaveEnabler = false;
+                this.deleteKeyFrames( trackToRemove, toDelete );
+                this.trackStateSaveEnabler = oldSaveEnabler;
+
+                trackToRemove = trackIdx;
+            }
+ 
+            toDelete.push(frameIdx)
+        }
+
+        this.saveState(trackToRemove, trackToRemove != firstTrack);
+        this.trackStateSaveEnabler = false;
+        this.deleteKeyFrames( trackToRemove, toDelete );
+        this.trackStateSaveEnabler = oldSaveEnabler;
+ 
+        this.lastKeyFramesSelected = [];
     }
 
-    /**
-    * Delete a keyframe given the track and the its index
-    * @param {Number} trackIdx track that keyframe belongs to 
-    * @param {Number} index index of the keyframe on the track
-    * @returns 
-    */
-    #delete( trackIdx, index ) {
-        
+    // for typed arrays. Does not update lastSelectedKeyframes
+    deleteKeyFrames( trackIdx, indices ){
         const track = this.animationClip.tracks[trackIdx];
 
-        // Delete time key (TypedArrays do not have splice )
-        track.times = track.times.filter( (v, i) => i != index);
-        track.edited = track.edited.filter( (v, i) => i != index);
-        track.selected = track.selected.filter( (v, i) => i != index);
-        track.hovered = track.hovered.filter( (v, i) => i != index);
+        if ( !indices.length ){ 
+            return false; 
+        }
 
-        // Delete values
-        const indexDim = track.dim * index;
-        const slice1 = track.values.slice(0, indexDim);
-        const slice2 = track.values.slice(indexDim + track.dim);
+        this.saveState( trackIdx );
 
-        track.values = LX.UTILS.concatTypedArray([slice1, slice2], Float32Array);
+        const oldNumFrames = track.times.length;
+        const newNumFrames = track.times.length - indices.length;
+        const newTimes = track.times.slice(0, newNumFrames);
+        const newValues = track.values.slice(0, newNumFrames * track.dim);
+        
+        let resultIdx = indices[0];
+        let resultValIdx = indices[0] * track.dim;
+        for(let i = 0; i < indices.length; ++i){
+            track.edited.splice(resultIdx, 1);
+            track.selected.splice(resultIdx, 1);
+            track.hovered.splice(resultIdx, 1);
+            
+            const idx = indices[i];
+            const endIdx = (i < (indices.length-1)) ? indices[i+1] : oldNumFrames;
+            const endValIdx = endIdx * track.dim;
+            for(let v = (idx+1)*track.dim; v < endValIdx; ++v ){
+                newValues[resultValIdx++] = track.values[v];
+            }
+            for( let f = idx+1; f < endIdx; ++f){
+                newTimes[resultIdx++] = track.times[f];
+            }
+        }
+
+        track.times = newTimes;
+        track.values = newValues;
 
         // Update animation action interpolation info
-        if(this.onDeleteKeyFrame)
-            this.onDeleteKeyFrame( trackIdx, index );
+        if(this.onDeleteKeyFrames)
+            this.onDeleteKeyFrames( trackIdx, indices );
+
+        
+        if ( (newTimes[newTimes.length - 1]) > this.duration ){
+            this.setDuration(newTimes[newTimes.length - 1]);
+        }
+
+        // if(this.onUpdateTrack)
+        //     this.onUpdateTrack( [trackIdx] );
         
         return true;
-    }
-
-    /** Delete one or more keyframes given the triggered event
-     * @e: event
-     * @track:
-     * @index: index of the keyframe on the track
-    */
-    deleteKeyFrame(track, index) {
-        
-        if(!track) {
-            //*********** WARNING: RELIES ON SORTED lastKeyFramesSelected ***********
-            
-            // start removing from the last keyframe 
-            let prevTrackRemoved = -1;
-            for( let i = this.lastKeyFramesSelected.length-1; i > -1; --i ){
-                let [trackIdx, frameIdx] = this.lastKeyFramesSelected[i];
-                if ( prevTrackRemoved != trackIdx ){
-                    this.saveState(trackIdx, prevTrackRemoved != -1);
-                    prevTrackRemoved = trackIdx;
-                }
-                this.#delete(trackIdx, frameIdx);
-            }
-            this.lastKeyFramesSelected = [];
-        }
-        else{
-            this.saveState(track.trackIdx);
-            this.#delete(track.trackIdx, index);
-        }
-
-        this.unSelectAllKeyFrames();
     }
 
     /**
@@ -2989,10 +3014,9 @@ class KeyFramesTimeline extends Timeline {
      */
     clearTrack(trackIdx) {
 
-        let track =  this.animationClip.tracks[trackIdx];
+        const track =  this.animationClip.tracks[trackIdx];
 
-        if(track.locked )
-        {
+        if(track.locked ){
             return;
         }
 
@@ -3000,11 +3024,12 @@ class KeyFramesTimeline extends Timeline {
         this.unSelectAllKeyFrames();
 
         this.saveState(track.trackIdx);
-        const count = track.times.length;
-        for(let i = count - 1; i >= 0; i--)
-        {
-            this.#delete(track.trackIdx, i);
-        } 
+
+        track.times = track.times.slice(0,0);
+        track.values = track.values.slice(0,0);
+        track.edited.length = 0;
+        track.hovered.length = 0;
+        track.selected.length = 0;
         
         return trackIdx;
     }
