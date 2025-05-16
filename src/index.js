@@ -1,4 +1,6 @@
 export * from './core.js';
+export * from './icons.js';
+export * from './utils.js';
 
 export * from './area.js';
 export * from './widget.js';
