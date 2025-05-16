@@ -3,55 +3,137 @@
     import {KeyFramesTimeline, ClipsTimeline} from "lexgui/components/timeline.js"
 
     MAKE_HEADER( "Timeline", "h1", "timeline" );
-    MAKE_PARAGRAPH( `Timeline is an abstrac class and it has the following derived clases:` );
+    MAKE_PARAGRAPH( `Timeline is an abstract class and it has the following derived clases:` );
     MAKE_CODE_BULLET_LIST( [
         `<a href="#keyframes-timeline">KeyframesTimeline</a>`,
-        `<a href="#curves-timeline">CurvesTimeline</a>`,
         `<a href="#clips-timeline">ClipsTimeline</a>`,
     ] );
     MAKE_HEADER( "Constructor", "h2", "" );
     MAKE_CLASS_CONSTRUCTOR( "Timeline", [
-        ["name", "String"],
+        ["id", "String", "Unique string that identifies this element"],
         ["options", "Object"]
     ] );
     
     MAKE_PARAGRAPH(`Each timeline has to be appended to an existing panel, where the possible ${INLINE_CODE(`options`)} are the following:` );
     MAKE_CODE_BULLET_LIST( [
+        ["title", "String", `Set a title for the timeline.`],
         ["loop", "Boolean", "Set looping mode animation by default."],
         ["skipVisibility", "Boolean", "When it's true, the un/active track button is disabled."],
         ["skipLock", "Boolean", "When it's true, the un/lock track button is disabled."],
         ["disableNewTracks", "Boolean", "When it's true, add new tracks option is disabled."],                
-    ] );
-
-    MAKE_PARAGRAPH( `Callback functions can be defined also in the ${INLINE_CODE("options")}. These are the possible functions that can be called after an actions is triggered:` );
-    MAKE_CODE_BULLET_LIST( [
-        ["onBeforeCreateTopBar", "Function", "Callback to add widgets on the top bar before the default ones."],
-        ["onAfterCreateTopBar", "Function", "Callback to add widgets on the top bar after the default ones."],
-        ["onChangePlayMode", "Function", "Function called when the play mode is changed (loop or once)."],
-        ["onChangeState", "Function", "Function called when the play/pause mode is changed."],
-        ["onSetDuration", "Function", "Function called when the duration is changed."],
-        ["onSetSpeed", "Function", "Function called when the speed is changed."],
-        ["onSetTime", "Function", "Function called when the current time is changed."],
-        ["onSelectTrack", "Function", "Function called when a track is selected."],
-        ["onLockTrack", "Function", "Function called when a track is un/locked."],
-        ["onChangeTrackVisibility", "Function", "Function called when a un/active track mode is triggered."],
-        ["onChangeTrackDisplay", "Function", "Function called when a un/active track is shown/hidden in the timeline."],
+        ["onCreateBeforeTopBar", "Function", `Callback to add widgets on the top bar before the 'current time' widget.`],
+        ["onCreateAfterTopBar", "Function", `Callback to add widgets on the top bar after the 'duration' widget.`],
+        ["onCreateControlsButtons", "Function", `Callback to add widgets on the top bar after the default ones (play, stop, loop).`],
+        ["onCreateSettingsButtons", "Function", `Callback to add widgets on the top bar before the default ones (optimize, configuration).`],
+        ["onShowOptimizeMenu", "Function", `Callback to add an optimize menu on the right side, before the configuration menu. If undefined, the menu will appear and use the default implementation. Set it to null, to deactivate it.`],
+        ["onShowConfiguration", "Function", `Callback to add widgets to the configuration menu.`]
     ] );
         
+    MAKE_HEADER( "Callbacks", "h2", "" );
+    MAKE_HEADER( "Constructor Callbacks", "h3", "" );
+    MAKE_PARAGRAPH( `These are used to build the interface of the timeline. Setting them outside the constructor will require a call to ${INLINE_CODE("updateHeader")} for them to take effect:`);
+    MAKE_CLASS_METHOD( "onCreateBeforeTopBar", `Callback to add widgets on the top bar before the 'current time' widget.`, [
+        ["panel", "LX panel"]
+    ] );
+    
+    MAKE_CLASS_METHOD( "onCreateAfterTopBar", `Callback to add widgets on the top bar after the 'duration' widget.`, [
+        ["panel", "LX panel"]
+    ] );
+    
+    MAKE_CLASS_METHOD( "onCreateControlsButtons", `Callback to add widgets on the top bar after the default ones (play, stop, loop).`, [
+        ["panel", "LX panel"]
+    ] );
+
+    MAKE_CLASS_METHOD( "onCreateSettingsButtons", `Callback to add widgets on the top bar before the default ones (optimize, configuration).`, [
+        ["panel", "LX panel"]
+    ] );
+
+    MAKE_CLASS_METHOD( "onShowOptimizeMenu", `Callback to add an optimize menu on the right side, before the configuration menu. If undefined, the menu will appear and use the default implementation. Set it to null, to deactivate it.`, [
+        ["panel", "LX panel"]
+    ] );
+
+    MAKE_CLASS_METHOD( "onShowConfiguration", `Callback to add widgets to the configuration menu.`, [
+        ["panel", "LX panel"]
+    ] );
+
+    MAKE_HEADER( "Callbacks", "h3", "" );
+    MAKE_PARAGRAPH( `These are used to react to some event and can be set at any time. Constructor's ${INLINE_CODE("options")} will not recognize this functions. `);
+    
+    MAKE_CLASS_METHOD( "onBeforeDrawContent", `Called before rendering the track elements.`, [
+        ["ctx", "canvas context"]
+    ] );
+
+    MAKE_CLASS_METHOD( "onStateStop", `After clicking the stop button. The ${INLINE_CODE("playing")} attribute is false.`, [] );
+
+    MAKE_CLASS_METHOD( "onStateChange", `Triggered after clicking the play/pause button. Receives the current state of the ${INLINE_CODE("playing")} attribute`, [
+        ["currentState", "Boolean"]
+    ] );
+
+    MAKE_CLASS_METHOD( "onSetTime", `Triggered after changing the current time using the ${INLINE_CODE("setTime")} function or the interface`, [
+        ["currentTime", "Number"]
+    ] );
+    
+    MAKE_CLASS_METHOD( "onSetDuration", `Triggered after calling ${INLINE_CODE("setDuration")}`, [
+        ["currentDuration", "Number"]
+    ] );
+
+    MAKE_CLASS_METHOD( "onChangeLoopMode", `Triggered after calling ${INLINE_CODE("setLoopMode")} or clicking on the loop button`, [
+        ["currentLoopMode", "Boolean"]
+    ] );
+    
+    MAKE_CLASS_METHOD( "onMouse", `Triggered after processing the mouse event over the canvas. The box selection of elements does not trigger this event. Receives the mouse event and the current time of the mouse location`, [
+        ["event", "MouseEvent"],
+        ["time", "Number"],
+    ] );
+
+    MAKE_CLASS_METHOD( "onDblClick", `Triggered after processing the mouse event over the canvas. The box selection of elements does not trigger this event. Receives the mouse event and the current time of the mouse location`, [
+        ["event", "MouseEvent"],
+    ] );
+
+    MAKE_CLASS_METHOD( "onAddNewTrackButton", `Triggered after clicking on the "add track" button (if enabled). The default implementation adds a track to the clip and makes it visible. This callback also to overwrite this behaviour`, [ ] );
+    
+    MAKE_CLASS_METHOD( "onAddNewTrack", `Triggered after creating a track through the ${INLINE_CODE("addNewTrack")} function. This callback can be used to change the default id of the track, modify the dimension of the values or to insert some initial values`, [
+        ["track", "Object"],
+    ] );
+
+    MAKE_CLASS_METHOD( "onItemSelected", `Triggered after calling ${INLINE_CODE("selectItems")}.`, [
+        ["currentSelectedItems", "Array of Numbers"],
+        ["itemsAdded", "Array of Numbers"],
+        ["itemsRemoved", "Array of Numbers"],
+    ] );
+
+    MAKE_CLASS_METHOD( "onSelectTrack", `Triggered after calling ${INLINE_CODE("selectTrack")}.`, [
+        ["track", "Object"]
+    ] );
+
+    MAKE_CLASS_METHOD( "onSetTrackState", `Triggered after calling ${INLINE_CODE("setTrackState")} or clicking in the eye icon (active) of the track.`, [
+        ["track", "Object"],
+        ["previousState", "Boolean"],
+    ] );
+
+    MAKE_CLASS_METHOD( "onLockTrack", `Triggered after clicking in the lock icon of the track.`, [
+        ["track", "Object"],
+        ["previousState", "Boolean"],
+    ] );
+          
     MAKE_HEADER( "Properties", "h2", "" );
     MAKE_CODE_BULLET_LIST( [
-        [".root", "LX.Area", "Container where the whole timeline is created"],
-        [".animationClip", "Object"],
+        [".root", "LX.Area", `${INLINE_CODE("Read-Only")} Container where the whole timeline is created`],
+        [".uniqueID", "String", `${INLINE_CODE("Read-Write")}.`],  
+        [".timelineTitle", "String", `${INLINE_CODE("Read-Write")}. Use ${INLINE_CODE("updateHeader")} after modifying it to update the interface`],
+        [".animationClip", "Object", `${INLINE_CODE("Read-Only")} Contains all the information of an animation. Setting an animationClip must be done through ${INLINE_CODE("setAnimationClip")}. Check each class for full details`],
         [
-            [".idx", "Number", "Id of the clip"],
-            [".tracks", "Array", "Tracks of the animation clip"],
+            [".name", "String", "Id of the animation"],
             [".duration", "Number", "0 by default"],
-            [".speed", "Number", "1 by default"],
+            [".tracks", "Array", "Tracks of the animation clip"],
+            [".data", "", "User defined data"]
         ],
-        [".tracksDrawn", "Array", "Contains the information of all tracks currently displayed on the timeline"],
-        [".tracksPerItem", "Object", "Contains all the information of the tracks for each item. For example, an item can has multiple tracks such as for position, for rotation or scale. "],
-        [".playing", "Boolean", ""],
-        [".duration", "Float", ""],               
+        [".playing", "Boolean", `${INLINE_CODE("Read-Only")}. Use ${INLINE_CODE("setState")} to modify its value`],  
+        [".loop", "Boolean", `${INLINE_CODE("Read-Only")}. Whether the loop button is set or not.`],
+        [".duration", "Number", `${INLINE_CODE("Read-Only")}. Use ${INLINE_CODE("setDuration")} to modify its value`],  
+        [".currentTime", "Number", `${INLINE_CODE("Read-Only")}. Use ${INLINE_CODE("setTime")} to modify its value`],  
+        [".historyMaxSteps", "Int", `${INLINE_CODE("Read-Write")}. Sets the maximum number of states for the history (undo & redo).`],  
+        [".trackHeight", "Number", `${INLINE_CODE("Read-Only")}. Size of the tracks drawn.`],        
     ] );
 
     MAKE_HEADER( "Methods", "h2", "" );
@@ -86,10 +168,10 @@
         ["speed", "Number"]
     ] );
 
-    MAKE_HEADER( "Keyframes timeline", "h2", "keyframes-timeline" );
+    MAKE_HEADER( "Keyframes Timeline", "h1", "keyframes-timeline" );
 
     {
-        const keyframestimeline = new KeyFramesTimeline( "Keyframes Timeline" );
+        const keyframestimeline = new KeyFramesTimeline( "Keyframes", { title: "Keyframes Timeline" } );
         const content = document.getElementById( 'content' );
         const area = new LX.Area( { skipAppend: true, height: "350px" } );
         area.attach(keyframestimeline);
@@ -112,6 +194,11 @@
         keyframestimeline.setAnimationClip(animation, true);
         keyframestimeline.setSelectedItems( ["group", 0, 6] );
 
+        keyframestimeline.onAddNewTrack = (trackInfo, options) => {
+            trackInfo.dim = 1 + Math.floor( Math.random() * 3.1 ); //doing this before any keyframe is added
+            trackInfo.id = "Track " + keyframestimeline.animationClip.tracks.length + " " + trackInfo.dim + "D";
+        }
+
         function render(){
             requestAnimationFrame( render );
             keyframestimeline.draw();
@@ -119,15 +206,106 @@
 
         render();
     }
-
-    MAKE_PARAGRAPH( `Callback functions can be defined also in the ${INLINE_CODE("options")}. These are the possible functions that can be called after an actions is triggered:` );
+   
+    MAKE_HEADER( "Keyframes AnimationClip", "h2", "" );
+    MAKE_PARAGRAPH( `New animationClips must be created through the ${INLINE_CODE("instantiateAnimationClip")} function and set to the timeline through ${INLINE_CODE("setAnimationClip")}.`);
     MAKE_CODE_BULLET_LIST( [
-        ["onShowOptimizeMenu (function)", ""],
-        ["onGetOptimizeThreshold (function)", ""]
+        [".name", "String", "Id of the animation"],
+        [".duration", "Number", `0 by default. If the clip is in a timeline, use ${INLINE_CODE("setDuration")} to modify it. Otherwise, duration can be modified`],
+        [".tracks", "Array", "Tracks of the animation clip"],
+        [".tracksPerGroup", "Object", "maps groupIds (Strings) to an array of tracks"],
+        [".data", "", "user defined data"]
     ] );
+
+    MAKE_HEADER( "Keyframes Tracks", "h2", "" );
+    MAKE_PARAGRAPH( `New Tracks should be added to the animationClip clip through the ${INLINE_CODE("addNewTrack")} function.`);
+    MAKE_CODE_BULLET_LIST( [
+        [".isTrack", "Boolean", `${INLINE_CODE("Read-Only")} Identifies it as a track`],
+        [".id", "String", `Name of the track. If the track is currently visible, changing its id will require a call to ${INLINE_CODE("updateLeftPanel")}`],
+        [".active", "Boolean", `${INLINE_CODE("Read-Only")} Whether it is disabled or not. Use ${INLINE_CODE("setTrackState")} to modify it.`],
+        [".locked", "Boolean", `Whether its elements can be modified or not.`],
+        [".isSelected", "Boolean", `${INLINE_CODE("Read-Only")} Whether to paint the track background blue, flagging it as selected.`],
+        [".trackIdx", "Number", `${INLINE_CODE("Read-Only")} Position of the track in the animationClip's tracks array.`],
+
+        [".dim", "Number", `Number of values per keyframe. It can be modified, as long as it makes sense with ${INLINE_CODE("times")} and ${INLINE_CODE("values")} attributes`],
+        [".groupId", "String", `${INLINE_CODE("Read-Only")} Group to which it is attached. Use ${INLINE_CODE("setTracksGroup")} instead of directly modifying it`],
+        [".groupTrackIdx", "Number", `${INLINE_CODE("Read-Only")} Index of the track inside the group array`],
+        
+        [".curves", "Boolean", `Whether to render this track as centered keyframes or curves`],
+        [".curvesRange", "[Number, Number]", `range of values [min, max] that the track will hold.`],
+
+        [".values", "Array Number", `Flat array of size = number-of-keyframes * dim, containing the values of each keyframe. Values inside the array can be safely modified. Directly modifying its length might lead to undefined behaviour.`],
+        [".times", "Array Number", `Flat array of size = number-of-keyframes, containing the timestamp of each keyframe sorted ascendently. Values inside the array can be safely modified as long as the array is kept sorted ascendently. Directly modifying its length might lead to undefined behaviour.`],
+        [".edited", "Array Boolean", `Array of size = number-of-keyframes, containing a flag to indicate whether the keyframe has been modified. Its values can be safely modified.`],
+        [".selected", "Array Boolean", `${INLINE_CODE("Read-Only")} Array of size number-of-keyframes, containing a flag to indicate whether the keyframe is currently selected. Modifying it might not update the underlying selection system.`],
+        [".hovered", "Array Boolean", `${INLINE_CODE("Read-Only")} Array of size number-of-keyframes, containing a flag to indicate whether the keyframe is currently hovered by the mouse. Modifying it might not update the underlying hovering system.`],
+
+        [".data", "", "user defined data"]
+    ] );
+
+    MAKE_HEADER( "Constructor", "h2", "" );
+    MAKE_CLASS_CONSTRUCTOR( "KeyFramesTimeline", [
+        ["id", "String", "Unique string that identifies this element"],
+        ["options", "Object"]
+    ] );
+
+    MAKE_HEADER( "Properties", "h2", "" );
+    MAKE_PARAGRAPH( `Check ${INLINE_CODE("Timeline")} properties`);
+    MAKE_CODE_BULLET_LIST( [
+        [".lastKeyFramesSelected", "Array of [trackIdx, keyframeIdx, keyframe time]", `${INLINE_CODE("Read-Only")} the currently selected keyframes across all tracks`]
+        [".keyValuePerPixel", "Number", `Applicable to tracks with dim = 1, amount of normalized value ( [ 0, 1 ] ) to add per pixel moved while holding ${INLINE_CODE("alt")}. Default to 1/${INLINE_CODE("trackHeight")}`],
+        [".defaultCurves", "Boolean", `Applicable to tracks with dim = 1, the default way of rendering tracks with dim = 1. If true, it renders them with curves.`],  
+        [".defaultCurvesRange", "[Number, Number]", `Applicable to tracks with dim = 1, the default range of values [min, max] that a track holds.`],  
+    ] );
+
+    MAKE_HEADER( "Callbacks", "h2", "" );
+    MAKE_PARAGRAPH(`Callbacks can be set directly to the instance of ${INLINE_CODE("KeyFramesTimeline")}`);
+    MAKE_CLASS_METHOD( "onAddNewTrack", `Triggered after creating a track through the ${INLINE_CODE("addNewTrack")} function. This callback can be used to change the default id of the track, modify the dimension of the values or to insert some initial values. To include this track into a group, use the ${INLINE_CODE("setTracksGroup")} function`, [
+        ["track", "Object"],
+    ] );
+    
+    MAKE_CLASS_METHOD( "onItemSelected", `Triggered after calling ${INLINE_CODE("selectItems")}.`, [
+        ["currentSelectedItems", "Array of Numbers for tracks or Strings for groups"],
+        ["itemsAdded", "Array of Numbers for tracks or Strings for groups"],
+        ["itemsRemoved", "Array of Numbers for tracks or Strings for groups"],
+    ] );
+
+    MAKE_CLASS_METHOD( "onSelectKeyFrame", `Triggered after selecting a keyframe.`, [
+        ["event", "Mouse Event"],
+        ["currentSelection", "[trackIdx, keyframeIdx, time of keyframe]"],
+    ] );
+
+    
+    MAKE_CLASS_METHOD( "onUnselectKeyFrames", `Triggered before unselecting all keyframes.`, [
+        ["selectedKeyframes", "Array of [trackIdx, keyframeIdx, timestamp of keyframe]"],
+    ] );
+
+    MAKE_CLASS_METHOD( "onContentMoved", `Triggered after moving keyframes. Calls it for each frame .`, [
+        ["trackIndex", "Number"],
+        ["keyframeIndex", "Number"],
+    ] );
+
+    MAKE_CLASS_METHOD( "onUpdateTrack", `Triggered after changing keyframe values through ${INLINE_CODE("Alt")} in a curves track, pasting values, undoing-redoing and adding keyframes.`, [
+        ["tracks", "Array of Number"],
+    ] );
+    
+    MAKE_CLASS_METHOD( "onOptimizeTracks", `Triggered after optimizing tracks. It receives either a valid track index or a -1 indicating that all tracks have been optimized at once`, [
+        ["trackIndex", "Number"],
+    ] );
+
+    MAKE_CLASS_METHOD( "onDeleteKeyFrames", `Triggered after deleting keyframes.`, [
+        ["trackIndex", "Number"],
+        ["keyframeIndices", "Array of Number"],
+    ] );
+
+
+    MAKE_HEADER( "Methods", "h2", "" );
+    MAKE_PARAGRAPH("TODO");
+
 
     MAKE_CODE( `@let@ kfTimeline = @new@ LX.@[typ]KeyframesTimeline@(@"Timeline name"@ );
 panel.attach(kfTimeline.root);` );
+
         
     MAKE_HEADER( "Clips timeline", "h2", "clips-timeline" );
     {
