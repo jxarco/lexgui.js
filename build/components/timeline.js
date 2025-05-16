@@ -1118,13 +1118,13 @@ class Timeline {
     * @param {int} trackIdx 
     * @param {boolean} isEnbaled
     */
-    setTrackState(trackIdx, isEnbaled = true) {
+    setTrackState(trackIdx, isEnbaled = true, skipCallback = false) {
         const track = this.animationClip.tracks[trackIdx];
             
         const oldState = track.active;
         track.active = isEnbaled;
 
-        if(this.onSetTrackState)
+        if(this.onSetTrackState && !skipCallback)
             this.onSetTrackState(track, oldState);
     }
 
