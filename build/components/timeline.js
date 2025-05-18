@@ -745,8 +745,6 @@ class Timeline {
         if(!this.canvas)
             return;
     
-        e.multipleSelection = false;
-
         let h = this.canvas.height;
         let w = this.canvas.width;
 
@@ -927,43 +925,34 @@ class Timeline {
     }
     
     /**
+     * keydown
      * @method processKeys
      * @param {*} e
      */
     processKeys(e) {
+        switch(e.key) {
+            case 'Delete': case 'Backspace':
+                this.deleteSelectedContent();
+                break;
+            case 'c': case 'C':
+                if(e.ctrlKey)
+                    this.copySelectedContent();
+                break;
+            case 'v': case 'V':
+                if(e.ctrlKey)
+                    this.pasteContent();
+                break;
+            case ' ':
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                this.changeState();
+                break; 
 
-        if( e.type == 'keydown' ) {
-            switch(e.key) {
-                case 'Delete': case 'Backspace':
-                    this.deleteSelectedContent();
-                    break;
-                case 'c': case 'C':
-                    if(e.ctrlKey)
-                        this.copySelectedContent();
-                    break;
-                case 'v': case 'V':
-                    if(e.ctrlKey)
-                        this.pasteContent();
-                    break;
-                case 'z': case 'Z':
-                    if(e.ctrlKey)
-                        this.undo();
-                    break;
-                case 'y': case 'Y':
-                    if(e.ctrlKey)
-                        this.redo();
-                    break;
-                case ' ':
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    this.changeState();
-                    break; 
-
-                case "Shift":
-                    this.canvas.style.cursor = "crosshair";
-                    break;
-            }
+            case "Shift":
+                this.canvas.style.cursor = "crosshair";
+                break;
         }
+    
     }
     
     /**
@@ -1305,7 +1294,7 @@ LX.Timeline = Timeline;
 
 class KeyFramesTimeline extends Timeline {       
 
-    static ADDKEY_VALUEARRAYS = 0x01;
+    static ADDKEY_VALUESINARRAYS = 0x01; // addkeyframes as [ [k0v0, k0v1...], [k1v0, k1v1...] ] instead of [k0v0,k0v1,k1v0,k1v1]
     /**
      * @param {string} name unique string
      * @param {object} options = {animationClip, selectedItems, x, y, width, height, canvas, trackHeight}
@@ -1658,14 +1647,13 @@ class KeyFramesTimeline extends Timeline {
         let discard = e.discard; // true when too much time has passed between Down and Up
         
         if(e.shiftKey) {
-            e.multipleSelection = true;
             // Manual multiple selection
             if(!discard && track) {
                 const keyFrameIdx = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * 5 );   
                 if ( keyFrameIdx > -1 ){
                     track.selected[keyFrameIdx] ?
-                    this.unSelectKeyFrame(track, keyFrameIdx) :
-                    this.processCurrentKeyFrame( e, keyFrameIdx, track, null, true ); 
+                        this.unSelectKeyFrame(track.trackIdx, keyFrameIdx) :
+                        this.processSelectionKeyFrame( track.trackIdx, keyFrameIdx, true ); 
                 }
             }
             // Box selection
@@ -1680,7 +1668,7 @@ class KeyFramesTimeline extends Timeline {
                         
                     if(keyFrameIndices) {
                         for(let index = keyFrameIndices[0]; index <= keyFrameIndices[1]; ++index){
-                            this.processCurrentKeyFrame( e, index, t, null, true );
+                            this.processSelectionKeyFrame( t.trackIdx, index, true );
                         }
                     }
                 }
@@ -1697,7 +1685,7 @@ class KeyFramesTimeline extends Timeline {
             if (track){
                 const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * 5 );
                 if( keyFrameIndex > -1 ) {
-                    this.processCurrentKeyFrame( e, keyFrameIndex, track, null, e.multipleSelection ); // Settings this as multiple so time is not being set
+                    this.processSelectionKeyFrame( track.trackIdx, keyFrameIndex, false ); // Settings this as multiple so time is not being set
                 }  
             }
         }
@@ -1914,9 +1902,9 @@ class KeyFramesTimeline extends Timeline {
                     title: "Add Here",
                     callback: () => {
                         if ( !e.track ){ return; }
-                        const arr = new Float32Array( e.track.dim );
-                        arr.fill(0);
-                        this.addKeyFrames( e.track.trackIdx, arr, [this.xToTime(e.localX)] );
+                        const values = new Float32Array( e.track.dim );
+                        values.fill(0);
+                        this.addKeyFrames( e.track.trackIdx, values, [this.xToTime(e.localX)] );
                     }
                 }
             );
@@ -1925,9 +1913,9 @@ class KeyFramesTimeline extends Timeline {
                     title: "Add",
                     callback: () => {
                         if ( !e.track ){ return; }
-                        const arr = new Float32Array( e.track.dim );
-                        arr.fill(0);
-                        this.addKeyFrames( e.track, arr, [this.currentTime] );
+                        const values = new Float32Array( e.track.dim );
+                        values.fill(0);
+                        this.addKeyFrames( e.track, values, [this.currentTime] );
                     }
                 }
             );
@@ -2015,7 +2003,7 @@ class KeyFramesTimeline extends Timeline {
 
         const keyframes = track.times;         
         const startTime = this.visualTimeRange[0];
-        const endTime = this.visualTimeRange[1];
+        const endTime = this.visualTimeRange[1] + 0.0000001;
 
         for(let j = 0; j < keyframes.length; ++j)
         {
@@ -2072,7 +2060,7 @@ class KeyFramesTimeline extends Timeline {
         const valueRange = track.curvesRange; //[min, max]
         const displayRange = trackHeight - defaultPointSize * 2;
         const startTime = this.visualTimeRange[0];
-        const endTime = this.visualTimeRange[1];
+        const endTime = this.visualTimeRange[1] + 0.0000001;
         //draw lines
         ctx.strokeStyle = "white";
         ctx.beginPath();
@@ -2181,9 +2169,9 @@ class KeyFramesTimeline extends Timeline {
      * (0,0,0,0,1,1,1,0,0,0,0,0,0,0) --> (0,0,1,1,0,0)
      * @param {Int} trackIdx index of track in the animation
      * @param {Bool} onlyEqualTime if true, removes only keyframes with equal times. Otherwise, values are ALSO compared through the class threshold
-     * @param {Bool} enableEvent if true, triggers "onOptimizeTracks" after optimizing
+     * @param {Bool} skipCallback if false, triggers "onOptimizeTracks" after optimizing
      */
-    optimizeTrack(trackIdx, onlyEqualTime = false, enableEvent = true ) {
+    optimizeTrack(trackIdx, onlyEqualTime = false, skipCallback = false ) {
         if ( !this.animationClip ){ return; }
 
         const track = this.animationClip.tracks[trackIdx],
@@ -2259,7 +2247,7 @@ class KeyFramesTimeline extends Timeline {
             this.updateTrack( track.trackIdx, track ); // update control variables (hover, edited, selected) 
         } 
 
-        if(this.onOptimizeTracks && enableEvent )
+        if(this.onOptimizeTracks && !skipCallback )
             this.onOptimizeTracks(trackIdx);
     }
 
@@ -2282,7 +2270,7 @@ class KeyFramesTimeline extends Timeline {
         // optimize
         for( let i = 0; i < this.animationClip.tracks.length; ++i ) {
             const track = this.animationClip.tracks[i];
-            this.optimizeTrack( track.trackIdx, onlyEqualTime, false );
+            this.optimizeTrack( track.trackIdx, onlyEqualTime, true );
         }
 
         // restore old enabler status
@@ -2372,8 +2360,8 @@ class KeyFramesTimeline extends Timeline {
             track.times = state.t;
             track.values = state.v;
             track.edited = state.edited;
-            if ( track.selected.length < track.times.length ){ track.selected.length = track.times.length; }
-            if ( track.hovered.length < track.times.length ){ track.hovered.length = track.times.length; }
+            if ( track.selected.length != track.times.length ){ track.selected.length = track.times.length; }
+            if ( track.hovered.length != track.times.length ){ track.hovered.length = track.times.length; }
             track.selected.fill(false);
             track.hovered.fill(false);
 
@@ -2522,7 +2510,7 @@ class KeyFramesTimeline extends Timeline {
         if(this.clipboard.value && this.lastKeyFramesSelected.length == 1) {
 
             let [trackIdx, keyIdx] = this.lastKeyFramesSelected[0];
-            this.pasteKeyFrameValue({}, this.animationClip.tracks[trackIdx], keyIdx);
+            this.pasteKeyFrameValue(this.animationClip.tracks[trackIdx], keyIdx);
             return true;
         }
         return false;
@@ -2557,7 +2545,7 @@ class KeyFramesTimeline extends Timeline {
         return true;
     }
 
-    pasteKeyFrameValue( e, track, index ) {
+    pasteKeyFrameValue( track, index ) {
 
         if(this.clipboard.value.type != track.type){
             return;
@@ -2570,17 +2558,6 @@ class KeyFramesTimeline extends Timeline {
 
         if(this.onUpdateTrack){
             this.onUpdateTrack( [track.trackIdx] );
-        }
-        
-        if(!e || !e.multipleSelection)
-        return;
-        
-        // Don't want anything after this
-        this.clearState();
-
-        // Copy to every selected key
-        for(let [trackIdx, keyIndex] of this.lastKeyFramesSelected) {
-            this.#paste( this.animationClip.tracks[trackIdx], keyIndex, this.clipboard.value.values );
         }
     }
 
@@ -2600,18 +2577,25 @@ class KeyFramesTimeline extends Timeline {
 
         if ( globalStart == Infinity ){ return false; }
 
+        // disable callback. It will be done once at the end
         const onUpdateTrack = this.onUpdateTrack;
         this.onUpdateTrack = null;
-
+        
+        
+        // disable history. It will be done with all changes combined into a single entry
+        const oldSaveEnabler = this.historySaveEnabler;
+        let trackCount = 0; // to detect when to create an entry or 
         for( let trackIdx in clipboardTracks ){
             
             const clipboardInfo = this.clipboard.keyframes[trackIdx];
             const times = clipboardInfo.times; 
             const values = clipboardInfo.values;
             const track = this.animationClip.tracks[trackIdx];
-            
-            this.addKeyFrames( track.trackIdx, values, times, -globalStart + pasteTime  );
-                       
+
+            this.saveState(track.trackIdx, trackCount++);
+            this.historySaveEnabler = false;
+            this.addKeyFrames( track.trackIdx, values, times, -globalStart + pasteTime, KeyFramesTimeline.ADDKEY_VALUESINARRAYS  );
+            this.historySaveEnabler = oldSaveEnabler;
         }
         
         // do only one update
@@ -2652,7 +2636,7 @@ class KeyFramesTimeline extends Timeline {
         let oldIdx = trackTimes.length-1;
 
         let t1 = performance.now();
-        if ( KeyFramesTimeline.ADDKEY_VALUEARRAYS & flags ){
+        if ( KeyFramesTimeline.ADDKEY_VALUESINARRAYS & flags ){
             
             for( let i = times.length-1; i > -1; --i ){
                 // copy new value in this place if needed
@@ -2738,6 +2722,7 @@ class KeyFramesTimeline extends Timeline {
                 this.historySaveEnabler = oldSaveEnabler;
 
                 trackToRemove = trackIdx;
+                toDelete.length = 0;
             }
  
             toDelete.push(frameIdx)
@@ -2920,26 +2905,18 @@ class KeyFramesTimeline extends Timeline {
     }
     
     /**
-     * @param {object} track track of animation clip (object not index)
-     * @param {int} frameIdx frame (index) to select inside the track 
-     * @param {bool} unselectPrev if true, unselects previously selected frames. Otherwise, stacks the new selection
+     * @param {Int} trackIdx track index of animation clip
+     * @param {Int} frameIdx frame (index) to select inside the track 
+     * @param {Boolean} skipCallback
      * @returns 
      */
-    selectKeyFrame( track, frameIdx, unselectPrev = true ) {        
-        if( !track || track.locked || !track.active )
-            return false;
+    selectKeyFrame( trackIdx, frameIdx, skipCallback = false ) {        
+        const track = this.animationClip.tracks[trackIdx];
+        if( track.locked || !track.active || track.selected[frameIdx] )
+            return null;
 
-        if ( unselectPrev ){
-            this.unSelectAllKeyFrames();
-        }
-
-        if ( track.selected[frameIdx] ){
-            return false;
-        }
-
-        const trackIdx = track.trackIdx;
         // [track idx, keyframe, keyframe time]
-        let selection = [track.trackIdx, frameIdx, track.times[frameIdx]];
+        const selection = [track.trackIdx, frameIdx, track.times[frameIdx]];
 
         // sort lastkeyframeselected ascending order (track and frame)
         let i = 0;
@@ -2952,19 +2929,20 @@ class KeyFramesTimeline extends Timeline {
         this.lastKeyFramesSelected.splice( i, 0, selection );
         track.selected[frameIdx] = true;
 
+        if( this.onSelectKeyFrame && !skipCallback){
+            this.onSelectKeyFrame(selection);
+        }
+
         return selection;
     }
 
-    unSelectKeyFrame( track, frameIdx ){
-        if( !track || track.locked || !track.active )
+    unSelectKeyFrame( trackIdx, frameIdx ){
+        const track = this.animationClip.tracks[trackIdx];
+        if( track.locked || !track.active || !track.selected[frameIdx] )
             return false;
         
-        if ( !track.selected[frameIdx] ){
-            return false;
-        }
         track.selected[frameIdx] = false;
         
-        const trackIdx = track.trackIdx;
         for( let i = 0; i < this.lastKeyFramesSelected.length; ++i ){
             const sk = this.lastKeyFramesSelected[i];
             if ( sk[0] === trackIdx && sk[1] === frameIdx ){
@@ -2980,31 +2958,28 @@ class KeyFramesTimeline extends Timeline {
         return this.lastKeyFramesSelected.length;
     }
 
-    processCurrentKeyFrame( e, keyFrameIndex, track, localX, multiple ) {
+    /**
+     * helper function to process a selection with multiple keyframes. Sets the time of the timeline to the first selected keyframe
+     * @param {Number} trackIdx 
+     * @param {Number} keyFrameIndex 
+     * @param {Boolean} multipleSelection whether to append to selection or reset it and make this keyframe the only current selection 
+     * @returns 
+     */
+    processSelectionKeyFrame( trackIdx, keyFrameIndex, multipleSelection = false ) {
 
-        track = this.animationClip.tracks[ track.trackIdx ];
+        const track = this.animationClip.tracks[ trackIdx ];
         if(track.locked)
             return;
 
-        e.multipleSelection = multiple;
-        if(!multiple && e.button != 2) {
+        if(!multipleSelection) {
             this.unSelectAllKeyFrames();
         }
 
-        keyFrameIndex = keyFrameIndex ?? this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * 5 );   
-        if(keyFrameIndex < 0)
-            return;
-        
-        const currentSelection = this.selectKeyFrame(track, keyFrameIndex, !multiple); // changes time 
+        this.selectKeyFrame(trackIdx, keyFrameIndex);
 
-        if( !multiple ) {
+        if( !multipleSelection ) {
             this.setTime(track.times[ keyFrameIndex ]);
-        }  
-        if( this.onSelectKeyFrame && this.onSelectKeyFrame(e, currentSelection)) {
-            // Event handled
-            return;
-        }        
-          
+        }          
     }
 
     /**

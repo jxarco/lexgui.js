@@ -125,16 +125,17 @@
         ];
     MAKE_CODE_BULLET_LIST( [
         [".root", "LX.Area", `${INLINE_CODE("Read-Only")} Container where the whole timeline is created`],
-        [".uniqueID", "String", `${INLINE_CODE("Read-Write")}.`],  
-        [".timelineTitle", "String", `${INLINE_CODE("Read-Write")}. Use ${INLINE_CODE("updateHeader")} after modifying it to update the interface`],
+        [".uniqueID", "String", `${INLINE_CODE("Read-Only")}.`],  
+        [".timelineTitle", "String", `Use ${INLINE_CODE("updateHeader")} after modifying it to update the interface`],
         [".animationClip", "Object", `${INLINE_CODE("Read-Only")} Contains all the information of an animation. Setting an animationClip must be done through ${INLINE_CODE("setAnimationClip")}. Check each class for full details`],
         baseAnimationClipOptions,
         [".playing", "Boolean", `${INLINE_CODE("Read-Only")}. Use ${INLINE_CODE("setState")} to modify its value`],  
         [".loop", "Boolean", `${INLINE_CODE("Read-Only")}. Whether the loop button is set or not.`],
         [".duration", "Number", `${INLINE_CODE("Read-Only")}. Use ${INLINE_CODE("setDuration")} to modify its value`],  
         [".currentTime", "Number", `${INLINE_CODE("Read-Only")}. Use ${INLINE_CODE("setTime")} to modify its value`],  
-        [".historyMaxSteps", "Int", `${INLINE_CODE("Read-Write")}. Sets the maximum number of states for the history (undo & redo).`],  
-        [".trackHeight", "Number", `${INLINE_CODE("Read-Only")}. Size of the tracks drawn.`],        
+        [".historyMaxSteps", "Int", `Sets the maximum number of states for the history (undo & redo).`],  
+        [".trackHeight", "Number", `${INLINE_CODE("Read-Only")}. Size of the tracks drawn.`],
+        [".optimizeThreshold", "Number", `Used to optimize tracks, if it has an optimization function`]
     ] );
 
     MAKE_HEADER( "Methods", "h2", "" );
@@ -143,7 +144,7 @@
     MAKE_CLASS_METHOD( ".updateLeftPanel", "Update part of the interface. If track ids are changed, this function needs to be called.", [], "" );
     MAKE_CLASS_METHOD( ".draw", "Renders the canvas.", [], "" );
 
-    MAKE_CLASS_METHOD( ".setAnimationClip", `Process and format the animation tracks and set it as the animationClip. If already a proper animationClip, set ${INLINE_CODE("needsToProcess")} attribute to ${INLINE_CODE("false")}`, [
+    MAKE_CLASS_METHOD( ".setAnimationClip", `Process and format the animation (and its tracks) and set it as the animationClip. If null, a new empty animation is generated. If already a proper animationClip, set ${INLINE_CODE("needsToProcess")} attribute to ${INLINE_CODE("false")}`, [
         ["animation", "Object"],
         ["needsToProcess", "Boolean"]
     ], "AnimationClip" );
@@ -195,7 +196,9 @@
     MAKE_CLASS_METHOD( ".show", `Make html visible`, [] );
     MAKE_CLASS_METHOD( ".hide", `Make html hidden`, [] );
 
-    MAKE_CLASS_METHOD( ".processKeys", `Processes keyboard events such as copy and paste functionalities. This function can be reimplemented if desired`, [] );
+    MAKE_CLASS_METHOD( ".processKeys", `Processes keyboard ${INLINE_CODE("keydown")} events such as copy and paste functionalities. This function can be reimplemented if desired`, [
+        ["keydownEvent", "KeyboardEvent"]
+    ] );
 
     MAKE_HEADER( "Controls", "h2", "" );
     let baseControls = [
@@ -206,20 +209,19 @@
         ],
         ["Mouse right click", "Opens contextual menu"],
         ["Shift + Wheel", "Zoom in/out"],
-        ["Ctrl + C", "Copy selected elements. Defined in processKeys"],
-        ["Ctrl + V", "Paste selected elements. Defined in processKeys"],
-        ["Ctrl + Z", "Undo. Defined in processKeys"],
-        ["Ctrl + Y", "Redo. Defined in processKeys"],
-        ["Space", "Changes timeline state. Defined in processKeys"],
-        ["Delete", "Delete selected elements. Defined in processKeys"],
-        ["Backspace", "Delete selected elements. Defined in processKeys"],
+        ["Ctrl + C", "Copy selected elements"],
+        ["Ctrl + V", "Paste selected elements"],
+        ["Space", "Changes timeline state"],
+        ["Delete", "Delete selected elements"],
+        ["Backspace", "Delete selected elements"],
     ];
+    MAKE_PARAGRAPH(`Default keyboard controls can be changed by reimplementing ${INLINE_CODE("processKeys")}`);
     MAKE_CODE_BULLET_LIST( baseControls );
 
     MAKE_HEADER( "Keyframes Timeline", "h1", "keyframes-timeline" );
 
     {
-        const keyframestimeline = new KeyFramesTimeline( "Keyframes", { title: "Keyframes Timeline" } );
+        const keyframestimeline = new KeyFramesTimeline( "KeyframesId", { title: "Keyframes Timeline" } );
         const content = document.getElementById( 'content' );
         const area = new LX.Area( { skipAppend: true, height: "350px" } );
         area.attach(keyframestimeline);
@@ -247,6 +249,40 @@
             trackInfo.id = "Track " + keyframestimeline.animationClip.tracks.length + " " + trackInfo.dim + "D";
         }
 
+        keyframestimeline.processKeys = function(e){
+            if( e.type != 'keydown' ){
+                return;
+            }
+            switch(e.key) {
+                case 'Delete': case 'Backspace':
+                    this.deleteSelectedContent();
+                    break;
+                case 'c': case 'C':
+                    if(e.ctrlKey)
+                        this.copySelectedContent();
+                    break;
+                case 'v': case 'V':
+                    if(e.ctrlKey)
+                        this.pasteContent();
+                    break;
+                case 'z': case 'Z':
+                    if(e.ctrlKey)
+                        this.undo();
+                    break;
+                case 'y': case 'Y':
+                    if(e.ctrlKey)
+                        this.redo();
+                    break;
+                case ' ':
+                    this.changeState();
+                    break; 
+
+                case "Shift":
+                    this.canvas.style.cursor = "crosshair";
+                    break;
+            }
+        }
+
         function render(){
             requestAnimationFrame( render );
             keyframestimeline.draw();
@@ -254,7 +290,7 @@
 
         render();
     }
-    MAKE_CODE( `@let@ kfTimeline = @new@ LX.@[typ]KeyframesTimeline@(@"Timeline name"@ );
+    MAKE_CODE( `@let@ kfTimeline = @new@ LX.@[typ]KeyframesTimeline@(@"KeyTimelineUniqueID"@, @{title: @"Keyframes Timeline"});
 panel.attach(kfTimeline.root);` );
 
    
@@ -318,10 +354,8 @@ panel.attach(kfTimeline.root);` );
     ] );
 
     MAKE_CLASS_METHOD( "onSelectKeyFrame", `Triggered after selecting a keyframe.`, [
-        ["event", "Mouse Event"],
         ["currentSelection", "[trackIdx, keyframeIdx, time of keyframe]"],
     ] );
-
     
     MAKE_CLASS_METHOD( "onUnselectKeyFrames", `Triggered before unselecting all keyframes.`, [
         ["selectedKeyframes", "Array of [trackIdx, keyframeIdx, timestamp of keyframe]"],
@@ -348,6 +382,95 @@ panel.attach(kfTimeline.root);` );
 
     MAKE_HEADER( "Methods", "h2", "" );
     MAKE_PARAGRAPH("TODO");
+
+    MAKE_CLASS_METHOD( ".setTracksGroup", "Group tracks. A track can only be in one group.", [
+        ["groupId", "String"],
+        ["trackIndices", "Array Number"],
+    ], "" );
+    MAKE_CLASS_METHOD( ".getTracksGroup", "Returns an array of object, each being a track of the group.", [
+        ["groupId", "String"],
+    ], "Array Tracks" );
+
+    MAKE_CLASS_METHOD( ".optimizeTrack", `Removes similar keyframes of a track, given the ${INLINE_CODE("optimizeThreshold")} attribute. If ${INLINE_CODE("onlyEqualTime")} is set, only keyframes with the same time will be removed, keepin the first occurrence`, [
+        ["trackIdx", "Number"],
+        ["onlyEqualTime", "Boolean"],
+        ["skipCallback", "Boolean"],
+    ], "" );
+    MAKE_CLASS_METHOD( ".optimizeTracks", `Removes similar keyframes of all track, given the ${INLINE_CODE("optimizeThreshold")} attribute. If ${INLINE_CODE("onlyEqualTime")} is set, only keyframes with the same time will be removed, keepin the first occurrence`, [
+        ["onlyEqualTime", "Boolean"],
+    ], "" );
+
+    
+    MAKE_CLASS_METHOD( ".saveState", `Saves the current state of the track into the history.`, [
+        ["trackIdx", "Number"],
+        ["combineWithPrevious", "Boolean"],
+    ], "" );
+    MAKE_CLASS_METHOD( ".undo", `Pops the stack of the undo history and sets it as current. Stores the previous state into the redo history.`, [
+    ], "" );
+    MAKE_CLASS_METHOD( ".redo", `Pops the stack of the redo history and sets it as current. Stores the previous state into the undo history.`, [
+    ], "" );
+
+    
+    MAKE_CLASS_METHOD( ".copySelectedContent", `Copies the lastKeyFramesSelected elements into clipboard.`, [
+    ], "" );
+    MAKE_CLASS_METHOD( ".pasteContent", `Paste copied keyframes into the tracks, positioned at ${INLINE_CODE("time")}.`, [
+        ["time", "Number"]
+    ], "" );
+    MAKE_CLASS_METHOD( ".deleteSelectedContent", `Delete selected keyframes into the tracks, positioned at ${INLINE_CODE("time")}.`, [
+    ], "" );
+    MAKE_CLASS_METHOD( ".clearTrack", `Delete all keyframes from a track.`, [
+        ["trackIdx", "Number"]
+    ], "" );
+
+    MAKE_CLASS_METHOD( ".deleteKeyframes", `Delete keyframes of a track.`, [
+        ["trackIdx", "Number"],
+        ["frameIndices", "Array of Number"],
+    ], "" );
+
+    MAKE_CLASS_METHOD( ".addKeyFrames", `Add keyframes to a track. If flags is set to ${INLINE_CODE("Timeline.ADDKEY_VALUESINARRAYS")} (0x01), values must be an array of arrays, each containing the values of a single frame. Otherwise, it must be a flat array.`, [
+        ["trackIdx", "Number"],
+        ["newValues", "Array of Number"],
+        ["newTimes", "Array of Number"],
+        ["timeOffset", "Number"],
+        ["flags", "Number"],
+    ], "" );
+
+    MAKE_CLASS_METHOD( ".getNearestKeyFrame", `Returns the index of the frame or -1. Modes { -1: nearest frame with t[f] <= time, 0: nearest frame, 1: nearest frame with t[f] >= time }.`, [
+        ["track", "obj"],
+        ["time", "Number"],
+        ["mode", "Number"],
+    ], "Number" );
+        
+    MAKE_CLASS_METHOD( ".processSelectionKeyFrame", `Helper function to select a keyframe and set the timeline time to that keyframe (only if ${INLINE_CODE("multipleSelection")} is ${INLINE_CODE("false")} ). If ${INLINE_CODE("multipleSelection")} is ${INLINE_CODE("true")}, previous selected keyframes are kept selected.`, [
+        ["trackIdx", "Number"],
+        ["frameIdx", "Number"],
+        ["multipleSelection", "Boolean"],
+    ], "[trackIdx, frameIdx, frameTime]" );
+
+    MAKE_CLASS_METHOD( ".selectKeyFrame", `Selects a keyframe, adding it to the currently selected keyframes.`, [
+        ["trackIdx", "Number"],
+        ["frameIdx", "Number"],
+        ["skipCallback", "Boolean"],
+    ], "[trackIdx, frameIdx, frameTime]" );
+
+    MAKE_CLASS_METHOD( ".unSelectKeyFrame", `Unselects a keyframe.`, [
+        ["trackIdx", "Number"],
+        ["frameIdx", "Number"],
+    ], "Boolean" );
+            
+    MAKE_CLASS_METHOD( ".unSelectKeyFrame", `Unselects a keyframe.`, [
+        ["trackIdx", "Number"],
+        ["frameIdx", "Number"],
+    ], "Boolean" );
+    MAKE_CLASS_METHOD( ".unSelectAllKeyFrames", `Unselects all keyframes.`, [
+    ], "" );
+
+    MAKE_CLASS_METHOD( ".unHoverAll", `Unhover current keyframes.`, [
+    ], "" );
+
+
+
+
     MAKE_CLASS_METHOD( ".getCurrentKeyFrame", "Get the nearest keyframe to _time_ given a maximum threshold.", [
         ["track", "Object"],
         ["time", "Number"],
@@ -355,15 +478,16 @@ panel.attach(kfTimeline.root);` );
     ], "Number" );
 
     MAKE_HEADER("Controls", "h2", "" );
+    MAKE_PARAGRAPH(`Default keyboard controls can be changed by reimplementing ${INLINE_CODE("processKeys")}`);
     MAKE_CODE_BULLET_LIST( baseControls.concat([
         ["ctrlKey + horizontal drag", "move selected keyframes (if any)"],
         ["altKey + vertical drag", `change value of selected keyframes. Only applicable to tracks with dim = 1 and their ${INLINE_CODE("curves")} attribute set to ${INLINE_CODE("true")}`],
     ]));
 
         
-    MAKE_HEADER( "Clips timeline", "h2", "clips-timeline" );
+    MAKE_HEADER( "Clips timeline", "h1", "clips-timeline" );
     {
-        const clipstimeline = new ClipsTimeline( "Clips Timeline" );
+        const clipstimeline = new ClipsTimeline( "ClipsId", { title: "Clips Timeline" } );
         const content = document.getElementById( 'content' );
         const area = new LX.Area( { skipAppend: true, height: "350px" } );
         area.attach(clipstimeline);
@@ -382,9 +506,44 @@ panel.attach(kfTimeline.root);` );
         }
         clipstimeline.setAnimationClip(animation, true);
 
-        clipsTimeline.onAddNewTrack = function( trackInfo ){
-            trackInfo.id = "Track_" + (this.animationClip.tracks.length-1);
+        clipstimeline.onAddNewTrack = function( trackInfo ){
+            trackInfo.id = "Track " + (this.animationClip.tracks.length-1);
         }
+
+        clipstimeline.processKeys = function(e){
+            if( e.type != 'keydown' ){
+                return;
+            }
+            switch(e.key) {
+                case 'Delete': case 'Backspace':
+                    this.deleteSelectedContent();
+                    break;
+                case 'c': case 'C':
+                    if(e.ctrlKey)
+                        this.copySelectedContent();
+                    break;
+                case 'v': case 'V':
+                    if(e.ctrlKey)
+                        this.pasteContent();
+                    break;
+                case 'z': case 'Z':
+                    if(e.ctrlKey)
+                        this.undo();
+                    break;
+                case 'y': case 'Y':
+                    if(e.ctrlKey)
+                        this.redo();
+                    break;
+                case ' ':
+                    this.changeState();
+                    break; 
+
+                case "Shift":
+                    this.canvas.style.cursor = "crosshair";
+                    break;
+            }
+        }
+
 
         function render(){
             requestAnimationFrame( render );
@@ -393,6 +552,9 @@ panel.attach(kfTimeline.root);` );
 
         render();
     }
+    MAKE_CODE( `@let@ clipTimeline = @new@ LX.@[typ]ClipsTimeline@(@"ClipsTimelineUniqueID"@, @{title: @"Clips Timeline"});
+panel.attach(clipTimeline.root);` );
+
 
     MAKE_PARAGRAPH( `..TODO` );
 
