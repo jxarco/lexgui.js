@@ -2761,13 +2761,13 @@ class GraphEditor {
         nameDom.innerText = name;
 
         // Change name in sidebar
-        const graphNameKey = this.currentGraph.name.replace( /\s/g, '' ).replaceAll( '.', '' );
-        const sidebarItem = this._sidebar.items.find( v => v.name === graphNameKey );
+        const sidebarItem = this._sidebar.items.find( v => v.name === this.currentGraph.name );
         if( sidebarItem )
         {
-            sidebarItem.name = newNameKey;
+            const oldName = sidebarItem.name;
+            sidebarItem.name = name;
             sidebarItem.dom.id = newNameKey;
-            sidebarItem.dom.innerHTML = sidebarItem.dom.innerHTML.replace( sidebarItem.dom.innerText, name );
+            sidebarItem.dom.innerHTML = sidebarItem.dom.innerHTML.replace( oldName, name );
         }
 
         // Change registered nodes function

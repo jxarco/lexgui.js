@@ -60,6 +60,17 @@
 
     let closedDefault = false;
 
+    const map2Dpoints = [
+        { "name": "angry", "pos": [-0.29348334680286725,-0.8813498603327697] },
+        { "name": "happy", "pos": [0.5728906393051147,-0.2508566975593567] },
+        { "name": "sad", "pos": [-0.542498156289837,0.3795300176749039] },
+        { "name": "calm", "pos": [0.46099435955317536,0.6203009288162395] },
+        { "name": "bored", "pos": [-0.349232931016368,0.8103832270857154] },
+        { "name": "frustrated", "pos": [-0.49046521102390306,-0.5708814736724744] },
+        { "name": "smile", "pos": [0.5762101669277435,0.20211987262339348] },
+        { "name": "upset", "pos": [-0.5796645457655041,-0.1907168771335228] }
+    ];
+
     fillPanels();
 
     // **** **** **** **** **** **** **** **** **** **** **** **** 
@@ -222,6 +233,8 @@
             panelB.addOTP("Custom Pattern", "23423411", null, { pattern: "xxxx-xxxx" });
             panelB.addOTP("Empty", "");
             panelB.addOTP("Disabled OTP", "965114", null, { disabled: true });
+            panelB.branch("Map2D Inputs", { closed: closedDefault });
+            panelB.addMap2D("Map2D", map2Dpoints, null, { size: [ 300, 300 ] });
             panelB.branch("Color Inputs", { closed: closedDefault });
             panelB.addColor("From Hex Color", "#b7a9b1");
             panelB.addColor("From RGB Color", { r: 1, g: 0.1, b: 0.6 });
@@ -338,6 +351,14 @@
             });
         }
 
+        // List
+        {
+            panelC.branch("List", { closed: closedDefault });
+            panelC.addList("Number List", [ 1, 2, 3, 4 ] );
+            panelC.addList("String List", [ 'GPTeam', 'Blat Bunny', 'Blat Panthers' ], 'Blat Panthers');
+            panelC.addList("String List with Icons", [['GPTeam', 'Gpu'], ['Blat Bunny', 'Bone'], ['Blat Panthers', 'PawPrint']], 'Blat Panthers');
+        }
+
         // Table
         {
             panelC.branch("Tables", { closed: closedDefault });
@@ -388,6 +409,14 @@
         {
             panelC.branch("Layers", { closed: closedDefault });
             panelC.addLayers("Layers", 10);
+        }
+
+        // Progress
+        {
+            panelC.branch("Progress", { closed: closedDefault });
+            panelC.addProgress("Default", 0.65, { showValue: true });
+            panelC.addProgress("Custom", 0.1, { min: -1, max: 1, low: -0.25, high: 0.25, optimum: 0.75, showValue: true });
+            panelC.addProgress("Custom Editable", -0.4, { min: -1, max: 1, low: -0.25, high: 0.25, optimum: 0.75, showValue: true, editable: true });
         }
     }
 </script>
