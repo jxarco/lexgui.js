@@ -145,7 +145,7 @@
     MAKE_CLASS_METHOD( ".draw", "Renders the canvas.", [], "" );
 
     MAKE_CLASS_METHOD( ".setAnimationClip", `Process and format the animation (and its tracks) and set it as the animationClip. If null, a new empty animation is generated. If already a proper animationClip, set ${INLINE_CODE("needsToProcess")} attribute to ${INLINE_CODE("false")}`, [
-        ["animation", "Object"],
+        ["animationClip", "Object"],
         ["needsToProcess", "Boolean"]
     ], "AnimationClip" );
     MAKE_CLASS_METHOD( ".addNewTrack", `Add a new track in the timeline using the options received. An empty track is generated if no options are sent. Options are the same attributes as the track. Check class specific tracks. ${INLINE_CODE("skipCallback")} skips ${INLINE_CODE("addNewTrack")}`, [
@@ -290,18 +290,21 @@
 
         render();
     }
-    MAKE_CODE( `@let@ kfTimeline = @new@ LX.@[typ]KeyframesTimeline@(@"KeyTimelineUniqueID"@, @{title: @"Keyframes Timeline"});
+    MAKE_CODE( `@let@ kfTimeline = @new@ LX.@[typ]KeyframesTimeline@(@"KeyTimelineUniqueID"@, @{title:@ @"Keyframes Timeline"@@}@);
 panel.attach(kfTimeline.root);` );
 
    
     MAKE_HEADER( "Keyframes AnimationClip", "h2", "" );
-    MAKE_PARAGRAPH( `Check ${INLINE_CODE("setAnimationClip")} to create a new animationClip.`);
+    MAKE_PARAGRAPH( `New animations should be created and set to the timeline through the ${INLINE_CODE("setAnimationClip")} function, that (optionaly) expects an object with the same attributes as an animationClip (see below). )`);
+    MAKE_PARAGRAPH( `Tracks will also be processed. Missing attributes will be set to default values.`);
     MAKE_CODE_BULLET_LIST( baseAnimationClipOptions.concat([
         [".tracksPerGroup", "Object", "maps groupIds (Strings) to an array of tracks"],
     ]) );
 
     MAKE_HEADER( "Keyframes Tracks", "h2", "" );
-    MAKE_PARAGRAPH( `New Tracks should be added to the animationClip clip through the ${INLINE_CODE("addNewTrack")} function.`);
+    MAKE_PARAGRAPH( `New Tracks should be added to the animationClip clip through the ${INLINE_CODE("addNewTrack")} function, that (optionaly) expects an object of the same attributes as a track (see below).`);
+    MAKE_PARAGRAPH(`All attributes except ${INLINE_CODE("isTrack")} and ${INLINE_CODE("trackIdx")} will be retrieved from the track information sent to the function, if available.`);
+    MAKE_PARAGRAPH(`${INLINE_CODE("id")} and ${INLINE_CODE("name")} attributes will me mapped to the ${INLINE_CODE("id")} of the track (in this order of precedence).`);
     MAKE_CODE_BULLET_LIST( [
         [".isTrack", "Boolean", `${INLINE_CODE("Read-Only")} Identifies it as a track`],
         [".id", "String", `Name of the track. If the track is currently visible, changing its id will require a call to ${INLINE_CODE("updateLeftPanel")}`],
@@ -335,7 +338,7 @@ panel.attach(kfTimeline.root);` );
     MAKE_HEADER( "Properties", "h2", "" );
     MAKE_PARAGRAPH( `Check ${INLINE_CODE("Timeline")} properties`);
     MAKE_CODE_BULLET_LIST( [
-        [".lastKeyFramesSelected", "Array of [trackIdx, keyframeIdx, keyframe time]", `${INLINE_CODE("Read-Only")} the currently selected keyframes across all tracks`],
+        [".lastKeyFramesSelected", "Array of [trackIdx, keyframeIdx, keyframe time]", `${INLINE_CODE("Read-Only")} the currently selected keyframes across all tracks, sorted ascendently`],
         [".keyValuePerPixel", "Number", `Applicable to tracks with dim = 1, amount of normalized value ( [ 0, 1 ] ) to add per pixel moved while holding ${INLINE_CODE("alt")}. Default to 1/${INLINE_CODE("trackHeight")}`],
         [".defaultCurves", "Boolean", `Applicable to tracks with dim = 1, the default way of rendering tracks with dim = 1. If true, it renders them with curves.`],  
         [".defaultCurvesRange", "[Number, Number]", `Applicable to tracks with dim = 1, the default range of values [min, max] that a track holds.`],  
@@ -343,6 +346,7 @@ panel.attach(kfTimeline.root);` );
 
     MAKE_HEADER( "Callbacks", "h2", "" );
     MAKE_PARAGRAPH(`Callbacks can be set directly to the instance of ${INLINE_CODE("KeyFramesTimeline")}`);
+    MAKE_PARAGRAPH(`Check ${INLINE_CODE("Timeline")} for the list of inherited callbacks. If a callback appears on both lists, the  ${INLINE_CODE("KeyFramesTimeline")} takes precedence.`);
     MAKE_CLASS_METHOD( "onAddNewTrack", `Triggered after creating a track through the ${INLINE_CODE("addNewTrack")} function. This callback can be used to change the default id of the track, modify the dimension of the values or to insert some initial values. To include this track into a group, use the ${INLINE_CODE("setTracksGroup")} function`, [
         ["track", "Object"],
     ] );
@@ -361,9 +365,9 @@ panel.attach(kfTimeline.root);` );
         ["selectedKeyframes", "Array of [trackIdx, keyframeIdx, timestamp of keyframe]"],
     ] );
 
-    MAKE_CLASS_METHOD( "onContentMoved", `Triggered after moving keyframes. Calls it for each frame .`, [
+    MAKE_CLASS_METHOD( "onContentMoved", `Triggered after moving keyframes horizontally. Calls it for each frame .`, [
         ["trackIndex", "Number"],
-        ["keyframeIndex", "Number"],
+        ["newKeyframeIndex", "Number"],
     ] );
 
     MAKE_CLASS_METHOD( "onUpdateTrack", `Triggered after changing keyframe values through ${INLINE_CODE("Alt")} in a curves track, pasting values, undoing-redoing and adding keyframes.`, [
@@ -381,7 +385,7 @@ panel.attach(kfTimeline.root);` );
 
 
     MAKE_HEADER( "Methods", "h2", "" );
-    MAKE_PARAGRAPH("TODO");
+    MAKE_PARAGRAPH(`Check ${INLINE_CODE("Timeline")} for the list of inherited methods. If a method appears on both lists, the ${INLINE_CODE("KeyFramesTimeline")} takes precedence.`);
 
     MAKE_CLASS_METHOD( ".setTracksGroup", "Group tracks. A track can only be in one group.", [
         ["groupId", "String"],
@@ -416,7 +420,8 @@ panel.attach(kfTimeline.root);` );
     MAKE_CLASS_METHOD( ".pasteContent", `Paste copied keyframes into the tracks, positioned at ${INLINE_CODE("time")}.`, [
         ["time", "Number"]
     ], "" );
-    MAKE_CLASS_METHOD( ".deleteSelectedContent", `Delete selected keyframes into the tracks, positioned at ${INLINE_CODE("time")}.`, [
+    MAKE_CLASS_METHOD( ".deleteSelectedContent", `Delete selected keyframes from the tracks.`, [
+        ["skipCallback", "Boolean"]
     ], "" );
     MAKE_CLASS_METHOD( ".clearTrack", `Delete all keyframes from a track.`, [
         ["trackIdx", "Number"]
@@ -425,6 +430,8 @@ panel.attach(kfTimeline.root);` );
     MAKE_CLASS_METHOD( ".deleteKeyframes", `Delete keyframes of a track.`, [
         ["trackIdx", "Number"],
         ["frameIndices", "Array of Number"],
+        ["skipCallback", "Boolean"]
+
     ], "" );
 
     MAKE_CLASS_METHOD( ".addKeyFrames", `Add keyframes to a track. If flags is set to ${INLINE_CODE("Timeline.ADDKEY_VALUESINARRAYS")} (0x01), values must be an array of arrays, each containing the values of a single frame. Otherwise, it must be a flat array.`, [
@@ -452,12 +459,7 @@ panel.attach(kfTimeline.root);` );
         ["frameIdx", "Number"],
         ["skipCallback", "Boolean"],
     ], "[trackIdx, frameIdx, frameTime]" );
-
-    MAKE_CLASS_METHOD( ".unSelectKeyFrame", `Unselects a keyframe.`, [
-        ["trackIdx", "Number"],
-        ["frameIdx", "Number"],
-    ], "Boolean" );
-            
+           
     MAKE_CLASS_METHOD( ".unSelectKeyFrame", `Unselects a keyframe.`, [
         ["trackIdx", "Number"],
         ["frameIdx", "Number"],
@@ -467,9 +469,6 @@ panel.attach(kfTimeline.root);` );
 
     MAKE_CLASS_METHOD( ".unHoverAll", `Unhover current keyframes.`, [
     ], "" );
-
-
-
 
     MAKE_CLASS_METHOD( ".getCurrentKeyFrame", "Get the nearest keyframe to _time_ given a maximum threshold.", [
         ["track", "Object"],
@@ -552,11 +551,159 @@ panel.attach(kfTimeline.root);` );
 
         render();
     }
-    MAKE_CODE( `@let@ clipTimeline = @new@ LX.@[typ]ClipsTimeline@(@"ClipsTimelineUniqueID"@, @{title: @"Clips Timeline"});
+    MAKE_CODE( `@let@ clipTimeline = @new@ LX.@[typ]ClipsTimeline@(@"ClipsTimelineUniqueID"@, @{title:@ @"Clips Timeline"@@}@);
 panel.attach(clipTimeline.root);` );
 
+    MAKE_HEADER( "ClipStimeline AnimationClip", "h2", "" );
+    MAKE_PARAGRAPH( `New animations should be created and set to the timeline through the ${INLINE_CODE("setAnimationClip")} function, that (optionaly) expects an object with the same attributes as an animationClip (see below). )`);
+    MAKE_PARAGRAPH( `Tracks will also be processed. Missing attributes will be set to default values.`);
+    MAKE_CODE_BULLET_LIST( baseAnimationClipOptions );
 
-    MAKE_PARAGRAPH( `..TODO` );
+    MAKE_HEADER( "Clip Tracks", "h2", "" );
+    MAKE_PARAGRAPH( `New Tracks should be added to the animationClip clip through the ${INLINE_CODE("addNewTrack")} function, that (optionaly) expects an object with the same attributes as a track (see below).`);
+    MAKE_PARAGRAPH(`All attributes except ${INLINE_CODE("isTrack")} and ${INLINE_CODE("trackIdx")} will be retrieved from the track information sent to the function. Missing attributes will be set to default values.`);
+    MAKE_PARAGRAPH(`${INLINE_CODE("id")} and ${INLINE_CODE("name")} attributes will me mapped to the ${INLINE_CODE("id")} of the track (in this order of precedence).`);
+    MAKE_CODE_BULLET_LIST( [
+        [".isTrack", "Boolean", `${INLINE_CODE("Read-Only")} Identifies it as a track`],
+        [".id", "String", `Name of the track. If the track is currently visible, changing its id will require a call to ${INLINE_CODE("updateLeftPanel")}`],
+        [".active", "Boolean", `${INLINE_CODE("Read-Only")} Whether it is disabled or not. Use ${INLINE_CODE("setTrackState")} to modify it.`],
+        [".locked", "Boolean", `Whether its elements can be modified or not.`],
+        [".isSelected", "Boolean", `${INLINE_CODE("Read-Only")} Whether to paint the track background blue, flagging it as selected.`],
+        [".trackIdx", "Number", `${INLINE_CODE("Read-Only")} Position of the track in the animationClip's tracks array.`],
+
+        [".clips", "Array Number", `Array with clips that will be attached to the track. Clip attributes can be modified. Clips must be sortes ascendently by its timing properties ${INLINE_CODE("start")} and ${INLINE_CODE("duration")} and must not overlap.`],
+        [".edited", "Array Boolean", `Array of size = number-of-clips, containing a flag to indicate whether the clip has been modified. Its values can be safely modified.`],
+        [".selected", "Array Boolean", `${INLINE_CODE("Read-Only")} Array of size number-of-clips, containing a flag to indicate whether the clip is currently selected. Modifying it might not update the underlying selection system.`],
+        [".hovered", "Array Boolean", `${INLINE_CODE("Read-Only")} Array of size number-of-clips, containing a flag to indicate whether the clip is currently hovered by the mouse. Modifying it might not update the underlying hovering system.`],
+
+        [".data", "", "user defined data"]
+    ] );
+
+    MAKE_HEADER( "Clip Structure", "h2", "" );
+    MAKE_PARAGRAPH( `Clips (not to be confused with AnimationClip) are the objects that will appear in the tracks, which might contain, the following properties:`);
+    MAKE_CODE_BULLET_LIST( [
+        [".id", "String", `Will be used to display a name over the clip. Can be empty`],
+        [".start", "Number", `${INLINE_CODE("Mandatory")} Time on which the clip starts.`],
+        [".duration", "Number", `${INLINE_CODE("Mandatory")} Duration of the clip. The end time will be computed as start + duration.`],
+        [".fadein", "Number", `If defined, sets the time at which the fadein ends. Must be in global, not relative to start`],
+        [".fadeout", "Number", `If defined, sets the time at which the fadeout starts. Must be in global, not relative to start`],
+        [".clipColor", "Color", `Defines the color of the clip. Must be a value accepted by ${INLINE_CODE("CanvasRenderingContext2D.fillStyle")}.`],
+        [".fadeColor", "Color", `Color of the areas defined by the fade attributes. Must be a value accepted by ${INLINE_CODE("CanvasRenderingContext2D.fillStyle")}.`],
+    ] );
+
+    MAKE_PARAGRAPH( `Clips can contain any other attributes and will be accessible at all times.`);
+    MAKE_PARAGRAPH( `The ${INLINE_CODE("cloneClips")} should be implemented by the user so the system knows how to properly duplicate clips.`);
+    
+    MAKE_HEADER( "Constructor", "h2", "" );
+    MAKE_CLASS_CONSTRUCTOR( "ClipsTimeline", [
+        ["id", "String", "Unique string that identifies this element"],
+        ["options", "Object"]
+    ] );
+
+    MAKE_HEADER( "Properties", "h2", "" );
+    MAKE_PARAGRAPH( `Check ${INLINE_CODE("Timeline")} properties`);
+    MAKE_CODE_BULLET_LIST( [
+        [".lastClipsSelected", "Array of [trackIdx, clipIdx]", `${INLINE_CODE("Read-Only")} The currently selected clips across all tracks, sorted ascendently`],
+    ] );
+
+    MAKE_HEADER( "Callbacks", "h2", "" );
+    MAKE_PARAGRAPH(`Callbacks can be set directly to the instance of ${INLINE_CODE("ClipsTimeline")}`);
+    MAKE_PARAGRAPH(`Check ${INLINE_CODE("Timeline")} for the list of inherited callbacks. If a callback appears on both lists, the  ${INLINE_CODE("ClipsTimeline")} takes precedence.`);
+
+    MAKE_CLASS_METHOD( "onUpdateTrack", `Triggered after adding clips, pasting clips and undoing-redoing.`, [
+        ["tracks", "Array of Number"],
+    ] );
+    
+    MAKE_CLASS_METHOD( "onContentMoved", `Triggered after moving clips horizontally or moving the fadein, fadeout and duration sliders. Calls it for each clip .`, [
+        ["clip", "Object"],
+        ["deltaTime", "Number"],
+    ] );
+
+    MAKE_CLASS_METHOD( "onSelectClip", `Triggered after selecting a clip. If all clips are selected, it returns null.`, [
+        ["clip", "Object"],
+    ] );
+    MAKE_CLASS_METHOD( "onDeleteClip", `Triggered after deleting a clip.`, [
+        ["trackIdx", "Number"],
+        ["clipIdx", "Number"],
+        ["clip", "Object"],
+    ] );
+
+    MAKE_CLASS_METHOD( "onDeleteSelectedClips", `Triggered after deleting the selected content.`, [
+        ["selectedContent", "Array of [trackIdx, clipIdx, clip Object]"],
+    ] );
+
+
+    MAKE_HEADER( "Methods", "h2", "" );
+    MAKE_PARAGRAPH(`Check ${INLINE_CODE("Timeline")} for the list of inherited methods. If a method appears on both lists, the ${INLINE_CODE("ClipsTimeline")} takes precedence.`);
+
+    MAKE_CLASS_METHOD( ".cloneClips", `Deep clone of a clip. Used to copy and paste clips. The default implementation uses ${INLINE_CODE("JSON.parse(JSON.stringify( ))")}.  ${INLINE_CODE("timeOffset")} adds/subtracts a delta time to all duplicated clips`, [
+        ["clipsToClone", "Array of Objects"],
+        ["timeOffset", "Number"],
+    ], "Array of Objects" );
+
+    MAKE_CLASS_METHOD( ".getClipOnTime", `Search clip in track that is on the specified time. Returns -1 if no clip overlaps with the timestamp`, [
+        ["track", "Object"],
+        ["time", "Number"],
+        ["threshold", "Number"],
+    ], "Number" );
+
+    MAKE_CLASS_METHOD( ".saveState", `Saves the current state of the track into the history.`, [
+        ["trackIdx", "Number"],
+        ["combineWithPrevious", "Boolean"],
+    ], "" );
+    MAKE_CLASS_METHOD( ".undo", `Pops the stack of the undo history and sets it as current. Stores the previous state into the redo history.`, [
+    ], "" );
+    MAKE_CLASS_METHOD( ".redo", `Pops the stack of the redo history and sets it as current. Stores the previous state into the undo history.`, [
+    ], "" );
+
+    MAKE_CLASS_METHOD( ".copySelectedContent", `Copies (clones) the lastSelectedClip elements into clipboard.`, [
+    ], "" );
+    MAKE_CLASS_METHOD( ".pasteContent", `Paste copied clips into the tracks, positioned at ${INLINE_CODE("time")}.`, [
+        ["time", "Number"]
+    ], "" );
+    MAKE_CLASS_METHOD( ".deleteSelectedContent", `Delete selected clips from the tracks.`, [
+        ["skipCallback", "Boolean"]
+    ], "" );
+    MAKE_CLASS_METHOD( ".clearTrack", `Delete all clips from a track.`, [
+        ["trackIdx", "Number"]
+    ], "" );
+
+    MAKE_CLASS_METHOD( ".deleteClip", `Delete selected clips from the tracks.`, [
+        ["trackIdx", "Number"],
+        ["clipIdx", "Number"],
+        ["skipCallback", "Boolean"]
+    ], "" );
+
+    MAKE_CLASS_METHOD( ".selectClip", `Selected a clip of the track. If ${INLINE_CODE("unselect")} is true, it unselects all selected clips, and makes this the only one selected`, [
+        ["trackIdx", "Number"],
+        ["clipIdx", "Number"],
+        ["unselect", "Boolean"],
+        ["skipCallback", "Boolean"]
+    ], "Number" );
+
+    MAKE_CLASS_METHOD( ".selectAll", `Unselect all selected clips.`, [
+        ["skipCallback", "Boolean"]
+    ], "" );
+
+    MAKE_CLASS_METHOD( ".unSelectClip", `Unselect a clip of the track.`, [
+        ["trackIdx", "Number"],
+        ["clipIdx", "Number"],
+    ], "Number" );
+
+    MAKE_CLASS_METHOD( ".unSelectAllClips", `Unselect all selected clips.`, [
+    ], "" );
+
+    MAKE_CLASS_METHOD( ".unHoverAll", `Unhover current clips.`, [
+    ], "" );
+
+
+    MAKE_HEADER("Controls", "h2", "" );
+    MAKE_PARAGRAPH(`Default keyboard controls can be changed by reimplementing ${INLINE_CODE("processKeys")}`);
+    MAKE_CODE_BULLET_LIST( baseControls.concat([
+        ["ctrlKey + horizontal drag", "move selected clips (if any) horizontally"],
+        ["ctrlKey + vertical drag", "move selected clips (if any) vertical. It automatically creates new tracks when reaching the bottom"],
+    ]));
+
 
     MAKE_LINE_BREAK();
     MAKE_LINE_BREAK();

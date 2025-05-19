@@ -2697,7 +2697,7 @@ class KeyFramesTimeline extends Timeline {
             this.onUpdateTrack( [trackIdx] );
     }
 
-    deleteSelectedContent() {
+    deleteSelectedContent(skipCallback = false) {
         
         //*********** WARNING: RELIES ON SORTED lastKeyFramesSelected ***********
             
@@ -2718,7 +2718,7 @@ class KeyFramesTimeline extends Timeline {
                 this.saveState(trackToRemove, trackToRemove != firstTrack);
 
                 this.historySaveEnabler = false;
-                this.deleteKeyFrames( trackToRemove, toDelete );
+                this.deleteKeyFrames( trackToRemove, toDelete, skipCallback );
                 this.historySaveEnabler = oldSaveEnabler;
 
                 trackToRemove = trackIdx;
@@ -2730,14 +2730,14 @@ class KeyFramesTimeline extends Timeline {
 
         this.saveState(trackToRemove, trackToRemove != firstTrack);
         this.historySaveEnabler = false;
-        this.deleteKeyFrames( trackToRemove, toDelete );
+        this.deleteKeyFrames( trackToRemove, toDelete, skipCallback );
         this.historySaveEnabler = oldSaveEnabler;
  
         this.lastKeyFramesSelected = [];
     }
 
     // for typed arrays. Does not update lastSelectedKeyframes
-    deleteKeyFrames( trackIdx, indices ){
+    deleteKeyFrames( trackIdx, indices, skipCallback = false ){
         const track = this.animationClip.tracks[trackIdx];
 
         if ( !indices.length ){ 
@@ -2773,7 +2773,7 @@ class KeyFramesTimeline extends Timeline {
         track.values = newValues;
 
         // Update animation action interpolation info
-        if(this.onDeleteKeyFrames)
+        if(this.onDeleteKeyFrames && !skipCallback)
             this.onDeleteKeyFrames( trackIdx, indices );
 
         
@@ -3150,11 +3150,11 @@ class ClipsTimeline extends Timeline {
             // Manual Multiple selection
             if(!discard) {
                 if ( track ){
-                    let clipIndex = this.getCurrentClip( track, this.xToTime( localX ), this.secondsPerPixel * 5 );
+                    let clipIndex = this.getClipOnTime( track, this.xToTime( localX ), this.secondsPerPixel * 5 );
                     if ( clipIndex > -1 ){
                         track.selected[clipIndex] ? 
-                            this.unselectClip( track, clipIndex, null ) :
-                            this.selectClip( track, clipIndex, null, false );
+                            this.unselectClip( track.trackIdx, clipIndex ) :
+                            this.selectClip( track.trackIdx, clipIndex, false );
                     }
                 }
             }
@@ -3171,7 +3171,7 @@ class ClipsTimeline extends Timeline {
                         
                     if(clipsIndices) {
                         for(let index of clipsIndices)
-                            this.selectClip( t, index, null, false );
+                            this.selectClip( t.trackIdx, index, false );
                     }
                 }
             }
@@ -3186,7 +3186,8 @@ class ClipsTimeline extends Timeline {
             // Check exact track clip
             if(!discard && track) {
                 if(e.button!=2){
-                    this.selectClip( track, null, localX );
+                    const clipIdx = this.getClipOnTime(track, this.xToTime(localX), 0.001);
+                    this.selectClip( track.trackIdx, clipIdx );
                 }
             } 
             
@@ -3235,16 +3236,18 @@ class ClipsTimeline extends Timeline {
 
             this.movingKeys = true;
         }
-        else if( !track || track && this.getCurrentClip(track, time, 0.001) == -1) { // clicked on empty space
+        else if( !track || track && this.getClipOnTime(track, time, 0.001) == -1) { // clicked on empty space
             this.unSelectAllClips();
             if(this.onSelectClip)
                 this.onSelectClip(null);
         }
         else if (track && (this.dragClipMode == "duration" || this.dragClipMode == "fadein" || this.dragClipMode == "fadeout" )) { // clicked while mouse was over fadeIn, fadeOut, duration
-            this.selectClip( track, null, localX ); // select current clip if any (unselect others)
+            const clipIdx = this.getClipOnTime(track, this.xToTime(localX), 0.001);
+            this.selectClip( track.trackIdx, clipIdx ); // select current clip if any (unselect others)
             if ( this.lastClipsSelected.length ){ 
                 this.saveState(track.trackIdx);
             }
+            this.movingKeys = true;
         }
     }
 
@@ -3262,7 +3265,6 @@ class ClipsTimeline extends Timeline {
             if ( time < 0 && delta > 0 ){ delta = 0; }
            
             if ( this.dragClipMode != "move" && this.lastClipsSelected.length == 1 ){ // change fade and duration of clips
-                this.movingKeys = true;
 
                 const track = this.animationClip.tracks[this.lastClipsSelected[0][0]]; 
                 let clip = track.clips[this.lastClipsSelected[0][1]];
@@ -3294,8 +3296,6 @@ class ClipsTimeline extends Timeline {
             } 
             else if ( this.dragClipMode == "move" && this.lastClipsSelected.length ) { // move clips
                 //*********** WARNING: RELIES ON SORTED lastClipsSelected ***********
-
-                this.movingKeys = true;
 
                 const treeOffset = this.lastTrackTreesWidgetOffset;
                 let newTrackClipsMove = Math.floor( (e.localY - treeOffset) / this.trackHeight );
@@ -3551,10 +3551,11 @@ class ClipsTimeline extends Timeline {
 
     onDblClick( e ) {
         
-        let track = e.track;
-        let localX = e.localX;
+        const track = e.track;
+        const localX = e.localX;
 
-        this.selectClip(track, null, localX); // unselect and try to select clip in localX, if any
+        const clipIdx = this.getClipOnTime(track, this.xToTime(localX), 0.001);
+        this.selectClip(track.trackIdx, clipIdx); // unselect and try to select clip in localX, if any
     }
 
     showContextMenu( e ) {
@@ -3588,6 +3589,14 @@ class ClipsTimeline extends Timeline {
                         title: "Paste",
                         callback: () => {
                             this.pasteContent();
+                        }
+                    }
+                );
+                actions.push(
+                    {
+                        title: "Paste Here",
+                        callback: () => {
+                            this.pasteContent( this.xToTime(e.localX) );
                         }
                     }
                 )
@@ -3707,7 +3716,7 @@ class ClipsTimeline extends Timeline {
                 ctx.font = this.pixelsPerSecond * 0.06  +"px" + Timeline.FONT;
             }
 
-            const text = clip.id; //clip.id.replaceAll("_", " ").replaceAll("-", " ");
+            const text = clip.id ?? ""; //clip.id.replaceAll("_", " ").replaceAll("-", " ");
             const textInfo = ctx.measureText( text );
             
             // Draw clip name if it's readable
@@ -3882,12 +3891,12 @@ class ClipsTimeline extends Timeline {
             this.updateLeftPanel();
         }
 
-        // save state for all to-be-modified tracks
+        // save state for all to-be-modified tracks. Do it once for all tracks
         for( let i = baseTrackIdx; i <= currTrackIdx; ++i ){
             this.saveState( i, i != baseTrackIdx );
         }
 
-        // disable trackState
+        // disable history saving
         let oldStateEnabler = this.historySaveEnabler;
         this.historySaveEnabler = false;
 
@@ -3902,73 +3911,79 @@ class ClipsTimeline extends Timeline {
     }
 
 
-    deleteSelectedContent() {
-        this.deleteClip();
+    deleteSelectedContent(skipCallback = false) {
+        //*********** WARNING: RELIES ON SORTED lastClipsSelected ***********
+        if ( !this.lastClipsSelected.length ){
+            return;
+        }
+
+        // delete selected clips from last to first. lastClipsSelected is sorted
+        const selected = this.lastClipsSelected;
+        this.lastClipsSelected = []; // so this.#delete does not check clipsselected on each loop (all will be destroyed)
+        let prevTrack = -1;
+        for( let i = selected.length-1; i > -1; --i ){
+            let s = selected[i];
+            if ( s[0] != prevTrack){
+                this.saveState(s[0], prevTrack != -1 );
+                prevTrack = s[0];
+            }
+
+           this.#delete(s[0], s[1]);
+        }
+
+        if (this.onDeleteSelectedClips && !skipCallback){
+            this.onDeleteSelectedClips(selected);
+        }
+        
     }
 
     /** Delete clip from the timeline
-     * @param {[trackIdx, clipIdx]} clip to be deleted
+     * @param {Number} trackIdx
+     * @param {Number} clipIdx clip to be deleted
     */
-    deleteClip( clip = null ) {
-            
-        if(!clip) {
-            //*********** WARNING: RELIES ON SORTED lastClipsSelected ***********
+    deleteClip( trackIdx, clipIdx, skipCallback = false ) {
+        
 
-            // delete selected clips from last to first. lastClipsSelected is sorted
-            const selected = this.lastClipsSelected;
-            this.lastClipsSelected = []; // so this.#delete does not check clipsselected on each loop (all will be destroyed)
-            let prevTrack = -1;
-            for( let i = selected.length-1; i > -1; --i ){
-                let s = selected[i];
-                if ( s[0] != prevTrack){
-                    this.saveState(s[0], prevTrack != -1 );
-                    prevTrack = s[0];
-                }
-                this.#delete(s[0], s[1]);
-            }
-        } 
-        else {
-            const [trackIdx, clipIdx] = clip;
+        this.saveState(trackIdx);
+        const clip = this.#delete(trackIdx, clipIdx);
 
-            this.saveState(trackIdx);
-            this.#delete(trackIdx, clipIdx);
+        if ( this.onDeleteClip && !skipCallback ){
+            this.onDeleteClip( trackIdx, clipIdx, clip );
         }
     }
 
     #delete(trackIdx, clipIdx) {
 
         const track = this.animationClip.tracks[trackIdx]; 
-        if(clipIdx >= 0)
-        {
-            
-            track.clips.splice(clipIdx, 1);
-            track.hovered.splice(clipIdx,1);
-            track.selected.splice(clipIdx,1);
-            track.edited.splice(clipIdx,1);
-
-            // remove from selected clips
-            for(let i = 0; i < this.lastClipsSelected.length; i++) {
-                let [selectedTrackIdx, selectedClipIdx] = this.lastClipsSelected[i];
-                if(selectedTrackIdx == trackIdx){
-                    if (selectedClipIdx == clipIdx){ // remove self
-                        this.lastClipsSelected.splice(i--,1);
-                    }else if (selectedClipIdx > clipIdx){ // move upper clips to the left
-                        this.lastClipsSelected[i][1]--; 
-                    }
-                }
-                else if( trackIdx < selectedTrackIdx ){ 
-                    break; 
+        
+        // remove from selected clips
+        for(let i = 0; i < this.lastClipsSelected.length; i++) {
+            const [selectedTrackIdx, selectedClipIdx] = this.lastClipsSelected[i];
+            if(selectedTrackIdx == trackIdx){
+                if (selectedClipIdx == clipIdx){ // remove self
+                    this.lastClipsSelected.splice(i--,1);
+                }else if (selectedClipIdx > clipIdx){ // move upper clips to the left
+                    this.lastClipsSelected[i][1]--; 
                 }
             }
-            
-            if ( this.hovered && this.hovered[0] == trackIdx ){ 
-                if ( this.hovered[1] == clipIdx ){ this.unHoverAll(); }
-                else if( this.hovered[1] > clipIdx ){ this.hovered[1]--; }
+            else if( trackIdx < selectedTrackIdx ){ 
+                break; 
             }
-
         }
-        return true;
+        
+        if ( this.hovered && this.hovered[0] == trackIdx ){ 
+            if ( this.hovered[1] == clipIdx ){ this.unHoverAll(); }
+            else if( this.hovered[1] > clipIdx ){ this.hovered[1]--; }
+        }
+
+        const clip = track[clipIdx];
+        track.hovered.splice(clipIdx,1);
+        track.selected.splice(clipIdx,1);
+        track.edited.splice(clipIdx,1);
+        track.clips.splice(clipIdx, 1);
+        return clip;
     }
+
 
 
     /**
@@ -4067,7 +4082,7 @@ class ClipsTimeline extends Timeline {
         if ( !this.historySaveEnabler ){ return; }
 
         const track = this.animationClip.tracks[trackIdx];
-        let clips = this.cloneClips(track.clips, 0);
+        const clips = this.cloneClips(track.clips, 0);
         // storing as array so multiple tracks can be in a same "undo" step
 
         const undoStep = { 
@@ -4132,14 +4147,16 @@ class ClipsTimeline extends Timeline {
     undo() { return this.#undoRedo(true); }
     redo() { return this.#undoRedo(false); }
     
-    getCurrentClip( track, time, threshold ) {
+    getClipOnTime( track, time, threshold ) {
 
-        if(!track || !track.clips.length)
-        return -1;
+        if(!track || !track.clips.length){
+            return -1;
+        }
 
         // Avoid iterating through all timestamps
-        if((time + threshold) < track.clips[0].start)
-        return -1;
+        if((time + threshold) < track.clips[0].start){
+            return -1;
+        }
 
         for(let i = 0; i < track.clips.length; ++i) {
             let t = track.clips[i];
@@ -4154,8 +4171,8 @@ class ClipsTimeline extends Timeline {
 
     unSelectAllClips() {
 
-        for(let [idx, keyIndex] of this.lastClipsSelected) {
-            this.animationClip.tracks[idx].selected[keyIndex]= false;
+        for(let [trackIdx, clipIdx] of this.lastClipsSelected) {
+            this.animationClip.tracks[trackIdx].selected[clipIdx]= false;
         }
         // Something has been unselected
         const unselected = this.lastClipsSelected.length > 0;
@@ -4163,32 +4180,33 @@ class ClipsTimeline extends Timeline {
         return unselected;
     }
 
-    selectAll( ) {
+    selectAll( skipCallback = false) {
 
         this.unSelectAllClips();
-        for(let idx = 0; idx < this.animationClip.tracks.length; idx++) {
-            for(let clipIdx = 0; clipIdx < this.animationClip.tracks[idx].clips.length; clipIdx++) {
-                this.animationClip.tracks[idx].selected[clipIdx] = true;
-                this.lastClipsSelected.push( [idx, clipIdx] ); // already sorted
+        for(let trackIdx = 0; trackIdx < this.animationClip.tracks.length; trackIdx++) {
+            for(let clipIdx = 0; clipIdx < this.animationClip.tracks[trackIdx].clips.length; clipIdx++) {
+                this.animationClip.tracks[trackIdx].selected[clipIdx] = true;
+                this.lastClipsSelected.push( [trackIdx, clipIdx] ); // already sorted
             }
         }
-        if(this.onSelectClip)
-            this.onSelectClip();
+        if(this.onSelectClip && !skipCallback)
+            this.onSelectClip(null);
     }
 
-    selectClip( track, clipIndex = null, localX = null, unselect = true, skipCallback = false ) {
-
-        clipIndex = clipIndex ?? this.getCurrentClip( track, this.xToTime( localX ), this.secondsPerPixel * 5 );
+    selectClip( trackIdx, clipIndex, unselect = true, skipCallback = false ) {
 
         if(unselect){
             this.unSelectAllClips();
         }
-                        
-        if(clipIndex < 0)
+        
+        if(clipIndex < 0){
             return -1;
-
-        if(track.selected[clipIndex])
+        }
+    
+        const track = this.animationClip.tracks[trackIdx];
+        if(track.selected[clipIndex]){
             return clipIndex;
+        }
 
         // Select if not handled
 
@@ -4199,7 +4217,7 @@ class ClipsTimeline extends Timeline {
             if ( t[0] < track.trackIdx ){ continue; }
             if ( t[0] > track.trackIdx || t[1] > clipIndex ){ break;}
         }
-        this.lastClipsSelected.splice(i,0, [track.trackIdx, clipIndex] ); //
+        this.lastClipsSelected.splice(i,0, [track.trackIdx, clipIndex, track.clips[clipIndex] ] ); //
         track.selected[clipIndex] = true;
 
         if( !skipCallback && this.onSelectClip ){
@@ -4209,19 +4227,20 @@ class ClipsTimeline extends Timeline {
         return clipIndex;
     }
 
-    unselectClip( track, clipIndex, localX = null ){
-        clipIndex = clipIndex ?? this.getCurrentClip( track, this.xToTime( localX ), this.secondsPerPixel * 5 );
-                        
-        if(clipIndex == -1)
-            return -1;
+    unselectClip( trackIdx, clipIndex ){
 
-        if(!track.selected[clipIndex])
+        if(clipIndex == -1){
             return -1;
+        }
+    
+        const track = this.animationClip.tracks[trackIdx];
+        if(!track.selected[clipIndex]){
+            return -1;
+        }
 
         track.selected[clipIndex] = false;
 
         // unselect 
-        let trackIdx = track.trackIdx;
         for( let i = 0; i < this.lastClipsSelected.length; ++i){
             let t = this.lastClipsSelected[i];
             if ( t[0] == trackIdx && t[1] == clipIndex ){
