@@ -30,26 +30,7 @@
 
             panel.addShader("PBR Shader", shaderInstance, (instance) => { console.log(instance) });
             panel.addShader("Empty", null);
-        },`
-LX.ADD_CUSTOM_WIDGET('Shader', {
-    icon: "Box",
-    default: {
-        'position': [0, 0],
-        'velocity': [0, 0, 0],
-        'color': [0, 0, 0, 0],
-        'hexColor': '#000',
-        'highRes': false
-    }
-});
-
-const shaderInstance = {
-    'hexColor': '#f5f505',
-    'highRes': true
-};
-
-panel.addShader("PBR Shader", shaderInstance, (instance) => { console.log(instance) });
-panel.addShader("Empty", null);
-` );
+        });
     }
 
     {

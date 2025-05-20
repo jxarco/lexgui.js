@@ -12,7 +12,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 var LX = {
-    version: "0.6.2",
+    version: "0.6.3",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -724,7 +724,7 @@ function makeCodeSnippet( code, size, options = { } )
             }
             else if( l.constructor == Array ) // It's a range
             {
-                for( let i = ( l[0] - 1 ); i <= ( l[1] - 1 ); i++ )
+                for( let i = ( l[ 0 ] - 1 ); i <= ( l[ 1 ] - 1 ); i++ )
                 {
                     code.childNodes[ i ].classList.add( "added" );
                 }
@@ -743,7 +743,7 @@ function makeCodeSnippet( code, size, options = { } )
             }
             else if( l.constructor == Array ) // It's a range
             {
-                for( let i = ( l[0] - 1 ); i <= ( l[1] - 1 ); i++ )
+                for( let i = ( l[ 0 ] - 1 ); i <= ( l[ 1 ] - 1 ); i++ )
                 {
                     code.childNodes[ i ].classList.add( "removed" );
                 }
@@ -863,6 +863,7 @@ function makeIcon( iconName, options = { } )
 
         // Resolve variant
         const requestedVariant = options.variant ?? "regular";
+        data = ( ( requestedVariant == "solid" ) ? LX.ICONS[ `${ iconName }@solid` ] : data ) ?? data;
         const variant = data[ 3 ];
 
         // Create internal icon if variant is the same as requested, there's no lucide/fallback data or if variant is "regular" (default)
@@ -1024,6 +1025,9 @@ class vec2 {
     nrm ( v0 = new vec2() ) { v0.set( this.x, this.y ); return v0.mul( 1.0 / this.len(), v0 ); }
     dst ( v ) { return v.sub( this ).len(); }
     clp ( min, max, v0 = new vec2() ) { v0.set( clamp( this.x, min, max ), clamp( this.y, min, max ) ); return v0; }
+
+    fromArray ( array ) { this.x = array[ 0 ]; this.y = array[ 1 ]; }
+    toArray () { return this.xy }
 };
 
 LX.vec2 = vec2;
@@ -1507,9 +1511,12 @@ async function init( options = { } )
         this.main_area = new Area( { id: options.id ?? 'mainarea' } );
     }
 
-    if( ( options.autoTheme ?? true ) && window.matchMedia && window.matchMedia( "(prefers-color-scheme: light)" ).matches )
+    if( ( options.autoTheme ?? true ) )
     {
-        LX.setTheme( "light" );
+        if( window.matchMedia && window.matchMedia( "(prefers-color-scheme: light)" ).matches )
+        {
+            LX.setTheme( "light" );
+        }
 
         window.matchMedia( "(prefers-color-scheme: dark)" ).addEventListener( "change", event => {
             LX.setTheme( event.matches ? "dark" : "light" );
@@ -1922,13 +1929,10 @@ function asTooltip( trigger, content, options = {} )
     } );
 
     trigger.addEventListener( "mouseleave", function(e) {
-        if( !tooltipDom ) return;
-
-        tooltipDom.dataset[ "closed" ] = true;
-
-        doAsync( () => {
+        if( tooltipDom )
+        {
             tooltipDom.remove();
-        }, 300 )
+        }
     } )
 }
 
@@ -3002,7 +3006,7 @@ class Calendar {
 
     constructor( dateString, options = {} ) {
 
-        this.root = LX.makeContainer( ["256px", "auto"], "border p-3 bg-primary rounded-lg text-md" );
+        this.root = LX.makeContainer( ["256px", "auto"], "p-1 text-md" );
 
         this.onChange = options.onChange;
         this.untilToday = options.untilToday;
@@ -4031,7 +4035,7 @@ class Area {
         {
             for( let i = 0; i < float.length; i++ )
             {
-                const t = float[i];
+                const t = float[ i ];
                 switch( t )
                 {
                 case 'h': break;
@@ -5662,8 +5666,9 @@ class Widget {
     static TABLE        = 34;
     static TABS         = 35;
     static DATE         = 36;
-    static LABEL        = 37;
-    static BLANK        = 38;
+    static MAP2D        = 37;
+    static LABEL        = 38;
+    static BLANK        = 39;
 
     static NO_CONTEXT_TYPES = [
         Widget.BUTTON,
@@ -5786,8 +5791,17 @@ class Widget {
     }
 
     _canPaste() {
-        return this.type === Widget.CUSTOM ? navigator.clipboard.customIdx !== undefined && this.customIdx == navigator.clipboard.customIdx :
-            navigator.clipboard.type === this.type;
+        let pasteAllowed = this.type === Widget.CUSTOM ?
+            ( navigator.clipboard.customIdx !== undefined && this.customIdx == navigator.clipboard.customIdx ) : navigator.clipboard.type === this.type;
+
+        pasteAllowed &= ( this.disabled !== true );
+
+        if( this.onAllowPaste )
+        {
+            pasteAllowed = this.onAllowPaste( pasteAllowed );
+        }
+
+        return pasteAllowed;
     }
 
     _trigger( event, callback, scope = this ) {
@@ -5824,7 +5838,7 @@ class Widget {
                     if (a == null || b == null) return false;
                     if (a.length !== b.length) return false;
                     for (var i = 0; i < a.length; ++i) {
-                        if (a[i] !== b[i]) return false;
+                        if (a[ i ] !== b[ i ]) return false;
                     }
                     return true;
                 })( value, this._initialValue ) : ( value == this._initialValue );
@@ -5899,6 +5913,7 @@ class Widget {
             case Widget.TABLE: return "Table";
             case Widget.TABS: return "Tabs";
             case Widget.DATE: return "Date";
+            case Widget.MAP2D: return "Map2D";
             case Widget.LABEL: return "Label";
             case Widget.BLANK: return "Blank";
             case Widget.CUSTOM: return this.customName;
@@ -6104,12 +6119,14 @@ class NodeTree {
         const nodeFilterInput = this.domEl.querySelector( ".lexnodetreefilter" );
 
         node.children = node.children ?? [];
+
         if( nodeFilterInput && nodeFilterInput.value != "" && !node.id.includes( nodeFilterInput.value ) )
         {
             for( var i = 0; i < node.children.length; ++i )
             {
                 this._createItem( node, node.children[ i ], level + 1, selectedId );
             }
+
             return;
         }
 
@@ -6454,7 +6471,7 @@ class NodeTree {
 
                 const index = dragged.parent.children.findIndex(n => n.id == dragged.id);
                 const removed = dragged.parent.children.splice(index, 1);
-                target.children.push( removed[0] );
+                target.children.push( removed[ 0 ] );
                 that.refresh();
                 delete window.__tree_node_dragged;
             });
@@ -6534,13 +6551,14 @@ class NodeTree {
             inputContainer.appendChild( visibilityBtn.root );
         }
 
-        const _hasChild = function( parent, id ) {
-            if( !parent.length  ) return;
-            for( var c of parent.children )
+        const _hasChild = function( node, id ) {
+            if( node.id == id ) return true;
+            let found = false;
+            for( var c of ( node?.children ?? [] ) )
             {
-                if( c.id == id ) return true;
-                return _hasChild( c, id );
+                found |= _hasChild( c, id );
             }
+            return found;
         };
 
         const exists = _hasChild( node, selectedId );
@@ -6567,6 +6585,7 @@ class NodeTree {
 
         this.data = newData ?? this.data;
         this.domEl.querySelector( "ul" ).innerHTML = "";
+
         if( this.data.constructor === Object )
         {
             this._createItem( null, this.data, 0, selectedId );
@@ -6596,15 +6615,14 @@ class NodeTree {
         this.refresh( null, id );
 
         this.domEl.querySelectorAll( ".selected" ).forEach( i => i.classList.remove( "selected" ) );
-        this.selected.length = 0;
 
-        var el = this.domEl.querySelector( "#" + id );
-        if( el )
-        {
-            el.classList.add( "selected" );
-            this.selected = [ el.treeData ];
-            el.focus();
-        }
+        // Element should exist, since tree was refreshed to show it
+        const el = this.domEl.querySelector( "#" + id );
+        console.assert(  el, "NodeTree: Can't select node " + id );
+
+        el.classList.add( "selected" );
+        this.selected = [ el.treeData ];
+        el.focus();
     }
 }
 
@@ -6865,8 +6883,16 @@ class TextArea extends Widget {
 
         container.appendChild( wValue );
 
-        if( options.disabled ?? false ) wValue.setAttribute( "disabled", true );
-        if( options.placeholder ) wValue.setAttribute( "placeholder", options.placeholder );
+        if( options.disabled ?? false )
+        {
+            this.disabled = true;
+            wValue.setAttribute( "disabled", true );
+        }
+
+        if( options.placeholder )
+        {
+            wValue.setAttribute( "placeholder", options.placeholder );
+        }
 
         const trigger = options.trigger ?? "default";
 
@@ -6984,6 +7010,7 @@ class Button extends Widget {
 
         if( options.disabled )
         {
+            this.disabled = true;
             wValue.setAttribute( "disabled", true );
         }
 
@@ -8212,7 +8239,7 @@ class Tags extends Widget {
 
             for( let i = 0; i < value.length; ++i )
             {
-                const tagName = value[i];
+                const tagName = value[ i ];
                 const tag = document.createElement('span');
                 tag.className = "lextag";
                 tag.innerHTML = tagName;
@@ -8809,7 +8836,7 @@ class NumberInput extends Widget {
 
         if( options.disabled )
         {
-            vecinput.disabled = true;
+            this.disabled = vecinput.disabled = true;
         }
 
         // Add slider below
@@ -8965,7 +8992,7 @@ class Vector extends Widget {
         super( Widget.VECTOR, name, [].concat( value ), options );
 
         this.onGetValue = () => {
-            let inputs = this.root.querySelectorAll( "input" );
+            let inputs = this.root.querySelectorAll( "input[type='number']" );
             let value = [];
             for( var v of inputs )
             {
@@ -9007,6 +9034,7 @@ class Vector extends Widget {
         container.className = "lexvector";
         this.root.appendChild( container );
 
+        this.disabled = ( options.disabled ?? false );
         const that = this;
 
         for( let i = 0; i < numComponents; ++i )
@@ -9037,7 +9065,7 @@ class Vector extends Widget {
             const dragIcon = LX.makeIcon( "MoveVertical", { iconClass: "drag-icon hidden-opacity", svgClass: "sm" } );
             box.appendChild( dragIcon );
 
-            if( options.disabled )
+            if( this.disabled )
             {
                 vecinput.disabled = true;
             }
@@ -10122,7 +10150,7 @@ class Table extends Widget {
                                             delete this.activeCustomFilters[ key ];
                                         }
                                         const activeFilters = Object.keys( this.activeCustomFilters ).filter(  k => this.activeCustomFilters[ k ] == f.name );
-                                        const filterBadgesHtml = activeFilters.reduce( ( acc, key ) => acc += LX.badge( key, "bg-tertiary text-sm" ), "" );
+                                        const filterBadgesHtml = activeFilters.reduce( ( acc, key ) => acc += LX.badge( key, "bg-tertiary fg-secondary text-sm border-0" ), "" );
                                         spanName.innerHTML = icon.innerHTML + f.name + ( activeFilters.length ? separatorHtml : "" ) + filterBadgesHtml;
                                         this.refresh();
                                     }
@@ -10134,7 +10162,7 @@ class Table extends Widget {
                         else if( f.type == "range" )
                         {
                             console.assert( f.min != undefined && f.max != undefined, "Range filter needs min and max values!" );
-                            const container = LX.makeContainer( ["240px", "auto"], "border bg-primary rounded-lg text-md" );
+                            const container = LX.makeContainer( ["240px", "auto"], "text-md" );
                             const panel = new Panel();
                             LX.makeContainer( ["100%", "auto"], "px-3 p-2 pb-0 text-md font-medium", f.name, container );
 
@@ -10147,13 +10175,13 @@ class Table extends Widget {
                                 panel.addNumber( null, f.start, (v) => {
                                     f.start = v;
                                     const inUse = ( f.start != f.min || f.end != f.max );
-                                    spanName.innerHTML = icon.innerHTML + f.name + ( inUse ? separatorHtml + LX.badge( `${ f.start } - ${ f.end } ${ f.units ?? "" }`, "bg-tertiary text-sm" ) : "" );
+                                    spanName.innerHTML = icon.innerHTML + f.name + ( inUse ? separatorHtml + LX.badge( `${ f.start } - ${ f.end } ${ f.units ?? "" }`, "bg-tertiary fg-secondary text-sm border-0" ) : "" );
                                     this.refresh();
                                 }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
                                 panel.addNumber( null, f.end, (v) => {
                                     f.end = v;
                                     const inUse = ( f.start != f.min || f.end != f.max );
-                                    spanName.innerHTML = icon.innerHTML + f.name + ( inUse ? separatorHtml + LX.badge( `${ f.start } - ${ f.end } ${ f.units ?? "" }`, "bg-tertiary text-sm" ) : "" );
+                                    spanName.innerHTML = icon.innerHTML + f.name + ( inUse ? separatorHtml + LX.badge( `${ f.start } - ${ f.end } ${ f.units ?? "" }`, "bg-tertiary fg-secondary text-sm border-0" ) : "" );
                                     this.refresh();
                                 }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
                                 panel.addButton( null, "Reset", () => {
@@ -10186,7 +10214,7 @@ class Table extends Widget {
                         }
                     }
                     this.refresh();
-                }, { title: "Reset filters", icon: "X" } );
+                }, { title: "Reset filters", tooltip: true, icon: "X" } );
                 headerContainer.appendChild( this._resetCustomFiltersBtn.root );
                 this._resetCustomFiltersBtn.root.classList.add( "hidden" );
             }
@@ -10334,7 +10362,7 @@ class Table extends Widget {
                 let movePending = null;
 
                 document.addEventListener( 'mouseup', (e) => {
-                    if( !rIdx ) return;
+                    if( rIdx === null ) return;
                     document.removeEventListener( "mousemove", onMove );
                     const fromRow = table.rows[ rIdx ];
                     fromRow.dY = 0;
@@ -10348,14 +10376,33 @@ class Table extends Widget {
                     if( movePending )
                     {
                         // Modify inner data first
+                        // Origin row should go to the target row, and the rest should be moved up/down
                         const fromIdx = rIdx - 1;
                         const targetIdx = movePending[ 1 ] - 1;
-                        var b = data.body[fromIdx];
-                        data.body[fromIdx] = data.body[targetIdx];
+                        const b = data.body[ fromIdx ];
+                        let targetOffset = 0;
+
+                        if( fromIdx == targetIdx ) return;
+                        if( fromIdx > targetIdx ) // Move up
+                        {
+                            for( let i = fromIdx; i > targetIdx; --i )
+                            {
+                                data.body[ i ] = data.body[ i - 1 ];
+                            }
+                        }
+                        else // Move down
+                        {
+                            targetOffset = 1;
+                            for( let i = fromIdx; i < targetIdx; ++i )
+                            {
+                                data.body[ i ] = data.body[ i + 1 ];
+                            }
+                        }
+
                         data.body[targetIdx] = b;
 
                         const parent = movePending[ 0 ].parentNode;
-                        parent.insertChildAtIndex(  movePending[ 0 ],  movePending[ 1 ] );
+                        parent.insertChildAtIndex(  movePending[ 0 ], targetIdx + targetOffset );
                         movePending = null;
                     }
 
@@ -10411,7 +10458,7 @@ class Table extends Widget {
                             }
                         }
 
-                        const show = Object.values( acfMap ).reduce( ( e, acc ) => acc *= e );
+                        const show = Object.values( acfMap ).reduce( ( e, acc ) => acc *= e, true );
                         if( !show )
                         {
                             continue;
@@ -10446,7 +10493,7 @@ class Table extends Widget {
                             }
                         }
 
-                        const show = Object.values( acfMap ).reduce( ( e, acc ) => acc *= e );
+                        const show = Object.values( acfMap ).reduce( ( e, acc ) => acc *= e, true );
                         if( !show )
                         {
                             continue;
@@ -10480,7 +10527,7 @@ class Table extends Widget {
                         row.addEventListener("mouseenter", function(e) {
                             e.preventDefault();
 
-                            if( rIdx && ( this.rowIndex != rIdx ) && ( eventCatched != this.rowIndex ) )
+                            if( rIdx != null && ( this.rowIndex != rIdx ) && ( eventCatched != this.rowIndex ) )
                             {
                                 eventCatched = this.rowIndex;
                                 const fromRow = table.rows[ rIdx ];
@@ -10489,7 +10536,7 @@ class Table extends Widget {
                                     movePending = [ fromRow, undo ? (this.rowIndex-1) : this.rowIndex ];
                                     this.style.transform = undo ? `` : `translateY(-${this.offsetHeight}px)`;
                                 } else {
-                                    movePending = [ fromRow, undo ? (this.rowIndex) : (this.rowIndex-1) ];
+                                    movePending = [ fromRow, undo ? (this.rowIndex+1) : (this.rowIndex) ];
                                     this.style.transform = undo ? `` : `translateY(${this.offsetHeight}px)`;
                                 }
                                 doAsync( () => {
@@ -10701,6 +10748,53 @@ class DatePicker extends Widget {
 LX.DatePicker = DatePicker;
 
 /**
+ * @class Map2D
+ * @description Map2D Widget
+ */
+
+class Map2D extends Widget {
+
+    constructor( name, points, callback, options = {} ) {
+
+        super( Widget.MAP2D, name, null, options );
+
+        this.onGetValue = () => {
+            return this.map2d.weightsObj;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+            // if( !skipCallback )
+            // {
+            //     this._trigger( new IEvent( name, curveInstance.element.value, event ), callback );
+            // }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
+        var container = document.createElement( "div" );
+        container.className = "lexmap2d";
+        this.root.appendChild( container );
+
+        this.map2d = new CanvasMap2D( points, callback, options );
+
+        const calendarIcon = LX.makeIcon( "SquareMousePointer" );
+        const calendarButton = new Button( null, "Open Map", () => {
+            this._popover = new Popover( calendarButton.root, [ this.map2d ] );
+        }, { buttonClass: `flex flex-row px-3 fg-secondary justify-between` } );
+
+        calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
+        container.appendChild( calendarButton.root );
+
+        doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.Map2D = Map2D;
+
+/**
  * @class Panel
  */
 
@@ -10803,7 +10897,7 @@ class Panel {
                 const signal = this.widgets[ w ].options.signal;
                 for( let i = 0; i < LX.signals[signal].length; i++ )
                 {
-                    if( LX.signals[signal][i] == this.widgets[ w ] )
+                    if( LX.signals[signal][ i ] == this.widgets[ w ] )
                     {
                         LX.signals[signal] = [...LX.signals[signal].slice(0, i), ...LX.signals[signal].slice(i+1)];
                     }
@@ -10815,11 +10909,11 @@ class Panel {
         {
             for( let w = 0; w < this.signals.length; w++ )
             {
-                let widget = Object.values(this.signals[ w ])[0];
+                let widget = Object.values(this.signals[ w ])[ 0 ];
                 let signal = widget.options.signal;
                 for( let i = 0; i < LX.signals[signal].length; i++ )
                 {
-                    if( LX.signals[signal][i] == widget )
+                    if( LX.signals[signal][ i ] == widget )
                     {
                         LX.signals[signal] = [...LX.signals[signal].slice(0, i), ...LX.signals[signal].slice(i+1)];
                     }
@@ -11872,6 +11966,19 @@ class Panel {
         const widget = new DatePicker( name, dateString, callback, options );
         return this._attachWidget( widget );
     }
+
+    /**
+     * @method addMap2D
+     * @param {String} name Widget name
+     * @param {Array} points
+     * @param {Function} callback
+     * @param {Object} options:
+     */
+
+    addMap2D( name, points, callback, options = { } ) {
+        const widget = new Map2D( name, points, callback, options );
+        return this._attachWidget( widget );
+    }
 }
 
 LX.Panel = Panel;
@@ -12020,7 +12127,7 @@ class Branch {
         this.grabber = grabber;
 
         function getBranchHeight() {
-            return that.root.offsetHeight - that.root.children[0].offsetHeight;
+            return that.root.offsetHeight - that.root.children[ 0 ].offsetHeight;
         }
 
         let that = this;
@@ -12480,7 +12587,7 @@ class PocketDialog extends Dialog {
             if( this.size )
             {
                 if( !this.minimized ) this.root.style.height = "auto";
-                else this.root.style.height = this.size[1];
+                else this.root.style.height = this.size[ 1 ];
             }
 
             this.root.classList.toggle("minimized");
@@ -12499,7 +12606,7 @@ class PocketDialog extends Dialog {
             {
                 for( let i = 0; i < float.length; i++ )
                 {
-                    const t = float[i];
+                    const t = float[ i ];
                     switch( t )
                     {
                     case 'b':
@@ -12789,7 +12896,7 @@ class ContextMenu {
                 return;
             }
 
-            if( children.find( c => Object.keys(c)[0] == key ) == null )
+            if( children.find( c => Object.keys(c)[ 0 ] == key ) == null )
             {
                 const parent = {};
                 parent[ key ] = [];
@@ -12830,7 +12937,7 @@ class ContextMenu {
 
     setColor( token, color ) {
 
-        if(color[0] !== '#')
+        if(color[ 0 ] !== '#')
             color = rgbToHex(color);
 
         this.colors[ token ] = color;
@@ -12934,8 +13041,8 @@ class CanvasCurve {
         element.resample = function( samples ) {
 
             let r = [];
-            let dx = (element.xrange[1] - element.xrange[ 0 ]) / samples;
-            for( let i = element.xrange[0]; i <= element.xrange[1]; i += dx )
+            let dx = (element.xrange[ 1 ] - element.xrange[ 0 ]) / samples;
+            for( let i = element.xrange[ 0 ]; i <= element.xrange[ 1 ]; i += dx )
             {
                 r.push( element.getValueAt(i) );
             }
@@ -12946,8 +13053,8 @@ class CanvasCurve {
 
             for( let i = 0; i < element.value; i++ )
             {
-                let value = element.value[i];
-                if(value[0] < v[0]) continue;
+                let value = element.value[ i ];
+                if(value[ 0 ] < v[ 0 ]) continue;
                 element.value.splice(i,0,v);
                 redraw();
                 return;
@@ -12959,14 +13066,14 @@ class CanvasCurve {
 
         //value to canvas
         function convert(v) {
-            return [ canvas.width * ( v[0] - element.xrange[0])/ (element.xrange[1]),
-                canvas.height * (v[1] - element.yrange[0])/ (element.yrange[1])];
+            return [ canvas.width * ( v[ 0 ] - element.xrange[ 0 ])/ (element.xrange[ 1 ]),
+                canvas.height * (v[ 1 ] - element.yrange[ 0 ])/ (element.yrange[ 1 ])];
         }
 
         //canvas to value
         function unconvert(v) {
-            return [(v[0] * element.xrange[1] / canvas.width + element.xrange[0]),
-                    (v[1] * element.yrange[1] / canvas.height + element.yrange[0])];
+            return [(v[ 0 ] * element.xrange[ 1 ] / canvas.width + element.xrange[ 0 ]),
+                    (v[ 1 ] * element.yrange[ 1 ] / canvas.height + element.yrange[ 0 ])];
         }
 
         let selected = -1;
@@ -13154,7 +13261,7 @@ class CanvasCurve {
                 options.callback.call( element, element.value, e );
         }
 
-        function distance(a,b) { return Math.sqrt( Math.pow(b[0]-a[0],2) + Math.pow(b[1]-a[1],2) ); };
+        function distance(a,b) { return Math.sqrt( Math.pow(b[ 0 ]-a[ 0 ],2) + Math.pow(b[ 1 ]-a[ 1 ],2) ); };
 
         function computeSelected( x, y ) {
 
@@ -13266,8 +13373,8 @@ class CanvasDial {
         element.resample = function( samples ) {
 
             var r = [];
-            var dx = (element.xrange[1] - element.xrange[ 0 ]) / samples;
-            for( var i = element.xrange[0]; i <= element.xrange[1]; i += dx)
+            var dx = (element.xrange[ 1 ] - element.xrange[ 0 ]) / samples;
+            for( var i = element.xrange[ 0 ]; i <= element.xrange[ 1 ]; i += dx)
             {
                 r.push( element.getValueAt(i) );
             }
@@ -13292,15 +13399,15 @@ class CanvasDial {
         //value to canvas
         function convert(v, r) {
 
-            Math.pow(v[0],2)
-            return [ canvas.width * ( v[0] - element.xrange[0])/ (element.xrange[1]),
-                canvas.height * (v[1] - element.yrange[0])/ (element.yrange[1])];
+            Math.pow(v[ 0 ],2)
+            return [ canvas.width * ( v[ 0 ] - element.xrange[ 0 ])/ (element.xrange[ 1 ]),
+                canvas.height * (v[ 1 ] - element.yrange[ 0 ])/ (element.yrange[ 1 ])];
         }
 
         //canvas to value
         function unconvert(v) {
-            return [(v[0] * element.xrange[1] / canvas.width + element.xrange[0]),
-                    (v[1] * element.yrange[1] / canvas.height + element.yrange[0])];
+            return [(v[ 0 ] * element.xrange[ 1 ] / canvas.width + element.xrange[ 0 ]),
+                    (v[ 1 ] * element.yrange[ 1 ] / canvas.height + element.yrange[ 0 ])];
         }
 
         var selected = -1;
@@ -13482,7 +13589,7 @@ class CanvasDial {
                 options.callback.call( element, element.value, e );
         }
 
-        function distance(a,b) { return Math.sqrt( Math.pow(b[0]-a[0],2) + Math.pow(b[1]-a[1],2) ); };
+        function distance(a,b) { return Math.sqrt( Math.pow(b[ 0 ]-a[ 0 ],2) + Math.pow(b[ 1 ]-a[ 1 ],2) ); };
 
         function computeSelected( x, y ) {
 
@@ -13526,6 +13633,439 @@ class CanvasDial {
 }
 
 LX.Dial = Dial;
+
+// Based on LGraphMap2D from @tamats (jagenjo)
+// https://github.com/jagenjo/litescene.js
+class CanvasMap2D {
+
+    static COLORS = [ [255, 0, 0], [0, 255, 0], [0, 0, 255], [0, 128, 128], [128, 0, 128], [128, 128, 0], [255, 128, 0], [255, 0, 128], [0, 128, 255], [128, 0, 255] ];
+    static GRID_SIZE = 64;
+
+    /**
+     * @constructor Map2D
+     * @param {Array} initialPoints
+     * @param {Function} callback
+     * @param {Object} options
+     * circular
+     * showNames
+     * size
+     */
+
+    constructor( initialPoints, callback, options = {} ) {
+
+        this.circular = options.circular ?? false;
+        this.showNames = options.showNames ?? true;
+        this.size = options.size ?? [ 200, 200 ];
+
+        this.points = initialPoints ?? [];
+        this.callback = callback;
+        this.weights = [];
+        this.weightsObj = {};
+        this.currentPosition = new LX.vec2( 0.5, 0.5 );
+        this.circleCenter = [ 0, 0 ];
+        this.circleRadius = 1;
+        this.margin = 8;
+        this.dragging = false;
+
+        this._valuesChanged = true;
+        this._selectedPoint = null;
+
+        this.root = LX.makeContainer( ["auto", "auto"] );
+        this.root.tabIndex = "1";
+
+        this.root.addEventListener( "mousedown", innerMouseDown );
+
+        const that = this;
+
+        function innerMouseDown( e )
+        {
+            var doc = that.root.ownerDocument;
+            doc.addEventListener("mouseup", innerMouseUp);
+            doc.addEventListener("mousemove", innerMouseMove);
+            e.stopPropagation();
+            e.preventDefault();
+
+            that.dragging = true;
+            return true;
+        }
+
+        function innerMouseMove( e )
+        {
+            if( !that.dragging )
+            {
+                return;
+            }
+
+            const margin = that.margin;
+            const rect = that.root.getBoundingClientRect();
+
+            let pos = new LX.vec2();
+            pos.set( e.x - rect.x - that.size[ 0 ] * 0.5, e.y - rect.y - that.size[ 1 ] * 0.5 );
+            var cpos = that.currentPosition;
+            cpos.set(
+                LX.clamp( pos.x / ( that.size[ 0 ] * 0.5 - margin ), -1, 1 ),
+                LX.clamp( pos.y / ( that.size[ 1 ] * 0.5 - margin ), -1, 1 )
+            );
+
+            if( that.circular )
+            {
+                const center = new LX.vec2( 0, 0 );
+                const dist = cpos.dst( center );
+                if( dist > 1 )
+                {
+                    cpos = cpos.nrm();
+                }
+            }
+
+            that.renderToCanvas( that.canvas.getContext( "2d", { willReadFrequently: true } ), that.canvas );
+
+            that.computeWeights( cpos );
+
+            if( that.callback )
+            {
+                that.callback( that.weightsObj, that.weights, cpos );
+            }
+
+            return true;
+        }
+
+        function innerMouseUp( e )
+        {
+            that.dragging = false;
+
+            var doc = that.root.ownerDocument;
+            doc.removeEventListener("mouseup", innerMouseUp);
+            doc.removeEventListener("mousemove", innerMouseMove);
+        }
+
+        this.canvas = document.createElement( "canvas" );
+        this.canvas.width = this.size[ 0 ];
+        this.canvas.height = this.size[ 1 ];
+        this.root.appendChild( this.canvas );
+
+        const ctx = this.canvas.getContext( "2d", { willReadFrequently: true } );
+        this.renderToCanvas( ctx, this.canvas );
+    }
+
+    /**
+     * @method computeWeights
+     * @param {LX.vec2} p
+     * @description Iterate for every cell to see if our point is nearer to the cell than the nearest point of the cell,
+     * If that is the case we increase the weight of the nearest point. At the end we normalize the weights of the points by the number of near points
+     * and that give us the weight for every point
+     */
+
+    computeWeights( p ) {
+
+        if( !this.points.length )
+        {
+            return;
+        }
+
+        let values = this._precomputedWeights;
+        if( !values || this._valuesChanged )
+        {
+            values = this.precomputeWeights();
+        }
+
+        let weights = this.weights;
+        weights.length = this.points.length;
+        for(var i = 0; i < weights.length; ++i)
+        {
+            weights[ i ] = 0;
+        }
+
+        const gridSize = CanvasMap2D.GRID_SIZE;
+
+        let totalInside = 0;
+        let pos2 = new LX.vec2();
+
+        for( var y = 0; y < gridSize; ++y )
+        {
+            for( var x = 0; x < gridSize; ++x )
+            {
+                pos2.set( ( x / gridSize) * 2 - 1, ( y / gridSize ) * 2 - 1 );
+
+                var dataPos = x * 2 + y * gridSize * 2;
+                var pointIdx = values[ dataPos ];
+
+                var isInside = p.dst( pos2 ) < ( values[ dataPos + 1] + 0.001 ); // epsilon
+                if( isInside )
+                {
+                    weights[ pointIdx ] += 1;
+                    totalInside++;
+                }
+            }
+        }
+
+        for( var i = 0; i < weights.length; ++i )
+        {
+            weights[ i ] /= totalInside;
+            this.weightsObj[ this.points[ i ].name ] = weights[ i ];
+        }
+
+        return weights;
+    }
+
+    /**
+     * @method precomputeWeights
+     * @description Precompute for every cell, which is the closest point of the points set and how far it is from the center of the cell
+     * We store point index and distance in this._precomputedWeights. This is done only when the points set change
+     */
+
+    precomputeWeights() {
+
+        this._valuesChanged = false;
+
+        const numPoints = this.points.length;
+        const gridSize = CanvasMap2D.GRID_SIZE;
+        const totalNums = 2 * gridSize * gridSize;
+
+        let position = new LX.vec2();
+
+        if( !this._precomputedWeights || this._precomputedWeights.length != totalNums )
+        {
+            this._precomputedWeights = new Float32Array( totalNums );
+        }
+
+        let values = this._precomputedWeights;
+        this._precomputedWeightsGridSize = gridSize;
+
+        for( let y = 0; y < gridSize; ++y )
+        {
+            for( let x = 0; x < gridSize; ++x )
+            {
+                let nearest = -1;
+                let minDistance = 100000;
+
+                for( let i = 0; i < numPoints; ++i )
+                {
+                    position.set( ( x / gridSize ) * 2 - 1, ( y / gridSize ) * 2 - 1 );
+
+                    let pointPosition = new LX.vec2();
+                    pointPosition.fromArray( this.points[ i ].pos );
+                    let dist = position.dst( pointPosition );
+                    if( dist > minDistance )
+                    {
+                        continue;
+                    }
+
+                    nearest = i;
+                    minDistance = dist;
+                }
+
+                values[ x * 2 + y * 2 * gridSize ] = nearest;
+                values[ x * 2 + y * 2 * gridSize + 1 ] = minDistance;
+            }
+        }
+
+        return values;
+    }
+
+    /**
+     * @method precomputeWeightsToImage
+     * @param {LX.vec2} p
+     */
+
+    precomputeWeightsToImage( p ) {
+
+        if( !this.points.length )
+        {
+            return null;
+        }
+
+        const gridSize = CanvasMap2D.GRID_SIZE;
+        var values = this._precomputedWeights;
+        if( !values || this._valuesChanged || this._precomputedWeightsGridSize != gridSize )
+        {
+            values = this.precomputeWeights();
+        }
+
+        var canvas = this.imageCanvas;
+        if( !canvas )
+        {
+            canvas = this.imageCanvas = document.createElement( "canvas" );
+        }
+
+        canvas.width = canvas.height = gridSize;
+        var ctx = canvas.getContext( "2d", { willReadFrequently: true } );
+
+        var weights = this.weights;
+        weights.length = this.points.length;
+        for (var i = 0; i < weights.length; ++i)
+        {
+            weights[ i ] = 0;
+        }
+
+        let totalInside = 0;
+        let pixels = ctx.getImageData( 0, 0, gridSize, gridSize );
+        let pos2 = new LX.vec2();
+
+        for( var y = 0; y < gridSize; ++y )
+        {
+            for( var x = 0; x < gridSize; ++x )
+            {
+                pos2.set( ( x / gridSize ) * 2 - 1, ( y / gridSize ) * 2 - 1 );
+
+                const pixelPos = x * 4 + y * gridSize * 4;
+                const dataPos = x * 2 + y * gridSize * 2;
+                const pointIdx = values[ dataPos ];
+                const c = CanvasMap2D.COLORS[ pointIdx % CanvasMap2D.COLORS.length ];
+
+                var isInside = p.dst( pos2 ) < ( values[ dataPos + 1 ] + 0.001 );
+                if( isInside )
+                {
+                    weights[ pointIdx ] += 1;
+                    totalInside++;
+                }
+
+                pixels.data[ pixelPos ] = c[ 0 ] + ( isInside ? 128 : 0 );
+                pixels.data[ pixelPos + 1 ] = c[ 1 ] + ( isInside ? 128 : 0 );
+                pixels.data[ pixelPos + 2 ] = c[ 2 ] + ( isInside ? 128 : 0 );
+                pixels.data[ pixelPos + 3 ] = 255;
+            }
+        }
+
+        for( let i = 0; i < weights.length; ++i )
+        {
+            weights[ i ] /= totalInside;
+        }
+
+        ctx.putImageData( pixels, 0, 0 );
+        return canvas;
+    }
+
+    addPoint( name, pos ) {
+        if( this.findPoint( name ) )
+        {
+            console.warn("CanvasMap2D.addPoint: There is already a point with that name" );
+            return;
+        }
+
+        if( !pos )
+        {
+            pos = [ this.currentPosition[ 0 ], this.currentPosition[ 1 ] ];
+        }
+
+        pos[ 0 ] = LX.clamp( pos[ 0 ], -1, 1 );
+        pos[ 1 ] = LX.clamp( pos[ 1 ], -1, 1 );
+
+        const point = { name, pos };
+        this.points.push( point );
+        this._valuesChanged = true;
+        return point;
+    }
+
+    removePoint( name ) {
+        const removeIdx = this.points.findIndex( (p) => p.name == name );
+        if( removeIdx > -1 )
+        {
+            this.points.splice( removeIdx, 1 );
+            this._valuesChanged = true;
+        }
+    }
+
+    findPoint( name ) {
+        return this.points.find( p => p.name == name );
+    }
+
+    clear() {
+        this.points.length = 0;
+        this._precomputedWeights = null;
+        this._canvas = null;
+        this._selectedPoint = null;
+    }
+
+    renderToCanvas( ctx, canvas ) {
+
+        const margin = this.margin;
+        const w = this.size[ 0 ];
+        const h = this.size[ 1 ];
+
+        ctx.fillStyle = "black";
+        ctx.strokeStyle = "#BBB";
+
+        ctx.clearRect( 0, 0, w, h );
+
+        if( this.circular )
+        {
+            this.circleCenter[ 0 ] = w * 0.5;
+            this.circleCenter[ 1 ] = h * 0.5;
+            this.circleRadius = h * 0.5 - margin;
+
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc( this.circleCenter[ 0 ], this.circleCenter[ 1 ], this.circleRadius, 0, Math.PI * 2 );
+            ctx.fill();
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo( this.circleCenter[ 0 ] + 0.5, this.circleCenter[ 1 ] - this.circleRadius );
+            ctx.lineTo( this.circleCenter[ 0 ] + 0.5, this.circleCenter[ 1 ] + this.circleRadius );
+            ctx.moveTo( this.circleCenter[ 0 ] - this.circleRadius, this.circleCenter[ 1 ]);
+            ctx.lineTo( this.circleCenter[ 0 ] + this.circleRadius, this.circleCenter[ 1 ]);
+            ctx.stroke();
+        }
+        else
+        {
+            ctx.fillRect( margin, margin, w - margin * 2, h - margin * 2 );
+            ctx.strokeRect( margin, margin, w - margin * 2, h - margin * 2 );
+        }
+
+        var image = this.precomputeWeightsToImage( this.currentPosition );
+        if( image )
+        {
+            ctx.globalAlpha = 0.5;
+            ctx.imageSmoothingEnabled = false;
+            if( this.circular )
+            {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc( this.circleCenter[ 0 ], this.circleCenter[ 1 ], this.circleRadius, 0, Math.PI * 2 );
+                ctx.clip();
+                ctx.drawImage( image, this.circleCenter[ 0 ] - this.circleRadius, this.circleCenter[ 1 ] - this.circleRadius, this.circleRadius * 2, this.circleRadius * 2 );
+                ctx.restore();
+            }
+            else
+            {
+                ctx.drawImage( image, margin, margin, w - margin * 2, h - margin * 2 );
+            }
+            ctx.imageSmoothingEnabled = true;
+            ctx.globalAlpha = 1;
+        }
+
+        for( let i = 0; i < this.points.length; ++i )
+        {
+            const point = this.points[ i ];
+            let x = point.pos[ 0 ] * 0.5 + 0.5;
+            let y = point.pos[ 1 ] * 0.5 + 0.5;
+            x = x * ( w - margin * 2 ) + margin;
+            y = y * ( h - margin * 2 ) + margin;
+            x = LX.clamp( x, margin, w - margin );
+            y = LX.clamp( y, margin, h - margin );
+            ctx.fillStyle = ( point == this._selectedPoint ) ? "#CDF" : "#BCD";
+            ctx.beginPath();
+            ctx.arc( x, y, 3, 0, Math.PI * 2 );
+            ctx.fill();
+            if( this.showNames )
+            {
+                ctx.fillText( point.name, x + 5, y + 5 );
+            }
+        }
+
+        ctx.fillStyle = "white";
+        ctx.beginPath();
+        var x = this.currentPosition.x * 0.5 + 0.5;
+        var y = this.currentPosition.y * 0.5 + 0.5;
+        x = x * ( w - margin * 2 ) + margin;
+        y = y * ( h - margin * 2 ) + margin;
+        x = LX.clamp( x, margin, w - margin );
+        y = LX.clamp( y, margin, h - margin );
+        ctx.arc( x, y, 4, 0, Math.PI * 2 );
+        ctx.fill();
+    }
+}
+
+LX.CanvasMap2D = CanvasMap2D;
 
 class AssetViewEvent {
 
@@ -14267,7 +14807,7 @@ class AssetView {
 
         for( let i = 0; i < e.dataTransfer.files.length; ++i )
         {
-            const file = e.dataTransfer.files[i];
+            const file = e.dataTransfer.files[ i ];
 
             const result = this.currentData.find( e => e.id === file.name );
             if(result) continue;
@@ -14482,7 +15022,7 @@ Object.assign(LX, {
         if( request.data )
         {
             for( var i in request.data)
-                data.append(i,request.data[i]);
+                data.append(i,request.data[ i ]);
         }
 
         xhr.send( data );
@@ -14547,8 +15087,8 @@ Object.assign(LX, {
             var script = document.createElement('script');
             script.num = i;
             script.type = 'text/javascript';
-            script.src = url[i] + ( version ? "?version=" + version : "" );
-            script.original_src = url[i];
+            script.src = url[ i ] + ( version ? "?version=" + version : "" );
+            script.original_src = url[ i ];
             script.async = false;
             script.onload = function( e ) {
                 total--;
@@ -14567,7 +15107,7 @@ Object.assign(LX, {
                 script.onerror = function(err) {
                     onError(err, this.original_src, this.num );
                 }
-            document.getElementsByTagName('head')[0].appendChild(script);
+            document.getElementsByTagName('head')[ 0 ].appendChild(script);
         }
     },
 
@@ -14738,13 +15278,13 @@ LX.UTILS = {
         // Draw an open curve, not connected at the ends
         for( var i = 0; i < (n - 4); i += 2 )
         {
-            cp = cp.concat(LX.UTILS.getControlPoints(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
+            cp = cp.concat(LX.UTILS.getControlPoints(pts[ i ],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
         }
 
         for( var i = 2; i < ( pts.length - 5 ); i += 2 )
         {
             ctx.beginPath();
-            ctx.moveTo(pts[i], pts[i+1]);
+            ctx.moveTo(pts[ i ], pts[i+1]);
             ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
             ctx.stroke();
             ctx.closePath();
@@ -14767,7 +15307,7 @@ LX.UTILS = {
     }
 };
 
-LX.ICONS = {
+const RAW_ICONS = {
     // Internals
     "Clone": [512, 512, [], "regular", "M64 464l224 0c8.8 0 16-7.2 16-16l0-64 48 0 0 64c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 224c0-35.3 28.7-64 64-64l64 0 0 48-64 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16zM224 304l224 0c8.8 0 16-7.2 16-16l0-224c0-8.8-7.2-16-16-16L224 48c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16zm-64-16l0-224c0-35.3 28.7-64 64-64L448 0c35.3 0 64 28.7 64 64l0 224c0 35.3-28.7 64-64 64l-224 0c-35.3 0-64-28.7-64-64z"],
     "IdBadge": [384, 512, [], "regular", "M256 48l0 16c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32-14.3-32-32l0-16L64 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16l0-384c0-8.8-7.2-16-16-16l-64 0zM0 64C0 28.7 28.7 0 64 0L320 0c35.3 0 64 28.7 64 64l0 384c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64zM160 320l64 0c44.2 0 80 35.8 80 80c0 8.8-7.2 16-16 16L96 416c-8.8 0-16-7.2-16-16c0-44.2 35.8-80 80-80zm-32-96a64 64 0 1 1 128 0 64 64 0 1 1 -128 0z"],
@@ -14784,8 +15324,7 @@ LX.ICONS = {
     "ClosedCaptioning": [576, 512, ["CC"], "regular", "M512 80c8.8 0 16 7.2 16 16l0 320c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16L48 96c0-8.8 7.2-16 16-16l448 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l448 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zM200 208c14.2 0 27 6.1 35.8 16c8.8 9.9 24 10.7 33.9 1.9s10.7-24 1.9-33.9c-17.5-19.6-43.1-32-71.5-32c-53 0-96 43-96 96s43 96 96 96c28.4 0 54-12.4 71.5-32c8.8-9.9 8-25-1.9-33.9s-25-8-33.9 1.9c-8.8 9.9-21.6 16-35.8 16c-26.5 0-48-21.5-48-48s21.5-48 48-48zm144 48c0-26.5 21.5-48 48-48c14.2 0 27 6.1 35.8 16c8.8 9.9 24 10.7 33.9 1.9s10.7-24 1.9-33.9c-17.5-19.6-43.1-32-71.5-32c-53 0-96 43-96 96s43 96 96 96c28.4 0 54-12.4 71.5-32c8.8-9.9 8-25-1.9-33.9s-25-8-33.9 1.9c-8.8 9.9-21.6 16-35.8 16c-26.5 0-48-21.5-48-48z"],
     "ChildReaching": [384, 512, [], "solid", "M256 64A64 64 0 1 0 128 64a64 64 0 1 0 128 0zM152.9 169.3c-23.7-8.4-44.5-24.3-58.8-45.8L74.6 94.2C64.8 79.5 45 75.6 30.2 85.4s-18.7 29.7-8.9 44.4L40.9 159c18.1 27.1 42.8 48.4 71.1 62.4L112 480c0 17.7 14.3 32 32 32s32-14.3 32-32l0-96 32 0 0 96c0 17.7 14.3 32 32 32s32-14.3 32-32l0-258.4c29.1-14.2 54.4-36.2 72.7-64.2l18.2-27.9c9.6-14.8 5.4-34.6-9.4-44.3s-34.6-5.5-44.3 9.4L291 122.4c-21.8 33.4-58.9 53.6-98.8 53.6c-12.6 0-24.9-2-36.6-5.8c-.9-.3-1.8-.7-2.7-.9z"],
     "HourglassHalf": [384, 512, [], "regular", "M0 24C0 10.7 10.7 0 24 0L360 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-8 0 0 19c0 40.3-16 79-44.5 107.5L225.9 256l81.5 81.5C336 366 352 404.7 352 445l0 19 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24L24 512c-13.3 0-24-10.7-24-24s10.7-24 24-24l8 0 0-19c0-40.3 16-79 44.5-107.5L158.1 256 76.5 174.5C48 146 32 107.3 32 67l0-19-8 0C10.7 48 0 37.3 0 24zM110.5 371.5c-3.9 3.9-7.5 8.1-10.7 12.5l184.4 0c-3.2-4.4-6.8-8.6-10.7-12.5L192 289.9l-81.5 81.5zM284.2 128C297 110.4 304 89 304 67l0-19L80 48l0 19c0 22.1 7 43.4 19.8 61l184.4 0z"],
-    "PaperPlane": [512, 512, [], "regular", "M16.1 260.2c-22.6 12.9-20.5 47.3 3.6 57.3L160 376l0 103.3c0 18.1 14.6 32.7 32.7 32.7c9.7 0 18.9-4.3 25.1-11.8l62-74.3 123.9 51.6c18.9 7.9 40.8-4.5 43.9-24.7l64-416c1.9-12.1-3.4-24.3-13.5-31.2s-23.3-7.5-34-1.4l-448 256zm52.1 25.5L409.7 90.6 190.1 336l1.2 1L68.2 285.7zM403.3 425.4L236.7 355.9 450.8 116.6 403.3 425.4z"],
-    // "PaperPlane": [512, 512, [], "solid", "M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480l0-83.6c0-4 1.5-7.8 4.2-10.8L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3 .3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z"],
+    "PaperPlane": [512, 512, [], "regular", "M16.1 260.2c-22.6 12.9-20.5 47.3 3.6 57.3L160 376l0 103.3c0 18.1 14.6 32.7 32.7 32.7c9.7 0 18.9-4.3 25.1-11.8l62-74.3 123.9 51.6c18.9 7.9 40.8-4.5 43.9-24.7l64-416c1.9-12.1-3.4-24.3-13.5-31.2s-23.3-7.5-34-1.4l-448 256zm52.1 25.5L409.7 90.6 190.1 336l1.2 1L68.2 285.7zM403.3 425.4L236.7 355.9 450.8 116.6 403.3 425.4z"],    
     "Axis3DArrows": [24, 24, [], "solid", "m12 2l4 4h-3v7.85l6.53 3.76L21 15.03l1.5 5.47l-5.5 1.46l1.53-2.61L12 15.58l-6.53 3.77L7 21.96L1.5 20.5L3 15.03l1.47 2.58L11 13.85V6H8z"],
     "PersonWalkingDashedLineArrowRight": [640, 512, [], "solid", "M208 96a48 48 0 1 0 0-96 48 48 0 1 0 0 96zM123.7 200.5c1-.4 1.9-.8 2.9-1.2l-16.9 63.5c-5.6 21.1-.1 43.6 14.7 59.7l70.7 77.1 22 88.1c4.3 17.1 21.7 27.6 38.8 23.3s27.6-21.7 23.3-38.8l-23-92.1c-1.9-7.8-5.8-14.9-11.2-20.8l-49.5-54 19.3-65.5 9.6 23c4.4 10.6 12.5 19.3 22.8 24.5l26.7 13.3c15.8 7.9 35 1.5 42.9-14.3s1.5-35-14.3-42.9L281 232.7l-15.3-36.8C248.5 154.8 208.3 128 163.7 128c-22.8 0-45.3 4.8-66.1 14l-8 3.5c-32.9 14.6-58.1 42.4-69.4 76.5l-2.6 7.8c-5.6 16.8 3.5 34.9 20.2 40.5s34.9-3.5 40.5-20.2l2.6-7.8c5.7-17.1 18.3-30.9 34.7-38.2l8-3.5zm-30 135.1L68.7 398 9.4 457.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L116.3 441c4.6-4.6 8.2-10.1 10.6-16.1l14.5-36.2-40.7-44.4c-2.5-2.7-4.8-5.6-7-8.6zM550.6 153.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L530.7 224 384 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l146.7 0-25.4 25.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l80-80c12.5-12.5 12.5-32.8 0-45.3l-80-80zM392 0c-13.3 0-24 10.7-24 24l0 48c0 13.3 10.7 24 24 24s24-10.7 24-24l0-48c0-13.3-10.7-24-24-24zm24 152c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 16c0 13.3 10.7 24 24 24s24-10.7 24-24l0-16zM392 320c-13.3 0-24 10.7-24 24l0 16c0 13.3 10.7 24 24 24s24-10.7 24-24l0-16c0-13.3-10.7-24-24-24zm24 120c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 48c0 13.3 10.7 24 24 24s24-10.7 24-24l0-48z"],
     "PersonWalkingArrowLoopLeft": [640, 512, [], "solid", "M208 96a48 48 0 1 0 0-96 48 48 0 1 0 0 96zM123.7 200.5c1-.4 1.9-.8 2.9-1.2l-16.9 63.5c-5.6 21.1-.1 43.6 14.7 59.7l70.7 77.1 22 88.1c4.3 17.1 21.7 27.6 38.8 23.3s27.6-21.7 23.3-38.8l-23-92.1c-1.9-7.8-5.8-14.9-11.2-20.8l-49.5-54 19.3-65.5 9.6 23c4.4 10.6 12.5 19.3 22.8 24.5l26.7 13.3c15.8 7.9 35 1.5 42.9-14.3s1.5-35-14.3-42.9L281 232.7l-15.3-36.8C248.5 154.8 208.3 128 163.7 128c-22.8 0-45.3 4.8-66.1 14l-8 3.5c-32.9 14.6-58.1 42.4-69.4 76.5l-2.6 7.8c-5.6 16.8 3.5 34.9 20.2 40.5s34.9-3.5 40.5-20.2l2.6-7.8c5.7-17.1 18.3-30.9 34.7-38.2l8-3.5zm-30 135.1L68.7 398 9.4 457.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L116.3 441c4.6-4.6 8.2-10.1 10.6-16.1l14.5-36.2-40.7-44.4c-2.5-2.7-4.8-5.6-7-8.6zm347.7 119c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L461.3 384l18.7 0c88.4 0 160-71.6 160-160s-71.6-160-160-160L352 64c-17.7 0-32 14.3-32 32s14.3 32 32 32l128 0c53 0 96 43 96 96s-43 96-96 96l-18.7 0 25.4-25.4c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-80 80c-12.5 12.5-12.5 32.8 0 45.3l80 80z"],
@@ -14805,10 +15344,10 @@ LX.ICONS = {
     "HandLizard": [512, 512, [], "regular", "M72 112c-13.3 0-24 10.7-24 24s10.7 24 24 24l168 0c35.3 0 64 28.7 64 64s-28.7 64-64 64l-104 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l152 0c4.5 0 8.9 1.3 12.7 3.6l64 40c7 4.4 11.3 12.1 11.3 20.4l0 24c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-10.7L281.1 384 136 384c-39.8 0-72-32.2-72-72s32.2-72 72-72l104 0c8.8 0 16-7.2 16-16s-7.2-16-16-16L72 208c-39.8 0-72-32.2-72-72S32.2 64 72 64l209.6 0c46.7 0 90.9 21.5 119.7 58.3l78.4 100.1c20.9 26.7 32.3 59.7 32.3 93.7L512 424c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-107.9c0-23.2-7.8-45.8-22.1-64.1L363.5 151.9c-19.7-25.2-49.9-39.9-81.9-39.9L72 112z"],
     "HandPeace": [512, 512, [], "regular", "M250.8 1.4c-35.2-3.7-66.6 21.8-70.3 57L174 119 156.7 69.6C145 36.3 108.4 18.8 75.1 30.5S24.2 78.8 35.9 112.1L88.7 262.2C73.5 276.7 64 297.3 64 320c0 0 0 0 0 0l0 24c0 92.8 75.2 168 168 168l48 0c92.8 0 168-75.2 168-168l0-72 0-16 0-32c0-35.3-28.7-64-64-64c-7.9 0-15.4 1.4-22.4 4c-10.4-21.3-32.3-36-57.6-36c-.7 0-1.5 0-2.2 0l5.9-56.3c3.7-35.2-21.8-66.6-57-70.3zm-.2 155.4C243.9 166.9 240 179 240 192l0 48c0 .7 0 1.4 0 2c-5.1-1.3-10.5-2-16-2l-7.4 0-5.4-15.3 17-161.3c.9-8.8 8.8-15.2 17.6-14.2s15.2 8.8 14.2 17.6l-9.5 90.1zM111.4 85.6L165.7 240 144 240c-4 0-8 .3-11.9 .9L81.2 96.2c-2.9-8.3 1.5-17.5 9.8-20.4s17.5 1.5 20.4 9.8zM288 192c0-8.8 7.2-16 16-16s16 7.2 16 16l0 32 0 16c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-48zm38.4 108c10.4 21.3 32.3 36 57.6 36c5.5 0 10.9-.7 16-2l0 10c0 66.3-53.7 120-120 120l-48 0c-66.3 0-120-53.7-120-120l0-24s0 0 0 0c0-17.7 14.3-32 32-32l80 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-40 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l40 0c35.3 0 64-28.7 64-64c0-.7 0-1.4 0-2c5.1 1.3 10.5 2 16 2c7.9 0 15.4-1.4 22.4-4zM400 272c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-32 0-16c0-8.8 7.2-16 16-16s16 7.2 16 16l0 32 0 16z"],
     "CircleNodes": [512, 512, [], "solid", "M418.4 157.9c35.3-8.3 61.6-40 61.6-77.9c0-44.2-35.8-80-80-80c-43.4 0-78.7 34.5-80 77.5L136.2 151.1C121.7 136.8 101.9 128 80 128c-44.2 0-80 35.8-80 80s35.8 80 80 80c12.2 0 23.8-2.7 34.1-7.6L259.7 407.8c-2.4 7.6-3.7 15.8-3.7 24.2c0 44.2 35.8 80 80 80s80-35.8 80-80c0-27.7-14-52.1-35.4-66.4l37.8-207.7zM156.3 232.2c2.2-6.9 3.5-14.2 3.7-21.7l183.8-73.5c3.6 3.5 7.4 6.7 11.6 9.5L317.6 354.1c-5.5 1.3-10.8 3.1-15.8 5.5L156.3 232.2z"],
-    "CircleRight": [512, 512, [], "solid", "M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM294.6 151.2c-4.2-4.6-10.1-7.2-16.4-7.2C266 144 256 154 256 166.3l0 41.7-96 0c-17.7 0-32 14.3-32 32l0 32c0 17.7 14.3 32 32 32l96 0 0 41.7c0 12.3 10 22.3 22.3 22.3c6.2 0 12.1-2.6 16.4-7.2l84-91c3.5-3.8 5.4-8.7 5.4-13.9s-1.9-10.1-5.4-13.9l-84-91z"],
-    "CircleUp": [512, 512, [], "solid", "M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM151.2 217.4c-4.6 4.2-7.2 10.1-7.2 16.4c0 12.3 10 22.3 22.3 22.3l41.7 0 0 96c0 17.7 14.3 32 32 32l32 0c17.7 0 32-14.3 32-32l0-96 41.7 0c12.3 0 22.3-10 22.3-22.3c0-6.2-2.6-12.1-7.2-16.4l-91-84c-3.8-3.5-8.7-5.4-13.9-5.4s-10.1 1.9-13.9 5.4l-91 84z"],
-    "CircleLeft": [512, 512, [], "solid", "M48 256a208 208 0 1 1 416 0A208 208 0 1 1 48 256zm464 0A256 256 0 1 0 0 256a256 256 0 1 0 512 0zM217.4 376.9c4.2 4.5 10.1 7.1 16.3 7.1c12.3 0 22.3-10 22.3-22.3l0-57.7 96 0c17.7 0 32-14.3 32-32l0-32c0-17.7-14.3-32-32-32l-96 0 0-57.7c0-12.3-10-22.3-22.3-22.3c-6.2 0-12.1 2.6-16.3 7.1L117.5 242.2c-3.5 3.8-5.5 8.7-5.5 13.8s2 10.1 5.5 13.8l99.9 107.1z"],
-    "CircleDown": [512, 512, [], "solid", "M256 464a208 208 0 1 1 0-416 208 208 0 1 1 0 416zM256 0a256 256 0 1 0 0 512A256 256 0 1 0 256 0zM376.9 294.6c4.5-4.2 7.1-10.1 7.1-16.3c0-12.3-10-22.3-22.3-22.3L304 256l0-96c0-17.7-14.3-32-32-32l-32 0c-17.7 0-32 14.3-32 32l0 96-57.7 0C138 256 128 266 128 278.3c0 6.2 2.6 12.1 7.1 16.3l107.1 99.9c3.8 3.5 8.7 5.5 13.8 5.5s10.1-2 13.8-5.5l107.1-99.9z"],
+    "CircleRight": [512, 512, [], "regular", "M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM294.6 151.2c-4.2-4.6-10.1-7.2-16.4-7.2C266 144 256 154 256 166.3l0 41.7-96 0c-17.7 0-32 14.3-32 32l0 32c0 17.7 14.3 32 32 32l96 0 0 41.7c0 12.3 10 22.3 22.3 22.3c6.2 0 12.1-2.6 16.4-7.2l84-91c3.5-3.8 5.4-8.7 5.4-13.9s-1.9-10.1-5.4-13.9l-84-91z"],
+    "CircleUp": [512, 512, [], "regular", "M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM151.2 217.4c-4.6 4.2-7.2 10.1-7.2 16.4c0 12.3 10 22.3 22.3 22.3l41.7 0 0 96c0 17.7 14.3 32 32 32l32 0c17.7 0 32-14.3 32-32l0-96 41.7 0c12.3 0 22.3-10 22.3-22.3c0-6.2-2.6-12.1-7.2-16.4l-91-84c-3.8-3.5-8.7-5.4-13.9-5.4s-10.1 1.9-13.9 5.4l-91 84z"],
+    "CircleLeft": [512, 512, [], "regular", "M48 256a208 208 0 1 1 416 0A208 208 0 1 1 48 256zm464 0A256 256 0 1 0 0 256a256 256 0 1 0 512 0zM217.4 376.9c4.2 4.5 10.1 7.1 16.3 7.1c12.3 0 22.3-10 22.3-22.3l0-57.7 96 0c17.7 0 32-14.3 32-32l0-32c0-17.7-14.3-32-32-32l-96 0 0-57.7c0-12.3-10-22.3-22.3-22.3c-6.2 0-12.1 2.6-16.3 7.1L117.5 242.2c-3.5 3.8-5.5 8.7-5.5 13.8s2 10.1 5.5 13.8l99.9 107.1z"],
+    "CircleDown": [512, 512, [], "regular", "M256 464a208 208 0 1 1 0-416 208 208 0 1 1 0 416zM256 0a256 256 0 1 0 0 512A256 256 0 1 0 256 0zM376.9 294.6c4.5-4.2 7.1-10.1 7.1-16.3c0-12.3-10-22.3-22.3-22.3L304 256l0-96c0-17.7-14.3-32-32-32l-32 0c-17.7 0-32 14.3-32 32l0 96-57.7 0C138 256 128 266 128 278.3c0 6.2 2.6 12.1 7.1 16.3l107.1 99.9c3.8 3.5 8.7 5.5 13.8 5.5s10.1-2 13.8-5.5l107.1-99.9z"],
     "WindowRestore": [512, 512, [], "solid", "M432 48L208 48c-17.7 0-32 14.3-32 32l0 16-48 0 0-16c0-44.2 35.8-80 80-80L432 0c44.2 0 80 35.8 80 80l0 224c0 44.2-35.8 80-80 80l-16 0 0-48 16 0c17.7 0 32-14.3 32-32l0-224c0-17.7-14.3-32-32-32zM48 448c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16l0-192L48 256l0 192zM64 128l256 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 192c0-35.3 28.7-64 64-64z"],
     "WindowMaximize": [512, 512, [], "solid", "M.3 89.5C.1 91.6 0 93.8 0 96L0 224 0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-192 0-128c0-35.3-28.7-64-64-64L64 32c-2.2 0-4.4 .1-6.5 .3c-9.2 .9-17.8 3.8-25.5 8.2C21.8 46.5 13.4 55.1 7.7 65.5c-3.9 7.3-6.5 15.4-7.4 24zM48 224l416 0 0 192c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16l0-192z"],
     "WindowMinimize": [512, 512, [], "solid", "M24 432c-13.3 0-24 10.7-24 24s10.7 24 24 24l464 0c13.3 0 24-10.7 24-24s-10.7-24-24-24L24 432z"],
@@ -14879,7 +15418,6 @@ LX.ICONS = {
     "Shuffle": [512, 512, [], "solid", "M403.8 34.4c12-5 25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6l0-32-32 0c-10.1 0-19.6 4.7-25.6 12.8L284 229.3 244 176l31.2-41.6C293.3 110.2 321.8 96 352 96l32 0 0-32c0-12.9 7.8-24.6 19.8-29.6zM164 282.7L204 336l-31.2 41.6C154.7 401.8 126.2 416 96 416l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l64 0c10.1 0 19.6-4.7 25.6-12.8L164 282.7zm274.6 188c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6l0-32-32 0c-30.2 0-58.7-14.2-76.8-38.4L121.6 172.8c-6-8.1-15.5-12.8-25.6-12.8l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l64 0c30.2 0 58.7 14.2 76.8 38.4L326.4 339.2c6 8.1 15.5 12.8 25.6 12.8l32 0 0-32c0-12.9 7.8-24.6 19.8-29.6s25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64z"],
     "Play": [384, 512, [], "solid", "M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80L0 432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"],
     "Pause": [320, 512, [], "solid", "M48 64C21.5 64 0 85.5 0 112L0 400c0 26.5 21.5 48 48 48l32 0c26.5 0 48-21.5 48-48l0-288c0-26.5-21.5-48-48-48L48 64zm192 0c-26.5 0-48 21.5-48 48l0 288c0 26.5 21.5 48 48 48l32 0c26.5 0 48-21.5 48-48l0-288c0-26.5-21.5-48-48-48l-32 0z"],
-    "PlusCircle": [512, 512, [], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344l0-64-64 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l64 0 0-64c0-13.3 10.7-24 24-24s24 10.7 24 24l0 64 64 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-64 0 0 64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"],
     "LogIn": [512, 512, [], "solid", "M352 96l64 0c17.7 0 32 14.3 32 32l0 256c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0c53 0 96-43 96-96l0-256c0-53-43-96-96-96l-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32zm-9.4 182.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L242.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128z"],
     "LogOut": [512, 512, [], "solid", "M502.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 224 192 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128zM160 96c17.7 0 32-14.3 32-32s-14.3-32-32-32L96 32C43 32 0 75 0 128L0 384c0 53 43 96 96 96l64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32l64 0z"],
     "MousePointer": [320, 512, [], "solid", "M0 55.2L0 426c0 12.2 9.9 22 22 22c6.3 0 12.4-2.7 16.6-7.5L121.2 346l58.1 116.3c7.9 15.8 27.1 22.2 42.9 14.3s22.2-27.1 14.3-42.9L179.8 320l118.1 0c12.2 0 22.1-9.9 22.1-22.1c0-6.3-2.7-12.3-7.4-16.5L38.6 37.9C34.3 34.1 28.9 32 23.2 32C10.4 32 0 42.4 0 55.2z"],
@@ -14889,28 +15427,47 @@ LX.ICONS = {
     "CircleCheck": [512, 512, ["CheckCircle2"], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"],
     "CirclePlay": [512, 512, [], "solid", "M0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zM188.3 147.1c-7.6 4.2-12.3 12.3-12.3 20.9l0 176c0 8.7 4.7 16.7 12.3 20.9s16.8 4.1 24.3-.5l144-88c7.1-4.4 11.5-12.1 11.5-20.5s-4.4-16.1-11.5-20.5l-144-88c-7.4-4.5-16.7-4.7-24.3-.5z"],
     "CirclePause": [512, 512, [], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM224 192l0 128c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-128c0-17.7 14.3-32 32-32s32 14.3 32 32zm128 0l0 128c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-128c0-17.7 14.3-32 32-32s32 14.3 32 32z"],
+    "CirclePlus": [512, 512, ["PlusCircle"], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344l0-64-64 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l64 0 0-64c0-13.3 10.7-24 24-24s24 10.7 24 24l0 64 64 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-64 0 0 64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"],
+    "CircleMinus": [512, 512, ["MinusCircle"], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM184 232l144 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-144 0c-13.3 0-24-10.7-24-24s10.7-24 24-24z"],
     "CircleStop": [512, 512, [], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM192 160l128 0c17.7 0 32 14.3 32 32l0 128c0 17.7-14.3 32-32 32l-128 0c-17.7 0-32-14.3-32-32l0-128c0-17.7 14.3-32 32-32z"],
     "CircleDot": [512, 512, [], "solid", "M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm256-96a96 96 0 1 1 0 192 96 96 0 1 1 0-192z"],
     "CircleHelp": [512, 512, ["HelpCircle"], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM169.8 165.3c7.9-22.3 29.1-37.3 52.8-37.3l58.3 0c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L280 264.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24l0-13.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1l-58.3 0c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"],
+    "CircleArrowUp": [512, 512, ["ArrowUpCircle"], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM385 215c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-71-71L280 392c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-214.1-71 71c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9L239 103c9.4-9.4 24.6-9.4 33.9 0L385 215z"],
+    "CircleArrowDown": [512, 512, ["ArrowDownCircle"], "solid", "M256 0a256 256 0 1 0 0 512A256 256 0 1 0 256 0zM127 297c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l71 71L232 120c0-13.3 10.7-24 24-24s24 10.7 24 24l0 214.1 71-71c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9L273 409c-9.4 9.4-24.6 9.4-33.9 0L127 297z"],
+    "CircleArrowLeft": [512, 512, ["ArrowLeftCircle"], "solid", "M512 256A256 256 0 1 0 0 256a256 256 0 1 0 512 0zM215 127c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-71 71L392 232c13.3 0 24 10.7 24 24s-10.7 24-24 24l-214.1 0 71 71c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0L103 273c-9.4-9.4-9.4-24.6 0-33.9L215 127z"],
+    "CircleArrowRight": [512, 512, ["ArrowRightCircle"], "solid", "M0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM297 385c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l71-71L120 280c-13.3 0-24-10.7-24-24s10.7-24 24-24l214.1 0-71-71c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0L409 239c9.4 9.4 9.4 24.6 0 33.9L297 385z"],
+    "CircleAlert": [512, 512, ["AlertCircle"], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24l0 112c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-112c0-13.3 10.7-24 24-24zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"],
+    "CircleUser": [512, 512, ["UserCircle"], "solid", "M399 384.2C376.9 345.8 335.4 320 288 320l-64 0c-47.4 0-88.9 25.8-111 64.2c35.2 39.2 86.2 63.8 143 63.8s107.8-24.7 143-63.8zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm256 16a72 72 0 1 0 0-144 72 72 0 1 0 0 144z"],
+    "CircleChevronRight": [512, 512, ["ChevronRightCircle"], "solid", "M0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM241 377c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l87-87-87-87c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0L345 239c9.4 9.4 9.4 24.6 0 33.9L241 377z"],
+    "CircleChevronDown": [512, 512, ["ChevronDownCircle"], "solid", "M256 0a256 256 0 1 0 0 512A256 256 0 1 0 256 0zM135 241c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l87 87 87-87c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9L273 345c-9.4 9.4-24.6 9.4-33.9 0L135 241z"],
+    "CircleChevronUp": [512, 512, ["ChevronUpCircle"], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM377 271c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-87-87-87 87c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9L239 167c9.4-9.4 24.6-9.4 33.9 0L377 271z"],
+    "CircleChevronLeft": [512, 512, ["ChevronLeftCircle"], "solid", "M512 256A256 256 0 1 0 0 256a256 256 0 1 0 512 0zM271 135c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-87 87 87 87c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0L167 273c-9.4-9.4-9.4-24.6 0-33.9L271 135z"],
+    "CircleX": [512, 512, ["XCircle"], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"],
     "Apple": [384, 512, [], "solid", "M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"],
     "Chrome": [512, 512, [], "solid", "M0 256C0 209.4 12.47 165.6 34.27 127.1L144.1 318.3C166 357.5 207.9 384 256 384C270.3 384 283.1 381.7 296.8 377.4L220.5 509.6C95.9 492.3 0 385.3 0 256zM365.1 321.6C377.4 302.4 384 279.1 384 256C384 217.8 367.2 183.5 340.7 160H493.4C505.4 189.6 512 222.1 512 256C512 397.4 397.4 511.1 256 512L365.1 321.6zM477.8 128H256C193.1 128 142.3 172.1 130.5 230.7L54.19 98.47C101 38.53 174 0 256 0C350.8 0 433.5 51.48 477.8 128V128zM168 256C168 207.4 207.4 168 256 168C304.6 168 344 207.4 344 256C344 304.6 304.6 344 256 344C207.4 344 168 304.6 168 256z"],
     "Facebook": [512, 512, [], "solid", "M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256C0 376 82.7 476.8 194.2 504.5V334.2H141.4V256h52.8V222.3c0-87.1 39.4-127.5 125-127.5c16.2 0 44.2 3.2 55.7 6.4V172c-6-.6-16.5-1-29.6-1c-42 0-58.2 15.9-58.2 57.2V256h83.6l-14.4 78.2H287V510.1C413.8 494.8 512 386.9 512 256h0z"],
     "Github": [496, 512, [], "solid", "M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"],
     "Youtube": [576, 512, [], "solid", "M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"],
-    // Some Aliases
-    "VR": "VrCardboard",
-    "Script": "Scroll",
-    "Media": "PhotoFilm",
-    "CC": "ClosedCaptioning",
-    "ASL": "HandsAslInterpreting",
-    "HandRock": "HandBackFist",
-    "Chain": "Link",
-    "ChainBroken": "LinkOff",
-    "ChainOff": "LinkOff",
-    "Unlink": "LinkOff",
-    "HelpCircle": "CircleHelp",
-    "CheckCircle2": "CircleCheck"
+    "CircleRight@solid": [512, 512, [], "solid", "M0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zm395.3 11.3l-112 112c-4.6 4.6-11.5 5.9-17.4 3.5s-9.9-8.3-9.9-14.8l0-64-96 0c-17.7 0-32-14.3-32-32l0-32c0-17.7 14.3-32 32-32l96 0 0-64c0-6.5 3.9-12.3 9.9-14.8s12.9-1.1 17.4 3.5l112 112c6.2 6.2 6.2 16.4 0 22.6z"],
+    "CircleUp@solid": [512, 512, [], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm11.3-395.3l112 112c4.6 4.6 5.9 11.5 3.5 17.4s-8.3 9.9-14.8 9.9l-64 0 0 96c0 17.7-14.3 32-32 32l-32 0c-17.7 0-32-14.3-32-32l0-96-64 0c-6.5 0-12.3-3.9-14.8-9.9s-1.1-12.9 3.5-17.4l112-112c6.2-6.2 16.4-6.2 22.6 0z"],
+    "CircleLeft@solid": [512, 512, [], "solid", "M512 256A256 256 0 1 0 0 256a256 256 0 1 0 512 0zM116.7 244.7l112-112c4.6-4.6 11.5-5.9 17.4-3.5s9.9 8.3 9.9 14.8l0 64 96 0c17.7 0 32 14.3 32 32l0 32c0 17.7-14.3 32-32 32l-96 0 0 64c0 6.5-3.9 12.3-9.9 14.8s-12.9 1.1-17.4-3.5l-112-112c-6.2-6.2-6.2-16.4 0-22.6z"],
+    "CircleDown@solid": [512, 512, [], "solid", "M256 0a256 256 0 1 0 0 512A256 256 0 1 0 256 0zM244.7 395.3l-112-112c-4.6-4.6-5.9-11.5-3.5-17.4s8.3-9.9 14.8-9.9l64 0 0-96c0-17.7 14.3-32 32-32l32 0c17.7 0 32 14.3 32 32l0 96 64 0c6.5 0 12.3 3.9 14.8 9.9s1.1 12.9-3.5 17.4l-112 112c-6.2 6.2-16.4 6.2-22.6 0z"],
+    "PaperPlane@solid": [512, 512, [], "solid", "M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480l0-83.6c0-4 1.5-7.8 4.2-10.8L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3 .3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z"],
 }
+
+// Generate Alias icons
+
+LX.ICONS = (() => {
+    const aliasIcons = {};
+
+    for( let i in RAW_ICONS )
+    {
+        const aliases = RAW_ICONS[ i ][ 2 ];
+        aliases.forEach( a => aliasIcons[ a ] = i );
+    }
+
+    return { ...RAW_ICONS, ...aliasIcons };
+})();
 
 // Alias for Lucide Icons
 LX.LucideIconAlias = {

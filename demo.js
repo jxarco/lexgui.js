@@ -7,11 +7,11 @@ window.LX = LX;
 
 const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
 
-
 // Menubar
 {
     const menubar = area.addMenubar( [
-        { name: "Docs", icon: "search", kbd: "F1", callback: () => { window.open("./docs/") } }
+        { name: "Docs", callback: () => { window.open("./docs/") } },
+        { name: "Examples", callback: () => { window.open("./examples/") } },
     ] );
 
     menubar.setButtonImage("lexgui.js", "images/icon.png", () => {window.open("https://jxarco.github.io/lexgui.js/")}, {float: "left"})
@@ -173,7 +173,7 @@ const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
                                 'actions': [
                                     {
                                         'name': 'Open script',
-                                        'icon': 'Script'
+                                        'icon': 'Scroll'
                                     }
                                 ]
                             }
@@ -235,6 +235,18 @@ const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
             panel.addText("Name", "node_1");
             panel.addCheckbox("Visibility", true, null, { className: "accent" });
             panel.addLayers("Layers", 10, null);
+
+            const map2Dpoints = [
+                { "name": "angry", "pos": [-0.29348334680286725,-0.8813498603327697] },
+                { "name": "happy", "pos": [0.5728906393051147,-0.2508566975593567] },
+                { "name": "sad", "pos": [-0.542498156289837,0.3795300176749039] },
+                { "name": "calm", "pos": [0.46099435955317536,0.6203009288162395] },
+                { "name": "bored", "pos": [-0.349232931016368,0.8103832270857154] },
+                { "name": "frustrated", "pos": [-0.49046521102390306,-0.5708814736724744] },
+                { "name": "smile", "pos": [0.5762101669277435,0.20211987262339348] },
+                { "name": "upset", "pos": [-0.5796645457655041,-0.1907168771335228] }
+            ];
+            panel.addMap2D("Map2D", map2Dpoints, null, { size: [ 300, 300 ] });
 
             panel.addTitle( "Transform" );
             panel.addVector3( "Position", [0.0, 0.0, 0.0] );
@@ -361,7 +373,7 @@ const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
         {
             // Buttons
             {
-                const mailPreviewHeader = LX.makeContainer( [ "100%", "59.59px" ], "flex flex-row border-bottom p-1", "", right );
+                const mailPreviewHeader = LX.makeContainer( [ "100%", "43.5px" ], "flex flex-row border-bottom p-1", "", right );
 
                 mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Archive", tooltip: true, buttonClass: "bg-none", icon: "Archive" } ).root );
                 mailPreviewHeader.appendChild( new LX.Button( null, "", null, { title: "Move to junk", tooltip: true, buttonClass: "bg-none", icon: "ArchiveX" } ).root );
@@ -421,7 +433,7 @@ const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
                         LX.toast( "Message sent!", "To:" + mail.email, { timeout: 5000, action: { name: "Undo", callback: ( toast, actionName, event ) => {
                             toast.close();
                         } } } );
-                    }, { className: "ml-auto", buttonClass: "contrast" } );
+                    }, { className: "ml-auto", buttonClass: "contrast px-2" } );
                     previewButtons.appendChild( sendButton.root );
                 };
             }
@@ -439,17 +451,17 @@ const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
         `, tasksContainer );
 
         const tableWidget = new LX.Table(null, {
-            head: ["Name", "Status", "Priority"],
+            head: [ "Name", "Status", "Priority", "ID" ],
             body: [
-                ["Alice", "In Progress", "High"],
-                ["Bob", "Backlog", "Medium"],
-                ["Prince", "Canceled", "Low"],
-                ["Sean", "Done", "High"],
-                ["Carter", "In Progress", "Medium"],
-                ["James", "Backlog", "Low"],
-                ["Mickey", "Todo", "Low"],
-                ["Charlie", "Canceled", "Low"],
-                ["Potato", "Todo", "High"]
+                [ "Alice", "In Progress", "High", 1 ],
+                [ "Bob", "Backlog", "Medium", 2 ],
+                [ "Prince", "Canceled", "Low", 3 ],
+                [ "Sean", "Done", "High", 4 ],
+                [ "Carter", "In Progress", "Medium", 5 ],
+                [ "James", "Backlog", "Low", 6 ],
+                [ "Mickey", "Todo", "Low", 7 ],
+                [ "Charlie", "Canceled", "Low", 8 ],
+                [ "Potato", "Todo", "High", 9 ]
             ]
         }, {
             selectable: true,
@@ -459,6 +471,7 @@ const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
             customFilters: [
                 { name: "Status", options: ["Backlog", "Todo", "In Progress", "Done", "Cancelled"] },
                 { name: "Priority", options: ["Low", "Medium", "High"] },
+                { name: "ID", type: "range", min: 0, max: 9, step: 1, units: "hr" },
             ],
             rowActions: [
                 { icon: "Edit", title: "Edit Row" },
@@ -469,7 +482,9 @@ const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
                 return [
                     { name: "Export" },
                     { name: "Make a copy" },
-                    { name: "Favourite" }
+                    { name: "Favourite" },
+                    null,
+                    { name: "Delete", icon: "Trash2", className: "fg-error" },
                 ]
             }
         });

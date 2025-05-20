@@ -2,7 +2,23 @@
 
 ## dev
 
-## 0.6.2 (master)
+Separate source into files. Generate module using `npm rollup`.
+Fixed making floating branch + docking to panel.
+Fixed graph renaming bug in NodeGraph editor.
+
+## 0.6.3 (master)
+
+Widgets:
+- New Map2D Widget (For NNI).
+- Fixed `NodeTree.select` when item is not shown.
+- Fixed issue corrupting table body when manual sorting in Table Widget.
+
+Fixed `autoTheme` on start with `dark` color scheme.
+Improved Context Menu docs section.
+Added a few more icon solid variants.
+Minor fixes.
+
+## 0.6.2
 
 Widgets:
 - Fixed Title Widget class override.

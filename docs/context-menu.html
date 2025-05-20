@@ -1,11 +1,30 @@
 <script type="text/javascript">
 
-    MAKE_HEADER( "Context Menu", "h1", "context-menu" );
+    const content = document.getElementById( 'content' );
+
+    MAKE_HEADER( "Context and Dropdown Menus", "h1", "context-menu" );
             
-    MAKE_PARAGRAPH( `LexGUI offers a powerful context menu feature that allows you to create customizable context menus with ease. 
-    These menus provide quick access to relevant actions and options based on the user's current context, enhancing the overall user experience.` );
-    MAKE_PARAGRAPH( `LexGUI's context menus can be triggered not only on right-click, but in any custom event or moment is necessary. Call ${INLINE_CODE("LX.addContextMenu(title, event, callback, options)")}
-    to create a Context Menu:` );
+    MAKE_PARAGRAPH( `Context menus provide quick access to relevant actions and options based on the user's current context, enhancing the overall user experience. LexGUI offers two possible ways to create a custom Context Menu.` );
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH( `The first method is to use the ${ INLINE_CODE("LX.addContextMenu(title, event, callback, options)") } function, which allows you to create a reduced Context Menu, 
+    that can be triggered not only on right-click but in any custom event at any place where the mouse/trigger element is.` );
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const button = LX.makeContainer( ["auto", "auto"], "self-center bg-contrast fg-contrast p-2 rounded-lg cursor-pointer", "Click here", area );
+        button.listen( "click", ( event ) => {
+            event.preventDefault();
+            LX.addContextMenu( "Nodes", event, ( m ) => {
+                m.add( "Select Children", () => console.log( "Select children" ) );
+                m.add( "Clone", { color: "#0d5" } );
+                m.add( "Components/Transform" );
+                m.add( "Components/MeshRenderer" );
+                m.add( "Delete" );
+            } );
+        } );
+        content.appendChild( area.root );
+    }
+
     MAKE_CODE( `LX.@[mtd]addContextMenu@( @"Selected Nodes"@, event, m => {
     @[com]// Event is the DOM event that should have position info@
     m.@[mtd]add@( @"Select Children"@, () => console.@[mtd]log@(@"Select children"@) );
@@ -22,6 +41,61 @@
         ["callback", "Action to call when entry is clicked"],
         ["color", "Color of the left border of the entry (e.g. mark specific types of entries)"]
     ] );
+
+    MAKE_LINE_BREAK();
+
+    MAKE_PARAGRAPH( `The second method is to use the ${ INLINE_CODE("LX.addDropdownMenu(trigger, items, options)") } function, which allows you to create a bigger and more customizable Dropdown menu.
+    This menu needs a HTML element as trigger to be opened, and receives a list of items and other options as parameters.` );
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const button = LX.makeContainer( ["auto", "auto"], "self-center bg-contrast fg-contrast p-2 rounded-lg cursor-pointer", "Click here", area );
+        button.listen( "click", ( event ) => {
+            event.preventDefault();
+            LX.addDropdownMenu( button, [
+                "My Account",
+                null,
+                { name: "Profile", kbd: ["Meta", "P"], icon: "User" },
+                { name: "Billing", disabled: true, icon: "CreditCard" },
+                { name: "Settings", kbd: "S" },
+                null,
+                { name: "Team" },
+                { name: "Invite users", icon: "Search" },
+                null,
+                { name: "Github", icon: "Github" },
+                { name: "Support", submenu: [
+                    { name: "Email", icon: "Mail" },
+                    { name: "Message", submenu: [
+                        { name: "Whatsapp", kbd: "W" },
+                        { name: "iMessage", kbd: "M" },
+                    ]},
+                ]  }
+            ], { side: "right", align: "start" });
+        } );
+        content.appendChild( area.root );
+    }
+
+    MAKE_CODE( `LX.@[mtd]addDropdownMenu@( button, [
+    @"My Account"@,
+    @null@,
+    { name: @"Profile"@, kbd: [@"Meta"@, @"P"@], icon: @"User"@ },
+    { name: @"Billing"@, disabled: @true@, icon: @"CreditCard"@ },
+    { name: @"Settings"@, kbd: @"S"@ },
+    @null@,
+    { name: @"Team"@ },
+    { name: @"Invite users"@, icon: @"Search"@ },
+    @null@,
+    { name: @"Github"@, icon: @"Github"@ },
+    { name: @"Support"@, submenu: [
+        { name: @"Email"@, icon: @"Mail"@ },
+        { name: @"Message"@, submenu: [
+            { name: @"Whatsapp"@, kbd: @"W"@ },
+            { name: @"iMessage"@, kbd: @"M"@ },
+        ]},
+    ]  }
+], { side: @"right"@, align: @"start"@ });` );
+
+    MAKE_PARAGRAPH( `As options, you can set ${ INLINE_CODE("side") } and ${ INLINE_CODE("align") } options to place the menu relative to its trigger.` );
 
     MAKE_LINE_BREAK();
     MAKE_LINE_BREAK();

@@ -15,18 +15,11 @@
             panel.addCheckbox("Check me", true, (value, event) => {
                 console.log(value);
             });
+
             panel.addCheckbox("Check me with Label", true, (value, event) => {
                 console.log(value);
             }, { label: "Label" });
-        },`
-panel.addCheckbox("Check me", true, (value, event) => {
-    console.log(value);
-});
-
-panel.addCheckbox("Check me with Label", true, (value, event) => {
-    console.log(value);
-}, { label: "Label" });
-` );
+        });
     }
 
     {

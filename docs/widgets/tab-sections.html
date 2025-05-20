@@ -39,27 +39,7 @@
                     }
                 }
             ], { vertical: false });
-        },`
-panel.addTabSections("tabsName", [
-    {
-        name: "First tab", icon: "Discord",
-        onCreate: p => {
-            p.addTitle("Discord tab");
-            p.addButton(null, "Connect");
-        },
-        onSelect: p => {
-            console.log(p);
-        }
-    },
-    {
-        name: "Second tab", icon: "Github",
-        onCreate: p => {
-            p.addTitle("Github tab");
-            p.addButton(null, "Go", () => { window.open("https://github.com/jxarco/lexgui.js/") });
-        }
-    }
-], { vertical: false });
-` );
+        });
     }
 
     {

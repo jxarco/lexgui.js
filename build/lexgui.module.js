@@ -1,3 +1,4 @@
+// This is a generated file. Do not edit.
 // Lexgui.js @jxarco
 
 /**
@@ -5,8 +6,8 @@
  * @namespace LX
 */
 
-var LX = {
-    version: "0.6.2",
+const LX = {
+    version: "0.6.3",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -26,976 +27,6 @@ LX.CURVE_MOVEOUT_DELETE = 1;
 
 LX.DRAGGABLE_Z_INDEX    = 101;
 
-function clamp( num, min, max ) { return Math.min( Math.max( num, min ), max ); }
-function round( number, precision ) { return precision == 0 ? Math.floor( number ) : +(( number ).toFixed( precision ?? 2 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' )); }
-function remapRange( oldValue, oldMin, oldMax, newMin, newMax ) { return ((( oldValue - oldMin ) * ( newMax - newMin )) / ( oldMax - oldMin )) + newMin; }
-
-LX.clamp = clamp;
-LX.round = round;
-LX.remapRange = remapRange;
-
-// Timer that works everywhere (from litegraph.js)
-if ( typeof performance != "undefined" )
-{
-    LX.getTime = performance.now.bind( performance );
-}
-else if( typeof Date != "undefined" && Date.now )
-{
-    LX.getTime = Date.now.bind( Date );
-}
-else if ( typeof process != "undefined" )
-{
-    LX.getTime = function() {
-        const t = process.hrtime();
-        return t[ 0 ] * 0.001 + t[ 1 ] * 1e-6;
-    };
-}
-else
-{
-    LX.getTime = function() {
-        return new Date().getTime();
-    };
-}
-
-let ASYNC_ENABLED = true;
-
-/**
- * @method doAsync
- * @description Call a function asynchronously
- * @param {Function} fn Function to call
- * @param {Number} ms Time to wait until calling the function (in milliseconds)
- */
-function doAsync( fn, ms ) {
-    if( ASYNC_ENABLED )
-    {
-        setTimeout( fn, ms ?? 0 );
-    }
-    else
-    {
-        fn();
-    }
-}
-
-LX.doAsync = doAsync;
-
-/**
- * @method getSupportedDOMName
- * @description Convert a text string to a valid DOM name
- * @param {String} text Original text
- */
-function getSupportedDOMName( text )
-{
-    console.assert( typeof text == "string", "getSupportedDOMName: Text is not a string!" );
-
-    let name = text.trim();
-
-    // Replace specific known symbols
-    name = name.replace( /@/g, '_at_' ).replace( /\+/g, '_plus_' ).replace( /\./g, '_dot_' );
-    name = name.replace( /[^a-zA-Z0-9_-]/g, '_' );
-
-    // prefix with an underscore if needed
-    if( /^[0-9]/.test( name ) )
-    {
-        name = '_' + name;
-    }
-
-    return name;
-}
-
-LX.getSupportedDOMName = getSupportedDOMName;
-
-/**
- * @method has
- * @description Ask if LexGUI is using a specific component
- * @param {String} componentName Name of the LexGUI component
- */
-function has( componentName )
-{
-    return ( LX.components.indexOf( componentName ) > -1 );
-}
-
-LX.has = has;
-
-/**
- * @method getExtension
- * @description Get a extension from a path/url/filename
- * @param {String} name
- */
-function getExtension( name )
-{
-    return name.includes('.') ? name.split('.').pop() : null;
-}
-
-LX.getExtension = getExtension;
-
-/**
- * @method stripHTML
- * @description Cleans any DOM element string to get only the text
- * @param {String} html
- */
-function stripHTML( html )
-{
-    const div = document.createElement( "div" );
-    div.innerHTML = html;
-    return div.textContent || div.innerText || '';
-}
-
-LX.stripHTML = stripHTML;
-
-/**
- * @method parsePixelSize
- * @description Parses any css size and returns a number of pixels
- * @param {Number|String} size
- * @param {Number} total
- */
-const parsePixelSize = ( size, total ) => {
-
-    if( size.constructor === Number ) { return size; } // Assuming pixels..
-
-    if( size.constructor === String )
-    {
-        const value = parseFloat( size );
-
-        if( size.endsWith( "px" ) ) { return value; } // String pixels
-        if( size.endsWith( '%' ) ) { return ( value / 100 ) * total; } // Percentage
-        if( size.endsWith( "rem" ) || size.endsWith( "em" ) ) { const rootFontSize = 16; /*parseFloat(getComputedStyle(document.documentElement).fontSize);*/ return value * rootFontSize; } // rem unit: assume 16px = 1rem
-        if( size.endsWith( "vw" ) ) { return ( value / 100 ) * window.innerWidth; } // wViewport units
-        if( size.endsWith( "vh" ) ) { return ( value / 100 ) * window.innerHeight; } // hViewport units
-
-        // Any CSS calc expression (e.g., "calc(30% - 4px)")
-        if( size.startsWith( "calc(" ) )
-        {
-            const expr = size.slice( 5, -1 );
-            const parts = expr.split( /([+\-])/ ); // ["30% ", "-", "4px"]
-            let result = 0;
-            let op = "+";
-            for( let part of parts )
-            {
-                part = part.trim();
-                if( part === "+" || part === "-" )
-                {
-                    op = part;
-                }
-                else
-                {
-                    let value = parsePixelSize( part, total );
-                    result = ( op === "+" ) ? result + value : result - value;
-                }
-            }
-
-            return result;
-        }
-    }
-
-    throw( "Bad size format!" );
-}
-
-LX.parsePixelSize = parsePixelSize;
-
-/**
- * @method deepCopy
- * @description Create a deep copy with no references from an object
- * @param {Object} obj
- */
-function deepCopy( obj )
-{
-    return JSON.parse( JSON.stringify( obj ) )
-}
-
-LX.deepCopy = deepCopy;
-
-/**
- * @method setTheme
- * @description Set dark or light theme
- * @param {String} colorScheme Name of the scheme
- */
-function setTheme( colorScheme )
-{
-    colorScheme = ( colorScheme == "light" ) ? "light" : "dark";
-    document.documentElement.setAttribute( "data-theme", colorScheme );
-    LX.emit( "@on_new_color_scheme", colorScheme );
-}
-
-LX.setTheme = setTheme;
-
-/**
- * @method getTheme
- * @description Gets either "dark" or "light" theme value
- */
-function getTheme()
-{
-    return document.documentElement.getAttribute( "data-theme" ) ?? "dark";
-}
-
-LX.getTheme = getTheme;
-
-/**
- * @method switchTheme
- * @description Toggles between "dark" and "light" themes
- */
-function switchTheme()
-{
-    const currentTheme = getTheme();
-    setTheme( currentTheme == "dark" ? "light" : "dark" );
-}
-
-LX.switchTheme = switchTheme;
-
-/**
- * @method setThemeColor
- * @description Sets a new value for one of the main theme variables
- * @param {String} colorName Name of the theme variable
- * @param {String} color Color in rgba/hex
- */
-function setThemeColor( colorName, color )
-{
-    const r = document.querySelector( ':root' );
-    r.style.setProperty( '--' + colorName, color );
-}
-
-LX.setThemeColor = setThemeColor;
-
-/**
- * @method getThemeColor
- * @description Get the value for one of the main theme variables
- * @param {String} colorName Name of the theme variable
- */
-function getThemeColor( colorName )
-{
-    const r = getComputedStyle( document.querySelector( ':root' ) );
-    const value = r.getPropertyValue( '--' + colorName );
-
-    if( value.includes( "light-dark" ) )
-    {
-        const currentScheme = r.getPropertyValue( "color-scheme" );
-
-        if( currentScheme == "light" )
-        {
-            return value.substring( value.indexOf( '(' ) + 1, value.indexOf( ',' ) ).replace( /\s/g, '' );
-        }
-        else
-        {
-            return value.substring( value.indexOf( ',' ) + 1, value.indexOf( ')' ) ).replace( /\s/g, '' );
-        }
-    }
-
-    return value;
-}
-
-LX.getThemeColor = getThemeColor;
-
-/**
- * @method getBase64Image
- * @description Convert an image to a base64 string
- * @param {Image} img
- */
-function getBase64Image( img )
-{
-    const canvas = document.createElement( 'canvas' );
-    canvas.width = img.width;
-    canvas.height = img.height;
-    const ctx = canvas.getContext( '2d' );
-    ctx.drawImage( img, 0, 0 );
-    return canvas.toDataURL( 'image/png' );
-}
-
-LX.getBase64Image = getBase64Image;
-
-/**
- * @method hexToRgb
- * @description Convert a hexadecimal string to a valid RGB color
- * @param {String} hex Hexadecimal color
- */
-function hexToRgb( hex )
-{
-    const hexPattern = /^#(?:[A-Fa-f0-9]{3,4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/;
-    if( !hexPattern.test( hex ) )
-    {
-        throw( `Invalid Hex Color: ${ hex }` );
-    }
-
-    hex = hex.replace( /^#/, '' );
-
-    // Expand shorthand form (#RGB or #RGBA)
-    if( hex.length === 3 || hex.length === 4 )
-    {
-        hex = hex.split( '' ).map( c => c + c ).join( '' );
-    }
-
-    const bigint = parseInt( hex, 16 );
-
-    const r = ( ( bigint >> ( hex.length === 8 ? 24 : 16 ) ) & 255 ) / 255;
-    const g = ( ( bigint >> ( hex.length === 8 ? 16 : 8 ) ) & 255 ) / 255;
-    const b = ( ( bigint >> ( hex.length === 8 ? 8 : 0 ) ) & 255 ) / 255;
-    const a = ( hex.length === 8 ? ( bigint & 255 ) : ( hex.length === 4 ? parseInt( hex.slice( -2 ), 16 ) : 255 ) ) / 255;
-
-    return { r, g, b, a };
-}
-
-LX.hexToRgb = hexToRgb;
-
-/**
- * @method hexToHsv
- * @description Convert a hexadecimal string to HSV (0..360|0..1|0..1)
- * @param {String} hexStr Hexadecimal color
- */
-function hexToHsv( hexStr )
-{
-    const rgb = hexToRgb( hexStr );
-    return rgbToHsv( rgb );
-}
-
-LX.hexToHsv = hexToHsv;
-
-/**
- * @method rgbToHex
- * @description Convert a RGB color to a hexadecimal string
- * @param {Object} rgb Object containing RGB color
- * @param {Number} scale Use 255 for 0..255 range or 1 for 0..1 range
- */
-function rgbToHex( rgb, scale = 255 )
-{
-    const rgbArray = [ rgb.r, rgb.g, rgb.b ];
-    if( rgb.a != undefined ) rgbArray.push( rgb.a );
-
-    return (
-        "#" +
-        rgbArray.map( c => {
-            c = Math.floor( c * scale );
-            const hex = c.toString(16);
-            return hex.length === 1 ? ( '0' + hex ) : hex;
-        }).join("")
-    );
-}
-
-LX.rgbToHex = rgbToHex;
-
-/**
- * @method rgbToCss
- * @description Convert a RGB color (0..1) to a CSS color format
- * @param {Object} rgb Object containing RGB color
- */
-function rgbToCss( rgb )
-{
-    return { r: Math.floor( rgb.r * 255 ), g: Math.floor( rgb.g * 255 ), b: Math.floor( rgb.b * 255 ), a: rgb.a };
-}
-
-LX.rgbToCss = rgbToCss;
-
-/**
- * @method rgbToHsv
- * @description Convert a RGB color (0..1) array to HSV (0..360|0..1|0..1)
- * @param {Object} rgb Array containing R, G, B
- */
-function rgbToHsv( rgb )
-{
-    let { r, g, b, a } = rgb;
-    a = a ?? 1;
-
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    const d = max - min;
-    let h = 0;
-
-    if (d !== 0) {
-        if (max === r) { h = ((g - b) / d) % 6 }
-        else if (max === g) { h = (b - r) / d + 2 }
-        else { h = (r - g) / d + 4 }
-        h *= 60
-        if (h < 0) { h += 360 }
-    }
-
-    const s = max === 0 ? 0 : (d / max);
-    const v = max;
-
-    return { h, s, v, a };
-}
-
-LX.rgbToHsv = rgbToHsv;
-
-/**
- * @method hsvToRgb
- * @description Convert an HSV color (0..360|0..1|0..1) array to RGB (0..1|0..255)
- * @param {Array} hsv Array containing H, S, V
- */
-function hsvToRgb( hsv )
-{
-    const { h, s, v, a } = hsv;
-    const c = v * s;
-    const x = c * (1 - Math.abs( ( (h / 60) % 2 ) - 1) )
-    const m = v - c;
-    let r = 0, g = 0, b = 0;
-
-    if( h < 60 ) { r = c; g = x; b = 0; }
-    else if ( h < 120 ) { r = x; g = c; b = 0; }
-    else if ( h < 180 ) { r = 0; g = c; b = x; }
-    else if ( h < 240 ) { r = 0; g = x; b = c; }
-    else if ( h < 300 ) { r = x; g = 0; b = c; }
-    else { r = c; g = 0; b = x; }
-
-    return { r: ( r + m ), g: ( g + m ), b: ( b + m ), a };
-}
-
-LX.hsvToRgb = hsvToRgb;
-
-/**
- * @method measureRealWidth
- * @description Measure the pixel width of a text
- * @param {Number} value Text to measure
- * @param {Number} paddingPlusMargin Padding offset
- */
-function measureRealWidth( value, paddingPlusMargin = 8 )
-{
-    var i = document.createElement( "span" );
-    i.className = "lexinputmeasure";
-    i.innerHTML = value;
-    document.body.appendChild( i );
-    var rect = i.getBoundingClientRect();
-    LX.UTILS.deleteElement( i );
-    return rect.width + paddingPlusMargin;
-}
-
-LX.measureRealWidth = measureRealWidth;
-
-/**
- * @method simple_guidGenerator
- * @description Get a random unique id
- */
-function simple_guidGenerator()
-{
-    var S4 = function() {
-        return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
-    };
-    return (S4()+"-"+S4()+"-"+S4());
-}
-
-LX.guidGenerator = simple_guidGenerator;
-
-/**
- * @method buildTextPattern
- * @description Create a validation pattern using specific options
- * @param {Object} options
- * lowercase (Boolean): Text must contain a lowercase char
- * uppercase (Boolean): Text must contain an uppercase char
- * digit (Boolean): Text must contain a digit
- * specialChar (Boolean): Text must contain a special char
- * noSpaces (Boolean): Do not allow spaces in text
- * minLength (Number): Text minimum length
- * maxLength (Number): Text maximum length
- * asRegExp (Boolean): Return pattern as Regular Expression instance
- */
-function buildTextPattern( options = {} )
-{
-    let patterns = [];
-    if ( options.lowercase ) patterns.push("(?=.*[a-z])");
-    if ( options.uppercase ) patterns.push("(?=.*[A-Z])");
-    if ( options.digit ) patterns.push("(?=.*\\d)");
-    if ( options.specialChar ) patterns.push("(?=.*[@#$%^&+=!])");
-    if ( options.noSpaces ) patterns.push("(?!.*\\s)");
-
-    let minLength = options.minLength || 0;
-    let maxLength = options.maxLength || ""; // Empty means no max length restriction
-
-    let pattern = `^${ patterns.join("") }.{${ minLength },${ maxLength }}$`;
-    return options.asRegExp ? new RegExp( pattern ) : pattern;
-}
-
-LX.buildTextPattern = buildTextPattern;
-
-/**
- * @method makeDraggable
- * @description Allows an element to be dragged
- * @param {Element} domEl
- * @param {Object} options
- * autoAdjust (Bool): Sets in a correct position at the beggining
- * dragMargin (Number): Margin of drag container
- * onMove (Function): Called each move event
- * onDragStart (Function): Called when drag event starts
- * updateLayers (Function): Update Zindex of elements to update layers
- */
-function makeDraggable( domEl, options = { } )
-{
-    let offsetX = 0;
-    let offsetY = 0;
-    let currentTarget = null;
-    let targetClass = options.targetClass;
-    let dragMargin = options.dragMargin ?? 3;
-
-    let _computePosition = ( e, top, left ) => {
-        const nullRect = { x: 0, y: 0, width: 0, height: 0 };
-        const parentRect = domEl.parentElement ? domEl.parentElement.getBoundingClientRect() : nullRect;
-        const isFixed = ( domEl.style.position == "fixed" );
-        const fixedOffset = isFixed ? new LX.vec2( parentRect.x, parentRect.y ) : new LX.vec2();
-        left = left ?? e.clientX - offsetX - parentRect.x;
-        top = top ?? e.clientY - offsetY - parentRect.y;
-        domEl.style.left = clamp( left, dragMargin + fixedOffset.x, fixedOffset.x + parentRect.width - domEl.offsetWidth - dragMargin ) + 'px';
-        domEl.style.top = clamp( top, dragMargin + fixedOffset.y, fixedOffset.y + parentRect.height - domEl.offsetHeight - dragMargin ) + 'px';
-        domEl.style.translate = "none"; // Force remove translation
-    };
-
-    // Initial adjustment
-    if( options.autoAdjust )
-    {
-       _computePosition( null, parseInt( domEl.style.left ), parseInt( domEl.style.top ) )
-    }
-
-    let id = LX.UTILS.uidGenerator();
-    domEl[ 'draggable-id' ] = id;
-
-    const defaultMoveFunc = e => {
-        if( !currentTarget )
-        {
-            return;
-        }
-
-        _computePosition( e );
-    };
-
-    const customMoveFunc = e => {
-        if( !currentTarget )
-        {
-            return;
-        }
-
-        if( options.onMove )
-        {
-            options.onMove( currentTarget );
-        }
-    };
-
-    let onMove = options.onMove ? customMoveFunc : defaultMoveFunc;
-    let onDragStart = options.onDragStart;
-
-    domEl.setAttribute( 'draggable', true );
-    domEl.addEventListener( "mousedown", function( e ) {
-        currentTarget = ( e.target.classList.contains( targetClass ) || !targetClass ) ? e.target : null;
-    } );
-
-    domEl.addEventListener( "dragstart", function( e ) {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-
-        if( !currentTarget )
-        {
-            return;
-        }
-
-        // Remove image when dragging
-        var img = new Image();
-        img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
-        e.dataTransfer.setDragImage( img, 0, 0 );
-        e.dataTransfer.effectAllowed = "move";
-
-        const rect = e.target.getBoundingClientRect();
-        const parentRect = currentTarget.parentElement.getBoundingClientRect();
-        const isFixed = ( currentTarget.style.position == "fixed" );
-        const fixedOffset = isFixed ? new LX.vec2( parentRect.x, parentRect.y ) : new LX.vec2();
-        offsetX = e.clientX - rect.x - fixedOffset.x;
-        offsetY = e.clientY - rect.y - fixedOffset.y;
-
-        document.addEventListener( "mousemove", onMove );
-
-        currentTarget.eventCatched = true;
-
-        if( options.updateLayers ?? true )
-        {
-            // Force active dialog to show on top
-            if( LX.activeDraggable )
-            {
-                LX.activeDraggable.style.zIndex = LX.DRAGGABLE_Z_INDEX;
-            }
-
-            LX.activeDraggable = domEl;
-            LX.activeDraggable.style.zIndex = LX.DRAGGABLE_Z_INDEX + 1;
-        }
-
-        if( onDragStart )
-        {
-            onDragStart( currentTarget, e );
-        }
-    }, false );
-
-    document.addEventListener( 'mouseup', (e) => {
-        if( currentTarget )
-        {
-            currentTarget = null;
-            document.removeEventListener( "mousemove", onMove );
-        }
-    } );
-}
-
-LX.makeDraggable = makeDraggable;
-
-/**
- * @method makeCollapsible
- * @description Allows an element to be collapsed/expanded
- * @param {Element} domEl: Element to be treated as collapsible
- * @param {Element} content: Content to display/hide on collapse/extend
- * @param {Element} parent: Element where the content will be appended (default is domEl.parent)
- * @param {Object} options
- */
-function makeCollapsible( domEl, content, parent, options = { } )
-{
-    domEl.classList.add( "collapsible" );
-
-    const collapsed = ( options.collapsed ?? true );
-    const actionIcon = LX.makeIcon( "Right" );
-    actionIcon.classList.add( "collapser" );
-    actionIcon.dataset[ "collapsed" ] = collapsed;
-    actionIcon.style.marginLeft = "auto";
-    actionIcon.style.marginRight = "0.2rem";
-
-    actionIcon.addEventListener( "click", function( e ) {
-        e.preventDefault();
-        e.stopPropagation();
-        if( this.dataset[ "collapsed" ] )
-        {
-            delete this.dataset[ "collapsed" ];
-            content.style.display = "block";
-        }
-        else
-        {
-            this.dataset[ "collapsed" ] = true;
-            content.style.display = "none";
-        }
-    } );
-
-    domEl.appendChild( actionIcon );
-
-    parent = parent ?? domEl.parentElement;
-
-    parent.appendChild( content );
-}
-
-LX.makeCollapsible = makeCollapsible;
-
-/**
- * @method makeCodeSnippet
- * @description Create a code snippet in a specific language
- * @param {String} code
- * @param {Array} size
- * @param {Object} options
- * language (String):
- * windowMode (Boolean):
- * lineNumbers (Boolean):
- * firstLine (Number): TODO
- * linesAdded (Array):
- * linesRemoved (Array):
- * tabName (String):
- * className (String): Extra class to customize snippet
- */
-function makeCodeSnippet( code, size, options = { } )
-{
-    if( !LX.has('CodeEditor') )
-    {
-        console.error( "Import the CodeEditor component to create snippets!" );
-        return;
-    }
-
-    const snippet = document.createElement( "div" );
-    snippet.className = "lexcodesnippet " + ( options.className ?? "" );
-    snippet.style.width = size ? size[ 0 ] : "auto";
-    snippet.style.height = size ? size[ 1 ] : "auto";
-    const area = new Area( { noAppend: true } );
-    let editor = new LX.CodeEditor( area, {
-        skipInfo: true,
-        disableEdition: true,
-        allowAddScripts: false,
-        name: options.tabName,
-        // showTab: options.showTab ?? true
-    } );
-    editor.setText( code, options.language ?? "Plain Text" );
-
-    if( options.linesAdded )
-    {
-        const code = editor.root.querySelector( ".code" );
-        for( let l of options.linesAdded )
-        {
-            if( l.constructor == Number )
-            {
-                code.childNodes[ l - 1 ].classList.add( "added" );
-            }
-            else if( l.constructor == Array ) // It's a range
-            {
-                for( let i = ( l[0] - 1 ); i <= ( l[1] - 1 ); i++ )
-                {
-                    code.childNodes[ i ].classList.add( "added" );
-                }
-            }
-        }
-    }
-
-    if( options.linesRemoved )
-    {
-        const code = editor.root.querySelector( ".code" );
-        for( let l of options.linesRemoved )
-        {
-            if( l.constructor == Number )
-            {
-                code.childNodes[ l - 1 ].classList.add( "removed" );
-            }
-            else if( l.constructor == Array ) // It's a range
-            {
-                for( let i = ( l[0] - 1 ); i <= ( l[1] - 1 ); i++ )
-                {
-                    code.childNodes[ i ].classList.add( "removed" );
-                }
-            }
-        }
-    }
-
-    if( options.windowMode )
-    {
-        const windowActionButtons = document.createElement( "div" );
-        windowActionButtons.className = "lexwindowbuttons";
-        const aButton = document.createElement( "span" );
-        aButton.style.background = "#ee4f50";
-        const bButton = document.createElement( "span" );
-        bButton.style.background = "#f5b720";
-        const cButton = document.createElement( "span" );
-        cButton.style.background = "#53ca29";
-        windowActionButtons.appendChild( aButton );
-        windowActionButtons.appendChild( bButton );
-        windowActionButtons.appendChild( cButton );
-        const tabs = editor.root.querySelector( ".lexareatabs" );
-        tabs.prepend( windowActionButtons );
-    }
-
-    if( !( options.lineNumbers ?? true ) )
-    {
-        editor.root.classList.add( "no-gutter" );
-    }
-
-    snippet.appendChild( area.root );
-    return snippet;
-}
-
-LX.makeCodeSnippet = makeCodeSnippet;
-
-/**
- * @method makeKbd
- * @description Kbd element to display a keyboard key.
- * @param {Array} keys
- * @param {String} extraClass
- */
-function makeKbd( keys, extraClass = "" )
-{
-    const specialKeys = {
-        "Ctrl": '⌃',
-        "Enter": '↩',
-        "Shift": '⇧',
-        "CapsLock": '⇪',
-        "Meta": '⌘',
-        "Option": '⌥',
-        "Alt": '⌥',
-        "Tab": '⇥',
-        "ArrowUp": '↑',
-        "ArrowDown": '↓',
-        "ArrowLeft": '←',
-        "ArrowRight": '→',
-        "Space": '␣'
-    };
-
-    const kbd = LX.makeContainer( ["auto", "auto"], "flex flex-row ml-auto" );
-
-    for( const k of keys )
-    {
-        LX.makeContainer( ["auto", "auto"], "self-center text-xs fg-secondary select-none", specialKeys[ k ] ?? k, kbd );
-    }
-
-    return kbd;
-}
-
-LX.makeKbd = makeKbd;
-
-/**
- * @method makeIcon
- * @description Gets an SVG element using one of LX.ICONS
- * @param {String} iconName
- * @param {Object} options
- * title
- * extraClass
- * svgClass
- * variant
- * ...Any Lucide icon options
- */
-function makeIcon( iconName, options = { } )
-{
-    let svg = null;
-
-    const _createIconFromSVG = ( svg ) => {
-        if( options.svgClass && options.svgClass.length )
-        {
-            options.svgClass.split( " " ).forEach( c => svg.classList.add( c ) );
-        }
-        const icon = document.createElement( "a" );
-        icon.title = options.title ?? "";
-        icon.className = "lexicon " + ( options.iconClass ?? "" );
-        icon.appendChild( svg );
-        svg.dataset[ "name" ] = iconName;
-        return icon;
-    }
-
-    if( iconName.includes( "@" ) )
-    {
-        const parts = iconName.split( "@" );
-        iconName = parts[ 0 ];
-        options.variant = parts[ 1 ];
-    }
-
-    let data = LX.ICONS[ iconName ];
-    const lucideData = lucide[ iconName ] ?? lucide[ LX.LucideIconAlias[ iconName ] ];
-
-    if( data )
-    {
-        // Resolve alias
-        if( data.constructor == String )
-        {
-            data = LX.ICONS[ data ];
-        }
-
-        // Resolve variant
-        const requestedVariant = options.variant ?? "regular";
-        const variant = data[ 3 ];
-
-        // Create internal icon if variant is the same as requested, there's no lucide/fallback data or if variant is "regular" (default)
-        if( ( requestedVariant == variant ) || !lucideData || variant == "regular" )
-        {
-            svg = document.createElementNS( "http://www.w3.org/2000/svg", "svg" );
-            svg.setAttribute( "viewBox", `0 0 ${ data[ 0 ] } ${ data[ 1 ] }` );
-
-            if( data[ 5 ] )
-            {
-                const classes = data[ 5 ].svgClass;
-                classes?.split( ' ' ).forEach( c => {
-                    svg.classList.add( c )
-                } );
-
-                const attrs = data[ 5 ].svgAttributes;
-                attrs?.split( ' ' ).forEach( attr => {
-                    const t = attr.split( '=' );
-                    svg.setAttribute( t[ 0 ], t[ 1 ] );
-                } );
-            }
-
-            const path = document.createElement( "path" );
-            path.setAttribute( "fill",  "currentColor" );
-            path.setAttribute( "d",  data[ 4 ] );
-            svg.appendChild( path );
-
-            if( data[ 5 ] )
-            {
-                const classes = data[ 5 ].pathClass;
-                classes?.split( ' ' ).forEach( c => {
-                    path.classList.add( c )
-                } );
-
-                const attrs = data[ 5 ].pathAttributes;
-                attrs?.split( ' ' ).forEach( attr => {
-                    const t = attr.split( '=' );
-                    path.setAttribute( t[ 0 ], t[ 1 ] );
-                } );
-            }
-
-            const faLicense = `<!-- This icon might belong to a collection from Iconify - https://iconify.design/ - or !Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc. -->`;
-            svg.innerHTML += faLicense;
-            return _createIconFromSVG( svg );
-        }
-    }
-
-    // Fallback to Lucide icon
-    console.assert( lucideData, `No existing icon named _${ iconName }_` );
-    svg = lucide.createElement( lucideData, options );
-
-    return _createIconFromSVG( svg );
-}
-
-LX.makeIcon = makeIcon;
-
-/**
- * @method registerIcon
- * @description Register an SVG icon to LX.ICONS
- * @param {String} iconName
- * @param {String} svgString
- * @param {String} variant
- * @param {Array} aliases
- */
-function registerIcon( iconName, svgString, variant = "none", aliases = [] )
-{
-    const svg = new DOMParser().parseFromString( svgString, 'image/svg+xml' ).documentElement;
-    const path = svg.querySelector( "path" );
-    const viewBox = svg.getAttribute( "viewBox" ).split( ' ' );
-    const pathData = path.getAttribute( 'd' );
-
-    let svgAttributes = [];
-    let pathAttributes = [];
-
-    for( const attr of svg.attributes )
-    {
-        switch( attr.name )
-        {
-        case "transform":
-        case "fill":
-        case "stroke-width":
-        case "stroke-linecap":
-        case "stroke-linejoin":
-            svgAttributes.push( `${ attr.name }=${ attr.value }` );
-            break;
-        }
-    }
-
-    for( const attr of path.attributes )
-    {
-        switch( attr.name )
-        {
-        case "transform":
-        case "fill":
-        case "stroke-width":
-        case "stroke-linecap":
-        case "stroke-linejoin":
-            pathAttributes.push( `${ attr.name }=${ attr.value }` );
-            break;
-        }
-    }
-
-    const iconData = [
-        parseInt( viewBox[ 2 ] ),
-        parseInt( viewBox[ 3 ] ),
-        aliases,
-        variant,
-        pathData,
-        {
-            svgAttributes: svgAttributes.length ? svgAttributes.join( ' ' ) : null,
-            pathAttributes: pathAttributes.length ? pathAttributes.join( ' ' ) : null
-        }
-    ];
-
-    if( LX.ICONS[ iconName ] )
-    {
-        console.warn( `${ iconName } will be added/replaced in LX.ICONS` );
-    }
-
-    LX.ICONS[ iconName ] = iconData;
-}
-
-LX.registerIcon = registerIcon;
-
-/**
- * @method registerCommandbarEntry
- * @description Adds an extra command bar entry
- * @param {String} name
- * @param {Function} callback
- */
-function registerCommandbarEntry( name, callback )
-{
-    LX.extraCommandbarEntries.push( { name, callback } );
-}
-
-LX.registerCommandbarEntry = registerCommandbarEntry;
-
-// Utils classes
-
 class vec2 {
 
     constructor( x, y ) {
@@ -1009,17 +40,19 @@ class vec2 {
     set ( x, y ) { this.x = x; this.y = y; }
     add ( v, v0 = new vec2() ) { v0.set( this.x + v.x, this.y + v.y ); return v0; }
     sub ( v, v0 = new vec2() ) { v0.set( this.x - v.x, this.y - v.y ); return v0; }
-    mul ( v, v0 = new vec2() ) { if( v.constructor == Number ) { v = new vec2( v ) } v0.set( this.x * v.x, this.y * v.y ); return v0; }
-    div ( v, v0 = new vec2() ) { if( v.constructor == Number ) { v = new vec2( v ) } v0.set( this.x / v.x, this.y / v.y ); return v0; }
+    mul ( v, v0 = new vec2() ) { if( v.constructor == Number ) { v = new vec2( v ); } v0.set( this.x * v.x, this.y * v.y ); return v0; }
+    div ( v, v0 = new vec2() ) { if( v.constructor == Number ) { v = new vec2( v ); } v0.set( this.x / v.x, this.y / v.y ); return v0; }
     abs ( v0 = new vec2() ) { v0.set( Math.abs( this.x ), Math.abs( this.y ) ); return v0; }
     dot ( v ) { return this.x * v.x + this.y * v.y; }
     len2 () { return this.dot( this ) }
     len () { return Math.sqrt( this.len2() ); }
     nrm ( v0 = new vec2() ) { v0.set( this.x, this.y ); return v0.mul( 1.0 / this.len(), v0 ); }
     dst ( v ) { return v.sub( this ).len(); }
-    clp ( min, max, v0 = new vec2() ) { v0.set( clamp( this.x, min, max ), clamp( this.y, min, max ) ); return v0; }
-};
+    clp ( min, max, v0 = new vec2() ) { v0.set( LX.clamp( this.x, min, max ), LX.clamp( this.y, min, max ) ); return v0; }
 
+    fromArray ( array ) { this.x = array[ 0 ]; this.y = array[ 1 ]; }
+    toArray () { return this.xy }
+}
 LX.vec2 = vec2;
 
 class Color {
@@ -1028,17 +61,17 @@ class Color {
 
         Object.defineProperty( Color.prototype, "rgb", {
             get: function() { return this._rgb; },
-            set: function( v ) { this._fromRGB( v ) }, enumerable: true, configurable: true
+            set: function( v ) { this._fromRGB( v ); }, enumerable: true, configurable: true
         });
 
         Object.defineProperty( Color.prototype, "hex", {
             get: function() { return this._hex; },
-            set: function( v ) { this._fromHex( v ) }, enumerable: true, configurable: true
+            set: function( v ) { this._fromHex( v ); }, enumerable: true, configurable: true
         });
 
         Object.defineProperty( Color.prototype, "hsv", {
             get: function() { return this._hsv; },
-            set: function( v ) { this._fromHSV( v ) }, enumerable: true, configurable: true
+            set: function( v ) { this._fromHSV( v ); }, enumerable: true, configurable: true
         });
 
 		this.set( value );
@@ -1062,7 +95,7 @@ class Color {
 		}
         else
         {
-            throw( "Bad color model!", value );
+            throw( value );
         }
 	}
 
@@ -1071,21 +104,21 @@ class Color {
     setHex( hex ) { this._fromHex( hex ); }
 
 	_fromHex( hex ) {
-		this._fromRGB( hexToRgb( hex ) );
+		this._fromRGB( LX.hexToRgb( hex ) );
 	}
 
 	_fromRGB( rgb ) {
 		this._rgb = rgb;
-		this._hsv = rgbToHsv( rgb );
-		this._hex = rgbToHex( rgb );
-        this.css = rgbToCss( this._rgb );
+		this._hsv = LX.rgbToHsv( rgb );
+		this._hex = LX.rgbToHex( rgb );
+        this.css = LX.rgbToCss( this._rgb );
 	}
 
 	_fromHSV( hsv ) {
 		this._hsv = hsv;
-		this._rgb = hsvToRgb( hsv );
-		this._hex = rgbToHex( this._rgb );
-        this.css = rgbToCss( this._rgb );
+		this._rgb = LX.hsvToRgb( hsv );
+		this._hex = LX.rgbToHex( this._rgb );
+        this.css = LX.rgbToCss( this._rgb );
 	}
 }
 
@@ -1188,26 +221,24 @@ function _createCommandbar( root )
 
     const header = LX.makeContainer( ["100%", "auto"], "flex flex-row" );
 
-    const filter = new TextInput( null, "", (v) => {
+    const filter = new LX.TextInput( null, "", (v) => {
         commandbar._addElements( v.toLowerCase() );
     }, { width: "100%", icon: "Search", trigger: "input", placeholder: "Search..." } );
     header.appendChild( filter.root );
 
-    const tabArea = new Area( {
+    const tabArea = new LX.Area( {
         width: "100%",
         skipAppend: true,
         className: "cb-tabs"
     } );
 
     const cbTabs = tabArea.addTabs( { parentClass: "p-2" } );
-    let cbFilter = null;
 
     // These tabs will serve as buttons by now
     // Filter stuff depending of the type of search
     {
         const _onSelectTab = ( e, tabName ) => {
-            cbFilter = tabName;
-        }
+        };
 
         cbTabs.add( "All", document.createElement('div'), { selected: true, onSelect: _onSelectTab } );
         // cbTabs.add( "Main", document.createElement('div'), { onSelect: _onSelectTab } );
@@ -1226,7 +257,7 @@ function _createCommandbar( root )
         {
             filter.set( "", true );
         }
-    }
+    };
 
     const _addElement = ( t, c, p, i ) => {
 
@@ -1276,7 +307,7 @@ function _createCommandbar( root )
         allItems.push( searchItem );
         itemContainer.appendChild( searchItem );
         refPrevious = searchItem;
-    }
+    };
 
     const _propagateAdd = ( item, filter, path, skipPropagation ) => {
 
@@ -1295,7 +326,7 @@ function _createCommandbar( root )
         }
 
         const submenu = item.submenu ?? item[ name ];
-        if( skipPropagation || !submenu )
+        if( !submenu )
         {
             return;
         }
@@ -1366,7 +397,7 @@ function _createCommandbar( root )
                 }
             }
         }
-    }
+    };
 
     commandbar.appendChild( header );
     commandbar.appendChild( tabArea.root );
@@ -1498,12 +529,15 @@ async function init( options = { } )
 
     if( !options.skipRoot && !options.skipDefaultArea )
     {
-        this.main_area = new Area( { id: options.id ?? 'mainarea' } );
+        this.main_area = new LX.Area( { id: options.id ?? 'mainarea' } );
     }
 
-    if( ( options.autoTheme ?? true ) && window.matchMedia && window.matchMedia( "(prefers-color-scheme: light)" ).matches )
+    if( ( options.autoTheme ?? true ) )
     {
-        LX.setTheme( "light" );
+        if( window.matchMedia && window.matchMedia( "(prefers-color-scheme: light)" ).matches )
+        {
+            LX.setTheme( "light" );
+        }
 
         window.matchMedia( "(prefers-color-scheme: dark)" ).addEventListener( "change", event => {
             LX.setTheme( event.matches ? "dark" : "light" );
@@ -1575,7 +609,7 @@ function message( text, title, options = {} )
 
     options.modal = true;
 
-    return new Dialog( title, p => {
+    return new LX.Dialog( title, p => {
         p.addTextArea( null, text, null, { disabled: true, fitHeight: true  } );
     }, options );
 }
@@ -1604,7 +638,7 @@ function popup( text, title, options = {} )
     options.class = "lexpopup";
 
     const time = options.timeout || 3000;
-    const dialog = new Dialog( title, p => {
+    const dialog = new LX.Dialog( title, p => {
         p.addTextArea( null, text, null, { disabled: true, fitHeight: true } );
     }, options );
 
@@ -1637,7 +671,7 @@ function prompt( text, title, callback, options = {} )
 
     let value = "";
 
-    const dialog = new Dialog( title, p => {
+    const dialog = new LX.Dialog( title, p => {
 
         p.addTextArea( null, text, null, { disabled: true, fitHeight: true } );
 
@@ -1701,7 +735,7 @@ function toast( title, description, options = {} )
     toast.style.translate = "0 calc(100% + 30px)";
     this.notifications.prepend( toast );
 
-    doAsync( () => {
+    LX.doAsync( () => {
 
         if( this.notifications.offsetWidth > this.notifications.iWidth )
         {
@@ -1731,7 +765,7 @@ function toast( title, description, options = {} )
 
     if( options.action )
     {
-        const panel = new Panel();
+        const panel = new LX.Panel();
         panel.addButton(null, options.action.name ?? "Accept", options.action.callback.bind( this, toast ), { width: "auto", maxWidth: "150px", className: "right", buttonClass: "border" });
         toast.appendChild( panel.root.childNodes[ 0 ] );
     }
@@ -1740,7 +774,7 @@ function toast( title, description, options = {} )
 
     toast.close = function() {
         this.dataset[ "closed" ] = true;
-        doAsync( () => {
+        LX.doAsync( () => {
             this.remove();
             if( !that.notifications.childElementCount )
             {
@@ -1763,7 +797,7 @@ function toast( title, description, options = {} )
 
     if( timeout != -1 )
     {
-        doAsync( () => {
+        LX.doAsync( () => {
             toast.close();
         }, timeout );
     }
@@ -1803,7 +837,7 @@ LX.badge = badge;
 function makeElement( htmlType, className, innerHTML, parent, overrideStyle = {} )
 {
     const element = document.createElement( htmlType );
-    element.className = className ?? ""
+    element.className = className ?? "";
     element.innerHTML = innerHTML ?? "";
     Object.assign( element.style, overrideStyle );
 
@@ -1874,7 +908,7 @@ function asTooltip( trigger, content, options = {} )
         tooltipDom.className = "lextooltip";
         tooltipDom.innerHTML = content;
 
-        doAsync( () => {
+        LX.doAsync( () => {
 
             const position = [ 0, 0 ];
             const rect = this.getBoundingClientRect();
@@ -1910,20 +944,17 @@ function asTooltip( trigger, content, options = {} )
 
             tooltipDom.style.left = `${ position[ 0 ] }px`;
             tooltipDom.style.top = `${ position[ 1 ] }px`;
-        } )
+        } );
 
         LX.root.appendChild( tooltipDom );
     } );
 
     trigger.addEventListener( "mouseleave", function(e) {
-        if( !tooltipDom ) return;
-
-        tooltipDom.dataset[ "closed" ] = true;
-
-        doAsync( () => {
+        if( tooltipDom )
+        {
             tooltipDom.remove();
-        }, 300 )
-    } )
+        }
+    } );
 }
 
 LX.asTooltip = asTooltip;
@@ -1939,8 +970,7 @@ class IEvent {
         this.value = value;
         this.domEvent = domEvent;
     }
-};
-
+}
 LX.IEvent = IEvent;
 
 class TreeEvent {
@@ -1977,8 +1007,7 @@ class TreeEvent {
             case TreeEvent.NODE_CARETCHANGED: return "tree_event_caretchanged";
         }
     }
-};
-
+}
 LX.TreeEvent = TreeEvent;
 
 function emit( signalName, value, options = {} )
@@ -2004,7 +1033,7 @@ function emit( signalName, value, options = {} )
 
     for( let obj of data )
     {
-        if( obj instanceof Widget )
+        if( obj instanceof LX.Widget )
         {
             obj.set( value, options.skipCallback ?? true );
         }
@@ -2088,7 +1117,7 @@ class Popover {
                 e.stopPropagation();
                 this.destroy();
             }
-        } )
+        } );
 
         if( content )
         {
@@ -2105,7 +1134,7 @@ class Popover {
 
         Popover.activeElement = this;
 
-        doAsync( () => {
+        LX.doAsync( () => {
             this._adjustPosition();
 
             this.root.focus();
@@ -2165,8 +1194,6 @@ class Popover {
                     position[ 1 ] += ( rect.y + rect.height );
                     alignWidth = true;
                     break;
-                default:
-                    break;
             }
 
             switch( this.align )
@@ -2183,8 +1210,6 @@ class Popover {
                     if( alignWidth ) { position[ 0 ] += rect.x - this.root.offsetWidth + rect.width; }
                     else { position[ 1 ] += rect.y - this.root.offsetHeight + rect.height; }
                     break;
-                default:
-                    break;
             }
         }
 
@@ -2197,8 +1222,7 @@ class Popover {
         this.root.style.left = `${ position[ 0 ] }px`;
         this.root.style.top = `${ position[ 1 ] }px`;
     }
-};
-
+}
 LX.Popover = Popover;
 
 /**
@@ -2225,7 +1249,7 @@ class Sheet {
                 e.stopPropagation();
                 this.destroy();
             }
-        } )
+        } );
 
         if( content )
         {
@@ -2240,7 +1264,7 @@ class Sheet {
             } );
         }
 
-        doAsync( () => {
+        LX.doAsync( () => {
 
             LX.modal.toggle( false );
 
@@ -2265,8 +1289,6 @@ class Sheet {
                     this.root.style.bottom = 0;
                     this.root.style.width = "100%";
                     this.root.style.height = size;
-                    break;
-                default:
                     break;
             }
 
@@ -2294,8 +1316,7 @@ class Sheet {
 
         LX.modal.toggle( true );
     }
-};
-
+}
 LX.Sheet = Sheet;
 
 /**
@@ -2341,7 +1362,7 @@ class DropdownMenu {
 
         DropdownMenu.currentMenu = this;
 
-        doAsync( () => {
+        LX.doAsync( () => {
             this._adjustPosition();
 
             this.root.focus();
@@ -2401,7 +1422,7 @@ class DropdownMenu {
             newParent.currentParent = parentDom;
             parentDom = newParent;
 
-            doAsync( () => {
+            LX.doAsync( () => {
                 const position = [ parentRect.x + parentRect.width, parentRect.y ];
 
                 if( this.avoidCollisions )
@@ -2466,7 +1487,7 @@ class DropdownMenu {
                     kdbKey = kdbKey.length == 1 ? kdbKey.toLowerCase() : kdbKey;
                     if( kdbKey == e.key )
                     {
-                        menuItem.click()
+                        menuItem.click();
                     }
                 } );
             }
@@ -2490,7 +1511,7 @@ class DropdownMenu {
 
             if( item.checked != undefined )
             {
-                const checkbox = new Checkbox( pKey + "_entryChecked", item.checked, (v) => {
+                const checkbox = new LX.Checkbox( pKey + "_entryChecked", item.checked, (v) => {
                     const f = item[ 'callback' ];
                     if( f )
                     {
@@ -2582,8 +1603,6 @@ class DropdownMenu {
                     position[ 1 ] += ( rect.y + rect.height );
                     alignWidth = true;
                     break;
-                default:
-                    break;
             }
 
             switch( this.align )
@@ -2599,8 +1618,6 @@ class DropdownMenu {
                 case "end":
                     if( alignWidth ) { position[ 0 ] += rect.x - this.root.offsetWidth + rect.width; }
                     else { position[ 1 ] += rect.y - this.root.offsetHeight + rect.height; }
-                    break;
-                default:
                     break;
             }
         }
@@ -2622,8 +1639,7 @@ class DropdownMenu {
         parent = parent ?? this.root;
         parent.appendChild( separator );
     }
-};
-
+}
 LX.DropdownMenu = DropdownMenu;
 
 function addDropdownMenu( trigger, items, options )
@@ -2695,7 +1711,7 @@ class ColorPicker {
             this._updateColorValue();
 
             pickerRect = this.colorPickerBackground.getBoundingClientRect();
-        }
+        };
 
         let innerMouseMove = e => {
             const dX = e.movementX;
@@ -2718,14 +1734,14 @@ class ColorPicker {
 
             e.stopPropagation();
             e.preventDefault();
-        }
+        };
 
         let innerMouseUp = e => {
             var doc = this.root.ownerDocument;
             doc.removeEventListener( 'mousemove', innerMouseMove );
             doc.removeEventListener( 'mouseup', innerMouseUp );
             document.body.classList.remove( 'noevents' );
-        }
+        };
 
         this.colorPickerBackground.addEventListener( "mousedown", innerMouseDown );
 
@@ -2733,8 +1749,8 @@ class ColorPicker {
 
         if( window.EyeDropper )
         {
-            hueAlphaContainer.appendChild( new Button(null, "eyedrop",  async () => {
-                const eyeDropper = new EyeDropper()
+            hueAlphaContainer.appendChild( new LX.Button(null, "eyedrop",  async () => {
+                const eyeDropper = new EyeDropper();
                 try {
                     const result = await eyeDropper.open();
                     this.fromHexColor( result.sRGBHex );
@@ -2776,11 +1792,11 @@ class ColorPicker {
             e.stopImmediatePropagation();
             e.stopPropagation();
 
-            const hueX = clamp( e.offsetX - this.markerHalfSize, 0, this.colorPickerTracker.offsetWidth - this.markerSize );
+            const hueX = LX.clamp( e.offsetX - this.markerHalfSize, 0, this.colorPickerTracker.offsetWidth - this.markerSize );
             _fromHueX( hueX );
 
             hueTrackerRect = this.colorPickerTracker.getBoundingClientRect();
-        }
+        };
 
         let innerMouseMoveHue = e => {
             const dX = e.movementX;
@@ -2789,19 +1805,19 @@ class ColorPicker {
             if ( dX != 0 && ( mouseX >= this.markerHalfSize || dX < 0 ) && ( mouseX < ( this.colorPickerTracker.offsetWidth - this.markerHalfSize ) || dX > 0 ) )
             {
                 const hueX = LX.clamp( parseInt( this.hueMarker.style.left ) + dX, 0, this.colorPickerTracker.offsetWidth - this.markerSize );
-                _fromHueX( hueX )
+                _fromHueX( hueX );
             }
 
             e.stopPropagation();
             e.preventDefault();
-        }
+        };
 
         let innerMouseUpHue = e => {
             var doc = this.root.ownerDocument;
             doc.removeEventListener( 'mousemove', innerMouseMoveHue );
             doc.removeEventListener( 'mouseup', innerMouseUpHue );
             document.body.classList.remove( 'noevents' );
-        }
+        };
 
         this.colorPickerTracker.addEventListener( "mousedown", innerMouseDownHue );
 
@@ -2835,10 +1851,10 @@ class ColorPicker {
                 document.body.classList.add( 'noevents' );
                 e.stopImmediatePropagation();
                 e.stopPropagation();
-                const alphaX = clamp( e.offsetX - this.markerHalfSize, 0, this.alphaTracker.offsetWidth - this.markerSize );
+                const alphaX = LX.clamp( e.offsetX - this.markerHalfSize, 0, this.alphaTracker.offsetWidth - this.markerSize );
                 _fromAlphaX( alphaX );
                 alphaTrackerRect = this.alphaTracker.getBoundingClientRect();
-            }
+            };
 
             let innerMouseMoveAlpha = e => {
                 const dX = e.movementX;
@@ -2852,14 +1868,14 @@ class ColorPicker {
 
                 e.stopPropagation();
                 e.preventDefault();
-            }
+            };
 
             let innerMouseUpAlpha = e => {
                 var doc = this.root.ownerDocument;
                 doc.removeEventListener( 'mousemove', innerMouseMoveAlpha );
                 doc.removeEventListener( 'mouseup', innerMouseUpAlpha );
                 document.body.classList.remove( 'noevents' );
-            }
+            };
 
             this.alphaTracker.addEventListener( "mousedown", innerMouseDownAlpha );
         }
@@ -2867,26 +1883,26 @@ class ColorPicker {
         // Info display
         const colorLabel = LX.makeContainer( ["100%", "auto"], "flex flex-row gap-1", "", this.root );
 
-        colorLabel.appendChild( new Select( null, [ "CSS", "Hex", "HSV", "RGB" ], this.colorModel, v => {
+        colorLabel.appendChild( new LX.Select( null, [ "CSS", "Hex", "HSV", "RGB" ], this.colorModel, v => {
             this.colorModel = v;
             this._updateColorValue( null, true );
         } ).root );
 
-        this.labelWidget = new TextInput( null, "", null, { inputClass: "bg-none", fit: true, disabled: true } );
+        this.labelWidget = new LX.TextInput( null, "", null, { inputClass: "bg-none", fit: true, disabled: true } );
         colorLabel.appendChild( this.labelWidget.root );
 
         // Copy button
         {
-            const copyButtonWidget = new Button(null, "copy",  async () => {
+            const copyButtonWidget = new LX.Button(null, "copy",  async () => {
                 navigator.clipboard.writeText( this.labelWidget.value() );
                 copyButtonWidget.root.querySelector( "input[type='checkbox']" ).style.pointerEvents = "none";
 
-                doAsync( () => {
+                LX.doAsync( () => {
                     copyButtonWidget.root.swap( true );
                     copyButtonWidget.root.querySelector( "input[type='checkbox']" ).style.pointerEvents = "auto";
                 }, 3000 );
 
-            }, { swap: "Check", icon: "Copy", buttonClass: "bg-none", className: "ml-auto", title: "Copy" })
+            }, { swap: "Check", icon: "Copy", buttonClass: "bg-none", className: "ml-auto", title: "Copy" } );
 
             copyButtonWidget.root.querySelector( ".swap-on svg" ).addClass( "fg-success" );
 
@@ -2895,7 +1911,7 @@ class ColorPicker {
 
         this._updateColorValue( hexValue, true );
 
-        doAsync( this._placeMarkers.bind( this ) );
+        LX.doAsync( this._placeMarkers.bind( this ) );
 
         this.onPopover = this._placeMarkers.bind( this );
     }
@@ -2916,7 +1932,7 @@ class ColorPicker {
 
     _svToPosition( s, v ) {
         this.intSatMarker.style.left = `${ LX.remapRange( s, 0, 1, -this.markerHalfSize, this.colorPickerBackground.offsetWidth - this.markerHalfSize ) }px`;
-        this.intSatMarker.style.top = `${ LX.remapRange( 1 - v, 0, 1, -this.markerHalfSize, this.colorPickerBackground.offsetHeight - this.markerHalfSize ) }px`
+        this.intSatMarker.style.top = `${ LX.remapRange( 1 - v, 0, 1, -this.markerHalfSize, this.colorPickerBackground.offsetHeight - this.markerHalfSize ) }px`;
     }
 
     _positionToSv( left, top ) {
@@ -2981,8 +1997,7 @@ class ColorPicker {
 
         this._updateColorValue( hexColor );
     }
-};
-
+}
 LX.ColorPicker = ColorPicker;
 
 class Calendar {
@@ -2996,7 +2011,7 @@ class Calendar {
 
     constructor( dateString, options = {} ) {
 
-        this.root = LX.makeContainer( ["256px", "auto"], "border p-3 bg-primary rounded-lg text-md" );
+        this.root = LX.makeContainer( ["256px", "auto"], "p-1 text-md" );
 
         this.onChange = options.onChange;
         this.untilToday = options.untilToday;
@@ -3064,7 +2079,7 @@ class Calendar {
                 this._previousMonth();
             } );
 
-            const monthYearLabel = LX.makeContainer( ["100%", "auto"], "text-center font-medium select-none", `${ this.monthName } ${ this.year }`, header );
+            LX.makeContainer( ["100%", "auto"], "text-center font-medium select-none", `${ this.monthName } ${ this.year }`, header );
 
             const nextMonthIcon = LX.makeIcon( "Right", { title: "Next Month", iconClass: "border p-1 rounded hover:bg-secondary", svgClass: "sm" } );
             header.appendChild( nextMonthIcon );
@@ -3232,1058 +2247,6 @@ class Calendar {
 
 LX.Calendar = Calendar;
 
-/* Layout Classes */
-
-class Area {
-
-    /**
-     * @constructor Area
-     * @param {Object} options
-     * id: Id of the element
-     * className: Add class to the element
-     * width: Width of the area element [fit space]
-     * height: Height of the area element [fit space]
-     * skipAppend: Create but not append to GUI root [false]
-     * minWidth: Minimum width to be applied when resizing
-     * minHeight: Minimum height to be applied when resizing
-     * maxWidth: Maximum width to be applied when resizing
-     * maxHeight: Maximum height to be applied when resizing
-     */
-
-    constructor( options = {} ) {
-
-        var root = document.createElement( 'div' );
-        root.className = "lexarea";
-        if( options.id )
-        {
-            root.id = options.id;
-        }
-        if( options.className )
-        {
-            root.className += " " + options.className;
-        }
-
-        var width = options.width || "100%";
-        var height = options.height || "100%";
-
-        // This has default options..
-        this.setLimitBox( options.minWidth, options.minHeight, options.maxWidth, options.maxHeight );
-
-        if( width.constructor == Number )
-        {
-            width += "px";
-        }
-        if( height.constructor == Number )
-        {
-            height += "px";
-        }
-
-        root.style.width = width;
-        root.style.height = height;
-
-        this.offset = 0;
-        this.root = root;
-        this.size = [ this.root.offsetWidth, this.root.offsetHeight ];
-        this.sections = [];
-        this.panels = [];
-
-        let lexroot = document.getElementById("lexroot");
-        if( lexroot && !options.skipAppend )
-        {
-            lexroot.appendChild( this.root );
-        }
-
-        let overlay = options.overlay;
-
-        if( overlay )
-        {
-            this.root.classList.add("overlay-" + overlay);
-
-            if( options.left )
-            {
-                this.root.style.left = options.left;
-            }
-            else if( options.right )
-            {
-                this.root.style.right = options.right;
-            }
-            else if( options.top )
-            {
-                this.root.style.top = options.top;
-            }
-            else if( options.bottom )
-            {
-                this.root.style.bottom = options.bottom;
-            }
-
-            const draggable = options.draggable ?? true;
-            if( draggable )
-            {
-                makeDraggable( root, options );
-            }
-
-            if( options.resizeable )
-            {
-                root.classList.add("resizeable");
-            }
-
-            if( options.resize )
-            {
-                this.splitBar = document.createElement("div");
-                let type = (overlay == "left") || (overlay == "right") ? "horizontal" : "vertical";
-                this.type = overlay;
-                this.splitBar.className = "lexsplitbar " + type;
-
-                if( overlay == "right" )
-                {
-                    this.splitBar.style.width = LX.DEFAULT_SPLITBAR_SIZE + "px";
-                    this.splitBar.style.left = -(LX.DEFAULT_SPLITBAR_SIZE / 2.0) + "px";
-                }
-                else if( overlay == "left" )
-                {
-                    let size = Math.min(document.body.clientWidth - LX.DEFAULT_SPLITBAR_SIZE, this.root.clientWidth);
-                    this.splitBar.style.width = LX.DEFAULT_SPLITBAR_SIZE + "px";
-                    this.splitBar.style.left = size + (LX.DEFAULT_SPLITBAR_SIZE / 2.0) + "px";
-                }
-                else if( overlay == "top" )
-                {
-                    let size = Math.min(document.body.clientHeight - LX.DEFAULT_SPLITBAR_SIZE, this.root.clientHeight);
-                    this.splitBar.style.height = LX.DEFAULT_SPLITBAR_SIZE + "px";
-                    this.splitBar.style.top = size + (LX.DEFAULT_SPLITBAR_SIZE / 2.0) + "px";
-                }
-                else if( overlay == "bottom" )
-                {
-                    this.splitBar.style.height = LX.DEFAULT_SPLITBAR_SIZE + "px";
-                    this.splitBar.style.top = -(LX.DEFAULT_SPLITBAR_SIZE / 2.0) + "px";
-                }
-
-                this.splitBar.addEventListener("mousedown", innerMouseDown);
-                this.root.appendChild( this.splitBar );
-
-                const that = this;
-                let lastMousePosition = [ 0, 0 ];
-
-                function innerMouseDown( e )
-                {
-                    const doc = that.root.ownerDocument;
-                    doc.addEventListener( 'mousemove', innerMouseMove );
-                    doc.addEventListener( 'mouseup', innerMouseUp );
-                    lastMousePosition[ 0 ] = e.x;
-                    lastMousePosition[ 1 ] = e.y;
-                    e.stopPropagation();
-                    e.preventDefault();
-                    document.body.classList.add( 'nocursor' );
-                    that.splitBar.classList.add( 'nocursor' );
-                }
-
-                function innerMouseMove( e )
-                {
-                    switch( that.type )
-                    {
-                        case "right":
-                            var dt = ( lastMousePosition[ 0 ] - e.x );
-                            var size = ( that.root.offsetWidth + dt );
-                            that.root.style.width = size + "px";
-                            break;
-                        case "left":
-                            var dt = ( lastMousePosition[ 0 ] - e.x );
-                            var size = Math.min(document.body.clientWidth - LX.DEFAULT_SPLITBAR_SIZE, (that.root.offsetWidth - dt));
-                            that.root.style.width = size + "px";
-                            that.splitBar.style.left = size + LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
-                            break;
-                        case "top":
-                            var dt = ( lastMousePosition[ 1 ] - e.y );
-                            var size = Math.min(document.body.clientHeight - LX.DEFAULT_SPLITBAR_SIZE, (that.root.offsetHeight - dt));
-                            that.root.style.height = size + "px";
-                            that.splitBar.style.top = size + LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
-                            break;
-                        case "bottom":
-                            var dt = ( lastMousePosition[ 1 ] - e.y );
-                            var size = ( that.root.offsetHeight + dt );
-                            that.root.style.height = size + "px";
-                            break;
-                    }
-
-                    lastMousePosition[ 0 ] = e.x;
-                    lastMousePosition[ 1 ] = e.y;
-                    e.stopPropagation();
-                    e.preventDefault();
-
-                    // Resize events
-                    if( that.onresize )
-                    {
-                        that.onresize( that.root.getBoundingClientRect() );
-                    }
-                }
-
-                function innerMouseUp( e )
-                {
-                    const doc = that.root.ownerDocument;
-                    doc.removeEventListener( 'mousemove', innerMouseMove );
-                    doc.removeEventListener( 'mouseup', innerMouseUp );
-                    document.body.classList.remove( 'nocursor' );
-                    that.splitBar.classList.remove( 'nocursor' );
-                }
-            }
-        }
-    }
-
-    /**
-     * @method attach
-     * @param {Element} content child to append to area (e.g. a Panel)
-     */
-
-    attach( content ) {
-
-        // Append to last split section if area has been split
-        if( this.sections.length )
-        {
-            this.sections[ 1 ].attach( content );
-            return;
-        }
-
-        if( !content )
-        {
-            throw("no content to attach");
-        }
-
-        content.parent = this;
-
-        let element = content.root ? content.root : content;
-        this.root.appendChild( element );
-    }
-
-    /**
-     * @method split
-     * @param {Object} options
-     * type: Split mode (horizontal, vertical) ["horizontal"]
-     * sizes: CSS Size of each new area (Array) ["50%", "50%"]
-     * resize: Allow area manual resizing [true]
-     * sizes: "Allow the area to be minimized [false]
-     */
-
-    split( options = {} ) {
-
-        if( this.sections.length )
-        {
-            // In case Area has been split before, get 2nd section as root
-            this.offset = this.root.childNodes[ 0 ].offsetHeight; // store offset to take into account when resizing
-            this._root = this.sections[ 0 ].root;
-            this.root = this.sections[ 1 ].root;
-        }
-
-        const type = options.type ?? "horizontal";
-        const sizes = options.sizes || [ "50%", "50%" ];
-        const auto = (options.sizes === 'auto') || ( options.sizes && options.sizes[ 0 ] == "auto" && options.sizes[ 1 ] == "auto" );
-        const rect = this.root.getBoundingClientRect();
-
-        // Secondary area fills space
-        if( !sizes[ 1 ] || ( sizes[ 0 ] != "auto" && sizes[ 1 ] == "auto" ) )
-        {
-            let size = sizes[ 0 ];
-            let margin = options.top ? options.top : 0;
-            if( size.constructor == Number )
-            {
-                size += margin;
-                size += "px";
-            }
-
-            sizes[ 1 ] = "calc( 100% - " + size + " )";
-        }
-
-        let minimizable = options.minimizable ?? false;
-        let resize = ( options.resize ?? true ) || minimizable;
-        let fixedSize = options.fixedSize ?? !resize;
-        let splitbarOffset = 0;
-        let primarySize = [];
-        let secondarySize = [];
-
-        this.offset = 0;
-
-        if( resize )
-        {
-            this.resize = resize;
-            this.splitBar = document.createElement( "div" );
-            this.splitBar.className = "lexsplitbar " + type;
-
-            if( type == "horizontal" )
-            {
-                this.splitBar.style.width = LX.DEFAULT_SPLITBAR_SIZE + "px";
-            }
-            else
-            {
-                this.splitBar.style.height = LX.DEFAULT_SPLITBAR_SIZE + "px";
-            }
-
-            this.splitBar.addEventListener( 'mousedown', innerMouseDown );
-
-            splitbarOffset = ( LX.DEFAULT_SPLITBAR_SIZE / 2 ); // updates
-        }
-
-        if( type == "horizontal" )
-        {
-            this.root.style.display = "flex";
-
-            if( !fixedSize )
-            {
-                const parentWidth = rect.width;
-                const leftPx = parsePixelSize( sizes[ 0 ], parentWidth );
-                const rightPx = parsePixelSize(  sizes[ 1 ], parentWidth );
-                const leftPercent = ( leftPx / parentWidth ) * 100;
-                const rightPercent = ( rightPx / parentWidth ) * 100;
-
-                // Style using percentages
-                primarySize[ 0 ] = `calc(${ leftPercent }% - ${ splitbarOffset }px)`;
-                secondarySize[ 0 ] = `calc(${ rightPercent }% - ${ splitbarOffset }px)`;
-            }
-            else
-            {
-                primarySize[ 0 ] = `calc(${ sizes[ 0 ] } - ${ splitbarOffset }px)`;
-                secondarySize[ 0 ] = `calc(${ sizes[ 1 ] } - ${ splitbarOffset }px)`;
-            }
-
-            primarySize[ 1 ] = "100%";
-            secondarySize[ 1 ] = "100%";
-        }
-        else // vertical
-        {
-            if( auto )
-            {
-                primarySize[ 1 ] = "auto";
-                secondarySize[ 1 ] = "auto";
-            }
-            else if( !fixedSize )
-            {
-                const parentHeight = rect.height;
-                const topPx = parsePixelSize( sizes[ 0 ], parentHeight );
-                const bottomPx = parsePixelSize( sizes[ 1 ], parentHeight );
-                const topPercent = ( topPx / parentHeight ) * 100;
-                const bottomPercent = ( bottomPx / parentHeight ) * 100;
-
-                primarySize[ 1 ] = ( sizes[ 0 ] == "auto" ? "auto" : `calc(${ topPercent }% - ${ splitbarOffset }px)`);
-                secondarySize[ 1 ] = ( sizes[ 1 ] == "auto" ? "auto" : `calc(${ bottomPercent }% - ${ splitbarOffset }px)`);
-            }
-            else
-            {
-                primarySize[ 1 ] = ( sizes[ 0 ] == "auto" ? "auto" : `calc(${ sizes[ 0 ] } - ${ splitbarOffset }px)`);
-                secondarySize[ 1 ] = ( sizes[ 1 ] == "auto" ? "auto" : `calc(${ sizes[ 1 ] } - ${ splitbarOffset }px)`);
-            }
-
-            primarySize[ 0 ] = "100%";
-            secondarySize[ 0 ] = "100%";
-        }
-
-        // Create areas
-        let area1 = new Area( { width: primarySize[ 0 ], height: primarySize[ 1 ], skipAppend: true, className: "split" + ( options.menubar || options.sidebar ? "" : " origin" ) } );
-        let area2 = new Area( { width: secondarySize[ 0 ], height: secondarySize[ 1 ], skipAppend: true, className: "split" } );
-
-        /*
-            If the parent area is not in the DOM, we need to wait for the resize event to get the its correct size
-            and set the sizes of the split areas accordingly.
-        */
-        if( !fixedSize && ( !rect.width || !rect.height ) )
-        {
-            const observer = new ResizeObserver( entries => {
-
-                console.assert( entries.length == 1, "AreaResizeObserver: more than one entry" );
-
-                const rect = entries[ 0 ].contentRect;
-                if( !rect.width || !rect.height )
-                {
-                    return;
-                }
-
-                this._update( [ rect.width, rect.height ], false );
-
-                // On auto splits, we only need to set the size of the parent area
-                if( !auto )
-                {
-                    if( type == "horizontal" )
-                    {
-                        const parentWidth = rect.width;
-                        const leftPx = parsePixelSize( sizes[ 0 ], parentWidth );
-                        const rightPx = parsePixelSize(  sizes[ 1 ], parentWidth );
-                        const leftPercent = ( leftPx / parentWidth ) * 100;
-                        const rightPercent = ( rightPx / parentWidth ) * 100;
-
-                        // Style using percentages
-                        primarySize[ 0 ] = `calc(${ leftPercent }% - ${ splitbarOffset }px)`;
-                        secondarySize[ 0 ] = `calc(${ rightPercent }% - ${ splitbarOffset }px)`;
-                    }
-                    else // vertical
-                    {
-                        const parentHeight = rect.height;
-                        const topPx = parsePixelSize( sizes[ 0 ], parentHeight );
-                        const bottomPx = parsePixelSize( sizes[ 1 ], parentHeight );
-                        const topPercent = ( topPx / parentHeight ) * 100;
-                        const bottomPercent = ( bottomPx / parentHeight ) * 100;
-
-                        primarySize[ 1 ] = ( sizes[ 0 ] == "auto" ? "auto" : `calc(${ topPercent }% - ${ splitbarOffset }px)`);
-                        secondarySize[ 1 ] = ( sizes[ 1 ] == "auto" ? "auto" : `calc(${ bottomPercent }% - ${ splitbarOffset }px)`);
-                    }
-
-                    area1.root.style.width = primarySize[ 0 ];
-                    area1.root.style.height = primarySize[ 1 ];
-
-                    area2.root.style.width = secondarySize[ 0 ];
-                    area2.root.style.height = secondarySize[ 1 ];
-                }
-
-                area1._update();
-                area2._update();
-
-                // Stop observing
-                observer.disconnect();
-            });
-
-            // Observe the parent area until the DOM is ready
-            // and the size is set correctly.
-            doAsync( () => {
-                observer.observe( this.root );
-            }, 100 );
-        }
-
-        if( auto && type == "vertical" )
-        {
-            // Listen resize event on first area
-            const resizeObserver = new ResizeObserver( entries => {
-                for ( const entry of entries )
-                {
-                    const size = entry.target.getComputedSize();
-                    area2.root.style.height = "calc(100% - " + ( size.height ) + "px )";
-                }
-                resizeObserver.disconnect();
-            });
-
-            resizeObserver.observe( area1.root );
-        }
-
-        // Being minimizable means it's also resizeable!
-        if( resize && minimizable )
-        {
-            this.splitExtended = false;
-
-            // Keep state of the animation when ends...
-            area2.root.addEventListener('animationend', e => {
-                const opacity = getComputedStyle( area2.root ).opacity;
-                area2.root.classList.remove( e.animationName + "-" + type );
-                area2.root.style.opacity = opacity;
-                flushCss( area2.root );
-            });
-
-            this.splitBar.addEventListener("contextmenu", e => {
-                e.preventDefault();
-                addContextMenu(null, e, c => {
-                    c.add("Extend", { disabled: this.splitExtended, callback: () => { this.extend() } });
-                    c.add("Reduce", { disabled: !this.splitExtended, callback: () => { this.reduce() } });
-                });
-            });
-        }
-
-        area1.parentArea = this;
-        area2.parentArea = this;
-
-        this.root.appendChild( area1.root );
-
-        if( resize )
-        {
-            this.root.appendChild( this.splitBar );
-        }
-
-        this.root.appendChild( area2.root );
-
-        this.sections = [ area1, area2 ];
-        this.type = type;
-
-        // Update sizes
-        this._update( rect.width || rect.height ? [ rect.width, rect.height ] : undefined );
-
-        if( !resize )
-        {
-            return this.sections;
-        }
-
-        const that = this;
-
-        function innerMouseDown( e )
-        {
-            const doc = that.root.ownerDocument;
-            doc.addEventListener( 'mousemove', innerMouseMove );
-            doc.addEventListener( 'mouseup', innerMouseUp );
-            e.stopPropagation();
-            e.preventDefault();
-            document.body.classList.add( 'nocursor' );
-            that.splitBar.classList.add( 'nocursor' );
-        }
-
-        function innerMouseMove( e )
-        {
-            if( that.type == "horizontal" )
-            {
-                that._moveSplit( -e.movementX );
-            }
-            else
-            {
-                that._moveSplit( -e.movementY );
-            }
-
-            e.stopPropagation();
-            e.preventDefault();
-        }
-
-        function innerMouseUp( e )
-        {
-            const doc = that.root.ownerDocument;
-            doc.removeEventListener( 'mousemove', innerMouseMove );
-            doc.removeEventListener( 'mouseup', innerMouseUp );
-            document.body.classList.remove( 'nocursor' );
-            that.splitBar.classList.remove( 'nocursor' );
-        }
-
-        return this.sections;
-    }
-
-    /**
-    * @method setLimitBox
-    * Set min max for width and height
-    */
-    setLimitBox( minw = 0, minh = 0, maxw = Infinity, maxh = Infinity ) {
-
-        this.minWidth   = minw;
-        this.minHeight  = minh;
-        this.maxWidth   = maxw;
-        this.maxHeight  = maxh;
-
-        if( minw != 0 ) this.root.style.minWidth = `${ minw }px`;
-        if( minh != 0 ) this.root.style.minHeight = `${ minh }px`;
-        if( maxw != Infinity ) this.root.style.maxWidth = `${ maxw }px`;
-        if( maxh != Infinity ) this.root.style.maxHeight = `${ maxh }px`;
-    }
-
-    /**
-    * @method resize
-    * Resize element
-    */
-    setSize( size ) {
-
-        let [ width, height ] = size;
-
-        if( width != undefined && width.constructor == Number )
-        {
-            width += "px";
-        }
-
-        if( height != undefined && height.constructor == Number )
-        {
-            height += "px";
-        }
-
-        if( width )
-        {
-            this.root.style.width = width;
-        }
-
-        if( height )
-        {
-            this.root.style.height = height;
-        }
-
-        if( this.onresize )
-        {
-            this.onresize( this.root.getBoundingClientRect() );
-        }
-
-        doAsync( () => {
-            this.size = [ this.root.clientWidth, this.root.clientHeight ];
-            this.propagateEvent( "onresize" );
-        }, 150 );
-    }
-
-    /**
-    * @method extend
-    * Hide 2nd area split
-    */
-    extend() {
-
-        if( this.splitExtended )
-        {
-            return;
-        }
-
-        let [ area1, area2 ] = this.sections;
-        this.splitExtended = true;
-
-        if( this.type == "vertical" )
-        {
-            this.offset = area2.root.offsetHeight;
-            area2.root.classList.add("fadeout-vertical");
-            this._moveSplit( -Infinity, true );
-
-        }
-        else
-        {
-            this.offset = area2.root.offsetWidth - 8; // Force some height here...
-            area2.root.classList.add("fadeout-horizontal");
-            this._moveSplit( -Infinity, true, 8 );
-        }
-
-        doAsync( () => this.propagateEvent('onresize'), 150 );
-    }
-
-    /**
-    * @method reduce
-    * Show 2nd area split
-    */
-    reduce() {
-
-        if( !this.splitExtended )
-        return;
-
-        this.splitExtended = false;
-        let [area1, area2] = this.sections;
-
-        if( this.type == "vertical")
-        {
-            area2.root.classList.add("fadein-vertical");
-            this._moveSplit(this.offset);
-        }
-        else
-        {
-            area2.root.classList.add("fadein-horizontal");
-            this._moveSplit(this.offset);
-        }
-
-        doAsync( () => this.propagateEvent('onresize'), 150 );
-    }
-
-    /**
-    * @method hide
-    * Hide element
-    */
-    hide() {
-        this.root.classList.add("hidden");
-    }
-
-    /**
-    * @method show
-    * Show element if it is hidden
-    */
-    show() {
-        this.root.classList.remove("hidden");
-    }
-
-    /**
-    * @method toggle
-    * Toggle element if it is hidden
-    */
-    toggle( force ) {
-        this.root.classList.toggle("hidden", force);
-    }
-
-    /**
-     * @method propagateEvent
-     */
-
-    propagateEvent( eventName ) {
-
-        for( let i = 0; i < this.sections.length; i++ )
-        {
-            const area = this.sections[ i ];
-
-            if( area[ eventName ] )
-            {
-                area[ eventName ].call( this, area.root.getBoundingClientRect() );
-            }
-
-            area.propagateEvent( eventName );
-        }
-    }
-
-    /**
-     * @method addPanel
-     * @param {Object} options
-     * Options to create a Panel
-     */
-
-    addPanel( options ) {
-        let panel = new Panel( options );
-        this.attach( panel );
-        this.panels.push( panel );
-        return panel;
-    }
-
-    /**
-     * @method addMenubar
-     * @param {Array} items Items to fill the menubar
-     * @param {Object} options:
-     * float: Justify content (left, center, right) [left]
-     * sticky: Fix menubar at the top [true]
-     */
-
-    addMenubar( items, options = {} ) {
-
-        let menubar = new Menubar( items, options );
-
-        LX.menubars.push( menubar );
-
-        const [ bar, content ] = this.split({ type: 'vertical', sizes: ["48px", null], resize: false, menubar: true });
-        menubar.siblingArea = content;
-
-        bar.attach( menubar );
-        bar.isMenubar = true;
-
-        if( options.sticky ?? true )
-        {
-            bar.root.className += " sticky top-0";
-        }
-
-        if( options.parentClass )
-        {
-            bar.root.className += ` ${ options.parentClass }`;
-        }
-
-        return menubar;
-    }
-
-    /**
-     * @method addSidebar
-     * @param {Function} callback Function to fill the sidebar
-     * @param {Object} options: Sidebar options
-     * width: Width of the sidebar [16rem]
-     * side: Side to attach the sidebar (left|right) [left]
-     */
-
-    addSidebar( callback, options = {} ) {
-
-        let sidebar = new SideBar( options );
-
-        if( callback )
-        {
-            callback( sidebar );
-        }
-
-        // Generate DOM elements after adding all entries
-        sidebar.update();
-
-        LX.sidebars.push( sidebar );
-
-        const side = options.side ?? "left";
-        console.assert( side == "left" || side == "right", "Invalid sidebar side: " + side );
-        const leftSidebar = ( side == "left" );
-
-        const width = options.width ?? "16rem";
-        const sizes = leftSidebar ? [ width, null ] : [ null, width ];
-        const [ left, right ] = this.split( { type: 'horizontal', sizes, resize: false, sidebar: true } );
-        sidebar.siblingArea = leftSidebar ? right : left;
-
-        let bar = leftSidebar ? left : right;
-        bar.attach( sidebar );
-        bar.isSidebar = true;
-
-        if( options.parentClass )
-        {
-            bar.root.className += ` ${ options.parentClass }`;
-        }
-
-        return sidebar;
-    }
-
-    /**
-     * @method addOverlayButtons
-     * @param {Array} buttons Buttons info
-     * @param {Object} options:
-     * float: Where to put the buttons (h: horizontal, v: vertical, t: top, m: middle, b: bottom, l: left, c: center, r: right) [htc]
-     */
-
-    addOverlayButtons( buttons, options = {} ) {
-
-        // Add to last split section if area has been split
-        if( this.sections.length )
-        {
-            this.sections[ 1 ].addOverlayButtons(  buttons, options );
-            return;
-        }
-
-        console.assert( buttons.constructor == Array && buttons.length );
-
-        // Set area to relative to use local position
-        this.root.style.position = "relative";
-
-        options.className = "lexoverlaybuttons";
-
-        let overlayPanel = this.addPanel( options );
-        let overlayGroup = null;
-
-        const container = document.createElement("div");
-        container.className = "lexoverlaybuttonscontainer";
-        container.appendChild( overlayPanel.root );
-        this.attach( container );
-
-        const float = options.float;
-
-        if( float )
-        {
-            for( let i = 0; i < float.length; i++ )
-            {
-                const t = float[i];
-                switch( t )
-                {
-                case 'h': break;
-                case 'v': container.className += " vertical"; break;
-                case 't': break;
-                case 'm': container.className += " middle"; break;
-                case 'b': container.className += " bottom"; break;
-                case 'l': break;
-                case 'c': container.className += " center"; break;
-                case 'r': container.className += " right"; break;
-                }
-            }
-        }
-
-        const _addButton = function( b, group, last ) {
-
-            const _options = {
-                width: "auto",
-                selectable: b.selectable,
-                selected: b.selected,
-                icon: b.icon,
-                img: b.img,
-                className: b.class ?? "",
-                title: b.name,
-                overflowContainerX: overlayPanel.root,
-                swap: b.swap
-            };
-
-            if( group )
-            {
-                if( !overlayGroup )
-                {
-                    overlayGroup = document.createElement('div');
-                    overlayGroup.className = "lexoverlaygroup";
-                    overlayPanel.queuedContainer = overlayGroup;
-                }
-
-                _options.parent = overlayGroup;
-            }
-
-            let callback = b.callback;
-
-            if( b.options )
-            {
-                overlayPanel.addSelect( null, b.options, b.name, callback, _options );
-            }
-            else
-            {
-                const button = overlayPanel.addButton( null, b.name, function( value, event ) {
-                    if( b.selectable )
-                    {
-                        if( b.group )
-                        {
-                            let _prev = b.selected;
-                            b.group.forEach( sub => sub.selected = false );
-                            b.selected = !_prev;
-                        }
-                        else
-                        {
-                            b.selected = !b.selected;
-                        }
-                    }
-
-                    if( callback )
-                    {
-                        callback( value, event, button.root );
-                    }
-
-                }, _options );
-            }
-
-            // ends the group
-            if( overlayGroup && last )
-            {
-                overlayPanel.root.appendChild( overlayGroup );
-                overlayGroup = null;
-                overlayPanel.clearQueue();
-            }
-        }
-
-        const _refreshPanel = function() {
-
-            overlayPanel.clear();
-
-            for( let b of buttons )
-            {
-                if( b.constructor === Array )
-                {
-                    for( let i = 0; i < b.length; ++i )
-                    {
-                        let sub = b[ i ];
-                        sub.group = b;
-                        _addButton(sub, true, i == ( b.length - 1 ));
-                    }
-                }
-                else
-                {
-                    _addButton( b );
-                }
-            }
-
-            // Add floating info
-            if( float )
-            {
-                var height = 0;
-                overlayPanel.root.childNodes.forEach( c => { height += c.offsetHeight; } );
-
-                if( container.className.includes( "middle" ) )
-                {
-                    container.style.top = "-moz-calc( 50% - " + (height * 0.5) + "px )";
-                    container.style.top = "-webkit-calc( 50% - " + (height * 0.5) + "px )";
-                    container.style.top = "calc( 50% - " + (height * 0.5) + "px )";
-                }
-            }
-        }
-
-        _refreshPanel();
-    }
-
-    /**
-     * @method addTabs
-     * @param {Object} options:
-     * parentClass: Add extra class to tab buttons container
-     */
-
-    addTabs( options = {} ) {
-
-        const tabs = new Tabs( this, options );
-
-        if( options.folding )
-        {
-            this.parentArea._disableSplitResize();
-            // Compensate split bar...
-            this.root.style.paddingTop = "4px";
-        }
-
-        return tabs;
-    }
-
-    _moveSplit( dt, forceAnimation = false, forceWidth = 0 ) {
-
-        if( !this.type )
-        {
-            throw( "No split area" );
-        }
-
-        if( dt === undefined ) // Splitbar didn't move!
-        {
-            return;
-        }
-
-        const a1 = this.sections[ 0 ];
-        var a1Root = a1.root;
-
-        if( !a1Root.classList.contains( "origin" ) )
-        {
-            a1Root = a1Root.parentElement;
-        }
-
-        const a2 = this.sections[ 1 ];
-        const a2Root = a2.root;
-        const splitData = "- "+ LX.DEFAULT_SPLITBAR_SIZE + "px";
-
-        let transition = null;
-        if( !forceAnimation )
-        {
-            // Remove transitions for this change..
-            transition = a1Root.style.transition;
-            a1Root.style.transition = a2Root.style.transition = "none";
-            // flushCss( a1Root );
-        }
-
-        if( this.type == "horizontal" )
-        {
-            var size = Math.max( a2Root.offsetWidth + dt, parseInt( a2.minWidth ) );
-            if( forceWidth ) size = forceWidth;
-
-            const parentWidth = this.size[ 0 ];
-            const rightPercent = ( size / parentWidth ) * 100;
-            const leftPercent = Math.max( 0, 100 - rightPercent );
-
-            a1Root.style.width = `-moz-calc(${ leftPercent }% ${ splitData })`;
-            a1Root.style.width = `-webkit-calc( ${ leftPercent }% ${ splitData })`;
-            a1Root.style.width = `calc( ${ leftPercent }% ${ splitData })`;
-            a2Root.style.width = `${ rightPercent }%`;
-            a2Root.style.width = `${ rightPercent }%`;
-            a2Root.style.width = `${ rightPercent }%`;
-
-            if( a1.maxWidth != Infinity )
-            {
-                a2Root.style.minWidth = `calc( 100% - ${ parseInt( a1.maxWidth ) }px )`;
-            }
-        }
-        else
-        {
-            var size = Math.max( ( a2Root.offsetHeight + dt ) + a2.offset, parseInt( a2.minHeight ) );
-            if( forceWidth ) size = forceWidth;
-
-            const parentHeight = this.size[ 1 ];
-            const bottomPercent = ( size / parentHeight ) * 100;
-            const topPercent = Math.max( 0, 100 - bottomPercent );
-
-            a1Root.style.height = `-moz-calc(${ topPercent }% ${ splitData })`;
-            a1Root.style.height = `-webkit-calc( ${ topPercent }% ${ splitData })`;
-            a1Root.style.height = `calc( ${ topPercent }% ${ splitData })`;
-            a2Root.style.height = `${ bottomPercent }%`;
-            a2Root.style.height = `${ bottomPercent }%`;
-            a2Root.style.height = `${ bottomPercent }%`;
-
-            if( a1.maxHeight != Infinity )
-            {
-                a2Root.style.minHeight = `calc( 100% - ${ parseInt( a1.maxHeight ) }px )`;
-            }
-        }
-
-        if( !forceAnimation )
-        {
-            // Reapply transitions
-            a1Root.style.transition = a2Root.style.transition = transition;
-        }
-
-        doAsync( () => {
-            this._update();
-            this.propagateEvent( 'onresize' );
-        }, 10 );
-    }
-
-    _disableSplitResize() {
-
-        this.resize = false;
-        this.splitBar.remove();
-        delete this.splitBar;
-    }
-
-    _update( newSize, propagate = true ) {
-
-        if( !newSize )
-        {
-            const rect = this.root.getBoundingClientRect();
-            this.size = [ rect.width, rect.height ];
-        }
-        else
-        {
-            this.size = newSize;
-        }
-
-        if( propagate )
-        {
-            for( var i = 0; i < this.sections.length; i++ )
-            {
-                this.sections[ i ]._update();
-            }
-        }
-    }
-};
-
-LX.Area = Area;
-
 function flushCss(element) {
     // By reading the offsetHeight property, we are forcing
     // the browser to flush the pending CSS changes (which it
@@ -4440,8 +2403,7 @@ class Tabs {
                 {
                     const bb = entry.contentRect;
                     const sibling = area.parentArea.sections[ 0 ].root;
-                    const addOffset = true; // hardcoded...
-                    sibling.style.height = "calc(100% - " + ((addOffset ? 42 : 0) + bb.height) + "px )";
+                    sibling.style.height = "calc(100% - " + ((42 ) + bb.height) + "px )";
                 }
             });
 
@@ -4650,6 +2612,10980 @@ class Tabs {
 LX.Tabs = Tabs;
 
 /**
+ * @class Footer
+ */
+
+class Footer {
+    /**
+     * @param {Object} options:
+     * columns: Array with data per column { title, items: [ { title, link } ]  }
+     * credits: html string
+     * socials: Array with data per item { title, link, icon }
+     * className: Extra class to customize
+    */
+    constructor( options = {} ) {
+
+        const root = document.createElement( "footer" );
+        root.className = "lexfooter" + ` ${ options.className ?? "" }`;
+
+        const wrapper = document.createElement( "div" );
+        wrapper.style.minHeight = "48px";
+        wrapper.className = "w-full";
+        root.appendChild( wrapper );
+
+        // const hr = document.createElement( "hr" );
+        // wrapper.appendChild( hr );
+
+        if( options.columns && options.columns.constructor == Array )
+        {
+            const cols = document.createElement( "div" );
+            cols.className = "columns";
+            cols.style.gridTemplateColumns = "1fr ".repeat( options.columns.length );
+            wrapper.appendChild( cols );
+
+            for( let col of options.columns )
+            {
+                const colDom = document.createElement( "div" );
+                colDom.className = "col";
+                cols.appendChild( colDom );
+
+                const colTitle = document.createElement( "h2" );
+                colTitle.innerHTML = col.title;
+                colDom.appendChild( colTitle );
+
+                if( !col.items || !col.items.length )
+                {
+                    continue;
+                }
+
+                const itemListDom = document.createElement( "ul" );
+                colDom.appendChild( itemListDom );
+
+                for( let item of col.items )
+                {
+                    const itemDom = document.createElement( "li" );
+                    itemDom.innerHTML = `<a class="" href="${ item.link }">${ item.title }</a>`;
+                    itemListDom.appendChild( itemDom );
+                }
+            }
+        }
+
+        if( options.credits || options.socials )
+        {
+            const creditsSocials = document.createElement( "div" );
+            creditsSocials.className = "credits-and-socials";
+            wrapper.appendChild( creditsSocials );
+
+            if( options.credits )
+            {
+                const credits = document.createElement( "p" );
+                credits.innerHTML = options.credits;
+                creditsSocials.appendChild( credits );
+            }
+
+            if( options.socials )
+            {
+                const socials = document.createElement( "div" );
+                socials.className = "socials flex flex-row gap-1 my-2 justify-end";
+
+                for( let social of options.socials )
+                {
+                    const socialIcon = LX.makeIcon( social.icon, { title: social.title, svgClass: "xl" } );
+                    socialIcon.href = social.link;
+                    socialIcon.target = "_blank";
+                    socials.appendChild( socialIcon );
+                }
+
+                creditsSocials.appendChild( socials );
+            }
+        }
+
+        // Append directly to body
+        const parent = options.parent ?? document.body;
+        parent.appendChild( root );
+
+        // Set always at bottom
+        root.previousElementSibling.style.flexGrow = "1";
+
+        this.root = root;
+    }
+}
+
+LX.Footer = Footer;
+
+/**
+ * @class Dialog
+ */
+
+class Dialog {
+
+    static _last_id = 0;
+
+    constructor( title, callback, options = {} ) {
+
+        if( !callback )
+        {
+            console.warn("Content is empty, add some widgets using 'callback' parameter!");
+        }
+
+        this._oncreate = callback;
+        this.id = LX.guidGenerator();
+
+        const size = options.size ?? [],
+            position = options.position ?? [],
+            draggable = options.draggable ?? true,
+            dockable = options.dockable ?? false,
+            modal = options.modal ?? false;
+
+        let root = document.createElement('dialog');
+        root.className = "lexdialog " + (options.className ?? "");
+        root.id = options.id ?? "dialog" + Dialog._last_id++;
+        LX.root.appendChild( root );
+
+        LX.doAsync( () => {
+            modal ? root.showModal() : root.show();
+        }, 10 );
+
+        let that = this;
+
+        const titleDiv = document.createElement('div');
+
+        if( title )
+        {
+            titleDiv.className = "lexdialogtitle";
+            titleDiv.innerHTML = title;
+            titleDiv.setAttribute( "draggable", false );
+            root.appendChild( titleDiv );
+        }
+
+        if( options.closable ?? true )
+        {
+            this.close = () => {
+
+                if( options.onBeforeClose )
+                {
+                    options.onBeforeClose( this );
+                }
+
+                if( !options.onclose )
+                {
+                    root.close();
+
+                    LX.doAsync( () => {
+                        that.panel.clear();
+                        root.remove();
+                    }, 150 );
+                }
+                else
+                {
+                    options.onclose( this.root );
+                }
+            };
+
+            const closeButton = LX.makeIcon( "X", { title: "Close", iconClass: "lexdialogcloser" } );
+            closeButton.addEventListener( "click", this.close );
+
+            const dockButton = LX.makeIcon( "Minus", { title: "Dock", iconClass: "ml-auto mr-2" } );
+            dockButton.addEventListener( "click", () => {
+
+                const data = this.branchData;
+                const panel = data.panel;
+                const panelChildCount = panel.root.childElementCount;
+
+                const branch = panel.branch( data.name, { closed: data.closed } );
+                branch.widgets = data.widgets;
+
+                for( let w of branch.widgets )
+                {
+                    branch.content.appendChild( w.root );
+                }
+
+                if( data.childIndex < panelChildCount )
+                {
+                    panel.root.insertChildAtIndex( branch.root, data.childIndex );
+                }
+
+                this.close();
+            } );
+
+            if( title )
+            {
+                if( dockable ) titleDiv.appendChild( dockButton );
+                titleDiv.appendChild( closeButton );
+            }
+            else
+            {
+                closeButton.classList.add( "notitle" );
+                root.appendChild( closeButton );
+            }
+        }
+
+        const panel = new LX.Panel();
+        panel.root.classList.add( "lexdialogcontent" );
+
+        if( !title )
+        {
+            panel.root.classList.add( "notitle" );
+        }
+
+        if( callback )
+        {
+            callback.call( this, panel );
+        }
+
+        root.appendChild( panel.root );
+
+        // Make branches have a distintive to manage some cases
+        panel.root.querySelectorAll(".lexbranch").forEach( b => b.classList.add("dialog") );
+
+        this.panel = panel;
+        this.root = root;
+        this.title = titleDiv;
+
+        if( draggable )
+        {
+            LX.makeDraggable( root, Object.assign( { targetClass: 'lexdialogtitle' }, options ) );
+        }
+
+        // Process position and size
+        if( size.length && typeof(size[ 0 ]) != "string" )
+        {
+            size[ 0 ] += "px";
+        }
+
+        if( size.length && typeof(size[ 1 ]) != "string" )
+        {
+            size[ 1 ] += "px";
+        }
+
+        root.style.width = size[ 0 ] ? (size[ 0 ]) : "25%";
+        root.style.height = size[ 1 ] ? (size[ 1 ]) : "auto";
+        root.style.translate = options.position ? "unset" : "-50% -50%";
+
+        if( options.size )
+        {
+            this.size = size;
+        }
+
+        root.style.left = position[ 0 ] ?? "50%";
+        root.style.top = position[ 1 ] ?? "50%";
+
+        panel.root.style.height = title ? "calc( 100% - " + ( titleDiv.offsetHeight + 30 ) + "px )" : "calc( 100% - 51px )";
+    }
+
+    destroy() {
+
+        this.root.remove();
+    }
+
+    refresh() {
+
+        this.panel.root.innerHTML = "";
+        this._oncreate.call(this, this.panel);
+    }
+
+    setPosition( x, y ) {
+
+        this.root.style.left = x + "px";
+        this.root.style.top = y + "px";
+    }
+
+    setTitle( title ) {
+
+        const titleDOM = this.root.querySelector( '.lexdialogtitle' );
+        if( !titleDOM )
+            return;
+        titleDOM.innerText = title;
+    }
+}
+
+LX.Dialog = Dialog;
+
+/**
+ * @class PocketDialog
+ */
+
+class PocketDialog extends Dialog {
+
+    static TOP      = 0;
+    static BOTTOM   = 1;
+
+    constructor( title, callback, options = {} ) {
+
+        options.draggable = options.draggable ?? false;
+        options.closable = options.closable ?? false;
+
+        const dragMargin = 3;
+
+        super( title, callback, options );
+
+        let that = this;
+        // Update margins on branch title closes/opens
+        LX.addSignal("@on_branch_closed", this.panel, closed => {
+            if( this.dock_pos == PocketDialog.BOTTOM )
+            {
+                this.root.style.top = "calc(100% - " + (this.root.offsetHeight + dragMargin) + "px)";
+            }
+        });
+
+        // Custom
+        this.root.classList.add( "pocket" );
+
+        this.root.style.translate = "none";
+        this.root.style.top = "0";
+        this.root.style.left = "unset";
+
+        if( !options.position )
+        {
+            this.root.style.right = dragMargin + "px";
+            this.root.style.top = dragMargin + "px";
+        }
+
+        this.panel.root.style.width = "100%";
+        this.panel.root.style.height = "100%";
+        this.dock_pos = PocketDialog.TOP;
+
+        this.minimized = false;
+        this.title.tabIndex = -1;
+        this.title.addEventListener("click", e => {
+            if( this.title.eventCatched )
+            {
+                this.title.eventCatched = false;
+                return;
+            }
+
+            // Sized dialogs have to keep their size
+            if( this.size )
+            {
+                if( !this.minimized ) this.root.style.height = "auto";
+                else this.root.style.height = this.size[ 1 ];
+            }
+
+            this.root.classList.toggle("minimized");
+            this.minimized = !this.minimized;
+
+            if( this.dock_pos == PocketDialog.BOTTOM )
+                that.root.style.top = this.root.classList.contains("minimized") ?
+                "calc(100% - " + (that.title.offsetHeight + 6) + "px)" : "calc(100% - " + (that.root.offsetHeight + dragMargin) + "px)";
+        });
+
+        if( !options.draggable )
+        {
+            const float = options.float;
+
+            if( float )
+            {
+                for( let i = 0; i < float.length; i++ )
+                {
+                    const t = float[ i ];
+                    switch( t )
+                    {
+                    case 'b':
+                        this.root.style.top = "calc(100% - " + (this.root.offsetHeight + dragMargin) + "px)";
+                        break;
+                    case 'l':
+                        this.root.style.right = "unset";
+                        this.root.style.left = options.position ? options.position[ 1 ] : ( dragMargin + "px" );
+                        break;
+                    }
+                }
+            }
+
+            this.root.classList.add('dockable');
+
+            this.title.addEventListener("keydown", function( e ) {
+                if( !e.ctrlKey )
+                {
+                    return;
+                }
+
+                that.root.style.right = "unset";
+
+                if( e.key == 'ArrowLeft' )
+                {
+                    that.root.style.left = '0px';
+                }
+                else if( e.key == 'ArrowRight' )
+                {
+                    that.root.style.left = "calc(100% - " + (that.root.offsetWidth + dragMargin) + "px)";
+                }
+                else if( e.key == 'ArrowUp' )
+                {
+                    that.root.style.top = "0px";
+                    that.dock_pos = PocketDialog.TOP;
+                }
+                else if( e.key == 'ArrowDown' )
+                {
+                    that.root.style.top = "calc(100% - " + (that.root.offsetHeight + dragMargin) + "px)";
+                    that.dock_pos = PocketDialog.BOTTOM;
+                }
+            });
+        }
+    }
+}
+
+LX.PocketDialog = PocketDialog;
+
+/**
+ * @class ContextMenu
+ */
+
+class ContextMenu {
+
+    constructor( event, title, options = {} ) {
+
+        // remove all context menus
+        document.body.querySelectorAll( ".lexcontextmenu" ).forEach( e => e.remove() );
+
+        this.root = document.createElement( "div" );
+        this.root.className = "lexcontextmenu";
+        this.root.style.left = ( event.x - 48 ) + "px";
+        this.root.style.top = ( event.y - 8 ) + "px";
+
+        this.root.addEventListener("mouseleave", function() {
+            this.remove();
+        });
+
+        this.items = [];
+        this.colors = {};
+
+        if( title )
+        {
+            const item = {};
+            item[ title ] = [];
+            item[ "className" ] = "cmtitle";
+            item[ "icon" ] = options.icon;
+            this.items.push( item );
+        }
+    }
+
+    _adjustPosition( div, margin, useAbsolute = false ) {
+
+        let rect = div.getBoundingClientRect();
+
+        if( !useAbsolute )
+        {
+            let width = rect.width;
+            if( rect.left < 0 )
+            {
+                div.style.left = margin + "px";
+            }
+            else if( window.innerWidth - rect.right < 0 )
+            {
+                div.style.left = (window.innerWidth - width - margin) + "px";
+            }
+
+            if( rect.top < 0 )
+            {
+                div.style.top = margin + "px";
+            }
+            else if( (rect.top + rect.height) > window.innerHeight )
+            {
+                div.style.top = (window.innerHeight - rect.height - margin) + "px";
+            }
+        }
+        else
+        {
+            let dt = window.innerWidth - rect.right;
+            if( dt < 0 )
+            {
+                div.style.left = div.offsetLeft + (dt - margin) + "px";
+            }
+
+            dt = window.innerHeight - (rect.top + rect.height);
+            if( dt < 0 )
+            {
+                div.style.top = div.offsetTop + (dt - margin + 20 ) + "px";
+            }
+        }
+    }
+
+    _createSubmenu( o, k, c, d ) {
+
+        this.root.querySelectorAll( ".lexcontextmenu" ).forEach( cm => cm.remove() );
+
+        let contextmenu = document.createElement('div');
+        contextmenu.className = "lexcontextmenu";
+        c.appendChild( contextmenu );
+
+        for( let i = 0; i < o[ k ].length; ++i )
+        {
+            const subitem = o[ k ][ i ];
+            const subkey = Object.keys( subitem )[ 0 ];
+            this._createEntry( subitem, subkey, contextmenu, d );
+        }
+
+        const rect = c.getBoundingClientRect();
+        contextmenu.style.left = ( rect.x + rect.width ) + "px";
+        contextmenu.style.marginTop = "-31px"; // Force to be at the first element level
+
+        // Set final width
+        this._adjustPosition( contextmenu, 6 );
+    }
+
+    _createEntry( o, k, c, d ) {
+
+        const hasSubmenu = o[ k ].length;
+        let entry = document.createElement('div');
+        entry.className = "lexmenuboxentry" + (o[ 'className' ] ? " " + o[ 'className' ] : "" );
+        entry.id = o.id ?? ("eId" + getSupportedDOMName( k ));
+        entry.innerHTML = "";
+        const icon = o[ 'icon' ];
+        if( icon )
+        {
+            entry.appendChild( LX.makeIcon( icon, { svgClass: "sm" } ) );
+        }
+        const disabled = o['disabled'];
+        entry.innerHTML += "<div class='lexentryname" + (disabled ? " disabled" : "") + "'>" + k + "</div>";
+        c.appendChild( entry );
+
+        if( this.colors[ k ] )
+        {
+            entry.style.borderColor = this.colors[ k ];
+        }
+
+        if( k == "" )
+        {
+            entry.className += " cmseparator";
+            return;
+        }
+
+        // Add callback
+        entry.addEventListener("click", e => {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            if( disabled )
+            {
+                return;
+            }
+
+            const f = o[ 'callback' ];
+            if( f )
+            {
+                f.call( this, k, entry );
+                this.root.remove();
+            }
+
+            if( !hasSubmenu )
+            {
+                return;
+            }
+
+            if( LX.OPEN_CONTEXTMENU_ENTRY == 'click' )
+                this._createSubmenu( o, k, entry, ++d );
+        });
+
+        if( !hasSubmenu )
+        {
+            return;
+        }
+
+        const submenuIcon = LX.makeIcon( "Menu", { svgClass: "sm" } );
+        entry.appendChild( submenuIcon );
+
+        if( LX.OPEN_CONTEXTMENU_ENTRY == 'mouseover' )
+        {
+            entry.addEventListener("mouseover", e => {
+                if(entry.built)
+                    return;
+                entry.built = true;
+                this._createSubmenu( o, k, entry, ++d );
+                e.stopPropagation();
+            });
+        }
+
+        entry.addEventListener("mouseleave", () => {
+            d = -1; // Reset depth
+            c.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+        });
+    }
+
+    onCreate() {
+        LX.doAsync( () => this._adjustPosition( this.root, 6 ) );
+    }
+
+    add( path, options = {} ) {
+
+        if(options.constructor == Function)
+            options = { callback: options };
+
+        // process path
+        path = path + ""; // make string!
+        const tokens = path.split("/");
+
+        // assign color to last token in path
+        const lastPath = tokens[tokens.length - 1];
+        this.colors[ lastPath ] = options.color;
+
+        let idx = 0;
+
+        const insert = (token, list) => {
+            if(token == undefined) return;
+
+            let found = null;
+            list.forEach( o => {
+                const keys = Object.keys(o);
+                const key = keys.find( t => t == token );
+                if(key) found = o[ key ];
+            } );
+
+            if( found )
+            {
+                insert( tokens[ idx++ ], found );
+            }
+            else
+            {
+                let item = {};
+                item[ token ] = [];
+                const nextToken = tokens[ idx++ ];
+                // Check if last token -> add callback
+                if( !nextToken )
+                {
+                    item[ 'id' ] = options.id;
+                    item[ 'icon' ] = options.icon;
+                    item[ 'callback' ] = options.callback;
+                    item[ 'disabled' ] = options.disabled ?? false;
+                }
+
+                list.push( item );
+                insert( nextToken, item[ token ] );
+            }
+        };
+
+        insert( tokens[idx++], this.items );
+
+        // Set parents
+
+        const setParent = _item => {
+
+            let key = Object.keys( _item )[ 0 ];
+            let children = _item[ key ];
+
+            if( !children.length )
+            {
+                return;
+            }
+
+            if( children.find( c => Object.keys(c)[ 0 ] == key ) == null )
+            {
+                const parent = {};
+                parent[ key ] = [];
+                parent[ 'className' ] = "cmtitle";
+                _item[ key ].unshift( parent );
+            }
+
+            for( let child of _item[ key ] )
+            {
+                let k = Object.keys( child )[ 0 ];
+                for( let i = 0; i < child[ k ].length; ++i )
+                {
+                    setParent( child );
+                }
+            }
+        };
+
+        for( let item of this.items )
+        {
+            setParent( item );
+        }
+
+        // Create elements
+
+        for( let item of this.items )
+        {
+            let key = Object.keys( item )[ 0 ];
+            let pKey = "eId" + getSupportedDOMName( key );
+
+            // Item already created
+            const id = "#" + ( item.id ?? pKey );
+            if( !this.root.querySelector( id ) )
+            {
+                this._createEntry( item, key, this.root, -1 );
+            }
+        }
+    }
+
+    setColor( token, color ) {
+
+        if(color[ 0 ] !== '#')
+            color = rgbToHex(color);
+
+        this.colors[ token ] = color;
+    }
+}
+LX.ContextMenu = ContextMenu;
+
+function addContextMenu( title, event, callback, options )
+{
+    const menu = new ContextMenu( event, title, options );
+    LX.root.appendChild( menu.root );
+
+    if( callback )
+    {
+        callback( menu );
+    }
+
+    menu.onCreate();
+
+    return menu;
+}
+
+LX.addContextMenu = addContextMenu;
+
+/**
+ * @class CanvasCurve
+ */
+
+class CanvasCurve {
+
+    constructor( value, options = {} ) {
+
+        let element = document.createElement( "div" );
+        element.className = "curve " + ( options.className ? options.className : "" );
+        element.style.minHeight = "50px";
+        element.style.width = options.width || "100%";
+        element.style.minWidth = "50px";
+        element.style.minHeight = "20px";
+
+        element.bgcolor = options.bgColor || LX.getThemeColor( "global-intense-background" );
+        element.pointscolor = options.pointsColor || LX.getThemeColor( "global-color-accent" );
+        element.activepointscolor = options.activePointsColor || LX.getThemeColor( "global-color-accent-light" );
+        element.linecolor = options.lineColor || "#555";
+        element.value = value || [];
+        element.xrange = options.xrange || [ 0, 1 ]; // min, max
+        element.yrange = options.yrange || [ 0, 1 ]; // min, max
+        element.defaulty = options.defaulty != null ? options.defaulty : 0.0;
+        element.no_overlap = options.noOverlap || false;
+        element.show_samples = options.showSamples || 0;
+        element.allow_add_values = options.allowAddValues ?? true;
+        element.draggable_x = options.draggableX ?? true;
+        element.draggable_y = options.draggableY ?? true;
+        element.smooth = (options.smooth && typeof( options.smooth ) == 'number' ? options.smooth : 0.3) || false;
+        element.move_out = options.moveOutAction ?? LX.CURVE_MOVEOUT_DELETE;
+
+        LX.addSignal( "@on_new_color_scheme", (el, value) => {
+            element.bgcolor = options.bgColor || LX.getThemeColor( "global-intense-background" );
+            element.pointscolor = options.pointsColor || LX.getThemeColor( "global-color-accent" );
+            element.activepointscolor = options.activePointsColor || LX.getThemeColor( "global-color-accent-light" );
+            this.redraw();
+        } );
+
+        this.element = element;
+
+        let canvas = document.createElement( "canvas" );
+        canvas.width = options.width || 200;
+        canvas.height = options.height || 50;
+        element.appendChild( canvas );
+        this.canvas = canvas;
+
+        element.addEventListener( "mousedown", onmousedown );
+
+        element.getValueAt = function( x ) {
+
+            if( x < element.xrange[ 0 ] || x > element.xrange[ 1 ] )
+            {
+                return element.defaulty;
+            }
+
+            let last = [ element.xrange[ 0 ], element.defaulty ];
+            let f = 0;
+            for( let i = 0; i < element.value.length; i += 1 )
+            {
+                let v = element.value[ i ];
+                if( x == v[ 0 ] ) return v[ 1 ];
+                if( x < v[ 0 ] )
+                {
+                    f = ( x - last[ 0 ] ) / (v[ 0 ] - last[ 0 ]);
+                    return last[ 1 ] * ( 1 - f ) + v[ 1 ] * f;
+                }
+
+                last = v;
+            }
+
+            v = [ element.xrange[ 1 ], element.defaulty ];
+            f = (x - last[ 0 ]) / (v[ 0 ] - last[ 0 ]);
+            return last[ 1 ] * ( 1 - f ) + v[ 1 ] * f;
+        };
+
+        element.resample = function( samples ) {
+
+            let r = [];
+            let dx = (element.xrange[ 1 ] - element.xrange[ 0 ]) / samples;
+            for( let i = element.xrange[ 0 ]; i <= element.xrange[ 1 ]; i += dx )
+            {
+                r.push( element.getValueAt(i) );
+            }
+            return r;
+        };
+
+        element.addValue = function(v) {
+
+            for( let i = 0; i < element.value; i++ )
+            {
+                let value = element.value[ i ];
+                if(value[ 0 ] < v[ 0 ]) continue;
+                element.value.splice(i,0,v);
+                redraw();
+                return;
+            }
+
+            element.value.push(v);
+            redraw();
+        };
+
+        //value to canvas
+        function convert(v) {
+            return [ canvas.width * ( v[ 0 ] - element.xrange[ 0 ])/ (element.xrange[ 1 ]),
+                canvas.height * (v[ 1 ] - element.yrange[ 0 ])/ (element.yrange[ 1 ])];
+        }
+
+        //canvas to value
+        function unconvert(v) {
+            return [(v[ 0 ] * element.xrange[ 1 ] / canvas.width + element.xrange[ 0 ]),
+                    (v[ 1 ] * element.yrange[ 1 ] / canvas.height + element.yrange[ 0 ])];
+        }
+
+        let selected = -1;
+
+        element.redraw = function( o = {} ) {
+
+            if( o.value ) element.value = o.value;
+            if( o.xrange ) element.xrange = o.xrange;
+            if( o.yrange ) element.yrange = o.yrange;
+            if( o.smooth ) element.smooth = o.smooth;
+
+            var ctx = canvas.getContext( "2d" );
+            ctx.setTransform( 1, 0, 0, 1, 0, 0 );
+            ctx.translate( 0, canvas.height );
+            ctx.scale( 1, -1 );
+
+            ctx.fillStyle = element.bgcolor;
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+
+            ctx.strokeStyle = element.linecolor;
+            ctx.beginPath();
+
+            //draw line
+            var pos = convert([ element.xrange[ 0 ],element.defaulty ]);
+            ctx.moveTo( pos[ 0 ], pos[ 1 ] );
+            let values = [pos[ 0 ], pos[ 1 ]];
+
+            for( var i in element.value )
+            {
+                var value = element.value[ i ];
+                pos = convert( value );
+                values.push( pos[ 0 ] );
+                values.push( pos[ 1 ] );
+                if( !element.smooth )
+                {
+                    ctx.lineTo( pos[ 0 ], pos[ 1 ] );
+                }
+            }
+
+            pos = convert([ element.xrange[ 1 ], element.defaulty ]);
+            values.push(pos[ 0 ]);
+            values.push(pos[ 1 ]);
+            if( !element.smooth )
+            {
+                ctx.lineTo( pos[ 0 ], pos[ 1 ] );
+                ctx.stroke();
+            }
+            else
+            {
+                LX.UTILS.drawSpline( ctx, values, element.smooth );
+            }
+
+            // Draw points
+            for( var i = 0; i < element.value.length; i += 1 )
+            {
+                var value = element.value[ i ];
+                pos = convert( value );
+                if( selected == i )
+                    ctx.fillStyle = element.activepointscolor;
+                else
+                    ctx.fillStyle = element.pointscolor;
+                ctx.beginPath();
+                ctx.arc( pos[ 0 ], pos[ 1 ], selected == i ? 4 : 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            if( element.show_samples )
+            {
+                var samples = element.resample(element.show_samples);
+                ctx.fillStyle = "#888";
+                for( var i = 0; i < samples.length; i += 1)
+                {
+                    var value = [ i * ((element.xrange[ 1 ] - element.xrange[ 0 ]) / element.show_samples) + element.xrange[ 0 ], samples[ i ] ];
+                    pos = convert(value);
+                    ctx.beginPath();
+                    ctx.arc( pos[ 0 ], pos[ 1 ], 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        };
+
+        var last_mouse = [ 0, 0 ];
+
+        function onmousedown( e ) {
+            document.addEventListener( "mousemove", onmousemove );
+            document.addEventListener( "mouseup", onmouseup );
+
+            var rect = canvas.getBoundingClientRect();
+            var mousex = e.clientX - rect.left;
+            var mousey = e.clientY - rect.top;
+
+            selected = computeSelected( mousex, canvas.height - mousey );
+
+            if( e.button == LX.MOUSE_LEFT_CLICK && selected == -1 && element.allow_add_values )
+            {
+                var v = unconvert([ mousex, canvas.height - mousey ]);
+                element.value.push( v );
+                sortValues();
+                selected = element.value.indexOf( v );
+            }
+
+            last_mouse = [ mousex, mousey ];
+            element.redraw();
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function onmousemove( e ) {
+
+            var rect = canvas.getBoundingClientRect();
+            var mousex = e.clientX - rect.left;
+            var mousey = e.clientY - rect.top;
+
+            if( mousex < 0 ) mousex = 0;
+            else if( mousex > canvas.width ) mousex = canvas.width;
+            if( mousey < 0 ) mousey = 0;
+            else if( mousey > canvas.height ) mousey = canvas.height;
+
+            // Dragging to remove
+            const currentMouseDiff = [ e.clientX - rect.left, e.clientY - rect.top ];
+            if( selected != -1 && distance( currentMouseDiff, [ mousex, mousey ] ) > canvas.height * 0.5 )
+            {
+                if( element.move_out == LX.CURVE_MOVEOUT_DELETE)
+                {
+                    element.value.splice( selected, 1 );
+                }
+                else
+                {
+                    const d = [ currentMouseDiff[ 0 ] - mousex, currentMouseDiff[ 1 ] - mousey ];
+                    let value = element.value[ selected ];
+                    value[ 0 ] = ( d[ 0 ] == 0.0 ) ? value[ 0 ] : ( d[ 0 ] < 0.0 ? element.xrange[ 0 ] : element.xrange[ 1 ] );
+                    value[ 1 ] = ( d[ 1 ] == 0.0 ) ? value[ 1 ] : ( d[ 1 ] < 0.0 ? element.yrange[ 1 ] : element.yrange[ 0 ] );
+                }
+
+                onmouseup( e );
+                return;
+            }
+
+            var dx = element.draggable_x ? last_mouse[ 0 ] - mousex : 0;
+            var dy = element.draggable_y ? last_mouse[ 1 ] - mousey : 0;
+            var delta = unconvert([ -dx, dy ]);
+
+            if( selected != -1 )
+            {
+                var minx = element.xrange[ 0 ];
+                var maxx = element.xrange[ 1 ];
+
+                if( element.no_overlap )
+                {
+                    if( selected > 0) minx = element.value[ selected - 1 ][ 0 ];
+                    if( selected < ( element.value.length - 1 ) ) maxx = element.value[ selected + 1 ][ 0 ];
+                }
+
+                var v = element.value[selected];
+                v[ 0 ] += delta[ 0 ];
+                v[ 1 ] += delta[ 1 ];
+                if(v[ 0 ] < minx) v[ 0 ] = minx;
+                else if(v[ 0 ] > maxx) v[ 0 ] = maxx;
+                if(v[ 1 ] < element.yrange[ 0 ]) v[ 1 ] = element.yrange[ 0 ];
+                else if(v[ 1 ] > element.yrange[ 1 ]) v[ 1 ] = element.yrange[ 1 ];
+            }
+
+            sortValues();
+            element.redraw();
+            last_mouse[ 0 ] = mousex;
+            last_mouse[ 1 ] = mousey;
+            onchange( e );
+
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function onmouseup( e ) {
+            selected = -1;
+            element.redraw();
+            document.removeEventListener("mousemove", onmousemove);
+            document.removeEventListener("mouseup", onmouseup);
+            onchange(e);
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function onchange( e ) {
+            if( options.callback )
+                options.callback.call( element, element.value, e );
+        }
+
+        function distance(a,b) { return Math.sqrt( Math.pow(b[ 0 ]-a[ 0 ],2) + Math.pow(b[ 1 ]-a[ 1 ],2) ); }
+        function computeSelected( x, y ) {
+
+            var minDistance = 100000;
+            var maxDistance = 8; //pixels
+            var selected = -1;
+            for( var i = 0; i < element.value.length; i++ )
+            {
+                var value = element.value[ i ];
+                var pos = convert( value );
+                var dist = distance( [ x,y ], pos );
+                if( dist < minDistance && dist < maxDistance )
+                {
+                    minDistance = dist;
+                    selected = i;
+                }
+            }
+            return selected;
+        }
+
+        function sortValues() {
+            var v = null;
+            if( selected != -1 )
+            {
+                v = element.value[ selected ];
+            }
+            element.value.sort(function( a,b ) { return a[ 0 ] - b[ 0 ]; });
+            if( v )
+            {
+                selected = element.value.indexOf( v );
+            }
+        }
+
+        element.redraw();
+        return this;
+    }
+
+    redraw( options = {} ) {
+        this.element.redraw( options );
+    }
+}
+
+LX.CanvasCurve = CanvasCurve;
+
+/**
+ * @class CanvasDial
+ */
+
+class CanvasDial {
+
+    constructor( panel, value, options = {} ) {
+
+        let element = document.createElement( "div" );
+        element.className = "dial " + ( options.className ? options.className : "" );
+        element.style.width = element.style.height = options.size || "100%";
+        element.style.minWidth = element.style.minHeight = "50px";
+
+        element.bgcolor = options.bgColor || LX.getThemeColor( "global-dark-background" );
+        element.pointscolor = options.pointsColor || LX.getThemeColor( "global-color-accent-light" );
+        element.linecolor = options.lineColor || "#555";
+        element.value = value || [];
+        element.xrange = options.xrange || [ 0, 1 ]; // min, max
+        element.yrange = options.yrange || [ 0, 1 ]; // min, max
+        element.defaulty = options.defaulty != null ? options.defaulty : 0.0;
+        element.no_overlap = options.noOverlap || false;
+        element.show_samples = options.showSamples || 0;
+        element.allow_add_values = options.allowAddValues ?? true;
+        element.draggable_x = options.draggableX ?? true;
+        element.draggable_y = options.draggableY ?? true;
+        element.smooth = (options.smooth && typeof( options.smooth ) == 'number' ? options.smooth : 0.3) || false;
+        element.move_out = options.moveOutAction ?? LX.CURVE_MOVEOUT_DELETE;
+
+        this.element = element;
+
+        let canvas = document.createElement( "canvas" );
+        canvas.width = canvas.height = options.size || 200;
+        element.appendChild( canvas );
+        this.canvas = canvas;
+
+        element.addEventListener( "mousedown", onmousedown );
+
+        element.getValueAt = function( x ) {
+
+            if( x < element.xrange[ 0 ] || x > element.xrange[ 1 ] )
+            {
+                return element.defaulty;
+            }
+
+            var last = [ element.xrange[ 0 ], element.defaulty ];
+            var f = 0;
+            for( var i = 0; i < element.value.length; i += 1 )
+            {
+                var v = element.value[ i ];
+                if( x == v[ 0 ] ) return v[ 1 ];
+                if( x < v[ 0 ] )
+                {
+                    f = ( x - last[ 0 ] ) / (v[ 0 ] - last[ 0 ]);
+                    return last[ 1 ] * ( 1 - f ) + v[ 1 ] * f;
+                }
+
+                last = v;
+            }
+
+            v = [ element.xrange[ 1 ], element.defaulty ];
+            f = (x - last[ 0 ]) / (v[ 0 ] - last[ 0 ]);
+            return last[ 1 ] * ( 1 - f ) + v[ 1 ] * f;
+        };
+
+        element.resample = function( samples ) {
+
+            var r = [];
+            var dx = (element.xrange[ 1 ] - element.xrange[ 0 ]) / samples;
+            for( var i = element.xrange[ 0 ]; i <= element.xrange[ 1 ]; i += dx)
+            {
+                r.push( element.getValueAt(i) );
+            }
+            return r;
+        };
+
+        element.addValue = function(v) {
+
+            for( var i = 0; i < element.value; i++ )
+            {
+                var value = element.value[ i ];
+                if(value[ 0 ] < v[ 0 ]) continue;
+                element.value.splice( i, 0, v );
+                redraw();
+                return;
+            }
+
+            element.value.push( v );
+            redraw();
+        };
+
+        //value to canvas
+        function convert(v, r) {
+
+            Math.pow(v[ 0 ],2);
+            return [ canvas.width * ( v[ 0 ] - element.xrange[ 0 ])/ (element.xrange[ 1 ]),
+                canvas.height * (v[ 1 ] - element.yrange[ 0 ])/ (element.yrange[ 1 ])];
+        }
+
+        //canvas to value
+        function unconvert(v) {
+            return [(v[ 0 ] * element.xrange[ 1 ] / canvas.width + element.xrange[ 0 ]),
+                    (v[ 1 ] * element.yrange[ 1 ] / canvas.height + element.yrange[ 0 ])];
+        }
+
+        var selected = -1;
+
+        element.redraw = function( o = {} ) {
+
+            if( o.value ) element.value = o.value;
+            if( o.xrange ) element.xrange = o.xrange;
+            if( o.yrange ) element.yrange = o.yrange;
+            if( o.smooth ) element.smooth = o.smooth;
+
+            var ctx = canvas.getContext( "2d" );
+            ctx.setTransform( 1, 0, 0, 1, 0, 0 );
+            ctx.translate( 0, canvas.height );
+            ctx.scale( 1, -1 );
+
+            ctx.fillStyle = element.bgcolor;
+            ctx.fillRect(0,0,canvas.width,canvas.height);
+
+            ctx.strokeStyle = element.linecolor;
+            ctx.beginPath();
+
+            //draw line
+            var pos = convert([ element.xrange[ 0 ],element.defaulty ]);
+            ctx.moveTo( pos[ 0 ], pos[ 1 ] );
+            let values = [pos[ 0 ], pos[ 1 ]];
+
+            for( var i in element.value)
+            {
+                var value = element.value[ i ];
+                pos = convert( value );
+                values.push( pos[ 0 ] );
+                values.push( pos[ 1 ] );
+            }
+
+            pos = convert([ element.xrange[ 1 ], element.defaulty ]);
+            values.push( pos[ 0 ] );
+            values.push( pos[ 1 ] );
+
+            // Draw points
+            const center =  [0,0];
+            pos = convert(center);
+            ctx.fillStyle = "gray";
+            ctx.beginPath();
+            ctx.arc( pos[ 0 ], pos[ 1 ], 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            for( var i = 0; i < element.value.length; i += 1 )
+            {
+                var value = element.value[ i ];
+                pos = convert( value );
+                if( selected == i )
+                    ctx.fillStyle = "white";
+                else
+                    ctx.fillStyle = element.pointscolor;
+                ctx.beginPath();
+                ctx.arc( pos[ 0 ], pos[ 1 ], selected == i ? 4 : 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            if( element.show_samples )
+            {
+                var samples = element.resample(element.show_samples);
+                ctx.fillStyle = "#888";
+                for( var i = 0; i < samples.length; i += 1)
+                {
+                    var value = [ i * ((element.xrange[ 1 ] - element.xrange[ 0 ]) / element.show_samples) + element.xrange[ 0 ], samples[ i ] ];
+                    pos = convert(value);
+                    ctx.beginPath();
+                    ctx.arc( pos[ 0 ], pos[ 1 ], 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        };
+
+        var last_mouse = [ 0, 0 ];
+
+        function onmousedown( e ) {
+            document.addEventListener( "mousemove", onmousemove );
+            document.addEventListener( "mouseup", onmouseup );
+
+            var rect = canvas.getBoundingClientRect();
+            var mousex = e.clientX - rect.left;
+            var mousey = e.clientY - rect.top;
+
+            selected = computeSelected( mousex, canvas.height - mousey );
+
+            if( e.button == LX.MOUSE_LEFT_CLICK && selected == -1 && element.allow_add_values )
+            {
+                var v = unconvert([ mousex, canvas.height - mousey ]);
+                element.value.push( v );
+                sortValues();
+                selected = element.value.indexOf( v );
+            }
+
+            last_mouse = [ mousex, mousey ];
+            element.redraw();
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function onmousemove( e ) {
+
+            var rect = canvas.getBoundingClientRect();
+            var mousex = e.clientX - rect.left;
+            var mousey = e.clientY - rect.top;
+
+            if( mousex < 0 ) mousex = 0;
+            else if( mousex > canvas.width ) mousex = canvas.width;
+            if( mousey < 0 ) mousey = 0;
+            else if( mousey > canvas.height ) mousey = canvas.height;
+
+            // Dragging to remove
+            const currentMouseDiff = [ e.clientX - rect.left, e.clientY - rect.top ];
+            if( selected != -1 && distance( currentMouseDiff, [ mousex, mousey ] ) > canvas.height * 0.5 )
+            {
+                if( element.move_out == LX.CURVE_MOVEOUT_DELETE)
+                {
+                    element.value.splice( selected, 1 );
+                }
+                else
+                {
+                    const d = [ currentMouseDiff[ 0 ] - mousex, currentMouseDiff[ 1 ] - mousey ];
+                    let value = element.value[ selected ];
+                    value[ 0 ] = ( d[ 0 ] == 0.0 ) ? value[ 0 ] : ( d[ 0 ] < 0.0 ? element.xrange[ 0 ] : element.xrange[ 1 ] );
+                    value[ 1 ] = ( d[ 1 ] == 0.0 ) ? value[ 1 ] : ( d[ 1 ] < 0.0 ? element.yrange[ 1 ] : element.yrange[ 0 ] );
+                }
+
+                onmouseup( e );
+                return;
+            }
+
+            var dx = element.draggable_x ? last_mouse[ 0 ] - mousex : 0;
+            var dy = element.draggable_y ? last_mouse[ 1 ] - mousey : 0;
+            var delta = unconvert([ -dx, dy ]);
+
+            if( selected != -1 )
+            {
+                var minx = element.xrange[ 0 ];
+                var maxx = element.xrange[ 1 ];
+
+                if( element.no_overlap )
+                {
+                    if( selected > 0) minx = element.value[ selected - 1 ][ 0 ];
+                    if( selected < ( element.value.length - 1 ) ) maxx = element.value[ selected + 1 ][ 0 ];
+                }
+
+                var v = element.value[selected];
+                v[ 0 ] += delta[ 0 ];
+                v[ 1 ] += delta[ 1 ];
+                if(v[ 0 ] < minx) v[ 0 ] = minx;
+                else if(v[ 0 ] > maxx) v[ 0 ] = maxx;
+                if(v[ 1 ] < element.yrange[ 0 ]) v[ 1 ] = element.yrange[ 0 ];
+                else if(v[ 1 ] > element.yrange[ 1 ]) v[ 1 ] = element.yrange[ 1 ];
+            }
+
+            sortValues();
+            element.redraw();
+            last_mouse[ 0 ] = mousex;
+            last_mouse[ 1 ] = mousey;
+            onchange( e );
+
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function onmouseup( e ) {
+            selected = -1;
+            element.redraw();
+            document.removeEventListener("mousemove", onmousemove);
+            document.removeEventListener("mouseup", onmouseup);
+            onchange(e);
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function onchange( e ) {
+            if( options.callback )
+                options.callback.call( element, element.value, e );
+        }
+
+        function distance(a,b) { return Math.sqrt( Math.pow(b[ 0 ]-a[ 0 ],2) + Math.pow(b[ 1 ]-a[ 1 ],2) ); }
+        function computeSelected( x, y ) {
+
+            var minDistance = 100000;
+            var maxDistance = 8; //pixels
+            var selected = -1;
+            for( var i = 0; i < element.value.length; i++ )
+            {
+                var value = element.value[ i ];
+                var pos = convert( value );
+                var dist = distance( [ x,y ], pos );
+                if( dist < minDistance && dist < maxDistance )
+                {
+                    minDistance = dist;
+                    selected = i;
+                }
+            }
+            return selected;
+        }
+
+        function sortValues() {
+            var v = null;
+            if( selected != -1 )
+            {
+                v = element.value[ selected ];
+            }
+            element.value.sort(function( a,b ) { return a[ 0 ] - b[ 0 ]; });
+            if( v )
+            {
+                selected = element.value.indexOf( v );
+            }
+        }
+
+        element.redraw();
+        return this;
+    }
+
+    redraw( options = {} ) {
+        this.element.redraw( options );
+    }
+}
+
+LX.CanvasDial = CanvasDial;
+
+// Based on LGraphMap2D from @tamats (jagenjo)
+// https://github.com/jagenjo/litescene.js
+class CanvasMap2D {
+
+    static COLORS = [ [255, 0, 0], [0, 255, 0], [0, 0, 255], [0, 128, 128], [128, 0, 128], [128, 128, 0], [255, 128, 0], [255, 0, 128], [0, 128, 255], [128, 0, 255] ];
+    static GRID_SIZE = 64;
+
+    /**
+     * @constructor Map2D
+     * @param {Array} initialPoints
+     * @param {Function} callback
+     * @param {Object} options
+     * circular
+     * showNames
+     * size
+     */
+
+    constructor( initialPoints, callback, options = {} ) {
+
+        this.circular = options.circular ?? false;
+        this.showNames = options.showNames ?? true;
+        this.size = options.size ?? [ 200, 200 ];
+
+        this.points = initialPoints ?? [];
+        this.callback = callback;
+        this.weights = [];
+        this.weightsObj = {};
+        this.currentPosition = new LX.vec2( 0.5, 0.5 );
+        this.circleCenter = [ 0, 0 ];
+        this.circleRadius = 1;
+        this.margin = 8;
+        this.dragging = false;
+
+        this._valuesChanged = true;
+        this._selectedPoint = null;
+
+        this.root = LX.makeContainer( ["auto", "auto"] );
+        this.root.tabIndex = "1";
+
+        this.root.addEventListener( "mousedown", innerMouseDown );
+
+        const that = this;
+
+        function innerMouseDown( e )
+        {
+            var doc = that.root.ownerDocument;
+            doc.addEventListener("mouseup", innerMouseUp);
+            doc.addEventListener("mousemove", innerMouseMove);
+            e.stopPropagation();
+            e.preventDefault();
+
+            that.dragging = true;
+            return true;
+        }
+
+        function innerMouseMove( e )
+        {
+            if( !that.dragging )
+            {
+                return;
+            }
+
+            const margin = that.margin;
+            const rect = that.root.getBoundingClientRect();
+
+            let pos = new LX.vec2();
+            pos.set( e.x - rect.x - that.size[ 0 ] * 0.5, e.y - rect.y - that.size[ 1 ] * 0.5 );
+            var cpos = that.currentPosition;
+            cpos.set(
+                LX.clamp( pos.x / ( that.size[ 0 ] * 0.5 - margin ), -1, 1 ),
+                LX.clamp( pos.y / ( that.size[ 1 ] * 0.5 - margin ), -1, 1 )
+            );
+
+            if( that.circular )
+            {
+                const center = new LX.vec2( 0, 0 );
+                const dist = cpos.dst( center );
+                if( dist > 1 )
+                {
+                    cpos = cpos.nrm();
+                }
+            }
+
+            that.renderToCanvas( that.canvas.getContext( "2d", { willReadFrequently: true } ), that.canvas );
+
+            that.computeWeights( cpos );
+
+            if( that.callback )
+            {
+                that.callback( that.weightsObj, that.weights, cpos );
+            }
+
+            return true;
+        }
+
+        function innerMouseUp( e )
+        {
+            that.dragging = false;
+
+            var doc = that.root.ownerDocument;
+            doc.removeEventListener("mouseup", innerMouseUp);
+            doc.removeEventListener("mousemove", innerMouseMove);
+        }
+
+        this.canvas = document.createElement( "canvas" );
+        this.canvas.width = this.size[ 0 ];
+        this.canvas.height = this.size[ 1 ];
+        this.root.appendChild( this.canvas );
+
+        const ctx = this.canvas.getContext( "2d", { willReadFrequently: true } );
+        this.renderToCanvas( ctx, this.canvas );
+    }
+
+    /**
+     * @method computeWeights
+     * @param {LX.vec2} p
+     * @description Iterate for every cell to see if our point is nearer to the cell than the nearest point of the cell,
+     * If that is the case we increase the weight of the nearest point. At the end we normalize the weights of the points by the number of near points
+     * and that give us the weight for every point
+     */
+
+    computeWeights( p ) {
+
+        if( !this.points.length )
+        {
+            return;
+        }
+
+        let values = this._precomputedWeights;
+        if( !values || this._valuesChanged )
+        {
+            values = this.precomputeWeights();
+        }
+
+        let weights = this.weights;
+        weights.length = this.points.length;
+        for(var i = 0; i < weights.length; ++i)
+        {
+            weights[ i ] = 0;
+        }
+
+        const gridSize = CanvasMap2D.GRID_SIZE;
+
+        let totalInside = 0;
+        let pos2 = new LX.vec2();
+
+        for( var y = 0; y < gridSize; ++y )
+        {
+            for( var x = 0; x < gridSize; ++x )
+            {
+                pos2.set( ( x / gridSize) * 2 - 1, ( y / gridSize ) * 2 - 1 );
+
+                var dataPos = x * 2 + y * gridSize * 2;
+                var pointIdx = values[ dataPos ];
+
+                var isInside = p.dst( pos2 ) < ( values[ dataPos + 1] + 0.001 ); // epsilon
+                if( isInside )
+                {
+                    weights[ pointIdx ] += 1;
+                    totalInside++;
+                }
+            }
+        }
+
+        for( var i = 0; i < weights.length; ++i )
+        {
+            weights[ i ] /= totalInside;
+            this.weightsObj[ this.points[ i ].name ] = weights[ i ];
+        }
+
+        return weights;
+    }
+
+    /**
+     * @method precomputeWeights
+     * @description Precompute for every cell, which is the closest point of the points set and how far it is from the center of the cell
+     * We store point index and distance in this._precomputedWeights. This is done only when the points set change
+     */
+
+    precomputeWeights() {
+
+        this._valuesChanged = false;
+
+        const numPoints = this.points.length;
+        const gridSize = CanvasMap2D.GRID_SIZE;
+        const totalNums = 2 * gridSize * gridSize;
+
+        let position = new LX.vec2();
+
+        if( !this._precomputedWeights || this._precomputedWeights.length != totalNums )
+        {
+            this._precomputedWeights = new Float32Array( totalNums );
+        }
+
+        let values = this._precomputedWeights;
+        this._precomputedWeightsGridSize = gridSize;
+
+        for( let y = 0; y < gridSize; ++y )
+        {
+            for( let x = 0; x < gridSize; ++x )
+            {
+                let nearest = -1;
+                let minDistance = 100000;
+
+                for( let i = 0; i < numPoints; ++i )
+                {
+                    position.set( ( x / gridSize ) * 2 - 1, ( y / gridSize ) * 2 - 1 );
+
+                    let pointPosition = new LX.vec2();
+                    pointPosition.fromArray( this.points[ i ].pos );
+                    let dist = position.dst( pointPosition );
+                    if( dist > minDistance )
+                    {
+                        continue;
+                    }
+
+                    nearest = i;
+                    minDistance = dist;
+                }
+
+                values[ x * 2 + y * 2 * gridSize ] = nearest;
+                values[ x * 2 + y * 2 * gridSize + 1 ] = minDistance;
+            }
+        }
+
+        return values;
+    }
+
+    /**
+     * @method precomputeWeightsToImage
+     * @param {LX.vec2} p
+     */
+
+    precomputeWeightsToImage( p ) {
+
+        if( !this.points.length )
+        {
+            return null;
+        }
+
+        const gridSize = CanvasMap2D.GRID_SIZE;
+        var values = this._precomputedWeights;
+        if( !values || this._valuesChanged || this._precomputedWeightsGridSize != gridSize )
+        {
+            values = this.precomputeWeights();
+        }
+
+        var canvas = this.imageCanvas;
+        if( !canvas )
+        {
+            canvas = this.imageCanvas = document.createElement( "canvas" );
+        }
+
+        canvas.width = canvas.height = gridSize;
+        var ctx = canvas.getContext( "2d", { willReadFrequently: true } );
+
+        var weights = this.weights;
+        weights.length = this.points.length;
+        for (var i = 0; i < weights.length; ++i)
+        {
+            weights[ i ] = 0;
+        }
+
+        let totalInside = 0;
+        let pixels = ctx.getImageData( 0, 0, gridSize, gridSize );
+        let pos2 = new LX.vec2();
+
+        for( var y = 0; y < gridSize; ++y )
+        {
+            for( var x = 0; x < gridSize; ++x )
+            {
+                pos2.set( ( x / gridSize ) * 2 - 1, ( y / gridSize ) * 2 - 1 );
+
+                const pixelPos = x * 4 + y * gridSize * 4;
+                const dataPos = x * 2 + y * gridSize * 2;
+                const pointIdx = values[ dataPos ];
+                const c = CanvasMap2D.COLORS[ pointIdx % CanvasMap2D.COLORS.length ];
+
+                var isInside = p.dst( pos2 ) < ( values[ dataPos + 1 ] + 0.001 );
+                if( isInside )
+                {
+                    weights[ pointIdx ] += 1;
+                    totalInside++;
+                }
+
+                pixels.data[ pixelPos ] = c[ 0 ] + ( isInside ? 128 : 0 );
+                pixels.data[ pixelPos + 1 ] = c[ 1 ] + ( isInside ? 128 : 0 );
+                pixels.data[ pixelPos + 2 ] = c[ 2 ] + ( isInside ? 128 : 0 );
+                pixels.data[ pixelPos + 3 ] = 255;
+            }
+        }
+
+        for( let i = 0; i < weights.length; ++i )
+        {
+            weights[ i ] /= totalInside;
+        }
+
+        ctx.putImageData( pixels, 0, 0 );
+        return canvas;
+    }
+
+    addPoint( name, pos ) {
+        if( this.findPoint( name ) )
+        {
+            console.warn("CanvasMap2D.addPoint: There is already a point with that name" );
+            return;
+        }
+
+        if( !pos )
+        {
+            pos = [ this.currentPosition[ 0 ], this.currentPosition[ 1 ] ];
+        }
+
+        pos[ 0 ] = LX.clamp( pos[ 0 ], -1, 1 );
+        pos[ 1 ] = LX.clamp( pos[ 1 ], -1, 1 );
+
+        const point = { name, pos };
+        this.points.push( point );
+        this._valuesChanged = true;
+        return point;
+    }
+
+    removePoint( name ) {
+        const removeIdx = this.points.findIndex( (p) => p.name == name );
+        if( removeIdx > -1 )
+        {
+            this.points.splice( removeIdx, 1 );
+            this._valuesChanged = true;
+        }
+    }
+
+    findPoint( name ) {
+        return this.points.find( p => p.name == name );
+    }
+
+    clear() {
+        this.points.length = 0;
+        this._precomputedWeights = null;
+        this._canvas = null;
+        this._selectedPoint = null;
+    }
+
+    renderToCanvas( ctx, canvas ) {
+
+        const margin = this.margin;
+        const w = this.size[ 0 ];
+        const h = this.size[ 1 ];
+
+        ctx.fillStyle = "black";
+        ctx.strokeStyle = "#BBB";
+
+        ctx.clearRect( 0, 0, w, h );
+
+        if( this.circular )
+        {
+            this.circleCenter[ 0 ] = w * 0.5;
+            this.circleCenter[ 1 ] = h * 0.5;
+            this.circleRadius = h * 0.5 - margin;
+
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc( this.circleCenter[ 0 ], this.circleCenter[ 1 ], this.circleRadius, 0, Math.PI * 2 );
+            ctx.fill();
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo( this.circleCenter[ 0 ] + 0.5, this.circleCenter[ 1 ] - this.circleRadius );
+            ctx.lineTo( this.circleCenter[ 0 ] + 0.5, this.circleCenter[ 1 ] + this.circleRadius );
+            ctx.moveTo( this.circleCenter[ 0 ] - this.circleRadius, this.circleCenter[ 1 ]);
+            ctx.lineTo( this.circleCenter[ 0 ] + this.circleRadius, this.circleCenter[ 1 ]);
+            ctx.stroke();
+        }
+        else
+        {
+            ctx.fillRect( margin, margin, w - margin * 2, h - margin * 2 );
+            ctx.strokeRect( margin, margin, w - margin * 2, h - margin * 2 );
+        }
+
+        var image = this.precomputeWeightsToImage( this.currentPosition );
+        if( image )
+        {
+            ctx.globalAlpha = 0.5;
+            ctx.imageSmoothingEnabled = false;
+            if( this.circular )
+            {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc( this.circleCenter[ 0 ], this.circleCenter[ 1 ], this.circleRadius, 0, Math.PI * 2 );
+                ctx.clip();
+                ctx.drawImage( image, this.circleCenter[ 0 ] - this.circleRadius, this.circleCenter[ 1 ] - this.circleRadius, this.circleRadius * 2, this.circleRadius * 2 );
+                ctx.restore();
+            }
+            else
+            {
+                ctx.drawImage( image, margin, margin, w - margin * 2, h - margin * 2 );
+            }
+            ctx.imageSmoothingEnabled = true;
+            ctx.globalAlpha = 1;
+        }
+
+        for( let i = 0; i < this.points.length; ++i )
+        {
+            const point = this.points[ i ];
+            let x = point.pos[ 0 ] * 0.5 + 0.5;
+            let y = point.pos[ 1 ] * 0.5 + 0.5;
+            x = x * ( w - margin * 2 ) + margin;
+            y = y * ( h - margin * 2 ) + margin;
+            x = LX.clamp( x, margin, w - margin );
+            y = LX.clamp( y, margin, h - margin );
+            ctx.fillStyle = ( point == this._selectedPoint ) ? "#CDF" : "#BCD";
+            ctx.beginPath();
+            ctx.arc( x, y, 3, 0, Math.PI * 2 );
+            ctx.fill();
+            if( this.showNames )
+            {
+                ctx.fillText( point.name, x + 5, y + 5 );
+            }
+        }
+
+        ctx.fillStyle = "white";
+        ctx.beginPath();
+        var x = this.currentPosition.x * 0.5 + 0.5;
+        var y = this.currentPosition.y * 0.5 + 0.5;
+        x = x * ( w - margin * 2 ) + margin;
+        y = y * ( h - margin * 2 ) + margin;
+        x = LX.clamp( x, margin, w - margin );
+        y = LX.clamp( y, margin, h - margin );
+        ctx.arc( x, y, 4, 0, Math.PI * 2 );
+        ctx.fill();
+    }
+}
+
+LX.CanvasMap2D = CanvasMap2D;
+
+/*
+*   Requests
+*/
+
+Object.assign(LX, {
+
+    /**
+    * Request file from url (it could be a binary, text, etc.). If you want a simplied version use
+    * @method request
+    * @param {Object} request object with all the parameters like data (for sending forms), dataType, success, error
+    * @param {Function} on_complete
+    **/
+    request( request ) {
+
+        var dataType = request.dataType || "text";
+        if(dataType == "json") //parse it locally
+            dataType = "text";
+        else if(dataType == "xml") //parse it locally
+            dataType = "text";
+        else if (dataType == "binary")
+        {
+            //request.mimeType = "text/plain; charset=x-user-defined";
+            dataType = "arraybuffer";
+            request.mimeType = "application/octet-stream";
+        }
+
+        //regular case, use AJAX call
+        var xhr = new XMLHttpRequest();
+        xhr.open( request.data ? 'POST' : 'GET', request.url, true);
+        if(dataType)
+            xhr.responseType = dataType;
+        if (request.mimeType)
+            xhr.overrideMimeType( request.mimeType );
+        if( request.nocache )
+            xhr.setRequestHeader('Cache-Control', 'no-cache');
+
+        xhr.onload = function(load)
+        {
+            var response = this.response;
+            if( this.status != 200)
+            {
+                var err = "Error " + this.status;
+                if(request.error)
+                    request.error(err);
+                return;
+            }
+
+            if(request.dataType == "json") //chrome doesnt support json format
+            {
+                try
+                {
+                    response = JSON.parse(response);
+                }
+                catch (err)
+                {
+                    if(request.error)
+                        request.error(err);
+                    else
+                        throw err;
+                }
+            }
+            else if(request.dataType == "xml")
+            {
+                try
+                {
+                    var xmlparser = new DOMParser();
+                    response = xmlparser.parseFromString(response,"text/xml");
+                }
+                catch (err)
+                {
+                    if(request.error)
+                        request.error(err);
+                    else
+                        throw err;
+                }
+            }
+            if(request.success)
+                request.success.call(this, response, this);
+        };
+        xhr.onerror = function(err) {
+            if(request.error)
+                request.error(err);
+        };
+
+        var data = new FormData();
+        if( request.data )
+        {
+            for( var i in request.data)
+                data.append(i,request.data[ i ]);
+        }
+
+        xhr.send( data );
+        return xhr;
+    },
+
+    /**
+    * Request file from url
+    * @method requestText
+    * @param {String} url
+    * @param {Function} onComplete
+    * @param {Function} onError
+    **/
+    requestText( url, onComplete, onError ) {
+        return this.request({ url: url, dataType:"text", success: onComplete, error: onError });
+    },
+
+    /**
+    * Request file from url
+    * @method requestJSON
+    * @param {String} url
+    * @param {Function} onComplete
+    * @param {Function} onError
+    **/
+    requestJSON( url, onComplete, onError ) {
+        return this.request({ url: url, dataType:"json", success: onComplete, error: onError });
+    },
+
+    /**
+    * Request binary file from url
+    * @method requestBinary
+    * @param {String} url
+    * @param {Function} onComplete
+    * @param {Function} onError
+    **/
+    requestBinary( url, onComplete, onError ) {
+        return this.request({ url: url, dataType:"binary", success: onComplete, error: onError });
+    },
+
+    /**
+    * Request script and inserts it in the DOM
+    * @method requireScript
+    * @param {String|Array} url the url of the script or an array containing several urls
+    * @param {Function} onComplete
+    * @param {Function} onError
+    * @param {Function} onProgress (if several files are required, onProgress is called after every file is added to the DOM)
+    **/
+    requireScript( url, onComplete, onError, onProgress, version ) {
+
+        if(!url)
+            throw("invalid URL");
+
+        if( url.constructor === String )
+            url = [url];
+
+        var total = url.length;
+        var loaded_scripts = [];
+
+        for( var i in url)
+        {
+            var script = document.createElement('script');
+            script.num = i;
+            script.type = 'text/javascript';
+            script.src = url[ i ] + ( version ? "?version=" + version : "" );
+            script.original_src = url[ i ];
+            script.async = false;
+            script.onload = function( e ) {
+                total--;
+                loaded_scripts.push(this);
+                if(total)
+                {
+                    if( onProgress )
+                    {
+                        onProgress( this.original_src, this.num );
+                    }
+                }
+                else if(onComplete)
+                    onComplete( loaded_scripts );
+            };
+            if(onError)
+                script.onerror = function(err) {
+                    onError(err, this.original_src, this.num );
+                };
+            document.getElementsByTagName('head')[ 0 ].appendChild(script);
+        }
+    },
+
+    loadScriptSync( url ) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement( "script" );
+            script.src = url;
+            script.async = false;
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error(`Failed to load ${url}`));
+            document.head.appendChild( script );
+        });
+    },
+
+    downloadURL( url, filename ) {
+
+        const fr = new FileReader();
+
+        const _download = function(_url) {
+            var link = document.createElement('a');
+            link.href = _url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        if( url.includes('http') )
+        {
+            LX.request({ url: url, dataType: 'blob', success: (f) => {
+                fr.readAsDataURL( f );
+                fr.onload = e => {
+                    _download(e.currentTarget.result);
+                };
+            } });
+        }else
+        {
+            _download(url);
+        }
+
+    },
+
+    downloadFile: function( filename, data, dataType ) {
+        if(!data)
+        {
+            console.warn("No file provided to download");
+            return;
+        }
+
+        if(!dataType)
+        {
+            if(data.constructor === String )
+                dataType = 'text/plain';
+            else
+                dataType = 'application/octet-stream';
+        }
+
+        var file = null;
+        if(data.constructor !== File && data.constructor !== Blob)
+            file = new Blob( [ data ], {type : dataType});
+        else
+            file = data;
+
+        var url = URL.createObjectURL( file );
+        var element = document.createElement("a");
+        element.setAttribute('href', url);
+        element.setAttribute('download', filename );
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+        setTimeout( function(){ URL.revokeObjectURL( url ); }, 1000*60 ); //wait one minute to revoke url
+    }
+});
+
+Object.defineProperty(String.prototype, 'lastChar', {
+    get: function() { return this[ this.length - 1 ]; },
+    enumerable: true,
+    configurable: true
+});
+
+Element.prototype.insertChildAtIndex = function( child, index = Infinity ) {
+    if ( index >= this.children.length ) this.appendChild( child );
+    else this.insertBefore( child, this.children[index] );
+};
+
+Element.prototype.hasClass = function( list ) {
+    list = [].concat( list );
+    var r = list.filter( v => this.classList.contains( v ) );
+    return !!r.length;
+};
+
+Element.prototype.addClass = function( className ) {
+    if( className ) this.classList.add( className );
+};
+
+Element.prototype.getComputedSize = function() {
+    // Since we use "box-sizing: border-box" now,
+    // it's all included in offsetWidth/offsetHeight
+    return {
+        width: this.offsetWidth,
+        height: this.offsetHeight
+    }
+};
+
+Element.prototype.getParentArea = function() {
+    let parent = this.parentElement;
+    while( parent ) {
+        if( parent.classList.contains( "lexarea" ) ) { return parent; }
+        parent = parent.parentElement;
+    }
+};
+
+Element.prototype.listen = function( eventName, callback, callbackName ) {
+    callbackName = callbackName ?? ( "_on" + eventName );
+    this[ callbackName ] = callback;
+    this.addEventListener( eventName, callback );
+};
+
+Element.prototype.ignore = function( eventName, callbackName ) {
+    callbackName = callbackName ?? ( "_on" + eventName );
+    const callback = this[ callbackName ];
+    this.removeEventListener( eventName, callback );
+};
+
+// icons.js @jxarco
+
+const RAW_ICONS = {
+    // Internals
+    "Clone": [512, 512, [], "regular", "M64 464l224 0c8.8 0 16-7.2 16-16l0-64 48 0 0 64c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 224c0-35.3 28.7-64 64-64l64 0 0 48-64 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16zM224 304l224 0c8.8 0 16-7.2 16-16l0-224c0-8.8-7.2-16-16-16L224 48c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16zm-64-16l0-224c0-35.3 28.7-64 64-64L448 0c35.3 0 64 28.7 64 64l0 224c0 35.3-28.7 64-64 64l-224 0c-35.3 0-64-28.7-64-64z"],
+    "IdBadge": [384, 512, [], "regular", "M256 48l0 16c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32-14.3-32-32l0-16L64 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16l0-384c0-8.8-7.2-16-16-16l-64 0zM0 64C0 28.7 28.7 0 64 0L320 0c35.3 0 64 28.7 64 64l0 384c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64zM160 320l64 0c44.2 0 80 35.8 80 80c0 8.8-7.2 16-16 16L96 416c-8.8 0-16-7.2-16-16c0-44.2 35.8-80 80-80zm-32-96a64 64 0 1 1 128 0 64 64 0 1 1 -128 0z"],
+    "Paste": [512, 512, [], "regular", "M104.6 48L64 48C28.7 48 0 76.7 0 112L0 384c0 35.3 28.7 64 64 64l96 0 0-48-96 0c-8.8 0-16-7.2-16-16l0-272c0-8.8 7.2-16 16-16l16 0c0 17.7 14.3 32 32 32l72.4 0C202 108.4 227.6 96 256 96l62 0c-7.1-27.6-32.2-48-62-48l-40.6 0C211.6 20.9 188.2 0 160 0s-51.6 20.9-55.4 48zM144 56a16 16 0 1 1 32 0 16 16 0 1 1 -32 0zM448 464l-192 0c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l140.1 0L464 243.9 464 448c0 8.8-7.2 16-16 16zM256 512l192 0c35.3 0 64-28.7 64-64l0-204.1c0-12.7-5.1-24.9-14.1-33.9l-67.9-67.9c-9-9-21.2-14.1-33.9-14.1L256 128c-35.3 0-64 28.7-64 64l0 256c0 35.3 28.7 64 64 64z"],
+    "Trash3": [448, 512, [], "regular", "M170.5 51.6L151.5 80l145 0-19-28.4c-1.5-2.2-4-3.6-6.7-3.6l-93.7 0c-2.7 0-5.2 1.3-6.7 3.6zm147-26.6L354.2 80 368 80l48 0 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-8 0 0 304c0 44.2-35.8 80-80 80l-224 0c-44.2 0-80-35.8-80-80l0-304-8 0c-13.3 0-24-10.7-24-24S10.7 80 24 80l8 0 48 0 13.8 0 36.7-55.1C140.9 9.4 158.4 0 177.1 0l93.7 0c18.7 0 36.2 9.4 46.6 24.9zM80 128l0 304c0 17.7 14.3 32 32 32l224 0c17.7 0 32-14.3 32-32l0-304L80 128zm80 64l0 208c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-208c0-8.8 7.2-16 16-16s16 7.2 16 16zm80 0l0 208c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-208c0-8.8 7.2-16 16-16s16 7.2 16 16zm80 0l0 208c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-208c0-8.8 7.2-16 16-16s16 7.2 16 16z"],
+    "FilePdf": [512, 512, [], "regular", "M64 464l48 0 0 48-48 0c-35.3 0-64-28.7-64-64L0 64C0 28.7 28.7 0 64 0L229.5 0c17 0 33.3 6.7 45.3 18.7l90.5 90.5c12 12 18.7 28.3 18.7 45.3L384 304l-48 0 0-144-80 0c-17.7 0-32-14.3-32-32l0-80L64 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16zM176 352l32 0c30.9 0 56 25.1 56 56s-25.1 56-56 56l-16 0 0 32c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-48 0-80c0-8.8 7.2-16 16-16zm32 80c13.3 0 24-10.7 24-24s-10.7-24-24-24l-16 0 0 48 16 0zm96-80l32 0c26.5 0 48 21.5 48 48l0 64c0 26.5-21.5 48-48 48l-32 0c-8.8 0-16-7.2-16-16l0-128c0-8.8 7.2-16 16-16zm32 128c8.8 0 16-7.2 16-16l0-64c0-8.8-7.2-16-16-16l-16 0 0 96 16 0zm80-112c0-8.8 7.2-16 16-16l48 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0 0 32 32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0 0 48c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-64 0-64z"],
+    "FileWord": [384, 512, [], "regular", "M48 448L48 64c0-8.8 7.2-16 16-16l160 0 0 80c0 17.7 14.3 32 32 32l80 0 0 288c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16zM64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-293.5c0-17-6.7-33.3-18.7-45.3L274.7 18.7C262.7 6.7 246.5 0 229.5 0L64 0zm55 241.1c-3.8-12.7-17.2-19.9-29.9-16.1s-19.9 17.2-16.1 29.9l48 160c3 10.2 12.4 17.1 23 17.1s19.9-7 23-17.1l25-83.4 25 83.4c3 10.2 12.4 17.1 23 17.1s19.9-7 23-17.1l48-160c3.8-12.7-3.4-26.1-16.1-29.9s-26.1 3.4-29.9 16.1l-25 83.4-25-83.4c-3-10.2-12.4-17.1-23-17.1s-19.9 7-23 17.1l-25 83.4-25-83.4z"],
+    "FilePowerpoint": [384, 512, [], "regular", "M64 464c-8.8 0-16-7.2-16-16L48 64c0-8.8 7.2-16 16-16l160 0 0 80c0 17.7 14.3 32 32 32l80 0 0 288c0 8.8-7.2 16-16 16L64 464zM64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-293.5c0-17-6.7-33.3-18.7-45.3L274.7 18.7C262.7 6.7 246.5 0 229.5 0L64 0zm72 208c-13.3 0-24 10.7-24 24l0 104 0 56c0 13.3 10.7 24 24 24s24-10.7 24-24l0-32 44 0c42 0 76-34 76-76s-34-76-76-76l-68 0zm68 104l-44 0 0-56 44 0c15.5 0 28 12.5 28 28s-12.5 28-28 28z"],
+    "FileExcel": [384, 512, [], "regular", "M48 448L48 64c0-8.8 7.2-16 16-16l160 0 0 80c0 17.7 14.3 32 32 32l80 0 0 288c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16zM64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-293.5c0-17-6.7-33.3-18.7-45.3L274.7 18.7C262.7 6.7 246.5 0 229.5 0L64 0zm90.9 233.3c-8.1-10.5-23.2-12.3-33.7-4.2s-12.3 23.2-4.2 33.7L161.6 320l-44.5 57.3c-8.1 10.5-6.3 25.5 4.2 33.7s25.5 6.3 33.7-4.2L192 359.1l37.1 47.6c8.1 10.5 23.2 12.3 33.7 4.2s12.3-23.2 4.2-33.7L222.4 320l44.5-57.3c8.1-10.5 6.3-25.5-4.2-33.7s-25.5-6.3-33.7 4.2L192 280.9l-37.1-47.6z"],
+    "Settings3": [640, 512, [], "solid", "M308.5 135.3c7.1-6.3 9.9-16.2 6.2-25c-2.3-5.3-4.8-10.5-7.6-15.5L304 89.4c-3-5-6.3-9.9-9.8-14.6c-5.7-7.6-15.7-10.1-24.7-7.1l-28.2 9.3c-10.7-8.8-23-16-36.2-20.9L199 27.1c-1.9-9.3-9.1-16.7-18.5-17.8C173.9 8.4 167.2 8 160.4 8l-.7 0c-6.8 0-13.5 .4-20.1 1.2c-9.4 1.1-16.6 8.6-18.5 17.8L115 56.1c-13.3 5-25.5 12.1-36.2 20.9L50.5 67.8c-9-3-19-.5-24.7 7.1c-3.5 4.7-6.8 9.6-9.9 14.6l-3 5.3c-2.8 5-5.3 10.2-7.6 15.6c-3.7 8.7-.9 18.6 6.2 25l22.2 19.8C32.6 161.9 32 168.9 32 176s.6 14.1 1.7 20.9L11.5 216.7c-7.1 6.3-9.9 16.2-6.2 25c2.3 5.3 4.8 10.5 7.6 15.6l3 5.2c3 5.1 6.3 9.9 9.9 14.6c5.7 7.6 15.7 10.1 24.7 7.1l28.2-9.3c10.7 8.8 23 16 36.2 20.9l6.1 29.1c1.9 9.3 9.1 16.7 18.5 17.8c6.7 .8 13.5 1.2 20.4 1.2s13.7-.4 20.4-1.2c9.4-1.1 16.6-8.6 18.5-17.8l6.1-29.1c13.3-5 25.5-12.1 36.2-20.9l28.2 9.3c9 3 19 .5 24.7-7.1c3.5-4.7 6.8-9.5 9.8-14.6l3.1-5.4c2.8-5 5.3-10.2 7.6-15.5c3.7-8.7 .9-18.6-6.2-25l-22.2-19.8c1.1-6.8 1.7-13.8 1.7-20.9s-.6-14.1-1.7-20.9l22.2-19.8zM112 176a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zM504.7 500.5c6.3 7.1 16.2 9.9 25 6.2c5.3-2.3 10.5-4.8 15.5-7.6l5.4-3.1c5-3 9.9-6.3 14.6-9.8c7.6-5.7 10.1-15.7 7.1-24.7l-9.3-28.2c8.8-10.7 16-23 20.9-36.2l29.1-6.1c9.3-1.9 16.7-9.1 17.8-18.5c.8-6.7 1.2-13.5 1.2-20.4s-.4-13.7-1.2-20.4c-1.1-9.4-8.6-16.6-17.8-18.5L583.9 307c-5-13.3-12.1-25.5-20.9-36.2l9.3-28.2c3-9 .5-19-7.1-24.7c-4.7-3.5-9.6-6.8-14.6-9.9l-5.3-3c-5-2.8-10.2-5.3-15.6-7.6c-8.7-3.7-18.6-.9-25 6.2l-19.8 22.2c-6.8-1.1-13.8-1.7-20.9-1.7s-14.1 .6-20.9 1.7l-19.8-22.2c-6.3-7.1-16.2-9.9-25-6.2c-5.3 2.3-10.5 4.8-15.6 7.6l-5.2 3c-5.1 3-9.9 6.3-14.6 9.9c-7.6 5.7-10.1 15.7-7.1 24.7l9.3 28.2c-8.8 10.7-16 23-20.9 36.2L315.1 313c-9.3 1.9-16.7 9.1-17.8 18.5c-.8 6.7-1.2 13.5-1.2 20.4s.4 13.7 1.2 20.4c1.1 9.4 8.6 16.6 17.8 18.5l29.1 6.1c5 13.3 12.1 25.5 20.9 36.2l-9.3 28.2c-3 9-.5 19 7.1 24.7c4.7 3.5 9.5 6.8 14.6 9.8l5.4 3.1c5 2.8 10.2 5.3 15.5 7.6c8.7 3.7 18.6 .9 25-6.2l19.8-22.2c6.8 1.1 13.8 1.7 20.9 1.7s14.1-.6 20.9-1.7l19.8 22.2zM464 304a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"],
+    "MessagesCircle": [640, 512, [], "regular", "M88.2 309.1c9.8-18.3 6.8-40.8-7.5-55.8C59.4 230.9 48 204 48 176c0-63.5 63.8-128 160-128s160 64.5 160 128s-63.8 128-160 128c-13.1 0-25.8-1.3-37.8-3.6c-10.4-2-21.2-.6-30.7 4.2c-4.1 2.1-8.3 4.1-12.6 6c-16 7.2-32.9 13.5-49.9 18c2.8-4.6 5.4-9.1 7.9-13.6c1.1-1.9 2.2-3.9 3.2-5.9zM208 352c114.9 0 208-78.8 208-176S322.9 0 208 0S0 78.8 0 176c0 41.8 17.2 80.1 45.9 110.3c-.9 1.7-1.9 3.5-2.8 5.1c-10.3 18.4-22.3 36.5-36.6 52.1c-6.6 7-8.3 17.2-4.6 25.9C5.8 378.3 14.4 384 24 384c43 0 86.5-13.3 122.7-29.7c4.8-2.2 9.6-4.5 14.2-6.8c15.1 3 30.9 4.5 47.1 4.5zM432 480c16.2 0 31.9-1.6 47.1-4.5c4.6 2.3 9.4 4.6 14.2 6.8C529.5 498.7 573 512 616 512c9.6 0 18.2-5.7 22-14.5c3.8-8.8 2-19-4.6-25.9c-14.2-15.6-26.2-33.7-36.6-52.1c-.9-1.7-1.9-3.4-2.8-5.1C622.8 384.1 640 345.8 640 304c0-94.4-87.9-171.5-198.2-175.8c4.1 15.2 6.2 31.2 6.2 47.8l0 .6c87.2 6.7 144 67.5 144 127.4c0 28-11.4 54.9-32.7 77.2c-14.3 15-17.3 37.6-7.5 55.8c1.1 2 2.2 4 3.2 5.9c2.5 4.5 5.2 9 7.9 13.6c-17-4.5-33.9-10.7-49.9-18c-4.3-1.9-8.5-3.9-12.6-6c-9.5-4.8-20.3-6.2-30.7-4.2c-12.1 2.4-24.8 3.6-37.8 3.6c-61.7 0-110-26.5-136.8-62.3c-16 5.4-32.8 9.4-50 11.8C279 439.8 350 480 432 480z"],
+    "LinkOff": [640, 512, ["ChainBroken", "ChainOff", "Unlink"], "solid", "M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L489.3 358.2l90.5-90.5c56.5-56.5 56.5-148 0-204.5c-50-50-128.8-56.5-186.3-15.4l-1.6 1.1c-14.4 10.3-17.7 30.3-7.4 44.6s30.3 17.7 44.6 7.4l1.6-1.1c32.1-22.9 76-19.3 103.8 8.6c31.5 31.5 31.5 82.5 0 114l-96 96-31.9-25C430.9 239.6 420.1 175.1 377 132c-52.2-52.3-134.5-56.2-191.3-11.7L38.8 5.1zM239 162c30.1-14.9 67.7-9.9 92.8 15.3c20 20 27.5 48.3 21.7 74.5L239 162zM406.6 416.4L220.9 270c-2.1 39.8 12.2 80.1 42.2 110c38.9 38.9 94.4 51 143.6 36.3zm-290-228.5L60.2 244.3c-56.5 56.5-56.5 148 0 204.5c50 50 128.8 56.5 186.3 15.4l1.6-1.1c14.4-10.3 17.7-30.3 7.4-44.6s-30.3-17.7-44.6-7.4l-1.6 1.1c-32.1 22.9-76 19.3-103.8-8.6C74 372 74 321 105.5 289.5l61.8-61.8-50.6-39.9z"],
+    "StreetView": [512, 512, [], "solid", "M320 64A64 64 0 1 0 192 64a64 64 0 1 0 128 0zm-96 96c-35.3 0-64 28.7-64 64l0 48c0 17.7 14.3 32 32 32l1.8 0 11.1 99.5c1.8 16.2 15.5 28.5 31.8 28.5l38.7 0c16.3 0 30-12.3 31.8-28.5L318.2 304l1.8 0c17.7 0 32-14.3 32-32l0-48c0-35.3-28.7-64-64-64l-64 0zM132.3 394.2c13-2.4 21.7-14.9 19.3-27.9s-14.9-21.7-27.9-19.3c-32.4 5.9-60.9 14.2-82 24.8c-10.5 5.3-20.3 11.7-27.8 19.6C6.4 399.5 0 410.5 0 424c0 21.4 15.5 36.1 29.1 45c14.7 9.6 34.3 17.3 56.4 23.4C130.2 504.7 190.4 512 256 512s125.8-7.3 170.4-19.6c22.1-6.1 41.8-13.8 56.4-23.4c13.7-8.9 29.1-23.6 29.1-45c0-13.5-6.4-24.5-14-32.6c-7.5-7.9-17.3-14.3-27.8-19.6c-21-10.6-49.5-18.9-82-24.8c-13-2.4-25.5 6.3-27.9 19.3s6.3 25.5 19.3 27.9c30.2 5.5 53.7 12.8 69 20.5c3.2 1.6 5.8 3.1 7.9 4.5c3.6 2.4 3.6 7.2 0 9.6c-8.8 5.7-23.1 11.8-43 17.3C374.3 457 318.5 464 256 464s-118.3-7-157.7-17.9c-19.9-5.5-34.2-11.6-43-17.3c-3.6-2.4-3.6-7.2 0-9.6c2.1-1.4 4.8-2.9 7.9-4.5c15.3-7.7 38.8-14.9 69-20.5z"],
+    "ClosedCaptioning": [576, 512, ["CC"], "regular", "M512 80c8.8 0 16 7.2 16 16l0 320c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16L48 96c0-8.8 7.2-16 16-16l448 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l448 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zM200 208c14.2 0 27 6.1 35.8 16c8.8 9.9 24 10.7 33.9 1.9s10.7-24 1.9-33.9c-17.5-19.6-43.1-32-71.5-32c-53 0-96 43-96 96s43 96 96 96c28.4 0 54-12.4 71.5-32c8.8-9.9 8-25-1.9-33.9s-25-8-33.9 1.9c-8.8 9.9-21.6 16-35.8 16c-26.5 0-48-21.5-48-48s21.5-48 48-48zm144 48c0-26.5 21.5-48 48-48c14.2 0 27 6.1 35.8 16c8.8 9.9 24 10.7 33.9 1.9s10.7-24 1.9-33.9c-17.5-19.6-43.1-32-71.5-32c-53 0-96 43-96 96s43 96 96 96c28.4 0 54-12.4 71.5-32c8.8-9.9 8-25-1.9-33.9s-25-8-33.9 1.9c-8.8 9.9-21.6 16-35.8 16c-26.5 0-48-21.5-48-48z"],
+    "ChildReaching": [384, 512, [], "solid", "M256 64A64 64 0 1 0 128 64a64 64 0 1 0 128 0zM152.9 169.3c-23.7-8.4-44.5-24.3-58.8-45.8L74.6 94.2C64.8 79.5 45 75.6 30.2 85.4s-18.7 29.7-8.9 44.4L40.9 159c18.1 27.1 42.8 48.4 71.1 62.4L112 480c0 17.7 14.3 32 32 32s32-14.3 32-32l0-96 32 0 0 96c0 17.7 14.3 32 32 32s32-14.3 32-32l0-258.4c29.1-14.2 54.4-36.2 72.7-64.2l18.2-27.9c9.6-14.8 5.4-34.6-9.4-44.3s-34.6-5.5-44.3 9.4L291 122.4c-21.8 33.4-58.9 53.6-98.8 53.6c-12.6 0-24.9-2-36.6-5.8c-.9-.3-1.8-.7-2.7-.9z"],
+    "HourglassHalf": [384, 512, [], "regular", "M0 24C0 10.7 10.7 0 24 0L360 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-8 0 0 19c0 40.3-16 79-44.5 107.5L225.9 256l81.5 81.5C336 366 352 404.7 352 445l0 19 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24L24 512c-13.3 0-24-10.7-24-24s10.7-24 24-24l8 0 0-19c0-40.3 16-79 44.5-107.5L158.1 256 76.5 174.5C48 146 32 107.3 32 67l0-19-8 0C10.7 48 0 37.3 0 24zM110.5 371.5c-3.9 3.9-7.5 8.1-10.7 12.5l184.4 0c-3.2-4.4-6.8-8.6-10.7-12.5L192 289.9l-81.5 81.5zM284.2 128C297 110.4 304 89 304 67l0-19L80 48l0 19c0 22.1 7 43.4 19.8 61l184.4 0z"],
+    "PaperPlane": [512, 512, [], "regular", "M16.1 260.2c-22.6 12.9-20.5 47.3 3.6 57.3L160 376l0 103.3c0 18.1 14.6 32.7 32.7 32.7c9.7 0 18.9-4.3 25.1-11.8l62-74.3 123.9 51.6c18.9 7.9 40.8-4.5 43.9-24.7l64-416c1.9-12.1-3.4-24.3-13.5-31.2s-23.3-7.5-34-1.4l-448 256zm52.1 25.5L409.7 90.6 190.1 336l1.2 1L68.2 285.7zM403.3 425.4L236.7 355.9 450.8 116.6 403.3 425.4z"],    
+    "Axis3DArrows": [24, 24, [], "solid", "m12 2l4 4h-3v7.85l6.53 3.76L21 15.03l1.5 5.47l-5.5 1.46l1.53-2.61L12 15.58l-6.53 3.77L7 21.96L1.5 20.5L3 15.03l1.47 2.58L11 13.85V6H8z"],
+    "PersonWalkingDashedLineArrowRight": [640, 512, [], "solid", "M208 96a48 48 0 1 0 0-96 48 48 0 1 0 0 96zM123.7 200.5c1-.4 1.9-.8 2.9-1.2l-16.9 63.5c-5.6 21.1-.1 43.6 14.7 59.7l70.7 77.1 22 88.1c4.3 17.1 21.7 27.6 38.8 23.3s27.6-21.7 23.3-38.8l-23-92.1c-1.9-7.8-5.8-14.9-11.2-20.8l-49.5-54 19.3-65.5 9.6 23c4.4 10.6 12.5 19.3 22.8 24.5l26.7 13.3c15.8 7.9 35 1.5 42.9-14.3s1.5-35-14.3-42.9L281 232.7l-15.3-36.8C248.5 154.8 208.3 128 163.7 128c-22.8 0-45.3 4.8-66.1 14l-8 3.5c-32.9 14.6-58.1 42.4-69.4 76.5l-2.6 7.8c-5.6 16.8 3.5 34.9 20.2 40.5s34.9-3.5 40.5-20.2l2.6-7.8c5.7-17.1 18.3-30.9 34.7-38.2l8-3.5zm-30 135.1L68.7 398 9.4 457.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L116.3 441c4.6-4.6 8.2-10.1 10.6-16.1l14.5-36.2-40.7-44.4c-2.5-2.7-4.8-5.6-7-8.6zM550.6 153.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L530.7 224 384 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l146.7 0-25.4 25.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l80-80c12.5-12.5 12.5-32.8 0-45.3l-80-80zM392 0c-13.3 0-24 10.7-24 24l0 48c0 13.3 10.7 24 24 24s24-10.7 24-24l0-48c0-13.3-10.7-24-24-24zm24 152c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 16c0 13.3 10.7 24 24 24s24-10.7 24-24l0-16zM392 320c-13.3 0-24 10.7-24 24l0 16c0 13.3 10.7 24 24 24s24-10.7 24-24l0-16c0-13.3-10.7-24-24-24zm24 120c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 48c0 13.3 10.7 24 24 24s24-10.7 24-24l0-48z"],
+    "PersonWalkingArrowLoopLeft": [640, 512, [], "solid", "M208 96a48 48 0 1 0 0-96 48 48 0 1 0 0 96zM123.7 200.5c1-.4 1.9-.8 2.9-1.2l-16.9 63.5c-5.6 21.1-.1 43.6 14.7 59.7l70.7 77.1 22 88.1c4.3 17.1 21.7 27.6 38.8 23.3s27.6-21.7 23.3-38.8l-23-92.1c-1.9-7.8-5.8-14.9-11.2-20.8l-49.5-54 19.3-65.5 9.6 23c4.4 10.6 12.5 19.3 22.8 24.5l26.7 13.3c15.8 7.9 35 1.5 42.9-14.3s1.5-35-14.3-42.9L281 232.7l-15.3-36.8C248.5 154.8 208.3 128 163.7 128c-22.8 0-45.3 4.8-66.1 14l-8 3.5c-32.9 14.6-58.1 42.4-69.4 76.5l-2.6 7.8c-5.6 16.8 3.5 34.9 20.2 40.5s34.9-3.5 40.5-20.2l2.6-7.8c5.7-17.1 18.3-30.9 34.7-38.2l8-3.5zm-30 135.1L68.7 398 9.4 457.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L116.3 441c4.6-4.6 8.2-10.1 10.6-16.1l14.5-36.2-40.7-44.4c-2.5-2.7-4.8-5.6-7-8.6zm347.7 119c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L461.3 384l18.7 0c88.4 0 160-71.6 160-160s-71.6-160-160-160L352 64c-17.7 0-32 14.3-32 32s14.3 32 32 32l128 0c53 0 96 43 96 96s-43 96-96 96l-18.7 0 25.4-25.4c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-80 80c-12.5 12.5-12.5 32.8 0 45.3l80 80z"],
+    "PersonWalkingArrowRight": [640, 512, [], "solid", "M208 96a48 48 0 1 0 0-96 48 48 0 1 0 0 96zM123.7 200.5c1-.4 1.9-.8 2.9-1.2l-16.9 63.5c-5.6 21.1-.1 43.6 14.7 59.7l70.7 77.1 22 88.1c4.3 17.1 21.7 27.6 38.8 23.3s27.6-21.7 23.3-38.8l-23-92.1c-1.9-7.8-5.8-14.9-11.2-20.8l-49.5-54 19.3-65.5 9.6 23c4.4 10.6 12.5 19.3 22.8 24.5l26.7 13.3c15.8 7.9 35 1.5 42.9-14.3s1.5-35-14.3-42.9L281 232.7l-15.3-36.8C248.5 154.8 208.3 128 163.7 128c-22.8 0-45.3 4.8-66.1 14l-8 3.5c-32.9 14.6-58.1 42.4-69.4 76.5l-2.6 7.8c-5.6 16.8 3.5 34.9 20.2 40.5s34.9-3.5 40.5-20.2l2.6-7.8c5.7-17.1 18.3-30.9 34.7-38.2l8-3.5zm-30 135.1L68.7 398 9.4 457.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L116.3 441c4.6-4.6 8.2-10.1 10.6-16.1l14.5-36.2-40.7-44.4c-2.5-2.7-4.8-5.6-7-8.6zM550.6 153.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L530.7 224 384 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l146.7 0-25.4 25.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l80-80c12.5-12.5 12.5-32.8 0-45.3l-80-80z"],
+    "ClapperboardClosed": [512, 512, [], "solid", "M448 32l-86.1 0-1 1-127 127 92.1 0 1-1L453.8 32.3c-1.9-.2-3.8-.3-5.8-.3zm64 128l0-64c0-15.1-5.3-29.1-14-40l-104 104L512 160zM294.1 32l-92.1 0-1 1L73.9 160l92.1 0 1-1 127-127zM64 32C28.7 32 0 60.7 0 96l0 64 6.1 0 1-1 127-127L64 32zM512 192L0 192 0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-224z"],
+    "UserOff": [640, 512, [], "solid", "M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L381.9 274c48.5-23.2 82.1-72.7 82.1-130C464 64.5 399.5 0 320 0C250.4 0 192.4 49.3 178.9 114.9L38.8 5.1zM545.5 512L528 512 284.3 320l-59 0C136.2 320 64 392.2 64 481.3c0 17 13.8 30.7 30.7 30.7l450.6 0 .3 0z"],
+    "PhotoFilm": [640, 512, ["Media"], "solid", "M256 0L576 0c35.3 0 64 28.7 64 64l0 224c0 35.3-28.7 64-64 64l-320 0c-35.3 0-64-28.7-64-64l0-224c0-35.3 28.7-64 64-64zM476 106.7C471.5 100 464 96 456 96s-15.5 4-20 10.7l-56 84L362.7 169c-4.6-5.7-11.5-9-18.7-9s-14.2 3.3-18.7 9l-64 80c-5.8 7.2-6.9 17.1-2.9 25.4s12.4 13.6 21.6 13.6l80 0 48 0 144 0c8.9 0 17-4.9 21.2-12.7s3.7-17.3-1.2-24.6l-96-144zM336 96a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zM64 128l96 0 0 256 0 32c0 17.7 14.3 32 32 32l128 0c17.7 0 32-14.3 32-32l0-32 160 0 0 64c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 192c0-35.3 28.7-64 64-64zm8 64c-8.8 0-16 7.2-16 16l0 16c0 8.8 7.2 16 16 16l16 0c8.8 0 16-7.2 16-16l0-16c0-8.8-7.2-16-16-16l-16 0zm0 104c-8.8 0-16 7.2-16 16l0 16c0 8.8 7.2 16 16 16l16 0c8.8 0 16-7.2 16-16l0-16c0-8.8-7.2-16-16-16l-16 0zm0 104c-8.8 0-16 7.2-16 16l0 16c0 8.8 7.2 16 16 16l16 0c8.8 0 16-7.2 16-16l0-16c0-8.8-7.2-16-16-16l-16 0zm336 16l0 16c0 8.8 7.2 16 16 16l16 0c8.8 0 16-7.2 16-16l0-16c0-8.8-7.2-16-16-16l-16 0c-8.8 0-16 7.2-16 16z"],
+    "Chart": [448, 512, [], "solid", "M160 80c0-26.5 21.5-48 48-48l32 0c26.5 0 48 21.5 48 48l0 352c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48l0-352zM0 272c0-26.5 21.5-48 48-48l32 0c26.5 0 48 21.5 48 48l0 160c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48L0 272zM368 96l32 0c26.5 0 48 21.5 48 48l0 288c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48z"],
+    "HandsAslInterpreting": [640, 512, ["ASL"], "solid", "M156.6 46.3c7.9-15.8 1.5-35-14.3-42.9s-35-1.5-42.9 14.3L13.5 189.4C4.6 207.2 0 226.8 0 246.7L0 256c0 70.7 57.3 128 128 128l72 0 8 0 0-.3c35.2-2.7 65.4-22.8 82.1-51.7c8.8-15.3 3.6-34.9-11.7-43.7s-34.9-3.6-43.7 11.7c-7 12-19.9 20-34.7 20c-22.1 0-40-17.9-40-40s17.9-40 40-40c14.8 0 27.7 8 34.7 20c8.8 15.3 28.4 20.5 43.7 11.7s20.5-28.4 11.7-43.7c-12.8-22.1-33.6-39.1-58.4-47.1l80.8-22c17-4.6 27.1-22.2 22.5-39.3s-22.2-27.1-39.3-22.5L194.9 124.6l81.6-68c13.6-11.3 15.4-31.5 4.1-45.1S249.1-3.9 235.5 7.4L133.6 92.3l23-46zM483.4 465.7c-7.9 15.8-1.5 35 14.3 42.9s35 1.5 42.9-14.3l85.9-171.7c8.9-17.8 13.5-37.4 13.5-57.2l0-9.3c0-70.7-57.3-128-128-128l-72 0-8 0 0 .3c-35.2 2.7-65.4 22.8-82.1 51.7c-8.9 15.3-3.6 34.9 11.7 43.7s34.9 3.6 43.7-11.7c7-12 19.9-20 34.7-20c22.1 0 40 17.9 40 40s-17.9 40-40 40c-14.8 0-27.7-8-34.7-20c-8.9-15.3-28.4-20.5-43.7-11.7s-20.5 28.4-11.7 43.7c12.8 22.1 33.6 39.1 58.4 47.1l-80.8 22c-17.1 4.7-27.1 22.2-22.5 39.3s22.2 27.1 39.3 22.5l100.7-27.5-81.6 68c-13.6 11.3-15.4 31.5-4.1 45.1s31.5 15.4 45.1 4.1l101.9-84.9-23 46z"],
+    "HandPointRight": [512, 512, [], "regular", "M448 128l-177.6 0c1 5.2 1.6 10.5 1.6 16l0 16 32 0 144 0c8.8 0 16-7.2 16-16s-7.2-16-16-16zM224 144c0-17.7-14.3-32-32-32c0 0 0 0 0 0l-24 0c-66.3 0-120 53.7-120 120l0 48c0 52.5 33.7 97.1 80.7 113.4c-.5-3.1-.7-6.2-.7-9.4c0-20 9.2-37.9 23.6-49.7c-4.9-9-7.6-19.4-7.6-30.3c0-15.1 5.3-29 14-40c-8.8-11-14-24.9-14-40l0-40c0-13.3 10.7-24 24-24s24 10.7 24 24l0 40c0 8.8 7.2 16 16 16s16-7.2 16-16l0-40 0-40zM192 64s0 0 0 0c18 0 34.6 6 48 16l208 0c35.3 0 64 28.7 64 64s-28.7 64-64 64l-82 0c1.3 5.1 2 10.5 2 16c0 25.3-14.7 47.2-36 57.6c2.6 7 4 14.5 4 22.4c0 20-9.2 37.9-23.6 49.7c4.9 9 7.6 19.4 7.6 30.3c0 35.3-28.7 64-64 64l-64 0-24 0C75.2 448 0 372.8 0 280l0-48C0 139.2 75.2 64 168 64l24 0zm64 336c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0-16 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l64 0zm16-176c0 5.5-.7 10.9-2 16l2 0 32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0 0 16zm-24 64l-40 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l48 0 16 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-24 0z"],
+    "HandPointUp": [384, 512, [], "regular", "M64 64l0 177.6c5.2-1 10.5-1.6 16-1.6l16 0 0-32L96 64c0-8.8-7.2-16-16-16s-16 7.2-16 16zM80 288c-17.7 0-32 14.3-32 32c0 0 0 0 0 0l0 24c0 66.3 53.7 120 120 120l48 0c52.5 0 97.1-33.7 113.4-80.7c-3.1 .5-6.2 .7-9.4 .7c-20 0-37.9-9.2-49.7-23.6c-9 4.9-19.4 7.6-30.3 7.6c-15.1 0-29-5.3-40-14c-11 8.8-24.9 14-40 14l-40 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l40 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-40 0-40 0zM0 320s0 0 0 0c0-18 6-34.6 16-48L16 64C16 28.7 44.7 0 80 0s64 28.7 64 64l0 82c5.1-1.3 10.5-2 16-2c25.3 0 47.2 14.7 57.6 36c7-2.6 14.5-4 22.4-4c20 0 37.9 9.2 49.7 23.6c9-4.9 19.4-7.6 30.3-7.6c35.3 0 64 28.7 64 64l0 64 0 24c0 92.8-75.2 168-168 168l-48 0C75.2 512 0 436.8 0 344l0-24zm336-64c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 48 0 16c0 8.8 7.2 16 16 16s16-7.2 16-16l0-64zM160 240c5.5 0 10.9 .7 16 2l0-2 0-32c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 32 16 0zm64 24l0 40c0 8.8 7.2 16 16 16s16-7.2 16-16l0-48 0-16c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 24z"],
+    "HandPointDown": [384, 512, [], "regular", "M64 448l0-177.6c5.2 1 10.5 1.6 16 1.6l16 0 0 32 0 144c0 8.8-7.2 16-16 16s-16-7.2-16-16zM80 224c-17.7 0-32-14.3-32-32c0 0 0 0 0 0l0-24c0-66.3 53.7-120 120-120l48 0c52.5 0 97.1 33.7 113.4 80.7c-3.1-.5-6.2-.7-9.4-.7c-20 0-37.9 9.2-49.7 23.6c-9-4.9-19.4-7.6-30.3-7.6c-15.1 0-29 5.3-40 14c-11-8.8-24.9-14-40-14l-40 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l40 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-40 0-40 0zM0 192s0 0 0 0c0 18 6 34.6 16 48l0 208c0 35.3 28.7 64 64 64s64-28.7 64-64l0-82c5.1 1.3 10.5 2 16 2c25.3 0 47.2-14.7 57.6-36c7 2.6 14.5 4 22.4 4c20 0 37.9-9.2 49.7-23.6c9 4.9 19.4 7.6 30.3 7.6c35.3 0 64-28.7 64-64l0-64 0-24C384 75.2 308.8 0 216 0L168 0C75.2 0 0 75.2 0 168l0 24zm336 64c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-48 0-16c0-8.8 7.2-16 16-16s16 7.2 16 16l0 64zM160 272c5.5 0 10.9-.7 16-2l0 2 0 32c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-32 16 0zm64-24l0-40c0-8.8 7.2-16 16-16s16 7.2 16 16l0 48 0 16c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-24z"],
+    "HandPointLeft": [512, 512, [], "regular", "M64 128l177.6 0c-1 5.2-1.6 10.5-1.6 16l0 16-32 0L64 160c-8.8 0-16-7.2-16-16s7.2-16 16-16zm224 16c0-17.7 14.3-32 32-32c0 0 0 0 0 0l24 0c66.3 0 120 53.7 120 120l0 48c0 52.5-33.7 97.1-80.7 113.4c.5-3.1 .7-6.2 .7-9.4c0-20-9.2-37.9-23.6-49.7c4.9-9 7.6-19.4 7.6-30.3c0-15.1-5.3-29-14-40c8.8-11 14-24.9 14-40l0-40c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-40 0-40zm32-80s0 0 0 0c-18 0-34.6 6-48 16L64 80C28.7 80 0 108.7 0 144s28.7 64 64 64l82 0c-1.3 5.1-2 10.5-2 16c0 25.3 14.7 47.2 36 57.6c-2.6 7-4 14.5-4 22.4c0 20 9.2 37.9 23.6 49.7c-4.9 9-7.6 19.4-7.6 30.3c0 35.3 28.7 64 64 64l64 0 24 0c92.8 0 168-75.2 168-168l0-48c0-92.8-75.2-168-168-168l-24 0zM256 400c-8.8 0-16-7.2-16-16s7.2-16 16-16l48 0 16 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-64 0zM240 224c0 5.5 .7 10.9 2 16l-2 0-32 0c-8.8 0-16-7.2-16-16s7.2-16 16-16l32 0 0 16zm24 64l40 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-48 0-16 0c-8.8 0-16-7.2-16-16s7.2-16 16-16l24 0z"],
+    "HandScissors": [512, 512, [], "regular", "M.2 276.3c-1.2-35.3 26.4-65 61.7-66.2l3.3-.1L57 208.1C22.5 200.5 .7 166.3 8.3 131.8S50.2 75.5 84.7 83.2l173 38.3c2.3-2.9 4.7-5.7 7.1-8.5l18.4-20.3C299.9 74.5 323.5 64 348.3 64l10.2 0c54.1 0 104.1 28.7 131.3 75.4l1.5 2.6c13.6 23.2 20.7 49.7 20.7 76.6L512 344c0 66.3-53.7 120-120 120l-8 0-96 0c-35.3 0-64-28.7-64-64c0-2.8 .2-5.6 .5-8.3c-19.4-11-32.5-31.8-32.5-55.7c0-.8 0-1.6 0-2.4L66.4 338c-35.3 1.2-65-26.4-66.2-61.7zm63.4-18.2c-8.8 .3-15.7 7.7-15.4 16.5s7.7 15.7 16.5 15.4l161.5-5.6c9.8-.3 18.7 5.3 22.7 14.2s2.2 19.3-4.5 26.4c-2.8 2.9-4.4 6.7-4.4 11c0 8.8 7.2 16 16 16c9.1 0 17.4 5.1 21.5 13.3s3.2 17.9-2.3 25.1c-2 2.7-3.2 6-3.2 9.6c0 8.8 7.2 16 16 16l96 0 8 0c39.8 0 72-32.2 72-72l0-125.4c0-18.4-4.9-36.5-14.2-52.4l-1.5-2.6c-18.6-32-52.8-51.6-89.8-51.6l-10.2 0c-11.3 0-22 4.8-29.6 13.1l-17.5-15.9 17.5 15.9-18.4 20.3c-.6 .6-1.1 1.3-1.7 1.9l57 13.2c8.6 2 14 10.6 12 19.2s-10.6 14-19.2 12l-85.6-19.7L74.3 130c-8.6-1.9-17.2 3.5-19.1 12.2s3.5 17.2 12.2 19.1l187.5 41.6c10.2 2.3 17.8 10.9 18.7 21.4l.1 1c.6 6.6-1.5 13.1-5.8 18.1s-10.6 7.9-17.2 8.2L63.6 258.1z"],
+    "HandSpock": [576, 512, [], "regular", "M170.2 80.8C161 47 180.8 12 214.6 2.4c34-9.6 69.4 10.2 79 44.2l30.3 107.1L337.1 84c6.6-34.7 40.1-57.5 74.8-50.9c31.4 6 53 33.9 52 64.9c10-2.6 20.8-2.8 31.5-.1c34.3 8.6 55.1 43.3 46.6 77.6L486.7 397.2C469.8 464.7 409.2 512 339.6 512l-33.7 0c-56.9 0-112.2-19-157.2-53.9l-92-71.6c-27.9-21.7-32.9-61.9-11.2-89.8s61.9-32.9 89.8-11.2l17 13.2L100.5 167.5c-13-32.9 3.2-70.1 36-83c11.1-4.4 22.7-5.4 33.7-3.7zm77.1-21.2c-2.4-8.5-11.2-13.4-19.7-11s-13.4 11.2-11 19.7l54.8 182.4c3.5 12.3-3.3 25.2-15.4 29.3s-25.3-2-30-13.9L174.9 138.1c-3.2-8.2-12.5-12.3-20.8-9s-12.3 12.5-9 20.8l73.3 185.6c12 30.3-23.7 57-49.4 37l-63.1-49.1c-7-5.4-17-4.2-22.5 2.8s-4.2 17 2.8 22.5l92 71.6c36.5 28.4 81.4 43.8 127.7 43.8l33.7 0c47.5 0 89-32.4 100.5-78.5l55.4-221.6c2.1-8.6-3.1-17.3-11.6-19.4s-17.3 3.1-19.4 11.6l-26 104C435.6 271.8 425 280 413 280c-16.5 0-28.9-15-25.8-31.2L415.7 99c1.7-8.7-4-17.1-12.7-18.7s-17.1 4-18.7 12.7L352.5 260c-2.2 11.6-12.4 20-24.2 20c-11 0-20.7-7.3-23.7-17.9L247.4 59.6z"],
+    "HandBackFist": [448, 512, ["HandRock"], "regular", "M144 64c0-8.8 7.2-16 16-16s16 7.2 16 16c0 9.1 5.1 17.4 13.3 21.5s17.9 3.2 25.1-2.3c2.7-2 6-3.2 9.6-3.2c8.8 0 16 7.2 16 16c0 9.1 5.1 17.4 13.3 21.5s17.9 3.2 25.1-2.3c2.7-2 6-3.2 9.6-3.2c8.8 0 16 7.2 16 16c0 9.1 5.1 17.4 13.3 21.5s17.9 3.2 25.1-2.3c2.7-2 6-3.2 9.6-3.2c8.8 0 16 7.2 16 16l0 104c0 31.3-20 58-48 67.9c-9.6 3.4-16 12.5-16 22.6L304 488c0 13.3 10.7 24 24 24s24-10.7 24-24l0-117.8c38-20.1 64-60.1 64-106.2l0-104c0-35.3-28.7-64-64-64c-2.8 0-5.6 .2-8.3 .5C332.8 77.1 311.9 64 288 64c-2.8 0-5.6 .2-8.3 .5C268.8 45.1 247.9 32 224 32c-2.8 0-5.6 .2-8.3 .5C204.8 13.1 183.9 0 160 0C124.7 0 96 28.7 96 64l0 64.3c-11.7 7.4-22.5 16.4-32 26.9l17.8 16.1L64 155.2l-9.4 10.5C40 181.8 32 202.8 32 224.6l0 12.8c0 49.6 24.2 96.1 64.8 124.5l13.8-19.7L96.8 361.9l8.9 6.2c6.9 4.8 14.4 8.6 22.3 11.3L128 488c0 13.3 10.7 24 24 24s24-10.7 24-24l0-128.1c0-12.6-9.8-23.1-22.4-23.9c-7.3-.5-14.3-2.9-20.3-7.1l-13.1 18.7 13.1-18.7-8.9-6.2C96.6 303.1 80 271.3 80 237.4l0-12.8c0-9.9 3.7-19.4 10.3-26.8l9.4-10.5c3.8-4.2 7.9-8.1 12.3-11.6l0 32.3c0 8.8 7.2 16 16 16s16-7.2 16-16l0-65.7 0-14.3 0-64z"],
+    "HandLizard": [512, 512, [], "regular", "M72 112c-13.3 0-24 10.7-24 24s10.7 24 24 24l168 0c35.3 0 64 28.7 64 64s-28.7 64-64 64l-104 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l152 0c4.5 0 8.9 1.3 12.7 3.6l64 40c7 4.4 11.3 12.1 11.3 20.4l0 24c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-10.7L281.1 384 136 384c-39.8 0-72-32.2-72-72s32.2-72 72-72l104 0c8.8 0 16-7.2 16-16s-7.2-16-16-16L72 208c-39.8 0-72-32.2-72-72S32.2 64 72 64l209.6 0c46.7 0 90.9 21.5 119.7 58.3l78.4 100.1c20.9 26.7 32.3 59.7 32.3 93.7L512 424c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-107.9c0-23.2-7.8-45.8-22.1-64.1L363.5 151.9c-19.7-25.2-49.9-39.9-81.9-39.9L72 112z"],
+    "HandPeace": [512, 512, [], "regular", "M250.8 1.4c-35.2-3.7-66.6 21.8-70.3 57L174 119 156.7 69.6C145 36.3 108.4 18.8 75.1 30.5S24.2 78.8 35.9 112.1L88.7 262.2C73.5 276.7 64 297.3 64 320c0 0 0 0 0 0l0 24c0 92.8 75.2 168 168 168l48 0c92.8 0 168-75.2 168-168l0-72 0-16 0-32c0-35.3-28.7-64-64-64c-7.9 0-15.4 1.4-22.4 4c-10.4-21.3-32.3-36-57.6-36c-.7 0-1.5 0-2.2 0l5.9-56.3c3.7-35.2-21.8-66.6-57-70.3zm-.2 155.4C243.9 166.9 240 179 240 192l0 48c0 .7 0 1.4 0 2c-5.1-1.3-10.5-2-16-2l-7.4 0-5.4-15.3 17-161.3c.9-8.8 8.8-15.2 17.6-14.2s15.2 8.8 14.2 17.6l-9.5 90.1zM111.4 85.6L165.7 240 144 240c-4 0-8 .3-11.9 .9L81.2 96.2c-2.9-8.3 1.5-17.5 9.8-20.4s17.5 1.5 20.4 9.8zM288 192c0-8.8 7.2-16 16-16s16 7.2 16 16l0 32 0 16c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-48zm38.4 108c10.4 21.3 32.3 36 57.6 36c5.5 0 10.9-.7 16-2l0 10c0 66.3-53.7 120-120 120l-48 0c-66.3 0-120-53.7-120-120l0-24s0 0 0 0c0-17.7 14.3-32 32-32l80 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-40 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l40 0c35.3 0 64-28.7 64-64c0-.7 0-1.4 0-2c5.1 1.3 10.5 2 16 2c7.9 0 15.4-1.4 22.4-4zM400 272c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-32 0-16c0-8.8 7.2-16 16-16s16 7.2 16 16l0 32 0 16z"],
+    "CircleNodes": [512, 512, [], "solid", "M418.4 157.9c35.3-8.3 61.6-40 61.6-77.9c0-44.2-35.8-80-80-80c-43.4 0-78.7 34.5-80 77.5L136.2 151.1C121.7 136.8 101.9 128 80 128c-44.2 0-80 35.8-80 80s35.8 80 80 80c12.2 0 23.8-2.7 34.1-7.6L259.7 407.8c-2.4 7.6-3.7 15.8-3.7 24.2c0 44.2 35.8 80 80 80s80-35.8 80-80c0-27.7-14-52.1-35.4-66.4l37.8-207.7zM156.3 232.2c2.2-6.9 3.5-14.2 3.7-21.7l183.8-73.5c3.6 3.5 7.4 6.7 11.6 9.5L317.6 354.1c-5.5 1.3-10.8 3.1-15.8 5.5L156.3 232.2z"],
+    "CircleRight": [512, 512, [], "regular", "M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM294.6 151.2c-4.2-4.6-10.1-7.2-16.4-7.2C266 144 256 154 256 166.3l0 41.7-96 0c-17.7 0-32 14.3-32 32l0 32c0 17.7 14.3 32 32 32l96 0 0 41.7c0 12.3 10 22.3 22.3 22.3c6.2 0 12.1-2.6 16.4-7.2l84-91c3.5-3.8 5.4-8.7 5.4-13.9s-1.9-10.1-5.4-13.9l-84-91z"],
+    "CircleUp": [512, 512, [], "regular", "M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM151.2 217.4c-4.6 4.2-7.2 10.1-7.2 16.4c0 12.3 10 22.3 22.3 22.3l41.7 0 0 96c0 17.7 14.3 32 32 32l32 0c17.7 0 32-14.3 32-32l0-96 41.7 0c12.3 0 22.3-10 22.3-22.3c0-6.2-2.6-12.1-7.2-16.4l-91-84c-3.8-3.5-8.7-5.4-13.9-5.4s-10.1 1.9-13.9 5.4l-91 84z"],
+    "CircleLeft": [512, 512, [], "regular", "M48 256a208 208 0 1 1 416 0A208 208 0 1 1 48 256zm464 0A256 256 0 1 0 0 256a256 256 0 1 0 512 0zM217.4 376.9c4.2 4.5 10.1 7.1 16.3 7.1c12.3 0 22.3-10 22.3-22.3l0-57.7 96 0c17.7 0 32-14.3 32-32l0-32c0-17.7-14.3-32-32-32l-96 0 0-57.7c0-12.3-10-22.3-22.3-22.3c-6.2 0-12.1 2.6-16.3 7.1L117.5 242.2c-3.5 3.8-5.5 8.7-5.5 13.8s2 10.1 5.5 13.8l99.9 107.1z"],
+    "CircleDown": [512, 512, [], "regular", "M256 464a208 208 0 1 1 0-416 208 208 0 1 1 0 416zM256 0a256 256 0 1 0 0 512A256 256 0 1 0 256 0zM376.9 294.6c4.5-4.2 7.1-10.1 7.1-16.3c0-12.3-10-22.3-22.3-22.3L304 256l0-96c0-17.7-14.3-32-32-32l-32 0c-17.7 0-32 14.3-32 32l0 96-57.7 0C138 256 128 266 128 278.3c0 6.2 2.6 12.1 7.1 16.3l107.1 99.9c3.8 3.5 8.7 5.5 13.8 5.5s10.1-2 13.8-5.5l107.1-99.9z"],
+    "WindowRestore": [512, 512, [], "solid", "M432 48L208 48c-17.7 0-32 14.3-32 32l0 16-48 0 0-16c0-44.2 35.8-80 80-80L432 0c44.2 0 80 35.8 80 80l0 224c0 44.2-35.8 80-80 80l-16 0 0-48 16 0c17.7 0 32-14.3 32-32l0-224c0-17.7-14.3-32-32-32zM48 448c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16l0-192L48 256l0 192zM64 128l256 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 192c0-35.3 28.7-64 64-64z"],
+    "WindowMaximize": [512, 512, [], "solid", "M.3 89.5C.1 91.6 0 93.8 0 96L0 224 0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-192 0-128c0-35.3-28.7-64-64-64L64 32c-2.2 0-4.4 .1-6.5 .3c-9.2 .9-17.8 3.8-25.5 8.2C21.8 46.5 13.4 55.1 7.7 65.5c-3.9 7.3-6.5 15.4-7.4 24zM48 224l416 0 0 192c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16l0-192z"],
+    "WindowMinimize": [512, 512, [], "solid", "M24 432c-13.3 0-24 10.7-24 24s10.7 24 24 24l464 0c13.3 0 24-10.7 24-24s-10.7-24-24-24L24 432z"],
+    "VrCardboard": [640, 512, ["VR"], "solid", "M576 64L64 64C28.7 64 0 92.7 0 128L0 384c0 35.3 28.7 64 64 64l120.4 0c24.2 0 46.4-13.7 57.2-35.4l32-64c8.8-17.5 26.7-28.6 46.3-28.6s37.5 11.1 46.3 28.6l32 64c10.8 21.7 33 35.4 57.2 35.4L576 448c35.3 0 64-28.7 64-64l0-256c0-35.3-28.7-64-64-64zM96 240a64 64 0 1 1 128 0A64 64 0 1 1 96 240zm384-64a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"],
+    "C": [32, 32, [], "solid", "M29.86 8c-.224-.385-.532-.724-.871-.921L17.234.292c-.677-.391-1.787-.391-2.464 0L3.015 7.079C2.338 7.47 1.78 8.432 1.78 9.214v13.573c0 .391.14.828.364 1.213.219.385.532.724.871.917l11.749 6.791c.683.391 1.787.391 2.464 0l11.755-6.791c.339-.193.647-.532.871-.917s.359-.823.359-1.213V9.214c.005-.391-.135-.828-.353-1.213zM16 25.479c-5.229 0-9.479-4.249-9.479-9.479S10.77 6.521 16 6.521a9.51 9.51 0 0 1 8.208 4.733l-4.104 2.376A4.76 4.76 0 0 0 16 11.259c-2.615 0-4.74 2.125-4.74 4.74s2.125 4.74 4.74 4.74a4.76 4.76 0 0 0 4.104-2.371l4.104 2.376A9.51 9.51 0 0 1 16 25.479z", { svgClass: "stroke-none" }],
+    "CPlusPlus": [32, 32, [], "solid", "M29.86 8c-.224-.385-.532-.724-.871-.921L17.234.292c-.677-.391-1.787-.391-2.464 0L3.015 7.079C2.338 7.47 1.78 8.432 1.78 9.214v13.573c0 .391.14.828.364 1.213c.219.385.532.724.871.917l11.749 6.791c.683.391 1.787.391 2.464 0l11.755-6.791c.339-.193.647-.532.871-.917s.359-.823.359-1.213V9.214c.005-.391-.135-.828-.353-1.213zM16 25.479c-5.229 0-9.479-4.249-9.479-9.479S10.77 6.521 16 6.521a9.51 9.51 0 0 1 8.208 4.733l-4.104 2.376A4.76 4.76 0 0 0 16 11.259c-2.615 0-4.74 2.125-4.74 4.74s2.125 4.74 4.74 4.74a4.76 4.76 0 0 0 4.104-2.371l4.104 2.376A9.51 9.51 0 0 1 16 25.477zm9.479-8.952h-1.052v1.052H23.37v-1.052h-1.052v-1.053h1.052v-1.052h1.057v1.052h1.052zm3.948 0h-1.052v1.052h-1.052v-1.052h-1.052v-1.053h1.052v-1.052h1.052v1.052h1.052z", { svgClass: "stroke-none" }],
+    "Discord": [640, 512, [], "solid", "M524.531,69.836a1.5,1.5,0,0,0-.764-.7A485.065,485.065,0,0,0,404.081,32.03a1.816,1.816,0,0,0-1.923.91,337.461,337.461,0,0,0-14.9,30.6,447.848,447.848,0,0,0-134.426,0,309.541,309.541,0,0,0-15.135-30.6,1.89,1.89,0,0,0-1.924-.91A483.689,483.689,0,0,0,116.085,69.137a1.712,1.712,0,0,0-.788.676C39.068,183.651,18.186,294.69,28.43,404.354a2.016,2.016,0,0,0,.765,1.375A487.666,487.666,0,0,0,176.02,479.918a1.9,1.9,0,0,0,2.063-.676A348.2,348.2,0,0,0,208.12,430.4a1.86,1.86,0,0,0-1.019-2.588,321.173,321.173,0,0,1-45.868-21.853,1.885,1.885,0,0,1-.185-3.126c3.082-2.309,6.166-4.711,9.109-7.137a1.819,1.819,0,0,1,1.9-.256c96.229,43.917,200.41,43.917,295.5,0a1.812,1.812,0,0,1,1.924.233c2.944,2.426,6.027,4.851,9.132,7.16a1.884,1.884,0,0,1-.162,3.126,301.407,301.407,0,0,1-45.89,21.83,1.875,1.875,0,0,0-1,2.611,391.055,391.055,0,0,0,30.014,48.815,1.864,1.864,0,0,0,2.063.7A486.048,486.048,0,0,0,610.7,405.729a1.882,1.882,0,0,0,.765-1.352C623.729,277.594,590.933,167.465,524.531,69.836ZM222.491,337.58c-28.972,0-52.844-26.587-52.844-59.239S193.056,219.1,222.491,219.1c29.665,0,53.306,26.82,52.843,59.239C275.334,310.993,251.924,337.58,222.491,337.58Zm195.38,0c-28.971,0-52.843-26.587-52.843-59.239S388.437,219.1,417.871,219.1c29.667,0,53.307,26.82,52.844,59.239C470.715,310.993,447.538,337.58,417.871,337.58Z"],
+    "Google": [488, 512, [], "solid", "M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"],
+    "Js": [32, 32, [], "solid", "M18.774 19.7a3.73 3.73 0 0 0 3.376 2.078c1.418 0 2.324-.709 2.324-1.688c0-1.173-.931-1.589-2.491-2.272l-.856-.367c-2.469-1.052-4.11-2.37-4.11-5.156c0-2.567 1.956-4.52 5.012-4.52A5.06 5.06 0 0 1 26.9 10.52l-2.665 1.711a2.33 2.33 0 0 0-2.2-1.467a1.49 1.49 0 0 0-1.638 1.467c0 1.027.636 1.442 2.1 2.078l.856.366c2.908 1.247 4.549 2.518 4.549 5.376c0 3.081-2.42 4.769-5.671 4.769a6.58 6.58 0 0 1-6.236-3.5ZM6.686 20c.538.954 1.027 1.76 2.2 1.76c1.124 0 1.834-.44 1.834-2.15V7.975h3.422v11.683c0 3.543-2.078 5.156-5.11 5.156A5.31 5.31 0 0 1 3.9 21.688Z"],
+    "Linux": [448, 512, [], "regular", "M220.8 123.3c1 .5 1.8 1.7 3 1.7 1.1 0 2.8-.4 2.9-1.5.2-1.4-1.9-2.3-3.2-2.9-1.7-.7-3.9-1-5.5-.1-.4.2-.8.7-.6 1.1.3 1.3 2.3 1.1 3.4 1.7zm-21.9 1.7c1.2 0 2-1.2 3-1.7 1.1-.6 3.1-.4 3.5-1.6.2-.4-.2-.9-.6-1.1-1.6-.9-3.8-.6-5.5.1-1.3.6-3.4 1.5-3.2 2.9.1 1 1.8 1.5 2.8 1.4zM420 403.8c-3.6-4-5.3-11.6-7.2-19.7-1.8-8.1-3.9-16.8-10.5-22.4-1.3-1.1-2.6-2.1-4-2.9-1.3-.8-2.7-1.5-4.1-2 9.2-27.3 5.6-54.5-3.7-79.1-11.4-30.1-31.3-56.4-46.5-74.4-17.1-21.5-33.7-41.9-33.4-72C311.1 85.4 315.7.1 234.8 0 132.4-.2 158 103.4 156.9 135.2c-1.7 23.4-6.4 41.8-22.5 64.7-18.9 22.5-45.5 58.8-58.1 96.7-6 17.9-8.8 36.1-6.2 53.3-6.5 5.8-11.4 14.7-16.6 20.2-4.2 4.3-10.3 5.9-17 8.3s-14 6-18.5 14.5c-2.1 3.9-2.8 8.1-2.8 12.4 0 3.9.6 7.9 1.2 11.8 1.2 8.1 2.5 15.7.8 20.8-5.2 14.4-5.9 24.4-2.2 31.7 3.8 7.3 11.4 10.5 20.1 12.3 17.3 3.6 40.8 2.7 59.3 12.5 19.8 10.4 39.9 14.1 55.9 10.4 11.6-2.6 21.1-9.6 25.9-20.2 12.5-.1 26.3-5.4 48.3-6.6 14.9-1.2 33.6 5.3 55.1 4.1.6 2.3 1.4 4.6 2.5 6.7v.1c8.3 16.7 23.8 24.3 40.3 23 16.6-1.3 34.1-11 48.3-27.9 13.6-16.4 36-23.2 50.9-32.2 7.4-4.5 13.4-10.1 13.9-18.3.4-8.2-4.4-17.3-15.5-29.7zM223.7 87.3c9.8-22.2 34.2-21.8 44-.4 6.5 14.2 3.6 30.9-4.3 40.4-1.6-.8-5.9-2.6-12.6-4.9 1.1-1.2 3.1-2.7 3.9-4.6 4.8-11.8-.2-27-9.1-27.3-7.3-.5-13.9 10.8-11.8 23-4.1-2-9.4-3.5-13-4.4-1-6.9-.3-14.6 2.9-21.8zM183 75.8c10.1 0 20.8 14.2 19.1 33.5-3.5 1-7.1 2.5-10.2 4.6 1.2-8.9-3.3-20.1-9.6-19.6-8.4.7-9.8 21.2-1.8 28.1 1 .8 1.9-.2-5.9 5.5-15.6-14.6-10.5-52.1 8.4-52.1zm-13.6 60.7c6.2-4.6 13.6-10 14.1-10.5 4.7-4.4 13.5-14.2 27.9-14.2 7.1 0 15.6 2.3 25.9 8.9 6.3 4.1 11.3 4.4 22.6 9.3 8.4 3.5 13.7 9.7 10.5 18.2-2.6 7.1-11 14.4-22.7 18.1-11.1 3.6-19.8 16-38.2 14.9-3.9-.2-7-1-9.6-2.1-8-3.5-12.2-10.4-20-15-8.6-4.8-13.2-10.4-14.7-15.3-1.4-4.9 0-9 4.2-12.3zm3.3 334c-2.7 35.1-43.9 34.4-75.3 18-29.9-15.8-68.6-6.5-76.5-21.9-2.4-4.7-2.4-12.7 2.6-26.4v-.2c2.4-7.6.6-16-.6-23.9-1.2-7.8-1.8-15 .9-20 3.5-6.7 8.5-9.1 14.8-11.3 10.3-3.7 11.8-3.4 19.6-9.9 5.5-5.7 9.5-12.9 14.3-18 5.1-5.5 10-8.1 17.7-6.9 8.1 1.2 15.1 6.8 21.9 16l19.6 35.6c9.5 19.9 43.1 48.4 41 68.9zm-1.4-25.9c-4.1-6.6-9.6-13.6-14.4-19.6 7.1 0 14.2-2.2 16.7-8.9 2.3-6.2 0-14.9-7.4-24.9-13.5-18.2-38.3-32.5-38.3-32.5-13.5-8.4-21.1-18.7-24.6-29.9s-3-23.3-.3-35.2c5.2-22.9 18.6-45.2 27.2-59.2 2.3-1.7.8 3.2-8.7 20.8-8.5 16.1-24.4 53.3-2.6 82.4.6-20.7 5.5-41.8 13.8-61.5 12-27.4 37.3-74.9 39.3-112.7 1.1.8 4.6 3.2 6.2 4.1 4.6 2.7 8.1 6.7 12.6 10.3 12.4 10 28.5 9.2 42.4 1.2 6.2-3.5 11.2-7.5 15.9-9 9.9-3.1 17.8-8.6 22.3-15 7.7 30.4 25.7 74.3 37.2 95.7 6.1 11.4 18.3 35.5 23.6 64.6 3.3-.1 7 .4 10.9 1.4 13.8-35.7-11.7-74.2-23.3-84.9-4.7-4.6-4.9-6.6-2.6-6.5 12.6 11.2 29.2 33.7 35.2 59 2.8 11.6 3.3 23.7.4 35.7 16.4 6.8 35.9 17.9 30.7 34.8-2.2-.1-3.2 0-4.2 0 3.2-10.1-3.9-17.6-22.8-26.1-19.6-8.6-36-8.6-38.3 12.5-12.1 4.2-18.3 14.7-21.4 27.3-2.8 11.2-3.6 24.7-4.4 39.9-.5 7.7-3.6 18-6.8 29-32.1 22.9-76.7 32.9-114.3 7.2zm257.4-11.5c-.9 16.8-41.2 19.9-63.2 46.5-13.2 15.7-29.4 24.4-43.6 25.5s-26.5-4.8-33.7-19.3c-4.7-11.1-2.4-23.1 1.1-36.3 3.7-14.2 9.2-28.8 9.9-40.6.8-15.2 1.7-28.5 4.2-38.7 2.6-10.3 6.6-17.2 13.7-21.1.3-.2.7-.3 1-.5.8 13.2 7.3 26.6 18.8 29.5 12.6 3.3 30.7-7.5 38.4-16.3 9-.3 15.7-.9 22.6 5.1 9.9 8.5 7.1 30.3 17.1 41.6 10.6 11.6 14 19.5 13.7 24.6zM173.3 148.7c2 1.9 4.7 4.5 8 7.1 6.6 5.2 15.8 10.6 27.3 10.6 11.6 0 22.5-5.9 31.8-10.8 4.9-2.6 10.9-7 14.8-10.4s5.9-6.3 3.1-6.6-2.6 2.6-6 5.1c-4.4 3.2-9.7 7.4-13.9 9.8-7.4 4.2-19.5 10.2-29.9 10.2s-18.7-4.8-24.9-9.7c-3.1-2.5-5.7-5-7.7-6.9-1.5-1.4-1.9-4.6-4.3-4.9-1.4-.1-1.8 3.7 1.7 6.5z"],
+    "SquareJs": [448, 512, [], "solid", "M448 96c0-35.3-28.7-64-64-64H64C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V96zM180.9 444.9c-33.7 0-53.2-17.4-63.2-38.5L152 385.7c6.6 11.7 12.6 21.6 27.1 21.6c13.8 0 22.6-5.4 22.6-26.5V237.7h42.1V381.4c0 43.6-25.6 63.5-62.9 63.5zm85.8-43L301 382.1c9 14.7 20.8 25.6 41.5 25.6c17.4 0 28.6-8.7 28.6-20.8c0-14.4-11.4-19.5-30.7-28l-10.5-4.5c-30.4-12.9-50.5-29.2-50.5-63.5c0-31.6 24.1-55.6 61.6-55.6c26.8 0 46 9.3 59.8 33.7L368 290c-7.2-12.9-15-18-27.1-18c-12.3 0-20.1 7.8-20.1 18c0 12.6 7.8 17.7 25.9 25.6l10.5 4.5c35.8 15.3 55.9 31 55.9 66.2c0 37.8-29.8 58.6-69.7 58.6c-39.1 0-64.4-18.6-76.7-43z"],
+    "Safari": [512, 512, [], "solid", "M274.69,274.69l-37.38-37.38L166,346ZM256,8C119,8,8,119,8,256S119,504,256,504,504,393,504,256,393,8,256,8ZM411.85,182.79l14.78-6.13A8,8,0,0,1,437.08,181h0a8,8,0,0,1-4.33,10.46L418,197.57a8,8,0,0,1-10.45-4.33h0A8,8,0,0,1,411.85,182.79ZM314.43,94l6.12-14.78A8,8,0,0,1,331,74.92h0a8,8,0,0,1,4.33,10.45l-6.13,14.78a8,8,0,0,1-10.45,4.33h0A8,8,0,0,1,314.43,94ZM256,60h0a8,8,0,0,1,8,8V84a8,8,0,0,1-8,8h0a8,8,0,0,1-8-8V68A8,8,0,0,1,256,60ZM181,74.92a8,8,0,0,1,10.46,4.33L197.57,94a8,8,0,1,1-14.78,6.12l-6.13-14.78A8,8,0,0,1,181,74.92Zm-63.58,42.49h0a8,8,0,0,1,11.31,0L140,128.72A8,8,0,0,1,140,140h0a8,8,0,0,1-11.31,0l-11.31-11.31A8,8,0,0,1,117.41,117.41ZM60,256h0a8,8,0,0,1,8-8H84a8,8,0,0,1,8,8h0a8,8,0,0,1-8,8H68A8,8,0,0,1,60,256Zm40.15,73.21-14.78,6.13A8,8,0,0,1,74.92,331h0a8,8,0,0,1,4.33-10.46L94,314.43a8,8,0,0,1,10.45,4.33h0A8,8,0,0,1,100.15,329.21Zm4.33-136h0A8,8,0,0,1,94,197.57l-14.78-6.12A8,8,0,0,1,74.92,181h0a8,8,0,0,1,10.45-4.33l14.78,6.13A8,8,0,0,1,104.48,193.24ZM197.57,418l-6.12,14.78a8,8,0,0,1-14.79-6.12l6.13-14.78A8,8,0,1,1,197.57,418ZM264,444a8,8,0,0,1-8,8h0a8,8,0,0,1-8-8V428a8,8,0,0,1,8-8h0a8,8,0,0,1,8,8Zm67-6.92h0a8,8,0,0,1-10.46-4.33L314.43,418a8,8,0,0,1,4.33-10.45h0a8,8,0,0,1,10.45,4.33l6.13,14.78A8,8,0,0,1,331,437.08Zm63.58-42.49h0a8,8,0,0,1-11.31,0L372,383.28A8,8,0,0,1,372,372h0a8,8,0,0,1,11.31,0l11.31,11.31A8,8,0,0,1,394.59,394.59ZM286.25,286.25,110.34,401.66,225.75,225.75,401.66,110.34ZM437.08,331h0a8,8,0,0,1-10.45,4.33l-14.78-6.13a8,8,0,0,1-4.33-10.45h0A8,8,0,0,1,418,314.43l14.78,6.12A8,8,0,0,1,437.08,331ZM444,264H428a8,8,0,0,1-8-8h0a8,8,0,0,1,8-8h16a8,8,0,0,1,8,8h0A8,8,0,0,1,444,264Z"],
+    "Python": [448, 512, [], "solid", "M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6zM286.2 404c11.1 0 20.1 9.1 20.1 20.3 0 11.3-9 20.4-20.1 20.4-11 0-20.1-9.2-20.1-20.4.1-11.3 9.1-20.3 20.1-20.3zM167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4zm-6.7-142.6c-11.1 0-20.1-9.1-20.1-20.3.1-11.3 9-20.4 20.1-20.4 11 0 20.1 9.2 20.1 20.4s-9 20.3-20.1 20.3z"],
+    "Markdown": [640, 512, [], "solid", "M593.8 59.1H46.2C20.7 59.1 0 79.8 0 105.2v301.5c0 25.5 20.7 46.2 46.2 46.2h547.7c25.5 0 46.2-20.7 46.1-46.1V105.2c0-25.4-20.7-46.1-46.2-46.1zM338.5 360.6H277v-120l-61.5 76.9-61.5-76.9v120H92.3V151.4h61.5l61.5 76.9 61.5-76.9h61.5v209.2zm135.3 3.1L381.5 256H443V151.4h61.5V256H566z"],
+    "Microsoft": [448, 512, [], "solid", "M0 32h214.6v214.6H0V32zm233.4 0H448v214.6H233.4V32zM0 265.4h214.6V480H0V265.4zm233.4 0H448V480H233.4V265.4z"],
+    "Npm": [576, 512, [], "solid", "M288 288h-32v-64h32v64zm288-128v192H288v32H160v-32H0V160h576zm-416 32H32v128h64v-96h32v96h32V192zm160 0H192v160h64v-32h64V192zm224 0H352v128h64v-96h32v96h32v-96h32v96h32V192z"],
+    "Reddit": [512, 512, [], "solid", "M0 256C0 114.6 114.6 0 256 0S512 114.6 512 256s-114.6 256-256 256L37.1 512c-13.7 0-20.5-16.5-10.9-26.2L75 437C28.7 390.7 0 326.7 0 256zM349.6 153.6c23.6 0 42.7-19.1 42.7-42.7s-19.1-42.7-42.7-42.7c-20.6 0-37.8 14.6-41.8 34c-34.5 3.7-61.4 33-61.4 68.4l0 .2c-37.5 1.6-71.8 12.3-99 29.1c-10.1-7.8-22.8-12.5-36.5-12.5c-33 0-59.8 26.8-59.8 59.8c0 24 14.1 44.6 34.4 54.1c2 69.4 77.6 125.2 170.6 125.2s168.7-55.9 170.6-125.3c20.2-9.6 34.1-30.2 34.1-54c0-33-26.8-59.8-59.8-59.8c-13.7 0-26.3 4.6-36.4 12.4c-27.4-17-62.1-27.7-100-29.1l0-.2c0-25.4 18.9-46.5 43.4-49.9l0 0c4.4 18.8 21.3 32.8 41.5 32.8zM177.1 246.9c16.7 0 29.5 17.6 28.5 39.3s-13.5 29.6-30.3 29.6s-31.4-8.8-30.4-30.5s15.4-38.3 32.1-38.3zm190.1 38.3c1 21.7-13.7 30.5-30.4 30.5s-29.3-7.9-30.3-29.6c-1-21.7 11.8-39.3 28.5-39.3s31.2 16.6 32.1 38.3zm-48.1 56.7c-10.3 24.6-34.6 41.9-63 41.9s-52.7-17.3-63-41.9c-1.2-2.9 .8-6.2 3.9-6.5c18.4-1.9 38.3-2.9 59.1-2.9s40.7 1 59.1 2.9c3.1 .3 5.1 3.6 3.9 6.5z"],
+    "Rust": [512, 512, [], "solid", "M508.52,249.75,486.7,236.24c-.17-2-.34-3.93-.55-5.88l18.72-17.5a7.35,7.35,0,0,0-2.44-12.25l-24-9c-.54-1.88-1.08-3.78-1.67-5.64l15-20.83a7.35,7.35,0,0,0-4.79-11.54l-25.42-4.15c-.9-1.73-1.79-3.45-2.73-5.15l10.68-23.42a7.35,7.35,0,0,0-6.95-10.39l-25.82.91q-1.79-2.22-3.61-4.4L439,81.84A7.36,7.36,0,0,0,430.16,73L405,78.93q-2.17-1.83-4.4-3.61l.91-25.82a7.35,7.35,0,0,0-10.39-7L367.7,53.23c-1.7-.94-3.43-1.84-5.15-2.73L358.4,25.08a7.35,7.35,0,0,0-11.54-4.79L326,35.26c-1.86-.59-3.75-1.13-5.64-1.67l-9-24a7.35,7.35,0,0,0-12.25-2.44l-17.5,18.72c-1.95-.21-3.91-.38-5.88-.55L262.25,3.48a7.35,7.35,0,0,0-12.5,0L236.24,25.3c-2,.17-3.93.34-5.88.55L212.86,7.13a7.35,7.35,0,0,0-12.25,2.44l-9,24c-1.89.55-3.79,1.08-5.66,1.68l-20.82-15a7.35,7.35,0,0,0-11.54,4.79l-4.15,25.41c-1.73.9-3.45,1.79-5.16,2.73L120.88,42.55a7.35,7.35,0,0,0-10.39,7l.92,25.81c-1.49,1.19-3,2.39-4.42,3.61L81.84,73A7.36,7.36,0,0,0,73,81.84L78.93,107c-1.23,1.45-2.43,2.93-3.62,4.41l-25.81-.91a7.42,7.42,0,0,0-6.37,3.26,7.35,7.35,0,0,0-.57,7.13l10.66,23.41c-.94,1.7-1.83,3.43-2.73,5.16L25.08,153.6a7.35,7.35,0,0,0-4.79,11.54l15,20.82c-.59,1.87-1.13,3.77-1.68,5.66l-24,9a7.35,7.35,0,0,0-2.44,12.25l18.72,17.5c-.21,1.95-.38,3.91-.55,5.88L3.48,249.75a7.35,7.35,0,0,0,0,12.5L25.3,275.76c.17,2,.34,3.92.55,5.87L7.13,299.13a7.35,7.35,0,0,0,2.44,12.25l24,9c.55,1.89,1.08,3.78,1.68,5.65l-15,20.83a7.35,7.35,0,0,0,4.79,11.54l25.42,4.15c.9,1.72,1.79,3.45,2.73,5.14L42.56,391.12a7.35,7.35,0,0,0,.57,7.13,7.13,7.13,0,0,0,6.37,3.26l25.83-.91q1.77,2.22,3.6,4.4L73,430.16A7.36,7.36,0,0,0,81.84,439L107,433.07q2.18,1.83,4.41,3.61l-.92,25.82a7.35,7.35,0,0,0,10.39,6.95l23.43-10.68c1.69.94,3.42,1.83,5.14,2.73l4.15,25.42a7.34,7.34,0,0,0,11.54,4.78l20.83-15c1.86.6,3.76,1.13,5.65,1.68l9,24a7.36,7.36,0,0,0,12.25,2.44l17.5-18.72c1.95.21,3.92.38,5.88.55l13.51,21.82a7.35,7.35,0,0,0,12.5,0l13.51-21.82c2-.17,3.93-.34,5.88-.56l17.5,18.73a7.36,7.36,0,0,0,12.25-2.44l9-24c1.89-.55,3.78-1.08,5.65-1.68l20.82,15a7.34,7.34,0,0,0,11.54-4.78l4.15-25.42c1.72-.9,3.45-1.79,5.15-2.73l23.42,10.68a7.35,7.35,0,0,0,10.39-6.95l-.91-25.82q2.22-1.79,4.4-3.61L430.16,439a7.36,7.36,0,0,0,8.84-8.84L433.07,405q1.83-2.17,3.61-4.4l25.82.91a7.23,7.23,0,0,0,6.37-3.26,7.35,7.35,0,0,0,.58-7.13L458.77,367.7c.94-1.7,1.83-3.43,2.73-5.15l25.42-4.15a7.35,7.35,0,0,0,4.79-11.54l-15-20.83c.59-1.87,1.13-3.76,1.67-5.65l24-9a7.35,7.35,0,0,0,2.44-12.25l-18.72-17.5c.21-1.95.38-3.91.55-5.87l21.82-13.51a7.35,7.35,0,0,0,0-12.5Zm-151,129.08A13.91,13.91,0,0,0,341,389.51l-7.64,35.67A187.51,187.51,0,0,1,177,424.44l-7.64-35.66a13.87,13.87,0,0,0-16.46-10.68l-31.51,6.76a187.38,187.38,0,0,1-16.26-19.21H258.3c1.72,0,2.89-.29,2.89-1.91V309.55c0-1.57-1.17-1.91-2.89-1.91H213.47l.05-34.35H262c4.41,0,23.66,1.28,29.79,25.87,1.91,7.55,6.17,32.14,9.06,40,2.89,8.82,14.6,26.46,27.1,26.46H407a187.3,187.3,0,0,1-17.34,20.09Zm25.77,34.49A15.24,15.24,0,1,1,368,398.08h.44A15.23,15.23,0,0,1,383.24,413.32Zm-225.62-.68a15.24,15.24,0,1,1-15.25-15.25h.45A15.25,15.25,0,0,1,157.62,412.64ZM69.57,234.15l32.83-14.6a13.88,13.88,0,0,0,7.06-18.33L102.69,186h26.56V305.73H75.65A187.65,187.65,0,0,1,69.57,234.15ZM58.31,198.09a15.24,15.24,0,0,1,15.23-15.25H74a15.24,15.24,0,1,1-15.67,15.24Zm155.16,24.49.05-35.32h63.26c3.28,0,23.07,3.77,23.07,18.62,0,12.29-15.19,16.7-27.68,16.7ZM399,306.71c-9.8,1.13-20.63-4.12-22-10.09-5.78-32.49-15.39-39.4-30.57-51.4,18.86-11.95,38.46-29.64,38.46-53.26,0-25.52-17.49-41.59-29.4-49.48-16.76-11-35.28-13.23-40.27-13.23H116.32A187.49,187.49,0,0,1,221.21,70.06l23.47,24.6a13.82,13.82,0,0,0,19.6.44l26.26-25a187.51,187.51,0,0,1,128.37,91.43l-18,40.57A14,14,0,0,0,408,220.43l34.59,15.33a187.12,187.12,0,0,1,.4,32.54H423.71c-1.91,0-2.69,1.27-2.69,3.13v8.82C421,301,409.31,305.58,399,306.71ZM240,60.21A15.24,15.24,0,0,1,255.21,45h.45A15.24,15.24,0,1,1,240,60.21ZM436.84,214a15.24,15.24,0,1,1,0-30.48h.44a15.24,15.24,0,0,1-.44,30.48Z"],
+    "Ubuntu": [576, 512, [], "solid", "M469.2 75A75.6 75.6 0 1 0 317.9 75a75.6 75.6 0 1 0 151.2 0zM154.2 240.7A75.6 75.6 0 1 0 3 240.7a75.6 75.6 0 1 0 151.2 0zM57 346C75.6 392.9 108 433 150 461.1s91.5 42.6 142 41.7c-14.7-18.6-22.9-41.5-23.2-65.2c-6.8-.9-13.3-2.1-19.5-3.4c-26.8-5.7-51.9-17.3-73.6-34s-39.3-38.1-51.7-62.5c-20.9 9.9-44.5 12.8-67.1 8.2zm395.1 89.8a75.6 75.6 0 1 0 -151.2 0 75.6 75.6 0 1 0 151.2 0zM444 351.6c18.5 14.8 31.6 35.2 37.2 58.2c33.3-41.3 52.6-92.2 54.8-145.2s-12.5-105.4-42.2-149.4c-8.6 21.5-24 39.6-43.8 51.6c15.4 28.6 22.9 60.8 21.9 93.2s-10.7 64-28 91.6zM101.1 135.4c12.4 2.7 24.3 7.5 35.1 14.3c16.6-24.2 38.9-44.1 64.8-58S255.8 70.4 285.2 70c.2-5.9 .9-11.9 2-17.7c3.6-16.7 11.1-32.3 21.8-45.5c-47.7-3.8-95.4 6-137.6 28.5S94.3 91.7 70.8 133.4c2.7-.2 5.3-.3 8-.3c7.5 0 15 .8 22.4 2.3z"],
+    "Windows": [448, 512, [], "solid", "M0 93.7l183.6-25.3v177.4H0V93.7zm0 324.6l183.6 25.3V268.4H0v149.9zm203.8 28L448 480V268.4H203.8v177.9zm0-380.6v180.1H448V32L203.8 65.7z"],
+    "Whatsapp": [448, 512, [], "regular", "M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"],
+    "X-Twitter": [512, 512, [], "regular", "M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"],
+    // Internals Override
+    "Keyboard": [576, 512, [], "regular", "M64 112c-8.8 0-16 7.2-16 16l0 256c0 8.8 7.2 16 16 16l448 0c8.8 0 16-7.2 16-16l0-256c0-8.8-7.2-16-16-16L64 112zM0 128C0 92.7 28.7 64 64 64l448 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128zM176 320l224 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-224 0c-8.8 0-16-7.2-16-16l0-16c0-8.8 7.2-16 16-16zm-72-72c0-8.8 7.2-16 16-16l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16zm16-96l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16c0-8.8 7.2-16 16-16zm64 96c0-8.8 7.2-16 16-16l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16zm16-96l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16c0-8.8 7.2-16 16-16zm64 96c0-8.8 7.2-16 16-16l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16zm16-96l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16c0-8.8 7.2-16 16-16zm64 96c0-8.8 7.2-16 16-16l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16zm16-96l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16c0-8.8 7.2-16 16-16zm64 96c0-8.8 7.2-16 16-16l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16zm16-96l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16c0-8.8 7.2-16 16-16z"],
+    "IdCard": [576, 512, [], "regular", "M528 160l0 256c0 8.8-7.2 16-16 16l-192 0c0-44.2-35.8-80-80-80l-64 0c-44.2 0-80 35.8-80 80l-32 0c-8.8 0-16-7.2-16-16l0-256 480 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l448 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zM272 256a64 64 0 1 0 -128 0 64 64 0 1 0 128 0zm104-48c-13.3 0-24 10.7-24 24s10.7 24 24 24l80 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-80 0zm0 96c-13.3 0-24 10.7-24 24s10.7 24 24 24l80 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-80 0z"],
+    "BookUser": [576, 512, [], "regular", "M512 80c8.8 0 16 7.2 16 16l0 320c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16L48 96c0-8.8 7.2-16 16-16l448 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l448 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zM208 256a64 64 0 1 0 0-128 64 64 0 1 0 0 128zm-32 32c-44.2 0-80 35.8-80 80c0 8.8 7.2 16 16 16l192 0c8.8 0 16-7.2 16-16c0-44.2-35.8-80-80-80l-64 0zM376 144c-13.3 0-24 10.7-24 24s10.7 24 24 24l80 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-80 0zm0 96c-13.3 0-24 10.7-24 24s10.7 24 24 24l80 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-80 0z"],
+    "Copy": [448, 512, [], "regular", "M384 336l-192 0c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l140.1 0L400 115.9 400 320c0 8.8-7.2 16-16 16zM192 384l192 0c35.3 0 64-28.7 64-64l0-204.1c0-12.7-5.1-24.9-14.1-33.9L366.1 14.1c-9-9-21.2-14.1-33.9-14.1L192 0c-35.3 0-64 28.7-64 64l0 256c0 35.3 28.7 64 64 64zM64 128c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l192 0c35.3 0 64-28.7 64-64l0-32-48 0 0 32c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l32 0 0-48-32 0z"],
+    "Eye": [576, 512, [], "regular", "M288 80c-65.2 0-118.8 29.6-159.9 67.7C89.6 183.5 63 226 49.4 256c13.6 30 40.2 72.5 78.6 108.3C169.2 402.4 222.8 432 288 432s118.8-29.6 159.9-67.7C486.4 328.5 513 286 526.6 256c-13.6-30-40.2-72.5-78.6-108.3C406.8 109.6 353.2 80 288 80zM95.4 112.6C142.5 68.8 207.2 32 288 32s145.5 36.8 192.6 80.6c46.8 43.5 78.1 95.4 93 131.1c3.3 7.9 3.3 16.7 0 24.6c-14.9 35.7-46.2 87.7-93 131.1C433.5 443.2 368.8 480 288 480s-145.5-36.8-192.6-80.6C48.6 356 17.3 304 2.5 268.3c-3.3-7.9-3.3-16.7 0-24.6C17.3 208 48.6 156 95.4 112.6zM288 336c44.2 0 80-35.8 80-80s-35.8-80-80-80c-.7 0-1.3 0-2 0c1.3 5.1 2 10.5 2 16c0 35.3-28.7 64-64 64c-5.5 0-10.9-.7-16-2c0 .7 0 1.3 0 2c0 44.2 35.8 80 80 80zm0-208a128 128 0 1 1 0 256 128 128 0 1 1 0-256z"],
+    "EyeOff": [640, 512, [], "regular", "M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zm151 118.3C226 97.7 269.5 80 320 80c65.2 0 118.8 29.6 159.9 67.7C518.4 183.5 545 226 558.6 256c-12.6 28-36.6 66.8-70.9 100.9l-53.8-42.2c9.1-17.6 14.2-37.5 14.2-58.7c0-70.7-57.3-128-128-128c-32.2 0-61.7 11.9-84.2 31.5l-46.1-36.1zM394.9 284.2l-81.5-63.9c4.2-8.5 6.6-18.2 6.6-28.3c0-5.5-.7-10.9-2-16c.7 0 1.3 0 2 0c44.2 0 80 35.8 80 80c0 9.9-1.8 19.4-5.1 28.2zm9.4 130.3C378.8 425.4 350.7 432 320 432c-65.2 0-118.8-29.6-159.9-67.7C121.6 328.5 95 286 81.4 256c8.3-18.4 21.5-41.5 39.4-64.8L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5l-41.9-33zM192 256c0 70.7 57.3 128 128 128c13.3 0 26.1-2 38.2-5.8L302 334c-23.5-5.4-43.1-21.2-53.7-42.3l-56.1-44.2c-.2 2.8-.3 5.6-.3 8.5z"],
+    "StickyNote": [448, 512, [], "regular", "M64 80c-8.8 0-16 7.2-16 16l0 320c0 8.8 7.2 16 16 16l224 0 0-80c0-17.7 14.3-32 32-32l80 0 0-224c0-8.8-7.2-16-16-16L64 80zM288 480L64 480c-35.3 0-64-28.7-64-64L0 96C0 60.7 28.7 32 64 32l320 0c35.3 0 64 28.7 64 64l0 224 0 5.5c0 17-6.7 33.3-18.7 45.3l-90.5 90.5c-12 12-28.3 18.7-45.3 18.7l-5.5 0z"],
+    "CreditCard": [576, 512, [], "regular", "M512 80c8.8 0 16 7.2 16 16l0 32L48 128l0-32c0-8.8 7.2-16 16-16l448 0zm16 144l0 192c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16l0-192 480 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l448 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zm56 304c-13.3 0-24 10.7-24 24s10.7 24 24 24l48 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-48 0zm128 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l112 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-112 0z"],
+    "Hourglass": [384, 512, [], "regular", "M24 0C10.7 0 0 10.7 0 24S10.7 48 24 48l8 0 0 19c0 40.3 16 79 44.5 107.5L158.1 256 76.5 337.5C48 366 32 404.7 32 445l0 19-8 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l336 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-8 0 0-19c0-40.3-16-79-44.5-107.5L225.9 256l81.5-81.5C336 146 352 107.3 352 67l0-19 8 0c13.3 0 24-10.7 24-24s-10.7-24-24-24L24 0zM192 289.9l81.5 81.5C293 391 304 417.4 304 445l0 19L80 464l0-19c0-27.6 11-54 30.5-73.5L192 289.9zm0-67.9l-81.5-81.5C91 121 80 94.6 80 67l0-19 224 0 0 19c0 27.6-11 54-30.5 73.5L192 222.1z"],
+    // Solid Variants
+    "Bell": [448, 512, [], "solid", "M224 0c-17.7 0-32 14.3-32 32l0 19.2C119 66 64 130.6 64 208l0 18.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S19.4 416 32 416l384 0c12.6 0 24-7.4 29.2-18.9s3.1-25-5.3-34.4l-7.4-8.3C401.3 319.2 384 273.9 384 226.8l0-18.8c0-77.4-55-142-128-156.8L256 32c0-17.7-14.3-32-32-32zm45.3 493.3c12-12 18.7-28.3 18.7-45.3l-64 0-64 0c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7z"],
+    "BellOff": [640, 512, [], "solid", "M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7l-90.2-70.7c.2-.4 .4-.9 .6-1.3c5.2-11.5 3.1-25-5.3-34.4l-7.4-8.3C497.3 319.2 480 273.9 480 226.8l0-18.8c0-77.4-55-142-128-156.8L352 32c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 19.2c-42.6 8.6-79 34.2-102 69.3L38.8 5.1zM406.2 416L160 222.1l0 4.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S115.4 416 128 416l278.2 0zm-40.9 77.3c12-12 18.7-28.3 18.7-45.3l-64 0-64 0c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7z"],
+    "Compass": [512, 512, [], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm50.7-186.9L162.4 380.6c-19.4 7.5-38.5-11.6-31-31l55.5-144.3c3.3-8.5 9.9-15.1 18.4-18.4l144.3-55.5c19.4-7.5 38.5 11.6 31 31L325.1 306.7c-3.2 8.5-9.9 15.1-18.4 18.4zM288 256a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"],
+    "File": [384, 512, [], "solid", "M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 288c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"],
+    "MessageCircle": [512, 512, [], "solid", "M512 240c0 114.9-114.6 208-256 208c-37.1 0-72.3-6.4-104.1-17.9c-11.9 8.7-31.3 20.6-54.3 30.6C73.6 471.1 44.7 480 16 480c-6.5 0-12.3-3.9-14.8-9.9c-2.5-6-1.1-12.8 3.4-17.4c0 0 0 0 0 0s0 0 0 0s0 0 0 0c0 0 0 0 0 0l.3-.3c.3-.3 .7-.7 1.3-1.4c1.1-1.2 2.8-3.1 4.9-5.7c4.1-5 9.6-12.4 15.2-21.6c10-16.6 19.5-38.4 21.4-62.9C17.7 326.8 0 285.1 0 240C0 125.1 114.6 32 256 32s256 93.1 256 208z"],
+    "Inbox": [512, 512, [], "solid", "M121 32C91.6 32 66 52 58.9 80.5L1.9 308.4C.6 313.5 0 318.7 0 323.9L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-92.1c0-5.2-.6-10.4-1.9-15.5l-57-227.9C446 52 420.4 32 391 32L121 32zm0 64l270 0 48 192-51.2 0c-12.1 0-23.2 6.8-28.6 17.7l-14.3 28.6c-5.4 10.8-16.5 17.7-28.6 17.7l-120.4 0c-12.1 0-23.2-6.8-28.6-17.7l-14.3-28.6c-5.4-10.8-16.5-17.7-28.6-17.7L73 288 121 96z"],
+    "Mail": [512, 512, [], "solid", "M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48L48 64zM0 176L0 384c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-208L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z"],
+    "MailOpen": [512, 512, [], "solid", "M64 208.1L256 65.9 448 208.1l0 47.4L289.5 373c-9.7 7.2-21.4 11-33.5 11s-23.8-3.9-33.5-11L64 255.5l0-47.4zM256 0c-12.1 0-23.8 3.9-33.5 11L25.9 156.7C9.6 168.8 0 187.8 0 208.1L0 448c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-239.9c0-20.3-9.6-39.4-25.9-51.4L289.5 11C279.8 3.9 268.1 0 256 0z"],
+    "Mic": [384, 512, [], "solid", "M192 0C139 0 96 43 96 96l0 160c0 53 43 96 96 96s96-43 96-96l0-160c0-53-43-96-96-96zM64 216c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40c0 89.1 66.2 162.7 152 174.4l0 33.6-48 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l72 0 72 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-48 0 0-33.6c85.8-11.7 152-85.3 152-174.4l0-40c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40c0 70.7-57.3 128-128 128s-128-57.3-128-128l0-40z"],
+    "MicOff": [640, 512, [], "solid", "M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L472.1 344.7c15.2-26 23.9-56.3 23.9-88.7l0-40c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40c0 21.2-5.1 41.1-14.2 58.7L416 300.8 416 96c0-53-43-96-96-96s-96 43-96 96l0 54.3L38.8 5.1zM344 430.4c20.4-2.8 39.7-9.1 57.3-18.2l-43.1-33.9C346.1 382 333.3 384 320 384c-70.7 0-128-57.3-128-128l0-8.7L144.7 210c-.5 1.9-.7 3.9-.7 6l0 40c0 89.1 66.2 162.7 152 174.4l0 33.6-48 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l72 0 72 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-48 0 0-33.6z"],
+    "Link": [640, 512, ["Chain"], "solid", "M579.8 267.7c56.5-56.5 56.5-148 0-204.5c-50-50-128.8-56.5-186.3-15.4l-1.6 1.1c-14.4 10.3-17.7 30.3-7.4 44.6s30.3 17.7 44.6 7.4l1.6-1.1c32.1-22.9 76-19.3 103.8 8.6c31.5 31.5 31.5 82.5 0 114L422.3 334.8c-31.5 31.5-82.5 31.5-114 0c-27.9-27.9-31.5-71.8-8.6-103.8l1.1-1.6c10.3-14.4 6.9-34.4-7.4-44.6s-34.4-6.9-44.6 7.4l-1.1 1.6C206.5 251.2 213 330 263 380c56.5 56.5 148 56.5 204.5 0L579.8 267.7zM60.2 244.3c-56.5 56.5-56.5 148 0 204.5c50 50 128.8 56.5 186.3 15.4l1.6-1.1c14.4-10.3 17.7-30.3 7.4-44.6s-30.3-17.7-44.6-7.4l-1.6 1.1c-32.1 22.9-76 19.3-103.8-8.6C74 372 74 321 105.5 289.5L217.7 177.2c31.5-31.5 82.5-31.5 114 0c27.9 27.9 31.5 71.8 8.6 103.9l-1.1 1.6c-10.3 14.4-6.9 34.4 7.4 44.6s34.4 6.9 44.6-7.4l1.1-1.6C433.5 260.8 427 182 377 132c-56.5-56.5-148-56.5-204.5 0L60.2 244.3z"],
+    "House": [576, 512, [], "solid", "M575.8 255.5c0 18-15 32.1-32 32.1l-32 0 .7 160.2c0 2.7-.2 5.4-.5 8.1l0 16.2c0 22.1-17.9 40-40 40l-16 0c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1L416 512l-24 0c-22.1 0-40-17.9-40-40l0-24 0-64c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32 14.3-32 32l0 64 0 24c0 22.1-17.9 40-40 40l-24 0-31.9 0c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2l-16 0c-22.1 0-40-17.9-40-40l0-112c0-.9 0-1.9 .1-2.8l0-69.7-32 0c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"],
+    "Gamepad": [640, 512, [], "solid", "M192 64C86 64 0 150 0 256S86 448 192 448l256 0c106 0 192-86 192-192s-86-192-192-192L192 64zM496 168a40 40 0 1 1 0 80 40 40 0 1 1 0-80zM392 304a40 40 0 1 1 80 0 40 40 0 1 1 -80 0zM168 200c0-13.3 10.7-24 24-24s24 10.7 24 24l0 32 32 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-32 0 0 32c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-32-32 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l32 0 0-32z"],
+    "Camera": [512, 512, [], "solid", "M149.1 64.8L138.7 96 64 96C28.7 96 0 124.7 0 160L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-256c0-35.3-28.7-64-64-64l-74.7 0L362.9 64.8C356.4 45.2 338.1 32 317.4 32L194.6 32c-20.7 0-39 13.2-45.5 32.8zM256 192a96 96 0 1 1 0 192 96 96 0 1 1 0-192z"],
+    "Printer": [512, 512, [], "solid", "M128 0C92.7 0 64 28.7 64 64l0 96 64 0 0-96 226.7 0L384 93.3l0 66.7 64 0 0-66.7c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0L128 0zM384 352l0 32 0 64-256 0 0-64 0-16 0-16 256 0zm64 32l32 0c17.7 0 32-14.3 32-32l0-96c0-35.3-28.7-64-64-64L64 192c-35.3 0-64 28.7-64 64l0 96c0 17.7 14.3 32 32 32l32 0 0 64c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-64zM432 248a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"],
+    "Server": [512, 512, [], "solid", "M64 32C28.7 32 0 60.7 0 96l0 64c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-64c0-35.3-28.7-64-64-64L64 32zm280 72a24 24 0 1 1 0 48 24 24 0 1 1 0-48zm48 24a24 24 0 1 1 48 0 24 24 0 1 1 -48 0zM64 288c-35.3 0-64 28.7-64 64l0 64c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-64c0-35.3-28.7-64-64-64L64 288zm280 72a24 24 0 1 1 0 48 24 24 0 1 1 0-48zm56 24a24 24 0 1 1 48 0 24 24 0 1 1 -48 0z"],
+    "Calendar": [448, 512, [], "solid", "M96 32l0 32L48 64C21.5 64 0 85.5 0 112l0 48 448 0 0-48c0-26.5-21.5-48-48-48l-48 0 0-32c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 32L160 64l0-32c0-17.7-14.3-32-32-32S96 14.3 96 32zM448 192L0 192 0 464c0 26.5 21.5 48 48 48l352 0c26.5 0 48-21.5 48-48l0-272z"],
+    "Pipette": [512, 512, [], "solid", "M341.6 29.2L240.1 130.8l-9.4-9.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-9.4-9.4L482.8 170.4c39-39 39-102.2 0-141.1s-102.2-39-141.1 0zM55.4 323.3c-15 15-23.4 35.4-23.4 56.6l0 42.4L5.4 462.2c-8.5 12.7-6.8 29.6 4 40.4s27.7 12.5 40.4 4L89.7 480l42.4 0c21.2 0 41.6-8.4 56.6-23.4L309.4 335.9l-45.3-45.3L143.4 411.3c-3 3-7.1 4.7-11.3 4.7L96 416l0-36.1c0-4.2 1.7-8.3 4.7-11.3L221.4 247.9l-45.3-45.3L55.4 323.3z"],
+    "Scroll": [576, 512, [], "solid", "M0 80l0 48c0 17.7 14.3 32 32 32l16 0 48 0 0-80c0-26.5-21.5-48-48-48S0 53.5 0 80zM112 32c10 13.4 16 30 16 48l0 304c0 35.3 28.7 64 64 64s64-28.7 64-64l0-5.3c0-32.4 26.3-58.7 58.7-58.7L480 320l0-192c0-53-43-96-96-96L112 32zM464 480c61.9 0 112-50.1 112-112c0-8.8-7.2-16-16-16l-245.3 0c-14.7 0-26.7 11.9-26.7 26.7l0 5.3c0 53-43 96-96 96l176 0 96 0z"],
+    "Smartphone": [384, 512, [], "solid", "M16 64C16 28.7 44.7 0 80 0L304 0c35.3 0 64 28.7 64 64l0 384c0 35.3-28.7 64-64 64L80 512c-35.3 0-64-28.7-64-64L16 64zM144 448c0 8.8 7.2 16 16 16l64 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-64 0c-8.8 0-16 7.2-16 16zM304 64L80 64l0 320 224 0 0-320z"],
+    "Settings": [512, 512, [], "solid", "M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-55.7-17.7c-13.4 10.3-28.2 18.9-44 25.4l-12.5 57.1c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-12.5-57.1c-15.8-6.5-30.6-15.1-44-25.4L83.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C64.6 273.1 64 264.6 64 256s.6-17.1 1.7-25.4L22.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l55.7 17.7c13.4-10.3 28.2-18.9 44-25.4l12.5-57.1c2-9.1 9-16.3 18.2-17.8C227.3 1.2 241.5 0 256 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l12.5 57.1c15.8 6.5 30.6 15.1 44 25.4l55.7-17.7c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM256 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"],
+    "Map": [576, 512, [], "solid", "M384 476.1L192 421.2l0-385.3L384 90.8l0 385.3zm32-1.2l0-386.5L543.1 37.5c15.8-6.3 32.9 5.3 32.9 22.3l0 334.8c0 9.8-6 18.6-15.1 22.3L416 474.8zM15.1 95.1L160 37.2l0 386.5L32.9 474.5C17.1 480.8 0 469.2 0 452.2L0 117.4c0-9.8 6-18.6 15.1-22.3z"],
+    "Folder": [512, 512, [], "solid", "M64 480H448c35.3 0 64-28.7 64-64V160c0-35.3-28.7-64-64-64H288c-10.1 0-19.6-4.7-25.6-12.8L243.2 57.6C231.1 41.5 212.1 32 192 32H64C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64z"],
+    "FolderOpen": [576, 512, [], "solid", "M384 480l48 0c11.4 0 21.9-6 27.6-15.9l112-192c5.8-9.9 5.8-22.1 .1-32.1S555.5 224 544 224l-400 0c-11.4 0-21.9 6-27.6 15.9L48 357.1 48 96c0-8.8 7.2-16 16-16l117.5 0c4.2 0 8.3 1.7 11.3 4.7l26.5 26.5c21 21 49.5 32.8 79.2 32.8L416 144c8.8 0 16 7.2 16 16l0 32 48 0 0-32c0-35.3-28.7-64-64-64L298.5 96c-17 0-33.3-6.7-45.3-18.7L226.7 50.7c-12-12-28.3-18.7-45.3-18.7L64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l23.7 0L384 480z"],
+    "FolderClosed": [512, 512, [], "solid", "M448 480L64 480c-35.3 0-64-28.7-64-64L0 192l512 0 0 224c0 35.3-28.7 64-64 64zm64-320L0 160 0 96C0 60.7 28.7 32 64 32l128 0c20.1 0 39.1 9.5 51.2 25.6l19.2 25.6c6 8.1 15.5 12.8 25.6 12.8l160 0c35.3 0 64 28.7 64 64z"],
+    "Function": [384, 512, [], "solid", "M314.7 32c-38.8 0-73.7 23.3-88.6 59.1L170.7 224 64 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l80 0L98.9 396.3c-5 11.9-16.6 19.7-29.5 19.7L32 416c-17.7 0-32 14.3-32 32s14.3 32 32 32l37.3 0c38.8 0 73.7-23.3 88.6-59.1L213.3 288 320 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-80 0 45.1-108.3c5-11.9 16.6-19.7 29.5-19.7L352 96c17.7 0 32-14.3 32-32s-14.3-32-32-32l-37.3 0z"],
+    "Stop": [384, 512, [], "solid", "M0 128C0 92.7 28.7 64 64 64H320c35.3 0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V128z"],
+    "Image": [512, 512, [], "solid", "M448 80c8.8 0 16 7.2 16 16l0 319.8-5-6.5-136-176c-4.5-5.9-11.6-9.3-19-9.3s-14.4 3.4-19 9.3L202 340.7l-30.5-42.7C167 291.7 159.8 288 152 288s-15 3.7-19.5 10.1l-80 112L48 416.3l0-.3L48 96c0-8.8 7.2-16 16-16l384 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zm80 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z"],
+    "Images": [576, 512, [], "solid", "M160 80l352 0c8.8 0 16 7.2 16 16l0 224c0 8.8-7.2 16-16 16l-21.2 0L388.1 178.9c-4.4-6.8-12-10.9-20.1-10.9s-15.7 4.1-20.1 10.9l-52.2 79.8-12.4-16.9c-4.5-6.2-11.7-9.8-19.4-9.8s-14.8 3.6-19.4 9.8L175.6 336 160 336c-8.8 0-16-7.2-16-16l0-224c0-8.8 7.2-16 16-16zM96 96l0 224c0 35.3 28.7 64 64 64l352 0c35.3 0 64-28.7 64-64l0-224c0-35.3-28.7-64-64-64L160 32c-35.3 0-64 28.7-64 64zM48 120c0-13.3-10.7-24-24-24S0 106.7 0 120L0 344c0 75.1 60.9 136 136 136l320 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-320 0c-48.6 0-88-39.4-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"],
+    "Info": [512, 512, [], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336l24 0 0-64-24 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l48 0c13.3 0 24 10.7 24 24l0 88 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-80 0c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"],
+    "Bone": [576, 512, [], "solid", "M153.7 144.8c6.9 16.3 20.6 31.2 38.3 31.2l192 0c17.7 0 31.4-14.9 38.3-31.2C434.4 116.1 462.9 96 496 96c44.2 0 80 35.8 80 80c0 30.4-17 56.9-42 70.4c-3.6 1.9-6 5.5-6 9.6s2.4 7.7 6 9.6c25 13.5 42 40 42 70.4c0 44.2-35.8 80-80 80c-33.1 0-61.6-20.1-73.7-48.8C415.4 350.9 401.7 336 384 336l-192 0c-17.7 0-31.4 14.9-38.3 31.2C141.6 395.9 113.1 416 80 416c-44.2 0-80-35.8-80-80c0-30.4 17-56.9 42-70.4c3.6-1.9 6-5.5 6-9.6s-2.4-7.7-6-9.6C17 232.9 0 206.4 0 176c0-44.2 35.8-80 80-80c33.1 0 61.6 20.1 73.7 48.8z"],
+    "Puzzle": [512, 512, [], "solid", "M192 104.8c0-9.2-5.8-17.3-13.2-22.8C167.2 73.3 160 61.3 160 48c0-26.5 28.7-48 64-48s64 21.5 64 48c0 13.3-7.2 25.3-18.8 34c-7.4 5.5-13.2 13.6-13.2 22.8c0 12.8 10.4 23.2 23.2 23.2l56.8 0c26.5 0 48 21.5 48 48l0 56.8c0 12.8 10.4 23.2 23.2 23.2c9.2 0 17.3-5.8 22.8-13.2c8.7-11.6 20.7-18.8 34-18.8c26.5 0 48 28.7 48 64s-21.5 64-48 64c-13.3 0-25.3-7.2-34-18.8c-5.5-7.4-13.6-13.2-22.8-13.2c-12.8 0-23.2 10.4-23.2 23.2L384 464c0 26.5-21.5 48-48 48l-56.8 0c-12.8 0-23.2-10.4-23.2-23.2c0-9.2 5.8-17.3 13.2-22.8c11.6-8.7 18.8-20.7 18.8-34c0-26.5-28.7-48-64-48s-64 21.5-64 48c0 13.3 7.2 25.3 18.8 34c7.4 5.5 13.2 13.6 13.2 22.8c0 12.8-10.4 23.2-23.2 23.2L48 512c-26.5 0-48-21.5-48-48L0 343.2C0 330.4 10.4 320 23.2 320c9.2 0 17.3 5.8 22.8 13.2C54.7 344.8 66.7 352 80 352c26.5 0 48-28.7 48-64s-21.5-64-48-64c-13.3 0-25.3 7.2-34 18.8C40.5 250.2 32.4 256 23.2 256C10.4 256 0 245.6 0 232.8L0 176c0-26.5 21.5-48 48-48l120.8 0c12.8 0 23.2-10.4 23.2-23.2z"],
+    "Lock": [448, 512, [], "solid", "M144 144l0 48 160 0 0-48c0-44.2-35.8-80-80-80s-80 35.8-80 80zM80 192l0-48C80 64.5 144.5 0 224 0s144 64.5 144 144l0 48 16 0c35.3 0 64 28.7 64 64l0 192c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 256c0-35.3 28.7-64 64-64l16 0z"],
+    "LockOpen": [576, 512, [], "solid", "M352 144c0-44.2 35.8-80 80-80s80 35.8 80 80l0 48c0 17.7 14.3 32 32 32s32-14.3 32-32l0-48C576 64.5 511.5 0 432 0S288 64.5 288 144l0 48L64 192c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-192c0-35.3-28.7-64-64-64l-32 0 0-48z"],
+    "Shuffle": [512, 512, [], "solid", "M403.8 34.4c12-5 25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6l0-32-32 0c-10.1 0-19.6 4.7-25.6 12.8L284 229.3 244 176l31.2-41.6C293.3 110.2 321.8 96 352 96l32 0 0-32c0-12.9 7.8-24.6 19.8-29.6zM164 282.7L204 336l-31.2 41.6C154.7 401.8 126.2 416 96 416l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l64 0c10.1 0 19.6-4.7 25.6-12.8L164 282.7zm274.6 188c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6l0-32-32 0c-30.2 0-58.7-14.2-76.8-38.4L121.6 172.8c-6-8.1-15.5-12.8-25.6-12.8l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l64 0c30.2 0 58.7 14.2 76.8 38.4L326.4 339.2c6 8.1 15.5 12.8 25.6 12.8l32 0 0-32c0-12.9 7.8-24.6 19.8-29.6s25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64z"],
+    "Play": [384, 512, [], "solid", "M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80L0 432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"],
+    "Pause": [320, 512, [], "solid", "M48 64C21.5 64 0 85.5 0 112L0 400c0 26.5 21.5 48 48 48l32 0c26.5 0 48-21.5 48-48l0-288c0-26.5-21.5-48-48-48L48 64zm192 0c-26.5 0-48 21.5-48 48l0 288c0 26.5 21.5 48 48 48l32 0c26.5 0 48-21.5 48-48l0-288c0-26.5-21.5-48-48-48l-32 0z"],
+    "LogIn": [512, 512, [], "solid", "M352 96l64 0c17.7 0 32 14.3 32 32l0 256c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0c53 0 96-43 96-96l0-256c0-53-43-96-96-96l-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32zm-9.4 182.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L242.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128z"],
+    "LogOut": [512, 512, [], "solid", "M502.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 224 192 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128zM160 96c17.7 0 32-14.3 32-32s-14.3-32-32-32L96 32C43 32 0 75 0 128L0 384c0 53 43 96 96 96l64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32l64 0z"],
+    "MousePointer": [320, 512, [], "solid", "M0 55.2L0 426c0 12.2 9.9 22 22 22c6.3 0 12.4-2.7 16.6-7.5L121.2 346l58.1 116.3c7.9 15.8 27.1 22.2 42.9 14.3s22.2-27.1 14.3-42.9L179.8 320l118.1 0c12.2 0 22.1-9.9 22.1-22.1c0-6.3-2.7-12.3-7.4-16.5L38.6 37.9C34.3 34.1 28.9 32 23.2 32C10.4 32 0 42.4 0 55.2z"],
+    "User": [512, 512, [], "solid", "M256 288A144 144 0 1 0 256 0a144 144 0 1 0 0 288zm-94.7 32C72.2 320 0 392.2 0 481.3c0 17 13.8 30.7 30.7 30.7l450.6 0c17 0 30.7-13.8 30.7-30.7C512 392.2 439.8 320 350.7 320l-189.4 0z"],
+    "HardDriveDownload": [512, 512, [], "solid", "M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 242.7-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7 288 32zM64 352c-35.3 0-64 28.7-64 64l0 32c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-32c0-35.3-28.7-64-64-64l-101.5 0-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352 64 352zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"],
+    "HardDriveUpload": [512, 512, [], "solid", "M288 109.3L288 352c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-242.7-73.4 73.4c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l128-128c12.5-12.5 32.8-12.5 45.3 0l128 128c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L288 109.3zM64 352l128 0c0 35.3 28.7 64 64 64s64-28.7 64-64l128 0c35.3 0 64 28.7 64 64l0 32c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64l0-32c0-35.3 28.7-64 64-64zM432 456a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"],
+    "CircleCheck": [512, 512, ["CheckCircle2"], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"],
+    "CirclePlay": [512, 512, [], "solid", "M0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zM188.3 147.1c-7.6 4.2-12.3 12.3-12.3 20.9l0 176c0 8.7 4.7 16.7 12.3 20.9s16.8 4.1 24.3-.5l144-88c7.1-4.4 11.5-12.1 11.5-20.5s-4.4-16.1-11.5-20.5l-144-88c-7.4-4.5-16.7-4.7-24.3-.5z"],
+    "CirclePause": [512, 512, [], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM224 192l0 128c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-128c0-17.7 14.3-32 32-32s32 14.3 32 32zm128 0l0 128c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-128c0-17.7 14.3-32 32-32s32 14.3 32 32z"],
+    "CirclePlus": [512, 512, ["PlusCircle"], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344l0-64-64 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l64 0 0-64c0-13.3 10.7-24 24-24s24 10.7 24 24l0 64 64 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-64 0 0 64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"],
+    "CircleMinus": [512, 512, ["MinusCircle"], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM184 232l144 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-144 0c-13.3 0-24-10.7-24-24s10.7-24 24-24z"],
+    "CircleStop": [512, 512, [], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM192 160l128 0c17.7 0 32 14.3 32 32l0 128c0 17.7-14.3 32-32 32l-128 0c-17.7 0-32-14.3-32-32l0-128c0-17.7 14.3-32 32-32z"],
+    "CircleDot": [512, 512, [], "solid", "M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm256-96a96 96 0 1 1 0 192 96 96 0 1 1 0-192z"],
+    "CircleHelp": [512, 512, ["HelpCircle"], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM169.8 165.3c7.9-22.3 29.1-37.3 52.8-37.3l58.3 0c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L280 264.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24l0-13.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1l-58.3 0c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"],
+    "CircleArrowUp": [512, 512, ["ArrowUpCircle"], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM385 215c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-71-71L280 392c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-214.1-71 71c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9L239 103c9.4-9.4 24.6-9.4 33.9 0L385 215z"],
+    "CircleArrowDown": [512, 512, ["ArrowDownCircle"], "solid", "M256 0a256 256 0 1 0 0 512A256 256 0 1 0 256 0zM127 297c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l71 71L232 120c0-13.3 10.7-24 24-24s24 10.7 24 24l0 214.1 71-71c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9L273 409c-9.4 9.4-24.6 9.4-33.9 0L127 297z"],
+    "CircleArrowLeft": [512, 512, ["ArrowLeftCircle"], "solid", "M512 256A256 256 0 1 0 0 256a256 256 0 1 0 512 0zM215 127c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-71 71L392 232c13.3 0 24 10.7 24 24s-10.7 24-24 24l-214.1 0 71 71c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0L103 273c-9.4-9.4-9.4-24.6 0-33.9L215 127z"],
+    "CircleArrowRight": [512, 512, ["ArrowRightCircle"], "solid", "M0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM297 385c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l71-71L120 280c-13.3 0-24-10.7-24-24s10.7-24 24-24l214.1 0-71-71c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0L409 239c9.4 9.4 9.4 24.6 0 33.9L297 385z"],
+    "CircleAlert": [512, 512, ["AlertCircle"], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-384c13.3 0 24 10.7 24 24l0 112c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-112c0-13.3 10.7-24 24-24zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"],
+    "CircleUser": [512, 512, ["UserCircle"], "solid", "M399 384.2C376.9 345.8 335.4 320 288 320l-64 0c-47.4 0-88.9 25.8-111 64.2c35.2 39.2 86.2 63.8 143 63.8s107.8-24.7 143-63.8zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm256 16a72 72 0 1 0 0-144 72 72 0 1 0 0 144z"],
+    "CircleChevronRight": [512, 512, ["ChevronRightCircle"], "solid", "M0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM241 377c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l87-87-87-87c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0L345 239c9.4 9.4 9.4 24.6 0 33.9L241 377z"],
+    "CircleChevronDown": [512, 512, ["ChevronDownCircle"], "solid", "M256 0a256 256 0 1 0 0 512A256 256 0 1 0 256 0zM135 241c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l87 87 87-87c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9L273 345c-9.4 9.4-24.6 9.4-33.9 0L135 241z"],
+    "CircleChevronUp": [512, 512, ["ChevronUpCircle"], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM377 271c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-87-87-87 87c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9L239 167c9.4-9.4 24.6-9.4 33.9 0L377 271z"],
+    "CircleChevronLeft": [512, 512, ["ChevronLeftCircle"], "solid", "M512 256A256 256 0 1 0 0 256a256 256 0 1 0 512 0zM271 135c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-87 87 87 87c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0L167 273c-9.4-9.4-9.4-24.6 0-33.9L271 135z"],
+    "CircleX": [512, 512, ["XCircle"], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"],
+    "Apple": [384, 512, [], "solid", "M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"],
+    "Chrome": [512, 512, [], "solid", "M0 256C0 209.4 12.47 165.6 34.27 127.1L144.1 318.3C166 357.5 207.9 384 256 384C270.3 384 283.1 381.7 296.8 377.4L220.5 509.6C95.9 492.3 0 385.3 0 256zM365.1 321.6C377.4 302.4 384 279.1 384 256C384 217.8 367.2 183.5 340.7 160H493.4C505.4 189.6 512 222.1 512 256C512 397.4 397.4 511.1 256 512L365.1 321.6zM477.8 128H256C193.1 128 142.3 172.1 130.5 230.7L54.19 98.47C101 38.53 174 0 256 0C350.8 0 433.5 51.48 477.8 128V128zM168 256C168 207.4 207.4 168 256 168C304.6 168 344 207.4 344 256C344 304.6 304.6 344 256 344C207.4 344 168 304.6 168 256z"],
+    "Facebook": [512, 512, [], "solid", "M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256C0 376 82.7 476.8 194.2 504.5V334.2H141.4V256h52.8V222.3c0-87.1 39.4-127.5 125-127.5c16.2 0 44.2 3.2 55.7 6.4V172c-6-.6-16.5-1-29.6-1c-42 0-58.2 15.9-58.2 57.2V256h83.6l-14.4 78.2H287V510.1C413.8 494.8 512 386.9 512 256h0z"],
+    "Github": [496, 512, [], "solid", "M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"],
+    "Youtube": [576, 512, [], "solid", "M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"],
+    "CircleRight@solid": [512, 512, [], "solid", "M0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zm395.3 11.3l-112 112c-4.6 4.6-11.5 5.9-17.4 3.5s-9.9-8.3-9.9-14.8l0-64-96 0c-17.7 0-32-14.3-32-32l0-32c0-17.7 14.3-32 32-32l96 0 0-64c0-6.5 3.9-12.3 9.9-14.8s12.9-1.1 17.4 3.5l112 112c6.2 6.2 6.2 16.4 0 22.6z"],
+    "CircleUp@solid": [512, 512, [], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm11.3-395.3l112 112c4.6 4.6 5.9 11.5 3.5 17.4s-8.3 9.9-14.8 9.9l-64 0 0 96c0 17.7-14.3 32-32 32l-32 0c-17.7 0-32-14.3-32-32l0-96-64 0c-6.5 0-12.3-3.9-14.8-9.9s-1.1-12.9 3.5-17.4l112-112c6.2-6.2 16.4-6.2 22.6 0z"],
+    "CircleLeft@solid": [512, 512, [], "solid", "M512 256A256 256 0 1 0 0 256a256 256 0 1 0 512 0zM116.7 244.7l112-112c4.6-4.6 11.5-5.9 17.4-3.5s9.9 8.3 9.9 14.8l0 64 96 0c17.7 0 32 14.3 32 32l0 32c0 17.7-14.3 32-32 32l-96 0 0 64c0 6.5-3.9 12.3-9.9 14.8s-12.9 1.1-17.4-3.5l-112-112c-6.2-6.2-6.2-16.4 0-22.6z"],
+    "CircleDown@solid": [512, 512, [], "solid", "M256 0a256 256 0 1 0 0 512A256 256 0 1 0 256 0zM244.7 395.3l-112-112c-4.6-4.6-5.9-11.5-3.5-17.4s8.3-9.9 14.8-9.9l64 0 0-96c0-17.7 14.3-32 32-32l32 0c17.7 0 32 14.3 32 32l0 96 64 0c6.5 0 12.3 3.9 14.8 9.9s1.1 12.9-3.5 17.4l-112 112c-6.2 6.2-16.4 6.2-22.6 0z"],
+    "PaperPlane@solid": [512, 512, [], "solid", "M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480l0-83.6c0-4 1.5-7.8 4.2-10.8L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3 .3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z"],
+};
+
+// Generate Alias icons
+
+LX.ICONS = (() => {
+    const aliasIcons = {};
+
+    for( let i in RAW_ICONS )
+    {
+        const aliases = RAW_ICONS[ i ][ 2 ];
+        aliases.forEach( a => aliasIcons[ a ] = i );
+    }
+
+    return { ...RAW_ICONS, ...aliasIcons };
+})();
+
+// Alias for Lucide Icons
+LX.LucideIconAlias = {
+    "Stop": "Square",
+    "Refresh": "RefreshCw",
+    "Left": "ChevronLeft",
+    "Right": "ChevronRight",
+    "Up": "ChevronUp",
+    "Down": "ChevronDown",
+    "MenuArrows": "ChevronsUpDown",
+    "RotateForward": "RotateCw",
+    "RotateRight": "RotateCw",
+    "RotateBack": "RotateCcw",
+    "RotateLeft": "RotateCcw",
+};
+
+// utils.js @jxarco
+
+function clamp( num, min, max ) { return Math.min( Math.max( num, min ), max ); }
+function round( number, precision ) { return precision == 0 ? Math.floor( number ) : +(( number ).toFixed( precision ?? 2 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' )); }
+function remapRange( oldValue, oldMin, oldMax, newMin, newMax ) { return ((( oldValue - oldMin ) * ( newMax - newMin )) / ( oldMax - oldMin )) + newMin; }
+
+LX.clamp = clamp;
+LX.round = round;
+LX.remapRange = remapRange;
+
+// Timer that works everywhere (from litegraph.js)
+if ( typeof performance != "undefined" )
+{
+    LX.getTime = performance.now.bind( performance );
+}
+else if( typeof Date != "undefined" && Date.now )
+{
+    LX.getTime = Date.now.bind( Date );
+}
+else if ( typeof process != "undefined" )
+{
+    LX.getTime = function() {
+        const t = process.hrtime();
+        return t[ 0 ] * 0.001 + t[ 1 ] * 1e-6;
+    };
+}
+else
+{
+    LX.getTime = function() {
+        return new Date().getTime();
+    };
+}
+
+/**
+ * @method doAsync
+ * @description Call a function asynchronously
+ * @param {Function} fn Function to call
+ * @param {Number} ms Time to wait until calling the function (in milliseconds)
+ */
+function doAsync( fn, ms ) {
+    {
+        setTimeout( fn, ms ?? 0 );
+    }
+}
+
+LX.doAsync = doAsync;
+
+/**
+ * @method getSupportedDOMName
+ * @description Convert a text string to a valid DOM name
+ * @param {String} text Original text
+ */
+function getSupportedDOMName$1( text )
+{
+    console.assert( typeof text == "string", "getSupportedDOMName: Text is not a string!" );
+
+    let name = text.trim();
+
+    // Replace specific known symbols
+    name = name.replace( /@/g, '_at_' ).replace( /\+/g, '_plus_' ).replace( /\./g, '_dot_' );
+    name = name.replace( /[^a-zA-Z0-9_-]/g, '_' );
+
+    // prefix with an underscore if needed
+    if( /^[0-9]/.test( name ) )
+    {
+        name = '_' + name;
+    }
+
+    return name;
+}
+
+LX.getSupportedDOMName = getSupportedDOMName$1;
+
+/**
+ * @method has
+ * @description Ask if LexGUI is using a specific component
+ * @param {String} componentName Name of the LexGUI component
+ */
+function has( componentName )
+{
+    return ( LX.components.indexOf( componentName ) > -1 );
+}
+
+LX.has = has;
+
+/**
+ * @method getExtension
+ * @description Get a extension from a path/url/filename
+ * @param {String} name
+ */
+function getExtension( name )
+{
+    return name.includes('.') ? name.split('.').pop() : null;
+}
+
+LX.getExtension = getExtension;
+
+/**
+ * @method stripHTML
+ * @description Cleans any DOM element string to get only the text
+ * @param {String} html
+ */
+function stripHTML( html )
+{
+    const div = document.createElement( "div" );
+    div.innerHTML = html;
+    return div.textContent || div.innerText || '';
+}
+
+LX.stripHTML = stripHTML;
+
+/**
+ * @method parsePixelSize
+ * @description Parses any css size and returns a number of pixels
+ * @param {Number|String} size
+ * @param {Number} total
+ */
+const parsePixelSize = ( size, total ) => {
+
+    if( size.constructor === Number ) { return size; } // Assuming pixels..
+
+    if( size.constructor === String )
+    {
+        const value = parseFloat( size );
+
+        if( size.endsWith( "px" ) ) { return value; } // String pixels
+        if( size.endsWith( '%' ) ) { return ( value / 100 ) * total; } // Percentage
+        if( size.endsWith( "rem" ) || size.endsWith( "em" ) ) { const rootFontSize = 16; /*parseFloat(getComputedStyle(document.documentElement).fontSize);*/ return value * rootFontSize; } // rem unit: assume 16px = 1rem
+        if( size.endsWith( "vw" ) ) { return ( value / 100 ) * window.innerWidth; } // wViewport units
+        if( size.endsWith( "vh" ) ) { return ( value / 100 ) * window.innerHeight; } // hViewport units
+
+        // Any CSS calc expression (e.g., "calc(30% - 4px)")
+        if( size.startsWith( "calc(" ) )
+        {
+            const expr = size.slice( 5, -1 );
+            const parts = expr.split( /([+\-])/ ); // ["30% ", "-", "4px"]
+            let result = 0;
+            let op = "+";
+            for( let part of parts )
+            {
+                part = part.trim();
+                if( part === "+" || part === "-" )
+                {
+                    op = part;
+                }
+                else
+                {
+                    let value = parsePixelSize( part, total );
+                    result = ( op === "+" ) ? result + value : result - value;
+                }
+            }
+
+            return result;
+        }
+    }
+
+    throw( "Bad size format!" );
+};
+
+LX.parsePixelSize = parsePixelSize;
+
+/**
+ * @method deepCopy
+ * @description Create a deep copy with no references from an object
+ * @param {Object} obj
+ */
+function deepCopy( obj )
+{
+    return JSON.parse( JSON.stringify( obj ) )
+}
+
+LX.deepCopy = deepCopy;
+
+/**
+ * @method setTheme
+ * @description Set dark or light theme
+ * @param {String} colorScheme Name of the scheme
+ */
+function setTheme( colorScheme )
+{
+    colorScheme = ( colorScheme == "light" ) ? "light" : "dark";
+    document.documentElement.setAttribute( "data-theme", colorScheme );
+    LX.emit( "@on_new_color_scheme", colorScheme );
+}
+
+LX.setTheme = setTheme;
+
+/**
+ * @method getTheme
+ * @description Gets either "dark" or "light" theme value
+ */
+function getTheme()
+{
+    return document.documentElement.getAttribute( "data-theme" ) ?? "dark";
+}
+
+LX.getTheme = getTheme;
+
+/**
+ * @method switchTheme
+ * @description Toggles between "dark" and "light" themes
+ */
+function switchTheme()
+{
+    const currentTheme = getTheme();
+    setTheme( currentTheme == "dark" ? "light" : "dark" );
+}
+
+LX.switchTheme = switchTheme;
+
+/**
+ * @method setThemeColor
+ * @description Sets a new value for one of the main theme variables
+ * @param {String} colorName Name of the theme variable
+ * @param {String} color Color in rgba/hex
+ */
+function setThemeColor( colorName, color )
+{
+    const r = document.querySelector( ':root' );
+    r.style.setProperty( '--' + colorName, color );
+}
+
+LX.setThemeColor = setThemeColor;
+
+/**
+ * @method getThemeColor
+ * @description Get the value for one of the main theme variables
+ * @param {String} colorName Name of the theme variable
+ */
+function getThemeColor( colorName )
+{
+    const r = getComputedStyle( document.querySelector( ':root' ) );
+    const value = r.getPropertyValue( '--' + colorName );
+
+    if( value.includes( "light-dark" ) )
+    {
+        const currentScheme = r.getPropertyValue( "color-scheme" );
+
+        if( currentScheme == "light" )
+        {
+            return value.substring( value.indexOf( '(' ) + 1, value.indexOf( ',' ) ).replace( /\s/g, '' );
+        }
+        else
+        {
+            return value.substring( value.indexOf( ',' ) + 1, value.indexOf( ')' ) ).replace( /\s/g, '' );
+        }
+    }
+
+    return value;
+}
+
+LX.getThemeColor = getThemeColor;
+
+/**
+ * @method getBase64Image
+ * @description Convert an image to a base64 string
+ * @param {Image} img
+ */
+function getBase64Image( img )
+{
+    const canvas = document.createElement( 'canvas' );
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext( '2d' );
+    ctx.drawImage( img, 0, 0 );
+    return canvas.toDataURL( 'image/png' );
+}
+
+LX.getBase64Image = getBase64Image;
+
+/**
+ * @method hexToRgb
+ * @description Convert a hexadecimal string to a valid RGB color
+ * @param {String} hex Hexadecimal color
+ */
+function hexToRgb( hex )
+{
+    const hexPattern = /^#(?:[A-Fa-f0-9]{3,4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/;
+    if( !hexPattern.test( hex ) )
+    {
+        throw( `Invalid Hex Color: ${ hex }` );
+    }
+
+    hex = hex.replace( /^#/, '' );
+
+    // Expand shorthand form (#RGB or #RGBA)
+    if( hex.length === 3 || hex.length === 4 )
+    {
+        hex = hex.split( '' ).map( c => c + c ).join( '' );
+    }
+
+    const bigint = parseInt( hex, 16 );
+
+    const r = ( ( bigint >> ( hex.length === 8 ? 24 : 16 ) ) & 255 ) / 255;
+    const g = ( ( bigint >> ( hex.length === 8 ? 16 : 8 ) ) & 255 ) / 255;
+    const b = ( ( bigint >> ( hex.length === 8 ? 8 : 0 ) ) & 255 ) / 255;
+    const a = ( hex.length === 8 ? ( bigint & 255 ) : ( hex.length === 4 ? parseInt( hex.slice( -2 ), 16 ) : 255 ) ) / 255;
+
+    return { r, g, b, a };
+}
+
+LX.hexToRgb = hexToRgb;
+
+/**
+ * @method hexToHsv
+ * @description Convert a hexadecimal string to HSV (0..360|0..1|0..1)
+ * @param {String} hexStr Hexadecimal color
+ */
+function hexToHsv( hexStr )
+{
+    const rgb = hexToRgb( hexStr );
+    return rgbToHsv( rgb );
+}
+
+LX.hexToHsv = hexToHsv;
+
+/**
+ * @method rgbToHex
+ * @description Convert a RGB color to a hexadecimal string
+ * @param {Object} rgb Object containing RGB color
+ * @param {Number} scale Use 255 for 0..255 range or 1 for 0..1 range
+ */
+function rgbToHex$1( rgb, scale = 255 )
+{
+    const rgbArray = [ rgb.r, rgb.g, rgb.b ];
+    if( rgb.a != undefined ) rgbArray.push( rgb.a );
+
+    return (
+        "#" +
+        rgbArray.map( c => {
+            c = Math.floor( c * scale );
+            const hex = c.toString(16);
+            return hex.length === 1 ? ( '0' + hex ) : hex;
+        }).join("")
+    );
+}
+
+LX.rgbToHex = rgbToHex$1;
+
+/**
+ * @method rgbToCss
+ * @description Convert a RGB color (0..1) to a CSS color format
+ * @param {Object} rgb Object containing RGB color
+ */
+function rgbToCss( rgb )
+{
+    return { r: Math.floor( rgb.r * 255 ), g: Math.floor( rgb.g * 255 ), b: Math.floor( rgb.b * 255 ), a: rgb.a };
+}
+
+LX.rgbToCss = rgbToCss;
+
+/**
+ * @method rgbToHsv
+ * @description Convert a RGB color (0..1) array to HSV (0..360|0..1|0..1)
+ * @param {Object} rgb Array containing R, G, B
+ */
+function rgbToHsv( rgb )
+{
+    let { r, g, b, a } = rgb;
+    a = a ?? 1;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const d = max - min;
+    let h = 0;
+
+    if (d !== 0) {
+        if (max === r) { h = ((g - b) / d) % 6; }
+        else if (max === g) { h = (b - r) / d + 2; }
+        else { h = (r - g) / d + 4; }
+        h *= 60;
+        if (h < 0) { h += 360; }
+    }
+
+    const s = max === 0 ? 0 : (d / max);
+    const v = max;
+
+    return { h, s, v, a };
+}
+
+LX.rgbToHsv = rgbToHsv;
+
+/**
+ * @method hsvToRgb
+ * @description Convert an HSV color (0..360|0..1|0..1) array to RGB (0..1|0..255)
+ * @param {Array} hsv Array containing H, S, V
+ */
+function hsvToRgb( hsv )
+{
+    const { h, s, v, a } = hsv;
+    const c = v * s;
+    const x = c * (1 - Math.abs( ( (h / 60) % 2 ) - 1) );
+    const m = v - c;
+    let r = 0, g = 0, b = 0;
+
+    if( h < 60 ) { r = c; g = x; b = 0; }
+    else if ( h < 120 ) { r = x; g = c; b = 0; }
+    else if ( h < 180 ) { r = 0; g = c; b = x; }
+    else if ( h < 240 ) { r = 0; g = x; b = c; }
+    else if ( h < 300 ) { r = x; g = 0; b = c; }
+    else { r = c; g = 0; b = x; }
+
+    return { r: ( r + m ), g: ( g + m ), b: ( b + m ), a };
+}
+
+LX.hsvToRgb = hsvToRgb;
+
+/**
+ * @method measureRealWidth
+ * @description Measure the pixel width of a text
+ * @param {Number} value Text to measure
+ * @param {Number} paddingPlusMargin Padding offset
+ */
+function measureRealWidth( value, paddingPlusMargin = 8 )
+{
+    var i = document.createElement( "span" );
+    i.className = "lexinputmeasure";
+    i.innerHTML = value;
+    document.body.appendChild( i );
+    var rect = i.getBoundingClientRect();
+    LX.UTILS.deleteElement( i );
+    return rect.width + paddingPlusMargin;
+}
+
+LX.measureRealWidth = measureRealWidth;
+
+/**
+ * @method guidGenerator
+ * @description Get a random unique id
+ */
+function guidGenerator()
+{
+    var S4 = function() {
+        return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+    };
+    return (S4()+"-"+S4()+"-"+S4());
+}
+
+LX.guidGenerator = guidGenerator;
+
+/**
+ * @method buildTextPattern
+ * @description Create a validation pattern using specific options
+ * @param {Object} options
+ * lowercase (Boolean): Text must contain a lowercase char
+ * uppercase (Boolean): Text must contain an uppercase char
+ * digit (Boolean): Text must contain a digit
+ * specialChar (Boolean): Text must contain a special char
+ * noSpaces (Boolean): Do not allow spaces in text
+ * minLength (Number): Text minimum length
+ * maxLength (Number): Text maximum length
+ * asRegExp (Boolean): Return pattern as Regular Expression instance
+ */
+function buildTextPattern( options = {} )
+{
+    let patterns = [];
+    if ( options.lowercase ) patterns.push("(?=.*[a-z])");
+    if ( options.uppercase ) patterns.push("(?=.*[A-Z])");
+    if ( options.digit ) patterns.push("(?=.*\\d)");
+    if ( options.specialChar ) patterns.push("(?=.*[@#$%^&+=!])");
+    if ( options.noSpaces ) patterns.push("(?!.*\\s)");
+
+    let minLength = options.minLength || 0;
+    let maxLength = options.maxLength || ""; // Empty means no max length restriction
+
+    let pattern = `^${ patterns.join("") }.{${ minLength },${ maxLength }}$`;
+    return options.asRegExp ? new RegExp( pattern ) : pattern;
+}
+
+LX.buildTextPattern = buildTextPattern;
+
+/**
+ * @method makeDraggable
+ * @description Allows an element to be dragged
+ * @param {Element} domEl
+ * @param {Object} options
+ * autoAdjust (Bool): Sets in a correct position at the beggining
+ * dragMargin (Number): Margin of drag container
+ * onMove (Function): Called each move event
+ * onDragStart (Function): Called when drag event starts
+ * updateLayers (Function): Update Zindex of elements to update layers
+ */
+function makeDraggable( domEl, options = { } )
+{
+    let offsetX = 0;
+    let offsetY = 0;
+    let currentTarget = null;
+    let targetClass = options.targetClass;
+    let dragMargin = options.dragMargin ?? 3;
+
+    let _computePosition = ( e, top, left ) => {
+        const nullRect = { x: 0, y: 0, width: 0, height: 0 };
+        const parentRect = domEl.parentElement ? domEl.parentElement.getBoundingClientRect() : nullRect;
+        const isFixed = ( domEl.style.position == "fixed" );
+        const fixedOffset = isFixed ? new LX.vec2( parentRect.x, parentRect.y ) : new LX.vec2();
+        left = left ?? e.clientX - offsetX - parentRect.x;
+        top = top ?? e.clientY - offsetY - parentRect.y;
+        domEl.style.left = LX.clamp( left, dragMargin + fixedOffset.x, fixedOffset.x + parentRect.width - domEl.offsetWidth - dragMargin ) + 'px';
+        domEl.style.top = LX.clamp( top, dragMargin + fixedOffset.y, fixedOffset.y + parentRect.height - domEl.offsetHeight - dragMargin ) + 'px';
+        domEl.style.translate = "none"; // Force remove translation
+    };
+
+    // Initial adjustment
+    if( options.autoAdjust )
+    {
+        _computePosition( null, parseInt( domEl.style.left ), parseInt( domEl.style.top ) );
+    }
+
+    let id = LX.guidGenerator();
+    domEl[ 'draggable-id' ] = id;
+
+    const defaultMoveFunc = e => {
+        if( !currentTarget )
+        {
+            return;
+        }
+
+        _computePosition( e );
+    };
+
+    const customMoveFunc = e => {
+        if( !currentTarget )
+        {
+            return;
+        }
+
+        if( options.onMove )
+        {
+            options.onMove( currentTarget );
+        }
+    };
+
+    let onMove = options.onMove ? customMoveFunc : defaultMoveFunc;
+    let onDragStart = options.onDragStart;
+
+    domEl.setAttribute( 'draggable', true );
+    domEl.addEventListener( "mousedown", function( e ) {
+        currentTarget = ( e.target.classList.contains( targetClass ) || !targetClass ) ? e.target : null;
+    } );
+
+    domEl.addEventListener( "dragstart", function( e ) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        if( !currentTarget )
+        {
+            return;
+        }
+
+        // Remove image when dragging
+        var img = new Image();
+        img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+        e.dataTransfer.setDragImage( img, 0, 0 );
+        e.dataTransfer.effectAllowed = "move";
+
+        const rect = e.target.getBoundingClientRect();
+        const parentRect = currentTarget.parentElement.getBoundingClientRect();
+        const isFixed = ( currentTarget.style.position == "fixed" );
+        const fixedOffset = isFixed ? new LX.vec2( parentRect.x, parentRect.y ) : new LX.vec2();
+        offsetX = e.clientX - rect.x - fixedOffset.x;
+        offsetY = e.clientY - rect.y - fixedOffset.y;
+
+        document.addEventListener( "mousemove", onMove );
+
+        currentTarget.eventCatched = true;
+
+        if( options.updateLayers ?? true )
+        {
+            // Force active dialog to show on top
+            if( LX.activeDraggable )
+            {
+                LX.activeDraggable.style.zIndex = LX.DRAGGABLE_Z_INDEX;
+            }
+
+            LX.activeDraggable = domEl;
+            LX.activeDraggable.style.zIndex = LX.DRAGGABLE_Z_INDEX + 1;
+        }
+
+        if( onDragStart )
+        {
+            onDragStart( currentTarget, e );
+        }
+    }, false );
+
+    document.addEventListener( 'mouseup', (e) => {
+        if( currentTarget )
+        {
+            currentTarget = null;
+            document.removeEventListener( "mousemove", onMove );
+        }
+    } );
+}
+
+LX.makeDraggable = makeDraggable;
+
+/**
+ * @method makeCollapsible
+ * @description Allows an element to be collapsed/expanded
+ * @param {Element} domEl: Element to be treated as collapsible
+ * @param {Element} content: Content to display/hide on collapse/extend
+ * @param {Element} parent: Element where the content will be appended (default is domEl.parent)
+ * @param {Object} options
+ */
+function makeCollapsible( domEl, content, parent, options = { } )
+{
+    domEl.classList.add( "collapsible" );
+
+    const collapsed = ( options.collapsed ?? true );
+    const actionIcon = LX.makeIcon( "Right" );
+    actionIcon.classList.add( "collapser" );
+    actionIcon.dataset[ "collapsed" ] = collapsed;
+    actionIcon.style.marginLeft = "auto";
+    actionIcon.style.marginRight = "0.2rem";
+
+    actionIcon.addEventListener( "click", function( e ) {
+        e.preventDefault();
+        e.stopPropagation();
+        if( this.dataset[ "collapsed" ] )
+        {
+            delete this.dataset[ "collapsed" ];
+            content.style.display = "block";
+        }
+        else
+        {
+            this.dataset[ "collapsed" ] = true;
+            content.style.display = "none";
+        }
+    } );
+
+    domEl.appendChild( actionIcon );
+
+    parent = parent ?? domEl.parentElement;
+
+    parent.appendChild( content );
+}
+
+LX.makeCollapsible = makeCollapsible;
+
+/**
+ * @method makeCodeSnippet
+ * @description Create a code snippet in a specific language
+ * @param {String} code
+ * @param {Array} size
+ * @param {Object} options
+ * language (String):
+ * windowMode (Boolean):
+ * lineNumbers (Boolean):
+ * firstLine (Number): TODO
+ * linesAdded (Array):
+ * linesRemoved (Array):
+ * tabName (String):
+ * className (String): Extra class to customize snippet
+ */
+function makeCodeSnippet( code, size, options = { } )
+{
+    if( !LX.has('CodeEditor') )
+    {
+        console.error( "Import the CodeEditor component to create snippets!" );
+        return;
+    }
+
+    const snippet = document.createElement( "div" );
+    snippet.className = "lexcodesnippet " + ( options.className ?? "" );
+    snippet.style.width = size ? size[ 0 ] : "auto";
+    snippet.style.height = size ? size[ 1 ] : "auto";
+    const area = new LX.Area( { noAppend: true } );
+    let editor = new LX.CodeEditor( area, {
+        skipInfo: true,
+        disableEdition: true,
+        allowAddScripts: false,
+        name: options.tabName,
+        // showTab: options.showTab ?? true
+    } );
+    editor.setText( code, options.language ?? "Plain Text" );
+
+    if( options.linesAdded )
+    {
+        const code = editor.root.querySelector( ".code" );
+        for( let l of options.linesAdded )
+        {
+            if( l.constructor == Number )
+            {
+                code.childNodes[ l - 1 ].classList.add( "added" );
+            }
+            else if( l.constructor == Array ) // It's a range
+            {
+                for( let i = ( l[ 0 ] - 1 ); i <= ( l[ 1 ] - 1 ); i++ )
+                {
+                    code.childNodes[ i ].classList.add( "added" );
+                }
+            }
+        }
+    }
+
+    if( options.linesRemoved )
+    {
+        const code = editor.root.querySelector( ".code" );
+        for( let l of options.linesRemoved )
+        {
+            if( l.constructor == Number )
+            {
+                code.childNodes[ l - 1 ].classList.add( "removed" );
+            }
+            else if( l.constructor == Array ) // It's a range
+            {
+                for( let i = ( l[ 0 ] - 1 ); i <= ( l[ 1 ] - 1 ); i++ )
+                {
+                    code.childNodes[ i ].classList.add( "removed" );
+                }
+            }
+        }
+    }
+
+    if( options.windowMode )
+    {
+        const windowActionButtons = document.createElement( "div" );
+        windowActionButtons.className = "lexwindowbuttons";
+        const aButton = document.createElement( "span" );
+        aButton.style.background = "#ee4f50";
+        const bButton = document.createElement( "span" );
+        bButton.style.background = "#f5b720";
+        const cButton = document.createElement( "span" );
+        cButton.style.background = "#53ca29";
+        windowActionButtons.appendChild( aButton );
+        windowActionButtons.appendChild( bButton );
+        windowActionButtons.appendChild( cButton );
+        const tabs = editor.root.querySelector( ".lexareatabs" );
+        tabs.prepend( windowActionButtons );
+    }
+
+    if( !( options.lineNumbers ?? true ) )
+    {
+        editor.root.classList.add( "no-gutter" );
+    }
+
+    snippet.appendChild( area.root );
+    return snippet;
+}
+
+LX.makeCodeSnippet = makeCodeSnippet;
+
+/**
+ * @method makeKbd
+ * @description Kbd element to display a keyboard key.
+ * @param {Array} keys
+ * @param {String} extraClass
+ */
+function makeKbd( keys, extraClass = "" )
+{
+    const specialKeys = {
+        "Ctrl": '⌃',
+        "Enter": '↩',
+        "Shift": '⇧',
+        "CapsLock": '⇪',
+        "Meta": '⌘',
+        "Option": '⌥',
+        "Alt": '⌥',
+        "Tab": '⇥',
+        "ArrowUp": '↑',
+        "ArrowDown": '↓',
+        "ArrowLeft": '←',
+        "ArrowRight": '→',
+        "Space": '␣'
+    };
+
+    const kbd = LX.makeContainer( ["auto", "auto"], "flex flex-row ml-auto" );
+
+    for( const k of keys )
+    {
+        LX.makeContainer( ["auto", "auto"], "self-center text-xs fg-secondary select-none", specialKeys[ k ] ?? k, kbd );
+    }
+
+    return kbd;
+}
+
+LX.makeKbd = makeKbd;
+
+/**
+ * @method makeIcon
+ * @description Gets an SVG element using one of LX.ICONS
+ * @param {String} iconName
+ * @param {Object} options
+ * title
+ * extraClass
+ * svgClass
+ * variant
+ * ...Any Lucide icon options
+ */
+function makeIcon( iconName, options = { } )
+{
+    let svg = null;
+
+    const _createIconFromSVG = ( svg ) => {
+        if( options.svgClass && options.svgClass.length )
+        {
+            options.svgClass.split( " " ).forEach( c => svg.classList.add( c ) );
+        }
+        const icon = document.createElement( "a" );
+        icon.title = options.title ?? "";
+        icon.className = "lexicon " + ( options.iconClass ?? "" );
+        icon.appendChild( svg );
+        svg.dataset[ "name" ] = iconName;
+        return icon;
+    };
+
+    if( iconName.includes( "@" ) )
+    {
+        const parts = iconName.split( "@" );
+        iconName = parts[ 0 ];
+        options.variant = parts[ 1 ];
+    }
+
+    let data = LX.ICONS[ iconName ];
+    const lucideData = lucide[ iconName ] ?? lucide[ LX.LucideIconAlias[ iconName ] ];
+
+    if( data )
+    {
+        // Resolve alias
+        if( data.constructor == String )
+        {
+            data = LX.ICONS[ data ];
+        }
+
+        // Resolve variant
+        const requestedVariant = options.variant ?? "regular";
+        data = ( ( requestedVariant == "solid" ) ? LX.ICONS[ `${ iconName }@solid` ] : data ) ?? data;
+        const variant = data[ 3 ];
+
+        // Create internal icon if variant is the same as requested, there's no lucide/fallback data or if variant is "regular" (default)
+        if( ( requestedVariant == variant ) || !lucideData || variant == "regular" )
+        {
+            svg = document.createElementNS( "http://www.w3.org/2000/svg", "svg" );
+            svg.setAttribute( "viewBox", `0 0 ${ data[ 0 ] } ${ data[ 1 ] }` );
+
+            if( data[ 5 ] )
+            {
+                const classes = data[ 5 ].svgClass;
+                classes?.split( ' ' ).forEach( c => {
+                    svg.classList.add( c );
+                } );
+
+                const attrs = data[ 5 ].svgAttributes;
+                attrs?.split( ' ' ).forEach( attr => {
+                    const t = attr.split( '=' );
+                    svg.setAttribute( t[ 0 ], t[ 1 ] );
+                } );
+            }
+
+            const path = document.createElement( "path" );
+            path.setAttribute( "fill",  "currentColor" );
+            path.setAttribute( "d",  data[ 4 ] );
+            svg.appendChild( path );
+
+            if( data[ 5 ] )
+            {
+                const classes = data[ 5 ].pathClass;
+                classes?.split( ' ' ).forEach( c => {
+                    path.classList.add( c );
+                } );
+
+                const attrs = data[ 5 ].pathAttributes;
+                attrs?.split( ' ' ).forEach( attr => {
+                    const t = attr.split( '=' );
+                    path.setAttribute( t[ 0 ], t[ 1 ] );
+                } );
+            }
+
+            const faLicense = `<!-- This icon might belong to a collection from Iconify - https://iconify.design/ - or !Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc. -->`;
+            svg.innerHTML += faLicense;
+            return _createIconFromSVG( svg );
+        }
+    }
+
+    // Fallback to Lucide icon
+    console.assert( lucideData, `No existing icon named _${ iconName }_` );
+    svg = lucide.createElement( lucideData, options );
+
+    return _createIconFromSVG( svg );
+}
+
+LX.makeIcon = makeIcon;
+
+/**
+ * @method registerIcon
+ * @description Register an SVG icon to LX.ICONS
+ * @param {String} iconName
+ * @param {String} svgString
+ * @param {String} variant
+ * @param {Array} aliases
+ */
+function registerIcon( iconName, svgString, variant = "none", aliases = [] )
+{
+    const svg = new DOMParser().parseFromString( svgString, 'image/svg+xml' ).documentElement;
+    const path = svg.querySelector( "path" );
+    const viewBox = svg.getAttribute( "viewBox" ).split( ' ' );
+    const pathData = path.getAttribute( 'd' );
+
+    let svgAttributes = [];
+    let pathAttributes = [];
+
+    for( const attr of svg.attributes )
+    {
+        switch( attr.name )
+        {
+        case "transform":
+        case "fill":
+        case "stroke-width":
+        case "stroke-linecap":
+        case "stroke-linejoin":
+            svgAttributes.push( `${ attr.name }=${ attr.value }` );
+            break;
+        }
+    }
+
+    for( const attr of path.attributes )
+    {
+        switch( attr.name )
+        {
+        case "transform":
+        case "fill":
+        case "stroke-width":
+        case "stroke-linecap":
+        case "stroke-linejoin":
+            pathAttributes.push( `${ attr.name }=${ attr.value }` );
+            break;
+        }
+    }
+
+    const iconData = [
+        parseInt( viewBox[ 2 ] ),
+        parseInt( viewBox[ 3 ] ),
+        aliases,
+        variant,
+        pathData,
+        {
+            svgAttributes: svgAttributes.length ? svgAttributes.join( ' ' ) : null,
+            pathAttributes: pathAttributes.length ? pathAttributes.join( ' ' ) : null
+        }
+    ];
+
+    if( LX.ICONS[ iconName ] )
+    {
+        console.warn( `${ iconName } will be added/replaced in LX.ICONS` );
+    }
+
+    LX.ICONS[ iconName ] = iconData;
+}
+
+LX.registerIcon = registerIcon;
+
+/**
+ * @method registerCommandbarEntry
+ * @description Adds an extra command bar entry
+ * @param {String} name
+ * @param {Function} callback
+ */
+function registerCommandbarEntry( name, callback )
+{
+    LX.extraCommandbarEntries.push( { name, callback } );
+}
+
+LX.registerCommandbarEntry = registerCommandbarEntry;
+
+/**
+ * Utils package
+ * @namespace LX.UTILS
+ * @description Collection of utility functions
+ */
+
+LX.UTILS = {
+
+    compareThreshold( v, p, n, t ) { return Math.abs(v - p) >= t || Math.abs(v - n) >= t },
+    compareThresholdRange( v0, v1, t0, t1 ) { return v0 >= t0 && v0 <= t1 || v1 >= t0 && v1 <= t1 || v0 <= t0 && v1 >= t1},
+    deleteElement( el ) { if( el ) el.remove(); },
+    flushCss(element) {
+        // By reading the offsetHeight property, we are forcing
+        // the browser to flush the pending CSS changes (which it
+        // does to ensure the value obtained is accurate).
+        element.offsetHeight;
+    },
+    getControlPoints( x0, y0, x1, y1, x2, y2, t ) {
+
+        //  x0,y0,x1,y1 are the coordinates of the end (knot) pts of this segment
+        //  x2,y2 is the next knot -- not connected here but needed to calculate p2
+        //  p1 is the control point calculated here, from x1 back toward x0.
+        //  p2 is the next control point, calculated here and returned to become the
+        //  next segment's p1.
+        //  t is the 'tension' which controls how far the control points spread.
+
+        //  Scaling factors: distances from this knot to the previous and following knots.
+        var d01=Math.sqrt(Math.pow(x1-x0,2)+Math.pow(y1-y0,2));
+        var d12=Math.sqrt(Math.pow(x2-x1,2)+Math.pow(y2-y1,2));
+
+        var fa=t*d01/(d01+d12);
+        var fb=t-fa;
+
+        var p1x=x1+fa*(x0-x2);
+        var p1y=y1+fa*(y0-y2);
+
+        var p2x=x1-fb*(x0-x2);
+        var p2y=y1-fb*(y0-y2);
+
+        return [p1x,p1y,p2x,p2y]
+    },
+    drawSpline( ctx, pts, t ) {
+
+        ctx.save();
+        var cp = [];   // array of control points, as x0,y0,x1,y1,...
+        var n = pts.length;
+
+        // Draw an open curve, not connected at the ends
+        for( var i = 0; i < (n - 4); i += 2 )
+        {
+            cp = cp.concat(LX.UTILS.getControlPoints(pts[ i ],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
+        }
+
+        for( var i = 2; i < ( pts.length - 5 ); i += 2 )
+        {
+            ctx.beginPath();
+            ctx.moveTo(pts[ i ], pts[i+1]);
+            ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
+            ctx.stroke();
+            ctx.closePath();
+        }
+
+        //  For open curves the first and last arcs are simple quadratics.
+        ctx.beginPath();
+        ctx.moveTo( pts[ 0 ], pts[ 1 ] );
+        ctx.quadraticCurveTo( cp[ 0 ], cp[ 1 ], pts[ 2 ], pts[ 3 ]);
+        ctx.stroke();
+        ctx.closePath();
+
+        ctx.beginPath();
+        ctx.moveTo( pts[ n-2 ], pts[ n-1 ] );
+        ctx.quadraticCurveTo( cp[ 2*n-10 ], cp[ 2*n-9 ], pts[ n-4 ], pts[ n-3 ]);
+        ctx.stroke();
+        ctx.closePath();
+
+        ctx.restore();
+    }
+};
+
+// area.js @jxarco
+
+class Area {
+
+    /**
+     * @constructor Area
+     * @param {Object} options
+     * id: Id of the element
+     * className: Add class to the element
+     * width: Width of the area element [fit space]
+     * height: Height of the area element [fit space]
+     * skipAppend: Create but not append to GUI root [false]
+     * minWidth: Minimum width to be applied when resizing
+     * minHeight: Minimum height to be applied when resizing
+     * maxWidth: Maximum width to be applied when resizing
+     * maxHeight: Maximum height to be applied when resizing
+     */
+
+    constructor( options = {} ) {
+
+        var root = document.createElement( 'div' );
+        root.className = "lexarea";
+        if( options.id )
+        {
+            root.id = options.id;
+        }
+        if( options.className )
+        {
+            root.className += " " + options.className;
+        }
+
+        var width = options.width || "100%";
+        var height = options.height || "100%";
+
+        // This has default options..
+        this.setLimitBox( options.minWidth, options.minHeight, options.maxWidth, options.maxHeight );
+
+        if( width.constructor == Number )
+        {
+            width += "px";
+        }
+        if( height.constructor == Number )
+        {
+            height += "px";
+        }
+
+        root.style.width = width;
+        root.style.height = height;
+
+        this.offset = 0;
+        this.root = root;
+        this.size = [ this.root.offsetWidth, this.root.offsetHeight ];
+        this.sections = [];
+        this.panels = [];
+
+        let lexroot = document.getElementById("lexroot");
+        if( lexroot && !options.skipAppend )
+        {
+            lexroot.appendChild( this.root );
+        }
+
+        let overlay = options.overlay;
+
+        if( overlay )
+        {
+            this.root.classList.add("overlay-" + overlay);
+
+            if( options.left )
+            {
+                this.root.style.left = options.left;
+            }
+            else if( options.right )
+            {
+                this.root.style.right = options.right;
+            }
+            else if( options.top )
+            {
+                this.root.style.top = options.top;
+            }
+            else if( options.bottom )
+            {
+                this.root.style.bottom = options.bottom;
+            }
+
+            const draggable = options.draggable ?? true;
+            if( draggable )
+            {
+                LX.makeDraggable( root, options );
+            }
+
+            if( options.resizeable )
+            {
+                root.classList.add("resizeable");
+            }
+
+            if( options.resize )
+            {
+                this.splitBar = document.createElement("div");
+                let type = (overlay == "left") || (overlay == "right") ? "horizontal" : "vertical";
+                this.type = overlay;
+                this.splitBar.className = "lexsplitbar " + type;
+
+                if( overlay == "right" )
+                {
+                    this.splitBar.style.width = LX.DEFAULT_SPLITBAR_SIZE + "px";
+                    this.splitBar.style.left = -(LX.DEFAULT_SPLITBAR_SIZE / 2.0) + "px";
+                }
+                else if( overlay == "left" )
+                {
+                    let size = Math.min(document.body.clientWidth - LX.DEFAULT_SPLITBAR_SIZE, this.root.clientWidth);
+                    this.splitBar.style.width = LX.DEFAULT_SPLITBAR_SIZE + "px";
+                    this.splitBar.style.left = size + (LX.DEFAULT_SPLITBAR_SIZE / 2.0) + "px";
+                }
+                else if( overlay == "top" )
+                {
+                    let size = Math.min(document.body.clientHeight - LX.DEFAULT_SPLITBAR_SIZE, this.root.clientHeight);
+                    this.splitBar.style.height = LX.DEFAULT_SPLITBAR_SIZE + "px";
+                    this.splitBar.style.top = size + (LX.DEFAULT_SPLITBAR_SIZE / 2.0) + "px";
+                }
+                else if( overlay == "bottom" )
+                {
+                    this.splitBar.style.height = LX.DEFAULT_SPLITBAR_SIZE + "px";
+                    this.splitBar.style.top = -(LX.DEFAULT_SPLITBAR_SIZE / 2.0) + "px";
+                }
+
+                this.splitBar.addEventListener("mousedown", innerMouseDown);
+                this.root.appendChild( this.splitBar );
+
+                const that = this;
+                let lastMousePosition = [ 0, 0 ];
+
+                function innerMouseDown( e )
+                {
+                    const doc = that.root.ownerDocument;
+                    doc.addEventListener( 'mousemove', innerMouseMove );
+                    doc.addEventListener( 'mouseup', innerMouseUp );
+                    lastMousePosition[ 0 ] = e.x;
+                    lastMousePosition[ 1 ] = e.y;
+                    e.stopPropagation();
+                    e.preventDefault();
+                    document.body.classList.add( 'nocursor' );
+                    that.splitBar.classList.add( 'nocursor' );
+                }
+
+                function innerMouseMove( e )
+                {
+                    switch( that.type )
+                    {
+                        case "right":
+                            var dt = ( lastMousePosition[ 0 ] - e.x );
+                            var size = ( that.root.offsetWidth + dt );
+                            that.root.style.width = size + "px";
+                            break;
+                        case "left":
+                            var dt = ( lastMousePosition[ 0 ] - e.x );
+                            var size = Math.min(document.body.clientWidth - LX.DEFAULT_SPLITBAR_SIZE, (that.root.offsetWidth - dt));
+                            that.root.style.width = size + "px";
+                            that.splitBar.style.left = size + LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
+                            break;
+                        case "top":
+                            var dt = ( lastMousePosition[ 1 ] - e.y );
+                            var size = Math.min(document.body.clientHeight - LX.DEFAULT_SPLITBAR_SIZE, (that.root.offsetHeight - dt));
+                            that.root.style.height = size + "px";
+                            that.splitBar.style.top = size + LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
+                            break;
+                        case "bottom":
+                            var dt = ( lastMousePosition[ 1 ] - e.y );
+                            var size = ( that.root.offsetHeight + dt );
+                            that.root.style.height = size + "px";
+                            break;
+                    }
+
+                    lastMousePosition[ 0 ] = e.x;
+                    lastMousePosition[ 1 ] = e.y;
+                    e.stopPropagation();
+                    e.preventDefault();
+
+                    // Resize events
+                    if( that.onresize )
+                    {
+                        that.onresize( that.root.getBoundingClientRect() );
+                    }
+                }
+
+                function innerMouseUp( e )
+                {
+                    const doc = that.root.ownerDocument;
+                    doc.removeEventListener( 'mousemove', innerMouseMove );
+                    doc.removeEventListener( 'mouseup', innerMouseUp );
+                    document.body.classList.remove( 'nocursor' );
+                    that.splitBar.classList.remove( 'nocursor' );
+                }
+            }
+        }
+    }
+
+    /**
+     * @method attach
+     * @param {Element} content child to append to area (e.g. a Panel)
+     */
+
+    attach( content ) {
+
+        // Append to last split section if area has been split
+        if( this.sections.length )
+        {
+            this.sections[ 1 ].attach( content );
+            return;
+        }
+
+        if( !content )
+        {
+            throw("no content to attach");
+        }
+
+        content.parent = this;
+
+        let element = content.root ? content.root : content;
+        this.root.appendChild( element );
+    }
+
+    /**
+     * @method split
+     * @param {Object} options
+     * type: Split mode (horizontal, vertical) ["horizontal"]
+     * sizes: CSS Size of each new area (Array) ["50%", "50%"]
+     * resize: Allow area manual resizing [true]
+     * sizes: "Allow the area to be minimized [false]
+     */
+
+    split( options = {} ) {
+
+        if( this.sections.length )
+        {
+            // In case Area has been split before, get 2nd section as root
+            this.offset = this.root.childNodes[ 0 ].offsetHeight; // store offset to take into account when resizing
+            this._root = this.sections[ 0 ].root;
+            this.root = this.sections[ 1 ].root;
+        }
+
+        const type = options.type ?? "horizontal";
+        const sizes = options.sizes || [ "50%", "50%" ];
+        const auto = (options.sizes === 'auto') || ( options.sizes && options.sizes[ 0 ] == "auto" && options.sizes[ 1 ] == "auto" );
+        const rect = this.root.getBoundingClientRect();
+
+        // Secondary area fills space
+        if( !sizes[ 1 ] || ( sizes[ 0 ] != "auto" && sizes[ 1 ] == "auto" ) )
+        {
+            let size = sizes[ 0 ];
+            let margin = options.top ? options.top : 0;
+            if( size.constructor == Number )
+            {
+                size += margin;
+                size += "px";
+            }
+
+            sizes[ 1 ] = "calc( 100% - " + size + " )";
+        }
+
+        let minimizable = options.minimizable ?? false;
+        let resize = ( options.resize ?? true ) || minimizable;
+        let fixedSize = options.fixedSize ?? !resize;
+        let splitbarOffset = 0;
+        let primarySize = [];
+        let secondarySize = [];
+
+        this.offset = 0;
+
+        if( resize )
+        {
+            this.resize = resize;
+            this.splitBar = document.createElement( "div" );
+            this.splitBar.className = "lexsplitbar " + type;
+
+            if( type == "horizontal" )
+            {
+                this.splitBar.style.width = LX.DEFAULT_SPLITBAR_SIZE + "px";
+            }
+            else
+            {
+                this.splitBar.style.height = LX.DEFAULT_SPLITBAR_SIZE + "px";
+            }
+
+            this.splitBar.addEventListener( 'mousedown', innerMouseDown );
+
+            splitbarOffset = ( LX.DEFAULT_SPLITBAR_SIZE / 2 ); // updates
+        }
+
+        if( type == "horizontal" )
+        {
+            this.root.style.display = "flex";
+
+            if( !fixedSize )
+            {
+                const parentWidth = rect.width;
+                const leftPx = LX.parsePixelSize( sizes[ 0 ], parentWidth );
+                const rightPx = LX.parsePixelSize(  sizes[ 1 ], parentWidth );
+                const leftPercent = ( leftPx / parentWidth ) * 100;
+                const rightPercent = ( rightPx / parentWidth ) * 100;
+
+                // Style using percentages
+                primarySize[ 0 ] = `calc(${ leftPercent }% - ${ splitbarOffset }px)`;
+                secondarySize[ 0 ] = `calc(${ rightPercent }% - ${ splitbarOffset }px)`;
+            }
+            else
+            {
+                primarySize[ 0 ] = `calc(${ sizes[ 0 ] } - ${ splitbarOffset }px)`;
+                secondarySize[ 0 ] = `calc(${ sizes[ 1 ] } - ${ splitbarOffset }px)`;
+            }
+
+            primarySize[ 1 ] = "100%";
+            secondarySize[ 1 ] = "100%";
+        }
+        else // vertical
+        {
+            if( auto )
+            {
+                primarySize[ 1 ] = "auto";
+                secondarySize[ 1 ] = "auto";
+            }
+            else if( !fixedSize )
+            {
+                const parentHeight = rect.height;
+                const topPx = LX.parsePixelSize( sizes[ 0 ], parentHeight );
+                const bottomPx = LX.parsePixelSize( sizes[ 1 ], parentHeight );
+                const topPercent = ( topPx / parentHeight ) * 100;
+                const bottomPercent = ( bottomPx / parentHeight ) * 100;
+
+                primarySize[ 1 ] = ( sizes[ 0 ] == "auto" ? "auto" : `calc(${ topPercent }% - ${ splitbarOffset }px)`);
+                secondarySize[ 1 ] = ( sizes[ 1 ] == "auto" ? "auto" : `calc(${ bottomPercent }% - ${ splitbarOffset }px)`);
+            }
+            else
+            {
+                primarySize[ 1 ] = ( sizes[ 0 ] == "auto" ? "auto" : `calc(${ sizes[ 0 ] } - ${ splitbarOffset }px)`);
+                secondarySize[ 1 ] = ( sizes[ 1 ] == "auto" ? "auto" : `calc(${ sizes[ 1 ] } - ${ splitbarOffset }px)`);
+            }
+
+            primarySize[ 0 ] = "100%";
+            secondarySize[ 0 ] = "100%";
+        }
+
+        // Create areas
+        let area1 = new Area( { width: primarySize[ 0 ], height: primarySize[ 1 ], skipAppend: true, className: "split" + ( options.menubar || options.sidebar ? "" : " origin" ) } );
+        let area2 = new Area( { width: secondarySize[ 0 ], height: secondarySize[ 1 ], skipAppend: true, className: "split" } );
+
+        /*
+            If the parent area is not in the DOM, we need to wait for the resize event to get the its correct size
+            and set the sizes of the split areas accordingly.
+        */
+        if( !fixedSize && ( !rect.width || !rect.height ) )
+        {
+            const observer = new ResizeObserver( entries => {
+
+                console.assert( entries.length == 1, "AreaResizeObserver: more than one entry" );
+
+                const rect = entries[ 0 ].contentRect;
+                if( !rect.width || !rect.height )
+                {
+                    return;
+                }
+
+                this._update( [ rect.width, rect.height ], false );
+
+                // On auto splits, we only need to set the size of the parent area
+                if( !auto )
+                {
+                    if( type == "horizontal" )
+                    {
+                        const parentWidth = rect.width;
+                        const leftPx = LX.parsePixelSize( sizes[ 0 ], parentWidth );
+                        const rightPx = LX.parsePixelSize(  sizes[ 1 ], parentWidth );
+                        const leftPercent = ( leftPx / parentWidth ) * 100;
+                        const rightPercent = ( rightPx / parentWidth ) * 100;
+
+                        // Style using percentages
+                        primarySize[ 0 ] = `calc(${ leftPercent }% - ${ splitbarOffset }px)`;
+                        secondarySize[ 0 ] = `calc(${ rightPercent }% - ${ splitbarOffset }px)`;
+                    }
+                    else // vertical
+                    {
+                        const parentHeight = rect.height;
+                        const topPx = LX.parsePixelSize( sizes[ 0 ], parentHeight );
+                        const bottomPx = LX.parsePixelSize( sizes[ 1 ], parentHeight );
+                        const topPercent = ( topPx / parentHeight ) * 100;
+                        const bottomPercent = ( bottomPx / parentHeight ) * 100;
+
+                        primarySize[ 1 ] = ( sizes[ 0 ] == "auto" ? "auto" : `calc(${ topPercent }% - ${ splitbarOffset }px)`);
+                        secondarySize[ 1 ] = ( sizes[ 1 ] == "auto" ? "auto" : `calc(${ bottomPercent }% - ${ splitbarOffset }px)`);
+                    }
+
+                    area1.root.style.width = primarySize[ 0 ];
+                    area1.root.style.height = primarySize[ 1 ];
+
+                    area2.root.style.width = secondarySize[ 0 ];
+                    area2.root.style.height = secondarySize[ 1 ];
+                }
+
+                area1._update();
+                area2._update();
+
+                // Stop observing
+                observer.disconnect();
+            });
+
+            // Observe the parent area until the DOM is ready
+            // and the size is set correctly.
+            LX.doAsync( () => {
+                observer.observe( this.root );
+            }, 100 );
+        }
+
+        if( auto && type == "vertical" )
+        {
+            // Listen resize event on first area
+            const resizeObserver = new ResizeObserver( entries => {
+                for ( const entry of entries )
+                {
+                    const size = entry.target.getComputedSize();
+                    area2.root.style.height = "calc(100% - " + ( size.height ) + "px )";
+                }
+                resizeObserver.disconnect();
+            });
+
+            resizeObserver.observe( area1.root );
+        }
+
+        // Being minimizable means it's also resizeable!
+        if( resize && minimizable )
+        {
+            this.splitExtended = false;
+
+            // Keep state of the animation when ends...
+            area2.root.addEventListener('animationend', e => {
+                const opacity = getComputedStyle( area2.root ).opacity;
+                area2.root.classList.remove( e.animationName + "-" + type );
+                area2.root.style.opacity = opacity;
+                LX.flushCss( area2.root );
+            });
+
+            this.splitBar.addEventListener("contextmenu", e => {
+                e.preventDefault();
+                LX.addContextMenu(null, e, c => {
+                    c.add("Extend", { disabled: this.splitExtended, callback: () => { this.extend(); } });
+                    c.add("Reduce", { disabled: !this.splitExtended, callback: () => { this.reduce(); } });
+                });
+            });
+        }
+
+        area1.parentArea = this;
+        area2.parentArea = this;
+
+        this.root.appendChild( area1.root );
+
+        if( resize )
+        {
+            this.root.appendChild( this.splitBar );
+        }
+
+        this.root.appendChild( area2.root );
+
+        this.sections = [ area1, area2 ];
+        this.type = type;
+
+        // Update sizes
+        this._update( rect.width || rect.height ? [ rect.width, rect.height ] : undefined );
+
+        if( !resize )
+        {
+            return this.sections;
+        }
+
+        const that = this;
+
+        function innerMouseDown( e )
+        {
+            const doc = that.root.ownerDocument;
+            doc.addEventListener( 'mousemove', innerMouseMove );
+            doc.addEventListener( 'mouseup', innerMouseUp );
+            e.stopPropagation();
+            e.preventDefault();
+            document.body.classList.add( 'nocursor' );
+            that.splitBar.classList.add( 'nocursor' );
+        }
+
+        function innerMouseMove( e )
+        {
+            if( that.type == "horizontal" )
+            {
+                that._moveSplit( -e.movementX );
+            }
+            else
+            {
+                that._moveSplit( -e.movementY );
+            }
+
+            e.stopPropagation();
+            e.preventDefault();
+        }
+
+        function innerMouseUp( e )
+        {
+            const doc = that.root.ownerDocument;
+            doc.removeEventListener( 'mousemove', innerMouseMove );
+            doc.removeEventListener( 'mouseup', innerMouseUp );
+            document.body.classList.remove( 'nocursor' );
+            that.splitBar.classList.remove( 'nocursor' );
+        }
+
+        return this.sections;
+    }
+
+    /**
+    * @method setLimitBox
+    * Set min max for width and height
+    */
+    setLimitBox( minw = 0, minh = 0, maxw = Infinity, maxh = Infinity ) {
+
+        this.minWidth   = minw;
+        this.minHeight  = minh;
+        this.maxWidth   = maxw;
+        this.maxHeight  = maxh;
+
+        if( minw != 0 ) this.root.style.minWidth = `${ minw }px`;
+        if( minh != 0 ) this.root.style.minHeight = `${ minh }px`;
+        if( maxw != Infinity ) this.root.style.maxWidth = `${ maxw }px`;
+        if( maxh != Infinity ) this.root.style.maxHeight = `${ maxh }px`;
+    }
+
+    /**
+    * @method resize
+    * Resize element
+    */
+    setSize( size ) {
+
+        let [ width, height ] = size;
+
+        if( width != undefined && width.constructor == Number )
+        {
+            width += "px";
+        }
+
+        if( height != undefined && height.constructor == Number )
+        {
+            height += "px";
+        }
+
+        if( width )
+        {
+            this.root.style.width = width;
+        }
+
+        if( height )
+        {
+            this.root.style.height = height;
+        }
+
+        if( this.onresize )
+        {
+            this.onresize( this.root.getBoundingClientRect() );
+        }
+
+        LX.doAsync( () => {
+            this.size = [ this.root.clientWidth, this.root.clientHeight ];
+            this.propagateEvent( "onresize" );
+        }, 150 );
+    }
+
+    /**
+    * @method extend
+    * Hide 2nd area split
+    */
+    extend() {
+
+        if( this.splitExtended )
+        {
+            return;
+        }
+
+        let [ area1, area2 ] = this.sections;
+        this.splitExtended = true;
+
+        if( this.type == "vertical" )
+        {
+            this.offset = area2.root.offsetHeight;
+            area2.root.classList.add("fadeout-vertical");
+            this._moveSplit( -Infinity, true );
+
+        }
+        else
+        {
+            this.offset = area2.root.offsetWidth - 8; // Force some height here...
+            area2.root.classList.add("fadeout-horizontal");
+            this._moveSplit( -Infinity, true, 8 );
+        }
+
+        LX.doAsync( () => this.propagateEvent('onresize'), 150 );
+    }
+
+    /**
+    * @method reduce
+    * Show 2nd area split
+    */
+    reduce() {
+
+        if( !this.splitExtended )
+        return;
+
+        this.splitExtended = false;
+        let [area1, area2] = this.sections;
+
+        if( this.type == "vertical")
+        {
+            area2.root.classList.add("fadein-vertical");
+            this._moveSplit(this.offset);
+        }
+        else
+        {
+            area2.root.classList.add("fadein-horizontal");
+            this._moveSplit(this.offset);
+        }
+
+        LX.doAsync( () => this.propagateEvent('onresize'), 150 );
+    }
+
+    /**
+    * @method hide
+    * Hide element
+    */
+    hide() {
+        this.root.classList.add("hidden");
+    }
+
+    /**
+    * @method show
+    * Show element if it is hidden
+    */
+    show() {
+        this.root.classList.remove("hidden");
+    }
+
+    /**
+    * @method toggle
+    * Toggle element if it is hidden
+    */
+    toggle( force ) {
+        this.root.classList.toggle("hidden", force);
+    }
+
+    /**
+     * @method propagateEvent
+     */
+
+    propagateEvent( eventName ) {
+
+        for( let i = 0; i < this.sections.length; i++ )
+        {
+            const area = this.sections[ i ];
+
+            if( area[ eventName ] )
+            {
+                area[ eventName ].call( this, area.root.getBoundingClientRect() );
+            }
+
+            area.propagateEvent( eventName );
+        }
+    }
+
+    /**
+     * @method addPanel
+     * @param {Object} options
+     * Options to create a Panel
+     */
+
+    addPanel( options ) {
+        let panel = new LX.Panel( options );
+        this.attach( panel );
+        this.panels.push( panel );
+        return panel;
+    }
+
+    /**
+     * @method addMenubar
+     * @param {Array} items Items to fill the menubar
+     * @param {Object} options:
+     * float: Justify content (left, center, right) [left]
+     * sticky: Fix menubar at the top [true]
+     */
+
+    addMenubar( items, options = {} ) {
+
+        let menubar = new LX.Menubar( items, options );
+
+        LX.menubars.push( menubar );
+
+        const [ bar, content ] = this.split({ type: 'vertical', sizes: ["48px", null], resize: false, menubar: true });
+        menubar.siblingArea = content;
+
+        bar.attach( menubar );
+        bar.isMenubar = true;
+
+        if( options.sticky ?? true )
+        {
+            bar.root.className += " sticky top-0";
+        }
+
+        if( options.parentClass )
+        {
+            bar.root.className += ` ${ options.parentClass }`;
+        }
+
+        return menubar;
+    }
+
+    /**
+     * @method addSidebar
+     * @param {Function} callback Function to fill the sidebar
+     * @param {Object} options: Sidebar options
+     * width: Width of the sidebar [16rem]
+     * side: Side to attach the sidebar (left|right) [left]
+     */
+
+    addSidebar( callback, options = {} ) {
+
+        let sidebar = new LX.Sidebar( options );
+
+        if( callback )
+        {
+            callback( sidebar );
+        }
+
+        // Generate DOM elements after adding all entries
+        sidebar.update();
+
+        LX.sidebars.push( sidebar );
+
+        const side = options.side ?? "left";
+        console.assert( side == "left" || side == "right", "Invalid sidebar side: " + side );
+        const leftSidebar = ( side == "left" );
+
+        const width = options.width ?? "16rem";
+        const sizes = leftSidebar ? [ width, null ] : [ null, width ];
+        const [ left, right ] = this.split( { type: 'horizontal', sizes, resize: false, sidebar: true } );
+        sidebar.siblingArea = leftSidebar ? right : left;
+
+        let bar = leftSidebar ? left : right;
+        bar.attach( sidebar );
+        bar.isSidebar = true;
+
+        if( options.parentClass )
+        {
+            bar.root.className += ` ${ options.parentClass }`;
+        }
+
+        return sidebar;
+    }
+
+    /**
+     * @method addOverlayButtons
+     * @param {Array} buttons Buttons info
+     * @param {Object} options:
+     * float: Where to put the buttons (h: horizontal, v: vertical, t: top, m: middle, b: bottom, l: left, c: center, r: right) [htc]
+     */
+
+    addOverlayButtons( buttons, options = {} ) {
+
+        // Add to last split section if area has been split
+        if( this.sections.length )
+        {
+            this.sections[ 1 ].addOverlayButtons(  buttons, options );
+            return;
+        }
+
+        console.assert( buttons.constructor == Array && buttons.length );
+
+        // Set area to relative to use local position
+        this.root.style.position = "relative";
+
+        options.className = "lexoverlaybuttons";
+
+        let overlayPanel = this.addPanel( options );
+        let overlayGroup = null;
+
+        const container = document.createElement("div");
+        container.className = "lexoverlaybuttonscontainer";
+        container.appendChild( overlayPanel.root );
+        this.attach( container );
+
+        const float = options.float;
+
+        if( float )
+        {
+            for( let i = 0; i < float.length; i++ )
+            {
+                const t = float[ i ];
+                switch( t )
+                {
+                case 'h': break;
+                case 'v': container.className += " vertical"; break;
+                case 't': break;
+                case 'm': container.className += " middle"; break;
+                case 'b': container.className += " bottom"; break;
+                case 'l': break;
+                case 'c': container.className += " center"; break;
+                case 'r': container.className += " right"; break;
+                }
+            }
+        }
+
+        const _addButton = function( b, group, last ) {
+
+            const _options = {
+                width: "auto",
+                selectable: b.selectable,
+                selected: b.selected,
+                icon: b.icon,
+                img: b.img,
+                className: b.class ?? "",
+                title: b.name,
+                overflowContainerX: overlayPanel.root,
+                swap: b.swap
+            };
+
+            if( group )
+            {
+                if( !overlayGroup )
+                {
+                    overlayGroup = document.createElement('div');
+                    overlayGroup.className = "lexoverlaygroup";
+                    overlayPanel.queuedContainer = overlayGroup;
+                }
+
+                _options.parent = overlayGroup;
+            }
+
+            let callback = b.callback;
+
+            if( b.options )
+            {
+                overlayPanel.addSelect( null, b.options, b.name, callback, _options );
+            }
+            else
+            {
+                const button = overlayPanel.addButton( null, b.name, function( value, event ) {
+                    if( b.selectable )
+                    {
+                        if( b.group )
+                        {
+                            let _prev = b.selected;
+                            b.group.forEach( sub => sub.selected = false );
+                            b.selected = !_prev;
+                        }
+                        else
+                        {
+                            b.selected = !b.selected;
+                        }
+                    }
+
+                    if( callback )
+                    {
+                        callback( value, event, button.root );
+                    }
+
+                }, _options );
+            }
+
+            // ends the group
+            if( overlayGroup && last )
+            {
+                overlayPanel.root.appendChild( overlayGroup );
+                overlayGroup = null;
+                overlayPanel.clearQueue();
+            }
+        };
+
+        const _refreshPanel = function() {
+
+            overlayPanel.clear();
+
+            for( let b of buttons )
+            {
+                if( b.constructor === Array )
+                {
+                    for( let i = 0; i < b.length; ++i )
+                    {
+                        let sub = b[ i ];
+                        sub.group = b;
+                        _addButton(sub, true, i == ( b.length - 1 ));
+                    }
+                }
+                else
+                {
+                    _addButton( b );
+                }
+            }
+
+            // Add floating info
+            if( float )
+            {
+                var height = 0;
+                overlayPanel.root.childNodes.forEach( c => { height += c.offsetHeight; } );
+
+                if( container.className.includes( "middle" ) )
+                {
+                    container.style.top = "-moz-calc( 50% - " + (height * 0.5) + "px )";
+                    container.style.top = "-webkit-calc( 50% - " + (height * 0.5) + "px )";
+                    container.style.top = "calc( 50% - " + (height * 0.5) + "px )";
+                }
+            }
+        };
+
+        _refreshPanel();
+    }
+
+    /**
+     * @method addTabs
+     * @param {Object} options:
+     * parentClass: Add extra class to tab buttons container
+     */
+
+    addTabs( options = {} ) {
+
+        const tabs = new LX.Tabs( this, options );
+
+        if( options.folding )
+        {
+            this.parentArea._disableSplitResize();
+            // Compensate split bar...
+            this.root.style.paddingTop = "4px";
+        }
+
+        return tabs;
+    }
+
+    _moveSplit( dt, forceAnimation = false, forceWidth = 0 ) {
+
+        if( !this.type )
+        {
+            throw( "No split area" );
+        }
+
+        if( dt === undefined ) // Splitbar didn't move!
+        {
+            return;
+        }
+
+        const a1 = this.sections[ 0 ];
+        var a1Root = a1.root;
+
+        if( !a1Root.classList.contains( "origin" ) )
+        {
+            a1Root = a1Root.parentElement;
+        }
+
+        const a2 = this.sections[ 1 ];
+        const a2Root = a2.root;
+        const splitData = "- "+ LX.DEFAULT_SPLITBAR_SIZE + "px";
+
+        let transition = null;
+        if( !forceAnimation )
+        {
+            // Remove transitions for this change..
+            transition = a1Root.style.transition;
+            a1Root.style.transition = a2Root.style.transition = "none";
+            // LX.flushCss( a1Root );
+        }
+
+        if( this.type == "horizontal" )
+        {
+            var size = Math.max( a2Root.offsetWidth + dt, parseInt( a2.minWidth ) );
+            if( forceWidth ) size = forceWidth;
+
+            const parentWidth = this.size[ 0 ];
+            const rightPercent = ( size / parentWidth ) * 100;
+            const leftPercent = Math.max( 0, 100 - rightPercent );
+
+            a1Root.style.width = `-moz-calc(${ leftPercent }% ${ splitData })`;
+            a1Root.style.width = `-webkit-calc( ${ leftPercent }% ${ splitData })`;
+            a1Root.style.width = `calc( ${ leftPercent }% ${ splitData })`;
+            a2Root.style.width = `${ rightPercent }%`;
+            a2Root.style.width = `${ rightPercent }%`;
+            a2Root.style.width = `${ rightPercent }%`;
+
+            if( a1.maxWidth != Infinity )
+            {
+                a2Root.style.minWidth = `calc( 100% - ${ parseInt( a1.maxWidth ) }px )`;
+            }
+        }
+        else
+        {
+            var size = Math.max( ( a2Root.offsetHeight + dt ) + a2.offset, parseInt( a2.minHeight ) );
+            if( forceWidth ) size = forceWidth;
+
+            const parentHeight = this.size[ 1 ];
+            const bottomPercent = ( size / parentHeight ) * 100;
+            const topPercent = Math.max( 0, 100 - bottomPercent );
+
+            a1Root.style.height = `-moz-calc(${ topPercent }% ${ splitData })`;
+            a1Root.style.height = `-webkit-calc( ${ topPercent }% ${ splitData })`;
+            a1Root.style.height = `calc( ${ topPercent }% ${ splitData })`;
+            a2Root.style.height = `${ bottomPercent }%`;
+            a2Root.style.height = `${ bottomPercent }%`;
+            a2Root.style.height = `${ bottomPercent }%`;
+
+            if( a1.maxHeight != Infinity )
+            {
+                a2Root.style.minHeight = `calc( 100% - ${ parseInt( a1.maxHeight ) }px )`;
+            }
+        }
+
+        if( !forceAnimation )
+        {
+            // Reapply transitions
+            a1Root.style.transition = a2Root.style.transition = transition;
+        }
+
+        LX.doAsync( () => {
+            this._update();
+            this.propagateEvent( 'onresize' );
+        }, 10 );
+    }
+
+    _disableSplitResize() {
+
+        this.resize = false;
+        this.splitBar.remove();
+        delete this.splitBar;
+    }
+
+    _update( newSize, propagate = true ) {
+
+        if( !newSize )
+        {
+            const rect = this.root.getBoundingClientRect();
+            this.size = [ rect.width, rect.height ];
+        }
+        else
+        {
+            this.size = newSize;
+        }
+
+        if( propagate )
+        {
+            for( var i = 0; i < this.sections.length; i++ )
+            {
+                this.sections[ i ]._update();
+            }
+        }
+    }
+}
+LX.Area = Area;
+
+// widget.js @jxarco
+
+/**
+ * @class Widget
+ */
+
+class Widget {
+
+    static NONE         = 0;
+    static TEXT         = 1;
+    static TEXTAREA     = 2;
+    static BUTTON       = 3;
+    static SELECT       = 4;
+    static CHECKBOX     = 5;
+    static TOGGLE       = 6;
+    static RADIO        = 7;
+    static BUTTONS      = 8;
+    static COLOR        = 9;
+    static RANGE        = 10;
+    static NUMBER       = 11;
+    static TITLE        = 12;
+    static VECTOR       = 13;
+    static TREE         = 14;
+    static PROGRESS     = 15;
+    static FILE         = 16;
+    static LAYERS       = 17;
+    static ARRAY        = 18;
+    static LIST         = 19;
+    static TAGS         = 20;
+    static CURVE        = 21;
+    static CARD         = 22;
+    static IMAGE        = 23;
+    static CONTENT      = 24;
+    static CUSTOM       = 25;
+    static SEPARATOR    = 26;
+    static KNOB         = 27;
+    static SIZE         = 28;
+    static OTP          = 29;
+    static PAD          = 30;
+    static FORM         = 31;
+    static DIAL         = 32;
+    static COUNTER      = 33;
+    static TABLE        = 34;
+    static TABS         = 35;
+    static DATE         = 36;
+    static MAP2D        = 37;
+    static LABEL        = 38;
+    static BLANK        = 39;
+
+    static NO_CONTEXT_TYPES = [
+        Widget.BUTTON,
+        Widget.LIST,
+        Widget.FILE,
+        Widget.PROGRESS
+    ];
+
+    constructor( type, name, value, options = {} ) {
+
+        this.type = type;
+        this.name = name;
+        this.options = options;
+        this._initialValue = value;
+
+        const root = document.createElement( 'div' );
+        root.className = "lexwidget";
+
+        if( options.id )
+        {
+            root.id = options.id;
+        }
+
+        if( options.title )
+        {
+            root.title = options.title;
+        }
+
+        if( options.className )
+        {
+            root.className += " " + options.className;
+        }
+
+        if( type != Widget.TITLE )
+        {
+            if( options.width )
+            {
+                root.style.width = root.style.minWidth = options.width;
+            }
+            if( options.maxWidth )
+            {
+                root.style.maxWidth = options.maxWidth;
+            }
+            if( options.minWidth )
+            {
+                root.style.minWidth = options.minWidth;
+            }
+            if( options.height )
+            {
+                root.style.height = root.style.minHeight = options.height;
+            }
+
+            LX.widgetResizeObserver.observe( root );
+        }
+
+        if( name != undefined )
+        {
+            if( !( options.hideName ?? false ) )
+            {
+                let domName = document.createElement( 'div' );
+                domName.className = "lexwidgetname";
+
+                if( options.justifyName )
+                {
+                    domName.classList.add( "float-" + options.justifyName );
+                }
+
+                domName.innerHTML = name;
+                domName.title = options.title ?? domName.innerHTML;
+                domName.style.width = options.nameWidth || LX.DEFAULT_NAME_WIDTH;
+                domName.style.minWidth = domName.style.width;
+
+                root.appendChild( domName );
+                root.domName = domName;
+
+                const that = this;
+
+                // Copy-paste info
+                domName.addEventListener('contextmenu', function( e ) {
+                    e.preventDefault();
+                    that.oncontextmenu( e );
+                });
+
+                if( !( options.skipReset ?? false )  && ( value != null ) )
+                {
+                    this._addResetProperty( domName, function( e ) {
+                        that.set( that._initialValue, false, e );
+                        this.style.display = "none"; // Og value, don't show it
+                    });
+                }
+            }
+        }
+        else
+        {
+            options.hideName = true;
+        }
+
+        if( options.signal )
+        {
+            LX.addSignal( options.signal, this );
+        }
+
+        this.root = root;
+        this.root.jsInstance = this;
+        this.options = options;
+    }
+
+    static _dispatchEvent( element, type, data, bubbles, cancelable ) {
+        let event = new CustomEvent( type, { 'detail': data, 'bubbles': bubbles, 'cancelable': cancelable } );
+        element.dispatchEvent( event );
+    }
+
+    _addResetProperty( container, callback ) {
+
+        const domEl = LX.makeIcon( "Undo2", { iconClass: "ml-0 mr-1 px-1", title: "Reset" } );
+        domEl.style.display = "none";
+        domEl.addEventListener( "click", callback );
+        container.appendChild( domEl );
+        return domEl;
+    }
+
+    _canPaste() {
+        let pasteAllowed = this.type === Widget.CUSTOM ?
+            ( navigator.clipboard.customIdx !== undefined && this.customIdx == navigator.clipboard.customIdx ) : navigator.clipboard.type === this.type;
+
+        pasteAllowed &= ( this.disabled !== true );
+
+        if( this.onAllowPaste )
+        {
+            pasteAllowed = this.onAllowPaste( pasteAllowed );
+        }
+
+        return pasteAllowed;
+    }
+
+    _trigger( event, callback, scope = this ) {
+
+        if( !callback )
+        {
+            return;
+        }
+
+        callback.call( scope, event.value, event.domEvent, event.name );
+    }
+
+    value() {
+
+        if( this.onGetValue )
+        {
+            return this.onGetValue();
+        }
+
+        console.warn( "Can't get value of " + this.typeName() );
+    }
+
+    set( value, skipCallback, event ) {
+
+        if( this.onSetValue )
+        {
+            let resetButton = this.root.querySelector( ".lexwidgetname .lexicon" );
+            if( resetButton )
+            {
+                resetButton.style.display = ( value != this.value() ? "block" : "none" );
+
+                const equalInitial = value.constructor === Array ? (function arraysEqual(a, b) {
+                    if (a === b) return true;
+                    if (a == null || b == null) return false;
+                    if (a.length !== b.length) return false;
+                    for (var i = 0; i < a.length; ++i) {
+                        if (a[ i ] !== b[ i ]) return false;
+                    }
+                    return true;
+                })( value, this._initialValue ) : ( value == this._initialValue );
+
+                resetButton.style.display = ( !equalInitial ? "block" : "none" );
+            }
+
+            return this.onSetValue( value, skipCallback ?? false, event );
+        }
+
+        console.warn("Can't set value of " + this.typeName());
+    }
+
+    oncontextmenu( e ) {
+
+        if( Widget.NO_CONTEXT_TYPES.includes( this.type ) )
+        {
+            return;
+        }
+
+        LX.addContextMenu( this.typeName(), e, c => {
+            c.add("Copy", () => { this.copy(); });
+            c.add("Paste", { disabled: !this._canPaste(), callback: () => { this.paste(); } } );
+        });
+    }
+
+    copy() {
+        navigator.clipboard.type = this.type;
+        navigator.clipboard.customIdx = this.customIdx;
+        navigator.clipboard.data = this.value();
+        navigator.clipboard.writeText( navigator.clipboard.data );
+    }
+
+    paste() {
+        if( !this._canPaste() )
+        {
+            return;
+        }
+
+        this.set( navigator.clipboard.data );
+    }
+
+    typeName() {
+
+        switch( this.type )
+        {
+            case Widget.TEXT: return "Text";
+            case Widget.TEXTAREA: return "TextArea";
+            case Widget.BUTTON: return "Button";
+            case Widget.SELECT: return "Select";
+            case Widget.CHECKBOX: return "Checkbox";
+            case Widget.TOGGLE: return "Toggle";
+            case Widget.RADIO: return "Radio";
+            case Widget.COLOR: return "Color";
+            case Widget.RANGE: return "Range";
+            case Widget.NUMBER: return "Number";
+            case Widget.VECTOR: return "Vector";
+            case Widget.TREE: return "Tree";
+            case Widget.PROGRESS: return "Progress";
+            case Widget.FILE: return "File";
+            case Widget.LAYERS: return "Layers";
+            case Widget.ARRAY: return "Array";
+            case Widget.LIST: return "List";
+            case Widget.TAGS: return "Tags";
+            case Widget.CURVE: return "Curve";
+            case Widget.KNOB: return "Knob";
+            case Widget.SIZE: return "Size";
+            case Widget.PAD: return "Pad";
+            case Widget.FORM: return "Form";
+            case Widget.DIAL: return "Dial";
+            case Widget.COUNTER: return "Counter";
+            case Widget.TABLE: return "Table";
+            case Widget.TABS: return "Tabs";
+            case Widget.DATE: return "Date";
+            case Widget.MAP2D: return "Map2D";
+            case Widget.LABEL: return "Label";
+            case Widget.BLANK: return "Blank";
+            case Widget.CUSTOM: return this.customName;
+        }
+
+        console.error( `Unknown Widget type: ${ this.type }` );
+    }
+
+    refresh() {
+
+    }
+}
+
+LX.Widget = Widget;
+
+function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
+{
+    let customIdx = LX.guidGenerator();
+
+    LX.Panel.prototype[ 'add' + customWidgetName ] = function( name, instance, callback ) {
+
+        options.nameWidth = "100%";
+
+        let widget = new Widget( Widget.CUSTOM, name, null, options );
+        this._attachWidget( widget );
+
+        widget.customName = customWidgetName;
+        widget.customIdx = customIdx;
+
+        widget.onGetValue = () => {
+            return instance;
+        };
+
+        widget.onSetValue = ( newValue, skipCallback, event ) => {
+            instance = newValue;
+            refresh_widget();
+            element.querySelector( ".lexcustomitems" ).toggleAttribute( 'hidden', false );
+            if( !skipCallback )
+            {
+                widget._trigger( new LX.IEvent( name, instance, event ), callback );
+            }
+        };
+
+        const element = widget.root;
+
+        let container, customWidgetsDom;
+        let defaultInstance = options.default ?? {};
+
+        // Add instance button
+
+        const refresh_widget = () => {
+
+            if( instance )
+            {
+                widget.instance = instance = Object.assign( LX.deepCopy(defaultInstance), instance );
+            }
+
+            if( container ) container.remove();
+            if( customWidgetsDom ) customWidgetsDom.remove();
+
+            container = document.createElement('div');
+            container.className = "lexcustomcontainer";
+            container.style.width = "100%";
+            element.appendChild( container );
+            element.dataset["opened"] = false;
+
+            const customIcon = LX.makeIcon( options.icon ?? "Box" );
+            const menuIcon = LX.makeIcon( "Menu" );
+
+            let buttonName = customWidgetName + (!instance ? " [empty]" : "");
+            let buttonEl = this.addButton(null, buttonName, (value, event) => {
+                if( instance )
+                {
+                    element.querySelector(".lexcustomitems").toggleAttribute('hidden');
+                    element.dataset["opened"] = !element.querySelector(".lexcustomitems").hasAttribute("hidden");
+                }
+                else
+                {
+                    LX.addContextMenu(null, event, c => {
+                        c.add("New " + customWidgetName, () => {
+                            instance = {};
+                            refresh_widget();
+                            element.querySelector(".lexcustomitems").toggleAttribute('hidden', false);
+                            element.dataset["opened"] = !element.querySelector(".lexcustomitems").hasAttribute("hidden");
+                        });
+                    });
+                }
+
+            }, { buttonClass: 'custom' });
+
+            const buttonSpan = buttonEl.root.querySelector( "span" );
+            buttonSpan.prepend( customIcon );
+            buttonSpan.appendChild( menuIcon );
+            container.appendChild( buttonEl.root );
+
+            if( instance )
+            {
+                menuIcon.addEventListener( "click", e => {
+                    e.stopImmediatePropagation();
+                    e.stopPropagation();
+                    LX.addContextMenu(null, e, c => {
+                        c.add("Clear", () => {
+                            instance = null;
+                            refresh_widget();
+                        });
+                    });
+                });
+            }
+
+            // Show elements
+
+            customWidgetsDom = document.createElement('div');
+            customWidgetsDom.className = "lexcustomitems";
+            customWidgetsDom.toggleAttribute('hidden', true);
+            element.appendChild( customWidgetsDom );
+
+            if( instance )
+            {
+                this.queue( customWidgetsDom );
+
+                const on_instance_changed = ( key, value, event ) => {
+                    instance[ key ] = value;
+                    widget._trigger( new LX.IEvent( name, instance, event ), callback );
+                };
+
+                for( let key in defaultInstance )
+                {
+                    const value = instance[ key ] ?? defaultInstance[ key ];
+
+                    switch( value.constructor )
+                    {
+                        case String:
+                            if( value[ 0 ] === '#' )
+                            {
+                                this.addColor( key, value, on_instance_changed.bind( this, key ) );
+                            }
+                            else
+                            {
+                                this.addText( key, value, on_instance_changed.bind( this, key ) );
+                            }
+                            break;
+                        case Number:
+                            this.addNumber( key, value, on_instance_changed.bind( this, key ) );
+                            break;
+                        case Boolean:
+                            this.addCheckbox( key, value, on_instance_changed.bind( this, key ) );
+                            break;
+                        case Array:
+                            if( value.length > 4 )
+                            {
+                                this.addArray( key, value, on_instance_changed.bind( this, key ) );
+                            }
+                            else
+                            {
+                                this._addVector( value.length, key, value, on_instance_changed.bind( this, key ) );
+                            }
+                            break;
+                    }
+                }
+
+                this.clearQueue();
+            }
+        };
+
+        refresh_widget();
+    };
+}
+
+LX.ADD_CUSTOM_WIDGET = ADD_CUSTOM_WIDGET;
+
+/**
+ * @class NodeTree
+ */
+
+class NodeTree {
+
+    constructor( domEl, data, options ) {
+
+        this.domEl = domEl;
+        this.data = data;
+        this.onevent = options.onevent;
+        this.options = options;
+        this.selected = [];
+
+        this._forceClose = false;
+
+        if( data.constructor === Object )
+        {
+            this._createItem( null, data );
+        }
+        else
+        {
+            for( let d of data )
+            {
+                this._createItem( null, d );
+            }
+        }
+    }
+
+    _createItem( parent, node, level = 0, selectedId ) {
+
+        const that = this;
+        const nodeFilterInput = this.domEl.querySelector( ".lexnodetreefilter" );
+
+        node.children = node.children ?? [];
+
+        if( nodeFilterInput && nodeFilterInput.value != "" && !node.id.includes( nodeFilterInput.value ) )
+        {
+            for( var i = 0; i < node.children.length; ++i )
+            {
+                this._createItem( node, node.children[ i ], level + 1, selectedId );
+            }
+
+            return;
+        }
+
+        const list = this.domEl.querySelector( 'ul' );
+
+        node.visible = node.visible ?? true;
+        node.parent = parent;
+        let isParent = node.children.length > 0;
+        let isSelected = this.selected.indexOf( node ) > -1 || node.selected;
+
+        if( this.options.onlyFolders )
+        {
+            let has_folders = false;
+            node.children.forEach( c => has_folders |= (c.type == 'folder') );
+            isParent = !!has_folders;
+        }
+
+        let item = document.createElement('li');
+        item.className = "lextreeitem " + "datalevel" + level + (isParent ? " parent" : "") + (isSelected ? " selected" : "");
+        item.id = LX.getSupportedDOMName( node.id );
+        item.tabIndex = "0";
+        item.treeData = node;
+
+        // Select hierarchy icon
+        let icon = (this.options.skipDefaultIcon ?? true) ? null : "Dot"; // Default: no childs
+        if( isParent )
+        {
+            icon = node.closed ? "Right" : "Down";
+        }
+
+        if( icon )
+        {
+            item.appendChild( LX.makeIcon( icon, { iconClass: "hierarchy", svgClass: "xs" } ) );
+        }
+
+        // Add display icon
+        icon = node.icon;
+
+        // Process icon
+        if( icon )
+        {
+            if( !node.icon.includes( '.' ) ) // Not a file
+            {
+                const classes = node.icon.split( ' ' );
+                const nodeIcon = LX.makeIcon( classes[ 0 ], { iconClass: "tree-item-icon mr-2", svgClass: "md" + ( classes.length > 1 ? ` ${ classes.slice( 0 ).join( ' ' ) }` : '' ) } );
+                item.appendChild( nodeIcon );
+            }
+            else // an image..
+            {
+                const rootPath = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/";
+                item.innerHTML += "<img src='" + ( rootPath + node.icon ) + "'>";
+            }
+        }
+
+        item.innerHTML += (node.rename ? "" : node.id);
+
+        item.setAttribute( 'draggable', true );
+        item.style.paddingLeft = ((3 + (level+1) * 15)) + "px";
+        list.appendChild( item );
+
+        // Callbacks
+        item.addEventListener("click", e => {
+            if( handled )
+            {
+                handled = false;
+                return;
+            }
+
+            if( !e.shiftKey )
+            {
+                list.querySelectorAll( "li" ).forEach( e => { e.classList.remove( 'selected' ); } );
+                this.selected.length = 0;
+            }
+
+            // Add or remove
+            const idx = this.selected.indexOf( node );
+            if( idx > -1 )
+            {
+                item.classList.remove( 'selected' );
+                this.selected.splice( idx, 1 );
+            }
+            else
+            {
+                item.classList.add( 'selected' );
+                this.selected.push( node );
+            }
+
+            // Only Show children...
+            if( isParent && node.id.length > 1 /* Strange case... */)
+            {
+                node.closed = false;
+                if( that.onevent )
+                {
+                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_CARETCHANGED, node, node.closed );
+                    that.onevent( event );
+                }
+                that.frefresh( node.id );
+            }
+
+            if( that.onevent )
+            {
+                const event = new LX.TreeEvent(LX.TreeEvent.NODE_SELECTED, e.shiftKey ? this.selected : node );
+                event.multiple = e.shiftKey;
+                that.onevent( event );
+            }
+        });
+
+        item.addEventListener("dblclick", function() {
+
+            if( that.options.rename ?? true )
+            {
+                // Trigger rename
+                node.rename = true;
+                that.refresh();
+            }
+
+            if( that.onevent )
+            {
+                const event = new LX.TreeEvent( LX.TreeEvent.NODE_DBLCLICKED, node );
+                that.onevent( event );
+            }
+        });
+
+        item.addEventListener( "contextmenu", e => {
+
+            e.preventDefault();
+
+            if( !that.onevent )
+            {
+                return;
+            }
+
+            const event = new LX.TreeEvent(LX.TreeEvent.NODE_CONTEXTMENU, this.selected.length > 1 ? this.selected : node, e);
+            event.multiple = this.selected.length > 1;
+
+            LX.addContextMenu( event.multiple ? "Selected Nodes" : event.node.id, event.value, m => {
+                event.panel = m;
+            });
+
+            that.onevent( event );
+
+            if( this.options.addDefault ?? false )
+            {
+                if( event.panel.items )
+                {
+                    event.panel.add( "" );
+                }
+
+                event.panel.add( "Select Children", () => {
+
+                    const selectChildren = ( n ) => {
+
+                        if( n.closed )
+                        {
+                            return;
+                        }
+
+                        for( let child of n.children ?? [] )
+                        {
+                            if( !child )
+                            {
+                                continue;
+                            }
+
+                            let nodeItem = this.domEl.querySelector( '#' + child.id );
+                            nodeItem.classList.add( "selected" );
+                            this.selected.push( child );
+                            selectChildren( child );
+                        }
+                    };
+
+                    this.domEl.querySelectorAll( ".selected" ).forEach( i => i.classList.remove( "selected" ) );
+                    this.selected.length = 0;
+
+                    // Add childs of the clicked node
+                    selectChildren( node );
+                } );
+
+                event.panel.add( "Delete", { callback: () => {
+                    // It's the root node
+                    if( !node.parent )
+                    {
+                        return;
+                    }
+
+                    if( that.onevent )
+                    {
+                        const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, node, e );
+                        that.onevent( event );
+                    }
+
+                    // Delete nodes now
+                    let childs = node.parent.children;
+                    const index = childs.indexOf( node );
+                    childs.splice( index, 1 );
+
+                    this.refresh();
+                } } );
+            }
+        });
+
+        item.addEventListener("keydown", e => {
+
+            if( node.rename )
+            {
+                return;
+            }
+
+            e.preventDefault();
+
+            if( e.key == "Delete" )
+            {
+                // Send event now so we have the info in selected array..
+                if( that.onevent )
+                {
+                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, this.selected.length > 1 ? this.selected : node, e );
+                    event.multiple = this.selected.length > 1;
+                    that.onevent( event );
+                }
+
+                // Delete nodes now
+                for( let _node of this.selected )
+                {
+                    let childs = _node.parent.children;
+                    const index = childs.indexOf( _node );
+                    childs.splice( index, 1 );
+                }
+
+                this.selected.length = 0;
+                this.refresh();
+            }
+            else if( e.key == "ArrowUp" || e.key == "ArrowDown" ) // Unique or zero selected
+            {
+                var selected = this.selected.length > 1 ? ( e.key == "ArrowUp" ? this.selected.shift() : this.selected.pop() ) : this.selected[ 0 ];
+                var el = this.domEl.querySelector( "#" + LX.getSupportedDOMName( selected.id ) );
+                var sibling = e.key == "ArrowUp" ? el.previousSibling : el.nextSibling;
+                if( sibling )
+                {
+                    sibling.click();
+                }
+            }
+        });
+
+        // Node rename
+
+        const nameInput = document.createElement( "input" );
+        nameInput.toggleAttribute( "hidden", !node.rename );
+        nameInput.className = "bg-none";
+        nameInput.value = node.id;
+        item.appendChild( nameInput );
+
+        if( node.rename )
+        {
+            item.classList.add('selected');
+            nameInput.focus();
+        }
+
+        nameInput.addEventListener("keyup", function( e ) {
+            if( e.key == "Enter" )
+            {
+                this.value = this.value.replace(/\s/g, '_');
+
+                if( that.onevent )
+                {
+                    const event = new LX.TreeEvent(LX.TreeEvent.NODE_RENAMED, node, this.value);
+                    that.onevent( event );
+                }
+
+                node.id = LX.getSupportedDOMName( this.value );
+                delete node.rename;
+                that.frefresh( node.id );
+                list.querySelector( "#" + node.id ).classList.add('selected');
+            }
+            else if(e.key == "Escape")
+            {
+                delete node.rename;
+                that.frefresh( node.id );
+            }
+        });
+
+        nameInput.addEventListener("blur", function( e ) {
+            delete node.rename;
+            that.refresh();
+        });
+
+        if( this.options.draggable ?? true )
+        {
+            // Drag nodes
+            if( parent ) // Root doesn't move!
+            {
+                item.addEventListener("dragstart", e => {
+                    window.__tree_node_dragged = node;
+                });
+            }
+
+            /* Events fired on other node items */
+            item.addEventListener("dragover", e => {
+                e.preventDefault(); // allow drop
+            }, false );
+            item.addEventListener("dragenter", (e) => {
+                e.target.classList.add("draggingover");
+            });
+            item.addEventListener("dragleave", (e) => {
+                e.target.classList.remove("draggingover");
+            });
+            item.addEventListener("drop", e => {
+                e.preventDefault(); // Prevent default action (open as link for some elements)
+                let dragged = window.__tree_node_dragged;
+                if(!dragged)
+                    return;
+                let target = node;
+                // Can't drop to same node
+                if( dragged.id == target.id )
+                {
+                    console.warn("Cannot parent node to itself!");
+                    return;
+                }
+
+                // Can't drop to child node
+                const isChild = function( newParent, node ) {
+                    var result = false;
+                    for( var c of node.children )
+                    {
+                        if( c.id == newParent.id ) return true;
+                        result |= isChild( newParent, c );
+                    }
+                    return result;
+                };
+
+                if( isChild( target, dragged ))
+                {
+                    console.warn("Cannot parent node to a current child!");
+                    return;
+                }
+
+                // Trigger node dragger event
+                if( that.onevent )
+                {
+                    const event = new LX.TreeEvent(LX.TreeEvent.NODE_DRAGGED, dragged, target);
+                    that.onevent( event );
+                }
+
+                const index = dragged.parent.children.findIndex(n => n.id == dragged.id);
+                const removed = dragged.parent.children.splice(index, 1);
+                target.children.push( removed[ 0 ] );
+                that.refresh();
+                delete window.__tree_node_dragged;
+            });
+        }
+
+        let handled = false;
+
+        // Show/hide children
+        if( isParent )
+        {
+            item.querySelector('a.hierarchy').addEventListener("click", function( e ) {
+
+                handled = true;
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+
+                if( e.altKey )
+                {
+                    const _closeNode = function( node ) {
+                        node.closed = !node.closed;
+                        for( var c of node.children )
+                        {
+                            _closeNode( c );
+                        }
+                    };
+                    _closeNode( node );
+                }
+                else
+                {
+                    node.closed = !node.closed;
+                }
+
+                if( that.onevent )
+                {
+                    const event = new LX.TreeEvent(LX.TreeEvent.NODE_CARETCHANGED, node, node.closed);
+                    that.onevent( event );
+                }
+                that.frefresh( node.id );
+            });
+        }
+
+        // Add button icons
+
+        const inputContainer = document.createElement( "div" );
+        item.appendChild( inputContainer );
+
+        if( node.actions )
+        {
+            for( let i = 0; i < node.actions.length; ++i )
+            {
+                const action = node.actions[ i ];
+                const actionIcon = LX.makeIcon( action.icon, { title: action.name } );
+                actionIcon.addEventListener("click", function( e ) {
+                    if( action.callback )
+                    {
+                        action.callback( node, actionIcon );
+                        e.stopPropagation();
+                    }
+                });
+
+                inputContainer.appendChild( actionIcon );
+            }
+        }
+
+        if( !node.skipVisibility ?? false )
+        {
+            const visibilityBtn = new LX.Button( null, "", ( swapValue, event ) => {
+                event.stopPropagation();
+                node.visible = node.visible === undefined ? false : !node.visible;
+                // Trigger visibility event
+                if( that.onevent )
+                {
+                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_VISIBILITY, node, node.visible );
+                    that.onevent( event );
+                }
+            }, { icon: node.visible ? "Eye" : "EyeOff", swap: node.visible ? "EyeOff" : "Eye", title: "Toggle visible", className: "p-0 m-0", buttonClass: "bg-none" } );
+            inputContainer.appendChild( visibilityBtn.root );
+        }
+
+        const _hasChild = function( node, id ) {
+            if( node.id == id ) return true;
+            let found = false;
+            for( var c of ( node?.children ?? [] ) )
+            {
+                found |= _hasChild( c, id );
+            }
+            return found;
+        };
+
+        const exists = _hasChild( node, selectedId );
+
+        if( node.closed && !exists )
+        {
+            return;
+        }
+
+        for( var i = 0; i < node.children.length; ++i )
+        {
+            let child = node.children[ i ];
+
+            if( this.options.onlyFolders && child.type != 'folder' )
+            {
+                continue;
+            }
+
+            this._createItem( node, child, level + 1, selectedId );
+        }
+    }
+
+    refresh( newData, selectedId ) {
+
+        this.data = newData ?? this.data;
+        this.domEl.querySelector( "ul" ).innerHTML = "";
+
+        if( this.data.constructor === Object )
+        {
+            this._createItem( null, this.data, 0, selectedId );
+        }
+        else
+        {
+            for( let d of this.data )
+            {
+                this._createItem( null, d, 0, selectedId );
+            }
+        }
+    }
+
+    /* Refreshes the tree and focuses current element */
+    frefresh( id ) {
+
+        this.refresh();
+        var el = this.domEl.querySelector( "#" + id );
+        if( el )
+        {
+            el.focus();
+        }
+    }
+
+    select( id ) {
+
+        this.refresh( null, id );
+
+        this.domEl.querySelectorAll( ".selected" ).forEach( i => i.classList.remove( "selected" ) );
+
+        // Element should exist, since tree was refreshed to show it
+        const el = this.domEl.querySelector( "#" + id );
+        console.assert(  el, "NodeTree: Can't select node " + id );
+
+        el.classList.add( "selected" );
+        this.selected = [ el.treeData ];
+        el.focus();
+    }
+}
+
+LX.NodeTree = NodeTree;
+
+/**
+ * @class Blank
+ * @description Blank Widget
+ */
+
+class Blank extends Widget {
+
+    constructor( width, height ) {
+
+        super( Widget.BLANK );
+
+        this.root.style.width = width ?? "auto";
+        this.root.style.height = height ?? "8px";
+    }
+}
+
+LX.Blank = Blank;
+
+/**
+ * @class Title
+ * @description Title Widget
+ */
+
+class Title extends Widget {
+
+    constructor( name, options = {} ) {
+
+        console.assert( name, "Can't create Title Widget without text!" );
+
+        // Note: Titles are not registered in Panel.widgets by now
+        super( Widget.TITLE, null, null, options );
+
+        this.root.className = `lextitle ${ this.root.className }`;
+
+        if( options.icon )
+        {
+            let icon = LX.makeIcon( options.icon, { iconClass: "mr-2" } );
+            icon.querySelector( "svg" ).style.color = options.iconColor || "";
+            this.root.appendChild( icon );
+        }
+
+        let text = document.createElement( "span" );
+        text.innerText = name;
+        this.root.appendChild( text );
+
+        Object.assign( this.root.style, options.style ?? {} );
+
+        if( options.link != undefined )
+        {
+            let linkDom = document.createElement('a');
+            linkDom.innerText = name;
+            linkDom.href = options.link;
+            linkDom.target = options.target ?? "";
+            linkDom.className = "lextitle link";
+            Object.assign( linkDom.style, options.style ?? {} );
+            this.root.replaceWith( linkDom );
+        }
+    }
+}
+
+LX.Title = Title;
+
+/**
+ * @class TextInput
+ * @description TextInput Widget
+ */
+
+class TextInput extends Widget {
+
+    constructor( name, value, callback, options = {} ) {
+
+        super( Widget.TEXT, name, String( value ), options );
+
+        this.onGetValue = () => {
+            return value;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+
+            if( !this.valid( newValue ) || ( this._lastValueTriggered == newValue ) )
+            {
+                return;
+            }
+
+            this._lastValueTriggered = value = newValue;
+
+            wValue.value = newValue;
+
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, newValue, event ), callback );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
+        };
+
+        this.valid = ( v ) => {
+            v = v ?? this.value();
+            if( !v.length || wValue.pattern == "" ) return true;
+            const regexp = new RegExp( wValue.pattern );
+            return regexp.test( v );
+        };
+
+        let container = document.createElement( 'div' );
+        container.className = ( options.warning ? " lexwarning" : "" );
+        container.style.display = "flex";
+        container.style.position = "relative";
+        this.root.appendChild( container );
+
+        this.disabled = ( options.disabled || options.warning ) ?? ( options.url ? true : false );
+        let wValue = null;
+
+        if( !this.disabled )
+        {
+            wValue = document.createElement( 'input' );
+            wValue.className = "lextext " + ( options.inputClass ?? "" );
+            wValue.type = options.type || "";
+            wValue.value = value || "";
+            wValue.style.textAlign = ( options.float ?? "" );
+
+            wValue.setAttribute( "placeholder", options.placeholder ?? "" );
+
+            if( options.required )
+            {
+                wValue.setAttribute( "required", options.required );
+            }
+
+            if( options.pattern )
+            {
+                wValue.setAttribute( "pattern", options.pattern );
+            }
+
+            const trigger = options.trigger ?? "default";
+
+            if( trigger == "default" )
+            {
+                wValue.addEventListener( "keyup", e => {
+                    if( e.key == "Enter" )
+                    {
+                        wValue.blur();
+                    }
+                });
+
+                wValue.addEventListener( "focusout", e => {
+                    this.set( e.target.value, false, e );
+                });
+            }
+            else if( trigger == "input" )
+            {
+                wValue.addEventListener("input", e => {
+                    this.set( e.target.value, false, e );
+                });
+            }
+
+            wValue.addEventListener( "mousedown", function( e ){
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+            });
+
+            if( options.icon )
+            {
+                wValue.style.paddingLeft = "1.75rem";
+                const icon = LX.makeIcon( options.icon, { iconClass: "absolute z-1 ml-2", svgClass: "sm" } );
+                container.appendChild( icon );
+            }
+
+        }
+        else if( options.url )
+        {
+            wValue = document.createElement( 'a' );
+            wValue.href = options.url;
+            wValue.target = "_blank";
+            wValue.innerHTML = value ?? "";
+            wValue.style.textAlign = options.float ?? "";
+            wValue.className = "lextext ellipsis-overflow";
+        }
+        else
+        {
+            wValue = document.createElement( 'input' );
+            wValue.disabled = true;
+            wValue.value = value;
+            wValue.style.textAlign = options.float ?? "";
+            wValue.className = "lextext ellipsis-overflow " + ( options.inputClass ?? "" );
+        }
+
+        if( options.fit )
+        {
+            wValue.classList.add( "size-content" );
+        }
+
+        Object.assign( wValue.style, options.style ?? {} );
+        container.appendChild( wValue );
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.TextInput = TextInput;
+
+/**
+ * @class TextArea
+ * @description TextArea Widget
+ */
+
+class TextArea extends Widget {
+
+    constructor( name, value, callback, options = {} ) {
+
+        super( Widget.TEXTAREA, name, value, options );
+
+        this.onGetValue = () => {
+            return value;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+
+            wValue.value = value = newValue;
+
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, newValue, event ), callback );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
+        };
+
+        let container = document.createElement( "div" );
+        container.className = "lextextarea";
+        container.style.display = "flex";
+        this.root.appendChild( container );
+
+        let wValue = document.createElement( "textarea" );
+        wValue.value = value ?? "";
+        wValue.className = ( options.inputClass ?? "" );
+        wValue.style.textAlign = options.float ?? "";
+        Object.assign( wValue.style, options.style ?? {} );
+
+        if( options.fitHeight ?? false )
+        {
+            wValue.classList.add( "size-content" );
+        }
+
+        if( !( options.resize ?? true ) )
+        {
+            wValue.classList.add( "resize-none" );
+        }
+
+        container.appendChild( wValue );
+
+        if( options.disabled ?? false )
+        {
+            this.disabled = true;
+            wValue.setAttribute( "disabled", true );
+        }
+
+        if( options.placeholder )
+        {
+            wValue.setAttribute( "placeholder", options.placeholder );
+        }
+
+        const trigger = options.trigger ?? "default";
+
+        if( trigger == "default" )
+        {
+            wValue.addEventListener("keyup", function(e) {
+                if( e.key == "Enter" )
+                {
+                    wValue.blur();
+                }
+            });
+
+            wValue.addEventListener("focusout", e => {
+                this.set( e.target.value, false, e );
+            });
+        }
+        else if( trigger == "input" )
+        {
+            wValue.addEventListener("input", e => {
+                this.set( e.target.value, false, e );
+            });
+        }
+
+        if( options.icon )
+        {
+            const icon = LX.makeIcon( options.icon, { iconClass: "absolute z-1 ml-2", svgClass: "sm" } );
+            container.appendChild( icon );
+        }
+
+        LX.doAsync( () => {
+            container.style.height = options.height ?? "";
+            this.onResize();
+        }, 10 );
+    }
+}
+
+LX.TextArea = TextArea;
+
+/**
+ * @class Button
+ * @description Button Widget
+ */
+
+class Button extends Widget {
+
+    constructor( name, value, callback, options = {} ) {
+
+        super( Widget.BUTTON, name, null, options );
+
+        this.onGetValue = () => {
+            return wValue.querySelector( "input" )?.checked;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+
+            if( ( options.swap ?? false ) )
+            {
+                this.root.setState( newValue, skipCallback );
+                return;
+            }
+
+            // No-swap buttons
+
+            wValue.innerHTML = "";
+
+            if( options.icon )
+            {
+                const icon = LX.makeIcon( options.icon );
+                wValue.prepend( icon );
+            }
+            else if( options.img )
+            {
+                let img = document.createElement( 'img' );
+                img.src = options.img;
+                wValue.prepend( img );
+            }
+            else
+            {
+                wValue.innerHTML = `<span>${ ( newValue ?? "" ) }</span>`;
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            wValue.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
+        var wValue = document.createElement( 'button' );
+        wValue.title = options.tooltip ? "" : ( options.title ?? "" );
+        wValue.className = "lexbutton p-1 " + ( options.buttonClass ?? "" );
+
+        this.root.appendChild( wValue );
+
+        if( options.selected )
+        {
+            wValue.classList.add( "selected" );
+        }
+
+        if( options.icon )
+        {
+            const icon = LX.makeIcon( options.icon );
+            wValue.prepend( icon );
+            wValue.classList.add( "justify-center" );
+        }
+        else if( options.img )
+        {
+            let img = document.createElement( 'img' );
+            img.src = options.img;
+            wValue.prepend( img );
+        }
+        else
+        {
+            wValue.innerHTML = `<span>${ ( value || "" ) }</span>`;
+        }
+
+        if( options.disabled )
+        {
+            this.disabled = true;
+            wValue.setAttribute( "disabled", true );
+        }
+
+        let trigger = wValue;
+
+        if( options.swap )
+        {
+            wValue.classList.add( "swap" );
+            wValue.querySelector( "a" ).classList.add( "swap-off" );
+
+            const input = document.createElement( "input" );
+            input.className = "p-0 border-0";
+            input.type = "checkbox";
+            wValue.prepend( input );
+
+            const swapIcon = LX.makeIcon( options.swap, { iconClass: "swap-on" } );
+            wValue.appendChild( swapIcon );
+
+            this.root.swap = function( skipCallback ) {
+                const swapInput = wValue.querySelector( "input" );
+                swapInput.checked = !swapInput.checked;
+                if( !skipCallback )
+                {
+                    trigger.click();
+                }
+            };
+
+            // Set if swap has to be performed
+            this.root.setState = function( v, skipCallback ) {
+                const swapInput = wValue.querySelector( "input" );
+                swapInput.checked = v;
+                if( !skipCallback )
+                {
+                    trigger.click();
+                }
+            };
+        }
+
+        trigger.addEventListener( "click", e => {
+            if( options.selectable )
+            {
+                if( options.parent )
+                {
+                    options.parent.querySelectorAll(".lexbutton.selected").forEach( b => { if( b == wValue ) return; b.classList.remove( "selected" ); } );
+                }
+
+                wValue.classList.toggle('selected');
+            }
+
+            const swapInput = wValue.querySelector( "input" );
+            this._trigger( new LX.IEvent( name, swapInput?.checked ?? value, e ), callback );
+        });
+
+        if( options.tooltip )
+        {
+            LX.asTooltip( wValue, options.title ?? name );
+        }
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.Button = Button;
+
+/**
+ * @class ComboButtons
+ * @description ComboButtons Widget
+ */
+
+class ComboButtons extends Widget {
+
+    constructor( name, values, options = {} ) {
+
+        const shouldSelect = !( options.noSelection ?? false );
+        let shouldToggle = shouldSelect && ( options.toggle ?? false );
+
+        let container = document.createElement('div');
+        container.className = "lexcombobuttons ";
+
+        options.skipReset = true;
+
+        if( options.float )
+        {
+            container.className += options.float;
+        }
+
+        let currentValue = [];
+        let buttonsBox = document.createElement('div');
+        buttonsBox.className = "lexcombobuttonsbox ";
+        container.appendChild( buttonsBox );
+
+        for( let b of values )
+        {
+            if( !b.value )
+            {
+                throw( "Set 'value' for each button!" );
+            }
+
+            let buttonEl = document.createElement('button');
+            buttonEl.className = "lexbutton combo";
+            buttonEl.title = b.icon ? b.value : "";
+            buttonEl.id = b.id ?? "";
+            buttonEl.dataset["value"] = b.value;
+
+            if( options.buttonClass )
+            {
+                buttonEl.classList.add( options.buttonClass );
+            }
+
+            if( shouldSelect && ( b.selected || options.selected?.includes( b.value ) ) )
+            {
+                buttonEl.classList.add("selected");
+                currentValue = ( currentValue ).concat( [ b.value ] );
+            }
+
+            if( b.icon )
+            {
+                const icon = LX.makeIcon( b.icon );
+                buttonEl.appendChild( icon );
+            }
+            else
+            {
+                buttonEl.innerHTML = `<span>${ b.value }</span>`;
+            }
+
+            if( b.disabled )
+            {
+                buttonEl.setAttribute( "disabled", true );
+            }
+
+            buttonEl.addEventListener("click", e => {
+
+                currentValue = [];
+
+                if( shouldSelect )
+                {
+                    if( shouldToggle )
+                    {
+                        buttonEl.classList.toggle( "selected" );
+                    }
+                    else
+                    {
+                        container.querySelectorAll( "button" ).forEach( s => s.classList.remove( "selected" ));
+                        buttonEl.classList.add( "selected" );
+                    }
+                }
+
+                container.querySelectorAll( "button" ).forEach( s => {
+
+                    if( s.classList.contains( "selected" ) )
+                    {
+                        currentValue.push( s.dataset[ "value" ] );
+                    }
+
+                } );
+
+                if( !shouldToggle && currentValue.length > 1 )
+                {
+                    console.error( `Enable _options.toggle_ to allow selecting multiple options in ComboButtons.` );
+                    return;
+                }
+
+                currentValue = currentValue[ 0 ];
+
+                this.set( b.value, false, buttonEl.classList.contains( "selected" ) );
+            });
+
+            buttonsBox.appendChild( buttonEl );
+        }
+
+        if( currentValue.length > 1 )
+        {
+            if( !shouldToggle )
+            {
+                options.toggle = true;
+                shouldToggle = shouldSelect;
+                console.warn( `Multiple options selected in '${ name }' ComboButtons. Enabling _toggle_ mode.` );
+            }
+        }
+        else
+        {
+            currentValue = currentValue[ 0 ];
+        }
+
+        super( Widget.BUTTONS, name, null, options );
+
+        this.onGetValue = () => {
+            return currentValue;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+
+            if( shouldSelect && ( event == undefined ) )
+            {
+                container.querySelectorAll( "button" ).forEach( s => s.classList.remove( "selected" ));
+
+                container.querySelectorAll( "button" ).forEach( s => {
+                    if( currentValue && currentValue.indexOf( s.dataset[ "value" ] ) > -1 )
+                    {
+                        s.classList.add( "selected" );
+                    }
+                } );
+            }
+
+            if( !skipCallback && newValue.constructor != Array )
+            {
+                const enabled = event;
+                const fn = values.filter( v => v.value == newValue )[ 0 ]?.callback;
+                this._trigger( new LX.IEvent( name, shouldToggle ? [ newValue, enabled ] : newValue, null ), fn );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
+        this.root.appendChild( container );
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.ComboButtons = ComboButtons;
+
+/**
+ * @class Card
+ * @description Card Widget
+ */
+
+class Card extends Widget {
+
+    constructor( name, options = {} ) {
+
+        options.hideName = true;
+
+        super( Widget.CARD, name, null, options );
+
+        let container = document.createElement('div');
+        container.className = "lexcard";
+        container.style.width = "100%";
+        this.root.appendChild( container );
+
+        if( options.img )
+        {
+            let img = document.createElement('img');
+            img.src = options.img;
+            container.appendChild( img );
+
+            if( options.link != undefined )
+            {
+                img.style.cursor = "pointer";
+                img.addEventListener('click', function() {
+                    const hLink = container.querySelector('a');
+                    if( hLink )
+                    {
+                        hLink.click();
+                    }
+                });
+            }
+        }
+
+        let cardNameDom = document.createElement('span');
+        cardNameDom.innerText = name;
+        container.appendChild( cardNameDom );
+
+        if( options.link != undefined )
+        {
+            let cardLinkDom = document.createElement( 'a' );
+            cardLinkDom.innerText = name;
+            cardLinkDom.href = options.link;
+            cardLinkDom.target = options.target ?? "";
+            cardNameDom.innerText = "";
+            cardNameDom.appendChild( cardLinkDom );
+        }
+
+        if( options.callback )
+        {
+            container.style.cursor = "pointer";
+            container.addEventListener("click", ( e ) => {
+                this._trigger( new LX.IEvent( name, null, e ), options.callback );
+            });
+        }
+    }
+}
+
+LX.Card = Card;
+
+/**
+ * @class Form
+ * @description Form Widget
+ */
+
+class Form extends Widget {
+
+    constructor( name, data, callback, options = {} ) {
+
+        if( data.constructor != Object )
+        {
+            console.error( "Form data must be an Object" );
+            return;
+        }
+
+        // Always hide name for this one
+        options.hideName = true;
+
+        super( Widget.FORM, name, null, options );
+
+        this.onGetValue = () => {
+            return container.formData;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+            container.formData = newValue;
+            const entries = container.querySelectorAll( ".lexwidget" );
+            for( let i = 0; i < entries.length; ++i )
+            {
+                const entry = entries[ i ];
+                if( entry.jsInstance.type != LX.Widget.TEXT )
+                {
+                    continue;
+                }
+                let entryName = entries[ i ].querySelector( ".lexwidgetname" ).innerText;
+                let entryInput = entries[ i ].querySelector( ".lextext input" );
+                entryInput.value = newValue[ entryName ] ?? "";
+                Widget._dispatchEvent( entryInput, "focusout", skipCallback );
+            }
+        };
+
+        let container = document.createElement( 'div' );
+        container.className = "lexformdata";
+        container.style.width = "100%";
+        container.formData = {};
+        this.root.appendChild( container );
+
+        for( let entry in data )
+        {
+            let entryData = data[ entry ];
+
+            if( entryData.constructor != Object )
+            {
+                entryData = { };
+                data[ entry ] = entryData;
+            }
+
+            entryData.placeholder = entryData.placeholder ?? entry;
+            entryData.width = "100%";
+
+            if( !( options.skipLabels ?? false ) )
+            {
+                const label = new LX.TextInput( null, entry, null, { disabled: true, inputClass: "formlabel nobg" } );
+                container.appendChild( label.root );
+            }
+
+            entryData.textWidget = new LX.TextInput( null, entryData.constructor == Object ? entryData.value : entryData, ( value ) => {
+                container.formData[ entry ] = value;
+            }, entryData );
+            container.appendChild( entryData.textWidget.root );
+
+            container.formData[ entry ] = entryData.constructor == Object ? entryData.value : entryData;
+        }
+
+        const buttonContainer = LX.makeContainer( ["100%", "auto"], "flex flex-row", "", container );
+
+        if( options.secondaryActionName || options.secondaryActionCallback )
+        {
+            const secondaryButton = new LX.Button( null, options.secondaryActionName ?? "Cancel", ( value, event ) => {
+                if( callback )
+                {
+                    callback( container.formData, event );
+                }
+            }, { width: "100%", minWidth: "0", buttonClass: options.secondaryButtonClass ?? "primary" } );
+
+            buttonContainer.appendChild( secondaryButton.root );
+        }
+
+        const primaryButton = new LX.Button( null, options.primaryActionName ?? "Submit", ( value, event ) => {
+
+            for( let entry in data )
+            {
+                let entryData = data[ entry ];
+
+                if( !entryData.textWidget.valid() )
+                {
+                    return;
+                }
+            }
+
+            if( callback )
+            {
+                callback( container.formData, event );
+            }
+        }, { width: "100%", minWidth: "0", buttonClass: options.primaryButtonClass ?? "contrast" } );
+
+        buttonContainer.appendChild( primaryButton.root );
+    }
+}
+
+LX.Form = Form;
+
+/**
+ * @class Select
+ * @description Select Widget
+ */
+
+class Select extends Widget {
+
+    constructor( name, values, value, callback, options = {} ) {
+
+        super( Widget.SELECT, name, value, options );
+
+        this.onGetValue = () => {
+            return value;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+            value = newValue;
+
+            let item = null;
+            const options = listOptions.childNodes;
+            options.forEach( e => {
+                e.classList.remove( "selected" );
+                if( e.getAttribute( "value" ) == newValue )
+                {
+                    item = e;
+                }
+            } );
+
+            console.assert( item, `Item ${ newValue } does not exist in the Select.` );
+            item.classList.add( "selected" );
+            selectedOption.refresh( value );
+
+            // Reset filter
+            if( filter )
+            {
+                filter.root.querySelector( "input" ).value = "";
+                const filteredOptions = this._filterOptions( values, "" );
+                list.refresh( filteredOptions );
+            }
+
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, value, event ), callback );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
+        };
+
+        let container = document.createElement( "div" );
+        container.className = "lexselect";
+        this.root.appendChild( container );
+
+        let wValue = document.createElement( 'div' );
+        wValue.className = "lexselect lexoption";
+        wValue.name = name;
+        wValue.iValue = value;
+
+        if( options.overflowContainer )
+        {
+            options.overflowContainerX = options.overflowContainerY = options.overflowContainer;
+        }
+
+        const _placeOptions = ( parent ) => {
+
+            const selectRoot = selectedOption.root;
+            const rect = selectRoot.getBoundingClientRect();
+            const nestedDialog = parent.parentElement.closest( "dialog" ) ?? parent.parentElement.closest( ".lexcolorpicker" );
+
+            // Manage vertical aspect
+            {
+                const overflowContainer = options.overflowContainerY ?? parent.getParentArea();
+                const listHeight = parent.offsetHeight;
+                let topPosition = rect.y;
+
+                let maxY = window.innerHeight;
+
+                if( overflowContainer )
+                {
+                    const parentRect = overflowContainer.getBoundingClientRect();
+                    maxY = parentRect.y + parentRect.height;
+                }
+
+                if( nestedDialog )
+                {
+                    const rect = nestedDialog.getBoundingClientRect();
+                    topPosition -= rect.y;
+                    maxY -= rect.y;
+                }
+
+                parent.style.top = ( topPosition + selectRoot.offsetHeight ) + 'px';
+
+                const showAbove = ( topPosition + listHeight ) > maxY;
+                if( showAbove )
+                {
+                    parent.style.top = ( topPosition - listHeight ) + 'px';
+                    parent.classList.add( "place-above" );
+                }
+            }
+
+            // Manage horizontal aspect
+            {
+                const overflowContainer = options.overflowContainerX ?? parent.getParentArea();
+                const listWidth = parent.offsetWidth;
+                let leftPosition = rect.x;
+
+                parent.style.minWidth = ( rect.width ) + 'px';
+
+                if( nestedDialog )
+                {
+                    const rect = nestedDialog.getBoundingClientRect();
+                    leftPosition -= rect.x;
+                }
+
+                parent.style.left = ( leftPosition ) + 'px';
+
+                let maxX = window.innerWidth;
+
+                if( overflowContainer )
+                {
+                    const parentRect = overflowContainer.getBoundingClientRect();
+                    maxX = parentRect.x + parentRect.width;
+                }
+
+                const showLeft = ( leftPosition + listWidth ) > maxX;
+                if( showLeft )
+                {
+                    parent.style.left = ( leftPosition - ( listWidth - rect.width ) ) + 'px';
+                }
+            }
+        };
+
+        let selectedOption = new LX.Button( null, value, ( value, event ) => {
+            if( list.unfocus_event )
+            {
+                delete list.unfocus_event;
+                return;
+            }
+
+            listDialog.classList.remove( "place-above" );
+            const opened = listDialog.hasAttribute( "open" );
+
+            if( !opened )
+            {
+                listDialog.show();
+                _placeOptions( listDialog );
+            }
+            else
+            {
+                listDialog.close();
+            }
+
+            if( filter )
+            {
+                filter.root.querySelector( "input" ).focus();
+            }
+
+        }, { buttonClass: "array", skipInlineCount: true, disabled: options.disabled } );
+
+        selectedOption.root.style.width = "100%";
+        selectedOption.root.querySelector( "span" ).appendChild( LX.makeIcon( "Down", { svgClass: "sm" } ) );
+
+        container.appendChild( selectedOption.root );
+
+        selectedOption.refresh = (v) => {
+            const buttonSpan = selectedOption.root.querySelector("span");
+            if( buttonSpan.innerText == "" )
+            {
+                buttonSpan.innerText = v;
+            }
+            else
+            {
+                buttonSpan.innerHTML = buttonSpan.innerHTML.replaceAll( buttonSpan.innerText, v );
+            }
+        };
+
+        // Add select options container
+
+        const listDialog = document.createElement( 'dialog' );
+        listDialog.className = "lexselectoptions";
+
+        let list = document.createElement( 'ul' );
+        list.tabIndex = -1;
+        list.className = "lexoptions";
+        listDialog.appendChild( list );
+
+        list.addEventListener( 'focusout', function( e ) {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            if( e.relatedTarget === selectedOption.root.querySelector( 'button' ) )
+            {
+                this.unfocus_event = true;
+                setTimeout( () => delete this.unfocus_event, 200 );
+            }
+            else if ( e.relatedTarget && listDialog.contains( e.relatedTarget ) )
+            {
+                return;
+            }
+            else if ( e.target.className == 'lexinput-filter' )
+            {
+                return;
+            }
+            listDialog.close();
+        });
+
+        // Add filter options
+        let filter = null;
+        if( options.filter ?? false )
+        {
+            const filterOptions = LX.deepCopy( options );
+            filterOptions.placeholder = filterOptions.placeholder ?? "Search...";
+            filterOptions.skipWidget = filterOptions.skipWidget ?? true;
+            filterOptions.trigger = "input";
+            filterOptions.icon = "Search";
+            filterOptions.className = "lexfilter";
+            filterOptions.inputClass = "outline";
+
+            filter = new LX.TextInput(null, options.filterValue ?? "", ( v ) => {
+                const filteredOptions = this._filterOptions( values, v );
+                list.refresh( filteredOptions );
+            }, filterOptions );
+            filter.root.querySelector( ".lextext" ).style.border = "1px solid transparent";
+
+            const input = filter.root.querySelector( "input" );
+
+            input.addEventListener('focusout', function( e ) {
+                if (e.relatedTarget && e.relatedTarget.tagName == "UL" && e.relatedTarget.classList.contains("lexoptions"))
+                {
+                    return;
+                }
+                listDialog.close();
+            });
+
+            list.appendChild( filter.root );
+        }
+
+        // Create option list to empty it easily..
+        const listOptions = document.createElement('span');
+        listOptions.className = "lexselectinnerlist";
+        list.appendChild( listOptions );
+
+        // Add select options list
+        list.refresh = ( currentOptions ) => {
+
+            // Empty list
+            listOptions.innerHTML = "";
+
+            if( !currentOptions.length )
+            {
+                let iValue = options.emptyMsg ?? "No options found.";
+
+                let option = document.createElement( "div" );
+                option.className = "option";
+                option.innerHTML = iValue;
+
+                let li = document.createElement( "li" );
+                li.className = "lexselectitem empty";
+                li.appendChild( option );
+
+                listOptions.appendChild( li );
+                return;
+            }
+
+            for( let i = 0; i < currentOptions.length; i++ )
+            {
+                let iValue = currentOptions[ i ];
+                let li = document.createElement( "li" );
+                let option = document.createElement( "div" );
+                option.className = "option";
+                li.appendChild( option );
+
+                const onSelect = e => {
+                    this.set( e.currentTarget.getAttribute( "value" ), false, e );
+                    listDialog.close();
+                };
+
+                li.addEventListener( "click", onSelect );
+
+                // Add string option
+                if( iValue.constructor != Object )
+                {
+                    const asLabel = ( iValue[ 0 ] === '@' );
+
+                    if( !asLabel )
+                    {
+                        option.innerHTML = `<span>${ iValue }</span>`;
+                        option.appendChild( LX.makeIcon( "Check" ) );
+                        option.value = iValue;
+                        li.setAttribute( "value", iValue );
+
+                        if( iValue == value )
+                        {
+                            li.classList.add( "selected" );
+                            wValue.innerHTML = iValue;
+                        }
+                    }
+                    else
+                    {
+                        option.innerHTML = "<span>" + iValue.substr( 1 ) + "</span>";
+                        li.removeEventListener( "click", onSelect );
+                    }
+
+                    li.classList.add( asLabel ? "lexselectlabel" : "lexselectitem" );
+                }
+                else
+                {
+                    // Add image option
+                    let img = document.createElement( "img" );
+                    img.src = iValue.src;
+                    li.setAttribute( "value", iValue.value );
+                    li.className = "lexlistitem";
+                    option.innerText = iValue.value;
+                    option.className += " media";
+                    option.prepend( img );
+
+                    option.setAttribute( "value", iValue.value );
+                    option.setAttribute( "data-index", i );
+                    option.setAttribute( "data-src", iValue.src );
+                    option.setAttribute( "title", iValue.value );
+
+                    if( value == iValue.value )
+                    {
+                        li.classList.add( "selected" );
+                    }
+                }
+
+                listOptions.appendChild( li );
+            }
+        };
+
+        list.refresh( values );
+
+        container.appendChild( listDialog );
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+
+    _filterOptions( options, value ) {
+
+        // Push to right container
+        const emptyFilter = !value.length;
+        let filteredOptions = [];
+
+        // Add widgets
+        for( let i = 0; i < options.length; i++ )
+        {
+            let o = options[ i ];
+            if( !emptyFilter )
+            {
+                let toCompare = ( typeof o == 'string' ) ? o : o.value;
+                const filterWord = value.toLowerCase();
+                const name = toCompare.toLowerCase();
+                if( !name.includes( filterWord ) ) continue;
+            }
+
+            filteredOptions.push( o );
+        }
+
+        return filteredOptions;
+    }
+}
+
+LX.Select = Select;
+
+/**
+ * @class Curve
+ * @description Curve Widget
+ */
+
+class Curve extends Widget {
+
+    constructor( name, values, callback, options = {} ) {
+
+        let defaultValues = JSON.parse( JSON.stringify( values ) );
+
+        super( Widget.CURVE, name, defaultValues, options );
+
+        this.onGetValue = () => {
+            return JSON.parse(JSON.stringify( curveInstance.element.value ));
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+            curveInstance.element.value = JSON.parse( JSON.stringify( newValue ) );
+            curveInstance.redraw();
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, curveInstance.element.value, event ), callback );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
+        var container = document.createElement( "div" );
+        container.className = "lexcurve";
+        this.root.appendChild( container );
+
+        options.callback = (v, e) => {
+            this._trigger( new LX.IEvent( name, v, e ), callback );
+        };
+
+        options.name = name;
+
+        let curveInstance = new LX.CanvasCurve( values, options );
+        container.appendChild( curveInstance.element );
+        this.curveInstance = curveInstance;
+
+        const observer = new ResizeObserver( entries => {
+            for ( const entry of entries )
+            {
+                curveInstance.canvas.width = entry.contentRect.width;
+                curveInstance.redraw();
+            }
+        });
+
+        observer.observe( container );
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.Curve = Curve;
+
+/**
+ * @class Dial
+ * @description Dial Widget
+ */
+
+class Dial extends Widget {
+
+    constructor( name, values, callback, options = {} ) {
+
+        let defaultValues = JSON.parse( JSON.stringify( values ) );
+
+        super( Widget.DIAL, name, defaultValues, options );
+
+        this.onGetValue = () => {
+            return JSON.parse( JSON.stringify( dialInstance.element.value ) );
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+            dialInstance.element.value = JSON.parse( JSON.stringify( newValue ) );
+            dialInstance.redraw();
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, dialInstance.element.value, event ), callback );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+            LX.flushCss( container );
+            dialInstance.element.style.height = dialInstance.element.offsetWidth + "px";
+            dialInstance.canvas.width = dialInstance.element.offsetWidth;
+            container.style.width = dialInstance.element.offsetWidth + "px";
+            dialInstance.canvas.height = dialInstance.canvas.width;
+            dialInstance.redraw();
+        };
+
+        var container = document.createElement( "div" );
+        container.className = "lexcurve";
+        this.root.appendChild( container );
+
+        options.callback = ( v, e ) => {
+            this._trigger( new LX.IEvent( name, v, e ), callback );
+        };
+
+        options.name = name;
+
+        let dialInstance = new LX.CanvasDial( this, values, options );
+        container.appendChild( dialInstance.element );
+        this.dialInstance = dialInstance;
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.Dial = Dial;
+
+/**
+ * @class Layers
+ * @description Layers Widget
+ */
+
+class Layers extends Widget {
+
+    constructor( name, value, callback, options = {} ) {
+
+        super( Widget.LAYERS, name, value, options );
+
+        this.onGetValue = () => {
+            return value;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+            value = newValue;
+            this.setLayers( value );
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent(name, value, event), callback );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
+        var container = document.createElement( "div" );
+        container.className = "lexlayers";
+        this.root.appendChild( container );
+
+        this.setLayers = ( val ) =>  {
+
+            container.innerHTML = "";
+
+            let binary = val.toString( 2 );
+            let nbits = binary.length;
+
+            // fill zeros
+            for( let i = 0; i < ( 16 - nbits ); ++i )
+            {
+                binary = '0' + binary;
+            }
+
+            for( let bit = 0; bit < 16; ++bit )
+            {
+                let layer = document.createElement( "div" );
+                layer.className = "lexlayer";
+
+                if( val != undefined )
+                {
+                    const valueBit = binary[ 16 - bit - 1 ];
+                    if( valueBit != undefined && valueBit == '1' )
+                    {
+                        layer.classList.add( "selected" );
+                    }
+                }
+
+                layer.innerText = bit + 1;
+                layer.title = "Bit " + bit + ", value " + (1 << bit);
+                container.appendChild( layer );
+
+                layer.addEventListener( "click", e => {
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    e.target.classList.toggle( "selected" );
+                    const newValue = val ^ ( 1 << bit );
+                    this.set( newValue, false, e );
+                } );
+            }
+        };
+
+        this.setLayers( value );
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.Layers = Layers;
+
+/**
+ * @class ItemArray
+ * @description ItemArray Widget
+ */
+
+class ItemArray extends Widget {
+
+    constructor( name, values = [], callback, options = {} ) {
+
+        options.nameWidth = "100%";
+
+        super( Widget.ARRAY, name, null, options );
+
+        this.onGetValue = () => {
+            return values;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+            values = newValue;
+            this._updateItems();
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, values, event ), callback );
+            }
+        };
+
+        // Add open array button
+
+        let container = document.createElement( "div" );
+        container.className = "lexarray";
+        container.style.width = "100%";
+        this.root.appendChild( container );
+        this.root.dataset["opened"] = false;
+
+        let buttonName = `Array (size ${ values.length })`;
+
+        const toggleButton = new LX.Button(null, buttonName, () => {
+            this.root.dataset["opened"] = this.root.dataset["opened"] == "true" ? false : true;
+            this.root.querySelector(".lexarrayitems").toggleAttribute( "hidden" );
+        }, { buttonClass: "array" });
+        toggleButton.root.querySelector( "span" ).appendChild( LX.makeIcon( "Down", { svgClass: "sm" } ) );
+        container.appendChild( toggleButton.root );
+
+        // Show elements
+
+        let arrayItems = document.createElement( "div" );
+        arrayItems.className = "lexarrayitems";
+        arrayItems.toggleAttribute( "hidden",  true );
+        this.root.appendChild( arrayItems );
+
+        this._updateItems = () => {
+
+            // Update num items
+            let buttonSpan = this.root.querySelector(".lexbutton.array span");
+            for( let node of buttonSpan.childNodes )
+            {
+                if ( node.nodeType === Node.TEXT_NODE ) { node.textContent = `Array (size ${ values.length })`; break; }
+            }
+
+            // Update inputs
+            arrayItems.innerHTML = "";
+
+            for( let i = 0; i < values.length; ++i )
+            {
+                const value = values[ i ];
+                let baseclass = options.innerValues ? 'select' : value.constructor;
+                let widget = null;
+
+                switch( baseclass  )
+                {
+                    case String:
+                        widget = new LX.TextInput(i + "", value, function(value, event) {
+                            values[ i ] = value;
+                            callback( values );
+                        }, { nameWidth: "12px", className: "p-0", skipReset: true });
+                        break;
+                    case Number:
+                        widget = new NumberInput(i + "", value, function(value, event) {
+                            values[ i ] = value;
+                            callback( values );
+                        }, { nameWidth: "12px", className: "p-0", skipReset: true });
+                        break;
+                    case 'select':
+                        widget = new Select(i + "", options.innerValues, value, function(value, event) {
+                            values[ i ] = value;
+                            callback( values );
+                        }, { nameWidth: "12px", className: "p-0", skipReset: true });
+                        break;
+                }
+
+                console.assert( widget, `Value of type ${ baseclass } cannot be modified in ItemArray` );
+
+                arrayItems.appendChild( widget.root );
+
+                const removeWidget = new LX.Button( null, "", ( v, event) => {
+                    values.splice( values.indexOf( value ), 1 );
+                    this._updateItems();
+                    this._trigger( new LX.IEvent(name, values, event), callback );
+                }, { title: "Remove item", icon: "Trash3"} );
+
+                widget.root.appendChild( removeWidget.root );
+            }
+
+            const addButton = new LX.Button(null, LX.makeIcon( "Plus", { svgClass: "sm" } ).innerHTML + "Add item", (v, event) => {
+                values.push( options.innerValues ? options.innerValues[ 0 ] : "" );
+                this._updateItems();
+                this._trigger( new LX.IEvent(name, values, event), callback );
+            }, { buttonClass: 'array' });
+
+            arrayItems.appendChild( addButton.root );
+        };
+
+        this._updateItems();
+    }
+}
+
+LX.ItemArray = ItemArray;
+
+/**
+ * @class List
+ * @description List Widget
+ */
+
+class List extends Widget {
+
+    constructor( name, values, value, callback, options = {} ) {
+
+        super( Widget.LIST, name, value, options );
+
+        this.onGetValue = () => {
+            return value;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+            listContainer.querySelectorAll( '.lexlistitem' ).forEach( e => e.classList.remove( 'selected' ) );
+
+            let idx = null;
+            for( let i = 0; i < values.length; ++i )
+            {
+                const v = values[ i ];
+                if( v == newValue || ( ( v.constructor == Array ) && ( v[ 0 ] == newValue ) ) )
+                {
+                    idx = i;
+                    break;
+                }
+            }
+
+            if( !idx )
+            {
+                console.error( `Cannot find item ${ newValue } in List.` );
+                return;
+            }
+
+            listContainer.children[ idx ].classList.toggle( 'selected' );
+            value = newValue;
+
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, newValue, event ), callback );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            listContainer.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
+        this._updateValues = ( newValues ) => {
+
+            values = newValues;
+            listContainer.innerHTML = "";
+
+            for( let i = 0; i < values.length; ++i )
+            {
+                let icon = null;
+                let itemValue = values[ i ];
+
+                if( itemValue.constructor === Array )
+                {
+                    icon = itemValue[ 1 ];
+                    itemValue = itemValue[ 0 ];
+                }
+
+                let listElement = document.createElement( 'div' );
+                listElement.className = "lexlistitem" + ( value == itemValue ? " selected" : "" );
+
+                if( icon )
+                {
+                    listElement.appendChild( LX.makeIcon( icon ) );
+                }
+
+                listElement.innerHTML += `<span>${ itemValue }</span>`;
+
+                listElement.addEventListener( 'click', e => {
+                    listContainer.querySelectorAll( '.lexlistitem' ).forEach( e => e.classList.remove( 'selected' ) );
+                    listElement.classList.toggle( 'selected' );
+                    value = itemValue;
+                    this._trigger( new LX.IEvent( name, itemValue, e ), callback );
+                });
+
+                listContainer.appendChild( listElement );
+            }
+        };
+
+        // Show list
+
+        let listContainer = document.createElement( 'div' );
+        listContainer.className = "lexlist";
+        this.root.appendChild( listContainer );
+
+        this._updateValues( values );
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.List = List;
+
+/**
+ * @class Tags
+ * @description Tags Widget
+ */
+
+class Tags extends Widget {
+
+    constructor( name, value, callback, options = {} ) {
+
+        value = value.replace( /\s/g, '' ).split( ',' );
+
+        let defaultValue = [].concat( value );
+        super( Widget.TAGS, name, defaultValue, options );
+
+        this.onGetValue = () => {
+            return [].concat( value );
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+            value = [].concat( newValue );
+            this.generateTags( value );
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, value, event ), callback );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            tagsContainer.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
+        // Show tags
+
+        const tagsContainer = document.createElement('div');
+        tagsContainer.className = "lextags";
+        this.root.appendChild( tagsContainer );
+
+        this.generateTags = ( value ) => {
+
+            tagsContainer.innerHTML = "";
+
+            for( let i = 0; i < value.length; ++i )
+            {
+                const tagName = value[ i ];
+                const tag = document.createElement('span');
+                tag.className = "lextag";
+                tag.innerHTML = tagName;
+
+                const removeButton = LX.makeIcon( "X", { svgClass: "sm" } );
+                tag.appendChild( removeButton );
+
+                removeButton.addEventListener( 'click', e => {
+                    tag.remove();
+                    value.splice( value.indexOf( tagName ), 1 );
+                    this.set( value, false, e );
+                } );
+
+                tagsContainer.appendChild( tag );
+            }
+
+            let tagInput = document.createElement( 'input' );
+            tagInput.value = "";
+            tagInput.placeholder = "Add tag...";
+            tagsContainer.appendChild( tagInput );
+
+            tagInput.onkeydown = e => {
+                const val = tagInput.value.replace( /\s/g, '' );
+                if( e.key == ' ' || e.key == 'Enter' )
+                {
+                    e.preventDefault();
+                    if( !val.length || value.indexOf( val ) > -1 )
+                        return;
+                    value.push( val );
+                    this.set( value, false, e );
+                }
+            };
+
+            tagInput.focus();
+        };
+
+        this.generateTags( value );
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.Tags = Tags;
+
+/**
+ * @class Checkbox
+ * @description Checkbox Widget
+ */
+
+class Checkbox extends Widget {
+
+    constructor( name, value, callback, options = {} ) {
+
+        if( !name && !options.label )
+        {
+            throw( "Set Widget Name or at least a label!" );
+        }
+
+        super( Widget.CHECKBOX, name, value, options );
+
+        this.onGetValue = () => {
+            return value;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+
+            if( newValue == value )
+            {
+                return;
+            }
+
+            checkbox.checked = value = newValue;
+
+            // Update suboptions menu
+            this.root.querySelector( ".lexcheckboxsubmenu" )?.toggleAttribute( 'hidden', !newValue );
+
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, newValue, event ), callback );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
+        };
+
+        var container = document.createElement( "div" );
+        container.className = "lexcheckboxcont";
+        this.root.appendChild( container );
+
+        let checkbox = document.createElement( "input" );
+        checkbox.type = "checkbox";
+        checkbox.className = "lexcheckbox " + ( options.className ?? "primary" );
+        checkbox.checked = value;
+        checkbox.disabled = options.disabled ?? false;
+        container.appendChild( checkbox );
+
+        let valueName = document.createElement( "span" );
+        valueName.className = "checkboxtext";
+        valueName.innerHTML = options.label ?? "On";
+        container.appendChild( valueName );
+
+        checkbox.addEventListener( "change" , e => {
+            this.set( checkbox.checked, false, e );
+        });
+
+        if( options.suboptions )
+        {
+            let suboptions = document.createElement( "div" );
+            suboptions.className = "lexcheckboxsubmenu";
+            suboptions.toggleAttribute( "hidden", !checkbox.checked );
+
+            const suboptionsPanel = new LX.Panel();
+            suboptionsPanel.queue( suboptions );
+            options.suboptions.call(this, suboptionsPanel);
+            suboptionsPanel.clearQueue();
+
+            this.root.appendChild( suboptions );
+        }
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.Checkbox = Checkbox;
+
+/**
+ * @class Toggle
+ * @description Toggle Widget
+ */
+
+class Toggle extends Widget {
+
+    constructor( name, value, callback, options = {} ) {
+
+        if( !name && !options.label )
+        {
+            throw( "Set Widget Name or at least a label!" );
+        }
+
+        super( Widget.TOGGLE, name, value, options );
+
+        this.onGetValue = () => {
+            return toggle.checked;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+
+            if( newValue == value )
+            {
+                return;
+            }
+
+            toggle.checked = value = newValue;
+
+            // Update suboptions menu
+            this.root.querySelector( ".lextogglesubmenu" )?.toggleAttribute( 'hidden', !newValue );
+
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, newValue, event ), callback );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
+        };
+
+        var container = document.createElement('div');
+        container.className = "lextogglecont";
+        this.root.appendChild( container );
+
+        let toggle = document.createElement('input');
+        toggle.type = "checkbox";
+        toggle.className = "lextoggle " + ( options.className ?? "" );
+        toggle.checked = value;
+        toggle.iValue = value;
+        toggle.disabled = options.disabled ?? false;
+        container.appendChild( toggle );
+
+        let valueName = document.createElement( 'span' );
+        valueName.className = "toggletext";
+        valueName.innerHTML = options.label ?? "On";
+        container.appendChild( valueName );
+
+        toggle.addEventListener( "change" , e => {
+            this.set( toggle.checked, false, e );
+        });
+
+        if( options.suboptions )
+        {
+            let suboptions = document.createElement('div');
+            suboptions.className = "lextogglesubmenu";
+            suboptions.toggleAttribute( 'hidden', !toggle.checked );
+
+            const suboptionsPanel = new LX.Panel();
+            suboptionsPanel.queue( suboptions );
+            options.suboptions.call(this, suboptionsPanel);
+            suboptionsPanel.clearQueue();
+
+            this.root.appendChild( suboptions );
+        }
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.Toggle = Toggle;
+
+/**
+ * @class RadioGroup
+ * @description RadioGroup Widget
+ */
+
+class RadioGroup extends Widget {
+
+    constructor( name, label, values, callback, options = {} ) {
+
+        super( Widget.RADIO, name, null, options );
+
+        let currentIndex = null;
+
+        this.onGetValue = () => {
+            const items = container.querySelectorAll( 'button' );
+            return currentIndex ? [ currentIndex, items[ currentIndex ] ] : undefined;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+
+            newValue = newValue[ 0 ] ?? newValue; // Allow getting index of { index, value } tupple
+
+            console.assert( newValue.constructor == Number, "RadioGroup _value_ must be an Array index!" );
+
+            const items = container.querySelectorAll( 'button' );
+            items.forEach( b => { b.checked = false; b.classList.remove( "checked" ); } );
+
+            const optionItem = items[ newValue ];
+            optionItem.checked = !optionItem.checked;
+            optionItem.classList.toggle( "checked" );
+
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( null, [ newValue, values[ newValue ] ], event ), callback );
+            }
+        };
+
+        var container = document.createElement( 'div' );
+        container.className = "lexradiogroup " + ( options.className ?? "" );
+        this.root.appendChild( container );
+
+        let labelSpan = document.createElement( 'span' );
+        labelSpan.innerHTML = label;
+        container.appendChild( labelSpan );
+
+        for( let i = 0; i < values.length; ++i )
+        {
+            const optionItem = document.createElement( 'div' );
+            optionItem.className = "lexradiogroupitem";
+            container.appendChild( optionItem );
+
+            const optionButton = document.createElement( 'button' );
+            optionButton.className = "flex p-0 rounded-lg cursor-pointer";
+            optionButton.disabled = options.disabled ?? false;
+            optionItem.appendChild( optionButton );
+
+            optionButton.addEventListener( "click", ( e ) => {
+                this.set( i, false, e );
+            } );
+
+            const checkedSpan = document.createElement( 'span' );
+            optionButton.appendChild( checkedSpan );
+
+            const optionLabel = document.createElement( 'span' );
+            optionLabel.innerHTML = values[ i ];
+            optionItem.appendChild( optionLabel );
+        }
+
+        if( options.selected )
+        {
+            console.assert( options.selected.constructor == Number, "RadioGroup _selected_ must be an Array index!" );
+            currentIndex = options.selected;
+            this.set( currentIndex, true );
+        }
+    }
+}
+
+LX.RadioGroup = RadioGroup;
+
+/**
+ * @class ColorInput
+ * @description ColorInput Widget
+ */
+
+class ColorInput extends Widget {
+
+    constructor( name, value, callback, options = {} ) {
+
+        value = value ?? "#000000";
+
+        const useAlpha = options.useAlpha ??
+            ( ( value.constructor === Object && 'a' in value ) || ( value.constructor === String && [ 5, 9 ].includes( value.length ) ) );
+
+        const widgetColor = new LX.Color( value );
+
+        // Force always hex internally
+        value = useAlpha ? widgetColor.hex : widgetColor.hex.substr( 0, 7 );
+
+        super( Widget.COLOR, name, value, options );
+
+        this.onGetValue = () => {
+            const currentColor = new LX.Color( value );
+            return options.useRGB ? currentColor.rgb : value;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+
+            const newColor = new LX.Color( newValue );
+
+            colorSampleRGB.style.color = value = newColor.hex.substr( 0, 7 );
+
+            if( useAlpha )
+            {
+                colorSampleAlpha.style.color = value = newColor.hex;
+            }
+
+            if( !this._skipTextUpdate )
+            {
+                textWidget.set( value, true, event );
+            }
+
+            if( !skipCallback )
+            {
+                let retValue = value;
+
+                if( options.useRGB )
+                {
+                    retValue = newColor.rgb;
+
+                    if( !useAlpha )
+                    {
+                        delete retValue.a;
+                    }
+                }
+
+                this._trigger( new LX.IEvent( name, retValue, event ), callback );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
+        var container = document.createElement( 'span' );
+        container.className = "lexcolor";
+        this.root.appendChild( container );
+
+        this.picker = new LX.ColorPicker( value, {
+            colorModel: options.useRGB ? "RGB" : "Hex",
+            useAlpha,
+            onChange: ( color ) => {
+                this._fromColorPicker = true;
+                this.set( color.hex );
+                delete this._fromColorPicker;
+            }
+        } );
+
+        let sampleContainer = LX.makeContainer( ["18px", "18px"], "flex flex-row bg-contrast rounded overflow-hidden", "", container );
+        sampleContainer.tabIndex = "1";
+        sampleContainer.addEventListener( "click", e => {
+            if( ( options.disabled ?? false ) )
+            {
+                return;
+            }
+
+            this._popover = new LX.Popover( sampleContainer, [ this.picker ] );
+        } );
+
+        let colorSampleRGB = document.createElement( 'div' );
+        colorSampleRGB.className = "lexcolorsample";
+        colorSampleRGB.style.color = value;
+        sampleContainer.appendChild( colorSampleRGB );
+
+        let colorSampleAlpha = null;
+
+        if( useAlpha )
+        {
+            colorSampleAlpha = document.createElement( 'div' );
+            colorSampleAlpha.className = "lexcolorsample";
+            colorSampleAlpha.style.color = value;
+            sampleContainer.appendChild( colorSampleAlpha );
+        }
+        else
+        {
+            colorSampleRGB.style.width = "18px";
+        }
+
+        const textWidget = new LX.TextInput( null, value, v => {
+            this._skipTextUpdate = true;
+            this.set( v );
+            delete this._skipTextUpdate;
+        }, { width: "calc( 100% - 24px )", disabled: options.disabled });
+
+        textWidget.root.style.marginLeft = "6px";
+        container.appendChild( textWidget.root );
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.ColorInput = ColorInput;
+
+/**
+ * @class RangeInput
+ * @description RangeInput Widget
+ */
+
+class RangeInput extends Widget {
+
+    constructor( name, value, callback, options = {} ) {
+
+        super( Widget.RANGE, name, value, options );
+
+        this.onGetValue = () => {
+            return value;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+
+            if( isNaN( newValue ) )
+            {
+                return;
+            }
+
+            slider.value = value = LX.clamp( +newValue, +slider.min, +slider.max );
+
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, options.left ? ( ( +slider.max ) - value + ( +slider.min ) ) : value, event ), callback );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
+        };
+
+        const container = document.createElement( 'div' );
+        container.className = "lexrange";
+        this.root.appendChild( container );
+
+        let slider = document.createElement( 'input' );
+        slider.className = "lexrangeslider " + ( options.className ?? "" );
+        slider.min = options.min ?? 0;
+        slider.max = options.max ?? 100;
+        slider.step = options.step ?? 1;
+        slider.type = "range";
+        slider.disabled = options.disabled ?? false;
+
+        if( value.constructor == Number )
+        {
+            value = LX.clamp( value, +slider.min, +slider.max );
+        }
+
+        if( options.left )
+        {
+            value = ( ( +slider.max ) - value + ( +slider.min ) );
+        }
+
+        slider.value = value;
+        container.appendChild( slider );
+
+        if( options.left ?? false )
+        {
+            slider.classList.add( "left" );
+        }
+
+        if( !( options.fill ?? true ) )
+        {
+            slider.classList.add( "no-fill" );
+        }
+
+        slider.addEventListener( "input", e => {
+            this.set( e.target.valueAsNumber, false, e );
+        }, { passive: false });
+
+        slider.addEventListener( "mousedown", function( e ) {
+            if( options.onPress )
+            {
+                options.onPress.bind( slider )( e, slider );
+            }
+        }, false );
+
+        slider.addEventListener( "mouseup", function( e ) {
+            if( options.onRelease )
+            {
+                options.onRelease.bind( slider )( e, slider );
+            }
+        }, false );
+
+        // Method to change min, max, step parameters
+        this.setLimits = ( newMin, newMax, newStep ) => {
+            slider.min = newMin ?? slider.min;
+            slider.max = newMax ?? slider.max;
+            slider.step = newStep ?? slider.step;
+            Widget._dispatchEvent( slider, "input", true );
+        };
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.RangeInput = RangeInput;
+
+/**
+ * @class NumberInput
+ * @description NumberInput Widget
+ */
+
+class NumberInput extends Widget {
+
+    constructor( name, value, callback, options = {} ) {
+
+        super( Widget.NUMBER, name, value, options );
+
+        this.onGetValue = () => {
+            return value;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+
+            if( isNaN( newValue ) )
+            {
+                return;
+            }
+
+            value = LX.clamp( +newValue, +vecinput.min, +vecinput.max );
+            vecinput.value = value = LX.round( value, options.precision );
+
+            // Update slider!
+            if( box.querySelector( ".lexinputslider" ) )
+            {
+                box.querySelector( ".lexinputslider" ).value = value;
+            }
+
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, value, event ), callback );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
+        };
+
+        var container = document.createElement( 'div' );
+        container.className = "lexnumber";
+        this.root.appendChild( container );
+
+        let box = document.createElement( 'div' );
+        box.className = "numberbox";
+        container.appendChild( box );
+
+        let valueBox = LX.makeContainer( [ "auto", "100%" ], "relative flex flex-row cursor-text", "", box );
+
+        let vecinput = document.createElement( 'input' );
+        vecinput.id = "number_" + LX.guidGenerator();
+        vecinput.className = "vecinput";
+        vecinput.min = options.min ?? -1e24;
+        vecinput.max = options.max ?? 1e24;
+        vecinput.step = options.step ?? "any";
+        vecinput.type = "number";
+
+        if( value.constructor == Number )
+        {
+            value = LX.clamp( value, +vecinput.min, +vecinput.max );
+            value = LX.round( value, options.precision );
+        }
+
+        vecinput.value = vecinput.iValue = value;
+        valueBox.appendChild( vecinput );
+
+        const dragIcon = LX.makeIcon( "MoveVertical", { iconClass: "drag-icon hidden-opacity", svgClass: "sm" } );
+        valueBox.appendChild( dragIcon );
+
+        if( options.units )
+        {
+            let unitBox = LX.makeContainer( [ "auto", "auto" ], "px-2 bg-secondary content-center", options.units, valueBox, { "word-break": "keep-all" } );
+            vecinput.unitBox = unitBox;
+        }
+
+        if( options.disabled )
+        {
+            this.disabled = vecinput.disabled = true;
+        }
+
+        // Add slider below
+        if( !options.skipSlider && options.min !== undefined && options.max !== undefined )
+        {
+            let sliderBox = LX.makeContainer( [ "100%", "auto" ], "", "", box );
+            let slider = document.createElement( 'input' );
+            slider.className = "lexinputslider";
+            slider.min = options.min;
+            slider.max = options.max;
+            slider.step = options.step ?? 1;
+            slider.type = "range";
+            slider.value = value;
+
+            slider.addEventListener( "input", ( e ) => {
+                this.set( slider.valueAsNumber, false, e );
+            }, false );
+
+            slider.addEventListener( "mousedown", function( e ) {
+                if( options.onPress )
+                {
+                    options.onPress.bind( slider )( e, slider );
+                }
+            }, false );
+
+            slider.addEventListener( "mouseup", function( e ) {
+                if( options.onRelease )
+                {
+                    options.onRelease.bind( slider )( e, slider );
+                }
+            }, false );
+
+            sliderBox.appendChild( slider );
+
+            // Method to change min, max, step parameters
+            this.setLimits = ( newMin, newMax, newStep ) => {
+                vecinput.min = slider.min = newMin ?? vecinput.min;
+                vecinput.max = slider.max = newMax ?? vecinput.max;
+                vecinput.step = newStep ?? vecinput.step;
+                slider.step = newStep ?? slider.step;
+                this.set( value, true );
+            };
+        }
+
+        vecinput.addEventListener( "input", function( e ) {
+            value = +this.valueAsNumber;
+            value = LX.round( value, options.precision );
+        }, false );
+
+        vecinput.addEventListener( "wheel", e => {
+            e.preventDefault();
+            if( vecinput !== document.activeElement )
+            {
+                return;
+            }
+            let mult = options.step ?? 1;
+            if( e.shiftKey ) mult *= 10;
+            else if( e.altKey ) mult *= 0.1;
+            value = ( +vecinput.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ) );
+            this.set( value, false, e );
+        }, { passive: false });
+
+        vecinput.addEventListener( "change", e => {
+            this.set( vecinput.valueAsNumber, false, e );
+        }, { passive: false });
+
+        // Add drag input
+
+        var that = this;
+
+        let innerMouseDown = e => {
+
+            if( ( document.activeElement == vecinput ) || ( e.button != LX.MOUSE_LEFT_CLICK ) )
+            {
+                return;
+            }
+
+            var doc = that.root.ownerDocument;
+            doc.addEventListener( 'mousemove', innerMouseMove );
+            doc.addEventListener( 'mouseup', innerMouseUp );
+            document.body.classList.add( 'noevents' );
+            dragIcon.classList.remove( 'hidden-opacity' );
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+
+            if( !document.pointerLockElement )
+            {
+                valueBox.requestPointerLock();
+            }
+
+            if( options.onPress )
+            {
+                options.onPress.bind( vecinput )( e, vecinput );
+            }
+        };
+
+        let innerMouseMove = e => {
+
+            let dt = -e.movementY;
+
+            if ( dt != 0 )
+            {
+                let mult = options.step ?? 1;
+                if( e.shiftKey ) mult *= 10;
+                else if( e.altKey ) mult *= 0.1;
+                value = ( +vecinput.valueAsNumber + mult * dt );
+                this.set( value, false, e );
+            }
+
+            e.stopPropagation();
+            e.preventDefault();
+        };
+
+        let innerMouseUp = e => {
+
+            var doc = that.root.ownerDocument;
+            doc.removeEventListener( 'mousemove', innerMouseMove );
+            doc.removeEventListener( 'mouseup', innerMouseUp );
+            document.body.classList.remove( 'noevents' );
+            dragIcon.classList.add( 'hidden-opacity' );
+
+            if( document.pointerLockElement )
+            {
+                document.exitPointerLock();
+            }
+
+            if( options.onRelease )
+            {
+                options.onRelease.bind( vecinput )( e, vecinput );
+            }
+        };
+
+        valueBox.addEventListener( "mousedown", innerMouseDown );
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.NumberInput = NumberInput;
+
+/**
+ * @class Vector
+ * @description Vector Widget
+ */
+
+class Vector extends Widget {
+
+    constructor( numComponents, name, value, callback, options = {} ) {
+
+        numComponents = LX.clamp( numComponents, 2, 4 );
+        value = value ?? new Array( numComponents ).fill( 0 );
+
+        super( Widget.VECTOR, name, [].concat( value ), options );
+
+        this.onGetValue = () => {
+            let inputs = this.root.querySelectorAll( "input[type='number']" );
+            let value = [];
+            for( var v of inputs )
+            {
+                value.push( +v.value );
+            }
+            return value;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+
+            if( vectorInputs.length != newValue.length )
+            {
+                console.error( "Input length does not match vector length." );
+                return;
+            }
+
+            for( let i = 0; i < vectorInputs.length; ++i )
+            {
+                let value = newValue[ i ];
+                value = LX.clamp( value, +vectorInputs[ i ].min, +vectorInputs[ i ].max );
+                value = LX.round( value, options.precision ) ?? 0;
+                vectorInputs[ i ].value = newValue[ i ] = value;
+            }
+
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, newValue, event ), callback );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
+        const vectorInputs = [];
+
+        var container = document.createElement( 'div' );
+        container.className = "lexvector";
+        this.root.appendChild( container );
+
+        this.disabled = ( options.disabled ?? false );
+        const that = this;
+
+        for( let i = 0; i < numComponents; ++i )
+        {
+            let box = document.createElement( 'div' );
+            box.className = "vecbox";
+            box.innerHTML = "<span class='" + LX.Panel.VECTOR_COMPONENTS[ i ] + "'></span>";
+
+            let vecinput = document.createElement( 'input' );
+            vecinput.className = "vecinput v" + numComponents;
+            vecinput.min = options.min ?? -1e24;
+            vecinput.max = options.max ?? 1e24;
+            vecinput.step = options.step ?? "any";
+            vecinput.type = "number";
+            vecinput.id = "vec" + numComponents + "_" + LX.guidGenerator();
+            vecinput.idx = i;
+            vectorInputs[ i ] = vecinput;
+            box.appendChild( vecinput );
+
+            if( value[ i ].constructor == Number )
+            {
+                value[ i ] = LX.clamp( value[ i ], +vecinput.min, +vecinput.max );
+                value[ i ] = LX.round( value[ i ], options.precision );
+            }
+
+            vecinput.value = vecinput.iValue = value[ i ];
+
+            const dragIcon = LX.makeIcon( "MoveVertical", { iconClass: "drag-icon hidden-opacity", svgClass: "sm" } );
+            box.appendChild( dragIcon );
+
+            if( this.disabled )
+            {
+                vecinput.disabled = true;
+            }
+
+            // Add wheel input
+            vecinput.addEventListener( "wheel", function( e ) {
+                e.preventDefault();
+                if( this !== document.activeElement )
+                    return;
+                let mult = options.step ?? 1;
+                if( e.shiftKey ) mult = 10;
+                else if( e.altKey ) mult = 0.1;
+
+                if( lockerButton.locked )
+                {
+                    for( let v of that.querySelectorAll(".vecinput") )
+                    {
+                        v.value = LX.round( +v.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ), options.precision );
+                        Widget._dispatchEvent( v, "change" );
+                    }
+                }
+                else
+                {
+                    this.value = LX.round( +this.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ), options.precision );
+                    Widget._dispatchEvent( vecinput, "change" );
+                }
+            }, { passive: false } );
+
+            vecinput.addEventListener( "change", e => {
+
+                if( isNaN( e.target.value ) )
+                {
+                    return;
+                }
+
+                let val = LX.clamp( e.target.value, +vecinput.min, +vecinput.max );
+                val = LX.round( val, options.precision );
+
+                if( lockerButton.locked )
+                {
+                    for( let v of vectorInputs )
+                    {
+                        v.value = val;
+                        value[ v.idx ] = val;
+                    }
+                }
+                else
+                {
+                    vecinput.value = val;
+                    value[ e.target.idx ] = val;
+                }
+
+                this.set( value, false, e );
+            }, false );
+
+            // Add drag input
+
+            function innerMouseDown( e )
+            {
+                if( ( document.activeElement == vecinput ) || ( e.button != LX.MOUSE_LEFT_CLICK ) )
+                {
+                    return;
+                }
+
+                var doc = that.root.ownerDocument;
+                doc.addEventListener( 'mousemove', innerMouseMove );
+                doc.addEventListener( 'mouseup', innerMouseUp );
+                document.body.classList.add( 'noevents' );
+                dragIcon.classList.remove( 'hidden-opacity' );
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+
+                if( !document.pointerLockElement )
+                {
+                    box.requestPointerLock();
+                }
+
+                if( options.onPress )
+                {
+                    options.onPress.bind( vecinput )( e, vecinput );
+                }
+            }
+
+            function innerMouseMove( e )
+            {
+                let dt = -e.movementY;
+
+                if ( dt != 0 )
+                {
+                    let mult = options.step ?? 1;
+                    if( e.shiftKey ) mult = 10;
+                    else if( e.altKey ) mult = 0.1;
+
+                    if( lockerButton.locked )
+                    {
+                        for( let v of that.root.querySelectorAll( ".vecinput" ) )
+                        {
+                            v.value = LX.round( +v.valueAsNumber + mult * dt, options.precision );
+                            Widget._dispatchEvent( v, "change" );
+                        }
+                    }
+                    else
+                    {
+                        vecinput.value = LX.round( +vecinput.valueAsNumber + mult * dt, options.precision );
+                        Widget._dispatchEvent( vecinput, "change" );
+                    }
+                }
+
+                e.stopPropagation();
+                e.preventDefault();
+            }
+
+            function innerMouseUp( e )
+            {
+                var doc = that.root.ownerDocument;
+                doc.removeEventListener( 'mousemove', innerMouseMove );
+                doc.removeEventListener( 'mouseup', innerMouseUp );
+                document.body.classList.remove( 'noevents' );
+                dragIcon.classList.add('hidden-opacity');
+
+                if( document.pointerLockElement )
+                {
+                    document.exitPointerLock();
+                }
+
+                if( options.onRelease )
+                {
+                    options.onRelease.bind( vecinput )( e, vecinput );
+                }
+            }
+
+            box.addEventListener( "mousedown", innerMouseDown );
+            container.appendChild( box );
+        }
+
+        // Method to change min, max, step parameters
+        if( options.min !== undefined || options.max !== undefined )
+        {
+            this.setLimits = ( newMin, newMax, newStep ) => {
+                for( let v of vectorInputs )
+                {
+                    v.min = newMin ?? v.min;
+                    v.max = newMax ?? v.max;
+                    v.step = newStep ?? v.step;
+                }
+
+                this.set( value, true );
+            };
+        }
+
+        const lockerButton = new LX.Button( null, "", (swapValue) => {
+            lockerButton.locked = swapValue;
+        }, { title: "Lock", icon: "LockOpen", swap: "Lock", buttonClass: "bg-none p-0" } );
+        container.appendChild( lockerButton.root );
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.Vector = Vector;
+
+/**
+ * @class SizeInput
+ * @description SizeInput Widget
+ */
+
+class SizeInput extends Widget {
+
+    constructor( name, value, callback, options = {} ) {
+
+        super( Widget.SIZE, name, value, options );
+
+        this.onGetValue = () => {
+            const value = [];
+            for( let i = 0; i < this.root.dimensions.length; ++i )
+            {
+                value.push( this.root.dimensions[ i ].value() );
+            }
+            return value;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+            for( let i = 0; i < this.root.dimensions.length; ++i )
+            {
+                this.root.dimensions[ i ].set( newValue[ i ], skipCallback );
+            }
+        };
+
+        this.root.aspectRatio = ( value.length == 2 ? value[ 0 ] / value[ 1 ] : null );
+        this.root.dimensions = [];
+
+        for( let i = 0; i < value.length; ++i )
+        {
+            const p = new LX.Panel();
+            this.root.dimensions[ i ] = p.addNumber( null, value[ i ], ( v ) => {
+
+                const value = this.value();
+
+                if( this.root.locked )
+                {
+                    const ar = ( i == 0 ? 1.0 / this.root.aspectRatio : this.root.aspectRatio );
+                    const index = ( 1 + i ) % 2;
+                    value[ index ] = v * ar;
+                    this.root.dimensions[ index ].set( value[ index ], true );
+                }
+
+                if( callback )
+                {
+                    callback( value );
+                }
+
+            }, { min: 0, disabled: options.disabled, precision: options.precision, className: "flex-fill" } );
+
+            this.root.appendChild( this.root.dimensions[ i ].root );
+
+            if( ( i + 1 ) != value.length )
+            {
+                const xIcon = LX.makeIcon( "X", { svgClass: "fg-accent font-bold" } );
+                this.root.appendChild( xIcon );
+            }
+        }
+
+        if( options.units )
+        {
+            let unitSpan = document.createElement( 'span' );
+            unitSpan.className = "select-none fg-tertiary font-medium";
+            unitSpan.innerText = options.units;
+            this.root.appendChild( unitSpan );
+        }
+
+        // Lock aspect ratio
+        if( this.root.aspectRatio )
+        {
+            const lockerButton = new LX.Button( null, "", (swapValue) => {
+                this.root.locked = swapValue;
+                if( swapValue )
+                {
+                    // Recompute ratio
+                    const value = this.value();
+                    this.root.aspectRatio = value[ 0 ] / value[ 1 ];
+                }
+            }, { title: "Lock Aspect Ratio", icon: "LockOpen", swap: "Lock", buttonClass: "bg-none p-0" } );
+            this.root.appendChild( lockerButton.root );
+        }
+    }
+}
+
+LX.SizeInput = SizeInput;
+
+/**
+ * @class OTPInput
+ * @description OTPInput Widget
+ */
+
+class OTPInput extends Widget {
+
+    constructor( name, value, callback, options = {} ) {
+
+        const pattern = options.pattern ?? "xxx-xxx";
+        const patternSize = ( pattern.match(/x/g) || [] ).length;
+
+        value = String( value );
+        if( !value.length )
+        {
+            value = "x".repeat( patternSize );
+        }
+
+        super( Widget.OTP, name, value, options );
+
+        this.onGetValue = () => {
+            return +value;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+
+            value = newValue;
+
+            _refreshInput( value );
+
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, +newValue, event ), callback );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
+        this.disabled = options.disabled ?? false;
+
+        const container = document.createElement( 'div' );
+        container.className = "lexotp flex flex-row items-center";
+        this.root.appendChild( container );
+
+        const groups = pattern.split( '-' );
+
+        const _refreshInput = ( valueString ) => {
+
+            container.innerHTML = "";
+
+            let itemsCount = 0;
+            let activeSlot = 0;
+
+            for( let i = 0; i < groups.length; ++i )
+            {
+                const g = groups[ i ];
+
+                for( let j = 0; j < g.length; ++j )
+                {
+                    let number = valueString[ itemsCount++ ];
+                    number = ( number == 'x' ? '' : number );
+
+                    const slotDom = LX.makeContainer( ["36px", "30px"],
+                        "lexotpslot border-top border-bottom border-left px-3 cursor-text select-none font-medium outline-none", number, container );
+                    slotDom.tabIndex = "1";
+
+                    if( this.disabled )
+                    {
+                        slotDom.classList.add( "disabled" );
+                    }
+
+                    const otpIndex = itemsCount;
+
+                    if( j == 0 )
+                    {
+                        slotDom.className += " rounded-l";
+                    }
+                    else if( j == ( g.length - 1 ) )
+                    {
+                        slotDom.className += " rounded-r border-right";
+                    }
+
+                    slotDom.addEventListener( "click", () => {
+                        if( this.disabled ) { return; }
+                        container.querySelectorAll( ".lexotpslot" ).forEach( s => s.classList.remove( "active" ) );
+                        const activeDom = container.querySelectorAll( ".lexotpslot" )[ activeSlot ];
+                        activeDom.classList.add( "active" );
+                        activeDom.focus();
+                    } );
+
+                    slotDom.addEventListener( "blur", () => {
+                        if( this.disabled ) { return; }
+                        LX.doAsync( () => {
+                            if( container.contains( document.activeElement ) ) { return; }
+                            container.querySelectorAll( ".lexotpslot" ).forEach( s => s.classList.remove( "active" ) );
+                        }, 10 );
+                    } );
+
+                    slotDom.addEventListener( "keyup", e => {
+                        if( this.disabled ) { return; }
+                        if( !/[^0-9]+/g.test( e.key ) )
+                        {
+                            const number = e.key;
+                            console.assert( parseInt( number ) != NaN );
+
+                            slotDom.innerHTML = number;
+                            valueString = valueString.substring( 0, otpIndex - 1 ) + number + valueString.substring( otpIndex );
+
+                            const nexActiveDom = container.querySelectorAll( ".lexotpslot" )[ activeSlot + 1 ];
+                            if( nexActiveDom )
+                            {
+                                container.querySelectorAll( ".lexotpslot" )[ activeSlot ].classList.remove( "active" );
+                                nexActiveDom.classList.add( "active" );
+                                nexActiveDom.focus();
+                                activeSlot++;
+                            }
+                            else
+                            {
+                                this.set( valueString );
+                            }
+                        }
+                        else if( e.key == "ArrowLeft" || e.key == "ArrowRight" )
+                        {
+                            const dt = ( e.key == "ArrowLeft" ) ? -1 : 1;
+                            const newActiveDom = container.querySelectorAll( ".lexotpslot" )[ activeSlot + dt ];
+                            if( newActiveDom )
+                            {
+                                container.querySelectorAll( ".lexotpslot" )[ activeSlot ].classList.remove( "active" );
+                                newActiveDom.classList.add( "active" );
+                                newActiveDom.focus();
+                                activeSlot += dt;
+                            }
+                        }
+                        else if( e.key == "Enter" && !valueString.includes( 'x' ) )
+                        {
+                            this.set( valueString );
+                        }
+                    } );
+                }
+
+                if( i < ( groups.length - 1 ) )
+                {
+                    LX.makeContainer( ["auto", "auto"], "mx-2", `-`, container );
+                }
+            }
+
+            console.assert( itemsCount == valueString.length, "OTP Value/Pattern Mismatch!" );
+        };
+
+        _refreshInput( value );
+    }
+}
+
+LX.OTPInput = OTPInput;
+
+/**
+ * @class Pad
+ * @description Pad Widget
+ */
+
+class Pad extends Widget {
+
+    constructor( name, value, callback, options = {} ) {
+
+        super( Widget.PAD, name, null, options );
+
+        this.onGetValue = () => {
+            return thumb.value.xy;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+            thumb.value.set( newValue[ 0 ], newValue[ 1 ] );
+            _updateValue( thumb.value );
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, thumb.value.xy ), callback );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
+        var container = document.createElement( 'div' );
+        container.className = "lexpad";
+        this.root.appendChild( container );
+
+        let pad = document.createElement('div');
+        pad.id = "lexpad-" + name;
+        pad.className = "lexinnerpad";
+        pad.style.width = options.padSize ?? '96px';
+        pad.style.height = options.padSize ?? '96px';
+        container.appendChild( pad );
+
+        let thumb = document.createElement('div');
+        thumb.className = "lexpadthumb";
+        thumb.value = new LX.vec2( value[ 0 ], value[ 1 ] );
+        thumb.min = options.min ?? 0;
+        thumb.max = options.max ?? 1;
+        pad.appendChild( thumb );
+
+        let _updateValue = v => {
+            const [ w, h ] = [ pad.offsetWidth, pad.offsetHeight ];
+            const value0to1 = new LX.vec2( LX.remapRange( v.x, thumb.min, thumb.max, 0.0, 1.0 ), LX.remapRange( v.y, thumb.min, thumb.max, 0.0, 1.0 ) );
+            thumb.style.transform = `translate(calc( ${ w * value0to1.x }px - 50% ), calc( ${ h * value0to1.y }px - 50%)`;
+        };
+
+        pad.addEventListener( "mousedown", innerMouseDown );
+
+        let that = this;
+
+        function innerMouseDown( e )
+        {
+            if( document.activeElement == thumb )
+            {
+                return;
+            }
+
+            var doc = that.root.ownerDocument;
+            doc.addEventListener( 'mousemove', innerMouseMove );
+            doc.addEventListener( 'mouseup', innerMouseUp );
+            document.body.classList.add( 'nocursor' );
+            document.body.classList.add( 'noevents' );
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            thumb.classList.add( "active" );
+
+            if( options.onPress )
+            {
+                options.onPress.bind( thumb )( e, thumb );
+            }
+        }
+
+        function innerMouseMove( e )
+        {
+            const rect = pad.getBoundingClientRect();
+            const relativePosition = new LX.vec2( e.x - rect.x, e.y - rect.y );
+            relativePosition.clp( 0.0, pad.offsetWidth, relativePosition);
+            const [ w, h ] = [ pad.offsetWidth, pad.offsetHeight ];
+            const value0to1 = relativePosition.div( new LX.vec2( pad.offsetWidth, pad.offsetHeight ) );
+
+            thumb.style.transform = `translate(calc( ${ w * value0to1.x }px - 50% ), calc( ${ h * value0to1.y }px - 50%)`;
+            thumb.value = new LX.vec2( LX.remapRange( value0to1.x, 0.0, 1.0, thumb.min, thumb.max ), LX.remapRange( value0to1.y, 0.0, 1.0, thumb.min, thumb.max ) );
+
+            that._trigger( new LX.IEvent( name, thumb.value.xy, e ), callback );
+
+            e.stopPropagation();
+            e.preventDefault();
+        }
+
+        function innerMouseUp( e )
+        {
+            var doc = that.root.ownerDocument;
+            doc.removeEventListener( 'mousemove', innerMouseMove );
+            doc.removeEventListener( 'mouseup', innerMouseUp );
+            document.body.classList.remove( 'nocursor' );
+            document.body.classList.remove( 'noevents' );
+            thumb.classList.remove( "active" );
+
+            if( options.onRelease )
+            {
+                options.onRelease.bind( thumb )( e, thumb );
+            }
+        }
+
+        LX.doAsync( () => {
+            this.onResize();
+            _updateValue( thumb.value );
+        } );
+    }
+}
+
+LX.Pad = Pad;
+
+/**
+ * @class Progress
+ * @description Progress Widget
+ */
+
+class Progress extends Widget {
+
+    constructor( name, value, options = {} ) {
+
+        super( Widget.PROGRESS, name, value, options );
+
+        this.onGetValue = () => {
+            return progress.value;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+            this.root.querySelector("meter").value = newValue;
+            _updateColor();
+            if( this.root.querySelector("span") )
+            {
+                this.root.querySelector("span").innerText = newValue;
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
+        const container = document.createElement('div');
+        container.className = "lexprogress";
+        this.root.appendChild( container );
+
+        // add slider (0-1 if not specified different )
+
+        let progress = document.createElement('meter');
+        progress.id = "lexprogressbar-" + name;
+        progress.className = "lexprogressbar";
+        progress.step = "any";
+        progress.min = options.min ?? 0;
+        progress.max = options.max ?? 1;
+        progress.low = options.low ?? progress.low;
+        progress.high = options.high ?? progress.high;
+        progress.optimum = options.optimum ?? progress.optimum;
+        progress.value = value;
+        container.appendChild( progress );
+
+        const _updateColor = () => {
+
+            let backgroundColor = LX.getThemeColor( "global-selected" );
+
+            if( progress.low != undefined && progress.value < progress.low )
+            {
+                backgroundColor = LX.getThemeColor( "global-color-error" );
+            }
+            else if( progress.high != undefined && progress.value < progress.high )
+            {
+                backgroundColor = LX.getThemeColor( "global-color-warning" );
+            }
+
+            progress.style.background = `color-mix(in srgb, ${backgroundColor} 20%, transparent)`;
+        };
+
+        if( options.showValue )
+        {
+            if( document.getElementById('progressvalue-' + name ) )
+            {
+                document.getElementById('progressvalue-' + name ).remove();
+            }
+
+            let span = document.createElement("span");
+            span.id = "progressvalue-" + name;
+            span.style.padding = "0px 5px";
+            span.innerText = value;
+            container.appendChild( span );
+        }
+
+        if( options.editable ?? false )
+        {
+            progress.classList.add( "editable" );
+
+            let innerMouseDown = e => {
+
+                var doc = this.root.ownerDocument;
+                doc.addEventListener( 'mousemove', innerMouseMove );
+                doc.addEventListener( 'mouseup', innerMouseUp );
+                document.body.classList.add( 'noevents' );
+                progress.classList.add( "grabbing" );
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+
+                const rect = progress.getBoundingClientRect();
+                const newValue = LX.round( LX.remapRange( e.offsetX, 0, rect.width, progress.min, progress.max ) );
+                this.set( newValue, false, e );
+            };
+
+            let innerMouseMove = e => {
+
+                let dt = e.movementX;
+
+                if ( dt != 0 )
+                {
+                    const rect = progress.getBoundingClientRect();
+                    const newValue = LX.round( LX.remapRange( e.offsetX - rect.x, 0, rect.width, progress.min, progress.max ) );
+                    this.set( newValue, false, e );
+
+                    if( options.callback )
+                    {
+                        options.callback( newValue, e );
+                    }
+                }
+
+                e.stopPropagation();
+                e.preventDefault();
+            };
+
+            let innerMouseUp = e => {
+
+                var doc = this.root.ownerDocument;
+                doc.removeEventListener( 'mousemove', innerMouseMove );
+                doc.removeEventListener( 'mouseup', innerMouseUp );
+                document.body.classList.remove( 'noevents' );
+                progress.classList.remove( "grabbing" );
+            };
+
+            progress.addEventListener( "mousedown", innerMouseDown );
+        }
+
+        _updateColor();
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.Progress = Progress;
+
+/**
+ * @class FileInput
+ * @description FileInput Widget
+ */
+
+class FileInput extends Widget {
+
+    constructor( name, callback, options = { } ) {
+
+        super( Widget.FILE, name, null, options );
+
+        let local = options.local ?? true;
+        let type = options.type ?? 'text';
+        let read = options.read ?? true;
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            input.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
+        // Create hidden input
+        let input = document.createElement( 'input' );
+        input.className = "lexfileinput";
+        input.type = 'file';
+        input.disabled = options.disabled ?? false;
+        this.root.appendChild( input );
+
+        if( options.placeholder )
+        {
+            input.placeholder = options.placeholder;
+        }
+
+        input.addEventListener( 'change', function( e ) {
+
+            const files = e.target.files;
+            if( !files.length ) return;
+            if( read )
+            {
+                if( options.onBeforeRead )
+                    options.onBeforeRead();
+
+                const reader = new FileReader();
+
+                if( type === 'text' ) reader.readAsText( files[ 0 ] );
+                else if( type === 'buffer' ) reader.readAsArrayBuffer( files[ 0 ] );
+                else if( type === 'bin' ) reader.readAsBinaryString( files[ 0 ] );
+                else if( type === 'url' ) reader.readAsDataURL( files[ 0 ] );
+
+                reader.onload = e => { callback.call( this, e.target.result, files[ 0 ] ); } ;
+            }
+            else
+                callback( files[ 0 ] );
+        });
+
+        input.addEventListener( 'cancel', function( e ) {
+            callback( null );
+        });
+
+        if( local )
+        {
+            let settingsDialog = null;
+
+            const settingButton = new LX.Button(null, "", () => {
+
+                if( settingsDialog )
+                {
+                    return;
+                }
+
+                settingsDialog = new LX.Dialog( "Load Settings", p => {
+                    p.addSelect( "Type", [ 'text', 'buffer', 'bin', 'url' ], type, v => { type = v; } );
+                    p.addButton( null, "Reload", v => { input.dispatchEvent( new Event( 'change' ) ); } );
+                }, { onclose: ( root ) => { root.remove(); settingsDialog = null; } } );
+
+            }, { skipInlineCount: true, title: "Settings", disabled: options.disabled, icon: "Settings" });
+
+            this.root.appendChild( settingButton.root );
+        }
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.FileInput = FileInput;
+
+/**
+ * @class Tree
+ * @description Tree Widget
+ */
+
+class Tree extends Widget {
+
+    constructor( name, data, options = {} ) {
+
+        options.hideName = true;
+
+        super( Widget.TREE, name, null, options );
+
+        let container = document.createElement('div');
+        container.className = "lextree";
+        this.root.appendChild( container );
+
+        if( name )
+        {
+            let title = document.createElement('span');
+            title.innerHTML = name;
+            container.appendChild( title );
+        }
+
+        let toolsDiv = document.createElement('div');
+        toolsDiv.className = "lextreetools";
+        if( !name )
+        {
+            toolsDiv.className += " notitle";
+        }
+
+        // Tree icons
+        if( options.icons )
+        {
+            for( let data of options.icons )
+            {
+                const iconEl = LX.makeIcon( data.icon, { title: data.name } );
+                iconEl.addEventListener( "click", data.callback );
+                toolsDiv.appendChild( iconEl );
+            }
+        }
+
+        // Node filter
+
+        options.filter = options.filter ?? true;
+
+        let nodeFilterInput = null;
+        if( options.filter )
+        {
+            nodeFilterInput = document.createElement( "input" );
+            nodeFilterInput.className = "lexnodetreefilter";
+            nodeFilterInput.setAttribute("placeholder", "Filter..");
+            nodeFilterInput.style.width =  "100%";
+            nodeFilterInput.addEventListener('input', () => {
+                this.innerTree.refresh();
+            });
+
+            let searchIcon = LX.makeIcon( "Search" );
+            toolsDiv.appendChild( nodeFilterInput );
+            toolsDiv.appendChild( searchIcon );
+        }
+
+        if( options.icons || options.filter )
+        {
+            container.appendChild( toolsDiv );
+        }
+
+        // Tree
+
+        let list = document.createElement('ul');
+        list.addEventListener("contextmenu", function( e ) {
+            e.preventDefault();
+        });
+
+        container.appendChild( list );
+
+        this.innerTree = new NodeTree( container, data, options );
+    }
+}
+
+LX.Tree = Tree;
+
+/**
+ * @class TabSections
+ * @description TabSections Widget
+ */
+
+class TabSections extends Widget {
+
+    constructor( name, tabs, options = {} ) {
+
+        options.hideName = true;
+
+        super( Widget.TABS, name, null, options );
+
+        if( tabs.constructor != Array )
+        {
+            throw( "Param @tabs must be an Array!" );
+        }
+
+        const vertical = options.vertical ?? true;
+        const showNames = !vertical && ( options.showNames ?? false );
+
+        let container = document.createElement( 'div' );
+        container.className = "lextabscontainer";
+        if( !vertical )
+        {
+            container.className += " horizontal";
+        }
+
+        let tabContainer = document.createElement( "div" );
+        tabContainer.className = "tabs";
+        container.appendChild( tabContainer );
+        this.root.appendChild( container );
+
+        for( let i = 0; i < tabs.length; ++i )
+        {
+            const tab = tabs[ i ];
+            console.assert( tab.name );
+            const isSelected = ( i == 0 );
+            let tabEl = document.createElement( "div" );
+            tabEl.className = "lextab " + (i == tabs.length - 1 ? "last" : "") + ( isSelected ? "selected" : "" );
+            tabEl.innerHTML = ( showNames ? tab.name : "" );
+            tabEl.appendChild( LX.makeIcon( tab.icon ?? "Hash", { title: tab.name } ) );
+
+            let infoContainer = document.createElement( "div" );
+            infoContainer.id = tab.name.replace( /\s/g, '' );
+            infoContainer.className = "widgets";
+
+            if( !isSelected )
+            {
+                infoContainer.toggleAttribute( "hidden", true );
+            }
+
+            container.appendChild( infoContainer );
+
+            tabEl.addEventListener( "click", e => {
+                // Change selected tab
+                tabContainer.querySelectorAll( ".lextab" ).forEach( e => { e.classList.remove( "selected" ); } );
+                tabEl.classList.add( "selected" );
+                // Hide all tabs content
+                container.querySelectorAll(".widgets").forEach( e => { e.toggleAttribute( "hidden", true ); } );
+                // Show tab content
+                const el = container.querySelector( '#' + infoContainer.id );
+                el.toggleAttribute( "hidden" );
+
+                if( tab.onSelect )
+                {
+                    tab.onSelect( this, infoContainer );
+                }
+            });
+
+            tabContainer.appendChild( tabEl );
+
+            if( tab.onCreate )
+            {
+                // Push to tab space
+                const creationPanel = new LX.Panel();
+                creationPanel.queue( infoContainer );
+                tab.onCreate.call(this, creationPanel);
+                creationPanel.clearQueue();
+            }
+        }
+    }
+}
+
+LX.TabSections = TabSections;
+
+/**
+ * @class Counter
+ * @description Counter Widget
+ */
+
+class Counter extends Widget {
+
+    constructor( name, value, callback, options = { } ) {
+
+        super( Widget.COUNTER, name, value, options );
+
+        this.onGetValue = () => {
+            return counterText.count;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+            newValue = LX.clamp( newValue, min, max );
+            counterText.count = newValue;
+            counterText.innerHTML = newValue;
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, newValue, event ), callback );
+            }
+        };
+
+        const min = options.min ?? 0;
+        const max = options.max ?? 100;
+        const step = options.step ?? 1;
+
+        const container = document.createElement( 'div' );
+        container.className = "lexcounter";
+        this.root.appendChild( container );
+
+        const substrButton = new LX.Button(null, "", ( value, e ) => {
+            let mult = step ?? 1;
+            if( e.shiftKey ) mult *= 10;
+            this.set( counterText.count - mult, false, e );
+        }, { skipInlineCount: true, title: "Minus", icon: "Minus" });
+
+        container.appendChild( substrButton.root );
+
+        const containerBox = document.createElement( 'div' );
+        containerBox.className = "lexcounterbox";
+        container.appendChild( containerBox );
+
+        const counterText = document.createElement( 'span' );
+        counterText.className = "lexcountervalue";
+        counterText.innerHTML = value;
+        counterText.count = value;
+        containerBox.appendChild( counterText );
+
+        if( options.label )
+        {
+            const counterLabel = document.createElement( 'span' );
+            counterLabel.className = "lexcounterlabel";
+            counterLabel.innerHTML = options.label;
+            containerBox.appendChild( counterLabel );
+        }
+
+        const addButton = new LX.Button(null, "", ( value, e ) => {
+            let mult = step ?? 1;
+            if( e.shiftKey ) mult *= 10;
+            this.set( counterText.count + mult, false, e );
+        }, { skipInlineCount: true, title: "Plus", icon: "Plus" });
+        container.appendChild( addButton.root );
+    }
+}
+
+LX.Counter = Counter;
+
+/**
+ * @class Table
+ * @description Table Widget
+ */
+
+class Table extends Widget {
+
+    constructor( name, data, options = { } ) {
+
+        if( !data )
+        {
+            throw( "Data is needed to create a table!" );
+        }
+
+        super( Widget.TABLE, name, null, options );
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
+        const container = document.createElement('div');
+        container.className = "lextable";
+        this.root.appendChild( container );
+
+        this.centered = options.centered ?? false;
+        if( this.centered === true )
+        {
+            container.classList.add( "centered" );
+        }
+
+        this.filter = options.filter ?? false;
+        this.toggleColumns = options.toggleColumns ?? false;
+        this.customFilters = options.customFilters ?? false;
+        this.activeCustomFilters = {};
+        this._currentFilter = options.filterValue;
+
+        data.head = data.head ?? [];
+        data.body = data.body ?? [];
+        data.checkMap = { };
+        data.colVisibilityMap = { };
+        data.head.forEach( (col, index) => { data.colVisibilityMap[ index ] = true; });
+
+        const compareFn = ( idx, order, a, b) => {
+            if (a[idx] < b[idx]) return -order;
+            else if (a[idx] > b[idx]) return order;
+            return 0;
+        };
+
+        const sortFn = ( idx, sign ) => {
+            data.body = data.body.sort( compareFn.bind( this, idx, sign ) );
+            this.refresh();
+        };
+
+        // Append header
+        if( this.filter || this.customFilters || this.toggleColumns )
+        {
+            const headerContainer = LX.makeContainer( [ "100%", "auto" ], "flex flex-row" );
+
+            if( this.filter )
+            {
+                const filterOptions = LX.deepCopy( options );
+                filterOptions.placeholder = `Filter ${ this.filter }...`;
+                filterOptions.skipWidget = true;
+                filterOptions.trigger = "input";
+                filterOptions.inputClass = "outline";
+
+                let filter = new LX.TextInput(null, this._currentFilter ?? "", ( v ) => {
+                    this._currentFilter = v;
+                    this.refresh();
+                }, filterOptions );
+
+                headerContainer.appendChild( filter.root );
+            }
+
+            if( this.customFilters )
+            {
+                const icon = LX.makeIcon( "CirclePlus", { svgClass: "sm" } );
+                const separatorHtml = `<div class="lexcontainer border-right self-center mx-1" style="width: 1px; height: 70%;"></div>`;
+
+                for( let f of this.customFilters )
+                {
+                    f.widget = new LX.Button(null, icon.innerHTML + f.name, ( v ) => {
+
+                        const spanName = f.widget.root.querySelector( "span" );
+
+                        if( f.options )
+                        {
+                            const menuOptions = f.options.map( ( colName, idx ) => {
+                                const item = {
+                                    name: colName,
+                                    checked:  !!this.activeCustomFilters[ colName ],
+                                    callback: (key, v, dom) => {
+                                        if( v ) { this.activeCustomFilters[ key ] = f.name; }
+                                        else {
+                                            delete this.activeCustomFilters[ key ];
+                                        }
+                                        const activeFilters = Object.keys( this.activeCustomFilters ).filter(  k => this.activeCustomFilters[ k ] == f.name );
+                                        const filterBadgesHtml = activeFilters.reduce( ( acc, key ) => acc += LX.badge( key, "bg-tertiary fg-secondary text-sm border-0" ), "" );
+                                        spanName.innerHTML = icon.innerHTML + f.name + ( activeFilters.length ? separatorHtml : "" ) + filterBadgesHtml;
+                                        this.refresh();
+                                    }
+                                };
+                                return item;
+                            } );
+                            new LX.DropdownMenu( f.widget.root, menuOptions, { side: "bottom", align: "start" });
+                        }
+                        else if( f.type == "range" )
+                        {
+                            console.assert( f.min != undefined && f.max != undefined, "Range filter needs min and max values!" );
+                            const container = LX.makeContainer( ["240px", "auto"], "text-md" );
+                            const panel = new LX.Panel();
+                            LX.makeContainer( ["100%", "auto"], "px-3 p-2 pb-0 text-md font-medium", f.name, container );
+
+                            f.start = f.start ?? f.min;
+                            f.end = f.end ?? f.max;
+
+                            panel.refresh = () => {
+                                panel.clear();
+                                panel.sameLine( 2, "justify-center" );
+                                panel.addNumber( null, f.start, (v) => {
+                                    f.start = v;
+                                    const inUse = ( f.start != f.min || f.end != f.max );
+                                    spanName.innerHTML = icon.innerHTML + f.name + ( inUse ? separatorHtml + LX.badge( `${ f.start } - ${ f.end } ${ f.units ?? "" }`, "bg-tertiary fg-secondary text-sm border-0" ) : "" );
+                                    this.refresh();
+                                }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
+                                panel.addNumber( null, f.end, (v) => {
+                                    f.end = v;
+                                    const inUse = ( f.start != f.min || f.end != f.max );
+                                    spanName.innerHTML = icon.innerHTML + f.name + ( inUse ? separatorHtml + LX.badge( `${ f.start } - ${ f.end } ${ f.units ?? "" }`, "bg-tertiary fg-secondary text-sm border-0" ) : "" );
+                                    this.refresh();
+                                }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
+                                panel.addButton( null, "Reset", () => {
+                                    f.start = f.min;
+                                    f.end = f.max;
+                                    spanName.innerHTML = icon.innerHTML + f.name;
+                                    panel.refresh();
+                                    this.refresh();
+                                }, { buttonClass: "contrast" } );
+                            };
+                            panel.refresh();
+                            container.appendChild( panel.root );
+                            new LX.Popover( f.widget.root, [ container ], { side: "bottom" } );
+                        }
+
+                    }, { buttonClass: "px-2 primary dashed" } );
+                    headerContainer.appendChild( f.widget.root );
+                }
+
+                this._resetCustomFiltersBtn = new LX.Button(null, "resetButton", ( v ) => {
+                    this.activeCustomFilters = {};
+                    this._resetCustomFiltersBtn.root.classList.add( "hidden" );
+                    for( let f of this.customFilters )
+                    {
+                        f.widget.root.querySelector( "span" ).innerHTML = ( icon.innerHTML + f.name );
+                        if( f.type == "range" )
+                        {
+                            f.start = f.min;
+                            f.end = f.max;
+                        }
+                    }
+                    this.refresh();
+                }, { title: "Reset filters", tooltip: true, icon: "X" } );
+                headerContainer.appendChild( this._resetCustomFiltersBtn.root );
+                this._resetCustomFiltersBtn.root.classList.add( "hidden" );
+            }
+
+            if( this.toggleColumns )
+            {
+                const icon = LX.makeIcon( "Settings2" );
+                const toggleColumnsBtn = new LX.Button( "toggleColumnsBtn", icon.innerHTML + "View", (value, e) => {
+                    const menuOptions = data.head.map( ( colName, idx ) => {
+                        const item = {
+                            name: colName,
+                            icon: "Check",
+                            callback: () => {
+                                data.colVisibilityMap[ idx ] = !data.colVisibilityMap[ idx ];
+                                const cells = table.querySelectorAll(`tr > *:nth-child(${idx + this.rowOffsetCount + 1})`);
+                                cells.forEach(cell => {
+                                    cell.style.display = (cell.style.display === "none") ? "" : "none";
+                                });
+                            }
+                        };
+                        if( !data.colVisibilityMap[ idx ] ) delete item.icon;
+                        return item;
+                    } );
+                    new LX.DropdownMenu( e.target, menuOptions, { side: "bottom", align: "end" });
+                }, { hideName: true } );
+                headerContainer.appendChild( toggleColumnsBtn.root );
+                toggleColumnsBtn.root.style.marginLeft = "auto";
+            }
+
+            container.appendChild( headerContainer );
+        }
+
+        const table = document.createElement( 'table' );
+        container.appendChild( table );
+
+        this.refresh = () => {
+
+            this._currentFilter = this._currentFilter ?? "";
+
+            table.innerHTML = "";
+
+            this.rowOffsetCount = 0;
+
+            // Head
+            {
+                const head = document.createElement( 'thead' );
+                head.className = "lextablehead";
+                table.appendChild( head );
+
+                const hrow = document.createElement( 'tr' );
+
+                if( options.sortable ?? false )
+                {
+                    const th = document.createElement( 'th' );
+                    th.style.width = "0px";
+                    hrow.appendChild( th );
+                    this.rowOffsetCount++;
+                }
+
+                if( options.selectable ?? false )
+                {
+                    const th = document.createElement( 'th' );
+                    th.style.width = "0px";
+                    const input = document.createElement( 'input' );
+                    input.type = "checkbox";
+                    input.className = "lexcheckbox accent";
+                    input.checked = data.checkMap[ ":root" ] ?? false;
+                    th.appendChild( input );
+
+                    input.addEventListener( 'change', function() {
+
+                        data.checkMap[ ":root" ] = this.checked;
+
+                        const body = table.querySelector( "tbody" );
+                        for( const el of body.childNodes )
+                        {
+                            data.checkMap[ el.getAttribute( "rowId" ) ] = this.checked;
+                            el.querySelector( "input[type='checkbox']" ).checked = this.checked;
+                        }
+                    });
+
+                    this.rowOffsetCount++;
+                    hrow.appendChild( th );
+                }
+
+                for( const headData of data.head )
+                {
+                    const th = document.createElement( 'th' );
+                    th.innerHTML = `<span>${ headData }</span>`;
+                    th.querySelector( "span" ).appendChild( LX.makeIcon( "MenuArrows", { svgClass: "sm" } ) );
+
+                    const idx = data.head.indexOf( headData );
+                    if( this.centered && this.centered.indexOf( idx ) > -1 )
+                    {
+                        th.classList.add( "centered" );
+                    }
+
+                    const menuOptions = [
+                        { name: "Asc", icon: "ArrowUpAZ", callback: sortFn.bind( this, idx, 1 ) },
+                        { name: "Desc", icon: "ArrowDownAZ", callback: sortFn.bind( this, idx, -1 ) }
+                    ];
+
+                    if( this.toggleColumns )
+                    {
+                        menuOptions.push(
+                            null,
+                            {
+                                name: "Hide", icon: "EyeOff", callback: () => {
+                                    data.colVisibilityMap[ idx ] = false;
+                                    const cells = table.querySelectorAll(`tr > *:nth-child(${idx + this.rowOffsetCount + 1})`);
+                                    cells.forEach(cell => {
+                                        cell.style.display = (cell.style.display === "none") ? "" : "none";
+                                    });
+                                }
+                            }
+                        );
+                    }
+
+                    th.addEventListener( 'click', event => {
+                        new LX.DropdownMenu( event.target, menuOptions, { side: "bottom", align: "start" });
+                    });
+
+                    hrow.appendChild( th );
+                }
+
+                // Add empty header column
+                if( options.rowActions )
+                {
+                    const th = document.createElement( 'th' );
+                    th.className = "sm";
+                    hrow.appendChild( th );
+                }
+
+                head.appendChild( hrow );
+            }
+
+            // Body
+            {
+                const body = document.createElement( 'tbody' );
+                body.className = "lextablebody";
+                table.appendChild( body );
+
+                let rIdx = null;
+                let eventCatched = false;
+                let movePending = null;
+
+                document.addEventListener( 'mouseup', (e) => {
+                    if( rIdx === null ) return;
+                    document.removeEventListener( "mousemove", onMove );
+                    const fromRow = table.rows[ rIdx ];
+                    fromRow.dY = 0;
+                    fromRow.classList.remove( "dragging" );
+                    Array.from( table.rows ).forEach( v => {
+                        v.style.transform = ``;
+                        v.style.transition = `none`;
+                    } );
+                    LX.flushCss( fromRow );
+
+                    if( movePending )
+                    {
+                        // Modify inner data first
+                        // Origin row should go to the target row, and the rest should be moved up/down
+                        const fromIdx = rIdx - 1;
+                        const targetIdx = movePending[ 1 ] - 1;
+                        const b = data.body[ fromIdx ];
+                        let targetOffset = 0;
+
+                        if( fromIdx == targetIdx ) return;
+                        if( fromIdx > targetIdx ) // Move up
+                        {
+                            for( let i = fromIdx; i > targetIdx; --i )
+                            {
+                                data.body[ i ] = data.body[ i - 1 ];
+                            }
+                        }
+                        else // Move down
+                        {
+                            targetOffset = 1;
+                            for( let i = fromIdx; i < targetIdx; ++i )
+                            {
+                                data.body[ i ] = data.body[ i + 1 ];
+                            }
+                        }
+
+                        data.body[targetIdx] = b;
+
+                        const parent = movePending[ 0 ].parentNode;
+                        parent.insertChildAtIndex(  movePending[ 0 ], targetIdx + targetOffset );
+                        movePending = null;
+                    }
+
+                    rIdx = null;
+
+                    LX.doAsync( () => {
+                        Array.from( table.rows ).forEach( v => {
+                            v.style.transition = `transform 0.2s ease-in`;
+                        } );
+                    } );
+                } );
+
+                let onMove = ( e ) => {
+                    if( !rIdx ) return;
+                    const fromRow = table.rows[ rIdx ];
+                    fromRow.dY = fromRow.dY ?? 0;
+                    fromRow.dY += e.movementY;
+                    fromRow.style.transform = `translateY(${fromRow.dY}px)`;
+                };
+
+                for( let r = 0; r < data.body.length; ++r )
+                {
+                    const bodyData = data.body[ r ];
+
+                    if( this.filter )
+                    {
+                        const filterColIndex = data.head.indexOf( this.filter );
+                        if( filterColIndex > -1 )
+                        {
+                            const validRowValue = LX.stripHTML( bodyData[ filterColIndex ] ).toLowerCase();
+                            if( !validRowValue.includes( this._currentFilter.toLowerCase() ) )
+                            {
+                                continue;
+                            }
+                        }
+                    }
+
+                    if( Object.keys( this.activeCustomFilters ).length )
+                    {
+                        let acfMap = {};
+
+                        this._resetCustomFiltersBtn.root.classList.remove( "hidden" );
+
+                        for( let acfValue in this.activeCustomFilters )
+                        {
+                            const acfName = this.activeCustomFilters[ acfValue ];
+                            acfMap[ acfName ] = acfMap[ acfName ] ?? false;
+
+                            const filterColIndex = data.head.indexOf( acfName );
+                            if( filterColIndex > -1 )
+                            {
+                                acfMap[ acfName ] |= ( bodyData[ filterColIndex ] === acfValue );
+                            }
+                        }
+
+                        const show = Object.values( acfMap ).reduce( ( e, acc ) => acc *= e, true );
+                        if( !show )
+                        {
+                            continue;
+                        }
+                    }
+
+                    // Check range/date filters
+                    if( this.customFilters )
+                    {
+                        let acfMap = {};
+
+                        for( let f of this.customFilters )
+                        {
+                            const acfName = f.name;
+
+                            if( f.type == "range" )
+                            {
+                                acfMap[ acfName ] = acfMap[ acfName ] ?? false;
+
+                                const filterColIndex = data.head.indexOf( acfName );
+                                if( filterColIndex > -1 )
+                                {
+                                    const validRowValue = parseFloat( bodyData[ filterColIndex ] );
+                                    const min = f.start ?? f.min;
+                                    const max = f.end ?? f.max;
+                                    acfMap[ acfName ] |= ( validRowValue >= min ) && ( validRowValue <= max );
+                                }
+                            }
+                            else if( f.type == "date" )
+                            ;
+                        }
+
+                        const show = Object.values( acfMap ).reduce( ( e, acc ) => acc *= e, true );
+                        if( !show )
+                        {
+                            continue;
+                        }
+                    }
+
+                    const row = document.createElement( 'tr' );
+                    const rowId = LX.getSupportedDOMName( bodyData.join( '-' ) );
+                    row.setAttribute( "rowId", rowId.substr(0, 32) );
+
+                    if( options.sortable ?? false )
+                    {
+                        const td = document.createElement( 'td' );
+                        td.style.width = "0px";
+                        const icon = LX.makeIcon( "GripVertical" );
+                        td.appendChild( icon );
+
+                        icon.draggable = true;
+
+                        icon.addEventListener("dragstart", (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            e.stopImmediatePropagation();
+
+                            rIdx = row.rowIndex;
+                            row.classList.add( "dragging" );
+
+                            document.addEventListener( "mousemove", onMove );
+                        }, false );
+
+                        row.addEventListener("mouseenter", function(e) {
+                            e.preventDefault();
+
+                            if( rIdx != null && ( this.rowIndex != rIdx ) && ( eventCatched != this.rowIndex ) )
+                            {
+                                eventCatched = this.rowIndex;
+                                const fromRow = table.rows[ rIdx ];
+                                const undo = ( this.style.transform != `` );
+                                if (this.rowIndex > rIdx) {
+                                    movePending = [ fromRow, undo ? (this.rowIndex-1) : this.rowIndex ];
+                                    this.style.transform = undo ? `` : `translateY(-${this.offsetHeight}px)`;
+                                } else {
+                                    movePending = [ fromRow, undo ? (this.rowIndex+1) : (this.rowIndex) ];
+                                    this.style.transform = undo ? `` : `translateY(${this.offsetHeight}px)`;
+                                }
+                                LX.doAsync( () => {
+                                    eventCatched = false;
+                                } );
+                            }
+                        });
+
+                        row.appendChild( td );
+                    }
+
+                    if( options.selectable ?? false )
+                    {
+                        const td = document.createElement( 'td' );
+                        const input = document.createElement( 'input' );
+                        input.type = "checkbox";
+                        input.className = "lexcheckbox accent";
+                        input.checked = data.checkMap[ rowId ];
+                        td.appendChild( input );
+
+                        input.addEventListener( 'change', function() {
+                            data.checkMap[ rowId ] = this.checked;
+
+                            const headInput = table.querySelector( "thead input[type='checkbox']" );
+
+                            if( !this.checked )
+                            {
+                                headInput.checked = data.checkMap[ ":root" ] = false;
+                            }
+                            else
+                            {
+                                const rowInputs = Array.from( table.querySelectorAll( "tbody input[type='checkbox']" ) );
+                                const uncheckedRowInputs = rowInputs.filter( i => { return !i.checked; } );
+                                if( !uncheckedRowInputs.length )
+                                {
+                                    headInput.checked = data.checkMap[ ":root" ] = true;
+                                }
+                            }
+                        });
+
+                        row.appendChild( td );
+                    }
+
+                    for( const rowData of bodyData )
+                    {
+                        const td = document.createElement( 'td' );
+                        td.innerHTML = `${ rowData }`;
+
+                        const idx = bodyData.indexOf( rowData );
+                        if( this.centered && this.centered.indexOf( idx ) > -1 )
+                        {
+                            td.classList.add( "centered" );
+                        }
+
+                        row.appendChild( td );
+                    }
+
+                    if( options.rowActions )
+                    {
+                        const td = document.createElement( 'td' );
+                        td.style.width = "0px";
+
+                        const buttons = document.createElement( 'div' );
+                        buttons.className = "lextablebuttons";
+                        td.appendChild( buttons );
+
+                        for( const action of options.rowActions )
+                        {
+                            let button = null;
+
+                            if( action == "delete" )
+                            {
+                                button = LX.makeIcon( "Trash3", { title: "Delete Row" } );
+                                button.addEventListener( 'click', function() {
+                                    // Don't need to refresh table..
+                                    data.body.splice( r, 1 );
+                                    row.remove();
+                                });
+                            }
+                            else if( action == "menu" )
+                            {
+                                button = LX.makeIcon( "Ellipsis", { title: "Menu" } );
+                                button.addEventListener( 'click', function( event ) {
+                                    if( !options.onMenuAction )
+                                    {
+                                        return;
+                                    }
+
+                                    const menuOptions = options.onMenuAction( r, data );
+                                    console.assert( menuOptions.length, "Add items to the Menu Action Dropdown!" );
+
+                                    new LX.DropdownMenu( event.target, menuOptions, { side: "bottom", align: "end" });
+                                });
+                            }
+                            else // custom actions
+                            {
+                                console.assert( action.constructor == Object );
+                                button = LX.makeIcon( action.icon, { title: action.title } );
+
+                                if( action.callback )
+                                {
+                                    button.addEventListener( 'click', e => {
+                                        const mustRefresh = action.callback( bodyData, table, e );
+                                        if( mustRefresh )
+                                        {
+                                            this.refresh();
+                                        }
+                                    });
+                                }
+                            }
+
+                            console.assert( button );
+                            buttons.appendChild( button );
+                        }
+
+                        row.appendChild( td );
+                    }
+
+                    body.appendChild( row );
+                }
+            }
+
+            for( const v in data.colVisibilityMap )
+            {
+                const idx = parseInt( v );
+                if( !data.colVisibilityMap[ idx ] )
+                {
+                    const cells = table.querySelectorAll(`tr > *:nth-child(${idx + this.rowOffsetCount + 1})`);
+                    cells.forEach(cell => {
+                        cell.style.display = (cell.style.display === "none") ? "" : "none";
+                    });
+                }
+            }
+        };
+
+        this.refresh();
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.Table = Table;
+
+/**
+ * @class DatePicker
+ * @description DatePicker Widget
+ */
+
+class DatePicker extends Widget {
+
+    constructor( name, dateString, callback, options = { } ) {
+
+        super( Widget.DATE, name, null, options );
+
+        if( options.today )
+        {
+            const date = new Date();
+            dateString = `${ date.getDate() }/${ date.getMonth() + 1 }/${ date.getFullYear() }`;
+        }
+
+        this.onGetValue = () => {
+            return dateString;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+
+            dateString = newValue;
+
+            this.calendar.fromDateString( newValue );
+
+            refresh( this.calendar.getFullDate() );
+
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, newValue, event ), callback );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
+        const container = document.createElement('div');
+        container.className = "lexdate";
+        this.root.appendChild( container );
+
+        this.calendar = new LX.Calendar( dateString, { onChange: ( date ) => {
+            this.set( `${ date.day }/${ date.month }/${ date.year }` );
+        }, ...options });
+
+        const refresh = ( currentDate ) => {
+            container.innerHTML = "";
+            const calendarIcon = LX.makeIcon( "Calendar" );
+            const calendarButton = new LX.Button( null, currentDate ?? "Pick a date", () => {
+                this._popover = new LX.Popover( calendarButton.root, [ this.calendar ] );
+            }, { buttonClass: `flex flex-row px-3 ${ currentDate ? "" : "fg-tertiary" } justify-between` } );
+
+            calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
+            container.appendChild( calendarButton.root );
+        };
+
+        refresh( dateString ? this.calendar.getFullDate(): null );
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.DatePicker = DatePicker;
+
+/**
+ * @class Map2D
+ * @description Map2D Widget
+ */
+
+class Map2D extends Widget {
+
+    constructor( name, points, callback, options = {} ) {
+
+        super( Widget.MAP2D, name, null, options );
+
+        this.onGetValue = () => {
+            return this.map2d.weightsObj;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+            // if( !skipCallback )
+            // {
+            //     this._trigger( new LX.IEvent( name, curveInstance.element.value, event ), callback );
+            // }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
+        var container = document.createElement( "div" );
+        container.className = "lexmap2d";
+        this.root.appendChild( container );
+
+        this.map2d = new LX.CanvasMap2D( points, callback, options );
+
+        const calendarIcon = LX.makeIcon( "SquareMousePointer" );
+        const calendarButton = new LX.Button( null, "Open Map", () => {
+            this._popover = new LX.Popover( calendarButton.root, [ this.map2d ] );
+        }, { buttonClass: `flex flex-row px-3 fg-secondary justify-between` } );
+
+        calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
+        container.appendChild( calendarButton.root );
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.Map2D = Map2D;
+
+// panel.js @jxarco
+
+/**
+ * @class Panel
+ */
+
+class Panel {
+
+    /**
+     * @param {Object} options
+     * id: Id of the element
+     * className: Add class to the element
+     * width: Width of the panel element [fit space]
+     * height: Height of the panel element [fit space]
+     * style: CSS Style object to be applied to the panel
+     */
+
+    constructor( options = {} ) {
+
+        var root = document.createElement('div');
+        root.className = "lexpanel";
+
+        if( options.id )
+        {
+            root.id = options.id;
+        }
+
+        if( options.className )
+        {
+            root.className += " " + options.className;
+        }
+
+        root.style.width = options.width || "100%";
+        root.style.height = options.height || "100%";
+        Object.assign( root.style, options.style ?? {} );
+
+        this.root = root;
+        this.branches = [];
+        this.widgets = {};
+
+        this._branchOpen = false;
+        this._currentBranch = null;
+        this._queue = []; // Append widgets in other locations
+        this._inlineWidgetsLeft = -1;
+        this._inline_queued_container = null;
+    }
+
+    get( name ) {
+
+        return this.widgets[ name ];
+    }
+
+    getValue( name ) {
+
+        let widget = this.widgets[ name ];
+
+        if( !widget )
+        {
+            throw( "No widget called " + name );
+        }
+
+        return widget.value();
+    }
+
+    setValue( name, value, skipCallback ) {
+
+        let widget = this.widgets[ name ];
+
+        if( !widget )
+        {
+            throw( "No widget called " + name );
+        }
+
+        return widget.set( value, skipCallback );
+    }
+
+    /**
+     * @method attach
+     * @param {Element} content child element to append to panel
+     */
+
+    attach( content ) {
+
+        console.assert( content, "No content to attach!" );
+        content.parent = this;
+        this.root.appendChild( content.root ? content.root : content );
+    }
+
+    /**
+     * @method clear
+     */
+
+    clear() {
+
+        this._branchOpen = false;
+        this.branches = [];
+        this._currentBranch = null;
+
+        for( let w in this.widgets )
+        {
+            if( this.widgets[ w ].options && this.widgets[ w ].options.signal )
+            {
+                const signal = this.widgets[ w ].options.signal;
+                for( let i = 0; i < LX.signals[signal].length; i++ )
+                {
+                    if( LX.signals[signal][ i ] == this.widgets[ w ] )
+                    {
+                        LX.signals[signal] = [...LX.signals[signal].slice(0, i), ...LX.signals[signal].slice(i+1)];
+                    }
+                }
+            }
+        }
+
+        if( this.signals )
+        {
+            for( let w = 0; w < this.signals.length; w++ )
+            {
+                let widget = Object.values(this.signals[ w ])[ 0 ];
+                let signal = widget.options.signal;
+                for( let i = 0; i < LX.signals[signal].length; i++ )
+                {
+                    if( LX.signals[signal][ i ] == widget )
+                    {
+                        LX.signals[signal] = [...LX.signals[signal].slice(0, i), ...LX.signals[signal].slice(i+1)];
+                    }
+                }
+            }
+        }
+
+        this.widgets = {};
+        this.root.innerHTML = "";
+    }
+
+    /**
+     * @method sameLine
+     * @param {Number} number Of widgets that will be placed in the same line
+     * @param {String} className Extra class to customize inline widgets parent container
+     * @description Next N widgets will be in the same line. If no number, it will inline all until calling nextLine()
+     */
+
+    sameLine( number, className ) {
+
+        this._inline_queued_container = this.queuedContainer;
+        this._inlineWidgetsLeft = ( number ?? Infinity );
+        this._inlineExtraClass = className ?? null;
+    }
+
+    /**
+     * @method endLine
+     * @param {String} className Extra class to customize inline widgets parent container
+     * @description Stop inlining widgets. Use it only if the number of widgets to be inlined is NOT specified.
+     */
+
+    endLine( className ) {
+
+        className = className ?? this._inlineExtraClass;
+
+        if( this._inlineWidgetsLeft == -1 )
+        {
+            console.warn("No pending widgets to be inlined!");
+            return;
+        }
+
+        this._inlineWidgetsLeft = -1;
+
+        if( !this._inlineContainer )
+        {
+            this._inlineContainer = document.createElement('div');
+            this._inlineContainer.className = "lexinlinewidgets";
+
+            if( className )
+            {
+                this._inlineContainer.className += ` ${ className }`;
+            }
+        }
+
+        // Push all elements single element or Array[element, container]
+        for( let item of this._inlineWidgets )
+        {
+            const isPair = ( item.constructor == Array );
+
+            if( isPair )
+            {
+                // eg. an array, inline items appended later to
+                if( this._inline_queued_container )
+                {
+                    this._inlineContainer.appendChild( item[ 0 ] );
+                }
+                // eg. a select, item is appended to parent, not to inline cont.
+                else
+                {
+                    item[ 1 ].appendChild( item[ 0 ] );
+                }
+            }
+            else
+            {
+                this._inlineContainer.appendChild( item );
+            }
+        }
+
+        if( !this._inline_queued_container )
+        {
+            if( this._currentBranch )
+            {
+                this._currentBranch.content.appendChild( this._inlineContainer );
+            }
+            else
+            {
+                this.root.appendChild( this._inlineContainer );
+            }
+        }
+        else
+        {
+            this._inline_queued_container.appendChild( this._inlineContainer );
+        }
+
+        delete this._inlineWidgets;
+        delete this._inlineContainer;
+        delete this._inlineExtraClass;
+    }
+
+    /**
+     * @method branch
+     * @param {String} name Name of the branch/section
+     * @param {Object} options
+     * id: Id of the branch
+     * className: Add class to the branch
+     * closed: Set branch collapsed/opened [false]
+     * icon: Set branch icon (LX.ICONS)
+     * filter: Allow filter widgets in branch by name [false]
+     */
+
+    branch( name, options = {} ) {
+
+        if( this._branchOpen )
+        {
+            this.merge();
+        }
+
+        // Create new branch
+        var branch = new LX.Branch( name, options );
+        branch.panel = this;
+
+        // Declare new open
+        this._branchOpen = true;
+        this._currentBranch = branch;
+
+        this.branches.push( branch );
+        this.root.appendChild( branch.root );
+
+        // Add widget filter
+        if( options.filter )
+        {
+            this._addFilter( options.filter, { callback: this._searchWidgets.bind( this, branch.name ) } );
+        }
+
+        return branch;
+    }
+
+    merge() {
+        this._branchOpen = false;
+        this._currentBranch = null;
+    }
+
+    _pick( arg, def ) {
+        return (typeof arg == 'undefined' ? def : arg);
+    }
+
+    /*
+        Panel Widgets
+    */
+
+    _attachWidget( widget, options = {} ) {
+
+        if( widget.name != undefined )
+        {
+            this.widgets[ widget.name ] = widget;
+        }
+
+        if( widget.options.signal && !widget.name )
+        {
+            if( !this.signals )
+            {
+                this.signals = [];
+            }
+
+            this.signals.push( { [ widget.options.signal ]: widget } );
+        }
+
+        const _insertWidget = el => {
+            if( options.container )
+            {
+                options.container.appendChild( el );
+            }
+            else if( !this.queuedContainer )
+            {
+                if( this._currentBranch )
+                {
+                    if( !options.skipWidget )
+                    {
+                        this._currentBranch.widgets.push( widget );
+                    }
+                    this._currentBranch.content.appendChild( el );
+                }
+                else
+                {
+                    el.className += " nobranch w-full";
+                    this.root.appendChild( el );
+                }
+            }
+            // Append content to queued tab container
+            else
+            {
+                this.queuedContainer.appendChild( el );
+            }
+        };
+
+        const _storeWidget = el => {
+
+            if( !this.queuedContainer )
+            {
+                this._inlineWidgets.push( el );
+            }
+            // Append content to queued tab container
+            else
+            {
+                this._inlineWidgets.push( [ el, this.queuedContainer ] );
+            }
+        };
+
+        // Process inline widgets
+        if( this._inlineWidgetsLeft > 0 && !options.skipInlineCount )
+        {
+            if( !this._inlineWidgets )
+            {
+                this._inlineWidgets = [];
+            }
+
+            // Store widget and its container
+            _storeWidget( widget.root );
+
+            this._inlineWidgetsLeft--;
+
+            // Last widget
+            if( !this._inlineWidgetsLeft )
+            {
+                this.endLine();
+            }
+        }
+        else
+        {
+            _insertWidget( widget.root );
+        }
+
+        return widget;
+    }
+
+    _addFilter( placeholder, options = {} ) {
+
+        options.placeholder = placeholder.constructor == String ? placeholder : "Filter properties..";
+        options.skipWidget = options.skipWidget ?? true;
+        options.skipInlineCount = true;
+
+        let widget = new LX.TextInput( null, null, null, options );
+        const element = widget.root;
+        element.className += " lexfilter";
+
+        let input = document.createElement('input');
+        input.className = 'lexinput-filter';
+        input.setAttribute( "placeholder", options.placeholder );
+        input.style.width =  "100%";
+        input.value = options.filterValue || "";
+
+        let searchIcon = LX.makeIcon( "Search" );
+        element.appendChild( searchIcon );
+        element.appendChild( input );
+
+        input.addEventListener("input", e => {
+            if( options.callback )
+            {
+                options.callback( input.value, e );
+            }
+        });
+
+        return element;
+    }
+
+    _searchWidgets( branchName, value ) {
+
+        for( let b of this.branches )
+        {
+            if( b.name !== branchName )
+            {
+                continue;
+            }
+
+            // remove all widgets
+            for( let w of b.widgets )
+            {
+                if( w.domEl.classList.contains('lexfilter') )
+                {
+                    continue;
+                }
+                w.domEl.remove();
+            }
+
+            // push to right container
+            this.queue( b.content );
+
+            const emptyFilter = !value.length;
+
+            // add widgets
+            for( let w of b.widgets )
+            {
+                if( !emptyFilter )
+                {
+                    if(!w.name) continue;
+                    value.toLowerCase();
+                    const name = w.name.toLowerCase();
+                    if(!name.includes(value)) continue;
+                }
+
+                // insert filtered widget
+                this.queuedContainer.appendChild( w.domEl );
+            }
+
+            // push again to current branch
+            this.clearQueue();
+
+            // no more branches to check!
+            return;
+        }
+    }
+
+    /**
+     * @method getBranch
+     * @param {String} name if null, return current branch
+     */
+
+    getBranch( name ) {
+
+        if( name )
+        {
+            return this.branches.find( b => b.name == name );
+        }
+
+        return this._currentBranch;
+    }
+
+    /**
+     * @method queue
+     * @param {HTMLElement} domEl container to append elements to
+     */
+
+    queue( domEl ) {
+
+        if( !domEl && this._currentBranch)
+        {
+            domEl = this._currentBranch.root;
+        }
+
+        if( this.queuedContainer )
+        {
+            this._queue.push( this.queuedContainer );
+        }
+
+        this.queuedContainer = domEl;
+    }
+
+    /**
+     * @method clearQueue
+     */
+
+    clearQueue() {
+
+        if( this._queue && this._queue.length)
+        {
+            this.queuedContainer = this._queue.pop();
+            return;
+        }
+
+        delete this.queuedContainer;
+    }
+
+    /**
+     * @method addSeparator
+     */
+
+    addSeparator() {
+
+        var element = document.createElement('div');
+        element.className = "lexseparator";
+
+        let widget = new LX.Widget( LX.Widget.SEPARATOR );
+        widget.root = element;
+
+        if( this._currentBranch )
+        {
+            this._currentBranch.content.appendChild( element );
+            this._currentBranch.widgets.push( widget );
+        }
+        else
+        {
+            this.root.appendChild( element );
+        }
+    }
+
+    /**
+     * @method addBlank
+     * @param {Number} width
+     * @param {Number} height
+     */
+
+    addBlank( width, height ) {
+        const widget = new LX.Blank( width, height );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addTitle
+     * @param {String} name Title name
+     * @param {Object} options:
+     * link: Href in case title is an hyperlink
+     * target: Target name of the iframe (if any)
+     * icon: Name of the icon (if any)
+     * iconColor: Color of title icon (if any)
+     * style: CSS to override
+     */
+
+    addTitle( name, options = {} ) {
+        const widget = new LX.Title( name, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addText
+     * @param {String} name Widget name
+     * @param {String} value Text value
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * hideName: Don't use name as label [false]
+     * disabled: Make the widget disabled [false]
+     * required: Make the input required
+     * placeholder: Add input placeholder
+     * icon: Icon (if any) to append at the input start
+     * pattern: Regular expression that value must match
+     * trigger: Choose onchange trigger (default, input) [default]
+     * inputWidth: Width of the text input
+     * fit: Input widts fits content [false]
+     * inputClass: Class to add to the native input element
+     * skipReset: Don't add the reset value button when value changes
+     * float: Justify input text content
+     * justifyName: Justify name content
+     */
+
+    addText( name, value, callback, options = {} ) {
+        const widget = new LX.TextInput( name, value, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addTextArea
+     * @param {String} name Widget name
+     * @param {String} value Text Area value
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * hideName: Don't use name as label [false]
+     * disabled: Make the widget disabled [false]
+     * placeholder: Add input placeholder
+     * resize: Allow resize [true]
+     * trigger: Choose onchange trigger (default, input) [default]
+     * inputWidth: Width of the text input
+     * float: Justify input text content
+     * justifyName: Justify name content
+     * fitHeight: Height adapts to text
+     */
+
+    addTextArea( name, value, callback, options = {} ) {
+        const widget = new LX.TextArea( name, value, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addLabel
+     * @param {String} value Information string
+     * @param {Object} options Text options
+     */
+
+    addLabel( value, options = {} ) {
+        options.disabled = true;
+        options.inputClass = ( options.inputClass ?? "" ) + " nobg";
+        const widget = this.addText( null, value, null, options );
+        widget.type = LX.Widget.LABEL;
+        return widget;
+    }
+
+    /**
+     * @method addButton
+     * @param {String} name Widget name
+     * @param {String} value Button name
+     * @param {Function} callback Callback function on click
+     * @param {Object} options:
+     * hideName: Don't use name as label [false]
+     * disabled: Make the widget disabled [false]
+     * icon: Icon class to show as button value
+     * img: Path to image to show as button value
+     * title: Text to show in native Element title
+     * buttonClass: Class to add to the native button element
+     */
+
+    addButton( name, value, callback, options = {} ) {
+        const widget = new LX.Button( name, value, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addComboButtons
+     * @param {String} name Widget name
+     * @param {Array} values Each of the {value, callback, selected, disabled} items
+     * @param {Object} options:
+     * hideName: Don't use name as label [false]
+     * float: Justify content (left, center, right) [center]
+     * selected: Selected button by default (String|Array)
+     * noSelection: Buttons can be clicked, but they are not selectable
+     * toggle: Buttons can be toggled insted of selecting only one
+     */
+
+    addComboButtons( name, values, options = {} ) {
+        const widget = new LX.ComboButtons( name, values, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addCard
+     * @param {String} name Card Name
+     * @param {Object} options:
+     * text: Card text
+     * link: Card link
+     * title: Card dom title
+     * src: url of the image
+     * callback (Function): function to call on click
+     */
+
+    addCard( name, options = {} ) {
+        const widget = new LX.Card( name, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addForm
+     * @param {String} name Widget name
+     * @param {Object} data Form data
+     * @param {Function} callback Callback function on submit form
+     * @param {Object} options:
+     * primaryActionName: Text to be shown in the primary action button ['Submit']
+     * primaryButtonClass: Button class for primary action button ['contrast']
+     * secondaryActionName: Text to be shown in the secondary action button ['Cancel']
+     * secondaryActionCallback: Callback function on press secondary button
+     * secondaryButtonClass: Button class for secondary action button ['primary']
+     * skipLabels: Do not show input field labels [false]
+     */
+
+    addForm( name, data, callback, options = {} ) {
+        const widget = new LX.Form( name, data, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addContent
+     * @param {String} name Widget name
+     * @param {HTMLElement/String} element
+     * @param {Object} options
+     */
+
+    addContent( name, element, options = {} ) {
+
+        console.assert( element, "Empty content!" );
+
+        if( element.constructor == String )
+        {
+            const tmp = document.createElement( "div" );
+            tmp.innerHTML = element;
+
+            if( tmp.childElementCount > 1 )
+            {
+                element = tmp;
+            }
+            else
+            {
+                element = tmp.firstElementChild;
+            }
+        }
+
+        options.hideName = true;
+
+        let widget = new LX.Widget( LX.Widget.CONTENT, name, null, options );
+        widget.root.appendChild( element );
+
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addImage
+     * @param {String} name Widget name
+     * @param {String} url Image Url
+     * @param {Object} options
+     * hideName: Don't use name as label [false]
+     */
+
+    async addImage( name, url, options = {} ) {
+
+        console.assert( url, "Empty src/url for Image!" );
+
+        let container = document.createElement( 'div' );
+        container.className = "leximage";
+        container.style.width = "100%";
+
+        let img = document.createElement( 'img' );
+        img.src = url;
+        Object.assign( img.style, options.style ?? {} );
+        container.appendChild( img );
+
+        let widget = new LX.Widget( LX.Widget.IMAGE, name, null, options );
+        widget.root.appendChild( container );
+
+        // await img.decode();
+        img.decode();
+
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addSelect
+     * @param {String} name Widget name
+     * @param {Array} values Posible options of the select widget -> String (for default select) or Object = {value, url} (for images, gifs..)
+     * @param {String} value Select by default option
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * hideName: Don't use name as label [false]
+     * filter: Add a search bar to the widget [false]
+     * disabled: Make the widget disabled [false]
+     * skipReset: Don't add the reset value button when value changes
+     * placeholder: Placeholder for the filter input
+     * emptyMsg: Custom message to show when no filtered results
+     */
+
+    addSelect( name, values, value, callback, options = {} ) {
+        const widget = new LX.Select( name, values, value, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addCurve
+     * @param {String} name Widget name
+     * @param {Array of Array} values Array of 2N Arrays of each value of the curve
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * skipReset: Don't add the reset value button when value changes
+     * bgColor: Widget background color
+     * pointsColor: Curve points color
+     * lineColor: Curve line color
+     * noOverlap: Points do not overlap, replacing themselves if necessary
+     * allowAddValues: Support adding values on click
+     * smooth: Curve smoothness
+     * moveOutAction: Clamp or delete points moved out of the curve (LX.CURVE_MOVEOUT_CLAMP, LX.CURVE_MOVEOUT_DELETE)
+    */
+
+    addCurve( name, values, callback, options = {} ) {
+        const widget = new LX.Curve( name, values, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addDial
+     * @param {String} name Widget name
+     * @param {Array of Array} values Array of 2N Arrays of each value of the dial
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * skipReset: Don't add the reset value button when value changes
+     * bgColor: Widget background color
+     * pointsColor: Curve points color
+     * lineColor: Curve line color
+     * noOverlap: Points do not overlap, replacing themselves if necessary
+     * allowAddValues: Support adding values on click
+     * smooth: Curve smoothness
+     * moveOutAction: Clamp or delete points moved out of the curve (LX.CURVE_MOVEOUT_CLAMP, LX.CURVE_MOVEOUT_DELETE)
+    */
+
+    addDial( name, values, callback, options = {} ) {
+        const widget = new LX.Dial( name, values, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addLayers
+     * @param {String} name Widget name
+     * @param {Number} value Flag value by default option
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     */
+
+    addLayers( name, value, callback, options = {} ) {
+        const widget = new LX.Layers( name, value, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addArray
+     * @param {String} name Widget name
+     * @param {Array} values By default values in the array
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * innerValues (Array): Use select mode and use values as options
+     */
+
+    addArray( name, values = [], callback, options = {} ) {
+        const widget = new LX.ItemArray( name, values, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addList
+     * @param {String} name Widget name
+     * @param {Array} values List values
+     * @param {String} value Selected list value
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * hideName: Don't use name as label [false]
+     */
+
+    addList( name, values, value, callback, options = {} ) {
+        const widget = new LX.List( name, values, value, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addTags
+     * @param {String} name Widget name
+     * @param {String} value Comma separated tags
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * hideName: Don't use name as label [false]
+     */
+
+    addTags( name, value, callback, options = {} ) {
+        const widget = new LX.Tags( name, value, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addCheckbox
+     * @param {String} name Widget name
+     * @param {Boolean} value Value of the checkbox
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * disabled: Make the widget disabled [false]
+     * label: Checkbox label
+     * suboptions: Callback to add widgets in case of TRUE value
+     * className: Extra classes to customize style
+     */
+
+    addCheckbox( name, value, callback, options = {} ) {
+        const widget = new LX.Checkbox( name, value, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addToggle
+     * @param {String} name Widget name
+     * @param {Boolean} value Value of the checkbox
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * disabled: Make the widget disabled [false]
+     * label: Toggle label
+     * suboptions: Callback to add widgets in case of TRUE value
+     * className: Customize colors
+     */
+
+    addToggle( name, value, callback, options = {} ) {
+        const widget = new LX.Toggle( name, value, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addRadioGroup
+     * @param {String} name Widget name
+     * @param {String} label Radio label
+     * @param {Array} values Radio options
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * disabled: Make the widget disabled [false]
+     * className: Customize colors
+     * selected: Index of the default selected option
+     */
+
+    addRadioGroup( name, label, values, callback, options = {} ) {
+        const widget = new LX.RadioGroup( name, label, values, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addColor
+     * @param {String} name Widget name
+     * @param {String} value Default color (hex)
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * disabled: Make the widget disabled [false]
+     * useRGB: The callback returns color as Array (r, g, b) and not hex [false]
+     */
+
+    addColor( name, value, callback, options = {} ) {
+        const widget = new LX.ColorInput( name, value, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addRange
+     * @param {String} name Widget name
+     * @param {Number} value Default number value
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * hideName: Don't use name as label [false]
+     * className: Extra classes to customize style
+     * disabled: Make the widget disabled [false]
+     * left: The slider goes to the left instead of the right
+     * fill: Fill slider progress [true]
+     * step: Step of the input
+     * min, max: Min and Max values for the input
+     */
+
+    addRange( name, value, callback, options = {} ) {
+        const widget = new LX.RangeInput( name, value, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addNumber
+     * @param {String} name Widget name
+     * @param {Number} value Default number value
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * hideName: Don't use name as label [false]
+     * disabled: Make the widget disabled [false]
+     * step: Step of the input
+     * precision: The number of digits to appear after the decimal point
+     * min, max: Min and Max values for the input
+     * skipSlider: If there are min and max values, skip the slider
+     * units: Unit as string added to the end of the value
+     * onPress: Callback function on mouse down
+     * onRelease: Callback function on mouse up
+     */
+
+    addNumber( name, value, callback, options = {} ) {
+        const widget = new LX.NumberInput( name, value, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    static VECTOR_COMPONENTS = { 0: 'x', 1: 'y', 2: 'z', 3: 'w' };
+
+    _addVector( numComponents, name, value, callback, options = {} ) {
+        const widget = new LX.Vector( numComponents, name, value, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addVector N (2, 3, 4)
+     * @param {String} name Widget name
+     * @param {Array} value Array of N components
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * disabled: Make the widget disabled [false]
+     * step: Step of the inputs
+     * min, max: Min and Max values for the inputs
+     * onPress: Callback function on mouse down
+     * onRelease: Callback function on mouse is released
+     */
+
+    addVector2( name, value, callback, options ) {
+        return this._addVector( 2, name, value, callback, options );
+    }
+
+    addVector3( name, value, callback, options ) {
+        return this._addVector( 3, name, value, callback, options );
+    }
+
+    addVector4( name, value, callback, options ) {
+        return this._addVector( 4, name, value, callback, options );
+    }
+
+    /**
+     * @method addSize
+     * @param {String} name Widget name
+     * @param {Number} value Default number value
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * hideName: Don't use name as label [false]
+     * disabled: Make the widget disabled [false]
+     * units: Unit as string added to the end of the value
+     */
+
+    addSize( name, value, callback, options = {} ) {
+        const widget = new LX.SizeInput( name, value, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addOTP
+     * @param {String} name Widget name
+     * @param {String} value Default numeric value in string format
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * hideName: Don't use name as label [false]
+     * disabled: Make the widget disabled [false]
+     * pattern: OTP numeric pattern
+     */
+
+    addOTP( name, value, callback, options = {} ) {
+        const widget = new LX.OTPInput( name, value, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addPad
+     * @param {String} name Widget name
+     * @param {Array} value Pad value
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * disabled: Make the widget disabled [false]
+     * min, max: Min and Max values
+     * padSize: Size of the pad (css)
+     * onPress: Callback function on mouse down
+     * onRelease: Callback function on mouse up
+     */
+
+    addPad( name, value, callback, options = {} ) {
+        const widget = new LX.Pad( name, value, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addProgress
+     * @param {String} name Widget name
+     * @param {Number} value Progress value
+     * @param {Object} options:
+     * min, max: Min and Max values
+     * low, optimum, high: Low and High boundary values, Optimum point in the range
+     * showValue: Show current value
+     * editable: Allow edit value
+     * callback: Function called on change value
+     */
+
+    addProgress( name, value, options = {} ) {
+        const widget = new LX.Progress( name, value, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addFile
+     * @param {String} name Widget name
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * local: Ask for local file
+     * disabled: Make the widget disabled [false]
+     * read: Return the file itself (False) or the contents (True)
+     * type: type to read as [text (Default), buffer, bin, url]
+     */
+
+    addFile( name, callback, options = { } ) {
+        const widget = new LX.FileInput( name, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addTree
+     * @param {String} name Widget name
+     * @param {Object} data Data of the tree
+     * @param {Object} options:
+     * icons: Array of objects with icon button information {name, icon, callback}
+     * filter: Add nodes filter [true]
+     * rename: Boolean to allow rename [true]
+     * onevent(tree_event): Called when node is selected, dbl clicked, contextmenu opened, changed visibility, parent or name
+     */
+
+    addTree( name, data, options = {} ) {
+        const widget = new LX.Tree( name, data, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addTabSections
+     * @param {String} name Widget name
+     * @param {Array} tabs Contains objects with {
+     *      name: Name of the tab (if icon, use as title)
+     *      icon: Icon to be used as the tab icon (optional)
+     *      onCreate: Func to be called at tab creation
+     *      onSelect: Func to be called on select tab (optional)
+     * }
+     * @param {Object} options
+     * vertical: Use vertical or horizontal tabs (vertical by default)
+     * showNames: Show tab name only in horizontal tabs
+     */
+
+    addTabSections( name, tabs, options = {} ) {
+        const widget = new LX.TabSections( name, tabs, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addCounter
+     * @param {String} name Widget name
+     * @param {Number} value Counter value
+     * @param {Function} callback Callback function on change
+     * @param {Object} options:
+     * disabled: Make the widget disabled [false]
+     * min, max: Min and Max values
+     * step: Step for adding/substracting
+     * label: Text to show below the counter
+     */
+
+    addCounter( name, value, callback, options = { } ) {
+        const widget = new LX.Counter( name, value, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addTable
+     * @param {String} name Widget name
+     * @param {Number} data Table data
+     * @param {Object} options:
+     * hideName: Don't use name as label [false]
+     * head: Table headers (each of the headers per column)
+     * body: Table body (data per row for each column)
+     * rowActions: Allow to add actions per row
+     * onMenuAction: Function callback to fill the "menu" context
+     * selectable: Each row can be selected
+     * sortable: Rows can be sorted by the user manually
+     * centered: Center text within columns. true for all, Array for center selected cols
+     * toggleColumns: Columns visibility can be toggled
+     * filter: Name of the column to filter by text input (if any)
+     * filterValue: Initial filter value
+     * customFilters: Add selectors to filter by specific option values
+     */
+
+    addTable( name, data, options = { } ) {
+        const widget = new LX.Table( name, data, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addDate
+     * @param {String} name Widget name
+     * @param {String} dateString
+     * @param {Function} callback
+     * @param {Object} options:
+     * hideName: Don't use name as label [false]
+     * today: Set current day as selected by default
+     * untilToday: Allow dates only until current day
+     * fromToday: Allow dates only from current day
+     */
+
+    addDate( name, dateString, callback, options = { } ) {
+        const widget = new LX.DatePicker( name, dateString, callback, options );
+        return this._attachWidget( widget );
+    }
+
+    /**
+     * @method addMap2D
+     * @param {String} name Widget name
+     * @param {Array} points
+     * @param {Function} callback
+     * @param {Object} options:
+     */
+
+    addMap2D( name, points, callback, options = { } ) {
+        const widget = new LX.Map2D( name, points, callback, options );
+        return this._attachWidget( widget );
+    }
+}
+
+LX.Panel = Panel;
+
+// branch.js @jxarco
+
+/**
+ * @class Branch
+ */
+
+class Branch {
+
+    constructor( name, options = {} ) {
+
+        this.name = name;
+
+        var root = document.createElement( 'div' );
+        root.className = "lexbranch";
+        if( options.id )
+        {
+            root.id = options.id;
+        }
+        if( options.className )
+        {
+            root.className += " " + options.className;
+        }
+
+        root.style.margin = "0 auto";
+
+        var that = this;
+
+        this.closed = options.closed ?? false;
+        this.root = root;
+        this.widgets = [];
+
+        // Create element
+        var title = document.createElement( 'div' );
+        title.className = "lexbranchtitle";
+
+        if( options.icon )
+        {
+            const branchIcon = LX.makeIcon( options.icon, { iconClass: "mr-2" } );
+            title.appendChild( branchIcon );
+        }
+
+        title.innerHTML += ( name || "Branch" );
+
+        const collapseIcon = LX.makeIcon( "Right", { iconClass: "switch-branch-button", svgClass: "sm" } );
+        title.appendChild( collapseIcon );
+
+        root.appendChild( title );
+
+        var branchContent = document.createElement( 'div' );
+        branchContent.id = name.replace( /\s/g, '' );
+        branchContent.className = "lexbranchcontent";
+        root.appendChild( branchContent );
+        this.content = branchContent;
+
+        this._addBranchSeparator();
+
+        if( this.closed )
+        {
+            title.classList.add( "closed" );
+            root.classList.add( "closed" );
+            this.grabber.setAttribute( "hidden", true );
+            LX.doAsync( () => {
+                this.content.setAttribute( "hidden", true );
+            }, 10 );
+        }
+
+        this.onclick = function( e ) {
+            // e.stopPropagation();
+            this.classList.toggle( "closed" );
+            this.parentElement.classList.toggle( "closed" );
+
+            that.content.toggleAttribute( "hidden" );
+            that.grabber.toggleAttribute( "hidden" );
+
+            LX.emit( "@on_branch_closed", this.classList.contains( "closed" ) );
+        };
+
+        this.oncontextmenu = function( e ) {
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            if( this.parentElement.classList.contains("dialog") )
+            {
+                return;
+            }
+
+            LX.addContextMenu("Dock", e, p => {
+                e.preventDefault();
+                p.add( 'Floating', that._onMakeFloating.bind( that ) );
+            }, { icon: "WindowRestore" });
+        };
+
+        title.addEventListener( 'click', this.onclick );
+        title.addEventListener( 'contextmenu', this.oncontextmenu );
+    }
+
+    _onMakeFloating() {
+
+        const dialog = new LX.Dialog( this.name, p => {
+            // add widgets
+            for( let w of this.widgets )
+            {
+                p.root.appendChild( w.root );
+            }
+        }, { dockable: true });
+
+        const childIndex = Array.from( this.root.parentElement.childNodes ).indexOf( this.root );
+        console.assert( childIndex >= 0, "Branch not found!" );
+
+        dialog.branchData = {
+            name: this.name,
+            widgets: this.widgets,
+            closed: this.closed,
+            panel: this.panel,
+            childIndex
+        };
+
+        this.root.remove();
+    }
+
+    _addBranchSeparator() {
+
+        const element = document.createElement('div');
+        element.className = "lexwidgetseparator";
+        element.style.width = "100%";
+        element.style.background = "none";
+
+        const grabber = document.createElement('div');
+        grabber.innerHTML = "&#9662;";
+        element.appendChild(grabber);
+
+        LX.doAsync( () => {
+            grabber.style.marginLeft = ((parseFloat(LX.DEFAULT_NAME_WIDTH) / 100.0) * this.content.offsetWidth) + "px";
+        }, 10 );
+
+        const line = document.createElement('div');
+        line.style.width = "1px";
+        line.style.marginLeft = "6px";
+        line.style.marginTop = "2px";
+        line.style.height = "0px"; // get in time
+        grabber.appendChild( line );
+        grabber.addEventListener( "mousedown", innerMouseDown );
+
+        this.grabber = grabber;
+
+        function getBranchHeight() {
+            return that.root.offsetHeight - that.root.children[ 0 ].offsetHeight;
+        }
+
+        let that = this;
+
+        function innerMouseDown( e )
+        {
+            var doc = that.root.ownerDocument;
+            doc.addEventListener("mouseup", innerMouseUp);
+            doc.addEventListener("mousemove", innerMouseMove);
+            e.stopPropagation();
+            e.preventDefault();
+            const h = getBranchHeight();
+            line.style.height = (h-3) + "px";
+            document.body.classList.add('nocursor');
+        }
+
+        function innerMouseMove(e)
+        {
+            let dt = e.movementX;
+
+            if ( dt != 0 )
+            {
+                const margin = parseFloat( grabber.style.marginLeft );
+                grabber.style.marginLeft = LX.clamp( margin + dt, 32, that.content.offsetWidth - 32 ) + "px";
+            }
+        }
+
+        function innerMouseUp(e)
+        {
+            that._updateWidgets();
+
+            line.style.height = "0px";
+
+            var doc = that.root.ownerDocument;
+            doc.removeEventListener("mouseup", innerMouseUp);
+            doc.removeEventListener("mousemove", innerMouseMove);
+            document.body.classList.remove('nocursor');
+        }
+
+        this.content.appendChild( element );
+    }
+
+    _updateWidgets() {
+
+        var size = this.grabber.style.marginLeft;
+
+        // Update sizes of widgets inside
+        for( let i = 0; i < this.widgets.length; i++ )
+        {
+            let widget = this.widgets[ i ];
+            const element = widget.root;
+
+            if( element.children.length < 2 )
+            {
+                continue;
+            }
+
+            let name = element.children[ 0 ];
+            let value = element.children[ 1 ];
+
+            name.style.width = size;
+            name.style.minWidth = size;
+
+            switch( widget.type )
+            {
+                case LX.Widget.CUSTOM:
+                case LX.Widget.ARRAY:
+                    continue;
+            }
+            value.style.width = "-moz-calc( 100% - " + size + " )";
+            value.style.width = "-webkit-calc( 100% - " + size + " )";
+            value.style.width = "calc( 100% - " + size + " )";
+        }
+    }
+}
+LX.Branch = Branch;
+
+// menubar.js @jxarco
+
+/**
  * @class Menubar
  */
 
@@ -4719,7 +13655,7 @@ class Menubar {
                 this._resetMenubar(true);
                 entry.classList.add( "selected" );
                 entry.dataset["built"] = "true";
-                this._currentDropdown = addDropdownMenu( entry, item.submenu ?? [], { side: "bottom", align: "start", onBlur: () => {
+                this._currentDropdown = LX.addDropdownMenu( entry, item.submenu ?? [], { side: "bottom", align: "start", onBlur: () => {
                     this._resetMenubar();
                 } });
             };
@@ -4953,7 +13889,7 @@ class Menubar {
         {
             const data = buttons[ i ];
             const title = data.title;
-            const button = new Button( title, "", data.callback, { title, buttonClass: "bg-none", disabled: data.disabled, icon: data.icon, hideName: true, swap: data.swap } )
+            const button = new LX.Button( title, "", data.callback, { title, buttonClass: "bg-none", disabled: data.disabled, icon: data.icon, hideName: true, swap: data.swap } );
             this.buttonContainer.appendChild( button.root );
 
             if( title )
@@ -4962,15 +13898,16 @@ class Menubar {
             }
         }
     }
-};
-
+}
 LX.Menubar = Menubar;
 
+// sidebar.js @jxarco
+
 /**
- * @class SideBar
+ * @class Sidebar
  */
 
-class SideBar {
+class Sidebar {
 
     /**
      * @param {Object} options
@@ -5002,7 +13939,7 @@ class SideBar {
 
         this._displaySelected = options.displaySelected ?? false;
 
-        Object.defineProperty( SideBar.prototype, "displaySelected", {
+        Object.defineProperty( Sidebar.prototype, "displaySelected", {
             get: function() { return this._displaySelected; },
             set: function( v ) {
                 this._displaySelected = v;
@@ -5022,7 +13959,7 @@ class SideBar {
 
         this.filterString = "";
 
-        doAsync( () => {
+        LX.doAsync( () => {
 
             this.root.parentElement.ogWidth = this.root.parentElement.style.width;
             this.root.parentElement.style.transition = "width 0.25s ease-out";
@@ -5060,7 +13997,7 @@ class SideBar {
         // Entry filter
         if( ( options.filter ?? false ) )
         {
-            const filterTextInput = new TextInput(null, "", (value, event) => {
+            const filterTextInput = new LX.TextInput(null, "", (value, event) => {
                 this.filterString = value;
                 this.update();
             }, { inputClass: "outline", placeholder: "Search...", icon: "Search", className: "lexsidebarfilter" });
@@ -5230,7 +14167,7 @@ class SideBar {
 
         this.resizeObserver.observe( this.root.parentElement );
 
-        doAsync( () => {
+        LX.doAsync( () => {
             this.root.classList.toggle( "collapsed", this.collapsed );
             this.resizeObserver.unobserve( this.root.parentElement );
             this.root.querySelectorAll( ".lexsidebarentrycontent" ).forEach( e => e.dataset[ "disableTooltip" ] = !this.collapsed );
@@ -5404,7 +14341,7 @@ class SideBar {
 
                     if( this.groups[ item.group ] != null )
                     {
-                        const groupActionIcon = LX.makeIcon( this.groups[ item.group ].icon, { svgClass: "sm" } )
+                        const groupActionIcon = LX.makeIcon( this.groups[ item.group ].icon, { svgClass: "sm" } );
                         groupEntry.appendChild( groupActionIcon );
                         groupActionIcon.addEventListener( "click", e => {
                             if( this.groups[ item.group ].callback )
@@ -5456,7 +14393,7 @@ class SideBar {
             if( options.type == "checkbox" )
             {
                 item.value = options.value ?? false;
-                const panel = new Panel();
+                const panel = new LX.Panel();
                 item.checkbox = panel.addCheckbox(null, item.value, (value, event) => {
                     event.preventDefault();
                     event.stopPropagation();
@@ -5550,7 +14487,7 @@ class SideBar {
 
             if( isCollapsable )
             {
-                this.collapseContainer.appendChild( subentryContainer )
+                this.collapseContainer.appendChild( subentryContainer );
                 delete this.collapseContainer;
             }
             else if( currentGroup )
@@ -5609,7917 +14546,10 @@ class SideBar {
             }
         }
     }
-};
-
-LX.SideBar = SideBar;
-
-/**
- * @class Widget
- */
-
-class Widget {
-
-    static NONE         = 0;
-    static TEXT         = 1;
-    static TEXTAREA     = 2;
-    static BUTTON       = 3;
-    static SELECT       = 4;
-    static CHECKBOX     = 5;
-    static TOGGLE       = 6;
-    static RADIO        = 7;
-    static BUTTONS      = 8;
-    static COLOR        = 9;
-    static RANGE        = 10;
-    static NUMBER       = 11;
-    static TITLE        = 12;
-    static VECTOR       = 13;
-    static TREE         = 14;
-    static PROGRESS     = 15;
-    static FILE         = 16;
-    static LAYERS       = 17;
-    static ARRAY        = 18;
-    static LIST         = 19;
-    static TAGS         = 20;
-    static CURVE        = 21;
-    static CARD         = 22;
-    static IMAGE        = 23;
-    static CONTENT      = 24;
-    static CUSTOM       = 25;
-    static SEPARATOR    = 26;
-    static KNOB         = 27;
-    static SIZE         = 28;
-    static OTP          = 29;
-    static PAD          = 30;
-    static FORM         = 31;
-    static DIAL         = 32;
-    static COUNTER      = 33;
-    static TABLE        = 34;
-    static TABS         = 35;
-    static DATE         = 36;
-    static LABEL        = 37;
-    static BLANK        = 38;
-
-    static NO_CONTEXT_TYPES = [
-        Widget.BUTTON,
-        Widget.LIST,
-        Widget.FILE,
-        Widget.PROGRESS
-    ];
-
-    constructor( type, name, value, options = {} ) {
-
-        this.type = type;
-        this.name = name;
-        this.options = options;
-        this._initialValue = value;
-
-        const root = document.createElement( 'div' );
-        root.className = "lexwidget";
-
-        if( options.id )
-        {
-            root.id = options.id;
-        }
-
-        if( options.title )
-        {
-            root.title = options.title;
-        }
-
-        if( options.className )
-        {
-            root.className += " " + options.className;
-        }
-
-        if( type != Widget.TITLE )
-        {
-            if( options.width )
-            {
-                root.style.width = root.style.minWidth = options.width;
-            }
-            if( options.maxWidth )
-            {
-                root.style.maxWidth = options.maxWidth;
-            }
-            if( options.minWidth )
-            {
-                root.style.minWidth = options.minWidth;
-            }
-            if( options.height )
-            {
-                root.style.height = root.style.minHeight = options.height;
-            }
-
-            LX.widgetResizeObserver.observe( root );
-        }
-
-        if( name != undefined )
-        {
-            if( !( options.hideName ?? false ) )
-            {
-                let domName = document.createElement( 'div' );
-                domName.className = "lexwidgetname";
-
-                if( options.justifyName )
-                {
-                    domName.classList.add( "float-" + options.justifyName );
-                }
-
-                domName.innerHTML = name;
-                domName.title = options.title ?? domName.innerHTML;
-                domName.style.width = options.nameWidth || LX.DEFAULT_NAME_WIDTH;
-                domName.style.minWidth = domName.style.width;
-
-                root.appendChild( domName );
-                root.domName = domName;
-
-                const that = this;
-
-                // Copy-paste info
-                domName.addEventListener('contextmenu', function( e ) {
-                    e.preventDefault();
-                    that.oncontextmenu( e );
-                });
-
-                if( !( options.skipReset ?? false )  && ( value != null ) )
-                {
-                    this._addResetProperty( domName, function( e ) {
-                        that.set( that._initialValue, false, e );
-                        this.style.display = "none"; // Og value, don't show it
-                    });
-                }
-            }
-        }
-        else
-        {
-            options.hideName = true;
-        }
-
-        if( options.signal )
-        {
-            LX.addSignal( options.signal, this );
-        }
-
-        this.root = root;
-        this.root.jsInstance = this;
-        this.options = options;
-    }
-
-    static _dispatchEvent( element, type, data, bubbles, cancelable ) {
-        let event = new CustomEvent( type, { 'detail': data, 'bubbles': bubbles, 'cancelable': cancelable } );
-        element.dispatchEvent( event );
-    }
-
-    _addResetProperty( container, callback ) {
-
-        const domEl = LX.makeIcon( "Undo2", { iconClass: "ml-0 mr-1 px-1", title: "Reset" } )
-        domEl.style.display = "none";
-        domEl.addEventListener( "click", callback );
-        container.appendChild( domEl );
-        return domEl;
-    }
-
-    _canPaste() {
-        return this.type === Widget.CUSTOM ? navigator.clipboard.customIdx !== undefined && this.customIdx == navigator.clipboard.customIdx :
-            navigator.clipboard.type === this.type;
-    }
-
-    _trigger( event, callback, scope = this ) {
-
-        if( !callback )
-        {
-            return;
-        }
-
-        callback.call( scope, event.value, event.domEvent, event.name );
-    }
-
-    value() {
-
-        if( this.onGetValue )
-        {
-            return this.onGetValue();
-        }
-
-        console.warn( "Can't get value of " + this.typeName() );
-    }
-
-    set( value, skipCallback, event ) {
-
-        if( this.onSetValue )
-        {
-            let resetButton = this.root.querySelector( ".lexwidgetname .lexicon" );
-            if( resetButton )
-            {
-                resetButton.style.display = ( value != this.value() ? "block" : "none" );
-
-                const equalInitial = value.constructor === Array ? (function arraysEqual(a, b) {
-                    if (a === b) return true;
-                    if (a == null || b == null) return false;
-                    if (a.length !== b.length) return false;
-                    for (var i = 0; i < a.length; ++i) {
-                        if (a[i] !== b[i]) return false;
-                    }
-                    return true;
-                })( value, this._initialValue ) : ( value == this._initialValue );
-
-                resetButton.style.display = ( !equalInitial ? "block" : "none" );
-            }
-
-            return this.onSetValue( value, skipCallback ?? false, event );
-        }
-
-        console.warn("Can't set value of " + this.typeName());
-    }
-
-    oncontextmenu( e ) {
-
-        if( Widget.NO_CONTEXT_TYPES.includes( this.type ) )
-        {
-            return;
-        }
-
-        addContextMenu( this.typeName(), e, c => {
-            c.add("Copy", () => { this.copy() });
-            c.add("Paste", { disabled: !this._canPaste(), callback: () => { this.paste() } } );
-        });
-    }
-
-    copy() {
-        navigator.clipboard.type = this.type;
-        navigator.clipboard.customIdx = this.customIdx;
-        navigator.clipboard.data = this.value();
-        navigator.clipboard.writeText( navigator.clipboard.data );
-    }
-
-    paste() {
-        if( !this._canPaste() )
-        {
-            return;
-        }
-
-        this.set( navigator.clipboard.data );
-    }
-
-    typeName() {
-
-        switch( this.type )
-        {
-            case Widget.TEXT: return "Text";
-            case Widget.TEXTAREA: return "TextArea";
-            case Widget.BUTTON: return "Button";
-            case Widget.SELECT: return "Select";
-            case Widget.CHECKBOX: return "Checkbox";
-            case Widget.TOGGLE: return "Toggle";
-            case Widget.RADIO: return "Radio";
-            case Widget.COLOR: return "Color";
-            case Widget.RANGE: return "Range";
-            case Widget.NUMBER: return "Number";
-            case Widget.VECTOR: return "Vector";
-            case Widget.TREE: return "Tree";
-            case Widget.PROGRESS: return "Progress";
-            case Widget.FILE: return "File";
-            case Widget.LAYERS: return "Layers";
-            case Widget.ARRAY: return "Array";
-            case Widget.LIST: return "List";
-            case Widget.TAGS: return "Tags";
-            case Widget.CURVE: return "Curve";
-            case Widget.KNOB: return "Knob";
-            case Widget.SIZE: return "Size";
-            case Widget.PAD: return "Pad";
-            case Widget.FORM: return "Form";
-            case Widget.DIAL: return "Dial";
-            case Widget.COUNTER: return "Counter";
-            case Widget.TABLE: return "Table";
-            case Widget.TABS: return "Tabs";
-            case Widget.DATE: return "Date";
-            case Widget.LABEL: return "Label";
-            case Widget.BLANK: return "Blank";
-            case Widget.CUSTOM: return this.customName;
-        }
-
-        console.error( `Unknown Widget type: ${ this.type }` );
-    }
-
-    refresh() {
-
-    }
 }
+LX.Sidebar = Sidebar;
 
-LX.Widget = Widget;
-
-function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
-{
-    let customIdx = simple_guidGenerator();
-
-    Panel.prototype[ 'add' + customWidgetName ] = function( name, instance, callback ) {
-
-        options.nameWidth = "100%";
-
-        let widget = new Widget( Widget.CUSTOM, name, null, options );
-        this._attachWidget( widget );
-
-        widget.customName = customWidgetName;
-        widget.customIdx = customIdx;
-
-        widget.onGetValue = () => {
-            return instance;
-        };
-
-        widget.onSetValue = ( newValue, skipCallback, event ) => {
-            instance = newValue;
-            refresh_widget();
-            element.querySelector( ".lexcustomitems" ).toggleAttribute( 'hidden', false );
-            if( !skipCallback )
-            {
-                widget._trigger( new IEvent( name, instance, event ), callback );
-            }
-        };
-
-        const element = widget.root;
-
-        let container, customWidgetsDom;
-        let default_instance = options.default ?? {};
-
-        // Add instance button
-
-        const refresh_widget = () => {
-
-            if( instance )
-            {
-                widget.instance = instance = Object.assign(deepCopy(default_instance), instance);
-            }
-
-            if( container ) container.remove();
-            if( customWidgetsDom ) customWidgetsDom.remove();
-
-            container = document.createElement('div');
-            container.className = "lexcustomcontainer";
-            container.style.width = "100%";
-            element.appendChild( container );
-            element.dataset["opened"] = false;
-
-            const customIcon = LX.makeIcon( options.icon ?? "Box" );
-            const menuIcon = LX.makeIcon( "Menu" );
-
-            let buttonName = customWidgetName + (!instance ? " [empty]" : "");
-            let buttonEl = this.addButton(null, buttonName, (value, event) => {
-                if( instance )
-                {
-                    element.querySelector(".lexcustomitems").toggleAttribute('hidden');
-                    element.dataset["opened"] = !element.querySelector(".lexcustomitems").hasAttribute("hidden");
-                }
-                else
-                {
-                    addContextMenu(null, event, c => {
-                        c.add("New " + customWidgetName, () => {
-                            instance = {};
-                            refresh_widget();
-                            element.querySelector(".lexcustomitems").toggleAttribute('hidden', false);
-                            element.dataset["opened"] = !element.querySelector(".lexcustomitems").hasAttribute("hidden");
-                        });
-                    });
-                }
-
-            }, { buttonClass: 'custom' });
-
-            const buttonSpan = buttonEl.root.querySelector( "span" );
-            buttonSpan.prepend( customIcon );
-            buttonSpan.appendChild( menuIcon );
-            container.appendChild( buttonEl.root );
-
-            if( instance )
-            {
-                menuIcon.addEventListener( "click", e => {
-                    e.stopImmediatePropagation();
-                    e.stopPropagation();
-                    addContextMenu(null, e, c => {
-                        c.add("Clear", () => {
-                            instance = null;
-                            refresh_widget();
-                        });
-                    });
-                });
-            }
-
-            // Show elements
-
-            customWidgetsDom = document.createElement('div');
-            customWidgetsDom.className = "lexcustomitems";
-            customWidgetsDom.toggleAttribute('hidden', true);
-            element.appendChild( customWidgetsDom );
-
-            if( instance )
-            {
-                this.queue( customWidgetsDom );
-
-                const on_instance_changed = ( key, value, event ) => {
-                    instance[ key ] = value;
-                    widget._trigger( new IEvent( name, instance, event ), callback );
-                };
-
-                for( let key in default_instance )
-                {
-                    const value = instance[ key ] ?? default_instance[ key ];
-
-                    switch( value.constructor )
-                    {
-                        case String:
-                            if( value[ 0 ] === '#' )
-                            {
-                                this.addColor( key, value, on_instance_changed.bind( this, key ) );
-                            }
-                            else
-                            {
-                                this.addText( key, value, on_instance_changed.bind( this, key ) );
-                            }
-                            break;
-                        case Number:
-                            this.addNumber( key, value, on_instance_changed.bind( this, key ) );
-                            break;
-                        case Boolean:
-                            this.addCheckbox( key, value, on_instance_changed.bind( this, key ) );
-                            break;
-                        case Array:
-                            if( value.length > 4 )
-                            {
-                                this.addArray( key, value, on_instance_changed.bind( this, key ) );
-                            }
-                            else
-                            {
-                                this._addVector( value.length, key, value, on_instance_changed.bind( this, key ) );
-                            }
-                            break;
-                    }
-                }
-
-                this.clearQueue();
-            }
-        };
-
-        refresh_widget();
-    };
-}
-
-LX.ADD_CUSTOM_WIDGET = ADD_CUSTOM_WIDGET;
-
-/**
- * @class NodeTree
- */
-
-class NodeTree {
-
-    constructor( domEl, data, options ) {
-
-        this.domEl = domEl;
-        this.data = data;
-        this.onevent = options.onevent;
-        this.options = options;
-        this.selected = [];
-
-        this._forceClose = false;
-
-        if( data.constructor === Object )
-        {
-            this._createItem( null, data );
-        }
-        else
-        {
-            for( let d of data )
-            {
-                this._createItem( null, d );
-            }
-        }
-    }
-
-    _createItem( parent, node, level = 0, selectedId ) {
-
-        const that = this;
-        const nodeFilterInput = this.domEl.querySelector( ".lexnodetreefilter" );
-
-        node.children = node.children ?? [];
-        if( nodeFilterInput && nodeFilterInput.value != "" && !node.id.includes( nodeFilterInput.value ) )
-        {
-            for( var i = 0; i < node.children.length; ++i )
-            {
-                this._createItem( node, node.children[ i ], level + 1, selectedId );
-            }
-            return;
-        }
-
-        const list = this.domEl.querySelector( 'ul' );
-
-        node.visible = node.visible ?? true;
-        node.parent = parent;
-        let isParent = node.children.length > 0;
-        let isSelected = this.selected.indexOf( node ) > -1 || node.selected;
-
-        if( this.options.onlyFolders )
-        {
-            let has_folders = false;
-            node.children.forEach( c => has_folders |= (c.type == 'folder') );
-            isParent = !!has_folders;
-        }
-
-        let item = document.createElement('li');
-        item.className = "lextreeitem " + "datalevel" + level + (isParent ? " parent" : "") + (isSelected ? " selected" : "");
-        item.id = LX.getSupportedDOMName( node.id );
-        item.tabIndex = "0";
-        item.treeData = node;
-
-        // Select hierarchy icon
-        let icon = (this.options.skipDefaultIcon ?? true) ? null : "Dot"; // Default: no childs
-        if( isParent )
-        {
-            icon = node.closed ? "Right" : "Down";
-        }
-
-        if( icon )
-        {
-            item.appendChild( LX.makeIcon( icon, { iconClass: "hierarchy", svgClass: "xs" } ) );
-        }
-
-        // Add display icon
-        icon = node.icon;
-
-        // Process icon
-        if( icon )
-        {
-            if( !node.icon.includes( '.' ) ) // Not a file
-            {
-                const classes = node.icon.split( ' ' );
-                const nodeIcon = LX.makeIcon( classes[ 0 ], { iconClass: "tree-item-icon mr-2", svgClass: "md" + ( classes.length > 1 ? ` ${ classes.slice( 0 ).join( ' ' ) }` : '' ) } );
-                item.appendChild( nodeIcon );
-            }
-            else // an image..
-            {
-                const rootPath = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/";
-                item.innerHTML += "<img src='" + ( rootPath + node.icon ) + "'>";
-            }
-        }
-
-        item.innerHTML += (node.rename ? "" : node.id);
-
-        item.setAttribute( 'draggable', true );
-        item.style.paddingLeft = ((3 + (level+1) * 15)) + "px";
-        list.appendChild( item );
-
-        // Callbacks
-        item.addEventListener("click", e => {
-            if( handled )
-            {
-                handled = false;
-                return;
-            }
-
-            if( !e.shiftKey )
-            {
-                list.querySelectorAll( "li" ).forEach( e => { e.classList.remove( 'selected' ); } );
-                this.selected.length = 0;
-            }
-
-            // Add or remove
-            const idx = this.selected.indexOf( node );
-            if( idx > -1 )
-            {
-                item.classList.remove( 'selected' );
-                this.selected.splice( idx, 1 );
-            }
-            else
-            {
-                item.classList.add( 'selected' );
-                this.selected.push( node );
-            }
-
-            // Only Show children...
-            if( isParent && node.id.length > 1 /* Strange case... */)
-            {
-                node.closed = false;
-                if( that.onevent )
-                {
-                    const event = new TreeEvent( TreeEvent.NODE_CARETCHANGED, node, node.closed );
-                    that.onevent( event );
-                }
-                that.frefresh( node.id );
-            }
-
-            if( that.onevent )
-            {
-                const event = new TreeEvent(TreeEvent.NODE_SELECTED, e.shiftKey ? this.selected : node );
-                event.multiple = e.shiftKey;
-                that.onevent( event );
-            }
-        });
-
-        item.addEventListener("dblclick", function() {
-
-            if( that.options.rename ?? true )
-            {
-                // Trigger rename
-                node.rename = true;
-                that.refresh();
-            }
-
-            if( that.onevent )
-            {
-                const event = new TreeEvent( TreeEvent.NODE_DBLCLICKED, node );
-                that.onevent( event );
-            }
-        });
-
-        item.addEventListener( "contextmenu", e => {
-
-            e.preventDefault();
-
-            if( !that.onevent )
-            {
-                return;
-            }
-
-            const event = new TreeEvent(TreeEvent.NODE_CONTEXTMENU, this.selected.length > 1 ? this.selected : node, e);
-            event.multiple = this.selected.length > 1;
-
-            LX.addContextMenu( event.multiple ? "Selected Nodes" : event.node.id, event.value, m => {
-                event.panel = m;
-            });
-
-            that.onevent( event );
-
-            if( this.options.addDefault ?? false )
-            {
-                if( event.panel.items )
-                {
-                    event.panel.add( "" );
-                }
-
-                event.panel.add( "Select Children", () => {
-
-                    const selectChildren = ( n ) => {
-
-                        if( n.closed )
-                        {
-                            return;
-                        }
-
-                        for( let child of n.children ?? [] )
-                        {
-                            if( !child )
-                            {
-                                continue;
-                            }
-
-                            let nodeItem = this.domEl.querySelector( '#' + child.id );
-                            nodeItem.classList.add( "selected" );
-                            this.selected.push( child );
-                            selectChildren( child );
-                        }
-                    };
-
-                    this.domEl.querySelectorAll( ".selected" ).forEach( i => i.classList.remove( "selected" ) );
-                    this.selected.length = 0;
-
-                    // Add childs of the clicked node
-                    selectChildren( node );
-                } );
-
-                event.panel.add( "Delete", { callback: () => {
-                    // It's the root node
-                    if( !node.parent )
-                    {
-                        return;
-                    }
-
-                    if( that.onevent )
-                    {
-                        const event = new TreeEvent( TreeEvent.NODE_DELETED, node, e );
-                        that.onevent( event );
-                    }
-
-                    // Delete nodes now
-                    let childs = node.parent.children;
-                    const index = childs.indexOf( node );
-                    childs.splice( index, 1 );
-
-                    this.refresh();
-                } } );
-            }
-        });
-
-        item.addEventListener("keydown", e => {
-
-            if( node.rename )
-            {
-                return;
-            }
-
-            e.preventDefault();
-
-            if( e.key == "Delete" )
-            {
-                // Send event now so we have the info in selected array..
-                if( that.onevent )
-                {
-                    const event = new TreeEvent( TreeEvent.NODE_DELETED, this.selected.length > 1 ? this.selected : node, e );
-                    event.multiple = this.selected.length > 1;
-                    that.onevent( event );
-                }
-
-                // Delete nodes now
-                for( let _node of this.selected )
-                {
-                    let childs = _node.parent.children;
-                    const index = childs.indexOf( _node );
-                    childs.splice( index, 1 );
-                }
-
-                this.selected.length = 0;
-                this.refresh();
-            }
-            else if( e.key == "ArrowUp" || e.key == "ArrowDown" ) // Unique or zero selected
-            {
-                var selected = this.selected.length > 1 ? ( e.key == "ArrowUp" ? this.selected.shift() : this.selected.pop() ) : this.selected[ 0 ];
-                var el = this.domEl.querySelector( "#" + LX.getSupportedDOMName( selected.id ) );
-                var sibling = e.key == "ArrowUp" ? el.previousSibling : el.nextSibling;
-                if( sibling )
-                {
-                    sibling.click();
-                }
-            }
-        });
-
-        // Node rename
-
-        const nameInput = document.createElement( "input" );
-        nameInput.toggleAttribute( "hidden", !node.rename );
-        nameInput.className = "bg-none";
-        nameInput.value = node.id;
-        item.appendChild( nameInput );
-
-        if( node.rename )
-        {
-            item.classList.add('selected');
-            nameInput.focus();
-        }
-
-        nameInput.addEventListener("keyup", function( e ) {
-            if( e.key == "Enter" )
-            {
-                this.value = this.value.replace(/\s/g, '_');
-
-                if( that.onevent )
-                {
-                    const event = new TreeEvent(TreeEvent.NODE_RENAMED, node, this.value);
-                    that.onevent( event );
-                }
-
-                node.id = LX.getSupportedDOMName( this.value );
-                delete node.rename;
-                that.frefresh( node.id );
-                list.querySelector( "#" + node.id ).classList.add('selected');
-            }
-            else if(e.key == "Escape")
-            {
-                delete node.rename;
-                that.frefresh( node.id );
-            }
-        });
-
-        nameInput.addEventListener("blur", function( e ) {
-            delete node.rename;
-            that.refresh();
-        });
-
-        if( this.options.draggable ?? true )
-        {
-            // Drag nodes
-            if( parent ) // Root doesn't move!
-            {
-                item.addEventListener("dragstart", e => {
-                    window.__tree_node_dragged = node;
-                });
-            }
-
-            /* Events fired on other node items */
-            item.addEventListener("dragover", e => {
-                e.preventDefault(); // allow drop
-            }, false );
-            item.addEventListener("dragenter", (e) => {
-                e.target.classList.add("draggingover");
-            });
-            item.addEventListener("dragleave", (e) => {
-                e.target.classList.remove("draggingover");
-            });
-            item.addEventListener("drop", e => {
-                e.preventDefault(); // Prevent default action (open as link for some elements)
-                let dragged = window.__tree_node_dragged;
-                if(!dragged)
-                    return;
-                let target = node;
-                // Can't drop to same node
-                if( dragged.id == target.id )
-                {
-                    console.warn("Cannot parent node to itself!");
-                    return;
-                }
-
-                // Can't drop to child node
-                const isChild = function( newParent, node ) {
-                    var result = false;
-                    for( var c of node.children )
-                    {
-                        if( c.id == newParent.id ) return true;
-                        result |= isChild( newParent, c );
-                    }
-                    return result;
-                };
-
-                if( isChild( target, dragged ))
-                {
-                    console.warn("Cannot parent node to a current child!");
-                    return;
-                }
-
-                // Trigger node dragger event
-                if( that.onevent )
-                {
-                    const event = new TreeEvent(TreeEvent.NODE_DRAGGED, dragged, target);
-                    that.onevent( event );
-                }
-
-                const index = dragged.parent.children.findIndex(n => n.id == dragged.id);
-                const removed = dragged.parent.children.splice(index, 1);
-                target.children.push( removed[0] );
-                that.refresh();
-                delete window.__tree_node_dragged;
-            });
-        }
-
-        let handled = false;
-
-        // Show/hide children
-        if( isParent )
-        {
-            item.querySelector('a.hierarchy').addEventListener("click", function( e ) {
-
-                handled = true;
-                e.stopImmediatePropagation();
-                e.stopPropagation();
-
-                if( e.altKey )
-                {
-                    const _closeNode = function( node ) {
-                        node.closed = !node.closed;
-                        for( var c of node.children )
-                        {
-                            _closeNode( c );
-                        }
-                    };
-                    _closeNode( node );
-                }
-                else
-                {
-                    node.closed = !node.closed;
-                }
-
-                if( that.onevent )
-                {
-                    const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed);
-                    that.onevent( event );
-                }
-                that.frefresh( node.id );
-            });
-        }
-
-        // Add button icons
-
-        const inputContainer = document.createElement( "div" );
-        item.appendChild( inputContainer );
-
-        if( node.actions )
-        {
-            for( let i = 0; i < node.actions.length; ++i )
-            {
-                const action = node.actions[ i ];
-                const actionIcon = LX.makeIcon( action.icon, { title: action.name } );
-                actionIcon.addEventListener("click", function( e ) {
-                    if( action.callback )
-                    {
-                        action.callback( node, actionIcon );
-                        e.stopPropagation();
-                    }
-                });
-
-                inputContainer.appendChild( actionIcon );
-            }
-        }
-
-        if( !node.skipVisibility ?? false )
-        {
-            const visibilityBtn = new Button( null, "", ( swapValue, event ) => {
-                event.stopPropagation();
-                node.visible = node.visible === undefined ? false : !node.visible;
-                // Trigger visibility event
-                if( that.onevent )
-                {
-                    const event = new TreeEvent( TreeEvent.NODE_VISIBILITY, node, node.visible );
-                    that.onevent( event );
-                }
-            }, { icon: node.visible ? "Eye" : "EyeOff", swap: node.visible ? "EyeOff" : "Eye", title: "Toggle visible", className: "p-0 m-0", buttonClass: "bg-none" } );
-            inputContainer.appendChild( visibilityBtn.root );
-        }
-
-        const _hasChild = function( parent, id ) {
-            if( !parent.length  ) return;
-            for( var c of parent.children )
-            {
-                if( c.id == id ) return true;
-                return _hasChild( c, id );
-            }
-        };
-
-        const exists = _hasChild( node, selectedId );
-
-        if( node.closed && !exists )
-        {
-            return;
-        }
-
-        for( var i = 0; i < node.children.length; ++i )
-        {
-            let child = node.children[ i ];
-
-            if( this.options.onlyFolders && child.type != 'folder' )
-            {
-                continue;
-            }
-
-            this._createItem( node, child, level + 1, selectedId );
-        }
-    }
-
-    refresh( newData, selectedId ) {
-
-        this.data = newData ?? this.data;
-        this.domEl.querySelector( "ul" ).innerHTML = "";
-        if( this.data.constructor === Object )
-        {
-            this._createItem( null, this.data, 0, selectedId );
-        }
-        else
-        {
-            for( let d of this.data )
-            {
-                this._createItem( null, d, 0, selectedId );
-            }
-        }
-    }
-
-    /* Refreshes the tree and focuses current element */
-    frefresh( id ) {
-
-        this.refresh();
-        var el = this.domEl.querySelector( "#" + id );
-        if( el )
-        {
-            el.focus();
-        }
-    }
-
-    select( id ) {
-
-        this.refresh( null, id );
-
-        this.domEl.querySelectorAll( ".selected" ).forEach( i => i.classList.remove( "selected" ) );
-        this.selected.length = 0;
-
-        var el = this.domEl.querySelector( "#" + id );
-        if( el )
-        {
-            el.classList.add( "selected" );
-            this.selected = [ el.treeData ];
-            el.focus();
-        }
-    }
-}
-
-LX.NodeTree = NodeTree;
-
-/**
- * @class Blank
- * @description Blank Widget
- */
-
-class Blank extends Widget {
-
-    constructor( width, height ) {
-
-        super( Widget.BLANK );
-
-        this.root.style.width = width ?? "auto";
-        this.root.style.height = height ?? "8px";
-    }
-}
-
-LX.Blank = Blank;
-
-/**
- * @class Title
- * @description Title Widget
- */
-
-class Title extends Widget {
-
-    constructor( name, options = {} ) {
-
-        console.assert( name, "Can't create Title Widget without text!" );
-
-        // Note: Titles are not registered in Panel.widgets by now
-        super( Widget.TITLE, null, null, options );
-
-        this.root.className = `lextitle ${ this.root.className }`;
-
-        if( options.icon )
-        {
-            let icon = LX.makeIcon( options.icon, { iconClass: "mr-2" } );
-            icon.querySelector( "svg" ).style.color = options.iconColor || "";
-            this.root.appendChild( icon );
-        }
-
-        let text = document.createElement( "span" );
-        text.innerText = name;
-        this.root.appendChild( text );
-
-        Object.assign( this.root.style, options.style ?? {} );
-
-        if( options.link != undefined )
-        {
-            let linkDom = document.createElement('a');
-            linkDom.innerText = name;
-            linkDom.href = options.link;
-            linkDom.target = options.target ?? "";
-            linkDom.className = "lextitle link";
-            Object.assign( linkDom.style, options.style ?? {} );
-            this.root.replaceWith( linkDom );
-        }
-    }
-}
-
-LX.Title = Title;
-
-/**
- * @class TextInput
- * @description TextInput Widget
- */
-
-class TextInput extends Widget {
-
-    constructor( name, value, callback, options = {} ) {
-
-        super( Widget.TEXT, name, String( value ), options );
-
-        this.onGetValue = () => {
-            return value;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-
-            if( !this.valid( newValue ) || ( this._lastValueTriggered == newValue ) )
-            {
-                return;
-            }
-
-            this._lastValueTriggered = value = newValue;
-
-            wValue.value = newValue;
-
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( name, newValue, event ), callback );
-            }
-        };
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
-        };
-
-        this.valid = ( v ) => {
-            v = v ?? this.value();
-            if( !v.length || wValue.pattern == "" ) return true;
-            const regexp = new RegExp( wValue.pattern );
-            return regexp.test( v );
-        };
-
-        let container = document.createElement( 'div' );
-        container.className = ( options.warning ? " lexwarning" : "" );
-        container.style.display = "flex";
-        container.style.position = "relative";
-        this.root.appendChild( container );
-
-        this.disabled = ( options.disabled || options.warning ) ?? ( options.url ? true : false );
-        let wValue = null;
-
-        if( !this.disabled )
-        {
-            wValue = document.createElement( 'input' );
-            wValue.className = "lextext " + ( options.inputClass ?? "" );
-            wValue.type = options.type || "";
-            wValue.value = value || "";
-            wValue.style.textAlign = ( options.float ?? "" );
-
-            wValue.setAttribute( "placeholder", options.placeholder ?? "" );
-
-            if( options.required )
-            {
-                wValue.setAttribute( "required", options.required );
-            }
-
-            if( options.pattern )
-            {
-                wValue.setAttribute( "pattern", options.pattern );
-            }
-
-            const trigger = options.trigger ?? "default";
-
-            if( trigger == "default" )
-            {
-                wValue.addEventListener( "keyup", e => {
-                    if( e.key == "Enter" )
-                    {
-                        wValue.blur();
-                    }
-                });
-
-                wValue.addEventListener( "focusout", e => {
-                    this.set( e.target.value, false, e );
-                });
-            }
-            else if( trigger == "input" )
-            {
-                wValue.addEventListener("input", e => {
-                    this.set( e.target.value, false, e );
-                });
-            }
-
-            wValue.addEventListener( "mousedown", function( e ){
-                e.stopImmediatePropagation();
-                e.stopPropagation();
-            });
-
-            if( options.icon )
-            {
-                wValue.style.paddingLeft = "1.75rem";
-                const icon = LX.makeIcon( options.icon, { iconClass: "absolute z-1 ml-2", svgClass: "sm" } );
-                container.appendChild( icon );
-            }
-
-        }
-        else if( options.url )
-        {
-            wValue = document.createElement( 'a' );
-            wValue.href = options.url;
-            wValue.target = "_blank";
-            wValue.innerHTML = value ?? "";
-            wValue.style.textAlign = options.float ?? "";
-            wValue.className = "lextext ellipsis-overflow";
-        }
-        else
-        {
-            wValue = document.createElement( 'input' );
-            wValue.disabled = true;
-            wValue.value = value;
-            wValue.style.textAlign = options.float ?? "";
-            wValue.className = "lextext ellipsis-overflow " + ( options.inputClass ?? "" );
-        }
-
-        if( options.fit )
-        {
-            wValue.classList.add( "size-content" );
-        }
-
-        Object.assign( wValue.style, options.style ?? {} );
-        container.appendChild( wValue );
-
-        doAsync( this.onResize.bind( this ) );
-    }
-}
-
-LX.TextInput = TextInput;
-
-/**
- * @class TextArea
- * @description TextArea Widget
- */
-
-class TextArea extends Widget {
-
-    constructor( name, value, callback, options = {} ) {
-
-        super( Widget.TEXTAREA, name, value, options );
-
-        this.onGetValue = () => {
-            return value;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-
-            wValue.value = value = newValue;
-
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( name, newValue, event ), callback );
-            }
-        };
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
-        };
-
-        let container = document.createElement( "div" );
-        container.className = "lextextarea";
-        container.style.display = "flex";
-        this.root.appendChild( container );
-
-        let wValue = document.createElement( "textarea" );
-        wValue.value = value ?? "";
-        wValue.className = ( options.inputClass ?? "" );
-        wValue.style.textAlign = options.float ?? "";
-        Object.assign( wValue.style, options.style ?? {} );
-
-        if( options.fitHeight ?? false )
-        {
-            wValue.classList.add( "size-content" );
-        }
-
-        if( !( options.resize ?? true ) )
-        {
-            wValue.classList.add( "resize-none" );
-        }
-
-        container.appendChild( wValue );
-
-        if( options.disabled ?? false ) wValue.setAttribute( "disabled", true );
-        if( options.placeholder ) wValue.setAttribute( "placeholder", options.placeholder );
-
-        const trigger = options.trigger ?? "default";
-
-        if( trigger == "default" )
-        {
-            wValue.addEventListener("keyup", function(e) {
-                if( e.key == "Enter" )
-                {
-                    wValue.blur();
-                }
-            });
-
-            wValue.addEventListener("focusout", e => {
-                this.set( e.target.value, false, e );
-            });
-        }
-        else if( trigger == "input" )
-        {
-            wValue.addEventListener("input", e => {
-                this.set( e.target.value, false, e );
-            });
-        }
-
-        if( options.icon )
-        {
-            const icon = LX.makeIcon( options.icon, { iconClass: "absolute z-1 ml-2", svgClass: "sm" } );
-            container.appendChild( icon );
-        }
-
-        doAsync( () => {
-            container.style.height = options.height ?? "";
-            this.onResize();
-        }, 10 );
-    }
-}
-
-LX.TextArea = TextArea;
-
-/**
- * @class Button
- * @description Button Widget
- */
-
-class Button extends Widget {
-
-    constructor( name, value, callback, options = {} ) {
-
-        super( Widget.BUTTON, name, null, options );
-
-        this.onGetValue = () => {
-            return wValue.querySelector( "input" )?.checked;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-
-            if( ( options.swap ?? false ) )
-            {
-                this.root.setState( newValue, skipCallback );
-                return;
-            }
-
-            // No-swap buttons
-
-            wValue.innerHTML = "";
-
-            if( options.icon )
-            {
-                const icon = LX.makeIcon( options.icon );
-                wValue.prepend( icon );
-            }
-            else if( options.img )
-            {
-                let img = document.createElement( 'img' );
-                img.src = options.img;
-                wValue.prepend( img );
-            }
-            else
-            {
-                wValue.innerHTML = `<span>${ ( newValue ?? "" ) }</span>`;
-            }
-        };
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            wValue.style.width = `calc( 100% - ${ realNameWidth })`;
-        };
-
-        var wValue = document.createElement( 'button' );
-        wValue.title = options.tooltip ? "" : ( options.title ?? "" );
-        wValue.className = "lexbutton p-1 " + ( options.buttonClass ?? "" );
-
-        this.root.appendChild( wValue );
-
-        if( options.selected )
-        {
-            wValue.classList.add( "selected" );
-        }
-
-        if( options.icon )
-        {
-            const icon = LX.makeIcon( options.icon );
-            wValue.prepend( icon );
-            wValue.classList.add( "justify-center" );
-        }
-        else if( options.img )
-        {
-            let img = document.createElement( 'img' );
-            img.src = options.img;
-            wValue.prepend( img );
-        }
-        else
-        {
-            wValue.innerHTML = `<span>${ ( value || "" ) }</span>`;
-        }
-
-        if( options.disabled )
-        {
-            wValue.setAttribute( "disabled", true );
-        }
-
-        let trigger = wValue;
-
-        if( options.swap )
-        {
-            wValue.classList.add( "swap" );
-            wValue.querySelector( "a" ).classList.add( "swap-off" );
-
-            const input = document.createElement( "input" );
-            input.className = "p-0 border-0";
-            input.type = "checkbox";
-            wValue.prepend( input );
-
-            const swapIcon = LX.makeIcon( options.swap, { iconClass: "swap-on" } );
-            wValue.appendChild( swapIcon );
-
-            this.root.swap = function( skipCallback ) {
-                const swapInput = wValue.querySelector( "input" );
-                swapInput.checked = !swapInput.checked;
-                if( !skipCallback )
-                {
-                    trigger.click();
-                }
-            };
-
-            // Set if swap has to be performed
-            this.root.setState = function( v, skipCallback ) {
-                const swapInput = wValue.querySelector( "input" );
-                swapInput.checked = v;
-                if( !skipCallback )
-                {
-                    trigger.click();
-                }
-            };
-        }
-
-        trigger.addEventListener( "click", e => {
-            if( options.selectable )
-            {
-                if( options.parent )
-                {
-                    options.parent.querySelectorAll(".lexbutton.selected").forEach( b => { if( b == wValue ) return; b.classList.remove( "selected" ) } );
-                }
-
-                wValue.classList.toggle('selected');
-            }
-
-            const swapInput = wValue.querySelector( "input" );
-            this._trigger( new IEvent( name, swapInput?.checked ?? value, e ), callback );
-        });
-
-        if( options.tooltip )
-        {
-            LX.asTooltip( wValue, options.title ?? name );
-        }
-
-        doAsync( this.onResize.bind( this ) );
-    }
-}
-
-LX.Button = Button;
-
-/**
- * @class ComboButtons
- * @description ComboButtons Widget
- */
-
-class ComboButtons extends Widget {
-
-    constructor( name, values, options = {} ) {
-
-        const shouldSelect = !( options.noSelection ?? false );
-        let shouldToggle = shouldSelect && ( options.toggle ?? false );
-
-        let container = document.createElement('div');
-        container.className = "lexcombobuttons ";
-
-        options.skipReset = true;
-
-        if( options.float )
-        {
-            container.className += options.float;
-        }
-
-        let currentValue = [];
-        let buttonsBox = document.createElement('div');
-        buttonsBox.className = "lexcombobuttonsbox ";
-        container.appendChild( buttonsBox );
-
-        for( let b of values )
-        {
-            if( !b.value )
-            {
-                throw( "Set 'value' for each button!" );
-            }
-
-            let buttonEl = document.createElement('button');
-            buttonEl.className = "lexbutton combo";
-            buttonEl.title = b.icon ? b.value : "";
-            buttonEl.id = b.id ?? "";
-            buttonEl.dataset["value"] = b.value;
-
-            if( options.buttonClass )
-            {
-                buttonEl.classList.add( options.buttonClass );
-            }
-
-            if( shouldSelect && ( b.selected || options.selected?.includes( b.value ) ) )
-            {
-                buttonEl.classList.add("selected");
-                currentValue = ( currentValue ).concat( [ b.value ] );
-            }
-
-            if( b.icon )
-            {
-                const icon = LX.makeIcon( b.icon );
-                buttonEl.appendChild( icon );
-            }
-            else
-            {
-                buttonEl.innerHTML = `<span>${ b.value }</span>`;
-            }
-
-            if( b.disabled )
-            {
-                buttonEl.setAttribute( "disabled", true );
-            }
-
-            buttonEl.addEventListener("click", e => {
-
-                currentValue = [];
-
-                if( shouldSelect )
-                {
-                    if( shouldToggle )
-                    {
-                        buttonEl.classList.toggle( "selected" );
-                    }
-                    else
-                    {
-                        container.querySelectorAll( "button" ).forEach( s => s.classList.remove( "selected" ));
-                        buttonEl.classList.add( "selected" );
-                    }
-                }
-
-                container.querySelectorAll( "button" ).forEach( s => {
-
-                    if( s.classList.contains( "selected" ) )
-                    {
-                        currentValue.push( s.dataset[ "value" ] );
-                    }
-
-                } );
-
-                if( !shouldToggle && currentValue.length > 1 )
-                {
-                    console.error( `Enable _options.toggle_ to allow selecting multiple options in ComboButtons.` );
-                    return;
-                }
-
-                currentValue = currentValue[ 0 ];
-
-                this.set( b.value, false, buttonEl.classList.contains( "selected" ) );
-            });
-
-            buttonsBox.appendChild( buttonEl );
-        }
-
-        if( currentValue.length > 1 )
-        {
-            if( !shouldToggle )
-            {
-                options.toggle = true;
-                shouldToggle = shouldSelect;
-                console.warn( `Multiple options selected in '${ name }' ComboButtons. Enabling _toggle_ mode.` );
-            }
-        }
-        else
-        {
-            currentValue = currentValue[ 0 ];
-        }
-
-        super( Widget.BUTTONS, name, null, options );
-
-        this.onGetValue = () => {
-            return currentValue;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-
-            if( shouldSelect && ( event == undefined ) )
-            {
-                container.querySelectorAll( "button" ).forEach( s => s.classList.remove( "selected" ));
-
-                container.querySelectorAll( "button" ).forEach( s => {
-                    if( currentValue && currentValue.indexOf( s.dataset[ "value" ] ) > -1 )
-                    {
-                        s.classList.add( "selected" );
-                    }
-                } );
-            }
-
-            if( !skipCallback && newValue.constructor != Array )
-            {
-                const enabled = event;
-                const fn = values.filter( v => v.value == newValue )[ 0 ]?.callback;
-                this._trigger( new IEvent( name, shouldToggle ? [ newValue, enabled ] : newValue, null ), fn );
-            }
-        };
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        };
-
-        this.root.appendChild( container );
-
-        doAsync( this.onResize.bind( this ) );
-    }
-}
-
-LX.ComboButtons = ComboButtons;
-
-/**
- * @class Card
- * @description Card Widget
- */
-
-class Card extends Widget {
-
-    constructor( name, options = {} ) {
-
-        options.hideName = true;
-
-        super( Widget.CARD, name, null, options );
-
-        let container = document.createElement('div');
-        container.className = "lexcard";
-        container.style.width = "100%";
-        this.root.appendChild( container );
-
-        if( options.img )
-        {
-            let img = document.createElement('img');
-            img.src = options.img;
-            container.appendChild( img );
-
-            if( options.link != undefined )
-            {
-                img.style.cursor = "pointer";
-                img.addEventListener('click', function() {
-                    const hLink = container.querySelector('a');
-                    if( hLink )
-                    {
-                        hLink.click();
-                    }
-                });
-            }
-        }
-
-        let cardNameDom = document.createElement('span');
-        cardNameDom.innerText = name;
-        container.appendChild( cardNameDom );
-
-        if( options.link != undefined )
-        {
-            let cardLinkDom = document.createElement( 'a' );
-            cardLinkDom.innerText = name;
-            cardLinkDom.href = options.link;
-            cardLinkDom.target = options.target ?? "";
-            cardNameDom.innerText = "";
-            cardNameDom.appendChild( cardLinkDom );
-        }
-
-        if( options.callback )
-        {
-            container.style.cursor = "pointer";
-            container.addEventListener("click", ( e ) => {
-                this._trigger( new IEvent( name, null, e ), options.callback );
-            });
-        }
-    }
-}
-
-LX.Card = Card;
-
-/**
- * @class Form
- * @description Form Widget
- */
-
-class Form extends Widget {
-
-    constructor( name, data, callback, options = {} ) {
-
-        if( data.constructor != Object )
-        {
-            console.error( "Form data must be an Object" );
-            return;
-        }
-
-        // Always hide name for this one
-        options.hideName = true;
-
-        super( Widget.FORM, name, null, options );
-
-        this.onGetValue = () => {
-            return container.formData;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-            container.formData = newValue;
-            const entries = container.querySelectorAll( ".lexwidget" );
-            for( let i = 0; i < entries.length; ++i )
-            {
-                const entry = entries[ i ];
-                if( entry.jsInstance.type != LX.Widget.TEXT )
-                {
-                    continue;
-                }
-                let entryName = entries[ i ].querySelector( ".lexwidgetname" ).innerText;
-                let entryInput = entries[ i ].querySelector( ".lextext input" );
-                entryInput.value = newValue[ entryName ] ?? "";
-                Widget._dispatchEvent( entryInput, "focusout", skipCallback );
-            }
-        };
-
-        let container = document.createElement( 'div' );
-        container.className = "lexformdata";
-        container.style.width = "100%";
-        container.formData = {};
-        this.root.appendChild( container );
-
-        for( let entry in data )
-        {
-            let entryData = data[ entry ];
-
-            if( entryData.constructor != Object )
-            {
-                entryData = { };
-                data[ entry ] = entryData;
-            }
-
-            entryData.placeholder = entryData.placeholder ?? entry;
-            entryData.width = "100%";
-
-            if( !( options.skipLabels ?? false ) )
-            {
-                const label = new TextInput( null, entry, null, { disabled: true, inputClass: "formlabel nobg" } );
-                container.appendChild( label.root );
-            }
-
-            entryData.textWidget = new TextInput( null, entryData.constructor == Object ? entryData.value : entryData, ( value ) => {
-                container.formData[ entry ] = value;
-            }, entryData );
-            container.appendChild( entryData.textWidget.root );
-
-            container.formData[ entry ] = entryData.constructor == Object ? entryData.value : entryData;
-        }
-
-        const buttonContainer = LX.makeContainer( ["100%", "auto"], "flex flex-row", "", container );
-
-        if( options.secondaryActionName || options.secondaryActionCallback )
-        {
-            const secondaryButton = new Button( null, options.secondaryActionName ?? "Cancel", ( value, event ) => {
-                if( callback )
-                {
-                    callback( container.formData, event );
-                }
-            }, { width: "100%", minWidth: "0", buttonClass: options.secondaryButtonClass ?? "primary" } );
-
-            buttonContainer.appendChild( secondaryButton.root );
-        }
-
-        const primaryButton = new Button( null, options.primaryActionName ?? "Submit", ( value, event ) => {
-
-            for( let entry in data )
-            {
-                let entryData = data[ entry ];
-
-                if( !entryData.textWidget.valid() )
-                {
-                    return;
-                }
-            }
-
-            if( callback )
-            {
-                callback( container.formData, event );
-            }
-        }, { width: "100%", minWidth: "0", buttonClass: options.primaryButtonClass ?? "contrast" } );
-
-        buttonContainer.appendChild( primaryButton.root );
-    }
-}
-
-LX.Form = Form;
-
-/**
- * @class Select
- * @description Select Widget
- */
-
-class Select extends Widget {
-
-    constructor( name, values, value, callback, options = {} ) {
-
-        super( Widget.SELECT, name, value, options );
-
-        this.onGetValue = () => {
-            return value;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-            value = newValue;
-
-            let item = null;
-            const options = listOptions.childNodes;
-            options.forEach( e => {
-                e.classList.remove( "selected" );
-                if( e.getAttribute( "value" ) == newValue )
-                {
-                    item = e;
-                }
-            } );
-
-            console.assert( item, `Item ${ newValue } does not exist in the Select.` );
-            item.classList.add( "selected" );
-            selectedOption.refresh( value );
-
-            // Reset filter
-            if( filter )
-            {
-                filter.root.querySelector( "input" ).value = "";
-                const filteredOptions = this._filterOptions( values, "" );
-                list.refresh( filteredOptions );
-            }
-
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( name, value, event ), callback );
-            }
-        };
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
-        };
-
-        let container = document.createElement( "div" );
-        container.className = "lexselect";
-        this.root.appendChild( container );
-
-        let wValue = document.createElement( 'div' );
-        wValue.className = "lexselect lexoption";
-        wValue.name = name;
-        wValue.iValue = value;
-
-        if( options.overflowContainer )
-        {
-            options.overflowContainerX = options.overflowContainerY = options.overflowContainer;
-        }
-
-        const _placeOptions = ( parent ) => {
-
-            const selectRoot = selectedOption.root;
-            const rect = selectRoot.getBoundingClientRect();
-            const nestedDialog = parent.parentElement.closest( "dialog" ) ?? parent.parentElement.closest( ".lexcolorpicker" );
-
-            // Manage vertical aspect
-            {
-                const overflowContainer = options.overflowContainerY ?? parent.getParentArea();
-                const listHeight = parent.offsetHeight;
-                let topPosition = rect.y;
-
-                let maxY = window.innerHeight;
-
-                if( overflowContainer )
-                {
-                    const parentRect = overflowContainer.getBoundingClientRect();
-                    maxY = parentRect.y + parentRect.height;
-                }
-
-                if( nestedDialog )
-                {
-                    const rect = nestedDialog.getBoundingClientRect();
-                    topPosition -= rect.y;
-                    maxY -= rect.y;
-                }
-
-                parent.style.top = ( topPosition + selectRoot.offsetHeight ) + 'px';
-
-                const showAbove = ( topPosition + listHeight ) > maxY;
-                if( showAbove )
-                {
-                    parent.style.top = ( topPosition - listHeight ) + 'px';
-                    parent.classList.add( "place-above" );
-                }
-            }
-
-            // Manage horizontal aspect
-            {
-                const overflowContainer = options.overflowContainerX ?? parent.getParentArea();
-                const listWidth = parent.offsetWidth;
-                let leftPosition = rect.x;
-
-                parent.style.minWidth = ( rect.width ) + 'px';
-
-                if( nestedDialog )
-                {
-                    const rect = nestedDialog.getBoundingClientRect();
-                    leftPosition -= rect.x;
-                }
-
-                parent.style.left = ( leftPosition ) + 'px';
-
-                let maxX = window.innerWidth;
-
-                if( overflowContainer )
-                {
-                    const parentRect = overflowContainer.getBoundingClientRect();
-                    maxX = parentRect.x + parentRect.width;
-                }
-
-                const showLeft = ( leftPosition + listWidth ) > maxX;
-                if( showLeft )
-                {
-                    parent.style.left = ( leftPosition - ( listWidth - rect.width ) ) + 'px';
-                }
-            }
-        };
-
-        let selectedOption = new Button( null, value, ( value, event ) => {
-            if( list.unfocus_event )
-            {
-                delete list.unfocus_event;
-                return;
-            }
-
-            listDialog.classList.remove( "place-above" );
-            const opened = listDialog.hasAttribute( "open" );
-
-            if( !opened )
-            {
-                listDialog.show();
-                _placeOptions( listDialog );
-            }
-            else
-            {
-                listDialog.close();
-            }
-
-            if( filter )
-            {
-                filter.root.querySelector( "input" ).focus();
-            }
-
-        }, { buttonClass: "array", skipInlineCount: true, disabled: options.disabled } );
-
-        selectedOption.root.style.width = "100%";
-        selectedOption.root.querySelector( "span" ).appendChild( LX.makeIcon( "Down", { svgClass: "sm" } ) );
-
-        container.appendChild( selectedOption.root );
-
-        selectedOption.refresh = (v) => {
-            const buttonSpan = selectedOption.root.querySelector("span");
-            if( buttonSpan.innerText == "" )
-            {
-                buttonSpan.innerText = v;
-            }
-            else
-            {
-                buttonSpan.innerHTML = buttonSpan.innerHTML.replaceAll( buttonSpan.innerText, v );
-            }
-        }
-
-        // Add select options container
-
-        const listDialog = document.createElement( 'dialog' );
-        listDialog.className = "lexselectoptions";
-
-        let list = document.createElement( 'ul' );
-        list.tabIndex = -1;
-        list.className = "lexoptions";
-        listDialog.appendChild( list )
-
-        list.addEventListener( 'focusout', function( e ) {
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            if( e.relatedTarget === selectedOption.root.querySelector( 'button' ) )
-            {
-                this.unfocus_event = true;
-                setTimeout( () => delete this.unfocus_event, 200 );
-            }
-            else if ( e.relatedTarget && listDialog.contains( e.relatedTarget ) )
-            {
-                return;
-            }
-            else if ( e.target.className == 'lexinput-filter' )
-            {
-                return;
-            }
-            listDialog.close();
-        });
-
-        // Add filter options
-        let filter = null;
-        if( options.filter ?? false )
-        {
-            const filterOptions = LX.deepCopy( options );
-            filterOptions.placeholder = filterOptions.placeholder ?? "Search...";
-            filterOptions.skipWidget = filterOptions.skipWidget ?? true;
-            filterOptions.trigger = "input";
-            filterOptions.icon = "Search";
-            filterOptions.className = "lexfilter";
-            filterOptions.inputClass = "outline";
-
-            filter = new TextInput(null, options.filterValue ?? "", ( v ) => {
-                const filteredOptions = this._filterOptions( values, v );
-                list.refresh( filteredOptions );
-            }, filterOptions );
-            filter.root.querySelector( ".lextext" ).style.border = "1px solid transparent";
-
-            const input = filter.root.querySelector( "input" );
-
-            input.addEventListener('focusout', function( e ) {
-                if (e.relatedTarget && e.relatedTarget.tagName == "UL" && e.relatedTarget.classList.contains("lexoptions"))
-                {
-                    return;
-                }
-                listDialog.close();
-            });
-
-            list.appendChild( filter.root );
-        }
-
-        // Create option list to empty it easily..
-        const listOptions = document.createElement('span');
-        listOptions.className = "lexselectinnerlist";
-        list.appendChild( listOptions );
-
-        // Add select options list
-        list.refresh = ( currentOptions ) => {
-
-            // Empty list
-            listOptions.innerHTML = "";
-
-            if( !currentOptions.length )
-            {
-                let iValue = options.emptyMsg ?? "No options found.";
-
-                let option = document.createElement( "div" );
-                option.className = "option";
-                option.innerHTML = iValue;
-
-                let li = document.createElement( "li" );
-                li.className = "lexselectitem empty";
-                li.appendChild( option );
-
-                listOptions.appendChild( li );
-                return;
-            }
-
-            for( let i = 0; i < currentOptions.length; i++ )
-            {
-                let iValue = currentOptions[ i ];
-                let li = document.createElement( "li" );
-                let option = document.createElement( "div" );
-                option.className = "option";
-                li.appendChild( option );
-
-                const onSelect = e => {
-                    this.set( e.currentTarget.getAttribute( "value" ), false, e );
-                    listDialog.close();
-                };
-
-                li.addEventListener( "click", onSelect );
-
-                // Add string option
-                if( iValue.constructor != Object )
-                {
-                    const asLabel = ( iValue[ 0 ] === '@' );
-
-                    if( !asLabel )
-                    {
-                        option.innerHTML = `<span>${ iValue }</span>`;
-                        option.appendChild( LX.makeIcon( "Check" ) )
-                        option.value = iValue;
-                        li.setAttribute( "value", iValue );
-
-                        if( iValue == value )
-                        {
-                            li.classList.add( "selected" );
-                            wValue.innerHTML = iValue;
-                        }
-                    }
-                    else
-                    {
-                        option.innerHTML = "<span>" + iValue.substr( 1 ) + "</span>";
-                        li.removeEventListener( "click", onSelect );
-                    }
-
-                    li.classList.add( asLabel ? "lexselectlabel" : "lexselectitem" );
-                }
-                else
-                {
-                    // Add image option
-                    let img = document.createElement( "img" );
-                    img.src = iValue.src;
-                    li.setAttribute( "value", iValue.value );
-                    li.className = "lexlistitem";
-                    option.innerText = iValue.value;
-                    option.className += " media";
-                    option.prepend( img );
-
-                    option.setAttribute( "value", iValue.value );
-                    option.setAttribute( "data-index", i );
-                    option.setAttribute( "data-src", iValue.src );
-                    option.setAttribute( "title", iValue.value );
-
-                    if( value == iValue.value )
-                    {
-                        li.classList.add( "selected" );
-                    }
-                }
-
-                listOptions.appendChild( li );
-            }
-        }
-
-        list.refresh( values );
-
-        container.appendChild( listDialog );
-
-        doAsync( this.onResize.bind( this ) );
-    }
-
-    _filterOptions( options, value ) {
-
-        // Push to right container
-        const emptyFilter = !value.length;
-        let filteredOptions = [];
-
-        // Add widgets
-        for( let i = 0; i < options.length; i++ )
-        {
-            let o = options[ i ];
-            if( !emptyFilter )
-            {
-                let toCompare = ( typeof o == 'string' ) ? o : o.value;
-                const filterWord = value.toLowerCase();
-                const name = toCompare.toLowerCase();
-                if( !name.includes( filterWord ) ) continue;
-            }
-
-            filteredOptions.push( o );
-        }
-
-        return filteredOptions;
-    }
-}
-
-LX.Select = Select;
-
-/**
- * @class Curve
- * @description Curve Widget
- */
-
-class Curve extends Widget {
-
-    constructor( name, values, callback, options = {} ) {
-
-        let defaultValues = JSON.parse( JSON.stringify( values ) );
-
-        super( Widget.CURVE, name, defaultValues, options );
-
-        this.onGetValue = () => {
-            return JSON.parse(JSON.stringify( curveInstance.element.value ));
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-            curveInstance.element.value = JSON.parse( JSON.stringify( newValue ) );
-            curveInstance.redraw();
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( name, curveInstance.element.value, event ), callback );
-            }
-        };
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        };
-
-        var container = document.createElement( "div" );
-        container.className = "lexcurve";
-        this.root.appendChild( container );
-
-        options.callback = (v, e) => {
-            this._trigger( new IEvent( name, v, e ), callback );
-        };
-
-        options.name = name;
-
-        let curveInstance = new CanvasCurve( values, options );
-        container.appendChild( curveInstance.element );
-        this.curveInstance = curveInstance;
-
-        const observer = new ResizeObserver( entries => {
-            for ( const entry of entries )
-            {
-                curveInstance.canvas.width = entry.contentRect.width;
-                curveInstance.redraw();
-            }
-        });
-
-        observer.observe( container );
-
-        doAsync( this.onResize.bind( this ) );
-    }
-}
-
-LX.Curve = Curve;
-
-/**
- * @class Dial
- * @description Dial Widget
- */
-
-class Dial extends Widget {
-
-    constructor( name, values, callback, options = {} ) {
-
-        let defaultValues = JSON.parse( JSON.stringify( values ) );
-
-        super( Widget.DIAL, name, defaultValues, options );
-
-        this.onGetValue = () => {
-            return JSON.parse( JSON.stringify( dialInstance.element.value ) );
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-            dialInstance.element.value = JSON.parse( JSON.stringify( newValue ) );
-            dialInstance.redraw();
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( name, dialInstance.element.value, event ), callback );
-            }
-        };
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-            flushCss( container );
-            dialInstance.element.style.height = dialInstance.element.offsetWidth + "px";
-            dialInstance.canvas.width = dialInstance.element.offsetWidth;
-            container.style.width = dialInstance.element.offsetWidth + "px";
-            dialInstance.canvas.height = dialInstance.canvas.width;
-            dialInstance.redraw();
-        };
-
-        var container = document.createElement( "div" );
-        container.className = "lexcurve";
-        this.root.appendChild( container );
-
-        options.callback = ( v, e ) => {
-            this._trigger( new IEvent( name, v, e ), callback );
-        };
-
-        options.name = name;
-
-        let dialInstance = new CanvasDial( this, values, options );
-        container.appendChild( dialInstance.element );
-        this.dialInstance = dialInstance;
-
-        doAsync( this.onResize.bind( this ) );
-    }
-}
-
-LX.Curve = Curve;
-
-/**
- * @class Layers
- * @description Layers Widget
- */
-
-class Layers extends Widget {
-
-    constructor( name, value, callback, options = {} ) {
-
-        super( Widget.LAYERS, name, value, options );
-
-        this.onGetValue = () => {
-            return value;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-            value = newValue;
-            this.setLayers( value );
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent(name, value, event), callback );
-            }
-        };
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        };
-
-        var container = document.createElement( "div" );
-        container.className = "lexlayers";
-        this.root.appendChild( container );
-
-        this.setLayers = ( val ) =>  {
-
-            container.innerHTML = "";
-
-            let binary = val.toString( 2 );
-            let nbits = binary.length;
-
-            // fill zeros
-            for( let i = 0; i < ( 16 - nbits ); ++i )
-            {
-                binary = '0' + binary;
-            }
-
-            for( let bit = 0; bit < 16; ++bit )
-            {
-                let layer = document.createElement( "div" );
-                layer.className = "lexlayer";
-
-                if( val != undefined )
-                {
-                    const valueBit = binary[ 16 - bit - 1 ];
-                    if( valueBit != undefined && valueBit == '1' )
-                    {
-                        layer.classList.add( "selected" );
-                    }
-                }
-
-                layer.innerText = bit + 1;
-                layer.title = "Bit " + bit + ", value " + (1 << bit);
-                container.appendChild( layer );
-
-                layer.addEventListener( "click", e => {
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                    e.target.classList.toggle( "selected" );
-                    const newValue = val ^ ( 1 << bit );
-                    this.set( newValue, false, e );
-                } );
-            }
-        };
-
-        this.setLayers( value );
-
-        doAsync( this.onResize.bind( this ) );
-    }
-}
-
-LX.Layers = Layers;
-
-/**
- * @class ItemArray
- * @description ItemArray Widget
- */
-
-class ItemArray extends Widget {
-
-    constructor( name, values = [], callback, options = {} ) {
-
-        options.nameWidth = "100%";
-
-        super( Widget.ARRAY, name, null, options );
-
-        this.onGetValue = () => {
-            return values;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-            values = newValue;
-            this._updateItems();
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( name, values, event ), callback );
-            }
-        };
-
-        // Add open array button
-
-        let container = document.createElement( "div" );
-        container.className = "lexarray";
-        container.style.width = "100%";
-        this.root.appendChild( container );
-        this.root.dataset["opened"] = false;
-
-        let buttonName = `Array (size ${ values.length })`;
-
-        const toggleButton = new Button(null, buttonName, () => {
-            this.root.dataset["opened"] = this.root.dataset["opened"] == "true" ? false : true;
-            this.root.querySelector(".lexarrayitems").toggleAttribute( "hidden" );
-        }, { buttonClass: "array" });
-        toggleButton.root.querySelector( "span" ).appendChild( LX.makeIcon( "Down", { svgClass: "sm" } ) );
-        container.appendChild( toggleButton.root );
-
-        // Show elements
-
-        let arrayItems = document.createElement( "div" );
-        arrayItems.className = "lexarrayitems";
-        arrayItems.toggleAttribute( "hidden",  true );
-        this.root.appendChild( arrayItems );
-
-        this._updateItems = () => {
-
-            // Update num items
-            let buttonSpan = this.root.querySelector(".lexbutton.array span");
-            for( let node of buttonSpan.childNodes )
-            {
-                if ( node.nodeType === Node.TEXT_NODE ) { node.textContent = `Array (size ${ values.length })`; break; }
-            }
-
-            // Update inputs
-            arrayItems.innerHTML = "";
-
-            for( let i = 0; i < values.length; ++i )
-            {
-                const value = values[ i ];
-                let baseclass = options.innerValues ? 'select' : value.constructor;
-                let widget = null;
-
-                switch( baseclass  )
-                {
-                    case String:
-                        widget = new TextInput(i + "", value, function(value, event) {
-                            values[ i ] = value;
-                            callback( values );
-                        }, { nameWidth: "12px", className: "p-0", skipReset: true });
-                        break;
-                    case Number:
-                        widget = new NumberInput(i + "", value, function(value, event) {
-                            values[ i ] = value;
-                            callback( values );
-                        }, { nameWidth: "12px", className: "p-0", skipReset: true });
-                        break;
-                    case 'select':
-                        widget = new Select(i + "", options.innerValues, value, function(value, event) {
-                            values[ i ] = value;
-                            callback( values );
-                        }, { nameWidth: "12px", className: "p-0", skipReset: true });
-                        break;
-                }
-
-                console.assert( widget, `Value of type ${ baseclass } cannot be modified in ItemArray` );
-
-                arrayItems.appendChild( widget.root );
-
-                const removeWidget = new Button( null, "", ( v, event) => {
-                    values.splice( values.indexOf( value ), 1 );
-                    this._updateItems();
-                    this._trigger( new IEvent(name, values, event), callback );
-                }, { title: "Remove item", icon: "Trash3"} );
-
-                widget.root.appendChild( removeWidget.root );
-            }
-
-            const addButton = new Button(null, LX.makeIcon( "Plus", { svgClass: "sm" } ).innerHTML + "Add item", (v, event) => {
-                values.push( options.innerValues ? options.innerValues[ 0 ] : "" );
-                this._updateItems();
-                this._trigger( new IEvent(name, values, event), callback );
-            }, { buttonClass: 'array' });
-
-            arrayItems.appendChild( addButton.root );
-        };
-
-        this._updateItems();
-    }
-}
-
-LX.ItemArray = ItemArray;
-
-/**
- * @class List
- * @description List Widget
- */
-
-class List extends Widget {
-
-    constructor( name, values, value, callback, options = {} ) {
-
-        super( Widget.LIST, name, value, options );
-
-        this.onGetValue = () => {
-            return value;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-            listContainer.querySelectorAll( '.lexlistitem' ).forEach( e => e.classList.remove( 'selected' ) );
-
-            let idx = null;
-            for( let i = 0; i < values.length; ++i )
-            {
-                const v = values[ i ];
-                if( v == newValue || ( ( v.constructor == Array ) && ( v[ 0 ] == newValue ) ) )
-                {
-                    idx = i;
-                    break;
-                }
-            }
-
-            if( !idx )
-            {
-                console.error( `Cannot find item ${ newValue } in List.` );
-                return;
-            }
-
-            listContainer.children[ idx ].classList.toggle( 'selected' );
-            value = newValue;
-
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( name, newValue, event ), callback );
-            }
-        };
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            listContainer.style.width = `calc( 100% - ${ realNameWidth })`;
-        };
-
-        this._updateValues = ( newValues ) => {
-
-            values = newValues;
-            listContainer.innerHTML = "";
-
-            for( let i = 0; i < values.length; ++i )
-            {
-                let icon = null;
-                let itemValue = values[ i ];
-
-                if( itemValue.constructor === Array )
-                {
-                    icon = itemValue[ 1 ];
-                    itemValue = itemValue[ 0 ];
-                }
-
-                let listElement = document.createElement( 'div' );
-                listElement.className = "lexlistitem" + ( value == itemValue ? " selected" : "" );
-
-                if( icon )
-                {
-                    listElement.appendChild( LX.makeIcon( icon ) );
-                }
-
-                listElement.innerHTML += `<span>${ itemValue }</span>`;
-
-                listElement.addEventListener( 'click', e => {
-                    listContainer.querySelectorAll( '.lexlistitem' ).forEach( e => e.classList.remove( 'selected' ) );
-                    listElement.classList.toggle( 'selected' );
-                    value = itemValue;
-                    this._trigger( new IEvent( name, itemValue, e ), callback );
-                });
-
-                listContainer.appendChild( listElement );
-            }
-        };
-
-        // Show list
-
-        let listContainer = document.createElement( 'div' );
-        listContainer.className = "lexlist";
-        this.root.appendChild( listContainer );
-
-        this._updateValues( values );
-
-        doAsync( this.onResize.bind( this ) );
-    }
-}
-
-LX.List = List;
-
-/**
- * @class Tags
- * @description Tags Widget
- */
-
-class Tags extends Widget {
-
-    constructor( name, value, callback, options = {} ) {
-
-        value = value.replace( /\s/g, '' ).split( ',' );
-
-        let defaultValue = [].concat( value );
-        super( Widget.TAGS, name, defaultValue, options );
-
-        this.onGetValue = () => {
-            return [].concat( value );
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-            value = [].concat( newValue );
-            this.generateTags( value );
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( name, value, event ), callback );
-            }
-        };
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            tagsContainer.style.width = `calc( 100% - ${ realNameWidth })`;
-        };
-
-        // Show tags
-
-        const tagsContainer = document.createElement('div');
-        tagsContainer.className = "lextags";
-        this.root.appendChild( tagsContainer );
-
-        this.generateTags = ( value ) => {
-
-            tagsContainer.innerHTML = "";
-
-            for( let i = 0; i < value.length; ++i )
-            {
-                const tagName = value[i];
-                const tag = document.createElement('span');
-                tag.className = "lextag";
-                tag.innerHTML = tagName;
-
-                const removeButton = LX.makeIcon( "X", { svgClass: "sm" } );
-                tag.appendChild( removeButton );
-
-                removeButton.addEventListener( 'click', e => {
-                    tag.remove();
-                    value.splice( value.indexOf( tagName ), 1 );
-                    this.set( value, false, e );
-                } );
-
-                tagsContainer.appendChild( tag );
-            }
-
-            let tagInput = document.createElement( 'input' );
-            tagInput.value = "";
-            tagInput.placeholder = "Add tag...";
-            tagsContainer.appendChild( tagInput );
-
-            tagInput.onkeydown = e => {
-                const val = tagInput.value.replace( /\s/g, '' );
-                if( e.key == ' ' || e.key == 'Enter' )
-                {
-                    e.preventDefault();
-                    if( !val.length || value.indexOf( val ) > -1 )
-                        return;
-                    value.push( val );
-                    this.set( value, false, e );
-                }
-            };
-
-            tagInput.focus();
-        }
-
-        this.generateTags( value );
-
-        doAsync( this.onResize.bind( this ) );
-    }
-}
-
-LX.Tags = Tags;
-
-/**
- * @class Checkbox
- * @description Checkbox Widget
- */
-
-class Checkbox extends Widget {
-
-    constructor( name, value, callback, options = {} ) {
-
-        if( !name && !options.label )
-        {
-            throw( "Set Widget Name or at least a label!" );
-        }
-
-        super( Widget.CHECKBOX, name, value, options );
-
-        this.onGetValue = () => {
-            return value;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-
-            if( newValue == value )
-            {
-                return;
-            }
-
-            checkbox.checked = value = newValue;
-
-            // Update suboptions menu
-            this.root.querySelector( ".lexcheckboxsubmenu" )?.toggleAttribute( 'hidden', !newValue );
-
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( name, newValue, event ), callback );
-            }
-        };
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
-        };
-
-        var container = document.createElement( "div" );
-        container.className = "lexcheckboxcont";
-        this.root.appendChild( container );
-
-        let checkbox = document.createElement( "input" );
-        checkbox.type = "checkbox";
-        checkbox.className = "lexcheckbox " + ( options.className ?? "primary" );
-        checkbox.checked = value;
-        checkbox.disabled = options.disabled ?? false;
-        container.appendChild( checkbox );
-
-        let valueName = document.createElement( "span" );
-        valueName.className = "checkboxtext";
-        valueName.innerHTML = options.label ?? "On";
-        container.appendChild( valueName );
-
-        checkbox.addEventListener( "change" , e => {
-            this.set( checkbox.checked, false, e );
-        });
-
-        if( options.suboptions )
-        {
-            let suboptions = document.createElement( "div" );
-            suboptions.className = "lexcheckboxsubmenu";
-            suboptions.toggleAttribute( "hidden", !checkbox.checked );
-
-            const suboptionsPanel = new Panel();
-            suboptionsPanel.queue( suboptions );
-            options.suboptions.call(this, suboptionsPanel);
-            suboptionsPanel.clearQueue();
-
-            this.root.appendChild( suboptions );
-        }
-
-        doAsync( this.onResize.bind( this ) );
-    }
-}
-
-LX.Checkbox = Checkbox;
-
-/**
- * @class Toggle
- * @description Toggle Widget
- */
-
-class Toggle extends Widget {
-
-    constructor( name, value, callback, options = {} ) {
-
-        if( !name && !options.label )
-        {
-            throw( "Set Widget Name or at least a label!" );
-        }
-
-        super( Widget.TOGGLE, name, value, options );
-
-        this.onGetValue = () => {
-            return toggle.checked;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-
-            if( newValue == value )
-            {
-                return;
-            }
-
-            toggle.checked = value = newValue;
-
-            // Update suboptions menu
-            this.root.querySelector( ".lextogglesubmenu" )?.toggleAttribute( 'hidden', !newValue );
-
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( name, newValue, event ), callback );
-            }
-        };
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
-        };
-
-        var container = document.createElement('div');
-        container.className = "lextogglecont";
-        this.root.appendChild( container );
-
-        let toggle = document.createElement('input');
-        toggle.type = "checkbox";
-        toggle.className = "lextoggle " + ( options.className ?? "" );
-        toggle.checked = value;
-        toggle.iValue = value;
-        toggle.disabled = options.disabled ?? false;
-        container.appendChild( toggle );
-
-        let valueName = document.createElement( 'span' );
-        valueName.className = "toggletext";
-        valueName.innerHTML = options.label ?? "On";
-        container.appendChild( valueName );
-
-        toggle.addEventListener( "change" , e => {
-            this.set( toggle.checked, false, e );
-        });
-
-        if( options.suboptions )
-        {
-            let suboptions = document.createElement('div');
-            suboptions.className = "lextogglesubmenu";
-            suboptions.toggleAttribute( 'hidden', !toggle.checked );
-
-            const suboptionsPanel = new Panel();
-            suboptionsPanel.queue( suboptions );
-            options.suboptions.call(this, suboptionsPanel);
-            suboptionsPanel.clearQueue();
-
-            this.root.appendChild( suboptions );
-        }
-
-        doAsync( this.onResize.bind( this ) );
-    }
-}
-
-LX.Toggle = Toggle;
-
-/**
- * @class RadioGroup
- * @description RadioGroup Widget
- */
-
-class RadioGroup extends Widget {
-
-    constructor( name, label, values, callback, options = {} ) {
-
-        super( Widget.RADIO, name, null, options );
-
-        let currentIndex = null;
-
-        this.onGetValue = () => {
-            const items = container.querySelectorAll( 'button' );
-            return currentIndex ? [ currentIndex, items[ currentIndex ] ] : undefined;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-
-            newValue = newValue[ 0 ] ?? newValue; // Allow getting index of { index, value } tupple
-
-            console.assert( newValue.constructor == Number, "RadioGroup _value_ must be an Array index!" );
-
-            const items = container.querySelectorAll( 'button' );
-            items.forEach( b => { b.checked = false; b.classList.remove( "checked" ) } );
-
-            const optionItem = items[ newValue ];
-            optionItem.checked = !optionItem.checked;
-            optionItem.classList.toggle( "checked" );
-
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( null, [ newValue, values[ newValue ] ], event ), callback );
-            }
-        };
-
-        var container = document.createElement( 'div' );
-        container.className = "lexradiogroup " + ( options.className ?? "" );
-        this.root.appendChild( container );
-
-        let labelSpan = document.createElement( 'span' );
-        labelSpan.innerHTML = label;
-        container.appendChild( labelSpan );
-
-        for( let i = 0; i < values.length; ++i )
-        {
-            const optionItem = document.createElement( 'div' );
-            optionItem.className = "lexradiogroupitem";
-            container.appendChild( optionItem );
-
-            const optionButton = document.createElement( 'button' );
-            optionButton.className = "flex p-0 rounded-lg cursor-pointer";
-            optionButton.disabled = options.disabled ?? false;
-            optionItem.appendChild( optionButton );
-
-            optionButton.addEventListener( "click", ( e ) => {
-                this.set( i, false, e );
-            } );
-
-            const checkedSpan = document.createElement( 'span' );
-            optionButton.appendChild( checkedSpan );
-
-            const optionLabel = document.createElement( 'span' );
-            optionLabel.innerHTML = values[ i ];
-            optionItem.appendChild( optionLabel );
-        }
-
-        if( options.selected )
-        {
-            console.assert( options.selected.constructor == Number, "RadioGroup _selected_ must be an Array index!" );
-            currentIndex = options.selected;
-            this.set( currentIndex, true );
-        }
-    }
-}
-
-LX.RadioGroup = RadioGroup;
-
-/**
- * @class ColorInput
- * @description ColorInput Widget
- */
-
-class ColorInput extends Widget {
-
-    constructor( name, value, callback, options = {} ) {
-
-        value = value ?? "#000000";
-
-        const useAlpha = options.useAlpha ??
-            ( ( value.constructor === Object && 'a' in value ) || ( value.constructor === String && [ 5, 9 ].includes( value.length ) ) );
-
-        const widgetColor = new Color( value );
-
-        // Force always hex internally
-        value = useAlpha ? widgetColor.hex : widgetColor.hex.substr( 0, 7 );
-
-        super( Widget.COLOR, name, value, options );
-
-        this.onGetValue = () => {
-            const currentColor = new Color( value );
-            return options.useRGB ? currentColor.rgb : value;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-
-            const newColor = new Color( newValue );
-
-            colorSampleRGB.style.color = value = newColor.hex.substr( 0, 7 );
-
-            if( useAlpha )
-            {
-                colorSampleAlpha.style.color = value = newColor.hex;
-            }
-
-            if( !this._skipTextUpdate )
-            {
-                textWidget.set( value, true, event );
-            }
-
-            if( !skipCallback )
-            {
-                let retValue = value;
-
-                if( options.useRGB )
-                {
-                    retValue = newColor.rgb;
-
-                    if( !useAlpha )
-                    {
-                        delete retValue.a;
-                    }
-                }
-
-                this._trigger( new IEvent( name, retValue, event ), callback );
-            }
-        };
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        };
-
-        var container = document.createElement( 'span' );
-        container.className = "lexcolor";
-        this.root.appendChild( container );
-
-        this.picker = new ColorPicker( value, {
-            colorModel: options.useRGB ? "RGB" : "Hex",
-            useAlpha,
-            onChange: ( color ) => {
-                this._fromColorPicker = true;
-                this.set( color.hex );
-                delete this._fromColorPicker;
-            }
-        } );
-
-        let sampleContainer = LX.makeContainer( ["18px", "18px"], "flex flex-row bg-contrast rounded overflow-hidden", "", container );
-        sampleContainer.tabIndex = "1";
-        sampleContainer.addEventListener( "click", e => {
-            if( ( options.disabled ?? false ) )
-            {
-                return;
-            }
-
-            this._popover = new Popover( sampleContainer, [ this.picker ] );
-        } );
-
-        let colorSampleRGB = document.createElement( 'div' );
-        colorSampleRGB.className = "lexcolorsample";
-        colorSampleRGB.style.color = value;
-        sampleContainer.appendChild( colorSampleRGB );
-
-        let colorSampleAlpha = null;
-
-        if( useAlpha )
-        {
-            colorSampleAlpha = document.createElement( 'div' );
-            colorSampleAlpha.className = "lexcolorsample";
-            colorSampleAlpha.style.color = value;
-            sampleContainer.appendChild( colorSampleAlpha );
-        }
-        else
-        {
-            colorSampleRGB.style.width = "18px";
-        }
-
-        const textWidget = new TextInput( null, value, v => {
-            this._skipTextUpdate = true;
-            this.set( v );
-            delete this._skipTextUpdate;
-        }, { width: "calc( 100% - 24px )", disabled: options.disabled });
-
-        textWidget.root.style.marginLeft = "6px";
-        container.appendChild( textWidget.root );
-
-        doAsync( this.onResize.bind( this ) );
-    }
-}
-
-LX.ColorInput = ColorInput;
-
-/**
- * @class RangeInput
- * @description RangeInput Widget
- */
-
-class RangeInput extends Widget {
-
-    constructor( name, value, callback, options = {} ) {
-
-        super( Widget.RANGE, name, value, options );
-
-        this.onGetValue = () => {
-            return value;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-
-            if( isNaN( newValue ) )
-            {
-                return;
-            }
-
-            slider.value = value = clamp( +newValue, +slider.min, +slider.max );
-
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( name, options.left ? ( ( +slider.max ) - value + ( +slider.min ) ) : value, event ), callback );
-            }
-        };
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
-        };
-
-        const container = document.createElement( 'div' );
-        container.className = "lexrange";
-        this.root.appendChild( container );
-
-        let slider = document.createElement( 'input' );
-        slider.className = "lexrangeslider " + ( options.className ?? "" );
-        slider.min = options.min ?? 0;
-        slider.max = options.max ?? 100;
-        slider.step = options.step ?? 1;
-        slider.type = "range";
-        slider.disabled = options.disabled ?? false;
-
-        if( value.constructor == Number )
-        {
-            value = clamp( value, +slider.min, +slider.max );
-        }
-
-        if( options.left )
-        {
-            value = ( ( +slider.max ) - value + ( +slider.min ) );
-        }
-
-        slider.value = value;
-        container.appendChild( slider );
-
-        if( options.left ?? false )
-        {
-            slider.classList.add( "left" );
-        }
-
-        if( !( options.fill ?? true ) )
-        {
-            slider.classList.add( "no-fill" );
-        }
-
-        slider.addEventListener( "input", e => {
-            this.set( e.target.valueAsNumber, false, e );
-        }, { passive: false });
-
-        slider.addEventListener( "mousedown", function( e ) {
-            if( options.onPress )
-            {
-                options.onPress.bind( slider )( e, slider );
-            }
-        }, false );
-
-        slider.addEventListener( "mouseup", function( e ) {
-            if( options.onRelease )
-            {
-                options.onRelease.bind( slider )( e, slider );
-            }
-        }, false );
-
-        // Method to change min, max, step parameters
-        this.setLimits = ( newMin, newMax, newStep ) => {
-            slider.min = newMin ?? slider.min;
-            slider.max = newMax ?? slider.max;
-            slider.step = newStep ?? slider.step;
-            Widget._dispatchEvent( slider, "input", true );
-        };
-
-        doAsync( this.onResize.bind( this ) );
-    }
-}
-
-LX.RangeInput = RangeInput;
-
-/**
- * @class NumberInput
- * @description NumberInput Widget
- */
-
-class NumberInput extends Widget {
-
-    constructor( name, value, callback, options = {} ) {
-
-        super( Widget.NUMBER, name, value, options );
-
-        this.onGetValue = () => {
-            return value;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-
-            if( isNaN( newValue ) )
-            {
-                return;
-            }
-
-            value = clamp( +newValue, +vecinput.min, +vecinput.max );
-            vecinput.value = value = round( value, options.precision );
-
-            // Update slider!
-            if( box.querySelector( ".lexinputslider" ) )
-            {
-                box.querySelector( ".lexinputslider" ).value = value;
-            }
-
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( name, value, event ), callback );
-            }
-        };
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
-        };
-
-        var container = document.createElement( 'div' );
-        container.className = "lexnumber";
-        this.root.appendChild( container );
-
-        let box = document.createElement( 'div' );
-        box.className = "numberbox";
-        container.appendChild( box );
-
-        let valueBox = LX.makeContainer( [ "auto", "100%" ], "relative flex flex-row cursor-text", "", box );
-
-        let vecinput = document.createElement( 'input' );
-        vecinput.id = "number_" + simple_guidGenerator();
-        vecinput.className = "vecinput";
-        vecinput.min = options.min ?? -1e24;
-        vecinput.max = options.max ?? 1e24;
-        vecinput.step = options.step ?? "any";
-        vecinput.type = "number";
-
-        if( value.constructor == Number )
-        {
-            value = clamp( value, +vecinput.min, +vecinput.max );
-            value = round( value, options.precision );
-        }
-
-        vecinput.value = vecinput.iValue = value;
-        valueBox.appendChild( vecinput );
-
-        const dragIcon = LX.makeIcon( "MoveVertical", { iconClass: "drag-icon hidden-opacity", svgClass: "sm" } );
-        valueBox.appendChild( dragIcon );
-
-        if( options.units )
-        {
-            let unitBox = LX.makeContainer( [ "auto", "auto" ], "px-2 bg-secondary content-center", options.units, valueBox );
-            vecinput.unitBox = unitBox;
-        }
-
-        if( options.disabled )
-        {
-            vecinput.disabled = true;
-        }
-
-        // Add slider below
-        if( !options.skipSlider && options.min !== undefined && options.max !== undefined )
-        {
-            let sliderBox = LX.makeContainer( [ "100%", "auto" ], "", "", box );
-            let slider = document.createElement( 'input' );
-            slider.className = "lexinputslider";
-            slider.min = options.min;
-            slider.max = options.max;
-            slider.step = options.step ?? 1;
-            slider.type = "range";
-            slider.value = value;
-
-            slider.addEventListener( "input", ( e ) => {
-                this.set( slider.valueAsNumber, false, e );
-            }, false );
-
-            slider.addEventListener( "mousedown", function( e ) {
-                if( options.onPress )
-                {
-                    options.onPress.bind( slider )( e, slider );
-                }
-            }, false );
-
-            slider.addEventListener( "mouseup", function( e ) {
-                if( options.onRelease )
-                {
-                    options.onRelease.bind( slider )( e, slider );
-                }
-            }, false );
-
-            sliderBox.appendChild( slider );
-
-            // Method to change min, max, step parameters
-            this.setLimits = ( newMin, newMax, newStep ) => {
-                vecinput.min = slider.min = newMin ?? vecinput.min;
-                vecinput.max = slider.max = newMax ?? vecinput.max;
-                vecinput.step = newStep ?? vecinput.step;
-                slider.step = newStep ?? slider.step;
-                this.set( value, true );
-            };
-        }
-
-        vecinput.addEventListener( "input", function( e ) {
-            value = +this.valueAsNumber;
-            value = round( value, options.precision );
-        }, false );
-
-        vecinput.addEventListener( "wheel", e => {
-            e.preventDefault();
-            if( vecinput !== document.activeElement )
-            {
-                return;
-            }
-            let mult = options.step ?? 1;
-            if( e.shiftKey ) mult *= 10;
-            else if( e.altKey ) mult *= 0.1;
-            value = ( +vecinput.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ) );
-            this.set( value, false, e );
-        }, { passive: false });
-
-        vecinput.addEventListener( "change", e => {
-            this.set( vecinput.valueAsNumber, false, e );
-        }, { passive: false });
-
-        // Add drag input
-
-        var that = this;
-
-        let innerMouseDown = e => {
-
-            if( ( document.activeElement == vecinput ) || ( e.button != LX.MOUSE_LEFT_CLICK ) )
-            {
-                return;
-            }
-
-            var doc = that.root.ownerDocument;
-            doc.addEventListener( 'mousemove', innerMouseMove );
-            doc.addEventListener( 'mouseup', innerMouseUp );
-            document.body.classList.add( 'noevents' );
-            dragIcon.classList.remove( 'hidden-opacity' );
-            e.stopImmediatePropagation();
-            e.stopPropagation();
-
-            if( !document.pointerLockElement )
-            {
-                valueBox.requestPointerLock();
-            }
-
-            if( options.onPress )
-            {
-                options.onPress.bind( vecinput )( e, vecinput );
-            }
-        }
-
-        let innerMouseMove = e => {
-
-            let dt = -e.movementY;
-
-            if ( dt != 0 )
-            {
-                let mult = options.step ?? 1;
-                if( e.shiftKey ) mult *= 10;
-                else if( e.altKey ) mult *= 0.1;
-                value = ( +vecinput.valueAsNumber + mult * dt );
-                this.set( value, false, e );
-            }
-
-            e.stopPropagation();
-            e.preventDefault();
-        }
-
-        let innerMouseUp = e => {
-
-            var doc = that.root.ownerDocument;
-            doc.removeEventListener( 'mousemove', innerMouseMove );
-            doc.removeEventListener( 'mouseup', innerMouseUp );
-            document.body.classList.remove( 'noevents' );
-            dragIcon.classList.add( 'hidden-opacity' );
-
-            if( document.pointerLockElement )
-            {
-                document.exitPointerLock();
-            }
-
-            if( options.onRelease )
-            {
-                options.onRelease.bind( vecinput )( e, vecinput );
-            }
-        }
-
-        valueBox.addEventListener( "mousedown", innerMouseDown );
-
-        doAsync( this.onResize.bind( this ) );
-    }
-}
-
-LX.NumberInput = NumberInput;
-
-/**
- * @class Vector
- * @description Vector Widget
- */
-
-class Vector extends Widget {
-
-    constructor( numComponents, name, value, callback, options = {} ) {
-
-        numComponents = clamp( numComponents, 2, 4 );
-        value = value ?? new Array( numComponents ).fill( 0 );
-
-        super( Widget.VECTOR, name, [].concat( value ), options );
-
-        this.onGetValue = () => {
-            let inputs = this.root.querySelectorAll( "input" );
-            let value = [];
-            for( var v of inputs )
-            {
-                value.push( +v.value );
-            }
-            return value;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-
-            if( vectorInputs.length != newValue.length )
-            {
-                console.error( "Input length does not match vector length." );
-                return;
-            }
-
-            for( let i = 0; i < vectorInputs.length; ++i )
-            {
-                let value = newValue[ i ];
-                value = clamp( value, +vectorInputs[ i ].min, +vectorInputs[ i ].max );
-                value = round( value, options.precision ) ?? 0;
-                vectorInputs[ i ].value = newValue[ i ] = value;
-            }
-
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( name, newValue, event ), callback );
-            }
-        };
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        };
-
-        const vectorInputs = [];
-
-        var container = document.createElement( 'div' );
-        container.className = "lexvector";
-        this.root.appendChild( container );
-
-        const that = this;
-
-        for( let i = 0; i < numComponents; ++i )
-        {
-            let box = document.createElement( 'div' );
-            box.className = "vecbox";
-            box.innerHTML = "<span class='" + Panel.VECTOR_COMPONENTS[ i ] + "'></span>";
-
-            let vecinput = document.createElement( 'input' );
-            vecinput.className = "vecinput v" + numComponents;
-            vecinput.min = options.min ?? -1e24;
-            vecinput.max = options.max ?? 1e24;
-            vecinput.step = options.step ?? "any";
-            vecinput.type = "number";
-            vecinput.id = "vec" + numComponents + "_" + simple_guidGenerator();
-            vecinput.idx = i;
-            vectorInputs[ i ] = vecinput;
-            box.appendChild( vecinput );
-
-            if( value[ i ].constructor == Number )
-            {
-                value[ i ] = clamp( value[ i ], +vecinput.min, +vecinput.max );
-                value[ i ] = round( value[ i ], options.precision );
-            }
-
-            vecinput.value = vecinput.iValue = value[ i ];
-
-            const dragIcon = LX.makeIcon( "MoveVertical", { iconClass: "drag-icon hidden-opacity", svgClass: "sm" } );
-            box.appendChild( dragIcon );
-
-            if( options.disabled )
-            {
-                vecinput.disabled = true;
-            }
-
-            // Add wheel input
-            vecinput.addEventListener( "wheel", function( e ) {
-                e.preventDefault();
-                if( this !== document.activeElement )
-                    return;
-                let mult = options.step ?? 1;
-                if( e.shiftKey ) mult = 10;
-                else if( e.altKey ) mult = 0.1;
-
-                if( lockerButton.locked )
-                {
-                    for( let v of that.querySelectorAll(".vecinput") )
-                    {
-                        v.value = round( +v.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ), options.precision );
-                        Widget._dispatchEvent( v, "change" );
-                    }
-                }
-                else
-                {
-                    this.value = round( +this.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ), options.precision );
-                    Widget._dispatchEvent( vecinput, "change" );
-                }
-            }, { passive: false } );
-
-            vecinput.addEventListener( "change", e => {
-
-                if( isNaN( e.target.value ) )
-                {
-                    return;
-                }
-
-                let val = clamp( e.target.value, +vecinput.min, +vecinput.max );
-                val = round( val, options.precision );
-
-                if( lockerButton.locked )
-                {
-                    for( let v of vectorInputs )
-                    {
-                        v.value = val;
-                        value[ v.idx ] = val;
-                    }
-                }
-                else
-                {
-                    vecinput.value = val;
-                    value[ e.target.idx ] = val;
-                }
-
-                this.set( value, false, e );
-            }, false );
-
-            // Add drag input
-
-            function innerMouseDown( e )
-            {
-                if( ( document.activeElement == vecinput ) || ( e.button != LX.MOUSE_LEFT_CLICK ) )
-                {
-                    return;
-                }
-
-                var doc = that.root.ownerDocument;
-                doc.addEventListener( 'mousemove', innerMouseMove );
-                doc.addEventListener( 'mouseup', innerMouseUp );
-                document.body.classList.add( 'noevents' );
-                dragIcon.classList.remove( 'hidden-opacity' );
-                e.stopImmediatePropagation();
-                e.stopPropagation();
-
-                if( !document.pointerLockElement )
-                {
-                    box.requestPointerLock();
-                }
-
-                if( options.onPress )
-                {
-                    options.onPress.bind( vecinput )( e, vecinput );
-                }
-            }
-
-            function innerMouseMove( e )
-            {
-                let dt = -e.movementY;
-
-                if ( dt != 0 )
-                {
-                    let mult = options.step ?? 1;
-                    if( e.shiftKey ) mult = 10;
-                    else if( e.altKey ) mult = 0.1;
-
-                    if( lockerButton.locked )
-                    {
-                        for( let v of that.root.querySelectorAll( ".vecinput" ) )
-                        {
-                            v.value = round( +v.valueAsNumber + mult * dt, options.precision );
-                            Widget._dispatchEvent( v, "change" );
-                        }
-                    }
-                    else
-                    {
-                        vecinput.value = round( +vecinput.valueAsNumber + mult * dt, options.precision );
-                        Widget._dispatchEvent( vecinput, "change" );
-                    }
-                }
-
-                e.stopPropagation();
-                e.preventDefault();
-            }
-
-            function innerMouseUp( e )
-            {
-                var doc = that.root.ownerDocument;
-                doc.removeEventListener( 'mousemove', innerMouseMove );
-                doc.removeEventListener( 'mouseup', innerMouseUp );
-                document.body.classList.remove( 'noevents' );
-                dragIcon.classList.add('hidden-opacity');
-
-                if( document.pointerLockElement )
-                {
-                    document.exitPointerLock();
-                }
-
-                if( options.onRelease )
-                {
-                    options.onRelease.bind( vecinput )( e, vecinput );
-                }
-            }
-
-            box.addEventListener( "mousedown", innerMouseDown );
-            container.appendChild( box );
-        }
-
-        // Method to change min, max, step parameters
-        if( options.min !== undefined || options.max !== undefined )
-        {
-            this.setLimits = ( newMin, newMax, newStep ) => {
-                for( let v of vectorInputs )
-                {
-                    v.min = newMin ?? v.min;
-                    v.max = newMax ?? v.max;
-                    v.step = newStep ?? v.step;
-                }
-
-                this.set( value, true );
-            };
-        }
-
-        const lockerButton = new Button( null, "", (swapValue) => {
-            lockerButton.locked = swapValue;
-        }, { title: "Lock", icon: "LockOpen", swap: "Lock", buttonClass: "bg-none p-0" } );
-        container.appendChild( lockerButton.root );
-
-        doAsync( this.onResize.bind( this ) );
-    }
-}
-
-LX.Vector = Vector;
-
-/**
- * @class SizeInput
- * @description SizeInput Widget
- */
-
-class SizeInput extends Widget {
-
-    constructor( name, value, callback, options = {} ) {
-
-        super( Widget.SIZE, name, value, options );
-
-        this.onGetValue = () => {
-            const value = [];
-            for( let i = 0; i < this.root.dimensions.length; ++i )
-            {
-                value.push( this.root.dimensions[ i ].value() );
-            }
-            return value;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-            for( let i = 0; i < this.root.dimensions.length; ++i )
-            {
-                this.root.dimensions[ i ].set( newValue[ i ], skipCallback );
-            }
-        };
-
-        this.root.aspectRatio = ( value.length == 2 ? value[ 0 ] / value[ 1 ] : null );
-        this.root.dimensions = [];
-
-        for( let i = 0; i < value.length; ++i )
-        {
-            const p = new Panel();
-            this.root.dimensions[ i ] = p.addNumber( null, value[ i ], ( v ) => {
-
-                const value = this.value();
-
-                if( this.root.locked )
-                {
-                    const ar = ( i == 0 ? 1.0 / this.root.aspectRatio : this.root.aspectRatio );
-                    const index = ( 1 + i ) % 2;
-                    value[ index ] = v * ar;
-                    this.root.dimensions[ index ].set( value[ index ], true );
-                }
-
-                if( callback )
-                {
-                    callback( value );
-                }
-
-            }, { min: 0, disabled: options.disabled, precision: options.precision, className: "flex-fill" } );
-
-            this.root.appendChild( this.root.dimensions[ i ].root );
-
-            if( ( i + 1 ) != value.length )
-            {
-                const xIcon = LX.makeIcon( "X", { svgClass: "fg-accent font-bold" } );
-                this.root.appendChild( xIcon );
-            }
-        }
-
-        if( options.units )
-        {
-            let unitSpan = document.createElement( 'span' );
-            unitSpan.className = "select-none fg-tertiary font-medium";
-            unitSpan.innerText = options.units;
-            this.root.appendChild( unitSpan );
-        }
-
-        // Lock aspect ratio
-        if( this.root.aspectRatio )
-        {
-            const lockerButton = new Button( null, "", (swapValue) => {
-                this.root.locked = swapValue;
-                if( swapValue )
-                {
-                    // Recompute ratio
-                    const value = this.value();
-                    this.root.aspectRatio = value[ 0 ] / value[ 1 ];
-                }
-            }, { title: "Lock Aspect Ratio", icon: "LockOpen", swap: "Lock", buttonClass: "bg-none p-0" } );
-            this.root.appendChild( lockerButton.root );
-        }
-    }
-}
-
-LX.SizeInput = SizeInput;
-
-/**
- * @class OTPInput
- * @description OTPInput Widget
- */
-
-class OTPInput extends Widget {
-
-    constructor( name, value, callback, options = {} ) {
-
-        const pattern = options.pattern ?? "xxx-xxx";
-        const patternSize = ( pattern.match(/x/g) || [] ).length;
-
-        value = String( value );
-        if( !value.length )
-        {
-            value = "x".repeat( patternSize );
-        }
-
-        super( Widget.OTP, name, value, options );
-
-        this.onGetValue = () => {
-            return +value;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-
-            value = newValue;
-
-            _refreshInput( value );
-
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( name, +newValue, event ), callback );
-            }
-        };
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        };
-
-        this.disabled = options.disabled ?? false;
-
-        const container = document.createElement( 'div' );
-        container.className = "lexotp flex flex-row items-center";
-        this.root.appendChild( container );
-
-        const groups = pattern.split( '-' );
-
-        const _refreshInput = ( valueString ) => {
-
-            container.innerHTML = "";
-
-            let itemsCount = 0;
-            let activeSlot = 0;
-
-            for( let i = 0; i < groups.length; ++i )
-            {
-                const g = groups[ i ];
-
-                for( let j = 0; j < g.length; ++j )
-                {
-                    let number = valueString[ itemsCount++ ];
-                    number = ( number == 'x' ? '' : number );
-
-                    const slotDom = LX.makeContainer( ["36px", "30px"],
-                        "lexotpslot border-top border-bottom border-left px-3 cursor-text select-none font-medium outline-none", number, container );
-                    slotDom.tabIndex = "1";
-
-                    if( this.disabled )
-                    {
-                        slotDom.classList.add( "disabled" );
-                    }
-
-                    const otpIndex = itemsCount;
-
-                    if( j == 0 )
-                    {
-                        slotDom.className += " rounded-l";
-                    }
-                    else if( j == ( g.length - 1 ) )
-                    {
-                        slotDom.className += " rounded-r border-right";
-                    }
-
-                    slotDom.addEventListener( "click", () => {
-                        if( this.disabled ) { return; }
-                        container.querySelectorAll( ".lexotpslot" ).forEach( s => s.classList.remove( "active" ) );
-                        const activeDom = container.querySelectorAll( ".lexotpslot" )[ activeSlot ];
-                        activeDom.classList.add( "active" );
-                        activeDom.focus();
-                    } );
-
-                    slotDom.addEventListener( "blur", () => {
-                        if( this.disabled ) { return; }
-                        doAsync( () => {
-                            if( container.contains( document.activeElement ) ) { return; }
-                            container.querySelectorAll( ".lexotpslot" ).forEach( s => s.classList.remove( "active" ) );
-                        }, 10 );
-                    } );
-
-                    slotDom.addEventListener( "keyup", e => {
-                        if( this.disabled ) { return; }
-                        if( !/[^0-9]+/g.test( e.key ) )
-                        {
-                            const number = e.key;
-                            console.assert( parseInt( number ) != NaN );
-
-                            slotDom.innerHTML = number;
-                            valueString = valueString.substring( 0, otpIndex - 1 ) + number + valueString.substring( otpIndex );
-
-                            const nexActiveDom = container.querySelectorAll( ".lexotpslot" )[ activeSlot + 1 ];
-                            if( nexActiveDom )
-                            {
-                                container.querySelectorAll( ".lexotpslot" )[ activeSlot ].classList.remove( "active" );
-                                nexActiveDom.classList.add( "active" );
-                                nexActiveDom.focus();
-                                activeSlot++;
-                            }
-                            else
-                            {
-                                this.set( valueString );
-                            }
-                        }
-                        else if( e.key == "ArrowLeft" || e.key == "ArrowRight" )
-                        {
-                            const dt = ( e.key == "ArrowLeft" ) ? -1 : 1;
-                            const newActiveDom = container.querySelectorAll( ".lexotpslot" )[ activeSlot + dt ];
-                            if( newActiveDom )
-                            {
-                                container.querySelectorAll( ".lexotpslot" )[ activeSlot ].classList.remove( "active" );
-                                newActiveDom.classList.add( "active" );
-                                newActiveDom.focus();
-                                activeSlot += dt;
-                            }
-                        }
-                        else if( e.key == "Enter" && !valueString.includes( 'x' ) )
-                        {
-                            this.set( valueString );
-                        }
-                    } );
-                }
-
-                if( i < ( groups.length - 1 ) )
-                {
-                    LX.makeContainer( ["auto", "auto"], "mx-2", `-`, container );
-                }
-            }
-
-            console.assert( itemsCount == valueString.length, "OTP Value/Pattern Mismatch!" )
-        }
-
-        _refreshInput( value );
-    }
-}
-
-LX.OTPInput = OTPInput;
-
-/**
- * @class Pad
- * @description Pad Widget
- */
-
-class Pad extends Widget {
-
-    constructor( name, value, callback, options = {} ) {
-
-        super( Widget.PAD, name, null, options );
-
-        this.onGetValue = () => {
-            return thumb.value.xy;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-            thumb.value.set( newValue[ 0 ], newValue[ 1 ] );
-            _updateValue( thumb.value );
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( name, thumb.value.xy ), callback );
-            }
-        };
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        };
-
-        var container = document.createElement( 'div' );
-        container.className = "lexpad";
-        this.root.appendChild( container );
-
-        let pad = document.createElement('div');
-        pad.id = "lexpad-" + name;
-        pad.className = "lexinnerpad";
-        pad.style.width = options.padSize ?? '96px';
-        pad.style.height = options.padSize ?? '96px';
-        container.appendChild( pad );
-
-        let thumb = document.createElement('div');
-        thumb.className = "lexpadthumb";
-        thumb.value = new LX.vec2( value[ 0 ], value[ 1 ] );
-        thumb.min = options.min ?? 0;
-        thumb.max = options.max ?? 1;
-        pad.appendChild( thumb );
-
-        let _updateValue = v => {
-            const [ w, h ] = [ pad.offsetWidth, pad.offsetHeight ];
-            const value0to1 = new LX.vec2( remapRange( v.x, thumb.min, thumb.max, 0.0, 1.0 ), remapRange( v.y, thumb.min, thumb.max, 0.0, 1.0 ) );
-            thumb.style.transform = `translate(calc( ${ w * value0to1.x }px - 50% ), calc( ${ h * value0to1.y }px - 50%)`;
-        }
-
-        pad.addEventListener( "mousedown", innerMouseDown );
-
-        let that = this;
-
-        function innerMouseDown( e )
-        {
-            if( document.activeElement == thumb )
-            {
-                return;
-            }
-
-            var doc = that.root.ownerDocument;
-            doc.addEventListener( 'mousemove', innerMouseMove );
-            doc.addEventListener( 'mouseup', innerMouseUp );
-            document.body.classList.add( 'nocursor' );
-            document.body.classList.add( 'noevents' );
-            e.stopImmediatePropagation();
-            e.stopPropagation();
-            thumb.classList.add( "active" );
-
-            if( options.onPress )
-            {
-                options.onPress.bind( thumb )( e, thumb );
-            }
-        }
-
-        function innerMouseMove( e )
-        {
-            const rect = pad.getBoundingClientRect();
-            const relativePosition = new LX.vec2( e.x - rect.x, e.y - rect.y );
-            relativePosition.clp( 0.0, pad.offsetWidth, relativePosition);
-            const [ w, h ] = [ pad.offsetWidth, pad.offsetHeight ];
-            const value0to1 = relativePosition.div( new LX.vec2( pad.offsetWidth, pad.offsetHeight ) );
-
-            thumb.style.transform = `translate(calc( ${ w * value0to1.x }px - 50% ), calc( ${ h * value0to1.y }px - 50%)`;
-            thumb.value = new LX.vec2( remapRange( value0to1.x, 0.0, 1.0, thumb.min, thumb.max ), remapRange( value0to1.y, 0.0, 1.0, thumb.min, thumb.max ) );
-
-            that._trigger( new IEvent( name, thumb.value.xy, e ), callback );
-
-            e.stopPropagation();
-            e.preventDefault();
-        }
-
-        function innerMouseUp( e )
-        {
-            var doc = that.root.ownerDocument;
-            doc.removeEventListener( 'mousemove', innerMouseMove );
-            doc.removeEventListener( 'mouseup', innerMouseUp );
-            document.body.classList.remove( 'nocursor' );
-            document.body.classList.remove( 'noevents' );
-            thumb.classList.remove( "active" );
-
-            if( options.onRelease )
-            {
-                options.onRelease.bind( thumb )( e, thumb );
-            }
-        }
-
-        doAsync( () => {
-            this.onResize();
-            _updateValue( thumb.value )
-        } );
-    }
-}
-
-LX.Pad = Pad;
-
-/**
- * @class Progress
- * @description Progress Widget
- */
-
-class Progress extends Widget {
-
-    constructor( name, value, options = {} ) {
-
-        super( Widget.PROGRESS, name, value, options );
-
-        this.onGetValue = () => {
-            return progress.value;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-            this.root.querySelector("meter").value = newValue;
-            _updateColor();
-            if( this.root.querySelector("span") )
-            {
-                this.root.querySelector("span").innerText = newValue;
-            }
-        };
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        };
-
-        const container = document.createElement('div');
-        container.className = "lexprogress";
-        this.root.appendChild( container );
-
-        // add slider (0-1 if not specified different )
-
-        let progress = document.createElement('meter');
-        progress.id = "lexprogressbar-" + name;
-        progress.className = "lexprogressbar";
-        progress.step = "any";
-        progress.min = options.min ?? 0;
-        progress.max = options.max ?? 1;
-        progress.low = options.low ?? progress.low;
-        progress.high = options.high ?? progress.high;
-        progress.optimum = options.optimum ?? progress.optimum;
-        progress.value = value;
-        container.appendChild( progress );
-
-        const _updateColor = () => {
-
-            let backgroundColor = LX.getThemeColor( "global-selected" );
-
-            if( progress.low != undefined && progress.value < progress.low )
-            {
-                backgroundColor = LX.getThemeColor( "global-color-error" );
-            }
-            else if( progress.high != undefined && progress.value < progress.high )
-            {
-                backgroundColor = LX.getThemeColor( "global-color-warning" );
-            }
-
-            progress.style.background = `color-mix(in srgb, ${backgroundColor} 20%, transparent)`;
-        };
-
-        if( options.showValue )
-        {
-            if( document.getElementById('progressvalue-' + name ) )
-            {
-                document.getElementById('progressvalue-' + name ).remove();
-            }
-
-            let span = document.createElement("span");
-            span.id = "progressvalue-" + name;
-            span.style.padding = "0px 5px";
-            span.innerText = value;
-            container.appendChild( span );
-        }
-
-        if( options.editable ?? false )
-        {
-            progress.classList.add( "editable" );
-
-            let innerMouseDown = e => {
-
-                var doc = this.root.ownerDocument;
-                doc.addEventListener( 'mousemove', innerMouseMove );
-                doc.addEventListener( 'mouseup', innerMouseUp );
-                document.body.classList.add( 'noevents' );
-                progress.classList.add( "grabbing" );
-                e.stopImmediatePropagation();
-                e.stopPropagation();
-
-                const rect = progress.getBoundingClientRect();
-                const newValue = round( remapRange( e.offsetX, 0, rect.width, progress.min, progress.max ) );
-                this.set( newValue, false, e );
-            }
-
-            let innerMouseMove = e => {
-
-                let dt = e.movementX;
-
-                if ( dt != 0 )
-                {
-                    const rect = progress.getBoundingClientRect();
-                    const newValue = round( remapRange( e.offsetX - rect.x, 0, rect.width, progress.min, progress.max ) );
-                    this.set( newValue, false, e );
-
-                    if( options.callback )
-                    {
-                        options.callback( newValue, e );
-                    }
-                }
-
-                e.stopPropagation();
-                e.preventDefault();
-            }
-
-            let innerMouseUp = e => {
-
-                var doc = this.root.ownerDocument;
-                doc.removeEventListener( 'mousemove', innerMouseMove );
-                doc.removeEventListener( 'mouseup', innerMouseUp );
-                document.body.classList.remove( 'noevents' );
-                progress.classList.remove( "grabbing" );
-            }
-
-            progress.addEventListener( "mousedown", innerMouseDown );
-        }
-
-        _updateColor();
-
-        doAsync( this.onResize.bind( this ) );
-    }
-}
-
-LX.Progress = Progress;
-
-/**
- * @class FileInput
- * @description FileInput Widget
- */
-
-class FileInput extends Widget {
-
-    constructor( name, callback, options = { } ) {
-
-        super( Widget.FILE, name, null, options );
-
-        let local = options.local ?? true;
-        let type = options.type ?? 'text';
-        let read = options.read ?? true;
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            input.style.width = `calc( 100% - ${ realNameWidth })`;
-        };
-
-        // Create hidden input
-        let input = document.createElement( 'input' );
-        input.className = "lexfileinput";
-        input.type = 'file';
-        input.disabled = options.disabled ?? false;
-        this.root.appendChild( input );
-
-        if( options.placeholder )
-        {
-            input.placeholder = options.placeholder;
-        }
-
-        input.addEventListener( 'change', function( e ) {
-
-            const files = e.target.files;
-            if( !files.length ) return;
-            if( read )
-            {
-                if( options.onBeforeRead )
-                    options.onBeforeRead();
-
-                const reader = new FileReader();
-
-                if( type === 'text' ) reader.readAsText( files[ 0 ] );
-                else if( type === 'buffer' ) reader.readAsArrayBuffer( files[ 0 ] );
-                else if( type === 'bin' ) reader.readAsBinaryString( files[ 0 ] );
-                else if( type === 'url' ) reader.readAsDataURL( files[ 0 ] );
-
-                reader.onload = e => { callback.call( this, e.target.result, files[ 0 ] ) } ;
-            }
-            else
-                callback( files[ 0 ] );
-        });
-
-        input.addEventListener( 'cancel', function( e ) {
-            callback( null );
-        });
-
-        if( local )
-        {
-            let settingsDialog = null;
-
-            const settingButton = new Button(null, "", () => {
-
-                if( settingsDialog )
-                {
-                    return;
-                }
-
-                settingsDialog = new Dialog( "Load Settings", p => {
-                    p.addSelect( "Type", [ 'text', 'buffer', 'bin', 'url' ], type, v => { type = v } );
-                    p.addButton( null, "Reload", v => { input.dispatchEvent( new Event( 'change' ) ) } );
-                }, { onclose: ( root ) => { root.remove(); settingsDialog = null; } } );
-
-            }, { skipInlineCount: true, title: "Settings", disabled: options.disabled, icon: "Settings" });
-
-            this.root.appendChild( settingButton.root );
-        }
-
-        doAsync( this.onResize.bind( this ) );
-    }
-}
-
-LX.FileInput = FileInput;
-
-/**
- * @class Tree
- * @description Tree Widget
- */
-
-class Tree extends Widget {
-
-    constructor( name, data, options = {} ) {
-
-        options.hideName = true;
-
-        super( Widget.TREE, name, null, options );
-
-        let container = document.createElement('div');
-        container.className = "lextree";
-        this.root.appendChild( container );
-
-        if( name )
-        {
-            let title = document.createElement('span');
-            title.innerHTML = name;
-            container.appendChild( title );
-        }
-
-        let toolsDiv = document.createElement('div');
-        toolsDiv.className = "lextreetools";
-        if( !name )
-        {
-            toolsDiv.className += " notitle";
-        }
-
-        // Tree icons
-        if( options.icons )
-        {
-            for( let data of options.icons )
-            {
-                const iconEl = LX.makeIcon( data.icon, { title: data.name } );
-                iconEl.addEventListener( "click", data.callback );
-                toolsDiv.appendChild( iconEl );
-            }
-        }
-
-        // Node filter
-
-        options.filter = options.filter ?? true;
-
-        let nodeFilterInput = null;
-        if( options.filter )
-        {
-            nodeFilterInput = document.createElement( "input" );
-            nodeFilterInput.className = "lexnodetreefilter";
-            nodeFilterInput.setAttribute("placeholder", "Filter..");
-            nodeFilterInput.style.width =  "100%";
-            nodeFilterInput.addEventListener('input', () => {
-                this.innerTree.refresh();
-            });
-
-            let searchIcon = LX.makeIcon( "Search" );
-            toolsDiv.appendChild( nodeFilterInput );
-            toolsDiv.appendChild( searchIcon );
-        }
-
-        if( options.icons || options.filter )
-        {
-            container.appendChild( toolsDiv );
-        }
-
-        // Tree
-
-        let list = document.createElement('ul');
-        list.addEventListener("contextmenu", function( e ) {
-            e.preventDefault();
-        });
-
-        container.appendChild( list );
-
-        this.innerTree = new NodeTree( container, data, options );
-    }
-}
-
-LX.Tree = Tree;
-
-/**
- * @class TabSections
- * @description TabSections Widget
- */
-
-class TabSections extends Widget {
-
-    constructor( name, tabs, options = {} ) {
-
-        options.hideName = true;
-
-        super( Widget.TABS, name, null, options );
-
-        if( tabs.constructor != Array )
-        {
-            throw( "Param @tabs must be an Array!" );
-        }
-
-        const vertical = options.vertical ?? true;
-        const showNames = !vertical && ( options.showNames ?? false );
-
-        let container = document.createElement( 'div' );
-        container.className = "lextabscontainer";
-        if( !vertical )
-        {
-            container.className += " horizontal";
-        }
-
-        let tabContainer = document.createElement( "div" );
-        tabContainer.className = "tabs";
-        container.appendChild( tabContainer );
-        this.root.appendChild( container );
-
-        for( let i = 0; i < tabs.length; ++i )
-        {
-            const tab = tabs[ i ];
-            console.assert( tab.name );
-            const isSelected = ( i == 0 );
-            let tabEl = document.createElement( "div" );
-            tabEl.className = "lextab " + (i == tabs.length - 1 ? "last" : "") + ( isSelected ? "selected" : "" );
-            tabEl.innerHTML = ( showNames ? tab.name : "" );
-            tabEl.appendChild( LX.makeIcon( tab.icon ?? "Hash", { title: tab.name } ) );
-
-            let infoContainer = document.createElement( "div" );
-            infoContainer.id = tab.name.replace( /\s/g, '' );
-            infoContainer.className = "widgets";
-
-            if( !isSelected )
-            {
-                infoContainer.toggleAttribute( "hidden", true );
-            }
-
-            container.appendChild( infoContainer );
-
-            tabEl.addEventListener( "click", e => {
-                // Change selected tab
-                tabContainer.querySelectorAll( ".lextab" ).forEach( e => { e.classList.remove( "selected" ); } );
-                tabEl.classList.add( "selected" );
-                // Hide all tabs content
-                container.querySelectorAll(".widgets").forEach( e => { e.toggleAttribute( "hidden", true ); } );
-                // Show tab content
-                const el = container.querySelector( '#' + infoContainer.id );
-                el.toggleAttribute( "hidden" );
-
-                if( tab.onSelect )
-                {
-                    tab.onSelect( this, infoContainer );
-                }
-            });
-
-            tabContainer.appendChild( tabEl );
-
-            if( tab.onCreate )
-            {
-                // Push to tab space
-                const creationPanel = new Panel();
-                creationPanel.queue( infoContainer );
-                tab.onCreate.call(this, creationPanel);
-                creationPanel.clearQueue();
-            }
-        }
-    }
-}
-
-LX.TabSections = TabSections;
-
-/**
- * @class Counter
- * @description Counter Widget
- */
-
-class Counter extends Widget {
-
-    constructor( name, value, callback, options = { } ) {
-
-        super( Widget.COUNTER, name, value, options );
-
-        this.onGetValue = () => {
-            return counterText.count;
-        };
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-            newValue = clamp( newValue, min, max );
-            counterText.count = newValue;
-            counterText.innerHTML = newValue;
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( name, newValue, event ), callback );
-            }
-        };
-
-        const min = options.min ?? 0;
-        const max = options.max ?? 100;
-        const step = options.step ?? 1;
-
-        const container = document.createElement( 'div' );
-        container.className = "lexcounter";
-        this.root.appendChild( container );
-
-        const substrButton = new Button(null, "", ( value, e ) => {
-            let mult = step ?? 1;
-            if( e.shiftKey ) mult *= 10;
-            this.set( counterText.count - mult, false, e );
-        }, { skipInlineCount: true, title: "Minus", icon: "Minus" });
-
-        container.appendChild( substrButton.root );
-
-        const containerBox = document.createElement( 'div' );
-        containerBox.className = "lexcounterbox";
-        container.appendChild( containerBox );
-
-        const counterText = document.createElement( 'span' );
-        counterText.className = "lexcountervalue";
-        counterText.innerHTML = value;
-        counterText.count = value;
-        containerBox.appendChild( counterText );
-
-        if( options.label )
-        {
-            const counterLabel = document.createElement( 'span' );
-            counterLabel.className = "lexcounterlabel";
-            counterLabel.innerHTML = options.label;
-            containerBox.appendChild( counterLabel );
-        }
-
-        const addButton = new Button(null, "", ( value, e ) => {
-            let mult = step ?? 1;
-            if( e.shiftKey ) mult *= 10;
-            this.set( counterText.count + mult, false, e );
-        }, { skipInlineCount: true, title: "Plus", icon: "Plus" });
-        container.appendChild( addButton.root );
-    }
-}
-
-LX.Counter = Counter;
-
-/**
- * @class Table
- * @description Table Widget
- */
-
-class Table extends Widget {
-
-    constructor( name, data, options = { } ) {
-
-        if( !data )
-        {
-            throw( "Data is needed to create a table!" );
-        }
-
-        super( Widget.TABLE, name, null, options );
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        };
-
-        const container = document.createElement('div');
-        container.className = "lextable";
-        this.root.appendChild( container );
-
-        this.centered = options.centered ?? false;
-        if( this.centered === true )
-        {
-            container.classList.add( "centered" );
-        }
-
-        this.filter = options.filter ?? false;
-        this.toggleColumns = options.toggleColumns ?? false;
-        this.customFilters = options.customFilters ?? false;
-        this.activeCustomFilters = {};
-        this._currentFilter = options.filterValue;
-
-        data.head = data.head ?? [];
-        data.body = data.body ?? [];
-        data.checkMap = { };
-        data.colVisibilityMap = { };
-        data.head.forEach( (col, index) => { data.colVisibilityMap[ index ] = true; })
-
-        const compareFn = ( idx, order, a, b) => {
-            if (a[idx] < b[idx]) return -order;
-            else if (a[idx] > b[idx]) return order;
-            return 0;
-        }
-
-        const sortFn = ( idx, sign ) => {
-            data.body = data.body.sort( compareFn.bind( this, idx, sign ) );
-            this.refresh();
-        }
-
-        // Append header
-        if( this.filter || this.customFilters || this.toggleColumns )
-        {
-            const headerContainer = LX.makeContainer( [ "100%", "auto" ], "flex flex-row" );
-
-            if( this.filter )
-            {
-                const filterOptions = LX.deepCopy( options );
-                filterOptions.placeholder = `Filter ${ this.filter }...`;
-                filterOptions.skipWidget = true;
-                filterOptions.trigger = "input";
-                filterOptions.inputClass = "outline";
-
-                let filter = new TextInput(null, this._currentFilter ?? "", ( v ) => {
-                    this._currentFilter = v;
-                    this.refresh();
-                }, filterOptions );
-
-                headerContainer.appendChild( filter.root );
-            }
-
-            if( this.customFilters )
-            {
-                const icon = LX.makeIcon( "CirclePlus", { svgClass: "sm" } );
-                const separatorHtml = `<div class="lexcontainer border-right self-center mx-1" style="width: 1px; height: 70%;"></div>`;
-
-                for( let f of this.customFilters )
-                {
-                    f.widget = new Button(null, icon.innerHTML + f.name, ( v ) => {
-
-                        const spanName = f.widget.root.querySelector( "span" );
-
-                        if( f.options )
-                        {
-                            const menuOptions = f.options.map( ( colName, idx ) => {
-                                const item = {
-                                    name: colName,
-                                    checked:  !!this.activeCustomFilters[ colName ],
-                                    callback: (key, v, dom) => {
-                                        if( v ) { this.activeCustomFilters[ key ] = f.name; }
-                                        else {
-                                            delete this.activeCustomFilters[ key ];
-                                        }
-                                        const activeFilters = Object.keys( this.activeCustomFilters ).filter(  k => this.activeCustomFilters[ k ] == f.name );
-                                        const filterBadgesHtml = activeFilters.reduce( ( acc, key ) => acc += LX.badge( key, "bg-tertiary text-sm" ), "" );
-                                        spanName.innerHTML = icon.innerHTML + f.name + ( activeFilters.length ? separatorHtml : "" ) + filterBadgesHtml;
-                                        this.refresh();
-                                    }
-                                }
-                                return item;
-                            } );
-                            new DropdownMenu( f.widget.root, menuOptions, { side: "bottom", align: "start" });
-                        }
-                        else if( f.type == "range" )
-                        {
-                            console.assert( f.min != undefined && f.max != undefined, "Range filter needs min and max values!" );
-                            const container = LX.makeContainer( ["240px", "auto"], "border bg-primary rounded-lg text-md" );
-                            const panel = new Panel();
-                            LX.makeContainer( ["100%", "auto"], "px-3 p-2 pb-0 text-md font-medium", f.name, container );
-
-                            f.start = f.start ?? f.min;
-                            f.end = f.end ?? f.max;
-
-                            panel.refresh = () => {
-                                panel.clear();
-                                panel.sameLine( 2, "justify-center" );
-                                panel.addNumber( null, f.start, (v) => {
-                                    f.start = v;
-                                    const inUse = ( f.start != f.min || f.end != f.max );
-                                    spanName.innerHTML = icon.innerHTML + f.name + ( inUse ? separatorHtml + LX.badge( `${ f.start } - ${ f.end } ${ f.units ?? "" }`, "bg-tertiary text-sm" ) : "" );
-                                    this.refresh();
-                                }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
-                                panel.addNumber( null, f.end, (v) => {
-                                    f.end = v;
-                                    const inUse = ( f.start != f.min || f.end != f.max );
-                                    spanName.innerHTML = icon.innerHTML + f.name + ( inUse ? separatorHtml + LX.badge( `${ f.start } - ${ f.end } ${ f.units ?? "" }`, "bg-tertiary text-sm" ) : "" );
-                                    this.refresh();
-                                }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
-                                panel.addButton( null, "Reset", () => {
-                                    f.start = f.min;
-                                    f.end = f.max;
-                                    spanName.innerHTML = icon.innerHTML + f.name;
-                                    panel.refresh();
-                                    this.refresh();
-                                }, { buttonClass: "contrast" } );
-                            }
-                            panel.refresh();
-                            container.appendChild( panel.root );
-                            new Popover( f.widget.root, [ container ], { side: "bottom" } );
-                        }
-
-                    }, { buttonClass: "px-2 primary dashed" } );
-                    headerContainer.appendChild( f.widget.root );
-                }
-
-                this._resetCustomFiltersBtn = new Button(null, "resetButton", ( v ) => {
-                    this.activeCustomFilters = {};
-                    this._resetCustomFiltersBtn.root.classList.add( "hidden" );
-                    for( let f of this.customFilters )
-                    {
-                        f.widget.root.querySelector( "span" ).innerHTML = ( icon.innerHTML + f.name );
-                        if( f.type == "range" )
-                        {
-                            f.start = f.min;
-                            f.end = f.max;
-                        }
-                    }
-                    this.refresh();
-                }, { title: "Reset filters", icon: "X" } );
-                headerContainer.appendChild( this._resetCustomFiltersBtn.root );
-                this._resetCustomFiltersBtn.root.classList.add( "hidden" );
-            }
-
-            if( this.toggleColumns )
-            {
-                const icon = LX.makeIcon( "Settings2" );
-                const toggleColumnsBtn = new Button( "toggleColumnsBtn", icon.innerHTML + "View", (value, e) => {
-                    const menuOptions = data.head.map( ( colName, idx ) => {
-                        const item = {
-                            name: colName,
-                            icon: "Check",
-                            callback: () => {
-                                data.colVisibilityMap[ idx ] = !data.colVisibilityMap[ idx ];
-                                const cells = table.querySelectorAll(`tr > *:nth-child(${idx + this.rowOffsetCount + 1})`);
-                                cells.forEach(cell => {
-                                    cell.style.display = (cell.style.display === "none") ? "" : "none";
-                                });
-                            }
-                        }
-                        if( !data.colVisibilityMap[ idx ] ) delete item.icon;
-                        return item;
-                    } );
-                    new DropdownMenu( e.target, menuOptions, { side: "bottom", align: "end" });
-                }, { hideName: true } );
-                headerContainer.appendChild( toggleColumnsBtn.root );
-                toggleColumnsBtn.root.style.marginLeft = "auto";
-            }
-
-            container.appendChild( headerContainer );
-        }
-
-        const table = document.createElement( 'table' );
-        container.appendChild( table );
-
-        this.refresh = () => {
-
-            this._currentFilter = this._currentFilter ?? "";
-
-            table.innerHTML = "";
-
-            this.rowOffsetCount = 0;
-
-            // Head
-            {
-                const head = document.createElement( 'thead' );
-                head.className = "lextablehead";
-                table.appendChild( head );
-
-                const hrow = document.createElement( 'tr' );
-
-                if( options.sortable ?? false )
-                {
-                    const th = document.createElement( 'th' );
-                    th.style.width = "0px";
-                    hrow.appendChild( th );
-                    this.rowOffsetCount++;
-                }
-
-                if( options.selectable ?? false )
-                {
-                    const th = document.createElement( 'th' );
-                    th.style.width = "0px";
-                    const input = document.createElement( 'input' );
-                    input.type = "checkbox";
-                    input.className = "lexcheckbox accent";
-                    input.checked = data.checkMap[ ":root" ] ?? false;
-                    th.appendChild( input );
-
-                    input.addEventListener( 'change', function() {
-
-                        data.checkMap[ ":root" ] = this.checked;
-
-                        const body = table.querySelector( "tbody" );
-                        for( const el of body.childNodes )
-                        {
-                            data.checkMap[ el.getAttribute( "rowId" ) ] = this.checked;
-                            el.querySelector( "input[type='checkbox']" ).checked = this.checked;
-                        }
-                    });
-
-                    this.rowOffsetCount++;
-                    hrow.appendChild( th );
-                }
-
-                for( const headData of data.head )
-                {
-                    const th = document.createElement( 'th' );
-                    th.innerHTML = `<span>${ headData }</span>`;
-                    th.querySelector( "span" ).appendChild( LX.makeIcon( "MenuArrows", { svgClass: "sm" } ) );
-
-                    const idx = data.head.indexOf( headData );
-                    if( this.centered && this.centered.indexOf( idx ) > -1 )
-                    {
-                        th.classList.add( "centered" );
-                    }
-
-                    const menuOptions = [
-                        { name: "Asc", icon: "ArrowUpAZ", callback: sortFn.bind( this, idx, 1 ) },
-                        { name: "Desc", icon: "ArrowDownAZ", callback: sortFn.bind( this, idx, -1 ) }
-                    ];
-
-                    if( this.toggleColumns )
-                    {
-                        menuOptions.push(
-                            null,
-                            {
-                                name: "Hide", icon: "EyeOff", callback: () => {
-                                    data.colVisibilityMap[ idx ] = false;
-                                    const cells = table.querySelectorAll(`tr > *:nth-child(${idx + this.rowOffsetCount + 1})`);
-                                    cells.forEach(cell => {
-                                        cell.style.display = (cell.style.display === "none") ? "" : "none";
-                                    });
-                                }
-                            }
-                        );
-                    }
-
-                    th.addEventListener( 'click', event => {
-                        new DropdownMenu( event.target, menuOptions, { side: "bottom", align: "start" });
-                    });
-
-                    hrow.appendChild( th );
-                }
-
-                // Add empty header column
-                if( options.rowActions )
-                {
-                    const th = document.createElement( 'th' );
-                    th.className = "sm";
-                    hrow.appendChild( th );
-                }
-
-                head.appendChild( hrow );
-            }
-
-            // Body
-            {
-                const body = document.createElement( 'tbody' );
-                body.className = "lextablebody";
-                table.appendChild( body );
-
-                let rIdx = null;
-                let eventCatched = false;
-                let movePending = null;
-
-                document.addEventListener( 'mouseup', (e) => {
-                    if( !rIdx ) return;
-                    document.removeEventListener( "mousemove", onMove );
-                    const fromRow = table.rows[ rIdx ];
-                    fromRow.dY = 0;
-                    fromRow.classList.remove( "dragging" );
-                    Array.from( table.rows ).forEach( v => {
-                        v.style.transform = ``;
-                        v.style.transition = `none`;
-                    } );
-                    flushCss( fromRow );
-
-                    if( movePending )
-                    {
-                        // Modify inner data first
-                        const fromIdx = rIdx - 1;
-                        const targetIdx = movePending[ 1 ] - 1;
-                        var b = data.body[fromIdx];
-                        data.body[fromIdx] = data.body[targetIdx];
-                        data.body[targetIdx] = b;
-
-                        const parent = movePending[ 0 ].parentNode;
-                        parent.insertChildAtIndex(  movePending[ 0 ],  movePending[ 1 ] );
-                        movePending = null;
-                    }
-
-                    rIdx = null;
-
-                    doAsync( () => {
-                        Array.from( table.rows ).forEach( v => {
-                            v.style.transition = `transform 0.2s ease-in`;
-                        } );
-                    } )
-                } );
-
-                let onMove = ( e ) => {
-                    if( !rIdx ) return;
-                    const fromRow = table.rows[ rIdx ];
-                    fromRow.dY = fromRow.dY ?? 0;
-                    fromRow.dY += e.movementY;
-                    fromRow.style.transform = `translateY(${fromRow.dY}px)`;
-                };
-
-                for( let r = 0; r < data.body.length; ++r )
-                {
-                    const bodyData = data.body[ r ];
-
-                    if( this.filter )
-                    {
-                        const filterColIndex = data.head.indexOf( this.filter );
-                        if( filterColIndex > -1 )
-                        {
-                            const validRowValue = stripHTML( bodyData[ filterColIndex ] ).toLowerCase();
-                            if( !validRowValue.includes( this._currentFilter.toLowerCase() ) )
-                            {
-                                continue;
-                            }
-                        }
-                    }
-
-                    if( Object.keys( this.activeCustomFilters ).length )
-                    {
-                        let acfMap = {};
-
-                        this._resetCustomFiltersBtn.root.classList.remove( "hidden" );
-
-                        for( let acfValue in this.activeCustomFilters )
-                        {
-                            const acfName = this.activeCustomFilters[ acfValue ];
-                            acfMap[ acfName ] = acfMap[ acfName ] ?? false;
-
-                            const filterColIndex = data.head.indexOf( acfName );
-                            if( filterColIndex > -1 )
-                            {
-                                acfMap[ acfName ] |= ( bodyData[ filterColIndex ] === acfValue );
-                            }
-                        }
-
-                        const show = Object.values( acfMap ).reduce( ( e, acc ) => acc *= e );
-                        if( !show )
-                        {
-                            continue;
-                        }
-                    }
-
-                    // Check range/date filters
-                    if( this.customFilters )
-                    {
-                        let acfMap = {};
-
-                        for( let f of this.customFilters )
-                        {
-                            const acfName = f.name;
-
-                            if( f.type == "range" )
-                            {
-                                acfMap[ acfName ] = acfMap[ acfName ] ?? false;
-
-                                const filterColIndex = data.head.indexOf( acfName );
-                                if( filterColIndex > -1 )
-                                {
-                                    const validRowValue = parseFloat( bodyData[ filterColIndex ] );
-                                    const min = f.start ?? f.min;
-                                    const max = f.end ?? f.max;
-                                    acfMap[ acfName ] |= ( validRowValue >= min ) && ( validRowValue <= max );
-                                }
-                            }
-                            else if( f.type == "date" )
-                            {
-                                // TODO
-                            }
-                        }
-
-                        const show = Object.values( acfMap ).reduce( ( e, acc ) => acc *= e );
-                        if( !show )
-                        {
-                            continue;
-                        }
-                    }
-
-                    const row = document.createElement( 'tr' );
-                    const rowId = LX.getSupportedDOMName( bodyData.join( '-' ) );
-                    row.setAttribute( "rowId", rowId.substr(0, 32) );
-
-                    if( options.sortable ?? false )
-                    {
-                        const td = document.createElement( 'td' );
-                        td.style.width = "0px";
-                        const icon = LX.makeIcon( "GripVertical" );
-                        td.appendChild( icon );
-
-                        icon.draggable = true;
-
-                        icon.addEventListener("dragstart", (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            e.stopImmediatePropagation();
-
-                            rIdx = row.rowIndex;
-                            row.classList.add( "dragging" );
-
-                            document.addEventListener( "mousemove", onMove );
-                        }, false );
-
-                        row.addEventListener("mouseenter", function(e) {
-                            e.preventDefault();
-
-                            if( rIdx && ( this.rowIndex != rIdx ) && ( eventCatched != this.rowIndex ) )
-                            {
-                                eventCatched = this.rowIndex;
-                                const fromRow = table.rows[ rIdx ];
-                                const undo = ( this.style.transform != `` );
-                                if (this.rowIndex > rIdx) {
-                                    movePending = [ fromRow, undo ? (this.rowIndex-1) : this.rowIndex ];
-                                    this.style.transform = undo ? `` : `translateY(-${this.offsetHeight}px)`;
-                                } else {
-                                    movePending = [ fromRow, undo ? (this.rowIndex) : (this.rowIndex-1) ];
-                                    this.style.transform = undo ? `` : `translateY(${this.offsetHeight}px)`;
-                                }
-                                doAsync( () => {
-                                    eventCatched = false;
-                                } )
-                            }
-                        });
-
-                        row.appendChild( td );
-                    }
-
-                    if( options.selectable ?? false )
-                    {
-                        const td = document.createElement( 'td' );
-                        const input = document.createElement( 'input' );
-                        input.type = "checkbox";
-                        input.className = "lexcheckbox accent";
-                        input.checked = data.checkMap[ rowId ];
-                        td.appendChild( input );
-
-                        input.addEventListener( 'change', function() {
-                            data.checkMap[ rowId ] = this.checked;
-
-                            const headInput = table.querySelector( "thead input[type='checkbox']" );
-
-                            if( !this.checked )
-                            {
-                                headInput.checked = data.checkMap[ ":root" ] = false;
-                            }
-                            else
-                            {
-                                const rowInputs = Array.from( table.querySelectorAll( "tbody input[type='checkbox']" ) );
-                                const uncheckedRowInputs = rowInputs.filter( i => { return !i.checked; } );
-                                if( !uncheckedRowInputs.length )
-                                {
-                                    headInput.checked = data.checkMap[ ":root" ] = true;
-                                }
-                            }
-                        });
-
-                        row.appendChild( td );
-                    }
-
-                    for( const rowData of bodyData )
-                    {
-                        const td = document.createElement( 'td' );
-                        td.innerHTML = `${ rowData }`;
-
-                        const idx = bodyData.indexOf( rowData );
-                        if( this.centered && this.centered.indexOf( idx ) > -1 )
-                        {
-                            td.classList.add( "centered" );
-                        }
-
-                        row.appendChild( td );
-                    }
-
-                    if( options.rowActions )
-                    {
-                        const td = document.createElement( 'td' );
-                        td.style.width = "0px";
-
-                        const buttons = document.createElement( 'div' );
-                        buttons.className = "lextablebuttons";
-                        td.appendChild( buttons );
-
-                        for( const action of options.rowActions )
-                        {
-                            let button = null;
-
-                            if( action == "delete" )
-                            {
-                                button = LX.makeIcon( "Trash3", { title: "Delete Row" } );
-                                button.addEventListener( 'click', function() {
-                                    // Don't need to refresh table..
-                                    data.body.splice( r, 1 );
-                                    row.remove();
-                                });
-                            }
-                            else if( action == "menu" )
-                            {
-                                button = LX.makeIcon( "Ellipsis", { title: "Menu" } );
-                                button.addEventListener( 'click', function( event ) {
-                                    if( !options.onMenuAction )
-                                    {
-                                        return;
-                                    }
-
-                                    const menuOptions = options.onMenuAction( r, data );
-                                    console.assert( menuOptions.length, "Add items to the Menu Action Dropdown!" );
-
-                                    new DropdownMenu( event.target, menuOptions, { side: "bottom", align: "end" });
-                                });
-                            }
-                            else // custom actions
-                            {
-                                console.assert( action.constructor == Object );
-                                button = LX.makeIcon( action.icon, { title: action.title } );
-
-                                if( action.callback )
-                                {
-                                    button.addEventListener( 'click', e => {
-                                        const mustRefresh = action.callback( bodyData, table, e );
-                                        if( mustRefresh )
-                                        {
-                                            this.refresh();
-                                        }
-                                    });
-                                }
-                            }
-
-                            console.assert( button );
-                            buttons.appendChild( button );
-                        }
-
-                        row.appendChild( td );
-                    }
-
-                    body.appendChild( row );
-                }
-            }
-
-            for( const v in data.colVisibilityMap )
-            {
-                const idx = parseInt( v );
-                if( !data.colVisibilityMap[ idx ] )
-                {
-                    const cells = table.querySelectorAll(`tr > *:nth-child(${idx + this.rowOffsetCount + 1})`);
-                    cells.forEach(cell => {
-                        cell.style.display = (cell.style.display === "none") ? "" : "none";
-                    });
-                }
-            }
-        }
-
-        this.refresh();
-
-        doAsync( this.onResize.bind( this ) );
-    }
-}
-
-LX.Table = Table;
-
-/**
- * @class DatePicker
- * @description DatePicker Widget
- */
-
-class DatePicker extends Widget {
-
-    constructor( name, dateString, callback, options = { } ) {
-
-        super( Widget.DATE, name, null, options );
-
-        if( options.today )
-        {
-            const date = new Date();
-            dateString = `${ date.getDate() }/${ date.getMonth() + 1 }/${ date.getFullYear() }`;
-        }
-
-        this.onGetValue = () => {
-            return dateString;
-        }
-
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-
-            dateString = newValue;
-
-            this.calendar.fromDateString( newValue );
-
-            refresh( this.calendar.getFullDate() );
-
-            if( !skipCallback )
-            {
-                this._trigger( new IEvent( name, newValue, event ), callback );
-            }
-        }
-
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        };
-
-        const container = document.createElement('div');
-        container.className = "lexdate";
-        this.root.appendChild( container );
-
-        this.calendar = new Calendar( dateString, { onChange: ( date ) => {
-            this.set( `${ date.day }/${ date.month }/${ date.year }` )
-        }, ...options });
-
-        const refresh = ( currentDate ) => {
-            container.innerHTML = "";
-            const calendarIcon = LX.makeIcon( "Calendar" );
-            const calendarButton = new Button( null, currentDate ?? "Pick a date", () => {
-                this._popover = new Popover( calendarButton.root, [ this.calendar ] );
-            }, { buttonClass: `flex flex-row px-3 ${ currentDate ? "" : "fg-tertiary" } justify-between` } );
-
-            calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
-            container.appendChild( calendarButton.root );
-        };
-
-        refresh( dateString ? this.calendar.getFullDate(): null );
-
-        doAsync( this.onResize.bind( this ) );
-    }
-}
-
-LX.DatePicker = DatePicker;
-
-/**
- * @class Panel
- */
-
-class Panel {
-
-    /**
-     * @param {Object} options
-     * id: Id of the element
-     * className: Add class to the element
-     * width: Width of the panel element [fit space]
-     * height: Height of the panel element [fit space]
-     * style: CSS Style object to be applied to the panel
-     */
-
-    constructor( options = {} ) {
-
-        var root = document.createElement('div');
-        root.className = "lexpanel";
-
-        if( options.id )
-        {
-            root.id = options.id;
-        }
-
-        if( options.className )
-        {
-            root.className += " " + options.className;
-        }
-
-        root.style.width = options.width || "100%";
-        root.style.height = options.height || "100%";
-        Object.assign( root.style, options.style ?? {} );
-
-        this.root = root;
-        this.branches = [];
-        this.widgets = {};
-
-        this._branchOpen = false;
-        this._currentBranch = null;
-        this._queue = []; // Append widgets in other locations
-        this._inlineWidgetsLeft = -1;
-        this._inline_queued_container = null;
-    }
-
-    get( name ) {
-
-        return this.widgets[ name ];
-    }
-
-    getValue( name ) {
-
-        let widget = this.widgets[ name ];
-
-        if( !widget )
-        {
-            throw( "No widget called " + name );
-        }
-
-        return widget.value();
-    }
-
-    setValue( name, value, skipCallback ) {
-
-        let widget = this.widgets[ name ];
-
-        if( !widget )
-        {
-            throw( "No widget called " + name );
-        }
-
-        return widget.set( value, skipCallback );
-    }
-
-    /**
-     * @method attach
-     * @param {Element} content child element to append to panel
-     */
-
-    attach( content ) {
-
-        console.assert( content, "No content to attach!" );
-        content.parent = this;
-        this.root.appendChild( content.root ? content.root : content );
-    }
-
-    /**
-     * @method clear
-     */
-
-    clear() {
-
-        this._branchOpen = false;
-        this.branches = [];
-        this._currentBranch = null;
-
-        for( let w in this.widgets )
-        {
-            if( this.widgets[ w ].options && this.widgets[ w ].options.signal )
-            {
-                const signal = this.widgets[ w ].options.signal;
-                for( let i = 0; i < LX.signals[signal].length; i++ )
-                {
-                    if( LX.signals[signal][i] == this.widgets[ w ] )
-                    {
-                        LX.signals[signal] = [...LX.signals[signal].slice(0, i), ...LX.signals[signal].slice(i+1)];
-                    }
-                }
-            }
-        }
-
-        if( this.signals )
-        {
-            for( let w = 0; w < this.signals.length; w++ )
-            {
-                let widget = Object.values(this.signals[ w ])[0];
-                let signal = widget.options.signal;
-                for( let i = 0; i < LX.signals[signal].length; i++ )
-                {
-                    if( LX.signals[signal][i] == widget )
-                    {
-                        LX.signals[signal] = [...LX.signals[signal].slice(0, i), ...LX.signals[signal].slice(i+1)];
-                    }
-                }
-            }
-        }
-
-        this.widgets = {};
-        this.root.innerHTML = "";
-    }
-
-    /**
-     * @method sameLine
-     * @param {Number} number Of widgets that will be placed in the same line
-     * @param {String} className Extra class to customize inline widgets parent container
-     * @description Next N widgets will be in the same line. If no number, it will inline all until calling nextLine()
-     */
-
-    sameLine( number, className ) {
-
-        this._inline_queued_container = this.queuedContainer;
-        this._inlineWidgetsLeft = ( number ?? Infinity );
-        this._inlineExtraClass = className ?? null;
-    }
-
-    /**
-     * @method endLine
-     * @param {String} className Extra class to customize inline widgets parent container
-     * @description Stop inlining widgets. Use it only if the number of widgets to be inlined is NOT specified.
-     */
-
-    endLine( className ) {
-
-        className = className ?? this._inlineExtraClass;
-
-        if( this._inlineWidgetsLeft == -1 )
-        {
-            console.warn("No pending widgets to be inlined!");
-            return;
-        }
-
-        this._inlineWidgetsLeft = -1;
-
-        if( !this._inlineContainer )
-        {
-            this._inlineContainer = document.createElement('div');
-            this._inlineContainer.className = "lexinlinewidgets";
-
-            if( className )
-            {
-                this._inlineContainer.className += ` ${ className }`;
-            }
-        }
-
-        // Push all elements single element or Array[element, container]
-        for( let item of this._inlineWidgets )
-        {
-            const isPair = ( item.constructor == Array );
-
-            if( isPair )
-            {
-                // eg. an array, inline items appended later to
-                if( this._inline_queued_container )
-                {
-                    this._inlineContainer.appendChild( item[ 0 ] );
-                }
-                // eg. a select, item is appended to parent, not to inline cont.
-                else
-                {
-                    item[ 1 ].appendChild( item[ 0 ] );
-                }
-            }
-            else
-            {
-                this._inlineContainer.appendChild( item );
-            }
-        }
-
-        if( !this._inline_queued_container )
-        {
-            if( this._currentBranch )
-            {
-                this._currentBranch.content.appendChild( this._inlineContainer );
-            }
-            else
-            {
-                this.root.appendChild( this._inlineContainer );
-            }
-        }
-        else
-        {
-            this._inline_queued_container.appendChild( this._inlineContainer );
-        }
-
-        delete this._inlineWidgets;
-        delete this._inlineContainer;
-        delete this._inlineExtraClass;
-    }
-
-    /**
-     * @method branch
-     * @param {String} name Name of the branch/section
-     * @param {Object} options
-     * id: Id of the branch
-     * className: Add class to the branch
-     * closed: Set branch collapsed/opened [false]
-     * icon: Set branch icon (LX.ICONS)
-     * filter: Allow filter widgets in branch by name [false]
-     */
-
-    branch( name, options = {} ) {
-
-        if( this._branchOpen )
-        {
-            this.merge();
-        }
-
-        // Create new branch
-        var branch = new Branch( name, options );
-        branch.panel = this;
-
-        // Declare new open
-        this._branchOpen = true;
-        this._currentBranch = branch;
-
-        // Append to panel
-        if( this.branches.length == 0 )
-        {
-            branch.root.classList.add('first');
-        }
-
-        // This is the last!
-        this.root.querySelectorAll(".lexbranch.last").forEach( e => { e.classList.remove("last"); } );
-        branch.root.classList.add('last');
-
-        this.branches.push( branch );
-        this.root.appendChild( branch.root );
-
-        // Add widget filter
-        if( options.filter )
-        {
-            this._addFilter( options.filter, { callback: this._searchWidgets.bind( this, branch.name ) } );
-        }
-
-        return branch;
-    }
-
-    merge() {
-        this._branchOpen = false;
-        this._currentBranch = null;
-    }
-
-    _pick( arg, def ) {
-        return (typeof arg == 'undefined' ? def : arg);
-    }
-
-    /*
-        Panel Widgets
-    */
-
-    _attachWidget( widget, options = {} ) {
-
-        if( widget.name != undefined )
-        {
-            this.widgets[ widget.name ] = widget;
-        }
-
-        if( widget.options.signal && !widget.name )
-        {
-            if( !this.signals )
-            {
-                this.signals = [];
-            }
-
-            this.signals.push( { [ widget.options.signal ]: widget } )
-        }
-
-        const _insertWidget = el => {
-            if( options.container )
-            {
-                options.container.appendChild( el );
-            }
-            else if( !this.queuedContainer )
-            {
-                if( this._currentBranch )
-                {
-                    if( !options.skipWidget )
-                    {
-                        this._currentBranch.widgets.push( widget );
-                    }
-                    this._currentBranch.content.appendChild( el );
-                }
-                else
-                {
-                    el.className += " nobranch w-full";
-                    this.root.appendChild( el );
-                }
-            }
-            // Append content to queued tab container
-            else
-            {
-                this.queuedContainer.appendChild( el );
-            }
-        };
-
-        const _storeWidget = el => {
-
-            if( !this.queuedContainer )
-            {
-                this._inlineWidgets.push( el );
-            }
-            // Append content to queued tab container
-            else
-            {
-                this._inlineWidgets.push( [ el, this.queuedContainer ] );
-            }
-        };
-
-        // Process inline widgets
-        if( this._inlineWidgetsLeft > 0 && !options.skipInlineCount )
-        {
-            if( !this._inlineWidgets )
-            {
-                this._inlineWidgets = [];
-            }
-
-            // Store widget and its container
-            _storeWidget( widget.root );
-
-            this._inlineWidgetsLeft--;
-
-            // Last widget
-            if( !this._inlineWidgetsLeft )
-            {
-                this.endLine();
-            }
-        }
-        else
-        {
-            _insertWidget( widget.root );
-        }
-
-        return widget;
-    }
-
-    _addFilter( placeholder, options = {} ) {
-
-        options.placeholder = placeholder.constructor == String ? placeholder : "Filter properties..";
-        options.skipWidget = options.skipWidget ?? true;
-        options.skipInlineCount = true;
-
-        let widget = new TextInput( null, null, null, options )
-        const element = widget.root;
-        element.className += " lexfilter";
-
-        let input = document.createElement('input');
-        input.className = 'lexinput-filter';
-        input.setAttribute( "placeholder", options.placeholder );
-        input.style.width =  "100%";
-        input.value = options.filterValue || "";
-
-        let searchIcon = LX.makeIcon( "Search" );
-        element.appendChild( searchIcon );
-        element.appendChild( input );
-
-        input.addEventListener("input", e => {
-            if( options.callback )
-            {
-                options.callback( input.value, e );
-            }
-        });
-
-        return element;
-    }
-
-    _searchWidgets( branchName, value ) {
-
-        for( let b of this.branches )
-        {
-            if( b.name !== branchName )
-            {
-                continue;
-            }
-
-            // remove all widgets
-            for( let w of b.widgets )
-            {
-                if( w.domEl.classList.contains('lexfilter') )
-                {
-                    continue;
-                }
-                w.domEl.remove();
-            }
-
-            // push to right container
-            this.queue( b.content );
-
-            const emptyFilter = !value.length;
-
-            // add widgets
-            for( let w of b.widgets )
-            {
-                if( !emptyFilter )
-                {
-                    if(!w.name) continue;
-                    const filterWord = value.toLowerCase();
-                    const name = w.name.toLowerCase();
-                    if(!name.includes(value)) continue;
-                }
-
-                // insert filtered widget
-                this.queuedContainer.appendChild( w.domEl );
-            }
-
-            // push again to current branch
-            this.clearQueue();
-
-            // no more branches to check!
-            return;
-        }
-    }
-
-    /**
-     * @method getBranch
-     * @param {String} name if null, return current branch
-     */
-
-    getBranch( name ) {
-
-        if( name )
-        {
-            return this.branches.find( b => b.name == name );
-        }
-
-        return this._currentBranch;
-    }
-
-    /**
-     * @method queue
-     * @param {HTMLElement} domEl container to append elements to
-     */
-
-    queue( domEl ) {
-
-        if( !domEl && this._currentBranch)
-        {
-            domEl = this._currentBranch.root;
-        }
-
-        if( this.queuedContainer )
-        {
-            this._queue.push( this.queuedContainer );
-        }
-
-        this.queuedContainer = domEl;
-    }
-
-    /**
-     * @method clearQueue
-     */
-
-    clearQueue() {
-
-        if( this._queue && this._queue.length)
-        {
-            this.queuedContainer = this._queue.pop();
-            return;
-        }
-
-        delete this.queuedContainer;
-    }
-
-    /**
-     * @method addSeparator
-     */
-
-    addSeparator() {
-
-        var element = document.createElement('div');
-        element.className = "lexseparator";
-
-        let widget = new Widget( Widget.SEPARATOR );
-        widget.root = element;
-
-        if( this._currentBranch )
-        {
-            this._currentBranch.content.appendChild( element );
-            this._currentBranch.widgets.push( widget );
-        }
-        else
-        {
-            this.root.appendChild( element );
-        }
-    }
-
-    /**
-     * @method addBlank
-     * @param {Number} width
-     * @param {Number} height
-     */
-
-    addBlank( width, height ) {
-        const widget = new Blank( width, height );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addTitle
-     * @param {String} name Title name
-     * @param {Object} options:
-     * link: Href in case title is an hyperlink
-     * target: Target name of the iframe (if any)
-     * icon: Name of the icon (if any)
-     * iconColor: Color of title icon (if any)
-     * style: CSS to override
-     */
-
-    addTitle( name, options = {} ) {
-        const widget = new Title( name, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addText
-     * @param {String} name Widget name
-     * @param {String} value Text value
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     * hideName: Don't use name as label [false]
-     * disabled: Make the widget disabled [false]
-     * required: Make the input required
-     * placeholder: Add input placeholder
-     * icon: Icon (if any) to append at the input start
-     * pattern: Regular expression that value must match
-     * trigger: Choose onchange trigger (default, input) [default]
-     * inputWidth: Width of the text input
-     * fit: Input widts fits content [false]
-     * inputClass: Class to add to the native input element
-     * skipReset: Don't add the reset value button when value changes
-     * float: Justify input text content
-     * justifyName: Justify name content
-     */
-
-    addText( name, value, callback, options = {} ) {
-        const widget = new TextInput( name, value, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addTextArea
-     * @param {String} name Widget name
-     * @param {String} value Text Area value
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     * hideName: Don't use name as label [false]
-     * disabled: Make the widget disabled [false]
-     * placeholder: Add input placeholder
-     * resize: Allow resize [true]
-     * trigger: Choose onchange trigger (default, input) [default]
-     * inputWidth: Width of the text input
-     * float: Justify input text content
-     * justifyName: Justify name content
-     * fitHeight: Height adapts to text
-     */
-
-    addTextArea( name, value, callback, options = {} ) {
-        const widget = new TextArea( name, value, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addLabel
-     * @param {String} value Information string
-     * @param {Object} options Text options
-     */
-
-    addLabel( value, options = {} ) {
-        options.disabled = true;
-        options.inputClass = ( options.inputClass ?? "" ) + " nobg";
-        const widget = this.addText( null, value, null, options );
-        widget.type = Widget.LABEL;
-        return widget;
-    }
-
-    /**
-     * @method addButton
-     * @param {String} name Widget name
-     * @param {String} value Button name
-     * @param {Function} callback Callback function on click
-     * @param {Object} options:
-     * hideName: Don't use name as label [false]
-     * disabled: Make the widget disabled [false]
-     * icon: Icon class to show as button value
-     * img: Path to image to show as button value
-     * title: Text to show in native Element title
-     * buttonClass: Class to add to the native button element
-     */
-
-    addButton( name, value, callback, options = {} ) {
-        const widget = new Button( name, value, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addComboButtons
-     * @param {String} name Widget name
-     * @param {Array} values Each of the {value, callback, selected, disabled} items
-     * @param {Object} options:
-     * hideName: Don't use name as label [false]
-     * float: Justify content (left, center, right) [center]
-     * selected: Selected button by default (String|Array)
-     * noSelection: Buttons can be clicked, but they are not selectable
-     * toggle: Buttons can be toggled insted of selecting only one
-     */
-
-    addComboButtons( name, values, options = {} ) {
-        const widget = new ComboButtons( name, values, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addCard
-     * @param {String} name Card Name
-     * @param {Object} options:
-     * text: Card text
-     * link: Card link
-     * title: Card dom title
-     * src: url of the image
-     * callback (Function): function to call on click
-     */
-
-    addCard( name, options = {} ) {
-        const widget = new Card( name, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addForm
-     * @param {String} name Widget name
-     * @param {Object} data Form data
-     * @param {Function} callback Callback function on submit form
-     * @param {Object} options:
-     * primaryActionName: Text to be shown in the primary action button ['Submit']
-     * primaryButtonClass: Button class for primary action button ['contrast']
-     * secondaryActionName: Text to be shown in the secondary action button ['Cancel']
-     * secondaryActionCallback: Callback function on press secondary button
-     * secondaryButtonClass: Button class for secondary action button ['primary']
-     * skipLabels: Do not show input field labels [false]
-     */
-
-    addForm( name, data, callback, options = {} ) {
-        const widget = new Form( name, data, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addContent
-     * @param {String} name Widget name
-     * @param {HTMLElement/String} element
-     * @param {Object} options
-     */
-
-    addContent( name, element, options = {} ) {
-
-        console.assert( element, "Empty content!" );
-
-        if( element.constructor == String )
-        {
-            const tmp = document.createElement( "div" );
-            tmp.innerHTML = element;
-
-            if( tmp.childElementCount > 1 )
-            {
-                element = tmp;
-            }
-            else
-            {
-                element = tmp.firstElementChild;
-            }
-        }
-
-        options.hideName = true;
-
-        let widget = new Widget( Widget.CONTENT, name, null, options );
-        widget.root.appendChild( element );
-
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addImage
-     * @param {String} name Widget name
-     * @param {String} url Image Url
-     * @param {Object} options
-     * hideName: Don't use name as label [false]
-     */
-
-    async addImage( name, url, options = {} ) {
-
-        console.assert( url, "Empty src/url for Image!" );
-
-        let container = document.createElement( 'div' );
-        container.className = "leximage";
-        container.style.width = "100%";
-
-        let img = document.createElement( 'img' );
-        img.src = url;
-        Object.assign( img.style, options.style ?? {} );
-        container.appendChild( img );
-
-        let widget = new Widget( Widget.IMAGE, name, null, options );
-        widget.root.appendChild( container );
-
-        // await img.decode();
-        img.decode();
-
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addSelect
-     * @param {String} name Widget name
-     * @param {Array} values Posible options of the select widget -> String (for default select) or Object = {value, url} (for images, gifs..)
-     * @param {String} value Select by default option
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     * hideName: Don't use name as label [false]
-     * filter: Add a search bar to the widget [false]
-     * disabled: Make the widget disabled [false]
-     * skipReset: Don't add the reset value button when value changes
-     * placeholder: Placeholder for the filter input
-     * emptyMsg: Custom message to show when no filtered results
-     */
-
-    addSelect( name, values, value, callback, options = {} ) {
-        const widget = new Select( name, values, value, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addCurve
-     * @param {String} name Widget name
-     * @param {Array of Array} values Array of 2N Arrays of each value of the curve
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     * skipReset: Don't add the reset value button when value changes
-     * bgColor: Widget background color
-     * pointsColor: Curve points color
-     * lineColor: Curve line color
-     * noOverlap: Points do not overlap, replacing themselves if necessary
-     * allowAddValues: Support adding values on click
-     * smooth: Curve smoothness
-     * moveOutAction: Clamp or delete points moved out of the curve (LX.CURVE_MOVEOUT_CLAMP, LX.CURVE_MOVEOUT_DELETE)
-    */
-
-    addCurve( name, values, callback, options = {} ) {
-        const widget = new Curve( name, values, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addDial
-     * @param {String} name Widget name
-     * @param {Array of Array} values Array of 2N Arrays of each value of the dial
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     * skipReset: Don't add the reset value button when value changes
-     * bgColor: Widget background color
-     * pointsColor: Curve points color
-     * lineColor: Curve line color
-     * noOverlap: Points do not overlap, replacing themselves if necessary
-     * allowAddValues: Support adding values on click
-     * smooth: Curve smoothness
-     * moveOutAction: Clamp or delete points moved out of the curve (LX.CURVE_MOVEOUT_CLAMP, LX.CURVE_MOVEOUT_DELETE)
-    */
-
-    addDial( name, values, callback, options = {} ) {
-        const widget = new Dial( name, values, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addLayers
-     * @param {String} name Widget name
-     * @param {Number} value Flag value by default option
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     */
-
-    addLayers( name, value, callback, options = {} ) {
-        const widget = new Layers( name, value, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addArray
-     * @param {String} name Widget name
-     * @param {Array} values By default values in the array
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     * innerValues (Array): Use select mode and use values as options
-     */
-
-    addArray( name, values = [], callback, options = {} ) {
-        const widget = new ItemArray( name, values, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addList
-     * @param {String} name Widget name
-     * @param {Array} values List values
-     * @param {String} value Selected list value
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     * hideName: Don't use name as label [false]
-     */
-
-    addList( name, values, value, callback, options = {} ) {
-        const widget = new List( name, values, value, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addTags
-     * @param {String} name Widget name
-     * @param {String} value Comma separated tags
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     * hideName: Don't use name as label [false]
-     */
-
-    addTags( name, value, callback, options = {} ) {
-        const widget = new Tags( name, value, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addCheckbox
-     * @param {String} name Widget name
-     * @param {Boolean} value Value of the checkbox
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     * disabled: Make the widget disabled [false]
-     * label: Checkbox label
-     * suboptions: Callback to add widgets in case of TRUE value
-     * className: Extra classes to customize style
-     */
-
-    addCheckbox( name, value, callback, options = {} ) {
-        const widget = new Checkbox( name, value, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addToggle
-     * @param {String} name Widget name
-     * @param {Boolean} value Value of the checkbox
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     * disabled: Make the widget disabled [false]
-     * label: Toggle label
-     * suboptions: Callback to add widgets in case of TRUE value
-     * className: Customize colors
-     */
-
-    addToggle( name, value, callback, options = {} ) {
-        const widget = new Toggle( name, value, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addRadioGroup
-     * @param {String} name Widget name
-     * @param {String} label Radio label
-     * @param {Array} values Radio options
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     * disabled: Make the widget disabled [false]
-     * className: Customize colors
-     * selected: Index of the default selected option
-     */
-
-    addRadioGroup( name, label, values, callback, options = {} ) {
-        const widget = new RadioGroup( name, label, values, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addColor
-     * @param {String} name Widget name
-     * @param {String} value Default color (hex)
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     * disabled: Make the widget disabled [false]
-     * useRGB: The callback returns color as Array (r, g, b) and not hex [false]
-     */
-
-    addColor( name, value, callback, options = {} ) {
-        const widget = new ColorInput( name, value, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addRange
-     * @param {String} name Widget name
-     * @param {Number} value Default number value
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     * hideName: Don't use name as label [false]
-     * className: Extra classes to customize style
-     * disabled: Make the widget disabled [false]
-     * left: The slider goes to the left instead of the right
-     * fill: Fill slider progress [true]
-     * step: Step of the input
-     * min, max: Min and Max values for the input
-     */
-
-    addRange( name, value, callback, options = {} ) {
-        const widget = new RangeInput( name, value, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addNumber
-     * @param {String} name Widget name
-     * @param {Number} value Default number value
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     * hideName: Don't use name as label [false]
-     * disabled: Make the widget disabled [false]
-     * step: Step of the input
-     * precision: The number of digits to appear after the decimal point
-     * min, max: Min and Max values for the input
-     * skipSlider: If there are min and max values, skip the slider
-     * units: Unit as string added to the end of the value
-     * onPress: Callback function on mouse down
-     * onRelease: Callback function on mouse up
-     */
-
-    addNumber( name, value, callback, options = {} ) {
-        const widget = new NumberInput( name, value, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    static VECTOR_COMPONENTS = { 0: 'x', 1: 'y', 2: 'z', 3: 'w' };
-
-    _addVector( numComponents, name, value, callback, options = {} ) {
-        const widget = new Vector( numComponents, name, value, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addVector N (2, 3, 4)
-     * @param {String} name Widget name
-     * @param {Array} value Array of N components
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     * disabled: Make the widget disabled [false]
-     * step: Step of the inputs
-     * min, max: Min and Max values for the inputs
-     * onPress: Callback function on mouse down
-     * onRelease: Callback function on mouse is released
-     */
-
-    addVector2( name, value, callback, options ) {
-        return this._addVector( 2, name, value, callback, options );
-    }
-
-    addVector3( name, value, callback, options ) {
-        return this._addVector( 3, name, value, callback, options );
-    }
-
-    addVector4( name, value, callback, options ) {
-        return this._addVector( 4, name, value, callback, options );
-    }
-
-    /**
-     * @method addSize
-     * @param {String} name Widget name
-     * @param {Number} value Default number value
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     * hideName: Don't use name as label [false]
-     * disabled: Make the widget disabled [false]
-     * units: Unit as string added to the end of the value
-     */
-
-    addSize( name, value, callback, options = {} ) {
-        const widget = new SizeInput( name, value, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addOTP
-     * @param {String} name Widget name
-     * @param {String} value Default numeric value in string format
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     * hideName: Don't use name as label [false]
-     * disabled: Make the widget disabled [false]
-     * pattern: OTP numeric pattern
-     */
-
-    addOTP( name, value, callback, options = {} ) {
-        const widget = new OTPInput( name, value, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addPad
-     * @param {String} name Widget name
-     * @param {Array} value Pad value
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     * disabled: Make the widget disabled [false]
-     * min, max: Min and Max values
-     * padSize: Size of the pad (css)
-     * onPress: Callback function on mouse down
-     * onRelease: Callback function on mouse up
-     */
-
-    addPad( name, value, callback, options = {} ) {
-        const widget = new Pad( name, value, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addProgress
-     * @param {String} name Widget name
-     * @param {Number} value Progress value
-     * @param {Object} options:
-     * min, max: Min and Max values
-     * low, optimum, high: Low and High boundary values, Optimum point in the range
-     * showValue: Show current value
-     * editable: Allow edit value
-     * callback: Function called on change value
-     */
-
-    addProgress( name, value, options = {} ) {
-        const widget = new Progress( name, value, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addFile
-     * @param {String} name Widget name
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     * local: Ask for local file
-     * disabled: Make the widget disabled [false]
-     * read: Return the file itself (False) or the contents (True)
-     * type: type to read as [text (Default), buffer, bin, url]
-     */
-
-    addFile( name, callback, options = { } ) {
-        const widget = new FileInput( name, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addTree
-     * @param {String} name Widget name
-     * @param {Object} data Data of the tree
-     * @param {Object} options:
-     * icons: Array of objects with icon button information {name, icon, callback}
-     * filter: Add nodes filter [true]
-     * rename: Boolean to allow rename [true]
-     * onevent(tree_event): Called when node is selected, dbl clicked, contextmenu opened, changed visibility, parent or name
-     */
-
-    addTree( name, data, options = {} ) {
-        const widget = new Tree( name, data, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addTabSections
-     * @param {String} name Widget name
-     * @param {Array} tabs Contains objects with {
-     *      name: Name of the tab (if icon, use as title)
-     *      icon: Icon to be used as the tab icon (optional)
-     *      onCreate: Func to be called at tab creation
-     *      onSelect: Func to be called on select tab (optional)
-     * }
-     * @param {Object} options
-     * vertical: Use vertical or horizontal tabs (vertical by default)
-     * showNames: Show tab name only in horizontal tabs
-     */
-
-    addTabSections( name, tabs, options = {} ) {
-        const widget = new TabSections( name, tabs, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addCounter
-     * @param {String} name Widget name
-     * @param {Number} value Counter value
-     * @param {Function} callback Callback function on change
-     * @param {Object} options:
-     * disabled: Make the widget disabled [false]
-     * min, max: Min and Max values
-     * step: Step for adding/substracting
-     * label: Text to show below the counter
-     */
-
-    addCounter( name, value, callback, options = { } ) {
-        const widget = new Counter( name, value, callback, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addTable
-     * @param {String} name Widget name
-     * @param {Number} data Table data
-     * @param {Object} options:
-     * hideName: Don't use name as label [false]
-     * head: Table headers (each of the headers per column)
-     * body: Table body (data per row for each column)
-     * rowActions: Allow to add actions per row
-     * onMenuAction: Function callback to fill the "menu" context
-     * selectable: Each row can be selected
-     * sortable: Rows can be sorted by the user manually
-     * centered: Center text within columns. true for all, Array for center selected cols
-     * toggleColumns: Columns visibility can be toggled
-     * filter: Name of the column to filter by text input (if any)
-     * filterValue: Initial filter value
-     * customFilters: Add selectors to filter by specific option values
-     */
-
-    addTable( name, data, options = { } ) {
-        const widget = new Table( name, data, options );
-        return this._attachWidget( widget );
-    }
-
-    /**
-     * @method addDate
-     * @param {String} name Widget name
-     * @param {String} dateString
-     * @param {Function} callback
-     * @param {Object} options:
-     * hideName: Don't use name as label [false]
-     * today: Set current day as selected by default
-     * untilToday: Allow dates only until current day
-     * fromToday: Allow dates only from current day
-     */
-
-    addDate( name, dateString, callback, options = { } ) {
-        const widget = new DatePicker( name, dateString, callback, options );
-        return this._attachWidget( widget );
-    }
-}
-
-LX.Panel = Panel;
-
-/**
- * @class Branch
- */
-
-class Branch {
-
-    constructor( name, options = {} ) {
-
-        this.name = name;
-
-        var root = document.createElement( 'div' );
-        root.className = "lexbranch";
-        if( options.id )
-        {
-            root.id = options.id;
-        }
-        if( options.className )
-        {
-            root.className += " " + options.className;
-        }
-
-        root.style.margin = "0 auto";
-
-        var that = this;
-
-        this.root = root;
-        this.widgets = [];
-
-        // Create element
-        var title = document.createElement( 'div' );
-        title.className = "lexbranchtitle";
-
-        if( options.icon )
-        {
-            const branchIcon = LX.makeIcon( options.icon, { iconClass: "mr-2" } );
-            title.appendChild( branchIcon );
-        }
-
-        title.innerHTML += ( name || "Branch" );
-
-        const collapseIcon = LX.makeIcon( "Right", { iconClass: "switch-branch-button", svgClass: "sm" } );
-        title.appendChild( collapseIcon );
-
-        root.appendChild( title );
-
-        var branchContent = document.createElement( 'div' );
-        branchContent.id = name.replace( /\s/g, '' );
-        branchContent.className = "lexbranchcontent";
-        root.appendChild( branchContent );
-        this.content = branchContent;
-
-        this._addBranchSeparator();
-
-        if( options.closed )
-        {
-            title.classList.add( "closed" );
-            root.classList.add( "closed" );
-            this.grabber.setAttribute( "hidden", true );
-            doAsync( () => {
-                this.content.setAttribute( "hidden", true );
-            }, 10 );
-        }
-
-        this.onclick = function( e ) {
-            // e.stopPropagation();
-            this.classList.toggle( "closed" );
-            this.parentElement.classList.toggle( "closed" );
-
-            that.content.toggleAttribute( "hidden" );
-            that.grabber.toggleAttribute( "hidden" );
-
-            LX.emit( "@on_branch_closed", this.classList.contains( "closed" ) );
-        };
-
-        this.oncontextmenu = function( e ) {
-
-            e.preventDefault();
-            e.stopPropagation();
-
-            if( this.parentElement.classList.contains("dialog") )
-            {
-                return;
-            }
-
-            addContextMenu("Dock", e, p => {
-                e.preventDefault();
-                p.add( 'Floating', that._onMakeFloating.bind( that ) );
-            }, { icon: "WindowRestore" });
-        };
-
-        title.addEventListener( 'click', this.onclick );
-        title.addEventListener( 'contextmenu', this.oncontextmenu );
-    }
-
-    _onMakeFloating() {
-
-        const dialog = new Dialog(this.name, p => {
-            // add widgets
-            for( let w of this.widgets )
-            {
-                p.root.appendChild( w.root );
-            }
-        });
-        dialog.widgets = this.widgets;
-
-        const parent = this.root.parentElement;
-
-        this.root.remove();
-
-        // Make next the first branch
-        const next_branch = parent.querySelector(".lexbranch");
-        if(next_branch) next_branch.classList.add('first');
-
-        // Make new last the last branch
-        const last_branch = parent.querySelectorAll(".lexbranch");
-        if(last_branch.length) last_branch[last_branch.length - 1].classList.add('last');
-    }
-
-    _addBranchSeparator() {
-
-        const element = document.createElement('div');
-        element.className = "lexwidgetseparator";
-        element.style.width = "100%";
-        element.style.background = "none";
-
-        const grabber = document.createElement('div');
-        grabber.innerHTML = "&#9662;";
-        element.appendChild(grabber);
-
-        doAsync( () => {
-            grabber.style.marginLeft = ((parseFloat(LX.DEFAULT_NAME_WIDTH) / 100.0) * this.content.offsetWidth) + "px";
-        }, 10 )
-
-        const line = document.createElement('div');
-        line.style.width = "1px";
-        line.style.marginLeft = "6px";
-        line.style.marginTop = "2px";
-        line.style.height = "0px"; // get in time
-        grabber.appendChild( line );
-        grabber.addEventListener( "mousedown", innerMouseDown );
-
-        this.grabber = grabber;
-
-        function getBranchHeight() {
-            return that.root.offsetHeight - that.root.children[0].offsetHeight;
-        }
-
-        let that = this;
-
-        function innerMouseDown( e )
-        {
-            var doc = that.root.ownerDocument;
-            doc.addEventListener("mouseup", innerMouseUp);
-            doc.addEventListener("mousemove", innerMouseMove);
-            e.stopPropagation();
-            e.preventDefault();
-            const h = getBranchHeight();
-            line.style.height = (h-3) + "px";
-            document.body.classList.add('nocursor');
-        }
-
-        function innerMouseMove(e)
-        {
-            let dt = e.movementX;
-
-            if ( dt != 0 )
-            {
-                const margin = parseFloat( grabber.style.marginLeft );
-                grabber.style.marginLeft = clamp( margin + dt, 32, that.content.offsetWidth - 32 ) + "px";
-            }
-        }
-
-        function innerMouseUp(e)
-        {
-            that._updateWidgets();
-
-            line.style.height = "0px";
-
-            var doc = that.root.ownerDocument;
-            doc.removeEventListener("mouseup", innerMouseUp);
-            doc.removeEventListener("mousemove", innerMouseMove);
-            document.body.classList.remove('nocursor');
-        }
-
-        this.content.appendChild( element );
-    }
-
-    _updateWidgets() {
-
-        var size = this.grabber.style.marginLeft;
-
-        // Update sizes of widgets inside
-        for( let i = 0; i < this.widgets.length; i++ )
-        {
-            let widget = this.widgets[ i ];
-            const element = widget.root;
-
-            if( element.children.length < 2 )
-            {
-                continue;
-            }
-
-            let name = element.children[ 0 ];
-            let value = element.children[ 1 ];
-
-            name.style.width = size;
-            name.style.minWidth = size;
-
-            switch( widget.type )
-            {
-                case Widget.CUSTOM:
-                case Widget.ARRAY:
-                    continue;
-            };
-
-            value.style.width = "-moz-calc( 100% - " + size + " )";
-            value.style.width = "-webkit-calc( 100% - " + size + " )";
-            value.style.width = "calc( 100% - " + size + " )";
-        }
-    }
-};
-
-LX.Branch = Branch;
-
-/**
- * @class Footer
- */
-
-class Footer {
-    /**
-     * @param {Object} options:
-     * columns: Array with data per column { title, items: [ { title, link } ]  }
-     * credits: html string
-     * socials: Array with data per item { title, link, icon }
-     * className: Extra class to customize
-    */
-    constructor( options = {} ) {
-
-        const root = document.createElement( "footer" );
-        root.className = "lexfooter" + ` ${ options.className ?? "" }`;
-
-        const wrapper = document.createElement( "div" );
-        wrapper.style.minHeight = "48px";
-        wrapper.className = "w-full";
-        root.appendChild( wrapper );
-
-        // const hr = document.createElement( "hr" );
-        // wrapper.appendChild( hr );
-
-        if( options.columns && options.columns.constructor == Array )
-        {
-            const cols = document.createElement( "div" );
-            cols.className = "columns";
-            cols.style.gridTemplateColumns = "1fr ".repeat( options.columns.length );
-            wrapper.appendChild( cols );
-
-            for( let col of options.columns )
-            {
-                const colDom = document.createElement( "div" );
-                colDom.className = "col";
-                cols.appendChild( colDom );
-
-                const colTitle = document.createElement( "h2" );
-                colTitle.innerHTML = col.title;
-                colDom.appendChild( colTitle );
-
-                if( !col.items || !col.items.length )
-                {
-                    continue;
-                }
-
-                const itemListDom = document.createElement( "ul" );
-                colDom.appendChild( itemListDom );
-
-                for( let item of col.items )
-                {
-                    const itemDom = document.createElement( "li" );
-                    itemDom.innerHTML = `<a class="" href="${ item.link }">${ item.title }</a>`;
-                    itemListDom.appendChild( itemDom );
-                }
-            }
-        }
-
-        if( options.credits || options.socials )
-        {
-            const creditsSocials = document.createElement( "div" );
-            creditsSocials.className = "credits-and-socials";
-            wrapper.appendChild( creditsSocials );
-
-            if( options.credits )
-            {
-                const credits = document.createElement( "p" );
-                credits.innerHTML = options.credits;
-                creditsSocials.appendChild( credits );
-            }
-
-            if( options.socials )
-            {
-                const socials = document.createElement( "div" );
-                socials.className = "socials flex flex-row gap-1 my-2 justify-end";
-
-                for( let social of options.socials )
-                {
-                    const socialIcon = LX.makeIcon( social.icon, { title: social.title, svgClass: "xl" } );
-                    socialIcon.href = social.link;
-                    socialIcon.target = "_blank";
-                    socials.appendChild( socialIcon );
-                }
-
-                creditsSocials.appendChild( socials );
-            }
-        }
-
-        // Append directly to body
-        const parent = options.parent ?? document.body;
-        parent.appendChild( root );
-
-        // Set always at bottom
-        root.previousElementSibling.style.flexGrow = "1";
-
-        this.root = root;
-    }
-}
-
-LX.Footer = Footer;
-
-/**
- * @class Dialog
- */
-
-class Dialog {
-
-    static _last_id = 0;
-
-    constructor( title, callback, options = {} ) {
-
-        if( !callback )
-        {
-            console.warn("Content is empty, add some widgets using 'callback' parameter!");
-        }
-
-        this._oncreate = callback;
-        this.id = simple_guidGenerator();
-
-        const size = options.size ?? [],
-            position = options.position ?? [],
-            draggable = options.draggable ?? true,
-            modal = options.modal ?? false;
-
-        let root = document.createElement('dialog');
-        root.className = "lexdialog " + (options.className ?? "");
-        root.id = options.id ?? "dialog" + Dialog._last_id++;
-        LX.root.appendChild( root );
-
-        doAsync( () => {
-            modal ? root.showModal() : root.show();
-        }, 10 );
-
-        let that = this;
-
-        const titleDiv = document.createElement('div');
-
-        if( title )
-        {
-            titleDiv.className = "lexdialogtitle";
-            titleDiv.innerHTML = title;
-            titleDiv.setAttribute('draggable', false);
-
-            titleDiv.oncontextmenu = function( e ) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                if(!LX.main_area || LX.main_area.type !== 'horizontal')
-                    return;
-
-                addContextMenu("Dock", e, p => {
-                    e.preventDefault();
-
-                    const _getNextPanel = function( area ) {
-                        let p = area.panels[ 0 ];
-                        if( p ) return p;
-                        for(var s of area.sections){
-                            p = _getNextPanel( s );
-                            if( p ) return p;
-                        }
-                    }
-
-                    const _appendBranch = function( panel ) {
-                        let branch = panel.branches.find( b => b.name === title );
-                        if( !branch )
-                        {
-                            panel.branch( title );
-                            branch = panel.branches.find( b => b.name === title );
-                        }
-                        else
-                        {
-                            panel.root.appendChild( branch.root );
-                        }
-
-                        for( let w of that.widgets )
-                        {
-                            branch.content.appendChild( w.root );
-                        }
-
-                        branch.widgets = that.widgets;
-
-                        // Make new last the last branch
-                        panel.root.querySelectorAll(".lexbranch.last").forEach( e => { e.classList.remove("last"); } );
-                        branch.root.classList.add('last');
-                        root.remove();
-                    }
-
-                    // Right
-                    let rpanel = _getNextPanel(LX.main_area.sections[ 1 ]);
-                    p.add('<i class="This goes to the right">', { icon: "PanelRightDashed", disabled: !rpanel, id: 'dock_options0', callback: () => {
-                        _appendBranch(rpanel);
-                    }});
-                    // Left
-                    let lpanel = _getNextPanel(LX.main_area.sections[ 0 ]);
-                    p.add('<i class="This goes to the left">', { icon: "PanelLeftDashed", disabled: !lpanel, id: 'dock_options1', callback: () => {
-                        _appendBranch(lpanel);
-                    }});
-                }, { icon: "WindowRestore" });
-            };
-
-            root.appendChild( titleDiv );
-        }
-
-        if( options.closable ?? true )
-        {
-            this.close = () => {
-
-                if( options.onBeforeClose )
-                {
-                    options.onBeforeClose( this );
-                }
-
-                if( !options.onclose )
-                {
-                    root.close();
-
-                    doAsync( () => {
-                        that.panel.clear();
-                        root.remove();
-                    }, 150 );
-                }
-                else
-                {
-                    options.onclose( this.root );
-                }
-            };
-
-            const closeButton = LX.makeIcon( "X", { title: "Close", iconClass: "lexdialogcloser" } );
-            closeButton.addEventListener( "click", this.close );
-
-            if( title )
-            {
-                titleDiv.appendChild( closeButton );
-            }
-            else
-            {
-                closeButton.classList.add( "notitle" );
-                root.appendChild( closeButton );
-            }
-        }
-
-        const panel = new Panel();
-        panel.root.classList.add( "lexdialogcontent" );
-
-        if( !title )
-        {
-            panel.root.classList.add( "notitle" );
-        }
-
-        if( callback )
-        {
-            callback.call( this, panel );
-        }
-
-        root.appendChild( panel.root );
-
-        // Make branches have a distintive to manage some cases
-        panel.root.querySelectorAll(".lexbranch").forEach( b => b.classList.add("dialog") );
-
-        this.panel = panel;
-        this.root = root;
-        this.title = titleDiv;
-
-        if( draggable )
-        {
-            makeDraggable( root, Object.assign( { targetClass: 'lexdialogtitle' }, options ) );
-        }
-
-        // Process position and size
-        if( size.length && typeof(size[ 0 ]) != "string" )
-        {
-            size[ 0 ] += "px";
-        }
-
-        if( size.length && typeof(size[ 1 ]) != "string" )
-        {
-            size[ 1 ] += "px";
-        }
-
-        root.style.width = size[ 0 ] ? (size[ 0 ]) : "25%";
-        root.style.height = size[ 1 ] ? (size[ 1 ]) : "auto";
-        root.style.translate = options.position ? "unset" : "-50% -50%";
-
-        if( options.size )
-        {
-            this.size = size;
-        }
-
-        root.style.left = position[ 0 ] ?? "50%";
-        root.style.top = position[ 1 ] ?? "50%";
-
-        panel.root.style.height = title ? "calc( 100% - " + ( titleDiv.offsetHeight + 30 ) + "px )" : "calc( 100% - 51px )";
-    }
-
-    destroy() {
-
-        this.root.remove();
-    }
-
-    refresh() {
-
-        this.panel.root.innerHTML = "";
-        this._oncreate.call(this, this.panel);
-    }
-
-    setPosition( x, y ) {
-
-        this.root.style.left = x + "px";
-        this.root.style.top = y + "px";
-    }
-
-    setTitle( title ) {
-
-        const titleDOM = this.root.querySelector( '.lexdialogtitle' );
-        if( !titleDOM )
-            return;
-        titleDOM.innerText = title;
-    }
-}
-
-LX.Dialog = Dialog;
-
-/**
- * @class PocketDialog
- */
-
-class PocketDialog extends Dialog {
-
-    static TOP      = 0;
-    static BOTTOM   = 1;
-
-    constructor( title, callback, options = {} ) {
-
-        options.draggable = options.draggable ?? false;
-        options.closable = options.closable ?? false;
-
-        const dragMargin = 3;
-
-        super( title, callback, options );
-
-        let that = this;
-        // Update margins on branch title closes/opens
-        LX.addSignal("@on_branch_closed", this.panel, closed => {
-            if( this.dock_pos == PocketDialog.BOTTOM )
-            {
-                this.root.style.top = "calc(100% - " + (this.root.offsetHeight + dragMargin) + "px)";
-            }
-        });
-
-        // Custom
-        this.root.classList.add( "pocket" );
-
-        this.root.style.translate = "none";
-        this.root.style.top = "0";
-        this.root.style.left = "unset";
-
-        if( !options.position )
-        {
-            this.root.style.right = dragMargin + "px";
-            this.root.style.top = dragMargin + "px";
-        }
-
-        this.panel.root.style.width = "100%";
-        this.panel.root.style.height = "100%";
-        this.dock_pos = PocketDialog.TOP;
-
-        this.minimized = false;
-        this.title.tabIndex = -1;
-        this.title.addEventListener("click", e => {
-            if( this.title.eventCatched )
-            {
-                this.title.eventCatched = false;
-                return;
-            }
-
-            // Sized dialogs have to keep their size
-            if( this.size )
-            {
-                if( !this.minimized ) this.root.style.height = "auto";
-                else this.root.style.height = this.size[1];
-            }
-
-            this.root.classList.toggle("minimized");
-            this.minimized = !this.minimized;
-
-            if( this.dock_pos == PocketDialog.BOTTOM )
-                that.root.style.top = this.root.classList.contains("minimized") ?
-                "calc(100% - " + (that.title.offsetHeight + 6) + "px)" : "calc(100% - " + (that.root.offsetHeight + dragMargin) + "px)";
-        });
-
-        if( !options.draggable )
-        {
-            const float = options.float;
-
-            if( float )
-            {
-                for( let i = 0; i < float.length; i++ )
-                {
-                    const t = float[i];
-                    switch( t )
-                    {
-                    case 'b':
-                        this.root.style.top = "calc(100% - " + (this.root.offsetHeight + dragMargin) + "px)";
-                        break;
-                    case 'l':
-                        this.root.style.right = "unset";
-                        this.root.style.left = options.position ? options.position[ 1 ] : ( dragMargin + "px" );
-                        break;
-                    }
-                }
-            }
-
-            this.root.classList.add('dockable');
-
-            this.title.addEventListener("keydown", function( e ) {
-                if( !e.ctrlKey )
-                {
-                    return;
-                }
-
-                that.root.style.right = "unset";
-
-                if( e.key == 'ArrowLeft' )
-                {
-                    that.root.style.left = '0px';
-                }
-                else if( e.key == 'ArrowRight' )
-                {
-                    that.root.style.left = "calc(100% - " + (that.root.offsetWidth + dragMargin) + "px)";
-                }
-                else if( e.key == 'ArrowUp' )
-                {
-                    that.root.style.top = "0px";
-                    that.dock_pos = PocketDialog.TOP;
-                }
-                else if( e.key == 'ArrowDown' )
-                {
-                    that.root.style.top = "calc(100% - " + (that.root.offsetHeight + dragMargin) + "px)";
-                    that.dock_pos = PocketDialog.BOTTOM;
-                }
-            });
-        }
-    }
-}
-
-LX.PocketDialog = PocketDialog;
-
-/**
- * @class ContextMenu
- */
-
-class ContextMenu {
-
-    constructor( event, title, options = {} ) {
-
-        // remove all context menus
-        document.body.querySelectorAll( ".lexcontextmenu" ).forEach( e => e.remove() );
-
-        this.root = document.createElement( "div" );
-        this.root.className = "lexcontextmenu";
-        this.root.style.left = ( event.x - 48 ) + "px";
-        this.root.style.top = ( event.y - 8 ) + "px";
-
-        this.root.addEventListener("mouseleave", function() {
-            this.remove();
-        });
-
-        this.items = [];
-        this.colors = {};
-
-        if( title )
-        {
-            const item = {};
-            item[ title ] = [];
-            item[ "className" ] = "cmtitle";
-            item[ "icon" ] = options.icon;
-            this.items.push( item );
-        }
-    }
-
-    _adjustPosition( div, margin, useAbsolute = false ) {
-
-        let rect = div.getBoundingClientRect();
-
-        if( !useAbsolute )
-        {
-            let width = rect.width;
-            if( rect.left < 0 )
-            {
-                div.style.left = margin + "px";
-            }
-            else if( window.innerWidth - rect.right < 0 )
-            {
-                div.style.left = (window.innerWidth - width - margin) + "px";
-            }
-
-            if( rect.top < 0 )
-            {
-                div.style.top = margin + "px";
-            }
-            else if( (rect.top + rect.height) > window.innerHeight )
-            {
-                div.style.top = (window.innerHeight - rect.height - margin) + "px";
-            }
-        }
-        else
-        {
-            let dt = window.innerWidth - rect.right;
-            if( dt < 0 )
-            {
-                div.style.left = div.offsetLeft + (dt - margin) + "px";
-            }
-
-            dt = window.innerHeight - (rect.top + rect.height);
-            if( dt < 0 )
-            {
-                div.style.top = div.offsetTop + (dt - margin + 20 ) + "px";
-            }
-        }
-    }
-
-    _createSubmenu( o, k, c, d ) {
-
-        this.root.querySelectorAll( ".lexcontextmenu" ).forEach( cm => cm.remove() );
-
-        let contextmenu = document.createElement('div');
-        contextmenu.className = "lexcontextmenu";
-        c.appendChild( contextmenu );
-
-        for( let i = 0; i < o[ k ].length; ++i )
-        {
-            const subitem = o[ k ][ i ];
-            const subkey = Object.keys( subitem )[ 0 ];
-            this._createEntry( subitem, subkey, contextmenu, d );
-        }
-
-        const rect = c.getBoundingClientRect();
-        contextmenu.style.left = ( rect.x + rect.width ) + "px";
-        contextmenu.style.marginTop = "-31px"; // Force to be at the first element level
-
-        // Set final width
-        this._adjustPosition( contextmenu, 6 );
-    }
-
-    _createEntry( o, k, c, d ) {
-
-        const hasSubmenu = o[ k ].length;
-        let entry = document.createElement('div');
-        entry.className = "lexmenuboxentry" + (o[ 'className' ] ? " " + o[ 'className' ] : "" );
-        entry.id = o.id ?? ("eId" + getSupportedDOMName( k ));
-        entry.innerHTML = "";
-        const icon = o[ 'icon' ];
-        if( icon )
-        {
-            entry.appendChild( LX.makeIcon( icon, { svgClass: "sm" } ) );
-        }
-        const disabled = o['disabled'];
-        entry.innerHTML += "<div class='lexentryname" + (disabled ? " disabled" : "") + "'>" + k + "</div>";
-        c.appendChild( entry );
-
-        if( this.colors[ k ] )
-        {
-            entry.style.borderColor = this.colors[ k ];
-        }
-
-        if( k == "" )
-        {
-            entry.className += " cmseparator";
-            return;
-        }
-
-        // Add callback
-        entry.addEventListener("click", e => {
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-
-            if( disabled )
-            {
-                return;
-            }
-
-            const f = o[ 'callback' ];
-            if( f )
-            {
-                f.call( this, k, entry );
-                this.root.remove();
-            }
-
-            if( !hasSubmenu )
-            {
-                return;
-            }
-
-            if( LX.OPEN_CONTEXTMENU_ENTRY == 'click' )
-                this._createSubmenu( o, k, entry, ++d );
-        });
-
-        if( !hasSubmenu )
-        {
-            return;
-        }
-
-        const submenuIcon = LX.makeIcon( "Menu", { svgClass: "sm" } )
-        entry.appendChild( submenuIcon );
-
-        if( LX.OPEN_CONTEXTMENU_ENTRY == 'mouseover' )
-        {
-            entry.addEventListener("mouseover", e => {
-                if(entry.built)
-                    return;
-                entry.built = true;
-                this._createSubmenu( o, k, entry, ++d );
-                e.stopPropagation();
-            });
-        }
-
-        entry.addEventListener("mouseleave", () => {
-            d = -1; // Reset depth
-            c.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
-        });
-    }
-
-    onCreate() {
-        doAsync( () => this._adjustPosition( this.root, 6 ) );
-    }
-
-    add( path, options = {} ) {
-
-        if(options.constructor == Function)
-            options = { callback: options };
-
-        // process path
-        path = path + ""; // make string!
-        const tokens = path.split("/");
-
-        // assign color to last token in path
-        const lastPath = tokens[tokens.length - 1];
-        this.colors[ lastPath ] = options.color;
-
-        let idx = 0;
-
-        const insert = (token, list) => {
-            if(token == undefined) return;
-
-            let found = null;
-            list.forEach( o => {
-                const keys = Object.keys(o);
-                const key = keys.find( t => t == token );
-                if(key) found = o[ key ];
-            } );
-
-            if( found )
-            {
-                insert( tokens[ idx++ ], found );
-            }
-            else
-            {
-                let item = {};
-                item[ token ] = [];
-                const nextToken = tokens[ idx++ ];
-                // Check if last token -> add callback
-                if( !nextToken )
-                {
-                    item[ 'id' ] = options.id;
-                    item[ 'icon' ] = options.icon;
-                    item[ 'callback' ] = options.callback;
-                    item[ 'disabled' ] = options.disabled ?? false;
-                }
-
-                list.push( item );
-                insert( nextToken, item[ token ] );
-            }
-        };
-
-        insert( tokens[idx++], this.items );
-
-        // Set parents
-
-        const setParent = _item => {
-
-            let key = Object.keys( _item )[ 0 ];
-            let children = _item[ key ];
-
-            if( !children.length )
-            {
-                return;
-            }
-
-            if( children.find( c => Object.keys(c)[0] == key ) == null )
-            {
-                const parent = {};
-                parent[ key ] = [];
-                parent[ 'className' ] = "cmtitle";
-                _item[ key ].unshift( parent );
-            }
-
-            for( let child of _item[ key ] )
-            {
-                let k = Object.keys( child )[ 0 ];
-                for( let i = 0; i < child[ k ].length; ++i )
-                {
-                    setParent( child );
-                }
-            }
-        };
-
-        for( let item of this.items )
-        {
-            setParent( item );
-        }
-
-        // Create elements
-
-        for( let item of this.items )
-        {
-            let key = Object.keys( item )[ 0 ];
-            let pKey = "eId" + getSupportedDOMName( key );
-
-            // Item already created
-            const id = "#" + ( item.id ?? pKey );
-            if( !this.root.querySelector( id ) )
-            {
-                this._createEntry( item, key, this.root, -1 );
-            }
-        }
-    }
-
-    setColor( token, color ) {
-
-        if(color[0] !== '#')
-            color = rgbToHex(color);
-
-        this.colors[ token ] = color;
-    }
-};
-
-LX.ContextMenu = ContextMenu;
-
-function addContextMenu( title, event, callback, options )
-{
-    const menu = new ContextMenu( event, title, options );
-    LX.root.appendChild( menu.root );
-
-    if( callback )
-    {
-        callback( menu );
-    }
-
-    menu.onCreate();
-
-    return menu;
-}
-
-LX.addContextMenu = addContextMenu;
-
-/**
- * @class CanvasCurve
- */
-
-class CanvasCurve {
-
-    constructor( value, options = {} ) {
-
-        let element = document.createElement( "div" );
-        element.className = "curve " + ( options.className ? options.className : "" );
-        element.style.minHeight = "50px";
-        element.style.width = options.width || "100%";
-        element.style.minWidth = "50px";
-        element.style.minHeight = "20px";
-
-        element.bgcolor = options.bgColor || LX.getThemeColor( "global-intense-background" );
-        element.pointscolor = options.pointsColor || LX.getThemeColor( "global-color-accent" );
-        element.activepointscolor = options.activePointsColor || LX.getThemeColor( "global-color-accent-light" );
-        element.linecolor = options.lineColor || "#555";
-        element.value = value || [];
-        element.xrange = options.xrange || [ 0, 1 ]; // min, max
-        element.yrange = options.yrange || [ 0, 1 ]; // min, max
-        element.defaulty = options.defaulty != null ? options.defaulty : 0.0;
-        element.no_overlap = options.noOverlap || false;
-        element.show_samples = options.showSamples || 0;
-        element.allow_add_values = options.allowAddValues ?? true;
-        element.draggable_x = options.draggableX ?? true;
-        element.draggable_y = options.draggableY ?? true;
-        element.smooth = (options.smooth && typeof( options.smooth ) == 'number' ? options.smooth : 0.3) || false;
-        element.move_out = options.moveOutAction ?? LX.CURVE_MOVEOUT_DELETE;
-
-        LX.addSignal( "@on_new_color_scheme", (el, value) => {
-            element.bgcolor = options.bgColor || LX.getThemeColor( "global-intense-background" );
-            element.pointscolor = options.pointsColor || LX.getThemeColor( "global-color-accent" );
-            element.activepointscolor = options.activePointsColor || LX.getThemeColor( "global-color-accent-light" );
-            this.redraw();
-        } );
-
-        this.element = element;
-
-        let canvas = document.createElement( "canvas" );
-        canvas.width = options.width || 200;
-        canvas.height = options.height || 50;
-        element.appendChild( canvas );
-        this.canvas = canvas;
-
-        element.addEventListener( "mousedown", onmousedown );
-
-        element.getValueAt = function( x ) {
-
-            if( x < element.xrange[ 0 ] || x > element.xrange[ 1 ] )
-            {
-                return element.defaulty;
-            }
-
-            let last = [ element.xrange[ 0 ], element.defaulty ];
-            let f = 0;
-            for( let i = 0; i < element.value.length; i += 1 )
-            {
-                let v = element.value[ i ];
-                if( x == v[ 0 ] ) return v[ 1 ];
-                if( x < v[ 0 ] )
-                {
-                    f = ( x - last[ 0 ] ) / (v[ 0 ] - last[ 0 ]);
-                    return last[ 1 ] * ( 1 - f ) + v[ 1 ] * f;
-                }
-
-                last = v;
-            }
-
-            v = [ element.xrange[ 1 ], element.defaulty ];
-            f = (x - last[ 0 ]) / (v[ 0 ] - last[ 0 ]);
-            return last[ 1 ] * ( 1 - f ) + v[ 1 ] * f;
-        }
-
-        element.resample = function( samples ) {
-
-            let r = [];
-            let dx = (element.xrange[1] - element.xrange[ 0 ]) / samples;
-            for( let i = element.xrange[0]; i <= element.xrange[1]; i += dx )
-            {
-                r.push( element.getValueAt(i) );
-            }
-            return r;
-        }
-
-        element.addValue = function(v) {
-
-            for( let i = 0; i < element.value; i++ )
-            {
-                let value = element.value[i];
-                if(value[0] < v[0]) continue;
-                element.value.splice(i,0,v);
-                redraw();
-                return;
-            }
-
-            element.value.push(v);
-            redraw();
-        }
-
-        //value to canvas
-        function convert(v) {
-            return [ canvas.width * ( v[0] - element.xrange[0])/ (element.xrange[1]),
-                canvas.height * (v[1] - element.yrange[0])/ (element.yrange[1])];
-        }
-
-        //canvas to value
-        function unconvert(v) {
-            return [(v[0] * element.xrange[1] / canvas.width + element.xrange[0]),
-                    (v[1] * element.yrange[1] / canvas.height + element.yrange[0])];
-        }
-
-        let selected = -1;
-
-        element.redraw = function( o = {} ) {
-
-            if( o.value ) element.value = o.value;
-            if( o.xrange ) element.xrange = o.xrange;
-            if( o.yrange ) element.yrange = o.yrange;
-            if( o.smooth ) element.smooth = o.smooth;
-
-            var ctx = canvas.getContext( "2d" );
-            ctx.setTransform( 1, 0, 0, 1, 0, 0 );
-            ctx.translate( 0, canvas.height );
-            ctx.scale( 1, -1 );
-
-            ctx.fillStyle = element.bgcolor;
-            ctx.fillRect(0,0,canvas.width,canvas.height);
-
-            ctx.strokeStyle = element.linecolor;
-            ctx.beginPath();
-
-            //draw line
-            var pos = convert([ element.xrange[ 0 ],element.defaulty ]);
-            ctx.moveTo( pos[ 0 ], pos[ 1 ] );
-            let values = [pos[ 0 ], pos[ 1 ]];
-
-            for( var i in element.value )
-            {
-                var value = element.value[ i ];
-                pos = convert( value );
-                values.push( pos[ 0 ] );
-                values.push( pos[ 1 ] );
-                if( !element.smooth )
-                {
-                    ctx.lineTo( pos[ 0 ], pos[ 1 ] );
-                }
-            }
-
-            pos = convert([ element.xrange[ 1 ], element.defaulty ]);
-            values.push(pos[ 0 ]);
-            values.push(pos[ 1 ]);
-            if( !element.smooth )
-            {
-                ctx.lineTo( pos[ 0 ], pos[ 1 ] );
-                ctx.stroke();
-            }
-            else
-            {
-                LX.UTILS.drawSpline( ctx, values, element.smooth );
-            }
-
-            // Draw points
-            for( var i = 0; i < element.value.length; i += 1 )
-            {
-                var value = element.value[ i ];
-                pos = convert( value );
-                if( selected == i )
-                    ctx.fillStyle = element.activepointscolor;
-                else
-                    ctx.fillStyle = element.pointscolor;
-                ctx.beginPath();
-                ctx.arc( pos[ 0 ], pos[ 1 ], selected == i ? 4 : 3, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            if( element.show_samples )
-            {
-                var samples = element.resample(element.show_samples);
-                ctx.fillStyle = "#888";
-                for( var i = 0; i < samples.length; i += 1)
-                {
-                    var value = [ i * ((element.xrange[ 1 ] - element.xrange[ 0 ]) / element.show_samples) + element.xrange[ 0 ], samples[ i ] ];
-                    pos = convert(value);
-                    ctx.beginPath();
-                    ctx.arc( pos[ 0 ], pos[ 1 ], 2, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-        }
-
-        var last_mouse = [ 0, 0 ];
-
-        function onmousedown( e ) {
-            document.addEventListener( "mousemove", onmousemove );
-            document.addEventListener( "mouseup", onmouseup );
-
-            var rect = canvas.getBoundingClientRect();
-            var mousex = e.clientX - rect.left;
-            var mousey = e.clientY - rect.top;
-
-            selected = computeSelected( mousex, canvas.height - mousey );
-
-            if( e.button == LX.MOUSE_LEFT_CLICK && selected == -1 && element.allow_add_values )
-            {
-                var v = unconvert([ mousex, canvas.height - mousey ]);
-                element.value.push( v );
-                sortValues();
-                selected = element.value.indexOf( v );
-            }
-
-            last_mouse = [ mousex, mousey ];
-            element.redraw();
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        function onmousemove( e ) {
-
-            var rect = canvas.getBoundingClientRect();
-            var mousex = e.clientX - rect.left;
-            var mousey = e.clientY - rect.top;
-
-            if( mousex < 0 ) mousex = 0;
-            else if( mousex > canvas.width ) mousex = canvas.width;
-            if( mousey < 0 ) mousey = 0;
-            else if( mousey > canvas.height ) mousey = canvas.height;
-
-            // Dragging to remove
-            const currentMouseDiff = [ e.clientX - rect.left, e.clientY - rect.top ];
-            if( selected != -1 && distance( currentMouseDiff, [ mousex, mousey ] ) > canvas.height * 0.5 )
-            {
-                if( element.move_out == LX.CURVE_MOVEOUT_DELETE)
-                {
-                    element.value.splice( selected, 1 );
-                }
-                else
-                {
-                    const d = [ currentMouseDiff[ 0 ] - mousex, currentMouseDiff[ 1 ] - mousey ];
-                    let value = element.value[ selected ];
-                    value[ 0 ] = ( d[ 0 ] == 0.0 ) ? value[ 0 ] : ( d[ 0 ] < 0.0 ? element.xrange[ 0 ] : element.xrange[ 1 ] );
-                    value[ 1 ] = ( d[ 1 ] == 0.0 ) ? value[ 1 ] : ( d[ 1 ] < 0.0 ? element.yrange[ 1 ] : element.yrange[ 0 ] );
-                }
-
-                onmouseup( e );
-                return;
-            }
-
-            var dx = element.draggable_x ? last_mouse[ 0 ] - mousex : 0;
-            var dy = element.draggable_y ? last_mouse[ 1 ] - mousey : 0;
-            var delta = unconvert([ -dx, dy ]);
-
-            if( selected != -1 )
-            {
-                var minx = element.xrange[ 0 ];
-                var maxx = element.xrange[ 1 ];
-
-                if( element.no_overlap )
-                {
-                    if( selected > 0) minx = element.value[ selected - 1 ][ 0 ];
-                    if( selected < ( element.value.length - 1 ) ) maxx = element.value[ selected + 1 ][ 0 ];
-                }
-
-                var v = element.value[selected];
-                v[ 0 ] += delta[ 0 ];
-                v[ 1 ] += delta[ 1 ];
-                if(v[ 0 ] < minx) v[ 0 ] = minx;
-                else if(v[ 0 ] > maxx) v[ 0 ] = maxx;
-                if(v[ 1 ] < element.yrange[ 0 ]) v[ 1 ] = element.yrange[ 0 ];
-                else if(v[ 1 ] > element.yrange[ 1 ]) v[ 1 ] = element.yrange[ 1 ];
-            }
-
-            sortValues();
-            element.redraw();
-            last_mouse[ 0 ] = mousex;
-            last_mouse[ 1 ] = mousey;
-            onchange( e );
-
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        function onmouseup( e ) {
-            selected = -1;
-            element.redraw();
-            document.removeEventListener("mousemove", onmousemove);
-            document.removeEventListener("mouseup", onmouseup);
-            onchange(e);
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        function onchange( e ) {
-            if( options.callback )
-                options.callback.call( element, element.value, e );
-        }
-
-        function distance(a,b) { return Math.sqrt( Math.pow(b[0]-a[0],2) + Math.pow(b[1]-a[1],2) ); };
-
-        function computeSelected( x, y ) {
-
-            var minDistance = 100000;
-            var maxDistance = 8; //pixels
-            var selected = -1;
-            for( var i = 0; i < element.value.length; i++ )
-            {
-                var value = element.value[ i ];
-                var pos = convert( value );
-                var dist = distance( [ x,y ], pos );
-                if( dist < minDistance && dist < maxDistance )
-                {
-                    minDistance = dist;
-                    selected = i;
-                }
-            }
-            return selected;
-        }
-
-        function sortValues() {
-            var v = null;
-            if( selected != -1 )
-            {
-                v = element.value[ selected ];
-            }
-            element.value.sort(function( a,b ) { return a[ 0 ] - b[ 0 ]; });
-            if( v )
-            {
-                selected = element.value.indexOf( v );
-            }
-        }
-
-        element.redraw();
-        return this;
-    }
-
-    redraw( options = {} ) {
-        this.element.redraw( options );
-    }
-}
-
-LX.CanvasCurve = CanvasCurve;
-
-/**
- * @class CanvasDial
- */
-
-class CanvasDial {
-
-    constructor( panel, value, options = {} ) {
-
-        let element = document.createElement( "div" );
-        element.className = "dial " + ( options.className ? options.className : "" );
-        element.style.width = element.style.height = options.size || "100%";
-        element.style.minWidth = element.style.minHeight = "50px";
-
-        element.bgcolor = options.bgColor || LX.getThemeColor( "global-dark-background" );
-        element.pointscolor = options.pointsColor || LX.getThemeColor( "global-color-accent-light" );
-        element.linecolor = options.lineColor || "#555";
-        element.value = value || [];
-        element.xrange = options.xrange || [ 0, 1 ]; // min, max
-        element.yrange = options.yrange || [ 0, 1 ]; // min, max
-        element.defaulty = options.defaulty != null ? options.defaulty : 0.0;
-        element.no_overlap = options.noOverlap || false;
-        element.show_samples = options.showSamples || 0;
-        element.allow_add_values = options.allowAddValues ?? true;
-        element.draggable_x = options.draggableX ?? true;
-        element.draggable_y = options.draggableY ?? true;
-        element.smooth = (options.smooth && typeof( options.smooth ) == 'number' ? options.smooth : 0.3) || false;
-        element.move_out = options.moveOutAction ?? LX.CURVE_MOVEOUT_DELETE;
-
-        this.element = element;
-
-        let canvas = document.createElement( "canvas" );
-        canvas.width = canvas.height = options.size || 200;
-        element.appendChild( canvas );
-        this.canvas = canvas;
-
-        element.addEventListener( "mousedown", onmousedown );
-
-        element.getValueAt = function( x ) {
-
-            if( x < element.xrange[ 0 ] || x > element.xrange[ 1 ] )
-            {
-                return element.defaulty;
-            }
-
-            var last = [ element.xrange[ 0 ], element.defaulty ];
-            var f = 0;
-            for( var i = 0; i < element.value.length; i += 1 )
-            {
-                var v = element.value[ i ];
-                if( x == v[ 0 ] ) return v[ 1 ];
-                if( x < v[ 0 ] )
-                {
-                    f = ( x - last[ 0 ] ) / (v[ 0 ] - last[ 0 ]);
-                    return last[ 1 ] * ( 1 - f ) + v[ 1 ] * f;
-                }
-
-                last = v;
-            }
-
-            v = [ element.xrange[ 1 ], element.defaulty ];
-            f = (x - last[ 0 ]) / (v[ 0 ] - last[ 0 ]);
-            return last[ 1 ] * ( 1 - f ) + v[ 1 ] * f;
-        }
-
-        element.resample = function( samples ) {
-
-            var r = [];
-            var dx = (element.xrange[1] - element.xrange[ 0 ]) / samples;
-            for( var i = element.xrange[0]; i <= element.xrange[1]; i += dx)
-            {
-                r.push( element.getValueAt(i) );
-            }
-            return r;
-        }
-
-        element.addValue = function(v) {
-
-            for( var i = 0; i < element.value; i++ )
-            {
-                var value = element.value[ i ];
-                if(value[ 0 ] < v[ 0 ]) continue;
-                element.value.splice( i, 0, v );
-                redraw();
-                return;
-            }
-
-            element.value.push( v );
-            redraw();
-        }
-
-        //value to canvas
-        function convert(v, r) {
-
-            Math.pow(v[0],2)
-            return [ canvas.width * ( v[0] - element.xrange[0])/ (element.xrange[1]),
-                canvas.height * (v[1] - element.yrange[0])/ (element.yrange[1])];
-        }
-
-        //canvas to value
-        function unconvert(v) {
-            return [(v[0] * element.xrange[1] / canvas.width + element.xrange[0]),
-                    (v[1] * element.yrange[1] / canvas.height + element.yrange[0])];
-        }
-
-        var selected = -1;
-
-        element.redraw = function( o = {} ) {
-
-            if( o.value ) element.value = o.value;
-            if( o.xrange ) element.xrange = o.xrange;
-            if( o.yrange ) element.yrange = o.yrange;
-            if( o.smooth ) element.smooth = o.smooth;
-
-            var ctx = canvas.getContext( "2d" );
-            ctx.setTransform( 1, 0, 0, 1, 0, 0 );
-            ctx.translate( 0, canvas.height );
-            ctx.scale( 1, -1 );
-
-            ctx.fillStyle = element.bgcolor;
-            ctx.fillRect(0,0,canvas.width,canvas.height);
-
-            ctx.strokeStyle = element.linecolor;
-            ctx.beginPath();
-
-            //draw line
-            var pos = convert([ element.xrange[ 0 ],element.defaulty ]);
-            ctx.moveTo( pos[ 0 ], pos[ 1 ] );
-            let values = [pos[ 0 ], pos[ 1 ]];
-
-            for( var i in element.value)
-            {
-                var value = element.value[ i ];
-                pos = convert( value );
-                values.push( pos[ 0 ] );
-                values.push( pos[ 1 ] );
-            }
-
-            pos = convert([ element.xrange[ 1 ], element.defaulty ]);
-            values.push( pos[ 0 ] );
-            values.push( pos[ 1 ] );
-
-            // Draw points
-            const center =  [0,0];
-            pos = convert(center)
-            ctx.fillStyle = "gray";
-            ctx.beginPath();
-            ctx.arc( pos[ 0 ], pos[ 1 ], 3, 0, Math.PI * 2);
-            ctx.fill();
-
-            for( var i = 0; i < element.value.length; i += 1 )
-            {
-                var value = element.value[ i ];
-                pos = convert( value );
-                if( selected == i )
-                    ctx.fillStyle = "white";
-                else
-                    ctx.fillStyle = element.pointscolor;
-                ctx.beginPath();
-                ctx.arc( pos[ 0 ], pos[ 1 ], selected == i ? 4 : 3, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            if( element.show_samples )
-            {
-                var samples = element.resample(element.show_samples);
-                ctx.fillStyle = "#888";
-                for( var i = 0; i < samples.length; i += 1)
-                {
-                    var value = [ i * ((element.xrange[ 1 ] - element.xrange[ 0 ]) / element.show_samples) + element.xrange[ 0 ], samples[ i ] ];
-                    pos = convert(value);
-                    ctx.beginPath();
-                    ctx.arc( pos[ 0 ], pos[ 1 ], 2, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-        }
-
-        var last_mouse = [ 0, 0 ];
-
-        function onmousedown( e ) {
-            document.addEventListener( "mousemove", onmousemove );
-            document.addEventListener( "mouseup", onmouseup );
-
-            var rect = canvas.getBoundingClientRect();
-            var mousex = e.clientX - rect.left;
-            var mousey = e.clientY - rect.top;
-
-            selected = computeSelected( mousex, canvas.height - mousey );
-
-            if( e.button == LX.MOUSE_LEFT_CLICK && selected == -1 && element.allow_add_values )
-            {
-                var v = unconvert([ mousex, canvas.height - mousey ]);
-                element.value.push( v );
-                sortValues();
-                selected = element.value.indexOf( v );
-            }
-
-            last_mouse = [ mousex, mousey ];
-            element.redraw();
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        function onmousemove( e ) {
-
-            var rect = canvas.getBoundingClientRect();
-            var mousex = e.clientX - rect.left;
-            var mousey = e.clientY - rect.top;
-
-            if( mousex < 0 ) mousex = 0;
-            else if( mousex > canvas.width ) mousex = canvas.width;
-            if( mousey < 0 ) mousey = 0;
-            else if( mousey > canvas.height ) mousey = canvas.height;
-
-            // Dragging to remove
-            const currentMouseDiff = [ e.clientX - rect.left, e.clientY - rect.top ];
-            if( selected != -1 && distance( currentMouseDiff, [ mousex, mousey ] ) > canvas.height * 0.5 )
-            {
-                if( element.move_out == LX.CURVE_MOVEOUT_DELETE)
-                {
-                    element.value.splice( selected, 1 );
-                }
-                else
-                {
-                    const d = [ currentMouseDiff[ 0 ] - mousex, currentMouseDiff[ 1 ] - mousey ];
-                    let value = element.value[ selected ];
-                    value[ 0 ] = ( d[ 0 ] == 0.0 ) ? value[ 0 ] : ( d[ 0 ] < 0.0 ? element.xrange[ 0 ] : element.xrange[ 1 ] );
-                    value[ 1 ] = ( d[ 1 ] == 0.0 ) ? value[ 1 ] : ( d[ 1 ] < 0.0 ? element.yrange[ 1 ] : element.yrange[ 0 ] );
-                }
-
-                onmouseup( e );
-                return;
-            }
-
-            var dx = element.draggable_x ? last_mouse[ 0 ] - mousex : 0;
-            var dy = element.draggable_y ? last_mouse[ 1 ] - mousey : 0;
-            var delta = unconvert([ -dx, dy ]);
-
-            if( selected != -1 )
-            {
-                var minx = element.xrange[ 0 ];
-                var maxx = element.xrange[ 1 ];
-
-                if( element.no_overlap )
-                {
-                    if( selected > 0) minx = element.value[ selected - 1 ][ 0 ];
-                    if( selected < ( element.value.length - 1 ) ) maxx = element.value[ selected + 1 ][ 0 ];
-                }
-
-                var v = element.value[selected];
-                v[ 0 ] += delta[ 0 ];
-                v[ 1 ] += delta[ 1 ];
-                if(v[ 0 ] < minx) v[ 0 ] = minx;
-                else if(v[ 0 ] > maxx) v[ 0 ] = maxx;
-                if(v[ 1 ] < element.yrange[ 0 ]) v[ 1 ] = element.yrange[ 0 ];
-                else if(v[ 1 ] > element.yrange[ 1 ]) v[ 1 ] = element.yrange[ 1 ];
-            }
-
-            sortValues();
-            element.redraw();
-            last_mouse[ 0 ] = mousex;
-            last_mouse[ 1 ] = mousey;
-            onchange( e );
-
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        function onmouseup( e ) {
-            selected = -1;
-            element.redraw();
-            document.removeEventListener("mousemove", onmousemove);
-            document.removeEventListener("mouseup", onmouseup);
-            onchange(e);
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        function onchange( e ) {
-            if( options.callback )
-                options.callback.call( element, element.value, e );
-        }
-
-        function distance(a,b) { return Math.sqrt( Math.pow(b[0]-a[0],2) + Math.pow(b[1]-a[1],2) ); };
-
-        function computeSelected( x, y ) {
-
-            var minDistance = 100000;
-            var maxDistance = 8; //pixels
-            var selected = -1;
-            for( var i = 0; i < element.value.length; i++ )
-            {
-                var value = element.value[ i ];
-                var pos = convert( value );
-                var dist = distance( [ x,y ], pos );
-                if( dist < minDistance && dist < maxDistance )
-                {
-                    minDistance = dist;
-                    selected = i;
-                }
-            }
-            return selected;
-        }
-
-        function sortValues() {
-            var v = null;
-            if( selected != -1 )
-            {
-                v = element.value[ selected ];
-            }
-            element.value.sort(function( a,b ) { return a[ 0 ] - b[ 0 ]; });
-            if( v )
-            {
-                selected = element.value.indexOf( v );
-            }
-        }
-
-        element.redraw();
-        return this;
-    }
-
-    redraw( options = {} ) {
-        this.element.redraw( options );
-    }
-}
-
-LX.Dial = Dial;
+// asset_view.js @jxarco
 
 class AssetViewEvent {
 
@@ -13533,14 +14563,14 @@ class AssetViewEvent {
     static ASSET_CHECKED    = 7;
 
     constructor( type, item, value ) {
-        this.type = type || TreeEvent.NONE;
+        this.type = type || LX.TreeEvent.NONE;
         this.item = item;
         this.value = value;
         this.multiple = false; // Multiple selection
     }
 
     string() {
-        switch(this.type)
+        switch( this.type )
         {
             case AssetViewEvent.NONE: return "assetview_event_none";
             case AssetViewEvent.ASSET_SELECTED: return "assetview_event_selected";
@@ -13552,8 +14582,7 @@ class AssetViewEvent {
             case AssetViewEvent.ASSET_CHECKED: return "assetview_event_checked";
         }
     }
-};
-
+}
 LX.AssetViewEvent = AssetViewEvent;
 
 /**
@@ -13689,7 +14718,7 @@ class AssetView {
 
         if( this.rightPanel )
         {
-            this.rightPanel.clear()
+            this.rightPanel.clear();
         }
     }
 
@@ -13755,7 +14784,7 @@ class AssetView {
         let tree_data = {
             id: '/',
             children: this.data
-        }
+        };
 
         const tree = this.leftPanel.addTree( "Content Browser", tree_data, {
             // icons: tree_icons,
@@ -13821,7 +14850,7 @@ class AssetView {
         }
 
         const on_sort = ( value, event ) => {
-            const cmenu = addContextMenu( "Sort by", event, c => {
+            const cmenu = LX.addContextMenu( "Sort by", event, c => {
                 c.add("Name", () => this._sortData('id') );
                 c.add("Type", () => this._sortData('type') );
                 c.add("");
@@ -13833,10 +14862,10 @@ class AssetView {
             {
                 cmenu.root.style.zIndex = (+getComputedStyle( parent ).zIndex) + 1;
             }
-        }
+        };
 
         const on_change_view = ( value, event ) => {
-            const cmenu = addContextMenu( "Layout", event, c => {
+            const cmenu = LX.addContextMenu( "Layout", event, c => {
                 c.add("Content", () => this._setContentLayout( AssetView.LAYOUT_CONTENT ) );
                 c.add("");
                 c.add("List", () => this._setContentLayout( AssetView.LAYOUT_LIST ) );
@@ -13844,7 +14873,7 @@ class AssetView {
             const parent = this.parent.root.parentElement;
             if( parent.classList.contains('lexdialog') )
                 cmenu.root.style.zIndex = (+getComputedStyle( parent ).zIndex) + 1;
-        }
+        };
 
         const on_change_page = ( value, event ) => {
             if( !this.allowNextPage )
@@ -13860,7 +14889,7 @@ class AssetView {
             {
                 this._refreshContent();
             }
-        }
+        };
 
         this.rightPanel.sameLine();
         this.rightPanel.addSelect( "Filter", this.allowedTypes, this.allowedTypes[ 0 ], v => this._refreshContent.call(this, null, v), { width: "30%", minWidth: "128px" } );
@@ -13953,7 +14982,7 @@ class AssetView {
         const add_item = function(item) {
 
             const type = item.type.charAt( 0 ).toUpperCase() + item.type.slice( 1 );
-            const extension = getExtension( item.id );
+            const extension = LX.getExtension( item.id );
             const isFolder = type === "Folder";
 
             let itemEl = document.createElement('li');
@@ -14041,7 +15070,7 @@ class AssetView {
             if( !that.skipPreview )
             {
                 let preview = null;
-                const hasImage = item.src && (['png', 'jpg'].indexOf( getExtension( item.src ) ) > -1 || item.src.includes("data:image/") ); // Support b64 image as src
+                const hasImage = item.src && (['png', 'jpg'].indexOf( LX.getExtension( item.src ) ) > -1 || item.src.includes("data:image/") ); // Support b64 image as src
 
                 if( hasImage || isFolder || !isContentLayout)
                 {
@@ -14070,7 +15099,7 @@ class AssetView {
                     {
                         var newFontSize = newEmSize * textBaseSize;
                         textEl.style.fontSize = newFontSize + "px";
-                        preview.style.paddingTop = "calc(50% - " + (textEl.offsetHeight * 0.5 + 10) + "px)"
+                        preview.style.paddingTop = "calc(50% - " + (textEl.offsetHeight * 0.5 + 10) + "px)";
                     }
                 }
             }
@@ -14150,7 +15179,7 @@ class AssetView {
             }, false );
 
             return itemEl;
-        }
+        };
 
         const fr = new FileReader();
 
@@ -14214,7 +15243,7 @@ class AssetView {
 
         if( file.type == 'image' || file.src )
         {
-            const hasImage = ['png', 'jpg'].indexOf( getExtension( file.src ) ) > -1 || is_base_64;
+            const hasImage = ['png', 'jpg'].indexOf( LX.getExtension( file.src ) ) > -1 || is_base_64;
             if( hasImage )
             {
                 this.previewPanel.addImage( null, file.src, { style: { width: "100%" } } );
@@ -14261,7 +15290,7 @@ class AssetView {
 
         for( let i = 0; i < e.dataTransfer.files.length; ++i )
         {
-            const file = e.dataTransfer.files[i];
+            const file = e.dataTransfer.files[ i ];
 
             const result = this.currentData.find( e => e.id === file.name );
             if(result) continue;
@@ -14371,7 +15400,7 @@ class AssetView {
 
         delete item.domEl;
         delete item.folder;
-        const new_item = deepCopy( item );
+        const new_item = LX.deepCopy( item );
         this.currentData.splice( idx, 0, new_item );
 
         this._refreshContent( this.searchValue, this.filter );
@@ -14388,537 +15417,4 @@ class AssetView {
 
 LX.AssetView = AssetView;
 
-/*
-*   Requests
-*/
-
-Object.assign(LX, {
-
-    /**
-    * Request file from url (it could be a binary, text, etc.). If you want a simplied version use
-    * @method request
-    * @param {Object} request object with all the parameters like data (for sending forms), dataType, success, error
-    * @param {Function} on_complete
-    **/
-    request( request ) {
-
-        var dataType = request.dataType || "text";
-        if(dataType == "json") //parse it locally
-            dataType = "text";
-        else if(dataType == "xml") //parse it locally
-            dataType = "text";
-        else if (dataType == "binary")
-        {
-            //request.mimeType = "text/plain; charset=x-user-defined";
-            dataType = "arraybuffer";
-            request.mimeType = "application/octet-stream";
-        }
-
-        //regular case, use AJAX call
-        var xhr = new XMLHttpRequest();
-        xhr.open( request.data ? 'POST' : 'GET', request.url, true);
-        if(dataType)
-            xhr.responseType = dataType;
-        if (request.mimeType)
-            xhr.overrideMimeType( request.mimeType );
-        if( request.nocache )
-            xhr.setRequestHeader('Cache-Control', 'no-cache');
-
-        xhr.onload = function(load)
-        {
-            var response = this.response;
-            if( this.status != 200)
-            {
-                var err = "Error " + this.status;
-                if(request.error)
-                    request.error(err);
-                return;
-            }
-
-            if(request.dataType == "json") //chrome doesnt support json format
-            {
-                try
-                {
-                    response = JSON.parse(response);
-                }
-                catch (err)
-                {
-                    if(request.error)
-                        request.error(err);
-                    else
-                        throw err;
-                }
-            }
-            else if(request.dataType == "xml")
-            {
-                try
-                {
-                    var xmlparser = new DOMParser();
-                    response = xmlparser.parseFromString(response,"text/xml");
-                }
-                catch (err)
-                {
-                    if(request.error)
-                        request.error(err);
-                    else
-                        throw err;
-                }
-            }
-            if(request.success)
-                request.success.call(this, response, this);
-        };
-        xhr.onerror = function(err) {
-            if(request.error)
-                request.error(err);
-        }
-
-        var data = new FormData();
-        if( request.data )
-        {
-            for( var i in request.data)
-                data.append(i,request.data[i]);
-        }
-
-        xhr.send( data );
-        return xhr;
-    },
-
-    /**
-    * Request file from url
-    * @method requestText
-    * @param {String} url
-    * @param {Function} onComplete
-    * @param {Function} onError
-    **/
-    requestText( url, onComplete, onError ) {
-        return this.request({ url: url, dataType:"text", success: onComplete, error: onError });
-    },
-
-    /**
-    * Request file from url
-    * @method requestJSON
-    * @param {String} url
-    * @param {Function} onComplete
-    * @param {Function} onError
-    **/
-    requestJSON( url, onComplete, onError ) {
-        return this.request({ url: url, dataType:"json", success: onComplete, error: onError });
-    },
-
-    /**
-    * Request binary file from url
-    * @method requestBinary
-    * @param {String} url
-    * @param {Function} onComplete
-    * @param {Function} onError
-    **/
-    requestBinary( url, onComplete, onError ) {
-        return this.request({ url: url, dataType:"binary", success: onComplete, error: onError });
-    },
-
-    /**
-    * Request script and inserts it in the DOM
-    * @method requireScript
-    * @param {String|Array} url the url of the script or an array containing several urls
-    * @param {Function} onComplete
-    * @param {Function} onError
-    * @param {Function} onProgress (if several files are required, onProgress is called after every file is added to the DOM)
-    **/
-    requireScript( url, onComplete, onError, onProgress, version ) {
-
-        if(!url)
-            throw("invalid URL");
-
-        if( url.constructor === String )
-            url = [url];
-
-        var total = url.length;
-        var size = total;
-        var loaded_scripts = [];
-
-        for( var i in url)
-        {
-            var script = document.createElement('script');
-            script.num = i;
-            script.type = 'text/javascript';
-            script.src = url[i] + ( version ? "?version=" + version : "" );
-            script.original_src = url[i];
-            script.async = false;
-            script.onload = function( e ) {
-                total--;
-                loaded_scripts.push(this);
-                if(total)
-                {
-                    if( onProgress )
-                    {
-                        onProgress( this.original_src, this.num );
-                    }
-                }
-                else if(onComplete)
-                    onComplete( loaded_scripts );
-            };
-            if(onError)
-                script.onerror = function(err) {
-                    onError(err, this.original_src, this.num );
-                }
-            document.getElementsByTagName('head')[0].appendChild(script);
-        }
-    },
-
-    loadScriptSync( url ) {
-        return new Promise((resolve, reject) => {
-            const script = document.createElement( "script" );
-            script.src = url;
-            script.async = false;
-            script.onload = () => resolve();
-            script.onerror = () => reject(new Error(`Failed to load ${url}`));
-            document.head.appendChild( script );
-        });
-    },
-
-    downloadURL( url, filename ) {
-
-        const fr = new FileReader();
-
-        const _download = function(_url) {
-            var link = document.createElement('a');
-            link.href = _url;
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        if( url.includes('http') )
-        {
-            LX.request({ url: url, dataType: 'blob', success: (f) => {
-                fr.readAsDataURL( f );
-                fr.onload = e => {
-                    _download(e.currentTarget.result);
-                };
-            } });
-        }else
-        {
-            _download(url);
-        }
-
-    },
-
-    downloadFile: function( filename, data, dataType ) {
-        if(!data)
-        {
-            console.warn("No file provided to download");
-            return;
-        }
-
-        if(!dataType)
-        {
-            if(data.constructor === String )
-                dataType = 'text/plain';
-            else
-                dataType = 'application/octet-stream';
-        }
-
-        var file = null;
-        if(data.constructor !== File && data.constructor !== Blob)
-            file = new Blob( [ data ], {type : dataType});
-        else
-            file = data;
-
-        var url = URL.createObjectURL( file );
-        var element = document.createElement("a");
-        element.setAttribute('href', url);
-        element.setAttribute('download', filename );
-        element.style.display = 'none';
-        document.body.appendChild(element);
-        element.click();
-        document.body.removeChild(element);
-        setTimeout( function(){ URL.revokeObjectURL( url ); }, 1000*60 ); //wait one minute to revoke url
-    }
-});
-
-Object.defineProperty(String.prototype, 'lastChar', {
-    get: function() { return this[ this.length - 1 ]; },
-    enumerable: true,
-    configurable: true
-});
-
-Element.prototype.insertChildAtIndex = function( child, index = Infinity ) {
-    if ( index >= this.children.length ) this.appendChild( child );
-    else this.insertBefore( child, this.children[index] );
-}
-
-Element.prototype.hasClass = function( list ) {
-    list = [].concat( list );
-    var r = list.filter( v => this.classList.contains( v ) );
-    return !!r.length;
-}
-
-Element.prototype.addClass = function( className ) {
-    if( className ) this.classList.add( className );
-}
-
-Element.prototype.getComputedSize = function() {
-    // Since we use "box-sizing: border-box" now,
-    // it's all included in offsetWidth/offsetHeight
-    return {
-        width: this.offsetWidth,
-        height: this.offsetHeight
-    }
-}
-
-Element.prototype.getParentArea = function() {
-    let parent = this.parentElement;
-    while( parent ) {
-        if( parent.classList.contains( "lexarea" ) ) { return parent; }
-        parent = parent.parentElement;
-    }
-}
-
-Element.prototype.listen = function( eventName, callback, callbackName ) {
-    callbackName = callbackName ?? ( "_on" + eventName );
-    this[ callbackName ] = callback;
-    this.addEventListener( eventName, callback );
-}
-
-Element.prototype.ignore = function( eventName, callbackName ) {
-    callbackName = callbackName ?? ( "_on" + eventName );
-    const callback = this[ callbackName ];
-    this.removeEventListener( eventName, callback );
-}
-
-LX.UTILS = {
-    getTime() { return new Date().getTime() },
-    compareThreshold( v, p, n, t ) { return Math.abs(v - p) >= t || Math.abs(v - n) >= t },
-    compareThresholdRange( v0, v1, t0, t1 ) { return v0 >= t0 && v0 <= t1 || v1 >= t0 && v1 <= t1 || v0 <= t0 && v1 >= t1},
-    uidGenerator: simple_guidGenerator,
-    deleteElement( el ) { if( el ) el.remove(); },
-    flushCss(element) {
-        // By reading the offsetHeight property, we are forcing
-        // the browser to flush the pending CSS changes (which it
-        // does to ensure the value obtained is accurate).
-        element.offsetHeight;
-    },
-    getControlPoints( x0, y0, x1, y1, x2, y2, t ) {
-
-        //  x0,y0,x1,y1 are the coordinates of the end (knot) pts of this segment
-        //  x2,y2 is the next knot -- not connected here but needed to calculate p2
-        //  p1 is the control point calculated here, from x1 back toward x0.
-        //  p2 is the next control point, calculated here and returned to become the
-        //  next segment's p1.
-        //  t is the 'tension' which controls how far the control points spread.
-
-        //  Scaling factors: distances from this knot to the previous and following knots.
-        var d01=Math.sqrt(Math.pow(x1-x0,2)+Math.pow(y1-y0,2));
-        var d12=Math.sqrt(Math.pow(x2-x1,2)+Math.pow(y2-y1,2));
-
-        var fa=t*d01/(d01+d12);
-        var fb=t-fa;
-
-        var p1x=x1+fa*(x0-x2);
-        var p1y=y1+fa*(y0-y2);
-
-        var p2x=x1-fb*(x0-x2);
-        var p2y=y1-fb*(y0-y2);
-
-        return [p1x,p1y,p2x,p2y]
-    },
-    drawSpline( ctx, pts, t ) {
-
-        ctx.save();
-        var cp = [];   // array of control points, as x0,y0,x1,y1,...
-        var n = pts.length;
-
-        // Draw an open curve, not connected at the ends
-        for( var i = 0; i < (n - 4); i += 2 )
-        {
-            cp = cp.concat(LX.UTILS.getControlPoints(pts[i],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
-        }
-
-        for( var i = 2; i < ( pts.length - 5 ); i += 2 )
-        {
-            ctx.beginPath();
-            ctx.moveTo(pts[i], pts[i+1]);
-            ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
-            ctx.stroke();
-            ctx.closePath();
-        }
-
-        //  For open curves the first and last arcs are simple quadratics.
-        ctx.beginPath();
-        ctx.moveTo( pts[ 0 ], pts[ 1 ] );
-        ctx.quadraticCurveTo( cp[ 0 ], cp[ 1 ], pts[ 2 ], pts[ 3 ]);
-        ctx.stroke();
-        ctx.closePath();
-
-        ctx.beginPath();
-        ctx.moveTo( pts[ n-2 ], pts[ n-1 ] );
-        ctx.quadraticCurveTo( cp[ 2*n-10 ], cp[ 2*n-9 ], pts[ n-4 ], pts[ n-3 ]);
-        ctx.stroke();
-        ctx.closePath();
-
-        ctx.restore();
-    }
-};
-
-LX.ICONS = {
-    // Internals
-    "Clone": [512, 512, [], "regular", "M64 464l224 0c8.8 0 16-7.2 16-16l0-64 48 0 0 64c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 224c0-35.3 28.7-64 64-64l64 0 0 48-64 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16zM224 304l224 0c8.8 0 16-7.2 16-16l0-224c0-8.8-7.2-16-16-16L224 48c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16zm-64-16l0-224c0-35.3 28.7-64 64-64L448 0c35.3 0 64 28.7 64 64l0 224c0 35.3-28.7 64-64 64l-224 0c-35.3 0-64-28.7-64-64z"],
-    "IdBadge": [384, 512, [], "regular", "M256 48l0 16c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32-14.3-32-32l0-16L64 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16l0-384c0-8.8-7.2-16-16-16l-64 0zM0 64C0 28.7 28.7 0 64 0L320 0c35.3 0 64 28.7 64 64l0 384c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64zM160 320l64 0c44.2 0 80 35.8 80 80c0 8.8-7.2 16-16 16L96 416c-8.8 0-16-7.2-16-16c0-44.2 35.8-80 80-80zm-32-96a64 64 0 1 1 128 0 64 64 0 1 1 -128 0z"],
-    "Paste": [512, 512, [], "regular", "M104.6 48L64 48C28.7 48 0 76.7 0 112L0 384c0 35.3 28.7 64 64 64l96 0 0-48-96 0c-8.8 0-16-7.2-16-16l0-272c0-8.8 7.2-16 16-16l16 0c0 17.7 14.3 32 32 32l72.4 0C202 108.4 227.6 96 256 96l62 0c-7.1-27.6-32.2-48-62-48l-40.6 0C211.6 20.9 188.2 0 160 0s-51.6 20.9-55.4 48zM144 56a16 16 0 1 1 32 0 16 16 0 1 1 -32 0zM448 464l-192 0c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l140.1 0L464 243.9 464 448c0 8.8-7.2 16-16 16zM256 512l192 0c35.3 0 64-28.7 64-64l0-204.1c0-12.7-5.1-24.9-14.1-33.9l-67.9-67.9c-9-9-21.2-14.1-33.9-14.1L256 128c-35.3 0-64 28.7-64 64l0 256c0 35.3 28.7 64 64 64z"],
-    "Trash3": [448, 512, [], "regular", "M170.5 51.6L151.5 80l145 0-19-28.4c-1.5-2.2-4-3.6-6.7-3.6l-93.7 0c-2.7 0-5.2 1.3-6.7 3.6zm147-26.6L354.2 80 368 80l48 0 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-8 0 0 304c0 44.2-35.8 80-80 80l-224 0c-44.2 0-80-35.8-80-80l0-304-8 0c-13.3 0-24-10.7-24-24S10.7 80 24 80l8 0 48 0 13.8 0 36.7-55.1C140.9 9.4 158.4 0 177.1 0l93.7 0c18.7 0 36.2 9.4 46.6 24.9zM80 128l0 304c0 17.7 14.3 32 32 32l224 0c17.7 0 32-14.3 32-32l0-304L80 128zm80 64l0 208c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-208c0-8.8 7.2-16 16-16s16 7.2 16 16zm80 0l0 208c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-208c0-8.8 7.2-16 16-16s16 7.2 16 16zm80 0l0 208c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-208c0-8.8 7.2-16 16-16s16 7.2 16 16z"],
-    "FilePdf": [512, 512, [], "regular", "M64 464l48 0 0 48-48 0c-35.3 0-64-28.7-64-64L0 64C0 28.7 28.7 0 64 0L229.5 0c17 0 33.3 6.7 45.3 18.7l90.5 90.5c12 12 18.7 28.3 18.7 45.3L384 304l-48 0 0-144-80 0c-17.7 0-32-14.3-32-32l0-80L64 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16zM176 352l32 0c30.9 0 56 25.1 56 56s-25.1 56-56 56l-16 0 0 32c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-48 0-80c0-8.8 7.2-16 16-16zm32 80c13.3 0 24-10.7 24-24s-10.7-24-24-24l-16 0 0 48 16 0zm96-80l32 0c26.5 0 48 21.5 48 48l0 64c0 26.5-21.5 48-48 48l-32 0c-8.8 0-16-7.2-16-16l0-128c0-8.8 7.2-16 16-16zm32 128c8.8 0 16-7.2 16-16l0-64c0-8.8-7.2-16-16-16l-16 0 0 96 16 0zm80-112c0-8.8 7.2-16 16-16l48 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0 0 32 32 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-32 0 0 48c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-64 0-64z"],
-    "FileWord": [384, 512, [], "regular", "M48 448L48 64c0-8.8 7.2-16 16-16l160 0 0 80c0 17.7 14.3 32 32 32l80 0 0 288c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16zM64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-293.5c0-17-6.7-33.3-18.7-45.3L274.7 18.7C262.7 6.7 246.5 0 229.5 0L64 0zm55 241.1c-3.8-12.7-17.2-19.9-29.9-16.1s-19.9 17.2-16.1 29.9l48 160c3 10.2 12.4 17.1 23 17.1s19.9-7 23-17.1l25-83.4 25 83.4c3 10.2 12.4 17.1 23 17.1s19.9-7 23-17.1l48-160c3.8-12.7-3.4-26.1-16.1-29.9s-26.1 3.4-29.9 16.1l-25 83.4-25-83.4c-3-10.2-12.4-17.1-23-17.1s-19.9 7-23 17.1l-25 83.4-25-83.4z"],
-    "FilePowerpoint": [384, 512, [], "regular", "M64 464c-8.8 0-16-7.2-16-16L48 64c0-8.8 7.2-16 16-16l160 0 0 80c0 17.7 14.3 32 32 32l80 0 0 288c0 8.8-7.2 16-16 16L64 464zM64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-293.5c0-17-6.7-33.3-18.7-45.3L274.7 18.7C262.7 6.7 246.5 0 229.5 0L64 0zm72 208c-13.3 0-24 10.7-24 24l0 104 0 56c0 13.3 10.7 24 24 24s24-10.7 24-24l0-32 44 0c42 0 76-34 76-76s-34-76-76-76l-68 0zm68 104l-44 0 0-56 44 0c15.5 0 28 12.5 28 28s-12.5 28-28 28z"],
-    "FileExcel": [384, 512, [], "regular", "M48 448L48 64c0-8.8 7.2-16 16-16l160 0 0 80c0 17.7 14.3 32 32 32l80 0 0 288c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16zM64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-293.5c0-17-6.7-33.3-18.7-45.3L274.7 18.7C262.7 6.7 246.5 0 229.5 0L64 0zm90.9 233.3c-8.1-10.5-23.2-12.3-33.7-4.2s-12.3 23.2-4.2 33.7L161.6 320l-44.5 57.3c-8.1 10.5-6.3 25.5 4.2 33.7s25.5 6.3 33.7-4.2L192 359.1l37.1 47.6c8.1 10.5 23.2 12.3 33.7 4.2s12.3-23.2 4.2-33.7L222.4 320l44.5-57.3c8.1-10.5 6.3-25.5-4.2-33.7s-25.5-6.3-33.7 4.2L192 280.9l-37.1-47.6z"],
-    "Settings3": [640, 512, [], "solid", "M308.5 135.3c7.1-6.3 9.9-16.2 6.2-25c-2.3-5.3-4.8-10.5-7.6-15.5L304 89.4c-3-5-6.3-9.9-9.8-14.6c-5.7-7.6-15.7-10.1-24.7-7.1l-28.2 9.3c-10.7-8.8-23-16-36.2-20.9L199 27.1c-1.9-9.3-9.1-16.7-18.5-17.8C173.9 8.4 167.2 8 160.4 8l-.7 0c-6.8 0-13.5 .4-20.1 1.2c-9.4 1.1-16.6 8.6-18.5 17.8L115 56.1c-13.3 5-25.5 12.1-36.2 20.9L50.5 67.8c-9-3-19-.5-24.7 7.1c-3.5 4.7-6.8 9.6-9.9 14.6l-3 5.3c-2.8 5-5.3 10.2-7.6 15.6c-3.7 8.7-.9 18.6 6.2 25l22.2 19.8C32.6 161.9 32 168.9 32 176s.6 14.1 1.7 20.9L11.5 216.7c-7.1 6.3-9.9 16.2-6.2 25c2.3 5.3 4.8 10.5 7.6 15.6l3 5.2c3 5.1 6.3 9.9 9.9 14.6c5.7 7.6 15.7 10.1 24.7 7.1l28.2-9.3c10.7 8.8 23 16 36.2 20.9l6.1 29.1c1.9 9.3 9.1 16.7 18.5 17.8c6.7 .8 13.5 1.2 20.4 1.2s13.7-.4 20.4-1.2c9.4-1.1 16.6-8.6 18.5-17.8l6.1-29.1c13.3-5 25.5-12.1 36.2-20.9l28.2 9.3c9 3 19 .5 24.7-7.1c3.5-4.7 6.8-9.5 9.8-14.6l3.1-5.4c2.8-5 5.3-10.2 7.6-15.5c3.7-8.7 .9-18.6-6.2-25l-22.2-19.8c1.1-6.8 1.7-13.8 1.7-20.9s-.6-14.1-1.7-20.9l22.2-19.8zM112 176a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zM504.7 500.5c6.3 7.1 16.2 9.9 25 6.2c5.3-2.3 10.5-4.8 15.5-7.6l5.4-3.1c5-3 9.9-6.3 14.6-9.8c7.6-5.7 10.1-15.7 7.1-24.7l-9.3-28.2c8.8-10.7 16-23 20.9-36.2l29.1-6.1c9.3-1.9 16.7-9.1 17.8-18.5c.8-6.7 1.2-13.5 1.2-20.4s-.4-13.7-1.2-20.4c-1.1-9.4-8.6-16.6-17.8-18.5L583.9 307c-5-13.3-12.1-25.5-20.9-36.2l9.3-28.2c3-9 .5-19-7.1-24.7c-4.7-3.5-9.6-6.8-14.6-9.9l-5.3-3c-5-2.8-10.2-5.3-15.6-7.6c-8.7-3.7-18.6-.9-25 6.2l-19.8 22.2c-6.8-1.1-13.8-1.7-20.9-1.7s-14.1 .6-20.9 1.7l-19.8-22.2c-6.3-7.1-16.2-9.9-25-6.2c-5.3 2.3-10.5 4.8-15.6 7.6l-5.2 3c-5.1 3-9.9 6.3-14.6 9.9c-7.6 5.7-10.1 15.7-7.1 24.7l9.3 28.2c-8.8 10.7-16 23-20.9 36.2L315.1 313c-9.3 1.9-16.7 9.1-17.8 18.5c-.8 6.7-1.2 13.5-1.2 20.4s.4 13.7 1.2 20.4c1.1 9.4 8.6 16.6 17.8 18.5l29.1 6.1c5 13.3 12.1 25.5 20.9 36.2l-9.3 28.2c-3 9-.5 19 7.1 24.7c4.7 3.5 9.5 6.8 14.6 9.8l5.4 3.1c5 2.8 10.2 5.3 15.5 7.6c8.7 3.7 18.6 .9 25-6.2l19.8-22.2c6.8 1.1 13.8 1.7 20.9 1.7s14.1-.6 20.9-1.7l19.8 22.2zM464 304a48 48 0 1 1 0 96 48 48 0 1 1 0-96z"],
-    "MessagesCircle": [640, 512, [], "regular", "M88.2 309.1c9.8-18.3 6.8-40.8-7.5-55.8C59.4 230.9 48 204 48 176c0-63.5 63.8-128 160-128s160 64.5 160 128s-63.8 128-160 128c-13.1 0-25.8-1.3-37.8-3.6c-10.4-2-21.2-.6-30.7 4.2c-4.1 2.1-8.3 4.1-12.6 6c-16 7.2-32.9 13.5-49.9 18c2.8-4.6 5.4-9.1 7.9-13.6c1.1-1.9 2.2-3.9 3.2-5.9zM208 352c114.9 0 208-78.8 208-176S322.9 0 208 0S0 78.8 0 176c0 41.8 17.2 80.1 45.9 110.3c-.9 1.7-1.9 3.5-2.8 5.1c-10.3 18.4-22.3 36.5-36.6 52.1c-6.6 7-8.3 17.2-4.6 25.9C5.8 378.3 14.4 384 24 384c43 0 86.5-13.3 122.7-29.7c4.8-2.2 9.6-4.5 14.2-6.8c15.1 3 30.9 4.5 47.1 4.5zM432 480c16.2 0 31.9-1.6 47.1-4.5c4.6 2.3 9.4 4.6 14.2 6.8C529.5 498.7 573 512 616 512c9.6 0 18.2-5.7 22-14.5c3.8-8.8 2-19-4.6-25.9c-14.2-15.6-26.2-33.7-36.6-52.1c-.9-1.7-1.9-3.4-2.8-5.1C622.8 384.1 640 345.8 640 304c0-94.4-87.9-171.5-198.2-175.8c4.1 15.2 6.2 31.2 6.2 47.8l0 .6c87.2 6.7 144 67.5 144 127.4c0 28-11.4 54.9-32.7 77.2c-14.3 15-17.3 37.6-7.5 55.8c1.1 2 2.2 4 3.2 5.9c2.5 4.5 5.2 9 7.9 13.6c-17-4.5-33.9-10.7-49.9-18c-4.3-1.9-8.5-3.9-12.6-6c-9.5-4.8-20.3-6.2-30.7-4.2c-12.1 2.4-24.8 3.6-37.8 3.6c-61.7 0-110-26.5-136.8-62.3c-16 5.4-32.8 9.4-50 11.8C279 439.8 350 480 432 480z"],
-    "LinkOff": [640, 512, ["ChainBroken", "ChainOff", "Unlink"], "solid", "M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L489.3 358.2l90.5-90.5c56.5-56.5 56.5-148 0-204.5c-50-50-128.8-56.5-186.3-15.4l-1.6 1.1c-14.4 10.3-17.7 30.3-7.4 44.6s30.3 17.7 44.6 7.4l1.6-1.1c32.1-22.9 76-19.3 103.8 8.6c31.5 31.5 31.5 82.5 0 114l-96 96-31.9-25C430.9 239.6 420.1 175.1 377 132c-52.2-52.3-134.5-56.2-191.3-11.7L38.8 5.1zM239 162c30.1-14.9 67.7-9.9 92.8 15.3c20 20 27.5 48.3 21.7 74.5L239 162zM406.6 416.4L220.9 270c-2.1 39.8 12.2 80.1 42.2 110c38.9 38.9 94.4 51 143.6 36.3zm-290-228.5L60.2 244.3c-56.5 56.5-56.5 148 0 204.5c50 50 128.8 56.5 186.3 15.4l1.6-1.1c14.4-10.3 17.7-30.3 7.4-44.6s-30.3-17.7-44.6-7.4l-1.6 1.1c-32.1 22.9-76 19.3-103.8-8.6C74 372 74 321 105.5 289.5l61.8-61.8-50.6-39.9z"],
-    "StreetView": [512, 512, [], "solid", "M320 64A64 64 0 1 0 192 64a64 64 0 1 0 128 0zm-96 96c-35.3 0-64 28.7-64 64l0 48c0 17.7 14.3 32 32 32l1.8 0 11.1 99.5c1.8 16.2 15.5 28.5 31.8 28.5l38.7 0c16.3 0 30-12.3 31.8-28.5L318.2 304l1.8 0c17.7 0 32-14.3 32-32l0-48c0-35.3-28.7-64-64-64l-64 0zM132.3 394.2c13-2.4 21.7-14.9 19.3-27.9s-14.9-21.7-27.9-19.3c-32.4 5.9-60.9 14.2-82 24.8c-10.5 5.3-20.3 11.7-27.8 19.6C6.4 399.5 0 410.5 0 424c0 21.4 15.5 36.1 29.1 45c14.7 9.6 34.3 17.3 56.4 23.4C130.2 504.7 190.4 512 256 512s125.8-7.3 170.4-19.6c22.1-6.1 41.8-13.8 56.4-23.4c13.7-8.9 29.1-23.6 29.1-45c0-13.5-6.4-24.5-14-32.6c-7.5-7.9-17.3-14.3-27.8-19.6c-21-10.6-49.5-18.9-82-24.8c-13-2.4-25.5 6.3-27.9 19.3s6.3 25.5 19.3 27.9c30.2 5.5 53.7 12.8 69 20.5c3.2 1.6 5.8 3.1 7.9 4.5c3.6 2.4 3.6 7.2 0 9.6c-8.8 5.7-23.1 11.8-43 17.3C374.3 457 318.5 464 256 464s-118.3-7-157.7-17.9c-19.9-5.5-34.2-11.6-43-17.3c-3.6-2.4-3.6-7.2 0-9.6c2.1-1.4 4.8-2.9 7.9-4.5c15.3-7.7 38.8-14.9 69-20.5z"],
-    "ClosedCaptioning": [576, 512, ["CC"], "regular", "M512 80c8.8 0 16 7.2 16 16l0 320c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16L48 96c0-8.8 7.2-16 16-16l448 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l448 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zM200 208c14.2 0 27 6.1 35.8 16c8.8 9.9 24 10.7 33.9 1.9s10.7-24 1.9-33.9c-17.5-19.6-43.1-32-71.5-32c-53 0-96 43-96 96s43 96 96 96c28.4 0 54-12.4 71.5-32c8.8-9.9 8-25-1.9-33.9s-25-8-33.9 1.9c-8.8 9.9-21.6 16-35.8 16c-26.5 0-48-21.5-48-48s21.5-48 48-48zm144 48c0-26.5 21.5-48 48-48c14.2 0 27 6.1 35.8 16c8.8 9.9 24 10.7 33.9 1.9s10.7-24 1.9-33.9c-17.5-19.6-43.1-32-71.5-32c-53 0-96 43-96 96s43 96 96 96c28.4 0 54-12.4 71.5-32c8.8-9.9 8-25-1.9-33.9s-25-8-33.9 1.9c-8.8 9.9-21.6 16-35.8 16c-26.5 0-48-21.5-48-48z"],
-    "ChildReaching": [384, 512, [], "solid", "M256 64A64 64 0 1 0 128 64a64 64 0 1 0 128 0zM152.9 169.3c-23.7-8.4-44.5-24.3-58.8-45.8L74.6 94.2C64.8 79.5 45 75.6 30.2 85.4s-18.7 29.7-8.9 44.4L40.9 159c18.1 27.1 42.8 48.4 71.1 62.4L112 480c0 17.7 14.3 32 32 32s32-14.3 32-32l0-96 32 0 0 96c0 17.7 14.3 32 32 32s32-14.3 32-32l0-258.4c29.1-14.2 54.4-36.2 72.7-64.2l18.2-27.9c9.6-14.8 5.4-34.6-9.4-44.3s-34.6-5.5-44.3 9.4L291 122.4c-21.8 33.4-58.9 53.6-98.8 53.6c-12.6 0-24.9-2-36.6-5.8c-.9-.3-1.8-.7-2.7-.9z"],
-    "HourglassHalf": [384, 512, [], "regular", "M0 24C0 10.7 10.7 0 24 0L360 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-8 0 0 19c0 40.3-16 79-44.5 107.5L225.9 256l81.5 81.5C336 366 352 404.7 352 445l0 19 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24L24 512c-13.3 0-24-10.7-24-24s10.7-24 24-24l8 0 0-19c0-40.3 16-79 44.5-107.5L158.1 256 76.5 174.5C48 146 32 107.3 32 67l0-19-8 0C10.7 48 0 37.3 0 24zM110.5 371.5c-3.9 3.9-7.5 8.1-10.7 12.5l184.4 0c-3.2-4.4-6.8-8.6-10.7-12.5L192 289.9l-81.5 81.5zM284.2 128C297 110.4 304 89 304 67l0-19L80 48l0 19c0 22.1 7 43.4 19.8 61l184.4 0z"],
-    "PaperPlane": [512, 512, [], "regular", "M16.1 260.2c-22.6 12.9-20.5 47.3 3.6 57.3L160 376l0 103.3c0 18.1 14.6 32.7 32.7 32.7c9.7 0 18.9-4.3 25.1-11.8l62-74.3 123.9 51.6c18.9 7.9 40.8-4.5 43.9-24.7l64-416c1.9-12.1-3.4-24.3-13.5-31.2s-23.3-7.5-34-1.4l-448 256zm52.1 25.5L409.7 90.6 190.1 336l1.2 1L68.2 285.7zM403.3 425.4L236.7 355.9 450.8 116.6 403.3 425.4z"],
-    // "PaperPlane": [512, 512, [], "solid", "M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480l0-83.6c0-4 1.5-7.8 4.2-10.8L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3 .3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z"],
-    "Axis3DArrows": [24, 24, [], "solid", "m12 2l4 4h-3v7.85l6.53 3.76L21 15.03l1.5 5.47l-5.5 1.46l1.53-2.61L12 15.58l-6.53 3.77L7 21.96L1.5 20.5L3 15.03l1.47 2.58L11 13.85V6H8z"],
-    "PersonWalkingDashedLineArrowRight": [640, 512, [], "solid", "M208 96a48 48 0 1 0 0-96 48 48 0 1 0 0 96zM123.7 200.5c1-.4 1.9-.8 2.9-1.2l-16.9 63.5c-5.6 21.1-.1 43.6 14.7 59.7l70.7 77.1 22 88.1c4.3 17.1 21.7 27.6 38.8 23.3s27.6-21.7 23.3-38.8l-23-92.1c-1.9-7.8-5.8-14.9-11.2-20.8l-49.5-54 19.3-65.5 9.6 23c4.4 10.6 12.5 19.3 22.8 24.5l26.7 13.3c15.8 7.9 35 1.5 42.9-14.3s1.5-35-14.3-42.9L281 232.7l-15.3-36.8C248.5 154.8 208.3 128 163.7 128c-22.8 0-45.3 4.8-66.1 14l-8 3.5c-32.9 14.6-58.1 42.4-69.4 76.5l-2.6 7.8c-5.6 16.8 3.5 34.9 20.2 40.5s34.9-3.5 40.5-20.2l2.6-7.8c5.7-17.1 18.3-30.9 34.7-38.2l8-3.5zm-30 135.1L68.7 398 9.4 457.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L116.3 441c4.6-4.6 8.2-10.1 10.6-16.1l14.5-36.2-40.7-44.4c-2.5-2.7-4.8-5.6-7-8.6zM550.6 153.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L530.7 224 384 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l146.7 0-25.4 25.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l80-80c12.5-12.5 12.5-32.8 0-45.3l-80-80zM392 0c-13.3 0-24 10.7-24 24l0 48c0 13.3 10.7 24 24 24s24-10.7 24-24l0-48c0-13.3-10.7-24-24-24zm24 152c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 16c0 13.3 10.7 24 24 24s24-10.7 24-24l0-16zM392 320c-13.3 0-24 10.7-24 24l0 16c0 13.3 10.7 24 24 24s24-10.7 24-24l0-16c0-13.3-10.7-24-24-24zm24 120c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 48c0 13.3 10.7 24 24 24s24-10.7 24-24l0-48z"],
-    "PersonWalkingArrowLoopLeft": [640, 512, [], "solid", "M208 96a48 48 0 1 0 0-96 48 48 0 1 0 0 96zM123.7 200.5c1-.4 1.9-.8 2.9-1.2l-16.9 63.5c-5.6 21.1-.1 43.6 14.7 59.7l70.7 77.1 22 88.1c4.3 17.1 21.7 27.6 38.8 23.3s27.6-21.7 23.3-38.8l-23-92.1c-1.9-7.8-5.8-14.9-11.2-20.8l-49.5-54 19.3-65.5 9.6 23c4.4 10.6 12.5 19.3 22.8 24.5l26.7 13.3c15.8 7.9 35 1.5 42.9-14.3s1.5-35-14.3-42.9L281 232.7l-15.3-36.8C248.5 154.8 208.3 128 163.7 128c-22.8 0-45.3 4.8-66.1 14l-8 3.5c-32.9 14.6-58.1 42.4-69.4 76.5l-2.6 7.8c-5.6 16.8 3.5 34.9 20.2 40.5s34.9-3.5 40.5-20.2l2.6-7.8c5.7-17.1 18.3-30.9 34.7-38.2l8-3.5zm-30 135.1L68.7 398 9.4 457.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L116.3 441c4.6-4.6 8.2-10.1 10.6-16.1l14.5-36.2-40.7-44.4c-2.5-2.7-4.8-5.6-7-8.6zm347.7 119c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L461.3 384l18.7 0c88.4 0 160-71.6 160-160s-71.6-160-160-160L352 64c-17.7 0-32 14.3-32 32s14.3 32 32 32l128 0c53 0 96 43 96 96s-43 96-96 96l-18.7 0 25.4-25.4c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-80 80c-12.5 12.5-12.5 32.8 0 45.3l80 80z"],
-    "PersonWalkingArrowRight": [640, 512, [], "solid", "M208 96a48 48 0 1 0 0-96 48 48 0 1 0 0 96zM123.7 200.5c1-.4 1.9-.8 2.9-1.2l-16.9 63.5c-5.6 21.1-.1 43.6 14.7 59.7l70.7 77.1 22 88.1c4.3 17.1 21.7 27.6 38.8 23.3s27.6-21.7 23.3-38.8l-23-92.1c-1.9-7.8-5.8-14.9-11.2-20.8l-49.5-54 19.3-65.5 9.6 23c4.4 10.6 12.5 19.3 22.8 24.5l26.7 13.3c15.8 7.9 35 1.5 42.9-14.3s1.5-35-14.3-42.9L281 232.7l-15.3-36.8C248.5 154.8 208.3 128 163.7 128c-22.8 0-45.3 4.8-66.1 14l-8 3.5c-32.9 14.6-58.1 42.4-69.4 76.5l-2.6 7.8c-5.6 16.8 3.5 34.9 20.2 40.5s34.9-3.5 40.5-20.2l2.6-7.8c5.7-17.1 18.3-30.9 34.7-38.2l8-3.5zm-30 135.1L68.7 398 9.4 457.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L116.3 441c4.6-4.6 8.2-10.1 10.6-16.1l14.5-36.2-40.7-44.4c-2.5-2.7-4.8-5.6-7-8.6zM550.6 153.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L530.7 224 384 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l146.7 0-25.4 25.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l80-80c12.5-12.5 12.5-32.8 0-45.3l-80-80z"],
-    "ClapperboardClosed": [512, 512, [], "solid", "M448 32l-86.1 0-1 1-127 127 92.1 0 1-1L453.8 32.3c-1.9-.2-3.8-.3-5.8-.3zm64 128l0-64c0-15.1-5.3-29.1-14-40l-104 104L512 160zM294.1 32l-92.1 0-1 1L73.9 160l92.1 0 1-1 127-127zM64 32C28.7 32 0 60.7 0 96l0 64 6.1 0 1-1 127-127L64 32zM512 192L0 192 0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-224z"],
-    "UserOff": [640, 512, [], "solid", "M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L381.9 274c48.5-23.2 82.1-72.7 82.1-130C464 64.5 399.5 0 320 0C250.4 0 192.4 49.3 178.9 114.9L38.8 5.1zM545.5 512L528 512 284.3 320l-59 0C136.2 320 64 392.2 64 481.3c0 17 13.8 30.7 30.7 30.7l450.6 0 .3 0z"],
-    "PhotoFilm": [640, 512, ["Media"], "solid", "M256 0L576 0c35.3 0 64 28.7 64 64l0 224c0 35.3-28.7 64-64 64l-320 0c-35.3 0-64-28.7-64-64l0-224c0-35.3 28.7-64 64-64zM476 106.7C471.5 100 464 96 456 96s-15.5 4-20 10.7l-56 84L362.7 169c-4.6-5.7-11.5-9-18.7-9s-14.2 3.3-18.7 9l-64 80c-5.8 7.2-6.9 17.1-2.9 25.4s12.4 13.6 21.6 13.6l80 0 48 0 144 0c8.9 0 17-4.9 21.2-12.7s3.7-17.3-1.2-24.6l-96-144zM336 96a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zM64 128l96 0 0 256 0 32c0 17.7 14.3 32 32 32l128 0c17.7 0 32-14.3 32-32l0-32 160 0 0 64c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 192c0-35.3 28.7-64 64-64zm8 64c-8.8 0-16 7.2-16 16l0 16c0 8.8 7.2 16 16 16l16 0c8.8 0 16-7.2 16-16l0-16c0-8.8-7.2-16-16-16l-16 0zm0 104c-8.8 0-16 7.2-16 16l0 16c0 8.8 7.2 16 16 16l16 0c8.8 0 16-7.2 16-16l0-16c0-8.8-7.2-16-16-16l-16 0zm0 104c-8.8 0-16 7.2-16 16l0 16c0 8.8 7.2 16 16 16l16 0c8.8 0 16-7.2 16-16l0-16c0-8.8-7.2-16-16-16l-16 0zm336 16l0 16c0 8.8 7.2 16 16 16l16 0c8.8 0 16-7.2 16-16l0-16c0-8.8-7.2-16-16-16l-16 0c-8.8 0-16 7.2-16 16z"],
-    "Chart": [448, 512, [], "solid", "M160 80c0-26.5 21.5-48 48-48l32 0c26.5 0 48 21.5 48 48l0 352c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48l0-352zM0 272c0-26.5 21.5-48 48-48l32 0c26.5 0 48 21.5 48 48l0 160c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48L0 272zM368 96l32 0c26.5 0 48 21.5 48 48l0 288c0 26.5-21.5 48-48 48l-32 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48z"],
-    "HandsAslInterpreting": [640, 512, ["ASL"], "solid", "M156.6 46.3c7.9-15.8 1.5-35-14.3-42.9s-35-1.5-42.9 14.3L13.5 189.4C4.6 207.2 0 226.8 0 246.7L0 256c0 70.7 57.3 128 128 128l72 0 8 0 0-.3c35.2-2.7 65.4-22.8 82.1-51.7c8.8-15.3 3.6-34.9-11.7-43.7s-34.9-3.6-43.7 11.7c-7 12-19.9 20-34.7 20c-22.1 0-40-17.9-40-40s17.9-40 40-40c14.8 0 27.7 8 34.7 20c8.8 15.3 28.4 20.5 43.7 11.7s20.5-28.4 11.7-43.7c-12.8-22.1-33.6-39.1-58.4-47.1l80.8-22c17-4.6 27.1-22.2 22.5-39.3s-22.2-27.1-39.3-22.5L194.9 124.6l81.6-68c13.6-11.3 15.4-31.5 4.1-45.1S249.1-3.9 235.5 7.4L133.6 92.3l23-46zM483.4 465.7c-7.9 15.8-1.5 35 14.3 42.9s35 1.5 42.9-14.3l85.9-171.7c8.9-17.8 13.5-37.4 13.5-57.2l0-9.3c0-70.7-57.3-128-128-128l-72 0-8 0 0 .3c-35.2 2.7-65.4 22.8-82.1 51.7c-8.9 15.3-3.6 34.9 11.7 43.7s34.9 3.6 43.7-11.7c7-12 19.9-20 34.7-20c22.1 0 40 17.9 40 40s-17.9 40-40 40c-14.8 0-27.7-8-34.7-20c-8.9-15.3-28.4-20.5-43.7-11.7s-20.5 28.4-11.7 43.7c12.8 22.1 33.6 39.1 58.4 47.1l-80.8 22c-17.1 4.7-27.1 22.2-22.5 39.3s22.2 27.1 39.3 22.5l100.7-27.5-81.6 68c-13.6 11.3-15.4 31.5-4.1 45.1s31.5 15.4 45.1 4.1l101.9-84.9-23 46z"],
-    "HandPointRight": [512, 512, [], "regular", "M448 128l-177.6 0c1 5.2 1.6 10.5 1.6 16l0 16 32 0 144 0c8.8 0 16-7.2 16-16s-7.2-16-16-16zM224 144c0-17.7-14.3-32-32-32c0 0 0 0 0 0l-24 0c-66.3 0-120 53.7-120 120l0 48c0 52.5 33.7 97.1 80.7 113.4c-.5-3.1-.7-6.2-.7-9.4c0-20 9.2-37.9 23.6-49.7c-4.9-9-7.6-19.4-7.6-30.3c0-15.1 5.3-29 14-40c-8.8-11-14-24.9-14-40l0-40c0-13.3 10.7-24 24-24s24 10.7 24 24l0 40c0 8.8 7.2 16 16 16s16-7.2 16-16l0-40 0-40zM192 64s0 0 0 0c18 0 34.6 6 48 16l208 0c35.3 0 64 28.7 64 64s-28.7 64-64 64l-82 0c1.3 5.1 2 10.5 2 16c0 25.3-14.7 47.2-36 57.6c2.6 7 4 14.5 4 22.4c0 20-9.2 37.9-23.6 49.7c4.9 9 7.6 19.4 7.6 30.3c0 35.3-28.7 64-64 64l-64 0-24 0C75.2 448 0 372.8 0 280l0-48C0 139.2 75.2 64 168 64l24 0zm64 336c8.8 0 16-7.2 16-16s-7.2-16-16-16l-48 0-16 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l64 0zm16-176c0 5.5-.7 10.9-2 16l2 0 32 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-32 0 0 16zm-24 64l-40 0c-8.8 0-16 7.2-16 16s7.2 16 16 16l48 0 16 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-24 0z"],
-    "HandPointUp": [384, 512, [], "regular", "M64 64l0 177.6c5.2-1 10.5-1.6 16-1.6l16 0 0-32L96 64c0-8.8-7.2-16-16-16s-16 7.2-16 16zM80 288c-17.7 0-32 14.3-32 32c0 0 0 0 0 0l0 24c0 66.3 53.7 120 120 120l48 0c52.5 0 97.1-33.7 113.4-80.7c-3.1 .5-6.2 .7-9.4 .7c-20 0-37.9-9.2-49.7-23.6c-9 4.9-19.4 7.6-30.3 7.6c-15.1 0-29-5.3-40-14c-11 8.8-24.9 14-40 14l-40 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l40 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-40 0-40 0zM0 320s0 0 0 0c0-18 6-34.6 16-48L16 64C16 28.7 44.7 0 80 0s64 28.7 64 64l0 82c5.1-1.3 10.5-2 16-2c25.3 0 47.2 14.7 57.6 36c7-2.6 14.5-4 22.4-4c20 0 37.9 9.2 49.7 23.6c9-4.9 19.4-7.6 30.3-7.6c35.3 0 64 28.7 64 64l0 64 0 24c0 92.8-75.2 168-168 168l-48 0C75.2 512 0 436.8 0 344l0-24zm336-64c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 48 0 16c0 8.8 7.2 16 16 16s16-7.2 16-16l0-64zM160 240c5.5 0 10.9 .7 16 2l0-2 0-32c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 32 16 0zm64 24l0 40c0 8.8 7.2 16 16 16s16-7.2 16-16l0-48 0-16c0-8.8-7.2-16-16-16s-16 7.2-16 16l0 24z"],
-    "HandPointDown": [384, 512, [], "regular", "M64 448l0-177.6c5.2 1 10.5 1.6 16 1.6l16 0 0 32 0 144c0 8.8-7.2 16-16 16s-16-7.2-16-16zM80 224c-17.7 0-32-14.3-32-32c0 0 0 0 0 0l0-24c0-66.3 53.7-120 120-120l48 0c52.5 0 97.1 33.7 113.4 80.7c-3.1-.5-6.2-.7-9.4-.7c-20 0-37.9 9.2-49.7 23.6c-9-4.9-19.4-7.6-30.3-7.6c-15.1 0-29 5.3-40 14c-11-8.8-24.9-14-40-14l-40 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l40 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-40 0-40 0zM0 192s0 0 0 0c0 18 6 34.6 16 48l0 208c0 35.3 28.7 64 64 64s64-28.7 64-64l0-82c5.1 1.3 10.5 2 16 2c25.3 0 47.2-14.7 57.6-36c7 2.6 14.5 4 22.4 4c20 0 37.9-9.2 49.7-23.6c9 4.9 19.4 7.6 30.3 7.6c35.3 0 64-28.7 64-64l0-64 0-24C384 75.2 308.8 0 216 0L168 0C75.2 0 0 75.2 0 168l0 24zm336 64c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-48 0-16c0-8.8 7.2-16 16-16s16 7.2 16 16l0 64zM160 272c5.5 0 10.9-.7 16-2l0 2 0 32c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-32 16 0zm64-24l0-40c0-8.8 7.2-16 16-16s16 7.2 16 16l0 48 0 16c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-24z"],
-    "HandPointLeft": [512, 512, [], "regular", "M64 128l177.6 0c-1 5.2-1.6 10.5-1.6 16l0 16-32 0L64 160c-8.8 0-16-7.2-16-16s7.2-16 16-16zm224 16c0-17.7 14.3-32 32-32c0 0 0 0 0 0l24 0c66.3 0 120 53.7 120 120l0 48c0 52.5-33.7 97.1-80.7 113.4c.5-3.1 .7-6.2 .7-9.4c0-20-9.2-37.9-23.6-49.7c4.9-9 7.6-19.4 7.6-30.3c0-15.1-5.3-29-14-40c8.8-11 14-24.9 14-40l0-40c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-40 0-40zm32-80s0 0 0 0c-18 0-34.6 6-48 16L64 80C28.7 80 0 108.7 0 144s28.7 64 64 64l82 0c-1.3 5.1-2 10.5-2 16c0 25.3 14.7 47.2 36 57.6c-2.6 7-4 14.5-4 22.4c0 20 9.2 37.9 23.6 49.7c-4.9 9-7.6 19.4-7.6 30.3c0 35.3 28.7 64 64 64l64 0 24 0c92.8 0 168-75.2 168-168l0-48c0-92.8-75.2-168-168-168l-24 0zM256 400c-8.8 0-16-7.2-16-16s7.2-16 16-16l48 0 16 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-64 0zM240 224c0 5.5 .7 10.9 2 16l-2 0-32 0c-8.8 0-16-7.2-16-16s7.2-16 16-16l32 0 0 16zm24 64l40 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-48 0-16 0c-8.8 0-16-7.2-16-16s7.2-16 16-16l24 0z"],
-    "HandScissors": [512, 512, [], "regular", "M.2 276.3c-1.2-35.3 26.4-65 61.7-66.2l3.3-.1L57 208.1C22.5 200.5 .7 166.3 8.3 131.8S50.2 75.5 84.7 83.2l173 38.3c2.3-2.9 4.7-5.7 7.1-8.5l18.4-20.3C299.9 74.5 323.5 64 348.3 64l10.2 0c54.1 0 104.1 28.7 131.3 75.4l1.5 2.6c13.6 23.2 20.7 49.7 20.7 76.6L512 344c0 66.3-53.7 120-120 120l-8 0-96 0c-35.3 0-64-28.7-64-64c0-2.8 .2-5.6 .5-8.3c-19.4-11-32.5-31.8-32.5-55.7c0-.8 0-1.6 0-2.4L66.4 338c-35.3 1.2-65-26.4-66.2-61.7zm63.4-18.2c-8.8 .3-15.7 7.7-15.4 16.5s7.7 15.7 16.5 15.4l161.5-5.6c9.8-.3 18.7 5.3 22.7 14.2s2.2 19.3-4.5 26.4c-2.8 2.9-4.4 6.7-4.4 11c0 8.8 7.2 16 16 16c9.1 0 17.4 5.1 21.5 13.3s3.2 17.9-2.3 25.1c-2 2.7-3.2 6-3.2 9.6c0 8.8 7.2 16 16 16l96 0 8 0c39.8 0 72-32.2 72-72l0-125.4c0-18.4-4.9-36.5-14.2-52.4l-1.5-2.6c-18.6-32-52.8-51.6-89.8-51.6l-10.2 0c-11.3 0-22 4.8-29.6 13.1l-17.5-15.9 17.5 15.9-18.4 20.3c-.6 .6-1.1 1.3-1.7 1.9l57 13.2c8.6 2 14 10.6 12 19.2s-10.6 14-19.2 12l-85.6-19.7L74.3 130c-8.6-1.9-17.2 3.5-19.1 12.2s3.5 17.2 12.2 19.1l187.5 41.6c10.2 2.3 17.8 10.9 18.7 21.4l.1 1c.6 6.6-1.5 13.1-5.8 18.1s-10.6 7.9-17.2 8.2L63.6 258.1z"],
-    "HandSpock": [576, 512, [], "regular", "M170.2 80.8C161 47 180.8 12 214.6 2.4c34-9.6 69.4 10.2 79 44.2l30.3 107.1L337.1 84c6.6-34.7 40.1-57.5 74.8-50.9c31.4 6 53 33.9 52 64.9c10-2.6 20.8-2.8 31.5-.1c34.3 8.6 55.1 43.3 46.6 77.6L486.7 397.2C469.8 464.7 409.2 512 339.6 512l-33.7 0c-56.9 0-112.2-19-157.2-53.9l-92-71.6c-27.9-21.7-32.9-61.9-11.2-89.8s61.9-32.9 89.8-11.2l17 13.2L100.5 167.5c-13-32.9 3.2-70.1 36-83c11.1-4.4 22.7-5.4 33.7-3.7zm77.1-21.2c-2.4-8.5-11.2-13.4-19.7-11s-13.4 11.2-11 19.7l54.8 182.4c3.5 12.3-3.3 25.2-15.4 29.3s-25.3-2-30-13.9L174.9 138.1c-3.2-8.2-12.5-12.3-20.8-9s-12.3 12.5-9 20.8l73.3 185.6c12 30.3-23.7 57-49.4 37l-63.1-49.1c-7-5.4-17-4.2-22.5 2.8s-4.2 17 2.8 22.5l92 71.6c36.5 28.4 81.4 43.8 127.7 43.8l33.7 0c47.5 0 89-32.4 100.5-78.5l55.4-221.6c2.1-8.6-3.1-17.3-11.6-19.4s-17.3 3.1-19.4 11.6l-26 104C435.6 271.8 425 280 413 280c-16.5 0-28.9-15-25.8-31.2L415.7 99c1.7-8.7-4-17.1-12.7-18.7s-17.1 4-18.7 12.7L352.5 260c-2.2 11.6-12.4 20-24.2 20c-11 0-20.7-7.3-23.7-17.9L247.4 59.6z"],
-    "HandBackFist": [448, 512, ["HandRock"], "regular", "M144 64c0-8.8 7.2-16 16-16s16 7.2 16 16c0 9.1 5.1 17.4 13.3 21.5s17.9 3.2 25.1-2.3c2.7-2 6-3.2 9.6-3.2c8.8 0 16 7.2 16 16c0 9.1 5.1 17.4 13.3 21.5s17.9 3.2 25.1-2.3c2.7-2 6-3.2 9.6-3.2c8.8 0 16 7.2 16 16c0 9.1 5.1 17.4 13.3 21.5s17.9 3.2 25.1-2.3c2.7-2 6-3.2 9.6-3.2c8.8 0 16 7.2 16 16l0 104c0 31.3-20 58-48 67.9c-9.6 3.4-16 12.5-16 22.6L304 488c0 13.3 10.7 24 24 24s24-10.7 24-24l0-117.8c38-20.1 64-60.1 64-106.2l0-104c0-35.3-28.7-64-64-64c-2.8 0-5.6 .2-8.3 .5C332.8 77.1 311.9 64 288 64c-2.8 0-5.6 .2-8.3 .5C268.8 45.1 247.9 32 224 32c-2.8 0-5.6 .2-8.3 .5C204.8 13.1 183.9 0 160 0C124.7 0 96 28.7 96 64l0 64.3c-11.7 7.4-22.5 16.4-32 26.9l17.8 16.1L64 155.2l-9.4 10.5C40 181.8 32 202.8 32 224.6l0 12.8c0 49.6 24.2 96.1 64.8 124.5l13.8-19.7L96.8 361.9l8.9 6.2c6.9 4.8 14.4 8.6 22.3 11.3L128 488c0 13.3 10.7 24 24 24s24-10.7 24-24l0-128.1c0-12.6-9.8-23.1-22.4-23.9c-7.3-.5-14.3-2.9-20.3-7.1l-13.1 18.7 13.1-18.7-8.9-6.2C96.6 303.1 80 271.3 80 237.4l0-12.8c0-9.9 3.7-19.4 10.3-26.8l9.4-10.5c3.8-4.2 7.9-8.1 12.3-11.6l0 32.3c0 8.8 7.2 16 16 16s16-7.2 16-16l0-65.7 0-14.3 0-64z"],
-    "HandLizard": [512, 512, [], "regular", "M72 112c-13.3 0-24 10.7-24 24s10.7 24 24 24l168 0c35.3 0 64 28.7 64 64s-28.7 64-64 64l-104 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l152 0c4.5 0 8.9 1.3 12.7 3.6l64 40c7 4.4 11.3 12.1 11.3 20.4l0 24c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-10.7L281.1 384 136 384c-39.8 0-72-32.2-72-72s32.2-72 72-72l104 0c8.8 0 16-7.2 16-16s-7.2-16-16-16L72 208c-39.8 0-72-32.2-72-72S32.2 64 72 64l209.6 0c46.7 0 90.9 21.5 119.7 58.3l78.4 100.1c20.9 26.7 32.3 59.7 32.3 93.7L512 424c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-107.9c0-23.2-7.8-45.8-22.1-64.1L363.5 151.9c-19.7-25.2-49.9-39.9-81.9-39.9L72 112z"],
-    "HandPeace": [512, 512, [], "regular", "M250.8 1.4c-35.2-3.7-66.6 21.8-70.3 57L174 119 156.7 69.6C145 36.3 108.4 18.8 75.1 30.5S24.2 78.8 35.9 112.1L88.7 262.2C73.5 276.7 64 297.3 64 320c0 0 0 0 0 0l0 24c0 92.8 75.2 168 168 168l48 0c92.8 0 168-75.2 168-168l0-72 0-16 0-32c0-35.3-28.7-64-64-64c-7.9 0-15.4 1.4-22.4 4c-10.4-21.3-32.3-36-57.6-36c-.7 0-1.5 0-2.2 0l5.9-56.3c3.7-35.2-21.8-66.6-57-70.3zm-.2 155.4C243.9 166.9 240 179 240 192l0 48c0 .7 0 1.4 0 2c-5.1-1.3-10.5-2-16-2l-7.4 0-5.4-15.3 17-161.3c.9-8.8 8.8-15.2 17.6-14.2s15.2 8.8 14.2 17.6l-9.5 90.1zM111.4 85.6L165.7 240 144 240c-4 0-8 .3-11.9 .9L81.2 96.2c-2.9-8.3 1.5-17.5 9.8-20.4s17.5 1.5 20.4 9.8zM288 192c0-8.8 7.2-16 16-16s16 7.2 16 16l0 32 0 16c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-48zm38.4 108c10.4 21.3 32.3 36 57.6 36c5.5 0 10.9-.7 16-2l0 10c0 66.3-53.7 120-120 120l-48 0c-66.3 0-120-53.7-120-120l0-24s0 0 0 0c0-17.7 14.3-32 32-32l80 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-40 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l40 0c35.3 0 64-28.7 64-64c0-.7 0-1.4 0-2c5.1 1.3 10.5 2 16 2c7.9 0 15.4-1.4 22.4-4zM400 272c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-32 0-16c0-8.8 7.2-16 16-16s16 7.2 16 16l0 32 0 16z"],
-    "CircleNodes": [512, 512, [], "solid", "M418.4 157.9c35.3-8.3 61.6-40 61.6-77.9c0-44.2-35.8-80-80-80c-43.4 0-78.7 34.5-80 77.5L136.2 151.1C121.7 136.8 101.9 128 80 128c-44.2 0-80 35.8-80 80s35.8 80 80 80c12.2 0 23.8-2.7 34.1-7.6L259.7 407.8c-2.4 7.6-3.7 15.8-3.7 24.2c0 44.2 35.8 80 80 80s80-35.8 80-80c0-27.7-14-52.1-35.4-66.4l37.8-207.7zM156.3 232.2c2.2-6.9 3.5-14.2 3.7-21.7l183.8-73.5c3.6 3.5 7.4 6.7 11.6 9.5L317.6 354.1c-5.5 1.3-10.8 3.1-15.8 5.5L156.3 232.2z"],
-    "CircleRight": [512, 512, [], "solid", "M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM294.6 151.2c-4.2-4.6-10.1-7.2-16.4-7.2C266 144 256 154 256 166.3l0 41.7-96 0c-17.7 0-32 14.3-32 32l0 32c0 17.7 14.3 32 32 32l96 0 0 41.7c0 12.3 10 22.3 22.3 22.3c6.2 0 12.1-2.6 16.4-7.2l84-91c3.5-3.8 5.4-8.7 5.4-13.9s-1.9-10.1-5.4-13.9l-84-91z"],
-    "CircleUp": [512, 512, [], "solid", "M256 48a208 208 0 1 1 0 416 208 208 0 1 1 0-416zm0 464A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM151.2 217.4c-4.6 4.2-7.2 10.1-7.2 16.4c0 12.3 10 22.3 22.3 22.3l41.7 0 0 96c0 17.7 14.3 32 32 32l32 0c17.7 0 32-14.3 32-32l0-96 41.7 0c12.3 0 22.3-10 22.3-22.3c0-6.2-2.6-12.1-7.2-16.4l-91-84c-3.8-3.5-8.7-5.4-13.9-5.4s-10.1 1.9-13.9 5.4l-91 84z"],
-    "CircleLeft": [512, 512, [], "solid", "M48 256a208 208 0 1 1 416 0A208 208 0 1 1 48 256zm464 0A256 256 0 1 0 0 256a256 256 0 1 0 512 0zM217.4 376.9c4.2 4.5 10.1 7.1 16.3 7.1c12.3 0 22.3-10 22.3-22.3l0-57.7 96 0c17.7 0 32-14.3 32-32l0-32c0-17.7-14.3-32-32-32l-96 0 0-57.7c0-12.3-10-22.3-22.3-22.3c-6.2 0-12.1 2.6-16.3 7.1L117.5 242.2c-3.5 3.8-5.5 8.7-5.5 13.8s2 10.1 5.5 13.8l99.9 107.1z"],
-    "CircleDown": [512, 512, [], "solid", "M256 464a208 208 0 1 1 0-416 208 208 0 1 1 0 416zM256 0a256 256 0 1 0 0 512A256 256 0 1 0 256 0zM376.9 294.6c4.5-4.2 7.1-10.1 7.1-16.3c0-12.3-10-22.3-22.3-22.3L304 256l0-96c0-17.7-14.3-32-32-32l-32 0c-17.7 0-32 14.3-32 32l0 96-57.7 0C138 256 128 266 128 278.3c0 6.2 2.6 12.1 7.1 16.3l107.1 99.9c3.8 3.5 8.7 5.5 13.8 5.5s10.1-2 13.8-5.5l107.1-99.9z"],
-    "WindowRestore": [512, 512, [], "solid", "M432 48L208 48c-17.7 0-32 14.3-32 32l0 16-48 0 0-16c0-44.2 35.8-80 80-80L432 0c44.2 0 80 35.8 80 80l0 224c0 44.2-35.8 80-80 80l-16 0 0-48 16 0c17.7 0 32-14.3 32-32l0-224c0-17.7-14.3-32-32-32zM48 448c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16l0-192L48 256l0 192zM64 128l256 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 192c0-35.3 28.7-64 64-64z"],
-    "WindowMaximize": [512, 512, [], "solid", "M.3 89.5C.1 91.6 0 93.8 0 96L0 224 0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-192 0-128c0-35.3-28.7-64-64-64L64 32c-2.2 0-4.4 .1-6.5 .3c-9.2 .9-17.8 3.8-25.5 8.2C21.8 46.5 13.4 55.1 7.7 65.5c-3.9 7.3-6.5 15.4-7.4 24zM48 224l416 0 0 192c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16l0-192z"],
-    "WindowMinimize": [512, 512, [], "solid", "M24 432c-13.3 0-24 10.7-24 24s10.7 24 24 24l464 0c13.3 0 24-10.7 24-24s-10.7-24-24-24L24 432z"],
-    "VrCardboard": [640, 512, ["VR"], "solid", "M576 64L64 64C28.7 64 0 92.7 0 128L0 384c0 35.3 28.7 64 64 64l120.4 0c24.2 0 46.4-13.7 57.2-35.4l32-64c8.8-17.5 26.7-28.6 46.3-28.6s37.5 11.1 46.3 28.6l32 64c10.8 21.7 33 35.4 57.2 35.4L576 448c35.3 0 64-28.7 64-64l0-256c0-35.3-28.7-64-64-64zM96 240a64 64 0 1 1 128 0A64 64 0 1 1 96 240zm384-64a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"],
-    "C": [32, 32, [], "solid", "M29.86 8c-.224-.385-.532-.724-.871-.921L17.234.292c-.677-.391-1.787-.391-2.464 0L3.015 7.079C2.338 7.47 1.78 8.432 1.78 9.214v13.573c0 .391.14.828.364 1.213.219.385.532.724.871.917l11.749 6.791c.683.391 1.787.391 2.464 0l11.755-6.791c.339-.193.647-.532.871-.917s.359-.823.359-1.213V9.214c.005-.391-.135-.828-.353-1.213zM16 25.479c-5.229 0-9.479-4.249-9.479-9.479S10.77 6.521 16 6.521a9.51 9.51 0 0 1 8.208 4.733l-4.104 2.376A4.76 4.76 0 0 0 16 11.259c-2.615 0-4.74 2.125-4.74 4.74s2.125 4.74 4.74 4.74a4.76 4.76 0 0 0 4.104-2.371l4.104 2.376A9.51 9.51 0 0 1 16 25.479z", { svgClass: "stroke-none" }],
-    "CPlusPlus": [32, 32, [], "solid", "M29.86 8c-.224-.385-.532-.724-.871-.921L17.234.292c-.677-.391-1.787-.391-2.464 0L3.015 7.079C2.338 7.47 1.78 8.432 1.78 9.214v13.573c0 .391.14.828.364 1.213c.219.385.532.724.871.917l11.749 6.791c.683.391 1.787.391 2.464 0l11.755-6.791c.339-.193.647-.532.871-.917s.359-.823.359-1.213V9.214c.005-.391-.135-.828-.353-1.213zM16 25.479c-5.229 0-9.479-4.249-9.479-9.479S10.77 6.521 16 6.521a9.51 9.51 0 0 1 8.208 4.733l-4.104 2.376A4.76 4.76 0 0 0 16 11.259c-2.615 0-4.74 2.125-4.74 4.74s2.125 4.74 4.74 4.74a4.76 4.76 0 0 0 4.104-2.371l4.104 2.376A9.51 9.51 0 0 1 16 25.477zm9.479-8.952h-1.052v1.052H23.37v-1.052h-1.052v-1.053h1.052v-1.052h1.057v1.052h1.052zm3.948 0h-1.052v1.052h-1.052v-1.052h-1.052v-1.053h1.052v-1.052h1.052v1.052h1.052z", { svgClass: "stroke-none" }],
-    "Discord": [640, 512, [], "solid", "M524.531,69.836a1.5,1.5,0,0,0-.764-.7A485.065,485.065,0,0,0,404.081,32.03a1.816,1.816,0,0,0-1.923.91,337.461,337.461,0,0,0-14.9,30.6,447.848,447.848,0,0,0-134.426,0,309.541,309.541,0,0,0-15.135-30.6,1.89,1.89,0,0,0-1.924-.91A483.689,483.689,0,0,0,116.085,69.137a1.712,1.712,0,0,0-.788.676C39.068,183.651,18.186,294.69,28.43,404.354a2.016,2.016,0,0,0,.765,1.375A487.666,487.666,0,0,0,176.02,479.918a1.9,1.9,0,0,0,2.063-.676A348.2,348.2,0,0,0,208.12,430.4a1.86,1.86,0,0,0-1.019-2.588,321.173,321.173,0,0,1-45.868-21.853,1.885,1.885,0,0,1-.185-3.126c3.082-2.309,6.166-4.711,9.109-7.137a1.819,1.819,0,0,1,1.9-.256c96.229,43.917,200.41,43.917,295.5,0a1.812,1.812,0,0,1,1.924.233c2.944,2.426,6.027,4.851,9.132,7.16a1.884,1.884,0,0,1-.162,3.126,301.407,301.407,0,0,1-45.89,21.83,1.875,1.875,0,0,0-1,2.611,391.055,391.055,0,0,0,30.014,48.815,1.864,1.864,0,0,0,2.063.7A486.048,486.048,0,0,0,610.7,405.729a1.882,1.882,0,0,0,.765-1.352C623.729,277.594,590.933,167.465,524.531,69.836ZM222.491,337.58c-28.972,0-52.844-26.587-52.844-59.239S193.056,219.1,222.491,219.1c29.665,0,53.306,26.82,52.843,59.239C275.334,310.993,251.924,337.58,222.491,337.58Zm195.38,0c-28.971,0-52.843-26.587-52.843-59.239S388.437,219.1,417.871,219.1c29.667,0,53.307,26.82,52.844,59.239C470.715,310.993,447.538,337.58,417.871,337.58Z"],
-    "Google": [488, 512, [], "solid", "M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"],
-    "Js": [32, 32, [], "solid", "M18.774 19.7a3.73 3.73 0 0 0 3.376 2.078c1.418 0 2.324-.709 2.324-1.688c0-1.173-.931-1.589-2.491-2.272l-.856-.367c-2.469-1.052-4.11-2.37-4.11-5.156c0-2.567 1.956-4.52 5.012-4.52A5.06 5.06 0 0 1 26.9 10.52l-2.665 1.711a2.33 2.33 0 0 0-2.2-1.467a1.49 1.49 0 0 0-1.638 1.467c0 1.027.636 1.442 2.1 2.078l.856.366c2.908 1.247 4.549 2.518 4.549 5.376c0 3.081-2.42 4.769-5.671 4.769a6.58 6.58 0 0 1-6.236-3.5ZM6.686 20c.538.954 1.027 1.76 2.2 1.76c1.124 0 1.834-.44 1.834-2.15V7.975h3.422v11.683c0 3.543-2.078 5.156-5.11 5.156A5.31 5.31 0 0 1 3.9 21.688Z"],
-    "Linux": [448, 512, [], "regular", "M220.8 123.3c1 .5 1.8 1.7 3 1.7 1.1 0 2.8-.4 2.9-1.5.2-1.4-1.9-2.3-3.2-2.9-1.7-.7-3.9-1-5.5-.1-.4.2-.8.7-.6 1.1.3 1.3 2.3 1.1 3.4 1.7zm-21.9 1.7c1.2 0 2-1.2 3-1.7 1.1-.6 3.1-.4 3.5-1.6.2-.4-.2-.9-.6-1.1-1.6-.9-3.8-.6-5.5.1-1.3.6-3.4 1.5-3.2 2.9.1 1 1.8 1.5 2.8 1.4zM420 403.8c-3.6-4-5.3-11.6-7.2-19.7-1.8-8.1-3.9-16.8-10.5-22.4-1.3-1.1-2.6-2.1-4-2.9-1.3-.8-2.7-1.5-4.1-2 9.2-27.3 5.6-54.5-3.7-79.1-11.4-30.1-31.3-56.4-46.5-74.4-17.1-21.5-33.7-41.9-33.4-72C311.1 85.4 315.7.1 234.8 0 132.4-.2 158 103.4 156.9 135.2c-1.7 23.4-6.4 41.8-22.5 64.7-18.9 22.5-45.5 58.8-58.1 96.7-6 17.9-8.8 36.1-6.2 53.3-6.5 5.8-11.4 14.7-16.6 20.2-4.2 4.3-10.3 5.9-17 8.3s-14 6-18.5 14.5c-2.1 3.9-2.8 8.1-2.8 12.4 0 3.9.6 7.9 1.2 11.8 1.2 8.1 2.5 15.7.8 20.8-5.2 14.4-5.9 24.4-2.2 31.7 3.8 7.3 11.4 10.5 20.1 12.3 17.3 3.6 40.8 2.7 59.3 12.5 19.8 10.4 39.9 14.1 55.9 10.4 11.6-2.6 21.1-9.6 25.9-20.2 12.5-.1 26.3-5.4 48.3-6.6 14.9-1.2 33.6 5.3 55.1 4.1.6 2.3 1.4 4.6 2.5 6.7v.1c8.3 16.7 23.8 24.3 40.3 23 16.6-1.3 34.1-11 48.3-27.9 13.6-16.4 36-23.2 50.9-32.2 7.4-4.5 13.4-10.1 13.9-18.3.4-8.2-4.4-17.3-15.5-29.7zM223.7 87.3c9.8-22.2 34.2-21.8 44-.4 6.5 14.2 3.6 30.9-4.3 40.4-1.6-.8-5.9-2.6-12.6-4.9 1.1-1.2 3.1-2.7 3.9-4.6 4.8-11.8-.2-27-9.1-27.3-7.3-.5-13.9 10.8-11.8 23-4.1-2-9.4-3.5-13-4.4-1-6.9-.3-14.6 2.9-21.8zM183 75.8c10.1 0 20.8 14.2 19.1 33.5-3.5 1-7.1 2.5-10.2 4.6 1.2-8.9-3.3-20.1-9.6-19.6-8.4.7-9.8 21.2-1.8 28.1 1 .8 1.9-.2-5.9 5.5-15.6-14.6-10.5-52.1 8.4-52.1zm-13.6 60.7c6.2-4.6 13.6-10 14.1-10.5 4.7-4.4 13.5-14.2 27.9-14.2 7.1 0 15.6 2.3 25.9 8.9 6.3 4.1 11.3 4.4 22.6 9.3 8.4 3.5 13.7 9.7 10.5 18.2-2.6 7.1-11 14.4-22.7 18.1-11.1 3.6-19.8 16-38.2 14.9-3.9-.2-7-1-9.6-2.1-8-3.5-12.2-10.4-20-15-8.6-4.8-13.2-10.4-14.7-15.3-1.4-4.9 0-9 4.2-12.3zm3.3 334c-2.7 35.1-43.9 34.4-75.3 18-29.9-15.8-68.6-6.5-76.5-21.9-2.4-4.7-2.4-12.7 2.6-26.4v-.2c2.4-7.6.6-16-.6-23.9-1.2-7.8-1.8-15 .9-20 3.5-6.7 8.5-9.1 14.8-11.3 10.3-3.7 11.8-3.4 19.6-9.9 5.5-5.7 9.5-12.9 14.3-18 5.1-5.5 10-8.1 17.7-6.9 8.1 1.2 15.1 6.8 21.9 16l19.6 35.6c9.5 19.9 43.1 48.4 41 68.9zm-1.4-25.9c-4.1-6.6-9.6-13.6-14.4-19.6 7.1 0 14.2-2.2 16.7-8.9 2.3-6.2 0-14.9-7.4-24.9-13.5-18.2-38.3-32.5-38.3-32.5-13.5-8.4-21.1-18.7-24.6-29.9s-3-23.3-.3-35.2c5.2-22.9 18.6-45.2 27.2-59.2 2.3-1.7.8 3.2-8.7 20.8-8.5 16.1-24.4 53.3-2.6 82.4.6-20.7 5.5-41.8 13.8-61.5 12-27.4 37.3-74.9 39.3-112.7 1.1.8 4.6 3.2 6.2 4.1 4.6 2.7 8.1 6.7 12.6 10.3 12.4 10 28.5 9.2 42.4 1.2 6.2-3.5 11.2-7.5 15.9-9 9.9-3.1 17.8-8.6 22.3-15 7.7 30.4 25.7 74.3 37.2 95.7 6.1 11.4 18.3 35.5 23.6 64.6 3.3-.1 7 .4 10.9 1.4 13.8-35.7-11.7-74.2-23.3-84.9-4.7-4.6-4.9-6.6-2.6-6.5 12.6 11.2 29.2 33.7 35.2 59 2.8 11.6 3.3 23.7.4 35.7 16.4 6.8 35.9 17.9 30.7 34.8-2.2-.1-3.2 0-4.2 0 3.2-10.1-3.9-17.6-22.8-26.1-19.6-8.6-36-8.6-38.3 12.5-12.1 4.2-18.3 14.7-21.4 27.3-2.8 11.2-3.6 24.7-4.4 39.9-.5 7.7-3.6 18-6.8 29-32.1 22.9-76.7 32.9-114.3 7.2zm257.4-11.5c-.9 16.8-41.2 19.9-63.2 46.5-13.2 15.7-29.4 24.4-43.6 25.5s-26.5-4.8-33.7-19.3c-4.7-11.1-2.4-23.1 1.1-36.3 3.7-14.2 9.2-28.8 9.9-40.6.8-15.2 1.7-28.5 4.2-38.7 2.6-10.3 6.6-17.2 13.7-21.1.3-.2.7-.3 1-.5.8 13.2 7.3 26.6 18.8 29.5 12.6 3.3 30.7-7.5 38.4-16.3 9-.3 15.7-.9 22.6 5.1 9.9 8.5 7.1 30.3 17.1 41.6 10.6 11.6 14 19.5 13.7 24.6zM173.3 148.7c2 1.9 4.7 4.5 8 7.1 6.6 5.2 15.8 10.6 27.3 10.6 11.6 0 22.5-5.9 31.8-10.8 4.9-2.6 10.9-7 14.8-10.4s5.9-6.3 3.1-6.6-2.6 2.6-6 5.1c-4.4 3.2-9.7 7.4-13.9 9.8-7.4 4.2-19.5 10.2-29.9 10.2s-18.7-4.8-24.9-9.7c-3.1-2.5-5.7-5-7.7-6.9-1.5-1.4-1.9-4.6-4.3-4.9-1.4-.1-1.8 3.7 1.7 6.5z"],
-    "SquareJs": [448, 512, [], "solid", "M448 96c0-35.3-28.7-64-64-64H64C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V96zM180.9 444.9c-33.7 0-53.2-17.4-63.2-38.5L152 385.7c6.6 11.7 12.6 21.6 27.1 21.6c13.8 0 22.6-5.4 22.6-26.5V237.7h42.1V381.4c0 43.6-25.6 63.5-62.9 63.5zm85.8-43L301 382.1c9 14.7 20.8 25.6 41.5 25.6c17.4 0 28.6-8.7 28.6-20.8c0-14.4-11.4-19.5-30.7-28l-10.5-4.5c-30.4-12.9-50.5-29.2-50.5-63.5c0-31.6 24.1-55.6 61.6-55.6c26.8 0 46 9.3 59.8 33.7L368 290c-7.2-12.9-15-18-27.1-18c-12.3 0-20.1 7.8-20.1 18c0 12.6 7.8 17.7 25.9 25.6l10.5 4.5c35.8 15.3 55.9 31 55.9 66.2c0 37.8-29.8 58.6-69.7 58.6c-39.1 0-64.4-18.6-76.7-43z"],
-    "Safari": [512, 512, [], "solid", "M274.69,274.69l-37.38-37.38L166,346ZM256,8C119,8,8,119,8,256S119,504,256,504,504,393,504,256,393,8,256,8ZM411.85,182.79l14.78-6.13A8,8,0,0,1,437.08,181h0a8,8,0,0,1-4.33,10.46L418,197.57a8,8,0,0,1-10.45-4.33h0A8,8,0,0,1,411.85,182.79ZM314.43,94l6.12-14.78A8,8,0,0,1,331,74.92h0a8,8,0,0,1,4.33,10.45l-6.13,14.78a8,8,0,0,1-10.45,4.33h0A8,8,0,0,1,314.43,94ZM256,60h0a8,8,0,0,1,8,8V84a8,8,0,0,1-8,8h0a8,8,0,0,1-8-8V68A8,8,0,0,1,256,60ZM181,74.92a8,8,0,0,1,10.46,4.33L197.57,94a8,8,0,1,1-14.78,6.12l-6.13-14.78A8,8,0,0,1,181,74.92Zm-63.58,42.49h0a8,8,0,0,1,11.31,0L140,128.72A8,8,0,0,1,140,140h0a8,8,0,0,1-11.31,0l-11.31-11.31A8,8,0,0,1,117.41,117.41ZM60,256h0a8,8,0,0,1,8-8H84a8,8,0,0,1,8,8h0a8,8,0,0,1-8,8H68A8,8,0,0,1,60,256Zm40.15,73.21-14.78,6.13A8,8,0,0,1,74.92,331h0a8,8,0,0,1,4.33-10.46L94,314.43a8,8,0,0,1,10.45,4.33h0A8,8,0,0,1,100.15,329.21Zm4.33-136h0A8,8,0,0,1,94,197.57l-14.78-6.12A8,8,0,0,1,74.92,181h0a8,8,0,0,1,10.45-4.33l14.78,6.13A8,8,0,0,1,104.48,193.24ZM197.57,418l-6.12,14.78a8,8,0,0,1-14.79-6.12l6.13-14.78A8,8,0,1,1,197.57,418ZM264,444a8,8,0,0,1-8,8h0a8,8,0,0,1-8-8V428a8,8,0,0,1,8-8h0a8,8,0,0,1,8,8Zm67-6.92h0a8,8,0,0,1-10.46-4.33L314.43,418a8,8,0,0,1,4.33-10.45h0a8,8,0,0,1,10.45,4.33l6.13,14.78A8,8,0,0,1,331,437.08Zm63.58-42.49h0a8,8,0,0,1-11.31,0L372,383.28A8,8,0,0,1,372,372h0a8,8,0,0,1,11.31,0l11.31,11.31A8,8,0,0,1,394.59,394.59ZM286.25,286.25,110.34,401.66,225.75,225.75,401.66,110.34ZM437.08,331h0a8,8,0,0,1-10.45,4.33l-14.78-6.13a8,8,0,0,1-4.33-10.45h0A8,8,0,0,1,418,314.43l14.78,6.12A8,8,0,0,1,437.08,331ZM444,264H428a8,8,0,0,1-8-8h0a8,8,0,0,1,8-8h16a8,8,0,0,1,8,8h0A8,8,0,0,1,444,264Z"],
-    "Python": [448, 512, [], "solid", "M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6zM286.2 404c11.1 0 20.1 9.1 20.1 20.3 0 11.3-9 20.4-20.1 20.4-11 0-20.1-9.2-20.1-20.4.1-11.3 9.1-20.3 20.1-20.3zM167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4zm-6.7-142.6c-11.1 0-20.1-9.1-20.1-20.3.1-11.3 9-20.4 20.1-20.4 11 0 20.1 9.2 20.1 20.4s-9 20.3-20.1 20.3z"],
-    "Markdown": [640, 512, [], "solid", "M593.8 59.1H46.2C20.7 59.1 0 79.8 0 105.2v301.5c0 25.5 20.7 46.2 46.2 46.2h547.7c25.5 0 46.2-20.7 46.1-46.1V105.2c0-25.4-20.7-46.1-46.2-46.1zM338.5 360.6H277v-120l-61.5 76.9-61.5-76.9v120H92.3V151.4h61.5l61.5 76.9 61.5-76.9h61.5v209.2zm135.3 3.1L381.5 256H443V151.4h61.5V256H566z"],
-    "Microsoft": [448, 512, [], "solid", "M0 32h214.6v214.6H0V32zm233.4 0H448v214.6H233.4V32zM0 265.4h214.6V480H0V265.4zm233.4 0H448V480H233.4V265.4z"],
-    "Npm": [576, 512, [], "solid", "M288 288h-32v-64h32v64zm288-128v192H288v32H160v-32H0V160h576zm-416 32H32v128h64v-96h32v96h32V192zm160 0H192v160h64v-32h64V192zm224 0H352v128h64v-96h32v96h32v-96h32v96h32V192z"],
-    "Reddit": [512, 512, [], "solid", "M0 256C0 114.6 114.6 0 256 0S512 114.6 512 256s-114.6 256-256 256L37.1 512c-13.7 0-20.5-16.5-10.9-26.2L75 437C28.7 390.7 0 326.7 0 256zM349.6 153.6c23.6 0 42.7-19.1 42.7-42.7s-19.1-42.7-42.7-42.7c-20.6 0-37.8 14.6-41.8 34c-34.5 3.7-61.4 33-61.4 68.4l0 .2c-37.5 1.6-71.8 12.3-99 29.1c-10.1-7.8-22.8-12.5-36.5-12.5c-33 0-59.8 26.8-59.8 59.8c0 24 14.1 44.6 34.4 54.1c2 69.4 77.6 125.2 170.6 125.2s168.7-55.9 170.6-125.3c20.2-9.6 34.1-30.2 34.1-54c0-33-26.8-59.8-59.8-59.8c-13.7 0-26.3 4.6-36.4 12.4c-27.4-17-62.1-27.7-100-29.1l0-.2c0-25.4 18.9-46.5 43.4-49.9l0 0c4.4 18.8 21.3 32.8 41.5 32.8zM177.1 246.9c16.7 0 29.5 17.6 28.5 39.3s-13.5 29.6-30.3 29.6s-31.4-8.8-30.4-30.5s15.4-38.3 32.1-38.3zm190.1 38.3c1 21.7-13.7 30.5-30.4 30.5s-29.3-7.9-30.3-29.6c-1-21.7 11.8-39.3 28.5-39.3s31.2 16.6 32.1 38.3zm-48.1 56.7c-10.3 24.6-34.6 41.9-63 41.9s-52.7-17.3-63-41.9c-1.2-2.9 .8-6.2 3.9-6.5c18.4-1.9 38.3-2.9 59.1-2.9s40.7 1 59.1 2.9c3.1 .3 5.1 3.6 3.9 6.5z"],
-    "Rust": [512, 512, [], "solid", "M508.52,249.75,486.7,236.24c-.17-2-.34-3.93-.55-5.88l18.72-17.5a7.35,7.35,0,0,0-2.44-12.25l-24-9c-.54-1.88-1.08-3.78-1.67-5.64l15-20.83a7.35,7.35,0,0,0-4.79-11.54l-25.42-4.15c-.9-1.73-1.79-3.45-2.73-5.15l10.68-23.42a7.35,7.35,0,0,0-6.95-10.39l-25.82.91q-1.79-2.22-3.61-4.4L439,81.84A7.36,7.36,0,0,0,430.16,73L405,78.93q-2.17-1.83-4.4-3.61l.91-25.82a7.35,7.35,0,0,0-10.39-7L367.7,53.23c-1.7-.94-3.43-1.84-5.15-2.73L358.4,25.08a7.35,7.35,0,0,0-11.54-4.79L326,35.26c-1.86-.59-3.75-1.13-5.64-1.67l-9-24a7.35,7.35,0,0,0-12.25-2.44l-17.5,18.72c-1.95-.21-3.91-.38-5.88-.55L262.25,3.48a7.35,7.35,0,0,0-12.5,0L236.24,25.3c-2,.17-3.93.34-5.88.55L212.86,7.13a7.35,7.35,0,0,0-12.25,2.44l-9,24c-1.89.55-3.79,1.08-5.66,1.68l-20.82-15a7.35,7.35,0,0,0-11.54,4.79l-4.15,25.41c-1.73.9-3.45,1.79-5.16,2.73L120.88,42.55a7.35,7.35,0,0,0-10.39,7l.92,25.81c-1.49,1.19-3,2.39-4.42,3.61L81.84,73A7.36,7.36,0,0,0,73,81.84L78.93,107c-1.23,1.45-2.43,2.93-3.62,4.41l-25.81-.91a7.42,7.42,0,0,0-6.37,3.26,7.35,7.35,0,0,0-.57,7.13l10.66,23.41c-.94,1.7-1.83,3.43-2.73,5.16L25.08,153.6a7.35,7.35,0,0,0-4.79,11.54l15,20.82c-.59,1.87-1.13,3.77-1.68,5.66l-24,9a7.35,7.35,0,0,0-2.44,12.25l18.72,17.5c-.21,1.95-.38,3.91-.55,5.88L3.48,249.75a7.35,7.35,0,0,0,0,12.5L25.3,275.76c.17,2,.34,3.92.55,5.87L7.13,299.13a7.35,7.35,0,0,0,2.44,12.25l24,9c.55,1.89,1.08,3.78,1.68,5.65l-15,20.83a7.35,7.35,0,0,0,4.79,11.54l25.42,4.15c.9,1.72,1.79,3.45,2.73,5.14L42.56,391.12a7.35,7.35,0,0,0,.57,7.13,7.13,7.13,0,0,0,6.37,3.26l25.83-.91q1.77,2.22,3.6,4.4L73,430.16A7.36,7.36,0,0,0,81.84,439L107,433.07q2.18,1.83,4.41,3.61l-.92,25.82a7.35,7.35,0,0,0,10.39,6.95l23.43-10.68c1.69.94,3.42,1.83,5.14,2.73l4.15,25.42a7.34,7.34,0,0,0,11.54,4.78l20.83-15c1.86.6,3.76,1.13,5.65,1.68l9,24a7.36,7.36,0,0,0,12.25,2.44l17.5-18.72c1.95.21,3.92.38,5.88.55l13.51,21.82a7.35,7.35,0,0,0,12.5,0l13.51-21.82c2-.17,3.93-.34,5.88-.56l17.5,18.73a7.36,7.36,0,0,0,12.25-2.44l9-24c1.89-.55,3.78-1.08,5.65-1.68l20.82,15a7.34,7.34,0,0,0,11.54-4.78l4.15-25.42c1.72-.9,3.45-1.79,5.15-2.73l23.42,10.68a7.35,7.35,0,0,0,10.39-6.95l-.91-25.82q2.22-1.79,4.4-3.61L430.16,439a7.36,7.36,0,0,0,8.84-8.84L433.07,405q1.83-2.17,3.61-4.4l25.82.91a7.23,7.23,0,0,0,6.37-3.26,7.35,7.35,0,0,0,.58-7.13L458.77,367.7c.94-1.7,1.83-3.43,2.73-5.15l25.42-4.15a7.35,7.35,0,0,0,4.79-11.54l-15-20.83c.59-1.87,1.13-3.76,1.67-5.65l24-9a7.35,7.35,0,0,0,2.44-12.25l-18.72-17.5c.21-1.95.38-3.91.55-5.87l21.82-13.51a7.35,7.35,0,0,0,0-12.5Zm-151,129.08A13.91,13.91,0,0,0,341,389.51l-7.64,35.67A187.51,187.51,0,0,1,177,424.44l-7.64-35.66a13.87,13.87,0,0,0-16.46-10.68l-31.51,6.76a187.38,187.38,0,0,1-16.26-19.21H258.3c1.72,0,2.89-.29,2.89-1.91V309.55c0-1.57-1.17-1.91-2.89-1.91H213.47l.05-34.35H262c4.41,0,23.66,1.28,29.79,25.87,1.91,7.55,6.17,32.14,9.06,40,2.89,8.82,14.6,26.46,27.1,26.46H407a187.3,187.3,0,0,1-17.34,20.09Zm25.77,34.49A15.24,15.24,0,1,1,368,398.08h.44A15.23,15.23,0,0,1,383.24,413.32Zm-225.62-.68a15.24,15.24,0,1,1-15.25-15.25h.45A15.25,15.25,0,0,1,157.62,412.64ZM69.57,234.15l32.83-14.6a13.88,13.88,0,0,0,7.06-18.33L102.69,186h26.56V305.73H75.65A187.65,187.65,0,0,1,69.57,234.15ZM58.31,198.09a15.24,15.24,0,0,1,15.23-15.25H74a15.24,15.24,0,1,1-15.67,15.24Zm155.16,24.49.05-35.32h63.26c3.28,0,23.07,3.77,23.07,18.62,0,12.29-15.19,16.7-27.68,16.7ZM399,306.71c-9.8,1.13-20.63-4.12-22-10.09-5.78-32.49-15.39-39.4-30.57-51.4,18.86-11.95,38.46-29.64,38.46-53.26,0-25.52-17.49-41.59-29.4-49.48-16.76-11-35.28-13.23-40.27-13.23H116.32A187.49,187.49,0,0,1,221.21,70.06l23.47,24.6a13.82,13.82,0,0,0,19.6.44l26.26-25a187.51,187.51,0,0,1,128.37,91.43l-18,40.57A14,14,0,0,0,408,220.43l34.59,15.33a187.12,187.12,0,0,1,.4,32.54H423.71c-1.91,0-2.69,1.27-2.69,3.13v8.82C421,301,409.31,305.58,399,306.71ZM240,60.21A15.24,15.24,0,0,1,255.21,45h.45A15.24,15.24,0,1,1,240,60.21ZM436.84,214a15.24,15.24,0,1,1,0-30.48h.44a15.24,15.24,0,0,1-.44,30.48Z"],
-    "Ubuntu": [576, 512, [], "solid", "M469.2 75A75.6 75.6 0 1 0 317.9 75a75.6 75.6 0 1 0 151.2 0zM154.2 240.7A75.6 75.6 0 1 0 3 240.7a75.6 75.6 0 1 0 151.2 0zM57 346C75.6 392.9 108 433 150 461.1s91.5 42.6 142 41.7c-14.7-18.6-22.9-41.5-23.2-65.2c-6.8-.9-13.3-2.1-19.5-3.4c-26.8-5.7-51.9-17.3-73.6-34s-39.3-38.1-51.7-62.5c-20.9 9.9-44.5 12.8-67.1 8.2zm395.1 89.8a75.6 75.6 0 1 0 -151.2 0 75.6 75.6 0 1 0 151.2 0zM444 351.6c18.5 14.8 31.6 35.2 37.2 58.2c33.3-41.3 52.6-92.2 54.8-145.2s-12.5-105.4-42.2-149.4c-8.6 21.5-24 39.6-43.8 51.6c15.4 28.6 22.9 60.8 21.9 93.2s-10.7 64-28 91.6zM101.1 135.4c12.4 2.7 24.3 7.5 35.1 14.3c16.6-24.2 38.9-44.1 64.8-58S255.8 70.4 285.2 70c.2-5.9 .9-11.9 2-17.7c3.6-16.7 11.1-32.3 21.8-45.5c-47.7-3.8-95.4 6-137.6 28.5S94.3 91.7 70.8 133.4c2.7-.2 5.3-.3 8-.3c7.5 0 15 .8 22.4 2.3z"],
-    "Windows": [448, 512, [], "solid", "M0 93.7l183.6-25.3v177.4H0V93.7zm0 324.6l183.6 25.3V268.4H0v149.9zm203.8 28L448 480V268.4H203.8v177.9zm0-380.6v180.1H448V32L203.8 65.7z"],
-    "Whatsapp": [448, 512, [], "regular", "M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"],
-    "X-Twitter": [512, 512, [], "regular", "M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"],
-    // Internals Override
-    "Keyboard": [576, 512, [], "regular", "M64 112c-8.8 0-16 7.2-16 16l0 256c0 8.8 7.2 16 16 16l448 0c8.8 0 16-7.2 16-16l0-256c0-8.8-7.2-16-16-16L64 112zM0 128C0 92.7 28.7 64 64 64l448 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128zM176 320l224 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-224 0c-8.8 0-16-7.2-16-16l0-16c0-8.8 7.2-16 16-16zm-72-72c0-8.8 7.2-16 16-16l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16zm16-96l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16c0-8.8 7.2-16 16-16zm64 96c0-8.8 7.2-16 16-16l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16zm16-96l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16c0-8.8 7.2-16 16-16zm64 96c0-8.8 7.2-16 16-16l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16zm16-96l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16c0-8.8 7.2-16 16-16zm64 96c0-8.8 7.2-16 16-16l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16zm16-96l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16c0-8.8 7.2-16 16-16zm64 96c0-8.8 7.2-16 16-16l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16zm16-96l16 0c8.8 0 16 7.2 16 16l0 16c0 8.8-7.2 16-16 16l-16 0c-8.8 0-16-7.2-16-16l0-16c0-8.8 7.2-16 16-16z"],
-    "IdCard": [576, 512, [], "regular", "M528 160l0 256c0 8.8-7.2 16-16 16l-192 0c0-44.2-35.8-80-80-80l-64 0c-44.2 0-80 35.8-80 80l-32 0c-8.8 0-16-7.2-16-16l0-256 480 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l448 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zM272 256a64 64 0 1 0 -128 0 64 64 0 1 0 128 0zm104-48c-13.3 0-24 10.7-24 24s10.7 24 24 24l80 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-80 0zm0 96c-13.3 0-24 10.7-24 24s10.7 24 24 24l80 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-80 0z"],
-    "BookUser": [576, 512, [], "regular", "M512 80c8.8 0 16 7.2 16 16l0 320c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16L48 96c0-8.8 7.2-16 16-16l448 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l448 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zM208 256a64 64 0 1 0 0-128 64 64 0 1 0 0 128zm-32 32c-44.2 0-80 35.8-80 80c0 8.8 7.2 16 16 16l192 0c8.8 0 16-7.2 16-16c0-44.2-35.8-80-80-80l-64 0zM376 144c-13.3 0-24 10.7-24 24s10.7 24 24 24l80 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-80 0zm0 96c-13.3 0-24 10.7-24 24s10.7 24 24 24l80 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-80 0z"],
-    "Copy": [448, 512, [], "regular", "M384 336l-192 0c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l140.1 0L400 115.9 400 320c0 8.8-7.2 16-16 16zM192 384l192 0c35.3 0 64-28.7 64-64l0-204.1c0-12.7-5.1-24.9-14.1-33.9L366.1 14.1c-9-9-21.2-14.1-33.9-14.1L192 0c-35.3 0-64 28.7-64 64l0 256c0 35.3 28.7 64 64 64zM64 128c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l192 0c35.3 0 64-28.7 64-64l0-32-48 0 0 32c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l32 0 0-48-32 0z"],
-    "Eye": [576, 512, [], "regular", "M288 80c-65.2 0-118.8 29.6-159.9 67.7C89.6 183.5 63 226 49.4 256c13.6 30 40.2 72.5 78.6 108.3C169.2 402.4 222.8 432 288 432s118.8-29.6 159.9-67.7C486.4 328.5 513 286 526.6 256c-13.6-30-40.2-72.5-78.6-108.3C406.8 109.6 353.2 80 288 80zM95.4 112.6C142.5 68.8 207.2 32 288 32s145.5 36.8 192.6 80.6c46.8 43.5 78.1 95.4 93 131.1c3.3 7.9 3.3 16.7 0 24.6c-14.9 35.7-46.2 87.7-93 131.1C433.5 443.2 368.8 480 288 480s-145.5-36.8-192.6-80.6C48.6 356 17.3 304 2.5 268.3c-3.3-7.9-3.3-16.7 0-24.6C17.3 208 48.6 156 95.4 112.6zM288 336c44.2 0 80-35.8 80-80s-35.8-80-80-80c-.7 0-1.3 0-2 0c1.3 5.1 2 10.5 2 16c0 35.3-28.7 64-64 64c-5.5 0-10.9-.7-16-2c0 .7 0 1.3 0 2c0 44.2 35.8 80 80 80zm0-208a128 128 0 1 1 0 256 128 128 0 1 1 0-256z"],
-    "EyeOff": [640, 512, [], "regular", "M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zm151 118.3C226 97.7 269.5 80 320 80c65.2 0 118.8 29.6 159.9 67.7C518.4 183.5 545 226 558.6 256c-12.6 28-36.6 66.8-70.9 100.9l-53.8-42.2c9.1-17.6 14.2-37.5 14.2-58.7c0-70.7-57.3-128-128-128c-32.2 0-61.7 11.9-84.2 31.5l-46.1-36.1zM394.9 284.2l-81.5-63.9c4.2-8.5 6.6-18.2 6.6-28.3c0-5.5-.7-10.9-2-16c.7 0 1.3 0 2 0c44.2 0 80 35.8 80 80c0 9.9-1.8 19.4-5.1 28.2zm9.4 130.3C378.8 425.4 350.7 432 320 432c-65.2 0-118.8-29.6-159.9-67.7C121.6 328.5 95 286 81.4 256c8.3-18.4 21.5-41.5 39.4-64.8L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5l-41.9-33zM192 256c0 70.7 57.3 128 128 128c13.3 0 26.1-2 38.2-5.8L302 334c-23.5-5.4-43.1-21.2-53.7-42.3l-56.1-44.2c-.2 2.8-.3 5.6-.3 8.5z"],
-    "StickyNote": [448, 512, [], "regular", "M64 80c-8.8 0-16 7.2-16 16l0 320c0 8.8 7.2 16 16 16l224 0 0-80c0-17.7 14.3-32 32-32l80 0 0-224c0-8.8-7.2-16-16-16L64 80zM288 480L64 480c-35.3 0-64-28.7-64-64L0 96C0 60.7 28.7 32 64 32l320 0c35.3 0 64 28.7 64 64l0 224 0 5.5c0 17-6.7 33.3-18.7 45.3l-90.5 90.5c-12 12-28.3 18.7-45.3 18.7l-5.5 0z"],
-    "CreditCard": [576, 512, [], "regular", "M512 80c8.8 0 16 7.2 16 16l0 32L48 128l0-32c0-8.8 7.2-16 16-16l448 0zm16 144l0 192c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16l0-192 480 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l448 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zm56 304c-13.3 0-24 10.7-24 24s10.7 24 24 24l48 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-48 0zm128 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l112 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-112 0z"],
-    "Hourglass": [384, 512, [], "regular", "M24 0C10.7 0 0 10.7 0 24S10.7 48 24 48l8 0 0 19c0 40.3 16 79 44.5 107.5L158.1 256 76.5 337.5C48 366 32 404.7 32 445l0 19-8 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l336 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-8 0 0-19c0-40.3-16-79-44.5-107.5L225.9 256l81.5-81.5C336 146 352 107.3 352 67l0-19 8 0c13.3 0 24-10.7 24-24s-10.7-24-24-24L24 0zM192 289.9l81.5 81.5C293 391 304 417.4 304 445l0 19L80 464l0-19c0-27.6 11-54 30.5-73.5L192 289.9zm0-67.9l-81.5-81.5C91 121 80 94.6 80 67l0-19 224 0 0 19c0 27.6-11 54-30.5 73.5L192 222.1z"],
-    // Solid Variants
-    "Bell": [448, 512, [], "solid", "M224 0c-17.7 0-32 14.3-32 32l0 19.2C119 66 64 130.6 64 208l0 18.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S19.4 416 32 416l384 0c12.6 0 24-7.4 29.2-18.9s3.1-25-5.3-34.4l-7.4-8.3C401.3 319.2 384 273.9 384 226.8l0-18.8c0-77.4-55-142-128-156.8L256 32c0-17.7-14.3-32-32-32zm45.3 493.3c12-12 18.7-28.3 18.7-45.3l-64 0-64 0c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7z"],
-    "BellOff": [640, 512, [], "solid", "M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7l-90.2-70.7c.2-.4 .4-.9 .6-1.3c5.2-11.5 3.1-25-5.3-34.4l-7.4-8.3C497.3 319.2 480 273.9 480 226.8l0-18.8c0-77.4-55-142-128-156.8L352 32c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 19.2c-42.6 8.6-79 34.2-102 69.3L38.8 5.1zM406.2 416L160 222.1l0 4.8c0 47-17.3 92.4-48.5 127.6l-7.4 8.3c-8.4 9.4-10.4 22.9-5.3 34.4S115.4 416 128 416l278.2 0zm-40.9 77.3c12-12 18.7-28.3 18.7-45.3l-64 0-64 0c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7z"],
-    "Compass": [512, 512, [], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm50.7-186.9L162.4 380.6c-19.4 7.5-38.5-11.6-31-31l55.5-144.3c3.3-8.5 9.9-15.1 18.4-18.4l144.3-55.5c19.4-7.5 38.5 11.6 31 31L325.1 306.7c-3.2 8.5-9.9 15.1-18.4 18.4zM288 256a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"],
-    "File": [384, 512, [], "solid", "M0 64C0 28.7 28.7 0 64 0L224 0l0 128c0 17.7 14.3 32 32 32l128 0 0 288c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 64zm384 64l-128 0L256 0 384 128z"],
-    "MessageCircle": [512, 512, [], "solid", "M512 240c0 114.9-114.6 208-256 208c-37.1 0-72.3-6.4-104.1-17.9c-11.9 8.7-31.3 20.6-54.3 30.6C73.6 471.1 44.7 480 16 480c-6.5 0-12.3-3.9-14.8-9.9c-2.5-6-1.1-12.8 3.4-17.4c0 0 0 0 0 0s0 0 0 0s0 0 0 0c0 0 0 0 0 0l.3-.3c.3-.3 .7-.7 1.3-1.4c1.1-1.2 2.8-3.1 4.9-5.7c4.1-5 9.6-12.4 15.2-21.6c10-16.6 19.5-38.4 21.4-62.9C17.7 326.8 0 285.1 0 240C0 125.1 114.6 32 256 32s256 93.1 256 208z"],
-    "Inbox": [512, 512, [], "solid", "M121 32C91.6 32 66 52 58.9 80.5L1.9 308.4C.6 313.5 0 318.7 0 323.9L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-92.1c0-5.2-.6-10.4-1.9-15.5l-57-227.9C446 52 420.4 32 391 32L121 32zm0 64l270 0 48 192-51.2 0c-12.1 0-23.2 6.8-28.6 17.7l-14.3 28.6c-5.4 10.8-16.5 17.7-28.6 17.7l-120.4 0c-12.1 0-23.2-6.8-28.6-17.7l-14.3-28.6c-5.4-10.8-16.5-17.7-28.6-17.7L73 288 121 96z"],
-    "Mail": [512, 512, [], "solid", "M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48L48 64zM0 176L0 384c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-208L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z"],
-    "MailOpen": [512, 512, [], "solid", "M64 208.1L256 65.9 448 208.1l0 47.4L289.5 373c-9.7 7.2-21.4 11-33.5 11s-23.8-3.9-33.5-11L64 255.5l0-47.4zM256 0c-12.1 0-23.8 3.9-33.5 11L25.9 156.7C9.6 168.8 0 187.8 0 208.1L0 448c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-239.9c0-20.3-9.6-39.4-25.9-51.4L289.5 11C279.8 3.9 268.1 0 256 0z"],
-    "Mic": [384, 512, [], "solid", "M192 0C139 0 96 43 96 96l0 160c0 53 43 96 96 96s96-43 96-96l0-160c0-53-43-96-96-96zM64 216c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40c0 89.1 66.2 162.7 152 174.4l0 33.6-48 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l72 0 72 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-48 0 0-33.6c85.8-11.7 152-85.3 152-174.4l0-40c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40c0 70.7-57.3 128-128 128s-128-57.3-128-128l0-40z"],
-    "MicOff": [640, 512, [], "solid", "M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L472.1 344.7c15.2-26 23.9-56.3 23.9-88.7l0-40c0-13.3-10.7-24-24-24s-24 10.7-24 24l0 40c0 21.2-5.1 41.1-14.2 58.7L416 300.8 416 96c0-53-43-96-96-96s-96 43-96 96l0 54.3L38.8 5.1zM344 430.4c20.4-2.8 39.7-9.1 57.3-18.2l-43.1-33.9C346.1 382 333.3 384 320 384c-70.7 0-128-57.3-128-128l0-8.7L144.7 210c-.5 1.9-.7 3.9-.7 6l0 40c0 89.1 66.2 162.7 152 174.4l0 33.6-48 0c-13.3 0-24 10.7-24 24s10.7 24 24 24l72 0 72 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-48 0 0-33.6z"],
-    "Link": [640, 512, ["Chain"], "solid", "M579.8 267.7c56.5-56.5 56.5-148 0-204.5c-50-50-128.8-56.5-186.3-15.4l-1.6 1.1c-14.4 10.3-17.7 30.3-7.4 44.6s30.3 17.7 44.6 7.4l1.6-1.1c32.1-22.9 76-19.3 103.8 8.6c31.5 31.5 31.5 82.5 0 114L422.3 334.8c-31.5 31.5-82.5 31.5-114 0c-27.9-27.9-31.5-71.8-8.6-103.8l1.1-1.6c10.3-14.4 6.9-34.4-7.4-44.6s-34.4-6.9-44.6 7.4l-1.1 1.6C206.5 251.2 213 330 263 380c56.5 56.5 148 56.5 204.5 0L579.8 267.7zM60.2 244.3c-56.5 56.5-56.5 148 0 204.5c50 50 128.8 56.5 186.3 15.4l1.6-1.1c14.4-10.3 17.7-30.3 7.4-44.6s-30.3-17.7-44.6-7.4l-1.6 1.1c-32.1 22.9-76 19.3-103.8-8.6C74 372 74 321 105.5 289.5L217.7 177.2c31.5-31.5 82.5-31.5 114 0c27.9 27.9 31.5 71.8 8.6 103.9l-1.1 1.6c-10.3 14.4-6.9 34.4 7.4 44.6s34.4 6.9 44.6-7.4l1.1-1.6C433.5 260.8 427 182 377 132c-56.5-56.5-148-56.5-204.5 0L60.2 244.3z"],
-    "House": [576, 512, [], "solid", "M575.8 255.5c0 18-15 32.1-32 32.1l-32 0 .7 160.2c0 2.7-.2 5.4-.5 8.1l0 16.2c0 22.1-17.9 40-40 40l-16 0c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1L416 512l-24 0c-22.1 0-40-17.9-40-40l0-24 0-64c0-17.7-14.3-32-32-32l-64 0c-17.7 0-32 14.3-32 32l0 64 0 24c0 22.1-17.9 40-40 40l-24 0-31.9 0c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2l-16 0c-22.1 0-40-17.9-40-40l0-112c0-.9 0-1.9 .1-2.8l0-69.7-32 0c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z"],
-    "Gamepad": [640, 512, [], "solid", "M192 64C86 64 0 150 0 256S86 448 192 448l256 0c106 0 192-86 192-192s-86-192-192-192L192 64zM496 168a40 40 0 1 1 0 80 40 40 0 1 1 0-80zM392 304a40 40 0 1 1 80 0 40 40 0 1 1 -80 0zM168 200c0-13.3 10.7-24 24-24s24 10.7 24 24l0 32 32 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-32 0 0 32c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-32-32 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l32 0 0-32z"],
-    "Camera": [512, 512, [], "solid", "M149.1 64.8L138.7 96 64 96C28.7 96 0 124.7 0 160L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-256c0-35.3-28.7-64-64-64l-74.7 0L362.9 64.8C356.4 45.2 338.1 32 317.4 32L194.6 32c-20.7 0-39 13.2-45.5 32.8zM256 192a96 96 0 1 1 0 192 96 96 0 1 1 0-192z"],
-    "Printer": [512, 512, [], "solid", "M128 0C92.7 0 64 28.7 64 64l0 96 64 0 0-96 226.7 0L384 93.3l0 66.7 64 0 0-66.7c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0L128 0zM384 352l0 32 0 64-256 0 0-64 0-16 0-16 256 0zm64 32l32 0c17.7 0 32-14.3 32-32l0-96c0-35.3-28.7-64-64-64L64 192c-35.3 0-64 28.7-64 64l0 96c0 17.7 14.3 32 32 32l32 0 0 64c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-64zM432 248a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"],
-    "Server": [512, 512, [], "solid", "M64 32C28.7 32 0 60.7 0 96l0 64c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-64c0-35.3-28.7-64-64-64L64 32zm280 72a24 24 0 1 1 0 48 24 24 0 1 1 0-48zm48 24a24 24 0 1 1 48 0 24 24 0 1 1 -48 0zM64 288c-35.3 0-64 28.7-64 64l0 64c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-64c0-35.3-28.7-64-64-64L64 288zm280 72a24 24 0 1 1 0 48 24 24 0 1 1 0-48zm56 24a24 24 0 1 1 48 0 24 24 0 1 1 -48 0z"],
-    "Calendar": [448, 512, [], "solid", "M96 32l0 32L48 64C21.5 64 0 85.5 0 112l0 48 448 0 0-48c0-26.5-21.5-48-48-48l-48 0 0-32c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 32L160 64l0-32c0-17.7-14.3-32-32-32S96 14.3 96 32zM448 192L0 192 0 464c0 26.5 21.5 48 48 48l352 0c26.5 0 48-21.5 48-48l0-272z"],
-    "Pipette": [512, 512, [], "solid", "M341.6 29.2L240.1 130.8l-9.4-9.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3l-9.4-9.4L482.8 170.4c39-39 39-102.2 0-141.1s-102.2-39-141.1 0zM55.4 323.3c-15 15-23.4 35.4-23.4 56.6l0 42.4L5.4 462.2c-8.5 12.7-6.8 29.6 4 40.4s27.7 12.5 40.4 4L89.7 480l42.4 0c21.2 0 41.6-8.4 56.6-23.4L309.4 335.9l-45.3-45.3L143.4 411.3c-3 3-7.1 4.7-11.3 4.7L96 416l0-36.1c0-4.2 1.7-8.3 4.7-11.3L221.4 247.9l-45.3-45.3L55.4 323.3z"],
-    "Scroll": [576, 512, [], "solid", "M0 80l0 48c0 17.7 14.3 32 32 32l16 0 48 0 0-80c0-26.5-21.5-48-48-48S0 53.5 0 80zM112 32c10 13.4 16 30 16 48l0 304c0 35.3 28.7 64 64 64s64-28.7 64-64l0-5.3c0-32.4 26.3-58.7 58.7-58.7L480 320l0-192c0-53-43-96-96-96L112 32zM464 480c61.9 0 112-50.1 112-112c0-8.8-7.2-16-16-16l-245.3 0c-14.7 0-26.7 11.9-26.7 26.7l0 5.3c0 53-43 96-96 96l176 0 96 0z"],
-    "Smartphone": [384, 512, [], "solid", "M16 64C16 28.7 44.7 0 80 0L304 0c35.3 0 64 28.7 64 64l0 384c0 35.3-28.7 64-64 64L80 512c-35.3 0-64-28.7-64-64L16 64zM144 448c0 8.8 7.2 16 16 16l64 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-64 0c-8.8 0-16 7.2-16 16zM304 64L80 64l0 320 224 0 0-320z"],
-    "Settings": [512, 512, [], "solid", "M495.9 166.6c3.2 8.7 .5 18.4-6.4 24.6l-43.3 39.4c1.1 8.3 1.7 16.8 1.7 25.4s-.6 17.1-1.7 25.4l43.3 39.4c6.9 6.2 9.6 15.9 6.4 24.6c-4.4 11.9-9.7 23.3-15.8 34.3l-4.7 8.1c-6.6 11-14 21.4-22.1 31.2c-5.9 7.2-15.7 9.6-24.5 6.8l-55.7-17.7c-13.4 10.3-28.2 18.9-44 25.4l-12.5 57.1c-2 9.1-9 16.3-18.2 17.8c-13.8 2.3-28 3.5-42.5 3.5s-28.7-1.2-42.5-3.5c-9.2-1.5-16.2-8.7-18.2-17.8l-12.5-57.1c-15.8-6.5-30.6-15.1-44-25.4L83.1 425.9c-8.8 2.8-18.6 .3-24.5-6.8c-8.1-9.8-15.5-20.2-22.1-31.2l-4.7-8.1c-6.1-11-11.4-22.4-15.8-34.3c-3.2-8.7-.5-18.4 6.4-24.6l43.3-39.4C64.6 273.1 64 264.6 64 256s.6-17.1 1.7-25.4L22.4 191.2c-6.9-6.2-9.6-15.9-6.4-24.6c4.4-11.9 9.7-23.3 15.8-34.3l4.7-8.1c6.6-11 14-21.4 22.1-31.2c5.9-7.2 15.7-9.6 24.5-6.8l55.7 17.7c13.4-10.3 28.2-18.9 44-25.4l12.5-57.1c2-9.1 9-16.3 18.2-17.8C227.3 1.2 241.5 0 256 0s28.7 1.2 42.5 3.5c9.2 1.5 16.2 8.7 18.2 17.8l12.5 57.1c15.8 6.5 30.6 15.1 44 25.4l55.7-17.7c8.8-2.8 18.6-.3 24.5 6.8c8.1 9.8 15.5 20.2 22.1 31.2l4.7 8.1c6.1 11 11.4 22.4 15.8 34.3zM256 336a80 80 0 1 0 0-160 80 80 0 1 0 0 160z"],
-    "Map": [576, 512, [], "solid", "M384 476.1L192 421.2l0-385.3L384 90.8l0 385.3zm32-1.2l0-386.5L543.1 37.5c15.8-6.3 32.9 5.3 32.9 22.3l0 334.8c0 9.8-6 18.6-15.1 22.3L416 474.8zM15.1 95.1L160 37.2l0 386.5L32.9 474.5C17.1 480.8 0 469.2 0 452.2L0 117.4c0-9.8 6-18.6 15.1-22.3z"],
-    "Folder": [512, 512, [], "solid", "M64 480H448c35.3 0 64-28.7 64-64V160c0-35.3-28.7-64-64-64H288c-10.1 0-19.6-4.7-25.6-12.8L243.2 57.6C231.1 41.5 212.1 32 192 32H64C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64z"],
-    "FolderOpen": [576, 512, [], "solid", "M384 480l48 0c11.4 0 21.9-6 27.6-15.9l112-192c5.8-9.9 5.8-22.1 .1-32.1S555.5 224 544 224l-400 0c-11.4 0-21.9 6-27.6 15.9L48 357.1 48 96c0-8.8 7.2-16 16-16l117.5 0c4.2 0 8.3 1.7 11.3 4.7l26.5 26.5c21 21 49.5 32.8 79.2 32.8L416 144c8.8 0 16 7.2 16 16l0 32 48 0 0-32c0-35.3-28.7-64-64-64L298.5 96c-17 0-33.3-6.7-45.3-18.7L226.7 50.7c-12-12-28.3-18.7-45.3-18.7L64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l23.7 0L384 480z"],
-    "FolderClosed": [512, 512, [], "solid", "M448 480L64 480c-35.3 0-64-28.7-64-64L0 192l512 0 0 224c0 35.3-28.7 64-64 64zm64-320L0 160 0 96C0 60.7 28.7 32 64 32l128 0c20.1 0 39.1 9.5 51.2 25.6l19.2 25.6c6 8.1 15.5 12.8 25.6 12.8l160 0c35.3 0 64 28.7 64 64z"],
-    "Function": [384, 512, [], "solid", "M314.7 32c-38.8 0-73.7 23.3-88.6 59.1L170.7 224 64 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l80 0L98.9 396.3c-5 11.9-16.6 19.7-29.5 19.7L32 416c-17.7 0-32 14.3-32 32s14.3 32 32 32l37.3 0c38.8 0 73.7-23.3 88.6-59.1L213.3 288 320 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-80 0 45.1-108.3c5-11.9 16.6-19.7 29.5-19.7L352 96c17.7 0 32-14.3 32-32s-14.3-32-32-32l-37.3 0z"],
-    "Stop": [384, 512, [], "solid", "M0 128C0 92.7 28.7 64 64 64H320c35.3 0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V128z"],
-    "Image": [512, 512, [], "solid", "M448 80c8.8 0 16 7.2 16 16l0 319.8-5-6.5-136-176c-4.5-5.9-11.6-9.3-19-9.3s-14.4 3.4-19 9.3L202 340.7l-30.5-42.7C167 291.7 159.8 288 152 288s-15 3.7-19.5 10.1l-80 112L48 416.3l0-.3L48 96c0-8.8 7.2-16 16-16l384 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zm80 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z"],
-    "Images": [576, 512, [], "solid", "M160 80l352 0c8.8 0 16 7.2 16 16l0 224c0 8.8-7.2 16-16 16l-21.2 0L388.1 178.9c-4.4-6.8-12-10.9-20.1-10.9s-15.7 4.1-20.1 10.9l-52.2 79.8-12.4-16.9c-4.5-6.2-11.7-9.8-19.4-9.8s-14.8 3.6-19.4 9.8L175.6 336 160 336c-8.8 0-16-7.2-16-16l0-224c0-8.8 7.2-16 16-16zM96 96l0 224c0 35.3 28.7 64 64 64l352 0c35.3 0 64-28.7 64-64l0-224c0-35.3-28.7-64-64-64L160 32c-35.3 0-64 28.7-64 64zM48 120c0-13.3-10.7-24-24-24S0 106.7 0 120L0 344c0 75.1 60.9 136 136 136l320 0c13.3 0 24-10.7 24-24s-10.7-24-24-24l-320 0c-48.6 0-88-39.4-88-88l0-224zm208 24a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"],
-    "Info": [512, 512, [], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336l24 0 0-64-24 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l48 0c13.3 0 24 10.7 24 24l0 88 8 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-80 0c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"],
-    "Bone": [576, 512, [], "solid", "M153.7 144.8c6.9 16.3 20.6 31.2 38.3 31.2l192 0c17.7 0 31.4-14.9 38.3-31.2C434.4 116.1 462.9 96 496 96c44.2 0 80 35.8 80 80c0 30.4-17 56.9-42 70.4c-3.6 1.9-6 5.5-6 9.6s2.4 7.7 6 9.6c25 13.5 42 40 42 70.4c0 44.2-35.8 80-80 80c-33.1 0-61.6-20.1-73.7-48.8C415.4 350.9 401.7 336 384 336l-192 0c-17.7 0-31.4 14.9-38.3 31.2C141.6 395.9 113.1 416 80 416c-44.2 0-80-35.8-80-80c0-30.4 17-56.9 42-70.4c3.6-1.9 6-5.5 6-9.6s-2.4-7.7-6-9.6C17 232.9 0 206.4 0 176c0-44.2 35.8-80 80-80c33.1 0 61.6 20.1 73.7 48.8z"],
-    "Puzzle": [512, 512, [], "solid", "M192 104.8c0-9.2-5.8-17.3-13.2-22.8C167.2 73.3 160 61.3 160 48c0-26.5 28.7-48 64-48s64 21.5 64 48c0 13.3-7.2 25.3-18.8 34c-7.4 5.5-13.2 13.6-13.2 22.8c0 12.8 10.4 23.2 23.2 23.2l56.8 0c26.5 0 48 21.5 48 48l0 56.8c0 12.8 10.4 23.2 23.2 23.2c9.2 0 17.3-5.8 22.8-13.2c8.7-11.6 20.7-18.8 34-18.8c26.5 0 48 28.7 48 64s-21.5 64-48 64c-13.3 0-25.3-7.2-34-18.8c-5.5-7.4-13.6-13.2-22.8-13.2c-12.8 0-23.2 10.4-23.2 23.2L384 464c0 26.5-21.5 48-48 48l-56.8 0c-12.8 0-23.2-10.4-23.2-23.2c0-9.2 5.8-17.3 13.2-22.8c11.6-8.7 18.8-20.7 18.8-34c0-26.5-28.7-48-64-48s-64 21.5-64 48c0 13.3 7.2 25.3 18.8 34c7.4 5.5 13.2 13.6 13.2 22.8c0 12.8-10.4 23.2-23.2 23.2L48 512c-26.5 0-48-21.5-48-48L0 343.2C0 330.4 10.4 320 23.2 320c9.2 0 17.3 5.8 22.8 13.2C54.7 344.8 66.7 352 80 352c26.5 0 48-28.7 48-64s-21.5-64-48-64c-13.3 0-25.3 7.2-34 18.8C40.5 250.2 32.4 256 23.2 256C10.4 256 0 245.6 0 232.8L0 176c0-26.5 21.5-48 48-48l120.8 0c12.8 0 23.2-10.4 23.2-23.2z"],
-    "Lock": [448, 512, [], "solid", "M144 144l0 48 160 0 0-48c0-44.2-35.8-80-80-80s-80 35.8-80 80zM80 192l0-48C80 64.5 144.5 0 224 0s144 64.5 144 144l0 48 16 0c35.3 0 64 28.7 64 64l0 192c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 256c0-35.3 28.7-64 64-64l16 0z"],
-    "LockOpen": [576, 512, [], "solid", "M352 144c0-44.2 35.8-80 80-80s80 35.8 80 80l0 48c0 17.7 14.3 32 32 32s32-14.3 32-32l0-48C576 64.5 511.5 0 432 0S288 64.5 288 144l0 48L64 192c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l320 0c35.3 0 64-28.7 64-64l0-192c0-35.3-28.7-64-64-64l-32 0 0-48z"],
-    "Shuffle": [512, 512, [], "solid", "M403.8 34.4c12-5 25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6l0-32-32 0c-10.1 0-19.6 4.7-25.6 12.8L284 229.3 244 176l31.2-41.6C293.3 110.2 321.8 96 352 96l32 0 0-32c0-12.9 7.8-24.6 19.8-29.6zM164 282.7L204 336l-31.2 41.6C154.7 401.8 126.2 416 96 416l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l64 0c10.1 0 19.6-4.7 25.6-12.8L164 282.7zm274.6 188c-9.2 9.2-22.9 11.9-34.9 6.9s-19.8-16.6-19.8-29.6l0-32-32 0c-30.2 0-58.7-14.2-76.8-38.4L121.6 172.8c-6-8.1-15.5-12.8-25.6-12.8l-64 0c-17.7 0-32-14.3-32-32s14.3-32 32-32l64 0c30.2 0 58.7 14.2 76.8 38.4L326.4 339.2c6 8.1 15.5 12.8 25.6 12.8l32 0 0-32c0-12.9 7.8-24.6 19.8-29.6s25.7-2.2 34.9 6.9l64 64c6 6 9.4 14.1 9.4 22.6s-3.4 16.6-9.4 22.6l-64 64z"],
-    "Play": [384, 512, [], "solid", "M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80L0 432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"],
-    "Pause": [320, 512, [], "solid", "M48 64C21.5 64 0 85.5 0 112L0 400c0 26.5 21.5 48 48 48l32 0c26.5 0 48-21.5 48-48l0-288c0-26.5-21.5-48-48-48L48 64zm192 0c-26.5 0-48 21.5-48 48l0 288c0 26.5 21.5 48 48 48l32 0c26.5 0 48-21.5 48-48l0-288c0-26.5-21.5-48-48-48l-32 0z"],
-    "PlusCircle": [512, 512, [], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM232 344l0-64-64 0c-13.3 0-24-10.7-24-24s10.7-24 24-24l64 0 0-64c0-13.3 10.7-24 24-24s24 10.7 24 24l0 64 64 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-64 0 0 64c0 13.3-10.7 24-24 24s-24-10.7-24-24z"],
-    "LogIn": [512, 512, [], "solid", "M352 96l64 0c17.7 0 32 14.3 32 32l0 256c0 17.7-14.3 32-32 32l-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0c53 0 96-43 96-96l0-256c0-53-43-96-96-96l-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32zm-9.4 182.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L242.7 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128z"],
-    "LogOut": [512, 512, [], "solid", "M502.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L402.7 224 192 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l210.7 0-73.4 73.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l128-128zM160 96c17.7 0 32-14.3 32-32s-14.3-32-32-32L96 32C43 32 0 75 0 128L0 384c0 53 43 96 96 96l64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0c-17.7 0-32-14.3-32-32l0-256c0-17.7 14.3-32 32-32l64 0z"],
-    "MousePointer": [320, 512, [], "solid", "M0 55.2L0 426c0 12.2 9.9 22 22 22c6.3 0 12.4-2.7 16.6-7.5L121.2 346l58.1 116.3c7.9 15.8 27.1 22.2 42.9 14.3s22.2-27.1 14.3-42.9L179.8 320l118.1 0c12.2 0 22.1-9.9 22.1-22.1c0-6.3-2.7-12.3-7.4-16.5L38.6 37.9C34.3 34.1 28.9 32 23.2 32C10.4 32 0 42.4 0 55.2z"],
-    "User": [512, 512, [], "solid", "M256 288A144 144 0 1 0 256 0a144 144 0 1 0 0 288zm-94.7 32C72.2 320 0 392.2 0 481.3c0 17 13.8 30.7 30.7 30.7l450.6 0c17 0 30.7-13.8 30.7-30.7C512 392.2 439.8 320 350.7 320l-189.4 0z"],
-    "HardDriveDownload": [512, 512, [], "solid", "M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 242.7-73.4-73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l128 128c12.5 12.5 32.8 12.5 45.3 0l128-128c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L288 274.7 288 32zM64 352c-35.3 0-64 28.7-64 64l0 32c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-32c0-35.3-28.7-64-64-64l-101.5 0-45.3 45.3c-25 25-65.5 25-90.5 0L165.5 352 64 352zm368 56a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"],
-    "HardDriveUpload": [512, 512, [], "solid", "M288 109.3L288 352c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-242.7-73.4 73.4c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l128-128c12.5-12.5 32.8-12.5 45.3 0l128 128c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L288 109.3zM64 352l128 0c0 35.3 28.7 64 64 64s64-28.7 64-64l128 0c35.3 0 64 28.7 64 64l0 32c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64l0-32c0-35.3 28.7-64 64-64zM432 456a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"],
-    "CircleCheck": [512, 512, ["CheckCircle2"], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"],
-    "CirclePlay": [512, 512, [], "solid", "M0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zM188.3 147.1c-7.6 4.2-12.3 12.3-12.3 20.9l0 176c0 8.7 4.7 16.7 12.3 20.9s16.8 4.1 24.3-.5l144-88c7.1-4.4 11.5-12.1 11.5-20.5s-4.4-16.1-11.5-20.5l-144-88c-7.4-4.5-16.7-4.7-24.3-.5z"],
-    "CirclePause": [512, 512, [], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM224 192l0 128c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-128c0-17.7 14.3-32 32-32s32 14.3 32 32zm128 0l0 128c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-128c0-17.7 14.3-32 32-32s32 14.3 32 32z"],
-    "CircleStop": [512, 512, [], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM192 160l128 0c17.7 0 32 14.3 32 32l0 128c0 17.7-14.3 32-32 32l-128 0c-17.7 0-32-14.3-32-32l0-128c0-17.7 14.3-32 32-32z"],
-    "CircleDot": [512, 512, [], "solid", "M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm256-96a96 96 0 1 1 0 192 96 96 0 1 1 0-192z"],
-    "CircleHelp": [512, 512, ["HelpCircle"], "solid", "M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM169.8 165.3c7.9-22.3 29.1-37.3 52.8-37.3l58.3 0c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L280 264.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24l0-13.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1l-58.3 0c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"],
-    "Apple": [384, 512, [], "solid", "M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"],
-    "Chrome": [512, 512, [], "solid", "M0 256C0 209.4 12.47 165.6 34.27 127.1L144.1 318.3C166 357.5 207.9 384 256 384C270.3 384 283.1 381.7 296.8 377.4L220.5 509.6C95.9 492.3 0 385.3 0 256zM365.1 321.6C377.4 302.4 384 279.1 384 256C384 217.8 367.2 183.5 340.7 160H493.4C505.4 189.6 512 222.1 512 256C512 397.4 397.4 511.1 256 512L365.1 321.6zM477.8 128H256C193.1 128 142.3 172.1 130.5 230.7L54.19 98.47C101 38.53 174 0 256 0C350.8 0 433.5 51.48 477.8 128V128zM168 256C168 207.4 207.4 168 256 168C304.6 168 344 207.4 344 256C344 304.6 304.6 344 256 344C207.4 344 168 304.6 168 256z"],
-    "Facebook": [512, 512, [], "solid", "M512 256C512 114.6 397.4 0 256 0S0 114.6 0 256C0 376 82.7 476.8 194.2 504.5V334.2H141.4V256h52.8V222.3c0-87.1 39.4-127.5 125-127.5c16.2 0 44.2 3.2 55.7 6.4V172c-6-.6-16.5-1-29.6-1c-42 0-58.2 15.9-58.2 57.2V256h83.6l-14.4 78.2H287V510.1C413.8 494.8 512 386.9 512 256h0z"],
-    "Github": [496, 512, [], "solid", "M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"],
-    "Youtube": [576, 512, [], "solid", "M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305zm-317.51 213.508V175.185l142.739 81.205-142.739 81.201z"],
-    // Some Aliases
-    "VR": "VrCardboard",
-    "Script": "Scroll",
-    "Media": "PhotoFilm",
-    "CC": "ClosedCaptioning",
-    "ASL": "HandsAslInterpreting",
-    "HandRock": "HandBackFist",
-    "Chain": "Link",
-    "ChainBroken": "LinkOff",
-    "ChainOff": "LinkOff",
-    "Unlink": "LinkOff",
-    "HelpCircle": "CircleHelp",
-    "CheckCircle2": "CircleCheck"
-}
-
-// Alias for Lucide Icons
-LX.LucideIconAlias = {
-    "Stop": "Square",
-    "Refresh": "RefreshCw",
-    "Left": "ChevronLeft",
-    "Right": "ChevronRight",
-    "Up": "ChevronUp",
-    "Down": "ChevronDown",
-    "MenuArrows": "ChevronsUpDown",
-    "RotateForward": "RotateCw",
-    "RotateRight": "RotateCw",
-    "RotateBack": "RotateCcw",
-    "RotateLeft": "RotateCcw",
-}
-
-export { LX };
+export { ADD_CUSTOM_WIDGET, Area, AssetView, AssetViewEvent, Branch, LX, Menubar, Panel, Sidebar, Widget };
