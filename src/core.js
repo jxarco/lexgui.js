@@ -3147,7 +3147,7 @@ class ContextMenu {
         const hasSubmenu = o[ k ].length;
         let entry = document.createElement('div');
         entry.className = "lexmenuboxentry" + (o[ 'className' ] ? " " + o[ 'className' ] : "" );
-        entry.id = o.id ?? ("eId" + getSupportedDOMName( k ));
+        entry.id = o.id ?? ("eId" + LX.getSupportedDOMName( k ));
         entry.innerHTML = "";
         const icon = o[ 'icon' ];
         if( icon )
@@ -3314,7 +3314,7 @@ class ContextMenu {
         for( let item of this.items )
         {
             let key = Object.keys( item )[ 0 ];
-            let pKey = "eId" + getSupportedDOMName( key );
+            let pKey = "eId" + LX.getSupportedDOMName( key );
 
             // Item already created
             const id = "#" + ( item.id ?? pKey );
@@ -3328,7 +3328,7 @@ class ContextMenu {
     setColor( token, color ) {
 
         if(color[ 0 ] !== '#')
-            color = rgbToHex(color);
+            color = LX.rgbToHex(color);
 
         this.colors[ token ] = color;
     }

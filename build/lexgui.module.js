@@ -3128,7 +3128,7 @@ class ContextMenu {
         const hasSubmenu = o[ k ].length;
         let entry = document.createElement('div');
         entry.className = "lexmenuboxentry" + (o[ 'className' ] ? " " + o[ 'className' ] : "" );
-        entry.id = o.id ?? ("eId" + getSupportedDOMName( k ));
+        entry.id = o.id ?? ("eId" + LX.getSupportedDOMName( k ));
         entry.innerHTML = "";
         const icon = o[ 'icon' ];
         if( icon )
@@ -3295,7 +3295,7 @@ class ContextMenu {
         for( let item of this.items )
         {
             let key = Object.keys( item )[ 0 ];
-            let pKey = "eId" + getSupportedDOMName( key );
+            let pKey = "eId" + LX.getSupportedDOMName( key );
 
             // Item already created
             const id = "#" + ( item.id ?? pKey );
@@ -3309,7 +3309,7 @@ class ContextMenu {
     setColor( token, color ) {
 
         if(color[ 0 ] !== '#')
-            color = rgbToHex(color);
+            color = LX.rgbToHex(color);
 
         this.colors[ token ] = color;
     }
@@ -4964,7 +4964,7 @@ LX.doAsync = doAsync;
  * @description Convert a text string to a valid DOM name
  * @param {String} text Original text
  */
-function getSupportedDOMName$1( text )
+function getSupportedDOMName( text )
 {
     console.assert( typeof text == "string", "getSupportedDOMName: Text is not a string!" );
 
@@ -4983,7 +4983,7 @@ function getSupportedDOMName$1( text )
     return name;
 }
 
-LX.getSupportedDOMName = getSupportedDOMName$1;
+LX.getSupportedDOMName = getSupportedDOMName;
 
 /**
  * @method has
@@ -5234,7 +5234,7 @@ LX.hexToHsv = hexToHsv;
  * @param {Object} rgb Object containing RGB color
  * @param {Number} scale Use 255 for 0..255 range or 1 for 0..1 range
  */
-function rgbToHex$1( rgb, scale = 255 )
+function rgbToHex( rgb, scale = 255 )
 {
     const rgbArray = [ rgb.r, rgb.g, rgb.b ];
     if( rgb.a != undefined ) rgbArray.push( rgb.a );
@@ -5249,7 +5249,7 @@ function rgbToHex$1( rgb, scale = 255 )
     );
 }
 
-LX.rgbToHex = rgbToHex$1;
+LX.rgbToHex = rgbToHex;
 
 /**
  * @method rgbToCss
