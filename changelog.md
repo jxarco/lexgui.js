@@ -7,6 +7,9 @@ Timeline:
   - `onUpdateTrack` now expects an array of track indices as argument.
   - Added root.
 
+Widgets:
+- Centered Map2D initial position.
+
 Add `Editor` demo example.
 Separate source into files. Generate module using `npm rollup`.
 Fixed making floating branch + docking to panel.

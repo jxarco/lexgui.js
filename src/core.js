@@ -4051,7 +4051,7 @@ class CanvasMap2D {
         this.callback = callback;
         this.weights = [];
         this.weightsObj = {};
-        this.currentPosition = new LX.vec2( 0.5, 0.5 );
+        this.currentPosition = new LX.vec2( 0.0, 0.0 );
         this.circleCenter = [ 0, 0 ];
         this.circleRadius = 1;
         this.margin = 8;
