@@ -3778,7 +3778,6 @@ class ClipsTimeline extends Timeline {
                     trackIdx = i;
                     break;
                 }
-                console.warn("There is already a clip stored in time slot ", clipInCurrentSlot)
             }
             if(trackIdx < 0){
                 trackIdx = this.addNewTrack();
