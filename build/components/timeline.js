@@ -818,7 +818,7 @@ class Timeline {
                 return;
             }
             // this.canvas.style.cursor = "default";
-            const discard = this.movingKeys || (LX.UTILS.getTime() - this.clickTime) > this.clickDiscardTimeout; // ms
+            const discard = this.movingKeys || (LX.getTime() - this.clickTime) > this.clickDiscardTimeout; // ms
 
             e.discard = discard;
  
@@ -839,7 +839,7 @@ class Timeline {
         if( e.type == "mousedown")	{
             // e.preventDefault();
             
-            this.clickTime = LX.UTILS.getTime();
+            this.clickTime = LX.getTime();
 
             if(e.shiftKey && this.active) {
                 this.boxSelection = true;

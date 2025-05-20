@@ -201,7 +201,7 @@
     ] );
 
     MAKE_HEADER( "Controls", "h2", "" );
-    let baseControls = [
+    const baseControls = [
         ["Mouse left click", ""],
         [
             ["Drag over time markers", "change current time "],
@@ -478,10 +478,13 @@ panel.attach(kfTimeline.root);` );
 
     MAKE_HEADER("Controls", "h2", "" );
     MAKE_PARAGRAPH(`Default keyboard controls can be changed by reimplementing ${INLINE_CODE("processKeys")}`);
-    MAKE_CODE_BULLET_LIST( baseControls.concat([
+
+    let keyControls = baseControls.slice();
+    keyControls[1].push(
         ["ctrlKey + horizontal drag", "move selected keyframes (if any)"],
-        ["altKey + vertical drag", `change value of selected keyframes. Only applicable to tracks with dim = 1 and their ${INLINE_CODE("curves")} attribute set to ${INLINE_CODE("true")}`],
-    ]));
+        ["altKey + vertical drag", `change value of selected keyframes. Only applicable to tracks with dim = 1 and their ${INLINE_CODE("curves")} attribute set to ${INLINE_CODE("true")}`]
+    );
+    MAKE_CODE_BULLET_LIST( keyControls );
 
         
     MAKE_HEADER( "Clips timeline", "h1", "clips-timeline" );
@@ -699,10 +702,12 @@ panel.attach(clipTimeline.root);` );
 
     MAKE_HEADER("Controls", "h2", "" );
     MAKE_PARAGRAPH(`Default keyboard controls can be changed by reimplementing ${INLINE_CODE("processKeys")}`);
-    MAKE_CODE_BULLET_LIST( baseControls.concat([
-        ["ctrlKey + horizontal drag", "move selected clips (if any) horizontally"],
-        ["ctrlKey + vertical drag", "move selected clips (if any) vertical. It automatically creates new tracks when reaching the bottom"],
-    ]));
+    let clipControls = baseControls.slice();
+    clipControls[1].push(
+        ["ctrlKey + horizontal drag", `move selected clips (if any) horizontally. Holding ${INLINE_CODE("ctrlKey")} pressed is not necessary once the mouse is clicked down.` ],
+        ["ctrlKey + altKey + vertical drag", `move selected clips (if any) vertically. It automatically creates new tracks when reaching the bottom. Holding ${INLINE_CODE("ctrlKey")} pressed is not necessary once the mouse is clicked down.`]
+    );
+    MAKE_CODE_BULLET_LIST( clipControls );
 
 
     MAKE_LINE_BREAK();
