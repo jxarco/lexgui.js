@@ -6,6 +6,8 @@ Timeline:
   - Paste refactor.
   - `onUpdateTrack` now expects an array of track indices as argument.
   - Added root.
+  - Added documentation.
+  - Fixed example.
 
 Widgets:
 - Centered Map2D initial position.
