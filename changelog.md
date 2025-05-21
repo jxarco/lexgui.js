@@ -2,11 +2,25 @@
 
 ## dev
 
+## 0.6.4 (master)
+
+Timeline:
+  - Paste refactor.
+  - `onUpdateTrack` now expects an array of track indices as argument.
+  - Added root.
+  - Added documentation.
+  - Fixed example.
+
+Widgets:
+- Centered Map2D initial position.
+
+Add `Editor` demo example.
 Separate source into files. Generate module using `npm rollup`.
 Fixed making floating branch + docking to panel.
 Fixed graph renaming bug in NodeGraph editor.
+Resize fixes in VideoEditor component.
 
-## 0.6.3 (master)
+## 0.6.3
 
 Widgets:
 - New Map2D Widget (For NNI).

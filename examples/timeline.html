@@ -57,8 +57,8 @@
         createKeyframeTimeline( bottomTabs );
         createClipsTimeline( bottomTabs );
         createCurvesTimeline( bottomTabs );
-        debugger;
-        activeTimeline.resize();
+
+        LX.doAsync( activeTimeline.resize.bind( activeTimeline ) );
 
         let mode = types.KEYFRAMES;
 
@@ -125,7 +125,7 @@
                     }
                 }
             });
-            panel.addText("Text", "Lexgui.js @evallsg", null, {placeholder: "e.g. ColorPicker", icon: "Type"});
+            panel.addText("Text", "Lexgui.js @evallsg @japopra", null, {placeholder: "e.g. ColorPicker", icon: "Type"});
             panel.addColor("Font Color", { r: 1, g: 0.1, b: 0.6 }, (value, event) => {
                 console.log("Font Color: ", value);
             });
