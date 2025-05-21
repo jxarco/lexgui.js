@@ -3751,9 +3751,10 @@ class ClipsTimeline extends Timeline {
     * @param {obj} clip  clip to be added
     * @param {int} trackIdx (optional) track where to put the clip. -1 will find the first free slot. ***WARNING*** Must call getClipsInRange, before calling this function with a valid trackdIdx
     * @param {float} offsetTime (optional) offset time of current time
+    * @param {float} searchStartTrackIdx (optional) if trackIdx is set to -1, this idx will be used as the starting point to find a valid track
     * @returns  a zero/positive value if successful. Otherwise, -1
     */
-    addClip( clip, trackIdx = -1, offsetTime = 0 ) {
+    addClip( clip, trackIdx = -1, offsetTime = 0, searchStartTrackIdx = 0 ) {
         if ( !this.animationClip ){ return -1; }
 
         // Update clip information
@@ -3769,7 +3770,7 @@ class ClipsTimeline extends Timeline {
             trackIdx = this.addNewTrack();
         }
         else if ( trackIdx < 0 ){ // find first free track slot
-            for(let i = 0; i < this.animationClip.tracks.length; i++) {
+            for(let i = searchStartTrackIdx; i < this.animationClip.tracks.length; i++) {
                 let clipInCurrentSlot = this.animationClip.tracks[i].clips.find( t => { 
                     return LX.UTILS.compareThresholdRange(newStart, clip.start + clip.duration, t.start, t.start+t.duration);                
                 });
@@ -3823,17 +3824,18 @@ class ClipsTimeline extends Timeline {
         return newIdx;
     }
 
-
-    /** Add an array of clips to the timeline in the first free track at the current time
-     * @clips: clips to be added
-     * @offsetTime: (optional) offset time of current time
-    */
-
-    addClips( clips, offsetTime = 0 ){
+    /**
+     *  Add an array of clips to the timeline in the first suitable tracks. It tries to put clips in the same track if possible. All clips will be in adjacent tracks to each other
+     * @param {Array of objects} clips 
+     * @param {Number} offsetTime 
+     * @param {Int} searchStartTrackIdx 
+     * @returns 
+     */
+    addClips( clips, offsetTime = 0, searchStartTrackIdx = 0 ){
         if( !this.animationClip || !clips.length ){ return false; }
 
         let clipTrackIdxs = new Int16Array( clips.length );
-        let baseTrackIdx = -1;
+        let baseTrackIdx = searchStartTrackIdx -1; // every time the algorithm fails, it increments the starting track Idx 
         let currTrackIdx = -1;
         const tracks = this.animationClip.tracks;
         const lastTrackLength = tracks.length;
@@ -3845,7 +3847,7 @@ class ClipsTimeline extends Timeline {
             if ( c == 0 ){ // last search failed, move one track down and check again
                 ++baseTrackIdx; 
                 currTrackIdx = baseTrackIdx;
-                if ( currTrackIdx >= tracks.length ){ this.addNewTrack(null, false); }
+                while ( currTrackIdx >= tracks.length ){ this.addNewTrack(null, false); }
                 let clipsInCurrentSlot = tracks[baseTrackIdx].clips.find( t => { return LX.UTILS.compareThresholdRange(clipStart, clipEnd, t.start, t.start+t.duration); });
                 
                 // reset search
