@@ -644,6 +644,18 @@ panel.attach(clipTimeline.root);` );
         ["timeOffset", "Number"],
     ], "Array of Objects" );
 
+    MAKE_CLASS_METHOD( ".addClip", `Add a clip in a track. An ${INLINE_CODE("offsetTime")} is added to the time attributes of the clip. If ${INLINE_CODE("trackIdx")} is -1, the clip will be added in the first suitable track it finds, starting from ${INLINE_CODE("searchStartTrackIdx")} (defaults to 0). Returns the clip's index in the track.`, [
+        ["trackIdx", "Int"],
+        ["offsetTime", "Number"],
+        ["searchStartTrackIdx", "Int"],
+    ], "Number" );
+
+    MAKE_CLASS_METHOD( ".addClips", `Add several clips in the timeline, starting from ${INLINE_CODE("searchStartTrackIdx")} (defaults to 0). An ${INLINE_CODE("offsetTime")} is added to the time attributes of the clip.`, [
+        ["clips", "Array of Objects"],
+        ["offsetTime", "Number"],
+        ["searchStartTrackIdx", "Int"],
+    ], "Number" );
+
     MAKE_CLASS_METHOD( ".getClipOnTime", `Search clip in track that is on the specified time. Returns -1 if no clip overlaps with the timestamp`, [
         ["track", "Object"],
         ["time", "Number"],
