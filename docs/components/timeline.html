@@ -190,9 +190,21 @@
         ["isEnabled", "Boolean"],
         ["skipCallback", "Boolean"],
     ] );
+    
+    MAKE_CLASS_METHOD( ".saveState", `Saves the current state of the track into the history.`, [
+        ["trackIdx", "Number"],
+        ["combineWithPrevious", "Boolean"],
+    ], "" );
+
+    MAKE_CLASS_METHOD( ".undo", `Pops the stack of the undo history and sets it as current. Stores the previous state into the redo history.`, [
+    ], "" );
+    MAKE_CLASS_METHOD( ".redo", `Pops the stack of the redo history and sets it as current. Stores the previous state into the undo history.`, [
+    ], "" );
+
     MAKE_CLASS_METHOD( ".resize", `Resize timeline. If no parameters are sent, it uses its container to determine the size.`, [
         ["size", "[width, height] (optional)"]
     ] );
+
     MAKE_CLASS_METHOD( ".show", `Make html visible`, [] );
     MAKE_CLASS_METHOD( ".hide", `Make html hidden`, [] );
 
@@ -403,17 +415,6 @@ panel.attach(kfTimeline.root);` );
     MAKE_CLASS_METHOD( ".optimizeTracks", `Removes similar keyframes of all track, given the ${INLINE_CODE("optimizeThreshold")} attribute. If ${INLINE_CODE("onlyEqualTime")} is set, only keyframes with the same time will be removed, keepin the first occurrence`, [
         ["onlyEqualTime", "Boolean"],
     ], "" );
-
-    
-    MAKE_CLASS_METHOD( ".saveState", `Saves the current state of the track into the history.`, [
-        ["trackIdx", "Number"],
-        ["combineWithPrevious", "Boolean"],
-    ], "" );
-    MAKE_CLASS_METHOD( ".undo", `Pops the stack of the undo history and sets it as current. Stores the previous state into the redo history.`, [
-    ], "" );
-    MAKE_CLASS_METHOD( ".redo", `Pops the stack of the redo history and sets it as current. Stores the previous state into the undo history.`, [
-    ], "" );
-
     
     MAKE_CLASS_METHOD( ".copySelectedContent", `Copies the lastKeyFramesSelected elements into clipboard.`, [
     ], "" );
@@ -661,15 +662,6 @@ panel.attach(clipTimeline.root);` );
         ["time", "Number"],
         ["threshold", "Number"],
     ], "Number" );
-
-    MAKE_CLASS_METHOD( ".saveState", `Saves the current state of the track into the history.`, [
-        ["trackIdx", "Number"],
-        ["combineWithPrevious", "Boolean"],
-    ], "" );
-    MAKE_CLASS_METHOD( ".undo", `Pops the stack of the undo history and sets it as current. Stores the previous state into the redo history.`, [
-    ], "" );
-    MAKE_CLASS_METHOD( ".redo", `Pops the stack of the redo history and sets it as current. Stores the previous state into the undo history.`, [
-    ], "" );
 
     MAKE_CLASS_METHOD( ".copySelectedContent", `Copies (clones) the lastSelectedClip elements into clipboard.`, [
     ], "" );

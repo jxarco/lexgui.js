@@ -350,6 +350,25 @@ class Timeline {
         return trackInfo.trackIdx;
     }
 
+    deleteTracks( tracksIndices ){
+        this.unSelectAllElements(); // there should be no other object holding a trackIdx
+
+
+        tracksIndices.sort((a,b) => a-b );
+        for (let i = 0; i < tracksIndices.length; ++i){
+            this.historyUndo[ this.historyUndo.length - 1 ]
+        }
+        this.saveState(idx);
+
+        const tracks = this.animationClip.tracks;
+        for( let i = tracksIndices.length-1; i > -1 ; --i ){
+            const idx = tracksIndices[i];
+            tracks.splice(idx, 1);
+        }
+
+
+    }
+
     /**
      * Finds tracks (wholy and partially) inside the range minY maxY.
      * (Full) Canvas local coordinates.
@@ -1101,7 +1120,11 @@ class Timeline {
             tracks[ i ].isSelected = false;
         }
     }
-// --------------------------------------------------
+
+    unselectAllElements(){
+
+    }
+
     /**
     * @method setTrackState
     * @param {int} trackIdx 
@@ -1116,6 +1139,62 @@ class Timeline {
         if(this.onSetTrackState && !skipCallback)
             this.onSetTrackState(track, oldState);
     }
+
+    /**
+     * @param {Number} trackIdx index of track in the animation (not local index) 
+     * @param {Bool} combineWithPrevious whether to create a new entry or unify changes into a single undo entry
+     */
+    saveState( trackIdx, combineWithPrevious = false ) {
+        if ( !this.historySaveEnabler ){ return; }
+
+        const undoStep = this.historyGenerateTrackStep( trackIdx );
+        undoStep.trackIdx = trackIdx;
+
+        if ( combineWithPrevious && this.historyUndo.length ){
+            this.historyUndo[ this.historyUndo.length - 1 ].push( undoStep );
+        }
+        else{
+            this.historyUndo.push( [undoStep] );
+        }
+
+        if ( this.historyUndo.length > this.historyMaxSteps ){ this.historyUndo.shift(); } // remove first (oldest) element 
+        this.historyRedo = [];
+    }
+
+    #undoRedo(isUndo = true) {
+        
+        let toBeShown = isUndo ? this.historyUndo : this.historyRedo;
+        let toBeStored = isUndo ? this.historyRedo : this.historyUndo;
+        
+        if (!toBeShown.length){ return false; }
+        
+        this.unselectAllElements();
+        
+        const combinedState = toBeShown.pop();
+        const combinedStateToStore = [];
+
+        for( let i = 0; i < combinedState.length; ++i ){
+            const state = combinedState[i];
+            const trackIdx = state.trackIdx;
+           
+            const stateToStore = this.historyApplyTrackStep( state, isUndo );
+            stateToStore.trackIdx = trackIdx;
+            combinedStateToStore.push( stateToStore );
+               
+            // Update animation action interpolation info
+            if(this.onUpdateTrack)
+                this.onUpdateTrack( [state.trackIdx] );
+        }
+
+        toBeStored.push(combinedStateToStore);
+
+        return true;
+    }
+
+    undo() { return this.#undoRedo(true); }
+    redo() { return this.#undoRedo(false); }
+    // historyApplyTrackStep( state, isUndo ) MUST BE IMPLEMENTED BY CHILD CLASS
+    // historyGenerateTrackStep( trackIdx ) MUST BE IMPLEMENTED BY CHILD CLASS
 
     /**
      * @method resize
@@ -1185,6 +1264,7 @@ class Timeline {
         Usually call a super.whateverFunction to generate its base form, and expand it with extra attributes
     */
 
+    
     /**
      * This functions uses the selectedItems and generates the data that will feed the LX.Tree widget.
      * This function is used by updateLeftPanel. Some timelines might allow grouping of tracks. Such timelines may overwrite this function
@@ -1315,25 +1395,6 @@ class KeyFramesTimeline extends Timeline {
         }
     }
 
-    
-    /**
-     * @param {object} options options for the new track 
-     *  { id: string, active: bool, locked: bool, } 
-     * @returns 
-     */
-    addNewTrack( options = {}, skipCallback = false ) {
-
-        const trackInfo = this.instantiateTrack(options);
-        trackInfo.trackIdx = this.animationClip.tracks.length;
-        this.animationClip.tracks.push( trackInfo );
-        
-        if ( this.onAddNewTrack && !skipCallback ){
-            this.onAddNewTrack( trackInfo, options ); // if user wants it on a group, they should use these callback 
-        }
-
-        return trackInfo.trackIdx;
-    }
-
     // OVERRIDE
     generateSelectedItemsTreeData(){
         const treeTracks = [];
@@ -1383,6 +1444,24 @@ class KeyFramesTimeline extends Timeline {
             }
         }
         return treeTracks;
+    }
+
+    /**
+     * @param {object} options options for the new track 
+     *  { id: string, active: bool, locked: bool, } 
+     * @returns 
+     */
+    addNewTrack( options = {}, skipCallback = false ) {
+
+        const trackInfo = this.instantiateTrack(options);
+        trackInfo.trackIdx = this.animationClip.tracks.length;
+        this.animationClip.tracks.push( trackInfo );
+        
+        if ( this.onAddNewTrack && !skipCallback ){
+            this.onAddNewTrack( trackInfo, options ); // if user wants it on a group, they should use these callback 
+        }
+
+        return trackInfo.trackIdx;
     }
 
     /**
@@ -1493,6 +1572,12 @@ class KeyFramesTimeline extends Timeline {
         }
 
         return animationClip;
+    }
+
+    // OVERRIDE
+    unselectAllElements(){
+        this.unSelectAllKeyFrames();
+        this.unHoverAll();
     }
 
     /**
@@ -2304,78 +2389,52 @@ class KeyFramesTimeline extends Timeline {
             })
         });
     }
-
+    
     /**
-     * @param {Number} trackIdx index of track in the animation (not local index) 
-     * @param {Bool} combineWithPrevious whether to create a new entry or unify changes into a single undo entry
+     * saveState function uses this to generate a "copy" of the track. 
+     * @param {Number} trackIdx 
+     * @returns All necessary information to reconstruct the track state
      */
-    saveState( trackIdx, combineWithPrevious = false ) {
-        if ( !this.historySaveEnabler ){ return; }
-
+    historyGenerateTrackStep( trackIdx ){
         const trackInfo = this.animationClip.tracks[trackIdx];
 
         const undoStep = {
-                trackIdx: trackIdx,
-                t: trackInfo.times.slice(),
-                v: trackInfo.values.slice(),
-                edited: trackInfo.edited.slice(0, trackInfo.times.length)
+            trackIdx: trackIdx, // already done by saveState
+            t: trackInfo.times.slice(),
+            v: trackInfo.values.slice(),
+            edited: trackInfo.edited.slice(0, trackInfo.times.length)
         };
 
-        if ( combineWithPrevious && this.historyUndo.length ){
-            this.historyUndo[ this.historyUndo.length - 1 ].push( undoStep );
-        }
-        else{
-            this.historyUndo.push( [undoStep] );
-        }
+        return undoStep;
+    } 
 
-        if ( this.historyUndo.length > this.historyMaxSteps ){ this.historyUndo.shift(); } // remove first (oldest) element 
-        this.historyRedo = [];
+    /**
+     * It should swap the previous state with the incoming state of the track. It must return the previous state. 
+     * historyGenerateTrackStep could be used to copy the previous state. However, as it is a swap, it suffices to just copy the references.
+     * @param {Object} state object with a trackIdx:Number and whatever information was saved in historyGenerateTrackStep
+     * @param {Boolean} isUndo
+     * @returns previous state object
+     */
+    historyApplyTrackStep( state, isUndo ){
+        const track = this.animationClip.tracks[state.trackIdx];
+
+        const stateToReturn = { 
+            trackIdx: state.trackIdx,
+            t: track.times,
+            v: track.values,
+            edited: track.edited
+        };
+
+        track.times = state.t;
+        track.values = state.v;
+        track.edited = state.edited;
+        if ( track.selected.length != track.times.length ){ track.selected.length = track.times.length; }
+        if ( track.hovered.length != track.times.length ){ track.hovered.length = track.times.length; }
+        track.selected.fill(false);
+        track.hovered.fill(false);
+
+        return stateToReturn;
     }
-
-    #undoRedo(isUndo = true){
-
-        let toBeShown = isUndo ? this.historyUndo : this.historyRedo;
-        let toBeStored = isUndo ? this.historyRedo : this.historyUndo;
-
-        if (!toBeShown.length){ return false; }
-
-        this.unSelectAllKeyFrames();
-        this.unHoverAll();
-        
-        const combinedState = toBeShown.pop();
-        const combinedStateToStore = [];
-
-        for( let i = 0; i < combinedState.length; ++i ){
-            const state = combinedState[i];
-            const track = this.animationClip.tracks[state.trackIdx];
-
-            // same as savestate
-            combinedStateToStore.push({ 
-                trackIdx: state.trackIdx,
-                t: track.times,
-                v: track.values,
-                edited: track.edited
-            });
-
-            track.times = state.t;
-            track.values = state.v;
-            track.edited = state.edited;
-            if ( track.selected.length != track.times.length ){ track.selected.length = track.times.length; }
-            if ( track.hovered.length != track.times.length ){ track.hovered.length = track.times.length; }
-            track.selected.fill(false);
-            track.hovered.fill(false);
-
-            if(this.onUpdateTrack)
-                this.onUpdateTrack( [state.trackIdx] );
-        }
-
-        toBeStored.push(combinedStateToStore);
-
-        return true;
-    }
-    
-    undo() { return this.#undoRedo(true); }
-    redo() { return this.#undoRedo(false); }
 
     /**
     * 
@@ -3079,6 +3138,12 @@ class ClipsTimeline extends Timeline {
         this.changeSelectedItems();
     }
 
+    // OVERRIDE
+    unselectAllElements(){
+        this.unSelectAllClips();
+        this.unHoverAll();
+    }
+
     /**
      * OVERRIDE ITEM SELECTION.
      * CLIPS WILL OFFER NO SELECTION. All tracks are visible
@@ -3363,7 +3428,7 @@ class ClipsTimeline extends Timeline {
                                     
                                     // save track state if necessary
                                     const undoState = this.historyUndo[this.historyUndo.length-1];
-                                    let state = 0
+                                    let state = 0;
                                     for( ; state < undoState.length; ++state ){
                                         if ( newTrackIdx == undoState[state].trackIdx ){ break; }
                                     }
@@ -4079,75 +4144,50 @@ class ClipsTimeline extends Timeline {
         return;
     }
 
-    saveState( trackIdx, combineWithPrevious = false ) {
-        if ( !this.historySaveEnabler ){ return; }
-
+    /**
+     * saveState function uses this to generate a "copy" of the track. 
+     * @param {Number} trackIdx 
+     * @returns All necessary information to reconstruct the track state
+     */
+    historyGenerateTrackStep( trackIdx ){
         const track = this.animationClip.tracks[trackIdx];
         const clips = this.cloneClips(track.clips, 0);
-        // storing as array so multiple tracks can be in a same "undo" step
 
-        const undoStep = { 
-            trackIdx: trackIdx,
+        const undoStep = {
+            trackIdx: trackIdx, // already done by saveState
             clips: clips,
             edited: track.edited.slice(0,track.clips.length)
         };
 
-        if ( combineWithPrevious && this.historyUndo.length ){
-            this.historyUndo[ this.historyUndo.length-1 ].push( undoStep );            
-        }
-        else{
-            this.historyUndo.push( [ undoStep ] );
-        }
+        return undoStep;
+    } 
 
-        if ( this.historyUndo.length > this.historyMaxSteps ){ this.historyUndo.shift(); } // remove first (oldest) element 
+    /**
+     * It should swap the previous state with the incoming state of the track. It must return the previous state. 
+     * historyGenerateTrackStep could be used to copy the previous state. However, as it is a swap, it suffices to just copy the references.
+     * @param {Object} state object with a trackIdx:Number and whatever information was saved in historyGenerateTrackStep
+     * @param {Boolean} isUndo
+     * @returns previous state object
+     */
+    historyApplyTrackStep( state, isUndo ){
+        const track = this.animationClip.tracks[state.trackIdx];
 
-        this.historyRedo = [];
+        const stateToReturn = { 
+            trackIdx: state.trackIdx, // already done by saveState
+            clips: track.clips,
+            edited: track.edited
+        };
+        
+        track.clips = state.clips;
+        track.edited = state.edited;
+        if ( track.selected.length < track.clips.length ){ track.selected.length = track.clips.length; }
+        if ( track.hovered.length < track.clips.length ){ track.hovered.length = track.clips.length; }
+        track.selected.fill(false);
+        track.hovered.fill(false);
+
+        return stateToReturn;
     }
 
-    #undoRedo(isUndo = true) {
-        
-        let toBeShown = isUndo ? this.historyUndo : this.historyRedo;
-        let toBeStored = isUndo ? this.historyRedo : this.historyUndo;
-        
-        if (!toBeShown.length){ return false; }
-        
-        this.unSelectAllClips();
-        this.unHoverAll();
-        
-        const combinedState = toBeShown.pop();
-        const combinedStateToStore = [];
-
-        for( let i = 0; i < combinedState.length; ++i ){
-            const state = combinedState[i];
-            const track = this.animationClip.tracks[state.trackIdx];
-
-            // same as savestate
-            combinedStateToStore.push( {
-                trackIdx: state.trackIdx,
-                clips: track.clips,
-                edited: track.edited
-            });
-            
-            track.clips = state.clips;
-            track.edited = state.edited;
-            if ( track.selected.length < track.clips.length ){ track.selected.length = track.clips.length; }
-            if ( track.hovered.length < track.clips.length ){ track.hovered.length = track.clips.length; }
-            track.selected.fill(false);
-            track.hovered.fill(false);
-    
-            // Update animation action interpolation info
-            if(this.onUpdateTrack)
-                this.onUpdateTrack( [state.trackIdx] );
-        }
-
-        toBeStored.push(combinedStateToStore);
-
-        return true;
-    }
-
-    undo() { return this.#undoRedo(true); }
-    redo() { return this.#undoRedo(false); }
-    
     getClipOnTime( track, time, threshold ) {
 
         if(!track || !track.clips.length){
