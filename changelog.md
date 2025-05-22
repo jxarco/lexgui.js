@@ -2,6 +2,8 @@
 
 ## dev
 
+Removed LX.UTILS. Moved methods to global namespace `LX`.
+
 ## 0.6.4 (master)
 
 Timeline:

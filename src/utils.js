@@ -54,6 +54,30 @@ function doAsync( fn, ms ) {
 LX.doAsync = doAsync;
 
 /**
+ * @method flushCss
+ * @description By reading the offsetHeight property, we are forcing the browser to flush
+ * the pending CSS changes (which it does to ensure the value obtained is accurate).
+ * @param {HTMLElement} element
+ */
+function flushCss( element )
+{
+    element.offsetHeight;
+}
+
+LX.flushCss = flushCss;
+
+/**
+ * @method deleteElement
+ * @param {HTMLElement} element
+ */
+function deleteElement( element )
+{
+    if( element !== undefined ) element.remove();
+}
+
+LX.deleteElement = deleteElement;
+
+/**
  * @method getSupportedDOMName
  * @description Convert a text string to a valid DOM name
  * @param {String} text Original text
@@ -430,7 +454,7 @@ function measureRealWidth( value, paddingPlusMargin = 8 )
     i.innerHTML = value;
     document.body.appendChild( i );
     var rect = i.getBoundingClientRect();
-    LX.UTILS.deleteElement( i );
+    LX.deleteElement( i );
     return rect.width + paddingPlusMargin;
 }
 
@@ -1597,80 +1621,105 @@ Object.assign(LX, {
 });
 
 /**
- * Utils package
- * @namespace LX.UTILS
- * @description Collection of utility functions
- */
+ * @method compareThreshold
+ * @param {String} url
+ * @param {Function} onComplete
+ * @param {Function} onError
+ **/
+function compareThreshold( v, p, n, t )
+{
+    return Math.abs( v - p ) >= t || Math.abs( v - n ) >= t;
+}
 
-LX.UTILS = {
+LX.compareThreshold = compareThreshold;
 
-    compareThreshold( v, p, n, t ) { return Math.abs(v - p) >= t || Math.abs(v - n) >= t },
-    compareThresholdRange( v0, v1, t0, t1 ) { return v0 >= t0 && v0 <= t1 || v1 >= t0 && v1 <= t1 || v0 <= t0 && v1 >= t1},
-    deleteElement( el ) { if( el ) el.remove(); },
-    flushCss(element) {
-        // By reading the offsetHeight property, we are forcing
-        // the browser to flush the pending CSS changes (which it
-        // does to ensure the value obtained is accurate).
-        element.offsetHeight;
-    },
-    getControlPoints( x0, y0, x1, y1, x2, y2, t ) {
+/**
+ * @method compareThresholdRange
+ * @param {String} url
+ * @param {Function} onComplete
+ * @param {Function} onError
+ **/
+function compareThresholdRange( v0, v1, t0, t1 )
+{
+    return v0 >= t0 && v0 <= t1 || v1 >= t0 && v1 <= t1 || v0 <= t0 && v1 >= t1;
+}
 
-        //  x0,y0,x1,y1 are the coordinates of the end (knot) pts of this segment
-        //  x2,y2 is the next knot -- not connected here but needed to calculate p2
-        //  p1 is the control point calculated here, from x1 back toward x0.
-        //  p2 is the next control point, calculated here and returned to become the
-        //  next segment's p1.
-        //  t is the 'tension' which controls how far the control points spread.
+LX.compareThresholdRange = compareThresholdRange;
 
-        //  Scaling factors: distances from this knot to the previous and following knots.
-        var d01=Math.sqrt(Math.pow(x1-x0,2)+Math.pow(y1-y0,2));
-        var d12=Math.sqrt(Math.pow(x2-x1,2)+Math.pow(y2-y1,2));
+/**
+ * @method getControlPoints
+ * @param {String} url
+ * @param {Function} onComplete
+ * @param {Function} onError
+ **/
+function getControlPoints( x0, y0, x1, y1, x2, y2, t )
+{
+    //  x0,y0,x1,y1 are the coordinates of the end (knot) pts of this segment
+    //  x2,y2 is the next knot -- not connected here but needed to calculate p2
+    //  p1 is the control point calculated here, from x1 back toward x0.
+    //  p2 is the next control point, calculated here and returned to become the
+    //  next segment's p1.
+    //  t is the 'tension' which controls how far the control points spread.
 
-        var fa=t*d01/(d01+d12);
-        var fb=t-fa;
+    //  Scaling factors: distances from this knot to the previous and following knots.
+    var d01=Math.sqrt(Math.pow(x1-x0,2)+Math.pow(y1-y0,2));
+    var d12=Math.sqrt(Math.pow(x2-x1,2)+Math.pow(y2-y1,2));
 
-        var p1x=x1+fa*(x0-x2);
-        var p1y=y1+fa*(y0-y2);
+    var fa=t*d01/(d01+d12);
+    var fb=t-fa;
 
-        var p2x=x1-fb*(x0-x2);
-        var p2y=y1-fb*(y0-y2);
+    var p1x=x1+fa*(x0-x2);
+    var p1y=y1+fa*(y0-y2);
 
-        return [p1x,p1y,p2x,p2y]
-    },
-    drawSpline( ctx, pts, t ) {
+    var p2x=x1-fb*(x0-x2);
+    var p2y=y1-fb*(y0-y2);
 
-        ctx.save();
-        var cp = [];   // array of control points, as x0,y0,x1,y1,...
-        var n = pts.length;
+    return [p1x,p1y,p2x,p2y]
+}
 
-        // Draw an open curve, not connected at the ends
-        for( var i = 0; i < (n - 4); i += 2 )
-        {
-            cp = cp.concat(LX.UTILS.getControlPoints(pts[ i ],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
-        }
+LX.getControlPoints = getControlPoints;
 
-        for( var i = 2; i < ( pts.length - 5 ); i += 2 )
-        {
-            ctx.beginPath();
-            ctx.moveTo(pts[ i ], pts[i+1]);
-            ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
-            ctx.stroke();
-            ctx.closePath();
-        }
+/**
+ * @method drawSpline
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Array} pts
+ * @param {Number} t
+ **/
+function drawSpline( ctx, pts, t )
+{
+    ctx.save();
+    var cp = [];   // array of control points, as x0,y0,x1,y1,...
+    var n = pts.length;
 
-        //  For open curves the first and last arcs are simple quadratics.
-        ctx.beginPath();
-        ctx.moveTo( pts[ 0 ], pts[ 1 ] );
-        ctx.quadraticCurveTo( cp[ 0 ], cp[ 1 ], pts[ 2 ], pts[ 3 ]);
-        ctx.stroke();
-        ctx.closePath();
-
-        ctx.beginPath();
-        ctx.moveTo( pts[ n-2 ], pts[ n-1 ] );
-        ctx.quadraticCurveTo( cp[ 2*n-10 ], cp[ 2*n-9 ], pts[ n-4 ], pts[ n-3 ]);
-        ctx.stroke();
-        ctx.closePath();
-
-        ctx.restore();
+    // Draw an open curve, not connected at the ends
+    for( var i = 0; i < (n - 4); i += 2 )
+    {
+        cp = cp.concat(LX.getControlPoints(pts[ i ],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
     }
-};
+
+    for( var i = 2; i < ( pts.length - 5 ); i += 2 )
+    {
+        ctx.beginPath();
+        ctx.moveTo(pts[ i ], pts[i+1]);
+        ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
+        ctx.stroke();
+        ctx.closePath();
+    }
+
+    //  For open curves the first and last arcs are simple quadratics.
+    ctx.beginPath();
+    ctx.moveTo( pts[ 0 ], pts[ 1 ] );
+    ctx.quadraticCurveTo( cp[ 0 ], cp[ 1 ], pts[ 2 ], pts[ 3 ]);
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.moveTo( pts[ n-2 ], pts[ n-1 ] );
+    ctx.quadraticCurveTo( cp[ 2*n-10 ], cp[ 2*n-9 ], pts[ n-4 ], pts[ n-3 ]);
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.restore();
+}
+
+LX.drawSpline = drawSpline;
