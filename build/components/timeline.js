@@ -350,25 +350,6 @@ class Timeline {
         return trackInfo.trackIdx;
     }
 
-    deleteTracks( tracksIndices ){
-        this.unSelectAllElements(); // there should be no other object holding a trackIdx
-
-
-        tracksIndices.sort((a,b) => a-b );
-        for (let i = 0; i < tracksIndices.length; ++i){
-            this.historyUndo[ this.historyUndo.length - 1 ]
-        }
-        this.saveState(idx);
-
-        const tracks = this.animationClip.tracks;
-        for( let i = tracksIndices.length-1; i > -1 ; --i ){
-            const idx = tracksIndices[i];
-            tracks.splice(idx, 1);
-        }
-
-
-    }
-
     /**
      * Finds tracks (wholy and partially) inside the range minY maxY.
      * (Full) Canvas local coordinates.
@@ -1444,24 +1425,6 @@ class KeyFramesTimeline extends Timeline {
             }
         }
         return treeTracks;
-    }
-
-    /**
-     * @param {object} options options for the new track 
-     *  { id: string, active: bool, locked: bool, } 
-     * @returns 
-     */
-    addNewTrack( options = {}, skipCallback = false ) {
-
-        const trackInfo = this.instantiateTrack(options);
-        trackInfo.trackIdx = this.animationClip.tracks.length;
-        this.animationClip.tracks.push( trackInfo );
-        
-        if ( this.onAddNewTrack && !skipCallback ){
-            this.onAddNewTrack( trackInfo, options ); // if user wants it on a group, they should use these callback 
-        }
-
-        return trackInfo.trackIdx;
     }
 
     /**
