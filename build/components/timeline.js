@@ -3582,8 +3582,10 @@ class ClipsTimeline extends Timeline {
         const track = e.track;
         const localX = e.localX;
 
-        const clipIdx = this.getClipOnTime(track, this.xToTime(localX), 0.001);
-        this.selectClip(track.trackIdx, clipIdx); // unselect and try to select clip in localX, if any
+        if ( track ){
+            const clipIdx = this.getClipOnTime(track, this.xToTime(localX), 0.001);
+            this.selectClip(track.trackIdx, clipIdx); // unselect and try to select clip in localX, if any
+        }
     }
 
     showContextMenu( e ) {
