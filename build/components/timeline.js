@@ -1010,9 +1010,9 @@ class Timeline {
      * [ trackIdx ]
      * @param {Array} itemsName array of numbers identifying tracks
      */
-    setSelectedItems( items ) {
+    setSelectedItems( items, skipCallback = false ) {
         this.selectedItems = [];      
-        this.changeSelectedItems( items, null );
+        this.changeSelectedItems( items, null, skipCallback );
     }
 
     /**
