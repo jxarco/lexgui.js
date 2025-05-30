@@ -1310,7 +1310,7 @@ class Timeline {
     instantiateAnimationClip(options) {
         options = options ?? {};
         const animationClip = {
-            name: options.id ?? (options.name ?? "animationClip"),
+            id: options.id ?? (options.name ?? "animationClip"),
             duration: options.duration ?? 0,
             tracks: [],
             tracksPerGroup: options.tracksPerGroup ?? {},
