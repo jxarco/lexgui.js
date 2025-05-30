@@ -118,7 +118,7 @@
           
     MAKE_HEADER( "Properties", "h2", "" );
     const baseAnimationClipOptions = [
-            [".name", "String", "Id of the animation"],
+            [".id", "String", "Id of the animation"],
             [".data", "", "User defined data"],
             [".duration", "Number", "0 by default"],
             [".tracks", "Array", "Tracks of the animation clip"],
@@ -239,6 +239,8 @@
         area.attach(keyframestimeline);
         content.appendChild( area.root );
         keyframestimeline.resize();
+
+        if ( window.keyframeTimeline ){ window.keyframeTimeline.__terminate = true; }
         window.keyframeTimeline = keyframestimeline;
         
         const animation = {
@@ -295,8 +297,30 @@
             }
         }
 
-        function render(){
+        let lastTimestamp = performance.now();
+        keyframestimeline.onStateStop = () => {
+            keyframestimeline.setTime(0);
+        }
+        keyframestimeline.onStateChange = () => {
+            lastTimestamp = performance.now();
+        }
+        function render(timestamp){
+
+            // avoids multiple instances of keyframestimeline to render. Just render the last one
+            // clicking on other documentation entries WILL NOT terminate render. 
+            // TODO it should terminate as soon as documentation page is changed
+            if ( keyframestimeline.__terminate ){
+                return;
+            }
+
             requestAnimationFrame( render );
+            
+            if ( keyframestimeline.playing ){
+                const dt = ( timestamp - lastTimestamp ) * 0.001;
+                keyframestimeline.setTime( (keyframestimeline.currentTime + dt) % keyframestimeline.animationClip.duration)
+            }
+
+            lastTimestamp = timestamp;
             keyframestimeline.draw();
         }
 
@@ -496,6 +520,7 @@ panel.attach(kfTimeline.root);` );
         area.attach(clipstimeline);
         content.appendChild( area.root );
         clipstimeline.resize();
+        if ( window.clipsTimeline ){ window.clipsTimeline.__terminate = true; }
         window.clipsTimeline = clipstimeline;
         
         const animation = {
@@ -547,9 +572,30 @@ panel.attach(kfTimeline.root);` );
             }
         }
 
+        let lastTimestamp = performance.now();
+        clipstimeline.onStateStop = () => {
+            clipstimeline.setTime(0);
+        }
+        clipstimeline.onStateChange = () => {
+            lastTimestamp = performance.now();
+        }
+        function render(timestamp){
 
-        function render(){
+            // avoids multiple instances of clipstimeline to render. Just render the last one
+            // clicking on other documentation entries WILL NOT terminate render. 
+            // TODO it should terminate as soon as documentation page is changed
+            if ( clipstimeline.__terminate ){
+                return;
+            }
+
             requestAnimationFrame( render );
+            
+            if ( clipstimeline.playing ){
+                const dt = ( timestamp - lastTimestamp ) * 0.001;
+                clipstimeline.setTime( (clipstimeline.currentTime + dt) % clipstimeline.animationClip.duration)
+            }
+
+            lastTimestamp = timestamp;
             clipstimeline.draw();
         }
 
