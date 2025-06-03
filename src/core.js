@@ -1156,6 +1156,7 @@ class DropdownMenu {
             {
                 const checkbox = new LX.Checkbox( pKey + "_entryChecked", item.checked, (v) => {
                     const f = item[ 'callback' ];
+                    item.checked = v;
                     if( f )
                     {
                         f.call( this, key, v, menuItem );
