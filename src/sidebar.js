@@ -34,6 +34,7 @@ class Sidebar {
 
         this.root = document.createElement( "div" );
         this.root.className = "lexsidebar " + ( options.className ?? "" );
+        this.callback = options.callback ?? null;
 
         this._displaySelected = options.displaySelected ?? false;
 
@@ -50,17 +51,19 @@ class Sidebar {
             configurable: true
         });
 
+        const mobile = navigator && /Android|iPhone/i.test( navigator.userAgent );
+
         this.side = options.side ?? "left";
         this.collapsable = options.collapsable ?? true;
         this._collapseWidth = ( options.collapseToIcons ?? true ) ? "58px" : "0px";
-        this.collapsed = false;
+        this.collapsed = options.collapsed ?? mobile;
 
         this.filterString = "";
 
         LX.doAsync( () => {
 
             this.root.parentElement.ogWidth = this.root.parentElement.style.width;
-            this.root.parentElement.style.transition = "width 0.25s ease-out";
+            this.root.parentElement.style.transition = this.collapsed ? "" : "width 0.25s ease-out";
 
             this.resizeObserver = new ResizeObserver( entries => {
                 for ( const entry of entries )
@@ -68,6 +71,24 @@ class Sidebar {
                     this.siblingArea.setSize( [ "calc(100% - " + ( entry.contentRect.width ) + "px )", null ] );
                 }
             });
+
+            if( this.collapsed )
+            {
+                this.root.classList.toggle( "collapsed", this.collapsed );
+                this.root.parentElement.style.width = this._collapseWidth;
+
+                if( !this.resizeObserver )
+                {
+                    throw( "Wait until ResizeObserver has been created!" );
+                }
+
+                this.resizeObserver.observe( this.root.parentElement );
+
+                LX.doAsync( () => {
+                    this.resizeObserver.unobserve( this.root.parentElement );
+                    this.root.querySelectorAll( ".lexsidebarentrycontent" ).forEach( e => e.dataset[ "disableTooltip" ] = !this.collapsed );
+                }, 10 );
+            }
 
         }, 10 );
 
@@ -84,11 +105,29 @@ class Sidebar {
                 const icon = LX.makeIcon( this.side == "left" ? "PanelLeft" : "PanelRight", { title: "Toggle Sidebar", iconClass: "toggler" } );
                 this.header.appendChild( icon );
 
-                icon.addEventListener( "click", (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    this.toggleCollapsed();
-                } );
+                if( mobile )
+                {
+                    // create an area and append a sidebar:
+                    const area = new LX.Area({ skipAppend: true });
+                    const sheetSidebarOptions = LX.deepCopy( options );
+                    sheetSidebarOptions.collapsed = false;
+                    sheetSidebarOptions.collapsable = false;
+                    area.addSidebar( this.callback, sheetSidebarOptions );
+
+                    icon.addEventListener( "click", e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        new LX.Sheet("256px", [ area ]);
+                    } );
+                }
+                else
+                {
+                    icon.addEventListener( "click", e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.toggleCollapsed();
+                    } );
+                }
             }
         }
 
