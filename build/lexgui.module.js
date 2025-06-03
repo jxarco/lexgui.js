@@ -14069,7 +14069,7 @@ class Sidebar {
                     icon.addEventListener( "click", e => {
                         e.preventDefault();
                         e.stopPropagation();
-                        new LX.Sheet("256px", [ area ]);
+                        new LX.Sheet("256px", [ area ], { side: this.side } );
                     } );
                 }
                 else
