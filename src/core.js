@@ -1896,13 +1896,6 @@ class Calendar {
 
 LX.Calendar = Calendar;
 
-function flushCss(element) {
-    // By reading the offsetHeight property, we are forcing
-    // the browser to flush the pending CSS changes (which it
-    // does to ensure the value obtained is accurate).
-    element.offsetHeight;
-}
-
 /**
  * @class Tabs
  */
@@ -2028,7 +2021,7 @@ class Tabs {
                 this.thumb.style.transition = "none";
                 this.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
                 this.thumb.style.width = ( tabEl.offsetWidth ) + "px";
-                flushCss( this.thumb );
+                LX.flushCss( this.thumb );
                 this.thumb.style.transition = transition;
             });
 
@@ -3144,7 +3137,7 @@ class CanvasCurve {
             }
             else
             {
-                LX.UTILS.drawSpline( ctx, values, element.smooth );
+                LX.drawSpline( ctx, values, element.smooth );
             }
 
             // Draw points

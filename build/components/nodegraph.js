@@ -393,7 +393,7 @@ class GraphEditor {
 
         this.clear();
 
-        graph.id = graph.id ?? graph.constructor.name  + '-' + LX.UTILS.uidGenerator();
+        graph.id = graph.id ?? graph.constructor.name  + '-' + LX.guidGenerator();
 
         this.graphs[ graph.id ] = graph;
 
@@ -730,7 +730,7 @@ class GraphEditor {
         //     {
         //         var panel = new LX.Panel();
 
-        //         p.signal = "@" + LX.UTILS.uidGenerator() + node.title;
+        //         p.signal = "@" + LX.guidGenerator() + node.title;
 
         //         switch( p.type )
         //         {
@@ -862,7 +862,7 @@ class GraphEditor {
 
         this._addNodeIOEvents( nodeContainer );
 
-        const id = node.id ?? node.title.toLowerCase().replaceAll( /\s/g, '-' ) + '-' + LX.UTILS.uidGenerator();
+        const id = node.id ?? node.title.toLowerCase().replaceAll( /\s/g, '-' ) + '-' + LX.guidGenerator();
         this.nodes[ id ] = { data: node, dom: nodeContainer };
 
         node.id = id;
@@ -1035,7 +1035,7 @@ class GraphEditor {
                     if( !this._onLink( e ) )
                     {
                         // Delete entire SVG if not a successful connection..
-                        LX.UTILS.deleteElement( this._generatingLink.path ? this._generatingLink.path.parentElement : null );
+                        LX.deleteElement( this._generatingLink.path ? this._generatingLink.path.parentElement : null );
                     }
 
                     delete this._generatingLink;
@@ -1272,7 +1272,7 @@ class GraphEditor {
             return;
         }
 
-        LX.UTILS.deleteElement( el );
+        LX.deleteElement( el );
 
         // Delete from the editor
 
@@ -1302,7 +1302,7 @@ class GraphEditor {
             {
                 var link = this.currentGraph.links[ key ][ i ];
 
-                LX.UTILS.deleteElement( link.path.parentElement );
+                LX.deleteElement( link.path.parentElement );
 
                 const targetNodeId = targetIsInput ? link.inputNode : link.outputNode;
 
@@ -1344,7 +1344,7 @@ class GraphEditor {
     _deleteGroup( groupId ) {
 
         const dom = this.groups[ groupId ];
-        LX.UTILS.deleteElement( dom );
+        LX.deleteElement( dom );
 
         // Delete from the editor
 
@@ -1428,7 +1428,7 @@ class GraphEditor {
             var links = this._getLinks( targetId, nodeId );
 
             var linkIdx = links.findIndex( i => ( i.inputIdx == srcIndex && i.outputIdx == targetIndex ) );
-            LX.UTILS.deleteElement( links[ linkIdx ].path.parentElement );
+            LX.deleteElement( links[ linkIdx ].path.parentElement );
             links.splice( linkIdx, 1 );
 
             // Input has no longer any connected link
@@ -1478,7 +1478,7 @@ class GraphEditor {
                     var links = this._getLinks( nodeId, targetId );
 
                     var linkIdx = links.findIndex( i => ( i.inputIdx == targetIndex && i.outputIdx == srcIndex ) );
-                    LX.UTILS.deleteElement( links[ linkIdx ].path.parentElement );
+                    LX.deleteElement( links[ linkIdx ].path.parentElement );
                     links.splice( linkIdx, 1 );
 
                     // Remove a connection from the output connections
@@ -1674,7 +1674,7 @@ class GraphEditor {
             const linkInfo = Object.assign( { }, this._generatingLink );
 
             // Delete old link
-            LX.UTILS.deleteElement( this._generatingLink.path ? this._generatingLink.path.parentElement : null );
+            LX.deleteElement( this._generatingLink.path ? this._generatingLink.path.parentElement : null );
             delete this._generatingLink;
 
             // Open contextmenu to auto-connect something..
@@ -1688,7 +1688,7 @@ class GraphEditor {
 
             this._selectNodesInBox( this._boxSelecting, this._mousePosition, e.altKey );
 
-            LX.UTILS.deleteElement( this._currentBoxSelectionSVG );
+            LX.deleteElement( this._currentBoxSelectionSVG );
 
             delete this._currentBoxSelectionSVG;
             delete this._boxSelecting;
@@ -2526,7 +2526,7 @@ class GraphEditor {
             return;
         }
 
-        const group_id = bb ? bb.id : "group-" + LX.UTILS.uidGenerator();
+        const group_id = bb ? bb.id : "group-" + LX.guidGenerator();
 
         let groupDOM = document.createElement( 'div' );
         groupDOM.id = group_id;

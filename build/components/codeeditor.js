@@ -2097,7 +2097,7 @@ class CodeEditor {
         if( deltaY >= 0 )
         {
             while( deltaY < ( cursorSelections.childElementCount - 1 ) )
-                LX.UTILS.deleteElement( cursorSelections.lastChild );
+                LX.deleteElement( cursorSelections.lastChild );
 
             for(let i = fromY; i <= toY; i++){
 
@@ -2148,7 +2148,7 @@ class CodeEditor {
         else // Selection goes up...
         {
             while( Math.abs( deltaY ) < ( cursorSelections.childElementCount - 1 ) )
-                LX.UTILS.deleteElement( cursorSelections.firstChild );
+                LX.deleteElement( cursorSelections.firstChild );
 
             for( let i = toY; i <= fromY; i++ ){
 
@@ -2837,7 +2837,7 @@ class CodeEditor {
         // Single line
         if( !force )
         {
-            LX.UTILS.deleteElement( this.code.childNodes[ local_line_num ] );
+            LX.deleteElement( this.code.childNodes[ local_line_num ] );
             this.code.insertChildAtIndex( document.createElement( 'pre' ), local_line_num );
         }
 
@@ -3470,7 +3470,7 @@ class CodeEditor {
 
         if( cursor )
         {
-            LX.UTILS.deleteElement( this.selections[ cursor.name ] );
+            LX.deleteElement( this.selections[ cursor.name ] );
             delete this.selections[ cursor.name ];
             delete cursor.selection;
         }
@@ -3478,7 +3478,7 @@ class CodeEditor {
         {
             for( let cursor of this.cursors.children )
             {
-                LX.UTILS.deleteElement( this.selections[ cursor.name ] );
+                LX.deleteElement( this.selections[ cursor.name ] );
                 delete this.selections[ cursor.name ];
                 delete cursor.selection;
             }
@@ -3667,9 +3667,9 @@ class CodeEditor {
 
     removeCursor( cursor ) {
 
-        LX.UTILS.deleteElement( this.selections[ cursor.name ] );
+        LX.deleteElement( this.selections[ cursor.name ] );
         delete this.selections[ cursor.name ];
-        LX.UTILS.deleteElement( cursor );
+        LX.deleteElement( cursor );
     }
 
     resetCursorPos( flag, cursor ) {
@@ -3962,7 +3962,7 @@ class CodeEditor {
         line.appendChild( text );
         text.innerText = char;
         var rect = text.getBoundingClientRect();
-        LX.UTILS.deleteElement( parentContainer );
+        LX.deleteElement( parentContainer );
         const bb = [ use_floating ? rect.width : Math.floor( rect.width ), use_floating ? rect.height : Math.floor( rect.height ) ];
         return get_bb ? bb : bb[ 0 ];
     }
@@ -4238,7 +4238,7 @@ class CodeEditor {
 
         else if( this._lastResult )
         {
-            LX.UTILS.deleteElement( this._lastResult.dom );
+            LX.deleteElement( this._lastResult.dom );
             delete this._lastResult;
         }
 
@@ -4261,7 +4261,7 @@ class CodeEditor {
 
         if( this._lastResult )
         {
-            LX.UTILS.deleteElement( this._lastResult.dom );
+            LX.deleteElement( this._lastResult.dom );
             cursorData = this._lastResult.pos;
             delete this._lastResult;
         }

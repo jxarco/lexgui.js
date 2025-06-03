@@ -722,7 +722,7 @@ class Area {
 
     addSidebar( callback, options = {} ) {
 
-        let sidebar = new LX.Sidebar( options );
+        let sidebar = new LX.Sidebar( { callback, ...options } );
 
         if( callback )
         {

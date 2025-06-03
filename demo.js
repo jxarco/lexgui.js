@@ -469,7 +469,7 @@ const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
             toggleColumns: true,
             filter: "Name",
             customFilters: [
-                { name: "Status", options: ["Backlog", "Todo", "In Progress", "Done", "Cancelled"] },
+                { name: "Status", options: ["Backlog", "Todo", "In Progress", "Done", "Canceled"] },
                 { name: "Priority", options: ["Low", "Medium", "High"] },
                 { name: "ID", type: "range", min: 0, max: 9, step: 1, units: "hr" },
             ],
