@@ -3938,6 +3938,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 /* Table Widget */
 
+.lextable {
+    overflow-x: scroll;
+}
+
 .lextable table {
     width: 100%;
     border: 1px solid;
