@@ -2,6 +2,9 @@
 
 ## dev
 
+Fixed horizontal scroll in Table Widget.
+Fixed checkbox in Dropdown item.
+
 ## 0.6.5 (master)
 
 Timeline:
