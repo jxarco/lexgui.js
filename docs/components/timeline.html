@@ -118,7 +118,7 @@
           
     MAKE_HEADER( "Properties", "h2", "" );
     const baseAnimationClipOptions = [
-            [".name", "String", "Id of the animation"],
+            [".id", "String", "Id of the animation"],
             [".data", "", "User defined data"],
             [".duration", "Number", "0 by default"],
             [".tracks", "Array", "Tracks of the animation clip"],
@@ -190,9 +190,21 @@
         ["isEnabled", "Boolean"],
         ["skipCallback", "Boolean"],
     ] );
+    
+    MAKE_CLASS_METHOD( ".saveState", `Saves the current state of the track into the history.`, [
+        ["trackIdx", "Number"],
+        ["combineWithPrevious", "Boolean"],
+    ], "" );
+
+    MAKE_CLASS_METHOD( ".undo", `Pops the stack of the undo history and sets it as current. Stores the previous state into the redo history.`, [
+    ], "" );
+    MAKE_CLASS_METHOD( ".redo", `Pops the stack of the redo history and sets it as current. Stores the previous state into the undo history.`, [
+    ], "" );
+
     MAKE_CLASS_METHOD( ".resize", `Resize timeline. If no parameters are sent, it uses its container to determine the size.`, [
         ["size", "[width, height] (optional)"]
     ] );
+
     MAKE_CLASS_METHOD( ".show", `Make html visible`, [] );
     MAKE_CLASS_METHOD( ".hide", `Make html hidden`, [] );
 
@@ -227,6 +239,8 @@
         area.attach(keyframestimeline);
         content.appendChild( area.root );
         keyframestimeline.resize();
+
+        if ( window.keyframeTimeline ){ window.keyframeTimeline.__terminate = true; }
         window.keyframeTimeline = keyframestimeline;
         
         const animation = {
@@ -283,8 +297,30 @@
             }
         }
 
-        function render(){
+        let lastTimestamp = performance.now();
+        keyframestimeline.onStateStop = () => {
+            keyframestimeline.setTime(0);
+        }
+        keyframestimeline.onStateChange = () => {
+            lastTimestamp = performance.now();
+        }
+        function render(timestamp){
+
+            // avoids multiple instances of keyframestimeline to render. Just render the last one
+            // clicking on other documentation entries WILL NOT terminate render. 
+            // TODO it should terminate as soon as documentation page is changed
+            if ( keyframestimeline.__terminate ){
+                return;
+            }
+
             requestAnimationFrame( render );
+            
+            if ( keyframestimeline.playing ){
+                const dt = ( timestamp - lastTimestamp ) * 0.001;
+                keyframestimeline.setTime( (keyframestimeline.currentTime + dt) % keyframestimeline.animationClip.duration)
+            }
+
+            lastTimestamp = timestamp;
             keyframestimeline.draw();
         }
 
@@ -403,17 +439,6 @@ panel.attach(kfTimeline.root);` );
     MAKE_CLASS_METHOD( ".optimizeTracks", `Removes similar keyframes of all track, given the ${INLINE_CODE("optimizeThreshold")} attribute. If ${INLINE_CODE("onlyEqualTime")} is set, only keyframes with the same time will be removed, keepin the first occurrence`, [
         ["onlyEqualTime", "Boolean"],
     ], "" );
-
-    
-    MAKE_CLASS_METHOD( ".saveState", `Saves the current state of the track into the history.`, [
-        ["trackIdx", "Number"],
-        ["combineWithPrevious", "Boolean"],
-    ], "" );
-    MAKE_CLASS_METHOD( ".undo", `Pops the stack of the undo history and sets it as current. Stores the previous state into the redo history.`, [
-    ], "" );
-    MAKE_CLASS_METHOD( ".redo", `Pops the stack of the redo history and sets it as current. Stores the previous state into the undo history.`, [
-    ], "" );
-
     
     MAKE_CLASS_METHOD( ".copySelectedContent", `Copies the lastKeyFramesSelected elements into clipboard.`, [
     ], "" );
@@ -495,6 +520,7 @@ panel.attach(kfTimeline.root);` );
         area.attach(clipstimeline);
         content.appendChild( area.root );
         clipstimeline.resize();
+        if ( window.clipsTimeline ){ window.clipsTimeline.__terminate = true; }
         window.clipsTimeline = clipstimeline;
         
         const animation = {
@@ -546,9 +572,30 @@ panel.attach(kfTimeline.root);` );
             }
         }
 
+        let lastTimestamp = performance.now();
+        clipstimeline.onStateStop = () => {
+            clipstimeline.setTime(0);
+        }
+        clipstimeline.onStateChange = () => {
+            lastTimestamp = performance.now();
+        }
+        function render(timestamp){
 
-        function render(){
+            // avoids multiple instances of clipstimeline to render. Just render the last one
+            // clicking on other documentation entries WILL NOT terminate render. 
+            // TODO it should terminate as soon as documentation page is changed
+            if ( clipstimeline.__terminate ){
+                return;
+            }
+
             requestAnimationFrame( render );
+            
+            if ( clipstimeline.playing ){
+                const dt = ( timestamp - lastTimestamp ) * 0.001;
+                clipstimeline.setTime( (clipstimeline.currentTime + dt) % clipstimeline.animationClip.duration)
+            }
+
+            lastTimestamp = timestamp;
             clipstimeline.draw();
         }
 
@@ -644,20 +691,23 @@ panel.attach(clipTimeline.root);` );
         ["timeOffset", "Number"],
     ], "Array of Objects" );
 
+    MAKE_CLASS_METHOD( ".addClip", `Add a clip in a track. An ${INLINE_CODE("offsetTime")} is added to the time attributes of the clip. If ${INLINE_CODE("trackIdx")} is -1, the clip will be added in the first suitable track it finds, starting from ${INLINE_CODE("searchStartTrackIdx")} (defaults to 0). Returns the clip's index in the track.`, [
+        ["trackIdx", "Int"],
+        ["offsetTime", "Number"],
+        ["searchStartTrackIdx", "Int"],
+    ], "Number" );
+
+    MAKE_CLASS_METHOD( ".addClips", `Add several clips in the timeline, starting from ${INLINE_CODE("searchStartTrackIdx")} (defaults to 0). An ${INLINE_CODE("offsetTime")} is added to the time attributes of the clip.`, [
+        ["clips", "Array of Objects"],
+        ["offsetTime", "Number"],
+        ["searchStartTrackIdx", "Int"],
+    ], "Number" );
+
     MAKE_CLASS_METHOD( ".getClipOnTime", `Search clip in track that is on the specified time. Returns -1 if no clip overlaps with the timestamp`, [
         ["track", "Object"],
         ["time", "Number"],
         ["threshold", "Number"],
     ], "Number" );
-
-    MAKE_CLASS_METHOD( ".saveState", `Saves the current state of the track into the history.`, [
-        ["trackIdx", "Number"],
-        ["combineWithPrevious", "Boolean"],
-    ], "" );
-    MAKE_CLASS_METHOD( ".undo", `Pops the stack of the undo history and sets it as current. Stores the previous state into the redo history.`, [
-    ], "" );
-    MAKE_CLASS_METHOD( ".redo", `Pops the stack of the redo history and sets it as current. Stores the previous state into the undo history.`, [
-    ], "" );
 
     MAKE_CLASS_METHOD( ".copySelectedContent", `Copies (clones) the lastSelectedClip elements into clipboard.`, [
     ], "" );
