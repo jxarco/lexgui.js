@@ -2,9 +2,22 @@
 
 ## dev
 
-Removed LX.UTILS. Moved methods to global namespace `LX`.
+Fixed horizontal scroll in Table Widget.
+Fixed checkbox in Dropdown item.
 
-## 0.6.4 (master)
+## 0.6.5 (master)
+
+Timeline:
+  - Refactored undo-redo.
+  - ClipsTimeline: added an argument on `addClip` to start search at a particular track.
+  - Documentation updated.
+  - Minor fixes.
+
+Use sidebar inside Sheet element on mobile.
+Removed LX.UTILS. Moved methods to global namespace `LX`.
+Minor fixes in example demos.
+
+## 0.6.4
 
 Timeline:
   - Paste refactor.

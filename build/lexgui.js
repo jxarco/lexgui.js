@@ -14,7 +14,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 const LX = {
-    version: "0.6.3",
+    version: "0.6.5",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -596,375 +596,6 @@ function setCommandbarState( value, resetEntries = true )
 }
 
 LX.setCommandbarState = setCommandbarState;
-
-/**
- * @method message
- * @param {String} text
- * @param {String} title (Optional)
- * @param {Object} options
- * id: Id of the message dialog
- * position: Dialog position in screen [screen centered]
- * draggable: Dialog can be dragged [false]
- */
-
-function message( text, title, options = {} )
-{
-    if( !text )
-    {
-        throw( "No message to show" );
-    }
-
-    options.modal = true;
-
-    return new LX.Dialog( title, p => {
-        p.addTextArea( null, text, null, { disabled: true, fitHeight: true  } );
-    }, options );
-}
-
-LX.message = message;
-
-/**
- * @method popup
- * @param {String} text
- * @param {String} title (Optional)
- * @param {Object} options
- * id: Id of the message dialog
- * timeout (Number): Delay time before it closes automatically (ms). Default: [3000]
- * position (Array): [x,y] Dialog position in screen. Default: [screen centered]
- * size (Array): [width, height]
- */
-
-function popup( text, title, options = {} )
-{
-    if( !text )
-    {
-        throw("No message to show");
-    }
-
-    options.size = options.size ?? [ "max-content", "auto" ];
-    options.class = "lexpopup";
-
-    const time = options.timeout || 3000;
-    const dialog = new LX.Dialog( title, p => {
-        p.addTextArea( null, text, null, { disabled: true, fitHeight: true } );
-    }, options );
-
-    setTimeout( () => {
-        dialog.close();
-    }, Math.max( time, 150 ) );
-
-    return dialog;
-}
-
-LX.popup = popup;
-
-/**
- * @method prompt
- * @param {String} text
- * @param {String} title (Optional)
- * @param {Object} options
- * id: Id of the prompt dialog
- * position: Dialog position in screen [screen centered]
- * draggable: Dialog can be dragged [false]
- * input: If false, no text input appears
- * accept: Accept text
- * required: Input has to be filled [true]. Default: false
- */
-
-function prompt( text, title, callback, options = {} )
-{
-    options.modal = true;
-    options.className = "prompt";
-
-    let value = "";
-
-    const dialog = new LX.Dialog( title, p => {
-
-        p.addTextArea( null, text, null, { disabled: true, fitHeight: true } );
-
-        if( options.input ?? true )
-        {
-            p.addText( null, options.input || value, v => value = v, { placeholder: "..." } );
-        }
-
-        p.sameLine( 2 );
-
-        p.addButton(null, "Cancel", () => {if(options.on_cancel) options.on_cancel(); dialog.close();} );
-
-        p.addButton( null, options.accept || "Continue", () => {
-            if( options.required && value === '' )
-            {
-                text += text.includes("You must fill the input text.") ? "": "\nYou must fill the input text.";
-                dialog.close();
-                prompt( text, title, callback, options );
-            }
-            else
-            {
-                if( callback ) callback.call( this, value );
-                dialog.close();
-            }
-        }, { buttonClass: "primary" });
-
-    }, options );
-
-    // Focus text prompt
-    if( options.input ?? true )
-    {
-        dialog.root.querySelector( 'input' ).focus();
-    }
-
-    return dialog;
-}
-
-LX.prompt = prompt;
-
-/**
- * @method toast
- * @param {String} title
- * @param {String} description (Optional)
- * @param {Object} options
- * action: Data of the custom action { name, callback }
- * closable: Allow closing the toast
- * timeout: Time in which the toast closed automatically, in ms. -1 means persistent. [3000]
- */
-
-function toast( title, description, options = {} )
-{
-    if( !title )
-    {
-        throw( "The toast needs at least a title!" );
-    }
-
-    console.assert( this.notifications );
-
-    const toast = document.createElement( "li" );
-    toast.className = "lextoast";
-    toast.style.translate = "0 calc(100% + 30px)";
-    this.notifications.prepend( toast );
-
-    LX.doAsync( () => {
-
-        if( this.notifications.offsetWidth > this.notifications.iWidth )
-        {
-            this.notifications.iWidth = Math.min( this.notifications.offsetWidth, 480 );
-            this.notifications.style.width = this.notifications.iWidth + "px";
-        }
-
-        toast.dataset[ "open" ] = true;
-    }, 10 );
-
-    const content = document.createElement( "div" );
-    content.className = "lextoastcontent";
-    toast.appendChild( content );
-
-    const titleContent = document.createElement( "div" );
-    titleContent.className = "title";
-    titleContent.innerHTML = title;
-    content.appendChild( titleContent );
-
-    if( description )
-    {
-        const desc = document.createElement( "div" );
-        desc.className = "desc";
-        desc.innerHTML = description;
-        content.appendChild( desc );
-    }
-
-    if( options.action )
-    {
-        const panel = new LX.Panel();
-        panel.addButton(null, options.action.name ?? "Accept", options.action.callback.bind( this, toast ), { width: "auto", maxWidth: "150px", className: "right", buttonClass: "border" });
-        toast.appendChild( panel.root.childNodes[ 0 ] );
-    }
-
-    const that = this;
-
-    toast.close = function() {
-        this.dataset[ "closed" ] = true;
-        LX.doAsync( () => {
-            this.remove();
-            if( !that.notifications.childElementCount )
-            {
-                that.notifications.style.width = "unset";
-                that.notifications.iWidth = 0;
-            }
-        }, 500 );
-    };
-
-    if( options.closable ?? true )
-    {
-        const closeIcon = LX.makeIcon( "X", { iconClass: "closer" } );
-        closeIcon.addEventListener( "click", () => {
-            toast.close();
-        } );
-        toast.appendChild( closeIcon );
-    }
-
-    const timeout = options.timeout ?? 3000;
-
-    if( timeout != -1 )
-    {
-        LX.doAsync( () => {
-            toast.close();
-        }, timeout );
-    }
-}
-
-LX.toast = toast;
-
-/**
- * @method badge
- * @param {String} text
- * @param {String} className
- * @param {Object} options
- * style: Style attributes to override
- * asElement: Returns the badge as HTMLElement [false]
- */
-
-function badge( text, className, options = {} )
-{
-    const container = document.createElement( "div" );
-    container.innerHTML = text;
-    container.className = "lexbadge " + ( className ?? "" );
-    Object.assign( container.style, options.style ?? {} );
-    return ( options.asElement ?? false ) ? container : container.outerHTML;
-}
-
-LX.badge = badge;
-
-/**
- * @method makeElement
- * @param {String} htmlType
- * @param {String} className
- * @param {String} innerHTML
- * @param {HTMLElement} parent
- * @param {Object} overrideStyle
- */
-
-function makeElement( htmlType, className, innerHTML, parent, overrideStyle = {} )
-{
-    const element = document.createElement( htmlType );
-    element.className = className ?? "";
-    element.innerHTML = innerHTML ?? "";
-    Object.assign( element.style, overrideStyle );
-
-    if( parent )
-    {
-        if( parent.attach ) // Use attach method if possible
-        {
-            parent.attach( element );
-        }
-        else // its a native HTMLElement
-        {
-            parent.appendChild( element );
-        }
-    }
-
-    return element;
-}
-
-LX.makeElement = makeElement;
-
-/**
- * @method makeContainer
- * @param {Array} size
- * @param {String} className
- * @param {String} innerHTML
- * @param {HTMLElement} parent
- * @param {Object} overrideStyle
- */
-
-function makeContainer( size, className, innerHTML, parent, overrideStyle = {} )
-{
-    const container = LX.makeElement( "div", "lexcontainer " + ( className ?? "" ), innerHTML, parent, overrideStyle );
-    container.style.width = size && size[ 0 ] ? size[ 0 ] : "100%";
-    container.style.height = size && size[ 1 ] ? size[ 1 ] : "100%";
-    return container;
-}
-
-LX.makeContainer = makeContainer;
-
-/**
- * @method asTooltip
- * @param {HTMLElement} trigger
- * @param {String} content
- * @param {Object} options
- * side: Side of the tooltip
- * offset: Tooltip margin offset
- * active: Tooltip active by default [true]
- */
-
-function asTooltip( trigger, content, options = {} )
-{
-    console.assert( trigger, "You need a trigger to generate a tooltip!" );
-
-    trigger.dataset[ "disableTooltip" ] = !( options.active ?? true );
-
-    let tooltipDom = null;
-
-    trigger.addEventListener( "mouseenter", function(e) {
-
-        if( trigger.dataset[ "disableTooltip" ] == "true" )
-        {
-            return;
-        }
-
-        LX.root.querySelectorAll( ".lextooltip" ).forEach( e => e.remove() );
-
-        tooltipDom = document.createElement( "div" );
-        tooltipDom.className = "lextooltip";
-        tooltipDom.innerHTML = content;
-
-        LX.doAsync( () => {
-
-            const position = [ 0, 0 ];
-            const rect = this.getBoundingClientRect();
-            const offset = options.offset ?? 6;
-            let alignWidth = true;
-
-            switch( options.side ?? "top" )
-            {
-                case "left":
-                    position[ 0 ] += ( rect.x - tooltipDom.offsetWidth - offset );
-                    alignWidth = false;
-                    break;
-                case "right":
-                    position[ 0 ] += ( rect.x + rect.width + offset );
-                    alignWidth = false;
-                    break;
-                case "top":
-                    position[ 1 ] += ( rect.y - tooltipDom.offsetHeight - offset );
-                    alignWidth = true;
-                    break;
-                case "bottom":
-                    position[ 1 ] += ( rect.y + rect.height + offset );
-                    alignWidth = true;
-                    break;
-            }
-
-            if( alignWidth ) { position[ 0 ] += ( rect.x + rect.width * 0.5 ) - tooltipDom.offsetWidth * 0.5; }
-            else { position[ 1 ] += ( rect.y + rect.height * 0.5 ) - tooltipDom.offsetHeight * 0.5; }
-
-            // Avoid collisions
-            position[ 0 ] = LX.clamp( position[ 0 ], 0, window.innerWidth - tooltipDom.offsetWidth - 4 );
-            position[ 1 ] = LX.clamp( position[ 1 ], 0, window.innerHeight - tooltipDom.offsetHeight - 4 );
-
-            tooltipDom.style.left = `${ position[ 0 ] }px`;
-            tooltipDom.style.top = `${ position[ 1 ] }px`;
-        } );
-
-        LX.root.appendChild( tooltipDom );
-    } );
-
-    trigger.addEventListener( "mouseleave", function(e) {
-        if( tooltipDom )
-        {
-            tooltipDom.remove();
-        }
-    } );
-}
-
-LX.asTooltip = asTooltip;
 
 /*
 *   Events and Signals
@@ -2254,13 +1885,6 @@ class Calendar {
 
 LX.Calendar = Calendar;
 
-function flushCss(element) {
-    // By reading the offsetHeight property, we are forcing
-    // the browser to flush the pending CSS changes (which it
-    // does to ensure the value obtained is accurate).
-    element.offsetHeight;
-}
-
 /**
  * @class Tabs
  */
@@ -2386,7 +2010,7 @@ class Tabs {
                 this.thumb.style.transition = "none";
                 this.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
                 this.thumb.style.width = ( tabEl.offsetWidth ) + "px";
-                flushCss( this.thumb );
+                LX.flushCss( this.thumb );
                 this.thumb.style.transition = transition;
             });
 
@@ -3500,7 +3124,7 @@ class CanvasCurve {
             }
             else
             {
-                LX.UTILS.drawSpline( ctx, values, element.smooth );
+                LX.drawSpline( ctx, values, element.smooth );
             }
 
             // Draw points
@@ -4442,254 +4066,6 @@ class CanvasMap2D {
 
 LX.CanvasMap2D = CanvasMap2D;
 
-/*
-*   Requests
-*/
-
-Object.assign(LX, {
-
-    /**
-    * Request file from url (it could be a binary, text, etc.). If you want a simplied version use
-    * @method request
-    * @param {Object} request object with all the parameters like data (for sending forms), dataType, success, error
-    * @param {Function} on_complete
-    **/
-    request( request ) {
-
-        var dataType = request.dataType || "text";
-        if(dataType == "json") //parse it locally
-            dataType = "text";
-        else if(dataType == "xml") //parse it locally
-            dataType = "text";
-        else if (dataType == "binary")
-        {
-            //request.mimeType = "text/plain; charset=x-user-defined";
-            dataType = "arraybuffer";
-            request.mimeType = "application/octet-stream";
-        }
-
-        //regular case, use AJAX call
-        var xhr = new XMLHttpRequest();
-        xhr.open( request.data ? 'POST' : 'GET', request.url, true);
-        if(dataType)
-            xhr.responseType = dataType;
-        if (request.mimeType)
-            xhr.overrideMimeType( request.mimeType );
-        if( request.nocache )
-            xhr.setRequestHeader('Cache-Control', 'no-cache');
-
-        xhr.onload = function(load)
-        {
-            var response = this.response;
-            if( this.status != 200)
-            {
-                var err = "Error " + this.status;
-                if(request.error)
-                    request.error(err);
-                return;
-            }
-
-            if(request.dataType == "json") //chrome doesnt support json format
-            {
-                try
-                {
-                    response = JSON.parse(response);
-                }
-                catch (err)
-                {
-                    if(request.error)
-                        request.error(err);
-                    else
-                        throw err;
-                }
-            }
-            else if(request.dataType == "xml")
-            {
-                try
-                {
-                    var xmlparser = new DOMParser();
-                    response = xmlparser.parseFromString(response,"text/xml");
-                }
-                catch (err)
-                {
-                    if(request.error)
-                        request.error(err);
-                    else
-                        throw err;
-                }
-            }
-            if(request.success)
-                request.success.call(this, response, this);
-        };
-        xhr.onerror = function(err) {
-            if(request.error)
-                request.error(err);
-        };
-
-        var data = new FormData();
-        if( request.data )
-        {
-            for( var i in request.data)
-                data.append(i,request.data[ i ]);
-        }
-
-        xhr.send( data );
-        return xhr;
-    },
-
-    /**
-    * Request file from url
-    * @method requestText
-    * @param {String} url
-    * @param {Function} onComplete
-    * @param {Function} onError
-    **/
-    requestText( url, onComplete, onError ) {
-        return this.request({ url: url, dataType:"text", success: onComplete, error: onError });
-    },
-
-    /**
-    * Request file from url
-    * @method requestJSON
-    * @param {String} url
-    * @param {Function} onComplete
-    * @param {Function} onError
-    **/
-    requestJSON( url, onComplete, onError ) {
-        return this.request({ url: url, dataType:"json", success: onComplete, error: onError });
-    },
-
-    /**
-    * Request binary file from url
-    * @method requestBinary
-    * @param {String} url
-    * @param {Function} onComplete
-    * @param {Function} onError
-    **/
-    requestBinary( url, onComplete, onError ) {
-        return this.request({ url: url, dataType:"binary", success: onComplete, error: onError });
-    },
-
-    /**
-    * Request script and inserts it in the DOM
-    * @method requireScript
-    * @param {String|Array} url the url of the script or an array containing several urls
-    * @param {Function} onComplete
-    * @param {Function} onError
-    * @param {Function} onProgress (if several files are required, onProgress is called after every file is added to the DOM)
-    **/
-    requireScript( url, onComplete, onError, onProgress, version ) {
-
-        if(!url)
-            throw("invalid URL");
-
-        if( url.constructor === String )
-            url = [url];
-
-        var total = url.length;
-        var loaded_scripts = [];
-
-        for( var i in url)
-        {
-            var script = document.createElement('script');
-            script.num = i;
-            script.type = 'text/javascript';
-            script.src = url[ i ] + ( version ? "?version=" + version : "" );
-            script.original_src = url[ i ];
-            script.async = false;
-            script.onload = function( e ) {
-                total--;
-                loaded_scripts.push(this);
-                if(total)
-                {
-                    if( onProgress )
-                    {
-                        onProgress( this.original_src, this.num );
-                    }
-                }
-                else if(onComplete)
-                    onComplete( loaded_scripts );
-            };
-            if(onError)
-                script.onerror = function(err) {
-                    onError(err, this.original_src, this.num );
-                };
-            document.getElementsByTagName('head')[ 0 ].appendChild(script);
-        }
-    },
-
-    loadScriptSync( url ) {
-        return new Promise((resolve, reject) => {
-            const script = document.createElement( "script" );
-            script.src = url;
-            script.async = false;
-            script.onload = () => resolve();
-            script.onerror = () => reject(new Error(`Failed to load ${url}`));
-            document.head.appendChild( script );
-        });
-    },
-
-    downloadURL( url, filename ) {
-
-        const fr = new FileReader();
-
-        const _download = function(_url) {
-            var link = document.createElement('a');
-            link.href = _url;
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        };
-
-        if( url.includes('http') )
-        {
-            LX.request({ url: url, dataType: 'blob', success: (f) => {
-                fr.readAsDataURL( f );
-                fr.onload = e => {
-                    _download(e.currentTarget.result);
-                };
-            } });
-        }else
-        {
-            _download(url);
-        }
-
-    },
-
-    downloadFile: function( filename, data, dataType ) {
-        if(!data)
-        {
-            console.warn("No file provided to download");
-            return;
-        }
-
-        if(!dataType)
-        {
-            if(data.constructor === String )
-                dataType = 'text/plain';
-            else
-                dataType = 'application/octet-stream';
-        }
-
-        var file = null;
-        if(data.constructor !== File && data.constructor !== Blob)
-            file = new Blob( [ data ], {type : dataType});
-        else
-            file = data;
-
-        var url = URL.createObjectURL( file );
-        var element = document.createElement("a");
-        element.setAttribute('href', url);
-        element.setAttribute('download', filename );
-        element.style.display = 'none';
-        document.body.appendChild(element);
-        element.click();
-        document.body.removeChild(element);
-        setTimeout( function(){ URL.revokeObjectURL( url ); }, 1000*60 ); //wait one minute to revoke url
-    }
-});
-
 Object.defineProperty(String.prototype, 'lastChar', {
     get: function() { return this[ this.length - 1 ]; },
     enumerable: true,
@@ -4967,6 +4343,30 @@ function doAsync( fn, ms ) {
 LX.doAsync = doAsync;
 
 /**
+ * @method flushCss
+ * @description By reading the offsetHeight property, we are forcing the browser to flush
+ * the pending CSS changes (which it does to ensure the value obtained is accurate).
+ * @param {HTMLElement} element
+ */
+function flushCss( element )
+{
+    element.offsetHeight;
+}
+
+LX.flushCss = flushCss;
+
+/**
+ * @method deleteElement
+ * @param {HTMLElement} element
+ */
+function deleteElement( element )
+{
+    if( element !== undefined ) element.remove();
+}
+
+LX.deleteElement = deleteElement;
+
+/**
  * @method getSupportedDOMName
  * @description Convert a text string to a valid DOM name
  * @param {String} text Original text
@@ -5036,9 +4436,13 @@ LX.stripHTML = stripHTML;
  * @param {Number|String} size
  * @param {Number} total
  */
-const parsePixelSize = ( size, total ) => {
-
-    if( size.constructor === Number ) { return size; } // Assuming pixels..
+function parsePixelSize( size, total )
+{
+    // Assuming pixels..
+    if( size.constructor === Number )
+    {
+        return size;
+    }
 
     if( size.constructor === String )
     {
@@ -5076,7 +4480,7 @@ const parsePixelSize = ( size, total ) => {
     }
 
     throw( "Bad size format!" );
-};
+}
 
 LX.parsePixelSize = parsePixelSize;
 
@@ -5339,7 +4743,7 @@ function measureRealWidth( value, paddingPlusMargin = 8 )
     i.innerHTML = value;
     document.body.appendChild( i );
     var rect = i.getBoundingClientRect();
-    LX.UTILS.deleteElement( i );
+    LX.deleteElement( i );
     return rect.width + paddingPlusMargin;
 }
 
@@ -5883,84 +5287,730 @@ function registerCommandbarEntry( name, callback )
 
 LX.registerCommandbarEntry = registerCommandbarEntry;
 
+/*
+    Dialog and Notification Elements
+*/
+
 /**
- * Utils package
- * @namespace LX.UTILS
- * @description Collection of utility functions
+ * @method message
+ * @param {String} text
+ * @param {String} title (Optional)
+ * @param {Object} options
+ * id: Id of the message dialog
+ * position: Dialog position in screen [screen centered]
+ * draggable: Dialog can be dragged [false]
  */
 
-LX.UTILS = {
-
-    compareThreshold( v, p, n, t ) { return Math.abs(v - p) >= t || Math.abs(v - n) >= t },
-    compareThresholdRange( v0, v1, t0, t1 ) { return v0 >= t0 && v0 <= t1 || v1 >= t0 && v1 <= t1 || v0 <= t0 && v1 >= t1},
-    deleteElement( el ) { if( el ) el.remove(); },
-    flushCss(element) {
-        // By reading the offsetHeight property, we are forcing
-        // the browser to flush the pending CSS changes (which it
-        // does to ensure the value obtained is accurate).
-        element.offsetHeight;
-    },
-    getControlPoints( x0, y0, x1, y1, x2, y2, t ) {
-
-        //  x0,y0,x1,y1 are the coordinates of the end (knot) pts of this segment
-        //  x2,y2 is the next knot -- not connected here but needed to calculate p2
-        //  p1 is the control point calculated here, from x1 back toward x0.
-        //  p2 is the next control point, calculated here and returned to become the
-        //  next segment's p1.
-        //  t is the 'tension' which controls how far the control points spread.
-
-        //  Scaling factors: distances from this knot to the previous and following knots.
-        var d01=Math.sqrt(Math.pow(x1-x0,2)+Math.pow(y1-y0,2));
-        var d12=Math.sqrt(Math.pow(x2-x1,2)+Math.pow(y2-y1,2));
-
-        var fa=t*d01/(d01+d12);
-        var fb=t-fa;
-
-        var p1x=x1+fa*(x0-x2);
-        var p1y=y1+fa*(y0-y2);
-
-        var p2x=x1-fb*(x0-x2);
-        var p2y=y1-fb*(y0-y2);
-
-        return [p1x,p1y,p2x,p2y]
-    },
-    drawSpline( ctx, pts, t ) {
-
-        ctx.save();
-        var cp = [];   // array of control points, as x0,y0,x1,y1,...
-        var n = pts.length;
-
-        // Draw an open curve, not connected at the ends
-        for( var i = 0; i < (n - 4); i += 2 )
-        {
-            cp = cp.concat(LX.UTILS.getControlPoints(pts[ i ],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
-        }
-
-        for( var i = 2; i < ( pts.length - 5 ); i += 2 )
-        {
-            ctx.beginPath();
-            ctx.moveTo(pts[ i ], pts[i+1]);
-            ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
-            ctx.stroke();
-            ctx.closePath();
-        }
-
-        //  For open curves the first and last arcs are simple quadratics.
-        ctx.beginPath();
-        ctx.moveTo( pts[ 0 ], pts[ 1 ] );
-        ctx.quadraticCurveTo( cp[ 0 ], cp[ 1 ], pts[ 2 ], pts[ 3 ]);
-        ctx.stroke();
-        ctx.closePath();
-
-        ctx.beginPath();
-        ctx.moveTo( pts[ n-2 ], pts[ n-1 ] );
-        ctx.quadraticCurveTo( cp[ 2*n-10 ], cp[ 2*n-9 ], pts[ n-4 ], pts[ n-3 ]);
-        ctx.stroke();
-        ctx.closePath();
-
-        ctx.restore();
+function message( text, title, options = {} )
+{
+    if( !text )
+    {
+        throw( "No message to show" );
     }
-};
+
+    options.modal = true;
+
+    return new LX.Dialog( title, p => {
+        p.addTextArea( null, text, null, { disabled: true, fitHeight: true  } );
+    }, options );
+}
+
+LX.message = message;
+
+/**
+ * @method popup
+ * @param {String} text
+ * @param {String} title (Optional)
+ * @param {Object} options
+ * id: Id of the message dialog
+ * timeout (Number): Delay time before it closes automatically (ms). Default: [3000]
+ * position (Array): [x,y] Dialog position in screen. Default: [screen centered]
+ * size (Array): [width, height]
+ */
+
+function popup( text, title, options = {} )
+{
+    if( !text )
+    {
+        throw("No message to show");
+    }
+
+    options.size = options.size ?? [ "max-content", "auto" ];
+    options.class = "lexpopup";
+
+    const time = options.timeout || 3000;
+    const dialog = new LX.Dialog( title, p => {
+        p.addTextArea( null, text, null, { disabled: true, fitHeight: true } );
+    }, options );
+
+    setTimeout( () => {
+        dialog.close();
+    }, Math.max( time, 150 ) );
+
+    return dialog;
+}
+
+LX.popup = popup;
+
+/**
+ * @method prompt
+ * @param {String} text
+ * @param {String} title (Optional)
+ * @param {Object} options
+ * id: Id of the prompt dialog
+ * position: Dialog position in screen [screen centered]
+ * draggable: Dialog can be dragged [false]
+ * input: If false, no text input appears
+ * accept: Accept text
+ * required: Input has to be filled [true]. Default: false
+ */
+
+function prompt( text, title, callback, options = {} )
+{
+    options.modal = true;
+    options.className = "prompt";
+
+    let value = "";
+
+    const dialog = new LX.Dialog( title, p => {
+
+        p.addTextArea( null, text, null, { disabled: true, fitHeight: true } );
+
+        if( options.input ?? true )
+        {
+            p.addText( null, options.input || value, v => value = v, { placeholder: "..." } );
+        }
+
+        p.sameLine( 2 );
+
+        p.addButton(null, "Cancel", () => {if(options.on_cancel) options.on_cancel(); dialog.close();} );
+
+        p.addButton( null, options.accept || "Continue", () => {
+            if( options.required && value === '' )
+            {
+                text += text.includes("You must fill the input text.") ? "": "\nYou must fill the input text.";
+                dialog.close();
+                prompt( text, title, callback, options );
+            }
+            else
+            {
+                if( callback ) callback.call( this, value );
+                dialog.close();
+            }
+        }, { buttonClass: "primary" });
+
+    }, options );
+
+    // Focus text prompt
+    if( options.input ?? true )
+    {
+        dialog.root.querySelector( 'input' ).focus();
+    }
+
+    return dialog;
+}
+
+LX.prompt = prompt;
+
+/**
+ * @method toast
+ * @param {String} title
+ * @param {String} description (Optional)
+ * @param {Object} options
+ * action: Data of the custom action { name, callback }
+ * closable: Allow closing the toast
+ * timeout: Time in which the toast closed automatically, in ms. -1 means persistent. [3000]
+ */
+
+function toast( title, description, options = {} )
+{
+    if( !title )
+    {
+        throw( "The toast needs at least a title!" );
+    }
+
+    console.assert( this.notifications );
+
+    const toast = document.createElement( "li" );
+    toast.className = "lextoast";
+    toast.style.translate = "0 calc(100% + 30px)";
+    this.notifications.prepend( toast );
+
+    LX.doAsync( () => {
+
+        if( this.notifications.offsetWidth > this.notifications.iWidth )
+        {
+            this.notifications.iWidth = Math.min( this.notifications.offsetWidth, 480 );
+            this.notifications.style.width = this.notifications.iWidth + "px";
+        }
+
+        toast.dataset[ "open" ] = true;
+    }, 10 );
+
+    const content = document.createElement( "div" );
+    content.className = "lextoastcontent";
+    toast.appendChild( content );
+
+    const titleContent = document.createElement( "div" );
+    titleContent.className = "title";
+    titleContent.innerHTML = title;
+    content.appendChild( titleContent );
+
+    if( description )
+    {
+        const desc = document.createElement( "div" );
+        desc.className = "desc";
+        desc.innerHTML = description;
+        content.appendChild( desc );
+    }
+
+    if( options.action )
+    {
+        const panel = new LX.Panel();
+        panel.addButton(null, options.action.name ?? "Accept", options.action.callback.bind( this, toast ), { width: "auto", maxWidth: "150px", className: "right", buttonClass: "border" });
+        toast.appendChild( panel.root.childNodes[ 0 ] );
+    }
+
+    const that = this;
+
+    toast.close = function() {
+        this.dataset[ "closed" ] = true;
+        LX.doAsync( () => {
+            this.remove();
+            if( !that.notifications.childElementCount )
+            {
+                that.notifications.style.width = "unset";
+                that.notifications.iWidth = 0;
+            }
+        }, 500 );
+    };
+
+    if( options.closable ?? true )
+    {
+        const closeIcon = LX.makeIcon( "X", { iconClass: "closer" } );
+        closeIcon.addEventListener( "click", () => {
+            toast.close();
+        } );
+        toast.appendChild( closeIcon );
+    }
+
+    const timeout = options.timeout ?? 3000;
+
+    if( timeout != -1 )
+    {
+        LX.doAsync( () => {
+            toast.close();
+        }, timeout );
+    }
+}
+
+LX.toast = toast;
+
+/**
+ * @method badge
+ * @param {String} text
+ * @param {String} className
+ * @param {Object} options
+ * style: Style attributes to override
+ * asElement: Returns the badge as HTMLElement [false]
+ */
+
+function badge( text, className, options = {} )
+{
+    const container = document.createElement( "div" );
+    container.innerHTML = text;
+    container.className = "lexbadge " + ( className ?? "" );
+    Object.assign( container.style, options.style ?? {} );
+    return ( options.asElement ?? false ) ? container : container.outerHTML;
+}
+
+LX.badge = badge;
+
+/**
+ * @method makeElement
+ * @param {String} htmlType
+ * @param {String} className
+ * @param {String} innerHTML
+ * @param {HTMLElement} parent
+ * @param {Object} overrideStyle
+ */
+
+function makeElement( htmlType, className, innerHTML, parent, overrideStyle = {} )
+{
+    const element = document.createElement( htmlType );
+    element.className = className ?? "";
+    element.innerHTML = innerHTML ?? "";
+    Object.assign( element.style, overrideStyle );
+
+    if( parent )
+    {
+        if( parent.attach ) // Use attach method if possible
+        {
+            parent.attach( element );
+        }
+        else // its a native HTMLElement
+        {
+            parent.appendChild( element );
+        }
+    }
+
+    return element;
+}
+
+LX.makeElement = makeElement;
+
+/**
+ * @method makeContainer
+ * @param {Array} size
+ * @param {String} className
+ * @param {String} innerHTML
+ * @param {HTMLElement} parent
+ * @param {Object} overrideStyle
+ */
+
+function makeContainer( size, className, innerHTML, parent, overrideStyle = {} )
+{
+    const container = LX.makeElement( "div", "lexcontainer " + ( className ?? "" ), innerHTML, parent, overrideStyle );
+    container.style.width = size && size[ 0 ] ? size[ 0 ] : "100%";
+    container.style.height = size && size[ 1 ] ? size[ 1 ] : "100%";
+    return container;
+}
+
+LX.makeContainer = makeContainer;
+
+/**
+ * @method asTooltip
+ * @param {HTMLElement} trigger
+ * @param {String} content
+ * @param {Object} options
+ * side: Side of the tooltip
+ * offset: Tooltip margin offset
+ * active: Tooltip active by default [true]
+ */
+
+function asTooltip( trigger, content, options = {} )
+{
+    console.assert( trigger, "You need a trigger to generate a tooltip!" );
+
+    trigger.dataset[ "disableTooltip" ] = !( options.active ?? true );
+
+    let tooltipDom = null;
+
+    trigger.addEventListener( "mouseenter", function(e) {
+
+        if( trigger.dataset[ "disableTooltip" ] == "true" )
+        {
+            return;
+        }
+
+        LX.root.querySelectorAll( ".lextooltip" ).forEach( e => e.remove() );
+
+        tooltipDom = document.createElement( "div" );
+        tooltipDom.className = "lextooltip";
+        tooltipDom.innerHTML = content;
+
+        LX.doAsync( () => {
+
+            const position = [ 0, 0 ];
+            const rect = this.getBoundingClientRect();
+            const offset = options.offset ?? 6;
+            let alignWidth = true;
+
+            switch( options.side ?? "top" )
+            {
+                case "left":
+                    position[ 0 ] += ( rect.x - tooltipDom.offsetWidth - offset );
+                    alignWidth = false;
+                    break;
+                case "right":
+                    position[ 0 ] += ( rect.x + rect.width + offset );
+                    alignWidth = false;
+                    break;
+                case "top":
+                    position[ 1 ] += ( rect.y - tooltipDom.offsetHeight - offset );
+                    alignWidth = true;
+                    break;
+                case "bottom":
+                    position[ 1 ] += ( rect.y + rect.height + offset );
+                    alignWidth = true;
+                    break;
+            }
+
+            if( alignWidth ) { position[ 0 ] += ( rect.x + rect.width * 0.5 ) - tooltipDom.offsetWidth * 0.5; }
+            else { position[ 1 ] += ( rect.y + rect.height * 0.5 ) - tooltipDom.offsetHeight * 0.5; }
+
+            // Avoid collisions
+            position[ 0 ] = LX.clamp( position[ 0 ], 0, window.innerWidth - tooltipDom.offsetWidth - 4 );
+            position[ 1 ] = LX.clamp( position[ 1 ], 0, window.innerHeight - tooltipDom.offsetHeight - 4 );
+
+            tooltipDom.style.left = `${ position[ 0 ] }px`;
+            tooltipDom.style.top = `${ position[ 1 ] }px`;
+        } );
+
+        LX.root.appendChild( tooltipDom );
+    } );
+
+    trigger.addEventListener( "mouseleave", function(e) {
+        if( tooltipDom )
+        {
+            tooltipDom.remove();
+        }
+    } );
+}
+
+LX.asTooltip = asTooltip;
+
+/*
+*   Requests
+*/
+
+Object.assign(LX, {
+
+    /**
+    * Request file from url (it could be a binary, text, etc.). If you want a simplied version use
+    * @method request
+    * @param {Object} request object with all the parameters like data (for sending forms), dataType, success, error
+    * @param {Function} on_complete
+    **/
+    request( request ) {
+
+        var dataType = request.dataType || "text";
+        if(dataType == "json") //parse it locally
+            dataType = "text";
+        else if(dataType == "xml") //parse it locally
+            dataType = "text";
+        else if (dataType == "binary")
+        {
+            //request.mimeType = "text/plain; charset=x-user-defined";
+            dataType = "arraybuffer";
+            request.mimeType = "application/octet-stream";
+        }
+
+        //regular case, use AJAX call
+        var xhr = new XMLHttpRequest();
+        xhr.open( request.data ? 'POST' : 'GET', request.url, true);
+        if(dataType)
+            xhr.responseType = dataType;
+        if (request.mimeType)
+            xhr.overrideMimeType( request.mimeType );
+        if( request.nocache )
+            xhr.setRequestHeader('Cache-Control', 'no-cache');
+
+        xhr.onload = function(load)
+        {
+            var response = this.response;
+            if( this.status != 200)
+            {
+                var err = "Error " + this.status;
+                if(request.error)
+                    request.error(err);
+                return;
+            }
+
+            if(request.dataType == "json") //chrome doesnt support json format
+            {
+                try
+                {
+                    response = JSON.parse(response);
+                }
+                catch (err)
+                {
+                    if(request.error)
+                        request.error(err);
+                    else
+                        throw err;
+                }
+            }
+            else if(request.dataType == "xml")
+            {
+                try
+                {
+                    var xmlparser = new DOMParser();
+                    response = xmlparser.parseFromString(response,"text/xml");
+                }
+                catch (err)
+                {
+                    if(request.error)
+                        request.error(err);
+                    else
+                        throw err;
+                }
+            }
+            if(request.success)
+                request.success.call(this, response, this);
+        };
+        xhr.onerror = function(err) {
+            if(request.error)
+                request.error(err);
+        };
+
+        var data = new FormData();
+        if( request.data )
+        {
+            for( var i in request.data)
+                data.append(i,request.data[ i ]);
+        }
+
+        xhr.send( data );
+        return xhr;
+    },
+
+    /**
+    * Request file from url
+    * @method requestText
+    * @param {String} url
+    * @param {Function} onComplete
+    * @param {Function} onError
+    **/
+    requestText( url, onComplete, onError ) {
+        return this.request({ url: url, dataType:"text", success: onComplete, error: onError });
+    },
+
+    /**
+    * Request file from url
+    * @method requestJSON
+    * @param {String} url
+    * @param {Function} onComplete
+    * @param {Function} onError
+    **/
+    requestJSON( url, onComplete, onError ) {
+        return this.request({ url: url, dataType:"json", success: onComplete, error: onError });
+    },
+
+    /**
+    * Request binary file from url
+    * @method requestBinary
+    * @param {String} url
+    * @param {Function} onComplete
+    * @param {Function} onError
+    **/
+    requestBinary( url, onComplete, onError ) {
+        return this.request({ url: url, dataType:"binary", success: onComplete, error: onError });
+    },
+
+    /**
+    * Request script and inserts it in the DOM
+    * @method requireScript
+    * @param {String|Array} url the url of the script or an array containing several urls
+    * @param {Function} onComplete
+    * @param {Function} onError
+    * @param {Function} onProgress (if several files are required, onProgress is called after every file is added to the DOM)
+    **/
+    requireScript( url, onComplete, onError, onProgress, version ) {
+
+        if(!url)
+            throw("invalid URL");
+
+        if( url.constructor === String )
+            url = [url];
+
+        var total = url.length;
+        var loaded_scripts = [];
+
+        for( var i in url)
+        {
+            var script = document.createElement('script');
+            script.num = i;
+            script.type = 'text/javascript';
+            script.src = url[ i ] + ( version ? "?version=" + version : "" );
+            script.original_src = url[ i ];
+            script.async = false;
+            script.onload = function( e ) {
+                total--;
+                loaded_scripts.push(this);
+                if(total)
+                {
+                    if( onProgress )
+                    {
+                        onProgress( this.original_src, this.num );
+                    }
+                }
+                else if(onComplete)
+                    onComplete( loaded_scripts );
+            };
+            if(onError)
+                script.onerror = function(err) {
+                    onError(err, this.original_src, this.num );
+                };
+            document.getElementsByTagName('head')[ 0 ].appendChild(script);
+        }
+    },
+
+    loadScriptSync( url ) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement( "script" );
+            script.src = url;
+            script.async = false;
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error(`Failed to load ${url}`));
+            document.head.appendChild( script );
+        });
+    },
+
+    downloadURL( url, filename ) {
+
+        const fr = new FileReader();
+
+        const _download = function(_url) {
+            var link = document.createElement('a');
+            link.href = _url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        if( url.includes('http') )
+        {
+            LX.request({ url: url, dataType: 'blob', success: (f) => {
+                fr.readAsDataURL( f );
+                fr.onload = e => {
+                    _download(e.currentTarget.result);
+                };
+            } });
+        }else
+        {
+            _download(url);
+        }
+
+    },
+
+    downloadFile: function( filename, data, dataType ) {
+        if(!data)
+        {
+            console.warn("No file provided to download");
+            return;
+        }
+
+        if(!dataType)
+        {
+            if(data.constructor === String )
+                dataType = 'text/plain';
+            else
+                dataType = 'application/octet-stream';
+        }
+
+        var file = null;
+        if(data.constructor !== File && data.constructor !== Blob)
+            file = new Blob( [ data ], {type : dataType});
+        else
+            file = data;
+
+        var url = URL.createObjectURL( file );
+        var element = document.createElement("a");
+        element.setAttribute('href', url);
+        element.setAttribute('download', filename );
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+        setTimeout( function(){ URL.revokeObjectURL( url ); }, 1000*60 ); //wait one minute to revoke url
+    }
+});
+
+/**
+ * @method compareThreshold
+ * @param {String} url
+ * @param {Function} onComplete
+ * @param {Function} onError
+ **/
+function compareThreshold( v, p, n, t )
+{
+    return Math.abs( v - p ) >= t || Math.abs( v - n ) >= t;
+}
+
+LX.compareThreshold = compareThreshold;
+
+/**
+ * @method compareThresholdRange
+ * @param {String} url
+ * @param {Function} onComplete
+ * @param {Function} onError
+ **/
+function compareThresholdRange( v0, v1, t0, t1 )
+{
+    return v0 >= t0 && v0 <= t1 || v1 >= t0 && v1 <= t1 || v0 <= t0 && v1 >= t1;
+}
+
+LX.compareThresholdRange = compareThresholdRange;
+
+/**
+ * @method getControlPoints
+ * @param {String} url
+ * @param {Function} onComplete
+ * @param {Function} onError
+ **/
+function getControlPoints( x0, y0, x1, y1, x2, y2, t )
+{
+    //  x0,y0,x1,y1 are the coordinates of the end (knot) pts of this segment
+    //  x2,y2 is the next knot -- not connected here but needed to calculate p2
+    //  p1 is the control point calculated here, from x1 back toward x0.
+    //  p2 is the next control point, calculated here and returned to become the
+    //  next segment's p1.
+    //  t is the 'tension' which controls how far the control points spread.
+
+    //  Scaling factors: distances from this knot to the previous and following knots.
+    var d01=Math.sqrt(Math.pow(x1-x0,2)+Math.pow(y1-y0,2));
+    var d12=Math.sqrt(Math.pow(x2-x1,2)+Math.pow(y2-y1,2));
+
+    var fa=t*d01/(d01+d12);
+    var fb=t-fa;
+
+    var p1x=x1+fa*(x0-x2);
+    var p1y=y1+fa*(y0-y2);
+
+    var p2x=x1-fb*(x0-x2);
+    var p2y=y1-fb*(y0-y2);
+
+    return [p1x,p1y,p2x,p2y]
+}
+
+LX.getControlPoints = getControlPoints;
+
+/**
+ * @method drawSpline
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Array} pts
+ * @param {Number} t
+ **/
+function drawSpline( ctx, pts, t )
+{
+    ctx.save();
+    var cp = [];   // array of control points, as x0,y0,x1,y1,...
+    var n = pts.length;
+
+    // Draw an open curve, not connected at the ends
+    for( var i = 0; i < (n - 4); i += 2 )
+    {
+        cp = cp.concat(LX.getControlPoints(pts[ i ],pts[i+1],pts[i+2],pts[i+3],pts[i+4],pts[i+5],t));
+    }
+
+    for( var i = 2; i < ( pts.length - 5 ); i += 2 )
+    {
+        ctx.beginPath();
+        ctx.moveTo(pts[ i ], pts[i+1]);
+        ctx.bezierCurveTo(cp[2*i-2],cp[2*i-1],cp[2*i],cp[2*i+1],pts[i+2],pts[i+3]);
+        ctx.stroke();
+        ctx.closePath();
+    }
+
+    //  For open curves the first and last arcs are simple quadratics.
+    ctx.beginPath();
+    ctx.moveTo( pts[ 0 ], pts[ 1 ] );
+    ctx.quadraticCurveTo( cp[ 0 ], cp[ 1 ], pts[ 2 ], pts[ 3 ]);
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.moveTo( pts[ n-2 ], pts[ n-1 ] );
+    ctx.quadraticCurveTo( cp[ 2*n-10 ], cp[ 2*n-9 ], pts[ n-4 ], pts[ n-3 ]);
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.restore();
+}
+
+LX.drawSpline = drawSpline;
 
 // area.js @jxarco
 
@@ -6685,7 +6735,7 @@ class Area {
 
     addSidebar( callback, options = {} ) {
 
-        let sidebar = new LX.Sidebar( options );
+        let sidebar = new LX.Sidebar( { callback, ...options } );
 
         if( callback )
         {
@@ -13943,6 +13993,7 @@ class Sidebar {
 
         this.root = document.createElement( "div" );
         this.root.className = "lexsidebar " + ( options.className ?? "" );
+        this.callback = options.callback ?? null;
 
         this._displaySelected = options.displaySelected ?? false;
 
@@ -13959,17 +14010,19 @@ class Sidebar {
             configurable: true
         });
 
+        const mobile = navigator && /Android|iPhone/i.test( navigator.userAgent );
+
         this.side = options.side ?? "left";
         this.collapsable = options.collapsable ?? true;
         this._collapseWidth = ( options.collapseToIcons ?? true ) ? "58px" : "0px";
-        this.collapsed = false;
+        this.collapsed = options.collapsed ?? mobile;
 
         this.filterString = "";
 
         LX.doAsync( () => {
 
             this.root.parentElement.ogWidth = this.root.parentElement.style.width;
-            this.root.parentElement.style.transition = "width 0.25s ease-out";
+            this.root.parentElement.style.transition = this.collapsed ? "" : "width 0.25s ease-out";
 
             this.resizeObserver = new ResizeObserver( entries => {
                 for ( const entry of entries )
@@ -13977,6 +14030,24 @@ class Sidebar {
                     this.siblingArea.setSize( [ "calc(100% - " + ( entry.contentRect.width ) + "px )", null ] );
                 }
             });
+
+            if( this.collapsed )
+            {
+                this.root.classList.toggle( "collapsed", this.collapsed );
+                this.root.parentElement.style.width = this._collapseWidth;
+
+                if( !this.resizeObserver )
+                {
+                    throw( "Wait until ResizeObserver has been created!" );
+                }
+
+                this.resizeObserver.observe( this.root.parentElement );
+
+                LX.doAsync( () => {
+                    this.resizeObserver.unobserve( this.root.parentElement );
+                    this.root.querySelectorAll( ".lexsidebarentrycontent" ).forEach( e => e.dataset[ "disableTooltip" ] = !this.collapsed );
+                }, 10 );
+            }
 
         }, 10 );
 
@@ -13993,11 +14064,29 @@ class Sidebar {
                 const icon = LX.makeIcon( this.side == "left" ? "PanelLeft" : "PanelRight", { title: "Toggle Sidebar", iconClass: "toggler" } );
                 this.header.appendChild( icon );
 
-                icon.addEventListener( "click", (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    this.toggleCollapsed();
-                } );
+                if( mobile )
+                {
+                    // create an area and append a sidebar:
+                    const area = new LX.Area({ skipAppend: true });
+                    const sheetSidebarOptions = LX.deepCopy( options );
+                    sheetSidebarOptions.collapsed = false;
+                    sheetSidebarOptions.collapsable = false;
+                    area.addSidebar( this.callback, sheetSidebarOptions );
+
+                    icon.addEventListener( "click", e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        new LX.Sheet("256px", [ area ], { side: this.side } );
+                    } );
+                }
+                else
+                {
+                    icon.addEventListener( "click", e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.toggleCollapsed();
+                    } );
+                }
             }
         }
 

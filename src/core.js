@@ -6,7 +6,7 @@
 */
 
 const LX = {
-    version: "0.6.4",
+    version: "0.6.5",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -1156,6 +1156,7 @@ class DropdownMenu {
             {
                 const checkbox = new LX.Checkbox( pKey + "_entryChecked", item.checked, (v) => {
                     const f = item[ 'callback' ];
+                    item.checked = v;
                     if( f )
                     {
                         f.call( this, key, v, menuItem );

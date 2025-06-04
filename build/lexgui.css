@@ -3938,6 +3938,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 /* Table Widget */
 
+.lextable {
+    overflow-x: scroll;
+}
+
 .lextable table {
     width: 100%;
     border: 1px solid;
@@ -3999,6 +4003,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     padding-block: 2px;
     cursor: pointer;
     transition: all 0.1s linear;
+    white-space: nowrap;
     background-color: var(--global-color-tertiary);
     -webkit-user-select: none;
     -moz-user-select: none;
