@@ -2633,7 +2633,7 @@ class KeyFramesTimeline extends Timeline {
      * 
      * @param {int} trackIdx 
      * @param {array} newValues array of values for each keyframe. It should be a flat array of size track.dim*numKeyframes. Check ADDKEY_VALUESINARRAYS flag
-     * @param {array of numbers} newTimes 
+     * @param {array of numbers} newTimes must be ordered ascendently
      * @param {number} timeOffset 
      * @param {int} flags     
      *      KeyFramesTimeline.ADDKEY_VALUESINARRAYS: if set, newValues is an array of arrays, one for each entry [ [1,2,3], [5,6,7] ]. Times is still a flat array of values [ 0, 0.2 ]
@@ -2656,8 +2656,7 @@ class KeyFramesTimeline extends Timeline {
 
         let newIdx = newTimes.length-1;
         let oldIdx = trackTimes.length-1;
-
-        let t1 = performance.now();
+        let resultIndices = [];
         if ( KeyFramesTimeline.ADDKEY_VALUESINARRAYS & flags ){
             
             for( let i = times.length-1; i > -1; --i ){
@@ -2672,6 +2671,8 @@ class KeyFramesTimeline extends Timeline {
                     track.hovered.splice(oldIdx+1, 0, false);
                     track.selected.splice(oldIdx+1, 0, false);
                     track.edited.splice(oldIdx+1, 0, true);
+
+                    resultIndices.push(i);
                     continue;
                 }
                 
@@ -2695,6 +2696,8 @@ class KeyFramesTimeline extends Timeline {
                     track.hovered.splice(oldIdx+1, 0, false);
                     track.selected.splice(oldIdx+1, 0, false);
                     track.edited.splice(oldIdx+1, 0, true);
+
+                    resultIndices.push(i);
                     continue;
                 }
                 
@@ -2715,8 +2718,11 @@ class KeyFramesTimeline extends Timeline {
             this.setDuration(newTimes[newTimes.length - 1] + timeOffset);
         }
 
-        if(this.onUpdateTrack)
+        if(this.onUpdateTrack){
             this.onUpdateTrack( [trackIdx] );
+        }
+
+        return resultIndices;
     }
 
     deleteSelectedContent(skipCallback = false) {
