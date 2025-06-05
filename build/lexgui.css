@@ -5878,6 +5878,12 @@ ul.lexassetscontent {
 .hover\:fg-error:hover { color: var(--global-color-error) !important }
 .hover\:fg-warning:hover { color: var(--global-color-warning) !important }
 
+.hover\:scale-xs:hover { transform: scale(1.01); transition: transform 0.3s cubic-bezier(.42,.97,.52,1.19); }
+.hover\:scale-sm:hover { transform: scale(1.025); transition: transform 0.3s cubic-bezier(.42,.97,.52,1.19); }
+.hover\:scale-md:hover { transform: scale(1.05); transition: transform 0.3s cubic-bezier(.42,.97,.52,1.19); }
+.hover\:scale-bg:hover { transform: scale(1.1); transition: transform 0.3s cubic-bezier(.42,.97,.52,1.19); }
+.hover\:scale-xl:hover { transform: scale(1.25); transition: transform 0.3s cubic-bezier(.42,.97,.52,1.19); }
+
 .stroke-none { stroke: none }
 
 /* Layout */
