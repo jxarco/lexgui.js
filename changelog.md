@@ -2,12 +2,15 @@
 
 ## dev
 
+## 0.6.6 (master)
+
 Fixed horizontal scroll in Table Widget.
 Fixed checkbox in Dropdown item.
 Callbacks in collapsable sidebar entries are now executed.
 Add `docmaker.js` script (Documentation maker) as new LX component.
+Added `hover:scale` CSS selectors.
 
-## 0.6.5 (master)
+## 0.6.5
 
 Timeline:
   - Refactored undo-redo.

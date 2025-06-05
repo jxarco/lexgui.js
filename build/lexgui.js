@@ -14,7 +14,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 const LX = {
-    version: "0.6.5",
+    version: "0.6.6",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -1151,6 +1151,7 @@ class DropdownMenu {
             {
                 const checkbox = new LX.Checkbox( pKey + "_entryChecked", item.checked, (v) => {
                     const f = item[ 'callback' ];
+                    item.checked = v;
                     if( f )
                     {
                         f.call( this, key, v, menuItem );
@@ -14526,20 +14527,17 @@ class Sidebar {
                     return;
                 }
 
+                const f = options.callback;
+                if( f ) f.call( this, key, item.value, e );
+
                 if( isCollapsable )
                 {
                     itemDom.querySelector( ".collapser" ).click();
                 }
-                else
+                else if( item.checkbox )
                 {
-                    const f = options.callback;
-                    if( f ) f.call( this, key, item.value, e );
-
-                    if( item.checkbox )
-                    {
-                        item.value = !item.value;
-                        item.checkbox.set( item.value, true );
-                    }
+                    item.value = !item.value;
+                    item.checkbox.set( item.value, true );
                 }
 
                 // Manage selected
