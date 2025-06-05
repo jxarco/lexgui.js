@@ -4,6 +4,7 @@
 
 Fixed horizontal scroll in Table Widget.
 Fixed checkbox in Dropdown item.
+Callbacks in collapsable sidebar entries are now executed.
 
 ## 0.6.5 (master)
 
