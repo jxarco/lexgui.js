@@ -14520,20 +14520,17 @@ class Sidebar {
                     return;
                 }
 
+                const f = options.callback;
+                if( f ) f.call( this, key, item.value, e );
+
                 if( isCollapsable )
                 {
                     itemDom.querySelector( ".collapser" ).click();
                 }
-                else
+                else if( item.checkbox )
                 {
-                    const f = options.callback;
-                    if( f ) f.call( this, key, item.value, e );
-
-                    if( item.checkbox )
-                    {
-                        item.value = !item.value;
-                        item.checkbox.set( item.value, true );
-                    }
+                    item.value = !item.value;
+                    item.checkbox.set( item.value, true );
                 }
 
                 // Manage selected

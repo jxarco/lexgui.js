@@ -1,7 +1,17 @@
 // @jxarco
 
-const KEY_WORDS = ['var', 'let', 'const', 'static', 'function', 'null', 'undefined', 'new', 'delete', 'true', 'false', 'NaN', 'this'];
+import { LX } from 'lexgui';
+
+if( !LX )
+{
+    throw( "lexgui.js missing!" );
+}
+
+const CPP_KEY_WORDS = ['int', 'float', 'double', 'bool', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'nullptr', 'NULL', 'unsigned', 'namespace'];
+const CLASS_WORDS = ['uint32_t', 'uint64_t', 'uint8_t'];
 const STATEMENT_WORDS = ['for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'import', 'from'];
+
+const JS_KEY_WORDS = ['var', 'let', 'const', 'static', 'function', 'null', 'undefined', 'new', 'delete', 'true', 'false', 'NaN', 'this'];
 const HTML_ATTRIBUTES = ['html', 'charset', 'rel', 'src', 'href', 'crossorigin', 'type', 'lang'];
 const HTML_TAGS = ['html', 'DOCTYPE', 'head', 'meta', 'title', 'link', 'script', 'body', 'style'];
 
@@ -12,10 +22,14 @@ function SET_DOM_TARGET( element )
     mainContainer = element;
 }
 
+window.SET_DOM_TARGET = SET_DOM_TARGET;
+
 function MAKE_LINE_BREAK()
 {
     mainContainer.appendChild( document.createElement('br') );
 }
+
+window.MAKE_LINE_BREAK = MAKE_LINE_BREAK;
 
 function MAKE_HEADER( string, type, id )
 {
@@ -26,6 +40,8 @@ function MAKE_HEADER( string, type, id )
     mainContainer.appendChild( header );
 }
 
+window.MAKE_HEADER = MAKE_HEADER;
+
 function MAKE_PARAGRAPH( string, sup )
 {
     console.assert(string);
@@ -35,7 +51,9 @@ function MAKE_PARAGRAPH( string, sup )
     mainContainer.appendChild( paragraph );
 }
 
-function MAKE_CODE( text )
+window.MAKE_PARAGRAPH = MAKE_PARAGRAPH;
+
+function MAKE_CODE( text, language = "js" )
 {
     console.assert(text);
 
@@ -105,9 +123,17 @@ function MAKE_CODE( text )
                     text = text.substr( 0, i ) + '@' + content + '@' + text.substr( i + content.length + 3 );
                 }
 
-                if( KEY_WORDS.includes( content ) )
+                if( language == "cpp" && CPP_KEY_WORDS.includes( content ) )
                 {
-                    highlight = "kwd";    
+                    highlight = "kwd";
+                }
+                else if( language == "js" && JS_KEY_WORDS.includes( content ) )
+                {
+                    highlight = "kwd";
+                }
+                else if( CLASS_WORDS.includes( content ) )
+                {
+                    highlight = "cls";
                 }
                 else if( STATEMENT_WORDS.includes( content ) )
                 {
@@ -162,17 +188,22 @@ function MAKE_CODE( text )
     mainContainer.appendChild( container );
 }
 
+window.MAKE_CODE = MAKE_CODE;
+
 function MAKE_BULLET_LIST( list )
 {
     console.assert(list && list.length > 0);
     let ul = document.createElement('ul');
     for( var el of list ) {
         let li = document.createElement('li');
+        li.className = "leading-loose";
         li.innerHTML = el;
         ul.appendChild( li );
     }
     mainContainer.appendChild( ul );
 }
+
+window.MAKE_BULLET_LIST = MAKE_BULLET_LIST;
 
 function ADD_CODE_LIST_ITEM( item, target )
 {
@@ -183,9 +214,12 @@ function ADD_CODE_LIST_ITEM( item, target )
         return;
     }
     let li = document.createElement('li');
+    li.className = "leading-loose";
     li.innerHTML = split ? ( item.length == 2 ? INLINE_CODE( item[0] ) + ": " + item[1] : INLINE_CODE( item[0] + " <span class='desc'>(" + item[1] + ")</span>" ) + ": " + item[2] ) : INLINE_CODE( item );
     target.appendChild( li );
 }
+
+window.ADD_CODE_LIST_ITEM = ADD_CODE_LIST_ITEM;
 
 function MAKE_CLASS_METHOD( name, desc, params, ret )
 {
@@ -203,18 +237,26 @@ function MAKE_CLASS_METHOD( name, desc, params, ret )
     MAKE_PARAGRAPH( desc );
 }
 
-function MAKE_CLASS_CONSTRUCTOR( name, params )
+window.MAKE_CLASS_METHOD = MAKE_CLASS_METHOD;
+
+function MAKE_CLASS_CONSTRUCTOR( name, params, language = "js" )
 {
     let paramsHTML = "";    
     for( var p of params ) {
-        const name = p[ 0 ];
-        const type = p[ 1 ];
-        paramsHTML += name + ": <span class='desc'>" + type + "</span>" + ( params.indexOf( p ) != (params.length - 1) ? ', ' : '' );
+        const str1 = p[ 0 ]; // cpp: param          js: name
+        const str2 = p[ 1 ]; // cpp: defaultValue   js: type
+        if( language == "cpp" ) {
+            paramsHTML += str1 + ( str2 ? " = <span class='desc'>" + str2 + "</span>" : "" ) + ( params.indexOf( p ) != (params.length - 1) ? ', ' : '' );
+        } else if( language == "js" ) {
+            paramsHTML += str1 + ": <span class='desc'>" + str2 + "</span>" + ( params.indexOf( p ) != (params.length - 1) ? ', ' : '' );
+        }
     }
     let pr = document.createElement('p');
     pr.innerHTML = INLINE_CODE( "<span class='constructor'>" + name + "(" + paramsHTML + ")" + "</span>" );
     mainContainer.appendChild( pr );
 }
+
+window.MAKE_CLASS_CONSTRUCTOR = MAKE_CLASS_CONSTRUCTOR;
 
 function MAKE_CODE_BULLET_LIST( list, target )
 {
@@ -230,11 +272,15 @@ function MAKE_CODE_BULLET_LIST( list, target )
     }
 }
 
+window.MAKE_CODE_BULLET_LIST = MAKE_CODE_BULLET_LIST;
+
 function START_CODE_BULLET_LIST()
 {
     let ul = document.createElement('ul');
     window.listQueued = ul;
 }
+
+window.START_CODE_BULLET_LIST = START_CODE_BULLET_LIST;
 
 function END_CODE_BULLET_LIST()
 {
@@ -243,11 +289,15 @@ function END_CODE_BULLET_LIST()
     window.listQueued = undefined;
 }
 
+window.END_CODE_BULLET_LIST = END_CODE_BULLET_LIST;
+
 function INLINE_LINK( string, href )
 {
     console.assert(string && href);
     return `<a href="` + href + `">` + string + `</a>`;
 }
+
+window.INLINE_LINK = INLINE_LINK;
 
 function INLINE_PAGE( string, page )
 {
@@ -255,11 +305,15 @@ function INLINE_PAGE( string, page )
     return `<a onclick="loadPage('` + page + `')">` + string + `</a>`;
 }
 
+window.INLINE_PAGE = INLINE_PAGE;
+
 function INLINE_CODE( string, codeClass )
 {
     console.assert(string);
     return `<code class="inline ${ codeClass ?? "" }">` + string + `</code>`;
 }
+
+window.INLINE_CODE = INLINE_CODE;
 
 function COPY_SNIPPET( b )
 {
@@ -277,10 +331,87 @@ function COPY_SNIPPET( b )
     console.log("Copied!");
 }
 
-function INSERT_IMAGE( src, caption = "" )
+function INSERT_IMAGE( src, caption = "", parent )
 {
     let img = document.createElement('img');
     img.src = src;
     img.alt = caption;
-    mainContainer.appendChild( img );
+    img.className = "my-1";
+    ( parent ?? mainContainer ).appendChild( img );
+}
+
+window.INSERT_IMAGE = INSERT_IMAGE;
+
+function INSERT_IMAGES( sources, captions = [], width, height )
+{
+    const mobile = navigator && /Android|iPhone/i.test(navigator.userAgent);
+
+    if( !mobile )
+    {
+        let div = document.createElement('div');
+        div.style.width = width ?? "auto";
+        div.style.height = height ?? "256px";
+        div.className = "flex flex-row justify-center";
+
+        for( let i = 0; i < sources.length; ++i )
+        {
+            INSERT_IMAGE( sources[ i ], captions[ i ], div );
+        }
+
+        mainContainer.appendChild( div );
+    }
+    else
+    {
+        for( let i = 0; i < sources.length; ++i )
+        {
+            INSERT_IMAGE( sources[ i ], captions[ i ] );
+        }
+    }
+}
+
+window.INSERT_IMAGES = INSERT_IMAGES;
+
+function INSERT_VIDEO( src, caption = "", controls = true, autoplay = false )
+{
+    let video = document.createElement( 'video' );
+    video.src = src;
+    video.controls = controls;
+    video.autoplay = autoplay;
+    if( autoplay )
+    {
+        video.muted = true;
+    }
+    video.loop = true;
+    video.alt = caption;
+    mainContainer.appendChild( video  );
+}
+
+window.INSERT_VIDEO = INSERT_VIDEO;
+
+function MAKE_NOTE( string, title = "Note" )
+{
+    console.assert( string );
+
+    let note = document.createElement( 'div' );
+    note.className = "note";
+
+    let header = document.createElement( 'div' );
+    header.className = "note-header";
+    header.appendChild( LX.makeIcon( "NotepadText" ) );
+    header.innerHTML += "<b>" + title + "</b>";
+
+    let body = document.createElement( 'div' );
+    body.className = "note-body";
+    body.innerHTML = string;
+
+    note.appendChild( header );
+    note.appendChild( body );
+    mainContainer.appendChild( note );
+}
+
+window.MAKE_NOTE = MAKE_NOTE;
+
+export { SET_DOM_TARGET, MAKE_LINE_BREAK, MAKE_HEADER, MAKE_PARAGRAPH, MAKE_CODE, MAKE_BULLET_LIST,
+    MAKE_CLASS_METHOD, MAKE_CLASS_CONSTRUCTOR, MAKE_CODE_BULLET_LIST, START_CODE_BULLET_LIST, ADD_CODE_LIST_ITEM,
+    END_CODE_BULLET_LIST, INLINE_LINK, INLINE_PAGE, INLINE_CODE, INSERT_IMAGE, INSERT_IMAGES, INSERT_VIDEO, MAKE_NOTE
 }
