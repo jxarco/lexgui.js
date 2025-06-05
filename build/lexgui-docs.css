@@ -162,7 +162,7 @@ code.inline.desc {
 
 #content > img {
 	width: 100%;
-	margin: 16px calc(-1 * var(--page-padding)) ;
+	/* margin: 16px calc(-1 * var(--page-padding)) ; */
 	border-radius: 4px;	
 }
 
@@ -251,12 +251,17 @@ code.inline.desc {
 pre .str, code .str { color: #c79369; } /* string */
 pre .kwd, code .kwd { color: #2194ce; } /* keyword */
 pre .com, code .com { color: #999999; } /* comment */
-pre .typ, code .typ { color: #4fccbd; } /* type */
+pre .cls, code .cls { color: #4fccbd; } /* class */
+pre .stc, code .stc { color: #0b6b60; } /* static member */
+pre .stf, code .stf { color: #6d8cf5; } /* static function */
 pre .lit, code .lit { color: #ce57b4; } /* literal */
-pre .pun, code .pun { color: #888888; } /* punctuation */
+
+pre .pre, code .pre { color: #8f8c8c; } /* preprocessor */
 pre .pln, code .pln { color: #444444; } /* plaintext */
 pre .dec, code .dec { color: #a5dba0; } /* decimal */
 pre .mtd, code .mtd { color: #e6e2b8; } /* method */
+pre .var, code .var { color: #d8d5d5; } /* variable */
+pre .enu, code .enu { color: #c0dec2; } /* enum */
 
 pre .tag, code .tag { color: #2194ce; } /* HTML tag */
 pre .atn, code .atn { color: #81cdf8; } /* HTML attribute name */
@@ -304,6 +309,36 @@ code:has(.constructor) {
 	padding-inline: 8px;
 }
 
+.note {
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 16px 0;
+    font-size: 0.95rem;
+    color: var(--global-text-secondary);
+    box-shadow: 0 1px 3px var(--global-color-tertiary);
+}
+
+.note-header {
+    background-color: var(--global-color-tertiary);
+    color: var(--global-text-secondary);
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    font-weight: bold;
+}
+
+.note-header svg {
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+}
+
+.note-body {
+    padding: 12px;
+    line-height: 1.5;
+}
+
 :root[data-theme="light"] #content {
 	color: #202124;
 }
@@ -323,10 +358,12 @@ code:has(.constructor) {
 :root[data-theme="light"] pre .str, :root[data-theme="light"] code .str { color: #188038; }
 :root[data-theme="light"] pre .kwd, :root[data-theme="light"] code .kwd { color: #1967d2; }
 :root[data-theme="light"] pre .com, :root[data-theme="light"] code .com { color: #b80672; }
-:root[data-theme="light"] pre .typ, :root[data-theme="light"] code .typ { color: #0b9484; }
+:root[data-theme="light"] pre .cls, :root[data-theme="light"] code .cls { color: #0b9484; }
 :root[data-theme="light"] pre .dec, :root[data-theme="light"] code .dec { color: #c5221f; }
-:root[data-theme="light"] pre .mtd, :root[data-theme="light"] code .mtd { color: #504f4c; }
+:root[data-theme="light"] pre .mtd, :root[data-theme="light"] code .mtd { color: #636362; }
 :root[data-theme="light"] pre .lit, :root[data-theme="light"] code .lit { color: #1967d2; }
+:root[data-theme="light"] pre .var, :root[data-theme="light"] code .var { color: #222222; }
+:root[data-theme="light"] pre .enu, :root[data-theme="light"] code .enu { color: #505fe2; }
 :root[data-theme="light"] pre .tag, :root[data-theme="light"] code .tag { color: #2183b4; }
 :root[data-theme="light"] pre .atn, :root[data-theme="light"] code .atn { color: #a753c0; }
 
@@ -352,4 +389,22 @@ code:has(.constructor) {
 
 :root[data-theme="light"] #goUpButton:hover {
 	color: #879094;
+}
+
+.lextable {
+	overflow-x: scroll
+}
+
+.lextable table {
+	table-layout: auto;
+}
+
+.lextable table th {
+	white-space: nowrap;
+}
+
+/* Hack to shrink Type and Method columns in reference docs */
+.lextable:has(input) table tbody tr:last-child td:not(:last-child) {
+	width: 1px;
+    white-space: nowrap;
 }
