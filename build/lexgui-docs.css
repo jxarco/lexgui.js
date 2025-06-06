@@ -151,7 +151,7 @@ code.inline.desc {
 }
 
 #content strong {
-	font-weight:900;
+	font-weight:700;
 }
 
 #content a.permalink {
@@ -225,29 +225,6 @@ code.inline.desc {
 
 }
 
-#goUpButton {
-	position: fixed;
-	z-index: 10;
-	bottom: 32px;
-	right: 32px;
-	border: 1px solid #666;
-	border-radius: 6px;
-	outline: none;
-	background: none;
-	font-size: 18px;
-	padding: 6px;
-	color: #bbb;
-	transition: all 0.25s;
-	width: 32px;
-	height: 32px;
-}
-
-#goUpButton:hover {
-	color: #ccc;
-	border-color: #ccc;
-	cursor: pointer;
-}
-
 pre .str, code .str { color: #c79369; } /* string */
 pre .kwd, code .kwd { color: #2194ce; } /* keyword */
 pre .com, code .com { color: #999999; } /* comment */
@@ -295,48 +272,15 @@ code:has(.constructor) {
 }
 
 #content span.solid {
-	/* background-color: var(--global-selected); */
 	border-radius: 8px;
 	padding: 2px;
 	padding-inline: 8px;
 }
 
 #content span.outline {
-	/* border: 1px solid var(--global-accent); */
-	/* color: var(--global-selected); */
 	border-radius: 8px;
 	padding: 2px;
 	padding-inline: 8px;
-}
-
-.note {
-    border-radius: 8px;
-    overflow: hidden;
-    margin: 16px 0;
-    font-size: 0.95rem;
-    color: var(--global-text-secondary);
-    box-shadow: 0 1px 3px var(--global-color-tertiary);
-}
-
-.note-header {
-    background-color: var(--global-color-tertiary);
-    color: var(--global-text-secondary);
-    padding: 8px 12px;
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
-    font-weight: bold;
-}
-
-.note-header svg {
-    width: 1em;
-    height: 1em;
-    flex-shrink: 0;
-}
-
-.note-body {
-    padding: 12px;
-    line-height: 1.5;
 }
 
 :root[data-theme="light"] #content {

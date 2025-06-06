@@ -2,6 +2,9 @@
 
 ## dev
 
+Added `MAKE_NUMBERED_LIST` to docmaker.js component.
+Clean docmaker css.
+
 ## 0.6.6 (master)
 
 Fixed horizontal scroll in Table Widget.

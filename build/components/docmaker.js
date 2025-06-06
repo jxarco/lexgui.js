@@ -190,12 +190,14 @@ function MAKE_CODE( text, language = "js" )
 
 window.MAKE_CODE = MAKE_CODE;
 
-function MAKE_BULLET_LIST( list )
+function MAKE_LIST( list, type )
 {
-    console.assert(list && list.length > 0);
-    let ul = document.createElement('ul');
+    const validTypes = [ 'bullet', 'numbered' ];
+    console.assert( list && list.length > 0 && validTypes.includes(type), "Invalid list type or empty list" + type );
+    const typeString = type == 'bullet' ? 'ul' : 'ol';
+    let ul = document.createElement( typeString );
     for( var el of list ) {
-        let li = document.createElement('li');
+        let li = document.createElement( 'li' );
         li.className = "leading-loose";
         li.innerHTML = el;
         ul.appendChild( li );
@@ -203,7 +205,19 @@ function MAKE_BULLET_LIST( list )
     mainContainer.appendChild( ul );
 }
 
+function MAKE_BULLET_LIST( list )
+{
+    MAKE_LIST( list, 'bullet' );
+}
+
 window.MAKE_BULLET_LIST = MAKE_BULLET_LIST;
+
+function MAKE_NUMBERED_LIST( list )
+{
+    MAKE_LIST( list, 'numbered' );
+}
+
+window.MAKE_NUMBERED_LIST = MAKE_NUMBERED_LIST;
 
 function ADD_CODE_LIST_ITEM( item, target )
 {
@@ -388,25 +402,19 @@ function INSERT_VIDEO( src, caption = "", controls = true, autoplay = false )
 
 window.INSERT_VIDEO = INSERT_VIDEO;
 
-function MAKE_NOTE( string, title = "Note" )
+function MAKE_NOTE( string, warning, title, icon )
 {
     console.assert( string );
 
-    let note = document.createElement( 'div' );
-    note.className = "note";
+    const note = LX.makeContainer( [], "border rounded-lg overflow-hidden text-md fg-secondary my-6", "", mainContainer );
 
     let header = document.createElement( 'div' );
-    header.className = "note-header";
-    header.appendChild( LX.makeIcon( "NotepadText" ) );
-    header.innerHTML += "<b>" + title + "</b>";
-
-    let body = document.createElement( 'div' );
-    body.className = "note-body";
-    body.innerHTML = string;
-
+    header.className = "flex bg-tertiary font-semibold px-3 py-2 gap-2 fg-secondary";
+    header.appendChild( LX.makeIcon( icon ?? ( warning ? "MessageSquareWarning" : "NotepadText" ) ) );
+    header.innerHTML += ( title ?? ( warning ? "Important" : "Note" ) );
     note.appendChild( header );
-    note.appendChild( body );
-    mainContainer.appendChild( note );
+
+    const body = LX.makeContainer( [], "leading-6 p-3", string, note );
 }
 
 window.MAKE_NOTE = MAKE_NOTE;
