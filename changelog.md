@@ -2,6 +2,7 @@
 
 ## dev
 
+Fix Sidebar Header/Footer arrows icon: Only added if click listener exists.
 Added `MAKE_NUMBERED_LIST` to docmaker.js component.
 Clean docmaker css.
 Docs updated.

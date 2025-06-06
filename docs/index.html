@@ -133,6 +133,20 @@
             footerTitle: "jxarco",
             footerSubtitle: "alexroco.30@gmail.com",
             footerImage: "https://avatars.githubusercontent.com/u/25059187?s=400&u=ad8907b748c13e4e1a7cdd3882826acb6a2928b5&v=4",
+            onFooterPressed: (event, dom) => {
+                event.preventDefault();
+                LX.addDropdownMenu( dom, [
+                    "Other Projects",
+                    null,
+                    { name: "wgpuEngine", icon: "Torus", callback: () => open( "https://github.com/upf-gti/wgpuEngine", "_blank" ) },
+                    { name: "Rooms VR", icon: "DoorOpen", callback: () => open( "https://github.com/upf-gti/rooms", "_blank" ) },
+                    null,
+                    "Socials",
+                    null,
+                    { name: "Github", icon: "Github", callback: () => open( "https://github.com/jxarco", "_blank" ) },
+                    { name: "Linkedin", icon: "Linkedin", callback: () => open( "https://www.linkedin.com/in/alejandro-roco/", "_blank" ) },
+                ], { side: "right", align: "start" });
+            },
             // footer: customFooter,
             collapsed: false,
             collapsable: false,

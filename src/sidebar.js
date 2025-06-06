@@ -220,6 +220,13 @@ class Sidebar {
             info.appendChild( infoSubtext );
         }
 
+        // Add icon if onHeaderPressed is defined and not collapsable (it uses the toggler icon)
+        if( options.onHeaderPressed && !this.collapsable )
+        {
+            const icon = LX.makeIcon( "MenuArrows" );
+            header.appendChild( icon );
+        }
+
         return header;
     }
 
@@ -265,8 +272,13 @@ class Sidebar {
             info.appendChild( infoSubtext );
         }
 
-        const icon = LX.makeIcon( "MenuArrows" );
-        footer.appendChild( icon );
+        // Add icon if onFooterPressed is defined
+        // Useful to indicate that the footer is clickable
+        if( options.onFooterPressed )
+        {
+            const icon = LX.makeIcon( "MenuArrows" );
+            footer.appendChild( icon );
+        }
 
         return footer;
     }
