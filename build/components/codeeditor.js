@@ -1089,7 +1089,7 @@ class CodeEditor {
             this.addTab("+", false, "New File");
         }
 
-        this.addTab( options.name || "untitled", true, options.title, { language: "Plain Text" } );
+        this.addTab( options.name || "untitled", true, options.title, { language: options.highlight ?? "Plain Text" } );
 
         // Create inspector panel
         let panel = this._createPanelInfo();
