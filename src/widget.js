@@ -344,11 +344,6 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
 
         const refresh_widget = () => {
 
-            if( instance )
-            {
-                widget.instance = instance = Object.assign( LX.deepCopy(defaultInstance), instance );
-            }
-
             if( container ) container.remove();
             if( customWidgetsDom ) customWidgetsDom.remove();
 
@@ -413,13 +408,36 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                 this.queue( customWidgetsDom );
 
                 const on_instance_changed = ( key, value, event ) => {
-                    instance[ key ] = value;
+                    const setter = options[ `_set_${ key }` ];
+                    if( setter )
+                    {
+                        setter.call( instance, value );
+                    }
+                    else
+                    {
+                        instance[ key ] = value;
+                    }
                     widget._trigger( new LX.IEvent( name, instance, event ), callback );
                 };
 
                 for( let key in defaultInstance )
                 {
-                    const value = instance[ key ] ?? defaultInstance[ key ];
+                    let value = null;
+
+                    const getter = options[ `_get_${ key }` ];
+                    if( getter )
+                    {
+                        value = instance[ key ] ? getter.call( instance ) : getter.call( defaultInstance );
+                    }
+                    else
+                    {
+                        value = instance[ key ] ?? defaultInstance[ key ];
+                    }
+
+                    if( !value )
+                    {
+                        continue;
+                    }
 
                     switch( value.constructor )
                     {
@@ -448,6 +466,9 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                             {
                                 this._addVector( value.length, key, value, on_instance_changed.bind( this, key ) );
                             }
+                            break;
+                        default:
+                            console.warn( `Unsupported property type: ${ value.constructor.name }` )
                             break;
                     }
                 }
@@ -1386,6 +1407,27 @@ class Button extends Widget {
             wValue.innerHTML = `<span>${ ( value || "" ) }</span>`;
         }
 
+        if( options.fileInput )
+        {
+            const fileInput = document.createElement( "input" );
+            fileInput.type = "file";
+            fileInput.className = "file-input";
+            fileInput.style.display = "none";
+            wValue.appendChild( fileInput );
+
+            fileInput.addEventListener( 'change', function( e ) {
+                const files = e.target.files;
+                if( !files.length ) return;
+
+                const reader = new FileReader();
+                if( options.fileInputType === 'text' ) reader.readAsText( files[ 0 ] );
+                else if( options.fileInputType === 'buffer' ) reader.readAsArrayBuffer( files[ 0 ] );
+                else if( options.fileInputType === 'bin' ) reader.readAsBinaryString( files[ 0 ] );
+                else if( options.fileInputType === 'url' ) reader.readAsDataURL( files[ 0 ] );
+                reader.onload = e => { callback.call( this, e.target.result, files[ 0 ] ); } ;
+            });
+        }
+
         if( options.disabled )
         {
             this.disabled = true;
@@ -1438,8 +1480,15 @@ class Button extends Widget {
                 wValue.classList.toggle('selected');
             }
 
-            const swapInput = wValue.querySelector( "input" );
-            this._trigger( new LX.IEvent( name, swapInput?.checked ?? value, e ), callback );
+            if( options.fileInput )
+            {
+                wValue.querySelector( ".file-input" ).click();
+            }
+            else
+            {
+                const swapInput = wValue.querySelector( "input" );
+                this._trigger( new LX.IEvent( name, swapInput?.checked ?? value, e ), callback );
+            }
         });
 
         if( options.tooltip )
