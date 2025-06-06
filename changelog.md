@@ -4,6 +4,7 @@
 
 Added `MAKE_NUMBERED_LIST` to docmaker.js component.
 Clean docmaker css.
+Docs updated.
 
 ## 0.6.6 (master)
 

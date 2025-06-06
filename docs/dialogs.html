@@ -1,12 +1,15 @@
 <script type="text/javascript">
 
-    MAKE_HEADER( "Creating windowed dialogs", "h1", "dialogs" );
+    MAKE_HEADER( "Windowed Dialogs.", "h1", "dialogs" );
 
     MAKE_PARAGRAPH( `LexGUI allows to create Dialogs, also known as modal windows or pop-ups, allowing developers to display
     important information, gather user input, or prompt for user actions without navigating away from the current context.
     The possible dialogs are the following:` );
 
+    MAKE_LINE_BREAK();
     INSERT_IMAGE(`../examples/previews/dialogs.png`, "dialogs" );
+    MAKE_LINE_BREAK();
+    MAKE_LINE_BREAK();
 
     MAKE_CODE_BULLET_LIST( [
         ["Classic", "General pop-up to display any kind of information or errors"],
@@ -17,7 +20,7 @@
 
     MAKE_PARAGRAPH( `To fill the dialog content, a panel is automatically created inside the root so it's possible 
     to begin branching and adding widgets. The same way as menubars, you can fill the panel inside the creation callback. The following code creates a classic dialog:` );
-    MAKE_CODE( `@const@ dialog = @new@ LX.@[typ]Dialog@(@"Title"@, p => {
+    MAKE_CODE( `@const@ dialog = @new@ LX.@[cls]Dialog@(@"Title"@, p => {
     @[com]// Start adding widgets@
     p.@[mtd]addNumber@(@"Example"@, @18@);
 }, options);
@@ -25,9 +28,7 @@
 @[com]// To use classic dialogs as simple messages or error alerts, they can be also created using LX.message@
 @const@ dialog = LX.@[mtd]message@(@"Some text"@, @"Title"@, options);` );
 
-    MAKE_PARAGRAPH( `To create a Pocket Dialog you can follow the same steps but using ${INLINE_CODE("LX.PocketDialog")} class.` );
-
-    MAKE_PARAGRAPH( `In case of prompts, you can create them using the following code:` );
+    MAKE_PARAGRAPH( `To create a Pocket Dialog you can follow the same steps but using ${INLINE_CODE("LX.PocketDialog")} class. In case of prompts, you can create them using the following code:` );
     MAKE_CODE( `LX.@[mtd]prompt@(@"Message"@, @"Title"@, result => {
     @[com]// result is the user's response@
     console.@[mtd]log@(result);

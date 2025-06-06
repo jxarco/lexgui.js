@@ -1,15 +1,15 @@
 <script type="text/javascript">
 
-    MAKE_HEADER( "Panel branching", "h1", "branch" );
+    MAKE_HEADER( "Panel Branching.", "h1", "branch" );
             
     MAKE_PARAGRAPH( `Before you begin adding widgets, consider whether they could be grouped into specific categories. 
-    If so, it might be beneficial to organize them into sections known as <strong>branches</strong> These branches help maintain a structured and organized arrangement of widgets.` );
-    MAKE_PARAGRAPH( `By opening and merging branches at any time, you can seamlessly incorporate widgets into your panels using ${INLINE_CODE("Panel.branch(name, options)")}:` );
-    MAKE_CODE( `panel.@[mtd]branch@(@"Section Title"@);
+    If so, it might be beneficial to organize them into sections known as <strong>branches</strong> These branches help maintain a structured and organized arrangement of widgets.
+    By opening and merging branches at any time, you can seamlessly incorporate widgets into your panels using ${INLINE_CODE("Panel.branch(name, options)")}:` );
+    MAKE_CODE( `@[var]panel@.@[mtd]branch@(@"Section Title"@);
 
 @[com]// Add widgets here...@
 
-panel.@[mtd]merge@();
+@[var]panel@.@[mtd]merge@();
 ` );
 
     MAKE_PARAGRAPH( `When branching, you can use some options:` );

@@ -2,7 +2,7 @@
 
     import { LX } from 'lexgui';
 
-    MAKE_HEADER( `Installation (v${ LX.version })`, "h1", "installation" );
+    MAKE_HEADER( `Installation.`, "h1", "installation" );
 
     MAKE_HEADER( "Project structure", "h2", "project-structure" );
 
@@ -30,30 +30,30 @@
 &lt;/@body@&gt;
 &lt;/@html@&gt;` );
 
-    MAKE_PARAGRAPH( `Don't forget to replace &lt;version&gt; with an actual version of lexgui.js, like "0.5.4".
+    MAKE_NOTE( `Don't forget to replace &lt;version&gt; with an actual version of lexgui.js, like "${ LX.version }".
     The most recent version can be found on the ${INLINE_LINK("npm version list", "https://www.npmjs.com/package/lexgui?activeTab=versions")}}.
     Use <i>lexgui</i> without the version tag to use the latest version.`, true );
 
     MAKE_CODE_BULLET_LIST( ["main.js"] );
-    MAKE_CODE( `@import@ { @[typ]LX@ } @from@ @'lexgui'@;
+    MAKE_CODE( `@import@ { @[cls]LX@ } @from@ @'lexgui'@;
 
 @[com]// Your code...@` );
 
 
     MAKE_HEADER( "Building components", "h2", "components" );
-    MAKE_PARAGRAPH( `By default, lexgui.js provides the core elements for creating web interfaces. Other components, such as the code editor or timelines are located in the components/ directory. 
-    These ones are not required to be installed individually, but they <b>do need to be imported separately<b>:` );
-    MAKE_CODE( `@import@ { @[typ]LX@ } @from@ @'lexgui'@;
+    MAKE_PARAGRAPH( `By default, lexgui.js provides the core elements for creating web interfaces. Other components, such as the code editor or timelines are located in the ${ INLINE_CODE( "components/" ) } directory. 
+    These ones are not required to be installed individually, but they <span class='font-semibold'>do need to be imported separately</span>:` );
+    MAKE_CODE( `@import@ { @[cls]LX@ } @from@ @'lexgui'@;
 
 @[com]// First option, importing the component@
-@import@ { @[typ]CodeEditor@ } @from@ @'lexgui/components/codeeditor.js'@;
+@import@ { @[cls]CodeEditor@ } @from@ @'lexgui/components/codeeditor.js'@;
 
-@const@ editor = @new@ @[typ]CodeEditor@();
+@const@ @[var]editor@ = @new@ @[cls]CodeEditor@();
 
 @[com]// Or since it's added to the LX namespace...@
 @import@ @'lexgui/components/codeeditor.js'@;
 
-@const@ editor = @new@ @[typ]LX@.@[typ]CodeEditor@();` );
+@const@ @[var]editor@ = @new@ @[cls]LX@.@[cls]CodeEditor@();` );
 
     MAKE_LINE_BREAK();
     MAKE_LINE_BREAK();
