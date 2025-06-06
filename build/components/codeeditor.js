@@ -265,8 +265,6 @@ class CodeEditor {
 
             panel.addTitle( "EXPLORER" );
 
-            this._tabStorage = {};
-
             let sceneData = {
                 'id': 'WORKSPACE',
                 'skipVisibility': true,
@@ -320,6 +318,7 @@ class CodeEditor {
         this.skipInfo = options.skipInfo ?? false;
         this.disableEdition = options.disableEdition ?? false;
 
+        this._tabStorage = {};
         this.tabs = this.area.addTabs( { onclose: (name) => {
             delete this.openedTabs[ name ];
             if( Object.keys( this.openedTabs ).length < 2 )
@@ -1849,6 +1848,18 @@ class CodeEditor {
         this.processLines();
         this._changeLanguageFromExtension( LX.getExtension( name ) );
         this._updateDataInfoPanel( "@tab-name", code.tabname );
+    }
+
+    closeTab( name, eraseAll ) {
+
+        this.tabs.delete( name );
+
+        if( eraseAll )
+        {
+            delete this.openedTabs[ name ];
+            delete this.loadedTabs[ name ];
+            delete this._tabStorage[ name ];
+        }
     }
 
     loadTabFromFile() {
