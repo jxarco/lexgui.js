@@ -2,6 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>Examples - LexGUI.js </title>
     <link rel="stylesheet" href="../build/lexgui.css">
     <link rel="icon" href="../images/icon.png">
@@ -24,18 +25,9 @@
 
         // Init library and get main area
         let area = await LX.init();
+        let iFrameArea = null;
 
-        // Split main area
-        let [leftArea, rightArea] = area.split({ sizes: ["20%","80%"], resize: false });
-
-        leftArea.root.style.borderRight = "2px solid gray";
-
-        const menubar = leftArea.addMenubar( [
-            { name: "Docs v" + LX.version, callback: (v, name) => { location.href = "../docs/"; } }
-        ] );
-
-        menubar.setButtonIcon("Github", "Github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
-
+        const mobile = navigator && /Android|iPhone/i.test( navigator.userAgent );
         const examples = [
             'All Widgets',    
             'Area Tabs',
@@ -49,17 +41,9 @@
             "Timeline"
         ];
 
-        let panel = leftArea.addPanel();
-        fillExamples( panel );
+        let panel = null;
 
-        let iframe = document.createElement('iframe');
-        iframe.id = iframe.name = 'viewer';
-        iframe.src = examples[0].replace(" ", "_").toLowerCase() + ".html";
-        iframe.style.width = "100%";
-        iframe.style.height = "100%";
-        rightArea.root.appendChild(iframe);
-
-        rightArea.addOverlayButtons([
+        const overlayButtons = [
             {
                 name: "View Source Code",
                 icon: "Code",
@@ -68,7 +52,46 @@
                     window.open("https://github.com/jxarco/lexgui.js/blob/master/examples/" + tokens[tokens.length - 1], '_blank')
                 }
             }
-        ], { float: "hbc" } );
+        ];
+
+        if( mobile )
+        {
+            const sheetArea = new LX.Area({ skipAppend: true });
+            panel = sheetArea.addPanel();
+            iFrameArea = area;
+
+            overlayButtons.splice( 0, 0, {
+                name: "Examples Menu",
+                icon: "PanelLeft",
+                callback: (value, event) => { 
+                    window.__currentSheet = new LX.Sheet("256px", [ sheetArea ] );
+                }
+            });
+        }
+        else
+        {
+            let [ leftArea, rightArea ] = area.split({ sizes: ["20%","80%"], resize: false });
+            leftArea.root.style.borderRight = "2px solid gray";
+
+            const menubar = leftArea.addMenubar( [
+                { name: "Docs v" + LX.version, callback: (v, name) => { location.href = "../docs/"; } }
+            ] );
+            menubar.setButtonIcon("Github", "Github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
+
+            panel = leftArea.addPanel();
+            iFrameArea = rightArea;
+        }
+
+        fillExamples( panel );
+
+        let iframe = document.createElement('iframe');
+        iframe.id = iframe.name = 'viewer';
+        iframe.src = examples[0].replace(" ", "_").toLowerCase() + ".html";
+        iframe.style.width = "100%";
+        iframe.style.height = "100%";
+        iFrameArea.root.appendChild(iframe);
+
+        iFrameArea.addOverlayButtons( overlayButtons, { float: "hbc" } );
 
         // **** **** **** **** **** **** **** **** **** **** **** **** 
 
@@ -83,9 +106,13 @@
                     img: "previews/" + id + ".png",
                     callback: function() {
                         iframe.src = id + ".html";
+                        if( window.__currentSheet )
+                        {
+                            window.__currentSheet.destroy();
+                        }
                     }
                 };
-                panel.addCard(ex, options);
+                panel.addCard( ex, options );
             }
         }
     </script>

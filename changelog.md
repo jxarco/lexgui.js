@@ -6,6 +6,8 @@ Widgets:
 - Button Widget now allows `options.fileInput` to request a file on click.
 - Custom Widgets now allow getter and setter options to process non-native types.
 
+Fixed html viewport scale issues.
+Fixed Sheet zIndex.
 Fix Sidebar Header/Footer arrows icon: Only added if click listener exists.
 Added `MAKE_NUMBERED_LIST` to docmaker.js component.
 Clean docmaker css.

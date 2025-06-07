@@ -879,7 +879,7 @@ class Sheet {
         this.root.dataset["side"] = this.side;
         this.root.tabIndex = "1";
         this.root.role = "dialog";
-        this.root.className = "lexsheet fixed z-100 bg-primary";
+        this.root.className = "lexsheet fixed z-1000 bg-primary";
         LX.root.appendChild( this.root );
 
         this.root.addEventListener( "keydown", (e) => {

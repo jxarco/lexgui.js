@@ -26,7 +26,7 @@
     let area = await LX.init();
 
     // split main area
-    var [topArea, bottomArea] = area.split({ type: 'vertical', sizes: ["25%", "75%"] });
+    var [ topArea, bottomArea ] = area.split({ type: 'vertical', sizes: ["25%", "75%"] });
 
     // add canvas to topArea
     var canvas = document.createElement('canvas');
@@ -43,13 +43,13 @@
         canvas.height = bounding.height;
     };
 
-    let graph_editor = new LX.GraphEditor(bottomArea, {
+    let graphEditor = new LX.GraphEditor( bottomArea, {
+        sidebar: false,
+    } );
 
-    });
+    graphEditor.loadGraph("../data/graph_sample.json");
 
-    graph_editor.loadGraph("../data/graph_sample.json");
-
-    function loop(dt) {
+    function loop( dt ) {
 
         var ctx = canvas.getContext("2d");
 
@@ -60,7 +60,7 @@
         ctx.fillStyle = "#ff1999";
 
         const text = "Lexgui.js @jxarco";
-        ctx.fillText(text, 100, 125);
+        ctx.fillText( text, 100, 125 );
 
         requestAnimationFrame(loop);
     }

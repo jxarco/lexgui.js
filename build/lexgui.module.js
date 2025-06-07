@@ -870,7 +870,7 @@ class Sheet {
         this.root.dataset["side"] = this.side;
         this.root.tabIndex = "1";
         this.root.role = "dialog";
-        this.root.className = "lexsheet fixed z-100 bg-primary";
+        this.root.className = "lexsheet fixed z-1000 bg-primary";
         LX.root.appendChild( this.root );
 
         this.root.addEventListener( "keydown", (e) => {
@@ -12883,6 +12883,7 @@ class Panel {
      * disabled: Make the widget disabled [false]
      * icon: Icon class to show as button value
      * fileInput: Button click requests a file
+     * fileInputType: Type of the requested file
      * img: Path to image to show as button value
      * title: Text to show in native Element title
      * buttonClass: Class to add to the native button element
