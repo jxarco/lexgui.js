@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.6.7 (master)
+
 Widgets:
 - Button Widget now allows `options.fileInput` to request a file on click.
 - Custom Widgets now allow getter and setter options to process non-native types.
@@ -18,7 +20,7 @@ Added `MAKE_NUMBERED_LIST` to docmaker.js component.
 Clean docmaker css.
 Docs updated.
 
-## 0.6.6 (master)
+## 0.6.6
 
 Fixed horizontal scroll in Table Widget.
 Fixed checkbox in Dropdown item.
