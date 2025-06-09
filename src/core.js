@@ -2224,6 +2224,11 @@ class Tabs {
 
     delete( name ) {
 
+        if( this.selected == name )
+        {
+            this.selected = null;
+        }
+
         const tabEl = this.tabDOMs[ name ];
 
         if( !tabEl || tabEl.fixed )
