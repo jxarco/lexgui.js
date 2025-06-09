@@ -14,7 +14,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 const LX = {
-    version: "0.6.6",
+    version: "0.6.7",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -877,7 +877,7 @@ class Sheet {
         this.root.dataset["side"] = this.side;
         this.root.tabIndex = "1";
         this.root.role = "dialog";
-        this.root.className = "lexsheet fixed z-100 bg-primary";
+        this.root.className = "lexsheet fixed z-1000 bg-primary";
         LX.root.appendChild( this.root );
 
         this.root.addEventListener( "keydown", (e) => {
@@ -2211,6 +2211,11 @@ class Tabs {
     }
 
     delete( name ) {
+
+        if( this.selected == name )
+        {
+            this.selected = null;
+        }
 
         const tabEl = this.tabDOMs[ name ];
 
@@ -7409,11 +7414,6 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
 
         const refresh_widget = () => {
 
-            if( instance )
-            {
-                widget.instance = instance = Object.assign( LX.deepCopy(defaultInstance), instance );
-            }
-
             if( container ) container.remove();
             if( customWidgetsDom ) customWidgetsDom.remove();
 
@@ -7478,13 +7478,36 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                 this.queue( customWidgetsDom );
 
                 const on_instance_changed = ( key, value, event ) => {
-                    instance[ key ] = value;
+                    const setter = options[ `_set_${ key }` ];
+                    if( setter )
+                    {
+                        setter.call( instance, value );
+                    }
+                    else
+                    {
+                        instance[ key ] = value;
+                    }
                     widget._trigger( new LX.IEvent( name, instance, event ), callback );
                 };
 
                 for( let key in defaultInstance )
                 {
-                    const value = instance[ key ] ?? defaultInstance[ key ];
+                    let value = null;
+
+                    const getter = options[ `_get_${ key }` ];
+                    if( getter )
+                    {
+                        value = instance[ key ] ? getter.call( instance ) : getter.call( defaultInstance );
+                    }
+                    else
+                    {
+                        value = instance[ key ] ?? defaultInstance[ key ];
+                    }
+
+                    if( !value )
+                    {
+                        continue;
+                    }
 
                     switch( value.constructor )
                     {
@@ -7513,6 +7536,9 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                             {
                                 this._addVector( value.length, key, value, on_instance_changed.bind( this, key ) );
                             }
+                            break;
+                        default:
+                            console.warn( `Unsupported property type: ${ value.constructor.name }` );
                             break;
                     }
                 }
@@ -8451,6 +8477,27 @@ class Button extends Widget {
             wValue.innerHTML = `<span>${ ( value || "" ) }</span>`;
         }
 
+        if( options.fileInput )
+        {
+            const fileInput = document.createElement( "input" );
+            fileInput.type = "file";
+            fileInput.className = "file-input";
+            fileInput.style.display = "none";
+            wValue.appendChild( fileInput );
+
+            fileInput.addEventListener( 'change', function( e ) {
+                const files = e.target.files;
+                if( !files.length ) return;
+
+                const reader = new FileReader();
+                if( options.fileInputType === 'text' ) reader.readAsText( files[ 0 ] );
+                else if( options.fileInputType === 'buffer' ) reader.readAsArrayBuffer( files[ 0 ] );
+                else if( options.fileInputType === 'bin' ) reader.readAsBinaryString( files[ 0 ] );
+                else if( options.fileInputType === 'url' ) reader.readAsDataURL( files[ 0 ] );
+                reader.onload = e => { callback.call( this, e.target.result, files[ 0 ] ); } ;
+            });
+        }
+
         if( options.disabled )
         {
             this.disabled = true;
@@ -8503,8 +8550,15 @@ class Button extends Widget {
                 wValue.classList.toggle('selected');
             }
 
-            const swapInput = wValue.querySelector( "input" );
-            this._trigger( new LX.IEvent( name, swapInput?.checked ?? value, e ), callback );
+            if( options.fileInput )
+            {
+                wValue.querySelector( ".file-input" ).click();
+            }
+            else
+            {
+                const swapInput = wValue.querySelector( "input" );
+                this._trigger( new LX.IEvent( name, swapInput?.checked ?? value, e ), callback );
+            }
         });
 
         if( options.tooltip )
@@ -12840,6 +12894,8 @@ class Panel {
      * hideName: Don't use name as label [false]
      * disabled: Make the widget disabled [false]
      * icon: Icon class to show as button value
+     * fileInput: Button click requests a file
+     * fileInputType: Type of the requested file
      * img: Path to image to show as button value
      * title: Text to show in native Element title
      * buttonClass: Class to add to the native button element
@@ -14180,6 +14236,13 @@ class Sidebar {
             info.appendChild( infoSubtext );
         }
 
+        // Add icon if onHeaderPressed is defined and not collapsable (it uses the toggler icon)
+        if( options.onHeaderPressed && !this.collapsable )
+        {
+            const icon = LX.makeIcon( "MenuArrows" );
+            header.appendChild( icon );
+        }
+
         return header;
     }
 
@@ -14225,8 +14288,13 @@ class Sidebar {
             info.appendChild( infoSubtext );
         }
 
-        const icon = LX.makeIcon( "MenuArrows" );
-        footer.appendChild( icon );
+        // Add icon if onFooterPressed is defined
+        // Useful to indicate that the footer is clickable
+        if( options.onFooterPressed )
+        {
+            const icon = LX.makeIcon( "MenuArrows" );
+            footer.appendChild( icon );
+        }
 
         return footer;
     }
