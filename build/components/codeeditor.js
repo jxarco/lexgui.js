@@ -2545,11 +2545,11 @@ class CodeEditor {
 
     async _copyContent( cursor ) {
 
-        let text_to_copy = "";
+        let textToCopy = "";
 
         if( !cursor.selection )
         {
-            text_to_copy = "\n" + this.code.lines[ cursor.line ];
+            textToCopy = "\n" + this.code.lines[ cursor.line ];
         }
         else
         {
@@ -2569,22 +2569,23 @@ class CodeEditor {
             const num_chars = cursor.selection.chars + ( cursor.selection.toY - cursor.selection.fromY ) * separator.length;
             const text = code.substr( index, num_chars );
             const lines = text.split( separator );
-            text_to_copy = lines.join('\n');
+            textToCopy = lines.join('\n');
         }
 
-        navigator.clipboard.writeText( text_to_copy ).then(() => console.log("Successfully copied"), (err) => console.error("Error"));
+        navigator.clipboard.writeText( textToCopy );
+            // .then(() => console.log("Successfully copied"), (err) => console.error("Error"));
     }
 
     async _cutContent( cursor ) {
 
         let lidx = cursor.line;
-        let text_to_cut = "";
+        let textToCut = "";
 
         this._addUndoStep( cursor, true );
 
         if( !cursor.selection )
         {
-            text_to_cut = "\n" + this.code.lines[ cursor.line ];
+            textToCut = "\n" + this.code.lines[ cursor.line ];
             this.code.lines.splice( lidx, 1 );
             this.processLines();
             this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
@@ -2609,12 +2610,13 @@ class CodeEditor {
             const num_chars = cursor.selection.chars + (cursor.selection.toY - cursor.selection.fromY) * separator.length;
             const text = code.substr(index, num_chars);
             const lines = text.split(separator);
-            text_to_cut = lines.join('\n');
+            textToCut = lines.join('\n');
 
             this.deleteSelection( cursor );
         }
 
-        navigator.clipboard.writeText( text_to_cut ).then(() => console.log("Successfully cut"), (err) => console.error("Error"));
+        navigator.clipboard.writeText( textToCut );
+            // .then(() => console.log("Successfully cut"), (err) => console.error("Error"));
     }
 
     _duplicateLine( lidx, cursor ) {
