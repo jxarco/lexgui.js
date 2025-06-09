@@ -6,6 +6,11 @@ Widgets:
 - Button Widget now allows `options.fileInput` to request a file on click.
 - Custom Widgets now allow getter and setter options to process non-native types.
 
+CodeEditor:
+- Add `CodeEditor.closeTab` and `CodeEditor.getSelectedTabName`.
+- Fixed bug using `CodeEditor._tabStorage`.
+- Fixed initial tab language override.
+
 Fixed html viewport scale issues.
 Fixed Sheet zIndex.
 Fix Sidebar Header/Footer arrows icon: Only added if click listener exists.

@@ -221,8 +221,9 @@ class CodeEditor {
 
     static __instances  = [];
 
-    static CURSOR_LEFT  = 1;
-    static CURSOR_TOP   = 2;
+    static CURSOR_LEFT      = 1;
+    static CURSOR_TOP       = 2;
+    static CURSOR_LEFT_TOP  = CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP;
 
     static SELECTION_X      = 1;
     static SELECTION_Y      = 2
@@ -975,7 +976,7 @@ class CodeEditor {
                         }
                         else {
                             cursor.selection.invertIfNecessary();
-                            this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP, cursor );
+                            this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, cursor );
                             this.cursorToLine( cursor, cursor.selection.fromY, true );
                             this.cursorToPosition( cursor, cursor.selection.fromX );
                             this.endSelection();
@@ -1056,7 +1057,7 @@ class CodeEditor {
                         else
                         {
                             cursor.selection.invertIfNecessary();
-                            this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP, cursor );
+                            this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, cursor );
                             this.cursorToLine( cursor, cursor.selection.toY );
                             this.cursorToPosition( cursor, cursor.selection.toX );
                             this.endSelection();
@@ -1770,7 +1771,7 @@ class CodeEditor {
         if( selected )
         {
             this.code = code;
-            this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
+            this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP );
             this.processLines();
         }
 
@@ -1844,10 +1845,10 @@ class CodeEditor {
 
         // Select as current...
         this.code = code;
-        this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
+        this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP );
         this.processLines();
         this._changeLanguageFromExtension( LX.getExtension( name ) );
-        this._updateDataInfoPanel( "@tab-name", code.tabname );
+        this._updateDataInfoPanel( "@tab-name", code.tabName );
     }
 
     closeTab( name, eraseAll ) {
@@ -1860,6 +1861,10 @@ class CodeEditor {
             delete this.loadedTabs[ name ];
             delete this._tabStorage[ name ];
         }
+    }
+
+    getSelectedTabName() {
+        return this.tabs.selected;
     }
 
     loadTabFromFile() {
@@ -3502,7 +3507,7 @@ class CodeEditor {
         this._removeSecondaryCursors();
 
         var cursor = this._getCurrentCursor();
-        this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP, cursor );
+        this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, cursor );
 
         this.startSelection( cursor );
 
