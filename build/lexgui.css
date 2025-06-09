@@ -3835,10 +3835,9 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexwidget:has(.lextogglesubmenu),
 .lexwidget:has(.lexcustomcontainer) {
     border-radius: 6px;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: auto auto;
     transition: background-color 0.2s ease-out;
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .lexwidget:has(.lexarrayitems)[data-opened=true],

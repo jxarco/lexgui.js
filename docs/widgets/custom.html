@@ -13,7 +13,8 @@
 
     MAKE_CODE_BULLET_LIST( [
         [ "icon", "String", "Icon to be added into the custom widget" ],
-        [ "default", "Object", "The data for a default instance of your class" ]
+        [ "default", "Object", "The data for a default instance of your class" ],
+        [ "onCreate", "Function", "Callback to add more widgets to the instance panel" ],
     ] )
 
     MAKE_NOTE( `If you are using non-native types (e.g. Emscripten handles, or any other custom classes which LexGUI doesn't know how to inspect), you can add getters and setters for each of your
@@ -42,6 +43,32 @@
     }
 });` );
 
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH(`You can also provide a custom creation callback (${INLINE_CODE("options.onCreate")}) that runs when the widget is created, allowing you to add additional widgets beyond the default instance property widgets, such as buttons.
+    Since the registration only occur once, you can pass your custom parameters when you create each of the instance widgets, which will be available when the creation function is called: `);
+
+        MAKE_CODE( `@[cls]LX@.@[mtd]ADD_CUSTOM_WIDGET@( @"Shader"@, {
+    icon: @"FileText"@,
+    default: {
+        path: @""@,
+        type: @[cls]Shader@.@[enu]Standard@
+    },
+
+    @[com]// _instance_ and _node_ are custom user data@
+    onCreate: ( panel, instance, node ) => {
+        @if@( @this@.shaderData[ instance.path ] ) {
+            panel.@[mtd]addButton@( @null@, @"Edit Shader"@, ( value ) => {
+                @this@.@[mtd]editShader@( shader );
+            }, { buttonClass: @"accent"@ } );
+        }
+        @else@ {
+            panel.@[mtd]addButton@( @null@, @"New Shader"@, ( value ) => {
+                @this@.@[mtd]createNewShader@( node );
+            }, { buttonClass: @"contrast"@ } );
+        }
+    }
+});` );
+
     {
         window.__addInteractiveCodeExample( content, widgetName, panel => {
             LX.ADD_CUSTOM_WIDGET('Shader', {
@@ -52,6 +79,11 @@
                     'color': [0, 0, 0, 0],
                     'hexColor': '#000',
                     'highRes': false
+                },
+                onCreate: ( panel, buttonName, printName ) => {
+                    panel.addButton( null, buttonName, ( value ) => {
+                        console.log( printName )
+                    }, { buttonClass: "accent" } );
                 }
             });
 
@@ -60,8 +92,8 @@
                 'highRes': true
             };
 
-            panel.addShader("PBR Shader", shaderInstance, (instance) => { console.log(instance) });
-            panel.addShader("Empty", null);
+            panel.addShader("PBR Shader", shaderInstance, (instance) => { console.log(instance) }, "MyButton", "Print this" );
+            panel.addShader("Empty", null, null, "MySecondButton", "Print also this" );
         });
     }
 

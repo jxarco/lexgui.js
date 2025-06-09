@@ -313,7 +313,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
 
     LX.Panel.prototype[ 'add' + customWidgetName ] = function( name, instance, callback ) {
 
-        options.nameWidth = "100%";
+        const userParams = Array.from( arguments ).slice( 3 );
 
         let widget = new Widget( Widget.CUSTOM, name, null, options );
         this._attachWidget( widget );
@@ -333,6 +333,11 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
             {
                 widget._trigger( new LX.IEvent( name, instance, event ), callback );
             }
+        };
+
+        widget.onResize = ( rect ) => {
+            const realNameWidth = ( widget.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
         const element = widget.root;
@@ -471,6 +476,11 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                             console.warn( `Unsupported property type: ${ value.constructor.name }` )
                             break;
                     }
+                }
+
+                if( options.onCreate )
+                {
+                    options.onCreate.call( this, this, ...userParams );
                 }
 
                 this.clearQueue();

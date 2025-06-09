@@ -2,6 +2,12 @@
 
 ## dev
 
+Widgets:
+- Support `options.onCreate` on register Custom Widget.
+
+Docs updated.
+Minor CSS tweaks.
+
 ## 0.6.7 (master)
 
 Widgets:
