@@ -5,6 +5,7 @@
 Widgets:
 - Support `options.onCreate` on register Custom Widget.
 
+Fixed vertical area split resize when `sizes: "auto"`.
 Docs updated.
 Minor CSS tweaks.
 

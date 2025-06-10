@@ -413,16 +413,15 @@ class Area {
         if( auto && type == "vertical" )
         {
             // Listen resize event on first area
-            const resizeObserver = new ResizeObserver( entries => {
+            this._autoVerticalResizeObserver = new ResizeObserver( entries => {
                 for ( const entry of entries )
                 {
                     const size = entry.target.getComputedSize();
                     area2.root.style.height = "calc(100% - " + ( size.height ) + "px )";
                 }
-                resizeObserver.disconnect();
             });
 
-            resizeObserver.observe( area1.root );
+            this._autoVerticalResizeObserver.observe( area1.root );
         }
 
         // Being minimizable means it's also resizeable!
@@ -942,6 +941,12 @@ class Area {
         if( dt === undefined ) // Splitbar didn't move!
         {
             return;
+        }
+
+        // When manual resizing, we don't need the observer anymore
+        if( this._autoVerticalResizeObserver )
+        {
+            this._autoVerticalResizeObserver.disconnect();
         }
 
         const a1 = this.sections[ 0 ];
