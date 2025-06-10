@@ -9,9 +9,8 @@
     MAKE_LINE_BREAK();
     MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTable(name, data, options)")} to add a ${ widgetName } Widget to your panel or
     create it anywhere using ${INLINE_CODE(`new LX.${ widgetName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
-    MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH( `Note: You can use default row actions as String such as 'delete' or 'menu', which have predefined icons and callbacks.
-        For the 'menu' action, you must fill the possible menus inside the created Dropdown using ${INLINE_CODE("options.onMenuAction")}.`, true);
+    MAKE_NOTE( `You can use default row actions as String such as 'delete' or 'menu', which have predefined icons and callbacks.
+        For the 'menu' action, you must fill the possible menus inside the created Dropdown using ${INLINE_CODE("options.onMenuAction")}.` );
 
     {
         window.__addInteractiveCodeExample( content, widgetName, panel => {
@@ -88,4 +87,9 @@
             } )
         }, {});
     }
+
+    MAKE_NOTE( `The return value in the ${INLINE_CODE("rowActions")} item callbacks are used to refresh (true) or not (false) the table DOM.`, true );
+
+    MAKE_PARAGRAPH( `Check the ${ INLINE_PAGE( "Table API reference", "reference/table" ) } to know more details about the Table Widget.` );
+
 </script>
