@@ -14,7 +14,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 const LX = {
-    version: "0.6.7",
+    version: "0.6.8",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -6432,16 +6432,15 @@ class Area {
         if( auto && type == "vertical" )
         {
             // Listen resize event on first area
-            const resizeObserver = new ResizeObserver( entries => {
+            this._autoVerticalResizeObserver = new ResizeObserver( entries => {
                 for ( const entry of entries )
                 {
                     const size = entry.target.getComputedSize();
                     area2.root.style.height = "calc(100% - " + ( size.height ) + "px )";
                 }
-                resizeObserver.disconnect();
             });
 
-            resizeObserver.observe( area1.root );
+            this._autoVerticalResizeObserver.observe( area1.root );
         }
 
         // Being minimizable means it's also resizeable!
@@ -6963,6 +6962,12 @@ class Area {
             return;
         }
 
+        // When manual resizing, we don't need the observer anymore
+        if( this._autoVerticalResizeObserver )
+        {
+            this._autoVerticalResizeObserver.disconnect();
+        }
+
         const a1 = this.sections[ 0 ];
         var a1Root = a1.root;
 
@@ -7383,7 +7388,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
 
     LX.Panel.prototype[ 'add' + customWidgetName ] = function( name, instance, callback ) {
 
-        options.nameWidth = "100%";
+        const userParams = Array.from( arguments ).slice( 3 );
 
         let widget = new Widget( Widget.CUSTOM, name, null, options );
         this._attachWidget( widget );
@@ -7403,6 +7408,11 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
             {
                 widget._trigger( new LX.IEvent( name, instance, event ), callback );
             }
+        };
+
+        widget.onResize = ( rect ) => {
+            const realNameWidth = ( widget.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
         const element = widget.root;
@@ -7541,6 +7551,11 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                             console.warn( `Unsupported property type: ${ value.constructor.name }` );
                             break;
                     }
+                }
+
+                if( options.onCreate )
+                {
+                    options.onCreate.call( this, this, ...userParams );
                 }
 
                 this.clearQueue();
@@ -11574,16 +11589,16 @@ class Table extends Widget {
         container.className = "lextable";
         this.root.appendChild( container );
 
-        this.centered = options.centered ?? false;
-        if( this.centered === true )
+        this._centered = options.centered ?? false;
+        if( this._centered === true )
         {
             container.classList.add( "centered" );
         }
 
-        this.filter = options.filter ?? false;
-        this.toggleColumns = options.toggleColumns ?? false;
-        this.customFilters = options.customFilters ?? false;
         this.activeCustomFilters = {};
+        this.filter = options.filter ?? false;
+        this.customFilters = options.customFilters ?? false;
+        this._toggleColumns = options.toggleColumns ?? false;
         this._currentFilter = options.filterValue;
 
         data.head = data.head ?? [];
@@ -11591,6 +11606,7 @@ class Table extends Widget {
         data.checkMap = { };
         data.colVisibilityMap = { };
         data.head.forEach( (col, index) => { data.colVisibilityMap[ index ] = true; });
+        this.data = data;
 
         const compareFn = ( idx, order, a, b) => {
             if (a[idx] < b[idx]) return -order;
@@ -11604,7 +11620,7 @@ class Table extends Widget {
         };
 
         // Append header
-        if( this.filter || this.customFilters || this.toggleColumns )
+        if( this.filter || this.customFilters || this._toggleColumns )
         {
             const headerContainer = LX.makeContainer( [ "100%", "auto" ], "flex flex-row" );
 
@@ -11716,7 +11732,7 @@ class Table extends Widget {
                 this._resetCustomFiltersBtn.root.classList.add( "hidden" );
             }
 
-            if( this.toggleColumns )
+            if( this._toggleColumns )
             {
                 const icon = LX.makeIcon( "Settings2" );
                 const toggleColumnsBtn = new LX.Button( "toggleColumnsBtn", icon.innerHTML + "View", (value, e) => {
@@ -11804,7 +11820,7 @@ class Table extends Widget {
                     th.querySelector( "span" ).appendChild( LX.makeIcon( "MenuArrows", { svgClass: "sm" } ) );
 
                     const idx = data.head.indexOf( headData );
-                    if( this.centered && this.centered.indexOf( idx ) > -1 )
+                    if( this._centered?.indexOf && this._centered.indexOf( idx ) > -1 )
                     {
                         th.classList.add( "centered" );
                     }
@@ -11814,7 +11830,7 @@ class Table extends Widget {
                         { name: "Desc", icon: "ArrowDownAZ", callback: sortFn.bind( this, idx, -1 ) }
                     ];
 
-                    if( this.toggleColumns )
+                    if( this._toggleColumns )
                     {
                         menuOptions.push(
                             null,
@@ -11876,6 +11892,9 @@ class Table extends Widget {
                         // Origin row should go to the target row, and the rest should be moved up/down
                         const fromIdx = rIdx - 1;
                         const targetIdx = movePending[ 1 ] - 1;
+
+                        LX.emit( "@on_table_sort", { instance: this, fromIdx, targetIdx } );
+
                         const b = data.body[ fromIdx ];
                         let targetOffset = 0;
 
@@ -12081,7 +12100,7 @@ class Table extends Widget {
                         td.innerHTML = `${ rowData }`;
 
                         const idx = bodyData.indexOf( rowData );
-                        if( this.centered && this.centered.indexOf( idx ) > -1 )
+                        if( this._centered?.indexOf && this._centered.indexOf( idx ) > -1 )
                         {
                             td.classList.add( "centered" );
                         }
@@ -12171,7 +12190,49 @@ class Table extends Widget {
 
         LX.doAsync( this.onResize.bind( this ) );
     }
+
+    getSelectedRows() {
+
+        const selectedRows = [];
+
+        for( const row of this.data.body )
+        {
+            const rowId = LX.getSupportedDOMName( row.join( '-' ) ).substr( 0, 32 );
+            if( this.data.checkMap[ rowId ] === true )
+            {
+                selectedRows.push( row );
+            }
+        }
+
+        return selectedRows;
+    }
+
+    _setCentered( v ) {
+
+        if( v.constructor == Boolean )
+        {
+            const container = this.root.querySelector( ".lextable" );
+            container.classList.toggle( "centered", v );
+        }
+        else
+        {
+            // Make sure this is an array containing which columns have
+            // to be centered
+            v = [].concat( v );
+        }
+
+        this._centered = v;
+
+        this.refresh();
+    }
 }
+
+Object.defineProperty( Table.prototype, "centered", {
+    get: function() { return this._centered; },
+    set: function( v ) { this._setCentered( v ); },
+    enumerable: true,
+    configurable: true
+});
 
 LX.Table = Table;
 

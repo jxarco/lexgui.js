@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.6.8 (master)
+
 Widgets:
 - Support `options.onCreate` on register Custom Widget.
 - Table:
@@ -19,7 +21,7 @@ Fixed vertical area split resize when `sizes: "auto"`.
 Docs updated.
 Minor CSS tweaks.
 
-## 0.6.7 (master)
+## 0.6.7
 
 Widgets:
 - Button Widget now allows `options.fileInput` to request a file on click.
