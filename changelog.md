@@ -5,6 +5,9 @@
 Widgets:
 - Support `options.onCreate` on register Custom Widget.
 
+CodeEditor:
+- Default scrolling behaviour (Space key) is now prevented.
+
 Fixed vertical area split resize when `sizes: "auto"`.
 Docs updated.
 Minor CSS tweaks.

@@ -2220,6 +2220,14 @@ class CodeEditor {
         return;
 
         const key = e.key ?? e.detail.key;
+
+        // Do not propagate "space to scroll" event
+        if( key == ' ' )
+        {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
         const target = e.detail.targetCursor;
 
         // Global keys
