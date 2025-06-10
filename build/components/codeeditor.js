@@ -1678,14 +1678,16 @@ class CodeEditor {
         }
 
         this._removeSecondaryCursors();
+
         var cursor = this._getCurrentCursor( true );
-
         this.saveCursor( cursor, this.code.cursorState );
-
         this.code = this.loadedTabs[ name ];
         this.restoreCursor( cursor, this.code.cursorState );
 
         this.endSelection();
+
+        this.hideAutoCompleteBox();
+
         this._updateDataInfoPanel( "@tab-name", name );
 
         if( this.code.languageOverride )
