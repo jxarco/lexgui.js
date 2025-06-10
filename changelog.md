@@ -4,6 +4,11 @@
 
 Widgets:
 - Support `options.onCreate` on register Custom Widget.
+- Table:
+  - Add support for `Table.getSelectedRows`.
+  - Manually sorting now emits signal `@on_table_sort`.
+  - Defined property `centered` to allow dynamic changes.
+  - Exposed table data.
 
 CodeEditor:
 - Default scrolling behaviour (Space key) is now prevented.
