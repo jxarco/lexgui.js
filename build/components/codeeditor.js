@@ -756,31 +756,43 @@ class CodeEditor {
             let idx = firstNonspaceIndex( this.code.lines[ ln ] );
 
             // We already are in the first non space index...
-            if(idx == cursor.position) idx = 0;
+            if( idx == cursor.position ) idx = 0;
 
             const prestring = this.code.lines[ ln ].substring( 0, idx );
             let lastX = cursor.position;
 
             this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
-            if(idx > 0)
+            if( idx > 0 )
+            {
                 this.cursorToString( cursor, prestring );
-            this.setScrollLeft( 0 );
+            }
+            else
+            {
+                // No spaces, start from char 0
+                idx = 0;
+            }
 
-            // Merge cursors
+            this.setScrollLeft( 0 );
             this.mergeCursors( ln );
 
             if( e.shiftKey && !e.cancelShift )
             {
                 // Get last selection range
                 if( cursor.selection )
+                {
                     lastX += cursor.selection.chars;
+                }
 
                 if( !cursor.selection )
+                {
                     this.startSelection( cursor );
+                }
 
                 var string = this.code.lines[ ln ].substring( idx, lastX );
                 if( cursor.selection.sameLine() )
+                {
                     cursor.selection.selectInline( cursor, idx, cursor.line, this.measureString( string ) );
+                }
                 else
                 {
                     this._processSelection( cursor, e );
@@ -2367,7 +2379,9 @@ class CodeEditor {
 
         // keys with length > 1 are probably special keys
         if( key.length > 1 && this.specialKeys.indexOf( key ) == -1 )
+        {
             return;
+        }
 
         let lidx = cursor.line;
         this.code.lines[ lidx ] = this.code.lines[ lidx ] ?? "";
@@ -2598,7 +2612,9 @@ class CodeEditor {
             this.processLines();
             this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
             if( this.code.lines[ lidx ] == undefined )
+            {
                 this.lineUp( cursor );
+            }
         }
         else
         {
@@ -2606,18 +2622,20 @@ class CodeEditor {
             if( cursor.selection ) cursor.selection.invertIfNecessary();
 
             const separator = "_NEWLINE_";
-            let code = this.code.lines.join(separator);
+            let code = this.code.lines.join( separator );
 
             // Get linear start index
             let index = 0;
 
-            for(let i = 0; i <= cursor.selection.fromY; i++)
+            for( let i = 0; i <= cursor.selection.fromY; i++ )
+            {
                 index += (i == cursor.selection.fromY ? cursor.selection.fromX : this.code.lines[ i ].length);
+            }
 
             index += cursor.selection.fromY * separator.length;
-            const num_chars = cursor.selection.chars + (cursor.selection.toY - cursor.selection.fromY) * separator.length;
-            const text = code.substr(index, num_chars);
-            const lines = text.split(separator);
+            const numChars = cursor.selection.chars + (cursor.selection.toY - cursor.selection.fromY) * separator.length;
+            const text = code.substr( index, numChars );
+            const lines = text.split( separator );
             textToCut = lines.join('\n');
 
             this.deleteSelection( cursor );

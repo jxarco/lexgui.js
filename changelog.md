@@ -7,6 +7,7 @@ Widgets:
 
 CodeEditor:
 - Default scrolling behaviour (Space key) is now prevented.
+- Fix `Shift+Home` selection when first char is a space.
 
 Fixed vertical area split resize when `sizes: "auto"`.
 Docs updated.
