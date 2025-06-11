@@ -2,10 +2,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>LexGUI Docs</title>
     <link rel="stylesheet" href="../build/lexgui.css">
-    <link rel="stylesheet" href="style.css">
-    <script type="text/javascript" src="docmaker.js"></script>
+    <link rel="stylesheet" href="../build/lexgui-docs.css">
     <link rel="icon" href="../images/icon.png"> 
     <script type="importmap">
         {
@@ -22,6 +22,7 @@
 
         import { LX } from 'lexgui';
         import 'lexgui/components/codeeditor.js';
+        import 'lexgui/components/docmaker.js';
 
         window.LX = LX;
 
@@ -112,134 +113,167 @@
 
         // Init library and get main area
         let area = await LX.init( { rootClass: "wrapper" } );
+        let menubar = null;
 
-        if( false )
-        {
-            area.root.style.borderRight = "2px solid gray";
-            const menubar = area.addMenubar( [
-                { name: "Examples", callback: () => { location.href = "../examples/"; } },
-                { name: "Docs v" + LX.version, callback: () => { location.href = "../docs/"; } }
-            ]);
-
-            menubar.setButtonIcon("Github", "Github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
-
-            // Split main area
-            area.split({ type: 'vertical', sizes: "auto", resize: false });
-            let [top, bottom] = area.sections;
-
-            let panel = top.addPanel();
-            fillDocs( panel, true );
-
-            bottom.root.appendChild(content);
-        }
-        else
-        {
-            const open = ( url, target, name, dom, event ) => {
-                if( event ) event.preventDefault();
-                if( target )
-                {
-                    window.open( url, target );
-                }
-                else
-                {
-                    loadPage( url );
-                }
-            }
-
-            const sidebar = area.addSidebar( m => {
-                m.group( "Manual" );
-                m.add( "Installation", { callback: open.bind( this, "installation.html", null ) } );
-                m.add( "Getting Started", { callback: open.bind( this, "getting-started.html", null ) } );
-                m.add( "Creating an area", { callback: open.bind( this, "creating-area.html", null ) } );
-                m.add( "Instancing panels", { callback: open.bind( this, "instancing-panels.html", null ) } );
-                m.add( "Branching", { callback: open.bind( this, "branching.html", null ) } );
-                m.add( "Adding the First Widget", { callback: open.bind( this, "first-widget.html", null ) } );
-                m.add( "Dialog", { callback: open.bind( this, "dialog.html", null ) } );
-                m.add( "Notifications", { callback: open.bind( this, "notifications.html", null ) } );
-                m.add( "Context Menus", { callback: open.bind( this, "context-menu.html", null ) } );
-                m.add( "Event Handling", { callback: open.bind( this, "event-handling.html", null ) } );
-                m.add( "Theme Customization", { callback: open.bind( this, "themes.html", null ) } );
-                m.add( "Icons", { callback: open.bind( this, "icons.html", null ) } );
-                m.separator();
-                m.group( "Widgets" );
-
-                m.add( "Buttons and Toggles" );
-                for( const w of [ "Button", "Checkbox", "Combo Buttons", "Radio Group", "Toggle" ] )
-                {
-                    const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
-                    m.add( "Buttons and Toggles/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );
-
-                    LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
-                }
-
-                m.add( "Data Inputs" );
-                for( const w of [ "Color", "Curve", "Date Picker", "File", "Item Array", "Layers", "Map 2D", "Number", "OTP Input", "Pad", "Range", "Select", "Size", "Tags", "Text", "Text Area", "Vector" ] )
-                {
-                    const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
-                    m.add( "Data Inputs/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );
-
-                    LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
-                }
-
-                m.add( "Layout and Structure" );
-                for( const w of [ "Data Tree", "Form", "List", "Tab Sections", "Table", "Title" ] )
-                {
-                    const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
-                    m.add( "Layout and Structure/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );
-
-                    LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
-                }
-
-                m.add( "Misc" );
-                for( const w of [ "Custom", "Progress", "Other Widgets" ] )
-                {
-                    const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
-                    m.add( "Misc/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );
-
-                    LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
-                }
-
-                m.separator();
-                m.group( "Components" );
-                m.add( "Code Editor", { callback: open.bind( this, "components/code-editor.html", null ) } );
-                m.add( "Graph Editor", { callback: open.bind( this, "components/graph-editor.html", null ) } );
-                m.add( "Timeline", { callback: open.bind( this, "components/timeline.html", null ) } );
-                m.add( "Video Editor", { callback: open.bind( this, "components/video-editor.html", null ) } );
-                m.separator();
-                m.group( "API Reference" );
-                m.add( "Area", { callback: open.bind( this, "reference/area.html", null ) } );
-                m.add( "Branch", { callback: open.bind( this, "reference/branch.html", null ) } );
-                m.add( "Menubar", { callback: open.bind( this, "reference/menubar.html", null ) } );
-                m.add( "Panel", { callback: open.bind( this, "reference/panel.html", null ) } );
-                m.add( "Sidebar", { callback: open.bind( this, "reference/sidebar.html", null ) } );
-                m.add( "Tabs", { callback: open.bind( this, "reference/tabs.html", null ) } );
-                m.add( "Widget", { callback: open.bind( this, "reference/widget.html", null ) } );
-                m.separator();
-                m.add( "LexGUI Examples", { icon: "Monitor", callback: open.bind( this, "../examples/", "_blank" ) } );
-                m.add( "Source Code", { icon: "Code", callback: open.bind( this, "https://github.com/jxarco/lexgui.js/", "_blank" ) } );
-            }, { 
-                headerTitle: "LexGUI",
-                headerSubtitle: 'v' + LX.version,
-                headerImage: "https://raw.githubusercontent.com/jxarco/lexgui.js/refs/heads/master/images/icon.png",
-                footerTitle: "jxarco",
-                footerSubtitle: "alexroco.30@gmail.com",
-                footerImage: "https://avatars.githubusercontent.com/u/25059187?s=400&u=ad8907b748c13e4e1a7cdd3882826acb6a2928b5&v=4",
-                collapsable: false
-            });
-
-            const menubar = sidebar.siblingArea.addMenubar();
-            const starterTheme = LX.getTheme();
-
-            menubar.addButtons([{
+        const starterTheme = LX.getTheme();
+        const menubarButtons = [
+            {
                 title: "Change Theme",
                 icon: starterTheme == "dark" ? "Moon" : "Sun",
                 swap: starterTheme == "dark" ? "Sun" : "Moon",
                 callback:  (value, event) => { LX.switchTheme() }
-            }]);
+            }
+        ];
 
-            menubar.siblingArea.root.style.overflowY = "scroll";
-            menubar.siblingArea.root.appendChild( content );
+        const customFooter = LX.makeContainer( ["100%", "32px"], "", "<p>Site created with _</p><span><a href='https://github.com/jxarco/lexgui.js/'>LexGUI.js</a></span>_" );
+
+        const sidebarOptions = {
+            headerTitle: "LexGUI",
+            headerSubtitle: 'v' + LX.version,
+            headerImage: "https://raw.githubusercontent.com/jxarco/lexgui.js/refs/heads/master/images/icon.png",
+            footerTitle: "jxarco",
+            footerSubtitle: "alexroco.30@gmail.com",
+            footerImage: "https://avatars.githubusercontent.com/u/25059187?s=400&u=ad8907b748c13e4e1a7cdd3882826acb6a2928b5&v=4",
+            onFooterPressed: (event, dom) => {
+                event.preventDefault();
+                LX.addDropdownMenu( dom, [
+                    "Other Projects",
+                    null,
+                    { name: "wgpuEngine", icon: "Torus", callback: () => open( "https://github.com/upf-gti/wgpuEngine", "_blank" ) },
+                    { name: "Rooms VR", icon: "DoorOpen", callback: () => open( "https://github.com/upf-gti/rooms", "_blank" ) },
+                    null,
+                    "Socials",
+                    null,
+                    { name: "Github", icon: "Github", callback: () => open( "https://github.com/jxarco", "_blank" ) },
+                    { name: "Linkedin", icon: "Linkedin", callback: () => open( "https://www.linkedin.com/in/alejandro-roco/", "_blank" ) },
+                ], { side: "right", align: "start" });
+            },
+            // footer: customFooter,
+            collapsed: false,
+            collapsable: false,
+            displaySelected: true
+        };
+
+        const open = ( url, target, name, dom, event ) => {
+            if( event ) event.preventDefault();
+            if( target )
+            {
+                window.open( url, target );
+            }
+            else
+            {
+                loadPage( url );
+            }
+            if( window.__currentSheet )
+            {
+                window.__currentSheet.destroy();
+            }
         }
+
+        const sidebarCallback = m => {
+            m.group( "Manual" );
+            m.add( "Installation", { callback: open.bind( this, "installation.html", null ) } );
+            m.add( "Getting Started", { callback: open.bind( this, "getting-started.html", null ) } );
+            m.add( "Creating Areas", { callback: open.bind( this, "creating-areas.html", null ) } );
+            m.add( "Instancing Panels", { callback: open.bind( this, "instancing-panels.html", null ) } );
+            m.add( "Panel Branching", { callback: open.bind( this, "branching.html", null ) } );
+            m.add( "Adding First Widgets", { callback: open.bind( this, "first-widgets.html", null ) } );
+            m.add( "Dialogs", { callback: open.bind( this, "dialogs.html", null ) } );
+            m.add( "Notifications", { callback: open.bind( this, "notifications.html", null ) } );
+            m.add( "Context Menus", { callback: open.bind( this, "context-menu.html", null ) } );
+            m.add( "Event Handling", { callback: open.bind( this, "event-handling.html", null ) } );
+            m.add( "Theme Customization", { callback: open.bind( this, "themes.html", null ) } );
+            m.add( "Icons", { callback: open.bind( this, "icons.html", null ) } );
+            m.separator();
+            m.group( "Widgets" );
+
+            m.add( "Buttons and Toggles" );
+            for( const w of [ "Button", "Checkbox", "Combo Buttons", "Radio Group", "Toggle" ] )
+            {
+                const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
+                m.add( "Buttons and Toggles/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );
+
+                LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
+            }
+
+            m.add( "Data Inputs" );
+            for( const w of [ "Color", "Curve", "Date Picker", "File", "Item Array", "Layers", "Map 2D", "Number", "OTP Input", "Pad", "Range", "Select", "Size", "Tags", "Text", "Text Area", "Vector" ] )
+            {
+                const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
+                m.add( "Data Inputs/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );
+
+                LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
+            }
+
+            m.add( "Layout and Structure" );
+            for( const w of [ "Data Tree", "Form", "List", "Tab Sections", "Table", "Title" ] )
+            {
+                const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
+                m.add( "Layout and Structure/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );
+
+                LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
+            }
+
+            m.add( "Misc" );
+            for( const w of [ "Custom", "Progress", "Other Widgets" ] )
+            {
+                const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
+                m.add( "Misc/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );
+
+                LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
+            }
+
+            m.separator();
+            m.group( "Components" );
+            m.add( "Code Editor", { callback: open.bind( this, "components/code-editor.html", null ) } );
+            m.add( "Doc Maker", { callback: open.bind( this, "components/doc-maker.html", null ) } );
+            m.add( "Graph Editor", { callback: open.bind( this, "components/graph-editor.html", null ) } );
+            m.add( "Timeline", { callback: open.bind( this, "components/timeline.html", null ) } );
+            m.add( "Video Editor", { callback: open.bind( this, "components/video-editor.html", null ) } );
+            m.separator();
+            m.group( "API Reference" );
+            m.add( "Area", { callback: open.bind( this, "reference/area.html", null ) } );
+            m.add( "Branch", { callback: open.bind( this, "reference/branch.html", null ) } );
+            m.add( "Menubar", { callback: open.bind( this, "reference/menubar.html", null ) } );
+            m.add( "Panel", { callback: open.bind( this, "reference/panel.html", null ) } );
+            m.add( "Sidebar", { callback: open.bind( this, "reference/sidebar.html", null ) } );
+            m.add( "Tabs", { callback: open.bind( this, "reference/tabs.html", null ) } );
+            m.add( "Widget", { callback: open.bind( this, "reference/widget.html", null ) } );
+            m.separator();
+            m.add( "LexGUI Examples", { icon: "Monitor", callback: open.bind( this, "../examples/", "_blank" ) } );
+            m.add( "Source Code", { icon: "Code", callback: open.bind( this, "https://github.com/jxarco/lexgui.js/", "_blank" ) } );
+        }
+
+        if( mobile )
+        {
+            menubar = area.addMenubar();
+
+            const sheetArea = new LX.Area({ skipAppend: true });
+            sheetArea.addSidebar( sidebarCallback, sidebarOptions );
+
+            menubarButtons.splice( 0, 0,
+                {
+                    title: "Menu",
+                    icon: "PanelLeft",
+                    callback: (value, event) => {
+                        window.__currentSheet = new LX.Sheet("256px", [ sheetArea ] );
+                    }
+                }
+            );
+        }
+        else
+        {
+            const sidebar = area.addSidebar( sidebarCallback, sidebarOptions );
+            menubar = sidebar.siblingArea.addMenubar();
+        }
+
+        customFooter.style.fontSize = "12px";
+        customFooter.classList.add( "fg-secondary", "justify-center" );
+
+        menubar.addButtons( menubarButtons );
+
+        menubar.siblingArea.root.style.overflowY = "scroll";
+        menubar.siblingArea.root.appendChild( content );
 
         let params = new URLSearchParams( document.location.search );
         loadPage( ( params.get( "p" ) ?? "installation" ) + ".html", false );

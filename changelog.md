@@ -2,10 +2,52 @@
 
 ## dev
 
+## 0.6.8 (master)
+
+Widgets:
+- Support `options.onCreate` on register Custom Widget.
+- Table:
+  - Add support for `Table.getSelectedRows`.
+  - Manually sorting now emits signal `@on_table_sort`.
+  - Defined property `centered` to allow dynamic changes.
+  - Exposed table data.
+
+CodeEditor:
+- Default scrolling behaviour (Space key) is now prevented.
+- Fix `Shift+Home` selection when first char is a space.
+- Fixed hide autocomplete when tab changes.
+
+Fixed vertical area split resize when `sizes: "auto"`.
+Docs updated.
+Minor CSS tweaks.
+
+## 0.6.7
+
+Widgets:
+- Button Widget now allows `options.fileInput` to request a file on click.
+- Custom Widgets now allow getter and setter options to process non-native types.
+
+CodeEditor:
+- Add `CodeEditor.closeTab` and `CodeEditor.getSelectedTabName`.
+- Fixed bug using `CodeEditor._tabStorage`.
+- Fixed initial tab language override.
+
+Fixed html viewport scale issues.
+Fixed Sheet zIndex.
+Fix Sidebar Header/Footer arrows icon: Only added if click listener exists.
+Added `MAKE_NUMBERED_LIST` to docmaker.js component.
+Clean docmaker css.
+Docs updated.
+
+## 0.6.6
+
 Fixed horizontal scroll in Table Widget.
 Fixed checkbox in Dropdown item.
+Callbacks in collapsable sidebar entries are now executed.
+Add `docmaker.js` script (Documentation maker) as new LX component.
+Added `hover:scale` CSS selectors.
 
-## 0.6.5 (master)
+## 0.6.5
 
 Timeline:
   - Refactored undo-redo.

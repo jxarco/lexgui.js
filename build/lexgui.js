@@ -14,7 +14,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 const LX = {
-    version: "0.6.5",
+    version: "0.6.8",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -877,7 +877,7 @@ class Sheet {
         this.root.dataset["side"] = this.side;
         this.root.tabIndex = "1";
         this.root.role = "dialog";
-        this.root.className = "lexsheet fixed z-100 bg-primary";
+        this.root.className = "lexsheet fixed z-1000 bg-primary";
         LX.root.appendChild( this.root );
 
         this.root.addEventListener( "keydown", (e) => {
@@ -1151,6 +1151,7 @@ class DropdownMenu {
             {
                 const checkbox = new LX.Checkbox( pKey + "_entryChecked", item.checked, (v) => {
                     const f = item[ 'callback' ];
+                    item.checked = v;
                     if( f )
                     {
                         f.call( this, key, v, menuItem );
@@ -2210,6 +2211,11 @@ class Tabs {
     }
 
     delete( name ) {
+
+        if( this.selected == name )
+        {
+            this.selected = null;
+        }
 
         const tabEl = this.tabDOMs[ name ];
 
@@ -6426,16 +6432,15 @@ class Area {
         if( auto && type == "vertical" )
         {
             // Listen resize event on first area
-            const resizeObserver = new ResizeObserver( entries => {
+            this._autoVerticalResizeObserver = new ResizeObserver( entries => {
                 for ( const entry of entries )
                 {
                     const size = entry.target.getComputedSize();
                     area2.root.style.height = "calc(100% - " + ( size.height ) + "px )";
                 }
-                resizeObserver.disconnect();
             });
 
-            resizeObserver.observe( area1.root );
+            this._autoVerticalResizeObserver.observe( area1.root );
         }
 
         // Being minimizable means it's also resizeable!
@@ -6957,6 +6962,12 @@ class Area {
             return;
         }
 
+        // When manual resizing, we don't need the observer anymore
+        if( this._autoVerticalResizeObserver )
+        {
+            this._autoVerticalResizeObserver.disconnect();
+        }
+
         const a1 = this.sections[ 0 ];
         var a1Root = a1.root;
 
@@ -7377,7 +7388,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
 
     LX.Panel.prototype[ 'add' + customWidgetName ] = function( name, instance, callback ) {
 
-        options.nameWidth = "100%";
+        const userParams = Array.from( arguments ).slice( 3 );
 
         let widget = new Widget( Widget.CUSTOM, name, null, options );
         this._attachWidget( widget );
@@ -7399,6 +7410,11 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
             }
         };
 
+        widget.onResize = ( rect ) => {
+            const realNameWidth = ( widget.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
         const element = widget.root;
 
         let container, customWidgetsDom;
@@ -7407,11 +7423,6 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
         // Add instance button
 
         const refresh_widget = () => {
-
-            if( instance )
-            {
-                widget.instance = instance = Object.assign( LX.deepCopy(defaultInstance), instance );
-            }
 
             if( container ) container.remove();
             if( customWidgetsDom ) customWidgetsDom.remove();
@@ -7477,13 +7488,36 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                 this.queue( customWidgetsDom );
 
                 const on_instance_changed = ( key, value, event ) => {
-                    instance[ key ] = value;
+                    const setter = options[ `_set_${ key }` ];
+                    if( setter )
+                    {
+                        setter.call( instance, value );
+                    }
+                    else
+                    {
+                        instance[ key ] = value;
+                    }
                     widget._trigger( new LX.IEvent( name, instance, event ), callback );
                 };
 
                 for( let key in defaultInstance )
                 {
-                    const value = instance[ key ] ?? defaultInstance[ key ];
+                    let value = null;
+
+                    const getter = options[ `_get_${ key }` ];
+                    if( getter )
+                    {
+                        value = instance[ key ] ? getter.call( instance ) : getter.call( defaultInstance );
+                    }
+                    else
+                    {
+                        value = instance[ key ] ?? defaultInstance[ key ];
+                    }
+
+                    if( !value )
+                    {
+                        continue;
+                    }
 
                     switch( value.constructor )
                     {
@@ -7513,7 +7547,15 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                                 this._addVector( value.length, key, value, on_instance_changed.bind( this, key ) );
                             }
                             break;
+                        default:
+                            console.warn( `Unsupported property type: ${ value.constructor.name }` );
+                            break;
                     }
+                }
+
+                if( options.onCreate )
+                {
+                    options.onCreate.call( this, this, ...userParams );
                 }
 
                 this.clearQueue();
@@ -8450,6 +8492,27 @@ class Button extends Widget {
             wValue.innerHTML = `<span>${ ( value || "" ) }</span>`;
         }
 
+        if( options.fileInput )
+        {
+            const fileInput = document.createElement( "input" );
+            fileInput.type = "file";
+            fileInput.className = "file-input";
+            fileInput.style.display = "none";
+            wValue.appendChild( fileInput );
+
+            fileInput.addEventListener( 'change', function( e ) {
+                const files = e.target.files;
+                if( !files.length ) return;
+
+                const reader = new FileReader();
+                if( options.fileInputType === 'text' ) reader.readAsText( files[ 0 ] );
+                else if( options.fileInputType === 'buffer' ) reader.readAsArrayBuffer( files[ 0 ] );
+                else if( options.fileInputType === 'bin' ) reader.readAsBinaryString( files[ 0 ] );
+                else if( options.fileInputType === 'url' ) reader.readAsDataURL( files[ 0 ] );
+                reader.onload = e => { callback.call( this, e.target.result, files[ 0 ] ); } ;
+            });
+        }
+
         if( options.disabled )
         {
             this.disabled = true;
@@ -8502,8 +8565,15 @@ class Button extends Widget {
                 wValue.classList.toggle('selected');
             }
 
-            const swapInput = wValue.querySelector( "input" );
-            this._trigger( new LX.IEvent( name, swapInput?.checked ?? value, e ), callback );
+            if( options.fileInput )
+            {
+                wValue.querySelector( ".file-input" ).click();
+            }
+            else
+            {
+                const swapInput = wValue.querySelector( "input" );
+                this._trigger( new LX.IEvent( name, swapInput?.checked ?? value, e ), callback );
+            }
         });
 
         if( options.tooltip )
@@ -11519,16 +11589,16 @@ class Table extends Widget {
         container.className = "lextable";
         this.root.appendChild( container );
 
-        this.centered = options.centered ?? false;
-        if( this.centered === true )
+        this._centered = options.centered ?? false;
+        if( this._centered === true )
         {
             container.classList.add( "centered" );
         }
 
-        this.filter = options.filter ?? false;
-        this.toggleColumns = options.toggleColumns ?? false;
-        this.customFilters = options.customFilters ?? false;
         this.activeCustomFilters = {};
+        this.filter = options.filter ?? false;
+        this.customFilters = options.customFilters ?? false;
+        this._toggleColumns = options.toggleColumns ?? false;
         this._currentFilter = options.filterValue;
 
         data.head = data.head ?? [];
@@ -11536,6 +11606,7 @@ class Table extends Widget {
         data.checkMap = { };
         data.colVisibilityMap = { };
         data.head.forEach( (col, index) => { data.colVisibilityMap[ index ] = true; });
+        this.data = data;
 
         const compareFn = ( idx, order, a, b) => {
             if (a[idx] < b[idx]) return -order;
@@ -11549,7 +11620,7 @@ class Table extends Widget {
         };
 
         // Append header
-        if( this.filter || this.customFilters || this.toggleColumns )
+        if( this.filter || this.customFilters || this._toggleColumns )
         {
             const headerContainer = LX.makeContainer( [ "100%", "auto" ], "flex flex-row" );
 
@@ -11661,7 +11732,7 @@ class Table extends Widget {
                 this._resetCustomFiltersBtn.root.classList.add( "hidden" );
             }
 
-            if( this.toggleColumns )
+            if( this._toggleColumns )
             {
                 const icon = LX.makeIcon( "Settings2" );
                 const toggleColumnsBtn = new LX.Button( "toggleColumnsBtn", icon.innerHTML + "View", (value, e) => {
@@ -11749,7 +11820,7 @@ class Table extends Widget {
                     th.querySelector( "span" ).appendChild( LX.makeIcon( "MenuArrows", { svgClass: "sm" } ) );
 
                     const idx = data.head.indexOf( headData );
-                    if( this.centered && this.centered.indexOf( idx ) > -1 )
+                    if( this._centered?.indexOf && this._centered.indexOf( idx ) > -1 )
                     {
                         th.classList.add( "centered" );
                     }
@@ -11759,7 +11830,7 @@ class Table extends Widget {
                         { name: "Desc", icon: "ArrowDownAZ", callback: sortFn.bind( this, idx, -1 ) }
                     ];
 
-                    if( this.toggleColumns )
+                    if( this._toggleColumns )
                     {
                         menuOptions.push(
                             null,
@@ -11821,6 +11892,9 @@ class Table extends Widget {
                         // Origin row should go to the target row, and the rest should be moved up/down
                         const fromIdx = rIdx - 1;
                         const targetIdx = movePending[ 1 ] - 1;
+
+                        LX.emit( "@on_table_sort", { instance: this, fromIdx, targetIdx } );
+
                         const b = data.body[ fromIdx ];
                         let targetOffset = 0;
 
@@ -12026,7 +12100,7 @@ class Table extends Widget {
                         td.innerHTML = `${ rowData }`;
 
                         const idx = bodyData.indexOf( rowData );
-                        if( this.centered && this.centered.indexOf( idx ) > -1 )
+                        if( this._centered?.indexOf && this._centered.indexOf( idx ) > -1 )
                         {
                             td.classList.add( "centered" );
                         }
@@ -12116,7 +12190,49 @@ class Table extends Widget {
 
         LX.doAsync( this.onResize.bind( this ) );
     }
+
+    getSelectedRows() {
+
+        const selectedRows = [];
+
+        for( const row of this.data.body )
+        {
+            const rowId = LX.getSupportedDOMName( row.join( '-' ) ).substr( 0, 32 );
+            if( this.data.checkMap[ rowId ] === true )
+            {
+                selectedRows.push( row );
+            }
+        }
+
+        return selectedRows;
+    }
+
+    _setCentered( v ) {
+
+        if( v.constructor == Boolean )
+        {
+            const container = this.root.querySelector( ".lextable" );
+            container.classList.toggle( "centered", v );
+        }
+        else
+        {
+            // Make sure this is an array containing which columns have
+            // to be centered
+            v = [].concat( v );
+        }
+
+        this._centered = v;
+
+        this.refresh();
+    }
 }
+
+Object.defineProperty( Table.prototype, "centered", {
+    get: function() { return this._centered; },
+    set: function( v ) { this._setCentered( v ); },
+    enumerable: true,
+    configurable: true
+});
 
 LX.Table = Table;
 
@@ -12839,6 +12955,8 @@ class Panel {
      * hideName: Don't use name as label [false]
      * disabled: Make the widget disabled [false]
      * icon: Icon class to show as button value
+     * fileInput: Button click requests a file
+     * fileInputType: Type of the requested file
      * img: Path to image to show as button value
      * title: Text to show in native Element title
      * buttonClass: Class to add to the native button element
@@ -14179,6 +14297,13 @@ class Sidebar {
             info.appendChild( infoSubtext );
         }
 
+        // Add icon if onHeaderPressed is defined and not collapsable (it uses the toggler icon)
+        if( options.onHeaderPressed && !this.collapsable )
+        {
+            const icon = LX.makeIcon( "MenuArrows" );
+            header.appendChild( icon );
+        }
+
         return header;
     }
 
@@ -14224,8 +14349,13 @@ class Sidebar {
             info.appendChild( infoSubtext );
         }
 
-        const icon = LX.makeIcon( "MenuArrows" );
-        footer.appendChild( icon );
+        // Add icon if onFooterPressed is defined
+        // Useful to indicate that the footer is clickable
+        if( options.onFooterPressed )
+        {
+            const icon = LX.makeIcon( "MenuArrows" );
+            footer.appendChild( icon );
+        }
 
         return footer;
     }
@@ -14526,20 +14656,17 @@ class Sidebar {
                     return;
                 }
 
+                const f = options.callback;
+                if( f ) f.call( this, key, item.value, e );
+
                 if( isCollapsable )
                 {
                     itemDom.querySelector( ".collapser" ).click();
                 }
-                else
+                else if( item.checkbox )
                 {
-                    const f = options.callback;
-                    if( f ) f.call( this, key, item.value, e );
-
-                    if( item.checkbox )
-                    {
-                        item.value = !item.value;
-                        item.checkbox.set( item.value, true );
-                    }
+                    item.value = !item.value;
+                    item.checkbox.set( item.value, true );
                 }
 
                 // Manage selected

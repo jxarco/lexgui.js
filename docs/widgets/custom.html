@@ -5,10 +5,69 @@
     const widgetName = "Custom";
 
     MAKE_HEADER(widgetName + ".", "h1", widgetName.toLowerCase());
-    MAKE_PARAGRAPH(`Lexgui supports generating custom widgets based on specific object data. By calling ${INLINE_CODE("LX.ADD_CUSTOM_WIDGET( name, options )")}, 
-        you can register a new Panel method that will create your custom widgets.` );
+    MAKE_PARAGRAPH(`Lexgui supports generating custom widgets based on specific object data. By calling the function ${INLINE_CODE("LX.ADD_CUSTOM_WIDGET( name, options )")}, 
+        you can register a new Panel method that will create your custom widgets. Once the widget has been registered, call ${INLINE_CODE("Panel.add&lt;WidgetName&gt;(name, value, callback)")} to add the custom Widget to your panel.`);
+
     MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH(`Once the widget has been registered, call ${INLINE_CODE("Panel.add_WidgetName_(name, value, callback)")} to add the custom Widget to your panel.`);
+    MAKE_PARAGRAPH(`Within the options of ${INLINE_CODE("LX.ADD_CUSTOM_WIDGET")}, you can add the following data:`);
+
+    MAKE_CODE_BULLET_LIST( [
+        [ "icon", "String", "Icon to be added into the custom widget" ],
+        [ "default", "Object", "The data for a default instance of your class" ],
+        [ "onCreate", "Function", "Callback to add more widgets to the instance panel" ],
+    ] )
+
+    MAKE_NOTE( `If you are using non-native types (e.g. Emscripten handles, or any other custom classes which LexGUI doesn't know how to inspect), you can add getters and setters for each of your
+    default properties (see example code below).`, true )
+
+    MAKE_CODE( `@[com]// Getters convert to native Array type@
+@[com]// and Setters convert to custom class from native Array type@
+
+@[cls]LX@.@[mtd]ADD_CUSTOM_WIDGET@( @"AABB"@, {
+    icon: @"Box"@,
+    @[mtd]_get_center@: @function@() {
+        @return@ [ @this@.center.x, @this@.center.y, @this@.center.z ];
+    },
+    @[mtd]_set_center@: @function@( value ) {
+        @this@.center.x = value[ @0@ ]; @this@.center.y = value[ @1@ ]; @this@.center.z = value[ @2@ ];
+    },
+    @[mtd]_get_halfSize@: @function@() {
+        @return@ [ @this@.halfSize.x, @this@.halfSize.y, @this@.halfSize.z ];
+    },
+    @[mtd]_set_halfSize@: @function@( value ) {
+        @this@.halfSize.x = value[ @0@ ]; @this@.halfSize.y = value[ @1@ ]; @this@.halfSize.z = value[ @2@ ];
+    },
+    default: {
+        center: @new@ @[cls]Vector3@( @0.0@ ),
+        halfSize: @new@ @[cls]Vector3@( @0.0@ )
+    }
+});` );
+
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH(`You can also provide a custom creation callback (${INLINE_CODE("options.onCreate")}) that runs when the widget is created, allowing you to add additional widgets beyond the default instance property widgets, such as buttons.
+    Since the registration only occur once, you can pass your custom parameters when you create each of the instance widgets, which will be available when the creation function is called: `);
+
+        MAKE_CODE( `@[cls]LX@.@[mtd]ADD_CUSTOM_WIDGET@( @"Shader"@, {
+    icon: @"FileText"@,
+    default: {
+        path: @""@,
+        type: @[cls]Shader@.@[enu]Standard@
+    },
+
+    @[com]// _instance_ and _node_ are custom user data@
+    onCreate: ( panel, instance, node ) => {
+        @if@( @this@.shaderData[ instance.path ] ) {
+            panel.@[mtd]addButton@( @null@, @"Edit Shader"@, ( value ) => {
+                @this@.@[mtd]editShader@( shader );
+            }, { buttonClass: @"accent"@ } );
+        }
+        @else@ {
+            panel.@[mtd]addButton@( @null@, @"New Shader"@, ( value ) => {
+                @this@.@[mtd]createNewShader@( node );
+            }, { buttonClass: @"contrast"@ } );
+        }
+    }
+});` );
 
     {
         window.__addInteractiveCodeExample( content, widgetName, panel => {
@@ -20,6 +79,11 @@
                     'color': [0, 0, 0, 0],
                     'hexColor': '#000',
                     'highRes': false
+                },
+                onCreate: ( panel, buttonName, printName ) => {
+                    panel.addButton( null, buttonName, ( value ) => {
+                        console.log( printName )
+                    }, { buttonClass: "accent" } );
                 }
             });
 
@@ -28,8 +92,8 @@
                 'highRes': true
             };
 
-            panel.addShader("PBR Shader", shaderInstance, (instance) => { console.log(instance) });
-            panel.addShader("Empty", null);
+            panel.addShader("PBR Shader", shaderInstance, (instance) => { console.log(instance) }, "MyButton", "Print this" );
+            panel.addShader("Empty", null, null, "MySecondButton", "Print also this" );
         });
     }
 

@@ -6,7 +6,7 @@
 */
 
 const LX = {
-    version: "0.6.5",
+    version: "0.6.8",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -879,7 +879,7 @@ class Sheet {
         this.root.dataset["side"] = this.side;
         this.root.tabIndex = "1";
         this.root.role = "dialog";
-        this.root.className = "lexsheet fixed z-100 bg-primary";
+        this.root.className = "lexsheet fixed z-1000 bg-primary";
         LX.root.appendChild( this.root );
 
         this.root.addEventListener( "keydown", (e) => {
@@ -2223,6 +2223,11 @@ class Tabs {
     }
 
     delete( name ) {
+
+        if( this.selected == name )
+        {
+            this.selected = null;
+        }
 
         const tabEl = this.tabDOMs[ name ];
 

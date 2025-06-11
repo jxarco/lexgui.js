@@ -221,8 +221,9 @@ class CodeEditor {
 
     static __instances  = [];
 
-    static CURSOR_LEFT  = 1;
-    static CURSOR_TOP   = 2;
+    static CURSOR_LEFT      = 1;
+    static CURSOR_TOP       = 2;
+    static CURSOR_LEFT_TOP  = CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP;
 
     static SELECTION_X      = 1;
     static SELECTION_Y      = 2
@@ -264,8 +265,6 @@ class CodeEditor {
             let panel = new LX.Panel();
 
             panel.addTitle( "EXPLORER" );
-
-            this._tabStorage = {};
 
             let sceneData = {
                 'id': 'WORKSPACE',
@@ -320,6 +319,7 @@ class CodeEditor {
         this.skipInfo = options.skipInfo ?? false;
         this.disableEdition = options.disableEdition ?? false;
 
+        this._tabStorage = {};
         this.tabs = this.area.addTabs( { onclose: (name) => {
             delete this.openedTabs[ name ];
             if( Object.keys( this.openedTabs ).length < 2 )
@@ -756,31 +756,43 @@ class CodeEditor {
             let idx = firstNonspaceIndex( this.code.lines[ ln ] );
 
             // We already are in the first non space index...
-            if(idx == cursor.position) idx = 0;
+            if( idx == cursor.position ) idx = 0;
 
             const prestring = this.code.lines[ ln ].substring( 0, idx );
             let lastX = cursor.position;
 
             this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
-            if(idx > 0)
+            if( idx > 0 )
+            {
                 this.cursorToString( cursor, prestring );
-            this.setScrollLeft( 0 );
+            }
+            else
+            {
+                // No spaces, start from char 0
+                idx = 0;
+            }
 
-            // Merge cursors
+            this.setScrollLeft( 0 );
             this.mergeCursors( ln );
 
             if( e.shiftKey && !e.cancelShift )
             {
                 // Get last selection range
                 if( cursor.selection )
+                {
                     lastX += cursor.selection.chars;
+                }
 
                 if( !cursor.selection )
+                {
                     this.startSelection( cursor );
+                }
 
                 var string = this.code.lines[ ln ].substring( idx, lastX );
                 if( cursor.selection.sameLine() )
+                {
                     cursor.selection.selectInline( cursor, idx, cursor.line, this.measureString( string ) );
+                }
                 else
                 {
                     this._processSelection( cursor, e );
@@ -976,7 +988,7 @@ class CodeEditor {
                         }
                         else {
                             cursor.selection.invertIfNecessary();
-                            this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP, cursor );
+                            this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, cursor );
                             this.cursorToLine( cursor, cursor.selection.fromY, true );
                             this.cursorToPosition( cursor, cursor.selection.fromX );
                             this.endSelection();
@@ -1057,7 +1069,7 @@ class CodeEditor {
                         else
                         {
                             cursor.selection.invertIfNecessary();
-                            this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP, cursor );
+                            this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, cursor );
                             this.cursorToLine( cursor, cursor.selection.toY );
                             this.cursorToPosition( cursor, cursor.selection.toX );
                             this.endSelection();
@@ -1090,7 +1102,7 @@ class CodeEditor {
             this.addTab("+", false, "New File");
         }
 
-        this.addTab( options.name || "untitled", true, options.title, { language: "Plain Text" } );
+        this.addTab( options.name || "untitled", true, options.title, { language: options.highlight ?? "Plain Text" } );
 
         // Create inspector panel
         let panel = this._createPanelInfo();
@@ -1666,14 +1678,16 @@ class CodeEditor {
         }
 
         this._removeSecondaryCursors();
+
         var cursor = this._getCurrentCursor( true );
-
         this.saveCursor( cursor, this.code.cursorState );
-
         this.code = this.loadedTabs[ name ];
         this.restoreCursor( cursor, this.code.cursorState );
 
         this.endSelection();
+
+        this.hideAutoCompleteBox();
+
         this._updateDataInfoPanel( "@tab-name", name );
 
         if( this.code.languageOverride )
@@ -1771,7 +1785,7 @@ class CodeEditor {
         if( selected )
         {
             this.code = code;
-            this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
+            this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP );
             this.processLines();
         }
 
@@ -1845,10 +1859,26 @@ class CodeEditor {
 
         // Select as current...
         this.code = code;
-        this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP );
+        this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP );
         this.processLines();
         this._changeLanguageFromExtension( LX.getExtension( name ) );
-        this._updateDataInfoPanel( "@tab-name", code.tabname );
+        this._updateDataInfoPanel( "@tab-name", code.tabName );
+    }
+
+    closeTab( name, eraseAll ) {
+
+        this.tabs.delete( name );
+
+        if( eraseAll )
+        {
+            delete this.openedTabs[ name ];
+            delete this.loadedTabs[ name ];
+            delete this._tabStorage[ name ];
+        }
+    }
+
+    getSelectedTabName() {
+        return this.tabs.selected;
     }
 
     loadTabFromFile() {
@@ -2204,6 +2234,14 @@ class CodeEditor {
         return;
 
         const key = e.key ?? e.detail.key;
+
+        // Do not propagate "space to scroll" event
+        if( key == ' ' )
+        {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
         const target = e.detail.targetCursor;
 
         // Global keys
@@ -2343,7 +2381,9 @@ class CodeEditor {
 
         // keys with length > 1 are probably special keys
         if( key.length > 1 && this.specialKeys.indexOf( key ) == -1 )
+        {
             return;
+        }
 
         let lidx = cursor.line;
         this.code.lines[ lidx ] = this.code.lines[ lidx ] ?? "";
@@ -2529,11 +2569,11 @@ class CodeEditor {
 
     async _copyContent( cursor ) {
 
-        let text_to_copy = "";
+        let textToCopy = "";
 
         if( !cursor.selection )
         {
-            text_to_copy = "\n" + this.code.lines[ cursor.line ];
+            textToCopy = "\n" + this.code.lines[ cursor.line ];
         }
         else
         {
@@ -2553,27 +2593,30 @@ class CodeEditor {
             const num_chars = cursor.selection.chars + ( cursor.selection.toY - cursor.selection.fromY ) * separator.length;
             const text = code.substr( index, num_chars );
             const lines = text.split( separator );
-            text_to_copy = lines.join('\n');
+            textToCopy = lines.join('\n');
         }
 
-        navigator.clipboard.writeText( text_to_copy ).then(() => console.log("Successfully copied"), (err) => console.error("Error"));
+        navigator.clipboard.writeText( textToCopy );
+            // .then(() => console.log("Successfully copied"), (err) => console.error("Error"));
     }
 
     async _cutContent( cursor ) {
 
         let lidx = cursor.line;
-        let text_to_cut = "";
+        let textToCut = "";
 
         this._addUndoStep( cursor, true );
 
         if( !cursor.selection )
         {
-            text_to_cut = "\n" + this.code.lines[ cursor.line ];
+            textToCut = "\n" + this.code.lines[ cursor.line ];
             this.code.lines.splice( lidx, 1 );
             this.processLines();
             this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
             if( this.code.lines[ lidx ] == undefined )
+            {
                 this.lineUp( cursor );
+            }
         }
         else
         {
@@ -2581,24 +2624,27 @@ class CodeEditor {
             if( cursor.selection ) cursor.selection.invertIfNecessary();
 
             const separator = "_NEWLINE_";
-            let code = this.code.lines.join(separator);
+            let code = this.code.lines.join( separator );
 
             // Get linear start index
             let index = 0;
 
-            for(let i = 0; i <= cursor.selection.fromY; i++)
+            for( let i = 0; i <= cursor.selection.fromY; i++ )
+            {
                 index += (i == cursor.selection.fromY ? cursor.selection.fromX : this.code.lines[ i ].length);
+            }
 
             index += cursor.selection.fromY * separator.length;
-            const num_chars = cursor.selection.chars + (cursor.selection.toY - cursor.selection.fromY) * separator.length;
-            const text = code.substr(index, num_chars);
-            const lines = text.split(separator);
-            text_to_cut = lines.join('\n');
+            const numChars = cursor.selection.chars + (cursor.selection.toY - cursor.selection.fromY) * separator.length;
+            const text = code.substr( index, numChars );
+            const lines = text.split( separator );
+            textToCut = lines.join('\n');
 
             this.deleteSelection( cursor );
         }
 
-        navigator.clipboard.writeText( text_to_cut ).then(() => console.log("Successfully cut"), (err) => console.error("Error"));
+        navigator.clipboard.writeText( textToCut );
+            // .then(() => console.log("Successfully cut"), (err) => console.error("Error"));
     }
 
     _duplicateLine( lidx, cursor ) {
@@ -3491,7 +3537,7 @@ class CodeEditor {
         this._removeSecondaryCursors();
 
         var cursor = this._getCurrentCursor();
-        this.resetCursorPos( CodeEditor.CURSOR_LEFT | CodeEditor.CURSOR_TOP, cursor );
+        this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, cursor );
 
         this.startSelection( cursor );
 
