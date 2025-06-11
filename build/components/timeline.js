@@ -3721,7 +3721,7 @@ class ClipsTimeline extends Timeline {
                     const fadeinX = this.pixelsPerSecond * (clip.fadein - clip.start);
                     ctx.roundRect(x, y + offset, fadeinX, trackHeight, {tl: 5, bl: 5, tr:0, br:0}, true);
                 }
-                if ( clip.fadein != undefined ){
+                if ( clip.fadeout != undefined ){
                     const fadeoutX = this.pixelsPerSecond * (clip.start + clip.duration - (clip.fadeout));
                     ctx.roundRect( x + w - fadeoutX, y + offset, fadeoutX, trackHeight, {tl: 0, bl: 0, tr:5, br:5}, true);
                 }
