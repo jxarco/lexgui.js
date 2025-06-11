@@ -3303,10 +3303,10 @@ class ClipsTimeline extends Timeline {
                 const track = this.animationClip.tracks[this.lastClipsSelected[0][0]]; 
                 let clip = track.clips[this.lastClipsSelected[0][1]];
                 if( this.dragClipMode == "fadein" ) {
-                    clip.fadein = Math.min(Math.max(clip.fadein + delta, clip.start), clip.fadeout);
+                    clip.fadein = Math.min(Math.max(clip.fadein + delta, clip.start), clip.fadeout ?? (clip.start+clip.duration) );
                 }
                 else if( this.dragClipMode == "fadeout" ) {
-                    clip.fadeout = Math.max(Math.min(clip.fadeout + delta, clip.start+clip.duration), clip.fadein);
+                    clip.fadeout = Math.max(Math.min(clip.fadeout + delta, clip.start+clip.duration), clip.fadein ?? clip.start );
                 }
                 else if( this.dragClipMode == "duration" ) {
                     let duration = Math.max(0, clip.duration + delta);
