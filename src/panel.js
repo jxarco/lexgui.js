@@ -1095,6 +1095,8 @@ class Panel {
      * @param {Array} tabs Contains objects with {
      *      name: Name of the tab (if icon, use as title)
      *      icon: Icon to be used as the tab icon (optional)
+     *      iconClass: Class to be added to the icon (optional)
+     *      svgClass: Class to be added to the inner SVG of the icon (optional)
      *      onCreate: Func to be called at tab creation
      *      onSelect: Func to be called on select tab (optional)
      * }

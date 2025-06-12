@@ -11443,7 +11443,7 @@ class TabSections extends Widget {
             let tabEl = document.createElement( "div" );
             tabEl.className = "lextab " + (i == tabs.length - 1 ? "last" : "") + ( isSelected ? "selected" : "" );
             tabEl.innerHTML = ( showNames ? tab.name : "" );
-            tabEl.appendChild( LX.makeIcon( tab.icon ?? "Hash", { title: tab.name } ) );
+            tabEl.appendChild( LX.makeIcon( tab.icon ?? "Hash", { title: tab.name, iconClass: tab.iconClass, svgClass: tab.svgClass } ) );
 
             let infoContainer = document.createElement( "div" );
             infoContainer.id = tab.name.replace( /\s/g, '' );
@@ -11479,7 +11479,7 @@ class TabSections extends Widget {
                 // Push to tab space
                 const creationPanel = new LX.Panel();
                 creationPanel.queue( infoContainer );
-                tab.onCreate.call(this, creationPanel);
+                tab.onCreate.call( this, creationPanel, infoContainer );
                 creationPanel.clearQueue();
             }
         }
@@ -13440,6 +13440,8 @@ class Panel {
      * @param {Array} tabs Contains objects with {
      *      name: Name of the tab (if icon, use as title)
      *      icon: Icon to be used as the tab icon (optional)
+     *      iconClass: Class to be added to the icon (optional)
+     *      svgClass: Class to be added to the inner SVG of the icon (optional)
      *      onCreate: Func to be called at tab creation
      *      onSelect: Func to be called on select tab (optional)
      * }
