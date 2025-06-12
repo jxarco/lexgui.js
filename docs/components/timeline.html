@@ -459,7 +459,7 @@ panel.attach(kfTimeline.root);` );
 
     ], "" );
 
-    MAKE_CLASS_METHOD( ".addKeyFrames", `Add keyframes to a track. If flags is set to ${INLINE_CODE("Timeline.ADDKEY_VALUESINARRAYS")} (0x01), values must be an array of arrays, each containing the values of a single frame. Otherwise, it must be a flat array.`, [
+    MAKE_CLASS_METHOD( ".addKeyFrames", `Add keyframes to a track. ${INLINE_CODE("newTimes")} must be sorted ascendently. If ${INLINE_CODE("flags")} is set to ${INLINE_CODE("Timeline.ADDKEY_VALUESINARRAYS")} (0x01), values must be an array of arrays, each containing the values of a single frame. Otherwise, it must be a flat array.`, [
         ["trackIdx", "Number"],
         ["newValues", "Array of Number"],
         ["newTimes", "Array of Number"],

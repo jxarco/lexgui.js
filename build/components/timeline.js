@@ -2633,7 +2633,7 @@ class KeyFramesTimeline extends Timeline {
      * 
      * @param {int} trackIdx 
      * @param {array} newValues array of values for each keyframe. It should be a flat array of size track.dim*numKeyframes. Check ADDKEY_VALUESINARRAYS flag
-     * @param {array of numbers} newTimes 
+     * @param {array of numbers} newTimes must be ordered ascendently
      * @param {number} timeOffset 
      * @param {int} flags     
      *      KeyFramesTimeline.ADDKEY_VALUESINARRAYS: if set, newValues is an array of arrays, one for each entry [ [1,2,3], [5,6,7] ]. Times is still a flat array of values [ 0, 0.2 ]
@@ -2656,8 +2656,7 @@ class KeyFramesTimeline extends Timeline {
 
         let newIdx = newTimes.length-1;
         let oldIdx = trackTimes.length-1;
-
-        let t1 = performance.now();
+        let resultIndices = [];
         if ( KeyFramesTimeline.ADDKEY_VALUESINARRAYS & flags ){
             
             for( let i = times.length-1; i > -1; --i ){
@@ -2672,6 +2671,8 @@ class KeyFramesTimeline extends Timeline {
                     track.hovered.splice(oldIdx+1, 0, false);
                     track.selected.splice(oldIdx+1, 0, false);
                     track.edited.splice(oldIdx+1, 0, true);
+
+                    resultIndices.push(i);
                     continue;
                 }
                 
@@ -2695,6 +2696,8 @@ class KeyFramesTimeline extends Timeline {
                     track.hovered.splice(oldIdx+1, 0, false);
                     track.selected.splice(oldIdx+1, 0, false);
                     track.edited.splice(oldIdx+1, 0, true);
+
+                    resultIndices.push(i);
                     continue;
                 }
                 
@@ -2715,8 +2718,11 @@ class KeyFramesTimeline extends Timeline {
             this.setDuration(newTimes[newTimes.length - 1] + timeOffset);
         }
 
-        if(this.onUpdateTrack)
+        if(this.onUpdateTrack){
             this.onUpdateTrack( [trackIdx] );
+        }
+
+        return resultIndices;
     }
 
     deleteSelectedContent(skipCallback = false) {
@@ -3099,6 +3105,7 @@ class ClipsTimeline extends Timeline {
     setAnimationClip( animation, needsToProcess ){
         super.setAnimationClip(animation, needsToProcess);
         this.changeSelectedItems();
+        return this.animationClip;
     }
 
     // OVERRIDE
@@ -3297,10 +3304,10 @@ class ClipsTimeline extends Timeline {
                 const track = this.animationClip.tracks[this.lastClipsSelected[0][0]]; 
                 let clip = track.clips[this.lastClipsSelected[0][1]];
                 if( this.dragClipMode == "fadein" ) {
-                    clip.fadein = Math.min(Math.max(clip.fadein + delta, clip.start), clip.fadeout);
+                    clip.fadein = Math.min(Math.max(clip.fadein + delta, clip.start), clip.fadeout ?? (clip.start+clip.duration) );
                 }
                 else if( this.dragClipMode == "fadeout" ) {
-                    clip.fadeout = Math.max(Math.min(clip.fadeout + delta, clip.start+clip.duration), clip.fadein);
+                    clip.fadeout = Math.max(Math.min(clip.fadeout + delta, clip.start+clip.duration), clip.fadein ?? clip.start );
                 }
                 else if( this.dragClipMode == "duration" ) {
                     let duration = Math.max(0, clip.duration + delta);
@@ -3715,7 +3722,7 @@ class ClipsTimeline extends Timeline {
                     const fadeinX = this.pixelsPerSecond * (clip.fadein - clip.start);
                     ctx.roundRect(x, y + offset, fadeinX, trackHeight, {tl: 5, bl: 5, tr:0, br:0}, true);
                 }
-                if ( clip.fadein != undefined ){
+                if ( clip.fadeout != undefined ){
                     const fadeoutX = this.pixelsPerSecond * (clip.start + clip.duration - (clip.fadeout));
                     ctx.roundRect( x + w - fadeoutX, y + offset, fadeoutX, trackHeight, {tl: 0, bl: 0, tr:5, br:5}, true);
                 }
