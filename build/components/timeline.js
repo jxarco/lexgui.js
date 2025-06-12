@@ -3105,6 +3105,7 @@ class ClipsTimeline extends Timeline {
     setAnimationClip( animation, needsToProcess ){
         super.setAnimationClip(animation, needsToProcess);
         this.changeSelectedItems();
+        return this.animationClip;
     }
 
     // OVERRIDE
