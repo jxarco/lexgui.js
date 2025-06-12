@@ -3287,6 +3287,7 @@ class NumberInput extends Widget {
             slider.step = options.step ?? 1;
             slider.type = "range";
             slider.value = value;
+            slider.disabled = this.disabled;
 
             slider.addEventListener( "input", ( e ) => {
                 this.set( slider.valueAsNumber, false, e );

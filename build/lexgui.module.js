@@ -10355,6 +10355,7 @@ class NumberInput extends Widget {
             slider.step = options.step ?? 1;
             slider.type = "range";
             slider.value = value;
+            slider.disabled = this.disabled;
 
             slider.addEventListener( "input", ( e ) => {
                 this.set( slider.valueAsNumber, false, e );
@@ -12008,8 +12009,8 @@ class Table extends Widget {
                     }
 
                     const row = document.createElement( 'tr' );
-                    const rowId = LX.getSupportedDOMName( bodyData.join( '-' ) );
-                    row.setAttribute( "rowId", rowId.substr(0, 32) );
+                    const rowId = LX.getSupportedDOMName( bodyData.join( '-' ) ).substr(0, 32);
+                    row.setAttribute( "rowId", rowId );
 
                     if( options.sortable ?? false )
                     {

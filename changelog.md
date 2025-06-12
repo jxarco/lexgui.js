@@ -2,6 +2,16 @@
 
 ## dev
 
+Timeline:
+- `addKeyframes` now returns new indices.
+- Fixed fadein/fadeout when one of them doesn't exist.
+- Fix fadeout draw
+- `setClip` now returns the Animation Clip.
+
+Widgets:
+- Fixed rowId in Table Widget.
+- Fixed disabled NumberInput slider.
+
 ## 0.6.8 (master)
 
 Widgets:
