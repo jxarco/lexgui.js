@@ -7616,9 +7616,9 @@ class NodeTree {
 
         if( this.options.onlyFolders )
         {
-            let has_folders = false;
-            node.children.forEach( c => has_folders |= (c.type == 'folder') );
-            isParent = !!has_folders;
+            let hasFolders = false;
+            node.children.forEach( c => hasFolders |= (c.type == 'folder') );
+            isParent = !!hasFolders;
         }
 
         let item = document.createElement('li');
@@ -7783,22 +7783,14 @@ class NodeTree {
                 } );
 
                 event.panel.add( "Delete", { callback: () => {
-                    // It's the root node
-                    if( !node.parent )
-                    {
-                        return;
-                    }
 
-                    if( that.onevent )
+                    const ok = that.deleteNode( node );
+
+                    if( ok && that.onevent )
                     {
                         const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, node, e );
                         that.onevent( event );
                     }
-
-                    // Delete nodes now
-                    let childs = node.parent.children;
-                    const index = childs.indexOf( node );
-                    childs.splice( index, 1 );
 
                     this.refresh();
                 } } );
@@ -7816,23 +7808,26 @@ class NodeTree {
 
             if( e.key == "Delete" )
             {
-                // Send event now so we have the info in selected array..
-                if( that.onevent )
+                const nodesDeleted = [];
+
+                for( let _node of this.selected )
                 {
-                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, this.selected.length > 1 ? this.selected : node, e );
-                    event.multiple = this.selected.length > 1;
+                    if( that.deleteNode( _node ) )
+                    {
+                        nodesDeleted.push( _node );
+                    }
+                }
+
+                // Send event now so we have the info in selected array..
+                if( nodesDeleted.length && that.onevent )
+                {
+                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, nodesDeleted.length > 1 ? nodesDeleted : node, e );
+                    event.multiple = nodesDeleted.length > 1;
                     that.onevent( event );
                 }
 
-                // Delete nodes now
-                for( let _node of this.selected )
-                {
-                    let childs = _node.parent.children;
-                    const index = childs.indexOf( _node );
-                    childs.splice( index, 1 );
-                }
-
                 this.selected.length = 0;
+
                 this.refresh();
             }
             else if( e.key == "ArrowUp" || e.key == "ArrowDown" ) // Unique or zero selected
@@ -8100,6 +8095,35 @@ class NodeTree {
         el.classList.add( "selected" );
         this.selected = [ el.treeData ];
         el.focus();
+    }
+
+    deleteNode( node ) {
+
+        const dataAsArray = ( this.data.constructor === Array );
+
+        // Can be either Array or Object type data
+        if( node.parent )
+        {
+            let childs = node.parent.children;
+            const index = childs.indexOf( node );
+            childs.splice( index, 1 );
+        }
+        else
+        {
+            if( dataAsArray )
+            {
+                const index = this.data.indexOf( node );
+                console.assert( index > -1, "NodeTree: Can't delete root node " + node.id + " from data array!" );
+                this.data.splice( index, 1 );
+            }
+            else
+            {
+                console.warn( "NodeTree: Can't delete root node from object data!" );
+                return false;
+            }
+        }
+
+        return true;
     }
 }
 
