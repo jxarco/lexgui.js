@@ -2966,6 +2966,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     font-size: var(--global-font-size-lg);
 }
 
+.lexmenubar .lexmenubuttons.left {
+    margin-left: unset;
+}
+
 .lexmenubar .lexmenubuttons.right {
     margin-left: unset;
     margin-right: 12px;

@@ -15,6 +15,8 @@ Widgets:
 - TabSection's `onCreate` now receives also the tab content HTML Container (2nd parameter).
 - Fixed some Delete edge cases (key and ContextMenu) of Tree Widget.
 
+Fixed Menubar buttons using `float: left` alignment.
+
 ## 0.6.8 (master)
 
 Widgets:

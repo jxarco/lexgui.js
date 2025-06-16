@@ -14065,7 +14065,7 @@ class Menubar {
             this.buttonContainer.className = "lexmenubuttons";
             this.buttonContainer.classList.add( options.float ?? "center" );
 
-            if( options.position == "right" )
+            if( options.float == "right" )
             {
                 this.buttonContainer.right = true;
             }
