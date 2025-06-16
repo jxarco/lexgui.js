@@ -3748,18 +3748,16 @@ class ClipsTimeline extends Timeline {
             }
             
 
-            // Overwrite style with small font size if it's zoomed out
-            if( this.pixelsPerSecond < 200) {
-                ctx.font = this.pixelsPerSecond * 0.06  +"px" + Timeline.FONT;
-            }
-
-            const text = clip.id ?? ""; //clip.id.replaceAll("_", " ").replaceAll("-", " ");
+            let text = clip.id ?? ""; //clip.id.replaceAll("_", " ").replaceAll("-", " ");
             const textInfo = ctx.measureText( text );
             
-            // Draw clip name if it's readable
-            if(this.pixelsPerSecond > 100) {
-                ctx.fillText( text, x + (w - textInfo.width)*0.5,  y + offset + trackHeight * 0.5);
+            let textWidth = textInfo.width;
+            if ( textWidth > w && textWidth > 0){
+                let amount = Math.floor( w * text.length / textWidth );
+                text = text.substr( 0, amount );
+                textWidth = w;
             }
+            ctx.fillText( text, x + (w - textWidth)*0.5,  y + offset + trackHeight * 0.5);
 
             ctx.fillStyle = track.hovered[j] ? "white" : "#f5f5f5"//track.hovered[j] ? "white" : Timeline.FONT_COLOR_QUATERNARY;
             ctx.strokeStyle = "rgba(125,125,125,0.4)";
