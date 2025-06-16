@@ -15,12 +15,16 @@
             // String values
             panel.addSelect("String Select", ["Option 1", "Option 2", "Option 3"], "Option 1", (value, event) => {
                 console.log(value);
-            });
+            }, { "on_Option 1": ( panel ) => {
+                panel.addNumber( "A number", 23 );
+            }, "on_Option 3": ( panel ) => {
+                panel.addText( "Some text", "Hello! I was hidden" );
+            } });
 
             // Media values
             const options = [
-            { value: "Option 1", src: "../data/clips.png" }, 
-            { value: "Option 2", src: "../data/realizer_signon.png" }
+                { value: "Option 1", src: "../data/clips.png" },
+                { value: "Option 2", src: "../data/realizer_signon.png" }
             ];
             panel.addSelect("Media Select", options, "Option 1", (value, event) => {
                 console.log(value);
@@ -58,4 +62,8 @@
             } )
         }, {});
     }
+
+    MAKE_NOTE( `As extra options, you can use ${ INLINE_CODE( `options.on_&lt;OptionName&gt;` ) } as a Function to create new widgets when a selected option has been
+        created.` )
+
 </script>

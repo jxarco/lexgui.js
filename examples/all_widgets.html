@@ -255,6 +255,9 @@
             panelB.addRange("Disabled", 29, null, { min: 1, max: 48, step: 1, disabled: true });
             panelB.branch("Select Inputs", { closed: closedDefault });
             panelB.addSelect("Classic", selectValues, "Unity", null);
+            panelB.addSelect("With Suboptions", selectValues, "Unity", null, { on_Unity: (p) => {
+                p.addNumber( "A Number", 44 );
+            } });
             panelB.addSelect("With Labels", selectValuesWithLabels, "Unity", null);
             panelB.addSelect("With Filter", selectValuesWithLabels, "Godot", null, { filter: true, placeholder: "Search tools..." });
             panelB.addSelect("Custom Empty Msg", selectValuesWithLabels, "Unreal Engine", null, { filter: true, emptyMsg: "No tools found.", placeholder: "Search tools..." });

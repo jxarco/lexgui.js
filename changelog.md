@@ -14,6 +14,7 @@ Widgets:
 - TabSections icons can be modified using `iconClass` and `svgClass`.
 - TabSection's `onCreate` now receives also the tab content HTML Container (2nd parameter).
 - Fixed some Delete edge cases (key and ContextMenu) of Tree Widget.
+- Select Widget now allows creating new widgets as suboptions for each select value.
 
 Fixed Menubar buttons using `float: left` alignment.
 

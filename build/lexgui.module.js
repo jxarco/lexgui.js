@@ -7421,8 +7421,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
             if( customWidgetsDom ) customWidgetsDom.remove();
 
             container = document.createElement('div');
-            container.className = "lexcustomcontainer";
-            container.style.width = "100%";
+            container.className = "lexcustomcontainer w-full";
             element.appendChild( container );
             element.dataset["opened"] = false;
 
@@ -8959,8 +8958,8 @@ class Select extends Widget {
             value = newValue;
 
             let item = null;
-            const options = listOptions.childNodes;
-            options.forEach( e => {
+            const listOptionsNodes = listOptions.childNodes;
+            listOptionsNodes.forEach( e => {
                 e.classList.remove( "selected" );
                 if( e.getAttribute( "value" ) == newValue )
                 {
@@ -8979,6 +8978,22 @@ class Select extends Widget {
                 const filteredOptions = this._filterOptions( values, "" );
                 list.refresh( filteredOptions );
             }
+
+            // Update suboptions menu
+            const suboptions = this.root.querySelector( ".lexcustomcontainer" );
+            const suboptionsFunc = options[ `on_${ value }` ];
+            suboptions.toggleAttribute( "hidden", !suboptionsFunc );
+
+            if( suboptionsFunc )
+            {
+                suboptions.innerHTML = "";
+                const suboptionsPanel = new LX.Panel();
+                suboptionsPanel.queue( suboptions );
+                suboptionsFunc.call(this, suboptionsPanel);
+                suboptionsPanel.clearQueue();
+            }
+
+            this.root.dataset["opened"] = ( !!suboptionsFunc );
 
             if( !skipCallback )
             {
@@ -9275,6 +9290,25 @@ class Select extends Widget {
         list.refresh( values );
 
         container.appendChild( listDialog );
+
+        // Element suboptions
+        let suboptions = document.createElement( "div" );
+        suboptions.className = "lexcustomcontainer w-full";
+
+        const suboptionsFunc = options[ `on_${ value }` ];
+        suboptions.toggleAttribute( "hidden", !suboptionsFunc );
+
+        if( suboptionsFunc )
+        {
+            suboptions.innerHTML = "";
+            const suboptionsPanel = new LX.Panel();
+            suboptionsPanel.queue( suboptions );
+            suboptionsFunc.call( this, suboptionsPanel );
+            suboptionsPanel.clearQueue();
+        }
+
+        this.root.appendChild( suboptions );
+        this.root.dataset["opened"] = ( !!suboptionsFunc );
 
         LX.doAsync( this.onResize.bind( this ) );
     }
