@@ -1290,7 +1290,7 @@ class Timeline {
      * @param {obj} options set some values for the track instance (groups and trackIdx not included)
      * @returns 
      */
-    instantiateTrack(options = {}) { 
+    instantiateTrack(options = {}, clone = false) { 
         return {
             isTrack: true,
             id: options.id ?? ( Math.floor(performance.now().toString()) + "_" + Math.floor(Math.random() * 0xffff) ), //must be unique, at least inside a group
@@ -1307,13 +1307,12 @@ class Timeline {
      * @param {obj} animation data with which to generate an animationClip 
      * @returns 
      */
-    instantiateAnimationClip(options) {
+    instantiateAnimationClip(options, clone = false) {
         options = options ?? {};
         const animationClip = {
             id: options.id ?? (options.name ?? "animationClip"),
             duration: options.duration ?? 0,
             tracks: [],
-            tracksPerGroup: options.tracksPerGroup ?? {},
             data: options.data ?? null, // user defined data
         };
         return animationClip;
@@ -1433,42 +1432,42 @@ class KeyFramesTimeline extends Timeline {
      *  id, dim, values, times, selected, edited, hovered
      * @returns 
      */
-    instantiateTrack(options ={}){
+    instantiateTrack(options ={}, clone = false){
         const track = super.instantiateTrack(options);
         track.dim = Math.max(1,options.dim ?? 1); // >= 1
         track.groupId = null,
         track.groupTrackIdx = -1, // track Idx inside group only if in group
 
-        track.values = new Float32Array(0); 
+        track.values = new Float32Array(0);
         track.times = new Float32Array(0);
         track.selected = [];
         track.edited = [];
         track.hovered = [];
 
         if ( options.values && options.times ){
-            track.values = options.values;
-            track.times = options.times;
+            track.values = clone ? options.values.slice() : options.values;
+            track.times = clone ? options.times.slice() : options.times;
             
             const numFrames = track.times.length;
             if ( options.selected && options.selected.length == numFrames ){
-                track.selected = options.selected;
+                track.selected = clone ? options.selected.slice() : options.selected;
             }else{ 
                 track.selected = (new Array(numFrames)).fill(false);
             }
             if ( options.edited && options.edited.length == numFrames ){
-                track.edited = options.edited;
+                track.edited = clone ? options.edited.slice() : options.edited;
             }else{ 
                 track.edited = (new Array(numFrames)).fill(false);
             }
             if ( options.hovered && options.hovered.length == numFrames ){
-                track.hovered = options.hovered;
+                track.hovered = clone ? options.hovered.slice() : options.hovered;
             }else{ 
                 track.hovered = (new Array(numFrames)).fill(false);
             }
         }
 
         track.curves = options.curves ?? this.defaultCurves; // only works if dim == 1
-        track.curvesRange = options.curvesRange ?? this.defaultCurvesRange.slice(0);
+        track.curvesRange = ( options.curvesRange ?? this.defaultCurvesRange ).slice();
         return track;
     }
 
@@ -1477,9 +1476,11 @@ class KeyFramesTimeline extends Timeline {
      * @param {obj} animation data with which to generate an animationClip 
      * @returns 
      */
-    instantiateAnimationClip(animation) {
+    instantiateAnimationClip(animation, clone = false) {
 
-        const animationClip = super.instantiateAnimationClip(animation);
+        const animationClip = super.instantiateAnimationClip(animation, clone);
+
+        animationClip.tracksPerGroup = {};
 
         if (animation && animation.tracks) {
             const tracksPerGroup = {};
@@ -1496,18 +1497,13 @@ class KeyFramesTimeline extends Timeline {
                     else{ valueDim = 1; }
                 }
 
-                let leftOver = values.length % valueDim; // just in case values have an incorrect length
-                let amounEntries = Math.min( times.length, values.length - leftOver );
-                times = times.slice(0, amounEntries); 
-                values = values.slice(0, amounEntries * valueDim);
-
                 let baseName = track.id ?? track.name;
                 const [groupId, trackId] = baseName ? this._getValidTrackName(baseName) : [null, null];
 
                 const toInstantiate = Object.assign({}, track);
                 toInstantiate.id = trackId;
                 toInstantiate.dim = valueDim;
-                const trackInfo = this.instantiateTrack(toInstantiate);
+                const trackInfo = this.instantiateTrack(toInstantiate, clone);
                 
                 // manual group insertion
                 if ( groupId ){
@@ -1525,12 +1521,33 @@ class KeyFramesTimeline extends Timeline {
                                 
                 animationClip.tracks.push(trackInfo);
 
-                if ( times.length ){ duration = Math.max( duration, times[times.length-1]); }
+                if ( trackInfo.times.length ){ duration = Math.max( duration, trackInfo.times[trackInfo.times.length-1]); }
             }
 
             animationClip.tracksPerGroup = tracksPerGroup;
             if ( !animation || !animation.duration ){
                 animationClip.duration = duration;
+            }
+            
+            // overwrite trackspergroup
+            if ( animation.tracksPerGroup ){
+                
+                // ungroup all tracks (just in case)
+                animationClip.tracks.forEach( (v,i,arr) =>{ v.groupId = null; v.groupTrackIdx = -1; } );
+                
+                animationClip.tracksPerGroup = {};
+                let tpg = animation.tracksPerGroup;
+                for( let groupId in tpg ){
+                    const source = tpg[groupId];
+                    const target = [];
+                    for( let ti = 0; ti < source.length; ++ti ){
+                        const trackInfo = animationClip.tracks[ source[ti].trackIdx ]; // redo references
+                        target[ti] = trackInfo; 
+                        trackInfo.groupId = groupId;
+                        trackInfo.groupTrackIdx = ti; // index of track in group
+                    }
+                    animationClip.tracksPerGroup[ groupId ] = target;
+                }
             }
         }
 
@@ -3042,6 +3059,10 @@ LX.KeyFramesTimeline = KeyFramesTimeline;
  */
 
 class ClipsTimeline extends Timeline {
+    static CLONEREASON_COPY = 1;
+    static CLONEREASON_PASTE = 2;
+    static CLONEREASON_HISTORY = 3;
+    static CLONEREASON_TRACKCLONE = 4;
 
     /**
      * @param {string} name 
@@ -3063,14 +3084,14 @@ class ClipsTimeline extends Timeline {
      * @param {obj} animation data with which to generate an animationClip 
      * @returns 
      */
-    instantiateAnimationClip(animation) {
+    instantiateAnimationClip(animation, clone = false) {
 
         const animationClip = super.instantiateAnimationClip(animation);
 
         if (animation && animation.tracks){
             for( let i = 0; i < animation.tracks.length; ++i ) {
     
-                const trackInfo = this.instantiateTrack( animation.tracks[i] );
+                const trackInfo = this.instantiateTrack( animation.tracks[i], clone );
                 trackInfo.trackIdx = animationClip.tracks.length;
 
                 animationClip.tracks.push(trackInfo);
@@ -3078,6 +3099,47 @@ class ClipsTimeline extends Timeline {
         }
         
         return animationClip;
+    }
+
+    /**
+     * 
+     * @param {obj} options set some values for the track instance (groups and trackIdx not included)
+     * @returns 
+    */
+    instantiateTrack(options = {}, clone = false) {
+        const track = super.instantiateTrack(options);
+
+        track.trackIdx = this.animationClip.tracks.length;
+
+        track.selected = [];
+        track.edited = [];
+        track.hovered = [];
+        
+        if( options.clips ){
+            track.clips = clone ? this.cloneClips(options.clips, 0, ClipsTimeline.CLONEREASON_TRACKCLONE) : options.clips;
+        }else{
+            track.clips = [];
+        }
+
+        const numClips = track.clips.length;
+
+        if ( options.selected && options.selected.length == numClips ){
+            track.selected = clone ? options.selected.slice() : options.selected;
+        }else{ 
+            track.selected = (new Array(numClips)).fill(false);
+        }
+        if ( options.edited && options.edited.length == numClips ){
+            track.edited = clone ? options.edited.slice() : options.edited;
+        }else{ 
+            track.edited = (new Array(numClips)).fill(false);
+        }
+        if ( options.hovered && options.hovered.length == numClips ){
+            track.hovered = clone ? options.hovered.slice() : options.hovered;
+        }else{ 
+            track.hovered = (new Array(numClips)).fill(false);
+        }
+
+        return track;
     }
 
     // use default updateleftpanel
@@ -3127,42 +3189,6 @@ class ClipsTimeline extends Timeline {
         this.selectedItems = this.animationClip.tracks.slice();
 
         this.updateLeftPanel();
-    }
-            
-    /**
-     * 
-     * @param {obj} options set some values for the track instance (groups and trackIdx not included)
-     * @returns 
-    */
-    instantiateTrack(options = {}) {
-        const track = super.instantiateTrack(options);
-
-        track.trackIdx = this.animationClip.tracks.length;
-
-        track.clips = options.clips ?? [];
-        track.selected = [];
-        track.edited = [];
-        track.hovered = [];
-        
-        const numClips = track.clips.length;
-
-        if ( options.selected && options.selected.length == numClips ){
-            track.selected = options.selected;
-        }else{ 
-            track.selected = (new Array(numClips)).fill(false);
-        }
-        if ( options.edited && options.edited.length == numClips ){
-            track.edited = options.edited;
-        }else{ 
-            track.edited = (new Array(numClips)).fill(false);
-        }
-        if ( options.hovered && options.hovered.length == numClips ){
-            track.hovered = options.hovered;
-        }else{ 
-            track.hovered = (new Array(numClips)).fill(false);
-        }
-
-        return track;
     }
 
     unHoverAll(){
@@ -4031,9 +4057,10 @@ class ClipsTimeline extends Timeline {
      * User defined. Used when copying and pasting
      * @param {Array of clips} clipsToClone array of original clips. Do not modify clips in this array
      * @param {float} timeOffset Value of time that should be added (or subtracted) from the timing attributes 
+     * @param {int} reason Flag to signal the reason of the clone
      * @returns {Array of clips}
      */
-    cloneClips( clipsToClone, timeOffset ){
+    cloneClips( clipsToClone, timeOffset, reason = 0 ){
         let clipsToReturn = JSON.parse(JSON.stringify(clipsToClone))
         for(let i = 0; i < clipsToReturn.length; ++i){
             let clip = clipsToReturn[i];
@@ -4066,7 +4093,7 @@ class ClipsTimeline extends Timeline {
         }
 
         globalStart = Math.max(0, globalStart);
-        this.clipboard = this.cloneClips( clipsToCopy, -globalStart );
+        this.clipboard = this.cloneClips( clipsToCopy, -globalStart, ClipsTimeline.CLONEREASON_COPY );
     }
 
     pasteContent( time = this.currentTime ) {
@@ -4077,7 +4104,7 @@ class ClipsTimeline extends Timeline {
 
         time = Math.max(0, time);
 
-        let clipsToAdd = this.cloneClips( this.clipboard, time );
+        let clipsToAdd = this.cloneClips( this.clipboard, time, ClipsTimeline.CLONEREASON_PASTE );
         this.addClips(clipsToAdd, 0);
     }
 
@@ -4126,7 +4153,7 @@ class ClipsTimeline extends Timeline {
      */
     historyGenerateTrackStep( trackIdx ){
         const track = this.animationClip.tracks[trackIdx];
-        const clips = this.cloneClips(track.clips, 0);
+        const clips = this.cloneClips(track.clips, 0, ClipsTimeline.CLONEREASON_HISTORY);
 
         const undoStep = {
             trackIdx: trackIdx, // already done by saveState
