@@ -3236,6 +3236,10 @@ class ClipsTimeline extends Timeline {
         let localY = e.localY;
         let track = e.track;
         
+        if ( e.button > 0 ){ 
+            return;
+        }
+        
         if(e.ctrlKey && track) { // move clips
             
             let x = e.offsetX;
