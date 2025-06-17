@@ -604,6 +604,7 @@ class Panel {
      * hideName: Don't use name as label [false]
      * disabled: Make the widget disabled [false]
      * icon: Icon class to show as button value
+     * iconPosition: Icon position (cover|start|end)
      * fileInput: Button click requests a file
      * fileInputType: Type of the requested file
      * img: Path to image to show as button value

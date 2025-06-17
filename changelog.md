@@ -9,6 +9,7 @@ Timeline:
 - `setClip` now returns the Animation Clip.
 
 Widgets:
+- Added support for `options.iconPosition` in Button Widget (`cover` as default).
 - Fixed rowId in Table Widget.
 - Show "No results." row if no data in Table Widget.
 - Fixed disabled NumberInput slider.

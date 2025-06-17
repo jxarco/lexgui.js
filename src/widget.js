@@ -1423,17 +1423,37 @@ class Button extends Widget {
             wValue.classList.add( "selected" );
         }
 
-        if( options.icon )
-        {
-            const icon = LX.makeIcon( options.icon );
-            wValue.prepend( icon );
-            wValue.classList.add( "justify-center" );
-        }
-        else if( options.img )
+        if( options.img )
         {
             let img = document.createElement( 'img' );
             img.src = options.img;
             wValue.prepend( img );
+        }
+        else if( options.icon )
+        {
+            const icon = LX.makeIcon( options.icon );
+            const iconPosition = options.iconPosition ?? "cover";
+
+            // Default
+            if( iconPosition == "cover" || ( options.swap !== undefined ) )
+            {
+                wValue.prepend( icon );
+            }
+            else
+            {
+                wValue.innerHTML = `<span>${ ( value || "" ) }</span>`;
+
+                if( iconPosition == "start" )
+                {
+                    wValue.querySelector( "span" ).prepend( icon );
+                }
+                else // "end"
+                {
+                    wValue.querySelector( "span" ).appendChild( icon );
+                }
+            }
+
+            wValue.classList.add( "justify-center" );
         }
         else
         {
