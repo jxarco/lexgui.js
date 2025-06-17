@@ -6798,6 +6798,7 @@ class Area {
         this.attach( container );
 
         const float = options.float;
+        let floatClass = "";
 
         if( float )
         {
@@ -6807,15 +6808,17 @@ class Area {
                 switch( t )
                 {
                 case 'h': break;
-                case 'v': container.className += " vertical"; break;
+                case 'v': floatClass += " vertical"; break;
                 case 't': break;
-                case 'm': container.className += " middle"; break;
-                case 'b': container.className += " bottom"; break;
+                case 'm': floatClass += " middle"; break;
+                case 'b': floatClass += " bottom"; break;
                 case 'l': break;
-                case 'c': container.className += " center"; break;
-                case 'r': container.className += " right"; break;
+                case 'c': floatClass += " center"; break;
+                case 'r': floatClass += " right"; break;
                 }
             }
+
+            container.className += ` ${ floatClass }`;
         }
 
         const _addButton = function( b, group, last ) {
@@ -6894,7 +6897,7 @@ class Area {
                 {
                     // Add a separator
                     const separator = document.createElement("div");
-                    separator.className = "lexoverlayseparator";
+                    separator.className = "lexoverlayseparator" + floatClass;
                     overlayPanel.root.appendChild( separator );
                     continue;
                 }

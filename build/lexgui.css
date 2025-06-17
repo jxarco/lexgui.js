@@ -3577,6 +3577,12 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     margin-top: -0.25em;
 }
 
+.lexoverlaybuttonscontainer.vertical .lexoverlayseparator {
+    width: calc(100% + 0.5em);
+    height: 2px;
+    margin-left: -0.25em;
+}
+
 /* Area Tabs */
 
 .lexareatabs {
