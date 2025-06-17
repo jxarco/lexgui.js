@@ -1383,7 +1383,7 @@ class Button extends Widget {
 
             if( ( options.swap ?? false ) )
             {
-                this.root.setState( newValue, skipCallback );
+                this.setState( newValue, skipCallback );
                 return;
             }
 
