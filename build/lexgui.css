@@ -1889,7 +1889,7 @@ dialog .lexselect .lexselectoptions {
 
 .lexselect .lexselectlabel {
     width: 100%;
-    color: var(--global-text-secondary);
+    color: var(--global-text-tertiary);
     padding-inline: 0.6rem;
     padding-block: 0.2rem;
     min-height: 20px;
@@ -4105,7 +4105,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     grid-column: span 2;
 }
 
-.lexcustomcontainer span {
+.lexcustomcontainer button.custom span {
     align-items: center;
     display: flex;
     justify-content: space-between;

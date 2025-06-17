@@ -17,6 +17,7 @@ Widgets:
 - Select Widget now allows creating new widgets as suboptions for each select value.
 
 Fixed Menubar buttons using `float: left` alignment.
+Minor fixes CSS.
 
 ## 0.6.8 (master)
 

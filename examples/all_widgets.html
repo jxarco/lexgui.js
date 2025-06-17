@@ -256,7 +256,7 @@
             panelB.branch("Select Inputs", { closed: closedDefault });
             panelB.addSelect("Classic", selectValues, "Unity", null);
             panelB.addSelect("With Suboptions", selectValues, "Unity", null, { on_Unity: (p) => {
-                p.addNumber( "A Number", 44 );
+                p.addButton("Unity Button", "Click me!", null, { buttonClass: "contrast" });
             } });
             panelB.addSelect("With Labels", selectValuesWithLabels, "Unity", null);
             panelB.addSelect("With Filter", selectValuesWithLabels, "Godot", null, { filter: true, placeholder: "Search tools..." });
@@ -294,10 +294,7 @@
                                 'actions': [
                                     {
                                         'name': 'Open script',
-                                        'icon': 'Scroll',
-                                        'callback': function (node) {
-                                            console.log(node.id + ": Script opened!")
-                                        }
+                                        'icon': 'Scroll'
                                     }
                                 ]
                             }
