@@ -3569,6 +3569,14 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     margin-right: 0px;
 }
 
+.lexoverlayseparator {
+    background-color: var(--global-color-tertiary);
+    opacity: 0.9;
+    width: 2px;
+    height: calc(100% + 0.5em);
+    margin-top: -0.25em;
+}
+
 /* Area Tabs */
 
 .lexareatabs {

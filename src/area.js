@@ -878,6 +878,15 @@ class Area {
 
             for( let b of buttons )
             {
+                if( b === null )
+                {
+                    // Add a separator
+                    const separator = document.createElement("div");
+                    separator.className = "lexoverlayseparator";
+                    overlayPanel.root.appendChild( separator );
+                    continue;
+                }
+
                 if( b.constructor === Array )
                 {
                     for( let i = 0; i < b.length; ++i )

@@ -18,6 +18,7 @@ Widgets:
 - Fixed some Delete edge cases (key and ContextMenu) of Tree Widget.
 - Select Widget now allows creating new widgets as suboptions for each select value.
 
+Added support for Area Overlaybuttons separators.
 Fixed Menubar buttons using `float: left` alignment.
 Minor fixes CSS.
 
