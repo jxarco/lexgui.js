@@ -305,7 +305,7 @@ class Menubar {
         {
             const data = buttons[ i ];
             const title = data.title;
-            const button = new LX.Button( title, "", data.callback, { title, buttonClass: "bg-none", disabled: data.disabled, icon: data.icon, hideName: true, swap: data.swap } )
+            const button = new LX.Button( title, data.label, data.callback, { title, buttonClass: "bg-none", disabled: data.disabled, icon: data.icon, hideName: true, swap: data.swap, iconPosition: "start" } )
             this.buttonContainer.appendChild( button.root );
 
             if( title )

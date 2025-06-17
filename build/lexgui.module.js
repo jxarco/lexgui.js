@@ -5070,7 +5070,7 @@ LX.makeCodeSnippet = makeCodeSnippet;
  * @param {Array} keys
  * @param {String} extraClass
  */
-function makeKbd( keys, extraClass = "" )
+function makeKbd( keys, useSpecialKeys = true, extraClass = "" )
 {
     const specialKeys = {
         "Ctrl": '⌃',
@@ -5092,7 +5092,7 @@ function makeKbd( keys, extraClass = "" )
 
     for( const k of keys )
     {
-        LX.makeContainer( ["auto", "auto"], "self-center text-xs fg-secondary select-none", specialKeys[ k ] ?? k, kbd );
+        LX.makeContainer( ["auto", "auto"], "self-center text-xs fg-secondary select-none " + extraClass, useSpecialKeys ? specialKeys[ k ] ?? k : k, kbd );
     }
 
     return kbd;
@@ -14152,7 +14152,7 @@ class Menubar {
         {
             const data = buttons[ i ];
             const title = data.title;
-            const button = new LX.Button( title, "", data.callback, { title, buttonClass: "bg-none", disabled: data.disabled, icon: data.icon, hideName: true, swap: data.swap } );
+            const button = new LX.Button( title, data.label, data.callback, { title, buttonClass: "bg-none", disabled: data.disabled, icon: data.icon, hideName: true, swap: data.swap, iconPosition: "start" } );
             this.buttonContainer.appendChild( button.root );
 
             if( title )

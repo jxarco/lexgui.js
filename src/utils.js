@@ -782,7 +782,7 @@ LX.makeCodeSnippet = makeCodeSnippet;
  * @param {Array} keys
  * @param {String} extraClass
  */
-function makeKbd( keys, extraClass = "" )
+function makeKbd( keys, useSpecialKeys = true, extraClass = "" )
 {
     const specialKeys = {
         "Ctrl": '⌃',
@@ -804,7 +804,7 @@ function makeKbd( keys, extraClass = "" )
 
     for( const k of keys )
     {
-        LX.makeContainer( ["auto", "auto"], "self-center text-xs fg-secondary select-none", specialKeys[ k ] ?? k, kbd );
+        LX.makeContainer( ["auto", "auto"], "self-center text-xs fg-secondary select-none " + extraClass, useSpecialKeys ? specialKeys[ k ] ?? k : k, kbd );
     }
 
     return kbd;
