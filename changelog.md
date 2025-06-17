@@ -10,6 +10,7 @@ Timeline:
 
 Widgets:
 - Fixed rowId in Table Widget.
+- Show "No results." row if no data in Table Widget.
 - Fixed disabled NumberInput slider.
 - TabSections icons can be modified using `iconClass` and `svgClass`.
 - TabSection's `onCreate` now receives also the tab content HTML Container (2nd parameter).

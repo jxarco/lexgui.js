@@ -3998,6 +3998,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     align-content: center;
 }
 
+.lextable td.empty-row {
+    text-align: center;
+    padding-block: 16px;
+}
+
 .lextable th {
     --th-color: var(--global-text-secondary);
     font-weight: 600;

@@ -4788,7 +4788,9 @@ class Table extends Widget {
                         const body = table.querySelector( "tbody" );
                         for( const el of body.childNodes )
                         {
-                            data.checkMap[ el.getAttribute( "rowId" ) ] = this.checked;
+                            const rowId = el.getAttribute( "rowId" );
+                            if( !rowId ) continue;
+                            data.checkMap[ rowId ] = this.checked;
                             el.querySelector( "input[type='checkbox']" ).checked = this.checked;
                         }
                     });
@@ -5118,7 +5120,7 @@ class Table extends Widget {
                             }
                             else if( action == "menu" )
                             {
-                                button = LX.makeIcon( "Ellipsis", { title: "Menu" } );
+                                button = LX.makeIcon( "EllipsisVertical", { title: "Menu" } );
                                 button.addEventListener( 'click', function( event ) {
                                     if( !options.onMenuAction )
                                     {
@@ -5155,6 +5157,17 @@ class Table extends Widget {
                         row.appendChild( td );
                     }
 
+                    body.appendChild( row );
+                }
+
+                if( body.childNodes.length == 0 )
+                {
+                    const row = document.createElement( 'tr' );
+                    const td = document.createElement( 'td' );
+                    td.setAttribute( "colspan", data.head.length + this.rowOffsetCount + 1 ); // +1 for rowActions
+                    td.className = "empty-row";
+                    td.innerHTML = "No results.";
+                    row.appendChild( td );
                     body.appendChild( row );
                 }
             }
