@@ -165,45 +165,42 @@ class Menubar {
         }
 
         let button = this.buttons[ name ];
+        // If the button already exists, delete it
+        // since only one button of this type can exist
         if( button )
         {
-            button.innerHTML = "";
-            button.appendChild( LX.makeIcon( icon, { svgClass: "xl" } ) );
-            return;
+            delete this.buttons[ name ];
+            LX.deleteElement( button.root );
         }
 
         // Otherwise, create it
-        button = document.createElement('div');
-        const disabled = options.disabled ?? false;
-        button.className = "lexmenubutton main" + (disabled ? " disabled" : "");
-        button.title = name;
-        button.appendChild( LX.makeIcon( icon, { svgClass: "xl" } ) );
+        button = new LX.Button( name, null, callback, {
+            title: name,
+            buttonClass: "lexmenubutton main bg-none",
+            disabled: options.disabled,
+            icon,
+            svgClass: "xl",
+            hideName: true,
+            swap: options.swap
+        } );
 
         if( options.float == "right" )
         {
-            button.right = true;
+            button.root.right = true;
         }
 
         if( this.root.lastChild && this.root.lastChild.right )
         {
-            this.root.lastChild.before( button );
+            this.root.lastChild.before( button.root );
         }
         else if( options.float == "left" )
         {
-            this.root.prepend( button );
+            this.root.prepend( button.root );
         }
         else
         {
-            this.root.appendChild( button );
+            this.root.appendChild( button.root );
         }
-
-        const _b = button.querySelector('a');
-        _b.addEventListener("click", (e) => {
-            if( callback && !disabled )
-            {
-                callback.call( this, _b, e );
-            }
-        });
 
         this.buttons[ name ] = button;
     }
@@ -310,7 +307,7 @@ class Menubar {
 
             if( title )
             {
-                this.buttons[ title ] = button.root;
+                this.buttons[ title ] = button;
             }
         }
     }

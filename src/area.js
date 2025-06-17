@@ -1,6 +1,176 @@
 // area.js @jxarco
 import { LX } from './core.js';
 
+class AreaOverlayButtons {
+
+    /**
+     * @constructor AreaOverlayButtons
+     */
+
+    constructor( area, buttonsArray, options = {} ) {
+
+        this.area = area;
+        this.options = options;
+
+        this.buttons = {};
+
+        this._buildButtons( buttonsArray, options );
+    }
+
+    _buildButtons( buttonsArray, options ) {
+
+        options.className = "lexoverlaybuttons";
+
+        let overlayPanel = this.area.addPanel( options );
+        let overlayGroup = null;
+
+        const container = document.createElement( "div" );
+        container.className = "lexoverlaybuttonscontainer";
+        container.appendChild( overlayPanel.root );
+        this.area.attach( container );
+
+        const float = options.float;
+        let floatClass = "";
+
+        if( float )
+        {
+            for( let i = 0; i < float.length; i++ )
+            {
+                const t = float[ i ];
+                switch( t )
+                {
+                case 'h': break;
+                case 'v': floatClass += " vertical"; break;
+                case 't': break;
+                case 'm': floatClass += " middle"; break;
+                case 'b': floatClass += " bottom"; break;
+                case 'l': break;
+                case 'c': floatClass += " center"; break;
+                case 'r': floatClass += " right"; break;
+                }
+            }
+
+            container.className += ` ${ floatClass }`;
+        }
+
+        const _addButton = ( b, group, last ) => {
+
+            const _options = {
+                width: "auto",
+                selectable: b.selectable,
+                selected: b.selected,
+                icon: b.icon,
+                img: b.img,
+                className: b.class ?? "",
+                title: b.name,
+                overflowContainerX: overlayPanel.root,
+                swap: b.swap
+            };
+
+            if( group )
+            {
+                if( !overlayGroup )
+                {
+                    overlayGroup = document.createElement('div');
+                    overlayGroup.className = "lexoverlaygroup";
+                    overlayPanel.queuedContainer = overlayGroup;
+                }
+
+                _options.parent = overlayGroup;
+            }
+
+            let callback = b.callback;
+            let widget = null;
+
+            if( b.options )
+            {
+                widget = overlayPanel.addSelect( null, b.options, b.value ?? b.name, callback, _options );
+            }
+            else
+            {
+                widget = overlayPanel.addButton( null, b.name, function( value, event ) {
+                    if( b.selectable )
+                    {
+                        if( b.group )
+                        {
+                            let _prev = b.selected;
+                            b.group.forEach( sub => sub.selected = false );
+                            b.selected = !_prev;
+                        }
+                        else
+                        {
+                            b.selected = !b.selected;
+                        }
+                    }
+
+                    if( callback )
+                    {
+                        callback( value, event, widget.root );
+                    }
+
+                }, _options );
+            }
+
+            this.buttons[ b.name ] = widget;
+
+            // ends the group
+            if( overlayGroup && last )
+            {
+                overlayPanel.root.appendChild( overlayGroup );
+                overlayGroup = null;
+                overlayPanel.clearQueue();
+            }
+        }
+
+        const _refreshPanel = function() {
+
+            overlayPanel.clear();
+
+            for( let b of buttonsArray )
+            {
+                if( b === null )
+                {
+                    // Add a separator
+                    const separator = document.createElement("div");
+                    separator.className = "lexoverlayseparator" + floatClass;
+                    overlayPanel.root.appendChild( separator );
+                    continue;
+                }
+
+                if( b.constructor === Array )
+                {
+                    for( let i = 0; i < b.length; ++i )
+                    {
+                        let sub = b[ i ];
+                        sub.group = b;
+                        _addButton( sub, true, i == ( b.length - 1 ) );
+                    }
+                }
+                else
+                {
+                    _addButton( b );
+                }
+            }
+
+            // Add floating info
+            if( float )
+            {
+                var height = 0;
+                overlayPanel.root.childNodes.forEach( c => { height += c.offsetHeight; } );
+
+                if( container.className.includes( "middle" ) )
+                {
+                    container.style.top = "-moz-calc( 50% - " + (height * 0.5) + "px )";
+                    container.style.top = "-webkit-calc( 50% - " + (height * 0.5) + "px )";
+                    container.style.top = "calc( 50% - " + (height * 0.5) + "px )";
+                }
+            }
+        }
+
+        _refreshPanel();
+    }
+}
+
 class Area {
 
     /**
@@ -766,8 +936,7 @@ class Area {
         // Add to last split section if area has been split
         if( this.sections.length )
         {
-            this.sections[ 1 ].addOverlayButtons(  buttons, options );
-            return;
+            return this.sections[ 1 ].addOverlayButtons(  buttons, options );
         }
 
         console.assert( buttons.constructor == Array && buttons.length );
@@ -775,152 +944,10 @@ class Area {
         // Set area to relative to use local position
         this.root.style.position = "relative";
 
-        options.className = "lexoverlaybuttons";
+        // Reset if already exists
+        this.overlayButtons = new AreaOverlayButtons( this, buttons, options );
 
-        let overlayPanel = this.addPanel( options );
-        let overlayGroup = null;
-
-        const container = document.createElement("div");
-        container.className = "lexoverlaybuttonscontainer";
-        container.appendChild( overlayPanel.root );
-        this.attach( container );
-
-        const float = options.float;
-        let floatClass = "";
-
-        if( float )
-        {
-            for( let i = 0; i < float.length; i++ )
-            {
-                const t = float[ i ];
-                switch( t )
-                {
-                case 'h': break;
-                case 'v': floatClass += " vertical"; break;
-                case 't': break;
-                case 'm': floatClass += " middle"; break;
-                case 'b': floatClass += " bottom"; break;
-                case 'l': break;
-                case 'c': floatClass += " center"; break;
-                case 'r': floatClass += " right"; break;
-                }
-            }
-
-            container.className += ` ${ floatClass }`;
-        }
-
-        const _addButton = function( b, group, last ) {
-
-            const _options = {
-                width: "auto",
-                selectable: b.selectable,
-                selected: b.selected,
-                icon: b.icon,
-                img: b.img,
-                className: b.class ?? "",
-                title: b.name,
-                overflowContainerX: overlayPanel.root,
-                swap: b.swap
-            };
-
-            if( group )
-            {
-                if( !overlayGroup )
-                {
-                    overlayGroup = document.createElement('div');
-                    overlayGroup.className = "lexoverlaygroup";
-                    overlayPanel.queuedContainer = overlayGroup;
-                }
-
-                _options.parent = overlayGroup;
-            }
-
-            let callback = b.callback;
-
-            if( b.options )
-            {
-                overlayPanel.addSelect( null, b.options, b.name, callback, _options );
-            }
-            else
-            {
-                const button = overlayPanel.addButton( null, b.name, function( value, event ) {
-                    if( b.selectable )
-                    {
-                        if( b.group )
-                        {
-                            let _prev = b.selected;
-                            b.group.forEach( sub => sub.selected = false );
-                            b.selected = !_prev;
-                        }
-                        else
-                        {
-                            b.selected = !b.selected;
-                        }
-                    }
-
-                    if( callback )
-                    {
-                        callback( value, event, button.root );
-                    }
-
-                }, _options );
-            }
-
-            // ends the group
-            if( overlayGroup && last )
-            {
-                overlayPanel.root.appendChild( overlayGroup );
-                overlayGroup = null;
-                overlayPanel.clearQueue();
-            }
-        }
-
-        const _refreshPanel = function() {
-
-            overlayPanel.clear();
-
-            for( let b of buttons )
-            {
-                if( b === null )
-                {
-                    // Add a separator
-                    const separator = document.createElement("div");
-                    separator.className = "lexoverlayseparator" + floatClass;
-                    overlayPanel.root.appendChild( separator );
-                    continue;
-                }
-
-                if( b.constructor === Array )
-                {
-                    for( let i = 0; i < b.length; ++i )
-                    {
-                        let sub = b[ i ];
-                        sub.group = b;
-                        _addButton(sub, true, i == ( b.length - 1 ));
-                    }
-                }
-                else
-                {
-                    _addButton( b );
-                }
-            }
-
-            // Add floating info
-            if( float )
-            {
-                var height = 0;
-                overlayPanel.root.childNodes.forEach( c => { height += c.offsetHeight; } );
-
-                if( container.className.includes( "middle" ) )
-                {
-                    container.style.top = "-moz-calc( 50% - " + (height * 0.5) + "px )";
-                    container.style.top = "-webkit-calc( 50% - " + (height * 0.5) + "px )";
-                    container.style.top = "calc( 50% - " + (height * 0.5) + "px )";
-                }
-            }
-        }
-
-        _refreshPanel();
+        return this.overlayButtons;
     }
 
     /**

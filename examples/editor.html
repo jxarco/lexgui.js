@@ -225,7 +225,7 @@
         {
             icon: "RotateLeft",
             callback: (value, event) => {
-                const playButton = m.getButton("Play");
+                const playButton = menubar.getButton("Play");
                 playButton.swap();
             }
         },
@@ -418,7 +418,7 @@
     // add on resize event to control canvas size
     topTabs.area.onresize = resizeCanvas;
 
-    topTabs.area.addOverlayButtons([
+    const overlaybuttons = topTabs.area.addOverlayButtons([
         [
             {
                 name: "Select",
@@ -440,8 +440,9 @@
             }
         ],
         {
-            name: "Lit",
+            name: "Render Mode",
             options: ["Lit", "Unlit", "Wireframe"],
+            value: "Lit",
             callback: (value, event) => console.log(value)
         },
         [
@@ -452,7 +453,8 @@
                 selectable: true
             },
             {
-                name: 10,
+                name: "Snap Values",
+                value: 10,
                 options: [10, 100, 1000],
                 callback: value => console.log(value)
             }

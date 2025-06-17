@@ -2,6 +2,12 @@
 
 ## dev
 
+Widgets:
+- All `Button` widgets have now `setState` method (not only those with `swap` feature).
+
+New `AreaOverlayButtons` to improve management and support changing buttons state.
+Docs updated.
+
 ## 0.6.9 (master)
 
 Timeline:

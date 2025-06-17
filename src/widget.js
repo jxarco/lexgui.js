@@ -1375,7 +1375,8 @@ class Button extends Widget {
         super( Widget.BUTTON, name, null, options );
 
         this.onGetValue = () => {
-            return wValue.querySelector( "input" )?.checked;
+            const swapInput = wValue.querySelector( "input" );
+            return swapInput ? swapInput.checked : value
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
@@ -1412,6 +1413,30 @@ class Button extends Widget {
             wValue.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
+        // In case of swap, set if a change has to be performed
+        this.setState = function( v, skipCallback ) {
+            const swapInput = wValue.querySelector( "input" );
+
+            if( swapInput )
+            {
+                swapInput.checked = v;
+            }
+            else if( options.selectable )
+            {
+                if( options.parent )
+                {
+                    options.parent.querySelectorAll(".lexbutton.selected").forEach( b => { if( b == wValue ) return; b.classList.remove( "selected" ) } );
+                }
+
+                wValue.classList.toggle( "selected", v );
+            }
+
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, swapInput ? swapInput.checked : value, null ), callback );
+            }
+        };
+
         var wValue = document.createElement( 'button' );
         wValue.title = options.tooltip ? "" : ( options.title ?? "" );
         wValue.className = "lexbutton p-1 " + ( options.buttonClass ?? "" );
@@ -1431,7 +1456,7 @@ class Button extends Widget {
         }
         else if( options.icon )
         {
-            const icon = LX.makeIcon( options.icon );
+            const icon = LX.makeIcon( options.icon, { iconClass: options.iconClass, svgClass: options.svgClass } );
             const iconPosition = options.iconPosition ?? "cover";
 
             // Default
@@ -1502,19 +1527,9 @@ class Button extends Widget {
             const swapIcon = LX.makeIcon( options.swap, { iconClass: "swap-on" } );
             wValue.appendChild( swapIcon );
 
-            this.root.swap = function( skipCallback ) {
+            this.swap = function( skipCallback ) {
                 const swapInput = wValue.querySelector( "input" );
                 swapInput.checked = !swapInput.checked;
-                if( !skipCallback )
-                {
-                    trigger.click();
-                }
-            };
-
-            // Set if swap has to be performed
-            this.root.setState = function( v, skipCallback ) {
-                const swapInput = wValue.querySelector( "input" );
-                swapInput.checked = v;
                 if( !skipCallback )
                 {
                     trigger.click();
