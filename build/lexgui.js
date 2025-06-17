@@ -14,7 +14,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 const LX = {
-    version: "0.6.8",
+    version: "0.6.9",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -5077,7 +5077,7 @@ LX.makeCodeSnippet = makeCodeSnippet;
  * @param {Array} keys
  * @param {String} extraClass
  */
-function makeKbd( keys, extraClass = "" )
+function makeKbd( keys, useSpecialKeys = true, extraClass = "" )
 {
     const specialKeys = {
         "Ctrl": '⌃',
@@ -5099,7 +5099,7 @@ function makeKbd( keys, extraClass = "" )
 
     for( const k of keys )
     {
-        LX.makeContainer( ["auto", "auto"], "self-center text-xs fg-secondary select-none", specialKeys[ k ] ?? k, kbd );
+        LX.makeContainer( ["auto", "auto"], "self-center text-xs fg-secondary select-none " + extraClass, useSpecialKeys ? specialKeys[ k ] ?? k : k, kbd );
     }
 
     return kbd;
@@ -6805,6 +6805,7 @@ class Area {
         this.attach( container );
 
         const float = options.float;
+        let floatClass = "";
 
         if( float )
         {
@@ -6814,15 +6815,17 @@ class Area {
                 switch( t )
                 {
                 case 'h': break;
-                case 'v': container.className += " vertical"; break;
+                case 'v': floatClass += " vertical"; break;
                 case 't': break;
-                case 'm': container.className += " middle"; break;
-                case 'b': container.className += " bottom"; break;
+                case 'm': floatClass += " middle"; break;
+                case 'b': floatClass += " bottom"; break;
                 case 'l': break;
-                case 'c': container.className += " center"; break;
-                case 'r': container.className += " right"; break;
+                case 'c': floatClass += " center"; break;
+                case 'r': floatClass += " right"; break;
                 }
             }
+
+            container.className += ` ${ floatClass }`;
         }
 
         const _addButton = function( b, group, last ) {
@@ -6897,6 +6900,15 @@ class Area {
 
             for( let b of buttons )
             {
+                if( b === null )
+                {
+                    // Add a separator
+                    const separator = document.createElement("div");
+                    separator.className = "lexoverlayseparator" + floatClass;
+                    overlayPanel.root.appendChild( separator );
+                    continue;
+                }
+
                 if( b.constructor === Array )
                 {
                     for( let i = 0; i < b.length; ++i )
@@ -7428,8 +7440,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
             if( customWidgetsDom ) customWidgetsDom.remove();
 
             container = document.createElement('div');
-            container.className = "lexcustomcontainer";
-            container.style.width = "100%";
+            container.className = "lexcustomcontainer w-full";
             element.appendChild( container );
             element.dataset["opened"] = false;
 
@@ -7623,9 +7634,9 @@ class NodeTree {
 
         if( this.options.onlyFolders )
         {
-            let has_folders = false;
-            node.children.forEach( c => has_folders |= (c.type == 'folder') );
-            isParent = !!has_folders;
+            let hasFolders = false;
+            node.children.forEach( c => hasFolders |= (c.type == 'folder') );
+            isParent = !!hasFolders;
         }
 
         let item = document.createElement('li');
@@ -7790,22 +7801,14 @@ class NodeTree {
                 } );
 
                 event.panel.add( "Delete", { callback: () => {
-                    // It's the root node
-                    if( !node.parent )
-                    {
-                        return;
-                    }
 
-                    if( that.onevent )
+                    const ok = that.deleteNode( node );
+
+                    if( ok && that.onevent )
                     {
                         const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, node, e );
                         that.onevent( event );
                     }
-
-                    // Delete nodes now
-                    let childs = node.parent.children;
-                    const index = childs.indexOf( node );
-                    childs.splice( index, 1 );
 
                     this.refresh();
                 } } );
@@ -7823,23 +7826,26 @@ class NodeTree {
 
             if( e.key == "Delete" )
             {
-                // Send event now so we have the info in selected array..
-                if( that.onevent )
+                const nodesDeleted = [];
+
+                for( let _node of this.selected )
                 {
-                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, this.selected.length > 1 ? this.selected : node, e );
-                    event.multiple = this.selected.length > 1;
+                    if( that.deleteNode( _node ) )
+                    {
+                        nodesDeleted.push( _node );
+                    }
+                }
+
+                // Send event now so we have the info in selected array..
+                if( nodesDeleted.length && that.onevent )
+                {
+                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, nodesDeleted.length > 1 ? nodesDeleted : node, e );
+                    event.multiple = nodesDeleted.length > 1;
                     that.onevent( event );
                 }
 
-                // Delete nodes now
-                for( let _node of this.selected )
-                {
-                    let childs = _node.parent.children;
-                    const index = childs.indexOf( _node );
-                    childs.splice( index, 1 );
-                }
-
                 this.selected.length = 0;
+
                 this.refresh();
             }
             else if( e.key == "ArrowUp" || e.key == "ArrowDown" ) // Unique or zero selected
@@ -8107,6 +8113,35 @@ class NodeTree {
         el.classList.add( "selected" );
         this.selected = [ el.treeData ];
         el.focus();
+    }
+
+    deleteNode( node ) {
+
+        const dataAsArray = ( this.data.constructor === Array );
+
+        // Can be either Array or Object type data
+        if( node.parent )
+        {
+            let childs = node.parent.children;
+            const index = childs.indexOf( node );
+            childs.splice( index, 1 );
+        }
+        else
+        {
+            if( dataAsArray )
+            {
+                const index = this.data.indexOf( node );
+                console.assert( index > -1, "NodeTree: Can't delete root node " + node.id + " from data array!" );
+                this.data.splice( index, 1 );
+            }
+            else
+            {
+                console.warn( "NodeTree: Can't delete root node from object data!" );
+                return false;
+            }
+        }
+
+        return true;
     }
 }
 
@@ -8475,17 +8510,37 @@ class Button extends Widget {
             wValue.classList.add( "selected" );
         }
 
-        if( options.icon )
-        {
-            const icon = LX.makeIcon( options.icon );
-            wValue.prepend( icon );
-            wValue.classList.add( "justify-center" );
-        }
-        else if( options.img )
+        if( options.img )
         {
             let img = document.createElement( 'img' );
             img.src = options.img;
             wValue.prepend( img );
+        }
+        else if( options.icon )
+        {
+            const icon = LX.makeIcon( options.icon );
+            const iconPosition = options.iconPosition ?? "cover";
+
+            // Default
+            if( iconPosition == "cover" || ( options.swap !== undefined ) )
+            {
+                wValue.prepend( icon );
+            }
+            else
+            {
+                wValue.innerHTML = `<span>${ ( value || "" ) }</span>`;
+
+                if( iconPosition == "start" )
+                {
+                    wValue.querySelector( "span" ).prepend( icon );
+                }
+                else // "end"
+                {
+                    wValue.querySelector( "span" ).appendChild( icon );
+                }
+            }
+
+            wValue.classList.add( "justify-center" );
         }
         else
         {
@@ -8942,8 +8997,8 @@ class Select extends Widget {
             value = newValue;
 
             let item = null;
-            const options = listOptions.childNodes;
-            options.forEach( e => {
+            const listOptionsNodes = listOptions.childNodes;
+            listOptionsNodes.forEach( e => {
                 e.classList.remove( "selected" );
                 if( e.getAttribute( "value" ) == newValue )
                 {
@@ -8962,6 +9017,22 @@ class Select extends Widget {
                 const filteredOptions = this._filterOptions( values, "" );
                 list.refresh( filteredOptions );
             }
+
+            // Update suboptions menu
+            const suboptions = this.root.querySelector( ".lexcustomcontainer" );
+            const suboptionsFunc = options[ `on_${ value }` ];
+            suboptions.toggleAttribute( "hidden", !suboptionsFunc );
+
+            if( suboptionsFunc )
+            {
+                suboptions.innerHTML = "";
+                const suboptionsPanel = new LX.Panel();
+                suboptionsPanel.queue( suboptions );
+                suboptionsFunc.call(this, suboptionsPanel);
+                suboptionsPanel.clearQueue();
+            }
+
+            this.root.dataset["opened"] = ( !!suboptionsFunc );
 
             if( !skipCallback )
             {
@@ -9258,6 +9329,25 @@ class Select extends Widget {
         list.refresh( values );
 
         container.appendChild( listDialog );
+
+        // Element suboptions
+        let suboptions = document.createElement( "div" );
+        suboptions.className = "lexcustomcontainer w-full";
+
+        const suboptionsFunc = options[ `on_${ value }` ];
+        suboptions.toggleAttribute( "hidden", !suboptionsFunc );
+
+        if( suboptionsFunc )
+        {
+            suboptions.innerHTML = "";
+            const suboptionsPanel = new LX.Panel();
+            suboptionsPanel.queue( suboptions );
+            suboptionsFunc.call( this, suboptionsPanel );
+            suboptionsPanel.clearQueue();
+        }
+
+        this.root.appendChild( suboptions );
+        this.root.dataset["opened"] = ( !!suboptionsFunc );
 
         LX.doAsync( this.onResize.bind( this ) );
     }
@@ -10362,6 +10452,7 @@ class NumberInput extends Widget {
             slider.step = options.step ?? 1;
             slider.type = "range";
             slider.value = value;
+            slider.disabled = this.disabled;
 
             slider.addEventListener( "input", ( e ) => {
                 this.set( slider.valueAsNumber, false, e );
@@ -11449,7 +11540,7 @@ class TabSections extends Widget {
             let tabEl = document.createElement( "div" );
             tabEl.className = "lextab " + (i == tabs.length - 1 ? "last" : "") + ( isSelected ? "selected" : "" );
             tabEl.innerHTML = ( showNames ? tab.name : "" );
-            tabEl.appendChild( LX.makeIcon( tab.icon ?? "Hash", { title: tab.name } ) );
+            tabEl.appendChild( LX.makeIcon( tab.icon ?? "Hash", { title: tab.name, iconClass: tab.iconClass, svgClass: tab.svgClass } ) );
 
             let infoContainer = document.createElement( "div" );
             infoContainer.id = tab.name.replace( /\s/g, '' );
@@ -11485,7 +11576,7 @@ class TabSections extends Widget {
                 // Push to tab space
                 const creationPanel = new LX.Panel();
                 creationPanel.queue( infoContainer );
-                tab.onCreate.call(this, creationPanel);
+                tab.onCreate.call( this, creationPanel, infoContainer );
                 creationPanel.clearQueue();
             }
         }
@@ -11804,7 +11895,9 @@ class Table extends Widget {
                         const body = table.querySelector( "tbody" );
                         for( const el of body.childNodes )
                         {
-                            data.checkMap[ el.getAttribute( "rowId" ) ] = this.checked;
+                            const rowId = el.getAttribute( "rowId" );
+                            if( !rowId ) continue;
+                            data.checkMap[ rowId ] = this.checked;
                             el.querySelector( "input[type='checkbox']" ).checked = this.checked;
                         }
                     });
@@ -12015,8 +12108,8 @@ class Table extends Widget {
                     }
 
                     const row = document.createElement( 'tr' );
-                    const rowId = LX.getSupportedDOMName( bodyData.join( '-' ) );
-                    row.setAttribute( "rowId", rowId.substr(0, 32) );
+                    const rowId = LX.getSupportedDOMName( bodyData.join( '-' ) ).substr(0, 32);
+                    row.setAttribute( "rowId", rowId );
 
                     if( options.sortable ?? false )
                     {
@@ -12132,7 +12225,7 @@ class Table extends Widget {
                             }
                             else if( action == "menu" )
                             {
-                                button = LX.makeIcon( "Ellipsis", { title: "Menu" } );
+                                button = LX.makeIcon( "EllipsisVertical", { title: "Menu" } );
                                 button.addEventListener( 'click', function( event ) {
                                     if( !options.onMenuAction )
                                     {
@@ -12169,6 +12262,17 @@ class Table extends Widget {
                         row.appendChild( td );
                     }
 
+                    body.appendChild( row );
+                }
+
+                if( body.childNodes.length == 0 )
+                {
+                    const row = document.createElement( 'tr' );
+                    const td = document.createElement( 'td' );
+                    td.setAttribute( "colspan", data.head.length + this.rowOffsetCount + 1 ); // +1 for rowActions
+                    td.className = "empty-row";
+                    td.innerHTML = "No results.";
+                    row.appendChild( td );
                     body.appendChild( row );
                 }
             }
@@ -12955,6 +13059,7 @@ class Panel {
      * hideName: Don't use name as label [false]
      * disabled: Make the widget disabled [false]
      * icon: Icon class to show as button value
+     * iconPosition: Icon position (cover|start|end)
      * fileInput: Button click requests a file
      * fileInputType: Type of the requested file
      * img: Path to image to show as button value
@@ -13446,6 +13551,8 @@ class Panel {
      * @param {Array} tabs Contains objects with {
      *      name: Name of the tab (if icon, use as title)
      *      icon: Icon to be used as the tab icon (optional)
+     *      iconClass: Class to be added to the icon (optional)
+     *      svgClass: Class to be added to the inner SVG of the icon (optional)
      *      onCreate: Func to be called at tab creation
      *      onSelect: Func to be called on select tab (optional)
      * }
@@ -14045,7 +14152,7 @@ class Menubar {
             this.buttonContainer.className = "lexmenubuttons";
             this.buttonContainer.classList.add( options.float ?? "center" );
 
-            if( options.position == "right" )
+            if( options.float == "right" )
             {
                 this.buttonContainer.right = true;
             }
@@ -14064,7 +14171,7 @@ class Menubar {
         {
             const data = buttons[ i ];
             const title = data.title;
-            const button = new LX.Button( title, "", data.callback, { title, buttonClass: "bg-none", disabled: data.disabled, icon: data.icon, hideName: true, swap: data.swap } );
+            const button = new LX.Button( title, data.label, data.callback, { title, buttonClass: "bg-none", disabled: data.disabled, icon: data.icon, hideName: true, swap: data.swap, iconPosition: "start" } );
             this.buttonContainer.appendChild( button.root );
 
             if( title )

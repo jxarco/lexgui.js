@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.6.9 (master)
+
 Timeline:
 - `addKeyframes` now returns new indices.
 - Fixed fadein/fadeout when one of them doesn't exist.
@@ -22,7 +24,7 @@ Added support for Area Overlaybuttons separators.
 Fixed Menubar buttons using `float: left` alignment.
 Minor fixes CSS.
 
-## 0.6.8 (master)
+## 0.6.8
 
 Widgets:
 - Support `options.onCreate` on register Custom Widget.
