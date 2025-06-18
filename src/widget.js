@@ -1433,7 +1433,7 @@ class Button extends Widget {
 
             if( !skipCallback )
             {
-                this._trigger( new LX.IEvent( name, swapInput ? swapInput.checked : value, null ), callback );
+                this._trigger( new LX.IEvent( name, swapInput ? swapInput.checked : ( options.selectable ? v : value ), null ), callback );
             }
         };
 
@@ -1538,6 +1538,7 @@ class Button extends Widget {
         }
 
         trigger.addEventListener( "click", e => {
+            let isSelected;
             if( options.selectable )
             {
                 if( options.parent )
@@ -1545,7 +1546,7 @@ class Button extends Widget {
                     options.parent.querySelectorAll(".lexbutton.selected").forEach( b => { if( b == wValue ) return; b.classList.remove( "selected" ) } );
                 }
 
-                wValue.classList.toggle('selected');
+                isSelected = wValue.classList.toggle('selected');
             }
 
             if( options.fileInput )
@@ -1555,7 +1556,7 @@ class Button extends Widget {
             else
             {
                 const swapInput = wValue.querySelector( "input" );
-                this._trigger( new LX.IEvent( name, swapInput?.checked ?? value, e ), callback );
+                this._trigger( new LX.IEvent( name, swapInput?.checked ?? ( options.selectable ? isSelected : value ), e ), callback );
             }
         });
 
