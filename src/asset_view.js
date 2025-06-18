@@ -58,10 +58,14 @@ class AssetView {
 
         if( options.rootPath )
         {
-            if(options.rootPath.constructor !== String)
-                console.warn("Asset Root Path must be a String (now is " + path.constructor.name + ")");
+            if( options.rootPath.constructor !== String )
+            {
+                console.warn( `Asset Root Path must be a String (now is a ${ path.constructor.name })` );
+            }
             else
+            {
                 this.rootPath = options.rootPath;
+            }
         }
 
         let div = document.createElement('div');
@@ -430,7 +434,7 @@ class AssetView {
         this.content.className = (isContentLayout ? "lexassetscontent" : "lexassetscontent list");
         let that = this;
 
-        const add_item = function(item) {
+        const _addItem = function(item) {
 
             const type = item.type.charAt( 0 ).toUpperCase() + item.type.slice( 1 );
             const extension = LX.getExtension( item.id );
@@ -455,20 +459,27 @@ class AssetView {
                         return;
                     }
 
+                    const dialog = itemEl.closest('dialog');
                     const rect = itemEl.getBoundingClientRect();
                     const targetRect = e.target.getBoundingClientRect();
-                    const parentRect = desc.parentElement.getBoundingClientRect();
 
-                    let localOffsetX = targetRect.x - parentRect.x - ( targetRect.x - rect.x );
-                    let localOffsetY = targetRect.y - parentRect.y - ( targetRect.y - rect.y );
+                    let localOffsetX = rect.x + e.offsetX;
+                    let localOffsetY = rect.y + e.offsetY;
+
+                    if( dialog )
+                    {
+                        const dialogRect = dialog.getBoundingClientRect();
+                        localOffsetX -= dialogRect.x;
+                        localOffsetY -= dialogRect.y;
+                    }
 
                     if( e.target.classList.contains( "lexassettitle" ) )
                     {
                         localOffsetY += ( targetRect.y - rect.y );
                     }
 
-                    desc.style.left = (localOffsetX + e.offsetX + 12) + "px";
-                    desc.style.top = (localOffsetY + e.offsetY) + "px";
+                    desc.style.left = ( localOffsetX ) + "px";
+                    desc.style.top = ( localOffsetY - 36 ) + "px";
                 });
 
                 itemEl.addEventListener("mouseenter", () => {
@@ -666,7 +677,7 @@ class AssetView {
                 } });
             }else
             {
-                item.domEl = add_item( item );
+                item.domEl = _addItem( item );
             }
         }
 

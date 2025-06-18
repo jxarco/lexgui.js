@@ -4585,9 +4585,10 @@ ul.lexassetscontent {
 }
 
 .lexassetscontent .lexitemdesc {
-    position: absolute;
+    position: fixed;
     font-weight: 600;
-    background-color: #afafaf;
+    white-space: nowrap;
+    background-color: var(--global-text-secondary);
     color: var(--global-color-primary);
     font-size: var(--global-font-size);
     border-radius: 6px;
